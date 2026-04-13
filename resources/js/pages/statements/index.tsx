@@ -78,6 +78,11 @@ export default function StatementsIndex({ statements }: { statements: Paginated<
 							</td>
 							<td>{statement.transaction_date}</td>
 							<td className={statement.amount < 0 ? "text-danger" : "text-success"}>
+								{statement.allocations_sum_amount !== null
+									? statement.allocations_sum_amount < 0
+										? `-$${Math.abs(statement.allocations_sum_amount).toFixed(2)} / `
+										: `$${statement.allocations_sum_amount.toFixed(2)} / `
+									: null}
 								{statement.amount < 0
 									? `-$${Math.abs(statement.amount).toFixed(2)}`
 									: `$${statement.amount.toFixed(2)}`}
@@ -231,9 +236,13 @@ function AllocateToRecord({ statements }: { statements: Statement[] }) {
 													<span className="input-group-text">$</span>
 													<input
 														type="number"
+														step={0.01}
 														className={`form-control ${errors[`statements.${i}.amount`] ? "is-invalid" : ""}`}
 														name={`statements[${i}][amount]`}
-														defaultValue={statement.amount}
+														defaultValue={
+															statement.amount -
+															(statement.allocations_sum_amount ?? 0)
+														}
 													/>
 													<div className="invalid-feedback">
 														{errors[`statements.${i}.amount`]}

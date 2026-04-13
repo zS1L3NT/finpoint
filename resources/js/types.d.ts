@@ -22,6 +22,8 @@ export type Statement = {
 	status: string
 	currency: string
 	amount: number
+
+	allocations_sum_amount: number | null
 }
 
 export type Record = {
