@@ -24,57 +24,17 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Account whereBalance($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Account whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Account whereName($value)
- * @mixin \Eloquent
  */
 	class Account extends \Eloquent {}
 }
 
 namespace App\Models{
 /**
- * @property string $id
- * @property string $name
- * @property string $description
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Event newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Event newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Event query()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Event whereDescription($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Event whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Event whereName($value)
- * @mixin \Eloquent
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Category newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Category newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Category query()
  */
-	class Event extends \Eloquent {}
-}
-
-namespace App\Models{
-/**
- * @property int $event_id
- * @property int $record_id
- * @property-read \App\Models\Event $event
- * @property-read \App\Models\Record $record
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EventRecord newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EventRecord newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EventRecord query()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EventRecord whereEventId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EventRecord whereRecordId($value)
- * @mixin \Eloquent
- */
-	class EventRecord extends \Eloquent {}
-}
-
-namespace App\Models{
-/**
- * @property int $event_id
- * @property int $statement_id
- * @property-read \App\Models\Event $event
- * @property-read \App\Models\Statement $statement
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EventStatement newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EventStatement newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EventStatement query()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EventStatement whereEventId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EventStatement whereStatementId($value)
- * @mixin \Eloquent
- */
-	class EventStatement extends \Eloquent {}
+	class Category extends \Eloquent {}
 }
 
 namespace App\Models{
@@ -83,7 +43,6 @@ namespace App\Models{
  * @property string $date
  * @property numeric $value
  * @property string $description
- * @property-read \App\Models\Event|null $event
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Record newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Record newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Record query()
@@ -91,7 +50,6 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Record whereDescription($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Record whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Record whereValue($value)
- * @mixin \Eloquent
  */
 	class Record extends \Eloquent {}
 }
@@ -130,7 +88,6 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Statement whereSupplementaryCodeDescription($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Statement whereTransactionDate($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Statement whereValueDate($value)
- * @mixin \Eloquent
  */
 	class Statement extends \Eloquent {}
 }
