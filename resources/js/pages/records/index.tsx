@@ -18,7 +18,11 @@ export default function RecordsIndex({ records }: { records: Paginated<Record> }
 					{records.data.map(record => (
 						<tr key={record.id}>
 							<td>{record.date}</td>
-							<td>{record.amount}</td>
+							<td className={record.amount < 0 ? "text-danger" : "text-success"}>
+								{record.amount < 0
+									? `-$${Math.abs(record.amount).toFixed(2)}`
+									: `$${record.amount.toFixed(2)}`}
+							</td>
 							<td>{record.description}</td>
 						</tr>
 					))}
