@@ -1,5 +1,5 @@
-import { Form } from "@inertiajs/react"
 import React, { Fragment, useEffect, useRef, useState } from "react"
+import RecordController from "@/actions/App/Http/Controllers/RecordController"
 import { Paginated, Statement } from "@/types"
 
 export default function StatementsIndex({ statements }: { statements: Paginated<Statement> }) {
@@ -122,15 +122,31 @@ export default function StatementsIndex({ statements }: { statements: Paginated<
 }
 
 function AllocateToRecord({ statements }: { statements: Statement[] }) {
-	// const { post, setData } = useHttp()
+	const closeButtonRef = useRef<HTMLButtonElement>(null)
+	const [errors, setErrors] = useState<Record<string, string[]>>({})
 
-	const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
+	const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
 		e.preventDefault()
-		console.log(e)
+
+		await fetch(RecordController.store.url(), {
+			method: "post",
+			body: new FormData(e.currentTarget),
+			headers: { Accept: "application/json" },
+		})
+			.then(async res => [res, await res.json()] as const)
+			.then(([res, data]) => {
+				if (res.status === 422) {
+					setErrors(data.errors)
+				}
+
+				if (res.status === 201) {
+					closeButtonRef.current?.click()
+				}
+			})
 	}
 
 	return (
-		<Form
+		<form
 			className="modal fade"
 			id="allocate-to-record"
 			tabIndex={-1}
@@ -158,10 +174,11 @@ function AllocateToRecord({ statements }: { statements: Statement[] }) {
 							</label>
 							<input
 								type="text"
-								className="form-control"
+								className={`form-control ${errors.description ? "is-invalid" : ""}`}
 								name="description"
 								id="description"
 							/>
+							<div className="invalid-feedback">{errors.description}</div>
 						</div>
 
 						<div className="mb-3">
@@ -224,10 +241,13 @@ function AllocateToRecord({ statements }: { statements: Statement[] }) {
 													<span className="input-group-text">$</span>
 													<input
 														type="number"
-														className="form-control"
+														className={`form-control ${errors[`statements.${i}.amount`] ? "is-invalid" : ""}`}
 														name={`statements[${i}][amount]`}
 														defaultValue={statement.amount}
 													/>
+													<div className="invalid-feedback">
+														{errors[`statements.${i}.amount`]}
+													</div>
 												</div>
 											</td>
 										</tr>
@@ -237,9 +257,12 @@ function AllocateToRecord({ statements }: { statements: Statement[] }) {
 												<div className="input-group">
 													<input
 														type="text"
-														className="form-control"
+														className={`form-control ${errors[`statements.${i}.description`] ? "is-invalid" : ""}`}
 														name={`statements[${i}][description]`}
 													/>
+													<div className="invalid-feedback">
+														{errors[`statements.${i}.description`]}
+													</div>
 												</div>
 											</td>
 										</tr>
@@ -249,7 +272,12 @@ function AllocateToRecord({ statements }: { statements: Statement[] }) {
 						))}
 					</div>
 					<div className="modal-footer">
-						<button type="button" className="btn btn-secondary" data-bs-dismiss="modal">
+						<button
+							ref={closeButtonRef}
+							type="button"
+							className="btn btn-secondary"
+							data-bs-dismiss="modal"
+						>
 							Close
 						</button>
 						<button type="submit" className="btn btn-primary">
@@ -258,6 +286,6 @@ function AllocateToRecord({ statements }: { statements: Statement[] }) {
 					</div>
 				</div>
 			</div>
-		</Form>
+		</form>
 	)
 }
