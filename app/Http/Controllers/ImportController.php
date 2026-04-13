@@ -39,7 +39,7 @@ class ImportController extends Controller
                     ]);
                     $account_id = $info[1];
                 } else {
-                    throw ValidationException::withMessages(["file" => "Invalid CSV Format"]);
+                    throw ValidationException::withMessages(["files" => "Invalid CSV Format"]);
                 }
 
                 array_shift($lines); // Statement as at: XX XXX XXXX

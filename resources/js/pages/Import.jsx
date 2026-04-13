@@ -3,6 +3,8 @@ import { Form } from "@inertiajs/react"
 import Layout from "./Layout"
 
 export default function Import({ errors }) {
+    const fileErrors = Object.entries(errors).filter(([k, v]) => k.startsWith("files")).map(([k, v]) => v)
+
     return (
         <Layout title="Import Bank Statements">
             <h1>Import Bank Statements</h1>
@@ -10,9 +12,9 @@ export default function Import({ errors }) {
             <Form method="POST" encType="multipart/form-data" action={route("import.store")} className="m-auto vstack gap-3">
                 <div className="col-12 mb-3">
                     <label htmlFor="files[]">Files</label>
-                    <input type="file" multiple className={`form-control ${errors.files ? "is-invalid" : ""}`} id="files[]" name="files[]" />
+                    <input type="file" multiple className={`form-control ${fileErrors ? "is-invalid" : ""}`} id="files[]" name="files[]" />
                     <div className="invalid-feedback">
-                        {errors.files}
+                        {fileErrors[0]}
                     </div>
                 </div>
 
