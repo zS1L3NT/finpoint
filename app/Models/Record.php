@@ -4,9 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Attributes\Table;
+use Illuminate\Database\Eloquent\Attributes\WithoutTimestamps;
 use Illuminate\Database\Eloquent\Model;
 
 #[Table(keyType: "string", incrementing: false)]
+#[WithoutTimestamps()]
 #[Guarded([])]
 class Record extends Model
 {
@@ -17,11 +19,11 @@ class Record extends Model
 
     public function statements()
     {
-        return $this->belongsToMany(Statement::class, Allocation::class, "target_record_id", "source_statement_id");
+        return $this->belongsToMany(Statement::class, "allocations", "target_record_id", "source_statement_id");
     }
 
     public function records()
     {
-        return $this->belongsToMany(Record::class, Allocation::class, "target_record_id", "source_record_id");
+        return $this->belongsToMany(Record::class, "allocations", "target_record_id", "source_record_id");
     }
 }

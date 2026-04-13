@@ -14,7 +14,7 @@ return new class extends Migration {
         Schema::create("records", function (Blueprint $table) {
             $table->text("id")->primary();
             $table->text("date");
-            $table->foreignIdFor(Category::class)->constrained();
+            $table->foreignIdFor(Category::class)->nullable()->constrained();
             $table->decimal("amount");
             $table->text("description");
         });

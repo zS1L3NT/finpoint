@@ -12,7 +12,7 @@ export default function Import({ errors }) {
             <Form method="POST" encType="multipart/form-data" action={route("import.store")} className="m-auto vstack gap-3">
                 <div className="col-12 mb-3">
                     <label htmlFor="files[]">Files</label>
-                    <input type="file" multiple className={`form-control ${fileErrors ? "is-invalid" : ""}`} id="files[]" name="files[]" />
+                    <input type="file" multiple className={`form-control ${fileErrors.length ? "is-invalid" : ""}`} id="files[]" name="files[]" />
                     <div className="invalid-feedback">
                         {fileErrors[0]}
                     </div>

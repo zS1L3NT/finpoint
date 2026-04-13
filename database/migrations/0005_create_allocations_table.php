@@ -14,12 +14,12 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create("allocations", function (Blueprint $table) {
-            $table->text("id")->primary();
             $table->foreignIdFor(Statement::class, "source_statement_id")->nullable()->constrained();
             $table->foreignIdFor(Record::class, "source_record_id")->nullable()->constrained();
             $table->foreignIdFor(Record::class, "target_record_id")->constrained();
             $table->text("description");
             $table->decimal("amount");
+            $table->primary(["source_statement_id", "source_record_id", "target_record_id"]);
         });
 
         DB::statement(<<<EOF
