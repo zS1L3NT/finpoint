@@ -30,9 +30,34 @@ namespace App\Models{
 
 namespace App\Models{
 /**
+ * @property int $id
+ * @property string|null $source_statement_id
+ * @property string|null $source_record_id
+ * @property string $target_record_id
+ * @property numeric $amount
+ * @property string|null $source_check
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Allocation newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Allocation newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Allocation query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Allocation whereAmount($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Allocation whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Allocation whereSourceCheck($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Allocation whereSourceRecordId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Allocation whereSourceStatementId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Allocation whereTargetRecordId($value)
+ */
+	class Allocation extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * @property string $id
+ * @property string $name
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Category newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Category newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Category query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Category whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Category whereName($value)
  */
 	class Category extends \Eloquent {}
 }
@@ -41,22 +66,24 @@ namespace App\Models{
 /**
  * @property string $id
  * @property string $date
- * @property numeric $value
+ * @property string $category_id
+ * @property numeric $amount
  * @property string $description
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Record newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Record newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Record query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Record whereAmount($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Record whereCategoryId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Record whereDate($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Record whereDescription($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Record whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Record whereValue($value)
  */
 	class Record extends \Eloquent {}
 }
 
 namespace App\Models{
 /**
- * @property int $account_id
+ * @property string $account_id
  * @property string $id
  * @property string $transaction_date
  * @property string $value_date
