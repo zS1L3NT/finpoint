@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useRef, useState } from "react"
+import React, { Fragment, useRef, useState } from "react"
 import RecordController from "@/actions/App/Http/Controllers/RecordController"
 import { Paginated, Statement } from "@/types"
 
@@ -17,19 +17,6 @@ export default function StatementsIndex({ statements }: { statements: Paginated<
 			return ""
 		}
 	}
-
-	useEffect(() => {
-		const handleKeyDown = (e: KeyboardEvent) => {
-			if (e.key === "Enter") {
-				modalButtonRef.current?.click()
-			}
-		}
-
-		window.addEventListener("keydown", handleKeyDown)
-		return () => {
-			window.removeEventListener("keydown", handleKeyDown)
-		}
-	}, [modalButtonRef])
 
 	return (
 		<>
