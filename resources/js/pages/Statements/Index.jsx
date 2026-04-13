@@ -52,17 +52,23 @@ export default function StatementsIndex({ statements }) {
 							key={statement.id}
 							className={`${selectedIds.includes(statement.id) ? "table-active" : ""}`}
 							style={{ cursor: "pointer" }}
-							onClick={e => {
-								e.preventDefault()
-								setSelected(statement.id, selectedIds.includes(statement.id))
+							onClick={() =>
+								setSelected(statement.id, !selectedIds.includes(statement.id))
+							}
+							onKeyDown={e => {
+								if (e.key === " ") {
+									e.preventDefault()
+									setSelected(statement.id, !selectedIds.includes(statement.id))
+								}
 							}}
+							tabIndex={0}
 						>
 							<td>
 								<input
 									type="checkbox"
 									checked={selectedIds.includes(statement.id)}
-									style={{ pointerEvents: "none", userSelect: "none" }}
-									onChange={e => e.preventDefault()}
+									onChange={e => setSelected(statement.id, e.target.checked)}
+									tabIndex={-1}
 								/>
 							</td>
 							<td>
