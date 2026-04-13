@@ -1,1 +1,5 @@
-import './bootstrap';
+import { createInertiaApp } from "@inertiajs/react"
+
+createInertiaApp({
+    strictMode: true,
+})

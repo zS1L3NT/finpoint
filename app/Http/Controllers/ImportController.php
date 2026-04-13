@@ -7,12 +7,13 @@ use App\Models\Statement;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Inertia\Inertia;
 
 class ImportController extends Controller
 {
     public function index()
     {
-        return view("import");
+        return Inertia::render("Import");
     }
 
     public function store()
