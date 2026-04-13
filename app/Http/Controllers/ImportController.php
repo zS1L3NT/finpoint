@@ -62,7 +62,8 @@ class ImportController extends Controller
                 $statements = $rows->map(fn($row) => $header->combine(str_getcsv($row)));
 
                 foreach ($statements as $statement) {
-                    $id = hash("sha256", $statement->values()->join(","));
+                    // Value Date changes across bank exports...
+                    $id = hash("sha256", $statement->except("Value Date")->values()->join(","));
 
                     if (!Statement::find($id)) {
                         Statement::query()->insert([
