@@ -128,6 +128,9 @@ function AllocateToRecord({ statements }: { statements: Statement[] }) {
 
 				if (res.status === 201) {
 					closeButtonRef.current?.click()
+					setTimeout(() => {
+						window.location.reload()
+					}, 500)
 				}
 			})
 	}
