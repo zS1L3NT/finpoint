@@ -10,5 +10,8 @@ use Illuminate\Database\Eloquent\Model;
 #[Guarded([])]
 class Category extends Model
 {
-    // 
+    public function records()
+    {
+        return $this->hasMany(Record::class);
+    }
 }

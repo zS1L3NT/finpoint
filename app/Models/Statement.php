@@ -18,4 +18,9 @@ class Statement extends Model
             return $this->credit_amount;
         }
     }
+
+    public function account()
+    {
+        return $this->belongsTo(Account::class);
+    }
 }
