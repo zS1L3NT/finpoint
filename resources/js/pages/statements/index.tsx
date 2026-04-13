@@ -1,0 +1,263 @@
+import { Form } from "@inertiajs/react"
+import React, { Fragment, useEffect, useRef, useState } from "react"
+import { Paginated, Statement } from "@/types"
+
+export default function StatementsIndex({ statements }: { statements: Paginated<Statement> }) {
+	const modalButtonRef = useRef<HTMLButtonElement>(null)
+	const [selectedIds, setSelectedIds] = useState<string[]>([])
+
+	const setSelected = (id: string, selected: boolean) => {
+		setSelectedIds(ids => (selected ? [...ids, id] : ids.filter(_id => _id !== id)))
+	}
+
+	const decodeHtml = (html: string) => {
+		if (typeof window !== "undefined") {
+			return new DOMParser().parseFromString(html, "text/html").documentElement.textContent
+		} else {
+			return ""
+		}
+	}
+
+	useEffect(() => {
+		const handleKeyDown = (e: KeyboardEvent) => {
+			if (e.key === "Enter") {
+				modalButtonRef.current?.click()
+			}
+		}
+
+		window.addEventListener("keydown", handleKeyDown)
+		return () => {
+			window.removeEventListener("keydown", handleKeyDown)
+		}
+	}, [modalButtonRef])
+
+	return (
+		<>
+			<div className="d-flex justify-content-between align-items-center mb-4">
+				<h1>Statements</h1>
+
+				<button
+					ref={modalButtonRef}
+					type="button"
+					className="btn btn-primary"
+					data-bs-toggle="modal"
+					data-bs-target="#allocate-to-record"
+					disabled={!selectedIds.length}
+				>
+					Allocate to Record
+				</button>
+			</div>
+
+			<table className="table table-hover">
+				<thead>
+					<tr>
+						<th></th>
+						<th>Account</th>
+						<th>Date</th>
+						<th>Amount</th>
+						<th>Supplementary</th>
+						<th>Client</th>
+					</tr>
+				</thead>
+
+				<tbody>
+					{statements.data.map(statement => (
+						<tr
+							key={statement.id}
+							className={`${selectedIds.includes(statement.id) ? "table-active" : ""}`}
+							style={{ cursor: "pointer" }}
+							onClick={() =>
+								setSelected(statement.id, !selectedIds.includes(statement.id))
+							}
+							onKeyDown={e => {
+								if (e.key === " ") {
+									e.preventDefault()
+									setSelected(statement.id, !selectedIds.includes(statement.id))
+								}
+							}}
+							tabIndex={0}
+						>
+							<td>
+								<input
+									type="checkbox"
+									className="form-check-input"
+									checked={selectedIds.includes(statement.id)}
+									onChange={e => setSelected(statement.id, e.target.checked)}
+									tabIndex={-1}
+								/>
+							</td>
+							<td>
+								{statement.account.name} ({statement.account.id})
+							</td>
+							<td>{statement.transaction_date}</td>
+							<td className={statement.amount < 0 ? "text-danger" : "text-success"}>
+								{statement.amount < 0
+									? `-$${Math.abs(statement.amount).toFixed(2)}`
+									: `$${statement.amount.toFixed(2)}`}
+							</td>
+							<td>{statement.supplementary_code}</td>
+							<td>{statement.client_reference}</td>
+						</tr>
+					))}
+				</tbody>
+			</table>
+
+			<nav>
+				<ul className="pagination justify-content-center">
+					{statements.links.map(link => (
+						<li key={link.label} className={`page-item ${link.active ? "active" : ""}`}>
+							<a className="page-link" href={link.url}>
+								{decodeHtml(link.label)}
+							</a>
+						</li>
+					))}
+				</ul>
+			</nav>
+
+			<AllocateToRecord
+				statements={statements.data.filter(s => selectedIds.includes(s.id))}
+			/>
+		</>
+	)
+}
+
+function AllocateToRecord({ statements }: { statements: Statement[] }) {
+	// const { post, setData } = useHttp()
+
+	const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
+		e.preventDefault()
+		console.log(e)
+	}
+
+	return (
+		<Form
+			className="modal fade"
+			id="allocate-to-record"
+			tabIndex={-1}
+			aria-labelledby="allocate-to-record-label"
+			aria-hidden="true"
+			onSubmit={handleSubmit}
+		>
+			<div className="modal-dialog modal-dialog-centered modal-lg">
+				<div className="modal-content">
+					<div className="modal-header">
+						<h1 className="modal-title fs-5" id="allocate-to-record-label">
+							Allocate to Record
+						</h1>
+						<button
+							type="button"
+							className="btn-close"
+							data-bs-dismiss="modal"
+							aria-label="Close"
+						></button>
+					</div>
+					<div className="modal-body">
+						<div className="mb-3">
+							<label htmlFor="description" className="form-label">
+								Description
+							</label>
+							<input
+								type="text"
+								className="form-control"
+								name="description"
+								id="description"
+							/>
+						</div>
+
+						<div className="mb-3">
+							<label htmlFor="date" className="form-label">
+								Date
+							</label>
+							<input
+								type="date"
+								className="form-control"
+								name="date"
+								id="date"
+								defaultValue={
+									statements.map(s => s.transaction_date).toSorted()[0] ?? ""
+								}
+							/>
+						</div>
+
+						<div className="mb-3">
+							<label htmlFor="category_id" className="form-label">
+								Category
+							</label>
+							<select
+								className="form-select"
+								name="category_id"
+								id="category_id"
+								defaultValue=""
+							></select>
+						</div>
+
+						{statements.map((statement, i) => (
+							<Fragment key={statement.id}>
+								<hr />
+
+								<input
+									type="hidden"
+									name={`statements[${i}][id]`}
+									value={statement.id}
+								/>
+
+								<table className="table table-sm table-borderless">
+									<tbody>
+										<tr>
+											<th style={{ width: 150 }}>Supplementary</th>
+											<td>{statement.supplementary_code}</td>
+										</tr>
+										<tr>
+											<th>Client</th>
+											<td>{statement.client_reference}</td>
+										</tr>
+										<tr>
+											<th>Account</th>
+											<td>
+												{statement.account.name} ({statement.account.id})
+											</td>
+										</tr>
+										<tr>
+											<th>Allocated</th>
+											<td>
+												<div className="input-group">
+													<span className="input-group-text">$</span>
+													<input
+														type="number"
+														className="form-control"
+														name={`statements[${i}][amount]`}
+														defaultValue={statement.amount}
+													/>
+												</div>
+											</td>
+										</tr>
+										<tr>
+											<th>Description</th>
+											<td>
+												<div className="input-group">
+													<input
+														type="text"
+														className="form-control"
+														name={`statements[${i}][description]`}
+													/>
+												</div>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</Fragment>
+						))}
+					</div>
+					<div className="modal-footer">
+						<button type="button" className="btn btn-secondary" data-bs-dismiss="modal">
+							Close
+						</button>
+						<button type="submit" className="btn btn-primary">
+							Save changes
+						</button>
+					</div>
+				</div>
+			</div>
+		</Form>
+	)
+}

@@ -13,7 +13,7 @@ class ImportController extends Controller
 {
     public function index()
     {
-        return Inertia::render("Import");
+        return Inertia::render("import");
     }
 
     public function store()

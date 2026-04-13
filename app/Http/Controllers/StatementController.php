@@ -10,6 +10,6 @@ class StatementController extends Controller
     public function index()
     {
         $statements = Statement::with("account")->orderBy("transaction_date", "desc")->paginate(100);
-        return Inertia::render("Statements/Index", compact("statements"));
+        return Inertia::render("statements/index", compact("statements"));
     }
 }

@@ -1,12 +1,9 @@
-import React, { useEffect } from "react"
+import React from "react"
+import ImportController from "@/actions/App/Http/Controllers/ImportController"
+import RecordController from "@/actions/App/Http/Controllers/RecordController"
+import StatementController from "@/actions/App/Http/Controllers/StatementController"
 
-export default function Layout({ title, children, className }) {
-	useEffect(() => {
-		if (title) {
-			document.title = title
-		}
-	}, [title])
-
+export default function Layout({ children }: { children: React.ReactNode }) {
 	return (
 		<div className="d-flex flex-column">
 			<nav className="navbar navbar-expand-lg bg-body-tertiary">
@@ -28,20 +25,17 @@ export default function Layout({ title, children, className }) {
 					<div className="collapse navbar-collapse" id="navbarNav">
 						<ul className="navbar-nav ms-auto">
 							<li className="nav-item">
-								{/** biome-ignore lint/correctness/noUndeclaredVariables: Injected */}
-								<a className="nav-link" href={route("import.index")}>
+								<a className="nav-link" href={ImportController.index.url()}>
 									Import
 								</a>
 							</li>
 							<li className="nav-item">
-								{/** biome-ignore lint/correctness/noUndeclaredVariables: Injected */}
-								<a className="nav-link" href={route("statements.index")}>
+								<a className="nav-link" href={StatementController.index.url()}>
 									Statements
 								</a>
 							</li>
 							<li className="nav-item">
-								{/** biome-ignore lint/correctness/noUndeclaredVariables: Injected */}
-								<a className="nav-link" href={route("records.index")}>
+								<a className="nav-link" href={RecordController.index.url()}>
 									Records
 								</a>
 							</li>
@@ -50,7 +44,7 @@ export default function Layout({ title, children, className }) {
 				</div>
 			</nav>
 
-			<main className={`container flex-grow-1 mt-5 ${className}`}>{children}</main>
+			<main className="container flex-grow-1 mt-5">{children}</main>
 
 			<footer>
 				<p className="text-center py-3">Copyright &copy; Zechariah Tan</p>

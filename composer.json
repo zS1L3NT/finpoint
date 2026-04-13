@@ -10,7 +10,7 @@
 		"inertiajs/inertia-laravel": "^3.0",
 		"laravel/framework": "^13.0",
 		"laravel/tinker": "^3.0",
-		"tightenco/ziggy": "^2.6"
+		"laravel/wayfinder": "^0.1.16"
 	},
 	"require-dev": {
 		"barryvdh/laravel-ide-helper": "^3.7",

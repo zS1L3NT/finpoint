@@ -7,13 +7,16 @@
     <title></title>
     <link rel="stylesheet" href="{{ asset('bootstrap.min.css')  }}">
     <script defer src="{{ asset('bootstrap.bundle.min.js')  }}"></script>
-    @routes
-    @inertiaHead
-    @vite("resources/js/app.js")
+
+    @viteReactRefresh
+    @vite(["resources/css/app.css", "resources/js/app.tsx", "resources/js/pages/{$page["component"]}.tsx"])
+    <x-inertia::head>
+        <title>{{ config("app.name", "Laravel") }}</title>
+    </x-inertia::head>
 </head>
 
 <body>
-    @inertia
+    <x-inertia::app />
 </body>
 
 </html>

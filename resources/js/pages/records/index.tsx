@@ -1,8 +1,8 @@
-import Layout from "../Layout"
+import { Paginated, Record } from "@/types"
 
-export default function RecordsIndex({ records }) {
+export default function RecordsIndex({ records }: { records: Paginated<Record> }) {
 	return (
-		<Layout title="Record List">
+		<>
 			<h1 className="mb-4">Records</h1>
 
 			<table className="table table-hover">
@@ -24,6 +24,6 @@ export default function RecordsIndex({ records }) {
 					))}
 				</tbody>
 			</table>
-		</Layout>
+		</>
 	)
 }
