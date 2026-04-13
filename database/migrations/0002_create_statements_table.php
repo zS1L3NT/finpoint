@@ -26,6 +26,7 @@ return new class extends Migration {
             $table->text("currency");
             $table->decimal("debit_amount")->nullable();
             $table->decimal("credit_amount")->nullable();
+            $table->decimal("amount")->virtualAs("- COALESCE(debit_amount, 0) + COALESCE(credit_amount, 0)");
         });
     }
 

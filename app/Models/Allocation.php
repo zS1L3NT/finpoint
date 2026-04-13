@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\WithoutTimestamps;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
-#[Table(keyType: "string", incrementing: false)]
+#[Table(name: "allocations", keyType: "string", incrementing: false)]
 #[WithoutTimestamps()]
 #[Guarded([])]
 #[Hidden(["source_check"])]
