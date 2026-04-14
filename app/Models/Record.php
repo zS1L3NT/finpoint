@@ -19,11 +19,11 @@ class Record extends Model
 
     public function statements()
     {
-        return $this->belongsToMany(Statement::class, "allocations", "target_record_id", "source_statement_id");
+        return $this->belongsToMany(Statement::class, "allocations", "target_record_id", "source_statement_id")->withPivot(["amount", "description"]);
     }
 
     public function records()
     {
-        return $this->belongsToMany(Record::class, "allocations", "target_record_id", "source_record_id");
+        return $this->belongsToMany(Record::class, "allocations", "target_record_id", "source_record_id")->withPivot(["amount", "description"]);
     }
 }

@@ -86,8 +86,29 @@ class RecordController extends Controller
         return $record;
     }
 
-    public function edit(Record $record)
+    public function show(Record $record) {
+        $record->load("category", "statements", "statements.account");
+        return Inertia::render("records/show", compact("record"));
+    }
+
+    public function update(Record $record)
     {
-        return Inertia::render("records/edit", compact("record"));
+        $dto = request()->validate([
+            "title" => "string",
+            "people" => "string",
+            "location" => "string",
+            "date" => "date_format:Y-m-d",
+            "category_id" => "exists:categories,id",
+            "statements" => "array",
+            "statements.*.id" => "required|exists:statements,id",
+            "statements.*.amount" => "decimal:0,2",
+            "statements.*.description" => "string"
+        ]);
+
+        DB::transaction(function () use ($record, $dto) {
+            $record->update(collect($dto)->except("statements")->toArray());
+
+            $errors = collect();
+        });
     }
 }

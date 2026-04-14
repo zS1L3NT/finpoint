@@ -24,6 +24,6 @@ class Statement extends Model
 
     public function records()
     {
-        return $this->belongsToMany(Record::class, "allocations", "source_statement_id", "target_record_id");
+        return $this->belongsToMany(Record::class, "allocations", "source_statement_id", "target_record_id")->withPivot(["amount", "description"]);
     }
 }
