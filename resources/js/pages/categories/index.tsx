@@ -8,7 +8,7 @@ type CategoryExtra = {
 	can_delete: boolean
 }
 
-export default function CategoriesIndex({
+export default function CategoryIndex({
 	categories,
 }: {
 	categories: (Category & CategoryExtra)[]

@@ -9,7 +9,7 @@ type RecordExtra = {
 	statements: Statement[]
 }
 
-export default function RecordsIndex({ records }: { records: Paginated<Record & RecordExtra> }) {
+export default function RecordIndex({ records }: { records: Paginated<Record & RecordExtra> }) {
 	const handleClick = (record: Record) => {
 		router.visit(RecordController.show({ record: record.id }).url)
 	}
