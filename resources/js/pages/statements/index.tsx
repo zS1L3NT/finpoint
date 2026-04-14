@@ -1,8 +1,14 @@
 import React, { Fragment, useRef, useState } from "react"
 import RecordController from "@/actions/App/Http/Controllers/RecordController"
-import { Paginated, Statement } from "@/types"
+import { Category, Paginated, Statement } from "@/types"
 
-export default function StatementsIndex({ statements }: { statements: Paginated<Statement> }) {
+export default function StatementsIndex({
+	statements,
+	categories,
+}: {
+	statements: Paginated<Statement>
+	categories: Category[]
+}) {
 	const modalButtonRef = useRef<HTMLButtonElement>(null)
 	const [selectedIds, setSelectedIds] = useState<string[]>([])
 
@@ -108,12 +114,19 @@ export default function StatementsIndex({ statements }: { statements: Paginated<
 
 			<AllocateToRecord
 				statements={statements.data.filter(s => selectedIds.includes(s.id))}
+				categories={categories}
 			/>
 		</>
 	)
 }
 
-function AllocateToRecord({ statements }: { statements: Statement[] }) {
+function AllocateToRecord({
+	statements,
+	categories,
+}: {
+	statements: Statement[]
+	categories: Category[]
+}) {
 	const closeButtonRef = useRef<HTMLButtonElement>(null)
 	const [errors, setErrors] = useState<Record<string, string[]>>({})
 
@@ -196,11 +209,20 @@ function AllocateToRecord({ statements }: { statements: Statement[] }) {
 								Category
 							</label>
 							<select
-								className="form-select"
+								className={`form-select ${errors.category_id?.length ? "is-invalid" : ""}`}
 								name="category_id"
 								id="category_id"
-								defaultValue=""
-							></select>
+							>
+								<option value="" selected>
+									-
+								</option>
+								{categories.map(category => (
+									<option key={category.id} value={category.id}>
+										{category.name}
+									</option>
+								))}
+							</select>
+							<div className="invalid-feedback">{errors.category_id?.join("\n")}</div>
 						</div>
 
 						{statements.map((statement, i) => (

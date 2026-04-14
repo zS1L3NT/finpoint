@@ -21,7 +21,7 @@ class RecordController extends Controller
         request()->validate([
             "date" => "required|date_format:Y-m-d",
             "description" => "required|string",
-            "category_id" => "exists:categories,id",
+            "category_id" => "required|exists:categories,id",
             "statements" => "required|array",
             "statements.*.id" => "required|exists:statements,id",
             "statements.*.amount" => "required|decimal:0,2",

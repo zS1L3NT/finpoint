@@ -38,7 +38,7 @@ export type Category = {
 	name: string
 	icon: string
 	color: string
-	children: Category[]
 
-	records_count: number
+	children: Category[] | null
+	records_count: number | null
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Statement;
 use Inertia\Inertia;
 
@@ -17,6 +18,8 @@ class StatementController extends Controller
             ->orderBy("transaction_date", "desc")
             ->paginate(100);
 
-        return Inertia::render("statements/index", compact("statements"));
+        $categories = Category::orderBy("name")->get();
+
+        return Inertia::render("statements/index", compact("statements", "categories"));
     }
 }
