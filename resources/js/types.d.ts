@@ -39,7 +39,7 @@ export type Category = {
 	icon: string
 	color: string
 	parent_category_id: string | null
-
 	children: Category[] | null
-	records_count: number | null
+
+	can_delete: boolean
 }

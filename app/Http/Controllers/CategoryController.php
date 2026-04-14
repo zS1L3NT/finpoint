@@ -12,7 +12,6 @@ class CategoryController extends Controller
     {
         $categories = Category::query()
             ->with("children")
-            ->withCount("records")
             ->whereNull("parent_category_id")
             ->orderBy("name")
             ->get();

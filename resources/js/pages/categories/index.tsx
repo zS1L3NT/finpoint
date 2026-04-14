@@ -362,7 +362,7 @@ function CategoryEditor({ category, categories }: { category: Category; categori
 								type="button"
 								className="btn btn-danger me-auto"
 								onClick={handleDelete}
-								disabled={!!category.records_count || !!category.children?.length}
+								disabled={!category.can_delete}
 							>
 								Delete
 							</button>
