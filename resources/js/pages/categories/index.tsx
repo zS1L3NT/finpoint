@@ -28,7 +28,7 @@ export default function CategoriesIndex({ categories }: { categories: Category[]
 			<CategoryCreator categories={categories} />
 
 			{categories.map(category => (
-				<CategoryEditor key={category.id} category={category} />
+				<CategoryEditor key={category.id} category={category} categories={categories} />
 			))}
 		</>
 	)
@@ -200,17 +200,19 @@ function CategoryCreator({ categories }: { categories: Category[] }) {
 	)
 }
 
-function CategoryEditor({ category }: { category: Category }) {
+function CategoryEditor({ category, categories }: { category: Category; categories: Category[] }) {
 	const closeButtonRef = useRef<HTMLButtonElement>(null)
 	const [name, setName] = useState("")
 	const [icon, setIcon] = useState("")
 	const [color, setColor] = useState("")
+	const [parentCategoryId, setParentCategoryId] = useState<string | null>()
 	const [errors, setErrors] = useState<Record<string, string[]>>({})
 
 	useEffect(() => {
 		setName(category.name)
 		setIcon(category.icon)
 		setColor(category.color)
+		setParentCategoryId(category.parent_category_id)
 	}, [category])
 
 	const handleDelete = async () => {
@@ -326,6 +328,30 @@ function CategoryEditor({ category }: { category: Category }) {
 								<div className="invalid-feedback">{errors.color?.join("\n")}</div>
 							</div>
 
+							{parentCategoryId ? (
+								<div className="mb-3">
+									<label htmlFor="parent_category_id" className="form-label">
+										Parent Category
+									</label>
+									<select
+										className={`form-select ${errors.parent_category_id?.length ? "is-invalid" : ""}`}
+										name="parent_category_id"
+										id="parent_category_id"
+										value={parentCategoryId}
+										onChange={e => setParentCategoryId(e.target.value)}
+									>
+										{categories.map(category => (
+											<option key={category.id} value={category.id}>
+												{category.name}
+											</option>
+										))}
+									</select>
+									<div className="invalid-feedback">
+										{errors.parent_category_id?.join("\n")}
+									</div>
+								</div>
+							) : null}
+
 							<div className="d-flex align-items-center gap-2 mt-4">
 								<Icon name={icon} color={color} />
 								<p className="m-0">{name}</p>
@@ -336,7 +362,7 @@ function CategoryEditor({ category }: { category: Category }) {
 								type="button"
 								className="btn btn-danger me-auto"
 								onClick={handleDelete}
-								disabled={category.records_count !== 0}
+								disabled={!!category.records_count || !!category.children?.length}
 							>
 								Delete
 							</button>
@@ -357,7 +383,7 @@ function CategoryEditor({ category }: { category: Category }) {
 			</form>
 
 			{category.children?.map(category => (
-				<CategoryEditor key={category.id} category={category} />
+				<CategoryEditor key={category.id} category={category} categories={categories} />
 			))}
 		</>
 	)
