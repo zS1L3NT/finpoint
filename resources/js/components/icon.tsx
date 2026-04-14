@@ -16,7 +16,11 @@ export default function Icon({
 
 	useEffect(() => {
 		if (ref.current) {
-			;new (window as any).bootstrap.Tooltip(ref.current)
+			try {
+				;new (window as any).bootstrap.Tooltip(ref.current)
+			} catch {
+				//
+			}
 		}
 	}, [ref.current])
 
