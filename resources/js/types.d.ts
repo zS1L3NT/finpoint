@@ -29,8 +29,11 @@ export type Statement = {
 export type Record = {
 	id: string
 	date: string
-	description: string
+	title: string
+	people: string | null
+	location: string | null
 	amount: number
+	category: Category
 }
 
 export type Category = {
@@ -38,8 +41,8 @@ export type Category = {
 	name: string
 	icon: string
 	color: string
+
 	parent_category_id: string | null
 	children: Category[] | null
-
-	can_delete: boolean
+	can_delete: boolean | null
 }

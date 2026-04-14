@@ -12,11 +12,13 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create("records", function (Blueprint $table) {
-            $table->text("id")->primary();
-            $table->text("date");
-            $table->foreignIdFor(Category::class)->constrained();
+            $table->string("id")->primary();
+            $table->string("title");
+            $table->string("people")->nullable();
+            $table->string("location")->nullable();
+            $table->timestamp("date");
             $table->decimal("amount");
-            $table->text("description");
+            $table->foreignIdFor(Category::class)->constrained();
         });
     }
 

@@ -18,9 +18,11 @@ class RecordController extends Controller
 
     public function store()
     {
-        request()->validate([
+        $data = request()->validate([
+            "title" => "required|string",
+            "people" => "nullable|string",
+            "location" => "nullable|string",
             "date" => "required|date_format:Y-m-d",
-            "description" => "required|string",
             "category_id" => "required|exists:categories,id",
             "statements" => "required|array",
             "statements.*.id" => "required|exists:statements,id",
@@ -28,16 +30,14 @@ class RecordController extends Controller
             "statements.*.description" => "present"
         ]);
 
-        $record = DB::transaction(function () {
+        $record = DB::transaction(function () use ($data) {
             $record = Record::query()->create([
                 "id" => Uuid::uuid4(),
-                "date" => request("date"),
-                "category_id" => request("category_id"),
-                "amount" => round(collect(request("statements"))->reduce(fn($acc, $el) => $acc + $el["amount"], 0), 2),
-                "description" => request("description")
+                "amount" => round(collect($data["statements"])->reduce(fn($acc, $el) => $acc + $el["amount"], 0), 2),
+                ...collect($data)->except("statements")
             ]);
 
-            foreach (request("statements") as $statement) {
+            foreach ($data["statements"] as $statement) {
                 $record->statements()->attach($statement["id"], [
                     "amount" => $statement["amount"],
                     "description" => $statement["description"] ?: ""

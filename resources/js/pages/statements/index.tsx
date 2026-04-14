@@ -1,5 +1,6 @@
 import React, { Fragment, useRef, useState } from "react"
 import { Category, Paginated, Statement } from "@/types"
+import { formatCurrency } from "@/utils"
 import RecordController from "@/wayfinder/actions/App/Http/Controllers/RecordController"
 
 export default function StatementsIndex({
@@ -34,7 +35,7 @@ export default function StatementsIndex({
 					type="button"
 					className="btn btn-primary"
 					data-bs-toggle="modal"
-					data-bs-target="#allocate-to-record"
+					data-bs-target="#record-allocator"
 					disabled={!selectedIds.length}
 				>
 					Allocate to Record
@@ -85,13 +86,9 @@ export default function StatementsIndex({
 							<td>{statement.transaction_date}</td>
 							<td className={statement.amount < 0 ? "text-danger" : "text-success"}>
 								{statement.allocations_sum_amount !== null
-									? statement.allocations_sum_amount < 0
-										? `-$${Math.abs(statement.allocations_sum_amount).toFixed(2)} / `
-										: `$${statement.allocations_sum_amount.toFixed(2)} / `
+									? formatCurrency(statement.allocations_sum_amount) + " out of "
 									: null}
-								{statement.amount < 0
-									? `-$${Math.abs(statement.amount).toFixed(2)}`
-									: `$${statement.amount.toFixed(2)}`}
+								{formatCurrency(statement.amount)}
 							</td>
 							<td>{statement.supplementary_code}</td>
 							<td>{statement.client_reference}</td>
@@ -112,7 +109,7 @@ export default function StatementsIndex({
 				</ul>
 			</nav>
 
-			<AllocateToRecord
+			<RecordAllocator
 				statements={statements.data.filter(s => selectedIds.includes(s.id))}
 				categories={categories}
 			/>
@@ -120,7 +117,7 @@ export default function StatementsIndex({
 	)
 }
 
-function AllocateToRecord({
+function RecordAllocator({
 	statements,
 	categories,
 }: {
@@ -156,16 +153,16 @@ function AllocateToRecord({
 	return (
 		<form
 			className="modal fade"
-			id="allocate-to-record"
+			id="record-allocator"
 			tabIndex={-1}
-			aria-labelledby="allocate-to-record-label"
+			aria-labelledby="record-allocator-label"
 			aria-hidden="true"
 			onSubmit={handleSubmit}
 		>
-			<div className="modal-dialog modal-dialog-centered modal-lg">
+			<div className="modal-dialog modal-dialog-centered modal-xl">
 				<div className="modal-content">
 					<div className="modal-header">
-						<h1 className="modal-title fs-5" id="allocate-to-record-label">
+						<h1 className="modal-title fs-5" id="record-allocator-label">
 							Allocate to Record
 						</h1>
 						<button
@@ -176,124 +173,188 @@ function AllocateToRecord({
 						></button>
 					</div>
 					<div className="modal-body">
-						<div className="mb-3">
-							<label htmlFor="description" className="form-label">
-								Description
-							</label>
-							<input
-								type="text"
-								className={`form-control ${errors.description?.length ? "is-invalid" : ""}`}
-								name="description"
-								id="description"
-							/>
-							<div className="invalid-feedback">{errors.description?.join("\n")}</div>
-						</div>
+						<div className="d-flex gap-4">
+							<div className="flex-fill">
+								<div className="mb-3">
+									<label htmlFor="title" className="form-label">
+										Title
+									</label>
+									<input
+										type="text"
+										className={`form-control ${errors.title?.length ? "is-invalid" : ""}`}
+										name="title"
+										id="title"
+									/>
+									<div className="invalid-feedback">
+										{errors.title?.join("\n")}
+									</div>
+								</div>
 
-						<div className="mb-3">
-							<label htmlFor="date" className="form-label">
-								Date
-							</label>
-							<input
-								type="date"
-								className="form-control"
-								name="date"
-								id="date"
-								defaultValue={
-									statements.map(s => s.transaction_date).toSorted()[0] ?? ""
-								}
-							/>
-						</div>
+								<div className="mb-3">
+									<label htmlFor="people" className="form-label">
+										People
+									</label>
+									<input
+										type="text"
+										className={`form-control ${errors.people?.length ? "is-invalid" : ""}`}
+										name="people"
+										id="people"
+									/>
+									<div className="invalid-feedback">
+										{errors.people?.join("\n")}
+									</div>
+								</div>
 
-						<div className="mb-3">
-							<label htmlFor="category_id" className="form-label">
-								Category
-							</label>
-							<select
-								className={`form-select ${errors.category_id?.length ? "is-invalid" : ""}`}
-								name="category_id"
-								id="category_id"
-								defaultValue=""
-							>
-								<option value="">-</option>
-								{categories.map(category => (
-									<option key={category.id} value={category.id}>
-										{category.name}
-									</option>
+								<div className="mb-3">
+									<label htmlFor="location" className="form-label">
+										Location
+									</label>
+									<input
+										type="text"
+										className={`form-control ${errors.location?.length ? "is-invalid" : ""}`}
+										name="location"
+										id="location"
+									/>
+									<div className="invalid-feedback">
+										{errors.location?.join("\n")}
+									</div>
+								</div>
+
+								<div className="mb-3">
+									<label htmlFor="date" className="form-label">
+										Date
+									</label>
+									<input
+										type="date"
+										className="form-control"
+										name="date"
+										id="date"
+										defaultValue={
+											statements.map(s => s.transaction_date).toSorted()[0] ??
+											""
+										}
+									/>
+								</div>
+
+								<div className="mb-3">
+									<label htmlFor="category_id" className="form-label">
+										Category
+									</label>
+									<select
+										className={`form-select ${errors.category_id?.length ? "is-invalid" : ""}`}
+										name="category_id"
+										id="category_id"
+										defaultValue=""
+									>
+										<option value="">-</option>
+										{categories.map(category => (
+											<option key={category.id} value={category.id}>
+												{category.name}
+											</option>
+										))}
+									</select>
+									<div className="invalid-feedback">
+										{errors.category_id?.join("\n")}
+									</div>
+								</div>
+							</div>
+
+							<div className="vr"></div>
+
+							<div className="flex-fill">
+								{statements.map((statement, i) => (
+									<Fragment key={statement.id}>
+										{i !== 0 ? <hr /> : null}
+
+										<input
+											type="hidden"
+											name={`statements[${i}][id]`}
+											value={statement.id}
+										/>
+
+										<table className="table table-sm table-borderless">
+											<tbody>
+												<tr>
+													<th>Account</th>
+													<td>
+														{statement.account.name} (
+														{statement.account.id})
+													</td>
+												</tr>
+												<tr>
+													<th>Details</th>
+													<td>
+														{statement.supplementary_code}
+														{", "}
+														{statement.client_reference}
+													</td>
+												</tr>
+												<tr>
+													<th>Date</th>
+													<td>{statement.transaction_date}</td>
+												</tr>
+												<tr>
+													<th className="align-middle">Allocated</th>
+													<td>
+														<div className="input-group">
+															<span className="input-group-text">
+																$
+															</span>
+															<input
+																type="number"
+																step={0.01}
+																className={`form-control ${errors[`statements.${i}.amount`]?.length ? "is-invalid" : ""}`}
+																name={`statements[${i}][amount]`}
+																defaultValue={
+																	statement.amount -
+																	(statement.allocations_sum_amount ??
+																		0)
+																}
+															/>
+															<span className="input-group-text">
+																out of{" "}
+																{formatCurrency(
+																	statement.amount -
+																		(statement.allocations_sum_amount ??
+																			0),
+																)}
+															</span>
+														</div>
+														<div className="invalid-feedback">
+															{errors[`statements.${i}.amount`]?.join(
+																"\n",
+															)}
+														</div>
+													</td>
+												</tr>
+												<tr>
+													<th
+														className="align-middle"
+														style={{ width: 120 }}
+													>
+														Description
+													</th>
+													<td>
+														<div className="input-group">
+															<input
+																type="text"
+																className={`form-control ${errors[`statements.${i}.description`]?.length ? "is-invalid" : ""}`}
+																name={`statements[${i}][description]`}
+															/>
+															<div className="invalid-feedback">
+																{errors[
+																	`statements.${i}.description`
+																]?.join("\n")}
+															</div>
+														</div>
+													</td>
+												</tr>
+											</tbody>
+										</table>
+									</Fragment>
 								))}
-							</select>
-							<div className="invalid-feedback">{errors.category_id?.join("\n")}</div>
+							</div>
 						</div>
-
-						{statements.map((statement, i) => (
-							<Fragment key={statement.id}>
-								<hr />
-
-								<input
-									type="hidden"
-									name={`statements[${i}][id]`}
-									value={statement.id}
-								/>
-
-								<table className="table table-sm table-borderless">
-									<tbody>
-										<tr>
-											<th style={{ width: 150 }}>Supplementary</th>
-											<td>{statement.supplementary_code}</td>
-										</tr>
-										<tr>
-											<th>Client</th>
-											<td>{statement.client_reference}</td>
-										</tr>
-										<tr>
-											<th>Account</th>
-											<td>
-												{statement.account.name} ({statement.account.id})
-											</td>
-										</tr>
-										<tr>
-											<th>Allocated</th>
-											<td>
-												<div className="input-group">
-													<span className="input-group-text">$</span>
-													<input
-														type="number"
-														step={0.01}
-														className={`form-control ${errors[`statements.${i}.amount`]?.length ? "is-invalid" : ""}`}
-														name={`statements[${i}][amount]`}
-														defaultValue={
-															statement.amount -
-															(statement.allocations_sum_amount ?? 0)
-														}
-													/>
-													<div className="invalid-feedback">
-														{errors[`statements.${i}.amount`]?.join(
-															"\n",
-														)}
-													</div>
-												</div>
-											</td>
-										</tr>
-										<tr>
-											<th>Description</th>
-											<td>
-												<div className="input-group">
-													<input
-														type="text"
-														className={`form-control ${errors[`statements.${i}.description`]?.length ? "is-invalid" : ""}`}
-														name={`statements[${i}][description]`}
-													/>
-													<div className="invalid-feedback">
-														{errors[
-															`statements.${i}.description`
-														]?.join("\n")}
-													</div>
-												</div>
-											</td>
-										</tr>
-									</tbody>
-								</table>
-							</Fragment>
-						))}
 					</div>
 					<div className="modal-footer">
 						<button
@@ -305,7 +366,7 @@ function AllocateToRecord({
 							Close
 						</button>
 						<button type="submit" className="btn btn-primary">
-							Save changes
+							Save
 						</button>
 					</div>
 				</div>
