@@ -3,7 +3,16 @@ import Icon from "@/components/icon"
 import { Category } from "@/types"
 import CategoryController from "@/wayfinder/actions/App/Http/Controllers/CategoryController"
 
-export default function CategoriesIndex({ categories }: { categories: Category[] }) {
+type CategoryExtra = {
+	children: (Category & CategoryExtra)[] | null
+	can_delete: boolean
+}
+
+export default function CategoriesIndex({
+	categories,
+}: {
+	categories: (Category & CategoryExtra)[]
+}) {
 	return (
 		<>
 			<div className="d-flex justify-content-between align-items-center mb-4">
@@ -34,7 +43,7 @@ export default function CategoriesIndex({ categories }: { categories: Category[]
 	)
 }
 
-function CategoryItem({ category, depth }: { category: Category; depth: number }) {
+function CategoryItem({ category, depth }: { category: Category & CategoryExtra; depth: number }) {
 	return (
 		<>
 			<button
@@ -44,7 +53,7 @@ function CategoryItem({ category, depth }: { category: Category; depth: number }
 				data-bs-target={`#category-${category.id}-editor`}
 			>
 				<div className="d-flex align-items-center gap-2" style={{ marginLeft: depth * 24 }}>
-					<Icon name={category.icon} color={category.color} />
+					<Icon {...category} />
 					<p className="m-0">{category.name}</p>
 				</div>
 			</button>
@@ -56,7 +65,7 @@ function CategoryItem({ category, depth }: { category: Category; depth: number }
 	)
 }
 
-function CategoryCreator({ categories }: { categories: Category[] }) {
+function CategoryCreator({ categories }: { categories: (Category & CategoryExtra)[] }) {
 	const closeButtonRef = useRef<HTMLButtonElement>(null)
 	const [name, setName] = useState("")
 	const [icon, setIcon] = useState("")
@@ -177,7 +186,7 @@ function CategoryCreator({ categories }: { categories: Category[] }) {
 						</div>
 
 						<div className="d-flex align-items-center gap-2 mt-4">
-							<Icon name={icon} color={color} />
+							<Icon name={name} icon={icon} color={color} />
 							<p className="m-0">{name}</p>
 						</div>
 					</div>
@@ -200,7 +209,13 @@ function CategoryCreator({ categories }: { categories: Category[] }) {
 	)
 }
 
-function CategoryEditor({ category, categories }: { category: Category; categories: Category[] }) {
+function CategoryEditor({
+	category,
+	categories,
+}: {
+	category: Category & CategoryExtra
+	categories: Category[]
+}) {
 	const closeButtonRef = useRef<HTMLButtonElement>(null)
 	const [name, setName] = useState("")
 	const [icon, setIcon] = useState("")
@@ -353,7 +368,7 @@ function CategoryEditor({ category, categories }: { category: Category; categori
 							) : null}
 
 							<div className="d-flex align-items-center gap-2 mt-4">
-								<Icon name={icon} color={color} />
+								<Icon name={name} icon={icon} color={color} />
 								<p className="m-0">{name}</p>
 							</div>
 						</div>
