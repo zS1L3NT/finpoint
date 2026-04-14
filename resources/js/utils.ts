@@ -5,3 +5,13 @@ export const formatCurrency = (amount: number) => {
 		return `$${amount.toFixed(2)}`
 	}
 }
+
+export const styleCurrency = (amount: number) => {
+	if (amount < 0) {
+		return { color: "rgb(var(--bs-danger-rgb))" }
+	} else if (amount > 0) {
+		return { color: "rgb(var(--bs-success-rgb))" }
+	} else {
+		return {}
+	}
+}

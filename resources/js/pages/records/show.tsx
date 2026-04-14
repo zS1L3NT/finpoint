@@ -1,7 +1,7 @@
 import React from "react"
 import Icon from "@/components/icon"
 import { Account, Category, Record, Statement } from "@/types"
-import { formatCurrency } from "@/utils"
+import { formatCurrency, styleCurrency } from "@/utils"
 
 type RecordExtra = {
 	category: Category
@@ -35,6 +35,13 @@ export default function RecordShow({ record }: { record: Record & RecordExtra })
 
 				<div className="row">
 					<div className="col">
+						<p className="m-0 fs-6 font-monospaced text-body-secondary">AMOUNT</p>
+						<p className="fs-3" style={styleCurrency(record.amount)}>
+							{formatCurrency(record.amount)}
+						</p>
+					</div>
+
+					<div className="col">
 						<p className="m-0 fs-6 font-monospaced text-body-secondary">CATEGORY</p>
 						<div className="d-flex align-items-center gap-2">
 							<Icon {...record.category} size={16} />
@@ -46,11 +53,6 @@ export default function RecordShow({ record }: { record: Record & RecordExtra })
 						<p className="m-0 fs-6 font-monospaced text-body-secondary">DATE</p>
 						<p className="fs-5">{record.date}</p>
 					</div>
-
-					<div className="col">
-						<p className="m-0 fs-6 font-monospaced text-body-secondary">STATEMENTS</p>
-						<p className="fs-5">{record.statements.length}</p>
-					</div>
 				</div>
 			</div>
 
@@ -59,14 +61,14 @@ export default function RecordShow({ record }: { record: Record & RecordExtra })
 			<h3>Statements</h3>
 
 			<div>
-				<table className="table table-hover">
+				<table className="table table-hover" style={{ tableLayout: "fixed" }}>
 					<thead>
 						<tr>
-							<th>Account</th>
-							<th>Date</th>
-							<th>Amount</th>
+							<th style={{ width: 250 }}>Account</th>
+							<th style={{ width: 125 }}>Date</th>
+							<th style={{ width: 125 }}>Total ($)</th>
+							<th style={{ width: 125 }}>Allocated ($)</th>
 							<th>Description</th>
-							<th>Label</th>
 						</tr>
 					</thead>
 
@@ -76,19 +78,23 @@ export default function RecordShow({ record }: { record: Record & RecordExtra })
 								<td>
 									{statement.account.name} ({statement.account.id})
 								</td>
-								<td>{statement.date}</td>
-								<td
-									className={
-										statement.amount < 0 ? "text-danger" : "text-success"
-									}
-								>
-									{statement.pivot.amount !== null
-										? formatCurrency(statement.pivot.amount) + " out of "
-										: null}
+								<td>{statement.date.slice(0, "YYYY-MM-DD".length)}</td>
+								<td style={styleCurrency(statement.amount)}>
 									{formatCurrency(statement.amount)}
 								</td>
-								<td>{statement.description}</td>
-								<td>{statement.pivot.description}</td>
+								<td style={styleCurrency(statement.amount)}>
+									{formatCurrency(statement.pivot.amount)}
+								</td>
+								<td
+									title={statement.description}
+									style={{
+										textOverflow: "ellipsis",
+										overflow: "hidden",
+										whiteSpace: "nowrap",
+									}}
+								>
+									{statement.description}
+								</td>
 							</tr>
 						))}
 					</tbody>

@@ -1,6 +1,6 @@
 import React, { Fragment, useRef, useState } from "react"
 import { Category, Paginated, Statement } from "@/types"
-import { formatCurrency } from "@/utils"
+import { formatCurrency, styleCurrency } from "@/utils"
 import RecordController from "@/wayfinder/actions/App/Http/Controllers/RecordController"
 
 export type StatementExtra = {
@@ -91,15 +91,16 @@ export default function Allocator({
 								{statement.account.name} ({statement.account.id})
 							</td>
 							<td>{statement.date.slice(0, "YYYY-MM-DD".length)}</td>
-							<td className={statement.amount < 0 ? "text-danger" : "text-success"}>
+							<td style={styleCurrency(statement.amount)}>
 								{formatCurrency(statement.amount)}
 							</td>
-							<td className={statement.amount < 0 ? "text-danger" : "text-success"}>
+							<td style={styleCurrency(statement.amount)}>
 								{formatCurrency(
 									statement.amount - (statement.allocations_sum_amount ?? 0),
 								)}
 							</td>
 							<td
+								title={statement.description}
 								style={{
 									textOverflow: "ellipsis",
 									overflow: "hidden",

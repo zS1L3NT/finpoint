@@ -1,7 +1,7 @@
 import { router } from "@inertiajs/react"
 import Icon from "@/components/icon"
 import { Category, Paginated, Record, Statement } from "@/types"
-import { formatCurrency } from "@/utils"
+import { formatCurrency, styleCurrency } from "@/utils"
 import RecordController from "@/wayfinder/actions/App/Http/Controllers/RecordController"
 
 type RecordExtra = {
@@ -17,16 +17,6 @@ export default function RecordsIndex({ records }: { records: Paginated<Record & 
 	return (
 		<>
 			<h1 className="mb-4">Records</h1>
-
-			{Object.entries(
-				Object.groupBy(records.data, record => record.date.slice(0, "YYYY-MM".length)),
-			)
-				.toSorted()
-				.map(([month, monthRecords]) => {
-					const sortedDates = Object.entries(
-						Object.groupBy(monthRecords ?? [], record => record.date),
-					).toSorted()
-				})}
 
 			<table className="table table-hover">
 				<thead>
@@ -65,13 +55,7 @@ export default function RecordsIndex({ records }: { records: Paginated<Record & 
 												<td rowSpan={dateRecords?.length ?? 0}>{date}</td>
 											) : null}
 
-											<td
-												className={
-													record.amount < 0
-														? "text-danger"
-														: "text-success"
-												}
-											>
+											<td style={styleCurrency(record.amount)}>
 												{formatCurrency(record.amount)}
 											</td>
 
