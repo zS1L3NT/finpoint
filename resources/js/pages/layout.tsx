@@ -1,4 +1,5 @@
 import React from "react"
+import CategoryController from "@/actions/App/Http/Controllers/CategoryController"
 import ImportController from "@/actions/App/Http/Controllers/ImportController"
 import RecordController from "@/actions/App/Http/Controllers/RecordController"
 import StatementController from "@/actions/App/Http/Controllers/StatementController"
@@ -37,6 +38,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 							<li className="nav-item">
 								<a className="nav-link" href={RecordController.index.url()}>
 									Records
+								</a>
+							</li>
+							<li className="nav-item">
+								<a className="nav-link" href={CategoryController.index.url()}>
+									Categories
 								</a>
 							</li>
 						</ul>

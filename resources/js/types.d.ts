@@ -32,3 +32,13 @@ export type Record = {
 	description: string
 	amount: number
 }
+
+export type Category = {
+	id: string
+	name: string
+	icon: string
+	color: string
+	children: Category[]
+
+	records_count: number
+}

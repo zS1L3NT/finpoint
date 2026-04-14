@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Category;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -11,8 +12,11 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create("categories", function (Blueprint $table) {
-            $table->text("id")->primary();
-            $table->text("name");
+            $table->string("id")->primary();
+            $table->string("name")->unique();
+            $table->string("icon");
+            $table->string("color");
+            $table->foreignIdFor(Category::class, "parent_category_id")->nullable()->constrained();
         });
     }
 

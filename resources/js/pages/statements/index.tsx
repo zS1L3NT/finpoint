@@ -169,11 +169,11 @@ function AllocateToRecord({ statements }: { statements: Statement[] }) {
 							</label>
 							<input
 								type="text"
-								className={`form-control ${errors.description ? "is-invalid" : ""}`}
+								className={`form-control ${errors.description?.length ? "is-invalid" : ""}`}
 								name="description"
 								id="description"
 							/>
-							<div className="invalid-feedback">{errors.description}</div>
+							<div className="invalid-feedback">{errors.description?.join("\n")}</div>
 						</div>
 
 						<div className="mb-3">
@@ -237,7 +237,7 @@ function AllocateToRecord({ statements }: { statements: Statement[] }) {
 													<input
 														type="number"
 														step={0.01}
-														className={`form-control ${errors[`statements.${i}.amount`] ? "is-invalid" : ""}`}
+														className={`form-control ${errors[`statements.${i}.amount`]?.length ? "is-invalid" : ""}`}
 														name={`statements[${i}][amount]`}
 														defaultValue={
 															statement.amount -
@@ -245,7 +245,9 @@ function AllocateToRecord({ statements }: { statements: Statement[] }) {
 														}
 													/>
 													<div className="invalid-feedback">
-														{errors[`statements.${i}.amount`]}
+														{errors[`statements.${i}.amount`]?.join(
+															"\n",
+														)}
 													</div>
 												</div>
 											</td>
@@ -256,11 +258,13 @@ function AllocateToRecord({ statements }: { statements: Statement[] }) {
 												<div className="input-group">
 													<input
 														type="text"
-														className={`form-control ${errors[`statements.${i}.description`] ? "is-invalid" : ""}`}
+														className={`form-control ${errors[`statements.${i}.description`]?.length ? "is-invalid" : ""}`}
 														name={`statements[${i}][description]`}
 													/>
 													<div className="invalid-feedback">
-														{errors[`statements.${i}.description`]}
+														{errors[
+															`statements.${i}.description`
+														]?.join("\n")}
 													</div>
 												</div>
 											</td>
