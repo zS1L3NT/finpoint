@@ -319,11 +319,11 @@ function RecordAllocator({
 																			0),
 																)}
 															</span>
-														</div>
-														<div className="invalid-feedback">
-															{errors[`statements.${i}.amount`]?.join(
-																"\n",
-															)}
+															<div className="invalid-feedback">
+																{errors[
+																	`statements.${i}.amount`
+																]?.join("\n")}
+															</div>
 														</div>
 													</td>
 												</tr>
