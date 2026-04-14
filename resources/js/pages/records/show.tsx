@@ -1,7 +1,9 @@
-import React from "react"
+import { router } from "@inertiajs/react"
+import React, { Fragment, useRef, useState } from "react"
 import Icon from "@/components/icon"
 import { Account, Category, Record, Statement } from "@/types"
 import { formatCurrency, styleCurrency } from "@/utils"
+import RecordController from "@/wayfinder/actions/App/Http/Controllers/RecordController"
 
 type RecordExtra = {
 	category: Category
@@ -10,10 +12,27 @@ type RecordExtra = {
 	})[]
 }
 
-export default function RecordShow({ record }: { record: Record & RecordExtra }) {
+export default function RecordShow({
+	record,
+	categories,
+}: {
+	record: Record & RecordExtra
+	categories: Category[]
+}) {
 	return (
 		<>
-			<h1 className="mb-4">Record {record.id}</h1>
+			<div className="d-flex justify-content-between align-items-center mb-4">
+				<h1 className="mb-4">Record {record.id}</h1>
+
+				<button
+					type="button"
+					className="btn btn-primary"
+					data-bs-toggle="modal"
+					data-bs-target="#record-editor"
+				>
+					Edit
+				</button>
+			</div>
 
 			<div className="my-3">
 				<div className="row">
@@ -100,6 +119,284 @@ export default function RecordShow({ record }: { record: Record & RecordExtra })
 					</tbody>
 				</table>
 			</div>
+
+			<RecordEditor record={record} categories={categories} />
 		</>
+	)
+}
+
+function RecordEditor({
+	record,
+	categories,
+}: {
+	record: Record & RecordExtra
+	categories: Category[]
+}) {
+	const closeButtonRef = useRef<HTMLButtonElement>(null)
+	const [errors, setErrors] = useState<globalThis.Record<string, string[]>>({})
+
+	const handleDelete = async () => {
+		const formData = new FormData()
+		formData.set("_method", "DELETE")
+
+		await fetch(RecordController.destroy({ record: record.id }).url, {
+			method: "post",
+			body: formData,
+			headers: { Accept: "application/json" },
+		}).then(res => {
+			if (res.status === 200) {
+				closeButtonRef.current?.click()
+				setTimeout(() => {
+					router.visit(RecordController.index.url())
+				}, 500)
+			}
+		})
+	}
+
+	const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
+		e.preventDefault()
+
+		const formData = new FormData(e.currentTarget)
+		formData.set("_method", "PUT")
+
+		await fetch(RecordController.update({ record: record.id }).url, {
+			method: "post",
+			body: formData,
+			headers: { Accept: "application/json" },
+		})
+			.then(async res => [res, await res.json()] as const)
+			.then(([res, data]) => {
+				if (res.status === 422) {
+					setErrors(data.errors)
+				}
+
+				if (res.status === 200) {
+					closeButtonRef.current?.click()
+					setTimeout(() => {
+						window.location.reload()
+					}, 500)
+				}
+			})
+	}
+
+	return (
+		<form
+			className="modal fade"
+			id="record-editor"
+			tabIndex={-1}
+			aria-labelledby="record-editor"
+			aria-hidden="true"
+			onSubmit={handleSubmit}
+		>
+			<div className="modal-dialog modal-dialog-centered modal-xl">
+				<div className="modal-content">
+					<div className="modal-header">
+						<h1 className="modal-title fs-5" id="record-editor-label">
+							Record Editor
+						</h1>
+						<button
+							type="button"
+							className="btn-close"
+							data-bs-dismiss="modal"
+							aria-label="Close"
+						></button>
+					</div>
+					<div className="modal-body">
+						<div className="d-flex gap-4">
+							<div style={{ width: 300 }}>
+								<div className="mb-3">
+									<label htmlFor="title" className="form-label">
+										Title
+									</label>
+									<input
+										type="text"
+										className={`form-control ${errors.title?.length ? "is-invalid" : ""}`}
+										name="title"
+										id="title"
+										defaultValue={record.title}
+									/>
+									<div className="invalid-feedback">
+										{errors.title?.join("\n")}
+									</div>
+								</div>
+
+								<div className="mb-3">
+									<label htmlFor="people" className="form-label">
+										People
+									</label>
+									<input
+										type="text"
+										className={`form-control ${errors.people?.length ? "is-invalid" : ""}`}
+										name="people"
+										id="people"
+										defaultValue={record.people ?? ""}
+									/>
+									<div className="invalid-feedback">
+										{errors.people?.join("\n")}
+									</div>
+								</div>
+
+								<div className="mb-3">
+									<label htmlFor="location" className="form-label">
+										Location
+									</label>
+									<input
+										type="text"
+										className={`form-control ${errors.location?.length ? "is-invalid" : ""}`}
+										name="location"
+										id="location"
+										defaultValue={record.location ?? ""}
+									/>
+									<div className="invalid-feedback">
+										{errors.location?.join("\n")}
+									</div>
+								</div>
+
+								<div className="mb-3">
+									<label htmlFor="date" className="form-label">
+										Date
+									</label>
+									<input
+										type="date"
+										className="form-control"
+										name="date"
+										id="date"
+										defaultValue={record.date.slice(0, "YYYY-MM-DD".length)}
+									/>
+								</div>
+
+								<div className="mb-3">
+									<label htmlFor="category_id" className="form-label">
+										Category
+									</label>
+									<select
+										className={`form-select ${errors.category_id?.length ? "is-invalid" : ""}`}
+										name="category_id"
+										id="category_id"
+										defaultValue={record.category.id}
+									>
+										{categories.map(category => (
+											<option key={category.id} value={category.id}>
+												{category.name}
+											</option>
+										))}
+									</select>
+									<div className="invalid-feedback">
+										{errors.category_id?.join("\n")}
+									</div>
+								</div>
+							</div>
+
+							<div className="vr"></div>
+
+							<div className="flex-fill">
+								{record.statements.map((statement, i) => (
+									<Fragment key={statement.id}>
+										{i !== 0 ? <hr /> : null}
+
+										<input
+											type="hidden"
+											name={`statements[${i}][id]`}
+											value={statement.id}
+										/>
+
+										<table className="table table-sm table-borderless">
+											<tbody>
+												<tr>
+													<th style={{ width: 120 }}>Account</th>
+													<td>
+														{statement.account.name} (
+														{statement.account.id})
+													</td>
+												</tr>
+												<tr>
+													<th>Description</th>
+													<td>{statement.description}</td>
+												</tr>
+												<tr>
+													<th>Date</th>
+													<td>{statement.date}</td>
+												</tr>
+												<tr>
+													<th className="align-middle">Allocated</th>
+													<td>
+														<div
+															className="input-group"
+															style={{ width: 400 }}
+														>
+															<span className="input-group-text">
+																$
+															</span>
+															<input
+																type="number"
+																step={0.01}
+																className={`form-control ${errors[`statements.${i}.amount`]?.length ? "is-invalid" : ""}`}
+																name={`statements[${i}][amount]`}
+																defaultValue={
+																	statement.pivot.amount
+																}
+															/>
+															<span className="input-group-text">
+																out of{" "}
+																{formatCurrency(statement.amount)}
+															</span>
+															<div className="invalid-feedback">
+																{errors[
+																	`statements.${i}.amount`
+																]?.join("\n")}
+															</div>
+														</div>
+													</td>
+												</tr>
+												<tr>
+													<th className="align-middle">Description</th>
+													<td>
+														<div
+															className="input-group"
+															style={{ width: 400 }}
+														>
+															<input
+																type="text"
+																className={`form-control ${errors[`statements.${i}.description`]?.length ? "is-invalid" : ""}`}
+																name={`statements[${i}][description]`}
+															/>
+															<div className="invalid-feedback">
+																{errors[
+																	`statements.${i}.description`
+																]?.join("\n")}
+															</div>
+														</div>
+													</td>
+												</tr>
+											</tbody>
+										</table>
+									</Fragment>
+								))}
+							</div>
+						</div>
+					</div>
+					<div className="modal-footer">
+						<button
+							type="button"
+							className="btn btn-danger me-auto"
+							onClick={handleDelete}
+						>
+							Delete
+						</button>
+						<button
+							ref={closeButtonRef}
+							type="button"
+							className="btn btn-secondary"
+							data-bs-dismiss="modal"
+						>
+							Close
+						</button>
+						<button type="submit" className="btn btn-primary">
+							Save
+						</button>
+					</div>
+				</div>
+			</div>
+		</form>
 	)
 }
