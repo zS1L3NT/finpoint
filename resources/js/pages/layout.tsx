@@ -1,8 +1,8 @@
 import React from "react"
-import CategoryController from "@/actions/App/Http/Controllers/CategoryController"
-import ImportController from "@/actions/App/Http/Controllers/ImportController"
-import RecordController from "@/actions/App/Http/Controllers/RecordController"
-import StatementController from "@/actions/App/Http/Controllers/StatementController"
+import CategoryController from "@/wayfinder/actions/App/Http/Controllers/CategoryController"
+import ImportController from "@/wayfinder/actions/App/Http/Controllers/ImportController"
+import RecordController from "@/wayfinder/actions/App/Http/Controllers/RecordController"
+import StatementController from "@/wayfinder/actions/App/Http/Controllers/StatementController"
 
 export default function Layout({ children }: { children: React.ReactNode }) {
 	return (

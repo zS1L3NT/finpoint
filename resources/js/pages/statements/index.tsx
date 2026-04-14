@@ -1,6 +1,6 @@
 import React, { Fragment, useRef, useState } from "react"
-import RecordController from "@/actions/App/Http/Controllers/RecordController"
 import { Category, Paginated, Statement } from "@/types"
+import RecordController from "@/wayfinder/actions/App/Http/Controllers/RecordController"
 
 export default function StatementsIndex({
 	statements,

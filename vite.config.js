@@ -17,7 +17,8 @@ export default defineConfig({
             }
         }),
         wayfinder({
-            formVariants: true
+            formVariants: true,
+            path: "resources/js/wayfinder"
         })
     ],
 });

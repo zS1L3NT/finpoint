@@ -1,6 +1,6 @@
 import { Form } from "@inertiajs/react"
 import React from "react"
-import ImportController from "@/actions/App/Http/Controllers/ImportController"
+import ImportController from "@/wayfinder/actions/App/Http/Controllers/ImportController"
 
 export default function Import({ errors }: { errors: Record<string, string> }) {
 	const fileErrors = Object.entries(errors)

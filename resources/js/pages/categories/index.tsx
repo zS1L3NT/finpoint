@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react"
-import CategoryController from "@/actions/App/Http/Controllers/CategoryController"
 import Icon from "@/components/icon"
 import { Category } from "@/types"
+import CategoryController from "@/wayfinder/actions/App/Http/Controllers/CategoryController"
 
 export default function CategoriesIndex({ categories }: { categories: Category[] }) {
 	return (
