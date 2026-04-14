@@ -1,8 +1,8 @@
 import React from "react"
+import AllocatorController from "@/wayfinder/actions/App/Http/Controllers/AllocatorController"
 import CategoryController from "@/wayfinder/actions/App/Http/Controllers/CategoryController"
-import ImportController from "@/wayfinder/actions/App/Http/Controllers/ImportController"
+import ImporterController from "@/wayfinder/actions/App/Http/Controllers/ImporterController"
 import RecordController from "@/wayfinder/actions/App/Http/Controllers/RecordController"
-import StatementController from "@/wayfinder/actions/App/Http/Controllers/StatementController"
 
 export default function Layout({ children }: { children: React.ReactNode }) {
 	return (
@@ -26,13 +26,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 					<div className="collapse navbar-collapse" id="navbarNav">
 						<ul className="navbar-nav ms-auto">
 							<li className="nav-item">
-								<a className="nav-link" href={ImportController.index.url()}>
-									Import
+								<a className="nav-link" href={ImporterController.index.url()}>
+									Importer
 								</a>
 							</li>
 							<li className="nav-item">
-								<a className="nav-link" href={StatementController.index.url()}>
-									Statements
+								<a className="nav-link" href={AllocatorController.index.url()}>
+									Allocator
 								</a>
 							</li>
 							<li className="nav-item">

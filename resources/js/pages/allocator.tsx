@@ -7,7 +7,7 @@ export type StatementExtra = {
 	allocations_sum_amount: number
 }
 
-export default function StatementsIndex({
+export default function Allocator({
 	statements,
 	categories,
 }: {
@@ -32,7 +32,10 @@ export default function StatementsIndex({
 	return (
 		<>
 			<div className="d-flex justify-content-between align-items-center mb-4">
-				<h1>Statements</h1>
+				<div>
+					<h1>Allocator</h1>
+					<p className="text-body-secondary">Allocate bank statements to app records</p>
+				</div>
 
 				<button
 					ref={modalButtonRef}

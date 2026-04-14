@@ -9,11 +9,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
-class ImportController extends Controller
+class ImporterController extends Controller
 {
     public function index()
     {
-        return Inertia::render("import");
+        return Inertia::render("importer");
     }
 
     public function store()
@@ -78,6 +78,6 @@ class ImportController extends Controller
             }
         });
 
-        return redirect()->route("statements.index");
+        return redirect()->route("allocator.index");
     }
 }

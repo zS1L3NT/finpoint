@@ -4,9 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Statement;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 
-class StatementController extends Controller
+class AllocatorController extends Controller
 {
     public function index()
     {
@@ -20,6 +21,6 @@ class StatementController extends Controller
 
         $categories = Category::orderBy("name")->get();
 
-        return Inertia::render("statements/index", compact("statements", "categories"));
+        return Inertia::render("allocator", compact("statements", "categories"));
     }
 }
