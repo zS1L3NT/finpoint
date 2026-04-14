@@ -69,18 +69,9 @@ class ImportController extends Controller
                         Statement::query()->insert([
                             "account_id" => $account_id,
                             "id" => $id,
-                            "transaction_date" => Carbon::createFromFormat("d M Y", $statement["Transaction Date"])->format("Y-m-d"),
-                            "value_date" => Carbon::createFromFormat("d M Y", $statement["Value Date"])->format("Y-m-d"),
-                            "statement_code" => $statement["Statement Code"],
-                            "description" => $statement["Description"],
-                            "supplementary_code" => $statement["Supplementary Code"],
-                            "supplementary_code_description" => $statement["Supplementary Code Description"],
-                            "client_reference" => $statement["Client Reference"],
-                            "additional_reference" => $statement["Additional Reference"],
-                            "status" => $statement["Status"],
-                            "currency" => $statement["Currency"],
-                            "debit_amount" => $statement["Debit Amount"] !== "" ? $statement["Debit Amount"] : null,
-                            "credit_amount" => $statement["Credit Amount"] !== "" ? $statement["Credit Amount"] : null,
+                            "date" => Carbon::createFromFormat("d M Y", $statement["Transaction Date"]),
+                            "description" => collect([$statement["Supplementary Code"], $statement["Client Reference"], $statement["Additional Reference"]])->filter(fn($v) => !empty($v))->join(", "),
+                            "amount" => $statement["Debit Amount"] !== "" ? -$statement["Debit Amount"] : $statement["Credit Amount"],
                         ]);
                     }
                 }

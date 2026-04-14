@@ -65,8 +65,7 @@ export default function RecordShow({ record }: { record: Record & RecordExtra })
 							<th>Account</th>
 							<th>Date</th>
 							<th>Amount</th>
-							<th>Supplementary</th>
-							<th>Client</th>
+							<th>Description</th>
 							<th>Label</th>
 						</tr>
 					</thead>
@@ -77,7 +76,7 @@ export default function RecordShow({ record }: { record: Record & RecordExtra })
 								<td>
 									{statement.account.name} ({statement.account.id})
 								</td>
-								<td>{statement.transaction_date}</td>
+								<td>{statement.date}</td>
 								<td
 									className={
 										statement.amount < 0 ? "text-danger" : "text-success"
@@ -88,8 +87,7 @@ export default function RecordShow({ record }: { record: Record & RecordExtra })
 										: null}
 									{formatCurrency(statement.amount)}
 								</td>
-								<td>{statement.supplementary_code}</td>
-								<td>{statement.client_reference}</td>
+								<td>{statement.description}</td>
 								<td>{statement.pivot.description}</td>
 							</tr>
 						))}

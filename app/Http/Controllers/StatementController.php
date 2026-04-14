@@ -15,7 +15,7 @@ class StatementController extends Controller
             ->withSum("allocations", "amount")
             ->whereNull("allocations_sum_amount")
             ->orWhereColumn("allocations_sum_amount", "!=", "statements.amount")
-            ->orderBy("transaction_date", "desc")
+            ->orderBy("date", "desc")
             ->paginate(100);
 
         $categories = Category::orderBy("name")->get();

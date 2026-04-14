@@ -3,11 +3,15 @@ import { Category, Paginated, Statement } from "@/types"
 import { formatCurrency } from "@/utils"
 import RecordController from "@/wayfinder/actions/App/Http/Controllers/RecordController"
 
+export type StatementExtra = {
+	allocations_sum_amount: number
+}
+
 export default function StatementsIndex({
 	statements,
 	categories,
 }: {
-	statements: Paginated<Statement>
+	statements: Paginated<Statement & StatementExtra>
 	categories: Category[]
 }) {
 	const modalButtonRef = useRef<HTMLButtonElement>(null)
@@ -42,15 +46,15 @@ export default function StatementsIndex({
 				</button>
 			</div>
 
-			<table className="table table-hover">
+			<table className="table table-hover" style={{ tableLayout: "fixed" }}>
 				<thead>
 					<tr>
-						<th></th>
-						<th>Account</th>
-						<th>Date</th>
-						<th>Amount</th>
-						<th>Supplementary</th>
-						<th>Client</th>
+						<th style={{ width: 32 }}></th>
+						<th style={{ width: 250 }}>Account</th>
+						<th style={{ width: 125 }}>Date</th>
+						<th style={{ width: 125 }}>Total ($)</th>
+						<th style={{ width: 125 }}>Allocable ($)</th>
+						<th>Description</th>
 					</tr>
 				</thead>
 
@@ -83,15 +87,24 @@ export default function StatementsIndex({
 							<td>
 								{statement.account.name} ({statement.account.id})
 							</td>
-							<td>{statement.transaction_date}</td>
+							<td>{statement.date.slice(0, "YYYY-MM-DD".length)}</td>
 							<td className={statement.amount < 0 ? "text-danger" : "text-success"}>
-								{statement.allocations_sum_amount !== null
-									? formatCurrency(statement.allocations_sum_amount) + " out of "
-									: null}
 								{formatCurrency(statement.amount)}
 							</td>
-							<td>{statement.supplementary_code}</td>
-							<td>{statement.client_reference}</td>
+							<td className={statement.amount < 0 ? "text-danger" : "text-success"}>
+								{formatCurrency(
+									statement.amount - (statement.allocations_sum_amount ?? 0),
+								)}
+							</td>
+							<td
+								style={{
+									textOverflow: "ellipsis",
+									overflow: "hidden",
+									whiteSpace: "nowrap",
+								}}
+							>
+								{statement.description}
+							</td>
 						</tr>
 					))}
 				</tbody>
@@ -121,7 +134,7 @@ function RecordAllocator({
 	statements,
 	categories,
 }: {
-	statements: Statement[]
+	statements: (Statement & StatementExtra)[]
 	categories: Category[]
 }) {
 	const closeButtonRef = useRef<HTMLButtonElement>(null)
@@ -229,10 +242,9 @@ function RecordAllocator({
 										className="form-control"
 										name="date"
 										id="date"
-										defaultValue={
-											statements.map(s => s.transaction_date).toSorted()[0] ??
-											""
-										}
+										defaultValue={(
+											statements.map(s => s.date).toSorted()[0] ?? ""
+										).slice(0, "YYYY-MM-DD".length)}
 									/>
 								</div>
 
@@ -282,16 +294,12 @@ function RecordAllocator({
 													</td>
 												</tr>
 												<tr>
-													<th>Details</th>
-													<td>
-														{statement.supplementary_code}
-														{", "}
-														{statement.client_reference}
-													</td>
+													<th>Description</th>
+													<td>{statement.description}</td>
 												</tr>
 												<tr>
 													<th>Date</th>
-													<td>{statement.transaction_date}</td>
+													<td>{statement.date}</td>
 												</tr>
 												<tr>
 													<th className="align-middle">Allocated</th>
