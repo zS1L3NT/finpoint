@@ -34,6 +34,7 @@ export type Record = {
 	location: string | null
 	amount: number
 	category: Category
+	statements: Statement[]
 }
 
 export type Category = {
