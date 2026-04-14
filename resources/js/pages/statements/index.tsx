@@ -212,10 +212,9 @@ function AllocateToRecord({
 								className={`form-select ${errors.category_id?.length ? "is-invalid" : ""}`}
 								name="category_id"
 								id="category_id"
+								defaultValue=""
 							>
-								<option value="" selected>
-									-
-								</option>
+								<option value="">-</option>
 								{categories.map(category => (
 									<option key={category.id} value={category.id}>
 										{category.name}

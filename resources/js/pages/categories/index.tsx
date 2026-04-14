@@ -19,13 +19,17 @@ export default function CategoriesIndex({ categories }: { categories: Category[]
 				</button>
 			</div>
 
-			<CategoryCreator categories={categories} />
-
 			<div className="list-group">
 				{categories.map(category => (
 					<CategoryItem key={category.id} category={category} depth={0} />
 				))}
 			</div>
+
+			<CategoryCreator categories={categories} />
+
+			{categories.map(category => (
+				<CategoryEditor key={category.id} category={category} />
+			))}
 		</>
 	)
 }
@@ -44,8 +48,6 @@ function CategoryItem({ category, depth }: { category: Category; depth: number }
 					<p className="m-0">{category.name}</p>
 				</div>
 			</button>
-
-			<CategoryEditor category={category} />
 
 			{category.children?.map(category => (
 				<CategoryItem key={category.id} category={category} depth={depth + 1} />
@@ -160,10 +162,9 @@ function CategoryCreator({ categories }: { categories: Category[] }) {
 								className={`form-select ${errors.parent_category_id?.length ? "is-invalid" : ""}`}
 								name="parent_category_id"
 								id="parent_category_id"
+								defaultValue=""
 							>
-								<option value="" selected>
-									-
-								</option>
+								<option value="">-</option>
 								{categories.map(category => (
 									<option key={category.id} value={category.id}>
 										{category.name}
@@ -257,101 +258,107 @@ function CategoryEditor({ category }: { category: Category }) {
 	}
 
 	return (
-		<form
-			className="modal fade"
-			id={`category-${category.id}-editor`}
-			tabIndex={-1}
-			aria-labelledby={`category-${category.id}-editor-label`}
-			aria-hidden="true"
-			onSubmit={handleSubmit}
-		>
-			<div className="modal-dialog modal-dialog-centered">
-				<div className="modal-content">
-					<div className="modal-header">
-						<h1 className="modal-title fs-5" id={`category-${category.id}-editor`}>
-							Category Editor
-						</h1>
-						<button
-							type="button"
-							className="btn-close"
-							data-bs-dismiss="modal"
-							aria-label="Close"
-						></button>
-					</div>
-					<div className="modal-body">
-						<div className="mb-3">
-							<label htmlFor="name" className="form-label">
-								Name
-							</label>
-							<input
-								type="text"
-								className={`form-control ${errors.name?.length ? "is-invalid" : ""}`}
-								name="name"
-								id="name"
-								value={name}
-								onChange={e => setName(e.target.value)}
-							/>
-							<div className="invalid-feedback">{errors.name?.join("\n")}</div>
+		<>
+			<form
+				className="modal fade"
+				id={`category-${category.id}-editor`}
+				tabIndex={-1}
+				aria-labelledby={`category-${category.id}-editor-label`}
+				aria-hidden="true"
+				onSubmit={handleSubmit}
+			>
+				<div className="modal-dialog modal-dialog-centered">
+					<div className="modal-content">
+						<div className="modal-header">
+							<h1 className="modal-title fs-5" id={`category-${category.id}-editor`}>
+								Category Editor
+							</h1>
+							<button
+								type="button"
+								className="btn-close"
+								data-bs-dismiss="modal"
+								aria-label="Close"
+							></button>
 						</div>
+						<div className="modal-body">
+							<div className="mb-3">
+								<label htmlFor="name" className="form-label">
+									Name
+								</label>
+								<input
+									type="text"
+									className={`form-control ${errors.name?.length ? "is-invalid" : ""}`}
+									name="name"
+									id="name"
+									value={name}
+									onChange={e => setName(e.target.value)}
+								/>
+								<div className="invalid-feedback">{errors.name?.join("\n")}</div>
+							</div>
 
-						<div className="mb-3">
-							<label htmlFor="icon" className="form-label">
-								Icon
-							</label>
-							<input
-								type="text"
-								className={`form-control ${errors.icon?.length ? "is-invalid" : ""}`}
-								name="icon"
-								id="icon"
-								value={icon}
-								onChange={e => setIcon(e.target.value)}
-							/>
-							<div className="invalid-feedback">{errors.icon?.join("\n")}</div>
-						</div>
+							<div className="mb-3">
+								<label htmlFor="icon" className="form-label">
+									Icon
+								</label>
+								<input
+									type="text"
+									className={`form-control ${errors.icon?.length ? "is-invalid" : ""}`}
+									name="icon"
+									id="icon"
+									value={icon}
+									onChange={e => setIcon(e.target.value)}
+								/>
+								<div className="invalid-feedback">{errors.icon?.join("\n")}</div>
+							</div>
 
-						<div className="mb-3">
-							<label htmlFor="color" className="form-label">
-								Color
-							</label>
-							<input
-								type="text"
-								className={`form-control ${errors.color?.length ? "is-invalid" : ""}`}
-								name="color"
-								id="color"
-								value={color}
-								onChange={e => setColor(e.target.value)}
-							/>
-							<div className="invalid-feedback">{errors.color?.join("\n")}</div>
-						</div>
+							<div className="mb-3">
+								<label htmlFor="color" className="form-label">
+									Color
+								</label>
+								<input
+									type="text"
+									className={`form-control ${errors.color?.length ? "is-invalid" : ""}`}
+									name="color"
+									id="color"
+									value={color}
+									onChange={e => setColor(e.target.value)}
+								/>
+								<div className="invalid-feedback">{errors.color?.join("\n")}</div>
+							</div>
 
-						<div className="d-flex align-items-center gap-2 mt-4">
-							<Icon name={icon} color={color} />
-							<p className="m-0">{name}</p>
+							<div className="d-flex align-items-center gap-2 mt-4">
+								<Icon name={icon} color={color} />
+								<p className="m-0">{name}</p>
+							</div>
 						</div>
-					</div>
-					<div className="modal-footer">
-						<button
-							type="button"
-							className="btn btn-danger me-auto"
-							onClick={handleDelete}
-							disabled={category.records_count !== 0}
-						>
-							Delete
-						</button>
-						<button
-							ref={closeButtonRef}
-							type="button"
-							className="btn btn-secondary"
-							data-bs-dismiss="modal"
-						>
-							Close
-						</button>
-						<button type="submit" className="btn btn-primary">
-							Save
-						</button>
+						<div className="modal-footer">
+							<button
+								type="button"
+								className="btn btn-danger me-auto"
+								onClick={handleDelete}
+								disabled={category.records_count !== 0}
+							>
+								Delete
+							</button>
+							<button
+								ref={closeButtonRef}
+								type="button"
+								className="btn btn-secondary"
+								data-bs-dismiss="modal"
+							>
+								Close
+							</button>
+							<button type="submit" className="btn btn-primary">
+								Save
+							</button>
+						</div>
 					</div>
 				</div>
-			</div>
-		</form>
+			</form>
+
+			{category.children?.map(category => (
+				<CategoryEditor key={category.id} category={category} />
+			))}
+		</>
 	)
 }
