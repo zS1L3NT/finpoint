@@ -174,7 +174,7 @@ function RecordAllocator({
 					</div>
 					<div className="modal-body">
 						<div className="d-flex gap-4">
-							<div className="flex-fill">
+							<div style={{ width: 300 }}>
 								<div className="mb-3">
 									<label htmlFor="title" className="form-label">
 										Title
@@ -275,7 +275,7 @@ function RecordAllocator({
 										<table className="table table-sm table-borderless">
 											<tbody>
 												<tr>
-													<th>Account</th>
+													<th style={{ width: 120 }}>Account</th>
 													<td>
 														{statement.account.name} (
 														{statement.account.id})
@@ -296,7 +296,10 @@ function RecordAllocator({
 												<tr>
 													<th className="align-middle">Allocated</th>
 													<td>
-														<div className="input-group">
+														<div
+															className="input-group"
+															style={{ width: 400 }}
+														>
 															<span className="input-group-text">
 																$
 															</span>
@@ -328,14 +331,12 @@ function RecordAllocator({
 													</td>
 												</tr>
 												<tr>
-													<th
-														className="align-middle"
-														style={{ width: 120 }}
-													>
-														Description
-													</th>
+													<th className="align-middle">Description</th>
 													<td>
-														<div className="input-group">
+														<div
+															className="input-group"
+															style={{ width: 400 }}
+														>
 															<input
 																type="text"
 																className={`form-control ${errors[`statements.${i}.description`]?.length ? "is-invalid" : ""}`}
