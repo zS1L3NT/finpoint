@@ -253,7 +253,7 @@ update.form = updateForm
 
 /**
 * @see \App\Http\Controllers\CategoryController::destroy
-* @see app/Http/Controllers/CategoryController.php:53
+* @see app/Http/Controllers/CategoryController.php:54
 * @route '/categories/{category}'
 */
 export const destroy = (args: { category: string | { id: string } } | [category: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -268,7 +268,7 @@ destroy.definition = {
 
 /**
 * @see \App\Http\Controllers\CategoryController::destroy
-* @see app/Http/Controllers/CategoryController.php:53
+* @see app/Http/Controllers/CategoryController.php:54
 * @route '/categories/{category}'
 */
 destroy.url = (args: { category: string | { id: string } } | [category: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
@@ -301,7 +301,7 @@ destroy.url = (args: { category: string | { id: string } } | [category: string |
 
 /**
 * @see \App\Http\Controllers\CategoryController::destroy
-* @see app/Http/Controllers/CategoryController.php:53
+* @see app/Http/Controllers/CategoryController.php:54
 * @route '/categories/{category}'
 */
 destroy.delete = (args: { category: string | { id: string } } | [category: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -311,7 +311,7 @@ destroy.delete = (args: { category: string | { id: string } } | [category: strin
 
 /**
 * @see \App\Http\Controllers\CategoryController::destroy
-* @see app/Http/Controllers/CategoryController.php:53
+* @see app/Http/Controllers/CategoryController.php:54
 * @route '/categories/{category}'
 */
 const destroyForm = (args: { category: string | { id: string } } | [category: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -326,7 +326,7 @@ const destroyForm = (args: { category: string | { id: string } } | [category: st
 
 /**
 * @see \App\Http\Controllers\CategoryController::destroy
-* @see app/Http/Controllers/CategoryController.php:53
+* @see app/Http/Controllers/CategoryController.php:54
 * @route '/categories/{category}'
 */
 destroyForm.delete = (args: { category: string | { id: string } } | [category: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

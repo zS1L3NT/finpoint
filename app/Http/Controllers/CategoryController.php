@@ -40,9 +40,10 @@ class CategoryController extends Controller
     public function update(Category $category)
     {
         $data = request()->validate([
-            "name" => "string|unique:categories,name",
+            "name" => "string|unique:categories,name," . $category->id,
             "icon" => "string",
             "color" => "string",
+            "parent_category_id" => "exists:categories,id"
         ]);
 
         $category->update($data);
