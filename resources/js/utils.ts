@@ -15,3 +15,11 @@ export const styleCurrency = (amount: number) => {
 		return {}
 	}
 }
+
+export const decodeHtml = (html: string) => {
+	if (typeof window !== "undefined") {
+		return new DOMParser().parseFromString(html, "text/html").documentElement.textContent
+	} else {
+		return ""
+	}
+}

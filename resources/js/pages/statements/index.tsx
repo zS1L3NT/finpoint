@@ -1,6 +1,6 @@
 import { router } from "@inertiajs/react"
 import { Account, Paginated, Record, Statement } from "@/types"
-import { formatCurrency, styleCurrency } from "@/utils"
+import { decodeHtml, formatCurrency, styleCurrency } from "@/utils"
 import StatementController from "@/wayfinder/actions/App/Http/Controllers/StatementController"
 
 type StatementExtra = {
@@ -66,6 +66,18 @@ export default function StatementIndex({
 					))}
 				</tbody>
 			</table>
+
+			<nav>
+				<ul className="pagination justify-content-center">
+					{statements.links.map(link => (
+						<li key={link.label} className={`page-item ${link.active ? "active" : ""}`}>
+							<a className="page-link" href={link.url}>
+								{decodeHtml(link.label)}
+							</a>
+						</li>
+					))}
+				</ul>
+			</nav>
 		</>
 	)
 }

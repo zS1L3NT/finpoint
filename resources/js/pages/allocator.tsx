@@ -1,6 +1,6 @@
 import React, { Fragment, useRef, useState } from "react"
 import { Account, Category, Paginated, Statement } from "@/types"
-import { formatCurrency, styleCurrency } from "@/utils"
+import { decodeHtml, formatCurrency, styleCurrency } from "@/utils"
 import RecordController from "@/wayfinder/actions/App/Http/Controllers/RecordController"
 
 type StatementExtra = {
@@ -20,14 +20,6 @@ export default function Allocator({
 
 	const setSelected = (id: string, selected: boolean) => {
 		setSelectedIds(ids => (selected ? [...ids, id] : ids.filter(_id => _id !== id)))
-	}
-
-	const decodeHtml = (html: string) => {
-		if (typeof window !== "undefined") {
-			return new DOMParser().parseFromString(html, "text/html").documentElement.textContent
-		} else {
-			return ""
-		}
 	}
 
 	return (
