@@ -3,6 +3,7 @@ import AllocatorController from "@/wayfinder/actions/App/Http/Controllers/Alloca
 import CategoryController from "@/wayfinder/actions/App/Http/Controllers/CategoryController"
 import ImporterController from "@/wayfinder/actions/App/Http/Controllers/ImporterController"
 import RecordController from "@/wayfinder/actions/App/Http/Controllers/RecordController"
+import StatementController from "@/wayfinder/actions/App/Http/Controllers/StatementController"
 
 export default function Layout({ children }: { children: React.ReactNode }) {
 	return (
@@ -33,6 +34,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 							<li className="nav-item">
 								<a className="nav-link" href={AllocatorController.index.url()}>
 									Allocator
+								</a>
+							</li>
+							<li className="nav-item">
+								<a className="nav-link" href={StatementController.index.url()}>
+									Statements
 								</a>
 							</li>
 							<li className="nav-item">

@@ -48,14 +48,27 @@ export default function RecordIndex({ records }: { records: Paginated<Record & R
 											onClick={() => handleClick(record)}
 										>
 											{dateIndex === 0 && recordIndex === 0 ? (
-												<td rowSpan={monthRecords?.length ?? 0}>{month}</td>
+												<td
+													className="align-middle"
+													rowSpan={monthRecords?.length ?? 0}
+												>
+													{month}
+												</td>
 											) : null}
 
 											{recordIndex === 0 ? (
-												<td rowSpan={dateRecords?.length ?? 0}>{date}</td>
+												<td
+													className="align-middle"
+													rowSpan={dateRecords?.length ?? 0}
+												>
+													{date}
+												</td>
 											) : null}
 
-											<td style={styleCurrency(record.amount)}>
+											<td
+												className="align-middle"
+												style={styleCurrency(record.amount)}
+											>
 												{formatCurrency(record.amount)}
 											</td>
 

@@ -1,10 +1,11 @@
 import React, { Fragment, useRef, useState } from "react"
-import { Category, Paginated, Statement } from "@/types"
+import { Account, Category, Paginated, Statement } from "@/types"
 import { formatCurrency, styleCurrency } from "@/utils"
 import RecordController from "@/wayfinder/actions/App/Http/Controllers/RecordController"
 
-export type StatementExtra = {
+type StatementExtra = {
 	allocations_sum_amount: number
+	account: Account
 }
 
 export default function Allocator({

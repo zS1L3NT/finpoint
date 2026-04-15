@@ -9,7 +9,6 @@ export type Account = {
 }
 
 export type Statement = {
-	account: Account
 	id: string
 	date: string
 	description: string

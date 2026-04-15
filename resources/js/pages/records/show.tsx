@@ -22,7 +22,7 @@ export default function RecordShow({
 	return (
 		<>
 			<div className="d-flex justify-content-between align-items-center mb-4">
-				<h1 className="mb-4">Record {record.id}</h1>
+				<h1 className="m-0">Record {record.id}</h1>
 
 				<button
 					type="button"
@@ -79,46 +79,44 @@ export default function RecordShow({
 
 			<h3>Statements</h3>
 
-			<div>
-				<table className="table table-hover" style={{ tableLayout: "fixed" }}>
-					<thead>
-						<tr>
-							<th style={{ width: 250 }}>Account</th>
-							<th style={{ width: 125 }}>Date</th>
-							<th style={{ width: 125 }}>Total ($)</th>
-							<th style={{ width: 125 }}>Allocated ($)</th>
-							<th>Description</th>
-						</tr>
-					</thead>
+			<table className="table table-hover" style={{ tableLayout: "fixed" }}>
+				<thead>
+					<tr>
+						<th style={{ width: 250 }}>Account</th>
+						<th style={{ width: 125 }}>Date</th>
+						<th style={{ width: 125 }}>Statement ($)</th>
+						<th style={{ width: 125 }}>Allocated ($)</th>
+						<th>Allocation Description</th>
+					</tr>
+				</thead>
 
-					<tbody>
-						{record.statements.map(statement => (
-							<tr key={statement.id}>
-								<td>
-									{statement.account.name} ({statement.account.id})
-								</td>
-								<td>{statement.date.slice(0, "YYYY-MM-DD".length)}</td>
-								<td style={styleCurrency(statement.amount)}>
-									{formatCurrency(statement.amount)}
-								</td>
-								<td style={styleCurrency(statement.amount)}>
-									{formatCurrency(statement.pivot.amount)}
-								</td>
-								<td
-									title={statement.description}
-									style={{
-										textOverflow: "ellipsis",
-										overflow: "hidden",
-										whiteSpace: "nowrap",
-									}}
-								>
-									{statement.description}
-								</td>
-							</tr>
-						))}
-					</tbody>
-				</table>
-			</div>
+				<tbody>
+					{record.statements.map(statement => (
+						<tr key={statement.id}>
+							<td>
+								{statement.account.name} ({statement.account.id})
+							</td>
+							<td>{statement.date.slice(0, "YYYY-MM-DD".length)}</td>
+							<td style={styleCurrency(statement.amount)}>
+								{formatCurrency(statement.amount)}
+							</td>
+							<td style={styleCurrency(statement.amount)}>
+								{formatCurrency(statement.pivot.amount)}
+							</td>
+							<td
+								title={statement.description}
+								style={{
+									textOverflow: "ellipsis",
+									overflow: "hidden",
+									whiteSpace: "nowrap",
+								}}
+							>
+								{statement.pivot.description}
+							</td>
+						</tr>
+					))}
+				</tbody>
+			</table>
 
 			<RecordEditor record={record} categories={categories} />
 		</>
