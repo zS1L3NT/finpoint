@@ -4,6 +4,7 @@ import Icon from "@/components/icon"
 import { Account, Category, Record, Statement } from "@/types"
 import { formatCurrency, styleCurrency } from "@/utils"
 import RecordController from "@/wayfinder/actions/App/Http/Controllers/RecordController"
+import StatementController from "@/wayfinder/actions/App/Http/Controllers/StatementController"
 
 type RecordExtra = {
 	category: Category
@@ -19,6 +20,10 @@ export default function RecordShow({
 	record: Record & RecordExtra
 	categories: Category[]
 }) {
+	const handleClick = (statement: Statement) => {
+		router.visit(StatementController.show({ statement: statement.id }).url)
+	}
+
 	return (
 		<>
 			<div className="d-flex justify-content-between align-items-center mb-4">
@@ -92,7 +97,11 @@ export default function RecordShow({
 
 				<tbody>
 					{record.statements.map(statement => (
-						<tr key={statement.id}>
+						<tr
+							key={statement.id}
+							style={{ cursor: "pointer" }}
+							onClick={() => handleClick(statement)}
+						>
 							<td>
 								{statement.account.name} ({statement.account.id})
 							</td>

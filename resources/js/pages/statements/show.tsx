@@ -1,6 +1,8 @@
+import { router } from "@inertiajs/react"
 import Icon from "@/components/icon"
 import { Account, Category, Record, Statement } from "@/types"
 import { formatCurrency, styleCurrency } from "@/utils"
+import RecordController from "@/wayfinder/actions/App/Http/Controllers/RecordController"
 
 type StatementExtra = {
 	account: Account
@@ -10,6 +12,10 @@ type StatementExtra = {
 }
 
 export default function StatementShow({ statement }: { statement: Statement & StatementExtra }) {
+	const handleClick = (record: Record) => {
+		router.visit(RecordController.show({ record: record.id }).url)
+	}
+
 	return (
 		<>
 			<h1 className="mb-4">Statement {statement.id}</h1>
@@ -61,7 +67,11 @@ export default function StatementShow({ statement }: { statement: Statement & St
 
 				<tbody>
 					{statement.records.map(record => (
-						<tr key={statement.id}>
+						<tr
+							key={statement.id}
+							style={{ cursor: "pointer" }}
+							onClick={() => handleClick(record)}
+						>
 							<td className="d-flex align-items-center gap-2">
 								<Icon {...record.category} />
 								<p className="m-0">

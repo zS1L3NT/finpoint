@@ -6,8 +6,10 @@ use App\Models\Account;
 use App\Models\Statement;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
+use Ramsey\Uuid\Uuid;
 
 class ImporterController extends Controller
 {
@@ -63,7 +65,18 @@ class ImporterController extends Controller
 
                 foreach ($statements as $statement) {
                     // Value Date changes across bank exports...
-                    $id = hash("sha256", $statement->except("Value Date")->values()->join(","));
+                    $id = Uuid::uuid5(
+                        Uuid::NAMESPACE_OID,
+                        collect([
+                            $account_id,
+                            $statement["Transaction Date"],
+                            $statement["Supplementary Code"],
+                            $statement["Client Reference"],
+                            $statement["Additional Reference"],
+                            $statement["Debit Amount"],
+                            $statement["Credit Amount"]
+                        ])->join(",")
+                    );
 
                     if (!Statement::find($id)) {
                         Statement::query()->insert([
