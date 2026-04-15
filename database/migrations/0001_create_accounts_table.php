@@ -11,8 +11,8 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create("accounts", function (Blueprint $table) {
-            $table->text("id")->primary();
-            $table->text("name");
+            $table->string("id")->primary();
+            $table->string("name");
             $table->decimal("balance");
         });
     }
