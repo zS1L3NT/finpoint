@@ -1,4 +1,5 @@
 import { router } from "@inertiajs/react"
+import { DateTime } from "luxon"
 import Icon from "@/components/icon"
 import { Category, Paginated, Record, Statement } from "@/types"
 import { decodeHtml, formatCurrency, styleCurrency } from "@/utils"
@@ -21,8 +22,8 @@ export default function RecordIndex({ records }: { records: Paginated<Record & R
 			<table className="table table-hover">
 				<thead>
 					<tr>
-						<th style={{ width: 120 }}>Month</th>
-						<th style={{ width: 120 }}>Date</th>
+						<th style={{ width: 80 }}>Month</th>
+						<th style={{ width: 160 }}>Date & Time</th>
 						<th style={{ width: 120 }}>Amount</th>
 						<th>Title</th>
 					</tr>
@@ -37,10 +38,12 @@ export default function RecordIndex({ records }: { records: Paginated<Record & R
 						.toSorted(([a], [b]) => b.localeCompare(a))
 						.map(([month, monthRecords]) =>
 							Object.entries(
-								Object.groupBy(monthRecords ?? [], record => record.date),
+								Object.groupBy(monthRecords ?? [], record =>
+									record.date.slice(0, "YYYY-MM-DD".length),
+								),
 							)
 								.toSorted(([a], [b]) => b.localeCompare(a))
-								.map(([date, dateRecords], dateIndex) =>
+								.map(([, dateRecords], dateIndex) =>
 									dateRecords?.map((record, recordIndex) => (
 										<tr
 											key={record.id}
@@ -52,7 +55,7 @@ export default function RecordIndex({ records }: { records: Paginated<Record & R
 													className="align-middle"
 													rowSpan={monthRecords?.length ?? 0}
 												>
-													{month}
+													{DateTime.fromFormat(month, "yyyy-MM").toFormat("MMM yy")}
 												</td>
 											) : null}
 
@@ -61,7 +64,7 @@ export default function RecordIndex({ records }: { records: Paginated<Record & R
 													className="align-middle"
 													rowSpan={dateRecords?.length ?? 0}
 												>
-													{date}
+													{record.date}
 												</td>
 											) : null}
 

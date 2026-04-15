@@ -38,7 +38,7 @@ export default function StatementShow({ statement }: { statement: Statement & St
 
 					<div className="col">
 						<p className="m-0 fs-6 font-monospaced text-body-secondary">DATE</p>
-						<p className="fs-5">{statement.date.slice(0, "YYYY-MM-DD".length)}</p>
+						<p className="fs-5">{statement.date}</p>
 					</div>
 				</div>
 
@@ -58,7 +58,7 @@ export default function StatementShow({ statement }: { statement: Statement & St
 				<thead>
 					<tr>
 						<th style={{ width: 250 }}>Title</th>
-						<th style={{ width: 125 }}>Date</th>
+						<th style={{ width: 160 }}>Date & Time</th>
 						<th style={{ width: 125 }}>Record ($)</th>
 						<th style={{ width: 125 }}>Allocated ($)</th>
 						<th>Allocation Description</th>
@@ -68,7 +68,7 @@ export default function StatementShow({ statement }: { statement: Statement & St
 				<tbody>
 					{statement.records.map(record => (
 						<tr
-							key={statement.id}
+							key={record.id}
 							style={{ cursor: "pointer" }}
 							onClick={() => handleClick(record)}
 						>
@@ -81,7 +81,7 @@ export default function StatementShow({ statement }: { statement: Statement & St
 								</p>
 							</td>
 							<td className="align-middle">
-								{statement.date.slice(0, "YYYY-MM-DD".length)}
+								{record.date}
 							</td>
 							<td className="align-middle" style={styleCurrency(record.amount)}>
 								{formatCurrency(record.amount)}

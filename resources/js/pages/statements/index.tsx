@@ -43,7 +43,7 @@ export default function StatementIndex({
 							<td>
 								{statement.account.name} ({statement.account.id})
 							</td>
-							<td>{statement.date.slice(0, "YYYY-MM-DD".length)}</td>
+							<td>{statement.date}</td>
 							<td style={styleCurrency(statement.amount)}>
 								{formatCurrency(statement.amount)}
 							</td>

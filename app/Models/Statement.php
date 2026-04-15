@@ -12,6 +12,10 @@ use Illuminate\Database\Eloquent\Model;
 #[Guarded([])]
 class Statement extends Model
 {
+    public $casts = [
+        "date" => "date:Y-m-d"
+    ];
+
     public function account()
     {
         return $this->belongsTo(Account::class);

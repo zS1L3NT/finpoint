@@ -6,6 +6,7 @@ use App\Models\Allocation;
 use App\Models\Category;
 use App\Models\Record;
 use App\Models\Statement;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
@@ -25,7 +26,7 @@ class RecordController extends Controller
             "title" => "required|string",
             "people" => "nullable|string",
             "location" => "nullable|string",
-            "date" => "required|date_format:Y-m-d",
+            "date" => "required|date_format:Y-m-d\\TH:i",
             "category_id" => "required|exists:categories,id",
             "statements" => "required|array",
             "statements.*.id" => "required|exists:statements,id",
@@ -37,7 +38,8 @@ class RecordController extends Controller
             $record = Record::query()->create([
                 "id" => Uuid::uuid4(),
                 "amount" => round(collect($dto["statements"])->reduce(fn($acc, $el) => $acc + $el["amount"], 0), 2),
-                ...collect($dto)->except("statements")
+                "date" => Carbon::createFromFormat("Y-m-d\\TH:i", $dto["date"])->format("Y-m-d H:i:s"),
+                ...collect($dto)->except("statements", "date")
             ]);
 
             $errors = collect();
@@ -99,7 +101,7 @@ class RecordController extends Controller
             "title" => "required|string",
             "people" => "nullable|string",
             "location" => "nullable|string",
-            "date" => "required|date_format:Y-m-d",
+            "date" => "required|date_format:Y-m-d\\TH:i",
             "category_id" => "required|exists:categories,id",
             "statements" => "required|array",
             "statements.*.id" => "required|exists:statements,id",
@@ -110,7 +112,8 @@ class RecordController extends Controller
         return DB::transaction(function () use ($record, $dto) {
             $record->update([
                 "amount" => round(collect($dto["statements"])->reduce(fn($acc, $el) => $acc + $el["amount"], 0), 2),
-                ...collect($dto)->except("statements")->toArray()
+                "date" => Carbon::createFromFormat("Y-m-d\\TH:i", $dto["date"])->format("Y-m-d H:i:s"),
+                ...collect($dto)->except("statements", "date")
             ]);
 
             $errors = collect();

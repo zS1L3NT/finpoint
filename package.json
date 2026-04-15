@@ -12,12 +12,14 @@
 		"@inertiajs/vite": "^3.0.3",
 		"@vitejs/plugin-react": "^6.0.1",
 		"lucide-react": "^1.8.0",
+		"luxon": "^3.7.2",
 		"react": "^19.2.5",
 		"react-dom": "^19.2.5"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.11",
 		"@laravel/vite-plugin-wayfinder": "^0.1.7",
+		"@types/luxon": "^3.7.1",
 		"@types/react": "^19.2.14",
 		"@types/react-dom": "^19.2.3",
 		"babel-plugin-react-compiler": "^1.0.0",

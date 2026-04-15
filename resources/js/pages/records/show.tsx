@@ -105,7 +105,7 @@ export default function RecordShow({
 							<td>
 								{statement.account.name} ({statement.account.id})
 							</td>
-							<td>{statement.date.slice(0, "YYYY-MM-DD".length)}</td>
+							<td>{statement.date}</td>
 							<td style={styleCurrency(statement.amount)}>
 								{formatCurrency(statement.amount)}
 							</td>
@@ -264,11 +264,11 @@ function RecordEditor({
 										Date
 									</label>
 									<input
-										type="date"
+										type="datetime-local"
 										className="form-control"
 										name="date"
 										id="date"
-										defaultValue={record.date.slice(0, "YYYY-MM-DD".length)}
+										defaultValue={record.date}
 									/>
 								</div>
 
