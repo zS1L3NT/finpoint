@@ -21,7 +21,8 @@ class CategoryController extends Controller
 
     public function store()
     {
-        $data = request()->validate([
+        $dto = request()->validate([
+            "id" => "required|string|unique:categories,id",
             "name" => "required|string|unique:categories,name",
             "icon" => "required|string",
             "color" => "required|string",
@@ -30,7 +31,7 @@ class CategoryController extends Controller
 
         $category = Category::query()->create([
             "id" => Uuid::uuid4(),
-            ...$data
+            ...$dto
         ]);
 
         return $category;
@@ -38,14 +39,15 @@ class CategoryController extends Controller
 
     public function update(Category $category)
     {
-        $data = request()->validate([
-            "name" => "string|unique:categories,name," . $category->id,
-            "icon" => "string",
-            "color" => "string",
-            "parent_category_id" => "exists:categories,id"
+        $dto = request()->validate([
+            "id" => "required|string|unique:categories,id," . $category->id,
+            "name" => "required|string|unique:categories,name," . $category->name,
+            "icon" => "required|string",
+            "color" => "required|string",
+            "parent_category_id" => "nullable|exists:categories,id"
         ]);
 
-        $category->update($data);
+        $category->update($dto);
 
         return $category;
     }

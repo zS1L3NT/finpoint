@@ -16,7 +16,7 @@ return new class extends Migration {
             $table->string("name")->unique();
             $table->string("icon");
             $table->string("color");
-            $table->foreignIdFor(Category::class, "parent_category_id")->nullable()->constrained();
+            $table->foreignIdFor(Category::class, "parent_category_id")->nullable()->constrained()->cascadeOnUpdate();
         });
     }
 

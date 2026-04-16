@@ -119,6 +119,20 @@ function CategoryCreator({ categories }: { categories: (Category & CategoryExtra
 					</div>
 					<div className="modal-body">
 						<div className="mb-3">
+							<label htmlFor="id" className="form-label">
+								Id
+							</label>
+							<input
+								type="text"
+								className={`form-control ${errors.id?.length ? "is-invalid" : ""}`}
+								name="id"
+								id="id"
+								defaultValue=""
+							/>
+							<div className="invalid-feedback">{errors.id?.join("\n")}</div>
+						</div>
+
+						<div className="mb-3">
 							<label htmlFor="name" className="form-label">
 								Name
 							</label>
@@ -217,6 +231,7 @@ function CategoryEditor({
 	categories: Category[]
 }) {
 	const closeButtonRef = useRef<HTMLButtonElement>(null)
+	const [id, setId] = useState("")
 	const [name, setName] = useState("")
 	const [icon, setIcon] = useState("")
 	const [color, setColor] = useState("")
@@ -224,6 +239,7 @@ function CategoryEditor({
 	const [errors, setErrors] = useState<Record<string, string[]>>({})
 
 	useEffect(() => {
+		setId(category.id)
 		setName(category.name)
 		setIcon(category.icon)
 		setColor(category.color)
@@ -298,6 +314,21 @@ function CategoryEditor({
 							></button>
 						</div>
 						<div className="modal-body">
+							<div className="mb-3">
+								<label htmlFor="id" className="form-label">
+									Id
+								</label>
+								<input
+									type="text"
+									className={`form-control ${errors.id?.length ? "is-invalid" : ""}`}
+									name="id"
+									id="id"
+									value={id}
+									onChange={e => setId(e.target.value)}
+								/>
+								<div className="invalid-feedback">{errors.id?.join("\n")}</div>
+							</div>
+
 							<div className="mb-3">
 								<label htmlFor="name" className="form-label">
 									Name
