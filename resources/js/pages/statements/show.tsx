@@ -50,9 +50,7 @@ export default function StatementShow({ statement }: { statement: Statement & St
 				</div>
 			</div>
 
-			<hr />
-
-			<h3>Records</h3>
+			<h3 className="mt-5 mb-4">Records</h3>
 
 			<table className="table table-hover" style={{ tableLayout: "fixed" }}>
 				<thead>
@@ -74,15 +72,13 @@ export default function StatementShow({ statement }: { statement: Statement & St
 						>
 							<td className="d-flex align-items-center gap-2">
 								<Icon {...record.category} />
-								<p className="m-0">
+								<p className="m-0" style={{ flex: 1 }}>
 									{record.title}
 									{record.people ? ` with ${record.people}` : ""}
 									{record.location ? ` @ ${record.location}` : ""}
 								</p>
 							</td>
-							<td className="align-middle">
-								{record.date}
-							</td>
+							<td className="align-middle">{record.date}</td>
 							<td className="align-middle" style={styleCurrency(record.amount)}>
 								{formatCurrency(record.amount)}
 							</td>

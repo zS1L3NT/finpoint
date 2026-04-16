@@ -84,9 +84,7 @@ export default function RecordShow({
 				</div>
 			</div>
 
-			<hr />
-
-			<h3>Statements</h3>
+			<h3 className="mt-5 mb-4">Statements</h3>
 
 			<table className="table table-hover" style={{ tableLayout: "fixed" }}>
 				<thead>
