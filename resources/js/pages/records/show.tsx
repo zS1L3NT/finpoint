@@ -7,10 +7,14 @@ import RecordController from "@/wayfinder/actions/App/Http/Controllers/RecordCon
 import StatementController from "@/wayfinder/actions/App/Http/Controllers/StatementController"
 
 type RecordExtra = {
-	category: Category
+	category: Category & CategoryExtra
 	statements: (Statement & { account: Account } & {
 		pivot: { amount: number; description: string }
 	})[]
+}
+
+type CategoryExtra = {
+	children: Category[]
 }
 
 export default function RecordShow({
@@ -18,7 +22,7 @@ export default function RecordShow({
 	categories,
 }: {
 	record: Record & RecordExtra
-	categories: Category[]
+	categories: (Category & CategoryExtra)[]
 }) {
 	const handleClick = (statement: Statement) => {
 		router.visit(StatementController.show({ statement: statement.id }).url)
@@ -137,7 +141,7 @@ function RecordEditor({
 	categories,
 }: {
 	record: Record & RecordExtra
-	categories: Category[]
+	categories: (Category & CategoryExtra)[]
 }) {
 	const closeButtonRef = useRef<HTMLButtonElement>(null)
 	const [errors, setErrors] = useState<globalThis.Record<string, string[]>>({})
@@ -283,9 +287,14 @@ function RecordEditor({
 										defaultValue={record.category.id}
 									>
 										{categories.map(category => (
-											<option key={category.id} value={category.id}>
-												{category.name}
-											</option>
+											<optgroup key={category.id} label={category.name}>
+												<option value={category.id}>{category.name}</option>
+												{category.children?.map(category => (
+													<option key={category.id} value={category.id}>
+														{category.name}
+													</option>
+												))}
+											</optgroup>
 										))}
 									</select>
 									<div className="invalid-feedback">

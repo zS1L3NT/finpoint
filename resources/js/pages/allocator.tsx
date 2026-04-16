@@ -8,12 +8,16 @@ type StatementExtra = {
 	account: Account
 }
 
+type CategoryExtra = {
+	children: Category[]
+}
+
 export default function Allocator({
 	statements,
 	categories,
 }: {
 	statements: Paginated<Statement & StatementExtra>
-	categories: Category[]
+	categories: (Category & CategoryExtra)[]
 }) {
 	const modalButtonRef = useRef<HTMLButtonElement>(null)
 	const [selectedIds, setSelectedIds] = useState<string[]>([])
@@ -132,7 +136,7 @@ function RecordAllocator({
 	categories,
 }: {
 	statements: (Statement & StatementExtra)[]
-	categories: Category[]
+	categories: (Category & CategoryExtra)[]
 }) {
 	const closeButtonRef = useRef<HTMLButtonElement>(null)
 	const [errors, setErrors] = useState<Record<string, string[]>>({})
@@ -260,9 +264,14 @@ function RecordAllocator({
 									>
 										<option value="">-</option>
 										{categories.map(category => (
-											<option key={category.id} value={category.id}>
-												{category.name}
-											</option>
+											<optgroup key={category.id} label={category.name}>
+												<option value={category.id}>{category.name}</option>
+												{category.children.map(category => (
+													<option key={category.id} value={category.id}>
+														{category.name}
+													</option>
+												))}
+											</optgroup>
 										))}
 									</select>
 									<div className="invalid-feedback">

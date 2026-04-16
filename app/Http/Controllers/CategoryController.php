@@ -41,7 +41,7 @@ class CategoryController extends Controller
     {
         $dto = request()->validate([
             "id" => "required|string|unique:categories,id," . $category->id,
-            "name" => "required|string|unique:categories,name," . $category->name,
+            "name" => "required|string|unique:categories,name," . $category->id,
             "icon" => "required|string",
             "color" => "required|string",
             "parent_category_id" => "nullable|exists:categories,id"

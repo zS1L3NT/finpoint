@@ -17,6 +17,7 @@ class RecordController extends Controller
     public function index()
     {
         $records = Record::with("category", "statements")->orderBy("date", "desc")->paginate(100);
+
         return Inertia::render("records/index", compact("records"));
     }
 
@@ -91,7 +92,13 @@ class RecordController extends Controller
     public function show(Record $record)
     {
         $record->load("category", "statements", "statements.account");
-        $categories = Category::orderBy("name")->get();
+
+        $categories = Category::query()
+            ->with("children")
+            ->whereNull("parent_category_id")
+            ->orderBy("name")
+            ->get();
+
         return Inertia::render("records/show", compact("record", "categories"));
     }
 

@@ -19,7 +19,11 @@ class AllocatorController extends Controller
             ->orderBy("date", "desc")
             ->paginate(100);
 
-        $categories = Category::orderBy("name")->get();
+        $categories = Category::query()
+            ->with("children")
+            ->whereNull("parent_category_id")
+            ->orderBy("name")
+            ->get();
 
         return Inertia::render("allocator", compact("statements", "categories"));
     }
