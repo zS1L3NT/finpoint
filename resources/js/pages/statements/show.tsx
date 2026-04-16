@@ -75,7 +75,7 @@ export default function StatementShow({ statement }: { statement: Statement & St
 								<Icon {...record.category} />
 								<p className="m-0" style={{ flex: 1 }}>
 									{record.title}
-									{record.people ? ` with ${record.people}` : ""}
+									{record.people ? ` w/ ${record.people}` : ""}
 									{record.location ? ` @ ${record.location}` : ""}
 								</p>
 							</td>

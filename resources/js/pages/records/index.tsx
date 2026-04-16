@@ -103,7 +103,7 @@ export default function RecordIndex({ records }: { records: Paginated<Record & R
 														<p className="m-0">
 															{record.title}
 															{record.people
-																? ` with ${record.people}`
+																? ` w/ ${record.people}`
 																: ""}
 															{record.location
 																? ` @ ${record.location}`
