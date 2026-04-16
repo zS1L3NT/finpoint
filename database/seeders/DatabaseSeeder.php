@@ -45,47 +45,38 @@ class DatabaseSeeder extends Seeder
                 "name" => "Other",
                 "icon" => "circle-question-mark",
                 "color" => "#9E9E9E",
-                "children" => [
-                    [
-                        "name" => "Transfer",
-                        "icon" => "arrow-left-right",
-                    ]
-                ]
             ],
             [
-                "name" => "Loans",
-                "icon" => "hand-coins",
+                "name" => "Transfer",
+                "icon" => "arrow-left-right",
                 "color" => "#01BFA5",
                 "children" => [
                     [
-                        "name" => "Lending",
-                        "icon" => "banknote-arrow-up"
+                        "name" => "Salary",
+                        "icon" => "dollar-sign"
                     ],
                     [
-                        "name" => "Repayment",
-                        "icon" => "banknote-arrow-down"
+                        "name" => "Claim",
+                        "icon" => "hand-coins"
                     ],
                     [
-                        "name" => "Reimbursement",
-                        "icon" => "banknote"
-                    ]
-                ]
-            ],
-            [
-                "name" => "Gifts",
-                "icon" => "gift",
-                "color" => "#AB47BD",
-                "children" => [
+                        "name" => "Gift",
+                        "icon" => "gift"
+                    ],
                     [
-                        "name" => "Birthday",
-                        "icon" => "cake"
+                        "name" => "Investment",
+                        "icon" => "chart-candlestick"
+                    ],
+                    [
+                        "name" => "Loan",
+                        "icon" => "handshake",
                     ]
                 ]
             ],
             [
                 "name" => "Transport",
                 "icon" => "navigation",
-                "color" => "#788F9C",
+                "color" => "#AB47BD",
                 "children" => [
                     [
                         "name" => "Airplane",
