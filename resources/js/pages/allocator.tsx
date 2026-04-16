@@ -1,3 +1,4 @@
+import { router } from "@inertiajs/react"
 import { DateTime } from "luxon"
 import React, { Fragment, useEffect, useRef, useState } from "react"
 import { Account, Category, Paginated, Statement } from "@/types"
@@ -127,6 +128,7 @@ export default function Allocator({
 			<RecordAllocator
 				statements={statements.data.filter(s => selectedIds.includes(s.id))}
 				categories={categories}
+				clearSelectedIds={() => setSelectedIds([])}
 			/>
 		</>
 	)
@@ -135,9 +137,11 @@ export default function Allocator({
 function RecordAllocator({
 	statements,
 	categories,
+	clearSelectedIds,
 }: {
 	statements: (Statement & StatementExtra)[]
 	categories: (Category & CategoryExtra)[]
+	clearSelectedIds: () => void
 }) {
 	const closeButtonRef = useRef<HTMLButtonElement>(null)
 	const [datetime, setDatetime] = useState("")
@@ -182,9 +186,8 @@ function RecordAllocator({
 
 				if (res.status === 201) {
 					closeButtonRef.current?.click()
-					setTimeout(() => {
-						window.location.reload()
-					}, 500)
+					router.reload()
+					clearSelectedIds()
 				}
 			})
 	}

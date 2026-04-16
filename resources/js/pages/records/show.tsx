@@ -191,9 +191,7 @@ function RecordEditor({
 
 				if (res.status === 200) {
 					closeButtonRef.current?.click()
-					setTimeout(() => {
-						window.location.reload()
-					}, 500)
+					router.reload()
 				}
 			})
 	}

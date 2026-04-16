@@ -1,3 +1,4 @@
+import { router } from "@inertiajs/react"
 import React, { useEffect, useRef, useState } from "react"
 import Icon from "@/components/icon"
 import { Category } from "@/types"
@@ -88,9 +89,7 @@ function CategoryCreator({ categories }: { categories: (Category & CategoryExtra
 
 				if (res.status === 201) {
 					closeButtonRef.current?.click()
-					setTimeout(() => {
-						window.location.reload()
-					}, 500)
+					router.reload()
 				}
 			})
 	}
@@ -257,9 +256,7 @@ function CategoryEditor({
 		}).then(res => {
 			if (res.status === 200) {
 				closeButtonRef.current?.click()
-				setTimeout(() => {
-					window.location.reload()
-				}, 500)
+				router.reload()
 			}
 		})
 	}
@@ -283,9 +280,7 @@ function CategoryEditor({
 
 				if (res.status === 200) {
 					closeButtonRef.current?.click()
-					setTimeout(() => {
-						window.location.reload()
-					}, 500)
+					router.reload()
 				}
 			})
 	}
