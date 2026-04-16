@@ -31,3 +31,8 @@ export type Category = {
 	color: string
 	parent_category_id: string | null
 }
+
+export type Allocation = {
+	amount: number
+	description: string
+}

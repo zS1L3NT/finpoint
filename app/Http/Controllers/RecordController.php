@@ -32,7 +32,7 @@ class RecordController extends Controller
             "statements" => "required|array",
             "statements.*.id" => "required|exists:statements,id",
             "statements.*.amount" => "required|decimal:0,2",
-            "statements.*.description" => "present"
+            "statements.*.description" => "nullable|string"
         ]);
 
         return DB::transaction(function () use ($dto) {
@@ -113,7 +113,7 @@ class RecordController extends Controller
             "statements" => "required|array",
             "statements.*.id" => "required|exists:statements,id",
             "statements.*.amount" => "required|decimal:0,2",
-            "statements.*.description" => "present"
+            "statements.*.description" => "nullable|string"
         ]);
 
         return DB::transaction(function () use ($record, $dto) {

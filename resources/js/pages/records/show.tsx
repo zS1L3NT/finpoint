@@ -1,16 +1,14 @@
 import { router } from "@inertiajs/react"
 import React, { Fragment, useRef, useState } from "react"
 import Icon from "@/components/icon"
-import { Account, Category, Record, Statement } from "@/types"
+import { Account, Allocation, Category, Record, Statement } from "@/types"
 import { formatCurrency, styleCurrency } from "@/utils"
 import RecordController from "@/wayfinder/actions/App/Http/Controllers/RecordController"
 import StatementController from "@/wayfinder/actions/App/Http/Controllers/StatementController"
 
 type RecordExtra = {
 	category: Category & CategoryExtra
-	statements: (Statement & { account: Account } & {
-		pivot: { amount: number; description: string }
-	})[]
+	statements: (Statement & { account: Account } & { pivot: Allocation })[]
 }
 
 type CategoryExtra = {

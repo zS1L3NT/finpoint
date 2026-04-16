@@ -1,14 +1,12 @@
 import { router } from "@inertiajs/react"
 import Icon from "@/components/icon"
-import { Account, Category, Record, Statement } from "@/types"
+import { Account, Allocation, Category, Record, Statement } from "@/types"
 import { formatCurrency, styleCurrency } from "@/utils"
 import RecordController from "@/wayfinder/actions/App/Http/Controllers/RecordController"
 
 type StatementExtra = {
 	account: Account
-	records: (Record & { category: Category } & {
-		pivot: { amount: number; description: string }
-	})[]
+	records: (Record & { category: Category } & { pivot: Allocation })[]
 }
 
 export default function StatementShow({ statement }: { statement: Statement & StatementExtra }) {
