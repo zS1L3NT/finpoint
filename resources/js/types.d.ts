@@ -17,7 +17,7 @@ export type Statement = {
 
 export type Record = {
 	id: string
-	date: string
+	datetime: string
 	title: string
 	people: string | null
 	location: string | null

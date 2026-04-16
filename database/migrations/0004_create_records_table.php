@@ -17,7 +17,7 @@ return new class extends Migration {
             $table->string("people")->nullable();
             $table->string("location")->nullable();
             $table->string("description")->nullable();
-            $table->timestamp("date");
+            $table->timestamp("datetime");
             $table->decimal("amount");
             $table->foreignIdFor(Category::class)->constrained()->cascadeOnUpdate();
         });

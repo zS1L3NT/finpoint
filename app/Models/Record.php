@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 class Record extends Model
 {
     public $casts = [
-        "date" => "date:Y-m-d H:i"
+        "datetime" => "date:Y-m-d H:i"
     ];
 
     public function category()

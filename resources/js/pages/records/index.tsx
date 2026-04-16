@@ -32,14 +32,14 @@ export default function RecordIndex({ records }: { records: Paginated<Record & R
 				<tbody>
 					{Object.entries(
 						Object.groupBy(records.data, record =>
-							record.date.slice(0, "YYYY-MM".length),
+							record.datetime.slice(0, "YYYY-MM".length),
 						),
 					)
 						.toSorted(([a], [b]) => b.localeCompare(a))
 						.map(([month, monthRecords]) =>
 							Object.entries(
 								Object.groupBy(monthRecords ?? [], record =>
-									record.date.slice(0, "YYYY-MM-DD".length),
+									record.datetime.slice(0, "YYYY-MM-DD".length),
 								),
 							)
 								.toSorted(([a], [b]) => b.localeCompare(a))
@@ -67,7 +67,7 @@ export default function RecordIndex({ records }: { records: Paginated<Record & R
 													rowSpan={dateRecords?.length ?? 0}
 												>
 													{DateTime.fromFormat(
-														record.date,
+														record.datetime,
 														"y-MM-dd T",
 													).toFormat("d MMM y, h:mm a")}
 												</td>

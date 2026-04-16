@@ -16,7 +16,9 @@ class RecordController extends Controller
 {
     public function index()
     {
-        $records = Record::with("category", "statements")->orderBy("date", "desc")->paginate(100);
+        $records = Record::with("category", "statements")
+            ->orderBy("datetime", "desc")
+            ->paginate(100);
 
         return Inertia::render("records/index", compact("records"));
     }
@@ -28,7 +30,7 @@ class RecordController extends Controller
             "people" => "nullable|string",
             "location" => "nullable|string",
             "description" => "nullable|string",
-            "date" => "required|date_format:Y-m-d\\TH:i",
+            "datetime" => "required|date_format:Y-m-d\\TH:i",
             "category_id" => "required|exists:categories,id",
             "statements" => "required|array",
             "statements.*.id" => "required|exists:statements,id",
@@ -40,8 +42,8 @@ class RecordController extends Controller
             $record = Record::query()->create([
                 "id" => Uuid::uuid4(),
                 "amount" => round(collect($dto["statements"])->reduce(fn($acc, $el) => $acc + $el["amount"], 0), 2),
-                "date" => Carbon::createFromFormat("Y-m-d\\TH:i", $dto["date"])->format("Y-m-d H:i:s"),
-                ...collect($dto)->except("statements", "date")
+                "datetime" => Carbon::createFromFormat("Y-m-d\\TH:i", $dto["datetime"])->format("Y-m-d H:i:s"),
+                ...collect($dto)->except("statements", "datetime")
             ]);
 
             $errors = collect();
@@ -110,7 +112,7 @@ class RecordController extends Controller
             "people" => "nullable|string",
             "location" => "nullable|string",
             "description" => "nullable|string",
-            "date" => "required|date_format:Y-m-d\\TH:i",
+            "datetime" => "required|date_format:Y-m-d\\TH:i",
             "category_id" => "required|exists:categories,id",
             "statements" => "required|array",
             "statements.*.id" => "required|exists:statements,id",
@@ -121,8 +123,8 @@ class RecordController extends Controller
         return DB::transaction(function () use ($record, $dto) {
             $record->update([
                 "amount" => round(collect($dto["statements"])->reduce(fn($acc, $el) => $acc + $el["amount"], 0), 2),
-                "date" => Carbon::createFromFormat("Y-m-d\\TH:i", $dto["date"])->format("Y-m-d H:i:s"),
-                ...collect($dto)->except("statements", "date")
+                "datetime" => Carbon::createFromFormat("Y-m-d\\TH:i", $dto["datetime"])->format("Y-m-d H:i:s"),
+                ...collect($dto)->except("statements", "datetime")
             ]);
 
             $errors = collect();

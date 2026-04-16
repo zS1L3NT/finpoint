@@ -20,6 +20,7 @@ class StatementController extends Controller
     public function show(Statement $statement)
     {
         $statement->load("account", "records", "records.category");
+
         return Inertia::render("statements/show", compact("statement"));
     }
 }

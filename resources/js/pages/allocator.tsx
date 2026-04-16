@@ -140,7 +140,7 @@ function RecordAllocator({
 	categories: (Category & CategoryExtra)[]
 }) {
 	const closeButtonRef = useRef<HTMLButtonElement>(null)
-	const [date, setDate] = useState("")
+	const [datetime, setDatetime] = useState("")
 	const [errors, setErrors] = useState<Record<string, string[]>>({})
 
 	/**
@@ -160,9 +160,9 @@ function RecordAllocator({
 			.toSorted((a, b) => a.toMillis() - b.toMillis())[0]
 
 		if (textDate) {
-			setDate(textDate.startOf("day").toFormat("yyyy-MM-dd HH:mm"))
+			setDatetime(textDate.startOf("day").toFormat("yyyy-MM-dd HH:mm"))
 		} else {
-			setDate((statements.map(s => s.date).toSorted()[0] ?? "") + " 00:00")
+			setDatetime((statements.map(s => s.date).toSorted()[0] ?? "") + " 00:00")
 		}
 	}, [statements])
 
@@ -260,18 +260,18 @@ function RecordAllocator({
 								</div>
 
 								<div className="mb-3">
-									<label htmlFor="date" className="form-label">
-										Date
+									<label htmlFor="datetime" className="form-label">
+										Date & Time
 									</label>
 									<input
 										type="datetime-local"
-										className={`form-control ${errors.date?.length ? "is-invalid" : ""}`}
-										name="date"
-										id="date"
-										defaultValue={date}
+										className={`form-control ${errors.datetime?.length ? "is-invalid" : ""}`}
+										name="datetime"
+										id="datetime"
+										defaultValue={datetime}
 									/>
 									<div className="invalid-feedback">
-										{errors.date?.join("\n")}
+										{errors.datetime?.join("\n")}
 									</div>
 								</div>
 

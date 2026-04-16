@@ -80,7 +80,7 @@ export default function StatementShow({ statement }: { statement: Statement & St
 								</p>
 							</td>
 							<td className="align-middle">
-								{DateTime.fromFormat(record.date, "y-MM-dd T").toFormat(
+								{DateTime.fromFormat(record.datetime, "y-MM-dd T").toFormat(
 									"d MMM y, h:mm a",
 								)}
 							</td>

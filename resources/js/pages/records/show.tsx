@@ -79,7 +79,7 @@ export default function RecordShow({
 					<div className="col">
 						<p className="m-0 fs-6 font-monospaced text-body-secondary">DATE & TIME</p>
 						<p className="fs-5">
-							{DateTime.fromFormat(record.date, "y-MM-dd T").toFormat(
+							{DateTime.fromFormat(record.datetime, "y-MM-dd T").toFormat(
 								"d MMM y, h:mm a",
 							)}
 						</p>
@@ -272,15 +272,15 @@ function RecordEditor({
 								</div>
 
 								<div className="mb-3">
-									<label htmlFor="date" className="form-label">
-										Date
+									<label htmlFor="datetime" className="form-label">
+										Date & Time
 									</label>
 									<input
 										type="datetime-local"
 										className="form-control"
-										name="date"
-										id="date"
-										defaultValue={record.date}
+										name="datetime"
+										id="datetime"
+										defaultValue={record.datetime}
 									/>
 								</div>
 
