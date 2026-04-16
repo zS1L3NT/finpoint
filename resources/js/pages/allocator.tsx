@@ -1,4 +1,5 @@
-import React, { Fragment, useRef, useState } from "react"
+import { DateTime } from "luxon"
+import React, { Fragment, useEffect, useRef, useState } from "react"
 import { Account, Category, Paginated, Statement } from "@/types"
 import { decodeHtml, formatCurrency, styleCurrency } from "@/utils"
 import RecordController from "@/wayfinder/actions/App/Http/Controllers/RecordController"
@@ -139,7 +140,31 @@ function RecordAllocator({
 	categories: (Category & CategoryExtra)[]
 }) {
 	const closeButtonRef = useRef<HTMLButtonElement>(null)
+	const [date, setDate] = useState("")
 	const [errors, setErrors] = useState<Record<string, string[]>>({})
+
+	/**
+	 * Scans all transactions for the unique date format like 09APR,
+	 * these dates best reflect when the transactions was made.
+	 * If it is found, use the earliest one, if not use the earliest
+	 * date from the statements
+	 */
+	useEffect(() => {
+		const textDateRegex = /\d{2}(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)/
+		const textDate = statements
+			.map(s => s.description.match(textDateRegex)?.[0])
+			.filter(s => !!s)
+			// biome-ignore lint/style/noNonNullAssertion: Filtered above
+			.map(s => DateTime.fromFormat(s!.slice(0, 3) + s!.slice(3, 5).toLowerCase(), "ddMMM"))
+			.filter(d => d.isValid)
+			.toSorted((a, b) => a.toMillis() - b.toMillis())[0]
+
+		if (textDate) {
+			setDate(textDate.startOf("day").toFormat("yyyy-MM-dd HH:mm"))
+		} else {
+			setDate((statements.map(s => s.date).toSorted()[0] ?? "") + " 00:00")
+		}
+	}, [statements])
 
 	const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
 		e.preventDefault()
@@ -243,9 +268,7 @@ function RecordAllocator({
 										className={`form-control ${errors.date?.length ? "is-invalid" : ""}`}
 										name="date"
 										id="date"
-										defaultValue={
-											statements.map(s => s.date).toSorted()[0] ?? ""
-										}
+										defaultValue={date}
 									/>
 									<div className="invalid-feedback">
 										{errors.date?.join("\n")}
