@@ -23,7 +23,8 @@ export default function RecordIndex({ records }: { records: Paginated<Record & R
 				<thead>
 					<tr>
 						<th style={{ width: 80 }}>Month</th>
-						<th style={{ width: 200 }}>Date & Time</th>
+						<th style={{ width: 110 }}>Date</th>
+						<th style={{ width: 90 }}>Time</th>
 						<th style={{ width: 120 }}>Amount</th>
 						<th>Title</th>
 					</tr>
@@ -43,53 +44,75 @@ export default function RecordIndex({ records }: { records: Paginated<Record & R
 								),
 							)
 								.toSorted(([a], [b]) => b.localeCompare(a))
-								.map(([, dateRecords], dateIndex) =>
-									dateRecords?.map((record, recordIndex) => (
-										<tr
-											key={record.id}
-											style={{ cursor: "pointer" }}
-											onClick={() => handleClick(record)}
-										>
-											{dateIndex === 0 && recordIndex === 0 ? (
-												<td
-													className="align-middle"
-													rowSpan={monthRecords?.length ?? 0}
+								.map(([date, dateRecords], dateIndex) =>
+									Object.entries(
+										Object.groupBy(dateRecords ?? [], record =>
+											record.datetime.slice(0, "YYYY-MM-DD HH:mm".length),
+										),
+									)
+										.toSorted(([a], [b]) => b.localeCompare(a))
+										.map(([, timeRecords], timeIndex) =>
+											timeRecords?.map((record, recordIndex) => (
+												<tr
+													key={record.id}
+													style={{ cursor: "pointer" }}
+													onClick={() => handleClick(record)}
 												>
-													{DateTime.fromFormat(month, "y-MM").toFormat(
-														"MMM yy",
-													)}
-												</td>
-											) : null}
+													{timeIndex === 0 &&
+													dateIndex === 0 &&
+													recordIndex === 0 ? (
+														<td
+															className="align-middle"
+															rowSpan={monthRecords?.length ?? 0}
+														>
+															{DateTime.fromFormat(
+																month,
+																"y-MM",
+															).toFormat("MMM yy")}
+														</td>
+													) : null}
 
-											{recordIndex === 0 ? (
-												<td
-													className="align-middle"
-													rowSpan={dateRecords?.length ?? 0}
-												>
-													{DateTime.fromFormat(
-														record.datetime,
-														"y-MM-dd T",
-													).toFormat("d MMM y, h:mm a")}
-												</td>
-											) : null}
+													{timeIndex === 0 && recordIndex === 0 ? (
+														<td
+															className="align-middle"
+															rowSpan={dateRecords?.length ?? 0}
+														>
+															{DateTime.fromFormat(
+																date,
+																"y-MM-dd",
+															).toFormat("d MMM y")}
+														</td>
+													) : null}
 
-											<td
-												className="align-middle"
-												style={styleCurrency(record.amount)}
-											>
-												{formatCurrency(record.amount)}
-											</td>
+													<td className="align-middle">
+														{DateTime.fromFormat(
+															record.datetime,
+															"y-MM-dd T",
+														).toFormat("h:mm a")}
+													</td>
 
-											<td className="d-flex align-items-center gap-2">
-												<Icon {...record.category} />
-												<p className="m-0">
-													{record.title}
-													{record.people ? ` with ${record.people}` : ""}
-													{record.location ? ` @ ${record.location}` : ""}
-												</p>
-											</td>
-										</tr>
-									)),
+													<td
+														className="align-middle"
+														style={styleCurrency(record.amount)}
+													>
+														{formatCurrency(record.amount)}
+													</td>
+
+													<td className="d-flex align-items-center gap-2">
+														<Icon {...record.category} />
+														<p className="m-0">
+															{record.title}
+															{record.people
+																? ` with ${record.people}`
+																: ""}
+															{record.location
+																? ` @ ${record.location}`
+																: ""}
+														</p>
+													</td>
+												</tr>
+											)),
+										),
 								),
 						)}
 				</tbody>
