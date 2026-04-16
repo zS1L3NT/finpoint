@@ -23,8 +23,8 @@ export default function RecordIndex({ records }: { records: Paginated<Record & R
 				<thead>
 					<tr>
 						<th style={{ width: 80 }}>Month</th>
-						<th style={{ width: 110 }}>Date</th>
-						<th style={{ width: 90 }}>Time</th>
+						<th style={{ width: 120 }}>Date</th>
+						<th style={{ width: 100 }}>Time</th>
 						<th style={{ width: 120 }}>Amount</th>
 						<th>Title</th>
 					</tr>
@@ -99,7 +99,7 @@ export default function RecordIndex({ records }: { records: Paginated<Record & R
 													</td>
 
 													<td className="d-flex align-items-center gap-2">
-														<Icon {...record.category} />
+														<Icon {...record.category} size={16} />
 														<p className="m-0">
 															{record.title}
 															{record.people
