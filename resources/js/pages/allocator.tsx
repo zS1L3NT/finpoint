@@ -236,13 +236,16 @@ function RecordAllocator({
 									</label>
 									<input
 										type="datetime-local"
-										className="form-control"
+										className={`form-control ${errors.date?.length ? "is-invalid" : ""}`}
 										name="date"
 										id="date"
 										defaultValue={
 											statements.map(s => s.date).toSorted()[0] ?? ""
 										}
 									/>
+									<div className="invalid-feedback">
+										{errors.date?.join("\n")}
+									</div>
 								</div>
 
 								<div className="mb-3">
