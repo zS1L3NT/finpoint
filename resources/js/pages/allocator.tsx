@@ -105,9 +105,13 @@ export default function Allocator({
 									overflow: "hidden",
 									whiteSpace: "nowrap",
 								}}
-							>
-								{statement.description}
-							</td>
+								dangerouslySetInnerHTML={{
+									__html: statement.description.replaceAll(
+										/(\d{2}(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC))/g,
+										"<mark>$1</mark>",
+									),
+								}}
+							/>
 						</tr>
 					))}
 				</tbody>
