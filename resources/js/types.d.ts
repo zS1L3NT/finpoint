@@ -21,6 +21,7 @@ export type Record = {
 	title: string
 	people: string | null
 	location: string | null
+	description: string | null
 	amount: number
 }
 

@@ -301,6 +301,21 @@ function RecordAllocator({
 										{errors.category_id?.join("\n")}
 									</div>
 								</div>
+
+								<div className="mb-3">
+									<label htmlFor="description" className="form-label">
+										Description
+									</label>
+									<textarea
+										className={`form-control ${errors.description?.length ? "is-invalid" : ""}`}
+										name="description"
+										id="description"
+										rows={4}
+									/>
+									<div className="invalid-feedback">
+										{errors.description?.join("\n")}
+									</div>
+								</div>
 							</div>
 
 							<div className="vr"></div>

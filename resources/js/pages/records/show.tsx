@@ -80,6 +80,13 @@ export default function RecordShow({
 						<p className="fs-5">{record.date}</p>
 					</div>
 				</div>
+
+				<div className="row">
+					<div className="col">
+						<p className="m-0 fs-6 font-monospaced text-body-secondary">DESCRIPTION</p>
+						<p className="fs-5">{record.description ?? "-"}</p>
+					</div>
+				</div>
 			</div>
 
 			<h3 className="mt-5 mb-4">Statements</h3>
@@ -297,6 +304,22 @@ function RecordEditor({
 										{errors.category_id?.join("\n")}
 									</div>
 								</div>
+
+								<div className="mb-3">
+									<label htmlFor="description" className="form-label">
+										Description
+									</label>
+									<textarea
+										className={`form-control ${errors.description?.length ? "is-invalid" : ""}`}
+										name="description"
+										id="description"
+										rows={4}
+										defaultValue={record.description ?? ""}
+									/>
+									<div className="invalid-feedback">
+										{errors.description?.join("\n")}
+									</div>
+								</div>
 							</div>
 
 							<div className="vr"></div>
@@ -371,6 +394,9 @@ function RecordEditor({
 																type="text"
 																className={`form-control ${errors[`statements.${i}.description`]?.length ? "is-invalid" : ""}`}
 																name={`statements[${i}][description]`}
+																defaultValue={
+																	statement.pivot.description
+																}
 															/>
 															<div className="invalid-feedback">
 																{errors[
