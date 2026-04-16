@@ -4,7 +4,6 @@ import { formatCurrency, styleCurrency } from "@/utils"
 import StatementController from "@/wayfinder/actions/App/Http/Controllers/StatementController"
 
 type StatementExtra = {
-	allocations_sum_amount: number
 	account: Account
 	records: Record[]
 }
@@ -28,7 +27,6 @@ export default function StatementIndex({
 						<th style={{ width: 250 }}>Account</th>
 						<th style={{ width: 125 }}>Date</th>
 						<th style={{ width: 125 }}>Total ($)</th>
-						<th style={{ width: 125 }}>Allocable ($)</th>
 						<th>Description</th>
 					</tr>
 				</thead>
@@ -46,11 +44,6 @@ export default function StatementIndex({
 							<td>{statement.date}</td>
 							<td style={styleCurrency(statement.amount)}>
 								{formatCurrency(statement.amount)}
-							</td>
-							<td style={styleCurrency(statement.amount)}>
-								{formatCurrency(
-									statement.amount - (statement.allocations_sum_amount ?? 0),
-								)}
 							</td>
 							<td
 								title={statement.description}

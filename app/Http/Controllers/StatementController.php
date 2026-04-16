@@ -11,7 +11,6 @@ class StatementController extends Controller
     {
         $statements = Statement::query()
             ->with("account")
-            ->withSum("allocations", "amount")
             ->orderBy("date", "desc")
             ->paginate(100);
 
