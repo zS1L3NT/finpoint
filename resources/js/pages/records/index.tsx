@@ -23,7 +23,7 @@ export default function RecordIndex({ records }: { records: Paginated<Record & R
 				<thead>
 					<tr>
 						<th style={{ width: 80 }}>Month</th>
-						<th style={{ width: 160 }}>Date & Time</th>
+						<th style={{ width: 200 }}>Date & Time</th>
 						<th style={{ width: 120 }}>Amount</th>
 						<th>Title</th>
 					</tr>
@@ -55,7 +55,9 @@ export default function RecordIndex({ records }: { records: Paginated<Record & R
 													className="align-middle"
 													rowSpan={monthRecords?.length ?? 0}
 												>
-													{DateTime.fromFormat(month, "yyyy-MM").toFormat("MMM yy")}
+													{DateTime.fromFormat(month, "y-MM").toFormat(
+														"MMM yy",
+													)}
 												</td>
 											) : null}
 
@@ -64,7 +66,10 @@ export default function RecordIndex({ records }: { records: Paginated<Record & R
 													className="align-middle"
 													rowSpan={dateRecords?.length ?? 0}
 												>
-													{record.date}
+													{DateTime.fromFormat(
+														record.date,
+														"y-MM-dd T",
+													).toFormat("d MMM y h:mm a")}
 												</td>
 											) : null}
 
