@@ -147,9 +147,15 @@ function RecordAllocator({
 	categories: (Category & CategoryExtra)[]
 	clearSelectedIds: () => void
 }) {
+	const formRef = useRef<HTMLFormElement>(null)
 	const closeButtonRef = useRef<HTMLButtonElement>(null)
 	const [datetime, setDatetime] = useState("")
 	const [errors, setErrors] = useState<Record<string, string[]>>({})
+
+	useEffect(() => {
+		formRef.current?.reset()
+		setErrors({})
+	}, [statements])
 
 	/**
 	 * Scans all transactions for the unique date format like 09APR,
@@ -198,6 +204,7 @@ function RecordAllocator({
 
 	return (
 		<form
+			ref={formRef}
 			className="modal fade"
 			id="record-allocator"
 			tabIndex={-1}
