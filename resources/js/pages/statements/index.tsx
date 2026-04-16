@@ -1,6 +1,6 @@
 import { router } from "@inertiajs/react"
 import { Account, Paginated, Record, Statement } from "@/types"
-import { decodeHtml, formatCurrency, styleCurrency } from "@/utils"
+import { formatCurrency, styleCurrency } from "@/utils"
 import StatementController from "@/wayfinder/actions/App/Http/Controllers/StatementController"
 
 type StatementExtra = {
@@ -72,7 +72,7 @@ export default function StatementIndex({
 					{statements.links.map(link => (
 						<li key={link.label} className={`page-item ${link.active ? "active" : ""}`}>
 							<a className="page-link" href={link.url}>
-								{decodeHtml(link.label)}
+								{link.label.replace("&laquo;", "«").replace("&raquo;", "»")}
 							</a>
 						</li>
 					))}

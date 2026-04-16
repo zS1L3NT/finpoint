@@ -2,7 +2,7 @@ import { router } from "@inertiajs/react"
 import { DateTime } from "luxon"
 import Icon from "@/components/icon"
 import { Category, Paginated, Record, Statement } from "@/types"
-import { decodeHtml, formatCurrency, styleCurrency } from "@/utils"
+import { formatCurrency, styleCurrency } from "@/utils"
 import RecordController from "@/wayfinder/actions/App/Http/Controllers/RecordController"
 
 type RecordExtra = {
@@ -100,7 +100,7 @@ export default function RecordIndex({ records }: { records: Paginated<Record & R
 					{records.links.map(link => (
 						<li key={link.label} className={`page-item ${link.active ? "active" : ""}`}>
 							<a className="page-link" href={link.url}>
-								{decodeHtml(link.label)}
+								{link.label.replace("&laquo;", "«").replace("&raquo;", "»")}
 							</a>
 						</li>
 					))}

@@ -1,7 +1,7 @@
 import { DateTime } from "luxon"
 import React, { Fragment, useEffect, useRef, useState } from "react"
 import { Account, Category, Paginated, Statement } from "@/types"
-import { decodeHtml, formatCurrency, styleCurrency } from "@/utils"
+import { formatCurrency, styleCurrency } from "@/utils"
 import RecordController from "@/wayfinder/actions/App/Http/Controllers/RecordController"
 
 type StatementExtra = {
@@ -117,7 +117,7 @@ export default function Allocator({
 					{statements.links.map(link => (
 						<li key={link.label} className={`page-item ${link.active ? "active" : ""}`}>
 							<a className="page-link" href={link.url}>
-								{decodeHtml(link.label)}
+								{link.label.replace("&laquo;", "«").replace("&raquo;", "»")}
 							</a>
 						</li>
 					))}
