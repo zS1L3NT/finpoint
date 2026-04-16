@@ -67,6 +67,7 @@ function CategoryItem({ category, depth }: { category: Category & CategoryExtra;
 }
 
 function CategoryCreator({ categories }: { categories: (Category & CategoryExtra)[] }) {
+	const formRef = useRef<HTMLFormElement>(null)
 	const closeButtonRef = useRef<HTMLButtonElement>(null)
 	const [name, setName] = useState("")
 	const [icon, setIcon] = useState("")
@@ -88,6 +89,12 @@ function CategoryCreator({ categories }: { categories: (Category & CategoryExtra
 				}
 
 				if (res.status === 201) {
+					formRef.current?.reset()
+					setName("")
+					setIcon("")
+					setColor("")
+					setErrors({})
+
 					closeButtonRef.current?.click()
 					router.reload()
 				}
@@ -96,6 +103,7 @@ function CategoryCreator({ categories }: { categories: (Category & CategoryExtra
 
 	return (
 		<form
+			ref={formRef}
 			className="modal fade"
 			id="category-creator"
 			tabIndex={-1}
