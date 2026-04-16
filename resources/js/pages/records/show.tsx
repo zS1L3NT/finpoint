@@ -1,4 +1,5 @@
 import { router } from "@inertiajs/react"
+import { DateTime } from "luxon"
 import React, { Fragment, useRef, useState } from "react"
 import Icon from "@/components/icon"
 import { Account, Allocation, Category, Record, Statement } from "@/types"
@@ -76,8 +77,12 @@ export default function RecordShow({
 					</div>
 
 					<div className="col">
-						<p className="m-0 fs-6 font-monospaced text-body-secondary">DATE</p>
-						<p className="fs-5">{record.date}</p>
+						<p className="m-0 fs-6 font-monospaced text-body-secondary">DATE & TIME</p>
+						<p className="fs-5">
+							{DateTime.fromFormat(record.date, "y-MM-dd T").toFormat(
+								"d MMM y, h:mm a",
+							)}
+						</p>
 					</div>
 				</div>
 
@@ -94,7 +99,7 @@ export default function RecordShow({
 			<table className="table table-hover" style={{ tableLayout: "fixed" }}>
 				<thead>
 					<tr>
-						<th style={{ width: 250 }}>Account</th>
+						<th style={{ width: 125 }}>Account</th>
 						<th style={{ width: 125 }}>Date</th>
 						<th style={{ width: 125 }}>Statement ($)</th>
 						<th style={{ width: 125 }}>Allocated ($)</th>
@@ -109,10 +114,10 @@ export default function RecordShow({
 							style={{ cursor: "pointer" }}
 							onClick={() => handleClick(statement)}
 						>
+							<td>{statement.account.id}</td>
 							<td>
-								{statement.account.name} ({statement.account.id})
+								{DateTime.fromFormat(statement.date, "y-MM-dd").toFormat("d MMM y")}
 							</td>
-							<td>{statement.date}</td>
 							<td style={styleCurrency(statement.amount)}>
 								{formatCurrency(statement.amount)}
 							</td>

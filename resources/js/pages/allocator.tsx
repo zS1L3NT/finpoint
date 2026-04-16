@@ -51,9 +51,9 @@ export default function Allocator({
 				<thead>
 					<tr>
 						<th style={{ width: 32 }}></th>
-						<th style={{ width: 250 }}>Account</th>
+						<th style={{ width: 125 }}>Account</th>
 						<th style={{ width: 125 }}>Date</th>
-						<th style={{ width: 125 }}>Total ($)</th>
+						<th style={{ width: 100 }}>Total ($)</th>
 						<th style={{ width: 125 }}>Allocable ($)</th>
 						<th>Description</th>
 					</tr>
@@ -85,10 +85,10 @@ export default function Allocator({
 									tabIndex={-1}
 								/>
 							</td>
+							<td>{statement.account.id}</td>
 							<td>
-								{statement.account.name} ({statement.account.id})
+								{DateTime.fromFormat(statement.date, "y-MM-dd").toFormat("d MMM y")}
 							</td>
-							<td>{statement.date}</td>
 							<td style={styleCurrency(statement.amount)}>
 								{formatCurrency(statement.amount)}
 							</td>

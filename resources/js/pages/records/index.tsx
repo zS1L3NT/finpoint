@@ -69,7 +69,7 @@ export default function RecordIndex({ records }: { records: Paginated<Record & R
 													{DateTime.fromFormat(
 														record.date,
 														"y-MM-dd T",
-													).toFormat("d MMM y h:mm a")}
+													).toFormat("d MMM y, h:mm a")}
 												</td>
 											) : null}
 

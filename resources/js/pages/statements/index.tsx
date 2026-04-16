@@ -1,4 +1,5 @@
 import { router } from "@inertiajs/react"
+import { DateTime } from "luxon"
 import { Account, Paginated, Record, Statement } from "@/types"
 import { formatCurrency, styleCurrency } from "@/utils"
 import StatementController from "@/wayfinder/actions/App/Http/Controllers/StatementController"
@@ -24,9 +25,9 @@ export default function StatementIndex({
 			<table className="table table-hover" style={{ tableLayout: "fixed" }}>
 				<thead>
 					<tr>
-						<th style={{ width: 250 }}>Account</th>
+						<th style={{ width: 125 }}>Account</th>
 						<th style={{ width: 125 }}>Date</th>
-						<th style={{ width: 125 }}>Total ($)</th>
+						<th style={{ width: 100 }}>Total ($)</th>
 						<th>Description</th>
 					</tr>
 				</thead>
@@ -38,10 +39,10 @@ export default function StatementIndex({
 							style={{ cursor: "pointer" }}
 							onClick={() => handleClick(statement)}
 						>
+							<td>{statement.account.id}</td>
 							<td>
-								{statement.account.name} ({statement.account.id})
+								{DateTime.fromFormat(statement.date, "y-MM-dd").toFormat("d MMM y")}
 							</td>
-							<td>{statement.date}</td>
 							<td style={styleCurrency(statement.amount)}>
 								{formatCurrency(statement.amount)}
 							</td>

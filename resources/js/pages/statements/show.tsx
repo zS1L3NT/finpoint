@@ -1,4 +1,5 @@
 import { router } from "@inertiajs/react"
+import { DateTime } from "luxon"
 import Icon from "@/components/icon"
 import { Account, Allocation, Category, Record, Statement } from "@/types"
 import { formatCurrency, styleCurrency } from "@/utils"
@@ -36,7 +37,9 @@ export default function StatementShow({ statement }: { statement: Statement & St
 
 					<div className="col">
 						<p className="m-0 fs-6 font-monospaced text-body-secondary">DATE</p>
-						<p className="fs-5">{statement.date}</p>
+						<p className="fs-5">
+							{DateTime.fromFormat(statement.date, "y-MM-dd").toFormat("d MMM y")}
+						</p>
 					</div>
 				</div>
 
@@ -54,7 +57,7 @@ export default function StatementShow({ statement }: { statement: Statement & St
 				<thead>
 					<tr>
 						<th style={{ width: 250 }}>Title</th>
-						<th style={{ width: 160 }}>Date & Time</th>
+						<th style={{ width: 200 }}>Date & Time</th>
 						<th style={{ width: 125 }}>Record ($)</th>
 						<th style={{ width: 125 }}>Allocated ($)</th>
 						<th>Allocation Description</th>
@@ -76,7 +79,11 @@ export default function StatementShow({ statement }: { statement: Statement & St
 									{record.location ? ` @ ${record.location}` : ""}
 								</p>
 							</td>
-							<td className="align-middle">{record.date}</td>
+							<td className="align-middle">
+								{DateTime.fromFormat(record.date, "y-MM-dd T").toFormat(
+									"d MMM y, h:mm a",
+								)}
+							</td>
 							<td className="align-middle" style={styleCurrency(record.amount)}>
 								{formatCurrency(record.amount)}
 							</td>
