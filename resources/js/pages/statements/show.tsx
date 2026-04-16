@@ -60,7 +60,7 @@ export default function StatementShow({ statement }: { statement: Statement & St
 						<th style={{ width: 200 }}>Date & Time</th>
 						<th style={{ width: 125 }}>Record ($)</th>
 						<th style={{ width: 125 }}>Allocated ($)</th>
-						<th>Allocation Description</th>
+						<th>Description</th>
 					</tr>
 				</thead>
 
@@ -90,7 +90,7 @@ export default function StatementShow({ statement }: { statement: Statement & St
 							<td className="align-middle" style={styleCurrency(record.amount)}>
 								{formatCurrency(record.pivot.amount)}
 							</td>
-							<td className="align-middle">{record.pivot.description}</td>
+							<td className="align-middle">{record.description}</td>
 						</tr>
 					))}
 				</tbody>

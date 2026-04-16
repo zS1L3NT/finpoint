@@ -35,7 +35,6 @@ class RecordController extends Controller
             "statements" => "required|array",
             "statements.*.id" => "required|exists:statements,id",
             "statements.*.amount" => "required|decimal:0,2",
-            "statements.*.description" => "nullable|string"
         ]);
 
         return DB::transaction(function () use ($dto) {
@@ -84,7 +83,6 @@ class RecordController extends Controller
             foreach ($dto["statements"] as $statement_dto) {
                 $record->statements()->attach($statement_dto["id"], [
                     "amount" => $statement_dto["amount"],
-                    "description" => $statement_dto["description"] ?: ""
                 ]);
             }
 
@@ -117,7 +115,6 @@ class RecordController extends Controller
             "statements" => "required|array",
             "statements.*.id" => "required|exists:statements,id",
             "statements.*.amount" => "required|decimal:0,2",
-            "statements.*.description" => "nullable|string"
         ]);
 
         return DB::transaction(function () use ($record, $dto) {
@@ -165,7 +162,6 @@ class RecordController extends Controller
             foreach ($dto["statements"] as $statement_dto) {
                 $record->statements()->updateExistingPivot($statement_dto["id"], [
                     "amount" => $statement_dto["amount"],
-                    "description" => $statement_dto["description"] ?: ""
                 ]);
             }
 

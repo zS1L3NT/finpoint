@@ -399,26 +399,6 @@ function RecordAllocator({
 														</div>
 													</td>
 												</tr>
-												<tr>
-													<th className="align-middle">Description</th>
-													<td>
-														<div
-															className="input-group"
-															style={{ width: 400 }}
-														>
-															<input
-																type="text"
-																className={`form-control ${errors[`statements.${i}.description`]?.length ? "is-invalid" : ""}`}
-																name={`statements[${i}][description]`}
-															/>
-															<div className="invalid-feedback">
-																{errors[
-																	`statements.${i}.description`
-																]?.join("\n")}
-															</div>
-														</div>
-													</td>
-												</tr>
 											</tbody>
 										</table>
 									</Fragment>

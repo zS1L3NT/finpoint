@@ -35,5 +35,4 @@ export type Category = {
 
 export type Allocation = {
 	amount: number
-	description: string
 }

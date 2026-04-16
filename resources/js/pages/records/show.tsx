@@ -103,7 +103,7 @@ export default function RecordShow({
 						<th style={{ width: 125 }}>Date</th>
 						<th style={{ width: 125 }}>Statement ($)</th>
 						<th style={{ width: 125 }}>Allocated ($)</th>
-						<th>Allocation Description</th>
+						<th>Description</th>
 					</tr>
 				</thead>
 
@@ -132,7 +132,7 @@ export default function RecordShow({
 									whiteSpace: "nowrap",
 								}}
 							>
-								{statement.pivot.description}
+								{statement.description}
 							</td>
 						</tr>
 					))}
@@ -381,29 +381,6 @@ function RecordEditor({
 															<div className="invalid-feedback">
 																{errors[
 																	`statements.${i}.amount`
-																]?.join("\n")}
-															</div>
-														</div>
-													</td>
-												</tr>
-												<tr>
-													<th className="align-middle">Description</th>
-													<td>
-														<div
-															className="input-group"
-															style={{ width: 400 }}
-														>
-															<input
-																type="text"
-																className={`form-control ${errors[`statements.${i}.description`]?.length ? "is-invalid" : ""}`}
-																name={`statements[${i}][description]`}
-																defaultValue={
-																	statement.pivot.description
-																}
-															/>
-															<div className="invalid-feedback">
-																{errors[
-																	`statements.${i}.description`
 																]?.join("\n")}
 															</div>
 														</div>
