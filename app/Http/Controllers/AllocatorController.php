@@ -14,8 +14,8 @@ class AllocatorController extends Controller
         $statements = Statement::query()
             ->with("account")
             ->withSum("allocations", "amount")
-            ->whereNull("allocations_sum_amount")
-            ->orWhereColumn("allocations_sum_amount", "!=", "statements.amount")
+            ->when(request()->query("query"), fn($query, $q) => $query->where("description", "like", "%" . $q . "%"))
+            ->where(fn($query) => $query->whereNull("allocations_sum_amount")->orWhereColumn("allocations_sum_amount", "!=", "statements.amount"))
             ->orderBy("date", "desc")
             ->paginate(100);
 

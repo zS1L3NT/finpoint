@@ -30,7 +30,7 @@ export default function Allocator({
 
 	return (
 		<>
-			<div className="d-flex justify-content-between align-items-center mb-4">
+			<div className="d-flex justify-content-between align-items-center mb-2">
 				<div>
 					<h1>Allocator</h1>
 					<p className="text-body-secondary">Allocate bank statements to app records</p>
@@ -46,6 +46,19 @@ export default function Allocator({
 				>
 					Allocate to Record
 				</button>
+			</div>
+
+			<div className="d-flex justify-content-end">
+				<input
+					type="text"
+					className="form-control mb-4"
+					style={{ width: 300 }}
+					placeholder="Search..."
+					value={new URLSearchParams(window.location.search).get("query") ?? ""}
+					onChange={e => {
+						router.reload({ data: { query: e.target.value } })
+					}}
+				/>
 			</div>
 
 			<table className="table table-hover" style={{ tableLayout: "fixed" }}>

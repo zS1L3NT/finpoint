@@ -11,6 +11,7 @@ class StatementController extends Controller
     {
         $statements = Statement::query()
             ->with("account")
+            ->when(request()->query("query"), fn($query, $q) => $query->where("description", "like", "%" . $q . "%"))
             ->orderBy("date", "desc")
             ->paginate(100);
 

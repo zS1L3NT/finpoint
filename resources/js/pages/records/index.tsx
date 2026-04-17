@@ -17,7 +17,20 @@ export default function RecordIndex({ records }: { records: Paginated<Record & R
 
 	return (
 		<>
-			<h1 className="mb-4">Records</h1>
+			<h1 className="mb-2">Records</h1>
+
+			<div className="d-flex justify-content-end">
+				<input
+					type="text"
+					className="form-control mb-4"
+					style={{ width: 300 }}
+					placeholder="Search..."
+					value={new URLSearchParams(window.location.search).get("query") ?? ""}
+					onChange={e => {
+						router.reload({ data: { query: e.target.value } })
+					}}
+				/>
+			</div>
 
 			<table className="table table-hover">
 				<thead>

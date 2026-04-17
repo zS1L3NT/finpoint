@@ -17,6 +17,7 @@ class RecordController extends Controller
     public function index()
     {
         $records = Record::with("category", "statements")
+            ->when(request()->query("query"), fn($query, $q) => $query->where("description", "like", "%" . $q . "%"))
             ->orderBy("datetime", "desc")
             ->paginate(100);
 
