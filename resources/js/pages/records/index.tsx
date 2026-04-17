@@ -101,7 +101,9 @@ export default function RecordIndex({ records }: { records: Paginated<Record & R
 														{DateTime.fromFormat(
 															record.datetime,
 															"y-MM-dd T",
-														).toFormat("h:mm a")}
+														)
+															.toFormat("h:mm a")
+															.replace("12:00 AM", "-")}
 													</td>
 
 													<td

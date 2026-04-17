@@ -79,9 +79,9 @@ export default function RecordShow({
 					<div className="col">
 						<p className="m-0 fs-6 font-monospaced text-body-secondary">DATE & TIME</p>
 						<p className="fs-5">
-							{DateTime.fromFormat(record.datetime, "y-MM-dd T").toFormat(
-								"d MMM y, h:mm a",
-							)}
+							{DateTime.fromFormat(record.datetime, "y-MM-dd T")
+								.toFormat("d MMM y, h:mm a")
+								.replace("12:00 AM", "-")}
 						</p>
 					</div>
 				</div>

@@ -80,9 +80,9 @@ export default function StatementShow({ statement }: { statement: Statement & St
 								</p>
 							</td>
 							<td className="align-middle">
-								{DateTime.fromFormat(record.datetime, "y-MM-dd T").toFormat(
-									"d MMM y, h:mm a",
-								)}
+								{DateTime.fromFormat(record.datetime, "y-MM-dd T")
+									.toFormat("d MMM y, h:mm a")
+									.replace("12:00 AM", "-")}
 							</td>
 							<td className="align-middle" style={styleCurrency(record.amount)}>
 								{formatCurrency(record.amount)}
