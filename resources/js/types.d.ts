@@ -36,3 +36,12 @@ export type Category = {
 export type Allocation = {
 	amount: number
 }
+
+export type Budget = {
+	id: string
+	name: string
+	amount: number
+	start_date: string
+	end_date: string
+	automatic: boolean
+}

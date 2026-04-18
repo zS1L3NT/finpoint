@@ -1,5 +1,6 @@
 import React from "react"
 import AllocatorController from "@/wayfinder/actions/App/Http/Controllers/AllocatorController"
+import BudgetController from "@/wayfinder/actions/App/Http/Controllers/BudgetController"
 import CategoryController from "@/wayfinder/actions/App/Http/Controllers/CategoryController"
 import ImporterController from "@/wayfinder/actions/App/Http/Controllers/ImporterController"
 import RecordController from "@/wayfinder/actions/App/Http/Controllers/RecordController"
@@ -44,6 +45,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 							<li className="nav-item">
 								<a className="nav-link" href={RecordController.index.url()}>
 									Records
+								</a>
+							</li>
+							<li className="nav-item">
+								<a className="nav-link" href={BudgetController.index.url()}>
+									Budgets
 								</a>
 							</li>
 							<li className="nav-item">

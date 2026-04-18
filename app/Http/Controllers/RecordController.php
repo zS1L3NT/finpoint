@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Allocation;
+use App\Models\Budget;
 use App\Models\Category;
 use App\Models\Record;
 use App\Models\Statement;
@@ -45,6 +46,16 @@ class RecordController extends Controller
                 "datetime" => Carbon::createFromFormat("Y-m-d\\TH:i", $dto["datetime"])->format("Y-m-d H:i:s"),
                 ...collect($dto)->except("statements", "datetime")
             ]);
+
+            // If the record falls within a budget range and the budget is automatic, add it to that budget
+            $budgets = Budget::query()
+                ->where("start_date", "<=", $record->datetime)
+                ->where("end_date", ">=", $record->datetime)
+                ->where("automatic", true)
+                ->get();
+            foreach ($budgets as $budget) {
+                $budget->records()->attach($record);
+            }
 
             $errors = collect();
 
