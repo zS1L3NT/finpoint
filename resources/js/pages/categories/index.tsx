@@ -2,7 +2,7 @@ import { router } from "@inertiajs/react"
 import React, { useEffect, useRef, useState } from "react"
 import Icon from "@/components/icon"
 import { Category } from "@/types"
-import CategoryController from "@/wayfinder/actions/App/Http/Controllers/CategoryController"
+import ApiCategoryController from "@/wayfinder/actions/App/Http/Controllers/Api/CategoryController"
 
 type CategoryExtra = {
 	children: (Category & CategoryExtra)[] | null
@@ -77,7 +77,7 @@ function CategoryCreator({ categories }: { categories: (Category & CategoryExtra
 	const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
 		e.preventDefault()
 
-		await fetch(CategoryController.store().url, {
+		await fetch(ApiCategoryController.store().url, {
 			method: "post",
 			body: new FormData(e.currentTarget),
 			headers: { Accept: "application/json" },
@@ -257,7 +257,7 @@ function CategoryEditor({
 		const formData = new FormData()
 		formData.set("_method", "DELETE")
 
-		await fetch(CategoryController.destroy({ category }).url, {
+		await fetch(ApiCategoryController.destroy({ category }).url, {
 			method: "post",
 			body: formData,
 			headers: { Accept: "application/json" },
@@ -275,7 +275,7 @@ function CategoryEditor({
 		const formData = new FormData(e.currentTarget)
 		formData.set("_method", "PUT")
 
-		await fetch(CategoryController.update({ category }).url, {
+		await fetch(ApiCategoryController.update({ category }).url, {
 			method: "post",
 			body: formData,
 			headers: { Accept: "application/json" },

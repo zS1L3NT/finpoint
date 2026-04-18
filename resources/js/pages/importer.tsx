@@ -1,6 +1,6 @@
 import { Form } from "@inertiajs/react"
 import React, { useState } from "react"
-import ImporterController from "@/wayfinder/actions/App/Http/Controllers/ImporterController"
+import ApiImporterController from "@/wayfinder/actions/App/Http/Controllers/Api/ImporterController"
 
 export default function Importer(props: { errors: Record<string, string> }) {
 	const [filled, setFilled] = useState(false)
@@ -13,7 +13,7 @@ export default function Importer(props: { errors: Record<string, string> }) {
 		<Form
 			method="POST"
 			encType="multipart/form-data"
-			action={ImporterController.store.url()}
+			action={ApiImporterController.store.url()}
 			className="m-auto vstack gap-3"
 		>
 			<div className="d-flex justify-content-between align-items-center mb-4">

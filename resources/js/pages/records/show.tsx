@@ -4,8 +4,9 @@ import React, { Fragment, useRef, useState } from "react"
 import Icon from "@/components/icon"
 import { Account, Allocation, Category, Record, Statement } from "@/types"
 import { formatCurrency, styleCurrency } from "@/utils"
-import RecordController from "@/wayfinder/actions/App/Http/Controllers/RecordController"
-import StatementController from "@/wayfinder/actions/App/Http/Controllers/StatementController"
+import ApiRecordController from "@/wayfinder/actions/App/Http/Controllers/Api/RecordController"
+import WebRecordController from "@/wayfinder/actions/App/Http/Controllers/RecordController"
+import WebStatementController from "@/wayfinder/actions/App/Http/Controllers/StatementController"
 
 type RecordExtra = {
 	category: Category & CategoryExtra
@@ -24,7 +25,7 @@ export default function RecordShow({
 	categories: (Category & CategoryExtra)[]
 }) {
 	const handleClick = (statement: Statement) => {
-		router.visit(StatementController.show({ statement: statement.id }).url)
+		router.visit(WebStatementController.show({ statement: statement.id }).url)
 	}
 
 	return (
@@ -158,7 +159,7 @@ function RecordEditor({
 		const formData = new FormData()
 		formData.set("_method", "DELETE")
 
-		await fetch(RecordController.destroy({ record: record.id }).url, {
+		await fetch(ApiRecordController.destroy({ record: record.id }).url, {
 			method: "post",
 			body: formData,
 			headers: { Accept: "application/json" },
@@ -166,7 +167,7 @@ function RecordEditor({
 			if (res.status === 200) {
 				closeButtonRef.current?.click()
 				setTimeout(() => {
-					router.visit(RecordController.index.url())
+					router.visit(WebRecordController.index.url())
 				}, 500)
 			}
 		})
@@ -178,7 +179,7 @@ function RecordEditor({
 		const formData = new FormData(e.currentTarget)
 		formData.set("_method", "PUT")
 
-		await fetch(RecordController.update({ record: record.id }).url, {
+		await fetch(ApiRecordController.update({ record: record.id }).url, {
 			method: "post",
 			body: formData,
 			headers: { Accept: "application/json" },

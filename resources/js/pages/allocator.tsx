@@ -3,7 +3,7 @@ import { DateTime } from "luxon"
 import React, { Fragment, useEffect, useRef, useState } from "react"
 import { Account, Category, Paginated, Statement } from "@/types"
 import { formatCurrency, styleCurrency } from "@/utils"
-import RecordController from "@/wayfinder/actions/App/Http/Controllers/RecordController"
+import ApiRecordController from "@/wayfinder/actions/App/Http/Controllers/Api/RecordController"
 
 type StatementExtra = {
 	allocations_sum_amount: number
@@ -196,7 +196,7 @@ function RecordAllocator({
 	const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
 		e.preventDefault()
 
-		await fetch(RecordController.store.url(), {
+		await fetch(ApiRecordController.store.url(), {
 			method: "post",
 			body: new FormData(e.currentTarget),
 			headers: { Accept: "application/json" },

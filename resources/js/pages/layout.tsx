@@ -1,10 +1,10 @@
 import React from "react"
-import AllocatorController from "@/wayfinder/actions/App/Http/Controllers/AllocatorController"
-import BudgetController from "@/wayfinder/actions/App/Http/Controllers/BudgetController"
-import CategoryController from "@/wayfinder/actions/App/Http/Controllers/CategoryController"
-import ImporterController from "@/wayfinder/actions/App/Http/Controllers/ImporterController"
-import RecordController from "@/wayfinder/actions/App/Http/Controllers/RecordController"
-import StatementController from "@/wayfinder/actions/App/Http/Controllers/StatementController"
+import WebAllocatorController from "@/wayfinder/actions/App/Http/Controllers/AllocatorController"
+import WebBudgetController from "@/wayfinder/actions/App/Http/Controllers/BudgetController"
+import WebCategoryController from "@/wayfinder/actions/App/Http/Controllers/CategoryController"
+import WebImporterController from "@/wayfinder/actions/App/Http/Controllers/ImporterController"
+import WebRecordController from "@/wayfinder/actions/App/Http/Controllers/RecordController"
+import WebStatementController from "@/wayfinder/actions/App/Http/Controllers/StatementController"
 
 export default function Layout({ children }: { children: React.ReactNode }) {
 	return (
@@ -28,32 +28,32 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 					<div className="collapse navbar-collapse" id="navbarNav">
 						<ul className="navbar-nav ms-auto">
 							<li className="nav-item">
-								<a className="nav-link" href={ImporterController.index.url()}>
+								<a className="nav-link" href={WebImporterController.index.url()}>
 									Importer
 								</a>
 							</li>
 							<li className="nav-item">
-								<a className="nav-link" href={AllocatorController.index.url()}>
+								<a className="nav-link" href={WebAllocatorController.index.url()}>
 									Allocator
 								</a>
 							</li>
 							<li className="nav-item">
-								<a className="nav-link" href={StatementController.index.url()}>
+								<a className="nav-link" href={WebStatementController.index.url()}>
 									Statements
 								</a>
 							</li>
 							<li className="nav-item">
-								<a className="nav-link" href={RecordController.index.url()}>
+								<a className="nav-link" href={WebRecordController.index.url()}>
 									Records
 								</a>
 							</li>
 							<li className="nav-item">
-								<a className="nav-link" href={BudgetController.index.url()}>
+								<a className="nav-link" href={WebBudgetController.index.url()}>
 									Budgets
 								</a>
 							</li>
 							<li className="nav-item">
-								<a className="nav-link" href={CategoryController.index.url()}>
+								<a className="nav-link" href={WebCategoryController.index.url()}>
 									Categories
 								</a>
 							</li>

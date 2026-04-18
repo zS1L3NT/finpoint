@@ -3,7 +3,7 @@ import { DateTime } from "luxon"
 import { useRef, useState } from "react"
 import { Category, Record } from "@/types"
 import { formatCurrency, styleCurrency } from "@/utils"
-import RecordController from "@/wayfinder/actions/App/Http/Controllers/Api/RecordController"
+import ApiRecordController from "@/wayfinder/actions/App/Http/Controllers/Api/RecordController"
 import Icon from "./icon"
 
 type RecordExtra = {
@@ -24,7 +24,7 @@ export default function RecordSearch({
 	const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
 		e.preventDefault()
 
-		await fetch(RecordController.index.url({ query: { query } }), {
+		await fetch(ApiRecordController.index.url({ query: { query } }), {
 			headers: { Accept: "application/json" },
 		})
 			.then(async res => await res.json())

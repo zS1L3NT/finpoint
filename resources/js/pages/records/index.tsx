@@ -3,7 +3,7 @@ import { DateTime } from "luxon"
 import Icon from "@/components/icon"
 import { Category, Paginated, Record, Statement } from "@/types"
 import { formatCurrency, styleCurrency } from "@/utils"
-import RecordController from "@/wayfinder/actions/App/Http/Controllers/RecordController"
+import WebRecordController from "@/wayfinder/actions/App/Http/Controllers/RecordController"
 
 type RecordExtra = {
 	category: Category
@@ -12,7 +12,7 @@ type RecordExtra = {
 
 export default function RecordIndex({ records }: { records: Paginated<Record & RecordExtra> }) {
 	const handleClick = (record: Record) => {
-		router.visit(RecordController.show({ record: record.id }).url)
+		router.visit(WebRecordController.show({ record: record.id }).url)
 	}
 
 	return (

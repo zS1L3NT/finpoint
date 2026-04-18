@@ -2,7 +2,7 @@ import { router } from "@inertiajs/react"
 import { DateTime } from "luxon"
 import { Account, Paginated, Record, Statement } from "@/types"
 import { formatCurrency, styleCurrency } from "@/utils"
-import StatementController from "@/wayfinder/actions/App/Http/Controllers/StatementController"
+import WebStatementController from "@/wayfinder/actions/App/Http/Controllers/StatementController"
 
 type StatementExtra = {
 	account: Account
@@ -15,7 +15,7 @@ export default function StatementIndex({
 	statements: Paginated<Statement & StatementExtra>
 }) {
 	const handleClick = (statement: Statement) => {
-		router.visit(StatementController.show({ statement: statement.id }).url)
+		router.visit(WebStatementController.show({ statement: statement.id }).url)
 	}
 
 	return (

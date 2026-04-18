@@ -2,11 +2,12 @@ import { router } from "@inertiajs/react"
 import { DateTime } from "luxon"
 import { useRef, useState } from "react"
 import { Budget, Paginated } from "@/types"
-import BudgetController from "@/wayfinder/actions/App/Http/Controllers/BudgetController"
+import ApiBudgetController from "@/wayfinder/actions/App/Http/Controllers/Api/BudgetController"
+import WebBudgetController from "@/wayfinder/actions/App/Http/Controllers/BudgetController"
 
 export default function BudgetIndex({ budgets }: { budgets: Paginated<Budget> }) {
 	const handleClick = (budget: Budget) => {
-		router.visit(BudgetController.show({ budget: budget.id }).url)
+		router.visit(WebBudgetController.show({ budget: budget.id }).url)
 	}
 
 	return (
@@ -82,7 +83,7 @@ function BudgetCreator() {
 	const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
 		e.preventDefault()
 
-		await fetch(BudgetController.store().url, {
+		await fetch(ApiBudgetController.store().url, {
 			method: "post",
 			body: new FormData(e.currentTarget),
 			headers: { Accept: "application/json" },

@@ -8,16 +8,16 @@ use App\Http\Controllers\RecordController;
 use App\Http\Controllers\StatementController;
 use Illuminate\Support\Facades\Route;
 
-Route::resource("importer", ImporterController::class)->only("index", "store");
+Route::resource("importer", ImporterController::class)->only("index");
 
 Route::resource("allocator", AllocatorController::class)->only("index");
 
 Route::resource("statements", StatementController::class)->only("index", "show");
 
-Route::resource("records", RecordController::class)->only("index", "store", "show", "update", "destroy");
+Route::resource("records", RecordController::class)->only("index", "show");
 
-Route::resource("budgets", BudgetController::class)->only("index", "store", "show", "update", "destroy");
+Route::resource("budgets", BudgetController::class)->only("index", "show");
 
-Route::resource("categories", CategoryController::class)->only("index", "store", "update", "destroy");
+Route::resource("categories", CategoryController::class)->only("index");
 
 Route::redirect("/", "/importer");

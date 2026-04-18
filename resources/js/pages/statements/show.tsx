@@ -3,7 +3,7 @@ import { DateTime } from "luxon"
 import Icon from "@/components/icon"
 import { Account, Allocation, Category, Record, Statement } from "@/types"
 import { formatCurrency, styleCurrency } from "@/utils"
-import RecordController from "@/wayfinder/actions/App/Http/Controllers/RecordController"
+import WebRecordController from "@/wayfinder/actions/App/Http/Controllers/RecordController"
 
 type StatementExtra = {
 	account: Account
@@ -12,7 +12,7 @@ type StatementExtra = {
 
 export default function StatementShow({ statement }: { statement: Statement & StatementExtra }) {
 	const handleClick = (record: Record) => {
-		router.visit(RecordController.show({ record: record.id }).url)
+		router.visit(WebRecordController.show({ record: record.id }).url)
 	}
 
 	return (

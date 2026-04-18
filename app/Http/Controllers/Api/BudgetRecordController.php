@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Budget;
 use App\Models\Record;
-use Illuminate\Http\Request;
 
 class BudgetRecordController extends Controller
 {

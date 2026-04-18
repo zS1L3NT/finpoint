@@ -6,9 +6,10 @@ import Icon from "@/components/icon"
 import RecordSearch from "@/components/record-search"
 import { Budget, Category, Record } from "@/types"
 import { formatCurrency, styleCurrency } from "@/utils"
-import BudgetRecordController from "@/wayfinder/actions/App/Http/Controllers/Api/BudgetRecordController"
-import BudgetController from "@/wayfinder/actions/App/Http/Controllers/BudgetController"
-import RecordController from "@/wayfinder/actions/App/Http/Controllers/RecordController"
+import ApiBudgetController from "@/wayfinder/actions/App/Http/Controllers/Api/BudgetController"
+import ApiBudgetRecordController from "@/wayfinder/actions/App/Http/Controllers/Api/BudgetRecordController"
+import WebBudgetController from "@/wayfinder/actions/App/Http/Controllers/BudgetController"
+import WebRecordController from "@/wayfinder/actions/App/Http/Controllers/RecordController"
 
 type BudgetExtra = {
 	records: (Record & RecordExtra)[]
@@ -21,7 +22,7 @@ type RecordExtra = {
 
 export default function BudgetShow({ budget }: { budget: Budget & BudgetExtra }) {
 	const handleClick = (record: Record) => {
-		router.visit(RecordController.show({ record: record.id }).url)
+		router.visit(WebRecordController.show({ record: record.id }).url)
 	}
 
 	const startDate = DateTime.fromFormat(budget.start_date, "y-MM-dd")
@@ -31,7 +32,7 @@ export default function BudgetShow({ budget }: { budget: Budget & BudgetExtra })
 		const formData = new FormData()
 		formData.set("record_id", record.id)
 
-		await fetch(BudgetRecordController.store({ budget: budget.id }).url, {
+		await fetch(ApiBudgetRecordController.store({ budget: budget.id }).url, {
 			method: "POST",
 			body: formData,
 			headers: { Accept: "application/json" },
@@ -46,11 +47,14 @@ export default function BudgetShow({ budget }: { budget: Budget & BudgetExtra })
 		const formData = new FormData()
 		formData.set("_method", "DELETE")
 
-		await fetch(BudgetRecordController.destroy({ budget: budget.id, record: record.id }).url, {
-			method: "POST",
-			body: formData,
-			headers: { Accept: "application/json" },
-		}).then(res => {
+		await fetch(
+			ApiBudgetRecordController.destroy({ budget: budget.id, record: record.id }).url,
+			{
+				method: "POST",
+				body: formData,
+				headers: { Accept: "application/json" },
+			},
+		).then(res => {
 			if (res.status === 200) {
 				router.reload()
 			}
@@ -88,7 +92,7 @@ export default function BudgetShow({ budget }: { budget: Budget & BudgetExtra })
 						</p>
 					</div>
 				</div>
-				
+
 				<div className="row">
 					<div className="col">
 						<p className="m-0 fs-6 font-monospaced text-body-secondary">SPENT</p>
@@ -188,14 +192,14 @@ function BudgetEditor({ budget }: { budget: Budget }) {
 		const formData = new FormData()
 		formData.set("_method", "DELETE")
 
-		await fetch(BudgetController.destroy({ budget: budget.id }).url, {
+		await fetch(ApiBudgetController.destroy({ budget: budget.id }).url, {
 			method: "post",
 			body: formData,
 			headers: { Accept: "application/json" },
 		}).then(res => {
 			if (res.status === 200) {
 				closeButtonRef.current?.click()
-				router.visit(BudgetController.index.url())
+				router.visit(WebBudgetController.index.url())
 			}
 		})
 	}
@@ -206,7 +210,7 @@ function BudgetEditor({ budget }: { budget: Budget }) {
 		const formData = new FormData(e.currentTarget)
 		formData.set("_method", "PUT")
 
-		await fetch(BudgetController.update({ budget: budget.id }).url, {
+		await fetch(ApiBudgetController.update({ budget: budget.id }).url, {
 			method: "post",
 			body: formData,
 			headers: { Accept: "application/json" },
