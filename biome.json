@@ -1,9 +1,11 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.4.11/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.4.12/schema.json",
 	"files": {
 		"includes": [
 			"resources/js/**/*.{js,jsx,ts,tsx}",
-			"!resources/js/{actions,routes,wayfinder}/**/*.*",
+			"!resources/js/wayfinder/**/*.*",
+			"!resources/js/components/ui/**/*.*",
+			"vite.config.ts",
 			"*.json",
 			"*.jsonc"
 		]

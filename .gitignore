@@ -12,6 +12,7 @@
 /.vscode
 /.zed
 /auth.json
+/bootstrap/ssr
 /node_modules
 /public/build
 /public/hot
@@ -20,8 +21,7 @@
 /storage/pail
 /vendor
 _ide_helper.php
+_ide_helper_models.php
 Homestead.json
 Homestead.yaml
-Thumbs.db
-fintrack.sqlite
 resources/js/wayfinder
