@@ -85,6 +85,6 @@ class ImporterController extends Controller
             }
         });
 
-        return redirect()->route("allocator.index");
+        return [];
     }
 }
