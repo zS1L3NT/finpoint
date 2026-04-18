@@ -4,6 +4,7 @@ import WebBudgetController from "@/wayfinder/actions/App/Http/Controllers/Budget
 import WebCategoryController from "@/wayfinder/actions/App/Http/Controllers/CategoryController"
 import WebImporterController from "@/wayfinder/actions/App/Http/Controllers/ImporterController"
 import WebRecordController from "@/wayfinder/actions/App/Http/Controllers/RecordController"
+import WebRecurrenceController from "@/wayfinder/actions/App/Http/Controllers/RecurrenceController"
 import WebStatementController from "@/wayfinder/actions/App/Http/Controllers/StatementController"
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -50,6 +51,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 							<li className="nav-item">
 								<a className="nav-link" href={WebBudgetController.index.url()}>
 									Budgets
+								</a>
+							</li>
+							<li className="nav-item">
+								<a className="nav-link" href={WebRecurrenceController.index.url()}>
+									Recurrences
 								</a>
 							</li>
 							<li className="nav-item">

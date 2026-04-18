@@ -5,6 +5,7 @@ use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ImporterController;
 use App\Http\Controllers\RecordController;
+use App\Http\Controllers\RecurrenceController;
 use App\Http\Controllers\StatementController;
 use Illuminate\Support\Facades\Route;
 
@@ -17,6 +18,8 @@ Route::resource("statements", StatementController::class)->only("index", "show")
 Route::resource("records", RecordController::class)->only("index", "show");
 
 Route::resource("budgets", BudgetController::class)->only("index", "show");
+
+Route::resource("recurrences", RecurrenceController::class)->only("index", "show");
 
 Route::resource("categories", CategoryController::class)->only("index");
 

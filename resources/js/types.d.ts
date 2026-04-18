@@ -45,3 +45,10 @@ export type Budget = {
 	end_date: string
 	automatic: boolean
 }
+
+export type Recurrence = {
+	id: string
+	name: string
+	amount: number
+	period: "week" | "month" | "year"
+}
