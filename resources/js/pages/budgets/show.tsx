@@ -1,9 +1,12 @@
 import { router } from "@inertiajs/react"
+import { TrashIcon } from "lucide-react"
 import { DateTime } from "luxon"
 import { useRef, useState } from "react"
 import Icon from "@/components/icon"
+import RecordSearch from "@/components/record-search"
 import { Budget, Category, Record } from "@/types"
 import { formatCurrency, styleCurrency } from "@/utils"
+import BudgetRecordController from "@/wayfinder/actions/App/Http/Controllers/Api/BudgetRecordController"
 import BudgetController from "@/wayfinder/actions/App/Http/Controllers/BudgetController"
 import RecordController from "@/wayfinder/actions/App/Http/Controllers/RecordController"
 
@@ -19,6 +22,39 @@ type RecordExtra = {
 export default function BudgetShow({ budget }: { budget: Budget & BudgetExtra }) {
 	const handleClick = (record: Record) => {
 		router.visit(RecordController.show({ record: record.id }).url)
+	}
+
+	const startDate = DateTime.fromFormat(budget.start_date, "y-MM-dd")
+	const endDate = DateTime.fromFormat(budget.end_date, "y-MM-dd")
+
+	const handleAttachRecord = async (record: Record) => {
+		const formData = new FormData()
+		formData.set("record_id", record.id)
+
+		await fetch(BudgetRecordController.store({ budget: budget.id }).url, {
+			method: "POST",
+			body: formData,
+			headers: { Accept: "application/json" },
+		}).then(res => {
+			if (res.status === 200) {
+				router.reload()
+			}
+		})
+	}
+
+	const handleDetachRecord = async (record: Record) => {
+		const formData = new FormData()
+		formData.set("_method", "DELETE")
+
+		await fetch(BudgetRecordController.destroy({ budget: budget.id, record: record.id }).url, {
+			method: "POST",
+			body: formData,
+			headers: { Accept: "application/json" },
+		}).then(res => {
+			if (res.status === 200) {
+				router.reload()
+			}
+		})
 	}
 
 	return (
@@ -44,26 +80,39 @@ export default function BudgetShow({ budget }: { budget: Budget & BudgetExtra })
 					</div>
 
 					<div className="col">
-						<p className="m-0 fs-6 font-monospaced text-body-secondary">AMOUNT</p>
-						<p className="fs-3">${budget.amount.toFixed(2)}</p>
-					</div>
-
-					<div className="col">
 						<p className="m-0 fs-6 font-monospaced text-body-secondary">PERIOD</p>
 						<p className="fs-5">
 							{budget.start_date && budget.end_date
-								? `${DateTime.fromFormat(budget.start_date, "y-MM-dd").toFormat(
-										"d MMM y",
-									)} ~ ${DateTime.fromFormat(budget.end_date, "y-MM-dd").toFormat(
-										"d MMM y",
-									)}`
+								? `${startDate.toFormat("d MMM y")} ~ ${endDate.toFormat("d MMM y")}`
 								: "One-Time"}
 						</p>
 					</div>
 				</div>
+				
+				<div className="row">
+					<div className="col">
+						<p className="m-0 fs-6 font-monospaced text-body-secondary">SPENT</p>
+						<p className="fs-3">${-budget.records_sum_amount.toFixed(2)}</p>
+					</div>
+
+					<div className="col">
+						<p className="m-0 fs-6 font-monospaced text-body-secondary">TOTAL</p>
+						<p className="fs-3">${budget.amount.toFixed(2)}</p>
+					</div>
+				</div>
 			</div>
 
-			<h3 className="mt-5 mb-4">Records</h3>
+			<div className="d-flex justify-content-between align-items-center mt-5 mb-4">
+				<h3 className="m-0">Records</h3>
+
+				<button
+					className="btn btn-primary"
+					data-bs-toggle="modal"
+					data-bs-target="#record-search"
+				>
+					Add Record to Budget
+				</button>
+			</div>
 
 			<table className="table table-hover" style={{ tableLayout: "fixed" }}>
 				<thead>
@@ -96,11 +145,35 @@ export default function BudgetShow({ budget }: { budget: Budget & BudgetExtra })
 									{record.people ? ` w/ ${record.people}` : ""}
 									{record.location ? ` @ ${record.location}` : ""}
 								</p>
+
+								<button
+									type="button"
+									className="btn btn-danger ms-auto"
+									onClick={async e => {
+										e.stopPropagation()
+
+										await handleDetachRecord(record)
+									}}
+								>
+									<TrashIcon />
+								</button>
 							</td>
 						</tr>
 					))}
 				</tbody>
 			</table>
+
+			<RecordSearch
+				filter={record =>
+					DateTime.fromFormat(record.datetime, "y-MM-dd T") >= startDate &&
+					DateTime.fromFormat(record.datetime, "y-MM-dd T") <= endDate &&
+					!budget.records.find(r => r.id === record.id)
+				}
+				handler={async (record, close) => {
+					await handleAttachRecord(record)
+					close()
+				}}
+			/>
 
 			<BudgetEditor budget={budget} />
 		</>
