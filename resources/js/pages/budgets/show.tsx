@@ -13,7 +13,7 @@ import WebRecordController from "@/wayfinder/actions/App/Http/Controllers/Record
 
 type BudgetExtra = {
 	records: (Record & RecordExtra)[]
-	records_sum_amount: number
+	records_sum_amount: number | null
 }
 
 type RecordExtra = {
@@ -99,7 +99,7 @@ export default function BudgetShow({ budget }: { budget: Budget & BudgetExtra })
 				<div className="row">
 					<div className="col">
 						<p className="m-0 fs-6 font-monospaced text-body-secondary">SPENT</p>
-						<p className="fs-3">${-budget.records_sum_amount.toFixed(2)}</p>
+						<p className="fs-3">${-(budget.records_sum_amount ?? 0).toFixed(2)}</p>
 					</div>
 
 					<div className="col">

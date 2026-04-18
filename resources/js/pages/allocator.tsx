@@ -6,8 +6,8 @@ import { formatCurrency, styleCurrency } from "@/utils"
 import ApiRecordController from "@/wayfinder/actions/App/Http/Controllers/Api/RecordController"
 
 type StatementExtra = {
-	allocations_sum_amount: number
 	account: Account
+	allocations_sum_amount: number | null
 }
 
 type CategoryExtra = {
