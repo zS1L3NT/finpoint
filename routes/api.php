@@ -13,6 +13,6 @@ Route::apiResource("records", RecordController::class)->only("index", "store", "
 
 Route::apiResource("budgets", BudgetController::class)->only("store", "update", "destroy");
 
-Route::apiResource("budgets.records", BudgetRecordController::class)->only("store", "destroy");
+Route::apiResource("budgets.records", BudgetRecordController::class)->only("update", "destroy");
 
 Route::apiResource("categories", CategoryController::class)->only("store", "update", "destroy");

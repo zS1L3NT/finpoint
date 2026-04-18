@@ -30,13 +30,16 @@ export default function BudgetShow({ budget }: { budget: Budget & BudgetExtra })
 
 	const handleAttachRecord = async (record: Record) => {
 		const formData = new FormData()
-		formData.set("record_id", record.id)
+		formData.set("_method", "PUT")
 
-		await fetch(ApiBudgetRecordController.store({ budget: budget.id }).url, {
-			method: "POST",
-			body: formData,
-			headers: { Accept: "application/json" },
-		}).then(res => {
+		await fetch(
+			ApiBudgetRecordController.update({ budget: budget.id, record: record.id }).url,
+			{
+				method: "POST",
+				body: formData,
+				headers: { Accept: "application/json" },
+			},
+		).then(res => {
 			if (res.status === 200) {
 				router.reload()
 			}

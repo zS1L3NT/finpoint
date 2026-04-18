@@ -8,13 +8,9 @@ use App\Models\Record;
 
 class BudgetRecordController extends Controller
 {
-    public function store(Budget $budget)
+    public function update(Budget $budget, Record $record)
     {
-        $dto = request()->validate([
-            "record_id" => "exists:records,id"
-        ]);
-
-        $budget->records()->attach($dto["record_id"]);
+        $budget->records()->attach($record);
 
         return [];
     }
