@@ -1,10 +1,9 @@
 import { router } from "@inertiajs/react"
 import { useForm } from "@tanstack/react-form"
-import { LinkIcon, MoreHorizontalIcon } from "lucide-react"
-import { DateTime } from "luxon"
-import { useEffect, useState } from "react"
+import { PencilIcon, Trash2Icon } from "lucide-react"
+import { useState } from "react"
 import AppHeader from "@/components/app-header"
-import DataTable from "@/components/data-table"
+import DetailCard from "@/components/detail-card"
 import AmountField from "@/components/form/amount-field"
 import ComboboxField from "@/components/form/combobox-field"
 import DatetimeField from "@/components/form/datetime-field"
@@ -20,7 +19,6 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
 import {
 	Dialog,
 	DialogClose,
@@ -31,224 +29,177 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog"
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
+import { FieldGroup } from "@/components/ui/field"
 import { Progress } from "@/components/ui/progress"
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@/components/ui/table"
 import useApiFormErrors from "@/hooks/use-api-form-errors"
-import usePaginatedTableState from "@/hooks/use-paginated-table-state"
-import { cn, round2dp, toCurrency, toDate } from "@/lib/utils"
-import { Account, Category, Paginated, Statement } from "@/types"
-import { allocator, statement } from "@/wayfinder/routes"
-import { store } from "@/wayfinder/routes/records"
+import { cn, currencyClass, toCurrency, toDate, toDatetime, withMethod } from "@/lib/utils"
+import { Account, Allocation, Category, Record, Statement } from "@/types"
+import RecordController from "@/wayfinder/actions/App/Http/Controllers/RecordController"
+import StatementController from "@/wayfinder/actions/App/Http/Controllers/StatementController"
+import { destroy, update } from "@/wayfinder/routes/records"
 
-type StatementExtra = {
-	account: Account
-	allocations_sum_amount: number | null
+type RecordExtra = {
+	category: Category & CategoryExtra
+	statements: (Statement & { account: Account } & { pivot: Allocation })[]
 }
 
 type CategoryExtra = {
 	children: Category[]
 }
 
-export default function Allocator({
-	statements,
+export default function RecordPage({
+	record,
 	categories,
 }: {
-	statements: Paginated<Statement & StatementExtra>
+	record: Record & RecordExtra
 	categories: (Category & CategoryExtra)[]
 }) {
-	const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({})
-	const { query, pageSize, handleQueryChange, handlePageSizeChange, handleVisit } =
-		usePaginatedTableState({
-			syncOn: statements,
-			buildUrl: query => allocator({ query }).url,
-		})
-
-	useEffect(() => {
-		setRowSelection(currentSelection =>
-			Object.fromEntries(
-				statements.data
-					.filter(statement => currentSelection[statement.id])
-					.map(statement => [statement.id, true]),
-			),
-		)
-	}, [statements.data])
-
 	return (
 		<>
-			<AppHeader title="Allocator" />
+			<AppHeader title="Record" />
 
 			<div className="container mx-auto flex flex-col gap-8 p-8">
-				<div className="flex flex-col gap-1">
-					<h2 className="text-2xl font-semibold">Allocator</h2>
-					<p className="text-muted-foreground">Allocate bank statements to app records</p>
+				<div className="flex items-start justify-between gap-4">
+					<div className="flex flex-col gap-1">
+						<h2 className="text-2xl font-semibold">Record {record.id}</h2>
+						<p className="text-muted-foreground">
+							Review the record details and the statements allocated to it.
+						</p>
+					</div>
+
+					<RecordEditorDialog record={record} categories={categories} />
 				</div>
 
-				<DataTable
-					data={statements}
-					columns={[
-						{
-							id: "select",
-							cell: ({ row }) => (
-								<div className="flex items-center justify-center">
-									<Checkbox
-										checked={row.getIsSelected()}
-										onCheckedChange={value => row.toggleSelected(!!value)}
-										aria-label={`Select statement ${row.original.id}`}
-									/>
-								</div>
-							),
-						},
-						{
-							header: "Account",
-							cell: ({ row }) => row.original.account.id,
-						},
-						{
-							header: "Date",
-							cell: ({ row }) => (
-								<span className="text-muted-foreground">
-									{toDate(row.original.date)}
-								</span>
-							),
-						},
-						{
-							header: "Amount",
-							cell: ({ row }) => {
-								const total = row.original.amount
-								const allocable = round2dp(
-									total - (row.original.allocations_sum_amount ?? 0),
-								)
+				<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+					<DetailCard label="Title" value={record.title} />
+					<DetailCard label="People" value={record.people ?? "-"} />
+					<DetailCard label="Location" value={record.location ?? "-"} />
+					<DetailCard
+						label="Amount"
+						value={toCurrency(record.amount)}
+						valueClassName={currencyClass(record.amount)}
+					/>
+					<DetailCard
+						label="Category"
+						value={
+							<div className="flex items-center gap-2">
+								<Icon {...record.category} size={16} />
+								<span>{record.category.name}</span>
+							</div>
+						}
+					/>
+					<DetailCard label="Date & Time" value={toDatetime(record.datetime)} />
+				</div>
 
-								return (
-									<Field className="w-full max-w-sm">
-										<FieldLabel>
-											<span>Allocable</span>
-											<div className="ml-auto">
-												<span
-													className={cn(
-														"text-muted-foreground",
-														allocable < 0
-															? "text-red-500"
-															: allocable > 0
-																? "text-green-500"
-																: "text-foreground",
+				<Card>
+					<CardHeader>
+						<CardTitle>Description</CardTitle>
+						<CardDescription>Additional context for this record.</CardDescription>
+					</CardHeader>
+					<CardContent>{record.description ?? "-"}</CardContent>
+				</Card>
+
+				<Card>
+					<CardHeader>
+						<CardTitle>Statements</CardTitle>
+						<CardDescription>
+							Allocated statements attached to this record.
+						</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<div className="overflow-hidden rounded-lg border bg-card">
+							<Table>
+								<TableHeader>
+									<TableRow>
+										<TableHead className="w-32">Account</TableHead>
+										<TableHead className="w-32">Date</TableHead>
+										<TableHead className="w-36">Statement</TableHead>
+										<TableHead className="w-36">Allocated</TableHead>
+										<TableHead>Description</TableHead>
+									</TableRow>
+								</TableHeader>
+								<TableBody>
+									{record.statements.length ? (
+										record.statements.map(statement => (
+											<TableRow
+												key={statement.id}
+												className="cursor-pointer"
+												onClick={() =>
+													router.visit(
+														StatementController.show({
+															statement: statement.id,
+														}).url,
+													)
+												}
+											>
+												<TableCell>{statement.account.id}</TableCell>
+												<TableCell>{toDate(statement.date)}</TableCell>
+												<TableCell
+													className={currencyClass(statement.amount)}
+												>
+													{toCurrency(statement.amount)}
+												</TableCell>
+												<TableCell
+													className={currencyClass(
+														statement.pivot.amount,
 													)}
 												>
-													{toCurrency(allocable)}
-												</span>
-												{" / "}
-												<span
-													className={cn(
-														"font-bold",
-														total < 0
-															? "text-red-500"
-															: total > 0
-																? "text-green-500"
-																: "text-foreground",
-													)}
-												>
-													{toCurrency(total)}
-												</span>
-											</div>
-										</FieldLabel>
-										<Progress
-											value={total === 0 ? 0 : (allocable / total) * 100}
-										/>
-									</Field>
-								)
-							},
-						},
-						{
-							header: "Description",
-							cell: ({ row }) => (
-								<div className="truncate text-muted-foreground">
-									{row.original.description}
-								</div>
-							),
-						},
-						{
-							id: "actions",
-							cell: ({ row }) => (
-								<DropdownMenu>
-									<DropdownMenuTrigger asChild>
-										<Button variant="ghost" className="size-8 p-0">
-											<span className="sr-only">Open menu</span>
-											<MoreHorizontalIcon className="size-4" />
-										</Button>
-									</DropdownMenuTrigger>
-									<DropdownMenuContent align="end">
-										<DropdownMenuLabel>Actions</DropdownMenuLabel>
-										<DropdownMenuItem asChild>
-											<a href={statement.url({ statement: row.original })}>
-												View statement
-											</a>
-										</DropdownMenuItem>
-									</DropdownMenuContent>
-								</DropdownMenu>
-							),
-						},
-					]}
-					header={{
-						query,
-						onQueryChange: handleQueryChange,
-						pageSize,
-						onPageSizeChange: handlePageSizeChange,
-						searchPlaceholder: "Filter statements...",
-						children: (
-							<AllocateRecordDialog
-								statements={statements.data}
-								rowSelection={rowSelection}
-								categories={categories}
-								clear={() => setRowSelection({})}
-							/>
-						),
-					}}
-					footer={{
-						summary: `${Object.values(rowSelection).filter(Boolean).length} selected. Showing ${statements.data.length} of ${statements.total} statements.`,
-						handleVisit,
-					}}
-					emptyMessage="No statements found."
-					getRowId={row => row.id}
-					rowSelection={rowSelection}
-					setRowSelection={setRowSelection}
-				/>
+													{toCurrency(statement.pivot.amount)}
+												</TableCell>
+												<TableCell className="max-w-0 truncate text-muted-foreground">
+													{statement.description}
+												</TableCell>
+											</TableRow>
+										))
+									) : (
+										<TableRow>
+											<TableCell
+												colSpan={5}
+												className="h-24 text-center text-muted-foreground"
+											>
+												No statements found.
+											</TableCell>
+										</TableRow>
+									)}
+								</TableBody>
+							</Table>
+						</div>
+					</CardContent>
+				</Card>
 			</div>
 		</>
 	)
 }
 
-function AllocateRecordDialog({
-	statements,
-	rowSelection,
+function RecordEditorDialog({
+	record,
 	categories,
-	clear,
 }: {
-	statements: (Statement & StatementExtra)[]
-	rowSelection: Record<string, boolean>
+	record: Record & RecordExtra
 	categories: (Category & CategoryExtra)[]
-	clear: () => void
 }) {
 	const [open, setOpen] = useState(false)
 	const { mergeErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
-	const selected = statements.filter(statement => rowSelection[statement.id])
 
 	const categoriesFlat = categories.flatMap(category => [category, ...category.children])
 	const initialValues = {
-		title: "",
-		people: "",
-		location: "",
-		datetime: inferAllocatorDatetime(selected),
-		category_id: "",
-		description: "",
-		statements: selected.map(statement => ({
+		title: record.title,
+		people: record.people ?? "",
+		location: record.location ?? "",
+		datetime: record.datetime.replace(" ", "T"),
+		category_id: record.category.id,
+		description: record.description ?? "",
+		statements: record.statements.map(statement => ({
 			id: statement.id,
-			amount: round2dp(statement.amount - (statement.allocations_sum_amount ?? 0)),
+			amount: statement.pivot.amount,
 		})),
 	}
 
@@ -268,9 +219,9 @@ function AllocateRecordDialog({
 				formData.append(`statements[${index}][amount]`, `${statement.amount}`)
 			})
 
-			const response = await fetch(store.url(), {
+			const response = await fetch(update.url({ record: record.id }), {
 				method: "POST",
-				body: formData,
+				body: withMethod(formData, "PUT"),
 				headers: { Accept: "application/json" },
 			})
 
@@ -280,13 +231,25 @@ function AllocateRecordDialog({
 				return
 			}
 
-			if (response.status === 201) {
+			if (response.ok) {
 				setOpen(false)
-				clear()
 				router.reload()
 			}
 		},
 	})
+
+	const handleDelete = async () => {
+		const response = await fetch(destroy.url({ record: record.id }), {
+			method: "POST",
+			body: withMethod(new FormData(), "DELETE"),
+			headers: { Accept: "application/json" },
+		})
+
+		if (response.ok) {
+			setOpen(false)
+			router.visit(RecordController.index.url())
+		}
+	}
 
 	return (
 		<Dialog
@@ -301,21 +264,21 @@ function AllocateRecordDialog({
 		>
 			<DialogTrigger
 				render={
-					<Button disabled={!selected.length}>
-						<LinkIcon /> Create Record
+					<Button>
+						<PencilIcon /> Edit
 					</Button>
 				}
 			/>
 			<DialogContent className="sm:max-w-4xl">
 				<DialogHeader>
-					<DialogTitle>Create New Record</DialogTitle>
+					<DialogTitle>Edit Record</DialogTitle>
 					<DialogDescription>
-						Allocate {selected.length} selected statement(s) to a new record.
+						Update the record details and its statement allocations.
 					</DialogDescription>
 				</DialogHeader>
 
 				<form
-					id="allocate-record-form"
+					id="record-editor-form"
 					className="grid gap-8 lg:grid-cols-2"
 					onSubmit={event => {
 						event.preventDefault()
@@ -442,7 +405,7 @@ function AllocateRecordDialog({
 						<p className="text-sm font-semibold">Allocation Amounts</p>
 
 						<div className="flex flex-col gap-2">
-							{selected.map((statement, index) => (
+							{record.statements.map((statement, index) => (
 								<form.Field
 									key={statement.id}
 									name={`statements[${index}].amount` as const}
@@ -451,10 +414,7 @@ function AllocateRecordDialog({
 											field.state.meta.errors,
 											field.name,
 										)
-										const allocable = round2dp(
-											statement.amount -
-												(statement.allocations_sum_amount ?? 0),
-										)
+										const allocable = Math.abs(statement.amount)
 
 										return (
 											<Card
@@ -492,7 +452,9 @@ function AllocateRecordDialog({
 																: Math.max(
 																		0,
 																		Math.min(
-																			(field.state.value /
+																			(Math.abs(
+																				field.state.value,
+																			) /
 																				allocable) *
 																				100,
 																			100,
@@ -511,6 +473,14 @@ function AllocateRecordDialog({
 				</form>
 
 				<DialogFooter>
+					<Button
+						type="button"
+						variant="destructive"
+						className="mr-auto"
+						onClick={handleDelete}
+					>
+						<Trash2Icon /> Delete
+					</Button>
 					<DialogClose
 						render={
 							<Button type="button" variant="outline">
@@ -518,55 +488,11 @@ function AllocateRecordDialog({
 							</Button>
 						}
 					/>
-					<Button type="submit" form="allocate-record-form">
+					<Button type="submit" form="record-editor-form">
 						Save changes
 					</Button>
 				</DialogFooter>
 			</DialogContent>
 		</Dialog>
 	)
-}
-
-const DESCRIPTION_DATE_REGEX = /\b\d{2}(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\b/
-
-function inferAllocatorDatetime(statements: (Statement & StatementExtra)[]) {
-	const describedDates = statements.flatMap(statement => {
-		const match = statement.description.match(DESCRIPTION_DATE_REGEX)?.[0]
-		if (!match) {
-			return []
-		}
-
-		const statementDate = DateTime.fromFormat(statement.date, "yyyy-MM-dd")
-		if (!statementDate.isValid) {
-			return []
-		}
-
-		let describedDate = DateTime.fromFormat(
-			`${statementDate.year}-${match.slice(0, 2)}${match.slice(2).toLowerCase()}`,
-			"yyyy-ddMMM",
-		).startOf("day")
-
-		if (!describedDate.isValid) {
-			return []
-		}
-
-		if (describedDate.toMillis() > statementDate.endOf("day").toMillis()) {
-			describedDate = describedDate.minus({ years: 1 })
-		}
-
-		return [describedDate]
-	})
-
-	const earliestDate =
-		[...describedDates].sort((a, b) => a.toMillis() - b.toMillis())[0] ??
-		statements
-			.flatMap(statement => {
-				const statementDate = DateTime.fromFormat(statement.date, "yyyy-MM-dd").startOf(
-					"day",
-				)
-				return statementDate.isValid ? [statementDate] : []
-			})
-			.sort((a, b) => a.toMillis() - b.toMillis())[0]
-
-	return earliestDate ? earliestDate.toFormat("yyyy-MM-dd'T'HH:mm") : ""
 }

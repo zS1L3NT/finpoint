@@ -1,6 +1,12 @@
+export type PaginatedLink = {
+	active: boolean
+	label: string
+	url: string | null
+}
+
 export type Paginated<T> = {
 	data: T[]
-	links: { active: boolean; label: string; url: string }[]
+	links: PaginatedLink[]
 	total: number
 	per_page: number
 	current_page: number

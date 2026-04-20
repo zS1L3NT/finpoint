@@ -7,7 +7,14 @@ export const cn = (...inputs: ClassValue[]) => {
 }
 
 export const round2dp = (number: number) => {
-	return Math.floor(number * 100) / 100
+	return Math.round(number * 100) / 100
+}
+
+export const currencyClass = (amount: number) => {
+	return cn(
+		"font-medium",
+		amount < 0 ? "text-red-500" : amount > 0 ? "text-green-600" : "text-foreground",
+	)
 }
 
 export const toCurrency = (amount: number) => {
@@ -18,11 +25,16 @@ export const toCurrency = (amount: number) => {
 }
 
 export const toDate = (date: string) => {
-	return DateTime.fromFormat(date, "y-MM-dd").toFormat("d MMM y")
+	return DateTime.fromFormat(date, "yyyy-MM-dd").toFormat("d MMM y")
 }
 
 export const toDatetime = (datetime: string) => {
-	return DateTime.fromFormat(datetime, "y-MM-dd T")
+	return DateTime.fromFormat(datetime, "yyyy-MM-dd HH:mm")
 		.toFormat("d MMM y, h:mm a")
 		.replace("12:00 AM", "-")
+}
+
+export const withMethod = (formData: FormData, method: "PUT" | "PATCH" | "DELETE") => {
+	formData.set("_method", method)
+	return formData
 }

@@ -42,6 +42,7 @@ export default function ComboboxField<T>({
 			<Combobox
 				items={items}
 				itemToStringLabel={getItemString}
+				itemToStringValue={getItemId}
 				value={value}
 				onValueChange={onChange}
 			>

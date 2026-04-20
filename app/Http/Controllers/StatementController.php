@@ -13,15 +13,16 @@ class StatementController extends Controller
             ->with("account")
             ->when(request()->query("query"), fn($query, $q) => $query->where("description", "like", "%" . $q . "%"))
             ->orderBy("date", "desc")
-            ->paginate(25);
+            ->paginate(request("per_page") ?? 25)
+            ->withQueryString();
 
-        return Inertia::render("statements/index", compact("statements"));
+        return Inertia::render("statements", compact("statements"));
     }
 
     public function show(Statement $statement)
     {
         $statement->load("account", "records", "records.category");
 
-        return Inertia::render("statements/show", compact("statement"));
+        return Inertia::render("statement", compact("statement"));
     }
 }

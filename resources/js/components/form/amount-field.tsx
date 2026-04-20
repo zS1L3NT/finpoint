@@ -1,6 +1,7 @@
+import type { ReactNode } from "react"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { cn, toCurrency } from "@/lib/utils"
+import { cn } from "@/lib/utils"
 
 type ErrorItem = { message?: string }
 
@@ -12,6 +13,7 @@ type Props = {
 	step?: number
 	min?: number
 	max?: number
+	suffix?: ReactNode
 	onChange: (value: number) => void
 }
 
@@ -23,6 +25,7 @@ export default function AmountField({
 	step = 0.01,
 	min,
 	max,
+	suffix,
 	onChange,
 }: Props) {
 	return (
@@ -45,7 +48,7 @@ export default function AmountField({
 					aria-invalid={!!errors.length}
 					className={cn("flex-1 pl-6", errors.length ? "border-destructive" : null)}
 				/>
-				<span>of {toCurrency(value)}</span>
+				{suffix ? <span>{suffix}</span> : null}
 			</div>
 			<FieldError errors={errors} />
 		</Field>

@@ -1,5 +1,5 @@
-import { ChevronDownIcon } from "lucide-react"
 import { DateTime } from "luxon"
+import { CalendarIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
@@ -12,26 +12,33 @@ type ErrorItem = { message?: string }
 type Props = {
 	id: string
 	label?: string
-	timeInputId?: string
 	value: string
 	errors: ErrorItem[]
 	placeholder?: string
 	onChange: (value: string) => void
 }
 
+const parseValue = (value: string) => {
+	if (!value) {
+		return null
+	}
+
+	const date = DateTime.fromFormat(value, "yyyy-MM-dd'T'HH:mm")
+	return date.isValid ? date : null
+}
+
+const toInputValue = (date: DateTime) => date.toFormat("yyyy-MM-dd'T'HH:mm")
+
 export default function DatetimeField({
 	id,
 	label = "Datetime",
-	placeholder = "Select date",
-	timeInputId,
 	value,
 	errors,
+	placeholder = "Select date",
 	onChange,
 }: Props) {
-	const selected = value ? DateTime.fromISO(value) : null
-	const selectedDate = selected ? selected.toJSDate() : undefined
+	const selected = parseValue(value)
 	const selectedTime = selected ? selected.toFormat("HH:mm") : ""
-	const selectedDateLabel = selected ? selected.toFormat("DDD") : ""
 
 	const updateDate = (date: Date | undefined) => {
 		if (!date) {
@@ -44,22 +51,24 @@ export default function DatetimeField({
 			year: date.getFullYear(),
 			month: date.getMonth() + 1,
 			day: date.getDate(),
-		})
-
-		onChange(next.toISO() ?? "")
-	}
-
-	const updateTime = (time: string) => {
-		const [hours, minutes] = time.split(":").map(Number)
-		const source = selected ?? DateTime.now()
-		const next = source.set({
-			hour: Number.isNaN(hours) ? 0 : hours,
-			minute: Number.isNaN(minutes) ? 0 : minutes,
 			second: 0,
 			millisecond: 0,
 		})
 
-		onChange(next.toISO() ?? "")
+		onChange(toInputValue(next))
+	}
+
+	const updateTime = (time: string) => {
+		const [hours = "0", minutes = "0"] = time.split(":")
+		const source = selected ?? DateTime.now().startOf("day")
+		const next = source.set({
+			hour: Number(hours),
+			minute: Number(minutes),
+			second: 0,
+			millisecond: 0,
+		})
+
+		onChange(toInputValue(next))
 	}
 
 	return (
@@ -74,25 +83,34 @@ export default function DatetimeField({
 								variant="outline"
 								aria-invalid={!!errors.length}
 								className={cn(
-									"w-full justify-between font-normal",
-									!selectedDate && "text-muted-foreground",
+									"w-full justify-start text-left font-normal",
+									!selected && "text-muted-foreground",
 									errors.length ? "border-destructive" : null,
 								)}
 							>
-								{selectedDate ? selectedDateLabel : placeholder}
-								<ChevronDownIcon className="size-4 opacity-50" />
+								<CalendarIcon />
+								{selected ? (
+									selected.toFormat("d MMM yyyy")
+								) : (
+									<span>{placeholder}</span>
+								)}
 							</Button>
 						}
 					/>
 					<PopoverContent className="w-auto p-0" align="start">
-						<Calendar mode="single" selected={selectedDate} onSelect={updateDate} />
+						<Calendar
+							mode="single"
+							selected={selected?.toJSDate()}
+							onSelect={updateDate}
+						/>
 					</PopoverContent>
 				</Popover>
 				<Input
-					id={timeInputId ?? `${id}-time`}
+					id={`${id}-time`}
 					type="time"
+					step="60"
 					value={selectedTime}
-					onChange={e => updateTime(e.target.value)}
+					onChange={event => updateTime(event.target.value)}
 					aria-invalid={!!errors.length}
 					className={cn(errors.length ? "border-destructive" : null)}
 				/>
