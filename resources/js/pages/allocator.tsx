@@ -37,7 +37,7 @@ export default function Allocator({
 	categories: (Category & CategoryExtra)[]
 }) {
 	const [query, setQuery] = useState("")
-	const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 100 })
+	const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 25 })
 	const [rowSelection, setRowSelection] = useState<{ [key: string]: boolean }>({})
 
 	useEffect(() => {
@@ -46,7 +46,7 @@ export default function Allocator({
 		// biome-ignore lint/style/noNonNullAssertion: Asserted not null
 		const page = params.get("page") !== null ? +params.get("page")! : 1
 		// biome-ignore lint/style/noNonNullAssertion: Asserted not null
-		const perPage = params.get("per_page") !== null ? +params.get("per_page")! : 100
+		const perPage = params.get("per_page") !== null ? +params.get("per_page")! : 25
 
 		if (page !== pagination.pageIndex + 1 || perPage !== pagination.pageSize) {
 			refresh()

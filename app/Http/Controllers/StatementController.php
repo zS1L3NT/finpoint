@@ -13,7 +13,7 @@ class StatementController extends Controller
             ->with("account")
             ->when(request()->query("query"), fn($query, $q) => $query->where("description", "like", "%" . $q . "%"))
             ->orderBy("date", "desc")
-            ->paginate(100);
+            ->paginate(25);
 
         return Inertia::render("statements/index", compact("statements"));
     }

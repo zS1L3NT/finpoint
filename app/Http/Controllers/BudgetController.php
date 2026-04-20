@@ -11,7 +11,7 @@ class BudgetController extends Controller
     {
         $budgets = Budget::query()
             ->orderBy("start_date", "desc")
-            ->paginate(100);
+            ->paginate(25);
 
         return Inertia::render("budgets/index", compact("budgets"));
     }

@@ -11,7 +11,7 @@ class RecurrenceController extends Controller
     {
         $recurrences = Recurrence::query()
             ->orderBy("amount", "desc")
-            ->paginate(100);
+            ->paginate(25);
 
         return Inertia::render("recurrences/index", compact("recurrences"));
     }

@@ -13,7 +13,7 @@ class RecordController extends Controller
         $records = Record::with("category", "statements")
             ->when(request()->query("query"), fn($query, $q) => $query->where("title", "like", "%" . $q . "%")->orWhere("description", "like", "%" . $q . "%"))
             ->orderBy("datetime", "desc")
-            ->paginate(100);
+            ->paginate(25);
 
         return Inertia::render("records/index", compact("records"));
     }
