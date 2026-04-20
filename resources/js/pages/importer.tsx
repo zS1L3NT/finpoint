@@ -16,7 +16,7 @@ import { allocator } from "@/wayfinder/routes"
 import { store } from "@/wayfinder/routes/importer"
 
 export default function Importer() {
-	const [errors, setErrors] = useState<Record<string, string[]>>({})
+	const [errors, setErrors] = useState<{ [key: string]: string[] }>({})
 
 	const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
 		e.preventDefault()

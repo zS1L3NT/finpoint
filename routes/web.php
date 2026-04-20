@@ -42,8 +42,4 @@ Route::resource("categories", CategoryController::class)->only("index")->names([
     "index" => "categories"
 ]);
 
-// Route::redirect("/", "/importer");
-
-Route::get("/", function () {
-    return Inertia::render("welcome");
-});
+Route::redirect("/", "/importer");

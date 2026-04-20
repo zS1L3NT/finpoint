@@ -1,6 +1,9 @@
 export type Paginated<T> = {
 	data: T[]
 	links: { active: boolean; label: string; url: string }[]
+	total: number
+	per_page: number
+	current_page: number
 }
 
 export type Account = {

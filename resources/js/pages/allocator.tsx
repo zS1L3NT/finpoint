@@ -1,9 +1,24 @@
 import { router } from "@inertiajs/react"
-import { DateTime } from "luxon"
-import React, { Fragment, useEffect, useRef, useState } from "react"
+import { MoreHorizontalIcon } from "lucide-react"
+import { useEffect, useState } from "react"
+import AllocateRecordDialog from "@/components/allocate-record-dialog"
+import AppHeader from "@/components/app-header"
+import DataTable from "@/components/data-table"
+import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Field, FieldLabel } from "@/components/ui/field"
+import { Input } from "@/components/ui/input"
+import { Progress } from "@/components/ui/progress"
+import { cn, round2dp, toCurrency, toDate } from "@/lib/utils"
 import { Account, Category, Paginated, Statement } from "@/types"
-import { formatCurrency, styleCurrency } from "@/utils"
-import ApiRecordController from "@/wayfinder/actions/App/Http/Controllers/Api/RecordController"
+import { allocator, statement } from "@/wayfinder/routes"
 
 type StatementExtra = {
 	account: Account
@@ -21,419 +36,176 @@ export default function Allocator({
 	statements: Paginated<Statement & StatementExtra>
 	categories: (Category & CategoryExtra)[]
 }) {
-	const modalButtonRef = useRef<HTMLButtonElement>(null)
-	const [selectedIds, setSelectedIds] = useState<string[]>([])
+	const [query, setQuery] = useState("")
+	const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 100 })
+	const [rowSelection, setRowSelection] = useState<{ [key: string]: boolean }>({})
 
-	const setSelected = (id: string, selected: boolean) => {
-		setSelectedIds(ids => (selected ? [...ids, id] : ids.filter(_id => _id !== id)))
+	useEffect(() => {
+		const params = new URLSearchParams(window.location.search)
+
+		// biome-ignore lint/style/noNonNullAssertion: Asserted not null
+		const page = params.get("page") !== null ? +params.get("page")! : 1
+		// biome-ignore lint/style/noNonNullAssertion: Asserted not null
+		const perPage = params.get("per_page") !== null ? +params.get("per_page")! : 100
+
+		if (page !== pagination.pageIndex + 1 || perPage !== pagination.pageSize) {
+			refresh()
+		}
+	}, [pagination])
+
+	useEffect(() => {
+		refresh()
+	}, [query])
+
+	const refresh = () => {
+		router.visit(
+			allocator({
+				query: {
+					page: pagination.pageIndex + 1,
+					per_page: pagination.pageSize,
+					query: query !== "" ? query : undefined,
+				},
+			}).url,
+			{ preserveState: true },
+		)
 	}
 
 	return (
 		<>
-			<div className="d-flex justify-content-between align-items-center mb-2">
-				<div>
-					<h1>Allocator</h1>
-					<p className="text-body-secondary">Allocate bank statements to app records</p>
+			<AppHeader title="Allocator" />
+
+			<div className="container mx-auto p-8 flex flex-col gap-8">
+				<div className="flex flex-col gap-1">
+					<h2 className="text-2xl font-semibold">Allocator</h2>
+					<p className="text-muted-foreground">Allocate bank statements to app records</p>
 				</div>
 
-				<button
-					ref={modalButtonRef}
-					type="button"
-					className="btn btn-primary"
-					data-bs-toggle="modal"
-					data-bs-target="#record-allocator"
-					disabled={!selectedIds.length}
-				>
-					Allocate to Record
-				</button>
-			</div>
-
-			<div className="d-flex justify-content-end">
-				<input
-					type="text"
-					className="form-control mb-4"
-					style={{ width: 300 }}
-					placeholder="Search..."
-					value={new URLSearchParams(window.location.search).get("query") ?? ""}
-					onChange={e => {
-						router.reload({ data: { query: e.target.value } })
-					}}
-				/>
-			</div>
-
-			<table className="table table-hover" style={{ tableLayout: "fixed" }}>
-				<thead>
-					<tr>
-						<th style={{ width: 32 }}></th>
-						<th style={{ width: 125 }}>Account</th>
-						<th style={{ width: 125 }}>Date</th>
-						<th style={{ width: 100 }}>Total ($)</th>
-						<th style={{ width: 125 }}>Allocable ($)</th>
-						<th>Description</th>
-					</tr>
-				</thead>
-
-				<tbody>
-					{statements.data.map(statement => (
-						<tr
-							key={statement.id}
-							className={`${selectedIds.includes(statement.id) ? "table-active" : ""}`}
-							style={{ cursor: "pointer" }}
-							onClick={() =>
-								setSelected(statement.id, !selectedIds.includes(statement.id))
-							}
-							onKeyDown={e => {
-								if (e.key === " ") {
-									e.preventDefault()
-									setSelected(statement.id, !selectedIds.includes(statement.id))
-								}
-							}}
-							tabIndex={0}
-						>
-							<td>
-								<input
-									type="checkbox"
-									className="form-check-input"
-									checked={selectedIds.includes(statement.id)}
-									onChange={e => setSelected(statement.id, e.target.checked)}
-									tabIndex={-1}
-								/>
-							</td>
-							<td>{statement.account.id}</td>
-							<td>
-								{DateTime.fromFormat(statement.date, "y-MM-dd").toFormat("d MMM y")}
-							</td>
-							<td style={styleCurrency(statement.amount)}>
-								{formatCurrency(statement.amount)}
-							</td>
-							<td style={styleCurrency(statement.amount)}>
-								{formatCurrency(
-									statement.amount - (statement.allocations_sum_amount ?? 0),
-								)}
-							</td>
-							<td
-								title={statement.description}
-								style={{
-									textOverflow: "ellipsis",
-									overflow: "hidden",
-									whiteSpace: "nowrap",
-								}}
-								dangerouslySetInnerHTML={{
-									__html: statement.description.replaceAll(
-										/(\d{2}(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC))/g,
-										"<mark>$1</mark>",
-									),
-								}}
+				<div className="flex flex-col gap-4">
+					<div className="flex items-center justify-between">
+						<div className="flex flex-1 items-center gap-2">
+							<Input
+								type="text"
+								placeholder="Filter statements..."
+								className="w-50"
+								value={query}
+								onChange={e => setQuery(e.target.value)}
 							/>
-						</tr>
-					))}
-				</tbody>
-			</table>
-
-			<nav>
-				<ul className="pagination justify-content-center">
-					{statements.links.map(link => (
-						<li key={link.label} className={`page-item ${link.active ? "active" : ""}`}>
-							<a className="page-link" href={link.url}>
-								{link.label.replace("&laquo;", "«").replace("&raquo;", "»")}
-							</a>
-						</li>
-					))}
-				</ul>
-			</nav>
-
-			<RecordAllocator
-				statements={statements.data.filter(s => selectedIds.includes(s.id))}
-				categories={categories}
-				clearSelectedIds={() => setSelectedIds([])}
-			/>
-		</>
-	)
-}
-
-function RecordAllocator({
-	statements,
-	categories,
-	clearSelectedIds,
-}: {
-	statements: (Statement & StatementExtra)[]
-	categories: (Category & CategoryExtra)[]
-	clearSelectedIds: () => void
-}) {
-	const formRef = useRef<HTMLFormElement>(null)
-	const closeButtonRef = useRef<HTMLButtonElement>(null)
-	const [datetime, setDatetime] = useState("")
-	const [errors, setErrors] = useState<Record<string, string[]>>({})
-
-	useEffect(() => {
-		formRef.current?.reset()
-		setErrors({})
-	}, [statements])
-
-	/**
-	 * Scans all transactions for the unique date format like 09APR,
-	 * these dates best reflect when the transactions was made.
-	 * If it is found, use the earliest one, if not use the earliest
-	 * date from the statements
-	 */
-	useEffect(() => {
-		const textDateRegex = /\d{2}(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)/
-		const textDate = statements
-			.map(s => s.description.match(textDateRegex)?.[0])
-			.filter(s => !!s)
-			// biome-ignore lint/style/noNonNullAssertion: Filtered above
-			.map(s => DateTime.fromFormat(s!.slice(0, 3) + s!.slice(3, 5).toLowerCase(), "ddMMM"))
-			.filter(d => d.isValid)
-			.toSorted((a, b) => a.toMillis() - b.toMillis())[0]
-
-		if (textDate) {
-			setDatetime(textDate.startOf("day").toFormat("yyyy-MM-dd HH:mm"))
-		} else {
-			setDatetime((statements.map(s => s.date).toSorted()[0] ?? "") + " 00:00")
-		}
-	}, [statements])
-
-	const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
-		e.preventDefault()
-
-		await fetch(ApiRecordController.store.url(), {
-			method: "post",
-			body: new FormData(e.currentTarget),
-			headers: { Accept: "application/json" },
-		})
-			.then(async res => [res, await res.json()] as const)
-			.then(([res, data]) => {
-				if (res.status === 422) {
-					setErrors(data.errors)
-				}
-
-				if (res.status === 201) {
-					closeButtonRef.current?.click()
-					router.reload()
-					clearSelectedIds()
-				}
-			})
-	}
-
-	return (
-		<form
-			ref={formRef}
-			className="modal fade"
-			id="record-allocator"
-			tabIndex={-1}
-			aria-labelledby="record-allocator-label"
-			aria-hidden="true"
-			onSubmit={handleSubmit}
-		>
-			<div className="modal-dialog modal-dialog-centered modal-xl">
-				<div className="modal-content">
-					<div className="modal-header">
-						<h1 className="modal-title fs-5" id="record-allocator-label">
-							Allocate to Record
-						</h1>
-						<button
-							type="button"
-							className="btn-close"
-							data-bs-dismiss="modal"
-							aria-label="Close"
-						></button>
-					</div>
-					<div className="modal-body">
-						<div className="d-flex gap-4">
-							<div style={{ width: 300 }}>
-								<div className="mb-3">
-									<label htmlFor="title" className="form-label">
-										Title
-									</label>
-									<input
-										type="text"
-										className={`form-control ${errors.title?.length ? "is-invalid" : ""}`}
-										name="title"
-										id="title"
-									/>
-									<div className="invalid-feedback">
-										{errors.title?.join("\n")}
-									</div>
-								</div>
-
-								<div className="mb-3">
-									<label htmlFor="people" className="form-label">
-										People
-									</label>
-									<input
-										type="text"
-										className={`form-control ${errors.people?.length ? "is-invalid" : ""}`}
-										name="people"
-										id="people"
-									/>
-									<div className="invalid-feedback">
-										{errors.people?.join("\n")}
-									</div>
-								</div>
-
-								<div className="mb-3">
-									<label htmlFor="location" className="form-label">
-										Location
-									</label>
-									<input
-										type="text"
-										className={`form-control ${errors.location?.length ? "is-invalid" : ""}`}
-										name="location"
-										id="location"
-									/>
-									<div className="invalid-feedback">
-										{errors.location?.join("\n")}
-									</div>
-								</div>
-
-								<div className="mb-3">
-									<label htmlFor="datetime" className="form-label">
-										Date & Time
-									</label>
-									<input
-										type="datetime-local"
-										className={`form-control ${errors.datetime?.length ? "is-invalid" : ""}`}
-										name="datetime"
-										id="datetime"
-										defaultValue={datetime}
-									/>
-									<div className="invalid-feedback">
-										{errors.datetime?.join("\n")}
-									</div>
-								</div>
-
-								<div className="mb-3">
-									<label htmlFor="category_id" className="form-label">
-										Category
-									</label>
-									<select
-										className={`form-select ${errors.category_id?.length ? "is-invalid" : ""}`}
-										name="category_id"
-										id="category_id"
-										defaultValue=""
-									>
-										<option value="">-</option>
-										{categories.map(category => (
-											<optgroup key={category.id} label={category.name}>
-												<option value={category.id}>{category.name}</option>
-												{category.children.map(category => (
-													<option key={category.id} value={category.id}>
-														{category.name}
-													</option>
-												))}
-											</optgroup>
-										))}
-									</select>
-									<div className="invalid-feedback">
-										{errors.category_id?.join("\n")}
-									</div>
-								</div>
-
-								<div className="mb-3">
-									<label htmlFor="description" className="form-label">
-										Description
-									</label>
-									<textarea
-										className={`form-control ${errors.description?.length ? "is-invalid" : ""}`}
-										name="description"
-										id="description"
-										rows={4}
-									/>
-									<div className="invalid-feedback">
-										{errors.description?.join("\n")}
-									</div>
-								</div>
-							</div>
-
-							<div className="vr"></div>
-
-							<div className="flex-fill">
-								{statements.map((statement, i) => (
-									<Fragment key={statement.id}>
-										{i !== 0 ? <hr /> : null}
-
-										<input
-											type="hidden"
-											name={`statements[${i}][id]`}
-											value={statement.id}
-										/>
-
-										<table className="table table-sm table-borderless">
-											<tbody>
-												<tr>
-													<th style={{ width: 120 }}>Account</th>
-													<td>
-														{statement.account.name} (
-														{statement.account.id})
-													</td>
-												</tr>
-												<tr>
-													<th>Description</th>
-													<td>{statement.description}</td>
-												</tr>
-												<tr>
-													<th>Date</th>
-													<td>{statement.date}</td>
-												</tr>
-												<tr>
-													<th className="align-middle">Allocated</th>
-													<td>
-														<div
-															className="input-group"
-															style={{ width: 400 }}
-														>
-															<span className="input-group-text">
-																$
-															</span>
-															<input
-																type="number"
-																step={0.01}
-																className={`form-control ${errors[`statements.${i}.amount`]?.length ? "is-invalid" : ""}`}
-																name={`statements[${i}][amount]`}
-																defaultValue={
-																	statement.amount -
-																	(statement.allocations_sum_amount ??
-																		0)
-																}
-															/>
-															<span className="input-group-text">
-																out of{" "}
-																{formatCurrency(
-																	statement.amount -
-																		(statement.allocations_sum_amount ??
-																			0),
-																)}
-															</span>
-															<div className="invalid-feedback">
-																{errors[
-																	`statements.${i}.amount`
-																]?.join("\n")}
-															</div>
-														</div>
-													</td>
-												</tr>
-											</tbody>
-										</table>
-									</Fragment>
-								))}
-							</div>
 						</div>
+
+						<AllocateRecordDialog
+							statements={statements.data.filter((s, i) => rowSelection[i])}
+							categories={categories}
+							clear={() => setRowSelection({})}
+						/>
 					</div>
-					<div className="modal-footer">
-						<button
-							ref={closeButtonRef}
-							type="button"
-							className="btn btn-secondary"
-							data-bs-dismiss="modal"
-						>
-							Close
-						</button>
-						<button type="submit" className="btn btn-primary">
-							Save
-						</button>
-					</div>
+
+					<DataTable
+						data={statements}
+						pagination={pagination}
+						setPagination={setPagination}
+						rowSelection={rowSelection}
+						setRowSelection={setRowSelection}
+						columns={[
+							{
+								id: "select",
+								cell: ({ row }) => (
+									<div className="flex items-center justify-center">
+										<Checkbox
+											checked={row.getIsSelected()}
+											onCheckedChange={value => row.toggleSelected(!!value)}
+											aria-label="Select row"
+										/>
+									</div>
+								),
+								enableSorting: false,
+								enableHiding: false,
+							},
+							{
+								accessorFn: statement => statement.account.id,
+								header: "Account",
+							},
+							{
+								accessorFn: statement => toDate(statement.date),
+								header: "Date",
+							},
+							{
+								header: "Amount",
+								cell: ({ row }) => {
+									const total = row.original.amount
+									const allocable = round2dp(
+										total - (row.original.allocations_sum_amount ?? 0),
+									)
+
+									return (
+										<Field className="w-full max-w-sm">
+											<FieldLabel>
+												<span>Allocable</span>
+												<div className="ml-auto">
+													<span
+														className={cn(
+															"text-muted-foreground",
+															allocable < 0
+																? "text-red-500"
+																: allocable > 0
+																	? "text-green-500"
+																	: "text-foreground",
+														)}
+													>
+														{toCurrency(allocable)}
+													</span>
+													{" / "}
+													<span
+														className={cn(
+															"font-bold",
+															total < 0
+																? "text-red-500"
+																: total > 0
+																	? "text-green-500"
+																	: "text-foreground",
+														)}
+													>
+														{toCurrency(total)}
+													</span>
+												</div>
+											</FieldLabel>
+											<Progress value={(allocable / total) * 100} />
+										</Field>
+									)
+								},
+							},
+							{
+								accessorKey: "description",
+								header: "Description",
+							},
+							{
+								id: "actions",
+								cell: ({ row }) => (
+									<DropdownMenu>
+										<DropdownMenuTrigger asChild>
+											<Button variant="ghost" className="size-8 p-0">
+												<span className="sr-only">Open menu</span>
+												<MoreHorizontalIcon className="size-4"></MoreHorizontalIcon>
+											</Button>
+										</DropdownMenuTrigger>
+										<DropdownMenuContent align="end">
+											<DropdownMenuLabel>Actions</DropdownMenuLabel>
+											<DropdownMenuItem asChild>
+												<a
+													href={statement.url({
+														statement: row.original,
+													})}
+												>
+													View statement
+												</a>
+											</DropdownMenuItem>
+										</DropdownMenuContent>
+									</DropdownMenu>
+								),
+							},
+						]}
+					/>
 				</div>
 			</div>
-		</form>
+		</>
 	)
 }
