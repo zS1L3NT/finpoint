@@ -15,6 +15,6 @@ class CategoryController extends Controller
             ->orderBy("name")
             ->get();
 
-        return Inertia::render("categories/index", compact("categories"));
+        return Inertia::render("categories", compact("categories"));
     }
 }
