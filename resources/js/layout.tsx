@@ -1,9 +1,14 @@
+import { usePage } from "@inertiajs/react"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
+import { SharedPageProps } from "@/types"
 import AppSidebar from "./components/app-sidebar"
 
 export default function Layout({ children }: { children: React.ReactNode }) {
+	const { sidebarOpen } = usePage<SharedPageProps>().props
+
 	return (
 		<SidebarProvider
+			defaultOpen={sidebarOpen}
 			style={
 				{
 					"--sidebar-width": "calc(var(--spacing) * 72)",

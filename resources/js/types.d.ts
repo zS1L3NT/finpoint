@@ -1,3 +1,10 @@
+export type Appearance = "light" | "dark" | "system"
+
+export type SharedPageProps = {
+	appearance: Appearance
+	sidebarOpen: boolean
+}
+
 export type PaginatedLink = {
 	active: boolean
 	label: string
