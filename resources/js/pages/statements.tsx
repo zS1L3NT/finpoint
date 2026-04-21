@@ -16,11 +16,10 @@ export default function StatementsPage({
 }: {
 	statements: Paginated<Statement & StatementExtra>
 }) {
-	const { query, pageSize, handleQueryChange, handlePageSizeChange, handleVisit } =
-		usePaginatedTableState({
-			syncOn: statements,
-			buildUrl: query => StatementController.index({ query }).url,
-		})
+	const { query, pageSize, handleQueryChange, handlePageSizeChange } = usePaginatedTableState({
+		syncOn: statements,
+		buildUrl: query => statementsRoute({ query }).url,
+	})
 
 	return (
 		<>
@@ -81,7 +80,6 @@ export default function StatementsPage({
 					}}
 					footer={{
 						summary: `Showing ${statements.data.length} of ${statements.total} statements.`,
-						handleVisit,
 					}}
 					emptyMessage="No statements found."
 					onRowClick={row =>

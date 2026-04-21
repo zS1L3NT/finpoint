@@ -1,4 +1,4 @@
-import { router } from "@inertiajs/react"
+import { Link, router } from "@inertiajs/react"
 import { useForm } from "@tanstack/react-form"
 import { LinkIcon, MoreHorizontalIcon } from "lucide-react"
 import { DateTime } from "luxon"
@@ -64,11 +64,10 @@ export default function Allocator({
 	categories: (Category & CategoryExtra)[]
 }) {
 	const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({})
-	const { query, pageSize, handleQueryChange, handlePageSizeChange, handleVisit } =
-		usePaginatedTableState({
-			syncOn: statements,
-			buildUrl: query => allocator({ query }).url,
-		})
+	const { query, pageSize, handleQueryChange, handlePageSizeChange } = usePaginatedTableState({
+		syncOn: statements,
+		buildUrl: query => allocator({ query }).url,
+	})
 
 	useEffect(() => {
 		setRowSelection(currentSelection =>
@@ -185,9 +184,9 @@ export default function Allocator({
 									<DropdownMenuContent align="end">
 										<DropdownMenuLabel>Actions</DropdownMenuLabel>
 										<DropdownMenuItem asChild>
-											<a href={statement.url({ statement: row.original })}>
+											<Link href={statement.url({ statement: row.original })}>
 												View statement
-											</a>
+											</Link>
 										</DropdownMenuItem>
 									</DropdownMenuContent>
 								</DropdownMenu>
@@ -211,7 +210,6 @@ export default function Allocator({
 					}}
 					footer={{
 						summary: `${Object.values(rowSelection).filter(Boolean).length} selected. Showing ${statements.data.length} of ${statements.total} statements.`,
-						handleVisit,
 					}}
 					emptyMessage="No statements found."
 					getRowId={row => row.id}

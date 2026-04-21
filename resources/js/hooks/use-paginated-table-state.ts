@@ -52,14 +52,6 @@ export default function usePaginatedTableState({
 		)
 	}
 
-	const handleVisit = (url?: string | null) => {
-		if (!url) {
-			return
-		}
-
-		router.visit(url, { preserveState: true, preserveScroll: true })
-	}
-
 	const handleQueryChange = (value: string) => {
 		setQuery(value)
 		visit({ query: value, page: "1" })
@@ -75,6 +67,5 @@ export default function usePaginatedTableState({
 		handleQueryChange,
 		pageSize,
 		handlePageSizeChange,
-		handleVisit,
 	}
 }

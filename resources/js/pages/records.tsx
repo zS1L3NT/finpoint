@@ -13,11 +13,10 @@ type RecordExtra = {
 }
 
 export default function RecordsPage({ records }: { records: Paginated<Record & RecordExtra> }) {
-	const { query, pageSize, handleQueryChange, handlePageSizeChange, handleVisit } =
-		usePaginatedTableState({
-			syncOn: records,
-			buildUrl: query => RecordController.index({ query }).url,
-		})
+	const { query, pageSize, handleQueryChange, handlePageSizeChange } = usePaginatedTableState({
+		syncOn: records,
+		buildUrl: query => recordsRoute({ query }).url,
+	})
 
 	return (
 		<>
@@ -83,7 +82,6 @@ export default function RecordsPage({ records }: { records: Paginated<Record & R
 					}}
 					footer={{
 						summary: `Showing ${records.data.length} of ${records.total} records.`,
-						handleVisit,
 					}}
 					emptyMessage="No records found."
 					onRowClick={row =>

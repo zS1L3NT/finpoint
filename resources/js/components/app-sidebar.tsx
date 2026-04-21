@@ -1,3 +1,4 @@
+import { Link } from "@inertiajs/react"
 import {
 	CalendarSyncIcon,
 	ChartPieIcon,
@@ -10,7 +11,6 @@ import {
 import {
 	Sidebar,
 	SidebarContent,
-	SidebarFooter,
 	SidebarGroup,
 	SidebarGroupLabel,
 	SidebarHeader,
@@ -38,10 +38,10 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
 							asChild
 							className="data-[slot=sidebar-menu-button]:p-1.5!"
 						>
-							<a href={importer.url()}>
+							<Link href={importer.url()}>
 								{/* <IconInnerShadowTop className="size-5!" /> */}
 								<span className="text-base font-semibold">Finpoint</span>
-							</a>
+							</Link>
 						</SidebarMenuButton>
 					</SidebarMenuItem>
 				</SidebarMenu>
@@ -52,19 +52,19 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
 					<SidebarMenu>
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
-								<a href={importer.url()}>
+								<Link href={importer.url()}>
 									<ImportIcon />
 									<span>Importer</span>
-								</a>
+								</Link>
 							</SidebarMenuButton>
 						</SidebarMenuItem>
 
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
-								<a href={allocator.url()}>
+								<Link href={allocator.url()}>
 									<LinkIcon />
 									<span>Allocator</span>
-								</a>
+								</Link>
 							</SidebarMenuButton>
 						</SidebarMenuItem>
 					</SidebarMenu>
@@ -75,19 +75,19 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
 					<SidebarMenu>
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
-								<a href={budgets.url()}>
+								<Link href={budgets.url()}>
 									<ChartPieIcon />
 									<span>Budgets</span>
-								</a>
+								</Link>
 							</SidebarMenuButton>
 						</SidebarMenuItem>
 
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
-								<a href={recurrences.url()}>
+								<Link href={recurrences.url()}>
 									<CalendarSyncIcon />
 									<span>Recurrences</span>
-								</a>
+								</Link>
 							</SidebarMenuButton>
 						</SidebarMenuItem>
 					</SidebarMenu>
@@ -98,37 +98,33 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
 					<SidebarMenu>
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
-								<a href={records.url()}>
+								<Link href={records.url()}>
 									<ReceiptTextIcon />
 									<span>Records</span>
-								</a>
+								</Link>
 							</SidebarMenuButton>
 						</SidebarMenuItem>
 
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
-								<a href={statements.url()}>
+								<Link href={statements.url()}>
 									<CreditCardIcon />
 									<span>Statements</span>
-								</a>
+								</Link>
 							</SidebarMenuButton>
 						</SidebarMenuItem>
 
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
-								<a href={categories.url()}>
+								<Link href={categories.url()}>
 									<TagIcon />
 									<span>Categories</span>
-								</a>
+								</Link>
 							</SidebarMenuButton>
 						</SidebarMenuItem>
 					</SidebarMenu>
 				</SidebarGroup>
-				{/* <NavMain items={data.navMain} />
-				<NavDocuments items={data.documents} />
-				<NavSecondary items={data.navSecondary} className="mt-auto" /> */}
 			</SidebarContent>
-			<SidebarFooter>{/* <NavUser user={data.user} /> */}</SidebarFooter>
 		</Sidebar>
 	)
 }
