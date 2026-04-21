@@ -281,8 +281,9 @@ function RecurrenceEditor({ recurrence }: { recurrence: Recurrence }) {
 									className={`form-select ${errors.period?.length ? "is-invalid" : ""}`}
 									name="period"
 									id="period"
-									defaultValue={recurrence.period}
+									defaultValue={recurrence.amount}
 								>
+									<option value="week">Weekly</option>
 									<option value="month">Monthly</option>
 									<option value="year">Yearly</option>
 								</select>
