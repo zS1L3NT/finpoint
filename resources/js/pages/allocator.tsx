@@ -94,6 +94,7 @@ export default function Allocator({
 					columns={[
 						{
 							id: "select",
+							meta: { width: "3rem" },
 							cell: ({ row }) => (
 								<div className="flex items-center justify-center">
 									<Checkbox
@@ -106,10 +107,12 @@ export default function Allocator({
 						},
 						{
 							header: "Account",
+							meta: { width: "8rem" },
 							cell: ({ row }) => row.original.account.id,
 						},
 						{
 							header: "Date",
+							meta: { width: "8rem" },
 							cell: ({ row }) => (
 								<span className="text-muted-foreground">
 									{toDate(row.original.date)}
@@ -118,6 +121,7 @@ export default function Allocator({
 						},
 						{
 							header: "Amount",
+							meta: { width: "16rem" },
 							cell: ({ row }) => {
 								const total = row.original.amount
 								const allocable = round2dp(
@@ -173,6 +177,7 @@ export default function Allocator({
 						},
 						{
 							id: "actions",
+							meta: { width: "3rem" },
 							cell: ({ row }) => (
 								<DropdownMenu>
 									<DropdownMenuTrigger asChild>

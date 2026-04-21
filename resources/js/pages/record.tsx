@@ -1,6 +1,6 @@
-import { router } from "@inertiajs/react"
+import { Link, router } from "@inertiajs/react"
 import { useForm } from "@tanstack/react-form"
-import { PencilIcon, Trash2Icon } from "lucide-react"
+import { MoreHorizontalIcon, PencilIcon, Trash2Icon } from "lucide-react"
 import { useState } from "react"
 import AppHeader from "@/components/app-header"
 import DetailCard from "@/components/detail-card"
@@ -29,6 +29,13 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog"
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { FieldGroup } from "@/components/ui/field"
 import { Progress } from "@/components/ui/progress"
 import {
@@ -43,7 +50,7 @@ import useApiFormErrors from "@/hooks/use-api-form-errors"
 import { cn, currencyClass, toCurrency, toDate, toDatetime, withMethod } from "@/lib/utils"
 import { Account, Allocation, Category, Record, Statement } from "@/types"
 import RecordController from "@/wayfinder/actions/App/Http/Controllers/RecordController"
-import StatementController from "@/wayfinder/actions/App/Http/Controllers/StatementController"
+import { statement as statementRoute } from "@/wayfinder/routes"
 import { destroy, update } from "@/wayfinder/routes/records"
 
 type RecordExtra = {
@@ -116,30 +123,21 @@ export default function RecordPage({
 					</CardHeader>
 					<CardContent>
 						<div className="overflow-hidden rounded-lg border bg-card">
-							<Table>
+							<Table className="table-fixed">
 								<TableHeader>
 									<TableRow>
 										<TableHead className="w-32">Account</TableHead>
 										<TableHead className="w-32">Date</TableHead>
-										<TableHead className="w-36">Statement</TableHead>
-										<TableHead className="w-36">Allocated</TableHead>
+										<TableHead className="w-24">Statement</TableHead>
+										<TableHead className="w-24">Allocated</TableHead>
 										<TableHead>Description</TableHead>
+										<TableHead className="w-12" />
 									</TableRow>
 								</TableHeader>
 								<TableBody>
 									{record.statements.length ? (
 										record.statements.map(statement => (
-											<TableRow
-												key={statement.id}
-												className="cursor-pointer"
-												onClick={() =>
-													router.visit(
-														StatementController.show({
-															statement: statement.id,
-														}).url,
-													)
-												}
-											>
+											<TableRow key={statement.id}>
 												<TableCell>{statement.account.id}</TableCell>
 												<TableCell>{toDate(statement.date)}</TableCell>
 												<TableCell
@@ -157,12 +155,41 @@ export default function RecordPage({
 												<TableCell className="max-w-0 truncate text-muted-foreground">
 													{statement.description}
 												</TableCell>
+												<TableCell>
+													<DropdownMenu>
+														<DropdownMenuTrigger asChild>
+															<Button
+																variant="ghost"
+																className="size-8 p-0"
+															>
+																<span className="sr-only">
+																	Open menu
+																</span>
+																<MoreHorizontalIcon className="size-4" />
+															</Button>
+														</DropdownMenuTrigger>
+														<DropdownMenuContent align="end">
+															<DropdownMenuLabel>
+																Actions
+															</DropdownMenuLabel>
+															<DropdownMenuItem asChild>
+																<Link
+																	href={statementRoute.url({
+																		statement,
+																	})}
+																>
+																	View statement
+																</Link>
+															</DropdownMenuItem>
+														</DropdownMenuContent>
+													</DropdownMenu>
+												</TableCell>
 											</TableRow>
 										))
 									) : (
 										<TableRow>
 											<TableCell
-												colSpan={5}
+												colSpan={6}
 												className="h-24 text-center text-muted-foreground"
 											>
 												No statements found.

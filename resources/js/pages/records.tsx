@@ -1,11 +1,20 @@
-import { router } from "@inertiajs/react"
+import { Link } from "@inertiajs/react"
+import { MoreHorizontalIcon } from "lucide-react"
 import AppHeader from "@/components/app-header"
 import DataTable from "@/components/data-table"
 import Icon from "@/components/icon"
+import { Button } from "@/components/ui/button"
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import usePaginatedTableState from "@/hooks/use-paginated-table-state"
 import { currencyClass, toCurrency, toDatetime } from "@/lib/utils"
 import { Category, Paginated, Record, Statement } from "@/types"
-import RecordController from "@/wayfinder/actions/App/Http/Controllers/RecordController"
+import { record, records as recordsRoute } from "@/wayfinder/routes"
 
 type RecordExtra = {
 	category: Category
@@ -35,6 +44,7 @@ export default function RecordsPage({ records }: { records: Paginated<Record & R
 					columns={[
 						{
 							header: "Date & Time",
+							meta: { width: "12rem" },
 							cell: ({ row }) => (
 								<span className="text-muted-foreground">
 									{toDatetime(row.original.datetime)}
@@ -43,6 +53,7 @@ export default function RecordsPage({ records }: { records: Paginated<Record & R
 						},
 						{
 							header: "Amount",
+							meta: { width: "6rem" },
 							cell: ({ row }) => (
 								<span className={currencyClass(row.original.amount)}>
 									{toCurrency(row.original.amount)}
@@ -72,6 +83,28 @@ export default function RecordsPage({ records }: { records: Paginated<Record & R
 								</div>
 							),
 						},
+						{
+							id: "actions",
+							meta: { width: "3rem" },
+							cell: ({ row }) => (
+								<DropdownMenu>
+									<DropdownMenuTrigger asChild>
+										<Button variant="ghost" className="size-8 p-0">
+											<span className="sr-only">Open menu</span>
+											<MoreHorizontalIcon className="size-4" />
+										</Button>
+									</DropdownMenuTrigger>
+									<DropdownMenuContent align="end">
+										<DropdownMenuLabel>Actions</DropdownMenuLabel>
+										<DropdownMenuItem asChild>
+											<Link href={record.url({ record: row.original })}>
+												View record
+											</Link>
+										</DropdownMenuItem>
+									</DropdownMenuContent>
+								</DropdownMenu>
+							),
+						},
 					]}
 					header={{
 						query,
@@ -84,9 +117,6 @@ export default function RecordsPage({ records }: { records: Paginated<Record & R
 						summary: `Showing ${records.data.length} of ${records.total} records.`,
 					}}
 					emptyMessage="No records found."
-					onRowClick={row =>
-						router.visit(RecordController.show({ record: row.original.id }).url)
-					}
 				/>
 			</div>
 		</>

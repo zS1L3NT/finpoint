@@ -1,8 +1,17 @@
-import { router } from "@inertiajs/react"
+import { Link } from "@inertiajs/react"
+import { MoreHorizontalIcon } from "lucide-react"
 import AppHeader from "@/components/app-header"
 import DetailCard from "@/components/detail-card"
 import Icon from "@/components/icon"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import {
 	Table,
 	TableBody,
@@ -13,7 +22,7 @@ import {
 } from "@/components/ui/table"
 import { currencyClass, toCurrency, toDate, toDatetime } from "@/lib/utils"
 import { Account, Allocation, Category, Record, Statement } from "@/types"
-import RecordController from "@/wayfinder/actions/App/Http/Controllers/RecordController"
+import { record as recordRoute } from "@/wayfinder/routes"
 
 type StatementExtra = {
 	account: Account
@@ -61,29 +70,21 @@ export default function StatementPage({ statement }: { statement: Statement & St
 					</CardHeader>
 					<CardContent>
 						<div className="overflow-hidden rounded-lg border bg-card">
-							<Table>
+							<Table className="table-fixed">
 								<TableHeader>
 									<TableRow>
-										<TableHead className="w-72">Record</TableHead>
-										<TableHead className="w-44">Date & Time</TableHead>
-										<TableHead className="w-36">Record</TableHead>
-										<TableHead className="w-36">Allocated</TableHead>
+										<TableHead className="w-96">Record</TableHead>
+										<TableHead className="w-48">Date & Time</TableHead>
+										<TableHead className="w-24">Amount</TableHead>
+										<TableHead className="w-24">Allocated</TableHead>
 										<TableHead>Description</TableHead>
+										<TableHead className="w-12" />
 									</TableRow>
 								</TableHeader>
 								<TableBody>
 									{statement.records.length ? (
 										statement.records.map(record => (
-											<TableRow
-												key={record.id}
-												className="cursor-pointer"
-												onClick={() =>
-													router.visit(
-														RecordController.show({ record: record.id })
-															.url,
-													)
-												}
-											>
+											<TableRow key={record.id}>
 												<TableCell>
 													<div className="flex items-center gap-3">
 														<Icon {...record.category} size={16} />
@@ -119,12 +120,41 @@ export default function StatementPage({ statement }: { statement: Statement & St
 												<TableCell className="max-w-0 truncate text-muted-foreground">
 													{record.description ?? "-"}
 												</TableCell>
+												<TableCell>
+													<DropdownMenu>
+														<DropdownMenuTrigger asChild>
+															<Button
+																variant="ghost"
+																className="size-8 p-0"
+															>
+																<span className="sr-only">
+																	Open menu
+																</span>
+																<MoreHorizontalIcon className="size-4" />
+															</Button>
+														</DropdownMenuTrigger>
+														<DropdownMenuContent align="end">
+															<DropdownMenuLabel>
+																Actions
+															</DropdownMenuLabel>
+															<DropdownMenuItem asChild>
+																<Link
+																	href={recordRoute.url({
+																		record,
+																	})}
+																>
+																	View record
+																</Link>
+															</DropdownMenuItem>
+														</DropdownMenuContent>
+													</DropdownMenu>
+												</TableCell>
 											</TableRow>
 										))
 									) : (
 										<TableRow>
 											<TableCell
-												colSpan={5}
+												colSpan={6}
 												className="h-24 text-center text-muted-foreground"
 											>
 												No records found.

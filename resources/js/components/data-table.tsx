@@ -56,12 +56,18 @@ export default function DataTable<TData, TValue>({
 			{header ? <PaginatedTableHeader {...header} /> : null}
 
 			<div className="overflow-hidden rounded-lg border bg-card">
-				<Table>
+				<Table className="table-fixed">
 					<TableHeader>
 						{table.getHeaderGroups().map(headerGroup => (
 							<TableRow key={headerGroup.id}>
 								{headerGroup.headers.map(header => (
-									<TableHead key={header.id}>
+									<TableHead
+										key={header.id}
+										style={{
+											width: (header.column.columnDef.meta as { width?: any })
+												?.width,
+										}}
+									>
 										{header.isPlaceholder
 											? null
 											: flexRender(

@@ -1,10 +1,19 @@
-import { router } from "@inertiajs/react"
+import { Link } from "@inertiajs/react"
+import { MoreHorizontalIcon } from "lucide-react"
 import AppHeader from "@/components/app-header"
 import DataTable from "@/components/data-table"
+import { Button } from "@/components/ui/button"
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import usePaginatedTableState from "@/hooks/use-paginated-table-state"
 import { currencyClass, toCurrency, toDate } from "@/lib/utils"
 import { Account, Paginated, Record, Statement } from "@/types"
-import StatementController from "@/wayfinder/actions/App/Http/Controllers/StatementController"
+import { statement, statements as statementsRoute } from "@/wayfinder/routes"
 
 type StatementExtra = {
 	account: Account
@@ -38,10 +47,12 @@ export default function StatementsPage({
 					columns={[
 						{
 							header: "Account",
+							meta: { width: "8rem" },
 							cell: ({ row }) => row.original.account.id,
 						},
 						{
 							header: "Date",
+							meta: { width: "8rem" },
 							cell: ({ row }) => (
 								<span className="text-muted-foreground">
 									{toDate(row.original.date)}
@@ -50,6 +61,7 @@ export default function StatementsPage({
 						},
 						{
 							header: "Amount",
+							meta: { width: "6rem" },
 							cell: ({ row }) => (
 								<span className={currencyClass(row.original.amount)}>
 									{toCurrency(row.original.amount)}
@@ -70,6 +82,28 @@ export default function StatementsPage({
 								/>
 							),
 						},
+						{
+							id: "actions",
+							meta: { width: "3rem" },
+							cell: ({ row }) => (
+								<DropdownMenu>
+									<DropdownMenuTrigger asChild>
+										<Button variant="ghost" className="size-8 p-0">
+											<span className="sr-only">Open menu</span>
+											<MoreHorizontalIcon className="size-4" />
+										</Button>
+									</DropdownMenuTrigger>
+									<DropdownMenuContent align="end">
+										<DropdownMenuLabel>Actions</DropdownMenuLabel>
+										<DropdownMenuItem asChild>
+											<Link href={statement.url({ statement: row.original })}>
+												View statement
+											</Link>
+										</DropdownMenuItem>
+									</DropdownMenuContent>
+								</DropdownMenu>
+							),
+						},
 					]}
 					header={{
 						query,
@@ -82,9 +116,6 @@ export default function StatementsPage({
 						summary: `Showing ${statements.data.length} of ${statements.total} statements.`,
 					}}
 					emptyMessage="No statements found."
-					onRowClick={row =>
-						router.visit(StatementController.show({ statement: row.original.id }).url)
-					}
 				/>
 			</div>
 		</>
