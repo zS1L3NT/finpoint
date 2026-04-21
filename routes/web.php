@@ -3,6 +3,7 @@
 use App\Http\Controllers\AllocatorController;
 use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ImporterController;
 use App\Http\Controllers\RecordController;
 use App\Http\Controllers\RecurrenceController;
@@ -41,4 +42,4 @@ Route::resource('categories', CategoryController::class)->only('index')->names([
     'index' => 'categories',
 ]);
 
-Route::redirect('/', '/importer');
+Route::get('/', DashboardController::class)->name('dashboard');

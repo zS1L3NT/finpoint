@@ -2,6 +2,7 @@ import { Link } from "@inertiajs/react"
 import {
 	CalendarSyncIcon,
 	ChartPieIcon,
+	CircleDollarSignIcon,
 	CreditCardIcon,
 	ImportIcon,
 	LinkIcon,
@@ -22,6 +23,7 @@ import {
 	allocator,
 	budgets,
 	categories,
+	dashboard,
 	importer,
 	records,
 	recurrences,
@@ -38,8 +40,8 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
 							asChild
 							className="data-[slot=sidebar-menu-button]:p-1.5!"
 						>
-							<Link href={importer.url()}>
-								{/* <IconInnerShadowTop className="size-5!" /> */}
+							<Link href={dashboard.url()}>
+								<CircleDollarSignIcon className="size-5!" />
 								<span className="text-base font-semibold">Finpoint</span>
 							</Link>
 						</SidebarMenuButton>
