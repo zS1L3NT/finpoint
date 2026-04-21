@@ -1,0 +1,56 @@
+import type { ReactNode } from "react"
+import { Field, FieldError, FieldLabel } from "@/components/ui/field"
+import { Input } from "@/components/ui/input"
+import { cn } from "@/lib/utils"
+
+type ErrorItem = { message?: string }
+
+type Props = {
+	id: string
+	label: string
+	value: number
+	errors: ErrorItem[]
+	step?: number
+	min?: number
+	max?: number
+	suffix?: ReactNode
+	onChange: (value: number) => void
+}
+
+export default function AmountField({
+	id,
+	label,
+	value,
+	errors,
+	step = 0.01,
+	min,
+	max,
+	suffix,
+	onChange,
+}: Props) {
+	return (
+		<Field data-invalid={!!errors.length}>
+			<FieldLabel htmlFor={id}>{label}</FieldLabel>
+			<div className="relative flex items-center gap-2">
+				<span className="absolute left-2.5">$</span>
+				<Input
+					id={id}
+					name={id}
+					type="number"
+					step={step}
+					min={min}
+					max={max}
+					value={value}
+					onChange={e => {
+						const next = Number(e.target.value)
+						onChange(Number.isNaN(next) ? 0 : next)
+					}}
+					aria-invalid={!!errors.length}
+					className={cn("flex-1 pl-6", errors.length ? "border-destructive" : null)}
+				/>
+				{suffix ? <span>{suffix}</span> : null}
+			</div>
+			<FieldError errors={errors} />
+		</Field>
+	)
+}

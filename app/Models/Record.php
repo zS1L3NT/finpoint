@@ -7,13 +7,13 @@ use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\WithoutTimestamps;
 use Illuminate\Database\Eloquent\Model;
 
-#[Table(keyType: "string", incrementing: false)]
+#[Table(keyType: 'string', incrementing: false)]
 #[WithoutTimestamps()]
 #[Guarded([])]
 class Record extends Model
 {
     public $casts = [
-        "datetime" => "date:Y-m-d H:i"
+        'datetime' => 'date:Y-m-d H:i',
     ];
 
     public function category()
@@ -23,11 +23,11 @@ class Record extends Model
 
     public function statements()
     {
-        return $this->belongsToMany(Statement::class, "allocations", "target_record_id", "source_statement_id")->withPivot(["amount"]);
+        return $this->belongsToMany(Statement::class, 'allocations', 'target_record_id', 'source_statement_id')->withPivot(['amount']);
     }
 
     public function records()
     {
-        return $this->belongsToMany(Record::class, "allocations", "target_record_id", "source_record_id")->withPivot(["amount"]);
+        return $this->belongsToMany(Record::class, 'allocations', 'target_record_id', 'source_record_id')->withPivot(['amount']);
     }
 }

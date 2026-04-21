@@ -10,11 +10,11 @@ class CategoryController extends Controller
     public function index()
     {
         $categories = Category::query()
-            ->with("children")
-            ->whereNull("parent_category_id")
-            ->orderBy("name")
+            ->with('children')
+            ->whereNull('parent_category_id')
+            ->orderBy('name')
             ->get();
 
-        return Inertia::render("categories/index", compact("categories"));
+        return Inertia::render('categories', compact('categories'));
     }
 }

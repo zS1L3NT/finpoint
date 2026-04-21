@@ -1,134 +1,289 @@
-import { SearchIcon } from "lucide-react"
+import { Link } from "@inertiajs/react"
+import { LoaderCircleIcon, SearchIcon, SparklesIcon } from "lucide-react"
 import { DateTime } from "luxon"
-import { useRef, useState } from "react"
+import { useEffect, useState } from "react"
+import Icon from "@/components/icon"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Field, FieldDescription, FieldLabel } from "@/components/ui/field"
+import { Input } from "@/components/ui/input"
+import {
+	Sheet,
+	SheetContent,
+	SheetDescription,
+	SheetFooter,
+	SheetHeader,
+	SheetTitle,
+	SheetTrigger,
+} from "@/components/ui/sheet"
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@/components/ui/table"
+import { currencyClass, toCurrency, toDatetime } from "@/lib/utils"
 import { Category, Record } from "@/types"
-import { formatCurrency, styleCurrency } from "@/utils"
-import ApiRecordController from "@/wayfinder/actions/App/Http/Controllers/Api/RecordController"
-import Icon from "./icon"
+import { record as recordRoute } from "@/wayfinder/routes"
+import { index as recordsIndex } from "@/wayfinder/routes/records"
 
 type RecordExtra = {
 	category: Category
 }
 
+type SearchState = "idle" | "loading" | "done"
+
 export default function RecordSearch({
+	title,
+	description,
+	emptyTitle = "No records match yet",
+	emptyDescription = "Try a different search phrase or broaden the filter.",
 	filter,
 	handler,
+	trigger,
 }: {
+	title: string
+	description: string
+	emptyTitle?: string
+	emptyDescription?: string
 	filter?: (record: Record & RecordExtra) => boolean
-	handler: (record: Record & RecordExtra, close: () => void) => Promise<void>
+	handler: (record: Record & RecordExtra) => Promise<void>
+	trigger: React.ReactNode
 }) {
-	const closeButtonRef = useRef<HTMLButtonElement>(null)
+	const [open, setOpen] = useState(false)
 	const [query, setQuery] = useState("")
 	const [records, setRecords] = useState<(Record & RecordExtra)[]>([])
+	const [status, setStatus] = useState<SearchState>("idle")
+	const [isAttachingId, setIsAttachingId] = useState<string | null>(null)
 
-	const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
-		e.preventDefault()
+	useEffect(() => {
+		if (open) {
+			return
+		}
 
-		await fetch(ApiRecordController.index.url({ query: { query } }), {
-			headers: { Accept: "application/json" },
-		})
-			.then(async res => await res.json())
-			.then(records => {
-				if (filter) {
-					setRecords(records.filter(filter))
-				} else {
-					setRecords(records)
-				}
-			})
+		setQuery("")
+		setRecords([])
+		setStatus("idle")
+		setIsAttachingId(null)
+	}, [open])
+
+	const handleSearch = async (event?: React.FormEvent<HTMLFormElement>) => {
+		event?.preventDefault()
+		setStatus("loading")
+
+		const response = await fetch(
+			recordsIndex.url({
+				query: query.trim() ? { query: query.trim() } : undefined,
+			}),
+			{
+				headers: { Accept: "application/json" },
+			},
+		)
+
+		const data = ((await response.json().catch(() => [])) as (Record & RecordExtra)[]).filter(
+			record => (filter ? filter(record) : true),
+		)
+
+		setRecords(data)
+		setStatus("done")
 	}
 
-	const handleSelect = async (record: Record & RecordExtra) => {
-		await handler(record, () => {
-			closeButtonRef.current?.click()
-			setTimeout(() => {
-				setRecords([])
-				setQuery("")
-			}, 500)
-		})
+	const handleAttach = async (record: Record & RecordExtra) => {
+		setIsAttachingId(record.id)
+
+		try {
+			await handler(record)
+			setOpen(false)
+		} finally {
+			setIsAttachingId(null)
+		}
 	}
 
 	return (
-		<form
-			className="modal fade"
-			id="record-search"
-			tabIndex={-1}
-			aria-labelledby="record-search-label"
-			aria-hidden="true"
-			onSubmit={handleSubmit}
-		>
-			<div className="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
-				<div className="modal-content">
-					<div className="modal-header">
-						<h1 className="modal-title fs-5" id="record-search-label">
-							Record Search
-						</h1>
-						<button
-							ref={closeButtonRef}
-							type="button"
-							className="btn-close"
-							data-bs-dismiss="modal"
-							aria-label="Close"
-						></button>
-					</div>
-					<div className="modal-body">
-						<div className="d-flex gap-3 mb-3">
-							<input
-								type="text"
-								placeholder="Search records..."
-								className="form-control flex-full"
-								value={query}
-								onChange={e => setQuery(e.target.value)}
-							/>
+		<Sheet open={open} onOpenChange={setOpen}>
+			<SheetTrigger asChild>{trigger}</SheetTrigger>
+			<SheetContent side="right" className="w-full sm:max-w-4xl">
+				<SheetHeader className="gap-2 border-b">
+					<SheetTitle>{title}</SheetTitle>
+					<SheetDescription>{description}</SheetDescription>
+				</SheetHeader>
 
-							<button className="btn btn-primary">
-								<SearchIcon />
-							</button>
+				<div className="flex flex-1 flex-col gap-4 overflow-y-auto px-6 pb-6">
+					<form className="pt-6" onSubmit={handleSearch}>
+						<Field>
+							<FieldLabel htmlFor="record-search-query">Search records</FieldLabel>
+							<div className="flex gap-2">
+								<Input
+									id="record-search-query"
+									type="search"
+									placeholder="Search by title or description"
+									value={query}
+									onChange={event => setQuery(event.target.value)}
+								/>
+								<Button type="submit" disabled={status === "loading"}>
+									{status === "loading" ? (
+										<LoaderCircleIcon className="animate-spin" />
+									) : (
+										<SearchIcon />
+									)}
+									Search
+								</Button>
+							</div>
+							<FieldDescription>
+								Leave blank to browse all available records.
+							</FieldDescription>
+						</Field>
+					</form>
+
+					{status === "idle" ? (
+						<RecordSearchEmptyState
+							title="Start with a search"
+							description="Find an existing record to attach without leaving this page."
+							icon={<SparklesIcon className="size-4" />}
+						/>
+					) : null}
+
+					{status === "loading" ? (
+						<RecordSearchEmptyState
+							title="Searching records"
+							description="Pulling the latest matching records from the API."
+							icon={<LoaderCircleIcon className="size-4 animate-spin" />}
+						/>
+					) : null}
+
+					{status === "done" && !records.length ? (
+						<RecordSearchEmptyState
+							title={emptyTitle}
+							description={emptyDescription}
+							icon={<SearchIcon className="size-4" />}
+						/>
+					) : null}
+
+					{records.length ? (
+						<div className="overflow-hidden rounded-lg border bg-card">
+							<Table className="table-fixed">
+								<TableHeader>
+									<TableRow>
+										<TableHead className="w-40">Date &amp; Time</TableHead>
+										<TableHead className="w-28">Amount</TableHead>
+										<TableHead>Record</TableHead>
+										<TableHead className="w-40">Category</TableHead>
+										<TableHead className="w-40">Actions</TableHead>
+									</TableRow>
+								</TableHeader>
+								<TableBody>
+									{records.map(record => {
+										const details = [
+											record.people ? `w/ ${record.people}` : null,
+											record.location ? `@ ${record.location}` : null,
+										]
+											.filter(Boolean)
+											.join(" ")
+
+										return (
+											<TableRow key={record.id}>
+												<TableCell className="text-muted-foreground">
+													{toDatetime(record.datetime)}
+												</TableCell>
+												<TableCell>
+													<span className={currencyClass(record.amount)}>
+														{toCurrency(record.amount)}
+													</span>
+												</TableCell>
+												<TableCell>
+													<div className="flex items-start gap-3">
+														<Icon {...record.category} size={16} />
+														<div className="min-w-0">
+															<p className="truncate font-medium">
+																{record.title}
+															</p>
+															<p className="truncate text-muted-foreground">
+																{details ||
+																	record.description ||
+																	"No extra context"}
+															</p>
+														</div>
+													</div>
+												</TableCell>
+												<TableCell className="text-muted-foreground">
+													{record.category.name}
+												</TableCell>
+												<TableCell>
+													<div className="flex items-center gap-2">
+														<Button variant="outline" size="sm" asChild>
+															<Link
+																href={recordRoute.url({ record })}
+															>
+																Open
+															</Link>
+														</Button>
+														<Button
+															size="sm"
+															onClick={() =>
+																void handleAttach(record)
+															}
+															disabled={isAttachingId !== null}
+														>
+															{isAttachingId === record.id ? (
+																<>
+																	<LoaderCircleIcon className="animate-spin" />
+																	Attaching
+																</>
+															) : (
+																"Attach"
+															)}
+														</Button>
+													</div>
+												</TableCell>
+											</TableRow>
+										)
+									})}
+								</TableBody>
+							</Table>
 						</div>
-
-						{records.length ? (
-							<table className="table table-hover">
-								<thead>
-									<tr>
-										<th style={{ width: 200 }}>Date & Time</th>
-										<th style={{ width: 125 }}>Amount ($)</th>
-										<th>Title</th>
-									</tr>
-								</thead>
-
-								<tbody>
-									{records.map(record => (
-										<tr
-											key={record.id}
-											style={{ cursor: "pointer" }}
-											onClick={() => handleSelect(record)}
-										>
-											<td className="align-middle">
-												{DateTime.fromFormat(record.datetime, "y-MM-dd T")
-													.toFormat("d MMM y, h:mm a")
-													.replace("12:00 AM", "-")}
-											</td>
-											<td
-												className="align-middle"
-												style={styleCurrency(record.amount)}
-											>
-												{formatCurrency(record.amount)}
-											</td>
-											<td className="d-flex align-items-center gap-2">
-												<Icon {...record.category} />
-												<p className="m-0" style={{ flex: 1 }}>
-													{record.title}
-													{record.people ? ` w/ ${record.people}` : ""}
-													{record.location ? ` @ ${record.location}` : ""}
-												</p>
-											</td>
-										</tr>
-									))}
-								</tbody>
-							</table>
-						) : null}
-					</div>
+					) : null}
 				</div>
-			</div>
-		</form>
+
+				<SheetFooter className="border-t bg-muted/20">
+					<Button type="button" variant="outline" onClick={() => setOpen(false)}>
+						Done
+					</Button>
+				</SheetFooter>
+			</SheetContent>
+		</Sheet>
 	)
+}
+
+function RecordSearchEmptyState({
+	title,
+	description,
+	icon,
+}: {
+	title: string
+	description: string
+	icon: React.ReactNode
+}) {
+	return (
+		<Card className="border border-dashed border-border/80 bg-muted/20">
+			<CardContent className="flex flex-col items-center gap-2 py-10 text-center">
+				<div className="flex size-10 items-center justify-center rounded-full bg-background text-muted-foreground ring-1 ring-border">
+					{icon}
+				</div>
+				<div className="space-y-1">
+					<p className="font-medium">{title}</p>
+					<p className="text-sm text-muted-foreground">{description}</p>
+				</div>
+			</CardContent>
+		</Card>
+	)
+}
+
+export const isRecordWithinBudgetRange = (record: Record, startDate: string, endDate: string) => {
+	const datetime = DateTime.fromFormat(record.datetime, "yyyy-MM-dd HH:mm")
+	const start = DateTime.fromFormat(startDate, "yyyy-MM-dd").startOf("day")
+	const end = DateTime.fromFormat(endDate, "yyyy-MM-dd").endOf("day")
+
+	return datetime.isValid && start.isValid && end.isValid && datetime >= start && datetime <= end
 }

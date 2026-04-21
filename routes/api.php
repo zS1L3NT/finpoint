@@ -9,16 +9,16 @@ use App\Http\Controllers\Api\RecurrenceController;
 use App\Http\Controllers\Api\RecurrenceRecordController;
 use Illuminate\Support\Facades\Route;
 
-Route::apiResource("importer", ImporterController::class)->only("store");
+Route::apiResource('importer', ImporterController::class)->only('store');
 
-Route::apiResource("records", RecordController::class)->only("index", "store", "update", "destroy");
+Route::apiResource('records', RecordController::class)->only('index', 'store', 'update', 'destroy');
 
-Route::apiResource("budgets", BudgetController::class)->only("store", "update", "destroy");
+Route::apiResource('budgets', BudgetController::class)->only('store', 'update', 'destroy');
 
-Route::apiResource("budgets.records", BudgetRecordController::class)->only("update", "destroy");
+Route::apiResource('budgets.records', BudgetRecordController::class)->only('update', 'destroy');
 
-Route::apiResource("recurrences", RecurrenceController::class)->only("store", "update", "destroy");
+Route::apiResource('recurrences', RecurrenceController::class)->only('store', 'update', 'destroy');
 
-Route::apiResource("recurrences.records", RecurrenceRecordController::class)->only("update", "destroy");
+Route::apiResource('recurrences.records', RecurrenceRecordController::class)->only('update', 'destroy');
 
-Route::apiResource("categories", CategoryController::class)->only("store", "update", "destroy");
+Route::apiResource('categories', CategoryController::class)->only('store', 'update', 'destroy');

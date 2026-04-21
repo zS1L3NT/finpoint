@@ -8,13 +8,13 @@ use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\WithoutTimestamps;
 use Illuminate\Database\Eloquent\Model;
 
-#[Table(keyType: "string", incrementing: false)]
+#[Table(keyType: 'string', incrementing: false)]
 #[WithoutTimestamps()]
 #[Guarded([])]
 class Recurrence extends Model
 {
     public function records()
     {
-        return $this->belongsToMany(Record::class, RecurrenceRecord::class)->orderBy("datetime", "desc");
+        return $this->belongsToMany(Record::class, RecurrenceRecord::class)->orderBy('datetime', 'desc');
     }
 }

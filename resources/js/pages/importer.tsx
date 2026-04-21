@@ -1,44 +1,85 @@
-import { Form } from "@inertiajs/react"
-import React, { useState } from "react"
-import ApiImporterController from "@/wayfinder/actions/App/Http/Controllers/Api/ImporterController"
+import { router } from "@inertiajs/react"
+import { useState } from "react"
+import AppHeader from "@/components/app-header"
+import { Button } from "@/components/ui/button"
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card"
+import { Field, FieldError, FieldLabel } from "@/components/ui/field"
+import { Input } from "@/components/ui/input"
+import { allocator } from "@/wayfinder/routes"
+import { store } from "@/wayfinder/routes/importer"
 
-export default function Importer(props: { errors: Record<string, string> }) {
-	const [filled, setFilled] = useState(false)
+export default function Importer() {
+	const [errors, setErrors] = useState<{ [key: string]: string[] }>({})
 
-	const errors = Object.entries(props.errors)
+	const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
+		e.preventDefault()
+
+		await fetch(store.url(), {
+			method: "POST",
+			body: new FormData(e.currentTarget),
+			headers: { Accept: "application/json" },
+		})
+			.then(async res => [res, await res.json()] as const)
+			.then(([res, data]) => {
+				if (res.status === 422) {
+					setErrors(data.errors)
+				}
+
+				if (res.status === 200) {
+					router.visit(allocator.url())
+				}
+			})
+	}
+
+	const filesErrors = Object.entries(errors)
 		.filter(([k, v]) => k.startsWith("files"))
-		.map(([k, v]) => v)
+		.toSorted(([a], [b]) => a.localeCompare(b))
+		.flatMap(([k, v]) => v)
 
 	return (
-		<Form
-			method="POST"
-			encType="multipart/form-data"
-			action={ApiImporterController.store.url()}
-			className="m-auto vstack gap-3"
-		>
-			<div className="d-flex justify-content-between align-items-center mb-4">
-				<div>
-					<h1>Importer</h1>
-					<p className="text-body-secondary">Import bank statements from CSV files</p>
-				</div>
+		<>
+			<AppHeader title="Importer" />
 
-				<button className="btn btn-primary" type="submit" disabled={!filled}>
-					Import CSVs
-				</button>
-			</div>
-
-			<div className="col-12 mb-3">
-				<label htmlFor="files[]">Files</label>
-				<input
-					type="file"
-					multiple
-					className={`form-control ${errors.length ? "is-invalid" : ""}`}
-					id="files[]"
-					name="files[]"
-					onChange={e => setFilled(!!e.target.files?.length)}
-				/>
-				<div className="invalid-feedback">{errors[0]}</div>
-			</div>
-		</Form>
+			<form
+				method="POST"
+				// action={importMethod.url()}
+				encType="mutlipart/form-data"
+				className="flex items-center justify-center min-h-full"
+				onSubmit={handleSubmit}
+			>
+				<Card className="min-w-md">
+					<CardHeader>
+						<CardTitle>Importer</CardTitle>
+						<CardDescription>Import bank statements from CSV files</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<Field data-invalid={!!filesErrors.length}>
+							<FieldLabel htmlFor="files[]">Files</FieldLabel>
+							<Input
+								id="files[]"
+								name="files[]"
+								type="file"
+								multiple
+								required
+								aria-invalid={!!filesErrors.length}
+							/>
+							<FieldError>{filesErrors[0]}</FieldError>
+						</Field>
+					</CardContent>
+					<CardFooter className="flex-col gap-2">
+						<Button type="submit" className="w-full">
+							Import
+						</Button>
+					</CardFooter>
+				</Card>
+			</form>
+		</>
 	)
 }

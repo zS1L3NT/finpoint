@@ -11,23 +11,23 @@ class RecurrenceController extends Controller
     public function store()
     {
         $dto = request()->validate([
-            "name" => "required|string",
-            "amount" => "required|decimal:0,2",
-            "period" => "required|in:weeb,month,year"
+            'name' => 'required|string',
+            'amount' => 'required|decimal:0,2',
+            'period' => 'required|in:week,month,year',
         ]);
 
         return Recurrence::query()->create([
-            "id" => Uuid::uuid4(),
-            ...$dto
+            'id' => Uuid::uuid4(),
+            ...$dto,
         ]);
     }
 
     public function update(Recurrence $recurrence)
     {
         $dto = request()->validate([
-            "name" => "required|string",
-            "amount" => "required|decimal:0,2",
-            "period" => "required|in:weeb,month,year"
+            'name' => 'required|string',
+            'amount' => 'required|decimal:0,2',
+            'period' => 'required|in:week,month,year',
         ]);
 
         $recurrence->update($dto);

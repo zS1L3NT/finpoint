@@ -1,0 +1,132 @@
+import { Link } from "@inertiajs/react"
+import {
+	CalendarSyncIcon,
+	ChartPieIcon,
+	CircleDollarSignIcon,
+	CreditCardIcon,
+	ImportIcon,
+	LinkIcon,
+	ReceiptTextIcon,
+	TagIcon,
+} from "lucide-react"
+import {
+	Sidebar,
+	SidebarContent,
+	SidebarGroup,
+	SidebarGroupLabel,
+	SidebarHeader,
+	SidebarMenu,
+	SidebarMenuButton,
+	SidebarMenuItem,
+} from "@/components/ui/sidebar"
+import {
+	allocator,
+	budgets,
+	categories,
+	dashboard,
+	importer,
+	records,
+	recurrences,
+	statements,
+} from "@/wayfinder/routes"
+
+export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+	return (
+		<Sidebar collapsible="offcanvas" variant="floating" {...props}>
+			<SidebarHeader>
+				<SidebarMenu>
+					<SidebarMenuItem>
+						<SidebarMenuButton
+							asChild
+							className="data-[slot=sidebar-menu-button]:p-1.5!"
+						>
+							<Link href={dashboard.url()}>
+								<CircleDollarSignIcon className="size-5!" />
+								<span className="text-base font-semibold">Finpoint</span>
+							</Link>
+						</SidebarMenuButton>
+					</SidebarMenuItem>
+				</SidebarMenu>
+			</SidebarHeader>
+			<SidebarContent>
+				<SidebarGroup className="group-data-[collapsible=icon]:hidden">
+					<SidebarGroupLabel>Data Control</SidebarGroupLabel>
+					<SidebarMenu>
+						<SidebarMenuItem>
+							<SidebarMenuButton asChild>
+								<Link href={importer.url()}>
+									<ImportIcon />
+									<span>Importer</span>
+								</Link>
+							</SidebarMenuButton>
+						</SidebarMenuItem>
+
+						<SidebarMenuItem>
+							<SidebarMenuButton asChild>
+								<Link href={allocator.url()}>
+									<LinkIcon />
+									<span>Allocator</span>
+								</Link>
+							</SidebarMenuButton>
+						</SidebarMenuItem>
+					</SidebarMenu>
+				</SidebarGroup>
+
+				<SidebarGroup className="group-data-[collapsible=icon]:hidden">
+					<SidebarGroupLabel>Accounting</SidebarGroupLabel>
+					<SidebarMenu>
+						<SidebarMenuItem>
+							<SidebarMenuButton asChild>
+								<Link href={budgets.url()}>
+									<ChartPieIcon />
+									<span>Budgets</span>
+								</Link>
+							</SidebarMenuButton>
+						</SidebarMenuItem>
+
+						<SidebarMenuItem>
+							<SidebarMenuButton asChild>
+								<Link href={recurrences.url()}>
+									<CalendarSyncIcon />
+									<span>Recurrences</span>
+								</Link>
+							</SidebarMenuButton>
+						</SidebarMenuItem>
+					</SidebarMenu>
+				</SidebarGroup>
+
+				<SidebarGroup className="group-data-[collapsible=icon]:hidden">
+					<SidebarGroupLabel>Data View</SidebarGroupLabel>
+					<SidebarMenu>
+						<SidebarMenuItem>
+							<SidebarMenuButton asChild>
+								<Link href={records.url()}>
+									<ReceiptTextIcon />
+									<span>Records</span>
+								</Link>
+							</SidebarMenuButton>
+						</SidebarMenuItem>
+
+						<SidebarMenuItem>
+							<SidebarMenuButton asChild>
+								<Link href={statements.url()}>
+									<CreditCardIcon />
+									<span>Statements</span>
+								</Link>
+							</SidebarMenuButton>
+						</SidebarMenuItem>
+
+						<SidebarMenuItem>
+							<SidebarMenuButton asChild>
+								<Link href={categories.url()}>
+									<TagIcon />
+									<span>Categories</span>
+								</Link>
+							</SidebarMenuButton>
+						</SidebarMenuItem>
+					</SidebarMenu>
+				</SidebarGroup>
+			</SidebarContent>
+		</Sidebar>
+	)
+}

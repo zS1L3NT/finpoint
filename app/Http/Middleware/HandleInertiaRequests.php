@@ -37,7 +37,8 @@ class HandleInertiaRequests extends Middleware
     {
         return [
             ...parent::share($request),
-            //
+            'appearance' => $request->cookie('appearance') ?? 'system',
+            'sidebarOpen' => $request->cookie('sidebar_state', 'false') === 'true',
         ];
     }
 }
