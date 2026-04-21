@@ -16,7 +16,8 @@ class AllocatorController extends Controller
             ->when(request()->query("query"), fn($query, $q) => $query->where("description", "like", "%" . $q . "%"))
             ->where(fn($query) => $query->whereNull("allocations_sum_amount")->orWhereColumn("allocations_sum_amount", "!=", "statements.amount"))
             ->orderBy("date", "desc")
-            ->paginate(perPage: request("per_page") ?? 25);
+            ->paginate(request("per_page") ?? 25)
+            ->withQueryString();
 
         $categories = Category::query()
             ->with("children")
