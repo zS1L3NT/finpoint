@@ -10,7 +10,7 @@ class RecurrenceRecordController extends Controller
 {
     public function update(Recurrence $recurrence, Record $record)
     {
-        $recurrence->records()->attach($record);
+        $recurrence->records()->syncWithoutDetaching($record);
 
         return [];
     }

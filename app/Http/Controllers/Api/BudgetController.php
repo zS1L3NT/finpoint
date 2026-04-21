@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Budget;
 use App\Models\Record;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Ramsey\Uuid\Uuid;
 
@@ -28,13 +29,14 @@ class BudgetController extends Controller
             ]);
 
             if ($budget->automatic) {
-                if ($budget->start_date !== null && $budget->end_date !== null) {
-                    $budget->records()->attach(
-                        Record::query()
-                            ->whereBetween('datetime', [$budget->start_date, $budget->end_date])
-                            ->get()
-                    );
-                }
+                $budget->records()->attach(
+                    Record::query()
+                        ->whereBetween('datetime', [
+                            Carbon::parse($budget->start_date)->startOfDay(),
+                            Carbon::parse($budget->end_date)->endOfDay(),
+                        ])
+                        ->pluck('id')
+                );
             }
 
             return $budget;
@@ -53,6 +55,17 @@ class BudgetController extends Controller
             ...$dto,
             'automatic' => isset($dto['automatic']) && $dto['automatic'] === 'on',
         ]);
+
+        if ($budget->automatic) {
+            $budget->records()->syncWithoutDetaching(
+                Record::query()
+                    ->whereBetween('datetime', [
+                        Carbon::parse($budget->start_date)->startOfDay(),
+                        Carbon::parse($budget->end_date)->endOfDay(),
+                    ])
+                    ->pluck('id')
+            );
+        }
 
         return $budget;
     }

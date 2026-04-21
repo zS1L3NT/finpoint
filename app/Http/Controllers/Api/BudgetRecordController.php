@@ -10,7 +10,7 @@ class BudgetRecordController extends Controller
 {
     public function update(Budget $budget, Record $record)
     {
-        $budget->records()->attach($record);
+        $budget->records()->syncWithoutDetaching($record);
 
         return [];
     }
