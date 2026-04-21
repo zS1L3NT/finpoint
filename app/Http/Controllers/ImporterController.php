@@ -8,6 +8,6 @@ class ImporterController extends Controller
 {
     public function index()
     {
-        return Inertia::render("importer");
+        return Inertia::render('importer');
     }
 }

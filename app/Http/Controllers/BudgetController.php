@@ -10,17 +10,17 @@ class BudgetController extends Controller
     public function index()
     {
         $budgets = Budget::query()
-            ->orderBy("start_date", "desc")
+            ->orderBy('start_date', 'desc')
             ->paginate(25);
 
-        return Inertia::render("budgets/index", compact("budgets"));
+        return Inertia::render('budgets/index', compact('budgets'));
     }
 
     public function show(Budget $budget)
     {
-        $budget->loadSum("records", "amount");
-        $budget->load("records", "records.category");
+        $budget->loadSum('records', 'amount');
+        $budget->load('records', 'records.category');
 
-        return Inertia::render("budgets/show", compact("budget"));
+        return Inertia::render('budgets/show', compact('budget'));
     }
 }

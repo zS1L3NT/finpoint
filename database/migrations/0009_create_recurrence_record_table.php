@@ -13,10 +13,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create("recurrence_records", function (Blueprint $table) {
+        Schema::create('recurrence_records', function (Blueprint $table) {
             $table->foreignIdFor(Recurrence::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Record::class)->constrained()->cascadeOnDelete();
-            $table->primary(["recurrence_id", "record_id"]);
+            $table->primary(['recurrence_id', 'record_id']);
         });
     }
 
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists("recurrence_records");
+        Schema::dropIfExists('recurrence_records');
     }
 };

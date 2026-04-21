@@ -5,7 +5,9 @@
 	"scripts": {
 		"dev": "vite",
 		"lint": "biome check --write",
-		"build": "vite build"
+		"lint:check": "biome check",
+		"build": "vite build",
+		"types:check": "tsc --noEmit"
 	},
 	"dependencies": {
 		"@base-ui/react": "^1.4.0",
