@@ -50,5 +50,5 @@ export type Recurrence = {
 	id: string
 	name: string
 	amount: number
-	period: "week" | "month" | "year"
+	period: "month" | "year"
 }

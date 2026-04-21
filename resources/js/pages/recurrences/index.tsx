@@ -158,7 +158,6 @@ function RecurrenceCreator() {
 								id="period"
 								defaultValue="month"
 							>
-								<option value="week">Weekly</option>
 								<option value="month">Monthly</option>
 								<option value="year">Yearly</option>
 							</select>
