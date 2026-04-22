@@ -1,9 +1,9 @@
 import { Link } from "@inertiajs/react"
 import { CreditCardIcon } from "lucide-react"
-import AppHeader from "@/components/app-header"
 import DetailCard from "@/components/detail-card"
 import Icon from "@/components/icon"
-import PageHeader from "@/components/page-header"
+import AppHeader from "@/components/layout/app-header"
+import PageHeader from "@/components/layout/page-header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {

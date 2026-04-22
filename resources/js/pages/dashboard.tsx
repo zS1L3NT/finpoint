@@ -10,9 +10,9 @@ import {
 	SparklesIcon,
 } from "lucide-react"
 import { DateTime } from "luxon"
-import AppHeader from "@/components/app-header"
 import Icon from "@/components/icon"
-import PageHeader from "@/components/page-header"
+import AppHeader from "@/components/layout/app-header"
+import PageHeader from "@/components/layout/page-header"
 import { Button } from "@/components/ui/button"
 import {
 	Card,

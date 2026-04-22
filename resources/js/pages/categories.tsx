@@ -1,11 +1,11 @@
 import { router } from "@inertiajs/react"
 import { PencilIcon, PlusIcon, TagIcon, Trash2Icon } from "lucide-react"
 import { useEffect, useState } from "react"
-import AppHeader from "@/components/app-header"
 import ComboboxField from "@/components/form/combobox-field"
 import TextField from "@/components/form/text-field"
 import Icon from "@/components/icon"
-import PageHeader from "@/components/page-header"
+import AppHeader from "@/components/layout/app-header"
+import PageHeader from "@/components/layout/page-header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {

@@ -9,11 +9,11 @@ import {
 	Trash2Icon,
 } from "lucide-react"
 import { useState } from "react"
-import AppHeader from "@/components/app-header"
 import DetailCard from "@/components/detail-card"
 import AmountField from "@/components/form/amount-field"
 import Icon from "@/components/icon"
-import PageHeader from "@/components/page-header"
+import AppHeader from "@/components/layout/app-header"
+import PageHeader from "@/components/layout/page-header"
 import RecordSearch from "@/components/record-search"
 import { Button } from "@/components/ui/button"
 import {

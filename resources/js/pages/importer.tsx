@@ -1,6 +1,8 @@
 import { router } from "@inertiajs/react"
 import { useState } from "react"
-import AppHeader from "@/components/app-header"
+import DetailCard from "@/components/detail-card"
+import AppHeader from "@/components/layout/app-header"
+import PageHeader from "@/components/layout/page-header"
 import { Button } from "@/components/ui/button"
 import {
 	Card,
