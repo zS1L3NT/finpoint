@@ -198,11 +198,7 @@ export default function BudgetPage({ budget }: { budget: Budget & BudgetExtra })
 								emptyTitle="No eligible records found"
 								emptyDescription="Only records inside the budget range and not already attached appear here."
 								filter={record =>
-									isRecordWithinBudgetRange(
-										record,
-										budget.start_date,
-										budget.end_date,
-									) && !budget.records.some(attached => attached.id === record.id)
+									!budget.records.some(attached => attached.id === record.id)
 								}
 								handler={record => mutateRecord(record, "attach")}
 								trigger={

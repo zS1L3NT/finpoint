@@ -1,6 +1,5 @@
 import { Link } from "@inertiajs/react"
 import { LoaderCircleIcon, SearchIcon, SparklesIcon } from "lucide-react"
-import { DateTime } from "luxon"
 import { useEffect, useState } from "react"
 import Icon from "@/components/icon"
 import { Button } from "@/components/ui/button"
@@ -278,12 +277,4 @@ function RecordSearchEmptyState({
 			</CardContent>
 		</Card>
 	)
-}
-
-export const isRecordWithinBudgetRange = (record: Record, startDate: string, endDate: string) => {
-	const datetime = DateTime.fromFormat(record.datetime, "yyyy-MM-dd HH:mm")
-	const start = DateTime.fromFormat(startDate, "yyyy-MM-dd").startOf("day")
-	const end = DateTime.fromFormat(endDate, "yyyy-MM-dd").endOf("day")
-
-	return datetime.isValid && start.isValid && end.isValid && datetime >= start && datetime <= end
 }
