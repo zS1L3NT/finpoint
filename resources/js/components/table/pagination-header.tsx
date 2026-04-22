@@ -9,7 +9,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select"
 
-export default function PaginatedTableHeader({
+export default function PaginationHeader({
 	query,
 	onQueryChange,
 	pageSize,

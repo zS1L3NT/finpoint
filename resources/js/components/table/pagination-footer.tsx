@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/pagination"
 import { PaginatedLink } from "@/types"
 
-export default function PaginatedTableFooter({
+export default function PaginationFooter({
 	summary,
 	links,
 }: {

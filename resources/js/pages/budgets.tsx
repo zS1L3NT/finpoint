@@ -4,11 +4,11 @@ import { LoaderCircleIcon, PiggyBankIcon, PlusIcon, SparklesIcon } from "lucide-
 import { DateTime } from "luxon"
 import { useState } from "react"
 import AppHeader from "@/components/app-header"
-import DataTable from "@/components/data-table"
 import DetailCard from "@/components/detail-card"
 import AmountField from "@/components/form/amount-field"
 import TextField from "@/components/form/text-field"
 import PageHeader from "@/components/page-header"
+import DataTable from "@/components/table/data-table"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {

@@ -8,8 +8,8 @@ import {
 	useReactTable,
 } from "@tanstack/react-table"
 import type { ComponentProps } from "react"
-import PaginatedTableFooter from "@/components/paginated-table-footer"
-import PaginatedTableHeader from "@/components/paginated-table-header"
+import PaginationFooter from "@/components/table/pagination-footer"
+import PaginationHeader from "@/components/table/pagination-header"
 import {
 	Table,
 	TableBody,
@@ -34,8 +34,8 @@ export default function DataTable<TData, TValue>({
 }: {
 	data: Paginated<TData>
 	columns: ColumnDef<TData, TValue>[]
-	header?: ComponentProps<typeof PaginatedTableHeader>
-	footer?: Omit<ComponentProps<typeof PaginatedTableFooter>, "links">
+	header?: ComponentProps<typeof PaginationHeader>
+	footer?: Omit<ComponentProps<typeof PaginationFooter>, "links">
 	emptyMessage?: string
 	getRowId?: (row: TData) => string
 	rowSelection?: RowSelectionState
@@ -53,7 +53,7 @@ export default function DataTable<TData, TValue>({
 
 	return (
 		<div className="flex flex-col gap-4">
-			{header ? <PaginatedTableHeader {...header} /> : null}
+			{header ? <PaginationHeader {...header} /> : null}
 
 			<div className="overflow-hidden rounded-lg border bg-card">
 				<Table className="table-fixed">
@@ -112,7 +112,7 @@ export default function DataTable<TData, TValue>({
 				</Table>
 			</div>
 
-			{footer ? <PaginatedTableFooter links={data.links} {...footer} /> : null}
+			{footer ? <PaginationFooter links={data.links} {...footer} /> : null}
 		</div>
 	)
 }
