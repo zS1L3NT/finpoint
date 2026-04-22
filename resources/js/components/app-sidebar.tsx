@@ -20,14 +20,14 @@ import {
 	SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import {
-	allocator,
-	budgets,
-	categories,
-	dashboard,
-	importer,
-	records,
-	recurrences,
-	statements,
+	allocatorWebRoute,
+	budgetsWebRoute,
+	categoriesWebRoute,
+	dashboardWebRoute,
+	importerWebRoute,
+	recordsWebRoute,
+	recurrencesWebRoute,
+	statementsWebRoute,
 } from "@/wayfinder/routes"
 
 export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -40,7 +40,7 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
 							asChild
 							className="data-[slot=sidebar-menu-button]:p-1.5!"
 						>
-							<Link href={dashboard.url()}>
+							<Link href={dashboardWebRoute.url()}>
 								<CircleDollarSignIcon className="size-5!" />
 								<span className="text-base font-semibold">Finpoint</span>
 							</Link>
@@ -54,7 +54,7 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
 					<SidebarMenu>
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
-								<Link href={importer.url()}>
+								<Link href={importerWebRoute.url()}>
 									<ImportIcon />
 									<span>Importer</span>
 								</Link>
@@ -63,7 +63,7 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
 
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
-								<Link href={allocator.url()}>
+								<Link href={allocatorWebRoute.url()}>
 									<LinkIcon />
 									<span>Allocator</span>
 								</Link>
@@ -77,7 +77,7 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
 					<SidebarMenu>
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
-								<Link href={budgets.url()}>
+								<Link href={budgetsWebRoute.url()}>
 									<PiggyBankIcon />
 									<span>Budgets</span>
 								</Link>
@@ -86,7 +86,7 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
 
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
-								<Link href={recurrences.url()}>
+								<Link href={recurrencesWebRoute.url()}>
 									<CalendarSyncIcon />
 									<span>Recurrences</span>
 								</Link>
@@ -100,7 +100,7 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
 					<SidebarMenu>
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
-								<Link href={records.url()}>
+								<Link href={recordsWebRoute.url()}>
 									<ReceiptTextIcon />
 									<span>Records</span>
 								</Link>
@@ -109,7 +109,7 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
 
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
-								<Link href={statements.url()}>
+								<Link href={statementsWebRoute.url()}>
 									<CreditCardIcon />
 									<span>Statements</span>
 								</Link>
@@ -118,7 +118,7 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
 
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
-								<Link href={categories.url()}>
+								<Link href={categoriesWebRoute.url()}>
 									<TagIcon />
 									<span>Categories</span>
 								</Link>

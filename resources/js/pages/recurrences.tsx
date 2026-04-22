@@ -40,8 +40,11 @@ import useApiFormErrors from "@/hooks/use-api-form-errors"
 import usePaginatedTableState from "@/hooks/use-paginated-table-state"
 import { currencyClass, round2dp, toCurrency } from "@/lib/utils"
 import { Paginated, Recurrence } from "@/types"
-import { recurrence as recurrenceRoute, recurrences as recurrencesRoute } from "@/wayfinder/routes"
-import { store as storeRecurrence } from "@/wayfinder/routes/recurrences"
+import {
+	recurrenceStoreApiRoute,
+	recurrencesWebRoute,
+	recurrenceWebRoute,
+} from "@/wayfinder/routes"
 
 type RecurrenceOverview = Recurrence & {
 	records_count: number
@@ -72,7 +75,7 @@ export default function RecurrencesPage({
 }) {
 	const { query, pageSize, handleQueryChange, handlePageSizeChange } = usePaginatedTableState({
 		syncOn: recurrences,
-		buildUrl: query => recurrencesRoute({ query }).url,
+		buildUrl: query => recurrencesWebRoute({ query }).url,
 	})
 
 	const slices = buildBreakdownSlices(breakdown)
@@ -220,7 +223,9 @@ export default function RecurrencesPage({
 							meta: { width: "6rem" },
 							cell: ({ row }) => (
 								<Button variant="outline" size="sm" asChild>
-									<Link href={recurrenceRoute.url({ recurrence: row.original })}>
+									<Link
+										href={recurrenceWebRoute.url({ recurrence: row.original })}
+									>
 										Open
 									</Link>
 								</Button>
@@ -311,7 +316,7 @@ function RecurrenceCreateDialog() {
 			formData.append("amount", `${value.amount}`)
 			formData.append("period", value.period)
 
-			const response = await fetch(storeRecurrence.url(), {
+			const response = await fetch(recurrenceStoreApiRoute.url(), {
 				method: "POST",
 				body: formData,
 				headers: { Accept: "application/json" },

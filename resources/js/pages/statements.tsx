@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import usePaginatedTableState from "@/hooks/use-paginated-table-state"
 import { currencyClass, toCurrency, toDate } from "@/lib/utils"
 import { Account, Paginated, Statement } from "@/types"
-import { statement, statements as statementsRoute } from "@/wayfinder/routes"
+import { statementsWebRoute, statementWebRoute } from "@/wayfinder/routes"
 
 type StatementExtra = {
 	account: Account
@@ -20,7 +20,7 @@ export default function StatementsPage({
 }) {
 	const { query, pageSize, handleQueryChange, handlePageSizeChange } = usePaginatedTableState({
 		syncOn: statements,
-		buildUrl: query => statementsRoute({ query }).url,
+		buildUrl: query => statementsWebRoute({ query }).url,
 	})
 
 	return (
@@ -74,7 +74,7 @@ export default function StatementsPage({
 							meta: { width: "4rem" },
 							cell: ({ row }) => (
 								<Button variant="outline" size="sm" asChild>
-									<Link href={statement.url({ statement: row.original })}>
+									<Link href={statementWebRoute.url({ statement: row.original })}>
 										Open
 									</Link>
 								</Button>

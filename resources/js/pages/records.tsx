@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import usePaginatedTableState from "@/hooks/use-paginated-table-state"
 import { currencyClass, toCurrency, toDatetime } from "@/lib/utils"
 import { Category, Paginated, Record, Statement } from "@/types"
-import { record, records as recordsRoute } from "@/wayfinder/routes"
+import { recordsWebRoute, recordWebRoute } from "@/wayfinder/routes"
 
 type RecordExtra = {
 	category: Category
@@ -18,7 +18,7 @@ type RecordExtra = {
 export default function RecordsPage({ records }: { records: Paginated<Record & RecordExtra> }) {
 	const { query, pageSize, handleQueryChange, handlePageSizeChange } = usePaginatedTableState({
 		syncOn: records,
-		buildUrl: query => recordsRoute({ query }).url,
+		buildUrl: query => recordsWebRoute({ query }).url,
 	})
 
 	return (
@@ -82,7 +82,9 @@ export default function RecordsPage({ records }: { records: Paginated<Record & R
 							meta: { width: "4rem" },
 							cell: ({ row }) => (
 								<Button variant="outline" size="sm" asChild>
-									<Link href={record.url({ record: row.original })}>Open</Link>
+									<Link href={recordWebRoute.url({ record: row.original })}>
+										Open
+									</Link>
 								</Button>
 							),
 						},

@@ -12,8 +12,7 @@ import {
 } from "@/components/ui/card"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { allocator } from "@/wayfinder/routes"
-import { store } from "@/wayfinder/routes/importer"
+import { allocatorWebRoute, importerApiRoute } from "@/wayfinder/routes"
 
 export default function Importer() {
 	const [errors, setErrors] = useState<{ [key: string]: string[] }>({})
@@ -33,7 +32,7 @@ export default function Importer() {
 				}
 
 				if (res.status === 200) {
-					router.visit(allocator.url())
+					router.visit(allocatorWebRoute.url())
 				}
 			})
 	}
@@ -54,7 +53,7 @@ export default function Importer() {
 				icon={ImportIcon}
 				actions={
 					<Button size="lg" variant="outline" asChild>
-						<Link href={allocator.url()}>
+						<Link href={allocatorWebRoute.url()}>
 							<LinkIcon /> Open allocator
 						</Link>
 					</Button>

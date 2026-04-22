@@ -22,10 +22,10 @@ import useApiFormErrors from "@/hooks/use-api-form-errors"
 import { cn, withMethod } from "@/lib/utils"
 import { Category } from "@/types"
 import {
-	destroy as destroyCategory,
-	store as storeCategory,
-	update as updateCategory,
-} from "@/wayfinder/routes/categories"
+	categoryDestroyApiRoute,
+	categoryStoreApiRoute,
+	categoryUpdateApiRoute,
+} from "@/wayfinder/routes"
 
 type CategoryNode = Category & {
 	children?: CategoryNode[] | null
@@ -223,7 +223,7 @@ function CategoryDialog({
 		}
 
 		const response = await fetch(
-			isEditing ? updateCategory.url({ category: category.id }) : storeCategory.url(),
+			isEditing ? categoryUpdateApiRoute.url({ category }) : categoryStoreApiRoute.url(),
 			{
 				method: "POST",
 				body: isEditing ? withMethod(formData, "PUT") : formData,
@@ -248,7 +248,7 @@ function CategoryDialog({
 			return
 		}
 
-		const response = await fetch(destroyCategory.url({ category: category.id }), {
+		const response = await fetch(categoryDestroyApiRoute.url({ category }), {
 			method: "POST",
 			body: withMethod(new FormData(), "DELETE"),
 			headers: { Accept: "application/json" },

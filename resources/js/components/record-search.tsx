@@ -25,8 +25,7 @@ import {
 } from "@/components/ui/table"
 import { currencyClass, toCurrency, toDatetime } from "@/lib/utils"
 import { Category, Record } from "@/types"
-import { record as recordRoute } from "@/wayfinder/routes"
-import { index as recordsIndex } from "@/wayfinder/routes/records"
+import { recordIndexApiRoute, recordWebRoute } from "@/wayfinder/routes"
 
 type RecordExtra = {
 	category: Category
@@ -73,7 +72,7 @@ export default function RecordSearch({
 		setStatus("loading")
 
 		const response = await fetch(
-			recordsIndex.url({
+			recordIndexApiRoute.url({
 				query: query.trim() ? { query: query.trim() } : undefined,
 			}),
 			{
@@ -213,7 +212,9 @@ export default function RecordSearch({
 													<div className="flex items-center gap-2">
 														<Button variant="outline" size="sm" asChild>
 															<Link
-																href={recordRoute.url({ record })}
+																href={recordWebRoute.url({
+																	record,
+																})}
 															>
 																Open
 															</Link>

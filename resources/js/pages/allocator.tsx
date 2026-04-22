@@ -38,8 +38,7 @@ import useApiFormErrors from "@/hooks/use-api-form-errors"
 import usePaginatedTableState from "@/hooks/use-paginated-table-state"
 import { cn, round2dp, toCurrency, toDate } from "@/lib/utils"
 import { Account, Category, Paginated, Statement } from "@/types"
-import { allocator, statement } from "@/wayfinder/routes"
-import { store } from "@/wayfinder/routes/records"
+import { allocatorWebRoute, recordStoreApiRoute, statementWebRoute } from "@/wayfinder/routes"
 
 type StatementExtra = {
 	account: Account
@@ -60,7 +59,7 @@ export default function Allocator({
 	const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({})
 	const { query, pageSize, handleQueryChange, handlePageSizeChange } = usePaginatedTableState({
 		syncOn: statements,
-		buildUrl: query => allocator({ query }).url,
+		buildUrl: query => allocatorWebRoute({ query }).url,
 	})
 
 	useEffect(() => {
@@ -182,7 +181,7 @@ export default function Allocator({
 							meta: { width: "4rem" },
 							cell: ({ row }) => (
 								<Button variant="outline" size="sm" asChild>
-									<Link href={statement.url({ statement: row.original })}>
+									<Link href={statementWebRoute.url({ statement: row.original })}>
 										Open
 									</Link>
 								</Button>
@@ -262,7 +261,7 @@ function AllocateRecordDialog({
 				formData.append(`statements[${index}][amount]`, `${statement.amount}`)
 			})
 
-			const response = await fetch(store.url(), {
+			const response = await fetch(recordStoreApiRoute.url(), {
 				method: "POST",
 				body: formData,
 				headers: { Accept: "application/json" },

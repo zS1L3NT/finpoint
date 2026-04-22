@@ -50,12 +50,14 @@ import {
 import useApiFormErrors from "@/hooks/use-api-form-errors"
 import { cn, currencyClass, round2dp, toCurrency, toDatetime, withMethod } from "@/lib/utils"
 import { Budget, Category, Record } from "@/types"
-import { budgets as budgetsRoute, record as recordRoute } from "@/wayfinder/routes"
-import { destroy as destroyBudget, update as updateBudget } from "@/wayfinder/routes/budgets"
 import {
-	update as attachBudgetRecord,
-	destroy as detachBudgetRecord,
-} from "@/wayfinder/routes/budgets/records"
+	budgetDestroyApiRoute,
+	budgetRecordDestroyApiRoute,
+	budgetRecordUpdateApiRoute,
+	budgetsWebRoute,
+	budgetUpdateApiRoute,
+	recordWebRoute,
+} from "@/wayfinder/routes"
 
 type BudgetExtra = {
 	records: (Record & RecordExtra)[]
@@ -82,8 +84,8 @@ export default function BudgetPage({ budget }: { budget: Budget & BudgetExtra })
 		try {
 			const route =
 				mode === "attach"
-					? attachBudgetRecord.url({ budget: budget.id, record: record.id })
-					: detachBudgetRecord.url({ budget: budget.id, record: record.id })
+					? budgetRecordUpdateApiRoute.url({ budget, record })
+					: budgetRecordDestroyApiRoute.url({ budget, record })
 
 			const response = await fetch(route, {
 				method: "POST",
@@ -110,7 +112,7 @@ export default function BudgetPage({ budget }: { budget: Budget & BudgetExtra })
 					description="Budget details"
 					icon={PiggyBankIcon}
 					actions={<BudgetEditorDialog budget={budget} />}
-					back={{ name: "Back to budgets", url: budgetsRoute.url() }}
+					back={{ name: "Back to budgets", url: budgetsWebRoute.url() }}
 				/>
 
 				<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
@@ -285,7 +287,9 @@ export default function BudgetPage({ budget }: { budget: Budget & BudgetExtra })
 													<div className="flex items-center gap-2">
 														<Button variant="outline" size="sm" asChild>
 															<Link
-																href={recordRoute.url({ record })}
+																href={recordWebRoute.url({
+																	record,
+																})}
 															>
 																Open
 															</Link>
@@ -370,7 +374,7 @@ function BudgetEditorDialog({ budget }: { budget: Budget }) {
 				formData.append("automatic", "on")
 			}
 
-			const response = await fetch(updateBudget.url({ budget: budget.id }), {
+			const response = await fetch(budgetUpdateApiRoute.url({ budget }), {
 				method: "POST",
 				body: withMethod(formData, "PUT"),
 				headers: { Accept: "application/json" },
@@ -390,7 +394,7 @@ function BudgetEditorDialog({ budget }: { budget: Budget }) {
 	})
 
 	const handleDelete = async () => {
-		const response = await fetch(destroyBudget.url({ budget: budget.id }), {
+		const response = await fetch(budgetDestroyApiRoute.url({ budget }), {
 			method: "POST",
 			body: withMethod(new FormData(), "DELETE"),
 			headers: { Accept: "application/json" },
@@ -398,7 +402,7 @@ function BudgetEditorDialog({ budget }: { budget: Budget }) {
 
 		if (response.ok) {
 			setOpen(false)
-			router.visit(budgetsRoute.url())
+			router.visit(budgetsWebRoute.url())
 		}
 	}
 

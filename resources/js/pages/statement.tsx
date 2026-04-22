@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/table"
 import { currencyClass, toCurrency, toDate, toDatetime } from "@/lib/utils"
 import { Account, Allocation, Category, Record, Statement } from "@/types"
-import { record as recordRoute, statements as statementsRoute } from "@/wayfinder/routes"
+import { recordWebRoute, statementsWebRoute } from "@/wayfinder/routes"
 
 type StatementExtra = {
 	account: Account
@@ -36,7 +36,7 @@ export default function StatementPage({ statement }: { statement: Statement & St
 					icon={CreditCardIcon}
 					back={{
 						name: "Back to statements",
-						url: statementsRoute.url(),
+						url: statementsWebRoute.url(),
 					}}
 				/>
 
@@ -120,7 +120,7 @@ export default function StatementPage({ statement }: { statement: Statement & St
 												</TableCell>
 												<TableCell>
 													<Button variant="outline" size="sm" asChild>
-														<Link href={recordRoute.url({ record })}>
+														<Link href={recordWebRoute.url({ record })}>
 															Open
 														</Link>
 													</Button>

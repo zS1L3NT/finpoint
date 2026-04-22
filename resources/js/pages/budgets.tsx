@@ -28,8 +28,7 @@ import useApiFormErrors from "@/hooks/use-api-form-errors"
 import usePaginatedTableState from "@/hooks/use-paginated-table-state"
 import { cn, currencyClass, round2dp, toCurrency } from "@/lib/utils"
 import { Budget, Paginated } from "@/types"
-import { budget as budgetRoute, budgets as budgetsRoute } from "@/wayfinder/routes"
-import { store as storeBudget } from "@/wayfinder/routes/budgets"
+import { budgetStoreApiRoute, budgetsWebRoute, budgetWebRoute } from "@/wayfinder/routes"
 
 type BudgetOverview = Budget & {
 	records_sum_amount: number | null
@@ -45,7 +44,7 @@ export default function BudgetsPage({
 }) {
 	const { query, pageSize, handleQueryChange, handlePageSizeChange } = usePaginatedTableState({
 		syncOn: budgets,
-		buildUrl: query => budgetsRoute({ query }).url,
+		buildUrl: query => budgetsWebRoute({ query }).url,
 	})
 
 	const totalBudgeted = overview.reduce((sum, budget) => sum + budget.amount, 0)
@@ -193,7 +192,7 @@ export default function BudgetsPage({
 							meta: { width: "4rem" },
 							cell: ({ row }) => (
 								<Button variant="outline" size="sm" asChild>
-									<Link href={budgetRoute.url({ budget: row.original })}>
+									<Link href={budgetWebRoute.url({ budget: row.original })}>
 										Open
 									</Link>
 								</Button>
@@ -239,7 +238,7 @@ function BudgetCreateDialog() {
 				formData.append("automatic", "on")
 			}
 
-			const response = await fetch(storeBudget.url(), {
+			const response = await fetch(budgetStoreApiRoute.url(), {
 				method: "POST",
 				body: formData,
 				headers: { Accept: "application/json" },

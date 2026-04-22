@@ -55,15 +55,14 @@ import {
 import useApiFormErrors from "@/hooks/use-api-form-errors"
 import { currencyClass, round2dp, toCurrency, toDatetime, withMethod } from "@/lib/utils"
 import { Category, Record, Recurrence } from "@/types"
-import { record as recordRoute, recurrences as recurrencesRoute } from "@/wayfinder/routes"
 import {
-	destroy as destroyRecurrence,
-	update as updateRecurrence,
-} from "@/wayfinder/routes/recurrences"
-import {
-	update as attachRecurrenceRecord,
-	destroy as detachRecurrenceRecord,
-} from "@/wayfinder/routes/recurrences/records"
+	recordWebRoute,
+	recurrenceDestroyApiRoute,
+	recurrenceRecordDestroyApiRoute,
+	recurrenceRecordUpdateApiRoute,
+	recurrencesWebRoute,
+	recurrenceUpdateApiRoute,
+} from "@/wayfinder/routes"
 
 type RecurrenceExtra = {
 	records: (Record & RecordExtra)[]
@@ -89,8 +88,8 @@ export default function RecurrencePage({
 		try {
 			const route =
 				mode === "attach"
-					? attachRecurrenceRecord.url({ recurrence: recurrence.id, record: record.id })
-					: detachRecurrenceRecord.url({ recurrence: recurrence.id, record: record.id })
+					? recurrenceRecordUpdateApiRoute.url({ recurrence, record })
+					: recurrenceRecordDestroyApiRoute.url({ recurrence, record })
 
 			const response = await fetch(route, {
 				method: "POST",
@@ -119,7 +118,7 @@ export default function RecurrencePage({
 					actions={<RecurrenceEditorDialog recurrence={recurrence} />}
 					back={{
 						name: "Back to recurrences",
-						url: recurrencesRoute.url(),
+						url: recurrencesWebRoute.url(),
 					}}
 				/>
 
@@ -275,7 +274,9 @@ export default function RecurrencePage({
 													<div className="flex items-center gap-2">
 														<Button variant="outline" size="sm" asChild>
 															<Link
-																href={recordRoute.url({ record })}
+																href={recordWebRoute.url({
+																	record,
+																})}
 															>
 																Open
 															</Link>
@@ -339,7 +340,7 @@ function RecurrenceEditorDialog({ recurrence }: { recurrence: Recurrence }) {
 			formData.append("amount", `${value.amount}`)
 			formData.append("period", value.period)
 
-			const response = await fetch(updateRecurrence.url({ recurrence: recurrence.id }), {
+			const response = await fetch(recurrenceUpdateApiRoute.url({ recurrence }), {
 				method: "POST",
 				body: withMethod(formData, "PUT"),
 				headers: { Accept: "application/json" },
@@ -359,7 +360,7 @@ function RecurrenceEditorDialog({ recurrence }: { recurrence: Recurrence }) {
 	})
 
 	const handleDelete = async () => {
-		const response = await fetch(destroyRecurrence.url({ recurrence: recurrence.id }), {
+		const response = await fetch(recurrenceDestroyApiRoute.url({ recurrence }), {
 			method: "POST",
 			body: withMethod(new FormData(), "DELETE"),
 			headers: { Accept: "application/json" },
@@ -367,7 +368,7 @@ function RecurrenceEditorDialog({ recurrence }: { recurrence: Recurrence }) {
 
 		if (response.ok) {
 			setOpen(false)
-			router.visit(recurrencesRoute.url())
+			router.visit(recurrencesWebRoute.url())
 		}
 	}
 

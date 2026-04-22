@@ -34,15 +34,14 @@ import {
 import { cn, currencyClass, round2dp, toCurrency, toDate, toDatetime } from "@/lib/utils"
 import { Account, Budget, Category, Record, Recurrence, Statement } from "@/types"
 import {
-	allocator,
-	budget as budgetRoute,
-	budgets,
-	importer,
-	record as recordRoute,
-	records,
-	recurrence as recurrenceRoute,
-	recurrences,
-	statement as statementRoute,
+	allocatorWebRoute,
+	budgetsWebRoute,
+	budgetWebRoute,
+	importerWebRoute,
+	recordsWebRoute,
+	recordWebRoute,
+	recurrenceWebRoute,
+	statementWebRoute,
 } from "@/wayfinder/routes"
 
 type DashboardSummary = {
@@ -150,12 +149,12 @@ export default function DashboardPage({
 					actions={
 						<>
 							<Button size="lg" asChild>
-								<Link href={allocator.url()}>
+								<Link href={allocatorWebRoute.url()}>
 									<LinkIcon /> Open allocator
 								</Link>
 							</Button>
 							<Button size="lg" variant="outline" asChild>
-								<Link href={importer.url()}>
+								<Link href={importerWebRoute.url()}>
 									<ImportIcon /> Import statements
 								</Link>
 							</Button>
@@ -184,17 +183,17 @@ export default function DashboardPage({
 							<div className="space-y-6">
 								<div className="flex flex-wrap gap-3">
 									<Button size="lg" asChild>
-										<Link href={allocator.url()}>
+										<Link href={allocatorWebRoute.url()}>
 											<LinkIcon /> Open allocator
 										</Link>
 									</Button>
 									<Button size="lg" variant="outline" asChild>
-										<Link href={importer.url()}>
+										<Link href={importerWebRoute.url()}>
 											<ImportIcon /> Import statements
 										</Link>
 									</Button>
 									<Button size="lg" variant="outline" asChild>
-										<Link href={records.url()}>
+										<Link href={recordsWebRoute.url()}>
 											<ReceiptTextIcon /> Browse records
 										</Link>
 									</Button>
@@ -303,7 +302,7 @@ export default function DashboardPage({
 						label="Allocator backlog"
 						value={`${summary.pendingStatements} statements`}
 						detail={`${toCurrency(summary.allocatorBacklog)} unresolved`}
-						href={allocator.url()}
+						href={allocatorWebRoute.url()}
 						accentClassName="from-amber-500/[0.16] to-amber-500/[0.05]"
 					/>
 					<SpotlightMetric
@@ -311,7 +310,7 @@ export default function DashboardPage({
 						label="Records this month"
 						value={summary.recordsThisMonth}
 						detail={`${toCurrency(summary.incomeThisMonth)} in / ${toCurrency(-summary.expensesThisMonth)} out`}
-						href={records.url()}
+						href={recordsWebRoute.url()}
 						accentClassName="from-sky-500/[0.16] to-sky-500/[0.05]"
 					/>
 					<SpotlightMetric
@@ -319,7 +318,7 @@ export default function DashboardPage({
 						label="Active budgets"
 						value={summary.activeBudgets}
 						detail={`${toCurrency(summary.activeBudgetSpent)} tracked of ${toCurrency(summary.activeBudgetPlanned)}`}
-						href={budgets.url()}
+						href={budgetsWebRoute.url()}
 						accentClassName="from-fuchsia-500/[0.16] to-fuchsia-500/[0.05]"
 					/>
 					<SpotlightMetric
@@ -327,7 +326,7 @@ export default function DashboardPage({
 						label="Recurring load"
 						value={toCurrency(summary.monthlyRecurring)}
 						detail={`${summary.totalRecurrences} items, ${summary.linkedRecurrenceRecords} linked records`}
-						href={recurrences.url()}
+						href={recurrencesWebRoute.url()}
 						accentClassName="from-emerald-500/[0.16] to-emerald-500/[0.05]"
 					/>
 				</div>
@@ -339,7 +338,7 @@ export default function DashboardPage({
 							<CardTitle>Income versus expenses</CardTitle>
 							<CardAction>
 								<Button variant="outline" size="sm" asChild>
-									<Link href={records.url()}>View records</Link>
+									<Link href={recordsWebRoute.url()}>View records</Link>
 								</Button>
 							</CardAction>
 						</CardHeader>
@@ -387,7 +386,7 @@ export default function DashboardPage({
 								<CardTitle>Where pressure is building</CardTitle>
 								<CardAction>
 									<Button variant="outline" size="sm" asChild>
-										<Link href={budgets.url()}>All budgets</Link>
+										<Link href={budgetsWebRoute.url()}>All budgets</Link>
 									</Button>
 								</CardAction>
 							</CardHeader>
@@ -439,7 +438,7 @@ export default function DashboardPage({
 							<CardTitle>Statements still needing attention</CardTitle>
 							<CardAction>
 								<Button variant="outline" size="sm" asChild>
-									<Link href={allocator.url()}>
+									<Link href={allocatorWebRoute.url()}>
 										Open allocator
 										<ArrowRightIcon />
 									</Link>
@@ -489,7 +488,7 @@ export default function DashboardPage({
 													<TableCell>
 														<Button variant="ghost" size="sm" asChild>
 															<Link
-																href={statementRoute.url({
+																href={statementWebRoute.url({
 																	statement,
 																})}
 															>
@@ -521,7 +520,7 @@ export default function DashboardPage({
 							<CardTitle>Latest records</CardTitle>
 							<CardAction>
 								<Button variant="outline" size="sm" asChild>
-									<Link href={records.url()}>
+									<Link href={recordsWebRoute.url()}>
 										All records
 										<ArrowRightIcon />
 									</Link>
@@ -579,7 +578,7 @@ export default function DashboardPage({
 												</TableCell>
 												<TableCell>
 													<Button variant="ghost" size="sm" asChild>
-														<Link href={recordRoute.url({ record })}>
+														<Link href={recordWebRoute.url({ record })}>
 															View
 														</Link>
 													</Button>
@@ -816,7 +815,7 @@ function BudgetWatchRow({ budget }: { budget: BudgetSpotlight }) {
 				</div>
 
 				<Button variant="outline" size="sm" asChild>
-					<Link href={budgetRoute.url({ budget })}>Open</Link>
+					<Link href={budgetWebRoute.url({ budget })}>Open</Link>
 				</Button>
 			</div>
 
@@ -869,7 +868,7 @@ function RecurrenceLoadRow({
 				</div>
 
 				<Button variant="outline" size="sm" asChild>
-					<Link href={recurrenceRoute.url({ recurrence })}>Open</Link>
+					<Link href={recurrenceWebRoute.url({ recurrence })}>Open</Link>
 				</Button>
 			</div>
 

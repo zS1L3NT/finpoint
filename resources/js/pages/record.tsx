@@ -43,9 +43,12 @@ import {
 import useApiFormErrors from "@/hooks/use-api-form-errors"
 import { cn, currencyClass, toCurrency, toDate, toDatetime, withMethod } from "@/lib/utils"
 import { Account, Allocation, Category, Record, Statement } from "@/types"
-import RecordController from "@/wayfinder/actions/App/Http/Controllers/RecordController"
-import { records, statement as statementRoute } from "@/wayfinder/routes"
-import { destroy, update } from "@/wayfinder/routes/records"
+import {
+	recordDestroyApiRoute,
+	recordsWebRoute,
+	recordUpdateApiRoute,
+	statementWebRoute,
+} from "@/wayfinder/routes"
 
 type RecordExtra = {
 	category: Category & CategoryExtra
@@ -76,7 +79,7 @@ export default function RecordPage({
 					actions={<RecordEditorDialog record={record} categories={categories} />}
 					back={{
 						name: "Back to records",
-						url: records.url(),
+						url: recordsWebRoute.url(),
 					}}
 				/>
 
@@ -153,7 +156,9 @@ export default function RecordPage({
 												<TableCell>
 													<Button variant="outline" size="sm" asChild>
 														<Link
-															href={statementRoute.url({ statement })}
+															href={statementWebRoute.url({
+																statement,
+															})}
 														>
 															Open
 														</Link>
@@ -221,7 +226,7 @@ function RecordEditorDialog({
 				formData.append(`statements[${index}][amount]`, `${statement.amount}`)
 			})
 
-			const response = await fetch(update.url({ record: record.id }), {
+			const response = await fetch(recordUpdateApiRoute.url({ record }), {
 				method: "POST",
 				body: withMethod(formData, "PUT"),
 				headers: { Accept: "application/json" },
@@ -241,7 +246,7 @@ function RecordEditorDialog({
 	})
 
 	const handleDelete = async () => {
-		const response = await fetch(destroy.url({ record: record.id }), {
+		const response = await fetch(recordDestroyApiRoute.url({ record }), {
 			method: "POST",
 			body: withMethod(new FormData(), "DELETE"),
 			headers: { Accept: "application/json" },
@@ -249,7 +254,7 @@ function RecordEditorDialog({
 
 		if (response.ok) {
 			setOpen(false)
-			router.visit(RecordController.index.url())
+			router.visit(recordsWebRoute.url())
 		}
 	}
 
