@@ -1,6 +1,6 @@
 import { Link, router } from "@inertiajs/react"
 import { useForm } from "@tanstack/react-form"
-import { LinkIcon, MoreHorizontalIcon } from "lucide-react"
+import { LinkIcon } from "lucide-react"
 import { DateTime } from "luxon"
 import { useEffect, useState } from "react"
 import AppHeader from "@/components/app-header"
@@ -11,6 +11,7 @@ import DatetimeField from "@/components/form/datetime-field"
 import TextField from "@/components/form/text-field"
 import TextareaField from "@/components/form/textarea-field"
 import Icon from "@/components/icon"
+import PageHeader from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import {
 	Card,
@@ -84,10 +85,12 @@ export default function Allocator({
 			<AppHeader title="Allocator" />
 
 			<div className="container mx-auto flex flex-col gap-8 p-8">
-				<div className="flex flex-col gap-1">
-					<h2 className="text-2xl font-semibold">Allocator</h2>
-					<p className="text-muted-foreground">Allocate bank statements to app records</p>
-				</div>
+				<PageHeader
+					title="Allocator"
+					subtitle="Allocate bank statements to app records."
+					description="Allocation workspace"
+					icon={LinkIcon}
+				/>
 
 				<DataTable
 					data={statements}

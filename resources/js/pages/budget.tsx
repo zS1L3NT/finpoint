@@ -1,10 +1,9 @@
 import { Link, router } from "@inertiajs/react"
 import { useForm } from "@tanstack/react-form"
 import {
-	ArrowLeftIcon,
-	CalendarRangeIcon,
 	LoaderCircleIcon,
 	PencilIcon,
+	PiggyBankIcon,
 	PlusIcon,
 	SparklesIcon,
 	Trash2Icon,
@@ -16,7 +15,8 @@ import DetailCard from "@/components/detail-card"
 import AmountField from "@/components/form/amount-field"
 import TextField from "@/components/form/text-field"
 import Icon from "@/components/icon"
-import RecordSearch, { isRecordWithinBudgetRange } from "@/components/record-search"
+import PageHeader from "@/components/page-header"
+import RecordSearch from "@/components/record-search"
 import { Button } from "@/components/ui/button"
 import {
 	Card,
@@ -104,29 +104,14 @@ export default function BudgetPage({ budget }: { budget: Budget & BudgetExtra })
 			<AppHeader title="Budget" />
 
 			<div className="container mx-auto flex flex-col gap-8 p-8">
-				<div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-					<div className="space-y-3">
-						<Button variant="outline" size="sm" asChild>
-							<Link href={budgetsRoute.url()}>
-								<ArrowLeftIcon /> Back to budgets
-							</Link>
-						</Button>
-
-						<div className="space-y-1">
-							<div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
-								<CalendarRangeIcon className="size-3.5" />
-								Budget detail
-							</div>
-							<h2 className="text-3xl font-semibold tracking-tight">{budget.name}</h2>
-							<p className="max-w-2xl text-sm text-muted-foreground">
-								Manage the spending window, review attached records, and fine-tune
-								what belongs in this bucket.
-							</p>
-						</div>
-					</div>
-
-					<BudgetEditorDialog budget={budget} />
-				</div>
+				<PageHeader
+					title={budget.name}
+					subtitle="Manage the spending window, review attached records, and fine-tune what this budget tracks."
+					description="Budget details"
+					icon={PiggyBankIcon}
+					actions={<BudgetEditorDialog budget={budget} />}
+					back={{ name: "Back to budgets", url: budgetsRoute.url() }}
+				/>
 
 				<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
 					<DetailCard label="Planned" value={toCurrency(budget.amount)} />

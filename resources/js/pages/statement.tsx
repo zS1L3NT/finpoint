@@ -1,8 +1,9 @@
 import { Link } from "@inertiajs/react"
-import { MoreHorizontalIcon } from "lucide-react"
+import { CreditCardIcon } from "lucide-react"
 import AppHeader from "@/components/app-header"
 import DetailCard from "@/components/detail-card"
 import Icon from "@/components/icon"
+import PageHeader from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -35,12 +36,16 @@ export default function StatementPage({ statement }: { statement: Statement & St
 			<AppHeader title="Statement" />
 
 			<div className="container mx-auto flex flex-col gap-8 p-8">
-				<div className="flex flex-col gap-1">
-					<h2 className="text-2xl font-semibold">Statement {statement.id}</h2>
-					<p className="text-muted-foreground">
-						Review the imported statement and the records allocated to it.
-					</p>
-				</div>
+				<PageHeader
+					title={`Statement ${statement.id}`}
+					subtitle="Review the imported statement and the records allocated to it."
+					description="Statement details"
+					icon={CreditCardIcon}
+					back={{
+						name: "Back to statements",
+						url: statementsRoute.url(),
+					}}
+				/>
 
 				<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
 					<DetailCard

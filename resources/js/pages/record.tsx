@@ -1,6 +1,6 @@
 import { Link, router } from "@inertiajs/react"
 import { useForm } from "@tanstack/react-form"
-import { MoreHorizontalIcon, PencilIcon, Trash2Icon } from "lucide-react"
+import { PencilIcon, ReceiptTextIcon, Trash2Icon } from "lucide-react"
 import { useState } from "react"
 import AppHeader from "@/components/app-header"
 import DetailCard from "@/components/detail-card"
@@ -10,6 +10,7 @@ import DatetimeField from "@/components/form/datetime-field"
 import TextField from "@/components/form/text-field"
 import TextareaField from "@/components/form/textarea-field"
 import Icon from "@/components/icon"
+import PageHeader from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import {
 	Card,
@@ -50,7 +51,7 @@ import useApiFormErrors from "@/hooks/use-api-form-errors"
 import { cn, currencyClass, toCurrency, toDate, toDatetime, withMethod } from "@/lib/utils"
 import { Account, Allocation, Category, Record, Statement } from "@/types"
 import RecordController from "@/wayfinder/actions/App/Http/Controllers/RecordController"
-import { statement as statementRoute } from "@/wayfinder/routes"
+import { records, statement as statementRoute } from "@/wayfinder/routes"
 import { destroy, update } from "@/wayfinder/routes/records"
 
 type RecordExtra = {
@@ -74,16 +75,17 @@ export default function RecordPage({
 			<AppHeader title="Record" />
 
 			<div className="container mx-auto flex flex-col gap-8 p-8">
-				<div className="flex items-start justify-between gap-4">
-					<div className="flex flex-col gap-1">
-						<h2 className="text-2xl font-semibold">Record {record.id}</h2>
-						<p className="text-muted-foreground">
-							Review the record details and the statements allocated to it.
-						</p>
-					</div>
-
-					<RecordEditorDialog record={record} categories={categories} />
-				</div>
+				<PageHeader
+					title={record.title}
+					subtitle="Review the record details and the statements allocated to it."
+					description="Record details"
+					icon={ReceiptTextIcon}
+					actions={<RecordEditorDialog record={record} categories={categories} />}
+					back={{
+						name: "Back to records",
+						url: records.url(),
+					}}
+				/>
 
 				<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
 					<DetailCard label="Title" value={record.title} />

@@ -8,6 +8,7 @@ import DataTable from "@/components/data-table"
 import DetailCard from "@/components/detail-card"
 import AmountField from "@/components/form/amount-field"
 import TextField from "@/components/form/text-field"
+import PageHeader from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -59,23 +60,13 @@ export default function BudgetsPage({
 			<AppHeader title="Budgets" />
 
 			<div className="container mx-auto flex flex-col gap-8 p-8">
-				<div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-					<div className="space-y-2">
-						<div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
-							<PiggyBankIcon className="size-3.5" />
-							Budget planner
-						</div>
-						<div className="space-y-1">
-							<h2 className="text-3xl font-semibold tracking-tight">Budgets</h2>
-							<p className="max-w-2xl text-sm text-muted-foreground">
-								Track fixed spending windows, monitor how much has already been
-								consumed, and jump straight into the records inside each budget.
-							</p>
-						</div>
-					</div>
-
-					<BudgetCreateDialog />
-				</div>
+				<PageHeader
+					title="Budgets"
+					subtitle="Track fixed spending windows, monitor how much has already been consumed, and jump straight into the records inside each budget."
+					description="Budget planner"
+					icon={PiggyBankIcon}
+					actions={<BudgetCreateDialog />}
+				/>
 
 				<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
 					<DetailCard label="Budgets" value={overview.length} />

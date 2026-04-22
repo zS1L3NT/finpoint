@@ -1,11 +1,12 @@
 import { Link, router } from "@inertiajs/react"
 import { useForm } from "@tanstack/react-form"
-import { LoaderCircleIcon, PlusIcon, RepeatIcon } from "lucide-react"
+import { CalendarSyncIcon, LoaderCircleIcon, PlusIcon } from "lucide-react"
 import { useState } from "react"
 import AppHeader from "@/components/app-header"
 import DataTable from "@/components/data-table"
 import DetailCard from "@/components/detail-card"
 import AmountField from "@/components/form/amount-field"
+import PageHeader from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import {
 	Card,
@@ -87,23 +88,13 @@ export default function RecurrencesPage({
 			<AppHeader title="Recurrences" />
 
 			<div className="container mx-auto flex flex-col gap-8 p-8">
-				<div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-					<div className="space-y-2">
-						<div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
-							<RepeatIcon className="size-3.5" />
-							Recurring spend map
-						</div>
-						<div className="space-y-1">
-							<h2 className="text-3xl font-semibold tracking-tight">Recurrences</h2>
-							<p className="max-w-2xl text-sm text-muted-foreground">
-								See your recurring commitments as a monthly breakdown, then dive
-								into the records that support each pattern.
-							</p>
-						</div>
-					</div>
-
-					<RecurrenceCreateDialog />
-				</div>
+				<PageHeader
+					title="Recurrences"
+					subtitle="See your recurring commitments as a monthly breakdown, then dive into the records that support each pattern."
+					description="Recurring spend map"
+					icon={CalendarSyncIcon}
+					actions={<RecurrenceCreateDialog />}
+				/>
 
 				<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
 					<DetailCard label="Recurrences" value={breakdown.length} />

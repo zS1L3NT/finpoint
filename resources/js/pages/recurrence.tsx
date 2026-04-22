@@ -1,7 +1,7 @@
 import { Link, router } from "@inertiajs/react"
 import { useForm } from "@tanstack/react-form"
 import {
-	ArrowLeftIcon,
+	CalendarSyncIcon,
 	LoaderCircleIcon,
 	PencilIcon,
 	PlusIcon,
@@ -13,6 +13,7 @@ import AppHeader from "@/components/app-header"
 import DetailCard from "@/components/detail-card"
 import AmountField from "@/components/form/amount-field"
 import Icon from "@/components/icon"
+import PageHeader from "@/components/page-header"
 import RecordSearch from "@/components/record-search"
 import { Button } from "@/components/ui/button"
 import {
@@ -110,31 +111,17 @@ export default function RecurrencePage({
 			<AppHeader title="Recurrence" />
 
 			<div className="container mx-auto flex flex-col gap-8 p-8">
-				<div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-					<div className="space-y-3">
-						<Button variant="outline" size="sm" asChild>
-							<Link href={recurrencesRoute.url()}>
-								<ArrowLeftIcon /> Back to recurrences
-							</Link>
-						</Button>
-
-						<div className="space-y-1">
-							<div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
-								<RepeatIcon className="size-3.5" />
-								Recurring item
-							</div>
-							<h2 className="text-3xl font-semibold tracking-tight">
-								{recurrence.name}
-							</h2>
-							<p className="max-w-2xl text-sm text-muted-foreground">
-								Use linked records to ground this recurrence in real spending
-								activity while keeping a clean normalized monthly view.
-							</p>
-						</div>
-					</div>
-
-					<RecurrenceEditorDialog recurrence={recurrence} />
-				</div>
+				<PageHeader
+					title={recurrence.name}
+					subtitle="Use linked records to ground this recurrence in real spending activity while keeping a clean normalized monthly view."
+					description="Recurrence details"
+					icon={CalendarSyncIcon}
+					actions={<RecurrenceEditorDialog recurrence={recurrence} />}
+					back={{
+						name: "Back to recurrences",
+						url: recurrencesRoute.url(),
+					}}
+				/>
 
 				<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
 					<DetailCard label="Period" value={formatRecurrencePeriod(recurrence.period)} />

@@ -3,17 +3,16 @@ import {
 	ArrowDownRightIcon,
 	ArrowRightIcon,
 	ArrowUpRightIcon,
-	CalendarSyncIcon,
-	ChartPieIcon,
+	CircleDollarSignIcon,
 	ImportIcon,
 	LinkIcon,
 	ReceiptTextIcon,
 	SparklesIcon,
-	TriangleAlertIcon,
 } from "lucide-react"
 import { DateTime } from "luxon"
 import AppHeader from "@/components/app-header"
 import Icon from "@/components/icon"
+import PageHeader from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import {
 	Card,
@@ -143,6 +142,27 @@ export default function DashboardPage({
 			<AppHeader title="Dashboard" />
 
 			<div className="container mx-auto flex flex-col gap-8 p-8">
+				<PageHeader
+					title="Dashboard"
+					subtitle="Watch allocator pressure, active budget burn, recurring load, and recent ledger movement from one place."
+					description="Financial control tower"
+					icon={CircleDollarSignIcon}
+					actions={
+						<>
+							<Button size="lg" asChild>
+								<Link href={allocator.url()}>
+									<LinkIcon /> Open allocator
+								</Link>
+							</Button>
+							<Button size="lg" variant="outline" asChild>
+								<Link href={importer.url()}>
+									<ImportIcon /> Import statements
+								</Link>
+							</Button>
+						</>
+					}
+				/>
+
 				<div className="grid gap-6 xl:grid-cols-[1.25fr_0.75fr]">
 					<Card className="relative overflow-hidden border border-border/70 bg-gradient-to-br from-emerald-500/[0.18] via-card via-45% to-sky-500/[0.12] py-0">
 						<div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.36),transparent_34%),radial-gradient(circle_at_bottom_right,rgba(14,165,233,0.18),transparent_36%)]" />

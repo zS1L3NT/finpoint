@@ -1,11 +1,11 @@
 import { Link } from "@inertiajs/react"
 import {
 	CalendarSyncIcon,
-	ChartPieIcon,
 	CircleDollarSignIcon,
 	CreditCardIcon,
 	ImportIcon,
 	LinkIcon,
+	PiggyBankIcon,
 	ReceiptTextIcon,
 	TagIcon,
 } from "lucide-react"
@@ -78,7 +78,7 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
 								<Link href={budgets.url()}>
-									<ChartPieIcon />
+									<PiggyBankIcon />
 									<span>Budgets</span>
 								</Link>
 							</SidebarMenuButton>

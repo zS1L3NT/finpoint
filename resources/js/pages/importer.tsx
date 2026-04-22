@@ -47,6 +47,20 @@ export default function Importer() {
 		<>
 			<AppHeader title="Importer" />
 
+			<PageHeader
+				title="Importer"
+				subtitle="Upload one or more bank CSV exports, create any missing accounts, and move straight into allocation once the feed is loaded."
+				description="Import workspace"
+				icon={ImportIcon}
+				actions={
+					<Button size="lg" variant="outline" asChild>
+						<Link href={allocator.url()}>
+							<LinkIcon /> Open allocator
+						</Link>
+					</Button>
+				}
+			/>
+
 			<form
 				method="POST"
 				// action={importMethod.url()}

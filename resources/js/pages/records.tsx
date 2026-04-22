@@ -1,8 +1,9 @@
 import { Link } from "@inertiajs/react"
-import { MoreHorizontalIcon } from "lucide-react"
+import { ReceiptTextIcon } from "lucide-react"
 import AppHeader from "@/components/app-header"
 import DataTable from "@/components/data-table"
 import Icon from "@/components/icon"
+import PageHeader from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import {
 	DropdownMenu,
@@ -32,12 +33,12 @@ export default function RecordsPage({ records }: { records: Paginated<Record & R
 			<AppHeader title="Records" />
 
 			<div className="container mx-auto flex flex-col gap-8 p-8">
-				<div className="flex flex-col gap-1">
-					<h2 className="text-2xl font-semibold">Records</h2>
-					<p className="text-muted-foreground">
-						Browse records with linked statements and category context.
-					</p>
-				</div>
+				<PageHeader
+					title="Records"
+					subtitle="Browse records with linked statements and category context."
+					description="Ledger view"
+					icon={ReceiptTextIcon}
+				/>
 
 				<DataTable
 					data={records}

@@ -1,10 +1,11 @@
 import { router } from "@inertiajs/react"
-import { PencilIcon, PlusIcon, Trash2Icon } from "lucide-react"
+import { PencilIcon, PlusIcon, TagIcon, Trash2Icon } from "lucide-react"
 import { useEffect, useState } from "react"
 import AppHeader from "@/components/app-header"
 import ComboboxField from "@/components/form/combobox-field"
 import TextField from "@/components/form/text-field"
 import Icon from "@/components/icon"
+import PageHeader from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -61,18 +62,17 @@ export default function CategoriesPage({ categories }: { categories: CategoryNod
 			<AppHeader title="Categories" />
 
 			<div className="container mx-auto flex flex-col gap-8 p-8">
-				<div className="flex items-start justify-between gap-4">
-					<div className="flex flex-col gap-1">
-						<h2 className="text-2xl font-semibold">Categories</h2>
-						<p className="text-muted-foreground">
-							Manage top-level categories and their nested children.
-						</p>
-					</div>
-
-					<Button type="button" onClick={() => setDialogState({ mode: "create" })}>
-						<PlusIcon /> Create Category
-					</Button>
-				</div>
+				<PageHeader
+					title="Categories"
+					subtitle="Manage top-level categories and their nested children."
+					description="Category map"
+					icon={TagIcon}
+					actions={
+						<Button type="button" onClick={() => setDialogState({ mode: "create" })}>
+							<PlusIcon /> Create Category
+						</Button>
+					}
+				/>
 
 				<Card>
 					<CardHeader>

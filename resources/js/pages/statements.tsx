@@ -1,7 +1,8 @@
 import { Link } from "@inertiajs/react"
-import { MoreHorizontalIcon } from "lucide-react"
+import { CreditCardIcon } from "lucide-react"
 import AppHeader from "@/components/app-header"
 import DataTable from "@/components/data-table"
+import PageHeader from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import {
 	DropdownMenu,
@@ -35,12 +36,12 @@ export default function StatementsPage({
 			<AppHeader title="Statements" />
 
 			<div className="container mx-auto flex flex-col gap-8 p-8">
-				<div className="flex flex-col gap-1">
-					<h2 className="text-2xl font-semibold">Statements</h2>
-					<p className="text-muted-foreground">
-						Review imported bank statements and their linked records.
-					</p>
-				</div>
+				<PageHeader
+					icon={CreditCardIcon}
+					description="Imported bank feed"
+					title="Statements"
+					subtitle="Review imported bank statements and their linked records."
+				/>
 
 				<DataTable
 					data={statements}
