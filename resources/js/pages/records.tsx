@@ -5,13 +5,6 @@ import DataTable from "@/components/data-table"
 import Icon from "@/components/icon"
 import PageHeader from "@/components/page-header"
 import { Button } from "@/components/ui/button"
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import usePaginatedTableState from "@/hooks/use-paginated-table-state"
 import { currencyClass, toCurrency, toDatetime } from "@/lib/utils"
 import { Category, Paginated, Record, Statement } from "@/types"
@@ -86,24 +79,11 @@ export default function RecordsPage({ records }: { records: Paginated<Record & R
 						},
 						{
 							id: "actions",
-							meta: { width: "3rem" },
+							meta: { width: "4rem" },
 							cell: ({ row }) => (
-								<DropdownMenu>
-									<DropdownMenuTrigger asChild>
-										<Button variant="ghost" className="size-8 p-0">
-											<span className="sr-only">Open menu</span>
-											<MoreHorizontalIcon className="size-4" />
-										</Button>
-									</DropdownMenuTrigger>
-									<DropdownMenuContent align="end">
-										<DropdownMenuLabel>Actions</DropdownMenuLabel>
-										<DropdownMenuItem asChild>
-											<Link href={record.url({ record: row.original })}>
-												View record
-											</Link>
-										</DropdownMenuItem>
-									</DropdownMenuContent>
-								</DropdownMenu>
+								<Button variant="outline" size="sm" asChild>
+									<Link href={record.url({ record: row.original })}>Open</Link>
+								</Button>
 							),
 						},
 					]}

@@ -190,7 +190,7 @@ export default function BudgetsPage({
 						},
 						{
 							id: "actions",
-							meta: { width: "6rem" },
+							meta: { width: "4rem" },
 							cell: ({ row }) => (
 								<Button variant="outline" size="sm" asChild>
 									<Link href={budgetRoute.url({ budget: row.original })}>

@@ -7,13 +7,6 @@ import PageHeader from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
 	Table,
 	TableBody,
 	TableCell,
@@ -23,7 +16,7 @@ import {
 } from "@/components/ui/table"
 import { currencyClass, toCurrency, toDate, toDatetime } from "@/lib/utils"
 import { Account, Allocation, Category, Record, Statement } from "@/types"
-import { record as recordRoute } from "@/wayfinder/routes"
+import { record as recordRoute, statements as statementsRoute } from "@/wayfinder/routes"
 
 type StatementExtra = {
 	account: Account
@@ -83,7 +76,7 @@ export default function StatementPage({ statement }: { statement: Statement & St
 										<TableHead className="w-24">Amount</TableHead>
 										<TableHead className="w-24">Allocated</TableHead>
 										<TableHead>Description</TableHead>
-										<TableHead className="w-12" />
+										<TableHead className="w-16" />
 									</TableRow>
 								</TableHeader>
 								<TableBody>
@@ -122,37 +115,15 @@ export default function StatementPage({ statement }: { statement: Statement & St
 												>
 													{toCurrency(record.pivot.amount)}
 												</TableCell>
-												<TableCell className="max-w-0 truncate text-muted-foreground">
+												<TableCell className="truncate text-muted-foreground">
 													{record.description ?? "-"}
 												</TableCell>
 												<TableCell>
-													<DropdownMenu>
-														<DropdownMenuTrigger asChild>
-															<Button
-																variant="ghost"
-																className="size-8 p-0"
-															>
-																<span className="sr-only">
-																	Open menu
-																</span>
-																<MoreHorizontalIcon className="size-4" />
-															</Button>
-														</DropdownMenuTrigger>
-														<DropdownMenuContent align="end">
-															<DropdownMenuLabel>
-																Actions
-															</DropdownMenuLabel>
-															<DropdownMenuItem asChild>
-																<Link
-																	href={recordRoute.url({
-																		record,
-																	})}
-																>
-																	View record
-																</Link>
-															</DropdownMenuItem>
-														</DropdownMenuContent>
-													</DropdownMenu>
+													<Button variant="outline" size="sm" asChild>
+														<Link href={recordRoute.url({ record })}>
+															Open
+														</Link>
+													</Button>
 												</TableCell>
 											</TableRow>
 										))

@@ -30,13 +30,6 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog"
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { FieldGroup } from "@/components/ui/field"
 import { Progress } from "@/components/ui/progress"
 import {
@@ -158,33 +151,13 @@ export default function RecordPage({
 													{statement.description}
 												</TableCell>
 												<TableCell>
-													<DropdownMenu>
-														<DropdownMenuTrigger asChild>
-															<Button
-																variant="ghost"
-																className="size-8 p-0"
-															>
-																<span className="sr-only">
-																	Open menu
-																</span>
-																<MoreHorizontalIcon className="size-4" />
-															</Button>
-														</DropdownMenuTrigger>
-														<DropdownMenuContent align="end">
-															<DropdownMenuLabel>
-																Actions
-															</DropdownMenuLabel>
-															<DropdownMenuItem asChild>
-																<Link
-																	href={statementRoute.url({
-																		statement,
-																	})}
-																>
-																	View statement
-																</Link>
-															</DropdownMenuItem>
-														</DropdownMenuContent>
-													</DropdownMenu>
+													<Button variant="outline" size="sm" asChild>
+														<Link
+															href={statementRoute.url({ statement })}
+														>
+															Open
+														</Link>
+													</Button>
 												</TableCell>
 											</TableRow>
 										))
