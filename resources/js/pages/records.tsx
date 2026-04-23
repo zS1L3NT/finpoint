@@ -3,7 +3,7 @@ import { ReceiptTextIcon } from "lucide-react"
 import Icon from "@/components/icon"
 import AppHeader from "@/components/layout/app-header"
 import PageHeader from "@/components/layout/page-header"
-import DataTable from "@/components/table/data-table"
+import PaginatedDataTable from "@/components/table/paginated-data-table"
 import { Button } from "@/components/ui/button"
 import usePaginatedTableState from "@/hooks/use-paginated-table-state"
 import { currencyClass, toCurrency, toDatetime } from "@/lib/utils"
@@ -32,8 +32,8 @@ export default function RecordsPage({ records }: { records: Paginated<Record & R
 					icon={ReceiptTextIcon}
 				/>
 
-				<DataTable
-					data={records}
+				<PaginatedDataTable
+					paginated={records}
 					columns={[
 						{
 							header: "Record",

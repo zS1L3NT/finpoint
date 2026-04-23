@@ -13,7 +13,7 @@ import TextareaField from "@/components/form/textarea-field"
 import Icon from "@/components/icon"
 import AppHeader from "@/components/layout/app-header"
 import PageHeader from "@/components/layout/page-header"
-import DataTable from "@/components/table/data-table"
+import PaginatedDataTable from "@/components/table/paginated-data-table"
 import { Button } from "@/components/ui/button"
 import {
 	Card,
@@ -86,8 +86,8 @@ export default function Allocator({
 					icon={LinkIcon}
 				/>
 
-				<DataTable
-					data={statements}
+				<PaginatedDataTable
+					paginated={statements}
 					columns={[
 						{
 							id: "select",
@@ -175,7 +175,6 @@ export default function Allocator({
 						summary: `${Object.values(rowSelection).filter(Boolean).length} selected. Showing ${statements.data.length} of ${statements.total} statements.`,
 					}}
 					emptyMessage="No statements found."
-					getRowId={row => row.id}
 					rowSelection={rowSelection}
 					setRowSelection={setRowSelection}
 				/>

@@ -5,16 +5,9 @@ import DetailCard from "@/components/detail-card"
 import Icon from "@/components/icon"
 import AppHeader from "@/components/layout/app-header"
 import PageHeader from "@/components/layout/page-header"
+import DataTable from "@/components/table/data-table"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from "@/components/ui/table"
 import { currencyClass, toCurrency, toDate, toDatetime } from "@/lib/utils"
 import { Account, Allocation, Category, Record, Statement } from "@/types"
 import { recordWebRoute, statementsWebRoute } from "@/wayfinder/routes"
@@ -59,81 +52,78 @@ export default function StatementPage({ statement }: { statement: Statement & St
 						<CardDescription>Records linked to this statement.</CardDescription>
 					</CardHeader>
 					<CardContent>
-						<div className="overflow-hidden rounded-lg border bg-card">
-							<Table className="table-fixed">
-								<TableHeader>
-									<TableRow>
-										<TableHead className="w-64">Record</TableHead>
-										<TableHead className="w-64">Amount</TableHead>
-										<TableHead className="w-48">Date & Time</TableHead>
-										<TableHead>Description</TableHead>
-										<TableHead className="w-16" />
-									</TableRow>
-								</TableHeader>
-								<TableBody>
-									{statement.records.length ? (
-										statement.records.map(record => (
-											<TableRow key={record.id}>
-												<TableCell>
-													<div className="flex items-center gap-3">
-														<Icon {...record.category} size={16} />
-														<div className="min-w-0">
-															<p className="truncate font-medium">
-																{record.title}
-															</p>
-															<p className="truncate text-muted-foreground">
-																{[
-																	record.people
-																		? `w/ ${record.people}`
-																		: null,
-																	record.location
-																		? `@ ${record.location}`
-																		: null,
-																]
-																	.filter(Boolean)
-																	.join(" ") ||
-																	"No extra context"}
-															</p>
-														</div>
-													</div>
-												</TableCell>
-												<TableCell>
-													<AllocateBar
-														title="Allocated"
-														value={record.pivot.amount}
-														total={record.amount}
-													/>
-												</TableCell>
-												<TableCell>{toDatetime(record.datetime)}</TableCell>
-												<TableCell className="truncate text-muted-foreground">
-													{record.description ?? "-"}
-												</TableCell>
-												<TableCell>
-													<Button variant="outline" size="sm" asChild>
-														<Link
-															href={recordWebRoute.url({
-																record,
-															})}
-														>
-															Open
-														</Link>
-													</Button>
-												</TableCell>
-											</TableRow>
-										))
-									) : (
-										<TableRow>
-											<TableCell
-												colSpan={6}
-												className="h-24 text-center text-muted-foreground"
+						<DataTable
+							data={statement.records}
+							columns={[
+								{
+									header: "Record",
+									meta: { width: "16rem" },
+									cell: ({ row }) => (
+										<div className="flex items-center gap-3">
+											<Icon {...row.original.category} size={16} />
+											<div className="min-w-0">
+												<p className="truncate font-medium">
+													{row.original.title}
+												</p>
+												<p className="truncate text-muted-foreground">
+													{[
+														row.original.people
+															? `w/ ${row.original.people}`
+															: null,
+														row.original.location
+															? `@ ${row.original.location}`
+															: null,
+													]
+														.filter(Boolean)
+														.join(" ") || "No extra context"}
+												</p>
+											</div>
+										</div>
+									),
+								},
+								{
+									header: "Amount",
+									meta: { width: "16rem" },
+									cell: ({ row }) => (
+										<AllocateBar
+											title="Allocated"
+											value={row.original.pivot.amount}
+											total={row.original.amount}
+										/>
+									),
+								},
+								{
+									header: "Date & Time",
+									meta: { width: "12rem" },
+									cell: ({ row }) => toDatetime(row.original.datetime),
+								},
+								{
+									header: "Description",
+									meta: { width: "fit-content" },
+									cell: ({ row }) => (
+										<div className="max-w-0 truncate text-muted-foreground">
+											{row.original.description || "-"}
+										</div>
+									),
+								},
+								{
+									id: "actions",
+									meta: { width: "4rem" },
+									cell: ({ row }) => (
+										<Button variant="outline" size="sm" asChild>
+											<Link
+												href={recordWebRoute.url({
+													record: row.original,
+												})}
 											>
-												No records found.
-											</TableCell>
-										</TableRow>
-									)}
-								</TableBody>
-							</Table>
-						</div>
+												Open
+											</Link>
+										</Button>
+									),
+								},
+							]}
+							emptyMessage="No records found."
+						/>
 					</CardContent>
 				</Card>
 			</div>

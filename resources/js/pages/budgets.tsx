@@ -7,7 +7,7 @@ import AmountField from "@/components/form/amount-field"
 import TextField from "@/components/form/text-field"
 import AppHeader from "@/components/layout/app-header"
 import PageHeader from "@/components/layout/page-header"
-import DataTable from "@/components/table/data-table"
+import PaginatedDataTable from "@/components/table/paginated-data-table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -53,8 +53,8 @@ export default function BudgetsPage({ budgets }: { budgets: Paginated<Budget & B
 					actions={<BudgetCreateDialog />}
 				/>
 
-				<DataTable
-					data={budgets}
+				<PaginatedDataTable
+					paginated={budgets}
 					columns={[
 						{
 							header: "Budget",

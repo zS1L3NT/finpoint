@@ -2,7 +2,7 @@ import { Link } from "@inertiajs/react"
 import { CreditCardIcon } from "lucide-react"
 import AppHeader from "@/components/layout/app-header"
 import PageHeader from "@/components/layout/page-header"
-import DataTable from "@/components/table/data-table"
+import PaginatedDataTable from "@/components/table/paginated-data-table"
 import { Button } from "@/components/ui/button"
 import usePaginatedTableState from "@/hooks/use-paginated-table-state"
 import { currencyClass, toCurrency, toDate } from "@/lib/utils"
@@ -35,8 +35,8 @@ export default function StatementsPage({
 					icon={CreditCardIcon}
 				/>
 
-				<DataTable
-					data={statements}
+				<PaginatedDataTable
+					paginated={statements}
 					columns={[
 						{
 							header: "Account",

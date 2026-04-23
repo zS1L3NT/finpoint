@@ -12,6 +12,7 @@ import TextareaField from "@/components/form/textarea-field"
 import Icon from "@/components/icon"
 import AppHeader from "@/components/layout/app-header"
 import PageHeader from "@/components/layout/page-header"
+import DataTable from "@/components/table/data-table"
 import { Button } from "@/components/ui/button"
 import {
 	Card,
@@ -33,14 +34,6 @@ import {
 } from "@/components/ui/dialog"
 import { FieldGroup } from "@/components/ui/field"
 import { Progress } from "@/components/ui/progress"
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from "@/components/ui/table"
 import useApiFormErrors from "@/hooks/use-api-form-errors"
 import { cn, currencyClass, toCurrency, toDate, toDatetime, withMethod } from "@/lib/utils"
 import { Account, Allocation, Category, Record, Statement } from "@/types"
@@ -122,59 +115,56 @@ export default function RecordPage({
 						</CardDescription>
 					</CardHeader>
 					<CardContent>
-						<div className="overflow-hidden rounded-lg border bg-card">
-							<Table className="table-fixed">
-								<TableHeader>
-									<TableRow>
-										<TableHead className="w-32">Account</TableHead>
-										<TableHead className="w-32">Date</TableHead>
-										<TableHead className="w-64">Amount</TableHead>
-										<TableHead>Description</TableHead>
-										<TableHead className="w-16" />
-									</TableRow>
-								</TableHeader>
-								<TableBody>
-									{record.statements.length ? (
-										record.statements.map(statement => (
-											<TableRow key={statement.id}>
-												<TableCell>{statement.account.id}</TableCell>
-												<TableCell>{toDate(statement.date)}</TableCell>
-												<TableCell>
-													<AllocateBar
-														title="Allocated"
-														value={statement.pivot.amount}
-														total={statement.amount}
-													/>
-												</TableCell>
-												<TableCell className="max-w-0 truncate text-muted-foreground">
-													{statement.description}
-												</TableCell>
-												<TableCell>
-													<Button variant="outline" size="sm" asChild>
-														<Link
-															href={statementWebRoute.url({
-																statement,
-															})}
-														>
-															Open
-														</Link>
-													</Button>
-												</TableCell>
-											</TableRow>
-										))
-									) : (
-										<TableRow>
-											<TableCell
-												colSpan={6}
-												className="h-24 text-center text-muted-foreground"
+						<DataTable
+							data={record.statements}
+							columns={[
+								{
+									header: "Account",
+									meta: { width: "8rem" },
+									cell: ({ row }) => row.original.account.id,
+								},
+								{
+									header: "Date",
+									meta: { width: "8rem" },
+									cell: ({ row }) => toDate(row.original.date),
+								},
+								{
+									header: "Amount",
+									meta: { width: "16rem" },
+									cell: ({ row }) => (
+										<AllocateBar
+											title="Allocated"
+											value={row.original.pivot.amount}
+											total={row.original.amount}
+										/>
+									),
+								},
+								{
+									header: "Description",
+									cell: ({ row }) => (
+										<div className="max-w-0 truncate text-muted-foreground">
+											{row.original.description || "-"}
+										</div>
+									),
+								},
+								{
+									id: "actions",
+									meta: { width: "4rem" },
+									cell: ({ row }) => (
+										<Button variant="outline" size="sm" asChild>
+											<Link
+												href={statementWebRoute.url({
+													statement: row.original,
+												})}
 											>
-												No statements found.
-											</TableCell>
-										</TableRow>
-									)}
-								</TableBody>
-							</Table>
-						</div>
+												Open
+											</Link>
+										</Button>
+									),
+								},
+							]}
+							emptyMessage="No statements found."
+						/>
 					</CardContent>
 				</Card>
 			</div>

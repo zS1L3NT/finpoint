@@ -6,7 +6,7 @@ import DetailCard from "@/components/detail-card"
 import AmountField from "@/components/form/amount-field"
 import AppHeader from "@/components/layout/app-header"
 import PageHeader from "@/components/layout/page-header"
-import DataTable from "@/components/table/data-table"
+import PaginatedDataTable from "@/components/table/paginated-data-table"
 import { Button } from "@/components/ui/button"
 import {
 	Card,
@@ -171,8 +171,8 @@ export default function RecurrencesPage({
 					</p>
 				</div>
 
-				<DataTable
-					data={recurrences}
+				<PaginatedDataTable
+					paginated={recurrences}
 					columns={[
 						{
 							header: "Recurrence",
