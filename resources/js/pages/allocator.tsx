@@ -3,6 +3,7 @@ import { useForm } from "@tanstack/react-form"
 import { LinkIcon } from "lucide-react"
 import { DateTime } from "luxon"
 import { useEffect, useState } from "react"
+import AllocateBar from "@/components/allocate-bar"
 import DetailCard from "@/components/detail-card"
 import AmountField from "@/components/form/amount-field"
 import ComboboxField from "@/components/form/combobox-field"
@@ -33,7 +34,7 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog"
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
+import { FieldGroup } from "@/components/ui/field"
 import { Progress } from "@/components/ui/progress"
 import useApiFormErrors from "@/hooks/use-api-form-errors"
 import usePaginatedTableState from "@/hooks/use-paginated-table-state"
@@ -118,50 +119,16 @@ export default function Allocator({
 						{
 							header: "Amount",
 							meta: { width: "16rem" },
-							cell: ({ row }) => {
-								const total = row.original.amount
-								const allocable = round2dp(
-									total - (row.original.allocations_sum_amount ?? 0),
-								)
-
-								return (
-									<Field className="w-full max-w-sm">
-										<FieldLabel>
-											<span>Allocable</span>
-											<div className="ml-auto">
-												<span
-													className={cn(
-														"text-muted-foreground",
-														allocable < 0
-															? "text-red-500"
-															: allocable > 0
-																? "text-green-500"
-																: "text-foreground",
-													)}
-												>
-													{toCurrency(allocable)}
-												</span>
-												{" / "}
-												<span
-													className={cn(
-														"font-bold",
-														total < 0
-															? "text-red-500"
-															: total > 0
-																? "text-green-500"
-																: "text-foreground",
-													)}
-												>
-													{toCurrency(total)}
-												</span>
-											</div>
-										</FieldLabel>
-										<Progress
-											value={total === 0 ? 0 : (allocable / total) * 100}
-										/>
-									</Field>
-								)
-							},
+							cell: ({ row }) => (
+								<AllocateBar
+									title="Allocable"
+									value={round2dp(
+										row.original.amount -
+											(row.original.allocations_sum_amount ?? 0),
+									)}
+									total={row.original.amount}
+								/>
+							),
 						},
 						{
 							header: "Description",

@@ -1,5 +1,6 @@
 import { Link } from "@inertiajs/react"
 import { CreditCardIcon } from "lucide-react"
+import AllocateBar from "@/components/allocate-bar"
 import DetailCard from "@/components/detail-card"
 import Icon from "@/components/icon"
 import AppHeader from "@/components/layout/app-header"
@@ -62,10 +63,9 @@ export default function StatementPage({ statement }: { statement: Statement & St
 							<Table className="table-fixed">
 								<TableHeader>
 									<TableRow>
-										<TableHead className="w-96">Record</TableHead>
+										<TableHead className="w-64">Record</TableHead>
+										<TableHead className="w-64">Amount</TableHead>
 										<TableHead className="w-48">Date & Time</TableHead>
-										<TableHead className="w-24">Amount</TableHead>
-										<TableHead className="w-24">Allocated</TableHead>
 										<TableHead>Description</TableHead>
 										<TableHead className="w-16" />
 									</TableRow>
@@ -97,21 +97,24 @@ export default function StatementPage({ statement }: { statement: Statement & St
 														</div>
 													</div>
 												</TableCell>
+												<TableCell>
+													<AllocateBar
+														title="Allocated"
+														value={record.pivot.amount}
+														total={record.amount}
+													/>
+												</TableCell>
 												<TableCell>{toDatetime(record.datetime)}</TableCell>
-												<TableCell className={currencyClass(record.amount)}>
-													{toCurrency(record.amount)}
-												</TableCell>
-												<TableCell
-													className={currencyClass(record.pivot.amount)}
-												>
-													{toCurrency(record.pivot.amount)}
-												</TableCell>
 												<TableCell className="truncate text-muted-foreground">
 													{record.description ?? "-"}
 												</TableCell>
 												<TableCell>
 													<Button variant="outline" size="sm" asChild>
-														<Link href={recordWebRoute.url({ record })}>
+														<Link
+															href={recordWebRoute.url({
+																record,
+															})}
+														>
 															Open
 														</Link>
 													</Button>

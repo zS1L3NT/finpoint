@@ -2,6 +2,7 @@ import { Link, router } from "@inertiajs/react"
 import { useForm } from "@tanstack/react-form"
 import { PencilIcon, ReceiptTextIcon, Trash2Icon } from "lucide-react"
 import { useState } from "react"
+import AllocateBar from "@/components/allocate-bar"
 import DetailCard from "@/components/detail-card"
 import AmountField from "@/components/form/amount-field"
 import ComboboxField from "@/components/form/combobox-field"
@@ -127,8 +128,7 @@ export default function RecordPage({
 									<TableRow>
 										<TableHead className="w-32">Account</TableHead>
 										<TableHead className="w-32">Date</TableHead>
-										<TableHead className="w-24">Statement</TableHead>
-										<TableHead className="w-24">Allocated</TableHead>
+										<TableHead className="w-64">Amount</TableHead>
 										<TableHead>Description</TableHead>
 										<TableHead className="w-16" />
 									</TableRow>
@@ -139,17 +139,12 @@ export default function RecordPage({
 											<TableRow key={statement.id}>
 												<TableCell>{statement.account.id}</TableCell>
 												<TableCell>{toDate(statement.date)}</TableCell>
-												<TableCell
-													className={currencyClass(statement.amount)}
-												>
-													{toCurrency(statement.amount)}
-												</TableCell>
-												<TableCell
-													className={currencyClass(
-														statement.pivot.amount,
-													)}
-												>
-													{toCurrency(statement.pivot.amount)}
+												<TableCell>
+													<AllocateBar
+														title="Allocated"
+														value={statement.pivot.amount}
+														total={statement.amount}
+													/>
 												</TableCell>
 												<TableCell className="max-w-0 truncate text-muted-foreground">
 													{statement.description}

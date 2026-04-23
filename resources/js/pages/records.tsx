@@ -41,7 +41,7 @@ export default function RecordsPage({ records }: { records: Paginated<Record & R
 							cell: ({ row }) => (
 								<div className="flex items-center gap-3">
 									<Icon {...row.original.category} size={16} />
-									<div className="min-w-0">
+									<div>
 										<p className="truncate font-medium">{row.original.title}</p>
 										<p className="truncate text-muted-foreground">
 											{[
