@@ -99,26 +99,27 @@ export default function StatementPage({ statement }: { statement: Statement & St
 								},
 								{
 									header: "Description",
-									meta: { width: "fit-content" },
+									meta: { width: "24rem" },
 									cell: ({ row }) => (
-										<div className="max-w-0 truncate text-muted-foreground">
+										<div className="truncate text-muted-foreground">
 											{row.original.description || "-"}
 										</div>
 									),
 								},
 								{
 									id: "actions",
-									meta: { width: "4rem" },
 									cell: ({ row }) => (
-										<Button variant="outline" size="sm" asChild>
-											<Link
-												href={recordWebRoute.url({
-													record: row.original,
-												})}
-											>
-												Open
-											</Link>
-										</Button>
+										<div className="flex justify-end">
+											<Button variant="outline" size="sm" asChild>
+												<Link
+													href={recordWebRoute.url({
+														record: row.original,
+													})}
+												>
+													Open
+												</Link>
+											</Button>
+										</div>
 									),
 								},
 							]}

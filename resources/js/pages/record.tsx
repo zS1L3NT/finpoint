@@ -142,7 +142,7 @@ export default function RecordPage({
 								{
 									header: "Description",
 									cell: ({ row }) => (
-										<div className="max-w-0 truncate text-muted-foreground">
+										<div className="truncate text-muted-foreground">
 											{row.original.description || "-"}
 										</div>
 									),
@@ -151,15 +151,17 @@ export default function RecordPage({
 									id: "actions",
 									meta: { width: "4rem" },
 									cell: ({ row }) => (
-										<Button variant="outline" size="sm" asChild>
-											<Link
-												href={statementWebRoute.url({
-													statement: row.original,
-												})}
-											>
-												Open
-											</Link>
-										</Button>
+										<div className="flex justify-end">
+											<Button variant="outline" size="sm" asChild>
+												<Link
+													href={statementWebRoute.url({
+														statement: row.original,
+													})}
+												>
+													Open
+												</Link>
+											</Button>
+										</div>
 									),
 								},
 							]}

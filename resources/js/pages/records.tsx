@@ -78,6 +78,15 @@ export default function RecordsPage({ records }: { records: Paginated<Record & R
 							),
 						},
 						{
+							header: "Description",
+							meta: { width: "24rem" },
+							cell: ({ row }) => (
+								<div className="truncate text-muted-foreground">
+									{row.original.description || "-"}
+								</div>
+							),
+						},
+						{
 							id: "actions",
 							cell: ({ row }) => (
 								<div className="flex justify-end">
