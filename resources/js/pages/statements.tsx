@@ -29,10 +29,10 @@ export default function StatementsPage({
 
 			<div className="container mx-auto flex flex-col gap-8 p-8">
 				<PageHeader
-					icon={CreditCardIcon}
-					description="Imported bank feed"
 					title="Statements"
 					subtitle="Review imported bank statements and their linked records."
+					description="Imported bank feed"
+					icon={CreditCardIcon}
 				/>
 
 				<DataTable

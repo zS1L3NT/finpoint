@@ -72,8 +72,20 @@ export default function RecordPage({
 
 			<div className="container mx-auto flex flex-col gap-8 p-8">
 				<PageHeader
-					title={record.title}
-					subtitle="Review the record details and the statements allocated to it."
+					title={
+						<div className="flex items-center gap-2">
+							{record.title}
+							<p className="text-xl text-muted-foreground">
+								{[
+									record.people ? `w/ ${record.people}` : null,
+									record.location ? `@ ${record.location}` : null,
+								]
+									.filter(Boolean)
+									.join(" ")}
+							</p>
+						</div>
+					}
+					subtitle={record.description}
 					description="Record details"
 					icon={ReceiptTextIcon}
 					actions={<RecordEditorDialog record={record} categories={categories} />}
@@ -84,14 +96,6 @@ export default function RecordPage({
 				/>
 
 				<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-					<DetailCard label="Title" value={record.title} />
-					<DetailCard label="People" value={record.people ?? "-"} />
-					<DetailCard label="Location" value={record.location ?? "-"} />
-					<DetailCard
-						label="Amount"
-						value={toCurrency(record.amount)}
-						valueClassName={currencyClass(record.amount)}
-					/>
 					<DetailCard
 						label="Category"
 						value={
@@ -101,16 +105,13 @@ export default function RecordPage({
 							</div>
 						}
 					/>
+					<DetailCard
+						label="Amount"
+						value={toCurrency(record.amount)}
+						valueClassName={cn(currencyClass(record.amount), "text-base")}
+					/>
 					<DetailCard label="Date & Time" value={toDatetime(record.datetime)} />
 				</div>
-
-				<Card>
-					<CardHeader>
-						<CardTitle>Description</CardTitle>
-						<CardDescription>Additional context for this record.</CardDescription>
-					</CardHeader>
-					<CardContent>{record.description ?? "-"}</CardContent>
-				</Card>
 
 				<Card>
 					<CardHeader>
@@ -129,7 +130,7 @@ export default function RecordPage({
 										<TableHead className="w-24">Statement</TableHead>
 										<TableHead className="w-24">Allocated</TableHead>
 										<TableHead>Description</TableHead>
-										<TableHead className="w-12" />
+										<TableHead className="w-16" />
 									</TableRow>
 								</TableHeader>
 								<TableBody>

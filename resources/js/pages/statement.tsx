@@ -30,8 +30,7 @@ export default function StatementPage({ statement }: { statement: Statement & St
 
 			<div className="container mx-auto flex flex-col gap-8 p-8">
 				<PageHeader
-					title={`Statement ${statement.id}`}
-					subtitle="Review the imported statement and the records allocated to it."
+					title={statement.description}
 					description="Statement details"
 					icon={CreditCardIcon}
 					back={{
@@ -42,24 +41,16 @@ export default function StatementPage({ statement }: { statement: Statement & St
 
 				<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
 					<DetailCard
+						label="Account"
+						value={`${statement.account.name} (${statement.account.id})`}
+					/>
+					<DetailCard
 						label="Amount"
 						value={toCurrency(statement.amount)}
 						valueClassName={currencyClass(statement.amount)}
 					/>
-					<DetailCard
-						label="Account"
-						value={`${statement.account.name} (${statement.account.id})`}
-					/>
 					<DetailCard label="Date" value={toDate(statement.date)} />
 				</div>
-
-				<Card>
-					<CardHeader>
-						<CardTitle>Description</CardTitle>
-						<CardDescription>Imported statement description.</CardDescription>
-					</CardHeader>
-					<CardContent>{statement.description}</CardContent>
-				</Card>
 
 				<Card>
 					<CardHeader>

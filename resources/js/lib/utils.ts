@@ -11,10 +11,7 @@ export const round2dp = (number: number) => {
 }
 
 export const currencyClass = (amount: number) => {
-	return cn(
-		"font-medium",
-		amount < 0 ? "text-red-500" : amount > 0 ? "text-green-600" : "text-foreground",
-	)
+	return amount < 0 ? "text-red-500" : amount > 0 ? "text-green-600" : "text-foreground"
 }
 
 export const toCurrency = (amount: number) => {

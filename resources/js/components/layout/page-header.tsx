@@ -11,12 +11,12 @@ export default function PageHeader({
 	actions,
 	back,
 }: {
-	title: string
-	subtitle: string
-	description: string
+	title: ReactNode
+	subtitle?: ReactNode
+	description: ReactNode
 	icon: LucideIcon
 	actions?: ReactNode
-	back?: { name: string; url: string }
+	back?: { name: ReactNode; url: string }
 }) {
 	return (
 		<div className="flex justify-between items-end">
@@ -36,7 +36,9 @@ export default function PageHeader({
 						{description}
 					</div>
 					<h2 className="text-3xl font-semibold tracking-tight">{title}</h2>
-					<p className="max-w-2xl text-sm text-muted-foreground">{subtitle}</p>
+					{subtitle ? (
+						<p className="max-w-2xl text-sm text-muted-foreground">{subtitle}</p>
+					) : null}
 				</div>
 			</div>
 

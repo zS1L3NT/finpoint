@@ -7,12 +7,11 @@ import DataTable from "@/components/table/data-table"
 import { Button } from "@/components/ui/button"
 import usePaginatedTableState from "@/hooks/use-paginated-table-state"
 import { currencyClass, toCurrency, toDatetime } from "@/lib/utils"
-import { Category, Paginated, Record, Statement } from "@/types"
+import { Category, Paginated, Record } from "@/types"
 import { recordsWebRoute, recordWebRoute } from "@/wayfinder/routes"
 
 type RecordExtra = {
 	category: Category
-	statements: Statement[]
 }
 
 export default function RecordsPage({ records }: { records: Paginated<Record & RecordExtra> }) {
@@ -28,7 +27,7 @@ export default function RecordsPage({ records }: { records: Paginated<Record & R
 			<div className="container mx-auto flex flex-col gap-8 p-8">
 				<PageHeader
 					title="Records"
-					subtitle="Browse records with linked statements and category context."
+					subtitle="Browse and manage your financial records."
 					description="Ledger view"
 					icon={ReceiptTextIcon}
 				/>
@@ -37,25 +36,8 @@ export default function RecordsPage({ records }: { records: Paginated<Record & R
 					data={records}
 					columns={[
 						{
-							header: "Date & Time",
-							meta: { width: "12rem" },
-							cell: ({ row }) => (
-								<span className="text-muted-foreground">
-									{toDatetime(row.original.datetime)}
-								</span>
-							),
-						},
-						{
-							header: "Amount",
-							meta: { width: "6rem" },
-							cell: ({ row }) => (
-								<span className={currencyClass(row.original.amount)}>
-									{toCurrency(row.original.amount)}
-								</span>
-							),
-						},
-						{
 							header: "Record",
+							meta: { width: "16rem" },
 							cell: ({ row }) => (
 								<div className="flex items-center gap-3">
 									<Icon {...row.original.category} size={16} />
@@ -78,14 +60,33 @@ export default function RecordsPage({ records }: { records: Paginated<Record & R
 							),
 						},
 						{
-							id: "actions",
-							meta: { width: "4rem" },
+							header: "Amount",
+							meta: { width: "8rem" },
 							cell: ({ row }) => (
-								<Button variant="outline" size="sm" asChild>
-									<Link href={recordWebRoute.url({ record: row.original })}>
-										Open
-									</Link>
-								</Button>
+								<span className={currencyClass(row.original.amount)}>
+									{toCurrency(row.original.amount)}
+								</span>
+							),
+						},
+						{
+							header: "Date & Time",
+							meta: { width: "12rem" },
+							cell: ({ row }) => (
+								<span className="text-muted-foreground">
+									{toDatetime(row.original.datetime)}
+								</span>
+							),
+						},
+						{
+							id: "actions",
+							cell: ({ row }) => (
+								<div className="flex justify-end">
+									<Button variant="outline" size="sm" asChild>
+										<Link href={recordWebRoute.url({ record: row.original })}>
+											Open
+										</Link>
+									</Button>
+								</div>
 							),
 						},
 					]}
