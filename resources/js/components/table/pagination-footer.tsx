@@ -32,6 +32,7 @@ export default function PaginationFooter({
 								!previousLink?.url ? "pointer-events-none opacity-50" : undefined
 							}
 							aria-disabled={!previousLink?.url}
+							preserveState
 						/>
 					</PaginationItem>
 					{links.slice(1, -1).map(link => (
@@ -40,6 +41,7 @@ export default function PaginationFooter({
 								href={link.url ?? "#"}
 								className={!link.url ? "pointer-events-none opacity-50" : undefined}
 								isActive={link.active}
+								preserveState
 							>
 								<span dangerouslySetInnerHTML={{ __html: link.label }} />
 							</PaginationLink>
@@ -48,10 +50,11 @@ export default function PaginationFooter({
 					<PaginationItem>
 						<PaginationNext
 							href={nextLink?.url ?? "#"}
-							aria-disabled={!nextLink?.url}
 							className={
 								!nextLink?.url ? "pointer-events-none opacity-50" : undefined
 							}
+							aria-disabled={!nextLink?.url}
+							preserveState
 						/>
 					</PaginationItem>
 				</PaginationContent>

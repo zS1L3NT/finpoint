@@ -226,101 +226,95 @@ export default function BudgetPage({ budget }: { budget: Budget & BudgetExtra })
 					</Card>
 				</div>
 
-				<Card className="py-0">
-					<CardHeader className="border-b py-4">
+				<Card>
+					<CardHeader>
 						<CardTitle>Attached records</CardTitle>
 						<CardDescription>
 							Records that currently contribute to this budget.
 						</CardDescription>
 					</CardHeader>
-
-					<CardContent className="p-0">
-						<Table>
-							<TableHeader>
-								<TableRow>
-									<TableHead className="w-40">Date &amp; Time</TableHead>
-									<TableHead className="w-28">Amount</TableHead>
-									<TableHead>Record</TableHead>
-									<TableHead className="w-40">Category</TableHead>
-									<TableHead className="w-36">Actions</TableHead>
-								</TableRow>
-							</TableHeader>
-							<TableBody>
-								{budget.records.length ? (
-									budget.records.map(record => {
-										const details = [
-											record.people ? `w/ ${record.people}` : null,
-											record.location ? `@ ${record.location}` : null,
-										]
-											.filter(Boolean)
-											.join(" ")
-
-										return (
-											<TableRow key={record.id}>
-												<TableCell className="text-muted-foreground">
-													{toDatetime(record.datetime)}
-												</TableCell>
-												<TableCell>
-													<span className={currencyClass(record.amount)}>
-														{toCurrency(record.amount)}
-													</span>
-												</TableCell>
-												<TableCell>
-													<div className="flex items-start gap-3">
-														<Icon {...record.category} size={16} />
-														<div className="min-w-0">
-															<p className="truncate font-medium">
-																{record.title}
-															</p>
-															<p className="truncate text-muted-foreground">
-																{details ||
-																	record.description ||
-																	"No extra context"}
-															</p>
-														</div>
-													</div>
-												</TableCell>
-												<TableCell className="text-muted-foreground">
-													{record.category.name}
-												</TableCell>
-												<TableCell>
-													<div className="flex items-center gap-2">
-														<Button variant="outline" size="sm" asChild>
-															<Link
-																href={recordWebRoute.url({
-																	record,
-																})}
-															>
-																Open
-															</Link>
-														</Button>
-														<Button
-															variant="destructive"
-															size="sm"
-															onClick={() =>
-																void mutateRecord(record, "detach")
-															}
-															disabled={isMutatingRecords}
-														>
-															<Trash2Icon /> Remove
-														</Button>
-													</div>
-												</TableCell>
-											</TableRow>
-										)
-									})
-								) : (
-									<TableRow>
-										<TableCell
-											colSpan={5}
-											className="h-24 text-center text-muted-foreground"
-										>
-											No records attached to this budget yet.
-										</TableCell>
-									</TableRow>
-								)}
-							</TableBody>
-						</Table>
+					<CardContent>
+						<DataTable
+							data={budget.records}
+							columns={[
+								{
+									header: "Record",
+									meta: { width: "20rem" },
+									cell: ({ row }) => (
+										<div className="flex items-center gap-3">
+											<Icon {...row.original.category} size={16} />
+											<div className="flex-1 overflow-hidden">
+												<p className="truncate font-medium">
+													{row.original.title}
+												</p>
+												<p className="truncate text-muted-foreground">
+													{[
+														row.original.people
+															? `w/ ${row.original.people}`
+															: null,
+														row.original.location
+															? `@ ${row.original.location}`
+															: null,
+													]
+														.filter(Boolean)
+														.join(" ") || "No extra context"}
+												</p>
+											</div>
+										</div>
+									),
+								},
+								{
+									header: "Amount",
+									meta: { width: "8rem" },
+									cell: ({ row }) => (
+										<span className={currencyClass(row.original.amount)}>
+											{toCurrency(row.original.amount)}
+										</span>
+									),
+								},
+								{
+									header: "Date & Time",
+									meta: { width: "12rem" },
+									cell: ({ row }) => toDatetime(row.original.datetime),
+								},
+								{
+									header: "Description",
+									meta: { width: "24rem" },
+									cell: ({ row }) => (
+										<div className="truncate text-muted-foreground">
+											{row.original.description || "-"}
+										</div>
+									),
+								},
+								{
+									id: "actions",
+									cell: ({ row }) => (
+										<div className="flex justify-end gap-2">
+											<Button variant="outline" size="sm" asChild>
+												<Link
+													href={recordWebRoute.url({
+														record: row.original,
+													})}
+												>
+													Open
+												</Link>
+											</Button>
+											<Button
+												variant="destructive"
+												size="sm"
+												onClick={() =>
+													void mutateRecord(row.original, "detach")
+												}
+												disabled={isMutatingRecords}
+											>
+												<Trash2Icon /> Remove
+											</Button>
+										</div>
+									),
+								},
+							]}
+							emptyMessage="No records found."
+						/>
 					</CardContent>
 				</Card>
 			</div>

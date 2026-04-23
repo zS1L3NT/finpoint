@@ -1,11 +1,4 @@
-import {
-	type ColumnDef,
-	flexRender,
-	getCoreRowModel,
-	type OnChangeFn,
-	type RowSelectionState,
-	useReactTable,
-} from "@tanstack/react-table"
+import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table"
 import type { ComponentProps } from "react"
 import PaginationFooter from "@/components/table/pagination-footer"
 import PaginationHeader from "@/components/table/pagination-header"
@@ -25,24 +18,18 @@ export default function PaginatedDataTable<TData extends { id: string }, TValue>
 	header,
 	footer,
 	emptyMessage = "No results.",
-	rowSelection = {},
-	setRowSelection,
 }: {
 	paginated: Paginated<TData>
 	columns: ColumnDef<TData, TValue>[]
 	header: ComponentProps<typeof PaginationHeader>
 	footer: Omit<ComponentProps<typeof PaginationFooter>, "links">
 	emptyMessage?: string
-	rowSelection?: RowSelectionState
-	setRowSelection?: OnChangeFn<RowSelectionState>
 }) {
 	const table = useReactTable({
 		data: paginated.data,
 		columns,
 		getCoreRowModel: getCoreRowModel(),
 		getRowId: row => row.id,
-		onRowSelectionChange: setRowSelection,
-		state: { rowSelection },
 	})
 
 	return (

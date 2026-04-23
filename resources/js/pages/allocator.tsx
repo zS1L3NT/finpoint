@@ -2,7 +2,7 @@ import { Link, router } from "@inertiajs/react"
 import { useForm } from "@tanstack/react-form"
 import { LinkIcon } from "lucide-react"
 import { DateTime } from "luxon"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import AllocateBar from "@/components/allocate-bar"
 import DetailCard from "@/components/detail-card"
 import AmountField from "@/components/form/amount-field"
@@ -38,7 +38,7 @@ import { FieldGroup } from "@/components/ui/field"
 import { Progress } from "@/components/ui/progress"
 import useApiFormErrors from "@/hooks/use-api-form-errors"
 import usePaginatedTableState from "@/hooks/use-paginated-table-state"
-import { cn, round2dp, toCurrency, toDate } from "@/lib/utils"
+import { cn, currencyClass, round2dp, toCurrency, toDate } from "@/lib/utils"
 import { Account, Category, Paginated, Statement } from "@/types"
 import { allocatorWebRoute, recordStoreApiRoute, statementWebRoute } from "@/wayfinder/routes"
 
@@ -58,21 +58,16 @@ export default function Allocator({
 	statements: Paginated<Statement & StatementExtra>
 	categories: (Category & CategoryExtra)[]
 }) {
-	const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({})
+	const [selected, setSelected] = useState<(Statement & StatementExtra)[]>([])
 	const { query, pageSize, handleQueryChange, handlePageSizeChange } = usePaginatedTableState({
 		syncOn: statements,
 		buildUrl: query => allocatorWebRoute({ query }).url,
 	})
 
-	useEffect(() => {
-		setRowSelection(currentSelection =>
-			Object.fromEntries(
-				statements.data
-					.filter(statement => currentSelection[statement.id])
-					.map(statement => [statement.id, true]),
-			),
-		)
-	}, [statements.data])
+	const selectedAmount = selected.reduce(
+		(sum, statement) => sum + (statement.amount - (statement.allocations_sum_amount ?? 0)),
+		0,
+	)
 
 	return (
 		<>
@@ -86,6 +81,16 @@ export default function Allocator({
 					icon={LinkIcon}
 				/>
 
+				<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+					<DetailCard label="Pending Statements" value={statements.total} />
+					<DetailCard label="Selected Statements" value={selected.length} />
+					<DetailCard
+						label="Selected Amount"
+						value={toCurrency(selectedAmount)}
+						valueClassName={currencyClass(selectedAmount)}
+					/>
+				</div>
+
 				<PaginatedDataTable
 					paginated={statements}
 					columns={[
@@ -95,8 +100,14 @@ export default function Allocator({
 							cell: ({ row }) => (
 								<div className="flex items-center justify-center">
 									<Checkbox
-										checked={row.getIsSelected()}
-										onCheckedChange={value => row.toggleSelected(!!value)}
+										checked={!!selected.find(s => s.id === row.original.id)}
+										onCheckedChange={value =>
+											setSelected(prev =>
+												value
+													? [...prev, row.original]
+													: prev.filter(s => s.id !== row.original.id),
+											)
+										}
 										aria-label={`Select statement ${row.original.id}`}
 									/>
 								</div>
@@ -164,19 +175,16 @@ export default function Allocator({
 						searchPlaceholder: "Filter statements...",
 						children: (
 							<AllocateRecordDialog
-								statements={statements.data}
-								rowSelection={rowSelection}
+								statements={selected ? Object.values(selected) : []}
 								categories={categories}
-								clear={() => setRowSelection({})}
+								clear={() => setSelected([])}
 							/>
 						),
 					}}
 					footer={{
-						summary: `${Object.values(rowSelection).filter(Boolean).length} selected. Showing ${statements.data.length} of ${statements.total} statements.`,
+						summary: `${Object.values(selected).filter(Boolean).length} selected. Showing ${statements.data.length} of ${statements.total} statements.`,
 					}}
 					emptyMessage="No statements found."
-					rowSelection={rowSelection}
-					setRowSelection={setRowSelection}
 				/>
 			</div>
 		</>
@@ -185,28 +193,25 @@ export default function Allocator({
 
 function AllocateRecordDialog({
 	statements,
-	rowSelection,
 	categories,
 	clear,
 }: {
 	statements: (Statement & StatementExtra)[]
-	rowSelection: Record<string, boolean>
 	categories: (Category & CategoryExtra)[]
 	clear: () => void
 }) {
 	const [open, setOpen] = useState(false)
 	const { mergeErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
-	const selected = statements.filter(statement => rowSelection[statement.id])
 
 	const categoriesFlat = categories.flatMap(category => [category, ...category.children])
 	const initialValues = {
 		title: "",
 		people: "",
 		location: "",
-		datetime: inferAllocatorDatetime(selected),
+		datetime: inferAllocatorDatetime(statements),
 		category_id: "",
 		description: "",
-		statements: selected.map(statement => ({
+		statements: statements.map(statement => ({
 			id: statement.id,
 			amount: round2dp(statement.amount - (statement.allocations_sum_amount ?? 0)),
 		})),
@@ -223,7 +228,7 @@ function AllocateRecordDialog({
 			formData.append("category_id", value.category_id)
 			formData.append("description", value.description)
 
-			value.statements.forEach((statement, index) => {
+			statements.forEach((statement, index) => {
 				formData.append(`statements[${index}][id]`, statement.id)
 				formData.append(`statements[${index}][amount]`, `${statement.amount}`)
 			})
@@ -261,7 +266,7 @@ function AllocateRecordDialog({
 		>
 			<DialogTrigger
 				render={
-					<Button disabled={!selected.length}>
+					<Button disabled={!statements.length}>
 						<LinkIcon /> Create Record
 					</Button>
 				}
@@ -270,7 +275,7 @@ function AllocateRecordDialog({
 				<DialogHeader>
 					<DialogTitle>Create New Record</DialogTitle>
 					<DialogDescription>
-						Allocate {selected.length} selected statement(s) to a new record.
+						Allocate {statements.length} selected statement(s) to a new record.
 					</DialogDescription>
 				</DialogHeader>
 
@@ -402,7 +407,7 @@ function AllocateRecordDialog({
 						<p className="text-sm font-semibold">Allocation Amounts</p>
 
 						<div className="flex flex-col gap-2">
-							{selected.map((statement, index) => (
+							{statements.map((statement, index) => (
 								<form.Field
 									key={statement.id}
 									name={`statements[${index}].amount` as const}
@@ -487,9 +492,9 @@ function AllocateRecordDialog({
 	)
 }
 
-const DESCRIPTION_DATE_REGEX = /\b\d{2}(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\b/
-
 function inferAllocatorDatetime(statements: (Statement & StatementExtra)[]) {
+	const DESCRIPTION_DATE_REGEX = /\b\d{2}(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\b/
+
 	const describedDates = statements.flatMap(statement => {
 		const match = statement.description.match(DESCRIPTION_DATE_REGEX)?.[0]
 		if (!match) {
