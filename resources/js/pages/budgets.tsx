@@ -1,14 +1,14 @@
 import { Link, router } from "@inertiajs/react"
 import { useForm } from "@tanstack/react-form"
-import { LoaderCircleIcon, PiggyBankIcon, PlusIcon, SparklesIcon } from "lucide-react"
+import { LoaderCircleIcon, PiggyBankIcon, PlusIcon, SparklesIcon, WrenchIcon } from "lucide-react"
 import { DateTime } from "luxon"
 import { useState } from "react"
-import DetailCard from "@/components/detail-card"
 import AmountField from "@/components/form/amount-field"
 import TextField from "@/components/form/text-field"
 import AppHeader from "@/components/layout/app-header"
 import PageHeader from "@/components/layout/page-header"
 import DataTable from "@/components/table/data-table"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -26,33 +26,19 @@ import { Input } from "@/components/ui/input"
 import { Progress } from "@/components/ui/progress"
 import useApiFormErrors from "@/hooks/use-api-form-errors"
 import usePaginatedTableState from "@/hooks/use-paginated-table-state"
-import { cn, currencyClass, round2dp, toCurrency } from "@/lib/utils"
+import { toCurrency } from "@/lib/utils"
 import { Budget, Paginated } from "@/types"
 import { budgetStoreApiRoute, budgetsWebRoute, budgetWebRoute } from "@/wayfinder/routes"
 
-type BudgetOverview = Budget & {
+type BudgetExtra = {
 	records_sum_amount: number | null
-	records_count: number
 }
 
-export default function BudgetsPage({
-	budgets,
-	overview,
-}: {
-	budgets: Paginated<BudgetOverview>
-	overview: BudgetOverview[]
-}) {
+export default function BudgetsPage({ budgets }: { budgets: Paginated<Budget & BudgetExtra> }) {
 	const { query, pageSize, handleQueryChange, handlePageSizeChange } = usePaginatedTableState({
 		syncOn: budgets,
 		buildUrl: query => budgetsWebRoute({ query }).url,
 	})
-
-	const totalBudgeted = overview.reduce((sum, budget) => sum + budget.amount, 0)
-	const totalSpent = overview.reduce(
-		(sum, budget) => sum + Math.abs(Math.min(budget.records_sum_amount ?? 0, 0)),
-		0,
-	)
-	const activeBudgetCount = overview.filter(budget => isBudgetActive(budget)).length
 
 	return (
 		<>
@@ -67,77 +53,63 @@ export default function BudgetsPage({
 					actions={<BudgetCreateDialog />}
 				/>
 
-				<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-					<DetailCard label="Budgets" value={overview.length} />
-					<DetailCard label="Active Now" value={activeBudgetCount} />
-					<DetailCard label="Planned Spend" value={toCurrency(totalBudgeted)} />
-					<DetailCard
-						label="Tracked Spend"
-						value={toCurrency(-Math.abs(totalSpent))}
-						valueClassName={currencyClass(-Math.abs(totalSpent))}
-					/>
-				</div>
-
-				<div className="flex flex-col gap-1">
-					<h3 className="text-xl font-semibold tracking-tight">Budget library</h3>
-					<p className="text-sm text-muted-foreground">
-						Open a budget to inspect records, adjust rules, or attach extra entries.
-					</p>
-				</div>
-
 				<DataTable
 					data={budgets}
 					columns={[
 						{
 							header: "Budget",
+							meta: { width: "16rem" },
 							cell: ({ row }) => {
 								const budget = row.original
 
+								const now = DateTime.now()
+								const start = DateTime.fromFormat(
+									budget.start_date,
+									"yyyy-MM-dd",
+								).startOf("day")
+								const end = DateTime.fromFormat(
+									budget.end_date,
+									"yyyy-MM-dd",
+								).endOf("day")
+
 								return (
-									<div className="min-w-0">
-										<div className="flex items-center gap-2">
-											<p className="truncate font-medium">{budget.name}</p>
-											<span className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">
-												{isBudgetActive(budget) ? "Active" : "Planned"}
-											</span>
-										</div>
-										<p className="truncate text-muted-foreground">
-											{budget.automatic
-												? "Auto-attaches in-range records"
-												: "Manual record assignment"}
-										</p>
+									<div className="flex items-center gap-2">
+										<p className="truncate font-medium">{budget.name}</p>
+										<Badge
+											variant={
+												now >= start && now <= end ? "default" : "secondary"
+											}
+										>
+											{now <= start
+												? "Upcoming"
+												: now >= end
+													? "Passed"
+													: "Active"}
+										</Badge>
 									</div>
 								)
 							},
 						},
 						{
-							header: "Window",
-							meta: { width: "16rem" },
-							cell: ({ row }) => (
-								<span className="text-muted-foreground">
-									{formatBudgetDateWindow(row.original)}
-								</span>
-							),
-						},
-						{
 							header: "Usage",
-							meta: { width: "18rem" },
+							meta: { width: "20rem" },
 							cell: ({ row }) => {
-								const spent = Math.abs(
-									Math.min(row.original.records_sum_amount ?? 0, 0),
-								)
+								const budget = row.original
+
+								const spent = Math.abs(Math.min(budget.records_sum_amount ?? 0, 0))
 								const usage =
-									row.original.amount === 0
+									budget.amount === 0
 										? 0
-										: Math.min((spent / row.original.amount) * 100, 100)
+										: Math.min((spent / budget.amount) * 100, 100)
 
 								return (
-									<div className="w-full max-w-xs space-y-2">
+									<div className="w-full max-w-xs space-y-2 pe-8">
 										<div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
 											<span>{Math.round(usage)}% used</span>
 											<span>
-												{toCurrency(-spent)} of{" "}
-												{toCurrency(row.original.amount)}
+												{toCurrency(spent)}
+												{" / "}
+												{toCurrency(budget.amount)}
 											</span>
 										</div>
 										<Progress value={usage} className="h-2" />
@@ -146,56 +118,38 @@ export default function BudgetsPage({
 							},
 						},
 						{
-							header: "Remaining",
-							meta: { width: "8rem" },
-							cell: ({ row }) => {
-								const spent = Math.abs(
-									Math.min(row.original.records_sum_amount ?? 0, 0),
-								)
-								const remaining = round2dp(row.original.amount - spent)
-
-								return (
-									<span
-										className={cn(
-											"font-medium",
-											remaining < 0 ? "text-destructive" : "text-foreground",
-										)}
-									>
-										{toCurrency(remaining)}
-									</span>
-								)
-							},
-						},
-						{
-							header: "Records",
-							meta: { width: "6rem" },
+							header: "Window",
+							meta: { width: "12rem" },
 							cell: ({ row }) => (
-								<span className="text-muted-foreground">
-									{row.original.records_count}
+								<span className="text-muted-foreground pe-8">
+									{formatBudgetDateWindow(row.original)}
 								</span>
 							),
 						},
 						{
-							header: "Mode",
+							header: "Type",
 							meta: { width: "8rem" },
 							cell: ({ row }) => (
-								<div className="flex items-center gap-2 text-muted-foreground">
+								<div className="flex items-center gap-2 text-muted-foreground pe-8">
 									{row.original.automatic ? (
-										<SparklesIcon className="size-3.5" />
-									) : null}
+										<SparklesIcon className="size-4" />
+									) : (
+										<WrenchIcon className="size-4" />
+									)}
 									<span>{row.original.automatic ? "Automatic" : "Manual"}</span>
 								</div>
 							),
 						},
 						{
 							id: "actions",
-							meta: { width: "4rem" },
 							cell: ({ row }) => (
-								<Button variant="outline" size="sm" asChild>
-									<Link href={budgetWebRoute.url({ budget: row.original })}>
-										Open
-									</Link>
-								</Button>
+								<div className="flex justify-end">
+									<Button variant="outline" size="sm" asChild>
+										<Link href={budgetWebRoute.url({ budget: row.original })}>
+											Open
+										</Link>
+									</Button>
+								</div>
 							),
 						},
 					]}
@@ -420,14 +374,6 @@ function BudgetCreateDialog() {
 			</DialogContent>
 		</Dialog>
 	)
-}
-
-function isBudgetActive(budget: Budget) {
-	const now = DateTime.now()
-	const start = DateTime.fromFormat(budget.start_date, "yyyy-MM-dd").startOf("day")
-	const end = DateTime.fromFormat(budget.end_date, "yyyy-MM-dd").endOf("day")
-
-	return start.isValid && end.isValid && now >= start && now <= end
 }
 
 function formatBudgetDateWindow(budget: Budget) {

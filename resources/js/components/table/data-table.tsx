@@ -61,13 +61,7 @@ export default function DataTable<TData, TValue>({
 						{table.getHeaderGroups().map(headerGroup => (
 							<TableRow key={headerGroup.id}>
 								{headerGroup.headers.map(header => (
-									<TableHead
-										key={header.id}
-										style={{
-											width: (header.column.columnDef.meta as { width?: any })
-												?.width,
-										}}
-									>
+									<TableHead key={header.id} style={header.column.columnDef.meta}>
 										{header.isPlaceholder
 											? null
 											: flexRender(
