@@ -38,7 +38,7 @@ import {
 } from "@/components/ui/select"
 import useApiFormErrors from "@/hooks/use-api-form-errors"
 import usePaginatedTableState from "@/hooks/use-paginated-table-state"
-import { currencyClass, round2dp, toCurrency } from "@/lib/utils"
+import { cn, currencyClass, round2dp, toCurrency } from "@/lib/utils"
 import { Paginated, Recurrence } from "@/types"
 import {
 	recurrenceStoreApiRoute,
@@ -176,59 +176,57 @@ export default function RecurrencesPage({
 					columns={[
 						{
 							header: "Recurrence",
+							meta: { width: "20rem" },
 							cell: ({ row }) => (
-								<div className="min-w-0">
+								<div className="flex items-center gap-2">
 									<p className="truncate font-medium">{row.original.name}</p>
-									<p className="truncate text-muted-foreground">
-										{formatRecurrencePeriod(row.original.period)} cadence
-									</p>
 								</div>
 							),
 						},
 						{
-							header: "Entered",
-							meta: { width: "8rem" },
+							header: "Monthly",
+							meta: { width: "6rem" },
 							cell: ({ row }) => (
-								<span className={currencyClass(-Math.abs(row.original.amount))}>
-									{toCurrency(row.original.amount)}
+								<span className={cn(currencyClass(row.original.amount), row.original.period === "year" ? "opacity-50" : null)}>
+									{toCurrency(
+										round2dp(
+											row.original.period === "month"
+												? row.original.amount
+												: row.original.amount / 12,
+										),
+									)}
 								</span>
 							),
 						},
 						{
-							header: "Monthly",
-							meta: { width: "8rem" },
-							cell: ({ row }) => {
-								const monthlyAmount = round2dp(
-									toMonthlyAmount(row.original.amount, row.original.period),
-								)
-
-								return (
-									<span className={currencyClass(-Math.abs(monthlyAmount))}>
-										{toCurrency(monthlyAmount)}
-									</span>
-								)
-							},
-						},
-						{
-							header: "Linked records",
-							meta: { width: "8rem" },
+							header: "Yearly",
+							meta: { width: "6rem" },
 							cell: ({ row }) => (
-								<span className="text-muted-foreground">
-									{row.original.records_count}
+								<span className={cn(currencyClass(row.original.amount), row.original.period === "month" ? "opacity-50" : null)}>
+									{toCurrency(
+										round2dp(
+											row.original.period === "year"
+												? row.original.amount
+												: row.original.amount * 12,
+										),
+									)}
 								</span>
 							),
 						},
 						{
 							id: "actions",
-							meta: { width: "6rem" },
 							cell: ({ row }) => (
-								<Button variant="outline" size="sm" asChild>
-									<Link
-										href={recurrenceWebRoute.url({ recurrence: row.original })}
-									>
-										Open
-									</Link>
-								</Button>
+								<div className="flex justify-end">
+									<Button variant="outline" size="sm" asChild>
+										<Link
+											href={recurrenceWebRoute.url({
+												recurrence: row.original,
+											})}
+										>
+											Open
+										</Link>
+									</Button>
+								</div>
 							),
 						},
 					]}
