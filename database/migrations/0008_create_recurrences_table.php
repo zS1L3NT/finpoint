@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('id')->primary();
             $table->string('name');
             $table->double('amount');
-            $table->enum('period', ['week', 'month', 'year']);
+            $table->enum('period', ['month', 'year']);
         });
     }
 

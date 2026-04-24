@@ -146,7 +146,6 @@ class DashboardController extends Controller
     private function toMonthlyAmount(float $amount, string $period): float
     {
         return match ($period) {
-            'week' => ($amount * 52) / 12,
             'year' => $amount / 12,
             default => $amount,
         };

@@ -13,7 +13,7 @@ class RecurrenceController extends Controller
         $dto = request()->validate([
             'name' => 'required|string',
             'amount' => 'required|decimal:0,2',
-            'period' => 'required|in:week,month,year',
+            'period' => 'required|in:month,year',
         ]);
 
         return Recurrence::query()->create([
@@ -27,7 +27,7 @@ class RecurrenceController extends Controller
         $dto = request()->validate([
             'name' => 'required|string',
             'amount' => 'required|decimal:0,2',
-            'period' => 'required|in:week,month,year',
+            'period' => 'required|in:month,year',
         ]);
 
         $recurrence->update($dto);

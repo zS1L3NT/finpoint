@@ -448,7 +448,6 @@ function RecurrenceEditorDialog({ recurrence }: { recurrence: Recurrence }) {
 									</SelectTrigger>
 									<SelectContent>
 										<SelectGroup>
-											<SelectItem value="week">Weekly</SelectItem>
 											<SelectItem value="month">Monthly</SelectItem>
 											<SelectItem value="year">Yearly</SelectItem>
 										</SelectGroup>
@@ -496,8 +495,6 @@ function RecurrenceEditorDialog({ recurrence }: { recurrence: Recurrence }) {
 
 function toMonthlyAmount(amount: number, period: Recurrence["period"]) {
 	switch (period) {
-		case "week":
-			return (amount * 52) / 12
 		case "year":
 			return amount / 12
 		default:
@@ -506,5 +503,5 @@ function toMonthlyAmount(amount: number, period: Recurrence["period"]) {
 }
 
 function formatRecurrencePeriod(period: Recurrence["period"]) {
-	return period === "week" ? "Weekly" : period === "year" ? "Yearly" : "Monthly"
+	return period === "year" ? "Yearly" : "Monthly"
 }

@@ -139,8 +139,9 @@ export default function RecurrencesPage({
 													</p>
 												</div>
 												<p className="mt-1 text-xs text-muted-foreground">
-													{formatRecurrencePeriod(slice.period)} •{" "}
-													{slice.records_count} linked record
+													{slice.period[0].toUpperCase() +
+														slice.period.slice(1)}{" "}
+													• {slice.records_count} linked record
 													{slice.records_count === 1 ? "" : "s"}
 												</p>
 											</div>
@@ -427,7 +428,6 @@ function RecurrenceCreateDialog() {
 										</SelectTrigger>
 										<SelectContent>
 											<SelectGroup>
-												<SelectItem value="week">Weekly</SelectItem>
 												<SelectItem value="month">Monthly</SelectItem>
 												<SelectItem value="year">Yearly</SelectItem>
 											</SelectGroup>
@@ -496,15 +496,9 @@ function buildBreakdownSlices(recurrences: RecurrenceOverview[]) {
 
 function toMonthlyAmount(amount: number, period: Recurrence["period"]) {
 	switch (period) {
-		case "week":
-			return (amount * 52) / 12
 		case "year":
 			return amount / 12
 		default:
 			return amount
 	}
-}
-
-function formatRecurrencePeriod(period: Recurrence["period"]) {
-	return period === "week" ? "Weekly" : period === "year" ? "Yearly" : "Monthly"
 }
