@@ -229,8 +229,8 @@ function AllocateRecordDialog({
 			formData.append("description", value.description)
 
 			statements.forEach((statement, index) => {
-				formData.append(`statements[${index}][id]`, statement.id)
-				formData.append(`statements[${index}][amount]`, `${statement.amount}`)
+				formData.append(`statements[${index}][id]`, `${value.statements[index].id}`)
+				formData.append(`statements[${index}][amount]`, `${value.statements[index].amount}`)
 			})
 
 			const response = await fetch(recordStoreApiRoute.url(), {
