@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Budget;
+use App\Models\Category;
 use Inertia\Inertia;
 
 class BudgetController extends Controller
@@ -22,10 +23,14 @@ class BudgetController extends Controller
 
     public function show(Budget $budget)
     {
-        $budget->loadSum('records', 'amount');
-        $budget->loadCount('records');
         $budget->load('records', 'records.category');
 
-        return Inertia::render('budget', compact('budget'));
+        $categories = Category::query()
+            ->with('children')
+            ->whereNull('parent_category_id')
+            ->orderBy('name')
+            ->get();
+
+        return Inertia::render('budget', compact('budget', 'categories'));
     }
 }

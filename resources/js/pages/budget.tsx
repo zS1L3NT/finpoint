@@ -1,15 +1,8 @@
 import { Link, router } from "@inertiajs/react"
 import { useForm } from "@tanstack/react-form"
-import {
-	LoaderCircleIcon,
-	PencilIcon,
-	PiggyBankIcon,
-	PlusIcon,
-	SparklesIcon,
-	Trash2Icon,
-} from "lucide-react"
-import { DateTime } from "luxon"
+import { LoaderCircleIcon, PencilIcon, PiggyBankIcon, PlusIcon, Trash2Icon } from "lucide-react"
 import { useState } from "react"
+import { Label, Pie, PieChart } from "recharts"
 import DetailCard from "@/components/detail-card"
 import AmountField from "@/components/form/amount-field"
 import TextField from "@/components/form/text-field"
@@ -17,6 +10,7 @@ import Icon from "@/components/icon"
 import AppHeader from "@/components/layout/app-header"
 import PageHeader from "@/components/layout/page-header"
 import RecordSearch from "@/components/record-search"
+import DataTable from "@/components/table/data-table"
 import { Button } from "@/components/ui/button"
 import {
 	Card,
@@ -26,6 +20,13 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card"
+import {
+	ChartContainer,
+	ChartLegend,
+	ChartLegendContent,
+	ChartTooltip,
+	ChartTooltipContent,
+} from "@/components/ui/chart"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
 	Dialog,
@@ -38,17 +39,8 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog"
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field"
-import { Progress } from "@/components/ui/progress"
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from "@/components/ui/table"
 import useApiFormErrors from "@/hooks/use-api-form-errors"
-import { cn, currencyClass, round2dp, toCurrency, toDatetime, withMethod } from "@/lib/utils"
+import { currencyClass, round2dp, toCurrency, toDatetime, withMethod } from "@/lib/utils"
 import { Budget, Category, Record } from "@/types"
 import {
 	budgetDestroyApiRoute,
@@ -61,43 +53,47 @@ import {
 
 type BudgetExtra = {
 	records: (Record & RecordExtra)[]
-	records_sum_amount: number | null
-	records_count: number
 }
 
 type RecordExtra = {
 	category: Category
 }
 
-export default function BudgetPage({ budget }: { budget: Budget & BudgetExtra }) {
-	const [isMutatingRecords, setIsMutatingRecords] = useState(false)
+type CategoryExtra = {
+	children: Category[]
+}
 
-	const spent = Math.abs(Math.min(budget.records_sum_amount ?? 0, 0))
+export default function BudgetPage({
+	budget,
+	categories,
+}: {
+	budget: Budget & BudgetExtra
+	categories: (Category & CategoryExtra)[]
+}) {
+	const spent = -round2dp(budget.records.reduce((acc, el) => acc + el.amount, 0))
 	const remaining = round2dp(budget.amount - spent)
-	const usage = budget.amount === 0 ? 0 : Math.min((spent / budget.amount) * 100, 100)
-	const start = DateTime.fromFormat(budget.start_date, "yyyy-MM-dd")
-	const end = DateTime.fromFormat(budget.end_date, "yyyy-MM-dd")
 
-	const mutateRecord = async (record: Record, mode: "attach" | "detach") => {
-		setIsMutatingRecords(true)
+	const attach = async (record: Record) => {
+		const response = await fetch(budgetRecordUpdateApiRoute.url({ budget, record }), {
+			method: "POST",
+			body: withMethod(new FormData(), "PUT"),
+			headers: { Accept: "application/json" },
+		})
 
-		try {
-			const route =
-				mode === "attach"
-					? budgetRecordUpdateApiRoute.url({ budget, record })
-					: budgetRecordDestroyApiRoute.url({ budget, record })
+		if (response.ok) {
+			router.reload()
+		}
+	}
 
-			const response = await fetch(route, {
-				method: "POST",
-				body: withMethod(new FormData(), mode === "attach" ? "PUT" : "DELETE"),
-				headers: { Accept: "application/json" },
-			})
+	const detach = async (record: Record) => {
+		const response = await fetch(budgetRecordDestroyApiRoute.url({ budget, record }), {
+			method: "POST",
+			body: withMethod(new FormData(), "DELETE"),
+			headers: { Accept: "application/json" },
+		})
 
-			if (response.ok) {
-				router.reload()
-			}
-		} finally {
-			setIsMutatingRecords(false)
+		if (response.ok) {
+			router.reload()
 		}
 	}
 
@@ -108,7 +104,6 @@ export default function BudgetPage({ budget }: { budget: Budget & BudgetExtra })
 			<div className="container mx-auto flex flex-col gap-8 p-8">
 				<PageHeader
 					title={budget.name}
-					subtitle="Manage the spending window, review attached records, and fine-tune what this budget tracks."
 					description="Budget details"
 					icon={PiggyBankIcon}
 					actions={<BudgetEditorDialog budget={budget} />}
@@ -117,92 +112,140 @@ export default function BudgetPage({ budget }: { budget: Budget & BudgetExtra })
 
 				<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
 					<DetailCard label="Planned" value={toCurrency(budget.amount)} />
-					<DetailCard
-						label="Spent"
-						value={toCurrency(-spent)}
-						valueClassName={currencyClass(-spent)}
-					/>
+					<DetailCard label="Spent" value={toCurrency(spent)} />
 					<DetailCard
 						label="Remaining"
 						value={toCurrency(remaining)}
 						valueClassName={remaining < 0 ? "text-destructive" : undefined}
 					/>
-					<DetailCard label="Records" value={budget.records_count} />
+					<DetailCard label="Records" value={budget.records.length} />
 					<DetailCard
 						label="Mode"
 						value={budget.automatic ? "Automatic attach" : "Manual attach"}
 					/>
 				</div>
 
-				<div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-					<Card className="border border-border/70 bg-linear-to-br from-card via-card to-muted/30 py-0">
-						<CardHeader className="border-b py-4">
-							<CardDescription>Usage</CardDescription>
-							<CardTitle className="text-xl">How this budget is tracking</CardTitle>
-							<CardAction className="text-sm text-muted-foreground">
-								{start.toFormat("d MMM yyyy")} to {end.toFormat("d MMM yyyy")}
-							</CardAction>
+				<div className="flex gap-6">
+					<Card className="flex-1">
+						<CardHeader>
+							<CardTitle>Spending by Category</CardTitle>
 						</CardHeader>
+						<CardContent>
+							<ChartContainer
+								config={Object.fromEntries([
+									...categories.map(c => [
+										c.id,
+										{ label: c.name, color: c.color },
+									]),
+									...categories.flatMap(c =>
+										c.children.map(({ id }) => [
+											id,
+											{ label: c.name, color: c.color },
+										]),
+									),
+								])}
+								className="aspect-square mx-auto"
+							>
+								<PieChart>
+									<Pie
+										data={categories.map(c => ({
+											id: c.id,
+											category: c.name,
+											amount: round2dp(
+												budget.records
+													.filter(
+														r =>
+															r.category.id === c.id ||
+															r.category.parent_category_id === c.id,
+													)
+													.reduce((acc, el) => acc - el.amount, 0),
+											),
+											fill: c.color,
+										}))}
+										dataKey="amount"
+										nameKey="category"
+										innerRadius="50%"
+										outerRadius="80%"
+										strokeWidth={1}
+										stroke="var(--primary)"
+									>
+										<Label
+											content={({ viewBox }) => {
+												if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+													const { cx, cy } = viewBox
+													return (
+														<g
+															transform={`translate(${cx}, ${cy - 40 + 4})`} // Approximate vertical height of the text
+														>
+															<text
+																textAnchor="middle"
+																className="fill-foreground text-xl font-bold"
+															>
+																{toCurrency(spent)}
+															</text>
+															<text
+																y={20}
+																textAnchor="middle"
+																className="fill-muted-foreground"
+															>
+																{`of ${toCurrency(budget.amount)}`}
+															</text>
+														</g>
+													)
+												}
+											}}
+										/>
+									</Pie>
 
-						<CardContent className="space-y-5 py-6">
-							<div className="space-y-2">
-								<div className="flex items-center justify-between text-sm">
-									<span>{Math.round(usage)}% used</span>
-									<span className="text-muted-foreground">
-										{toCurrency(-spent)} of {toCurrency(budget.amount)}
-									</span>
-								</div>
-								<Progress value={usage} className="h-3" />
-							</div>
+									<Pie
+										data={categories
+											.flatMap(c => [c, ...c.children])
+											.map(c => ({
+												id: c.id,
+												category: c.name,
+												amount: round2dp(
+													budget.records
+														.filter(r => r.category.id === c.id)
+														.reduce((acc, el) => acc - el.amount, 0),
+												),
+												fill: c.color,
+											}))}
+										dataKey="amount"
+										nameKey="category"
+										innerRadius="80%"
+										outerRadius="100%"
+										strokeWidth={1}
+										stroke="var(--primary)"
+									/>
 
-							<div className="grid gap-3 md:grid-cols-3">
-								<UsagePanel
-									label="Healthy pace"
-									value={remaining >= 0 ? "On track" : "Over budget"}
-									tone={remaining >= 0 ? "good" : "danger"}
-								/>
-								<UsagePanel
-									label="Linked records"
-									value={`${budget.records.length} attached`}
-									tone="neutral"
-								/>
-								<UsagePanel
-									label="Rule"
-									value={
-										budget.automatic
-											? "Auto-pulls in-range records"
-											: "Curated manually"
-									}
-									tone="neutral"
-								/>
-							</div>
+									<ChartTooltip
+										cursor={false}
+										content={<ChartTooltipContent className="w-48" />}
+									/>
+
+									<ChartLegend
+										payloadUniqBy={p =>
+											categories.find(c => c.name === p.value)?.id ??
+											categories.find(c =>
+												c.children.some(c => c.name === p.value),
+											)?.id
+										}
+										content={
+											<ChartLegendContent
+												nameKey="id"
+												className="flex-wrap gap-2"
+											/>
+										}
+									/>
+								</PieChart>
+							</ChartContainer>
 						</CardContent>
 					</Card>
-
-					<Card className="border border-border/70 py-0">
-						<CardHeader className="border-b py-4">
-							<CardDescription>Record attachment</CardDescription>
-							<CardTitle>Keep the budget scoped</CardTitle>
+					<Card className="flex-2">
+						<CardHeader>
+							<CardTitle>Spending over Time</CardTitle>
 						</CardHeader>
-
-						<CardContent className="flex flex-col gap-4 py-6">
-							<div className="rounded-xl border border-dashed border-border/80 bg-muted/20 p-4">
-								<p className="font-medium">Suggested attachment rule</p>
-								<p className="mt-1 text-sm text-muted-foreground">
-									This picker only suggests records inside the budget period that
-									are not already attached.
-								</p>
-							</div>
-
-							<div className="flex items-center justify-between rounded-lg bg-background px-3 py-2 text-xs text-muted-foreground ring-1 ring-border">
-								<span>
-									{budget.automatic
-										? "New in-range records may attach automatically"
-										: "Attachments stay manual"}
-								</span>
-								{budget.automatic ? <SparklesIcon className="size-3.5" /> : null}
-							</div>
-						</CardContent>
+						<CardContent></CardContent>
 					</Card>
 				</div>
 
@@ -216,7 +259,7 @@ export default function BudgetPage({ budget }: { budget: Budget & BudgetExtra })
 							<RecordSearch
 								title="Attach record to budget"
 								excluded={budget.records}
-								handler={record => mutateRecord(record, "attach")}
+								handler={attach}
 								trigger={
 									<Button>
 										<PlusIcon /> Attach record
@@ -294,10 +337,7 @@ export default function BudgetPage({ budget }: { budget: Budget & BudgetExtra })
 											<Button
 												variant="destructive"
 												size="sm"
-												onClick={() =>
-													void mutateRecord(row.original, "detach")
-												}
-												disabled={isMutatingRecords}
+												onClick={() => detach(row.original)}
 											>
 												<Trash2Icon /> Remove
 											</Button>
@@ -311,34 +351,6 @@ export default function BudgetPage({ budget }: { budget: Budget & BudgetExtra })
 				</Card>
 			</div>
 		</>
-	)
-}
-
-function UsagePanel({
-	label,
-	value,
-	tone,
-}: {
-	label: string
-	value: string
-	tone: "good" | "danger" | "neutral"
-}) {
-	return (
-		<div className="rounded-lg bg-background/70 p-4 ring-1 ring-border/70">
-			<p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">{label}</p>
-			<p
-				className={cn(
-					"mt-2 text-sm font-semibold",
-					tone === "good"
-						? "text-green-600"
-						: tone === "danger"
-							? "text-destructive"
-							: "text-foreground",
-				)}
-			>
-				{value}
-			</p>
-		</div>
 	)
 }
 
