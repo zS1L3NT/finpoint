@@ -194,26 +194,6 @@ export default function BudgetPage({ budget }: { budget: Budget & BudgetExtra })
 								</p>
 							</div>
 
-							<RecordSearch
-								title="Attach record to budget"
-								description="Find an existing record within this budget window and attach it here."
-								emptyTitle="No eligible records found"
-								emptyDescription="Only records inside the budget range and not already attached appear here."
-								filter={record =>
-									!budget.records.some(attached => attached.id === record.id)
-								}
-								handler={record => mutateRecord(record, "attach")}
-								trigger={
-									<Button
-										className="w-full"
-										size="lg"
-										disabled={isMutatingRecords}
-									>
-										<PlusIcon /> Attach record
-									</Button>
-								}
-							/>
-
 							<div className="flex items-center justify-between rounded-lg bg-background px-3 py-2 text-xs text-muted-foreground ring-1 ring-border">
 								<span>
 									{budget.automatic
@@ -232,6 +212,18 @@ export default function BudgetPage({ budget }: { budget: Budget & BudgetExtra })
 						<CardDescription>
 							Records that currently contribute to this budget.
 						</CardDescription>
+						<CardAction>
+							<RecordSearch
+								title="Attach record to budget"
+								excluded={budget.records}
+								handler={record => mutateRecord(record, "attach")}
+								trigger={
+									<Button>
+										<PlusIcon /> Attach record
+									</Button>
+								}
+							/>
+						</CardAction>
 					</CardHeader>
 					<CardContent>
 						<DataTable

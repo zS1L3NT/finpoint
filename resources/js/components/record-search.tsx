@@ -1,249 +1,136 @@
-import { Link } from "@inertiajs/react"
-import { LoaderCircleIcon, SearchIcon, SparklesIcon } from "lucide-react"
 import { useEffect, useState } from "react"
 import Icon from "@/components/icon"
+import DataTable from "@/components/table/data-table"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Field, FieldDescription, FieldLabel } from "@/components/ui/field"
+import { Field, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import {
 	Sheet,
 	SheetContent,
-	SheetDescription,
 	SheetFooter,
 	SheetHeader,
 	SheetTitle,
 	SheetTrigger,
 } from "@/components/ui/sheet"
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from "@/components/ui/table"
 import { currencyClass, toCurrency, toDatetime } from "@/lib/utils"
 import { Category, Record } from "@/types"
-import { recordIndexApiRoute, recordWebRoute } from "@/wayfinder/routes"
+import { recordIndexApiRoute } from "@/wayfinder/routes"
 
 type RecordExtra = {
 	category: Category
 }
 
-type SearchState = "idle" | "loading" | "done"
-
 export default function RecordSearch({
 	title,
-	description,
-	emptyTitle = "No records match yet",
-	emptyDescription = "Try a different search phrase or broaden the filter.",
-	filter,
+	excluded,
 	handler,
 	trigger,
 }: {
 	title: string
-	description: string
-	emptyTitle?: string
-	emptyDescription?: string
-	filter?: (record: Record & RecordExtra) => boolean
+	excluded?: Record[]
 	handler: (record: Record & RecordExtra) => Promise<void>
 	trigger: React.ReactNode
 }) {
 	const [open, setOpen] = useState(false)
 	const [query, setQuery] = useState("")
 	const [records, setRecords] = useState<(Record & RecordExtra)[]>([])
-	const [status, setStatus] = useState<SearchState>("idle")
-	const [isAttachingId, setIsAttachingId] = useState<string | null>(null)
 
 	useEffect(() => {
-		if (open) {
-			return
+		if (!open) {
+			setQuery("")
 		}
-
-		setQuery("")
-		setRecords([])
-		setStatus("idle")
-		setIsAttachingId(null)
 	}, [open])
 
-	const handleSearch = async (event?: React.FormEvent<HTMLFormElement>) => {
-		event?.preventDefault()
-		setStatus("loading")
+	useEffect(() => {
+		void handleSearch()
+	}, [query])
 
-		const response = await fetch(
-			recordIndexApiRoute.url({
-				query: query.trim() ? { query: query.trim() } : undefined,
-			}),
-			{
-				headers: { Accept: "application/json" },
-			},
-		)
+	const handleSearch = async () => {
+		const response = await fetch(recordIndexApiRoute.url({ query: { query } }), {
+			headers: { Accept: "application/json" },
+		})
 
-		const data = ((await response.json().catch(() => [])) as (Record & RecordExtra)[]).filter(
-			record => (filter ? filter(record) : true),
-		)
-
-		setRecords(data)
-		setStatus("done")
-	}
-
-	const handleAttach = async (record: Record & RecordExtra) => {
-		setIsAttachingId(record.id)
-
-		try {
-			await handler(record)
-			setOpen(false)
-		} finally {
-			setIsAttachingId(null)
+		if (response.ok) {
+			setRecords(await response.json())
 		}
 	}
 
 	return (
 		<Sheet open={open} onOpenChange={setOpen}>
 			<SheetTrigger asChild>{trigger}</SheetTrigger>
-			<SheetContent side="right" className="w-full sm:max-w-4xl">
+			<SheetContent side="right" className="w-4xl">
 				<SheetHeader className="gap-2 border-b">
 					<SheetTitle>{title}</SheetTitle>
-					<SheetDescription>{description}</SheetDescription>
 				</SheetHeader>
 
-				<div className="flex flex-1 flex-col gap-4 overflow-y-auto px-6 pb-6">
-					<form className="pt-6" onSubmit={handleSearch}>
-						<Field>
-							<FieldLabel htmlFor="record-search-query">Search records</FieldLabel>
-							<div className="flex gap-2">
-								<Input
-									id="record-search-query"
-									type="search"
-									placeholder="Search by title or description"
-									value={query}
-									onChange={event => setQuery(event.target.value)}
-								/>
-								<Button type="submit" disabled={status === "loading"}>
-									{status === "loading" ? (
-										<LoaderCircleIcon className="animate-spin" />
-									) : (
-										<SearchIcon />
-									)}
-									Search
-								</Button>
-							</div>
-							<FieldDescription>
-								Leave blank to browse all available records.
-							</FieldDescription>
-						</Field>
-					</form>
-
-					{status === "idle" ? (
-						<RecordSearchEmptyState
-							title="Start with a search"
-							description="Find an existing record to attach without leaving this page."
-							icon={<SparklesIcon className="size-4" />}
+				<div className="flex flex-1 flex-col gap-4 overflow-y-hidden p-6">
+					<Field>
+						<FieldLabel htmlFor="record-search-query">Search records</FieldLabel>
+						<Input
+							id="record-search-query"
+							type="search"
+							placeholder="Search by title or description"
+							value={query}
+							onChange={event => setQuery(event.target.value)}
 						/>
-					) : null}
+					</Field>
 
-					{status === "loading" ? (
-						<RecordSearchEmptyState
-							title="Searching records"
-							description="Pulling the latest matching records from the API."
-							icon={<LoaderCircleIcon className="size-4 animate-spin" />}
-						/>
-					) : null}
-
-					{status === "done" && !records.length ? (
-						<RecordSearchEmptyState
-							title={emptyTitle}
-							description={emptyDescription}
-							icon={<SearchIcon className="size-4" />}
-						/>
-					) : null}
-
-					{records.length ? (
-						<div className="overflow-hidden rounded-lg border bg-card">
-							<Table className="table-fixed">
-								<TableHeader>
-									<TableRow>
-										<TableHead className="w-40">Date &amp; Time</TableHead>
-										<TableHead className="w-28">Amount</TableHead>
-										<TableHead>Record</TableHead>
-										<TableHead className="w-40">Category</TableHead>
-										<TableHead className="w-40">Actions</TableHead>
-									</TableRow>
-								</TableHeader>
-								<TableBody>
-									{records.map(record => {
-										const details = [
-											record.people ? `w/ ${record.people}` : null,
-											record.location ? `@ ${record.location}` : null,
-										]
-											.filter(Boolean)
-											.join(" ")
-
-										return (
-											<TableRow key={record.id}>
-												<TableCell className="text-muted-foreground">
-													{toDatetime(record.datetime)}
-												</TableCell>
-												<TableCell>
-													<span className={currencyClass(record.amount)}>
-														{toCurrency(record.amount)}
+					<ScrollArea className="flex-1 overflow-y-hidden">
+						<DataTable
+							data={records.filter(r => !excluded?.some(e => e.id === r.id))}
+							columns={[
+								{
+									header: "Record",
+									cell: ({ row }) => (
+										<div>
+											<div className="flex items-center gap-2">
+												<Icon {...row.original.category} size={20} />
+												<div className="flex-1 truncate">
+													<div className="truncate">
+														<span className="font-medium">
+															{row.original.title}{" "}
+														</span>
+														<span className="text-muted-foreground">
+															{[
+																row.original.people
+																	? `w/ ${row.original.people}`
+																	: null,
+																row.original.location
+																	? `@ ${row.original.location}`
+																	: null,
+															]
+																.filter(Boolean)
+																.join(" ")}
+														</span>
+													</div>
+													<div className="text-muted-foreground">
+														{toDatetime(row.original.datetime)}
+													</div>
+													<span
+														className={currencyClass(
+															row.original.amount,
+														)}
+													>
+														{toCurrency(row.original.amount)}
 													</span>
-												</TableCell>
-												<TableCell>
-													<div className="flex items-start gap-3">
-														<Icon {...record.category} size={16} />
-														<div className="min-w-0">
-															<p className="truncate font-medium">
-																{record.title}
-															</p>
-															<p className="truncate text-muted-foreground">
-																{details ||
-																	record.description ||
-																	"No extra context"}
-															</p>
-														</div>
-													</div>
-												</TableCell>
-												<TableCell className="text-muted-foreground">
-													{record.category.name}
-												</TableCell>
-												<TableCell>
-													<div className="flex items-center gap-2">
-														<Button variant="outline" size="sm" asChild>
-															<Link
-																href={recordWebRoute.url({
-																	record,
-																})}
-															>
-																Open
-															</Link>
-														</Button>
-														<Button
-															size="sm"
-															onClick={() =>
-																void handleAttach(record)
-															}
-															disabled={isAttachingId !== null}
-														>
-															{isAttachingId === record.id ? (
-																<>
-																	<LoaderCircleIcon className="animate-spin" />
-																	Attaching
-																</>
-															) : (
-																"Attach"
-															)}
-														</Button>
-													</div>
-												</TableCell>
-											</TableRow>
-										)
-									})}
-								</TableBody>
-							</Table>
-						</div>
-					) : null}
+												</div>
+											</div>
+										</div>
+									),
+								},
+								{
+									id: "actions",
+									meta: { width: "4.5rem" },
+									cell: ({ row }) => (
+										<Button size="sm" onClick={() => handler(row.original)}>
+											Attach
+										</Button>
+									),
+								},
+							]}
+						/>
+					</ScrollArea>
 				</div>
 
 				<SheetFooter className="border-t bg-muted/20">
@@ -253,29 +140,5 @@ export default function RecordSearch({
 				</SheetFooter>
 			</SheetContent>
 		</Sheet>
-	)
-}
-
-function RecordSearchEmptyState({
-	title,
-	description,
-	icon,
-}: {
-	title: string
-	description: string
-	icon: React.ReactNode
-}) {
-	return (
-		<Card className="border border-dashed border-border/80 bg-muted/20">
-			<CardContent className="flex flex-col items-center gap-2 py-10 text-center">
-				<div className="flex size-10 items-center justify-center rounded-full bg-background text-muted-foreground ring-1 ring-border">
-					{icon}
-				</div>
-				<div className="space-y-1">
-					<p className="font-medium">{title}</p>
-					<p className="text-sm text-muted-foreground">{description}</p>
-				</div>
-			</CardContent>
-		</Card>
 	)
 }

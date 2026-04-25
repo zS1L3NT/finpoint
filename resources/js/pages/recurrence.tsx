@@ -185,12 +185,7 @@ export default function RecurrencePage({
 
 							<RecordSearch
 								title="Attach record to recurrence"
-								description="Search existing records and link them to this recurring pattern."
-								emptyTitle="Everything is already linked"
-								emptyDescription="Try another search term if the record you want is not showing yet."
-								filter={record =>
-									!recurrence.records.some(attached => attached.id === record.id)
-								}
+								excluded={recurrence.records}
 								handler={record => mutateRecord(record, "attach")}
 								trigger={
 									<Button
