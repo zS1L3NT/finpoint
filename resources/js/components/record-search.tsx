@@ -8,7 +8,6 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import {
 	Sheet,
 	SheetContent,
-	SheetFooter,
 	SheetHeader,
 	SheetTitle,
 	SheetTrigger,
@@ -132,12 +131,6 @@ export default function RecordSearch({
 						/>
 					</ScrollArea>
 				</div>
-
-				<SheetFooter className="border-t bg-muted/20">
-					<Button type="button" variant="outline" onClick={() => setOpen(false)}>
-						Done
-					</Button>
-				</SheetFooter>
 			</SheetContent>
 		</Sheet>
 	)
