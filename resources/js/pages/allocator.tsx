@@ -153,15 +153,9 @@ export default function Allocator({
 							header: "Description",
 							// Expand width to maximum for statements
 							cell: ({ row }) => (
-								<div
-									className="truncate text-muted-foreground"
-									dangerouslySetInnerHTML={{
-										__html: row.original.description.replaceAll(
-											/(\d{2}(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC))/g,
-											"<mark>$1</mark>",
-										),
-									}}
-								/>
+								<div className="truncate text-muted-foreground">
+									{row.original.description}
+								</div>
 							),
 						},
 						{
