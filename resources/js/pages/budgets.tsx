@@ -26,7 +26,7 @@ import { Input } from "@/components/ui/input"
 import { Progress } from "@/components/ui/progress"
 import useApiFormErrors from "@/hooks/use-api-form-errors"
 import usePaginatedTableState from "@/hooks/use-paginated-table-state"
-import { toCurrency } from "@/lib/utils"
+import { parseDate, toCurrency } from "@/lib/utils"
 import { Budget, Paginated } from "@/types"
 import { budgetStoreApiRoute, budgetsWebRoute, budgetWebRoute } from "@/wayfinder/routes"
 
@@ -63,14 +63,8 @@ export default function BudgetsPage({ budgets }: { budgets: Paginated<Budget & B
 								const budget = row.original
 
 								const now = DateTime.now()
-								const start = DateTime.fromFormat(
-									budget.start_date,
-									"yyyy-MM-dd",
-								).startOf("day")
-								const end = DateTime.fromFormat(
-									budget.end_date,
-									"yyyy-MM-dd",
-								).endOf("day")
+								const start = parseDate(budget.start_date).startOf("day")
+								const end = parseDate(budget.end_date).endOf("day")
 
 								return (
 									<div className="flex items-center gap-2">
@@ -377,8 +371,8 @@ function BudgetCreateDialog() {
 }
 
 function formatBudgetDateWindow(budget: Budget) {
-	const start = DateTime.fromFormat(budget.start_date, "yyyy-MM-dd")
-	const end = DateTime.fromFormat(budget.end_date, "yyyy-MM-dd")
+	const start = parseDate(budget.start_date)
+	const end = parseDate(budget.end_date)
 
 	return start.isValid && end.isValid
 		? `${start.toFormat("d MMM yyyy")} to ${end.toFormat("d MMM yyyy")}`

@@ -52,7 +52,15 @@ import {
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field"
 import { Progress } from "@/components/ui/progress"
 import useApiFormErrors from "@/hooks/use-api-form-errors"
-import { currencyClass, round2dp, toCurrency, toDatetime, withMethod } from "@/lib/utils"
+import {
+	currencyClass,
+	parseDate,
+	parseDatetime,
+	round2dp,
+	toCurrency,
+	toDatetime,
+	withMethod,
+} from "@/lib/utils"
 import { Budget, Category, Record } from "@/types"
 import {
 	budgetDestroyApiRoute,
@@ -81,11 +89,11 @@ type CategoryExtra = {
 }
 
 const getAggregations = (budget: Budget & BudgetExtra) => {
-	const startDate = DateTime.fromFormat(budget.start_date, "yyyy-MM-dd")
-	const endDate = DateTime.fromFormat(budget.end_date, "yyyy-MM-dd")
+	const startDate = parseDate(budget.start_date)
+	const endDate = parseDate(budget.end_date)
 
 	let elapsedSpending = budget.records
-		.filter(r => DateTime.fromFormat(r.datetime, "yyyy-MM-dd HH:mm") < startDate)
+		.filter(r => parseDatetime(r.datetime) < startDate)
 		.reduce((acc, el) => acc - el.amount, 0)
 	let elapsedDays = 0
 	const dates: DateTime[] = []
@@ -97,9 +105,7 @@ const getAggregations = (budget: Budget & BudgetExtra) => {
 
 		const amountForDate = round2dp(
 			budget.records
-				.filter(r =>
-					DateTime.fromFormat(r.datetime, "yyyy-MM-dd HH:mm").hasSame(date, "day"),
-				)
+				.filter(r => parseDatetime(r.datetime).hasSame(date, "day"))
 				.reduce((acc, el) => acc - el.amount, 0),
 		)
 

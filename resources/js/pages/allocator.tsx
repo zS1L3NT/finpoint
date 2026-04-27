@@ -38,7 +38,7 @@ import { FieldGroup } from "@/components/ui/field"
 import { Progress } from "@/components/ui/progress"
 import useApiFormErrors from "@/hooks/use-api-form-errors"
 import usePaginatedTableState from "@/hooks/use-paginated-table-state"
-import { cn, currencyClass, round2dp, toCurrency, toDatetime } from "@/lib/utils"
+import { cn, currencyClass, parseDatetime, round2dp, toCurrency, toDatetime } from "@/lib/utils"
 import { Account, Category, Paginated, Statement } from "@/types"
 import { allocatorWebRoute, recordStoreApiRoute, statementWebRoute } from "@/wayfinder/routes"
 
@@ -501,7 +501,7 @@ function inferAllocatorDatetime(statements: (Statement & StatementExtra)[]) {
 			return []
 		}
 
-		const statementDate = DateTime.fromFormat(statement.date, "yyyy-MM-dd")
+		const statementDate = parseDatetime(statement.date)
 		if (!statementDate.isValid) {
 			return []
 		}
@@ -526,9 +526,7 @@ function inferAllocatorDatetime(statements: (Statement & StatementExtra)[]) {
 		[...describedDates].sort((a, b) => a.toMillis() - b.toMillis())[0] ??
 		statements
 			.flatMap(statement => {
-				const statementDate = DateTime.fromFormat(statement.date, "yyyy-MM-dd").startOf(
-					"day",
-				)
+				const statementDate = parseDatetime(statement.date)
 				return statementDate.isValid ? [statementDate] : []
 			})
 			.sort((a, b) => a.toMillis() - b.toMillis())[0]
