@@ -7,6 +7,7 @@ use App\Models\Account;
 use App\Models\Statement;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Ramsey\Uuid\Uuid;
 
@@ -27,7 +28,9 @@ class ImporterController extends Controller
 
     private function dbs()
     {
-        DB::transaction(function () {
+        return DB::transaction(function () {
+            $count = 0;
+
             foreach (request('files') as $file) {
                 $lines = explode(PHP_EOL, $file->get());
 
@@ -40,8 +43,9 @@ class ImporterController extends Controller
                         'name' => $info[0],
                         'id' => $info[1],
                         'balance' => 0,
+                        'bank' => 'DBS',
                     ]);
-                    $account_id = $info[1];
+                    $account_id = Str::replace('-', '', $info[1]);
                 } else {
                     throw ValidationException::withMessages(['files' => 'Invalid CSV Format']);
                 }
@@ -66,33 +70,24 @@ class ImporterController extends Controller
                 $statements = $rows->map(fn($row) => $header->combine(str_getcsv($row)));
 
                 foreach ($statements as $statement) {
-                    // Value Date changes across bank exports...
-                    $id = Uuid::uuid5(
-                        Uuid::NAMESPACE_OID,
-                        collect([
-                            $account_id,
-                            $statement['Transaction Date'],
-                            $statement['Supplementary Code'],
-                            $statement['Client Reference'],
-                            $statement['Additional Reference'],
-                            $statement['Debit Amount'],
-                            $statement['Credit Amount'],
-                        ])->join(',')
-                    );
+                    $data = [
+                        'account_id' => $account_id,
+                        'date' => Carbon::createFromFormat('d M Y', $statement['Transaction Date'])->startOfDay(),
+                        'description' => collect([$statement['Supplementary Code'], $statement['Client Reference'], $statement['Additional Reference']])->filter(fn($v) => !empty($v))->join(', '),
+                        'amount' => $statement['Debit Amount'] !== '' ? -$statement['Debit Amount'] : $statement['Credit Amount'],
+                    ];
 
-                    if (!Statement::find($id)) {
+                    if (!Statement::query()->where($data)->exists()) {
+                        $count++;
                         Statement::query()->insert([
-                            'account_id' => $account_id,
-                            'id' => $id,
-                            'date' => Carbon::createFromFormat('d M Y', $statement['Transaction Date']),
-                            'description' => collect([$statement['Supplementary Code'], $statement['Client Reference'], $statement['Additional Reference']])->filter(fn($v) => !empty($v))->join(', '),
-                            'amount' => $statement['Debit Amount'] !== '' ? -$statement['Debit Amount'] : $statement['Credit Amount'],
+                            'id' => Uuid::uuid4(),
+                            ...$data
                         ]);
                     }
                 }
             }
-        });
 
-        return [];
+            return ['imported' => $count];
+        });
     }
 }
