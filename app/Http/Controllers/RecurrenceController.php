@@ -20,6 +20,7 @@ class RecurrenceController extends Controller
         $recurrences = $query
             ->withCount('records')
             ->orderBy('amount', 'desc')
+            ->groupBy('recurrences.id')
             ->paginate(request('per_page') ?? 25)
             ->withQueryString();
 

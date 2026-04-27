@@ -15,6 +15,7 @@ class RecordController extends Controller
             ->withCount('statements')
             ->when(request()->query('query'), fn($query, $q) => $query->where('title', 'like', '%' . $q . '%')->orWhere('people', 'like', '%' . $q . '%')->orWhere('location', 'like', '%' . $q . '%')->orWhere('description', 'like', '%' . $q . '%'))
             ->orderBy('datetime', 'desc')
+            ->groupBy('records.id')
             ->paginate(request('per_page') ?? 25)
             ->withQueryString();
 

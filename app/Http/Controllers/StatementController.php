@@ -13,6 +13,7 @@ class StatementController extends Controller
             ->with('account')
             ->when(request()->query('query'), fn ($query, $q) => $query->where('description', 'like', '%'.$q.'%'))
             ->orderBy('datetime', 'desc')
+            ->groupBy('statements.id')
             ->paginate(request('per_page') ?? 25)
             ->withQueryString();
 
