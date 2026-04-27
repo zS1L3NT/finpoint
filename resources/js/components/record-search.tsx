@@ -72,6 +72,7 @@ export default function RecordSearch({
 
 					<ScrollArea className="flex-1 overflow-y-hidden">
 						<DataTable
+							key={records.map(r => r.id).join(",")}
 							data={records.filter(r => !excluded?.some(e => e.id === r.id))}
 							columns={[
 								{
