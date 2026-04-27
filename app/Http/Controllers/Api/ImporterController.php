@@ -34,7 +34,8 @@ class ImporterController extends Controller
     private function dbs()
     {
         return DB::transaction(function () {
-            $count = 0;
+            $imported = 0;
+            $skipped = 0;
 
             foreach (request('files') as $file) {
                 $data = $this->parseFile($file);
@@ -85,23 +86,26 @@ class ImporterController extends Controller
                     ];
 
                     if (!Statement::query()->where($data)->exists()) {
-                        $count++;
+                        $imported++;
                         Statement::query()->insert([
                             'id' => Uuid::uuid4(),
                             ...$data
                         ]);
+                    } else {
+                        $skipped++;
                     }
                 }
             }
 
-            return ['imported' => $count];
+            return compact('imported', 'skipped');
         });
     }
 
     private function uob()
     {
         return DB::transaction(function () {
-            $count = 0;
+            $imported = 0;
+            $skipped = 0;
 
             foreach (request('files') as $file) {
                 $data = $this->parseFile($file);
@@ -151,16 +155,18 @@ class ImporterController extends Controller
                     ];
 
                     if (!Statement::query()->where($data)->exists()) {
-                        $count++;
+                        $imported++;
                         Statement::query()->insert([
                             'id' => Uuid::uuid4(),
                             ...$data
                         ]);
+                    } else {
+                        $skipped++;
                     }
                 }
             }
 
-            return ['imported' => $count];
+            return compact('imported', 'skipped');
         });
     }
 

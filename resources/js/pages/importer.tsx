@@ -1,7 +1,7 @@
-import { router } from "@inertiajs/react"
 import { useForm } from "@tanstack/react-form"
 import { FileIcon, ImportIcon } from "lucide-react"
 import { useState } from "react"
+import { toast } from "sonner"
 import SelectField from "@/components/form/select-field"
 import AppHeader from "@/components/layout/app-header"
 import PageHeader from "@/components/layout/page-header"
@@ -18,7 +18,7 @@ import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from "@/components/ui/item"
 import useApiFormErrors from "@/hooks/use-api-form-errors"
-import { allocatorWebRoute, importerApiRoute } from "@/wayfinder/routes"
+import { importerApiRoute } from "@/wayfinder/routes"
 
 export default function Importer() {
 	const [files, setFiles] = useState<File[]>([])
@@ -47,7 +47,18 @@ export default function Importer() {
 			}
 
 			if (response.ok) {
-				router.visit(allocatorWebRoute.url())
+				const data = await response.json().catch(() => null)
+				toast.success(`Imported successful`, {
+					description: (
+						<>
+							<p>Imported {data.imported} statements.</p>
+							<p>Skipped {data.skipped} duplicates.</p>
+						</>
+					),
+				})
+				form.reset()
+				setFiles([])
+				return
 			}
 		},
 	})

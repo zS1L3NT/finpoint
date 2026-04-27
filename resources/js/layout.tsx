@@ -1,6 +1,7 @@
 import { usePage } from "@inertiajs/react"
 import AppSidebar from "@/components/layout/app-sidebar"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
+import { Toaster } from "@/components/ui/sonner"
 import { SharedPageProps } from "@/types"
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -16,6 +17,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 				} as React.CSSProperties
 			}
 		>
+			<Toaster />
 			<AppSidebar />
 			<SidebarInset className="min-h-full">{children}</SidebarInset>
 		</SidebarProvider>
