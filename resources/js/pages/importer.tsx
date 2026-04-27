@@ -38,6 +38,7 @@ export default function Importer() {
 		},
 		onSubmit: async ({ value }) => {
 			const formData = new FormData()
+			formData.append("bank", value.bank)
 			value.files.forEach(file => formData.append("files[]", file))
 
 			const response = await fetch(importerApiRoute.url(), {
@@ -128,7 +129,6 @@ export default function Importer() {
 												name="files[]"
 												type="file"
 												multiple
-												required
 												accept=".csv,text/csv"
 												aria-invalid={!!errors.length}
 												onChange={event => {
