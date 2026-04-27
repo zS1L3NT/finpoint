@@ -35,7 +35,14 @@ import {
 import { FieldGroup } from "@/components/ui/field"
 import { Progress } from "@/components/ui/progress"
 import useApiFormErrors from "@/hooks/use-api-form-errors"
-import { classForCurrency, cn, formatCurrency, formatDatetime, withMethod } from "@/lib/utils"
+import {
+	classForCurrency,
+	cn,
+	formatCurrency,
+	formatDatetime,
+	round2dp,
+	withMethod,
+} from "@/lib/utils"
 import { Account, Allocation, Category, Record, Statement } from "@/types"
 import {
 	recordDestroyApiRoute,
@@ -46,7 +53,13 @@ import {
 
 type RecordExtra = {
 	category: Category & CategoryExtra
-	statements: (Statement & { account: Account } & { pivot: Allocation })[]
+	statements: (Statement & StatementExtra)[]
+}
+
+type StatementExtra = {
+	allocations_sum_amount: number
+	account: Account
+	pivot: Allocation
 }
 
 type CategoryExtra = {
@@ -409,7 +422,11 @@ function RecordEditorDialog({
 											field.state.meta.errors,
 											field.name,
 										)
-										const allocable = Math.abs(statement.amount)
+										const allocable = round2dp(
+											statement.amount -
+												statement.allocations_sum_amount +
+												statement.pivot.amount,
+										)
 
 										return (
 											<Card

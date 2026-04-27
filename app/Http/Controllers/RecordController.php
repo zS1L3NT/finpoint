@@ -24,6 +24,9 @@ class RecordController extends Controller
     public function show(Record $record)
     {
         $record->load('category', 'statements', 'statements.account');
+        foreach ($record->statements as $statement) {
+            $statement->loadSum('allocations', 'amount');
+        }
 
         $categories = Category::query()
             ->with('children')
