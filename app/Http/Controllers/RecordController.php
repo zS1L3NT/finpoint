@@ -13,7 +13,18 @@ class RecordController extends Controller
         $records = Record::query()
             ->with('category')
             ->withCount('statements')
-            ->when(request()->query('query'), fn($query, $q) => $query->where('title', 'like', '%' . $q . '%')->orWhere('people', 'like', '%' . $q . '%')->orWhere('location', 'like', '%' . $q . '%')->orWhere('description', 'like', '%' . $q . '%'))
+            ->when(
+                request()->query('query'),
+                fn($query, $q) => $query
+                    ->leftJoin('categories', 'records.category_id', '=', 'categories.id')
+                    ->where('title', 'like', '%' . $q . '%')
+                    ->orWhere('people', 'like', '%' . $q . '%')
+                    ->orWhere('location', 'like', '%' . $q . '%')
+                    ->orWhere('description', 'like', '%' . $q . '%')
+                    // ->orWhere('datetime', '=', Carbon::parse($q))
+                    ->orWhere('amount', 'like', '%' . $q . '%')
+                    ->orWhere('categories.name', 'like', '%' . $q . '%')
+            )
             ->orderBy('datetime', 'desc')
             ->groupBy('records.id')
             ->paginate(request('per_page') ?? 25)

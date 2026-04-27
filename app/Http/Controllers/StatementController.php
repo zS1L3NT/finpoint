@@ -11,7 +11,14 @@ class StatementController extends Controller
     {
         $statements = Statement::query()
             ->with('account')
-            ->when(request()->query('query'), fn ($query, $q) => $query->where('description', 'like', '%'.$q.'%'))
+            ->when(
+                request()->query('query'),
+                fn($query, $q) => $query
+                    ->leftJoin('accounts', 'accounts.id', '=', 'statements.account_id')
+                    ->where('description', 'like', '%' . $q . '%')
+                    ->orWhere('amount', 'like', '%' . $q . '%')
+                    ->orWhere('accounts.id', 'like', '%' . $q . '%')
+            )
             ->orderBy('datetime', 'desc')
             ->groupBy('statements.id')
             ->paginate(request('per_page') ?? 25)

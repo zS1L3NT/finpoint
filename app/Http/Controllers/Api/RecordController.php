@@ -13,8 +13,19 @@ class RecordController extends Controller
 {
     public function index()
     {
-        return Record::with('category', 'statements')
-            ->when(request()->query('query'), fn ($query, $q) => $query->where('title', 'like', '%'.$q.'%')->orWhere('people', 'like', '%'.$q.'%')->orWhere('location', 'like', '%'.$q.'%')->orWhere('description', 'like', '%'.$q.'%'))
+        return Record::with('category')
+            ->when(
+                request()->query('query'),
+                fn($query, $q) => $query
+                    ->leftJoin('categories', 'records.category_id', '=', 'categories.id')
+                    ->where('title', 'like', '%' . $q . '%')
+                    ->orWhere('people', 'like', '%' . $q . '%')
+                    ->orWhere('location', 'like', '%' . $q . '%')
+                    ->orWhere('description', 'like', '%' . $q . '%')
+                    // ->orWhere('datetime', '=', Carbon::parse($q))
+                    ->orWhere('amount', 'like', '%' . $q . '%')
+                    ->orWhere('categories.name', 'like', '%' . $q . '%')
+            )
             ->orderBy('datetime', 'desc')
             ->get();
     }

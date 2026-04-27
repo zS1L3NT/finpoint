@@ -11,7 +11,12 @@ class BudgetController extends Controller
     public function index()
     {
         $budgets = Budget::query()
-            ->when(request()->query('query'), fn($query, $term) => $query->where('name', 'like', '%' . $term . '%'))
+            ->when(
+                request()->query('query'),
+                fn($query, $q) => $query
+                    ->where('name', 'like', '%' . $q . '%')
+                    ->orWhere('amount', 'like', '%' . $q . '%')
+            )
             ->withSum('records', 'amount')
             ->orderBy('end_date', 'desc')
             ->groupBy('budgets.id')
