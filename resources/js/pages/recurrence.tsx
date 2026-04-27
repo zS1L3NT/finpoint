@@ -46,7 +46,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select"
 import useApiFormErrors from "@/hooks/use-api-form-errors"
-import { currencyClass, round2dp, toCurrency, toDatetime, withMethod } from "@/lib/utils"
+import { classForCurrency, formatCurrency, formatDatetime, round2dp, withMethod } from "@/lib/utils"
 import { Category, Record, Recurrence } from "@/types"
 import {
 	recordWebRoute,
@@ -110,9 +110,9 @@ export default function RecurrencePage({
 
 				<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
 					<DetailCard label="Period" value={formatRecurrencePeriod(recurrence.period)} />
-					<DetailCard label="Entered amount" value={toCurrency(recurrence.amount)} />
-					<DetailCard label="Monthly equivalent" value={toCurrency(monthlyAmount)} />
-					<DetailCard label="Annualised" value={toCurrency(yearlyAmount)} />
+					<DetailCard label="Entered amount" value={formatCurrency(recurrence.amount)} />
+					<DetailCard label="Monthly equivalent" value={formatCurrency(monthlyAmount)} />
+					<DetailCard label="Annualised" value={formatCurrency(yearlyAmount)} />
 					<DetailCard label="Linked records" value={recurrence.records_count} />
 				</div>
 
@@ -134,7 +134,7 @@ export default function RecurrencePage({
 											Monthly equivalent
 										</p>
 										<p className="mt-2 text-3xl font-semibold">
-											{toCurrency(monthlyAmount)}
+											{formatCurrency(monthlyAmount)}
 										</p>
 									</div>
 									<div className="flex size-12 items-center justify-center rounded-full bg-muted ring-1 ring-border">
@@ -151,7 +151,7 @@ export default function RecurrencePage({
 							<div className="grid gap-3 md:grid-cols-2">
 								<MiniMetricCard
 									label="Original value"
-									value={toCurrency(recurrence.amount)}
+									value={formatCurrency(recurrence.amount)}
 								/>
 								<MiniMetricCard
 									label="Linked evidence"
@@ -232,15 +232,15 @@ export default function RecurrencePage({
 									header: "Amount",
 									meta: { width: "8rem" },
 									cell: ({ row }) => (
-										<span className={currencyClass(row.original.amount)}>
-											{toCurrency(row.original.amount)}
+										<span className={classForCurrency(row.original.amount)}>
+											{formatCurrency(row.original.amount)}
 										</span>
 									),
 								},
 								{
 									header: "Date & Time",
 									meta: { width: "12rem" },
-									cell: ({ row }) => toDatetime(row.original.datetime),
+									cell: ({ row }) => formatDatetime(row.original.datetime),
 								},
 								{
 									header: "Description",

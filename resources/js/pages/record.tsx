@@ -35,7 +35,7 @@ import {
 import { FieldGroup } from "@/components/ui/field"
 import { Progress } from "@/components/ui/progress"
 import useApiFormErrors from "@/hooks/use-api-form-errors"
-import { cn, currencyClass, toCurrency, toDatetime, withMethod } from "@/lib/utils"
+import { classForCurrency, cn, formatCurrency, formatDatetime, withMethod } from "@/lib/utils"
 import { Account, Allocation, Category, Record, Statement } from "@/types"
 import {
 	recordDestroyApiRoute,
@@ -101,10 +101,10 @@ export default function RecordPage({
 					/>
 					<DetailCard
 						label="Amount"
-						value={toCurrency(record.amount)}
-						valueClassName={cn(currencyClass(record.amount), "text-base")}
+						value={formatCurrency(record.amount)}
+						valueClassName={cn(classForCurrency(record.amount), "text-base")}
 					/>
-					<DetailCard label="Date & Time" value={toDatetime(record.datetime)} />
+					<DetailCard label="Date & Time" value={formatDatetime(record.datetime)} />
 				</div>
 
 				<Card>
@@ -126,7 +126,7 @@ export default function RecordPage({
 								{
 									header: "Date & Time",
 									meta: { width: "12rem" },
-									cell: ({ row }) => toDatetime(row.original.date),
+									cell: ({ row }) => formatDatetime(row.original.date),
 								},
 								{
 									header: "Amount",
@@ -422,10 +422,10 @@ function RecordEditorDialog({
 														{statement.description}
 													</CardTitle>
 													<CardDescription>
-														{toDatetime(statement.date)}
+														{formatDatetime(statement.date)}
 													</CardDescription>
 													<CardAction className="text-sm font-semibold">
-														{toCurrency(statement.amount)}
+														{formatCurrency(statement.amount)}
 													</CardAction>
 												</CardHeader>
 												<CardContent className="flex flex-col gap-4">
@@ -434,7 +434,7 @@ function RecordEditorDialog({
 														label="Amount"
 														value={field.state.value}
 														errors={errors}
-														suffix={`of ${toCurrency(allocable)}`}
+														suffix={`of ${formatCurrency(allocable)}`}
 														onChange={value => {
 															field.handleChange(value)
 															clearApiError(field.name)

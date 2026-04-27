@@ -53,12 +53,12 @@ import { Field, FieldDescription, FieldLabel } from "@/components/ui/field"
 import { Progress } from "@/components/ui/progress"
 import useApiFormErrors from "@/hooks/use-api-form-errors"
 import {
-	currencyClass,
+	classForCurrency,
+	formatCurrency,
+	formatDatetime,
 	parseDate,
 	parseDatetime,
 	round2dp,
-	toCurrency,
-	toDatetime,
 	withMethod,
 } from "@/lib/utils"
 import { Budget, Category, Record } from "@/types"
@@ -166,8 +166,8 @@ export default function BudgetPage({
 		projectedExceedDate,
 	} = useMemo(() => getAggregations(budget), [budget])
 
-	console.log("Average daily spend:", toCurrency(currentPace))
-	console.log("Recommended daily spend for remaining days:", toCurrency(idealPace))
+	console.log("Average daily spend:", formatCurrency(currentPace))
+	console.log("Recommended daily spend for remaining days:", formatCurrency(idealPace))
 
 	const attach = async (record: Record) => {
 		const response = await fetch(budgetRecordUpdateApiRoute.url({ budget, record }), {
@@ -212,8 +212,8 @@ export default function BudgetPage({
 						value={
 							<div className="space-y-2">
 								<div>
-									<p className="text-sm">{toCurrency(elapsedSpending)}</p>
-									<p className="text-muted-foreground">{`${Math.ceil((elapsedSpending / budget.amount) * 100)}% of ${toCurrency(budget.amount)}`}</p>
+									<p className="text-sm">{formatCurrency(elapsedSpending)}</p>
+									<p className="text-muted-foreground">{`${Math.ceil((elapsedSpending / budget.amount) * 100)}% of ${formatCurrency(budget.amount)}`}</p>
 								</div>
 								<Progress
 									value={(elapsedSpending / budget.amount) * 100}
@@ -226,7 +226,7 @@ export default function BudgetPage({
 						label="Usage Pace"
 						value={
 							<div>
-								<p className="text-sm">{toCurrency(currentPace)} / day</p>
+								<p className="text-sm">{formatCurrency(currentPace)} / day</p>
 								{/* <p className="text-muted-foreground">
 									Spend {toCurrency(idealPace)} / day or less to stay on track
 								</p> */}
@@ -237,7 +237,7 @@ export default function BudgetPage({
 						label="Recommended Pace"
 						value={
 							<div>
-								<p className="text-sm">{toCurrency(idealPace)} / day</p>
+								<p className="text-sm">{formatCurrency(idealPace)} / day</p>
 								{/* <p className="text-muted-foreground">
 									Spend {toCurrency(idealPace)} / day or less to stay on track
 								</p> */}
@@ -248,7 +248,7 @@ export default function BudgetPage({
 						label="Usage Projection"
 						value={
 							<div>
-								<p className="text-sm">{toCurrency(projectedSpending)}</p>
+								<p className="text-sm">{formatCurrency(projectedSpending)}</p>
 								<p className="text-muted-foreground">
 									{projectedExceedDate
 										? projectedExceedDate > DateTime.now()
@@ -322,14 +322,14 @@ export default function BudgetPage({
 																textAnchor="middle"
 																className="fill-foreground text-xl font-bold"
 															>
-																{toCurrency(elapsedSpending)}
+																{formatCurrency(elapsedSpending)}
 															</text>
 															<text
 																y={20}
 																textAnchor="middle"
 																className="fill-muted-foreground"
 															>
-																{`of ${toCurrency(budget.amount)}`}
+																{`of ${formatCurrency(budget.amount)}`}
 															</text>
 														</g>
 													)
@@ -496,15 +496,15 @@ export default function BudgetPage({
 									header: "Amount",
 									meta: { width: "8rem" },
 									cell: ({ row }) => (
-										<span className={currencyClass(row.original.amount)}>
-											{toCurrency(row.original.amount)}
+										<span className={classForCurrency(row.original.amount)}>
+											{formatCurrency(row.original.amount)}
 										</span>
 									),
 								},
 								{
 									header: "Date & Time",
 									meta: { width: "12rem" },
-									cell: ({ row }) => toDatetime(row.original.datetime),
+									cell: ({ row }) => formatDatetime(row.original.datetime),
 								},
 								{
 									header: "Description",

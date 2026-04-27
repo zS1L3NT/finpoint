@@ -38,7 +38,7 @@ import { FieldGroup } from "@/components/ui/field"
 import { Progress } from "@/components/ui/progress"
 import useApiFormErrors from "@/hooks/use-api-form-errors"
 import usePaginatedTableState from "@/hooks/use-paginated-table-state"
-import { cn, currencyClass, parseDatetime, round2dp, toCurrency, toDatetime } from "@/lib/utils"
+import { classForCurrency, cn, formatCurrency, formatDatetime, parseDatetime, round2dp } from "@/lib/utils"
 import { Account, Category, Paginated, Statement } from "@/types"
 import { allocatorWebRoute, recordStoreApiRoute, statementWebRoute } from "@/wayfinder/routes"
 
@@ -86,8 +86,8 @@ export default function Allocator({
 					<DetailCard label="Selected Statements" value={selected.length} />
 					<DetailCard
 						label="Selected Amount"
-						value={toCurrency(selectedAmount)}
-						valueClassName={currencyClass(selectedAmount)}
+						value={formatCurrency(selectedAmount)}
+						valueClassName={classForCurrency(selectedAmount)}
 					/>
 				</div>
 
@@ -123,7 +123,7 @@ export default function Allocator({
 							meta: { width: "12rem" },
 							cell: ({ row }) => (
 								<span className="text-muted-foreground">
-									{toDatetime(row.original.date)}
+									{formatDatetime(row.original.date)}
 								</span>
 							),
 						},
@@ -432,10 +432,10 @@ function AllocateRecordDialog({
 														{statement.description}
 													</CardTitle>
 													<CardDescription>
-														{toDatetime(statement.date)}
+														{formatDatetime(statement.date)}
 													</CardDescription>
 													<CardAction className="text-sm font-semibold">
-														{toCurrency(statement.amount)}
+														{formatCurrency(statement.amount)}
 													</CardAction>
 												</CardHeader>
 												<CardContent className="flex flex-col gap-4">
@@ -444,7 +444,7 @@ function AllocateRecordDialog({
 														label="Amount"
 														value={field.state.value}
 														errors={errors}
-														suffix={`of ${toCurrency(allocable)}`}
+														suffix={`of ${formatCurrency(allocable)}`}
 														onChange={value => {
 															field.handleChange(value)
 															clearApiError(field.name)

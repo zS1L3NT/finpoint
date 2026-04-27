@@ -8,7 +8,7 @@ import PageHeader from "@/components/layout/page-header"
 import DataTable from "@/components/table/data-table"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { currencyClass, toCurrency, toDatetime } from "@/lib/utils"
+import { classForCurrency, formatCurrency, formatDatetime } from "@/lib/utils"
 import { Account, Allocation, Category, Record, Statement } from "@/types"
 import { recordWebRoute, statementsWebRoute } from "@/wayfinder/routes"
 
@@ -40,10 +40,10 @@ export default function StatementPage({ statement }: { statement: Statement & St
 					/>
 					<DetailCard
 						label="Amount"
-						value={toCurrency(statement.amount)}
-						valueClassName={currencyClass(statement.amount)}
+						value={formatCurrency(statement.amount)}
+						valueClassName={classForCurrency(statement.amount)}
 					/>
-					<DetailCard label="Date & Time" value={toDatetime(statement.date)} />
+					<DetailCard label="Date & Time" value={formatDatetime(statement.date)} />
 				</div>
 
 				<Card>
@@ -95,7 +95,7 @@ export default function StatementPage({ statement }: { statement: Statement & St
 								{
 									header: "Date & Time",
 									meta: { width: "12rem" },
-									cell: ({ row }) => toDatetime(row.original.datetime),
+									cell: ({ row }) => formatDatetime(row.original.datetime),
 								},
 								{
 									header: "Description",

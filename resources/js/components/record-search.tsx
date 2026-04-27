@@ -12,7 +12,7 @@ import {
 	SheetTitle,
 	SheetTrigger,
 } from "@/components/ui/sheet"
-import { currencyClass, toCurrency, toDatetime } from "@/lib/utils"
+import { classForCurrency, formatCurrency, formatDatetime } from "@/lib/utils"
 import { Category, Record } from "@/types"
 import { recordIndexApiRoute } from "@/wayfinder/routes"
 
@@ -104,14 +104,14 @@ export default function RecordSearch({
 														</span>
 													</div>
 													<div className="text-muted-foreground">
-														{toDatetime(row.original.datetime)}
+														{formatDatetime(row.original.datetime)}
 													</div>
 													<span
-														className={currencyClass(
+														className={classForCurrency(
 															row.original.amount,
 														)}
 													>
-														{toCurrency(row.original.amount)}
+														{formatCurrency(row.original.amount)}
 													</span>
 												</div>
 											</div>

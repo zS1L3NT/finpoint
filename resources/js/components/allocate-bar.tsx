@@ -1,5 +1,5 @@
 import { Progress } from "@/components/ui/progress"
-import { cn, currencyClass, toCurrency } from "@/lib/utils"
+import { classForCurrency, cn, formatCurrency } from "@/lib/utils"
 
 export default function AllocateBar({
 	title,
@@ -15,12 +15,12 @@ export default function AllocateBar({
 			<div className="flex justify-between">
 				<span>{title}</span>
 				<div>
-					<span className={cn("text-muted-foreground", currencyClass(value))}>
-						{toCurrency(value)}
+					<span className={cn("text-muted-foreground", classForCurrency(value))}>
+						{formatCurrency(value)}
 					</span>
 					{" / "}
-					<span className={cn("font-bold", currencyClass(total))}>
-						{toCurrency(total)}
+					<span className={cn("font-bold", classForCurrency(total))}>
+						{formatCurrency(total)}
 					</span>
 				</div>
 			</div>

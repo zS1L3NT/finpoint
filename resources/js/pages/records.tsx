@@ -6,7 +6,7 @@ import PageHeader from "@/components/layout/page-header"
 import PaginatedDataTable from "@/components/table/paginated-data-table"
 import { Button } from "@/components/ui/button"
 import usePaginatedTableState from "@/hooks/use-paginated-table-state"
-import { currencyClass, toCurrency, toDatetime } from "@/lib/utils"
+import { classForCurrency, formatCurrency, formatDatetime } from "@/lib/utils"
 import { Category, Paginated, Record } from "@/types"
 import { recordsWebRoute, recordWebRoute } from "@/wayfinder/routes"
 
@@ -63,8 +63,8 @@ export default function RecordsPage({ records }: { records: Paginated<Record & R
 							header: "Amount",
 							meta: { width: "8rem" },
 							cell: ({ row }) => (
-								<span className={currencyClass(row.original.amount)}>
-									{toCurrency(row.original.amount)}
+								<span className={classForCurrency(row.original.amount)}>
+									{formatCurrency(row.original.amount)}
 								</span>
 							),
 						},
@@ -73,7 +73,7 @@ export default function RecordsPage({ records }: { records: Paginated<Record & R
 							meta: { width: "12rem" },
 							cell: ({ row }) => (
 								<span className="text-muted-foreground">
-									{toDatetime(row.original.datetime)}
+									{formatDatetime(row.original.datetime)}
 								</span>
 							),
 						},

@@ -5,7 +5,7 @@ import PageHeader from "@/components/layout/page-header"
 import PaginatedDataTable from "@/components/table/paginated-data-table"
 import { Button } from "@/components/ui/button"
 import usePaginatedTableState from "@/hooks/use-paginated-table-state"
-import { currencyClass, toCurrency, toDatetime } from "@/lib/utils"
+import { classForCurrency, formatCurrency, formatDatetime } from "@/lib/utils"
 import { Account, Paginated, Statement } from "@/types"
 import { statementsWebRoute, statementWebRoute } from "@/wayfinder/routes"
 
@@ -48,7 +48,7 @@ export default function StatementsPage({
 							meta: { width: "12rem" },
 							cell: ({ row }) => (
 								<span className="text-muted-foreground">
-									{toDatetime(row.original.date)}
+									{formatDatetime(row.original.date)}
 								</span>
 							),
 						},
@@ -56,8 +56,8 @@ export default function StatementsPage({
 							header: "Amount",
 							meta: { width: "6rem" },
 							cell: ({ row }) => (
-								<span className={currencyClass(row.original.amount)}>
-									{toCurrency(row.original.amount)}
+								<span className={classForCurrency(row.original.amount)}>
+									{formatCurrency(row.original.amount)}
 								</span>
 							),
 						},

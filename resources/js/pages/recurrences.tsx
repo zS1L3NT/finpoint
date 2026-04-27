@@ -38,7 +38,7 @@ import {
 } from "@/components/ui/select"
 import useApiFormErrors from "@/hooks/use-api-form-errors"
 import usePaginatedTableState from "@/hooks/use-paginated-table-state"
-import { cn, currencyClass, round2dp, toCurrency } from "@/lib/utils"
+import { classForCurrency, cn, formatCurrency, round2dp } from "@/lib/utils"
 import { Paginated, Recurrence } from "@/types"
 import {
 	recurrenceStoreApiRoute,
@@ -101,8 +101,8 @@ export default function RecurrencesPage({
 
 				<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
 					<DetailCard label="Recurrences" value={breakdown.length} />
-					<DetailCard label="Monthly run-rate" value={toCurrency(monthlyTotal)} />
-					<DetailCard label="Annualised" value={toCurrency(yearlyTotal)} />
+					<DetailCard label="Monthly run-rate" value={formatCurrency(monthlyTotal)} />
+					<DetailCard label="Annualised" value={formatCurrency(yearlyTotal)} />
 					<DetailCard label="Linked records" value={linkedRecordCount} />
 				</div>
 
@@ -111,7 +111,7 @@ export default function RecurrencesPage({
 						<CardDescription>Monthly breakdown</CardDescription>
 						<CardTitle>Where your money is going</CardTitle>
 						<CardAction className="text-sm text-muted-foreground">
-							{toCurrency(monthlyTotal)} / month
+							{formatCurrency(monthlyTotal)} / month
 						</CardAction>
 					</CardHeader>
 
@@ -147,7 +147,7 @@ export default function RecurrencesPage({
 											</div>
 											<div className="text-right">
 												<p className="font-semibold">
-													{toCurrency(slice.monthlyAmount)}
+													{formatCurrency(slice.monthlyAmount)}
 												</p>
 												<p className="text-xs text-muted-foreground">
 													{slice.percentage.toFixed(1)}%
@@ -188,8 +188,8 @@ export default function RecurrencesPage({
 							header: "Monthly",
 							meta: { width: "6rem" },
 							cell: ({ row }) => (
-								<span className={cn(currencyClass(row.original.amount), row.original.period === "year" ? "opacity-50" : null)}>
-									{toCurrency(
+								<span className={cn(classForCurrency(row.original.amount), row.original.period === "year" ? "opacity-50" : null)}>
+									{formatCurrency(
 										round2dp(
 											row.original.period === "month"
 												? row.original.amount
@@ -203,8 +203,8 @@ export default function RecurrencesPage({
 							header: "Yearly",
 							meta: { width: "6rem" },
 							cell: ({ row }) => (
-								<span className={cn(currencyClass(row.original.amount), row.original.period === "month" ? "opacity-50" : null)}>
-									{toCurrency(
+								<span className={cn(classForCurrency(row.original.amount), row.original.period === "month" ? "opacity-50" : null)}>
+									{formatCurrency(
 										round2dp(
 											row.original.period === "year"
 												? row.original.amount
@@ -287,7 +287,7 @@ function RecurrencePieChart({
 					<p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
 						Monthly total
 					</p>
-					<p className="mt-2 text-2xl font-semibold">{toCurrency(monthlyTotal)}</p>
+					<p className="mt-2 text-2xl font-semibold">{formatCurrency(monthlyTotal)}</p>
 				</div>
 			</div>
 

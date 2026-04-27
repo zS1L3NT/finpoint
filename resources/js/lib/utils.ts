@@ -18,7 +18,7 @@ export const parseDate = (value: string) => {
 	return DateTime.fromFormat(value, "yyyy-MM-dd")
 }
 
-export const toDatetime = (value: string) => {
+export const formatDatetime = (value: string) => {
 	const datetime = parseDatetime(value)
 	if (datetime.isValid) {
 		return datetime.toFormat("d MMM y, h:mm a")?.replace("12:00 AM", "-")
@@ -27,14 +27,14 @@ export const toDatetime = (value: string) => {
 	}
 }
 
-export const toCurrency = (amount: number) => {
+export const formatCurrency = (amount: number) => {
 	return new Intl.NumberFormat("en-SG", {
 		style: "currency",
 		currency: "SGD",
 	}).format(amount)
 }
 
-export const currencyClass = (amount: number) => {
+export const classForCurrency = (amount: number) => {
 	return amount < 0 ? "text-red-500" : amount > 0 ? "text-green-600" : "text-foreground"
 }
 

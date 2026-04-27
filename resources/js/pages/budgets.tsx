@@ -26,7 +26,7 @@ import { Input } from "@/components/ui/input"
 import { Progress } from "@/components/ui/progress"
 import useApiFormErrors from "@/hooks/use-api-form-errors"
 import usePaginatedTableState from "@/hooks/use-paginated-table-state"
-import { parseDate, toCurrency } from "@/lib/utils"
+import { formatCurrency, parseDate } from "@/lib/utils"
 import { Budget, Paginated } from "@/types"
 import { budgetStoreApiRoute, budgetsWebRoute, budgetWebRoute } from "@/wayfinder/routes"
 
@@ -101,9 +101,9 @@ export default function BudgetsPage({ budgets }: { budgets: Paginated<Budget & B
 										<div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
 											<span>{Math.round(usage)}% used</span>
 											<span>
-												{toCurrency(spent)}
+												{formatCurrency(spent)}
 												{" / "}
-												{toCurrency(budget.amount)}
+												{formatCurrency(budget.amount)}
 											</span>
 										</div>
 										<Progress value={usage} className="h-2" />
