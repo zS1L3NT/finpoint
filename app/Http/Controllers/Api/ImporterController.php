@@ -16,23 +16,12 @@ use stdClass;
 
 class ImporterController extends Controller
 {
-    public function store()
+    public function dbs()
     {
         request()->validate([
-            'bank' => 'required|string|in:dbs,uob',
-            'files' => 'required|array',
-            'files.*' => 'file|extensions:csv,xlsx,xls',
+            'files.*' => 'file|extensions:csv',
         ]);
 
-        if (request('bank') === 'dbs') {
-            return $this->dbs();
-        } elseif (request('bank') === 'uob') {
-            return $this->uob();
-        }
-    }
-
-    private function dbs()
-    {
         return DB::transaction(function () {
             $imported = 0;
             $skipped = 0;
@@ -101,8 +90,12 @@ class ImporterController extends Controller
         });
     }
 
-    private function uob()
+    public function uob()
     {
+        request()->validate([
+            'files.*' => 'file|extensions:xlsx,xls',
+        ]);
+
         return DB::transaction(function () {
             $imported = 0;
             $skipped = 0;
@@ -170,6 +163,59 @@ class ImporterController extends Controller
         });
     }
 
+    public function revolut()
+    {
+        request()->validate([
+            'file' => 'file|extensions:csv',
+            'account_id' => 'required|string',
+            'account_name' => 'string',
+        ]);
+
+        return DB::transaction(function () {
+            $imported = 0;
+            $skipped = 0;
+
+            $data = $this->parseFile(request('file'));
+
+            if (request('account_name')) {
+                Account::query()->insert([
+                    'id' => request('account_id'),
+                    'name' => request('account_name'),
+                    'balance' => 0,
+                    'bank' => 'Revolut',
+                ]);
+            }
+
+            $header = $data->shift();
+            $statements = $data->map(fn($row) => $header->combine($row));
+
+            foreach ($statements as $statement) {
+                if ($statement['State'] !== 'COMPLETED') {
+                    throw ValidationException::withMessages(['files' => 'Invalid CSV Format: Incompleted transaction found']);
+                }
+
+                $data = [
+                    'account_id' => request('account_id'),
+                    'date' => Carbon::createFromFormat('Y-m-d H:i:s', $statement['Started Date']),
+                    'description' => $statement['Description'],
+                    'amount' => $statement['Amount'] - $statement['Fee'],
+                ];
+
+                if (!Statement::query()->where($data)->exists()) {
+                    $imported++;
+                    Statement::query()->insert([
+                        'id' => Uuid::uuid4(),
+                        ...$data
+                    ]);
+                } else {
+                    $skipped++;
+                }
+            }
+
+            return compact('imported', 'skipped');
+        });
+    }
+
     /**
      * Summary of parseFile
      * @param UploadedFile $file
@@ -178,11 +224,10 @@ class ImporterController extends Controller
     private function parseFile(UploadedFile $file)
     {
         if ($file->getClientOriginalExtension() === 'csv') {
-            return collect(explode(PHP_EOL, $file->get()))
+            return collect(explode(PHP_EOL, trim($file->get())))
                 ->map(
                     fn($line) =>
-                    collect(str_getcsv($line))
-                        ->map(fn($value) => $value === '' ? null : $value)
+                    collect(str_getcsv($line))->map(fn($value) => $value === '' ? null : $value)
                 );
         } elseif (in_array($file->getClientOriginalExtension(), ['xlsx', 'xls'])) {
             return Excel::toCollection(new stdClass(), $file)->first();

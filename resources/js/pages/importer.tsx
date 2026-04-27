@@ -1,8 +1,9 @@
-import { useForm } from "@tanstack/react-form"
+import { useForm, useStore } from "@tanstack/react-form"
 import { FileIcon, ImportIcon } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import SelectField from "@/components/form/select-field"
+import TextField from "@/components/form/text-field"
 import AppHeader from "@/components/layout/app-header"
 import PageHeader from "@/components/layout/page-header"
 import { Button } from "@/components/ui/button"
@@ -18,23 +19,56 @@ import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from "@/components/ui/item"
 import useApiFormErrors from "@/hooks/use-api-form-errors"
-import { importerApiRoute } from "@/wayfinder/routes"
+import { Account } from "@/types"
+import {
+	importerDbsApiRoute,
+	importerRevolutApiRoute,
+	importerUobApiRoute,
+} from "@/wayfinder/routes"
 
-export default function Importer() {
+const BANKS_REQUIRING_ADDITIONAL_INFO = ["revolut"]
+
+export default function Importer({ accounts }: { accounts: Account[] }) {
 	const [files, setFiles] = useState<File[]>([])
 	const { mergeErrors, clearApiError, setApiErrors } = useApiFormErrors()
 
 	const form = useForm({
 		defaultValues: {
 			bank: "",
+			account_select: "",
+			account_id: "",
+			account_name: "",
 			files: [] as File[],
 		},
 		onSubmit: async ({ value }) => {
+			let url = ""
 			const formData = new FormData()
-			formData.append("bank", value.bank)
-			value.files.forEach(file => formData.append("files[]", file))
 
-			const response = await fetch(importerApiRoute.url(), {
+			if (value.bank === "dbs") {
+				url = importerDbsApiRoute.url()
+				files.forEach(file => formData.append("files[]", file))
+			}
+
+			if (value.bank === "uob") {
+				url = importerUobApiRoute.url()
+				files.forEach(file => formData.append("files[]", file))
+			}
+
+			if (value.bank === "revolut") {
+				url = importerRevolutApiRoute.url()
+				if (files[0]) {
+					formData.append("file", files[0])
+				}
+
+				if (value.account_select === "new") {
+					formData.append("account_id", value.account_id)
+					formData.append("account_name", value.account_name)
+				} else {
+					formData.append("account_id", value.account_select)
+				}
+			}
+
+			const response = await fetch(url, {
 				method: "POST",
 				body: formData,
 				headers: { Accept: "application/json" },
@@ -62,6 +96,9 @@ export default function Importer() {
 			}
 		},
 	})
+
+	const bank = useStore(form.store, state => state.values.bank)
+	const accountSelect = useStore(form.store, state => state.values.account_select)
 
 	return (
 		<>
@@ -108,6 +145,7 @@ export default function Importer() {
 										items={[
 											{ value: "dbs", label: "DBS" },
 											{ value: "uob", label: "UOB" },
+											{ value: "revolut", label: "Revolut" },
 										]}
 										onChange={value => {
 											field.handleChange(value)
@@ -116,6 +154,81 @@ export default function Importer() {
 									/>
 								)}
 							/>
+
+							{BANKS_REQUIRING_ADDITIONAL_INFO.includes(bank) && (
+								<>
+									<form.Field
+										name="account_select"
+										children={field => (
+											<SelectField
+												id={field.name}
+												label="Account"
+												value={field.state.value}
+												errors={[]}
+												items={[
+													...accounts
+														.filter(
+															a =>
+																a.bank.toLowerCase() ===
+																bank.toLowerCase(),
+														)
+														.map(a => ({
+															label: a.name,
+															value: a.id,
+														})),
+													{ label: "New account", value: "new" },
+												]}
+												onChange={value => {
+													field.handleChange(value)
+													clearApiError(field.name)
+												}}
+											/>
+										)}
+									/>
+
+									{accountSelect === "new" && (
+										<>
+											<form.Field
+												name="account_id"
+												children={field => (
+													<TextField
+														id={field.name}
+														label="Account ID"
+														value={field.state.value}
+														errors={mergeErrors(
+															field.state.meta.errors,
+															field.name,
+														)}
+														onChange={value => {
+															field.handleChange(value)
+															clearApiError(field.name)
+														}}
+													/>
+												)}
+											/>
+
+											<form.Field
+												name="account_name"
+												children={field => (
+													<TextField
+														id={field.name}
+														label="Account Name"
+														value={field.state.value}
+														errors={mergeErrors(
+															field.state.meta.errors,
+															field.name,
+														)}
+														onChange={value => {
+															field.handleChange(value)
+															clearApiError(field.name)
+														}}
+													/>
+												)}
+											/>
+										</>
+									)}
+								</>
+							)}
 
 							<form.Field
 								name="files"
@@ -131,7 +244,9 @@ export default function Importer() {
 												id={field.name}
 												name="files[]"
 												type="file"
-												multiple
+												multiple={
+													!BANKS_REQUIRING_ADDITIONAL_INFO.includes(bank)
+												}
 												accept={[
 													".csv",
 													".xls",

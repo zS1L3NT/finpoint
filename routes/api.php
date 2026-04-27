@@ -9,11 +9,9 @@ use App\Http\Controllers\Api\RecurrenceController;
 use App\Http\Controllers\Api\RecurrenceRecordController;
 use Illuminate\Support\Facades\Route;
 
-Route::apiResource('importer', ImporterController::class)
-    ->only('store')
-    ->names([
-        'store' => 'importer-api-route',
-    ]);
+Route::post('importer/dbs', [ImporterController::class, 'dbs'])->name('importer-dbs-api-route');
+Route::post('importer/uob', [ImporterController::class, 'uob'])->name('importer-uob-api-route');
+Route::post('importer/revolut', [ImporterController::class, 'revolut'])->name('importer-revolut-api-route');
 
 Route::apiResource('records', RecordController::class)
     ->only('index', 'store', 'update', 'destroy')
