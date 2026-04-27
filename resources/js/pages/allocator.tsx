@@ -38,9 +38,16 @@ import { FieldGroup } from "@/components/ui/field"
 import { Progress } from "@/components/ui/progress"
 import useApiFormErrors from "@/hooks/use-api-form-errors"
 import usePaginatedTableState from "@/hooks/use-paginated-table-state"
-import { classForCurrency, cn, formatCurrency, formatDatetime, parseDatetime, round2dp } from "@/lib/utils"
+import {
+	classForCurrency,
+	cn,
+	formatCurrency,
+	formatDatetime,
+	parseDatetime,
+	round2dp,
+} from "@/lib/utils"
 import { Account, Category, Paginated, Statement } from "@/types"
-import { allocatorWebRoute, recordStoreApiRoute, statementWebRoute } from "@/wayfinder/routes"
+import { allocatorApiRoute, allocatorWebRoute, statementWebRoute } from "@/wayfinder/routes"
 
 type StatementExtra = {
 	account: Account
@@ -233,7 +240,7 @@ function AllocateRecordDialog({
 				formData.append(`statements[${index}][amount]`, `${value.statements[index].amount}`)
 			})
 
-			const response = await fetch(recordStoreApiRoute.url(), {
+			const response = await fetch(allocatorApiRoute.url(), {
 				method: "POST",
 				body: formData,
 				headers: { Accept: "application/json" },

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AllocatorController;
 use App\Http\Controllers\Api\BudgetController;
 use App\Http\Controllers\Api\BudgetRecordController;
 use App\Http\Controllers\Api\CategoryController;
@@ -13,11 +14,12 @@ Route::post('importer/dbs', [ImporterController::class, 'dbs'])->name('importer-
 Route::post('importer/uob', [ImporterController::class, 'uob'])->name('importer-uob-api-route');
 Route::post('importer/revolut', [ImporterController::class, 'revolut'])->name('importer-revolut-api-route');
 
+Route::post('allocator', AllocatorController::class)->name('allocator-api-route');
+
 Route::apiResource('records', RecordController::class)
     ->only('index', 'store', 'update', 'destroy')
     ->names([
         'index' => 'record-index-api-route',
-        'store' => 'record-store-api-route',
         'update' => 'record-update-api-route',
         'destroy' => 'record-destroy-api-route',
     ]);
