@@ -5,24 +5,29 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Account;
 use App\Models\Statement;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Maatwebsite\Excel\Facades\Excel;
 use Ramsey\Uuid\Uuid;
+use stdClass;
 
 class ImporterController extends Controller
 {
     public function store()
     {
         request()->validate([
-            'bank' => 'required|string|in:dbs',
+            'bank' => 'required|string|in:dbs,uob',
             'files' => 'required|array',
-            'files.*' => 'file|extensions:csv',
+            'files.*' => 'file|extensions:csv,xlsx,xls',
         ]);
 
         if (request('bank') === 'dbs') {
             return $this->dbs();
+        } elseif (request('bank') === 'uob') {
+            return $this->uob();
         }
     }
 
@@ -32,49 +37,47 @@ class ImporterController extends Controller
             $count = 0;
 
             foreach (request('files') as $file) {
-                $lines = explode(PHP_EOL, $file->get());
+                $data = $this->parseFile($file);
 
                 $account_id = '';
-                $details = str_getcsv(array_shift($lines));
+                $details = $data->shift();
                 if ($details[0] === 'Account Details For:') {
                     $info = explode(' ', $details[1]);
+                    $account_id = Str::replace('-', '', $info[1]);
 
                     Account::query()->insertOrIgnore([
+                        'id' => $account_id,
                         'name' => $info[0],
-                        'id' => $info[1],
                         'balance' => 0,
                         'bank' => 'DBS',
                     ]);
-                    $account_id = Str::replace('-', '', $info[1]);
                 } else {
                     throw ValidationException::withMessages(['files' => 'Invalid CSV Format']);
                 }
 
-                array_shift($lines); // Statement as at: XX XXX XXXX
+                $data->shift(); // Statement as at: XX XXX XXXX
 
-                array_shift($lines); //
+                $data->shift(); //
 
-                array_shift($lines); // Currency: SGD - Singapore Dollar
+                $data->shift(); // Currency: SGD - Singapore Dollar
 
-                array_shift($lines); //
+                $data->shift(); //
 
-                array_shift($lines); // Available Balance: $XXXX.XX
+                $data->shift(); // Available Balance: $XXXX.XX
 
-                array_shift($lines); // Ledger Balance: $XXXX.XX
+                $data->shift(); // Ledger Balance: $XXXX.XX
 
-                array_shift($lines); //
+                $data->shift(); //
 
-                $header = collect(str_getcsv(array_shift($lines)));
-                $rows = collect($lines);
-
-                $statements = $rows->map(fn($row) => $header->combine(str_getcsv($row)));
+                $header = $data->shift();
+                $statements = $data->map(fn($row) => $header->combine($row));
 
                 foreach ($statements as $statement) {
                     $data = [
                         'account_id' => $account_id,
                         'date' => Carbon::createFromFormat('d M Y', $statement['Transaction Date'])->startOfDay(),
                         'description' => collect([$statement['Supplementary Code'], $statement['Client Reference'], $statement['Additional Reference']])->filter(fn($v) => !empty($v))->join(', '),
-                        'amount' => $statement['Debit Amount'] !== '' ? -$statement['Debit Amount'] : $statement['Credit Amount'],
+                        'amount' => $statement['Debit Amount'] !== null ? -$statement['Debit Amount'] : $statement['Credit Amount'],
                     ];
 
                     if (!Statement::query()->where($data)->exists()) {
@@ -89,5 +92,92 @@ class ImporterController extends Controller
 
             return ['imported' => $count];
         });
+    }
+
+    private function uob()
+    {
+        return DB::transaction(function () {
+            $count = 0;
+
+            foreach (request('files') as $file) {
+                $data = $this->parseFile($file);
+
+                $data->shift(); // United Overseas Bank Limited. Company Reg No. 193500026Z
+
+                $data->shift(); //
+
+                $data->shift(); // Account Statement Details
+
+                $data->shift(); //
+
+                $account_id = '';
+                $details = $data->shift();
+                if ($details[0] === 'Account Number:') {
+                    $account_id = $details[1];
+                } else {
+                    throw ValidationException::withMessages(['files' => 'Invalid CSV Format']);
+                }
+
+                $account_name = '';
+                $details = $data->shift();
+                if ($details[0] === 'Account Type:') {
+                    $account_name = $details[1];
+                } else {
+                    throw ValidationException::withMessages(['files' => 'Invalid CSV Format']);
+                }
+
+                $data->shift(); // Statement Period: XX XXX XXXX to XX XXX XXXX
+
+                Account::query()->insertOrIgnore([
+                    'id' => $account_id,
+                    'name' => $account_name,
+                    'balance' => 0,
+                    'bank' => 'UOB',
+                ]);
+
+                $header = $data->shift();
+                $statements = $data->map(fn($row) => $header->combine($row));
+
+                foreach ($statements as $statement) {
+                    $data = [
+                        'account_id' => $account_id,
+                        'date' => Carbon::createFromFormat('d M Y', $statement['Transaction Date'])->startOfDay(),
+                        'description' => $statement['Transaction Description'],
+                        'amount' => $statement['Withdrawal'] !== 0 ? -$statement['Withdrawal'] : $statement['Deposit'],
+                    ];
+
+                    if (!Statement::query()->where($data)->exists()) {
+                        $count++;
+                        Statement::query()->insert([
+                            'id' => Uuid::uuid4(),
+                            ...$data
+                        ]);
+                    }
+                }
+            }
+
+            return ['imported' => $count];
+        });
+    }
+
+    /**
+     * Summary of parseFile
+     * @param UploadedFile $file
+     * @return \Illuminate\Support\Collection<int, \Illuminate\Support\Collection<int, string | null>>
+     */
+    private function parseFile(UploadedFile $file)
+    {
+        if ($file->getClientOriginalExtension() === 'csv') {
+            return collect(explode(PHP_EOL, $file->get()))
+                ->map(
+                    fn($line) =>
+                    collect(str_getcsv($line))
+                        ->map(fn($value) => $value === '' ? null : $value)
+                );
+        } elseif (in_array($file->getClientOriginalExtension(), ['xlsx', 'xls'])) {
+            return Excel::toCollection(new stdClass(), $file)->first();
+        } else {
+            throw ValidationException::withMessages(['files' => 'Unsupported file type']);
+        }
     }
 }

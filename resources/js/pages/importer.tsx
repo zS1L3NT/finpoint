@@ -2,6 +2,7 @@ import { router } from "@inertiajs/react"
 import { useForm } from "@tanstack/react-form"
 import { FileIcon, ImportIcon } from "lucide-react"
 import { useState } from "react"
+import SelectField from "@/components/form/select-field"
 import AppHeader from "@/components/layout/app-header"
 import PageHeader from "@/components/layout/page-header"
 import { Button } from "@/components/ui/button"
@@ -16,14 +17,6 @@ import {
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from "@/components/ui/item"
-import {
-	Select,
-	SelectContent,
-	SelectGroup,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select"
 import useApiFormErrors from "@/hooks/use-api-form-errors"
 import { allocatorWebRoute, importerApiRoute } from "@/wayfinder/routes"
 
@@ -33,7 +26,7 @@ export default function Importer() {
 
 	const form = useForm({
 		defaultValues: {
-			bank: "dbs",
+			bank: "",
 			files: [] as File[],
 		},
 		onSubmit: async ({ value }) => {
@@ -95,22 +88,21 @@ export default function Importer() {
 							<form.Field
 								name="bank"
 								children={field => (
-									<Field>
-										<FieldLabel htmlFor={field.name}>Bank</FieldLabel>
-										<Select
-											value={field.state.value}
-											onValueChange={value => field.handleChange(value)}
-										>
-											<SelectTrigger className="w-full" id={field.name}>
-												<SelectValue />
-											</SelectTrigger>
-											<SelectContent>
-												<SelectGroup>
-													<SelectItem value="dbs">DBS</SelectItem>
-												</SelectGroup>
-											</SelectContent>
-										</Select>
-									</Field>
+									<SelectField
+										id={field.name}
+										label="Bank"
+										value={field.state.value}
+										errors={mergeErrors(field.state.meta.errors, field.name)}
+										placeholder="Select your bank"
+										items={[
+											{ value: "dbs", label: "DBS" },
+											{ value: "uob", label: "UOB" },
+										]}
+										onChange={value => {
+											field.handleChange(value)
+											clearApiError(field.name)
+										}}
+									/>
 								)}
 							/>
 
@@ -129,7 +121,14 @@ export default function Importer() {
 												name="files[]"
 												type="file"
 												multiple
-												accept=".csv,text/csv"
+												accept={[
+													".csv",
+													".xls",
+													".xlsx",
+													"text/csv",
+													"application/vnd.ms-excel",
+													"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+												].join(",")}
 												aria-invalid={!!errors.length}
 												onChange={event => {
 													const nextFiles = Array.from(
@@ -140,7 +139,7 @@ export default function Importer() {
 													clearApiError(field.name)
 												}}
 											/>
-											<FieldError>{errors[0]?.message}</FieldError>
+											<FieldError errors={errors} />
 										</Field>
 									)
 								}}

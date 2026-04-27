@@ -9,7 +9,6 @@ type Props = {
 	value: string
 	errors: ErrorItem[]
 	placeholder?: string
-	description?: string
 	type?: "text" | "email" | "tel" | "url" | "search" | "password"
 	onChange: (value: string) => void
 }
@@ -20,14 +19,12 @@ export default function TextField({
 	value,
 	errors,
 	placeholder,
-	description,
 	type = "text",
 	onChange,
 }: Props) {
 	return (
 		<Field data-invalid={!!errors.length}>
 			<FieldLabel htmlFor={id}>{label}</FieldLabel>
-			{description ? <p className="text-xs text-muted-foreground">{description}</p> : null}
 			<Input
 				id={id}
 				name={id}
