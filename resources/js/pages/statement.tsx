@@ -8,7 +8,7 @@ import PageHeader from "@/components/layout/page-header"
 import DataTable from "@/components/table/data-table"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { currencyClass, toCurrency, toDate, toDatetime } from "@/lib/utils"
+import { currencyClass, toCurrency, toDatetime } from "@/lib/utils"
 import { Account, Allocation, Category, Record, Statement } from "@/types"
 import { recordWebRoute, statementsWebRoute } from "@/wayfinder/routes"
 
@@ -43,7 +43,7 @@ export default function StatementPage({ statement }: { statement: Statement & St
 						value={toCurrency(statement.amount)}
 						valueClassName={currencyClass(statement.amount)}
 					/>
-					<DetailCard label="Date" value={toDate(statement.date)} />
+					<DetailCard label="Date & Time" value={toDatetime(statement.date)} />
 				</div>
 
 				<Card>

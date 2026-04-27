@@ -35,7 +35,7 @@ import {
 import { FieldGroup } from "@/components/ui/field"
 import { Progress } from "@/components/ui/progress"
 import useApiFormErrors from "@/hooks/use-api-form-errors"
-import { cn, currencyClass, toCurrency, toDate, toDatetime, withMethod } from "@/lib/utils"
+import { cn, currencyClass, toCurrency, toDatetime, withMethod } from "@/lib/utils"
 import { Account, Allocation, Category, Record, Statement } from "@/types"
 import {
 	recordDestroyApiRoute,
@@ -124,9 +124,9 @@ export default function RecordPage({
 									cell: ({ row }) => row.original.account.id,
 								},
 								{
-									header: "Date",
-									meta: { width: "8rem" },
-									cell: ({ row }) => toDate(row.original.date),
+									header: "Date & Time",
+									meta: { width: "12rem" },
+									cell: ({ row }) => toDatetime(row.original.date),
 								},
 								{
 									header: "Amount",
@@ -422,7 +422,7 @@ function RecordEditorDialog({
 														{statement.description}
 													</CardTitle>
 													<CardDescription>
-														{toDate(statement.date)}
+														{toDatetime(statement.date)}
 													</CardDescription>
 													<CardAction className="text-sm font-semibold">
 														{toCurrency(statement.amount)}

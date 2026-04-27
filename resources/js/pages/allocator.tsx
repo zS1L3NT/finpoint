@@ -38,7 +38,7 @@ import { FieldGroup } from "@/components/ui/field"
 import { Progress } from "@/components/ui/progress"
 import useApiFormErrors from "@/hooks/use-api-form-errors"
 import usePaginatedTableState from "@/hooks/use-paginated-table-state"
-import { cn, currencyClass, round2dp, toCurrency, toDate } from "@/lib/utils"
+import { cn, currencyClass, round2dp, toCurrency, toDatetime } from "@/lib/utils"
 import { Account, Category, Paginated, Statement } from "@/types"
 import { allocatorWebRoute, recordStoreApiRoute, statementWebRoute } from "@/wayfinder/routes"
 
@@ -119,11 +119,11 @@ export default function Allocator({
 							cell: ({ row }) => row.original.account.id,
 						},
 						{
-							header: "Date",
-							meta: { width: "8rem" },
+							header: "Date & Time",
+							meta: { width: "12rem" },
 							cell: ({ row }) => (
 								<span className="text-muted-foreground">
-									{toDate(row.original.date)}
+									{toDatetime(row.original.date)}
 								</span>
 							),
 						},
@@ -432,7 +432,7 @@ function AllocateRecordDialog({
 														{statement.description}
 													</CardTitle>
 													<CardDescription>
-														{toDate(statement.date)}
+														{toDatetime(statement.date)}
 													</CardDescription>
 													<CardAction className="text-sm font-semibold">
 														{toCurrency(statement.amount)}

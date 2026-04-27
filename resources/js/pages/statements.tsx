@@ -5,7 +5,7 @@ import PageHeader from "@/components/layout/page-header"
 import PaginatedDataTable from "@/components/table/paginated-data-table"
 import { Button } from "@/components/ui/button"
 import usePaginatedTableState from "@/hooks/use-paginated-table-state"
-import { currencyClass, toCurrency, toDate } from "@/lib/utils"
+import { currencyClass, toCurrency, toDatetime } from "@/lib/utils"
 import { Account, Paginated, Statement } from "@/types"
 import { statementsWebRoute, statementWebRoute } from "@/wayfinder/routes"
 
@@ -44,11 +44,11 @@ export default function StatementsPage({
 							cell: ({ row }) => row.original.account.id,
 						},
 						{
-							header: "Date",
-							meta: { width: "8rem" },
+							header: "Date & Time",
+							meta: { width: "12rem" },
 							cell: ({ row }) => (
 								<span className="text-muted-foreground">
-									{toDate(row.original.date)}
+									{toDatetime(row.original.date)}
 								</span>
 							),
 						},

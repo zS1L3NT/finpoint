@@ -21,10 +21,6 @@ export const toCurrency = (amount: number) => {
 	}).format(amount)
 }
 
-export const toDate = (date: string) => {
-	return DateTime.fromFormat(date, "yyyy-MM-dd").toFormat("d MMM y")
-}
-
 export const toDatetime = (datetime: string) => {
 	return DateTime.fromFormat(datetime, "yyyy-MM-dd HH:mm")
 		.toFormat("d MMM y, h:mm a")

@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 class Statement extends Model
 {
     public $casts = [
-        'date' => 'date:Y-m-d',
+        'date' => 'date:Y-m-d H:i',
     ];
 
     public function account()
