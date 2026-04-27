@@ -71,30 +71,23 @@ export default function RecurrencePage({
 }: {
 	recurrence: Recurrence & RecurrenceExtra
 }) {
-	const [isMutatingRecords, setIsMutatingRecords] = useState(false)
 	const monthlyAmount = round2dp(toMonthlyAmount(recurrence.amount, recurrence.period))
 	const yearlyAmount = round2dp(monthlyAmount * 12)
 
 	const mutateRecord = async (record: Record, mode: "attach" | "detach") => {
-		setIsMutatingRecords(true)
+		const route =
+			mode === "attach"
+				? recurrenceRecordUpdateApiRoute.url({ recurrence, record })
+				: recurrenceRecordDestroyApiRoute.url({ recurrence, record })
 
-		try {
-			const route =
-				mode === "attach"
-					? recurrenceRecordUpdateApiRoute.url({ recurrence, record })
-					: recurrenceRecordDestroyApiRoute.url({ recurrence, record })
+		const response = await fetch(route, {
+			method: "POST",
+			body: withMethod(new FormData(), mode === "attach" ? "PUT" : "DELETE"),
+			headers: { Accept: "application/json" },
+		})
 
-			const response = await fetch(route, {
-				method: "POST",
-				body: withMethod(new FormData(), mode === "attach" ? "PUT" : "DELETE"),
-				headers: { Accept: "application/json" },
-			})
-
-			if (response.ok) {
-				router.reload()
-			}
-		} finally {
-			setIsMutatingRecords(false)
+		if (response.ok) {
+			router.reload()
 		}
 	}
 
@@ -188,11 +181,7 @@ export default function RecurrencePage({
 								excluded={recurrence.records}
 								handler={record => mutateRecord(record, "attach")}
 								trigger={
-									<Button
-										className="w-full"
-										size="lg"
-										disabled={isMutatingRecords}
-									>
+									<Button className="w-full" size="lg">
 										<PlusIcon /> Attach record
 									</Button>
 								}
