@@ -23,18 +23,18 @@ const parseValue = (value: string) => {
 		return null
 	}
 
-	const date = DateTime.fromFormat(value, "yyyy-MM-dd'T'HH:mm")
-	return date.isValid ? date : null
+	const datetime = DateTime.fromFormat(value, "yyyy-MM-dd'T'HH:mm")
+	return datetime.isValid ? datetime : null
 }
 
-const toInputValue = (date: DateTime) => date.toFormat("yyyy-MM-dd'T'HH:mm")
+const toInputValue = (datetime: DateTime) => datetime.toFormat("yyyy-MM-dd'T'HH:mm")
 
 export default function DatetimeField({
 	id,
-	label = "Datetime",
+	label = "Date & Time",
 	value,
 	errors,
-	placeholder = "Select date",
+	placeholder = "Select date & time",
 	onChange,
 }: Props) {
 	const selected = parseValue(value)

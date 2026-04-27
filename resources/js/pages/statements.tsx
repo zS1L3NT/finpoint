@@ -48,7 +48,7 @@ export default function StatementsPage({
 							meta: { width: "12rem" },
 							cell: ({ row }) => (
 								<span className="text-muted-foreground">
-									{formatDatetime(row.original.date)}
+									{formatDatetime(row.original.datetime)}
 								</span>
 							),
 						},

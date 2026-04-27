@@ -139,7 +139,7 @@ export default function RecordPage({
 								{
 									header: "Date & Time",
 									meta: { width: "12rem" },
-									cell: ({ row }) => formatDatetime(row.original.date),
+									cell: ({ row }) => formatDatetime(row.original.datetime),
 								},
 								{
 									header: "Amount",
@@ -439,7 +439,7 @@ function RecordEditorDialog({
 														{statement.description}
 													</CardTitle>
 													<CardDescription>
-														{formatDatetime(statement.date)}
+														{formatDatetime(statement.datetime)}
 													</CardDescription>
 													<CardAction className="text-sm font-semibold">
 														{formatCurrency(statement.amount)}

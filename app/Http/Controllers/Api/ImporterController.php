@@ -69,7 +69,7 @@ class ImporterController extends Controller
 
                     $data = [
                         'account_id' => $account_id,
-                        'date' => Carbon::createFromFormat('d M Y', $statement['Transaction Date'])->startOfDay(),
+                        'datetime' => Carbon::createFromFormat('d M Y', $statement['Transaction Date'])->startOfDay(),
                         'description' => collect([$statement['Supplementary Code'], $statement['Client Reference'], $statement['Additional Reference']])->filter(fn($v) => !empty($v))->join(', '),
                         'amount' => $statement['Debit Amount'] !== null ? -$statement['Debit Amount'] : $statement['Credit Amount'],
                     ];
@@ -142,7 +142,7 @@ class ImporterController extends Controller
                 foreach ($statements as $statement) {
                     $data = [
                         'account_id' => $account_id,
-                        'date' => Carbon::createFromFormat('d M Y', $statement['Transaction Date'])->startOfDay(),
+                        'datetime' => Carbon::createFromFormat('d M Y', $statement['Transaction Date'])->startOfDay(),
                         'description' => $statement['Transaction Description'],
                         'amount' => $statement['Withdrawal'] !== 0 ? -$statement['Withdrawal'] : $statement['Deposit'],
                     ];
@@ -196,7 +196,7 @@ class ImporterController extends Controller
 
                 $data = [
                     'account_id' => request('account_id'),
-                    'date' => Carbon::createFromFormat('Y-m-d H:i:s', $statement['Started Date']),
+                    'datetime' => Carbon::createFromFormat('Y-m-d H:i:s', $statement['Started Date']),
                     'description' => $statement['Description'],
                     'amount' => $statement['Amount'] - $statement['Fee'],
                 ];

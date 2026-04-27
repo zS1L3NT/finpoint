@@ -43,7 +43,7 @@ export default function StatementPage({ statement }: { statement: Statement & St
 						value={formatCurrency(statement.amount)}
 						valueClassName={classForCurrency(statement.amount)}
 					/>
-					<DetailCard label="Date & Time" value={formatDatetime(statement.date)} />
+					<DetailCard label="Date & Time" value={formatDatetime(statement.datetime)} />
 				</div>
 
 				<Card>

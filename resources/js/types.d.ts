@@ -27,7 +27,7 @@ export type Account = {
 
 export type Statement = {
 	id: string
-	date: string
+	datetime: string
 	description: string
 	amount: number
 }

@@ -123,7 +123,7 @@ export default function Allocator({
 							meta: { width: "12rem" },
 							cell: ({ row }) => (
 								<span className="text-muted-foreground">
-									{formatDatetime(row.original.date)}
+									{formatDatetime(row.original.datetime)}
 								</span>
 							),
 						},
@@ -432,7 +432,7 @@ function AllocateRecordDialog({
 														{statement.description}
 													</CardTitle>
 													<CardDescription>
-														{formatDatetime(statement.date)}
+														{formatDatetime(statement.datetime)}
 													</CardDescription>
 													<CardAction className="text-sm font-semibold">
 														{formatCurrency(statement.amount)}
@@ -501,7 +501,7 @@ function inferAllocatorDatetime(statements: (Statement & StatementExtra)[]) {
 			return []
 		}
 
-		const statementDate = parseDatetime(statement.date)
+		const statementDate = parseDatetime(statement.datetime)
 		if (!statementDate.isValid) {
 			return []
 		}
@@ -526,7 +526,7 @@ function inferAllocatorDatetime(statements: (Statement & StatementExtra)[]) {
 		[...describedDates].sort((a, b) => a.toMillis() - b.toMillis())[0] ??
 		statements
 			.flatMap(statement => {
-				const statementDate = parseDatetime(statement.date)
+				const statementDate = parseDatetime(statement.datetime)
 				return statementDate.isValid ? [statementDate] : []
 			})
 			.sort((a, b) => a.toMillis() - b.toMillis())[0]
