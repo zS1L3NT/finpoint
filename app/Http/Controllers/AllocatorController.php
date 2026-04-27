@@ -30,7 +30,7 @@ class AllocatorController extends Controller
                     ->whereNull('allocations_sum_amount')
                     ->orWhereColumn('allocations_sum_amount', '!=', 'statements.amount')
             )
-            ->orderBy('date', 'desc')
+            ->orderBy('datetime', 'desc')
             ->groupBy('statements.id')
             ->paginate(request('per_page') ?? 25)
             ->withQueryString();
