@@ -15,10 +15,18 @@ class ImporterController extends Controller
     public function store()
     {
         request()->validate([
+            'bank' => 'required|string|in:dbs',
             'files' => 'required|array',
             'files.*' => 'file|extensions:csv',
         ]);
 
+        if (request('bank') === 'dbs') {
+            return $this->dbs();
+        }
+    }
+
+    private function dbs()
+    {
         DB::transaction(function () {
             foreach (request('files') as $file) {
                 $lines = explode(PHP_EOL, $file->get());
@@ -55,7 +63,7 @@ class ImporterController extends Controller
                 $header = collect(str_getcsv(array_shift($lines)));
                 $rows = collect($lines);
 
-                $statements = $rows->map(fn ($row) => $header->combine(str_getcsv($row)));
+                $statements = $rows->map(fn($row) => $header->combine(str_getcsv($row)));
 
                 foreach ($statements as $statement) {
                     // Value Date changes across bank exports...
@@ -72,12 +80,12 @@ class ImporterController extends Controller
                         ])->join(',')
                     );
 
-                    if (! Statement::find($id)) {
+                    if (!Statement::find($id)) {
                         Statement::query()->insert([
                             'account_id' => $account_id,
                             'id' => $id,
                             'date' => Carbon::createFromFormat('d M Y', $statement['Transaction Date']),
-                            'description' => collect([$statement['Supplementary Code'], $statement['Client Reference'], $statement['Additional Reference']])->filter(fn ($v) => ! empty($v))->join(', '),
+                            'description' => collect([$statement['Supplementary Code'], $statement['Client Reference'], $statement['Additional Reference']])->filter(fn($v) => !empty($v))->join(', '),
                             'amount' => $statement['Debit Amount'] !== '' ? -$statement['Debit Amount'] : $statement['Credit Amount'],
                         ]);
                     }

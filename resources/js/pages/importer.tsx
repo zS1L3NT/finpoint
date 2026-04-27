@@ -1,6 +1,7 @@
 import { router } from "@inertiajs/react"
+import { useForm } from "@tanstack/react-form"
+import { FileIcon, ImportIcon } from "lucide-react"
 import { useState } from "react"
-import DetailCard from "@/components/detail-card"
 import AppHeader from "@/components/layout/app-header"
 import PageHeader from "@/components/layout/page-header"
 import { Button } from "@/components/ui/button"
@@ -14,87 +15,174 @@ import {
 } from "@/components/ui/card"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from "@/components/ui/item"
+import {
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select"
+import useApiFormErrors from "@/hooks/use-api-form-errors"
 import { allocatorWebRoute, importerApiRoute } from "@/wayfinder/routes"
 
 export default function Importer() {
-	const [errors, setErrors] = useState<{ [key: string]: string[] }>({})
+	const [files, setFiles] = useState<File[]>([])
+	const { mergeErrors, clearApiError, setApiErrors } = useApiFormErrors()
 
-	const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
-		e.preventDefault()
+	const form = useForm({
+		defaultValues: {
+			bank: "dbs",
+			files: [] as File[],
+		},
+		onSubmit: async ({ value }) => {
+			const formData = new FormData()
+			value.files.forEach(file => formData.append("files[]", file))
 
-		await fetch(store.url(), {
-			method: "POST",
-			body: new FormData(e.currentTarget),
-			headers: { Accept: "application/json" },
-		})
-			.then(async res => [res, await res.json()] as const)
-			.then(([res, data]) => {
-				if (res.status === 422) {
-					setErrors(data.errors)
-				}
-
-				if (res.status === 200) {
-					router.visit(allocatorWebRoute.url())
-				}
+			const response = await fetch(importerApiRoute.url(), {
+				method: "POST",
+				body: formData,
+				headers: { Accept: "application/json" },
 			})
-	}
 
-	const filesErrors = Object.entries(errors)
-		.filter(([k, v]) => k.startsWith("files"))
-		.toSorted(([a], [b]) => a.localeCompare(b))
-		.flatMap(([k, v]) => v)
+			if (response.status === 422) {
+				const data = await response.json().catch(() => null)
+				setApiErrors((data?.errors ?? {}) as globalThis.Record<string, string[]>)
+				return
+			}
+
+			if (response.ok) {
+				router.visit(allocatorWebRoute.url())
+			}
+		},
+	})
 
 	return (
 		<>
 			<AppHeader title="Importer" />
 
-			<PageHeader
-				title="Importer"
-				subtitle="Upload one or more bank CSV exports, create any missing accounts, and move straight into allocation once the feed is loaded."
-				description="Import workspace"
-				icon={ImportIcon}
-				actions={
-					<Button size="lg" variant="outline" asChild>
-						<Link href={allocatorWebRoute.url()}>
-							<LinkIcon /> Open allocator
-						</Link>
-					</Button>
-				}
-			/>
+			<div className="container mx-auto flex flex-col gap-8 p-8">
+				<PageHeader
+					title="Importer"
+					subtitle="Upload one or more bank CSV exports, create any missing accounts, and move straight into allocation once the feed is loaded."
+					description="Import workspace"
+					icon={ImportIcon}
+				/>
 
-			<form
-				method="POST"
-				// action={importMethod.url()}
-				encType="mutlipart/form-data"
-				className="flex items-center justify-center min-h-full"
-				onSubmit={handleSubmit}
-			>
-				<Card className="min-w-md">
-					<CardHeader>
-						<CardTitle>Importer</CardTitle>
-						<CardDescription>Import bank statements from CSV files</CardDescription>
-					</CardHeader>
-					<CardContent>
-						<Field data-invalid={!!filesErrors.length}>
-							<FieldLabel htmlFor="files[]">Files</FieldLabel>
-							<Input
-								id="files[]"
-								name="files[]"
-								type="file"
-								multiple
-								required
-								aria-invalid={!!filesErrors.length}
+				<form
+					method="POST"
+					encType="multipart/form-data"
+					onSubmit={event => {
+						event.preventDefault()
+						void form.handleSubmit()
+					}}
+				>
+					<Card className="w-full md:w-1/2">
+						<CardHeader>
+							<CardTitle>Upload statements</CardTitle>
+							<CardDescription>
+								Select your bank and upload CSV files to import your bank
+								statements.
+								<br />
+								Missing accounts are created automatically and duplicate statement
+								rows are skipped.
+							</CardDescription>
+						</CardHeader>
+
+						<CardContent className="space-y-6">
+							<form.Field
+								name="bank"
+								children={field => (
+									<Field>
+										<FieldLabel htmlFor={field.name}>Bank</FieldLabel>
+										<Select
+											value={field.state.value}
+											onValueChange={value => field.handleChange(value)}
+										>
+											<SelectTrigger className="w-full" id={field.name}>
+												<SelectValue />
+											</SelectTrigger>
+											<SelectContent>
+												<SelectGroup>
+													<SelectItem value="dbs">DBS</SelectItem>
+												</SelectGroup>
+											</SelectContent>
+										</Select>
+									</Field>
+								)}
 							/>
-							<FieldError>{filesErrors[0]}</FieldError>
-						</Field>
-					</CardContent>
-					<CardFooter className="flex-col gap-2">
-						<Button type="submit" className="w-full">
-							Import
-						</Button>
-					</CardFooter>
-				</Card>
-			</form>
+
+							<form.Field
+								name="files"
+								children={field => {
+									const errors = mergeErrors(field.state.meta.errors, field.name)
+
+									return (
+										<Field data-invalid={!!errors.length}>
+											<FieldLabel htmlFor={field.name}>
+												Statement files
+											</FieldLabel>
+											<Input
+												id={field.name}
+												name="files[]"
+												type="file"
+												multiple
+												required
+												accept=".csv,text/csv"
+												aria-invalid={!!errors.length}
+												onChange={event => {
+													const nextFiles = Array.from(
+														event.currentTarget.files ?? [],
+													)
+													field.handleChange(nextFiles)
+													setFiles(nextFiles)
+													clearApiError(field.name)
+												}}
+											/>
+											<FieldError>{errors[0]?.message}</FieldError>
+										</Field>
+									)
+								}}
+							/>
+
+							{files.length ? (
+								<div className="space-y-2">
+									{files.map(file => (
+										<Item key={`${file.name}-${file.size}`} variant="outline">
+											<ItemMedia>
+												<FileIcon className="size-5" />
+											</ItemMedia>
+											<ItemContent>
+												<ItemTitle>{file.name}</ItemTitle>
+												<ItemDescription>
+													{(file.size / 1024).toFixed(2)} KB
+												</ItemDescription>
+											</ItemContent>
+										</Item>
+									))}
+								</div>
+							) : null}
+						</CardContent>
+
+						<CardFooter>
+							<Button type="submit" variant="outline" className="w-full">
+								<form.Subscribe
+									selector={state => state.isSubmitting}
+									children={isSubmitting =>
+										isSubmitting ? (
+											<ImportIcon className="animate-pulse" />
+										) : (
+											<ImportIcon />
+										)
+									}
+								/>
+								Import
+							</Button>
+						</CardFooter>
+					</Card>
+				</form>
+			</div>
 		</>
 	)
 }
