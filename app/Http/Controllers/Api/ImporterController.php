@@ -73,6 +73,10 @@ class ImporterController extends Controller
                 $statements = $data->map(fn($row) => $header->combine($row));
 
                 foreach ($statements as $statement) {
+                    if ($statement['Status'] !== 'Settled') {
+                        throw ValidationException::withMessages(['files' => 'Invalid CSV Format: Unsettled transaction found']);
+                    }
+
                     $data = [
                         'account_id' => $account_id,
                         'date' => Carbon::createFromFormat('d M Y', $statement['Transaction Date'])->startOfDay(),
