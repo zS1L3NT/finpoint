@@ -1,8 +1,19 @@
 import { Link, router } from "@inertiajs/react"
 import { useForm } from "@tanstack/react-form"
 import { LoaderCircleIcon, PencilIcon, PiggyBankIcon, PlusIcon, Trash2Icon } from "lucide-react"
-import { useState } from "react"
-import { Label, Pie, PieChart } from "recharts"
+import { DateTime } from "luxon"
+import { useMemo, useState } from "react"
+import {
+	Area,
+	AreaChart,
+	CartesianGrid,
+	Label,
+	Pie,
+	PieChart,
+	ReferenceLine,
+	XAxis,
+	YAxis,
+} from "recharts"
 import DetailCard from "@/components/detail-card"
 import AmountField from "@/components/form/amount-field"
 import TextField from "@/components/form/text-field"
@@ -39,6 +50,7 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog"
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field"
+import { Progress } from "@/components/ui/progress"
 import useApiFormErrors from "@/hooks/use-api-form-errors"
 import { currencyClass, round2dp, toCurrency, toDatetime, withMethod } from "@/lib/utils"
 import { Budget, Category, Record } from "@/types"
@@ -50,6 +62,11 @@ import {
 	budgetUpdateApiRoute,
 	recordWebRoute,
 } from "@/wayfinder/routes"
+
+/**
+ * Show a line for current pace & recommended pace
+ * Add more details into the details cards
+ */
 
 type BudgetExtra = {
 	records: (Record & RecordExtra)[]
@@ -63,6 +80,67 @@ type CategoryExtra = {
 	children: Category[]
 }
 
+const getAggregations = (budget: Budget & BudgetExtra) => {
+	const startDate = DateTime.fromFormat(budget.start_date, "yyyy-MM-dd")
+	const endDate = DateTime.fromFormat(budget.end_date, "yyyy-MM-dd")
+
+	let elapsedSpending = budget.records
+		.filter(r => DateTime.fromFormat(r.datetime, "yyyy-MM-dd HH:mm") < startDate)
+		.reduce((acc, el) => acc - el.amount, 0)
+	let elapsedDays = 0
+	const dates: DateTime[] = []
+	const cumulated: number[] = []
+
+	for (let i = 0; i <= endDate.diff(startDate, "days").days; i++) {
+		const date = startDate.plus({ days: i })
+		dates.push(date)
+
+		const amountForDate = round2dp(
+			budget.records
+				.filter(r =>
+					DateTime.fromFormat(r.datetime, "yyyy-MM-dd HH:mm").hasSame(date, "day"),
+				)
+				.reduce((acc, el) => acc - el.amount, 0),
+		)
+
+		if (date.startOf("day") < DateTime.now()) {
+			elapsedSpending = round2dp(elapsedSpending + amountForDate)
+			elapsedDays += 1
+		}
+
+		if (i === 0) {
+			cumulated.push(amountForDate)
+		} else {
+			cumulated.push(round2dp(cumulated[i - 1] + amountForDate))
+		}
+	}
+
+	const remainingSpending = round2dp(budget.amount - elapsedSpending)
+	const remainingDays = dates.length - elapsedDays
+
+	const currentPace = elapsedDays > 0 ? round2dp(elapsedSpending / elapsedDays) : 0
+	const idealPace = remainingDays > 0 ? round2dp(remainingSpending / remainingDays) : 0
+
+	const projectedSpending = round2dp(currentPace * dates.length)
+	const projectedExceedDate =
+		currentPace * dates.length > budget.amount
+			? startDate.plus({ days: Math.ceil(budget.amount / currentPace) })
+			: null
+
+	return {
+		dates,
+		cumulated,
+		elapsedSpending,
+		remainingSpending,
+		elapsedDays,
+		remainingDays,
+		currentPace,
+		idealPace,
+		projectedSpending,
+		projectedExceedDate,
+	}
+}
+
 export default function BudgetPage({
 	budget,
 	categories,
@@ -70,8 +148,20 @@ export default function BudgetPage({
 	budget: Budget & BudgetExtra
 	categories: (Category & CategoryExtra)[]
 }) {
-	const spent = -round2dp(budget.records.reduce((acc, el) => acc + el.amount, 0))
-	const remaining = round2dp(budget.amount - spent)
+	const {
+		dates,
+		cumulated,
+		elapsedSpending,
+		remainingSpending,
+		elapsedDays,
+		currentPace,
+		idealPace,
+		projectedSpending,
+		projectedExceedDate,
+	} = useMemo(() => getAggregations(budget), [budget])
+
+	console.log("Average daily spend:", toCurrency(currentPace))
+	console.log("Recommended daily spend for remaining days:", toCurrency(idealPace))
 
 	const attach = async (record: Record) => {
 		const response = await fetch(budgetRecordUpdateApiRoute.url({ budget, record }), {
@@ -110,15 +200,60 @@ export default function BudgetPage({
 					back={{ name: "Back to budgets", url: budgetsWebRoute.url() }}
 				/>
 
-				<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-					<DetailCard label="Planned" value={toCurrency(budget.amount)} />
-					<DetailCard label="Spent" value={toCurrency(spent)} />
+				<div className="grid gap-4 md:grid-cols-4 xl:grid-cols-5">
 					<DetailCard
-						label="Remaining"
-						value={toCurrency(remaining)}
-						valueClassName={remaining < 0 ? "text-destructive" : undefined}
+						label="Budget Usage"
+						value={
+							<div className="space-y-2">
+								<div>
+									<p className="text-sm">{toCurrency(elapsedSpending)}</p>
+									<p className="text-muted-foreground">{`${Math.ceil((elapsedSpending / budget.amount) * 100)}% of ${toCurrency(budget.amount)}`}</p>
+								</div>
+								<Progress
+									value={(elapsedSpending / budget.amount) * 100}
+									className="h-2"
+								/>
+							</div>
+						}
 					/>
-					<DetailCard label="Records" value={budget.records.length} />
+					<DetailCard
+						label="Usage Pace"
+						value={
+							<div>
+								<p className="text-sm">{toCurrency(currentPace)} / day</p>
+								{/* <p className="text-muted-foreground">
+									Spend {toCurrency(idealPace)} / day or less to stay on track
+								</p> */}
+							</div>
+						}
+					/>
+					<DetailCard
+						label="Recommended Pace"
+						value={
+							<div>
+								<p className="text-sm">{toCurrency(idealPace)} / day</p>
+								{/* <p className="text-muted-foreground">
+									Spend {toCurrency(idealPace)} / day or less to stay on track
+								</p> */}
+							</div>
+						}
+					/>
+					<DetailCard
+						label="Usage Projection"
+						value={
+							<div>
+								<p className="text-sm">{toCurrency(projectedSpending)}</p>
+								<p className="text-muted-foreground">
+									{projectedExceedDate
+										? projectedExceedDate > DateTime.now()
+											? `Will exceed on ${projectedExceedDate.toFormat("d MMM y")}`
+											: `Exceeded on ${projectedExceedDate.toFormat("d MMM y")}`
+										: "On track to stay within budget"}
+								</p>
+							</div>
+						}
+						valueClassName={remainingSpending < 0 ? "text-destructive" : undefined}
+					/>
 					<DetailCard
 						label="Mode"
 						value={budget.automatic ? "Automatic attach" : "Manual attach"}
@@ -130,7 +265,7 @@ export default function BudgetPage({
 						<CardHeader>
 							<CardTitle>Spending by Category</CardTitle>
 						</CardHeader>
-						<CardContent>
+						<CardContent className="my-auto">
 							<ChartContainer
 								config={Object.fromEntries([
 									...categories.map(c => [
@@ -144,7 +279,7 @@ export default function BudgetPage({
 										]),
 									),
 								])}
-								className="aspect-square mx-auto"
+								className="aspect-square"
 							>
 								<PieChart>
 									<Pie
@@ -181,7 +316,7 @@ export default function BudgetPage({
 																textAnchor="middle"
 																className="fill-foreground text-xl font-bold"
 															>
-																{toCurrency(spent)}
+																{toCurrency(elapsedSpending)}
 															</text>
 															<text
 																y={20}
@@ -245,7 +380,60 @@ export default function BudgetPage({
 						<CardHeader>
 							<CardTitle>Spending over Time</CardTitle>
 						</CardHeader>
-						<CardContent></CardContent>
+						<CardContent>
+							<ChartContainer
+								config={{
+									within: { label: "Within budget" },
+									exceed: { label: "Exceeding budget" },
+									projected: { label: "Projected spend" },
+								}}
+							>
+								<AreaChart
+									data={[
+										...dates.slice(0, elapsedDays).map((d, i) => ({
+											date: d.toFormat("d MMM y"),
+											within:
+												cumulated[i] < budget.amount
+													? cumulated[i]
+													: undefined,
+											exceed:
+												cumulated[i] > budget.amount ||
+												(cumulated[i] < budget.amount &&
+													cumulated[i + 1] > budget.amount)
+													? cumulated[i]
+													: undefined,
+										})),
+										...dates.slice(elapsedDays).map((d, i) => ({
+											date: d.toFormat("d MMM y"),
+										})),
+									]}
+								>
+									<CartesianGrid />
+									<XAxis dataKey="date" />
+									<YAxis min={budget.amount} />
+
+									<Area
+										dataKey="within"
+										fill="var(--color-green-600)"
+										fillOpacity={0.25}
+										stroke="var(--color-green-600)"
+									/>
+									<Area
+										dataKey="exceed"
+										fill="var(--color-red-500)"
+										fillOpacity={0.25}
+										stroke="var(--color-red-500)"
+									/>
+
+									<ReferenceLine label="Budget" y={budget.amount} />
+
+									<ChartTooltip
+										cursor={false}
+										content={<ChartTooltipContent className="w-50" />}
+									/>
+								</AreaChart>
+							</ChartContainer>
+						</CardContent>
 					</Card>
 				</div>
 
