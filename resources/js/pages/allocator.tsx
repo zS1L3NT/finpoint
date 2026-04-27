@@ -38,6 +38,7 @@ import { FieldGroup } from "@/components/ui/field"
 import { Progress } from "@/components/ui/progress"
 import useApiFormErrors from "@/hooks/use-api-form-errors"
 import usePaginatedTableState from "@/hooks/use-paginated-table-state"
+import { TABLE_WIDTHS } from "@/lib/table-widths"
 import {
 	classForCurrency,
 	cn,
@@ -103,7 +104,7 @@ export default function Allocator({
 					columns={[
 						{
 							id: "select",
-							meta: { width: "3rem" },
+							meta: { width: TABLE_WIDTHS.CHECKBOX },
 							cell: ({ row }) => (
 								<div className="flex items-center justify-center">
 									<Checkbox
@@ -122,12 +123,12 @@ export default function Allocator({
 						},
 						{
 							header: "Account",
-							meta: { width: "8rem" },
+							meta: { width: TABLE_WIDTHS.ACCOUNT },
 							cell: ({ row }) => row.original.account.id,
 						},
 						{
 							header: "Date & Time",
-							meta: { width: "12rem" },
+							meta: { width: TABLE_WIDTHS.DATETIME },
 							cell: ({ row }) => (
 								<span className="text-muted-foreground">
 									{formatDatetime(row.original.datetime)}
@@ -136,7 +137,7 @@ export default function Allocator({
 						},
 						{
 							header: "Amount",
-							meta: { width: "16rem" },
+							meta: { width: TABLE_WIDTHS.AMOUNT_BAR },
 							cell: ({ row }) => (
 								<AllocateBar
 									title="Allocable"
@@ -150,6 +151,7 @@ export default function Allocator({
 						},
 						{
 							header: "Description",
+							// Expand width to maximum for statements
 							cell: ({ row }) => (
 								<div
 									className="truncate text-muted-foreground"
@@ -164,7 +166,7 @@ export default function Allocator({
 						},
 						{
 							id: "actions",
-							meta: { width: "4rem" },
+							meta: { width: TABLE_WIDTHS.ACTIONS_OPEN },
 							cell: ({ row }) => (
 								<Button variant="outline" size="sm" asChild>
 									<Link href={statementWebRoute.url({ statement: row.original })}>

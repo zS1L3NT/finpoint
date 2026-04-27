@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/select"
 import useApiFormErrors from "@/hooks/use-api-form-errors"
 import usePaginatedTableState from "@/hooks/use-paginated-table-state"
+import { TABLE_WIDTHS } from "@/lib/table-widths"
 import { classForCurrency, cn, formatCurrency, round2dp } from "@/lib/utils"
 import { Paginated, Recurrence } from "@/types"
 import {
@@ -177,7 +178,7 @@ export default function RecurrencesPage({
 					columns={[
 						{
 							header: "Recurrence",
-							meta: { width: "20rem" },
+							meta: { width: TABLE_WIDTHS.RECURRENCE },
 							cell: ({ row }) => (
 								<div className="flex items-center gap-2">
 									<p className="truncate font-medium">{row.original.name}</p>
@@ -186,9 +187,14 @@ export default function RecurrencesPage({
 						},
 						{
 							header: "Monthly",
-							meta: { width: "6rem" },
+							meta: { width: TABLE_WIDTHS.RECURRENCE_MONTHLY },
 							cell: ({ row }) => (
-								<span className={cn(classForCurrency(row.original.amount), row.original.period === "year" ? "opacity-50" : null)}>
+								<span
+									className={cn(
+										classForCurrency(row.original.amount),
+										row.original.period === "year" ? "opacity-50" : null,
+									)}
+								>
 									{formatCurrency(
 										round2dp(
 											row.original.period === "month"
@@ -201,9 +207,14 @@ export default function RecurrencesPage({
 						},
 						{
 							header: "Yearly",
-							meta: { width: "6rem" },
+							meta: { width: TABLE_WIDTHS.RECURRENCE_YEARLY },
 							cell: ({ row }) => (
-								<span className={cn(classForCurrency(row.original.amount), row.original.period === "month" ? "opacity-50" : null)}>
+								<span
+									className={cn(
+										classForCurrency(row.original.amount),
+										row.original.period === "month" ? "opacity-50" : null,
+									)}
+								>
 									{formatCurrency(
 										round2dp(
 											row.original.period === "year"

@@ -6,6 +6,7 @@ import PageHeader from "@/components/layout/page-header"
 import PaginatedDataTable from "@/components/table/paginated-data-table"
 import { Button } from "@/components/ui/button"
 import usePaginatedTableState from "@/hooks/use-paginated-table-state"
+import { TABLE_WIDTHS } from "@/lib/table-widths"
 import { classForCurrency, formatCurrency, formatDatetime } from "@/lib/utils"
 import { Category, Paginated, Record } from "@/types"
 import { recordsWebRoute, recordWebRoute } from "@/wayfinder/routes"
@@ -37,7 +38,7 @@ export default function RecordsPage({ records }: { records: Paginated<Record & R
 					columns={[
 						{
 							header: "Record",
-							meta: { width: "20rem" },
+							meta: { width: TABLE_WIDTHS.RECORD },
 							cell: ({ row }) => (
 								<div className="flex items-center gap-3">
 									<Icon {...row.original.category} size={16} />
@@ -61,7 +62,7 @@ export default function RecordsPage({ records }: { records: Paginated<Record & R
 						},
 						{
 							header: "Amount",
-							meta: { width: "8rem" },
+							meta: { width: TABLE_WIDTHS.AMOUNT },
 							cell: ({ row }) => (
 								<span className={classForCurrency(row.original.amount)}>
 									{formatCurrency(row.original.amount)}
@@ -70,7 +71,7 @@ export default function RecordsPage({ records }: { records: Paginated<Record & R
 						},
 						{
 							header: "Date & Time",
-							meta: { width: "12rem" },
+							meta: { width: TABLE_WIDTHS.DATETIME },
 							cell: ({ row }) => (
 								<span className="text-muted-foreground">
 									{formatDatetime(row.original.datetime)}
@@ -79,7 +80,7 @@ export default function RecordsPage({ records }: { records: Paginated<Record & R
 						},
 						{
 							header: "Description",
-							meta: { width: "24rem" },
+							meta: { width: TABLE_WIDTHS.DESCRIPTION },
 							cell: ({ row }) => (
 								<div className="truncate text-muted-foreground">
 									{row.original.description || "-"}

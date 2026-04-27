@@ -5,6 +5,7 @@ import PageHeader from "@/components/layout/page-header"
 import PaginatedDataTable from "@/components/table/paginated-data-table"
 import { Button } from "@/components/ui/button"
 import usePaginatedTableState from "@/hooks/use-paginated-table-state"
+import { TABLE_WIDTHS } from "@/lib/table-widths"
 import { classForCurrency, formatCurrency, formatDatetime } from "@/lib/utils"
 import { Account, Paginated, Statement } from "@/types"
 import { statementsWebRoute, statementWebRoute } from "@/wayfinder/routes"
@@ -40,12 +41,12 @@ export default function StatementsPage({
 					columns={[
 						{
 							header: "Account",
-							meta: { width: "8rem" },
+							meta: { width: TABLE_WIDTHS.ACCOUNT },
 							cell: ({ row }) => row.original.account.id,
 						},
 						{
 							header: "Date & Time",
-							meta: { width: "12rem" },
+							meta: { width: TABLE_WIDTHS.DATETIME },
 							cell: ({ row }) => (
 								<span className="text-muted-foreground">
 									{formatDatetime(row.original.datetime)}
@@ -54,7 +55,7 @@ export default function StatementsPage({
 						},
 						{
 							header: "Amount",
-							meta: { width: "6rem" },
+							meta: { width: TABLE_WIDTHS.AMOUNT },
 							cell: ({ row }) => (
 								<span className={classForCurrency(row.original.amount)}>
 									{formatCurrency(row.original.amount)}
@@ -63,6 +64,7 @@ export default function StatementsPage({
 						},
 						{
 							header: "Description",
+							// Expand width to maximum for statements
 							cell: ({ row }) => (
 								<div className="truncate text-muted-foreground">
 									{row.original.description}
@@ -71,13 +73,19 @@ export default function StatementsPage({
 						},
 						{
 							id: "actions",
-							meta: { width: "4rem" },
+							meta: { width: TABLE_WIDTHS.ACTIONS_OPEN },
 							cell: ({ row }) => (
-								<Button variant="outline" size="sm" asChild>
-									<Link href={statementWebRoute.url({ statement: row.original })}>
-										Open
-									</Link>
-								</Button>
+								<div className="flex justify-end">
+									<Button variant="outline" size="sm" asChild>
+										<Link
+											href={statementWebRoute.url({
+												statement: row.original,
+											})}
+										>
+											Open
+										</Link>
+									</Button>
+								</div>
 							),
 						},
 					]}

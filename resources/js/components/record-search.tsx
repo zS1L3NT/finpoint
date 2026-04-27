@@ -5,13 +5,8 @@ import { Button } from "@/components/ui/button"
 import { Field, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import {
-	Sheet,
-	SheetContent,
-	SheetHeader,
-	SheetTitle,
-	SheetTrigger,
-} from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import { TABLE_WIDTHS } from "@/lib/table-widths"
 import { classForCurrency, formatCurrency, formatDatetime } from "@/lib/utils"
 import { Category, Record } from "@/types"
 import { recordIndexApiRoute } from "@/wayfinder/routes"
@@ -120,7 +115,7 @@ export default function RecordSearch({
 								},
 								{
 									id: "actions",
-									meta: { width: "4.5rem" },
+									meta: { width: TABLE_WIDTHS.ACTIONS_ATTACH },
 									cell: ({ row }) => (
 										<Button size="sm" onClick={() => handler(row.original)}>
 											Attach

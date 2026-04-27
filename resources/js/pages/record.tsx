@@ -35,6 +35,7 @@ import {
 import { FieldGroup } from "@/components/ui/field"
 import { Progress } from "@/components/ui/progress"
 import useApiFormErrors from "@/hooks/use-api-form-errors"
+import { TABLE_WIDTHS } from "@/lib/table-widths"
 import {
 	classForCurrency,
 	cn,
@@ -133,17 +134,17 @@ export default function RecordPage({
 							columns={[
 								{
 									header: "Account",
-									meta: { width: "8rem" },
+									meta: { width: TABLE_WIDTHS.ACCOUNT },
 									cell: ({ row }) => row.original.account.id,
 								},
 								{
 									header: "Date & Time",
-									meta: { width: "12rem" },
+									meta: { width: TABLE_WIDTHS.DATETIME },
 									cell: ({ row }) => formatDatetime(row.original.datetime),
 								},
 								{
 									header: "Amount",
-									meta: { width: "16rem" },
+									meta: { width: TABLE_WIDTHS.AMOUNT_BAR },
 									cell: ({ row }) => (
 										<AllocateBar
 											title="Allocated"
@@ -154,6 +155,7 @@ export default function RecordPage({
 								},
 								{
 									header: "Description",
+									// Expand width to maximum for statements
 									cell: ({ row }) => (
 										<div className="truncate text-muted-foreground">
 											{row.original.description || "-"}
@@ -162,7 +164,7 @@ export default function RecordPage({
 								},
 								{
 									id: "actions",
-									meta: { width: "4rem" },
+									meta: { width: TABLE_WIDTHS.ACTIONS_OPEN },
 									cell: ({ row }) => (
 										<div className="flex justify-end">
 											<Button variant="outline" size="sm" asChild>

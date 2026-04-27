@@ -8,6 +8,7 @@ import PageHeader from "@/components/layout/page-header"
 import DataTable from "@/components/table/data-table"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { TABLE_WIDTHS } from "@/lib/table-widths"
 import { classForCurrency, formatCurrency, formatDatetime } from "@/lib/utils"
 import { Account, Allocation, Category, Record, Statement } from "@/types"
 import { recordWebRoute, statementsWebRoute } from "@/wayfinder/routes"
@@ -57,7 +58,7 @@ export default function StatementPage({ statement }: { statement: Statement & St
 							columns={[
 								{
 									header: "Record",
-									meta: { width: "20rem" },
+									meta: { width: TABLE_WIDTHS.RECORD },
 									cell: ({ row }) => (
 										<div className="flex items-center gap-3">
 											<Icon {...row.original.category} size={16} />
@@ -83,7 +84,7 @@ export default function StatementPage({ statement }: { statement: Statement & St
 								},
 								{
 									header: "Amount",
-									meta: { width: "16rem" },
+									meta: { width: TABLE_WIDTHS.AMOUNT_BAR },
 									cell: ({ row }) => (
 										<AllocateBar
 											title="Allocated"
@@ -94,12 +95,12 @@ export default function StatementPage({ statement }: { statement: Statement & St
 								},
 								{
 									header: "Date & Time",
-									meta: { width: "12rem" },
+									meta: { width: TABLE_WIDTHS.DATETIME },
 									cell: ({ row }) => formatDatetime(row.original.datetime),
 								},
 								{
 									header: "Description",
-									meta: { width: "24rem" },
+									meta: { width: TABLE_WIDTHS.DESCRIPTION },
 									cell: ({ row }) => (
 										<div className="truncate text-muted-foreground">
 											{row.original.description || "-"}

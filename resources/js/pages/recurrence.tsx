@@ -46,6 +46,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select"
 import useApiFormErrors from "@/hooks/use-api-form-errors"
+import { TABLE_WIDTHS } from "@/lib/table-widths"
 import { classForCurrency, formatCurrency, formatDatetime, round2dp, withMethod } from "@/lib/utils"
 import { Category, Record, Recurrence } from "@/types"
 import {
@@ -204,7 +205,7 @@ export default function RecurrencePage({
 							columns={[
 								{
 									header: "Record",
-									meta: { width: "20rem" },
+									meta: { width: TABLE_WIDTHS.RECORD},
 									cell: ({ row }) => (
 										<div className="flex items-center gap-3">
 											<Icon {...row.original.category} size={16} />
@@ -230,7 +231,7 @@ export default function RecurrencePage({
 								},
 								{
 									header: "Amount",
-									meta: { width: "8rem" },
+									meta: { width: TABLE_WIDTHS.AMOUNT },
 									cell: ({ row }) => (
 										<span className={classForCurrency(row.original.amount)}>
 											{formatCurrency(row.original.amount)}
@@ -239,12 +240,12 @@ export default function RecurrencePage({
 								},
 								{
 									header: "Date & Time",
-									meta: { width: "12rem" },
+									meta: { width: TABLE_WIDTHS.DATETIME },
 									cell: ({ row }) => formatDatetime(row.original.datetime),
 								},
 								{
 									header: "Description",
-									meta: { width: "24rem" },
+									meta: { width: TABLE_WIDTHS.DESCRIPTION },
 									cell: ({ row }) => (
 										<div className="truncate text-muted-foreground">
 											{row.original.description || "-"}

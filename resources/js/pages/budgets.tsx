@@ -26,6 +26,7 @@ import { Input } from "@/components/ui/input"
 import { Progress } from "@/components/ui/progress"
 import useApiFormErrors from "@/hooks/use-api-form-errors"
 import usePaginatedTableState from "@/hooks/use-paginated-table-state"
+import { TABLE_WIDTHS } from "@/lib/table-widths"
 import { formatCurrency, parseDate } from "@/lib/utils"
 import { Budget, Paginated } from "@/types"
 import { budgetStoreApiRoute, budgetsWebRoute, budgetWebRoute } from "@/wayfinder/routes"
@@ -58,7 +59,7 @@ export default function BudgetsPage({ budgets }: { budgets: Paginated<Budget & B
 					columns={[
 						{
 							header: "Budget",
-							meta: { width: "16rem" },
+							meta: { width: TABLE_WIDTHS.BUDGET },
 							cell: ({ row }) => {
 								const budget = row.original
 
@@ -86,7 +87,7 @@ export default function BudgetsPage({ budgets }: { budgets: Paginated<Budget & B
 						},
 						{
 							header: "Usage",
-							meta: { width: "20rem" },
+							meta: { width: TABLE_WIDTHS.BUDGET_USAGE },
 							cell: ({ row }) => {
 								const budget = row.original
 
@@ -113,7 +114,7 @@ export default function BudgetsPage({ budgets }: { budgets: Paginated<Budget & B
 						},
 						{
 							header: "Window",
-							meta: { width: "12rem" },
+							meta: { width: TABLE_WIDTHS.BUDGET_WINDOW },
 							cell: ({ row }) => (
 								<span className="text-muted-foreground pe-8">
 									{formatBudgetDateWindow(row.original)}
@@ -122,7 +123,7 @@ export default function BudgetsPage({ budgets }: { budgets: Paginated<Budget & B
 						},
 						{
 							header: "Type",
-							meta: { width: "8rem" },
+							meta: { width: TABLE_WIDTHS.BUDGET_TYPE },
 							cell: ({ row }) => (
 								<div className="flex items-center gap-2 text-muted-foreground pe-8">
 									{row.original.automatic ? (
