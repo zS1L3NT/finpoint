@@ -52,7 +52,7 @@ class ImporterController extends Controller
                         'bank' => 'DBS',
                     ]);
                 } else {
-                    throw ValidationException::withMessages(['files' => 'Invalid CSV Format']);
+                    throw ValidationException::withMessages(['files' => 'Invalid CSV Format: Missing Account details']);
                 }
 
                 $data->shift(); // Statement as at: XX XXX XXXX
@@ -115,7 +115,7 @@ class ImporterController extends Controller
                 if ($details[0] === 'Account Number:') {
                     $account_id = $details[1];
                 } else {
-                    throw ValidationException::withMessages(['files' => 'Invalid CSV Format']);
+                    throw ValidationException::withMessages(['files' => 'Invalid CSV Format: Missing Account Number']);
                 }
 
                 $account_name = '';
@@ -123,7 +123,7 @@ class ImporterController extends Controller
                 if ($details[0] === 'Account Type:') {
                     $account_name = $details[1];
                 } else {
-                    throw ValidationException::withMessages(['files' => 'Invalid CSV Format']);
+                    throw ValidationException::withMessages(['files' => 'Invalid CSV Format: Missing Account Type']);
                 }
 
                 $data->shift(); // Statement Period: XX XXX XXXX to XX XXX XXXX
