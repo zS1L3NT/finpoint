@@ -70,9 +70,15 @@ type CategoryExtra = {
 export default function RecordPage({
 	record,
 	categories,
+	titles,
+	locations,
+	peoples,
 }: {
 	record: Record & RecordExtra
 	categories: (Category & CategoryExtra)[]
+	titles: string[]
+	locations: string[]
+	peoples: string[]
 }) {
 	return (
 		<>
@@ -96,7 +102,15 @@ export default function RecordPage({
 					subtitle={record.description}
 					description="Record details"
 					icon={ReceiptTextIcon}
-					actions={<RecordEditorDialog record={record} categories={categories} />}
+					actions={
+						<RecordEditorDialog
+							record={record}
+							categories={categories}
+							titles={titles}
+							locations={locations}
+							peoples={peoples}
+						/>
+					}
 					back={{
 						name: "Back to records",
 						url: recordsWebRoute.url(),
@@ -192,9 +206,15 @@ export default function RecordPage({
 function RecordEditorDialog({
 	record,
 	categories,
+	titles,
+	locations,
+	peoples,
 }: {
 	record: Record & RecordExtra
 	categories: (Category & CategoryExtra)[]
+	titles: string[]
+	locations: string[]
+	peoples: string[]
 }) {
 	const [open, setOpen] = useState(false)
 	const { mergeErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
@@ -306,6 +326,7 @@ function RecordEditorDialog({
 										id={field.name}
 										label="Title"
 										value={field.state.value}
+										suggestions={titles}
 										errors={mergeErrors(field.state.meta.errors, field.name)}
 										onChange={value => {
 											field.handleChange(value)
@@ -321,6 +342,7 @@ function RecordEditorDialog({
 										id={field.name}
 										label="People"
 										value={field.state.value}
+										suggestions={peoples}
 										errors={mergeErrors(field.state.meta.errors, field.name)}
 										onChange={value => {
 											field.handleChange(value)
@@ -336,6 +358,7 @@ function RecordEditorDialog({
 										id={field.name}
 										label="Location"
 										value={field.state.value}
+										suggestions={locations}
 										errors={mergeErrors(field.state.meta.errors, field.name)}
 										onChange={value => {
 											field.handleChange(value)

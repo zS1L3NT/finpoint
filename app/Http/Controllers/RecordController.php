@@ -35,10 +35,10 @@ class RecordController extends Controller
 
     public function show(Record $record)
     {
-        $record->load('category', 'statements', 'statements.account');
-        foreach ($record->statements as $statement) {
-            $statement->loadSum('allocations', 'amount');
-        }
+        $record->load([
+            'category',
+            'statements' => fn($query) => $query->with('account')->withSum('allocations', 'amount')
+        ]);
 
         $categories = Category::query()
             ->with('children')
@@ -46,6 +46,24 @@ class RecordController extends Controller
             ->orderBy('name')
             ->get();
 
-        return Inertia::render('record', compact('record', 'categories'));
+        $titles = Record::query()
+            ->distinct()
+            ->whereNotNull('title')
+            ->orderBy('title')
+            ->pluck('title');
+
+        $locations = Record::query()
+            ->distinct()
+            ->whereNotNull('location')
+            ->orderBy('location')
+            ->pluck('location');
+
+        $peoples = Record::query()
+            ->distinct()
+            ->whereNotNull('people')
+            ->orderBy('people')
+            ->pluck('people');
+
+        return Inertia::render('record', compact('record', 'categories', 'titles', 'locations', 'peoples'));
     }
 }

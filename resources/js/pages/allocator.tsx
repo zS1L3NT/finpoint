@@ -62,9 +62,15 @@ type CategoryExtra = {
 export default function Allocator({
 	statements,
 	categories,
+	titles,
+	locations,
+	peoples,
 }: {
 	statements: Paginated<Statement & StatementExtra>
 	categories: (Category & CategoryExtra)[]
+	titles: string[]
+	locations: string[]
+	peoples: string[]
 }) {
 	const [selected, setSelected] = useState<(Statement & StatementExtra)[]>([])
 	const { query, pageSize, handleQueryChange, handlePageSizeChange } = usePaginatedTableState({
@@ -180,6 +186,9 @@ export default function Allocator({
 							<AllocateRecordDialog
 								statements={selected ? Object.values(selected) : []}
 								categories={categories}
+								titles={titles}
+								locations={locations}
+								peoples={peoples}
 								clear={() => setSelected([])}
 							/>
 						),
@@ -197,10 +206,16 @@ export default function Allocator({
 function AllocateRecordDialog({
 	statements,
 	categories,
+	titles,
+	locations,
+	peoples,
 	clear,
 }: {
 	statements: (Statement & StatementExtra)[]
 	categories: (Category & CategoryExtra)[]
+	titles: string[]
+	locations: string[]
+	peoples: string[]
 	clear: () => void
 }) {
 	const [open, setOpen] = useState(false)
@@ -301,6 +316,7 @@ function AllocateRecordDialog({
 										id={field.name}
 										label="Title"
 										value={field.state.value}
+										suggestions={titles}
 										errors={mergeErrors(field.state.meta.errors, field.name)}
 										onChange={value => {
 											field.handleChange(value)
@@ -316,6 +332,7 @@ function AllocateRecordDialog({
 										id={field.name}
 										label="People"
 										value={field.state.value}
+										suggestions={peoples}
 										errors={mergeErrors(field.state.meta.errors, field.name)}
 										onChange={value => {
 											field.handleChange(value)
@@ -331,6 +348,7 @@ function AllocateRecordDialog({
 										id={field.name}
 										label="Location"
 										value={field.state.value}
+										suggestions={locations}
 										errors={mergeErrors(field.state.meta.errors, field.name)}
 										onChange={value => {
 											field.handleChange(value)
