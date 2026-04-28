@@ -56,17 +56,6 @@ class BudgetController extends Controller
             'automatic' => isset($dto['automatic']) && $dto['automatic'] === 'on',
         ]);
 
-        if ($budget->automatic) {
-            $budget->records()->syncWithoutDetaching(
-                Record::query()
-                    ->whereBetween('datetime', [
-                        Carbon::parse($budget->start_date)->startOfDay(),
-                        Carbon::parse($budget->end_date)->endOfDay(),
-                    ])
-                    ->pluck('id')
-            );
-        }
-
         return $budget;
     }
 
