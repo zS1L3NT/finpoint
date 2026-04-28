@@ -1,6 +1,6 @@
 import { Link, router } from "@inertiajs/react"
 import { useForm } from "@tanstack/react-form"
-import { LoaderCircleIcon, PencilIcon, PiggyBankIcon, PlusIcon, Trash2Icon } from "lucide-react"
+import { PencilIcon, PiggyBankIcon, PlusIcon, Trash2Icon } from "lucide-react"
 import { DateTime } from "luxon"
 import { useMemo, useState } from "react"
 import {
@@ -708,12 +708,6 @@ function BudgetEditorDialog({ budget }: { budget: Budget }) {
 						}
 					/>
 					<Button type="submit" form="budget-edit-form">
-						<form.Subscribe
-							selector={state => state.isSubmitting}
-							children={isSubmitting =>
-								isSubmitting ? <LoaderCircleIcon className="animate-spin" /> : null
-							}
-						/>
 						Save changes
 					</Button>
 				</DialogFooter>

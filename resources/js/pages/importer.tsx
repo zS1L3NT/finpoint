@@ -292,16 +292,7 @@ export default function Importer({ accounts }: { accounts: Account[] }) {
 
 						<CardFooter>
 							<Button type="submit" variant="outline" className="w-full">
-								<form.Subscribe
-									selector={state => state.isSubmitting}
-									children={isSubmitting =>
-										isSubmitting ? (
-											<ImportIcon className="animate-pulse" />
-										) : (
-											<ImportIcon />
-										)
-									}
-								/>
+								<ImportIcon />
 								Import
 							</Button>
 						</CardFooter>

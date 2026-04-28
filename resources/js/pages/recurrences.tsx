@@ -1,6 +1,6 @@
 import { Link, router } from "@inertiajs/react"
 import { useForm } from "@tanstack/react-form"
-import { CalendarSyncIcon, LoaderCircleIcon, PlusIcon } from "lucide-react"
+import { CalendarSyncIcon, PlusIcon } from "lucide-react"
 import { useState } from "react"
 import DetailCard from "@/components/detail-card"
 import AmountField from "@/components/form/amount-field"
@@ -463,12 +463,6 @@ function RecurrenceCreateDialog() {
 						}
 					/>
 					<Button type="submit" form="recurrence-create-form">
-						<form.Subscribe
-							selector={state => state.isSubmitting}
-							children={isSubmitting =>
-								isSubmitting ? <LoaderCircleIcon className="animate-spin" /> : null
-							}
-						/>
 						Create recurrence
 					</Button>
 				</DialogFooter>

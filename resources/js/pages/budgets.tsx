@@ -1,6 +1,6 @@
 import { Link, router } from "@inertiajs/react"
 import { useForm } from "@tanstack/react-form"
-import { LoaderCircleIcon, PiggyBankIcon, PlusIcon, SparklesIcon, WrenchIcon } from "lucide-react"
+import { PiggyBankIcon, PlusIcon, SparklesIcon, WrenchIcon } from "lucide-react"
 import { DateTime } from "luxon"
 import { useState } from "react"
 import AmountField from "@/components/form/amount-field"
@@ -357,12 +357,6 @@ function BudgetCreateDialog() {
 						}
 					/>
 					<Button type="submit" form="budget-create-form">
-						<form.Subscribe
-							selector={state => state.isSubmitting}
-							children={isSubmitting =>
-								isSubmitting ? <LoaderCircleIcon className="animate-spin" /> : null
-							}
-						/>
 						Create budget
 					</Button>
 				</DialogFooter>

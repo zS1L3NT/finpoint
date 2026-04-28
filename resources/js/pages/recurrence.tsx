@@ -1,13 +1,6 @@
 import { Link, router } from "@inertiajs/react"
 import { useForm } from "@tanstack/react-form"
-import {
-	CalendarSyncIcon,
-	LoaderCircleIcon,
-	PencilIcon,
-	PlusIcon,
-	RepeatIcon,
-	Trash2Icon,
-} from "lucide-react"
+import { CalendarSyncIcon, PencilIcon, PlusIcon, RepeatIcon, Trash2Icon } from "lucide-react"
 import { useState } from "react"
 import DetailCard from "@/components/detail-card"
 import AmountField from "@/components/form/amount-field"
@@ -205,7 +198,7 @@ export default function RecurrencePage({
 							columns={[
 								{
 									header: "Record",
-									meta: { width: TABLE_WIDTHS.RECORD},
+									meta: { width: TABLE_WIDTHS.RECORD },
 									cell: ({ row }) => (
 										<div className="flex items-center gap-3">
 											<Icon {...row.original.category} size={16} />
@@ -464,12 +457,6 @@ function RecurrenceEditorDialog({ recurrence }: { recurrence: Recurrence }) {
 						}
 					/>
 					<Button type="submit" form="recurrence-edit-form">
-						<form.Subscribe
-							selector={state => state.isSubmitting}
-							children={isSubmitting =>
-								isSubmitting ? <LoaderCircleIcon className="animate-spin" /> : null
-							}
-						/>
 						Save changes
 					</Button>
 				</DialogFooter>
