@@ -133,9 +133,8 @@ export default function Importer({ accounts }: { accounts: Account[] }) {
 						</CardHeader>
 
 						<CardContent className="space-y-6">
-							<form.Field
-								name="bank"
-								children={field => (
+							<form.Field name="bank">
+								{field => (
 									<SelectField
 										id={field.name}
 										label="Bank"
@@ -153,13 +152,12 @@ export default function Importer({ accounts }: { accounts: Account[] }) {
 										}}
 									/>
 								)}
-							/>
+							</form.Field>
 
 							{BANKS_REQUIRING_ADDITIONAL_INFO.includes(bank) && (
 								<>
-									<form.Field
-										name="account_select"
-										children={field => (
+									<form.Field name="account_select">
+										{field => (
 											<SelectField
 												id={field.name}
 												label="Account"
@@ -184,13 +182,12 @@ export default function Importer({ accounts }: { accounts: Account[] }) {
 												}}
 											/>
 										)}
-									/>
+									</form.Field>
 
 									{accountSelect === "new" && (
 										<>
-											<form.Field
-												name="account_id"
-												children={field => (
+											<form.Field name="account_id">
+												{field => (
 													<TextField
 														id={field.name}
 														label="Account ID"
@@ -205,11 +202,10 @@ export default function Importer({ accounts }: { accounts: Account[] }) {
 														}}
 													/>
 												)}
-											/>
+											</form.Field>
 
-											<form.Field
-												name="account_name"
-												children={field => (
+											<form.Field name="account_name">
+												{field => (
 													<TextField
 														id={field.name}
 														label="Account Name"
@@ -224,15 +220,14 @@ export default function Importer({ accounts }: { accounts: Account[] }) {
 														}}
 													/>
 												)}
-											/>
+											</form.Field>
 										</>
 									)}
 								</>
 							)}
 
-							<form.Field
-								name="files"
-								children={field => {
+							<form.Field name="files">
+								{field => {
 									const errors = mergeErrors(field.state.meta.errors, field.name)
 
 									return (
@@ -269,7 +264,7 @@ export default function Importer({ accounts }: { accounts: Account[] }) {
 										</Field>
 									)
 								}}
-							/>
+							</form.Field>
 
 							{files.length ? (
 								<div className="space-y-2">

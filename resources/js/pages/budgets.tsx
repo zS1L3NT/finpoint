@@ -242,9 +242,8 @@ function BudgetCreateDialog() {
 					}}
 				>
 					<FieldGroup className="grid gap-4 md:grid-cols-2">
-						<form.Field
-							name="name"
-							children={field => (
+						<form.Field name="name">
+							{field => (
 								<TextField
 									id={field.name}
 									label="Name"
@@ -256,10 +255,9 @@ function BudgetCreateDialog() {
 									}}
 								/>
 							)}
-						/>
-						<form.Field
-							name="amount"
-							children={field => (
+						</form.Field>
+						<form.Field name="amount">
+							{field => (
 								<AmountField
 									id={field.name}
 									label="Amount"
@@ -272,10 +270,9 @@ function BudgetCreateDialog() {
 									}}
 								/>
 							)}
-						/>
-						<form.Field
-							name="start_date"
-							children={field => (
+						</form.Field>
+						<form.Field name="start_date">
+							{field => (
 								<Field
 									data-invalid={
 										!!mergeErrors(field.state.meta.errors, field.name).length
@@ -297,10 +294,9 @@ function BudgetCreateDialog() {
 									/>
 								</Field>
 							)}
-						/>
-						<form.Field
-							name="end_date"
-							children={field => (
+						</form.Field>
+						<form.Field name="end_date">
+							{field => (
 								<Field
 									data-invalid={
 										!!mergeErrors(field.state.meta.errors, field.name).length
@@ -322,12 +318,11 @@ function BudgetCreateDialog() {
 									/>
 								</Field>
 							)}
-						/>
+						</form.Field>
 					</FieldGroup>
 
-					<form.Field
-						name="automatic"
-						children={field => (
+					<form.Field name="automatic">
+						{field => (
 							<Field orientation="horizontal">
 								<Checkbox
 									checked={field.state.value}
@@ -345,7 +340,7 @@ function BudgetCreateDialog() {
 								</div>
 							</Field>
 						)}
-					/>
+					</form.Field>
 				</form>
 
 				<DialogFooter>

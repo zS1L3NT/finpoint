@@ -309,9 +309,8 @@ function AllocateRecordDialog({
 						<p className="text-sm font-semibold">Record Information</p>
 
 						<FieldGroup>
-							<form.Field
-								name="title"
-								children={field => (
+							<form.Field name="title">
+								{field => (
 									<TextField
 										id={field.name}
 										label="Title"
@@ -324,10 +323,9 @@ function AllocateRecordDialog({
 										}}
 									/>
 								)}
-							/>
-							<form.Field
-								name="people"
-								children={field => (
+							</form.Field>
+							<form.Field name="people">
+								{field => (
 									<TextField
 										id={field.name}
 										label="People"
@@ -340,10 +338,9 @@ function AllocateRecordDialog({
 										}}
 									/>
 								)}
-							/>
-							<form.Field
-								name="location"
-								children={field => (
+							</form.Field>
+							<form.Field name="location">
+								{field => (
 									<TextField
 										id={field.name}
 										label="Location"
@@ -356,10 +353,9 @@ function AllocateRecordDialog({
 										}}
 									/>
 								)}
-							/>
-							<form.Field
-								name="datetime"
-								children={field => (
+							</form.Field>
+							<form.Field name="datetime">
+								{field => (
 									<DatetimeField
 										id={field.name}
 										value={field.state.value}
@@ -370,10 +366,9 @@ function AllocateRecordDialog({
 										}}
 									/>
 								)}
-							/>
-							<form.Field
-								name="category_id"
-								children={field => (
+							</form.Field>
+							<form.Field name="category_id">
+								{field => (
 									<ComboboxField
 										id={field.name}
 										label="Category"
@@ -405,10 +400,9 @@ function AllocateRecordDialog({
 										}}
 									/>
 								)}
-							/>
-							<form.Field
-								name="description"
-								children={field => (
+							</form.Field>
+							<form.Field name="description">
+								{field => (
 									<TextareaField
 										id={field.name}
 										label="Description"
@@ -420,7 +414,7 @@ function AllocateRecordDialog({
 										}}
 									/>
 								)}
-							/>
+							</form.Field>
 						</FieldGroup>
 					</div>
 
@@ -432,7 +426,8 @@ function AllocateRecordDialog({
 								<form.Field
 									key={statement.id}
 									name={`statements[${index}].amount` as const}
-									children={field => {
+								>
+									{field => {
 										const errors = mergeErrors(
 											field.state.meta.errors,
 											field.name,
@@ -490,7 +485,7 @@ function AllocateRecordDialog({
 											</Card>
 										)
 									}}
-								/>
+								</form.Field>
 							))}
 						</div>
 					</div>

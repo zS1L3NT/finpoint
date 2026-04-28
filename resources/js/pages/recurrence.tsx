@@ -369,9 +369,8 @@ function RecurrenceEditorDialog({ recurrence }: { recurrence: Recurrence }) {
 						void form.handleSubmit()
 					}}
 				>
-					<form.Field
-						name="name"
-						children={field => (
+					<form.Field name="name">
+						{field => (
 							<Field
 								data-invalid={
 									!!mergeErrors(field.state.meta.errors, field.name).length
@@ -391,11 +390,9 @@ function RecurrenceEditorDialog({ recurrence }: { recurrence: Recurrence }) {
 								/>
 							</Field>
 						)}
-					/>
-
-					<form.Field
-						name="amount"
-						children={field => (
+					</form.Field>
+					<form.Field name="amount">
+						{field => (
 							<AmountField
 								id={field.name}
 								label="Amount"
@@ -407,11 +404,9 @@ function RecurrenceEditorDialog({ recurrence }: { recurrence: Recurrence }) {
 								}}
 							/>
 						)}
-					/>
-
-					<form.Field
-						name="period"
-						children={field => (
+					</form.Field>
+					<form.Field name="period">
+						{field => (
 							<Field>
 								<FieldLabel htmlFor={field.name}>Period</FieldLabel>
 								<Select
@@ -437,7 +432,7 @@ function RecurrenceEditorDialog({ recurrence }: { recurrence: Recurrence }) {
 								</FieldDescription>
 							</Field>
 						)}
-					/>
+					</form.Field>
 				</form>
 
 				<DialogFooter>

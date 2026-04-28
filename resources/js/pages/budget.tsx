@@ -635,9 +635,8 @@ function BudgetEditorDialog({ budget }: { budget: Budget }) {
 					}}
 				>
 					<div className="grid gap-4 md:grid-cols-2">
-						<form.Field
-							name="name"
-							children={field => (
+						<form.Field name="name">
+							{field => (
 								<TextField
 									id={field.name}
 									label="Name"
@@ -649,10 +648,9 @@ function BudgetEditorDialog({ budget }: { budget: Budget }) {
 									}}
 								/>
 							)}
-						/>
-						<form.Field
-							name="amount"
-							children={field => (
+						</form.Field>
+						<form.Field name="amount">
+							{field => (
 								<AmountField
 									id={field.name}
 									label="Amount"
@@ -665,12 +663,11 @@ function BudgetEditorDialog({ budget }: { budget: Budget }) {
 									}}
 								/>
 							)}
-						/>
+						</form.Field>
 					</div>
 
-					<form.Field
-						name="automatic"
-						children={field => (
+					<form.Field name="automatic">
+						{field => (
 							<Field orientation="horizontal">
 								<Checkbox
 									checked={field.state.value}
@@ -688,7 +685,7 @@ function BudgetEditorDialog({ budget }: { budget: Budget }) {
 								</div>
 							</Field>
 						)}
-					/>
+					</form.Field>
 				</form>
 
 				<DialogFooter>
