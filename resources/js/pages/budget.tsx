@@ -1,6 +1,13 @@
 import { Link, router } from "@inertiajs/react"
 import { useForm } from "@tanstack/react-form"
-import { PencilIcon, PiggyBankIcon, PlusIcon, Trash2Icon } from "lucide-react"
+import {
+	PencilIcon,
+	PiggyBankIcon,
+	PlusIcon,
+	SparklesIcon,
+	Trash2Icon,
+	WrenchIcon,
+} from "lucide-react"
 import { DateTime } from "luxon"
 import { useMemo, useState } from "react"
 import {
@@ -8,6 +15,7 @@ import {
 	AreaChart,
 	CartesianGrid,
 	Label,
+	Line,
 	Pie,
 	PieChart,
 	ReferenceLine,
@@ -55,6 +63,7 @@ import useApiFormErrors from "@/hooks/use-api-form-errors"
 import { TABLE_WIDTHS } from "@/lib/table-widths"
 import {
 	classForCurrency,
+	cn,
 	formatCurrency,
 	formatDatetime,
 	parseDate,
@@ -125,14 +134,11 @@ const getAggregations = (budget: Budget & BudgetExtra) => {
 	const remainingSpending = round2dp(budget.amount - elapsedSpending)
 	const remainingDays = dates.length - elapsedDays
 
+	const budgetPace = round2dp(budget.amount / dates.length)
 	const currentPace = elapsedDays > 0 ? round2dp(elapsedSpending / elapsedDays) : 0
 	const idealPace = remainingDays > 0 ? round2dp(remainingSpending / remainingDays) : 0
 
-	const projectedSpending = round2dp(currentPace * dates.length)
-	const projectedExceedDate =
-		currentPace * dates.length > budget.amount
-			? startDate.plus({ days: Math.ceil(budget.amount / currentPace) })
-			: null
+	const projectedSpending = elapsedSpending + round2dp(currentPace * remainingDays)
 
 	return {
 		dates,
@@ -141,10 +147,10 @@ const getAggregations = (budget: Budget & BudgetExtra) => {
 		remainingSpending,
 		elapsedDays,
 		remainingDays,
+		budgetPace,
 		currentPace,
 		idealPace,
 		projectedSpending,
-		projectedExceedDate,
 	}
 }
 
@@ -159,12 +165,11 @@ export default function BudgetPage({
 		dates,
 		cumulated,
 		elapsedSpending,
-		remainingSpending,
 		elapsedDays,
+		budgetPace,
 		currentPace,
 		idealPace,
 		projectedSpending,
-		projectedExceedDate,
 	} = useMemo(() => getAggregations(budget), [budget])
 
 	console.log("Average daily spend:", formatCurrency(currentPace))
@@ -201,20 +206,40 @@ export default function BudgetPage({
 			<div className="container mx-auto flex flex-col gap-8 p-8">
 				<PageHeader
 					title={budget.name}
+					subtitle={
+						<div className="flex items-center gap-1 text-muted-foreground">
+							{budget.automatic ? (
+								<SparklesIcon className="size-4" />
+							) : (
+								<WrenchIcon className="size-4" />
+							)}
+							<span>
+								{budget.automatic ? "Automatic" : "Manual"} record attachment
+							</span>
+						</div>
+					}
 					description="Budget details"
 					icon={PiggyBankIcon}
 					actions={<BudgetEditorDialog budget={budget} />}
 					back={{ name: "Back to budgets", url: budgetsWebRoute.url() }}
 				/>
 
-				<div className="grid gap-4 md:grid-cols-4 xl:grid-cols-5">
+				<div className="grid gap-4 grid-cols-4">
 					<DetailCard
 						label="Budget Usage"
 						value={
 							<div className="space-y-2">
-								<div>
-									<p className="text-sm">{formatCurrency(elapsedSpending)}</p>
-									<p className="text-muted-foreground">{`${Math.ceil((elapsedSpending / budget.amount) * 100)}% of ${formatCurrency(budget.amount)}`}</p>
+								<div className="space-y-0.5">
+									<p
+										className={cn(
+											elapsedSpending > budget.amount
+												? "text-red-500"
+												: "text-green-600",
+										)}
+									>
+										{formatCurrency(elapsedSpending)}
+									</p>
+									<p className="text-xs text-muted-foreground">{`${Math.ceil((elapsedSpending / budget.amount) * 100)}% of ${formatCurrency(budget.amount)}`}</p>
 								</div>
 								<Progress
 									value={(elapsedSpending / budget.amount) * 100}
@@ -224,46 +249,50 @@ export default function BudgetPage({
 						}
 					/>
 					<DetailCard
+						label="Usage Projection"
+						value={
+							<div className="space-y-0.5">
+								<p
+									className={cn(
+										currentPace < idealPace
+											? ""
+											: elapsedSpending > budget.amount
+												? "text-red-500"
+												: "text-orange-500",
+									)}
+								>
+									{formatCurrency(projectedSpending)}
+								</p>
+								<p className="text-xs text-muted-foreground">
+									{formatCurrency(Math.abs(budget.amount - projectedSpending))}{" "}
+									{projectedSpending > budget.amount ? "over" : "under"} budget
+								</p>
+							</div>
+						}
+					/>
+					<DetailCard
 						label="Usage Pace"
 						value={
-							<div>
-								<p className="text-sm">{formatCurrency(currentPace)} / day</p>
-								{/* <p className="text-muted-foreground">
-									Spend {toCurrency(idealPace)} / day or less to stay on track
-								</p> */}
+							<div className="space-y-0.5">
+								<p>{formatCurrency(currentPace)} / day</p>
+								<p className="text-xs text-muted-foreground">
+									Budget target is {formatCurrency(budgetPace)} / day
+								</p>
 							</div>
 						}
 					/>
 					<DetailCard
 						label="Recommended Pace"
 						value={
-							<div>
-								<p className="text-sm">{formatCurrency(idealPace)} / day</p>
-								{/* <p className="text-muted-foreground">
-									Spend {toCurrency(idealPace)} / day or less to stay on track
-								</p> */}
-							</div>
-						}
-					/>
-					<DetailCard
-						label="Usage Projection"
-						value={
-							<div>
-								<p className="text-sm">{formatCurrency(projectedSpending)}</p>
-								<p className="text-muted-foreground">
-									{projectedExceedDate
-										? projectedExceedDate > DateTime.now()
-											? `Will exceed on ${projectedExceedDate.toFormat("d MMM y")}`
-											: `Exceeded on ${projectedExceedDate.toFormat("d MMM y")}`
-										: "On track to stay within budget"}
+							<div className="space-y-0.5">
+								<p>{formatCurrency(idealPace)} / day</p>
+								<p className="text-xs text-muted-foreground">
+									{idealPace > budgetPace
+										? "You can spend more than current pace and still stay within budget"
+										: "You need to spend less than current pace to stay within budget"}
 								</p>
 							</div>
 						}
-						valueClassName={remainingSpending < 0 ? "text-destructive" : undefined}
-					/>
-					<DetailCard
-						label="Mode"
-						value={budget.automatic ? "Automatic attach" : "Manual attach"}
 					/>
 				</div>
 
@@ -409,27 +438,67 @@ export default function BudgetPage({
 													cumulated[i + 1] > budget.amount)
 													? cumulated[i]
 													: undefined,
+											projected:
+												i === elapsedDays - 1 ? elapsedSpending : undefined,
 										})),
 										...dates.slice(elapsedDays).map((d, i) => ({
 											date: d.toFormat("d MMM y"),
+											projected: round2dp(
+												elapsedSpending + currentPace * (i + 1),
+											),
 										})),
 									]}
 								>
 									<CartesianGrid />
 									<XAxis dataKey="date" />
-									<YAxis min={budget.amount} />
+									<YAxis
+										ticks={Array.from(
+											{
+												length:
+													Math.floor(
+														Math.max(projectedSpending, budget.amount) /
+															100,
+													) + 1,
+											},
+											(_, i) => i * 100,
+										)}
+									/>
 
 									<Area
 										dataKey="within"
 										fill="var(--color-green-600)"
-										fillOpacity={0.25}
+										fillOpacity={0.1}
 										stroke="var(--color-green-600)"
+										strokeWidth={2}
 									/>
 									<Area
 										dataKey="exceed"
 										fill="var(--color-red-500)"
-										fillOpacity={0.25}
+										fillOpacity={0.1}
 										stroke="var(--color-red-500)"
+										strokeWidth={2}
+									/>
+
+									<Line
+										dataKey="projected"
+										fill={
+											currentPace < idealPace
+												? "var(--foreground)"
+												: elapsedSpending > budget.amount
+													? "var(--color-red-500)"
+													: "var(--color-orange-500)"
+										}
+										fillOpacity={0.1}
+										stroke={
+											currentPace < idealPace
+												? "var(--foreground)"
+												: elapsedSpending > budget.amount
+													? "var(--color-red-500)"
+													: "var(--color-orange-500)"
+										}
+										strokeWidth={2}
+										dot={false}
+										animationBegin={1000}
 									/>
 
 									<ReferenceLine label="Budget" y={budget.amount} />
