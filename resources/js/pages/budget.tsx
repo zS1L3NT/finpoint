@@ -83,28 +83,40 @@ const getAggregations = (budget: Budget, records: (Record & RecordExtra)[]) => {
 		.filter(r => parseDatetime(r.datetime) < startDate)
 		.reduce((acc, el) => acc - el.amount, 0)
 	let elapsedDays = 0
+
 	const dates: DateTime[] = []
-	const cumulated: number[] = []
+	const elapsedValues: (number | null)[] = []
+	const projectedValues: (number | null)[] = []
 
 	for (let i = 0; i <= endDate.diff(startDate, "days").days; i++) {
 		const date = startDate.plus({ days: i })
 		dates.push(date)
 
-		const amountForDate = round2dp(
-			records
-				.filter(r => parseDatetime(r.datetime).hasSame(date, "day"))
-				.reduce((acc, el) => acc - el.amount, 0),
-		)
+		elapsedValues[i] = null
+		projectedValues[i] = null
 
-		if (date.startOf("day") < DateTime.now()) {
-			elapsedSpending = round2dp(elapsedSpending + amountForDate)
+		if (DateTime.now().endOf("day") >= date.endOf("day")) {
+			const amount = round2dp(
+				records
+					.filter(r => parseDatetime(r.datetime).hasSame(date, "day"))
+					.reduce((acc, el) => acc - el.amount, 0),
+			)
+
+			elapsedSpending = round2dp(elapsedSpending + amount)
 			elapsedDays += 1
+
+			if (i === 0) {
+				elapsedValues[i] = amount
+			} else {
+				// biome-ignore lint/style/noNonNullAssertion: Previous values are always non-null
+				elapsedValues[i] = round2dp(elapsedValues[i - 1]! + amount)
+			}
 		}
 
-		if (i === 0) {
-			cumulated.push(amountForDate)
-		} else {
-			cumulated.push(round2dp(cumulated[i - 1] + amountForDate))
+		if (DateTime.now().startOf("day") <= date.startOf("day")) {
+			const currentPace = elapsedDays > 0 ? round2dp(elapsedSpending / elapsedDays) : 0
+
+			projectedValues[i] = round2dp(elapsedSpending + currentPace * (i + 1 - elapsedDays))
 		}
 	}
 
@@ -115,19 +127,15 @@ const getAggregations = (budget: Budget, records: (Record & RecordExtra)[]) => {
 	const currentPace = elapsedDays > 0 ? round2dp(elapsedSpending / elapsedDays) : 0
 	const idealPace = remainingDays > 0 ? round2dp(remainingSpending / remainingDays) : 0
 
-	const projectedSpending = elapsedSpending + round2dp(currentPace * remainingDays)
-
 	return {
 		dates,
-		cumulated,
+		elapsedValues,
+		projectedValues,
 		elapsedSpending,
-		remainingSpending,
-		elapsedDays,
-		remainingDays,
+		projectedSpending: projectedValues.at(-1) ?? elapsedSpending,
 		budgetPace,
 		currentPace,
 		idealPace,
-		projectedSpending,
 	}
 }
 
@@ -168,13 +176,13 @@ export default function BudgetPage({
 
 	const {
 		dates,
-		cumulated,
+		elapsedValues,
+		projectedValues,
 		elapsedSpending,
-		elapsedDays,
+		projectedSpending,
 		budgetPace,
 		currentPace,
 		idealPace,
-		projectedSpending,
 	} = useMemo(
 		() =>
 			getAggregations(
@@ -183,6 +191,71 @@ export default function BudgetPage({
 			),
 		[budget, records],
 	)
+
+	const areaChartData = useMemo(() => {
+		const data: {
+			[date: string]: { ein?: number; eout?: number; pin?: number; pout?: number }
+		} = {}
+
+		for (const date of dates) {
+			const key = date.toFormat("d MMM y")
+			data[key] = {}
+		}
+
+		for (let i = 0; i < elapsedValues.length; i++) {
+			const date = dates[i]
+			const key = date.toFormat("d MMM y")
+
+			const elapsedValue = elapsedValues[i]
+			if (elapsedValue === null) continue
+
+			if (elapsedValue <= budget.amount) {
+				data[key].ein = elapsedValue
+
+				// Currently doesn't exceed budget, but will exceed on next day
+				const nextElapsedValue = elapsedValues[i + 1]
+				if (nextElapsedValue !== null && nextElapsedValue > budget.amount) {
+					data[key].eout = elapsedValue
+				}
+			} else {
+				data[key].eout = elapsedValue
+			}
+		}
+
+		for (let i = 0; i < projectedValues.length; i++) {
+			const date = dates[i]
+			const key = date.toFormat("d MMM y")
+
+			const projectedValue = projectedValues[i]
+			if (projectedValue === null) continue
+
+			if (projectedValue <= budget.amount) {
+				data[key].pin = projectedValue
+
+				// Currently doesn't exceed budget, but will exceed on next day
+				const nextProjectedValue = projectedValues[i + 1]
+				if (nextProjectedValue !== null && nextProjectedValue > budget.amount) {
+					data[key].pout = projectedValue
+
+					// Condition to skip setting projected in-budget
+					const previousProjectedValue = projectedValues[i - 1]
+					if (previousProjectedValue === null) {
+						delete data[key].pin
+					}
+				}
+			} else {
+				data[key].pout = projectedValue
+			}
+		}
+
+		return Object.entries(data).map(([date, { ein, eout, pin, pout }]) => ({
+			date,
+			ein,
+			eout,
+			pin,
+			pout,
+		}))
+	}, [budget.amount, dates, elapsedValues, projectedValues])
 
 	return (
 		<>
@@ -406,36 +479,13 @@ export default function BudgetPage({
 						<CardContent>
 							<ChartContainer
 								config={{
-									within: { label: "Within budget" },
-									exceed: { label: "Exceeding budget" },
-									projected: { label: "Projected spend" },
+									ein: { label: "Usage" },
+									eout: { label: "Exceed" },
+									pin: { label: "Usage (Projection)" },
+									pout: { label: "Exceed (Projection)" },
 								}}
 							>
-								<AreaChart
-									data={[
-										...dates.slice(0, elapsedDays).map((d, i) => ({
-											date: d.toFormat("d MMM y"),
-											within:
-												cumulated[i] < budget.amount
-													? cumulated[i]
-													: undefined,
-											exceed:
-												cumulated[i] > budget.amount ||
-												(cumulated[i] < budget.amount &&
-													cumulated[i + 1] > budget.amount)
-													? cumulated[i]
-													: undefined,
-											projected:
-												i === elapsedDays - 1 ? elapsedSpending : undefined,
-										})),
-										...dates.slice(elapsedDays).map((d, i) => ({
-											date: d.toFormat("d MMM y"),
-											projected: round2dp(
-												elapsedSpending + currentPace * (i + 1),
-											),
-										})),
-									]}
-								>
+								<AreaChart data={areaChartData}>
 									<CartesianGrid />
 									<XAxis dataKey="date" />
 									<YAxis
@@ -452,14 +502,14 @@ export default function BudgetPage({
 									/>
 
 									<Area
-										dataKey="within"
+										dataKey="ein"
 										fill="var(--color-green-600)"
 										fillOpacity={0.1}
 										stroke="var(--color-green-600)"
 										strokeWidth={2}
 									/>
 									<Area
-										dataKey="exceed"
+										dataKey="eout"
 										fill="var(--color-red-500)"
 										fillOpacity={0.1}
 										stroke="var(--color-red-500)"
@@ -467,22 +517,19 @@ export default function BudgetPage({
 									/>
 
 									<Line
-										dataKey="projected"
-										fill={
-											currentPace < idealPace
-												? "var(--foreground)"
-												: elapsedSpending > budget.amount
-													? "var(--color-red-500)"
-													: "var(--color-orange-500)"
-										}
+										dataKey="pin"
+										fill="var(--foreground)"
 										fillOpacity={0.1}
-										stroke={
-											currentPace < idealPace
-												? "var(--foreground)"
-												: elapsedSpending > budget.amount
-													? "var(--color-red-500)"
-													: "var(--color-orange-500)"
-										}
+										stroke="var(--foreground)"
+										strokeWidth={2}
+										dot={false}
+										animationBegin={1000}
+									/>
+									<Line
+										dataKey="pout"
+										fill="var(--color-orange-500)"
+										fillOpacity={0.1}
+										stroke="var(--color-orange-500)"
 										strokeWidth={2}
 										dot={false}
 										animationBegin={1000}
@@ -494,6 +541,8 @@ export default function BudgetPage({
 										cursor={false}
 										content={<ChartTooltipContent className="w-50" />}
 									/>
+
+									<ChartLegend content={<ChartLegendContent />} />
 								</AreaChart>
 							</ChartContainer>
 						</CardContent>
