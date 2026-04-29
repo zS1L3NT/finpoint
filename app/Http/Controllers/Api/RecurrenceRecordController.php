@@ -8,14 +8,14 @@ use App\Models\Recurrence;
 
 class RecurrenceRecordController extends Controller
 {
-    public function update(Recurrence $recurrence, Record $record)
+    public function attach(Recurrence $recurrence, Record $record)
     {
-        $recurrence->records()->syncWithoutDetaching($record);
+        $recurrence->records()->attach($record);
 
         return [];
     }
 
-    public function destroy(Recurrence $recurrence, Record $record)
+    public function detach(Recurrence $recurrence, Record $record)
     {
         $recurrence->records()->detach($record);
 

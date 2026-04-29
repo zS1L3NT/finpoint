@@ -60,8 +60,8 @@ import {
 } from "@/lib/utils"
 import { Budget, Category, Record } from "@/types"
 import {
-	budgetRecordDestroyApiRoute,
-	budgetRecordUpdateApiRoute,
+	budgetRecordAttachApiRoute,
+	budgetRecordDetachApiRoute,
 	budgetsWebRoute,
 	recordWebRoute,
 } from "@/wayfinder/routes"
@@ -151,9 +151,8 @@ export default function BudgetPage({
 	const [showingExcluded, setShowingExcluded] = useState(false)
 
 	const attach = async (record: Record) => {
-		const response = await fetch(budgetRecordUpdateApiRoute.url({ budget, record }), {
+		const response = await fetch(budgetRecordAttachApiRoute.url({ budget, record }), {
 			method: "POST",
-			body: withMethod(new FormData(), "PUT"),
 			headers: { Accept: "application/json" },
 		})
 
@@ -163,7 +162,7 @@ export default function BudgetPage({
 	}
 
 	const detach = async (record: Record) => {
-		const response = await fetch(budgetRecordDestroyApiRoute.url({ budget, record }), {
+		const response = await fetch(budgetRecordDetachApiRoute.url({ budget, record }), {
 			method: "POST",
 			body: withMethod(new FormData(), "DELETE"),
 			headers: { Accept: "application/json" },

@@ -8,14 +8,14 @@ use App\Models\Record;
 
 class BudgetRecordController extends Controller
 {
-    public function update(Budget $budget, Record $record)
+    public function attach(Budget $budget, Record $record)
     {
-        $budget->records()->syncWithoutDetaching($record);
+        $budget->records()->attach($record);
 
         return [];
     }
 
-    public function destroy(Budget $budget, Record $record)
+    public function detach(Budget $budget, Record $record)
     {
         $budget->records()->detach($record);
 

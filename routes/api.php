@@ -32,12 +32,8 @@ Route::apiResource('budgets', BudgetController::class)
         'destroy' => 'budget-destroy-api-route'
     ]);
 
-Route::apiResource('budgets.records', BudgetRecordController::class)
-    ->only('update', 'destroy')
-    ->names([
-        'update' => 'budget-record-update-api-route',
-        'destroy' => 'budget-record-destroy-api-route'
-    ]);
+Route::post('budgets/{budget}/records/{record}', [BudgetRecordController::class, 'attach'])->name('budget-record-attach-api-route');
+Route::delete('budgets/{budget}/records/{record}', [BudgetRecordController::class, 'detach'])->name('budget-record-detach-api-route');
 
 Route::apiResource('recurrences', RecurrenceController::class)
     ->only('store', 'update', 'destroy')
@@ -47,12 +43,8 @@ Route::apiResource('recurrences', RecurrenceController::class)
         'destroy' => 'recurrence-destroy-api-route'
     ]);
 
-Route::apiResource('recurrences.records', RecurrenceRecordController::class)
-    ->only('update', 'destroy')
-    ->names([
-        'update' => 'recurrence-record-update-api-route',
-        'destroy' => 'recurrence-record-destroy-api-route'
-    ]);
+Route::post('recurrences/{recurrence}/records/{record}', [RecurrenceRecordController::class, 'attach'])->name('recurrence-record-attach-api-route');
+Route::delete('recurrences/{recurrence}/records/{record}', [RecurrenceRecordController::class, 'detach'])->name('recurrence-record-detach-api-route');
 
 Route::apiResource('categories', CategoryController::class)
     ->only('store', 'update', 'destroy')

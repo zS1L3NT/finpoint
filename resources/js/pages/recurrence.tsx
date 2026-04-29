@@ -21,8 +21,8 @@ import { classForCurrency, formatCurrency, formatDatetime, round2dp, withMethod 
 import { Category, Record, Recurrence } from "@/types"
 import {
 	recordWebRoute,
-	recurrenceRecordDestroyApiRoute,
-	recurrenceRecordUpdateApiRoute,
+	recurrenceRecordAttachApiRoute,
+	recurrenceRecordDetachApiRoute,
 	recurrencesWebRoute,
 } from "@/wayfinder/routes"
 
@@ -46,12 +46,12 @@ export default function RecurrencePage({
 	const mutateRecord = async (record: Record, mode: "attach" | "detach") => {
 		const route =
 			mode === "attach"
-				? recurrenceRecordUpdateApiRoute.url({ recurrence, record })
-				: recurrenceRecordDestroyApiRoute.url({ recurrence, record })
+				? recurrenceRecordAttachApiRoute.url({ recurrence, record })
+				: recurrenceRecordDetachApiRoute.url({ recurrence, record })
 
 		const response = await fetch(route, {
 			method: "POST",
-			body: withMethod(new FormData(), mode === "attach" ? "PUT" : "DELETE"),
+			body: mode === "attach" ? undefined : withMethod(new FormData(), "DELETE"),
 			headers: { Accept: "application/json" },
 		})
 
