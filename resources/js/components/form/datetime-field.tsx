@@ -100,6 +100,7 @@ export default function DatetimeField({
 					<PopoverContent className="w-auto p-0" align="start">
 						<Calendar
 							mode="single"
+							defaultMonth={selected?.toJSDate()}
 							selected={selected?.toJSDate()}
 							onSelect={updateDate}
 						/>

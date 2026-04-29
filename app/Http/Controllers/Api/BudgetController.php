@@ -18,7 +18,7 @@ class BudgetController extends Controller
             'amount' => 'required|decimal:0,2',
             'start_date' => 'required|date_format:Y-m-d',
             'end_date' => 'required|date_format:Y-m-d|after:start_date',
-            'automatic' => 'nullable|in:on',
+            'automatic' => 'nullable|in:on,off',
         ]);
 
         return DB::transaction(function () use ($dto) {
@@ -48,7 +48,9 @@ class BudgetController extends Controller
         $dto = request()->validate([
             'name' => 'required|string',
             'amount' => 'required|decimal:0,2',
-            'automatic' => 'nullable|in:on',
+            'start_date' => 'required|date_format:Y-m-d',
+            'end_date' => 'required|date_format:Y-m-d|after:start_date',
+            'automatic' => 'nullable|in:on,off',
         ]);
 
         $budget->update([

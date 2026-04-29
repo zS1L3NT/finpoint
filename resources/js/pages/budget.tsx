@@ -24,6 +24,7 @@ import {
 } from "recharts"
 import DetailCard from "@/components/detail-card"
 import AmountField from "@/components/form/amount-field"
+import DateField from "@/components/form/date-field"
 import TextField from "@/components/form/text-field"
 import Icon from "@/components/icon"
 import AppHeader from "@/components/layout/app-header"
@@ -57,7 +58,7 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog"
-import { Field, FieldDescription, FieldLabel } from "@/components/ui/field"
+import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Progress } from "@/components/ui/progress"
 import useApiFormErrors from "@/hooks/use-api-form-errors"
 import { TABLE_WIDTHS } from "@/lib/table-widths"
@@ -626,15 +627,17 @@ function BudgetEditorDialog({ budget }: { budget: Budget }) {
 		defaultValues: {
 			name: budget.name,
 			amount: budget.amount,
-			automatic: budget.automatic,
+			start_date: budget.start_date,
+			end_date: budget.end_date,
+			automatic: !!budget.automatic,
 		},
 		onSubmit: async ({ value }) => {
 			const formData = new FormData()
 			formData.append("name", value.name)
 			formData.append("amount", `${value.amount}`)
-			if (value.automatic) {
-				formData.append("automatic", "on")
-			}
+			formData.append("start_date", value.start_date)
+			formData.append("end_date", value.end_date)
+			formData.append("automatic", value.automatic ? "on" : "off")
 
 			const response = await fetch(budgetUpdateApiRoute.url({ budget }), {
 				method: "POST",
@@ -650,7 +653,9 @@ function BudgetEditorDialog({ budget }: { budget: Budget }) {
 
 			if (response.ok) {
 				setOpen(false)
-				router.reload()
+				setTimeout(() => {
+					router.reload()
+				}, 300)
 			}
 		},
 	})
@@ -703,7 +708,7 @@ function BudgetEditorDialog({ budget }: { budget: Budget }) {
 						void form.handleSubmit()
 					}}
 				>
-					<div className="grid gap-4 md:grid-cols-2">
+					<FieldGroup className="grid gap-4 md:grid-cols-2">
 						<form.Field name="name">
 							{field => (
 								<TextField
@@ -733,7 +738,35 @@ function BudgetEditorDialog({ budget }: { budget: Budget }) {
 								/>
 							)}
 						</form.Field>
-					</div>
+						<form.Field name="start_date">
+							{field => (
+								<DateField
+									id={field.name}
+									label="Start date"
+									value={field.state.value}
+									errors={mergeErrors(field.state.meta.errors, field.name)}
+									onChange={value => {
+										field.handleChange(value)
+										clearApiError(field.name)
+									}}
+								/>
+							)}
+						</form.Field>
+						<form.Field name="end_date">
+							{field => (
+								<DateField
+									id={field.name}
+									label="End date"
+									value={field.state.value}
+									errors={mergeErrors(field.state.meta.errors, field.name)}
+									onChange={value => {
+										field.handleChange(value)
+										clearApiError(field.name)
+									}}
+								/>
+							)}
+						</form.Field>
+					</FieldGroup>
 
 					<form.Field name="automatic">
 						{field => (

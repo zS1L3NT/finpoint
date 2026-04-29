@@ -4,6 +4,7 @@ import { PiggyBankIcon, PlusIcon, SparklesIcon, WrenchIcon } from "lucide-react"
 import { DateTime } from "luxon"
 import { useState } from "react"
 import AmountField from "@/components/form/amount-field"
+import DateField from "@/components/form/date-field"
 import TextField from "@/components/form/text-field"
 import AppHeader from "@/components/layout/app-header"
 import PageHeader from "@/components/layout/page-header"
@@ -22,7 +23,6 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog"
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
 import { Progress } from "@/components/ui/progress"
 import useApiFormErrors from "@/hooks/use-api-form-errors"
 import usePaginatedTableState from "@/hooks/use-paginated-table-state"
@@ -183,9 +183,7 @@ function BudgetCreateDialog() {
 			formData.append("amount", `${value.amount}`)
 			formData.append("start_date", value.start_date)
 			formData.append("end_date", value.end_date)
-			if (value.automatic) {
-				formData.append("automatic", "on")
-			}
+			formData.append("automatic", value.automatic ? "on" : "off")
 
 			const response = await fetch(budgetStoreApiRoute.url(), {
 				method: "POST",
@@ -273,50 +271,30 @@ function BudgetCreateDialog() {
 						</form.Field>
 						<form.Field name="start_date">
 							{field => (
-								<Field
-									data-invalid={
-										!!mergeErrors(field.state.meta.errors, field.name).length
-									}
-								>
-									<FieldLabel htmlFor={field.name}>Start date</FieldLabel>
-									<Input
-										id={field.name}
-										type="date"
-										value={field.state.value}
-										onChange={event => {
-											field.handleChange(event.target.value)
-											clearApiError(field.name)
-										}}
-										aria-invalid={
-											!!mergeErrors(field.state.meta.errors, field.name)
-												.length
-										}
-									/>
-								</Field>
+								<DateField
+									id={field.name}
+									label="Start date"
+									value={field.state.value}
+									errors={mergeErrors(field.state.meta.errors, field.name)}
+									onChange={value => {
+										field.handleChange(value)
+										clearApiError(field.name)
+									}}
+								/>
 							)}
 						</form.Field>
 						<form.Field name="end_date">
 							{field => (
-								<Field
-									data-invalid={
-										!!mergeErrors(field.state.meta.errors, field.name).length
-									}
-								>
-									<FieldLabel htmlFor={field.name}>End date</FieldLabel>
-									<Input
-										id={field.name}
-										type="date"
-										value={field.state.value}
-										onChange={event => {
-											field.handleChange(event.target.value)
-											clearApiError(field.name)
-										}}
-										aria-invalid={
-											!!mergeErrors(field.state.meta.errors, field.name)
-												.length
-										}
-									/>
-								</Field>
+								<DateField
+									id={field.name}
+									label="End date"
+									value={field.state.value}
+									errors={mergeErrors(field.state.meta.errors, field.name)}
+									onChange={value => {
+										field.handleChange(value)
+										clearApiError(field.name)
+									}}
+								/>
 							)}
 						</form.Field>
 					</FieldGroup>
