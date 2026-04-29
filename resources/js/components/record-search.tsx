@@ -33,6 +33,8 @@ export default function RecordSearch({
 	useEffect(() => {
 		if (!open) {
 			setQuery("")
+		} else {
+			void handleSearch()
 		}
 	}, [open])
 

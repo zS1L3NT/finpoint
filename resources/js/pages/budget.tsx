@@ -1,6 +1,8 @@
 import { Link, router } from "@inertiajs/react"
 import { useForm } from "@tanstack/react-form"
 import {
+	EyeIcon,
+	EyeOffIcon,
 	PencilIcon,
 	PiggyBankIcon,
 	PlusIcon,
@@ -60,6 +62,7 @@ import {
 } from "@/components/ui/dialog"
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Progress } from "@/components/ui/progress"
+import { Toggle } from "@/components/ui/toggle"
 import useApiFormErrors from "@/hooks/use-api-form-errors"
 import { TABLE_WIDTHS } from "@/lib/table-widths"
 import {
@@ -82,28 +85,20 @@ import {
 	recordWebRoute,
 } from "@/wayfinder/routes"
 
-/**
- * Show a line for current pace & recommended pace
- * Add more details into the details cards
- */
-
-type BudgetExtra = {
-	records: (Record & RecordExtra)[]
-}
-
 type RecordExtra = {
 	category: Category
+	excluded: boolean
 }
 
 type CategoryExtra = {
 	children: Category[]
 }
 
-const getAggregations = (budget: Budget & BudgetExtra) => {
+const getAggregations = (budget: Budget, records: (Record & RecordExtra)[]) => {
 	const startDate = parseDate(budget.start_date)
 	const endDate = parseDate(budget.end_date)
 
-	let elapsedSpending = budget.records
+	let elapsedSpending = records
 		.filter(r => parseDatetime(r.datetime) < startDate)
 		.reduce((acc, el) => acc - el.amount, 0)
 	let elapsedDays = 0
@@ -115,7 +110,7 @@ const getAggregations = (budget: Budget & BudgetExtra) => {
 		dates.push(date)
 
 		const amountForDate = round2dp(
-			budget.records
+			records
 				.filter(r => parseDatetime(r.datetime).hasSame(date, "day"))
 				.reduce((acc, el) => acc - el.amount, 0),
 		)
@@ -157,21 +152,14 @@ const getAggregations = (budget: Budget & BudgetExtra) => {
 
 export default function BudgetPage({
 	budget,
+	records,
 	categories,
 }: {
-	budget: Budget & BudgetExtra
+	budget: Budget
+	records: (Record & RecordExtra)[]
 	categories: (Category & CategoryExtra)[]
 }) {
-	const {
-		dates,
-		cumulated,
-		elapsedSpending,
-		elapsedDays,
-		budgetPace,
-		currentPace,
-		idealPace,
-		projectedSpending,
-	} = useMemo(() => getAggregations(budget), [budget])
+	const [showingExcluded, setShowingExcluded] = useState(false)
 
 	const attach = async (record: Record) => {
 		const response = await fetch(budgetRecordUpdateApiRoute.url({ budget, record }), {
@@ -196,6 +184,24 @@ export default function BudgetPage({
 			router.reload()
 		}
 	}
+
+	const {
+		dates,
+		cumulated,
+		elapsedSpending,
+		elapsedDays,
+		budgetPace,
+		currentPace,
+		idealPace,
+		projectedSpending,
+	} = useMemo(
+		() =>
+			getAggregations(
+				budget,
+				records.filter(r => !r.excluded),
+			),
+		[budget, records],
+	)
 
 	return (
 		<>
@@ -321,7 +327,8 @@ export default function BudgetPage({
 											id: c.id,
 											category: c.name,
 											amount: round2dp(
-												budget.records
+												records
+													.filter(r => !r.excluded)
 													.filter(
 														r =>
 															r.category.id === c.id ||
@@ -373,7 +380,8 @@ export default function BudgetPage({
 												id: c.id,
 												category: c.name,
 												amount: round2dp(
-													budget.records
+													records
+														.filter(r => !r.excluded)
 														.filter(r => r.category.id === c.id)
 														.reduce((acc, el) => acc - el.amount, 0),
 												),
@@ -518,27 +526,42 @@ export default function BudgetPage({
 							Records that currently contribute to this budget.
 						</CardDescription>
 						<CardAction>
-							<RecordSearch
-								title="Attach record to budget"
-								filters={{ exclude_budget_id: budget.id }}
-								handler={attach}
-								trigger={
-									<Button>
-										<PlusIcon /> Attach record
-									</Button>
-								}
-							/>
+							<div className="flex items-center gap-2">
+								<Toggle
+									pressed={showingExcluded}
+									onPressedChange={setShowingExcluded}
+								>
+									{showingExcluded ? <EyeIcon /> : <EyeOffIcon />}
+									Show Excluded
+								</Toggle>
+
+								<RecordSearch
+									title="Attach record to budget"
+									filters={{ exclude_budget_id: budget.id }}
+									handler={attach}
+									trigger={
+										<Button>
+											<PlusIcon /> Attach record
+										</Button>
+									}
+								/>
+							</div>
 						</CardAction>
 					</CardHeader>
 					<CardContent>
 						<DataTable
-							data={budget.records}
+							data={records.filter(r => showingExcluded || !r.excluded)}
 							columns={[
 								{
 									header: "Record",
 									meta: { width: TABLE_WIDTHS.RECORD },
 									cell: ({ row }) => (
-										<div className="flex items-center gap-3">
+										<div
+											className={cn(
+												"flex items-center gap-3",
+												row.original.excluded && "opacity-25",
+											)}
+										>
 											<Icon {...row.original.category} size={16} />
 											<div className="flex-1 overflow-hidden">
 												<p className="truncate font-medium">
@@ -564,7 +587,12 @@ export default function BudgetPage({
 									header: "Amount",
 									meta: { width: TABLE_WIDTHS.AMOUNT },
 									cell: ({ row }) => (
-										<span className={classForCurrency(row.original.amount)}>
+										<span
+											className={cn(
+												classForCurrency(row.original.amount),
+												row.original.excluded && "opacity-25",
+											)}
+										>
 											{formatCurrency(row.original.amount)}
 										</span>
 									),
@@ -572,13 +600,22 @@ export default function BudgetPage({
 								{
 									header: "Date & Time",
 									meta: { width: TABLE_WIDTHS.DATETIME },
-									cell: ({ row }) => formatDatetime(row.original.datetime),
+									cell: ({ row }) => (
+										<span className={cn(row.original.excluded && "opacity-25")}>
+											{formatDatetime(row.original.datetime)}
+										</span>
+									),
 								},
 								{
 									header: "Description",
 									meta: { width: TABLE_WIDTHS.DESCRIPTION },
 									cell: ({ row }) => (
-										<div className="truncate text-muted-foreground">
+										<div
+											className={cn(
+												"truncate text-muted-foreground",
+												row.original.excluded && "opacity-25",
+											)}
+										>
 											{row.original.description || "-"}
 										</div>
 									),
@@ -596,13 +633,22 @@ export default function BudgetPage({
 													Open
 												</Link>
 											</Button>
-											<Button
-												variant="destructive"
-												size="sm"
-												onClick={() => detach(row.original)}
-											>
-												<Trash2Icon /> Remove
-											</Button>
+											{row.original.excluded ? (
+												<Button
+													size="sm"
+													onClick={() => attach(row.original)}
+												>
+													<PlusIcon /> Attach
+												</Button>
+											) : (
+												<Button
+													variant="destructive"
+													size="sm"
+													onClick={() => detach(row.original)}
+												>
+													<Trash2Icon /> Detach
+												</Button>
+											)}
 										</div>
 									),
 								},
