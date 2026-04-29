@@ -1,0 +1,5 @@
+.git
+.env
+database/*.sqlite
+node_modules
+vendor
