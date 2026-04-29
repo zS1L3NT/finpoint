@@ -18,13 +18,16 @@ class RecordController extends Controller
                 fn($query, $q) => $query
                     ->select('records.*')
                     ->leftJoin('categories', 'records.category_id', '=', 'categories.id')
-                    ->where('title', 'like', '%' . $q . '%')
-                    ->orWhere('people', 'like', '%' . $q . '%')
-                    ->orWhere('location', 'like', '%' . $q . '%')
-                    ->orWhere('description', 'like', '%' . $q . '%')
-                    // ->orWhere('datetime', '=', Carbon::parse($q))
-                    ->orWhere('amount', 'like', '%' . $q . '%')
-                    ->orWhere('categories.name', 'like', '%' . $q . '%')
+                    ->where(
+                        fn($query) => $query
+                            ->where('title', 'like', '%' . $q . '%')
+                            ->orWhere('people', 'like', '%' . $q . '%')
+                            ->orWhere('location', 'like', '%' . $q . '%')
+                            ->orWhere('description', 'like', '%' . $q . '%')
+                            // ->orWhere('datetime', '=', Carbon::parse($q))
+                            ->orWhere('amount', 'like', '%' . $q . '%')
+                            ->orWhere('categories.name', 'like', '%' . $q . '%')
+                    )
             )
             ->orderBy('datetime', 'desc')
             ->groupBy('records.id')

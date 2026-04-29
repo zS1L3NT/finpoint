@@ -14,8 +14,11 @@ class BudgetController extends Controller
             ->when(
                 request()->query('query'),
                 fn($query, $q) => $query
-                    ->where('name', 'like', '%' . $q . '%')
-                    ->orWhere('amount', 'like', '%' . $q . '%')
+                    ->where(
+                        fn($query) => $query
+                            ->where('name', 'like', '%' . $q . '%')
+                            ->orWhere('amount', 'like', '%' . $q . '%')
+                    )
             )
             ->withSum('records', 'amount')
             ->orderBy('end_date', 'desc')

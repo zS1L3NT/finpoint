@@ -13,8 +13,11 @@ class RecurrenceController extends Controller
             ->when(
                 request()->query('query'),
                 fn($query, $q) => $query
-                    ->where('name', 'like', '%' . $q . '%')
-                    ->orWhere('amount', 'like', '%' . $q . '%')
+                    ->where(
+                        fn($query) => $query
+                            ->where('name', 'like', '%' . $q . '%')
+                            ->orWhere('amount', 'like', '%' . $q . '%')
+                    )
             );
 
         $breakdown = (clone $query)

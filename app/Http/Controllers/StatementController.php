@@ -16,9 +16,12 @@ class StatementController extends Controller
                 fn($query, $q) => $query
                     ->select('statements.*')
                     ->leftJoin('accounts', 'accounts.id', '=', 'statements.account_id')
-                    ->where('description', 'like', '%' . $q . '%')
-                    ->orWhere('amount', 'like', '%' . $q . '%')
-                    ->orWhere('accounts.id', 'like', '%' . $q . '%')
+                    ->where(
+                        fn ($query) => $query
+                            ->where('description', 'like', '%' . $q . '%')
+                            ->orWhere('amount', 'like', '%' . $q . '%')
+                            ->orWhere('accounts.id', 'like', '%' . $q . '%')
+                    )
             )
             ->orderBy('datetime', 'desc')
             ->groupBy('statements.id')
