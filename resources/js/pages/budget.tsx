@@ -265,7 +265,7 @@ export default function BudgetPage({
 							<div className="space-y-0.5">
 								<p
 									className={cn(
-										currentPace < idealPace
+										idealPace === 0 || currentPace < idealPace
 											? ""
 											: elapsedSpending > budget.amount
 												? "text-destructive"
