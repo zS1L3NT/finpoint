@@ -44,6 +44,11 @@ export default function ImporterPage({ accounts }: { accounts: Account[] }) {
 			let url = ""
 			const formData = new FormData()
 
+			if (!value.bank) {
+				setApiErrors({ bank: ["Please select a bank"] })
+				return
+			}
+
 			if (value.bank === "dbs") {
 				url = importerDbsApiRoute.url()
 				files.forEach(file => formData.append("files[]", file))
