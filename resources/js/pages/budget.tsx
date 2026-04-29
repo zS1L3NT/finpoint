@@ -47,6 +47,7 @@ import {
 import { Progress } from "@/components/ui/progress"
 import { Toggle } from "@/components/ui/toggle"
 import BudgetEditorDialog from "@/dialogs/budget-editor"
+import { useHistory } from "@/history"
 import { TABLE_WIDTHS } from "@/lib/table-widths"
 import {
 	classForCurrency,
@@ -148,6 +149,8 @@ export default function BudgetPage({
 	records: (Record & RecordExtra)[]
 	categories: (Category & CategoryExtra)[]
 }) {
+	const { handlePush } = useHistory()
+
 	const [showingExcluded, setShowingExcluded] = useState(false)
 
 	const attach = async (record: Record) => {
@@ -658,6 +661,7 @@ export default function BudgetPage({
 													href={recordWebRoute.url({
 														record: row.original,
 													})}
+													onClick={handlePush(`Budget ${budget.id}`)}
 												>
 													Open
 												</Link>

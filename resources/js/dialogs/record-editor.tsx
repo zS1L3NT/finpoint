@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/dialog"
 import { FieldGroup } from "@/components/ui/field"
 import { Progress } from "@/components/ui/progress"
+import { useHistory } from "@/history"
 import useApiFormErrors from "@/hooks/use-api-form-errors"
 import { cn, formatCurrency, formatDatetime, round2dp, withMethod } from "@/lib/utils"
 import { Account, Allocation, Category, Record, Statement } from "@/types"
@@ -62,6 +63,8 @@ export default function RecordEditorDialog({
 	locations: string[]
 	peoples: string[]
 }) {
+	const { handleClear } = useHistory()
+
 	const [open, setOpen] = useState(false)
 	const { mergeErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
 
@@ -123,6 +126,7 @@ export default function RecordEditorDialog({
 
 		if (response.ok) {
 			setOpen(false)
+			handleClear()
 			router.visit(recordsWebRoute.url())
 		}
 	}

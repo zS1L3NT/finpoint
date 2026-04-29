@@ -5,6 +5,7 @@ import AppHeader from "@/components/layout/app-header"
 import PageHeader from "@/components/layout/page-header"
 import PaginatedDataTable from "@/components/table/paginated-data-table"
 import { Button } from "@/components/ui/button"
+import { useHistory } from "@/history"
 import usePaginatedTableState from "@/hooks/use-paginated-table-state"
 import { TABLE_WIDTHS } from "@/lib/table-widths"
 import { classForCurrency, formatCurrency, formatDatetime } from "@/lib/utils"
@@ -16,6 +17,8 @@ type RecordExtra = {
 }
 
 export default function RecordsPage({ records }: { records: Paginated<Record & RecordExtra> }) {
+	const { handlePush } = useHistory()
+
 	const { query, pageSize, handleQueryChange, handlePageSizeChange } = usePaginatedTableState({
 		syncOn: records,
 		buildUrl: query => recordsWebRoute({ query }).url,
@@ -92,7 +95,10 @@ export default function RecordsPage({ records }: { records: Paginated<Record & R
 							cell: ({ row }) => (
 								<div className="flex justify-end">
 									<Button variant="outline" size="sm" asChild>
-										<Link href={recordWebRoute.url({ record: row.original })}>
+										<Link
+											href={recordWebRoute.url({ record: row.original })}
+											onClick={handlePush("Records")}
+										>
 											Open
 										</Link>
 									</Button>

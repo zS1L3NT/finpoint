@@ -4,6 +4,7 @@ import AppHeader from "@/components/layout/app-header"
 import PageHeader from "@/components/layout/page-header"
 import PaginatedDataTable from "@/components/table/paginated-data-table"
 import { Button } from "@/components/ui/button"
+import { useHistory } from "@/history"
 import usePaginatedTableState from "@/hooks/use-paginated-table-state"
 import { TABLE_WIDTHS } from "@/lib/table-widths"
 import { classForCurrency, formatCurrency, formatDatetime } from "@/lib/utils"
@@ -19,6 +20,8 @@ export default function StatementsPage({
 }: {
 	statements: Paginated<Statement & StatementExtra>
 }) {
+	const { handlePush } = useHistory()
+
 	const { query, pageSize, handleQueryChange, handlePageSizeChange } = usePaginatedTableState({
 		syncOn: statements,
 		buildUrl: query => statementsWebRoute({ query }).url,
@@ -81,6 +84,7 @@ export default function StatementsPage({
 											href={statementWebRoute.url({
 												statement: row.original,
 											})}
+											onClick={handlePush("Statements")}
 										>
 											Open
 										</Link>

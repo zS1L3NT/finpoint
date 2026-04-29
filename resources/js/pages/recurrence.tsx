@@ -16,6 +16,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card"
 import RecurrenceEditorDialog from "@/dialogs/recurrence-editor"
+import { useHistory } from "@/history"
 import { TABLE_WIDTHS } from "@/lib/table-widths"
 import { classForCurrency, formatCurrency, formatDatetime, round2dp, withMethod } from "@/lib/utils"
 import { Category, Record, Recurrence } from "@/types"
@@ -40,6 +41,8 @@ export default function RecurrencePage({
 }: {
 	recurrence: Recurrence & RecurrenceExtra
 }) {
+	const { handlePush } = useHistory()
+
 	const monthlyAmount = round2dp(toMonthlyAmount(recurrence.amount, recurrence.period))
 	const yearlyAmount = round2dp(monthlyAmount * 12)
 
@@ -229,6 +232,9 @@ export default function RecurrencePage({
 													href={recordWebRoute.url({
 														record: row.original,
 													})}
+													onClick={handlePush(
+														`Recurrence ${recurrence.id}`,
+													)}
 												>
 													Open
 												</Link>

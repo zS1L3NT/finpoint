@@ -9,6 +9,7 @@ import DataTable from "@/components/table/data-table"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import RecordEditorDialog from "@/dialogs/record-editor"
+import { useHistory } from "@/history"
 import { TABLE_WIDTHS } from "@/lib/table-widths"
 import { classForCurrency, cn, formatCurrency, formatDatetime } from "@/lib/utils"
 import { Account, Allocation, Category, Record, Statement } from "@/types"
@@ -42,6 +43,8 @@ export default function RecordPage({
 	locations: string[]
 	peoples: string[]
 }) {
+	const { handlePush } = useHistory()
+
 	return (
 		<>
 			<AppHeader title="Record" />
@@ -148,6 +151,7 @@ export default function RecordPage({
 													href={statementWebRoute.url({
 														statement: row.original,
 													})}
+													onClick={handlePush(`Record ${record.id}`)}
 												>
 													Open
 												</Link>

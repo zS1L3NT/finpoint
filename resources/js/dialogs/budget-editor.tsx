@@ -18,12 +18,15 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog"
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field"
+import { useHistory } from "@/history"
 import useApiFormErrors from "@/hooks/use-api-form-errors"
 import { withMethod } from "@/lib/utils"
 import { Budget } from "@/types"
 import { budgetDestroyApiRoute, budgetsWebRoute, budgetUpdateApiRoute } from "@/wayfinder/routes"
 
 export default function BudgetEditorDialog({ budget }: { budget: Budget }) {
+	const { handleClear } = useHistory()
+
 	const [open, setOpen] = useState(false)
 	const { mergeErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
 
@@ -73,6 +76,7 @@ export default function BudgetEditorDialog({ budget }: { budget: Budget }) {
 
 		if (response.ok) {
 			setOpen(false)
+			handleClear()
 			router.visit(budgetsWebRoute.url())
 		}
 	}

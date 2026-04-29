@@ -8,6 +8,7 @@ import PageHeader from "@/components/layout/page-header"
 import DataTable from "@/components/table/data-table"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useHistory } from "@/history"
 import { TABLE_WIDTHS } from "@/lib/table-widths"
 import { classForCurrency, formatCurrency, formatDatetime } from "@/lib/utils"
 import { Account, Allocation, Category, Record, Statement } from "@/types"
@@ -19,6 +20,8 @@ type StatementExtra = {
 }
 
 export default function StatementPage({ statement }: { statement: Statement & StatementExtra }) {
+	const { handlePush } = useHistory()
+
 	return (
 		<>
 			<AppHeader title="Statement" />
@@ -116,6 +119,9 @@ export default function StatementPage({ statement }: { statement: Statement & St
 													href={recordWebRoute.url({
 														record: row.original,
 													})}
+													onClick={handlePush(
+														`Statement ${statement.id}`,
+													)}
 												>
 													Open
 												</Link>

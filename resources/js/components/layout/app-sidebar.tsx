@@ -19,6 +19,7 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { useHistory } from "@/history"
 import {
 	allocatorWebRoute,
 	budgetsWebRoute,
@@ -31,6 +32,8 @@ import {
 } from "@/wayfinder/routes"
 
 export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+	const { handleClear } = useHistory()
+
 	return (
 		<Sidebar collapsible="offcanvas" variant="floating" {...props}>
 			<SidebarHeader>
@@ -40,7 +43,7 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
 							asChild
 							className="data-[slot=sidebar-menu-button]:p-1.5!"
 						>
-							<Link href={dashboardWebRoute.url()}>
+							<Link href={dashboardWebRoute.url()} onClick={handleClear}>
 								<CircleDollarSignIcon className="size-5!" />
 								<span className="text-base font-semibold">Finpoint</span>
 							</Link>
@@ -54,7 +57,7 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
 					<SidebarMenu>
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
-								<Link href={importerWebRoute.url()}>
+								<Link href={importerWebRoute.url()} onClick={handleClear}>
 									<ImportIcon />
 									<span>Importer</span>
 								</Link>
@@ -63,7 +66,7 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
 
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
-								<Link href={allocatorWebRoute.url()}>
+								<Link href={allocatorWebRoute.url()} onClick={handleClear}>
 									<LinkIcon />
 									<span>Allocator</span>
 								</Link>
@@ -77,7 +80,7 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
 					<SidebarMenu>
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
-								<Link href={budgetsWebRoute.url()}>
+								<Link href={budgetsWebRoute.url()} onClick={handleClear}>
 									<PiggyBankIcon />
 									<span>Budgets</span>
 								</Link>
@@ -86,7 +89,7 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
 
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
-								<Link href={recurrencesWebRoute.url()}>
+								<Link href={recurrencesWebRoute.url()} onClick={handleClear}>
 									<CalendarSyncIcon />
 									<span>Recurrences</span>
 								</Link>
@@ -100,7 +103,7 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
 					<SidebarMenu>
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
-								<Link href={recordsWebRoute.url()}>
+								<Link href={recordsWebRoute.url()} onClick={handleClear}>
 									<ReceiptTextIcon />
 									<span>Records</span>
 								</Link>
@@ -109,7 +112,7 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
 
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
-								<Link href={statementsWebRoute.url()}>
+								<Link href={statementsWebRoute.url()} onClick={handleClear}>
 									<CreditCardIcon />
 									<span>Statements</span>
 								</Link>
@@ -118,7 +121,7 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
 
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
-								<Link href={categoriesWebRoute.url()}>
+								<Link href={categoriesWebRoute.url()} onClick={handleClear}>
 									<TagIcon />
 									<span>Categories</span>
 								</Link>

@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import BudgetCreatorDialog from "@/dialogs/budget-creator"
+import { useHistory } from "@/history"
 import usePaginatedTableState from "@/hooks/use-paginated-table-state"
 import { TABLE_WIDTHS } from "@/lib/table-widths"
 import { formatCurrency, parseDate } from "@/lib/utils"
@@ -19,6 +20,8 @@ type BudgetExtra = {
 }
 
 export default function BudgetsPage({ budgets }: { budgets: Paginated<Budget & BudgetExtra> }) {
+	const { handlePush } = useHistory()
+
 	const { query, pageSize, handleQueryChange, handlePageSizeChange } = usePaginatedTableState({
 		syncOn: budgets,
 		buildUrl: query => budgetsWebRoute({ query }).url,
@@ -123,7 +126,10 @@ export default function BudgetsPage({ budgets }: { budgets: Paginated<Budget & B
 							cell: ({ row }) => (
 								<div className="flex justify-end">
 									<Button variant="outline" size="sm" asChild>
-										<Link href={budgetWebRoute.url({ budget: row.original })}>
+										<Link
+											href={budgetWebRoute.url({ budget: row.original })}
+											onClick={handlePush("Budgets")}
+										>
 											Open
 										</Link>
 									</Button>

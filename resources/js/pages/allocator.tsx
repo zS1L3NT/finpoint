@@ -9,6 +9,7 @@ import PaginatedDataTable from "@/components/table/paginated-data-table"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import RecordCreatorDialog from "@/dialogs/record-creator"
+import { useHistory } from "@/history"
 import usePaginatedTableState from "@/hooks/use-paginated-table-state"
 import { TABLE_WIDTHS } from "@/lib/table-widths"
 import { classForCurrency, formatCurrency, formatDatetime, round2dp } from "@/lib/utils"
@@ -37,6 +38,8 @@ export default function AllocatorPage({
 	locations: string[]
 	peoples: string[]
 }) {
+	const { handlePush } = useHistory()
+
 	const [selected, setSelected] = useState<(Statement & StatementExtra)[]>([])
 	const { query, pageSize, handleQueryChange, handlePageSizeChange } = usePaginatedTableState({
 		syncOn: statements,
@@ -134,7 +137,10 @@ export default function AllocatorPage({
 							meta: { width: TABLE_WIDTHS.ACTIONS_OPEN },
 							cell: ({ row }) => (
 								<Button variant="outline" size="sm" asChild>
-									<Link href={statementWebRoute.url({ statement: row.original })}>
+									<Link
+										href={statementWebRoute.url({ statement: row.original })}
+										onClick={handlePush("Allocator")}
+									>
 										Open
 									</Link>
 								</Button>

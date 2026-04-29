@@ -24,6 +24,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select"
+import { useHistory } from "@/history"
 import useApiFormErrors from "@/hooks/use-api-form-errors"
 import { withMethod } from "@/lib/utils"
 import { Recurrence } from "@/types"
@@ -34,6 +35,8 @@ import {
 } from "@/wayfinder/routes"
 
 export default function RecurrenceEditorDialog({ recurrence }: { recurrence: Recurrence }) {
+	const { handleClear } = useHistory()
+
 	const [open, setOpen] = useState(false)
 	const { mergeErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
 
@@ -77,6 +80,7 @@ export default function RecurrenceEditorDialog({ recurrence }: { recurrence: Rec
 
 		if (response.ok) {
 			setOpen(false)
+			handleClear()
 			router.visit(recurrencesWebRoute.url())
 		}
 	}

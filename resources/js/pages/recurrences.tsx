@@ -14,6 +14,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card"
 import RecurrenceCreatorDialog from "@/dialogs/recurrence-creator"
+import { useHistory } from "@/history"
 import usePaginatedTableState from "@/hooks/use-paginated-table-state"
 import { TABLE_WIDTHS } from "@/lib/table-widths"
 import { classForCurrency, cn, formatCurrency, round2dp } from "@/lib/utils"
@@ -47,6 +48,8 @@ export default function RecurrencesPage({
 	recurrences: Paginated<RecurrenceOverview>
 	breakdown: RecurrenceOverview[]
 }) {
+	const { handlePush } = useHistory()
+
 	const { query, pageSize, handleQueryChange, handlePageSizeChange } = usePaginatedTableState({
 		syncOn: recurrences,
 		buildUrl: query => recurrencesWebRoute({ query }).url,
@@ -207,6 +210,7 @@ export default function RecurrencesPage({
 											href={recurrenceWebRoute.url({
 												recurrence: row.original,
 											})}
+											onClick={handlePush("Recurrences")}
 										>
 											Open
 										</Link>

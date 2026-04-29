@@ -2,6 +2,7 @@ import { Link } from "@inertiajs/react"
 import { ArrowLeftIcon, type LucideIcon } from "lucide-react"
 import type { ReactNode } from "react"
 import { Button } from "@/components/ui/button"
+import { useHistory } from "@/history"
 
 export default function PageHeader({
 	title,
@@ -18,14 +19,16 @@ export default function PageHeader({
 	actions?: ReactNode
 	back?: { name: ReactNode; url: string }
 }) {
+	const { latest, handlePop } = useHistory()
+
 	return (
 		<div className="flex justify-between items-end">
 			<div className="space-y-4">
-				{back ? (
+				{back && latest ? (
 					<Button variant="outline" size="sm" asChild>
-						<Link href={back.url}>
+						<Link href={latest.url} onClick={handlePop}>
 							<ArrowLeftIcon />
-							{back.name}
+							Back to {latest.name}
 						</Link>
 					</Button>
 				) : null}
