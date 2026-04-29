@@ -1,4 +1,5 @@
 import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table"
+import { AnimatePresence } from "framer-motion"
 import type { ComponentProps } from "react"
 import PaginationFooter from "@/components/table/pagination-footer"
 import PaginationHeader from "@/components/table/pagination-header"
@@ -37,7 +38,7 @@ export default function PaginatedDataTable<TData extends { id: string }, TValue>
 			{header ? <PaginationHeader {...header} /> : null}
 
 			<div className="overflow-hidden rounded-lg border bg-card">
-				<Table className="table-fixed">
+				<Table className="table-fixed overflow-hidden">
 					<TableHeader>
 						{table.getHeaderGroups().map(headerGroup => (
 							<TableRow key={headerGroup.id}>
@@ -55,33 +56,37 @@ export default function PaginatedDataTable<TData extends { id: string }, TValue>
 						))}
 					</TableHeader>
 					<TableBody>
-						{table.getRowModel().rows.length ? (
-							table.getRowModel().rows.map(row => (
-								<TableRow
-									key={row.id}
-									data-state={row.getIsSelected() && "selected"}
-									className="cursor-pointer"
-								>
-									{row.getVisibleCells().map(cell => (
-										<TableCell key={cell.id}>
-											{flexRender(
-												cell.column.columnDef.cell,
-												cell.getContext(),
-											)}
-										</TableCell>
-									))}
+						<AnimatePresence>
+							{table.getRowModel().rows.length ? (
+								table.getRowModel().rows.map(row => (
+									<TableRow
+										key={row.id}
+										layout
+										layoutId={row.id}
+										data-state={row.getIsSelected() && "selected"}
+										className="cursor-pointer"
+									>
+										{row.getVisibleCells().map(cell => (
+											<TableCell key={cell.id}>
+												{flexRender(
+													cell.column.columnDef.cell,
+													cell.getContext(),
+												)}
+											</TableCell>
+										))}
+									</TableRow>
+								))
+							) : (
+								<TableRow layout layoutId="empty">
+									<TableCell
+										colSpan={columns.length}
+										className="h-24 text-center text-muted-foreground"
+									>
+										{emptyMessage}
+									</TableCell>
 								</TableRow>
-							))
-						) : (
-							<TableRow>
-								<TableCell
-									colSpan={columns.length}
-									className="h-24 text-center text-muted-foreground"
-								>
-									{emptyMessage}
-								</TableCell>
-							</TableRow>
-						)}
+							)}
+						</AnimatePresence>
 					</TableBody>
 				</Table>
 			</div>
