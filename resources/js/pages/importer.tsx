@@ -28,7 +28,7 @@ import {
 
 const BANKS_REQUIRING_ADDITIONAL_INFO = ["revolut"]
 
-export default function Importer({ accounts }: { accounts: Account[] }) {
+export default function ImporterPage({ accounts }: { accounts: Account[] }) {
 	const [files, setFiles] = useState<File[]>([])
 	const { mergeErrors, clearApiError, setApiErrors } = useApiFormErrors()
 
