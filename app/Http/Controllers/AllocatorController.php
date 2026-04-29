@@ -17,6 +17,7 @@ class AllocatorController extends Controller
             ->when(
                 request()->query('query'),
                 fn($query, $q) => $query
+                    ->select('statements.*')
                     ->leftJoin('accounts', 'statements.account_id', '=', 'accounts.id')
                     ->where(
                         fn($query) => $query

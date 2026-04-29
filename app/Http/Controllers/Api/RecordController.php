@@ -17,6 +17,7 @@ class RecordController extends Controller
             ->when(
                 request()->query('query'),
                 fn($query, $q) => $query
+                    ->select('records.*')
                     ->leftJoin('categories', 'records.category_id', '=', 'categories.id')
                     ->where('title', 'like', '%' . $q . '%')
                     ->orWhere('people', 'like', '%' . $q . '%')
