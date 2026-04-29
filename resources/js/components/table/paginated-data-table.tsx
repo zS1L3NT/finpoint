@@ -62,7 +62,6 @@ export default function PaginatedDataTable<TData extends { id: string }, TValue>
 									<TableRow
 										key={row.id}
 										layout
-										layoutId={row.id}
 										data-state={row.getIsSelected() && "selected"}
 										className="cursor-pointer"
 									>
