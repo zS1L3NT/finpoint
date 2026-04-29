@@ -173,9 +173,6 @@ export default function BudgetPage({
 		projectedSpending,
 	} = useMemo(() => getAggregations(budget), [budget])
 
-	console.log("Average daily spend:", formatCurrency(currentPace))
-	console.log("Recommended daily spend for remaining days:", formatCurrency(idealPace))
-
 	const attach = async (record: Record) => {
 		const response = await fetch(budgetRecordUpdateApiRoute.url({ budget, record }), {
 			method: "POST",
@@ -523,7 +520,7 @@ export default function BudgetPage({
 						<CardAction>
 							<RecordSearch
 								title="Attach record to budget"
-								excluded={budget.records}
+								filters={{ exclude_budget_id: budget.id }}
 								handler={attach}
 								trigger={
 									<Button>

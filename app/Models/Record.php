@@ -30,4 +30,14 @@ class Record extends Model
     {
         return $this->belongsToMany(Record::class, 'allocations', 'target_record_id', 'source_record_id')->withPivot(['amount']);
     }
+
+    public function budgets()
+    {
+        return $this->belongsToMany(Budget::class, 'budget_records', 'record_id', 'budget_id')->withPivot(['amount']);
+    }
+
+    public function recurrences()
+    {
+        return $this->belongsToMany(Recurrence::class, 'recurrence_records', 'record_id', 'recurrence_id');
+    }
 }

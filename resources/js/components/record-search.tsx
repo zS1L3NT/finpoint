@@ -17,12 +17,12 @@ type RecordExtra = {
 
 export default function RecordSearch({
 	title,
-	excluded,
+	filters,
 	handler,
 	trigger,
 }: {
 	title: string
-	excluded?: Record[]
+	filters?: { [key: string]: any }
 	handler: (record: Record & RecordExtra) => Promise<void>
 	trigger: React.ReactNode
 }) {
@@ -41,7 +41,7 @@ export default function RecordSearch({
 	}, [query])
 
 	const handleSearch = async () => {
-		const response = await fetch(recordIndexApiRoute.url({ query: { query } }), {
+		const response = await fetch(recordIndexApiRoute.url({ query: { query, ...filters } }), {
 			headers: { Accept: "application/json" },
 		})
 
@@ -72,44 +72,41 @@ export default function RecordSearch({
 
 					<ScrollArea className="flex-1 overflow-y-hidden">
 						<DataTable
-							key={records.map(r => r.id).join(",")}
-							data={records.filter(r => !excluded?.some(e => e.id === r.id))}
+							data={records}
 							columns={[
 								{
 									header: "Record",
 									cell: ({ row }) => (
-										<div>
-											<div className="flex items-center gap-2">
-												<Icon {...row.original.category} size={20} />
-												<div className="flex-1 truncate">
-													<div className="truncate">
-														<span className="font-medium">
-															{row.original.title}{" "}
-														</span>
-														<span className="text-muted-foreground">
-															{[
-																row.original.people
-																	? `w/ ${row.original.people}`
-																	: null,
-																row.original.location
-																	? `@ ${row.original.location}`
-																	: null,
-															]
-																.filter(Boolean)
-																.join(" ")}
-														</span>
-													</div>
-													<div className="text-muted-foreground">
-														{formatDatetime(row.original.datetime)}
-													</div>
-													<span
-														className={classForCurrency(
-															row.original.amount,
-														)}
-													>
-														{formatCurrency(row.original.amount)}
+										<div className="flex items-center gap-2">
+											<Icon {...row.original.category} size={20} />
+											<div className="flex-1 truncate">
+												<div className="truncate">
+													<span className="font-medium">
+														{row.original.title}{" "}
+													</span>
+													<span className="text-muted-foreground">
+														{[
+															row.original.people
+																? `w/ ${row.original.people}`
+																: null,
+															row.original.location
+																? `@ ${row.original.location}`
+																: null,
+														]
+															.filter(Boolean)
+															.join(" ")}
 													</span>
 												</div>
+												<div className="text-muted-foreground">
+													{formatDatetime(row.original.datetime)}
+												</div>
+												<span
+													className={classForCurrency(
+														row.original.amount,
+													)}
+												>
+													{formatCurrency(row.original.amount)}
+												</span>
 											</div>
 										</div>
 									),
@@ -118,7 +115,10 @@ export default function RecordSearch({
 									id: "actions",
 									meta: { width: TABLE_WIDTHS.ACTIONS_ATTACH },
 									cell: ({ row }) => (
-										<Button size="sm" onClick={() => handler(row.original)}>
+										<Button
+											size="sm"
+											onClick={() => handler(row.original).then(handleSearch)}
+										>
 											Attach
 										</Button>
 									),

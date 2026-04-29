@@ -172,7 +172,7 @@ export default function RecurrencePage({
 
 							<RecordSearch
 								title="Attach record to recurrence"
-								excluded={recurrence.records}
+								filters={{ exclude_recurrence_id: recurrence.id }}
 								handler={record => mutateRecord(record, "attach")}
 								trigger={
 									<Button className="w-full" size="lg">

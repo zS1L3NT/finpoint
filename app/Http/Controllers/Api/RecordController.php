@@ -30,6 +30,16 @@ class RecordController extends Controller
                             ->orWhere('categories.name', 'like', '%' . $q . '%')
                     )
             )
+            ->when(
+                request()->query('exclude_budget_id'),
+                fn($query, $id) => $query
+                    ->whereDoesntHave('budgets', fn($query) => $query->where('budgets.id', $id))
+            )
+            ->when(
+                request()->query('exclude_recurrence_id'),
+                fn($query, $id) => $query
+                    ->whereDoesntHave('recurrences', fn($query) => $query->where('recurrences.id', $id))
+            )
             ->orderBy('datetime', 'desc')
             ->get();
     }
@@ -50,7 +60,7 @@ class RecordController extends Controller
 
         return DB::transaction(function () use ($record, $dto) {
             $record->update([
-                'amount' => round(collect($dto['statements'])->reduce(fn ($acc, $el) => $acc + $el['amount'], 0), 2),
+                'amount' => round(collect($dto['statements'])->reduce(fn($acc, $el) => $acc + $el['amount'], 0), 2),
                 'datetime' => Carbon::createFromFormat('Y-m-d\\TH:i', $dto['datetime'])->format('Y-m-d H:i:s'),
                 ...collect($dto)->except('statements', 'datetime'),
             ]);
