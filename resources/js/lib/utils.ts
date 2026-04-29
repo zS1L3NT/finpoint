@@ -35,7 +35,7 @@ export const formatCurrency = (amount: number) => {
 }
 
 export const classForCurrency = (amount: number) => {
-	return amount < 0 ? "text-red-500" : amount > 0 ? "text-green-600" : "text-foreground"
+	return amount < 0 ? "text-destructive" : amount > 0 ? "text-creative" : "text-foreground"
 }
 
 export const withMethod = (formData: FormData, method: "PUT" | "PATCH" | "DELETE") => {

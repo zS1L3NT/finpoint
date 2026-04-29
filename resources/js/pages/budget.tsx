@@ -203,6 +203,13 @@ export default function BudgetPage({
 		[budget, records],
 	)
 
+	console.log(
+		getAggregations(
+			budget,
+			records.filter(r => !r.excluded),
+		),
+	)
+
 	return (
 		<>
 			<AppHeader title="Budget" />
@@ -237,8 +244,8 @@ export default function BudgetPage({
 									<p
 										className={cn(
 											elapsedSpending > budget.amount
-												? "text-red-500"
-												: "text-green-600",
+												? "text-destructive"
+												: "text-creative",
 										)}
 									>
 										{formatCurrency(elapsedSpending)}
@@ -261,7 +268,7 @@ export default function BudgetPage({
 										currentPace < idealPace
 											? ""
 											: elapsedSpending > budget.amount
-												? "text-red-500"
+												? "text-destructive"
 												: "text-orange-500",
 									)}
 								>
@@ -636,6 +643,7 @@ export default function BudgetPage({
 											{row.original.excluded ? (
 												<Button
 													size="sm"
+													variant="creative"
 													onClick={() => attach(row.original)}
 												>
 													<PlusIcon /> Attach
