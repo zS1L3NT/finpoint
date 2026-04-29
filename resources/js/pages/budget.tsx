@@ -2,10 +2,10 @@ import { Link, router } from "@inertiajs/react"
 import {
 	EyeIcon,
 	EyeOffIcon,
+	Link2Icon,
+	Link2OffIcon,
 	PiggyBankIcon,
-	PlusIcon,
 	SparklesIcon,
-	Trash2Icon,
 	WrenchIcon,
 } from "lucide-react"
 import { DateTime } from "luxon"
@@ -570,7 +570,7 @@ export default function BudgetPage({
 									handler={attach}
 									trigger={
 										<Button>
-											<PlusIcon /> Attach record
+											<Link2Icon /> Attach record
 										</Button>
 									}
 								/>
@@ -668,7 +668,7 @@ export default function BudgetPage({
 													variant="creative"
 													onClick={() => attach(row.original)}
 												>
-													<PlusIcon /> Attach
+													<Link2Icon /> Attach
 												</Button>
 											) : (
 												<Button
@@ -676,7 +676,7 @@ export default function BudgetPage({
 													size="sm"
 													onClick={() => detach(row.original)}
 												>
-													<Trash2Icon /> Detach
+													<Link2OffIcon /> Detach
 												</Button>
 											)}
 										</div>

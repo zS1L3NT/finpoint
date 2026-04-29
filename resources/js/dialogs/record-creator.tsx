@@ -1,6 +1,6 @@
 import { router } from "@inertiajs/react"
 import { useForm } from "@tanstack/react-form"
-import { LinkIcon } from "lucide-react"
+import { PlusIcon } from "lucide-react"
 import { DateTime } from "luxon"
 import { useState } from "react"
 import AmountField from "@/components/form/amount-field"
@@ -126,7 +126,7 @@ export default function RecordCreatorDialog({
 			<DialogTrigger
 				render={
 					<Button disabled={!statements.length}>
-						<LinkIcon /> Create Record
+						<PlusIcon /> Create Record
 					</Button>
 				}
 			/>
