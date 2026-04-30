@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Pivots\RecordQuota;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\WithoutTimestamps;
@@ -39,5 +40,15 @@ class Record extends Model
     public function recurrences()
     {
         return $this->belongsToMany(Recurrence::class, 'recurrence_records', 'record_id', 'recurrence_id');
+    }
+
+    public function quota()
+    {
+        return $this->hasOneThrough(Quota::class, RecordQuota::class, 'record_id', 'id', 'id', 'quota_id');
+    }
+
+    public function quota_pivot()
+    {
+        return $this->hasOne(RecordQuota::class, 'record_id');
     }
 }
