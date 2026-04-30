@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\BudgetController;
 use App\Http\Controllers\Api\BudgetRecordController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ImporterController;
+use App\Http\Controllers\Api\QuotaController;
 use App\Http\Controllers\Api\RecordController;
 use App\Http\Controllers\Api\RecurrenceController;
 use App\Http\Controllers\Api\RecurrenceRecordController;
@@ -52,4 +53,12 @@ Route::apiResource('categories', CategoryController::class)
         'store' => 'category-store-api-route',
         'update' => 'category-update-api-route',
         'destroy' => 'category-destroy-api-route'
+    ]);
+
+Route::apiResource('quotas', QuotaController::class)
+    ->only('store', 'update', 'destroy')
+    ->names([
+        'store' => 'quota-store-api-route',
+        'update' => 'quota-update-api-route',
+        'destroy' => 'quota-destroy-api-route'
     ]);
