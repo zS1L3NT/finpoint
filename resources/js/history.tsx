@@ -24,7 +24,10 @@ export const HistoryProvider = ({ children }: { children: React.ReactNode }) => 
 			value={{
 				latest: history[history.length - 1],
 				handlePush: name => () => {
-					setHistory(history => [...history, { name, url: window.location.pathname }])
+					setHistory(history => [
+						...history,
+						{ name, url: location.pathname + location.search },
+					])
 				},
 				handlePop: () => {
 					setHistory(history => history.slice(0, -1))
