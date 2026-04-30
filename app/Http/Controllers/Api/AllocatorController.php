@@ -60,7 +60,7 @@ class AllocatorController extends Controller
                         continue;
                     }
 
-                    if ($statement->amount - $allocated - $statement_dto['amount'] < 0) {
+                    if (round($statement->amount - $allocated - $statement_dto['amount'], 2) < 0) {
                         $errors->put("statements.$i.amount", 'This amount exceeds what can be allocated');
 
                         continue;
@@ -74,7 +74,7 @@ class AllocatorController extends Controller
                         continue;
                     }
 
-                    if ($statement->amount - $allocated - $statement_dto['amount'] > 0) {
+                    if (round($statement->amount - $allocated - $statement_dto['amount'], 2) > 0) {
                         $errors->put("statements.$i.amount", 'This amount exceeds what can be allocated');
 
                         continue;
