@@ -45,6 +45,7 @@ export default function ComboboxField<T>({
 				itemToStringValue={getItemId}
 				value={value}
 				onValueChange={onChange}
+				autoHighlight
 			>
 				<ComboboxInput
 					id={id}

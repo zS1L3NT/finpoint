@@ -39,6 +39,7 @@ export default function TextField({
 					items={[...new Set(value.trim() ? [value, ...suggestions] : suggestions)]}
 					value={value}
 					onValueChange={e => onChange(e ?? "")}
+					autoHighlight
 				>
 					<ComboboxInput
 						id={id}
