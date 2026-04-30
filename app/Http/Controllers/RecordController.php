@@ -12,7 +12,6 @@ class RecordController extends Controller
     {
         $records = Record::query()
             ->with('category')
-            ->withCount('statements')
             ->when(
                 request()->query('query'),
                 fn($query, $q) => $query
