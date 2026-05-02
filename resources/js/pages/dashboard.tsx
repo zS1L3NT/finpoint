@@ -384,6 +384,22 @@ export default function DashboardPage({
 								{
 									id: "select",
 									meta: { width: TABLE_WIDTHS.CHECKBOX },
+									header: () => (
+										<div className="flex items-center justify-center">
+											<Checkbox
+												checked={
+													selected.length !== records.length
+														? selected.length
+															? "indeterminate"
+															: false
+														: true
+												}
+												onCheckedChange={value =>
+													setSelected(value !== true ? [] : records)
+												}
+											/>
+										</div>
+									),
 									cell: ({ row }) => (
 										<div className="flex items-center justify-center">
 											<Checkbox
@@ -392,7 +408,7 @@ export default function DashboardPage({
 												}
 												onCheckedChange={value =>
 													setSelected(prev =>
-														value
+														value === true
 															? [...prev, row.original]
 															: prev.filter(
 																	s => s.id !== row.original.id,
@@ -473,17 +489,11 @@ export default function DashboardPage({
 													Open
 												</Link>
 											</Button>
-											{/* <Button
-												variant="destructive"
-												size="sm"
-												onClick={() => detach(row.original)}
-											>
-												<Link2OffIcon /> Detach
-											</Button> */}
 										</div>
 									),
 								},
 							]}
+							selectedIds={selected.map(s => s.id)}
 							emptyMessage="No records found."
 						/>
 					</CardContent>

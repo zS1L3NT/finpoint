@@ -12,10 +12,12 @@ import {
 export default function DataTable<TData extends { id: string }, TValue>({
 	data,
 	columns,
+	selectedIds,
 	emptyMessage,
 }: {
 	data: TData[]
 	columns: ColumnDef<TData, TValue>[]
+	selectedIds?: string[]
 	emptyMessage?: string
 }) {
 	const table = useReactTable({
@@ -51,7 +53,7 @@ export default function DataTable<TData extends { id: string }, TValue>({
 								<TableRow
 									key={row.id}
 									layout
-									data-state={row.getIsSelected() && "selected"}
+									data-state={selectedIds?.includes(row.id) && "selected"}
 									className="cursor-pointer"
 								>
 									{row.getVisibleCells().map(cell => (

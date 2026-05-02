@@ -167,6 +167,7 @@ export default function AllocatorPage({
 					footer={{
 						summary: `${Object.values(selected).filter(Boolean).length} selected. Showing ${statements.data.length} of ${statements.total} statements.`,
 					}}
+					selectedIds={selected.map(s => s.id)}
 					emptyMessage="No statements found."
 				/>
 			</div>

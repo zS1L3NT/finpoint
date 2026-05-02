@@ -18,12 +18,14 @@ export default function PaginatedDataTable<TData extends { id: string }, TValue>
 	columns,
 	header,
 	footer,
+	selectedIds,
 	emptyMessage = "No results.",
 }: {
 	paginated: Paginated<TData>
 	columns: ColumnDef<TData, TValue>[]
 	header: ComponentProps<typeof PaginationHeader>
 	footer: Omit<ComponentProps<typeof PaginationFooter>, "links">
+	selectedIds?: string[]
 	emptyMessage?: string
 }) {
 	const table = useReactTable({
@@ -62,7 +64,7 @@ export default function PaginatedDataTable<TData extends { id: string }, TValue>
 									<TableRow
 										key={row.id}
 										layout
-										data-state={row.getIsSelected() && "selected"}
+										data-state={selectedIds?.includes(row.id) && "selected"}
 										className="cursor-pointer"
 									>
 										{row.getVisibleCells().map(cell => (
