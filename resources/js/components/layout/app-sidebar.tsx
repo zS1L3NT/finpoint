@@ -1,6 +1,6 @@
 import { Link } from "@inertiajs/react"
 import {
-	CalendarSyncIcon,
+	ChartAreaIcon,
 	CircleDollarSignIcon,
 	CreditCardIcon,
 	ImportIcon,
@@ -27,7 +27,6 @@ import {
 	dashboardWebRoute,
 	importerWebRoute,
 	recordsWebRoute,
-	recurrencesWebRoute,
 	statementsWebRoute,
 } from "@/wayfinder/routes"
 
@@ -53,13 +52,13 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
 			</SidebarHeader>
 			<SidebarContent>
 				<SidebarGroup className="group-data-[collapsible=icon]:hidden">
-					<SidebarGroupLabel>Data Control</SidebarGroupLabel>
+					<SidebarGroupLabel>Workspaces</SidebarGroupLabel>
 					<SidebarMenu>
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
-								<Link href={importerWebRoute.url()} onClick={handleClear}>
-									<ImportIcon />
-									<span>Importer</span>
+								<Link href={dashboardWebRoute.url()} onClick={handleClear}>
+									<ChartAreaIcon />
+									<span>Dashboard</span>
 								</Link>
 							</SidebarMenuButton>
 						</SidebarMenuItem>
@@ -72,26 +71,21 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
 								</Link>
 							</SidebarMenuButton>
 						</SidebarMenuItem>
-					</SidebarMenu>
-				</SidebarGroup>
 
-				<SidebarGroup className="group-data-[collapsible=icon]:hidden">
-					<SidebarGroupLabel>Accounting</SidebarGroupLabel>
-					<SidebarMenu>
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
-								<Link href={budgetsWebRoute.url()} onClick={handleClear}>
-									<PiggyBankIcon />
-									<span>Budgets</span>
+								<Link href={importerWebRoute.url()} onClick={handleClear}>
+									<ImportIcon />
+									<span>Importer</span>
 								</Link>
 							</SidebarMenuButton>
 						</SidebarMenuItem>
 
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
-								<Link href={recurrencesWebRoute.url()} onClick={handleClear}>
-									<CalendarSyncIcon />
-									<span>Recurrences</span>
+								<Link href={budgetsWebRoute.url()} onClick={handleClear}>
+									<PiggyBankIcon />
+									<span>Budgets</span>
 								</Link>
 							</SidebarMenuButton>
 						</SidebarMenuItem>

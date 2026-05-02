@@ -14,6 +14,7 @@ type Props = {
 	min?: number
 	max?: number
 	suffix?: ReactNode
+	disabled?: boolean
 	onChange: (value: number) => void
 }
 
@@ -26,6 +27,7 @@ export default function AmountField({
 	min,
 	max,
 	suffix,
+	disabled,
 	onChange,
 }: Props) {
 	return (
@@ -46,6 +48,7 @@ export default function AmountField({
 						onChange(Number.isNaN(next) ? 0 : next)
 					}}
 					aria-invalid={!!errors.length}
+					disabled={disabled}
 					className={cn("flex-1 pl-6", errors.length ? "border-destructive" : null)}
 				/>
 				{suffix ? <span>{suffix}</span> : null}

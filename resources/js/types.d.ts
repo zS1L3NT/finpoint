@@ -36,6 +36,7 @@ export type Record = {
 	id: string
 	datetime: string
 	title: string
+	subtitle: string | null
 	people: string | null
 	location: string | null
 	description: string | null
@@ -63,9 +64,11 @@ export type Budget = {
 	automatic: boolean
 }
 
-export type Recurrence = {
+export type Quota = {
 	id: string
 	name: string
-	amount: number
-	period: "month" | "year"
+	color: string
+	month: string
+	year: number
+	amount: number | null
 }

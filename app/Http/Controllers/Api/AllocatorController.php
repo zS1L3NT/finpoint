@@ -47,6 +47,8 @@ class AllocatorController extends Controller
                 $budget->records()->attach($record);
             }
 
+            $record->quota_pivot()->create();
+
             $errors = collect();
 
             foreach ($dto['statements'] as $i => $statement_dto) {
