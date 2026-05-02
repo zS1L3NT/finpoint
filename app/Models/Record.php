@@ -31,7 +31,7 @@ class Record extends Model
             if ($subtitle) {
                 $subtitle .= " @ " . $this->location;
             } else {
-                $subtitle .= "@" . $this->location;
+                $subtitle .= "@ " . $this->location;
             }
         }
 
