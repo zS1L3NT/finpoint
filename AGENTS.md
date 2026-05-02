@@ -24,6 +24,11 @@
 
 ## Code Style
 - Don't create unnecessary one-time-use variables
+- Keep code as short as possible without hurting clarity
+- Avoid extra scopes, callback blocks, or helper variables when an inline expression is clear
+- Do not introduce one-time-use variables, derived sets/arrays/objects, or temporary names unless they meaningfully improve readability
+- Do not pad files with defensive abstractions or line-heavy rewrites for simple logic
+- The user cares a lot about line length and overall file density; prefer tighter expressions and fewer lines when the result is still readable
 - Don't deviate from library defaults / use hacky methods to accomplish what I ask unless absolutely necessary. Deep dive into the library before doing this
 - If the library provides something or if we have a component for something, use it
 - Code scoped to a specific component should stay within that specific component file
