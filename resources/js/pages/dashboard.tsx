@@ -81,8 +81,8 @@ export default function DashboardPage({
 
 	const [selected, setSelected] = useState<(Record & RecordExtra)[]>([])
 	const [areaQuota, setAreaQuota] = useState<Quota | null>(null)
-	const [tableQuotas, setTableQuotas] = useState<Quota[]>([])
-	const [tableShowNoQuota, setTableShowNoQuota] = useState(true)
+	const [tableQuotaIds, setTableQuotaIds] = useState<string[]>([])
+	const [tableShowNoQuota, setTableShowNoQuota] = useState(false)
 
 	const date = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy").toJSDate()
 
@@ -131,14 +131,13 @@ export default function DashboardPage({
 		}
 	})
 
-	const filteredRecords = records.filter(r =>
-		r.quota ? tableQuotas.find(q => q.id === r.quota?.id) : tableShowNoQuota,
-	)
+	const filteredRecords =
+		tableQuotaIds.length || tableShowNoQuota
+			? records.filter(r => (r.quota ? tableQuotaIds.includes(r.quota.id) : tableShowNoQuota))
+			: records
 
 	useEffect(() => {
-		if (quotas) {
-			setTableQuotas(quotas)
-		}
+		setTableQuotaIds(ids => ids.filter(id => quotas.some(quota => quota.id === id)))
 
 		/**
 		 * This if statement contains code specific to the developer's dashboard workflow
@@ -332,7 +331,7 @@ export default function DashboardPage({
 										</Button>
 									</DropdownMenuTrigger>
 									<DropdownMenuContent align="end" className="w-56">
-										<DropdownMenuLabel>Visible records</DropdownMenuLabel>
+										<DropdownMenuLabel>Filter by quota</DropdownMenuLabel>
 										<DropdownMenuSeparator />
 										<DropdownMenuGroup>
 											<DropdownMenuCheckboxItem
@@ -350,17 +349,20 @@ export default function DashboardPage({
 											{quotas.map(quota => (
 												<DropdownMenuCheckboxItem
 													key={quota.id}
-													checked={
-														!!tableQuotas.find(q => q.id === quota.id)
-													}
+													checked={tableQuotaIds.includes(quota.id)}
 													onSelect={event => event.preventDefault()}
-													onCheckedChange={checked => {
-														setTableQuotas(qs =>
-															checked
-																? [...qs, quota]
-																: qs.filter(q => q.id !== quota.id),
+													onCheckedChange={checked =>
+														setTableQuotaIds(ids =>
+															checked === true
+																? [
+																		...ids.filter(
+																			id => id !== quota.id,
+																		),
+																		quota.id,
+																	]
+																: ids.filter(id => id !== quota.id),
 														)
-													}}
+													}
 												>
 													{quota.name}
 												</DropdownMenuCheckboxItem>
