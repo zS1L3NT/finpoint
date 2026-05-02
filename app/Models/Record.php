@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Pivots\RecordQuota;
+use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\WithoutTimestamps;
@@ -11,11 +12,31 @@ use Illuminate\Database\Eloquent\Model;
 #[Table(keyType: 'string', incrementing: false)]
 #[WithoutTimestamps()]
 #[Guarded([])]
+#[Appends('subtitle')]
 class Record extends Model
 {
     public $casts = [
         'datetime' => 'date:Y-m-d H:i',
     ];
+
+    public function getSubtitleAttribute()
+    {
+        $subtitle = "";
+
+        if ($this->people) {
+            $subtitle .= "w/ " . $this->people;
+        }
+
+        if ($this->location) {
+            if ($subtitle) {
+                $subtitle .= " @ " . $this->location;
+            } else {
+                $subtitle .= "@" . $this->location;
+            }
+        }
+
+        return $subtitle ?: null;
+    }
 
     public function category()
     {

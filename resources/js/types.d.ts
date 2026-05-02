@@ -36,6 +36,7 @@ export type Record = {
 	id: string
 	datetime: string
 	title: string
+	subtitle: string | null
 	people: string | null
 	location: string | null
 	description: string | null

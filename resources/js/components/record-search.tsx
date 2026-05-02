@@ -87,16 +87,7 @@ export default function RecordSearch({
 														{row.original.title}{" "}
 													</span>
 													<span className="text-muted-foreground">
-														{[
-															row.original.people
-																? `w/ ${row.original.people}`
-																: null,
-															row.original.location
-																? `@ ${row.original.location}`
-																: null,
-														]
-															.filter(Boolean)
-															.join(" ")}
+														{row.original.subtitle}
 													</span>
 												</div>
 												<div className="text-muted-foreground">

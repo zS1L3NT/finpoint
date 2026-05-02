@@ -328,16 +328,7 @@ export default function DashboardPage({
 													{row.original.title}
 												</p>
 												<p className="truncate text-muted-foreground">
-													{[
-														row.original.people
-															? `w/ ${row.original.people}`
-															: null,
-														row.original.location
-															? `@ ${row.original.location}`
-															: null,
-													]
-														.filter(Boolean)
-														.join(" ") || "No extra context"}
+													{row.original.subtitle || "No extra context"}
 												</p>
 											</div>
 										</div>

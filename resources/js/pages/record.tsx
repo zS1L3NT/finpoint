@@ -54,14 +54,7 @@ export default function RecordPage({
 					title={
 						<div className="flex items-center gap-2">
 							{record.title}
-							<p className="text-xl text-muted-foreground">
-								{[
-									record.people ? `w/ ${record.people}` : null,
-									record.location ? `@ ${record.location}` : null,
-								]
-									.filter(Boolean)
-									.join(" ")}
-							</p>
+							<p className="text-xl text-muted-foreground">{record.subtitle}</p>
 						</div>
 					}
 					subtitle={record.description}
