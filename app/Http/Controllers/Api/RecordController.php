@@ -147,7 +147,7 @@ class RecordController extends Controller
                 ...collect($dto)->except('statements', 'datetime'),
             ]);
 
-            if ($record->datetime->format('F') !== $record->quota->month || $record->datetime->format('Y') !== $record->quota->year) {
+            if ($record->datetime->format('F') !== $record->quota?->month || $record->datetime->format('Y') !== $record->quota?->year) {
                 $record->quota_pivot()->update(['quota_id' => null]);
             }
 
