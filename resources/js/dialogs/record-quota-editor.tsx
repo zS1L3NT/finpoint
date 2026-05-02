@@ -78,7 +78,10 @@ export default function RecordQuotaDialog({
 
 			setOpen(false)
 			clear()
-			router.reload()
+
+			setTimeout(() => {
+				router.reload()
+			}, 300)
 		} catch {
 			setError("Unable to attach the selected records.")
 		} finally {
