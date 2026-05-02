@@ -81,7 +81,7 @@ class RecordController extends Controller
 
             foreach ($dto['statements'] as $i => $statement_dto) {
                 $statement = Statement::find($statement_dto['id']);
-                $allocated = $statement->allocations()->sum('amount');
+                $allocated = round($statement->allocations()->sum('amount'), 2);
 
                 if ($statement->amount > 0) {
                     if ($statement_dto['amount'] <= 0) {
@@ -155,7 +155,7 @@ class RecordController extends Controller
 
             foreach ($dto['statements'] as $i => $statement_dto) {
                 $statement = $record->statements()->find($statement_dto['id']);
-                $allocated = $statement->allocations()->sum('amount');
+                $allocated = round($statement->allocations()->sum('amount'), 2);
 
                 if ($statement->amount > 0) {
                     if ($statement_dto['amount'] <= 0) {
@@ -164,7 +164,7 @@ class RecordController extends Controller
                         continue;
                     }
 
-                    if ($statement->amount - $allocated - $statement_dto['amount'] + $statement->pivot->amount < 0) {
+                    if (round($statement->amount - $allocated - $statement_dto['amount'] + $statement->pivot->amount, 2) < 0) {
                         $errors->put("statements.$i.amount", 'This amount exceeds what can be allocated');
 
                         continue;
@@ -178,7 +178,7 @@ class RecordController extends Controller
                         continue;
                     }
 
-                    if ($statement->amount - $allocated - $statement_dto['amount'] + $statement->pivot->amount > 0) {
+                    if (round($statement->amount - $allocated - $statement_dto['amount'] + $statement->pivot->amount, 2) > 0) {
                         $errors->put("statements.$i.amount", 'This amount exceeds what can be allocated');
 
                         continue;

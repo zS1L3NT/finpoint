@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Allocation;
 use App\Models\Category;
 use App\Models\Record;
 use Inertia\Inertia;
@@ -40,7 +41,13 @@ class RecordController extends Controller
     {
         $record->load([
             'category',
-            'statements' => fn($query) => $query->with('account')->withSum('allocations', 'amount')
+            'statements' => fn($query) => $query
+                ->with('account')
+                ->addSelect([
+                    'allocations_sum_amount' => Allocation::query()
+                        ->selectRaw('round(sum(amount), 2)')
+                        ->whereColumn('source_statement_id', 'statements.id'),
+                ])
         ]);
 
         $categories = Category::query()

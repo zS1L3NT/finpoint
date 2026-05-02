@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Allocation;
 use App\Models\Category;
 use App\Models\Record;
 use App\Models\Statement;
@@ -13,7 +14,11 @@ class AllocatorController extends Controller
     {
         $statements = Statement::query()
             ->with('account')
-            ->withSum('allocations', 'amount')
+            ->addSelect([
+                'allocations_sum_amount' => Allocation::query()
+                    ->selectRaw('round(sum(amount), 2)')
+                    ->whereColumn('source_statement_id', 'statements.id'),
+            ])
             ->when(
                 request()->query('query'),
                 fn($query, $q) => $query
@@ -26,11 +31,7 @@ class AllocatorController extends Controller
                             ->orWhere('accounts.id', 'like', '%' . $q . '%')
                     )
             )
-            ->where(
-                fn($query) => $query
-                    ->whereNull('allocations_sum_amount')
-                    ->orWhereColumn('allocations_sum_amount', '!=', 'statements.amount')
-            )
+            ->havingRaw('allocations_sum_amount is null or allocations_sum_amount != round(statements.amount, 2)')
             ->orderBy('datetime', 'desc')
             ->groupBy('statements.id')
             ->paginate(request('per_page') ?? 25)
