@@ -33,7 +33,7 @@ import { Progress } from "@/components/ui/progress"
 import useApiFormErrors from "@/hooks/use-api-form-errors"
 import { cn, formatCurrency, formatDatetime, parseDatetime, round2dp } from "@/lib/utils"
 import { Account, Category, Statement } from "@/types"
-import { allocatorApiRoute } from "@/wayfinder/routes"
+import { recordStoreApiRoute } from "@/wayfinder/routes"
 
 type StatementExtra = {
 	account: Account
@@ -92,7 +92,7 @@ export default function RecordCreatorDialog({
 				formData.append(`statements[${index}][amount]`, `${value.statements[index].amount}`)
 			})
 
-			const response = await fetch(allocatorApiRoute.url(), {
+			const response = await fetch(recordStoreApiRoute.url(), {
 				method: "POST",
 				body: formData,
 				headers: { Accept: "application/json" },
