@@ -27,12 +27,14 @@ export default function QuotaCreatorDialog({ month, year }: { month: string; yea
 	const form = useForm({
 		defaultValues: {
 			name: "",
+			color: "",
 			amount: 0,
 			unlimited: false,
 		},
 		onSubmit: async ({ value }) => {
 			const formData = new FormData()
 			formData.append("name", value.name)
+			formData.append("color", value.color)
 			formData.append("month", month)
 			formData.append("year", `${year}`)
 			if (!value.unlimited) {
@@ -100,6 +102,21 @@ export default function QuotaCreatorDialog({ month, year }: { month: string; yea
 								<TextField
 									id={field.name}
 									label="Name"
+									value={field.state.value}
+									errors={mergeErrors(field.state.meta.errors, field.name)}
+									onChange={value => {
+										field.handleChange(value)
+										clearApiError(field.name)
+									}}
+								/>
+							)}
+						</form.Field>
+
+						<form.Field name="color">
+							{field => (
+								<TextField
+									id={field.name}
+									label="Color"
 									value={field.state.value}
 									errors={mergeErrors(field.state.meta.errors, field.name)}
 									onChange={value => {

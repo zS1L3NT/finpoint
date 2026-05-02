@@ -180,7 +180,15 @@ export default function DashboardPage({
 								>
 									<div className="flex items-start justify-between gap-4">
 										<div className="min-w-0 space-y-1">
-											<p className="font-medium">{quota.name}</p>
+											<Badge
+												variant="outline"
+												style={{
+													borderColor: quota.color,
+													color: quota.color,
+												}}
+											>
+												{quota.name}
+											</Badge>
 											<p className="text-xs text-muted-foreground">
 												{quotaRecords.length} transaction
 												{quotaRecords.length === 1 ? "" : "s"}
@@ -261,7 +269,7 @@ export default function DashboardPage({
 
 				{quotas.length ? (
 					<Card>
-						<CardContent className="flex gap-2">
+						<CardContent className="flex justify-center gap-2">
 							{quotas.map(quota => (
 								<div key={quota.id} className="flex-1">
 									<p className="text-sm font-heading font-medium text-center">
@@ -342,7 +350,13 @@ export default function DashboardPage({
 									meta: { width: TABLE_WIDTHS.QUOTA },
 									cell: ({ row }) =>
 										row.original.quota ? (
-											<Badge variant="outline">
+											<Badge
+												variant="outline"
+												style={{
+													borderColor: row.original.quota.color,
+													color: row.original.quota.color,
+												}}
+											>
 												{row.original.quota.name}
 											</Badge>
 										) : null,

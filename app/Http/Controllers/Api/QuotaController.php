@@ -12,6 +12,7 @@ class QuotaController extends Controller
     {
         $dto = request()->validate([
             'name' => 'required|string',
+            'color' => 'required|string',
             'month' => 'required|date_format:F',
             'year' => 'required|date_format:Y',
             'amount' => 'nullable|decimal:0,2',
@@ -30,6 +31,7 @@ class QuotaController extends Controller
     {
         $dto = request()->validate([
             'name' => 'required|string',
+            'color' => 'required|string',
             'amount' => 'nullable|decimal:0,2',
         ]);
 

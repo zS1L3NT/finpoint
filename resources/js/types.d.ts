@@ -74,6 +74,7 @@ export type Recurrence = {
 export type Quota = {
 	id: string
 	name: string
+	color: string
 	month: string
 	year: number
 	amount: number | null

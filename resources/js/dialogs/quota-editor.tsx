@@ -28,6 +28,7 @@ export default function QuotaEditorDialog({ quota }: { quota: Quota }) {
 
 	const initialValues = {
 		name: quota.name,
+		color: quota.color,
 		amount: quota.amount ?? 0,
 		unlimited: quota.amount === null,
 	}
@@ -37,6 +38,7 @@ export default function QuotaEditorDialog({ quota }: { quota: Quota }) {
 		onSubmit: async ({ value }) => {
 			const formData = new FormData()
 			formData.append("name", value.name)
+			formData.append("color", value.color)
 			if (!value.unlimited) {
 				formData.append("amount", `${value.amount}`)
 			}
@@ -115,6 +117,21 @@ export default function QuotaEditorDialog({ quota }: { quota: Quota }) {
 								<TextField
 									id={field.name}
 									label="Name"
+									value={field.state.value}
+									errors={mergeErrors(field.state.meta.errors, field.name)}
+									onChange={value => {
+										field.handleChange(value)
+										clearApiError(field.name)
+									}}
+								/>
+							)}
+						</form.Field>
+
+						<form.Field name="color">
+							{field => (
+								<TextField
+									id={field.name}
+									label="Color"
 									value={field.state.value}
 									errors={mergeErrors(field.state.meta.errors, field.name)}
 									onChange={value => {
