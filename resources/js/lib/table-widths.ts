@@ -6,6 +6,7 @@ export const TABLE_WIDTHS = {
 
     DESCRIPTION: "32rem",
 	DATETIME: "10rem",
+	QUOTA: "8rem",
     AMOUNT: "8rem",
 	AMOUNT_BAR: "16rem",
 	BUDGET_USAGE: "20rem",

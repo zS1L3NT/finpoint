@@ -1,6 +1,9 @@
+import { router } from "@inertiajs/react"
 import { useForm } from "@tanstack/react-form"
+import { PlusIcon } from "lucide-react"
 import { useState } from "react"
 import AmountField from "@/components/form/amount-field"
+import { Button } from "@/components/ui/button"
 import {
 	Dialog,
 	DialogClose,
@@ -24,9 +27,6 @@ import {
 import useApiFormErrors from "@/hooks/use-api-form-errors"
 import { Recurrence } from "@/types"
 import { recurrenceStoreApiRoute } from "@/wayfinder/routes"
-import { router } from "@inertiajs/react"
-import { Button } from "@/components/ui/button"
-import { PlusIcon } from "lucide-react"
 
 export default function RecurrenceCreatorDialog() {
 	const [open, setOpen] = useState(false)

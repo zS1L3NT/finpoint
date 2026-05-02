@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ImporterController;
 use App\Http\Controllers\Api\QuotaController;
 use App\Http\Controllers\Api\RecordController;
+use App\Http\Controllers\Api\RecordQuotaController;
 use App\Http\Controllers\Api\RecurrenceController;
 use App\Http\Controllers\Api\RecurrenceRecordController;
 use Illuminate\Support\Facades\Route;
@@ -24,6 +25,9 @@ Route::apiResource('records', RecordController::class)
         'update' => 'record-update-api-route',
         'destroy' => 'record-destroy-api-route',
     ]);
+
+Route::post('records/{record}/quotas/{quota}', [RecordQuotaController::class, 'attach'])->name('record-quota-attach-api-route');
+Route::delete('records/{record}/quotas/{quota}', [RecordQuotaController::class, 'detach'])->name('record-quota-detach-api-route');
 
 Route::apiResource('budgets', BudgetController::class)
     ->only('store', 'update', 'destroy')

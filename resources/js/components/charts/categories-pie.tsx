@@ -6,7 +6,7 @@ import {
 	ChartTooltip,
 	ChartTooltipContent,
 } from "@/components/ui/chart"
-import { formatCurrency, round2dp } from "@/lib/utils"
+import { cn, formatCurrency, round2dp } from "@/lib/utils"
 import { Category, Record } from "@/types"
 
 type RecordExtra = {
@@ -18,13 +18,15 @@ type CategoryExtra = {
 }
 
 export default function CategoriesPieChart({
+	className,
 	records,
 	categories,
 	limit,
 }: {
+	className?: string
 	records: (Record & RecordExtra)[]
 	categories: (Category & CategoryExtra)[]
-	limit: number | null
+	limit?: number
 }) {
 	return (
 		<ChartContainer
@@ -34,7 +36,7 @@ export default function CategoriesPieChart({
 					c.children.map(({ id }) => [id, { label: c.name, color: c.color }]),
 				),
 			])}
-			className="aspect-square"
+			className={cn("aspect-square", className)}
 		>
 			<PieChart>
 				<Pie
@@ -75,15 +77,13 @@ export default function CategoriesPieChart({
 												records.reduce((acc, r) => acc - r.amount, 0),
 											)}
 										</text>
-										{limit ? (
-											<text
-												y={20}
-												textAnchor="middle"
-												className="fill-muted-foreground"
-											>
-												{`of ${formatCurrency(limit)}`}
-											</text>
-										) : null}
+										<text
+											y={20}
+											textAnchor="middle"
+											className="fill-muted-foreground"
+										>
+											{limit ? `of ${formatCurrency(limit)}` : "No limit"}
+										</text>
 									</g>
 								)
 							}

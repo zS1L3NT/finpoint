@@ -24,7 +24,7 @@ export default function UsageAreaChart({
 }: {
 	className?: string
 	records: (Record & RecordExtra)[]
-	limit: number
+	limit?: number
 	start: DateTime
 	end: DateTime
 }) {
@@ -39,7 +39,13 @@ export default function UsageAreaChart({
 		const projectedValues: (number | null)[] = []
 
 		const data: {
-			[date: string]: { ein?: number; eout?: number; pin?: number; pout?: number }
+			[date: string]: {
+				ein?: number
+				eout?: number
+				pin?: number
+				pout?: number
+				usage?: number
+			}
 		} = {}
 
 		// Calculate values for all dates
@@ -84,16 +90,20 @@ export default function UsageAreaChart({
 			const elapsedValue = elapsedValues[i]
 			if (elapsedValue === null) continue
 
-			if (elapsedValue <= limit) {
-				data[key].ein = elapsedValue
+			if (limit) {
+				if (elapsedValue <= limit) {
+					data[key].ein = elapsedValue
 
-				// Currently doesn't exceed budget, but will exceed on next day
-				const nextElapsedValue = elapsedValues[i + 1]
-				if (nextElapsedValue !== null && nextElapsedValue > limit) {
+					// Currently doesn't exceed budget, but will exceed on next day
+					const nextElapsedValue = elapsedValues[i + 1]
+					if (nextElapsedValue !== null && nextElapsedValue > limit) {
+						data[key].eout = elapsedValue
+					}
+				} else {
 					data[key].eout = elapsedValue
 				}
 			} else {
-				data[key].eout = elapsedValue
+				data[key].usage = elapsedValue
 			}
 		}
 
@@ -105,38 +115,44 @@ export default function UsageAreaChart({
 			const projectedValue = projectedValues[i]
 			if (projectedValue === null) continue
 
-			if (projectedValue <= limit) {
-				data[key].pin = projectedValue
+			if (limit) {
+				if (projectedValue <= limit) {
+					data[key].pin = projectedValue
 
-				// Currently doesn't exceed budget, but will exceed on next day
-				const nextProjectedValue = projectedValues[i + 1]
-				if (nextProjectedValue !== null && nextProjectedValue > limit) {
-					data[key].pout = projectedValue
+					// Currently doesn't exceed budget, but will exceed on next day
+					const nextProjectedValue = projectedValues[i + 1]
+					if (nextProjectedValue !== null && nextProjectedValue > limit) {
+						data[key].pout = projectedValue
 
-					// Condition to skip setting projected in-budget
-					const previousProjectedValue = projectedValues[i - 1]
-					if (previousProjectedValue === null) {
-						delete data[key].pin
+						// Condition to skip setting projected in-budget
+						const previousProjectedValue = projectedValues[i - 1]
+						if (previousProjectedValue === null) {
+							delete data[key].pin
+						}
 					}
+				} else {
+					data[key].pout = projectedValue
 				}
-			} else {
-				data[key].pout = projectedValue
 			}
 		}
 
-		return Object.entries(data).map(([date, { ein, eout, pin, pout }]) => ({
+		return Object.entries(data).map(([date, { ein, eout, pin, pout, usage }]) => ({
 			date,
 			ein,
 			eout,
 			pin,
 			pout,
+			usage,
 		}))
 	}, [records, limit, start, end])
+
+	console.log(data)
 
 	return (
 		<ChartContainer
 			className={className}
 			config={{
+				usage: { label: "Usage" },
 				ein: { label: "Usage" },
 				eout: { label: "Exceed" },
 				pin: { label: "Usage (Projection)" },
@@ -156,41 +172,53 @@ export default function UsageAreaChart({
 				// )}
 				/>
 
-				<Area
-					dataKey="ein"
-					fill="var(--color-green-600)"
-					fillOpacity={0.1}
-					stroke="var(--color-green-600)"
-					strokeWidth={2}
-				/>
-				<Area
-					dataKey="eout"
-					fill="var(--color-red-500)"
-					fillOpacity={0.1}
-					stroke="var(--color-red-500)"
-					strokeWidth={2}
-				/>
+				{limit ? (
+					<>
+						<Area
+							dataKey="ein"
+							fill="var(--color-green-600)"
+							fillOpacity={0.1}
+							stroke="var(--color-green-600)"
+							strokeWidth={2}
+						/>
+						<Area
+							dataKey="eout"
+							fill="var(--color-red-500)"
+							fillOpacity={0.1}
+							stroke="var(--color-red-500)"
+							strokeWidth={2}
+						/>
 
-				<Line
-					dataKey="pin"
-					fill="var(--foreground)"
-					fillOpacity={0.1}
-					stroke="var(--foreground)"
-					strokeWidth={2}
-					dot={false}
-					animationBegin={1000}
-				/>
-				<Line
-					dataKey="pout"
-					fill="var(--color-orange-500)"
-					fillOpacity={0.1}
-					stroke="var(--color-orange-500)"
-					strokeWidth={2}
-					dot={false}
-					animationBegin={1000}
-				/>
+						<Line
+							dataKey="pin"
+							fill="var(--color-yellow-500)"
+							fillOpacity={0.1}
+							stroke="var(--color-yellow-500)"
+							strokeWidth={2}
+							dot={false}
+							animationBegin={1000}
+						/>
+						<Line
+							dataKey="pout"
+							fill="var(--color-orange-500)"
+							fillOpacity={0.1}
+							stroke="var(--color-orange-500)"
+							strokeWidth={2}
+							dot={false}
+							animationBegin={1000}
+						/>
 
-				<ReferenceLine label="Limit" y={limit} />
+						<ReferenceLine label="Limit" y={limit} />
+					</>
+				) : (
+					<Area
+						dataKey="usage"
+						fill="var(--color-white)"
+						fillOpacity={0.1}
+						stroke="var(--color-white)"
+						strokeWidth={2}
+					/>
+				)}
 
 				<ChartTooltip cursor={false} content={<ChartTooltipContent className="w-50" />} />
 

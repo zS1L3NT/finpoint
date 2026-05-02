@@ -341,7 +341,7 @@ export default function RecordCreatorDialog({
 						}
 					/>
 					<Button type="submit" form="allocate-record-form">
-						Save changes
+						Create Record
 					</Button>
 				</DialogFooter>
 			</DialogContent>

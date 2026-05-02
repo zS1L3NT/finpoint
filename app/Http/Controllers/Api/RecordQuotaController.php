@@ -8,7 +8,7 @@ use App\Models\Record;
 
 class RecordQuotaController extends Controller
 {
-    public function store(Record $record, Quota $quota)
+    public function attach(Record $record, Quota $quota)
     {
         $record->quota_pivot()->update(['quota_id' => $quota->id]);
 
@@ -16,7 +16,7 @@ class RecordQuotaController extends Controller
     }
 
 
-    public function destroy(Record $record, Quota $quota)
+    public function detach(Record $record, Quota $quota)
     {
         $record->quota_pivot()->update(['quota_id' => null]);
 
