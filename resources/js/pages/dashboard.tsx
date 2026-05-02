@@ -259,21 +259,25 @@ export default function DashboardPage({
 					</Card>
 				</div>
 
-				<Card>
-					<CardContent className="flex gap-2">
-						{quotas.map(quota => (
-							<div key={quota.id} className="flex-1">
-								<p className="text-sm font-heading font-medium text-center">Spending for {quota.name}</p>
-								<CategoriesPieChart
-									className="pt-4"
-									categories={categories}
-									records={records.filter(r => r.quota?.id === quota.id)}
-									limit={quota.amount ?? undefined}
-								/>
-							</div>
-						))}
-					</CardContent>
-				</Card>
+				{quotas.length ? (
+					<Card>
+						<CardContent className="flex gap-2">
+							{quotas.map(quota => (
+								<div key={quota.id} className="flex-1">
+									<p className="text-sm font-heading font-medium text-center">
+										Spending for {quota.name}
+									</p>
+									<CategoriesPieChart
+										className="mx-auto pt-4 max-h-100"
+										categories={categories}
+										records={records.filter(r => r.quota?.id === quota.id)}
+										limit={quota.amount ?? undefined}
+									/>
+								</div>
+							))}
+						</CardContent>
+					</Card>
+				) : null}
 
 				<Card>
 					<CardHeader>
