@@ -1,5 +1,11 @@
 import { Link, router } from "@inertiajs/react"
-import { ArrowLeftIcon, ArrowRightIcon, CalendarIcon, CircleDollarSignIcon } from "lucide-react"
+import {
+	ArrowLeftIcon,
+	ArrowRightIcon,
+	CalendarIcon,
+	CircleDollarSignIcon,
+	ListFilterIcon,
+} from "lucide-react"
 import { DateTime } from "luxon"
 import { useEffect, useState } from "react"
 import CategoriesPieChart from "@/components/charts/categories-pie"
@@ -20,6 +26,15 @@ import {
 	CardTitle,
 } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
+import {
+	DropdownMenu,
+	DropdownMenuCheckboxItem,
+	DropdownMenuContent,
+	DropdownMenuGroup,
+	DropdownMenuLabel,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { MonthPicker } from "@/components/ui/monthpicker"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Progress } from "@/components/ui/progress"
@@ -64,8 +79,10 @@ export default function DashboardPage({
 }) {
 	const { handlePush } = useHistory()
 
-	const [quota, setQuota] = useState<Quota | null>(null)
 	const [selected, setSelected] = useState<(Record & RecordExtra)[]>([])
+	const [areaQuota, setAreaQuota] = useState<Quota | null>(null)
+	const [tableQuotas, setTableQuotas] = useState<Quota[]>([])
+	const [tableShowNoQuota, setTableShowNoQuota] = useState(true)
 
 	const date = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy").toJSDate()
 
@@ -114,13 +131,21 @@ export default function DashboardPage({
 		}
 	})
 
-	/**
-	 * This effect contains code specific to the developer's dashboard workflow
-	 * You can comment this out or remove it if it doesn't apply to your use case
-	 */
+	const filteredRecords = records.filter(r =>
+		r.quota ? tableQuotas.find(q => q.id === r.quota?.id) : tableShowNoQuota,
+	)
+
 	useEffect(() => {
 		if (quotas) {
-			setQuota(quotas.find(q => q.name === "Daily") ?? null)
+			setTableQuotas(quotas)
+		}
+
+		/**
+		 * This if statement contains code specific to the developer's dashboard workflow
+		 * You can comment this out or remove it if it doesn't apply to your use case
+		 */
+		if (quotas) {
+			setAreaQuota(quotas.find(q => q.name === "Daily") ?? null)
 		}
 	}, [quotas])
 
@@ -228,9 +253,9 @@ export default function DashboardPage({
 							<CardTitle>Spending over Time</CardTitle>
 							<CardAction>
 								<Select
-									value={quota?.id}
+									value={areaQuota?.id}
 									onValueChange={value =>
-										setQuota(quotas.find(q => q.id === value) ?? null)
+										setAreaQuota(quotas.find(q => q.id === value) ?? null)
 									}
 								>
 									<SelectTrigger className="w-32">
@@ -242,7 +267,7 @@ export default function DashboardPage({
 												<SelectItem
 													key={q.id}
 													value={q.id.toString()}
-													onSelect={() => setQuota(q)}
+													onSelect={() => setAreaQuota(q)}
 												>
 													{q.name}
 												</SelectItem>
@@ -254,8 +279,12 @@ export default function DashboardPage({
 						</CardHeader>
 						<CardContent>
 							<UsageAreaChart
-								records={quota ? records.filter(r => r.quota?.id === quota.id) : []}
-								limit={quota?.amount ?? undefined}
+								records={
+									areaQuota
+										? records.filter(r => r.quota?.id === areaQuota.id)
+										: []
+								}
+								limit={areaQuota?.amount ?? undefined}
 								start={DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy").startOf(
 									"month",
 								)}
@@ -294,7 +323,53 @@ export default function DashboardPage({
 							Records for {DateTime.fromJSDate(date).toFormat("MMMM yyyy")}. Select
 							records to attach to a quota.
 						</CardDescription>
-						<CardAction>
+						<CardAction className="flex gap-2">
+							{quotas.length ? (
+								<DropdownMenu>
+									<DropdownMenuTrigger asChild>
+										<Button type="button" variant="outline">
+											<ListFilterIcon /> Filter quotas
+										</Button>
+									</DropdownMenuTrigger>
+									<DropdownMenuContent align="end" className="w-56">
+										<DropdownMenuLabel>Visible records</DropdownMenuLabel>
+										<DropdownMenuSeparator />
+										<DropdownMenuGroup>
+											<DropdownMenuCheckboxItem
+												checked={tableShowNoQuota}
+												onSelect={event => event.preventDefault()}
+												onCheckedChange={checked =>
+													setTableShowNoQuota(checked === true)
+												}
+											>
+												No quota
+											</DropdownMenuCheckboxItem>
+										</DropdownMenuGroup>
+										<DropdownMenuSeparator />
+										<DropdownMenuGroup>
+											{quotas.map(quota => (
+												<DropdownMenuCheckboxItem
+													key={quota.id}
+													checked={
+														!!tableQuotas.find(q => q.id === quota.id)
+													}
+													onSelect={event => event.preventDefault()}
+													onCheckedChange={checked => {
+														setTableQuotas(qs =>
+															checked
+																? [...qs, quota]
+																: qs.filter(q => q.id !== quota.id),
+														)
+													}}
+												>
+													{quota.name}
+												</DropdownMenuCheckboxItem>
+											))}
+										</DropdownMenuGroup>
+									</DropdownMenuContent>
+								</DropdownMenu>
+							) : null}
+
 							<RecordQuotaDialog
 								records={selected}
 								quotas={quotas}
@@ -304,7 +379,7 @@ export default function DashboardPage({
 					</CardHeader>
 					<CardContent>
 						<DataTable
-							data={records}
+							data={filteredRecords}
 							columns={[
 								{
 									id: "select",
