@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useRef, useState } from "react"
 import { Label, Pie, PieChart } from "recharts"
 import {
 	ChartContainer,
@@ -28,31 +29,80 @@ export default function CategoriesPieChart({
 	categories: (Category & CategoryExtra)[]
 	limit?: number
 }) {
+	const containerRef = useRef<HTMLDivElement>(null)
+	const legendRef = useRef<HTMLDivElement>(null)
+
+	const [textBoxY, setTextBoxY] = useState<number>()
+
+	const categoryData = useMemo(
+		() =>
+			categories
+				.flatMap(c => c)
+				.map(c => {
+					const categoryRecords = records.filter(
+						r => r.category.id === c.id || r.category.parent_category_id === c.id,
+					)
+
+					return {
+						category: c,
+						recordCount: categoryRecords.length,
+						amount: round2dp(categoryRecords.reduce((acc, el) => acc - el.amount, 0)),
+					}
+				})
+				.filter(d => d.recordCount > 0),
+		[categories, records],
+	)
+
+	const subcategoryData = useMemo(
+		() =>
+			categories
+				.flatMap(c => [c, ...c.children])
+				.map(c => {
+					const subcategoryRecords = records.filter(r => r.category.id === c.id)
+
+					return {
+						category: c,
+						recordCount: subcategoryRecords.length,
+						amount: round2dp(
+							subcategoryRecords.reduce((acc, el) => acc - el.amount, 0),
+						),
+					}
+				})
+				.filter(d => d.recordCount > 0),
+		[categories, records],
+	)
+
+	useEffect(() => {
+		setTimeout(() => {
+			// Height of the pie chart
+			const pieChartHeight = containerRef.current?.children.item(1)?.clientHeight ?? 0
+
+			const legendHeight = (legendRef.current?.clientHeight ?? 0) + 12
+
+			const MANUAL_SHIFT = 4
+
+			setTextBoxY((pieChartHeight - legendHeight) / 2 + MANUAL_SHIFT)
+		})
+	}, [categoryData, subcategoryData])
+
 	return (
 		<ChartContainer
+			ref={containerRef}
+			className={cn("aspect-square", className)}
 			config={Object.fromEntries([
 				...categories.map(c => [c.id, { label: c.name, color: c.color }]),
 				...categories.flatMap(c =>
 					c.children.map(({ id }) => [id, { label: c.name, color: c.color }]),
 				),
 			])}
-			className={cn("aspect-square", className)}
 		>
 			<PieChart>
 				<Pie
-					data={categories.map(c => ({
-						id: c.id,
-						category: c.name,
-						amount: round2dp(
-							records
-								.filter(
-									r =>
-										r.category.id === c.id ||
-										r.category.parent_category_id === c.id,
-								)
-								.reduce((acc, el) => acc - el.amount, 0),
-						),
-						fill: c.color,
+					data={categoryData.map(d => ({
+						id: d.category.id,
+						category: d.category.name,
+						amount: d.amount,
+						fill: d.category.color,
 					}))}
 					dataKey="amount"
 					nameKey="category"
@@ -63,11 +113,10 @@ export default function CategoriesPieChart({
 				>
 					<Label
 						content={({ viewBox }) => {
-							if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-								const { cx, cy } = viewBox
+							if (viewBox && "cx" in viewBox && textBoxY !== undefined) {
 								return (
 									<g
-										transform={`translate(${cx}, ${cy - 40 + 4})`} // Approximate vertical height of the text
+										transform={`translate(${viewBox.cx}, ${textBoxY})`} // Approximate vertical height of the text
 									>
 										<text
 											textAnchor="middle"
@@ -92,18 +141,12 @@ export default function CategoriesPieChart({
 				</Pie>
 
 				<Pie
-					data={categories
-						.flatMap(c => [c, ...c.children])
-						.map(c => ({
-							id: c.id,
-							category: c.name,
-							amount: round2dp(
-								records
-									.filter(r => r.category.id === c.id)
-									.reduce((acc, el) => acc - el.amount, 0),
-							),
-							fill: c.color,
-						}))}
+					data={subcategoryData.map(d => ({
+						id: d.category.id,
+						category: d.category.name,
+						amount: d.amount,
+						fill: d.category.color,
+					}))}
 					dataKey="amount"
 					nameKey="category"
 					innerRadius="80%"
@@ -119,7 +162,13 @@ export default function CategoriesPieChart({
 						categories.find(c => c.name === p.value)?.id ??
 						categories.find(c => c.children.some(c => c.name === p.value))?.id
 					}
-					content={<ChartLegendContent nameKey="id" className="flex-wrap gap-2" />}
+					content={
+						<ChartLegendContent
+							ref={legendRef}
+							nameKey="id"
+							className="flex-wrap gap-2"
+						/>
+					}
 				/>
 			</PieChart>
 		</ChartContainer>

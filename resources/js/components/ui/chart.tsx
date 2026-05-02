@@ -271,6 +271,7 @@ function ChartTooltipContent({
 const ChartLegend = RechartsPrimitive.Legend
 
 function ChartLegendContent({
+  ref,
   className,
   hideIcon = false,
   payload,
@@ -279,7 +280,7 @@ function ChartLegendContent({
 }: React.ComponentProps<"div"> & {
   hideIcon?: boolean
   nameKey?: string
-} & RechartsPrimitive.DefaultLegendContentProps) {
+} & Omit<RechartsPrimitive.DefaultLegendContentProps, "ref">) {
   const { config } = useChart()
 
   if (!payload?.length) {
@@ -288,6 +289,7 @@ function ChartLegendContent({
 
   return (
     <div
+      ref={ref}
       className={cn(
         "flex items-center justify-center gap-4",
         verticalAlign === "top" ? "pb-3" : "pt-3",
