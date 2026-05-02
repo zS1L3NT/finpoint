@@ -35,11 +35,6 @@ class RecordController extends Controller
                 fn($query, $id) => $query
                     ->whereDoesntHave('budgets', fn($query) => $query->where('budgets.id', $id))
             )
-            ->when(
-                request()->query('exclude_recurrence_id'),
-                fn($query, $id) => $query
-                    ->whereDoesntHave('recurrences', fn($query) => $query->where('recurrences.id', $id))
-            )
             ->orderBy('datetime', 'desc')
             ->get();
     }

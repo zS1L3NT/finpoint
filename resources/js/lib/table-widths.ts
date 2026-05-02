@@ -2,7 +2,6 @@ export const TABLE_WIDTHS = {
 	ACCOUNT: "8rem",
     RECORD: "24rem",
 	BUDGET: "20rem",
-	RECURRENCE: "20rem",
 
     DESCRIPTION: "32rem",
 	DATETIME: "10rem",
@@ -12,8 +11,6 @@ export const TABLE_WIDTHS = {
 	BUDGET_USAGE: "20rem",
 	BUDGET_WINDOW: "12rem",
 	BUDGET_TYPE: "8rem",
-	RECURRENCE_MONTHLY: "6rem",
-	RECURRENCE_YEARLY: "6rem",
 
 	CHECKBOX: "3rem",
 	ACTIONS_OPEN: "4rem",

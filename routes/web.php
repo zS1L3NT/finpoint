@@ -6,7 +6,6 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ImporterController;
 use App\Http\Controllers\RecordController;
-use App\Http\Controllers\RecurrenceController;
 use App\Http\Controllers\StatementController;
 use Illuminate\Support\Facades\Route;
 
@@ -41,13 +40,6 @@ Route::resource('budgets', BudgetController::class)
     ->names([
         'index' => 'budgets-web-route',
         'show' => 'budget-web-route',
-    ]);
-
-Route::resource('recurrences', RecurrenceController::class)
-    ->only('index', 'show')
-    ->names([
-        'index' => 'recurrences-web-route',
-        'show' => 'recurrence-web-route',
     ]);
 
 Route::resource('categories', CategoryController::class)

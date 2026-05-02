@@ -64,13 +64,6 @@ export type Budget = {
 	automatic: boolean
 }
 
-export type Recurrence = {
-	id: string
-	name: string
-	amount: number
-	period: "month" | "year"
-}
-
 export type Quota = {
 	id: string
 	name: string

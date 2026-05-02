@@ -58,11 +58,6 @@ class Record extends Model
         return $this->belongsToMany(Budget::class, 'budget_records', 'record_id', 'budget_id')->withPivot(['amount']);
     }
 
-    public function recurrences()
-    {
-        return $this->belongsToMany(Recurrence::class, 'recurrence_records', 'record_id', 'recurrence_id');
-    }
-
     public function quota()
     {
         return $this->hasOneThrough(Quota::class, RecordQuota::class, 'record_id', 'id', 'id', 'quota_id');
