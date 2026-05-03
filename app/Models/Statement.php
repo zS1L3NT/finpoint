@@ -16,6 +16,11 @@ class Statement extends Model
         'datetime' => 'date:Y-m-d H:i',
     ];
 
+    public function getDescriptionAttribute()
+    {
+        return preg_replace('/\b\d{4}-\d{4}-\d{4}-(\d{4})\b/', 'XXXX-XXXX-XXXX-$1', $this->attributes['description']);
+    }
+
     public function account()
     {
         return $this->belongsTo(Account::class);
