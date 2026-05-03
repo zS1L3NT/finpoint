@@ -4,6 +4,7 @@ import {
 	ArrowRightIcon,
 	CalendarIcon,
 	CircleDollarSignIcon,
+	Link2OffIcon,
 	ListFilterIcon,
 } from "lucide-react"
 import { DateTime } from "luxon"
@@ -35,6 +36,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Input } from "@/components/ui/input"
 import { MonthPicker } from "@/components/ui/monthpicker"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Progress } from "@/components/ui/progress"
@@ -51,9 +53,14 @@ import QuotaEditorDialog from "@/dialogs/quota-editor"
 import RecordQuotaDialog from "@/dialogs/record-quota-editor"
 import { useHistory } from "@/history"
 import { TABLE_WIDTHS } from "@/lib/table-widths"
-import { classForCurrency, cn, formatCurrency, formatDatetime } from "@/lib/utils"
+import { classForCurrency, cn, formatCurrency, formatDatetime, withMethod } from "@/lib/utils"
 import { Category, Quota, Record } from "@/types"
-import { budgetsWebRoute, dashboardWebRoute, recordWebRoute } from "@/wayfinder/routes"
+import {
+	budgetsWebRoute,
+	dashboardWebRoute,
+	recordQuotaDetachApiRoute,
+	recordWebRoute,
+} from "@/wayfinder/routes"
 
 type RecordExtra = {
 	category: Category
@@ -81,6 +88,7 @@ export default function DashboardPage({
 
 	const [selected, setSelected] = useState<(Record & RecordExtra)[]>([])
 	const [areaQuota, setAreaQuota] = useState<Quota | null>(null)
+	const [tableQuery, setTableQuery] = useState("")
 	const [tableQuotaIds, setTableQuotaIds] = useState<string[]>([])
 	const [tableShowNoQuota, setTableShowNoQuota] = useState(false)
 
@@ -102,12 +110,29 @@ export default function DashboardPage({
 		)
 	}
 
-	const previous = () => {
-		setDate(DateTime.fromJSDate(date).minus({ month: 1 }).toJSDate())
-	}
+	const detach = async () => {
+		if (!selectedWithQuota.length) {
+			return
+		}
 
-	const next = () => {
-		setDate(DateTime.fromJSDate(date).plus({ month: 1 }).toJSDate())
+		const responses = await Promise.all(
+			selectedWithQuota.map(record =>
+				// biome-ignore lint/style/noNonNullAssertion: Filtered records without quota already
+				fetch(recordQuotaDetachApiRoute({ record, quota: record.quota! }).url, {
+					method: "POST",
+					body: withMethod(new FormData(), "DELETE"),
+					headers: { Accept: "application/json" },
+				}),
+			),
+		)
+
+		if (responses.every(response => response.ok)) {
+			setSelected([])
+
+			setTimeout(() => {
+				router.reload()
+			}, 300)
+		}
 	}
 
 	const quotaStats = quotas.map(quota => {
@@ -131,10 +156,24 @@ export default function DashboardPage({
 		}
 	})
 
-	const filteredRecords =
+	const filteredRecords = (
 		tableQuotaIds.length || tableShowNoQuota
 			? records.filter(r => (r.quota ? tableQuotaIds.includes(r.quota.id) : tableShowNoQuota))
 			: records
+	).filter(r =>
+		[
+			r.title,
+			r.subtitle,
+			r.description,
+			r.quota?.name,
+			formatCurrency(r.amount),
+			formatDatetime(r.datetime),
+		]
+			.filter(Boolean)
+			.some(value => value?.toLowerCase().includes(tableQuery.toLowerCase())),
+	)
+
+	const selectedWithQuota = selected.filter(r => r.quota)
 
 	useEffect(() => {
 		setTableQuotaIds(ids => ids.filter(id => quotas.some(quota => quota.id === id)))
@@ -148,6 +187,19 @@ export default function DashboardPage({
 		}
 	}, [quotas])
 
+	/**
+	 * This effect ensures that if a record is selected and then filtered out (either by the search query or quota filters),
+	 * it will be deselected. This prevents the user from trying to perform actions on records that are not currently visible,
+	 * which could lead to confusion or errors.
+	 */
+	useEffect(() => {
+		setSelected(prev =>
+			prev.every(record => filteredRecords.some(r => r.id === record.id))
+				? prev
+				: prev.filter(record => filteredRecords.some(r => r.id === record.id)),
+		)
+	}, [filteredRecords])
+
 	return (
 		<>
 			<AppHeader title="Dashboard" />
@@ -160,7 +212,14 @@ export default function DashboardPage({
 					icon={CircleDollarSignIcon}
 					actions={
 						<ButtonGroup>
-							<Button variant="outline" onClick={previous}>
+							<Button
+								variant="outline"
+								onClick={() =>
+									setDate(
+										DateTime.fromJSDate(date).minus({ month: 1 }).toJSDate(),
+									)
+								}
+							>
 								<ArrowLeftIcon />
 							</Button>
 							<Popover>
@@ -180,7 +239,12 @@ export default function DashboardPage({
 									<MonthPicker onMonthSelect={setDate} selectedMonth={date} />
 								</PopoverContent>
 							</Popover>
-							<Button variant="outline" onClick={next}>
+							<Button
+								variant="outline"
+								onClick={() =>
+									setDate(DateTime.fromJSDate(date).plus({ month: 1 }).toJSDate())
+								}
+							>
 								<ArrowRightIcon />
 							</Button>
 						</ButtonGroup>
@@ -235,7 +299,7 @@ export default function DashboardPage({
 														: null,
 												)}
 											>
-												{formatCurrency(spent)} /{" "}
+												{formatCurrency(spent)}{" / "}
 												{usage !== null
 													? formatCurrency(quota.amount ?? 0)
 													: "∞"}
@@ -322,65 +386,99 @@ export default function DashboardPage({
 							Records for {DateTime.fromJSDate(date).toFormat("MMMM yyyy")}. Select
 							records to attach to a quota.
 						</CardDescription>
-						<CardAction className="flex gap-2">
-							{quotas.length ? (
-								<DropdownMenu>
-									<DropdownMenuTrigger asChild>
-										<Button type="button" variant="outline">
-											<ListFilterIcon /> Filter quotas
-										</Button>
-									</DropdownMenuTrigger>
-									<DropdownMenuContent align="end" className="w-56">
-										<DropdownMenuLabel>Filter by quota</DropdownMenuLabel>
-										<DropdownMenuSeparator />
-										<DropdownMenuGroup>
-											<DropdownMenuCheckboxItem
-												checked={tableShowNoQuota}
-												onSelect={event => event.preventDefault()}
-												onCheckedChange={checked =>
-													setTableShowNoQuota(checked === true)
-												}
-											>
-												No quota
-											</DropdownMenuCheckboxItem>
-										</DropdownMenuGroup>
-										<DropdownMenuSeparator />
-										<DropdownMenuGroup>
-											{quotas.map(quota => (
-												<DropdownMenuCheckboxItem
-													key={quota.id}
-													checked={tableQuotaIds.includes(quota.id)}
-													onSelect={event => event.preventDefault()}
-													onCheckedChange={checked =>
-														setTableQuotaIds(ids =>
-															checked === true
-																? [
-																		...ids.filter(
-																			id => id !== quota.id,
-																		),
-																		quota.id,
-																	]
-																: ids.filter(id => id !== quota.id),
-														)
-													}
-												>
-													{quota.name}
-												</DropdownMenuCheckboxItem>
-											))}
-										</DropdownMenuGroup>
-									</DropdownMenuContent>
-								</DropdownMenu>
-							) : null}
-
-							<RecordQuotaDialog
-								records={selected}
-								quotas={quotas}
-								clear={() => setSelected([])}
-							/>
-						</CardAction>
 					</CardHeader>
 					<CardContent>
 						<DataTable
+							header={
+								<div className="flex items-end justify-between gap-4">
+									<div className="w-full max-w-sm">
+										<Input
+											placeholder="Filter records..."
+											value={tableQuery}
+											onChange={event => setTableQuery(event.target.value)}
+										/>
+									</div>
+									<div className="flex items-center gap-2">
+										{quotas.length ? (
+											<DropdownMenu>
+												<DropdownMenuTrigger asChild>
+													<Button type="button" variant="outline">
+														<ListFilterIcon /> Filter quotas
+													</Button>
+												</DropdownMenuTrigger>
+												<DropdownMenuContent align="end" className="w-56">
+													<DropdownMenuLabel>
+														Filter by quota
+													</DropdownMenuLabel>
+													<DropdownMenuSeparator />
+													<DropdownMenuGroup>
+														<DropdownMenuCheckboxItem
+															checked={tableShowNoQuota}
+															onSelect={event =>
+																event.preventDefault()
+															}
+															onCheckedChange={checked =>
+																setTableShowNoQuota(
+																	checked === true,
+																)
+															}
+														>
+															No quota
+														</DropdownMenuCheckboxItem>
+													</DropdownMenuGroup>
+													<DropdownMenuSeparator />
+													<DropdownMenuGroup>
+														{quotas.map(quota => (
+															<DropdownMenuCheckboxItem
+																key={quota.id}
+																checked={tableQuotaIds.includes(
+																	quota.id,
+																)}
+																onSelect={event =>
+																	event.preventDefault()
+																}
+																onCheckedChange={checked =>
+																	setTableQuotaIds(ids =>
+																		checked === true
+																			? [
+																					...ids.filter(
+																						id =>
+																							id !==
+																							quota.id,
+																					),
+																					quota.id,
+																				]
+																			: ids.filter(
+																					id =>
+																						id !==
+																						quota.id,
+																				),
+																	)
+																}
+															>
+																{quota.name}
+															</DropdownMenuCheckboxItem>
+														))}
+													</DropdownMenuGroup>
+												</DropdownMenuContent>
+											</DropdownMenu>
+										) : null}
+										<RecordQuotaDialog
+											records={selected}
+											quotas={quotas}
+											clear={() => setSelected([])}
+										/>
+										<Button
+											type="button"
+											disabled={!selectedWithQuota.length}
+											onClick={() => void detach()}
+										>
+											<Link2OffIcon />
+											Detach from Quota
+										</Button>
+									</div>
+								</div>
+							}
 							data={filteredRecords}
 							columns={[
 								{
@@ -390,14 +488,16 @@ export default function DashboardPage({
 										<div className="flex items-center justify-center">
 											<Checkbox
 												checked={
-													selected.length !== records.length
+													selected.length !== filteredRecords.length
 														? selected.length
 															? "indeterminate"
 															: false
 														: true
 												}
 												onCheckedChange={value =>
-													setSelected(value !== true ? [] : records)
+													setSelected(
+														value !== true ? [] : filteredRecords,
+													)
 												}
 											/>
 										</div>
