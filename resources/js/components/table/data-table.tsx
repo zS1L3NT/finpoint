@@ -53,12 +53,15 @@ export default function DataTable<TData extends { id: string }, TValue>({
 						))}
 					</TableHeader>
 					<TableBody>
-						<AnimatePresence>
+						<AnimatePresence initial={false}>
 							{table.getRowModel().rows.length ? (
 								table.getRowModel().rows.map(row => (
 									<TableRow
 										key={row.id}
-										layout
+										layout="position"
+										initial={{ opacity: 0 }}
+										animate={{ opacity: 1 }}
+										exit={{ opacity: 0 }}
 										data-state={selectedIds?.includes(row.id) && "selected"}
 										className="cursor-pointer"
 									>
