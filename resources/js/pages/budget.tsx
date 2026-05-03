@@ -250,9 +250,10 @@ export default function BudgetPage({
 						<CardContent>
 							<UsageAreaChart
 								records={budget.records}
-								limit={budget.amount}
 								start={parseDate(budget.start_date)}
 								end={parseDate(budget.end_date)}
+								maxY={Math.max(projectedSpending, budget.amount) * 1.1}
+								limit={budget.amount}
 							/>
 						</CardContent>
 					</Card>

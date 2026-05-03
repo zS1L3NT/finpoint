@@ -299,7 +299,8 @@ export default function DashboardPage({
 														: null,
 												)}
 											>
-												{formatCurrency(spent)}{" / "}
+												{formatCurrency(spent)}
+												{" / "}
 												{usage !== null
 													? formatCurrency(quota.amount ?? 0)
 													: "∞"}
@@ -347,13 +348,17 @@ export default function DashboardPage({
 										? records.filter(r => r.quota?.id === areaQuota.id)
 										: []
 								}
-								limit={areaQuota?.amount ?? undefined}
 								start={DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy").startOf(
 									"month",
 								)}
 								end={DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy").endOf(
 									"month",
 								)}
+								maxY={Math.max(
+									areaQuota?.amount ?? 0,
+									quotaStats.find(q => q.quota.id === areaQuota?.id)?.spent ?? 0,
+								)}
+								limit={areaQuota?.amount ?? undefined}
 							/>
 						</CardContent>
 					</Card>

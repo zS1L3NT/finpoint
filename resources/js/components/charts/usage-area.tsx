@@ -18,15 +18,17 @@ type RecordExtra = {
 export default function UsageAreaChart({
 	className,
 	records,
-	limit,
 	start,
 	end,
+	maxY,
+	limit,
 }: {
 	className?: string
 	records: (Record & RecordExtra)[]
-	limit?: number
 	start: DateTime
 	end: DateTime
+	maxY: number
+	limit?: number
 }) {
 	const data = useMemo(() => {
 		let elapsedSpending = records
@@ -163,13 +165,14 @@ export default function UsageAreaChart({
 				<CartesianGrid />
 				<XAxis dataKey="date" />
 				<YAxis
-				// ticks={Array.from(
-				// 	{
-				// 		length:
-				// 			Math.floor(Math.max(projectedSpending, budget.amount) / 100) + 1,
-				// 	},
-				// 	(_, i) => i * 100,
-				// )}
+					ticks={
+						maxY
+							? Array.from(
+									{ length: Math.floor(maxY / 100) + 1 + 1 },
+									(_, i) => i * 100,
+								)
+							: undefined
+					}
 				/>
 
 				{limit ? (
