@@ -1,44 +1,40 @@
 import type { ReactNode } from "react"
-import { Field, FieldError, FieldLabel } from "@/components/ui/field"
+import { FormField, type FormFieldProps } from "@/components/form/field"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 
-type ErrorItem = { message?: string }
-
-type Props = {
-	id: string
-	label: string
+type Props = FormFieldProps & {
 	value: number
-	errors: ErrorItem[]
+	placeholder?: string
 	step?: number
 	min?: number
 	max?: number
 	suffix?: ReactNode
-	disabled?: boolean
 	onChange: (value: number) => void
 }
 
 export default function AmountField({
-	id,
-	label,
 	value,
-	errors,
+	placeholder,
 	step = 0.01,
 	min,
 	max,
 	suffix,
-	disabled,
 	onChange,
+	...props
 }: Props) {
+	const { id, disabled, errors } = props
+	const invalid = !!errors?.length
+
 	return (
-		<Field data-invalid={!!errors.length}>
-			<FieldLabel htmlFor={id}>{label}</FieldLabel>
+		<FormField {...props}>
 			<div className="relative flex items-center gap-2">
 				<span className="absolute left-2.5">$</span>
 				<Input
 					id={id}
 					name={id}
 					type="number"
+					placeholder={placeholder}
 					step={step}
 					min={min}
 					max={max}
@@ -47,13 +43,12 @@ export default function AmountField({
 						const next = Number(e.target.value)
 						onChange(Number.isNaN(next) ? 0 : next)
 					}}
-					aria-invalid={!!errors.length}
+					aria-invalid={invalid}
 					disabled={disabled}
-					className={cn("flex-1 pl-6", errors.length ? "border-destructive" : null)}
+					className={cn("flex-1 pl-6", invalid ? "border-destructive" : null)}
 				/>
 				{suffix ? <span>{suffix}</span> : null}
 			</div>
-			<FieldError errors={errors} />
-		</Field>
+		</FormField>
 	)
 }

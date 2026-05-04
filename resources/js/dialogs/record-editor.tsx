@@ -218,6 +218,7 @@ export default function RecordEditorDialog({
 								{field => (
 									<DatetimeField
 										id={field.name}
+										label="Date & Time"
 										value={field.state.value}
 										errors={mergeErrors(field.state.meta.errors, field.name)}
 										onChange={value => {

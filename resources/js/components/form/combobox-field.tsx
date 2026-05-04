@@ -1,4 +1,5 @@
 import { type ReactNode } from "react"
+import { FormField, type FormFieldProps } from "@/components/form/field"
 import {
 	Combobox,
 	ComboboxContent,
@@ -7,13 +8,9 @@ import {
 	ComboboxItem,
 	ComboboxList,
 } from "@/components/ui/combobox"
-import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 
-type Props<T> = {
-	id: string
-	label: string
+type Props<T> = FormFieldProps & {
 	value: T | null
-	errors: { message?: string }[]
 	placeholder?: string
 	emptyText?: string
 	items: T[]
@@ -24,10 +21,7 @@ type Props<T> = {
 }
 
 export default function ComboboxField<T>({
-	id,
-	label,
 	value,
-	errors,
 	placeholder,
 	emptyText = "No items found.",
 	items,
@@ -35,22 +29,27 @@ export default function ComboboxField<T>({
 	getItemString,
 	renderItem,
 	onChange,
+	...props
 }: Props<T>) {
+	const { id, disabled, errors } = props
+	const invalid = !!errors?.length
+
 	return (
-		<Field data-invalid={!!errors.length}>
-			<FieldLabel htmlFor={id}>{label}</FieldLabel>
+		<FormField {...props}>
 			<Combobox
 				items={items}
 				itemToStringLabel={getItemString}
 				itemToStringValue={getItemId}
 				value={value}
 				onValueChange={onChange}
+				disabled={disabled}
 				autoHighlight
 			>
 				<ComboboxInput
 					id={id}
 					placeholder={placeholder}
-					aria-invalid={!!errors.length}
+					disabled={disabled}
+					aria-invalid={invalid}
 					showClear
 				/>
 				<ComboboxContent>
@@ -64,7 +63,6 @@ export default function ComboboxField<T>({
 					</ComboboxList>
 				</ComboboxContent>
 			</Combobox>
-			<FieldError errors={errors} />
-		</Field>
+		</FormField>
 	)
 }

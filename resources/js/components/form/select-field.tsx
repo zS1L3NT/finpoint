@@ -1,4 +1,4 @@
-import { Field, FieldError, FieldLabel } from "@/components/ui/field"
+import { FormField, type FormFieldProps } from "@/components/form/field"
 import {
 	Select,
 	SelectContent,
@@ -8,32 +8,20 @@ import {
 	SelectValue,
 } from "@/components/ui/select"
 
-type ErrorItem = { message?: string }
-
-type Props = {
-	id: string
-	label: string
+type Props = FormFieldProps & {
 	value: string
-	errors: ErrorItem[]
 	placeholder?: string
 	items: { value: string; label: string }[]
 	onChange: (value: string) => void
 }
 
-export default function SelectField({
-	id,
-	label,
-	value,
-	errors,
-	placeholder,
-	items,
-	onChange,
-}: Props) {
+export default function SelectField({ value, placeholder, items, onChange, ...props }: Props) {
+	const { id, disabled, errors } = props
+
 	return (
-		<Field data-invalid={!!errors.length}>
-			<FieldLabel htmlFor={id}>{label}</FieldLabel>
-			<Select value={value} onValueChange={onChange}>
-				<SelectTrigger className="w-full" id={id} aria-invalid={!!errors.length}>
+		<FormField {...props}>
+			<Select value={value} onValueChange={onChange} disabled={disabled}>
+				<SelectTrigger className="w-full" id={id} aria-invalid={!!errors?.length}>
 					<SelectValue placeholder={placeholder} />
 				</SelectTrigger>
 				<SelectContent>
@@ -46,7 +34,6 @@ export default function SelectField({
 					</SelectGroup>
 				</SelectContent>
 			</Select>
-			<FieldError errors={errors} />
-		</Field>
+		</FormField>
 	)
 }

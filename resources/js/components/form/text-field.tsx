@@ -1,3 +1,4 @@
+import { FormField, type FormFieldProps } from "@/components/form/field"
 import {
 	Combobox,
 	ComboboxContent,
@@ -5,16 +6,10 @@ import {
 	ComboboxItem,
 	ComboboxList,
 } from "@/components/ui/combobox"
-import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 
-type ErrorItem = { message?: string }
-
-type Props = {
-	id: string
-	label: string
+type Props = FormFieldProps & {
 	value: string
-	errors: ErrorItem[]
 	placeholder?: string
 	suggestions?: string[]
 	type?: "text" | "email" | "tel" | "url" | "search" | "password"
@@ -22,23 +17,24 @@ type Props = {
 }
 
 export default function TextField({
-	id,
-	label,
 	value,
-	errors,
 	placeholder,
 	suggestions,
 	type = "text",
 	onChange,
+	...props
 }: Props) {
+	const { id, disabled, errors } = props
+	const invalid = !!errors?.length
+
 	return (
-		<Field data-invalid={!!errors.length}>
-			<FieldLabel htmlFor={id}>{label}</FieldLabel>
+		<FormField {...props}>
 			{suggestions ? (
 				<Combobox
 					items={[...new Set(value.trim() ? [value, ...suggestions] : suggestions)]}
 					value={value}
 					onValueChange={e => onChange(e ?? "")}
+					disabled={disabled}
 					autoHighlight
 				>
 					<ComboboxInput
@@ -46,8 +42,9 @@ export default function TextField({
 						name={id}
 						type={type}
 						placeholder={placeholder}
+						disabled={disabled}
 						onChange={e => onChange(e.target.value)}
-						aria-invalid={!!errors.length}
+						aria-invalid={invalid}
 						showTrigger={false}
 					/>
 					<ComboboxContent className="w-fit min-w-0">
@@ -71,11 +68,11 @@ export default function TextField({
 					type={type}
 					placeholder={placeholder}
 					value={value}
+					disabled={disabled}
 					onChange={e => onChange(e.target.value)}
-					aria-invalid={!!errors.length}
+					aria-invalid={invalid}
 				/>
 			)}
-			<FieldError errors={errors} />
-		</Field>
+		</FormField>
 	)
 }

@@ -119,9 +119,7 @@ export default function RecordsPage({ records }: { records: Paginated<Record & R
 							<>
 								<DateField
 									id="start_date"
-									label=""
 									value={startDate ?? ""}
-									errors={[]}
 									className="w-32"
 									placeholder="Start date"
 									onChange={date => setStartDate(date || null)}
@@ -129,9 +127,7 @@ export default function RecordsPage({ records }: { records: Paginated<Record & R
 
 								<DateField
 									id="end_date"
-									label=""
 									value={endDate ?? ""}
-									errors={[]}
 									className="w-32"
 									placeholder="End date"
 									onChange={date => setEndDate(date || null)}

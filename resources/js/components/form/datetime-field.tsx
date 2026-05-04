@@ -1,19 +1,14 @@
 import { CalendarIcon } from "lucide-react"
 import { DateTime } from "luxon"
+import { FormField, type FormFieldProps } from "@/components/form/field"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
-import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
 
-type ErrorItem = { message?: string }
-
-type Props = {
-	id: string
-	label?: string
+type Props = FormFieldProps & {
 	value: string
-	errors: ErrorItem[]
 	placeholder?: string
 	onChange: (value: string) => void
 }
@@ -30,15 +25,15 @@ const parseValue = (value: string) => {
 const toInputValue = (datetime: DateTime) => datetime.toFormat("yyyy-MM-dd'T'HH:mm")
 
 export default function DatetimeField({
-	id,
-	label = "Date & Time",
 	value,
-	errors,
 	placeholder = "Select date & time",
 	onChange,
+	...props
 }: Props) {
+	const { id, disabled, errors } = props
 	const selected = parseValue(value)
 	const selectedTime = selected ? selected.toFormat("HH:mm") : ""
+	const invalid = !!errors?.length
 
 	const updateDate = (date: Date | undefined) => {
 		if (!date) {
@@ -72,8 +67,7 @@ export default function DatetimeField({
 	}
 
 	return (
-		<Field data-invalid={!!errors.length}>
-			<FieldLabel htmlFor={id}>{label}</FieldLabel>
+		<FormField {...props}>
 			<div className="grid grid-cols-2 gap-2">
 				<Popover>
 					<PopoverTrigger
@@ -81,11 +75,12 @@ export default function DatetimeField({
 							<Button
 								id={id}
 								variant="outline"
-								aria-invalid={!!errors.length}
+								disabled={disabled}
+								aria-invalid={invalid}
 								className={cn(
 									"w-full justify-start text-left font-normal",
 									!selected && "text-muted-foreground",
-									errors.length ? "border-destructive" : null,
+									invalid ? "border-destructive" : null,
 								)}
 							>
 								<CalendarIcon />
@@ -111,12 +106,12 @@ export default function DatetimeField({
 					type="time"
 					step="60"
 					value={selectedTime}
+					disabled={disabled}
 					onChange={event => updateTime(event.target.value)}
-					aria-invalid={!!errors.length}
-					className={cn(errors.length ? "border-destructive" : null)}
+					aria-invalid={invalid}
+					className={cn(invalid ? "border-destructive" : null)}
 				/>
 			</div>
-			<FieldError errors={errors} />
-		</Field>
+		</FormField>
 	)
 }

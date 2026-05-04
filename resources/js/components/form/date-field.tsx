@@ -1,38 +1,29 @@
 import { CalendarIcon, XIcon } from "lucide-react"
 import { DateTime } from "luxon"
+import { FormField, type FormFieldProps } from "@/components/form/field"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
-import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn, parseDate } from "@/lib/utils"
 
-type ErrorItem = { message?: string }
-
-type Props = {
-	id: string
-	label?: string
+type Props = FormFieldProps & {
 	value: string
-	errors: ErrorItem[]
-	className?: string
 	placeholder?: string
 	onChange: (value: string) => void
 }
 
 export default function DateField({
-	id,
-	label,
 	value,
-	errors,
-	className,
 	placeholder = "Select date",
 	onChange,
+	...props
 }: Props) {
+	const { id, disabled, errors } = props
 	const selected = parseDate(value)
+	const invalid = !!errors?.length
 
 	return (
-		<Field data-invalid={!!errors.length} className={className}>
-			{label ? <FieldLabel htmlFor={id}>{label}</FieldLabel> : null}
-
+		<FormField {...props}>
 			<div className="relative">
 				<Popover>
 					<PopoverTrigger
@@ -40,12 +31,13 @@ export default function DateField({
 							<Button
 								id={id}
 								variant="outline"
-								aria-invalid={!!errors.length}
+								disabled={disabled}
+								aria-invalid={invalid}
 								className={cn(
 									"w-full justify-start text-left font-normal",
 									selected.isValid && "pr-8",
 									!selected.isValid && "text-muted-foreground",
-									errors.length ? "border-destructive" : null,
+									invalid ? "border-destructive" : null,
 								)}
 							>
 								<CalendarIcon />
@@ -78,14 +70,13 @@ export default function DateField({
 						size="icon-xs"
 						className="absolute top-1/2 right-1 -translate-y-1/2"
 						aria-label="Clear date"
+						disabled={disabled}
 						onClick={() => onChange("")}
 					>
 						<XIcon />
 					</Button>
 				) : null}
 			</div>
-
-			<FieldError errors={errors} />
-		</Field>
+		</FormField>
 	)
 }
