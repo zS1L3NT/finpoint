@@ -59,7 +59,7 @@ class RecordController extends Controller
         return DB::transaction(function () use ($dto) {
             $record = Record::query()->create([
                 'id' => Uuid::uuid4(),
-                'amount' => round(collect($dto['statements'])->reduce(fn ($acc, $el) => $acc + $el['amount'], 0), 2),
+                'amount' => round(collect($dto['statements'])->reduce(fn($acc, $el) => $acc + $el['amount'], 0), 2),
                 'datetime' => Carbon::createFromFormat('Y-m-d\\TH:i', $dto['datetime'])->format('Y-m-d H:i:s'),
                 ...collect($dto)->except('statements', 'datetime'),
             ]);
@@ -147,7 +147,7 @@ class RecordController extends Controller
                 ...collect($dto)->except('statements', 'datetime'),
             ]);
 
-            if ($record->datetime->format('F') !== $record->quota?->month || $record->datetime->format('Y') !== $record->quota?->year) {
+            if ($record->datetime->format('F') !== $record->quota?->month || $record->datetime->format('Y') !== (string) $record->quota?->year) {
                 $record->quota_pivot()->update(['quota_id' => null]);
             }
 
