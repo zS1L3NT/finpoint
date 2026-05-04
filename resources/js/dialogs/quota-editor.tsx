@@ -17,7 +17,7 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
-import useApiFormErrors from "@/hooks/use-api-form-errors"
+import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { withMethod } from "@/lib/utils"
 import { Quota } from "@/types"
 import { quotaDestroyApiRoute, quotaUpdateApiRoute } from "@/wayfinder/routes"

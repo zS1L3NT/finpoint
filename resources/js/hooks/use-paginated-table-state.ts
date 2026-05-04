@@ -14,7 +14,7 @@ const getSearchParams = () =>
 		? new URLSearchParams()
 		: new URLSearchParams(window.location.search)
 
-export default function usePaginatedTableState({
+export function usePaginatedTableState({
 	syncOn,
 	buildUrl,
 }: {

@@ -18,7 +18,7 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog"
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field"
-import useApiFormErrors from "@/hooks/use-api-form-errors"
+import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { budgetStoreApiRoute } from "@/wayfinder/routes"
 
 export default function BudgetCreatorDialog() {

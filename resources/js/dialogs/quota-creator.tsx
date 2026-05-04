@@ -17,7 +17,7 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
-import useApiFormErrors from "@/hooks/use-api-form-errors"
+import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { quotaStoreApiRoute } from "@/wayfinder/routes"
 
 export default function QuotaCreatorDialog({ month, year }: { month: string; year: number }) {

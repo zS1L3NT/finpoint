@@ -16,7 +16,7 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog"
 import { FieldGroup } from "@/components/ui/field"
-import useApiFormErrors from "@/hooks/use-api-form-errors"
+import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { cn, withMethod } from "@/lib/utils"
 import { Category } from "@/types"
 import {

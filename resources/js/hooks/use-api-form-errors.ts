@@ -4,7 +4,7 @@ type ErrorItem = { message?: string }
 
 const toDotPath = (path: string) => path.replace(/\[(\d+)\]/g, ".$1")
 
-export default function useApiFormErrors() {
+export function useApiFormErrors() {
 	const [apiErrors, setApiErrors] = useState<Record<string, string[]>>({})
 
 	const getApiFieldErrors = useCallback(
