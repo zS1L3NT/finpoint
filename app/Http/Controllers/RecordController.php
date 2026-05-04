@@ -29,6 +29,14 @@ class RecordController extends Controller
                             ->orWhere('categories.name', 'like', '%' . $q . '%')
                     )
             )
+            ->when(
+                request()->query('start_date'),
+                fn($query, $date) => $query->whereDate('datetime', '>=', $date)
+            )
+            ->when(
+                request()->query('end_date'),
+                fn($query, $date) => $query->whereDate('datetime', '<=', $date)
+            )
             ->orderBy('datetime', 'desc')
             ->groupBy('records.id')
             ->paginate(request('per_page') ?? 25)
@@ -47,7 +55,7 @@ class RecordController extends Controller
                     'allocations_sum_amount' => Allocation::query()
                         ->selectRaw('round(sum(amount), 2)')
                         ->whereColumn('source_statement_id', 'statements.id'),
-                ])
+                ]),
         ]);
 
         $categories = Category::query()

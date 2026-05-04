@@ -15,23 +15,28 @@ export default function PaginationHeader({
 	pageSize,
 	onPageSizeChange,
 	searchPlaceholder,
-	children,
+	filters,
+	actions,
 }: {
 	query: string
 	onQueryChange: (value: string) => void
 	pageSize: string
 	onPageSizeChange: (value: string) => void
 	searchPlaceholder: string
-	children?: ReactNode
+	filters?: ReactNode
+	actions?: ReactNode
 }) {
 	return (
 		<div className="flex items-end justify-between gap-4">
-			<div className="w-full max-w-sm">
+			<div className="flex items-end gap-2">
 				<Input
+					className="w-sm"
 					placeholder={searchPlaceholder}
 					value={query}
 					onChange={e => onQueryChange(e.target.value)}
 				/>
+
+				{filters}
 			</div>
 
 			<div className="flex items-center gap-3">
@@ -51,7 +56,8 @@ export default function PaginationHeader({
 						</SelectContent>
 					</Select>
 				</div>
-				{children}
+
+				{actions}
 			</div>
 		</div>
 	)

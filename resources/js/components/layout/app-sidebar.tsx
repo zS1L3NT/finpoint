@@ -9,6 +9,7 @@ import {
 	ReceiptTextIcon,
 	TagIcon,
 } from "lucide-react"
+import { DateTime } from "luxon"
 import {
 	Sidebar,
 	SidebarContent,
@@ -97,7 +98,14 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
 					<SidebarMenu>
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
-								<Link href={recordsWebRoute.url()} onClick={handleClear}>
+								<Link
+									href={recordsWebRoute.url({
+										query: {
+											end_date: DateTime.now().toFormat("yyyy-MM-dd"),
+										},
+									})}
+									onClick={handleClear}
+								>
 									<ReceiptTextIcon />
 									<span>Records</span>
 								</Link>

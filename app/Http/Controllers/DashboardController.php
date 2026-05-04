@@ -34,6 +34,6 @@ class DashboardController extends Controller
             ->where('year', $year)
             ->get();
 
-        return Inertia::render('dashboard', compact('month', 'year', 'records', 'categories', 'quotas'));
+        return Inertia::render('dashboard', compact('records', 'categories', 'quotas'));
     }
 }

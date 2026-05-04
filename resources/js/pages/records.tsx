@@ -1,5 +1,6 @@
 import { Link } from "@inertiajs/react"
 import { ReceiptTextIcon } from "lucide-react"
+import DateField from "@/components/form/date-field"
 import Icon from "@/components/icon"
 import AppHeader from "@/components/layout/app-header"
 import PageHeader from "@/components/layout/page-header"
@@ -7,6 +8,7 @@ import PaginatedDataTable from "@/components/table/paginated-data-table"
 import { Button } from "@/components/ui/button"
 import { useHistory } from "@/history"
 import usePaginatedTableState from "@/hooks/use-paginated-table-state"
+import { useSearchParam } from "@/hooks/use-search-param"
 import { TABLE_WIDTHS } from "@/lib/table-widths"
 import { classForCurrency, formatCurrency, formatDatetime } from "@/lib/utils"
 import { Category, Paginated, Record } from "@/types"
@@ -19,9 +21,19 @@ type RecordExtra = {
 export default function RecordsPage({ records }: { records: Paginated<Record & RecordExtra> }) {
 	const { handlePush } = useHistory()
 
+	const [startDate, setStartDate] = useSearchParam("start_date")
+	const [endDate, setEndDate] = useSearchParam("end_date")
+
 	const { query, pageSize, handleQueryChange, handlePageSizeChange } = usePaginatedTableState({
 		syncOn: records,
-		buildUrl: query => recordsWebRoute({ query }).url,
+		buildUrl: query =>
+			recordsWebRoute({
+				query: {
+					...query,
+					start_date: startDate || undefined,
+					end_date: endDate || undefined,
+				},
+			}).url,
 	})
 
 	return (
@@ -103,6 +115,29 @@ export default function RecordsPage({ records }: { records: Paginated<Record & R
 						pageSize,
 						onPageSizeChange: handlePageSizeChange,
 						searchPlaceholder: "Search records...",
+						filters: (
+							<>
+								<DateField
+									id="start_date"
+									label=""
+									value={startDate ?? ""}
+									errors={[]}
+									className="w-32"
+									placeholder="Start date"
+									onChange={date => setStartDate(date || null)}
+								/>
+
+								<DateField
+									id="end_date"
+									label=""
+									value={endDate ?? ""}
+									errors={[]}
+									className="w-32"
+									placeholder="End date"
+									onChange={date => setEndDate(date || null)}
+								/>
+							</>
+						),
 					}}
 					footer={{
 						summary: `Showing ${records.data.length} of ${records.total} records.`,

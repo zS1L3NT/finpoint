@@ -52,6 +52,7 @@ import QuotaCreatorDialog from "@/dialogs/quota-creator"
 import QuotaEditorDialog from "@/dialogs/quota-editor"
 import RecordQuotaDialog from "@/dialogs/record-quota-editor"
 import { useHistory } from "@/history"
+import { useSearchParam } from "@/hooks/use-search-param"
 import { TABLE_WIDTHS } from "@/lib/table-widths"
 import { classForCurrency, cn, formatCurrency, formatDatetime, withMethod } from "@/lib/utils"
 import { Category, Quota, Record } from "@/types"
@@ -72,14 +73,10 @@ type CategoryExtra = {
 }
 
 export default function DashboardPage({
-	month,
-	year,
 	records,
 	categories,
 	quotas,
 }: {
-	month: string
-	year: number
 	records: (Record & RecordExtra)[]
 	categories: (Category & CategoryExtra)[]
 	quotas: Quota[]
@@ -92,7 +89,9 @@ export default function DashboardPage({
 	const [tableQuotaIds, setTableQuotaIds] = useState<string[]>([])
 	const [tableShowNoQuota, setTableShowNoQuota] = useState(false)
 
-	const date = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy").toJSDate()
+	const [month] = useSearchParam("month", DateTime.now().toFormat("MMMM"))
+	const [year] = useSearchParam("year", DateTime.now().toFormat("yyyy"))
+	const date = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
 
 	const setDate = (date: Date) => {
 		const dt = DateTime.fromJSDate(date)
@@ -214,11 +213,7 @@ export default function DashboardPage({
 						<ButtonGroup>
 							<Button
 								variant="outline"
-								onClick={() =>
-									setDate(
-										DateTime.fromJSDate(date).minus({ month: 1 }).toJSDate(),
-									)
-								}
+								onClick={() => setDate(date.minus({ month: 1 }).toJSDate())}
 							>
 								<ArrowLeftIcon />
 							</Button>
@@ -227,23 +222,20 @@ export default function DashboardPage({
 									render={
 										<Button variant="outline" className="w-32">
 											<CalendarIcon className="mr-2 h-4 w-4" />
-											{date ? (
-												DateTime.fromJSDate(date).toFormat("MMM yyyy")
-											) : (
-												<span>Pick a month</span>
-											)}
+											{date.toFormat("MMM yyyy")}
 										</Button>
 									}
 								/>
 								<PopoverContent className="w-auto p-0">
-									<MonthPicker onMonthSelect={setDate} selectedMonth={date} />
+									<MonthPicker
+										onMonthSelect={setDate}
+										selectedMonth={date.toJSDate()}
+									/>
 								</PopoverContent>
 							</Popover>
 							<Button
 								variant="outline"
-								onClick={() =>
-									setDate(DateTime.fromJSDate(date).plus({ month: 1 }).toJSDate())
-								}
+								onClick={() => setDate(date.plus({ month: 1 }).toJSDate())}
 							>
 								<ArrowRightIcon />
 							</Button>
@@ -257,7 +249,7 @@ export default function DashboardPage({
 						<CardHeader>
 							<CardTitle>Quotas</CardTitle>
 							<CardAction>
-								<QuotaCreatorDialog month={month} year={year} />
+								<QuotaCreatorDialog month={month} year={+year} />
 							</CardAction>
 						</CardHeader>
 						<CardContent className="grid gap-3">
@@ -388,8 +380,8 @@ export default function DashboardPage({
 					<CardHeader>
 						<CardTitle>Monthly records</CardTitle>
 						<CardDescription>
-							Records for {DateTime.fromJSDate(date).toFormat("MMMM yyyy")}. Select
-							records to attach to a quota.
+							Records for {date.toFormat("MMMM yyyy")}. Select records to attach to a
+							quota.
 						</CardDescription>
 					</CardHeader>
 					<CardContent>

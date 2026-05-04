@@ -32,6 +32,7 @@
 - Don't deviate from library defaults / use hacky methods to accomplish what I ask unless absolutely necessary. Deep dive into the library before doing this
 - If the library provides something or if we have a component for something, use it
 - Code scoped to a specific component should stay within that specific component file
+- Generic logic that is not specific to one hook/component/page should be moved to an appropriate shared utility instead of living inside a feature-specific file
 
 ## Domain
 - Most domain tables use string primary keys, not auto-increment integers.

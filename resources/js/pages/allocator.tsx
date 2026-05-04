@@ -3,6 +3,7 @@ import { LinkIcon } from "lucide-react"
 import { useState } from "react"
 import AllocateBar from "@/components/allocate-bar"
 import DetailCard from "@/components/detail-card"
+import DateField from "@/components/form/date-field"
 import AppHeader from "@/components/layout/app-header"
 import PageHeader from "@/components/layout/page-header"
 import PaginatedDataTable from "@/components/table/paginated-data-table"
@@ -11,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import RecordCreatorDialog from "@/dialogs/record-creator"
 import { useHistory } from "@/history"
 import usePaginatedTableState from "@/hooks/use-paginated-table-state"
+import { useSearchParam } from "@/hooks/use-search-param"
 import { TABLE_WIDTHS } from "@/lib/table-widths"
 import { classForCurrency, formatCurrency, formatDatetime, round2dp } from "@/lib/utils"
 import { Account, Category, Paginated, Statement } from "@/types"
@@ -40,10 +42,21 @@ export default function AllocatorPage({
 }) {
 	const { handlePush } = useHistory()
 
+	const [startDate, setStartDate] = useSearchParam("start_date")
+	const [endDate, setEndDate] = useSearchParam("end_date")
+
 	const [selected, setSelected] = useState<(Statement & StatementExtra)[]>([])
+
 	const { query, pageSize, handleQueryChange, handlePageSizeChange } = usePaginatedTableState({
 		syncOn: statements,
-		buildUrl: query => allocatorWebRoute({ query }).url,
+		buildUrl: query =>
+			allocatorWebRoute({
+				query: {
+					...query,
+					start_date: startDate || undefined,
+					end_date: endDate || undefined,
+				},
+			}).url,
 	})
 
 	const selectedAmount = selected.reduce(
@@ -153,7 +166,30 @@ export default function AllocatorPage({
 						pageSize,
 						onPageSizeChange: handlePageSizeChange,
 						searchPlaceholder: "Filter statements...",
-						children: (
+						filters: (
+							<>
+								<DateField
+									id="start_date"
+									label=""
+									value={startDate ?? ""}
+									errors={[]}
+									className="w-32"
+									placeholder="Start date"
+									onChange={date => setStartDate(date || null)}
+								/>
+
+								<DateField
+									id="end_date"
+									label=""
+									value={endDate ?? ""}
+									errors={[]}
+									className="w-32"
+									placeholder="End date"
+									onChange={date => setEndDate(date || null)}
+								/>
+							</>
+						),
+						actions: (
 							<RecordCreatorDialog
 								statements={selected ? Object.values(selected) : []}
 								categories={categories}

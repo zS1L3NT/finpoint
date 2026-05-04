@@ -31,6 +31,14 @@ class AllocatorController extends Controller
                             ->orWhere('accounts.id', 'like', '%' . $q . '%')
                     )
             )
+            ->when(
+                request()->query('start_date'),
+                fn($query, $date) => $query->whereDate('datetime', '>=', $date)
+            )
+            ->when(
+                request()->query('end_date'),
+                fn($query, $date) => $query->whereDate('datetime', '<=', $date)
+            )
             ->havingRaw('allocations_sum_amount is null or allocations_sum_amount != round(statements.amount, 2)')
             ->orderBy('datetime', 'desc')
             ->groupBy('statements.id')
