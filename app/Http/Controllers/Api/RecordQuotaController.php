@@ -10,15 +10,14 @@ class RecordQuotaController extends Controller
 {
     public function attach(Record $record, Quota $quota)
     {
-        $record->quota_pivot()->update(['quota_id' => $quota->id]);
+        $record->quota()->associate($quota)->save();
 
         return [];
     }
 
-
-    public function detach(Record $record, Quota $quota)
+    public function detach(Record $record)
     {
-        $record->quota_pivot()->update(['quota_id' => null]);
+        $record->quota()->dissociate()->save();
 
         return [];
     }

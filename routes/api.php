@@ -23,8 +23,8 @@ Route::apiResource('records', RecordController::class)
         'destroy' => 'record-destroy-api-route',
     ]);
 
-Route::post('records/{record}/quotas/{quota}', [RecordQuotaController::class, 'attach'])->name('record-quota-attach-api-route');
-Route::delete('records/{record}/quotas/{quota}', [RecordQuotaController::class, 'detach'])->name('record-quota-detach-api-route');
+Route::post('records/{record}/quota/{quota}', [RecordQuotaController::class, 'attach'])->name('record-quota-attach-api-route');
+Route::delete('records/{record}/quota', [RecordQuotaController::class, 'detach'])->name('record-quota-detach-api-route');
 
 Route::apiResource('budgets', BudgetController::class)
     ->only('store', 'update', 'destroy')

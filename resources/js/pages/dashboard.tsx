@@ -116,8 +116,7 @@ export default function DashboardPage({
 
 		const responses = await Promise.all(
 			selectedWithQuota.map(record =>
-				// biome-ignore lint/style/noNonNullAssertion: Filtered records without quota already
-				fetch(recordQuotaDetachApiRoute({ record, quota: record.quota! }).url, {
+				fetch(recordQuotaDetachApiRoute({ record }).url, {
 					method: "POST",
 					body: withMethod(new FormData(), "DELETE"),
 					headers: { Accept: "application/json" },

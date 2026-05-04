@@ -75,8 +75,6 @@ class RecordController extends Controller
                 $budget->records()->attach($record);
             }
 
-            $record->quota_pivot()->create();
-
             $errors = collect();
 
             foreach ($dto['statements'] as $i => $statement_dto) {
@@ -148,7 +146,7 @@ class RecordController extends Controller
             ]);
 
             if ($record->datetime->format('F') !== $record->quota?->month || $record->datetime->format('Y') !== (string) $record->quota?->year) {
-                $record->quota_pivot()->update(['quota_id' => null]);
+                $record->quota()->disassociate()->save();
             }
 
             $errors = collect();

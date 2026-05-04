@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Pivots\RecordQuota;
 use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Attributes\Table;
@@ -60,11 +59,6 @@ class Record extends Model
 
     public function quota()
     {
-        return $this->hasOneThrough(Quota::class, RecordQuota::class, 'record_id', 'id', 'id', 'quota_id');
-    }
-
-    public function quota_pivot()
-    {
-        return $this->hasOne(RecordQuota::class, 'record_id');
+        return $this->belongsTo(Quota::class);
     }
 }

@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Pivots\RecordQuota;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\WithoutTimestamps;
@@ -15,6 +14,6 @@ class Quota extends Model
 {
     public function records()
     {
-        return $this->hasManyThrough(Record::class, RecordQuota::class, 'quota_id', 'id', 'id', 'record_id');
+        return $this->hasMany(Record::class);
     }
 }
