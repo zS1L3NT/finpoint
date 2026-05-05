@@ -37,7 +37,6 @@ export default function BudgetsPage({ budgets }: { budgets: Paginated<Budget & B
 					subtitle="Track fixed spending windows, monitor how much has already been consumed, and jump straight into the records inside each budget."
 					description="Budget planner"
 					icon={PiggyBankIcon}
-					actions={<BudgetCreatorDialog />}
 				/>
 
 				<PaginatedDataTable
@@ -143,6 +142,7 @@ export default function BudgetsPage({ budgets }: { budgets: Paginated<Budget & B
 						pageSize,
 						onPageSizeChange: handlePageSizeChange,
 						searchPlaceholder: "Search all budgets...",
+						actions: <BudgetCreatorDialog />,
 					}}
 					footer={{
 						summary: `Showing ${budgets.data.length} of ${budgets.total} budgets.`,

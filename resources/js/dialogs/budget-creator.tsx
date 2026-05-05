@@ -73,7 +73,7 @@ export default function BudgetCreatorDialog() {
 		>
 			<DialogTrigger
 				render={
-					<Button size="lg">
+					<Button>
 						<PlusIcon /> New Budget
 					</Button>
 				}
