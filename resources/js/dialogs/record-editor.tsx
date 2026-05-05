@@ -181,7 +181,7 @@ export default function RecordEditorDialog({
 			trigger={
 				<Button variant="outline">
 					<Link2Icon />
-					Attach Statements
+					Attach statement
 				</Button>
 			}
 		/>
