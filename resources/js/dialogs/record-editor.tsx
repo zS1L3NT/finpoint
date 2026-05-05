@@ -48,6 +48,7 @@ import {
 } from "@/components/ui/empty"
 import { FieldGroup } from "@/components/ui/field"
 import { Progress } from "@/components/ui/progress"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { useHistory } from "@/history"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { cn, formatCurrency, formatDatetime, round2dp, withMethod } from "@/lib/utils"
@@ -379,79 +380,101 @@ export default function RecordEditorDialog({
 						</div>
 
 						<div className="flex flex-col gap-2">
-							{formStatements.map(({ id }, index) => (
-								<form.Field key={id} name={`statements[${index}].amount` as const}>
-									{field => {
-										// biome-ignore lint/style/noNonNullAssertion: All full statement objects must be cached
-										const statement = statements.find(s => s.id === id)!
-
-										const errors = mergeErrors(
-											field.state.meta.errors,
-											field.name,
-										)
-										const allocable = round2dp(
-											statement.allocable_amount +
-												(statement.pivot?.amount ?? 0),
-										)
-
-										const percent =
-											allocable === 0
-												? 0
-												: (field.state.value / allocable) * 100
-
-										return (
-											<Card
-												className={cn(
-													errors.length ? "border-destructive/50" : null,
-												)}
+							<ScrollArea className="h-fit max-h-200">
+								<div className="space-y-2">
+									{formStatements.map(({ id }, index) => (
+										<div key={id} className="p-0.5">
+											<form.Field
+												name={`statements[${index}].amount` as const}
 											>
-												<CardHeader>
-													<CardTitle className="text-sm leading-5">
-														{statement.description}
-													</CardTitle>
-													<CardDescription>
-														{formatDatetime(statement.datetime)}
-													</CardDescription>
-													<CardAction className="text-sm font-semibold">
-														<Button
-															variant="destructive"
-															onClick={() => {
-																form.setFieldValue(
-																	"statements",
-																	form
-																		.getFieldValue("statements")
-																		.filter(s => s.id !== id),
-																)
-															}}
+												{field => {
+													// biome-ignore lint/style/noNonNullAssertion: All full statement objects must be cached
+													const statement = statements.find(
+														s => s.id === id,
+													)!
+
+													const errors = mergeErrors(
+														field.state.meta.errors,
+														field.name,
+													)
+													const allocable = round2dp(
+														statement.allocable_amount +
+															(statement.pivot?.amount ?? 0),
+													)
+
+													const percent =
+														allocable === 0
+															? 0
+															: (field.state.value / allocable) * 100
+
+													return (
+														<Card
+															className={cn(
+																errors.length
+																	? "border-destructive/50"
+																	: null,
+															)}
 														>
-															<TrashIcon />
-														</Button>
-													</CardAction>
-												</CardHeader>
-												<CardContent className="flex flex-col gap-4">
-													<AmountField
-														id={field.name}
-														label="Amount"
-														value={field.state.value}
-														errors={errors}
-														suffix={`of ${formatCurrency(allocable)}`}
-														onChange={value => {
-															field.handleChange(value)
-															clearApiError(field.name)
-														}}
-													/>
-													<Progress
-														value={percent}
-														className={cn(
-															percent > 100 ? "text-red-400" : null,
-														)}
-													/>
-												</CardContent>
-											</Card>
-										)
-									}}
-								</form.Field>
-							))}
+															<CardHeader>
+																<CardTitle className="text-sm leading-5">
+																	{statement.description}
+																</CardTitle>
+																<CardDescription>
+																	{formatDatetime(
+																		statement.datetime,
+																	)}
+																</CardDescription>
+																<CardAction className="text-sm font-semibold">
+																	<Button
+																		variant="destructive"
+																		onClick={() => {
+																			form.setFieldValue(
+																				"statements",
+																				form
+																					.getFieldValue(
+																						"statements",
+																					)
+																					.filter(
+																						s =>
+																							s.id !==
+																							id,
+																					),
+																			)
+																		}}
+																	>
+																		<TrashIcon />
+																	</Button>
+																</CardAction>
+															</CardHeader>
+															<CardContent className="flex flex-col gap-4">
+																<AmountField
+																	id={field.name}
+																	label="Amount"
+																	value={field.state.value}
+																	errors={errors}
+																	suffix={`of ${formatCurrency(allocable)}`}
+																	onChange={value => {
+																		field.handleChange(value)
+																		clearApiError(field.name)
+																	}}
+																/>
+																<Progress
+																	value={percent}
+																	className={cn(
+																		percent > 100
+																			? "text-red-400"
+																			: null,
+																	)}
+																/>
+															</CardContent>
+														</Card>
+													)
+												}}
+											</form.Field>
+										</div>
+									))}
+								</div>
+							</ScrollArea>
 
 							{!formStatements.length && (
 								<Empty className="border border-dashed">

@@ -26,6 +26,7 @@ import {
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
 import { FieldGroup } from "@/components/ui/field"
 import { Progress } from "@/components/ui/progress"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { cn, formatCurrency, formatDatetime, parseDatetime, round2dp } from "@/lib/utils"
 import { CategoryWithChildren, Statement } from "@/types"
@@ -296,74 +297,82 @@ export default function RecordCreatorDialog({
 					<div className="flex flex-col gap-4">
 						<p className="text-sm font-semibold">Statements Attached</p>
 
-						<div className="flex flex-col gap-2">
-							{statements.map((statement, index) => (
-								<form.Field
-									key={statement.id}
-									name={`statements[${index}].amount` as const}
-								>
-									{field => {
-										const errors = mergeErrors(
-											field.state.meta.errors,
-											field.name,
-										)
-										const allocable = statement.allocable_amount
+						<ScrollArea className="h-fit max-h-200">
+							<div className="space-y-2">
+								{statements.map((statement, index) => (
+									<div key={statement.id} className="p-0.5">
+										<form.Field name={`statements[${index}].amount` as const}>
+											{field => {
+												const errors = mergeErrors(
+													field.state.meta.errors,
+													field.name,
+												)
+												const allocable = statement.allocable_amount
 
-										const percent =
-											allocable === 0
-												? 0
-												: (field.state.value / allocable) * 100
+												const percent =
+													allocable === 0
+														? 0
+														: (field.state.value / allocable) * 100
 
-										return (
-											<Card
-												className={cn(
-													errors.length ? "border-destructive/50" : null,
-												)}
-											>
-												<CardHeader>
-													<CardTitle className="text-sm leading-5">
-														{statement.description}
-													</CardTitle>
-													<CardDescription>
-														{formatDatetime(statement.datetime)}
-													</CardDescription>
-												</CardHeader>
-												<CardContent className="flex flex-col gap-4">
-													<AmountField
-														id={field.name}
-														label="Amount"
-														value={field.state.value}
-														errors={errors}
-														suffix={`of ${formatCurrency(allocable)}`}
-														onChange={value => {
-															field.handleChange(value)
-															form.setFieldValue(
-																"amount",
-																round2dp(
-																	form
-																		.getFieldValue("statements")
-																		.reduce(
-																			(acc, el, i) =>
-																				acc + el.amount,
-																			0,
-																		),
-																),
-															)
-															clearApiError(field.name)
-														}}
-													/>
-													<Progress
-														value={percent}
+												return (
+													<Card
 														className={cn(
-															percent > 100 ? "text-red-400" : null,
+															errors.length
+																? "border-destructive/50"
+																: null,
 														)}
-													/>
-												</CardContent>
-											</Card>
-										)
-									}}
-								</form.Field>
-							))}
+													>
+														<CardHeader>
+															<CardTitle className="text-sm leading-5">
+																{statement.description}
+															</CardTitle>
+															<CardDescription>
+																{formatDatetime(statement.datetime)}
+															</CardDescription>
+														</CardHeader>
+														<CardContent className="flex flex-col gap-4">
+															<AmountField
+																id={field.name}
+																label="Amount"
+																value={field.state.value}
+																errors={errors}
+																suffix={`of ${formatCurrency(allocable)}`}
+																onChange={value => {
+																	field.handleChange(value)
+																	form.setFieldValue(
+																		"amount",
+																		round2dp(
+																			form
+																				.getFieldValue(
+																					"statements",
+																				)
+																				.reduce(
+																					(acc, el, i) =>
+																						acc +
+																						el.amount,
+																					0,
+																				),
+																		),
+																	)
+																	clearApiError(field.name)
+																}}
+															/>
+															<Progress
+																value={percent}
+																className={cn(
+																	percent > 100
+																		? "text-red-400"
+																		: null,
+																)}
+															/>
+														</CardContent>
+													</Card>
+												)
+											}}
+										</form.Field>
+									</div>
+								))}
+							</div>
 
 							{!statements.length && (
 								<Empty className="border border-dashed">
@@ -378,7 +387,7 @@ export default function RecordCreatorDialog({
 									</EmptyHeader>
 								</Empty>
 							)}
-						</div>
+						</ScrollArea>
 					</div>
 				</form>
 
