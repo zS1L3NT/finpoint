@@ -9,6 +9,7 @@ import {
 	Trash2Icon,
 	TrashIcon,
 } from "lucide-react"
+import { DateTime } from "luxon"
 import { useEffect, useState } from "react"
 import AmountField from "@/components/form/amount-field"
 import ComboboxField from "@/components/form/combobox-field"
@@ -144,7 +145,9 @@ export default function RecordEditorDialog({
 		if (response.ok) {
 			setOpen(false)
 			handleClear()
-			router.visit(recordsWebRoute.url())
+			router.visit(
+				recordsWebRoute.url({ query: { end_date: DateTime.now().toFormat("yyyy-MM-dd") } }),
+			)
 		}
 	}
 
