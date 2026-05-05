@@ -15,7 +15,7 @@ class RecordController extends Controller
 {
     public function index()
     {
-        return Record::with('category')
+        return Record::query()
             ->when(
                 request()->query('query'),
                 fn($query, $q) => $query
@@ -37,6 +37,7 @@ class RecordController extends Controller
                     ->whereDoesntHave('budgets', fn($query) => $query->where('budgets.id', $id))
             )
             ->orderBy('datetime', 'desc')
+            ->groupBy('records.id')
             ->get();
     }
 
