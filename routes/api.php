@@ -7,11 +7,18 @@ use App\Http\Controllers\Api\ImporterController;
 use App\Http\Controllers\Api\QuotaController;
 use App\Http\Controllers\Api\RecordController;
 use App\Http\Controllers\Api\RecordQuotaController;
+use App\Http\Controllers\Api\StatementController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('importer/dbs', [ImporterController::class, 'dbs'])->name('importer-dbs-api-route');
 Route::post('importer/uob', [ImporterController::class, 'uob'])->name('importer-uob-api-route');
 Route::post('importer/revolut', [ImporterController::class, 'revolut'])->name('importer-revolut-api-route');
+
+Route::apiResource('statements', StatementController::class)
+    ->only('index')
+    ->names([
+        'index' => 'statement-index-api-route',
+    ]);
 
 Route::apiResource('records', RecordController::class)
     ->only('index', 'store', 'update', 'destroy')

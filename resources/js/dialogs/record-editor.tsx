@@ -1,13 +1,23 @@
 import { router } from "@inertiajs/react"
-import { useForm } from "@tanstack/react-form"
-import { PencilIcon, Trash2Icon } from "lucide-react"
-import { useState } from "react"
+import { useForm, useStore } from "@tanstack/react-form"
+import { AnimatePresence, motion } from "framer-motion"
+import {
+	AlertTriangleIcon,
+	CreditCardIcon,
+	Link2Icon,
+	PencilIcon,
+	Trash2Icon,
+	TrashIcon,
+} from "lucide-react"
+import { useEffect, useState } from "react"
 import AmountField from "@/components/form/amount-field"
 import ComboboxField from "@/components/form/combobox-field"
 import DatetimeField from "@/components/form/datetime-field"
 import TextField from "@/components/form/text-field"
 import TextareaField from "@/components/form/textarea-field"
 import Icon from "@/components/icon"
+import StatementSearch from "@/components/statement-search"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
 	Card,
@@ -27,6 +37,14 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog"
+import {
+	Empty,
+	EmptyContent,
+	EmptyDescription,
+	EmptyHeader,
+	EmptyMedia,
+	EmptyTitle,
+} from "@/components/ui/empty"
 import { FieldGroup } from "@/components/ui/field"
 import { Progress } from "@/components/ui/progress"
 import { useHistory } from "@/history"
@@ -60,36 +78,41 @@ export default function RecordEditorDialog({
 	const { handleClear } = useHistory()
 
 	const [open, setOpen] = useState(false)
+	const [statements, setStatements] = useState<(Statement & StatementExtra)[]>([])
 	const { mergeErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
 
+	useEffect(() => {
+		setStatements(record.statements)
+	}, [record.statements])
+
 	const categoriesFlat = categories.flatMap(category => [category, ...category.children])
-	const initialValues = {
-		title: record.title,
-		people: record.people ?? "",
-		location: record.location ?? "",
-		datetime: record.datetime.replace(" ", "T"),
-		category_id: record.category.id,
-		description: record.description ?? "",
-		statements: record.statements.map(statement => ({
-			id: statement.id,
-			amount: statement.pivot.amount,
-		})),
-	}
 
 	const form = useForm({
-		defaultValues: initialValues,
+		defaultValues: {
+			title: record.title,
+			people: record.people ?? "",
+			location: record.location ?? "",
+			datetime: record.datetime.replace(" ", "T"),
+			amount: record.amount,
+			category_id: record.category.id,
+			description: record.description ?? "",
+			statements: record.statements.map(statement => ({
+				id: statement.id,
+				amount: statement.pivot?.amount ?? 0,
+			})),
+		},
 		onSubmit: async ({ value }) => {
 			const formData = new FormData()
 			formData.append("title", value.title)
 			formData.append("people", value.people)
 			formData.append("location", value.location)
 			formData.append("datetime", value.datetime)
+			formData.append("amount", `${value.amount}`)
 			formData.append("category_id", value.category_id)
 			formData.append("description", value.description)
-
 			value.statements.forEach((statement, index) => {
-				formData.append(`statements[${index}][id]`, `${value.statements[index].id}`)
-				formData.append(`statements[${index}][amount]`, `${value.statements[index].amount}`)
+				formData.append(`statements[${index}][id]`, statement.id)
+				formData.append(`statements[${index}][amount]`, `${statement.amount}`)
 			})
 
 			const response = await fetch(recordUpdateApiRoute.url({ record }), {
@@ -125,13 +148,49 @@ export default function RecordEditorDialog({
 		}
 	}
 
+	const isPendingAmount = useStore(
+		form.store,
+		state =>
+			round2dp(state.values.statements.reduce((acc, el) => acc + el.amount, 0)) !==
+			round2dp(state.values.amount),
+	)
+
+	const formStatements = useStore(form.store, state => state.values.statements)
+
+	useEffect(() => {
+		form.setFieldValue(
+			"amount",
+			round2dp(formStatements.reduce((acc, el) => acc + el.amount, 0)),
+		)
+	}, [formStatements])
+
+	const attachStatementsButton = (
+		<StatementSearch
+			title="Attach statements to record"
+			filters={{ exclude_ids: formStatements.map(s => s.id).join(",") }}
+			handler={async statement => {
+				setStatements(prev => [...prev, statement])
+				form.setFieldValue("statements", [
+					...form.getFieldValue("statements"),
+					{ id: statement.id, amount: statement.allocable_amount },
+				])
+			}}
+			trigger={
+				<Button variant="outline">
+					<Link2Icon />
+					Attach Statements
+				</Button>
+			}
+		/>
+	)
+
 	return (
 		<Dialog
 			open={open}
 			onOpenChange={nextOpen => {
 				setOpen(nextOpen)
 				if (nextOpen) {
-					form.reset(initialValues)
+					form.reset()
 					resetApiErrors()
 				}
 			}}
@@ -222,6 +281,42 @@ export default function RecordEditorDialog({
 									/>
 								)}
 							</form.Field>
+							<form.Field name="amount">
+								{field => (
+									<AmountField
+										id={field.name}
+										label="Amount"
+										value={field.state.value}
+										errors={mergeErrors(field.state.meta.errors, field.name)}
+										onChange={value => {
+											field.handleChange(value)
+											clearApiError(field.name)
+										}}
+									/>
+								)}
+							</form.Field>
+							<AnimatePresence>
+								{isPendingAmount && (
+									<motion.div
+										layout="position"
+										initial={{ opacity: 0, height: 0, marginTop: -16 }}
+										animate={{ opacity: 1, height: "auto" }}
+										exit={{ opacity: 0, height: 0, marginTop: -16 }}
+									>
+										<Alert className="mt-4 max-w-md border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-50">
+											<AlertTriangleIcon />
+											<AlertTitle>
+												Amount does not match the sum of Allocation Amounts
+											</AlertTitle>
+											<AlertDescription>
+												This transaction will be marked as pending until the
+												record amount matches the sum of allocated statement
+												amounts.
+											</AlertDescription>
+										</Alert>
+									</motion.div>
+								)}
+							</AnimatePresence>
 							<form.Field name="category_id">
 								{field => (
 									<ComboboxField
@@ -274,23 +369,26 @@ export default function RecordEditorDialog({
 					</div>
 
 					<div className="flex flex-col gap-4">
-						<p className="text-sm font-semibold">Allocation Amounts</p>
+						<div className="flex justify-between">
+							<p className="text-sm font-semibold">Statements Attached</p>
+
+							{!!formStatements.length && attachStatementsButton}
+						</div>
 
 						<div className="flex flex-col gap-2">
-							{record.statements.map((statement, index) => (
-								<form.Field
-									key={statement.id}
-									name={`statements[${index}].amount` as const}
-								>
+							{formStatements.map(({ id }, index) => (
+								<form.Field key={id} name={`statements[${index}].amount` as const}>
 									{field => {
+										// biome-ignore lint/style/noNonNullAssertion: All full statement objects must be cached
+										const statement = statements.find(s => s.id === id)!
+
 										const errors = mergeErrors(
 											field.state.meta.errors,
 											field.name,
 										)
 										const allocable = round2dp(
-											statement.amount -
-												statement.allocations_sum_amount +
-												statement.pivot.amount,
+											statement.allocable_amount +
+												(statement.pivot?.amount ?? 0),
 										)
 
 										return (
@@ -307,7 +405,19 @@ export default function RecordEditorDialog({
 														{formatDatetime(statement.datetime)}
 													</CardDescription>
 													<CardAction className="text-sm font-semibold">
-														{formatCurrency(statement.amount)}
+														<Button
+															variant="destructive"
+															onClick={() => {
+																form.setFieldValue(
+																	"statements",
+																	form
+																		.getFieldValue("statements")
+																		.filter(s => s.id !== id),
+																)
+															}}
+														>
+															<TrashIcon />
+														</Button>
 													</CardAction>
 												</CardHeader>
 												<CardContent className="flex flex-col gap-4">
@@ -345,6 +455,21 @@ export default function RecordEditorDialog({
 									}}
 								</form.Field>
 							))}
+
+							{!formStatements.length && (
+								<Empty className="border border-dashed">
+									<EmptyHeader>
+										<EmptyMedia variant="icon">
+											<CreditCardIcon />
+										</EmptyMedia>
+										<EmptyTitle>No Statements</EmptyTitle>
+										<EmptyDescription>
+											No statements selected for allocation.
+										</EmptyDescription>
+									</EmptyHeader>
+									<EmptyContent>{attachStatementsButton}</EmptyContent>
+								</Empty>
+							)}
 						</div>
 					</div>
 				</form>

@@ -29,7 +29,11 @@ export default function AmountField({
 	return (
 		<FormField {...props}>
 			<div className="relative flex items-center gap-2">
-				<span className="absolute left-2.5">$</span>
+				<span
+					className={cn("absolute left-2.5", disabled ? "text-muted-foreground" : null)}
+				>
+					$
+				</span>
 				<Input
 					id={id}
 					name={id}

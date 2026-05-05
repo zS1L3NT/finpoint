@@ -1,6 +1,7 @@
 import { router } from "@inertiajs/react"
-import { useForm } from "@tanstack/react-form"
-import { PlusIcon } from "lucide-react"
+import { useForm, useStore } from "@tanstack/react-form"
+import { AnimatePresence, motion } from "framer-motion"
+import { AlertTriangleIcon, CreditCardIcon, PlusIcon } from "lucide-react"
 import { DateTime } from "luxon"
 import { useState } from "react"
 import AmountField from "@/components/form/amount-field"
@@ -9,15 +10,9 @@ import DatetimeField from "@/components/form/datetime-field"
 import TextField from "@/components/form/text-field"
 import TextareaField from "@/components/form/textarea-field"
 import Icon from "@/components/icon"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import {
-	Card,
-	CardAction,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
 	Dialog,
 	DialogClose,
@@ -28,6 +23,7 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog"
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
 import { FieldGroup } from "@/components/ui/field"
 import { Progress } from "@/components/ui/progress"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
@@ -54,27 +50,30 @@ export default function RecordCreatorDialog({
 	const { mergeErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
 
 	const categoriesFlat = categories.flatMap(category => [category, ...category.children])
-	const initialValues = {
-		title: "",
-		people: "",
-		location: "",
-		datetime: inferAllocatorDatetime(statements),
-		category_id: "",
-		description: "",
-		statements: statements.map(statement => ({
-			id: statement.id,
-			amount: round2dp(statement.amount - (statement.allocations_sum_amount ?? 0)),
-		})),
-	}
 
 	const form = useForm({
-		defaultValues: initialValues,
+		defaultValues: {
+			title: "",
+			people: "",
+			location: "",
+			datetime: inferAllocatorDatetime(statements),
+			amount: round2dp(
+				statements.reduce((acc, statement) => acc + statement.allocable_amount, 0),
+			),
+			category_id: "",
+			description: "",
+			statements: statements.map(statement => ({
+				id: statement.id,
+				amount: round2dp(statement.allocable_amount),
+			})),
+		},
 		onSubmit: async ({ value }) => {
 			const formData = new FormData()
 			formData.append("title", value.title)
 			formData.append("people", value.people)
 			formData.append("location", value.location)
 			formData.append("datetime", value.datetime)
+			formData.append("amount", `${value.amount}`)
 			formData.append("category_id", value.category_id)
 			formData.append("description", value.description)
 
@@ -103,20 +102,27 @@ export default function RecordCreatorDialog({
 		},
 	})
 
+	const isPendingAmount = useStore(
+		form.store,
+		state =>
+			round2dp(state.values.statements.reduce((acc, el) => acc + el.amount, 0)) !==
+			round2dp(state.values.amount),
+	)
+
 	return (
 		<Dialog
 			open={open}
 			onOpenChange={nextOpen => {
 				setOpen(nextOpen)
 				if (nextOpen) {
-					form.reset(initialValues)
+					form.reset()
 					resetApiErrors()
 				}
 			}}
 		>
 			<DialogTrigger
 				render={
-					<Button disabled={!statements.length}>
+					<Button>
 						<PlusIcon /> Create Record
 					</Button>
 				}
@@ -200,6 +206,42 @@ export default function RecordCreatorDialog({
 									/>
 								)}
 							</form.Field>
+							<form.Field name="amount">
+								{field => (
+									<AmountField
+										id={field.name}
+										label="Amount"
+										value={field.state.value}
+										errors={mergeErrors(field.state.meta.errors, field.name)}
+										onChange={value => {
+											field.handleChange(value)
+											clearApiError(field.name)
+										}}
+									/>
+								)}
+							</form.Field>
+							<AnimatePresence>
+								{isPendingAmount && (
+									<motion.div
+										layout="position"
+										initial={{ opacity: 0, height: 0, marginTop: -16 }}
+										animate={{ opacity: 1, height: "auto" }}
+										exit={{ opacity: 0, height: 0, marginTop: -16 }}
+									>
+										<Alert className="mt-4 max-w-md border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-50">
+											<AlertTriangleIcon />
+											<AlertTitle>
+												Amount does not match the sum of Allocation Amounts
+											</AlertTitle>
+											<AlertDescription>
+												This transaction will be marked as pending until the
+												record amount matches the sum of allocated statement
+												amounts.
+											</AlertDescription>
+										</Alert>
+									</motion.div>
+								)}
+							</AnimatePresence>
 							<form.Field name="category_id">
 								{field => (
 									<ComboboxField
@@ -252,7 +294,7 @@ export default function RecordCreatorDialog({
 					</div>
 
 					<div className="flex flex-col gap-4">
-						<p className="text-sm font-semibold">Allocation Amounts</p>
+						<p className="text-sm font-semibold">Statements Attached</p>
 
 						<div className="flex flex-col gap-2">
 							{statements.map((statement, index) => (
@@ -264,10 +306,6 @@ export default function RecordCreatorDialog({
 										const errors = mergeErrors(
 											field.state.meta.errors,
 											field.name,
-										)
-										const allocable = round2dp(
-											statement.amount -
-												(statement.allocations_sum_amount ?? 0),
 										)
 
 										return (
@@ -283,9 +321,6 @@ export default function RecordCreatorDialog({
 													<CardDescription>
 														{formatDatetime(statement.datetime)}
 													</CardDescription>
-													<CardAction className="text-sm font-semibold">
-														{formatCurrency(statement.amount)}
-													</CardAction>
 												</CardHeader>
 												<CardContent className="flex flex-col gap-4">
 													<AmountField
@@ -293,21 +328,33 @@ export default function RecordCreatorDialog({
 														label="Amount"
 														value={field.state.value}
 														errors={errors}
-														suffix={`of ${formatCurrency(allocable)}`}
+														suffix={`of ${formatCurrency(statement.allocable_amount)}`}
 														onChange={value => {
 															field.handleChange(value)
+															form.setFieldValue(
+																"amount",
+																round2dp(
+																	form
+																		.getFieldValue("statements")
+																		.reduce(
+																			(acc, el, i) =>
+																				acc + el.amount,
+																			0,
+																		),
+																),
+															)
 															clearApiError(field.name)
 														}}
 													/>
 													<Progress
 														value={
-															allocable === 0
+															statement.allocable_amount === 0
 																? 0
 																: Math.max(
 																		0,
 																		Math.min(
 																			(field.state.value /
-																				allocable) *
+																				statement.allocable_amount) *
 																				100,
 																			100,
 																		),
@@ -320,6 +367,20 @@ export default function RecordCreatorDialog({
 									}}
 								</form.Field>
 							))}
+
+							{!statements.length && (
+								<Empty className="border border-dashed">
+									<EmptyHeader>
+										<EmptyMedia variant="icon">
+											<CreditCardIcon />
+										</EmptyMedia>
+										<EmptyTitle>No Statements</EmptyTitle>
+										<EmptyDescription>
+											No statements selected for allocation.
+										</EmptyDescription>
+									</EmptyHeader>
+								</Empty>
+							)}
 						</div>
 					</div>
 				</form>
