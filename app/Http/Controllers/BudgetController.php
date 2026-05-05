@@ -23,7 +23,7 @@ class BudgetController extends Controller
             ->withSum('records', 'amount')
             ->orderBy('end_date', 'desc')
             ->groupBy('budgets.id')
-            ->paginate(request('per_page') ?? 25)
+            ->paginate(request('per_page') ?? 100)
             ->withQueryString();
 
         return Inertia::render('budgets', compact('budgets'));

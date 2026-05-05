@@ -37,7 +37,7 @@ class RecordController extends Controller
             )
             ->orderBy('datetime', 'desc')
             ->groupBy('records.id')
-            ->paginate(request('per_page') ?? 25)
+            ->paginate(request('per_page') ?? 100)
             ->withQueryString();
 
         return Inertia::render('records', compact('records'));

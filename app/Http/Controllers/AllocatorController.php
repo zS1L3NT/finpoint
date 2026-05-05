@@ -36,7 +36,7 @@ class AllocatorController extends Controller
             ->havingRaw('allocable_amount is null or allocable_amount != 0')
             ->orderBy('datetime', 'desc')
             ->groupBy('statements.id')
-            ->paginate(request('per_page') ?? 25)
+            ->paginate(request('per_page') ?? 100)
             ->withQueryString();
 
         $categories = Category::query()

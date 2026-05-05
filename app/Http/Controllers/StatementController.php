@@ -23,7 +23,7 @@ class StatementController extends Controller
             )
             ->orderBy('datetime', 'desc')
             ->groupBy('statements.id')
-            ->paginate(request('per_page') ?? 25)
+            ->paginate(request('per_page') ?? 100)
             ->withQueryString();
 
         return Inertia::render('statements', compact('statements'));
