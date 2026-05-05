@@ -66,7 +66,15 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
 
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
-								<Link href={allocatorWebRoute.url()} onClick={handleClear}>
+								<Link
+									href={allocatorWebRoute.url({
+										query: {
+											// I only want to start tracking from 2026 onwards
+											start_date: "2026-01-01",
+										},
+									})}
+									onClick={handleClear}
+								>
 									<LinkIcon />
 									<span>Allocator</span>
 								</Link>
