@@ -32,17 +32,8 @@ import { FieldGroup } from "@/components/ui/field"
 import { Progress } from "@/components/ui/progress"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { cn, formatCurrency, formatDatetime, parseDatetime, round2dp } from "@/lib/utils"
-import { Account, Category, Statement } from "@/types"
+import { CategoryWithChildren, Statement } from "@/types"
 import { recordStoreApiRoute } from "@/wayfinder/routes"
-
-type StatementExtra = {
-	account: Account
-	allocations_sum_amount: number | null
-}
-
-type CategoryExtra = {
-	children: Category[]
-}
 
 export default function RecordCreatorDialog({
 	statements,
@@ -52,8 +43,8 @@ export default function RecordCreatorDialog({
 	peoples,
 	clear,
 }: {
-	statements: (Statement & StatementExtra)[]
-	categories: (Category & CategoryExtra)[]
+	statements: Statement[]
+	categories: CategoryWithChildren[]
 	titles: string[]
 	locations: string[]
 	peoples: string[]
@@ -350,7 +341,7 @@ export default function RecordCreatorDialog({
 	)
 }
 
-function inferAllocatorDatetime(statements: (Statement & StatementExtra)[]) {
+function inferAllocatorDatetime(statements: Statement[]) {
 	const DESCRIPTION_DATE_REGEX = /\b\d{2}(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\b/
 
 	const describedDates = statements.flatMap(statement => {

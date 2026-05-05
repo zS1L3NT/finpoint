@@ -13,12 +13,6 @@ class AllocatorController extends Controller
     public function index()
     {
         $statements = Statement::query()
-            ->with('account')
-            ->addSelect([
-                'allocations_sum_amount' => Allocation::query()
-                    ->selectRaw('round(sum(amount), 2)')
-                    ->whereColumn('source_statement_id', 'statements.id'),
-            ])
             ->when(
                 request()->query('query'),
                 fn($query, $q) => $query
@@ -39,7 +33,7 @@ class AllocatorController extends Controller
                 request()->query('end_date'),
                 fn($query, $date) => $query->whereDate('datetime', '<=', $date)
             )
-            ->havingRaw('allocations_sum_amount is null or allocations_sum_amount != round(statements.amount, 2)')
+            ->havingRaw('allocable_amount is null or allocable_amount != 0')
             ->orderBy('datetime', 'desc')
             ->groupBy('statements.id')
             ->paginate(request('per_page') ?? 25)

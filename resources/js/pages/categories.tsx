@@ -6,16 +6,14 @@ import PageHeader from "@/components/layout/page-header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import CategoryDialog from "@/dialogs/category"
-import { Category } from "@/types"
+import { Category, CategoryWithChildren } from "@/types"
 
-type CategoryNode = Category & {
-	children?: CategoryNode[] | null
-	can_delete: boolean
-}
+type CategoryDialogState =
+	| { mode: "create" }
+	| { mode: "edit"; category: Category | CategoryWithChildren }
+	| null
 
-type CategoryDialogState = { mode: "create" } | { mode: "edit"; category: CategoryNode } | null
-
-export default function CategoriesPage({ categories }: { categories: CategoryNode[] }) {
+export default function CategoriesPage({ categories }: { categories: CategoryWithChildren[] }) {
 	const [dialogState, setDialogState] = useState<CategoryDialogState>(null)
 
 	return (
@@ -74,8 +72,8 @@ function CategoryTree({
 	categories,
 	onEdit,
 }: {
-	categories: CategoryNode[]
-	onEdit: (category: CategoryNode) => void
+	categories: (Category | CategoryWithChildren)[]
+	onEdit: (category: Category | CategoryWithChildren) => void
 }) {
 	return (
 		<div className="flex flex-col divide-y">
@@ -90,8 +88,8 @@ function CategoryTreeItem({
 	category,
 	onEdit,
 }: {
-	category: CategoryNode
-	onEdit: (category: CategoryNode) => void
+	category: Category | CategoryWithChildren
+	onEdit: (category: Category | CategoryWithChildren) => void
 }) {
 	return (
 		<div className="flex flex-col">
@@ -106,7 +104,7 @@ function CategoryTreeItem({
 					<p className="truncate text-xs text-muted-foreground">{category.id}</p>
 				</div>
 				<div className="flex items-center gap-2 text-xs text-muted-foreground">
-					{category.children?.length ? (
+					{"children" in category ? (
 						<span>
 							{category.children.length} child
 							{category.children.length === 1 ? "" : "ren"}
@@ -116,7 +114,7 @@ function CategoryTreeItem({
 				</div>
 			</button>
 
-			{category.children?.length ? (
+			{"children" in category ? (
 				<div className="ml-6 border-l border-border/60">
 					<CategoryTree categories={category.children} onEdit={onEdit} />
 				</div>

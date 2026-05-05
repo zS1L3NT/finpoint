@@ -8,12 +8,8 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { TABLE_WIDTHS } from "@/lib/table-widths"
 import { classForCurrency, formatCurrency, formatDatetime } from "@/lib/utils"
-import { Category, Record } from "@/types"
+import { Record } from "@/types"
 import { recordIndexApiRoute } from "@/wayfinder/routes"
-
-type RecordExtra = {
-	category: Category
-}
 
 export default function RecordSearch({
 	title,
@@ -23,12 +19,12 @@ export default function RecordSearch({
 }: {
 	title: string
 	filters?: { [key: string]: any }
-	handler: (record: Record & RecordExtra) => Promise<void>
+	handler: (record: Record) => Promise<void>
 	trigger: React.ReactNode
 }) {
 	const [open, setOpen] = useState(false)
 	const [query, setQuery] = useState("")
-	const [records, setRecords] = useState<(Record & RecordExtra)[]>([])
+	const [records, setRecords] = useState<Record[]>([])
 
 	useEffect(() => {
 		if (!open) {

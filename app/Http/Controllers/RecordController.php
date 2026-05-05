@@ -12,7 +12,6 @@ class RecordController extends Controller
     public function index()
     {
         $records = Record::query()
-            ->with('category')
             ->when(
                 request()->query('query'),
                 fn($query, $q) => $query
@@ -47,16 +46,7 @@ class RecordController extends Controller
 
     public function show(Record $record)
     {
-        $record->load([
-            'category',
-            'statements' => fn($query) => $query
-                ->with('account')
-                ->addSelect([
-                    'allocations_sum_amount' => Allocation::query()
-                        ->selectRaw('round(sum(amount), 2)')
-                        ->whereColumn('source_statement_id', 'statements.id'),
-                ]),
-        ]);
+        $record->load('statements');
 
         $categories = Category::query()
             ->with('children')

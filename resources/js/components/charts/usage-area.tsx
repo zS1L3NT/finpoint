@@ -9,11 +9,7 @@ import {
 	ChartTooltipContent,
 } from "@/components/ui/chart"
 import { parseDatetime, round2dp } from "@/lib/utils"
-import { Category, Record } from "@/types"
-
-type RecordExtra = {
-	category: Category
-}
+import { Record } from "@/types"
 
 export default function UsageAreaChart({
 	className,
@@ -24,7 +20,7 @@ export default function UsageAreaChart({
 	limit,
 }: {
 	className?: string
-	records: (Record & RecordExtra)[]
+	records: Record[]
 	start: DateTime
 	end: DateTime
 	maxY: number

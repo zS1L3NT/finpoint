@@ -18,17 +18,12 @@ import {
 import { FieldGroup } from "@/components/ui/field"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { cn, withMethod } from "@/lib/utils"
-import { Category } from "@/types"
+import { Category, CategoryWithChildren } from "@/types"
 import {
 	categoryDestroyApiRoute,
 	categoryStoreApiRoute,
 	categoryUpdateApiRoute,
 } from "@/wayfinder/routes"
-
-type CategoryNode = Category & {
-	children?: CategoryNode[] | null
-	can_delete: boolean
-}
 
 type CategoryFormValues = {
 	id: string
@@ -38,7 +33,7 @@ type CategoryFormValues = {
 	parent_category_id: string
 }
 
-function isChildCategory(category: CategoryNode | null) {
+function isChildCategory(category: Category | CategoryWithChildren | null) {
 	return category?.parent_category_id !== null
 }
 
@@ -59,8 +54,8 @@ export default function CategoryDialog({
 }: {
 	open: boolean
 	mode: "create" | "edit"
-	category: CategoryNode | null
-	categories: CategoryNode[]
+	category: Category | CategoryWithChildren | null
+	categories: (Category | CategoryWithChildren)[]
 	onOpenChange: (open: boolean) => void
 }) {
 	const isEditing = mode === "edit" && category !== null

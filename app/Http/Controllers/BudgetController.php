@@ -31,7 +31,7 @@ class BudgetController extends Controller
 
     public function show(Budget $budget)
     {
-        $budget->load('records', 'records.category');
+        $budget->load('records');
             
         $categories = Category::query()
             ->with('children')

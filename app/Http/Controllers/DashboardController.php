@@ -18,7 +18,7 @@ class DashboardController extends Controller
         $date = Carbon::parse($month . ' ' . $year);
 
         $records = Record::query()
-            ->with('category', 'quota')
+            ->with('quota')
             ->whereBetween('datetime', [$date->clone()->startOfMonth(), $date->clone()->endOfMonth()])
             ->orderBy('datetime', 'desc')
             ->get();

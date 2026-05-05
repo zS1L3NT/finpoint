@@ -24,11 +24,10 @@ import {
 } from "@/components/ui/item"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { classForCurrency, formatCurrency, formatDatetime } from "@/lib/utils"
-import { Category, Quota, Record } from "@/types"
+import { Quota, Record } from "@/types"
 import { recordQuotaAttachApiRoute } from "@/wayfinder/routes"
 
 type RecordExtra = {
-	category: Category
 	quota: Quota | null
 }
 

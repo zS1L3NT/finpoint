@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Api\AllocatorController;
 use App\Http\Controllers\Api\BudgetController;
 use App\Http\Controllers\Api\BudgetRecordController;
 use App\Http\Controllers\Api\CategoryController;
@@ -31,7 +30,7 @@ Route::apiResource('budgets', BudgetController::class)
     ->names([
         'store' => 'budget-store-api-route',
         'update' => 'budget-update-api-route',
-        'destroy' => 'budget-destroy-api-route'
+        'destroy' => 'budget-destroy-api-route',
     ]);
 
 Route::post('budgets/{budget}/records/{record}', [BudgetRecordController::class, 'attach'])->name('budget-record-attach-api-route');
@@ -42,7 +41,7 @@ Route::apiResource('categories', CategoryController::class)
     ->names([
         'store' => 'category-store-api-route',
         'update' => 'category-update-api-route',
-        'destroy' => 'category-destroy-api-route'
+        'destroy' => 'category-destroy-api-route',
     ]);
 
 Route::apiResource('quotas', QuotaController::class)
@@ -50,5 +49,5 @@ Route::apiResource('quotas', QuotaController::class)
     ->names([
         'store' => 'quota-store-api-route',
         'update' => 'quota-update-api-route',
-        'destroy' => 'quota-destroy-api-route'
+        'destroy' => 'quota-destroy-api-route',
     ]);

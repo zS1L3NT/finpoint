@@ -8,15 +8,7 @@ import {
 	ChartTooltipContent,
 } from "@/components/ui/chart"
 import { cn, formatCurrency, round2dp } from "@/lib/utils"
-import { Category, Record } from "@/types"
-
-type RecordExtra = {
-	category: Category
-}
-
-type CategoryExtra = {
-	children: Category[]
-}
+import { CategoryWithChildren, Record } from "@/types"
 
 export default function CategoriesPieChart({
 	className,
@@ -25,8 +17,8 @@ export default function CategoriesPieChart({
 	limit,
 }: {
 	className?: string
-	records: (Record & RecordExtra)[]
-	categories: (Category & CategoryExtra)[]
+	records: Record[]
+	categories: CategoryWithChildren[]
 	limit?: number
 }) {
 	const containerRef = useRef<HTMLDivElement>(null)

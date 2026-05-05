@@ -10,7 +10,6 @@ class StatementController extends Controller
     public function index()
     {
         $statements = Statement::query()
-            ->with('account')
             ->when(
                 request()->query('query'),
                 fn($query, $q) => $query
@@ -33,7 +32,7 @@ class StatementController extends Controller
 
     public function show(Statement $statement)
     {
-        $statement->load('account', 'records', 'records.category');
+        $statement->load('records');
 
         return Inertia::render('statement', compact('statement'));
     }

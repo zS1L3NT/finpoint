@@ -18,6 +18,8 @@ class Record extends Model
         'datetime' => 'date:Y-m-d H:i',
     ];
 
+    protected $with = ['category'];
+
     public function getSubtitleAttribute()
     {
         $subtitle = "";

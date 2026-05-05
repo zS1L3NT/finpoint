@@ -33,7 +33,7 @@ import {
 	round2dp,
 	withMethod,
 } from "@/lib/utils"
-import { Budget, Category, Record } from "@/types"
+import { Budget, CategoryWithChildren, Record } from "@/types"
 import {
 	budgetRecordAttachApiRoute,
 	budgetRecordDetachApiRoute,
@@ -42,15 +42,7 @@ import {
 } from "@/wayfinder/routes"
 
 type BudgetExtra = {
-	records: (Record & RecordExtra)[]
-}
-
-type RecordExtra = {
-	category: Category
-}
-
-type CategoryExtra = {
-	children: Category[]
+	records: Record[]
 }
 
 const getAggregations = (budget: Budget & BudgetExtra) => {
@@ -101,7 +93,7 @@ export default function BudgetPage({
 	categories,
 }: {
 	budget: Budget & BudgetExtra
-	categories: (Category & CategoryExtra)[]
+	categories: CategoryWithChildren[]
 }) {
 	const { handlePush } = useHistory()
 

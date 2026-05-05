@@ -30,6 +30,8 @@ export type Statement = {
 	datetime: string
 	description: string
 	amount: number
+	allocable_amount: number
+	account: Account
 }
 
 export type Record = {
@@ -41,6 +43,7 @@ export type Record = {
 	location: string | null
 	description: string | null
 	amount: number
+	category: Category
 }
 
 export type Category = {
@@ -49,6 +52,11 @@ export type Category = {
 	icon: string
 	color: string
 	parent_category_id: string | null
+	can_delete: boolean
+}
+
+export type CategoryWithChildren = Category & {
+	children: Category[]
 }
 
 export type Allocation = {

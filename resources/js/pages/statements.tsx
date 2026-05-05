@@ -8,18 +8,10 @@ import { useHistory } from "@/history"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { TABLE_WIDTHS } from "@/lib/table-widths"
 import { classForCurrency, formatCurrency, formatDatetime } from "@/lib/utils"
-import { Account, Paginated, Statement } from "@/types"
+import { Paginated, Statement } from "@/types"
 import { statementsWebRoute, statementWebRoute } from "@/wayfinder/routes"
 
-type StatementExtra = {
-	account: Account
-}
-
-export default function StatementsPage({
-	statements,
-}: {
-	statements: Paginated<Statement & StatementExtra>
-}) {
+export default function StatementsPage({ statements }: { statements: Paginated<Statement> }) {
 	const { handlePush } = useHistory()
 
 	const { query, pageSize, handleQueryChange, handlePageSizeChange } = usePaginatedTableState({

@@ -55,7 +55,7 @@ import { useHistory } from "@/history"
 import { useSearchParam } from "@/hooks/use-search-param"
 import { TABLE_WIDTHS } from "@/lib/table-widths"
 import { classForCurrency, cn, formatCurrency, formatDatetime, withMethod } from "@/lib/utils"
-import { Category, Quota, Record } from "@/types"
+import { CategoryWithChildren, Quota, Record } from "@/types"
 import {
 	budgetsWebRoute,
 	dashboardWebRoute,
@@ -64,12 +64,7 @@ import {
 } from "@/wayfinder/routes"
 
 type RecordExtra = {
-	category: Category
 	quota: Quota | null
-}
-
-type CategoryExtra = {
-	children: Category[]
 }
 
 export default function DashboardPage({
@@ -78,7 +73,7 @@ export default function DashboardPage({
 	quotas,
 }: {
 	records: (Record & RecordExtra)[]
-	categories: (Category & CategoryExtra)[]
+	categories: CategoryWithChildren[]
 	quotas: Quota[]
 }) {
 	const { handlePush } = useHistory()

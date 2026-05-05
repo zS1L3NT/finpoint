@@ -12,22 +12,16 @@ import RecordEditorDialog from "@/dialogs/record-editor"
 import { useHistory } from "@/history"
 import { TABLE_WIDTHS } from "@/lib/table-widths"
 import { classForCurrency, cn, formatCurrency, formatDatetime } from "@/lib/utils"
-import { Account, Allocation, Category, Record, Statement } from "@/types"
+import { Allocation, CategoryWithChildren, Record, Statement } from "@/types"
 import { recordsWebRoute, statementWebRoute } from "@/wayfinder/routes"
 
 type RecordExtra = {
-	category: Category & CategoryExtra
+	category: CategoryWithChildren
 	statements: (Statement & StatementExtra)[]
 }
 
 type StatementExtra = {
-	allocations_sum_amount: number
-	account: Account
 	pivot: Allocation
-}
-
-type CategoryExtra = {
-	children: Category[]
 }
 
 export default function RecordPage({
@@ -38,7 +32,7 @@ export default function RecordPage({
 	peoples,
 }: {
 	record: Record & RecordExtra
-	categories: (Category & CategoryExtra)[]
+	categories: CategoryWithChildren[]
 	titles: string[]
 	locations: string[]
 	peoples: string[]

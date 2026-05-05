@@ -11,14 +11,10 @@ import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { useSearchParam } from "@/hooks/use-search-param"
 import { TABLE_WIDTHS } from "@/lib/table-widths"
 import { classForCurrency, formatCurrency, formatDatetime } from "@/lib/utils"
-import { Category, Paginated, Record } from "@/types"
+import { Paginated, Record } from "@/types"
 import { recordsWebRoute, recordWebRoute } from "@/wayfinder/routes"
 
-type RecordExtra = {
-	category: Category
-}
-
-export default function RecordsPage({ records }: { records: Paginated<Record & RecordExtra> }) {
+export default function RecordsPage({ records }: { records: Paginated<Record> }) {
 	const { handlePush } = useHistory()
 
 	const [startDate, setStartDate] = useSearchParam("start_date")

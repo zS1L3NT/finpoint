@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\StatementAllocableScope;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\WithoutTimestamps;
@@ -16,9 +17,21 @@ class Statement extends Model
         'datetime' => 'date:Y-m-d H:i',
     ];
 
+    protected $with = ['account'];
+
+    protected static function booted()
+    {
+        static::addGlobalScope(new StatementAllocableScope);
+    }
+
     public function getDescriptionAttribute()
     {
         return preg_replace('/\b\d{4}-\d{4}-\d{4}-(\d{4})\b/', 'XXXX-XXXX-XXXX-$1', $this->attributes['description']);
+    }
+
+    public function getAllocableAmountAttribute()
+    {
+        return $this->attributes['allocable_amount'] ?? $this->amount;
     }
 
     public function account()

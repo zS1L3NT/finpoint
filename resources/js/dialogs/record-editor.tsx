@@ -32,22 +32,16 @@ import { Progress } from "@/components/ui/progress"
 import { useHistory } from "@/history"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { cn, formatCurrency, formatDatetime, round2dp, withMethod } from "@/lib/utils"
-import { Account, Allocation, Category, Record, Statement } from "@/types"
+import { Allocation, CategoryWithChildren, Record, Statement } from "@/types"
 import { recordDestroyApiRoute, recordsWebRoute, recordUpdateApiRoute } from "@/wayfinder/routes"
 
 type RecordExtra = {
-	category: Category & CategoryExtra
+	category: CategoryWithChildren
 	statements: (Statement & StatementExtra)[]
 }
 
 type StatementExtra = {
-	allocations_sum_amount: number
-	account: Account
-	pivot: Allocation
-}
-
-type CategoryExtra = {
-	children: Category[]
+	pivot?: Allocation
 }
 
 export default function RecordEditorDialog({
@@ -58,7 +52,7 @@ export default function RecordEditorDialog({
 	peoples,
 }: {
 	record: Record & RecordExtra
-	categories: (Category & CategoryExtra)[]
+	categories: CategoryWithChildren[]
 	titles: string[]
 	locations: string[]
 	peoples: string[]

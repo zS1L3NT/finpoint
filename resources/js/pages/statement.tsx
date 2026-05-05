@@ -11,12 +11,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useHistory } from "@/history"
 import { TABLE_WIDTHS } from "@/lib/table-widths"
 import { classForCurrency, formatCurrency, formatDatetime } from "@/lib/utils"
-import { Account, Allocation, Category, Record, Statement } from "@/types"
+import { Allocation, Record, Statement } from "@/types"
 import { recordWebRoute, statementsWebRoute } from "@/wayfinder/routes"
 
 type StatementExtra = {
-	account: Account
-	records: (Record & { category: Category } & { pivot: Allocation })[]
+	records: (Record & RecordExtra)[]
+}
+
+type RecordExtra = {
+	pivot: Allocation
 }
 
 export default function StatementPage({ statement }: { statement: Statement & StatementExtra }) {
