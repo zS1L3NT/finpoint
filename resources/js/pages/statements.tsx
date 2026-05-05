@@ -90,7 +90,7 @@ export default function StatementsPage({ statements }: { statements: Paginated<S
 						onQueryChange: handleQueryChange,
 						pageSize,
 						onPageSizeChange: handlePageSizeChange,
-						searchPlaceholder: "Search statements...",
+						searchPlaceholder: "Search all statements...",
 					}}
 					footer={{
 						summary: `Showing ${statements.data.length} of ${statements.total} statements.`,

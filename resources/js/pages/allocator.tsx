@@ -150,7 +150,7 @@ export default function AllocatorPage({
 						onQueryChange: handleQueryChange,
 						pageSize,
 						onPageSizeChange: handlePageSizeChange,
-						searchPlaceholder: "Filter statements...",
+						searchPlaceholder: "Search unallocated statements...",
 						filters: (
 							<>
 								<DateField

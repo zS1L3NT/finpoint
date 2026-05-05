@@ -142,7 +142,7 @@ export default function BudgetsPage({ budgets }: { budgets: Paginated<Budget & B
 						onQueryChange: handleQueryChange,
 						pageSize,
 						onPageSizeChange: handlePageSizeChange,
-						searchPlaceholder: "Search budgets...",
+						searchPlaceholder: "Search all budgets...",
 					}}
 					footer={{
 						summary: `Showing ${budgets.data.length} of ${budgets.total} budgets.`,

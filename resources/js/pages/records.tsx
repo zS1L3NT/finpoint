@@ -118,7 +118,7 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 						onQueryChange: handleQueryChange,
 						pageSize,
 						onPageSizeChange: handlePageSizeChange,
-						searchPlaceholder: "Search records...",
+						searchPlaceholder: "Search all records...",
 						filters: (
 							<>
 								<DateField

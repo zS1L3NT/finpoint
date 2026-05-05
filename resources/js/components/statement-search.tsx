@@ -62,7 +62,7 @@ export default function StatementSearch({
 						<Input
 							id="statement-search-query"
 							type="search"
-							placeholder="Search by description, amount, or account"
+							placeholder="Search unattached statements..."
 							value={query}
 							onChange={event => setQuery(event.target.value)}
 						/>

@@ -63,7 +63,7 @@ export default function RecordSearch({
 						<Input
 							id="record-search-query"
 							type="search"
-							placeholder="Search by title or description"
+							placeholder="Search unattached records..."
 							value={query}
 							onChange={event => setQuery(event.target.value)}
 						/>
