@@ -307,6 +307,12 @@ export default function RecordCreatorDialog({
 											field.state.meta.errors,
 											field.name,
 										)
+										const allocable = statement.allocable_amount
+
+										const percent =
+											allocable === 0
+												? 0
+												: (field.state.value / allocable) * 100
 
 										return (
 											<Card
@@ -328,7 +334,7 @@ export default function RecordCreatorDialog({
 														label="Amount"
 														value={field.state.value}
 														errors={errors}
-														suffix={`of ${formatCurrency(statement.allocable_amount)}`}
+														suffix={`of ${formatCurrency(allocable)}`}
 														onChange={value => {
 															field.handleChange(value)
 															form.setFieldValue(
@@ -347,19 +353,10 @@ export default function RecordCreatorDialog({
 														}}
 													/>
 													<Progress
-														value={
-															statement.allocable_amount === 0
-																? 0
-																: Math.max(
-																		0,
-																		Math.min(
-																			(field.state.value /
-																				statement.allocable_amount) *
-																				100,
-																			100,
-																		),
-																	)
-														}
+														value={percent}
+														className={cn(
+															percent > 100 ? "text-red-400" : null,
+														)}
 													/>
 												</CardContent>
 											</Card>

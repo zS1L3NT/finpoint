@@ -394,6 +394,11 @@ export default function RecordEditorDialog({
 												(statement.pivot?.amount ?? 0),
 										)
 
+										const percent =
+											allocable === 0
+												? 0
+												: (field.state.value / allocable) * 100
+
 										return (
 											<Card
 												className={cn(
@@ -436,21 +441,10 @@ export default function RecordEditorDialog({
 														}}
 													/>
 													<Progress
-														value={
-															allocable === 0
-																? 0
-																: Math.max(
-																		0,
-																		Math.min(
-																			(Math.abs(
-																				field.state.value,
-																			) /
-																				allocable) *
-																				100,
-																			100,
-																		),
-																	)
-														}
+														value={percent}
+														className={cn(
+															percent > 100 ? "text-red-400" : null,
+														)}
 													/>
 												</CardContent>
 											</Card>
