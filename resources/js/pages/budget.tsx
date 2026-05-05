@@ -5,6 +5,7 @@ import { useMemo } from "react"
 import CategoriesPieChart from "@/components/charts/categories-pie"
 import UsageAreaChart from "@/components/charts/usage-area"
 import DetailCard from "@/components/detail-card"
+import BudgetEditorDialog from "@/components/dialogs/budget-editor"
 import Icon from "@/components/icon"
 import AppHeader from "@/components/layout/app-header"
 import PageHeader from "@/components/layout/page-header"
@@ -21,7 +22,6 @@ import {
 	CardTitle,
 } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
-import BudgetEditorDialog from "@/dialogs/budget-editor"
 import { useHistory } from "@/history"
 import { TABLE_WIDTHS } from "@/lib/table-widths"
 import {

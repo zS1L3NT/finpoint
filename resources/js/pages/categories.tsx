@@ -1,11 +1,11 @@
 import { PencilIcon, PlusIcon, TagIcon } from "lucide-react"
 import { useState } from "react"
+import CategoryDialog from "@/components/dialogs/category"
 import Icon from "@/components/icon"
 import AppHeader from "@/components/layout/app-header"
 import PageHeader from "@/components/layout/page-header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import CategoryDialog from "@/dialogs/category"
 import { Category, CategoryWithChildren } from "@/types"
 
 type CategoryDialogState =
