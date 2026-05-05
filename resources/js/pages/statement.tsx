@@ -41,15 +41,26 @@ export default function StatementPage({ statement }: { statement: Statement & St
 					}}
 				/>
 
-				<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+				<div className="grid gap-4 lg:grid-cols-4">
+					<DetailCard
+						label="Amount"
+						value={
+							<AllocateBar
+								title={
+									!statement.allocable_amount
+										? "Fully allocated"
+										: statement.allocable_amount === statement.amount
+											? "Not allocated"
+											: "Partially allocated"
+								}
+								value={statement.amount - statement.allocable_amount}
+								total={statement.amount}
+							/>
+						}
+					/>
 					<DetailCard
 						label="Account"
 						value={`${statement.account.name} (${statement.account.id})`}
-					/>
-					<DetailCard
-						label="Amount"
-						value={formatCurrency(statement.amount)}
-						valueClassName={classForCurrency(statement.amount)}
 					/>
 					<DetailCard label="Date & Time" value={formatDatetime(statement.datetime)} />
 				</div>
@@ -87,13 +98,13 @@ export default function StatementPage({ statement }: { statement: Statement & St
 								},
 								{
 									header: "Amount",
-									meta: { width: TABLE_WIDTHS.AMOUNT_BAR },
+									meta: { width: TABLE_WIDTHS.AMOUNT },
 									cell: ({ row }) => (
-										<AllocateBar
-											title="Allocated"
-											value={row.original.pivot.amount}
-											total={row.original.amount}
-										/>
+										<div
+											className={classForCurrency(row.original.pivot.amount)}
+										>
+											{formatCurrency(row.original.pivot.amount)}
+										</div>
 									),
 								},
 								{

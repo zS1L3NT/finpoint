@@ -75,7 +75,12 @@ export default function RecordPage({
 					}}
 				/>
 
-				<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+				<div className="grid gap-4 lg:grid-cols-4">
+					<DetailCard
+						label="Amount"
+						value={formatCurrency(record.amount)}
+						valueClassName={cn(classForCurrency(record.amount), "text-base")}
+					/>
 					<DetailCard
 						label="Category"
 						value={
@@ -84,11 +89,6 @@ export default function RecordPage({
 								<span>{record.category.name}</span>
 							</div>
 						}
-					/>
-					<DetailCard
-						label="Amount"
-						value={formatCurrency(record.amount)}
-						valueClassName={cn(classForCurrency(record.amount), "text-base")}
 					/>
 					<DetailCard label="Date & Time" value={formatDatetime(record.datetime)} />
 				</div>
