@@ -6,6 +6,7 @@ import Icon from "@/components/icon"
 import AppHeader from "@/components/layout/app-header"
 import PageHeader from "@/components/layout/page-header"
 import DataTable from "@/components/table/data-table"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import RecordEditorDialog from "@/dialogs/record-editor"
@@ -49,6 +50,11 @@ export default function RecordPage({
 						<div className="flex items-center gap-2">
 							{record.title}
 							<p className="text-xl text-muted-foreground">{record.subtitle}</p>
+							{record.is_pending && (
+								<Badge variant="warning" className="tracking-normal">
+									Pending
+								</Badge>
+							)}
 						</div>
 					}
 					subtitle={record.description}

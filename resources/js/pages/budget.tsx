@@ -10,6 +10,7 @@ import AppHeader from "@/components/layout/app-header"
 import PageHeader from "@/components/layout/page-header"
 import RecordSearch from "@/components/record-search"
 import DataTable from "@/components/table/data-table"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
 	Card,
@@ -282,6 +283,11 @@ export default function BudgetPage({
 											<Icon {...row.original.category} size={16} />
 											<div className="flex-1 overflow-hidden">
 												<p className="truncate font-medium">
+													{row.original.is_pending && (
+														<Badge variant="warning" className="mr-1">
+															Pending
+														</Badge>
+													)}
 													{row.original.title}
 												</p>
 												<p className="truncate text-muted-foreground">

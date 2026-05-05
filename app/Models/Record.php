@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\RecordAllocatedAmount;
 use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Attributes\Table;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 #[Table(keyType: 'string', incrementing: false)]
 #[WithoutTimestamps()]
 #[Guarded([])]
-#[Appends('subtitle')]
+#[Appends('subtitle', 'is_pending')]
 class Record extends Model
 {
     public $casts = [
@@ -19,6 +20,11 @@ class Record extends Model
     ];
 
     protected $with = ['category'];
+
+    protected static function booted()
+    {
+        static::addGlobalScope(new RecordAllocatedAmount);
+    }
 
     public function getSubtitleAttribute()
     {
@@ -37,6 +43,11 @@ class Record extends Model
         }
 
         return $subtitle ?: null;
+    }
+
+    public function getIsPendingAttribute()
+    {
+        return ($this->attributes['allocated_amount'] ?? 0) != $this->amount;
     }
 
     public function category()

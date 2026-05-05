@@ -5,6 +5,7 @@ import Icon from "@/components/icon"
 import AppHeader from "@/components/layout/app-header"
 import PageHeader from "@/components/layout/page-header"
 import PaginatedDataTable from "@/components/table/paginated-data-table"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useHistory } from "@/history"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
@@ -54,7 +55,14 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 								<div className="flex items-center gap-3">
 									<Icon {...row.original.category} size={16} />
 									<div className="flex-1 overflow-hidden">
-										<p className="truncate font-medium">{row.original.title}</p>
+										<p className="truncate font-medium">
+											{row.original.is_pending && (
+												<Badge variant="warning" className="mr-1">
+													Pending
+												</Badge>
+											)}
+											{row.original.title}
+										</p>
 										<p className="truncate text-muted-foreground">
 											{row.original.subtitle || "No extra context"}
 										</p>

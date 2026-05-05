@@ -6,6 +6,7 @@ import Icon from "@/components/icon"
 import AppHeader from "@/components/layout/app-header"
 import PageHeader from "@/components/layout/page-header"
 import DataTable from "@/components/table/data-table"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useHistory } from "@/history"
@@ -70,6 +71,11 @@ export default function StatementPage({ statement }: { statement: Statement & St
 											<Icon {...row.original.category} size={16} />
 											<div className="flex-1 overflow-hidden">
 												<p className="truncate font-medium">
+													{row.original.is_pending && (
+														<Badge variant="warning" className="mr-1">
+															Pending
+														</Badge>
+													)}
 													{row.original.title}
 												</p>
 												<p className="truncate text-muted-foreground">

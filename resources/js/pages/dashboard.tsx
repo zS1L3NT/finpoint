@@ -520,6 +520,11 @@ export default function DashboardPage({
 											<Icon {...row.original.category} size={16} />
 											<div className="flex-1 overflow-hidden">
 												<p className="truncate font-medium">
+													{row.original.is_pending && (
+														<Badge variant="warning" className="mr-1">
+															Pending
+														</Badge>
+													)}
 													{row.original.title}
 												</p>
 												<p className="truncate text-muted-foreground">

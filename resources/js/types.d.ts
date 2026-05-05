@@ -43,6 +43,7 @@ export type Record = {
 	location: string | null
 	description: string | null
 	amount: number
+	is_pending: boolean
 	category: Category
 }
 

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import Icon from "@/components/icon"
 import DataTable from "@/components/table/data-table"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Field, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
@@ -80,6 +81,14 @@ export default function RecordSearch({
 											<div className="flex-1 truncate">
 												<div className="truncate">
 													<span className="font-medium">
+														{row.original.is_pending && (
+															<Badge
+																variant="warning"
+																className="mr-1"
+															>
+																Pending
+															</Badge>
+														)}
 														{row.original.title}{" "}
 													</span>
 													<span className="text-muted-foreground">
