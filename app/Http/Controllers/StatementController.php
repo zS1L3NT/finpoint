@@ -13,7 +13,6 @@ class StatementController extends Controller
             ->when(
                 request()->query('query'),
                 fn($query, $q) => $query
-                    ->select('statements.*')
                     ->leftJoin('accounts', 'accounts.id', '=', 'statements.account_id')
                     ->where(
                         fn ($query) => $query
