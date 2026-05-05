@@ -3,6 +3,7 @@ import { Link2Icon } from "lucide-react"
 import { useState } from "react"
 import SelectField from "@/components/form/select-field"
 import Icon from "@/components/icon"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
 	Dialog,
@@ -106,7 +107,7 @@ export default function RecordQuotaDialog({
 					</Button>
 				}
 			/>
-			<DialogContent className="sm:max-w-2xl">
+			<DialogContent className="sm:max-w-lg">
 				<DialogHeader>
 					<DialogTitle>Attach Records to Quota</DialogTitle>
 					<DialogDescription>
@@ -147,15 +148,26 @@ export default function RecordQuotaDialog({
 
 					<div className="space-y-2">
 						<p className="text-sm font-semibold">Selected records</p>
-						<ScrollArea className="h-72 pr-4">
+						<ScrollArea className="h-72">
 							<div className="space-y-2">
 								{records.map(record => (
-									<Item key={record.id} variant="outline">
+									<Item
+										key={record.id}
+										variant="outline"
+										className="items-center"
+									>
 										<ItemMedia variant="icon">
 											<Icon {...record.category} size={14} />
 										</ItemMedia>
-										<ItemContent>
-											<ItemTitle>{record.title}</ItemTitle>
+										<ItemContent className="gap-0">
+											<ItemTitle>
+												{record.is_pending && (
+													<Badge variant="warning" className="mr-1">
+														Pending
+													</Badge>
+												)}
+												{record.title}
+											</ItemTitle>
 											<ItemDescription>
 												{formatDatetime(record.datetime)}
 												{record.quota
