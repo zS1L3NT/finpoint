@@ -6,10 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Allocation;
 use App\Models\Budget;
 use App\Models\Record;
-use App\Models\Statement;
+use App\Rules\EnsureStatementAmountDoesntExceedAllocable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
 use Ramsey\Uuid\Uuid;
 
 class RecordController extends Controller
@@ -50,16 +49,16 @@ class RecordController extends Controller
             'location' => 'nullable|string',
             'description' => 'nullable|string',
             'datetime' => 'required|date_format:Y-m-d\\TH:i',
+            'amount' => 'required|decimal:0,2',
             'category_id' => 'required|exists:categories,id',
-            'statements' => 'required|array',
+            'statements' => 'array',
             'statements.*.id' => 'required|exists:statements,id',
-            'statements.*.amount' => 'required|decimal:0,2',
+            'statements.*.amount' => ['required', 'decimal:0,2', new EnsureStatementAmountDoesntExceedAllocable],
         ]);
 
         return DB::transaction(function () use ($dto) {
             $record = Record::query()->create([
                 'id' => Uuid::uuid4(),
-                'amount' => round(collect($dto['statements'])->reduce(fn($acc, $el) => $acc + $el['amount'], 0), 2),
                 'datetime' => Carbon::createFromFormat('Y-m-d\\TH:i', $dto['datetime'])->format('Y-m-d H:i:s'),
                 ...collect($dto)->except('statements', 'datetime'),
             ]);
@@ -75,50 +74,16 @@ class RecordController extends Controller
                 $budget->records()->attach($record);
             }
 
-            $errors = collect();
-
-            foreach ($dto['statements'] as $i => $statement_dto) {
-                $statement = Statement::find($statement_dto['id']);
-                $allocated = round($statement->allocations()->sum('amount'), 2);
-
-                if ($statement->amount > 0) {
-                    if ($statement_dto['amount'] <= 0) {
-                        $errors->put("statements.$i.amount", 'The amount must be positive');
-
-                        continue;
-                    }
-
-                    if (round($statement->amount - $allocated - $statement_dto['amount'], 2) < 0) {
-                        $errors->put("statements.$i.amount", 'This amount exceeds what can be allocated');
-
-                        continue;
-                    }
-                }
-
-                if ($statement->amount < 0) {
-                    if ($statement_dto['amount'] >= 0) {
-                        $errors->put("statements.$i.amount", 'The amount must be negative');
-
-                        continue;
-                    }
-
-                    if (round($statement->amount - $allocated - $statement_dto['amount'], 2) > 0) {
-                        $errors->put("statements.$i.amount", 'This amount exceeds what can be allocated');
-
-                        continue;
-                    }
-                }
-            }
-
-            if ($errors->isNotEmpty()) {
-                throw ValidationException::withMessages($errors->toArray());
-            }
-
-            foreach ($dto['statements'] as $statement_dto) {
-                $record->statements()->attach($statement_dto['id'], [
-                    'amount' => $statement_dto['amount'],
-                ]);
-            }
+            $record->statements()
+                ->sync(
+                    collect($dto['statements'] ?? [])
+                        ->mapWithKeys(fn($statement_dto) => [
+                            $statement_dto['id'] => [
+                                'amount' => $statement_dto['amount']
+                            ]
+                        ])
+                        ->toArray()
+                );
 
             return $record;
         });
@@ -132,15 +97,15 @@ class RecordController extends Controller
             'location' => 'nullable|string',
             'description' => 'nullable|string',
             'datetime' => 'required|date_format:Y-m-d\\TH:i',
+            'amount' => 'required|decimal:0,2',
             'category_id' => 'required|exists:categories,id',
-            'statements' => 'required|array',
+            'statements' => 'array',
             'statements.*.id' => 'required|exists:statements,id',
-            'statements.*.amount' => 'required|decimal:0,2',
+            'statements.*.amount' => ['required', 'decimal:0,2', new EnsureStatementAmountDoesntExceedAllocable],
         ]);
 
         return DB::transaction(function () use ($record, $dto) {
             $record->update([
-                'amount' => round(collect($dto['statements'])->reduce(fn($acc, $el) => $acc + $el['amount'], 0), 2),
                 'datetime' => Carbon::createFromFormat('Y-m-d\\TH:i', $dto['datetime'])->format('Y-m-d H:i:s'),
                 ...collect($dto)->except('statements', 'datetime'),
             ]);
@@ -149,50 +114,16 @@ class RecordController extends Controller
                 $record->quota()->disassociate()->save();
             }
 
-            $errors = collect();
-
-            foreach ($dto['statements'] as $i => $statement_dto) {
-                $statement = $record->statements()->find($statement_dto['id']);
-                $allocated = round($statement->allocations()->sum('amount'), 2);
-
-                if ($statement->amount > 0) {
-                    if ($statement_dto['amount'] <= 0) {
-                        $errors->put("statements.$i.amount", 'The amount must be positive');
-
-                        continue;
-                    }
-
-                    if (round($statement->amount - $allocated - $statement_dto['amount'] + $statement->pivot->amount, 2) < 0) {
-                        $errors->put("statements.$i.amount", 'This amount exceeds what can be allocated');
-
-                        continue;
-                    }
-                }
-
-                if ($statement->amount < 0) {
-                    if ($statement_dto['amount'] >= 0) {
-                        $errors->put("statements.$i.amount", 'The amount must be negative');
-
-                        continue;
-                    }
-
-                    if (round($statement->amount - $allocated - $statement_dto['amount'] + $statement->pivot->amount, 2) > 0) {
-                        $errors->put("statements.$i.amount", 'This amount exceeds what can be allocated');
-
-                        continue;
-                    }
-                }
-            }
-
-            if ($errors->isNotEmpty()) {
-                throw ValidationException::withMessages($errors->toArray());
-            }
-
-            foreach ($dto['statements'] as $statement_dto) {
-                $record->statements()->updateExistingPivot($statement_dto['id'], [
-                    'amount' => $statement_dto['amount'],
-                ]);
-            }
+            $record->statements()
+                ->sync(
+                    collect($dto['statements'] ?? [])
+                        ->mapWithKeys(fn($statement_dto) => [
+                            $statement_dto['id'] => [
+                                'amount' => $statement_dto['amount']
+                            ]
+                        ])
+                        ->toArray()
+                );
 
             return $record;
         });
