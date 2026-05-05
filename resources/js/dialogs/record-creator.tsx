@@ -339,21 +339,6 @@ export default function RecordCreatorDialog({
 																suffix={`of ${formatCurrency(allocable)}`}
 																onChange={value => {
 																	field.handleChange(value)
-																	form.setFieldValue(
-																		"amount",
-																		round2dp(
-																			form
-																				.getFieldValue(
-																					"statements",
-																				)
-																				.reduce(
-																					(acc, el, i) =>
-																						acc +
-																						el.amount,
-																					0,
-																				),
-																		),
-																	)
 																	clearApiError(field.name)
 																}}
 															/>

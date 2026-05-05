@@ -161,13 +161,6 @@ export default function RecordEditorDialog({
 
 	const formStatements = useStore(form.store, state => state.values.statements)
 
-	useEffect(() => {
-		form.setFieldValue(
-			"amount",
-			round2dp(formStatements.reduce((acc, el) => acc + el.amount, 0)),
-		)
-	}, [formStatements])
-
 	const attachStatementsButton = (
 		<StatementSearch
 			title="Attach statements to record"
