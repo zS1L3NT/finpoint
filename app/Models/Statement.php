@@ -41,11 +41,11 @@ class Statement extends Model
 
     public function allocations()
     {
-        return $this->hasMany(Allocation::class, 'source_statement_id');
+        return $this->hasMany(Allocation::class);
     }
 
     public function records()
     {
-        return $this->belongsToMany(Record::class, 'allocations', 'source_statement_id', 'target_record_id')->orderBy('datetime', 'desc')->withPivot(['amount']);
+        return $this->belongsToMany(Record::class, Allocation::class)->orderBy('datetime', 'desc')->withPivot(['amount']);
     }
 }

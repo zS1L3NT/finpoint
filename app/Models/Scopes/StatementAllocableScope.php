@@ -17,7 +17,7 @@ class StatementAllocableScope implements Scope
         $builder->addSelect([
             'allocable_amount' => Allocation::query()
                 ->selectRaw('round(statements.amount - sum(allocations.amount), 2)')
-                ->whereColumn('allocations.source_statement_id', 'statements.id'),
+                ->whereColumn('allocations.statement_id', 'statements.id'),
         ]);
     }
 }

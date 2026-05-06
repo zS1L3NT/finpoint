@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Scopes\RecordAllocatedAmount;
+use App\Pivots\BudgetRecord;
 use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Attributes\Table;
@@ -57,17 +58,12 @@ class Record extends Model
 
     public function statements()
     {
-        return $this->belongsToMany(Statement::class, 'allocations', 'target_record_id', 'source_statement_id')->orderBy('datetime', 'desc')->withPivot(['amount']);
-    }
-
-    public function records()
-    {
-        return $this->belongsToMany(Record::class, 'allocations', 'target_record_id', 'source_record_id')->orderBy('datetime', 'desc')->withPivot(['amount']);
+        return $this->belongsToMany(Statement::class, Allocation::class)->orderBy('datetime', 'desc')->withPivot(['amount']);
     }
 
     public function budgets()
     {
-        return $this->belongsToMany(Budget::class, 'budget_records', 'record_id', 'budget_id')->withPivot(['amount']);
+        return $this->belongsToMany(Budget::class, BudgetRecord::class)->withPivot(['amount']);
     }
 
     public function quota()

@@ -17,7 +17,7 @@ class RecordAllocatedAmount implements Scope
         $builder->addSelect([
             'allocated_amount' => Allocation::query()
                 ->selectRaw('round(sum(allocations.amount), 2)')
-                ->whereColumn('allocations.target_record_id', 'records.id'),
+                ->whereColumn('allocations.record_id', 'records.id'),
         ]);
     }
 }

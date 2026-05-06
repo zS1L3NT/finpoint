@@ -131,11 +131,7 @@ class RecordController extends Controller
 
     public function destroy(Record $record)
     {
-        DB::transaction(function () use ($record) {
-            Allocation::query()->where('source_record_id', $record->id)->orWhere('target_record_id', $record->id)->delete();
-
-            $record->delete();
-        });
+        $record->delete();
 
         return [];
     }
