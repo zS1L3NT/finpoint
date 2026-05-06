@@ -53,7 +53,7 @@ import { useHistory } from "@/history"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { useFetch } from "@/hooks/use-fetch"
 import { cn, formatCurrency, formatDatetime, round2dp, withMethod } from "@/lib/utils"
-import { Allocation, Category, CategoryWithChildren, Record, RecordCompletions, Statement } from "@/types"
+import { Allocation, CategoryWithChildren, Record, RecordCompletions, Statement } from "@/types"
 import {
 	completionsRecordsApiRoute,
 	recordDestroyApiRoute,
@@ -62,7 +62,6 @@ import {
 } from "@/wayfinder/routes"
 
 type RecordExtra = {
-	category: Category
 	statements: (Statement & StatementExtra)[]
 }
 

@@ -14,11 +14,10 @@ import { useHistory } from "@/history"
 import { useFetch } from "@/hooks/use-fetch"
 import { TABLE_WIDTHS } from "@/lib/table-widths"
 import { classForCurrency, cn, formatCurrency, formatDatetime } from "@/lib/utils"
-import { Allocation, Category, CategoryWithChildren, Record, Statement } from "@/types"
+import { Allocation, CategoryWithChildren, Record, Statement } from "@/types"
 import { categoryIndexApiRoute, recordsWebRoute, statementWebRoute } from "@/wayfinder/routes"
 
 type RecordExtra = {
-	category: Category
 	statements: (Statement & StatementExtra)[]
 }
 
