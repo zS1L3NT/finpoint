@@ -1,4 +1,3 @@
-import type { ReactNode } from "react"
 import {
 	Pagination,
 	PaginationContent,
@@ -13,7 +12,7 @@ export default function PaginationFooter({
 	summary,
 	links,
 }: {
-	summary: ReactNode
+	summary: React.ReactNode
 	links: PaginatedLink[]
 }) {
 	const previousLink = links[0]

@@ -1,4 +1,3 @@
-import type { ReactNode } from "react"
 import { FormField, type FormFieldProps } from "@/components/form/field"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
@@ -9,7 +8,7 @@ type Props = FormFieldProps & {
 	step?: number
 	min?: number
 	max?: number
-	suffix?: ReactNode
+	suffix?: React.ReactNode
 	onChange: (value: number) => void
 }
 

@@ -1,4 +1,3 @@
-import { type ReactNode } from "react"
 import { FormField, type FormFieldProps } from "@/components/form/field"
 import {
 	Combobox,
@@ -16,7 +15,7 @@ type Props<T> = FormFieldProps & {
 	items: T[]
 	getItemId: (item: T) => string
 	getItemString: (item: T) => string
-	renderItem: (item: T) => ReactNode
+	renderItem: (item: T) => React.ReactNode
 	onChange: (value: T | null) => void
 }
 

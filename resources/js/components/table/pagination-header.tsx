@@ -1,4 +1,3 @@
-import type { ReactNode } from "react"
 import { Input } from "@/components/ui/input"
 import {
 	Select,
@@ -23,8 +22,8 @@ export default function PaginationHeader({
 	pageSize: string
 	onPageSizeChange: (value: string) => void
 	searchPlaceholder: string
-	filters?: ReactNode
-	actions?: ReactNode
+	filters?: React.ReactNode
+	actions?: React.ReactNode
 }) {
 	return (
 		<div className="flex items-end justify-between gap-4">

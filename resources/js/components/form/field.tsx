@@ -1,14 +1,13 @@
-import type { ReactNode } from "react"
 import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field"
 
 export type FieldErrorItem = { message?: string }
 
 export type FormFieldProps = {
 	id: string
-	label?: ReactNode
+	label?: React.ReactNode
 	errors?: FieldErrorItem[]
 	className?: string
-	description?: ReactNode
+	description?: React.ReactNode
 	disabled?: boolean
 }
 
@@ -20,7 +19,7 @@ export function FormField({
 	disabled,
 	children,
 	...props
-}: FormFieldProps & { children: ReactNode }) {
+}: FormFieldProps & { children: React.ReactNode }) {
 	return (
 		<Field data-invalid={!!errors?.length} data-disabled={disabled || undefined} {...props}>
 			{label ? <FieldLabel htmlFor={id}>{label}</FieldLabel> : null}

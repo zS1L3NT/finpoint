@@ -1,6 +1,5 @@
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table"
 import { AnimatePresence } from "framer-motion"
-import { ReactNode } from "react"
 import {
 	Table,
 	TableBody,
@@ -19,7 +18,7 @@ export default function DataTable<TData extends { id: string }, TValue>({
 }: {
 	data: TData[]
 	columns: ColumnDef<TData, TValue>[]
-	header?: ReactNode
+	header?: React.ReactNode
 	selectedIds?: string[]
 	emptyMessage?: string
 }) {

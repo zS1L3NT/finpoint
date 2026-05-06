@@ -1,6 +1,5 @@
 import { Link } from "@inertiajs/react"
 import { ArrowLeftIcon, type LucideIcon } from "lucide-react"
-import type { ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import { useHistory } from "@/history"
 
@@ -12,12 +11,12 @@ export default function PageHeader({
 	actions,
 	back,
 }: {
-	title: ReactNode
-	subtitle?: ReactNode
-	description: ReactNode
+	title: React.ReactNode
+	subtitle?: React.ReactNode
+	description: React.ReactNode
 	icon: LucideIcon
-	actions?: ReactNode
-	back?: { name: ReactNode; url: string }
+	actions?: React.ReactNode
+	back?: { name: React.ReactNode; url: string }
 }) {
 	const { latest, handlePop } = useHistory()
 
