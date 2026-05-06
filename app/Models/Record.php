@@ -46,11 +46,6 @@ class Record extends Model
         return $subtitle ?: null;
     }
 
-    public function getAllocaedAmountAttribute()
-    {
-        return $this->attributes['allocated_amount'] ?? 0;
-    }
-
     public function getIsPendingAttribute()
     {
         return $this->allocated_amount != $this->amount;

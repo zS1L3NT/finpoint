@@ -29,11 +29,6 @@ class Statement extends Model
         return preg_replace('/\b\d{4}-\d{4}-\d{4}-(\d{4})\b/', 'XXXX-XXXX-XXXX-$1', $this->attributes['description']);
     }
 
-    public function getAllocableAmountAttribute()
-    {
-        return $this->attributes['allocable_amount'] ?? $this->amount;
-    }
-
     public function account()
     {
         return $this->belongsTo(Account::class);

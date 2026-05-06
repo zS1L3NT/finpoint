@@ -35,11 +35,11 @@ class RecordController extends Controller
             )
             ->when(
                 request()->query('pending') === 'true',
-                fn($query) => $query->havingRaw('coalesce(allocated_amount, 0) != amount')
+                fn($query) => $query->havingRaw('allocated_amount != amount')
             )
             ->when(
                 request()->query('pending') === 'false',
-                fn($query) => $query->havingRaw('coalesce(allocated_amount, 0) = amount')
+                fn($query) => $query->havingRaw('allocated_amount = amount')
             )
             ->orderBy('datetime', 'desc')
             ->groupBy('records.id')

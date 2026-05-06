@@ -30,7 +30,7 @@ class AllocatorController extends Controller
                 request()->query('end_date'),
                 fn($query, $date) => $query->whereDate('datetime', '<=', $date)
             )
-            ->havingRaw('allocable_amount is null or allocable_amount != 0')
+            ->havingRaw('allocable_amount != 0')
             ->orderBy('datetime', 'desc')
             ->groupBy('statements.id')
             ->paginate(request('per_page') ?? 100)
