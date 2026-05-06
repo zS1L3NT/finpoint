@@ -81,15 +81,19 @@ export default function DashboardPage({
 
 	const categories = useFetch<CategoryWithChildren[]>(categoryIndexApiRoute.url(), [])
 
-	const [selected, setSelected] = useState<(Record & RecordExtra)[]>([])
-	const [areaQuota, setAreaQuota] = useState<Quota | null>(null)
-	const [tableQuery, setTableQuery] = useState("")
-	const [tableQuotaIds, setTableQuotaIds] = useState<string[]>([])
-	const [tableShowNoQuota, setTableShowNoQuota] = useState(false)
-
 	const [month] = useSearchParam("month", DateTime.now().toFormat("MMMM"))
 	const [year] = useSearchParam("year", DateTime.now().toFormat("yyyy"))
+	const [queryParam, setQueryParam] = useSearchParam("query")
+	const [quotaIdsParam, setQuotaIdsParam] = useSearchParam("quota_ids")
+	const [showNoQuotaParam, setShowNoQuotaParam] = useSearchParam("show_no_quotas")
+
 	const date = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
+	const query = queryParam ?? ""
+	const quotaIds = quotaIdsParam?.split(",").filter(Boolean) ?? []
+	const showNoQuota = showNoQuotaParam === "true"
+
+	const [selected, setSelected] = useState<(Record & RecordExtra)[]>([])
+	const [areaQuota, setAreaQuota] = useState<Quota | null>(null)
 
 	const setDate = (date: Date) => {
 		const dt = DateTime.fromJSDate(date)
@@ -98,6 +102,9 @@ export default function DashboardPage({
 				query: {
 					month: dt.toFormat("MMMM"),
 					year: dt.year,
+					query: queryParam || undefined,
+					quota_ids: quotaIdsParam || undefined,
+					show_no_quotas: showNoQuotaParam || undefined,
 				},
 			}),
 			{
@@ -153,8 +160,8 @@ export default function DashboardPage({
 	})
 
 	const filteredRecords = (
-		tableQuotaIds.length || tableShowNoQuota
-			? records.filter(r => (r.quota ? tableQuotaIds.includes(r.quota.id) : tableShowNoQuota))
+		quotaIds.length || showNoQuota
+			? records.filter(r => (r.quota ? quotaIds.includes(r.quota.id) : showNoQuota))
 			: records
 	).filter(r =>
 		[
@@ -166,10 +173,10 @@ export default function DashboardPage({
 			formatDatetime(r.datetime),
 		]
 			.filter(Boolean)
-			.some(value => value?.toLowerCase().includes(tableQuery.toLowerCase())),
+			.some(value => value?.toLowerCase().includes(query.toLowerCase())),
 	)
-	const activeQuotaFilters = quotas.filter(quota => tableQuotaIds.includes(quota.id))
-	const quotaFilterLabel = tableShowNoQuota
+	const activeQuotaFilters = quotas.filter(quota => quotaIds.includes(quota.id))
+	const quotaFilterLabel = showNoQuota
 		? activeQuotaFilters.length
 			? `${activeQuotaFilters.length + 1} selected`
 			: "No quota"
@@ -182,15 +189,20 @@ export default function DashboardPage({
 	const selectedWithQuota = selected.filter(r => r.quota)
 
 	useEffect(() => {
-		setTableQuotaIds(ids => ids.filter(id => quotas.some(quota => quota.id === id)))
+		const validIds = quotaIds.filter(id => quotas.some(quota => quota.id === id))
+		const nextQuotaIdsParam = validIds.length ? validIds.join(",") : null
 
+		if ((quotaIdsParam ?? null) !== nextQuotaIdsParam) {
+			setQuotaIdsParam(nextQuotaIdsParam)
+		}
+	}, [quotas, quotaIds, quotaIdsParam, setQuotaIdsParam])
+
+	useEffect(() => {
 		/**
 		 * This if statement contains code specific to the developer's dashboard workflow
 		 * You can comment this out or remove it if it doesn't apply to your use case
 		 */
-		if (quotas) {
-			setAreaQuota(quotas.find(q => q.name === "Daily") ?? null)
-		}
+		setAreaQuota(quotas.find(q => q.name === "Daily") ?? null)
 	}, [quotas])
 
 	/**
@@ -418,8 +430,10 @@ export default function DashboardPage({
 									<div className="w-full max-w-sm">
 										<Input
 											placeholder="Filter records..."
-											value={tableQuery}
-											onChange={event => setTableQuery(event.target.value)}
+											value={query}
+											onChange={event =>
+												setQueryParam(event.target.value || null)
+											}
 										/>
 									</div>
 									<div className="flex items-center gap-2">
@@ -449,13 +463,15 @@ export default function DashboardPage({
 													<DropdownMenuSeparator />
 													<DropdownMenuGroup>
 														<DropdownMenuCheckboxItem
-															checked={tableShowNoQuota}
+															checked={showNoQuota}
 															onSelect={event =>
 																event.preventDefault()
 															}
 															onCheckedChange={checked =>
-																setTableShowNoQuota(
-																	checked === true,
+																setShowNoQuotaParam(
+																	checked === true
+																		? "true"
+																		: null,
 																)
 															}
 														>
@@ -467,28 +483,29 @@ export default function DashboardPage({
 														{quotas.map(quota => (
 															<DropdownMenuCheckboxItem
 																key={quota.id}
-																checked={tableQuotaIds.includes(
+																checked={quotaIds.includes(
 																	quota.id,
 																)}
 																onSelect={event =>
 																	event.preventDefault()
 																}
 																onCheckedChange={checked =>
-																	setTableQuotaIds(ids =>
-																		checked === true
+																	setQuotaIdsParam(
+																		(checked === true
 																			? [
-																					...ids.filter(
+																					...quotaIds.filter(
 																						id =>
 																							id !==
 																							quota.id,
 																					),
 																					quota.id,
 																				]
-																			: ids.filter(
+																			: quotaIds.filter(
 																					id =>
 																						id !==
 																						quota.id,
-																				),
+																				)
+																		).join(",") || null,
 																	)
 																}
 															>
