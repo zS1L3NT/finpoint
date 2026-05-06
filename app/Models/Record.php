@@ -57,12 +57,12 @@ class Record extends Model
 
     public function statements()
     {
-        return $this->belongsToMany(Statement::class, 'allocations', 'target_record_id', 'source_statement_id')->withPivot(['amount']);
+        return $this->belongsToMany(Statement::class, 'allocations', 'target_record_id', 'source_statement_id')->orderBy('datetime', 'desc')->withPivot(['amount']);
     }
 
     public function records()
     {
-        return $this->belongsToMany(Record::class, 'allocations', 'target_record_id', 'source_record_id')->withPivot(['amount']);
+        return $this->belongsToMany(Record::class, 'allocations', 'target_record_id', 'source_record_id')->orderBy('datetime', 'desc')->withPivot(['amount']);
     }
 
     public function budgets()

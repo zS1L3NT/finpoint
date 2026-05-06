@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Pivots\BudgetRecord;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\WithoutTimestamps;
 use Illuminate\Database\Eloquent\Model;
@@ -12,7 +11,6 @@ use Illuminate\Database\Eloquent\Model;
 #[Table(keyType: 'string', incrementing: false)]
 #[WithoutTimestamps()]
 #[Guarded([])]
-#[Hidden(['date_check'])]
 class Budget extends Model
 {
     public $casts = [

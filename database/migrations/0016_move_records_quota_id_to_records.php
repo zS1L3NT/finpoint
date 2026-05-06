@@ -1,7 +1,5 @@
 <?php
 
-use App\Models\Quota;
-use App\Models\Record;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,11 +11,11 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('records', function (Blueprint $table) {
-            $table->foreignIdFor(Quota::class)->nullable()->constrained()->nullOnDelete();
+            $table->string('quota_id')->references('id')->on('quotas')->nullable()->constrained()->nullOnDelete();
         });
 
-        foreach (Record::all() as $record) {
-            $record->update([
+        foreach (DB::table('records')->get() as $record) {
+            DB::table('records')->where('id', $record->id)->update([
                 'quota_id' => DB::table('record_quota')->where('record_id', $record->id)->firstOrFail()->quota_id
             ]);
         }
@@ -31,11 +29,11 @@ return new class extends Migration {
     public function down(): void
     {
         Schema::create('record_quota', function (Blueprint $table) {
-            $table->foreignIdFor(Record::class)->primary()->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(Quota::class)->nullable()->constrained()->nullOnDelete();
+            $table->string('record_id')->references('id')->on('records')->primary()->constrained()->cascadeOnDelete();
+            $table->string('quota_id')->references('id')->on('quotas')->nullable()->constrained()->nullOnDelete();
         });
 
-        foreach (Record::all() as $record) {
+        foreach (DB::table('records')->get() as $record) {
             DB::table('record_quota')->insert([
                 'record_id' => $record->id,
                 'quota_id' => $record->quota_id,
