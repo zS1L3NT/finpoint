@@ -17,6 +17,7 @@ import RecordQuotaDialog from "@/components/dialogs/record-quota-editor"
 import Icon from "@/components/icon"
 import AppHeader from "@/components/layout/app-header"
 import PageHeader from "@/components/layout/page-header"
+import LimiterPaceCards, { getLimitAggregations } from "@/components/limiter-pace-cards"
 import DataTable from "@/components/table/data-table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -193,6 +194,18 @@ export default function DashboardPage({
 		)
 	}, [filteredRecords])
 
+	/**
+	 * This if statement contains code specific to the developer's dashboard workflow
+	 * You can comment this out or remove it if it doesn't apply to your use case
+	 */
+	const dailyQuota = quotas.find(q => q.name === "Daily")
+	const limitAggregations = getLimitAggregations(
+		records.filter(r => r.quota?.id === dailyQuota?.id),
+		date.startOf("month"),
+		date.endOf("month"),
+		dailyQuota?.amount ?? 0,
+	)
+
 	return (
 		<>
 			<AppHeader title="Dashboard" />
@@ -237,6 +250,14 @@ export default function DashboardPage({
 					}
 					back={{ name: "Back to budgets", url: budgetsWebRoute.url() }}
 				/>
+
+				{dailyQuota && (
+					<LimiterPaceCards
+						name="daily quota"
+						limit={dailyQuota?.amount ?? 0}
+						{...limitAggregations}
+					/>
+				)}
 
 				<div className="flex gap-8">
 					<Card className="flex-1">

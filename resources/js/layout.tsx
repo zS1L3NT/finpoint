@@ -2,9 +2,9 @@ import { usePage } from "@inertiajs/react"
 import AppSidebar from "@/components/layout/app-sidebar"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { Toaster } from "@/components/ui/sonner"
+import { TooltipProvider } from "@/components/ui/tooltip"
+import { HistoryProvider } from "@/history"
 import { SharedPageProps } from "@/types"
-import { TooltipProvider } from "./components/ui/tooltip"
-import { HistoryProvider } from "./history"
 
 export default function Layout({ children }: { children: React.ReactNode }) {
 	const { sidebarOpen } = usePage<SharedPageProps>().props
