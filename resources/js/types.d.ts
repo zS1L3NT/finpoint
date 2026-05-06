@@ -46,6 +46,7 @@ export type Record = {
 	allocated_amount: number
 	is_pending: boolean
 	category: Category
+	quota?: Quota | null
 }
 
 export type RecordCompletions = {

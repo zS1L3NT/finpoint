@@ -17,15 +17,13 @@ import { classForCurrency, cn, formatCurrency, formatDatetime } from "@/lib/util
 import { Allocation, CategoryWithChildren, Record, Statement } from "@/types"
 import { categoryIndexApiRoute, recordsWebRoute, statementWebRoute } from "@/wayfinder/routes"
 
-type RecordExtra = {
-	statements: (Statement & StatementExtra)[]
-}
-
-type StatementExtra = {
-	pivot: Allocation
-}
-
-export default function RecordPage({ record }: { record: Record & RecordExtra }) {
+export default function RecordPage({
+	record,
+	statements,
+}: {
+	record: Record
+	statements: (Statement & { pivot: Allocation })[]
+}) {
 	const { handlePush } = useHistory()
 
 	const categories = useFetch<CategoryWithChildren[]>(categoryIndexApiRoute.url(), [])
@@ -50,7 +48,13 @@ export default function RecordPage({ record }: { record: Record & RecordExtra })
 					subtitle={record.description}
 					description="Record details"
 					icon={ReceiptTextIcon}
-					actions={<RecordEditorDialog record={record} categories={categories} />}
+					actions={
+						<RecordEditorDialog
+							record={record}
+							statements={statements}
+							categories={categories}
+						/>
+					}
 					back={{
 						name: "Back to records",
 						url: recordsWebRoute.url(),
@@ -84,7 +88,7 @@ export default function RecordPage({ record }: { record: Record & RecordExtra })
 					</CardHeader>
 					<CardContent>
 						<DataTable
-							data={record.statements}
+							data={statements}
 							columns={[
 								{
 									header: "Account",

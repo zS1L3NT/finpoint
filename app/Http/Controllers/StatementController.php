@@ -31,8 +31,8 @@ class StatementController extends Controller
 
     public function show(Statement $statement)
     {
-        $statement->load('records');
+        $records = $statement->records;
 
-        return Inertia::render('statement', compact('statement'));
+        return Inertia::render('statement', compact('statement', 'records'));
     }
 }

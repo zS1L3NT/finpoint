@@ -38,11 +38,7 @@ import {
 	recordWebRoute,
 } from "@/wayfinder/routes"
 
-type BudgetExtra = {
-	records: Record[]
-}
-
-export default function BudgetPage({ budget }: { budget: Budget & BudgetExtra }) {
+export default function BudgetPage({ budget, records }: { budget: Budget; records: Record[] }) {
 	const { handlePush } = useHistory()
 
 	const categories = useFetch<CategoryWithChildren[]>(categoryIndexApiRoute.url(), [])
@@ -71,7 +67,7 @@ export default function BudgetPage({ budget }: { budget: Budget & BudgetExtra })
 	}
 
 	const limitAggregations = getLimitAggregations(
-		budget.records,
+		records,
 		parseDate(budget.start_date),
 		parseDate(budget.end_date),
 		budget.amount,
@@ -112,7 +108,7 @@ export default function BudgetPage({ budget }: { budget: Budget & BudgetExtra })
 						<CardContent className="my-auto">
 							<CategoriesPieChart
 								categories={categories}
-								records={budget.records}
+								records={records}
 								limit={budget.amount}
 							/>
 						</CardContent>
@@ -123,7 +119,7 @@ export default function BudgetPage({ budget }: { budget: Budget & BudgetExtra })
 						</CardHeader>
 						<CardContent>
 							<UsageAreaChart
-								records={budget.records}
+								records={records}
 								start={parseDate(budget.start_date)}
 								end={parseDate(budget.end_date)}
 								maxY={
@@ -157,7 +153,7 @@ export default function BudgetPage({ budget }: { budget: Budget & BudgetExtra })
 					</CardHeader>
 					<CardContent>
 						<DataTable
-							data={budget.records}
+							data={records}
 							columns={[
 								{
 									header: "Record",

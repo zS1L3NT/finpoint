@@ -28,16 +28,12 @@ import { classForCurrency, formatCurrency, formatDatetime } from "@/lib/utils"
 import { Quota, Record } from "@/types"
 import { recordQuotaAttachApiRoute } from "@/wayfinder/routes"
 
-type RecordExtra = {
-	quota: Quota | null
-}
-
 export default function RecordQuotaDialog({
 	records,
 	quotas,
 	clear,
 }: {
-	records: (Record & RecordExtra)[]
+	records: Record[]
 	quotas: Quota[]
 	clear: () => void
 }) {

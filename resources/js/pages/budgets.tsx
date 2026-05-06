@@ -15,11 +15,11 @@ import { formatCurrency, parseDate } from "@/lib/utils"
 import { Budget, Paginated } from "@/types"
 import { budgetsWebRoute, budgetWebRoute } from "@/wayfinder/routes"
 
-type BudgetExtra = {
-	records_sum_amount: number | null
-}
-
-export default function BudgetsPage({ budgets }: { budgets: Paginated<Budget & BudgetExtra> }) {
+export default function BudgetsPage({
+	budgets,
+}: {
+	budgets: Paginated<Budget & { records_sum_amount: number | null }>
+}) {
 	const { handlePush } = useHistory()
 
 	const { query, pageSize, handleQueryChange, handlePageSizeChange } = usePaginatedTableState({

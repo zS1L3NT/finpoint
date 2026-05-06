@@ -15,15 +15,13 @@ import { classForCurrency, formatCurrency, formatDatetime } from "@/lib/utils"
 import { Allocation, Record, Statement } from "@/types"
 import { recordWebRoute, statementsWebRoute } from "@/wayfinder/routes"
 
-type StatementExtra = {
-	records: (Record & RecordExtra)[]
-}
-
-type RecordExtra = {
-	pivot: Allocation
-}
-
-export default function StatementPage({ statement }: { statement: Statement & StatementExtra }) {
+export default function StatementPage({
+	statement,
+	records,
+}: {
+	statement: Statement
+	records: (Record & { pivot: Allocation })[]
+}) {
 	const { handlePush } = useHistory()
 
 	return (
@@ -72,7 +70,7 @@ export default function StatementPage({ statement }: { statement: Statement & St
 					</CardHeader>
 					<CardContent>
 						<DataTable
-							data={statement.records}
+							data={records}
 							columns={[
 								{
 									header: "Record",

@@ -66,17 +66,7 @@ import {
 	recordWebRoute,
 } from "@/wayfinder/routes"
 
-type RecordExtra = {
-	quota: Quota | null
-}
-
-export default function DashboardPage({
-	records,
-	quotas,
-}: {
-	records: (Record & RecordExtra)[]
-	quotas: Quota[]
-}) {
+export default function DashboardPage({ records, quotas }: { records: Record[]; quotas: Quota[] }) {
 	const { handlePush } = useHistory()
 
 	const categories = useFetch<CategoryWithChildren[]>(categoryIndexApiRoute.url(), [])
@@ -92,7 +82,7 @@ export default function DashboardPage({
 	const quotaIds = quotaIdsParam?.split(",").filter(Boolean) ?? []
 	const showNoQuota = showNoQuotaParam === "true"
 
-	const [selected, setSelected] = useState<(Record & RecordExtra)[]>([])
+	const [selected, setSelected] = useState<Record[]>([])
 	const [areaQuota, setAreaQuota] = useState<Quota | null>(null)
 
 	const setDate = (date: Date) => {

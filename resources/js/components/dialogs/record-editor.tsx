@@ -61,19 +61,13 @@ import {
 	recordUpdateApiRoute,
 } from "@/wayfinder/routes"
 
-type RecordExtra = {
-	statements: (Statement & StatementExtra)[]
-}
-
-type StatementExtra = {
-	pivot?: Allocation
-}
-
 export default function RecordEditorDialog({
 	record,
+	statements,
 	categories,
 }: {
-	record: Record & RecordExtra
+	record: Record
+	statements: (Statement & { pivot?: Allocation })[]
 	categories: CategoryWithChildren[]
 }) {
 	const { handleClear } = useHistory()
@@ -81,12 +75,12 @@ export default function RecordEditorDialog({
 	const completions = useFetch<RecordCompletions>(completionsRecordsApiRoute.url())
 
 	const [open, setOpen] = useState(false)
-	const [statements, setStatements] = useState<(Statement & StatementExtra)[]>([])
+	const [statementCache, setStatementCache] = useState<(Statement & { pivot?: Allocation })[]>([])
 	const { mergeErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
 
 	useEffect(() => {
-		setStatements(record.statements)
-	}, [record.statements])
+		setStatementCache(statements)
+	}, [statements])
 
 	const categoriesFlat = categories.flatMap(category => [category, ...category.children])
 
@@ -99,7 +93,7 @@ export default function RecordEditorDialog({
 			amount: record.amount,
 			category_id: record.category.id,
 			description: record.description ?? "",
-			statements: record.statements.map(statement => ({
+			statements: statements.map(statement => ({
 				id: statement.id,
 				amount: statement.pivot?.amount ?? 0,
 			})),
@@ -167,7 +161,7 @@ export default function RecordEditorDialog({
 			title="Attach statements to record"
 			filters={{ exclude_ids: formStatements.map(s => s.id).join(",") }}
 			handler={async statement => {
-				setStatements(prev => [...prev, statement])
+				setStatementCache(prev => [...prev, statement])
 				form.setFieldValue("statements", [
 					...form.getFieldValue("statements"),
 					{ id: statement.id, amount: statement.allocable_amount },
@@ -383,7 +377,7 @@ export default function RecordEditorDialog({
 											>
 												{field => {
 													// biome-ignore lint/style/noNonNullAssertion: All full statement objects must be cached
-													const statement = statements.find(
+													const statement = statementCache.find(
 														s => s.id === id,
 													)!
 

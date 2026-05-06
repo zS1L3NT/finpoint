@@ -51,8 +51,8 @@ class RecordController extends Controller
 
     public function show(Record $record)
     {
-        $record->load('statements');
+        $statements = $record->statements;
 
-        return Inertia::render('record', compact('record'));
+        return Inertia::render('record', compact('record', 'statements'));
     }
 }

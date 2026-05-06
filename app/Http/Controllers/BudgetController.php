@@ -30,8 +30,8 @@ class BudgetController extends Controller
 
     public function show(Budget $budget)
     {
-        $budget->load('records');
+        $records = $budget->records;
 
-        return Inertia::render('budget', compact('budget'));
+        return Inertia::render('budget', compact('budget', 'records'));
     }
 }
