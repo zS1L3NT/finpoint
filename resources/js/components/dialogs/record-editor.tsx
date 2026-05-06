@@ -51,9 +51,15 @@ import { Progress } from "@/components/ui/progress"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useHistory } from "@/history"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
+import { useFetch } from "@/hooks/use-fetch"
 import { cn, formatCurrency, formatDatetime, round2dp, withMethod } from "@/lib/utils"
-import { Allocation, CategoryWithChildren, Record, Statement } from "@/types"
-import { recordDestroyApiRoute, recordsWebRoute, recordUpdateApiRoute } from "@/wayfinder/routes"
+import { Allocation, CategoryWithChildren, Record, RecordCompletions, Statement } from "@/types"
+import {
+	completionsRecordsApiRoute,
+	recordDestroyApiRoute,
+	recordsWebRoute,
+	recordUpdateApiRoute,
+} from "@/wayfinder/routes"
 
 type RecordExtra = {
 	category: CategoryWithChildren
@@ -67,17 +73,13 @@ type StatementExtra = {
 export default function RecordEditorDialog({
 	record,
 	categories,
-	titles,
-	locations,
-	peoples,
 }: {
 	record: Record & RecordExtra
 	categories: CategoryWithChildren[]
-	titles: string[]
-	locations: string[]
-	peoples: string[]
 }) {
 	const { handleClear } = useHistory()
+
+	const completions = useFetch<RecordCompletions>(completionsRecordsApiRoute.url())
 
 	const [open, setOpen] = useState(false)
 	const [statements, setStatements] = useState<(Statement & StatementExtra)[]>([])
@@ -225,7 +227,7 @@ export default function RecordEditorDialog({
 										id={field.name}
 										label="Title"
 										value={field.state.value}
-										suggestions={titles}
+										suggestions={completions?.titles}
 										errors={mergeErrors(field.state.meta.errors, field.name)}
 										onChange={value => {
 											field.handleChange(value)
@@ -240,7 +242,7 @@ export default function RecordEditorDialog({
 										id={field.name}
 										label="People"
 										value={field.state.value}
-										suggestions={peoples}
+										suggestions={completions?.peoples}
 										errors={mergeErrors(field.state.meta.errors, field.name)}
 										onChange={value => {
 											field.handleChange(value)
@@ -255,7 +257,7 @@ export default function RecordEditorDialog({
 										id={field.name}
 										label="Location"
 										value={field.state.value}
-										suggestions={locations}
+										suggestions={completions?.locations}
 										errors={mergeErrors(field.state.meta.errors, field.name)}
 										onChange={value => {
 											field.handleChange(value)

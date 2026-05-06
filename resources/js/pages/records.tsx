@@ -9,24 +9,21 @@ import PaginatedDataTable from "@/components/table/paginated-data-table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useHistory } from "@/history"
+import { useFetch } from "@/hooks/use-fetch"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { useSearchParam } from "@/hooks/use-search-param"
 import { TABLE_WIDTHS } from "@/lib/table-widths"
 import { classForCurrency, formatCurrency, formatDatetime } from "@/lib/utils"
 import { CategoryWithChildren, Paginated, Record } from "@/types"
-import { recordsWebRoute, recordWebRoute } from "@/wayfinder/routes"
+import { categoryIndexApiRoute, recordsWebRoute, recordWebRoute } from "@/wayfinder/routes"
 
-export default function RecordsPage({
-	records,
-	categories,
-}: {
-	records: Paginated<Record>
-	categories: CategoryWithChildren[]
-}) {
+export default function RecordsPage({ records }: { records: Paginated<Record> }) {
 	const { handlePush } = useHistory()
 
 	const [startDate, setStartDate] = useSearchParam("start_date")
 	const [endDate, setEndDate] = useSearchParam("end_date")
+
+	const categories = useFetch<CategoryWithChildren[]>(categoryIndexApiRoute.url(), [])
 
 	const { query, pageSize, handleQueryChange, handlePageSizeChange } = usePaginatedTableState({
 		syncOn: records,

@@ -30,7 +30,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { useFetch } from "@/hooks/use-fetch"
 import { cn, formatCurrency, formatDatetime, parseDatetime, round2dp } from "@/lib/utils"
-import { CategoryWithChildren, Statement } from "@/types"
+import { CategoryWithChildren, RecordCompletions, Statement } from "@/types"
 import { completionsRecordsApiRoute, recordStoreApiRoute } from "@/wayfinder/routes"
 
 export default function RecordCreatorDialog({
@@ -44,9 +44,7 @@ export default function RecordCreatorDialog({
 	disabled?: boolean
 	clear?: () => void
 }) {
-	const completions = useFetch<{ titles: string[]; peoples: string[]; locations: string[] }>(
-		completionsRecordsApiRoute.url(),
-	)
+	const completions = useFetch<RecordCompletions>(completionsRecordsApiRoute.url())
 
 	const [open, setOpen] = useState(false)
 	const { mergeErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()

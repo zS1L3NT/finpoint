@@ -20,6 +20,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card"
 import { useHistory } from "@/history"
+import { useFetch } from "@/hooks/use-fetch"
 import { TABLE_WIDTHS } from "@/lib/table-widths"
 import {
 	classForCurrency,
@@ -33,6 +34,7 @@ import {
 	budgetRecordAttachApiRoute,
 	budgetRecordDetachApiRoute,
 	budgetsWebRoute,
+	categoryIndexApiRoute,
 	recordWebRoute,
 } from "@/wayfinder/routes"
 
@@ -40,14 +42,10 @@ type BudgetExtra = {
 	records: Record[]
 }
 
-export default function BudgetPage({
-	budget,
-	categories,
-}: {
-	budget: Budget & BudgetExtra
-	categories: CategoryWithChildren[]
-}) {
+export default function BudgetPage({ budget }: { budget: Budget & BudgetExtra }) {
 	const { handlePush } = useHistory()
+
+	const categories = useFetch<CategoryWithChildren[]>(categoryIndexApiRoute.url(), [])
 
 	const attach = async (record: Record) => {
 		const response = await fetch(budgetRecordAttachApiRoute.url({ budget, record }), {

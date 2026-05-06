@@ -10,6 +10,15 @@ use Ramsey\Uuid\Uuid;
 
 class CategoryController extends Controller
 {
+    public function index()
+    {
+        return Category::query()
+            ->with('children')
+            ->whereNull('parent_category_id')
+            ->orderBy('name')
+            ->get();
+    }
+
     public function store()
     {
         $dto = request()->validate([

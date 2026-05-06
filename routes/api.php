@@ -47,8 +47,9 @@ Route::post('budgets/{budget}/records/{record}', [BudgetRecordController::class,
 Route::delete('budgets/{budget}/records/{record}', [BudgetRecordController::class, 'detach'])->name('budget-record-detach-api-route');
 
 Route::apiResource('categories', CategoryController::class)
-    ->only('store', 'update', 'destroy')
+    ->only('index', 'store', 'update', 'destroy')
     ->names([
+        'index' => 'category-index-api-route',
         'store' => 'category-store-api-route',
         'update' => 'category-update-api-route',
         'destroy' => 'category-destroy-api-route',

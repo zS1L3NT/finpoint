@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Allocation;
-use App\Models\Category;
 use App\Models\Record;
 use Inertia\Inertia;
 
@@ -40,43 +38,13 @@ class RecordController extends Controller
             ->paginate(request('per_page') ?? 100)
             ->withQueryString();
 
-        $categories = Category::query()
-            ->with('children')
-            ->whereNull('parent_category_id')
-            ->orderBy('name')
-            ->get();
-
-        return Inertia::render('records', compact('records', 'categories'));
+        return Inertia::render('records', compact('records'));
     }
 
     public function show(Record $record)
     {
         $record->load('statements');
 
-        $categories = Category::query()
-            ->with('children')
-            ->whereNull('parent_category_id')
-            ->orderBy('name')
-            ->get();
-
-        $titles = Record::query()
-            ->distinct()
-            ->whereNotNull('title')
-            ->orderBy('title')
-            ->pluck('title');
-
-        $locations = Record::query()
-            ->distinct()
-            ->whereNotNull('location')
-            ->orderBy('location')
-            ->pluck('location');
-
-        $peoples = Record::query()
-            ->distinct()
-            ->whereNotNull('people')
-            ->orderBy('people')
-            ->pluck('people');
-
-        return Inertia::render('record', compact('record', 'categories', 'titles', 'locations', 'peoples'));
+        return Inertia::render('record', compact('record'));
     }
 }

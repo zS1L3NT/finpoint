@@ -2,18 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
+use App\Http\Controllers\Api\CategoryController as ApiCategoryController;
 use Inertia\Inertia;
 
 class CategoryController extends Controller
 {
     public function index()
     {
-        $categories = Category::query()
-            ->with('children')
-            ->whereNull('parent_category_id')
-            ->orderBy('name')
-            ->get();
+        $categories = (new ApiCategoryController)->index();
 
         return Inertia::render('categories', compact('categories'));
     }

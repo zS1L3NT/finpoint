@@ -53,12 +53,14 @@ import {
 	SelectValue,
 } from "@/components/ui/select"
 import { useHistory } from "@/history"
+import { useFetch } from "@/hooks/use-fetch"
 import { useSearchParam } from "@/hooks/use-search-param"
 import { TABLE_WIDTHS } from "@/lib/table-widths"
 import { classForCurrency, cn, formatCurrency, formatDatetime, withMethod } from "@/lib/utils"
 import { CategoryWithChildren, Quota, Record } from "@/types"
 import {
 	budgetsWebRoute,
+	categoryIndexApiRoute,
 	dashboardWebRoute,
 	recordQuotaDetachApiRoute,
 	recordWebRoute,
@@ -70,14 +72,14 @@ type RecordExtra = {
 
 export default function DashboardPage({
 	records,
-	categories,
 	quotas,
 }: {
 	records: (Record & RecordExtra)[]
-	categories: CategoryWithChildren[]
 	quotas: Quota[]
 }) {
 	const { handlePush } = useHistory()
+
+	const categories = useFetch<CategoryWithChildren[]>(categoryIndexApiRoute.url(), [])
 
 	const [selected, setSelected] = useState<(Record & RecordExtra)[]>([])
 	const [areaQuota, setAreaQuota] = useState<Quota | null>(null)

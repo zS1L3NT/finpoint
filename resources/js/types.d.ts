@@ -47,6 +47,12 @@ export type Record = {
 	category: Category
 }
 
+export type RecordCompletions = {
+	titles: string[]
+	locations: string[]
+	peoples: string[]
+}
+
 export type Category = {
 	id: string
 	name: string

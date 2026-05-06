@@ -11,30 +11,21 @@ import PaginatedDataTable from "@/components/table/paginated-data-table"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useHistory } from "@/history"
+import { useFetch } from "@/hooks/use-fetch"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { useSearchParam } from "@/hooks/use-search-param"
 import { TABLE_WIDTHS } from "@/lib/table-widths"
 import { classForCurrency, formatCurrency, formatDatetime, round2dp } from "@/lib/utils"
 import { CategoryWithChildren, Paginated, Statement } from "@/types"
-import { allocatorWebRoute, statementWebRoute } from "@/wayfinder/routes"
+import { allocatorWebRoute, categoryIndexApiRoute, statementWebRoute } from "@/wayfinder/routes"
 
-export default function AllocatorPage({
-	statements,
-	categories,
-	titles,
-	locations,
-	peoples,
-}: {
-	statements: Paginated<Statement>
-	categories: CategoryWithChildren[]
-	titles: string[]
-	locations: string[]
-	peoples: string[]
-}) {
+export default function AllocatorPage({ statements }: { statements: Paginated<Statement> }) {
 	const { handlePush } = useHistory()
 
 	const [startDate, setStartDate] = useSearchParam("start_date")
 	const [endDate, setEndDate] = useSearchParam("end_date")
+
+	const categories = useFetch<CategoryWithChildren[]>(categoryIndexApiRoute.url(), [])
 
 	const [selected, setSelected] = useState<Statement[]>([])
 

@@ -11,10 +11,11 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useHistory } from "@/history"
+import { useFetch } from "@/hooks/use-fetch"
 import { TABLE_WIDTHS } from "@/lib/table-widths"
 import { classForCurrency, cn, formatCurrency, formatDatetime } from "@/lib/utils"
 import { Allocation, CategoryWithChildren, Record, Statement } from "@/types"
-import { recordsWebRoute, statementWebRoute } from "@/wayfinder/routes"
+import { categoryIndexApiRoute, recordsWebRoute, statementWebRoute } from "@/wayfinder/routes"
 
 type RecordExtra = {
 	category: CategoryWithChildren
@@ -25,20 +26,10 @@ type StatementExtra = {
 	pivot: Allocation
 }
 
-export default function RecordPage({
-	record,
-	categories,
-	titles,
-	locations,
-	peoples,
-}: {
-	record: Record & RecordExtra
-	categories: CategoryWithChildren[]
-	titles: string[]
-	locations: string[]
-	peoples: string[]
-}) {
+export default function RecordPage({ record }: { record: Record & RecordExtra }) {
 	const { handlePush } = useHistory()
+
+	const categories = useFetch<CategoryWithChildren[]>(categoryIndexApiRoute.url(), [])
 
 	return (
 		<>
@@ -60,15 +51,7 @@ export default function RecordPage({
 					subtitle={record.description}
 					description="Record details"
 					icon={ReceiptTextIcon}
-					actions={
-						<RecordEditorDialog
-							record={record}
-							categories={categories}
-							titles={titles}
-							locations={locations}
-							peoples={peoples}
-						/>
-					}
+					actions={<RecordEditorDialog record={record} categories={categories} />}
 					back={{
 						name: "Back to records",
 						url: recordsWebRoute.url(),

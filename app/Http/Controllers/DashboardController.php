@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
 use App\Models\Quota;
 use App\Models\Record;
 use Illuminate\Support\Carbon;
@@ -23,17 +22,11 @@ class DashboardController extends Controller
             ->orderBy('datetime', 'desc')
             ->get();
 
-        $categories = Category::query()
-            ->with('children')
-            ->whereNull('parent_category_id')
-            ->orderBy('name')
-            ->get();
-
         $quotas = Quota::query()
             ->where('month', $month)
             ->where('year', $year)
             ->get();
 
-        return Inertia::render('dashboard', compact('records', 'categories', 'quotas'));
+        return Inertia::render('dashboard', compact('records', 'quotas'));
     }
 }

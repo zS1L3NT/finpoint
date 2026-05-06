@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
 use App\Models\Statement;
 use Inertia\Inertia;
 
@@ -37,12 +36,6 @@ class AllocatorController extends Controller
             ->paginate(request('per_page') ?? 100)
             ->withQueryString();
 
-        $categories = Category::query()
-            ->with('children')
-            ->whereNull('parent_category_id')
-            ->orderBy('name')
-            ->get();
-
-        return Inertia::render('allocator', compact('statements', 'categories'));
+        return Inertia::render('allocator', compact('statements'));
     }
 }
