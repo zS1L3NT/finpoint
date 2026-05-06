@@ -172,11 +172,9 @@ export default function AllocatorPage({
 						),
 						actions: (
 							<RecordCreatorDialog
-								statements={selected ? Object.values(selected) : []}
+								statements={selected}
 								categories={categories}
-								titles={titles}
-								locations={locations}
-								peoples={peoples}
+								disabled={!selected.length}
 								clear={() => setSelected([])}
 							/>
 						),

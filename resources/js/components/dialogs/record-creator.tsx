@@ -28,25 +28,26 @@ import { FieldGroup } from "@/components/ui/field"
 import { Progress } from "@/components/ui/progress"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
+import { useFetch } from "@/hooks/use-fetch"
 import { cn, formatCurrency, formatDatetime, parseDatetime, round2dp } from "@/lib/utils"
 import { CategoryWithChildren, Statement } from "@/types"
-import { recordStoreApiRoute } from "@/wayfinder/routes"
+import { completionsRecordsApiRoute, recordStoreApiRoute } from "@/wayfinder/routes"
 
 export default function RecordCreatorDialog({
 	statements,
 	categories,
-	titles,
-	locations,
-	peoples,
+	disabled,
 	clear,
 }: {
 	statements: Statement[]
 	categories: CategoryWithChildren[]
-	titles: string[]
-	locations: string[]
-	peoples: string[]
-	clear: () => void
+	disabled?: boolean
+	clear?: () => void
 }) {
+	const completions = useFetch<{ titles: string[]; peoples: string[]; locations: string[] }>(
+		completionsRecordsApiRoute.url(),
+	)
+
 	const [open, setOpen] = useState(false)
 	const { mergeErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
 
@@ -97,7 +98,7 @@ export default function RecordCreatorDialog({
 
 			if (response.status === 201) {
 				setOpen(false)
-				clear()
+				clear?.()
 				router.reload()
 			}
 		},
@@ -123,7 +124,7 @@ export default function RecordCreatorDialog({
 		>
 			<DialogTrigger
 				render={
-					<Button>
+					<Button disabled={disabled}>
 						<PlusIcon /> Create Record
 					</Button>
 				}
@@ -154,7 +155,7 @@ export default function RecordCreatorDialog({
 										id={field.name}
 										label="Title"
 										value={field.state.value}
-										suggestions={titles}
+										suggestions={completions?.titles}
 										errors={mergeErrors(field.state.meta.errors, field.name)}
 										onChange={value => {
 											field.handleChange(value)
@@ -169,7 +170,7 @@ export default function RecordCreatorDialog({
 										id={field.name}
 										label="People"
 										value={field.state.value}
-										suggestions={peoples}
+										suggestions={completions?.peoples}
 										errors={mergeErrors(field.state.meta.errors, field.name)}
 										onChange={value => {
 											field.handleChange(value)
@@ -184,7 +185,7 @@ export default function RecordCreatorDialog({
 										id={field.name}
 										label="Location"
 										value={field.state.value}
-										suggestions={locations}
+										suggestions={completions?.locations}
 										errors={mergeErrors(field.state.meta.errors, field.name)}
 										onChange={value => {
 											field.handleChange(value)

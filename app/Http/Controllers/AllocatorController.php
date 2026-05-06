@@ -2,9 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Allocation;
 use App\Models\Category;
-use App\Models\Record;
 use App\Models\Statement;
 use Inertia\Inertia;
 
@@ -45,24 +43,6 @@ class AllocatorController extends Controller
             ->orderBy('name')
             ->get();
 
-        $titles = Record::query()
-            ->distinct()
-            ->whereNotNull('title')
-            ->orderBy('title')
-            ->pluck('title');
-
-        $locations = Record::query()
-            ->distinct()
-            ->whereNotNull('location')
-            ->orderBy('location')
-            ->pluck('location');
-
-        $peoples = Record::query()
-            ->distinct()
-            ->whereNotNull('people')
-            ->orderBy('people')
-            ->pluck('people');
-
-        return Inertia::render('allocator', compact('statements', 'categories', 'titles', 'locations', 'peoples'));
+        return Inertia::render('allocator', compact('statements', 'categories'));
     }
 }

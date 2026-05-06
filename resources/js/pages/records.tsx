@@ -1,5 +1,6 @@
 import { Link } from "@inertiajs/react"
 import { ReceiptTextIcon } from "lucide-react"
+import RecordCreatorDialog from "@/components/dialogs/record-creator"
 import DateField from "@/components/form/date-field"
 import Icon from "@/components/icon"
 import AppHeader from "@/components/layout/app-header"
@@ -12,10 +13,16 @@ import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { useSearchParam } from "@/hooks/use-search-param"
 import { TABLE_WIDTHS } from "@/lib/table-widths"
 import { classForCurrency, formatCurrency, formatDatetime } from "@/lib/utils"
-import { Paginated, Record } from "@/types"
+import { CategoryWithChildren, Paginated, Record } from "@/types"
 import { recordsWebRoute, recordWebRoute } from "@/wayfinder/routes"
 
-export default function RecordsPage({ records }: { records: Paginated<Record> }) {
+export default function RecordsPage({
+	records,
+	categories,
+}: {
+	records: Paginated<Record>
+	categories: CategoryWithChildren[]
+}) {
 	const { handlePush } = useHistory()
 
 	const [startDate, setStartDate] = useSearchParam("start_date")
@@ -138,6 +145,7 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 								/>
 							</>
 						),
+						actions: <RecordCreatorDialog statements={[]} categories={categories} />,
 					}}
 					footer={{
 						summary: `Showing ${records.data.length} of ${records.total} records.`,

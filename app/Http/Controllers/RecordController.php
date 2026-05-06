@@ -40,7 +40,13 @@ class RecordController extends Controller
             ->paginate(request('per_page') ?? 100)
             ->withQueryString();
 
-        return Inertia::render('records', compact('records'));
+        $categories = Category::query()
+            ->with('children')
+            ->whereNull('parent_category_id')
+            ->orderBy('name')
+            ->get();
+
+        return Inertia::render('records', compact('records', 'categories'));
     }
 
     public function show(Record $record)

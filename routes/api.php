@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\BudgetController;
 use App\Http\Controllers\Api\BudgetRecordController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\CompletionsController;
 use App\Http\Controllers\Api\ImporterController;
 use App\Http\Controllers\Api\QuotaController;
 use App\Http\Controllers\Api\RecordController;
@@ -13,6 +14,8 @@ use Illuminate\Support\Facades\Route;
 Route::post('importer/dbs', [ImporterController::class, 'dbs'])->name('importer-dbs-api-route');
 Route::post('importer/uob', [ImporterController::class, 'uob'])->name('importer-uob-api-route');
 Route::post('importer/revolut', [ImporterController::class, 'revolut'])->name('importer-revolut-api-route');
+
+Route::get('completions/records', [CompletionsController::class, 'records'])->name('completions-records-api-route');
 
 Route::apiResource('statements', StatementController::class)
     ->only('index')
