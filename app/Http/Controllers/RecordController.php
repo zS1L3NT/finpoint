@@ -33,6 +33,14 @@ class RecordController extends Controller
                 request()->query('end_date'),
                 fn($query, $date) => $query->whereDate('datetime', '<=', $date)
             )
+            ->when(
+                request()->query('pending') === 'true',
+                fn($query) => $query->havingRaw('coalesce(allocated_amount, 0) != amount')
+            )
+            ->when(
+                request()->query('pending') === 'false',
+                fn($query) => $query->havingRaw('coalesce(allocated_amount, 0) = amount')
+            )
             ->orderBy('datetime', 'desc')
             ->groupBy('records.id')
             ->paginate(request('per_page') ?? 100)

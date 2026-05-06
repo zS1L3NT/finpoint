@@ -168,6 +168,16 @@ export default function DashboardPage({
 			.filter(Boolean)
 			.some(value => value?.toLowerCase().includes(tableQuery.toLowerCase())),
 	)
+	const activeQuotaFilters = quotas.filter(quota => tableQuotaIds.includes(quota.id))
+	const quotaFilterLabel = tableShowNoQuota
+		? activeQuotaFilters.length
+			? `${activeQuotaFilters.length + 1} selected`
+			: "No quota"
+		: activeQuotaFilters.length === 1
+			? activeQuotaFilters[0].name
+			: activeQuotaFilters.length > 1
+				? `${activeQuotaFilters.length} selected`
+				: null
 
 	const selectedWithQuota = selected.filter(r => r.quota)
 
@@ -416,8 +426,20 @@ export default function DashboardPage({
 										{quotas.length ? (
 											<DropdownMenu>
 												<DropdownMenuTrigger asChild>
-													<Button type="button" variant="outline">
+													<Button
+														type="button"
+														variant={
+															quotaFilterLabel
+																? "secondary"
+																: "outline"
+														}
+													>
 														<ListFilterIcon /> Filter quotas
+														{quotaFilterLabel ? (
+															<Badge variant="outline">
+																{quotaFilterLabel}
+															</Badge>
+														) : null}
 													</Button>
 												</DropdownMenuTrigger>
 												<DropdownMenuContent align="end" className="w-56">

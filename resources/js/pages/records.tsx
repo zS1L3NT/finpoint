@@ -1,5 +1,5 @@
 import { Link } from "@inertiajs/react"
-import { ReceiptTextIcon } from "lucide-react"
+import { ListFilterIcon, ReceiptTextIcon } from "lucide-react"
 import RecordCreatorDialog from "@/components/dialogs/record-creator"
 import DateField from "@/components/form/date-field"
 import Icon from "@/components/icon"
@@ -8,6 +8,15 @@ import PageHeader from "@/components/layout/page-header"
 import PaginatedDataTable from "@/components/table/paginated-data-table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import {
+	DropdownMenu,
+	DropdownMenuCheckboxItem,
+	DropdownMenuContent,
+	DropdownMenuGroup,
+	DropdownMenuLabel,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { useHistory } from "@/history"
 import { useFetch } from "@/hooks/use-fetch"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
@@ -22,6 +31,7 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 
 	const [startDate, setStartDate] = useSearchParam("start_date")
 	const [endDate, setEndDate] = useSearchParam("end_date")
+	const [pending, setPending] = useSearchParam("pending")
 
 	const categories = useFetch<CategoryWithChildren[]>(categoryIndexApiRoute.url(), [])
 
@@ -33,9 +43,12 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 					...query,
 					start_date: startDate || undefined,
 					end_date: endDate || undefined,
+					pending: pending || undefined,
 				},
 			}).url,
 	})
+	const pendingFilterLabel =
+		pending === "true" ? "Pending" : pending === "false" ? "Not pending" : null
 
 	return (
 		<>
@@ -125,6 +138,46 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 						searchPlaceholder: "Search all records...",
 						filters: (
 							<>
+								<DropdownMenu>
+									<DropdownMenuTrigger asChild>
+										<Button
+											type="button"
+											variant={pendingFilterLabel ? "secondary" : "outline"}
+										>
+											<ListFilterIcon /> Filter status
+											{pendingFilterLabel ? (
+												<Badge variant="outline">
+													{pendingFilterLabel}
+												</Badge>
+											) : null}
+										</Button>
+									</DropdownMenuTrigger>
+									<DropdownMenuContent align="end" className="w-48">
+										<DropdownMenuLabel>Filter by status</DropdownMenuLabel>
+										<DropdownMenuSeparator />
+										<DropdownMenuGroup>
+											<DropdownMenuCheckboxItem
+												checked={pending === "true"}
+												onSelect={event => event.preventDefault()}
+												onCheckedChange={checked =>
+													setPending(checked === true ? "true" : null)
+												}
+											>
+												Pending
+											</DropdownMenuCheckboxItem>
+											<DropdownMenuCheckboxItem
+												checked={pending === "false"}
+												onSelect={event => event.preventDefault()}
+												onCheckedChange={checked =>
+													setPending(checked === true ? "false" : null)
+												}
+											>
+												Not pending
+											</DropdownMenuCheckboxItem>
+										</DropdownMenuGroup>
+									</DropdownMenuContent>
+								</DropdownMenu>
+
 								<DateField
 									id="start_date"
 									value={startDate ?? ""}
