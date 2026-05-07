@@ -1,12 +1,14 @@
 import { Link } from "@inertiajs/react"
-import { LinkIcon } from "lucide-react"
+import { Link2Icon, LinkIcon, PlusIcon } from "lucide-react"
 import { useState } from "react"
 import AllocateBar from "@/components/allocate-bar"
 import DetailCard from "@/components/detail-card"
 import RecordCreatorDialog from "@/components/dialogs/record-creator"
+import RecordEditorDialog from "@/components/dialogs/record-editor"
 import DateField from "@/components/form/date-field"
 import AppHeader from "@/components/layout/app-header"
 import PageHeader from "@/components/layout/page-header"
+import RecordSearch from "@/components/record-search"
 import PaginatedDataTable from "@/components/table/paginated-data-table"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -16,8 +18,13 @@ import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { useSearchParam } from "@/hooks/use-search-param"
 import { TABLE_WIDTHS } from "@/lib/table-widths"
 import { classForCurrency, formatCurrency, formatDatetime, round2dp } from "@/lib/utils"
-import { CategoryWithChildren, Paginated, Statement } from "@/types"
-import { allocatorWebRoute, categoryIndexApiRoute, statementWebRoute } from "@/wayfinder/routes"
+import { CategoryWithChildren, Paginated, Record, Statement } from "@/types"
+import {
+	allocatorWebRoute,
+	categoryIndexApiRoute,
+	recordShowApiRoute,
+	statementWebRoute,
+} from "@/wayfinder/routes"
 
 export default function AllocatorPage({ statements }: { statements: Paginated<Statement> }) {
 	const { handlePush } = useHistory()
@@ -27,7 +34,10 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 
 	const categories = useFetch<CategoryWithChildren[]>(categoryIndexApiRoute.url(), [])
 
-	const [selected, setSelected] = useState<Statement[]>([])
+	const [selectedStatements, setSelectedStatements] = useState<Statement[]>([])
+	const [editingRecord, setEditingRecord] = useState<
+		(Record & { statements: Statement[] }) | null
+	>(null)
 
 	const { query, pageSize, handleQueryChange, handlePageSizeChange } = usePaginatedTableState({
 		syncOn: statements,
@@ -41,7 +51,10 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 			}).url,
 	})
 
-	const selectedAmount = selected.reduce((sum, statement) => sum + statement.allocable_amount, 0)
+	const selectedAmount = selectedStatements.reduce(
+		(sum, statement) => sum + statement.allocable_amount,
+		0,
+	)
 
 	return (
 		<>
@@ -57,7 +70,7 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 
 				<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
 					<DetailCard label="Pending Statements" value={statements.total} />
-					<DetailCard label="Selected Statements" value={selected.length} />
+					<DetailCard label="Selected Statements" value={selectedStatements.length} />
 					<DetailCard
 						label="Selected Amount"
 						value={formatCurrency(selectedAmount)}
@@ -74,9 +87,11 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 							cell: ({ row }) => (
 								<div className="flex items-center justify-center">
 									<Checkbox
-										checked={!!selected.find(s => s.id === row.original.id)}
+										checked={
+											!!selectedStatements.find(s => s.id === row.original.id)
+										}
 										onCheckedChange={value =>
-											setSelected(prev =>
+											setSelectedStatements(prev =>
 												value
 													? [...prev, row.original]
 													: prev.filter(s => s.id !== row.original.id),
@@ -162,25 +177,64 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 							</>
 						),
 						actions: (
-							<RecordCreatorDialog
-								statements={selected}
-								categories={categories}
-								trigger={
-									<Button disabled={!selectedStatements.length}>
-										<PlusIcon /> Create Record
-									</Button>
-								}
-								clear={() => setSelected([])}
-							/>
+							<>
+								<RecordCreatorDialog
+									statements={selectedStatements}
+									categories={categories}
+									trigger={
+										<Button disabled={!selectedStatements.length}>
+											<PlusIcon /> Create Record
+										</Button>
+									}
+									clear={() => setSelectedStatements([])}
+								/>
+								<RecordSearch
+									title="Attach to pending record"
+									filters={{ is_allocated: "false" }}
+									handler={async (record, close) => {
+										setEditingRecord(
+											await fetch(recordShowApiRoute.url({ record })).then(
+												res => res.json(),
+											),
+										)
+										close()
+									}}
+									trigger={
+										<Button disabled={!selectedStatements.length}>
+											<Link2Icon /> Attach to Record
+										</Button>
+									}
+									placeholder="Search pending records..."
+								/>
+							</>
 						),
 					}}
 					footer={{
-						summary: `${Object.values(selected).filter(Boolean).length} selected. Showing ${statements.data.length} of ${statements.total} statements.`,
+						summary: `${selectedStatements.length} selected. Showing ${statements.data.length} of ${statements.total} statements.`,
 					}}
-					selectedIds={selected.map(s => s.id)}
+					selectedIds={selectedStatements.map(s => s.id)}
 					emptyMessage="No statements found."
 				/>
 			</div>
+
+			{editingRecord ? (
+				<RecordEditorDialog
+					record={editingRecord}
+					statements={[
+						...editingRecord.statements,
+						...selectedStatements.filter(
+							ss => !editingRecord.statements.find(es => es.id === ss.id),
+						),
+					]}
+					categories={categories}
+					open={!!editingRecord}
+					setOpen={open => {
+						if (!open) {
+							setEditingRecord(null)
+						}
+					}}
+				/>
+			) : null}
 		</>
 	)
 }

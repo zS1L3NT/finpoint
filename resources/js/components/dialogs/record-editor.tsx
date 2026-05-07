@@ -1,14 +1,7 @@
 import { router } from "@inertiajs/react"
 import { useForm, useStore } from "@tanstack/react-form"
 import { AnimatePresence, motion } from "framer-motion"
-import {
-	AlertTriangleIcon,
-	CreditCardIcon,
-	Link2Icon,
-	PencilIcon,
-	Trash2Icon,
-	TrashIcon,
-} from "lucide-react"
+import { AlertTriangleIcon, CreditCardIcon, Link2Icon, Trash2Icon, TrashIcon } from "lucide-react"
 import { DateTime } from "luxon"
 import { useEffect, useState } from "react"
 import AmountField from "@/components/form/amount-field"
@@ -65,16 +58,21 @@ export default function RecordEditorDialog({
 	record,
 	statements,
 	categories,
+	open,
+	setOpen,
+	trigger,
 }: {
 	record: Record
 	statements: (Statement & { pivot?: Allocation })[]
 	categories: CategoryWithChildren[]
+	open: boolean
+	setOpen: (open: boolean) => void
+	trigger?: React.ReactElement
 }) {
 	const { handleClear } = useHistory()
 
 	const completions = useFetch<RecordCompletions>(completionsRecordsApiRoute.url())
 
-	const [open, setOpen] = useState(false)
 	const [statementCache, setStatementCache] = useState<(Statement & { pivot?: Allocation })[]>([])
 	const { mergeErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
 
@@ -95,7 +93,7 @@ export default function RecordEditorDialog({
 			description: record.description ?? "",
 			statements: statements.map(statement => ({
 				id: statement.id,
-				amount: statement.pivot?.amount ?? 0,
+				amount: statement.pivot?.amount ?? statement.allocable_amount,
 			})),
 		},
 		onSubmit: async ({ value }) => {
@@ -182,21 +180,15 @@ export default function RecordEditorDialog({
 	return (
 		<Dialog
 			open={open}
-			onOpenChange={nextOpen => {
-				setOpen(nextOpen)
-				if (nextOpen) {
+			onOpenChange={open => {
+				setOpen(open)
+				if (open) {
 					form.reset()
 					resetApiErrors()
 				}
 			}}
 		>
-			<DialogTrigger
-				render={
-					<Button>
-						<PencilIcon /> Edit
-					</Button>
-				}
-			/>
+			{trigger && <DialogTrigger>{trigger}</DialogTrigger>}
 			<DialogContent className="sm:max-w-4xl">
 				<DialogHeader>
 					<DialogTitle>Edit Record</DialogTitle>

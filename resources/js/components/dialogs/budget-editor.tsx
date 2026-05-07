@@ -95,7 +95,7 @@ export default function BudgetEditorDialog({ budget }: { budget: Budget }) {
 			<DialogTrigger
 				render={
 					<Button size="lg">
-						<PencilIcon /> Edit budget
+						<PencilIcon /> Edit Budget
 					</Button>
 				}
 			/>

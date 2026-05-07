@@ -24,10 +24,10 @@ Route::apiResource('statements', StatementController::class)
     ]);
 
 Route::apiResource('records', RecordController::class)
-    ->only('index', 'store', 'update', 'destroy')
     ->names([
         'index' => 'record-index-api-route',
         'store' => 'record-store-api-route',
+        'show' => 'record-show-api-route',
         'update' => 'record-update-api-route',
         'destroy' => 'record-destroy-api-route',
     ]);

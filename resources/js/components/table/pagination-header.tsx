@@ -38,23 +38,22 @@ export default function PaginationHeader({
 				{filters}
 			</div>
 
-			<div className="flex items-center gap-3">
-				<div className="flex items-center gap-3">
-					<span className="text-xs text-muted-foreground">Rows per page</span>
-					<Select value={pageSize} onValueChange={onPageSizeChange}>
-						<SelectTrigger className="w-20">
-							<SelectValue placeholder={pageSize} />
-						</SelectTrigger>
-						<SelectContent align="end">
-							<SelectGroup>
-								<SelectItem value="10">10</SelectItem>
-								<SelectItem value="25">25</SelectItem>
-								<SelectItem value="50">50</SelectItem>
-								<SelectItem value="100">100</SelectItem>
-							</SelectGroup>
-						</SelectContent>
-					</Select>
-				</div>
+			<div className="flex items-center gap-2">
+				<span className="text-xs text-muted-foreground">Rows per page</span>
+
+				<Select value={pageSize} onValueChange={onPageSizeChange}>
+					<SelectTrigger className="w-20">
+						<SelectValue placeholder={pageSize} />
+					</SelectTrigger>
+					<SelectContent align="end">
+						<SelectGroup>
+							<SelectItem value="10">10</SelectItem>
+							<SelectItem value="25">25</SelectItem>
+							<SelectItem value="50">50</SelectItem>
+							<SelectItem value="100">100</SelectItem>
+						</SelectGroup>
+					</SelectContent>
+				</Select>
 
 				{actions}
 			</div>

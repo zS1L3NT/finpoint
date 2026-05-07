@@ -1,5 +1,6 @@
 import { Link } from "@inertiajs/react"
-import { ReceiptTextIcon } from "lucide-react"
+import { PencilIcon, ReceiptTextIcon } from "lucide-react"
+import { useState } from "react"
 import AllocateBar from "@/components/allocate-bar"
 import DetailCard from "@/components/detail-card"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
@@ -28,6 +29,8 @@ export default function RecordPage({
 
 	const categories = useFetch<CategoryWithChildren[]>(categoryIndexApiRoute.url(), [])
 
+	const [isEditing, setIsEditing] = useState(false)
+
 	return (
 		<>
 			<AppHeader title="Record" />
@@ -53,6 +56,13 @@ export default function RecordPage({
 							record={record}
 							statements={statements}
 							categories={categories}
+							open={isEditing}
+							setOpen={setIsEditing}
+							trigger={
+								<Button>
+									<PencilIcon /> Edit Record
+								</Button>
+							}
 						/>
 					}
 					back={{
