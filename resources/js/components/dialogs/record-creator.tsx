@@ -36,13 +36,13 @@ import { completionsRecordsApiRoute, recordStoreApiRoute } from "@/wayfinder/rou
 export default function RecordCreatorDialog({
 	statements,
 	categories,
-	disabled,
 	clear,
+	trigger,
 }: {
 	statements: Statement[]
 	categories: CategoryWithChildren[]
-	disabled?: boolean
 	clear?: () => void
+	trigger?: React.ReactElement
 }) {
 	const completions = useFetch<RecordCompletions>(completionsRecordsApiRoute.url())
 
@@ -122,9 +122,13 @@ export default function RecordCreatorDialog({
 		>
 			<DialogTrigger
 				render={
-					<Button disabled={disabled}>
-						<PlusIcon /> Create Record
-					</Button>
+					trigger ? (
+						trigger
+					) : (
+						<Button>
+							<PlusIcon /> Create Record
+						</Button>
+					)
 				}
 			/>
 			<DialogContent className="sm:max-w-4xl">

@@ -165,7 +165,11 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 							<RecordCreatorDialog
 								statements={selected}
 								categories={categories}
-								disabled={!selected.length}
+								trigger={
+									<Button disabled={!selectedStatements.length}>
+										<PlusIcon /> Create Record
+									</Button>
+								}
 								clear={() => setSelected([])}
 							/>
 						),
