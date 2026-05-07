@@ -7,7 +7,7 @@ import {
 	ChartTooltip,
 	ChartTooltipContent,
 } from "@/components/ui/chart"
-import { cn, formatCurrency, round2dp } from "@/lib/utils"
+import { formatCurrency, round2dp } from "@/lib/utils"
 import { CategoryWithChildren, Record } from "@/types"
 
 export default function CategoriesPieChart({
@@ -84,7 +84,7 @@ export default function CategoriesPieChart({
 	return (
 		<ChartContainer
 			ref={containerRef}
-			className={cn("aspect-square", className)}
+			className={className}
 			config={Object.fromEntries([
 				...categories.map(c => [c.id, { label: c.name, color: c.color }]),
 				...categories.flatMap(c =>
