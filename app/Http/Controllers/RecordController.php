@@ -34,12 +34,8 @@ class RecordController extends Controller
                 fn($query, $date) => $query->whereDate('datetime', '<=', $date)
             )
             ->when(
-                request()->query('pending') === 'true',
-                fn($query) => $query->havingRaw('allocated_amount != amount')
-            )
-            ->when(
-                request()->query('pending') === 'false',
-                fn($query) => $query->havingRaw('allocated_amount = amount')
+                collect(['true', 'false'])->contains(request()->query('is_allocated')),
+                fn($query) => $query->havingRaw(request()->query('is_allocated') === 'true' ? 'allocated_amount = amount' : 'allocated_amount != amount')
             )
             ->orderBy('datetime', 'desc')
             ->groupBy('records.id')

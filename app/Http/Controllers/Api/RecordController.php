@@ -36,6 +36,10 @@ class RecordController extends Controller
                 fn($query, $id) => $query
                     ->whereDoesntHave('budgets', fn($query) => $query->where('budgets.id', $id))
             )
+            ->when(
+                collect(['true', 'false'])->contains(request()->query('is_allocated')),
+                fn($query) => $query->havingRaw(request()->query('is_allocated') === 'true' ? 'allocated_amount = amount' : 'allocated_amount != amount')
+            )
             ->orderBy('datetime', 'desc')
             ->groupBy('records.id')
             ->get();
@@ -87,6 +91,13 @@ class RecordController extends Controller
 
             return $record;
         });
+    }
+
+    public function show(Record $record)
+    {
+        $record->load('statements');
+
+        return $record;
     }
 
     public function update(Record $record)

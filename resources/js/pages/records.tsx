@@ -31,7 +31,7 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 
 	const [startDate, setStartDate] = useSearchParam("start_date")
 	const [endDate, setEndDate] = useSearchParam("end_date")
-	const [pending, setPending] = useSearchParam("pending")
+	const [isAllocated, setIsAllocated] = useSearchParam("is_allocated")
 
 	const categories = useFetch<CategoryWithChildren[]>(categoryIndexApiRoute.url(), [])
 
@@ -43,12 +43,12 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 					...query,
 					start_date: startDate || undefined,
 					end_date: endDate || undefined,
-					pending: pending || undefined,
+					is_allocated: isAllocated || undefined,
 				},
 			}).url,
 	})
 	const pendingFilterLabel =
-		pending === "true" ? "Pending" : pending === "false" ? "Not pending" : null
+		isAllocated === "true" ? "Not pending" : isAllocated === "false" ? "Pending" : null
 
 	return (
 		<>
@@ -157,19 +157,21 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 										<DropdownMenuSeparator />
 										<DropdownMenuGroup>
 											<DropdownMenuCheckboxItem
-												checked={pending === "true"}
+												checked={isAllocated === "false"}
 												onSelect={event => event.preventDefault()}
 												onCheckedChange={checked =>
-													setPending(checked === true ? "true" : null)
+													setIsAllocated(
+														checked === true ? "false" : null,
+													)
 												}
 											>
 												Pending
 											</DropdownMenuCheckboxItem>
 											<DropdownMenuCheckboxItem
-												checked={pending === "false"}
+												checked={isAllocated === "true"}
 												onSelect={event => event.preventDefault()}
 												onCheckedChange={checked =>
-													setPending(checked === true ? "false" : null)
+													setIsAllocated(checked === true ? "true" : null)
 												}
 											>
 												Not pending
