@@ -16,11 +16,7 @@ import { formatCurrency, parseDate } from "@/lib/utils"
 import { Budget, Paginated } from "@/types"
 import { budgetsWebRoute, budgetWebRoute } from "@/wayfinder/routes"
 
-export default function BudgetsPage({
-	budgets,
-}: {
-	budgets: Paginated<Budget & { records_sum_amount: number | null }>
-}) {
+export default function BudgetsPage({ budgets }: { budgets: Paginated<Budget> }) {
 	const { handlePush } = useHistory()
 	const [isCreatingBudget, setIsCreatingBudget] = useState(false)
 
@@ -78,7 +74,7 @@ export default function BudgetsPage({
 							cell: ({ row }) => {
 								const budget = row.original
 
-								const spent = Math.abs(Math.min(budget.records_sum_amount ?? 0, 0))
+								const spent = Math.abs(Math.min(budget.used_amount, 0))
 								const usage =
 									budget.amount === 0
 										? 0

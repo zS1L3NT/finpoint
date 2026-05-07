@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\BudgetUsedScope;
 use App\Pivots\BudgetRecord;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Attributes\Table;
@@ -18,6 +19,11 @@ class Budget extends Model
         'end_date' => 'date:Y-m-d',
     ];
 
+    protected static function booted()
+    {
+        static::addGlobalScope(new BudgetUsedScope);
+    }
+
     public static function appQuery($query = null)
     {
         return self::query()
@@ -30,7 +36,6 @@ class Budget extends Model
                             ->orWhere('amount', 'like', '%' . $q . '%')
                     )
             )
-            ->withSum('records', 'amount')
             ->orderBy('end_date', 'desc')
             ->groupBy('budgets.id');
     }

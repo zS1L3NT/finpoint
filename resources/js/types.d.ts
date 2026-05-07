@@ -76,6 +76,7 @@ export type Budget = {
 	id: string
 	name: string
 	amount: number
+	used_amount: number
 	start_date: string
 	end_date: string
 	automatic: boolean
