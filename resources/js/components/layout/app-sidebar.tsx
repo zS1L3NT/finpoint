@@ -83,15 +83,6 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
 
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
-								<Link href={importerWebRoute.url()} onClick={handleClear}>
-									<ImportIcon />
-									<span>Importer</span>
-								</Link>
-							</SidebarMenuButton>
-						</SidebarMenuItem>
-
-						<SidebarMenuItem>
-							<SidebarMenuButton asChild>
 								<Link href={budgetsWebRoute.url()} onClick={handleClear}>
 									<PiggyBankIcon />
 									<span>Budgets</span>
@@ -102,8 +93,17 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
 				</SidebarGroup>
 
 				<SidebarGroup className="group-data-[collapsible=icon]:hidden">
-					<SidebarGroupLabel>Data View</SidebarGroupLabel>
+					<SidebarGroupLabel>Data</SidebarGroupLabel>
 					<SidebarMenu>
+						<SidebarMenuItem>
+							<SidebarMenuButton asChild>
+								<Link href={importerWebRoute.url()} onClick={handleClear}>
+									<ImportIcon />
+									<span>Importer</span>
+								</Link>
+							</SidebarMenuButton>
+						</SidebarMenuItem>
+
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
 								<Link
@@ -129,6 +129,12 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
 							</SidebarMenuButton>
 						</SidebarMenuItem>
 
+					</SidebarMenu>
+				</SidebarGroup>
+
+				<SidebarGroup className="group-data-[collapsible=icon]:hidden">
+					<SidebarGroupLabel>Settings</SidebarGroupLabel>
+					<SidebarMenu>
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
 								<Link href={categoriesWebRoute.url()} onClick={handleClear}>
