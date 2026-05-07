@@ -25,7 +25,10 @@ class StatementController extends Controller
                 request()->query('exclude_ids'),
                 fn($query, $ids) => $query->whereNotIn('statements.id', explode(',', $ids))
             )
-            ->havingRaw('allocable_amount != 0')
+            ->when(
+                collect(['true', 'false'])->contains(request()->query('is_allocable')),
+                fn($query) => $query->havingRaw(request()->query('is_allocable') === 'true' ? 'allocable_amount != 0' : 'allocable_amount = 0')
+            )
             ->orderBy('datetime', 'desc')
             ->groupBy('statements.id')
             ->get();

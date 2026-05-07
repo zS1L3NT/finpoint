@@ -159,7 +159,10 @@ export default function RecordEditorDialog({
 	const attachStatementsButton = (
 		<StatementSearch
 			title="Attach statements to record"
-			filters={{ exclude_ids: formStatements.map(s => s.id).join(",") }}
+			filters={{
+				is_allocable: "true",
+				exclude_ids: formStatements.map(s => s.id).join(","),
+			}}
 			handler={async statement => {
 				setStatementCache(prev => [...prev, statement])
 				form.setFieldValue("statements", [
