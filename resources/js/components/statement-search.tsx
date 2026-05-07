@@ -19,7 +19,7 @@ export default function StatementSearch({
 }: {
 	title: string
 	filters: { [key: string]: any }
-	handler: (statement: Statement) => Promise<void>
+	handler: (statement: Statement, close: () => void) => Promise<void>
 	trigger: React.ReactNode
 }) {
 	const [open, setOpen] = useState(false)
@@ -123,7 +123,10 @@ export default function StatementSearch({
 									cell: ({ row }) => (
 										<Button
 											size="sm"
-											onClick={() => handler(row.original).then(handleSearch)}
+											onClick={async () => {
+												await handler(row.original, () => setOpen(false))
+												await handleSearch()
+											}}
 										>
 											Attach
 										</Button>

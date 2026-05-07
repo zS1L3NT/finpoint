@@ -17,11 +17,13 @@ export default function RecordSearch({
 	filters,
 	handler,
 	trigger,
+	placeholder = "Search unattached records...",
 }: {
 	title: string
 	filters?: { [key: string]: any }
-	handler: (record: Record) => Promise<void>
+	handler: (record: Record, close: () => void) => Promise<void>
 	trigger: React.ReactNode
+	placeholder?: string
 }) {
 	const [open, setOpen] = useState(false)
 	const [query, setQuery] = useState("")
@@ -63,7 +65,7 @@ export default function RecordSearch({
 						<Input
 							id="record-search-query"
 							type="search"
-							placeholder="Search unattached records..."
+							placeholder={placeholder}
 							value={query}
 							onChange={event => setQuery(event.target.value)}
 						/>
@@ -115,7 +117,10 @@ export default function RecordSearch({
 									cell: ({ row }) => (
 										<Button
 											size="sm"
-											onClick={() => handler(row.original).then(handleSearch)}
+											onClick={async () => {
+												await handler(row.original, () => setOpen(false))
+												await handleSearch()
+											}}
 										>
 											Attach
 										</Button>
