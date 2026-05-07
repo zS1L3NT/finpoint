@@ -58,15 +58,15 @@ export default function RecordEditorDialog({
 	record,
 	statements,
 	categories,
-	open,
-	setOpen,
+	isOpen,
+	setIsOpen,
 	trigger,
 }: {
 	record: Record
 	statements: (Statement & { pivot?: Allocation })[]
 	categories: CategoryWithChildren[]
-	open: boolean
-	setOpen: (open: boolean) => void
+	isOpen: boolean
+	setIsOpen: (isOpen: boolean) => void
 	trigger?: React.ReactElement
 }) {
 	const { handleClear } = useHistory()
@@ -123,7 +123,7 @@ export default function RecordEditorDialog({
 			}
 
 			if (response.ok) {
-				setOpen(false)
+				setIsOpen(false)
 				router.reload()
 			}
 		},
@@ -137,7 +137,7 @@ export default function RecordEditorDialog({
 		})
 
 		if (response.ok) {
-			setOpen(false)
+			setIsOpen(false)
 			handleClear()
 			router.visit(
 				recordsWebRoute.url({ query: { end_date: DateTime.now().toFormat("yyyy-MM-dd") } }),
@@ -157,16 +157,10 @@ export default function RecordEditorDialog({
 	const attachStatementsButton = (
 		<StatementSearch
 			title="Attach statements to record"
+			placeholder="Search unattached statements..."
 			filters={{
 				is_allocable: "true",
 				exclude_ids: formStatements.map(s => s.id).join(","),
-			}}
-			handler={async statement => {
-				setStatementCache(prev => [...prev, statement])
-				form.setFieldValue("statements", [
-					...form.getFieldValue("statements"),
-					{ id: statement.id, amount: statement.allocable_amount },
-				])
 			}}
 			trigger={
 				<Button variant="outline">
@@ -174,21 +168,28 @@ export default function RecordEditorDialog({
 					Attach statement
 				</Button>
 			}
+			handler={async statement => {
+				setStatementCache(prev => [...prev, statement])
+				form.setFieldValue("statements", [
+					...form.getFieldValue("statements"),
+					{ id: statement.id, amount: statement.allocable_amount },
+				])
+			}}
 		/>
 	)
 
 	return (
 		<Dialog
-			open={open}
-			onOpenChange={open => {
-				setOpen(open)
-				if (open) {
+			open={isOpen}
+			onOpenChange={isOpen => {
+				setIsOpen(isOpen)
+				if (isOpen) {
 					form.reset()
 					resetApiErrors()
 				}
 			}}
 		>
-			{trigger && <DialogTrigger>{trigger}</DialogTrigger>}
+			{trigger && <DialogTrigger render={trigger} />}
 			<DialogContent className="sm:max-w-4xl">
 				<DialogHeader>
 					<DialogTitle>Edit Record</DialogTitle>

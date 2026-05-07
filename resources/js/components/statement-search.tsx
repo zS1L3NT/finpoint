@@ -13,14 +13,16 @@ import { statementIndexApiRoute } from "@/wayfinder/routes"
 
 export default function StatementSearch({
 	title,
+	placeholder,
 	filters,
-	handler,
 	trigger,
+	handler,
 }: {
 	title: string
-	filters: { [key: string]: any }
-	handler: (statement: Statement, close: () => void) => Promise<void>
+	placeholder?: string
+	filters?: { [key: string]: any }
 	trigger: React.ReactNode
+	handler: (statement: Statement, close: () => void) => Promise<void>
 }) {
 	const [open, setOpen] = useState(false)
 	const [query, setQuery] = useState("")
@@ -62,7 +64,7 @@ export default function StatementSearch({
 						<Input
 							id="statement-search-query"
 							type="search"
-							placeholder="Search unattached statements..."
+							placeholder={placeholder ?? "Search statements..."}
 							value={query}
 							onChange={event => setQuery(event.target.value)}
 						/>

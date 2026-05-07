@@ -1,7 +1,6 @@
 import { router } from "@inertiajs/react"
 import { useForm } from "@tanstack/react-form"
-import { PencilIcon, Trash2Icon } from "lucide-react"
-import { useState } from "react"
+import { Trash2Icon } from "lucide-react"
 import AmountField from "@/components/form/amount-field"
 import DateField from "@/components/form/date-field"
 import TextField from "@/components/form/text-field"
@@ -24,10 +23,19 @@ import { withMethod } from "@/lib/utils"
 import { Budget } from "@/types"
 import { budgetDestroyApiRoute, budgetsWebRoute, budgetUpdateApiRoute } from "@/wayfinder/routes"
 
-export default function BudgetEditorDialog({ budget }: { budget: Budget }) {
+export default function BudgetEditorDialog({
+	budget,
+	isOpen,
+	setIsOpen,
+	trigger,
+}: {
+	budget: Budget
+	isOpen: boolean
+	setIsOpen: (isOpen: boolean) => void
+	trigger?: React.ReactElement
+}) {
 	const { handleClear } = useHistory()
 
-	const [open, setOpen] = useState(false)
 	const { mergeErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
 
 	const form = useForm({
@@ -59,7 +67,7 @@ export default function BudgetEditorDialog({ budget }: { budget: Budget }) {
 			}
 
 			if (response.ok) {
-				setOpen(false)
+				setIsOpen(false)
 				setTimeout(() => {
 					router.reload()
 				}, 300)
@@ -75,7 +83,7 @@ export default function BudgetEditorDialog({ budget }: { budget: Budget }) {
 		})
 
 		if (response.ok) {
-			setOpen(false)
+			setIsOpen(false)
 			handleClear()
 			router.visit(budgetsWebRoute.url())
 		}
@@ -83,22 +91,16 @@ export default function BudgetEditorDialog({ budget }: { budget: Budget }) {
 
 	return (
 		<Dialog
-			open={open}
-			onOpenChange={nextOpen => {
-				setOpen(nextOpen)
-				if (nextOpen) {
+			open={isOpen}
+			onOpenChange={isOpen => {
+				setIsOpen(isOpen)
+				if (isOpen) {
 					form.reset()
 					resetApiErrors()
 				}
 			}}
 		>
-			<DialogTrigger
-				render={
-					<Button size="lg">
-						<PencilIcon /> Edit Budget
-					</Button>
-				}
-			/>
+			{trigger && <DialogTrigger render={trigger} />}
 			<DialogContent className="sm:max-w-2xl">
 				<DialogHeader>
 					<DialogTitle>Edit Budget</DialogTitle>

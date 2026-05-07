@@ -1,6 +1,7 @@
 import { Link } from "@inertiajs/react"
-import { PiggyBankIcon, SparklesIcon, WrenchIcon } from "lucide-react"
+import { PiggyBankIcon, PlusIcon, SparklesIcon, WrenchIcon } from "lucide-react"
 import { DateTime } from "luxon"
+import { useState } from "react"
 import BudgetCreatorDialog from "@/components/dialogs/budget-creator"
 import AppHeader from "@/components/layout/app-header"
 import PageHeader from "@/components/layout/page-header"
@@ -21,6 +22,7 @@ export default function BudgetsPage({
 	budgets: Paginated<Budget & { records_sum_amount: number | null }>
 }) {
 	const { handlePush } = useHistory()
+	const [isCreatingBudget, setIsCreatingBudget] = useState(false)
 
 	const { query, pageSize, handleQueryChange, handlePageSizeChange } = usePaginatedTableState({
 		syncOn: budgets,
@@ -142,7 +144,17 @@ export default function BudgetsPage({
 						pageSize,
 						onPageSizeChange: handlePageSizeChange,
 						searchPlaceholder: "Search all budgets...",
-						actions: <BudgetCreatorDialog />,
+						actions: (
+							<BudgetCreatorDialog
+								isOpen={isCreatingBudget}
+								setIsOpen={setIsCreatingBudget}
+								trigger={
+									<Button>
+										<PlusIcon /> New Budget
+									</Button>
+								}
+							/>
+						),
 					}}
 					footer={{
 						summary: `Showing ${budgets.data.length} of ${budgets.total} budgets.`,

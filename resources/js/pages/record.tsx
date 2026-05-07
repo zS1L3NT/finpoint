@@ -29,7 +29,7 @@ export default function RecordPage({
 
 	const categories = useFetch<CategoryWithChildren[]>(categoryIndexApiRoute.url(), [])
 
-	const [isEditing, setIsEditing] = useState(false)
+	const [isEditingRecord, setIsEditingRecord] = useState(false)
 
 	return (
 		<>
@@ -56,8 +56,8 @@ export default function RecordPage({
 							record={record}
 							statements={statements}
 							categories={categories}
-							open={isEditing}
-							setOpen={setIsEditing}
+							isOpen={isEditingRecord}
+							setIsOpen={setIsEditingRecord}
 							trigger={
 								<Button>
 									<PencilIcon /> Edit Record

@@ -1,7 +1,5 @@
 import { router } from "@inertiajs/react"
 import { useForm, useStore } from "@tanstack/react-form"
-import { PlusIcon } from "lucide-react"
-import { useState } from "react"
 import AmountField from "@/components/form/amount-field"
 import TextField from "@/components/form/text-field"
 import { Button } from "@/components/ui/button"
@@ -20,8 +18,19 @@ import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { quotaStoreApiRoute } from "@/wayfinder/routes"
 
-export default function QuotaCreatorDialog({ month, year }: { month: string; year: number }) {
-	const [open, setOpen] = useState(false)
+export default function QuotaCreatorDialog({
+	month,
+	year,
+	isOpen,
+	setIsOpen,
+	trigger,
+}: {
+	month: string
+	year: number
+	isOpen: boolean
+	setIsOpen: (isOpen: boolean) => void
+	trigger?: React.ReactElement
+}) {
 	const { mergeErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
 
 	const form = useForm({
@@ -54,7 +63,7 @@ export default function QuotaCreatorDialog({ month, year }: { month: string; yea
 			}
 
 			if (response.ok) {
-				setOpen(false)
+				setIsOpen(false)
 				router.reload()
 			}
 		},
@@ -64,22 +73,16 @@ export default function QuotaCreatorDialog({ month, year }: { month: string; yea
 
 	return (
 		<Dialog
-			open={open}
-			onOpenChange={nextOpen => {
-				setOpen(nextOpen)
-				if (nextOpen) {
+			open={isOpen}
+			onOpenChange={isOpen => {
+				setIsOpen(isOpen)
+				if (isOpen) {
 					form.reset()
 					resetApiErrors()
 				}
 			}}
 		>
-			<DialogTrigger
-				render={
-					<Button size="sm">
-						<PlusIcon /> Create Quota
-					</Button>
-				}
-			/>
+			{trigger && <DialogTrigger render={trigger} />}
 			<DialogContent className="max-w-lg">
 				<DialogHeader>
 					<DialogTitle>Create Quota</DialogTitle>

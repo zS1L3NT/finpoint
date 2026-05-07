@@ -1,7 +1,5 @@
 import { router } from "@inertiajs/react"
 import { useForm } from "@tanstack/react-form"
-import { PlusIcon } from "lucide-react"
-import { useState } from "react"
 import AmountField from "@/components/form/amount-field"
 import DateField from "@/components/form/date-field"
 import TextField from "@/components/form/text-field"
@@ -21,8 +19,15 @@ import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { budgetStoreApiRoute } from "@/wayfinder/routes"
 
-export default function BudgetCreatorDialog() {
-	const [open, setOpen] = useState(false)
+export default function BudgetCreatorDialog({
+	isOpen,
+	setIsOpen,
+	trigger,
+}: {
+	isOpen: boolean
+	setIsOpen: (isOpen: boolean) => void
+	trigger?: React.ReactElement
+}) {
 	const { mergeErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
 
 	const form = useForm({
@@ -54,7 +59,7 @@ export default function BudgetCreatorDialog() {
 			}
 
 			if (response.ok) {
-				setOpen(false)
+				setIsOpen(false)
 				router.reload()
 			}
 		},
@@ -62,22 +67,16 @@ export default function BudgetCreatorDialog() {
 
 	return (
 		<Dialog
-			open={open}
-			onOpenChange={nextOpen => {
-				setOpen(nextOpen)
-				if (nextOpen) {
+			open={isOpen}
+			onOpenChange={isOpen => {
+				setIsOpen(isOpen)
+				if (isOpen) {
 					form.reset()
 					resetApiErrors()
 				}
 			}}
 		>
-			<DialogTrigger
-				render={
-					<Button>
-						<PlusIcon /> New Budget
-					</Button>
-				}
-			/>
+			{trigger && <DialogTrigger render={trigger} />}
 			<DialogContent className="sm:max-w-2xl">
 				<DialogHeader>
 					<DialogTitle>Create Budget</DialogTitle>

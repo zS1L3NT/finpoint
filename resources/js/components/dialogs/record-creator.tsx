@@ -1,9 +1,8 @@
 import { router } from "@inertiajs/react"
 import { useForm, useStore } from "@tanstack/react-form"
 import { AnimatePresence, motion } from "framer-motion"
-import { AlertTriangleIcon, CreditCardIcon, PlusIcon } from "lucide-react"
+import { AlertTriangleIcon, CreditCardIcon } from "lucide-react"
 import { DateTime } from "luxon"
-import { useState } from "react"
 import AmountField from "@/components/form/amount-field"
 import ComboboxField from "@/components/form/combobox-field"
 import DatetimeField from "@/components/form/datetime-field"
@@ -37,16 +36,19 @@ export default function RecordCreatorDialog({
 	statements,
 	categories,
 	clear,
+	isOpen,
+	setIsOpen,
 	trigger,
 }: {
 	statements: Statement[]
 	categories: CategoryWithChildren[]
 	clear?: () => void
+	isOpen: boolean
+	setIsOpen: (isOpen: boolean) => void
 	trigger?: React.ReactElement
 }) {
 	const completions = useFetch<RecordCompletions>(completionsRecordsApiRoute.url())
 
-	const [open, setOpen] = useState(false)
 	const { mergeErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
 
 	const categoriesFlat = categories.flatMap(category => [category, ...category.children])
@@ -95,7 +97,7 @@ export default function RecordCreatorDialog({
 			}
 
 			if (response.status === 201) {
-				setOpen(false)
+				setIsOpen(false)
 				clear?.()
 				router.reload()
 			}
@@ -111,26 +113,16 @@ export default function RecordCreatorDialog({
 
 	return (
 		<Dialog
-			open={open}
-			onOpenChange={nextOpen => {
-				setOpen(nextOpen)
-				if (nextOpen) {
+			open={isOpen}
+			onOpenChange={isOpen => {
+				setIsOpen(isOpen)
+				if (isOpen) {
 					form.reset()
 					resetApiErrors()
 				}
 			}}
 		>
-			<DialogTrigger
-				render={
-					trigger ? (
-						trigger
-					) : (
-						<Button>
-							<PlusIcon /> Create Record
-						</Button>
-					)
-				}
-			/>
+			{trigger && <DialogTrigger render={trigger} />}
 			<DialogContent className="sm:max-w-4xl">
 				<DialogHeader>
 					<DialogTitle>Create New Record</DialogTitle>

@@ -14,16 +14,16 @@ import { recordIndexApiRoute } from "@/wayfinder/routes"
 
 export default function RecordSearch({
 	title,
+	placeholder,
 	filters,
-	handler,
 	trigger,
-	placeholder = "Search unattached records...",
+	handler,
 }: {
 	title: string
-	filters?: { [key: string]: any }
-	handler: (record: Record, close: () => void) => Promise<void>
-	trigger: React.ReactNode
 	placeholder?: string
+	filters?: { [key: string]: any }
+	trigger: React.ReactNode
+	handler: (record: Record, close: () => void) => Promise<void>
 }) {
 	const [open, setOpen] = useState(false)
 	const [query, setQuery] = useState("")
@@ -65,7 +65,7 @@ export default function RecordSearch({
 						<Input
 							id="record-search-query"
 							type="search"
-							placeholder={placeholder}
+							placeholder={placeholder ?? "Search records..."}
 							value={query}
 							onChange={event => setQuery(event.target.value)}
 						/>

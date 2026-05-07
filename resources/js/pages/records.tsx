@@ -1,5 +1,6 @@
 import { Link } from "@inertiajs/react"
-import { ListFilterIcon, ReceiptTextIcon } from "lucide-react"
+import { ListFilterIcon, PlusIcon, ReceiptTextIcon } from "lucide-react"
+import { useState } from "react"
 import RecordCreatorDialog from "@/components/dialogs/record-creator"
 import DateField from "@/components/form/date-field"
 import Icon from "@/components/icon"
@@ -28,6 +29,7 @@ import { categoryIndexApiRoute, recordsWebRoute, recordWebRoute } from "@/wayfin
 
 export default function RecordsPage({ records }: { records: Paginated<Record> }) {
 	const { handlePush } = useHistory()
+	const [isCreatingRecord, setIsCreatingRecord] = useState(false)
 
 	const [startDate, setStartDate] = useSearchParam("start_date")
 	const [endDate, setEndDate] = useSearchParam("end_date")
@@ -197,7 +199,19 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 								/>
 							</>
 						),
-						actions: <RecordCreatorDialog statements={[]} categories={categories} />,
+						actions: (
+							<RecordCreatorDialog
+								statements={[]}
+								categories={categories}
+								isOpen={isCreatingRecord}
+								setIsOpen={setIsCreatingRecord}
+								trigger={
+									<Button>
+										<PlusIcon /> Create Record
+									</Button>
+								}
+							/>
+						),
 					}}
 					footer={{
 						summary: `Showing ${records.data.length} of ${records.total} records.`,

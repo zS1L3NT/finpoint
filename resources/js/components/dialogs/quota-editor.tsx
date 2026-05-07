@@ -1,7 +1,6 @@
 import { router } from "@inertiajs/react"
 import { useForm, useStore } from "@tanstack/react-form"
-import { PencilIcon, Trash2Icon } from "lucide-react"
-import { useState } from "react"
+import { Trash2Icon } from "lucide-react"
 import AmountField from "@/components/form/amount-field"
 import TextField from "@/components/form/text-field"
 import { Button } from "@/components/ui/button"
@@ -22,19 +21,26 @@ import { withMethod } from "@/lib/utils"
 import { Quota } from "@/types"
 import { quotaDestroyApiRoute, quotaUpdateApiRoute } from "@/wayfinder/routes"
 
-export default function QuotaEditorDialog({ quota }: { quota: Quota }) {
-	const [open, setOpen] = useState(false)
+export default function QuotaEditorDialog({
+	quota,
+	isOpen,
+	setIsOpen,
+	trigger,
+}: {
+	quota: Quota
+	isOpen: boolean
+	setIsOpen: (isOpen: boolean) => void
+	trigger?: React.ReactElement
+}) {
 	const { mergeErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
 
-	const initialValues = {
-		name: quota.name,
-		color: quota.color,
-		amount: quota.amount ?? 0,
-		unlimited: quota.amount === null,
-	}
-
 	const form = useForm({
-		defaultValues: initialValues,
+		defaultValues: {
+			name: quota.name,
+			color: quota.color,
+			amount: quota.amount ?? 0,
+			unlimited: quota.amount === null,
+		},
 		onSubmit: async ({ value }) => {
 			const formData = new FormData()
 			formData.append("name", value.name)
@@ -56,7 +62,7 @@ export default function QuotaEditorDialog({ quota }: { quota: Quota }) {
 			}
 
 			if (response.ok) {
-				setOpen(false)
+				setIsOpen(false)
 				router.reload()
 			}
 		},
@@ -70,7 +76,7 @@ export default function QuotaEditorDialog({ quota }: { quota: Quota }) {
 		})
 
 		if (response.ok) {
-			setOpen(false)
+			setIsOpen(false)
 			router.reload()
 		}
 	}
@@ -79,22 +85,16 @@ export default function QuotaEditorDialog({ quota }: { quota: Quota }) {
 
 	return (
 		<Dialog
-			open={open}
-			onOpenChange={nextOpen => {
-				setOpen(nextOpen)
-				if (nextOpen) {
-					form.reset(initialValues)
+			open={isOpen}
+			onOpenChange={isOpen => {
+				setIsOpen(isOpen)
+				if (isOpen) {
+					form.reset()
 					resetApiErrors()
 				}
 			}}
 		>
-			<DialogTrigger
-				render={
-					<Button variant="outline" size="sm">
-						<PencilIcon /> Edit
-					</Button>
-				}
-			/>
+			{trigger && <DialogTrigger render={trigger} />}
 			<DialogContent className="max-w-lg">
 				<DialogHeader>
 					<DialogTitle>Edit Quota</DialogTitle>

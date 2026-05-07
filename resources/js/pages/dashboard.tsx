@@ -4,8 +4,11 @@ import {
 	ArrowRightIcon,
 	CalendarIcon,
 	CircleDollarSignIcon,
+	Link2Icon,
 	Link2OffIcon,
 	ListFilterIcon,
+	PencilIcon,
+	PlusIcon,
 } from "lucide-react"
 import { DateTime } from "luxon"
 import { useEffect, useState } from "react"
@@ -84,6 +87,9 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 
 	const [selected, setSelected] = useState<Record[]>([])
 	const [areaQuota, setAreaQuota] = useState<Quota | null>(null)
+	const [editingQuotaId, setEditingQuotaId] = useState<string | null>(null)
+	const [isCreatingQuota, setIsCreatingQuota] = useState(false)
+	const [isAttachingQuota, setIsAttachingQuota] = useState(false)
 
 	const setDate = (date: Date) => {
 		const dt = DateTime.fromJSDate(date)
@@ -278,7 +284,17 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 						<CardHeader>
 							<CardTitle>Quotas</CardTitle>
 							<CardAction>
-								<QuotaCreatorDialog month={month} year={+year} />
+								<QuotaCreatorDialog
+									month={month}
+									year={+year}
+									isOpen={isCreatingQuota}
+									setIsOpen={setIsCreatingQuota}
+									trigger={
+										<Button size="sm">
+											<PlusIcon /> Create Quota
+										</Button>
+									}
+								/>
 							</CardAction>
 						</CardHeader>
 						<CardContent className="grid gap-3">
@@ -303,7 +319,18 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 												{quotaRecords.length === 1 ? "" : "s"}
 											</p>
 										</div>
-										<QuotaEditorDialog quota={quota} />
+										<QuotaEditorDialog
+											quota={quota}
+											isOpen={editingQuotaId === quota.id}
+											setIsOpen={isOpen =>
+												setEditingQuotaId(isOpen ? quota.id : null)
+											}
+											trigger={
+												<Button variant="outline" size="sm">
+													<PencilIcon /> Edit
+												</Button>
+											}
+										/>
 									</div>
 
 									<div className="space-y-2">
@@ -510,6 +537,13 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 											records={selected}
 											quotas={quotas}
 											clear={() => setSelected([])}
+											isOpen={isAttachingQuota}
+											setIsOpen={setIsAttachingQuota}
+											trigger={
+												<Button disabled={!selected.length}>
+													<Link2Icon /> Attach to Quota
+												</Button>
+											}
 										/>
 										<Button
 											type="button"

@@ -1,5 +1,4 @@
 import { router } from "@inertiajs/react"
-import { Link2Icon } from "lucide-react"
 import { useState } from "react"
 import SelectField from "@/components/form/select-field"
 import Icon from "@/components/icon"
@@ -32,12 +31,17 @@ export default function RecordQuotaDialog({
 	records,
 	quotas,
 	clear,
+	isOpen,
+	setIsOpen,
+	trigger,
 }: {
 	records: Record[]
 	quotas: Quota[]
 	clear: () => void
+	isOpen: boolean
+	setIsOpen: (isOpen: boolean) => void
+	trigger?: React.ReactElement
 }) {
-	const [open, setOpen] = useState(false)
 	const [quotaId, setQuotaId] = useState("")
 	const [error, setError] = useState("")
 	const [submitting, setSubmitting] = useState(false)
@@ -72,7 +76,7 @@ export default function RecordQuotaDialog({
 				return
 			}
 
-			setOpen(false)
+			setIsOpen(false)
 			clear()
 
 			setTimeout(() => {
@@ -87,22 +91,16 @@ export default function RecordQuotaDialog({
 
 	return (
 		<Dialog
-			open={open}
-			onOpenChange={nextOpen => {
-				setOpen(nextOpen)
-				if (nextOpen) {
+			open={isOpen}
+			onOpenChange={isOpen => {
+				setIsOpen(isOpen)
+				if (isOpen) {
 					setQuotaId("")
 					setError("")
 				}
 			}}
 		>
-			<DialogTrigger
-				render={
-					<Button disabled={!records.length}>
-						<Link2Icon /> Attach to Quota
-					</Button>
-				}
-			/>
+			{trigger && <DialogTrigger render={trigger} />}
 			<DialogContent className="sm:max-w-lg">
 				<DialogHeader>
 					<DialogTitle>Attach Records to Quota</DialogTitle>

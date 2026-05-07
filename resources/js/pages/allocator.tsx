@@ -35,6 +35,7 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 	const categories = useFetch<CategoryWithChildren[]>(categoryIndexApiRoute.url(), [])
 
 	const [selectedStatements, setSelectedStatements] = useState<Statement[]>([])
+	const [isCreatingRecord, setIsCreatingRecord] = useState(false)
 	const [editingRecord, setEditingRecord] = useState<
 		(Record & { statements: Statement[] }) | null
 	>(null)
@@ -181,6 +182,8 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 								<RecordCreatorDialog
 									statements={selectedStatements}
 									categories={categories}
+									isOpen={isCreatingRecord}
+									setIsOpen={setIsCreatingRecord}
 									trigger={
 										<Button disabled={!selectedStatements.length}>
 											<PlusIcon /> Create Record
@@ -190,6 +193,7 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 								/>
 								<RecordSearch
 									title="Attach to pending record"
+									placeholder="Search pending records..."
 									filters={{ is_allocated: "false" }}
 									handler={async (record, close) => {
 										setEditingRecord(
@@ -204,7 +208,6 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 											<Link2Icon /> Attach to Record
 										</Button>
 									}
-									placeholder="Search pending records..."
 								/>
 							</>
 						),
@@ -227,9 +230,9 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 						),
 					]}
 					categories={categories}
-					open={!!editingRecord}
-					setOpen={open => {
-						if (!open) {
+					isOpen={!!editingRecord}
+					setIsOpen={isOpen => {
+						if (!isOpen) {
 							setEditingRecord(null)
 							setSelectedStatements([])
 						}

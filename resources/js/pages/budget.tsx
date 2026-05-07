@@ -1,5 +1,13 @@
 import { Link, router } from "@inertiajs/react"
-import { Link2Icon, Link2OffIcon, PiggyBankIcon, SparklesIcon, WrenchIcon } from "lucide-react"
+import {
+	Link2Icon,
+	Link2OffIcon,
+	PencilIcon,
+	PiggyBankIcon,
+	SparklesIcon,
+	WrenchIcon,
+} from "lucide-react"
+import { useState } from "react"
 import CategoriesPieChart from "@/components/charts/categories-pie"
 import UsageAreaChart from "@/components/charts/usage-area"
 import BudgetEditorDialog from "@/components/dialogs/budget-editor"
@@ -42,6 +50,7 @@ export default function BudgetPage({ budget, records }: { budget: Budget; record
 	const { handlePush } = useHistory()
 
 	const categories = useFetch<CategoryWithChildren[]>(categoryIndexApiRoute.url(), [])
+	const [isEditingBudget, setIsEditingBudget] = useState(false)
 
 	const attach = async (record: Record) => {
 		const response = await fetch(budgetRecordAttachApiRoute.url({ budget, record }), {
@@ -94,7 +103,18 @@ export default function BudgetPage({ budget, records }: { budget: Budget; record
 					}
 					description="Budget details"
 					icon={PiggyBankIcon}
-					actions={<BudgetEditorDialog budget={budget} />}
+					actions={
+						<BudgetEditorDialog
+							budget={budget}
+							isOpen={isEditingBudget}
+							setIsOpen={setIsEditingBudget}
+							trigger={
+								<Button>
+									<PencilIcon /> Edit Budget
+								</Button>
+							}
+						/>
+					}
 					back={{ name: "Back to budgets", url: budgetsWebRoute.url() }}
 				/>
 
@@ -141,6 +161,7 @@ export default function BudgetPage({ budget, records }: { budget: Budget; record
 						<CardAction>
 							<RecordSearch
 								title="Attach record to budget"
+								placeholder="Search unattached records..."
 								filters={{ exclude_budget_id: budget.id }}
 								handler={attach}
 								trigger={
