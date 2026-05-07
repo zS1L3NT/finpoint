@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Allocation;
 use App\Models\Budget;
 use App\Models\Record;
 use App\Rules\EnsureStatementAmountDoesntExceedAllocable;
@@ -15,34 +14,11 @@ class RecordController extends Controller
 {
     public function index()
     {
-        return Record::query()
-            ->when(
-                request()->query('query'),
-                fn($query, $q) => $query
-                    ->leftJoin('categories', 'records.category_id', '=', 'categories.id')
-                    ->where(
-                        fn($query) => $query
-                            ->where('title', 'like', '%' . $q . '%')
-                            ->orWhere('people', 'like', '%' . $q . '%')
-                            ->orWhere('location', 'like', '%' . $q . '%')
-                            ->orWhere('description', 'like', '%' . $q . '%')
-                            // ->orWhere('datetime', '=', Carbon::parse($q))
-                            ->orWhere('amount', 'like', '%' . $q . '%')
-                            ->orWhere('categories.name', 'like', '%' . $q . '%')
-                    )
-            )
-            ->when(
-                request()->query('exclude_budget_id'),
-                fn($query, $id) => $query
-                    ->whereDoesntHave('budgets', fn($query) => $query->where('budgets.id', $id))
-            )
-            ->when(
-                collect(['true', 'false'])->contains(request()->query('is_allocated')),
-                fn($query) => $query->havingRaw(request()->query('is_allocated') === 'true' ? 'allocated_amount = amount' : 'allocated_amount != amount')
-            )
-            ->orderBy('datetime', 'desc')
-            ->groupBy('records.id')
-            ->get();
+        return Record::appQuery(
+            query: request()->query('query'),
+            exclude_budget_id: request()->query('exclude_budget_id'),
+            is_allocated: request()->query('is_allocated'),
+        )->get();
     }
 
     public function store()

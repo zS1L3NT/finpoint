@@ -9,20 +9,10 @@ class BudgetController extends Controller
 {
     public function index()
     {
-        $budgets = Budget::query()
-            ->when(
-                request()->query('query'),
-                fn($query, $q) => $query
-                    ->where(
-                        fn($query) => $query
-                            ->where('name', 'like', '%' . $q . '%')
-                            ->orWhere('amount', 'like', '%' . $q . '%')
-                    )
-            )
-            ->withSum('records', 'amount')
-            ->orderBy('end_date', 'desc')
-            ->groupBy('budgets.id')
-            ->paginate(request('per_page') ?? 100)
+        $budgets = Budget::appQuery(
+            query: request()->query('query')
+        )
+            ->paginate(request()->query('per_page') ?? 100)
             ->withQueryString();
 
         return Inertia::render('budgets', compact('budgets'));

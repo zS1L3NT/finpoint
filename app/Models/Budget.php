@@ -18,6 +18,23 @@ class Budget extends Model
         'end_date' => 'date:Y-m-d',
     ];
 
+    public static function appQuery($query = null)
+    {
+        return self::query()
+            ->when(
+                $query,
+                fn($query, $q) => $query
+                    ->where(
+                        fn($query) => $query
+                            ->where('name', 'like', '%' . $q . '%')
+                            ->orWhere('amount', 'like', '%' . $q . '%')
+                    )
+            )
+            ->withSum('records', 'amount')
+            ->orderBy('end_date', 'desc')
+            ->groupBy('budgets.id');
+    }
+
     public function records()
     {
         return $this->belongsToMany(Record::class, BudgetRecord::class)->orderBy('datetime', 'desc');

@@ -24,6 +24,45 @@ class Statement extends Model
         static::addGlobalScope(new StatementAllocableScope);
     }
 
+    public static function appQuery(
+        $query = null,
+        $exclude_ids = null,
+        $start_date = null,
+        $end_date = null,
+        $is_allocable = null
+    ) {
+        return self::query()
+            ->when(
+                $query,
+                fn($query, $q) => $query
+                    ->leftJoin('accounts', 'accounts.id', '=', 'statements.account_id')
+                    ->where(
+                        fn($query) => $query
+                            ->where('description', 'like', '%' . $q . '%')
+                            ->orWhere('amount', 'like', '%' . $q . '%')
+                            ->orWhere('accounts.id', 'like', '%' . $q . '%')
+                    )
+            )
+            ->when(
+                $exclude_ids,
+                fn($query) => $query->whereNotIn('statements.id', explode(',', $exclude_ids))
+            )
+            ->when(
+                $start_date,
+                fn($query) => $query->whereDate('datetime', '>=', $start_date)
+            )
+            ->when(
+                $end_date,
+                fn($query) => $query->whereDate('datetime', '<=', $end_date)
+            )
+            ->when(
+                collect(['true', 'false'])->contains($is_allocable),
+                fn($query) => $query->havingRaw($is_allocable === 'true' ? 'allocable_amount != 0' : 'allocable_amount = 0')
+            )
+            ->orderBy('datetime', 'desc')
+            ->groupBy('statements.id');
+    }
+
     public function getDescriptionAttribute()
     {
         return preg_replace('/\b\d{4}-\d{4}-\d{4}-(\d{4})\b/', 'XXXX-XXXX-XXXX-$1', $this->attributes['description']);
