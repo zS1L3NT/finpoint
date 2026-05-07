@@ -8,7 +8,7 @@ import RecordEditorDialog from "@/components/dialogs/record-editor"
 import DateField from "@/components/form/date-field"
 import AppHeader from "@/components/layout/app-header"
 import PageHeader from "@/components/layout/page-header"
-import RecordSearch from "@/components/record-search"
+import RecordSearchSheet from "@/components/sheets/record-search"
 import PaginatedDataTable from "@/components/table/paginated-data-table"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -36,6 +36,7 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 
 	const [selectedStatements, setSelectedStatements] = useState<Statement[]>([])
 	const [isCreatingRecord, setIsCreatingRecord] = useState(false)
+	const [isAttachingRecord, setIsAttachingRecord] = useState(false)
 	const [editingRecord, setEditingRecord] = useState<
 		(Record & { statements: Statement[] }) | null
 	>(null)
@@ -191,17 +192,19 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 									}
 									clear={() => setSelectedStatements([])}
 								/>
-								<RecordSearch
+								<RecordSearchSheet
 									title="Attach to pending record"
 									placeholder="Search pending records..."
 									filters={{ is_allocated: "false" }}
-									handler={async (record, close) => {
+									isOpen={isAttachingRecord}
+									setIsOpen={setIsAttachingRecord}
+									handler={async record => {
 										setEditingRecord(
 											await fetch(recordShowApiRoute.url({ record })).then(
 												res => res.json(),
 											),
 										)
-										close()
+										setIsAttachingRecord(false)
 									}}
 									trigger={
 										<Button disabled={!selectedStatements.length}>

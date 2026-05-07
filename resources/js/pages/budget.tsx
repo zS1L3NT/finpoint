@@ -15,7 +15,7 @@ import Icon from "@/components/icon"
 import AppHeader from "@/components/layout/app-header"
 import PageHeader from "@/components/layout/page-header"
 import LimiterPaceCards, { getLimitAggregations } from "@/components/limiter-pace-cards"
-import RecordSearch from "@/components/record-search"
+import RecordSearchSheet from "@/components/sheets/record-search"
 import DataTable from "@/components/table/data-table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -51,6 +51,7 @@ export default function BudgetPage({ budget, records }: { budget: Budget; record
 
 	const categories = useFetch<CategoryWithChildren[]>(categoryIndexApiRoute.url(), [])
 	const [isEditingBudget, setIsEditingBudget] = useState(false)
+	const [isAttachingRecord, setIsAttachingRecord] = useState(false)
 
 	const attach = async (record: Record) => {
 		const response = await fetch(budgetRecordAttachApiRoute.url({ budget, record }), {
@@ -159,14 +160,16 @@ export default function BudgetPage({ budget, records }: { budget: Budget; record
 							Records that currently contribute to this budget.
 						</CardDescription>
 						<CardAction>
-							<RecordSearch
+							<RecordSearchSheet
 								title="Attach record to budget"
 								placeholder="Search unattached records..."
 								filters={{ exclude_budget_id: budget.id }}
+								isOpen={isAttachingRecord}
+								setIsOpen={setIsAttachingRecord}
 								handler={attach}
 								trigger={
 									<Button>
-										<Link2Icon /> Attach record
+										<Link2Icon /> Attach Record
 									</Button>
 								}
 							/>

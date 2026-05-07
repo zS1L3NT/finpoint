@@ -11,30 +11,33 @@ import { classForCurrency, cn, formatCurrency, formatDatetime } from "@/lib/util
 import { Statement } from "@/types"
 import { statementIndexApiRoute } from "@/wayfinder/routes"
 
-export default function StatementSearch({
+export default function StatementSearchSheet({
 	title,
 	placeholder,
 	filters,
-	trigger,
+	isOpen,
+	setIsOpen,
 	handler,
+	trigger,
 }: {
 	title: string
 	placeholder?: string
 	filters?: { [key: string]: any }
-	trigger: React.ReactNode
-	handler: (statement: Statement, close: () => void) => Promise<void>
+	isOpen: boolean
+	setIsOpen: (isOpen: boolean) => void
+	handler: (statement: Statement) => Promise<void>
+	trigger?: React.ReactNode
 }) {
-	const [open, setOpen] = useState(false)
 	const [query, setQuery] = useState("")
 	const [statements, setStatements] = useState<Statement[]>([])
 
 	useEffect(() => {
-		if (!open) {
+		if (!isOpen) {
 			setQuery("")
 		} else {
 			void handleSearch()
 		}
-	}, [open])
+	}, [isOpen])
 
 	useEffect(() => {
 		void handleSearch()
@@ -51,8 +54,8 @@ export default function StatementSearch({
 	}
 
 	return (
-		<Sheet open={open} onOpenChange={setOpen}>
-			<SheetTrigger asChild>{trigger}</SheetTrigger>
+		<Sheet open={isOpen} onOpenChange={setIsOpen}>
+			{trigger && <SheetTrigger asChild>{trigger}</SheetTrigger>}
 			<SheetContent side="right" className="w-4xl">
 				<SheetHeader className="gap-2 border-b">
 					<SheetTitle>{title}</SheetTitle>
@@ -126,7 +129,7 @@ export default function StatementSearch({
 										<Button
 											size="sm"
 											onClick={async () => {
-												await handler(row.original, () => setOpen(false))
+												await handler(row.original)
 												await handleSearch()
 											}}
 										>

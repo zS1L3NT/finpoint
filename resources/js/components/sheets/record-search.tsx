@@ -12,30 +12,33 @@ import { classForCurrency, formatCurrency, formatDatetime } from "@/lib/utils"
 import { Record } from "@/types"
 import { recordIndexApiRoute } from "@/wayfinder/routes"
 
-export default function RecordSearch({
+export default function RecordSearchSheet({
 	title,
 	placeholder,
 	filters,
+	isOpen,
+	setIsOpen,
 	trigger,
 	handler,
 }: {
 	title: string
 	placeholder?: string
 	filters?: { [key: string]: any }
-	trigger: React.ReactNode
-	handler: (record: Record, close: () => void) => Promise<void>
+	isOpen: boolean
+	setIsOpen: (isOpen: boolean) => void
+	handler: (record: Record) => Promise<void>
+	trigger?: React.ReactNode
 }) {
-	const [open, setOpen] = useState(false)
 	const [query, setQuery] = useState("")
 	const [records, setRecords] = useState<Record[]>([])
 
 	useEffect(() => {
-		if (!open) {
+		if (!isOpen) {
 			setQuery("")
 		} else {
 			void handleSearch()
 		}
-	}, [open])
+	}, [isOpen])
 
 	useEffect(() => {
 		void handleSearch()
@@ -52,8 +55,8 @@ export default function RecordSearch({
 	}
 
 	return (
-		<Sheet open={open} onOpenChange={setOpen}>
-			<SheetTrigger asChild>{trigger}</SheetTrigger>
+		<Sheet open={isOpen} onOpenChange={setIsOpen}>
+			{trigger && <SheetTrigger asChild>{trigger}</SheetTrigger>}
 			<SheetContent side="right" className="w-4xl">
 				<SheetHeader className="gap-2 border-b">
 					<SheetTitle>{title}</SheetTitle>
@@ -118,7 +121,7 @@ export default function RecordSearch({
 										<Button
 											size="sm"
 											onClick={async () => {
-												await handler(row.original, () => setOpen(false))
+												await handler(row.original)
 												await handleSearch()
 											}}
 										>

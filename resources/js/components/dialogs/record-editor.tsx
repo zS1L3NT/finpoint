@@ -10,7 +10,7 @@ import DatetimeField from "@/components/form/datetime-field"
 import TextField from "@/components/form/text-field"
 import TextareaField from "@/components/form/textarea-field"
 import Icon from "@/components/icon"
-import StatementSearch from "@/components/statement-search"
+import StatementSearchSheet from "@/components/sheets/statement-search"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
@@ -74,6 +74,8 @@ export default function RecordEditorDialog({
 	const completions = useFetch<RecordCompletions>(completionsRecordsApiRoute.url())
 
 	const [statementCache, setStatementCache] = useState<(Statement & { pivot?: Allocation })[]>([])
+	const [isAttachingStatement, setIsAttachingStatement] = useState(false)
+
 	const { mergeErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
 
 	useEffect(() => {
@@ -154,20 +156,16 @@ export default function RecordEditorDialog({
 
 	const formStatements = useStore(form.store, state => state.values.statements)
 
-	const attachStatementsButton = (
-		<StatementSearch
+	const AttachStatementsSheet = (
+		<StatementSearchSheet
 			title="Attach statements to record"
 			placeholder="Search unattached statements..."
 			filters={{
 				is_allocable: "true",
 				exclude_ids: formStatements.map(s => s.id).join(","),
 			}}
-			trigger={
-				<Button variant="outline">
-					<Link2Icon />
-					Attach statement
-				</Button>
-			}
+			isOpen={isAttachingStatement}
+			setIsOpen={setIsAttachingStatement}
 			handler={async statement => {
 				setStatementCache(prev => [...prev, statement])
 				form.setFieldValue("statements", [
@@ -175,6 +173,12 @@ export default function RecordEditorDialog({
 					{ id: statement.id, amount: statement.allocable_amount },
 				])
 			}}
+			trigger={
+				<Button variant="outline">
+					<Link2Icon />
+					Attach Statement
+				</Button>
+			}
 		/>
 	)
 
@@ -360,7 +364,7 @@ export default function RecordEditorDialog({
 						<div className="flex justify-between">
 							<p className="text-sm font-semibold">Statements Attached</p>
 
-							{!!formStatements.length && attachStatementsButton}
+							{!!formStatements.length && AttachStatementsSheet}
 						</div>
 
 						<div className="flex flex-col gap-2">
@@ -471,7 +475,7 @@ export default function RecordEditorDialog({
 											No statements selected for allocation.
 										</EmptyDescription>
 									</EmptyHeader>
-									<EmptyContent>{attachStatementsButton}</EmptyContent>
+									<EmptyContent>{AttachStatementsSheet}</EmptyContent>
 								</Empty>
 							)}
 						</div>
