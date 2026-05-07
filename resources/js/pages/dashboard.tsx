@@ -193,14 +193,6 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 		}
 	}, [quotas, quotaIds, quotaIdsParam, setQuotaIdsParam])
 
-	useEffect(() => {
-		/**
-		 * This if statement contains code specific to the developer's dashboard workflow
-		 * You can comment this out or remove it if it doesn't apply to your use case
-		 */
-		setAreaQuota(quotas.find(q => q.name === "Daily") ?? null)
-	}, [quotas])
-
 	/**
 	 * This effect ensures that if a record is selected and then filtered out (either by the search query or quota filters),
 	 * it will be deselected. This prevents the user from trying to perform actions on records that are not currently visible,
@@ -215,7 +207,15 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 	}, [filteredRecords])
 
 	/**
-	 * This if statement contains code specific to the developer's dashboard workflow
+	 * This effect contains code specific to the developer's dashboard workflow
+	 * You can comment this out or remove it if it doesn't apply to your use case
+	 */
+	useEffect(() => {
+		setAreaQuota(quotas.find(q => q.name === "Daily") ?? null)
+	}, [quotas])
+
+	/**
+	 * These variables contain code specific to the developer's dashboard workflow
 	 * You can comment this out or remove it if it doesn't apply to your use case
 	 */
 	const dailyQuota = quotas.find(q => q.name === "Daily")
