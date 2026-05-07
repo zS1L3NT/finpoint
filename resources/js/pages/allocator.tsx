@@ -231,6 +231,7 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 					setOpen={open => {
 						if (!open) {
 							setEditingRecord(null)
+							setSelectedStatements([])
 						}
 					}}
 				/>
