@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react"
+import { createContext, useContext, useEffect, useState } from "react"
 
 const NOOP = () => {
 	//
@@ -17,7 +17,13 @@ const HistoryContext = createContext<{
 })
 
 export const HistoryProvider = ({ children }: { children: React.ReactNode }) => {
-	const [history, setHistory] = useState<{ name: string; url: string }[]>([])
+	const [history, setHistory] = useState<{ name: string; url: string }[]>(
+		JSON.parse(localStorage.getItem("history") || "[]"),
+	)
+
+	useEffect(() => {
+		localStorage.setItem("history", JSON.stringify(history))
+	}, [history])
 
 	return (
 		<HistoryContext.Provider
