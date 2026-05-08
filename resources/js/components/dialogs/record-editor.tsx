@@ -414,6 +414,7 @@ export default function RecordEditorDialog({
 																</CardDescription>
 																<CardAction className="text-sm font-semibold">
 																	<Button
+																		type="button"
 																		variant="destructive"
 																		onClick={() => {
 																			form.setFieldValue(
