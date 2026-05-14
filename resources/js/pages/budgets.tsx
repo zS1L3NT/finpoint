@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { useHistory } from "@/history"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
-import { TABLE_WIDTHS } from "@/lib/table-widths"
+import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
 import { formatCurrency, parseDate } from "@/lib/utils"
 import { Budget, Paginated } from "@/types"
 import { budgetsWebRoute, budgetWebRoute } from "@/wayfinder/routes"
@@ -42,7 +42,7 @@ export default function BudgetsPage({ budgets }: { budgets: Paginated<Budget> })
 					columns={[
 						{
 							header: "Budget",
-							meta: { width: TABLE_WIDTHS.BUDGET },
+							meta: { width: TABLE_WIDTH_CLASSNAMES.BUDGET },
 							cell: ({ row }) => {
 								const budget = row.original
 
@@ -70,7 +70,7 @@ export default function BudgetsPage({ budgets }: { budgets: Paginated<Budget> })
 						},
 						{
 							header: "Usage",
-							meta: { width: TABLE_WIDTHS.BUDGET_USAGE },
+							meta: { width: TABLE_WIDTH_CLASSNAMES.BUDGET_USAGE },
 							cell: ({ row }) => {
 								const budget = row.original
 
@@ -97,7 +97,7 @@ export default function BudgetsPage({ budgets }: { budgets: Paginated<Budget> })
 						},
 						{
 							header: "Window",
-							meta: { width: TABLE_WIDTHS.BUDGET_WINDOW },
+							meta: { width: TABLE_WIDTH_CLASSNAMES.BUDGET_WINDOW },
 							cell: ({ row }) => (
 								<span className="text-muted-foreground pe-8">
 									{formatBudgetDateWindow(row.original)}
@@ -106,7 +106,7 @@ export default function BudgetsPage({ budgets }: { budgets: Paginated<Budget> })
 						},
 						{
 							header: "Type",
-							meta: { width: TABLE_WIDTHS.BUDGET_TYPE },
+							meta: { width: TABLE_WIDTH_CLASSNAMES.BUDGET_TYPE },
 							cell: ({ row }) => (
 								<div className="flex items-center gap-2 text-muted-foreground pe-8">
 									{row.original.automatic ? (
@@ -120,17 +120,16 @@ export default function BudgetsPage({ budgets }: { budgets: Paginated<Budget> })
 						},
 						{
 							id: "actions",
+							meta: { width: TABLE_WIDTH_CLASSNAMES.ACTIONS_DYNAMIC_OPEN },
 							cell: ({ row }) => (
-								<div className="flex justify-end">
-									<Button variant="outline" size="sm" asChild>
-										<Link
-											href={budgetWebRoute.url({ budget: row.original })}
-											onClick={handlePush("Budgets")}
-										>
-											Open
-										</Link>
-									</Button>
-								</div>
+								<Button variant="outline" size="sm" asChild>
+									<Link
+										href={budgetWebRoute.url({ budget: row.original })}
+										onClick={handlePush("Budgets")}
+									>
+										Open
+									</Link>
+								</Button>
 							),
 						},
 					]}

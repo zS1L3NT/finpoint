@@ -39,7 +39,15 @@ export default function DataTable<TData extends { id: string }, TValue>({
 						{table.getHeaderGroups().map(headerGroup => (
 							<TableRow key={headerGroup.id}>
 								{headerGroup.headers.map(header => (
-									<TableHead key={header.id} style={header.column.columnDef.meta}>
+									<TableHead
+										key={header.id}
+										className={
+											header.column.columnDef.meta &&
+											"width" in header.column.columnDef.meta
+												? `${header.column.columnDef.meta?.width}`
+												: undefined
+										}
+									>
 										{header.isPlaceholder
 											? null
 											: flexRender(
@@ -65,7 +73,15 @@ export default function DataTable<TData extends { id: string }, TValue>({
 										className="cursor-pointer"
 									>
 										{row.getVisibleCells().map(cell => (
-											<TableCell key={cell.id}>
+											<TableCell
+												key={cell.id}
+												className={
+													cell.column.columnDef.meta &&
+													"width" in cell.column.columnDef.meta
+														? `${cell.column.columnDef.meta?.width}`
+														: undefined
+												}
+											>
 												{flexRender(
 													cell.column.columnDef.cell,
 													cell.getContext(),

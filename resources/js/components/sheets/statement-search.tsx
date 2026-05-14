@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Progress } from "@/components/ui/progress"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { TABLE_WIDTHS } from "@/lib/table-widths"
+import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
 import { classForCurrency, cn, formatCurrency, formatDatetime } from "@/lib/utils"
 import { Statement } from "@/types"
 import { statementIndexApiRoute } from "@/wayfinder/routes"
@@ -124,7 +124,7 @@ export default function StatementSearchSheet({
 								},
 								{
 									id: "actions",
-									meta: { width: TABLE_WIDTHS.ACTIONS_ATTACH },
+									meta: { width: TABLE_WIDTH_CLASSNAMES.ACTIONS_FIXED_ATTACH },
 									cell: ({ row }) => (
 										<Button
 											size="sm"

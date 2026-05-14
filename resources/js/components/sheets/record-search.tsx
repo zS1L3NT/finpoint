@@ -7,7 +7,7 @@ import { Field, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { TABLE_WIDTHS } from "@/lib/table-widths"
+import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
 import { classForCurrency, formatCurrency, formatDatetime } from "@/lib/utils"
 import { Record } from "@/types"
 import { recordIndexApiRoute } from "@/wayfinder/routes"
@@ -116,7 +116,7 @@ export default function RecordSearchSheet({
 								},
 								{
 									id: "actions",
-									meta: { width: TABLE_WIDTHS.ACTIONS_ATTACH },
+									meta: { width: TABLE_WIDTH_CLASSNAMES.ACTIONS_FIXED_ATTACH },
 									cell: ({ row }) => (
 										<Button
 											size="sm"

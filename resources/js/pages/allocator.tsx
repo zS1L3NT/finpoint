@@ -16,7 +16,7 @@ import { useHistory } from "@/history"
 import { useFetch } from "@/hooks/use-fetch"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { useSearchParam } from "@/hooks/use-search-param"
-import { TABLE_WIDTHS } from "@/lib/table-widths"
+import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
 import { classForCurrency, formatCurrency, formatDatetime, round2dp } from "@/lib/utils"
 import { CategoryWithChildren, Paginated, Record, Statement } from "@/types"
 import {
@@ -85,7 +85,7 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 					columns={[
 						{
 							id: "select",
-							meta: { width: TABLE_WIDTHS.CHECKBOX },
+							meta: { width: TABLE_WIDTH_CLASSNAMES.CHECKBOX },
 							cell: ({ row }) => (
 								<div className="flex items-center justify-center">
 									<Checkbox
@@ -106,12 +106,12 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 						},
 						{
 							header: "Account",
-							meta: { width: TABLE_WIDTHS.ACCOUNT },
+							meta: { width: TABLE_WIDTH_CLASSNAMES.ACCOUNT },
 							cell: ({ row }) => row.original.account.id,
 						},
 						{
 							header: "Date & Time",
-							meta: { width: TABLE_WIDTHS.DATETIME },
+							meta: { width: TABLE_WIDTH_CLASSNAMES.DATETIME },
 							cell: ({ row }) => (
 								<span className="text-muted-foreground">
 									{formatDatetime(row.original.datetime)}
@@ -120,7 +120,7 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 						},
 						{
 							header: "Amount",
-							meta: { width: TABLE_WIDTHS.AMOUNT_BAR },
+							meta: { width: TABLE_WIDTH_CLASSNAMES.AMOUNT_BAR },
 							cell: ({ row }) => (
 								<AllocateBar
 									title="Allocable"
@@ -131,7 +131,7 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 						},
 						{
 							header: "Description",
-							// Expand width to maximum for statements
+							meta: { width: TABLE_WIDTH_CLASSNAMES.STATEMENT },
 							cell: ({ row }) => (
 								<div className="truncate text-muted-foreground">
 									{row.original.description}
@@ -140,7 +140,7 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 						},
 						{
 							id: "actions",
-							meta: { width: TABLE_WIDTHS.ACTIONS_OPEN },
+							meta: { width: TABLE_WIDTH_CLASSNAMES.ACTIONS_FIXED_OPEN },
 							cell: ({ row }) => (
 								<Button variant="outline" size="sm" asChild>
 									<Link
@@ -160,7 +160,7 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 						onPageSizeChange: handlePageSizeChange,
 						searchPlaceholder: "Search unallocated statements...",
 						filters: (
-							<>
+							<div className="flex gap-2">
 								<DateField
 									id="start_date"
 									value={startDate ?? ""}
@@ -176,7 +176,7 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 									placeholder="End date"
 									onChange={date => setEndDate(date || null)}
 								/>
-							</>
+							</div>
 						),
 						actions: (
 							<>

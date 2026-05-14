@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/card"
 import { useHistory } from "@/history"
 import { useFetch } from "@/hooks/use-fetch"
-import { TABLE_WIDTHS } from "@/lib/table-widths"
+import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
 import {
 	classForCurrency,
 	formatCurrency,
@@ -182,7 +182,7 @@ export default function BudgetPage({ budget, records }: { budget: Budget; record
 							columns={[
 								{
 									header: "Record",
-									meta: { width: TABLE_WIDTHS.RECORD },
+									meta: { width: TABLE_WIDTH_CLASSNAMES.RECORD },
 									cell: ({ row }) => (
 										<div className="flex items-center gap-3">
 											<Icon {...row.original.category} size={16} />
@@ -204,7 +204,7 @@ export default function BudgetPage({ budget, records }: { budget: Budget; record
 								},
 								{
 									header: "Amount",
-									meta: { width: TABLE_WIDTHS.AMOUNT },
+									meta: { width: TABLE_WIDTH_CLASSNAMES.AMOUNT },
 									cell: ({ row }) => (
 										<span className={classForCurrency(row.original.amount)}>
 											{formatCurrency(row.original.amount)}
@@ -213,12 +213,12 @@ export default function BudgetPage({ budget, records }: { budget: Budget; record
 								},
 								{
 									header: "Date & Time",
-									meta: { width: TABLE_WIDTHS.DATETIME },
+									meta: { width: TABLE_WIDTH_CLASSNAMES.DATETIME },
 									cell: ({ row }) => formatDatetime(row.original.datetime),
 								},
 								{
 									header: "Description",
-									meta: { width: TABLE_WIDTHS.DESCRIPTION },
+									meta: { width: TABLE_WIDTH_CLASSNAMES.DESCRIPTION },
 									cell: ({ row }) => (
 										<div className="truncate text-muted-foreground">
 											{row.original.description || "-"}
@@ -227,6 +227,7 @@ export default function BudgetPage({ budget, records }: { budget: Budget; record
 								},
 								{
 									id: "actions",
+									meta: { width: TABLE_WIDTH_CLASSNAMES.ACTIONS_OPEN_DETACH },
 									cell: ({ row }) => (
 										<div className="flex justify-end gap-2">
 											<Button variant="outline" size="sm" asChild>

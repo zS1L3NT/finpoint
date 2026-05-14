@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useHistory } from "@/history"
 import { useFetch } from "@/hooks/use-fetch"
-import { TABLE_WIDTHS } from "@/lib/table-widths"
+import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
 import { classForCurrency, cn, formatCurrency, formatDatetime } from "@/lib/utils"
 import { Allocation, CategoryWithChildren, Record, Statement } from "@/types"
 import { categoryIndexApiRoute, recordsWebRoute, statementWebRoute } from "@/wayfinder/routes"
@@ -102,17 +102,17 @@ export default function RecordPage({
 							columns={[
 								{
 									header: "Account",
-									meta: { width: TABLE_WIDTHS.ACCOUNT },
+									meta: { width: TABLE_WIDTH_CLASSNAMES.ACCOUNT },
 									cell: ({ row }) => row.original.account.id,
 								},
 								{
 									header: "Date & Time",
-									meta: { width: TABLE_WIDTHS.DATETIME },
+									meta: { width: TABLE_WIDTH_CLASSNAMES.DATETIME },
 									cell: ({ row }) => formatDatetime(row.original.datetime),
 								},
 								{
 									header: "Amount",
-									meta: { width: TABLE_WIDTHS.AMOUNT_BAR },
+									meta: { width: TABLE_WIDTH_CLASSNAMES.AMOUNT_BAR },
 									cell: ({ row }) => (
 										<AllocateBar
 											title="Allocated"
@@ -123,7 +123,7 @@ export default function RecordPage({
 								},
 								{
 									header: "Description",
-									// Expand width to maximum for statements
+									meta: { width: TABLE_WIDTH_CLASSNAMES.STATEMENT },
 									cell: ({ row }) => (
 										<div className="truncate text-muted-foreground">
 											{row.original.description || "-"}
@@ -132,20 +132,18 @@ export default function RecordPage({
 								},
 								{
 									id: "actions",
-									meta: { width: TABLE_WIDTHS.ACTIONS_OPEN },
+									meta: { width: TABLE_WIDTH_CLASSNAMES.ACTIONS_FIXED_OPEN },
 									cell: ({ row }) => (
-										<div className="flex justify-end">
-											<Button variant="outline" size="sm" asChild>
-												<Link
-													href={statementWebRoute.url({
-														statement: row.original,
-													})}
-													onClick={handlePush(`Record ${record.id}`)}
-												>
-													Open
-												</Link>
-											</Button>
-										</div>
+										<Button variant="outline" size="sm" asChild>
+											<Link
+												href={statementWebRoute.url({
+													statement: row.original,
+												})}
+												onClick={handlePush(`Record ${record.id}`)}
+											>
+												Open
+											</Link>
+										</Button>
 									),
 								},
 							]}

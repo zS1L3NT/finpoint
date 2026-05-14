@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useHistory } from "@/history"
-import { TABLE_WIDTHS } from "@/lib/table-widths"
+import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
 import { classForCurrency, formatCurrency, formatDatetime } from "@/lib/utils"
 import { Allocation, Record, Statement } from "@/types"
 import { recordWebRoute, statementsWebRoute } from "@/wayfinder/routes"
@@ -74,7 +74,7 @@ export default function StatementPage({
 							columns={[
 								{
 									header: "Record",
-									meta: { width: TABLE_WIDTHS.RECORD },
+									meta: { width: TABLE_WIDTH_CLASSNAMES.RECORD },
 									cell: ({ row }) => (
 										<div className="flex items-center gap-3">
 											<Icon {...row.original.category} size={16} />
@@ -96,7 +96,7 @@ export default function StatementPage({
 								},
 								{
 									header: "Amount",
-									meta: { width: TABLE_WIDTHS.AMOUNT },
+									meta: { width: TABLE_WIDTH_CLASSNAMES.AMOUNT },
 									cell: ({ row }) => (
 										<div
 											className={classForCurrency(row.original.pivot.amount)}
@@ -107,12 +107,12 @@ export default function StatementPage({
 								},
 								{
 									header: "Date & Time",
-									meta: { width: TABLE_WIDTHS.DATETIME },
+									meta: { width: TABLE_WIDTH_CLASSNAMES.DATETIME },
 									cell: ({ row }) => formatDatetime(row.original.datetime),
 								},
 								{
 									header: "Description",
-									meta: { width: TABLE_WIDTHS.DESCRIPTION },
+									meta: { width: TABLE_WIDTH_CLASSNAMES.DESCRIPTION },
 									cell: ({ row }) => (
 										<div className="truncate text-muted-foreground">
 											{row.original.description || "-"}
@@ -121,21 +121,18 @@ export default function StatementPage({
 								},
 								{
 									id: "actions",
+									meta: { width: TABLE_WIDTH_CLASSNAMES.ACTIONS_OPEN },
 									cell: ({ row }) => (
-										<div className="flex justify-end">
-											<Button variant="outline" size="sm" asChild>
-												<Link
-													href={recordWebRoute.url({
-														record: row.original,
-													})}
-													onClick={handlePush(
-														`Statement ${statement.id}`,
-													)}
-												>
-													Open
-												</Link>
-											</Button>
-										</div>
+										<Button variant="outline" size="sm" asChild>
+											<Link
+												href={recordWebRoute.url({
+													record: row.original,
+												})}
+												onClick={handlePush(`Statement ${statement.id}`)}
+											>
+												Open
+											</Link>
+										</Button>
 									),
 								},
 							]}

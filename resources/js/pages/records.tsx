@@ -22,7 +22,7 @@ import { useHistory } from "@/history"
 import { useFetch } from "@/hooks/use-fetch"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { useSearchParam } from "@/hooks/use-search-param"
-import { TABLE_WIDTHS } from "@/lib/table-widths"
+import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
 import { classForCurrency, formatCurrency, formatDatetime } from "@/lib/utils"
 import { CategoryWithChildren, Paginated, Record } from "@/types"
 import { categoryIndexApiRoute, recordsWebRoute, recordWebRoute } from "@/wayfinder/routes"
@@ -69,7 +69,7 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 					columns={[
 						{
 							header: "Record",
-							meta: { width: TABLE_WIDTHS.RECORD },
+							meta: { width: TABLE_WIDTH_CLASSNAMES.RECORD },
 							cell: ({ row }) => (
 								<div className="flex items-center gap-3">
 									<Icon {...row.original.category} size={16} />
@@ -91,7 +91,7 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 						},
 						{
 							header: "Amount",
-							meta: { width: TABLE_WIDTHS.AMOUNT },
+							meta: { width: TABLE_WIDTH_CLASSNAMES.AMOUNT },
 							cell: ({ row }) => (
 								<span className={classForCurrency(row.original.amount)}>
 									{formatCurrency(row.original.amount)}
@@ -100,7 +100,7 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 						},
 						{
 							header: "Date & Time",
-							meta: { width: TABLE_WIDTHS.DATETIME },
+							meta: { width: TABLE_WIDTH_CLASSNAMES.DATETIME },
 							cell: ({ row }) => (
 								<span className="text-muted-foreground">
 									{formatDatetime(row.original.datetime)}
@@ -109,7 +109,7 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 						},
 						{
 							header: "Description",
-							meta: { width: TABLE_WIDTHS.DESCRIPTION },
+							meta: { width: TABLE_WIDTH_CLASSNAMES.DESCRIPTION },
 							cell: ({ row }) => (
 								<div className="truncate text-muted-foreground">
 									{row.original.description || "-"}
@@ -118,17 +118,16 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 						},
 						{
 							id: "actions",
+							meta: { width: TABLE_WIDTH_CLASSNAMES.ACTIONS_OPEN },
 							cell: ({ row }) => (
-								<div className="flex justify-end">
-									<Button variant="outline" size="sm" asChild>
-										<Link
-											href={recordWebRoute.url({ record: row.original })}
-											onClick={handlePush("Records")}
-										>
-											Open
-										</Link>
-									</Button>
-								</div>
+								<Button variant="outline" size="sm" asChild>
+									<Link
+										href={recordWebRoute.url({ record: row.original })}
+										onClick={handlePush("Records")}
+									>
+										Open
+									</Link>
+								</Button>
 							),
 						},
 					]}
@@ -139,7 +138,7 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 						onPageSizeChange: handlePageSizeChange,
 						searchPlaceholder: "Search all records...",
 						filters: (
-							<>
+							<div className="flex gap-2">
 								<DropdownMenu>
 									<DropdownMenuTrigger asChild>
 										<Button
@@ -197,7 +196,7 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 									placeholder="End date"
 									onChange={date => setEndDate(date || null)}
 								/>
-							</>
+							</div>
 						),
 						actions: (
 							<RecordCreatorDialog
@@ -207,7 +206,7 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 								setIsOpen={setIsCreatingRecord}
 								trigger={
 									<Button>
-										<PlusIcon /> Create Record
+										<PlusIcon /> Create Pending Record
 									</Button>
 								}
 							/>

@@ -1,12 +1,4 @@
 import { Input } from "@/components/ui/input"
-import {
-	Select,
-	SelectContent,
-	SelectGroup,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select"
 
 export default function PaginationHeader({
 	query,
@@ -27,7 +19,7 @@ export default function PaginationHeader({
 }) {
 	return (
 		<div className="flex items-end justify-between gap-4">
-			<div className="flex items-end gap-2">
+			<div className="flex flex-col 2xl:flex-row gap-2">
 				<Input
 					className="w-sm"
 					placeholder={searchPlaceholder}
@@ -38,25 +30,7 @@ export default function PaginationHeader({
 				{filters}
 			</div>
 
-			<div className="flex items-center gap-2">
-				<span className="text-xs text-muted-foreground">Rows per page</span>
-
-				<Select value={pageSize} onValueChange={onPageSizeChange}>
-					<SelectTrigger className="w-20">
-						<SelectValue placeholder={pageSize} />
-					</SelectTrigger>
-					<SelectContent align="end">
-						<SelectGroup>
-							<SelectItem value="10">10</SelectItem>
-							<SelectItem value="25">25</SelectItem>
-							<SelectItem value="50">50</SelectItem>
-							<SelectItem value="100">100</SelectItem>
-						</SelectGroup>
-					</SelectContent>
-				</Select>
-
-				{actions}
-			</div>
+			<div className="flex items-center gap-2">{actions}</div>
 		</div>
 	)
 }

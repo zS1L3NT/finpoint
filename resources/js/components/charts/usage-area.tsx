@@ -144,8 +144,6 @@ export default function UsageAreaChart({
 		}))
 	}, [records, limit, start, end])
 
-	console.log(data)
-
 	return (
 		<ChartContainer
 			className={className}

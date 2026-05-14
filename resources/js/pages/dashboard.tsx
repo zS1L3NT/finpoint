@@ -58,7 +58,7 @@ import {
 import { useHistory } from "@/history"
 import { useFetch } from "@/hooks/use-fetch"
 import { useSearchParam } from "@/hooks/use-search-param"
-import { TABLE_WIDTHS } from "@/lib/table-widths"
+import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
 import { classForCurrency, cn, formatCurrency, formatDatetime, withMethod } from "@/lib/utils"
 import { CategoryWithChildren, Quota, Record } from "@/types"
 import {
@@ -414,9 +414,9 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 
 				{quotas.length ? (
 					<Card>
-						<CardContent className="flex justify-center gap-2">
+						<CardContent className="flex flex-col items-center xl:flex-row justify-center gap-2">
 							{quotas.map(quota => (
-								<div key={quota.id} className="flex flex-col gap-4 size-90">
+								<div key={quota.id} className="flex flex-col items-center gap-4 size-60 xl:size-70 2xl:size-80">
 									<p className="text-sm font-heading font-medium text-center">
 										Spending for {quota.name}
 									</p>
@@ -560,7 +560,7 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 							columns={[
 								{
 									id: "select",
-									meta: { width: TABLE_WIDTHS.CHECKBOX },
+									meta: { width: TABLE_WIDTH_CLASSNAMES.CHECKBOX },
 									header: () => (
 										<div className="flex items-center justify-center">
 											<Checkbox
@@ -600,7 +600,7 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 								},
 								{
 									header: "Record",
-									meta: { width: TABLE_WIDTHS.RECORD },
+									meta: { width: TABLE_WIDTH_CLASSNAMES.RECORD },
 									cell: ({ row }) => (
 										<div className="flex items-center gap-3">
 											<Icon {...row.original.category} size={16} />
@@ -622,7 +622,7 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 								},
 								{
 									header: "Quota",
-									meta: { width: TABLE_WIDTHS.QUOTA },
+									meta: { width: TABLE_WIDTH_CLASSNAMES.QUOTA },
 									cell: ({ row }) =>
 										row.original.quota ? (
 											<Badge
@@ -638,7 +638,7 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 								},
 								{
 									header: "Amount",
-									meta: { width: TABLE_WIDTHS.AMOUNT },
+									meta: { width: TABLE_WIDTH_CLASSNAMES.AMOUNT },
 									cell: ({ row }) => (
 										<span className={classForCurrency(row.original.amount)}>
 											{formatCurrency(row.original.amount)}
@@ -647,12 +647,12 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 								},
 								{
 									header: "Date & Time",
-									meta: { width: TABLE_WIDTHS.DATETIME },
+									meta: { width: TABLE_WIDTH_CLASSNAMES.DATETIME },
 									cell: ({ row }) => formatDatetime(row.original.datetime),
 								},
 								{
 									header: "Description",
-									meta: { width: TABLE_WIDTHS.DESCRIPTION },
+									meta: { width: TABLE_WIDTH_CLASSNAMES.DESCRIPTION },
 									cell: ({ row }) => (
 										<div className="truncate text-muted-foreground">
 											{row.original.description || "-"}
@@ -661,19 +661,18 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 								},
 								{
 									id: "actions",
+									meta: { width: TABLE_WIDTH_CLASSNAMES.ACTIONS_OPEN },
 									cell: ({ row }) => (
-										<div className="flex justify-end gap-2">
-											<Button variant="outline" size="sm" asChild>
-												<Link
-													href={recordWebRoute.url({
-														record: row.original,
-													})}
-													onClick={handlePush("Dashboard")}
-												>
-													Open
-												</Link>
-											</Button>
-										</div>
+										<Button variant="outline" size="sm" asChild>
+											<Link
+												href={recordWebRoute.url({
+													record: row.original,
+												})}
+												onClick={handlePush("Dashboard")}
+											>
+												Open
+											</Link>
+										</Button>
 									),
 								},
 							]}
