@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\WithoutTimestamps;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 #[Table(keyType: 'string', incrementing: false)]
@@ -14,6 +15,12 @@ use Illuminate\Database\Eloquent\Model;
 #[Appends(['can_delete'])]
 class Category extends Model
 {
+    public static function booted() {
+        static::addGlobalScope('order', function (Builder $builder) {
+            $builder->orderBy('name');
+        });
+    }
+
     public function getCanDeleteAttribute()
     {
         return ! $this->records()->exists() && ! $this->children()->exists();
@@ -31,6 +38,6 @@ class Category extends Model
 
     public function children()
     {
-        return $this->hasMany(Category::class, 'parent_category_id')->orderBy('name');
+        return $this->hasMany(Category::class, 'parent_category_id');
     }
 }

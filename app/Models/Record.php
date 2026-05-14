@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\WithoutTimestamps;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 #[Table(keyType: 'string', incrementing: false)]
@@ -24,7 +25,23 @@ class Record extends Model
 
     protected static function booted()
     {
-        static::addGlobalScope(new RecordAllocatedAmount);
+        static::addGlobalScope('allocated', function (Builder $builder) {
+            $builder->addSelect([
+                'allocated_amount' => Allocation::query()
+                    ->selectRaw('coalesce(round(sum(allocations.amount), 2), 0)')
+                    ->whereColumn('allocations.record_id', 'records.id'),
+            ]);
+        });
+
+        static::addGlobalScope('order', function (Builder $builder) {
+            $builder
+                ->orderBy('datetime', 'desc')
+                ->orderBy('amount', 'asc')
+                ->orderBy('title', 'asc')
+                ->orderBy('people', 'asc')
+                ->orderBy('location', 'asc')
+                ->orderBy('description', 'asc');
+        });
     }
 
     public static function appQuery(
@@ -66,7 +83,6 @@ class Record extends Model
                 collect(['true', 'false'])->contains($is_allocated),
                 fn($query) => $query->havingRaw($is_allocated === 'true' ? 'allocated_amount = amount' : 'allocated_amount != amount')
             )
-            ->orderBy('datetime', 'desc')
             ->groupBy('records.id');
     }
 
@@ -101,7 +117,7 @@ class Record extends Model
 
     public function statements()
     {
-        return $this->belongsToMany(Statement::class, Allocation::class)->orderBy('datetime', 'desc')->withPivot(['amount']);
+        return $this->belongsToMany(Statement::class, Allocation::class)->withPivot(['amount']);
     }
 
     public function budgets()

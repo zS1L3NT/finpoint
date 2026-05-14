@@ -19,7 +19,6 @@ class DashboardController extends Controller
         $records = Record::query()
             ->with('quota')
             ->whereBetween('datetime', [$date->clone()->startOfMonth(), $date->clone()->endOfMonth()])
-            ->orderBy('datetime', 'desc')
             ->get();
 
         $quotas = Quota::query()

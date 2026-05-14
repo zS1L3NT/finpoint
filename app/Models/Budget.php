@@ -7,6 +7,7 @@ use App\Pivots\BudgetRecord;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\WithoutTimestamps;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 #[Table(keyType: 'string', incrementing: false)]
@@ -21,7 +22,13 @@ class Budget extends Model
 
     protected static function booted()
     {
-        static::addGlobalScope(new BudgetUsedScope);
+        static::addGlobalScope('used', function (Builder $builder) {
+            $builder->withSum('records as used_amount', 'amount');
+        });
+
+        static::addGlobalScope('order', function (Builder $builder) {
+            $builder->orderBy('end_date', 'desc');
+        });
     }
 
     public static function appQuery($query = null)
@@ -36,12 +43,11 @@ class Budget extends Model
                             ->orWhere('amount', 'like', '%' . $q . '%')
                     )
             )
-            ->orderBy('end_date', 'desc')
             ->groupBy('budgets.id');
     }
 
     public function records()
     {
-        return $this->belongsToMany(Record::class, BudgetRecord::class)->orderBy('datetime', 'desc');
+        return $this->belongsToMany(Record::class, BudgetRecord::class);
     }
 }

@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use App\Models\Scopes\StatementAllocableScope;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\WithoutTimestamps;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 #[Table(keyType: 'string', incrementing: false)]
@@ -21,7 +21,20 @@ class Statement extends Model
 
     protected static function booted()
     {
-        static::addGlobalScope(new StatementAllocableScope);
+        static::addGlobalScope('allocable', function (Builder $builder) {
+            $builder->addSelect([
+                'allocable_amount' => Allocation::query()
+                    ->selectRaw('coalesce(round(statements.amount - sum(allocations.amount), 2), statements.amount)')
+                    ->whereColumn('allocations.statement_id', 'statements.id'),
+            ]);
+        });
+
+        static::addGlobalScope('order', function (Builder $builder) {
+            $builder
+                ->orderBy('datetime', 'desc')
+                ->orderBy('amount', 'asc')
+                ->orderBy('description', 'asc');
+        });
     }
 
     public static function appQuery(
@@ -59,7 +72,6 @@ class Statement extends Model
                 collect(['true', 'false'])->contains($is_allocable),
                 fn($query) => $query->havingRaw($is_allocable === 'true' ? 'allocable_amount != 0' : 'allocable_amount = 0')
             )
-            ->orderBy('datetime', 'desc')
             ->groupBy('statements.id');
     }
 
@@ -80,6 +92,6 @@ class Statement extends Model
 
     public function records()
     {
-        return $this->belongsToMany(Record::class, Allocation::class)->orderBy('datetime', 'desc')->withPivot(['amount']);
+        return $this->belongsToMany(Record::class, Allocation::class)->withPivot(['amount']);
     }
 }

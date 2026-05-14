@@ -15,7 +15,6 @@ class CategoryController extends Controller
         return Category::query()
             ->with('children')
             ->whereNull('parent_category_id')
-            ->orderBy('name')
             ->get();
     }
 

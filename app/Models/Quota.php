@@ -14,6 +14,6 @@ class Quota extends Model
 {
     public function records()
     {
-        return $this->hasMany(Record::class)->orderBy('datetime', 'desc');
+        return $this->hasMany(Record::class);
     }
 }
