@@ -107,7 +107,7 @@ class Record extends Model
 
     public function getIsPendingAttribute()
     {
-        return $this->allocated_amount != $this->amount;
+        return $this->allocated_amount != $this->amount || $this->allocated_amount == 0;
     }
 
     public function category()
