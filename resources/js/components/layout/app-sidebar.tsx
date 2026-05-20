@@ -20,6 +20,7 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { START_DATE } from "@/constants"
 import { useHistory } from "@/history"
 import {
 	allocatorWebRoute,
@@ -69,8 +70,7 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
 								<Link
 									href={allocatorWebRoute.url({
 										query: {
-											// I only want to start tracking from 2026 onwards
-											start_date: "2026-01-01",
+											start_date: START_DATE,
 										},
 									})}
 									onClick={handleClear}
@@ -109,6 +109,7 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
 								<Link
 									href={recordsWebRoute.url({
 										query: {
+											start_date: START_DATE,
 											end_date: DateTime.now().toFormat("yyyy-MM-dd"),
 										},
 									})}
@@ -128,7 +129,6 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
 								</Link>
 							</SidebarMenuButton>
 						</SidebarMenuItem>
-
 					</SidebarMenu>
 				</SidebarGroup>
 

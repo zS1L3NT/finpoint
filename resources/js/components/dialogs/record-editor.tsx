@@ -42,6 +42,7 @@ import {
 import { FieldGroup } from "@/components/ui/field"
 import { Progress } from "@/components/ui/progress"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { START_DATE } from "@/constants"
 import { useHistory } from "@/history"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { useFetch } from "@/hooks/use-fetch"
@@ -142,7 +143,12 @@ export default function RecordEditorDialog({
 			setIsOpen(false)
 			handleClear()
 			router.visit(
-				recordsWebRoute.url({ query: { end_date: DateTime.now().toFormat("yyyy-MM-dd") } }),
+				recordsWebRoute.url({
+					query: {
+						start_date: START_DATE,
+						end_date: DateTime.now().toFormat("yyyy-MM-dd"),
+					},
+				}),
 			)
 		}
 	}
