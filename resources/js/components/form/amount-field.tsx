@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react"
 import { FormField, type FormFieldProps } from "@/components/form/field"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
@@ -5,7 +6,6 @@ import { cn } from "@/lib/utils"
 type Props = FormFieldProps & {
 	value: number
 	placeholder?: string
-	step?: number
 	min?: number
 	max?: number
 	suffix?: React.ReactNode
@@ -15,7 +15,6 @@ type Props = FormFieldProps & {
 export default function AmountField({
 	value,
 	placeholder,
-	step = 0.01,
 	min,
 	max,
 	suffix,
@@ -24,6 +23,15 @@ export default function AmountField({
 }: Props) {
 	const { id, disabled, errors } = props
 	const invalid = !!errors?.length
+	const [text, setText] = useState(() => `${value}`)
+	const committed = useRef(value)
+
+	useEffect(() => {
+		if (committed.current !== value) {
+			committed.current = value
+			setText(`${value}`)
+		}
+	}, [value])
 
 	return (
 		<FormField {...props}>
@@ -36,15 +44,26 @@ export default function AmountField({
 				<Input
 					id={id}
 					name={id}
-					type="number"
+					type="text"
+					inputMode="decimal"
 					placeholder={placeholder}
-					step={step}
 					min={min}
 					max={max}
-					value={value}
+					value={text}
 					onChange={e => {
-						const next = Number(e.target.value)
-						onChange(Number.isNaN(next) ? 0 : next)
+						const raw = e.target.value
+						if (raw === "" || raw === "-") {
+							setText(raw)
+							return
+						}
+
+						if (/^-?\d*\.?\d{0,2}$/.test(raw)) {
+							setText(raw)
+							const next = Number(raw)
+							if (!Number.isNaN(next)) {
+								onChange(next)
+							}
+						}
 					}}
 					aria-invalid={invalid}
 					disabled={disabled}
