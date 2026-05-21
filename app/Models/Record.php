@@ -30,6 +30,9 @@ class Record extends Model
                 'allocated_amount' => Allocation::query()
                     ->selectRaw('coalesce(round(sum(allocations.amount), 2), 0)')
                     ->whereColumn('allocations.record_id', 'records.id'),
+                'statement_count' => Allocation::query()
+                    ->selectRaw('count(*)')
+                    ->whereColumn('allocations.record_id', 'records.id'),
             ]);
         });
 
@@ -107,7 +110,7 @@ class Record extends Model
 
     public function getIsPendingAttribute()
     {
-        return $this->allocated_amount != $this->amount || $this->allocated_amount == 0;
+        return $this->allocated_amount != $this->amount || $this->statement_count == 0;
     }
 
     public function category()
