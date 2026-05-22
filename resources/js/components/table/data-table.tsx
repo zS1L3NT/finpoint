@@ -1,4 +1,4 @@
-import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table"
+import { ColumnDef, flexRender, getCoreRowModel, Row, useReactTable } from "@tanstack/react-table"
 import { AnimatePresence } from "framer-motion"
 import {
 	Table,
@@ -8,6 +8,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table"
+import { cn } from "@/lib/utils"
 
 export default function DataTable<TData extends { id: string }, TValue>({
 	data,
@@ -15,12 +16,14 @@ export default function DataTable<TData extends { id: string }, TValue>({
 	header,
 	selectedIds,
 	emptyMessage,
+	getRowClassName
 }: {
 	data: TData[]
 	columns: ColumnDef<TData, TValue>[]
 	header?: React.ReactNode
 	selectedIds?: string[]
 	emptyMessage?: string
+	getRowClassName?: (row: Row<TData>) => any
 }) {
 	const table = useReactTable({
 		data,
@@ -70,7 +73,7 @@ export default function DataTable<TData extends { id: string }, TValue>({
 										animate={{ opacity: 1 }}
 										exit={{ opacity: 0 }}
 										data-state={selectedIds?.includes(row.id) && "selected"}
-										className="cursor-pointer"
+										className={cn("cursor-pointer", getRowClassName?.(row))}
 									>
 										{row.getVisibleCells().map(cell => (
 											<TableCell

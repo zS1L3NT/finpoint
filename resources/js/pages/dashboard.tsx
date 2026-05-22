@@ -59,7 +59,14 @@ import { useHistory } from "@/history"
 import { useFetch } from "@/hooks/use-fetch"
 import { useSearchParam } from "@/hooks/use-search-param"
 import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
-import { classForCurrency, cn, formatCurrency, formatDatetime, withMethod } from "@/lib/utils"
+import {
+	classForCurrency,
+	cn,
+	formatCurrency,
+	formatDatetime,
+	parseDatetime,
+	withMethod,
+} from "@/lib/utils"
 import { CategoryWithChildren, Quota, Record } from "@/types"
 import {
 	budgetsWebRoute,
@@ -416,7 +423,10 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 					<Card>
 						<CardContent className="flex flex-col items-center xl:flex-row justify-center gap-2">
 							{quotas.map(quota => (
-								<div key={quota.id} className="flex flex-col items-center gap-4 size-60 xl:size-70 2xl:size-80">
+								<div
+									key={quota.id}
+									className="flex flex-col items-center gap-4 size-60 xl:size-70 2xl:size-80"
+								>
 									<p className="text-sm font-heading font-medium text-center">
 										Spending for {quota.name}
 									</p>
@@ -676,6 +686,17 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 									),
 								},
 							]}
+							getRowClassName={row =>
+								!filteredRecords[row.index + 1] ||
+								parseDatetime(filteredRecords[row.index].datetime)
+									.startOf("day")
+									.toMillis() ===
+									parseDatetime(filteredRecords[row.index + 1].datetime)
+										.startOf("day")
+										.toMillis()
+									? "border-0"
+									: ""
+							}
 							selectedIds={selected.map(s => s.id)}
 							emptyMessage="No records found."
 						/>
