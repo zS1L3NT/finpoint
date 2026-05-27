@@ -15,6 +15,7 @@ class Statement extends Model
 {
     public $casts = [
         'datetime' => 'date:Y-m-d H:i',
+        'index' => 'integer',
     ];
 
     protected $with = ['account'];
@@ -32,6 +33,7 @@ class Statement extends Model
         static::addGlobalScope('order', function (Builder $builder) {
             $builder
                 ->orderBy('datetime', 'desc')
+                ->orderBy('index', 'desc')
                 ->orderBy('amount', 'asc')
                 ->orderBy('description', 'asc');
         });
@@ -48,16 +50,16 @@ class Statement extends Model
         return self::query()
             ->when(
                 $query,
-                fn($query, $q) => $query
+                fn ($query, $q) => $query
                     ->where(
-                        fn($query) => $query
-                            ->where('description', 'like', '%' . $q . '%')
-                            ->orWhere('amount', 'like', '%' . $q . '%')
+                        fn ($query) => $query
+                            ->where('description', 'like', '%'.$q.'%')
+                            ->orWhere('amount', 'like', '%'.$q.'%')
                             ->orWhereHas(
                                 'account',
                                 fn ($query) => $query
-                                    ->where('id', 'like', '%' . $q . '%')
-                                    ->orWhere('name', 'like', '%' . $q . '%')
+                                    ->where('id', 'like', '%'.$q.'%')
+                                    ->orWhere('name', 'like', '%'.$q.'%')
                             )
                     )
             )
@@ -67,19 +69,19 @@ class Statement extends Model
             )
             ->when(
                 $exclude_ids,
-                fn($query) => $query->whereNotIn('statements.id', explode(',', $exclude_ids))
+                fn ($query) => $query->whereNotIn('statements.id', explode(',', $exclude_ids))
             )
             ->when(
                 $start_date,
-                fn($query) => $query->whereDate('datetime', '>=', $start_date)
+                fn ($query) => $query->whereDate('datetime', '>=', $start_date)
             )
             ->when(
                 $end_date,
-                fn($query) => $query->whereDate('datetime', '<=', $end_date)
+                fn ($query) => $query->whereDate('datetime', '<=', $end_date)
             )
             ->when(
                 collect(['true', 'false'])->contains($is_allocable),
-                fn($query) => $query->havingRaw($is_allocable === 'true' ? 'allocable_amount != 0' : 'allocable_amount = 0')
+                fn ($query) => $query->havingRaw($is_allocable === 'true' ? 'allocable_amount != 0' : 'allocable_amount = 0')
             )
             ->groupBy('statements.id');
     }

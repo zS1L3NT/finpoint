@@ -30,6 +30,7 @@ const BANKS_REQUIRING_ADDITIONAL_INFO = ["revolut"]
 
 export default function ImporterPage({ accounts }: { accounts: Account[] }) {
 	const [files, setFiles] = useState<File[]>([])
+	const [fileInputKey, setFileInputKey] = useState(0)
 	const { mergeErrors, clearApiError, setApiErrors } = useApiFormErrors()
 
 	const form = useForm({
@@ -90,13 +91,15 @@ export default function ImporterPage({ accounts }: { accounts: Account[] }) {
 				toast.success(`Imported successful`, {
 					description: (
 						<>
-							<p>Imported {data.imported} statements.</p>
-							<p>Skipped {data.skipped} duplicates.</p>
+							<p>Inserted {data.imported} statements.</p>
+							<p>Re-indexed {data.reindexed} existing statements.</p>
+							<p>Skipped {data.skipped} unchanged statements.</p>
 						</>
 					),
 				})
 				form.reset()
 				setFiles([])
+				setFileInputKey(key => key + 1)
 				return
 			}
 		},
@@ -133,7 +136,7 @@ export default function ImporterPage({ accounts }: { accounts: Account[] }) {
 								statements.
 								<br />
 								Missing accounts are created automatically and duplicate statement
-								rows are skipped.
+								rows are re-indexed when their day index changes.
 							</CardDescription>
 						</CardHeader>
 
@@ -241,6 +244,7 @@ export default function ImporterPage({ accounts }: { accounts: Account[] }) {
 												Statement files
 											</FieldLabel>
 											<Input
+												key={fileInputKey}
 												id={field.name}
 												name="files[]"
 												type="file"

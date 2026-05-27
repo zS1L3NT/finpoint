@@ -56,6 +56,7 @@ export default function StatementPage({
 					/>
 					<DetailCard label="Account" value={statement.account.name} />
 					<DetailCard label="Date & Time" value={formatDatetime(statement.datetime)} />
+					<DetailCard label="Day Index" value={statement.index} />
 				</div>
 
 				<Card>

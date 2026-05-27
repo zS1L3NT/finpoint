@@ -7,6 +7,7 @@ use App\Models\Account;
 use App\Models\Statement;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -19,14 +20,16 @@ class ImporterController extends Controller
     public function dbs()
     {
         request()->validate([
+            'files' => 'required|array|min:1',
             'files.*' => 'file|extensions:csv',
         ]);
 
         return DB::transaction(function () {
             $imported = 0;
+            $reindexed = 0;
             $skipped = 0;
 
-            foreach (request('files') as $file) {
+            foreach (request()->file('files') as $file) {
                 $data = $this->parseFile($file);
 
                 $account_id = '';
@@ -60,47 +63,122 @@ class ImporterController extends Controller
                 $data->shift(); //
 
                 $header = $data->shift();
-                $statements = $data->map(fn($row) => $header->combine($row));
+                $statements = $data->map(fn ($row) => $header->combine($row));
+                $statements_meta = [];
+                $duplicate_counts = [];
 
                 foreach ($statements as $statement) {
                     if ($statement['Status'] !== 'Settled') {
                         throw ValidationException::withMessages(['files' => 'Invalid CSV Format: Unsettled transaction found']);
                     }
 
+                    $datetime = Carbon::createFromFormat('d M Y', $statement['Transaction Date'])->startOfDay();
                     $data = [
                         'account_id' => $account_id,
-                        'datetime' => Carbon::createFromFormat('d M Y', $statement['Transaction Date'])->startOfDay(),
-                        'description' => collect([$statement['Supplementary Code'], $statement['Client Reference'], $statement['Additional Reference']])->filter(fn($v) => !empty($v))->join(', '),
+                        'datetime' => $datetime,
+                        'description' => collect([$statement['Supplementary Code'], $statement['Client Reference'], $statement['Additional Reference']])->filter(fn ($v) => ! empty($v))->join(', '),
                         'amount' => $statement['Debit Amount'] !== null ? -$statement['Debit Amount'] : $statement['Credit Amount'],
                     ];
 
-                    if (!Statement::query()->where($data)->exists()) {
+                    $unique_key = implode("\n", [$data['account_id'], $datetime->format('Y-m-d H:i:s'), $data['description'], $data['amount']]);
+                    $duplicate_counts[$unique_key] = ($duplicate_counts[$unique_key] ?? 0) + 1;
+
+                    $statements_meta[] = ['data' => $data, 'unique_key' => $unique_key];
+                }
+
+                // Count statements per day: ["2026-05-27" => 5]
+                $statement_count_by_date = collect($statements_meta)
+                    ->countBy(fn ($statement) => $statement['data']['datetime']->toDateString())
+                    ->all();
+
+                // Duplicate this variable so we can use it to count down to 1 when writing description indexes
+                $duplicate_indexes = $duplicate_counts;
+                $unmatched_duplicates = [];
+
+                foreach ($statements_meta as $statement_meta) {
+                    $data = $statement_meta['data'];
+                    $unique_key = $statement_meta['unique_key'];
+
+                    // DBS exports same-day rows newest-first, so decrementing makes index increase with time.
+                    $date = $data['datetime']->toDateString();
+                    $index = $statement_count_by_date[$date]--;
+
+                    if ($duplicate_counts[$unique_key] > 1) {
+                        $duplicate_index = $duplicate_indexes[$unique_key]--;
+                        $data['description'] = $data['description'] ? "{$data['description']} #$duplicate_index" : "#$duplicate_index";
+                    }
+
+                    $existing_statement = Statement::query()->where($data)->first();
+
+                    if ($existing_statement) {
+                        if ($existing_statement->index !== $index) {
+                            $existing_statement->update(['index' => $index]);
+                            $reindexed++;
+                        } else {
+                            $skipped++;
+                        }
+                    } elseif ($duplicate_counts[$unique_key] > 1) {
+                        // Flag as unmatched because older imports may still have the raw unlabelled description.
+                        $unmatched_duplicates[$unique_key][] = [
+                            'data' => $data,
+                            'raw_data' => $statement_meta['data'],
+                            'index' => $index,
+                        ];
+                    } else {
                         $imported++;
                         Statement::query()->insert([
                             'id' => Uuid::uuid4(),
-                            ...$data
+                            ...$data,
+                            'index' => $index,
                         ]);
-                    } else {
-                        $skipped++;
+                    }
+                }
+
+                // Ensure labelled duplicates are updated and matched with the correct #1, #2
+                foreach ($unmatched_duplicates as $statements_meta) {
+                    $existing_statement = Statement::query()->where($statements_meta[0]['raw_data'])->first();
+
+                    if ($existing_statement) {
+                        $match = collect($statements_meta)->search(fn ($statement) => $statement['index'] === $existing_statement->index);
+                        $key = $match === false ? array_key_first($statements_meta) : $match;
+                        $statement_meta = $statements_meta[$key];
+
+                        $existing_statement->update([
+                            'description' => $statement_meta['data']['description'],
+                            'index' => $statement_meta['index'],
+                        ]);
+                        $reindexed++;
+                        unset($statements_meta[$key]);
+                    }
+
+                    foreach ($statements_meta as $statement_meta) {
+                        $imported++;
+                        Statement::query()->insert([
+                            'id' => Uuid::uuid4(),
+                            ...$statement_meta['data'],
+                            'index' => $statement_meta['index'],
+                        ]);
                     }
                 }
             }
 
-            return compact('imported', 'skipped');
+            return compact('imported', 'reindexed', 'skipped');
         });
     }
 
     public function uob()
     {
         request()->validate([
+            'files' => 'required|array|min:1',
             'files.*' => 'file|extensions:xlsx,xls',
         ]);
 
         return DB::transaction(function () {
             $imported = 0;
+            $reindexed = 0;
             $skipped = 0;
 
-            foreach (request('files') as $file) {
+            foreach (request()->file('files') as $file) {
                 $data = $this->parseFile($file);
 
                 $data->shift(); // United Overseas Bank Limited. Company Reg No. 193500026Z
@@ -137,42 +215,116 @@ class ImporterController extends Controller
                 ]);
 
                 $header = $data->shift();
-                $statements = $data->map(fn($row) => $header->combine($row));
+                $statements = $data->map(fn ($row) => $header->combine($row));
+                $statements_meta = [];
+                $duplicate_counts = [];
 
                 foreach ($statements as $statement) {
+                    $datetime = Carbon::createFromFormat('d M Y', $statement['Transaction Date'])->startOfDay();
                     $data = [
                         'account_id' => $account_id,
-                        'datetime' => Carbon::createFromFormat('d M Y', $statement['Transaction Date'])->startOfDay(),
+                        'datetime' => $datetime,
                         'description' => $statement['Transaction Description'],
                         'amount' => $statement['Withdrawal'] !== 0 ? -$statement['Withdrawal'] : $statement['Deposit'],
                     ];
 
-                    if (!Statement::query()->where($data)->exists()) {
+                    $unique_key = implode("\n", [$data['account_id'], $datetime->format('Y-m-d H:i:s'), $data['description'], $data['amount']]);
+                    $duplicate_counts[$unique_key] = ($duplicate_counts[$unique_key] ?? 0) + 1;
+
+                    $statements_meta[] = ['data' => $data, 'unique_key' => $unique_key];
+                }
+
+                // Count statements per day: ["2026-05-27" => 5]
+                $statement_count_by_date = collect($statements_meta)
+                    ->countBy(fn ($statement) => $statement['data']['datetime']->toDateString())
+                    ->all();
+
+                // Duplicate this variable so we can use it to count down to 1 when writing description indexes
+                $duplicate_indexes = $duplicate_counts;
+                $unmatched_duplicates = [];
+
+                foreach ($statements_meta as $statement_meta) {
+                    $data = $statement_meta['data'];
+                    $unique_key = $statement_meta['unique_key'];
+
+                    // UOB exports same-day rows newest-first, so decrementing makes index increase with time.
+                    $date = $data['datetime']->toDateString();
+                    $index = $statement_count_by_date[$date]--;
+
+                    if ($duplicate_counts[$unique_key] > 1) {
+                        $duplicate_index = $duplicate_indexes[$unique_key]--;
+                        $data['description'] = $data['description'] ? "{$data['description']} #$duplicate_index" : "#$duplicate_index";
+                    }
+
+                    $existing_statement = Statement::query()->where($data)->first();
+
+                    if ($existing_statement) {
+                        if ($existing_statement->index !== $index) {
+                            $existing_statement->update(['index' => $index]);
+                            $reindexed++;
+                        } else {
+                            $skipped++;
+                        }
+                    } elseif ($duplicate_counts[$unique_key] > 1) {
+                        // Flag as unmatched because older imports may still have the raw unlabelled description.
+                        $unmatched_duplicates[$unique_key][] = [
+                            'data' => $data,
+                            'raw_data' => $statement_meta['data'],
+                            'index' => $index,
+                        ];
+                    } else {
                         $imported++;
                         Statement::query()->insert([
                             'id' => Uuid::uuid4(),
-                            ...$data
+                            ...$data,
+                            'index' => $index,
                         ]);
-                    } else {
-                        $skipped++;
+                    }
+                }
+
+                // Ensure labelled duplicates are updated and matched with the correct #1, #2
+                foreach ($unmatched_duplicates as $statements_meta) {
+                    $existing_statement = Statement::query()->where($statements_meta[0]['raw_data'])->first();
+
+                    if ($existing_statement) {
+                        $match = collect($statements_meta)->search(fn ($statement) => $statement['index'] === $existing_statement->index);
+                        $key = $match === false ? array_key_first($statements_meta) : $match;
+                        $statement_meta = $statements_meta[$key];
+
+                        $existing_statement->update([
+                            'description' => $statement_meta['data']['description'],
+                            'index' => $statement_meta['index'],
+                        ]);
+                        $reindexed++;
+                        unset($statements_meta[$key]);
+                    }
+
+                    foreach ($statements_meta as $statement_meta) {
+                        $imported++;
+                        Statement::query()->insert([
+                            'id' => Uuid::uuid4(),
+                            ...$statement_meta['data'],
+                            'index' => $statement_meta['index'],
+                        ]);
                     }
                 }
             }
 
-            return compact('imported', 'skipped');
+            return compact('imported', 'reindexed', 'skipped');
         });
     }
 
     public function revolut()
     {
         request()->validate([
-            'file' => 'file|extensions:csv',
+            'file' => 'required|file|extensions:csv',
             'account_id' => 'required|string',
             'account_name' => 'string',
         ]);
 
         return DB::transaction(function () {
             $imported = 0;
+            $reindexed = 0;
             $skipped = 0;
 
             $data = $this->parseFile(request('file'));
@@ -187,7 +339,7 @@ class ImporterController extends Controller
             }
 
             $header = $data->shift();
-            $statements = $data->map(fn($row) => $header->combine($row));
+            $statements = $data->map(fn ($row) => $header->combine($row));
 
             foreach ($statements as $statement) {
                 if ($statement['State'] !== 'COMPLETED') {
@@ -201,36 +353,35 @@ class ImporterController extends Controller
                     'amount' => $statement['Amount'] - $statement['Fee'],
                 ];
 
-                if (!Statement::query()->where($data)->exists()) {
+                if (! Statement::query()->where($data)->exists()) {
                     $imported++;
                     Statement::query()->insert([
                         'id' => Uuid::uuid4(),
-                        ...$data
+                        ...$data,
                     ]);
                 } else {
                     $skipped++;
                 }
             }
 
-            return compact('imported', 'skipped');
+            return compact('imported', 'reindexed', 'skipped');
         });
     }
 
     /**
      * Summary of parseFile
-     * @param UploadedFile $file
-     * @return \Illuminate\Support\Collection<int, \Illuminate\Support\Collection<int, string | null>>
+     *
+     * @return Collection<int, Collection<int, string | null>>
      */
     private function parseFile(UploadedFile $file)
     {
         if ($file->getClientOriginalExtension() === 'csv') {
             return collect(explode(PHP_EOL, trim($file->get())))
                 ->map(
-                    fn($line) =>
-                    collect(str_getcsv($line))->map(fn($value) => $value === '' ? null : $value)
+                    fn ($line) => collect(str_getcsv($line))->map(fn ($value) => $value === '' ? null : $value)
                 );
         } elseif (in_array($file->getClientOriginalExtension(), ['xlsx', 'xls'])) {
-            return Excel::toCollection(new stdClass(), $file)->first();
+            return Excel::toCollection(new stdClass, $file)->first();
         } else {
             throw ValidationException::withMessages(['files' => 'Unsupported file type']);
         }

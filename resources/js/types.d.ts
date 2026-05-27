@@ -30,6 +30,7 @@ export type Account = {
 export type Statement = {
 	id: string
 	datetime: string
+	index: number
 	description: string
 	amount: number
 	allocable_amount: number

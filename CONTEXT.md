@@ -6,6 +6,7 @@ Finpoint tracks imported account activity and the user-managed financial entries
 
 **Statement**:
 An imported bank row from an external account feed. A statement may be allocated to one or more records.
+Date-only statements may preserve a same-day timing order inferred from the bank export.
 _Avoid_: Transaction, bank row, feed row
 
 **Record**:
