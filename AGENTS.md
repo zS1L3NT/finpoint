@@ -1,6 +1,6 @@
 # AGENTS.md
 
-## Stack
+## Project Shape
 - Single Laravel 13 app with an Inertia React frontend; not a monorepo.
 - Vite entrypoints are `resources/css/app.css` and `resources/js/app.tsx`.
 - `routes/web.php` + `app/Http/Controllers/*` serve Inertia GET pages in `resources/js/pages`.
@@ -10,35 +10,30 @@
 ## Commands
 - Use `composer setup` for a fresh clone.
 - Use `composer dev` for normal local work; it starts `artisan serve` and Vite together.
-- JS/TS:
-- `bun lint` is write-mode (`biome check --write`).
-- Read-only checks are `bun lint:check` and `bun types:check`.
-- `bun run build` builds the frontend.
-- PHP:
-- `composer lint` auto-fixes with Pint; `composer lint:check` is read-only.
+- JS/TS: `bun lint` is write-mode (`biome check --write`); read-only checks are `bun lint:check` and `bun types:check`; `bun run build` builds the frontend.
+- PHP: `composer lint` auto-fixes with Pint; `composer lint:check` is read-only.
 
 ## Generated / Formatting
 - `resources/js/wayfinder` is generated and gitignored. After changing Laravel routes or controller signatures used by the frontend, regenerate with `php artisan wayfinder:generate --path=resources/js/wayfinder --with-form`.
 - Biome ignores `resources/js/wayfinder/**/*` and `resources/js/components/ui/**/*`.
 - Frontend TS/TSX uses tabs via Biome; PHP uses Pint / 4 spaces.
 
-## Code Style
-- Don't create unnecessary one-time-use variables
-- Keep code as short as possible without hurting clarity
-- Avoid extra scopes, callback blocks, or helper variables when an inline expression is clear
-- Do not introduce one-time-use variables, derived sets/arrays/objects, or temporary names unless they meaningfully improve readability
-- Do not pad files with defensive abstractions or line-heavy rewrites for simple logic
-- The user cares a lot about line length and overall file density; prefer tighter expressions and fewer lines when the result is still readable
-- Don't deviate from library defaults / use hacky methods to accomplish what I ask unless absolutely necessary. Deep dive into the library before doing this
-- If the library provides something or if we have a component for something, use it
-- Code scoped to a specific component should stay within that specific component file
-- Generic logic that is not specific to one hook/component/page should be moved to an appropriate shared utility instead of living inside a feature-specific file
+## Implementation Style
+- Inspect equivalent existing flows before implementing. Mirror local controller, route, page, form, dialog, and table patterns.
+- Do not reinvent local UI/data patterns. Reuse existing components/helpers, or extract the smallest shared helper that matches the local style.
+- When a display rule changes globally, centralize it in the shared table/component/utility path when practical.
+- Keep code dense and direct: avoid one-time-use variables, derived structures, extra scopes, callback blocks, and helper names unless they materially improve readability.
+- Do not pad simple logic with defensive abstractions or line-heavy rewrites.
+- Prefer shorter expressions and fewer lines while preserving clarity.
+- Do not deviate from library defaults or use hacky methods unless necessary. Deep-dive into the library before choosing a workaround.
+- Code scoped to one component should stay in that component file.
+- Generic logic that is not specific to one hook/component/page belongs in an appropriate shared utility.
+- Before changing the shape of a shared helper API in a meaningful way, such as converting a plain column factory into a hook, consult the user first unless they explicitly asked for that refactor.
 
-## Domain
+## Domain Language
+- Read `CONTEXT.md` for canonical domain terms and avoided aliases.
 - Most domain tables use string primary keys, not auto-increment integers.
-- `statements` are imported bank rows. `records` are user-managed entries linked through the `allocations` pivot. The allocator page shows statements whose allocated total still differs from `statements.amount`.
-- `budgets` and `recurrences` attach to `records` through `budget_records` and `recurrence_records`.
-- `categories` strictly nest only one layer down
 
-## Test / Env Gotchas
-- This project does not do any form of tests
+## Verification
+- This project does not have an automated test suite.
+- When asked to verify with `composer dev`, run it directly, smoke-test the relevant local route, and stop the dev server afterwards.
