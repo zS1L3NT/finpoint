@@ -4,6 +4,7 @@ import {
 	CircleDollarSignIcon,
 	CreditCardIcon,
 	ImportIcon,
+	LandmarkIcon,
 	LinkIcon,
 	PiggyBankIcon,
 	ReceiptTextIcon,
@@ -23,6 +24,7 @@ import {
 import { START_DATE } from "@/constants"
 import { useHistory } from "@/history"
 import {
+	accountsWebRoute,
 	allocatorWebRoute,
 	budgetsWebRoute,
 	categoriesWebRoute,
@@ -100,6 +102,15 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
 								<Link href={importerWebRoute.url()} onClick={handleClear}>
 									<ImportIcon />
 									<span>Importer</span>
+								</Link>
+							</SidebarMenuButton>
+						</SidebarMenuItem>
+
+						<SidebarMenuItem>
+							<SidebarMenuButton asChild>
+								<Link href={accountsWebRoute.url()} onClick={handleClear}>
+									<LandmarkIcon />
+									<span>Accounts</span>
 								</Link>
 							</SidebarMenuButton>
 						</SidebarMenuItem>

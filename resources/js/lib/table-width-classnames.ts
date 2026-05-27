@@ -1,5 +1,5 @@
 export const TABLE_WIDTH_CLASSNAMES = {
-	ACCOUNT: "w-32",
+	ACCOUNT: "w-40",
 	RECORD: "w-48 lg:w-56 xl:w-72 2xl:w-80",
 	BUDGET: "w-40 lg:w-48 xl:w-56 2xl:w-64",
 	STATEMENT: "w-full",
@@ -12,6 +12,8 @@ export const TABLE_WIDTH_CLASSNAMES = {
 	BUDGET_USAGE: "w-64 xl:w-72",
 	BUDGET_WINDOW: "w-48",
 	BUDGET_TYPE: "w-32",
+	BANK: "w-40",
+	STATEMENT_COUNT: "w-24",
 
 	CHECKBOX: "w-12",
 	ACTIONS_OPEN: "min-w-16 w-full flex justify-end xl:w-16 xl:table-cell",

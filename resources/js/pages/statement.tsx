@@ -1,19 +1,14 @@
-import { Link } from "@inertiajs/react"
 import { CreditCardIcon } from "lucide-react"
 import AllocateBar from "@/components/allocate-bar"
 import DetailCard from "@/components/detail-card"
-import Icon from "@/components/icon"
 import AppHeader from "@/components/layout/app-header"
 import PageHeader from "@/components/layout/page-header"
 import DataTable from "@/components/table/data-table"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { useRecordColumns } from "@/components/table/record-columns"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { useHistory } from "@/history"
-import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
-import { classForCurrency, formatCurrency, formatDatetime } from "@/lib/utils"
+import { formatDatetime } from "@/lib/utils"
 import { Allocation, Record, Statement } from "@/types"
-import { recordWebRoute, statementsWebRoute } from "@/wayfinder/routes"
+import { statementsWebRoute } from "@/wayfinder/routes"
 
 export default function StatementPage({
 	statement,
@@ -22,7 +17,10 @@ export default function StatementPage({
 	statement: Statement
 	records: (Record & { pivot: Allocation })[]
 }) {
-	const { handlePush } = useHistory()
+	const columns = useRecordColumns<Record & { pivot: Allocation }>({
+		amount: "allocated",
+		pageName: `Statement ${statement.id}`,
+	})
 
 	return (
 		<>
@@ -56,10 +54,7 @@ export default function StatementPage({
 							/>
 						}
 					/>
-					<DetailCard
-						label="Account"
-						value={`${statement.account.name} (${statement.account.id})`}
-					/>
+					<DetailCard label="Account" value={statement.account.name} />
 					<DetailCard label="Date & Time" value={formatDatetime(statement.datetime)} />
 				</div>
 
@@ -71,71 +66,7 @@ export default function StatementPage({
 					<CardContent>
 						<DataTable
 							data={records}
-							columns={[
-								{
-									header: "Record",
-									meta: { width: TABLE_WIDTH_CLASSNAMES.RECORD },
-									cell: ({ row }) => (
-										<div className="flex items-center gap-3">
-											<Icon {...row.original.category} size={16} />
-											<div className="flex-1 overflow-hidden">
-												<p className="truncate font-medium">
-													{row.original.is_pending && (
-														<Badge variant="warning" className="mr-1">
-															Pending
-														</Badge>
-													)}
-													{row.original.title}
-												</p>
-												<p className="truncate text-muted-foreground">
-													{row.original.subtitle || "No extra context"}
-												</p>
-											</div>
-										</div>
-									),
-								},
-								{
-									header: "Amount",
-									meta: { width: TABLE_WIDTH_CLASSNAMES.AMOUNT },
-									cell: ({ row }) => (
-										<div
-											className={classForCurrency(row.original.pivot.amount)}
-										>
-											{formatCurrency(row.original.pivot.amount)}
-										</div>
-									),
-								},
-								{
-									header: "Date & Time",
-									meta: { width: TABLE_WIDTH_CLASSNAMES.DATETIME },
-									cell: ({ row }) => formatDatetime(row.original.datetime),
-								},
-								{
-									header: "Description",
-									meta: { width: TABLE_WIDTH_CLASSNAMES.DESCRIPTION },
-									cell: ({ row }) => (
-										<div className="truncate text-muted-foreground">
-											{row.original.description || "-"}
-										</div>
-									),
-								},
-								{
-									id: "actions",
-									meta: { width: TABLE_WIDTH_CLASSNAMES.ACTIONS_OPEN },
-									cell: ({ row }) => (
-										<Button variant="outline" size="sm" asChild>
-											<Link
-												href={recordWebRoute.url({
-													record: row.original,
-												})}
-												onClick={handlePush(`Statement ${statement.id}`)}
-											>
-												Open
-											</Link>
-										</Button>
-									),
-								},
-							]}
+							columns={columns}
 							emptyMessage="No records found."
 						/>
 					</CardContent>

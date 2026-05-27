@@ -1,12 +1,11 @@
-import { Link } from "@inertiajs/react"
 import { ListFilterIcon, PlusIcon, ReceiptTextIcon } from "lucide-react"
 import { useState } from "react"
 import RecordCreatorDialog from "@/components/dialogs/record-creator"
 import DateField from "@/components/form/date-field"
-import Icon from "@/components/icon"
 import AppHeader from "@/components/layout/app-header"
 import PageHeader from "@/components/layout/page-header"
 import PaginatedDataTable from "@/components/table/paginated-data-table"
+import { useRecordColumns } from "@/components/table/record-columns"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -18,17 +17,13 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { useHistory } from "@/history"
 import { useFetch } from "@/hooks/use-fetch"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { useSearchParam } from "@/hooks/use-search-param"
-import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
-import { classForCurrency, formatCurrency, formatDatetime } from "@/lib/utils"
 import { CategoryWithChildren, Paginated, Record } from "@/types"
-import { categoryIndexApiRoute, recordsWebRoute, recordWebRoute } from "@/wayfinder/routes"
+import { categoryIndexApiRoute, recordsWebRoute } from "@/wayfinder/routes"
 
 export default function RecordsPage({ records }: { records: Paginated<Record> }) {
-	const { handlePush } = useHistory()
 	const [isCreatingRecord, setIsCreatingRecord] = useState(false)
 
 	const [startDate, setStartDate] = useSearchParam("start_date")
@@ -52,6 +47,8 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 	const pendingFilterLabel =
 		isAllocated === "true" ? "Not pending" : isAllocated === "false" ? "Pending" : null
 
+	const columns = useRecordColumns<Record>({ pageName: "Records" })
+
 	return (
 		<>
 			<AppHeader title="Records" />
@@ -66,71 +63,7 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 
 				<PaginatedDataTable
 					paginated={records}
-					columns={[
-						{
-							header: "Record",
-							meta: { width: TABLE_WIDTH_CLASSNAMES.RECORD },
-							cell: ({ row }) => (
-								<div className="flex items-center gap-3">
-									<Icon {...row.original.category} size={16} />
-									<div className="flex-1 overflow-hidden">
-										<p className="truncate font-medium">
-											{row.original.is_pending && (
-												<Badge variant="warning" className="mr-1">
-													Pending
-												</Badge>
-											)}
-											{row.original.title}
-										</p>
-										<p className="truncate text-muted-foreground">
-											{row.original.subtitle || "No extra context"}
-										</p>
-									</div>
-								</div>
-							),
-						},
-						{
-							header: "Amount",
-							meta: { width: TABLE_WIDTH_CLASSNAMES.AMOUNT },
-							cell: ({ row }) => (
-								<span className={classForCurrency(row.original.amount)}>
-									{formatCurrency(row.original.amount)}
-								</span>
-							),
-						},
-						{
-							header: "Date & Time",
-							meta: { width: TABLE_WIDTH_CLASSNAMES.DATETIME },
-							cell: ({ row }) => (
-								<span className="text-muted-foreground">
-									{formatDatetime(row.original.datetime)}
-								</span>
-							),
-						},
-						{
-							header: "Description",
-							meta: { width: TABLE_WIDTH_CLASSNAMES.DESCRIPTION },
-							cell: ({ row }) => (
-								<div className="truncate text-muted-foreground">
-									{row.original.description || "-"}
-								</div>
-							),
-						},
-						{
-							id: "actions",
-							meta: { width: TABLE_WIDTH_CLASSNAMES.ACTIONS_OPEN },
-							cell: ({ row }) => (
-								<Button variant="outline" size="sm" asChild>
-									<Link
-										href={recordWebRoute.url({ record: row.original })}
-										onClick={handlePush("Records")}
-									>
-										Open
-									</Link>
-								</Button>
-							),
-						},
-					]}
+					columns={columns}
 					header={{
 						query,
 						onQueryChange: handleQueryChange,

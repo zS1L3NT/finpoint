@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AccountController;
 use App\Http\Controllers\Api\BudgetController;
 use App\Http\Controllers\Api\BudgetRecordController;
 use App\Http\Controllers\Api\CategoryController;
@@ -21,6 +22,12 @@ Route::apiResource('statements', StatementController::class)
     ->only('index')
     ->names([
         'index' => 'statement-index-api-route',
+    ]);
+
+Route::apiResource('accounts', AccountController::class)
+    ->only('update')
+    ->names([
+        'update' => 'account-update-api-route',
     ]);
 
 Route::apiResource('records', RecordController::class)

@@ -16,7 +16,7 @@ export default function DataTable<TData extends { id: string }, TValue>({
 	header,
 	selectedIds,
 	emptyMessage,
-	getRowClassName
+	getRowClassName,
 }: {
 	data: TData[]
 	columns: ColumnDef<TData, TValue>[]

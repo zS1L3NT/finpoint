@@ -1,7 +1,5 @@
-import { Link } from "@inertiajs/react"
 import { Link2Icon, LinkIcon, PlusIcon } from "lucide-react"
 import { useState } from "react"
-import AllocateBar from "@/components/allocate-bar"
 import DetailCard from "@/components/detail-card"
 import RecordCreatorDialog from "@/components/dialogs/record-creator"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
@@ -10,25 +8,18 @@ import AppHeader from "@/components/layout/app-header"
 import PageHeader from "@/components/layout/page-header"
 import RecordSearchSheet from "@/components/sheets/record-search"
 import PaginatedDataTable from "@/components/table/paginated-data-table"
+import { useStatementColumns } from "@/components/table/statement-columns"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-import { useHistory } from "@/history"
 import { useFetch } from "@/hooks/use-fetch"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { useSearchParam } from "@/hooks/use-search-param"
 import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
-import { classForCurrency, formatCurrency, formatDatetime, round2dp } from "@/lib/utils"
+import { classForCurrency, formatCurrency } from "@/lib/utils"
 import { CategoryWithChildren, Paginated, Record, Statement } from "@/types"
-import {
-	allocatorWebRoute,
-	categoryIndexApiRoute,
-	recordShowApiRoute,
-	statementWebRoute,
-} from "@/wayfinder/routes"
+import { allocatorWebRoute, categoryIndexApiRoute, recordShowApiRoute } from "@/wayfinder/routes"
 
 export default function AllocatorPage({ statements }: { statements: Paginated<Statement> }) {
-	const { handlePush } = useHistory()
-
 	const [startDate, setStartDate] = useSearchParam("start_date")
 	const [endDate, setEndDate] = useSearchParam("end_date")
 
@@ -57,6 +48,10 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 		(sum, statement) => sum + statement.allocable_amount,
 		0,
 	)
+	const statementColumns = useStatementColumns<Statement>({
+		amount: "allocable",
+		pageName: "Allocator",
+	})
 
 	return (
 		<>
@@ -104,54 +99,7 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 								</div>
 							),
 						},
-						{
-							header: "Account",
-							meta: { width: TABLE_WIDTH_CLASSNAMES.ACCOUNT },
-							cell: ({ row }) => row.original.account.id,
-						},
-						{
-							header: "Date & Time",
-							meta: { width: TABLE_WIDTH_CLASSNAMES.DATETIME },
-							cell: ({ row }) => (
-								<span className="text-muted-foreground">
-									{formatDatetime(row.original.datetime)}
-								</span>
-							),
-						},
-						{
-							header: "Amount",
-							meta: { width: TABLE_WIDTH_CLASSNAMES.AMOUNT_BAR },
-							cell: ({ row }) => (
-								<AllocateBar
-									title="Allocable"
-									value={round2dp(row.original.allocable_amount)}
-									total={row.original.amount}
-								/>
-							),
-						},
-						{
-							header: "Description",
-							meta: { width: TABLE_WIDTH_CLASSNAMES.STATEMENT },
-							cell: ({ row }) => (
-								<div className="truncate text-muted-foreground">
-									{row.original.description}
-								</div>
-							),
-						},
-						{
-							id: "actions",
-							meta: { width: TABLE_WIDTH_CLASSNAMES.ACTIONS_FIXED_OPEN },
-							cell: ({ row }) => (
-								<Button variant="outline" size="sm" asChild>
-									<Link
-										href={statementWebRoute.url({ statement: row.original })}
-										onClick={handlePush("Allocator")}
-									>
-										Open
-									</Link>
-								</Button>
-							),
-						},
+						...statementColumns,
 					]}
 					header={{
 						query,

@@ -1,22 +1,19 @@
-import { Link } from "@inertiajs/react"
 import { PencilIcon, ReceiptTextIcon } from "lucide-react"
 import { useState } from "react"
-import AllocateBar from "@/components/allocate-bar"
 import DetailCard from "@/components/detail-card"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
 import Icon from "@/components/icon"
 import AppHeader from "@/components/layout/app-header"
 import PageHeader from "@/components/layout/page-header"
 import DataTable from "@/components/table/data-table"
+import { useStatementColumns } from "@/components/table/statement-columns"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { useHistory } from "@/history"
 import { useFetch } from "@/hooks/use-fetch"
-import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
 import { classForCurrency, cn, formatCurrency, formatDatetime } from "@/lib/utils"
 import { Allocation, CategoryWithChildren, Record, Statement } from "@/types"
-import { categoryIndexApiRoute, recordsWebRoute, statementWebRoute } from "@/wayfinder/routes"
+import { categoryIndexApiRoute, recordsWebRoute } from "@/wayfinder/routes"
 
 export default function RecordPage({
 	record,
@@ -25,11 +22,13 @@ export default function RecordPage({
 	record: Record
 	statements: (Statement & { pivot: Allocation })[]
 }) {
-	const { handlePush } = useHistory()
-
 	const categories = useFetch<CategoryWithChildren[]>(categoryIndexApiRoute.url(), [])
 
 	const [isEditingRecord, setIsEditingRecord] = useState(false)
+	const columns = useStatementColumns<Statement & { pivot: Allocation }>({
+		amount: "allocated",
+		pageName: `Record ${record.id}`,
+	})
 
 	return (
 		<>
@@ -99,54 +98,7 @@ export default function RecordPage({
 					<CardContent>
 						<DataTable
 							data={statements}
-							columns={[
-								{
-									header: "Account",
-									meta: { width: TABLE_WIDTH_CLASSNAMES.ACCOUNT },
-									cell: ({ row }) => row.original.account.id,
-								},
-								{
-									header: "Date & Time",
-									meta: { width: TABLE_WIDTH_CLASSNAMES.DATETIME },
-									cell: ({ row }) => formatDatetime(row.original.datetime),
-								},
-								{
-									header: "Amount",
-									meta: { width: TABLE_WIDTH_CLASSNAMES.AMOUNT_BAR },
-									cell: ({ row }) => (
-										<AllocateBar
-											title="Allocated"
-											value={row.original.pivot.amount}
-											total={row.original.amount}
-										/>
-									),
-								},
-								{
-									header: "Description",
-									meta: { width: TABLE_WIDTH_CLASSNAMES.STATEMENT },
-									cell: ({ row }) => (
-										<div className="truncate text-muted-foreground">
-											{row.original.description || "-"}
-										</div>
-									),
-								},
-								{
-									id: "actions",
-									meta: { width: TABLE_WIDTH_CLASSNAMES.ACTIONS_FIXED_OPEN },
-									cell: ({ row }) => (
-										<Button variant="outline" size="sm" asChild>
-											<Link
-												href={statementWebRoute.url({
-													statement: row.original,
-												})}
-												onClick={handlePush(`Record ${record.id}`)}
-											>
-												Open
-											</Link>
-										</Button>
-									),
-								},
-							]}
+							columns={columns}
 							emptyMessage="No statements found."
 						/>
 					</CardContent>

@@ -1,4 +1,4 @@
-import { Link, router } from "@inertiajs/react"
+import { router } from "@inertiajs/react"
 import {
 	ArrowLeftIcon,
 	ArrowRightIcon,
@@ -17,11 +17,11 @@ import UsageAreaChart from "@/components/charts/usage-area"
 import QuotaCreatorDialog from "@/components/dialogs/quota-creator"
 import QuotaEditorDialog from "@/components/dialogs/quota-editor"
 import RecordQuotaDialog from "@/components/dialogs/record-quota-editor"
-import Icon from "@/components/icon"
 import AppHeader from "@/components/layout/app-header"
 import PageHeader from "@/components/layout/page-header"
 import LimiterPaceCards, { getLimitAggregations } from "@/components/limiter-pace-cards"
 import DataTable from "@/components/table/data-table"
+import { useRecordColumns } from "@/components/table/record-columns"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
@@ -55,30 +55,19 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select"
-import { useHistory } from "@/history"
 import { useFetch } from "@/hooks/use-fetch"
 import { useSearchParam } from "@/hooks/use-search-param"
 import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
-import {
-	classForCurrency,
-	cn,
-	formatCurrency,
-	formatDatetime,
-	parseDatetime,
-	withMethod,
-} from "@/lib/utils"
+import { cn, formatCurrency, formatDatetime, parseDatetime, withMethod } from "@/lib/utils"
 import { CategoryWithChildren, Quota, Record } from "@/types"
 import {
 	budgetsWebRoute,
 	categoryIndexApiRoute,
 	dashboardWebRoute,
 	recordQuotaDetachApiRoute,
-	recordWebRoute,
 } from "@/wayfinder/routes"
 
 export default function DashboardPage({ records, quotas }: { records: Record[]; quotas: Quota[] }) {
-	const { handlePush } = useHistory()
-
 	const categories = useFetch<CategoryWithChildren[]>(categoryIndexApiRoute.url(), [])
 
 	const [month] = useSearchParam("month", DateTime.now().toFormat("MMMM"))
@@ -232,6 +221,11 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 		date.endOf("month"),
 		dailyQuota?.amount ?? 0,
 	)
+
+	const recordColumns = useRecordColumns<Record>({
+		showQuota: true,
+		pageName: "Dashboard",
+	})
 
 	return (
 		<>
@@ -608,83 +602,7 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 										</div>
 									),
 								},
-								{
-									header: "Record",
-									meta: { width: TABLE_WIDTH_CLASSNAMES.RECORD },
-									cell: ({ row }) => (
-										<div className="flex items-center gap-3">
-											<Icon {...row.original.category} size={16} />
-											<div className="flex-1 overflow-hidden">
-												<p className="truncate font-medium">
-													{row.original.is_pending && (
-														<Badge variant="warning" className="mr-1">
-															Pending
-														</Badge>
-													)}
-													{row.original.title}
-												</p>
-												<p className="truncate text-muted-foreground">
-													{row.original.subtitle || "No extra context"}
-												</p>
-											</div>
-										</div>
-									),
-								},
-								{
-									header: "Quota",
-									meta: { width: TABLE_WIDTH_CLASSNAMES.QUOTA },
-									cell: ({ row }) =>
-										row.original.quota ? (
-											<Badge
-												variant="outline"
-												style={{
-													borderColor: row.original.quota.color,
-													color: row.original.quota.color,
-												}}
-											>
-												{row.original.quota.name}
-											</Badge>
-										) : null,
-								},
-								{
-									header: "Amount",
-									meta: { width: TABLE_WIDTH_CLASSNAMES.AMOUNT },
-									cell: ({ row }) => (
-										<span className={classForCurrency(row.original.amount)}>
-											{formatCurrency(row.original.amount)}
-										</span>
-									),
-								},
-								{
-									header: "Date & Time",
-									meta: { width: TABLE_WIDTH_CLASSNAMES.DATETIME },
-									cell: ({ row }) => formatDatetime(row.original.datetime),
-								},
-								{
-									header: "Description",
-									meta: { width: TABLE_WIDTH_CLASSNAMES.DESCRIPTION },
-									cell: ({ row }) => (
-										<div className="truncate text-muted-foreground">
-											{row.original.description || "-"}
-										</div>
-									),
-								},
-								{
-									id: "actions",
-									meta: { width: TABLE_WIDTH_CLASSNAMES.ACTIONS_OPEN },
-									cell: ({ row }) => (
-										<Button variant="outline" size="sm" asChild>
-											<Link
-												href={recordWebRoute.url({
-													record: row.original,
-												})}
-												onClick={handlePush("Dashboard")}
-											>
-												Open
-											</Link>
-										</Button>
-									),
-								},
+								...recordColumns,
 							]}
 							getRowClassName={row =>
 								!filteredRecords[row.index + 1] ||

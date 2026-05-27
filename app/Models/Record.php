@@ -58,7 +58,6 @@ class Record extends Model
             ->when(
                 $query,
                 fn($query, $q) => $query
-                    ->leftJoin('categories', 'records.category_id', '=', 'categories.id')
                     ->where(
                         fn($query) => $query
                             ->where('title', 'like', '%' . $q . '%')
@@ -67,7 +66,12 @@ class Record extends Model
                             ->orWhere('description', 'like', '%' . $q . '%')
                             // ->orWhere('datetime', '=', Carbon::parse($q))
                             ->orWhere('amount', 'like', '%' . $q . '%')
-                            ->orWhere('categories.name', 'like', '%' . $q . '%')
+                            ->orWhereHas(
+                                'category',
+                                fn ($query) => $query
+                                    ->where('id', 'like', '%' . $q . '%')
+                                    ->orWhere('name', 'like', '%' . $q . '%')
+                            )
                     )
             )
             ->when(

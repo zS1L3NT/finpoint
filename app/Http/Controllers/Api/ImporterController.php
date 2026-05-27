@@ -178,7 +178,7 @@ class ImporterController extends Controller
             $data = $this->parseFile(request('file'));
 
             if (request('account_name')) {
-                Account::query()->insert([
+                Account::query()->insertOrIgnore([
                     'id' => request('account_id'),
                     'name' => request('account_name'),
                     'balance' => 0,

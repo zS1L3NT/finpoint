@@ -4,6 +4,9 @@ const NOOP = () => {
 	//
 }
 
+const getStoredHistory = () =>
+	typeof localStorage === "undefined" ? [] : JSON.parse(localStorage.getItem("history") || "[]")
+
 const HistoryContext = createContext<{
 	latest: { name: string; url: string } | null
 	handlePush: (name: string) => () => void
@@ -17,12 +20,12 @@ const HistoryContext = createContext<{
 })
 
 export const HistoryProvider = ({ children }: { children: React.ReactNode }) => {
-	const [history, setHistory] = useState<{ name: string; url: string }[]>(
-		JSON.parse(localStorage.getItem("history") || "[]"),
-	)
+	const [history, setHistory] = useState<{ name: string; url: string }[]>(getStoredHistory)
 
 	useEffect(() => {
-		localStorage.setItem("history", JSON.stringify(history))
+		if (typeof localStorage !== "undefined") {
+			localStorage.setItem("history", JSON.stringify(history))
+		}
 	}, [history])
 
 	return (

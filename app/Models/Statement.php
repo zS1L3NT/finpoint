@@ -39,22 +39,31 @@ class Statement extends Model
 
     public static function appQuery(
         $query = null,
+        $account_id = null,
         $exclude_ids = null,
         $start_date = null,
         $end_date = null,
-        $is_allocable = null
+        $is_allocable = null,
     ) {
         return self::query()
             ->when(
                 $query,
                 fn($query, $q) => $query
-                    ->leftJoin('accounts', 'accounts.id', '=', 'statements.account_id')
                     ->where(
                         fn($query) => $query
                             ->where('description', 'like', '%' . $q . '%')
                             ->orWhere('amount', 'like', '%' . $q . '%')
-                            ->orWhere('accounts.id', 'like', '%' . $q . '%')
+                            ->orWhereHas(
+                                'account',
+                                fn ($query) => $query
+                                    ->where('id', 'like', '%' . $q . '%')
+                                    ->orWhere('name', 'like', '%' . $q . '%')
+                            )
                     )
+            )
+            ->when(
+                $account_id,
+                fn ($query) => $query->where('account_id', $account_id)
             )
             ->when(
                 $exclude_ids,

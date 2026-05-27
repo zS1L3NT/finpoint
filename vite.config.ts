@@ -20,7 +20,7 @@ export default defineConfig({
 		tailwindcss(),
 		wayfinder({
 			path: "resources/js/wayfinder",
-			actions: false
+			actions: false,
 		}),
 	],
 })

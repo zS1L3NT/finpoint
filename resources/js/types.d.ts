@@ -22,7 +22,9 @@ export type Paginated<T> = {
 export type Account = {
 	id: string
 	name: string
+	balance: number
 	bank: string
+	statements_count?: number
 }
 
 export type Statement = {

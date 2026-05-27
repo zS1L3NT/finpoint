@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AllocatorController;
 use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\CategoryController;
@@ -26,6 +27,13 @@ Route::resource('statements', StatementController::class)
     ->names([
         'index' => 'statements-web-route',
         'show' => 'statement-web-route',
+    ]);
+
+Route::resource('accounts', AccountController::class)
+    ->only('index', 'show')
+    ->names([
+        'index' => 'accounts-web-route',
+        'show' => 'account-web-route',
     ]);
 
 Route::resource('records', RecordController::class)

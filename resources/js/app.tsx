@@ -8,4 +8,6 @@ await createInertiaApp({
 	strictMode: true,
 })
 
-initializeAppearance(document.documentElement.classList.contains("dark") ? "dark" : "system")
+if (typeof document !== "undefined") {
+	initializeAppearance(document.documentElement.classList.contains("dark") ? "dark" : "system")
+}
