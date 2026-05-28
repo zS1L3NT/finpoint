@@ -4,6 +4,7 @@ import { DateTime } from "luxon"
 import { useState } from "react"
 import BudgetCreatorDialog from "@/components/dialogs/budget-creator"
 import AppHeader from "@/components/layout/app-header"
+import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import PaginatedDataTable from "@/components/table/paginated-data-table"
 import { Badge } from "@/components/ui/badge"
@@ -29,7 +30,7 @@ export default function BudgetsPage({ budgets }: { budgets: Paginated<Budget> })
 		<>
 			<AppHeader title="Budgets" />
 
-			<div className="container mx-auto flex flex-col gap-8 p-8">
+			<PageContent>
 				<PageHeader
 					title="Budgets"
 					subtitle="Track fixed spending windows, monitor how much has already been consumed, and jump straight into the records inside each budget."
@@ -144,7 +145,7 @@ export default function BudgetsPage({ budgets }: { budgets: Paginated<Budget> })
 								isOpen={isCreatingBudget}
 								setIsOpen={setIsCreatingBudget}
 								trigger={
-									<Button>
+									<Button className="w-full sm:w-auto">
 										<PlusIcon /> New Budget
 									</Button>
 								}
@@ -154,9 +155,68 @@ export default function BudgetsPage({ budgets }: { budgets: Paginated<Budget> })
 					footer={{
 						summary: `Showing ${budgets.data.length} of ${budgets.total} budgets.`,
 					}}
+					mobileRow={({ original: budget }) => {
+						const now = DateTime.now()
+						const start = parseDate(budget.start_date).startOf("day")
+						const end = parseDate(budget.end_date).endOf("day")
+						const spent = Math.abs(Math.min(budget.used_amount, 0))
+						const usage =
+							budget.amount === 0 ? 0 : Math.min((spent / budget.amount) * 100, 100)
+						const state = now <= start ? "Upcoming" : now >= end ? "Passed" : "Active"
+
+						return (
+							<div className="flex flex-col gap-3">
+								<div className="flex items-start justify-between gap-3">
+									<div className="min-w-0">
+										<p className="font-medium break-words">{budget.name}</p>
+										<p className="text-xs text-muted-foreground">
+											{formatBudgetDateWindow(budget)}
+										</p>
+									</div>
+									<Badge variant={state === "Active" ? "default" : "secondary"}>
+										{state}
+									</Badge>
+								</div>
+
+								<div className="grid gap-2 text-xs text-muted-foreground">
+									<div className="flex items-center justify-between gap-3">
+										<span>{Math.round(usage)}% used</span>
+										<span>
+											{formatCurrency(spent)}
+											{" / "}
+											{formatCurrency(budget.amount)}
+										</span>
+									</div>
+									<Progress value={usage} className="h-2" />
+									<div className="flex items-center justify-between gap-3">
+										<span>Type</span>
+										<span className="flex items-center gap-1">
+											{budget.automatic ? (
+												<SparklesIcon className="size-3.5" />
+											) : (
+												<WrenchIcon className="size-3.5" />
+											)}
+											{budget.automatic ? "Automatic" : "Manual"}
+										</span>
+									</div>
+								</div>
+
+								<div className="flex justify-end">
+									<Button variant="outline" size="sm" asChild>
+										<Link
+											href={budgetWebRoute.url({ budget })}
+											onClick={handlePush("Budgets")}
+										>
+											Open
+										</Link>
+									</Button>
+								</div>
+							</div>
+						)
+					}}
 					emptyMessage="No budgets found."
 				/>
-			</div>
+			</PageContent>
 		</>
 	)
 }

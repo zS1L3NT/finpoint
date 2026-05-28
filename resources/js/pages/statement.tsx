@@ -2,9 +2,10 @@ import { CreditCardIcon } from "lucide-react"
 import AllocateBar from "@/components/allocate-bar"
 import DetailCard from "@/components/detail-card"
 import AppHeader from "@/components/layout/app-header"
+import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import DataTable from "@/components/table/data-table"
-import { useRecordColumns } from "@/components/table/record-columns"
+import { useRecordColumns, useRecordMobileRow } from "@/components/table/record-columns"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatDatetime } from "@/lib/utils"
 import { Allocation, Record, Statement } from "@/types"
@@ -21,12 +22,16 @@ export default function StatementPage({
 		amount: "allocated",
 		pageName: `Statement ${statement.id}`,
 	})
+	const mobileRow = useRecordMobileRow<Record & { pivot: Allocation }>({
+		amount: "allocated",
+		pageName: `Statement ${statement.id}`,
+	})
 
 	return (
 		<>
 			<AppHeader title="Statement" />
 
-			<div className="container mx-auto flex flex-col gap-8 p-8">
+			<PageContent>
 				<PageHeader
 					title={statement.description}
 					description="Statement details"
@@ -68,11 +73,12 @@ export default function StatementPage({
 						<DataTable
 							data={records}
 							columns={columns}
+							mobileRow={mobileRow}
 							emptyMessage="No records found."
 						/>
 					</CardContent>
 				</Card>
-			</div>
+			</PageContent>
 		</>
 	)
 }

@@ -101,7 +101,7 @@ export default function BudgetEditorDialog({
 			}}
 		>
 			{trigger && <DialogTrigger render={trigger} />}
-			<DialogContent className="sm:max-w-2xl">
+			<DialogContent className="md:max-w-2xl">
 				<DialogHeader>
 					<DialogTitle>Edit Budget</DialogTitle>
 					<DialogDescription>

@@ -3,9 +3,10 @@ import { useState } from "react"
 import DetailCard from "@/components/detail-card"
 import AccountDialog from "@/components/dialogs/account"
 import AppHeader from "@/components/layout/app-header"
+import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import PaginatedDataTable from "@/components/table/paginated-data-table"
-import { useStatementColumns } from "@/components/table/statement-columns"
+import { useStatementColumns, useStatementMobileRow } from "@/components/table/statement-columns"
 import { Button } from "@/components/ui/button"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import type { Account, Paginated, Statement } from "@/types"
@@ -28,12 +29,16 @@ export default function AccountPage({
 		showAccount: false,
 		pageName: `Account ${account.name}`,
 	})
+	const mobileRow = useStatementMobileRow<Statement>({
+		showAccount: false,
+		pageName: `Account ${account.name}`,
+	})
 
 	return (
 		<>
 			<AppHeader title="Account" />
 
-			<div className="container mx-auto flex flex-col gap-8 p-8">
+			<PageContent>
 				<PageHeader
 					title={account.name}
 					subtitle={`${account.bank} account`}
@@ -45,7 +50,7 @@ export default function AccountPage({
 							isOpen={isEditingAccount}
 							setIsOpen={setIsEditingAccount}
 							trigger={
-								<Button>
+								<Button className="w-full sm:w-auto">
 									<PencilIcon /> Edit Account
 								</Button>
 							}
@@ -76,9 +81,10 @@ export default function AccountPage({
 					footer={{
 						summary: `Showing ${statements.data.length} of ${statements.total} statements.`,
 					}}
+					mobileRow={mobileRow}
 					emptyMessage="No statements found."
 				/>
-			</div>
+			</PageContent>
 		</>
 	)
 }

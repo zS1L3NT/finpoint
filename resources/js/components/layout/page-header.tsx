@@ -21,10 +21,15 @@ export default function PageHeader({
 	const { latest, handlePop } = useHistory()
 
 	return (
-		<div className="flex justify-between items-end">
-			<div className="space-y-4">
+		<div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+			<div className="flex min-w-0 flex-col gap-4">
 				{back && latest ? (
-					<Button variant="outline" size="sm" asChild>
+					<Button
+						variant="outline"
+						size="sm"
+						className="w-fit max-w-full self-start"
+						asChild
+					>
 						<Link href={latest.url} onClick={handlePop}>
 							<ArrowLeftIcon />
 							Back to {latest.name}
@@ -32,19 +37,25 @@ export default function PageHeader({
 					</Button>
 				) : null}
 
-				<div className="space-y-1">
-					<div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+				<div className="flex min-w-0 flex-col gap-1">
+					<div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground md:tracking-[0.22em]">
 						<Icon className="size-3" />
 						{description}
 					</div>
-					<h2 className="text-3xl font-semibold tracking-tight">{title}</h2>
+					<h2 className="text-2xl font-semibold tracking-tight break-words md:text-3xl">
+						{title}
+					</h2>
 					{subtitle ? (
-						<p className="max-w-2xl text-sm text-muted-foreground">{subtitle}</p>
+						<div className="max-w-2xl text-sm text-muted-foreground">{subtitle}</div>
 					) : null}
 				</div>
 			</div>
 
-			{actions ? <div className="flex shrink-0 flex-wrap gap-3">{actions}</div> : null}
+			{actions ? (
+				<div className="flex w-full shrink-0 flex-col gap-2 sm:flex-row sm:flex-wrap md:w-auto md:justify-end">
+					{actions}
+				</div>
+			) : null}
 		</div>
 	)
 }

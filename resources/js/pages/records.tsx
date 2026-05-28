@@ -3,9 +3,10 @@ import { useState } from "react"
 import RecordCreatorDialog from "@/components/dialogs/record-creator"
 import DateField from "@/components/form/date-field"
 import AppHeader from "@/components/layout/app-header"
+import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import PaginatedDataTable from "@/components/table/paginated-data-table"
-import { useRecordColumns } from "@/components/table/record-columns"
+import { useRecordColumns, useRecordMobileRow } from "@/components/table/record-columns"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -48,12 +49,13 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 		isAllocated === "true" ? "Not pending" : isAllocated === "false" ? "Pending" : null
 
 	const columns = useRecordColumns<Record>({ pageName: "Records" })
+	const mobileRow = useRecordMobileRow<Record>({ pageName: "Records" })
 
 	return (
 		<>
 			<AppHeader title="Records" />
 
-			<div className="container mx-auto flex flex-col gap-8 p-8">
+			<PageContent>
 				<PageHeader
 					title="Records"
 					subtitle="Browse and manage your financial records."
@@ -71,12 +73,13 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 						onPageSizeChange: handlePageSizeChange,
 						searchPlaceholder: "Search all records...",
 						filters: (
-							<div className="flex gap-2">
+							<div className="flex flex-col gap-2 sm:flex-row">
 								<DropdownMenu>
 									<DropdownMenuTrigger asChild>
 										<Button
 											type="button"
 											variant={pendingFilterLabel ? "secondary" : "outline"}
+											className="w-full sm:w-auto"
 										>
 											<ListFilterIcon /> Filter status
 											{pendingFilterLabel ? (
@@ -117,7 +120,7 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 								<DateField
 									id="start_date"
 									value={startDate ?? ""}
-									className="w-32"
+									className="w-full sm:w-32"
 									placeholder="Start date"
 									onChange={date => setStartDate(date || null)}
 								/>
@@ -125,7 +128,7 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 								<DateField
 									id="end_date"
 									value={endDate ?? ""}
-									className="w-32"
+									className="w-full sm:w-32"
 									placeholder="End date"
 									onChange={date => setEndDate(date || null)}
 								/>
@@ -138,7 +141,7 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 								isOpen={isCreatingRecord}
 								setIsOpen={setIsCreatingRecord}
 								trigger={
-									<Button>
+									<Button className="w-full sm:w-auto">
 										<PlusIcon /> Create Pending Record
 									</Button>
 								}
@@ -148,9 +151,10 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 					footer={{
 						summary: `Showing ${records.data.length} of ${records.total} records.`,
 					}}
+					mobileRow={mobileRow}
 					emptyMessage="No records found."
 				/>
-			</div>
+			</PageContent>
 		</>
 	)
 }

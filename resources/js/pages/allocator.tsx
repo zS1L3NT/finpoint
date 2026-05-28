@@ -5,10 +5,11 @@ import RecordCreatorDialog from "@/components/dialogs/record-creator"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
 import DateField from "@/components/form/date-field"
 import AppHeader from "@/components/layout/app-header"
+import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import RecordSearchSheet from "@/components/sheets/record-search"
 import PaginatedDataTable from "@/components/table/paginated-data-table"
-import { useStatementColumns } from "@/components/table/statement-columns"
+import { useStatementColumns, useStatementMobileRow } from "@/components/table/statement-columns"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useFetch } from "@/hooks/use-fetch"
@@ -52,12 +53,27 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 		amount: "allocable",
 		pageName: "Allocator",
 	})
+	const statementMobileRow = useStatementMobileRow<Statement>({
+		amount: "allocable",
+		pageName: "Allocator",
+		leading: statement => (
+			<Checkbox
+				checked={!!selectedStatements.find(s => s.id === statement.id)}
+				onCheckedChange={value =>
+					setSelectedStatements(prev =>
+						value ? [...prev, statement] : prev.filter(s => s.id !== statement.id),
+					)
+				}
+				aria-label={`Select statement ${statement.id}`}
+			/>
+		),
+	})
 
 	return (
 		<>
 			<AppHeader title="Allocator" />
 
-			<div className="container mx-auto flex flex-col gap-8 p-8">
+			<PageContent>
 				<PageHeader
 					title="Allocator"
 					subtitle="Allocate bank statements to app records."
@@ -108,11 +124,11 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 						onPageSizeChange: handlePageSizeChange,
 						searchPlaceholder: "Search unallocated statements...",
 						filters: (
-							<div className="flex gap-2">
+							<div className="flex flex-col gap-2 sm:flex-row">
 								<DateField
 									id="start_date"
 									value={startDate ?? ""}
-									className="w-32"
+									className="w-full sm:w-32"
 									placeholder="Start date"
 									onChange={date => setStartDate(date || null)}
 								/>
@@ -120,7 +136,7 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 								<DateField
 									id="end_date"
 									value={endDate ?? ""}
-									className="w-32"
+									className="w-full sm:w-32"
 									placeholder="End date"
 									onChange={date => setEndDate(date || null)}
 								/>
@@ -134,7 +150,10 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 									isOpen={isCreatingRecord}
 									setIsOpen={setIsCreatingRecord}
 									trigger={
-										<Button disabled={!selectedStatements.length}>
+										<Button
+											disabled={!selectedStatements.length}
+											className="w-full sm:w-auto"
+										>
 											<PlusIcon /> Create Record
 										</Button>
 									}
@@ -155,7 +174,10 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 										setIsAttachingRecord(false)
 									}}
 									trigger={
-										<Button disabled={!selectedStatements.length}>
+										<Button
+											disabled={!selectedStatements.length}
+											className="w-full sm:w-auto"
+										>
 											<Link2Icon /> Attach to Record
 										</Button>
 									}
@@ -167,9 +189,10 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 						summary: `${selectedStatements.length} selected. Showing ${statements.data.length} of ${statements.total} statements.`,
 					}}
 					selectedIds={selectedStatements.map(s => s.id)}
+					mobileRow={statementMobileRow}
 					emptyMessage="No statements found."
 				/>
-			</div>
+			</PageContent>
 
 			{editingRecord ? (
 				<RecordEditorDialog

@@ -123,7 +123,7 @@ export default function RecordCreatorDialog({
 			}}
 		>
 			{trigger && <DialogTrigger render={trigger} />}
-			<DialogContent className="sm:max-w-4xl">
+			<DialogContent className="md:max-w-4xl">
 				<DialogHeader>
 					<DialogTitle>Create New Record</DialogTitle>
 					<DialogDescription>
@@ -230,7 +230,7 @@ export default function RecordCreatorDialog({
 												Amount does not match the sum of Allocation Amounts
 											</AlertTitle>
 											<AlertDescription>
-												This transaction will be marked as pending until the
+												This record will be marked as pending until the
 												record amount matches the sum of allocated statement
 												amounts.
 											</AlertDescription>

@@ -4,9 +4,10 @@ import DetailCard from "@/components/detail-card"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
 import Icon from "@/components/icon"
 import AppHeader from "@/components/layout/app-header"
+import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import DataTable from "@/components/table/data-table"
-import { useStatementColumns } from "@/components/table/statement-columns"
+import { useStatementColumns, useStatementMobileRow } from "@/components/table/statement-columns"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -29,17 +30,25 @@ export default function RecordPage({
 		amount: "allocated",
 		pageName: `Record ${record.id}`,
 	})
+	const mobileRow = useStatementMobileRow<Statement & { pivot: Allocation }>({
+		amount: "allocated",
+		pageName: `Record ${record.id}`,
+	})
 
 	return (
 		<>
 			<AppHeader title="Record" />
 
-			<div className="container mx-auto flex flex-col gap-8 p-8">
+			<PageContent>
 				<PageHeader
 					title={
-						<div className="flex items-center gap-2">
+						<div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
 							{record.title}
-							<p className="text-xl text-muted-foreground">{record.subtitle}</p>
+							{record.subtitle ? (
+								<span className="text-base text-muted-foreground md:text-xl">
+									{record.subtitle}
+								</span>
+							) : null}
 							{record.is_pending && (
 								<Badge variant="warning" className="tracking-normal">
 									Pending
@@ -58,7 +67,7 @@ export default function RecordPage({
 							isOpen={isEditingRecord}
 							setIsOpen={setIsEditingRecord}
 							trigger={
-								<Button>
+								<Button className="w-full sm:w-auto">
 									<PencilIcon /> Edit Record
 								</Button>
 							}
@@ -99,11 +108,12 @@ export default function RecordPage({
 						<DataTable
 							data={statements}
 							columns={columns}
+							mobileRow={mobileRow}
 							emptyMessage="No statements found."
 						/>
 					</CardContent>
 				</Card>
-			</div>
+			</PageContent>
 		</>
 	)
 }

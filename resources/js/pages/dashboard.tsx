@@ -18,10 +18,11 @@ import QuotaCreatorDialog from "@/components/dialogs/quota-creator"
 import QuotaEditorDialog from "@/components/dialogs/quota-editor"
 import RecordQuotaDialog from "@/components/dialogs/record-quota-editor"
 import AppHeader from "@/components/layout/app-header"
+import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import LimiterPaceCards, { getLimitAggregations } from "@/components/limiter-pace-cards"
 import DataTable from "@/components/table/data-table"
-import { useRecordColumns } from "@/components/table/record-columns"
+import { useRecordColumns, useRecordMobileRow } from "@/components/table/record-columns"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
@@ -226,19 +227,35 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 		showQuota: true,
 		pageName: "Dashboard",
 	})
+	const recordMobileRow = useRecordMobileRow<Record>({
+		showQuota: true,
+		pageName: "Dashboard",
+		mobileVariant: "dashboard",
+		leading: record => (
+			<Checkbox
+				checked={!!selected.find(s => s.id === record.id)}
+				aria-label={`Select record ${record.id}`}
+				onCheckedChange={value =>
+					setSelected(prev =>
+						value === true ? [...prev, record] : prev.filter(s => s.id !== record.id),
+					)
+				}
+			/>
+		),
+	})
 
 	return (
 		<>
 			<AppHeader title="Dashboard" />
 
-			<div className="container mx-auto flex flex-col gap-8 p-8">
+			<PageContent>
 				<PageHeader
 					title={`Dashboard for ${month} ${year}`}
 					subtitle="Monthly quotas and recent records overview"
 					description="Monthly Overview"
 					icon={CircleDollarSignIcon}
 					actions={
-						<ButtonGroup>
+						<ButtonGroup className="w-full sm:w-fit">
 							<Button
 								variant="outline"
 								onClick={() => setDate(date.minus({ month: 1 }).toJSDate())}
@@ -248,7 +265,7 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 							<Popover>
 								<PopoverTrigger
 									render={
-										<Button variant="outline" className="w-32">
+										<Button variant="outline" className="flex-1 sm:w-32">
 											<CalendarIcon className="mr-2 h-4 w-4" />
 											{date.toFormat("MMM yyyy")}
 										</Button>
@@ -280,8 +297,8 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 					/>
 				)}
 
-				<div className="flex gap-8">
-					<Card className="flex-1">
+				<div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] md:gap-8">
+					<Card>
 						<CardHeader>
 							<CardTitle>Quotas</CardTitle>
 							<CardAction>
@@ -316,7 +333,7 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 												{quota.name}
 											</Badge>
 											<p className="text-xs text-muted-foreground">
-												{quotaRecords.length} transaction
+												{quotaRecords.length} record
 												{quotaRecords.length === 1 ? "" : "s"}
 											</p>
 										</div>
@@ -361,7 +378,7 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 							))}
 						</CardContent>
 					</Card>
-					<Card className="flex-2">
+					<Card>
 						<CardHeader>
 							<CardTitle>Spending over Time</CardTitle>
 							<CardAction>
@@ -392,6 +409,7 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 						</CardHeader>
 						<CardContent>
 							<UsageAreaChart
+								className="h-64 aspect-auto md:h-auto md:aspect-video"
 								records={
 									areaQuota
 										? records.filter(r => r.quota?.id === areaQuota.id)
@@ -415,11 +433,11 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 
 				{quotas.length ? (
 					<Card>
-						<CardContent className="flex flex-col items-center xl:flex-row justify-center gap-2">
+						<CardContent className="grid justify-items-center gap-4 sm:grid-cols-2 xl:grid-cols-3">
 							{quotas.map(quota => (
 								<div
 									key={quota.id}
-									className="flex flex-col items-center gap-4 size-60 xl:size-70 2xl:size-80"
+									className="flex size-56 flex-col items-center gap-4 sm:size-60 xl:size-70 2xl:size-80"
 								>
 									<p className="text-sm font-heading font-medium text-center">
 										Spending for {quota.name}
@@ -447,8 +465,8 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 					<CardContent>
 						<DataTable
 							header={
-								<div className="flex items-end justify-between gap-4">
-									<div className="w-full max-w-sm">
+								<div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+									<div className="w-full md:max-w-sm">
 										<Input
 											placeholder="Filter records..."
 											value={query}
@@ -457,7 +475,7 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 											}
 										/>
 									</div>
-									<div className="flex items-center gap-2">
+									<div className="flex flex-col gap-2 sm:flex-row md:flex-wrap md:justify-end">
 										{quotas.length ? (
 											<DropdownMenu>
 												<DropdownMenuTrigger asChild>
@@ -468,6 +486,7 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 																? "secondary"
 																: "outline"
 														}
+														className="w-full sm:w-auto"
 													>
 														<ListFilterIcon /> Filter quotas
 														{quotaFilterLabel ? (
@@ -544,7 +563,10 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 											isOpen={isAttachingQuota}
 											setIsOpen={setIsAttachingQuota}
 											trigger={
-												<Button disabled={!selected.length}>
+												<Button
+													disabled={!selected.length}
+													className="w-full sm:w-auto"
+												>
 													<Link2Icon /> Attach to Quota
 												</Button>
 											}
@@ -553,6 +575,7 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 											type="button"
 											disabled={!selectedWithQuota.length}
 											onClick={() => void detach()}
+											className="w-full sm:w-auto"
 										>
 											<Link2OffIcon />
 											Detach from Quota
@@ -616,11 +639,12 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 									: ""
 							}
 							selectedIds={selected.map(s => s.id)}
+							mobileRow={recordMobileRow}
 							emptyMessage="No records found."
 						/>
 					</CardContent>
 				</Card>
-			</div>
+			</PageContent>
 		</>
 	)
 }

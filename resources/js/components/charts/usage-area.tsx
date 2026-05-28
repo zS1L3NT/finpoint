@@ -8,6 +8,7 @@ import {
 	ChartTooltip,
 	ChartTooltipContent,
 } from "@/components/ui/chart"
+import { useIsMobile } from "@/hooks/use-mobile"
 import { parseDatetime, round2dp } from "@/lib/utils"
 import { Record } from "@/types"
 
@@ -26,6 +27,7 @@ export default function UsageAreaChart({
 	maxY: number
 	limit?: number
 }) {
+	const isMobile = useIsMobile()
 	const data = useMemo(() => {
 		let elapsedSpending = records
 			.filter(r => parseDatetime(r.datetime) < start)
@@ -143,6 +145,15 @@ export default function UsageAreaChart({
 			usage,
 		}))
 	}, [records, limit, start, end])
+	const yTicks = useMemo(() => {
+		if (!maxY) {
+			return undefined
+		}
+
+		const step = Math.max(100, Math.ceil(maxY / (isMobile ? 3 : 5) / 100) * 100)
+
+		return Array.from({ length: Math.floor(maxY / step) + 2 }, (_, i) => i * step)
+	}, [isMobile, maxY])
 
 	return (
 		<ChartContainer
@@ -157,17 +168,12 @@ export default function UsageAreaChart({
 		>
 			<AreaChart data={data}>
 				<CartesianGrid />
-				<XAxis dataKey="date" />
-				<YAxis
-					ticks={
-						maxY
-							? Array.from(
-									{ length: Math.floor(maxY / 100) + 1 + 1 },
-									(_, i) => i * 100,
-								)
-							: undefined
-					}
+				<XAxis
+					dataKey="date"
+					interval={isMobile ? Math.max(Math.floor(data.length / 3), 0) : "preserveEnd"}
+					tickMargin={8}
 				/>
+				<YAxis ticks={yTicks} width={isMobile ? 36 : 48} />
 
 				{limit ? (
 					<>

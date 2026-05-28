@@ -68,7 +68,7 @@ export default function DatetimeField({
 
 	return (
 		<FormField {...props}>
-			<div className="grid grid-cols-2 gap-2">
+			<div className="grid w-full min-w-0 max-w-full grid-cols-1 gap-2 overflow-hidden sm:grid-cols-[minmax(0,1fr)_7.5rem]">
 				<Popover>
 					<PopoverTrigger
 						render={
@@ -78,7 +78,7 @@ export default function DatetimeField({
 								disabled={disabled}
 								aria-invalid={invalid}
 								className={cn(
-									"w-full justify-start text-left font-normal",
+									"min-w-0 max-w-full justify-start text-left text-sm font-normal md:text-xs/relaxed border-input",
 									!selected && "text-muted-foreground",
 									invalid ? "border-destructive" : null,
 								)}
@@ -109,7 +109,10 @@ export default function DatetimeField({
 					disabled={disabled}
 					onChange={event => updateTime(event.target.value)}
 					aria-invalid={invalid}
-					className={cn(invalid ? "border-destructive" : null)}
+					className={cn(
+						"min-w-0 max-w-full appearance-none [max-inline-size:100%] [min-inline-size:0]",
+						invalid ? "border-destructive" : null,
+					)}
 				/>
 			</div>
 		</FormField>

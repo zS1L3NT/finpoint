@@ -143,7 +143,7 @@ export default function CategoryDialog({
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="sm:max-w-lg">
+			<DialogContent className="md:max-w-lg">
 				<DialogHeader>
 					<DialogTitle>{isEditing ? "Edit Category" : "Create Category"}</DialogTitle>
 					<DialogDescription>

@@ -17,6 +17,7 @@ export default function DataTable<TData extends { id: string }, TValue>({
 	selectedIds,
 	emptyMessage,
 	getRowClassName,
+	mobileRow,
 }: {
 	data: TData[]
 	columns: ColumnDef<TData, TValue>[]
@@ -24,6 +25,7 @@ export default function DataTable<TData extends { id: string }, TValue>({
 	selectedIds?: string[]
 	emptyMessage?: string
 	getRowClassName?: (row: Row<TData>) => any
+	mobileRow?: (row: Row<TData>) => React.ReactNode
 }) {
 	const table = useReactTable({
 		data,
@@ -36,7 +38,34 @@ export default function DataTable<TData extends { id: string }, TValue>({
 		<div className="flex flex-col gap-4">
 			{header ? header : null}
 
-			<div className="overflow-hidden rounded-lg border bg-card">
+			{mobileRow ? (
+				<div className="grid gap-3 md:hidden">
+					<AnimatePresence initial={false}>
+						{table.getRowModel().rows.length ? (
+							table.getRowModel().rows.map(row => (
+								<div
+									key={row.id}
+									data-state={selectedIds?.includes(row.id) && "selected"}
+									className="rounded-lg border bg-card p-3 text-sm data-[state=selected]:bg-muted"
+								>
+									{mobileRow(row)}
+								</div>
+							))
+						) : (
+							<div className="rounded-lg border bg-card p-8 text-center text-sm text-muted-foreground">
+								{emptyMessage}
+							</div>
+						)}
+					</AnimatePresence>
+				</div>
+			) : null}
+
+			<div
+				className={cn(
+					"overflow-hidden rounded-lg border bg-card",
+					mobileRow ? "hidden md:block" : null,
+				)}
+			>
 				<Table className="table-fixed overflow-hidden">
 					<TableHeader>
 						{table.getHeaderGroups().map(headerGroup => (

@@ -6,7 +6,14 @@ import { Button } from "@/components/ui/button"
 import { Field, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import {
+	Sheet,
+	SheetContent,
+	SheetDescription,
+	SheetHeader,
+	SheetTitle,
+	SheetTrigger,
+} from "@/components/ui/sheet"
 import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
 import { classForCurrency, formatCurrency, formatDatetime } from "@/lib/utils"
 import { Record } from "@/types"
@@ -57,12 +64,15 @@ export default function RecordSearchSheet({
 	return (
 		<Sheet open={isOpen} onOpenChange={setIsOpen}>
 			{trigger && <SheetTrigger asChild>{trigger}</SheetTrigger>}
-			<SheetContent side="right" className="w-4xl">
+			<SheetContent side="right" className="md:w-full md:max-w-4xl">
 				<SheetHeader className="gap-2 border-b">
 					<SheetTitle>{title}</SheetTitle>
+					<SheetDescription className="sr-only">
+						Search records and attach one from the results.
+					</SheetDescription>
 				</SheetHeader>
 
-				<div className="flex flex-1 flex-col gap-4 overflow-y-hidden p-6">
+				<div className="flex flex-1 flex-col gap-4 overflow-y-hidden p-4 md:p-6">
 					<Field>
 						<FieldLabel htmlFor="record-search-query">Search records</FieldLabel>
 						<Input
@@ -130,6 +140,40 @@ export default function RecordSearchSheet({
 									),
 								},
 							]}
+							mobileRow={({ original: record }) => (
+								<div className="flex flex-col gap-3">
+									<div className="flex items-start gap-3">
+										<Icon {...record.category} size={20} />
+										<div className="min-w-0 flex-1">
+											<p className="font-medium break-words">
+												{record.is_pending && (
+													<Badge variant="warning" className="mr-1">
+														Pending
+													</Badge>
+												)}
+												{record.title}
+											</p>
+											<p className="text-xs text-muted-foreground">
+												{formatDatetime(record.datetime)}
+											</p>
+										</div>
+										<span className={classForCurrency(record.amount)}>
+											{formatCurrency(record.amount)}
+										</span>
+									</div>
+									<div className="flex justify-end">
+										<Button
+											size="sm"
+											onClick={async () => {
+												await handler(record)
+												await handleSearch()
+											}}
+										>
+											Attach
+										</Button>
+									</div>
+								</div>
+							)}
 						/>
 					</ScrollArea>
 				</div>

@@ -3,6 +3,7 @@ import { useState } from "react"
 import CategoryDialog from "@/components/dialogs/category"
 import Icon from "@/components/icon"
 import AppHeader from "@/components/layout/app-header"
+import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -20,14 +21,18 @@ export default function CategoriesPage({ categories }: { categories: CategoryWit
 		<>
 			<AppHeader title="Categories" />
 
-			<div className="container mx-auto flex flex-col gap-8 p-8">
+			<PageContent>
 				<PageHeader
 					title="Categories"
 					subtitle="Manage top-level categories and their nested children."
 					description="Category map"
 					icon={TagIcon}
 					actions={
-						<Button type="button" onClick={() => setDialogState({ mode: "create" })}>
+						<Button
+							type="button"
+							className="w-full sm:w-auto"
+							onClick={() => setDialogState({ mode: "create" })}
+						>
 							<PlusIcon /> Create Category
 						</Button>
 					}
@@ -51,7 +56,7 @@ export default function CategoriesPage({ categories }: { categories: CategoryWit
 						)}
 					</CardContent>
 				</Card>
-			</div>
+			</PageContent>
 
 			<CategoryDialog
 				open={dialogState !== null}
@@ -103,9 +108,9 @@ function CategoryTreeItem({
 					<p className="truncate font-medium">{category.name}</p>
 					<p className="truncate text-xs text-muted-foreground">{category.id}</p>
 				</div>
-				<div className="flex items-center gap-2 text-xs text-muted-foreground">
+				<div className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground">
 					{"children" in category ? (
-						<span>
+						<span className="hidden sm:inline">
 							{category.children.length} child
 							{category.children.length === 1 ? "" : "ren"}
 						</span>

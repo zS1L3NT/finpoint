@@ -101,7 +101,7 @@ export default function RecordQuotaDialog({
 			}}
 		>
 			{trigger && <DialogTrigger render={trigger} />}
-			<DialogContent className="sm:max-w-lg">
+			<DialogContent className="md:max-w-lg">
 				<DialogHeader>
 					<DialogTitle>Attach Records to Quota</DialogTitle>
 					<DialogDescription>

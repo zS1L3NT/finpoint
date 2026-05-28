@@ -45,7 +45,7 @@
 		],
 		"dev": [
 			"Composer\\Config::disableProcessTimeout",
-			"npx concurrently -c \"#93c5fd,#fdba74\" \"php artisan serve\" \"bun dev\" --names=laravel,vite --kill-others"
+			"npx concurrently -c \"#93c5fd,#fdba74\" \"php artisan serve --host=0.0.0.0\" \"bun dev\" --names=laravel,vite --kill-others"
 		],
 		"lint": ["pint --parallel", "bun lint"],
 		"lint:check": ["pint --parallel --test", "bun lint:check", "bun types:check"],

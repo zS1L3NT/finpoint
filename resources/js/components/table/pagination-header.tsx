@@ -18,10 +18,10 @@ export default function PaginationHeader({
 	actions?: React.ReactNode
 }) {
 	return (
-		<div className="flex items-end justify-between gap-4">
-			<div className="flex flex-col 2xl:flex-row gap-2">
+		<div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+			<div className="flex min-w-0 flex-col gap-2 md:flex-row md:flex-wrap">
 				<Input
-					className="w-sm"
+					className="w-full md:w-sm"
 					placeholder={searchPlaceholder}
 					value={query}
 					onChange={e => onQueryChange(e.target.value)}
@@ -30,7 +30,11 @@ export default function PaginationHeader({
 				{filters}
 			</div>
 
-			<div className="flex items-center gap-2">{actions}</div>
+			{actions ? (
+				<div className="flex flex-col gap-2 sm:flex-row md:items-center md:justify-end">
+					{actions}
+				</div>
+			) : null}
 		</div>
 	)
 }

@@ -12,11 +12,12 @@ import CategoriesPieChart from "@/components/charts/categories-pie"
 import UsageAreaChart from "@/components/charts/usage-area"
 import BudgetEditorDialog from "@/components/dialogs/budget-editor"
 import AppHeader from "@/components/layout/app-header"
+import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import LimiterPaceCards, { getLimitAggregations } from "@/components/limiter-pace-cards"
 import RecordSearchSheet from "@/components/sheets/record-search"
 import DataTable from "@/components/table/data-table"
-import { useRecordColumns } from "@/components/table/record-columns"
+import { useRecordColumns, useRecordMobileRow } from "@/components/table/record-columns"
 import { Button } from "@/components/ui/button"
 import {
 	Card,
@@ -74,6 +75,14 @@ export default function BudgetPage({ budget, records }: { budget: Budget; record
 			</Button>
 		),
 	})
+	const recordMobileRow = useRecordMobileRow<Record>({
+		pageName: `Budget ${budget.id}`,
+		extraActions: record => (
+			<Button variant="destructive" size="sm" onClick={() => detach(record)}>
+				<Link2OffIcon /> Detach
+			</Button>
+		),
+	})
 
 	const limitAggregations = getLimitAggregations(
 		records,
@@ -86,7 +95,7 @@ export default function BudgetPage({ budget, records }: { budget: Budget; record
 		<>
 			<AppHeader title="Budget" />
 
-			<div className="container mx-auto flex flex-col gap-8 p-8">
+			<PageContent>
 				<PageHeader
 					title={budget.name}
 					subtitle={
@@ -109,7 +118,7 @@ export default function BudgetPage({ budget, records }: { budget: Budget; record
 							isOpen={isEditingBudget}
 							setIsOpen={setIsEditingBudget}
 							trigger={
-								<Button>
+								<Button className="w-full sm:w-auto">
 									<PencilIcon /> Edit Budget
 								</Button>
 							}
@@ -120,26 +129,27 @@ export default function BudgetPage({ budget, records }: { budget: Budget; record
 
 				<LimiterPaceCards name="budget" limit={budget.amount} {...limitAggregations} />
 
-				<div className="flex gap-8">
-					<Card className="flex-1">
+				<div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] md:gap-8">
+					<Card>
 						<CardHeader>
 							<CardTitle>Spending by Category</CardTitle>
 						</CardHeader>
-						<CardContent className="h-full flex items-center">
+						<CardContent className="flex h-full items-center">
 							<CategoriesPieChart
-								className="w-full aspect-square px-8"
+								className="mx-auto aspect-square w-full max-w-72 px-2 md:max-w-none md:px-4"
 								categories={categories}
 								records={records}
 								limit={budget.amount}
 							/>
 						</CardContent>
 					</Card>
-					<Card className="flex-2">
+					<Card>
 						<CardHeader>
 							<CardTitle>Spending over Time</CardTitle>
 						</CardHeader>
 						<CardContent>
 							<UsageAreaChart
+								className="h-64 aspect-auto md:h-auto md:aspect-video"
 								records={records}
 								start={parseDate(budget.start_date)}
 								end={parseDate(budget.end_date)}
@@ -168,7 +178,7 @@ export default function BudgetPage({ budget, records }: { budget: Budget; record
 								setIsOpen={setIsAttachingRecord}
 								handler={attach}
 								trigger={
-									<Button>
+									<Button className="w-full sm:w-auto">
 										<Link2Icon /> Attach Record
 									</Button>
 								}
@@ -179,11 +189,12 @@ export default function BudgetPage({ budget, records }: { budget: Budget; record
 						<DataTable
 							data={records}
 							columns={recordColumns}
+							mobileRow={recordMobileRow}
 							emptyMessage="No records found."
 						/>
 					</CardContent>
 				</Card>
-			</div>
+			</PageContent>
 		</>
 	)
 }

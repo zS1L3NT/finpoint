@@ -95,7 +95,7 @@ export default function QuotaEditorDialog({
 			}}
 		>
 			{trigger && <DialogTrigger render={trigger} />}
-			<DialogContent className="max-w-lg">
+			<DialogContent className="md:max-w-lg">
 				<DialogHeader>
 					<DialogTitle>Edit Quota</DialogTitle>
 					<DialogDescription>

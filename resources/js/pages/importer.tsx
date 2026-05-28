@@ -5,6 +5,7 @@ import { toast } from "sonner"
 import SelectField from "@/components/form/select-field"
 import TextField from "@/components/form/text-field"
 import AppHeader from "@/components/layout/app-header"
+import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import { Button } from "@/components/ui/button"
 import {
@@ -112,7 +113,7 @@ export default function ImporterPage({ accounts }: { accounts: Account[] }) {
 		<>
 			<AppHeader title="Importer" />
 
-			<div className="container mx-auto flex flex-col gap-8 p-8">
+			<PageContent>
 				<PageHeader
 					title="Importer"
 					subtitle="Upload one or more bank CSV exports, create any missing accounts, and move straight into allocation once the feed is loaded."
@@ -302,7 +303,7 @@ export default function ImporterPage({ accounts }: { accounts: Account[] }) {
 						</CardFooter>
 					</Card>
 				</form>
-			</div>
+			</PageContent>
 		</>
 	)
 }

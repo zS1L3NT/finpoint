@@ -180,7 +180,7 @@ export default function RecordEditorDialog({
 				])
 			}}
 			trigger={
-				<Button variant="outline">
+				<Button variant="outline" className="w-fit">
 					<Link2Icon />
 					Attach Statement
 				</Button>
@@ -200,7 +200,7 @@ export default function RecordEditorDialog({
 			}}
 		>
 			{trigger && <DialogTrigger render={trigger} />}
-			<DialogContent className="sm:max-w-4xl">
+			<DialogContent className="md:max-w-4xl">
 				<DialogHeader>
 					<DialogTitle>Edit Record</DialogTitle>
 					<DialogDescription>
@@ -307,7 +307,7 @@ export default function RecordEditorDialog({
 												Amount does not match the sum of Allocation Amounts
 											</AlertTitle>
 											<AlertDescription>
-												This transaction will be marked as pending until the
+												This record will be marked as pending until the
 												record amount matches the sum of allocated statement
 												amounts.
 											</AlertDescription>
@@ -367,7 +367,7 @@ export default function RecordEditorDialog({
 					</div>
 
 					<div className="flex flex-col gap-4">
-						<div className="flex justify-between">
+						<div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
 							<p className="text-sm font-semibold">Statements Attached</p>
 
 							{!!formStatements.length && AttachStatementsSheet}

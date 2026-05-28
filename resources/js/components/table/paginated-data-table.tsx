@@ -1,4 +1,10 @@
-import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table"
+import {
+	type ColumnDef,
+	flexRender,
+	getCoreRowModel,
+	type Row,
+	useReactTable,
+} from "@tanstack/react-table"
 import { AnimatePresence } from "framer-motion"
 import type { ComponentProps } from "react"
 import PaginationFooter from "@/components/table/pagination-footer"
@@ -11,6 +17,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table"
+import { cn } from "@/lib/utils"
 import { Paginated } from "@/types"
 
 export default function PaginatedDataTable<TData extends { id: string }, TValue>({
@@ -20,6 +27,7 @@ export default function PaginatedDataTable<TData extends { id: string }, TValue>
 	footer,
 	selectedIds,
 	emptyMessage = "No results.",
+	mobileRow,
 }: {
 	paginated: Paginated<TData>
 	columns: ColumnDef<TData, TValue>[]
@@ -27,6 +35,7 @@ export default function PaginatedDataTable<TData extends { id: string }, TValue>
 	footer: Omit<ComponentProps<typeof PaginationFooter>, "links">
 	selectedIds?: string[]
 	emptyMessage?: string
+	mobileRow?: (row: Row<TData>) => React.ReactNode
 }) {
 	const table = useReactTable({
 		data: paginated.data,
@@ -39,7 +48,34 @@ export default function PaginatedDataTable<TData extends { id: string }, TValue>
 		<div className="flex flex-col gap-4">
 			{header ? <PaginationHeader {...header} /> : null}
 
-			<div className="overflow-hidden rounded-lg border bg-card">
+			{mobileRow ? (
+				<div className="grid gap-3 md:hidden">
+					<AnimatePresence initial={false}>
+						{table.getRowModel().rows.length ? (
+							table.getRowModel().rows.map(row => (
+								<div
+									key={row.id}
+									data-state={selectedIds?.includes(row.id) && "selected"}
+									className="rounded-lg border bg-card p-3 text-sm data-[state=selected]:bg-muted"
+								>
+									{mobileRow(row)}
+								</div>
+							))
+						) : (
+							<div className="rounded-lg border bg-card p-8 text-center text-sm text-muted-foreground">
+								{emptyMessage}
+							</div>
+						)}
+					</AnimatePresence>
+				</div>
+			) : null}
+
+			<div
+				className={cn(
+					"overflow-hidden rounded-lg border bg-card",
+					mobileRow ? "hidden md:block" : null,
+				)}
+			>
 				<Table className="table-fixed overflow-hidden">
 					<TableHeader>
 						{table.getHeaderGroups().map(headerGroup => (

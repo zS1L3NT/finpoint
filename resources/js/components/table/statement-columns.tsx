@@ -1,5 +1,6 @@
 import { Link } from "@inertiajs/react"
-import type { ColumnDef } from "@tanstack/react-table"
+import type { ColumnDef, Row } from "@tanstack/react-table"
+import type { ReactNode } from "react"
 import AllocateBar from "@/components/allocate-bar"
 import { Button } from "@/components/ui/button"
 import { useHistory } from "@/history"
@@ -10,15 +11,17 @@ import { statementWebRoute } from "@/wayfinder/routes"
 
 type StatementRow = Statement & { pivot?: Allocation }
 
+type StatementTableOptions = {
+	amount?: "amount" | "allocable" | "allocated"
+	showAccount?: boolean
+	pageName?: string
+}
+
 export function useStatementColumns<TStatement extends StatementRow>({
 	amount = "amount",
 	showAccount = true,
 	pageName,
-}: {
-	amount?: "amount" | "allocable" | "allocated"
-	showAccount?: boolean
-	pageName?: string
-}): ColumnDef<TStatement>[] {
+}: StatementTableOptions): ColumnDef<TStatement>[] {
 	const { handlePush } = useHistory()
 
 	return [
@@ -91,4 +94,71 @@ export function useStatementColumns<TStatement extends StatementRow>({
 			),
 		},
 	]
+}
+
+export function useStatementMobileRow<TStatement extends StatementRow>({
+	amount = "amount",
+	showAccount = true,
+	pageName,
+	leading,
+}: StatementTableOptions & {
+	leading?: (statement: TStatement) => ReactNode
+}): (row: Row<TStatement>) => ReactNode {
+	const { handlePush } = useHistory()
+
+	return row => {
+		const statement = row.original
+
+		return (
+			<div className="flex flex-col gap-3">
+				<div className="flex items-start gap-3">
+					{leading?.(statement)}
+					<div className="min-w-0 flex-1">
+						<p className="font-medium break-words">
+							{showAccount
+								? statement.account.name
+								: statement.description || "Statement"}
+						</p>
+						<p className="text-xs text-muted-foreground">
+							{formatDatetime(statement.datetime)}
+						</p>
+					</div>
+					{amount === "amount" ? (
+						<span className={classForCurrency(statement.amount)}>
+							{formatCurrency(statement.amount)}
+						</span>
+					) : null}
+				</div>
+
+				{amount === "allocable" || amount === "allocated" ? (
+					<AllocateBar
+						title={amount === "allocable" ? "Allocable" : "Allocated"}
+						value={
+							amount === "allocable"
+								? round2dp(statement.allocable_amount)
+								: (statement.pivot?.amount ?? 0)
+						}
+						total={statement.amount}
+					/>
+				) : null}
+
+				{showAccount ? (
+					<p className="text-xs text-muted-foreground break-words">
+						{statement.description || "-"}
+					</p>
+				) : null}
+
+				<div className="flex justify-end">
+					<Button variant="outline" size="sm" asChild>
+						<Link
+							href={statementWebRoute.url({ statement })}
+							onClick={pageName ? handlePush(pageName) : undefined}
+						>
+							Open
+						</Link>
+					</Button>
+				</div>
+			</div>
+		)
+	}
 }

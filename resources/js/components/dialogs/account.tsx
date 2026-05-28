@@ -65,7 +65,7 @@ export default function AccountDialog({
 	return (
 		<Dialog open={isOpen} onOpenChange={setIsOpen}>
 			{trigger ? <DialogTrigger render={trigger} /> : null}
-			<DialogContent className="sm:max-w-md">
+			<DialogContent className="md:max-w-md">
 				<DialogHeader>
 					<DialogTitle>Edit Account</DialogTitle>
 					<DialogDescription>

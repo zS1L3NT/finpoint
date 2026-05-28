@@ -5,7 +5,14 @@ import { Field, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Progress } from "@/components/ui/progress"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import {
+	Sheet,
+	SheetContent,
+	SheetDescription,
+	SheetHeader,
+	SheetTitle,
+	SheetTrigger,
+} from "@/components/ui/sheet"
 import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
 import { classForCurrency, cn, formatCurrency, formatDatetime } from "@/lib/utils"
 import { Statement } from "@/types"
@@ -56,12 +63,15 @@ export default function StatementSearchSheet({
 	return (
 		<Sheet open={isOpen} onOpenChange={setIsOpen}>
 			{trigger && <SheetTrigger asChild>{trigger}</SheetTrigger>}
-			<SheetContent side="right" className="w-4xl">
+			<SheetContent side="right" className="md:w-full md:max-w-4xl">
 				<SheetHeader className="gap-2 border-b">
 					<SheetTitle>{title}</SheetTitle>
+					<SheetDescription className="sr-only">
+						Search statements and attach one from the results.
+					</SheetDescription>
 				</SheetHeader>
 
-				<div className="flex flex-1 flex-col gap-4 overflow-y-hidden p-6">
+				<div className="flex flex-1 flex-col gap-4 overflow-y-hidden p-4 md:p-6">
 					<Field>
 						<FieldLabel htmlFor="statement-search-query">Search statements</FieldLabel>
 						<Input
@@ -138,6 +148,52 @@ export default function StatementSearchSheet({
 									),
 								},
 							]}
+							mobileRow={({ original: statement }) => (
+								<div className="flex flex-col gap-3">
+									<div>
+										<p className="font-medium break-words">
+											{statement.description}
+										</p>
+										<p className="text-xs text-muted-foreground">
+											{formatDatetime(statement.datetime)}
+										</p>
+									</div>
+									<div className="flex justify-between gap-3 text-xs">
+										<span
+											className={classForCurrency(statement.allocable_amount)}
+										>
+											{formatCurrency(statement.allocable_amount)}
+										</span>
+										<span
+											className={cn(
+												"font-bold",
+												classForCurrency(statement.amount),
+											)}
+										>
+											{formatCurrency(statement.amount)}
+										</span>
+									</div>
+									<Progress
+										value={
+											statement.amount === 0
+												? 0
+												: (statement.allocable_amount / statement.amount) *
+													100
+										}
+									/>
+									<div className="flex justify-end">
+										<Button
+											size="sm"
+											onClick={async () => {
+												await handler(statement)
+												await handleSearch()
+											}}
+										>
+											Attach
+										</Button>
+									</div>
+								</div>
+							)}
 						/>
 					</ScrollArea>
 				</div>
