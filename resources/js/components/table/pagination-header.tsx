@@ -18,7 +18,7 @@ export default function PaginationHeader({
 	actions?: React.ReactNode
 }) {
 	return (
-		<div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+		<div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
 			<div className="flex min-w-0 flex-col gap-2 md:flex-row md:flex-wrap">
 				<Input
 					className="w-full md:w-sm"

@@ -117,21 +117,23 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 									</DropdownMenuContent>
 								</DropdownMenu>
 
-								<DateField
-									id="start_date"
-									value={startDate ?? ""}
-									className="w-full sm:w-32"
-									placeholder="Start date"
-									onChange={date => setStartDate(date || null)}
-								/>
+								<div className="grid grid-cols-2 gap-2 sm:flex sm:flex-row">
+									<DateField
+										id="start_date"
+										value={startDate ?? ""}
+										className="min-w-0 sm:w-32"
+										placeholder="Start date"
+										onChange={date => setStartDate(date || null)}
+									/>
 
-								<DateField
-									id="end_date"
-									value={endDate ?? ""}
-									className="w-full sm:w-32"
-									placeholder="End date"
-									onChange={date => setEndDate(date || null)}
-								/>
+									<DateField
+										id="end_date"
+										value={endDate ?? ""}
+										className="min-w-0 sm:w-32"
+										placeholder="End date"
+										onChange={date => setEndDate(date || null)}
+									/>
+								</div>
 							</div>
 						),
 						actions: (
