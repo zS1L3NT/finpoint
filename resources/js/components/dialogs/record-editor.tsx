@@ -53,6 +53,7 @@ import {
 	recordDestroyApiRoute,
 	recordsWebRoute,
 	recordUpdateApiRoute,
+	recordWebRoute,
 } from "@/wayfinder/routes"
 
 export default function RecordEditorDialog({
@@ -70,7 +71,7 @@ export default function RecordEditorDialog({
 	setIsOpen: (isOpen: boolean) => void
 	trigger?: React.ReactElement
 }) {
-	const { handleClear } = useHistory()
+	const { latest, handlePop, handleClear } = useHistory()
 
 	const completions = useFetch<RecordCompletions>(completionsRecordsApiRoute.url())
 
@@ -141,15 +142,27 @@ export default function RecordEditorDialog({
 
 		if (response.ok) {
 			setIsOpen(false)
-			handleClear()
-			router.visit(
-				recordsWebRoute.url({
-					query: {
-						start_date: START_DATE,
-						end_date: DateTime.now().toFormat("yyyy-MM-dd"),
-					},
-				}),
-			)
+
+			if (location.pathname === recordWebRoute.url({ record })) {
+				if (latest) {
+					handlePop()
+					router.visit(latest.url)
+					return
+				}
+
+				handleClear()
+				router.visit(
+					recordsWebRoute.url({
+						query: {
+							start_date: START_DATE,
+							end_date: DateTime.now().toFormat("yyyy-MM-dd"),
+						},
+					}),
+				)
+				return
+			}
+
+			router.reload()
 		}
 	}
 

@@ -21,7 +21,12 @@ import { useHistory } from "@/history"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { withMethod } from "@/lib/utils"
 import { Budget } from "@/types"
-import { budgetDestroyApiRoute, budgetsWebRoute, budgetUpdateApiRoute } from "@/wayfinder/routes"
+import {
+	budgetDestroyApiRoute,
+	budgetsWebRoute,
+	budgetUpdateApiRoute,
+	budgetWebRoute,
+} from "@/wayfinder/routes"
 
 export default function BudgetEditorDialog({
 	budget,
@@ -34,7 +39,7 @@ export default function BudgetEditorDialog({
 	setIsOpen: (isOpen: boolean) => void
 	trigger?: React.ReactElement
 }) {
-	const { handleClear } = useHistory()
+	const { latest, handlePop, handleClear } = useHistory()
 
 	const { mergeErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
 
@@ -84,8 +89,20 @@ export default function BudgetEditorDialog({
 
 		if (response.ok) {
 			setIsOpen(false)
-			handleClear()
-			router.visit(budgetsWebRoute.url())
+
+			if (location.pathname === budgetWebRoute.url({ budget })) {
+				if (latest) {
+					handlePop()
+					router.visit(latest.url)
+					return
+				}
+
+				handleClear()
+				router.visit(budgetsWebRoute.url())
+				return
+			}
+
+			router.reload()
 		}
 	}
 
