@@ -46,7 +46,7 @@ export default function PageHeader({
 						{title}
 					</h2>
 					{subtitle ? (
-						<div className="max-w-2xl text-sm text-muted-foreground">{subtitle}</div>
+						<div className="max-w-2xl text-sm text-muted-foreground whitespace-pre-line break-words">{subtitle}</div>
 					) : null}
 				</div>
 			</div>
