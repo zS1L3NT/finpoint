@@ -91,7 +91,7 @@ export default function StatementSearchSheet({
 									header: "Account",
 									cell: ({ row }) => (
 										<div className="space-y-1">
-											<div className="text-wrap break-all">
+											<div className="whitespace-pre-line break-words">
 												{row.original.description}
 											</div>
 											<div className="flex justify-between">

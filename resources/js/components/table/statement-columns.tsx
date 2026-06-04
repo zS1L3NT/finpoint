@@ -74,7 +74,7 @@ export function useStatementColumns<TStatement extends StatementRow>({
 			header: "Description",
 			meta: { width: TABLE_WIDTH_CLASSNAMES.STATEMENT },
 			cell: ({ row }) => (
-				<div className="truncate text-muted-foreground">
+				<div className="whitespace-pre-line break-words text-muted-foreground">
 					{row.original.description || "-"}
 				</div>
 			),
@@ -114,7 +114,7 @@ export function useStatementMobileRow<TStatement extends StatementRow>({
 				<div className="flex items-start gap-3">
 					{leading?.(statement)}
 					<div className="min-w-0 flex-1">
-						<p className="font-medium break-words">
+						<p className="whitespace-pre-line break-words font-medium">
 							{showAccount
 								? statement.account.name
 								: statement.description || "Statement"}
@@ -143,7 +143,7 @@ export function useStatementMobileRow<TStatement extends StatementRow>({
 				) : null}
 
 				{showAccount ? (
-					<p className="text-xs text-muted-foreground break-words">
+					<p className="whitespace-pre-line break-words text-xs text-muted-foreground">
 						{statement.description || "-"}
 					</p>
 				) : null}

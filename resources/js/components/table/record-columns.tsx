@@ -96,7 +96,7 @@ export function useRecordColumns<TRecord extends RecordRow>({
 			header: "Description",
 			meta: { width: TABLE_WIDTH_CLASSNAMES.DESCRIPTION },
 			cell: ({ row }) => (
-				<div className="truncate text-muted-foreground">
+				<div className="whitespace-pre-line break-words text-muted-foreground">
 					{row.original.description || "-"}
 				</div>
 			),
@@ -210,7 +210,9 @@ export function useRecordMobileRow<TRecord extends RecordRow>({
 							) : null}
 						</div>
 						{record.description ? (
-							<p className="leading-relaxed break-words">{record.description}</p>
+							<p className="whitespace-pre-line break-words leading-relaxed">
+								{record.description}
+							</p>
 						) : null}
 						<div className="flex flex-wrap justify-end gap-2 pt-1">
 							{openButton}
@@ -266,7 +268,7 @@ export function useRecordMobileRow<TRecord extends RecordRow>({
 						</div>
 					) : null}
 					{record.description ? (
-						<p className="break-words">{record.description}</p>
+						<p className="whitespace-pre-line break-words">{record.description}</p>
 					) : null}
 				</div>
 
