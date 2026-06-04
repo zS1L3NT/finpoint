@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\Scopes\RecordAllocatedAmount;
 use App\Pivots\BudgetRecord;
 use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
@@ -57,55 +56,55 @@ class Record extends Model
         return self::query()
             ->when(
                 $query,
-                fn($query, $q) => $query
+                fn ($query, $q) => $query
                     ->where(
-                        fn($query) => $query
-                            ->where('title', 'like', '%' . $q . '%')
-                            ->orWhere('people', 'like', '%' . $q . '%')
-                            ->orWhere('location', 'like', '%' . $q . '%')
-                            ->orWhere('description', 'like', '%' . $q . '%')
+                        fn ($query) => $query
+                            ->where('title', 'like', '%'.$q.'%')
+                            ->orWhere('people', 'like', '%'.$q.'%')
+                            ->orWhere('location', 'like', '%'.$q.'%')
+                            ->orWhere('description', 'like', '%'.$q.'%')
                             // ->orWhere('datetime', '=', Carbon::parse($q))
-                            ->orWhere('amount', 'like', '%' . $q . '%')
+                            ->orWhere('amount', 'like', '%'.$q.'%')
                             ->orWhereHas(
                                 'category',
                                 fn ($query) => $query
-                                    ->where('id', 'like', '%' . $q . '%')
-                                    ->orWhere('name', 'like', '%' . $q . '%')
+                                    ->where('id', 'like', '%'.$q.'%')
+                                    ->orWhere('name', 'like', '%'.$q.'%')
                             )
                     )
             )
             ->when(
                 $exclude_budget_id,
-                fn($query) => $query->whereDoesntHave('budgets', fn($query) => $query->where('budgets.id', $exclude_budget_id))
+                fn ($query) => $query->whereDoesntHave('budgets', fn ($query) => $query->where('budgets.id', $exclude_budget_id))
             )
             ->when(
                 $start_date,
-                fn($query) => $query->whereDate('datetime', '>=', $start_date)
+                fn ($query) => $query->whereDate('datetime', '>=', $start_date)
             )
             ->when(
                 $end_date,
-                fn($query) => $query->whereDate('datetime', '<=', $end_date)
+                fn ($query) => $query->whereDate('datetime', '<=', $end_date)
             )
             ->when(
                 collect(['true', 'false'])->contains($is_allocated),
-                fn($query) => $query->havingRaw($is_allocated === 'true' ? 'allocated_amount = amount' : 'allocated_amount != amount')
+                fn ($query) => $query->havingRaw($is_allocated === 'true' ? 'allocated_amount = amount' : 'allocated_amount != amount')
             )
             ->groupBy('records.id');
     }
 
     public function getSubtitleAttribute()
     {
-        $subtitle = "";
+        $subtitle = '';
 
         if ($this->people) {
-            $subtitle .= "w/ " . $this->people;
+            $subtitle .= 'w/ '.$this->people;
         }
 
         if ($this->location) {
             if ($subtitle) {
-                $subtitle .= " @ " . $this->location;
+                $subtitle .= ' @ '.$this->location;
             } else {
-                $subtitle .= "@ " . $this->location;
+                $subtitle .= '@ '.$this->location;
             }
         }
 

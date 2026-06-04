@@ -1,6 +1,5 @@
 import { Link } from "@inertiajs/react"
 import type { ColumnDef, Row } from "@tanstack/react-table"
-import type { ReactNode } from "react"
 import Icon from "@/components/icon"
 import RecordAmount from "@/components/record-amount"
 import { Badge } from "@/components/ui/badge"
@@ -17,7 +16,7 @@ type RecordTableOptions<TRecord extends RecordRow> = {
 	amount?: "amount" | "allocated"
 	showQuota?: boolean
 	pageName?: string
-	extraActions?: (record: TRecord) => ReactNode
+	extraActions?: (record: TRecord) => React.ReactNode
 	actionWidth?: string
 	mobileVariant?: "default" | "dashboard"
 }
@@ -144,8 +143,8 @@ export function useRecordMobileRow<TRecord extends RecordRow>({
 	leading,
 	mobileVariant = "default",
 }: RecordTableOptions<TRecord> & {
-	leading?: (record: TRecord) => ReactNode
-}): (row: Row<TRecord>) => ReactNode {
+	leading?: (record: TRecord) => React.ReactNode
+}): (row: Row<TRecord>) => React.ReactNode {
 	const { handlePush } = useHistory()
 
 	return row => {

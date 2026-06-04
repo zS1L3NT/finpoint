@@ -172,10 +172,8 @@ export default function RecordEditorDialog({
 			round2dp(state.values.statements.reduce((acc, el) => acc + el.amount, 0)) !==
 			round2dp(state.values.amount),
 	)
-
 	const formStatements = useStore(form.store, state => state.values.statements)
-
-	const AttachStatementsSheet = (
+	const attachStatementsSheet = (
 		<StatementSearchSheet
 			title="Attach statements to record"
 			placeholder="Search unattached statements..."
@@ -383,7 +381,7 @@ export default function RecordEditorDialog({
 						<div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
 							<p className="text-sm font-semibold">Statements Attached</p>
 
-							{!!formStatements.length && AttachStatementsSheet}
+							{!!formStatements.length && attachStatementsSheet}
 						</div>
 
 						<div className="flex flex-col gap-2">
@@ -495,7 +493,7 @@ export default function RecordEditorDialog({
 											No statements selected for allocation.
 										</EmptyDescription>
 									</EmptyHeader>
-									<EmptyContent>{AttachStatementsSheet}</EmptyContent>
+									<EmptyContent>{attachStatementsSheet}</EmptyContent>
 								</Empty>
 							)}
 						</div>

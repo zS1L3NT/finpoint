@@ -18,11 +18,11 @@ class Account extends Model
             ->withCount('statements')
             ->when(
                 $query,
-                fn($query, $q) => $query->where(
-                    fn($query) => $query
-                        ->where('name', 'like', '%' . $q . '%')
-                        ->orWhere('bank', 'like', '%' . $q . '%')
-                        ->orWhere('id', 'like', '%' . $q . '%')
+                fn ($query, $q) => $query->where(
+                    fn ($query) => $query
+                        ->where('name', 'like', '%'.$q.'%')
+                        ->orWhere('bank', 'like', '%'.$q.'%')
+                        ->orWhere('id', 'like', '%'.$q.'%')
                 )
             )
             ->orderBy('bank')

@@ -15,13 +15,31 @@ type Props = FormFieldProps & {
 	onChange: (value: string) => void
 }
 
-export default function SelectField({ value, placeholder, items, onChange, ...props }: Props) {
-	const { id, disabled, errors } = props
+export default function SelectField({
+	id,
+	label,
+	description,
+	errors,
+	disabled,
+	className,
+	value,
+	placeholder,
+	items,
+	onChange,
+}: Props) {
+	const invalid = !!errors?.length
 
 	return (
-		<FormField {...props}>
+		<FormField
+			id={id}
+			label={label}
+			description={description}
+			errors={errors}
+			disabled={disabled}
+			className={className}
+		>
 			<Select value={value} onValueChange={onChange} disabled={disabled}>
-				<SelectTrigger className="w-full" id={id} aria-invalid={!!errors?.length}>
+				<SelectTrigger className="w-full" id={id} aria-invalid={invalid}>
 					<SelectValue placeholder={placeholder} />
 				</SelectTrigger>
 				<SelectContent>

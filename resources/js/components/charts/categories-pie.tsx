@@ -29,13 +29,12 @@ export default function CategoriesPieChart({
 	const categoryData = useMemo(
 		() =>
 			categories
-				.flatMap(c => c)
 				.map(c => {
-					const categoryRecords = records
-						.filter(r => r.amount < 0)
-						.filter(
-							r => r.category.id === c.id || r.category.parent_category_id === c.id,
-						)
+					const categoryRecords = records.filter(
+						r =>
+							r.amount < 0 &&
+							(r.category.id === c.id || r.category.parent_category_id === c.id),
+					)
 
 					return {
 						category: c,
@@ -52,9 +51,9 @@ export default function CategoriesPieChart({
 			categories
 				.flatMap(c => [c, ...c.children])
 				.map(c => {
-					const subcategoryRecords = records
-						.filter(r => r.amount < 0)
-						.filter(r => r.category.id === c.id)
+					const subcategoryRecords = records.filter(
+						r => r.amount < 0 && r.category.id === c.id,
+					)
 
 					return {
 						category: c,

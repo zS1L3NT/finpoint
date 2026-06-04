@@ -17,18 +17,29 @@ type Props = FormFieldProps & {
 }
 
 export default function TextField({
+	id,
+	label,
+	description,
+	errors,
+	disabled,
+	className,
 	value,
 	placeholder,
 	suggestions,
 	type = "text",
 	onChange,
-	...props
 }: Props) {
-	const { id, disabled, errors } = props
 	const invalid = !!errors?.length
 
 	return (
-		<FormField {...props}>
+		<FormField
+			id={id}
+			label={label}
+			description={description}
+			errors={errors}
+			disabled={disabled}
+			className={className}
+		>
 			{suggestions ? (
 				<Combobox
 					items={[...new Set(value.trim() ? [value, ...suggestions] : suggestions)]}

@@ -78,10 +78,9 @@ export default function RecordCreatorDialog({
 			formData.append("amount", `${value.amount}`)
 			formData.append("category_id", value.category_id)
 			formData.append("description", value.description)
-
-			statements.forEach((statement, index) => {
-				formData.append(`statements[${index}][id]`, `${value.statements[index].id}`)
-				formData.append(`statements[${index}][amount]`, `${value.statements[index].amount}`)
+			value.statements.forEach((statement, index) => {
+				formData.append(`statements[${index}][id]`, statement.id)
+				formData.append(`statements[${index}][amount]`, `${statement.amount}`)
 			})
 
 			const response = await fetch(recordStoreApiRoute.url(), {

@@ -14,20 +14,26 @@ type Props = FormFieldProps & {
 }
 
 export default function AmountField({
+	id,
+	label,
+	description,
+	errors,
+	disabled,
+	className,
 	value,
 	placeholder,
 	min,
 	max,
 	suffix,
 	onChange,
-	...props
 }: Props) {
-	const { id, disabled, errors } = props
-	const invalid = !!errors?.length
 	const [text, setText] = useState(() => `${value}`)
-	const committed = useRef(value)
-	const negative = text.startsWith("-")
+	const synced = useRef(value)
+
 	const canBeNegative = min === undefined || min < 0
+	const invalid = !!errors?.length
+	const negative = text.startsWith("-")
+
 	const commitText = (raw: string) => {
 		if (!canBeNegative && raw.startsWith("-")) {
 			return
@@ -46,6 +52,7 @@ export default function AmountField({
 			}
 		}
 	}
+
 	const stepValue = (direction: -1 | 1) => {
 		const next = Math.min(
 			max ?? Number.POSITIVE_INFINITY,
@@ -55,15 +62,31 @@ export default function AmountField({
 		onChange(next)
 	}
 
+	const toggleSign = () => {
+		if (negative) {
+			commitText(text.slice(1))
+			return
+		}
+
+		commitText(text === "" || text === "0" ? "-" : `-${text}`)
+	}
+
 	useEffect(() => {
-		if (committed.current !== value) {
-			committed.current = value
+		if (synced.current !== value) {
+			synced.current = value
 			setText(`${value}`)
 		}
 	}, [value])
 
 	return (
-		<FormField {...props}>
+		<FormField
+			id={id}
+			label={label}
+			description={description}
+			errors={errors}
+			disabled={disabled}
+			className={className}
+		>
 			<div className="flex min-w-0 items-center gap-2">
 				<div className="relative min-w-0 flex-1">
 					<span
@@ -107,14 +130,7 @@ export default function AmountField({
 							aria-label={negative ? "Make amount positive" : "Make amount negative"}
 							title={negative ? "Make amount positive" : "Make amount negative"}
 							disabled={disabled}
-							onClick={() => {
-								const raw = negative
-									? text.slice(1)
-									: text === "" || text === "0"
-										? "-"
-										: `-${text}`
-								commitText(raw)
-							}}
+							onClick={toggleSign}
 						>
 							+/-
 						</Button>

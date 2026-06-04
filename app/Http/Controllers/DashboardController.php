@@ -14,7 +14,7 @@ class DashboardController extends Controller
         $month = request()->query('month', now()->monthName);
         $year = request()->query('year', now()->year);
 
-        $date = Carbon::parse($month . ' ' . $year);
+        $date = Carbon::parse($month.' '.$year);
 
         $records = Record::query()
             ->with('quota')

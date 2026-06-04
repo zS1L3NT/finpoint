@@ -29,7 +29,7 @@ export default function StatementSearchSheet({
 }: {
 	title: string
 	placeholder?: string
-	filters?: { [key: string]: any }
+	filters?: globalThis.Record<string, string | undefined>
 	isOpen: boolean
 	setIsOpen: (isOpen: boolean) => void
 	handler: (statement: Statement) => Promise<void>
@@ -37,6 +37,16 @@ export default function StatementSearchSheet({
 }) {
 	const [query, setQuery] = useState("")
 	const [statements, setStatements] = useState<Statement[]>([])
+
+	const handleSearch = async () => {
+		const response = await fetch(statementIndexApiRoute.url({ query: { query, ...filters } }), {
+			headers: { Accept: "application/json" },
+		})
+
+		if (response.ok) {
+			setStatements(await response.json())
+		}
+	}
 
 	useEffect(() => {
 		if (!isOpen) {
@@ -49,16 +59,6 @@ export default function StatementSearchSheet({
 	useEffect(() => {
 		void handleSearch()
 	}, [query])
-
-	const handleSearch = async () => {
-		const response = await fetch(statementIndexApiRoute.url({ query: { query, ...filters } }), {
-			headers: { Accept: "application/json" },
-		})
-
-		if (response.ok) {
-			setStatements(await response.json())
-		}
-	}
 
 	return (
 		<Sheet open={isOpen} onOpenChange={setIsOpen}>

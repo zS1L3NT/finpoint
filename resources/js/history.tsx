@@ -1,14 +1,14 @@
 import { createContext, useContext, useEffect, useState } from "react"
 
-const NOOP = () => {
-	//
-}
+type HistoryItem = { name: string; url: string }
 
-const getStoredHistory = () =>
+const NOOP = () => undefined
+
+const getStoredHistory = (): HistoryItem[] =>
 	typeof localStorage === "undefined" ? [] : JSON.parse(localStorage.getItem("history") || "[]")
 
 const HistoryContext = createContext<{
-	latest: { name: string; url: string } | null
+	latest: HistoryItem | null
 	handlePush: (name: string) => () => void
 	handlePop: () => void
 	handleClear: () => void
@@ -20,7 +20,7 @@ const HistoryContext = createContext<{
 })
 
 export const HistoryProvider = ({ children }: { children: React.ReactNode }) => {
-	const [history, setHistory] = useState<{ name: string; url: string }[]>(getStoredHistory)
+	const [history, setHistory] = useState<HistoryItem[]>(getStoredHistory)
 
 	useEffect(() => {
 		if (typeof localStorage !== "undefined") {
@@ -31,7 +31,7 @@ export const HistoryProvider = ({ children }: { children: React.ReactNode }) => 
 	return (
 		<HistoryContext.Provider
 			value={{
-				latest: history[history.length - 1],
+				latest: history[history.length - 1] ?? null,
 				handlePush: name => () => {
 					setHistory(history => [
 						...history,

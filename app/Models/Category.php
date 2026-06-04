@@ -15,7 +15,8 @@ use Illuminate\Database\Eloquent\Model;
 #[Appends(['can_delete'])]
 class Category extends Model
 {
-    public static function booted() {
+    public static function booted()
+    {
         static::addGlobalScope('order', function (Builder $builder) {
             $builder->orderBy('name');
         });

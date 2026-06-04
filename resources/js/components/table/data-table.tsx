@@ -1,4 +1,10 @@
-import { ColumnDef, flexRender, getCoreRowModel, Row, useReactTable } from "@tanstack/react-table"
+import {
+	type ColumnDef,
+	flexRender,
+	getCoreRowModel,
+	type Row,
+	useReactTable,
+} from "@tanstack/react-table"
 import { AnimatePresence } from "framer-motion"
 import {
 	Table,
@@ -24,7 +30,7 @@ export default function DataTable<TData extends { id: string }, TValue>({
 	header?: React.ReactNode
 	selectedIds?: string[]
 	emptyMessage?: string
-	getRowClassName?: (row: Row<TData>) => any
+	getRowClassName?: (row: Row<TData>) => string | undefined
 	mobileRow?: (row: Row<TData>) => React.ReactNode
 }) {
 	const table = useReactTable({

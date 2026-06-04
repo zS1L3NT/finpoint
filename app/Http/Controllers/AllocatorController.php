@@ -13,7 +13,7 @@ class AllocatorController extends Controller
             query: request()->query('query'),
             start_date: request()->query('start_date'),
             end_date: request()->query('end_date'),
-            is_allocable: "true"
+            is_allocable: 'true'
         )
             ->paginate(request()->query('per_page') ?? 100)
             ->withQueryString();

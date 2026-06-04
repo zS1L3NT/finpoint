@@ -1,8 +1,14 @@
 import { router, usePage } from "@inertiajs/react"
 
 export function useSearchParam(key: string): [string | null, (value: string | null) => void]
-export function useSearchParam(key: string, defaultValue: string): [string, (value: string) => void]
-export function useSearchParam(key: string, defaultValue?: string): [any, (value: any) => void] {
+export function useSearchParam(
+	key: string,
+	defaultValue: string,
+): [string, (value: string | null) => void]
+export function useSearchParam(
+	key: string,
+	defaultValue?: string,
+): [string | null, (value: string | null) => void] {
 	const page = usePage()
 	const url = new URL(page.url, "http://localhost")
 
@@ -17,5 +23,5 @@ export function useSearchParam(key: string, defaultValue?: string): [any, (value
 		router.visit(url.pathname + url.search, { preserveState: true, preserveScroll: true })
 	}
 
-	return [value, setValue] as const
+	return [value, setValue]
 }

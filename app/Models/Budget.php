@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\Scopes\BudgetUsedScope;
 use App\Pivots\BudgetRecord;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Attributes\Table;
@@ -36,11 +35,11 @@ class Budget extends Model
         return self::query()
             ->when(
                 $query,
-                fn($query, $q) => $query
+                fn ($query, $q) => $query
                     ->where(
-                        fn($query) => $query
-                            ->where('name', 'like', '%' . $q . '%')
-                            ->orWhere('amount', 'like', '%' . $q . '%')
+                        fn ($query) => $query
+                            ->where('name', 'like', '%'.$q.'%')
+                            ->orWhere('amount', 'like', '%'.$q.'%')
                     )
             )
             ->groupBy('budgets.id');

@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
@@ -16,7 +17,7 @@ return new class extends Migration {
 
         foreach (DB::table('records')->get() as $record) {
             DB::table('records')->where('id', $record->id)->update([
-                'quota_id' => DB::table('record_quota')->where('record_id', $record->id)->firstOrFail()->quota_id
+                'quota_id' => DB::table('record_quota')->where('record_id', $record->id)->firstOrFail()->quota_id,
             ]);
         }
 

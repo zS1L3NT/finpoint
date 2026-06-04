@@ -20,6 +20,12 @@ type Props<T> = FormFieldProps & {
 }
 
 export default function ComboboxField<T>({
+	id,
+	label,
+	description,
+	errors,
+	disabled,
+	className,
 	value,
 	placeholder,
 	emptyText = "No items found.",
@@ -28,13 +34,18 @@ export default function ComboboxField<T>({
 	getItemString,
 	renderItem,
 	onChange,
-	...props
 }: Props<T>) {
-	const { id, disabled, errors } = props
 	const invalid = !!errors?.length
 
 	return (
-		<FormField {...props}>
+		<FormField
+			id={id}
+			label={label}
+			description={description}
+			errors={errors}
+			disabled={disabled}
+			className={className}
+		>
 			<Combobox
 				items={items}
 				itemToStringLabel={getItemString}

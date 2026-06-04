@@ -5,17 +5,17 @@ export type FieldErrorItem = { message?: string }
 export type FormFieldProps = {
 	id: string
 	label?: React.ReactNode
-	errors?: FieldErrorItem[]
-	className?: string
 	description?: React.ReactNode
+	errors?: FieldErrorItem[]
 	disabled?: boolean
+	className?: string
 }
 
 export function FormField({
 	id,
 	label,
-	errors,
 	description,
+	errors,
 	disabled,
 	children,
 	...props

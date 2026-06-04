@@ -26,12 +26,12 @@ export default function RecordSearchSheet({
 	filters,
 	isOpen,
 	setIsOpen,
-	trigger,
 	handler,
+	trigger,
 }: {
 	title: string
 	placeholder?: string
-	filters?: { [key: string]: any }
+	filters?: globalThis.Record<string, string | undefined>
 	isOpen: boolean
 	setIsOpen: (isOpen: boolean) => void
 	handler: (record: Record) => Promise<void>
@@ -39,6 +39,16 @@ export default function RecordSearchSheet({
 }) {
 	const [query, setQuery] = useState("")
 	const [records, setRecords] = useState<Record[]>([])
+
+	const handleSearch = async () => {
+		const response = await fetch(recordIndexApiRoute.url({ query: { query, ...filters } }), {
+			headers: { Accept: "application/json" },
+		})
+
+		if (response.ok) {
+			setRecords(await response.json())
+		}
+	}
 
 	useEffect(() => {
 		if (!isOpen) {
@@ -51,16 +61,6 @@ export default function RecordSearchSheet({
 	useEffect(() => {
 		void handleSearch()
 	}, [query])
-
-	const handleSearch = async () => {
-		const response = await fetch(recordIndexApiRoute.url({ query: { query, ...filters } }), {
-			headers: { Accept: "application/json" },
-		})
-
-		if (response.ok) {
-			setRecords(await response.json())
-		}
-	}
 
 	return (
 		<Sheet open={isOpen} onOpenChange={setIsOpen}>

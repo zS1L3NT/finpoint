@@ -1,6 +1,5 @@
 import { Link } from "@inertiajs/react"
 import type { ColumnDef, Row } from "@tanstack/react-table"
-import type { ReactNode } from "react"
 import AllocateBar from "@/components/allocate-bar"
 import { Button } from "@/components/ui/button"
 import { useHistory } from "@/history"
@@ -102,8 +101,8 @@ export function useStatementMobileRow<TStatement extends StatementRow>({
 	pageName,
 	leading,
 }: StatementTableOptions & {
-	leading?: (statement: TStatement) => ReactNode
-}): (row: Row<TStatement>) => ReactNode {
+	leading?: (statement: TStatement) => React.ReactNode
+}): (row: Row<TStatement>) => React.ReactNode {
 	const { handlePush } = useHistory()
 
 	return row => {

@@ -88,49 +88,7 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 	const [isCreatingQuota, setIsCreatingQuota] = useState(false)
 	const [isAttachingQuota, setIsAttachingQuota] = useState(false)
 
-	const setDate = (date: Date) => {
-		const dt = DateTime.fromJSDate(date)
-		router.visit(
-			dashboardWebRoute({
-				query: {
-					month: dt.toFormat("MMMM"),
-					year: dt.year,
-					query: queryParam || undefined,
-					quota_ids: quotaIdsParam || undefined,
-					show_no_quotas: showNoQuotaParam || undefined,
-				},
-			}),
-			{
-				preserveState: true,
-				preserveScroll: true,
-			},
-		)
-	}
-
-	const detach = async () => {
-		if (!selectedWithQuota.length) {
-			return
-		}
-
-		const responses = await Promise.all(
-			selectedWithQuota.map(record =>
-				fetch(recordQuotaDetachApiRoute({ record }).url, {
-					method: "POST",
-					body: withMethod(new FormData(), "DELETE"),
-					headers: { Accept: "application/json" },
-				}),
-			),
-		)
-
-		if (responses.every(response => response.ok)) {
-			setSelected([])
-
-			setTimeout(() => {
-				router.reload()
-			}, 300)
-		}
-	}
-
+	const selectedWithQuota = selected.filter(r => r.quota)
 	const quotaStats = quotas.map(quota => {
 		const quotaRecords = records.filter(record => record.quota?.id === quota.id)
 		const spent = Math.abs(
@@ -179,7 +137,17 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 				? `${activeQuotaFilters.length} selected`
 				: null
 
-	const selectedWithQuota = selected.filter(r => r.quota)
+	/**
+	 * These variables contain code specific to the developer's dashboard workflow
+	 * You can comment this out or remove it if it doesn't apply to your use case
+	 */
+	const dailyQuota = quotas.find(q => q.name === "Daily")
+	const limitAggregations = getLimitAggregations(
+		records.filter(r => r.quota?.id === dailyQuota?.id),
+		date.startOf("month"),
+		date.endOf("month"),
+		dailyQuota?.amount ?? 0,
+	)
 
 	useEffect(() => {
 		const validIds = quotaIds.filter(id => quotas.some(quota => quota.id === id))
@@ -208,20 +176,51 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 	 * You can comment this out or remove it if it doesn't apply to your use case
 	 */
 	useEffect(() => {
-		setAreaQuota(quotas.find(q => q.name === "Daily") ?? null)
-	}, [quotas])
+		setAreaQuota(dailyQuota ?? null)
+	}, [dailyQuota])
 
-	/**
-	 * These variables contain code specific to the developer's dashboard workflow
-	 * You can comment this out or remove it if it doesn't apply to your use case
-	 */
-	const dailyQuota = quotas.find(q => q.name === "Daily")
-	const limitAggregations = getLimitAggregations(
-		records.filter(r => r.quota?.id === dailyQuota?.id),
-		date.startOf("month"),
-		date.endOf("month"),
-		dailyQuota?.amount ?? 0,
-	)
+	const setDate = (nextDate: Date) => {
+		const dt = DateTime.fromJSDate(nextDate)
+		router.visit(
+			dashboardWebRoute({
+				query: {
+					month: dt.toFormat("MMMM"),
+					year: dt.year,
+					query: queryParam || undefined,
+					quota_ids: quotaIdsParam || undefined,
+					show_no_quotas: showNoQuotaParam || undefined,
+				},
+			}),
+			{
+				preserveState: true,
+				preserveScroll: true,
+			},
+		)
+	}
+
+	const detach = async () => {
+		if (!selectedWithQuota.length) {
+			return
+		}
+
+		const responses = await Promise.all(
+			selectedWithQuota.map(record =>
+				fetch(recordQuotaDetachApiRoute({ record }).url, {
+					method: "POST",
+					body: withMethod(new FormData(), "DELETE"),
+					headers: { Accept: "application/json" },
+				}),
+			),
+		)
+
+		if (responses.every(response => response.ok)) {
+			setSelected([])
+
+			setTimeout(() => {
+				router.reload()
+			}, 300)
+		}
+	}
 
 	const recordColumns = useRecordColumns<Record>({
 		showQuota: true,

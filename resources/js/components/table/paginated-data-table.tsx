@@ -6,7 +6,6 @@ import {
 	useReactTable,
 } from "@tanstack/react-table"
 import { AnimatePresence } from "framer-motion"
-import type { ComponentProps } from "react"
 import PaginationFooter from "@/components/table/pagination-footer"
 import PaginationHeader from "@/components/table/pagination-header"
 import {
@@ -31,8 +30,8 @@ export default function PaginatedDataTable<TData extends { id: string }, TValue>
 }: {
 	paginated: Paginated<TData>
 	columns: ColumnDef<TData, TValue>[]
-	header: ComponentProps<typeof PaginationHeader>
-	footer: Omit<ComponentProps<typeof PaginationFooter>, "links">
+	header: React.ComponentProps<typeof PaginationHeader>
+	footer: Omit<React.ComponentProps<typeof PaginationFooter>, "links">
 	selectedIds?: string[]
 	emptyMessage?: string
 	mobileRow?: (row: Row<TData>) => React.ReactNode

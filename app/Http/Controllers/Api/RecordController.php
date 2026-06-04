@@ -57,10 +57,10 @@ class RecordController extends Controller
             $record->statements()
                 ->sync(
                     collect($dto['statements'] ?? [])
-                        ->mapWithKeys(fn($statement_dto) => [
+                        ->mapWithKeys(fn ($statement_dto) => [
                             $statement_dto['id'] => [
-                                'amount' => $statement_dto['amount']
-                            ]
+                                'amount' => $statement_dto['amount'],
+                            ],
                         ])
                         ->toArray()
                 );
@@ -104,10 +104,10 @@ class RecordController extends Controller
             $record->statements()
                 ->sync(
                     collect($dto['statements'] ?? [])
-                        ->mapWithKeys(fn($statement_dto) => [
+                        ->mapWithKeys(fn ($statement_dto) => [
                             $statement_dto['id'] => [
-                                'amount' => $statement_dto['amount']
-                            ]
+                                'amount' => $statement_dto['amount'],
+                            ],
                         ])
                         ->toArray()
                 );

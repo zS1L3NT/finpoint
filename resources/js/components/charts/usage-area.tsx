@@ -38,7 +38,7 @@ export default function UsageAreaChart({
 		const elapsedValues: (number | null)[] = []
 		const projectedValues: (number | null)[] = []
 
-		const data: {
+		const points: {
 			[date: string]: {
 				ein?: number
 				eout?: number
@@ -52,7 +52,7 @@ export default function UsageAreaChart({
 		for (let i = 0; i <= end.diff(start, "days").days; i++) {
 			const date = start.plus({ days: i })
 			dates.push(date)
-			data[date.toFormat("d MMM y")] = {}
+			points[date.toFormat("d MMM y")] = {}
 
 			elapsedValues[i] = null
 			projectedValues[i] = null
@@ -92,18 +92,18 @@ export default function UsageAreaChart({
 
 			if (limit) {
 				if (elapsedValue <= limit) {
-					data[key].ein = elapsedValue
+					points[key].ein = elapsedValue
 
 					// Currently doesn't exceed budget, but will exceed on next day
 					const nextElapsedValue = elapsedValues[i + 1]
 					if (nextElapsedValue !== null && nextElapsedValue > limit) {
-						data[key].eout = elapsedValue
+						points[key].eout = elapsedValue
 					}
 				} else {
-					data[key].eout = elapsedValue
+					points[key].eout = elapsedValue
 				}
 			} else {
-				data[key].usage = elapsedValue
+				points[key].usage = elapsedValue
 			}
 		}
 
@@ -117,26 +117,26 @@ export default function UsageAreaChart({
 
 			if (limit) {
 				if (projectedValue <= limit) {
-					data[key].pin = projectedValue
+					points[key].pin = projectedValue
 
 					// Currently doesn't exceed budget, but will exceed on next day
 					const nextProjectedValue = projectedValues[i + 1]
 					if (nextProjectedValue !== null && nextProjectedValue > limit) {
-						data[key].pout = projectedValue
+						points[key].pout = projectedValue
 
 						// Condition to skip setting projected in-budget
 						const previousProjectedValue = projectedValues[i - 1]
 						if (previousProjectedValue === null) {
-							delete data[key].pin
+							delete points[key].pin
 						}
 					}
 				} else {
-					data[key].pout = projectedValue
+					points[key].pout = projectedValue
 				}
 			}
 		}
 
-		return Object.entries(data).map(([date, { ein, eout, pin, pout, usage }]) => ({
+		return Object.entries(points).map(([date, { ein, eout, pin, pout, usage }]) => ({
 			date,
 			ein,
 			eout,

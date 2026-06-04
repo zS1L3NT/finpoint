@@ -35,7 +35,7 @@ import {
 	statementsWebRoute,
 } from "@/wayfinder/routes"
 
-export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
 	const { handleClear } = useHistory()
 	const { isMobile, setOpenMobile } = useSidebar()
 	const handleSidebarLink = () => {

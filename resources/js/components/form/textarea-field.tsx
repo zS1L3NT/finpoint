@@ -7,11 +7,28 @@ type Props = FormFieldProps & {
 	onChange: (value: string) => void
 }
 
-export default function TextareaField({ value, placeholder, onChange, ...props }: Props) {
-	const { id, disabled, errors } = props
+export default function TextareaField({
+	id,
+	label,
+	description,
+	errors,
+	disabled,
+	className,
+	value,
+	placeholder,
+	onChange,
+}: Props) {
+	const invalid = !!errors?.length
 
 	return (
-		<FormField {...props}>
+		<FormField
+			id={id}
+			label={label}
+			description={description}
+			errors={errors}
+			disabled={disabled}
+			className={className}
+		>
 			<Textarea
 				id={id}
 				name={id}
@@ -19,7 +36,7 @@ export default function TextareaField({ value, placeholder, onChange, ...props }
 				placeholder={placeholder}
 				disabled={disabled}
 				onChange={e => onChange(e.target.value)}
-				aria-invalid={!!errors?.length}
+				aria-invalid={invalid}
 			/>
 		</FormField>
 	)

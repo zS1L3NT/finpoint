@@ -25,12 +25,16 @@ const parseValue = (value: string) => {
 const toInputValue = (datetime: DateTime) => datetime.toFormat("yyyy-MM-dd'T'HH:mm")
 
 export default function DatetimeField({
+	id,
+	label,
+	description,
+	errors,
+	disabled,
+	className,
 	value,
 	placeholder = "Select date & time",
 	onChange,
-	...props
 }: Props) {
-	const { id, disabled, errors } = props
 	const selected = parseValue(value)
 	const selectedTime = selected ? selected.toFormat("HH:mm") : ""
 	const invalid = !!errors?.length
@@ -67,7 +71,14 @@ export default function DatetimeField({
 	}
 
 	return (
-		<FormField {...props}>
+		<FormField
+			id={id}
+			label={label}
+			description={description}
+			errors={errors}
+			disabled={disabled}
+			className={className}
+		>
 			<div className="grid w-full min-w-0 max-w-full grid-cols-1 gap-2 overflow-hidden sm:grid-cols-[minmax(0,1fr)_7.5rem]">
 				<Popover>
 					<PopoverTrigger

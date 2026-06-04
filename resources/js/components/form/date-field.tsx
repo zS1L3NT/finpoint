@@ -13,17 +13,28 @@ type Props = FormFieldProps & {
 }
 
 export default function DateField({
+	id,
+	label,
+	description,
+	errors,
+	disabled,
+	className,
 	value,
 	placeholder = "Select date",
 	onChange,
-	...props
 }: Props) {
-	const { id, disabled, errors } = props
 	const selected = parseDate(value)
 	const invalid = !!errors?.length
 
 	return (
-		<FormField {...props}>
+		<FormField
+			id={id}
+			label={label}
+			description={description}
+			errors={errors}
+			disabled={disabled}
+			className={className}
+		>
 			<div className="relative">
 				<Popover>
 					<PopoverTrigger
