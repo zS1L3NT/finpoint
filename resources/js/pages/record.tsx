@@ -6,13 +6,14 @@ import Icon from "@/components/icon"
 import AppHeader from "@/components/layout/app-header"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
+import RecordAmount from "@/components/record-amount"
 import DataTable from "@/components/table/data-table"
 import { useStatementColumns, useStatementMobileRow } from "@/components/table/statement-columns"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useFetch } from "@/hooks/use-fetch"
-import { classForCurrency, cn, formatCurrency, formatDatetime } from "@/lib/utils"
+import { formatDatetime } from "@/lib/utils"
 import { Allocation, CategoryWithChildren, Record, Statement } from "@/types"
 import { categoryIndexApiRoute, recordsWebRoute } from "@/wayfinder/routes"
 
@@ -82,8 +83,7 @@ export default function RecordPage({
 				<div className="grid gap-4 lg:grid-cols-4">
 					<DetailCard
 						label="Amount"
-						value={formatCurrency(record.amount)}
-						valueClassName={cn(classForCurrency(record.amount), "text-base")}
+						value={<RecordAmount record={record} className="text-base" />}
 					/>
 					<DetailCard
 						label="Category"

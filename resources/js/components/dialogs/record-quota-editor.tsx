@@ -2,6 +2,7 @@ import { router } from "@inertiajs/react"
 import { useState } from "react"
 import SelectField from "@/components/form/select-field"
 import Icon from "@/components/icon"
+import RecordAmount from "@/components/record-amount"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -23,7 +24,7 @@ import {
 	ItemTitle,
 } from "@/components/ui/item"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { classForCurrency, formatCurrency, formatDatetime } from "@/lib/utils"
+import { formatCurrency, formatDatetime } from "@/lib/utils"
 import { Quota, Record } from "@/types"
 import { recordQuotaAttachApiRoute } from "@/wayfinder/routes"
 
@@ -170,9 +171,7 @@ export default function RecordQuotaDialog({
 											</ItemDescription>
 										</ItemContent>
 										<ItemActions className="ml-auto">
-											<span className={classForCurrency(record.amount)}>
-												{formatCurrency(record.amount)}
-											</span>
+											<RecordAmount record={record} />
 										</ItemActions>
 									</Item>
 								))}

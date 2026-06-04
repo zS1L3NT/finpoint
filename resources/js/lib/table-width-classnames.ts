@@ -7,7 +7,7 @@ export const TABLE_WIDTH_CLASSNAMES = {
 	DESCRIPTION: "hidden xl:table-cell",
 	DATETIME: "w-40",
 	QUOTA: "w-24 xl:w-28",
-	AMOUNT: "w-20 xl:w-24",
+	AMOUNT: "w-32 xl:w-40",
 	AMOUNT_BAR: "w-48 xl:w-64",
 	BUDGET_USAGE: "w-64 xl:w-72",
 	BUDGET_WINDOW: "w-48",

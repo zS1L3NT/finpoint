@@ -2,11 +2,12 @@ import { Link } from "@inertiajs/react"
 import type { ColumnDef, Row } from "@tanstack/react-table"
 import type { ReactNode } from "react"
 import Icon from "@/components/icon"
+import RecordAmount from "@/components/record-amount"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useHistory } from "@/history"
 import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
-import { classForCurrency, cn, formatCurrency, formatDatetime } from "@/lib/utils"
+import { classForCurrency, cn, formatDatetime } from "@/lib/utils"
 import type { Allocation, Record } from "@/types"
 import { recordWebRoute } from "@/wayfinder/routes"
 
@@ -80,7 +81,13 @@ export function useRecordColumns<TRecord extends RecordRow>({
 				const value =
 					amount === "allocated" ? (row.original.pivot?.amount ?? 0) : row.original.amount
 
-				return <span className={classForCurrency(value)}>{formatCurrency(value)}</span>
+				return (
+					<RecordAmount
+						record={row.original}
+						amount={value}
+						showAccumulated={amount === "amount" && row.original.is_pending}
+					/>
+				)
 			},
 		},
 		{
@@ -184,7 +191,11 @@ export function useRecordMobileRow<TRecord extends RecordRow>({
 										classForCurrency(value),
 									)}
 								>
-									{formatCurrency(value)}
+									<RecordAmount
+										record={record}
+										amount={value}
+										showAccumulated={amount === "amount" && record.is_pending}
+									/>
 								</span>
 							</div>
 						</div>
@@ -241,7 +252,11 @@ export function useRecordMobileRow<TRecord extends RecordRow>({
 							{record.subtitle || "No extra context"}
 						</p>
 					</div>
-					<span className={classForCurrency(value)}>{formatCurrency(value)}</span>
+					<RecordAmount
+						record={record}
+						amount={value}
+						showAccumulated={amount === "amount" && record.is_pending}
+					/>
 				</div>
 
 				<div className="grid gap-2 text-xs text-muted-foreground">

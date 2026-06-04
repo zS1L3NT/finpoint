@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import Icon from "@/components/icon"
+import RecordAmount from "@/components/record-amount"
 import DataTable from "@/components/table/data-table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -15,7 +16,7 @@ import {
 	SheetTrigger,
 } from "@/components/ui/sheet"
 import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
-import { classForCurrency, formatCurrency, formatDatetime } from "@/lib/utils"
+import { formatDatetime } from "@/lib/utils"
 import { Record } from "@/types"
 import { recordIndexApiRoute } from "@/wayfinder/routes"
 
@@ -113,13 +114,7 @@ export default function RecordSearchSheet({
 												<div className="text-muted-foreground">
 													{formatDatetime(row.original.datetime)}
 												</div>
-												<span
-													className={classForCurrency(
-														row.original.amount,
-													)}
-												>
-													{formatCurrency(row.original.amount)}
-												</span>
+												<RecordAmount record={row.original} />
 											</div>
 										</div>
 									),
@@ -157,9 +152,7 @@ export default function RecordSearchSheet({
 												{formatDatetime(record.datetime)}
 											</p>
 										</div>
-										<span className={classForCurrency(record.amount)}>
-											{formatCurrency(record.amount)}
-										</span>
+										<RecordAmount record={record} />
 									</div>
 									<div className="flex justify-end">
 										<Button
