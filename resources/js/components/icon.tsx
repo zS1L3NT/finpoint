@@ -24,7 +24,6 @@ import {
 	HospitalIcon,
 	IceCreamBowlIcon,
 	IdCardIcon,
-	type LucideIcon,
 	MirrorRoundIcon,
 	MonitorSmartphoneIcon,
 	NavigationIcon,
@@ -41,8 +40,34 @@ import {
 	WarehouseIcon,
 	WineIcon,
 } from "lucide-react"
+import { DynamicIcon, IconName, iconNames } from "lucide-react/dynamic"
 
-export const CATEGORY_ICONS = {
+export default function Icon({
+	icon,
+	color,
+	size = 20,
+}: {
+	icon: string
+	color: string
+	size?: number
+}) {
+	const PreloadedIcon = PRELOADED_ICONS[icon as keyof typeof PRELOADED_ICONS]
+
+	return (
+		<div
+			className="flex justify-center items-center rounded"
+			style={{ width: size * 2, height: size * 2, backgroundColor: color }}
+		>
+			{PreloadedIcon ? (
+				<PreloadedIcon color="white" size={size} />
+			) : iconNames.includes(icon as IconName) ? (
+				<DynamicIcon name={icon as IconName} color="white" size={size} />
+			) : null}
+		</div>
+	)
+}
+
+const PRELOADED_ICONS = {
 	cpu: CpuIcon,
 	"monitor-smartphone": MonitorSmartphoneIcon,
 	"card-sim": CardSimIcon,
@@ -83,35 +108,4 @@ export const CATEGORY_ICONS = {
 	"id-card": IdCardIcon,
 	heart: HeartIcon,
 	film: FilmIcon,
-} satisfies Record<string, LucideIcon>
-
-export type CategoryIconName = keyof typeof CATEGORY_ICONS
-
-export const FALLBACK_CATEGORY_ICON: CategoryIconName = "circle-question-mark"
-
-export const CATEGORY_ICON_NAMES = Object.keys(CATEGORY_ICONS) as CategoryIconName[]
-
-export function isCategoryIconName(icon: string): icon is CategoryIconName {
-	return icon in CATEGORY_ICONS
-}
-
-export default function Icon({
-	icon,
-	color,
-	size = 20,
-}: {
-	icon: string
-	color: string
-	size?: number
-}) {
-	const CategoryIcon = CATEGORY_ICONS[isCategoryIconName(icon) ? icon : FALLBACK_CATEGORY_ICON]
-
-	return (
-		<div
-			className="flex justify-center items-center rounded"
-			style={{ width: size * 2, height: size * 2, backgroundColor: color }}
-		>
-			<CategoryIcon color="white" size={size} />
-		</div>
-	)
 }

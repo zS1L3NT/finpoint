@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { buttonVariants } from "./button";
 import { cn } from "@/lib/utils";
 
@@ -110,7 +110,7 @@ function MonthCal({ selectedMonth, onMonthSelect, callbacks, variant, minDate, m
                         }}
                         className={cn(buttonVariants({ variant: variant?.chevrons ?? "outline" }), "inline-flex items-center justify-center h-7 w-7 p-0 absolute left-1")}
                     >
-                        <ChevronLeftIcon className="opacity-50 h-4 w-4" />
+                        <ChevronLeft className="opacity-50 h-4 w-4" />
                     </button>
                     <button
                         onClick={() => {
@@ -119,7 +119,7 @@ function MonthCal({ selectedMonth, onMonthSelect, callbacks, variant, minDate, m
                         }}
                         className={cn(buttonVariants({ variant: variant?.chevrons ?? "outline" }), "inline-flex items-center justify-center h-7 w-7 p-0 absolute right-1")}
                     >
-                        <ChevronRightIcon className="opacity-50 h-4 w-4" />
+                        <ChevronRight className="opacity-50 h-4 w-4" />
                     </button>
                 </div>
             </div>

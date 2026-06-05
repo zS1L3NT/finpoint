@@ -109,8 +109,7 @@
 		"skipLibCheck": true /* Skip type checking all .d.ts files. */,
 		"baseUrl": ".",
 		"paths": {
-			"@/*": ["./resources/js/*"],
-			"lucide-react": ["./resources/js/lib/lucide-react.ts"]
+			"@/*": ["./resources/js/*"]
 		},
 		"jsx": "react-jsx"
 	},

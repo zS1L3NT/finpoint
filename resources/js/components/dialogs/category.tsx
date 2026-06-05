@@ -3,12 +3,7 @@ import { Trash2Icon } from "lucide-react"
 import { useEffect, useState } from "react"
 import ComboboxField from "@/components/form/combobox-field"
 import TextField from "@/components/form/text-field"
-import Icon, {
-	CATEGORY_ICON_NAMES,
-	type CategoryIconName,
-	FALLBACK_CATEGORY_ICON,
-	isCategoryIconName,
-} from "@/components/icon"
+import Icon from "@/components/icon"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import {
@@ -33,7 +28,7 @@ import {
 type CategoryFormValues = {
 	id: string
 	name: string
-	icon: CategoryIconName
+	icon: string
 	color: string
 	parent_category_id: string
 }
@@ -45,7 +40,7 @@ function isChildCategory(category: Category | CategoryWithChildren | null) {
 const EMPTY_FORM_VALUES: CategoryFormValues = {
 	id: "",
 	name: "",
-	icon: FALLBACK_CATEGORY_ICON,
+	icon: "",
 	color: "",
 	parent_category_id: "",
 }
@@ -79,9 +74,7 @@ export default function CategoryDialog({
 				? {
 						id: category.id,
 						name: category.name,
-						icon: isCategoryIconName(category.icon)
-							? category.icon
-							: FALLBACK_CATEGORY_ICON,
+						icon: category.icon,
 						color: category.color,
 						parent_category_id: category.parent_category_id ?? "",
 					}
@@ -176,22 +169,12 @@ export default function CategoryDialog({
 							errors={getApiFieldErrors("name")}
 							onChange={value => setValue("name", value)}
 						/>
-						<ComboboxField<CategoryIconName>
+						<TextField
 							id="icon"
 							label="Icon"
 							value={values.icon}
 							errors={getApiFieldErrors("icon")}
-							placeholder="Select icon"
-							items={CATEGORY_ICON_NAMES}
-							getItemId={icon => icon}
-							getItemString={icon => icon}
-							renderItem={icon => (
-								<div className="flex items-center gap-2">
-									<Icon icon={icon} color={values.color} size={10} />
-									{icon}
-								</div>
-							)}
-							onChange={value => setValue("icon", value ?? FALLBACK_CATEGORY_ICON)}
+							onChange={value => setValue("icon", value)}
 						/>
 						<TextField
 							id="color"

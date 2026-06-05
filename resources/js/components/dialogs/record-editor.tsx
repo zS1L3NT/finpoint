@@ -1,7 +1,7 @@
 import { router } from "@inertiajs/react"
 import { useForm, useStore } from "@tanstack/react-form"
 import { AnimatePresence, motion } from "framer-motion"
-import { CreditCardIcon, Link2Icon, Trash2Icon, TrashIcon, TriangleAlertIcon } from "lucide-react"
+import { AlertTriangleIcon, CreditCardIcon, Link2Icon, Trash2Icon, TrashIcon } from "lucide-react"
 import { DateTime } from "luxon"
 import { useEffect, useState } from "react"
 import AmountField from "@/components/form/amount-field"
@@ -313,7 +313,7 @@ export default function RecordEditorDialog({
 										exit={{ opacity: 0, height: 0, marginTop: -16 }}
 									>
 										<Alert className="mt-4 max-w-md border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-50">
-											<TriangleAlertIcon />
+											<AlertTriangleIcon />
 											<AlertTitle>
 												Amount does not match the sum of Allocation Amounts
 											</AlertTitle>
