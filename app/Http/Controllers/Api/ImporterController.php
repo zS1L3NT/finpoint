@@ -225,7 +225,7 @@ class ImporterController extends Controller
                         'account_id' => $account_id,
                         'datetime' => $datetime,
                         'description' => $statement['Transaction Description'],
-                        'amount' => $statement['Withdrawal'] !== 0 ? -$statement['Withdrawal'] : $statement['Deposit'],
+                        'amount' => $statement['Withdrawal'] != 0 ? -$statement['Withdrawal'] : $statement['Deposit'],
                     ];
 
                     $unique_key = implode("\n", [$data['account_id'], $datetime->format('Y-m-d H:i:s'), $data['description'], $data['amount']]);
