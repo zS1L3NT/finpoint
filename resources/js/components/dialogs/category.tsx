@@ -3,7 +3,12 @@ import { Trash2Icon } from "lucide-react"
 import { useEffect, useState } from "react"
 import ComboboxField from "@/components/form/combobox-field"
 import TextField from "@/components/form/text-field"
-import Icon from "@/components/icon"
+import Icon, {
+	CATEGORY_ICON_NAMES,
+	type CategoryIconName,
+	FALLBACK_CATEGORY_ICON,
+	isCategoryIconName,
+} from "@/components/icon"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import {
@@ -28,7 +33,7 @@ import {
 type CategoryFormValues = {
 	id: string
 	name: string
-	icon: string
+	icon: CategoryIconName
 	color: string
 	parent_category_id: string
 }
@@ -40,7 +45,7 @@ function isChildCategory(category: Category | CategoryWithChildren | null) {
 const EMPTY_FORM_VALUES: CategoryFormValues = {
 	id: "",
 	name: "",
-	icon: "",
+	icon: FALLBACK_CATEGORY_ICON,
 	color: "",
 	parent_category_id: "",
 }
@@ -74,7 +79,9 @@ export default function CategoryDialog({
 				? {
 						id: category.id,
 						name: category.name,
-						icon: category.icon,
+						icon: isCategoryIconName(category.icon)
+							? category.icon
+							: FALLBACK_CATEGORY_ICON,
 						color: category.color,
 						parent_category_id: category.parent_category_id ?? "",
 					}
@@ -169,12 +176,22 @@ export default function CategoryDialog({
 							errors={getApiFieldErrors("name")}
 							onChange={value => setValue("name", value)}
 						/>
-						<TextField
+						<ComboboxField<CategoryIconName>
 							id="icon"
 							label="Icon"
 							value={values.icon}
 							errors={getApiFieldErrors("icon")}
-							onChange={value => setValue("icon", value)}
+							placeholder="Select icon"
+							items={CATEGORY_ICON_NAMES}
+							getItemId={icon => icon}
+							getItemString={icon => icon}
+							renderItem={icon => (
+								<div className="flex items-center gap-2">
+									<Icon icon={icon} color={values.color} size={10} />
+									{icon}
+								</div>
+							)}
+							onChange={value => setValue("icon", value ?? FALLBACK_CATEGORY_ICON)}
 						/>
 						<TextField
 							id="color"
