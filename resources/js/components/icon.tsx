@@ -1,46 +1,17 @@
-import {
-	AppleIcon,
-	ArrowLeftRightIcon,
-	BikeIcon,
-	BookOpenIcon,
-	CardSimIcon,
-	CarTaxiFrontIcon,
-	ChartCandlestickIcon,
-	CircleQuestionMarkIcon,
-	CoffeeIcon,
-	CpuIcon,
-	CupSodaIcon,
-	DollarSignIcon,
-	FilmIcon,
-	FolderCodeIcon,
-	FootprintsIcon,
-	GiftIcon,
-	GuitarIcon,
-	HandCoinsIcon,
-	HandshakeIcon,
-	HatGlassesIcon,
-	HeartIcon,
-	HeartPulseIcon,
-	HospitalIcon,
-	IceCreamBowlIcon,
-	IdCardIcon,
-	MirrorRoundIcon,
-	MonitorSmartphoneIcon,
-	NavigationIcon,
-	PartyPopperIcon,
-	PlaneIcon,
-	ScissorsIcon,
-	ShirtIcon,
-	ShoppingBagIcon,
-	SoupIcon,
-	TicketIcon,
-	ToolboxIcon,
-	TrainFrontIcon,
-	UtensilsIcon,
-	WarehouseIcon,
-	WineIcon,
-} from "lucide-react"
-import { DynamicIcon, IconName, iconNames } from "lucide-react/dynamic"
+import { Icon as IconifyIcon } from "@iconify/react"
+
+const ICONIFY_PREFIX = "lucide"
+const FALLBACK_ICON = `${ICONIFY_PREFIX}:circle-question-mark`
+
+function toIconifyName(icon: string) {
+	const value = icon.trim()
+
+	if (!value) {
+		return FALLBACK_ICON
+	}
+
+	return value.includes(":") ? value : `${ICONIFY_PREFIX}:${value}`
+}
 
 export default function Icon({
 	icon,
@@ -51,61 +22,29 @@ export default function Icon({
 	color: string
 	size?: number
 }) {
-	const PreloadedIcon = PRELOADED_ICONS[icon as keyof typeof PRELOADED_ICONS]
+	const name = toIconifyName(icon)
 
 	return (
 		<div
 			className="flex justify-center items-center rounded"
 			style={{ width: size * 2, height: size * 2, backgroundColor: color }}
 		>
-			{PreloadedIcon ? (
-				<PreloadedIcon color="white" size={size} />
-			) : iconNames.includes(icon as IconName) ? (
-				<DynamicIcon name={icon as IconName} color="white" size={size} />
-			) : null}
+			<IconifyIcon
+				icon={name}
+				color="white"
+				width={size}
+				height={size}
+				fallback={
+					name === FALLBACK_ICON ? null : (
+						<IconifyIcon
+							icon={FALLBACK_ICON}
+							color="white"
+							width={size}
+							height={size}
+						/>
+					)
+				}
+			/>
 		</div>
 	)
-}
-
-const PRELOADED_ICONS = {
-	cpu: CpuIcon,
-	"monitor-smartphone": MonitorSmartphoneIcon,
-	"card-sim": CardSimIcon,
-	"folder-code": FolderCodeIcon,
-	"circle-question-mark": CircleQuestionMarkIcon,
-	"arrow-left-right": ArrowLeftRightIcon,
-	"dollar-sign": DollarSignIcon,
-	"hand-coins": HandCoinsIcon,
-	gift: GiftIcon,
-	"chart-candlestick": ChartCandlestickIcon,
-	handshake: HandshakeIcon,
-	navigation: NavigationIcon,
-	plane: PlaneIcon,
-	bike: BikeIcon,
-	"car-taxi-front": CarTaxiFrontIcon,
-	"train-front": TrainFrontIcon,
-	"heart-pulse": HeartPulseIcon,
-	"mirror-round": MirrorRoundIcon,
-	scissors: ScissorsIcon,
-	hospital: HospitalIcon,
-	"shopping-bag": ShoppingBagIcon,
-	"hat-glasses": HatGlassesIcon,
-	shirt: ShirtIcon,
-	footprints: FootprintsIcon,
-	utensils: UtensilsIcon,
-	apple: AppleIcon,
-	coffee: CoffeeIcon,
-	soup: SoupIcon,
-	wine: WineIcon,
-	"ice-cream-bowl": IceCreamBowlIcon,
-	"cup-soda": CupSodaIcon,
-	"party-popper": PartyPopperIcon,
-	warehouse: WarehouseIcon,
-	"book-open": BookOpenIcon,
-	ticket: TicketIcon,
-	toolbox: ToolboxIcon,
-	guitar: GuitarIcon,
-	"id-card": IdCardIcon,
-	heart: HeartIcon,
-	film: FilmIcon,
 }

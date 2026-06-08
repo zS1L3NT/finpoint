@@ -1,4 +1,4 @@
-import { PencilIcon, ReceiptTextIcon } from "lucide-react"
+import { Icon as IconifyIcon } from "@iconify/react"
 import { useState } from "react"
 import DetailCard from "@/components/detail-card"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
@@ -59,7 +59,7 @@ export default function RecordPage({
 					}
 					subtitle={record.description}
 					description="Record details"
-					icon={ReceiptTextIcon}
+					icon="lucide:receipt-text"
 					actions={
 						<RecordEditorDialog
 							record={record}
@@ -69,7 +69,7 @@ export default function RecordPage({
 							setIsOpen={setIsEditingRecord}
 							trigger={
 								<Button className="w-full sm:w-auto">
-									<PencilIcon /> Edit Record
+									<IconifyIcon icon="lucide:pencil" /> Edit Record
 								</Button>
 							}
 						/>

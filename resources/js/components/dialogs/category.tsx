@@ -1,5 +1,5 @@
+import { Icon as IconifyIcon } from "@iconify/react"
 import { router } from "@inertiajs/react"
-import { Trash2Icon } from "lucide-react"
 import { useEffect, useState } from "react"
 import ComboboxField from "@/components/form/combobox-field"
 import TextField from "@/components/form/text-field"
@@ -239,7 +239,7 @@ export default function CategoryDialog({
 							onClick={handleDelete}
 							disabled={!category.can_delete}
 						>
-							<Trash2Icon /> Delete
+							<IconifyIcon icon="lucide:trash-2" /> Delete
 						</Button>
 					) : null}
 					<DialogClose

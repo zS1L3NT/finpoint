@@ -1,4 +1,4 @@
-import { ListFilterIcon, PlusIcon, ReceiptTextIcon } from "lucide-react"
+import { Icon as IconifyIcon } from "@iconify/react"
 import { useState } from "react"
 import RecordCreatorDialog from "@/components/dialogs/record-creator"
 import DateField from "@/components/form/date-field"
@@ -60,7 +60,7 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 					title="Records"
 					subtitle="Browse and manage your financial records."
 					description="Ledger view"
-					icon={ReceiptTextIcon}
+					icon="lucide:receipt-text"
 				/>
 
 				<PaginatedDataTable
@@ -81,7 +81,7 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 											variant={pendingFilterLabel ? "secondary" : "outline"}
 											className="w-full sm:w-auto"
 										>
-											<ListFilterIcon /> Filter status
+											<IconifyIcon icon="lucide:list-filter" /> Filter status
 											{pendingFilterLabel ? (
 												<Badge variant="outline">
 													{pendingFilterLabel}
@@ -144,7 +144,7 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 								setIsOpen={setIsCreatingRecord}
 								trigger={
 									<Button className="w-full sm:w-auto">
-										<PlusIcon /> Create Pending Record
+										<IconifyIcon icon="lucide:plus" /> Create Pending Record
 									</Button>
 								}
 							/>

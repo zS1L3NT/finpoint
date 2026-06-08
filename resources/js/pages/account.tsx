@@ -1,4 +1,4 @@
-import { LandmarkIcon, PencilIcon } from "lucide-react"
+import { Icon as IconifyIcon } from "@iconify/react"
 import { useState } from "react"
 import DetailCard from "@/components/detail-card"
 import AccountDialog from "@/components/dialogs/account"
@@ -43,7 +43,7 @@ export default function AccountPage({
 					title={account.name}
 					subtitle={`${account.bank} account`}
 					description="Account details"
-					icon={LandmarkIcon}
+					icon="lucide:landmark"
 					actions={
 						<AccountDialog
 							account={account}
@@ -51,7 +51,7 @@ export default function AccountPage({
 							setIsOpen={setIsEditingAccount}
 							trigger={
 								<Button className="w-full sm:w-auto">
-									<PencilIcon /> Edit Account
+									<IconifyIcon icon="lucide:pencil" /> Edit Account
 								</Button>
 							}
 						/>

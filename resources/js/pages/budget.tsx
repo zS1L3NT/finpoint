@@ -1,12 +1,5 @@
+import { Icon as IconifyIcon } from "@iconify/react"
 import { router } from "@inertiajs/react"
-import {
-	Link2Icon,
-	Link2OffIcon,
-	PencilIcon,
-	PiggyBankIcon,
-	SparklesIcon,
-	WrenchIcon,
-} from "lucide-react"
 import { useState } from "react"
 import CategoriesPieChart from "@/components/charts/categories-pie"
 import UsageAreaChart from "@/components/charts/usage-area"
@@ -71,7 +64,7 @@ export default function BudgetPage({ budget, records }: { budget: Budget; record
 		actionWidth: TABLE_WIDTH_CLASSNAMES.ACTIONS_OPEN_DETACH,
 		extraActions: record => (
 			<Button variant="destructive" size="sm" onClick={() => detach(record)}>
-				<Link2OffIcon /> Detach
+				<IconifyIcon icon="lucide:link-2-off" /> Detach
 			</Button>
 		),
 	})
@@ -79,7 +72,7 @@ export default function BudgetPage({ budget, records }: { budget: Budget; record
 		pageName: `Budget ${budget.id}`,
 		extraActions: record => (
 			<Button variant="destructive" size="sm" onClick={() => detach(record)}>
-				<Link2OffIcon /> Detach
+				<IconifyIcon icon="lucide:link-2-off" /> Detach
 			</Button>
 		),
 	})
@@ -101,9 +94,9 @@ export default function BudgetPage({ budget, records }: { budget: Budget; record
 					subtitle={
 						<div className="flex items-center gap-1 text-muted-foreground">
 							{budget.automatic ? (
-								<SparklesIcon className="size-4" />
+								<IconifyIcon icon="lucide:sparkles" className="size-4" />
 							) : (
-								<WrenchIcon className="size-4" />
+								<IconifyIcon icon="lucide:wrench" className="size-4" />
 							)}
 							<span>
 								{budget.automatic ? "Automatic" : "Manual"} record attachment
@@ -111,7 +104,7 @@ export default function BudgetPage({ budget, records }: { budget: Budget; record
 						</div>
 					}
 					description="Budget details"
-					icon={PiggyBankIcon}
+					icon="lucide:piggy-bank"
 					actions={
 						<BudgetEditorDialog
 							budget={budget}
@@ -119,7 +112,7 @@ export default function BudgetPage({ budget, records }: { budget: Budget; record
 							setIsOpen={setIsEditingBudget}
 							trigger={
 								<Button className="w-full sm:w-auto">
-									<PencilIcon /> Edit Budget
+									<IconifyIcon icon="lucide:pencil" /> Edit Budget
 								</Button>
 							}
 						/>
@@ -179,7 +172,7 @@ export default function BudgetPage({ budget, records }: { budget: Budget; record
 								handler={attach}
 								trigger={
 									<Button className="w-full sm:w-auto">
-										<Link2Icon /> Attach Record
+										<IconifyIcon icon="lucide:link-2" /> Attach Record
 									</Button>
 								}
 							/>

@@ -1,6 +1,6 @@
+import { Icon as IconifyIcon } from "@iconify/react"
 import { router } from "@inertiajs/react"
 import { useForm } from "@tanstack/react-form"
-import { Trash2Icon } from "lucide-react"
 import AmountField from "@/components/form/amount-field"
 import DateField from "@/components/form/date-field"
 import TextField from "@/components/form/text-field"
@@ -224,7 +224,7 @@ export default function BudgetEditorDialog({
 						className="mr-auto"
 						onClick={handleDelete}
 					>
-						<Trash2Icon /> Delete
+						<IconifyIcon icon="lucide:trash-2" /> Delete
 					</Button>
 					<DialogClose
 						render={

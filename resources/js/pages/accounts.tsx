@@ -1,5 +1,4 @@
 import { Link } from "@inertiajs/react"
-import { LandmarkIcon } from "lucide-react"
 import AppHeader from "@/components/layout/app-header"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
@@ -28,7 +27,7 @@ export default function AccountsPage({ accounts }: { accounts: Paginated<Account
 					title="Accounts"
 					subtitle="Manage imported bank accounts and their display names."
 					description="Account directory"
-					icon={LandmarkIcon}
+					icon="lucide:landmark"
 				/>
 
 				<PaginatedDataTable

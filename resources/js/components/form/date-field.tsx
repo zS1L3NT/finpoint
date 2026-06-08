@@ -1,4 +1,4 @@
-import { CalendarIcon, XIcon } from "lucide-react"
+import { Icon as IconifyIcon } from "@iconify/react"
 import { DateTime } from "luxon"
 import { FormField, type FormFieldProps } from "@/components/form/field"
 import { Button } from "@/components/ui/button"
@@ -51,7 +51,7 @@ export default function DateField({
 									invalid ? "border-destructive" : null,
 								)}
 							>
-								<CalendarIcon />
+								<IconifyIcon icon="lucide:calendar" />
 								{selected.isValid ? (
 									selected.toFormat("d MMM yyyy")
 								) : (
@@ -84,7 +84,7 @@ export default function DateField({
 						disabled={disabled}
 						onClick={() => onChange("")}
 					>
-						<XIcon />
+						<IconifyIcon icon="lucide:x" />
 					</Button>
 				) : null}
 			</div>

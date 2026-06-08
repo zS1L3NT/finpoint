@@ -1,5 +1,5 @@
+import { Icon as IconifyIcon } from "@iconify/react"
 import { Link } from "@inertiajs/react"
-import { ArrowLeftIcon, type LucideIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useHistory } from "@/history"
 
@@ -14,7 +14,7 @@ export default function PageHeader({
 	title: React.ReactNode
 	subtitle?: React.ReactNode
 	description: React.ReactNode
-	icon: LucideIcon
+	icon: string
 	actions?: React.ReactNode
 	back?: { name: React.ReactNode; url: string }
 }) {
@@ -31,7 +31,7 @@ export default function PageHeader({
 						asChild
 					>
 						<Link href={latest.url} onClick={handlePop}>
-							<ArrowLeftIcon />
+							<IconifyIcon icon="lucide:arrow-left" />
 							Back to {latest.name}
 						</Link>
 					</Button>
@@ -39,7 +39,7 @@ export default function PageHeader({
 
 				<div className="flex min-w-0 flex-col gap-1">
 					<div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground md:tracking-[0.22em]">
-						<Icon className="size-3" />
+						<IconifyIcon icon={Icon} className="size-3" />
 						{description}
 					</div>
 					<h2 className="text-2xl font-semibold tracking-tight break-words md:text-3xl">

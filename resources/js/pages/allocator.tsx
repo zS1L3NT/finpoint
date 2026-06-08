@@ -1,4 +1,4 @@
-import { Link2Icon, LinkIcon, PlusIcon } from "lucide-react"
+import { Icon as IconifyIcon } from "@iconify/react"
 import { useState } from "react"
 import DetailCard from "@/components/detail-card"
 import RecordCreatorDialog from "@/components/dialogs/record-creator"
@@ -78,7 +78,7 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 					title="Allocator"
 					subtitle="Allocate bank statements to app records."
 					description="Allocation workspace"
-					icon={LinkIcon}
+					icon="lucide:link"
 				/>
 
 				<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -154,7 +154,7 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 											disabled={!selectedStatements.length}
 											className="w-full sm:w-auto"
 										>
-											<PlusIcon /> Create Record
+											<IconifyIcon icon="lucide:plus" /> Create Record
 										</Button>
 									}
 									clear={() => setSelectedStatements([])}
@@ -178,7 +178,7 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 											disabled={!selectedStatements.length}
 											className="w-full sm:w-auto"
 										>
-											<Link2Icon /> Attach to Record
+											<IconifyIcon icon="lucide:link-2" /> Attach to Record
 										</Button>
 									}
 								/>

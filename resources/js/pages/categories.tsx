@@ -1,4 +1,4 @@
-import { PencilIcon, PlusIcon, TagIcon } from "lucide-react"
+import { Icon as IconifyIcon } from "@iconify/react"
 import { useState } from "react"
 import CategoryDialog from "@/components/dialogs/category"
 import Icon from "@/components/icon"
@@ -26,14 +26,14 @@ export default function CategoriesPage({ categories }: { categories: CategoryWit
 					title="Categories"
 					subtitle="Manage top-level categories and their nested children."
 					description="Category map"
-					icon={TagIcon}
+					icon="lucide:tag"
 					actions={
 						<Button
 							type="button"
 							className="w-full sm:w-auto"
 							onClick={() => setDialogState({ mode: "create" })}
 						>
-							<PlusIcon /> Create Category
+							<IconifyIcon icon="lucide:plus" /> Create Category
 						</Button>
 					}
 				/>
@@ -115,7 +115,7 @@ function CategoryTreeItem({
 							{category.children.length === 1 ? "" : "ren"}
 						</span>
 					) : null}
-					<PencilIcon className="size-3.5" />
+					<IconifyIcon icon="lucide:pencil" className="size-3.5" />
 				</div>
 			</button>
 

@@ -1,5 +1,5 @@
+import { Icon as IconifyIcon } from "@iconify/react"
 import { Link } from "@inertiajs/react"
-import { PiggyBankIcon, PlusIcon, SparklesIcon, WrenchIcon } from "lucide-react"
 import { DateTime } from "luxon"
 import { useState } from "react"
 import BudgetCreatorDialog from "@/components/dialogs/budget-creator"
@@ -35,7 +35,7 @@ export default function BudgetsPage({ budgets }: { budgets: Paginated<Budget> })
 					title="Budgets"
 					subtitle="Track fixed spending windows, monitor how much has already been consumed, and jump straight into the records inside each budget."
 					description="Budget planner"
-					icon={PiggyBankIcon}
+					icon="lucide:piggy-bank"
 				/>
 
 				<PaginatedDataTable
@@ -111,9 +111,9 @@ export default function BudgetsPage({ budgets }: { budgets: Paginated<Budget> })
 							cell: ({ row }) => (
 								<div className="flex items-center gap-2 text-muted-foreground pe-8">
 									{row.original.automatic ? (
-										<SparklesIcon className="size-4" />
+										<IconifyIcon icon="lucide:sparkles" className="size-4" />
 									) : (
-										<WrenchIcon className="size-4" />
+										<IconifyIcon icon="lucide:wrench" className="size-4" />
 									)}
 									<span>{row.original.automatic ? "Automatic" : "Manual"}</span>
 								</div>
@@ -146,7 +146,7 @@ export default function BudgetsPage({ budgets }: { budgets: Paginated<Budget> })
 								setIsOpen={setIsCreatingBudget}
 								trigger={
 									<Button className="w-full sm:w-auto">
-										<PlusIcon /> New Budget
+										<IconifyIcon icon="lucide:plus" /> New Budget
 									</Button>
 								}
 							/>
@@ -192,9 +192,15 @@ export default function BudgetsPage({ budgets }: { budgets: Paginated<Budget> })
 										<span>Type</span>
 										<span className="flex items-center gap-1">
 											{budget.automatic ? (
-												<SparklesIcon className="size-3.5" />
+												<IconifyIcon
+													icon="lucide:sparkles"
+													className="size-3.5"
+												/>
 											) : (
-												<WrenchIcon className="size-3.5" />
+												<IconifyIcon
+													icon="lucide:wrench"
+													className="size-3.5"
+												/>
 											)}
 											{budget.automatic ? "Automatic" : "Manual"}
 										</span>

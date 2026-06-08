@@ -1,5 +1,5 @@
+import { Icon as IconifyIcon } from "@iconify/react"
 import { useForm, useStore } from "@tanstack/react-form"
-import { FileIcon, ImportIcon } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import SelectField from "@/components/form/select-field"
@@ -118,7 +118,7 @@ export default function ImporterPage({ accounts }: { accounts: Account[] }) {
 					title="Importer"
 					subtitle="Upload one or more bank CSV exports, create any missing accounts, and move straight into allocation once the feed is loaded."
 					description="Import workspace"
-					icon={ImportIcon}
+					icon="lucide:import"
 				/>
 
 				<form
@@ -281,7 +281,10 @@ export default function ImporterPage({ accounts }: { accounts: Account[] }) {
 									{files.map(file => (
 										<Item key={`${file.name}-${file.size}`} variant="outline">
 											<ItemMedia>
-												<FileIcon className="size-5" />
+												<IconifyIcon
+													icon="lucide:file"
+													className="size-5"
+												/>
 											</ItemMedia>
 											<ItemContent>
 												<ItemTitle>{file.name}</ItemTitle>
@@ -297,7 +300,7 @@ export default function ImporterPage({ accounts }: { accounts: Account[] }) {
 
 						<CardFooter>
 							<Button type="submit" variant="outline" className="w-full">
-								<ImportIcon />
+								<IconifyIcon icon="lucide:import" />
 								Import
 							</Button>
 						</CardFooter>

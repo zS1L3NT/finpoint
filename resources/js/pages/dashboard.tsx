@@ -1,15 +1,5 @@
+import { Icon as IconifyIcon } from "@iconify/react"
 import { router } from "@inertiajs/react"
-import {
-	ArrowLeftIcon,
-	ArrowRightIcon,
-	CalendarIcon,
-	CircleDollarSignIcon,
-	Link2Icon,
-	Link2OffIcon,
-	ListFilterIcon,
-	PencilIcon,
-	PlusIcon,
-} from "lucide-react"
 import { DateTime } from "luxon"
 import { useEffect, useState } from "react"
 import CategoriesPieChart from "@/components/charts/categories-pie"
@@ -252,20 +242,23 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 					title={`Dashboard for ${month} ${year}`}
 					subtitle="Monthly quotas and recent records overview"
 					description="Monthly Overview"
-					icon={CircleDollarSignIcon}
+					icon="lucide:circle-dollar-sign"
 					actions={
 						<ButtonGroup className="w-full sm:w-fit">
 							<Button
 								variant="outline"
 								onClick={() => setDate(date.minus({ month: 1 }).toJSDate())}
 							>
-								<ArrowLeftIcon />
+								<IconifyIcon icon="lucide:arrow-left" />
 							</Button>
 							<Popover>
 								<PopoverTrigger
 									render={
 										<Button variant="outline" className="flex-1 sm:w-32">
-											<CalendarIcon className="mr-2 h-4 w-4" />
+											<IconifyIcon
+												icon="lucide:calendar"
+												className="mr-2 h-4 w-4"
+											/>
 											{date.toFormat("MMM yyyy")}
 										</Button>
 									}
@@ -281,7 +274,7 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 								variant="outline"
 								onClick={() => setDate(date.plus({ month: 1 }).toJSDate())}
 							>
-								<ArrowRightIcon />
+								<IconifyIcon icon="lucide:arrow-right" />
 							</Button>
 						</ButtonGroup>
 					}
@@ -308,7 +301,7 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 									setIsOpen={setIsCreatingQuota}
 									trigger={
 										<Button size="sm">
-											<PlusIcon /> Create Quota
+											<IconifyIcon icon="lucide:plus" /> Create Quota
 										</Button>
 									}
 								/>
@@ -344,7 +337,7 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 											}
 											trigger={
 												<Button variant="outline" size="sm">
-													<PencilIcon /> Edit
+													<IconifyIcon icon="lucide:pencil" /> Edit
 												</Button>
 											}
 										/>
@@ -487,7 +480,8 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 														}
 														className="w-full sm:w-auto"
 													>
-														<ListFilterIcon /> Filter quotas
+														<IconifyIcon icon="lucide:list-filter" />{" "}
+														Filter quotas
 														{quotaFilterLabel ? (
 															<Badge variant="outline">
 																{quotaFilterLabel}
@@ -566,7 +560,8 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 													disabled={!selected.length}
 													className="w-full sm:w-auto"
 												>
-													<Link2Icon /> Attach to Quota
+													<IconifyIcon icon="lucide:link-2" /> Attach to
+													Quota
 												</Button>
 											}
 										/>
@@ -576,7 +571,7 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 											onClick={() => void detach()}
 											className="w-full sm:w-auto"
 										>
-											<Link2OffIcon />
+											<IconifyIcon icon="lucide:link-2-off" />
 											Detach from Quota
 										</Button>
 									</div>

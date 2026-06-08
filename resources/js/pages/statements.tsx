@@ -1,4 +1,3 @@
-import { CreditCardIcon } from "lucide-react"
 import AppHeader from "@/components/layout/app-header"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
@@ -26,7 +25,7 @@ export default function StatementsPage({ statements }: { statements: Paginated<S
 					title="Statements"
 					subtitle="Review imported bank statements and their linked records."
 					description="Imported bank feed"
-					icon={CreditCardIcon}
+					icon="lucide:credit-card"
 				/>
 
 				<PaginatedDataTable

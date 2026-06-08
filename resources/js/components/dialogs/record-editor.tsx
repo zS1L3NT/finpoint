@@ -1,7 +1,7 @@
+import { Icon as IconifyIcon } from "@iconify/react"
 import { router } from "@inertiajs/react"
 import { useForm, useStore } from "@tanstack/react-form"
 import { AnimatePresence, motion } from "framer-motion"
-import { AlertTriangleIcon, CreditCardIcon, Link2Icon, Trash2Icon, TrashIcon } from "lucide-react"
 import { DateTime } from "luxon"
 import { useEffect, useState } from "react"
 import AmountField from "@/components/form/amount-field"
@@ -192,7 +192,7 @@ export default function RecordEditorDialog({
 			}}
 			trigger={
 				<Button variant="outline" className="w-fit">
-					<Link2Icon />
+					<IconifyIcon icon="lucide:link-2" />
 					Attach Statement
 				</Button>
 			}
@@ -313,7 +313,7 @@ export default function RecordEditorDialog({
 										exit={{ opacity: 0, height: 0, marginTop: -16 }}
 									>
 										<Alert className="mt-4 max-w-md border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-50">
-											<AlertTriangleIcon />
+											<IconifyIcon icon="lucide:triangle-alert" />
 											<AlertTitle>
 												Amount does not match the sum of Allocation Amounts
 											</AlertTitle>
@@ -448,7 +448,7 @@ export default function RecordEditorDialog({
 																			)
 																		}}
 																	>
-																		<TrashIcon />
+																		<IconifyIcon icon="lucide:trash" />
 																	</Button>
 																</CardAction>
 															</CardHeader>
@@ -486,7 +486,7 @@ export default function RecordEditorDialog({
 								<Empty className="border border-dashed">
 									<EmptyHeader>
 										<EmptyMedia variant="icon">
-											<CreditCardIcon />
+											<IconifyIcon icon="lucide:credit-card" />
 										</EmptyMedia>
 										<EmptyTitle>No Statements</EmptyTitle>
 										<EmptyDescription>
@@ -507,7 +507,7 @@ export default function RecordEditorDialog({
 						className="mr-auto"
 						onClick={handleDelete}
 					>
-						<Trash2Icon /> Delete
+						<IconifyIcon icon="lucide:trash-2" /> Delete
 					</Button>
 					<DialogClose
 						render={

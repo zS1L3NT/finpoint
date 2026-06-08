@@ -1,4 +1,3 @@
-import { CreditCardIcon } from "lucide-react"
 import AllocateBar from "@/components/allocate-bar"
 import DetailCard from "@/components/detail-card"
 import AppHeader from "@/components/layout/app-header"
@@ -35,7 +34,7 @@ export default function StatementPage({
 				<PageHeader
 					title={statement.description}
 					description="Statement details"
-					icon={CreditCardIcon}
+					icon="lucide:credit-card"
 					back={{
 						name: "Back to statements",
 						url: statementsWebRoute.url(),

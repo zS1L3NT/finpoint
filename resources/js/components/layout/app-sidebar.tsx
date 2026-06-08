@@ -1,15 +1,5 @@
+import { Icon as IconifyIcon } from "@iconify/react"
 import { Link } from "@inertiajs/react"
-import {
-	ChartAreaIcon,
-	CircleDollarSignIcon,
-	CreditCardIcon,
-	ImportIcon,
-	LandmarkIcon,
-	LinkIcon,
-	PiggyBankIcon,
-	ReceiptTextIcon,
-	TagIcon,
-} from "lucide-react"
 import { DateTime } from "luxon"
 import {
 	Sidebar,
@@ -56,7 +46,7 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 							className="data-[slot=sidebar-menu-button]:p-1.5!"
 						>
 							<Link href={dashboardWebRoute.url()} onClick={handleSidebarLink}>
-								<CircleDollarSignIcon className="size-5!" />
+								<IconifyIcon icon="lucide:circle-dollar-sign" className="size-5!" />
 								<span className="text-base font-semibold">Finpoint</span>
 							</Link>
 						</SidebarMenuButton>
@@ -70,7 +60,7 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
 								<Link href={dashboardWebRoute.url()} onClick={handleSidebarLink}>
-									<ChartAreaIcon />
+									<IconifyIcon icon="lucide:chart-area" />
 									<span>Dashboard</span>
 								</Link>
 							</SidebarMenuButton>
@@ -86,7 +76,7 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 									})}
 									onClick={handleSidebarLink}
 								>
-									<LinkIcon />
+									<IconifyIcon icon="lucide:link" />
 									<span>Allocator</span>
 								</Link>
 							</SidebarMenuButton>
@@ -95,7 +85,7 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
 								<Link href={budgetsWebRoute.url()} onClick={handleSidebarLink}>
-									<PiggyBankIcon />
+									<IconifyIcon icon="lucide:piggy-bank" />
 									<span>Budgets</span>
 								</Link>
 							</SidebarMenuButton>
@@ -109,7 +99,7 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
 								<Link href={importerWebRoute.url()} onClick={handleSidebarLink}>
-									<ImportIcon />
+									<IconifyIcon icon="lucide:import" />
 									<span>Importer</span>
 								</Link>
 							</SidebarMenuButton>
@@ -118,7 +108,7 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
 								<Link href={accountsWebRoute.url()} onClick={handleSidebarLink}>
-									<LandmarkIcon />
+									<IconifyIcon icon="lucide:landmark" />
 									<span>Accounts</span>
 								</Link>
 							</SidebarMenuButton>
@@ -135,7 +125,7 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 									})}
 									onClick={handleSidebarLink}
 								>
-									<ReceiptTextIcon />
+									<IconifyIcon icon="lucide:receipt-text" />
 									<span>Records</span>
 								</Link>
 							</SidebarMenuButton>
@@ -144,7 +134,7 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
 								<Link href={statementsWebRoute.url()} onClick={handleSidebarLink}>
-									<CreditCardIcon />
+									<IconifyIcon icon="lucide:credit-card" />
 									<span>Statements</span>
 								</Link>
 							</SidebarMenuButton>
@@ -158,7 +148,7 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
 								<Link href={categoriesWebRoute.url()} onClick={handleSidebarLink}>
-									<TagIcon />
+									<IconifyIcon icon="lucide:tag" />
 									<span>Categories</span>
 								</Link>
 							</SidebarMenuButton>
