@@ -342,6 +342,11 @@ class ImporterController extends Controller
             $statements = $data->map(fn ($row) => $header->combine($row));
 
             foreach ($statements as $statement) {
+                if ($statement['State'] === 'REVERTED') {
+                    $skipped++;
+                    continue;
+                }
+
                 if ($statement['State'] !== 'COMPLETED') {
                     throw ValidationException::withMessages(['files' => 'Invalid CSV Format: Incompleted transaction found']);
                 }
