@@ -60,9 +60,10 @@ import {
 
 export default function DashboardPage({ records, quotas }: { records: Record[]; quotas: Quota[] }) {
 	const categories = useFetch<CategoryWithChildren[]>(categoryIndexApiRoute.url(), [])
+	const now = DateTime.now()
 
-	const [month] = useSearchParam("month", DateTime.now().toFormat("MMMM"))
-	const [year] = useSearchParam("year", DateTime.now().toFormat("yyyy"))
+	const [month] = useSearchParam("month", now.toFormat("MMMM"))
+	const [year] = useSearchParam("year", now.toFormat("yyyy"))
 	const [queryParam, setQueryParam] = useSearchParam("query")
 	const [quotaIdsParam, setQuotaIdsParam] = useSearchParam("quota_ids")
 	const [showNoQuotaParam, setShowNoQuotaParam] = useSearchParam("show_no_quotas")
@@ -71,6 +72,9 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 	const query = queryParam ?? ""
 	const quotaIds = quotaIdsParam?.split(",").filter(Boolean) ?? []
 	const showNoQuota = showNoQuotaParam === "true"
+	const monthStart = date.startOf("month")
+	const monthEnd = date.endOf("month")
+	const dailyQuotaAsOf = date.hasSame(now, "month") ? now : monthEnd
 
 	const [selected, setSelected] = useState<Record[]>([])
 	const [areaQuota, setAreaQuota] = useState<Quota | null>(null)
@@ -88,9 +92,7 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 			),
 		)
 		const usage =
-			quota.amount === null || quota.amount === 0
-				? null
-				: Math.min((spent / quota.amount) * 100, 100)
+			quota.amount === null || quota.amount === 0 ? null : (spent / quota.amount) * 100
 
 		return {
 			quota,
@@ -134,9 +136,10 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 	const dailyQuota = quotas.find(q => q.name === "Daily")
 	const limitAggregations = getLimitAggregations(
 		records.filter(r => r.quota?.id === dailyQuota?.id),
-		date.startOf("month"),
-		date.endOf("month"),
+		monthStart,
+		monthEnd,
 		dailyQuota?.amount ?? 0,
+		dailyQuotaAsOf,
 	)
 
 	useEffect(() => {

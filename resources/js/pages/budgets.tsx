@@ -77,9 +77,7 @@ export default function BudgetsPage({ budgets }: { budgets: Paginated<Budget> })
 
 								const spent = Math.abs(Math.min(budget.used_amount, 0))
 								const usage =
-									budget.amount === 0
-										? 0
-										: Math.min((spent / budget.amount) * 100, 100)
+									budget.amount === 0 ? 0 : (spent / budget.amount) * 100
 
 								return (
 									<div className="w-full max-w-xs space-y-2 pe-8">
@@ -160,8 +158,7 @@ export default function BudgetsPage({ budgets }: { budgets: Paginated<Budget> })
 						const start = parseDate(budget.start_date).startOf("day")
 						const end = parseDate(budget.end_date).endOf("day")
 						const spent = Math.abs(Math.min(budget.used_amount, 0))
-						const usage =
-							budget.amount === 0 ? 0 : Math.min((spent / budget.amount) * 100, 100)
+						const usage = budget.amount === 0 ? 0 : (spent / budget.amount) * 100
 						const state = now <= start ? "Upcoming" : now >= end ? "Passed" : "Active"
 
 						return (

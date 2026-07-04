@@ -18,6 +18,7 @@ export const getLimitAggregations = (
 	startDate: DateTime,
 	endDate: DateTime,
 	limit: number,
+	asOfDate: DateTime = DateTime.now(),
 ): LimitAggregations => {
 	let elapsedSpending = records
 		.filter(r => parseDatetime(r.datetime) < startDate)
@@ -30,7 +31,7 @@ export const getLimitAggregations = (
 		const date = startDate.plus({ days: i })
 		dates.push(date)
 
-		if (DateTime.now().endOf("day") >= date.endOf("day")) {
+		if (asOfDate.endOf("day") >= date.endOf("day")) {
 			const amount = round2dp(
 				records
 					.filter(r => parseDatetime(r.datetime).hasSame(date, "day"))
@@ -70,6 +71,8 @@ export default function LimiterPaceCards({
 	idealPace,
 }: { name: string; limit: number } & LimitAggregations) {
 	const capitalisedName = name[0].toUpperCase() + name.slice(1)
+	const hasExceededLimit = elapsedSpending > limit
+	const hasExceededPace = idealPace !== 0 && currentPace >= idealPace
 
 	return (
 		<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
@@ -80,7 +83,7 @@ export default function LimiterPaceCards({
 						<div className="space-y-0.5">
 							<p
 								className={cn(
-									elapsedSpending > limit ? "text-destructive" : "text-creative",
+									hasExceededLimit ? "text-destructive" : "text-creative",
 								)}
 							>
 								{formatCurrency(elapsedSpending)}
@@ -97,9 +100,9 @@ export default function LimiterPaceCards({
 					<div className="space-y-0.5">
 						<p
 							className={cn(
-								idealPace === 0 || currentPace < idealPace
+								!hasExceededPace
 									? ""
-									: elapsedSpending > limit
+									: hasExceededLimit
 										? "text-destructive"
 										: "text-orange-500",
 							)}

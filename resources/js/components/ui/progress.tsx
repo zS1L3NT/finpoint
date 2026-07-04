@@ -8,6 +8,10 @@ function Progress({
   value,
   ...props
 }: React.ComponentProps<typeof ProgressPrimitive.Root>) {
+  const progress = value ?? 0
+  const baseProgress = Math.min(Math.max(progress, 0), 100)
+  const excessProgress = Math.min(Math.max(progress - 100, 0), 100)
+
   return (
     <ProgressPrimitive.Root
       data-slot="progress"
@@ -20,8 +24,15 @@ function Progress({
       <ProgressPrimitive.Indicator
         data-slot="progress-indicator"
         className="size-full flex-1 bg-current transition-all"
-        style={{ transform: `translateX(-${100 - (value || 0)}%)` }}
+        style={{ transform: `translateX(-${100 - baseProgress}%)` }}
       />
+      {excessProgress > 0 ? (
+        <div
+          data-slot="progress-excess-indicator"
+          className="absolute inset-0 bg-destructive transition-all"
+          style={{ transform: `translateX(-${100 - excessProgress}%)` }}
+        />
+      ) : null}
     </ProgressPrimitive.Root>
   )
 }
