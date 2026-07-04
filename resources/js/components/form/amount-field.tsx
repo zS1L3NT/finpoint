@@ -56,7 +56,7 @@ export default function AmountField({
 	const stepValue = (direction: -1 | 1) => {
 		const next = Math.min(
 			max ?? Number.POSITIVE_INFINITY,
-			Math.max(min ?? Number.NEGATIVE_INFINITY, round2dp((Number(text) || 0) + direction)),
+			Math.max(min ?? Number.NEGATIVE_INFINITY, round2dp((Number(text) || 0) + 0.01 * direction)),
 		)
 		setText(`${next}`)
 		onChange(next)
