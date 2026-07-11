@@ -74,7 +74,7 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 	const showNoQuota = showNoQuotaParam === "true"
 	const monthStart = date.startOf("month")
 	const monthEnd = date.endOf("month")
-	const dailyQuotaAsOf = date.hasSame(now, "month") ? now : monthEnd
+	const monthAsOf = date.hasSame(now, "month") ? now : monthEnd
 
 	const [selected, setSelected] = useState<Record[]>([])
 	const [areaQuota, setAreaQuota] = useState<Quota | null>(null)
@@ -139,7 +139,7 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 		monthStart,
 		monthEnd,
 		dailyQuota?.amount ?? 0,
-		dailyQuotaAsOf,
+		monthAsOf,
 	)
 
 	useEffect(() => {
@@ -421,6 +421,7 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 									quotaStats.find(q => q.quota.id === areaQuota?.id)?.spent ?? 0,
 								)}
 								limit={areaQuota?.amount ?? undefined}
+								asOfDate={monthAsOf}
 							/>
 						</CardContent>
 					</Card>

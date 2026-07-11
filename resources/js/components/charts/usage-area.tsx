@@ -19,6 +19,7 @@ export default function UsageAreaChart({
 	end,
 	maxY,
 	limit,
+	asOfDate = DateTime.now(),
 }: {
 	className?: string
 	records: Record[]
@@ -26,6 +27,7 @@ export default function UsageAreaChart({
 	end: DateTime
 	maxY: number
 	limit?: number
+	asOfDate?: DateTime
 }) {
 	const isMobile = useIsMobile()
 	const data = useMemo(() => {
@@ -57,7 +59,7 @@ export default function UsageAreaChart({
 			elapsedValues[i] = null
 			projectedValues[i] = null
 
-			if (DateTime.now().endOf("day") >= date.endOf("day")) {
+			if (asOfDate.endOf("day") >= date.endOf("day")) {
 				const amount = round2dp(
 					records
 						.filter(r => parseDatetime(r.datetime).hasSame(date, "day"))
@@ -75,7 +77,7 @@ export default function UsageAreaChart({
 				}
 			}
 
-			if (DateTime.now().startOf("day") <= date.startOf("day")) {
+			if (asOfDate.startOf("day") <= date.startOf("day")) {
 				const currentPace = elapsedDays > 0 ? round2dp(elapsedSpending / elapsedDays) : 0
 
 				projectedValues[i] = round2dp(elapsedSpending + currentPace * (i + 1 - elapsedDays))
@@ -144,7 +146,7 @@ export default function UsageAreaChart({
 			pout,
 			usage,
 		}))
-	}, [records, limit, start, end])
+	}, [records, limit, start, end, asOfDate])
 	const yTicks = useMemo(() => {
 		if (!maxY) {
 			return undefined

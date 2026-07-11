@@ -1,5 +1,6 @@
 import { Icon as IconifyIcon } from "@iconify/react"
 import { router } from "@inertiajs/react"
+import { DateTime } from "luxon"
 import { useState } from "react"
 import CategoriesPieChart from "@/components/charts/categories-pie"
 import UsageAreaChart from "@/components/charts/usage-area"
@@ -77,11 +78,17 @@ export default function BudgetPage({ budget, records }: { budget: Budget; record
 		),
 	})
 
+	const budgetStart = parseDate(budget.start_date)
+	const budgetEnd = parseDate(budget.end_date)
+	const now = DateTime.now()
+	const budgetAsOf =
+		now < budgetStart.startOf("day") || now > budgetEnd.endOf("day") ? budgetEnd : now
 	const limitAggregations = getLimitAggregations(
 		records,
-		parseDate(budget.start_date),
-		parseDate(budget.end_date),
+		budgetStart,
+		budgetEnd,
 		budget.amount,
+		budgetAsOf,
 	)
 
 	return (
@@ -144,13 +151,14 @@ export default function BudgetPage({ budget, records }: { budget: Budget; record
 							<UsageAreaChart
 								className="h-64 aspect-auto md:h-auto md:aspect-video"
 								records={records}
-								start={parseDate(budget.start_date)}
-								end={parseDate(budget.end_date)}
+								start={budgetStart}
+								end={budgetEnd}
 								maxY={
 									Math.max(limitAggregations.projectedSpending, budget.amount) *
 									1.1
 								}
 								limit={budget.amount}
+								asOfDate={budgetAsOf}
 							/>
 						</CardContent>
 					</Card>
