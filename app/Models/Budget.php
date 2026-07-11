@@ -26,7 +26,7 @@ class Budget extends Model
         });
 
         static::addGlobalScope('order', function (Builder $builder) {
-            $builder->orderBy('end_date', 'desc');
+            $builder->orderBy('start_date', 'desc');
         });
     }
 
