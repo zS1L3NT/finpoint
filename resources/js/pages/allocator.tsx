@@ -12,6 +12,7 @@ import PaginatedDataTable from "@/components/table/paginated-data-table"
 import { useStatementColumns, useStatementMobileRow } from "@/components/table/statement-columns"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { START_DATE } from "@/constants"
 import { useFetch } from "@/hooks/use-fetch"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { useSearchParam } from "@/hooks/use-search-param"
@@ -162,7 +163,7 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 								<RecordSearchSheet
 									title="Attach to pending record"
 									placeholder="Search pending records..."
-									filters={{ is_allocated: "false" }}
+									filters={{ start_date: START_DATE, is_allocated: "false" }}
 									isOpen={isAttachingRecord}
 									setIsOpen={setIsAttachingRecord}
 									handler={async record => {

@@ -17,6 +17,7 @@ class RecordController extends Controller
         return Record::appQuery(
             query: request()->query('query'),
             exclude_budget_id: request()->query('exclude_budget_id'),
+            start_date: request()->query('start_date'),
             is_allocated: request()->query('is_allocated'),
         )->get();
     }

@@ -180,6 +180,7 @@ export default function RecordEditorDialog({
 			filters={{
 				is_allocable: "true",
 				exclude_ids: formStatements.map(s => s.id).join(","),
+				start_date: START_DATE,
 			}}
 			isOpen={isAttachingStatement}
 			setIsOpen={setIsAttachingStatement}

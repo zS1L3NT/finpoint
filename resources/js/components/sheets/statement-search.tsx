@@ -1,3 +1,4 @@
+import { Icon as IconifyIcon } from "@iconify/react"
 import { useEffect, useState } from "react"
 import DataTable from "@/components/table/data-table"
 import { Button } from "@/components/ui/button"
@@ -37,11 +38,19 @@ export default function StatementSearchSheet({
 }) {
 	const [query, setQuery] = useState("")
 	const [statements, setStatements] = useState<Statement[]>([])
+	const [includeOlder, setIncludeOlder] = useState(false)
 
 	const handleSearch = async () => {
-		const response = await fetch(statementIndexApiRoute.url({ query: { query, ...filters } }), {
-			headers: { Accept: "application/json" },
-		})
+		const response = await fetch(
+			statementIndexApiRoute.url({
+				query: {
+					query,
+					...filters,
+					start_date: includeOlder ? undefined : filters?.start_date,
+				},
+			}),
+			{ headers: { Accept: "application/json" } },
+		)
 
 		if (response.ok) {
 			setStatements(await response.json())
@@ -51,14 +60,15 @@ export default function StatementSearchSheet({
 	useEffect(() => {
 		if (!isOpen) {
 			setQuery("")
-		} else {
-			void handleSearch()
+			setIncludeOlder(false)
 		}
 	}, [isOpen])
 
 	useEffect(() => {
-		void handleSearch()
-	}, [query])
+		if (isOpen) {
+			void handleSearch()
+		}
+	}, [isOpen, query, includeOlder])
 
 	return (
 		<Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -74,13 +84,25 @@ export default function StatementSearchSheet({
 				<div className="flex flex-1 flex-col gap-4 overflow-y-hidden p-4 md:p-6">
 					<Field>
 						<FieldLabel htmlFor="statement-search-query">Search statements</FieldLabel>
-						<Input
-							id="statement-search-query"
-							type="search"
-							placeholder={placeholder ?? "Search statements..."}
-							value={query}
-							onChange={event => setQuery(event.target.value)}
-						/>
+						<div className="flex gap-2">
+							<Input
+								id="statement-search-query"
+								type="search"
+								placeholder={placeholder ?? "Search statements..."}
+								value={query}
+								onChange={event => setQuery(event.target.value)}
+							/>
+							{filters?.start_date ? (
+								<Button
+									type="button"
+									variant={includeOlder ? "secondary" : "outline"}
+									aria-pressed={includeOlder}
+									onClick={() => setIncludeOlder(value => !value)}
+								>
+									<IconifyIcon icon="lucide:history" /> Include older
+								</Button>
+							) : null}
+						</div>
 					</Field>
 
 					<ScrollArea className="flex-1 overflow-y-hidden">

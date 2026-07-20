@@ -1,3 +1,4 @@
+import { Icon as IconifyIcon } from "@iconify/react"
 import { useEffect, useState } from "react"
 import Icon from "@/components/icon"
 import RecordAmount from "@/components/record-amount"
@@ -39,11 +40,19 @@ export default function RecordSearchSheet({
 }) {
 	const [query, setQuery] = useState("")
 	const [records, setRecords] = useState<Record[]>([])
+	const [includeOlder, setIncludeOlder] = useState(false)
 
 	const handleSearch = async () => {
-		const response = await fetch(recordIndexApiRoute.url({ query: { query, ...filters } }), {
-			headers: { Accept: "application/json" },
-		})
+		const response = await fetch(
+			recordIndexApiRoute.url({
+				query: {
+					query,
+					...filters,
+					start_date: includeOlder ? undefined : filters?.start_date,
+				},
+			}),
+			{ headers: { Accept: "application/json" } },
+		)
 
 		if (response.ok) {
 			setRecords(await response.json())
@@ -53,14 +62,15 @@ export default function RecordSearchSheet({
 	useEffect(() => {
 		if (!isOpen) {
 			setQuery("")
-		} else {
-			void handleSearch()
+			setIncludeOlder(false)
 		}
 	}, [isOpen])
 
 	useEffect(() => {
-		void handleSearch()
-	}, [query])
+		if (isOpen) {
+			void handleSearch()
+		}
+	}, [isOpen, query, includeOlder])
 
 	return (
 		<Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -76,13 +86,25 @@ export default function RecordSearchSheet({
 				<div className="flex flex-1 flex-col gap-4 overflow-y-hidden p-4 md:p-6">
 					<Field>
 						<FieldLabel htmlFor="record-search-query">Search records</FieldLabel>
-						<Input
-							id="record-search-query"
-							type="search"
-							placeholder={placeholder ?? "Search records..."}
-							value={query}
-							onChange={event => setQuery(event.target.value)}
-						/>
+						<div className="flex gap-2">
+							<Input
+								id="record-search-query"
+								type="search"
+								placeholder={placeholder ?? "Search records..."}
+								value={query}
+								onChange={event => setQuery(event.target.value)}
+							/>
+							{filters?.start_date ? (
+								<Button
+									type="button"
+									variant={includeOlder ? "secondary" : "outline"}
+									aria-pressed={includeOlder}
+									onClick={() => setIncludeOlder(value => !value)}
+								>
+									<IconifyIcon icon="lucide:history" /> Include older
+								</Button>
+							) : null}
+						</div>
 					</Field>
 
 					<ScrollArea className="flex-1 overflow-y-hidden">
