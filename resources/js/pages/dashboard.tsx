@@ -429,17 +429,17 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 
 				{quotas.length ? (
 					<Card>
-						<CardContent className="grid justify-items-center gap-4 sm:grid-cols-2 xl:grid-cols-3">
+						<CardContent className="grid gap-x-4 gap-y-8 sm:grid-cols-2 xl:grid-cols-3">
 							{quotas.map(quota => (
 								<div
 									key={quota.id}
-									className="flex size-56 flex-col items-center gap-4 sm:size-60 xl:size-70 2xl:size-80"
+									className="flex min-w-0 flex-col items-center gap-3"
 								>
 									<p className="text-sm font-heading font-medium text-center">
 										Spending for {quota.name}
 									</p>
 									<CategoriesPieChart
-										className="flex-1"
+										className="w-full"
 										categories={categories}
 										records={records.filter(r => r.quota?.id === quota.id)}
 										limit={quota.amount ?? undefined}

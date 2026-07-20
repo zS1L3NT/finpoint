@@ -136,7 +136,7 @@ export default function BudgetPage({ budget, records }: { budget: Budget; record
 						</CardHeader>
 						<CardContent className="flex h-full items-center">
 							<CategoriesPieChart
-								className="mx-auto aspect-square w-full max-w-72 px-2 md:max-w-none md:px-4"
+								className="mx-auto w-full"
 								categories={categories}
 								records={records}
 								limit={budget.amount}

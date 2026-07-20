@@ -1,13 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from "react"
-import { Label, Pie, PieChart } from "recharts"
-import {
-	ChartContainer,
-	ChartLegend,
-	ChartLegendContent,
-	ChartTooltip,
-	ChartTooltipContent,
-} from "@/components/ui/chart"
-import { formatCurrency, round2dp } from "@/lib/utils"
+import { useMemo } from "react"
+import { Pie, PieChart } from "recharts"
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { cn, formatCurrency, round2dp } from "@/lib/utils"
 import { CategoryWithChildren, Record } from "@/types"
 
 export default function CategoriesPieChart({
@@ -21,11 +15,6 @@ export default function CategoriesPieChart({
 	categories: CategoryWithChildren[]
 	limit?: number
 }) {
-	const containerRef = useRef<HTMLDivElement>(null)
-	const legendRef = useRef<HTMLDivElement>(null)
-
-	const [textBoxY, setTextBoxY] = useState<number>()
-
 	const categoryData = useMemo(
 		() =>
 			categories
@@ -66,106 +55,87 @@ export default function CategoriesPieChart({
 				.filter(d => d.recordCount > 0),
 		[categories, records],
 	)
-
-	useEffect(() => {
-		setTimeout(() => {
-			// Height of the pie chart
-			const pieChartHeight = containerRef.current?.children.item(1)?.clientHeight ?? 0
-
-			const legendHeight = (legendRef.current?.clientHeight ?? 0) + 12
-
-			const MANUAL_SHIFT = 4
-
-			setTextBoxY((pieChartHeight - legendHeight) / 2 + MANUAL_SHIFT)
-		})
-	}, [categoryData, subcategoryData])
+	const total = formatCurrency(records.reduce((acc, r) => acc - r.amount, 0))
+	const totalFontSize = Math.max(14, 20 - Math.max(total.length - 9, 0))
+	const config = Object.fromEntries([
+		...categories.map(c => [c.id, { label: c.name, color: c.color }]),
+		...categories.flatMap(c =>
+			c.children.map(({ id }) => [id, { label: c.name, color: c.color }]),
+		),
+	])
 
 	return (
-		<ChartContainer
-			ref={containerRef}
-			className={className}
-			config={Object.fromEntries([
-				...categories.map(c => [c.id, { label: c.name, color: c.color }]),
-				...categories.flatMap(c =>
-					c.children.map(({ id }) => [id, { label: c.name, color: c.color }]),
-				),
-			])}
-		>
-			<PieChart>
-				<Pie
-					data={categoryData.map(d => ({
-						id: d.category.id,
-						category: d.category.name,
-						amount: d.amount,
-						fill: d.category.color,
-					}))}
-					dataKey="amount"
-					nameKey="category"
-					innerRadius="50%"
-					outerRadius="80%"
-					strokeWidth={1}
-					stroke="var(--primary)"
+		<div className={cn("flex min-w-0 flex-col items-center gap-3", className)}>
+			<div className="relative aspect-square w-full max-w-56 sm:max-w-64 xl:max-w-72">
+				<ChartContainer
+					className="size-full aspect-square"
+					config={config}
+					initialDimension={{ width: 224, height: 224 }}
 				>
-					<Label
-						content={({ viewBox }) => {
-							if (viewBox && "cx" in viewBox && textBoxY !== undefined) {
-								return (
-									<g
-										transform={`translate(${viewBox.cx}, ${textBoxY})`} // Approximate vertical height of the text
-									>
-										<text
-											textAnchor="middle"
-											className="fill-foreground text-xl font-bold"
-										>
-											{formatCurrency(
-												records.reduce((acc, r) => acc - r.amount, 0),
-											)}
-										</text>
-										<text
-											y={20}
-											textAnchor="middle"
-											className="fill-muted-foreground"
-										>
-											{limit ? `of ${formatCurrency(limit)}` : "No limit"}
-										</text>
-									</g>
-								)
-							}
-						}}
-					/>
-				</Pie>
-
-				<Pie
-					data={subcategoryData.map(d => ({
-						id: d.category.id,
-						category: d.category.name,
-						amount: d.amount,
-						fill: d.category.color,
-					}))}
-					dataKey="amount"
-					nameKey="category"
-					innerRadius="80%"
-					outerRadius="100%"
-					strokeWidth={1}
-					stroke="var(--primary)"
-				/>
-
-				<ChartTooltip cursor={false} content={<ChartTooltipContent className="w-48" />} />
-
-				<ChartLegend
-					payloadUniqBy={p =>
-						categories.find(c => c.name === p.value)?.id ??
-						categories.find(c => c.children.some(c => c.name === p.value))?.id
-					}
-					content={
-						<ChartLegendContent
-							ref={legendRef}
-							nameKey="id"
-							className="flex-wrap gap-2"
+					<PieChart margin={{ top: 2, right: 2, bottom: 2, left: 2 }}>
+						<Pie
+							data={categoryData.map(d => ({
+								id: d.category.id,
+								category: d.category.name,
+								amount: d.amount,
+								fill: d.category.color,
+							}))}
+							dataKey="amount"
+							nameKey="category"
+							innerRadius="50%"
+							outerRadius="80%"
+							strokeWidth={1}
+							stroke="var(--primary)"
 						/>
-					}
-				/>
-			</PieChart>
-		</ChartContainer>
+
+						<Pie
+							data={subcategoryData.map(d => ({
+								id: d.category.id,
+								category: d.category.name,
+								amount: d.amount,
+								fill: d.category.color,
+							}))}
+							dataKey="amount"
+							nameKey="category"
+							innerRadius="80%"
+							outerRadius="100%"
+							strokeWidth={1}
+							stroke="var(--primary)"
+						/>
+
+						<ChartTooltip
+							cursor={false}
+							content={<ChartTooltipContent className="w-48" />}
+						/>
+					</PieChart>
+				</ChartContainer>
+
+				<div
+					data-slot="chart-label"
+					className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-1 text-center"
+				>
+					<span className="font-bold leading-none" style={{ fontSize: totalFontSize }}>
+						{total}
+					</span>
+					<span className="text-xs leading-none text-muted-foreground">
+						{limit ? `of ${formatCurrency(limit)}` : "No limit"}
+					</span>
+				</div>
+			</div>
+
+			{categoryData.length ? (
+				<ul className="flex max-w-full flex-wrap justify-center gap-x-3 gap-y-1 text-xs">
+					{categoryData.map(({ category }) => (
+						<li key={category.id} className="flex min-w-0 items-center gap-1.5">
+							<span
+								className="size-2.5 shrink-0 rounded-[2px]"
+								style={{ backgroundColor: category.color }}
+							/>
+							<span>{category.name}</span>
+						</li>
+					))}
+				</ul>
+			) : null}
+		</div>
 	)
 }
