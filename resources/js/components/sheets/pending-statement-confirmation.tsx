@@ -7,6 +7,14 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
+	Card,
+	CardAction,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card"
+import {
 	Dialog,
 	DialogClose,
 	DialogContent,
@@ -82,6 +90,20 @@ export default function PendingStatementConfirmationSheet({
 	const pendingAllocated = pendingStatement
 		? round2dp(pendingStatement.amount - pendingStatement.allocable_amount)
 		: 0
+	const matchingSign =
+		pendingAllocated === 0 ||
+		(!!statement &&
+			((statement.amount > 0 && pendingAllocated > 0) ||
+				(statement.amount < 0 && pendingAllocated < 0)))
+	const excessAmount =
+		statement && matchingSign
+			? round2dp(Math.max(0, Math.abs(pendingAllocated) - Math.abs(statement.amount)))
+			: 0
+	const allocationLabel = pendingStatement
+		? `${pendingStatement.allocation_count} ${
+				pendingStatement.allocation_count === 1 ? "allocation" : "allocations"
+			}`
+		: "0 allocations"
 	const canReplace =
 		!!statement &&
 		!!pendingStatement &&
@@ -262,59 +284,152 @@ export default function PendingStatementConfirmationSheet({
 					}
 				}}
 			>
-				<DialogContent className="md:max-w-lg">
-					<DialogHeader>
-						<DialogTitle>Replace this pending statement?</DialogTitle>
+				<DialogContent className="md:max-w-2xl">
+					<DialogHeader className="gap-1">
+						<DialogTitle>Confirm statement replacement</DialogTitle>
 						<DialogDescription>
-							The handwritten statement will be permanently deleted after its
-							allocations move unchanged to the imported statement.
+							Review the allocation transfer. Finpoint will not change any allocation
+							amounts automatically.
 						</DialogDescription>
 					</DialogHeader>
 
 					{statement && pendingStatement ? (
-						<div className="grid gap-3">
-							<div className="grid gap-1">
-								<p className="text-xs font-medium text-muted-foreground">
-									Imported statement
-								</p>
-								<p className="whitespace-pre-line break-words font-medium">
-									{statement.description}
-								</p>
-								<p className={cn("text-xs", classForCurrency(statement.amount))}>
-									{formatCurrency(statement.amount)} ·{" "}
-									{formatDatetime(statement.datetime)}
-								</p>
+						<div className="flex flex-col gap-4">
+							<div className="grid items-stretch gap-3 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
+								<Card size="sm">
+									<CardHeader>
+										<CardTitle>Pending statement</CardTitle>
+										<CardDescription>Deleted after replacement</CardDescription>
+										<CardAction>
+											<Badge variant="warning">Source</Badge>
+										</CardAction>
+									</CardHeader>
+									<CardContent className="flex flex-1 flex-col gap-3">
+										<div className="flex flex-1 flex-col gap-1">
+											<p className="whitespace-pre-line break-words font-medium">
+												{pendingStatement.description}
+											</p>
+											<p className="text-muted-foreground">
+												{formatDatetime(pendingStatement.datetime)}
+											</p>
+										</div>
+										<div className="grid grid-cols-2 gap-3 border-t pt-3">
+											<div className="flex flex-col gap-0.5">
+												<span className="text-muted-foreground">
+													Statement amount
+												</span>
+												<span
+													className={cn(
+														"font-semibold",
+														classForCurrency(pendingStatement.amount),
+													)}
+												>
+													{formatCurrency(pendingStatement.amount)}
+												</span>
+											</div>
+											<div className="flex flex-col gap-0.5">
+												<span className="text-muted-foreground">
+													Moving unchanged
+												</span>
+												<span
+													className={cn(
+														"font-semibold",
+														classForCurrency(pendingAllocated),
+													)}
+												>
+													{formatCurrency(pendingAllocated)}
+												</span>
+											</div>
+										</div>
+										<Badge variant="outline">{allocationLabel}</Badge>
+									</CardContent>
+								</Card>
+
+								<div className="flex items-center justify-center text-muted-foreground">
+									<IconifyIcon
+										icon="lucide:arrow-down"
+										className="size-4 sm:hidden"
+									/>
+									<IconifyIcon
+										icon="lucide:arrow-right"
+										className="hidden size-4 sm:block"
+									/>
+								</div>
+
+								<Card size="sm">
+									<CardHeader>
+										<CardTitle>Imported statement</CardTitle>
+										<CardDescription>Kept exactly as imported</CardDescription>
+										<CardAction>
+											<Badge variant="secondary">Destination</Badge>
+										</CardAction>
+									</CardHeader>
+									<CardContent className="flex flex-1 flex-col gap-3">
+										<div className="flex flex-1 flex-col gap-1">
+											<p className="whitespace-pre-line break-words font-medium">
+												{statement.description}
+											</p>
+											<p className="text-muted-foreground">
+												{formatDatetime(statement.datetime)}
+											</p>
+										</div>
+										<div className="grid grid-cols-2 gap-3 border-t pt-3">
+											<div className="flex flex-col gap-0.5">
+												<span className="text-muted-foreground">
+													Statement amount
+												</span>
+												<span
+													className={cn(
+														"font-semibold",
+														classForCurrency(statement.amount),
+													)}
+												>
+													{formatCurrency(statement.amount)}
+												</span>
+											</div>
+											<div className="flex flex-col gap-0.5">
+												<span className="text-muted-foreground">
+													Allocated now
+												</span>
+												<span className="font-semibold">
+													{formatCurrency(0)}
+												</span>
+											</div>
+										</div>
+										<Badge variant="outline">Fully unallocated</Badge>
+									</CardContent>
+								</Card>
 							</div>
 
-							<div className="grid gap-1">
-								<p className="text-xs font-medium text-muted-foreground">
-									Pending statement
-								</p>
-								<p className="whitespace-pre-line break-words font-medium">
-									{pendingStatement.description}
-								</p>
-								<p
-									className={cn(
-										"text-xs",
-										classForCurrency(pendingStatement.amount),
-									)}
-								>
-									{formatCurrency(pendingStatement.amount)} ·{" "}
-									{formatDatetime(pendingStatement.datetime)} ·{" "}
-									{pendingStatement.allocation_count} allocation(s)
-								</p>
-							</div>
-
-							{!canReplace ? (
-								<Alert variant="destructive">
-									<IconifyIcon icon="lucide:circle-alert" />
-									<AlertTitle>Allocations do not fit</AlertTitle>
+							{canReplace ? (
+								<Alert>
+									<IconifyIcon icon="lucide:circle-check" />
+									<AlertTitle>
+										{pendingAllocated === 0
+											? "No allocations to transfer"
+											: `${allocationLabel} ready to move`}
+									</AlertTitle>
 									<AlertDescription>
-										The pending statement’s unchanged allocations would
-										over-allocate the imported statement or use the wrong sign.
+										{pendingAllocated === 0
+											? "Replacing will only delete the handwritten pending statement."
+											: `${formatCurrency(pendingAllocated)} will move unchanged to the imported statement. The pending statement will then be permanently deleted.`}
 									</AlertDescription>
 								</Alert>
-							) : null}
+							) : (
+								<Alert variant="destructive">
+									<IconifyIcon icon="lucide:circle-alert" />
+									<AlertTitle>
+										{matchingSign
+											? `Over capacity by ${formatCurrency(excessAmount)}`
+											: "Allocation direction does not match"}
+									</AlertTitle>
+									<AlertDescription>
+										{matchingSign
+											? `${allocationLabel} total ${formatCurrency(pendingAllocated)}, but the imported statement can hold ${formatCurrency(statement.amount)}. Reduce the allocations before replacing.`
+											: `The pending allocations total ${formatCurrency(pendingAllocated)}, while the imported statement is ${formatCurrency(statement.amount)}. Their directions must match before replacing.`}
+									</AlertDescription>
+								</Alert>
+							)}
 						</div>
 					) : null}
 
@@ -327,7 +442,8 @@ export default function PendingStatementConfirmationSheet({
 							}
 						/>
 						<Button disabled={!canReplace} onClick={() => void handleReplace()}>
-							<IconifyIcon icon="lucide:replace" /> Replace pending
+							<IconifyIcon icon="lucide:replace" data-icon="inline-start" />
+							Transfer & replace
 						</Button>
 					</DialogFooter>
 				</DialogContent>
