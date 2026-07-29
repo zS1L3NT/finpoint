@@ -51,7 +51,8 @@ class Record extends Model
         $exclude_budget_id = null,
         $start_date = null,
         $end_date = null,
-        $is_allocated = null
+        $is_allocated = null,
+        $category_ids = null
     ) {
         return self::query()
             ->when(
@@ -65,12 +66,6 @@ class Record extends Model
                             ->orWhere('description', 'like', '%'.$q.'%')
                             // ->orWhere('datetime', '=', Carbon::parse($q))
                             ->orWhere('amount', 'like', '%'.$q.'%')
-                            ->orWhereHas(
-                                'category',
-                                fn ($query) => $query
-                                    ->where('id', 'like', '%'.$q.'%')
-                                    ->orWhere('name', 'like', '%'.$q.'%')
-                            )
                     )
             )
             ->when(
@@ -88,6 +83,10 @@ class Record extends Model
             ->when(
                 collect(['true', 'false'])->contains($is_allocated),
                 fn ($query) => $query->havingRaw($is_allocated === 'true' ? 'allocated_amount = amount' : 'allocated_amount != amount')
+            )
+            ->when(
+                $category_ids,
+                fn ($query) => $query->whereIn('category_id', $category_ids)
             )
             ->groupBy('records.id');
     }

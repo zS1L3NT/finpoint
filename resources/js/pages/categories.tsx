@@ -1,4 +1,5 @@
 import { Icon as IconifyIcon } from "@iconify/react"
+import { Link } from "@inertiajs/react"
 import { useState } from "react"
 import CategoryDialog from "@/components/dialogs/category"
 import Icon from "@/components/icon"
@@ -7,7 +8,9 @@ import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useHistory } from "@/history"
 import { Category, CategoryWithChildren } from "@/types"
+import { recordsWebRoute } from "@/wayfinder/routes"
 
 type CategoryDialogState =
 	| { mode: "create" }
@@ -16,6 +19,7 @@ type CategoryDialogState =
 
 export default function CategoriesPage({ categories }: { categories: CategoryWithChildren[] }) {
 	const [dialogState, setDialogState] = useState<CategoryDialogState>(null)
+	const { handlePush } = useHistory()
 
 	return (
 		<>
@@ -41,12 +45,15 @@ export default function CategoriesPage({ categories }: { categories: CategoryWit
 				<Card>
 					<CardHeader>
 						<CardTitle>Category Tree</CardTitle>
-						<CardDescription>Click a category to edit it.</CardDescription>
+						<CardDescription>
+							Open a category's records, or use Edit to manage it.
+						</CardDescription>
 					</CardHeader>
 					<CardContent className="px-0">
 						{categories.length ? (
 							<CategoryTree
 								categories={categories}
+								onOpen={handlePush("Categories")}
 								onEdit={category => setDialogState({ mode: "edit", category })}
 							/>
 						) : (
@@ -75,15 +82,22 @@ export default function CategoriesPage({ categories }: { categories: CategoryWit
 
 function CategoryTree({
 	categories,
+	onOpen,
 	onEdit,
 }: {
 	categories: (Category | CategoryWithChildren)[]
+	onOpen: () => void
 	onEdit: (category: Category | CategoryWithChildren) => void
 }) {
 	return (
 		<div className="flex flex-col divide-y">
 			{categories.map(category => (
-				<CategoryTreeItem key={category.id} category={category} onEdit={onEdit} />
+				<CategoryTreeItem
+					key={category.id}
+					category={category}
+					onOpen={onOpen}
+					onEdit={onEdit}
+				/>
 			))}
 		</div>
 	)
@@ -91,40 +105,51 @@ function CategoryTree({
 
 function CategoryTreeItem({
 	category,
+	onOpen,
 	onEdit,
 }: {
 	category: Category | CategoryWithChildren
+	onOpen: () => void
 	onEdit: (category: Category | CategoryWithChildren) => void
 }) {
 	return (
 		<div className="flex flex-col">
-			<button
-				type="button"
-				className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/40"
-				onClick={() => onEdit(category)}
-			>
-				<Icon {...category} size={14} />
-				<div className="min-w-0 flex-1">
-					<p className="truncate font-medium">{category.name}</p>
-					<p className="truncate text-xs text-muted-foreground">
-						{category.records_count}{" "}
-						{category.records_count === 1 ? "record" : "records"}
-					</p>
-				</div>
-				<div className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground">
+			<div className="group flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/40">
+				<Link
+					href={recordsWebRoute.url({ query: { category_ids: category.id } })}
+					className="flex min-w-0 flex-1 items-center gap-3 rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
+					onClick={onOpen}
+				>
+					<Icon {...category} size={14} />
+					<div className="min-w-0 flex-1">
+						<p className="truncate font-medium">{category.name}</p>
+						<p className="truncate text-xs text-muted-foreground">
+							{category.records_count}{" "}
+							{category.records_count === 1 ? "record" : "records"}
+						</p>
+					</div>
 					{"children" in category ? (
-						<span className="hidden sm:inline">
+						<span className="hidden shrink-0 text-xs text-muted-foreground sm:inline">
 							{category.children.length} child
 							{category.children.length === 1 ? "" : "ren"}
 						</span>
 					) : null}
-					<IconifyIcon icon="lucide:pencil" className="size-3.5" />
-				</div>
-			</button>
+				</Link>
+
+				<Button
+					type="button"
+					variant="outline"
+					size="sm"
+					className="shrink-0"
+					onClick={() => onEdit(category)}
+				>
+					Edit
+				</Button>
+			</div>
 
 			{"children" in category ? (
 				<div className="ml-6 border-l border-border/60">
-					<CategoryTree categories={category.children} onEdit={onEdit} />
+					<CategoryTree categories={category.children} onOpen={onOpen} onEdit={onEdit} />
 				</div>
 			) : null}
 		</div>

@@ -14,6 +14,7 @@ class RecordController extends Controller
             start_date: request()->query('start_date'),
             end_date: request()->query('end_date'),
             is_allocated: request()->query('is_allocated'),
+            category_ids: request()->string('category_ids')->explode(',')->filter()->all(),
         )
             ->paginate(request()->query('per_page') ?? 100)
             ->withQueryString();
