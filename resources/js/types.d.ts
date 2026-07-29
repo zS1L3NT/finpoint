@@ -68,6 +68,7 @@ export type Category = {
 	color: string
 	parent_category_id: string | null
 	can_delete: boolean
+	records_count: number
 }
 
 export type CategoryWithChildren = Category & {

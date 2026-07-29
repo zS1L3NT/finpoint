@@ -106,7 +106,10 @@ function CategoryTreeItem({
 				<Icon {...category} size={14} />
 				<div className="min-w-0 flex-1">
 					<p className="truncate font-medium">{category.name}</p>
-					<p className="truncate text-xs text-muted-foreground">{category.id}</p>
+					<p className="truncate text-xs text-muted-foreground">
+						{category.records_count}{" "}
+						{category.records_count === 1 ? "record" : "records"}
+					</p>
 				</div>
 				<div className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground">
 					{"children" in category ? (

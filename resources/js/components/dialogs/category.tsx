@@ -26,7 +26,6 @@ import {
 } from "@/wayfinder/routes"
 
 type CategoryFormValues = {
-	id: string
 	name: string
 	icon: string
 	color: string
@@ -38,7 +37,6 @@ function isChildCategory(category: Category | CategoryWithChildren | null) {
 }
 
 const EMPTY_FORM_VALUES: CategoryFormValues = {
-	id: "",
 	name: "",
 	icon: "",
 	color: "",
@@ -72,7 +70,6 @@ export default function CategoryDialog({
 		setValues(
 			category
 				? {
-						id: category.id,
 						name: category.name,
 						icon: category.icon,
 						color: category.color,
@@ -95,7 +92,6 @@ export default function CategoryDialog({
 		event.preventDefault()
 
 		const formData = new FormData()
-		formData.append("id", values.id)
 		formData.append("name", values.name)
 		formData.append("icon", values.icon)
 		formData.append("color", values.color)
@@ -156,19 +152,36 @@ export default function CategoryDialog({
 				<form id="category-form" className="flex flex-col gap-4" onSubmit={handleSubmit}>
 					<FieldGroup className="grid gap-4 md:grid-cols-2">
 						<TextField
-							id="id"
-							label="Id"
-							value={values.id}
-							errors={getApiFieldErrors("id")}
-							onChange={value => setValue("id", value)}
-						/>
-						<TextField
 							id="name"
 							label="Name"
 							value={values.name}
 							errors={getApiFieldErrors("name")}
 							onChange={value => setValue("name", value)}
 						/>
+						{canEditParentCategory ? (
+							<ComboboxField
+								id="parent_category_id"
+								label="Parent Category"
+								value={
+									parentOptions.find(
+										option => option.id === values.parent_category_id,
+									) ?? null
+								}
+								errors={getApiFieldErrors("parent_category_id")}
+								placeholder="Top-level category"
+								emptyText="No categories found."
+								items={parentOptions}
+								getItemId={option => option.id}
+								getItemString={option => option.name}
+								renderItem={option => (
+									<div className="flex items-center gap-2">
+										<Icon {...option} size={10} />
+										{option.name}
+									</div>
+								)}
+								onChange={value => setValue("parent_category_id", value?.id ?? "")}
+							/>
+						) : null}
 						<TextField
 							id="icon"
 							label="Icon"
@@ -185,31 +198,6 @@ export default function CategoryDialog({
 						/>
 					</FieldGroup>
 
-					{canEditParentCategory ? (
-						<ComboboxField
-							id="parent_category_id"
-							label="Parent Category"
-							value={
-								parentOptions.find(
-									option => option.id === values.parent_category_id,
-								) ?? null
-							}
-							errors={getApiFieldErrors("parent_category_id")}
-							placeholder="Top-level category"
-							emptyText="No categories found."
-							items={parentOptions}
-							getItemId={option => option.id}
-							getItemString={option => option.name}
-							renderItem={option => (
-								<div className="flex items-center gap-2">
-									<Icon {...option} size={10} />
-									{option.name}
-								</div>
-							)}
-							onChange={value => setValue("parent_category_id", value?.id ?? "")}
-						/>
-					) : null}
-
 					<Card size="sm" className="bg-muted/30 ring-0">
 						<CardContent className="flex items-center gap-3 py-1">
 							<Icon {...values} size={14} />
@@ -221,9 +209,6 @@ export default function CategoryDialog({
 									)}
 								>
 									{values.name || "Category preview"}
-								</p>
-								<p className="truncate text-xs text-muted-foreground">
-									{values.id || "category-id"}
 								</p>
 							</div>
 						</CardContent>
