@@ -1,6 +1,7 @@
 import { Link } from "@inertiajs/react"
 import type { ColumnDef, Row } from "@tanstack/react-table"
 import AllocateBar from "@/components/allocate-bar"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useHistory } from "@/history"
 import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
@@ -74,6 +75,11 @@ export function useStatementColumns<TStatement extends StatementRow>({
 			meta: { width: TABLE_WIDTH_CLASSNAMES.STATEMENT },
 			cell: ({ row }) => (
 				<div className="whitespace-pre-line break-words text-muted-foreground">
+					{row.original.is_pending ? (
+						<Badge variant="warning" className="mr-1">
+							Pending
+						</Badge>
+					) : null}
 					{row.original.description || "-"}
 				</div>
 			),
@@ -114,6 +120,11 @@ export function useStatementMobileRow<TStatement extends StatementRow>({
 					{leading?.(statement)}
 					<div className="min-w-0 flex-1">
 						<p className="whitespace-pre-line break-words font-medium">
+							{!showAccount && statement.is_pending ? (
+								<Badge variant="warning" className="mr-1">
+									Pending
+								</Badge>
+							) : null}
 							{showAccount
 								? statement.account.name
 								: statement.description || "Statement"}
@@ -143,6 +154,11 @@ export function useStatementMobileRow<TStatement extends StatementRow>({
 
 				{showAccount ? (
 					<p className="whitespace-pre-line break-words text-xs text-muted-foreground">
+						{statement.is_pending ? (
+							<Badge variant="warning" className="mr-1">
+								Pending
+							</Badge>
+						) : null}
 						{statement.description || "-"}
 					</p>
 				) : null}

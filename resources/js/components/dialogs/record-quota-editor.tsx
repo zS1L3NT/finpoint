@@ -15,11 +15,13 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog"
+import { FieldGroup } from "@/components/ui/field"
 import {
 	Item,
 	ItemActions,
 	ItemContent,
 	ItemDescription,
+	ItemGroup,
 	ItemMedia,
 	ItemTitle,
 } from "@/components/ui/item"
@@ -102,7 +104,7 @@ export default function RecordQuotaDialog({
 			}}
 		>
 			{trigger && <DialogTrigger render={trigger} />}
-			<DialogContent className="md:max-w-lg">
+			<DialogContent className="md:max-w-4xl">
 				<DialogHeader>
 					<DialogTitle>Attach Records to Quota</DialogTitle>
 					<DialogDescription>
@@ -113,38 +115,52 @@ export default function RecordQuotaDialog({
 
 				<form
 					id="record-quota-form"
-					className="grid gap-6"
+					className="grid gap-6 lg:grid-cols-[minmax(0,18rem)_minmax(0,1fr)]"
 					onSubmit={event => {
 						event.preventDefault()
 						void attach()
 					}}
 				>
-					{quotas.length ? (
-						<SelectField
-							id="quota_id"
-							label="Quota"
-							value={quotaId}
-							errors={error ? [{ message: error }] : []}
-							placeholder="Select a quota"
-							items={quotas.map(quota => ({
-								value: quota.id,
-								label: `${quota.name} ${quota.amount !== null ? `• ${formatCurrency(quota.amount)}` : "• No limit"}`,
-							}))}
-							onChange={value => {
-								setQuotaId(value)
-								setError("")
-							}}
-						/>
-					) : (
-						<p className="text-sm text-muted-foreground">
-							No quotas are available for this dashboard view.
+					<div className="flex flex-col gap-3">
+						<p className="text-sm font-semibold">Destination</p>
+						<FieldGroup>
+							{quotas.length ? (
+								<SelectField
+									id="quota_id"
+									label="Quota"
+									value={quotaId}
+									errors={error ? [{ message: error }] : []}
+									placeholder="Select a quota"
+									items={quotas.map(quota => ({
+										value: quota.id,
+										label: `${quota.name} ${quota.amount !== null ? `• ${formatCurrency(quota.amount)}` : "• No limit"}`,
+									}))}
+									onChange={value => {
+										setQuotaId(value)
+										setError("")
+									}}
+								/>
+							) : (
+								<p className="text-sm text-muted-foreground">
+									No quotas are available for this dashboard view.
+								</p>
+							)}
+						</FieldGroup>
+						<p className="text-xs text-muted-foreground">
+							Attaching replaces any current quota assignment for the selected
+							records.
 						</p>
-					)}
+					</div>
 
-					<div className="space-y-2">
-						<p className="text-sm font-semibold">Selected records</p>
-						<ScrollArea className="h-72">
-							<div className="space-y-2">
+					<div className="flex min-w-0 flex-col gap-3">
+						<div className="flex items-center justify-between gap-3">
+							<p className="text-sm font-semibold">Selected records</p>
+							<Badge variant="secondary">
+								{records.length} record{records.length === 1 ? "" : "s"}
+							</Badge>
+						</div>
+						<ScrollArea className="h-64 lg:h-80">
+							<ItemGroup className="gap-2 pr-3">
 								{records.map(record => (
 									<Item
 										key={record.id}
@@ -156,11 +172,9 @@ export default function RecordQuotaDialog({
 										</ItemMedia>
 										<ItemContent className="gap-0">
 											<ItemTitle>
-												{record.is_pending && (
-													<Badge variant="warning" className="mr-1">
-														Pending
-													</Badge>
-												)}
+												{record.is_pending ? (
+													<Badge variant="warning">Pending</Badge>
+												) : null}
 												{record.title}
 											</ItemTitle>
 											<ItemDescription>
@@ -175,7 +189,7 @@ export default function RecordQuotaDialog({
 										</ItemActions>
 									</Item>
 								))}
-							</div>
+							</ItemGroup>
 						</ScrollArea>
 					</div>
 				</form>

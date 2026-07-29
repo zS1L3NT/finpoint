@@ -1,10 +1,11 @@
 import { Icon as IconifyIcon } from "@iconify/react"
 import { useEffect, useState } from "react"
+import AllocateBar from "@/components/allocate-bar"
 import DataTable from "@/components/table/data-table"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Field, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { Progress } from "@/components/ui/progress"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import {
 	Sheet,
@@ -15,9 +16,15 @@ import {
 	SheetTrigger,
 } from "@/components/ui/sheet"
 import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
-import { classForCurrency, cn, formatCurrency, formatDatetime } from "@/lib/utils"
+import { formatDatetime } from "@/lib/utils"
 import { Statement } from "@/types"
 import { statementIndexApiRoute } from "@/wayfinder/routes"
+
+const ATTACHMENT_TABLE_WIDTHS = {
+	ACCOUNT: "w-32",
+	AMOUNT_BAR: "w-56",
+	ACTIONS: "w-24",
+}
 
 export default function StatementSearchSheet({
 	title,
@@ -73,18 +80,21 @@ export default function StatementSearchSheet({
 	return (
 		<Sheet open={isOpen} onOpenChange={setIsOpen}>
 			{trigger && <SheetTrigger asChild>{trigger}</SheetTrigger>}
-			<SheetContent side="right" className="md:w-full md:max-w-4xl">
+			<SheetContent
+				side="right"
+				className="md:data-[side=right]:w-full md:data-[side=right]:max-w-4xl"
+			>
 				<SheetHeader className="gap-2 border-b">
 					<SheetTitle>{title}</SheetTitle>
-					<SheetDescription className="sr-only">
-						Search statements and attach one from the results.
+					<SheetDescription>
+						Choose a statement with an allocable amount to attach to the current record.
 					</SheetDescription>
 				</SheetHeader>
 
 				<div className="flex flex-1 flex-col gap-4 overflow-y-hidden p-4 md:p-6">
 					<Field>
 						<FieldLabel htmlFor="statement-search-query">Search statements</FieldLabel>
-						<div className="flex gap-2">
+						<div className="flex flex-col gap-2 sm:flex-row">
 							<Input
 								id="statement-search-query"
 								type="search"
@@ -97,9 +107,11 @@ export default function StatementSearchSheet({
 									type="button"
 									variant={includeOlder ? "secondary" : "outline"}
 									aria-pressed={includeOlder}
+									className="sm:shrink-0"
 									onClick={() => setIncludeOlder(value => !value)}
 								>
-									<IconifyIcon icon="lucide:history" /> Include older
+									<IconifyIcon icon="lucide:history" data-icon="inline-start" />
+									Include older
 								</Button>
 							) : null}
 						</div>
@@ -111,52 +123,54 @@ export default function StatementSearchSheet({
 							columns={[
 								{
 									header: "Account",
+									meta: { width: ATTACHMENT_TABLE_WIDTHS.ACCOUNT },
 									cell: ({ row }) => (
-										<div className="space-y-1">
-											<div className="whitespace-pre-line break-words">
-												{row.original.description}
-											</div>
-											<div className="flex justify-between">
-												<div className="text-muted-foreground">
-													{formatDatetime(row.original.datetime)}
-												</div>
-
-												<div>
-													<span
-														className={classForCurrency(
-															row.original.allocable_amount,
-														)}
-													>
-														{formatCurrency(
-															row.original.allocable_amount,
-														)}
-													</span>
-													{" / "}
-													<span
-														className={cn(
-															"font-bold",
-															classForCurrency(row.original.amount),
-														)}
-													>
-														{formatCurrency(row.original.amount)}
-													</span>
-												</div>
-											</div>
-											<Progress
-												value={
-													row.original.amount === 0
-														? 0
-														: (row.original.allocable_amount /
-																row.original.amount) *
-															100
-												}
-											/>
+										<div className="flex flex-col gap-0.5">
+											<span className="font-medium">
+												{row.original.account.name}
+											</span>
+											<span className="text-muted-foreground">
+												{row.original.account.bank}
+											</span>
+										</div>
+									),
+								},
+								{
+									header: "Date & Time",
+									meta: { width: TABLE_WIDTH_CLASSNAMES.DATETIME },
+									cell: ({ row }) => (
+										<span className="text-muted-foreground">
+											{formatDatetime(row.original.datetime)}
+										</span>
+									),
+								},
+								{
+									header: "Allocable",
+									meta: { width: ATTACHMENT_TABLE_WIDTHS.AMOUNT_BAR },
+									cell: ({ row }) => (
+										<AllocateBar
+											title="Allocable"
+											value={row.original.allocable_amount}
+											total={row.original.amount}
+										/>
+									),
+								},
+								{
+									header: "Description",
+									cell: ({ row }) => (
+										<div className="whitespace-pre-line break-words text-muted-foreground">
+											{row.original.is_pending ? (
+												<Badge variant="warning" className="mr-1">
+													Pending
+												</Badge>
+											) : null}
+											{row.original.description || "-"}
 										</div>
 									),
 								},
 								{
 									id: "actions",
-									meta: { width: TABLE_WIDTH_CLASSNAMES.ACTIONS_FIXED_ATTACH },
+									meta: { width: ATTACHMENT_TABLE_WIDTHS.ACTIONS },
 									cell: ({ row }) => (
 										<Button
 											size="sm"
@@ -165,6 +179,10 @@ export default function StatementSearchSheet({
 												await handleSearch()
 											}}
 										>
+											<IconifyIcon
+												icon="lucide:link-2"
+												data-icon="inline-start"
+											/>
 											Attach
 										</Button>
 									),
@@ -172,50 +190,42 @@ export default function StatementSearchSheet({
 							]}
 							mobileRow={({ original: statement }) => (
 								<div className="flex flex-col gap-3">
-									<div>
+									<div className="flex flex-col gap-1">
 										<p className="font-medium break-words">
+											{statement.is_pending ? (
+												<Badge variant="warning" className="mr-1">
+													Pending
+												</Badge>
+											) : null}
 											{statement.description}
 										</p>
 										<p className="text-xs text-muted-foreground">
+											{statement.account.name} ·{" "}
 											{formatDatetime(statement.datetime)}
 										</p>
 									</div>
-									<div className="flex justify-between gap-3 text-xs">
-										<span
-											className={classForCurrency(statement.allocable_amount)}
-										>
-											{formatCurrency(statement.allocable_amount)}
-										</span>
-										<span
-											className={cn(
-												"font-bold",
-												classForCurrency(statement.amount),
-											)}
-										>
-											{formatCurrency(statement.amount)}
-										</span>
-									</div>
-									<Progress
-										value={
-											statement.amount === 0
-												? 0
-												: (statement.allocable_amount / statement.amount) *
-													100
-										}
+									<AllocateBar
+										title="Allocable"
+										value={statement.allocable_amount}
+										total={statement.amount}
 									/>
-									<div className="flex justify-end">
-										<Button
-											size="sm"
-											onClick={async () => {
-												await handler(statement)
-												await handleSearch()
-											}}
-										>
-											Attach
-										</Button>
-									</div>
+									<Button
+										size="sm"
+										className="w-full"
+										onClick={async () => {
+											await handler(statement)
+											await handleSearch()
+										}}
+									>
+										<IconifyIcon
+											icon="lucide:link-2"
+											data-icon="inline-start"
+										/>
+										Attach statement
+									</Button>
 								</div>
 							)}
+							emptyMessage="No allocable statements found."
 						/>
 					</ScrollArea>
 				</div>

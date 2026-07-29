@@ -34,6 +34,9 @@ export type Statement = {
 	description: string
 	amount: number
 	allocable_amount: number
+	allocation_count: number
+	is_pending: boolean
+	is_unallocated: boolean
 	account: Account
 }
 

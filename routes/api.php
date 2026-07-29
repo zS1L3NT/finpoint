@@ -19,10 +19,15 @@ Route::post('importer/revolut', [ImporterController::class, 'revolut'])->name('i
 Route::get('completions/records', [CompletionsController::class, 'records'])->name('completions-records-api-route');
 
 Route::apiResource('statements', StatementController::class)
-    ->only('index')
+    ->only('index', 'store', 'update', 'destroy')
     ->names([
         'index' => 'statement-index-api-route',
+        'store' => 'statement-store-api-route',
+        'update' => 'statement-update-api-route',
+        'destroy' => 'statement-destroy-api-route',
     ]);
+Route::post('statements/{statement}/replace-pending/{pending_statement}', [StatementController::class, 'replacePending'])
+    ->name('statement-replace-pending-api-route');
 
 Route::apiResource('accounts', AccountController::class)
     ->only('update')

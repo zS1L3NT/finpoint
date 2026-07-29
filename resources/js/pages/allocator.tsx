@@ -7,6 +7,7 @@ import DateField from "@/components/form/date-field"
 import AppHeader from "@/components/layout/app-header"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
+import PendingStatementConfirmationSheet from "@/components/sheets/pending-statement-confirmation"
 import RecordSearchSheet from "@/components/sheets/record-search"
 import PaginatedDataTable from "@/components/table/paginated-data-table"
 import { useStatementColumns, useStatementMobileRow } from "@/components/table/statement-columns"
@@ -30,6 +31,7 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 	const [selectedStatements, setSelectedStatements] = useState<Statement[]>([])
 	const [isCreatingRecord, setIsCreatingRecord] = useState(false)
 	const [isAttachingRecord, setIsAttachingRecord] = useState(false)
+	const [isReplacingPendingStatement, setIsReplacingPendingStatement] = useState(false)
 	const [editingRecord, setEditingRecord] = useState<
 		(Record & { statements: Statement[] }) | null
 	>(null)
@@ -50,6 +52,12 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 		(sum, statement) => sum + statement.allocable_amount,
 		0,
 	)
+	const replacementStatement =
+		selectedStatements.length === 1 &&
+		!selectedStatements[0].is_pending &&
+		selectedStatements[0].is_unallocated
+			? selectedStatements[0]
+			: null
 	const statementColumns = useStatementColumns<Statement>({
 		amount: "allocable",
 		pageName: "Allocator",
@@ -77,13 +85,13 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 			<PageContent>
 				<PageHeader
 					title="Allocator"
-					subtitle="Allocate bank statements to app records."
+					subtitle="Allocate statements to records and replace handwritten pending statements."
 					description="Allocation workspace"
 					icon="lucide:link"
 				/>
 
 				<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-					<DetailCard label="Pending Statements" value={statements.total} />
+					<DetailCard label="Allocable Statements" value={statements.total} />
 					<DetailCard label="Selected Statements" value={selectedStatements.length} />
 					<DetailCard
 						label="Selected Amount"
@@ -180,6 +188,21 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 											className="w-full sm:w-auto"
 										>
 											<IconifyIcon icon="lucide:link-2" /> Attach to Record
+										</Button>
+									}
+								/>
+								<PendingStatementConfirmationSheet
+									statement={replacementStatement}
+									isOpen={isReplacingPendingStatement}
+									setIsOpen={setIsReplacingPendingStatement}
+									onConfirmed={() => setSelectedStatements([])}
+									trigger={
+										<Button
+											disabled={!replacementStatement}
+											className="w-full sm:w-auto"
+											title="Select one fully unallocated imported statement"
+										>
+											<IconifyIcon icon="lucide:replace" /> Replace Pending
 										</Button>
 									}
 								/>

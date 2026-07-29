@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\WithoutTimestamps;
@@ -11,11 +12,13 @@ use Illuminate\Database\Eloquent\Model;
 #[Table(keyType: 'string', incrementing: false)]
 #[WithoutTimestamps()]
 #[Guarded([])]
+#[Appends('is_unallocated')]
 class Statement extends Model
 {
     public $casts = [
         'datetime' => 'date:Y-m-d H:i',
         'index' => 'integer',
+        'is_pending' => 'boolean',
     ];
 
     protected $with = ['account'];
@@ -26,6 +29,9 @@ class Statement extends Model
             $builder->addSelect([
                 'allocable_amount' => Allocation::query()
                     ->selectRaw('coalesce(round(statements.amount - sum(allocations.amount), 2), statements.amount)')
+                    ->whereColumn('allocations.statement_id', 'statements.id'),
+                'allocation_count' => Allocation::query()
+                    ->selectRaw('count(*)')
                     ->whereColumn('allocations.statement_id', 'statements.id'),
             ]);
         });
@@ -46,6 +52,8 @@ class Statement extends Model
         $start_date = null,
         $end_date = null,
         $is_allocable = null,
+        $is_pending = null,
+        $is_unallocated = null,
     ) {
         return self::query()
             ->when(
@@ -83,12 +91,25 @@ class Statement extends Model
                 collect(['true', 'false'])->contains($is_allocable),
                 fn ($query) => $query->havingRaw($is_allocable === 'true' ? 'allocable_amount != 0' : 'allocable_amount = 0')
             )
+            ->when(
+                collect(['true', 'false'])->contains($is_pending),
+                fn ($query) => $query->where('is_pending', $is_pending === 'true')
+            )
+            ->when(
+                collect(['true', 'false'])->contains($is_unallocated),
+                fn ($query) => $query->havingRaw($is_unallocated === 'true' ? 'allocation_count = 0' : 'allocation_count != 0')
+            )
             ->groupBy('statements.id');
     }
 
     public function getDescriptionAttribute()
     {
         return preg_replace('/\b\d{4}-\d{4}-\d{4}-(\d{4})\b/', 'XXXX-XXXX-XXXX-$1', $this->attributes['description']);
+    }
+
+    public function getIsUnallocatedAttribute()
+    {
+        return $this->allocation_count == 0;
     }
 
     public function account()

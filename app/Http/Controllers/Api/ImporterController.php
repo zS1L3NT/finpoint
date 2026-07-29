@@ -108,7 +108,7 @@ class ImporterController extends Controller
                         $data['description'] = $data['description'] ? "{$data['description']} #$duplicate_index" : "#$duplicate_index";
                     }
 
-                    $existing_statement = Statement::query()->where($data)->first();
+                    $existing_statement = Statement::query()->where($data)->where('is_pending', false)->first();
 
                     if ($existing_statement) {
                         if ($existing_statement->index !== $index) {
@@ -136,7 +136,7 @@ class ImporterController extends Controller
 
                 // Ensure labelled duplicates are updated and matched with the correct #1, #2
                 foreach ($unmatched_duplicates as $statements_meta) {
-                    $existing_statement = Statement::query()->where($statements_meta[0]['raw_data'])->first();
+                    $existing_statement = Statement::query()->where($statements_meta[0]['raw_data'])->where('is_pending', false)->first();
 
                     if ($existing_statement) {
                         $match = collect($statements_meta)->search(fn ($statement) => $statement['index'] === $existing_statement->index);
@@ -256,7 +256,7 @@ class ImporterController extends Controller
                         $data['description'] = $data['description'] ? "{$data['description']} #$duplicate_index" : "#$duplicate_index";
                     }
 
-                    $existing_statement = Statement::query()->where($data)->first();
+                    $existing_statement = Statement::query()->where($data)->where('is_pending', false)->first();
 
                     if ($existing_statement) {
                         if ($existing_statement->index !== $index) {
@@ -284,7 +284,7 @@ class ImporterController extends Controller
 
                 // Ensure labelled duplicates are updated and matched with the correct #1, #2
                 foreach ($unmatched_duplicates as $statements_meta) {
-                    $existing_statement = Statement::query()->where($statements_meta[0]['raw_data'])->first();
+                    $existing_statement = Statement::query()->where($statements_meta[0]['raw_data'])->where('is_pending', false)->first();
 
                     if ($existing_statement) {
                         $match = collect($statements_meta)->search(fn ($statement) => $statement['index'] === $existing_statement->index);
@@ -344,6 +344,7 @@ class ImporterController extends Controller
             foreach ($statements as $statement) {
                 if ($statement['State'] === 'REVERTED') {
                     $skipped++;
+
                     continue;
                 }
 
@@ -358,7 +359,7 @@ class ImporterController extends Controller
                     'amount' => $statement['Amount'] - $statement['Fee'],
                 ];
 
-                if (! Statement::query()->where($data)->exists()) {
+                if (! Statement::query()->where($data)->where('is_pending', false)->exists()) {
                     $imported++;
                     Statement::query()->insert([
                         'id' => Uuid::uuid4(),

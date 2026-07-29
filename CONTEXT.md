@@ -25,6 +25,10 @@ _Avoid_: User account, login account
 A record whose allocated statement amounts do not tally with the record amount. Pending records are useful when the real-world activity is known before the bank statements are fully confirmed.
 _Avoid_: Draft record, unconfirmed record
 
+**Pending Statement**:
+A handwritten placeholder for account activity that has not appeared in an imported bank feed yet. A pending statement may be allocated like any statement. When the imported statement arrives, it replaces one pending statement and inherits its allocations unchanged.
+_Avoid_: Draft statement, estimated record
+
 **Budget**:
 A spending plan with a custom date period and amount. Budget membership can be manual, or automatic when records fall within the budget period; records may still be attached or detached outside the period.
 _Avoid_: Quota, monthly cap

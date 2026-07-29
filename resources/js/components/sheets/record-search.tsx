@@ -1,7 +1,7 @@
 import { Icon as IconifyIcon } from "@iconify/react"
 import { useEffect, useState } from "react"
+import AllocateBar from "@/components/allocate-bar"
 import Icon from "@/components/icon"
-import RecordAmount from "@/components/record-amount"
 import DataTable from "@/components/table/data-table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -20,6 +20,11 @@ import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
 import { formatDatetime } from "@/lib/utils"
 import { Record } from "@/types"
 import { recordIndexApiRoute } from "@/wayfinder/routes"
+
+const ATTACHMENT_TABLE_WIDTHS = {
+	AMOUNT_BAR: "w-56",
+	ACTIONS: "w-24",
+}
 
 export default function RecordSearchSheet({
 	title,
@@ -75,18 +80,21 @@ export default function RecordSearchSheet({
 	return (
 		<Sheet open={isOpen} onOpenChange={setIsOpen}>
 			{trigger && <SheetTrigger asChild>{trigger}</SheetTrigger>}
-			<SheetContent side="right" className="md:w-full md:max-w-4xl">
+			<SheetContent
+				side="right"
+				className="md:data-[side=right]:w-full md:data-[side=right]:max-w-4xl"
+			>
 				<SheetHeader className="gap-2 border-b">
 					<SheetTitle>{title}</SheetTitle>
-					<SheetDescription className="sr-only">
-						Search records and attach one from the results.
+					<SheetDescription>
+						Choose a record to attach. Allocation progress is shown for context.
 					</SheetDescription>
 				</SheetHeader>
 
 				<div className="flex flex-1 flex-col gap-4 overflow-y-hidden p-4 md:p-6">
 					<Field>
 						<FieldLabel htmlFor="record-search-query">Search records</FieldLabel>
-						<div className="flex gap-2">
+						<div className="flex flex-col gap-2 sm:flex-row">
 							<Input
 								id="record-search-query"
 								type="search"
@@ -99,9 +107,11 @@ export default function RecordSearchSheet({
 									type="button"
 									variant={includeOlder ? "secondary" : "outline"}
 									aria-pressed={includeOlder}
+									className="sm:shrink-0"
 									onClick={() => setIncludeOlder(value => !value)}
 								>
-									<IconifyIcon icon="lucide:history" /> Include older
+									<IconifyIcon icon="lucide:history" data-icon="inline-start" />
+									Include older
 								</Button>
 							) : null}
 						</div>
@@ -114,36 +124,50 @@ export default function RecordSearchSheet({
 								{
 									header: "Record",
 									cell: ({ row }) => (
-										<div className="flex items-center gap-2">
-											<Icon {...row.original.category} size={20} />
-											<div className="flex-1 truncate">
-												<div className="truncate">
-													<span className="font-medium">
-														{row.original.is_pending && (
-															<Badge
-																variant="warning"
-																className="mr-1"
-															>
-																Pending
-															</Badge>
-														)}
-														{row.original.title}{" "}
-													</span>
-													<span className="text-muted-foreground">
-														{row.original.subtitle}
-													</span>
-												</div>
-												<div className="text-muted-foreground">
-													{formatDatetime(row.original.datetime)}
-												</div>
-												<RecordAmount record={row.original} />
+										<div className="flex items-start gap-3">
+											<Icon {...row.original.category} size={18} />
+											<div className="min-w-0 flex-1">
+												<p className="font-medium break-words">
+													{row.original.is_pending ? (
+														<Badge variant="warning" className="mr-1">
+															Pending
+														</Badge>
+													) : null}
+													{row.original.title}
+												</p>
+												<p className="text-muted-foreground break-words">
+													{row.original.category.name}
+													{row.original.subtitle
+														? ` · ${row.original.subtitle}`
+														: ""}
+												</p>
 											</div>
 										</div>
 									),
 								},
 								{
+									header: "Date & Time",
+									meta: { width: TABLE_WIDTH_CLASSNAMES.DATETIME },
+									cell: ({ row }) => (
+										<span className="text-muted-foreground">
+											{formatDatetime(row.original.datetime)}
+										</span>
+									),
+								},
+								{
+									header: "Allocation",
+									meta: { width: ATTACHMENT_TABLE_WIDTHS.AMOUNT_BAR },
+									cell: ({ row }) => (
+										<AllocateBar
+											title="Allocated"
+											value={row.original.allocated_amount}
+											total={row.original.amount}
+										/>
+									),
+								},
+								{
 									id: "actions",
-									meta: { width: TABLE_WIDTH_CLASSNAMES.ACTIONS_FIXED_ATTACH },
+									meta: { width: ATTACHMENT_TABLE_WIDTHS.ACTIONS },
 									cell: ({ row }) => (
 										<Button
 											size="sm"
@@ -152,6 +176,10 @@ export default function RecordSearchSheet({
 												await handleSearch()
 											}}
 										>
+											<IconifyIcon
+												icon="lucide:link-2"
+												data-icon="inline-start"
+											/>
 											Attach
 										</Button>
 									),
@@ -163,32 +191,46 @@ export default function RecordSearchSheet({
 										<Icon {...record.category} size={20} />
 										<div className="min-w-0 flex-1">
 											<p className="font-medium break-words">
-												{record.is_pending && (
+												{record.is_pending ? (
 													<Badge variant="warning" className="mr-1">
 														Pending
 													</Badge>
-												)}
+												) : null}
 												{record.title}
 											</p>
 											<p className="text-xs text-muted-foreground">
+												{record.category.name} ·{" "}
 												{formatDatetime(record.datetime)}
 											</p>
 										</div>
-										<RecordAmount record={record} />
 									</div>
-									<div className="flex justify-end">
-										<Button
-											size="sm"
-											onClick={async () => {
-												await handler(record)
-												await handleSearch()
-											}}
-										>
-											Attach
-										</Button>
-									</div>
+									{record.description ? (
+										<p className="line-clamp-2 text-xs text-muted-foreground break-words">
+											{record.description}
+										</p>
+									) : null}
+									<AllocateBar
+										title="Allocated"
+										value={record.allocated_amount}
+										total={record.amount}
+									/>
+									<Button
+										size="sm"
+										className="w-full"
+										onClick={async () => {
+											await handler(record)
+											await handleSearch()
+										}}
+									>
+										<IconifyIcon
+											icon="lucide:link-2"
+											data-icon="inline-start"
+										/>
+										Attach record
+									</Button>
 								</div>
 							)}
+							emptyMessage="No matching records found."
 						/>
 					</ScrollArea>
 				</div>
