@@ -235,6 +235,13 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 			/>
 		),
 	})
+	const xlRemainder = quotas.length % 4
+	const xlLastRowStartClass =
+		xlRemainder === 1
+			? "xl:col-start-5"
+			: xlRemainder === 2
+				? "xl:col-start-4"
+				: "xl:col-start-2"
 
 	return (
 		<>
@@ -429,11 +436,17 @@ export default function DashboardPage({ records, quotas }: { records: Record[]; 
 
 				{quotas.length ? (
 					<Card>
-						<CardContent className="grid gap-x-4 gap-y-8 sm:grid-cols-2 xl:grid-cols-3">
-							{quotas.map(quota => (
+						<CardContent className="grid gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-12">
+							{quotas.map((quota, index) => (
 								<div
 									key={quota.id}
-									className="flex min-w-0 flex-col items-center gap-3"
+									className={cn(
+										"flex min-w-0 flex-col items-center gap-3",
+										"xl:col-span-3",
+										index === quotas.length - xlRemainder &&
+											xlRemainder > 0 &&
+											xlLastRowStartClass,
+									)}
 								>
 									<p className="text-sm font-heading font-medium text-center">
 										Spending for {quota.name}
