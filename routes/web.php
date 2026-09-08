@@ -6,6 +6,7 @@ use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ImporterController;
+use App\Http\Controllers\MonthlyRecordController;
 use App\Http\Controllers\RecordController;
 use App\Http\Controllers\StatementController;
 use Illuminate\Support\Facades\Route;
@@ -35,6 +36,8 @@ Route::resource('accounts', AccountController::class)
         'index' => 'accounts-web-route',
         'show' => 'account-web-route',
     ]);
+
+Route::get('records/monthly', MonthlyRecordController::class)->name('monthly-records-web-route');
 
 Route::resource('records', RecordController::class)
     ->only('index', 'show')

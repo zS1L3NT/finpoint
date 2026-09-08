@@ -41,4 +41,9 @@ class Category extends Model
     {
         return $this->hasMany(Category::class, 'parent_category_id');
     }
+
+    public function defaultBucket()
+    {
+        return $this->belongsTo(Bucket::class, 'default_bucket_id');
+    }
 }

@@ -1,14 +1,14 @@
 <?php
 
 use App\Http\Controllers\Api\AccountController;
+use App\Http\Controllers\Api\BucketController;
 use App\Http\Controllers\Api\BudgetController;
 use App\Http\Controllers\Api\BudgetRecordController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CompletionsController;
 use App\Http\Controllers\Api\ImporterController;
-use App\Http\Controllers\Api\QuotaController;
+use App\Http\Controllers\Api\RecordBucketController;
 use App\Http\Controllers\Api\RecordController;
-use App\Http\Controllers\Api\RecordQuotaController;
 use App\Http\Controllers\Api\StatementController;
 use Illuminate\Support\Facades\Route;
 
@@ -35,6 +35,8 @@ Route::apiResource('accounts', AccountController::class)
         'update' => 'account-update-api-route',
     ]);
 
+Route::patch('records/bucket', [RecordBucketController::class, 'update'])->name('record-bucket-update-api-route');
+
 Route::apiResource('records', RecordController::class)
     ->names([
         'index' => 'record-index-api-route',
@@ -44,8 +46,14 @@ Route::apiResource('records', RecordController::class)
         'destroy' => 'record-destroy-api-route',
     ]);
 
-Route::post('records/{record}/quota/{quota}', [RecordQuotaController::class, 'attach'])->name('record-quota-attach-api-route');
-Route::delete('records/{record}/quota', [RecordQuotaController::class, 'detach'])->name('record-quota-detach-api-route');
+Route::apiResource('buckets', BucketController::class)
+    ->only('index', 'store', 'update')
+    ->names([
+        'index' => 'bucket-index-api-route',
+        'store' => 'bucket-store-api-route',
+        'update' => 'bucket-update-api-route',
+    ]);
+Route::put('buckets/{bucket}/target', [BucketController::class, 'target'])->name('bucket-target-update-api-route');
 
 Route::apiResource('budgets', BudgetController::class)
     ->only('store', 'update', 'destroy')
@@ -65,12 +73,4 @@ Route::apiResource('categories', CategoryController::class)
         'store' => 'category-store-api-route',
         'update' => 'category-update-api-route',
         'destroy' => 'category-destroy-api-route',
-    ]);
-
-Route::apiResource('quotas', QuotaController::class)
-    ->only('store', 'update', 'destroy')
-    ->names([
-        'store' => 'quota-store-api-route',
-        'update' => 'quota-update-api-route',
-        'destroy' => 'quota-destroy-api-route',
     ]);

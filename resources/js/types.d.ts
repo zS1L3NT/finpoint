@@ -52,8 +52,20 @@ export type Record = {
 	allocated_amount: number
 	is_pending: boolean
 	category: Category
-	quota?: Quota | null
+	analytics_treatment: AnalyticsTreatment
+	analytics_treatment_source: "category" | "manual"
+	revision: number
+	bucket_id: string | null
+	bucket_source: "category" | "manual" | null
+	bucket?: Bucket | null
 }
+
+export type AnalyticsTreatment =
+	| "income"
+	| "spending"
+	| "saving_investment"
+	| "neutral"
+	| "automatic"
 
 export type RecordCompletions = {
 	titles: string[]
@@ -69,6 +81,8 @@ export type Category = {
 	parent_category_id: string | null
 	can_delete: boolean
 	records_count: number
+	analytics_treatment: AnalyticsTreatment | null
+	default_bucket_id: string | null
 }
 
 export type CategoryWithChildren = Category & {
@@ -89,11 +103,48 @@ export type Budget = {
 	automatic: boolean
 }
 
-export type Quota = {
+export type Bucket = {
 	id: string
 	name: string
 	color: string
-	month: string
-	year: number
-	amount: number | null
+	group: "core" | "outlier" | "other"
+	pace_kind: "daily" | "recurring" | "none"
+	display_order: number
+	archived: boolean
+}
+
+export type AnalyticsSummary = {
+	income: number
+	spending: number
+	gross_spending: number
+	refunds: number
+	contributions: number
+	withdrawals: number
+	surplus: number
+	surplus_rate: number | null
+	pending_income: number
+	pending_spending: number
+	pending_gross_spending: number
+	pending_refunds: number
+	pending_count: number
+	unbucketed_count: number
+	daily: Array<{
+		date: string
+		income: number
+		spending: number
+		contributions: number
+		withdrawals: number
+		net: number
+		records: number
+	}>
+	categories: Array<{
+		id: string
+		name: string
+		icon: string
+		color: string
+		spending: number
+		records: number
+		bucket_spending: { [bucketId: string]: number }
+	}>
+	buckets: Array<Bucket & { spending: number; records: number }>
 }

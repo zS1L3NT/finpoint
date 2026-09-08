@@ -7,6 +7,7 @@ import { useEffect, useState } from "react"
 import AmountField from "@/components/form/amount-field"
 import ComboboxField from "@/components/form/combobox-field"
 import DatetimeField from "@/components/form/datetime-field"
+import RecordAnalyticsFields from "@/components/form/record-analytics-fields"
 import TextField from "@/components/form/text-field"
 import TextareaField from "@/components/form/textarea-field"
 import Icon from "@/components/icon"
@@ -77,6 +78,7 @@ export default function RecordEditorDialog({
 
 	const [statementCache, setStatementCache] = useState<(Statement & { pivot?: Allocation })[]>([])
 	const [isAttachingStatement, setIsAttachingStatement] = useState(false)
+	const [submitError, setSubmitError] = useState("")
 
 	const { mergeErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
 
@@ -94,6 +96,10 @@ export default function RecordEditorDialog({
 			datetime: record.datetime.replace(" ", "T"),
 			amount: record.amount,
 			category_id: record.category.id,
+			analytics_treatment:
+				record.analytics_treatment_source === "manual" ? record.analytics_treatment : "",
+			bucket_id: record.bucket_id ?? "",
+			bucket_source: record.bucket_source ?? ("category" as "category" | "manual"),
 			description: record.description ?? "",
 			statements: statements.map(statement => ({
 				id: statement.id,
@@ -101,6 +107,7 @@ export default function RecordEditorDialog({
 			})),
 		},
 		onSubmit: async ({ value }) => {
+			setSubmitError("")
 			const formData = new FormData()
 			formData.append("title", value.title)
 			formData.append("people", value.people)
@@ -108,6 +115,10 @@ export default function RecordEditorDialog({
 			formData.append("datetime", value.datetime)
 			formData.append("amount", `${value.amount}`)
 			formData.append("category_id", value.category_id)
+			formData.append("analytics_treatment", value.analytics_treatment)
+			formData.append("bucket_id", value.bucket_id)
+			formData.append("bucket_source", value.bucket_source)
+			formData.append("revision", `${record.revision}`)
 			formData.append("description", value.description)
 			value.statements.forEach((statement, index) => {
 				formData.append(`statements[${index}][id]`, statement.id)
@@ -119,18 +130,25 @@ export default function RecordEditorDialog({
 				body: withMethod(formData, "PUT"),
 				headers: { Accept: "application/json" },
 			})
+			const data = await response.json().catch(() => null)
 
 			if (response.status === 422) {
-				const data = await response.json().catch(() => null)
 				setApiErrors((data?.errors ?? {}) as globalThis.Record<string, string[]>)
+				setSubmitError("Correct the highlighted fields, then save again.")
 				return
 			}
 
 			if (response.ok) {
 				setIsOpen(false)
 				router.reload()
+				return
 			}
+
+			setSubmitError(
+				data?.message ?? "Unable to save this Record. Refresh the page and try again.",
+			)
 		},
+		onSubmitInvalid: () => setSubmitError("Correct the highlighted fields, then save again."),
 	})
 
 	const handleDelete = async () => {
@@ -172,6 +190,12 @@ export default function RecordEditorDialog({
 			round2dp(state.values.statements.reduce((acc, el) => acc + el.amount, 0)) !==
 			round2dp(state.values.amount),
 	)
+	const analytics = useStore(form.store, state => ({
+		treatment: state.values.analytics_treatment,
+		categoryId: state.values.category_id,
+		amount: state.values.amount,
+		bucketId: state.values.bucket_id,
+	}))
 	const formStatements = useStore(form.store, state => state.values.statements)
 	const attachStatementsSheet = (
 		<StatementSearchSheet
@@ -356,6 +380,14 @@ export default function RecordEditorDialog({
 										)}
 										onChange={value => {
 											field.handleChange(value?.id ?? "")
+											if (
+												form.getFieldValue("bucket_source") === "category"
+											) {
+												form.setFieldValue(
+													"bucket_id",
+													value?.default_bucket_id ?? "",
+												)
+											}
 											clearApiError(field.name)
 										}}
 									/>
@@ -376,6 +408,23 @@ export default function RecordEditorDialog({
 								)}
 							</form.Field>
 						</FieldGroup>
+						<RecordAnalyticsFields
+							treatment={analytics.treatment}
+							categoryTreatment={
+								categoriesFlat.find(
+									category => category.id === analytics.categoryId,
+								)?.analytics_treatment
+							}
+							amount={analytics.amount}
+							bucketId={analytics.bucketId}
+							onTreatmentChange={value =>
+								form.setFieldValue("analytics_treatment", value)
+							}
+							onBucketChange={value => {
+								form.setFieldValue("bucket_id", value)
+								form.setFieldValue("bucket_source", "manual")
+							}}
+						/>
 					</div>
 
 					<div className="flex flex-col gap-4">
@@ -502,6 +551,9 @@ export default function RecordEditorDialog({
 				</form>
 
 				<DialogFooter>
+					<p className="mr-auto text-xs text-destructive" aria-live="polite">
+						{submitError}
+					</p>
 					<Button
 						type="button"
 						variant="destructive"
@@ -517,7 +569,7 @@ export default function RecordEditorDialog({
 							</Button>
 						}
 					/>
-					<Button type="submit" form="record-editor-form">
+					<Button type="button" onClick={() => void form.handleSubmit()}>
 						Save changes
 					</Button>
 				</DialogFooter>

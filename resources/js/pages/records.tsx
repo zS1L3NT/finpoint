@@ -39,6 +39,7 @@ import { categoryIndexApiRoute, recordsWebRoute } from "@/wayfinder/routes"
 export default function RecordsPage({ records }: { records: Paginated<Record> }) {
 	const [isCreatingRecord, setIsCreatingRecord] = useState(false)
 	const page = usePage()
+	const pageUrl = new URL(page.url, "http://localhost")
 
 	const [startDate, setStartDate] = useSearchParam("start_date")
 	const [endDate, setEndDate] = useSearchParam("end_date")
@@ -61,6 +62,10 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 					end_date: endDate || undefined,
 					is_allocated: isAllocated || undefined,
 					category_ids: categoryIds.join(",") || undefined,
+					bucket_id: pageUrl.searchParams.get("bucket_id") || undefined,
+					bucket_group: pageUrl.searchParams.get("bucket_group") || undefined,
+					show_unbucketed: pageUrl.searchParams.get("show_unbucketed") || undefined,
+					treatment: pageUrl.searchParams.get("treatment") || undefined,
 				},
 			}).url,
 	})
@@ -81,6 +86,7 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 					description="Ledger view"
 					icon="lucide:receipt-text"
 				/>
+				<ActiveLedgerFilters />
 
 				<PaginatedDataTable
 					paginated={records}
@@ -179,6 +185,38 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 				/>
 			</PageContent>
 		</>
+	)
+}
+
+function ActiveLedgerFilters() {
+	const page = usePage()
+	const url = new URL(page.url, "http://localhost")
+	const bucketFiltered = Boolean(
+		url.searchParams.get("bucket_id") ||
+			url.searchParams.get("bucket_group") ||
+			url.searchParams.get("show_unbucketed"),
+	)
+
+	if (!bucketFiltered) return null
+
+	const visitWithout = (...keys: string[]) => {
+		for (const key of keys) url.searchParams.delete(key)
+		url.searchParams.delete("page")
+		router.visit(url.pathname + url.search, { preserveState: true, preserveScroll: true })
+	}
+
+	return (
+		<div className="flex flex-wrap items-center gap-2 rounded-lg border bg-muted/25 px-3 py-2 text-sm">
+			<span className="text-muted-foreground">Filtered ledger:</span>
+			<Badge variant="secondary">Bucket scope</Badge>
+			<Button
+				variant="ghost"
+				size="sm"
+				onClick={() => visitWithout("bucket_id", "bucket_group", "show_unbucketed")}
+			>
+				Clear special filters
+			</Button>
+		</div>
 	)
 }
 

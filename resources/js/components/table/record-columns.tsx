@@ -14,7 +14,6 @@ type RecordRow = Record & { pivot?: Allocation }
 
 type RecordTableOptions<TRecord extends RecordRow> = {
 	amount?: "amount" | "allocated"
-	showQuota?: boolean
 	pageName?: string
 	extraActions?: (record: TRecord) => React.ReactNode
 	actionWidth?: string
@@ -23,7 +22,6 @@ type RecordTableOptions<TRecord extends RecordRow> = {
 
 export function useRecordColumns<TRecord extends RecordRow>({
 	amount = "amount",
-	showQuota = false,
 	pageName,
 	extraActions,
 	actionWidth = TABLE_WIDTH_CLASSNAMES.ACTIONS_OPEN,
@@ -53,26 +51,6 @@ export function useRecordColumns<TRecord extends RecordRow>({
 				</div>
 			),
 		},
-		...(showQuota
-			? [
-					{
-						header: "Quota",
-						meta: { width: TABLE_WIDTH_CLASSNAMES.QUOTA },
-						cell: ({ row }) =>
-							row.original.quota ? (
-								<Badge
-									variant="outline"
-									style={{
-										borderColor: row.original.quota.color,
-										color: row.original.quota.color,
-									}}
-								>
-									{row.original.quota.name}
-								</Badge>
-							) : null,
-					} satisfies ColumnDef<TRecord>,
-				]
-			: []),
 		{
 			header: "Amount",
 			meta: { width: TABLE_WIDTH_CLASSNAMES.AMOUNT },
@@ -137,7 +115,6 @@ export function useRecordColumns<TRecord extends RecordRow>({
 
 export function useRecordMobileRow<TRecord extends RecordRow>({
 	amount = "amount",
-	showQuota = false,
 	pageName,
 	extraActions,
 	leading,
@@ -201,24 +178,7 @@ export function useRecordMobileRow<TRecord extends RecordRow>({
 					</div>
 
 					<div className="ml-12 flex flex-col gap-2 border-t pt-3 text-xs text-muted-foreground">
-						<div className="flex flex-wrap items-center gap-2">
-							<span>{formatDatetime(record.datetime)}</span>
-							{showQuota ? (
-								record.quota ? (
-									<Badge
-										variant="outline"
-										style={{
-											borderColor: record.quota.color,
-											color: record.quota.color,
-										}}
-									>
-										{record.quota.name}
-									</Badge>
-								) : (
-									<span>No quota</span>
-								)
-							) : null}
-						</div>
+						<div>{formatDatetime(record.datetime)}</div>
 						{record.description ? (
 							<p className="whitespace-pre-line break-words leading-relaxed">
 								{record.description}
@@ -263,24 +223,6 @@ export function useRecordMobileRow<TRecord extends RecordRow>({
 						<span>Date & Time</span>
 						<span className="text-right">{formatDatetime(record.datetime)}</span>
 					</div>
-					{showQuota ? (
-						<div className="flex items-center justify-between gap-3">
-							<span>Quota</span>
-							{record.quota ? (
-								<Badge
-									variant="outline"
-									style={{
-										borderColor: record.quota.color,
-										color: record.quota.color,
-									}}
-								>
-									{record.quota.name}
-								</Badge>
-							) : (
-								<span>No quota</span>
-							)}
-						</div>
-					) : null}
 					{record.description ? (
 						<p className="whitespace-pre-line break-words">{record.description}</p>
 					) : null}

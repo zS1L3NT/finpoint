@@ -31,15 +31,23 @@ _Avoid_: Draft statement, estimated record
 
 **Budget**:
 A spending plan with a custom date period and amount. Budget membership can be manual, or automatic when records fall within the budget period; records may still be attached or detached outside the period.
-_Avoid_: Quota, monthly cap
+_Avoid_: Spending bucket, monthly target
 
-**Quota**:
-A named monthly spending bucket for records in one calendar month. Records are assigned to quotas manually; a quota may have a spending limit or no limit.
-_Avoid_: Budget, category
+**Spending bucket**:
+A persistent, optional planning group for personal spending, such as Daily, Recurring, Irregular, or Holiday. A bucket can have a default monthly target and a target override for a specific month. Only Records whose effective treatment is Spending contribute to bucket totals.
+_Avoid_: Budget, category, treatment
+
+**Monthly target**:
+An optional comparison amount for a spending bucket in a calendar month. It does not reserve cash, carry a balance, or change a Record's accounting treatment.
+_Avoid_: Budget, limit, allowance
+
+**Treatment**:
+The accounting role of a Record: Income, Spending, Saving/investment, Transfer/neutral, or Automatic by amount direction. A Category supplies the normal default and a Record may override it for an exception.
+_Avoid_: Bucket, category type
 
 **Category**:
-A category decorates a record. It gives the record user-facing meaning, but has no relationship to budgets or quotas.
-_Avoid_: Budget category, quota type
+A category gives a Record user-facing meaning and supplies its usual treatment and optional default spending bucket. The defaults reduce repeated input; the Category, treatment, and bucket remain separate concepts.
+_Avoid_: Budget category, bucket, treatment
 
 **Subcategory**:
 A category presented under another category for one layer of grouping. Use subcategory only when the parent-child presentation matters; otherwise it is still just a category.
@@ -53,8 +61,8 @@ Domain expert: "Call it a statement. A statement is the imported account activit
 Developer: "Why is this record still pending?"
 Domain expert: "Its allocated statements do not tally with the record amount yet."
 
-Developer: "Should dining go under a budget or quota?"
-Domain expert: "Use a quota for a monthly bucket. Use a budget when the plan has its own custom period."
+Developer: "Should dining go under a budget or spending bucket?"
+Domain expert: "Use a spending bucket for persistent monthly planning. Use a budget when the plan has its own custom period."
 
-Developer: "Does a category control whether a record appears in a budget or quota?"
-Domain expert: "No. A category decorates the record; budgets and quotas are separate planning concepts."
+Developer: "Why do Category, treatment, and bucket all exist?"
+Domain expert: "The Category describes the Record, its treatment controls totals, and its optional bucket groups personal spending. Category defaults normally fill the other two."

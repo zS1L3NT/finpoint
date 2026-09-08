@@ -1,661 +1,866 @@
 import { Icon as IconifyIcon } from "@iconify/react"
-import { router } from "@inertiajs/react"
+import { Link, router } from "@inertiajs/react"
 import { DateTime } from "luxon"
-import { useEffect, useState } from "react"
-import CategoriesPieChart from "@/components/charts/categories-pie"
-import UsageAreaChart from "@/components/charts/usage-area"
-import QuotaCreatorDialog from "@/components/dialogs/quota-creator"
-import QuotaEditorDialog from "@/components/dialogs/quota-editor"
-import RecordQuotaDialog from "@/components/dialogs/record-quota-editor"
+import { type ReactNode, useMemo, useState } from "react"
+import CashflowChart, { CashflowPoint } from "@/components/charts/cashflow-chart"
+import BucketDialog from "@/components/dialogs/bucket"
+import Icon from "@/components/icon"
 import AppHeader from "@/components/layout/app-header"
 import PageContent from "@/components/layout/page-content"
-import PageHeader from "@/components/layout/page-header"
-import LimiterPaceCards, { getLimitAggregations } from "@/components/limiter-pace-cards"
-import DataTable from "@/components/table/data-table"
-import { useRecordColumns, useRecordMobileRow } from "@/components/table/record-columns"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
-import {
-	Card,
-	CardAction,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
-import {
-	DropdownMenu,
-	DropdownMenuCheckboxItem,
-	DropdownMenuContent,
-	DropdownMenuGroup,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { MonthPicker } from "@/components/ui/monthpicker"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Progress } from "@/components/ui/progress"
 import {
 	Select,
 	SelectContent,
-	SelectGroup,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select"
-import { useFetch } from "@/hooks/use-fetch"
-import { useSearchParam } from "@/hooks/use-search-param"
-import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
-import { cn, formatCurrency, formatDatetime, parseDatetime, withMethod } from "@/lib/utils"
-import { CategoryWithChildren, Quota, Record } from "@/types"
-import {
-	budgetsWebRoute,
-	categoryIndexApiRoute,
-	dashboardWebRoute,
-	recordQuotaDetachApiRoute,
-} from "@/wayfinder/routes"
+import { cn, formatCurrency } from "@/lib/utils"
+import { AnalyticsSummary, Bucket } from "@/types"
+import { dashboardWebRoute, monthlyRecordsWebRoute } from "@/wayfinder/routes"
 
-export default function DashboardPage({ records, quotas }: { records: Record[]; quotas: Quota[] }) {
-	const categories = useFetch<CategoryWithChildren[]>(categoryIndexApiRoute.url(), [])
-	const now = DateTime.now()
+type DashboardBucket = Bucket & {
+	spending: number
+	target: number | null
+	remaining: number | null
+	comparison: number | null
+}
 
-	const [month] = useSearchParam("month", now.toFormat("MMMM"))
-	const [year] = useSearchParam("year", now.toFormat("yyyy"))
-	const [queryParam, setQueryParam] = useSearchParam("query")
-	const [quotaIdsParam, setQuotaIdsParam] = useSearchParam("quota_ids")
-	const [showNoQuotaParam, setShowNoQuotaParam] = useSearchParam("show_no_quotas")
+type DashboardCategory = AnalyticsSummary["categories"][number] & {
+	share: number | null
+	comparison: number | null
+	baseline_bucket_spending: { [bucketId: string]: number }
+}
 
+type Comparison = {
+	count: number
+	income: ComparisonValue
+	spending: ComparisonValue
+	surplus: ComparisonValue
+	surplus_rate: ComparisonValue
+}
+
+type ComparisonValue = { average: number | null; difference: number | null }
+
+type Projection = {
+	available: boolean
+	daily_spending: number | null
+	projected_spending: number | null
+	scheduled_spending: number
+	remaining_days: number
+	bucket: {
+		name: string
+		spent: number
+		target: number
+		projected: number
+		usage_pace: number
+		target_pace: number
+		recommended_pace: number | null
+	} | null
+}
+
+export default function DashboardPage({
+	month,
+	year,
+	period,
+	summary,
+	comparison,
+	series,
+	projection,
+	buckets,
+	categories,
+	future_records_count,
+}: {
+	month: string
+	year: number
+	period: { is_current: boolean; is_future: boolean; through: string | null; label: string }
+	summary: AnalyticsSummary
+	comparison: Comparison
+	series: CashflowPoint[]
+	projection: Projection
+	buckets: DashboardBucket[]
+	categories: DashboardCategory[]
+	future_records_count: number
+}) {
 	const date = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
-	const query = queryParam ?? ""
-	const quotaIds = quotaIdsParam?.split(",").filter(Boolean) ?? []
-	const showNoQuota = showNoQuotaParam === "true"
-	const monthStart = date.startOf("month")
-	const monthEnd = date.endOf("month")
-	const monthAsOf = date.hasSame(now, "month") ? now : monthEnd
-
-	const [selected, setSelected] = useState<Record[]>([])
-	const [areaQuota, setAreaQuota] = useState<Quota | null>(null)
-	const [editingQuotaId, setEditingQuotaId] = useState<string | null>(null)
-	const [isCreatingQuota, setIsCreatingQuota] = useState(false)
-	const [isAttachingQuota, setIsAttachingQuota] = useState(false)
-
-	const selectedWithQuota = selected.filter(r => r.quota)
-	const quotaStats = quotas.map(quota => {
-		const quotaRecords = records.filter(record => record.quota?.id === quota.id)
-		const spent = Math.abs(
-			Math.min(
-				quotaRecords.reduce((acc, record) => acc + record.amount, 0),
+	const [scope, setScope] = useState("all")
+	const scopedBucketIds = useMemo(() => {
+		if (scope === "all") return [...buckets.map(bucket => bucket.id), "unbucketed"]
+		if (scope === "core" || scope === "outlier" || scope === "other") {
+			return buckets.filter(bucket => bucket.group === scope).map(bucket => bucket.id)
+		}
+		return [scope]
+	}, [scope, buckets])
+	const scopedCategories = categories
+		.map(category => {
+			const spending = scopedBucketIds.reduce(
+				(total, bucketId) => total + (category.bucket_spending[bucketId] ?? 0),
 				0,
-			),
-		)
-		const usage =
-			quota.amount === null || quota.amount === 0 ? null : (spent / quota.amount) * 100
-
-		return {
-			quota,
-			records: quotaRecords,
-			spent,
-			usage,
-		}
-	})
-
-	const filteredRecords = (
-		quotaIds.length || showNoQuota
-			? records.filter(r => (r.quota ? quotaIds.includes(r.quota.id) : showNoQuota))
-			: records
-	).filter(r =>
-		[
-			r.title,
-			r.subtitle,
-			r.description,
-			r.quota?.name,
-			formatCurrency(r.amount),
-			formatDatetime(r.datetime),
-		]
-			.filter(Boolean)
-			.some(value => value?.toLowerCase().includes(query.toLowerCase())),
+			)
+			const baseline = scopedBucketIds.reduce(
+				(total, bucketId) => total + (category.baseline_bucket_spending[bucketId] ?? 0),
+				0,
+			)
+			return {
+				...category,
+				spending,
+				comparison: comparison.count ? spending - baseline : null,
+			}
+		})
+		.filter(category => category.spending !== 0 || category.comparison !== 0)
+		.sort((a, b) => b.spending - a.spending)
+	const scopedTotal = scopedCategories.reduce((total, category) => total + category.spending, 0)
+	const scopeLabel = ["all", "core", "outlier", "other"].includes(scope)
+		? scope === "all"
+			? "All spending"
+			: scope[0].toUpperCase() + scope.slice(1)
+		: (buckets.find(bucket => bucket.id === scope)?.name ?? "Bucket")
+	const paceBucket = buckets.find(
+		bucket => bucket.pace_kind === "daily" && bucket.target !== null && bucket.target > 0,
 	)
-	const activeQuotaFilters = quotas.filter(quota => quotaIds.includes(quota.id))
-	const quotaFilterLabel = showNoQuota
-		? activeQuotaFilters.length
-			? `${activeQuotaFilters.length + 1} selected`
-			: "No quota"
-		: activeQuotaFilters.length === 1
-			? activeQuotaFilters[0].name
-			: activeQuotaFilters.length > 1
-				? `${activeQuotaFilters.length} selected`
-				: null
-
-	/**
-	 * These variables contain code specific to the developer's dashboard workflow
-	 * You can comment this out or remove it if it doesn't apply to your use case
-	 */
-	const dailyQuota = quotas.find(q => q.name === "Daily")
-	const limitAggregations = getLimitAggregations(
-		records.filter(r => r.quota?.id === dailyQuota?.id),
-		monthStart,
-		monthEnd,
-		dailyQuota?.amount ?? 0,
-		monthAsOf,
-	)
-
-	useEffect(() => {
-		const validIds = quotaIds.filter(id => quotas.some(quota => quota.id === id))
-		const nextQuotaIdsParam = validIds.length ? validIds.join(",") : null
-
-		if ((quotaIdsParam ?? null) !== nextQuotaIdsParam) {
-			setQuotaIdsParam(nextQuotaIdsParam)
-		}
-	}, [quotas, quotaIds, quotaIdsParam, setQuotaIdsParam])
-
-	/**
-	 * This effect ensures that if a record is selected and then filtered out (either by the search query or quota filters),
-	 * it will be deselected. This prevents the user from trying to perform actions on records that are not currently visible,
-	 * which could lead to confusion or errors.
-	 */
-	useEffect(() => {
-		setSelected(prev =>
-			prev.every(record => filteredRecords.some(r => r.id === record.id))
-				? prev
-				: prev.filter(record => filteredRecords.some(r => r.id === record.id)),
-		)
-	}, [filteredRecords])
-
-	/**
-	 * This effect contains code specific to the developer's dashboard workflow
-	 * You can comment this out or remove it if it doesn't apply to your use case
-	 */
-	useEffect(() => {
-		setAreaQuota(dailyQuota ?? null)
-	}, [dailyQuota])
 
 	const setDate = (nextDate: Date) => {
-		const dt = DateTime.fromJSDate(nextDate)
+		const next = DateTime.fromJSDate(nextDate)
 		router.visit(
-			dashboardWebRoute({
-				query: {
-					month: dt.toFormat("MMMM"),
-					year: dt.year,
-					query: queryParam || undefined,
-					quota_ids: quotaIdsParam || undefined,
-					show_no_quotas: showNoQuotaParam || undefined,
-				},
-			}),
-			{
-				preserveState: true,
-				preserveScroll: true,
-			},
+			dashboardWebRoute({ query: { month: next.toFormat("MMMM"), year: next.year } }),
 		)
 	}
-
-	const detach = async () => {
-		if (!selectedWithQuota.length) {
-			return
-		}
-
-		const responses = await Promise.all(
-			selectedWithQuota.map(record =>
-				fetch(recordQuotaDetachApiRoute({ record }).url, {
-					method: "POST",
-					body: withMethod(new FormData(), "DELETE"),
-					headers: { Accept: "application/json" },
-				}),
-			),
-		)
-
-		if (responses.every(response => response.ok)) {
-			setSelected([])
-
-			setTimeout(() => {
-				router.reload()
-			}, 300)
-		}
-	}
-
-	const recordColumns = useRecordColumns<Record>({
-		showQuota: true,
-		pageName: "Dashboard",
-	})
-	const recordMobileRow = useRecordMobileRow<Record>({
-		showQuota: true,
-		pageName: "Dashboard",
-		mobileVariant: "dashboard",
-		leading: record => (
-			<Checkbox
-				checked={!!selected.find(s => s.id === record.id)}
-				aria-label={`Select record ${record.id}`}
-				onCheckedChange={value =>
-					setSelected(prev =>
-						value === true ? [...prev, record] : prev.filter(s => s.id !== record.id),
-					)
-				}
-			/>
-		),
-	})
-	const xlRemainder = quotas.length % 4
-	const xlLastRowStartClass =
-		xlRemainder === 1
-			? "xl:col-start-5"
-			: xlRemainder === 2
-				? "xl:col-start-4"
-				: "xl:col-start-2"
 
 	return (
 		<>
 			<AppHeader title="Dashboard" />
-
-			<PageContent>
-				<PageHeader
-					title={`Dashboard for ${month} ${year}`}
-					subtitle="Monthly quotas and recent records overview"
-					description="Monthly Overview"
-					icon="lucide:circle-dollar-sign"
-					actions={
+			<PageContent className="gap-7 md:gap-9">
+				<header className="grid gap-5">
+					<div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+						<div>
+							<p className="text-xs font-medium tracking-[0.18em] text-muted-foreground uppercase">
+								Monthly overview
+							</p>
+							<h2 className="mt-1 text-3xl font-semibold tracking-tight">
+								{month} {year}
+							</h2>
+							<p className="mt-1 text-sm text-muted-foreground">
+								{period.label} · SGD · Based on Record dates
+							</p>
+						</div>
 						<ButtonGroup className="w-full sm:w-fit">
 							<Button
 								variant="outline"
+								aria-label="Previous month"
 								onClick={() => setDate(date.minus({ month: 1 }).toJSDate())}
 							>
 								<IconifyIcon icon="lucide:arrow-left" />
 							</Button>
 							<Popover>
 								<PopoverTrigger
-									render={
-										<Button variant="outline" className="flex-1 sm:w-32">
-											<IconifyIcon
-												icon="lucide:calendar"
-												className="mr-2 h-4 w-4"
-											/>
-											{date.toFormat("MMM yyyy")}
-										</Button>
-									}
-								/>
+									render={<Button variant="outline" className="flex-1 sm:w-32" />}
+								>
+									<IconifyIcon icon="lucide:calendar" />{" "}
+									{date.toFormat("MMM yyyy")}
+								</PopoverTrigger>
 								<PopoverContent className="w-auto p-0">
 									<MonthPicker
-										onMonthSelect={setDate}
 										selectedMonth={date.toJSDate()}
+										onMonthSelect={setDate}
 									/>
 								</PopoverContent>
 							</Popover>
 							<Button
 								variant="outline"
+								aria-label="Next month"
 								onClick={() => setDate(date.plus({ month: 1 }).toJSDate())}
 							>
 								<IconifyIcon icon="lucide:arrow-right" />
 							</Button>
 						</ButtonGroup>
-					}
-					back={{ name: "Back to budgets", url: budgetsWebRoute.url() }}
-				/>
+					</div>
 
-				{dailyQuota && (
-					<LimiterPaceCards
-						name="daily quota"
-						limit={dailyQuota?.amount ?? 0}
-						{...limitAggregations}
-					/>
-				)}
+					<nav className="flex border-b" aria-label="Monthly finance views">
+						<Link
+							className="border-b-2 border-foreground px-4 py-2 text-sm font-medium"
+							href={dashboardWebRoute({ query: { month, year } })}
+						>
+							Overview
+						</Link>
+						<Link
+							className="border-b-2 border-transparent px-4 py-2 text-sm text-muted-foreground hover:text-foreground"
+							href={monthlyRecordsWebRoute({ query: { month, year } })}
+						>
+							Monthly Records
+						</Link>
+					</nav>
+				</header>
 
-				<div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] md:gap-8">
+				{period.is_future ? (
 					<Card>
 						<CardHeader>
-							<CardTitle>Quotas</CardTitle>
-							<CardAction>
-								<QuotaCreatorDialog
-									month={month}
-									year={+year}
-									isOpen={isCreatingQuota}
-									setIsOpen={setIsCreatingQuota}
-									trigger={
-										<Button size="sm">
-											<IconifyIcon icon="lucide:plus" /> Create Quota
-										</Button>
-									}
-								/>
-							</CardAction>
+							<CardTitle>Future-dated Records</CardTitle>
+							<CardDescription>
+								{future_records_count
+									? `${future_records_count} Record${future_records_count === 1 ? "" : "s"} have been entered for this month.`
+									: "No Records have been entered for this month."}{" "}
+								Actual results and comparisons begin when the month starts.
+							</CardDescription>
 						</CardHeader>
-						<CardContent className="grid gap-3">
-							{quotaStats.map(({ quota, records: quotaRecords, spent, usage }) => (
-								<div
-									key={quota.id}
-									className="space-y-3 rounded-lg border border-border/70 px-4 py-3"
-								>
-									<div className="flex items-start justify-between gap-4">
-										<div className="min-w-0 space-y-1">
-											<Badge
-												variant="outline"
-												style={{
-													borderColor: quota.color,
-													color: quota.color,
-												}}
-											>
-												{quota.name}
-											</Badge>
-											<p className="text-xs text-muted-foreground">
-												{quotaRecords.length} record
-												{quotaRecords.length === 1 ? "" : "s"}
-											</p>
-										</div>
-										<QuotaEditorDialog
-											quota={quota}
-											isOpen={editingQuotaId === quota.id}
-											setIsOpen={isOpen =>
-												setEditingQuotaId(isOpen ? quota.id : null)
-											}
-											trigger={
-												<Button variant="outline" size="sm">
-													<IconifyIcon icon="lucide:pencil" /> Edit
-												</Button>
-											}
-										/>
-									</div>
-
-									<div className="space-y-2">
-										<div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
-											<span>
-												{usage !== null
-													? `${Math.round(usage)}% used`
-													: "No limit"}
-											</span>
-											<span
-												className={cn(
-													usage !== null && usage >= 100
-														? "text-destructive"
-														: null,
-												)}
-											>
-												{formatCurrency(spent)}
-												{" / "}
-												{usage !== null
-													? formatCurrency(quota.amount ?? 0)
-													: "∞"}
-											</span>
-										</div>
-										<Progress value={usage} className="h-2" />
-									</div>
-								</div>
-							))}
-						</CardContent>
 					</Card>
-					<Card>
-						<CardHeader>
-							<CardTitle>Spending over Time</CardTitle>
-							<CardAction>
+				) : (
+					<>
+						<SummaryBand summary={summary} comparison={comparison} />
+						{summary.unbucketed_count ? (
+							<div
+								className="flex flex-wrap gap-2"
+								aria-label="Records needing attention"
+							>
+								{summary.unbucketed_count ? (
+									<Button variant="outline" size="sm" asChild>
+										<Link
+											href={monthlyRecordsWebRoute({
+												query: { month, year, show_unbucketed: true },
+											})}
+										>
+											<IconifyIcon icon="lucide:inbox" />{" "}
+											{summary.unbucketed_count} unbucketed spending Record
+											{summary.unbucketed_count === 1 ? "" : "s"}
+										</Link>
+									</Button>
+								) : null}
+							</div>
+						) : null}
+
+						<Card>
+							<CardHeader className="border-b">
+								<CardTitle className="text-base">Spending pace</CardTitle>
+								<CardDescription>
+									Cumulative spending against the monthly target, with projected
+									month-end usage and current balance.
+								</CardDescription>
+							</CardHeader>
+							<CardContent>
+								<CashflowChart
+									data={series}
+									month={month}
+									year={year}
+									target={paceBucket?.target ?? null}
+									targetLabel={paceBucket?.name ?? null}
+								/>
+								<PaceSummary projection={projection} />
+							</CardContent>
+						</Card>
+
+						<section className="grid gap-4" aria-labelledby="spending-breakdown-title">
+							<div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+								<div>
+									<h3
+										id="spending-breakdown-title"
+										className="text-lg font-semibold"
+									>
+										Spending breakdown
+									</h3>
+									<p className="text-sm text-muted-foreground">
+										{scopeLabel} · {formatCurrency(scopedTotal)}
+									</p>
+								</div>
 								<Select
-									value={areaQuota?.id}
-									onValueChange={value =>
-										setAreaQuota(quotas.find(q => q.id === value) ?? null)
-									}
+									value={scope}
+									onValueChange={value => setScope(value ?? "all")}
 								>
-									<SelectTrigger className="w-32">
-										<SelectValue placeholder="Select a quota" />
+									<SelectTrigger className="w-full sm:w-52">
+										<SelectValue />
 									</SelectTrigger>
 									<SelectContent>
-										<SelectGroup>
-											{quotas.map(q => (
-												<SelectItem
-													key={q.id}
-													value={q.id.toString()}
-													onSelect={() => setAreaQuota(q)}
-												>
-													{q.name}
-												</SelectItem>
-											))}
-										</SelectGroup>
+										<SelectItem value="all">All spending</SelectItem>
+										<SelectItem value="core">Core</SelectItem>
+										<SelectItem value="outlier">Outlier</SelectItem>
+										{buckets.map(bucket => (
+											<SelectItem key={bucket.id} value={bucket.id}>
+												{bucket.name}
+											</SelectItem>
+										))}
 									</SelectContent>
 								</Select>
-							</CardAction>
-						</CardHeader>
-						<CardContent>
-							<UsageAreaChart
-								className="h-64 aspect-auto md:h-auto md:aspect-video"
-								records={
-									areaQuota
-										? records.filter(r => r.quota?.id === areaQuota.id)
-										: []
-								}
-								start={DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy").startOf(
-									"month",
-								)}
-								end={DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy").endOf(
-									"month",
-								)}
-								maxY={Math.max(
-									areaQuota?.amount ?? 0,
-									quotaStats.find(q => q.quota.id === areaQuota?.id)?.spent ?? 0,
-								)}
-								limit={areaQuota?.amount ?? undefined}
-								asOfDate={monthAsOf}
-							/>
-						</CardContent>
-					</Card>
-				</div>
+							</div>
+							<div className="grid gap-5 xl:grid-cols-[minmax(0,3fr)_minmax(18rem,2fr)]">
+								<CategoryBreakdown
+									categories={scopedCategories}
+									total={scopedTotal}
+									month={month}
+									year={year}
+									scope={scope}
+									comparisonCount={comparison.count}
+								/>
+								<BucketStatus
+									buckets={buckets}
+									month={month}
+									year={year}
+									activeScope={scope}
+									setScope={setScope}
+								/>
+							</div>
+						</section>
 
-				{quotas.length ? (
-					<Card>
-						<CardContent className="grid gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-12">
-							{quotas.map((quota, index) => (
-								<div
-									key={quota.id}
-									className={cn(
-										"flex min-w-0 flex-col items-center gap-3",
-										"xl:col-span-3",
-										index === quotas.length - xlRemainder &&
-											xlRemainder > 0 &&
-											xlLastRowStartClass,
-									)}
-								>
-									<p className="text-sm font-heading font-medium text-center">
-										Spending for {quota.name}
-									</p>
-									<CategoriesPieChart
-										className="w-full"
-										categories={categories}
-										records={records.filter(r => r.quota?.id === quota.id)}
-										limit={quota.amount ?? undefined}
-									/>
-								</div>
-							))}
-						</CardContent>
-					</Card>
-				) : null}
-
-				<Card>
-					<CardHeader>
-						<CardTitle>Monthly records</CardTitle>
-						<CardDescription>
-							Records for {date.toFormat("MMMM yyyy")}. Select records to attach to a
-							quota.
-						</CardDescription>
-					</CardHeader>
-					<CardContent>
-						<DataTable
-							header={
-								<div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-									<div className="w-full md:max-w-sm">
-										<Input
-											placeholder="Filter records..."
-											value={query}
-											onChange={event =>
-												setQueryParam(event.target.value || null)
-											}
-										/>
-									</div>
-									<div className="flex flex-col gap-2 sm:flex-row md:flex-wrap md:justify-end">
-										{quotas.length ? (
-											<DropdownMenu>
-												<DropdownMenuTrigger asChild>
-													<Button
-														type="button"
-														variant={
-															quotaFilterLabel
-																? "secondary"
-																: "outline"
-														}
-														className="w-full sm:w-auto"
-													>
-														<IconifyIcon icon="lucide:list-filter" />{" "}
-														Filter quotas
-														{quotaFilterLabel ? (
-															<Badge variant="outline">
-																{quotaFilterLabel}
-															</Badge>
-														) : null}
-													</Button>
-												</DropdownMenuTrigger>
-												<DropdownMenuContent align="end" className="w-56">
-													<DropdownMenuLabel>
-														Filter by quota
-													</DropdownMenuLabel>
-													<DropdownMenuSeparator />
-													<DropdownMenuGroup>
-														<DropdownMenuCheckboxItem
-															checked={showNoQuota}
-															onSelect={event =>
-																event.preventDefault()
-															}
-															onCheckedChange={checked =>
-																setShowNoQuotaParam(
-																	checked === true
-																		? "true"
-																		: null,
-																)
-															}
-														>
-															No quota
-														</DropdownMenuCheckboxItem>
-													</DropdownMenuGroup>
-													<DropdownMenuSeparator />
-													<DropdownMenuGroup>
-														{quotas.map(quota => (
-															<DropdownMenuCheckboxItem
-																key={quota.id}
-																checked={quotaIds.includes(
-																	quota.id,
-																)}
-																onSelect={event =>
-																	event.preventDefault()
-																}
-																onCheckedChange={checked =>
-																	setQuotaIdsParam(
-																		(checked === true
-																			? [
-																					...quotaIds.filter(
-																						id =>
-																							id !==
-																							quota.id,
-																					),
-																					quota.id,
-																				]
-																			: quotaIds.filter(
-																					id =>
-																						id !==
-																						quota.id,
-																				)
-																		).join(",") || null,
-																	)
-																}
-															>
-																{quota.name}
-															</DropdownMenuCheckboxItem>
-														))}
-													</DropdownMenuGroup>
-												</DropdownMenuContent>
-											</DropdownMenu>
-										) : null}
-										<RecordQuotaDialog
-											records={selected}
-											quotas={quotas}
-											clear={() => setSelected([])}
-											isOpen={isAttachingQuota}
-											setIsOpen={setIsAttachingQuota}
-											trigger={
-												<Button
-													disabled={!selected.length}
-													className="w-full sm:w-auto"
-												>
-													<IconifyIcon icon="lucide:link-2" /> Attach to
-													Quota
-												</Button>
-											}
-										/>
-										<Button
-											type="button"
-											disabled={!selectedWithQuota.length}
-											onClick={() => void detach()}
-											className="w-full sm:w-auto"
-										>
-											<IconifyIcon icon="lucide:link-2-off" />
-											Detach from Quota
-										</Button>
-									</div>
-								</div>
-							}
-							data={filteredRecords}
-							columns={[
-								{
-									id: "select",
-									meta: { width: TABLE_WIDTH_CLASSNAMES.CHECKBOX },
-									header: () => (
-										<div className="flex items-center justify-center">
-											<Checkbox
-												checked={
-													selected.length !== filteredRecords.length
-														? selected.length
-															? "indeterminate"
-															: false
-														: true
-												}
-												onCheckedChange={value =>
-													setSelected(
-														value !== true ? [] : filteredRecords,
-													)
-												}
-											/>
-										</div>
-									),
-									cell: ({ row }) => (
-										<div className="flex items-center justify-center">
-											<Checkbox
-												checked={
-													!!selected.find(s => s.id === row.original.id)
-												}
-												onCheckedChange={value =>
-													setSelected(prev =>
-														value === true
-															? [...prev, row.original]
-															: prev.filter(
-																	s => s.id !== row.original.id,
-																),
-													)
-												}
-											/>
-										</div>
-									),
-								},
-								...recordColumns,
-							]}
-							getRowClassName={row =>
-								!filteredRecords[row.index + 1] ||
-								parseDatetime(filteredRecords[row.index].datetime)
-									.startOf("day")
-									.toMillis() ===
-									parseDatetime(filteredRecords[row.index + 1].datetime)
-										.startOf("day")
-										.toMillis()
-									? "border-0"
-									: ""
-							}
-							selectedIds={selected.map(s => s.id)}
-							mobileRow={recordMobileRow}
-							emptyMessage="No records found."
-						/>
-					</CardContent>
-				</Card>
+						{summary.contributions || summary.withdrawals ? (
+							<InvestmentRow summary={summary} month={month} year={year} />
+						) : null}
+						<MonthlyRhythm summary={summary} period={period} date={date} />
+						{future_records_count ? (
+							<p className="text-sm text-muted-foreground">
+								<IconifyIcon icon="lucide:calendar-clock" className="mr-1 inline" />{" "}
+								{future_records_count} later-dated Record
+								{future_records_count === 1 ? "" : "s"} are listed separately in
+								Monthly Records.
+							</p>
+						) : null}
+					</>
+				)}
 			</PageContent>
 		</>
 	)
+}
+
+function SummaryBand({
+	summary,
+	comparison,
+}: {
+	summary: AnalyticsSummary
+	comparison: Comparison
+}) {
+	const surplusLabel =
+		summary.surplus > 0 ? "Surplus" : summary.surplus < 0 ? "Shortfall" : "Balanced"
+	const tone = summary.surplus > 0 ? "positive" : summary.surplus < 0 ? "negative" : "neutral"
+	return (
+		<Card className="gap-0 overflow-hidden py-0">
+			<MetricGrid className="rounded-none border-0">
+				<DashboardMetric
+					icon="lucide:circle-dollar-sign"
+					label="Income"
+					value={formatCurrency(summary.income)}
+					detail={comparisonText(comparison.income, comparison.count)}
+				/>
+				<DashboardMetric
+					icon="lucide:receipt-text"
+					label={summary.spending < 0 ? "Net refund" : "Spending"}
+					value={formatCurrency(Math.abs(summary.spending))}
+					detail={comparisonText(comparison.spending, comparison.count)}
+				/>
+				<DashboardMetric
+					icon="lucide:scale"
+					label={surplusLabel}
+					value={formatCurrency(Math.abs(summary.surplus))}
+					detail="Income less personal spending"
+					tone={tone}
+				/>
+				<DashboardMetric
+					icon="lucide:percent"
+					label="Surplus rate"
+					value={
+						summary.surplus_rate === null ? "—" : `${summary.surplus_rate.toFixed(1)}%`
+					}
+					detail={
+						summary.surplus_rate === null
+							? "No positive net income"
+							: comparisonRateText(comparison.surplus_rate, comparison.count)
+					}
+					tone={tone}
+				/>
+			</MetricGrid>
+			{summary.pending_count > 0 ? (
+				<div className="grid gap-3 border-t bg-amber-500/5 px-4 py-3 sm:grid-cols-[minmax(12rem,1.2fr)_repeat(3,minmax(0,1fr))] sm:items-center">
+					<div className="flex items-start gap-2.5">
+						<span className="mt-0.5 grid size-7 shrink-0 place-items-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
+							<IconifyIcon icon="lucide:circle-dashed" className="size-3.5" />
+						</span>
+						<div>
+							<p className="text-xs font-medium">Pending amounts included</p>
+							<p className="mt-0.5 text-xs text-muted-foreground">
+								Full Record values awaiting complete allocation
+							</p>
+						</div>
+					</div>
+					<PendingValue label="Income" value={summary.pending_income} />
+					<PendingValue label="Spending" value={summary.pending_gross_spending} />
+					<PendingValue label="Refunds" value={summary.pending_refunds} />
+				</div>
+			) : null}
+		</Card>
+	)
+}
+
+function PendingValue({ label, value }: { label: string; value: number }) {
+	return (
+		<div className="rounded-lg border bg-background/70 px-3 py-2">
+			<p className="text-[0.6875rem] font-medium text-muted-foreground">{label}</p>
+			<p className="mt-0.5 font-semibold tabular-nums">{formatCurrency(value)}</p>
+		</div>
+	)
+}
+
+function CategoryBreakdown({
+	categories,
+	total,
+	month,
+	year,
+	scope,
+	comparisonCount,
+}: {
+	categories: DashboardCategory[]
+	total: number
+	month: string
+	year: number
+	scope: string
+	comparisonCount: number
+}) {
+	const max = Math.max(...categories.map(category => Math.abs(category.spending)), 1)
+	return (
+		<Card>
+			<CardHeader>
+				<CardTitle>Categories</CardTitle>
+				<CardDescription>
+					Ranked net spending
+					{comparisonCount ? ` · Change from ${comparisonCount}-month average` : ""}
+				</CardDescription>
+			</CardHeader>
+			<CardContent className="grid gap-1">
+				{categories.length ? (
+					categories.slice(0, 8).map(category => (
+						<Link
+							key={category.id}
+							href={monthlyRecordsWebRoute({
+								query: {
+									month,
+									year,
+									category_ids: category.id,
+									bucket_id: !["all", "core", "outlier", "other"].includes(scope)
+										? scope
+										: undefined,
+									bucket_group: ["core", "outlier", "other"].includes(scope)
+										? scope
+										: undefined,
+								},
+							})}
+							className="group grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-3 rounded-md px-2 py-2 hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+						>
+							<div className="min-w-0">
+								<div className="flex items-center gap-2">
+									<Icon {...category} size={11} />
+									<span className="truncate font-medium">{category.name}</span>
+								</div>
+								<div className="mt-1 h-1 overflow-hidden rounded-full bg-muted">
+									<div
+										className="h-full rounded-full bg-foreground/60"
+										style={{
+											width: `${(Math.abs(category.spending) / max) * 100}%`,
+										}}
+									/>
+								</div>
+							</div>
+							<span className="tabular-nums">
+								{formatCurrency(category.spending)}
+							</span>
+							<CategoryChange value={category.comparison} />
+						</Link>
+					))
+				) : (
+					<p className="py-8 text-center text-muted-foreground">
+						No spending in this scope.
+					</p>
+				)}
+				<p className="mt-3 text-xs text-muted-foreground">
+					Select a Category to inspect the matching Records.
+				</p>
+			</CardContent>
+		</Card>
+	)
+}
+
+function CategoryChange({ value }: { value: number | null }) {
+	if (value === null) {
+		return <span className="w-24 text-right text-xs text-muted-foreground">—</span>
+	}
+	if (Math.abs(value) < 0.005) {
+		return <span className="w-24 text-right text-xs text-muted-foreground">No change</span>
+	}
+	return (
+		<span
+			className={cn(
+				"w-24 text-right text-xs font-medium tabular-nums",
+				value > 0
+					? "text-red-500 dark:text-red-400"
+					: "text-emerald-600 dark:text-emerald-400",
+			)}
+		>
+			{formatCurrency(Math.abs(value))} {value > 0 ? "more" : "less"}
+		</span>
+	)
+}
+
+function BucketStatus({
+	buckets,
+	month,
+	year,
+	activeScope,
+	setScope,
+}: {
+	buckets: DashboardBucket[]
+	month: string
+	year: number
+	activeScope: string
+	setScope: (scope: string) => void
+}) {
+	return (
+		<Card>
+			<CardHeader>
+				<div className="flex items-start justify-between gap-3">
+					<div>
+						<CardTitle>Buckets</CardTitle>
+						<CardDescription>Persistent groups · Monthly targets</CardDescription>
+					</div>
+					<BucketDialog
+						month={month}
+						year={year}
+						trigger={
+							<Button variant="outline" size="sm">
+								<IconifyIcon icon="lucide:plus" /> New
+							</Button>
+						}
+					/>
+				</div>
+			</CardHeader>
+			<CardContent className="grid gap-3">
+				{buckets.map(bucket => {
+					const usage =
+						bucket.target && bucket.target > 0
+							? (bucket.spending / bucket.target) * 100
+							: null
+					return (
+						<div
+							key={bucket.id}
+							className={cn(
+								"grid gap-2 rounded-md border px-3 py-3 transition-colors",
+								activeScope === bucket.id &&
+									"bg-muted/60 ring-1 ring-foreground/20",
+							)}
+						>
+							<div className="flex items-center justify-between gap-3">
+								<button
+									type="button"
+									aria-pressed={activeScope === bucket.id}
+									onClick={() => setScope(bucket.id)}
+									className="min-w-0 rounded text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+								>
+									<Badge
+										variant="outline"
+										style={{ borderColor: bucket.color, color: bucket.color }}
+									>
+										{bucket.name}
+									</Badge>
+								</button>
+								<span className="font-medium tabular-nums">
+									{formatCurrency(bucket.spending)}
+									{bucket.target !== null
+										? ` / ${formatCurrency(bucket.target)}`
+										: ""}
+								</span>
+							</div>
+							{usage !== null ? (
+								<BucketUsageBar name={bucket.name} usage={usage} />
+							) : null}
+							<div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+								<span className="capitalize">{bucket.group}</span>
+								<div className="flex items-center gap-2">
+									<span>
+										{bucket.target === null
+											? "No target"
+											: bucket.remaining !== null && bucket.remaining >= 0
+												? `${formatCurrency(bucket.remaining)} remaining`
+												: `Over by ${formatCurrency(Math.abs(bucket.remaining ?? 0))}`}
+									</span>
+									<BucketDialog
+										bucket={bucket}
+										month={month}
+										year={year}
+										trigger={
+											<Button variant="ghost" size="xs">
+												Edit
+											</Button>
+										}
+									/>
+								</div>
+							</div>
+						</div>
+					)
+				})}
+				<Button variant="outline" size="sm" asChild>
+					<Link href={monthlyRecordsWebRoute({ query: { month, year } })}>
+						Manage monthly Records
+					</Link>
+				</Button>
+			</CardContent>
+		</Card>
+	)
+}
+
+function BucketUsageBar({ name, usage }: { name: string; usage: number }) {
+	const displayedUsage = Math.max(usage, 0)
+	const scale = Math.max(displayedUsage, 100)
+	const withinTarget = (Math.min(displayedUsage, 100) / scale) * 100
+	const excess = (Math.max(displayedUsage - 100, 0) / scale) * 100
+
+	return (
+		<div
+			role="progressbar"
+			aria-label={`${name} target usage`}
+			aria-valuemin={0}
+			aria-valuenow={Math.round(usage)}
+			className="flex h-1 w-full overflow-hidden rounded-full bg-muted"
+		>
+			{excess ? (
+				<div
+					className="h-full bg-destructive transition-[width]"
+					style={{ width: `${excess}%` }}
+				/>
+			) : null}
+			<div
+				className="h-full bg-foreground/60 transition-[width]"
+				style={{ width: `${withinTarget}%` }}
+			/>
+		</div>
+	)
+}
+
+function InvestmentRow({
+	summary,
+	month,
+	year,
+}: {
+	summary: AnalyticsSummary
+	month: string
+	year: number
+}) {
+	return (
+		<Card size="sm">
+			<CardContent className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+				<div>
+					<p className="font-medium">Saving and investment movements</p>
+					<p className="text-xs text-muted-foreground">
+						Contributions {formatCurrency(summary.contributions)} · Withdrawals{" "}
+						{formatCurrency(summary.withdrawals)} · Net{" "}
+						{formatCurrency(summary.contributions - summary.withdrawals)}
+					</p>
+				</div>
+				<Button variant="outline" size="sm" asChild>
+					<Link
+						href={monthlyRecordsWebRoute({
+							query: { month, year, treatment: "saving_investment" },
+						})}
+					>
+						View Records
+					</Link>
+				</Button>
+			</CardContent>
+		</Card>
+	)
+}
+
+function PaceSummary({ projection }: { projection: Projection }) {
+	if (!projection.available) return null
+	const bucket = projection.bucket
+	return (
+		<MetricGrid className="mt-3">
+			<DashboardMetric
+				icon="lucide:chart-no-axes-combined"
+				label="Projected month-end"
+				value={formatCurrency(projection.projected_spending ?? 0)}
+				detail={`${formatCurrency(projection.daily_spending ?? 0)} daily pace${projection.scheduled_spending ? ` + ${formatCurrency(projection.scheduled_spending)} scheduled` : ""}`}
+			/>
+			<DashboardMetric
+				icon="lucide:gauge"
+				label={bucket ? `${bucket.name} usage pace` : "Usage pace"}
+				value={bucket ? `${formatCurrency(bucket.usage_pace)} / day` : "No paced bucket"}
+				detail={
+					bucket
+						? `Projected ${formatCurrency(bucket.projected)}`
+						: "Add a target to a daily-paced bucket"
+				}
+			/>
+			<DashboardMetric
+				icon="lucide:circle-gauge"
+				label="Recommended pace"
+				value={
+					bucket?.recommended_pace === null || !bucket
+						? "—"
+						: `${formatCurrency(bucket.recommended_pace)} / day`
+				}
+				detail={
+					bucket
+						? `To finish within ${formatCurrency(bucket.target)}`
+						: "No target available"
+				}
+			/>
+			<DashboardMetric
+				icon="lucide:calendar-range"
+				label="Remaining month"
+				value={`${projection.remaining_days} day${projection.remaining_days === 1 ? "" : "s"}`}
+				detail={
+					bucket
+						? `Target pace ${formatCurrency(bucket.target_pace)} / day`
+						: "Projection uses elapsed activity"
+				}
+			/>
+		</MetricGrid>
+	)
+}
+
+function MonthlyRhythm({
+	summary,
+	period,
+	date,
+}: {
+	summary: AnalyticsSummary
+	period: { is_current: boolean; is_future: boolean; through: string | null; label: string }
+	date: DateTime
+}) {
+	const days = summary.daily.filter(day => day.spending > 0)
+	const ordered = days.map(day => day.spending).sort((a, b) => a - b)
+	const middle = Math.floor(ordered.length / 2)
+	const typical = ordered.length
+		? ordered.length % 2
+			? ordered[middle]
+			: (ordered[middle - 1] + ordered[middle]) / 2
+		: 0
+	const peak = days.reduce<(typeof days)[number] | null>(
+		(highest, day) => (!highest || day.spending > highest.spending ? day : highest),
+		null,
+	)
+	const elapsed = period.is_future
+		? 0
+		: period.through
+			? DateTime.fromISO(period.through).day
+			: date.daysInMonth
+
+	return (
+		<Card>
+			<CardHeader>
+				<CardTitle>Spending rhythm</CardTitle>
+				<CardDescription>A compact view of when and how heavily you spent</CardDescription>
+			</CardHeader>
+			<CardContent>
+				<MetricGrid>
+					<DashboardMetric
+						icon="lucide:calendar-days"
+						label="Active spending days"
+						value={`${days.length} of ${elapsed}`}
+						detail={
+							elapsed
+								? `${Math.round((days.length / elapsed) * 100)}% of elapsed days`
+								: "No elapsed days"
+						}
+					/>
+					<DashboardMetric
+						icon="lucide:gauge"
+						label="Typical active day"
+						value={days.length ? formatCurrency(typical) : "—"}
+						detail="Median spend on days with activity"
+					/>
+					<DashboardMetric
+						icon="lucide:flame"
+						label="Highest-spend day"
+						value={peak ? formatCurrency(peak.spending) : "—"}
+						detail={
+							peak
+								? DateTime.fromISO(peak.date).toFormat("d MMMM")
+								: "No spending yet"
+						}
+					/>
+					<DashboardMetric
+						icon="lucide:rotate-ccw"
+						label="Refunds"
+						value={formatCurrency(summary.refunds)}
+						detail={`${formatCurrency(summary.gross_spending)} gross spending`}
+					/>
+				</MetricGrid>
+			</CardContent>
+		</Card>
+	)
+}
+
+function MetricGrid({ className, children }: { className?: string; children: ReactNode }) {
+	return (
+		<div
+			className={cn(
+				"grid gap-px overflow-hidden rounded-xl border bg-border sm:grid-cols-2 lg:grid-cols-4",
+				className,
+			)}
+		>
+			{children}
+		</div>
+	)
+}
+
+function DashboardMetric({
+	icon,
+	label,
+	value,
+	detail,
+	tone = "neutral",
+}: {
+	icon: string
+	label: string
+	value: string
+	detail: string
+	tone?: "positive" | "negative" | "neutral"
+}) {
+	return (
+		<div
+			className={cn(
+				"grid min-h-28 content-between bg-card p-4",
+				tone === "positive" && "bg-emerald-950 text-emerald-50",
+				tone === "negative" && "bg-red-950 text-red-50",
+			)}
+		>
+			<div
+				className={cn(
+					"flex items-center gap-2 text-xs font-medium text-muted-foreground",
+					tone !== "neutral" && "text-white/65",
+				)}
+			>
+				<span
+					className={cn(
+						"grid size-7 place-items-center rounded-lg border bg-background text-foreground shadow-xs",
+						tone !== "neutral" && "border-white/10 bg-white/10 text-white",
+					)}
+				>
+					<IconifyIcon icon={icon} className="size-3.5" />
+				</span>
+				{label}
+			</div>
+			<div className="mt-4">
+				<p className="text-2xl font-semibold tracking-tight tabular-nums">{value}</p>
+				<p
+					className={cn(
+						"mt-1 text-xs text-muted-foreground",
+						tone !== "neutral" && "text-white/65",
+					)}
+				>
+					{detail}
+				</p>
+			</div>
+		</div>
+	)
+}
+
+function comparisonText(value: ComparisonValue, count: number) {
+	if (!count || value.difference === null) return "No comparison history"
+	if (Math.abs(value.difference) < 0.005) return `Same as ${count}-month average`
+	return `${formatCurrency(Math.abs(value.difference))} ${value.difference > 0 ? "above" : "below"} ${count}-month average`
+}
+
+function comparisonRateText(value: ComparisonValue, count: number) {
+	if (!count || value.difference === null) return "No comparison history"
+	if (Math.abs(value.difference) < 0.05) return `Same as ${count}-month average`
+	return `${Math.abs(value.difference).toFixed(1)} points ${value.difference > 0 ? "above" : "below"} average`
 }

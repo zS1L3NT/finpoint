@@ -10,10 +10,24 @@ use Illuminate\Database\Eloquent\Model;
 #[Table(keyType: 'string', incrementing: false)]
 #[WithoutTimestamps()]
 #[Guarded([])]
-class Quota extends Model
+class Bucket extends Model
 {
+    protected $casts = [
+        'archived' => 'boolean',
+    ];
+
     public function records()
     {
         return $this->hasMany(Record::class);
+    }
+
+    public function defaults()
+    {
+        return $this->hasMany(BucketDefault::class);
+    }
+
+    public function targets()
+    {
+        return $this->hasMany(BucketTarget::class);
     }
 }

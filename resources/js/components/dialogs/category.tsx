@@ -2,6 +2,7 @@ import { Icon as IconifyIcon } from "@iconify/react"
 import { router } from "@inertiajs/react"
 import { useEffect, useState } from "react"
 import ComboboxField from "@/components/form/combobox-field"
+import SelectField from "@/components/form/select-field"
 import TextField from "@/components/form/text-field"
 import Icon from "@/components/icon"
 import { Button } from "@/components/ui/button"
@@ -17,9 +18,11 @@ import {
 } from "@/components/ui/dialog"
 import { FieldGroup } from "@/components/ui/field"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
+import { useFetch } from "@/hooks/use-fetch"
 import { cn, withMethod } from "@/lib/utils"
-import { Category, CategoryWithChildren } from "@/types"
+import { Bucket, Category, CategoryWithChildren } from "@/types"
 import {
+	bucketIndexApiRoute,
 	categoryDestroyApiRoute,
 	categoryStoreApiRoute,
 	categoryUpdateApiRoute,
@@ -30,6 +33,8 @@ type CategoryFormValues = {
 	icon: string
 	color: string
 	parent_category_id: string
+	analytics_treatment: string
+	default_bucket_id: string
 }
 
 function isChildCategory(category: Category | CategoryWithChildren | null) {
@@ -41,6 +46,8 @@ const EMPTY_FORM_VALUES: CategoryFormValues = {
 	icon: "",
 	color: "",
 	parent_category_id: "",
+	analytics_treatment: "",
+	default_bucket_id: "",
 }
 
 export default function CategoryDialog({
@@ -57,6 +64,7 @@ export default function CategoryDialog({
 	onOpenChange: (open: boolean) => void
 }) {
 	const isEditing = mode === "edit" && category !== null
+	const buckets = useFetch<Bucket[]>(bucketIndexApiRoute.url(), [])
 	const canEditParentCategory = !isEditing || isChildCategory(category)
 	const [values, setValues] = useState<CategoryFormValues>(EMPTY_FORM_VALUES)
 	const { getApiFieldErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
@@ -74,6 +82,8 @@ export default function CategoryDialog({
 						icon: category.icon,
 						color: category.color,
 						parent_category_id: category.parent_category_id ?? "",
+						analytics_treatment: category.analytics_treatment ?? "",
+						default_bucket_id: category.default_bucket_id ?? "",
 					}
 				: EMPTY_FORM_VALUES,
 		)
@@ -98,6 +108,8 @@ export default function CategoryDialog({
 		if (!isEditing || isChildCategory(category)) {
 			formData.append("parent_category_id", values.parent_category_id)
 		}
+		formData.append("analytics_treatment", values.analytics_treatment)
+		formData.append("default_bucket_id", values.default_bucket_id)
 
 		const response = await fetch(
 			isEditing ? categoryUpdateApiRoute.url({ category }) : categoryStoreApiRoute.url(),
@@ -213,6 +225,42 @@ export default function CategoryDialog({
 							</div>
 						</CardContent>
 					</Card>
+
+					<div className="grid gap-4 rounded-lg border p-4">
+						<div>
+							<p className="text-sm font-semibold">Analytics defaults</p>
+							<p className="text-xs text-muted-foreground">
+								New Records inherit these values, so normal creation needs no extra
+								classification work.
+							</p>
+						</div>
+						<SelectField
+							id="analytics_treatment"
+							label="Treatment"
+							value={values.analytics_treatment}
+							placeholder="Automatic by direction"
+							items={[
+								{ value: "income", label: "Income" },
+								{ value: "spending", label: "Spending" },
+								{ value: "saving_investment", label: "Saving/investment" },
+								{ value: "neutral", label: "Transfer/neutral" },
+								{ value: "automatic", label: "Automatic by direction" },
+							]}
+							errors={getApiFieldErrors("analytics_treatment")}
+							onChange={value => setValue("analytics_treatment", value)}
+						/>
+						<SelectField
+							id="default_bucket_id"
+							label="Default spending bucket"
+							value={values.default_bucket_id}
+							placeholder="No default bucket"
+							items={buckets
+								.filter(bucket => !bucket.archived)
+								.map(bucket => ({ value: bucket.id, label: bucket.name }))}
+							errors={getApiFieldErrors("default_bucket_id")}
+							onChange={value => setValue("default_bucket_id", value)}
+						/>
+					</div>
 				</form>
 
 				<DialogFooter>

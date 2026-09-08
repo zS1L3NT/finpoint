@@ -29,6 +29,8 @@ class CategoryController extends Controller
                 'nullable',
                 Rule::exists('categories', 'id')->whereNull('parent_category_id'),
             ],
+            'analytics_treatment' => ['nullable', Rule::in(['income', 'spending', 'saving_investment', 'neutral', 'automatic'])],
+            'default_bucket_id' => 'nullable|exists:buckets,id',
         ]);
 
         $id = Str::slug($dto['name']);
@@ -61,6 +63,8 @@ class CategoryController extends Controller
                 'nullable',
                 Rule::exists('categories', 'id')->whereNull('parent_category_id'),
             ],
+            'analytics_treatment' => ['nullable', Rule::in(['income', 'spending', 'saving_investment', 'neutral', 'automatic'])],
+            'default_bucket_id' => 'nullable|exists:buckets,id',
         ]);
 
         $id = Str::slug($dto['name']);

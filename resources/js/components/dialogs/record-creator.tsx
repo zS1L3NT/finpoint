@@ -6,6 +6,7 @@ import { DateTime } from "luxon"
 import AmountField from "@/components/form/amount-field"
 import ComboboxField from "@/components/form/combobox-field"
 import DatetimeField from "@/components/form/datetime-field"
+import RecordAnalyticsFields from "@/components/form/record-analytics-fields"
 import TextField from "@/components/form/text-field"
 import TextareaField from "@/components/form/textarea-field"
 import Icon from "@/components/icon"
@@ -63,6 +64,9 @@ export default function RecordCreatorDialog({
 				statements.reduce((acc, statement) => acc + statement.allocable_amount, 0),
 			),
 			category_id: "",
+			analytics_treatment: "",
+			bucket_id: "",
+			bucket_source: "category" as "category" | "manual",
 			description: "",
 			statements: statements.map(statement => ({
 				id: statement.id,
@@ -77,6 +81,9 @@ export default function RecordCreatorDialog({
 			formData.append("datetime", value.datetime)
 			formData.append("amount", `${value.amount}`)
 			formData.append("category_id", value.category_id)
+			formData.append("analytics_treatment", value.analytics_treatment)
+			formData.append("bucket_id", value.bucket_id)
+			formData.append("bucket_source", value.bucket_source)
 			formData.append("description", value.description)
 			value.statements.forEach((statement, index) => {
 				formData.append(`statements[${index}][id]`, statement.id)
@@ -109,6 +116,12 @@ export default function RecordCreatorDialog({
 			round2dp(state.values.statements.reduce((acc, el) => acc + el.amount, 0)) !==
 			round2dp(state.values.amount),
 	)
+	const analytics = useStore(form.store, state => ({
+		treatment: state.values.analytics_treatment,
+		categoryId: state.values.category_id,
+		amount: state.values.amount,
+		bucketId: state.values.bucket_id,
+	}))
 
 	return (
 		<Dialog
@@ -266,6 +279,14 @@ export default function RecordCreatorDialog({
 										)}
 										onChange={value => {
 											field.handleChange(value?.id ?? "")
+											if (
+												form.getFieldValue("bucket_source") === "category"
+											) {
+												form.setFieldValue(
+													"bucket_id",
+													value?.default_bucket_id ?? "",
+												)
+											}
 											clearApiError(field.name)
 										}}
 									/>
@@ -286,6 +307,23 @@ export default function RecordCreatorDialog({
 								)}
 							</form.Field>
 						</FieldGroup>
+						<RecordAnalyticsFields
+							treatment={analytics.treatment}
+							categoryTreatment={
+								categoriesFlat.find(
+									category => category.id === analytics.categoryId,
+								)?.analytics_treatment
+							}
+							amount={analytics.amount}
+							bucketId={analytics.bucketId}
+							onTreatmentChange={value =>
+								form.setFieldValue("analytics_treatment", value)
+							}
+							onBucketChange={value => {
+								form.setFieldValue("bucket_id", value)
+								form.setFieldValue("bucket_source", "manual")
+							}}
+						/>
 					</div>
 
 					<div className="flex flex-col gap-4">
