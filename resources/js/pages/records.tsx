@@ -19,38 +19,65 @@ import {
 	CommandItem,
 	CommandList,
 } from "@/components/ui/command"
-import {
-	DropdownMenu,
-	DropdownMenuCheckboxItem,
-	DropdownMenuContent,
-	DropdownMenuGroup,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import {
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectLabel,
+	SelectSeparator,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select"
 import { useFetch } from "@/hooks/use-fetch"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
-import { useSearchParam } from "@/hooks/use-search-param"
 import { cn } from "@/lib/utils"
-import { CategoryWithChildren, Paginated, Record } from "@/types"
-import { categoryIndexApiRoute, recordsWebRoute } from "@/wayfinder/routes"
+import { Bucket, CategoryWithChildren, Paginated, Record } from "@/types"
+import { bucketIndexApiRoute, categoryIndexApiRoute, recordsWebRoute } from "@/wayfinder/routes"
+
+const FILTER_CONTROL_CLASS = "border-border bg-input/20 text-foreground dark:bg-input/30"
 
 export default function RecordsPage({ records }: { records: Paginated<Record> }) {
 	const [isCreatingRecord, setIsCreatingRecord] = useState(false)
 	const page = usePage()
 	const pageUrl = new URL(page.url, "http://localhost")
-
-	const [startDate, setStartDate] = useSearchParam("start_date")
-	const [endDate, setEndDate] = useSearchParam("end_date")
-	const [isAllocated, setIsAllocated] = useSearchParam("is_allocated")
-	const categoryIds =
-		new URL(page.url, "http://localhost").searchParams
-			.get("category_ids")
-			?.split(",")
-			.filter(Boolean) ?? []
+	const startDate = pageUrl.searchParams.get("start_date")
+	const endDate = pageUrl.searchParams.get("end_date")
+	const isAllocated = pageUrl.searchParams.get("is_allocated")
+	const bucketId = pageUrl.searchParams.get("bucket_id")
+	const bucketGroup = pageUrl.searchParams.get("bucket_group")
+	const showUnbucketed = pageUrl.searchParams.get("show_unbucketed") === "1"
+	const treatment = pageUrl.searchParams.get("treatment")
+	const categoryIds = pageUrl.searchParams.get("category_ids")?.split(",").filter(Boolean) ?? []
 
 	const categories = useFetch<CategoryWithChildren[]>(categoryIndexApiRoute.url(), [])
+	const buckets = useFetch<Bucket[]>(bucketIndexApiRoute.url(), [])
+	const updateFilters = (changes: { [key: string]: string | null }) => {
+		const url = new URL(page.url, "http://localhost")
+		for (const [key, value] of Object.entries(changes)) {
+			if (value) url.searchParams.set(key, value)
+			else url.searchParams.delete(key)
+		}
+		url.searchParams.delete("page")
+		router.visit(url.pathname + url.search, { preserveState: true, preserveScroll: true })
+	}
+	const clearFilters = () =>
+		router.visit(
+			recordsWebRoute({
+				query: { per_page: pageUrl.searchParams.get("per_page") || undefined },
+			}),
+			{ preserveState: true, preserveScroll: true },
+		)
+	const activeFilterCount = [
+		pageUrl.searchParams.get("query"),
+		startDate,
+		endDate,
+		isAllocated,
+		categoryIds.length ? "categories" : null,
+		bucketId ?? bucketGroup ?? (showUnbucketed ? "unbucketed" : null),
+		treatment,
+	].filter(Boolean).length
 
 	const { query, pageSize, handleQueryChange, handlePageSizeChange } = usePaginatedTableState({
 		syncOn: records,
@@ -62,16 +89,13 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 					end_date: endDate || undefined,
 					is_allocated: isAllocated || undefined,
 					category_ids: categoryIds.join(",") || undefined,
-					bucket_id: pageUrl.searchParams.get("bucket_id") || undefined,
-					bucket_group: pageUrl.searchParams.get("bucket_group") || undefined,
-					show_unbucketed: pageUrl.searchParams.get("show_unbucketed") || undefined,
-					treatment: pageUrl.searchParams.get("treatment") || undefined,
+					bucket_id: bucketId || undefined,
+					bucket_group: bucketGroup || undefined,
+					show_unbucketed: showUnbucketed || undefined,
+					treatment: treatment || undefined,
 				},
 			}).url,
 	})
-	const pendingFilterLabel =
-		isAllocated === "true" ? "Not pending" : isAllocated === "false" ? "Pending" : null
-
 	const columns = useRecordColumns<Record>({ pageName: "Records" })
 	const mobileRow = useRecordMobileRow<Record>({ pageName: "Records" })
 
@@ -86,8 +110,6 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 					description="Ledger view"
 					icon="lucide:receipt-text"
 				/>
-				<ActiveLedgerFilters />
-
 				<PaginatedDataTable
 					paginated={records}
 					columns={columns}
@@ -98,70 +120,21 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 						onPageSizeChange: handlePageSizeChange,
 						searchPlaceholder: "Search all records...",
 						filters: (
-							<div className="flex flex-col gap-2 sm:flex-row">
-								<CategoryFilter categories={categories} selectedIds={categoryIds} />
-
-								<DropdownMenu>
-									<DropdownMenuTrigger asChild>
-										<Button
-											type="button"
-											variant={pendingFilterLabel ? "secondary" : "outline"}
-											className="w-full sm:w-auto"
-										>
-											<IconifyIcon icon="lucide:list-filter" /> Filter status
-											{pendingFilterLabel ? (
-												<Badge variant="outline">
-													{pendingFilterLabel}
-												</Badge>
-											) : null}
-										</Button>
-									</DropdownMenuTrigger>
-									<DropdownMenuContent align="end" className="w-48">
-										<DropdownMenuLabel>Filter by status</DropdownMenuLabel>
-										<DropdownMenuSeparator />
-										<DropdownMenuGroup>
-											<DropdownMenuCheckboxItem
-												checked={isAllocated === "false"}
-												onSelect={event => event.preventDefault()}
-												onCheckedChange={checked =>
-													setIsAllocated(
-														checked === true ? "false" : null,
-													)
-												}
-											>
-												Pending
-											</DropdownMenuCheckboxItem>
-											<DropdownMenuCheckboxItem
-												checked={isAllocated === "true"}
-												onSelect={event => event.preventDefault()}
-												onCheckedChange={checked =>
-													setIsAllocated(checked === true ? "true" : null)
-												}
-											>
-												Not pending
-											</DropdownMenuCheckboxItem>
-										</DropdownMenuGroup>
-									</DropdownMenuContent>
-								</DropdownMenu>
-
-								<div className="grid grid-cols-2 gap-2 sm:flex sm:flex-row">
-									<DateField
-										id="start_date"
-										value={startDate ?? ""}
-										className="min-w-0 sm:w-32"
-										placeholder="Start date"
-										onChange={date => setStartDate(date || null)}
-									/>
-
-									<DateField
-										id="end_date"
-										value={endDate ?? ""}
-										className="min-w-0 sm:w-32"
-										placeholder="End date"
-										onChange={date => setEndDate(date || null)}
-									/>
-								</div>
-							</div>
+							<RecordFilters
+								categories={categories}
+								categoryIds={categoryIds}
+								buckets={buckets}
+								startDate={startDate}
+								endDate={endDate}
+								isAllocated={isAllocated}
+								bucketId={bucketId}
+								bucketGroup={bucketGroup}
+								showUnbucketed={showUnbucketed}
+								treatment={treatment}
+								activeFilterCount={activeFilterCount}
+								onChange={updateFilters}
+								onClear={clearFilters}
+							/>
 						),
 						actions: (
 							<RecordCreatorDialog
@@ -188,34 +161,166 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 	)
 }
 
-function ActiveLedgerFilters() {
-	const page = usePage()
-	const url = new URL(page.url, "http://localhost")
-	const bucketFiltered = Boolean(
-		url.searchParams.get("bucket_id") ||
-			url.searchParams.get("bucket_group") ||
-			url.searchParams.get("show_unbucketed"),
-	)
+function RecordFilters({
+	categories,
+	categoryIds,
+	buckets,
+	startDate,
+	endDate,
+	isAllocated,
+	bucketId,
+	bucketGroup,
+	showUnbucketed,
+	treatment,
+	activeFilterCount,
+	onChange,
+	onClear,
+}: {
+	categories: CategoryWithChildren[]
+	categoryIds: string[]
+	buckets: Bucket[]
+	startDate: string | null
+	endDate: string | null
+	isAllocated: string | null
+	bucketId: string | null
+	bucketGroup: string | null
+	showUnbucketed: boolean
+	treatment: string | null
+	activeFilterCount: number
+	onChange: (changes: { [key: string]: string | null }) => void
+	onClear: () => void
+}) {
+	const bucketScope = showUnbucketed
+		? "unbucketed"
+		: bucketId
+			? `bucket:${bucketId}`
+			: bucketGroup
+				? `group:${bucketGroup}`
+				: "all"
+	const activeBuckets = buckets.filter(bucket => !bucket.archived)
 
-	if (!bucketFiltered) return null
+	const changeBucketScope = (scope: string) => {
+		const changes: { [key: string]: string | null } = {
+			bucket_id: null,
+			bucket_group: null,
+			show_unbucketed: null,
+		}
 
-	const visitWithout = (...keys: string[]) => {
-		for (const key of keys) url.searchParams.delete(key)
-		url.searchParams.delete("page")
-		router.visit(url.pathname + url.search, { preserveState: true, preserveScroll: true })
+		if (scope === "unbucketed") changes.show_unbucketed = "1"
+		else if (scope.startsWith("bucket:")) changes.bucket_id = scope.slice(7)
+		else if (scope.startsWith("group:")) changes.bucket_group = scope.slice(6)
+
+		onChange(changes)
 	}
 
 	return (
-		<div className="flex flex-wrap items-center gap-2 rounded-lg border bg-muted/25 px-3 py-2 text-sm">
-			<span className="text-muted-foreground">Filtered ledger:</span>
-			<Badge variant="secondary">Bucket scope</Badge>
-			<Button
-				variant="ghost"
-				size="sm"
-				onClick={() => visitWithout("bucket_id", "bucket_group", "show_unbucketed")}
+		<div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap">
+			<CategoryFilter
+				categories={categories}
+				selectedIds={categoryIds}
+				onChange={ids => onChange({ category_ids: ids.join(",") || null })}
+			/>
+
+			<Select
+				value={isAllocated ?? "all"}
+				onValueChange={value => onChange({ is_allocated: value === "all" ? null : value })}
 			>
-				Clear special filters
-			</Button>
+				<SelectTrigger className={cn("w-full sm:w-40", FILTER_CONTROL_CLASS)}>
+					<IconifyIcon icon="lucide:circle-check-big" />
+					<SelectValue />
+				</SelectTrigger>
+				<SelectContent align="start" variant="filter">
+					<SelectGroup>
+						<SelectItem value="all">Any status</SelectItem>
+						<SelectItem value="true">Complete</SelectItem>
+						<SelectItem value="false">Pending</SelectItem>
+					</SelectGroup>
+				</SelectContent>
+			</Select>
+
+			<Select value={bucketScope} onValueChange={changeBucketScope}>
+				<SelectTrigger className={cn("w-full sm:w-40", FILTER_CONTROL_CLASS)}>
+					<IconifyIcon icon="lucide:wallet-cards" />
+					<SelectValue />
+				</SelectTrigger>
+				<SelectContent align="start" variant="filter">
+					<SelectGroup>
+						<SelectItem value="all">Any bucket</SelectItem>
+						<SelectItem value="unbucketed">No bucket</SelectItem>
+					</SelectGroup>
+					<SelectSeparator />
+					<SelectGroup>
+						<SelectLabel>Bucket groups</SelectLabel>
+						<SelectItem value="group:core">Core</SelectItem>
+						<SelectItem value="group:outlier">Outlier</SelectItem>
+						<SelectItem value="group:other">Other</SelectItem>
+					</SelectGroup>
+					{activeBuckets.length ? <SelectSeparator /> : null}
+					{activeBuckets.length ? (
+						<SelectGroup>
+							<SelectLabel>Specific bucket</SelectLabel>
+							{activeBuckets.map(bucket => (
+								<SelectItem key={bucket.id} value={`bucket:${bucket.id}`}>
+									<span
+										className="size-2 rounded-full"
+										style={{ backgroundColor: bucket.color }}
+									/>
+									{bucket.name}
+								</SelectItem>
+							))}
+						</SelectGroup>
+					) : null}
+				</SelectContent>
+			</Select>
+
+			<Select
+				value={treatment ?? "all"}
+				onValueChange={value => onChange({ treatment: value === "all" ? null : value })}
+			>
+				<SelectTrigger className={cn("w-full sm:w-40", FILTER_CONTROL_CLASS)}>
+					<IconifyIcon icon="lucide:chart-no-axes-combined" />
+					<SelectValue />
+				</SelectTrigger>
+				<SelectContent align="start" variant="filter">
+					<SelectGroup>
+						<SelectItem value="all">Any treatment</SelectItem>
+						<SelectItem value="income">Income</SelectItem>
+						<SelectItem value="spending">Spending</SelectItem>
+						<SelectItem value="saving_investment">Saving / investment</SelectItem>
+						<SelectItem value="neutral">Excluded</SelectItem>
+						<SelectItem value="automatic">Automatic</SelectItem>
+					</SelectGroup>
+				</SelectContent>
+			</Select>
+
+			<DateField
+				id="records_start_date"
+				value={startDate ?? ""}
+				className="min-w-0 sm:w-40"
+				triggerClassName={FILTER_CONTROL_CLASS}
+				placeholder="Start date"
+				onChange={date => onChange({ start_date: date || null })}
+			/>
+			<DateField
+				id="records_end_date"
+				value={endDate ?? ""}
+				className="min-w-0 sm:w-40"
+				triggerClassName={FILTER_CONTROL_CLASS}
+				placeholder="End date"
+				onChange={date => onChange({ end_date: date || null })}
+			/>
+
+			{activeFilterCount ? (
+				<Button
+					type="button"
+					variant="outline"
+					className={cn("w-full sm:w-40", FILTER_CONTROL_CLASS)}
+					onClick={onClear}
+				>
+					<IconifyIcon icon="lucide:list-filter-x" /> Clear
+					<Badge variant="secondary">{activeFilterCount}</Badge>
+				</Button>
+			) : null}
 		</div>
 	)
 }
@@ -223,28 +328,16 @@ function ActiveLedgerFilters() {
 function CategoryFilter({
 	categories,
 	selectedIds,
+	onChange,
 }: {
 	categories: CategoryWithChildren[]
 	selectedIds: string[]
+	onChange: (ids: string[]) => void
 }) {
-	const page = usePage()
 	const categoriesFlat = categories.flatMap(category => [category, ...category.children])
 
-	const setSelectedIds = (ids: string[]) => {
-		const url = new URL(page.url, "http://localhost")
-
-		if (ids.length) {
-			url.searchParams.set("category_ids", ids.join(","))
-		} else {
-			url.searchParams.delete("category_ids")
-		}
-
-		url.searchParams.delete("page")
-		router.visit(url.pathname + url.search, { preserveState: true, preserveScroll: true })
-	}
-
 	const toggle = (id: string) =>
-		setSelectedIds(
+		onChange(
 			selectedIds.includes(id)
 				? selectedIds.filter(selectedId => selectedId !== id)
 				: [...selectedIds, id],
@@ -256,19 +349,23 @@ function CategoryFilter({
 				render={
 					<Button
 						type="button"
-						variant={selectedIds.length ? "secondary" : "outline"}
-						className="w-full sm:w-auto"
+						variant="outline"
+						className={cn("w-full justify-start sm:w-40", FILTER_CONTROL_CLASS)}
 					/>
 				}
 			>
-				<IconifyIcon icon="lucide:tags" /> Filter categories
-				{selectedIds.length ? (
-					<Badge variant="outline">{selectedIds.length} selected</Badge>
-				) : null}
+				<IconifyIcon icon="lucide:tags" />
+				<span className="truncate">
+					{selectedIds.length
+						? `${selectedIds.length} categor${selectedIds.length === 1 ? "y" : "ies"}`
+						: "Any category"}
+				</span>
+				<IconifyIcon icon="lucide:chevron-down" className="ml-auto" />
 			</PopoverTrigger>
 			<PopoverContent
 				align="start"
-				className="w-[calc(100vw-2rem)] gap-0 overflow-hidden p-0 sm:w-72"
+				variant="filter"
+				className="w-[calc(100vw-2rem)] overflow-hidden sm:w-72"
 			>
 				<Command
 					filter={(value, search) =>
@@ -286,7 +383,7 @@ function CategoryFilter({
 							size="icon-xs"
 							className="absolute top-2 right-2 z-10"
 							aria-label="Clear categories"
-							onClick={() => setSelectedIds([])}
+							onClick={() => onChange([])}
 						>
 							<IconifyIcon icon="lucide:x" />
 						</Button>
@@ -320,7 +417,12 @@ function CategoryFilterItem({
 	onSelect: () => void
 }) {
 	return (
-		<CommandItem value={category.name} data-checked={checked} onSelect={onSelect}>
+		<CommandItem
+			value={category.name}
+			data-checked={checked}
+			variant="filter"
+			onSelect={onSelect}
+		>
 			<div
 				className={cn(
 					"flex min-w-0 items-center gap-1",

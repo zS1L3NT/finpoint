@@ -16,13 +16,14 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import {
 	Select,
 	SelectContent,
+	SelectGroup,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select"
 import { cn, formatCurrency } from "@/lib/utils"
 import { AnalyticsSummary, Bucket } from "@/types"
-import { dashboardWebRoute, monthlyRecordsWebRoute } from "@/wayfinder/routes"
+import { dashboardWebRoute, monthlyRecordsWebRoute, recordsWebRoute } from "@/wayfinder/routes"
 
 type DashboardBucket = Bucket & {
 	spending: number
@@ -219,8 +220,11 @@ export default function DashboardPage({
 								{summary.unbucketed_count ? (
 									<Button variant="outline" size="sm" asChild>
 										<Link
-											href={monthlyRecordsWebRoute({
-												query: { month, year, show_unbucketed: true },
+											href={recordsWebRoute({
+												query: {
+													...monthRecordRange(month, year),
+													show_unbucketed: true,
+												},
 											})}
 										>
 											<IconifyIcon icon="lucide:inbox" />{" "}
@@ -272,15 +276,17 @@ export default function DashboardPage({
 									<SelectTrigger className="w-full sm:w-52">
 										<SelectValue />
 									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="all">All spending</SelectItem>
-										<SelectItem value="core">Core</SelectItem>
-										<SelectItem value="outlier">Outlier</SelectItem>
-										{buckets.map(bucket => (
-											<SelectItem key={bucket.id} value={bucket.id}>
-												{bucket.name}
-											</SelectItem>
-										))}
+									<SelectContent variant="filter">
+										<SelectGroup>
+											<SelectItem value="all">All spending</SelectItem>
+											<SelectItem value="core">Core</SelectItem>
+											<SelectItem value="outlier">Outlier</SelectItem>
+											{buckets.map(bucket => (
+												<SelectItem key={bucket.id} value={bucket.id}>
+													{bucket.name}
+												</SelectItem>
+											))}
+										</SelectGroup>
 									</SelectContent>
 								</Select>
 							</div>
@@ -429,10 +435,9 @@ function CategoryBreakdown({
 					categories.slice(0, 8).map(category => (
 						<Link
 							key={category.id}
-							href={monthlyRecordsWebRoute({
+							href={recordsWebRoute({
 								query: {
-									month,
-									year,
+									...monthRecordRange(month, year),
 									category_ids: category.id,
 									bucket_id: !["all", "core", "outlier", "other"].includes(scope)
 										? scope
@@ -654,8 +659,11 @@ function InvestmentRow({
 				</div>
 				<Button variant="outline" size="sm" asChild>
 					<Link
-						href={monthlyRecordsWebRoute({
-							query: { month, year, treatment: "saving_investment" },
+						href={recordsWebRoute({
+							query: {
+								...monthRecordRange(month, year),
+								treatment: "saving_investment",
+							},
 						})}
 					>
 						View Records
@@ -664,6 +672,14 @@ function InvestmentRow({
 			</CardContent>
 		</Card>
 	)
+}
+
+function monthRecordRange(month: string, year: number) {
+	const date = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
+	return {
+		start_date: date.startOf("month").toISODate() ?? undefined,
+		end_date: date.endOf("month").toISODate() ?? undefined,
+	}
 }
 
 function PaceSummary({ projection }: { projection: Projection }) {

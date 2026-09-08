@@ -9,6 +9,7 @@ import { cn, parseDate } from "@/lib/utils"
 type Props = FormFieldProps & {
 	value: string
 	placeholder?: string
+	triggerClassName?: string
 	onChange: (value: string) => void
 }
 
@@ -21,6 +22,7 @@ export default function DateField({
 	className,
 	value,
 	placeholder = "Select date",
+	triggerClassName,
 	onChange,
 }: Props) {
 	const selected = parseDate(value)
@@ -49,6 +51,7 @@ export default function DateField({
 									selected.isValid && "pr-8",
 									!selected.isValid && "text-muted-foreground",
 									invalid ? "border-destructive" : null,
+									triggerClassName,
 								)}
 							>
 								<IconifyIcon icon="lucide:calendar" />
