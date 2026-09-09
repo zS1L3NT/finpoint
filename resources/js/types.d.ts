@@ -83,6 +83,7 @@ export type Category = {
 	records_count: number
 	analytics_treatment: AnalyticsTreatment | null
 	default_bucket_id: string | null
+	default_bucket?: Bucket | null
 }
 
 export type CategoryWithChildren = Category & {

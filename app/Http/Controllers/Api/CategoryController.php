@@ -13,7 +13,10 @@ class CategoryController extends Controller
     public function index()
     {
         return Category::query()
-            ->with(['children' => fn ($query) => $query->withCount('records')])
+            ->with([
+                'defaultBucket',
+                'children' => fn ($query) => $query->with('defaultBucket')->withCount('records'),
+            ])
             ->withCount('records')
             ->whereNull('parent_category_id')
             ->get();

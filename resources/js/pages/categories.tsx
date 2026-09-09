@@ -9,6 +9,7 @@ import PageHeader from "@/components/layout/page-header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useHistory } from "@/history"
+import { treatmentLabel } from "@/lib/analytics"
 import { Category, CategoryWithChildren } from "@/types"
 import { recordsWebRoute } from "@/wayfinder/routes"
 
@@ -46,14 +47,14 @@ export default function CategoriesPage({ categories }: { categories: CategoryWit
 					<CardHeader>
 						<CardTitle>Category Tree</CardTitle>
 						<CardDescription>
-							Open a category's records, or use Edit to manage it.
+							Select a category to edit it, or find its Records.
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="px-0">
 						{categories.length ? (
 							<CategoryTree
 								categories={categories}
-								onOpen={handlePush("Categories")}
+								onFindRecords={handlePush("Categories")}
 								onEdit={category => setDialogState({ mode: "edit", category })}
 							/>
 						) : (
@@ -82,11 +83,11 @@ export default function CategoriesPage({ categories }: { categories: CategoryWit
 
 function CategoryTree({
 	categories,
-	onOpen,
+	onFindRecords,
 	onEdit,
 }: {
 	categories: (Category | CategoryWithChildren)[]
-	onOpen: () => void
+	onFindRecords: () => void
 	onEdit: (category: Category | CategoryWithChildren) => void
 }) {
 	return (
@@ -95,7 +96,7 @@ function CategoryTree({
 				<CategoryTreeItem
 					key={category.id}
 					category={category}
-					onOpen={onOpen}
+					onFindRecords={onFindRecords}
 					onEdit={onEdit}
 				/>
 			))}
@@ -105,27 +106,29 @@ function CategoryTree({
 
 function CategoryTreeItem({
 	category,
-	onOpen,
+	onFindRecords,
 	onEdit,
 }: {
 	category: Category | CategoryWithChildren
-	onOpen: () => void
+	onFindRecords: () => void
 	onEdit: (category: Category | CategoryWithChildren) => void
 }) {
 	return (
 		<div className="flex flex-col">
 			<div className="group flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/40">
-				<Link
-					href={recordsWebRoute.url({ query: { category_ids: category.id } })}
-					className="flex min-w-0 flex-1 items-center gap-3 rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
-					onClick={onOpen}
+				<button
+					type="button"
+					className="flex min-w-0 flex-1 items-center gap-3 rounded-sm text-left outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
+					onClick={() => onEdit(category)}
 				>
 					<Icon {...category} size={14} />
-					<div className="min-w-0 flex-1">
+					<div className="grid min-w-0 flex-1 gap-1">
 						<p className="truncate font-medium">{category.name}</p>
-						<p className="truncate text-xs text-muted-foreground">
-							{category.records_count}{" "}
-							{category.records_count === 1 ? "record" : "records"}
+						<p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+							<IconifyIcon icon="lucide:tag" className="size-3.5" />
+							<span className="truncate">
+								{`${treatmentLabel(category.analytics_treatment)} · ${category.default_bucket?.name ?? "No bucket"}`}
+							</span>
 						</p>
 					</div>
 					{"children" in category ? (
@@ -134,22 +137,28 @@ function CategoryTreeItem({
 							{category.children.length === 1 ? "" : "ren"}
 						</span>
 					) : null}
-				</Link>
+				</button>
 
-				<Button
-					type="button"
-					variant="outline"
-					size="sm"
-					className="shrink-0"
-					onClick={() => onEdit(category)}
-				>
-					Edit
+				<Button variant="outline" size="sm" className="shrink-0" asChild>
+					<Link
+						href={recordsWebRoute.url({ query: { category_ids: category.id } })}
+						aria-label={`Find records for ${category.name}`}
+						onClick={onFindRecords}
+					>
+						<IconifyIcon icon="lucide:search" data-icon="inline-start" />
+						{category.records_count}{" "}
+						{category.records_count === 1 ? "record" : "records"}
+					</Link>
 				</Button>
 			</div>
 
 			{"children" in category ? (
 				<div className="ml-6 border-l border-border/60">
-					<CategoryTree categories={category.children} onOpen={onOpen} onEdit={onEdit} />
+					<CategoryTree
+						categories={category.children}
+						onFindRecords={onFindRecords}
+						onEdit={onEdit}
+					/>
 				</div>
 			) : null}
 		</div>

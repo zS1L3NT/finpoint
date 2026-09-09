@@ -24,6 +24,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select"
 import { useFetch } from "@/hooks/use-fetch"
+import { treatmentLabel } from "@/lib/analytics"
 import { formatCurrency, formatDatetime } from "@/lib/utils"
 import {
 	Allocation,
@@ -447,7 +448,7 @@ function DayGroup({
 							</p>
 							<p className="flex items-center gap-1.5 text-xs text-muted-foreground">
 								<IconifyIcon icon="lucide:tag" className="size-3.5" />
-								{`${treatmentLabel(record)} · ${record.bucket?.name ?? "No bucket"}`}
+								{`${treatmentLabel(record.analytics_treatment)} · ${record.bucket?.name ?? "No bucket"}`}
 							</p>
 						</div>
 						<div className="flex shrink-0 flex-col items-end gap-2 sm:flex-row sm:items-center">
@@ -556,14 +557,4 @@ function canUseBucket(record: Record) {
 		record.analytics_treatment === "spending" ||
 		(record.analytics_treatment === "automatic" && record.amount < 0)
 	)
-}
-
-function treatmentLabel(record: Record) {
-	return {
-		income: "Income",
-		spending: "Spending",
-		saving_investment: "Saving/investment",
-		neutral: "Transfer/neutral",
-		automatic: "Automatic by direction",
-	}[record.analytics_treatment]
 }

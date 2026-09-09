@@ -1,6 +1,7 @@
 import SelectField from "@/components/form/select-field"
 import { FieldGroup } from "@/components/ui/field"
 import { useFetch } from "@/hooks/use-fetch"
+import { treatmentLabel } from "@/lib/analytics"
 import { AnalyticsTreatment, Bucket } from "@/types"
 import { bucketIndexApiRoute } from "@/wayfinder/routes"
 
@@ -76,16 +77,6 @@ export default function RecordAnalyticsFields({
 			</FieldGroup>
 		</div>
 	)
-}
-
-function treatmentLabel(treatment: AnalyticsTreatment) {
-	return {
-		income: "Income",
-		spending: "Spending",
-		saving_investment: "Saving/investment",
-		neutral: "Transfer/neutral",
-		automatic: "Automatic by direction",
-	}[treatment]
 }
 
 function canUseBucket(treatment: AnalyticsTreatment, amount: number) {

@@ -19,8 +19,9 @@ import {
 import { FieldGroup } from "@/components/ui/field"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { useFetch } from "@/hooks/use-fetch"
+import { treatmentLabel } from "@/lib/analytics"
 import { cn, withMethod } from "@/lib/utils"
-import { Bucket, Category, CategoryWithChildren } from "@/types"
+import { AnalyticsTreatment, Bucket, Category, CategoryWithChildren } from "@/types"
 import {
 	bucketIndexApiRoute,
 	categoryDestroyApiRoute,
@@ -33,7 +34,7 @@ type CategoryFormValues = {
 	icon: string
 	color: string
 	parent_category_id: string
-	analytics_treatment: string
+	analytics_treatment: AnalyticsTreatment | ""
 	default_bucket_id: string
 }
 
@@ -69,6 +70,11 @@ export default function CategoryDialog({
 	const [values, setValues] = useState<CategoryFormValues>(EMPTY_FORM_VALUES)
 	const { getApiFieldErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
 	const parentOptions = categories.filter(option => option.id !== category?.id)
+	const defaultBucketName = values.default_bucket_id
+		? (buckets.find(bucket => bucket.id === values.default_bucket_id)?.name ??
+			category?.default_bucket?.name ??
+			"Default bucket")
+		: "No bucket"
 
 	useEffect(() => {
 		if (!open) {
@@ -211,9 +217,9 @@ export default function CategoryDialog({
 					</FieldGroup>
 
 					<Card size="sm" className="bg-muted/30 ring-0">
-						<CardContent className="flex items-center gap-3 py-1">
+						<CardContent className="flex items-start gap-3 py-1">
 							<Icon {...values} size={14} />
-							<div className="min-w-0">
+							<div className="grid min-w-0 gap-1">
 								<p
 									className={cn(
 										"truncate font-medium",
@@ -221,6 +227,12 @@ export default function CategoryDialog({
 									)}
 								>
 									{values.name || "Category preview"}
+								</p>
+								<p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+									<IconifyIcon icon="lucide:tag" className="size-3.5" />
+									<span className="truncate">
+										{`${treatmentLabel(values.analytics_treatment || null)} · ${defaultBucketName}`}
+									</span>
 								</p>
 							</div>
 						</CardContent>
@@ -247,7 +259,9 @@ export default function CategoryDialog({
 								{ value: "automatic", label: "Automatic by direction" },
 							]}
 							errors={getApiFieldErrors("analytics_treatment")}
-							onChange={value => setValue("analytics_treatment", value)}
+							onChange={value =>
+								setValue("analytics_treatment", value as AnalyticsTreatment | "")
+							}
 						/>
 						<SelectField
 							id="default_bucket_id"
