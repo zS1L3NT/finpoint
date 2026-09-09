@@ -209,7 +209,13 @@ export default function RecordEditorDialog({
 			isOpen={isAttachingStatement}
 			setIsOpen={setIsAttachingStatement}
 			handler={async statement => {
-				setStatementCache(prev => [...prev, statement])
+				if (form.getFieldValue("statements").some(s => s.id === statement.id)) {
+					return
+				}
+
+				setStatementCache(prev =>
+					prev.some(s => s.id === statement.id) ? prev : [...prev, statement],
+				)
 				form.setFieldValue("statements", [
 					...form.getFieldValue("statements"),
 					{ id: statement.id, amount: statement.allocable_amount },

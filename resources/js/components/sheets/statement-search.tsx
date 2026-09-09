@@ -47,22 +47,13 @@ export default function StatementSearchSheet({
 	const [statements, setStatements] = useState<Statement[]>([])
 	const [includeOlder, setIncludeOlder] = useState(false)
 
-	const handleSearch = async () => {
-		const response = await fetch(
-			statementIndexApiRoute.url({
-				query: {
-					query,
-					...filters,
-					start_date: includeOlder ? undefined : filters?.start_date,
-				},
-			}),
-			{ headers: { Accept: "application/json" } },
-		)
-
-		if (response.ok) {
-			setStatements(await response.json())
-		}
-	}
+	const searchUrl = statementIndexApiRoute.url({
+		query: {
+			query,
+			...filters,
+			start_date: includeOlder ? undefined : filters?.start_date,
+		},
+	})
 
 	useEffect(() => {
 		if (!isOpen) {
@@ -72,10 +63,45 @@ export default function StatementSearchSheet({
 	}, [isOpen])
 
 	useEffect(() => {
-		if (isOpen) {
-			void handleSearch()
+		if (!isOpen) {
+			return
 		}
-	}, [isOpen, query, includeOlder])
+
+		const controller = new AbortController()
+		const timeout = window.setTimeout(
+			async () => {
+				try {
+					const response = await fetch(searchUrl, {
+						headers: { Accept: "application/json" },
+						signal: controller.signal,
+					})
+
+					if (response.ok) {
+						const data = await response.json()
+
+						if (!controller.signal.aborted) {
+							setStatements(data)
+						}
+					}
+				} catch (error) {
+					if (!controller.signal.aborted) {
+						throw error
+					}
+				}
+			},
+			query ? 250 : 0,
+		)
+
+		return () => {
+			window.clearTimeout(timeout)
+			controller.abort()
+		}
+	}, [isOpen, query, searchUrl])
+
+	const handleAttach = async (statement: Statement) => {
+		setStatements(prev => prev.filter(s => s.id !== statement.id))
+		await handler(statement)
+	}
 
 	return (
 		<Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -174,10 +200,7 @@ export default function StatementSearchSheet({
 									cell: ({ row }) => (
 										<Button
 											size="sm"
-											onClick={async () => {
-												await handler(row.original)
-												await handleSearch()
-											}}
+											onClick={() => void handleAttach(row.original)}
 										>
 											<IconifyIcon
 												icon="lucide:link-2"
@@ -212,10 +235,7 @@ export default function StatementSearchSheet({
 									<Button
 										size="sm"
 										className="w-full"
-										onClick={async () => {
-											await handler(statement)
-											await handleSearch()
-										}}
+										onClick={() => void handleAttach(statement)}
 									>
 										<IconifyIcon
 											icon="lucide:link-2"
