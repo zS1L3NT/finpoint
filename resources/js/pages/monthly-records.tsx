@@ -41,6 +41,7 @@ import {
 	monthlyRecordsWebRoute,
 	recordBucketUpdateApiRoute,
 	recordShowApiRoute,
+	recordsWebRoute,
 	recordWebRoute,
 } from "@/wayfinder/routes"
 
@@ -192,20 +193,41 @@ export default function MonthlyRecordsPage({
 							</Button>
 						</ButtonGroup>
 					</div>
-					<nav className="flex border-b" aria-label="Monthly finance views">
-						<Link
-							className="border-b-2 border-transparent px-4 py-2 text-sm text-muted-foreground hover:text-foreground"
-							href={dashboardWebRoute({ query: { month, year } })}
+					<div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+						<nav
+							className="flex min-w-0 border-b sm:flex-1"
+							aria-label="Monthly finance views"
 						>
-							Overview
-						</Link>
-						<Link
-							className="border-b-2 border-foreground px-4 py-2 text-sm font-medium"
-							href={monthlyRecordsWebRoute({ query: { month, year } })}
+							<Link
+								className="border-b-2 border-transparent px-4 py-2 text-sm text-muted-foreground hover:text-foreground"
+								href={dashboardWebRoute({ query: { month, year } })}
+							>
+								Overview
+							</Link>
+							<Link
+								className="border-b-2 border-foreground px-4 py-2 text-sm font-medium"
+								href={monthlyRecordsWebRoute({ query: { month, year } })}
+							>
+								Monthly Records
+							</Link>
+						</nav>
+						<Button
+							variant="outline"
+							className="h-9 w-full sm:mb-2 sm:h-7 sm:w-auto"
+							asChild
 						>
-							Monthly Records
-						</Link>
-					</nav>
+							<Link
+								href={recordsWebRoute({
+									query: {
+										start_date: date.startOf("month").toISODate(),
+										end_date: date.endOf("month").toISODate(),
+									},
+								})}
+							>
+								Open in Records <IconifyIcon icon="lucide:arrow-up-right" />
+							</Link>
+						</Button>
+					</div>
 				</header>
 
 				<SelectionBar
