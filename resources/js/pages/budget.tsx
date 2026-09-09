@@ -4,6 +4,7 @@ import { DateTime } from "luxon"
 import { useMemo, useState } from "react"
 import BudgetProgressChart from "@/components/charts/budget-progress-chart"
 import BudgetEditorDialog from "@/components/dialogs/budget-editor"
+import RecordEditorDialog from "@/components/dialogs/record-editor"
 import Icon from "@/components/icon"
 import AppHeader from "@/components/layout/app-header"
 import PageContent from "@/components/layout/page-content"
@@ -21,6 +22,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card"
 import { useFetch } from "@/hooks/use-fetch"
+import { useRecordEditor } from "@/hooks/use-record-editor"
 import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
 import { cn, formatCurrency, parseDate, parseDatetime, round2dp, withMethod } from "@/lib/utils"
 import type { Budget, CategoryWithChildren, Record } from "@/types"
@@ -35,6 +37,7 @@ export default function BudgetPage({ budget, records }: { budget: Budget; record
 	const categories = useFetch<CategoryWithChildren[]>(categoryIndexApiRoute.url(), [])
 	const [isEditingBudget, setIsEditingBudget] = useState(false)
 	const [isAttachingRecord, setIsAttachingRecord] = useState(false)
+	const { editingRecord, loadingRecordId, editRecord, setEditingRecord } = useRecordEditor()
 	const budgetStart = parseDate(budget.start_date)
 	const budgetEnd = parseDate(budget.end_date)
 	const now = DateTime.now()
@@ -72,6 +75,8 @@ export default function BudgetPage({ budget, records }: { budget: Budget; record
 	const recordColumns = useRecordColumns<Record>({
 		pageName: `Budget ${budget.id}`,
 		actionWidth: TABLE_WIDTH_CLASSNAMES.ACTIONS_OPEN_DETACH,
+		onEdit: record => void editRecord(record),
+		loadingRecordId,
 		extraActions: record => (
 			<Button variant="destructive" size="sm" onClick={() => detach(record)}>
 				<IconifyIcon icon="lucide:link-2-off" /> Detach
@@ -80,6 +85,8 @@ export default function BudgetPage({ budget, records }: { budget: Budget; record
 	})
 	const recordMobileRow = useRecordMobileRow<Record>({
 		pageName: `Budget ${budget.id}`,
+		onEdit: record => void editRecord(record),
+		loadingRecordId,
 		extraActions: record => (
 			<Button variant="destructive" size="sm" onClick={() => detach(record)}>
 				<IconifyIcon icon="lucide:link-2-off" /> Detach
@@ -119,7 +126,7 @@ export default function BudgetPage({ budget, records }: { budget: Budget; record
 							}
 						/>
 					}
-					back={{ name: "Back to budgets", url: budgetsWebRoute.url() }}
+					back={{ name: "Budgets", url: budgetsWebRoute.url() }}
 				/>
 
 				<Card className="gap-0 overflow-hidden py-0">
@@ -273,6 +280,18 @@ export default function BudgetPage({ budget, records }: { budget: Budget; record
 					</CardContent>
 				</Card>
 			</PageContent>
+
+			{editingRecord ? (
+				<RecordEditorDialog
+					record={editingRecord}
+					statements={editingRecord.statements}
+					categories={categories}
+					isOpen
+					setIsOpen={isOpen => {
+						if (!isOpen) setEditingRecord(null)
+					}}
+				/>
+			) : null}
 		</>
 	)
 }

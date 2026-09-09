@@ -1,14 +1,16 @@
 import { Icon as IconifyIcon } from "@iconify/react"
+import { router, usePage } from "@inertiajs/react"
 import { useState } from "react"
-import DetailCard from "@/components/detail-card"
 import RecordCreatorDialog from "@/components/dialogs/record-creator"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
 import DateField from "@/components/form/date-field"
 import AppHeader from "@/components/layout/app-header"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
+import SelectionBar from "@/components/selection-bar"
 import PendingStatementConfirmationSheet from "@/components/sheets/pending-statement-confirmation"
 import RecordSearchSheet from "@/components/sheets/record-search"
+import { ClearFiltersButton, FILTER_CONTROL_CLASS, FilterBar } from "@/components/table/filter-bar"
 import PaginatedDataTable from "@/components/table/paginated-data-table"
 import { useStatementColumns, useStatementMobileRow } from "@/components/table/statement-columns"
 import { Button } from "@/components/ui/button"
@@ -16,16 +18,16 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { START_DATE } from "@/constants"
 import { useFetch } from "@/hooks/use-fetch"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
-import { useSearchParam } from "@/hooks/use-search-param"
 import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
-import { classForCurrency, formatCurrency } from "@/lib/utils"
+import { formatCurrency } from "@/lib/utils"
 import { CategoryWithChildren, Paginated, Record, Statement } from "@/types"
 import { allocatorWebRoute, categoryIndexApiRoute, recordShowApiRoute } from "@/wayfinder/routes"
 
 export default function AllocatorPage({ statements }: { statements: Paginated<Statement> }) {
-	const [startDate, setStartDate] = useSearchParam("start_date")
-	const [endDate, setEndDate] = useSearchParam("end_date")
-
+	const page = usePage()
+	const pageUrl = new URL(page.url, "http://localhost")
+	const startDate = pageUrl.searchParams.get("start_date")
+	const endDate = pageUrl.searchParams.get("end_date")
 	const categories = useFetch<CategoryWithChildren[]>(categoryIndexApiRoute.url(), [])
 
 	const [selectedStatements, setSelectedStatements] = useState<Statement[]>([])
@@ -35,6 +37,25 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 	const [editingRecord, setEditingRecord] = useState<
 		(Record & { statements: Statement[] }) | null
 	>(null)
+	const updateFilters = (changes: { [key: string]: string | null }) => {
+		const url = new URL(page.url, "http://localhost")
+		for (const [key, value] of Object.entries(changes)) {
+			if (value) url.searchParams.set(key, value)
+			else url.searchParams.delete(key)
+		}
+		url.searchParams.delete("page")
+		router.visit(url.pathname + url.search, { preserveState: true, preserveScroll: true })
+	}
+	const activeFilterCount = [pageUrl.searchParams.get("query"), startDate, endDate].filter(
+		Boolean,
+	).length
+	const clearFilters = () =>
+		router.visit(
+			allocatorWebRoute({
+				query: { per_page: pageUrl.searchParams.get("per_page") || undefined },
+			}),
+			{ preserveState: true, preserveScroll: true },
+		)
 
 	const { query, pageSize, handleQueryChange, handlePageSizeChange } = usePaginatedTableState({
 		syncOn: statements,
@@ -90,16 +111,6 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 					icon="lucide:link"
 				/>
 
-				<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-					<DetailCard label="Allocable Statements" value={statements.total} />
-					<DetailCard label="Selected Statements" value={selectedStatements.length} />
-					<DetailCard
-						label="Selected Amount"
-						value={formatCurrency(selectedAmount)}
-						valueClassName={classForCurrency(selectedAmount)}
-					/>
-				</div>
-
 				<PaginatedDataTable
 					paginated={statements}
 					columns={[
@@ -133,80 +144,29 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 						onPageSizeChange: handlePageSizeChange,
 						searchPlaceholder: "Search unallocated statements...",
 						filters: (
-							<div className="grid grid-cols-2 gap-2 sm:flex sm:flex-row">
+							<FilterBar>
 								<DateField
-									id="start_date"
+									id="allocator_start_date"
 									value={startDate ?? ""}
-									className="min-w-0 sm:w-32"
+									className="min-w-0 sm:w-40"
+									triggerClassName={FILTER_CONTROL_CLASS}
 									placeholder="Start date"
-									onChange={date => setStartDate(date || null)}
+									onChange={date => updateFilters({ start_date: date || null })}
 								/>
 
 								<DateField
-									id="end_date"
+									id="allocator_end_date"
 									value={endDate ?? ""}
-									className="min-w-0 sm:w-32"
+									className="min-w-0 sm:w-40"
+									triggerClassName={FILTER_CONTROL_CLASS}
 									placeholder="End date"
-									onChange={date => setEndDate(date || null)}
+									onChange={date => updateFilters({ end_date: date || null })}
 								/>
-							</div>
-						),
-						actions: (
-							<>
-								<RecordCreatorDialog
-									statements={selectedStatements}
-									categories={categories}
-									isOpen={isCreatingRecord}
-									setIsOpen={setIsCreatingRecord}
-									trigger={
-										<Button
-											disabled={!selectedStatements.length}
-											className="w-full sm:w-auto"
-										>
-											<IconifyIcon icon="lucide:plus" /> Create Record
-										</Button>
-									}
-									clear={() => setSelectedStatements([])}
+								<ClearFiltersButton
+									count={activeFilterCount}
+									onClear={clearFilters}
 								/>
-								<RecordSearchSheet
-									title="Attach to pending record"
-									placeholder="Search pending records..."
-									filters={{ start_date: START_DATE, is_allocated: "false" }}
-									isOpen={isAttachingRecord}
-									setIsOpen={setIsAttachingRecord}
-									handler={async record => {
-										setEditingRecord(
-											await fetch(recordShowApiRoute.url({ record })).then(
-												res => res.json(),
-											),
-										)
-										setIsAttachingRecord(false)
-									}}
-									trigger={
-										<Button
-											disabled={!selectedStatements.length}
-											className="w-full sm:w-auto"
-										>
-											<IconifyIcon icon="lucide:link-2" /> Attach to Record
-										</Button>
-									}
-								/>
-								<PendingStatementConfirmationSheet
-									statement={replacementStatement}
-									isOpen={isReplacingPendingStatement}
-									setIsOpen={setIsReplacingPendingStatement}
-									onConfirmed={() => setSelectedStatements([])}
-									trigger={
-										<Button
-											disabled={!replacementStatement}
-											className="w-full sm:w-auto"
-											title="Select one fully unallocated imported statement"
-										>
-											<IconifyIcon icon="lucide:replace" /> Replace Pending
-										</Button>
-									}
-								/>
-							</>
+							</FilterBar>
 						),
 					}}
 					footer={{
@@ -217,6 +177,60 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 					emptyMessage="No statements found."
 				/>
 			</PageContent>
+
+			<SelectionBar
+				open={selectedStatements.length > 0}
+				summary={`${selectedStatements.length} selected · ${formatCurrency(selectedAmount)}`}
+			>
+				<RecordCreatorDialog
+					statements={selectedStatements}
+					categories={categories}
+					isOpen={isCreatingRecord}
+					setIsOpen={setIsCreatingRecord}
+					trigger={
+						<Button className="w-full sm:w-auto">
+							<IconifyIcon icon="lucide:plus" /> Create Record
+						</Button>
+					}
+					clear={() => setSelectedStatements([])}
+				/>
+				<RecordSearchSheet
+					title="Attach to pending record"
+					placeholder="Search pending records..."
+					filters={{ start_date: START_DATE, is_allocated: "false" }}
+					isOpen={isAttachingRecord}
+					setIsOpen={setIsAttachingRecord}
+					handler={async record => {
+						setEditingRecord(
+							await fetch(recordShowApiRoute.url({ record })).then(res => res.json()),
+						)
+						setIsAttachingRecord(false)
+					}}
+					trigger={
+						<Button className="w-full sm:w-auto">
+							<IconifyIcon icon="lucide:link-2" /> Attach to Record
+						</Button>
+					}
+				/>
+				<PendingStatementConfirmationSheet
+					statement={replacementStatement}
+					isOpen={isReplacingPendingStatement}
+					setIsOpen={setIsReplacingPendingStatement}
+					onConfirmed={() => setSelectedStatements([])}
+					trigger={
+						<Button
+							disabled={!replacementStatement}
+							className="w-full sm:w-auto"
+							title="Select one fully unallocated imported statement"
+						>
+							<IconifyIcon icon="lucide:replace" /> Replace Pending
+						</Button>
+					}
+				/>
+				<Button variant="ghost" onClick={() => setSelectedStatements([])}>
+					Clear
+				</Button>
+			</SelectionBar>
 
 			{editingRecord ? (
 				<RecordEditorDialog

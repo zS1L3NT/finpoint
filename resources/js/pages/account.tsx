@@ -1,7 +1,8 @@
 import { Icon as IconifyIcon } from "@iconify/react"
 import { useState } from "react"
-import DetailCard from "@/components/detail-card"
+import { DetailSummary, DetailSummaryItem } from "@/components/detail-summary"
 import AccountDialog from "@/components/dialogs/account"
+import PendingStatementDialog from "@/components/dialogs/pending-statement"
 import AppHeader from "@/components/layout/app-header"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
@@ -14,12 +15,15 @@ import { accountsWebRoute, accountWebRoute } from "@/wayfinder/routes"
 
 export default function AccountPage({
 	account,
+	accounts,
 	statements,
 }: {
 	account: Account
+	accounts: Account[]
 	statements: Paginated<Statement>
 }) {
 	const [isEditingAccount, setIsEditingAccount] = useState(false)
+	const [editingStatement, setEditingStatement] = useState<Statement | null>(null)
 
 	const { query, pageSize, handleQueryChange, handlePageSizeChange } = usePaginatedTableState({
 		syncOn: statements,
@@ -28,10 +32,12 @@ export default function AccountPage({
 	const columns = useStatementColumns<Statement>({
 		showAccount: false,
 		pageName: `Account ${account.name}`,
+		onEdit: setEditingStatement,
 	})
 	const mobileRow = useStatementMobileRow<Statement>({
 		showAccount: false,
 		pageName: `Account ${account.name}`,
+		onEdit: setEditingStatement,
 	})
 
 	return (
@@ -57,16 +63,19 @@ export default function AccountPage({
 						/>
 					}
 					back={{
-						name: "Back to accounts",
+						name: "Accounts",
 						url: accountsWebRoute.url(),
 					}}
 				/>
 
-				<div className="grid gap-4 lg:grid-cols-4">
-					<DetailCard label="Account ID" value={account.id} />
-					<DetailCard label="Bank" value={account.bank} />
-					<DetailCard label="Statements" value={account.statements_count ?? 0} />
-				</div>
+				<DetailSummary columns={2} footer={<span>Account ID · {account.id}</span>}>
+					<DetailSummaryItem icon="lucide:landmark" label="Bank" value={account.bank} />
+					<DetailSummaryItem
+						icon="lucide:credit-card"
+						label="Statements"
+						value={account.statements_count ?? 0}
+					/>
+				</DetailSummary>
 
 				<PaginatedDataTable
 					paginated={statements}
@@ -85,6 +94,17 @@ export default function AccountPage({
 					emptyMessage="No statements found."
 				/>
 			</PageContent>
+
+			{editingStatement ? (
+				<PendingStatementDialog
+					statement={editingStatement}
+					accounts={accounts}
+					isOpen
+					setIsOpen={open => {
+						if (!open) setEditingStatement(null)
+					}}
+				/>
+			) : null}
 		</>
 	)
 }

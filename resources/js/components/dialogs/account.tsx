@@ -13,6 +13,7 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
+import { useDialogCloseAnimation } from "@/hooks/use-dialog-close-animation"
 import { withMethod } from "@/lib/utils"
 import type { Account } from "@/types"
 import { accountUpdateApiRoute } from "@/wayfinder/routes"
@@ -20,7 +21,7 @@ import { accountUpdateApiRoute } from "@/wayfinder/routes"
 export default function AccountDialog({
 	account,
 	isOpen,
-	setIsOpen,
+	setIsOpen: onOpenChange,
 	trigger,
 }: {
 	account: Account
@@ -28,6 +29,7 @@ export default function AccountDialog({
 	setIsOpen: (isOpen: boolean) => void
 	trigger?: React.ReactElement
 }) {
+	const { open, setIsOpen, onOpenChangeComplete } = useDialogCloseAnimation(isOpen, onOpenChange)
 	const [name, setName] = useState(account.name)
 	const { getApiFieldErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
 
@@ -63,7 +65,7 @@ export default function AccountDialog({
 	}
 
 	return (
-		<Dialog open={isOpen} onOpenChange={setIsOpen}>
+		<Dialog open={open} onOpenChangeComplete={onOpenChangeComplete} onOpenChange={setIsOpen}>
 			{trigger ? <DialogTrigger render={trigger} /> : null}
 			<DialogContent className="md:max-w-md">
 				<DialogHeader>

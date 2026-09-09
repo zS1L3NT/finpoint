@@ -1,6 +1,7 @@
 import { Icon as IconifyIcon } from "@iconify/react"
 import { useState } from "react"
-import DetailCard from "@/components/detail-card"
+import { DetailSummary, DetailSummaryItem } from "@/components/detail-summary"
+import PendingStatementDialog from "@/components/dialogs/pending-statement"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
 import Icon from "@/components/icon"
 import AppHeader from "@/components/layout/app-header"
@@ -13,27 +14,33 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useFetch } from "@/hooks/use-fetch"
+import { treatmentLabel } from "@/lib/analytics"
 import { formatDatetime } from "@/lib/utils"
-import { Allocation, CategoryWithChildren, Record, Statement } from "@/types"
+import { Account, Allocation, CategoryWithChildren, Record, Statement } from "@/types"
 import { categoryIndexApiRoute, recordsWebRoute } from "@/wayfinder/routes"
 
 export default function RecordPage({
 	record,
 	statements,
+	accounts,
 }: {
 	record: Record
 	statements: (Statement & { pivot: Allocation })[]
+	accounts: Account[]
 }) {
 	const categories = useFetch<CategoryWithChildren[]>(categoryIndexApiRoute.url(), [])
 
 	const [isEditingRecord, setIsEditingRecord] = useState(false)
+	const [editingStatement, setEditingStatement] = useState<Statement | null>(null)
 	const columns = useStatementColumns<Statement & { pivot: Allocation }>({
 		amount: "allocated",
 		pageName: `Record ${record.id}`,
+		onEdit: setEditingStatement,
 	})
 	const mobileRow = useStatementMobileRow<Statement & { pivot: Allocation }>({
 		amount: "allocated",
 		pageName: `Record ${record.id}`,
+		onEdit: setEditingStatement,
 	})
 
 	return (
@@ -43,13 +50,8 @@ export default function RecordPage({
 			<PageContent>
 				<PageHeader
 					title={
-						<div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
+						<div className="flex flex-wrap items-center gap-2">
 							{record.title}
-							{record.subtitle ? (
-								<span className="text-base text-muted-foreground md:text-xl">
-									{record.subtitle}
-								</span>
-							) : null}
 							{record.is_pending && (
 								<Badge variant="warning" className="tracking-normal">
 									Pending
@@ -57,7 +59,14 @@ export default function RecordPage({
 							)}
 						</div>
 					}
-					subtitle={record.description}
+					subtitle={
+						<div className="grid gap-1">
+							{record.subtitle ? (
+								<span className="text-foreground/80">{record.subtitle}</span>
+							) : null}
+							{record.description ? <span>{record.description}</span> : null}
+						</div>
+					}
 					description="Record details"
 					icon="lucide:receipt-text"
 					actions={
@@ -75,17 +84,26 @@ export default function RecordPage({
 						/>
 					}
 					back={{
-						name: "Back to records",
+						name: "Records",
 						url: recordsWebRoute.url(),
 					}}
 				/>
 
-				<div className="grid gap-4 lg:grid-cols-4">
-					<DetailCard
+				<DetailSummary
+					footer={
+						<div className="flex flex-wrap gap-x-5 gap-y-1">
+							<span>Treatment · {treatmentLabel(record.analytics_treatment)}</span>
+							<span>Spending bucket · {record.bucket?.name ?? "No bucket"}</span>
+						</div>
+					}
+				>
+					<DetailSummaryItem
+						icon="lucide:circle-dollar-sign"
 						label="Amount"
 						value={<RecordAmount record={record} className="text-base" />}
 					/>
-					<DetailCard
+					<DetailSummaryItem
+						icon="lucide:tag"
 						label="Category"
 						value={
 							<div className="flex items-center gap-2">
@@ -94,8 +112,12 @@ export default function RecordPage({
 							</div>
 						}
 					/>
-					<DetailCard label="Date & Time" value={formatDatetime(record.datetime)} />
-				</div>
+					<DetailSummaryItem
+						icon="lucide:calendar-clock"
+						label="Date & Time"
+						value={formatDatetime(record.datetime)}
+					/>
+				</DetailSummary>
 
 				<Card>
 					<CardHeader>
@@ -114,6 +136,17 @@ export default function RecordPage({
 					</CardContent>
 				</Card>
 			</PageContent>
+
+			{editingStatement ? (
+				<PendingStatementDialog
+					statement={editingStatement}
+					accounts={accounts}
+					isOpen
+					setIsOpen={open => {
+						if (!open) setEditingStatement(null)
+					}}
+				/>
+			) : null}
 		</>
 	)
 }

@@ -23,6 +23,8 @@ class AccountController extends Controller
     {
         $account->loadCount('statements');
 
+        $accounts = Account::appQuery()->get();
+
         $statements = Statement::appQuery(
             query: request()->query('query'),
             account_id: $account->id,
@@ -30,6 +32,6 @@ class AccountController extends Controller
             ->paginate(request()->query('per_page') ?? 100)
             ->withQueryString();
 
-        return Inertia::render('account', compact('account', 'statements'));
+        return Inertia::render('account', compact('account', 'accounts', 'statements'));
     }
 }

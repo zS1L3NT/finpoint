@@ -1,24 +1,25 @@
 import { Icon as IconifyIcon } from "@iconify/react"
+import { router, usePage } from "@inertiajs/react"
 import { useState } from "react"
 import PendingStatementDialog from "@/components/dialogs/pending-statement"
+import DateField from "@/components/form/date-field"
 import AppHeader from "@/components/layout/app-header"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
+import { ClearFiltersButton, FILTER_CONTROL_CLASS, FilterBar } from "@/components/table/filter-bar"
 import PaginatedDataTable from "@/components/table/paginated-data-table"
 import { useStatementColumns, useStatementMobileRow } from "@/components/table/statement-columns"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
-	DropdownMenu,
-	DropdownMenuCheckboxItem,
-	DropdownMenuContent,
-	DropdownMenuGroup,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
-import { useSearchParam } from "@/hooks/use-search-param"
+import { cn } from "@/lib/utils"
 import { Account, Paginated, Statement } from "@/types"
 import { statementsWebRoute } from "@/wayfinder/routes"
 
@@ -30,7 +31,34 @@ export default function StatementsPage({
 	accounts: Account[]
 }) {
 	const [isCreatingStatement, setIsCreatingStatement] = useState(false)
-	const [isPending, setIsPending] = useSearchParam("is_pending")
+	const [editingStatement, setEditingStatement] = useState<Statement | null>(null)
+	const page = usePage()
+	const pageUrl = new URL(page.url, "http://localhost")
+	const isPending = pageUrl.searchParams.get("is_pending")
+	const startDate = pageUrl.searchParams.get("start_date")
+	const endDate = pageUrl.searchParams.get("end_date")
+	const updateFilters = (changes: { [key: string]: string | null }) => {
+		const url = new URL(page.url, "http://localhost")
+		for (const [key, value] of Object.entries(changes)) {
+			if (value) url.searchParams.set(key, value)
+			else url.searchParams.delete(key)
+		}
+		url.searchParams.delete("page")
+		router.visit(url.pathname + url.search, { preserveState: true, preserveScroll: true })
+	}
+	const activeFilterCount = [
+		pageUrl.searchParams.get("query"),
+		isPending,
+		startDate,
+		endDate,
+	].filter(Boolean).length
+	const clearFilters = () =>
+		router.visit(
+			statementsWebRoute({
+				query: { per_page: pageUrl.searchParams.get("per_page") || undefined },
+			}),
+			{ preserveState: true, preserveScroll: true },
+		)
 
 	const { query, pageSize, handleQueryChange, handlePageSizeChange } = usePaginatedTableState({
 		syncOn: statements,
@@ -38,15 +66,20 @@ export default function StatementsPage({
 			statementsWebRoute({
 				query: {
 					...query,
+					start_date: startDate || undefined,
+					end_date: endDate || undefined,
 					is_pending: isPending || undefined,
 				},
 			}).url,
 	})
-	const pendingFilterLabel =
-		isPending === "true" ? "Pending" : isPending === "false" ? "Imported" : null
-
-	const columns = useStatementColumns<Statement>({ pageName: "Statements" })
-	const mobileRow = useStatementMobileRow<Statement>({ pageName: "Statements" })
+	const columns = useStatementColumns<Statement>({
+		pageName: "Statements",
+		onEdit: setEditingStatement,
+	})
+	const mobileRow = useStatementMobileRow<Statement>({
+		pageName: "Statements",
+		onEdit: setEditingStatement,
+	})
 
 	return (
 		<>
@@ -70,44 +103,50 @@ export default function StatementsPage({
 						onPageSizeChange: handlePageSizeChange,
 						searchPlaceholder: "Search all statements...",
 						filters: (
-							<DropdownMenu>
-								<DropdownMenuTrigger asChild>
-									<Button
-										type="button"
-										variant={pendingFilterLabel ? "secondary" : "outline"}
-										className="w-full sm:w-auto"
+							<FilterBar>
+								<Select
+									value={isPending ?? "all"}
+									onValueChange={value =>
+										updateFilters({
+											is_pending: value === "all" ? null : value,
+										})
+									}
+								>
+									<SelectTrigger
+										className={cn("w-full sm:w-40", FILTER_CONTROL_CLASS)}
 									>
-										<IconifyIcon icon="lucide:list-filter" /> Filter status
-										{pendingFilterLabel ? (
-											<Badge variant="outline">{pendingFilterLabel}</Badge>
-										) : null}
-									</Button>
-								</DropdownMenuTrigger>
-								<DropdownMenuContent align="end" className="w-48">
-									<DropdownMenuLabel>Filter by status</DropdownMenuLabel>
-									<DropdownMenuSeparator />
-									<DropdownMenuGroup>
-										<DropdownMenuCheckboxItem
-											checked={isPending === "true"}
-											onSelect={event => event.preventDefault()}
-											onCheckedChange={checked =>
-												setIsPending(checked === true ? "true" : null)
-											}
-										>
-											Pending
-										</DropdownMenuCheckboxItem>
-										<DropdownMenuCheckboxItem
-											checked={isPending === "false"}
-											onSelect={event => event.preventDefault()}
-											onCheckedChange={checked =>
-												setIsPending(checked === true ? "false" : null)
-											}
-										>
-											Imported
-										</DropdownMenuCheckboxItem>
-									</DropdownMenuGroup>
-								</DropdownMenuContent>
-							</DropdownMenu>
+										<IconifyIcon icon="lucide:circle-check-big" />
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent align="start" variant="filter">
+										<SelectGroup>
+											<SelectItem value="all">Any status</SelectItem>
+											<SelectItem value="true">Pending</SelectItem>
+											<SelectItem value="false">Imported</SelectItem>
+										</SelectGroup>
+									</SelectContent>
+								</Select>
+								<DateField
+									id="statements_start_date"
+									value={startDate ?? ""}
+									className="min-w-0 sm:w-40"
+									triggerClassName={FILTER_CONTROL_CLASS}
+									placeholder="Start date"
+									onChange={date => updateFilters({ start_date: date || null })}
+								/>
+								<DateField
+									id="statements_end_date"
+									value={endDate ?? ""}
+									className="min-w-0 sm:w-40"
+									triggerClassName={FILTER_CONTROL_CLASS}
+									placeholder="End date"
+									onChange={date => updateFilters({ end_date: date || null })}
+								/>
+								<ClearFiltersButton
+									count={activeFilterCount}
+									onClear={clearFilters}
+								/>
+							</FilterBar>
 						),
 						actions: (
 							<PendingStatementDialog
@@ -129,6 +168,17 @@ export default function StatementsPage({
 					emptyMessage="No statements found."
 				/>
 			</PageContent>
+
+			{editingStatement ? (
+				<PendingStatementDialog
+					statement={editingStatement}
+					accounts={accounts}
+					isOpen
+					setIsOpen={open => {
+						if (!open) setEditingStatement(null)
+					}}
+				/>
+			) : null}
 		</>
 	)
 }

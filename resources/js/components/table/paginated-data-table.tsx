@@ -48,20 +48,20 @@ export default function PaginatedDataTable<TData extends { id: string }, TValue>
 			{header ? <PaginationHeader {...header} /> : null}
 
 			{mobileRow ? (
-				<div className="grid gap-3 md:hidden">
+				<div className="min-w-0 divide-y overflow-hidden rounded-lg border bg-card md:hidden">
 					<AnimatePresence initial={false}>
 						{table.getRowModel().rows.length ? (
 							table.getRowModel().rows.map(row => (
 								<div
 									key={row.id}
 									data-state={selectedIds?.includes(row.id) && "selected"}
-									className="rounded-lg border bg-card p-3 text-sm data-[state=selected]:bg-muted"
+									className="min-w-0 overflow-hidden px-3 py-2.5 text-sm data-[state=selected]:bg-muted"
 								>
 									{mobileRow(row)}
 								</div>
 							))
 						) : (
-							<div className="rounded-lg border bg-card p-8 text-center text-sm text-muted-foreground">
+							<div className="p-8 text-center text-sm text-muted-foreground">
 								{emptyMessage}
 							</div>
 						)}

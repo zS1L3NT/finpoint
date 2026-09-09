@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Account;
 use App\Models\Category;
 use App\Models\Record;
 use Inertia\Inertia;
@@ -35,7 +36,8 @@ class RecordController extends Controller
     public function show(Record $record)
     {
         $statements = $record->statements;
+        $accounts = Account::appQuery()->get();
 
-        return Inertia::render('record', compact('record', 'statements'));
+        return Inertia::render('record', compact('record', 'statements', 'accounts'));
     }
 }

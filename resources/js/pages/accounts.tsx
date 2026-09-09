@@ -1,4 +1,8 @@
+import { Icon as IconifyIcon } from "@iconify/react"
 import { Link } from "@inertiajs/react"
+import type { CellContext } from "@tanstack/react-table"
+import { useState } from "react"
+import AccountDialog from "@/components/dialogs/account"
 import AppHeader from "@/components/layout/app-header"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
@@ -12,6 +16,7 @@ import { accountsWebRoute, accountWebRoute } from "@/wayfinder/routes"
 
 export default function AccountsPage({ accounts }: { accounts: Paginated<Account> }) {
 	const { handlePush } = useHistory()
+	const [editingAccount, setEditingAccount] = useState<Account | null>(null)
 
 	const { query, pageSize, handleQueryChange, handlePageSizeChange } = usePaginatedTableState({
 		syncOn: accounts,
@@ -52,17 +57,11 @@ export default function AccountsPage({ accounts }: { accounts: Paginated<Account
 						},
 						{
 							id: "actions",
-							meta: { width: TABLE_WIDTH_CLASSNAMES.ACTIONS_DYNAMIC_OPEN },
-							cell: ({ row }) => (
-								<Button variant="outline" size="sm" asChild>
-									<Link
-										href={accountWebRoute.url({ account: row.original })}
-										onClick={handlePush("Accounts")}
-									>
-										Open
-									</Link>
-								</Button>
-							),
+							meta: {
+								onEdit: setEditingAccount,
+								width: TABLE_WIDTH_CLASSNAMES.ACTIONS_EDIT_OPEN,
+							},
+							cell: AccountActionsCell,
 						},
 					]}
 					header={{
@@ -76,31 +75,70 @@ export default function AccountsPage({ accounts }: { accounts: Paginated<Account
 						summary: `Showing ${accounts.data.length} of ${accounts.total} accounts.`,
 					}}
 					mobileRow={({ original: account }) => (
-						<div className="flex flex-col gap-3">
+						<div className="grid gap-2">
 							<div className="flex items-start justify-between gap-3">
 								<div className="min-w-0">
 									<p className="font-medium break-words">{account.name}</p>
 									<p className="text-xs text-muted-foreground">{account.bank}</p>
 								</div>
+							</div>
+							<div className="flex items-center justify-between gap-3">
 								<p className="text-xs text-muted-foreground">
 									{account.statements_count ?? 0} statements
 								</p>
-							</div>
-							<div className="flex justify-end">
-								<Button variant="outline" size="sm" asChild>
-									<Link
-										href={accountWebRoute.url({ account })}
-										onClick={handlePush("Accounts")}
+								<div className="flex gap-1.5">
+									<Button
+										variant="outline"
+										size="sm"
+										onClick={() => setEditingAccount(account)}
 									>
-										Open
-									</Link>
-								</Button>
+										<IconifyIcon icon="lucide:pencil" /> Edit
+									</Button>
+									<Button variant="outline" size="sm" asChild>
+										<Link
+											href={accountWebRoute.url({ account })}
+											onClick={handlePush("Accounts")}
+										>
+											Open
+										</Link>
+									</Button>
+								</div>
 							</div>
 						</div>
 					)}
 					emptyMessage="No accounts found."
 				/>
 			</PageContent>
+
+			{editingAccount ? (
+				<AccountDialog
+					account={editingAccount}
+					isOpen
+					setIsOpen={open => {
+						if (!open) setEditingAccount(null)
+					}}
+				/>
+			) : null}
 		</>
+	)
+}
+
+function AccountActionsCell({ row, column }: CellContext<Account, unknown>) {
+	const { handlePush } = useHistory()
+	const { onEdit } = column.columnDef.meta as { onEdit: (value: Account) => void }
+	return (
+		<div className="flex justify-end gap-1.5">
+			<Button variant="outline" size="sm" onClick={() => onEdit(row.original)}>
+				<IconifyIcon icon="lucide:pencil" /> Edit
+			</Button>
+			<Button variant="outline" size="sm" asChild>
+				<Link
+					href={accountWebRoute.url({ account: row.original })}
+					onClick={handlePush("Accounts")}
+				>
+					Open
+				</Link>
+			</Button>
+		</div>
 	)
 }

@@ -16,8 +16,10 @@ export const TABLE_WIDTH_CLASSNAMES = {
 
 	CHECKBOX: "w-12",
 	ACTIONS_OPEN: "min-w-16 w-full flex justify-end xl:w-16 xl:table-cell",
+	ACTIONS_EDIT_OPEN: "w-36",
 	ACTIONS_FIXED_OPEN: "w-16",
 	ACTIONS_DYNAMIC_OPEN: "min-w-16 w-full flex justify-end",
 	ACTIONS_FIXED_ATTACH: "w-18",
 	ACTIONS_OPEN_DETACH: "min-w-38 w-full flex justify-end xl:w-38 xl:table-cell",
+	ACTIONS_EDIT_OPEN_DETACH: "w-58",
 }

@@ -1,8 +1,9 @@
 import { Icon as IconifyIcon } from "@iconify/react"
 import { useState } from "react"
 import AllocateBar from "@/components/allocate-bar"
-import DetailCard from "@/components/detail-card"
+import { DetailSummary, DetailSummaryItem } from "@/components/detail-summary"
 import PendingStatementDialog from "@/components/dialogs/pending-statement"
+import RecordEditorDialog from "@/components/dialogs/record-editor"
 import AppHeader from "@/components/layout/app-header"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
@@ -11,9 +12,11 @@ import { useRecordColumns, useRecordMobileRow } from "@/components/table/record-
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useFetch } from "@/hooks/use-fetch"
+import { useRecordEditor } from "@/hooks/use-record-editor"
 import { formatDatetime } from "@/lib/utils"
-import { Account, Allocation, Record, Statement } from "@/types"
-import { statementsWebRoute } from "@/wayfinder/routes"
+import { Account, Allocation, CategoryWithChildren, Record, Statement } from "@/types"
+import { categoryIndexApiRoute, statementsWebRoute } from "@/wayfinder/routes"
 
 export default function StatementPage({
 	statement,
@@ -25,13 +28,19 @@ export default function StatementPage({
 	accounts: Account[]
 }) {
 	const [isEditingStatement, setIsEditingStatement] = useState(false)
+	const categories = useFetch<CategoryWithChildren[]>(categoryIndexApiRoute.url(), [])
+	const { editingRecord, loadingRecordId, editRecord, setEditingRecord } = useRecordEditor()
 	const columns = useRecordColumns<Record & { pivot: Allocation }>({
 		amount: "allocated",
 		pageName: `Statement ${statement.id}`,
+		onEdit: record => void editRecord(record),
+		loadingRecordId,
 	})
 	const mobileRow = useRecordMobileRow<Record & { pivot: Allocation }>({
 		amount: "allocated",
 		pageName: `Statement ${statement.id}`,
+		onEdit: record => void editRecord(record),
+		loadingRecordId,
 	})
 
 	return (
@@ -68,13 +77,22 @@ export default function StatementPage({
 						) : undefined
 					}
 					back={{
-						name: "Back to statements",
+						name: "Statements",
 						url: statementsWebRoute.url(),
 					}}
 				/>
 
-				<div className="grid gap-4 lg:grid-cols-4">
-					<DetailCard
+				<DetailSummary
+					footer={
+						statement.is_pending ? (
+							<span>Status · Handwritten pending Statement</span>
+						) : (
+							<span>Imported day index · {statement.index}</span>
+						)
+					}
+				>
+					<DetailSummaryItem
+						icon="lucide:circle-dollar-sign"
 						label="Amount"
 						value={
 							<AllocateBar
@@ -90,13 +108,17 @@ export default function StatementPage({
 							/>
 						}
 					/>
-					<DetailCard label="Account" value={statement.account.name} />
-					<DetailCard label="Date & Time" value={formatDatetime(statement.datetime)} />
-					<DetailCard
-						label={statement.is_pending ? "Status" : "Day Index"}
-						value={statement.is_pending ? "Pending" : statement.index}
+					<DetailSummaryItem
+						icon="lucide:landmark"
+						label="Account"
+						value={statement.account.name}
 					/>
-				</div>
+					<DetailSummaryItem
+						icon="lucide:calendar-clock"
+						label="Date & Time"
+						value={formatDatetime(statement.datetime)}
+					/>
+				</DetailSummary>
 
 				<Card>
 					<CardHeader>
@@ -113,6 +135,18 @@ export default function StatementPage({
 					</CardContent>
 				</Card>
 			</PageContent>
+
+			{editingRecord ? (
+				<RecordEditorDialog
+					record={editingRecord}
+					statements={editingRecord.statements}
+					categories={categories}
+					isOpen
+					setIsOpen={isOpen => {
+						if (!isOpen) setEditingRecord(null)
+					}}
+				/>
+			) : null}
 		</>
 	)
 }

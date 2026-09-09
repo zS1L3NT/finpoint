@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dialog"
 import { FieldGroup } from "@/components/ui/field"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
+import { useDialogCloseAnimation } from "@/hooks/use-dialog-close-animation"
 import { withMethod } from "@/lib/utils"
 import type { Account, Statement } from "@/types"
 import {
@@ -40,7 +41,7 @@ export default function PendingStatementDialog({
 	statement,
 	accounts,
 	isOpen,
-	setIsOpen,
+	setIsOpen: onOpenChange,
 	trigger,
 }: {
 	statement?: Statement
@@ -49,6 +50,7 @@ export default function PendingStatementDialog({
 	setIsOpen: (isOpen: boolean) => void
 	trigger?: React.ReactElement
 }) {
+	const { open, setIsOpen, onOpenChangeComplete } = useDialogCloseAnimation(isOpen, onOpenChange)
 	const isEditing = !!statement
 	const [values, setValues] = useState<PendingStatementValues>({
 		account_id: "",
@@ -145,7 +147,7 @@ export default function PendingStatementDialog({
 	}
 
 	return (
-		<Dialog open={isOpen} onOpenChange={setIsOpen}>
+		<Dialog open={open} onOpenChangeComplete={onOpenChangeComplete} onOpenChange={setIsOpen}>
 			{trigger ? <DialogTrigger render={trigger} /> : null}
 			<DialogContent className="md:max-w-lg">
 				<DialogHeader>

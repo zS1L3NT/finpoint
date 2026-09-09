@@ -1,8 +1,10 @@
 import { Icon as IconifyIcon } from "@iconify/react"
 import { Link } from "@inertiajs/react"
+import type { CellContext } from "@tanstack/react-table"
 import { DateTime } from "luxon"
 import { useState } from "react"
 import BudgetCreatorDialog from "@/components/dialogs/budget-creator"
+import BudgetEditorDialog from "@/components/dialogs/budget-editor"
 import AppHeader from "@/components/layout/app-header"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
@@ -20,6 +22,7 @@ import { budgetsWebRoute, budgetWebRoute } from "@/wayfinder/routes"
 export default function BudgetsPage({ budgets }: { budgets: Paginated<Budget> }) {
 	const { handlePush } = useHistory()
 	const [isCreatingBudget, setIsCreatingBudget] = useState(false)
+	const [editingBudget, setEditingBudget] = useState<Budget | null>(null)
 
 	const { query, pageSize, handleQueryChange, handlePageSizeChange } = usePaginatedTableState({
 		syncOn: budgets,
@@ -119,17 +122,11 @@ export default function BudgetsPage({ budgets }: { budgets: Paginated<Budget> })
 						},
 						{
 							id: "actions",
-							meta: { width: TABLE_WIDTH_CLASSNAMES.ACTIONS_DYNAMIC_OPEN },
-							cell: ({ row }) => (
-								<Button variant="outline" size="sm" asChild>
-									<Link
-										href={budgetWebRoute.url({ budget: row.original })}
-										onClick={handlePush("Budgets")}
-									>
-										Open
-									</Link>
-								</Button>
-							),
+							meta: {
+								onEdit: setEditingBudget,
+								width: TABLE_WIDTH_CLASSNAMES.ACTIONS_EDIT_OPEN,
+							},
+							cell: BudgetActionsCell,
 						},
 					]}
 					header={{
@@ -162,7 +159,7 @@ export default function BudgetsPage({ budgets }: { budgets: Paginated<Budget> })
 						const state = now <= start ? "Upcoming" : now >= end ? "Passed" : "Active"
 
 						return (
-							<div className="flex flex-col gap-3">
+							<div className="grid gap-2.5">
 								<div className="flex items-start justify-between gap-3">
 									<div className="min-w-0">
 										<p className="font-medium break-words">{budget.name}</p>
@@ -175,7 +172,7 @@ export default function BudgetsPage({ budgets }: { budgets: Paginated<Budget> })
 									</Badge>
 								</div>
 
-								<div className="grid gap-2 text-xs text-muted-foreground">
+								<div className="grid gap-1.5 text-xs text-muted-foreground">
 									<div className="flex items-center justify-between gap-3">
 										<span>{Math.round(usage)}% used</span>
 										<span>
@@ -186,7 +183,6 @@ export default function BudgetsPage({ budgets }: { budgets: Paginated<Budget> })
 									</div>
 									<Progress value={usage} className="h-2" />
 									<div className="flex items-center justify-between gap-3">
-										<span>Type</span>
 										<span className="flex items-center gap-1">
 											{budget.automatic ? (
 												<IconifyIcon
@@ -201,18 +197,24 @@ export default function BudgetsPage({ budgets }: { budgets: Paginated<Budget> })
 											)}
 											{budget.automatic ? "Automatic" : "Manual"}
 										</span>
+										<div className="flex gap-1.5">
+											<Button
+												variant="outline"
+												size="sm"
+												onClick={() => setEditingBudget(budget)}
+											>
+												<IconifyIcon icon="lucide:pencil" /> Edit
+											</Button>
+											<Button variant="outline" size="sm" asChild>
+												<Link
+													href={budgetWebRoute.url({ budget })}
+													onClick={handlePush("Budgets")}
+												>
+													Open
+												</Link>
+											</Button>
+										</div>
 									</div>
-								</div>
-
-								<div className="flex justify-end">
-									<Button variant="outline" size="sm" asChild>
-										<Link
-											href={budgetWebRoute.url({ budget })}
-											onClick={handlePush("Budgets")}
-										>
-											Open
-										</Link>
-									</Button>
 								</div>
 							</div>
 						)
@@ -220,6 +222,16 @@ export default function BudgetsPage({ budgets }: { budgets: Paginated<Budget> })
 					emptyMessage="No budgets found."
 				/>
 			</PageContent>
+
+			{editingBudget ? (
+				<BudgetEditorDialog
+					budget={editingBudget}
+					isOpen
+					setIsOpen={open => {
+						if (!open) setEditingBudget(null)
+					}}
+				/>
+			) : null}
 		</>
 	)
 }
@@ -231,4 +243,24 @@ function formatBudgetDateWindow(budget: Budget) {
 	return start.isValid && end.isValid
 		? `${start.toFormat("d MMM yyyy")} to ${end.toFormat("d MMM yyyy")}`
 		: "No time range set"
+}
+
+function BudgetActionsCell({ row, column }: CellContext<Budget, unknown>) {
+	const { handlePush } = useHistory()
+	const { onEdit } = column.columnDef.meta as { onEdit: (value: Budget) => void }
+	return (
+		<div className="flex justify-end gap-1.5">
+			<Button variant="outline" size="sm" onClick={() => onEdit(row.original)}>
+				<IconifyIcon icon="lucide:pencil" /> Edit
+			</Button>
+			<Button variant="outline" size="sm" asChild>
+				<Link
+					href={budgetWebRoute.url({ budget: row.original })}
+					onClick={handlePush("Budgets")}
+				>
+					Open
+				</Link>
+			</Button>
+		</div>
+	)
 }

@@ -161,7 +161,7 @@ export default function RecordCreatorDialog({
 										id={field.name}
 										label="Title"
 										value={field.state.value}
-										suggestions={completions?.titles}
+										suggestions={completions?.titles ?? []}
 										errors={mergeErrors(field.state.meta.errors, field.name)}
 										onChange={value => {
 											field.handleChange(value)
@@ -176,7 +176,7 @@ export default function RecordCreatorDialog({
 										id={field.name}
 										label="People"
 										value={field.state.value}
-										suggestions={completions?.peoples}
+										suggestions={completions?.peoples ?? []}
 										errors={mergeErrors(field.state.meta.errors, field.name)}
 										onChange={value => {
 											field.handleChange(value)
@@ -191,7 +191,7 @@ export default function RecordCreatorDialog({
 										id={field.name}
 										label="Location"
 										value={field.state.value}
-										suggestions={completions?.locations}
+										suggestions={completions?.locations ?? []}
 										errors={mergeErrors(field.state.meta.errors, field.name)}
 										onChange={value => {
 											field.handleChange(value)

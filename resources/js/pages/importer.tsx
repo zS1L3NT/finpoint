@@ -122,6 +122,7 @@ export default function ImporterPage({ accounts }: { accounts: Account[] }) {
 				/>
 
 				<form
+					className="grid max-w-5xl gap-6 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start"
 					method="POST"
 					encType="multipart/form-data"
 					onSubmit={event => {
@@ -129,8 +130,8 @@ export default function ImporterPage({ accounts }: { accounts: Account[] }) {
 						void form.handleSubmit()
 					}}
 				>
-					<Card className="w-full md:w-1/2">
-						<CardHeader>
+					<Card>
+						<CardHeader className="border-b">
 							<CardTitle>Upload statements</CardTitle>
 							<CardDescription>
 								Select your bank and upload CSV files to import your bank
@@ -298,12 +299,43 @@ export default function ImporterPage({ accounts }: { accounts: Account[] }) {
 							) : null}
 						</CardContent>
 
-						<CardFooter>
-							<Button type="submit" variant="outline" className="w-full">
+						<CardFooter className="border-t bg-muted/20">
+							<Button type="submit" className="w-full sm:ml-auto sm:w-auto">
 								<IconifyIcon icon="lucide:import" />
 								Import
 							</Button>
 						</CardFooter>
+					</Card>
+
+					<Card className="bg-muted/20" size="sm">
+						<CardHeader>
+							<CardTitle>Import flow</CardTitle>
+							<CardDescription>
+								A quick check before adding account activity.
+							</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<ol className="grid gap-4 text-sm">
+								<li className="flex gap-3">
+									<span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-foreground text-xs text-background">
+										1
+									</span>
+									<span>Select the bank that produced the export.</span>
+								</li>
+								<li className="flex gap-3">
+									<span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-foreground text-xs text-background">
+										2
+									</span>
+									<span>Choose the account when the bank requires it.</span>
+								</li>
+								<li className="flex gap-3">
+									<span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-foreground text-xs text-background">
+										3
+									</span>
+									<span>Review the selected files, then import.</span>
+								</li>
+							</ol>
+						</CardContent>
 					</Card>
 				</form>
 			</PageContent>

@@ -1,5 +1,6 @@
+import { Icon as IconifyIcon } from "@iconify/react"
 import { Link } from "@inertiajs/react"
-import type { ColumnDef, Row } from "@tanstack/react-table"
+import type { CellContext, ColumnDef, Row } from "@tanstack/react-table"
 import AllocateBar from "@/components/allocate-bar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -11,19 +12,54 @@ import { statementWebRoute } from "@/wayfinder/routes"
 
 type StatementRow = Statement & { pivot?: Allocation }
 
-type StatementTableOptions = {
+type StatementTableOptions<TStatement extends StatementRow> = {
 	amount?: "amount" | "allocable" | "allocated"
 	showAccount?: boolean
 	pageName?: string
+	onEdit?: (statement: TStatement) => void
+	loadingStatementId?: string | null
+}
+
+function StatementActionsCell<TStatement extends StatementRow>({
+	row,
+	column,
+}: CellContext<TStatement, unknown>) {
+	const { handlePush } = useHistory()
+	const { pageName, onEdit, loadingStatementId } = (
+		column.columnDef.meta as { statementActions: StatementTableOptions<TStatement> }
+	).statementActions
+	return (
+		<div className="flex items-center justify-end gap-1.5">
+			{onEdit && row.original.is_pending ? (
+				<Button
+					variant="outline"
+					size="sm"
+					className="w-[4.25rem]"
+					aria-busy={loadingStatementId === row.original.id}
+					onClick={() => onEdit(row.original)}
+				>
+					<IconifyIcon icon="lucide:pencil" /> Edit
+				</Button>
+			) : null}
+			<Button variant="outline" size="sm" asChild>
+				<Link
+					href={statementWebRoute.url({ statement: row.original })}
+					onClick={pageName ? handlePush(pageName) : undefined}
+				>
+					Open
+				</Link>
+			</Button>
+		</div>
+	)
 }
 
 export function useStatementColumns<TStatement extends StatementRow>({
 	amount = "amount",
 	showAccount = true,
 	pageName,
-}: StatementTableOptions): ColumnDef<TStatement>[] {
-	const { handlePush } = useHistory()
-
+	onEdit,
+	loadingStatementId,
+}: StatementTableOptions<TStatement>): ColumnDef<TStatement>[] {
 	return [
 		...(showAccount
 			? [
@@ -86,17 +122,13 @@ export function useStatementColumns<TStatement extends StatementRow>({
 		},
 		{
 			id: "actions",
-			meta: { width: TABLE_WIDTH_CLASSNAMES.ACTIONS_FIXED_OPEN },
-			cell: ({ row }) => (
-				<Button variant="outline" size="sm" asChild>
-					<Link
-						href={statementWebRoute.url({ statement: row.original })}
-						onClick={pageName ? handlePush(pageName) : undefined}
-					>
-						Open
-					</Link>
-				</Button>
-			),
+			meta: {
+				statementActions: { pageName, onEdit, loadingStatementId },
+				width: onEdit
+					? TABLE_WIDTH_CLASSNAMES.ACTIONS_EDIT_OPEN
+					: TABLE_WIDTH_CLASSNAMES.ACTIONS_FIXED_OPEN,
+			},
+			cell: StatementActionsCell,
 		},
 	]
 }
@@ -106,21 +138,46 @@ export function useStatementMobileRow<TStatement extends StatementRow>({
 	showAccount = true,
 	pageName,
 	leading,
-}: StatementTableOptions & {
+	onEdit,
+	loadingStatementId,
+}: StatementTableOptions<TStatement> & {
 	leading?: (statement: TStatement) => React.ReactNode
 }): (row: Row<TStatement>) => React.ReactNode {
 	const { handlePush } = useHistory()
 
 	return row => {
 		const statement = row.original
+		const actions = (
+			<div className="flex shrink-0 items-center justify-end gap-1.5">
+				{onEdit && statement.is_pending ? (
+					<Button
+						variant="outline"
+						size="sm"
+						className="w-[4.25rem]"
+						aria-busy={loadingStatementId === statement.id}
+						onClick={() => onEdit(statement)}
+					>
+						<IconifyIcon icon="lucide:pencil" /> Edit
+					</Button>
+				) : null}
+				<Button variant="outline" size="sm" asChild>
+					<Link
+						href={statementWebRoute.url({ statement })}
+						onClick={pageName ? handlePush(pageName) : undefined}
+					>
+						Open
+					</Link>
+				</Button>
+			</div>
+		)
 
 		return (
-			<div className="flex flex-col gap-3">
-				<div className="flex items-start gap-3">
+			<div className="grid min-w-0 gap-2">
+				<div className="flex min-w-0 items-start gap-3">
 					{leading?.(statement)}
 					<div className="min-w-0 flex-1">
-						<p className="whitespace-pre-line break-words font-medium">
-							{!showAccount && statement.is_pending ? (
+						<p className="truncate font-medium">
+							{statement.is_pending ? (
 								<Badge variant="warning" className="mr-1">
 									Pending
 								</Badge>
@@ -129,9 +186,11 @@ export function useStatementMobileRow<TStatement extends StatementRow>({
 								? statement.account.name
 								: statement.description || "Statement"}
 						</p>
-						<p className="text-xs text-muted-foreground">
-							{formatDatetime(statement.datetime)}
-						</p>
+						{showAccount ? (
+							<p className="truncate text-xs text-muted-foreground">
+								{statement.description || "No description"}
+							</p>
+						) : null}
 					</div>
 					{amount === "amount" ? (
 						<span className={classForCurrency(statement.amount)}>
@@ -152,26 +211,9 @@ export function useStatementMobileRow<TStatement extends StatementRow>({
 					/>
 				) : null}
 
-				{showAccount ? (
-					<p className="whitespace-pre-line break-words text-xs text-muted-foreground">
-						{statement.is_pending ? (
-							<Badge variant="warning" className="mr-1">
-								Pending
-							</Badge>
-						) : null}
-						{statement.description || "-"}
-					</p>
-				) : null}
-
-				<div className="flex justify-end">
-					<Button variant="outline" size="sm" asChild>
-						<Link
-							href={statementWebRoute.url({ statement })}
-							onClick={pageName ? handlePush(pageName) : undefined}
-						>
-							Open
-						</Link>
-					</Button>
+				<div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-1.5 pl-7 text-xs text-muted-foreground">
+					<span className="truncate">{formatDatetime(statement.datetime)}</span>
+					{actions}
 				</div>
 			</div>
 		)

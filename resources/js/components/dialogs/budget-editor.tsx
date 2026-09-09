@@ -19,6 +19,7 @@ import {
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { useHistory } from "@/history"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
+import { useDialogCloseAnimation } from "@/hooks/use-dialog-close-animation"
 import { withMethod } from "@/lib/utils"
 import { Budget } from "@/types"
 import {
@@ -31,7 +32,7 @@ import {
 export default function BudgetEditorDialog({
 	budget,
 	isOpen,
-	setIsOpen,
+	setIsOpen: onOpenChange,
 	trigger,
 }: {
 	budget: Budget
@@ -39,7 +40,8 @@ export default function BudgetEditorDialog({
 	setIsOpen: (isOpen: boolean) => void
 	trigger?: React.ReactElement
 }) {
-	const { latest, handlePop, handleClear } = useHistory()
+	const { open, setIsOpen, onOpenChangeComplete } = useDialogCloseAnimation(isOpen, onOpenChange)
+	const { navigateBack } = useHistory()
 
 	const { mergeErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
 
@@ -91,14 +93,7 @@ export default function BudgetEditorDialog({
 			setIsOpen(false)
 
 			if (location.pathname === budgetWebRoute.url({ budget })) {
-				if (latest) {
-					handlePop()
-					router.visit(latest.url)
-					return
-				}
-
-				handleClear()
-				router.visit(budgetsWebRoute.url())
+				navigateBack({ name: "Budgets", url: budgetsWebRoute.url() })
 				return
 			}
 
@@ -108,7 +103,8 @@ export default function BudgetEditorDialog({
 
 	return (
 		<Dialog
-			open={isOpen}
+			open={open}
+			onOpenChangeComplete={onOpenChangeComplete}
 			onOpenChange={isOpen => {
 				setIsOpen(isOpen)
 				if (isOpen) {

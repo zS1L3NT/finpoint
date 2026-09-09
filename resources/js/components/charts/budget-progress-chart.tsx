@@ -1,6 +1,14 @@
 import { DateTime } from "luxon"
 import { useMemo } from "react"
-import { Area, AreaChart, CartesianGrid, ReferenceLine, XAxis, YAxis } from "recharts"
+import {
+	type ActiveDotProps,
+	Area,
+	AreaChart,
+	CartesianGrid,
+	ReferenceLine,
+	XAxis,
+	YAxis,
+} from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { formatCurrency, parseDatetime, round2dp } from "@/lib/utils"
@@ -32,90 +40,153 @@ export default function BudgetProgressChart({
 	const projectionChange = colorChange(data, "projection", limit)
 
 	return (
-		<ChartContainer
-			className="h-72 w-full aspect-auto sm:h-80"
-			config={{
-				usage: { label: "Usage", color: "var(--color-emerald-500)" },
-				projection: { label: "Usage (projection)", color: "var(--color-amber-400)" },
-			}}
-		>
-			<AreaChart data={data} accessibilityLayer>
-				<defs>
-					<linearGradient id="budget-usage-line" x1="0" y1="0" x2="1" y2="0">
-						<stop offset={`${usageChange}%`} stopColor="var(--color-emerald-500)" />
-						<stop offset={`${usageChange}%`} stopColor="var(--color-rose-500)" />
-					</linearGradient>
-					<linearGradient id="budget-usage-fill" x1="0" y1="0" x2="1" y2="0">
-						<stop
-							offset={`${usageChange}%`}
-							stopColor="var(--color-emerald-500)"
-							stopOpacity={0.18}
-						/>
-						<stop
-							offset={`${usageChange}%`}
-							stopColor="var(--color-rose-500)"
-							stopOpacity={0.18}
-						/>
-					</linearGradient>
-					<linearGradient id="budget-projection-line" x1="0" y1="0" x2="1" y2="0">
-						<stop offset={`${projectionChange}%`} stopColor="var(--color-amber-400)" />
-						<stop offset={`${projectionChange}%`} stopColor="var(--color-orange-500)" />
-					</linearGradient>
-				</defs>
+		<div className="grid gap-2">
+			<p className="text-xs font-medium text-muted-foreground">Cumulative spending · SGD</p>
+			<ChartContainer
+				className="h-72 w-full aspect-auto cursor-crosshair sm:h-80"
+				config={{
+					usage: { label: "Usage", color: "var(--color-emerald-500)" },
+					projection: { label: "Usage (projection)", color: "var(--color-amber-400)" },
+				}}
+			>
+				<AreaChart data={data} accessibilityLayer>
+					<defs>
+						<linearGradient id="budget-usage-line" x1="0" y1="0" x2="1" y2="0">
+							<stop offset={`${usageChange}%`} stopColor="var(--color-emerald-500)" />
+							<stop offset={`${usageChange}%`} stopColor="var(--color-rose-500)" />
+						</linearGradient>
+						<linearGradient id="budget-usage-fill" x1="0" y1="0" x2="1" y2="0">
+							<stop
+								offset={`${usageChange}%`}
+								stopColor="var(--color-emerald-500)"
+								stopOpacity={0.18}
+							/>
+							<stop
+								offset={`${usageChange}%`}
+								stopColor="var(--color-rose-500)"
+								stopOpacity={0.18}
+							/>
+						</linearGradient>
+						<linearGradient id="budget-projection-line" x1="0" y1="0" x2="1" y2="0">
+							<stop
+								offset={`${projectionChange}%`}
+								stopColor="var(--color-amber-400)"
+							/>
+							<stop
+								offset={`${projectionChange}%`}
+								stopColor="var(--color-orange-500)"
+							/>
+						</linearGradient>
+						<linearGradient id="budget-projection-fill" x1="0" y1="0" x2="1" y2="0">
+							<stop
+								offset={`${projectionChange}%`}
+								stopColor="var(--color-amber-400)"
+								stopOpacity={0.1}
+							/>
+							<stop
+								offset={`${projectionChange}%`}
+								stopColor="var(--color-orange-500)"
+								stopOpacity={0.12}
+							/>
+						</linearGradient>
+					</defs>
 
-				<CartesianGrid strokeDasharray="3 3" vertical />
-				<XAxis dataKey="date" interval={interval} tickMargin={8} />
-				<YAxis
-					width={isMobile ? 44 : 64}
-					domain={[0, (dataMax: number) => Math.max(dataMax, limit) * 1.05]}
-					tickFormatter={compactCurrency}
-				/>
-				<ReferenceLine
-					y={limit}
-					stroke="var(--muted-foreground)"
-					strokeDasharray="4 4"
-					label={{
-						value: "Budget limit",
-						position: "insideTopRight",
-						fill: "var(--muted-foreground)",
-						fontSize: 11,
-					}}
-				/>
-				<ChartTooltip
-					content={
-						<ChartTooltipContent
-							formatter={(value, name) => (
-								<div className="flex min-w-40 items-center justify-between gap-4">
-									<span className="text-muted-foreground">{String(name)}</span>
-									<span className="font-medium tabular-nums">
-										{formatCurrency(Number(value))}
-									</span>
-								</div>
-							)}
-						/>
-					}
-				/>
-				<Area
-					dataKey="usage"
-					name="Usage"
-					stroke="url(#budget-usage-line)"
-					fill="url(#budget-usage-fill)"
-					strokeWidth={2.5}
-					dot={false}
-				/>
-				<Area
-					dataKey="projection"
-					name="Usage (projection)"
-					stroke="url(#budget-projection-line)"
-					fill="transparent"
-					strokeWidth={2.5}
-					strokeDasharray="7 5"
-					dot={false}
-					connectNulls
-				/>
-			</AreaChart>
-		</ChartContainer>
+					<CartesianGrid strokeDasharray="3 3" vertical />
+					<XAxis dataKey="date" interval={interval} tickMargin={8} />
+					<YAxis
+						width={isMobile ? 44 : 64}
+						domain={[0, (dataMax: number) => Math.max(dataMax, limit) * 1.05]}
+						tickFormatter={compactCurrency}
+					/>
+					<ReferenceLine
+						y={limit}
+						stroke="var(--muted-foreground)"
+						strokeDasharray="4 4"
+						label={{
+							value: "Budget limit",
+							position: "insideTopRight",
+							fill: "var(--muted-foreground)",
+							fontSize: 11,
+						}}
+					/>
+					<ChartTooltip
+						content={
+							<ChartTooltipContent
+								formatter={(value, name) => (
+									<div className="flex min-w-40 items-center justify-between gap-4">
+										<span className="text-muted-foreground">
+											{String(name)}
+										</span>
+										<span className="font-medium tabular-nums">
+											{formatCurrency(Number(value))}
+										</span>
+									</div>
+								)}
+							/>
+						}
+					/>
+					<Area
+						dataKey="usage"
+						name="Usage"
+						stroke="url(#budget-usage-line)"
+						fill="url(#budget-usage-fill)"
+						strokeWidth={2.5}
+						dot={false}
+						activeDot={props => (
+							<BudgetActiveDot
+								{...props}
+								field="usage"
+								limit={limit}
+								within="var(--color-emerald-500)"
+								exceeded="var(--color-rose-500)"
+							/>
+						)}
+					/>
+					<Area
+						dataKey="projection"
+						name="Usage (projection)"
+						stroke="url(#budget-projection-line)"
+						fill="url(#budget-projection-fill)"
+						strokeWidth={2.5}
+						strokeDasharray="7 5"
+						dot={false}
+						connectNulls
+						activeDot={props =>
+							props.payload.usage === null ? (
+								<BudgetActiveDot
+									{...props}
+									field="projection"
+									limit={limit}
+									within="var(--color-amber-400)"
+									exceeded="var(--color-orange-500)"
+								/>
+							) : null
+						}
+					/>
+				</AreaChart>
+			</ChartContainer>
+		</div>
 	)
+}
+
+function BudgetActiveDot({
+	cx,
+	cy,
+	payload,
+	field,
+	limit,
+	within,
+	exceeded,
+}: ActiveDotProps & {
+	field: "usage" | "projection"
+	limit: number
+	within: string
+	exceeded: string
+}) {
+	if (cx === undefined || cy === undefined) return null
+	const color = Number(payload[field]) > limit ? exceeded : within
+
+	return <circle cx={cx} cy={cy} r={5} fill={color} stroke="var(--background)" strokeWidth={2} />
 }
 
 function buildSeries(records: Record[], start: DateTime, end: DateTime, asOf: DateTime) {
@@ -162,8 +233,26 @@ function buildSeries(records: Record[], start: DateTime, end: DateTime, asOf: Da
 }
 
 function colorChange(data: BudgetProgressPoint[], field: "usage" | "projection", limit: number) {
-	const index = data.findIndex(point => point[field] !== null && point[field] > limit)
-	return index < 0 ? 100 : (index / Math.max(data.length - 1, 1)) * 100
+	const points = data.flatMap((point, index) => {
+		const value = point[field]
+		return value === null ? [] : [{ index, value }]
+	})
+	if (!points.length) return 100
+	if (points[0].value > limit) return 0
+
+	for (let index = 1; index < points.length; index += 1) {
+		const previous = points[index - 1]
+		const current = points[index]
+		if (current.value <= limit) continue
+
+		const change = current.value - previous.value
+		const crossing =
+			previous.index + (current.index - previous.index) * ((limit - previous.value) / change)
+		const span = points[points.length - 1].index - points[0].index
+		return span > 0 ? ((crossing - points[0].index) / span) * 100 : 0
+	}
+
+	return 100
 }
 
 function compactCurrency(value: number) {

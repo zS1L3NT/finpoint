@@ -46,6 +46,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { START_DATE } from "@/constants"
 import { useHistory } from "@/history"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
+import { useDialogCloseAnimation } from "@/hooks/use-dialog-close-animation"
 import { useFetch } from "@/hooks/use-fetch"
 import { cn, formatCurrency, formatDatetime, round2dp, withMethod } from "@/lib/utils"
 import { Allocation, CategoryWithChildren, Record, RecordCompletions, Statement } from "@/types"
@@ -62,7 +63,7 @@ export default function RecordEditorDialog({
 	statements,
 	categories,
 	isOpen,
-	setIsOpen,
+	setIsOpen: onOpenChange,
 	trigger,
 }: {
 	record: Record
@@ -72,7 +73,8 @@ export default function RecordEditorDialog({
 	setIsOpen: (isOpen: boolean) => void
 	trigger?: React.ReactElement
 }) {
-	const { latest, handlePop, handleClear } = useHistory()
+	const { open, setIsOpen, onOpenChangeComplete } = useDialogCloseAnimation(isOpen, onOpenChange)
+	const { navigateBack } = useHistory()
 
 	const completions = useFetch<RecordCompletions>(completionsRecordsApiRoute.url())
 
@@ -162,21 +164,15 @@ export default function RecordEditorDialog({
 			setIsOpen(false)
 
 			if (location.pathname === recordWebRoute.url({ record })) {
-				if (latest) {
-					handlePop()
-					router.visit(latest.url)
-					return
-				}
-
-				handleClear()
-				router.visit(
-					recordsWebRoute.url({
+				navigateBack({
+					name: "Records",
+					url: recordsWebRoute.url({
 						query: {
 							start_date: START_DATE,
 							end_date: DateTime.now().toFormat("yyyy-MM-dd"),
 						},
 					}),
-				)
+				})
 				return
 			}
 
@@ -232,7 +228,8 @@ export default function RecordEditorDialog({
 
 	return (
 		<Dialog
-			open={isOpen}
+			open={open}
+			onOpenChangeComplete={onOpenChangeComplete}
 			onOpenChange={isOpen => {
 				setIsOpen(isOpen)
 				if (isOpen) {
@@ -268,7 +265,7 @@ export default function RecordEditorDialog({
 										id={field.name}
 										label="Title"
 										value={field.state.value}
-										suggestions={completions?.titles}
+										suggestions={completions?.titles ?? []}
 										errors={mergeErrors(field.state.meta.errors, field.name)}
 										onChange={value => {
 											field.handleChange(value)
@@ -283,7 +280,7 @@ export default function RecordEditorDialog({
 										id={field.name}
 										label="People"
 										value={field.state.value}
-										suggestions={completions?.peoples}
+										suggestions={completions?.peoples ?? []}
 										errors={mergeErrors(field.state.meta.errors, field.name)}
 										onChange={value => {
 											field.handleChange(value)
@@ -298,7 +295,7 @@ export default function RecordEditorDialog({
 										id={field.name}
 										label="Location"
 										value={field.state.value}
-										suggestions={completions?.locations}
+										suggestions={completions?.locations ?? []}
 										errors={mergeErrors(field.state.meta.errors, field.name)}
 										onChange={value => {
 											field.handleChange(value)

@@ -47,7 +47,7 @@ export default function CategoriesPage({ categories }: { categories: CategoryWit
 					<CardHeader>
 						<CardTitle>Category Tree</CardTitle>
 						<CardDescription>
-							Select a category to edit it, or find its Records.
+							Review each category’s defaults, edit it, or open its Records.
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="px-0">
@@ -115,12 +115,8 @@ function CategoryTreeItem({
 }) {
 	return (
 		<div className="flex flex-col">
-			<div className="group flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/40">
-				<button
-					type="button"
-					className="flex min-w-0 flex-1 items-center gap-3 rounded-sm text-left outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
-					onClick={() => onEdit(category)}
-				>
+			<div className="group flex flex-col gap-2.5 px-4 py-3 transition-colors hover:bg-muted/40 sm:flex-row sm:items-center sm:gap-3">
+				<div className="flex w-full min-w-0 flex-1 items-center gap-3">
 					<Icon {...category} size={14} />
 					<div className="grid min-w-0 flex-1 gap-1">
 						<p className="truncate font-medium">{category.name}</p>
@@ -130,6 +126,10 @@ function CategoryTreeItem({
 								{`${treatmentLabel(category.analytics_treatment)} · ${category.default_bucket?.name ?? "No bucket"}`}
 							</span>
 						</p>
+						<p className="text-xs text-muted-foreground">
+							{category.records_count}{" "}
+							{category.records_count === 1 ? "Record" : "Records"}
+						</p>
 					</div>
 					{"children" in category ? (
 						<span className="hidden shrink-0 text-xs text-muted-foreground sm:inline">
@@ -137,19 +137,22 @@ function CategoryTreeItem({
 							{category.children.length === 1 ? "" : "ren"}
 						</span>
 					) : null}
-				</button>
+				</div>
 
-				<Button variant="outline" size="sm" className="shrink-0" asChild>
-					<Link
-						href={recordsWebRoute.url({ query: { category_ids: category.id } })}
-						aria-label={`Find records for ${category.name}`}
-						onClick={onFindRecords}
-					>
-						<IconifyIcon icon="lucide:search" data-icon="inline-start" />
-						{category.records_count}{" "}
-						{category.records_count === 1 ? "record" : "records"}
-					</Link>
-				</Button>
+				<div className="flex shrink-0 justify-end gap-1.5 self-end sm:self-auto">
+					<Button variant="outline" size="sm" onClick={() => onEdit(category)}>
+						<IconifyIcon icon="lucide:pencil" /> Edit
+					</Button>
+					<Button variant="outline" size="sm" asChild>
+						<Link
+							href={recordsWebRoute.url({ query: { category_ids: category.id } })}
+							aria-label={`Open records for ${category.name}`}
+							onClick={onFindRecords}
+						>
+							Open
+						</Link>
+					</Button>
+				</div>
 			</div>
 
 			{"children" in category ? (

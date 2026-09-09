@@ -2,14 +2,15 @@ import { Icon as IconifyIcon } from "@iconify/react"
 import { router, usePage } from "@inertiajs/react"
 import { useState } from "react"
 import RecordCreatorDialog from "@/components/dialogs/record-creator"
+import RecordEditorDialog from "@/components/dialogs/record-editor"
 import DateField from "@/components/form/date-field"
 import Icon from "@/components/icon"
 import AppHeader from "@/components/layout/app-header"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
+import { ClearFiltersButton, FILTER_CONTROL_CLASS, FilterBar } from "@/components/table/filter-bar"
 import PaginatedDataTable from "@/components/table/paginated-data-table"
 import { useRecordColumns, useRecordMobileRow } from "@/components/table/record-columns"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
 	Command,
@@ -32,11 +33,10 @@ import {
 } from "@/components/ui/select"
 import { useFetch } from "@/hooks/use-fetch"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
+import { useRecordEditor } from "@/hooks/use-record-editor"
 import { cn } from "@/lib/utils"
 import { Bucket, CategoryWithChildren, Paginated, Record } from "@/types"
 import { bucketIndexApiRoute, categoryIndexApiRoute, recordsWebRoute } from "@/wayfinder/routes"
-
-const FILTER_CONTROL_CLASS = "border-border bg-input/20 text-foreground dark:bg-input/30"
 
 export default function RecordsPage({ records }: { records: Paginated<Record> }) {
 	const [isCreatingRecord, setIsCreatingRecord] = useState(false)
@@ -53,6 +53,7 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 
 	const categories = useFetch<CategoryWithChildren[]>(categoryIndexApiRoute.url(), [])
 	const buckets = useFetch<Bucket[]>(bucketIndexApiRoute.url(), [])
+	const { editingRecord, loadingRecordId, editRecord, setEditingRecord } = useRecordEditor()
 	const updateFilters = (changes: { [key: string]: string | null }) => {
 		const url = new URL(page.url, "http://localhost")
 		for (const [key, value] of Object.entries(changes)) {
@@ -96,8 +97,16 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 				},
 			}).url,
 	})
-	const columns = useRecordColumns<Record>({ pageName: "Records" })
-	const mobileRow = useRecordMobileRow<Record>({ pageName: "Records" })
+	const columns = useRecordColumns<Record>({
+		pageName: "Records",
+		onEdit: record => void editRecord(record),
+		loadingRecordId,
+	})
+	const mobileRow = useRecordMobileRow<Record>({
+		pageName: "Records",
+		onEdit: record => void editRecord(record),
+		loadingRecordId,
+	})
 
 	return (
 		<>
@@ -157,6 +166,18 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 					emptyMessage="No records found."
 				/>
 			</PageContent>
+
+			{editingRecord ? (
+				<RecordEditorDialog
+					record={editingRecord}
+					statements={editingRecord.statements}
+					categories={categories}
+					isOpen
+					setIsOpen={isOpen => {
+						if (!isOpen) setEditingRecord(null)
+					}}
+				/>
+			) : null}
 		</>
 	)
 }
@@ -214,7 +235,7 @@ function RecordFilters({
 	}
 
 	return (
-		<div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap">
+		<FilterBar>
 			<CategoryFilter
 				categories={categories}
 				selectedIds={categoryIds}
@@ -310,18 +331,8 @@ function RecordFilters({
 				onChange={date => onChange({ end_date: date || null })}
 			/>
 
-			{activeFilterCount ? (
-				<Button
-					type="button"
-					variant="outline"
-					className={cn("w-full sm:w-40", FILTER_CONTROL_CLASS)}
-					onClick={onClear}
-				>
-					<IconifyIcon icon="lucide:list-filter-x" /> Clear
-					<Badge variant="secondary">{activeFilterCount}</Badge>
-				</Button>
-			) : null}
-		</div>
+			<ClearFiltersButton count={activeFilterCount} onClear={onClear} />
+		</FilterBar>
 	)
 }
 
@@ -350,17 +361,20 @@ function CategoryFilter({
 					<Button
 						type="button"
 						variant="outline"
-						className={cn("w-full justify-start sm:w-40", FILTER_CONTROL_CLASS)}
+						className={cn(
+							"grid w-full grid-cols-[1rem_minmax(0,1fr)_1rem] items-center sm:w-40",
+							FILTER_CONTROL_CLASS,
+						)}
 					/>
 				}
 			>
-				<IconifyIcon icon="lucide:tags" />
-				<span className="truncate">
+				<IconifyIcon icon="lucide:tags" className="justify-self-start" />
+				<span className="truncate text-center">
 					{selectedIds.length
 						? `${selectedIds.length} categor${selectedIds.length === 1 ? "y" : "ies"}`
 						: "Any category"}
 				</span>
-				<IconifyIcon icon="lucide:chevron-down" className="ml-auto" />
+				<IconifyIcon icon="lucide:chevron-down" className="justify-self-end" />
 			</PopoverTrigger>
 			<PopoverContent
 				align="start"

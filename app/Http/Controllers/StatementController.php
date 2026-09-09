@@ -12,6 +12,8 @@ class StatementController extends Controller
     {
         $statements = Statement::appQuery(
             query: request()->query('query'),
+            start_date: request()->query('start_date'),
+            end_date: request()->query('end_date'),
             is_pending: request()->query('is_pending'),
         )
             ->paginate(request()->query('per_page') ?? 100)

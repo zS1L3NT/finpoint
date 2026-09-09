@@ -1,7 +1,6 @@
 import { Icon as IconifyIcon } from "@iconify/react"
-import { Link } from "@inertiajs/react"
 import { Button } from "@/components/ui/button"
-import { useHistory } from "@/history"
+import { type HistoryItem, useHistory } from "@/history"
 
 export default function PageHeader({
 	title,
@@ -16,24 +15,29 @@ export default function PageHeader({
 	description: React.ReactNode
 	icon: string
 	actions?: React.ReactNode
-	back?: { name: React.ReactNode; url: string }
+	back?: HistoryItem
 }) {
-	const { latest, handlePop } = useHistory()
+	const { latest, isNavigatingBack, navigateBack } = useHistory()
+	const backTarget = back ? (latest ?? back) : null
 
 	return (
 		<div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
 			<div className="flex min-w-0 flex-col gap-4">
-				{back && latest ? (
+				{backTarget ? (
 					<Button
+						type="button"
 						variant="outline"
 						size="sm"
 						className="w-fit max-w-full self-start"
-						asChild
+						disabled={isNavigatingBack}
+						aria-busy={isNavigatingBack}
+						onClick={() => navigateBack(back ?? backTarget)}
 					>
-						<Link href={latest.url} onClick={handlePop}>
-							<IconifyIcon icon="lucide:arrow-left" />
-							Back to {latest.name}
-						</Link>
+						<IconifyIcon
+							icon={isNavigatingBack ? "lucide:loader-circle" : "lucide:arrow-left"}
+							className={isNavigatingBack ? "animate-spin" : undefined}
+						/>
+						Back to {backTarget.name}
 					</Button>
 				) : null}
 

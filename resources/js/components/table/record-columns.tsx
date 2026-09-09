@@ -1,12 +1,13 @@
+import { Icon as IconifyIcon } from "@iconify/react"
 import { Link } from "@inertiajs/react"
-import type { ColumnDef, Row } from "@tanstack/react-table"
+import type { CellContext, ColumnDef, Row } from "@tanstack/react-table"
 import Icon from "@/components/icon"
 import RecordAmount from "@/components/record-amount"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useHistory } from "@/history"
 import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
-import { classForCurrency, cn, formatDatetime } from "@/lib/utils"
+import { formatDatetime } from "@/lib/utils"
 import type { Allocation, Record } from "@/types"
 import { recordWebRoute } from "@/wayfinder/routes"
 
@@ -17,7 +18,53 @@ type RecordTableOptions<TRecord extends RecordRow> = {
 	pageName?: string
 	extraActions?: (record: TRecord) => React.ReactNode
 	actionWidth?: string
-	mobileVariant?: "default" | "dashboard"
+	onEdit?: (record: TRecord) => void
+	loadingRecordId?: string | null
+}
+
+function RecordActionsCell<TRecord extends RecordRow>({
+	row,
+	column,
+}: CellContext<TRecord, unknown>) {
+	const { handlePush } = useHistory()
+	const { pageName, extraActions, onEdit, loadingRecordId } = (
+		column.columnDef.meta as { recordActions: RecordTableOptions<TRecord> }
+	).recordActions
+	const actions = (
+		<div className="flex shrink-0 items-center justify-end gap-1.5">
+			{onEdit ? (
+				<Button
+					variant="outline"
+					size="sm"
+					className="w-[4.25rem]"
+					aria-busy={loadingRecordId === row.original.id}
+					onClick={() => {
+						if (!loadingRecordId) onEdit(row.original)
+					}}
+				>
+					<IconifyIcon icon="lucide:pencil" />
+					Edit
+				</Button>
+			) : null}
+			<Button variant="outline" size="sm" asChild>
+				<Link
+					href={recordWebRoute.url({ record: row.original })}
+					onClick={pageName ? handlePush(pageName) : undefined}
+				>
+					Open
+				</Link>
+			</Button>
+		</div>
+	)
+
+	return extraActions ? (
+		<div className="flex justify-end gap-2">
+			{actions}
+			{extraActions(row.original)}
+		</div>
+	) : (
+		actions
+	)
 }
 
 export function useRecordColumns<TRecord extends RecordRow>({
@@ -25,9 +72,9 @@ export function useRecordColumns<TRecord extends RecordRow>({
 	pageName,
 	extraActions,
 	actionWidth = TABLE_WIDTH_CLASSNAMES.ACTIONS_OPEN,
+	onEdit,
+	loadingRecordId,
 }: RecordTableOptions<TRecord>): ColumnDef<TRecord>[] {
-	const { handlePush } = useHistory()
-
 	return [
 		{
 			header: "Record",
@@ -87,28 +134,15 @@ export function useRecordColumns<TRecord extends RecordRow>({
 		},
 		{
 			id: "actions",
-			meta: { width: actionWidth },
-			cell: ({ row }) => {
-				const openButton = (
-					<Button variant="outline" size="sm" asChild>
-						<Link
-							href={recordWebRoute.url({ record: row.original })}
-							onClick={pageName ? handlePush(pageName) : undefined}
-						>
-							Open
-						</Link>
-					</Button>
-				)
-
-				return extraActions ? (
-					<div className="flex justify-end gap-2">
-						{openButton}
-						{extraActions(row.original)}
-					</div>
-				) : (
-					openButton
-				)
+			meta: {
+				recordActions: { pageName, extraActions, onEdit, loadingRecordId },
+				width: onEdit
+					? extraActions
+						? TABLE_WIDTH_CLASSNAMES.ACTIONS_EDIT_OPEN_DETACH
+						: TABLE_WIDTH_CLASSNAMES.ACTIONS_EDIT_OPEN
+					: actionWidth,
 			},
+			cell: RecordActionsCell,
 		},
 	]
 }
@@ -118,7 +152,8 @@ export function useRecordMobileRow<TRecord extends RecordRow>({
 	pageName,
 	extraActions,
 	leading,
-	mobileVariant = "default",
+	onEdit,
+	loadingRecordId,
 }: RecordTableOptions<TRecord> & {
 	leading?: (record: TRecord) => React.ReactNode
 }): (row: Row<TRecord>) => React.ReactNode {
@@ -127,75 +162,36 @@ export function useRecordMobileRow<TRecord extends RecordRow>({
 	return row => {
 		const record = row.original
 		const value = amount === "allocated" ? (record.pivot?.amount ?? 0) : record.amount
-		const openButton = (
-			<Button variant="outline" size="sm" asChild>
-				<Link
-					href={recordWebRoute.url({ record })}
-					onClick={pageName ? handlePush(pageName) : undefined}
-				>
-					Open
-				</Link>
-			</Button>
+		const actions = (
+			<div className="flex shrink-0 items-center justify-end gap-1.5">
+				{onEdit ? (
+					<Button
+						variant="outline"
+						size="sm"
+						className="w-[4.25rem]"
+						aria-busy={loadingRecordId === record.id}
+						onClick={() => {
+							if (!loadingRecordId) onEdit(record)
+						}}
+					>
+						<IconifyIcon icon="lucide:pencil" />
+						Edit
+					</Button>
+				) : null}
+				<Button variant="outline" size="sm" asChild>
+					<Link
+						href={recordWebRoute.url({ record })}
+						onClick={pageName ? handlePush(pageName) : undefined}
+					>
+						Open
+					</Link>
+				</Button>
+			</div>
 		)
 
-		if (mobileVariant === "dashboard") {
-			return (
-				<div className="flex flex-col gap-3">
-					<div className="flex items-start gap-3">
-						<div className="pt-1">{leading?.(record)}</div>
-						<Icon {...record.category} size={18} />
-						<div className="min-w-0 flex-1">
-							<div className="flex items-start justify-between gap-3">
-								<div className="min-w-0">
-									<p className="font-medium leading-snug break-words">
-										{record.is_pending && (
-											<Badge variant="warning" className="mr-1 align-middle">
-												Pending
-											</Badge>
-										)}
-										{record.title}
-									</p>
-									{record.subtitle ? (
-										<p className="text-xs leading-relaxed text-muted-foreground break-words">
-											{record.subtitle}
-										</p>
-									) : null}
-								</div>
-								<span
-									className={cn(
-										"shrink-0 text-sm font-medium tabular-nums whitespace-nowrap",
-										classForCurrency(value),
-									)}
-								>
-									<RecordAmount
-										record={record}
-										amount={value}
-										showAccumulated={amount === "amount" && record.is_pending}
-									/>
-								</span>
-							</div>
-						</div>
-					</div>
-
-					<div className="ml-12 flex flex-col gap-2 border-t pt-3 text-xs text-muted-foreground">
-						<div>{formatDatetime(record.datetime)}</div>
-						{record.description ? (
-							<p className="whitespace-pre-line break-words leading-relaxed">
-								{record.description}
-							</p>
-						) : null}
-						<div className="flex flex-wrap justify-end gap-2 pt-1">
-							{openButton}
-							{extraActions?.(record)}
-						</div>
-					</div>
-				</div>
-			)
-		}
-
 		return (
-			<div className="flex flex-col gap-3">
-				<div className="flex items-start gap-3">
+			<div className="grid min-w-0 gap-2">
+				<div className="flex min-w-0 items-start gap-3">
 					{leading?.(record)}
 					<Icon {...record.category} size={18} />
 					<div className="min-w-0 flex-1">
@@ -218,19 +214,12 @@ export function useRecordMobileRow<TRecord extends RecordRow>({
 					/>
 				</div>
 
-				<div className="grid gap-2 text-xs text-muted-foreground">
-					<div className="flex justify-between gap-3">
-						<span>Date & Time</span>
-						<span className="text-right">{formatDatetime(record.datetime)}</span>
+				<div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-1.5 pl-7 text-xs text-muted-foreground">
+					<span className="truncate">{formatDatetime(record.datetime)}</span>
+					<div className="flex flex-wrap items-center justify-end gap-1.5">
+						{actions}
+						{extraActions?.(record)}
 					</div>
-					{record.description ? (
-						<p className="whitespace-pre-line break-words">{record.description}</p>
-					) : null}
-				</div>
-
-				<div className="flex flex-wrap justify-end gap-2">
-					{openButton}
-					{extraActions?.(record)}
 				</div>
 			</div>
 		)

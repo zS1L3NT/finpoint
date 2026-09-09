@@ -1,6 +1,5 @@
 import { Icon as IconifyIcon } from "@iconify/react"
 import { Link, router } from "@inertiajs/react"
-import { AnimatePresence, motion } from "framer-motion"
 import { DateTime } from "luxon"
 import { useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
@@ -9,6 +8,7 @@ import Icon from "@/components/icon"
 import AppHeader from "@/components/layout/app-header"
 import PageContent from "@/components/layout/page-content"
 import RecordAmount from "@/components/record-amount"
+import SelectionBar from "@/components/selection-bar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
@@ -23,6 +23,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select"
+import { useHistory } from "@/history"
 import { useFetch } from "@/hooks/use-fetch"
 import { treatmentLabel } from "@/lib/analytics"
 import { formatCurrency, formatDatetime } from "@/lib/utils"
@@ -207,62 +208,53 @@ export default function MonthlyRecordsPage({
 					</nav>
 				</header>
 
-				<AnimatePresence>
-					{selected.length ? (
-						<motion.div
-							initial={{ opacity: 0, y: 24, scale: 0.98 }}
-							animate={{ opacity: 1, y: 0, scale: 1 }}
-							exit={{ opacity: 0, y: 16, scale: 0.98 }}
-							className="fixed inset-x-3 bottom-3 z-50 mx-auto flex max-w-4xl flex-col gap-3 rounded-2xl border bg-background/95 p-3 shadow-2xl backdrop-blur-md sm:bottom-5"
-						>
-							<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-								<strong className="mr-auto text-sm">
-									{selected.length} selected
-								</strong>
-								<Select
-									value={destination}
-									disabled={ineligible.length > 0}
-									onValueChange={value => setDestination(value ?? "")}
-								>
-									<SelectTrigger className="w-full sm:w-48">
-										<SelectValue placeholder="Choose bucket" />
-									</SelectTrigger>
-									<SelectContent>
-										{buckets.map(bucket => (
-											<SelectItem key={bucket.id} value={bucket.id}>
-												{bucket.name}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-								<Button
-									disabled={!destination || submitting || ineligible.length > 0}
-									onClick={() => void assign(destination)}
-								>
-									Assign bucket
-								</Button>
-								<Button
-									variant="outline"
-									disabled={submitting}
-									onClick={() => void assign(null)}
-								>
-									Remove bucket
-								</Button>
-								<Button variant="ghost" onClick={() => setSelected([])}>
-									Clear
-								</Button>
-							</div>
-							{ineligible.length ? (
-								<p className="text-sm text-amber-700 dark:text-amber-400">
-									{ineligible.length} selected Record
-									{ineligible.length === 1 ? "" : "s"} must be classified as
-									spending before assigning a bucket. Edit the Record and choose a
-									Treatment override first.
-								</p>
-							) : null}
-						</motion.div>
-					) : null}
-				</AnimatePresence>
+				<SelectionBar
+					open={selected.length > 0}
+					summary={`${selected.length} selected`}
+					message={
+						ineligible.length ? (
+							<p className="text-amber-700 dark:text-amber-400">
+								{ineligible.length} selected Record
+								{ineligible.length === 1 ? "" : "s"} must be classified as spending
+								before assigning a bucket. Edit the Record and choose a Treatment
+								override first.
+							</p>
+						) : undefined
+					}
+				>
+					<Select
+						value={destination}
+						disabled={ineligible.length > 0}
+						onValueChange={value => setDestination(value ?? "")}
+					>
+						<SelectTrigger className="w-full sm:w-48">
+							<SelectValue placeholder="Choose bucket" />
+						</SelectTrigger>
+						<SelectContent>
+							{buckets.map(bucket => (
+								<SelectItem key={bucket.id} value={bucket.id}>
+									{bucket.name}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+					<Button
+						disabled={!destination || submitting || ineligible.length > 0}
+						onClick={() => void assign(destination)}
+					>
+						Assign bucket
+					</Button>
+					<Button
+						variant="outline"
+						disabled={submitting}
+						onClick={() => void assign(null)}
+					>
+						Remove bucket
+					</Button>
+					<Button variant="ghost" onClick={() => setSelected([])}>
+						Clear
+					</Button>
+				</SelectionBar>
 				{records.length ? (
 					<section className="grid gap-4" aria-labelledby="actual-records">
 						<div className="flex items-center justify-between gap-3">
@@ -363,6 +355,7 @@ function DayGroup({
 	loadingRecordId: string | null
 	selectable?: boolean
 }) {
+	const { handlePush } = useHistory()
 	const income = records.reduce((sum, record) => sum + contribution(record).income, 0)
 	const spending = records.reduce((sum, record) => sum + contribution(record).spending, 0)
 	const allSelected = records.every(record => selected.includes(record.id))
@@ -467,7 +460,12 @@ function DayGroup({
 									Edit
 								</Button>
 								<Button variant="outline" size="sm" asChild>
-									<Link href={recordWebRoute({ record })}>Open</Link>
+									<Link
+										href={recordWebRoute({ record })}
+										onClick={handlePush("Monthly Records")}
+									>
+										Open
+									</Link>
 								</Button>
 							</div>
 						</div>
