@@ -123,7 +123,7 @@ function CategoryTreeItem({
 						<p className="flex items-center gap-1.5 text-xs text-muted-foreground">
 							<IconifyIcon icon="lucide:tag" className="size-3.5" />
 							<span className="truncate">
-								{`${treatmentLabel(category.analytics_treatment)} · ${category.default_bucket?.name ?? "No bucket"}`}
+								{`${category.analytics_treatment ? treatmentLabel(category.analytics_treatment) : "No default treatment"} · ${category.default_bucket?.name ?? "No default bucket"}`}
 							</span>
 						</p>
 						<p className="text-xs text-muted-foreground">
@@ -149,7 +149,7 @@ function CategoryTreeItem({
 							aria-label={`Open records for ${category.name}`}
 							onClick={onFindRecords}
 						>
-							Open
+							Open in records
 						</Link>
 					</Button>
 				</div>

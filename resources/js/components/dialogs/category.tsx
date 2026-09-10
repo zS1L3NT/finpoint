@@ -38,6 +38,8 @@ type CategoryFormValues = {
 	default_bucket_id: string
 }
 
+const NO_DEFAULT = "no_default"
+
 function isChildCategory(category: Category | CategoryWithChildren | null) {
 	return category?.parent_category_id !== null
 }
@@ -74,7 +76,7 @@ export default function CategoryDialog({
 		? (buckets.find(bucket => bucket.id === values.default_bucket_id)?.name ??
 			category?.default_bucket?.name ??
 			"Default bucket")
-		: "No bucket"
+		: "No default bucket"
 
 	useEffect(() => {
 		if (!open) {
@@ -231,7 +233,7 @@ export default function CategoryDialog({
 								<p className="flex items-center gap-1.5 text-xs text-muted-foreground">
 									<IconifyIcon icon="lucide:tag" className="size-3.5" />
 									<span className="truncate">
-										{`${treatmentLabel(values.analytics_treatment || null)} · ${defaultBucketName}`}
+										{`${values.analytics_treatment ? treatmentLabel(values.analytics_treatment) : "No default treatment"} · ${defaultBucketName}`}
 									</span>
 								</p>
 							</div>
@@ -239,19 +241,13 @@ export default function CategoryDialog({
 					</Card>
 
 					<div className="grid gap-4 rounded-lg border p-4">
-						<div>
-							<p className="text-sm font-semibold">Analytics defaults</p>
-							<p className="text-xs text-muted-foreground">
-								New Records inherit these values, so normal creation needs no extra
-								classification work.
-							</p>
-						</div>
+						<p className="text-sm font-semibold">Analytics defaults</p>
 						<SelectField
 							id="analytics_treatment"
 							label="Treatment"
-							value={values.analytics_treatment}
-							placeholder="Automatic by direction"
+							value={values.analytics_treatment || NO_DEFAULT}
 							items={[
+								{ value: NO_DEFAULT, label: "No default treatment" },
 								{ value: "income", label: "Income" },
 								{ value: "spending", label: "Spending" },
 								{ value: "saving_investment", label: "Saving/investment" },
@@ -260,19 +256,26 @@ export default function CategoryDialog({
 							]}
 							errors={getApiFieldErrors("analytics_treatment")}
 							onChange={value =>
-								setValue("analytics_treatment", value as AnalyticsTreatment | "")
+								setValue(
+									"analytics_treatment",
+									value === NO_DEFAULT ? "" : (value as AnalyticsTreatment),
+								)
 							}
 						/>
 						<SelectField
 							id="default_bucket_id"
-							label="Default spending bucket"
-							value={values.default_bucket_id}
-							placeholder="No default bucket"
-							items={buckets
-								.filter(bucket => !bucket.archived)
-								.map(bucket => ({ value: bucket.id, label: bucket.name }))}
+							label="Spending bucket"
+							value={values.default_bucket_id || NO_DEFAULT}
+							items={[
+								{ value: NO_DEFAULT, label: "No default bucket" },
+								...buckets
+									.filter(bucket => !bucket.archived)
+									.map(bucket => ({ value: bucket.id, label: bucket.name })),
+							]}
 							errors={getApiFieldErrors("default_bucket_id")}
-							onChange={value => setValue("default_bucket_id", value)}
+							onChange={value =>
+								setValue("default_bucket_id", value === NO_DEFAULT ? "" : value)
+							}
 						/>
 					</div>
 				</form>

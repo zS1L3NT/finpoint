@@ -191,7 +191,9 @@ export default function RecordEditorDialog({
 		categoryId: state.values.category_id,
 		amount: state.values.amount,
 		bucketId: state.values.bucket_id,
+		bucketSource: state.values.bucket_source,
 	}))
+	const analyticsCategory = categoriesFlat.find(category => category.id === analytics.categoryId)
 	const formStatements = useStore(form.store, state => state.values.statements)
 	const attachStatementsSheet = (
 		<StatementSearchSheet
@@ -413,19 +415,17 @@ export default function RecordEditorDialog({
 						</FieldGroup>
 						<RecordAnalyticsFields
 							treatment={analytics.treatment}
-							categoryTreatment={
-								categoriesFlat.find(
-									category => category.id === analytics.categoryId,
-								)?.analytics_treatment
-							}
+							categoryTreatment={analyticsCategory?.analytics_treatment}
 							amount={analytics.amount}
 							bucketId={analytics.bucketId}
+							bucketSource={analytics.bucketSource}
+							categoryBucketId={analyticsCategory?.default_bucket_id}
 							onTreatmentChange={value =>
 								form.setFieldValue("analytics_treatment", value)
 							}
-							onBucketChange={value => {
+							onBucketChange={(value, source) => {
 								form.setFieldValue("bucket_id", value)
-								form.setFieldValue("bucket_source", "manual")
+								form.setFieldValue("bucket_source", source)
 							}}
 						/>
 					</div>
