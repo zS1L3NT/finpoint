@@ -7,6 +7,7 @@ import BucketDialog from "@/components/dialogs/bucket"
 import Icon from "@/components/icon"
 import AppHeader from "@/components/layout/app-header"
 import PageContent from "@/components/layout/page-content"
+import { FILTER_CONTROL_CLASS } from "@/components/table/filter-bar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
@@ -18,12 +19,14 @@ import {
 	SelectContent,
 	SelectGroup,
 	SelectItem,
+	SelectLabel,
+	SelectSeparator,
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select"
 import { cn, formatCurrency } from "@/lib/utils"
 import { AnalyticsSummary, Bucket } from "@/types"
-import { dashboardWebRoute, monthlyRecordsWebRoute, recordsWebRoute } from "@/wayfinder/routes"
+import { dashboardWebRoute, monthlyRecordsWebRoute } from "@/wayfinder/routes"
 
 type DashboardBucket = Bucket & {
 	spending: number
@@ -220,9 +223,10 @@ export default function DashboardPage({
 								{summary.unbucketed_count ? (
 									<Button variant="outline" size="sm" asChild>
 										<Link
-											href={recordsWebRoute({
+											href={monthlyRecordsWebRoute({
 												query: {
-													...monthRecordRange(month, year),
+													month,
+													year,
 													show_unbucketed: true,
 												},
 											})}
@@ -273,20 +277,40 @@ export default function DashboardPage({
 									value={scope}
 									onValueChange={value => setScope(value ?? "all")}
 								>
-									<SelectTrigger className="w-full sm:w-52">
+									<SelectTrigger
+										className={cn("w-full sm:w-52", FILTER_CONTROL_CLASS)}
+									>
+										<IconifyIcon icon="lucide:wallet-cards" />
 										<SelectValue />
 									</SelectTrigger>
 									<SelectContent variant="filter">
 										<SelectGroup>
 											<SelectItem value="all">All spending</SelectItem>
+										</SelectGroup>
+										<SelectSeparator />
+										<SelectGroup>
+											<SelectLabel>Bucket groups</SelectLabel>
 											<SelectItem value="core">Core</SelectItem>
 											<SelectItem value="outlier">Outlier</SelectItem>
-											{buckets.map(bucket => (
-												<SelectItem key={bucket.id} value={bucket.id}>
-													{bucket.name}
-												</SelectItem>
-											))}
+											<SelectItem value="other">Other</SelectItem>
 										</SelectGroup>
+										{buckets.length ? <SelectSeparator /> : null}
+										{buckets.length ? (
+											<SelectGroup>
+												<SelectLabel>Specific bucket</SelectLabel>
+												{buckets.map(bucket => (
+													<SelectItem key={bucket.id} value={bucket.id}>
+														<span
+															className="size-2 rounded-full"
+															style={{
+																backgroundColor: bucket.color,
+															}}
+														/>
+														{bucket.name}
+													</SelectItem>
+												))}
+											</SelectGroup>
+										) : null}
 									</SelectContent>
 								</Select>
 							</div>
@@ -435,9 +459,10 @@ function CategoryBreakdown({
 					categories.slice(0, 8).map(category => (
 						<Link
 							key={category.id}
-							href={recordsWebRoute({
+							href={monthlyRecordsWebRoute({
 								query: {
-									...monthRecordRange(month, year),
+									month,
+									year,
 									category_ids: category.id,
 									bucket_id: !["all", "core", "outlier", "other"].includes(scope)
 										? scope
@@ -659,9 +684,10 @@ function InvestmentRow({
 				</div>
 				<Button variant="outline" size="sm" asChild>
 					<Link
-						href={recordsWebRoute({
+						href={monthlyRecordsWebRoute({
 							query: {
-								...monthRecordRange(month, year),
+								month,
+								year,
 								treatment: "saving_investment",
 							},
 						})}
@@ -672,14 +698,6 @@ function InvestmentRow({
 			</CardContent>
 		</Card>
 	)
-}
-
-function monthRecordRange(month: string, year: number) {
-	const date = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
-	return {
-		start_date: date.startOf("month").toISODate() ?? undefined,
-		end_date: date.endOf("month").toISODate() ?? undefined,
-	}
 }
 
 function PaceSummary({ projection }: { projection: Projection }) {

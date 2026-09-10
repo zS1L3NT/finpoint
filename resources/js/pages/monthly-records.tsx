@@ -9,6 +9,8 @@ import AppHeader from "@/components/layout/app-header"
 import PageContent from "@/components/layout/page-content"
 import RecordAmount from "@/components/record-amount"
 import SelectionBar from "@/components/selection-bar"
+import CategoryFilter from "@/components/table/category-filter"
+import { ClearFiltersButton, FILTER_CONTROL_CLASS, FilterBar } from "@/components/table/filter-bar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
@@ -19,14 +21,17 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import {
 	Select,
 	SelectContent,
+	SelectGroup,
 	SelectItem,
+	SelectLabel,
+	SelectSeparator,
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select"
 import { useHistory } from "@/history"
 import { useFetch } from "@/hooks/use-fetch"
 import { treatmentLabel } from "@/lib/analytics"
-import { formatCurrency, formatDatetime } from "@/lib/utils"
+import { cn, formatCurrency, formatDatetime } from "@/lib/utils"
 import {
 	Allocation,
 	AnalyticsSummary,
@@ -47,6 +52,16 @@ import {
 
 type EditableRecord = Record & { statements: (Statement & { pivot?: Allocation })[] }
 
+type Filters = {
+	category_ids?: string
+	is_allocated?: string
+	bucket_id?: string
+	bucket_group?: string
+	show_unbucketed?: string | boolean
+	treatment?: string
+	day?: string | number
+}
+
 export default function MonthlyRecordsPage({
 	month,
 	year,
@@ -55,6 +70,7 @@ export default function MonthlyRecordsPage({
 	future_records,
 	summary,
 	buckets,
+	filters,
 }: {
 	month: string
 	year: number
@@ -63,6 +79,7 @@ export default function MonthlyRecordsPage({
 	future_records: Record[]
 	summary: AnalyticsSummary
 	buckets: Bucket[]
+	filters: Filters
 }) {
 	const date = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
 	const categories = useFetch<CategoryWithChildren[]>(categoryIndexApiRoute.url(), [])
@@ -80,10 +97,15 @@ export default function MonthlyRecordsPage({
 		setSelected(current => current.filter(id => records.some(record => record.id === id)))
 	}, [records])
 
-	const visit = (nextDate = date) => {
+	const visit = (changes: Partial<Filters> = {}, nextDate = date) => {
+		const next: Filters = { ...filters, ...changes }
+		for (const [key, value] of Object.entries(next)) {
+			if (value === "" || value === false || value === undefined || value === null)
+				delete next[key as keyof Filters]
+		}
 		router.visit(
 			monthlyRecordsWebRoute({
-				query: { month: nextDate.toFormat("MMMM"), year: nextDate.year },
+				query: { month: nextDate.toFormat("MMMM"), year: nextDate.year, ...next },
 			}),
 			{ preserveState: true, preserveScroll: true },
 		)
@@ -122,6 +144,7 @@ export default function MonthlyRecordsPage({
 		setSubmitting(false)
 	}
 
+	const clearFilters = () => router.visit(monthlyRecordsWebRoute({ query: { month, year } }))
 	const toggleAll = (checked: boolean) =>
 		setSelected(checked ? records.map(record => record.id) : [])
 	const editRecord = async (record: Record) => {
@@ -166,7 +189,7 @@ export default function MonthlyRecordsPage({
 							<Button
 								variant="outline"
 								aria-label="Previous month"
-								onClick={() => visit(date.minus({ month: 1 }))}
+								onClick={() => visit({ day: undefined }, date.minus({ month: 1 }))}
 							>
 								<IconifyIcon icon="lucide:arrow-left" />
 							</Button>
@@ -180,14 +203,16 @@ export default function MonthlyRecordsPage({
 								<PopoverContent className="w-auto p-0">
 									<MonthPicker
 										selectedMonth={date.toJSDate()}
-										onMonthSelect={value => visit(DateTime.fromJSDate(value))}
+										onMonthSelect={value =>
+											visit({ day: undefined }, DateTime.fromJSDate(value))
+										}
 									/>
 								</PopoverContent>
 							</Popover>
 							<Button
 								variant="outline"
 								aria-label="Next month"
-								onClick={() => visit(date.plus({ month: 1 }))}
+								onClick={() => visit({ day: undefined }, date.plus({ month: 1 }))}
 							>
 								<IconifyIcon icon="lucide:arrow-right" />
 							</Button>
@@ -230,6 +255,15 @@ export default function MonthlyRecordsPage({
 					</div>
 				</header>
 
+				<MonthlyRecordFilters
+					date={date}
+					categories={categories}
+					buckets={buckets}
+					filters={filters}
+					onChange={changes => visit(changes)}
+					onClear={clearFilters}
+				/>
+
 				<SelectionBar
 					open={selected.length > 0}
 					summary={`${selected.length} selected`}
@@ -253,11 +287,13 @@ export default function MonthlyRecordsPage({
 							<SelectValue placeholder="Choose bucket" />
 						</SelectTrigger>
 						<SelectContent>
-							{buckets.map(bucket => (
-								<SelectItem key={bucket.id} value={bucket.id}>
-									{bucket.name}
-								</SelectItem>
-							))}
+							<SelectGroup>
+								{buckets.map(bucket => (
+									<SelectItem key={bucket.id} value={bucket.id}>
+										{bucket.name}
+									</SelectItem>
+								))}
+							</SelectGroup>
 						</SelectContent>
 					</Select>
 					<Button
@@ -319,7 +355,10 @@ export default function MonthlyRecordsPage({
 						<PeriodFooter summary={summary} date={date} period={period} />
 					</section>
 				) : !period.is_future ? (
-					<EmptyRecords />
+					<EmptyRecords
+						filtered={Object.keys(filters).length > 0}
+						onClear={clearFilters}
+					/>
 				) : null}
 
 				{future_records.length ? (
@@ -357,6 +396,156 @@ export default function MonthlyRecordsPage({
 				/>
 			) : null}
 		</>
+	)
+}
+
+function MonthlyRecordFilters({
+	date,
+	categories,
+	buckets,
+	filters,
+	onChange,
+	onClear,
+}: {
+	date: DateTime
+	categories: CategoryWithChildren[]
+	buckets: Bucket[]
+	filters: Filters
+	onChange: (changes: Partial<Filters>) => void
+	onClear: () => void
+}) {
+	const categoryIds = filters.category_ids?.split(",").filter(Boolean) ?? []
+	const bucketScope = filters.show_unbucketed
+		? "unbucketed"
+		: filters.bucket_id
+			? `bucket:${filters.bucket_id}`
+			: filters.bucket_group
+				? `group:${filters.bucket_group}`
+				: "all"
+	const activeFilterCount = [
+		categoryIds.length ? "category" : null,
+		filters.is_allocated,
+		bucketScope === "all" ? null : bucketScope,
+		filters.treatment,
+		filters.day,
+	].filter(Boolean).length
+
+	const changeBucketScope = (scope: string) => {
+		const changes: Partial<Filters> = {
+			bucket_id: undefined,
+			bucket_group: undefined,
+			show_unbucketed: undefined,
+		}
+		if (scope === "unbucketed") changes.show_unbucketed = true
+		else if (scope.startsWith("bucket:")) changes.bucket_id = scope.slice(7)
+		else if (scope.startsWith("group:")) changes.bucket_group = scope.slice(6)
+		onChange(changes)
+	}
+
+	return (
+		<section
+			className="flex flex-col gap-3 rounded-lg border bg-muted/20 p-3"
+			aria-labelledby="monthly-record-filters"
+		>
+			<div className="flex flex-wrap items-start justify-between gap-2">
+				<div>
+					<h3 id="monthly-record-filters" className="text-sm font-medium">
+						Filter this month
+					</h3>
+					<p className="text-xs text-muted-foreground">
+						{filters.day
+							? `Showing ${date.set({ day: Number(filters.day) }).toFormat("d LLL")}. `
+							: ""}
+						The list and totals update together.
+					</p>
+				</div>
+				{filters.day ? <Badge variant="secondary">Day {filters.day}</Badge> : null}
+			</div>
+			<FilterBar>
+				<CategoryFilter
+					categories={categories}
+					selectedIds={categoryIds}
+					onChange={ids => onChange({ category_ids: ids.join(",") || undefined })}
+				/>
+
+				<Select
+					value={filters.is_allocated ?? "all"}
+					onValueChange={value =>
+						onChange({ is_allocated: value === "all" ? undefined : value })
+					}
+				>
+					<SelectTrigger className={cn("w-full sm:w-40", FILTER_CONTROL_CLASS)}>
+						<IconifyIcon icon="lucide:circle-check-big" />
+						<SelectValue />
+					</SelectTrigger>
+					<SelectContent align="start" variant="filter">
+						<SelectGroup>
+							<SelectItem value="all">Any status</SelectItem>
+							<SelectItem value="true">Complete</SelectItem>
+							<SelectItem value="false">Pending</SelectItem>
+						</SelectGroup>
+					</SelectContent>
+				</Select>
+
+				<Select value={bucketScope} onValueChange={changeBucketScope}>
+					<SelectTrigger className={cn("w-full sm:w-40", FILTER_CONTROL_CLASS)}>
+						<IconifyIcon icon="lucide:wallet-cards" />
+						<SelectValue />
+					</SelectTrigger>
+					<SelectContent align="start" variant="filter">
+						<SelectGroup>
+							<SelectItem value="all">Any bucket</SelectItem>
+							<SelectItem value="unbucketed">No bucket</SelectItem>
+						</SelectGroup>
+						<SelectSeparator />
+						<SelectGroup>
+							<SelectLabel>Bucket groups</SelectLabel>
+							<SelectItem value="group:core">Core</SelectItem>
+							<SelectItem value="group:outlier">Outlier</SelectItem>
+							<SelectItem value="group:other">Other</SelectItem>
+						</SelectGroup>
+						{buckets.length ? <SelectSeparator /> : null}
+						{buckets.length ? (
+							<SelectGroup>
+								<SelectLabel>Specific bucket</SelectLabel>
+								{buckets.map(bucket => (
+									<SelectItem key={bucket.id} value={`bucket:${bucket.id}`}>
+										<span
+											className="size-2 rounded-full"
+											style={{ backgroundColor: bucket.color }}
+										/>
+										{bucket.name}
+									</SelectItem>
+								))}
+							</SelectGroup>
+						) : null}
+					</SelectContent>
+				</Select>
+
+				<Select
+					value={filters.treatment ?? "all"}
+					onValueChange={value =>
+						onChange({ treatment: value === "all" ? undefined : value })
+					}
+				>
+					<SelectTrigger className={cn("w-full sm:w-40", FILTER_CONTROL_CLASS)}>
+						<IconifyIcon icon="lucide:chart-no-axes-combined" />
+						<SelectValue />
+					</SelectTrigger>
+					<SelectContent align="start" variant="filter">
+						<SelectGroup>
+							<SelectItem value="all">Any treatment</SelectItem>
+							<SelectItem value="income">Income</SelectItem>
+							<SelectItem value="spending">Spending</SelectItem>
+							<SelectItem value="saving_investment">Saving / investment</SelectItem>
+							<SelectItem value="neutral">Excluded</SelectItem>
+							<SelectItem value="automatic">Automatic</SelectItem>
+						</SelectGroup>
+					</SelectContent>
+				</Select>
+				<ClearFiltersButton count={activeFilterCount} onClear={onClear} />
+			</FilterBar>
+		</section>
 	)
 }
 
@@ -537,7 +726,23 @@ function Metric({ label, value }: { label: string; value: string }) {
 	)
 }
 
-function EmptyRecords() {
+function EmptyRecords({ filtered, onClear }: { filtered: boolean; onClear: () => void }) {
+	if (filtered) {
+		return (
+			<Card>
+				<CardHeader>
+					<CardTitle>No matching Records</CardTitle>
+					<CardDescription>Try changing or clearing the current filters.</CardDescription>
+				</CardHeader>
+				<CardContent>
+					<Button variant="outline" onClick={onClear}>
+						Clear filters
+					</Button>
+				</CardContent>
+			</Card>
+		)
+	}
+
 	return (
 		<Card>
 			<CardHeader>

@@ -1,5 +1,4 @@
 import { router } from "@inertiajs/react"
-import { DateTime } from "luxon"
 import {
 	type ActiveDotProps,
 	Area,
@@ -14,7 +13,7 @@ import {
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { formatCurrency } from "@/lib/utils"
-import { recordsWebRoute } from "@/wayfinder/routes"
+import { monthlyRecordsWebRoute } from "@/wayfinder/routes"
 
 export type CashflowPoint = {
 	day: number
@@ -44,12 +43,9 @@ export default function CashflowChart({
 	const projectionChange = colorChange(data, "projected_spending", target)
 	const openDay = (state: { activeLabel?: number | string } | null) => {
 		if (!state?.activeLabel) return
-		const date = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy").set({
-			day: Number(state.activeLabel),
-		})
-		const isoDate = date.toISODate()
-		if (!isoDate) return
-		router.visit(recordsWebRoute({ query: { start_date: isoDate, end_date: isoDate } }))
+		router.visit(
+			monthlyRecordsWebRoute({ query: { month, year, day: Number(state.activeLabel) } }),
+		)
 	}
 
 	const tooltip = (
