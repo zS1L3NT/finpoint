@@ -557,17 +557,16 @@ export default function RecordEditorDialog({
 				</form>
 
 				<DialogFooter>
-					<p className="mr-auto text-xs text-destructive" aria-live="polite">
-						{submitError}
-					</p>
-					<Button
-						type="button"
-						variant="destructive"
-						className="mr-auto"
-						onClick={handleDelete}
-					>
-						<IconifyIcon icon="lucide:trash-2" /> Delete
-					</Button>
+					<div className="flex min-w-0 flex-col gap-2 sm:mr-auto sm:flex-row sm:items-center">
+						<Button type="button" variant="destructive" onClick={handleDelete}>
+							<IconifyIcon icon="lucide:trash-2" /> Delete
+						</Button>
+						{submitError ? (
+							<p className="text-xs text-destructive" aria-live="polite">
+								{submitError}
+							</p>
+						) : null}
+					</div>
 					<DialogClose
 						render={
 							<Button type="button" variant="outline">
