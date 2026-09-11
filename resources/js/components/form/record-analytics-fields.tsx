@@ -93,12 +93,14 @@ export default function RecordAnalyticsFields({
 							.filter(bucket => !bucket.archived)
 							.map(bucket => ({ value: bucket.id, label: bucket.name })),
 					]}
-					onChange={value =>
+					onChange={value => {
+						if (!value) return
+
 						onBucketChange(
 							value === CATEGORY_DEFAULT ? (categoryBucketId ?? "") : value,
 							value === CATEGORY_DEFAULT ? "category" : "manual",
 						)
-					}
+					}}
 				/>
 			</FieldGroup>
 		</div>

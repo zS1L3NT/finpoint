@@ -385,13 +385,16 @@ export default function RecordEditorDialog({
 										)}
 										onChange={value => {
 											field.handleChange(value?.id ?? "")
-											if (
-												form.getFieldValue("bucket_source") === "category"
-											) {
+											if (value?.default_bucket_id) {
 												form.setFieldValue(
 													"bucket_id",
-													value?.default_bucket_id ?? "",
+													value.default_bucket_id,
 												)
+												form.setFieldValue("bucket_source", "category")
+											} else if (
+												form.getFieldValue("bucket_source") === "category"
+											) {
+												form.setFieldValue("bucket_id", "")
 											}
 											clearApiError(field.name)
 										}}
