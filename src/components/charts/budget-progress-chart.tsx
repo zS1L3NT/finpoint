@@ -126,6 +126,7 @@ export default function BudgetProgressChart({
 						}
 					/>
 					<Area
+						isAnimationActive={false}
 						dataKey="usage"
 						name="Usage"
 						stroke="url(#budget-usage-line)"
@@ -143,6 +144,7 @@ export default function BudgetProgressChart({
 						)}
 					/>
 					<Area
+						isAnimationActive={false}
 						dataKey="projection"
 						name="Usage (projection)"
 						stroke="url(#budget-projection-line)"

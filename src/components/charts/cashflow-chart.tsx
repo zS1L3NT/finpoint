@@ -149,6 +149,7 @@ export default function CashflowChart({
 						) : null}
 						<ChartTooltip content={tooltip} />
 						<Area
+							isAnimationActive={false}
 							dataKey="spending"
 							name="Usage"
 							stroke="url(#actual-line)"
@@ -166,6 +167,7 @@ export default function CashflowChart({
 							)}
 						/>
 						<Area
+							isAnimationActive={false}
 							dataKey="projected_spending"
 							name="Usage (projection)"
 							stroke="url(#projection-line)"
@@ -210,6 +212,7 @@ export default function CashflowChart({
 						<ReferenceLine y={0} stroke="var(--border)" />
 						<ChartTooltip content={tooltip} />
 						<Line
+							isAnimationActive={false}
 							dataKey="surplus"
 							stroke="var(--color-surplus)"
 							strokeWidth={2.5}
