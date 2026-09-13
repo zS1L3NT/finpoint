@@ -60,7 +60,8 @@ export function downloadExport(data: FinpointExport): void {
 	const url = URL.createObjectURL(blob)
 	const anchor = document.createElement("a")
 	anchor.href = url
-	anchor.download = `finpoint-export-${data.exported_at.slice(0, 10)}.json`
+	const stamp = new Date().toISOString().replace(/[-:]/g, "").replace("T", "-").slice(0, 15)
+	anchor.download = `finpoint-backup-${stamp}.json`
 	document.body.appendChild(anchor)
 	anchor.click()
 	anchor.remove()
@@ -70,14 +71,14 @@ export function downloadExport(data: FinpointExport): void {
 export function parseImportFile(text: string): FinpointExport {
 	const parsed = JSON.parse(text) as Partial<FinpointExport>
 	if (parsed?.app !== "finpoint" || typeof parsed !== "object" || !parsed.tables) {
-		throw new Error("This file is not a Finpoint export.")
+		throw new Error("This file is not a Finpoint backup.")
 	}
 	if ((parsed.version ?? 0) > EXPORT_VERSION) {
-		throw new Error("This export was created by a newer Finpoint version.")
+		throw new Error("This backup was made by a newer Finpoint version.")
 	}
 	for (const table of TABLES) {
 		if (!Array.isArray(parsed.tables?.[table])) {
-			throw new Error(`Export is missing table "${table}".`)
+			throw new Error("This backup file looks incomplete.")
 		}
 	}
 	return parsed as FinpointExport

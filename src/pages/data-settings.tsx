@@ -47,9 +47,9 @@ export default function DataSettingsPage() {
 		setBusy("export")
 		try {
 			downloadExport(await exportData())
-			toast.success("Export downloaded.")
+			toast.success("Backup saved.")
 		} catch {
-			toast.error("Export failed.")
+			toast.error("Couldn't save backup.")
 		} finally {
 			setBusy(null)
 		}
@@ -57,14 +57,14 @@ export default function DataSettingsPage() {
 
 	const handleImport = async () => {
 		if (!importFile) {
-			toast.error("Choose an export file first.")
+			toast.error("Choose a backup file first.")
 			return
 		}
 		setBusy("import")
 		try {
 			const text = await importFile.text()
 			await importData(parseImportFile(text))
-			toast.success("Import complete. Your data was replaced.")
+			toast.success("Backup restored.")
 			setImportFile(null)
 			if (fileInputRef.current) fileInputRef.current.value = ""
 		} catch (cause) {
@@ -83,7 +83,7 @@ export default function DataSettingsPage() {
 		try {
 			await clearAllData()
 			await seedIfEmpty()
-			toast.success("Workspace cleared and defaults restored.")
+			toast.success("Workspace cleared.")
 			setConfirmingClear(false)
 		} catch {
 			toast.error("Could not clear data.")
@@ -116,7 +116,7 @@ export default function DataSettingsPage() {
 			<PageContent>
 				<PageHeader
 					title="Data"
-					subtitle="Your data lives in this browser's IndexedDB — it persists across sessions with no account or server. Export a JSON backup before switching browsers, and import it to restore."
+					subtitle="Everything is saved privately in this browser — no account, no server. Save a backup before switching devices, and restore it to pick up where you left off."
 					description="Settings"
 					icon="lucide:database"
 				/>
@@ -125,25 +125,35 @@ export default function DataSettingsPage() {
 					<div className="grid gap-6">
 						<Card>
 							<CardHeader className="border-b">
-								<CardTitle>Export backup</CardTitle>
+								<CardTitle>Save a backup</CardTitle>
 								<CardDescription>
-									Download every account, statement, record, allocation, budget,
-									category, and bucket as one versioned JSON file.
+									Save everything — accounts, statements, records, budgets,
+									categories, and spending buckets — into one backup file you can
+									keep or move to another device.
 								</CardDescription>
 							</CardHeader>
 							<CardContent>
 								{counts ? (
 									<ul className="grid gap-2 text-sm sm:grid-cols-2">
-										{Object.entries(counts).map(([table, count]) => (
+										{(
+											[
+												["accounts", "Accounts"],
+												["statements", "Statements"],
+												["records", "Records"],
+												["categories", "Categories"],
+												["budgets", "Budgets"],
+												["buckets", "Spending buckets"],
+											] as const
+										).map(([key, label]) => (
 											<li
-												key={table}
+												key={key}
 												className="flex items-center justify-between gap-3 border-b py-1.5"
 											>
 												<span className="text-muted-foreground">
-													{table.replaceAll("_", " ")}
+													{label}
 												</span>
 												<span className="font-medium tabular-nums">
-													{count}
+													{counts[key] ?? 0}
 												</span>
 											</li>
 										))}
@@ -170,19 +180,17 @@ export default function DataSettingsPage() {
 									onClick={() => void handleExport()}
 								>
 									<IconifyIcon icon="lucide:download" />
-									{busy === "export"
-										? "Exporting…"
-										: `Download JSON (${total} rows)`}
+									{busy === "export" ? "Saving…" : `Save backup (${total} items)`}
 								</Button>
 							</CardFooter>
 						</Card>
 
 						<Card>
 							<CardHeader className="border-b">
-								<CardTitle>Import backup</CardTitle>
+								<CardTitle>Restore a backup</CardTitle>
 								<CardDescription>
-									Restore from a Finpoint JSON export. This replaces all current
-									data in this browser.
+									Bring back a backup you saved earlier. This replaces everything
+									currently in this browser.
 								</CardDescription>
 							</CardHeader>
 							<CardContent className="space-y-4">
@@ -190,7 +198,7 @@ export default function DataSettingsPage() {
 									ref={fileInputRef}
 									type="file"
 									accept=".json,application/json"
-									aria-label="Finpoint export file"
+									aria-label="Finpoint backup file"
 									onChange={event =>
 										setImportFile(event.currentTarget.files?.[0] ?? null)
 									}
@@ -206,8 +214,8 @@ export default function DataSettingsPage() {
 										<ItemContent>
 											<ItemTitle>{importFile.name}</ItemTitle>
 											<ItemDescription>
-												{(importFile.size / 1024).toFixed(2)} KB · importing
-												replaces everything currently stored
+												{(importFile.size / 1024).toFixed(2)} KB · restoring
+												replaces everything you have now
 											</ItemDescription>
 										</ItemContent>
 									</Item>
@@ -221,7 +229,7 @@ export default function DataSettingsPage() {
 									onClick={() => void handleImport()}
 								>
 									<IconifyIcon icon="lucide:upload" />
-									{busy === "import" ? "Importing…" : "Import and replace"}
+									{busy === "import" ? "Restoring…" : "Restore backup"}
 								</Button>
 							</CardFooter>
 						</Card>
@@ -240,9 +248,9 @@ export default function DataSettingsPage() {
 								<ul className="grid gap-2 text-sm sm:grid-cols-2">
 									{[
 										["400+ records", "daily life, salary, investments"],
-										["470+ statements", "40+ awaiting allocation"],
-										["2 budgets", "trip + monthly autopilot"],
-										["Pending flow", "placeholders to replace"],
+										["470+ statements", "40+ waiting to be matched"],
+										["2 budgets", "a trip and a monthly plan"],
+										["Practice inbox", "unfinished items to complete"],
 									].map(([title, detail]) => (
 										<li
 											key={title}
@@ -336,8 +344,8 @@ export default function DataSettingsPage() {
 										1
 									</span>
 									<span>
-										Everything is stored locally in IndexedDB — no server sees
-										your data.
+										Everything is saved in this browser on this device — no
+										account, no server, nobody else sees it.
 									</span>
 								</li>
 								<li className="flex gap-3">
@@ -345,7 +353,8 @@ export default function DataSettingsPage() {
 										2
 									</span>
 									<span>
-										Schema upgrades run automatically via versioned migrations.
+										Finpoint keeps itself up to date in the background; your
+										data carries over automatically.
 									</span>
 								</li>
 								<li className="flex gap-3">
@@ -353,7 +362,8 @@ export default function DataSettingsPage() {
 										3
 									</span>
 									<span>
-										Export JSON before clearing browser data or moving devices.
+										Save a backup before clearing browser data or moving to
+										another device.
 									</span>
 								</li>
 							</ol>
