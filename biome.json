@@ -2,9 +2,8 @@
 	"$schema": "https://biomejs.dev/schemas/2.4.12/schema.json",
 	"files": {
 		"includes": [
-			"resources/js/**/*.{js,jsx,ts,tsx}",
-			"!resources/js/wayfinder/**/*.*",
-			"!resources/js/components/ui/**/*.*",
+			"src/**/*.{js,jsx,ts,tsx}",
+			"!src/components/ui/**/*.*",
 			"vite.config.ts",
 			"*.json",
 			"*.jsonc"
