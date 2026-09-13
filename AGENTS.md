@@ -2,12 +2,11 @@
 
 ## Project Shape
 - Fully client-side React + Vite app; no backend. `npm run dev` is the only thing needed to start.
-- `index.html` loads `src/app.tsx`, which boots IndexedDB (Dexie), seeds defaults, and mounts the react-router tree from `src/router.tsx` inside `src/layout.tsx`.
+- `index.html` loads `src/app.tsx`, which mounts the react-router tree from `src/router.tsx` inside `src/layout.tsx` immediately while IndexedDB (Dexie) opens and seeds in the background. No boot gate: live queries populate the UI as data arrives.
 - Layer segregation (UI must not cross it):
-  - `src/components/*` + `src/pages/*` are UI only: render, read via `useLiveQuery`/`useFetch`, and call `logic/*`. No direct Dexie imports.
+  - `src/components/*` + `src/pages/*` are UI only: render, read via `useLiveQuery`/`useFetch`, and call `logic/*`. No direct Dexie imports. Show `Skeleton` placeholders while live queries resolve, never blocking loaders.
   - `src/logic/*` holds domain operations and mirrors the old Laravel `Api/*Controller` surface 1:1 (accounts, statements, records, budgets, categories, buckets, importer, dashboard, monthly) so domain knowledge transfers.
   - `src/data/*` holds persistence: Dexie instance + versioned migrations (`db.ts`), first-run seed (`seed.ts`), JSON export/import (`exportImport.ts`).
-  - `src/stores/*` holds ephemeral global UI state (Zustand). Persisted state lives in IndexedDB, not here.
   - `src/routes.ts` centralizes all route paths (replaces Wayfinder).
 - React Compiler is enabled in `vite.config.ts`.
 

@@ -25,6 +25,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select"
+import { Skeleton } from "@/components/ui/skeleton"
 import { cn, formatCurrency } from "@/lib/utils"
 import { getDashboard } from "@/logic/dashboard"
 import { pathDashboard, pathMonthlyRecords } from "@/routes"
@@ -119,7 +120,24 @@ export default function DashboardPage() {
 			<>
 				<AppHeader title="Dashboard" />
 				<PageContent>
-					<p className="text-sm text-muted-foreground">Loading dashboard…</p>
+					<div className="grid gap-5">
+						<div className="grid gap-2">
+							<Skeleton className="h-4 w-32" />
+							<Skeleton className="h-8 w-64 max-w-full" />
+							<Skeleton className="h-4 w-96 max-w-full" />
+						</div>
+						<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+							<Skeleton className="h-28 w-full" />
+							<Skeleton className="h-28 w-full" />
+							<Skeleton className="h-28 w-full" />
+							<Skeleton className="h-28 w-full" />
+						</div>
+						<Skeleton className="h-72 w-full" />
+						<div className="grid gap-4 lg:grid-cols-2">
+							<Skeleton className="h-48 w-full" />
+							<Skeleton className="h-48 w-full" />
+						</div>
+					</div>
 				</PageContent>
 			</>
 		)

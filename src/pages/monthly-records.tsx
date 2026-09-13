@@ -29,6 +29,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select"
+import { Skeleton } from "@/components/ui/skeleton"
 import { useHistory } from "@/history"
 import { useFetch } from "@/hooks/use-fetch"
 import { treatmentLabel } from "@/lib/analytics"
@@ -195,7 +196,17 @@ export default function MonthlyRecordsPage() {
 			<>
 				<AppHeader title="Monthly Records" />
 				<PageContent>
-					<p className="text-sm text-muted-foreground">Loading monthly records…</p>
+					<div className="flex flex-col gap-4">
+						<Skeleton className="h-10 w-full" />
+						<div className="grid gap-2 overflow-hidden rounded-lg border bg-card p-3">
+							<Skeleton className="h-12 w-full" />
+							<Skeleton className="h-12 w-full" />
+							<Skeleton className="h-12 w-full" />
+							<Skeleton className="h-12 w-full" />
+							<Skeleton className="h-12 w-full" />
+							<Skeleton className="h-12 w-full" />
+						</div>
+					</div>
 				</PageContent>
 			</>
 		)

@@ -15,6 +15,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card"
 import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from "@/components/ui/item"
+import { Skeleton } from "@/components/ui/skeleton"
 import { db } from "@/data/db"
 import {
 	clearAllData,
@@ -129,7 +130,17 @@ export default function DataSettingsPage() {
 										))}
 									</ul>
 								) : (
-									<p className="text-sm text-muted-foreground">Loading counts…</p>
+									<ul className="grid gap-2 text-sm sm:grid-cols-2">
+										{Array.from({ length: 6 }).map((_, index) => (
+											<li
+												key={index}
+												className="flex items-center justify-between gap-3 border-b py-1.5"
+											>
+												<Skeleton className="h-4 w-24" />
+												<Skeleton className="h-4 w-10" />
+											</li>
+										))}
+									</ul>
 								)}
 							</CardContent>
 							<CardFooter className="border-t bg-muted/20">
