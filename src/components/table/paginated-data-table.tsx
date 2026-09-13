@@ -5,7 +5,7 @@ import {
 	type Row,
 	useReactTable,
 } from "@tanstack/react-table"
-import { memo } from "react"
+import { memo, useState } from "react"
 import PaginationFooter from "@/components/table/pagination-footer"
 import PaginationHeader from "@/components/table/pagination-header"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -48,13 +48,26 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 		getRowId: row => row.id,
 	})
 	const skeletonRows = Math.min(Math.max(Number(header.pageSize) || 8, 3), 12)
+	// Entrance animation plays once, on first arrival. The flag flips when it
+	// ends so pagination, search, and filter updates swap instantly forever.
+	const [entered, setEntered] = useState(false)
+	const arrive = (event: React.AnimationEvent) => {
+		if (event.target === event.currentTarget) setEntered(true)
+	}
+	const arrival = !entered ? "animate-in fade-in duration-200" : undefined
 
 	return (
 		<div className="flex flex-col gap-4">
 			{header ? <PaginationHeader {...header} /> : null}
 
 			{mobileRow ? (
-				<div className="min-w-0 divide-y overflow-hidden rounded-lg border bg-card md:hidden">
+				<div
+					onAnimationEnd={arrive}
+					className={cn(
+						"min-w-0 divide-y overflow-hidden rounded-lg border bg-card md:hidden",
+						arrival,
+					)}
+				>
 					{loading ? (
 						Array.from({ length: 4 }).map((_, index) => (
 							<div key={index} className="grid gap-1.5 px-3 py-2.5">
@@ -111,7 +124,11 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 							</TableRow>
 						))}
 					</TableHeader>
-					<TableBody key={loading ? "skeleton" : "rows"}>
+					<TableBody
+						key={loading ? "skeleton" : "rows"}
+						onAnimationEnd={arrive}
+						className={arrival}
+					>
 						{loading ? (
 							Array.from({ length: skeletonRows }).map((_, row) => (
 								<TableRow key={row}>
