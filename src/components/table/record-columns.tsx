@@ -210,6 +210,9 @@ export function useRecordMobileRow<TRecord extends RecordRow>({
 							<p className="text-xs text-muted-foreground break-words">
 								{record.subtitle || "No extra context"}
 							</p>
+							<p className="truncate text-xs text-muted-foreground">
+								{formatDatetime(record.datetime)}
+							</p>
 						</div>
 						<RecordAmount
 							record={record}
@@ -218,12 +221,9 @@ export function useRecordMobileRow<TRecord extends RecordRow>({
 						/>
 					</div>
 
-					<div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-1.5 pl-7 text-xs text-muted-foreground">
-						<span className="truncate">{formatDatetime(record.datetime)}</span>
-						<div className="flex flex-wrap items-center justify-end gap-1.5">
-							{actions}
-							{extraActions?.(record)}
-						</div>
+					<div className="flex items-center justify-end gap-1.5">
+						{actions}
+						{extraActions?.(record)}
 					</div>
 				</div>
 			)

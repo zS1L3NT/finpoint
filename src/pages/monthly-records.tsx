@@ -26,6 +26,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { useHistory } from "@/history"
 import { useFetch } from "@/hooks/use-fetch"
+import { useTabTransition } from "@/hooks/use-tab-transition"
 import { treatmentLabel } from "@/lib/analytics"
 import { cn, formatCurrency, formatDatetime } from "@/lib/utils"
 import { listCategories } from "@/logic/categories"
@@ -74,6 +75,7 @@ export default function MonthlyRecordsPage() {
 			? Number(dayParam)
 			: null
 	const date = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
+	const animateContent = useTabTransition()
 
 	const filterKey = JSON.stringify([
 		categoryIdsParam,
@@ -231,7 +233,12 @@ export default function MonthlyRecordsPage() {
 
 	return (
 		<>
-			<div className="grid gap-5 md:gap-7">
+			<div
+				className={cn(
+					"grid gap-5 md:gap-7",
+					animateContent && "animate-in fade-in duration-200",
+				)}
+			>
 				<MonthlyRecordFilters
 					date={date}
 					categories={categories}

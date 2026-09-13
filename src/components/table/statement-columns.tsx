@@ -191,6 +191,9 @@ export function useStatementMobileRow<TStatement extends StatementRow>({
 									{statement.description || "No description"}
 								</p>
 							) : null}
+							<p className="truncate text-xs text-muted-foreground">
+								{formatDatetime(statement.datetime)}
+							</p>
 						</div>
 						{amount === "amount" ? (
 							<span className={classForCurrency(statement.amount)}>
@@ -211,10 +214,7 @@ export function useStatementMobileRow<TStatement extends StatementRow>({
 						/>
 					) : null}
 
-					<div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-1.5 pl-7 text-xs text-muted-foreground">
-						<span className="truncate">{formatDatetime(statement.datetime)}</span>
-						{actions}
-					</div>
+					<div className="flex items-center justify-end gap-1.5">{actions}</div>
 				</div>
 			)
 		},

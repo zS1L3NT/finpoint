@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useMonthParams } from "@/hooks/use-month-params"
+import { useTabTransition } from "@/hooks/use-tab-transition"
 import { cn, formatCurrency } from "@/lib/utils"
 import { getDashboard } from "@/logic/dashboard"
 import { pathMonthlyRecords } from "@/routes"
@@ -81,6 +82,7 @@ type DashboardData = {
 
 export default function DashboardPage() {
 	const { month, year, date } = useMonthParams()
+	const animateContent = useTabTransition()
 	const data = useLiveQuery(() => getDashboard({ month, year }), [month, year]) as unknown as
 		| DashboardData
 		| undefined
@@ -168,7 +170,12 @@ export default function DashboardPage() {
 	)
 
 	return (
-		<div className="grid gap-7 md:gap-9">
+		<div
+			className={cn(
+				"grid gap-7 md:gap-9",
+				animateContent && "animate-in fade-in duration-200",
+			)}
+		>
 			{period.is_future ? (
 				<Card>
 					<CardHeader>

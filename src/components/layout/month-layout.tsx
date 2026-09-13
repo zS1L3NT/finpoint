@@ -8,6 +8,7 @@ import { ButtonGroup } from "@/components/ui/button-group"
 import { MonthPicker } from "@/components/ui/monthpicker"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { useMonthParams } from "@/hooks/use-month-params"
+import { armTabTransition } from "@/hooks/use-tab-transition"
 import { cn } from "@/lib/utils"
 import { pathDashboard, pathMonthlyRecords, pathRecords } from "@/routes"
 
@@ -111,6 +112,7 @@ export default function MonthLayout() {
 										: "border-foreground font-medium",
 								)}
 								to={pathDashboard({ month, year: String(year) })}
+								onClick={armTabTransition}
 							>
 								Overview
 							</Link>
@@ -122,6 +124,7 @@ export default function MonthLayout() {
 										: "border-transparent text-muted-foreground",
 								)}
 								to={pathMonthlyRecords({ month, year: String(year) })}
+								onClick={armTabTransition}
 							>
 								Monthly Records
 							</Link>
