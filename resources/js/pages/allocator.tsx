@@ -1,6 +1,7 @@
 import { Icon as IconifyIcon } from "@iconify/react"
 import { router, usePage } from "@inertiajs/react"
 import { useState } from "react"
+import AllocatorTabs from "@/components/allocator-tabs"
 import RecordCreatorDialog from "@/components/dialogs/record-creator"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
 import DateField from "@/components/form/date-field"
@@ -15,17 +16,32 @@ import PaginatedDataTable from "@/components/table/paginated-data-table"
 import { useStatementColumns, useStatementMobileRow } from "@/components/table/statement-columns"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import {
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select"
 import { START_DATE } from "@/constants"
 import { useFetch } from "@/hooks/use-fetch"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
-import { formatCurrency } from "@/lib/utils"
-import { CategoryWithChildren, Paginated, Record, Statement } from "@/types"
+import { cn, formatCurrency } from "@/lib/utils"
+import { Account, CategoryWithChildren, Paginated, Record, Statement } from "@/types"
 import { allocatorWebRoute, categoryIndexApiRoute, recordShowApiRoute } from "@/wayfinder/routes"
 
-export default function AllocatorPage({ statements }: { statements: Paginated<Statement> }) {
+export default function AllocatorPage({
+	statements,
+	accounts,
+}: {
+	statements: Paginated<Statement>
+	accounts: Account[]
+}) {
 	const page = usePage()
 	const pageUrl = new URL(page.url, "http://localhost")
+	const accountId = pageUrl.searchParams.get("account_id") ?? "all"
 	const startDate = pageUrl.searchParams.get("start_date")
 	const endDate = pageUrl.searchParams.get("end_date")
 	const categories = useFetch<CategoryWithChildren[]>(categoryIndexApiRoute.url(), [])
@@ -46,9 +62,12 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 		url.searchParams.delete("page")
 		router.visit(url.pathname + url.search, { preserveState: true, preserveScroll: true })
 	}
-	const activeFilterCount = [pageUrl.searchParams.get("query"), startDate, endDate].filter(
-		Boolean,
-	).length
+	const activeFilterCount = [
+		pageUrl.searchParams.get("query"),
+		accountId === "all" ? "" : accountId,
+		startDate,
+		endDate,
+	].filter(Boolean).length
 	const clearFilters = () =>
 		router.visit(
 			allocatorWebRoute({
@@ -63,6 +82,7 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 			allocatorWebRoute({
 				query: {
 					...query,
+					account_id: accountId === "all" ? undefined : accountId,
 					start_date: startDate || undefined,
 					end_date: endDate || undefined,
 				},
@@ -111,6 +131,8 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 					icon="lucide:link"
 				/>
 
+				<AllocatorTabs active="allocate" />
+
 				<PaginatedDataTable
 					paginated={statements}
 					columns={[
@@ -145,6 +167,31 @@ export default function AllocatorPage({ statements }: { statements: Paginated<St
 						searchPlaceholder: "Search unallocated statements...",
 						filters: (
 							<FilterBar>
+								<Select
+									value={accountId}
+									onValueChange={value =>
+										updateFilters({
+											account_id: value === "all" ? null : value,
+										})
+									}
+								>
+									<SelectTrigger
+										className={cn("w-full sm:w-40", FILTER_CONTROL_CLASS)}
+									>
+										<IconifyIcon icon="lucide:landmark" />
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent align="start" variant="filter">
+										<SelectGroup>
+											<SelectItem value="all">All Accounts</SelectItem>
+											{accounts.map(account => (
+												<SelectItem key={account.id} value={account.id}>
+													{account.name}
+												</SelectItem>
+											))}
+										</SelectGroup>
+									</SelectContent>
+								</Select>
 								<DateField
 									id="allocator_start_date"
 									value={startDate ?? ""}

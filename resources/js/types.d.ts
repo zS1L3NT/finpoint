@@ -40,6 +40,33 @@ export type Statement = {
 	account: Account
 }
 
+export type PendingReplacementStatement = Statement & {
+	suggestion_count: number
+}
+
+export type StatementReplacementCandidate = Statement & {
+	amount_difference: number
+	day_difference: number
+	is_exact_amount: boolean
+	allocated_amount: number
+	remaining_allocable_amount: number
+	can_replace: boolean
+	disabled_reason: string | null
+}
+
+export type StatementReplacementReview = {
+	pending_statement: Statement
+	statement: Statement
+	allocations: Array<Record & { allocation_amount: number }>
+	amount_difference: number
+	day_difference: number
+	is_exact_amount: boolean
+	allocated_amount: number
+	remaining_allocable_amount: number
+	can_replace: boolean
+	disabled_reason: string | null
+}
+
 export type Record = {
 	id: string
 	datetime: string

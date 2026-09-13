@@ -22,6 +22,8 @@ Route::resource('allocator', AllocatorController::class)
     ->names([
         'index' => 'allocator-web-route',
     ]);
+Route::get('allocator/pending', [AllocatorController::class, 'pending'])
+    ->name('allocator-pending-web-route');
 
 Route::resource('statements', StatementController::class)
     ->only('index', 'show')

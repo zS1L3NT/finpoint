@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Statement;
+use App\Support\StatementReplacement;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -72,34 +73,22 @@ class StatementController extends Controller
         return [];
     }
 
-    public function replacePending(Statement $statement, Statement $pending_statement)
-    {
-        return DB::transaction(function () use ($statement, $pending_statement) {
+    public function replacePending(
+        Statement $statement,
+        Statement $pending_statement,
+        StatementReplacement $replacement,
+    ) {
+        return DB::transaction(function () use ($statement, $pending_statement, $replacement) {
             $statement = Statement::query()->lockForUpdate()->findOrFail($statement->id);
             $pending_statement = Statement::query()->lockForUpdate()->findOrFail($pending_statement->id);
-
-            if ($statement->is_pending) {
-                throw ValidationException::withMessages([
-                    'statement' => 'Choose an imported statement as the replacement.',
-                ]);
-            }
-
-            $this->ensurePending($pending_statement);
-
-            if ($statement->account_id !== $pending_statement->account_id) {
-                throw ValidationException::withMessages([
-                    'statement' => 'The imported and pending statements must belong to the same account.',
-                ]);
-            }
-
-            if ($statement->allocations()->exists()) {
-                throw ValidationException::withMessages([
-                    'statement' => 'The imported statement must be fully unallocated.',
-                ]);
-            }
-
-            $allocations = $pending_statement->allocations()->lockForUpdate()->get();
-            $this->ensureAllocationsFit($statement->amount, $allocations);
+            $statementAllocations = $statement->allocations()->lockForUpdate()->get();
+            $pendingAllocations = $pending_statement->allocations()->lockForUpdate()->get();
+            $replacement->ensureCanReplace(
+                $statement,
+                $pending_statement,
+                $pendingAllocations,
+                $statementAllocations,
+            );
 
             $pending_statement->allocations()->update(['statement_id' => $statement->id]);
             $pending_statement->delete();

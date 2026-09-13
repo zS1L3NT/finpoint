@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\ImporterController;
 use App\Http\Controllers\Api\RecordBucketController;
 use App\Http\Controllers\Api\RecordController;
 use App\Http\Controllers\Api\StatementController;
+use App\Http\Controllers\Api\StatementReplacementController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('importer/dbs', [ImporterController::class, 'dbs'])->name('importer-dbs-api-route');
@@ -28,6 +29,10 @@ Route::apiResource('statements', StatementController::class)
     ]);
 Route::post('statements/{statement}/replace-pending/{pending_statement}', [StatementController::class, 'replacePending'])
     ->name('statement-replace-pending-api-route');
+Route::get('statements/{pending_statement}/replacement-candidates', [StatementReplacementController::class, 'candidates'])
+    ->name('statement-replacement-candidates-api-route');
+Route::get('statements/{pending_statement}/replacement-review/{statement}', [StatementReplacementController::class, 'review'])
+    ->name('statement-replacement-review-api-route');
 
 Route::apiResource('accounts', AccountController::class)
     ->only('update')
