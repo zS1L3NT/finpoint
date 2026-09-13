@@ -48,18 +48,18 @@ export default function AllocatorPage() {
 	const accounts = useLiveQuery(() => listAccounts(), []) ?? []
 	const categories =
 		useLiveQuery(() => listCategories() as unknown as Promise<CategoryWithChildren[]>, []) ?? []
-	const statements =
-		useLiveQuery(
-			() =>
-				listStatements({
-					query: query || null,
-					account_id: accountId === "all" ? null : accountId,
-					start_date: startDate,
-					end_date: endDate,
-					is_allocable: "true",
-				}),
-			[query, accountId, startDate, endDate],
-		) ?? []
+	const statementsQuery = useLiveQuery(
+		() =>
+			listStatements({
+				query: query || null,
+				account_id: accountId === "all" ? null : accountId,
+				start_date: startDate,
+				end_date: endDate,
+				is_allocable: "true",
+			}),
+		[query, accountId, startDate, endDate],
+	)
+	const statements = statementsQuery ?? []
 	const paginated = useMemo(
 		() => paginateItems(statements, parsePage(page), parsePageSize(pageSize)),
 		[statements, page, pageSize],
@@ -225,6 +225,7 @@ export default function AllocatorPage() {
 					selectedIds={selectedStatements.map(s => s.id)}
 					mobileRow={statementMobileRow}
 					emptyMessage="No statements found."
+					loading={statementsQuery === undefined}
 				/>
 			</PageContent>
 

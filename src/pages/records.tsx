@@ -86,32 +86,32 @@ export default function RecordsPage() {
 		treatment,
 	].filter(Boolean).length
 
-	const records =
-		useLiveQuery(
-			() =>
-				listRecords({
-					query: query || null,
-					start_date: startDate,
-					end_date: endDate,
-					is_allocated: isAllocated,
-					category_ids: categoryIds.length ? categoryIds : null,
-					bucket_id: bucketId,
-					bucket_group: bucketGroup,
-					show_unbucketed: showUnbucketed,
-					treatment,
-				}),
-			[
-				query,
-				startDate,
-				endDate,
-				isAllocated,
-				categoryIdsParam,
-				bucketId,
-				bucketGroup,
-				showUnbucketed,
+	const recordsQuery = useLiveQuery(
+		() =>
+			listRecords({
+				query: query || null,
+				start_date: startDate,
+				end_date: endDate,
+				is_allocated: isAllocated,
+				category_ids: categoryIds.length ? categoryIds : null,
+				bucket_id: bucketId,
+				bucket_group: bucketGroup,
+				show_unbucketed: showUnbucketed,
 				treatment,
-			],
-		) ?? []
+			}),
+		[
+			query,
+			startDate,
+			endDate,
+			isAllocated,
+			categoryIdsParam,
+			bucketId,
+			bucketGroup,
+			showUnbucketed,
+			treatment,
+		],
+	)
+	const records = recordsQuery ?? []
 	const paginated = useMemo(
 		() => paginateItems(records, parsePage(page), parsePageSize(pageSize)),
 		[records, page, pageSize],
@@ -202,6 +202,7 @@ export default function RecordsPage() {
 					footer={tableFooter}
 					mobileRow={mobileRow}
 					emptyMessage="No records found."
+					loading={recordsQuery === undefined}
 				/>
 			</PageContent>
 

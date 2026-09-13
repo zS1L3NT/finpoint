@@ -46,17 +46,17 @@ export default function StatementsPage() {
 		setParams({ query: null, is_pending: null, start_date: null, end_date: null, page: null })
 
 	const accounts = useLiveQuery(() => listAccounts(), []) ?? []
-	const statements =
-		useLiveQuery(
-			() =>
-				listStatements({
-					query: query || null,
-					is_pending: isPending,
-					start_date: startDate,
-					end_date: endDate,
-				}),
-			[query, isPending, startDate, endDate],
-		) ?? []
+	const statementsQuery = useLiveQuery(
+		() =>
+			listStatements({
+				query: query || null,
+				is_pending: isPending,
+				start_date: startDate,
+				end_date: endDate,
+			}),
+		[query, isPending, startDate, endDate],
+	)
+	const statements = statementsQuery ?? []
 	const paginated = useMemo(
 		() => paginateItems(statements, parsePage(page), parsePageSize(pageSize)),
 		[statements, page, pageSize],
@@ -155,6 +155,7 @@ export default function StatementsPage() {
 					}}
 					mobileRow={mobileRow}
 					emptyMessage="No statements found."
+					loading={statementsQuery === undefined}
 				/>
 			</PageContent>
 

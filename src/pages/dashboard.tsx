@@ -168,7 +168,10 @@ export default function DashboardPage() {
 	)
 
 	return (
-		<div className="grid gap-7 md:gap-9">
+		<div
+			key={`${month}-${year}`}
+			className="grid gap-7 animate-in fade-in duration-200 md:gap-9"
+		>
 			{period.is_future ? (
 				<Card>
 					<CardHeader>

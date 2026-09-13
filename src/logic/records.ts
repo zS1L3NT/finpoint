@@ -35,7 +35,7 @@ function subtitle(people: string | null, location: string | null): string | null
 	return out || null
 }
 
-async function enrich(
+export async function enrichRecords(
 	rows: {
 		id: string
 		title: string
@@ -161,7 +161,7 @@ export async function listRecords(filters: RecordFilters = {}) {
 		rows = rows.filter(r => !attached.has(r.id))
 	}
 
-	let enriched = await enrich(rows)
+	let enriched = await enrichRecords(rows)
 
 	const allocation = filters.is_allocated
 	if (allocation === "1" || allocation === "true") {
@@ -186,7 +186,7 @@ export async function listRecords(filters: RecordFilters = {}) {
 export async function getRecord(id: string) {
 	const row = await db.records.get(id)
 	if (!row) throw new Error("Record not found.")
-	const enriched = (await enrich([row]))[0]
+	const enriched = (await enrichRecords([row]))[0]
 	if (!enriched) throw new Error("Record not found.")
 	const allocations = await db.allocations.where("record_id").equals(id).toArray()
 	const statementIds = allocations.map(a => a.statement_id)

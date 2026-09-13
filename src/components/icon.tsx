@@ -7,7 +7,8 @@ function resolve(name: string) {
 }
 
 /** Drop-in for the old Iconify runtime icon: bundled SVG, same props. */
-export function UiIcon({ icon, ...props }: { icon: string } & React.ComponentProps<"svg">) {
+export function UiIcon({ icon, ...props }: { icon?: string | null } & React.ComponentProps<"svg">) {
+	if (!icon?.trim()) return null
 	const Component = resolve(icon)
 	return <Component {...props} />
 }
@@ -17,16 +18,21 @@ export default function Icon({
 	color,
 	size = 20,
 }: {
-	icon: string
-	color: string
+	icon?: string | null
+	color?: string | null
 	size?: number
 }) {
 	return (
 		<div
 			className="flex justify-center items-center rounded"
-			style={{ width: size * 2, height: size * 2, backgroundColor: color }}
+			style={{ width: size * 2, height: size * 2, backgroundColor: color ?? undefined }}
 		>
-			<UiIcon icon={icon} color="white" width={size} height={size} />
+			<UiIcon
+				icon={icon ?? "circle-question-mark"}
+				color="white"
+				width={size}
+				height={size}
+			/>
 		</div>
 	)
 }

@@ -5,9 +5,113 @@
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Finpoint</title>
+		<style>
+			body {
+				margin: 0;
+				background: #fafafa;
+			}
+			.boot {
+				display: flex;
+				min-height: 100vh;
+				font-family: system-ui, sans-serif;
+			}
+			.boot-side {
+				width: 288px;
+				flex-shrink: 0;
+				border-right: 1px solid #e5e5e5;
+				padding: 16px;
+			}
+			.boot-main {
+				flex: 1;
+				min-width: 0;
+				padding: 32px;
+				display: flex;
+				flex-direction: column;
+				gap: 28px;
+			}
+			.boot-bar {
+				border-radius: 6px;
+				background: #e5e5e5;
+				animation: boot-pulse 1.6s ease-in-out infinite;
+			}
+			.boot-cards {
+				display: grid;
+				gap: 16px;
+				grid-template-columns: repeat(4, 1fr);
+			}
+			.boot-card {
+				border: 1px solid #e5e5e5;
+				border-radius: 8px;
+				padding: 16px;
+				display: flex;
+				flex-direction: column;
+				gap: 10px;
+			}
+			@keyframes boot-pulse {
+				0%,
+				100% {
+					opacity: 1;
+				}
+				50% {
+					opacity: 0.45;
+				}
+			}
+			@media (max-width: 768px) {
+				.boot-side {
+					display: none;
+				}
+				.boot-cards {
+					grid-template-columns: repeat(2, 1fr);
+				}
+			}
+			@media (prefers-color-scheme: dark) {
+				body {
+					background: #0a0a0a;
+				}
+				.boot-side {
+					border-color: #262626;
+				}
+				.boot-bar {
+					background: #262626;
+				}
+				.boot-card {
+					border-color: #262626;
+				}
+			}
+		</style>
 	</head>
 	<body>
-		<div id="app"></div>
+		<div id="app">
+			<div class="boot">
+				<div class="boot-side"></div>
+				<div class="boot-main">
+					<div>
+						<div class="boot-bar" style="height: 12px; width: 130px"></div>
+						<div class="boot-bar" style="height: 36px; width: 260px; margin-top: 10px"></div>
+						<div class="boot-bar" style="height: 14px; width: 200px; margin-top: 8px"></div>
+					</div>
+					<div class="boot-cards">
+						<div class="boot-card">
+							<div class="boot-bar" style="height: 12px; width: 60%"></div>
+							<div class="boot-bar" style="height: 28px; width: 80%"></div>
+						</div>
+						<div class="boot-card">
+							<div class="boot-bar" style="height: 12px; width: 60%"></div>
+							<div class="boot-bar" style="height: 28px; width: 80%"></div>
+						</div>
+						<div class="boot-card">
+							<div class="boot-bar" style="height: 12px; width: 60%"></div>
+							<div class="boot-bar" style="height: 28px; width: 80%"></div>
+						</div>
+						<div class="boot-card">
+							<div class="boot-bar" style="height: 12px; width: 60%"></div>
+							<div class="boot-bar" style="height: 28px; width: 80%"></div>
+						</div>
+					</div>
+					<div class="boot-bar" style="height: 280px"></div>
+				</div>
+			</div>
+		</div>
 		<script type="module" src="/src/app.tsx"></script>
 	</body>
 </html>

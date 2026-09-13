@@ -231,7 +231,10 @@ export default function MonthlyRecordsPage() {
 
 	return (
 		<>
-			<div className="grid gap-5 md:gap-7">
+			<div
+				key={`${month}-${year}`}
+				className="grid gap-5 animate-in fade-in duration-200 md:gap-7"
+			>
 				<MonthlyRecordFilters
 					date={date}
 					categories={categories}

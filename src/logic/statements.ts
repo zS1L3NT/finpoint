@@ -2,6 +2,7 @@
 // and `Statement::appQuery` (filters, ordering, derived amounts).
 
 import { asPending, db } from "@/data/db"
+import { enrichRecords } from "@/logic/records"
 import {
 	dayDifference,
 	ensureCanReplace,
@@ -224,7 +225,10 @@ export async function getStatement(id: string) {
 	if (!enriched) throw new Error("Statement not found.")
 	const allocations = await db.allocations.where("statement_id").equals(id).toArray()
 	const recordIds = allocations.map(a => a.record_id)
-	const records = recordIds.length ? await db.records.where("id").anyOf(recordIds).toArray() : []
+	const recordRows = recordIds.length
+		? await db.records.where("id").anyOf(recordIds).toArray()
+		: []
+	const records = await enrichRecords(recordRows)
 	const amountByRecord = new Map(allocations.map(a => [a.record_id, a.amount]))
 
 	return {
