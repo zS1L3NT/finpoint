@@ -5,7 +5,6 @@ import {
 	type Row,
 	useReactTable,
 } from "@tanstack/react-table"
-import { AnimatePresence } from "framer-motion"
 import { memo } from "react"
 import PaginationFooter from "@/components/table/pagination-footer"
 import PaginationHeader from "@/components/table/pagination-header"
@@ -50,23 +49,21 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 
 			{mobileRow ? (
 				<div className="min-w-0 divide-y overflow-hidden rounded-lg border bg-card md:hidden">
-					<AnimatePresence initial={false}>
-						{table.getRowModel().rows.length ? (
-							table.getRowModel().rows.map(row => (
-								<div
-									key={row.id}
-									data-state={selectedIds?.includes(row.id) && "selected"}
-									className="min-w-0 overflow-hidden px-3 py-2.5 text-sm data-[state=selected]:bg-muted"
-								>
-									{mobileRow(row)}
-								</div>
-							))
-						) : (
-							<div className="p-8 text-center text-sm text-muted-foreground">
-								{emptyMessage}
+					{table.getRowModel().rows.length ? (
+						table.getRowModel().rows.map(row => (
+							<div
+								key={row.id}
+								data-state={selectedIds?.includes(row.id) && "selected"}
+								className="min-w-0 overflow-hidden px-3 py-2.5 text-sm data-[state=selected]:bg-muted"
+							>
+								{mobileRow(row)}
 							</div>
-						)}
-					</AnimatePresence>
+						))
+					) : (
+						<div className="p-8 text-center text-sm text-muted-foreground">
+							{emptyMessage}
+						</div>
+					)}
 				</div>
 			) : null}
 
@@ -102,47 +99,41 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 						))}
 					</TableHeader>
 					<TableBody>
-						<AnimatePresence initial={false}>
-							{table.getRowModel().rows.length ? (
-								table.getRowModel().rows.map(row => (
-									<TableRow
-										key={row.id}
-										layout="position"
-										initial={{ opacity: 0 }}
-										animate={{ opacity: 1 }}
-										exit={{ opacity: 0 }}
-										data-state={selectedIds?.includes(row.id) && "selected"}
-										className="cursor-pointer"
-									>
-										{row.getVisibleCells().map(cell => (
-											<TableCell
-												key={cell.id}
-												className={
-													cell.column.columnDef.meta &&
-													"width" in cell.column.columnDef.meta
-														? `${cell.column.columnDef.meta?.width}`
-														: undefined
-												}
-											>
-												{flexRender(
-													cell.column.columnDef.cell,
-													cell.getContext(),
-												)}
-											</TableCell>
-										))}
-									</TableRow>
-								))
-							) : (
-								<TableRow layout layoutId="empty">
-									<TableCell
-										colSpan={columns.length}
-										className="h-24 text-center text-muted-foreground"
-									>
-										{emptyMessage}
-									</TableCell>
+						{table.getRowModel().rows.length ? (
+							table.getRowModel().rows.map(row => (
+								<TableRow
+									key={row.id}
+									data-state={selectedIds?.includes(row.id) && "selected"}
+									className="cursor-pointer"
+								>
+									{row.getVisibleCells().map(cell => (
+										<TableCell
+											key={cell.id}
+											className={
+												cell.column.columnDef.meta &&
+												"width" in cell.column.columnDef.meta
+													? `${cell.column.columnDef.meta?.width}`
+													: undefined
+											}
+										>
+											{flexRender(
+												cell.column.columnDef.cell,
+												cell.getContext(),
+											)}
+										</TableCell>
+									))}
 								</TableRow>
-							)}
-						</AnimatePresence>
+							))
+						) : (
+							<TableRow>
+								<TableCell
+									colSpan={columns.length}
+									className="h-24 text-center text-muted-foreground"
+								>
+									{emptyMessage}
+								</TableCell>
+							</TableRow>
+						)}
 					</TableBody>
 				</Table>
 			</div>

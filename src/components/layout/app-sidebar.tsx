@@ -54,12 +54,6 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 			label: "Manage",
 			items: [
 				{
-					to: pathStatements(),
-					icon: "lucide:credit-card",
-					label: "Statements",
-					active: pathname.startsWith("/statements"),
-				},
-				{
 					to: pathAllocator({ start_date: START_DATE }),
 					icon: "lucide:link",
 					label: "Allocator",
@@ -73,6 +67,18 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 					icon: "lucide:receipt-text",
 					label: "Records",
 					active: pathname.startsWith("/records"),
+				},
+				{
+					to: pathStatements(),
+					icon: "lucide:credit-card",
+					label: "Statements",
+					active: pathname.startsWith("/statements"),
+				},
+				{
+					to: pathAccounts(),
+					icon: "lucide:landmark",
+					label: "Accounts",
+					active: pathname.startsWith("/accounts"),
 				},
 			],
 		},
@@ -101,12 +107,6 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 					icon: "lucide:import",
 					label: "Importer",
 					active: pathname === "/importer",
-				},
-				{
-					to: pathAccounts(),
-					icon: "lucide:landmark",
-					label: "Accounts",
-					active: pathname.startsWith("/accounts"),
 				},
 				{
 					to: pathDataSettings(),
