@@ -236,7 +236,7 @@ export default function MonthlyRecordsPage() {
 			<div
 				className={cn(
 					"grid gap-5 md:gap-7",
-					animateContent && "animate-in fade-in duration-200",
+					animateContent && "animate-in fade-in slide-in-from-bottom-2 duration-500",
 				)}
 			>
 				<MonthlyRecordFilters

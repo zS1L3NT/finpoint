@@ -173,7 +173,7 @@ export default function DashboardPage() {
 		<div
 			className={cn(
 				"grid gap-7 md:gap-9",
-				animateContent && "animate-in fade-in duration-200",
+				animateContent && "animate-in fade-in slide-in-from-bottom-2 duration-500",
 			)}
 		>
 			{period.is_future ? (
