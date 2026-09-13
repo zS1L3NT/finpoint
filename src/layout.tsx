@@ -1,5 +1,6 @@
 import { Outlet, useLocation } from "react-router-dom"
 import AppSidebar from "@/components/layout/app-sidebar"
+import Observability from "@/components/observability"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
@@ -35,6 +36,7 @@ export default function Layout() {
 					}
 				>
 					<Toaster />
+					<Observability />
 					<AppSidebar />
 					<SidebarInset className="min-h-full">
 						<TransitionedOutlet />
