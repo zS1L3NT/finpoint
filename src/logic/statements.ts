@@ -123,6 +123,7 @@ export async function listStatements(filters: StatementFilters = {}) {
 			a.amount - b.amount ||
 			a.description.localeCompare(b.description),
 	)
+
 	return enriched
 }
 
@@ -148,6 +149,7 @@ function validateStatement(input: StatementInput) {
 
 export async function createPendingStatement(input: StatementInput) {
 	const dto = validateStatement(input)
+
 	if (!(await db.accounts.get(dto.account_id))) {
 		throw new ValidationError({ account_id: ["Select an account."] })
 	}
@@ -161,6 +163,7 @@ export async function createPendingStatement(input: StatementInput) {
 		is_pending: asPending(true),
 	}
 	await db.statements.add(row)
+
 	return row
 }
 
@@ -171,6 +174,7 @@ export async function updatePendingStatement(id: string, input: StatementInput) 
 		throw new ValidationError({ statement: ["Imported statements are read-only."] })
 	}
 	const dto = validateStatement(input)
+
 	const allocations = await db.allocations.where("statement_id").equals(id).toArray()
 	ensureAllocationsFit(
 		dto.amount,
@@ -184,6 +188,7 @@ export async function updatePendingStatement(id: string, input: StatementInput) 
 	})
 	const saved = await db.statements.get(id)
 	if (!saved) throw new Error("Statement not found.")
+
 	return saved
 }
 
@@ -198,6 +203,7 @@ export async function deletePendingStatement(id: string) {
 			statement: ["Remove every allocation before deleting this pending statement."],
 		})
 	}
+
 	await db.statements.delete(id)
 }
 
@@ -220,6 +226,7 @@ export async function getStatement(id: string) {
 	const recordIds = allocations.map(a => a.record_id)
 	const records = recordIds.length ? await db.records.where("id").anyOf(recordIds).toArray() : []
 	const amountByRecord = new Map(allocations.map(a => [a.record_id, a.amount]))
+
 	return {
 		...enriched,
 		records: records.map(record => ({
@@ -248,6 +255,7 @@ export async function replacePendingStatement(statementId: string, pendingId: st
 			pendingAllocations,
 			statementAllocations,
 		)
+
 		await db.allocations
 			.where("statement_id")
 			.equals(pendingId)
@@ -255,6 +263,7 @@ export async function replacePendingStatement(statementId: string, pendingId: st
 		await db.statements.delete(pendingId)
 		const replacement = await db.statements.get(statementId)
 		if (!replacement) throw new Error("Statement not found.")
+
 		return replacement
 	})
 }
@@ -267,6 +276,7 @@ export async function replacementCandidates(
 	if (!pending) throw new Error("Statement not found.")
 	if (pending.is_pending !== 1)
 		throw new ValidationError({ pending_statement: ["Choose a pending statement to replace."] })
+
 	const scope = options.scope ?? "suggested"
 	const pendingAllocations = await db.allocations
 		.where("statement_id")
@@ -290,6 +300,7 @@ export async function replacementCandidates(
 	}
 
 	const pendingShape = { ...pending, is_pending: true }
+
 	let candidates = (await enrich(rows)).map(candidate => {
 		const reason = replacementReason(
 			{ ...candidate, account_id: pending.account_id, is_pending: false },
@@ -322,6 +333,7 @@ export async function replacementCandidates(
 
 	const page = options.page ?? 1
 	const perPage = Math.min(Math.max(1, options.per_page ?? 25), 100)
+
 	return paginate(candidates, page, perPage)
 }
 
@@ -340,6 +352,7 @@ export async function replacementReview(pendingId: string, statementId: string) 
 		.where("statement_id")
 		.equals(statementId)
 		.toArray()
+
 	const reason = replacementReason(
 		{ ...statement, is_pending: statement.is_pending === 1 },
 		{ ...pending, is_pending: true },
@@ -352,6 +365,7 @@ export async function replacementReview(pendingId: string, statementId: string) 
 	const recordIds = pendingAllocations.map(a => a.record_id)
 	const records = recordIds.length ? await db.records.where("id").anyOf(recordIds).toArray() : []
 	const amountByRecord = new Map(pendingAllocations.map(a => [a.record_id, a.amount]))
+
 	return {
 		pending_statement: pendingEnriched,
 		statement: statementEnriched,

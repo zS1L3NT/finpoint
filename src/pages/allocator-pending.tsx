@@ -1,5 +1,6 @@
 import { Icon as IconifyIcon } from "@iconify/react"
 import { useLiveQuery } from "dexie-react-hooks"
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
 import { useEffect, useMemo, useState } from "react"
 import { Link, useSearchParams } from "react-router-dom"
 import AllocatorTabs from "@/components/allocator-tabs"
@@ -60,6 +61,7 @@ export default function AllocatorPendingPage() {
 	const [queueQuery, setQueueQuery] = useState(queueQueryParam)
 	const [candidateQuery, setCandidateQuery] = useState(candidateQueryParam)
 	const [reviewStatement, setReviewStatement] = useState<Statement | null>(null)
+	const reduceMotion = useReducedMotion()
 
 	const updateParams = (
 		changes: globalThis.Record<string, string | number | null>,
@@ -285,15 +287,32 @@ export default function AllocatorPendingPage() {
 
 						{pendingStatements.data.length ? (
 							<div className="flex flex-col gap-2">
-								{pendingStatements.data.map(statement => (
-									<div key={statement.id}>
-										<PendingCard
-											statement={statement}
-											selected={statement.id === selectedPendingStatement?.id}
-											onSelect={() => selectPending(statement)}
-										/>
-									</div>
-								))}
+								<AnimatePresence initial={false}>
+									{pendingStatements.data.map((statement, index) => (
+										<motion.div
+											layout="position"
+											key={statement.id}
+											initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+											animate={{ opacity: 1, y: 0 }}
+											exit={reduceMotion ? undefined : { opacity: 0, y: -6 }}
+											transition={{
+												duration: reduceMotion ? 0 : 0.18,
+												delay: reduceMotion
+													? 0
+													: Math.min(index * 0.025, 0.1),
+												ease: "easeOut",
+											}}
+										>
+											<PendingCard
+												statement={statement}
+												selected={
+													statement.id === selectedPendingStatement?.id
+												}
+												onSelect={() => selectPending(statement)}
+											/>
+										</motion.div>
+									))}
+								</AnimatePresence>
 							</div>
 						) : (
 							<Empty className="border">
@@ -325,113 +344,138 @@ export default function AllocatorPendingPage() {
 						)}
 						aria-labelledby="candidate-title"
 					>
-						{selectedPendingStatement ? (
-							<div key={selectedPendingStatement.id} className="flex flex-col gap-4">
-								<Button
-									variant="outline"
-									className="w-fit md:hidden"
-									onClick={() => selectPending(null)}
+						<AnimatePresence mode="wait" initial={false}>
+							{selectedPendingStatement ? (
+								<motion.div
+									key={selectedPendingStatement.id}
+									initial={reduceMotion ? false : { opacity: 0, x: 12 }}
+									animate={{ opacity: 1, x: 0 }}
+									exit={reduceMotion ? undefined : { opacity: 0, x: -8 }}
+									transition={{
+										duration: reduceMotion ? 0 : 0.18,
+										ease: "easeOut",
+									}}
+									className="flex flex-col gap-4"
 								>
-									<IconifyIcon
-										icon="lucide:arrow-left"
-										data-icon="inline-start"
-									/>
-									Back to pending Statements
-								</Button>
-								<div className="flex flex-col gap-2">
-									<div>
-										<h3
-											id="candidate-title"
-											className="font-heading text-base font-medium"
-										>
-											Imported Statements
-										</h3>
-										<p className="truncate text-xs/relaxed text-muted-foreground">
-											For {selectedPendingStatement.description} ·{" "}
-											<span
-												className={classForCurrency(
-													selectedPendingStatement.amount,
-												)}
+									<Button
+										variant="outline"
+										className="w-fit md:hidden"
+										onClick={() => selectPending(null)}
+									>
+										<IconifyIcon
+											icon="lucide:arrow-left"
+											data-icon="inline-start"
+										/>
+										Back to pending Statements
+									</Button>
+									<div className="flex flex-col gap-2">
+										<div>
+											<h3
+												id="candidate-title"
+												className="font-heading text-base font-medium"
 											>
-												{formatCurrency(selectedPendingStatement.amount)}
-											</span>
-										</p>
-									</div>
-									<Input
-										placeholder="Search imported Statements..."
-										value={candidateQuery}
-										onChange={event => setCandidateQuery(event.target.value)}
-									/>
-									<FilterBar>
-										<Select
-											value={candidateScope}
-											onValueChange={value =>
-												updateParams({
-													candidate_scope:
-														value === "suggested" ? null : value,
-													candidate_page: null,
-												})
+												Imported Statements
+											</h3>
+											<p className="truncate text-xs/relaxed text-muted-foreground">
+												For {selectedPendingStatement.description} ·{" "}
+												<span
+													className={classForCurrency(
+														selectedPendingStatement.amount,
+													)}
+												>
+													{formatCurrency(
+														selectedPendingStatement.amount,
+													)}
+												</span>
+											</p>
+										</div>
+										<Input
+											placeholder="Search imported Statements..."
+											value={candidateQuery}
+											onChange={event =>
+												setCandidateQuery(event.target.value)
 											}
-										>
-											<SelectTrigger
-												className={cn(
-													"w-full sm:w-52",
-													FILTER_CONTROL_CLASS,
-												)}
+										/>
+										<FilterBar>
+											<Select
+												value={candidateScope}
+												onValueChange={value =>
+													updateParams({
+														candidate_scope:
+															value === "suggested" ? null : value,
+														candidate_page: null,
+													})
+												}
 											>
-												<IconifyIcon icon="lucide:list-filter" />
-												<SelectValue />
-											</SelectTrigger>
-											<SelectContent align="start" variant="filter">
-												<SelectGroup>
-													<SelectItem value="suggested">
-														Suggested replacements
-													</SelectItem>
-													<SelectItem value="all">
-														All unallocated imports
-													</SelectItem>
-												</SelectGroup>
-											</SelectContent>
-										</Select>
-										{candidateScope === "suggested" ? (
-											<span className="self-center text-xs/relaxed text-muted-foreground">
-												Within 7 days · up to $5 difference
-											</span>
-										) : null}
-									</FilterBar>
-								</div>
+												<SelectTrigger
+													className={cn(
+														"w-full sm:w-52",
+														FILTER_CONTROL_CLASS,
+													)}
+												>
+													<IconifyIcon icon="lucide:list-filter" />
+													<SelectValue />
+												</SelectTrigger>
+												<SelectContent align="start" variant="filter">
+													<SelectGroup>
+														<SelectItem value="suggested">
+															Suggested replacements
+														</SelectItem>
+														<SelectItem value="all">
+															All unallocated imports
+														</SelectItem>
+													</SelectGroup>
+												</SelectContent>
+											</Select>
+											{candidateScope === "suggested" ? (
+												<span className="self-center text-xs/relaxed text-muted-foreground">
+													Within 7 days · up to $5 difference
+												</span>
+											) : null}
+										</FilterBar>
+									</div>
 
-								<CandidateResults
-									data={candidates ?? null}
-									error={null}
-									showLoading={
-										candidates === undefined && !!selectedPendingStatement
-									}
-									scope={candidateScope}
-									onReview={setReviewStatement}
-									onPage={page =>
-										updateParams({
-											candidate_page: page === 1 ? null : page,
-										})
-									}
-								/>
-							</div>
-						) : (
-							<div key="empty">
-								<Empty className="min-h-72 border">
-									<EmptyHeader>
-										<EmptyMedia variant="icon">
-											<IconifyIcon icon="lucide:replace" />
-										</EmptyMedia>
-										<EmptyTitle>Select a pending Statement</EmptyTitle>
-										<EmptyDescription>
-											Choose a placeholder to see nearby imported Statements
-											that can inherit its Allocations.
-										</EmptyDescription>
-									</EmptyHeader>
-								</Empty>
-							</div>
-						)}
+									<CandidateResults
+										data={candidates ?? null}
+										error={null}
+										showLoading={
+											candidates === undefined && !!selectedPendingStatement
+										}
+										scope={candidateScope}
+										onReview={setReviewStatement}
+										onPage={page =>
+											updateParams({
+												candidate_page: page === 1 ? null : page,
+											})
+										}
+									/>
+								</motion.div>
+							) : (
+								<motion.div
+									key="empty"
+									initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+									animate={{ opacity: 1, y: 0 }}
+									exit={reduceMotion ? undefined : { opacity: 0, y: -6 }}
+									transition={{
+										duration: reduceMotion ? 0 : 0.16,
+										ease: "easeOut",
+									}}
+								>
+									<Empty className="min-h-72 border">
+										<EmptyHeader>
+											<EmptyMedia variant="icon">
+												<IconifyIcon icon="lucide:replace" />
+											</EmptyMedia>
+											<EmptyTitle>Select a pending Statement</EmptyTitle>
+											<EmptyDescription>
+												Choose a placeholder to see nearby imported
+												Statements that can inherit its Allocations.
+											</EmptyDescription>
+										</EmptyHeader>
+									</Empty>
+								</motion.div>
+							)}
+						</AnimatePresence>
 					</section>
 				</div>
 			</PageContent>
@@ -543,26 +587,34 @@ function CandidateResults({
 	onPage: (page: number) => void
 }) {
 	const { handlePush } = useHistory()
+	const reduceMotion = useReducedMotion()
+	const initial = reduceMotion ? false : { opacity: 0, y: 8 }
+	const transition = { duration: reduceMotion ? 0 : 0.18, ease: "easeOut" as const }
 	if (error)
 		return (
-			<div>
+			<motion.div initial={initial} animate={{ opacity: 1, y: 0 }} transition={transition}>
 				<Alert variant="destructive">
 					<IconifyIcon icon="lucide:circle-alert" />
 					<AlertTitle>Imports unavailable</AlertTitle>
 					<AlertDescription>{error}</AlertDescription>
 				</Alert>
-			</div>
+			</motion.div>
 		)
 	if (!data)
 		return showLoading ? (
-			<div className="flex items-center gap-2 py-4 text-xs text-muted-foreground">
+			<motion.div
+				initial={{ opacity: 0 }}
+				animate={{ opacity: 1 }}
+				transition={transition}
+				className="flex items-center gap-2 py-4 text-xs text-muted-foreground"
+			>
 				<IconifyIcon icon="lucide:loader-circle" className="animate-spin" />
 				Finding imported Statements…
-			</div>
+			</motion.div>
 		) : null
 	if (!data.data.length)
 		return (
-			<div>
+			<motion.div initial={initial} animate={{ opacity: 1, y: 0 }} transition={transition}>
 				<Empty className="border">
 					<EmptyHeader>
 						<EmptyMedia variant="icon">
@@ -580,15 +632,29 @@ function CandidateResults({
 						</EmptyDescription>
 					</EmptyHeader>
 				</Empty>
-			</div>
+			</motion.div>
 		)
 
 	const lastPage = Math.max(1, Math.ceil(data.total / data.per_page))
 	return (
-		<div className="flex flex-col gap-3">
+		<motion.div
+			initial={initial}
+			animate={{ opacity: 1, y: 0 }}
+			transition={transition}
+			className="flex flex-col gap-3"
+		>
 			<div className="flex flex-col gap-2">
-				{data.data.map(statement => (
-					<div key={statement.id}>
+				{data.data.map((statement, index) => (
+					<motion.div
+						key={statement.id}
+						layout="position"
+						initial={initial}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{
+							...transition,
+							delay: reduceMotion ? 0 : Math.min(index * 0.035, 0.14),
+						}}
+					>
 						<Card size="sm">
 							<CardHeader>
 								<CardTitle className="line-clamp-2">
@@ -656,7 +722,7 @@ function CandidateResults({
 								</Button>
 							</CardFooter>
 						</Card>
-					</div>
+					</motion.div>
 				))}
 			</div>
 			<div className="flex flex-col gap-2 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
@@ -684,6 +750,6 @@ function CandidateResults({
 					</Button>
 				</div>
 			</div>
-		</div>
+		</motion.div>
 	)
 }

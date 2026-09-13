@@ -33,6 +33,7 @@ export async function listBudgets(filters: BudgetFilters = {}) {
 		),
 	}))
 	enriched.sort((a, b) => b.start_date.localeCompare(a.start_date))
+
 	return enriched
 }
 
@@ -48,6 +49,7 @@ export async function getBudget(id: string) {
 		: []
 	const categories = new Map((await db.categories.toArray()).map(c => [c.id, c]))
 	const buckets = new Map((await db.buckets.toArray()).map(b => [b.id, b]))
+
 	return {
 		...budget,
 		used_amount: round2(records.reduce((sum, r) => sum + r.amount, 0)),
@@ -74,6 +76,7 @@ function validateBudget(input: {
 		v.reject("end_date", "The end date must be after the start date.")
 	}
 	v.throwIfInvalid()
+
 	return { name, amount, start_date, end_date }
 }
 
@@ -86,6 +89,7 @@ export async function createBudget(input: {
 }) {
 	const dto = validateBudget(input)
 	const automatic = !!input.automatic
+
 	return db.transaction("rw", [db.budgets, db.records, db.budget_records], async () => {
 		const id = newId()
 		await db.budgets.add({ id, ...dto, automatic })
@@ -116,9 +120,11 @@ export async function updateBudget(
 	},
 ) {
 	const dto = validateBudget(input)
+
 	await db.budgets.update(id, { ...dto, automatic: !!input.automatic })
 	const updated = await db.budgets.get(id)
 	if (!updated) throw new Error("Budget not found.")
+
 	return updated
 }
 

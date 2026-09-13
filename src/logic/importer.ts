@@ -194,6 +194,7 @@ async function upsertIndexed(rows: Parsed[] & { index?: number }[], withIndex: b
 
 export async function importDbs(files: File[]): Promise<ImportResult> {
 	if (!files.length) throw new ValidationError({ files: ["Select at least one file."] })
+
 	let imported = 0
 	let reindexed = 0
 	let skipped = 0
@@ -248,6 +249,7 @@ export async function importDbs(files: File[]): Promise<ImportResult> {
 
 export async function importUob(files: File[]): Promise<ImportResult> {
 	if (!files.length) throw new ValidationError({ files: ["Select at least one file."] })
+
 	let imported = 0
 	let reindexed = 0
 	let skipped = 0
@@ -297,6 +299,7 @@ export async function importRevolut(
 ): Promise<ImportResult> {
 	if (!file) throw new ValidationError({ files: ["Select a file."] })
 	if (!accountId.trim()) throw new ValidationError({ account_id: ["Select an account."] })
+
 	if (accountName?.trim()) {
 		await ensureAccount(accountId.trim(), accountName.trim(), "Revolut")
 	} else if (!(await db.accounts.get(accountId.trim()))) {

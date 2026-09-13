@@ -70,7 +70,7 @@ export async function listCategories() {
 		list.push(category)
 		childrenByParent.set(category.parent_category_id, list)
 	}
-	return withMeta
+	const tree = withMeta
 		.filter(category => !category.parent_category_id)
 		.sort((a, b) => a.name.localeCompare(b.name))
 		.map(category => ({
@@ -79,10 +79,13 @@ export async function listCategories() {
 				a.name.localeCompare(b.name),
 			),
 		}))
+
+	return tree
 }
 
 export async function createCategory(input: CategoryInput) {
 	const { id, ...dto } = cleanInput(input)
+
 	if (dto.parent_category_id === id) {
 		throw new ValidationError({ parent_category_id: ["A category cannot be its own parent."] })
 	}
@@ -100,11 +103,13 @@ export async function createCategory(input: CategoryInput) {
 	}
 	const row = { id, ...dto }
 	await db.categories.add(row)
+
 	return row
 }
 
 export async function updateCategory(currentId: string, input: CategoryInput) {
 	const { id, ...dto } = cleanInput(input)
+
 	const current = await db.categories.get(currentId)
 	if (!current) throw new Error("Category not found.")
 	if (id !== currentId && (await db.categories.get(id))) {
@@ -139,11 +144,13 @@ export async function updateCategory(currentId: string, input: CategoryInput) {
 			await db.categories.delete(currentId)
 			const renamed = await db.categories.get(id)
 			if (!renamed) throw new Error("Category not found.")
+
 			return renamed
 		}
 		await db.categories.update(currentId, { ...dto, parent_category_id })
 		const saved = await db.categories.get(currentId)
 		if (!saved) throw new Error("Category not found.")
+
 		return saved
 	})
 }
@@ -154,5 +161,6 @@ export async function deleteCategory(id: string) {
 	if (records > 0 || children > 0) {
 		throw new ValidationError({ category: ["This category is still in use."] })
 	}
+
 	await db.categories.delete(id)
 }

@@ -27,6 +27,7 @@ export async function getAccount(id: string) {
 	const account = await db.accounts.get(id)
 	if (!account) throw new Error("Account not found.")
 	const statements_count = await db.statements.where("account_id").equals(id).count()
+
 	return { ...account, statements_count }
 }
 
@@ -34,9 +35,11 @@ export async function updateAccount(id: string, input: { name: string }) {
 	const v = new Validator()
 	const name = v.text(input.name, "name")
 	v.throwIfInvalid()
+
 	await db.accounts.update(id, { name })
 	const updated = await db.accounts.get(id)
 	if (!updated) throw new Error("Account not found.")
+
 	return updated
 }
 

@@ -97,6 +97,7 @@ export async function getDashboard(input: DashboardInput) {
 		inMonth(r.datetime, date.startOf("month"), date.endOf("month")),
 	)
 	const analyticsAll = await toAnalyticsRecords(monthRecords, allocated)
+
 	const actualRecords = isFuture
 		? []
 		: analyticsAll.filter(r => DateTime.fromFormat(r.datetime, "yyyy-MM-dd HH:mm") <= actualEnd)

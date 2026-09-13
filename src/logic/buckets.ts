@@ -23,6 +23,7 @@ export async function createBucket(input: {
 	const group = v.oneOf(input.group, "group", GROUPS, "Invalid group.")
 	const pace_kind = v.oneOf(input.pace_kind, "pace_kind", PACE_KINDS, "Invalid pace.")
 	v.throwIfInvalid()
+
 	if (await db.buckets.where("name").equals(name).first()) {
 		throw new ValidationError({ name: ["This bucket name is already taken."] })
 	}
@@ -37,6 +38,7 @@ export async function createBucket(input: {
 		archived: false,
 	}
 	await db.buckets.add(row)
+
 	return row
 }
 
@@ -46,10 +48,12 @@ export async function updateBucket(
 ) {
 	const existing = await db.buckets.get(id)
 	if (!existing) throw new Error("Bucket not found.")
+
 	const v = new Validator()
 	const name = v.text(input.name, "name")
 	const color = v.text(input.color, "color")
 	v.throwIfInvalid()
+
 	const clash = await db.buckets.where("name").equals(name).first()
 	if (clash && clash.id !== id) {
 		throw new ValidationError({ name: ["This bucket name is already taken."] })
@@ -58,6 +62,7 @@ export async function updateBucket(
 	let pace_kind = v.oneOf(input.pace_kind, "pace_kind", PACE_KINDS) ?? existing.pace_kind
 	v.throwIfInvalid()
 	if (group === "outlier") pace_kind = "none"
+
 	await db.buckets.update(id, {
 		name,
 		color,
@@ -67,6 +72,7 @@ export async function updateBucket(
 	})
 	const saved = await db.buckets.get(id)
 	if (!saved) throw new Error("Bucket not found.")
+
 	return saved
 }
 
@@ -83,6 +89,7 @@ export async function setBucketTarget(
 			: v.amount(input.amount, "amount", "Amount must be zero or more.")
 	if (amount !== null && amount < 0) v.reject("amount", "Amount must be zero or more.")
 	v.throwIfInvalid()
+
 	if (scope === "month") {
 		await db.bucket_targets.put({ bucket_id: bucketId, month, amount })
 	} else {
@@ -93,9 +100,11 @@ export async function setBucketTarget(
 export async function targetFor(bucketId: string, month: string): Promise<number | null> {
 	const override = await db.bucket_targets.get([bucketId, month])
 	if (override) return override.amount
+
 	const defaults = await db.bucket_defaults.where("bucket_id").equals(bucketId).toArray()
 	const eligible = defaults
 		.filter(d => d.effective_month <= month)
 		.sort((a, b) => (a.effective_month < b.effective_month ? 1 : -1))
+
 	return eligible[0]?.amount ?? null
 }

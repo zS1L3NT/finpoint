@@ -163,13 +163,10 @@ export async function listRecords(filters: RecordFilters = {}) {
 
 	let enriched = await enrich(rows)
 
-	if (filters.is_allocated === "1" || filters.is_allocated === "true") {
+	const allocation = filters.is_allocated
+	if (allocation === "1" || allocation === "true") {
 		enriched = enriched.filter(r => r.allocated_amount === r.amount && r.statement_count > 0)
-	} else if (
-		filters.is_allocated === "0" ||
-		filters.is_allocated === "false" ||
-		filters.is_allocated === "false"
-	) {
+	} else if (allocation === "0" || allocation === "false") {
 		enriched = enriched.filter(r => !(r.allocated_amount === r.amount && r.statement_count > 0))
 	}
 
@@ -182,6 +179,7 @@ export async function listRecords(filters: RecordFilters = {}) {
 			(a.location ?? "").localeCompare(b.location ?? "") ||
 			(a.description ?? "").localeCompare(b.description ?? ""),
 	)
+
 	return enriched
 }
 
@@ -197,6 +195,7 @@ export async function getRecord(id: string) {
 		: []
 	const amountByStatement = new Map(allocations.map(a => [a.statement_id, a.amount]))
 	const accounts = new Map((await db.accounts.toArray()).map(a => [a.id, a]))
+
 	return {
 		...enriched,
 		statements: statements.map(statement => ({
@@ -329,6 +328,7 @@ function budgetCovers(budget: { start_date: string; end_date: string }, datetime
 
 export async function createRecord(input: RecordInput) {
 	const dto = validateRecordInput(input)
+
 	const category = await db.categories.get(dto.category_id)
 	if (!category) throw new ValidationError({ category_id: ["Select a category."] })
 	const statements = dto.statements ?? []
@@ -367,6 +367,7 @@ export async function createRecord(input: RecordInput) {
 			for (const budget of budgets) {
 				await db.budget_records.put({ budget_id: budget.id, record_id: id })
 			}
+
 			return stored
 		},
 	)
@@ -374,6 +375,7 @@ export async function createRecord(input: RecordInput) {
 
 export async function updateRecord(id: string, input: RecordInput & { revision?: number }) {
 	const dto = validateRecordInput(input)
+
 	const existing = await db.records.get(id)
 	if (!existing) throw new Error("Record not found.")
 	if (input.revision !== undefined && Number(input.revision) !== existing.revision) {
@@ -409,6 +411,7 @@ export async function updateRecord(id: string, input: RecordInput & { revision?:
 		}
 		const updated = await db.records.get(id)
 		if (!updated) throw new Error("Record not found.")
+
 		return updated
 	})
 }
@@ -426,12 +429,14 @@ export async function updateRecordBuckets(
 	bucketId: string | null,
 ) {
 	if (!items.length) throw new ValidationError({ records: ["Select at least one record."] })
+
 	if (bucketId) {
 		const bucket = await db.buckets.get(bucketId)
 		if (!bucket) throw new ValidationError({ bucket_id: ["Invalid bucket."] })
 		if (bucket.archived)
 			throw new ValidationError({ bucket_id: ["Archived buckets cannot receive Records."] })
 	}
+
 	return db.transaction("rw", [db.records], async () => {
 		const rows = await db.records
 			.where("id")
@@ -466,16 +471,19 @@ export async function updateRecordBuckets(
 				revision: record.revision + 1,
 			})
 		}
+
 		return { updated: rows.length }
 	})
 }
 
 export async function recordCompletions() {
 	const records = await db.records.toArray()
+
 	const unique = (values: (string | null)[]) =>
 		[...new Set(values.filter((v): v is string => !!v?.trim()))].sort((a, b) =>
 			a.localeCompare(b),
 		)
+
 	return {
 		titles: unique(records.map(r => r.title)),
 		locations: unique(records.map(r => r.location)),
