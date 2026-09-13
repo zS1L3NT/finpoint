@@ -119,24 +119,13 @@ export default function DashboardPage() {
 			<>
 				<AppHeader title="Dashboard" />
 				<PageContent className="gap-7 md:gap-9">
-					<header className="grid gap-5">
-						<div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-							<div className="grid gap-2">
-								<Skeleton className="h-3 w-32" />
-								<Skeleton className="h-9 w-56 max-w-full" />
-								<Skeleton className="h-4 w-72 max-w-full" />
-							</div>
-							<div className="flex gap-2">
-								<Skeleton className="h-9 w-9" />
-								<Skeleton className="h-9 w-32" />
-								<Skeleton className="h-9 w-9" />
-							</div>
-						</div>
-						<div className="flex gap-1 border-b pb-px">
-							<Skeleton className="h-9 w-24" />
-							<Skeleton className="h-9 w-36" />
-						</div>
-					</header>
+					<DashboardHeader
+						date={date}
+						month={month}
+						year={year}
+						label={null}
+						onMonthChange={setDate}
+					/>
 
 					<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 						{Array.from({ length: 4 }).map((_, index) => (
@@ -212,66 +201,13 @@ export default function DashboardPage() {
 		<>
 			<AppHeader title="Dashboard" />
 			<PageContent className="gap-7 animate-in fade-in duration-300 md:gap-9">
-				<header className="grid gap-5">
-					<div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-						<div>
-							<p className="text-xs font-medium tracking-[0.18em] text-muted-foreground uppercase">
-								Monthly overview
-							</p>
-							<h2 className="mt-1 text-3xl font-semibold tracking-tight">
-								{month} {year}
-							</h2>
-							<p className="mt-1 text-sm text-muted-foreground">
-								{period.label} · SGD · Based on Record dates
-							</p>
-						</div>
-						<ButtonGroup className="w-full sm:w-fit">
-							<Button
-								variant="outline"
-								aria-label="Previous month"
-								onClick={() => setDate(date.minus({ month: 1 }).toJSDate())}
-							>
-								<IconifyIcon icon="lucide:arrow-left" />
-							</Button>
-							<Popover>
-								<PopoverTrigger
-									render={<Button variant="outline" className="flex-1 sm:w-32" />}
-								>
-									<IconifyIcon icon="lucide:calendar" />{" "}
-									{date.toFormat("MMM yyyy")}
-								</PopoverTrigger>
-								<PopoverContent className="w-auto p-0">
-									<MonthPicker
-										selectedMonth={date.toJSDate()}
-										onMonthSelect={setDate}
-									/>
-								</PopoverContent>
-							</Popover>
-							<Button
-								variant="outline"
-								aria-label="Next month"
-								onClick={() => setDate(date.plus({ month: 1 }).toJSDate())}
-							>
-								<IconifyIcon icon="lucide:arrow-right" />
-							</Button>
-						</ButtonGroup>
-					</div>
-
-					<nav className="flex border-b" aria-label="Monthly finance views">
-						<Link
-							className="border-b-2 border-foreground px-4 py-2 text-sm font-medium"
-							to={pathDashboard({ month, year: String(year) })}
-						>
-							Overview
-						</Link>
-						<Link
-							className="border-b-2 border-transparent px-4 py-2 text-sm text-muted-foreground hover:text-foreground"
-							to={pathMonthlyRecords({ month, year: String(year) })}
-						>
-							Monthly Records
-						</Link>
-					</nav>
-				</header>
+				<DashboardHeader
+					date={date}
+					month={month}
+					year={year}
+					label={period.label}
+					onMonthChange={setDate}
+				/>
 
 				{period.is_future ? (
 					<Card>
@@ -964,4 +900,84 @@ function comparisonRateText(value: ComparisonValue, count: number) {
 	if (!count || value.difference === null) return "No comparison history"
 	if (Math.abs(value.difference) < 0.05) return `Same as ${count}-month average`
 	return `${Math.abs(value.difference).toFixed(1)} points ${value.difference > 0 ? "above" : "below"} average`
+}
+
+function DashboardHeader({
+	date,
+	month,
+	year,
+	label,
+	onMonthChange,
+}: {
+	date: DateTime
+	month: string
+	year: number
+	label: string | null
+	onMonthChange: (date: Date) => void
+}) {
+	return (
+		<header className="grid gap-5">
+			<div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+				<div>
+					<p className="text-xs font-medium tracking-[0.18em] text-muted-foreground uppercase">
+						Monthly overview
+					</p>
+					<h2 className="mt-1 text-3xl font-semibold tracking-tight">
+						{month} {year}
+					</h2>
+					{label === null ? (
+						<Skeleton className="mt-1 h-4 w-64 max-w-full" />
+					) : (
+						<p className="mt-1 text-sm text-muted-foreground">
+							{label} · SGD · Based on Record dates
+						</p>
+					)}
+				</div>
+				<ButtonGroup className="w-full sm:w-fit">
+					<Button
+						variant="outline"
+						aria-label="Previous month"
+						onClick={() => onMonthChange(date.minus({ month: 1 }).toJSDate())}
+					>
+						<IconifyIcon icon="lucide:arrow-left" />
+					</Button>
+					<Popover>
+						<PopoverTrigger
+							render={<Button variant="outline" className="flex-1 sm:w-32" />}
+						>
+							<IconifyIcon icon="lucide:calendar" /> {date.toFormat("MMM yyyy")}
+						</PopoverTrigger>
+						<PopoverContent className="w-auto p-0">
+							<MonthPicker
+								selectedMonth={date.toJSDate()}
+								onMonthSelect={onMonthChange}
+							/>
+						</PopoverContent>
+					</Popover>
+					<Button
+						variant="outline"
+						aria-label="Next month"
+						onClick={() => onMonthChange(date.plus({ month: 1 }).toJSDate())}
+					>
+						<IconifyIcon icon="lucide:arrow-right" />
+					</Button>
+				</ButtonGroup>
+			</div>
+
+			<nav className="flex border-b" aria-label="Monthly finance views">
+				<Link
+					className="border-b-2 border-foreground px-4 py-2 text-sm font-medium"
+					to={pathDashboard({ month, year: String(year) })}
+				>
+					Overview
+				</Link>
+				<Link
+					className="border-b-2 border-transparent px-4 py-2 text-sm text-muted-foreground hover:text-foreground"
+					to={pathMonthlyRecords({ month, year: String(year) })}
+				>
+					Monthly Records
+				</Link>
+			</nav>
+		</header>
+	)
 }

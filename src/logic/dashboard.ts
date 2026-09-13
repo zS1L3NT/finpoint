@@ -2,7 +2,14 @@
 // Pure functions over the IndexedDB tables — no HTTP involved.
 
 import { DateTime } from "luxon"
-import { db } from "@/data/db"
+import {
+	type AllocationRow,
+	type BucketDefaultRow,
+	type BucketRow,
+	type BucketTargetRow,
+	type CategoryRow,
+	db,
+} from "@/data/db"
 import { type AnalyticsRecord, summarize } from "@/logic/analytics"
 import { expandCategoryIdsForMonthly } from "@/logic/monthly-shared"
 
@@ -26,9 +33,9 @@ async function toAnalyticsRecords(
 		category_id: string
 	}[],
 	allocatedByRecord: Map<string, { sum: number; count: number }>,
+	categories: Map<string, CategoryRow>,
+	buckets: Map<string, BucketRow>,
 ): Promise<AnalyticsRecord[]> {
-	const categories = new Map((await db.categories.toArray()).map(c => [c.id, c]))
-	const buckets = new Map((await db.buckets.toArray()).map(b => [b.id, b]))
 	const items: (AnalyticsRecord | null)[] = rows.map(row => {
 		const entry = allocatedByRecord.get(row.id) ?? { sum: 0, count: 0 }
 		const category = categories.get(row.category_id)
@@ -69,14 +76,16 @@ async function toAnalyticsRecords(
 	return items.filter((r): r is AnalyticsRecord => r !== null)
 }
 
-async function allocatedMap(): Promise<Map<string, { sum: number; count: number }>> {
+function summarizeAllocations(
+	allocations: AllocationRow[],
+): Map<string, { sum: number; count: number }> {
 	const map = new Map<string, { sum: number; count: number }>()
-	await db.allocations.each(allocation => {
+	for (const allocation of allocations) {
 		const entry = map.get(allocation.record_id) ?? { sum: 0, count: 0 }
 		entry.sum = Math.round((entry.sum + allocation.amount) * 100) / 100
 		entry.count++
 		map.set(allocation.record_id, entry)
-	})
+	}
 	return map
 }
 
@@ -92,11 +101,30 @@ export async function getDashboard(input: DashboardInput) {
 	const isFuture = date.startOf("month") > today.startOf("month")
 	const actualEnd = isCurrent ? today.endOf("day") : date.endOf("month")
 
-	const allocated = await allocatedMap()
-	const monthRecords = (await db.records.toArray()).filter(r =>
-		inMonth(r.datetime, date.startOf("month"), date.endOf("month")),
+	const [allRecords, allocations, coverages, categoryRows, buckets, targets, defaults] =
+		await Promise.all([
+			db.records.toArray(),
+			db.allocations.toArray(),
+			db.analytics_months.toArray(),
+			db.categories.toArray(),
+			db.buckets.toArray(),
+			db.bucket_targets.toArray(),
+			db.bucket_defaults.toArray(),
+		])
+	const allocated = summarizeAllocations(allocations)
+	const categoriesById = new Map(categoryRows.map(c => [c.id, c]))
+	const bucketsById = new Map(buckets.map(b => [b.id, b]))
+	const coverageByMonth = new Map(coverages.map(c => [c.month, c]))
+
+	const monthStartDay = date.startOf("month")
+	const monthEndDay = date.endOf("month")
+	const monthRecords = allRecords.filter(r => inMonth(r.datetime, monthStartDay, monthEndDay))
+	const analyticsAll = await toAnalyticsRecords(
+		monthRecords,
+		allocated,
+		categoriesById,
+		bucketsById,
 	)
-	const analyticsAll = await toAnalyticsRecords(monthRecords, allocated)
 
 	const actualRecords = isFuture
 		? []
@@ -109,13 +137,13 @@ export async function getDashboard(input: DashboardInput) {
 	const comparisonMonths = []
 	for (let offset = 1; offset <= 3; offset++) {
 		const month = date.minus({ months: offset }).startOf("month")
-		const coverage = await db.analytics_months.get(month.toFormat("yyyy-MM-dd"))
+		const coverage = coverageByMonth.get(month.toFormat("yyyy-MM-dd"))
 		const endDay = isCurrent
 			? Math.min(today.day ?? 1, month.daysInMonth ?? 28)
 			: (month.daysInMonth ?? 28)
 		const end = month.set({ day: endDay }).endOf("day")
-		const rows = (await db.records.toArray()).filter(r => inMonth(r.datetime, month, end))
-		const items = await toAnalyticsRecords(rows, allocated)
+		const rows = allRecords.filter(r => inMonth(r.datetime, month, end))
+		const items = await toAnalyticsRecords(rows, allocated, categoriesById, bucketsById)
 		const excluded =
 			(coverage?.excluded_from_comparisons ?? false) ||
 			(coverage?.coverage ?? null) === "incomplete" ||
@@ -138,12 +166,12 @@ export async function getDashboard(input: DashboardInput) {
 
 	const included = comparisonMonths.filter(m => m.included)
 	const comparison = buildComparison(summary, included)
-	const buckets = await buildBuckets(date, summary, included)
+	const bucketsWithSpending = buildBuckets(date, summary, included, buckets, targets, defaults)
 	const projection = buildProjection(
 		date,
 		summary,
 		futureSummary,
-		buckets,
+		bucketsWithSpending,
 		isCurrent,
 		isFuture,
 		actualEnd.day ?? 1,
@@ -175,7 +203,7 @@ export async function getDashboard(input: DashboardInput) {
 		comparison,
 		series,
 		projection,
-		buckets,
+		buckets: bucketsWithSpending,
 		categories,
 		future_records_count: futureRecords.length,
 	}
@@ -341,10 +369,13 @@ function buildProjection(
 	}
 }
 
-async function buildBuckets(
+function buildBuckets(
 	date: DateTime,
 	summary: ReturnType<typeof summarize>,
 	included: { summary: ReturnType<typeof summarize> }[],
+	bucketRows: BucketRow[],
+	targets: BucketTargetRow[],
+	defaults: BucketDefaultRow[],
 ) {
 	const current = new Map(summary.buckets.map(b => [b.id, b]))
 	const baseline = new Map<string, number>()
@@ -356,21 +387,19 @@ async function buildBuckets(
 	for (const [id, total] of baseline) baseline.set(id, total / Math.max(included.length, 1))
 
 	const monthKey = date.toFormat("yyyy-MM-dd")
-	const buckets = (await db.buckets.toArray())
+	const buckets = bucketRows
 		.filter(b => !b.archived)
 		.sort((a, b) => a.display_order - b.display_order)
 	const out = []
 	for (const bucket of buckets) {
-		const override = await db.bucket_targets.get([bucket.id, monthKey])
+		const override = targets.find(t => t.bucket_id === bucket.id && t.month === monthKey)
 		let target = override ? override.amount : null
 		if (target === undefined) target = null
 		if (override === undefined) {
-			const defaults = (
-				await db.bucket_defaults.where("bucket_id").equals(bucket.id).toArray()
-			)
-				.filter(d => d.effective_month <= monthKey)
+			const eligible = defaults
+				.filter(d => d.bucket_id === bucket.id && d.effective_month <= monthKey)
 				.sort((a, b) => (a.effective_month < b.effective_month ? 1 : -1))
-			target = defaults[0]?.amount ?? null
+			target = eligible[0]?.amount ?? null
 		}
 		const spending = Number(current.get(bucket.id)?.spending ?? 0)
 		out.push({
