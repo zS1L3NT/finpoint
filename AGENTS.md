@@ -6,7 +6,7 @@
 - Layer segregation (UI must not cross it):
   - `src/components/*` + `src/pages/*` are UI only: render, read via `useLiveQuery`/`useFetch`, and call `logic/*`. No direct Dexie imports. Show `Skeleton` placeholders while live queries resolve, never blocking loaders.
   - `src/logic/*` holds domain operations and mirrors the old Laravel `Api/*Controller` surface 1:1 (accounts, statements, records, budgets, categories, buckets, importer, dashboard, monthly) so domain knowledge transfers.
-  - `src/data/*` holds persistence: Dexie instance + versioned migrations (`db.ts`), first-run seed (`seed.ts`), JSON export/import (`exportImport.ts`).
+  - `src/data/*` holds persistence: Dexie instance + versioned migrations (`db.ts`), first-run seed (`seed.ts`), JSON export/import (`export-import.ts`) + generated test data (`test-data.ts`).
   - `src/routes.ts` centralizes all route paths (replaces Wayfinder).
   - Overview + Monthly Records share the `MonthLayout` shell (title, month nav, tabs mount once, content swaps below), so tab switches never remount the header.
 - React Compiler is enabled in `vite.config.ts`.

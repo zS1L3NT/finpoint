@@ -24,13 +24,15 @@ import {
 	importData,
 	parseImportFile,
 	tableCounts,
-} from "@/data/exportImport"
+} from "@/data/export-import"
 import { seedIfEmpty } from "@/data/seed"
+import { generateTestData } from "@/data/test-data"
 
 export default function DataSettingsPage() {
 	const [busy, setBusy] = useState<string | null>(null)
 	const [importFile, setImportFile] = useState<File | null>(null)
 	const [confirmingClear, setConfirmingClear] = useState(false)
+	const [confirmingDemo, setConfirmingDemo] = useState(false)
 	const fileInputRef = useRef<HTMLInputElement>(null)
 	const counts =
 		useLiveQuery(async () => {
@@ -85,6 +87,23 @@ export default function DataSettingsPage() {
 			setConfirmingClear(false)
 		} catch {
 			toast.error("Could not clear data.")
+		} finally {
+			setBusy(null)
+		}
+	}
+
+	const handleDemo = async () => {
+		if (!confirmingDemo) {
+			setConfirmingDemo(true)
+			return
+		}
+		setBusy("demo")
+		try {
+			await importData(generateTestData())
+			toast.success("Demo workspace loaded.")
+			setConfirmingDemo(false)
+		} catch {
+			toast.error("Could not load demo data.")
 		} finally {
 			setBusy(null)
 		}
@@ -204,6 +223,65 @@ export default function DataSettingsPage() {
 									<IconifyIcon icon="lucide:upload" />
 									{busy === "import" ? "Importing…" : "Import and replace"}
 								</Button>
+							</CardFooter>
+						</Card>
+
+						<Card>
+							<CardHeader className="border-b">
+								<CardTitle>Try demo data</CardTitle>
+								<CardDescription>
+									Load a ready-made workspace with 3 accounts, 5 months of
+									records, allocations, budgets, and buckets — the fastest way to
+									see what Finpoint can do. This replaces all current data in this
+									browser.
+								</CardDescription>
+							</CardHeader>
+							<CardContent>
+								<ul className="grid gap-2 text-sm sm:grid-cols-2">
+									{[
+										["400+ records", "daily life, salary, investments"],
+										["470+ statements", "40+ awaiting allocation"],
+										["2 budgets", "trip + monthly autopilot"],
+										["Pending flow", "placeholders to replace"],
+									].map(([title, detail]) => (
+										<li
+											key={title}
+											className="flex items-center justify-between gap-3 border-b py-1.5"
+										>
+											<span className="font-medium">{title}</span>
+											<span className="text-right text-muted-foreground">
+												{detail}
+											</span>
+										</li>
+									))}
+								</ul>
+							</CardContent>
+							<CardFooter className="border-t bg-muted/20">
+								<Button
+									type="button"
+									className="w-full sm:ml-auto sm:w-auto"
+									disabled={busy !== null}
+									onClick={() => {
+										if (confirmingDemo) void handleDemo()
+										else setConfirmingDemo(true)
+									}}
+								>
+									<IconifyIcon icon="lucide:sparkles" />
+									{busy === "demo"
+										? "Loading…"
+										: confirmingDemo
+											? "Click again to replace everything with demo data"
+											: "Load demo data"}
+								</Button>
+								{confirmingDemo && busy !== "demo" ? (
+									<Button
+										type="button"
+										variant="outline"
+										onClick={() => setConfirmingDemo(false)}
+									>
+										Cancel
+									</Button>
+								) : null}
 							</CardFooter>
 						</Card>
 

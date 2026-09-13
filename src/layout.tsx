@@ -1,9 +1,25 @@
-import { Outlet } from "react-router-dom"
+import { Outlet, useLocation } from "react-router-dom"
 import AppSidebar from "@/components/layout/app-sidebar"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { HistoryProvider } from "@/history"
+
+function TransitionedOutlet() {
+	const { pathname } = useLocation()
+	// Overview and Monthly Records share one shell key so tab switches keep
+	// the month header mounted; their content animates itself on arrival.
+	const key = pathname === "/" || pathname === "/records/monthly" ? "month" : pathname
+
+	return (
+		<div
+			key={key}
+			className="animate-in fade-in slide-in-from-bottom-2 duration-300 motion-reduce:animate-none"
+		>
+			<Outlet />
+		</div>
+	)
+}
 
 export default function Layout() {
 	return (
@@ -21,7 +37,7 @@ export default function Layout() {
 					<Toaster />
 					<AppSidebar />
 					<SidebarInset className="min-h-full">
-						<Outlet />
+						<TransitionedOutlet />
 					</SidebarInset>
 				</SidebarProvider>
 				<Toaster />

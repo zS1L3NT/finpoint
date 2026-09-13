@@ -1,5 +1,5 @@
 import { DateTime } from "luxon"
-import { Link } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import {
 	Sidebar,
@@ -29,6 +29,7 @@ import {
 export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
 	const { handleClear } = useHistory()
 	const { isMobile, setOpenMobile } = useSidebar()
+	const { pathname } = useLocation()
 	const handleSidebarLink = () => {
 		handleClear()
 
@@ -36,6 +37,86 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 			setOpenMobile(false)
 		}
 	}
+
+	const groups = [
+		{
+			label: "Overview",
+			items: [
+				{
+					to: pathDashboard(),
+					icon: "lucide:chart-area",
+					label: "Dashboard",
+					active: pathname === "/",
+				},
+			],
+		},
+		{
+			label: "Manage",
+			items: [
+				{
+					to: pathStatements(),
+					icon: "lucide:credit-card",
+					label: "Statements",
+					active: pathname.startsWith("/statements"),
+				},
+				{
+					to: pathAllocator({ start_date: START_DATE }),
+					icon: "lucide:link",
+					label: "Allocator",
+					active: pathname.startsWith("/allocator"),
+				},
+				{
+					to: pathRecords({
+						start_date: START_DATE,
+						end_date: DateTime.now().toFormat("yyyy-MM-dd"),
+					}),
+					icon: "lucide:receipt-text",
+					label: "Records",
+					active: pathname.startsWith("/records"),
+				},
+			],
+		},
+		{
+			label: "Plan",
+			items: [
+				{
+					to: pathBudgets(),
+					icon: "lucide:piggy-bank",
+					label: "Budgets",
+					active: pathname.startsWith("/budgets"),
+				},
+				{
+					to: pathCategories(),
+					icon: "lucide:tag",
+					label: "Categories",
+					active: pathname.startsWith("/categories"),
+				},
+			],
+		},
+		{
+			label: "Data",
+			items: [
+				{
+					to: pathImporter(),
+					icon: "lucide:import",
+					label: "Importer",
+					active: pathname === "/importer",
+				},
+				{
+					to: pathAccounts(),
+					icon: "lucide:landmark",
+					label: "Accounts",
+					active: pathname.startsWith("/accounts"),
+				},
+				{
+					to: pathDataSettings(),
+					icon: "lucide:database",
+					label: "Data",
+					active: pathname.startsWith("/settings"),
+				},
+			],
+		},
+	]
 
 	return (
 		<Sidebar collapsible="offcanvas" variant="floating" {...props}>
@@ -55,109 +136,26 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 				</SidebarMenu>
 			</SidebarHeader>
 			<SidebarContent>
-				<SidebarGroup className="group-data-[collapsible=icon]:hidden">
-					<SidebarGroupLabel>Workspaces</SidebarGroupLabel>
-					<SidebarMenu>
-						<SidebarMenuItem>
-							<SidebarMenuButton asChild>
-								<Link to={pathDashboard()} onClick={handleSidebarLink}>
-									<IconifyIcon icon="lucide:chart-area" />
-									<span>Dashboard</span>
-								</Link>
-							</SidebarMenuButton>
-						</SidebarMenuItem>
-
-						<SidebarMenuItem>
-							<SidebarMenuButton asChild>
-								<Link
-									to={pathAllocator({ start_date: START_DATE })}
-									onClick={handleSidebarLink}
-								>
-									<IconifyIcon icon="lucide:link" />
-									<span>Allocator</span>
-								</Link>
-							</SidebarMenuButton>
-						</SidebarMenuItem>
-
-						<SidebarMenuItem>
-							<SidebarMenuButton asChild>
-								<Link to={pathBudgets()} onClick={handleSidebarLink}>
-									<IconifyIcon icon="lucide:piggy-bank" />
-									<span>Budgets</span>
-								</Link>
-							</SidebarMenuButton>
-						</SidebarMenuItem>
-					</SidebarMenu>
-				</SidebarGroup>
-
-				<SidebarGroup className="group-data-[collapsible=icon]:hidden">
-					<SidebarGroupLabel>Data</SidebarGroupLabel>
-					<SidebarMenu>
-						<SidebarMenuItem>
-							<SidebarMenuButton asChild>
-								<Link to={pathImporter()} onClick={handleSidebarLink}>
-									<IconifyIcon icon="lucide:import" />
-									<span>Importer</span>
-								</Link>
-							</SidebarMenuButton>
-						</SidebarMenuItem>
-
-						<SidebarMenuItem>
-							<SidebarMenuButton asChild>
-								<Link to={pathAccounts()} onClick={handleSidebarLink}>
-									<IconifyIcon icon="lucide:landmark" />
-									<span>Accounts</span>
-								</Link>
-							</SidebarMenuButton>
-						</SidebarMenuItem>
-
-						<SidebarMenuItem>
-							<SidebarMenuButton asChild>
-								<Link
-									to={pathRecords({
-										start_date: START_DATE,
-										end_date: DateTime.now().toFormat("yyyy-MM-dd"),
-									})}
-									onClick={handleSidebarLink}
-								>
-									<IconifyIcon icon="lucide:receipt-text" />
-									<span>Records</span>
-								</Link>
-							</SidebarMenuButton>
-						</SidebarMenuItem>
-
-						<SidebarMenuItem>
-							<SidebarMenuButton asChild>
-								<Link to={pathStatements()} onClick={handleSidebarLink}>
-									<IconifyIcon icon="lucide:credit-card" />
-									<span>Statements</span>
-								</Link>
-							</SidebarMenuButton>
-						</SidebarMenuItem>
-					</SidebarMenu>
-				</SidebarGroup>
-
-				<SidebarGroup className="group-data-[collapsible=icon]:hidden">
-					<SidebarGroupLabel>Settings</SidebarGroupLabel>
-					<SidebarMenu>
-						<SidebarMenuItem>
-							<SidebarMenuButton asChild>
-								<Link to={pathCategories()} onClick={handleSidebarLink}>
-									<IconifyIcon icon="lucide:tag" />
-									<span>Categories</span>
-								</Link>
-							</SidebarMenuButton>
-						</SidebarMenuItem>
-						<SidebarMenuItem>
-							<SidebarMenuButton asChild>
-								<Link to={pathDataSettings()} onClick={handleSidebarLink}>
-									<IconifyIcon icon="lucide:database" />
-									<span>Data</span>
-								</Link>
-							</SidebarMenuButton>
-						</SidebarMenuItem>
-					</SidebarMenu>
-				</SidebarGroup>
+				{groups.map(group => (
+					<SidebarGroup
+						key={group.label}
+						className="group-data-[collapsible=icon]:hidden"
+					>
+						<SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+						<SidebarMenu>
+							{group.items.map(item => (
+								<SidebarMenuItem key={item.label}>
+									<SidebarMenuButton asChild isActive={item.active}>
+										<Link to={item.to} onClick={handleSidebarLink}>
+											<IconifyIcon icon={item.icon} />
+											<span>{item.label}</span>
+										</Link>
+									</SidebarMenuButton>
+								</SidebarMenuItem>
+							))}
+						</SidebarMenu>
+					</SidebarGroup>
+				))}
 			</SidebarContent>
 		</Sidebar>
 	)
