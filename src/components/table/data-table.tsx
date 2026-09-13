@@ -5,7 +5,8 @@ import {
 	type Row,
 	useReactTable,
 } from "@tanstack/react-table"
-import { memo } from "react"
+import { AnimatePresence } from "framer-motion"
+import { memo, useEffect, useState } from "react"
 import {
 	Table,
 	TableBody,
@@ -39,6 +40,12 @@ function DataTable<TData extends { id: string }, TValue>({
 		getCoreRowModel: getCoreRowModel(),
 		getRowId: row => row.id,
 	})
+	// First arrival renders instantly; later list updates animate out/in.
+	const [live, setLive] = useState(false)
+	useEffect(() => {
+		setLive(true)
+	}, [])
+	const enter = live ? { opacity: 0, y: 12 } : false
 
 	return (
 		<div className="flex flex-col gap-4">
@@ -46,21 +53,23 @@ function DataTable<TData extends { id: string }, TValue>({
 
 			{mobileRow ? (
 				<div className="min-w-0 divide-y overflow-hidden rounded-lg border bg-card md:hidden">
-					{table.getRowModel().rows.length ? (
-						table.getRowModel().rows.map(row => (
-							<div
-								key={row.id}
-								data-state={selectedIds?.includes(row.id) && "selected"}
-								className="min-w-0 overflow-hidden px-3 py-2.5 text-sm data-[state=selected]:bg-muted"
-							>
-								{mobileRow(row)}
+					<AnimatePresence initial={false}>
+						{table.getRowModel().rows.length ? (
+							table.getRowModel().rows.map(row => (
+								<div
+									key={row.id}
+									data-state={selectedIds?.includes(row.id) && "selected"}
+									className="min-w-0 overflow-hidden px-3 py-2.5 text-sm data-[state=selected]:bg-muted"
+								>
+									{mobileRow(row)}
+								</div>
+							))
+						) : (
+							<div className="p-8 text-center text-sm text-muted-foreground">
+								{emptyMessage}
 							</div>
-						))
-					) : (
-						<div className="p-8 text-center text-sm text-muted-foreground">
-							{emptyMessage}
-						</div>
-					)}
+						)}
+					</AnimatePresence>
 				</div>
 			) : null}
 
@@ -96,41 +105,47 @@ function DataTable<TData extends { id: string }, TValue>({
 						))}
 					</TableHeader>
 					<TableBody>
-						{table.getRowModel().rows.length ? (
-							table.getRowModel().rows.map(row => (
-								<TableRow
-									key={row.id}
-									data-state={selectedIds?.includes(row.id) && "selected"}
-									className={cn("cursor-pointer", getRowClassName?.(row))}
-								>
-									{row.getVisibleCells().map(cell => (
-										<TableCell
-											key={cell.id}
-											className={
-												cell.column.columnDef.meta &&
-												"width" in cell.column.columnDef.meta
-													? `${cell.column.columnDef.meta?.width}`
-													: undefined
-											}
-										>
-											{flexRender(
-												cell.column.columnDef.cell,
-												cell.getContext(),
-											)}
-										</TableCell>
-									))}
+						<AnimatePresence initial={false}>
+							{table.getRowModel().rows.length ? (
+								table.getRowModel().rows.map(row => (
+									<TableRow
+										key={row.id}
+										layout="position"
+										initial={enter}
+										animate={{ opacity: 1, y: 0 }}
+										exit={{ opacity: 0, y: -12 }}
+										data-state={selectedIds?.includes(row.id) && "selected"}
+										className={cn("cursor-pointer", getRowClassName?.(row))}
+									>
+										{row.getVisibleCells().map(cell => (
+											<TableCell
+												key={cell.id}
+												className={
+													cell.column.columnDef.meta &&
+													"width" in cell.column.columnDef.meta
+														? `${cell.column.columnDef.meta?.width}`
+														: undefined
+												}
+											>
+												{flexRender(
+													cell.column.columnDef.cell,
+													cell.getContext(),
+												)}
+											</TableCell>
+										))}
+									</TableRow>
+								))
+							) : (
+								<TableRow layout layoutId="empty">
+									<TableCell
+										colSpan={columns.length}
+										className="h-24 text-center text-muted-foreground"
+									>
+										{emptyMessage}
+									</TableCell>
 								</TableRow>
-							))
-						) : (
-							<TableRow>
-								<TableCell
-									colSpan={columns.length}
-									className="h-24 text-center text-muted-foreground"
-								>
-									{emptyMessage}
-								</TableCell>
-							</TableRow>
-						)}
+							)}
+						</AnimatePresence>
 					</TableBody>
 				</Table>
 			</div>

@@ -7,7 +7,7 @@ export const FILTER_CONTROL_CLASS = "border-border bg-input/20 text-foreground d
 
 export function FilterBar({ children }: { children: React.ReactNode }) {
 	return (
-		<div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap">
+		<div className="grid w-full grid-cols-2 gap-2 lg:grid-cols-[repeat(4,max-content)]">
 			{children}
 		</div>
 	)

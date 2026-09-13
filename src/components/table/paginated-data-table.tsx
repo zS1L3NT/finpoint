@@ -5,7 +5,8 @@ import {
 	type Row,
 	useReactTable,
 } from "@tanstack/react-table"
-import { memo, useState } from "react"
+import { AnimatePresence } from "framer-motion"
+import { memo, useEffect, useState } from "react"
 import PaginationFooter from "@/components/table/pagination-footer"
 import PaginationHeader from "@/components/table/pagination-header"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -48,48 +49,43 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 		getRowId: row => row.id,
 	})
 	const skeletonRows = Math.min(Math.max(Number(header.pageSize) || 8, 3), 12)
-	// Entrance animation plays once, on first arrival. The flag flips when it
-	// ends so pagination, search, and filter updates swap instantly forever.
-	const [entered, setEntered] = useState(false)
-	const arrive = (event: React.AnimationEvent) => {
-		if (event.target === event.currentTarget) setEntered(true)
-	}
-	const arrival = !entered ? "animate-in fade-in duration-200" : undefined
+	// First arrival renders instantly; later list updates animate out/in.
+	const [live, setLive] = useState(false)
+	useEffect(() => {
+		if (!loading) setLive(true)
+	}, [loading])
+	const enter = live ? { opacity: 0, y: 12 } : false
 
 	return (
 		<div className="flex flex-col gap-4">
 			{header ? <PaginationHeader {...header} /> : null}
 
 			{mobileRow ? (
-				<div
-					onAnimationEnd={arrive}
-					className={cn(
-						"min-w-0 divide-y overflow-hidden rounded-lg border bg-card md:hidden",
-						arrival,
-					)}
-				>
-					{loading ? (
-						Array.from({ length: 4 }).map((_, index) => (
-							<div key={index} className="grid gap-1.5 px-3 py-2.5">
-								<Skeleton className="h-4 w-2/3" />
-								<Skeleton className="h-3 w-1/3" />
+				<div className="min-w-0 divide-y overflow-hidden rounded-lg border bg-card md:hidden">
+					<AnimatePresence initial={false}>
+						{loading ? (
+							Array.from({ length: 4 }).map((_, index) => (
+								<div key={index} className="grid gap-1.5 px-3 py-2.5">
+									<Skeleton className="h-4 w-2/3" />
+									<Skeleton className="h-3 w-1/3" />
+								</div>
+							))
+						) : table.getRowModel().rows.length ? (
+							table.getRowModel().rows.map(row => (
+								<div
+									key={row.id}
+									data-state={selectedIds?.includes(row.id) && "selected"}
+									className="min-w-0 overflow-hidden px-3 py-2.5 text-sm data-[state=selected]:bg-muted"
+								>
+									{mobileRow(row)}
+								</div>
+							))
+						) : (
+							<div className="p-8 text-center text-sm text-muted-foreground">
+								{emptyMessage}
 							</div>
-						))
-					) : table.getRowModel().rows.length ? (
-						table.getRowModel().rows.map(row => (
-							<div
-								key={row.id}
-								data-state={selectedIds?.includes(row.id) && "selected"}
-								className="min-w-0 overflow-hidden px-3 py-2.5 text-sm data-[state=selected]:bg-muted"
-							>
-								{mobileRow(row)}
-							</div>
-						))
-					) : (
-						<div className="p-8 text-center text-sm text-muted-foreground">
-							{emptyMessage}
-						</div>
-					)}
+						)}
+					</AnimatePresence>
 				</div>
 			) : null}
 
@@ -124,11 +120,7 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 							</TableRow>
 						))}
 					</TableHeader>
-					<TableBody
-						key={loading ? "skeleton" : "rows"}
-						onAnimationEnd={arrive}
-						className={arrival}
-					>
+					<TableBody key={loading ? "skeleton" : "rows"}>
 						{loading ? (
 							Array.from({ length: skeletonRows }).map((_, row) => (
 								<TableRow key={row}>
@@ -147,32 +139,38 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 								</TableRow>
 							))
 						) : table.getRowModel().rows.length ? (
-							table.getRowModel().rows.map(row => (
-								<TableRow
-									key={row.id}
-									data-state={selectedIds?.includes(row.id) && "selected"}
-									className="cursor-pointer"
-								>
-									{row.getVisibleCells().map(cell => (
-										<TableCell
-											key={cell.id}
-											className={
-												cell.column.columnDef.meta &&
-												"width" in cell.column.columnDef.meta
-													? `${cell.column.columnDef.meta?.width}`
-													: undefined
-											}
-										>
-											{flexRender(
-												cell.column.columnDef.cell,
-												cell.getContext(),
-											)}
-										</TableCell>
-									))}
-								</TableRow>
-							))
+							<AnimatePresence initial={false}>
+								{table.getRowModel().rows.map(row => (
+									<TableRow
+										key={row.id}
+										layout="position"
+										initial={enter}
+										animate={{ opacity: 1, y: 0 }}
+										exit={{ opacity: 0, y: -12 }}
+										data-state={selectedIds?.includes(row.id) && "selected"}
+										className="cursor-pointer"
+									>
+										{row.getVisibleCells().map(cell => (
+											<TableCell
+												key={cell.id}
+												className={
+													cell.column.columnDef.meta &&
+													"width" in cell.column.columnDef.meta
+														? `${cell.column.columnDef.meta?.width}`
+														: undefined
+												}
+											>
+												{flexRender(
+													cell.column.columnDef.cell,
+													cell.getContext(),
+												)}
+											</TableCell>
+										))}
+									</TableRow>
+								))}
+							</AnimatePresence>
 						) : (
-							<TableRow>
+							<TableRow layout layoutId="empty">
 								<TableCell
 									colSpan={columns.length}
 									className="h-24 text-center text-muted-foreground"
