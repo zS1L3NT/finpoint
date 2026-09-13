@@ -5,19 +5,14 @@ import { Link, useSearchParams } from "react-router-dom"
 import { toast } from "sonner"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
 import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
-import AppHeader from "@/components/layout/app-header"
-import PageContent from "@/components/layout/page-content"
 import RecordAmount from "@/components/record-amount"
 import SelectionBar from "@/components/selection-bar"
 import CategoryFilter from "@/components/table/category-filter"
 import { ClearFiltersButton, FILTER_CONTROL_CLASS, FilterBar } from "@/components/table/filter-bar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ButtonGroup } from "@/components/ui/button-group"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
-import { MonthPicker } from "@/components/ui/monthpicker"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import {
 	Select,
 	SelectContent,
@@ -37,7 +32,7 @@ import { listCategories } from "@/logic/categories"
 import { getMonthlyRecords } from "@/logic/monthly"
 import { ConflictError, getRecord, updateRecordBuckets } from "@/logic/records"
 import { ValidationError } from "@/logic/validate"
-import { pathDashboard, pathImporter, pathMonthlyRecords, pathRecord, pathRecords } from "@/routes"
+import { pathImporter, pathRecord } from "@/routes"
 import {
 	Allocation,
 	AnalyticsSummary,
@@ -192,166 +187,51 @@ export default function MonthlyRecordsPage() {
 
 	if (data === undefined) {
 		return (
-			<>
-				<AppHeader title="Monthly Records" />
-				<PageContent className="gap-5 md:gap-7">
-					<header className="grid gap-5">
-						<div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-							<div className="grid gap-2">
-								<Skeleton className="h-3 w-32" />
-								<Skeleton className="h-9 w-56 max-w-full" />
-								<Skeleton className="h-4 w-48 max-w-full" />
-							</div>
-							<div className="flex gap-2">
-								<Skeleton className="h-9 w-9" />
-								<Skeleton className="h-9 w-32" />
-								<Skeleton className="h-9 w-9" />
-							</div>
-						</div>
-						<div className="flex gap-1 border-b pb-px">
-							<Skeleton className="h-9 w-24" />
-							<Skeleton className="h-9 w-36" />
-						</div>
-					</header>
-
-					<div className="flex min-w-0 flex-col gap-2 md:flex-row md:flex-wrap">
-						<Skeleton className="h-10 w-full md:w-sm" />
-						<div className="flex gap-2">
-							<Skeleton className="h-9 w-32" />
-							<Skeleton className="h-9 w-32" />
-							<Skeleton className="hidden h-9 w-32 sm:block" />
-						</div>
+			<div className="grid gap-5 md:gap-7">
+				<div className="flex min-w-0 flex-col gap-2 md:flex-row md:flex-wrap">
+					<Skeleton className="h-10 w-full md:w-sm" />
+					<div className="flex gap-2">
+						<Skeleton className="h-9 w-32" />
+						<Skeleton className="h-9 w-32" />
+						<Skeleton className="hidden h-9 w-32 sm:block" />
 					</div>
+				</div>
 
-					<div className="overflow-hidden rounded-lg border bg-card">
-						<div className="grid grid-cols-[1fr_auto] items-center gap-3 border-b px-4 py-3 sm:grid-cols-[2fr_1fr_1fr_auto]">
-							<Skeleton className="h-4 w-3/4" />
+				<div className="overflow-hidden rounded-lg border bg-card">
+					<div className="grid grid-cols-[1fr_auto] items-center gap-3 border-b px-4 py-3 sm:grid-cols-[2fr_1fr_1fr_auto]">
+						<Skeleton className="h-4 w-3/4" />
+						<Skeleton className="hidden h-4 w-24 sm:block" />
+						<Skeleton className="hidden h-4 w-20 sm:block" />
+						<Skeleton className="h-4 w-16" />
+					</div>
+					{Array.from({ length: 6 }).map((_, index) => (
+						<div
+							key={index}
+							className="grid grid-cols-[1fr_auto] items-center gap-3 border-b px-4 py-3 last:border-b-0 sm:grid-cols-[2fr_1fr_1fr_auto]"
+						>
+							<div className="grid gap-1.5">
+								<Skeleton className="h-4 w-2/3" />
+								<Skeleton className="h-3 w-1/3" />
+							</div>
 							<Skeleton className="hidden h-4 w-24 sm:block" />
 							<Skeleton className="hidden h-4 w-20 sm:block" />
-							<Skeleton className="h-4 w-16" />
+							<Skeleton className="h-8 w-16" />
 						</div>
-						{Array.from({ length: 6 }).map((_, index) => (
-							<div
-								key={index}
-								className="grid grid-cols-[1fr_auto] items-center gap-3 border-b px-4 py-3 last:border-b-0 sm:grid-cols-[2fr_1fr_1fr_auto]"
-							>
-								<div className="grid gap-1.5">
-									<Skeleton className="h-4 w-2/3" />
-									<Skeleton className="h-3 w-1/3" />
-								</div>
-								<Skeleton className="hidden h-4 w-24 sm:block" />
-								<Skeleton className="hidden h-4 w-20 sm:block" />
-								<Skeleton className="h-8 w-16" />
-							</div>
-						))}
-					</div>
-				</PageContent>
-			</>
+					))}
+				</div>
+			</div>
 		)
 	}
 
 	if (data === null) {
-		return (
-			<>
-				<AppHeader title="Monthly Records" />
-				<PageContent>
-					<p className="text-sm text-muted-foreground">Monthly records not found.</p>
-				</PageContent>
-			</>
-		)
+		return <p className="text-sm text-muted-foreground">Monthly records not found.</p>
 	}
 
 	const { summary, buckets, period } = data
 
 	return (
 		<>
-			<AppHeader title="Monthly Records" />
-			<PageContent className="gap-5 animate-in fade-in duration-300 md:gap-7">
-				<header className="grid gap-5">
-					<div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-						<div>
-							<p className="text-xs font-medium tracking-[0.18em] text-muted-foreground uppercase">
-								Monthly Records
-							</p>
-							<h2 className="mt-1 text-3xl font-semibold tracking-tight">
-								{month} {year}
-							</h2>
-							<p className="mt-1 text-sm text-muted-foreground">
-								{period.is_current && period.through
-									? `Actuals through ${DateTime.fromISO(period.through).toFormat("d MMM")}`
-									: period.is_future
-										? "Future-dated Records"
-										: "Full month"}
-							</p>
-						</div>
-						<ButtonGroup className="w-full sm:w-fit">
-							<Button
-								variant="outline"
-								aria-label="Previous month"
-								onClick={() => visit({ day: undefined }, date.minus({ month: 1 }))}
-							>
-								<IconifyIcon icon="lucide:arrow-left" />
-							</Button>
-							<Popover>
-								<PopoverTrigger
-									render={<Button variant="outline" className="flex-1 sm:w-32" />}
-								>
-									<IconifyIcon icon="lucide:calendar" />{" "}
-									{date.toFormat("MMM yyyy")}
-								</PopoverTrigger>
-								<PopoverContent className="w-auto p-0">
-									<MonthPicker
-										selectedMonth={date.toJSDate()}
-										onMonthSelect={value =>
-											visit({ day: undefined }, DateTime.fromJSDate(value))
-										}
-									/>
-								</PopoverContent>
-							</Popover>
-							<Button
-								variant="outline"
-								aria-label="Next month"
-								onClick={() => visit({ day: undefined }, date.plus({ month: 1 }))}
-							>
-								<IconifyIcon icon="lucide:arrow-right" />
-							</Button>
-						</ButtonGroup>
-					</div>
-					<div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-						<nav
-							className="flex min-w-0 border-b sm:flex-1"
-							aria-label="Monthly finance views"
-						>
-							<Link
-								className="border-b-2 border-transparent px-4 py-2 text-sm text-muted-foreground hover:text-foreground"
-								to={pathDashboard({ month, year: String(year) })}
-							>
-								Overview
-							</Link>
-							<Link
-								className="border-b-2 border-foreground px-4 py-2 text-sm font-medium"
-								to={pathMonthlyRecords({ month, year: String(year) })}
-							>
-								Monthly Records
-							</Link>
-						</nav>
-						<Button
-							variant="outline"
-							className="h-9 w-full sm:mb-2 sm:h-7 sm:w-auto"
-							asChild
-						>
-							<Link
-								to={pathRecords({
-									start_date: date.startOf("month").toISODate() ?? undefined,
-									end_date: date.endOf("month").toISODate() ?? undefined,
-								})}
-							>
-								Open in Records <IconifyIcon icon="lucide:arrow-up-right" />
-							</Link>
-						</Button>
-					</div>
-				</header>
-
+			<div className="grid gap-5 animate-in fade-in duration-300 md:gap-7">
 				<MonthlyRecordFilters
 					date={date}
 					categories={categories}
@@ -480,7 +360,7 @@ export default function MonthlyRecordsPage() {
 						))}
 					</section>
 				) : null}
-			</PageContent>
+			</div>
 			{editingRecord ? (
 				<RecordEditorDialog
 					record={editingRecord}

@@ -8,6 +8,7 @@
   - `src/logic/*` holds domain operations and mirrors the old Laravel `Api/*Controller` surface 1:1 (accounts, statements, records, budgets, categories, buckets, importer, dashboard, monthly) so domain knowledge transfers.
   - `src/data/*` holds persistence: Dexie instance + versioned migrations (`db.ts`), first-run seed (`seed.ts`), JSON export/import (`exportImport.ts`).
   - `src/routes.ts` centralizes all route paths (replaces Wayfinder).
+  - Overview + Monthly Records share the `MonthLayout` shell (title, month nav, tabs mount once, content swaps below), so tab switches never remount the header.
 - React Compiler is enabled in `vite.config.ts`.
 
 ## Code Style

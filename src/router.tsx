@@ -1,4 +1,5 @@
 import { createBrowserRouter, Navigate } from "react-router-dom"
+import MonthLayout from "@/components/layout/month-layout"
 import Layout from "@/layout"
 import AccountPage from "@/pages/account"
 import AccountsPage from "@/pages/accounts"
@@ -21,7 +22,13 @@ export const router = createBrowserRouter([
 		path: "/",
 		element: <Layout />,
 		children: [
-			{ index: true, element: <DashboardPage /> },
+			{
+				element: <MonthLayout />,
+				children: [
+					{ index: true, element: <DashboardPage /> },
+					{ path: "records/monthly", element: <MonthlyRecordsPage /> },
+				],
+			},
 			{ path: "importer", element: <ImporterPage /> },
 			{ path: "allocator", element: <AllocatorPage /> },
 			{ path: "allocator/pending", element: <AllocatorPendingPage /> },
@@ -29,7 +36,6 @@ export const router = createBrowserRouter([
 			{ path: "statements/:id", element: <StatementPage /> },
 			{ path: "accounts", element: <AccountsPage /> },
 			{ path: "accounts/:id", element: <AccountPage /> },
-			{ path: "records/monthly", element: <MonthlyRecordsPage /> },
 			{ path: "records", element: <RecordsPage /> },
 			{ path: "records/:id", element: <RecordPage /> },
 			{ path: "budgets", element: <BudgetsPage /> },

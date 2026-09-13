@@ -1,19 +1,14 @@
 import { useLiveQuery } from "dexie-react-hooks"
 import { DateTime } from "luxon"
 import { type ReactNode, useMemo, useState } from "react"
-import { Link, useSearchParams } from "react-router-dom"
+import { Link } from "react-router-dom"
 import CashflowChart, { CashflowPoint } from "@/components/charts/cashflow-chart"
 import BucketDialog from "@/components/dialogs/bucket"
 import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
-import AppHeader from "@/components/layout/app-header"
-import PageContent from "@/components/layout/page-content"
 import { FILTER_CONTROL_CLASS } from "@/components/table/filter-bar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ButtonGroup } from "@/components/ui/button-group"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { MonthPicker } from "@/components/ui/monthpicker"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import {
 	Select,
 	SelectContent,
@@ -25,9 +20,10 @@ import {
 	SelectValue,
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useMonthParams } from "@/hooks/use-month-params"
 import { cn, formatCurrency } from "@/lib/utils"
 import { getDashboard } from "@/logic/dashboard"
-import { pathDashboard, pathMonthlyRecords } from "@/routes"
+import { pathMonthlyRecords } from "@/routes"
 import { AnalyticsSummary, Bucket } from "@/types"
 
 type DashboardBucket = Bucket & {
@@ -84,22 +80,12 @@ type DashboardData = {
 }
 
 export default function DashboardPage() {
-	const [searchParams, setSearchParams] = useSearchParams()
-	const now = DateTime.now()
-	const parsedMonth = DateTime.fromFormat(
-		`${searchParams.get("month") ?? now.toFormat("MMMM")} ${searchParams.get("year") ?? String(now.year)}`,
-		"MMMM yyyy",
-	)
-	const month = parsedMonth.isValid
-		? (parsedMonth.monthLong ?? now.toFormat("MMMM"))
-		: now.toFormat("MMMM")
-	const year = parsedMonth.isValid ? parsedMonth.year : now.year
+	const { month, year, date } = useMonthParams()
 	const data = useLiveQuery(() => getDashboard({ month, year }), [month, year]) as unknown as
 		| DashboardData
 		| undefined
 	const buckets = data?.buckets ?? []
 	const categories = data?.categories ?? []
-	const date = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
 	const [scope, setScope] = useState("all")
 	const scopedBucketIds = useMemo(() => {
 		if (scope === "all") return [...buckets.map(bucket => bucket.id), "unbucketed"]
@@ -109,63 +95,47 @@ export default function DashboardPage() {
 		return [scope]
 	}, [scope, buckets])
 
-	const setDate = (nextDate: Date) => {
-		const next = DateTime.fromJSDate(nextDate)
-		setSearchParams({ month: next.toFormat("MMMM"), year: String(next.year) })
-	}
-
 	if (!data) {
 		return (
-			<>
-				<AppHeader title="Dashboard" />
-				<PageContent className="gap-7 md:gap-9">
-					<DashboardHeader
-						date={date}
-						month={month}
-						year={year}
-						label={null}
-						onMonthChange={setDate}
-					/>
+			<div className="grid gap-7 md:gap-9">
+				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+					{Array.from({ length: 4 }).map((_, index) => (
+						<Card key={index}>
+							<CardContent className="grid gap-2">
+								<Skeleton className="h-3 w-20" />
+								<Skeleton className="h-7 w-28" />
+								<Skeleton className="h-3 w-24" />
+							</CardContent>
+						</Card>
+					))}
+				</div>
 
-					<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-						{Array.from({ length: 4 }).map((_, index) => (
-							<Card key={index}>
-								<CardContent className="grid gap-2">
-									<Skeleton className="h-3 w-20" />
-									<Skeleton className="h-7 w-28" />
-									<Skeleton className="h-3 w-24" />
-								</CardContent>
-							</Card>
-						))}
-					</div>
+				<Card>
+					<CardHeader className="border-b">
+						<Skeleton className="h-5 w-32" />
+						<Skeleton className="h-4 w-80 max-w-full" />
+					</CardHeader>
+					<CardContent>
+						<Skeleton className="h-64 w-full" />
+					</CardContent>
+				</Card>
 
-					<Card>
-						<CardHeader className="border-b">
-							<Skeleton className="h-5 w-32" />
-							<Skeleton className="h-4 w-80 max-w-full" />
-						</CardHeader>
-						<CardContent>
-							<Skeleton className="h-64 w-full" />
-						</CardContent>
-					</Card>
-
-					<section className="grid gap-4">
-						<div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-							<div className="grid gap-2">
-								<Skeleton className="h-6 w-48" />
-								<Skeleton className="h-4 w-40" />
-							</div>
-							<Skeleton className="h-9 w-full sm:w-52" />
-						</div>
+				<section className="grid gap-4">
+					<div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
 						<div className="grid gap-2">
-							<Skeleton className="h-14 w-full" />
-							<Skeleton className="h-14 w-full" />
-							<Skeleton className="h-14 w-full" />
-							<Skeleton className="h-14 w-full" />
+							<Skeleton className="h-6 w-48" />
+							<Skeleton className="h-4 w-40" />
 						</div>
-					</section>
-				</PageContent>
-			</>
+						<Skeleton className="h-9 w-full sm:w-52" />
+					</div>
+					<div className="grid gap-2">
+						<Skeleton className="h-14 w-full" />
+						<Skeleton className="h-14 w-full" />
+						<Skeleton className="h-14 w-full" />
+						<Skeleton className="h-14 w-full" />
+					</div>
+				</section>
+			</div>
 		)
 	}
 	const { period, summary, comparison, series, projection, future_records_count } = data
@@ -198,164 +168,147 @@ export default function DashboardPage() {
 	)
 
 	return (
-		<>
-			<AppHeader title="Dashboard" />
-			<PageContent className="gap-7 animate-in fade-in duration-300 md:gap-9">
-				<DashboardHeader
-					date={date}
-					month={month}
-					year={year}
-					label={period.label}
-					onMonthChange={setDate}
-				/>
+		<div className="grid gap-7 animate-in fade-in duration-300 md:gap-9">
+			{period.is_future ? (
+				<Card>
+					<CardHeader>
+						<CardTitle>Future-dated Records</CardTitle>
+						<CardDescription>
+							{future_records_count
+								? `${future_records_count} Record${future_records_count === 1 ? "" : "s"} have been entered for this month.`
+								: "No Records have been entered for this month."}{" "}
+							Actual results and comparisons begin when the month starts.
+						</CardDescription>
+					</CardHeader>
+				</Card>
+			) : (
+				<>
+					<SummaryBand summary={summary} comparison={comparison} />
+					{summary.unbucketed_count ? (
+						<div
+							className="flex flex-wrap gap-2"
+							aria-label="Records needing attention"
+						>
+							{summary.unbucketed_count ? (
+								<Button variant="outline" size="sm" asChild>
+									<Link
+										to={pathMonthlyRecords({
+											month,
+											year: String(year),
+											show_unbucketed: "true",
+										})}
+									>
+										<IconifyIcon icon="lucide:inbox" />{" "}
+										{summary.unbucketed_count} unbucketed spending Record
+										{summary.unbucketed_count === 1 ? "" : "s"}
+									</Link>
+								</Button>
+							) : null}
+						</div>
+					) : null}
 
-				{period.is_future ? (
 					<Card>
-						<CardHeader>
-							<CardTitle>Future-dated Records</CardTitle>
+						<CardHeader className="border-b">
+							<CardTitle className="text-base">Spending pace</CardTitle>
 							<CardDescription>
-								{future_records_count
-									? `${future_records_count} Record${future_records_count === 1 ? "" : "s"} have been entered for this month.`
-									: "No Records have been entered for this month."}{" "}
-								Actual results and comparisons begin when the month starts.
+								Cumulative spending against the monthly target, with projected
+								month-end usage and current balance.
 							</CardDescription>
 						</CardHeader>
+						<CardContent>
+							<CashflowChart
+								data={series}
+								month={month}
+								year={year}
+								target={paceBucket?.target ?? null}
+								targetLabel={paceBucket?.name ?? null}
+							/>
+							<PaceSummary projection={projection} />
+						</CardContent>
 					</Card>
-				) : (
-					<>
-						<SummaryBand summary={summary} comparison={comparison} />
-						{summary.unbucketed_count ? (
-							<div
-								className="flex flex-wrap gap-2"
-								aria-label="Records needing attention"
-							>
-								{summary.unbucketed_count ? (
-									<Button variant="outline" size="sm" asChild>
-										<Link
-											to={pathMonthlyRecords({
-												month,
-												year: String(year),
-												show_unbucketed: "true",
-											})}
-										>
-											<IconifyIcon icon="lucide:inbox" />{" "}
-											{summary.unbucketed_count} unbucketed spending Record
-											{summary.unbucketed_count === 1 ? "" : "s"}
-										</Link>
-									</Button>
-								) : null}
+
+					<section className="grid gap-4" aria-labelledby="spending-breakdown-title">
+						<div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+							<div>
+								<h3 id="spending-breakdown-title" className="text-lg font-semibold">
+									Spending breakdown
+								</h3>
+								<p className="text-sm text-muted-foreground">
+									{scopeLabel} · {formatCurrency(scopedTotal)}
+								</p>
 							</div>
-						) : null}
-
-						<Card>
-							<CardHeader className="border-b">
-								<CardTitle className="text-base">Spending pace</CardTitle>
-								<CardDescription>
-									Cumulative spending against the monthly target, with projected
-									month-end usage and current balance.
-								</CardDescription>
-							</CardHeader>
-							<CardContent>
-								<CashflowChart
-									data={series}
-									month={month}
-									year={year}
-									target={paceBucket?.target ?? null}
-									targetLabel={paceBucket?.name ?? null}
-								/>
-								<PaceSummary projection={projection} />
-							</CardContent>
-						</Card>
-
-						<section className="grid gap-4" aria-labelledby="spending-breakdown-title">
-							<div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-								<div>
-									<h3
-										id="spending-breakdown-title"
-										className="text-lg font-semibold"
-									>
-										Spending breakdown
-									</h3>
-									<p className="text-sm text-muted-foreground">
-										{scopeLabel} · {formatCurrency(scopedTotal)}
-									</p>
-								</div>
-								<Select
-									value={scope}
-									onValueChange={value => setScope(value ?? "all")}
+							<Select value={scope} onValueChange={value => setScope(value ?? "all")}>
+								<SelectTrigger
+									className={cn("w-full sm:w-52", FILTER_CONTROL_CLASS)}
 								>
-									<SelectTrigger
-										className={cn("w-full sm:w-52", FILTER_CONTROL_CLASS)}
-									>
-										<IconifyIcon icon="lucide:wallet-cards" />
-										<SelectValue />
-									</SelectTrigger>
-									<SelectContent variant="filter">
+									<IconifyIcon icon="lucide:wallet-cards" />
+									<SelectValue />
+								</SelectTrigger>
+								<SelectContent variant="filter">
+									<SelectGroup>
+										<SelectItem value="all">All spending</SelectItem>
+									</SelectGroup>
+									<SelectSeparator />
+									<SelectGroup>
+										<SelectLabel>Bucket groups</SelectLabel>
+										<SelectItem value="core">Core</SelectItem>
+										<SelectItem value="outlier">Outlier</SelectItem>
+										<SelectItem value="other">Other</SelectItem>
+									</SelectGroup>
+									{buckets.length ? <SelectSeparator /> : null}
+									{buckets.length ? (
 										<SelectGroup>
-											<SelectItem value="all">All spending</SelectItem>
+											<SelectLabel>Specific bucket</SelectLabel>
+											{buckets.map(bucket => (
+												<SelectItem key={bucket.id} value={bucket.id}>
+													<span
+														className="size-2 rounded-full"
+														style={{
+															backgroundColor: bucket.color,
+														}}
+													/>
+													{bucket.name}
+												</SelectItem>
+											))}
 										</SelectGroup>
-										<SelectSeparator />
-										<SelectGroup>
-											<SelectLabel>Bucket groups</SelectLabel>
-											<SelectItem value="core">Core</SelectItem>
-											<SelectItem value="outlier">Outlier</SelectItem>
-											<SelectItem value="other">Other</SelectItem>
-										</SelectGroup>
-										{buckets.length ? <SelectSeparator /> : null}
-										{buckets.length ? (
-											<SelectGroup>
-												<SelectLabel>Specific bucket</SelectLabel>
-												{buckets.map(bucket => (
-													<SelectItem key={bucket.id} value={bucket.id}>
-														<span
-															className="size-2 rounded-full"
-															style={{
-																backgroundColor: bucket.color,
-															}}
-														/>
-														{bucket.name}
-													</SelectItem>
-												))}
-											</SelectGroup>
-										) : null}
-									</SelectContent>
-								</Select>
-							</div>
-							<div className="grid gap-5 xl:grid-cols-[minmax(0,3fr)_minmax(18rem,2fr)]">
-								<CategoryBreakdown
-									categories={scopedCategories}
-									total={scopedTotal}
-									month={month}
-									year={year}
-									scope={scope}
-									comparisonCount={comparison.count}
-								/>
-								<BucketStatus
-									buckets={buckets}
-									month={month}
-									year={year}
-									activeScope={scope}
-									setScope={setScope}
-								/>
-							</div>
-						</section>
+									) : null}
+								</SelectContent>
+							</Select>
+						</div>
+						<div className="grid gap-5 xl:grid-cols-[minmax(0,3fr)_minmax(18rem,2fr)]">
+							<CategoryBreakdown
+								categories={scopedCategories}
+								total={scopedTotal}
+								month={month}
+								year={year}
+								scope={scope}
+								comparisonCount={comparison.count}
+							/>
+							<BucketStatus
+								buckets={buckets}
+								month={month}
+								year={year}
+								activeScope={scope}
+								setScope={setScope}
+							/>
+						</div>
+					</section>
 
-						{summary.contributions || summary.withdrawals ? (
-							<InvestmentRow summary={summary} month={month} year={year} />
-						) : null}
-						<MonthlyRhythm summary={summary} period={period} date={date} />
-						{future_records_count ? (
-							<p className="text-sm text-muted-foreground">
-								<IconifyIcon icon="lucide:calendar-clock" className="mr-1 inline" />{" "}
-								{future_records_count} later-dated Record
-								{future_records_count === 1 ? "" : "s"} are listed separately in
-								Monthly Records.
-							</p>
-						) : null}
-					</>
-				)}
-			</PageContent>
-		</>
+					{summary.contributions || summary.withdrawals ? (
+						<InvestmentRow summary={summary} month={month} year={year} />
+					) : null}
+					<MonthlyRhythm summary={summary} period={period} date={date} />
+					{future_records_count ? (
+						<p className="text-sm text-muted-foreground">
+							<IconifyIcon icon="lucide:calendar-clock" className="mr-1 inline" />{" "}
+							{future_records_count} later-dated Record
+							{future_records_count === 1 ? "" : "s"} are listed separately in Monthly
+							Records.
+						</p>
+					) : null}
+				</>
+			)}
+		</div>
 	)
 }
 
@@ -900,84 +853,4 @@ function comparisonRateText(value: ComparisonValue, count: number) {
 	if (!count || value.difference === null) return "No comparison history"
 	if (Math.abs(value.difference) < 0.05) return `Same as ${count}-month average`
 	return `${Math.abs(value.difference).toFixed(1)} points ${value.difference > 0 ? "above" : "below"} average`
-}
-
-function DashboardHeader({
-	date,
-	month,
-	year,
-	label,
-	onMonthChange,
-}: {
-	date: DateTime
-	month: string
-	year: number
-	label: string | null
-	onMonthChange: (date: Date) => void
-}) {
-	return (
-		<header className="grid gap-5">
-			<div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-				<div>
-					<p className="text-xs font-medium tracking-[0.18em] text-muted-foreground uppercase">
-						Monthly overview
-					</p>
-					<h2 className="mt-1 text-3xl font-semibold tracking-tight">
-						{month} {year}
-					</h2>
-					{label === null ? (
-						<Skeleton className="mt-1 h-4 w-64 max-w-full" />
-					) : (
-						<p className="mt-1 text-sm text-muted-foreground">
-							{label} · SGD · Based on Record dates
-						</p>
-					)}
-				</div>
-				<ButtonGroup className="w-full sm:w-fit">
-					<Button
-						variant="outline"
-						aria-label="Previous month"
-						onClick={() => onMonthChange(date.minus({ month: 1 }).toJSDate())}
-					>
-						<IconifyIcon icon="lucide:arrow-left" />
-					</Button>
-					<Popover>
-						<PopoverTrigger
-							render={<Button variant="outline" className="flex-1 sm:w-32" />}
-						>
-							<IconifyIcon icon="lucide:calendar" /> {date.toFormat("MMM yyyy")}
-						</PopoverTrigger>
-						<PopoverContent className="w-auto p-0">
-							<MonthPicker
-								selectedMonth={date.toJSDate()}
-								onMonthSelect={onMonthChange}
-							/>
-						</PopoverContent>
-					</Popover>
-					<Button
-						variant="outline"
-						aria-label="Next month"
-						onClick={() => onMonthChange(date.plus({ month: 1 }).toJSDate())}
-					>
-						<IconifyIcon icon="lucide:arrow-right" />
-					</Button>
-				</ButtonGroup>
-			</div>
-
-			<nav className="flex border-b" aria-label="Monthly finance views">
-				<Link
-					className="border-b-2 border-foreground px-4 py-2 text-sm font-medium"
-					to={pathDashboard({ month, year: String(year) })}
-				>
-					Overview
-				</Link>
-				<Link
-					className="border-b-2 border-transparent px-4 py-2 text-sm text-muted-foreground hover:text-foreground"
-					to={pathMonthlyRecords({ month, year: String(year) })}
-				>
-					Monthly Records
-				</Link>
-			</nav>
-		</header>
-	)
 }
