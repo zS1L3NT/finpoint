@@ -1,19 +1,16 @@
-import { usePage } from "@inertiajs/react"
+import { Outlet } from "react-router-dom"
 import AppSidebar from "@/components/layout/app-sidebar"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { HistoryProvider } from "@/history"
-import { SharedPageProps } from "@/types"
 
-export default function Layout({ children }: { children: React.ReactNode }) {
-	const { sidebarOpen } = usePage<SharedPageProps>().props
-
+export default function Layout() {
 	return (
 		<HistoryProvider>
 			<TooltipProvider delayDuration={0}>
 				<SidebarProvider
-					defaultOpen={sidebarOpen}
+					defaultOpen
 					style={
 						{
 							"--sidebar-width": "calc(var(--spacing) * 72)",
@@ -23,7 +20,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 				>
 					<Toaster />
 					<AppSidebar />
-					<SidebarInset className="min-h-full">{children}</SidebarInset>
+					<SidebarInset className="min-h-full">
+						<Outlet />
+					</SidebarInset>
 				</SidebarProvider>
 				<Toaster />
 			</TooltipProvider>

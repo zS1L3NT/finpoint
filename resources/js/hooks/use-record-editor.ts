@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { toast } from "sonner"
+import { getRecord } from "@/logic/records"
 import type { Record, Statement } from "@/types"
-import { recordShowApiRoute } from "@/wayfinder/routes"
 
 export type EditableRecord = Record & { statements: Statement[] }
 
@@ -13,15 +13,10 @@ export function useRecordEditor() {
 		if (loadingRecordId) return
 		setLoadingRecordId(record.id)
 		try {
-			const response = await fetch(recordShowApiRoute.url({ record }), {
-				headers: { Accept: "application/json" },
-			})
-			const data = await response.json().catch(() => null)
-			if (response.ok) {
-				setEditingRecord(data as EditableRecord)
-				return
-			}
-			toast.error(data?.message ?? "Unable to open this Record for editing.")
+			const data = await getRecord(record.id)
+			setEditingRecord(data as unknown as EditableRecord)
+		} catch {
+			toast.error("Unable to open this Record for editing.")
 		} finally {
 			setLoadingRecordId(null)
 		}

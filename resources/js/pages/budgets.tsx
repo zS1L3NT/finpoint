@@ -1,8 +1,9 @@
 import { Icon as IconifyIcon } from "@iconify/react"
-import { Link } from "@inertiajs/react"
 import type { CellContext } from "@tanstack/react-table"
+import { useLiveQuery } from "dexie-react-hooks"
 import { DateTime } from "luxon"
-import { useState } from "react"
+import { useMemo, useState } from "react"
+import { Link } from "react-router-dom"
 import BudgetCreatorDialog from "@/components/dialogs/budget-creator"
 import BudgetEditorDialog from "@/components/dialogs/budget-editor"
 import AppHeader from "@/components/layout/app-header"
@@ -16,18 +17,24 @@ import { useHistory } from "@/history"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
 import { formatCurrency, parseDate } from "@/lib/utils"
-import { Budget, Paginated } from "@/types"
-import { budgetsWebRoute, budgetWebRoute } from "@/wayfinder/routes"
+import { listBudgets } from "@/logic/budgets"
+import { paginateItems, parsePage, parsePageSize } from "@/logic/pagination"
+import { pathBudget } from "@/routes"
+import { Budget } from "@/types"
 
-export default function BudgetsPage({ budgets }: { budgets: Paginated<Budget> }) {
+export default function BudgetsPage() {
 	const { handlePush } = useHistory()
 	const [isCreatingBudget, setIsCreatingBudget] = useState(false)
 	const [editingBudget, setEditingBudget] = useState<Budget | null>(null)
 
-	const { query, pageSize, handleQueryChange, handlePageSizeChange } = usePaginatedTableState({
-		syncOn: budgets,
-		buildUrl: query => budgetsWebRoute({ query }).url,
-	})
+	const { query, page, pageSize, handleQueryChange, handlePageSizeChange } =
+		usePaginatedTableState()
+
+	const budgets = useLiveQuery(() => listBudgets({ query: query || null }), [query]) ?? []
+	const paginated = useMemo(
+		() => paginateItems(budgets, parsePage(page), parsePageSize(pageSize)),
+		[budgets, page, pageSize],
+	)
 
 	return (
 		<>
@@ -42,7 +49,7 @@ export default function BudgetsPage({ budgets }: { budgets: Paginated<Budget> })
 				/>
 
 				<PaginatedDataTable
-					paginated={budgets}
+					paginated={paginated}
 					columns={[
 						{
 							header: "Budget",
@@ -148,7 +155,7 @@ export default function BudgetsPage({ budgets }: { budgets: Paginated<Budget> })
 						),
 					}}
 					footer={{
-						summary: `Showing ${budgets.data.length} of ${budgets.total} budgets.`,
+						summary: `Showing ${paginated.data.length} of ${paginated.total} budgets.`,
 					}}
 					mobileRow={({ original: budget }) => {
 						const now = DateTime.now()
@@ -207,7 +214,7 @@ export default function BudgetsPage({ budgets }: { budgets: Paginated<Budget> })
 											</Button>
 											<Button variant="outline" size="sm" asChild>
 												<Link
-													href={budgetWebRoute.url({ budget })}
+													to={pathBudget(budget.id)}
 													onClick={handlePush("Budgets")}
 												>
 													Open
@@ -254,10 +261,7 @@ function BudgetActionsCell({ row, column }: CellContext<Budget, unknown>) {
 				<IconifyIcon icon="lucide:pencil" /> Edit
 			</Button>
 			<Button variant="outline" size="sm" asChild>
-				<Link
-					href={budgetWebRoute.url({ budget: row.original })}
-					onClick={handlePush("Budgets")}
-				>
+				<Link to={pathBudget(row.original.id)} onClick={handlePush("Budgets")}>
 					Open
 				</Link>
 			</Button>

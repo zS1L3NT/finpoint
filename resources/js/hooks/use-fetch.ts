@@ -1,15 +1,23 @@
-import { useHttp } from "@inertiajs/react"
-import { useEffect } from "react"
+// Replacement for the Inertia `useHttp` fetch helper.
+// Runs an async loader and returns its result (reactive on key change).
 
-export function useFetch<T>(url: string): T | null
-export function useFetch<T>(url: string, defaultValue: T): T
-export function useFetch<T>(url: string, defaultValue?: T) {
-	const { get, response } = useHttp<null, T>()
+import { useEffect, useState } from "react"
+
+export function useFetch<T>(loader: () => Promise<T>, defaultValue: T, key = ""): T {
+	const [value, setValue] = useState<T>(defaultValue)
 
 	useEffect(() => {
-		// biome-ignore lint/nursery/noFloatingPromises: No checkup on this promise needed
-		get(url)
-	}, [url])
+		let cancelled = false
+		loader().then(
+			result => {
+				if (!cancelled) setValue(result)
+			},
+			() => undefined,
+		)
+		return () => {
+			cancelled = true
+		}
+	}, [key])
 
-	return response ?? defaultValue ?? null
+	return value
 }

@@ -1,71 +1,70 @@
-import { router } from "@inertiajs/react"
-import { useEffect, useState } from "react"
+// Client-side replacement for the Inertia search/pagination helper.
+// Search text stays local (debounced by the table); page + page size live in
+// the URL search params via react-router so links stay shareable.
 
-type PaginatedTableQuery = {
-	page?: string
-	per_page?: string
-	query?: string
-}
+import { useCallback, useEffect, useState } from "react"
+import { useSearchParams } from "react-router-dom"
 
 const DEFAULT_PAGE_SIZE = "100"
 
-const getSearchParams = () =>
-	typeof window === "undefined"
-		? new URLSearchParams()
-		: new URLSearchParams(window.location.search)
-
-export function usePaginatedTableState({
-	syncOn,
-	buildUrl,
-}: {
-	syncOn: unknown
-	buildUrl: (query: PaginatedTableQuery) => string
-}) {
-	const [query, setQuery] = useState(() => getSearchParams().get("query") ?? "")
+export function usePaginatedTableState() {
+	const [searchParams, setSearchParams] = useSearchParams()
+	const [query, setQuery] = useState(() => searchParams.get("query") ?? "")
 	const [pageSize, setPageSize] = useState(
-		() => getSearchParams().get("per_page") ?? DEFAULT_PAGE_SIZE,
+		() => searchParams.get("per_page") ?? DEFAULT_PAGE_SIZE,
 	)
 
 	useEffect(() => {
-		const params = getSearchParams()
-		setQuery(params.get("query") ?? "")
-		setPageSize(params.get("per_page") ?? DEFAULT_PAGE_SIZE)
-	}, [syncOn])
+		setQuery(searchParams.get("query") ?? "")
+		setPageSize(searchParams.get("per_page") ?? DEFAULT_PAGE_SIZE)
+	}, [searchParams])
 
-	const visit = (overrides?: PaginatedTableQuery) => {
-		const nextQuery =
-			overrides && "query" in overrides
-				? overrides.query
-					? overrides.query
-					: undefined
-				: query !== ""
-					? query
-					: undefined
+	const page = searchParams.get("page") ?? "1"
 
-		router.visit(
-			buildUrl({
-				page: overrides?.page,
-				per_page: overrides?.per_page ?? pageSize,
-				query: nextQuery,
-			}),
-			{ preserveState: true, preserveScroll: true },
-		)
-	}
+	const setParams = useCallback(
+		(changes: Record<string, string | null>) => {
+			setSearchParams(prev => {
+				const next = new URLSearchParams(prev)
+				for (const [key, value] of Object.entries(changes)) {
+					if (value === null || value === "") next.delete(key)
+					else next.set(key, value)
+				}
+				return next
+			})
+		},
+		[setSearchParams],
+	)
 
-	const handleQueryChange = (value: string) => {
-		setQuery(value)
-		visit({ query: value, page: "1" })
-	}
+	const handleQueryChange = useCallback(
+		(value: string) => {
+			setQuery(value)
+			setParams({ query: value || null, page: null })
+		},
+		[setParams],
+	)
 
-	const handlePageSizeChange = (value: string) => {
-		setPageSize(value)
-		visit({ per_page: value, page: "1" })
-	}
+	const handlePageSizeChange = useCallback(
+		(value: string) => {
+			setPageSize(value)
+			setParams({ per_page: value, page: null })
+		},
+		[setParams],
+	)
+
+	const handlePageChange = useCallback(
+		(nextPage: number) => {
+			setParams({ page: nextPage <= 1 ? null : String(nextPage) })
+		},
+		[setParams],
+	)
 
 	return {
 		query,
-		handleQueryChange,
+		page,
 		pageSize,
+		handleQueryChange,
 		handlePageSizeChange,
+		handlePageChange,
+		setParams,
 	}
 }

@@ -1,4 +1,5 @@
 import { Icon as IconifyIcon } from "@iconify/react"
+import { useLiveQuery } from "dexie-react-hooks"
 import { useEffect, useState } from "react"
 import AllocateBar from "@/components/allocate-bar"
 import Icon from "@/components/icon"
@@ -18,8 +19,8 @@ import {
 } from "@/components/ui/sheet"
 import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
 import { formatDatetime } from "@/lib/utils"
+import { listRecords } from "@/logic/records"
 import { Record } from "@/types"
-import { recordIndexApiRoute } from "@/wayfinder/routes"
 
 const ATTACHMENT_TABLE_WIDTHS = {
 	AMOUNT_BAR: "w-56",
@@ -44,25 +45,24 @@ export default function RecordSearchSheet({
 	trigger?: React.ReactNode
 }) {
 	const [query, setQuery] = useState("")
-	const [records, setRecords] = useState<Record[]>([])
 	const [includeOlder, setIncludeOlder] = useState(false)
-
-	const handleSearch = async () => {
-		const response = await fetch(
-			recordIndexApiRoute.url({
-				query: {
-					query,
-					...filters,
-					start_date: includeOlder ? undefined : filters?.start_date,
-				},
-			}),
-			{ headers: { Accept: "application/json" } },
-		)
-
-		if (response.ok) {
-			setRecords(await response.json())
-		}
-	}
+	const records =
+		useLiveQuery(() => {
+			if (!isOpen) return []
+			return listRecords({
+				query: query || null,
+				exclude_budget_id: filters?.exclude_budget_id ?? null,
+				start_date: includeOlder ? null : (filters?.start_date ?? null),
+				is_allocated: filters?.is_allocated ?? null,
+			})
+		}, [
+			isOpen,
+			query,
+			includeOlder,
+			filters?.exclude_budget_id,
+			filters?.start_date,
+			filters?.is_allocated,
+		]) ?? []
 
 	useEffect(() => {
 		if (!isOpen) {
@@ -70,12 +70,6 @@ export default function RecordSearchSheet({
 			setIncludeOlder(false)
 		}
 	}, [isOpen])
-
-	useEffect(() => {
-		if (isOpen) {
-			void handleSearch()
-		}
-	}, [isOpen, query, includeOlder])
 
 	return (
 		<Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -173,7 +167,6 @@ export default function RecordSearchSheet({
 											size="sm"
 											onClick={async () => {
 												await handler(row.original)
-												await handleSearch()
 											}}
 										>
 											<IconifyIcon
@@ -219,7 +212,6 @@ export default function RecordSearchSheet({
 										className="w-full"
 										onClick={async () => {
 											await handler(record)
-											await handleSearch()
 										}}
 									>
 										<IconifyIcon

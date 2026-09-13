@@ -1,6 +1,6 @@
-import { Link } from "@inertiajs/react"
+import { Link } from "react-router-dom"
 import { cn } from "@/lib/utils"
-import { allocatorPendingWebRoute, allocatorWebRoute } from "@/wayfinder/routes"
+import { pathAllocator, pathAllocatorPending } from "@/routes"
 
 export default function AllocatorTabs({ active }: { active: "allocate" | "replace" }) {
 	return (
@@ -12,7 +12,7 @@ export default function AllocatorTabs({ active }: { active: "allocate" | "replac
 						? "border-foreground font-medium"
 						: "border-transparent text-muted-foreground hover:text-foreground",
 				)}
-				href={allocatorWebRoute()}
+				to={pathAllocator()}
 			>
 				Allocate to Records
 			</Link>
@@ -23,7 +23,7 @@ export default function AllocatorTabs({ active }: { active: "allocate" | "replac
 						? "border-foreground font-medium"
 						: "border-transparent text-muted-foreground hover:text-foreground",
 				)}
-				href={allocatorPendingWebRoute()}
+				to={pathAllocatorPending()}
 			>
 				Replace Pending
 			</Link>

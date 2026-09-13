@@ -1,7 +1,8 @@
 import { Icon as IconifyIcon } from "@iconify/react"
-import { Link } from "@inertiajs/react"
 import type { CellContext } from "@tanstack/react-table"
-import { useState } from "react"
+import { useLiveQuery } from "dexie-react-hooks"
+import { useMemo, useState } from "react"
+import { Link, useSearchParams } from "react-router-dom"
 import AccountDialog from "@/components/dialogs/account"
 import AppHeader from "@/components/layout/app-header"
 import PageContent from "@/components/layout/page-content"
@@ -11,17 +12,25 @@ import { Button } from "@/components/ui/button"
 import { useHistory } from "@/history"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
-import type { Account, Paginated } from "@/types"
-import { accountsWebRoute, accountWebRoute } from "@/wayfinder/routes"
+import { listAccounts } from "@/logic/accounts"
+import { paginateItems, parsePage, parsePageSize } from "@/logic/pagination"
+import { pathAccount } from "@/routes"
+import type { Account } from "@/types"
 
-export default function AccountsPage({ accounts }: { accounts: Paginated<Account> }) {
+export default function AccountsPage() {
 	const { handlePush } = useHistory()
 	const [editingAccount, setEditingAccount] = useState<Account | null>(null)
+	const [searchParams] = useSearchParams()
 
-	const { query, pageSize, handleQueryChange, handlePageSizeChange } = usePaginatedTableState({
-		syncOn: accounts,
-		buildUrl: query => accountsWebRoute({ query }).url,
-	})
+	const { query, page, pageSize, handleQueryChange, handlePageSizeChange } =
+		usePaginatedTableState()
+
+	const accounts = useLiveQuery(() => listAccounts(query), [query]) ?? []
+	const paginated = useMemo(
+		() => paginateItems(accounts, parsePage(page), parsePageSize(pageSize)),
+		[accounts, page, pageSize],
+	)
+	void searchParams
 
 	return (
 		<>
@@ -36,7 +45,7 @@ export default function AccountsPage({ accounts }: { accounts: Paginated<Account
 				/>
 
 				<PaginatedDataTable
-					paginated={accounts}
+					paginated={paginated}
 					columns={[
 						{
 							header: "Account",
@@ -72,7 +81,7 @@ export default function AccountsPage({ accounts }: { accounts: Paginated<Account
 						searchPlaceholder: "Search accounts...",
 					}}
 					footer={{
-						summary: `Showing ${accounts.data.length} of ${accounts.total} accounts.`,
+						summary: `Showing ${paginated.data.length} of ${paginated.total} accounts.`,
 					}}
 					mobileRow={({ original: account }) => (
 						<div className="grid gap-2">
@@ -96,7 +105,7 @@ export default function AccountsPage({ accounts }: { accounts: Paginated<Account
 									</Button>
 									<Button variant="outline" size="sm" asChild>
 										<Link
-											href={accountWebRoute.url({ account })}
+											to={pathAccount(account.id)}
 											onClick={handlePush("Accounts")}
 										>
 											Open
@@ -132,10 +141,7 @@ function AccountActionsCell({ row, column }: CellContext<Account, unknown>) {
 				<IconifyIcon icon="lucide:pencil" /> Edit
 			</Button>
 			<Button variant="outline" size="sm" asChild>
-				<Link
-					href={accountWebRoute.url({ account: row.original })}
-					onClick={handlePush("Accounts")}
-				>
+				<Link to={pathAccount(row.original.id)} onClick={handlePush("Accounts")}>
 					Open
 				</Link>
 			</Button>

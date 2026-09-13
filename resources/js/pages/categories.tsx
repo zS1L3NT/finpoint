@@ -1,6 +1,7 @@
 import { Icon as IconifyIcon } from "@iconify/react"
-import { Link } from "@inertiajs/react"
+import { useLiveQuery } from "dexie-react-hooks"
 import { useState } from "react"
+import { Link } from "react-router-dom"
 import CategoryDialog from "@/components/dialogs/category"
 import Icon from "@/components/icon"
 import AppHeader from "@/components/layout/app-header"
@@ -10,17 +11,19 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useHistory } from "@/history"
 import { treatmentLabel } from "@/lib/analytics"
+import { listCategories } from "@/logic/categories"
+import { pathRecords } from "@/routes"
 import { Category, CategoryWithChildren } from "@/types"
-import { recordsWebRoute } from "@/wayfinder/routes"
 
 type CategoryDialogState =
 	| { mode: "create" }
 	| { mode: "edit"; category: Category | CategoryWithChildren }
 	| null
 
-export default function CategoriesPage({ categories }: { categories: CategoryWithChildren[] }) {
+export default function CategoriesPage() {
 	const [dialogState, setDialogState] = useState<CategoryDialogState>(null)
 	const { handlePush } = useHistory()
+	const categories = useLiveQuery(() => listCategories(), []) ?? []
 
 	return (
 		<>
@@ -145,7 +148,7 @@ function CategoryTreeItem({
 					</Button>
 					<Button variant="outline" size="sm" asChild>
 						<Link
-							href={recordsWebRoute.url({ query: { category_ids: category.id } })}
+							to={pathRecords({ category_ids: category.id })}
 							aria-label={`Open records for ${category.name}`}
 							onClick={onFindRecords}
 						>

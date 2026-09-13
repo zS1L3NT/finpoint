@@ -1,5 +1,7 @@
 import { Icon as IconifyIcon } from "@iconify/react"
+import { useLiveQuery } from "dexie-react-hooks"
 import { useState } from "react"
+import { useParams } from "react-router-dom"
 import AllocateBar from "@/components/allocate-bar"
 import { DetailSummary, DetailSummaryItem } from "@/components/detail-summary"
 import PendingStatementDialog from "@/components/dialogs/pending-statement"
@@ -15,33 +17,45 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useFetch } from "@/hooks/use-fetch"
 import { useRecordEditor } from "@/hooks/use-record-editor"
 import { formatDatetime } from "@/lib/utils"
-import { Account, Allocation, CategoryWithChildren, Record, Statement } from "@/types"
-import { categoryIndexApiRoute, statementsWebRoute } from "@/wayfinder/routes"
+import { listAccounts } from "@/logic/accounts"
+import { listCategories } from "@/logic/categories"
+import { getStatement } from "@/logic/statements"
+import { pathStatements } from "@/routes"
+import type { Allocation, Record } from "@/types"
 
-export default function StatementPage({
-	statement,
-	records,
-	accounts,
-}: {
-	statement: Statement
-	records: (Record & { pivot: Allocation })[]
-	accounts: Account[]
-}) {
+export default function StatementPage() {
+	const { id } = useParams<{ id: string }>()
 	const [isEditingStatement, setIsEditingStatement] = useState(false)
-	const categories = useFetch<CategoryWithChildren[]>(categoryIndexApiRoute.url(), [])
+	const data = useLiveQuery(() => (id ? getStatement(id).catch(() => null) : null), [id])
+	const accounts = useLiveQuery(() => listAccounts(), []) ?? []
+	const categories = useFetch(() => listCategories(), [])
 	const { editingRecord, loadingRecordId, editRecord, setEditingRecord } = useRecordEditor()
 	const columns = useRecordColumns<Record & { pivot: Allocation }>({
 		amount: "allocated",
-		pageName: `Statement ${statement.id}`,
+		pageName: `Statement ${data?.id ?? ""}`,
 		onEdit: record => void editRecord(record),
 		loadingRecordId,
 	})
 	const mobileRow = useRecordMobileRow<Record & { pivot: Allocation }>({
 		amount: "allocated",
-		pageName: `Statement ${statement.id}`,
+		pageName: `Statement ${data?.id ?? ""}`,
 		onEdit: record => void editRecord(record),
 		loadingRecordId,
 	})
+
+	if (!data) {
+		return (
+			<>
+				<AppHeader title="Statement" />
+				<PageContent>
+					<p className="text-sm text-muted-foreground">Statement not found.</p>
+				</PageContent>
+			</>
+		)
+	}
+
+	const { records, ...statement } = data
+	const typedRecords = records as unknown as (Record & { pivot: Allocation })[]
 
 	return (
 		<>
@@ -78,7 +92,7 @@ export default function StatementPage({
 					}
 					back={{
 						name: "Statements",
-						url: statementsWebRoute.url(),
+						url: pathStatements(),
 					}}
 				/>
 
@@ -127,7 +141,7 @@ export default function StatementPage({
 					</CardHeader>
 					<CardContent>
 						<DataTable
-							data={records}
+							data={typedRecords}
 							columns={columns}
 							mobileRow={mobileRow}
 							emptyMessage="No records found."

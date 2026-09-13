@@ -1,4 +1,4 @@
-import { router } from "@inertiajs/react"
+import { useNavigate } from "react-router-dom"
 import {
 	type ActiveDotProps,
 	Area,
@@ -13,7 +13,7 @@ import {
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { formatCurrency } from "@/lib/utils"
-import { monthlyRecordsWebRoute } from "@/wayfinder/routes"
+import { pathMonthlyRecords } from "@/routes"
 
 export type CashflowPoint = {
 	day: number
@@ -38,13 +38,18 @@ export default function CashflowChart({
 	targetLabel: string | null
 }) {
 	const isMobile = useIsMobile()
+	const navigate = useNavigate()
 	const interval = isMobile ? Math.max(Math.floor(data.length / 4), 0) : "preserveStartEnd"
 	const actualChange = colorChange(data, "spending", target)
 	const projectionChange = colorChange(data, "projected_spending", target)
 	const openDay = (state: { activeLabel?: number | string } | null) => {
 		if (!state?.activeLabel) return
-		router.visit(
-			monthlyRecordsWebRoute({ query: { month, year, day: Number(state.activeLabel) } }),
+		void navigate(
+			pathMonthlyRecords({
+				month,
+				year: String(year),
+				day: String(Number(state.activeLabel)),
+			}),
 		)
 	}
 

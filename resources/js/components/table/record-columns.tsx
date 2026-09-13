@@ -1,6 +1,6 @@
 import { Icon as IconifyIcon } from "@iconify/react"
-import { Link } from "@inertiajs/react"
 import type { CellContext, ColumnDef, Row } from "@tanstack/react-table"
+import { Link } from "react-router-dom"
 import Icon from "@/components/icon"
 import RecordAmount from "@/components/record-amount"
 import { Badge } from "@/components/ui/badge"
@@ -8,8 +8,8 @@ import { Button } from "@/components/ui/button"
 import { useHistory } from "@/history"
 import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
 import { formatDatetime } from "@/lib/utils"
+import { pathRecord } from "@/routes"
 import type { Allocation, Record } from "@/types"
-import { recordWebRoute } from "@/wayfinder/routes"
 
 type RecordRow = Record & { pivot?: Allocation }
 
@@ -48,7 +48,7 @@ function RecordActionsCell<TRecord extends RecordRow>({
 			) : null}
 			<Button variant="outline" size="sm" asChild>
 				<Link
-					href={recordWebRoute.url({ record: row.original })}
+					to={pathRecord(row.original.id)}
 					onClick={pageName ? handlePush(pageName) : undefined}
 				>
 					Open
@@ -180,7 +180,7 @@ export function useRecordMobileRow<TRecord extends RecordRow>({
 				) : null}
 				<Button variant="outline" size="sm" asChild>
 					<Link
-						href={recordWebRoute.url({ record })}
+						to={pathRecord(record.id)}
 						onClick={pageName ? handlePush(pageName) : undefined}
 					>
 						Open

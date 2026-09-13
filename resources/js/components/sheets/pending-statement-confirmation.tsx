@@ -1,4 +1,4 @@
-import { router } from "@inertiajs/react"
+import { useLiveQuery } from "dexie-react-hooks"
 import { useEffect, useState } from "react"
 import StatementReplacementReviewDialog from "@/components/dialogs/statement-replacement-review"
 import DataTable from "@/components/table/data-table"
@@ -17,8 +17,8 @@ import {
 } from "@/components/ui/sheet"
 import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
 import { classForCurrency, formatCurrency, formatDatetime } from "@/lib/utils"
+import { listStatements } from "@/logic/statements"
 import type { Statement } from "@/types"
-import { statementIndexApiRoute } from "@/wayfinder/routes"
 
 export default function PendingStatementConfirmationSheet({
 	statement,
@@ -34,31 +34,22 @@ export default function PendingStatementConfirmationSheet({
 	trigger: React.ReactElement
 }) {
 	const [query, setQuery] = useState("")
-	const [statements, setStatements] = useState<Statement[]>([])
 	const [pendingStatement, setPendingStatement] = useState<Statement | null>(null)
+	const statements =
+		useLiveQuery(() => {
+			if (!isOpen || !statement) return []
+			return listStatements({
+				query: query || null,
+				account_id: statement.account.id,
+				is_pending: "true",
+			})
+		}, [isOpen, query, statement?.id]) ?? []
 
 	useEffect(() => {
-		if (!isOpen || !statement) {
+		if (!isOpen) {
 			setQuery("")
-			if (!statement) setStatements([])
-			return
 		}
-
-		const controller = new AbortController()
-		void fetch(
-			statementIndexApiRoute.url({
-				query: { query, account_id: statement.account.id, is_pending: "true" },
-			}),
-			{ headers: { Accept: "application/json" }, signal: controller.signal },
-		)
-			.then(response => (response.ok ? response.json() : []))
-			.then(setStatements)
-			.catch(error => {
-				if (error.name !== "AbortError") setStatements([])
-			})
-
-		return () => controller.abort()
-	}, [isOpen, query, statement])
+	}, [isOpen])
 
 	const review = (pending: Statement) => {
 		setPendingStatement(pending)
@@ -188,7 +179,6 @@ export default function PendingStatementConfirmationSheet({
 					setPendingStatement(null)
 					setIsOpen(false)
 					onConfirmed()
-					router.reload()
 				}}
 			/>
 		</>

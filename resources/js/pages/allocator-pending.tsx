@@ -1,7 +1,8 @@
 import { Icon as IconifyIcon } from "@iconify/react"
-import { Link, router, usePage } from "@inertiajs/react"
+import { useLiveQuery } from "dexie-react-hooks"
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
+import { Link, useSearchParams } from "react-router-dom"
 import AllocatorTabs from "@/components/allocator-tabs"
 import StatementReplacementReviewDialog, {
 	dateDifferenceLabel,
@@ -35,46 +36,50 @@ import {
 } from "@/components/ui/select"
 import { useHistory } from "@/history"
 import { classForCurrency, cn, formatCurrency, formatDatetime, round2dp } from "@/lib/utils"
+import { listAccounts } from "@/logic/accounts"
+import { paginateItems, parsePage, parsePageSize } from "@/logic/pagination"
+import { replacementComparison, replacementReason, sameDirection } from "@/logic/replacements"
+import { listStatements, replacementCandidates } from "@/logic/statements"
+import { pathStatement } from "@/routes"
 import type {
-	Account,
 	Paginated,
 	PendingReplacementStatement,
 	Statement,
 	StatementReplacementCandidate,
 } from "@/types"
-import {
-	allocatorPendingWebRoute,
-	statementReplacementCandidatesApiRoute,
-	statementWebRoute,
-} from "@/wayfinder/routes"
 
 type CandidatePage = Paginated<StatementReplacementCandidate>
 
-export default function AllocatorPendingPage({
-	pendingStatements,
-	selectedPendingStatement,
-	selectionMissing,
-	accounts,
-}: {
-	pendingStatements: Paginated<PendingReplacementStatement>
-	selectedPendingStatement: Statement | null
-	selectionMissing: boolean
-	accounts: Account[]
-}) {
-	const page = usePage()
-	const pageUrl = new URL(page.url, "http://localhost")
-	const queueQueryParam = pageUrl.searchParams.get("query") ?? ""
-	const candidateQueryParam = pageUrl.searchParams.get("candidate_query") ?? ""
-	const accountId = pageUrl.searchParams.get("account_id") ?? "all"
-	const candidateScope = pageUrl.searchParams.get("candidate_scope") ?? "suggested"
-	const candidatePage = Number(pageUrl.searchParams.get("candidate_page") ?? "1")
+export default function AllocatorPendingPage() {
+	const [searchParams, setSearchParams] = useSearchParams()
+	const queueQueryParam = searchParams.get("query") ?? ""
+	const candidateQueryParam = searchParams.get("candidate_query") ?? ""
+	const accountId = searchParams.get("account_id") ?? "all"
+	const candidateScope = searchParams.get("candidate_scope") ?? "suggested"
+	const candidatePage = parsePage(searchParams.get("candidate_page"))
+	const pendingStatementId = searchParams.get("pending_statement_id")
 	const [queueQuery, setQueueQuery] = useState(queueQueryParam)
 	const [candidateQuery, setCandidateQuery] = useState(candidateQueryParam)
-	const [candidates, setCandidates] = useState<CandidatePage | null>(null)
-	const [candidateError, setCandidateError] = useState<string | null>(null)
-	const [showCandidateLoading, setShowCandidateLoading] = useState(false)
 	const [reviewStatement, setReviewStatement] = useState<Statement | null>(null)
 	const reduceMotion = useReducedMotion()
+
+	const updateParams = (
+		changes: globalThis.Record<string, string | number | null>,
+		clearCandidate = false,
+	) => {
+		setSearchParams(prev => {
+			const next = new URLSearchParams(prev)
+			for (const [key, value] of Object.entries(changes)) {
+				if (value === null || value === "") next.delete(key)
+				else next.set(key, String(value))
+			}
+			if (clearCandidate) {
+				next.delete("candidate_query")
+				next.delete("candidate_page")
+			}
+			return next
+		})
+	}
 
 	useEffect(() => setQueueQuery(queueQueryParam), [queueQueryParam])
 	useEffect(() => setCandidateQuery(candidateQueryParam), [candidateQueryParam])
@@ -82,7 +87,10 @@ export default function AllocatorPendingPage({
 	useEffect(() => {
 		if (queueQuery === queueQueryParam) return
 		const timer = window.setTimeout(() => {
-			visit({ query: queueQuery || null, page: null, pending_statement_id: null }, true)
+			updateParams(
+				{ query: queueQuery || null, page: null, pending_statement_id: null },
+				true,
+			)
 		}, 300)
 		return () => window.clearTimeout(timer)
 	}, [queueQuery, queueQueryParam])
@@ -90,84 +98,82 @@ export default function AllocatorPendingPage({
 	useEffect(() => {
 		if (candidateQuery === candidateQueryParam) return
 		const timer = window.setTimeout(() => {
-			visit({ candidate_query: candidateQuery || null, candidate_page: null })
+			updateParams({ candidate_query: candidateQuery || null, candidate_page: null })
 		}, 300)
 		return () => window.clearTimeout(timer)
 	}, [candidateQuery, candidateQueryParam])
 
-	useEffect(() => {
-		if (!selectedPendingStatement) {
-			setCandidates(null)
-			setCandidateError(null)
-			setShowCandidateLoading(false)
-			return
-		}
+	const accounts = useLiveQuery(() => listAccounts(), []) ?? []
+	const pending =
+		useLiveQuery(
+			() =>
+				listStatements({
+					query: queueQueryParam || null,
+					account_id: accountId === "all" ? null : accountId,
+					is_pending: "true",
+				}),
+			[queueQueryParam, accountId],
+		) ?? []
+	const allPending = useLiveQuery(() => listStatements({ is_pending: "true" }), []) ?? []
+	const imports =
+		useLiveQuery(
+			() =>
+				listStatements({
+					account_id: accountId === "all" ? null : accountId,
+					is_pending: "false",
+					is_unallocated: "true",
+				}),
+			[accountId],
+		) ?? []
 
-		const controller = new AbortController()
-		const loadingTimer = window.setTimeout(() => setShowCandidateLoading(true), 200)
-		setCandidates(null)
-		setCandidateError(null)
-		setShowCandidateLoading(false)
-		void fetch(
-			statementReplacementCandidatesApiRoute.url(selectedPendingStatement, {
-				query: {
-					query: candidateQueryParam || undefined,
-					scope: candidateScope,
-					page: candidatePage,
-					per_page: 25,
-				},
-			}),
-			{ headers: { Accept: "application/json" }, signal: controller.signal },
-		)
-			.then(async response => {
-				if (!response.ok) throw new Error("Imported Statements could not be loaded.")
-				return response.json()
-			})
-			.then(data => {
-				window.clearTimeout(loadingTimer)
-				setShowCandidateLoading(false)
-				setCandidates(data)
-			})
-			.catch(error => {
-				if (error.name !== "AbortError") {
-					window.clearTimeout(loadingTimer)
-					setShowCandidateLoading(false)
-					setCandidateError(error.message)
-				}
-			})
+	const sortedPending = useMemo(
+		() =>
+			[...pending].sort(
+				(a, b) => a.datetime.localeCompare(b.datetime) || a.id.localeCompare(b.id),
+			),
+		[pending],
+	)
+	const queuePage = parsePage(searchParams.get("page"))
+	const queuePageSize = parsePageSize(searchParams.get("per_page"), 25)
+	const pendingStatements = useMemo<Paginated<PendingReplacementStatement>>(() => {
+		const paginated = paginateItems(sortedPending, queuePage, queuePageSize)
+		return {
+			...paginated,
+			data: paginated.data.map(statement => ({
+				...statement,
+				suggestion_count: countSuggestions(statement, imports),
+			})),
+		}
+	}, [sortedPending, queuePage, queuePageSize, imports])
 
-		return () => {
-			window.clearTimeout(loadingTimer)
-			controller.abort()
-		}
-	}, [selectedPendingStatement?.id, candidateQueryParam, candidateScope, candidatePage])
+	const selectedPendingStatement = pendingStatementId
+		? (allPending.find(statement => statement.id === pendingStatementId) ?? null)
+		: null
+	const selectionMissing = !!pendingStatementId && !selectedPendingStatement
 
-	const visit = (
-		changes: globalThis.Record<string, string | number | null>,
-		clearCandidate = false,
-	) => {
-		const url = new URL(page.url, "http://localhost")
-		for (const [key, value] of Object.entries(changes)) {
-			if (value === null || value === "") url.searchParams.delete(key)
-			else url.searchParams.set(key, String(value))
-		}
-		if (clearCandidate) {
-			for (const key of ["candidate_query", "candidate_page"]) url.searchParams.delete(key)
-		}
-		router.visit(url.pathname + url.search, { preserveState: true, preserveScroll: true })
-	}
+	const candidates = useLiveQuery(
+		() =>
+			selectedPendingStatement
+				? replacementCandidates(selectedPendingStatement.id, {
+						query: candidateQueryParam || undefined,
+						scope: candidateScope === "all" ? "all" : "suggested",
+						page: candidatePage,
+						per_page: 25,
+					}).catch(() => null)
+				: Promise.resolve(null),
+		[selectedPendingStatement?.id, candidateQueryParam, candidateScope, candidatePage],
+	)
 
 	const selectPending = (statement: PendingReplacementStatement | null) => {
 		setReviewStatement(null)
-		visit({
+		updateParams({
 			pending_statement_id: statement?.id ?? null,
 			candidate_page: null,
 			candidate_query: null,
 		})
 	}
 
-	const clearQueueFilters = () =>
-		router.visit(allocatorPendingWebRoute(), { preserveState: true, preserveScroll: true })
+	const clearQueueFilters = () => setSearchParams({})
 	const activeFilterCount = [queueQueryParam, accountId === "all" ? "" : accountId].filter(
 		Boolean,
 	).length
@@ -177,16 +183,19 @@ export default function AllocatorPendingPage({
 		)
 		const next =
 			pendingStatements.data[selectedIndex + 1] ?? pendingStatements.data[selectedIndex - 1]
-		const url = new URL(page.url, "http://localhost")
 		setReviewStatement(null)
-		for (const key of ["candidate_query", "candidate_page"]) url.searchParams.delete(key)
-		if (next) url.searchParams.set("pending_statement_id", next.id)
-		else {
-			url.searchParams.delete("pending_statement_id")
-			if (pendingStatements.current_page > 1)
-				url.searchParams.set("page", String(pendingStatements.current_page - 1))
-		}
-		router.visit(url.pathname + url.search, { preserveScroll: true })
+		setSearchParams(prev => {
+			const nextParams = new URLSearchParams(prev)
+			nextParams.delete("candidate_query")
+			nextParams.delete("candidate_page")
+			if (next) nextParams.set("pending_statement_id", next.id)
+			else {
+				nextParams.delete("pending_statement_id")
+				if (pendingStatements.current_page > 1)
+					nextParams.set("page", String(pendingStatements.current_page - 1))
+			}
+			return nextParams
+		})
 	}
 
 	return (
@@ -241,7 +250,7 @@ export default function AllocatorPendingPage({
 								<Select
 									value={accountId}
 									onValueChange={value =>
-										visit(
+										updateParams(
 											{
 												account_id: value === "all" ? null : value,
 												page: null,
@@ -323,7 +332,8 @@ export default function AllocatorPendingPage({
 
 						<PaginationFooter
 							summary={`Showing ${pendingStatements.data.length} of ${pendingStatements.total} pending Statements.`}
-							links={pendingStatements.links}
+							page={pendingStatements.current_page}
+							lastPage={pendingStatements.last_page ?? 1}
 						/>
 					</section>
 
@@ -390,7 +400,7 @@ export default function AllocatorPendingPage({
 											<Select
 												value={candidateScope}
 												onValueChange={value =>
-													visit({
+													updateParams({
 														candidate_scope:
 															value === "suggested" ? null : value,
 														candidate_page: null,
@@ -426,13 +436,17 @@ export default function AllocatorPendingPage({
 									</div>
 
 									<CandidateResults
-										data={candidates}
-										error={candidateError}
-										showLoading={showCandidateLoading}
+										data={candidates ?? null}
+										error={null}
+										showLoading={
+											candidates === undefined && !!selectedPendingStatement
+										}
 										scope={candidateScope}
 										onReview={setReviewStatement}
 										onPage={page =>
-											visit({ candidate_page: page === 1 ? null : page })
+											updateParams({
+												candidate_page: page === 1 ? null : page,
+											})
 										}
 									/>
 								</motion.div>
@@ -477,6 +491,34 @@ export default function AllocatorPendingPage({
 			/>
 		</>
 	)
+}
+
+function countSuggestions(statement: Statement, imports: Statement[]): number {
+	const pendingShape = {
+		id: statement.id,
+		account_id: statement.account.id,
+		amount: statement.amount,
+		datetime: statement.datetime,
+		is_pending: true,
+	}
+	let count = 0
+	for (const imported of imports) {
+		if (imported.account.id !== statement.account.id) continue
+		const candidate = {
+			id: imported.id,
+			account_id: imported.account.id,
+			amount: imported.amount,
+			datetime: imported.datetime,
+			is_pending: false,
+		}
+		if (!sameDirection(candidate, pendingShape)) continue
+		const comparison = replacementComparison(candidate, pendingShape, [])
+		if (Math.abs(comparison.day_difference) > 7) continue
+		if (comparison.amount_difference > 5) continue
+		if (replacementReason(candidate, pendingShape, [], []) !== null) continue
+		count += 1
+	}
+	return count
 }
 
 function PendingCard({
@@ -664,7 +706,7 @@ function CandidateResults({
 							<CardFooter className="justify-end gap-1.5">
 								<Button variant="outline" size="sm" asChild>
 									<Link
-										href={statementWebRoute.url({ statement })}
+										to={pathStatement(statement.id)}
 										onClick={handlePush("Allocator")}
 									>
 										Open

@@ -1,6 +1,7 @@
 import { Icon as IconifyIcon } from "@iconify/react"
-import { router } from "@inertiajs/react"
+import { useLiveQuery } from "dexie-react-hooks"
 import { useEffect, useState } from "react"
+import { toast } from "sonner"
 import ComboboxField from "@/components/form/combobox-field"
 import SelectField from "@/components/form/select-field"
 import TextField from "@/components/form/text-field"
@@ -18,16 +19,12 @@ import {
 } from "@/components/ui/dialog"
 import { FieldGroup } from "@/components/ui/field"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
-import { useFetch } from "@/hooks/use-fetch"
 import { treatmentLabel } from "@/lib/analytics"
-import { cn, withMethod } from "@/lib/utils"
-import { AnalyticsTreatment, Bucket, Category, CategoryWithChildren } from "@/types"
-import {
-	bucketIndexApiRoute,
-	categoryDestroyApiRoute,
-	categoryStoreApiRoute,
-	categoryUpdateApiRoute,
-} from "@/wayfinder/routes"
+import { cn } from "@/lib/utils"
+import { listBuckets } from "@/logic/buckets"
+import { createCategory, deleteCategory, updateCategory } from "@/logic/categories"
+import { ValidationError } from "@/logic/shared"
+import { AnalyticsTreatment, Category, CategoryWithChildren } from "@/types"
 
 type CategoryFormValues = {
 	name: string
@@ -67,7 +64,7 @@ export default function CategoryDialog({
 	onOpenChange: (open: boolean) => void
 }) {
 	const isEditing = mode === "edit" && category !== null
-	const buckets = useFetch<Bucket[]>(bucketIndexApiRoute.url(), [])
+	const buckets = useLiveQuery(() => listBuckets(), []) ?? []
 	const canEditParentCategory = !isEditing || isChildCategory(category)
 	const [values, setValues] = useState<CategoryFormValues>(EMPTY_FORM_VALUES)
 	const { getApiFieldErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
@@ -108,35 +105,27 @@ export default function CategoryDialog({
 
 	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault()
-
-		const formData = new FormData()
-		formData.append("name", values.name)
-		formData.append("icon", values.icon)
-		formData.append("color", values.color)
-		if (!isEditing || isChildCategory(category)) {
-			formData.append("parent_category_id", values.parent_category_id)
+		const input = {
+			name: values.name,
+			icon: values.icon,
+			color: values.color,
+			parent_category_id: values.parent_category_id || null,
+			analytics_treatment: values.analytics_treatment || null,
+			default_bucket_id: values.default_bucket_id || null,
 		}
-		formData.append("analytics_treatment", values.analytics_treatment)
-		formData.append("default_bucket_id", values.default_bucket_id)
-
-		const response = await fetch(
-			isEditing ? categoryUpdateApiRoute.url({ category }) : categoryStoreApiRoute.url(),
-			{
-				method: "POST",
-				body: isEditing ? withMethod(formData, "PUT") : formData,
-				headers: { Accept: "application/json" },
-			},
-		)
-
-		if (response.status === 422) {
-			const data = await response.json().catch(() => null)
-			setApiErrors((data?.errors ?? {}) as Record<string, string[]>)
-			return
-		}
-
-		if (response.ok) {
+		try {
+			if (isEditing && category) {
+				await updateCategory(category.id, input)
+			} else {
+				await createCategory(input)
+			}
 			onOpenChange(false)
-			router.reload()
+		} catch (cause) {
+			if (cause instanceof ValidationError) {
+				setApiErrors(cause.errors)
+				return
+			}
+			toast.error("Unable to save this category.")
 		}
 	}
 
@@ -144,16 +133,11 @@ export default function CategoryDialog({
 		if (!category) {
 			return
 		}
-
-		const response = await fetch(categoryDestroyApiRoute.url({ category }), {
-			method: "POST",
-			body: withMethod(new FormData(), "DELETE"),
-			headers: { Accept: "application/json" },
-		})
-
-		if (response.ok) {
+		try {
+			await deleteCategory(category.id)
 			onOpenChange(false)
-			router.reload()
+		} catch {
+			toast.error("Unable to delete this category.")
 		}
 	}
 

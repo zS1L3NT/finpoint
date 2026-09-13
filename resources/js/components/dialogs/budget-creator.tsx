@@ -1,5 +1,5 @@
-import { router } from "@inertiajs/react"
 import { useForm } from "@tanstack/react-form"
+import { toast } from "sonner"
 import AmountField from "@/components/form/amount-field"
 import DateField from "@/components/form/date-field"
 import TextField from "@/components/form/text-field"
@@ -17,7 +17,8 @@ import {
 } from "@/components/ui/dialog"
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
-import { budgetStoreApiRoute } from "@/wayfinder/routes"
+import { createBudget } from "@/logic/budgets"
+import { ValidationError } from "@/logic/shared"
 
 export default function BudgetCreatorDialog({
 	isOpen,
@@ -39,28 +40,21 @@ export default function BudgetCreatorDialog({
 			automatic: true,
 		},
 		onSubmit: async ({ value }) => {
-			const formData = new FormData()
-			formData.append("name", value.name)
-			formData.append("amount", `${value.amount}`)
-			formData.append("start_date", value.start_date)
-			formData.append("end_date", value.end_date)
-			formData.append("automatic", value.automatic ? "on" : "off")
-
-			const response = await fetch(budgetStoreApiRoute.url(), {
-				method: "POST",
-				body: formData,
-				headers: { Accept: "application/json" },
-			})
-
-			if (response.status === 422) {
-				const data = await response.json().catch(() => null)
-				setApiErrors((data?.errors ?? {}) as Record<string, string[]>)
-				return
-			}
-
-			if (response.ok) {
+			try {
+				await createBudget({
+					name: value.name,
+					amount: value.amount,
+					start_date: value.start_date,
+					end_date: value.end_date,
+					automatic: value.automatic,
+				})
 				setIsOpen(false)
-				router.reload()
+			} catch (cause) {
+				if (cause instanceof ValidationError) {
+					setApiErrors(cause.errors)
+					return
+				}
+				toast.error("Unable to create this budget.")
 			}
 		},
 	})

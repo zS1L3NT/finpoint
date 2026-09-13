@@ -1,5 +1,7 @@
 import { Icon as IconifyIcon } from "@iconify/react"
-import { useState } from "react"
+import { useLiveQuery } from "dexie-react-hooks"
+import { useMemo, useState } from "react"
+import { useParams } from "react-router-dom"
 import { DetailSummary, DetailSummaryItem } from "@/components/detail-summary"
 import AccountDialog from "@/components/dialogs/account"
 import PendingStatementDialog from "@/components/dialogs/pending-statement"
@@ -10,35 +12,53 @@ import PaginatedDataTable from "@/components/table/paginated-data-table"
 import { useStatementColumns, useStatementMobileRow } from "@/components/table/statement-columns"
 import { Button } from "@/components/ui/button"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
-import type { Account, Paginated, Statement } from "@/types"
-import { accountsWebRoute, accountWebRoute } from "@/wayfinder/routes"
+import { getAccount, listAccounts } from "@/logic/accounts"
+import { paginateItems, parsePage, parsePageSize } from "@/logic/pagination"
+import { listStatements } from "@/logic/statements"
+import { pathAccounts } from "@/routes"
+import type { Statement } from "@/types"
 
-export default function AccountPage({
-	account,
-	accounts,
-	statements,
-}: {
-	account: Account
-	accounts: Account[]
-	statements: Paginated<Statement>
-}) {
+export default function AccountPage() {
+	const { id } = useParams<{ id: string }>()
 	const [isEditingAccount, setIsEditingAccount] = useState(false)
 	const [editingStatement, setEditingStatement] = useState<Statement | null>(null)
 
-	const { query, pageSize, handleQueryChange, handlePageSizeChange } = usePaginatedTableState({
-		syncOn: statements,
-		buildUrl: query => accountWebRoute({ account }, { query }).url,
-	})
+	const { query, page, pageSize, handleQueryChange, handlePageSizeChange } =
+		usePaginatedTableState()
+
+	const account = useLiveQuery(() => (id ? getAccount(id).catch(() => null) : null), [id])
+	const accounts = useLiveQuery(() => listAccounts(), []) ?? []
+	const statements =
+		useLiveQuery(
+			() => listStatements({ query: query || null, account_id: id ?? null }),
+			[query, id],
+		) ?? []
+	const paginated = useMemo(
+		() => paginateItems(statements, parsePage(page), parsePageSize(pageSize)),
+		[statements, page, pageSize],
+	)
+
 	const columns = useStatementColumns<Statement>({
 		showAccount: false,
-		pageName: `Account ${account.name}`,
+		pageName: `Account ${account?.name ?? ""}`,
 		onEdit: setEditingStatement,
 	})
 	const mobileRow = useStatementMobileRow<Statement>({
 		showAccount: false,
-		pageName: `Account ${account.name}`,
+		pageName: `Account ${account?.name ?? ""}`,
 		onEdit: setEditingStatement,
 	})
+
+	if (!account) {
+		return (
+			<>
+				<AppHeader title="Account" />
+				<PageContent>
+					<p className="text-sm text-muted-foreground">Account not found.</p>
+				</PageContent>
+			</>
+		)
+	}
 
 	return (
 		<>
@@ -64,7 +84,7 @@ export default function AccountPage({
 					}
 					back={{
 						name: "Accounts",
-						url: accountsWebRoute.url(),
+						url: pathAccounts(),
 					}}
 				/>
 
@@ -78,7 +98,7 @@ export default function AccountPage({
 				</DetailSummary>
 
 				<PaginatedDataTable
-					paginated={statements}
+					paginated={paginated}
 					columns={columns}
 					header={{
 						query,
@@ -88,7 +108,7 @@ export default function AccountPage({
 						searchPlaceholder: "Search account statements...",
 					}}
 					footer={{
-						summary: `Showing ${statements.data.length} of ${statements.total} statements.`,
+						summary: `Showing ${paginated.data.length} of ${paginated.total} statements.`,
 					}}
 					mobileRow={mobileRow}
 					emptyMessage="No statements found."

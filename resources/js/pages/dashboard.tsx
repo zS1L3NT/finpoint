@@ -1,7 +1,8 @@
 import { Icon as IconifyIcon } from "@iconify/react"
-import { Link, router } from "@inertiajs/react"
+import { useLiveQuery } from "dexie-react-hooks"
 import { DateTime } from "luxon"
 import { type ReactNode, useMemo, useState } from "react"
+import { Link, useSearchParams } from "react-router-dom"
 import CashflowChart, { CashflowPoint } from "@/components/charts/cashflow-chart"
 import BucketDialog from "@/components/dialogs/bucket"
 import Icon from "@/components/icon"
@@ -25,8 +26,9 @@ import {
 	SelectValue,
 } from "@/components/ui/select"
 import { cn, formatCurrency } from "@/lib/utils"
+import { getDashboard } from "@/logic/dashboard"
+import { pathDashboard, pathMonthlyRecords } from "@/routes"
 import { AnalyticsSummary, Bucket } from "@/types"
-import { dashboardWebRoute, monthlyRecordsWebRoute } from "@/wayfinder/routes"
 
 type DashboardBucket = Bucket & {
 	spending: number
@@ -68,18 +70,7 @@ type Projection = {
 	} | null
 }
 
-export default function DashboardPage({
-	month,
-	year,
-	period,
-	summary,
-	comparison,
-	series,
-	projection,
-	buckets,
-	categories,
-	future_records_count,
-}: {
+type DashboardData = {
 	month: string
 	year: number
 	period: { is_current: boolean; is_future: boolean; through: string | null; label: string }
@@ -90,7 +81,24 @@ export default function DashboardPage({
 	buckets: DashboardBucket[]
 	categories: DashboardCategory[]
 	future_records_count: number
-}) {
+}
+
+export default function DashboardPage() {
+	const [searchParams, setSearchParams] = useSearchParams()
+	const now = DateTime.now()
+	const parsedMonth = DateTime.fromFormat(
+		`${searchParams.get("month") ?? now.toFormat("MMMM")} ${searchParams.get("year") ?? String(now.year)}`,
+		"MMMM yyyy",
+	)
+	const month = parsedMonth.isValid
+		? (parsedMonth.monthLong ?? now.toFormat("MMMM"))
+		: now.toFormat("MMMM")
+	const year = parsedMonth.isValid ? parsedMonth.year : now.year
+	const data = useLiveQuery(() => getDashboard({ month, year }), [month, year]) as unknown as
+		| DashboardData
+		| undefined
+	const buckets = data?.buckets ?? []
+	const categories = data?.categories ?? []
 	const date = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
 	const [scope, setScope] = useState("all")
 	const scopedBucketIds = useMemo(() => {
@@ -100,6 +108,23 @@ export default function DashboardPage({
 		}
 		return [scope]
 	}, [scope, buckets])
+
+	const setDate = (nextDate: Date) => {
+		const next = DateTime.fromJSDate(nextDate)
+		setSearchParams({ month: next.toFormat("MMMM"), year: String(next.year) })
+	}
+
+	if (!data) {
+		return (
+			<>
+				<AppHeader title="Dashboard" />
+				<PageContent>
+					<p className="text-sm text-muted-foreground">Loading dashboard…</p>
+				</PageContent>
+			</>
+		)
+	}
+	const { period, summary, comparison, series, projection, future_records_count } = data
 	const scopedCategories = categories
 		.map(category => {
 			const spending = scopedBucketIds.reduce(
@@ -127,13 +152,6 @@ export default function DashboardPage({
 	const paceBucket = buckets.find(
 		bucket => bucket.pace_kind === "daily" && bucket.target !== null && bucket.target > 0,
 	)
-
-	const setDate = (nextDate: Date) => {
-		const next = DateTime.fromJSDate(nextDate)
-		router.visit(
-			dashboardWebRoute({ query: { month: next.toFormat("MMMM"), year: next.year } }),
-		)
-	}
 
 	return (
 		<>
@@ -187,13 +205,13 @@ export default function DashboardPage({
 					<nav className="flex border-b" aria-label="Monthly finance views">
 						<Link
 							className="border-b-2 border-foreground px-4 py-2 text-sm font-medium"
-							href={dashboardWebRoute({ query: { month, year } })}
+							to={pathDashboard({ month, year: String(year) })}
 						>
 							Overview
 						</Link>
 						<Link
 							className="border-b-2 border-transparent px-4 py-2 text-sm text-muted-foreground hover:text-foreground"
-							href={monthlyRecordsWebRoute({ query: { month, year } })}
+							to={pathMonthlyRecords({ month, year: String(year) })}
 						>
 							Monthly Records
 						</Link>
@@ -223,12 +241,10 @@ export default function DashboardPage({
 								{summary.unbucketed_count ? (
 									<Button variant="outline" size="sm" asChild>
 										<Link
-											href={monthlyRecordsWebRoute({
-												query: {
-													month,
-													year,
-													show_unbucketed: true,
-												},
+											to={pathMonthlyRecords({
+												month,
+												year: String(year),
+												show_unbucketed: "true",
 											})}
 										>
 											<IconifyIcon icon="lucide:inbox" />{" "}
@@ -459,18 +475,16 @@ function CategoryBreakdown({
 					categories.slice(0, 8).map(category => (
 						<Link
 							key={category.id}
-							href={monthlyRecordsWebRoute({
-								query: {
-									month,
-									year,
-									category_ids: category.id,
-									bucket_id: !["all", "core", "outlier", "other"].includes(scope)
-										? scope
-										: undefined,
-									bucket_group: ["core", "outlier", "other"].includes(scope)
-										? scope
-										: undefined,
-								},
+							to={pathMonthlyRecords({
+								month,
+								year: String(year),
+								category_ids: category.id,
+								bucket_id: !["all", "core", "outlier", "other"].includes(scope)
+									? scope
+									: undefined,
+								bucket_group: ["core", "outlier", "other"].includes(scope)
+									? scope
+									: undefined,
 							})}
 							className="group grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-3 rounded-md px-2 py-2 hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 						>
@@ -625,7 +639,7 @@ function BucketStatus({
 					)
 				})}
 				<Button variant="outline" size="sm" asChild>
-					<Link href={monthlyRecordsWebRoute({ query: { month, year } })}>
+					<Link to={pathMonthlyRecords({ month, year: String(year) })}>
 						Manage monthly Records
 					</Link>
 				</Button>
@@ -684,12 +698,10 @@ function InvestmentRow({
 				</div>
 				<Button variant="outline" size="sm" asChild>
 					<Link
-						href={monthlyRecordsWebRoute({
-							query: {
-								month,
-								year,
-								treatment: "saving_investment",
-							},
+						to={pathMonthlyRecords({
+							month,
+							year: String(year),
+							treatment: "saving_investment",
 						})}
 					>
 						View Records

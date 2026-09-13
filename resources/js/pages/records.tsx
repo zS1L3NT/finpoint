@@ -1,6 +1,7 @@
 import { Icon as IconifyIcon } from "@iconify/react"
-import { router, usePage } from "@inertiajs/react"
-import { useState } from "react"
+import { useLiveQuery } from "dexie-react-hooks"
+import { useMemo, useState } from "react"
+import { useSearchParams } from "react-router-dom"
 import RecordCreatorDialog from "@/components/dialogs/record-creator"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
 import DateField from "@/components/form/date-field"
@@ -26,43 +27,48 @@ import { useFetch } from "@/hooks/use-fetch"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { useRecordEditor } from "@/hooks/use-record-editor"
 import { cn } from "@/lib/utils"
-import { Bucket, CategoryWithChildren, Paginated, Record } from "@/types"
-import { bucketIndexApiRoute, categoryIndexApiRoute, recordsWebRoute } from "@/wayfinder/routes"
+import { listBuckets } from "@/logic/buckets"
+import { listCategories } from "@/logic/categories"
+import { paginateItems, parsePage, parsePageSize } from "@/logic/pagination"
+import { listRecords } from "@/logic/records"
+import { Bucket, CategoryWithChildren, Record } from "@/types"
 
-export default function RecordsPage({ records }: { records: Paginated<Record> }) {
+export default function RecordsPage() {
 	const [isCreatingRecord, setIsCreatingRecord] = useState(false)
-	const page = usePage()
-	const pageUrl = new URL(page.url, "http://localhost")
-	const startDate = pageUrl.searchParams.get("start_date")
-	const endDate = pageUrl.searchParams.get("end_date")
-	const isAllocated = pageUrl.searchParams.get("is_allocated")
-	const bucketId = pageUrl.searchParams.get("bucket_id")
-	const bucketGroup = pageUrl.searchParams.get("bucket_group")
-	const showUnbucketed = pageUrl.searchParams.get("show_unbucketed") === "1"
-	const treatment = pageUrl.searchParams.get("treatment")
-	const categoryIds = pageUrl.searchParams.get("category_ids")?.split(",").filter(Boolean) ?? []
+	const [searchParams] = useSearchParams()
+	const startDate = searchParams.get("start_date")
+	const endDate = searchParams.get("end_date")
+	const isAllocated = searchParams.get("is_allocated")
+	const bucketId = searchParams.get("bucket_id")
+	const bucketGroup = searchParams.get("bucket_group")
+	const showUnbucketed = searchParams.get("show_unbucketed") === "1"
+	const treatment = searchParams.get("treatment")
+	const categoryIdsParam = searchParams.get("category_ids") ?? ""
+	const categoryIds = categoryIdsParam.split(",").filter(Boolean)
 
-	const categories = useFetch<CategoryWithChildren[]>(categoryIndexApiRoute.url(), [])
-	const buckets = useFetch<Bucket[]>(bucketIndexApiRoute.url(), [])
+	const categories = useFetch(() => listCategories(), [])
+	const buckets = useFetch(() => listBuckets(), [])
 	const { editingRecord, loadingRecordId, editRecord, setEditingRecord } = useRecordEditor()
+	const { query, page, pageSize, handleQueryChange, handlePageSizeChange, setParams } =
+		usePaginatedTableState()
 	const updateFilters = (changes: { [key: string]: string | null }) => {
-		const url = new URL(page.url, "http://localhost")
-		for (const [key, value] of Object.entries(changes)) {
-			if (value) url.searchParams.set(key, value)
-			else url.searchParams.delete(key)
-		}
-		url.searchParams.delete("page")
-		router.visit(url.pathname + url.search, { preserveState: true, preserveScroll: true })
+		setParams({ ...changes, page: null })
 	}
 	const clearFilters = () =>
-		router.visit(
-			recordsWebRoute({
-				query: { per_page: pageUrl.searchParams.get("per_page") || undefined },
-			}),
-			{ preserveState: true, preserveScroll: true },
-		)
+		setParams({
+			query: null,
+			start_date: null,
+			end_date: null,
+			is_allocated: null,
+			category_ids: null,
+			bucket_id: null,
+			bucket_group: null,
+			show_unbucketed: null,
+			treatment: null,
+			page: null,
+		})
 	const activeFilterCount = [
-		pageUrl.searchParams.get("query"),
+		searchParams.get("query"),
 		startDate,
 		endDate,
 		isAllocated,
@@ -71,23 +77,36 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 		treatment,
 	].filter(Boolean).length
 
-	const { query, pageSize, handleQueryChange, handlePageSizeChange } = usePaginatedTableState({
-		syncOn: records,
-		buildUrl: query =>
-			recordsWebRoute({
-				query: {
-					...query,
-					start_date: startDate || undefined,
-					end_date: endDate || undefined,
-					is_allocated: isAllocated || undefined,
-					category_ids: categoryIds.join(",") || undefined,
-					bucket_id: bucketId || undefined,
-					bucket_group: bucketGroup || undefined,
-					show_unbucketed: showUnbucketed || undefined,
-					treatment: treatment || undefined,
-				},
-			}).url,
-	})
+	const records =
+		useLiveQuery(
+			() =>
+				listRecords({
+					query: query || null,
+					start_date: startDate,
+					end_date: endDate,
+					is_allocated: isAllocated,
+					category_ids: categoryIds.length ? categoryIds : null,
+					bucket_id: bucketId,
+					bucket_group: bucketGroup,
+					show_unbucketed: showUnbucketed,
+					treatment,
+				}),
+			[
+				query,
+				startDate,
+				endDate,
+				isAllocated,
+				categoryIdsParam,
+				bucketId,
+				bucketGroup,
+				showUnbucketed,
+				treatment,
+			],
+		) ?? []
+	const paginated = useMemo(
+		() => paginateItems(records, parsePage(page), parsePageSize(pageSize)),
+		[records, page, pageSize],
+	)
 	const columns = useRecordColumns<Record>({
 		pageName: "Records",
 		onEdit: record => void editRecord(record),
@@ -111,7 +130,7 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 					icon="lucide:receipt-text"
 				/>
 				<PaginatedDataTable
-					paginated={records}
+					paginated={paginated}
 					columns={columns}
 					header={{
 						query,
@@ -151,7 +170,7 @@ export default function RecordsPage({ records }: { records: Paginated<Record> })
 						),
 					}}
 					footer={{
-						summary: `Showing ${records.data.length} of ${records.total} records.`,
+						summary: `Showing ${paginated.data.length} of ${paginated.total} records.`,
 					}}
 					mobileRow={mobileRow}
 					emptyMessage="No records found."

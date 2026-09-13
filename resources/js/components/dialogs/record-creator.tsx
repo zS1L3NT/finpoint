@@ -1,8 +1,8 @@
 import { Icon as IconifyIcon } from "@iconify/react"
-import { router } from "@inertiajs/react"
 import { useForm, useStore } from "@tanstack/react-form"
 import { AnimatePresence, motion } from "framer-motion"
 import { DateTime } from "luxon"
+import { toast } from "sonner"
 import AmountField from "@/components/form/amount-field"
 import ComboboxField from "@/components/form/combobox-field"
 import DatetimeField from "@/components/form/datetime-field"
@@ -30,8 +30,9 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { useFetch } from "@/hooks/use-fetch"
 import { cn, formatCurrency, formatDatetime, parseDatetime, round2dp } from "@/lib/utils"
-import { CategoryWithChildren, RecordCompletions, Statement } from "@/types"
-import { completionsRecordsApiRoute, recordStoreApiRoute } from "@/wayfinder/routes"
+import { createRecord, recordCompletions } from "@/logic/records"
+import { ValidationError } from "@/logic/shared"
+import { CategoryWithChildren, Statement } from "@/types"
 
 export default function RecordCreatorDialog({
 	statements,
@@ -48,7 +49,11 @@ export default function RecordCreatorDialog({
 	setIsOpen: (isOpen: boolean) => void
 	trigger?: React.ReactElement
 }) {
-	const completions = useFetch<RecordCompletions>(completionsRecordsApiRoute.url())
+	const completions = useFetch(() => recordCompletions(), {
+		titles: [],
+		locations: [],
+		peoples: [],
+	})
 
 	const { mergeErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
 
@@ -74,38 +79,28 @@ export default function RecordCreatorDialog({
 			})),
 		},
 		onSubmit: async ({ value }) => {
-			const formData = new FormData()
-			formData.append("title", value.title)
-			formData.append("people", value.people)
-			formData.append("location", value.location)
-			formData.append("datetime", value.datetime)
-			formData.append("amount", `${value.amount}`)
-			formData.append("category_id", value.category_id)
-			formData.append("analytics_treatment", value.analytics_treatment)
-			formData.append("bucket_id", value.bucket_id)
-			formData.append("bucket_source", value.bucket_source)
-			formData.append("description", value.description)
-			value.statements.forEach((statement, index) => {
-				formData.append(`statements[${index}][id]`, statement.id)
-				formData.append(`statements[${index}][amount]`, `${statement.amount}`)
-			})
-
-			const response = await fetch(recordStoreApiRoute.url(), {
-				method: "POST",
-				body: formData,
-				headers: { Accept: "application/json" },
-			})
-
-			if (response.status === 422) {
-				const data = await response.json().catch(() => null)
-				setApiErrors((data?.errors ?? {}) as globalThis.Record<string, string[]>)
-				return
-			}
-
-			if (response.status === 201) {
+			try {
+				await createRecord({
+					title: value.title,
+					people: value.people,
+					location: value.location,
+					description: value.description,
+					datetime: value.datetime,
+					amount: value.amount,
+					category_id: value.category_id,
+					analytics_treatment: value.analytics_treatment || null,
+					bucket_id: value.bucket_id || null,
+					bucket_source: value.bucket_source,
+					statements: value.statements,
+				})
 				setIsOpen(false)
 				clear?.()
-				router.reload()
+			} catch (cause) {
+				if (cause instanceof ValidationError) {
+					setApiErrors(cause.errors)
+					return
+				}
+				toast.error("Unable to create this record.")
 			}
 		},
 	})

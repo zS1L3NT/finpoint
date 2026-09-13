@@ -25,11 +25,17 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { classForCurrency, cn, formatCurrency, formatDatetime } from "@/lib/utils"
-import type { Statement, StatementReplacementReview } from "@/types"
-import {
-	statementReplacementReviewApiRoute,
-	statementReplacePendingApiRoute,
-} from "@/wayfinder/routes"
+import { getRecord } from "@/logic/records"
+import { ValidationError } from "@/logic/shared"
+import { replacementReview, replacePendingStatement } from "@/logic/statements"
+import type { Statement } from "@/types"
+
+type ReviewAllocation = Awaited<ReturnType<typeof getRecord>> & {
+	allocation_amount: number
+}
+type ReplacementReview = Omit<Awaited<ReturnType<typeof replacementReview>>, "allocations"> & {
+	allocations: ReviewAllocation[]
+}
 
 export default function StatementReplacementReviewDialog({
 	statement,
@@ -44,7 +50,7 @@ export default function StatementReplacementReviewDialog({
 	onOpenChange: (open: boolean) => void
 	onConfirmed: () => void
 }) {
-	const [review, setReview] = useState<StatementReplacementReview | null>(null)
+	const [review, setReview] = useState<ReplacementReview | null>(null)
 	const [error, setError] = useState<string | null>(null)
 	const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -55,68 +61,73 @@ export default function StatementReplacementReviewDialog({
 			return
 		}
 
-		const controller = new AbortController()
+		let cancelled = false
 		setReview(null)
 		setError(null)
-		void fetch(
-			statementReplacementReviewApiRoute.url({
-				pending_statement: pendingStatement,
-				statement,
-			}),
-			{ headers: { Accept: "application/json" }, signal: controller.signal },
-		)
-			.then(async response => {
-				if (!response.ok) {
-					const data = await response.json().catch(() => null)
-					throw new Error(
-						Object.values(
-							(data?.errors ?? {}) as globalThis.Record<string, string[]>,
-						)[0]?.[0] ?? "The replacement could not be reviewed.",
+		replacementReview(pendingStatement.id, statement.id).then(
+			result => {
+				void (async () => {
+					try {
+						const allocations = await Promise.all(
+							result.allocations.map(async allocation => ({
+								...(await getRecord(allocation.id)),
+								allocation_amount: allocation.allocation_amount,
+							})),
+						)
+						if (!cancelled) setReview({ ...result, allocations })
+					} catch (fetchError) {
+						if (cancelled) return
+						setError(
+							fetchError instanceof Error
+								? fetchError.message
+								: "The replacement could not be reviewed.",
+						)
+					}
+				})()
+			},
+			(fetchError: unknown) => {
+				if (cancelled) return
+				if (fetchError instanceof ValidationError) {
+					setError(
+						Object.values(fetchError.errors)[0]?.[0] ??
+							"The replacement could not be reviewed.",
 					)
+				} else if (fetchError instanceof Error) {
+					setError(fetchError.message)
+				} else {
+					setError("The replacement could not be reviewed.")
 				}
+			},
+		)
 
-				return response.json()
-			})
-			.then(setReview)
-			.catch(fetchError => {
-				if (fetchError.name !== "AbortError") setError(fetchError.message)
-			})
-
-		return () => controller.abort()
+		return () => {
+			cancelled = true
+		}
 	}, [open, statement, pendingStatement])
 
 	const handleReplace = async () => {
 		if (!review?.can_replace || isSubmitting) return
 
 		setIsSubmitting(true)
-		const response = await fetch(
-			statementReplacePendingApiRoute.url({
-				statement: review.statement,
-				pending_statement: review.pending_statement,
-			}),
-			{ method: "POST", headers: { Accept: "application/json" } },
-		)
-
-		if (!response.ok) {
-			const data = await response.json().catch(() => null)
+		try {
+			await replacePendingStatement(review.statement.id, review.pending_statement.id)
+			toast.success("Pending Statement replaced.", {
+				description: "Its Allocations now belong to the imported Statement.",
+			})
+			setIsSubmitting(false)
+			onOpenChange(false)
+			onConfirmed()
+		} catch (cause) {
 			const message =
-				Object.values(
-					(data?.errors ?? {}) as globalThis.Record<string, string[]>,
-				)[0]?.[0] ??
-				"The Statements changed while you were reviewing them. Refresh the pair and try again."
+				cause instanceof ValidationError
+					? (Object.values(cause.errors)[0]?.[0] ??
+						"The Statements changed while you were reviewing them. Refresh the pair and try again.")
+					: "The Statements changed while you were reviewing them. Refresh the pair and try again."
 			toast.error("Pending Statement could not be replaced.", { description: message })
 			setIsSubmitting(false)
 			setReview(null)
 			setError(message)
-			return
 		}
-
-		toast.success("Pending Statement replaced.", {
-			description: "Its Allocations now belong to the imported Statement.",
-		})
-		setIsSubmitting(false)
-		onOpenChange(false)
-		onConfirmed()
 	}
 
 	return (

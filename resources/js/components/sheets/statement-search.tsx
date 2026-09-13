@@ -1,4 +1,5 @@
 import { Icon as IconifyIcon } from "@iconify/react"
+import { useLiveQuery } from "dexie-react-hooks"
 import { useEffect, useState } from "react"
 import AllocateBar from "@/components/allocate-bar"
 import DataTable from "@/components/table/data-table"
@@ -17,8 +18,8 @@ import {
 } from "@/components/ui/sheet"
 import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
 import { formatDatetime } from "@/lib/utils"
+import { listStatements } from "@/logic/statements"
 import { Statement } from "@/types"
-import { statementIndexApiRoute } from "@/wayfinder/routes"
 
 const ATTACHMENT_TABLE_WIDTHS = {
 	ACCOUNT: "w-32",
@@ -44,62 +45,47 @@ export default function StatementSearchSheet({
 	trigger?: React.ReactNode
 }) {
 	const [query, setQuery] = useState("")
-	const [statements, setStatements] = useState<Statement[]>([])
 	const [includeOlder, setIncludeOlder] = useState(false)
-
-	const searchUrl = statementIndexApiRoute.url({
-		query: {
+	const [attachedIds, setAttachedIds] = useState<string[]>([])
+	const results =
+		useLiveQuery(() => {
+			if (!isOpen) return []
+			return listStatements({
+				query: query || null,
+				account_id: filters?.account_id ?? null,
+				exclude_ids: filters?.exclude_ids ?? null,
+				start_date: includeOlder ? null : (filters?.start_date ?? null),
+				end_date: filters?.end_date ?? null,
+				is_allocable: filters?.is_allocable ?? null,
+				is_pending: filters?.is_pending ?? null,
+				is_unallocated: filters?.is_unallocated ?? null,
+			})
+		}, [
+			isOpen,
 			query,
-			...filters,
-			start_date: includeOlder ? undefined : filters?.start_date,
-		},
-	})
+			includeOlder,
+			filters?.account_id,
+			filters?.exclude_ids,
+			filters?.start_date,
+			filters?.end_date,
+			filters?.is_allocable,
+			filters?.is_pending,
+			filters?.is_unallocated,
+		]) ?? []
+	const statements = results.filter(statement => !attachedIds.includes(statement.id))
 
 	useEffect(() => {
 		if (!isOpen) {
 			setQuery("")
 			setIncludeOlder(false)
+			setAttachedIds([])
 		}
 	}, [isOpen])
 
-	useEffect(() => {
-		if (!isOpen) {
-			return
-		}
-
-		const controller = new AbortController()
-		const timeout = window.setTimeout(
-			async () => {
-				try {
-					const response = await fetch(searchUrl, {
-						headers: { Accept: "application/json" },
-						signal: controller.signal,
-					})
-
-					if (response.ok) {
-						const data = await response.json()
-
-						if (!controller.signal.aborted) {
-							setStatements(data)
-						}
-					}
-				} catch (error) {
-					if (!controller.signal.aborted) {
-						throw error
-					}
-				}
-			},
-			query ? 250 : 0,
-		)
-
-		return () => {
-			window.clearTimeout(timeout)
-			controller.abort()
-		}
-	}, [isOpen, query, searchUrl])
-
 	const handleAttach = async (statement: Statement) => {
-		setStatements(prev => prev.filter(s => s.id !== statement.id))
+		setAttachedIds(previous =>
+			previous.includes(statement.id) ? previous : [...previous, statement.id],
+		)
 		await handler(statement)
 	}
 

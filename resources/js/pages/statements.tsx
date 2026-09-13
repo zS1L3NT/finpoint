@@ -1,6 +1,7 @@
 import { Icon as IconifyIcon } from "@iconify/react"
-import { router, usePage } from "@inertiajs/react"
-import { useState } from "react"
+import { useLiveQuery } from "dexie-react-hooks"
+import { useMemo, useState } from "react"
+import { useSearchParams } from "react-router-dom"
 import PendingStatementDialog from "@/components/dialogs/pending-statement"
 import DateField from "@/components/form/date-field"
 import AppHeader from "@/components/layout/app-header"
@@ -20,58 +21,46 @@ import {
 } from "@/components/ui/select"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { cn } from "@/lib/utils"
-import { Account, Paginated, Statement } from "@/types"
-import { statementsWebRoute } from "@/wayfinder/routes"
+import { listAccounts } from "@/logic/accounts"
+import { paginateItems, parsePage, parsePageSize } from "@/logic/pagination"
+import { listStatements } from "@/logic/statements"
+import type { Statement } from "@/types"
 
-export default function StatementsPage({
-	statements,
-	accounts,
-}: {
-	statements: Paginated<Statement>
-	accounts: Account[]
-}) {
+export default function StatementsPage() {
 	const [isCreatingStatement, setIsCreatingStatement] = useState(false)
 	const [editingStatement, setEditingStatement] = useState<Statement | null>(null)
-	const page = usePage()
-	const pageUrl = new URL(page.url, "http://localhost")
-	const isPending = pageUrl.searchParams.get("is_pending")
-	const startDate = pageUrl.searchParams.get("start_date")
-	const endDate = pageUrl.searchParams.get("end_date")
-	const updateFilters = (changes: { [key: string]: string | null }) => {
-		const url = new URL(page.url, "http://localhost")
-		for (const [key, value] of Object.entries(changes)) {
-			if (value) url.searchParams.set(key, value)
-			else url.searchParams.delete(key)
-		}
-		url.searchParams.delete("page")
-		router.visit(url.pathname + url.search, { preserveState: true, preserveScroll: true })
-	}
-	const activeFilterCount = [
-		pageUrl.searchParams.get("query"),
-		isPending,
-		startDate,
-		endDate,
-	].filter(Boolean).length
-	const clearFilters = () =>
-		router.visit(
-			statementsWebRoute({
-				query: { per_page: pageUrl.searchParams.get("per_page") || undefined },
-			}),
-			{ preserveState: true, preserveScroll: true },
-		)
+	const [searchParams] = useSearchParams()
+	const isPending = searchParams.get("is_pending")
+	const startDate = searchParams.get("start_date")
+	const endDate = searchParams.get("end_date")
 
-	const { query, pageSize, handleQueryChange, handlePageSizeChange } = usePaginatedTableState({
-		syncOn: statements,
-		buildUrl: query =>
-			statementsWebRoute({
-				query: {
-					...query,
-					start_date: startDate || undefined,
-					end_date: endDate || undefined,
-					is_pending: isPending || undefined,
-				},
-			}).url,
-	})
+	const { query, page, pageSize, handleQueryChange, handlePageSizeChange, setParams } =
+		usePaginatedTableState()
+	const updateFilters = (changes: { [key: string]: string | null }) => {
+		setParams({ ...changes, page: null })
+	}
+	const activeFilterCount = [searchParams.get("query"), isPending, startDate, endDate].filter(
+		Boolean,
+	).length
+	const clearFilters = () =>
+		setParams({ query: null, is_pending: null, start_date: null, end_date: null, page: null })
+
+	const accounts = useLiveQuery(() => listAccounts(), []) ?? []
+	const statements =
+		useLiveQuery(
+			() =>
+				listStatements({
+					query: query || null,
+					is_pending: isPending,
+					start_date: startDate,
+					end_date: endDate,
+				}),
+			[query, isPending, startDate, endDate],
+		) ?? []
+	const paginated = useMemo(
+		() => paginateItems(statements, parsePage(page), parsePageSize(pageSize)),
+		[statements, page, pageSize],
+	)
 	const columns = useStatementColumns<Statement>({
 		pageName: "Statements",
 		onEdit: setEditingStatement,
@@ -94,7 +83,7 @@ export default function StatementsPage({
 				/>
 
 				<PaginatedDataTable
-					paginated={statements}
+					paginated={paginated}
 					columns={columns}
 					header={{
 						query,
@@ -162,7 +151,7 @@ export default function StatementsPage({
 						),
 					}}
 					footer={{
-						summary: `Showing ${statements.data.length} of ${statements.total} statements.`,
+						summary: `Showing ${paginated.data.length} of ${paginated.total} statements.`,
 					}}
 					mobileRow={mobileRow}
 					emptyMessage="No statements found."

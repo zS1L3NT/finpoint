@@ -1,6 +1,7 @@
 import { Icon as IconifyIcon } from "@iconify/react"
-import { router } from "@inertiajs/react"
 import { useForm } from "@tanstack/react-form"
+import { useLocation } from "react-router-dom"
+import { toast } from "sonner"
 import AmountField from "@/components/form/amount-field"
 import DateField from "@/components/form/date-field"
 import TextField from "@/components/form/text-field"
@@ -20,14 +21,10 @@ import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui
 import { useHistory } from "@/history"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { useDialogCloseAnimation } from "@/hooks/use-dialog-close-animation"
-import { withMethod } from "@/lib/utils"
+import { deleteBudget, updateBudget } from "@/logic/budgets"
+import { ValidationError } from "@/logic/shared"
+import { pathBudget, pathBudgets } from "@/routes"
 import { Budget } from "@/types"
-import {
-	budgetDestroyApiRoute,
-	budgetsWebRoute,
-	budgetUpdateApiRoute,
-	budgetWebRoute,
-} from "@/wayfinder/routes"
 
 export default function BudgetEditorDialog({
 	budget,
@@ -42,6 +39,7 @@ export default function BudgetEditorDialog({
 }) {
 	const { open, setIsOpen, onOpenChangeComplete } = useDialogCloseAnimation(isOpen, onOpenChange)
 	const { navigateBack } = useHistory()
+	const location = useLocation()
 
 	const { mergeErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
 
@@ -54,50 +52,35 @@ export default function BudgetEditorDialog({
 			automatic: !!budget.automatic,
 		},
 		onSubmit: async ({ value }) => {
-			const formData = new FormData()
-			formData.append("name", value.name)
-			formData.append("amount", `${value.amount}`)
-			formData.append("start_date", value.start_date)
-			formData.append("end_date", value.end_date)
-			formData.append("automatic", value.automatic ? "on" : "off")
-
-			const response = await fetch(budgetUpdateApiRoute.url({ budget }), {
-				method: "POST",
-				body: withMethod(formData, "PUT"),
-				headers: { Accept: "application/json" },
-			})
-
-			if (response.status === 422) {
-				const data = await response.json().catch(() => null)
-				setApiErrors((data?.errors ?? {}) as globalThis.Record<string, string[]>)
-				return
-			}
-
-			if (response.ok) {
+			try {
+				await updateBudget(budget.id, {
+					name: value.name,
+					amount: value.amount,
+					start_date: value.start_date,
+					end_date: value.end_date,
+					automatic: value.automatic,
+				})
 				setIsOpen(false)
-				setTimeout(() => {
-					router.reload()
-				}, 300)
+			} catch (cause) {
+				if (cause instanceof ValidationError) {
+					setApiErrors(cause.errors)
+					return
+				}
+				toast.error("Unable to save this budget.")
 			}
 		},
 	})
 
 	const handleDelete = async () => {
-		const response = await fetch(budgetDestroyApiRoute.url({ budget }), {
-			method: "POST",
-			body: withMethod(new FormData(), "DELETE"),
-			headers: { Accept: "application/json" },
-		})
-
-		if (response.ok) {
+		try {
+			await deleteBudget(budget.id)
 			setIsOpen(false)
 
-			if (location.pathname === budgetWebRoute.url({ budget })) {
-				navigateBack({ name: "Budgets", url: budgetsWebRoute.url() })
-				return
+			if (location.pathname === pathBudget(budget.id)) {
+				navigateBack({ name: "Budgets", url: pathBudgets() })
 			}
-
-			router.reload()
+		} catch {
+			toast.error("Unable to delete this budget.")
 		}
 	}
 

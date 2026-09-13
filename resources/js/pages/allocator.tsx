@@ -1,6 +1,7 @@
 import { Icon as IconifyIcon } from "@iconify/react"
-import { router, usePage } from "@inertiajs/react"
-import { useState } from "react"
+import { useLiveQuery } from "dexie-react-hooks"
+import { useMemo, useState } from "react"
+import { useSearchParams } from "react-router-dom"
 import AllocatorTabs from "@/components/allocator-tabs"
 import RecordCreatorDialog from "@/components/dialogs/record-creator"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
@@ -25,26 +26,44 @@ import {
 	SelectValue,
 } from "@/components/ui/select"
 import { START_DATE } from "@/constants"
-import { useFetch } from "@/hooks/use-fetch"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
 import { cn, formatCurrency } from "@/lib/utils"
-import { Account, CategoryWithChildren, Paginated, Record, Statement } from "@/types"
-import { allocatorWebRoute, categoryIndexApiRoute, recordShowApiRoute } from "@/wayfinder/routes"
+import { listAccounts } from "@/logic/accounts"
+import { listCategories } from "@/logic/categories"
+import { paginateItems, parsePage, parsePageSize } from "@/logic/pagination"
+import { getRecord } from "@/logic/records"
+import { listStatements } from "@/logic/statements"
+import { CategoryWithChildren, Record, Statement } from "@/types"
 
-export default function AllocatorPage({
-	statements,
-	accounts,
-}: {
-	statements: Paginated<Statement>
-	accounts: Account[]
-}) {
-	const page = usePage()
-	const pageUrl = new URL(page.url, "http://localhost")
-	const accountId = pageUrl.searchParams.get("account_id") ?? "all"
-	const startDate = pageUrl.searchParams.get("start_date")
-	const endDate = pageUrl.searchParams.get("end_date")
-	const categories = useFetch<CategoryWithChildren[]>(categoryIndexApiRoute.url(), [])
+export default function AllocatorPage() {
+	const [searchParams] = useSearchParams()
+	const accountId = searchParams.get("account_id") ?? "all"
+	const startDate = searchParams.get("start_date")
+	const endDate = searchParams.get("end_date")
+
+	const { query, page, pageSize, handleQueryChange, handlePageSizeChange, setParams } =
+		usePaginatedTableState()
+
+	const accounts = useLiveQuery(() => listAccounts(), []) ?? []
+	const categories =
+		useLiveQuery(() => listCategories() as unknown as Promise<CategoryWithChildren[]>, []) ?? []
+	const statements =
+		useLiveQuery(
+			() =>
+				listStatements({
+					query: query || null,
+					account_id: accountId === "all" ? null : accountId,
+					start_date: startDate,
+					end_date: endDate,
+					is_allocable: "true",
+				}),
+			[query, accountId, startDate, endDate],
+		) ?? []
+	const paginated = useMemo(
+		() => paginateItems(statements, parsePage(page), parsePageSize(pageSize)),
+		[statements, page, pageSize],
+	)
 
 	const [selectedStatements, setSelectedStatements] = useState<Statement[]>([])
 	const [isCreatingRecord, setIsCreatingRecord] = useState(false)
@@ -54,40 +73,22 @@ export default function AllocatorPage({
 		(Record & { statements: Statement[] }) | null
 	>(null)
 	const updateFilters = (changes: { [key: string]: string | null }) => {
-		const url = new URL(page.url, "http://localhost")
-		for (const [key, value] of Object.entries(changes)) {
-			if (value) url.searchParams.set(key, value)
-			else url.searchParams.delete(key)
-		}
-		url.searchParams.delete("page")
-		router.visit(url.pathname + url.search, { preserveState: true, preserveScroll: true })
+		setParams({ ...changes, page: null })
 	}
 	const activeFilterCount = [
-		pageUrl.searchParams.get("query"),
+		searchParams.get("query"),
 		accountId === "all" ? "" : accountId,
 		startDate,
 		endDate,
 	].filter(Boolean).length
 	const clearFilters = () =>
-		router.visit(
-			allocatorWebRoute({
-				query: { per_page: pageUrl.searchParams.get("per_page") || undefined },
-			}),
-			{ preserveState: true, preserveScroll: true },
-		)
-
-	const { query, pageSize, handleQueryChange, handlePageSizeChange } = usePaginatedTableState({
-		syncOn: statements,
-		buildUrl: query =>
-			allocatorWebRoute({
-				query: {
-					...query,
-					account_id: accountId === "all" ? undefined : accountId,
-					start_date: startDate || undefined,
-					end_date: endDate || undefined,
-				},
-			}).url,
-	})
+		setParams({
+			query: null,
+			account_id: null,
+			start_date: null,
+			end_date: null,
+			page: null,
+		})
 
 	const selectedAmount = selectedStatements.reduce(
 		(sum, statement) => sum + statement.allocable_amount,
@@ -134,7 +135,7 @@ export default function AllocatorPage({
 				<AllocatorTabs active="allocate" />
 
 				<PaginatedDataTable
-					paginated={statements}
+					paginated={paginated}
 					columns={[
 						{
 							id: "select",
@@ -217,7 +218,7 @@ export default function AllocatorPage({
 						),
 					}}
 					footer={{
-						summary: `${selectedStatements.length} selected. Showing ${statements.data.length} of ${statements.total} statements.`,
+						summary: `${selectedStatements.length} selected. Showing ${paginated.data.length} of ${paginated.total} statements.`,
 					}}
 					selectedIds={selectedStatements.map(s => s.id)}
 					mobileRow={statementMobileRow}
@@ -248,9 +249,8 @@ export default function AllocatorPage({
 					isOpen={isAttachingRecord}
 					setIsOpen={setIsAttachingRecord}
 					handler={async record => {
-						setEditingRecord(
-							await fetch(recordShowApiRoute.url({ record })).then(res => res.json()),
-						)
+						const data = await getRecord(record.id)
+						setEditingRecord(data as unknown as Record & { statements: Statement[] })
 						setIsAttachingRecord(false)
 					}}
 					trigger={

@@ -1,5 +1,7 @@
 import { Icon as IconifyIcon } from "@iconify/react"
+import { useLiveQuery } from "dexie-react-hooks"
 import { useState } from "react"
+import { useParams } from "react-router-dom"
 import { DetailSummary, DetailSummaryItem } from "@/components/detail-summary"
 import PendingStatementDialog from "@/components/dialogs/pending-statement"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
@@ -16,32 +18,44 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useFetch } from "@/hooks/use-fetch"
 import { treatmentLabel } from "@/lib/analytics"
 import { formatDatetime } from "@/lib/utils"
-import { Account, Allocation, CategoryWithChildren, Record, Statement } from "@/types"
-import { categoryIndexApiRoute, recordsWebRoute } from "@/wayfinder/routes"
+import { listAccounts } from "@/logic/accounts"
+import { listCategories } from "@/logic/categories"
+import { getRecord } from "@/logic/records"
+import { pathRecords } from "@/routes"
+import type { Allocation, Statement } from "@/types"
 
-export default function RecordPage({
-	record,
-	statements,
-	accounts,
-}: {
-	record: Record
-	statements: (Statement & { pivot: Allocation })[]
-	accounts: Account[]
-}) {
-	const categories = useFetch<CategoryWithChildren[]>(categoryIndexApiRoute.url(), [])
+export default function RecordPage() {
+	const { id } = useParams<{ id: string }>()
+	const data = useLiveQuery(() => (id ? getRecord(id).catch(() => null) : null), [id])
+	const accounts = useLiveQuery(() => listAccounts(), []) ?? []
+	const categories = useFetch(() => listCategories(), [])
 
 	const [isEditingRecord, setIsEditingRecord] = useState(false)
 	const [editingStatement, setEditingStatement] = useState<Statement | null>(null)
 	const columns = useStatementColumns<Statement & { pivot: Allocation }>({
 		amount: "allocated",
-		pageName: `Record ${record.id}`,
+		pageName: `Record ${data?.id ?? ""}`,
 		onEdit: setEditingStatement,
 	})
 	const mobileRow = useStatementMobileRow<Statement & { pivot: Allocation }>({
 		amount: "allocated",
-		pageName: `Record ${record.id}`,
+		pageName: `Record ${data?.id ?? ""}`,
 		onEdit: setEditingStatement,
 	})
+
+	if (!data) {
+		return (
+			<>
+				<AppHeader title="Record" />
+				<PageContent>
+					<p className="text-sm text-muted-foreground">Record not found.</p>
+				</PageContent>
+			</>
+		)
+	}
+
+	const { statements, ...record } = data
+	const typedStatements = statements as unknown as (Statement & { pivot: Allocation })[]
 
 	return (
 		<>
@@ -72,7 +86,7 @@ export default function RecordPage({
 					actions={
 						<RecordEditorDialog
 							record={record}
-							statements={statements}
+							statements={typedStatements}
 							categories={categories}
 							isOpen={isEditingRecord}
 							setIsOpen={setIsEditingRecord}
@@ -85,7 +99,7 @@ export default function RecordPage({
 					}
 					back={{
 						name: "Records",
-						url: recordsWebRoute.url(),
+						url: pathRecords(),
 					}}
 				/>
 
@@ -128,7 +142,7 @@ export default function RecordPage({
 					</CardHeader>
 					<CardContent>
 						<DataTable
-							data={statements}
+							data={typedStatements}
 							columns={columns}
 							mobileRow={mobileRow}
 							emptyMessage="No statements found."

@@ -1,7 +1,8 @@
 import { Icon as IconifyIcon } from "@iconify/react"
-import { router } from "@inertiajs/react"
+import { useLiveQuery } from "dexie-react-hooks"
 import { DateTime } from "luxon"
 import { useMemo, useState } from "react"
+import { useParams } from "react-router-dom"
 import BudgetProgressChart from "@/components/charts/budget-progress-chart"
 import BudgetEditorDialog from "@/components/dialogs/budget-editor"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
@@ -21,25 +22,29 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card"
-import { useFetch } from "@/hooks/use-fetch"
 import { useRecordEditor } from "@/hooks/use-record-editor"
 import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
-import { cn, formatCurrency, parseDate, parseDatetime, round2dp, withMethod } from "@/lib/utils"
+import { cn, formatCurrency, parseDate, parseDatetime, round2dp } from "@/lib/utils"
+import { attachBudgetRecord, detachBudgetRecord, getBudget } from "@/logic/budgets"
+import { listCategories } from "@/logic/categories"
+import { pathBudgets } from "@/routes"
 import type { Budget, CategoryWithChildren, Record } from "@/types"
-import {
-	budgetRecordAttachApiRoute,
-	budgetRecordDetachApiRoute,
-	budgetsWebRoute,
-	categoryIndexApiRoute,
-} from "@/wayfinder/routes"
 
-export default function BudgetPage({ budget, records }: { budget: Budget; records: Record[] }) {
-	const categories = useFetch<CategoryWithChildren[]>(categoryIndexApiRoute.url(), [])
+export default function BudgetPage() {
+	const { id } = useParams<{ id: string }>()
+	const data = useLiveQuery(
+		() => (id ? getBudget(id).catch(() => null) : Promise.resolve(null)),
+		[id],
+	)
+	const categories =
+		useLiveQuery(() => listCategories() as unknown as Promise<CategoryWithChildren[]>, []) ?? []
 	const [isEditingBudget, setIsEditingBudget] = useState(false)
 	const [isAttachingRecord, setIsAttachingRecord] = useState(false)
 	const { editingRecord, loadingRecordId, editRecord, setEditingRecord } = useRecordEditor()
-	const budgetStart = parseDate(budget.start_date)
-	const budgetEnd = parseDate(budget.end_date)
+	const budget = (data ?? null) as Budget | null
+	const records = useMemo(() => (data?.records ?? []) as unknown as Record[], [data])
+	const budgetStart = parseDate(budget?.start_date ?? "2000-01-01")
+	const budgetEnd = parseDate(budget?.end_date ?? "2000-01-01")
 	const now = DateTime.now()
 	const budgetAsOf =
 		now < budgetStart.startOf("day")
@@ -47,33 +52,31 @@ export default function BudgetPage({ budget, records }: { budget: Budget; record
 			: now > budgetEnd.endOf("day")
 				? budgetEnd
 				: now
-	const analytics = getBudgetAnalytics(records, budgetStart, budgetEnd, budget.amount, budgetAsOf)
+	const analytics = getBudgetAnalytics(
+		records,
+		budgetStart,
+		budgetEnd,
+		budget?.amount ?? 0,
+		budgetAsOf,
+	)
 	const categoryData = useMemo(
 		() => getCategoryData(records, categories, budgetStart, budgetEnd),
 		[records, categories, budgetStart, budgetEnd],
 	)
 
 	const attach = async (record: Record) => {
-		const response = await fetch(budgetRecordAttachApiRoute.url({ budget, record }), {
-			method: "POST",
-			headers: { Accept: "application/json" },
-		})
-
-		if (response.ok) router.reload()
+		if (!budget) return
+		await attachBudgetRecord(budget.id, record.id)
+		setIsAttachingRecord(false)
 	}
 
 	const detach = async (record: Record) => {
-		const response = await fetch(budgetRecordDetachApiRoute.url({ budget, record }), {
-			method: "POST",
-			body: withMethod(new FormData(), "DELETE"),
-			headers: { Accept: "application/json" },
-		})
-
-		if (response.ok) router.reload()
+		if (!budget) return
+		await detachBudgetRecord(budget.id, record.id)
 	}
 
 	const recordColumns = useRecordColumns<Record>({
-		pageName: `Budget ${budget.id}`,
+		pageName: `Budget ${budget?.id ?? ""}`,
 		actionWidth: TABLE_WIDTH_CLASSNAMES.ACTIONS_OPEN_DETACH,
 		onEdit: record => void editRecord(record),
 		loadingRecordId,
@@ -84,7 +87,7 @@ export default function BudgetPage({ budget, records }: { budget: Budget; record
 		),
 	})
 	const recordMobileRow = useRecordMobileRow<Record>({
-		pageName: `Budget ${budget.id}`,
+		pageName: `Budget ${budget?.id ?? ""}`,
 		onEdit: record => void editRecord(record),
 		loadingRecordId,
 		extraActions: record => (
@@ -93,6 +96,17 @@ export default function BudgetPage({ budget, records }: { budget: Budget; record
 			</Button>
 		),
 	})
+
+	if (!budget) {
+		return (
+			<>
+				<AppHeader title="Budget" />
+				<PageContent>
+					<p className="text-sm text-muted-foreground">Budget not found.</p>
+				</PageContent>
+			</>
+		)
+	}
 
 	return (
 		<>
@@ -126,7 +140,7 @@ export default function BudgetPage({ budget, records }: { budget: Budget; record
 							}
 						/>
 					}
-					back={{ name: "Budgets", url: budgetsWebRoute.url() }}
+					back={{ name: "Budgets", url: pathBudgets() }}
 				/>
 
 				<Card className="gap-0 overflow-hidden py-0">

@@ -1,4 +1,7 @@
-import { router, usePage } from "@inertiajs/react"
+// Client-side replacement: reads a URL search param via react-router.
+
+import { useCallback } from "react"
+import { useSearchParams } from "react-router-dom"
 
 export function useSearchParam(key: string): [string | null, (value: string | null) => void]
 export function useSearchParam(
@@ -9,19 +12,20 @@ export function useSearchParam(
 	key: string,
 	defaultValue?: string,
 ): [string | null, (value: string | null) => void] {
-	const page = usePage()
-	const url = new URL(page.url, "http://localhost")
+	const [searchParams, setSearchParams] = useSearchParams()
+	const value = searchParams.get(key) ?? defaultValue ?? null
 
-	const value = url.searchParams.get(key) ?? defaultValue ?? null
-
-	const setValue = (value: string | null) => {
-		if (value !== null) {
-			url.searchParams.set(key, value)
-		} else {
-			url.searchParams.delete(key)
-		}
-		router.visit(url.pathname + url.search, { preserveState: true, preserveScroll: true })
-	}
+	const setValue = useCallback(
+		(next: string | null) => {
+			setSearchParams(prev => {
+				const params = new URLSearchParams(prev)
+				if (next === null || next === "") params.delete(key)
+				else params.set(key, next)
+				return params
+			})
+		},
+		[key, setSearchParams],
+	)
 
 	return [value, setValue]
 }

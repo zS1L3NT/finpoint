@@ -1,14 +1,14 @@
 import { Icon as IconifyIcon } from "@iconify/react"
-import { Link } from "@inertiajs/react"
 import type { CellContext, ColumnDef, Row } from "@tanstack/react-table"
+import { Link } from "react-router-dom"
 import AllocateBar from "@/components/allocate-bar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useHistory } from "@/history"
 import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
 import { classForCurrency, formatCurrency, formatDatetime, round2dp } from "@/lib/utils"
+import { pathStatement } from "@/routes"
 import type { Allocation, Statement } from "@/types"
-import { statementWebRoute } from "@/wayfinder/routes"
 
 type StatementRow = Statement & { pivot?: Allocation }
 
@@ -43,7 +43,7 @@ function StatementActionsCell<TStatement extends StatementRow>({
 			) : null}
 			<Button variant="outline" size="sm" asChild>
 				<Link
-					href={statementWebRoute.url({ statement: row.original })}
+					to={pathStatement(row.original.id)}
 					onClick={pageName ? handlePush(pageName) : undefined}
 				>
 					Open
@@ -162,7 +162,7 @@ export function useStatementMobileRow<TStatement extends StatementRow>({
 				) : null}
 				<Button variant="outline" size="sm" asChild>
 					<Link
-						href={statementWebRoute.url({ statement })}
+						to={pathStatement(statement.id)}
 						onClick={pageName ? handlePush(pageName) : undefined}
 					>
 						Open

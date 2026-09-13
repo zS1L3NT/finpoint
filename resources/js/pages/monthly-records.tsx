@@ -1,7 +1,8 @@
 import { Icon as IconifyIcon } from "@iconify/react"
-import { Link, router } from "@inertiajs/react"
+import { useLiveQuery } from "dexie-react-hooks"
 import { DateTime } from "luxon"
 import { useEffect, useMemo, useState } from "react"
+import { Link, useSearchParams } from "react-router-dom"
 import { toast } from "sonner"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
 import Icon from "@/components/icon"
@@ -32,6 +33,11 @@ import { useHistory } from "@/history"
 import { useFetch } from "@/hooks/use-fetch"
 import { treatmentLabel } from "@/lib/analytics"
 import { cn, formatCurrency, formatDatetime } from "@/lib/utils"
+import { listCategories } from "@/logic/categories"
+import { getMonthlyRecords } from "@/logic/monthly"
+import { ConflictError, getRecord, updateRecordBuckets } from "@/logic/records"
+import { ValidationError } from "@/logic/shared"
+import { pathDashboard, pathImporter, pathMonthlyRecords, pathRecord, pathRecords } from "@/routes"
 import {
 	Allocation,
 	AnalyticsSummary,
@@ -40,15 +46,6 @@ import {
 	Record,
 	Statement,
 } from "@/types"
-import {
-	categoryIndexApiRoute,
-	dashboardWebRoute,
-	monthlyRecordsWebRoute,
-	recordBucketUpdateApiRoute,
-	recordShowApiRoute,
-	recordsWebRoute,
-	recordWebRoute,
-} from "@/wayfinder/routes"
 
 type EditableRecord = Record & { statements: (Statement & { pivot?: Allocation })[] }
 
@@ -62,34 +59,59 @@ type Filters = {
 	day?: string | number
 }
 
-export default function MonthlyRecordsPage({
-	month,
-	year,
-	period,
-	records,
-	future_records,
-	summary,
-	buckets,
-	filters,
-}: {
-	month: string
-	year: number
-	period: { is_current: boolean; is_future: boolean; through: string | null }
-	records: Record[]
-	future_records: Record[]
-	summary: AnalyticsSummary
-	buckets: Bucket[]
-	filters: Filters
-}) {
+export default function MonthlyRecordsPage() {
+	const [searchParams, setSearchParams] = useSearchParams()
+	const now = DateTime.now()
+	const month = searchParams.get("month") ?? now.toFormat("MMMM")
+	const yearParam = searchParams.get("year")
+	const year =
+		yearParam !== null && Number.isFinite(Number(yearParam)) ? Number(yearParam) : now.year
+	const categoryIdsParam = searchParams.get("category_ids")
+	const isAllocated = searchParams.get("is_allocated")
+	const bucketId = searchParams.get("bucket_id")
+	const bucketGroup = searchParams.get("bucket_group")
+	const showUnbucketedParam = searchParams.get("show_unbucketed")
+	const showUnbucketed = showUnbucketedParam === "1" || showUnbucketedParam === "true"
+	const treatment = searchParams.get("treatment")
+	const dayParam = searchParams.get("day")
+	const day =
+		dayParam !== null && dayParam !== "" && Number.isFinite(Number(dayParam))
+			? Number(dayParam)
+			: null
 	const date = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
-	const categories = useFetch<CategoryWithChildren[]>(categoryIndexApiRoute.url(), [])
+
+	const filterKey = JSON.stringify([
+		categoryIdsParam,
+		isAllocated,
+		bucketId,
+		bucketGroup,
+		showUnbucketedParam,
+		treatment,
+		dayParam,
+	])
+	const data = useLiveQuery(
+		() =>
+			getMonthlyRecords(month, year, {
+				category_ids: categoryIdsParam,
+				is_allocated: isAllocated,
+				bucket_id: bucketId,
+				bucket_group: bucketGroup,
+				show_unbucketed: showUnbucketed,
+				treatment,
+				day,
+			}).catch(() => null),
+		[month, year, filterKey],
+	)
+	const categories = useFetch(() => listCategories(), [])
 	const [selected, setSelected] = useState<string[]>([])
 	const [destination, setDestination] = useState("")
 	const [submitting, setSubmitting] = useState(false)
 	const [editingRecord, setEditingRecord] = useState<EditableRecord | null>(null)
 	const [loadingRecordId, setLoadingRecordId] = useState<string | null>(null)
+	const records = useMemo(() => data?.records ?? [], [data])
+	const futureRecords = useMemo(() => data?.future_records ?? [], [data])
 	const actualGroups = useMemo(() => groupRecords(records), [records])
-	const futureGroups = useMemo(() => groupRecords(future_records), [future_records])
+	const futureGroups = useMemo(() => groupRecords(futureRecords), [futureRecords])
 	const selectedRecords = records.filter(record => selected.includes(record.id))
 	const ineligible = selectedRecords.filter(record => !canUseBucket(record))
 
@@ -97,72 +119,100 @@ export default function MonthlyRecordsPage({
 		setSelected(current => current.filter(id => records.some(record => record.id === id)))
 	}, [records])
 
+	const filters: Filters = {}
+	if (categoryIdsParam) filters.category_ids = categoryIdsParam
+	if (isAllocated) filters.is_allocated = isAllocated
+	if (bucketId) filters.bucket_id = bucketId
+	if (bucketGroup) filters.bucket_group = bucketGroup
+	if (showUnbucketedParam) filters.show_unbucketed = showUnbucketedParam
+	if (treatment) filters.treatment = treatment
+	if (dayParam) filters.day = dayParam
+
 	const visit = (changes: Partial<Filters> = {}, nextDate = date) => {
-		const next: Filters = { ...filters, ...changes }
-		for (const [key, value] of Object.entries(next)) {
-			if (value === "" || value === false || value === undefined || value === null)
-				delete next[key as keyof Filters]
+		const merged: Partial<Filters> = { ...filters, ...changes }
+		const next = new URLSearchParams(searchParams)
+		next.set("month", nextDate.toFormat("MMMM"))
+		next.set("year", String(nextDate.year))
+		for (const key of [
+			"category_ids",
+			"is_allocated",
+			"bucket_id",
+			"bucket_group",
+			"show_unbucketed",
+			"treatment",
+			"day",
+		] as const) {
+			const value = merged[key]
+			if (value === "" || value === false || value === undefined || value === null) {
+				next.delete(key)
+			} else {
+				next.set(key, key === "show_unbucketed" && value === true ? "1" : String(value))
+			}
 		}
-		router.visit(
-			monthlyRecordsWebRoute({
-				query: { month: nextDate.toFormat("MMMM"), year: nextDate.year, ...next },
-			}),
-			{ preserveState: true, preserveScroll: true },
-		)
+		setSearchParams(next)
 	}
 
-	const assign = async (bucketId: string | null) => {
+	const assign = async (targetBucketId: string | null) => {
 		if (!selectedRecords.length) return
 		setSubmitting(true)
-		const response = await fetch(recordBucketUpdateApiRoute.url(), {
-			method: "PATCH",
-			headers: { Accept: "application/json", "Content-Type": "application/json" },
-			body: JSON.stringify({
-				records: selectedRecords.map(record => ({
-					id: record.id,
-					revision: record.revision,
-				})),
-				bucket_id: bucketId,
-			}),
-		})
-		const data = await response.json().catch(() => null)
-		if (response.ok) {
+		try {
+			await updateRecordBuckets(
+				selectedRecords.map(record => ({ id: record.id, revision: record.revision })),
+				targetBucketId,
+			)
 			toast.success(
 				`${selectedRecords.length} Record${selectedRecords.length === 1 ? "" : "s"} updated.`,
 			)
 			setSelected([])
-			router.reload()
-		} else {
-			toast.error(
-				data?.message ??
-					Object.values(data?.errors ?? {})
-						.flat()
-						.join(" ") ??
-					"Unable to update the selected Records.",
-			)
+		} catch (cause) {
+			if (cause instanceof ValidationError || cause instanceof ConflictError) {
+				toast.error(cause.message)
+			} else {
+				toast.error("Unable to update the selected Records.")
+			}
+		} finally {
+			setSubmitting(false)
 		}
-		setSubmitting(false)
 	}
 
-	const clearFilters = () => router.visit(monthlyRecordsWebRoute({ query: { month, year } }))
+	const clearFilters = () => setSearchParams({ month, year: String(year) })
 	const toggleAll = (checked: boolean) =>
 		setSelected(checked ? records.map(record => record.id) : [])
 	const editRecord = async (record: Record) => {
 		setLoadingRecordId(record.id)
 		try {
-			const response = await fetch(recordShowApiRoute.url({ record }), {
-				headers: { Accept: "application/json" },
-			})
-			const data = await response.json().catch(() => null)
-			if (response.ok) {
-				setEditingRecord(data as EditableRecord)
-				return
-			}
-			toast.error(data?.message ?? "Unable to open this Record for editing.")
+			const detail = await getRecord(record.id)
+			setEditingRecord(detail as unknown as EditableRecord)
+		} catch {
+			toast.error("Unable to open this Record for editing.")
 		} finally {
 			setLoadingRecordId(null)
 		}
 	}
+
+	if (data === undefined) {
+		return (
+			<>
+				<AppHeader title="Monthly Records" />
+				<PageContent>
+					<p className="text-sm text-muted-foreground">Loading monthly records…</p>
+				</PageContent>
+			</>
+		)
+	}
+
+	if (data === null) {
+		return (
+			<>
+				<AppHeader title="Monthly Records" />
+				<PageContent>
+					<p className="text-sm text-muted-foreground">Monthly records not found.</p>
+				</PageContent>
+			</>
+		)
+	}
+
+	const { summary, buckets, period } = data
 
 	return (
 		<>
@@ -225,13 +275,13 @@ export default function MonthlyRecordsPage({
 						>
 							<Link
 								className="border-b-2 border-transparent px-4 py-2 text-sm text-muted-foreground hover:text-foreground"
-								href={dashboardWebRoute({ query: { month, year } })}
+								to={pathDashboard({ month, year: String(year) })}
 							>
 								Overview
 							</Link>
 							<Link
 								className="border-b-2 border-foreground px-4 py-2 text-sm font-medium"
-								href={monthlyRecordsWebRoute({ query: { month, year } })}
+								to={pathMonthlyRecords({ month, year: String(year) })}
 							>
 								Monthly Records
 							</Link>
@@ -242,11 +292,9 @@ export default function MonthlyRecordsPage({
 							asChild
 						>
 							<Link
-								href={recordsWebRoute({
-									query: {
-										start_date: date.startOf("month").toISODate(),
-										end_date: date.endOf("month").toISODate(),
-									},
+								to={pathRecords({
+									start_date: date.startOf("month").toISODate() ?? undefined,
+									end_date: date.endOf("month").toISODate() ?? undefined,
 								})}
 							>
 								Open in Records <IconifyIcon icon="lucide:arrow-up-right" />
@@ -361,7 +409,7 @@ export default function MonthlyRecordsPage({
 					/>
 				) : null}
 
-				{future_records.length ? (
+				{futureRecords.length ? (
 					<section className="grid gap-4">
 						<div>
 							<h3 className="text-lg font-semibold">Later this month</h3>
@@ -672,7 +720,7 @@ function DayGroup({
 								</Button>
 								<Button variant="outline" size="sm" asChild>
 									<Link
-										href={recordWebRoute({ record })}
+										to={pathRecord(record.id)}
 										onClick={handlePush("Monthly Records")}
 									>
 										Open
@@ -753,7 +801,7 @@ function EmptyRecords({ filtered, onClear }: { filtered: boolean; onClear: () =>
 			</CardHeader>
 			<CardContent>
 				<Button variant="outline" asChild>
-					<Link href="/importer">Import Statements</Link>
+					<Link to={pathImporter()}>Import Statements</Link>
 				</Button>
 			</CardContent>
 		</Card>

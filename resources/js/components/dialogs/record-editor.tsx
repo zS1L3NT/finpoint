@@ -1,9 +1,9 @@
 import { Icon as IconifyIcon } from "@iconify/react"
-import { router } from "@inertiajs/react"
 import { useForm, useStore } from "@tanstack/react-form"
 import { AnimatePresence, motion } from "framer-motion"
 import { DateTime } from "luxon"
 import { useEffect, useState } from "react"
+import { toast } from "sonner"
 import AmountField from "@/components/form/amount-field"
 import ComboboxField from "@/components/form/combobox-field"
 import DatetimeField from "@/components/form/datetime-field"
@@ -48,15 +48,10 @@ import { useHistory } from "@/history"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { useDialogCloseAnimation } from "@/hooks/use-dialog-close-animation"
 import { useFetch } from "@/hooks/use-fetch"
-import { cn, formatCurrency, formatDatetime, round2dp, withMethod } from "@/lib/utils"
-import { Allocation, CategoryWithChildren, Record, RecordCompletions, Statement } from "@/types"
-import {
-	completionsRecordsApiRoute,
-	recordDestroyApiRoute,
-	recordsWebRoute,
-	recordUpdateApiRoute,
-	recordWebRoute,
-} from "@/wayfinder/routes"
+import { cn, formatCurrency, formatDatetime, round2dp } from "@/lib/utils"
+import { ConflictError, deleteRecord, recordCompletions, updateRecord } from "@/logic/records"
+import { ValidationError } from "@/logic/shared"
+import { Allocation, CategoryWithChildren, Record, Statement } from "@/types"
 
 export default function RecordEditorDialog({
 	record,
@@ -76,7 +71,11 @@ export default function RecordEditorDialog({
 	const { open, setIsOpen, onOpenChangeComplete } = useDialogCloseAnimation(isOpen, onOpenChange)
 	const { navigateBack } = useHistory()
 
-	const completions = useFetch<RecordCompletions>(completionsRecordsApiRoute.url())
+	const completions = useFetch(() => recordCompletions(), {
+		titles: [],
+		locations: [],
+		peoples: [],
+	})
 
 	const [statementCache, setStatementCache] = useState<(Statement & { pivot?: Allocation })[]>([])
 	const [isAttachingStatement, setIsAttachingStatement] = useState(false)
@@ -110,73 +109,53 @@ export default function RecordEditorDialog({
 		},
 		onSubmit: async ({ value }) => {
 			setSubmitError("")
-			const formData = new FormData()
-			formData.append("title", value.title)
-			formData.append("people", value.people)
-			formData.append("location", value.location)
-			formData.append("datetime", value.datetime)
-			formData.append("amount", `${value.amount}`)
-			formData.append("category_id", value.category_id)
-			formData.append("analytics_treatment", value.analytics_treatment)
-			formData.append("bucket_id", value.bucket_id)
-			formData.append("bucket_source", value.bucket_source)
-			formData.append("revision", `${record.revision}`)
-			formData.append("description", value.description)
-			value.statements.forEach((statement, index) => {
-				formData.append(`statements[${index}][id]`, statement.id)
-				formData.append(`statements[${index}][amount]`, `${statement.amount}`)
-			})
-
-			const response = await fetch(recordUpdateApiRoute.url({ record }), {
-				method: "POST",
-				body: withMethod(formData, "PUT"),
-				headers: { Accept: "application/json" },
-			})
-			const data = await response.json().catch(() => null)
-
-			if (response.status === 422) {
-				setApiErrors((data?.errors ?? {}) as globalThis.Record<string, string[]>)
-				setSubmitError("Correct the highlighted fields, then save again.")
-				return
-			}
-
-			if (response.ok) {
+			try {
+				await updateRecord(record.id, {
+					title: value.title,
+					people: value.people,
+					location: value.location,
+					description: value.description,
+					datetime: value.datetime,
+					amount: value.amount,
+					category_id: value.category_id,
+					analytics_treatment: value.analytics_treatment || null,
+					bucket_id: value.bucket_id || null,
+					bucket_source: value.bucket_source,
+					revision: record.revision,
+					statements: value.statements,
+				})
 				setIsOpen(false)
-				router.reload()
-				return
+			} catch (cause) {
+				if (cause instanceof ValidationError) {
+					setApiErrors(cause.errors)
+					setSubmitError("Correct the highlighted fields, then save again.")
+					return
+				}
+				if (cause instanceof ConflictError) {
+					setSubmitError(cause.message)
+					toast.error(cause.message)
+					return
+				}
+				setSubmitError("Unable to save this Record. Refresh the page and try again.")
+				toast.error("Unable to save this record.")
 			}
-
-			setSubmitError(
-				data?.message ?? "Unable to save this Record. Refresh the page and try again.",
-			)
 		},
 		onSubmitInvalid: () => setSubmitError("Correct the highlighted fields, then save again."),
 	})
 
 	const handleDelete = async () => {
-		const response = await fetch(recordDestroyApiRoute.url({ record }), {
-			method: "POST",
-			body: withMethod(new FormData(), "DELETE"),
-			headers: { Accept: "application/json" },
-		})
-
-		if (response.ok) {
+		try {
+			await deleteRecord(record.id)
 			setIsOpen(false)
 
-			if (location.pathname === recordWebRoute.url({ record })) {
+			if (location.pathname === `/records/${record.id}`) {
 				navigateBack({
 					name: "Records",
-					url: recordsWebRoute.url({
-						query: {
-							start_date: START_DATE,
-							end_date: DateTime.now().toFormat("yyyy-MM-dd"),
-						},
-					}),
+					url: `/records?start_date=${START_DATE}&end_date=${DateTime.now().toFormat("yyyy-MM-dd")}`,
 				})
-				return
 			}
-
-			router.reload()
+		} catch {
+			toast.error("Unable to delete this record.")
 		}
 	}
 

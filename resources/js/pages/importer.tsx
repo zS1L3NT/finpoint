@@ -1,5 +1,6 @@
 import { Icon as IconifyIcon } from "@iconify/react"
 import { useForm, useStore } from "@tanstack/react-form"
+import { useLiveQuery } from "dexie-react-hooks"
 import { useState } from "react"
 import { toast } from "sonner"
 import SelectField from "@/components/form/select-field"
@@ -20,19 +21,17 @@ import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from "@/components/ui/item"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
-import { Account } from "@/types"
-import {
-	importerDbsApiRoute,
-	importerRevolutApiRoute,
-	importerUobApiRoute,
-} from "@/wayfinder/routes"
+import { listAccounts } from "@/logic/accounts"
+import { importDbs, importRevolut, importUob } from "@/logic/importer"
+import { ValidationError } from "@/logic/shared"
 
 const BANKS_REQUIRING_ADDITIONAL_INFO = ["revolut"]
 
-export default function ImporterPage({ accounts }: { accounts: Account[] }) {
+export default function ImporterPage() {
 	const [files, setFiles] = useState<File[]>([])
 	const [fileInputKey, setFileInputKey] = useState(0)
 	const { mergeErrors, clearApiError, setApiErrors } = useApiFormErrors()
+	const accounts = useLiveQuery(() => listAccounts(), []) ?? []
 
 	const form = useForm({
 		defaultValues: {
@@ -43,52 +42,24 @@ export default function ImporterPage({ accounts }: { accounts: Account[] }) {
 			files: [] as File[],
 		},
 		onSubmit: async ({ value }) => {
-			let url = ""
-			const formData = new FormData()
-
 			if (!value.bank) {
 				setApiErrors({ bank: ["Please select a bank"] })
 				return
 			}
 
-			if (value.bank === "dbs") {
-				url = importerDbsApiRoute.url()
-				files.forEach(file => formData.append("files[]", file))
-			}
-
-			if (value.bank === "uob") {
-				url = importerUobApiRoute.url()
-				files.forEach(file => formData.append("files[]", file))
-			}
-
-			if (value.bank === "revolut") {
-				url = importerRevolutApiRoute.url()
-				if (files[0]) {
-					formData.append("file", files[0])
-				}
-
-				if (value.account_select === "new") {
-					formData.append("account_id", value.account_id)
-					formData.append("account_name", value.account_name)
-				} else {
-					formData.append("account_id", value.account_select)
-				}
-			}
-
-			const response = await fetch(url, {
-				method: "POST",
-				body: formData,
-				headers: { Accept: "application/json" },
-			})
-
-			if (response.status === 422) {
-				const data = await response.json().catch(() => null)
-				setApiErrors((data?.errors ?? {}) as globalThis.Record<string, string[]>)
-				return
-			}
-
-			if (response.ok) {
-				const data = await response.json().catch(() => null)
+			try {
+				const data =
+					value.bank === "dbs"
+						? await importDbs(files)
+						: value.bank === "uob"
+							? await importUob(files)
+							: await importRevolut(
+									files[0],
+									value.account_select === "new"
+										? value.account_id
+										: value.account_select,
+									value.account_select === "new" ? value.account_name : undefined,
+								)
 				toast.success(`Imported successful`, {
 					description: (
 						<>
@@ -101,7 +72,12 @@ export default function ImporterPage({ accounts }: { accounts: Account[] }) {
 				form.reset()
 				setFiles([])
 				setFileInputKey(key => key + 1)
-				return
+			} catch (cause) {
+				if (cause instanceof ValidationError) {
+					setApiErrors(cause.errors)
+					return
+				}
+				toast.error("Import failed. Check your files and try again.")
 			}
 		},
 	})

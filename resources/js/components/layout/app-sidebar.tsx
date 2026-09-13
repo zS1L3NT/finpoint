@@ -1,6 +1,6 @@
 import { Icon as IconifyIcon } from "@iconify/react"
-import { Link } from "@inertiajs/react"
 import { DateTime } from "luxon"
+import { Link } from "react-router-dom"
 import {
 	Sidebar,
 	SidebarContent,
@@ -15,15 +15,16 @@ import {
 import { START_DATE } from "@/constants"
 import { useHistory } from "@/history"
 import {
-	accountsWebRoute,
-	allocatorWebRoute,
-	budgetsWebRoute,
-	categoriesWebRoute,
-	dashboardWebRoute,
-	importerWebRoute,
-	recordsWebRoute,
-	statementsWebRoute,
-} from "@/wayfinder/routes"
+	pathAccounts,
+	pathAllocator,
+	pathBudgets,
+	pathCategories,
+	pathDashboard,
+	pathDataSettings,
+	pathImporter,
+	pathRecords,
+	pathStatements,
+} from "@/routes"
 
 export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
 	const { handleClear } = useHistory()
@@ -45,7 +46,7 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 							asChild
 							className="data-[slot=sidebar-menu-button]:p-1.5!"
 						>
-							<Link href={dashboardWebRoute.url()} onClick={handleSidebarLink}>
+							<Link to={pathDashboard()} onClick={handleSidebarLink}>
 								<IconifyIcon icon="lucide:circle-dollar-sign" className="size-5!" />
 								<span className="text-base font-semibold">Finpoint</span>
 							</Link>
@@ -59,7 +60,7 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 					<SidebarMenu>
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
-								<Link href={dashboardWebRoute.url()} onClick={handleSidebarLink}>
+								<Link to={pathDashboard()} onClick={handleSidebarLink}>
 									<IconifyIcon icon="lucide:chart-area" />
 									<span>Dashboard</span>
 								</Link>
@@ -69,11 +70,7 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
 								<Link
-									href={allocatorWebRoute.url({
-										query: {
-											start_date: START_DATE,
-										},
-									})}
+									to={pathAllocator({ start_date: START_DATE })}
 									onClick={handleSidebarLink}
 								>
 									<IconifyIcon icon="lucide:link" />
@@ -84,7 +81,7 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
-								<Link href={budgetsWebRoute.url()} onClick={handleSidebarLink}>
+								<Link to={pathBudgets()} onClick={handleSidebarLink}>
 									<IconifyIcon icon="lucide:piggy-bank" />
 									<span>Budgets</span>
 								</Link>
@@ -98,7 +95,7 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 					<SidebarMenu>
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
-								<Link href={importerWebRoute.url()} onClick={handleSidebarLink}>
+								<Link to={pathImporter()} onClick={handleSidebarLink}>
 									<IconifyIcon icon="lucide:import" />
 									<span>Importer</span>
 								</Link>
@@ -107,7 +104,7 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
-								<Link href={accountsWebRoute.url()} onClick={handleSidebarLink}>
+								<Link to={pathAccounts()} onClick={handleSidebarLink}>
 									<IconifyIcon icon="lucide:landmark" />
 									<span>Accounts</span>
 								</Link>
@@ -117,11 +114,9 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
 								<Link
-									href={recordsWebRoute.url({
-										query: {
-											start_date: START_DATE,
-											end_date: DateTime.now().toFormat("yyyy-MM-dd"),
-										},
+									to={pathRecords({
+										start_date: START_DATE,
+										end_date: DateTime.now().toFormat("yyyy-MM-dd"),
 									})}
 									onClick={handleSidebarLink}
 								>
@@ -133,7 +128,7 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
-								<Link href={statementsWebRoute.url()} onClick={handleSidebarLink}>
+								<Link to={pathStatements()} onClick={handleSidebarLink}>
 									<IconifyIcon icon="lucide:credit-card" />
 									<span>Statements</span>
 								</Link>
@@ -147,9 +142,17 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 					<SidebarMenu>
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
-								<Link href={categoriesWebRoute.url()} onClick={handleSidebarLink}>
+								<Link to={pathCategories()} onClick={handleSidebarLink}>
 									<IconifyIcon icon="lucide:tag" />
 									<span>Categories</span>
+								</Link>
+							</SidebarMenuButton>
+						</SidebarMenuItem>
+						<SidebarMenuItem>
+							<SidebarMenuButton asChild>
+								<Link to={pathDataSettings()} onClick={handleSidebarLink}>
+									<IconifyIcon icon="lucide:database" />
+									<span>Data</span>
 								</Link>
 							</SidebarMenuButton>
 						</SidebarMenuItem>

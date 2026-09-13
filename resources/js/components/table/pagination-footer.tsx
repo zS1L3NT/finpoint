@@ -1,22 +1,46 @@
+import { useSearchParams } from "react-router-dom"
 import {
 	Pagination,
 	PaginationContent,
+	PaginationEllipsis,
 	PaginationItem,
 	PaginationLink,
 	PaginationNext,
 	PaginationPrevious,
 } from "@/components/ui/pagination"
-import { PaginatedLink } from "@/types"
+
+function pageHref(searchParams: URLSearchParams, page: number): string {
+	const next = new URLSearchParams(searchParams)
+	if (page <= 1) next.delete("page")
+	else next.set("page", String(page))
+	const suffix = next.toString()
+	return suffix ? `?${suffix}` : "?"
+}
+
+function pageWindow(current: number, last: number): (number | "…")[] {
+	if (last <= 7) return Array.from({ length: last }, (_, i) => i + 1)
+	const window = new Set([1, 2, current - 1, current, current + 1, last - 1, last])
+	const pages = [...window].filter(p => p >= 1 && p <= last).sort((a, b) => a - b)
+	const out: (number | "…")[] = []
+	for (let i = 0; i < pages.length; i++) {
+		out.push(pages[i])
+		if (i < pages.length - 1 && pages[i + 1] - pages[i] > 1) out.push("…")
+	}
+	return out
+}
 
 export default function PaginationFooter({
 	summary,
-	links,
+	page,
+	lastPage,
 }: {
 	summary: React.ReactNode
-	links: PaginatedLink[]
+	page: number
+	lastPage: number
+	links?: unknown
 }) {
-	const previousLink = links[0]
-	const nextLink = links.at(-1)
+	const [searchParams] = useSearchParams()
+	const current = Math.min(Math.max(1, page), Math.max(1, lastPage))
 
 	return (
 		<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -26,34 +50,34 @@ export default function PaginationFooter({
 				<PaginationContent className="flex-wrap">
 					<PaginationItem>
 						<PaginationPrevious
-							href={previousLink?.url ?? "#"}
-							className={
-								!previousLink?.url ? "pointer-events-none opacity-50" : undefined
-							}
-							aria-disabled={!previousLink?.url}
-							preserveState
+							to={pageHref(searchParams, current - 1)}
+							className={current <= 1 ? "pointer-events-none opacity-50" : undefined}
+							aria-disabled={current <= 1}
 						/>
 					</PaginationItem>
-					{links.slice(1, -1).map(link => (
-						<PaginationItem key={`${link.label}-${link.url ?? "null"}`}>
-							<PaginationLink
-								href={link.url ?? "#"}
-								className={!link.url ? "pointer-events-none opacity-50" : undefined}
-								isActive={link.active}
-								preserveState
-							>
-								<span dangerouslySetInnerHTML={{ __html: link.label }} />
-							</PaginationLink>
-						</PaginationItem>
-					))}
+					{pageWindow(current, Math.max(1, lastPage)).map(item =>
+						item === "…" ? (
+							<PaginationItem key={`ellipsis-${current}`}>
+								<PaginationEllipsis />
+							</PaginationItem>
+						) : (
+							<PaginationItem key={item}>
+								<PaginationLink
+									to={pageHref(searchParams, item)}
+									isActive={item === current}
+								>
+									{item}
+								</PaginationLink>
+							</PaginationItem>
+						),
+					)}
 					<PaginationItem>
 						<PaginationNext
-							href={nextLink?.url ?? "#"}
+							to={pageHref(searchParams, current + 1)}
 							className={
-								!nextLink?.url ? "pointer-events-none opacity-50" : undefined
+								current >= lastPage ? "pointer-events-none opacity-50" : undefined
 							}
-							aria-disabled={!nextLink?.url}
-							preserveState
+							aria-disabled={current >= lastPage}
 						/>
 					</PaginationItem>
 				</PaginationContent>

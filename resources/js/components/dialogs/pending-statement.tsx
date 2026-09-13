@@ -1,7 +1,7 @@
 import { Icon as IconifyIcon } from "@iconify/react"
-import { router } from "@inertiajs/react"
 import { DateTime } from "luxon"
 import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import AmountField from "@/components/form/amount-field"
 import DatetimeField from "@/components/form/datetime-field"
@@ -21,14 +21,14 @@ import {
 import { FieldGroup } from "@/components/ui/field"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { useDialogCloseAnimation } from "@/hooks/use-dialog-close-animation"
-import { withMethod } from "@/lib/utils"
-import type { Account, Statement } from "@/types"
+import { ValidationError } from "@/logic/shared"
 import {
-	statementDestroyApiRoute,
-	statementStoreApiRoute,
-	statementsWebRoute,
-	statementUpdateApiRoute,
-} from "@/wayfinder/routes"
+	createPendingStatement,
+	deletePendingStatement,
+	updatePendingStatement,
+} from "@/logic/statements"
+import { pathStatements } from "@/routes"
+import type { Account, Statement } from "@/types"
 
 type PendingStatementValues = {
 	account_id: string
@@ -51,6 +51,7 @@ export default function PendingStatementDialog({
 	trigger?: React.ReactElement
 }) {
 	const { open, setIsOpen, onOpenChangeComplete } = useDialogCloseAnimation(isOpen, onOpenChange)
+	const navigate = useNavigate()
 	const isEditing = !!statement
 	const [values, setValues] = useState<PendingStatementValues>({
 		account_id: "",
@@ -94,31 +95,30 @@ export default function PendingStatementDialog({
 	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault()
 
-		const formData = new FormData()
-		formData.append("account_id", values.account_id)
-		formData.append("datetime", values.datetime)
-		formData.append("amount", `${values.amount}`)
-		formData.append("description", values.description)
-
-		const response = await fetch(
-			statement ? statementUpdateApiRoute.url({ statement }) : statementStoreApiRoute.url(),
-			{
-				method: "POST",
-				body: statement ? withMethod(formData, "PUT") : formData,
-				headers: { Accept: "application/json" },
-			},
-		)
-
-		if (response.status === 422) {
-			const data = await response.json().catch(() => null)
-			setApiErrors((data?.errors ?? {}) as Record<string, string[]>)
-			return
-		}
-
-		if (response.ok) {
+		try {
+			if (statement) {
+				await updatePendingStatement(statement.id, {
+					account_id: values.account_id,
+					datetime: values.datetime,
+					amount: values.amount,
+					description: values.description,
+				})
+			} else {
+				await createPendingStatement({
+					account_id: values.account_id,
+					datetime: values.datetime,
+					amount: values.amount,
+					description: values.description,
+				})
+			}
 			setIsOpen(false)
 			toast.success(isEditing ? "Pending statement updated." : "Pending statement created.")
-			router.reload()
+		} catch (cause) {
+			if (cause instanceof ValidationError) {
+				setApiErrors(cause.errors)
+				return
+			}
+			toast.error("Unable to save this statement.")
 		}
 	}
 
@@ -127,22 +127,17 @@ export default function PendingStatementDialog({
 			return
 		}
 
-		const response = await fetch(statementDestroyApiRoute.url({ statement }), {
-			method: "POST",
-			body: withMethod(new FormData(), "DELETE"),
-			headers: { Accept: "application/json" },
-		})
-
-		if (response.status === 422) {
-			const data = await response.json().catch(() => null)
-			setApiErrors((data?.errors ?? {}) as Record<string, string[]>)
-			return
-		}
-
-		if (response.ok) {
+		try {
+			await deletePendingStatement(statement.id)
 			setIsOpen(false)
 			toast.success("Pending statement deleted.")
-			router.visit(statementsWebRoute.url())
+			void navigate(pathStatements())
+		} catch (cause) {
+			if (cause instanceof ValidationError) {
+				setApiErrors(cause.errors)
+				return
+			}
+			toast.error("Unable to delete this statement.")
 		}
 	}
 

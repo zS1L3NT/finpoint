@@ -1,9 +1,9 @@
+import { useLiveQuery } from "dexie-react-hooks"
 import SelectField from "@/components/form/select-field"
 import { FieldGroup } from "@/components/ui/field"
-import { useFetch } from "@/hooks/use-fetch"
 import { treatmentLabel } from "@/lib/analytics"
-import { AnalyticsTreatment, Bucket } from "@/types"
-import { bucketIndexApiRoute } from "@/wayfinder/routes"
+import { listBuckets } from "@/logic/buckets"
+import { AnalyticsTreatment } from "@/types"
 
 const CATEGORY_DEFAULT = "category_default"
 
@@ -26,7 +26,7 @@ export default function RecordAnalyticsFields({
 	onTreatmentChange: (value: string) => void
 	onBucketChange: (value: string, source: "category" | "manual") => void
 }) {
-	const buckets = useFetch<Bucket[]>(bucketIndexApiRoute.url(), [])
+	const buckets = useLiveQuery(() => listBuckets(), []) ?? []
 	const effectiveTreatment = (treatment || categoryTreatment || "automatic") as AnalyticsTreatment
 	const bucketEligible = canUseBucket(effectiveTreatment, amount)
 	const categoryBucket = buckets.find(bucket => bucket.id === categoryBucketId)

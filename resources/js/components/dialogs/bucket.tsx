@@ -1,6 +1,6 @@
-import { router } from "@inertiajs/react"
 import { DateTime } from "luxon"
 import { useState } from "react"
+import { toast } from "sonner"
 import AmountField from "@/components/form/amount-field"
 import SelectField from "@/components/form/select-field"
 import TextField from "@/components/form/text-field"
@@ -17,12 +17,9 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
+import { createBucket, setBucketTarget, updateBucket } from "@/logic/buckets"
+import { ValidationError } from "@/logic/shared"
 import { Bucket } from "@/types"
-import {
-	bucketStoreApiRoute,
-	bucketTargetUpdateApiRoute,
-	bucketUpdateApiRoute,
-} from "@/wayfinder/routes"
 
 type EditableBucket = Bucket & { target?: number | null }
 const fieldErrors = (errors?: string[]) => errors?.map(message => ({ message }))
@@ -66,55 +63,42 @@ export default function BucketDialog({
 	const submit = async () => {
 		setSubmitting(true)
 		setErrors({})
-		const payload = {
-			name,
-			color,
-			group,
-			pace_kind: group === "outlier" ? "none" : paceKind,
-			...(bucket ? { archived } : {}),
-		}
-		const response = await fetch(
-			bucket ? bucketUpdateApiRoute.url({ bucket }) : bucketStoreApiRoute.url(),
-			{
-				method: bucket ? "PUT" : "POST",
-				headers: { Accept: "application/json", "Content-Type": "application/json" },
-				body: JSON.stringify(payload),
-			},
-		)
-		const saved = await response.json().catch(() => null)
-		if (!response.ok) {
-			setErrors(saved?.errors ?? { form: [saved?.message ?? "Unable to save this bucket."] })
-			setSubmitting(false)
-			return
-		}
+		try {
+			const saved = bucket
+				? await updateBucket(bucket.id, {
+						name,
+						color,
+						group,
+						pace_kind: group === "outlier" ? "none" : paceKind,
+						archived,
+					})
+				: await createBucket({
+						name,
+						color,
+						group,
+						pace_kind: group === "outlier" ? "none" : paceKind,
+					})
 
-		const targetMonth =
-			targetScope === "default"
-				? selectedMonth.plus({ month: 1 }).toISODate()
-				: selectedMonth.toISODate()
-		const targetResponse = await fetch(bucketTargetUpdateApiRoute.url({ bucket: saved.id }), {
-			method: "PUT",
-			headers: { Accept: "application/json", "Content-Type": "application/json" },
-			body: JSON.stringify({
+			const targetMonth =
+				targetScope === "default"
+					? (selectedMonth.plus({ month: 1 }).toISODate() ?? "")
+					: (selectedMonth.toISODate() ?? "")
+			await setBucketTarget(saved.id, {
 				month: targetMonth,
 				amount: noTarget ? null : target,
-				scope: targetScope,
-			}),
-		})
-		if (!targetResponse.ok) {
-			const data = await targetResponse.json().catch(() => null)
-			setErrors(
-				data?.errors ?? {
-					form: [data?.message ?? "The bucket was saved, but its target was not."],
-				},
-			)
-			setSubmitting(false)
-			return
-		}
+				scope: targetScope as "month" | "default",
+			})
 
-		setOpen(false)
-		setSubmitting(false)
-		router.reload()
+			setOpen(false)
+		} catch (cause) {
+			if (cause instanceof ValidationError) {
+				setErrors(cause.errors)
+			} else {
+				toast.error("Unable to save this bucket.")
+			}
+		} finally {
+			setSubmitting(false)
+		}
 	}
 
 	return (

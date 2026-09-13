@@ -31,7 +31,7 @@ export default function PaginatedDataTable<TData extends { id: string }, TValue>
 	paginated: Paginated<TData>
 	columns: ColumnDef<TData, TValue>[]
 	header: React.ComponentProps<typeof PaginationHeader>
-	footer: Omit<React.ComponentProps<typeof PaginationFooter>, "links">
+	footer: { summary: React.ReactNode }
 	selectedIds?: string[]
 	emptyMessage?: string
 	mobileRow?: (row: Row<TData>) => React.ReactNode
@@ -146,7 +146,20 @@ export default function PaginatedDataTable<TData extends { id: string }, TValue>
 				</Table>
 			</div>
 
-			{footer ? <PaginationFooter links={paginated.links} {...footer} /> : null}
+			{footer ? (
+				<PaginationFooter
+					summary={footer.summary}
+					page={paginated.current_page}
+					lastPage={
+						typeof paginated.last_page === "number"
+							? paginated.last_page
+							: Math.max(
+									1,
+									Math.ceil(paginated.total / Math.max(1, paginated.per_page)),
+								)
+					}
+				/>
+			) : null}
 		</div>
 	)
 }
