@@ -4,6 +4,7 @@
 // Import: replaces the whole database from such a file (validated first).
 // Sessions persist automatically in IndexedDB — no manual save step.
 
+import { DateTime } from "luxon"
 import { db } from "@/data/db"
 
 export const EXPORT_VERSION = 1
@@ -60,8 +61,7 @@ export function downloadExport(data: FinpointExport): void {
 	const url = URL.createObjectURL(blob)
 	const anchor = document.createElement("a")
 	anchor.href = url
-	const stamp = new Date().toISOString().replace(/[-:]/g, "").replace("T", "-").slice(0, 15)
-	anchor.download = `finpoint-backup-${stamp}.json`
+	anchor.download = `finpoint-backup-${DateTime.now().setZone("Asia/Singapore").toFormat("yyyyLLdd-HHmmss")}.json`
 	document.body.appendChild(anchor)
 	anchor.click()
 	anchor.remove()
