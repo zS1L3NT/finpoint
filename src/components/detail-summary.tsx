@@ -1,4 +1,4 @@
-import { Icon as IconifyIcon } from "@iconify/react"
+import { UiIcon as IconifyIcon } from "@/components/icon"
 import { Card } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 

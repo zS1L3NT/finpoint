@@ -1,11 +1,10 @@
-import { Icon as IconifyIcon } from "@iconify/react"
 import { useLiveQuery } from "dexie-react-hooks"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import ComboboxField from "@/components/form/combobox-field"
 import SelectField from "@/components/form/select-field"
 import TextField from "@/components/form/text-field"
-import Icon from "@/components/icon"
+import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import {

@@ -1,11 +1,10 @@
-import { Icon as IconifyIcon } from "@iconify/react"
 import { useLiveQuery } from "dexie-react-hooks"
 import { DateTime } from "luxon"
 import { type ReactNode, useMemo, useState } from "react"
 import { Link, useSearchParams } from "react-router-dom"
 import CashflowChart, { CashflowPoint } from "@/components/charts/cashflow-chart"
 import BucketDialog from "@/components/dialogs/bucket"
-import Icon from "@/components/icon"
+import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
 import AppHeader from "@/components/layout/app-header"
 import PageContent from "@/components/layout/page-content"
 import { FILTER_CONTROL_CLASS } from "@/components/table/filter-bar"
@@ -119,25 +118,63 @@ export default function DashboardPage() {
 		return (
 			<>
 				<AppHeader title="Dashboard" />
-				<PageContent>
-					<div className="grid gap-5">
-						<div className="grid gap-2">
-							<Skeleton className="h-4 w-32" />
-							<Skeleton className="h-8 w-64 max-w-full" />
-							<Skeleton className="h-4 w-96 max-w-full" />
+				<PageContent className="gap-7 md:gap-9">
+					<header className="grid gap-5">
+						<div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+							<div className="grid gap-2">
+								<Skeleton className="h-3 w-32" />
+								<Skeleton className="h-9 w-56 max-w-full" />
+								<Skeleton className="h-4 w-72 max-w-full" />
+							</div>
+							<div className="flex gap-2">
+								<Skeleton className="h-9 w-9" />
+								<Skeleton className="h-9 w-32" />
+								<Skeleton className="h-9 w-9" />
+							</div>
 						</div>
-						<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-							<Skeleton className="h-28 w-full" />
-							<Skeleton className="h-28 w-full" />
-							<Skeleton className="h-28 w-full" />
-							<Skeleton className="h-28 w-full" />
+						<div className="flex gap-1 border-b pb-px">
+							<Skeleton className="h-9 w-24" />
+							<Skeleton className="h-9 w-36" />
 						</div>
-						<Skeleton className="h-72 w-full" />
-						<div className="grid gap-4 lg:grid-cols-2">
-							<Skeleton className="h-48 w-full" />
-							<Skeleton className="h-48 w-full" />
-						</div>
+					</header>
+
+					<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+						{Array.from({ length: 4 }).map((_, index) => (
+							<Card key={index}>
+								<CardContent className="grid gap-2">
+									<Skeleton className="h-3 w-20" />
+									<Skeleton className="h-7 w-28" />
+									<Skeleton className="h-3 w-24" />
+								</CardContent>
+							</Card>
+						))}
 					</div>
+
+					<Card>
+						<CardHeader className="border-b">
+							<Skeleton className="h-5 w-32" />
+							<Skeleton className="h-4 w-80 max-w-full" />
+						</CardHeader>
+						<CardContent>
+							<Skeleton className="h-64 w-full" />
+						</CardContent>
+					</Card>
+
+					<section className="grid gap-4">
+						<div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+							<div className="grid gap-2">
+								<Skeleton className="h-6 w-48" />
+								<Skeleton className="h-4 w-40" />
+							</div>
+							<Skeleton className="h-9 w-full sm:w-52" />
+						</div>
+						<div className="grid gap-2">
+							<Skeleton className="h-14 w-full" />
+							<Skeleton className="h-14 w-full" />
+							<Skeleton className="h-14 w-full" />
+							<Skeleton className="h-14 w-full" />
+						</div>
+					</section>
 				</PageContent>
 			</>
 		)
@@ -174,7 +211,7 @@ export default function DashboardPage() {
 	return (
 		<>
 			<AppHeader title="Dashboard" />
-			<PageContent className="gap-7 md:gap-9">
+			<PageContent className="gap-7 animate-in fade-in duration-300 md:gap-9">
 				<header className="grid gap-5">
 					<div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
 						<div>

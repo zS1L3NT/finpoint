@@ -1,4 +1,3 @@
-import { Icon as IconifyIcon } from "@iconify/react"
 import { useLiveQuery } from "dexie-react-hooks"
 import { DateTime } from "luxon"
 import { useMemo, useState } from "react"
@@ -6,7 +5,7 @@ import { useParams } from "react-router-dom"
 import BudgetProgressChart from "@/components/charts/budget-progress-chart"
 import BudgetEditorDialog from "@/components/dialogs/budget-editor"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
-import Icon from "@/components/icon"
+import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
 import AppHeader from "@/components/layout/app-header"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
@@ -40,7 +39,7 @@ export default function BudgetPage() {
 		useLiveQuery(() => listCategories() as unknown as Promise<CategoryWithChildren[]>, []) ?? []
 	const [isEditingBudget, setIsEditingBudget] = useState(false)
 	const [isAttachingRecord, setIsAttachingRecord] = useState(false)
-	const { editingRecord, loadingRecordId, editRecord, setEditingRecord } = useRecordEditor()
+	const { editingRecord, handleEdit, setEditingRecord } = useRecordEditor()
 	const budget = (data ?? null) as Budget | null
 	const records = useMemo(() => (data?.records ?? []) as unknown as Record[], [data])
 	const budgetStart = parseDate(budget?.start_date ?? "2000-01-01")
@@ -78,8 +77,7 @@ export default function BudgetPage() {
 	const recordColumns = useRecordColumns<Record>({
 		pageName: `Budget ${budget?.id ?? ""}`,
 		actionWidth: TABLE_WIDTH_CLASSNAMES.ACTIONS_OPEN_DETACH,
-		onEdit: record => void editRecord(record),
-		loadingRecordId,
+		onEdit: handleEdit,
 		extraActions: record => (
 			<Button variant="destructive" size="sm" onClick={() => detach(record)}>
 				<IconifyIcon icon="lucide:link-2-off" /> Detach
@@ -88,8 +86,7 @@ export default function BudgetPage() {
 	})
 	const recordMobileRow = useRecordMobileRow<Record>({
 		pageName: `Budget ${budget?.id ?? ""}`,
-		onEdit: record => void editRecord(record),
-		loadingRecordId,
+		onEdit: handleEdit,
 		extraActions: record => (
 			<Button variant="destructive" size="sm" onClick={() => detach(record)}>
 				<IconifyIcon icon="lucide:link-2-off" /> Detach

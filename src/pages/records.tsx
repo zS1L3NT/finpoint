@@ -1,10 +1,10 @@
-import { Icon as IconifyIcon } from "@iconify/react"
 import { useLiveQuery } from "dexie-react-hooks"
-import { useMemo, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { useSearchParams } from "react-router-dom"
 import RecordCreatorDialog from "@/components/dialogs/record-creator"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
 import DateField from "@/components/form/date-field"
+import { UiIcon as IconifyIcon } from "@/components/icon"
 import AppHeader from "@/components/layout/app-header"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
@@ -44,29 +44,38 @@ export default function RecordsPage() {
 	const showUnbucketed = searchParams.get("show_unbucketed") === "1"
 	const treatment = searchParams.get("treatment")
 	const categoryIdsParam = searchParams.get("category_ids") ?? ""
-	const categoryIds = categoryIdsParam.split(",").filter(Boolean)
+	const categoryIds = useMemo(
+		() => categoryIdsParam.split(",").filter(Boolean),
+		[categoryIdsParam],
+	)
 
 	const categories = useFetch(() => listCategories(), [])
 	const buckets = useFetch(() => listBuckets(), [])
-	const { editingRecord, loadingRecordId, editRecord, setEditingRecord } = useRecordEditor()
+	const { editingRecord, handleEdit, setEditingRecord } = useRecordEditor()
 	const { query, page, pageSize, handleQueryChange, handlePageSizeChange, setParams } =
 		usePaginatedTableState()
-	const updateFilters = (changes: { [key: string]: string | null }) => {
-		setParams({ ...changes, page: null })
-	}
-	const clearFilters = () =>
-		setParams({
-			query: null,
-			start_date: null,
-			end_date: null,
-			is_allocated: null,
-			category_ids: null,
-			bucket_id: null,
-			bucket_group: null,
-			show_unbucketed: null,
-			treatment: null,
-			page: null,
-		})
+	const updateFilters = useCallback(
+		(changes: { [key: string]: string | null }) => {
+			setParams({ ...changes, page: null })
+		},
+		[setParams],
+	)
+	const clearFilters = useCallback(
+		() =>
+			setParams({
+				query: null,
+				start_date: null,
+				end_date: null,
+				is_allocated: null,
+				category_ids: null,
+				bucket_id: null,
+				bucket_group: null,
+				show_unbucketed: null,
+				treatment: null,
+				page: null,
+			}),
+		[setParams],
+	)
 	const activeFilterCount = [
 		searchParams.get("query"),
 		startDate,
@@ -107,16 +116,73 @@ export default function RecordsPage() {
 		() => paginateItems(records, parsePage(page), parsePageSize(pageSize)),
 		[records, page, pageSize],
 	)
-	const columns = useRecordColumns<Record>({
-		pageName: "Records",
-		onEdit: record => void editRecord(record),
-		loadingRecordId,
-	})
-	const mobileRow = useRecordMobileRow<Record>({
-		pageName: "Records",
-		onEdit: record => void editRecord(record),
-		loadingRecordId,
-	})
+	const columns = useRecordColumns<Record>({ pageName: "Records", onEdit: handleEdit })
+	const mobileRow = useRecordMobileRow<Record>({ pageName: "Records", onEdit: handleEdit })
+	const tableHeader = useMemo(
+		() => ({
+			query,
+			onQueryChange: handleQueryChange,
+			pageSize,
+			onPageSizeChange: handlePageSizeChange,
+			searchPlaceholder: "Search all records...",
+			filters: (
+				<RecordFilters
+					categories={categories}
+					categoryIds={categoryIds}
+					buckets={buckets}
+					startDate={startDate}
+					endDate={endDate}
+					isAllocated={isAllocated}
+					bucketId={bucketId}
+					bucketGroup={bucketGroup}
+					showUnbucketed={showUnbucketed}
+					treatment={treatment}
+					activeFilterCount={activeFilterCount}
+					onChange={updateFilters}
+					onClear={clearFilters}
+				/>
+			),
+			actions: (
+				<RecordCreatorDialog
+					statements={[]}
+					categories={categories}
+					isOpen={isCreatingRecord}
+					setIsOpen={setIsCreatingRecord}
+					trigger={
+						<Button className="w-full sm:w-auto">
+							<IconifyIcon icon="lucide:plus" /> Create Pending Record
+						</Button>
+					}
+				/>
+			),
+		}),
+		[
+			query,
+			handleQueryChange,
+			pageSize,
+			handlePageSizeChange,
+			categories,
+			categoryIds,
+			buckets,
+			startDate,
+			endDate,
+			isAllocated,
+			bucketId,
+			bucketGroup,
+			showUnbucketed,
+			treatment,
+			activeFilterCount,
+			updateFilters,
+			clearFilters,
+			isCreatingRecord,
+		],
+	)
+	const tableFooter = useMemo(
+		() => ({
+			summary: `Showing ${paginated.data.length} of ${paginated.total} records.`,
+		}),
+		[paginated],
+	)
 
 	return (
 		<>
@@ -132,46 +198,8 @@ export default function RecordsPage() {
 				<PaginatedDataTable
 					paginated={paginated}
 					columns={columns}
-					header={{
-						query,
-						onQueryChange: handleQueryChange,
-						pageSize,
-						onPageSizeChange: handlePageSizeChange,
-						searchPlaceholder: "Search all records...",
-						filters: (
-							<RecordFilters
-								categories={categories}
-								categoryIds={categoryIds}
-								buckets={buckets}
-								startDate={startDate}
-								endDate={endDate}
-								isAllocated={isAllocated}
-								bucketId={bucketId}
-								bucketGroup={bucketGroup}
-								showUnbucketed={showUnbucketed}
-								treatment={treatment}
-								activeFilterCount={activeFilterCount}
-								onChange={updateFilters}
-								onClear={clearFilters}
-							/>
-						),
-						actions: (
-							<RecordCreatorDialog
-								statements={[]}
-								categories={categories}
-								isOpen={isCreatingRecord}
-								setIsOpen={setIsCreatingRecord}
-								trigger={
-									<Button className="w-full sm:w-auto">
-										<IconifyIcon icon="lucide:plus" /> Create Pending Record
-									</Button>
-								}
-							/>
-						),
-					}}
-					footer={{
-						summary: `Showing ${paginated.data.length} of ${paginated.total} records.`,
-					}}
+					header={tableHeader}
+					footer={tableFooter}
 					mobileRow={mobileRow}
 					emptyMessage="No records found."
 				/>

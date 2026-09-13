@@ -1,4 +1,3 @@
-import { Icon as IconifyIcon } from "@iconify/react"
 import { useLiveQuery } from "dexie-react-hooks"
 import { useState } from "react"
 import { useParams } from "react-router-dom"
@@ -6,6 +5,7 @@ import AllocateBar from "@/components/allocate-bar"
 import { DetailSummary, DetailSummaryItem } from "@/components/detail-summary"
 import PendingStatementDialog from "@/components/dialogs/pending-statement"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
+import { UiIcon as IconifyIcon } from "@/components/icon"
 import AppHeader from "@/components/layout/app-header"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
@@ -29,18 +29,16 @@ export default function StatementPage() {
 	const data = useLiveQuery(() => (id ? getStatement(id).catch(() => null) : null), [id])
 	const accounts = useLiveQuery(() => listAccounts(), []) ?? []
 	const categories = useFetch(() => listCategories(), [])
-	const { editingRecord, loadingRecordId, editRecord, setEditingRecord } = useRecordEditor()
+	const { editingRecord, handleEdit, setEditingRecord } = useRecordEditor()
 	const columns = useRecordColumns<Record & { pivot: Allocation }>({
 		amount: "allocated",
 		pageName: `Statement ${data?.id ?? ""}`,
-		onEdit: record => void editRecord(record),
-		loadingRecordId,
+		onEdit: handleEdit,
 	})
 	const mobileRow = useRecordMobileRow<Record & { pivot: Allocation }>({
 		amount: "allocated",
 		pageName: `Statement ${data?.id ?? ""}`,
-		onEdit: record => void editRecord(record),
-		loadingRecordId,
+		onEdit: handleEdit,
 	})
 
 	if (!data) {

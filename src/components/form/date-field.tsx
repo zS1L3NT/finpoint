@@ -1,6 +1,6 @@
-import { Icon as IconifyIcon } from "@iconify/react"
 import { DateTime } from "luxon"
 import { FormField, type FormFieldProps } from "@/components/form/field"
+import { UiIcon as IconifyIcon } from "@/components/icon"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"

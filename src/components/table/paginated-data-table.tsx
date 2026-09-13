@@ -6,6 +6,7 @@ import {
 	useReactTable,
 } from "@tanstack/react-table"
 import { AnimatePresence } from "framer-motion"
+import { memo } from "react"
 import PaginationFooter from "@/components/table/pagination-footer"
 import PaginationHeader from "@/components/table/pagination-header"
 import {
@@ -19,7 +20,7 @@ import {
 import { cn } from "@/lib/utils"
 import { Paginated } from "@/types"
 
-export default function PaginatedDataTable<TData extends { id: string }, TValue>({
+function PaginatedDataTable<TData extends { id: string }, TValue>({
 	paginated,
 	columns,
 	header,
@@ -163,3 +164,5 @@ export default function PaginatedDataTable<TData extends { id: string }, TValue>
 		</div>
 	)
 }
+
+export default memo(PaginatedDataTable) as typeof PaginatedDataTable

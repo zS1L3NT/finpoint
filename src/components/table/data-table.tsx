@@ -6,6 +6,7 @@ import {
 	useReactTable,
 } from "@tanstack/react-table"
 import { AnimatePresence } from "framer-motion"
+import { memo } from "react"
 import {
 	Table,
 	TableBody,
@@ -16,7 +17,7 @@ import {
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 
-export default function DataTable<TData extends { id: string }, TValue>({
+function DataTable<TData extends { id: string }, TValue>({
 	data,
 	columns,
 	header,
@@ -145,3 +146,5 @@ export default function DataTable<TData extends { id: string }, TValue>({
 		</div>
 	)
 }
+
+export default memo(DataTable) as typeof DataTable

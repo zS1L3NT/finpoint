@@ -1,4 +1,3 @@
-import { Icon as IconifyIcon } from "@iconify/react"
 import { useLiveQuery } from "dexie-react-hooks"
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
 import { useEffect, useMemo, useState } from "react"
@@ -7,6 +6,7 @@ import AllocatorTabs from "@/components/allocator-tabs"
 import StatementReplacementReviewDialog, {
 	dateDifferenceLabel,
 } from "@/components/dialogs/statement-replacement-review"
+import { UiIcon as IconifyIcon } from "@/components/icon"
 import AppHeader from "@/components/layout/app-header"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"

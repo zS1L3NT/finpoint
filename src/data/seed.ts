@@ -117,52 +117,53 @@ const BUCKETS = [
 ] as const
 
 export async function seedIfEmpty(): Promise<void> {
-	const flag = await db.meta.get("seeded_v1")
-	if (flag) return
-	if ((await db.categories.count()) > 0 || (await db.buckets.count()) > 0) {
-		await db.meta.put({ key: "seeded_v1", value: "1" })
-		return
-	}
+	// One transaction: the emptiness check and the writes must be atomic,
+	// otherwise a concurrent import (or second tab) can slip rows in between
+	// and the adds below collide with them.
+	return db.transaction("rw", [db.meta, db.buckets, db.categories], async () => {
+		if (await db.meta.get("seeded_v1")) return
+		if ((await db.categories.count()) > 0 || (await db.buckets.count()) > 0) {
+			await db.meta.put({ key: "seeded_v1", value: "1" })
+			return
+		}
 
-	const bucketIds: Record<string, string> = {}
-	for (const bucket of BUCKETS) {
-		const id = crypto.randomUUID()
-		bucketIds[bucket.name] = id
-		await db.buckets.add({
-			id,
-			name: bucket.name,
-			color: bucket.color,
-			group: bucket.group,
-			pace_kind: bucket.pace_kind,
-			display_order: bucket.display_order,
-			archived: false,
-		})
-	}
-
-	for (const category of CATEGORIES) {
-		const id = slug(category.name)
-		await db.categories.add({
-			id,
-			name: category.name,
-			icon: category.icon,
-			color: category.color,
-			parent_category_id: null,
-			analytics_treatment: treatmentFor(id),
-			default_bucket_id: null,
-		})
-		for (const child of category.children ?? []) {
-			const childId = slug(child.name)
-			await db.categories.add({
-				id: childId,
-				name: child.name,
-				icon: child.icon,
-				color: category.color,
-				parent_category_id: id,
-				analytics_treatment: treatmentFor(childId),
-				default_bucket_id: null,
+		for (const bucket of BUCKETS) {
+			await db.buckets.add({
+				id: crypto.randomUUID(),
+				name: bucket.name,
+				color: bucket.color,
+				group: bucket.group,
+				pace_kind: bucket.pace_kind,
+				display_order: bucket.display_order,
+				archived: false,
 			})
 		}
-	}
 
-	await db.meta.put({ key: "seeded_v1", value: "1" })
+		for (const category of CATEGORIES) {
+			const id = slug(category.name)
+			await db.categories.add({
+				id,
+				name: category.name,
+				icon: category.icon,
+				color: category.color,
+				parent_category_id: null,
+				analytics_treatment: treatmentFor(id),
+				default_bucket_id: null,
+			})
+			for (const child of category.children ?? []) {
+				const childId = slug(child.name)
+				await db.categories.add({
+					id: childId,
+					name: child.name,
+					icon: child.icon,
+					color: category.color,
+					parent_category_id: id,
+					analytics_treatment: treatmentFor(childId),
+					default_bucket_id: null,
+				})
+			}
+		}
+
+		await db.meta.put({ key: "seeded_v1", value: "1" })
+	})
 }

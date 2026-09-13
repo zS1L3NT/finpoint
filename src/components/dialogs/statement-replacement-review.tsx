@@ -1,6 +1,6 @@
-import { Icon as IconifyIcon } from "@iconify/react"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
+import { UiIcon as IconifyIcon } from "@/components/icon"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"

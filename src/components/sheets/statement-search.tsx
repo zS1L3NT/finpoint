@@ -1,7 +1,7 @@
-import { Icon as IconifyIcon } from "@iconify/react"
 import { useLiveQuery } from "dexie-react-hooks"
 import { useEffect, useState } from "react"
 import AllocateBar from "@/components/allocate-bar"
+import { UiIcon as IconifyIcon } from "@/components/icon"
 import DataTable from "@/components/table/data-table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"

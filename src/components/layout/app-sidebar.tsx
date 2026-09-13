@@ -1,6 +1,6 @@
-import { Icon as IconifyIcon } from "@iconify/react"
 import { DateTime } from "luxon"
 import { Link } from "react-router-dom"
+import { UiIcon as IconifyIcon } from "@/components/icon"
 import {
 	Sidebar,
 	SidebarContent,

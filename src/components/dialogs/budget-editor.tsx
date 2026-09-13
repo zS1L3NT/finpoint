@@ -1,10 +1,10 @@
-import { Icon as IconifyIcon } from "@iconify/react"
 import { useForm } from "@tanstack/react-form"
 import { useLocation } from "react-router-dom"
 import { toast } from "sonner"
 import AmountField from "@/components/form/amount-field"
 import DateField from "@/components/form/date-field"
 import TextField from "@/components/form/text-field"
+import { UiIcon as IconifyIcon } from "@/components/icon"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {

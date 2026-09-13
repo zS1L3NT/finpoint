@@ -1,4 +1,3 @@
-import { Icon as IconifyIcon } from "@iconify/react"
 import { DateTime } from "luxon"
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
@@ -7,6 +6,7 @@ import AmountField from "@/components/form/amount-field"
 import DatetimeField from "@/components/form/datetime-field"
 import SelectField from "@/components/form/select-field"
 import TextareaField from "@/components/form/textarea-field"
+import { UiIcon as IconifyIcon } from "@/components/icon"
 import { Button } from "@/components/ui/button"
 import {
 	Dialog,

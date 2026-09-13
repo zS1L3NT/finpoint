@@ -1,11 +1,10 @@
-import { Icon as IconifyIcon } from "@iconify/react"
 import { useLiveQuery } from "dexie-react-hooks"
 import { DateTime } from "luxon"
 import { useEffect, useMemo, useState } from "react"
 import { Link, useSearchParams } from "react-router-dom"
 import { toast } from "sonner"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
-import Icon from "@/components/icon"
+import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
 import AppHeader from "@/components/layout/app-header"
 import PageContent from "@/components/layout/page-content"
 import RecordAmount from "@/components/record-amount"
@@ -195,17 +194,56 @@ export default function MonthlyRecordsPage() {
 		return (
 			<>
 				<AppHeader title="Monthly Records" />
-				<PageContent>
-					<div className="flex flex-col gap-4">
-						<Skeleton className="h-10 w-full" />
-						<div className="grid gap-2 overflow-hidden rounded-lg border bg-card p-3">
-							<Skeleton className="h-12 w-full" />
-							<Skeleton className="h-12 w-full" />
-							<Skeleton className="h-12 w-full" />
-							<Skeleton className="h-12 w-full" />
-							<Skeleton className="h-12 w-full" />
-							<Skeleton className="h-12 w-full" />
+				<PageContent className="gap-5 md:gap-7">
+					<header className="grid gap-5">
+						<div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+							<div className="grid gap-2">
+								<Skeleton className="h-3 w-32" />
+								<Skeleton className="h-9 w-56 max-w-full" />
+								<Skeleton className="h-4 w-48 max-w-full" />
+							</div>
+							<div className="flex gap-2">
+								<Skeleton className="h-9 w-9" />
+								<Skeleton className="h-9 w-32" />
+								<Skeleton className="h-9 w-9" />
+							</div>
 						</div>
+						<div className="flex gap-1 border-b pb-px">
+							<Skeleton className="h-9 w-24" />
+							<Skeleton className="h-9 w-36" />
+						</div>
+					</header>
+
+					<div className="flex min-w-0 flex-col gap-2 md:flex-row md:flex-wrap">
+						<Skeleton className="h-10 w-full md:w-sm" />
+						<div className="flex gap-2">
+							<Skeleton className="h-9 w-32" />
+							<Skeleton className="h-9 w-32" />
+							<Skeleton className="hidden h-9 w-32 sm:block" />
+						</div>
+					</div>
+
+					<div className="overflow-hidden rounded-lg border bg-card">
+						<div className="grid grid-cols-[1fr_auto] items-center gap-3 border-b px-4 py-3 sm:grid-cols-[2fr_1fr_1fr_auto]">
+							<Skeleton className="h-4 w-3/4" />
+							<Skeleton className="hidden h-4 w-24 sm:block" />
+							<Skeleton className="hidden h-4 w-20 sm:block" />
+							<Skeleton className="h-4 w-16" />
+						</div>
+						{Array.from({ length: 6 }).map((_, index) => (
+							<div
+								key={index}
+								className="grid grid-cols-[1fr_auto] items-center gap-3 border-b px-4 py-3 last:border-b-0 sm:grid-cols-[2fr_1fr_1fr_auto]"
+							>
+								<div className="grid gap-1.5">
+									<Skeleton className="h-4 w-2/3" />
+									<Skeleton className="h-3 w-1/3" />
+								</div>
+								<Skeleton className="hidden h-4 w-24 sm:block" />
+								<Skeleton className="hidden h-4 w-20 sm:block" />
+								<Skeleton className="h-8 w-16" />
+							</div>
+						))}
 					</div>
 				</PageContent>
 			</>
@@ -228,7 +266,7 @@ export default function MonthlyRecordsPage() {
 	return (
 		<>
 			<AppHeader title="Monthly Records" />
-			<PageContent className="gap-5 md:gap-7">
+			<PageContent className="gap-5 animate-in fade-in duration-300 md:gap-7">
 				<header className="grid gap-5">
 					<div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
 						<div>

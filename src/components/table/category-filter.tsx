@@ -1,5 +1,4 @@
-import { Icon as IconifyIcon } from "@iconify/react"
-import Icon from "@/components/icon"
+import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
 import { FILTER_CONTROL_CLASS } from "@/components/table/filter-bar"
 import { Button } from "@/components/ui/button"
 import {

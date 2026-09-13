@@ -1,4 +1,4 @@
-import { Icon as IconifyIcon } from "@iconify/react"
+import { UiIcon as IconifyIcon } from "@/components/icon"
 import { Button } from "@/components/ui/button"
 import { type HistoryItem, useHistory } from "@/history"
 
