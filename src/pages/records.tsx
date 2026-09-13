@@ -34,7 +34,6 @@ import { listRecords } from "@/logic/records"
 import { Bucket, CategoryWithChildren, Record } from "@/types"
 
 export default function RecordsPage() {
-	const [isCreatingRecord, setIsCreatingRecord] = useState(false)
 	const [searchParams] = useSearchParams()
 	const startDate = searchParams.get("start_date")
 	const endDate = searchParams.get("end_date")
@@ -142,19 +141,7 @@ export default function RecordsPage() {
 					onClear={clearFilters}
 				/>
 			),
-			actions: (
-				<RecordCreatorDialog
-					statements={[]}
-					categories={categories}
-					isOpen={isCreatingRecord}
-					setIsOpen={setIsCreatingRecord}
-					trigger={
-						<Button className="w-full sm:w-auto">
-							<IconifyIcon icon="lucide:plus" /> Create Pending Record
-						</Button>
-					}
-				/>
-			),
+			actions: <RecordCreatorHost categories={categories} />,
 		}),
 		[
 			query,
@@ -174,7 +161,6 @@ export default function RecordsPage() {
 			activeFilterCount,
 			updateFilters,
 			clearFilters,
-			isCreatingRecord,
 		],
 	)
 	const tableFooter = useMemo(
@@ -218,6 +204,24 @@ export default function RecordsPage() {
 				/>
 			) : null}
 		</>
+	)
+}
+
+function RecordCreatorHost({ categories }: { categories: CategoryWithChildren[] }) {
+	const [isOpen, setIsOpen] = useState(false)
+
+	return (
+		<RecordCreatorDialog
+			statements={[]}
+			categories={categories}
+			isOpen={isOpen}
+			setIsOpen={setIsOpen}
+			trigger={
+				<Button className="w-full sm:w-auto">
+					<IconifyIcon icon="lucide:plus" /> Create Pending Record
+				</Button>
+			}
+		/>
 	)
 }
 

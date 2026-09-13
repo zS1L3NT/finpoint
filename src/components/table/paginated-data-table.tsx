@@ -54,13 +54,7 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 			{header ? <PaginationHeader {...header} /> : null}
 
 			{mobileRow ? (
-				<div
-					key={loading ? "skeleton" : "rows"}
-					className={cn(
-						"min-w-0 divide-y overflow-hidden rounded-lg border bg-card md:hidden",
-						!loading && "animate-in fade-in duration-200",
-					)}
-				>
+				<div className="min-w-0 divide-y overflow-hidden rounded-lg border bg-card md:hidden">
 					{loading ? (
 						Array.from({ length: 4 }).map((_, index) => (
 							<div key={index} className="grid gap-1.5 px-3 py-2.5">
@@ -117,10 +111,7 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 							</TableRow>
 						))}
 					</TableHeader>
-					<TableBody
-						key={loading ? "skeleton" : "rows"}
-						className={cn(!loading && "animate-in fade-in duration-200")}
-					>
+					<TableBody key={loading ? "skeleton" : "rows"}>
 						{loading ? (
 							Array.from({ length: skeletonRows }).map((_, row) => (
 								<TableRow key={row}>

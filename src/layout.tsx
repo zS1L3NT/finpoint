@@ -14,7 +14,7 @@ function TransitionedOutlet() {
 	return (
 		<div
 			key={key}
-			className="animate-in fade-in slide-in-from-bottom-2 duration-300 motion-reduce:animate-none"
+			className="animate-in fade-in slide-in-from-bottom-2 duration-500 motion-reduce:animate-none"
 		>
 			<Outlet />
 		</div>
