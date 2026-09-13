@@ -348,7 +348,7 @@ class ImporterController extends Controller
                     continue;
                 }
 
-                if ($statement['State'] !== 'COMPLETED') {
+                if (! in_array($statement['State'], ['COMPLETED', 'PENDING'], true)) {
                     throw ValidationException::withMessages(['files' => 'Invalid CSV Format: Incompleted transaction found']);
                 }
 
@@ -357,9 +357,10 @@ class ImporterController extends Controller
                     'datetime' => Carbon::createFromFormat('Y-m-d H:i:s', $statement['Started Date']),
                     'description' => $statement['Description'],
                     'amount' => $statement['Amount'] - $statement['Fee'],
+                    'is_pending' => $statement['State'] === 'PENDING',
                 ];
 
-                if (! Statement::query()->where($data)->where('is_pending', false)->exists()) {
+                if (! Statement::query()->where($data)->exists()) {
                     $imported++;
                     Statement::query()->insert([
                         'id' => Uuid::uuid4(),
