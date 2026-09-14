@@ -360,15 +360,24 @@ export default function DashboardPage() {
 					{summary.contributions || summary.withdrawals ? (
 						<InvestmentRow summary={summary} month={month} year={year} />
 					) : null}
-					<MonthlyRhythm summary={summary} period={period} date={date} />
-					{future_records_count ? (
-						<p className="text-sm text-muted-foreground">
-							<IconifyIcon icon="lucide:calendar-clock" className="mr-1 inline" />{" "}
-							{future_records_count} later-dated Record
-							{future_records_count === 1 ? "" : "s"} are listed separately in Monthly
-							Records.
-						</p>
-					) : null}
+					<MonthlyRhythm
+						summary={summary}
+						period={period}
+						date={date}
+						footer={
+							future_records_count ? (
+								<span>
+									<IconifyIcon
+										icon="lucide:calendar-clock"
+										className="mr-1 inline"
+									/>{" "}
+									{future_records_count} later-dated Record
+									{future_records_count === 1 ? "" : "s"} are listed separately in
+									Monthly Records.
+								</span>
+							) : undefined
+						}
+					/>
 
 					<Card>
 						<CardHeader>
@@ -384,7 +393,7 @@ export default function DashboardPage() {
 									{
 										id: "total",
 										name: "Total spending",
-										color: "var(--color-surplus)",
+										color: "var(--foreground)",
 									},
 								]}
 								month={month}
@@ -601,7 +610,17 @@ function CategoryBreakdown({
 	scope: string
 	comparisonCount: number
 }) {
-	const max = Math.max(...categories.map(category => Math.abs(category.spending)), 1)
+	const max = Math.max(
+		...categories
+			.slice(0, 8)
+			.flatMap(category => [
+				Math.abs(category.spending),
+				category.comparison === null
+					? 0
+					: Math.abs(category.spending - category.comparison),
+			]),
+		1,
+	)
 	return (
 		<Card>
 			<CardHeader>
@@ -613,42 +632,67 @@ function CategoryBreakdown({
 			</CardHeader>
 			<CardContent className="grid gap-1">
 				{categories.length ? (
-					categories.slice(0, 8).map(category => (
-						<Link
-							key={category.id}
-							to={pathMonthlyRecords({
-								month,
-								year: String(year),
-								category_ids: category.id,
-								bucket_id: !["all", "core", "outlier", "other"].includes(scope)
-									? scope
-									: undefined,
-								bucket_group: ["core", "outlier", "other"].includes(scope)
-									? scope
-									: undefined,
-							})}
-							className="group grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-3 rounded-md px-2 py-2 hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-						>
-							<div className="min-w-0">
-								<div className="flex items-center gap-2">
-									<Icon {...category} size={11} />
-									<span className="truncate font-medium">{category.name}</span>
+					categories.slice(0, 8).map(category => {
+						const usual =
+							category.comparison === null
+								? null
+								: category.spending - category.comparison
+						return (
+							<Link
+								key={category.id}
+								to={pathMonthlyRecords({
+									month,
+									year: String(year),
+									category_ids: category.id,
+									bucket_id: !["all", "core", "outlier", "other"].includes(scope)
+										? scope
+										: undefined,
+									bucket_group: ["core", "outlier", "other"].includes(scope)
+										? scope
+										: undefined,
+								})}
+								className="group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-md px-2 py-2 hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+							>
+								<div className="min-w-0">
+									<div className="flex items-center gap-2">
+										<Icon {...category} size={11} />
+										<span className="truncate font-medium">
+											{category.name}
+										</span>
+									</div>
+									<div className="mt-1.5 grid gap-1">
+										<div
+											className="h-1 overflow-hidden rounded-full bg-muted"
+											title={`${formatCurrency(category.spending)} this month`}
+										>
+											<div
+												className="h-full rounded-full bg-emerald-500"
+												style={{
+													width: `${(Math.abs(category.spending) / max) * 100}%`,
+												}}
+											/>
+										</div>
+										{usual === null ? null : (
+											<div
+												className="h-1 overflow-hidden rounded-full bg-muted"
+												title={`${formatCurrency(usual)} usual`}
+											>
+												<div
+													className="h-full rounded-full bg-muted-foreground/35"
+													style={{
+														width: `${(Math.abs(usual) / max) * 100}%`,
+													}}
+												/>
+											</div>
+										)}
+									</div>
 								</div>
-								<div className="mt-1 h-1 overflow-hidden rounded-full bg-muted">
-									<div
-										className="h-full rounded-full bg-foreground/60"
-										style={{
-											width: `${(Math.abs(category.spending) / max) * 100}%`,
-										}}
-									/>
-								</div>
-							</div>
-							<span className="tabular-nums">
-								{formatCurrency(category.spending)}
-							</span>
-							<CategoryChange value={category.comparison} />
-						</Link>
-					))
+								<span className="tabular-nums">
+									{formatCurrency(category.spending)}
+								</span>
+							</Link>
+						)
+					})
 				) : (
 					<p className="py-8 text-center text-muted-foreground">
 						No spending in this scope.
@@ -659,27 +703,6 @@ function CategoryBreakdown({
 				</p>
 			</CardContent>
 		</Card>
-	)
-}
-
-function CategoryChange({ value }: { value: number | null }) {
-	if (value === null) {
-		return <span className="w-24 text-right text-xs text-muted-foreground">—</span>
-	}
-	if (Math.abs(value) < 0.005) {
-		return <span className="w-24 text-right text-xs text-muted-foreground">No change</span>
-	}
-	return (
-		<span
-			className={cn(
-				"w-24 text-right text-xs font-medium tabular-nums",
-				value > 0
-					? "text-red-500 dark:text-red-400"
-					: "text-emerald-600 dark:text-emerald-400",
-			)}
-		>
-			{formatCurrency(Math.abs(value))} {value > 0 ? "more" : "less"}
-		</span>
 	)
 }
 
@@ -906,10 +929,12 @@ function MonthlyRhythm({
 	summary,
 	period,
 	date,
+	footer,
 }: {
 	summary: AnalyticsSummary
 	period: { is_current: boolean; is_future: boolean; through: string | null; label: string }
 	date: DateTime
+	footer?: React.ReactNode
 }) {
 	const days = summary.daily.filter(day => day.spending > 0)
 	const ordered = days.map(day => day.spending).sort((a, b) => a - b)
@@ -970,6 +995,7 @@ function MonthlyRhythm({
 						detail={`${formatCurrency(summary.gross_spending)} gross spending`}
 					/>
 				</MetricGrid>
+				{footer ? <div className="mt-4 text-sm text-muted-foreground">{footer}</div> : null}
 			</CardContent>
 		</Card>
 	)
