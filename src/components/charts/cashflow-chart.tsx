@@ -4,8 +4,6 @@ import {
 	Area,
 	AreaChart,
 	CartesianGrid,
-	Line,
-	LineChart,
 	ReferenceLine,
 	XAxis,
 	YAxis,
@@ -198,29 +196,6 @@ export default function CashflowChart({
 				</div>
 			</div>
 
-			<div>
-				<p className="mb-2 text-xs font-medium text-muted-foreground">
-					Surplus / shortfall · SGD
-				</p>
-				<ChartContainer
-					className="h-36 w-full aspect-auto cursor-crosshair sm:h-40"
-					config={{ surplus: { label: "Surplus", color: "var(--foreground)" } }}
-				>
-					<LineChart data={data} onClick={openDay} accessibilityLayer>
-						<XAxis dataKey="day" interval={interval} tickMargin={8} />
-						<YAxis width={isMobile ? 44 : 64} tickFormatter={compactCurrency} />
-						<ReferenceLine y={0} stroke="var(--border)" />
-						<ChartTooltip content={tooltip} />
-						<Line
-							isAnimationActive={false}
-							dataKey="surplus"
-							stroke="var(--color-surplus)"
-							strokeWidth={2.5}
-							dot={false}
-						/>
-					</LineChart>
-				</ChartContainer>
-			</div>
 			<details className="rounded-md border px-3 py-2 text-xs">
 				<summary className="cursor-pointer font-medium">Daily chart data</summary>
 				<div className="mt-2 overflow-x-auto">

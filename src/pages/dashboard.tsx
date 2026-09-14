@@ -3,7 +3,8 @@ import { DateTime } from "luxon"
 import { type ReactNode, useMemo } from "react"
 import { Link } from "react-router-dom"
 import CashflowChart, { CashflowPoint } from "@/components/charts/cashflow-chart"
-import WeekdayChart from "@/components/charts/weekday-chart"
+import DailySpendingChart from "@/components/charts/daily-spending-chart"
+import WeekdayBars from "@/components/charts/weekday-bars"
 import BucketDialog from "@/components/dialogs/bucket"
 import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
 import { FILTER_CONTROL_CLASS } from "@/components/table/filter-bar"
@@ -25,7 +26,7 @@ import { useMonthParams } from "@/hooks/use-month-params"
 import { usePersistentState } from "@/hooks/use-persistent-state"
 import { useTabTransition } from "@/hooks/use-tab-transition"
 import { cn, formatCurrency } from "@/lib/utils"
-import { getDashboard, getPaceView } from "@/logic/dashboard"
+import { getBucketDaily, getDashboard, getPaceView } from "@/logic/dashboard"
 import { pathMonthlyRecords } from "@/routes"
 import { AnalyticsSummary, Bucket } from "@/types"
 
@@ -105,6 +106,11 @@ type PaceData = {
 	paceBucket: { id: string; name: string; target: number | null } | null
 }
 
+type BucketDailyData = {
+	rows: Record<string, number | null>[]
+	buckets: { id: string; name: string; color: string }[]
+}
+
 export default function DashboardPage() {
 	const { month, year, date } = useMonthParams()
 	const animateContent = useTabTransition()
@@ -114,10 +120,6 @@ export default function DashboardPage() {
 	const buckets = data?.buckets ?? []
 	const categories = data?.categories ?? []
 	const [storedScope, setScope] = usePersistentState("finpoint.dashboard.scope", "all")
-	const [storedPaceScope, setPaceScope] = usePersistentState(
-		"finpoint.dashboard.pace-scope",
-		"all",
-	)
 	const validScope = (value: string) =>
 		value === "all" ||
 		value === "core" ||
@@ -127,11 +129,18 @@ export default function DashboardPage() {
 			? value
 			: "all"
 	const scope = validScope(storedScope)
-	const paceScope = validScope(storedPaceScope)
+	const dailyBucketId =
+		buckets.find(bucket => bucket.pace_kind === "daily")?.id ??
+		buckets.find(bucket => bucket.name.toLowerCase() === "daily")?.id ??
+		null
 	const paceData = useLiveQuery(
-		() => getPaceView(month, year, paceScope),
-		[month, year, paceScope],
+		() => getPaceView(month, year, dailyBucketId ?? "all"),
+		[month, year, dailyBucketId],
 	) as unknown as PaceData | undefined
+	const bucketDailyData = useLiveQuery(
+		() => getBucketDaily(month, year),
+		[month, year],
+	) as unknown as BucketDailyData | undefined
 	const scopedBucketIds = useMemo(() => {
 		if (scope === "all") return [...buckets.map(bucket => bucket.id), "unbucketed"]
 		if (scope === "core" || scope === "outlier" || scope === "other") {
@@ -140,7 +149,7 @@ export default function DashboardPage() {
 		return [scope]
 	}, [scope, buckets])
 
-	if (!data) {
+	if (!data || !paceData || !bucketDailyData) {
 		return (
 			<div className="grid gap-7 md:gap-9">
 				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -183,7 +192,7 @@ export default function DashboardPage() {
 			</div>
 		)
 	}
-	const { period, summary, comparison, series, projection, weekday, future_records_count } = data
+	const { period, summary, comparison, weekday, future_records_count } = data
 	const scopedCategories = categories
 		.map(category => {
 			const spending = scopedBucketIds.reduce(
@@ -208,12 +217,25 @@ export default function DashboardPage() {
 			? "All spending"
 			: scope.charAt(0).toUpperCase() + scope.slice(1)
 		: (buckets.find(bucket => bucket.id === scope)?.name ?? "Bucket")
-	const paceBucket = buckets.find(
-		bucket => bucket.pace_kind === "daily" && bucket.target !== null && bucket.target > 0,
-	)
-	const paceSeries = paceData?.series ?? series
-	const paceProjection = paceData?.projection ?? projection
-	const paceTarget = paceData ? paceData.paceBucket : paceBucket
+	const paceSeries = paceData.series
+	const paceProjection = paceData.projection
+	const paceTarget = paceData.paceBucket
+	const dailyLines = bucketDailyData.buckets.map(bucket => ({
+		...bucket,
+		width: bucket.id === dailyBucketId ? 2.5 : 2,
+		dashed: bucket.id === "unbucketed",
+	}))
+	const totalRows = bucketDailyData.rows.map((point, index) => {
+		const values = Object.entries(point)
+			.filter(([key]) => key !== "day")
+			.map(([, value]) => value)
+		return {
+			day: index + 1,
+			total: values.every(value => value === null)
+				? null
+				: values.reduce<number>((sum, value) => sum + (value ?? 0), 0),
+		}
+	})
 
 	return (
 		<div
@@ -262,20 +284,11 @@ export default function DashboardPage() {
 
 					<Card>
 						<CardHeader className="border-b">
-							<div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-								<div>
-									<CardTitle className="text-base">Spending pace</CardTitle>
-									<CardDescription>
-										Cumulative spending against the monthly target, with
-										projected month-end usage and current balance.
-									</CardDescription>
-								</div>
-								<ScopeSelect
-									value={paceScope}
-									buckets={buckets}
-									onChange={value => setPaceScope(value ?? "all")}
-								/>
-							</div>
+							<CardTitle className="text-base">Spending pace</CardTitle>
+							<CardDescription>
+								Daily-bucket spending against its monthly target, with projected
+								month-end usage and current balance.
+							</CardDescription>
 						</CardHeader>
 						<CardContent>
 							<CashflowChart
@@ -289,7 +302,25 @@ export default function DashboardPage() {
 						</CardContent>
 					</Card>
 
-					<WeekdayCard weekday={weekday} month={month} year={year} />
+					<Card>
+						<CardHeader className="border-b">
+							<CardTitle className="text-base">Daily spending</CardTitle>
+							<CardDescription>
+								Daily outflow per bucket, coloured by bucket. Select a day to open
+								its Records.
+							</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<DailySpendingChart
+								rows={bucketDailyData.rows}
+								buckets={dailyLines}
+								month={month}
+								year={year}
+							/>
+						</CardContent>
+					</Card>
+
+					<WeekdayCard weekday={weekday} />
 
 					<section className="grid gap-4" aria-labelledby="spending-breakdown-title">
 						<div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -338,6 +369,29 @@ export default function DashboardPage() {
 							Records.
 						</p>
 					) : null}
+
+					<Card>
+						<CardHeader>
+							<CardTitle>Total spending</CardTitle>
+							<CardDescription>
+								Every bucket combined, across the full month
+							</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<DailySpendingChart
+								rows={totalRows}
+								buckets={[
+									{
+										id: "total",
+										name: "Total spending",
+										color: "var(--color-surplus)",
+									},
+								]}
+								month={month}
+								year={year}
+							/>
+						</CardContent>
+					</Card>
 				</>
 			)}
 		</div>
@@ -390,15 +444,7 @@ function ScopeSelect({
 	)
 }
 
-function WeekdayCard({
-	weekday,
-	month,
-	year,
-}: {
-	weekday: WeekdayBreakdown
-	month: string
-	year: number
-}) {
+function WeekdayCard({ weekday }: { weekday: WeekdayBreakdown }) {
 	const active = weekday.stats.filter(stat => stat.days > 0)
 	const total = weekday.stats.reduce((sum, stat) => sum + stat.spending, 0)
 	const totalDays = weekday.stats.reduce((sum, stat) => sum + stat.days, 0)
@@ -413,12 +459,7 @@ function WeekdayCard({
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="grid gap-6">
-				<WeekdayChart
-					stats={weekday.stats}
-					series={weekday.series}
-					month={month}
-					year={year}
-				/>
+				<WeekdayBars stats={weekday.stats} />
 				<MetricGrid>
 					<DashboardMetric
 						icon="lucide:flame"

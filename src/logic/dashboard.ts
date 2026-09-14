@@ -344,6 +344,67 @@ export async function getPaceView(month: string, year: number, scope: string) {
 	}
 }
 
+export async function getBucketDaily(
+	month: string,
+	year: number,
+): Promise<{
+	rows: Record<string, number | null>[]
+	buckets: { id: string; name: string; color: string }[]
+}> {
+	const date = monthStart(month, year)
+	const today = DateTime.now().startOf("day")
+	const isFuture = date.startOf("month") > today.startOf("month")
+	const elapsed = isFuture ? 0 : (today.day ?? date.daysInMonth ?? 30)
+	const daysInMonth = date.daysInMonth ?? 30
+
+	const tables = await loadDashboardTables()
+	const active = tables.bucketRows.filter(b => !b.archived)
+	const spent = new Map<string, number>()
+	const unbucketed = new Map<number, number>()
+	for (const record of tables.records) {
+		const day = Number(record.datetime.slice(8, 10))
+		if (record.datetime.slice(0, 7) !== date.toFormat("yyyy-MM") || day > elapsed) continue
+		const outflow =
+			record.analytics_treatment === "spending" ||
+			(record.analytics_treatment === "automatic" && record.amount < 0)
+				? Math.max(-record.amount, 0)
+				: 0
+		if (outflow <= 0) continue
+		if (record.bucket_id) {
+			spent.set(record.bucket_id, (spent.get(record.bucket_id) ?? 0) + outflow)
+			const key = `${record.bucket_id}|${day}`
+			spent.set(key, (spent.get(key) ?? 0) + outflow)
+		} else {
+			unbucketed.set(day, (unbucketed.get(day) ?? 0) + outflow)
+		}
+	}
+
+	const buckets = active
+		.filter(b => (spent.get(b.id) ?? 0) > 0)
+		.map(b => ({ id: b.id, name: b.name, color: b.color }))
+	if ([...unbucketed.values()].some(v => v > 0)) {
+		buckets.push({ id: "unbucketed", name: "No bucket", color: "#94a3b8" })
+	}
+
+	const rows = Array.from({ length: Math.max(daysInMonth, 1) }, (_, i) => {
+		const day = i + 1
+		const point: Record<string, number | null> = { day }
+		for (const bucket of buckets) {
+			point[bucket.id] =
+				day > elapsed
+					? null
+					: Math.round(
+							(bucket.id === "unbucketed"
+								? (unbucketed.get(day) ?? 0)
+								: (spent.get(`${bucket.id}|${day}`) ?? 0)) * 100,
+						) / 100
+		}
+		return point
+	})
+
+	return { rows, buckets }
+}
+
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const
 
 function weekdayOf(dateString: string): string {
