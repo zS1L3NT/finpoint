@@ -1,3 +1,4 @@
+import { useReducedMotion } from "framer-motion"
 import { useNavigate } from "react-router-dom"
 import {
 	type ActiveDotProps,
@@ -38,6 +39,7 @@ export default function CashflowChart({
 	showProjection: boolean
 }) {
 	const isMobile = useIsMobile()
+	const reduceMotion = useReducedMotion()
 	const navigate = useNavigate()
 	const interval = isMobile ? Math.max(Math.floor(data.length / 4), 0) : "preserveStartEnd"
 	const actualChange = colorChange(data, "spending", target)
@@ -149,7 +151,10 @@ export default function CashflowChart({
 						) : null}
 						<ChartTooltip content={tooltip} />
 						<Area
-							isAnimationActive={false}
+							key={`actual-${month}-${year}`}
+							isAnimationActive={!reduceMotion}
+							animationDuration={700}
+							animationEasing="ease-out"
 							dataKey="spending"
 							name="Usage"
 							stroke="url(#actual-line)"
@@ -168,7 +173,11 @@ export default function CashflowChart({
 						/>
 						{showProjection ? (
 							<Area
-								isAnimationActive={false}
+								key={`projection-${month}-${year}`}
+								isAnimationActive={!reduceMotion}
+								animationBegin={140}
+								animationDuration={700}
+								animationEasing="ease-out"
 								dataKey="projected_spending"
 								name="Usage (projection)"
 								stroke="url(#projection-line)"
