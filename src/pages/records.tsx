@@ -285,23 +285,6 @@ function RecordFilters({
 				onChange={ids => onChange({ category_ids: ids.join(",") || null })}
 			/>
 
-			<Select
-				value={isAllocated ?? "all"}
-				onValueChange={value => onChange({ is_allocated: value === "all" ? null : value })}
-			>
-				<SelectTrigger className={cn("w-full sm:w-40", FILTER_CONTROL_CLASS)}>
-					<IconifyIcon icon="lucide:circle-check-big" />
-					<SelectValue />
-				</SelectTrigger>
-				<SelectContent align="start" variant="filter">
-					<SelectGroup>
-						<SelectItem value="all">Any status</SelectItem>
-						<SelectItem value="true">Complete</SelectItem>
-						<SelectItem value="false">Pending</SelectItem>
-					</SelectGroup>
-				</SelectContent>
-			</Select>
-
 			<Select value={bucketScope} onValueChange={changeBucketScope}>
 				<SelectTrigger className={cn("w-full sm:w-40", FILTER_CONTROL_CLASS)}>
 					<IconifyIcon icon="lucide:wallet-cards" />
@@ -353,6 +336,23 @@ function RecordFilters({
 						<SelectItem value="saving_investment">Saving / investment</SelectItem>
 						<SelectItem value="neutral">Excluded</SelectItem>
 						<SelectItem value="automatic">Automatic</SelectItem>
+					</SelectGroup>
+				</SelectContent>
+			</Select>
+
+			<Select
+				value={isAllocated ?? "all"}
+				onValueChange={value => onChange({ is_allocated: value === "all" ? null : value })}
+			>
+				<SelectTrigger className={cn("w-full sm:w-40", FILTER_CONTROL_CLASS)}>
+					<IconifyIcon icon="lucide:circle-check-big" />
+					<SelectValue />
+				</SelectTrigger>
+				<SelectContent align="start" variant="filter">
+					<SelectGroup>
+						<SelectItem value="all">Any status</SelectItem>
+						<SelectItem value="true">Complete</SelectItem>
+						<SelectItem value="false">Pending</SelectItem>
 					</SelectGroup>
 				</SelectContent>
 			</Select>
