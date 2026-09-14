@@ -368,7 +368,7 @@ export default function DashboardPage() {
 
 					<Card>
 						<CardHeader>
-							<ScopedCardTitle scope="Total">Surplus / shortfall</ScopedCardTitle>
+							<ScopedCardTitle scope="Total">Surplus / Shortfall</ScopedCardTitle>
 							<CardDescription>
 								Cumulative income minus personal spending across every bucket
 							</CardDescription>

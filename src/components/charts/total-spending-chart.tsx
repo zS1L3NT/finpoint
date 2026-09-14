@@ -6,12 +6,14 @@ import { useIsMobile } from "@/hooks/use-mobile"
 import { cn, formatCurrency } from "@/lib/utils"
 import { pathMonthlyRecords } from "@/routes"
 
+type SurplusPoint = { day: number; surplus: number | null }
+
 export default function TotalSpendingChart({
 	data,
 	month,
 	year,
 }: {
-	data: { day: number; surplus: number | null }[]
+	data: SurplusPoint[]
 	month: string
 	year: number
 }) {
@@ -19,7 +21,7 @@ export default function TotalSpendingChart({
 	const navigate = useNavigate()
 	const fillId = `surplus-fill-${useId().replace(/:/g, "")}`
 	const interval = isMobile ? Math.max(Math.floor(data.length / 4), 0) : "preserveStartEnd"
-	const domain = surplusDomain(data)
+	const axis = surplusAxis(data)
 	const zeroOffset = surplusZeroOffset(data)
 	const openDay = (state: { activeLabel?: number | string } | null) => {
 		if (!state?.activeLabel) return
@@ -37,7 +39,7 @@ export default function TotalSpendingChart({
 			<ChartContainer
 				className="h-48 w-full aspect-auto cursor-crosshair sm:h-54"
 				config={{
-					surplus: { label: "Surplus / shortfall", color: "var(--color-white)" },
+					surplus: { label: "Surplus / Shortfall", color: "var(--color-white)" },
 				}}
 			>
 				<ComposedChart data={data} onClick={openDay} accessibilityLayer>
@@ -58,7 +60,8 @@ export default function TotalSpendingChart({
 					<CartesianGrid vertical={false} />
 					<XAxis dataKey="day" interval={interval} tickMargin={8} />
 					<YAxis
-						domain={domain}
+						domain={axis.domain}
+						ticks={axis.ticks}
 						width={isMobile ? 44 : 64}
 						tickFormatter={value => formatCurrency(Number(value)).replace(/\.00$/, "")}
 					/>
@@ -93,7 +96,7 @@ export default function TotalSpendingChart({
 					/>
 					<Line
 						dataKey="surplus"
-						name="Surplus / shortfall"
+						name="Surplus / Shortfall"
 						stroke="var(--color-surplus)"
 						strokeWidth={2.5}
 						dot={false}
@@ -131,16 +134,53 @@ function LegendItem({
 	)
 }
 
-function surplusDomain(data: { surplus: number | null }[]): [number, number] {
+function surplusAxis(data: SurplusPoint[]): {
+	domain: [number, number]
+	ticks: number[]
+} {
 	const values = data.flatMap(point => (point.surplus === null ? [] : [point.surplus]))
 	const minimum = Math.min(0, ...values)
 	const maximum = Math.max(0, ...values)
-	const padding = Math.max(Math.max(Math.abs(minimum), Math.abs(maximum)) * 0.08, 1)
+	if (minimum === maximum) {
+		return { domain: [-1, 1], ticks: [-1, -0.5, 0, 0.5, 1] }
+	}
 
-	return [minimum < 0 ? minimum - padding : -padding, maximum > 0 ? maximum + padding : padding]
+	const step = niceStep((maximum - minimum) / 4)
+	const domainMinimum = minimum < 0 ? Math.floor(minimum / step) * step : 0
+	const domainMaximum = maximum > 0 ? Math.ceil(maximum / step) * step : 0
+	const intervalCount = Math.round((domainMaximum - domainMinimum) / step)
+	const ticks = Array.from({ length: intervalCount + 1 }, (_, index) =>
+		roundTick(domainMinimum + step * index),
+	)
+
+	return {
+		domain: [roundTick(domainMinimum), roundTick(domainMaximum)],
+		ticks,
+	}
 }
 
-function surplusZeroOffset(data: { surplus: number | null }[]): number {
+function niceStep(roughStep: number): number {
+	const magnitude = 10 ** Math.floor(Math.log10(roughStep))
+	const normalized = roughStep / magnitude
+	const factor =
+		normalized <= 1
+			? 1
+			: normalized <= 2
+				? 2
+				: normalized <= 2.5
+					? 2.5
+					: normalized <= 5
+						? 5
+						: 10
+
+	return factor * magnitude
+}
+
+function roundTick(value: number): number {
+	return Math.round(value * 1e10) / 1e10
+}
+
+function surplusZeroOffset(data: SurplusPoint[]): number {
 	const values = data.flatMap(point => (point.surplus === null ? [] : [point.surplus]))
 	const minimum = Math.min(0, ...values)
 	const maximum = Math.max(0, ...values)
