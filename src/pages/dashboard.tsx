@@ -349,6 +349,19 @@ export default function DashboardPage() {
 					{summary.contributions || summary.withdrawals ? (
 						<InvestmentRow summary={summary} month={month} year={year} />
 					) : null}
+
+					<Card>
+						<CardHeader>
+							<CardTitle>Surplus / shortfall</CardTitle>
+							<CardDescription>
+								Cumulative income minus spending, every bucket combined
+							</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<TotalSpendingChart data={series} month={month} year={year} />
+						</CardContent>
+					</Card>
+
 					<MonthlyRhythm
 						summary={summary}
 						period={period}
@@ -367,18 +380,6 @@ export default function DashboardPage() {
 							) : undefined
 						}
 					/>
-
-					<Card>
-						<CardHeader>
-							<CardTitle>Surplus / shortfall</CardTitle>
-							<CardDescription>
-								Cumulative income minus spending, every bucket combined
-							</CardDescription>
-						</CardHeader>
-						<CardContent>
-							<TotalSpendingChart data={series} month={month} year={year} />
-						</CardContent>
-					</Card>
 				</>
 			)}
 		</div>
