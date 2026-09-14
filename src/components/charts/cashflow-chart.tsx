@@ -28,12 +28,14 @@ export default function CashflowChart({
 	year,
 	target,
 	targetLabel,
+	showProjection,
 }: {
 	data: CashflowPoint[]
 	month: string
 	year: number
 	target: number | null
 	targetLabel: string | null
+	showProjection: boolean
 }) {
 	const isMobile = useIsMobile()
 	const navigate = useNavigate()
@@ -164,35 +166,41 @@ export default function CashflowChart({
 								/>
 							)}
 						/>
-						<Area
-							isAnimationActive={false}
-							dataKey="projected_spending"
-							name="Usage (projection)"
-							stroke="url(#projection-line)"
-							fill="url(#projection-fill)"
-							strokeWidth={2.5}
-							strokeDasharray="7 5"
-							dot={false}
-							connectNulls
-							activeDot={props =>
-								props.payload.spending === null ? (
-									<StatefulActiveDot
-										{...props}
-										field="projected_spending"
-										threshold={target}
-										within="var(--color-amber-400)"
-										exceeded="var(--color-orange-500)"
-									/>
-								) : null
-							}
-						/>
+						{showProjection ? (
+							<Area
+								isAnimationActive={false}
+								dataKey="projected_spending"
+								name="Usage (projection)"
+								stroke="url(#projection-line)"
+								fill="url(#projection-fill)"
+								strokeWidth={2.5}
+								strokeDasharray="7 5"
+								dot={false}
+								connectNulls
+								activeDot={props =>
+									props.payload.spending === null ? (
+										<StatefulActiveDot
+											{...props}
+											field="projected_spending"
+											threshold={target}
+											within="var(--color-amber-400)"
+											exceeded="var(--color-orange-500)"
+										/>
+									) : null
+								}
+							/>
+						) : null}
 					</AreaChart>
 				</ChartContainer>
 				<div className="mt-2 flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
 					<LegendItem color="bg-emerald-500" label="Usage" />
 					<LegendItem color="bg-rose-500" label="Exceed" />
-					<LegendItem color="bg-amber-400" label="Usage (projection)" />
-					<LegendItem color="bg-orange-500" label="Exceed (projection)" />
+					{showProjection ? (
+						<>
+							<LegendItem color="bg-amber-400" label="Usage (projection)" />
+							<LegendItem color="bg-orange-500" label="Exceed (projection)" />
+						</>
+					) : null}
 				</div>
 			</div>
 
@@ -205,7 +213,9 @@ export default function CashflowChart({
 								<th className="border-b py-1 text-left font-medium">Day</th>
 								<th className="border-b py-1 font-medium">Income</th>
 								<th className="border-b py-1 font-medium">Spending</th>
-								<th className="border-b py-1 font-medium">Projected</th>
+								{showProjection ? (
+									<th className="border-b py-1 font-medium">Projected</th>
+								) : null}
 								<th className="border-b py-1 font-medium">Surplus</th>
 								<th className="border-b py-1 font-medium">Average spending</th>
 							</tr>
@@ -222,9 +232,11 @@ export default function CashflowChart({
 									<td className="border-b py-1">
 										{currencyOrDash(point.spending)}
 									</td>
-									<td className="border-b py-1">
-										{currencyOrDash(point.projected_spending)}
-									</td>
+									{showProjection ? (
+										<td className="border-b py-1">
+											{currencyOrDash(point.projected_spending)}
+										</td>
+									) : null}
 									<td className="border-b py-1">
 										{currencyOrDash(point.surplus)}
 									</td>
@@ -240,8 +252,9 @@ export default function CashflowChart({
 				</div>
 			</details>
 			<p className="text-xs text-muted-foreground">
-				The dashed line extends the current gross spending pace and includes later-dated
-				Records already entered. Select a day to open its Records.
+				{showProjection
+					? "The dashed line extends the current gross spending pace and includes later-dated Records already entered. Select a day to open its Records."
+					: "The solid line shows the completed month. Select a day to open its Records."}
 			</p>
 		</div>
 	)

@@ -88,23 +88,24 @@ type DashboardData = {
 type WeekdayStat = {
 	day: string
 	spending: number
-	average: number | null
 	baseline: number
-	comparison: number
-	days: number
 }
 
 type WeekdayBreakdown = {
 	stats: WeekdayStat[]
-	series: Record<string, number | null>[]
-	highest: WeekdayStat | null
-	lowest: WeekdayStat | null
 }
 
 type PaceData = {
 	series: CashflowPoint[]
 	projection: Projection
 	paceBucket: { id: string; name: string; target: number | null } | null
+	completedMonth: {
+		spending: number
+		spending_per_day: number
+		target: number | null
+		target_difference: number | null
+	} | null
+	highestSpendingDay: { date: string; spending: number } | null
 }
 
 type BucketDailyData = {
@@ -113,7 +114,7 @@ type BucketDailyData = {
 }
 
 export default function DashboardPage() {
-	const { month, year, date } = useMonthParams()
+	const { month, year } = useMonthParams()
 	const animateContent = useTabTransition()
 	const data = useLiveQuery(() => getDashboard({ month, year }), [month, year]) as unknown as
 		| DashboardData
@@ -130,10 +131,11 @@ export default function DashboardPage() {
 			? value
 			: "all"
 	const scope = validScope(storedScope)
-	const dailyBucketId =
-		buckets.find(bucket => bucket.pace_kind === "daily")?.id ??
-		buckets.find(bucket => bucket.name.toLowerCase() === "daily")?.id ??
+	const dailyBucket =
+		buckets.find(bucket => bucket.pace_kind === "daily") ??
+		buckets.find(bucket => bucket.name.toLowerCase() === "daily") ??
 		null
+	const dailyBucketId = dailyBucket?.id ?? null
 	const paceData = useLiveQuery(
 		() => getPaceView(month, year, dailyBucketId ?? "all"),
 		[month, year, dailyBucketId],
@@ -218,9 +220,12 @@ export default function DashboardPage() {
 			? "All spending"
 			: scope.charAt(0).toUpperCase() + scope.slice(1)
 		: (buckets.find(bucket => bucket.id === scope)?.name ?? "Bucket")
+	const scopeColor = buckets.find(bucket => bucket.id === scope)?.color
 	const paceSeries = paceData.series
 	const paceProjection = paceData.projection
 	const paceTarget = paceData.paceBucket
+	const completedMonth = paceData.completedMonth
+	const highestSpendingDay = paceData.highestSpendingDay
 	const dailyLines = bucketDailyData.buckets.map(bucket => ({
 		...bucket,
 		width: bucket.id === dailyBucketId ? 2.5 : 2,
@@ -273,10 +278,13 @@ export default function DashboardPage() {
 
 					<Card>
 						<CardHeader className="border-b">
-							<CardTitle className="text-base">Spending pace</CardTitle>
+							<ScopedCardTitle scope="Daily" color={dailyBucket?.color}>
+								Spending pace
+							</ScopedCardTitle>
 							<CardDescription>
-								Daily-bucket spending against its monthly target, with projected
-								month-end usage and current balance.
+								{paceProjection.available
+									? "Daily-bucket spending against its monthly target, with projected month-end usage."
+									: "Completed Daily-bucket spending against its monthly target."}
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
@@ -286,37 +294,31 @@ export default function DashboardPage() {
 								year={year}
 								target={paceTarget?.target ?? null}
 								targetLabel={paceTarget?.name ?? null}
+								showProjection={paceProjection.available}
 							/>
-							<PaceSummary projection={paceProjection} />
-						</CardContent>
-					</Card>
-
-					<Card>
-						<CardHeader className="border-b">
-							<CardTitle className="text-base">Daily spending</CardTitle>
-							<CardDescription>
-								Daily outflow per bucket, coloured by bucket. Select a day to open
-								its Records.
-							</CardDescription>
-						</CardHeader>
-						<CardContent>
-							<DailySpendingChart
-								rows={bucketDailyData.rows}
-								buckets={dailyLines}
-								month={month}
-								year={year}
+							<PaceSummary
+								projection={paceProjection}
+								completedMonth={completedMonth}
+								highestSpendingDay={highestSpendingDay}
 							/>
 						</CardContent>
 					</Card>
-
-					<WeekdayCard weekday={weekday} />
 
 					<section className="grid gap-4" aria-labelledby="spending-breakdown-title">
 						<div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
 							<div>
-								<h3 id="spending-breakdown-title" className="text-lg font-semibold">
-									Spending breakdown
-								</h3>
+								<div className="flex items-center gap-2">
+									<h3
+										id="spending-breakdown-title"
+										className="text-lg font-semibold"
+									>
+										Spending breakdown
+									</h3>
+									<ScopeLabel
+										scope={scope === "all" ? "Total" : scopeLabel}
+										color={scopeColor}
+									/>
+								</div>
 								<p className="text-sm text-muted-foreground">
 									{scopeLabel} · {formatCurrency(scopedTotal)}
 								</p>
@@ -346,15 +348,29 @@ export default function DashboardPage() {
 						</div>
 					</section>
 
-					{summary.contributions || summary.withdrawals ? (
-						<InvestmentRow summary={summary} month={month} year={year} />
-					) : null}
+					<Card>
+						<CardHeader className="border-b">
+							<ScopedCardTitle scope="Total">Spending by day</ScopedCardTitle>
+							<CardDescription>
+								All spending buckets, split into daily outflow. Select a day to open
+								its Records.
+							</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<DailySpendingChart
+								rows={bucketDailyData.rows}
+								buckets={dailyLines}
+								month={month}
+								year={year}
+							/>
+						</CardContent>
+					</Card>
 
 					<Card>
 						<CardHeader>
-							<CardTitle>Surplus / shortfall</CardTitle>
+							<ScopedCardTitle scope="Total">Surplus / shortfall</ScopedCardTitle>
 							<CardDescription>
-								Cumulative income minus spending, every bucket combined
+								Cumulative income minus personal spending across every bucket
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
@@ -362,24 +378,11 @@ export default function DashboardPage() {
 						</CardContent>
 					</Card>
 
-					<MonthlyRhythm
-						summary={summary}
-						period={period}
-						date={date}
-						footer={
-							future_records_count ? (
-								<span>
-									<IconifyIcon
-										icon="lucide:calendar-clock"
-										className="mr-1 inline"
-									/>{" "}
-									{future_records_count} later-dated Record
-									{future_records_count === 1 ? "" : "s"} are listed separately in
-									Monthly Records.
-								</span>
-							) : undefined
-						}
-					/>
+					<WeekdayCard weekday={weekday} />
+
+					{summary.contributions || summary.withdrawals ? (
+						<InvestmentRow summary={summary} month={month} year={year} />
+					) : null}
 				</>
 			)}
 		</div>
@@ -433,67 +436,57 @@ function ScopeSelect({
 }
 
 function WeekdayCard({ weekday }: { weekday: WeekdayBreakdown }) {
-	const active = weekday.stats.filter(stat => stat.days > 0)
-	const total = weekday.stats.reduce((sum, stat) => sum + stat.spending, 0)
-	const totalDays = weekday.stats.reduce((sum, stat) => sum + stat.days, 0)
-	const aboveUsual = [...weekday.stats].sort((a, b) => b.comparison - a.comparison)[0]
-
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>Spending by weekday</CardTitle>
+				<ScopedCardTitle scope="Total">Spending by weekday</ScopedCardTitle>
 				<CardDescription>
-					Daily spending split by day of week, against the 3-month usual
+					All spending buckets grouped by weekday, against the 3-month usual
 				</CardDescription>
 			</CardHeader>
-			<CardContent className="grid gap-6">
+			<CardContent>
 				<WeekdayBars stats={weekday.stats} />
-				<MetricGrid>
-					<DashboardMetric
-						icon="lucide:flame"
-						label="Highest weekday"
-						value={weekday.highest ? weekday.highest.day : "—"}
-						detail={
-							weekday.highest
-								? `${formatCurrency(weekday.highest.spending)} total`
-								: "No spending yet"
-						}
-					/>
-					<DashboardMetric
-						icon="lucide:piggy-bank"
-						label="Lowest weekday"
-						value={weekday.lowest ? weekday.lowest.day : "—"}
-						detail={
-							weekday.lowest
-								? `${formatCurrency(weekday.lowest.spending)} total`
-								: "No spending yet"
-						}
-					/>
-					<DashboardMetric
-						icon="lucide:calendar-days"
-						label="Daily average"
-						value={totalDays ? formatCurrency(total / totalDays) : "—"}
-						detail={
-							totalDays
-								? `Across ${totalDays} active day${totalDays === 1 ? "" : "s"}`
-								: "No spending yet"
-						}
-					/>
-					<DashboardMetric
-						icon="lucide:arrow-up-right"
-						label="Furthest above usual"
-						value={aboveUsual && aboveUsual.comparison > 0 ? aboveUsual.day : "—"}
-						detail={
-							aboveUsual && aboveUsual.comparison > 0
-								? `+${formatCurrency(aboveUsual.comparison)} vs usual`
-								: active.length
-									? "Everything within usual"
-									: "No spending yet"
-						}
-					/>
-				</MetricGrid>
 			</CardContent>
 		</Card>
+	)
+}
+
+function ScopedCardTitle({
+	scope,
+	color,
+	children,
+}: {
+	scope: "Daily" | "Total"
+	color?: string
+	children: ReactNode
+}) {
+	return (
+		<CardTitle className="flex items-center gap-2 text-base">
+			{children}
+			<ScopeLabel scope={scope} color={color} />
+		</CardTitle>
+	)
+}
+
+function ScopeLabel({ scope, color }: { scope: string; color?: string }) {
+	if (scope === "Total") {
+		return (
+			<Badge
+				variant="outline"
+				style={{ borderColor: "var(--foreground)", color: "var(--foreground)" }}
+			>
+				Total
+			</Badge>
+		)
+	}
+	const bucketColor = color ?? (scope === "Daily" ? "var(--color-emerald-500)" : null)
+
+	return bucketColor ? (
+		<Badge variant="outline" style={{ borderColor: bucketColor, color: bucketColor }}>
+			{scope}
+		</Badge>
+	) : (
+		<Badge variant="secondary">{scope}</Badge>
 	)
 }
 
@@ -505,33 +498,33 @@ function SummaryBand({
 	comparison: Comparison
 }) {
 	const surplusLabel =
-		summary.surplus > 0 ? "Surplus" : summary.surplus < 0 ? "Shortfall" : "Balanced"
+		summary.surplus > 0 ? "Surplus" : summary.surplus < 0 ? "Shortfall" : "Balance"
 	const tone = summary.surplus > 0 ? "positive" : summary.surplus < 0 ? "negative" : "neutral"
 	return (
 		<Card className="gap-0 overflow-hidden py-0">
 			<MetricGrid className="rounded-none border-0">
 				<DashboardMetric
 					icon="lucide:circle-dollar-sign"
-					label="Income"
+					label="Total income"
 					value={formatCurrency(summary.income)}
 					detail={comparisonText(comparison.income, comparison.count)}
 				/>
 				<DashboardMetric
 					icon="lucide:receipt-text"
-					label={summary.spending < 0 ? "Net refund" : "Spending"}
+					label={summary.spending < 0 ? "Total net refund" : "Total spending"}
 					value={formatCurrency(Math.abs(summary.spending))}
 					detail={comparisonText(comparison.spending, comparison.count)}
 				/>
 				<DashboardMetric
 					icon="lucide:scale"
-					label={surplusLabel}
+					label={`Total ${surplusLabel.toLowerCase()}`}
 					value={formatCurrency(Math.abs(summary.surplus))}
 					detail="Income less personal spending"
 					tone={tone}
 				/>
 				<DashboardMetric
 					icon="lucide:percent"
-					label="Surplus rate"
+					label="Total surplus rate"
 					value={
 						summary.surplus_rate === null ? "—" : `${summary.surplus_rate.toFixed(1)}%`
 					}
@@ -855,9 +848,65 @@ function InvestmentRow({
 	)
 }
 
-function PaceSummary({ projection }: { projection: Projection }) {
-	if (!projection.available) return null
+function PaceSummary({
+	projection,
+	completedMonth,
+	highestSpendingDay,
+}: {
+	projection: Projection
+	completedMonth: PaceData["completedMonth"]
+	highestSpendingDay: PaceData["highestSpendingDay"]
+}) {
+	if (!projection.available) {
+		if (!completedMonth) return null
+
+		const targetDifference = completedMonth.target_difference
+
+		return (
+			<MetricGrid className="mt-3">
+				<DashboardMetric
+					icon="lucide:receipt-text"
+					label="Final month spending"
+					value={formatCurrency(completedMonth.spending)}
+					detail="Final Daily-bucket total"
+				/>
+				<DashboardMetric
+					icon="lucide:circle-check-big"
+					label="Final target result"
+					value={
+						targetDifference === null
+							? "No target"
+							: Math.abs(targetDifference) < 0.005
+								? "On target"
+								: `${formatCurrency(Math.abs(targetDifference))} ${targetDifference > 0 ? "under" : "over"}`
+					}
+					detail={
+						completedMonth.target === null
+							? "No Daily target was set"
+							: `Against ${formatCurrency(completedMonth.target)} target`
+					}
+				/>
+				<DashboardMetric
+					icon="lucide:calendar-days"
+					label="Spending per day"
+					value={`${formatCurrency(completedMonth.spending_per_day)} / day`}
+					detail="Full-month total ÷ calendar days"
+				/>
+				<DashboardMetric
+					icon="lucide:flame"
+					label="Highest-spend day"
+					value={highestSpendingDay ? formatCurrency(highestSpendingDay.spending) : "—"}
+					detail={
+						highestSpendingDay
+							? DateTime.fromISO(highestSpendingDay.date).toFormat("d MMMM")
+							: "No spending recorded"
+					}
+				/>
+			</MetricGrid>
+		)
+	}
 	const bucket = projection.bucket
+	const daysLeft = `${projection.remaining_days} day${projection.remaining_days === 1 ? "" : "s"} left`
 	return (
 		<MetricGrid className="mt-3">
 			<DashboardMetric
@@ -886,97 +935,21 @@ function PaceSummary({ projection }: { projection: Projection }) {
 				}
 				detail={
 					bucket
-						? `To finish within ${formatCurrency(bucket.target)}`
-						: "No target available"
+						? `${daysLeft} · To finish within ${formatCurrency(bucket.target)}`
+						: `${daysLeft} · No target available`
 				}
 			/>
 			<DashboardMetric
-				icon="lucide:calendar-range"
-				label="Remaining month"
-				value={`${projection.remaining_days} day${projection.remaining_days === 1 ? "" : "s"}`}
+				icon="lucide:flame"
+				label="Highest-spend day"
+				value={highestSpendingDay ? formatCurrency(highestSpendingDay.spending) : "—"}
 				detail={
-					bucket
-						? `Target pace ${formatCurrency(bucket.target_pace)} / day`
-						: "Projection uses elapsed activity"
+					highestSpendingDay
+						? DateTime.fromISO(highestSpendingDay.date).toFormat("d MMMM")
+						: "No spending yet"
 				}
 			/>
 		</MetricGrid>
-	)
-}
-
-function MonthlyRhythm({
-	summary,
-	period,
-	date,
-	footer,
-}: {
-	summary: AnalyticsSummary
-	period: { is_current: boolean; is_future: boolean; through: string | null; label: string }
-	date: DateTime
-	footer?: React.ReactNode
-}) {
-	const days = summary.daily.filter(day => day.spending > 0)
-	const ordered = days.map(day => day.spending).sort((a, b) => a - b)
-	const middle = Math.floor(ordered.length / 2)
-	const typical = ordered.length
-		? ordered.length % 2
-			? (ordered[middle] ?? 0)
-			: ((ordered[middle - 1] ?? 0) + (ordered[middle] ?? 0)) / 2
-		: 0
-	const peak = days.reduce<(typeof days)[number] | null>(
-		(highest, day) => (!highest || day.spending > highest.spending ? day : highest),
-		null,
-	)
-	const elapsed = period.is_future
-		? 0
-		: period.through
-			? (DateTime.fromISO(period.through).day ?? 0)
-			: (date.daysInMonth ?? 0)
-
-	return (
-		<Card>
-			<CardHeader>
-				<CardTitle>Spending rhythm</CardTitle>
-				<CardDescription>A compact view of when and how heavily you spent</CardDescription>
-			</CardHeader>
-			<CardContent>
-				<MetricGrid>
-					<DashboardMetric
-						icon="lucide:calendar-days"
-						label="Active spending days"
-						value={`${days.length} of ${elapsed}`}
-						detail={
-							elapsed
-								? `${Math.round((days.length / elapsed) * 100)}% of elapsed days`
-								: "No elapsed days"
-						}
-					/>
-					<DashboardMetric
-						icon="lucide:gauge"
-						label="Typical active day"
-						value={days.length ? formatCurrency(typical) : "—"}
-						detail="Median spend on days with activity"
-					/>
-					<DashboardMetric
-						icon="lucide:flame"
-						label="Highest-spend day"
-						value={peak ? formatCurrency(peak.spending) : "—"}
-						detail={
-							peak
-								? DateTime.fromISO(peak.date).toFormat("d MMMM")
-								: "No spending yet"
-						}
-					/>
-					<DashboardMetric
-						icon="lucide:rotate-ccw"
-						label="Refunds"
-						value={formatCurrency(summary.refunds)}
-						detail={`${formatCurrency(summary.gross_spending)} gross spending`}
-					/>
-				</MetricGrid>
-				{footer ? <div className="mt-4 text-sm text-muted-foreground">{footer}</div> : null}
-			</CardContent>
-		</Card>
 	)
 }
 

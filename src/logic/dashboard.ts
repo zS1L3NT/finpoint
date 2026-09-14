@@ -262,13 +262,7 @@ export async function getDashboard(input: DashboardInput) {
 		projection,
 		buckets: bucketsWithSpending,
 		categories,
-		weekday: buildWeekday(
-			summary,
-			included,
-			date.toFormat("yyyy-MM-dd"),
-			date.daysInMonth ?? 30,
-			isFuture ? 0 : (actualEnd.day ?? date.daysInMonth ?? 30),
-		),
+		weekday: buildWeekday(summary, included),
 		future_records_count: futureRecords.length,
 	}
 }
@@ -336,11 +330,32 @@ export async function getPaceView(month: string, year: number, scope: string) {
 	const pace = bucketsBuilt.find(
 		b => b.pace_kind === "daily" && b.target !== null && b.target > 0,
 	)
+	const highestSpendingDay = summary.daily.reduce<(typeof summary.daily)[number] | null>(
+		(highest, day) =>
+			day.spending > 0 && (!highest || day.spending > highest.spending) ? day : highest,
+		null,
+	)
 
 	return {
 		series,
 		projection,
 		paceBucket: pace ? { id: pace.id, name: pace.name, target: pace.target } : null,
+		completedMonth:
+			!isCurrent && !isFuture
+				? {
+						spending: Math.round(summary.spending * 100) / 100,
+						spending_per_day:
+							Math.round((summary.spending / (date.daysInMonth ?? 30)) * 100) / 100,
+						target: pace?.target ?? null,
+						target_difference:
+							pace?.target === null || pace?.target === undefined
+								? null
+								: Math.round((pace.target - pace.spending) * 100) / 100,
+					}
+				: null,
+		highestSpendingDay: highestSpendingDay
+			? { date: highestSpendingDay.date, spending: highestSpendingDay.spending }
+			: null,
 	}
 }
 
@@ -353,9 +368,10 @@ export async function getBucketDaily(
 }> {
 	const date = monthStart(month, year)
 	const today = DateTime.now().startOf("day")
+	const isCurrent = date.hasSame(today, "month")
 	const isFuture = date.startOf("month") > today.startOf("month")
-	const elapsed = isFuture ? 0 : (today.day ?? date.daysInMonth ?? 30)
 	const daysInMonth = date.daysInMonth ?? 30
+	const elapsed = isFuture ? 0 : isCurrent ? (today.day ?? daysInMonth) : daysInMonth
 
 	const tables = await loadDashboardTables()
 	const active = tables.bucketRows.filter(b => !b.archived)
@@ -416,12 +432,8 @@ function weekdayOf(dateString: string): string {
 function buildWeekday(
 	summary: ReturnType<typeof summarize>,
 	included: { summary: ReturnType<typeof summarize> }[],
-	monthKey: string,
-	daysInMonth: number,
-	elapsedDays: number,
 ) {
 	const days = summary.daily
-	const perDay = new Map(days.map(d => [d.date, d]))
 
 	const stats = WEEKDAYS.map(name => {
 		const monthDays = days.filter(d => weekdayOf(d.date) === name)
@@ -437,40 +449,11 @@ function buildWeekday(
 		return {
 			day: name,
 			spending: Math.round(spending * 100) / 100,
-			average:
-				monthDays.length > 0 ? Math.round((spending / monthDays.length) * 100) / 100 : null,
 			baseline: Math.round(baseline * 100) / 100,
-			comparison: Math.round((spending - baseline) * 100) / 100,
-			days: monthDays.length,
 		}
 	})
 
-	const dayCount = Math.max(daysInMonth, 1)
-	const prefix = monthKey.slice(0, 8)
-	const series = Array.from({ length: dayCount }, (_, i) => {
-		const day = i + 1
-		const point: Record<string, number | null> = { day }
-		for (const name of WEEKDAYS) {
-			if (day > elapsedDays) {
-				point[name] = null
-				continue
-			}
-			const date = `${prefix}${String(day).padStart(2, "0")}`
-			point[name] = weekdayOf(date) === name ? (perDay.get(date)?.spending ?? 0) : null
-		}
-		return point
-	})
-
-	const ranked = [...stats].sort((a, b) => b.spending - a.spending)
-	const highest = ranked[0]
-	const lowest = [...stats].sort((a, b) => a.spending - b.spending)[0]
-
-	return {
-		stats,
-		series,
-		highest: highest && highest.spending > 0 ? highest : null,
-		lowest: lowest && lowest.spending > 0 ? lowest : null,
-	}
+	return { stats }
 }
 
 function avg(values: (number | null)[]): number | null {
