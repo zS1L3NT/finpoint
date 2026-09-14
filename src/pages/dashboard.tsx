@@ -1,8 +1,9 @@
 import { useLiveQuery } from "dexie-react-hooks"
 import { DateTime } from "luxon"
-import { type ReactNode, useMemo, useState } from "react"
+import { type ReactNode, useMemo } from "react"
 import { Link } from "react-router-dom"
 import CashflowChart, { CashflowPoint } from "@/components/charts/cashflow-chart"
+import WeekdayChart from "@/components/charts/weekday-chart"
 import BucketDialog from "@/components/dialogs/bucket"
 import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
 import { FILTER_CONTROL_CLASS } from "@/components/table/filter-bar"
@@ -21,9 +22,10 @@ import {
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useMonthParams } from "@/hooks/use-month-params"
+import { usePersistentState } from "@/hooks/use-persistent-state"
 import { useTabTransition } from "@/hooks/use-tab-transition"
 import { cn, formatCurrency } from "@/lib/utils"
-import { getDashboard } from "@/logic/dashboard"
+import { getDashboard, getPaceView } from "@/logic/dashboard"
 import { pathMonthlyRecords } from "@/routes"
 import { AnalyticsSummary, Bucket } from "@/types"
 
@@ -77,7 +79,30 @@ type DashboardData = {
 	projection: Projection
 	buckets: DashboardBucket[]
 	categories: DashboardCategory[]
+	weekday: WeekdayBreakdown
 	future_records_count: number
+}
+
+type WeekdayStat = {
+	day: string
+	spending: number
+	average: number | null
+	baseline: number
+	comparison: number
+	days: number
+}
+
+type WeekdayBreakdown = {
+	stats: WeekdayStat[]
+	series: Record<string, number | null>[]
+	highest: WeekdayStat | null
+	lowest: WeekdayStat | null
+}
+
+type PaceData = {
+	series: CashflowPoint[]
+	projection: Projection
+	paceBucket: { id: string; name: string; target: number | null } | null
 }
 
 export default function DashboardPage() {
@@ -88,7 +113,25 @@ export default function DashboardPage() {
 		| undefined
 	const buckets = data?.buckets ?? []
 	const categories = data?.categories ?? []
-	const [scope, setScope] = useState("all")
+	const [storedScope, setScope] = usePersistentState("finpoint.dashboard.scope", "all")
+	const [storedPaceScope, setPaceScope] = usePersistentState(
+		"finpoint.dashboard.pace-scope",
+		"all",
+	)
+	const validScope = (value: string) =>
+		value === "all" ||
+		value === "core" ||
+		value === "outlier" ||
+		value === "other" ||
+		buckets.some(bucket => bucket.id === value)
+			? value
+			: "all"
+	const scope = validScope(storedScope)
+	const paceScope = validScope(storedPaceScope)
+	const paceData = useLiveQuery(
+		() => getPaceView(month, year, paceScope),
+		[month, year, paceScope],
+	) as unknown as PaceData | undefined
 	const scopedBucketIds = useMemo(() => {
 		if (scope === "all") return [...buckets.map(bucket => bucket.id), "unbucketed"]
 		if (scope === "core" || scope === "outlier" || scope === "other") {
@@ -140,7 +183,7 @@ export default function DashboardPage() {
 			</div>
 		)
 	}
-	const { period, summary, comparison, series, projection, future_records_count } = data
+	const { period, summary, comparison, series, projection, weekday, future_records_count } = data
 	const scopedCategories = categories
 		.map(category => {
 			const spending = scopedBucketIds.reduce(
@@ -168,6 +211,9 @@ export default function DashboardPage() {
 	const paceBucket = buckets.find(
 		bucket => bucket.pace_kind === "daily" && bucket.target !== null && bucket.target > 0,
 	)
+	const paceSeries = paceData?.series ?? series
+	const paceProjection = paceData?.projection ?? projection
+	const paceTarget = paceData ? paceData.paceBucket : paceBucket
 
 	return (
 		<div
@@ -216,23 +262,34 @@ export default function DashboardPage() {
 
 					<Card>
 						<CardHeader className="border-b">
-							<CardTitle className="text-base">Spending pace</CardTitle>
-							<CardDescription>
-								Cumulative spending against the monthly target, with projected
-								month-end usage and current balance.
-							</CardDescription>
+							<div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+								<div>
+									<CardTitle className="text-base">Spending pace</CardTitle>
+									<CardDescription>
+										Cumulative spending against the monthly target, with
+										projected month-end usage and current balance.
+									</CardDescription>
+								</div>
+								<ScopeSelect
+									value={paceScope}
+									buckets={buckets}
+									onChange={value => setPaceScope(value ?? "all")}
+								/>
+							</div>
 						</CardHeader>
 						<CardContent>
 							<CashflowChart
-								data={series}
+								data={paceSeries}
 								month={month}
 								year={year}
-								target={paceBucket?.target ?? null}
-								targetLabel={paceBucket?.name ?? null}
+								target={paceTarget?.target ?? null}
+								targetLabel={paceTarget?.name ?? null}
 							/>
-							<PaceSummary projection={projection} />
+							<PaceSummary projection={paceProjection} />
 						</CardContent>
 					</Card>
+
+					<WeekdayCard weekday={weekday} month={month} year={year} />
 
 					<section className="grid gap-4" aria-labelledby="spending-breakdown-title">
 						<div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -244,43 +301,11 @@ export default function DashboardPage() {
 									{scopeLabel} · {formatCurrency(scopedTotal)}
 								</p>
 							</div>
-							<Select value={scope} onValueChange={value => setScope(value ?? "all")}>
-								<SelectTrigger
-									className={cn("w-full sm:w-52", FILTER_CONTROL_CLASS)}
-								>
-									<IconifyIcon icon="lucide:wallet-cards" />
-									<SelectValue />
-								</SelectTrigger>
-								<SelectContent variant="filter">
-									<SelectGroup>
-										<SelectItem value="all">All spending</SelectItem>
-									</SelectGroup>
-									<SelectSeparator />
-									<SelectGroup>
-										<SelectLabel>Bucket groups</SelectLabel>
-										<SelectItem value="core">Core</SelectItem>
-										<SelectItem value="outlier">Outlier</SelectItem>
-										<SelectItem value="other">Other</SelectItem>
-									</SelectGroup>
-									{buckets.length ? <SelectSeparator /> : null}
-									{buckets.length ? (
-										<SelectGroup>
-											<SelectLabel>Specific bucket</SelectLabel>
-											{buckets.map(bucket => (
-												<SelectItem key={bucket.id} value={bucket.id}>
-													<span
-														className="size-2 rounded-full"
-														style={{
-															backgroundColor: bucket.color,
-														}}
-													/>
-													{bucket.name}
-												</SelectItem>
-											))}
-										</SelectGroup>
-									) : null}
-								</SelectContent>
-							</Select>
+							<ScopeSelect
+								value={scope}
+								buckets={buckets}
+								onChange={value => setScope(value ?? "all")}
+							/>
 						</div>
 						<div className="grid gap-5 xl:grid-cols-[minmax(0,3fr)_minmax(18rem,2fr)]">
 							<CategoryBreakdown
@@ -316,6 +341,130 @@ export default function DashboardPage() {
 				</>
 			)}
 		</div>
+	)
+}
+
+function ScopeSelect({
+	value,
+	buckets,
+	onChange,
+}: {
+	value: string
+	buckets: DashboardBucket[]
+	onChange: (value: string) => void
+}) {
+	return (
+		<Select value={value} onValueChange={item => onChange(item ?? "all")}>
+			<SelectTrigger className={cn("w-full sm:w-52", FILTER_CONTROL_CLASS)}>
+				<IconifyIcon icon="lucide:wallet-cards" />
+				<SelectValue />
+			</SelectTrigger>
+			<SelectContent variant="filter">
+				<SelectGroup>
+					<SelectItem value="all">All spending</SelectItem>
+				</SelectGroup>
+				<SelectSeparator />
+				<SelectGroup>
+					<SelectLabel>Bucket groups</SelectLabel>
+					<SelectItem value="core">Core</SelectItem>
+					<SelectItem value="outlier">Outlier</SelectItem>
+					<SelectItem value="other">Other</SelectItem>
+				</SelectGroup>
+				{buckets.length ? <SelectSeparator /> : null}
+				{buckets.length ? (
+					<SelectGroup>
+						<SelectLabel>Specific bucket</SelectLabel>
+						{buckets.map(bucket => (
+							<SelectItem key={bucket.id} value={bucket.id}>
+								<span
+									className="size-2 rounded-full"
+									style={{ backgroundColor: bucket.color }}
+								/>
+								{bucket.name}
+							</SelectItem>
+						))}
+					</SelectGroup>
+				) : null}
+			</SelectContent>
+		</Select>
+	)
+}
+
+function WeekdayCard({
+	weekday,
+	month,
+	year,
+}: {
+	weekday: WeekdayBreakdown
+	month: string
+	year: number
+}) {
+	const active = weekday.stats.filter(stat => stat.days > 0)
+	const total = weekday.stats.reduce((sum, stat) => sum + stat.spending, 0)
+	const totalDays = weekday.stats.reduce((sum, stat) => sum + stat.days, 0)
+	const aboveUsual = [...weekday.stats].sort((a, b) => b.comparison - a.comparison)[0]
+
+	return (
+		<Card>
+			<CardHeader>
+				<CardTitle>Spending by weekday</CardTitle>
+				<CardDescription>
+					Daily spending split by day of week, against the 3-month usual
+				</CardDescription>
+			</CardHeader>
+			<CardContent className="grid gap-6">
+				<WeekdayChart
+					stats={weekday.stats}
+					series={weekday.series}
+					month={month}
+					year={year}
+				/>
+				<MetricGrid>
+					<DashboardMetric
+						icon="lucide:flame"
+						label="Highest weekday"
+						value={weekday.highest ? weekday.highest.day : "—"}
+						detail={
+							weekday.highest
+								? `${formatCurrency(weekday.highest.spending)} total`
+								: "No spending yet"
+						}
+					/>
+					<DashboardMetric
+						icon="lucide:piggy-bank"
+						label="Lowest weekday"
+						value={weekday.lowest ? weekday.lowest.day : "—"}
+						detail={
+							weekday.lowest
+								? `${formatCurrency(weekday.lowest.spending)} total`
+								: "No spending yet"
+						}
+					/>
+					<DashboardMetric
+						icon="lucide:calendar-days"
+						label="Daily average"
+						value={totalDays ? formatCurrency(total / totalDays) : "—"}
+						detail={
+							totalDays
+								? `Across ${totalDays} active day${totalDays === 1 ? "" : "s"}`
+								: "No spending yet"
+						}
+					/>
+					<DashboardMetric
+						icon="lucide:arrow-up-right"
+						label="Furthest above usual"
+						value={aboveUsual && aboveUsual.comparison > 0 ? aboveUsual.day : "—"}
+						detail={
+							aboveUsual && aboveUsual.comparison > 0
+								? `+${formatCurrency(aboveUsual.comparison)} vs usual`
+								: active.length
+									? "Everything within usual"
+									: "No spending yet"
+						}
+					/>
+				</MetricGrid>
+			</CardContent>
+		</Card>
 	)
 }
 

@@ -4,11 +4,13 @@
 import { DateTime } from "luxon"
 import {
 	type AllocationRow,
+	type AnalyticsMonthRow,
 	type BucketDefaultRow,
 	type BucketRow,
 	type BucketTargetRow,
 	type CategoryRow,
 	db,
+	type RecordRow,
 } from "@/data/db"
 import { type AnalyticsRecord, summarize } from "@/logic/analytics"
 import { expandCategoryIdsForMonthly } from "@/logic/monthly-shared"
@@ -23,7 +25,7 @@ export function monthStart(month: string, year: number): DateTime {
 	return date.startOf("month")
 }
 
-async function toAnalyticsRecords(
+function toAnalyticsRecords(
 	rows: {
 		id: string
 		amount: number
@@ -35,7 +37,7 @@ async function toAnalyticsRecords(
 	allocatedByRecord: Map<string, { sum: number; count: number }>,
 	categories: Map<string, CategoryRow>,
 	buckets: Map<string, BucketRow>,
-): Promise<AnalyticsRecord[]> {
+): AnalyticsRecord[] {
 	const items: (AnalyticsRecord | null)[] = rows.map(row => {
 		const entry = allocatedByRecord.get(row.id) ?? { sum: 0, count: 0 }
 		const category = categories.get(row.category_id)
@@ -94,14 +96,19 @@ function inMonth(datetime: string, start: DateTime, end: DateTime): boolean {
 	return day >= start.toFormat("yyyy-MM-dd") && day <= end.toFormat("yyyy-MM-dd")
 }
 
-export async function getDashboard(input: DashboardInput) {
-	const date = monthStart(input.month, input.year)
-	const today = DateTime.now().startOf("day")
-	const isCurrent = date.hasSame(today, "month")
-	const isFuture = date.startOf("month") > today.startOf("month")
-	const actualEnd = isCurrent ? today.endOf("day") : date.endOf("month")
+type LoadedTables = {
+	records: RecordRow[]
+	allocated: Map<string, { sum: number; count: number }>
+	categories: Map<string, CategoryRow>
+	buckets: Map<string, BucketRow>
+	bucketRows: BucketRow[]
+	targets: BucketTargetRow[]
+	defaults: BucketDefaultRow[]
+	coverages: Map<string, AnalyticsMonthRow>
+}
 
-	const [allRecords, allocations, coverages, categoryRows, buckets, targets, defaults] =
+async function loadDashboardTables(): Promise<LoadedTables> {
+	const [allRecords, allocations, coverages, categories, buckets, targets, defaults] =
 		await Promise.all([
 			db.records.toArray(),
 			db.allocations.toArray(),
@@ -111,44 +118,56 @@ export async function getDashboard(input: DashboardInput) {
 			db.bucket_targets.toArray(),
 			db.bucket_defaults.toArray(),
 		])
-	const allocated = summarizeAllocations(allocations)
-	const categoriesById = new Map(categoryRows.map(c => [c.id, c]))
-	const bucketsById = new Map(buckets.map(b => [b.id, b]))
-	const coverageByMonth = new Map(coverages.map(c => [c.month, c]))
 
-	const monthStartDay = date.startOf("month")
-	const monthEndDay = date.endOf("month")
-	const monthRecords = allRecords.filter(r => inMonth(r.datetime, monthStartDay, monthEndDay))
-	const analyticsAll = await toAnalyticsRecords(
-		monthRecords,
-		allocated,
-		categoriesById,
-		bucketsById,
-	)
+	return {
+		records: allRecords,
+		allocated: summarizeAllocations(allocations),
+		categories: new Map(categories.map(c => [c.id, c])),
+		buckets: new Map(buckets.map(b => [b.id, b])),
+		bucketRows: buckets,
+		targets,
+		defaults,
+		coverages: new Map(coverages.map(c => [c.month, c])),
+	}
+}
 
-	const actualRecords = isFuture
-		? []
-		: analyticsAll.filter(r => DateTime.fromFormat(r.datetime, "yyyy-MM-dd HH:mm") <= actualEnd)
-	const futureRecords = analyticsAll.filter(r => !actualRecords.includes(r))
+/** Bucket ids for a pace/breakdown scope, or null for everything. */
+export function scopeBucketIds(scope: string, buckets: BucketRow[]): string[] | null {
+	if (scope === "all") return null
+	if (scope === "core" || scope === "outlier" || scope === "other") {
+		return buckets.filter(b => b.group === scope).map(b => b.id)
+	}
+	return [scope]
+}
 
-	const summary = summarize(actualRecords)
-	const futureSummary = summarize(futureRecords)
+function inScope(bucketId: string | null, scopeIds: string[] | null): boolean {
+	return scopeIds === null || (bucketId !== null && scopeIds.includes(bucketId))
+}
 
-	const comparisonMonths = []
+function comparisonSummaries(
+	date: DateTime,
+	today: DateTime,
+	isCurrent: boolean,
+	tables: LoadedTables,
+	scopeIds: string[] | null,
+) {
+	const out = []
 	for (let offset = 1; offset <= 3; offset++) {
 		const month = date.minus({ months: offset }).startOf("month")
-		const coverage = coverageByMonth.get(month.toFormat("yyyy-MM-dd"))
+		const coverage = tables.coverages.get(month.toFormat("yyyy-MM-dd"))
 		const endDay = isCurrent
 			? Math.min(today.day ?? 1, month.daysInMonth ?? 28)
 			: (month.daysInMonth ?? 28)
 		const end = month.set({ day: endDay }).endOf("day")
-		const rows = allRecords.filter(r => inMonth(r.datetime, month, end))
-		const items = await toAnalyticsRecords(rows, allocated, categoriesById, bucketsById)
+		const rows = tables.records.filter(
+			r => inMonth(r.datetime, month, end) && inScope(r.bucket_id, scopeIds),
+		)
+		const items = toAnalyticsRecords(rows, tables.allocated, tables.categories, tables.buckets)
 		const excluded =
 			(coverage?.excluded_from_comparisons ?? false) ||
 			(coverage?.coverage ?? null) === "incomplete" ||
 			(items.length === 0 && (coverage?.coverage ?? "unknown") !== "complete")
-		comparisonMonths.push({
+		out.push({
 			month: month.toFormat("MMM yyyy"),
 			included: !excluded,
 			reason: coverage?.excluded_from_comparisons
@@ -163,10 +182,48 @@ export async function getDashboard(input: DashboardInput) {
 			summary: summarize(items),
 		})
 	}
+	return out
+}
+
+export async function getDashboard(input: DashboardInput) {
+	const date = monthStart(input.month, input.year)
+	const today = DateTime.now().startOf("day")
+	const isCurrent = date.hasSame(today, "month")
+	const isFuture = date.startOf("month") > today.startOf("month")
+	const actualEnd = isCurrent ? today.endOf("day") : date.endOf("month")
+
+	const tables = await loadDashboardTables()
+
+	const monthStartDay = date.startOf("month")
+	const monthEndDay = date.endOf("month")
+	const monthRecords = tables.records.filter(r => inMonth(r.datetime, monthStartDay, monthEndDay))
+	const analyticsAll = toAnalyticsRecords(
+		monthRecords,
+		tables.allocated,
+		tables.categories,
+		tables.buckets,
+	)
+
+	const actualRecords = isFuture
+		? []
+		: analyticsAll.filter(r => DateTime.fromFormat(r.datetime, "yyyy-MM-dd HH:mm") <= actualEnd)
+	const futureRecords = analyticsAll.filter(r => !actualRecords.includes(r))
+
+	const summary = summarize(actualRecords)
+	const futureSummary = summarize(futureRecords)
+
+	const comparisonMonths = comparisonSummaries(date, today, isCurrent, tables, null)
 
 	const included = comparisonMonths.filter(m => m.included)
 	const comparison = buildComparison(summary, included)
-	const bucketsWithSpending = buildBuckets(date, summary, included, buckets, targets, defaults)
+	const bucketsWithSpending = buildBuckets(
+		date,
+		summary,
+		included,
+		tables.bucketRows,
+		tables.targets,
+		tables.defaults,
+	)
 	const projection = buildProjection(
 		date,
 		summary,
@@ -205,7 +262,153 @@ export async function getDashboard(input: DashboardInput) {
 		projection,
 		buckets: bucketsWithSpending,
 		categories,
+		weekday: buildWeekday(
+			summary,
+			included,
+			date.toFormat("yyyy-MM-dd"),
+			date.daysInMonth ?? 30,
+			isFuture ? 0 : (actualEnd.day ?? date.daysInMonth ?? 30),
+		),
 		future_records_count: futureRecords.length,
+	}
+}
+
+export async function getPaceView(month: string, year: number, scope: string) {
+	const date = monthStart(month, year)
+	const today = DateTime.now().startOf("day")
+	const isCurrent = date.hasSame(today, "month")
+	const isFuture = date.startOf("month") > today.startOf("month")
+	const actualEnd = isCurrent ? today.endOf("day") : date.endOf("month")
+
+	const tables = await loadDashboardTables()
+	const scopeIds = scopeBucketIds(scope, tables.bucketRows)
+
+	const monthRecords = tables.records.filter(
+		r =>
+			inMonth(r.datetime, date.startOf("month"), date.endOf("month")) &&
+			inScope(r.bucket_id, scopeIds),
+	)
+	const analyticsAll = toAnalyticsRecords(
+		monthRecords,
+		tables.allocated,
+		tables.categories,
+		tables.buckets,
+	)
+
+	const actualRecords = isFuture
+		? []
+		: analyticsAll.filter(r => DateTime.fromFormat(r.datetime, "yyyy-MM-dd HH:mm") <= actualEnd)
+	const futureRecords = analyticsAll.filter(r => !actualRecords.includes(r))
+
+	const summary = summarize(actualRecords)
+	const futureSummary = summarize(futureRecords)
+	const comparisonMonths = comparisonSummaries(date, today, isCurrent, tables, scopeIds)
+	const included = comparisonMonths.filter(m => m.included)
+
+	const scopedBucketRows = scopeIds
+		? tables.bucketRows.filter(b => scopeIds.includes(b.id))
+		: tables.bucketRows
+	const bucketsBuilt = buildBuckets(
+		date,
+		summary,
+		included,
+		scopedBucketRows,
+		tables.targets,
+		tables.defaults,
+	)
+	const projection = buildProjection(
+		date,
+		summary,
+		futureSummary,
+		bucketsBuilt,
+		isCurrent,
+		isFuture,
+		actualEnd.day ?? 1,
+	)
+	const series = buildSeries(
+		summary,
+		futureSummary,
+		included,
+		date.daysInMonth ?? 30,
+		actualEnd.day,
+		projection.daily_spending,
+	)
+	const pace = bucketsBuilt.find(
+		b => b.pace_kind === "daily" && b.target !== null && b.target > 0,
+	)
+
+	return {
+		series,
+		projection,
+		paceBucket: pace ? { id: pace.id, name: pace.name, target: pace.target } : null,
+	}
+}
+
+const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const
+
+function weekdayOf(dateString: string): string {
+	// summary.daily dates are "yyyy-MM-dd"; luxon weekday: 1 = Monday.
+	const weekday = DateTime.fromFormat(dateString, "yyyy-MM-dd").weekday ?? 1
+	return WEEKDAYS[weekday - 1] ?? "Mon"
+}
+
+function buildWeekday(
+	summary: ReturnType<typeof summarize>,
+	included: { summary: ReturnType<typeof summarize> }[],
+	monthKey: string,
+	daysInMonth: number,
+	elapsedDays: number,
+) {
+	const days = summary.daily
+	const perDay = new Map(days.map(d => [d.date, d]))
+
+	const stats = WEEKDAYS.map(name => {
+		const monthDays = days.filter(d => weekdayOf(d.date) === name)
+		const spending = monthDays.reduce((sum, d) => sum + d.spending, 0)
+		const baseline = included.length
+			? included.reduce((sum, m) => {
+					const monthSpending = m.summary.daily
+						.filter(d => weekdayOf(d.date) === name)
+						.reduce((daySum, d) => daySum + d.spending, 0)
+					return sum + monthSpending / included.length
+				}, 0)
+			: 0
+		return {
+			day: name,
+			spending: Math.round(spending * 100) / 100,
+			average:
+				monthDays.length > 0 ? Math.round((spending / monthDays.length) * 100) / 100 : null,
+			baseline: Math.round(baseline * 100) / 100,
+			comparison: Math.round((spending - baseline) * 100) / 100,
+			days: monthDays.length,
+		}
+	})
+
+	const dayCount = Math.max(daysInMonth, 1)
+	const prefix = monthKey.slice(0, 8)
+	const series = Array.from({ length: dayCount }, (_, i) => {
+		const day = i + 1
+		const point: Record<string, number | null> = { day }
+		for (const name of WEEKDAYS) {
+			if (day > elapsedDays) {
+				point[name] = null
+				continue
+			}
+			const date = `${prefix}${String(day).padStart(2, "0")}`
+			point[name] = weekdayOf(date) === name ? (perDay.get(date)?.spending ?? 0) : null
+		}
+		return point
+	})
+
+	const ranked = [...stats].sort((a, b) => b.spending - a.spending)
+	const highest = ranked[0]
+	const lowest = [...stats].sort((a, b) => a.spending - b.spending)[0]
+
+	return {
+		stats,
+		series,
+		highest: highest && highest.spending > 0 ? highest : null,
+		lowest: lowest && lowest.spending > 0 ? lowest : null,
 	}
 }
 
