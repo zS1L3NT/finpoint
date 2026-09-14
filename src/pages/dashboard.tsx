@@ -4,6 +4,7 @@ import { type ReactNode, useMemo } from "react"
 import { Link } from "react-router-dom"
 import CashflowChart, { CashflowPoint } from "@/components/charts/cashflow-chart"
 import DailySpendingChart from "@/components/charts/daily-spending-chart"
+import TotalSpendingChart from "@/components/charts/total-spending-chart"
 import WeekdayBars from "@/components/charts/weekday-bars"
 import BucketDialog from "@/components/dialogs/bucket"
 import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
@@ -192,7 +193,7 @@ export default function DashboardPage() {
 			</div>
 		)
 	}
-	const { period, summary, comparison, weekday, future_records_count } = data
+	const { period, summary, comparison, series, weekday, future_records_count } = data
 	const scopedCategories = categories
 		.map(category => {
 			const spending = scopedBucketIds.reduce(
@@ -225,18 +226,6 @@ export default function DashboardPage() {
 		width: bucket.id === dailyBucketId ? 2.5 : 2,
 		dashed: bucket.id === "unbucketed",
 	}))
-	const totalRows = bucketDailyData.rows.map((point, index) => {
-		const values = Object.entries(point)
-			.filter(([key]) => key !== "day")
-			.map(([, value]) => value)
-		return {
-			day: index + 1,
-			total: values.every(value => value === null)
-				? null
-				: values.reduce<number>((sum, value) => sum + (value ?? 0), 0),
-		}
-	})
-
 	return (
 		<div
 			className={cn(
@@ -381,24 +370,13 @@ export default function DashboardPage() {
 
 					<Card>
 						<CardHeader>
-							<CardTitle>Total spending</CardTitle>
+							<CardTitle>Surplus / shortfall</CardTitle>
 							<CardDescription>
-								Every bucket combined, across the full month
+								Cumulative income minus spending, every bucket combined
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
-							<DailySpendingChart
-								rows={totalRows}
-								buckets={[
-									{
-										id: "total",
-										name: "Total spending",
-										color: "var(--foreground)",
-									},
-								]}
-								month={month}
-								year={year}
-							/>
+							<TotalSpendingChart data={series} month={month} year={year} />
 						</CardContent>
 					</Card>
 				</>
