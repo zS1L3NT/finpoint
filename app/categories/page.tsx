@@ -1,6 +1,8 @@
+"use client"
+
 import { useLiveQuery } from "dexie-react-hooks"
+import Link from "next/link"
 import { useState } from "react"
-import { Link } from "react-router-dom"
 import CategoryDialog from "@/components/dialogs/category"
 import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
 import AppHeader from "@/components/layout/app-header"
@@ -147,7 +149,7 @@ function CategoryTreeItem({
 					</Button>
 					<Button variant="outline" size="sm" asChild>
 						<Link
-							to={pathRecords({ category_ids: category.id })}
+							href={pathRecords({ category_ids: category.id })}
 							aria-label={`Open records for ${category.name}`}
 							onClick={onFindRecords}
 						>
