@@ -112,8 +112,8 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 				},
 				{
 					to: pathDataSettings(),
-					icon: "lucide:database",
-					label: "Data",
+					icon: "lucide:refresh-cw",
+					label: "Sync",
 					active: pathname.startsWith("/settings"),
 				},
 			],

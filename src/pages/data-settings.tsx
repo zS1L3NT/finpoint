@@ -303,11 +303,11 @@ export default function DataSettingsPage() {
 
 	return (
 		<>
-			<AppHeader title="Data" />
+			<AppHeader title="Sync" />
 
 			<PageContent>
 				<PageHeader
-					title="Data"
+					title="Sync"
 					subtitle="Two separate backup systems: sync with your own Google Drive, or keep a backup file yourself. Both hold the same data shown above."
 					description="Settings"
 					icon="lucide:database"
@@ -330,7 +330,7 @@ export default function DataSettingsPage() {
 
 						<Card>
 							<CardHeader className="border-b">
-								<CardTitle>Backup system 1 · Google Drive sync</CardTitle>
+								<CardTitle>Automatic sync</CardTitle>
 								<CardDescription>
 									Stored in your own Drive's hidden app folder — we never see it.
 									Write this browser to Drive, or read Drive into this browser.
@@ -502,7 +502,7 @@ export default function DataSettingsPage() {
 
 						<Card>
 							<CardHeader className="border-b">
-								<CardTitle>Backup system 2 · File on this device</CardTitle>
+								<CardTitle>Manual sync</CardTitle>
 								<CardDescription>
 									Manual and offline. Download a backup file you keep, and restore
 									it here later or on another device.
@@ -700,7 +700,7 @@ export default function DataSettingsPage() {
 										2
 									</span>
 									<span>
-										Backup system 1: write this browser to your own Google Drive
+										Automatic sync: write this browser to your own Google Drive
 										and read it back on another device. Finpoint never sees it.
 									</span>
 								</li>
@@ -709,8 +709,8 @@ export default function DataSettingsPage() {
 										3
 									</span>
 									<span>
-										Backup system 2: download a file yourself and restore it
-										here later. Nothing leaves your hands.
+										Manual sync: download a file yourself and restore it here
+										later. Nothing leaves your hands.
 									</span>
 								</li>
 							</ol>
