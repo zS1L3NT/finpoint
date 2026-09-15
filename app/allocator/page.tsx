@@ -1,6 +1,10 @@
+"use client"
+
+export const dynamic = "force-dynamic"
+
 import { useLiveQuery } from "dexie-react-hooks"
+import { useSearchParams } from "next/navigation"
 import { useMemo, useState } from "react"
-import { useSearchParams } from "react-router-dom"
 import AllocatorTabs from "@/components/allocator-tabs"
 import RecordCreatorDialog from "@/components/dialogs/record-creator"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
@@ -37,7 +41,7 @@ import { listStatements } from "@/logic/statements"
 import { CategoryWithChildren, Record, Statement } from "@/types"
 
 export default function AllocatorPage() {
-	const [searchParams] = useSearchParams()
+	const searchParams = useSearchParams()
 	const accountId = searchParams.get("account_id") ?? "all"
 	const startDate = searchParams.get("start_date")
 	const endDate = searchParams.get("end_date")
