@@ -1,6 +1,7 @@
+"use client"
+
 import { useLiveQuery } from "dexie-react-hooks"
-import { useState } from "react"
-import { useParams } from "react-router-dom"
+import { use, useState } from "react"
 import { DetailSummary, DetailSummaryItem } from "@/components/detail-summary"
 import PendingStatementDialog from "@/components/dialogs/pending-statement"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
@@ -23,8 +24,8 @@ import { getRecord } from "@/logic/records"
 import { pathRecords } from "@/routes"
 import type { Allocation, Statement } from "@/types"
 
-export default function RecordPage() {
-	const { id } = useParams<{ id: string }>()
+export default function RecordPage({ params }: { params: Promise<{ id: string }> }) {
+	const { id } = use(params)
 	const data = useLiveQuery(() => (id ? getRecord(id).catch(() => null) : null), [id])
 	const accounts = useLiveQuery(() => listAccounts(), []) ?? []
 	const categories = useFetch(() => listCategories(), [])

@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom"
+import { useRouter } from "next/navigation"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { useIsMobile } from "@/hooks/use-mobile"
@@ -25,11 +25,11 @@ export default function DailySpendingChart({
 	year: number
 }) {
 	const isMobile = useIsMobile()
-	const navigate = useNavigate()
+	const router = useRouter()
 	const interval = isMobile ? Math.max(Math.floor(rows.length / 4), 0) : "preserveStartEnd"
 	const openDay = (state: { activeLabel?: number | string } | null) => {
 		if (!state?.activeLabel) return
-		void navigate(
+		void router.push(
 			pathMonthlyRecords({
 				month,
 				year: String(year),

@@ -1,5 +1,5 @@
+import { useRouter } from "next/navigation"
 import { useId } from "react"
-import { useNavigate } from "react-router-dom"
 import { Area, CartesianGrid, ComposedChart, Line, ReferenceLine, XAxis, YAxis } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { useIsMobile } from "@/hooks/use-mobile"
@@ -18,14 +18,14 @@ export default function TotalSpendingChart({
 	year: number
 }) {
 	const isMobile = useIsMobile()
-	const navigate = useNavigate()
+	const router = useRouter()
 	const fillId = `surplus-fill-${useId().replace(/:/g, "")}`
 	const interval = isMobile ? Math.max(Math.floor(data.length / 4), 0) : "preserveStartEnd"
 	const axis = surplusAxis(data)
 	const zeroOffset = surplusZeroOffset(data)
 	const openDay = (state: { activeLabel?: number | string } | null) => {
 		if (!state?.activeLabel) return
-		void navigate(
+		void router.push(
 			pathMonthlyRecords({
 				month,
 				year: String(year),

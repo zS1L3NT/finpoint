@@ -1,5 +1,5 @@
 import { useReducedMotion } from "framer-motion"
-import { useNavigate } from "react-router-dom"
+import { useRouter } from "next/navigation"
 import {
 	type ActiveDotProps,
 	Area,
@@ -40,13 +40,13 @@ export default function CashflowChart({
 }) {
 	const isMobile = useIsMobile()
 	const reduceMotion = useReducedMotion()
-	const navigate = useNavigate()
+	const router = useRouter()
 	const interval = isMobile ? Math.max(Math.floor(data.length / 4), 0) : "preserveStartEnd"
 	const actualChange = colorChange(data, "spending", target)
 	const projectionChange = colorChange(data, "projected_spending", target)
 	const openDay = (state: { activeLabel?: number | string } | null) => {
 		if (!state?.activeLabel) return
-		void navigate(
+		void router.push(
 			pathMonthlyRecords({
 				month,
 				year: String(year),
