@@ -1,6 +1,7 @@
 import { useState } from "react"
 
 function readStored(key: string, initial: string): string {
+	if (typeof window === "undefined") return initial
 	try {
 		return window.localStorage.getItem(key) ?? initial
 	} catch {
