@@ -28,7 +28,6 @@
 		"luxon": "^3.7.2",
 		"next": "^16.3.5",
 		"papaparse": "^5.7.0",
-		"puppeteer-core": "^25.11.0",
 		"radix-ui": "^1.4.3",
 		"react": "^19.2.0",
 		"react-day-picker": "^9.14.0",
