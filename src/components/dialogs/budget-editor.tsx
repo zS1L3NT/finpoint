@@ -1,5 +1,5 @@
 import { useForm } from "@tanstack/react-form"
-import { useLocation } from "react-router-dom"
+import { usePathname } from "next/navigation"
 import { toast } from "sonner"
 import AmountField from "@/components/form/amount-field"
 import DateField from "@/components/form/date-field"
@@ -39,7 +39,7 @@ export default function BudgetEditorDialog({
 }) {
 	const { open, setIsOpen, onOpenChangeComplete } = useDialogCloseAnimation(isOpen, onOpenChange)
 	const { navigateBack } = useHistory()
-	const location = useLocation()
+	const pathname = usePathname()
 
 	const { mergeErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
 
@@ -76,7 +76,7 @@ export default function BudgetEditorDialog({
 			await deleteBudget(budget.id)
 			setIsOpen(false)
 
-			if (location.pathname === pathBudget(budget.id)) {
+			if (pathname === pathBudget(budget.id)) {
 				navigateBack({ name: "Budgets", url: pathBudgets() })
 			}
 		} catch {
