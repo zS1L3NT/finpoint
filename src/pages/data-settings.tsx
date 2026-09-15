@@ -480,7 +480,7 @@ export default function DataSettingsPage() {
 							<CardFooter className="flex flex-wrap gap-2 border-t bg-muted/20">
 								<Button
 									type="button"
-									disabled={busy !== null || driveUnconfigured}
+									disabled={busy !== null || !drive || driveUnconfigured}
 									onClick={() => void handleDriveSync()}
 								>
 									<IconifyIcon icon="lucide:refresh-cw" />
