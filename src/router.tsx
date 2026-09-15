@@ -12,10 +12,12 @@ import DashboardPage from "@/pages/dashboard"
 import DataSettingsPage from "@/pages/data-settings"
 import ImporterPage from "@/pages/importer"
 import MonthlyRecordsPage from "@/pages/monthly-records"
+import PrivacyPage from "@/pages/privacy"
 import RecordPage from "@/pages/record"
 import RecordsPage from "@/pages/records"
 import StatementPage from "@/pages/statement"
 import StatementsPage from "@/pages/statements"
+import TermsPage from "@/pages/terms"
 
 export const router = createBrowserRouter([
 	{
@@ -42,6 +44,8 @@ export const router = createBrowserRouter([
 			{ path: "budgets/:id", element: <BudgetPage /> },
 			{ path: "categories", element: <CategoriesPage /> },
 			{ path: "settings/data", element: <DataSettingsPage /> },
+			{ path: "privacy", element: <PrivacyPage /> },
+			{ path: "terms", element: <TermsPage /> },
 			{ path: "*", element: <Navigate to="/" replace /> },
 		],
 	},

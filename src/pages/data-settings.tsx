@@ -1,5 +1,6 @@
 import { useLiveQuery } from "dexie-react-hooks"
 import { useEffect, useRef, useState } from "react"
+import { Link } from "react-router-dom"
 import { toast } from "sonner"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import AppHeader from "@/components/layout/app-header"
@@ -36,6 +37,7 @@ import {
 	pushDrive,
 	syncDrive,
 } from "@/logic/drive-sync"
+import { pathPrivacy, pathTerms } from "@/routes"
 
 const COUNT_ROWS = [
 	["accounts", "Accounts"],
@@ -639,6 +641,16 @@ export default function DataSettingsPage() {
 								) : null}
 							</CardFooter>
 						</Card>
+
+						<p className="text-center text-xs text-muted-foreground">
+							<Link to={pathPrivacy()} className="underline">
+								Privacy Policy
+							</Link>{" "}
+							·{" "}
+							<Link to={pathTerms()} className="underline">
+								Terms of Service
+							</Link>
+						</p>
 					</div>
 
 					<Card className="bg-muted/20" size="sm">

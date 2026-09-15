@@ -23,6 +23,8 @@ export const pathBudgets = (query?: Record<string, string | undefined>) =>
 export const pathBudget = (id: string) => `/budgets/${id}`
 export const pathCategories = () => "/categories"
 export const pathDataSettings = () => "/settings/data"
+export const pathPrivacy = () => "/privacy"
+export const pathTerms = () => "/terms"
 
 function withQuery(path: string, query?: Record<string, string | undefined>): string {
 	if (!query) return path
