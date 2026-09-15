@@ -5,7 +5,6 @@ import Link from "next/link"
 import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import { UiIcon as IconifyIcon } from "@/components/icon"
-import AppHeader from "@/components/layout/app-header"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import { Button } from "@/components/ui/button"
@@ -284,8 +283,6 @@ export default function DataSettingsPage() {
 
 	return (
 		<>
-			<AppHeader title="Sync" />
-
 			<PageContent>
 				<PageHeader
 					title="Sync"

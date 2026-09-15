@@ -6,7 +6,6 @@ import { DetailSummary, DetailSummaryItem } from "@/components/detail-summary"
 import AccountDialog from "@/components/dialogs/account"
 import PendingStatementDialog from "@/components/dialogs/pending-statement"
 import { UiIcon as IconifyIcon } from "@/components/icon"
-import AppHeader from "@/components/layout/app-header"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import PaginatedDataTable from "@/components/table/paginated-data-table"
@@ -53,7 +52,6 @@ export default function AccountPage({ params }: { params: Promise<{ id: string }
 	if (!account) {
 		return (
 			<>
-				<AppHeader title="Account" />
 				<PageContent>
 					<p className="text-sm text-muted-foreground">Account not found.</p>
 				</PageContent>
@@ -63,8 +61,6 @@ export default function AccountPage({ params }: { params: Promise<{ id: string }
 
 	return (
 		<>
-			<AppHeader title="Account" />
-
 			<PageContent>
 				<PageHeader
 					title={account.name}

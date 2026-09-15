@@ -7,7 +7,6 @@ import { toast } from "sonner"
 import SelectField from "@/components/form/select-field"
 import TextField from "@/components/form/text-field"
 import { UiIcon as IconifyIcon } from "@/components/icon"
-import AppHeader from "@/components/layout/app-header"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import { Button } from "@/components/ui/button"
@@ -88,8 +87,6 @@ export default function ImporterPage() {
 
 	return (
 		<>
-			<AppHeader title="Importer" />
-
 			<PageContent>
 				<PageHeader
 					title="Importer"

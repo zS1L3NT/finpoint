@@ -5,7 +5,6 @@ import Link from "next/link"
 import { useState } from "react"
 import CategoryDialog from "@/components/dialogs/category"
 import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
-import AppHeader from "@/components/layout/app-header"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import { Button } from "@/components/ui/button"
@@ -28,8 +27,6 @@ export default function CategoriesPage() {
 
 	return (
 		<>
-			<AppHeader title="Categories" />
-
 			<PageContent>
 				<PageHeader
 					title="Categories"

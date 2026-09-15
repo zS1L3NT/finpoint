@@ -7,7 +7,6 @@ import BudgetProgressChart from "@/components/charts/budget-progress-chart"
 import BudgetEditorDialog from "@/components/dialogs/budget-editor"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
 import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
-import AppHeader from "@/components/layout/app-header"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import RecordSearchSheet from "@/components/sheets/record-search"
@@ -98,7 +97,6 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 	if (!budget) {
 		return (
 			<>
-				<AppHeader title="Budget" />
 				<PageContent>
 					<p className="text-sm text-muted-foreground">Budget not found.</p>
 				</PageContent>
@@ -108,8 +106,6 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 
 	return (
 		<>
-			<AppHeader title="Budget" />
-
 			<PageContent>
 				<PageHeader
 					title={budget.name}
