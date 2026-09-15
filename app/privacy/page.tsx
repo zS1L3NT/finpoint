@@ -30,12 +30,20 @@ const SECTIONS: { heading: string; body: string[] }[] = [
 		],
 	},
 	{
+		heading: "Staying signed in to Drive (optional)",
+		body: [
+			"To spare you from re-approving Google every hour, connecting offers an optional lasting sign-in. Your browser sends a one-time code to our small auth endpoint, which exchanges it with Google and returns the lasting grant sealed inside an encrypted, httpOnly cookie (about 30 days) that JavaScript cannot read.",
+			"What the server holds: nothing but that sealed grant, inside a cookie that lives in your browser — there is no account database, and your financial data never passes through our server at all. The grant covers only the app's own Drive folder.",
+			"Logging out (Disconnect in Sync settings, or revoking Finpoint in your Google account's third-party access page) deletes the cookie and tells Google to invalidate the grant.",
+		],
+	},
+	{
 		heading: "Technical data processed to run the app",
 		body: [
 			"Hosting: the app is served as static files. Our hosting provider necessarily processes standard connection data (such as IP address) to deliver the page, per its own privacy policy.",
 			"Usage telemetry: the app includes Vercel Analytics and Speed Insights, which collect aggregate, privacy-friendly telemetry such as pages visited and page-load performance. They do not receive your financial data. See Vercel's Privacy Policy for details.",
 			"Google scripts: connecting Drive sync loads Google's sign-in library from Google's servers; Google may process technical data per its policies at that point.",
-			"We set no cookies of our own, run no ads, and sell no data — there is nothing to sell.",
+			"We set no tracking cookies, run no ads, and sell no data — there is nothing to sell. The only cookie of ours is the optional encrypted sign-in grant described above.",
 		],
 	},
 	{
