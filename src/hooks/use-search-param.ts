@@ -1,7 +1,10 @@
-// Client-side replacement: reads a URL search param via react-router.
+"use client"
 
+// Client-side replacement: reads a URL search param, mirroring the old
+// react-router hook's tuple API so call sites stay untouched.
+
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback } from "react"
-import { useSearchParams } from "react-router-dom"
 
 export function useSearchParam(key: string): [string | null, (value: string | null) => void]
 export function useSearchParam(
@@ -12,19 +15,20 @@ export function useSearchParam(
 	key: string,
 	defaultValue?: string,
 ): [string | null, (value: string | null) => void] {
-	const [searchParams, setSearchParams] = useSearchParams()
+	const searchParams = useSearchParams()
+	const router = useRouter()
+	const pathname = usePathname()
 	const value = searchParams.get(key) ?? defaultValue ?? null
 
 	const setValue = useCallback(
 		(next: string | null) => {
-			setSearchParams(prev => {
-				const params = new URLSearchParams(prev)
-				if (next === null || next === "") params.delete(key)
-				else params.set(key, next)
-				return params
-			})
+			const params = new URLSearchParams(searchParams.toString())
+			if (next === null || next === "") params.delete(key)
+			else params.set(key, next)
+			const suffix = params.toString()
+			router.push(suffix ? `${pathname}?${suffix}` : pathname, { scroll: false })
 		},
-		[key, setSearchParams],
+		[key, searchParams, router, pathname],
 	)
 
 	return [value, setValue]

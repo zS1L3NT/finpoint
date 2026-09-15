@@ -1,5 +1,7 @@
+"use client"
+
+import { usePathname, useRouter } from "next/navigation"
 import { createContext, useContext, useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
 
 export type HistoryItem = { name: string; url: string }
 
@@ -33,7 +35,8 @@ export const HistoryProvider = ({ children }: { children: React.ReactNode }) => 
 	const [history, setHistory] = useState<HistoryItem[]>([])
 	const [hasLoadedHistory, setHasLoadedHistory] = useState(false)
 	const [isNavigatingBack, setIsNavigatingBack] = useState(false)
-	const navigate = useNavigate()
+	const router = useRouter()
+	const pathname = usePathname()
 
 	useEffect(() => {
 		setHistory(getStoredHistory())
@@ -52,7 +55,7 @@ export const HistoryProvider = ({ children }: { children: React.ReactNode }) => 
 				handlePush: name => () => {
 					setHistory(history => [
 						...history,
-						{ name, url: location.pathname + location.search },
+						{ name, url: pathname + window.location.search },
 					])
 				},
 				handlePop: () => {
@@ -67,7 +70,7 @@ export const HistoryProvider = ({ children }: { children: React.ReactNode }) => 
 					const hasHistory = history.length > 0
 					const target = history[history.length - 1] ?? fallback
 					setIsNavigatingBack(true)
-					void navigate(target.url)
+					router.push(target.url)
 					if (hasHistory) {
 						setHistory(current => current.slice(0, -1))
 					}
