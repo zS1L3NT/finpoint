@@ -1,5 +1,10 @@
+"use client"
+
+export const dynamic = "force-dynamic"
+
 import { DateTime } from "luxon"
-import { Link, Outlet, useLocation } from "react-router-dom"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import AppHeader from "@/components/layout/app-header"
 import PageContent from "@/components/layout/page-content"
@@ -17,10 +22,10 @@ import { pathDashboard, pathMonthlyRecords, pathRecords } from "@/routes"
  * navigation, and tabs mount once and never remount on tab switches, so the
  * month heading cannot flash. Pages below the Outlet render content only.
  */
-export default function MonthLayout() {
+export default function MonthLayout({ children }: { children: React.ReactNode }) {
 	const { month, year, date, setSearchParams } = useMonthParams()
-	const location = useLocation()
-	const isMonthly = location.pathname.startsWith("/records/")
+	const pathname = usePathname()
+	const isMonthly = pathname.startsWith("/records/")
 
 	const today = DateTime.now().startOf("day")
 	const isCurrent = date.hasSame(today, "month")
@@ -111,7 +116,7 @@ export default function MonthLayout() {
 										? "border-transparent text-muted-foreground"
 										: "border-foreground font-medium",
 								)}
-								to={pathDashboard({ month, year: String(year) })}
+								href={pathDashboard({ month, year: String(year) })}
 								onClick={armTabTransition}
 							>
 								Overview
@@ -123,7 +128,7 @@ export default function MonthLayout() {
 										? "border-foreground font-medium"
 										: "border-transparent text-muted-foreground",
 								)}
-								to={pathMonthlyRecords({ month, year: String(year) })}
+								href={pathMonthlyRecords({ month, year: String(year) })}
 								onClick={armTabTransition}
 							>
 								Monthly Records
@@ -136,7 +141,7 @@ export default function MonthLayout() {
 								asChild
 							>
 								<Link
-									to={pathRecords({
+									href={pathRecords({
 										start_date: date.startOf("month").toISODate() ?? undefined,
 										end_date: date.endOf("month").toISODate() ?? undefined,
 									})}
@@ -148,7 +153,7 @@ export default function MonthLayout() {
 					</div>
 				</header>
 
-				<Outlet />
+				{children}
 			</PageContent>
 		</>
 	)

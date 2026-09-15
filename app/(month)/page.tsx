@@ -1,7 +1,11 @@
+"use client"
+
+export const dynamic = "force-dynamic"
+
 import { useLiveQuery } from "dexie-react-hooks"
 import { DateTime } from "luxon"
+import Link from "next/link"
 import { type ReactNode, useMemo } from "react"
-import { Link } from "react-router-dom"
 import CashflowChart, { CashflowPoint } from "@/components/charts/cashflow-chart"
 import DailySpendingChart from "@/components/charts/daily-spending-chart"
 import TotalSpendingChart from "@/components/charts/total-spending-chart"
@@ -261,7 +265,7 @@ export default function DashboardPage() {
 							{summary.unbucketed_count ? (
 								<Button variant="outline" size="sm" asChild>
 									<Link
-										to={pathMonthlyRecords({
+										href={pathMonthlyRecords({
 											month,
 											year: String(year),
 											show_unbucketed: "true",
@@ -612,7 +616,7 @@ function CategoryBreakdown({
 						return (
 							<Link
 								key={category.id}
-								to={pathMonthlyRecords({
+								href={pathMonthlyRecords({
 									month,
 									year: String(year),
 									category_ids: category.id,
@@ -775,7 +779,7 @@ function BucketStatus({
 					)
 				})}
 				<Button variant="outline" size="sm" asChild>
-					<Link to={pathMonthlyRecords({ month, year: String(year) })}>
+					<Link href={pathMonthlyRecords({ month, year: String(year) })}>
 						Manage monthly Records
 					</Link>
 				</Button>
@@ -834,7 +838,7 @@ function InvestmentRow({
 				</div>
 				<Button variant="outline" size="sm" asChild>
 					<Link
-						to={pathMonthlyRecords({
+						href={pathMonthlyRecords({
 							month,
 							year: String(year),
 							treatment: "saving_investment",
