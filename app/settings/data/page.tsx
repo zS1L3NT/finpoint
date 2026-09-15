@@ -1,6 +1,8 @@
+"use client"
+
 import { useLiveQuery } from "dexie-react-hooks"
+import Link from "next/link"
 import { useEffect, useRef, useState } from "react"
-import { Link } from "react-router-dom"
 import { toast } from "sonner"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import AppHeader from "@/components/layout/app-header"
@@ -692,11 +694,11 @@ export default function DataSettingsPage() {
 						</Card>
 
 						<p className="text-center text-xs text-muted-foreground">
-							<Link to={pathPrivacy()} className="underline">
+							<Link href={pathPrivacy()} className="underline">
 								Privacy Policy
 							</Link>{" "}
 							·{" "}
-							<Link to={pathTerms()} className="underline">
+							<Link href={pathTerms()} className="underline">
 								Terms of Service
 							</Link>
 						</p>
