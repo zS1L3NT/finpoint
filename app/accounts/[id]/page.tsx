@@ -1,6 +1,9 @@
+"use client"
+
+export const dynamic = "force-dynamic"
+
 import { useLiveQuery } from "dexie-react-hooks"
-import { useMemo, useState } from "react"
-import { useParams } from "react-router-dom"
+import { use, useMemo, useState } from "react"
 import { DetailSummary, DetailSummaryItem } from "@/components/detail-summary"
 import AccountDialog from "@/components/dialogs/account"
 import PendingStatementDialog from "@/components/dialogs/pending-statement"
@@ -18,8 +21,8 @@ import { listStatements } from "@/logic/statements"
 import { pathAccounts } from "@/routes"
 import type { Statement } from "@/types"
 
-export default function AccountPage() {
-	const { id } = useParams<{ id: string }>()
+export default function AccountPage({ params }: { params: Promise<{ id: string }> }) {
+	const { id } = use(params)
 	const [isEditingAccount, setIsEditingAccount] = useState(false)
 	const [editingStatement, setEditingStatement] = useState<Statement | null>(null)
 

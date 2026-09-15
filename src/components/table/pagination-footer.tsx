@@ -1,4 +1,6 @@
-import { useSearchParams } from "react-router-dom"
+"use client"
+
+import { useSearchParams } from "next/navigation"
 import {
 	Pagination,
 	PaginationContent,
@@ -42,7 +44,7 @@ export default function PaginationFooter({
 	lastPage: number
 	links?: unknown
 }) {
-	const [searchParams] = useSearchParams()
+	const searchParams = useSearchParams()
 	const current = Math.min(Math.max(1, page), Math.max(1, lastPage))
 
 	return (
@@ -53,7 +55,7 @@ export default function PaginationFooter({
 				<PaginationContent className="flex-wrap">
 					<PaginationItem>
 						<PaginationPrevious
-							to={pageHref(searchParams, current - 1)}
+							href={pageHref(searchParams, current - 1)}
 							className={current <= 1 ? "pointer-events-none opacity-50" : undefined}
 							aria-disabled={current <= 1}
 						/>
@@ -66,7 +68,7 @@ export default function PaginationFooter({
 						) : (
 							<PaginationItem key={item}>
 								<PaginationLink
-									to={pageHref(searchParams, item)}
+									href={pageHref(searchParams, item)}
 									isActive={item === current}
 								>
 									{item}
@@ -76,7 +78,7 @@ export default function PaginationFooter({
 					)}
 					<PaginationItem>
 						<PaginationNext
-							to={pageHref(searchParams, current + 1)}
+							href={pageHref(searchParams, current + 1)}
 							className={
 								current >= lastPage ? "pointer-events-none opacity-50" : undefined
 							}
