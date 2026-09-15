@@ -1,8 +1,10 @@
+"use client"
+
 import type { CellContext } from "@tanstack/react-table"
 import { useLiveQuery } from "dexie-react-hooks"
 import { DateTime } from "luxon"
+import Link from "next/link"
 import { useMemo, useState } from "react"
-import { Link } from "react-router-dom"
 import BudgetCreatorDialog from "@/components/dialogs/budget-creator"
 import BudgetEditorDialog from "@/components/dialogs/budget-editor"
 import { UiIcon as IconifyIcon } from "@/components/icon"
@@ -214,7 +216,7 @@ export default function BudgetsPage() {
 											</Button>
 											<Button variant="outline" size="sm" asChild>
 												<Link
-													to={pathBudget(budget.id)}
+													href={pathBudget(budget.id)}
 													onClick={handlePush("Budgets")}
 												>
 													Open
@@ -261,7 +263,7 @@ function BudgetActionsCell({ row, column }: CellContext<Budget, unknown>) {
 				<IconifyIcon icon="lucide:pencil" /> Edit
 			</Button>
 			<Button variant="outline" size="sm" asChild>
-				<Link to={pathBudget(row.original.id)} onClick={handlePush("Budgets")}>
+				<Link href={pathBudget(row.original.id)} onClick={handlePush("Budgets")}>
 					Open
 				</Link>
 			</Button>

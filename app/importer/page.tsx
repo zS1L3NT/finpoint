@@ -1,3 +1,5 @@
+"use client"
+
 import { useForm, useStore } from "@tanstack/react-form"
 import { useLiveQuery } from "dexie-react-hooks"
 import { useState } from "react"
