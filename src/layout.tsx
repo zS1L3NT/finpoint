@@ -44,7 +44,6 @@ export default function Layout() {
 						<TransitionedOutlet />
 					</SidebarInset>
 				</SidebarProvider>
-				<Toaster />
 			</TooltipProvider>
 		</HistoryProvider>
 	)

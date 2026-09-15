@@ -1,4 +1,5 @@
 import { Toaster as Sonner, type ToasterProps } from "sonner"
+import "sonner/dist/styles.css"
 import { CircleCheckIcon, InfoIcon, TriangleAlertIcon, OctagonXIcon, Loader2Icon } from "lucide-react"
 import { useAppearance } from "@/hooks/use-appearance"
 
