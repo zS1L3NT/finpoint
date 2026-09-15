@@ -1,7 +1,5 @@
 "use client"
 
-export const dynamic = "force-dynamic"
-
 import type { CellContext } from "@tanstack/react-table"
 import { useLiveQuery } from "dexie-react-hooks"
 import Link from "next/link"
