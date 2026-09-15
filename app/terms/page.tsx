@@ -26,6 +26,7 @@ const SECTIONS: { heading: string; body: string[] }[] = [
 		body: [
 			"Google Drive sync copies the whole dataset at once — it does not merge individual edits. Writing overwrites the Drive copy; reading replaces this browser. If both sides changed since the last sync, you must pick a winner; the loser is replaced.",
 			"Sync before switching devices. Do not treat either copy as version history: keep your own backup files for anything irreplaceable.",
+			"Staying signed in is optional: connecting can store a sealed, encrypted grant in a cookie on your device so background sync keeps working without asking Google again. You can end it at any time with Disconnect (which also asks Google to invalidate the grant). If the sign-in service is ever unreachable, sync simply falls back to manual — your local data is unaffected.",
 		],
 	},
 	{
