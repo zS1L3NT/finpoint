@@ -1,15 +1,16 @@
 // Google Drive persistence (user's own Drive, plaintext JSON).
 //
-// Nothing is sent to us: the access token lives only in memory in this
-// browser and goes only to googleapis.com. Set VITE_GOOGLE_CLIENT_ID to
-// enable; the UI degrades to a setup hint when it is missing.
+// Nothing financial is sent to us. Signing in uses a one-time popup code
+// that our /api/auth/* broker exchanges for tokens; the lasting grant lives
+// sealed inside an httpOnly cookie, never in JS. Set
+// NEXT_PUBLIC_GOOGLE_CLIENT_ID to enable.
 
 export const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.appdata"
 export const DRIVE_FILENAME = "finpoint-backup.json"
 
-type TokenResponse = {
-	access_token: string
-	expires_in: number
+type CodeResponse = {
+	code?: string
+	scope?: string
 	error?: string
 }
 
@@ -18,11 +19,13 @@ declare global {
 		google?: {
 			accounts: {
 				oauth2: {
-					initTokenClient: (config: {
+					initCodeClient: (config: {
 						client_id: string
 						scope: string
-						callback: (response: TokenResponse) => void
-					}) => { requestAccessToken: (options?: { prompt?: string }) => void }
+						ux_mode: "popup"
+						callback: (response: CodeResponse) => void
+						error_callback?: (error: { type: string }) => void
+					}) => { requestCode: () => void }
 				}
 			}
 		}
@@ -47,26 +50,13 @@ export class AuthNeededError extends Error {
 	}
 }
 
-const GRANT_KEY = "finpoint_drive_granted"
-
-function markDriveGranted(): void {
-	try {
-		sessionStorage.setItem(GRANT_KEY, "1")
-	} catch {
-		// Private mode: background sync simply stays manual-only.
-	}
-}
-
-function hasDriveGrant(): boolean {
-	try {
-		return sessionStorage.getItem(GRANT_KEY) === "1"
-	} catch {
-		return false
-	}
-}
-
 export function hasFreshDriveToken(): boolean {
 	return !!cachedToken && Date.now() < cachedToken.expiresAt - 60_000
+}
+
+function cacheToken(accessToken: string, expiresIn: number): string {
+	cachedToken = { token: accessToken, expiresAt: Date.now() + expiresIn * 1000 }
+	return accessToken
 }
 
 function loadGsi(): Promise<void> {
@@ -94,90 +84,76 @@ function loadGsi(): Promise<void> {
 	return gsiPromise
 }
 
-export async function ensureDriveToken(): Promise<string> {
+async function requestDriveCode(): Promise<string> {
 	const clientId = googleClientId()
 	if (!clientId) throw new Error("Google Drive is not set up yet (missing client ID).")
-	if (cachedToken && Date.now() < cachedToken.expiresAt - 60_000) return cachedToken.token
 
 	await loadGsi()
 	const oauth2 = window.google?.accounts?.oauth2
 	if (!oauth2) throw new Error("Could not load Google sign-in.")
 
-	const token = await new Promise<string>((resolve, reject) => {
-		const client = oauth2.initTokenClient({
+	return new Promise<string>((resolve, reject) => {
+		const timer = window.setTimeout(
+			() => reject(new Error("Google Drive connection timed out.")),
+			120_000,
+		)
+		const done = (fn: () => void) => {
+			window.clearTimeout(timer)
+			fn()
+		}
+		const client = oauth2.initCodeClient({
 			client_id: clientId,
 			scope: DRIVE_SCOPE,
+			ux_mode: "popup",
 			callback: response => {
-				if (response.error || !response.access_token) {
-					reject(new Error("Google Drive connection was cancelled."))
+				if (!response.code) {
+					done(() => reject(new Error("Google Drive connection was cancelled.")))
 					return
 				}
-				cachedToken = {
-					token: response.access_token,
-					expiresAt: Date.now() + response.expires_in * 1000,
-				}
-				markDriveGranted()
-				resolve(response.access_token)
+				done(() => resolve(response.code as string))
+			},
+			error_callback: () => {
+				done(() => reject(new Error("Google Drive connection was cancelled.")))
 			},
 		})
-		client.requestAccessToken({ prompt: cachedToken ? "" : "consent" })
+		client.requestCode()
 	})
-	return token
 }
 
-export async function ensureDriveTokenSilent(timeoutMs = 8000): Promise<string> {
-	if (!googleClientId()) throw new AuthNeededError()
+export async function ensureDriveToken(): Promise<string> {
 	if (hasFreshDriveToken() && cachedToken) return cachedToken.token
-	// Without a prior grant this session a popup is certain: don't even try.
-	if (!hasDriveGrant()) throw new AuthNeededError()
 
-	await loadGsi()
-	const oauth2 = window.google?.accounts?.oauth2
-	if (!oauth2) throw new AuthNeededError()
-
-	return new Promise<string>((resolve, reject) => {
-		const timer = window.setTimeout(() => reject(new AuthNeededError()), timeoutMs)
-		const client = oauth2.initTokenClient({
-			client_id: googleClientId(),
-			scope: DRIVE_SCOPE,
-			callback: response => {
-				window.clearTimeout(timer)
-				if (response.error || !response.access_token) {
-					reject(new AuthNeededError())
-					return
-				}
-				cachedToken = {
-					token: response.access_token,
-					expiresAt: Date.now() + response.expires_in * 1000,
-				}
-				markDriveGranted()
-				resolve(response.access_token)
-			},
-		})
-		try {
-			client.requestAccessToken({ prompt: "" })
-		} catch {
-			window.clearTimeout(timer)
-			reject(new AuthNeededError())
-		}
+	const response = await fetch("/api/auth/exchange", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ code: await requestDriveCode() }),
 	})
+	const parsed = (await response.json().catch(() => null)) as {
+		access_token?: string
+		expires_in?: number
+		message?: string
+	} | null
+	if (!response.ok || !parsed?.access_token) {
+		throw new Error(parsed?.message ?? "Could not connect Google Drive.")
+	}
+	return cacheToken(parsed.access_token, parsed.expires_in ?? 3600)
 }
 
-export function disconnectDrive(): void {
+export async function ensureDriveTokenSilent(): Promise<string> {
+	if (hasFreshDriveToken() && cachedToken) return cachedToken.token
+
+	const response = await fetch("/api/auth/token", { method: "POST" }).catch(() => null)
+	const parsed = (await response?.json().catch(() => null)) as {
+		access_token?: string
+		expires_in?: number
+	} | null
+	if (!response?.ok || !parsed?.access_token) throw new AuthNeededError()
+	return cacheToken(parsed.access_token, parsed.expires_in ?? 3600)
+}
+
+export async function disconnectDrive(): Promise<void> {
 	cachedToken = null
-	try {
-		sessionStorage.removeItem(GRANT_KEY)
-	} catch {
-		// Already gone.
-	}
-	if (window.google?.accounts?.oauth2 && googleClientId()) {
-		window.google.accounts.oauth2.initTokenClient({
-			client_id: googleClientId(),
-			scope: DRIVE_SCOPE,
-			// No-op: client created only so a future token request starts clean.
-			callback: () => undefined,
-		})
-	}
+	await fetch("/api/auth/logout", { method: "POST" }).catch(() => undefined)
 }
 
 export type DriveFileMeta = { id: string; modifiedTime: string; size?: string }
