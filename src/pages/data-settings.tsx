@@ -1,5 +1,5 @@
 import { useLiveQuery } from "dexie-react-hooks"
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import AppHeader from "@/components/layout/app-header"
@@ -27,12 +27,64 @@ import {
 } from "@/data/export-import"
 import { seedIfEmpty } from "@/data/seed"
 import { generateTestData } from "@/data/test-data"
+import {
+	type DriveStatus,
+	disconnectDriveSync,
+	driveLocalDirty,
+	driveStatus,
+	pullDrive,
+	pushDrive,
+	syncDrive,
+} from "@/logic/drive-sync"
+
+const COUNT_ROWS = [
+	["accounts", "Accounts"],
+	["statements", "Statements"],
+	["records", "Records"],
+	["categories", "Categories"],
+	["budgets", "Budgets"],
+	["buckets", "Spending buckets"],
+] as const
+
+function DataCounts({ counts }: { counts: Record<string, number> | null }) {
+	if (!counts) {
+		return (
+			<ul className="grid gap-2 text-sm sm:grid-cols-2">
+				{Array.from({ length: 6 }).map((_, index) => (
+					<li
+						key={index}
+						className="flex items-center justify-between gap-3 border-b py-1.5"
+					>
+						<Skeleton className="h-4 w-24" />
+						<Skeleton className="h-4 w-10" />
+					</li>
+				))}
+			</ul>
+		)
+	}
+	return (
+		<ul className="grid gap-2 text-sm sm:grid-cols-2">
+			{COUNT_ROWS.map(([key, label]) => (
+				<li key={key} className="flex items-center justify-between gap-3 border-b py-1.5">
+					<span className="text-muted-foreground">{label}</span>
+					<span className="font-medium tabular-nums">{counts[key] ?? 0}</span>
+				</li>
+			))}
+		</ul>
+	)
+}
 
 export default function DataSettingsPage() {
 	const [busy, setBusy] = useState<string | null>(null)
 	const [importFile, setImportFile] = useState<File | null>(null)
 	const [confirmingClear, setConfirmingClear] = useState(false)
 	const [confirmingDemo, setConfirmingDemo] = useState(false)
+	const [drive, setDrive] = useState<DriveStatus | null>(null)
+	const [conflictAt, setConflictAt] = useState<string | null>(null)
+	const [remoteAt, setRemoteAt] = useState<string | null>(null)
+	const [localDirty, setLocalDirty] = useState<boolean | null>(null)
+	const [confirmingPush, setConfirmingPush] = useState(false)
+	const [confirmingPull, setConfirmingPull] = useState(false)
 	const fileInputRef = useRef<HTMLInputElement>(null)
 	const counts =
 		useLiveQuery(async () => {
@@ -43,13 +95,47 @@ export default function DataSettingsPage() {
 
 	const total = counts ? Object.values(counts).reduce((sum, count) => sum + count, 0) : 0
 
+	useEffect(() => {
+		let cancelled = false
+		driveStatus()
+			.then(status => {
+				if (!cancelled) setDrive(status)
+			})
+			// Status is best-effort; the card renders a setup hint until it loads.
+			.catch(() => undefined)
+		return () => {
+			cancelled = true
+		}
+	}, [])
+
+	const refreshDrive = async () => {
+		try {
+			setDrive(await driveStatus())
+		} catch {
+			// Keep the last known status; toasts on the failing action explain.
+		}
+	}
+
+	useEffect(() => {
+		let cancelled = false
+		driveLocalDirty()
+			.then(dirty => {
+				if (!cancelled) setLocalDirty(dirty)
+			})
+			// Staleness is best-effort; the card still shows the last sync time.
+			.catch(() => undefined)
+		return () => {
+			cancelled = true
+		}
+	}, [total, drive?.lastSyncAt])
+
 	const handleExport = async () => {
 		setBusy("export")
 		try {
 			downloadExport(await exportData())
-			toast.success("Backup saved.")
+			toast.success("Backup file downloaded.")
 		} catch {
-			toast.error("Couldn't save backup.")
+			toast.error("Couldn't save backup file.")
 		} finally {
 			setBusy(null)
 		}
@@ -64,7 +150,7 @@ export default function DataSettingsPage() {
 		try {
 			const text = await importFile.text()
 			await importData(parseImportFile(text))
-			toast.success("Backup restored.")
+			toast.success("Backup file restored.")
 			setImportFile(null)
 			if (fileInputRef.current) fileInputRef.current.value = ""
 		} catch (cause) {
@@ -109,6 +195,109 @@ export default function DataSettingsPage() {
 		}
 	}
 
+	const clearDrivePrompts = () => {
+		setConflictAt(null)
+		setRemoteAt(null)
+		setConfirmingPush(false)
+		setConfirmingPull(false)
+	}
+
+	const handleDriveSync = async () => {
+		setBusy("drive")
+		try {
+			const result = await syncDrive()
+			await refreshDrive()
+			setConfirmingPush(false)
+			setConfirmingPull(false)
+			if (result.outcome === "up-to-date") toast.success("Already in sync with Google Drive.")
+			else if (result.outcome === "pushed") {
+				clearDrivePrompts()
+				toast.success("This browser written to Google Drive.")
+			} else if (result.outcome === "pulled") {
+				clearDrivePrompts()
+				toast.success("Google Drive read into this browser.")
+			} else if (result.outcome === "conflict") {
+				setConflictAt(result.remoteModifiedTime ?? "recently")
+				setRemoteAt(null)
+				toast.warning("Both sides changed — choose which to keep.")
+			} else if (result.outcome === "remote-newer") {
+				setRemoteAt(result.remoteModifiedTime ?? "recently")
+				setConflictAt(null)
+				toast.warning("Google Drive has a newer copy — choose what to do.")
+			} else toast.info("Nothing to sync yet.")
+		} catch (cause) {
+			toast.error(cause instanceof Error ? cause.message : "Drive sync failed.")
+		} finally {
+			setBusy(null)
+		}
+	}
+
+	const resolveDrivePush = async () => {
+		setBusy("drive-push")
+		try {
+			await pushDrive()
+			await refreshDrive()
+			clearDrivePrompts()
+			toast.success("This browser written to Google Drive.")
+		} catch (cause) {
+			toast.error(cause instanceof Error ? cause.message : "Could not write to Drive.")
+		} finally {
+			setBusy(null)
+		}
+	}
+
+	const resolveDrivePull = async () => {
+		setBusy("drive-pull")
+		try {
+			await pullDrive()
+			await refreshDrive()
+			clearDrivePrompts()
+			toast.success("Google Drive read into this browser.")
+		} catch (cause) {
+			toast.error(cause instanceof Error ? cause.message : "Could not read from Drive.")
+		} finally {
+			setBusy(null)
+		}
+	}
+
+	const handleDrivePush = () => {
+		if (!confirmingPush) {
+			setConfirmingPush(true)
+			return
+		}
+		void resolveDrivePush()
+	}
+
+	const handleDrivePull = () => {
+		if (!confirmingPull) {
+			setConfirmingPull(true)
+			return
+		}
+		void resolveDrivePull()
+	}
+
+	const handleDriveDisconnect = async () => {
+		setBusy("drive-disconnect")
+		try {
+			await disconnectDriveSync()
+			await refreshDrive()
+			clearDrivePrompts()
+			toast.success("Google Drive disconnected on this device.")
+		} catch {
+			toast.error("Could not disconnect.")
+		} finally {
+			setBusy(null)
+		}
+	}
+
+	const driveUnconfigured = drive?.configured === false
+	const driveConnected = !driveUnconfigured && !!drive?.lastSyncAt
+	const remoteNewer =
+		!driveUnconfigured &&
+		!!drive?.lastSyncAt &&
+		!!drive?.remoteModifiedTime &&
+		new Date(drive.remoteModifiedTime) > new Date(drive.lastSyncAt)
+
 	return (
 		<>
 			<AppHeader title="Data" />
@@ -116,7 +305,7 @@ export default function DataSettingsPage() {
 			<PageContent>
 				<PageHeader
 					title="Data"
-					subtitle="Everything is saved privately in this browser — no account, no server. Save a backup before switching devices, and restore it to pick up where you left off."
+					subtitle="Two separate backup systems: a file you download and keep yourself, or sync with your own Google Drive. Both hold the same data below."
 					description="Settings"
 					icon="lucide:database"
 				/>
@@ -125,112 +314,232 @@ export default function DataSettingsPage() {
 					<div className="grid gap-6">
 						<Card>
 							<CardHeader className="border-b">
-								<CardTitle>Save a backup</CardTitle>
+								<CardTitle>Your data on this browser</CardTitle>
 								<CardDescription>
-									Save everything — accounts, statements, records, budgets,
-									categories, and spending buckets — into one backup file you can
-									keep or move to another device.
+									Everything below lives in this browser. Both backup systems
+									above and below save exactly this.
 								</CardDescription>
 							</CardHeader>
 							<CardContent>
-								{counts ? (
-									<ul className="grid gap-2 text-sm sm:grid-cols-2">
-										{(
-											[
-												["accounts", "Accounts"],
-												["statements", "Statements"],
-												["records", "Records"],
-												["categories", "Categories"],
-												["budgets", "Budgets"],
-												["buckets", "Spending buckets"],
-											] as const
-										).map(([key, label]) => (
-											<li
-												key={key}
-												className="flex items-center justify-between gap-3 border-b py-1.5"
-											>
-												<span className="text-muted-foreground">
-													{label}
-												</span>
-												<span className="font-medium tabular-nums">
-													{counts[key] ?? 0}
-												</span>
-											</li>
-										))}
-									</ul>
-								) : (
-									<ul className="grid gap-2 text-sm sm:grid-cols-2">
-										{Array.from({ length: 6 }).map((_, index) => (
-											<li
-												key={index}
-												className="flex items-center justify-between gap-3 border-b py-1.5"
-											>
-												<Skeleton className="h-4 w-24" />
-												<Skeleton className="h-4 w-10" />
-											</li>
-										))}
-									</ul>
-								)}
+								<DataCounts counts={counts} />
 							</CardContent>
-							<CardFooter className="border-t bg-muted/20">
-								<Button
-									type="button"
-									className="w-full sm:ml-auto sm:w-auto"
-									disabled={busy !== null || total === 0}
-									onClick={() => void handleExport()}
-								>
-									<IconifyIcon icon="lucide:download" />
-									{busy === "export" ? "Saving…" : `Save backup (${total} items)`}
-								</Button>
-							</CardFooter>
 						</Card>
 
 						<Card>
 							<CardHeader className="border-b">
-								<CardTitle>Restore a backup</CardTitle>
+								<CardTitle>Backup system 1 · File on this device</CardTitle>
 								<CardDescription>
-									Bring back a backup you saved earlier. This replaces everything
-									currently in this browser.
+									Manual and offline. Download a backup file you keep, and restore
+									it here later or on another device.
 								</CardDescription>
 							</CardHeader>
-							<CardContent className="space-y-4">
-								<input
-									ref={fileInputRef}
-									type="file"
-									accept=".json,application/json"
-									aria-label="Finpoint backup file"
-									onChange={event =>
-										setImportFile(event.currentTarget.files?.[0] ?? null)
-									}
-								/>
-								{importFile ? (
-									<Item variant="outline">
-										<ItemMedia>
-											<IconifyIcon
-												icon="lucide:file-json"
-												className="size-5"
-											/>
-										</ItemMedia>
-										<ItemContent>
-											<ItemTitle>{importFile.name}</ItemTitle>
-											<ItemDescription>
-												{(importFile.size / 1024).toFixed(2)} KB · restoring
-												replaces everything you have now
-											</ItemDescription>
-										</ItemContent>
-									</Item>
-								) : null}
+							<CardContent className="space-y-6">
+								<div className="space-y-3">
+									<p className="text-sm font-medium">
+										Download from this browser
+									</p>
+									<p className="text-sm text-muted-foreground">
+										Save everything on this browser into one file.
+									</p>
+									<Button
+										type="button"
+										disabled={busy !== null || total === 0}
+										onClick={() => void handleExport()}
+									>
+										<IconifyIcon icon="lucide:download" />
+										{busy === "export"
+											? "Saving…"
+											: `Download backup (${total} items)`}
+									</Button>
+								</div>
+								<div className="space-y-3 border-t pt-6">
+									<p className="text-sm font-medium">Restore into this browser</p>
+									<p className="text-sm text-muted-foreground">
+										Replace everything in this browser with a backup file you
+										saved earlier.
+									</p>
+									<input
+										ref={fileInputRef}
+										type="file"
+										accept=".json,application/json"
+										aria-label="Finpoint backup file"
+										onChange={event =>
+											setImportFile(event.currentTarget.files?.[0] ?? null)
+										}
+									/>
+									{importFile ? (
+										<Item variant="outline">
+											<ItemMedia>
+												<IconifyIcon
+													icon="lucide:file-json"
+													className="size-5"
+												/>
+											</ItemMedia>
+											<ItemContent>
+												<ItemTitle>{importFile.name}</ItemTitle>
+												<ItemDescription>
+													{(importFile.size / 1024).toFixed(2)} KB ·
+													restoring replaces everything you have now
+												</ItemDescription>
+											</ItemContent>
+										</Item>
+									) : null}
+									<Button
+										type="button"
+										variant="outline"
+										disabled={busy !== null || !importFile}
+										onClick={() => void handleImport()}
+									>
+										<IconifyIcon icon="lucide:upload" />
+										{busy === "import" ? "Restoring…" : "Restore from file"}
+									</Button>
+								</div>
 							</CardContent>
-							<CardFooter className="border-t bg-muted/20">
+						</Card>
+
+						<Card>
+							<CardHeader className="border-b">
+								<CardTitle>Backup system 2 · Google Drive sync</CardTitle>
+								<CardDescription>
+									Stored in your own Drive's hidden app folder — we never see it.
+									Write this browser to Drive, or read Drive into this browser.
+								</CardDescription>
+							</CardHeader>
+							<CardContent className="space-y-3 text-sm">
+								{driveUnconfigured ? (
+									<ol className="grid list-decimal gap-2 pl-5 text-muted-foreground">
+										<li>Create a Web OAuth client in Google Cloud Console.</li>
+										<li>
+											Add this site as an authorized JavaScript origin for
+											that client.
+										</li>
+										<li>
+											Set <code>VITE_GOOGLE_CLIENT_ID</code> to the client ID
+											and restart.
+										</li>
+									</ol>
+								) : (
+									<>
+										<p className="text-muted-foreground">
+											{drive?.lastSyncAt
+												? `Last synced ${new Date(drive.lastSyncAt).toLocaleString()}.`
+												: "Not synced yet on this device."}{" "}
+											{localDirty
+												? "This browser has changes Drive doesn't have yet."
+												: drive?.lastSyncAt
+													? "This browser matches the last sync."
+													: null}
+										</p>
+										<p className="text-muted-foreground">
+											{drive?.remoteModifiedTime ? (
+												remoteNewer ? (
+													<span className="font-medium text-amber-600 dark:text-amber-400">
+														Google Drive has a newer copy (from{" "}
+														{new Date(
+															drive.remoteModifiedTime,
+														).toLocaleString()}
+														).
+													</span>
+												) : (
+													`Drive copy from ${new Date(drive.remoteModifiedTime).toLocaleString()}.`
+												)
+											) : (
+												"No copy in Google Drive yet."
+											)}
+										</p>
+										{conflictAt ? (
+											<p className="rounded-md border border-amber-500/40 bg-amber-500/10 p-3">
+												This browser and Google Drive both changed (Drive
+												copy from {new Date(conflictAt).toLocaleString()}).
+												Writing overwrites Drive; reading replaces this
+												browser — the loser is replaced.
+											</p>
+										) : null}
+										{remoteAt && !conflictAt ? (
+											<p className="rounded-md border border-amber-500/40 bg-amber-500/10 p-3">
+												Google Drive has a newer copy (from{" "}
+												{new Date(remoteAt).toLocaleString()}) and this
+												browser hasn't changed since the last sync. Reading
+												it replaces this browser.
+											</p>
+										) : null}
+									</>
+								)}
+							</CardContent>
+							<CardFooter className="flex flex-wrap gap-2 border-t bg-muted/20">
 								<Button
 									type="button"
-									className="w-full sm:ml-auto sm:w-auto"
-									disabled={busy !== null || !importFile}
-									onClick={() => void handleImport()}
+									disabled={busy !== null || driveUnconfigured}
+									onClick={() => void handleDriveSync()}
 								>
-									<IconifyIcon icon="lucide:upload" />
-									{busy === "import" ? "Restoring…" : "Restore backup"}
+									<IconifyIcon icon="lucide:refresh-cw" />
+									{busy === "drive" ? "Checking…" : "Check & sync"}
 								</Button>
+								{conflictAt || remoteAt ? (
+									<>
+										<Button
+											type="button"
+											variant="outline"
+											disabled={busy !== null}
+											onClick={() => void resolveDrivePull()}
+										>
+											<IconifyIcon icon="lucide:cloud-download" />
+											{busy === "drive-pull"
+												? "Reading…"
+												: "Read Drive into this browser"}
+										</Button>
+										<Button
+											type="button"
+											variant="outline"
+											disabled={busy !== null}
+											onClick={() => void resolveDrivePush()}
+										>
+											<IconifyIcon icon="lucide:cloud-upload" />
+											{busy === "drive-push"
+												? "Writing…"
+												: "Write this browser to Drive"}
+										</Button>
+									</>
+								) : (
+									<>
+										<Button
+											type="button"
+											variant="outline"
+											disabled={busy !== null || !driveConnected}
+											onClick={() => handleDrivePush()}
+										>
+											<IconifyIcon icon="lucide:cloud-upload" />
+											{busy === "drive-push"
+												? "Writing…"
+												: confirmingPush
+													? "Click again to overwrite Drive"
+													: "Write to Drive"}
+										</Button>
+										<Button
+											type="button"
+											variant="outline"
+											disabled={busy !== null || !driveConnected}
+											onClick={() => handleDrivePull()}
+										>
+											<IconifyIcon icon="lucide:cloud-download" />
+											{busy === "drive-pull"
+												? "Reading…"
+												: confirmingPull
+													? "Click again to replace this browser"
+													: "Read from Drive"}
+										</Button>
+										<Button
+											type="button"
+											variant="outline"
+											disabled={busy !== null || !driveConnected}
+											onClick={() => void handleDriveDisconnect()}
+										>
+											{busy === "drive-disconnect"
+												? "Leaving…"
+												: "Disconnect"}
+										</Button>
+									</>
+								)}
 							</CardFooter>
 						</Card>
 
@@ -353,8 +662,8 @@ export default function DataSettingsPage() {
 										2
 									</span>
 									<span>
-										Finpoint keeps itself up to date in the background; your
-										data carries over automatically.
+										Backup system 1: download a file yourself and restore it
+										here later. Nothing leaves your hands.
 									</span>
 								</li>
 								<li className="flex gap-3">
@@ -362,8 +671,8 @@ export default function DataSettingsPage() {
 										3
 									</span>
 									<span>
-										Save a backup before clearing browser data or moving to
-										another device.
+										Backup system 2: write this browser to your own Google Drive
+										and read it back on another device. Finpoint never sees it.
 									</span>
 								</li>
 							</ol>
