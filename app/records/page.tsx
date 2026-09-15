@@ -7,7 +7,6 @@ import RecordCreatorDialog from "@/components/dialogs/record-creator"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
 import DateField from "@/components/form/date-field"
 import { UiIcon as IconifyIcon } from "@/components/icon"
-import AppHeader from "@/components/layout/app-header"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import CategoryFilter from "@/components/table/category-filter"
@@ -174,8 +173,6 @@ export default function RecordsPage() {
 
 	return (
 		<>
-			<AppHeader title="Records" />
-
 			<PageContent>
 				<PageHeader
 					title="Records"

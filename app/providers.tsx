@@ -4,6 +4,7 @@ import { Analytics } from "@vercel/analytics/react"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { useEffect, useState } from "react"
 import AppSidebar from "@/components/layout/app-sidebar"
+import ShellHeader from "@/components/layout/shell-header"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
@@ -68,7 +69,10 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 					<Analytics />
 					<SpeedInsights />
 					<AppSidebar />
-					<SidebarInset className="min-h-full">{children}</SidebarInset>
+					<SidebarInset className="min-h-full">
+						<ShellHeader />
+						{children}
+					</SidebarInset>
 				</SidebarProvider>
 			</TooltipProvider>
 		</HistoryProvider>

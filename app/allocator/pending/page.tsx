@@ -10,7 +10,6 @@ import StatementReplacementReviewDialog, {
 	dateDifferenceLabel,
 } from "@/components/dialogs/statement-replacement-review"
 import { UiIcon as IconifyIcon } from "@/components/icon"
-import AppHeader from "@/components/layout/app-header"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import { ClearFiltersButton, FILTER_CONTROL_CLASS, FilterBar } from "@/components/table/filter-bar"
@@ -216,7 +215,6 @@ export default function AllocatorPendingPage() {
 
 	return (
 		<>
-			<AppHeader title="Allocator" />
 			<PageContent>
 				<PageHeader
 					title="Allocator"

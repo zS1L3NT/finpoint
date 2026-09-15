@@ -6,7 +6,6 @@ import { DetailSummary, DetailSummaryItem } from "@/components/detail-summary"
 import PendingStatementDialog from "@/components/dialogs/pending-statement"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
 import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
-import AppHeader from "@/components/layout/app-header"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import RecordAmount from "@/components/record-amount"
@@ -46,7 +45,6 @@ export default function RecordPage({ params }: { params: Promise<{ id: string }>
 	if (!data) {
 		return (
 			<>
-				<AppHeader title="Record" />
 				<PageContent>
 					<p className="text-sm text-muted-foreground">Record not found.</p>
 				</PageContent>
@@ -59,8 +57,6 @@ export default function RecordPage({ params }: { params: Promise<{ id: string }>
 
 	return (
 		<>
-			<AppHeader title="Record" />
-
 			<PageContent>
 				<PageHeader
 					title={

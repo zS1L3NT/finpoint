@@ -4,7 +4,6 @@ import { DateTime } from "luxon"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { UiIcon as IconifyIcon } from "@/components/icon"
-import AppHeader from "@/components/layout/app-header"
 import PageContent from "@/components/layout/page-content"
 import { Button } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
@@ -55,7 +54,6 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 
 	return (
 		<>
-			<AppHeader title={isMonthly ? "Monthly Records" : "Dashboard"} />
 			<PageContent className={isMonthly ? "gap-5 md:gap-7" : "gap-7 md:gap-9"}>
 				<header className="grid gap-5">
 					<div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">

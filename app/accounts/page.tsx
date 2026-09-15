@@ -6,7 +6,6 @@ import Link from "next/link"
 import { useMemo, useState } from "react"
 import AccountDialog from "@/components/dialogs/account"
 import { UiIcon as IconifyIcon } from "@/components/icon"
-import AppHeader from "@/components/layout/app-header"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import PaginatedDataTable from "@/components/table/paginated-data-table"
@@ -34,8 +33,6 @@ export default function AccountsPage() {
 
 	return (
 		<>
-			<AppHeader title="Accounts" />
-
 			<PageContent>
 				<PageHeader
 					title="Accounts"

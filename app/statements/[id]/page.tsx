@@ -7,7 +7,6 @@ import { DetailSummary, DetailSummaryItem } from "@/components/detail-summary"
 import PendingStatementDialog from "@/components/dialogs/pending-statement"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
 import { UiIcon as IconifyIcon } from "@/components/icon"
-import AppHeader from "@/components/layout/app-header"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import DataTable from "@/components/table/data-table"
@@ -45,7 +44,6 @@ export default function StatementPage({ params }: { params: Promise<{ id: string
 	if (!data) {
 		return (
 			<>
-				<AppHeader title="Statement" />
 				<PageContent>
 					<p className="text-sm text-muted-foreground">Statement not found.</p>
 				</PageContent>
@@ -58,8 +56,6 @@ export default function StatementPage({ params }: { params: Promise<{ id: string
 
 	return (
 		<>
-			<AppHeader title="Statement" />
-
 			<PageContent>
 				<PageHeader
 					title={

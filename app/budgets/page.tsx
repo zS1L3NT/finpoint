@@ -8,7 +8,6 @@ import { useMemo, useState } from "react"
 import BudgetCreatorDialog from "@/components/dialogs/budget-creator"
 import BudgetEditorDialog from "@/components/dialogs/budget-editor"
 import { UiIcon as IconifyIcon } from "@/components/icon"
-import AppHeader from "@/components/layout/app-header"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import PaginatedDataTable from "@/components/table/paginated-data-table"
@@ -40,8 +39,6 @@ export default function BudgetsPage() {
 
 	return (
 		<>
-			<AppHeader title="Budgets" />
-
 			<PageContent>
 				<PageHeader
 					title="Budgets"

@@ -6,7 +6,6 @@ import { useMemo, useState } from "react"
 import PendingStatementDialog from "@/components/dialogs/pending-statement"
 import DateField from "@/components/form/date-field"
 import { UiIcon as IconifyIcon } from "@/components/icon"
-import AppHeader from "@/components/layout/app-header"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import { ClearFiltersButton, FILTER_CONTROL_CLASS, FilterBar } from "@/components/table/filter-bar"
@@ -74,8 +73,6 @@ export default function StatementsPage() {
 
 	return (
 		<>
-			<AppHeader title="Statements" />
-
 			<PageContent>
 				<PageHeader
 					title="Statements"
