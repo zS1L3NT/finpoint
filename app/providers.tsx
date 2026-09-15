@@ -50,18 +50,12 @@ function Boot() {
 	return null
 }
 
-export default function Providers({
-	children,
-	sidebarOpen,
-}: {
-	children: React.ReactNode
-	sidebarOpen: boolean
-}) {
+export default function Providers({ children }: { children: React.ReactNode }) {
 	return (
 		<HistoryProvider>
 			<TooltipProvider delayDuration={0}>
 				<SidebarProvider
-					defaultOpen={sidebarOpen}
+					defaultOpen
 					style={
 						{
 							"--sidebar-width": "calc(var(--spacing) * 72)",
