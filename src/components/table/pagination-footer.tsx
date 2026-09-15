@@ -49,7 +49,7 @@ export default function PaginationFooter({
 
 	return (
 		<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-			<p className="text-xs text-muted-foreground">{summary}</p>
+			<div className="text-xs text-muted-foreground">{summary}</div>
 
 			<Pagination className="mx-0 w-full justify-start sm:w-auto sm:justify-end">
 				<PaginationContent className="flex-wrap">
