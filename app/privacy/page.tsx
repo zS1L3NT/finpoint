@@ -1,6 +1,5 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import AppHeader from "@/components/layout/app-header"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -81,15 +80,12 @@ const SECTIONS: { heading: string; body: string[] }[] = [
 ]
 
 export const metadata: Metadata = {
-	title: "Privacy Policy",
 	description: "How Finpoint handles your data: it stays in your browser.",
 }
 
 export default function PrivacyPage() {
 	return (
 		<>
-			<AppHeader title="Privacy Policy" />
-
 			<PageContent>
 				<PageHeader
 					title="Privacy Policy"

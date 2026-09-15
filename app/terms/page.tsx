@@ -1,6 +1,5 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import AppHeader from "@/components/layout/app-header"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -86,15 +85,12 @@ const SECTIONS: { heading: string; body: string[] }[] = [
 ]
 
 export const metadata: Metadata = {
-	title: "Terms of Service",
 	description: "The rules for using Finpoint, the local-first finance tracker.",
 }
 
 export default function TermsPage() {
 	return (
 		<>
-			<AppHeader title="Terms of Service" />
-
 			<PageContent>
 				<PageHeader
 					title="Terms of Service"
