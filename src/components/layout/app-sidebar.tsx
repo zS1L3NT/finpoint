@@ -128,7 +128,9 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 							className="data-[slot=sidebar-menu-button]:p-1.5!"
 						>
 							<Link to={pathDashboard()} onClick={handleSidebarLink}>
-								<IconifyIcon icon="lucide:circle-dollar-sign" className="size-5!" />
+								<span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-zinc-900">
+									<img src="/favicon.svg" alt="" className="size-5" />
+								</span>
 								<span className="text-base font-semibold">Finpoint</span>
 							</Link>
 						</SidebarMenuButton>

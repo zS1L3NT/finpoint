@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="256 256 768 768" fill="none">
+  <title>Finpoint icon with charcoal shadow</title>
+  <defs>
+    <filter id="shadow" x="256" y="256" width="768" height="768" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="22" result="spread"/>
+      <feGaussianBlur in="spread" stdDeviation="35" result="soft"/>
+      <feFlood flood-color="#18181B" flood-opacity="0.9"/>
+      <feComposite in2="soft" operator="in" result="halo"/>
+      <feGaussianBlur in="SourceAlpha" stdDeviation="13" result="close"/>
+      <feFlood flood-color="#18181B" flood-opacity="0.75"/>
+      <feComposite in2="close" operator="in" result="edge"/>
+      <feMerge>
+        <feMergeNode in="halo"/>
+        <feMergeNode in="edge"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <g fill="#FAFAFA" filter="url(#shadow)">
+    <path d="M 510 389 H 792 A 60 60 0 0 1 792 509 H 557 Q 537 509 537 529 V 583 H 745 A 59 59 0 0 1 745 701 H 557 Q 537 701 537 721 V 877 Q 537 888 526 888 H 482 Q 424 888 424 830 V 475 A 86 86 0 0 1 510 389 Z"/>
+    <circle cx="747" cy="820" r="68"/>
+  </g>
+</svg>

@@ -1,7 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 1280" fill="none">
   <title>Finpoint</title>
-  <rect width="1280" height="1280" fill="#18181B"/>
-  <g fill="#FAFAFA" transform="translate(640 640) scale(1.9) translate(-619.5 -638.5)">
+  <g fill="#FAFAFA">
     <path d="M 510 389 H 792 A 60 60 0 0 1 792 509 H 557 Q 537 509 537 529 V 583 H 745 A 59 59 0 0 1 745 701 H 557 Q 537 701 537 721 V 877 Q 537 888 526 888 H 482 Q 424 888 424 830 V 475 A 86 86 0 0 1 510 389 Z"/>
     <circle cx="747" cy="820" r="68"/>
   </g>
