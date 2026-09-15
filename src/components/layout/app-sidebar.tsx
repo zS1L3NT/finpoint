@@ -1,6 +1,8 @@
+import { XIcon } from "lucide-react"
 import { DateTime } from "luxon"
 import { Link, useLocation } from "react-router-dom"
 import { UiIcon as IconifyIcon } from "@/components/icon"
+import { Button } from "@/components/ui/button"
 import {
 	Sidebar,
 	SidebarContent,
@@ -120,12 +122,12 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 
 	return (
 		<Sidebar collapsible="offcanvas" variant="floating" {...props}>
-			<SidebarHeader>
-				<SidebarMenu>
+			<SidebarHeader className="flex-row items-center">
+				<SidebarMenu className="min-w-0 flex-1">
 					<SidebarMenuItem>
 						<SidebarMenuButton
 							asChild
-							className="data-[slot=sidebar-menu-button]:p-1.5!"
+							className="data-[slot=sidebar-menu-button]:h-auto! data-[slot=sidebar-menu-button]:py-1.5!"
 						>
 							<Link to={pathDashboard()} onClick={handleSidebarLink}>
 								<span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-zinc-900">
@@ -136,6 +138,18 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 						</SidebarMenuButton>
 					</SidebarMenuItem>
 				</SidebarMenu>
+				{isMobile ? (
+					<Button
+						type="button"
+						variant="ghost"
+						size="icon-sm"
+						className="shrink-0 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+						onClick={() => setOpenMobile(false)}
+					>
+						<XIcon />
+						<span className="sr-only">Close menu</span>
+					</Button>
+				) : null}
 			</SidebarHeader>
 			<SidebarContent>
 				{groups.map(group => (
