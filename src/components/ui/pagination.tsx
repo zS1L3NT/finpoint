@@ -1,9 +1,9 @@
 import * as React from "react"
 
+import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ChevronLeftIcon, ChevronRightIcon, MoreHorizontalIcon } from "lucide-react"
-import { Link } from "react-router-dom"
 
 function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
   return (

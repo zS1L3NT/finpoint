@@ -1,7 +1,10 @@
+"use client"
+
+export const dynamic = "force-dynamic"
+
 import { useLiveQuery } from "dexie-react-hooks"
 import { DateTime } from "luxon"
-import { useMemo, useState } from "react"
-import { useParams } from "react-router-dom"
+import { use, useMemo, useState } from "react"
 import BudgetProgressChart from "@/components/charts/budget-progress-chart"
 import BudgetEditorDialog from "@/components/dialogs/budget-editor"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
@@ -29,8 +32,8 @@ import { listCategories } from "@/logic/categories"
 import { pathBudgets } from "@/routes"
 import type { Budget, CategoryWithChildren, Record } from "@/types"
 
-export default function BudgetPage() {
-	const { id } = useParams<{ id: string }>()
+export default function BudgetPage({ params }: { params: Promise<{ id: string }> }) {
+	const { id } = use(params)
 	const data = useLiveQuery(
 		() => (id ? getBudget(id).catch(() => null) : Promise.resolve(null)),
 		[id],

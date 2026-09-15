@@ -1,6 +1,6 @@
 import type { CellContext, ColumnDef, Row } from "@tanstack/react-table"
+import Link from "next/link"
 import { useMemo } from "react"
-import { Link } from "react-router-dom"
 import AllocateBar from "@/components/allocate-bar"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import { Badge } from "@/components/ui/badge"
@@ -42,7 +42,7 @@ function StatementActionsCell<TStatement extends StatementRow>({
 			) : null}
 			<Button variant="outline" size="sm" asChild>
 				<Link
-					to={pathStatement(row.original.id)}
+					href={pathStatement(row.original.id)}
 					onClick={pageName ? handlePush(pageName) : undefined}
 				>
 					Open
@@ -162,7 +162,7 @@ export function useStatementMobileRow<TStatement extends StatementRow>({
 					) : null}
 					<Button variant="outline" size="sm" asChild>
 						<Link
-							to={pathStatement(statement.id)}
+							href={pathStatement(statement.id)}
 							onClick={pageName ? handlePush(pageName) : undefined}
 						>
 							Open

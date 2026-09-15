@@ -1,6 +1,6 @@
 import type { CellContext, ColumnDef, Row } from "@tanstack/react-table"
+import Link from "next/link"
 import { useMemo, useState } from "react"
-import { Link } from "react-router-dom"
 import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
 import RecordAmount from "@/components/record-amount"
 import { Badge } from "@/components/ui/badge"
@@ -61,7 +61,7 @@ function RecordActionsCell<TRecord extends RecordRow>({
 			{onEdit ? <RecordEditButton record={row.original} onEdit={onEdit} /> : null}
 			<Button variant="outline" size="sm" asChild>
 				<Link
-					to={pathRecord(row.original.id)}
+					href={pathRecord(row.original.id)}
 					onClick={pageName ? handlePush(pageName) : undefined}
 				>
 					Open
@@ -184,7 +184,7 @@ export function useRecordMobileRow<TRecord extends RecordRow>({
 					{onEdit ? <RecordEditButton record={record} onEdit={onEdit} /> : null}
 					<Button variant="outline" size="sm" asChild>
 						<Link
-							to={pathRecord(record.id)}
+							href={pathRecord(record.id)}
 							onClick={pageName ? handlePush(pageName) : undefined}
 						>
 							Open

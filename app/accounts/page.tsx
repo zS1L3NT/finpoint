@@ -1,7 +1,11 @@
+"use client"
+
+export const dynamic = "force-dynamic"
+
 import type { CellContext } from "@tanstack/react-table"
 import { useLiveQuery } from "dexie-react-hooks"
+import Link from "next/link"
 import { useMemo, useState } from "react"
-import { Link, useSearchParams } from "react-router-dom"
 import AccountDialog from "@/components/dialogs/account"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import AppHeader from "@/components/layout/app-header"
@@ -20,7 +24,6 @@ import type { Account } from "@/types"
 export default function AccountsPage() {
 	const { handlePush } = useHistory()
 	const [editingAccount, setEditingAccount] = useState<Account | null>(null)
-	const [searchParams] = useSearchParams()
 
 	const { query, page, pageSize, handleQueryChange, handlePageSizeChange } =
 		usePaginatedTableState()
@@ -30,7 +33,6 @@ export default function AccountsPage() {
 		() => paginateItems(accounts, parsePage(page), parsePageSize(pageSize)),
 		[accounts, page, pageSize],
 	)
-	void searchParams
 
 	return (
 		<>
@@ -105,7 +107,7 @@ export default function AccountsPage() {
 									</Button>
 									<Button variant="outline" size="sm" asChild>
 										<Link
-											to={pathAccount(account.id)}
+											href={pathAccount(account.id)}
 											onClick={handlePush("Accounts")}
 										>
 											Open
@@ -141,7 +143,7 @@ function AccountActionsCell({ row, column }: CellContext<Account, unknown>) {
 				<IconifyIcon icon="lucide:pencil" /> Edit
 			</Button>
 			<Button variant="outline" size="sm" asChild>
-				<Link to={pathAccount(row.original.id)} onClick={handlePush("Accounts")}>
+				<Link href={pathAccount(row.original.id)} onClick={handlePush("Accounts")}>
 					Open
 				</Link>
 			</Button>

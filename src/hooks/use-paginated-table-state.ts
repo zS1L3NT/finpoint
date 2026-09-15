@@ -1,14 +1,18 @@
+"use client"
+
 // Client-side replacement for the Inertia search/pagination helper.
 // Search text stays local (debounced by the table); page + page size live in
-// the URL search params via react-router so links stay shareable.
+// the URL search params so links stay shareable.
 
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
-import { useSearchParams } from "react-router-dom"
 
 const DEFAULT_PAGE_SIZE = "100"
 
 export function usePaginatedTableState() {
-	const [searchParams, setSearchParams] = useSearchParams()
+	const searchParams = useSearchParams()
+	const router = useRouter()
+	const pathname = usePathname()
 	const [query, setQuery] = useState(() => searchParams.get("query") ?? "")
 	const [pageSize, setPageSize] = useState(
 		() => searchParams.get("per_page") ?? DEFAULT_PAGE_SIZE,
@@ -23,16 +27,15 @@ export function usePaginatedTableState() {
 
 	const setParams = useCallback(
 		(changes: Record<string, string | null>) => {
-			setSearchParams(prev => {
-				const next = new URLSearchParams(prev)
-				for (const [key, value] of Object.entries(changes)) {
-					if (value === null || value === "") next.delete(key)
-					else next.set(key, value)
-				}
-				return next
-			})
+			const next = new URLSearchParams(searchParams.toString())
+			for (const [key, value] of Object.entries(changes)) {
+				if (value === null || value === "") next.delete(key)
+				else next.set(key, value)
+			}
+			const suffix = next.toString()
+			router.push(suffix ? `${pathname}?${suffix}` : pathname, { scroll: false })
 		},
-		[setSearchParams],
+		[searchParams, router, pathname],
 	)
 
 	const handleQueryChange = useCallback(
