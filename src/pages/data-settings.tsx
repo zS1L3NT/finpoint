@@ -425,10 +425,10 @@ export default function DataSettingsPage() {
 												<IconifyIcon icon="lucide:refresh-cw" />
 											)}
 											{busy === "drive"
-												? "Checking…"
+												? "Syncing…"
 												: driveTeaser
 													? "Connect Google Drive"
-													: "Check & sync"}
+													: "Sync now"}
 										</Button>
 										{conflictAt || remoteAt ? (
 											<>
@@ -468,7 +468,7 @@ export default function DataSettingsPage() {
 														? "Writing…"
 														: confirmingPush
 															? "Click again to overwrite Drive"
-															: "Write to Drive"}
+															: "Write this browser to Drive"}
 												</Button>
 												<Button
 													type="button"
@@ -481,7 +481,7 @@ export default function DataSettingsPage() {
 														? "Reading…"
 														: confirmingPull
 															? "Click again to replace this browser"
-															: "Read from Drive"}
+															: "Read Drive into this browser"}
 												</Button>
 												<Button
 													type="button"
@@ -490,7 +490,7 @@ export default function DataSettingsPage() {
 													onClick={() => void handleDriveDisconnect()}
 												>
 													{busy === "drive-disconnect"
-														? "Leaving…"
+														? "Disconnecting…"
 														: "Disconnect"}
 												</Button>
 											</>
@@ -523,7 +523,7 @@ export default function DataSettingsPage() {
 									>
 										<IconifyIcon icon="lucide:download" />
 										{busy === "export"
-											? "Saving…"
+											? "Downloading…"
 											: `Download backup (${total} items)`}
 									</Button>
 								</div>
