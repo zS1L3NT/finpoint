@@ -1,6 +1,7 @@
+"use client"
+
 import { useLiveQuery } from "dexie-react-hooks"
-import { useState } from "react"
-import { useParams } from "react-router-dom"
+import { use, useState } from "react"
 import AllocateBar from "@/components/allocate-bar"
 import { DetailSummary, DetailSummaryItem } from "@/components/detail-summary"
 import PendingStatementDialog from "@/components/dialogs/pending-statement"
@@ -23,8 +24,8 @@ import { getStatement } from "@/logic/statements"
 import { pathStatements } from "@/routes"
 import type { Allocation, Record } from "@/types"
 
-export default function StatementPage() {
-	const { id } = useParams<{ id: string }>()
+export default function StatementPage({ params }: { params: Promise<{ id: string }> }) {
+	const { id } = use(params)
 	const [isEditingStatement, setIsEditingStatement] = useState(false)
 	const data = useLiveQuery(() => (id ? getStatement(id).catch(() => null) : null), [id])
 	const accounts = useLiveQuery(() => listAccounts(), []) ?? []
