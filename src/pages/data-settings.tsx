@@ -294,6 +294,7 @@ export default function DataSettingsPage() {
 
 	const driveUnconfigured = drive?.configured === false
 	const driveConnected = !driveUnconfigured && !!drive?.lastSyncAt
+	const driveTeaser = !driveUnconfigured && !driveConnected && !conflictAt && !remoteAt
 	const remoteNewer =
 		!driveUnconfigured &&
 		!!drive?.lastSyncAt &&
@@ -307,7 +308,7 @@ export default function DataSettingsPage() {
 			<PageContent>
 				<PageHeader
 					title="Data"
-					subtitle="Two separate backup systems: a file you download and keep yourself, or sync with your own Google Drive. Both hold the same data below."
+					subtitle="Two separate backup systems: sync with your own Google Drive, or keep a backup file yourself. Both hold the same data shown above."
 					description="Settings"
 					icon="lucide:database"
 				/>
@@ -319,7 +320,7 @@ export default function DataSettingsPage() {
 								<CardTitle>Your data on this browser</CardTitle>
 								<CardDescription>
 									Everything below lives in this browser. Both backup systems
-									above and below save exactly this.
+									below save exactly this.
 								</CardDescription>
 							</CardHeader>
 							<CardContent>
@@ -329,7 +330,179 @@ export default function DataSettingsPage() {
 
 						<Card>
 							<CardHeader className="border-b">
-								<CardTitle>Backup system 1 · File on this device</CardTitle>
+								<CardTitle>Backup system 1 · Google Drive sync</CardTitle>
+								<CardDescription>
+									Stored in your own Drive's hidden app folder — we never see it.
+									Write this browser to Drive, or read Drive into this browser.
+								</CardDescription>
+							</CardHeader>
+							<CardContent className="space-y-3 text-sm">
+								{driveUnconfigured ? (
+									import.meta.env.DEV ? (
+										<ol className="grid list-decimal gap-2 pl-5 text-muted-foreground">
+											<li>
+												Create a Web OAuth client in Google Cloud Console.
+											</li>
+											<li>
+												Add this site as an authorized JavaScript origin for
+												that client.
+											</li>
+											<li>
+												Set <code>VITE_GOOGLE_CLIENT_ID</code> to the client
+												ID and restart.
+											</li>
+										</ol>
+									) : (
+										<p className="text-muted-foreground">
+											Google Drive sync isn't available in this version of
+											Finpoint. Your file backup below works regardless.
+										</p>
+									)
+								) : driveTeaser ? (
+									<p className="text-muted-foreground">
+										Keep this browser in sync across your devices using your own
+										Google Drive — we never see it.
+									</p>
+								) : (
+									<>
+										<p className="text-muted-foreground">
+											{drive?.lastSyncAt
+												? `Last synced ${new Date(drive.lastSyncAt).toLocaleString()}.`
+												: "Not synced yet on this device."}{" "}
+											{localDirty
+												? "This browser has changes Drive doesn't have yet."
+												: drive?.lastSyncAt
+													? "This browser matches the last sync."
+													: null}
+										</p>
+										<p className="text-muted-foreground">
+											{drive?.remoteModifiedTime ? (
+												remoteNewer ? (
+													<span className="font-medium text-amber-600 dark:text-amber-400">
+														Google Drive has a newer copy (from{" "}
+														{new Date(
+															drive.remoteModifiedTime,
+														).toLocaleString()}
+														).
+													</span>
+												) : (
+													`Drive copy from ${new Date(drive.remoteModifiedTime).toLocaleString()}.`
+												)
+											) : (
+												"No copy in Google Drive yet."
+											)}
+										</p>
+										{conflictAt ? (
+											<p className="rounded-md border border-amber-500/40 bg-amber-500/10 p-3">
+												This browser and Google Drive both changed (Drive
+												copy from {new Date(conflictAt).toLocaleString()}).
+												Writing overwrites Drive; reading replaces this
+												browser — the loser is replaced.
+											</p>
+										) : null}
+										{remoteAt && !conflictAt ? (
+											<p className="rounded-md border border-amber-500/40 bg-amber-500/10 p-3">
+												Google Drive has a newer copy (from{" "}
+												{new Date(remoteAt).toLocaleString()}) and this
+												browser hasn't changed since the last sync. Reading
+												it replaces this browser.
+											</p>
+										) : null}
+									</>
+								)}
+							</CardContent>
+							<CardFooter className="flex flex-wrap gap-2 border-t bg-muted/20">
+								{driveUnconfigured ? null : (
+									<>
+										<Button
+											type="button"
+											disabled={busy !== null || !drive || driveUnconfigured}
+											onClick={() => void handleDriveSync()}
+										>
+											{driveTeaser ? (
+												<IconifyIcon icon="lucide:link" />
+											) : (
+												<IconifyIcon icon="lucide:refresh-cw" />
+											)}
+											{busy === "drive"
+												? "Checking…"
+												: driveTeaser
+													? "Connect Google Drive"
+													: "Check & sync"}
+										</Button>
+										{conflictAt || remoteAt ? (
+											<>
+												<Button
+													type="button"
+													variant="outline"
+													disabled={busy !== null}
+													onClick={() => void resolveDrivePull()}
+												>
+													<IconifyIcon icon="lucide:cloud-download" />
+													{busy === "drive-pull"
+														? "Reading…"
+														: "Read Drive into this browser"}
+												</Button>
+												<Button
+													type="button"
+													variant="outline"
+													disabled={busy !== null}
+													onClick={() => void resolveDrivePush()}
+												>
+													<IconifyIcon icon="lucide:cloud-upload" />
+													{busy === "drive-push"
+														? "Writing…"
+														: "Write this browser to Drive"}
+												</Button>
+											</>
+										) : driveTeaser ? null : (
+											<>
+												<Button
+													type="button"
+													variant="outline"
+													disabled={busy !== null || !driveConnected}
+													onClick={() => handleDrivePush()}
+												>
+													<IconifyIcon icon="lucide:cloud-upload" />
+													{busy === "drive-push"
+														? "Writing…"
+														: confirmingPush
+															? "Click again to overwrite Drive"
+															: "Write to Drive"}
+												</Button>
+												<Button
+													type="button"
+													variant="outline"
+													disabled={busy !== null || !driveConnected}
+													onClick={() => handleDrivePull()}
+												>
+													<IconifyIcon icon="lucide:cloud-download" />
+													{busy === "drive-pull"
+														? "Reading…"
+														: confirmingPull
+															? "Click again to replace this browser"
+															: "Read from Drive"}
+												</Button>
+												<Button
+													type="button"
+													variant="outline"
+													disabled={busy !== null || !driveConnected}
+													onClick={() => void handleDriveDisconnect()}
+												>
+													{busy === "drive-disconnect"
+														? "Leaving…"
+														: "Disconnect"}
+												</Button>
+											</>
+										)}
+									</>
+								)}
+							</CardFooter>
+						</Card>
+
+						<Card>
+							<CardHeader className="border-b">
+								<CardTitle>Backup system 2 · File on this device</CardTitle>
 								<CardDescription>
 									Manual and offline. Download a backup file you keep, and restore
 									it here later or on another device.
@@ -398,162 +571,6 @@ export default function DataSettingsPage() {
 								</div>
 							</CardContent>
 						</Card>
-
-						<Card>
-							<CardHeader className="border-b">
-								<CardTitle>Backup system 2 · Google Drive sync</CardTitle>
-								<CardDescription>
-									Stored in your own Drive's hidden app folder — we never see it.
-									Write this browser to Drive, or read Drive into this browser.
-								</CardDescription>
-							</CardHeader>
-							<CardContent className="space-y-3 text-sm">
-								{driveUnconfigured ? (
-									import.meta.env.DEV ? (
-										<ol className="grid list-decimal gap-2 pl-5 text-muted-foreground">
-											<li>
-												Create a Web OAuth client in Google Cloud Console.
-											</li>
-											<li>
-												Add this site as an authorized JavaScript origin for
-												that client.
-											</li>
-											<li>
-												Set <code>VITE_GOOGLE_CLIENT_ID</code> to the client
-												ID and restart.
-											</li>
-										</ol>
-									) : (
-										<p className="text-muted-foreground">
-											Google Drive sync isn't available in this version of
-											Finpoint. Your file backup above works regardless.
-										</p>
-									)
-								) : (
-									<>
-										<p className="text-muted-foreground">
-											{drive?.lastSyncAt
-												? `Last synced ${new Date(drive.lastSyncAt).toLocaleString()}.`
-												: "Not synced yet on this device."}{" "}
-											{localDirty
-												? "This browser has changes Drive doesn't have yet."
-												: drive?.lastSyncAt
-													? "This browser matches the last sync."
-													: null}
-										</p>
-										<p className="text-muted-foreground">
-											{drive?.remoteModifiedTime ? (
-												remoteNewer ? (
-													<span className="font-medium text-amber-600 dark:text-amber-400">
-														Google Drive has a newer copy (from{" "}
-														{new Date(
-															drive.remoteModifiedTime,
-														).toLocaleString()}
-														).
-													</span>
-												) : (
-													`Drive copy from ${new Date(drive.remoteModifiedTime).toLocaleString()}.`
-												)
-											) : (
-												"No copy in Google Drive yet."
-											)}
-										</p>
-										{conflictAt ? (
-											<p className="rounded-md border border-amber-500/40 bg-amber-500/10 p-3">
-												This browser and Google Drive both changed (Drive
-												copy from {new Date(conflictAt).toLocaleString()}).
-												Writing overwrites Drive; reading replaces this
-												browser — the loser is replaced.
-											</p>
-										) : null}
-										{remoteAt && !conflictAt ? (
-											<p className="rounded-md border border-amber-500/40 bg-amber-500/10 p-3">
-												Google Drive has a newer copy (from{" "}
-												{new Date(remoteAt).toLocaleString()}) and this
-												browser hasn't changed since the last sync. Reading
-												it replaces this browser.
-											</p>
-										) : null}
-									</>
-								)}
-							</CardContent>
-							<CardFooter className="flex flex-wrap gap-2 border-t bg-muted/20">
-								<Button
-									type="button"
-									disabled={busy !== null || !drive || driveUnconfigured}
-									onClick={() => void handleDriveSync()}
-								>
-									<IconifyIcon icon="lucide:refresh-cw" />
-									{busy === "drive" ? "Checking…" : "Check & sync"}
-								</Button>
-								{conflictAt || remoteAt ? (
-									<>
-										<Button
-											type="button"
-											variant="outline"
-											disabled={busy !== null}
-											onClick={() => void resolveDrivePull()}
-										>
-											<IconifyIcon icon="lucide:cloud-download" />
-											{busy === "drive-pull"
-												? "Reading…"
-												: "Read Drive into this browser"}
-										</Button>
-										<Button
-											type="button"
-											variant="outline"
-											disabled={busy !== null}
-											onClick={() => void resolveDrivePush()}
-										>
-											<IconifyIcon icon="lucide:cloud-upload" />
-											{busy === "drive-push"
-												? "Writing…"
-												: "Write this browser to Drive"}
-										</Button>
-									</>
-								) : (
-									<>
-										<Button
-											type="button"
-											variant="outline"
-											disabled={busy !== null || !driveConnected}
-											onClick={() => handleDrivePush()}
-										>
-											<IconifyIcon icon="lucide:cloud-upload" />
-											{busy === "drive-push"
-												? "Writing…"
-												: confirmingPush
-													? "Click again to overwrite Drive"
-													: "Write to Drive"}
-										</Button>
-										<Button
-											type="button"
-											variant="outline"
-											disabled={busy !== null || !driveConnected}
-											onClick={() => handleDrivePull()}
-										>
-											<IconifyIcon icon="lucide:cloud-download" />
-											{busy === "drive-pull"
-												? "Reading…"
-												: confirmingPull
-													? "Click again to replace this browser"
-													: "Read from Drive"}
-										</Button>
-										<Button
-											type="button"
-											variant="outline"
-											disabled={busy !== null || !driveConnected}
-											onClick={() => void handleDriveDisconnect()}
-										>
-											{busy === "drive-disconnect"
-												? "Leaving…"
-												: "Disconnect"}
-										</Button>
-									</>
-								)}
-							</CardFooter>
-						</Card>
-
 						<Card>
 							<CardHeader className="border-b">
 								<CardTitle>Try demo data</CardTitle>
@@ -683,8 +700,8 @@ export default function DataSettingsPage() {
 										2
 									</span>
 									<span>
-										Backup system 1: download a file yourself and restore it
-										here later. Nothing leaves your hands.
+										Backup system 1: write this browser to your own Google Drive
+										and read it back on another device. Finpoint never sees it.
 									</span>
 								</li>
 								<li className="flex gap-3">
@@ -692,8 +709,8 @@ export default function DataSettingsPage() {
 										3
 									</span>
 									<span>
-										Backup system 2: write this browser to your own Google Drive
-										and read it back on another device. Finpoint never sees it.
+										Backup system 2: download a file yourself and restore it
+										here later. Nothing leaves your hands.
 									</span>
 								</li>
 							</ol>
