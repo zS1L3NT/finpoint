@@ -176,9 +176,9 @@ export default function DataSettingsPage() {
 			setConfirmingPull(false)
 			if (result.outcome === "up-to-date") toast.success("Already in sync with Google Drive.")
 			else if (result.outcome === "pushed") {
-				toast.success("This browser written to Google Drive.")
+				toast.success("Saved data to your Drive.")
 			} else if (result.outcome === "pulled") {
-				toast.success("Google Drive read into this browser.")
+				toast.success("Restored data from your Drive.")
 			} else if (result.outcome === "conflict") {
 				toast.warning("Both sides changed — choose which to keep.")
 			} else if (result.outcome === "remote-newer") {
@@ -197,7 +197,7 @@ export default function DataSettingsPage() {
 			await pushDrive()
 			await ingestManualResult({ outcome: "pushed" })
 			clearDrivePrompts()
-			toast.success("This browser written to Google Drive.")
+			toast.success("Saved data to your Drive.")
 		} catch (cause) {
 			toast.error(cause instanceof Error ? cause.message : "Could not write to Drive.")
 		} finally {
@@ -211,7 +211,7 @@ export default function DataSettingsPage() {
 			await pullDrive()
 			await ingestManualResult({ outcome: "pulled" })
 			clearDrivePrompts()
-			toast.success("Google Drive read into this browser.")
+			toast.success("Restored data from your Drive.")
 		} catch (cause) {
 			toast.error(cause instanceof Error ? cause.message : "Could not read from Drive.")
 		} finally {
@@ -311,7 +311,7 @@ export default function DataSettingsPage() {
 								<CardTitle>Automatic sync</CardTitle>
 								<CardDescription>
 									Stored in your own Drive's hidden app folder — we never see it.
-									Write this browser to Drive, or read Drive into this browser.
+									Save data to your Drive, or restore data from your Drive.
 								</CardDescription>
 							</CardHeader>
 							<CardContent className="space-y-3 text-sm">
@@ -437,6 +437,7 @@ export default function DataSettingsPage() {
 								{driveUnconfigured ? null : (
 									<>
 										<Button
+											className="w-full sm:w-auto"
 											type="button"
 											disabled={busy !== null || driveUnconfigured}
 											onClick={() => void handleDriveSync()}
@@ -452,60 +453,73 @@ export default function DataSettingsPage() {
 													? "Connect Google Drive"
 													: "Sync now"}
 										</Button>
-										{syncConflict || remoteNewer ? (
+										{!driveTeaser && (
 											<>
+												{syncConflict || remoteNewer ? (
+													<>
+														<Button
+															className="w-full sm:w-auto"
+															type="button"
+															variant="outline"
+															disabled={busy !== null}
+															onClick={() => void resolveDrivePull()}
+														>
+															<IconifyIcon icon="lucide:cloud-download" />
+															{busy === "drive-pull"
+																? "Reading…"
+																: "Restore data from your Drive"}
+														</Button>
+														<Button
+															className="w-full sm:w-auto"
+															type="button"
+															variant="outline"
+															disabled={busy !== null}
+															onClick={() => void resolveDrivePush()}
+														>
+															<IconifyIcon icon="lucide:cloud-upload" />
+															{busy === "drive-push"
+																? "Writing…"
+																: "Save data to your Drive"}
+														</Button>
+													</>
+												) : (
+													<>
+														<Button
+															className="w-full sm:w-auto"
+															type="button"
+															variant="outline"
+															disabled={
+																busy !== null || !driveConnected
+															}
+															onClick={() => handleDrivePush()}
+														>
+															<IconifyIcon icon="lucide:cloud-upload" />
+															{busy === "drive-push"
+																? "Writing…"
+																: confirmingPush
+																	? "Click again to save to Drive"
+																	: "Save to Drive"}
+														</Button>
+														<Button
+															className="w-full sm:w-auto"
+															type="button"
+															variant="outline"
+															disabled={
+																busy !== null || !driveConnected
+															}
+															onClick={() => handleDrivePull()}
+														>
+															<IconifyIcon icon="lucide:cloud-download" />
+															{busy === "drive-pull"
+																? "Reading…"
+																: confirmingPull
+																	? "Click again to restore from Drive"
+																	: "Restore from Drive"}
+														</Button>
+													</>
+												)}
 												<Button
-													type="button"
-													variant="outline"
-													disabled={busy !== null}
-													onClick={() => void resolveDrivePull()}
-												>
-													<IconifyIcon icon="lucide:cloud-download" />
-													{busy === "drive-pull"
-														? "Reading…"
-														: "Read Drive into this browser"}
-												</Button>
-												<Button
-													type="button"
-													variant="outline"
-													disabled={busy !== null}
-													onClick={() => void resolveDrivePush()}
-												>
-													<IconifyIcon icon="lucide:cloud-upload" />
-													{busy === "drive-push"
-														? "Writing…"
-														: "Write this browser to Drive"}
-												</Button>
-											</>
-										) : driveTeaser ? null : (
-											<>
-												<Button
-													type="button"
-													variant="outline"
-													disabled={busy !== null || !driveConnected}
-													onClick={() => handleDrivePush()}
-												>
-													<IconifyIcon icon="lucide:cloud-upload" />
-													{busy === "drive-push"
-														? "Writing…"
-														: confirmingPush
-															? "Click again to overwrite Drive"
-															: "Write this browser to Drive"}
-												</Button>
-												<Button
-													type="button"
-													variant="outline"
-													disabled={busy !== null || !driveConnected}
-													onClick={() => handleDrivePull()}
-												>
-													<IconifyIcon icon="lucide:cloud-download" />
-													{busy === "drive-pull"
-														? "Reading…"
-														: confirmingPull
-															? "Click again to replace this browser"
-															: "Read Drive into this browser"}
-												</Button>
-												<Button
+													className="w-full sm:w-auto"
 													type="button"
 													variant="outline"
 													disabled={busy !== null || !driveConnected}
