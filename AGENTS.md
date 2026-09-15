@@ -1,15 +1,15 @@
 # AGENTS.md
 
 ## Project Shape
-- Fully client-side React + Vite app; no backend. `npm run dev` is the only thing needed to start.
-- `index.html` loads `src/app.tsx`, which mounts the react-router tree from `src/router.tsx` inside `src/layout.tsx` immediately while IndexedDB (Dexie) opens and seeds in the background. No boot gate: live queries populate the UI as data arrives.
+- Next.js App Router app; mostly client-side, plus a tiny auth broker. `npm run dev` is the only thing needed to start.
+- `app/layout.tsx` renders the shell (metadata, theme/sidebar cookies, `app/providers.tsx`) while IndexedDB (Dexie) opens and seeds in the background. No boot gate: live queries populate the UI as data arrives.
 - Layer segregation (UI must not cross it):
-  - `src/components/*` + `src/pages/*` are UI only: render, read via `useLiveQuery`/`useFetch`, and call `logic/*`. No direct Dexie imports. Show `Skeleton` placeholders while live queries resolve, never blocking loaders.
-  - `src/logic/*` holds domain operations and mirrors the old Laravel `Api/*Controller` surface 1:1 (accounts, statements, records, budgets, categories, buckets, importer, dashboard, monthly) so domain knowledge transfers.
+  - `app/**/page.tsx` + `src/components/*` are UI only: render, read via `useLiveQuery`/`useFetch`, and call `logic/*`. No direct Dexie imports. Show `Skeleton` placeholders while live queries resolve, never blocking loaders. Interactive routes are `"use client"` + `force-dynamic` (search params); static content pages (privacy, terms) stay server components.
+  - `src/logic/*` holds domain operations and mirrors the old Laravel `Api/*Controller` surface 1:1 (accounts, statements, records, budgets, categories, buckets, importer, dashboard, monthly) so domain knowledge transfers. `src/logic/auto-sync.ts` is the background Drive engine.
   - `src/data/*` holds persistence: Dexie instance + versioned migrations (`db.ts`), first-run seed (`seed.ts`), JSON export/import (`export-import.ts`) + generated test data (`test-data.ts`).
-  - `src/routes.ts` centralizes all route paths (replaces Wayfinder).
-  - Overview + Monthly Records share the `MonthLayout` shell (title, month nav, tabs mount once, content swaps below), so tab switches never remount the header.
-- React Compiler is enabled in `vite.config.ts`.
+  - `src/routes.ts` centralizes all route paths; `app/api/auth/*` are Route Handlers for the Google OAuth broker only (exchange/token/logout) — financial data never touches them.
+  - Overview + Monthly Records share the `(month)` route-group shell (title, month nav, tabs mount once, content swaps below), so tab switches never remount the header.
+- React Compiler is enabled in `next.config.ts`.
 
 ## Code Style
 - Read `STYLE.md` for code style rules.
@@ -17,7 +17,7 @@
 
 ## Commands
 - Use `bun install` for a fresh clone.
-- Use `npm run dev` for normal local work (pure Vite, no server).
+- Use `npm run dev` for normal local work (Next.js on port 5173, preserving the Google OAuth origin).
 - `bun lint` is write-mode (`biome check --write`); read-only checks are `bun lint:check` and `bun types:check`; `bun run build` builds the app.
 
 ## Generated / Ignored Files
