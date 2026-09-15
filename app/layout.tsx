@@ -5,10 +5,7 @@ import "@/app.css"
 import Providers from "./providers"
 
 export const metadata: Metadata = {
-	title: {
-		default: "Finpoint",
-		template: "%s · Finpoint",
-	},
+	title: "Finpoint",
 	description: "Local-first personal finance tracker. Your data stays in your browser.",
 	manifest: "/manifest.json",
 	icons: {
