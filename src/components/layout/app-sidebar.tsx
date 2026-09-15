@@ -1,6 +1,9 @@
+"use client"
+
 import { XIcon } from "lucide-react"
 import { DateTime } from "luxon"
-import { Link, useLocation } from "react-router-dom"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import { Button } from "@/components/ui/button"
 import {
@@ -74,7 +77,7 @@ function SyncDot() {
 export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
 	const { handleClear } = useHistory()
 	const { isMobile, setOpenMobile } = useSidebar()
-	const { pathname } = useLocation()
+	const pathname = usePathname()
 	const handleSidebarLink = () => {
 		handleClear()
 
@@ -172,7 +175,7 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 							asChild
 							className="data-[slot=sidebar-menu-button]:h-auto! data-[slot=sidebar-menu-button]:py-1.5!"
 						>
-							<Link to={pathDashboard()} onClick={handleSidebarLink}>
+							<Link href={pathDashboard()} onClick={handleSidebarLink}>
 								<span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-zinc-900">
 									<img src="/favicon.svg" alt="" className="size-5" />
 								</span>
@@ -205,7 +208,7 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 							{group.items.map(item => (
 								<SidebarMenuItem key={item.label}>
 									<SidebarMenuButton asChild isActive={item.active}>
-										<Link to={item.to} onClick={handleSidebarLink}>
+										<Link href={item.to} onClick={handleSidebarLink}>
 											<IconifyIcon icon={item.icon} />
 											<span>{item.label}</span>
 											{item.to === pathDataSettings() ? <SyncDot /> : null}
