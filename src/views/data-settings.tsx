@@ -317,7 +317,7 @@ export default function DataSettingsPage() {
 							</CardHeader>
 							<CardContent className="space-y-3 text-sm">
 								{driveUnconfigured ? (
-									import.meta.env.DEV ? (
+									process.env.NODE_ENV === "development" ? (
 										<ol className="grid list-decimal gap-2 pl-5 text-muted-foreground">
 											<li>
 												Create a Web OAuth client in Google Cloud Console.
