@@ -1,7 +1,12 @@
+"use client"
+
+export const dynamic = "force-dynamic"
+
 import { useLiveQuery } from "dexie-react-hooks"
 import { DateTime } from "luxon"
+import Link from "next/link"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
-import { Link, useSearchParams } from "react-router-dom"
 import { toast } from "sonner"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
 import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
@@ -56,7 +61,24 @@ type Filters = {
 }
 
 export default function MonthlyRecordsPage() {
-	const [searchParams, setSearchParams] = useSearchParams()
+	const searchParams = useSearchParams()
+	const router = useRouter()
+	const pathname = usePathname()
+	const pushParams = (next: URLSearchParams) => {
+		const suffix = next.toString()
+		router.push(suffix ? pathname + "?" + suffix : pathname, { scroll: false })
+	}
+	const setSearchParams = (init: URLSearchParams | globalThis.Record<string, string>) => {
+		if (init instanceof URLSearchParams) {
+			pushParams(init)
+			return
+		}
+		const next = new URLSearchParams()
+		for (const [key, value] of Object.entries(init)) {
+			if (value !== undefined && value !== "") next.set(key, value)
+		}
+		pushParams(next)
+	}
 	const now = DateTime.now()
 	const month = searchParams.get("month") ?? now.toFormat("MMMM")
 	const yearParam = searchParams.get("year")
@@ -127,7 +149,7 @@ export default function MonthlyRecordsPage() {
 
 	const visit = (changes: Partial<Filters> = {}, nextDate = date) => {
 		const merged: Partial<Filters> = { ...filters, ...changes }
-		const next = new URLSearchParams(searchParams)
+		const next = new URLSearchParams(searchParams.toString())
 		next.set("month", nextDate.toFormat("MMMM"))
 		next.set("year", String(nextDate.year))
 		for (const key of [
@@ -656,7 +678,7 @@ function DayGroup({
 								</Button>
 								<Button variant="outline" size="sm" asChild>
 									<Link
-										to={pathRecord(record.id)}
+										href={pathRecord(record.id)}
 										onClick={handlePush("Monthly Records")}
 									>
 										Open
@@ -737,7 +759,7 @@ function EmptyRecords({ filtered, onClear }: { filtered: boolean; onClear: () =>
 			</CardHeader>
 			<CardContent>
 				<Button variant="outline" asChild>
-					<Link to={pathImporter()}>Import Statements</Link>
+					<Link href={pathImporter()}>Import Statements</Link>
 				</Button>
 			</CardContent>
 		</Card>
