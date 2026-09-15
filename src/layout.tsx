@@ -5,6 +5,7 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { HistoryProvider } from "@/history"
+import { useSyncToasts } from "@/hooks/use-sync-toasts"
 
 function TransitionedOutlet() {
 	const { pathname } = useLocation()
@@ -23,6 +24,7 @@ function TransitionedOutlet() {
 }
 
 export default function Layout() {
+	useSyncToasts()
 	return (
 		<HistoryProvider>
 			<TooltipProvider delayDuration={0}>

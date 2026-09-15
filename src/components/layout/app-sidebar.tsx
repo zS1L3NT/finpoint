@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/sidebar"
 import { START_DATE } from "@/constants"
 import { useHistory } from "@/history"
+import { useSyncStatus } from "@/hooks/use-sync-status"
 import {
 	pathAccounts,
 	pathAllocator,
@@ -27,6 +28,48 @@ import {
 	pathRecords,
 	pathStatements,
 } from "@/routes"
+
+function SyncDot() {
+	const sync = useSyncStatus()
+	if (!sync.configured) return null
+	const tone: string =
+		sync.activity != null
+			? "bg-sky-500 animate-pulse"
+			: sync.kind === "conflict" || sync.kind === "remote-newer"
+				? "bg-amber-500"
+				: sync.kind === "needs-auth" || sync.kind === "error"
+					? "bg-red-500"
+					: sync.kind === "offline"
+						? sync.localDirty
+							? "bg-amber-500"
+							: "bg-zinc-400"
+						: sync.kind === "local-changes" || sync.kind === "never-synced"
+							? "bg-sky-500"
+							: "bg-emerald-500"
+	const title =
+		sync.activity === "checking"
+			? "Checking Drive…"
+			: sync.activity === "pushing"
+				? "Writing to Drive…"
+				: sync.activity === "pulling"
+					? "Reading from Drive…"
+					: sync.kind === "conflict"
+						? "Needs your decision"
+						: sync.kind === "remote-newer"
+							? "Drive has a newer copy"
+							: sync.kind === "needs-auth"
+								? "Reconnect Google Drive"
+								: sync.kind === "offline"
+									? "Offline"
+									: sync.kind === "local-changes"
+										? "Unsaved changes"
+										: sync.kind === "never-synced"
+											? "Not connected yet"
+											: sync.kind === "error"
+												? (sync.error ?? "Sync failed")
+												: "In sync"
+	return <span title={title} className={`ml-auto size-2 shrink-0 rounded-full ${tone}`} />
+}
 
 export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
 	const { handleClear } = useHistory()
@@ -165,6 +208,7 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 										<Link to={item.to} onClick={handleSidebarLink}>
 											<IconifyIcon icon={item.icon} />
 											<span>{item.label}</span>
+											{item.to === pathDataSettings() ? <SyncDot /> : null}
 										</Link>
 									</SidebarMenuButton>
 								</SidebarMenuItem>

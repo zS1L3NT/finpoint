@@ -28,15 +28,10 @@ import {
 } from "@/data/export-import"
 import { seedIfEmpty } from "@/data/seed"
 import { generateTestData } from "@/data/test-data"
-import {
-	type DriveStatus,
-	disconnectDriveSync,
-	driveLocalDirty,
-	driveStatus,
-	pullDrive,
-	pushDrive,
-	syncDrive,
-} from "@/logic/drive-sync"
+import { useSyncStatus } from "@/hooks/use-sync-status"
+import { ingestManualResult, resetSyncDisplay } from "@/logic/auto-sync"
+import { disconnectDriveSync, pullDrive, pushDrive, syncDrive } from "@/logic/drive-sync"
+import { formatRelativeTime } from "@/logic/shared"
 import { pathPrivacy, pathTerms } from "@/routes"
 
 const COUNT_ROWS = [
@@ -81,12 +76,10 @@ export default function DataSettingsPage() {
 	const [importFile, setImportFile] = useState<File | null>(null)
 	const [confirmingClear, setConfirmingClear] = useState(false)
 	const [confirmingDemo, setConfirmingDemo] = useState(false)
-	const [drive, setDrive] = useState<DriveStatus | null>(null)
-	const [conflictAt, setConflictAt] = useState<string | null>(null)
-	const [remoteAt, setRemoteAt] = useState<string | null>(null)
-	const [localDirty, setLocalDirty] = useState<boolean | null>(null)
 	const [confirmingPush, setConfirmingPush] = useState(false)
 	const [confirmingPull, setConfirmingPull] = useState(false)
+	const [now, setNow] = useState(() => Date.now())
+	const sync = useSyncStatus()
 	const fileInputRef = useRef<HTMLInputElement>(null)
 	const counts =
 		useLiveQuery(async () => {
@@ -98,38 +91,9 @@ export default function DataSettingsPage() {
 	const total = counts ? Object.values(counts).reduce((sum, count) => sum + count, 0) : 0
 
 	useEffect(() => {
-		let cancelled = false
-		driveStatus()
-			.then(status => {
-				if (!cancelled) setDrive(status)
-			})
-			// Status is best-effort; the card renders a setup hint until it loads.
-			.catch(() => undefined)
-		return () => {
-			cancelled = true
-		}
+		const timer = window.setInterval(() => setNow(Date.now()), 30_000)
+		return () => window.clearInterval(timer)
 	}, [])
-
-	const refreshDrive = async () => {
-		try {
-			setDrive(await driveStatus())
-		} catch {
-			// Keep the last known status; toasts on the failing action explain.
-		}
-	}
-
-	useEffect(() => {
-		let cancelled = false
-		driveLocalDirty()
-			.then(dirty => {
-				if (!cancelled) setLocalDirty(dirty)
-			})
-			// Staleness is best-effort; the card still shows the last sync time.
-			.catch(() => undefined)
-		return () => {
-			cancelled = true
-		}
-	}, [total, drive?.lastSyncAt])
 
 	const handleExport = async () => {
 		setBusy("export")
@@ -198,8 +162,6 @@ export default function DataSettingsPage() {
 	}
 
 	const clearDrivePrompts = () => {
-		setConflictAt(null)
-		setRemoteAt(null)
 		setConfirmingPush(false)
 		setConfirmingPull(false)
 	}
@@ -208,23 +170,17 @@ export default function DataSettingsPage() {
 		setBusy("drive")
 		try {
 			const result = await syncDrive()
-			await refreshDrive()
+			await ingestManualResult(result)
 			setConfirmingPush(false)
 			setConfirmingPull(false)
 			if (result.outcome === "up-to-date") toast.success("Already in sync with Google Drive.")
 			else if (result.outcome === "pushed") {
-				clearDrivePrompts()
 				toast.success("This browser written to Google Drive.")
 			} else if (result.outcome === "pulled") {
-				clearDrivePrompts()
 				toast.success("Google Drive read into this browser.")
 			} else if (result.outcome === "conflict") {
-				setConflictAt(result.remoteModifiedTime ?? "recently")
-				setRemoteAt(null)
 				toast.warning("Both sides changed — choose which to keep.")
 			} else if (result.outcome === "remote-newer") {
-				setRemoteAt(result.remoteModifiedTime ?? "recently")
-				setConflictAt(null)
 				toast.warning("Google Drive has a newer copy — choose what to do.")
 			} else toast.info("Nothing to sync yet.")
 		} catch (cause) {
@@ -238,7 +194,7 @@ export default function DataSettingsPage() {
 		setBusy("drive-push")
 		try {
 			await pushDrive()
-			await refreshDrive()
+			await ingestManualResult({ outcome: "pushed" })
 			clearDrivePrompts()
 			toast.success("This browser written to Google Drive.")
 		} catch (cause) {
@@ -252,7 +208,7 @@ export default function DataSettingsPage() {
 		setBusy("drive-pull")
 		try {
 			await pullDrive()
-			await refreshDrive()
+			await ingestManualResult({ outcome: "pulled" })
 			clearDrivePrompts()
 			toast.success("Google Drive read into this browser.")
 		} catch (cause) {
@@ -282,7 +238,7 @@ export default function DataSettingsPage() {
 		setBusy("drive-disconnect")
 		try {
 			await disconnectDriveSync()
-			await refreshDrive()
+			await resetSyncDisplay()
 			clearDrivePrompts()
 			toast.success("Google Drive disconnected on this device.")
 		} catch {
@@ -292,14 +248,37 @@ export default function DataSettingsPage() {
 		}
 	}
 
-	const driveUnconfigured = drive?.configured === false
-	const driveConnected = !driveUnconfigured && !!drive?.lastSyncAt
-	const driveTeaser = !driveUnconfigured && !driveConnected && !conflictAt && !remoteAt
-	const remoteNewer =
-		!driveUnconfigured &&
-		!!drive?.lastSyncAt &&
-		!!drive?.remoteModifiedTime &&
-		new Date(drive.remoteModifiedTime) > new Date(drive.lastSyncAt)
+	const driveUnconfigured = !sync.configured
+	const driveConnected = sync.lastSyncAt != null
+	const driveTeaser = sync.configured && sync.kind === "never-synced"
+	const remoteNewer = sync.kind === "remote-newer"
+	const syncConflict = sync.kind === "conflict"
+	const browserTone =
+		sync.kind === "never-synced"
+			? "bg-zinc-400"
+			: sync.localDirty
+				? "bg-amber-500"
+				: "bg-emerald-500"
+	const browserLabel =
+		sync.kind === "never-synced"
+			? "Not yet synced"
+			: sync.localDirty
+				? "Unsaved changes"
+				: "No unsaved changes"
+	const driveState: { tone: string; label: string } =
+		sync.kind === "conflict"
+			? { tone: "bg-amber-500", label: "Needs your decision" }
+			: sync.kind === "remote-newer"
+				? { tone: "bg-amber-500", label: "Newer copy available" }
+				: sync.kind === "needs-auth"
+					? { tone: "bg-red-500", label: "Reconnect needed" }
+					: sync.kind === "offline"
+						? { tone: "bg-zinc-400", label: "Offline" }
+						: sync.kind === "error"
+							? { tone: "bg-red-500", label: "Sync failed" }
+							: sync.remoteModifiedTime
+								? { tone: "bg-emerald-500", label: "Up to date" }
+								: { tone: "bg-zinc-400", label: "No copy yet" }
 
 	return (
 		<>
@@ -365,47 +344,76 @@ export default function DataSettingsPage() {
 									</p>
 								) : (
 									<>
-										<p className="text-muted-foreground">
-											{drive?.lastSyncAt
-												? `Last synced ${new Date(drive.lastSyncAt).toLocaleString()}.`
-												: "Not synced yet on this device."}{" "}
-											{localDirty
-												? "This browser has changes Drive doesn't have yet."
-												: drive?.lastSyncAt
-													? "This browser matches the last sync."
-													: null}
-										</p>
-										<p className="text-muted-foreground">
-											{drive?.remoteModifiedTime ? (
-												remoteNewer ? (
-													<span className="font-medium text-amber-600 dark:text-amber-400">
-														Google Drive has a newer copy (from{" "}
-														{new Date(
-															drive.remoteModifiedTime,
+										<ul className="grid gap-2">
+											<li className="flex items-center justify-between gap-3 border-b py-1.5">
+												<span className="flex items-center gap-2 text-muted-foreground">
+													<span
+														className={`size-2 shrink-0 rounded-full ${browserTone}`}
+													/>
+													This browser
+												</span>
+												<span className="font-medium">{browserLabel}</span>
+											</li>
+											<li className="flex items-center justify-between gap-3 border-b py-1.5">
+												<span className="flex items-center gap-2 text-muted-foreground">
+													<span
+														className={`size-2 shrink-0 rounded-full ${driveState.tone}`}
+													/>
+													Google Drive
+												</span>
+												<span className="font-medium">
+													{driveState.label}
+												</span>
+											</li>
+											<li className="flex items-center justify-between gap-3 border-b py-1.5">
+												<span className="text-muted-foreground">
+													Last synced
+												</span>
+												{sync.lastSyncAt ? (
+													<span
+														className="font-medium tabular-nums"
+														title={new Date(
+															sync.lastSyncAt,
 														).toLocaleString()}
-														).
+													>
+														{formatRelativeTime(sync.lastSyncAt, now)}
 													</span>
 												) : (
-													`Drive copy from ${new Date(drive.remoteModifiedTime).toLocaleString()}.`
-												)
-											) : (
-												"No copy in Google Drive yet."
-											)}
-										</p>
-										{conflictAt ? (
+													<span className="font-medium text-muted-foreground">
+														Never
+													</span>
+												)}
+											</li>
+										</ul>
+										{sync.activity ? (
+											<p className="flex items-center gap-2 text-muted-foreground">
+												<span className="size-2 shrink-0 animate-pulse rounded-full bg-sky-500" />
+												{sync.activity === "checking"
+													? "Checking Drive…"
+													: sync.activity === "pushing"
+														? "Writing to Drive…"
+														: "Reading from Drive…"}
+											</p>
+										) : null}
+										{syncConflict ? (
 											<p className="rounded-md border border-amber-500/40 bg-amber-500/10 p-3">
 												This browser and Google Drive both changed (Drive
-												copy from {new Date(conflictAt).toLocaleString()}).
-												Writing overwrites Drive; reading replaces this
+												copy from{" "}
+												{sync.conflictAt
+													? new Date(sync.conflictAt).toLocaleString()
+													: "recently"}
+												). Writing overwrites Drive; reading replaces this
 												browser — the loser is replaced.
 											</p>
 										) : null}
-										{remoteAt && !conflictAt ? (
+										{remoteNewer ? (
 											<p className="rounded-md border border-amber-500/40 bg-amber-500/10 p-3">
 												Google Drive has a newer copy (from{" "}
-												{new Date(remoteAt).toLocaleString()}) and this
-												browser hasn't changed since the last sync. Reading
-												it replaces this browser.
+												{sync.conflictAt
+													? new Date(sync.conflictAt).toLocaleString()
+													: "recently"}
+												) and this browser hasn't changed since the last
+												sync. Reading it replaces this browser.
 											</p>
 										) : null}
 									</>
@@ -416,7 +424,7 @@ export default function DataSettingsPage() {
 									<>
 										<Button
 											type="button"
-											disabled={busy !== null || !drive || driveUnconfigured}
+											disabled={busy !== null || driveUnconfigured}
 											onClick={() => void handleDriveSync()}
 										>
 											{driveTeaser ? (
@@ -430,7 +438,7 @@ export default function DataSettingsPage() {
 													? "Connect Google Drive"
 													: "Sync now"}
 										</Button>
-										{conflictAt || remoteAt ? (
+										{syncConflict || remoteNewer ? (
 											<>
 												<Button
 													type="button"

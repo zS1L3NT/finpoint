@@ -5,6 +5,7 @@ import { RouterProvider } from "react-router-dom"
 import { db } from "@/data/db"
 import { seedIfEmpty } from "@/data/seed"
 import { initializeAppearance } from "@/hooks/use-appearance"
+import { startAutoSync } from "@/logic/auto-sync"
 import { router } from "@/router"
 
 initializeAppearance(
@@ -16,7 +17,14 @@ initializeAppearance(
 let boot: Promise<void> | null = null
 
 function ensureDb(): Promise<void> {
-	if (!boot) boot = db.open().then(() => seedIfEmpty())
+	if (!boot) {
+		boot = db
+			.open()
+			.then(() => seedIfEmpty())
+			.then(() => {
+				startAutoSync()
+			})
+	}
 	return boot
 }
 

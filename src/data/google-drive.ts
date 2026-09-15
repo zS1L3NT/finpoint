@@ -40,6 +40,35 @@ export function isDriveConfigured(): boolean {
 let gsiPromise: Promise<void> | null = null
 let cachedToken: { token: string; expiresAt: number } | null = null
 
+export class AuthNeededError extends Error {
+	constructor() {
+		super("Google Drive needs reconnecting.")
+		this.name = "AuthNeededError"
+	}
+}
+
+const GRANT_KEY = "finpoint_drive_granted"
+
+function markDriveGranted(): void {
+	try {
+		sessionStorage.setItem(GRANT_KEY, "1")
+	} catch {
+		// Private mode: background sync simply stays manual-only.
+	}
+}
+
+function hasDriveGrant(): boolean {
+	try {
+		return sessionStorage.getItem(GRANT_KEY) === "1"
+	} catch {
+		return false
+	}
+}
+
+export function hasFreshDriveToken(): boolean {
+	return !!cachedToken && Date.now() < cachedToken.expiresAt - 60_000
+}
+
 function loadGsi(): Promise<void> {
 	if (typeof window === "undefined")
 		return Promise.reject(new Error("Drive sync needs a browser."))
@@ -87,6 +116,7 @@ export async function ensureDriveToken(): Promise<string> {
 					token: response.access_token,
 					expiresAt: Date.now() + response.expires_in * 1000,
 				}
+				markDriveGranted()
 				resolve(response.access_token)
 			},
 		})
@@ -95,8 +125,51 @@ export async function ensureDriveToken(): Promise<string> {
 	return token
 }
 
+export async function ensureDriveTokenSilent(timeoutMs = 8000): Promise<string> {
+	if (!googleClientId()) throw new AuthNeededError()
+	if (hasFreshDriveToken() && cachedToken) return cachedToken.token
+	// Without a prior grant this session a popup is certain: don't even try.
+	if (!hasDriveGrant()) throw new AuthNeededError()
+
+	await loadGsi()
+	const oauth2 = window.google?.accounts?.oauth2
+	if (!oauth2) throw new AuthNeededError()
+
+	return new Promise<string>((resolve, reject) => {
+		const timer = window.setTimeout(() => reject(new AuthNeededError()), timeoutMs)
+		const client = oauth2.initTokenClient({
+			client_id: googleClientId(),
+			scope: DRIVE_SCOPE,
+			callback: response => {
+				window.clearTimeout(timer)
+				if (response.error || !response.access_token) {
+					reject(new AuthNeededError())
+					return
+				}
+				cachedToken = {
+					token: response.access_token,
+					expiresAt: Date.now() + response.expires_in * 1000,
+				}
+				markDriveGranted()
+				resolve(response.access_token)
+			},
+		})
+		try {
+			client.requestAccessToken({ prompt: "" })
+		} catch {
+			window.clearTimeout(timer)
+			reject(new AuthNeededError())
+		}
+	})
+}
+
 export function disconnectDrive(): void {
 	cachedToken = null
+	try {
+		sessionStorage.removeItem(GRANT_KEY)
+	} catch {
+		// Already gone.
+	}
 	if (window.google?.accounts?.oauth2 && googleClientId()) {
 		window.google.accounts.oauth2.initTokenClient({
 			client_id: googleClientId(),

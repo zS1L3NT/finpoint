@@ -43,7 +43,13 @@ async function metaGet(key: string): Promise<string | null> {
 }
 
 async function hashTables(tables: unknown): Promise<string> {
-	const bytes = new TextEncoder().encode(JSON.stringify(tables))
+	// Sort rows so the hash survives an export -> import -> export round trip
+	// (IndexedDB returns rows in key order, not insertion order).
+	const normalized: Record<string, unknown[]> = {}
+	for (const [key, rows] of Object.entries(tables as Record<string, unknown[]>)) {
+		normalized[key] = [...rows].sort((a, b) => (JSON.stringify(a) < JSON.stringify(b) ? -1 : 1))
+	}
+	const bytes = new TextEncoder().encode(JSON.stringify(normalized))
 	const digest = await crypto.subtle.digest("SHA-256", bytes)
 	return [...new Uint8Array(digest)].map(b => b.toString(16).padStart(2, "0")).join("")
 }

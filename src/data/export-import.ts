@@ -22,7 +22,7 @@ type TableName =
 	| "bucket_targets"
 	| "analytics_months"
 
-const TABLES: TableName[] = [
+export const TABLES: TableName[] = [
 	"accounts",
 	"statements",
 	"categories",

@@ -38,3 +38,14 @@ export function newId(): string {
 export function inputToStored(input: string): string {
 	return input.replace("T", " ")
 }
+
+/** ISO timestamp -> "just now", "5 min ago", … (locale-aware). */
+export function formatRelativeTime(iso: string, now: number = Date.now()): string {
+	const seconds = Math.round((new Date(iso).getTime() - now) / 1000)
+	const abs = Math.abs(seconds)
+	if (abs < 45) return "just now"
+	const relative = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" })
+	if (abs < 3600) return relative.format(Math.trunc(seconds / 60), "minute")
+	if (abs < 86400) return relative.format(Math.trunc(seconds / 3600), "hour")
+	return relative.format(Math.trunc(seconds / 86400), "day")
+}
