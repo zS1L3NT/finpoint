@@ -365,36 +365,51 @@ export default function DataSettingsPage() {
 													{driveState.label}
 												</span>
 											</li>
-											<li className="flex items-center justify-between gap-3 border-b py-1.5">
-												<span className="text-muted-foreground">
-													Last synced
-												</span>
-												{sync.lastSyncAt ? (
-													<span
-														className="font-medium tabular-nums"
-														title={new Date(
-															sync.lastSyncAt,
-														).toLocaleString()}
-													>
-														{formatRelativeTime(sync.lastSyncAt, now)}
-													</span>
+											<li
+												className="flex items-center justify-between gap-3 border-b py-1.5"
+												aria-live="polite"
+											>
+												{sync.activity ? (
+													<>
+														<span className="flex items-center gap-2 text-muted-foreground">
+															<span className="size-2 shrink-0 animate-pulse rounded-full bg-sky-500" />
+															{sync.activity === "checking"
+																? "Checking Drive"
+																: sync.activity === "pushing"
+																	? "Writing to Drive"
+																	: "Reading from Drive"}
+														</span>
+														<span className="font-medium text-muted-foreground">
+															now
+														</span>
+													</>
 												) : (
-													<span className="font-medium text-muted-foreground">
-														Never
-													</span>
+													<>
+														<span className="flex items-center gap-2 text-muted-foreground">
+															<span className="size-2 shrink-0 rounded-full bg-zinc-400" />
+															Last synced
+														</span>
+														{sync.lastSyncAt ? (
+															<span
+																className="font-medium tabular-nums"
+																title={new Date(
+																	sync.lastSyncAt,
+																).toLocaleString()}
+															>
+																{formatRelativeTime(
+																	sync.lastSyncAt,
+																	now,
+																)}
+															</span>
+														) : (
+															<span className="font-medium text-muted-foreground">
+																Never
+															</span>
+														)}
+													</>
 												)}
 											</li>
 										</ul>
-										{sync.activity ? (
-											<p className="flex items-center gap-2 text-muted-foreground">
-												<span className="size-2 shrink-0 animate-pulse rounded-full bg-sky-500" />
-												{sync.activity === "checking"
-													? "Checking Drive…"
-													: sync.activity === "pushing"
-														? "Writing to Drive…"
-														: "Reading from Drive…"}
-											</p>
-										) : null}
 										{syncConflict ? (
 											<p className="rounded-md border border-amber-500/40 bg-amber-500/10 p-3">
 												This browser and Google Drive both changed (Drive
