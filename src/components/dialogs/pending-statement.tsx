@@ -1,6 +1,6 @@
 import { DateTime } from "luxon"
+import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import AmountField from "@/components/form/amount-field"
 import DatetimeField from "@/components/form/datetime-field"
@@ -51,7 +51,7 @@ export default function PendingStatementDialog({
 	trigger?: React.ReactElement
 }) {
 	const { open, setIsOpen, onOpenChangeComplete } = useDialogCloseAnimation(isOpen, onOpenChange)
-	const navigate = useNavigate()
+	const router = useRouter()
 	const isEditing = !!statement
 	const [values, setValues] = useState<PendingStatementValues>({
 		account_id: "",
@@ -131,7 +131,7 @@ export default function PendingStatementDialog({
 			await deletePendingStatement(statement.id)
 			setIsOpen(false)
 			toast.success("Pending statement deleted.")
-			void navigate(pathStatements())
+			void router.push(pathStatements())
 		} catch (cause) {
 			if (cause instanceof ValidationError) {
 				setApiErrors(cause.errors)
