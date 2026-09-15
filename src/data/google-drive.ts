@@ -30,7 +30,7 @@ declare global {
 }
 
 export function googleClientId(): string {
-	return import.meta.env.VITE_GOOGLE_CLIENT_ID ?? ""
+	return process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? ""
 }
 
 export function isDriveConfigured(): boolean {
