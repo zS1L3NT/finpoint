@@ -409,17 +409,26 @@ export default function DataSettingsPage() {
 							</CardHeader>
 							<CardContent className="space-y-3 text-sm">
 								{driveUnconfigured ? (
-									<ol className="grid list-decimal gap-2 pl-5 text-muted-foreground">
-										<li>Create a Web OAuth client in Google Cloud Console.</li>
-										<li>
-											Add this site as an authorized JavaScript origin for
-											that client.
-										</li>
-										<li>
-											Set <code>VITE_GOOGLE_CLIENT_ID</code> to the client ID
-											and restart.
-										</li>
-									</ol>
+									import.meta.env.DEV ? (
+										<ol className="grid list-decimal gap-2 pl-5 text-muted-foreground">
+											<li>
+												Create a Web OAuth client in Google Cloud Console.
+											</li>
+											<li>
+												Add this site as an authorized JavaScript origin for
+												that client.
+											</li>
+											<li>
+												Set <code>VITE_GOOGLE_CLIENT_ID</code> to the client
+												ID and restart.
+											</li>
+										</ol>
+									) : (
+										<p className="text-muted-foreground">
+											Google Drive sync isn't available in this version of
+											Finpoint. Your file backup above works regardless.
+										</p>
+									)
 								) : (
 									<>
 										<p className="text-muted-foreground">
