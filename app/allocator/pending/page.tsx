@@ -1,7 +1,12 @@
+"use client"
+
+export const dynamic = "force-dynamic"
+
 import { useLiveQuery } from "dexie-react-hooks"
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
+import Link from "next/link"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
-import { Link, useSearchParams } from "react-router-dom"
 import AllocatorTabs from "@/components/allocator-tabs"
 import StatementReplacementReviewDialog, {
 	dateDifferenceLabel,
@@ -51,7 +56,24 @@ import type {
 type CandidatePage = Paginated<StatementReplacementCandidate>
 
 export default function AllocatorPendingPage() {
-	const [searchParams, setSearchParams] = useSearchParams()
+	const searchParams = useSearchParams()
+	const router = useRouter()
+	const pathname = usePathname()
+	const pushParams = (next: URLSearchParams) => {
+		const suffix = next.toString()
+		router.push(suffix ? `${pathname}?${suffix}` : pathname, { scroll: false })
+	}
+	const setSearchParams = (init: URLSearchParams | Record<string, string>) => {
+		if (init instanceof URLSearchParams) {
+			pushParams(init)
+			return
+		}
+		const next = new URLSearchParams()
+		for (const [key, value] of Object.entries(init)) {
+			if (value !== undefined && value !== "") next.set(key, value)
+		}
+		pushParams(next)
+	}
 	const queueQueryParam = searchParams.get("query") ?? ""
 	const candidateQueryParam = searchParams.get("candidate_query") ?? ""
 	const accountId = searchParams.get("account_id") ?? "all"
@@ -67,18 +89,16 @@ export default function AllocatorPendingPage() {
 		changes: globalThis.Record<string, string | number | null>,
 		clearCandidate = false,
 	) => {
-		setSearchParams(prev => {
-			const next = new URLSearchParams(prev)
-			for (const [key, value] of Object.entries(changes)) {
-				if (value === null || value === "") next.delete(key)
-				else next.set(key, String(value))
-			}
-			if (clearCandidate) {
-				next.delete("candidate_query")
-				next.delete("candidate_page")
-			}
-			return next
-		})
+		const next = new URLSearchParams(searchParams.toString())
+		for (const [key, value] of Object.entries(changes)) {
+			if (value === null || value === "") next.delete(key)
+			else next.set(key, String(value))
+		}
+		if (clearCandidate) {
+			next.delete("candidate_query")
+			next.delete("candidate_page")
+		}
+		pushParams(next)
 	}
 
 	useEffect(() => setQueueQuery(queueQueryParam), [queueQueryParam])
@@ -184,18 +204,16 @@ export default function AllocatorPendingPage() {
 		const next =
 			pendingStatements.data[selectedIndex + 1] ?? pendingStatements.data[selectedIndex - 1]
 		setReviewStatement(null)
-		setSearchParams(prev => {
-			const nextParams = new URLSearchParams(prev)
-			nextParams.delete("candidate_query")
-			nextParams.delete("candidate_page")
-			if (next) nextParams.set("pending_statement_id", next.id)
-			else {
-				nextParams.delete("pending_statement_id")
-				if (pendingStatements.current_page > 1)
-					nextParams.set("page", String(pendingStatements.current_page - 1))
-			}
-			return nextParams
-		})
+		const nextParams = new URLSearchParams(searchParams.toString())
+		nextParams.delete("candidate_query")
+		nextParams.delete("candidate_page")
+		if (next) nextParams.set("pending_statement_id", next.id)
+		else {
+			nextParams.delete("pending_statement_id")
+			if (pendingStatements.current_page > 1)
+				nextParams.set("page", String(pendingStatements.current_page - 1))
+		}
+		pushParams(nextParams)
 	}
 
 	return (
@@ -706,7 +724,7 @@ function CandidateResults({
 							<CardFooter className="justify-end gap-1.5">
 								<Button variant="outline" size="sm" asChild>
 									<Link
-										to={pathStatement(statement.id)}
+										href={pathStatement(statement.id)}
 										onClick={handlePush("Allocator")}
 									>
 										Open

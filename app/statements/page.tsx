@@ -1,6 +1,10 @@
+"use client"
+
+export const dynamic = "force-dynamic"
+
 import { useLiveQuery } from "dexie-react-hooks"
+import { useSearchParams } from "next/navigation"
 import { useMemo, useState } from "react"
-import { useSearchParams } from "react-router-dom"
 import PendingStatementDialog from "@/components/dialogs/pending-statement"
 import DateField from "@/components/form/date-field"
 import { UiIcon as IconifyIcon } from "@/components/icon"
@@ -29,7 +33,7 @@ import type { Statement } from "@/types"
 export default function StatementsPage() {
 	const [isCreatingStatement, setIsCreatingStatement] = useState(false)
 	const [editingStatement, setEditingStatement] = useState<Statement | null>(null)
-	const [searchParams] = useSearchParams()
+	const searchParams = useSearchParams()
 	const isPending = searchParams.get("is_pending")
 	const startDate = searchParams.get("start_date")
 	const endDate = searchParams.get("end_date")

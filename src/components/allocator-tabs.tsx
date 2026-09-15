@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom"
+import Link from "next/link"
 import { START_DATE } from "@/constants"
 import { cn } from "@/lib/utils"
 import { pathAllocator, pathAllocatorPending } from "@/routes"
@@ -13,7 +13,7 @@ export default function AllocatorTabs({ active }: { active: "allocate" | "replac
 						? "border-foreground font-medium"
 						: "border-transparent text-muted-foreground hover:text-foreground",
 				)}
-				to={pathAllocator({ start_date: START_DATE })}
+				href={pathAllocator({ start_date: START_DATE })}
 			>
 				Allocate to Records
 			</Link>
@@ -24,7 +24,7 @@ export default function AllocatorTabs({ active }: { active: "allocate" | "replac
 						? "border-foreground font-medium"
 						: "border-transparent text-muted-foreground hover:text-foreground",
 				)}
-				to={pathAllocatorPending()}
+				href={pathAllocatorPending()}
 			>
 				Replace Pending
 			</Link>
