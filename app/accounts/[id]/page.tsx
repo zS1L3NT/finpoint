@@ -1,7 +1,5 @@
 "use client"
 
-export const dynamic = "force-dynamic"
-
 import { useLiveQuery } from "dexie-react-hooks"
 import { use, useMemo, useState } from "react"
 import { DetailSummary, DetailSummaryItem } from "@/components/detail-summary"

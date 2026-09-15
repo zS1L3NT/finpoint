@@ -1,7 +1,5 @@
 "use client"
 
-export const dynamic = "force-dynamic"
-
 import { DateTime } from "luxon"
 import Link from "next/link"
 import { usePathname } from "next/navigation"

@@ -1,7 +1,5 @@
 "use client"
 
-export const dynamic = "force-dynamic"
-
 import { useLiveQuery } from "dexie-react-hooks"
 import { useSearchParams } from "next/navigation"
 import { useMemo, useState } from "react"
