@@ -37,7 +37,18 @@
 		"noEmit": true,
 		"allowJs": true,
 		"incremental": true,
-		"tsBuildInfoFile": "node_modules/.cache/tsbuildinfo"
+		"tsBuildInfoFile": "node_modules/.cache/tsbuildinfo",
+		"plugins": [{ "name": "next" }]
 	},
-	"include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "vite.config.ts"]
+	"include": [
+		"src/**/*.ts",
+		"src/**/*.d.ts",
+		"src/**/*.tsx",
+		"app/**/*.ts",
+		"app/**/*.tsx",
+		"next-env.d.ts",
+		".next/types/**/*.ts",
+		"vite.config.ts",
+		"next.config.ts"
+	]
 }

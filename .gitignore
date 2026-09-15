@@ -4,6 +4,7 @@
 /.vscode
 /.idea
 /node_modules
+/.next
 /dist
 /database/*.sqlite*
 /STYLE.md
