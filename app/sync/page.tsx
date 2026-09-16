@@ -98,10 +98,9 @@ export default function DataSettingsPage() {
 	const total = counts ? Object.values(counts).reduce((sum, count) => sum + count, 0) : 0
 
 	useEffect(() => {
-		const live = sync.activity != null || sync.nextPushAt != null
-		const timer = window.setInterval(() => setNow(Date.now()), live ? 1000 : 30_000)
+		const timer = window.setInterval(() => setNow(Date.now()), 1000)
 		return () => window.clearInterval(timer)
-	}, [sync.activity != null, sync.nextPushAt != null])
+	}, [])
 
 	const handleExport = async () => {
 		setBusy("export")
@@ -269,7 +268,6 @@ export default function DataSettingsPage() {
 	const driveConnected = sync.lastSyncAt != null
 	const driveTeaser = sync.configured && sync.kind === "never-synced"
 	const syncConflict = sync.kind === "conflict"
-	const showPending = sync.nextPushAt != null && sync.kind !== "offline"
 	const browserTone =
 		sync.kind === "never-synced"
 			? "bg-zinc-400"
@@ -396,16 +394,6 @@ export default function DataSettingsPage() {
 															{sync.activityStartedAt != null
 																? `${Math.max(0, Math.round((now - sync.activityStartedAt) / 1000))}s`
 																: "now"}
-														</span>
-													</>
-												) : showPending && sync.nextPushAt != null ? (
-													<>
-														<span className="flex items-center gap-2 text-muted-foreground">
-															<span className="size-2 shrink-0 rounded-full bg-sky-500" />
-															Next sync
-														</span>
-														<span className="font-medium tabular-nums text-muted-foreground">
-															{`${Math.max(0, Math.ceil((sync.nextPushAt - now) / 1000))}s`}
 														</span>
 													</>
 												) : (

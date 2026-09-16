@@ -40,7 +40,6 @@ export type SyncSnapshot = {
 	kind: SyncKind
 	activity: SyncActivity
 	activityStartedAt: number | null
-	nextPushAt: number | null
 	lastSyncAt: string | null
 	remoteModifiedTime: string | null
 	lastCheckAt: string | null
@@ -60,7 +59,6 @@ let snapshot: SyncSnapshot = {
 	kind: "unconfigured",
 	activity: null,
 	activityStartedAt: null,
-	nextPushAt: null,
 	lastSyncAt: null,
 	remoteModifiedTime: null,
 	lastCheckAt: null,
@@ -78,7 +76,6 @@ function sameSnapshot(a: SyncSnapshot, b: SyncSnapshot): boolean {
 		a.kind === b.kind &&
 		a.activity === b.activity &&
 		a.activityStartedAt === b.activityStartedAt &&
-		a.nextPushAt === b.nextPushAt &&
 		a.lastSyncAt === b.lastSyncAt &&
 		a.remoteModifiedTime === b.remoteModifiedTime &&
 		a.lastCheckAt === b.lastCheckAt &&
@@ -138,7 +135,6 @@ function markDirty(): void {
 		pushTimer = null
 		void cycle("dirty")
 	}, PUSH_DEBOUNCE_MS)
-	set({ nextPushAt: Date.now() + PUSH_DEBOUNCE_MS })
 	if (snapshot.configured && !snapshot.localDirty) {
 		set({ localDirty: true, kind: snapshot.lastSyncAt ? "local-changes" : "never-synced" })
 	}
@@ -222,7 +218,6 @@ export async function refreshSyncDisplay(): Promise<void> {
 
 async function finishCycle(outcome: DriveSyncResult, announced: boolean): Promise<void> {
 	pendingPush = false
-	set({ nextPushAt: null })
 	lastCycleAt = Date.now()
 	await markDriveChecked().catch(() => undefined)
 	const times = await refreshTimes()
@@ -291,7 +286,7 @@ export async function ingestManualResult(result: DriveSyncResult): Promise<void>
 /** Forget Drive state on this device (after disconnect). */
 export async function resetSyncDisplay(): Promise<void> {
 	pendingPush = false
-	set({ nextPushAt: null, activity: null, activityStartedAt: null })
+	set({ activity: null, activityStartedAt: null })
 	await refreshSyncDisplay()
 }
 
