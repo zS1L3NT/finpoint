@@ -6,10 +6,17 @@ export async function POST(request: NextRequest) {
 		return NextResponse.json({ error: "Too many attempts." }, { status: 429 })
 	}
 	const sealed = request.cookies.get(authCookieConfig().name)?.value
-	if (!sealed) return NextResponse.json({ error: "unauthorized" }, { status: 401 })
+	if (!sealed) {
+		console.warn("auth/token denied: no_cookie.")
+		return NextResponse.json({ error: "unauthorized", reason: "no_cookie" }, { status: 401 })
+	}
 	const refresh = await unsealRefreshToken(sealed).catch(() => null)
 	if (!refresh) {
-		const response = NextResponse.json({ error: "unauthorized" }, { status: 401 })
+		console.warn("auth/token denied: bad_seal.")
+		const response = NextResponse.json(
+			{ error: "unauthorized", reason: "bad_seal" },
+			{ status: 401 },
+		)
 		response.cookies.delete(authCookieConfig().name)
 		return response
 	}
@@ -30,13 +37,21 @@ export async function POST(request: NextRequest) {
 		}),
 	})
 	if (!response.ok) {
-		const clear = NextResponse.json({ error: "unauthorized" }, { status: 401 })
+		console.warn(`auth/token denied: refresh_rejected (${response.status}).`)
+		const clear = NextResponse.json(
+			{ error: "unauthorized", reason: "refresh_rejected" },
+			{ status: 401 },
+		)
 		if (response.status === 400) clear.cookies.delete(authCookieConfig().name)
 		return clear
 	}
 	const tokens = (await response.json()) as { access_token?: string; expires_in?: number }
 	if (!tokens.access_token) {
-		return NextResponse.json({ error: "unauthorized" }, { status: 401 })
+		console.warn("auth/token denied: no_access_token.")
+		return NextResponse.json(
+			{ error: "unauthorized", reason: "no_access_token" },
+			{ status: 401 },
+		)
 	}
 	return NextResponse.json({
 		access_token: tokens.access_token,
