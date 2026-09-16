@@ -38,7 +38,7 @@ function SyncDot() {
 	const tone: string =
 		sync.activity != null
 			? "bg-sky-500 animate-pulse"
-			: sync.kind === "conflict" || sync.kind === "remote-newer"
+			: sync.kind === "conflict"
 				? "bg-amber-500"
 				: sync.kind === "needs-auth" || sync.kind === "error"
 					? "bg-red-500"
@@ -58,19 +58,17 @@ function SyncDot() {
 					? "Reading from Drive…"
 					: sync.kind === "conflict"
 						? "Needs your decision"
-						: sync.kind === "remote-newer"
-							? "Drive has a newer copy"
-							: sync.kind === "needs-auth"
-								? "Reconnect Google Drive"
-								: sync.kind === "offline"
-									? "Offline"
-									: sync.kind === "local-changes"
-										? "Unsaved changes"
-										: sync.kind === "never-synced"
-											? "Not connected yet"
-											: sync.kind === "error"
-												? (sync.error ?? "Sync failed")
-												: "In sync"
+						: sync.kind === "needs-auth"
+							? "Reconnect Google Drive"
+							: sync.kind === "offline"
+								? "Offline"
+								: sync.kind === "local-changes"
+									? "Unsaved changes"
+									: sync.kind === "never-synced"
+										? "Not connected yet"
+										: sync.kind === "error"
+											? (sync.error ?? "Sync failed")
+											: "In sync"
 	return <span title={title} className={`ml-auto size-2 shrink-0 rounded-full ${tone}`} />
 }
 

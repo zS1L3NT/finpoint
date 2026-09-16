@@ -98,9 +98,10 @@ export default function DataSettingsPage() {
 	const total = counts ? Object.values(counts).reduce((sum, count) => sum + count, 0) : 0
 
 	useEffect(() => {
-		const timer = window.setInterval(() => setNow(Date.now()), 30_000)
+		const live = sync.activity != null || sync.nextPushAt != null
+		const timer = window.setInterval(() => setNow(Date.now()), live ? 1000 : 30_000)
 		return () => window.clearInterval(timer)
-	}, [])
+	}, [sync.activity != null, sync.nextPushAt != null])
 
 	const handleExport = async () => {
 		setBusy("export")
@@ -198,8 +199,6 @@ export default function DataSettingsPage() {
 				warnIfVaultUnproven()
 			} else if (result.outcome === "conflict") {
 				toast.warning("Both sides changed — choose which to keep.")
-			} else if (result.outcome === "remote-newer") {
-				toast.warning("Google Drive has a newer copy — choose what to do.")
 			} else toast.info("Nothing to sync yet.")
 		} catch (cause) {
 			toast.error(cause instanceof Error ? cause.message : "Drive sync failed.")
@@ -269,8 +268,8 @@ export default function DataSettingsPage() {
 	const driveUnconfigured = !sync.configured
 	const driveConnected = sync.lastSyncAt != null
 	const driveTeaser = sync.configured && sync.kind === "never-synced"
-	const remoteNewer = sync.kind === "remote-newer"
 	const syncConflict = sync.kind === "conflict"
+	const showPending = sync.nextPushAt != null && sync.kind !== "offline"
 	const browserTone =
 		sync.kind === "never-synced"
 			? "bg-zinc-400"
@@ -286,17 +285,15 @@ export default function DataSettingsPage() {
 	const driveState: { tone: string; label: string } =
 		sync.kind === "conflict"
 			? { tone: "bg-amber-500", label: "Needs your decision" }
-			: sync.kind === "remote-newer"
-				? { tone: "bg-amber-500", label: "Newer copy available" }
-				: sync.kind === "needs-auth"
-					? { tone: "bg-red-500", label: "Reconnect needed" }
-					: sync.kind === "offline"
-						? { tone: "bg-zinc-400", label: "Offline" }
-						: sync.kind === "error"
-							? { tone: "bg-red-500", label: "Sync failed" }
-							: sync.remoteModifiedTime
-								? { tone: "bg-emerald-500", label: "Up to date" }
-								: { tone: "bg-zinc-400", label: "No copy yet" }
+			: sync.kind === "needs-auth"
+				? { tone: "bg-red-500", label: "Reconnect needed" }
+				: sync.kind === "offline"
+					? { tone: "bg-zinc-400", label: "Offline" }
+					: sync.kind === "error"
+						? { tone: "bg-red-500", label: "Sync failed" }
+						: sync.remoteModifiedTime
+							? { tone: "bg-emerald-500", label: "Up to date" }
+							: { tone: "bg-zinc-400", label: "No copy yet" }
 
 	return (
 		<>
@@ -395,8 +392,20 @@ export default function DataSettingsPage() {
 																	? "Writing to Drive"
 																	: "Reading from Drive"}
 														</span>
-														<span className="font-medium text-muted-foreground">
-															now
+														<span className="font-medium tabular-nums text-muted-foreground">
+															{sync.activityStartedAt != null
+																? `${Math.max(0, Math.round((now - sync.activityStartedAt) / 1000))}s`
+																: "now"}
+														</span>
+													</>
+												) : showPending && sync.nextPushAt != null ? (
+													<>
+														<span className="flex items-center gap-2 text-muted-foreground">
+															<span className="size-2 shrink-0 rounded-full bg-sky-500" />
+															Next sync
+														</span>
+														<span className="font-medium tabular-nums text-muted-foreground">
+															{`${Math.max(0, Math.ceil((sync.nextPushAt - now) / 1000))}s`}
 														</span>
 													</>
 												) : (
@@ -437,16 +446,6 @@ export default function DataSettingsPage() {
 												browser — the loser is replaced.
 											</p>
 										) : null}
-										{remoteNewer ? (
-											<p className="rounded-md border border-amber-500/40 bg-amber-500/10 p-3">
-												Google Drive has a newer copy (from{" "}
-												{sync.conflictAt
-													? new Date(sync.conflictAt).toLocaleString()
-													: "recently"}
-												) and this browser hasn't changed since the last
-												sync. Reading it replaces this browser.
-											</p>
-										) : null}
 									</>
 								)}
 							</CardContent>
@@ -472,7 +471,7 @@ export default function DataSettingsPage() {
 										</Button>
 										{!driveTeaser && (
 											<>
-												{syncConflict || remoteNewer ? (
+												{syncConflict ? (
 													<>
 														<Button
 															className="w-full sm:w-auto"

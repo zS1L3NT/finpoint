@@ -23,13 +23,7 @@ const LAST_HASH_KEY = "drive_last_hash"
 const REMOTE_TIME_KEY = "drive_remote_time"
 const LAST_CHECK_KEY = "drive_last_check_at"
 
-export type DriveSyncOutcome =
-	| "up-to-date"
-	| "pushed"
-	| "pulled"
-	| "conflict"
-	| "remote-newer"
-	| "empty"
+export type DriveSyncOutcome = "up-to-date" | "pushed" | "pulled" | "conflict" | "empty"
 
 export type DriveSyncResult = {
 	outcome: DriveSyncOutcome
@@ -127,7 +121,8 @@ export async function syncDrive(): Promise<DriveSyncResult> {
 		return { outcome: "conflict", remoteModifiedTime: remoteMeta.modifiedTime }
 	}
 	if (remoteDirty) {
-		return { outcome: "remote-newer", remoteModifiedTime: remoteMeta.modifiedTime }
+		await pullDrive()
+		return { outcome: "pulled", remoteModifiedTime: remoteMeta.modifiedTime }
 	}
 
 	await pushDrive()

@@ -30,7 +30,6 @@ export type SyncKind =
 	| "never-synced"
 	| "up-to-date"
 	| "local-changes"
-	| "remote-newer"
 	| "conflict"
 	| "needs-auth"
 	| "offline"
@@ -40,6 +39,8 @@ export type SyncSnapshot = {
 	configured: boolean
 	kind: SyncKind
 	activity: SyncActivity
+	activityStartedAt: number | null
+	nextPushAt: number | null
 	lastSyncAt: string | null
 	remoteModifiedTime: string | null
 	lastCheckAt: string | null
@@ -58,6 +59,8 @@ let snapshot: SyncSnapshot = {
 	configured: false,
 	kind: "unconfigured",
 	activity: null,
+	activityStartedAt: null,
+	nextPushAt: null,
 	lastSyncAt: null,
 	remoteModifiedTime: null,
 	lastCheckAt: null,
@@ -74,6 +77,8 @@ function sameSnapshot(a: SyncSnapshot, b: SyncSnapshot): boolean {
 		a.configured === b.configured &&
 		a.kind === b.kind &&
 		a.activity === b.activity &&
+		a.activityStartedAt === b.activityStartedAt &&
+		a.nextPushAt === b.nextPushAt &&
 		a.lastSyncAt === b.lastSyncAt &&
 		a.remoteModifiedTime === b.remoteModifiedTime &&
 		a.lastCheckAt === b.lastCheckAt &&
@@ -85,6 +90,14 @@ function sameSnapshot(a: SyncSnapshot, b: SyncSnapshot): boolean {
 
 function set(patch: Partial<SyncSnapshot>): void {
 	const next = { ...snapshot, ...patch }
+	if (patch.activity !== undefined && !("activityStartedAt" in patch)) {
+		next.activityStartedAt =
+			patch.activity == null
+				? null
+				: snapshot.activity == null
+					? Date.now()
+					: snapshot.activityStartedAt
+	}
 	if (sameSnapshot(snapshot, next)) return
 	snapshot = next
 	for (const listener of snapshotListeners) listener()
@@ -125,6 +138,7 @@ function markDirty(): void {
 		pushTimer = null
 		void cycle("dirty")
 	}, PUSH_DEBOUNCE_MS)
+	set({ nextPushAt: Date.now() + PUSH_DEBOUNCE_MS })
 	if (snapshot.configured && !snapshot.localDirty) {
 		set({ localDirty: true, kind: snapshot.lastSyncAt ? "local-changes" : "never-synced" })
 	}
@@ -188,9 +202,7 @@ export async function refreshSyncDisplay(): Promise<void> {
 		driveLocalDirty().catch(() => snapshot.localDirty),
 	])
 	const kind =
-		snapshot.kind === "conflict" ||
-		snapshot.kind === "remote-newer" ||
-		snapshot.kind === "needs-auth"
+		snapshot.kind === "conflict" || snapshot.kind === "needs-auth"
 			? snapshot.kind
 			: !times.lastSyncAt
 				? "never-synced"
@@ -210,6 +222,7 @@ export async function refreshSyncDisplay(): Promise<void> {
 
 async function finishCycle(outcome: DriveSyncResult, announced: boolean): Promise<void> {
 	pendingPush = false
+	set({ nextPushAt: null })
 	lastCycleAt = Date.now()
 	await markDriveChecked().catch(() => undefined)
 	const times = await refreshTimes()
@@ -256,24 +269,6 @@ async function finishCycle(outcome: DriveSyncResult, announced: boolean): Promis
 				detail: "Open Sync to pick a winner.",
 			})
 		}
-	} else if (outcome.outcome === "remote-newer") {
-		const dirty = await driveLocalDirty().catch(() => true)
-		set({
-			kind: "remote-newer",
-			localDirty: dirty,
-			lastSyncAt: times.lastSyncAt,
-			remoteModifiedTime: outcome.remoteModifiedTime ?? times.remote,
-			lastCheckAt: times.check,
-			conflictAt: outcome.remoteModifiedTime ?? times.remote,
-			error: null,
-		})
-		if (announced) {
-			emit({
-				key: `remote-${outcome.remoteModifiedTime}`,
-				title: "Google Drive has a newer copy.",
-				detail: "Open Sync to read it or keep yours.",
-			})
-		}
 	} else {
 		set({
 			kind: times.lastSyncAt ? "up-to-date" : "never-synced",
@@ -296,6 +291,7 @@ export async function ingestManualResult(result: DriveSyncResult): Promise<void>
 /** Forget Drive state on this device (after disconnect). */
 export async function resetSyncDisplay(): Promise<void> {
 	pendingPush = false
+	set({ nextPushAt: null, activity: null, activityStartedAt: null })
 	await refreshSyncDisplay()
 }
 
@@ -345,17 +341,10 @@ async function cycle(reason: "boot" | "dirty" | "focus" | "online"): Promise<voi
 						remoteModifiedTime: remote.modifiedTime,
 					} as DriveSyncResult
 				if (remoteDirty) {
-					// Boot with a clean browser is the only auto-pull: nothing to lose.
-					if (reason === "boot") {
-						set({ activity: "pulling" })
-						await pullDrive()
-						return {
-							outcome: "pulled",
-							remoteModifiedTime: remote.modifiedTime,
-						} as DriveSyncResult
-					}
+					set({ activity: "pulling" })
+					await pullDrive()
 					return {
-						outcome: "remote-newer",
+						outcome: "pulled",
 						remoteModifiedTime: remote.modifiedTime,
 					} as DriveSyncResult
 				}
