@@ -22,7 +22,7 @@ export const pathBudgets = (query?: Record<string, string | undefined>) =>
 	withQuery("/budgets", query)
 export const pathBudget = (id: string) => `/budgets/${id}`
 export const pathCategories = () => "/categories"
-export const pathDataSettings = () => "/settings/data"
+export const pathDataSettings = () => "/sync"
 export const pathPrivacy = () => "/privacy"
 export const pathTerms = () => "/terms"
 

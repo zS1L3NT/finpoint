@@ -158,7 +158,7 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 					to: pathDataSettings(),
 					icon: "lucide:refresh-cw",
 					label: "Sync",
-					active: pathname.startsWith("/settings"),
+					active: pathname.startsWith("/sync"),
 				},
 			],
 		},

@@ -17,7 +17,7 @@ const TITLES: { match: (pathname: string) => boolean; title: string }[] = [
 	{ match: pathname => pathname.startsWith("/categories"), title: "Categories" },
 	{ match: pathname => pathname.startsWith("/importer"), title: "Importer" },
 	{ match: pathname => pathname.startsWith("/allocator"), title: "Allocator" },
-	{ match: pathname => pathname.startsWith("/settings/data"), title: "Sync" },
+	{ match: pathname => pathname.startsWith("/sync"), title: "Sync" },
 	{ match: pathname => pathname.startsWith("/privacy"), title: "Privacy Policy" },
 	{ match: pathname => pathname.startsWith("/terms"), title: "Terms of Service" },
 ]
