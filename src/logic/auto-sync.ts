@@ -17,6 +17,7 @@ import {
 	type DriveSyncResult,
 	driveLocalDirty,
 	driveStatus,
+	markDriveChecked,
 	pullDrive,
 	pushDrive,
 } from "@/logic/drive-sync"
@@ -41,6 +42,7 @@ export type SyncSnapshot = {
 	activity: SyncActivity
 	lastSyncAt: string | null
 	remoteModifiedTime: string | null
+	lastCheckAt: string | null
 	localDirty: boolean
 	conflictAt: string | null
 	error: string | null
@@ -58,6 +60,7 @@ let snapshot: SyncSnapshot = {
 	activity: null,
 	lastSyncAt: null,
 	remoteModifiedTime: null,
+	lastCheckAt: null,
 	localDirty: false,
 	conflictAt: null,
 	error: null,
@@ -73,6 +76,7 @@ function sameSnapshot(a: SyncSnapshot, b: SyncSnapshot): boolean {
 		a.activity === b.activity &&
 		a.lastSyncAt === b.lastSyncAt &&
 		a.remoteModifiedTime === b.remoteModifiedTime &&
+		a.lastCheckAt === b.lastCheckAt &&
 		a.localDirty === b.localDirty &&
 		a.conflictAt === b.conflictAt &&
 		a.error === b.error
@@ -146,12 +150,24 @@ async function withSyncLock(
 	)
 }
 
-async function refreshTimes(): Promise<{ lastSyncAt: string | null; remote: string | null }> {
+async function refreshTimes(): Promise<{
+	lastSyncAt: string | null
+	remote: string | null
+	check: string | null
+}> {
 	try {
 		const status = await driveStatus()
-		return { lastSyncAt: status.lastSyncAt, remote: status.remoteModifiedTime }
+		return {
+			lastSyncAt: status.lastSyncAt,
+			remote: status.remoteModifiedTime,
+			check: status.lastCheckAt,
+		}
 	} catch {
-		return { lastSyncAt: snapshot.lastSyncAt, remote: snapshot.remoteModifiedTime }
+		return {
+			lastSyncAt: snapshot.lastSyncAt,
+			remote: snapshot.remoteModifiedTime,
+			check: snapshot.lastCheckAt,
+		}
 	}
 }
 
@@ -187,6 +203,7 @@ export async function refreshSyncDisplay(): Promise<void> {
 		localDirty: dirty,
 		lastSyncAt: times.lastSyncAt,
 		remoteModifiedTime: times.remote,
+		lastCheckAt: times.check,
 		error: null,
 	})
 }
@@ -194,6 +211,7 @@ export async function refreshSyncDisplay(): Promise<void> {
 async function finishCycle(outcome: DriveSyncResult, announced: boolean): Promise<void> {
 	pendingPush = false
 	lastCycleAt = Date.now()
+	await markDriveChecked().catch(() => undefined)
 	const times = await refreshTimes()
 	if (outcome.outcome === "pushed") {
 		set({
@@ -201,6 +219,7 @@ async function finishCycle(outcome: DriveSyncResult, announced: boolean): Promis
 			localDirty: false,
 			lastSyncAt: times.lastSyncAt,
 			remoteModifiedTime: times.remote,
+			lastCheckAt: times.check,
 			conflictAt: null,
 			error: null,
 		})
@@ -210,6 +229,7 @@ async function finishCycle(outcome: DriveSyncResult, announced: boolean): Promis
 			localDirty: false,
 			lastSyncAt: times.lastSyncAt,
 			remoteModifiedTime: times.remote,
+			lastCheckAt: times.check,
 			conflictAt: null,
 			error: null,
 		})
@@ -225,6 +245,7 @@ async function finishCycle(outcome: DriveSyncResult, announced: boolean): Promis
 			localDirty: true,
 			lastSyncAt: times.lastSyncAt,
 			remoteModifiedTime: times.remote,
+			lastCheckAt: times.check,
 			conflictAt: outcome.remoteModifiedTime ?? times.remote,
 			error: null,
 		})
@@ -242,6 +263,7 @@ async function finishCycle(outcome: DriveSyncResult, announced: boolean): Promis
 			localDirty: dirty,
 			lastSyncAt: times.lastSyncAt,
 			remoteModifiedTime: outcome.remoteModifiedTime ?? times.remote,
+			lastCheckAt: times.check,
 			conflictAt: outcome.remoteModifiedTime ?? times.remote,
 			error: null,
 		})
@@ -258,6 +280,7 @@ async function finishCycle(outcome: DriveSyncResult, announced: boolean): Promis
 			localDirty: outcome.outcome === "empty" ? false : snapshot.localDirty,
 			lastSyncAt: times.lastSyncAt,
 			remoteModifiedTime: times.remote,
+			lastCheckAt: times.check,
 			conflictAt: null,
 			error: null,
 		})

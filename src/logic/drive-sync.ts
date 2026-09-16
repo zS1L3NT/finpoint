@@ -21,6 +21,7 @@ const FILE_ID_KEY = "drive_file_id"
 const LAST_SYNC_KEY = "drive_last_sync_at"
 const LAST_HASH_KEY = "drive_last_hash"
 const REMOTE_TIME_KEY = "drive_remote_time"
+const LAST_CHECK_KEY = "drive_last_check_at"
 
 export type DriveSyncOutcome =
 	| "up-to-date"
@@ -40,6 +41,7 @@ export type DriveStatus = {
 	fileId: string | null
 	lastSyncAt: string | null
 	remoteModifiedTime: string | null
+	lastCheckAt: string | null
 }
 
 async function metaGet(key: string): Promise<string | null> {
@@ -59,12 +61,18 @@ async function hashTables(tables: unknown): Promise<string> {
 }
 
 export async function driveStatus(): Promise<DriveStatus> {
-	const [fileId, lastSyncAt, remoteModifiedTime] = await Promise.all([
+	const [fileId, lastSyncAt, remoteModifiedTime, lastCheckAt] = await Promise.all([
 		metaGet(FILE_ID_KEY),
 		metaGet(LAST_SYNC_KEY),
 		metaGet(REMOTE_TIME_KEY),
+		metaGet(LAST_CHECK_KEY),
 	])
-	return { configured: isDriveConfigured(), fileId, lastSyncAt, remoteModifiedTime }
+	return { configured: isDriveConfigured(), fileId, lastSyncAt, remoteModifiedTime, lastCheckAt }
+}
+
+/** Stamp a completed Drive round trip (data moved or not). */
+export async function markDriveChecked(): Promise<void> {
+	await db.meta.put({ key: LAST_CHECK_KEY, value: new Date().toISOString() })
 }
 
 export async function driveLocalDirty(): Promise<boolean> {
