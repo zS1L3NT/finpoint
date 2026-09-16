@@ -31,6 +31,7 @@ export default function StatementsPage() {
 	const [isCreatingStatement, setIsCreatingStatement] = useState(false)
 	const [editingStatement, setEditingStatement] = useState<Statement | null>(null)
 	const searchParams = useSearchParams()
+	const accountId = searchParams.get("account_id") ?? "all"
 	const isPending = searchParams.get("is_pending")
 	const startDate = searchParams.get("start_date")
 	const endDate = searchParams.get("end_date")
@@ -40,22 +41,34 @@ export default function StatementsPage() {
 	const updateFilters = (changes: { [key: string]: string | null }) => {
 		setParams({ ...changes, page: null })
 	}
-	const activeFilterCount = [searchParams.get("query"), isPending, startDate, endDate].filter(
-		Boolean,
-	).length
+	const activeFilterCount = [
+		searchParams.get("query"),
+		accountId === "all" ? "" : accountId,
+		isPending,
+		startDate,
+		endDate,
+	].filter(Boolean).length
 	const clearFilters = () =>
-		setParams({ query: null, is_pending: null, start_date: null, end_date: null, page: null })
+		setParams({
+			query: null,
+			account_id: null,
+			is_pending: null,
+			start_date: null,
+			end_date: null,
+			page: null,
+		})
 
 	const accounts = useLiveQuery(() => listAccounts(), []) ?? []
 	const statementsQuery = useLiveQuery(
 		() =>
 			listStatements({
 				query: query || null,
+				account_id: accountId === "all" ? null : accountId,
 				is_pending: isPending,
 				start_date: startDate,
 				end_date: endDate,
 			}),
-		[query, isPending, startDate, endDate],
+		[query, accountId, isPending, startDate, endDate],
 	)
 	const statements = statementsQuery ?? []
 	const paginated = useMemo(
@@ -92,6 +105,31 @@ export default function StatementsPage() {
 						searchPlaceholder: "Search all statements...",
 						filters: (
 							<FilterBar>
+								<Select
+									value={accountId}
+									onValueChange={value =>
+										updateFilters({
+											account_id: value === "all" ? null : value,
+										})
+									}
+								>
+									<SelectTrigger
+										className={cn("w-full sm:w-40", FILTER_CONTROL_CLASS)}
+									>
+										<IconifyIcon icon="lucide:landmark" />
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent align="start" variant="filter">
+										<SelectGroup>
+											<SelectItem value="all">All Accounts</SelectItem>
+											{accounts.map(account => (
+												<SelectItem key={account.id} value={account.id}>
+													{account.name}
+												</SelectItem>
+											))}
+										</SelectGroup>
+									</SelectContent>
+								</Select>
 								<Select
 									value={isPending ?? "all"}
 									onValueChange={value =>

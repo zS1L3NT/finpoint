@@ -233,10 +233,20 @@ export async function getStatement(id: string) {
 
 	return {
 		...enriched,
-		records: records.map(record => ({
-			...record,
-			pivot: { amount: amountByRecord.get(record.id) ?? 0 },
-		})),
+		records: records
+			.map(record => ({
+				...record,
+				pivot: { amount: amountByRecord.get(record.id) ?? 0 },
+			}))
+			.sort(
+				(a, b) =>
+					b.datetime.localeCompare(a.datetime) ||
+					a.amount - b.amount ||
+					a.title.localeCompare(b.title) ||
+					(a.people ?? "").localeCompare(b.people ?? "") ||
+					(a.location ?? "").localeCompare(b.location ?? "") ||
+					(a.description ?? "").localeCompare(b.description ?? ""),
+			),
 	}
 }
 

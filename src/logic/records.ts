@@ -198,12 +198,20 @@ export async function getRecord(id: string) {
 
 	return {
 		...enriched,
-		statements: statements.map(statement => ({
-			...statement,
-			is_pending: statement.is_pending === 1,
-			pivot: { amount: amountByStatement.get(statement.id) ?? 0 },
-			account: accounts.get(statement.account_id) ?? null,
-		})),
+		statements: statements
+			.map(statement => ({
+				...statement,
+				is_pending: statement.is_pending === 1,
+				pivot: { amount: amountByStatement.get(statement.id) ?? 0 },
+				account: accounts.get(statement.account_id) ?? null,
+			}))
+			.sort(
+				(a, b) =>
+					b.datetime.localeCompare(a.datetime) ||
+					b.index - a.index ||
+					a.amount - b.amount ||
+					a.description.localeCompare(b.description),
+			),
 	}
 }
 
