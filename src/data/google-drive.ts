@@ -54,6 +54,14 @@ export function hasFreshDriveToken(): boolean {
 	return !!cachedToken && Date.now() < cachedToken.expiresAt - 60_000
 }
 
+let vaultProven: boolean | null = null
+
+/** Whether the last manual connect proved the vault round-trips. Null when
+ * untested (offline) — only an explicit false means "didn't stick". */
+export function wasVaultProven(): boolean | null {
+	return vaultProven
+}
+
 function cacheToken(accessToken: string, expiresIn: number): string {
 	cachedToken = { token: accessToken, expiresAt: Date.now() + expiresIn * 1000 }
 	return accessToken
@@ -122,6 +130,7 @@ async function requestDriveCode(): Promise<string> {
 
 export async function ensureDriveToken(): Promise<string> {
 	if (hasFreshDriveToken() && cachedToken) return cachedToken.token
+	vaultProven = null
 
 	const response = await fetch("/api/auth/exchange", {
 		method: "POST",
@@ -136,7 +145,14 @@ export async function ensureDriveToken(): Promise<string> {
 	if (!response.ok || !parsed?.access_token) {
 		throw new Error(parsed?.message ?? "Could not connect Google Drive.")
 	}
-	return cacheToken(parsed.access_token, parsed.expires_in ?? 3600)
+	const token = cacheToken(parsed.access_token, parsed.expires_in ?? 3600)
+	// Prove the vault round-trips right now, while the user is watching —
+	// otherwise a dead grant surfaces hours later as a mystery relogin.
+	if (typeof navigator !== "undefined" && navigator.onLine) {
+		const probe = await fetch("/api/auth/token", { method: "POST" }).catch(() => null)
+		vaultProven = !!probe?.ok
+	}
+	return token
 }
 
 export async function ensureDriveTokenSilent(): Promise<string> {

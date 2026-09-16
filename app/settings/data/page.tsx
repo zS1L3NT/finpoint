@@ -31,7 +31,13 @@ import { seedIfEmpty } from "@/data/seed"
 import { generateTestData } from "@/data/test-data"
 import { useSyncStatus } from "@/hooks/use-sync-status"
 import { ingestManualResult, resetSyncDisplay } from "@/logic/auto-sync"
-import { disconnectDriveSync, pullDrive, pushDrive, syncDrive } from "@/logic/drive-sync"
+import {
+	disconnectDriveSync,
+	pullDrive,
+	pushDrive,
+	syncDrive,
+	wasVaultProven,
+} from "@/logic/drive-sync"
 import { formatRelativeTime } from "@/logic/shared"
 import { pathPrivacy, pathTerms } from "@/routes"
 
@@ -167,6 +173,15 @@ export default function DataSettingsPage() {
 		setConfirmingPull(false)
 	}
 
+	const warnIfVaultUnproven = () => {
+		if (wasVaultProven() === false) {
+			toast.warning("Connected for now, but lasting sign-in didn't stick.", {
+				description:
+					"Background sync will stop within the hour. Check cookies for this site, then reconnect.",
+			})
+		}
+	}
+
 	const handleDriveSync = async () => {
 		setBusy("drive")
 		try {
@@ -177,8 +192,10 @@ export default function DataSettingsPage() {
 			if (result.outcome === "up-to-date") toast.success("Already in sync with Google Drive.")
 			else if (result.outcome === "pushed") {
 				toast.success("Saved data to your Drive.")
+				warnIfVaultUnproven()
 			} else if (result.outcome === "pulled") {
 				toast.success("Restored data from your Drive.")
+				warnIfVaultUnproven()
 			} else if (result.outcome === "conflict") {
 				toast.warning("Both sides changed — choose which to keep.")
 			} else if (result.outcome === "remote-newer") {

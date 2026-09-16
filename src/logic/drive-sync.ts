@@ -13,6 +13,8 @@ import {
 	uploadBackupFile,
 } from "@/data/google-drive"
 
+export { wasVaultProven } from "@/data/google-drive"
+
 const FILE_ID_KEY = "drive_file_id"
 const LAST_SYNC_KEY = "drive_last_sync_at"
 const LAST_HASH_KEY = "drive_last_hash"
