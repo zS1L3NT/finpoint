@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dialog"
 import { FieldGroup } from "@/components/ui/field"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
-import { treatmentLabel } from "@/lib/analytics"
+import { canUseDefaultBucket, treatmentLabel } from "@/lib/analytics"
 import { cn } from "@/lib/utils"
 import { listBuckets } from "@/logic/buckets"
 import { createCategory, deleteCategory, updateCategory } from "@/logic/categories"
@@ -68,6 +68,7 @@ export default function CategoryDialog({
 	const [values, setValues] = useState<CategoryFormValues>(EMPTY_FORM_VALUES)
 	const { getApiFieldErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
 	const parentOptions = categories.filter(option => option.id !== category?.id)
+	const bucketEligible = canUseDefaultBucket(values.analytics_treatment || null)
 	const defaultBucketName = values.default_bucket_id
 		? (buckets.find(bucket => bucket.id === values.default_bucket_id)?.name ??
 			category?.default_bucket?.name ??
@@ -216,7 +217,7 @@ export default function CategoryDialog({
 								<p className="flex items-center gap-1.5 text-xs text-muted-foreground">
 									<IconifyIcon icon="lucide:tag" className="size-3.5" />
 									<span className="truncate">
-										{`${values.analytics_treatment ? treatmentLabel(values.analytics_treatment) : "No default treatment"} · ${defaultBucketName}`}
+										{`${values.analytics_treatment ? treatmentLabel(values.analytics_treatment) : "No default treatment"}${bucketEligible ? ` · ${defaultBucketName}` : ""}`}
 									</span>
 								</p>
 							</div>
@@ -238,16 +239,19 @@ export default function CategoryDialog({
 								{ value: "automatic", label: "Automatic by direction" },
 							]}
 							errors={getApiFieldErrors("analytics_treatment")}
-							onChange={value =>
-								setValue(
-									"analytics_treatment",
-									value === NO_DEFAULT ? "" : (value as AnalyticsTreatment),
-								)
-							}
+							onChange={value => {
+								const treatment =
+									value === NO_DEFAULT ? "" : (value as AnalyticsTreatment)
+								setValue("analytics_treatment", treatment)
+								if (!canUseDefaultBucket(treatment || null)) {
+									setValue("default_bucket_id", "")
+								}
+							}}
 						/>
 						<SelectField
 							id="default_bucket_id"
 							label="Spending bucket"
+							disabled={!bucketEligible}
 							value={values.default_bucket_id || NO_DEFAULT}
 							items={[
 								{ value: NO_DEFAULT, label: "No default bucket" },

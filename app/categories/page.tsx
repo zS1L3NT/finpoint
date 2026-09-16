@@ -10,7 +10,7 @@ import PageHeader from "@/components/layout/page-header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useHistory } from "@/history"
-import { treatmentLabel } from "@/lib/analytics"
+import { canUseDefaultBucket, treatmentLabel } from "@/lib/analytics"
 import { listCategories } from "@/logic/categories"
 import { pathRecords } from "@/routes"
 import { Category, CategoryWithChildren } from "@/types"
@@ -124,7 +124,7 @@ function CategoryTreeItem({
 						<p className="flex items-center gap-1.5 text-xs text-muted-foreground">
 							<IconifyIcon icon="lucide:tag" className="size-3.5" />
 							<span className="truncate">
-								{`${category.analytics_treatment ? treatmentLabel(category.analytics_treatment) : "No default treatment"} · ${category.default_bucket?.name ?? "No default bucket"}`}
+								{`${category.analytics_treatment ? treatmentLabel(category.analytics_treatment) : "No default treatment"}${canUseDefaultBucket(category.analytics_treatment) ? ` · ${category.default_bucket?.name ?? "No default bucket"}` : ""}`}
 							</span>
 						</p>
 						<p className="text-xs text-muted-foreground">
