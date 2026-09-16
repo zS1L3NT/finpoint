@@ -403,17 +403,17 @@ export default function DataSettingsPage() {
 													<>
 														<span className="flex items-center gap-2 text-muted-foreground">
 															<span className="size-2 shrink-0 rounded-full bg-zinc-400" />
-															Last synced
+															Last checked
 														</span>
-														{sync.lastSyncAt ? (
+														{sync.lastCheckAt ? (
 															<span
 																className="font-medium tabular-nums"
 																title={new Date(
-																	sync.lastSyncAt,
+																	sync.lastCheckAt,
 																).toLocaleString()}
 															>
 																{formatRelativeTime(
-																	sync.lastSyncAt,
+																	sync.lastCheckAt,
 																	now,
 																)}
 															</span>
@@ -423,26 +423,6 @@ export default function DataSettingsPage() {
 															</span>
 														)}
 													</>
-												)}
-											</li>
-											<li className="flex items-center justify-between gap-3 border-b py-1.5">
-												<span className="flex items-center gap-2 text-muted-foreground">
-													<span className="size-2 shrink-0 rounded-full bg-zinc-400" />
-													Last checked
-												</span>
-												{sync.lastCheckAt ? (
-													<span
-														className="font-medium tabular-nums"
-														title={new Date(
-															sync.lastCheckAt,
-														).toLocaleString()}
-													>
-														{formatRelativeTime(sync.lastCheckAt, now)}
-													</span>
-												) : (
-													<span className="font-medium text-muted-foreground">
-														Never
-													</span>
 												)}
 											</li>
 										</ul>
