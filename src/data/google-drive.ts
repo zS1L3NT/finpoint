@@ -92,6 +92,8 @@ function loadGsi(): Promise<void> {
 	return gsiPromise
 }
 
+let codeFlow: Promise<string> | null = null
+
 async function requestDriveCode(): Promise<string> {
 	const clientId = googleClientId()
 	if (!clientId) throw new Error("Google Drive is not set up yet (missing client ID).")
@@ -100,7 +102,9 @@ async function requestDriveCode(): Promise<string> {
 	const oauth2 = window.google?.accounts?.oauth2
 	if (!oauth2) throw new Error("Could not load Google sign-in.")
 
-	return new Promise<string>((resolve, reject) => {
+	// One popup at a time: concurrent callers share it instead of stacking windows.
+	if (codeFlow) return codeFlow
+	codeFlow = new Promise<string>((resolve, reject) => {
 		const timer = window.setTimeout(
 			() => reject(new Error("Google Drive connection timed out.")),
 			120_000,
@@ -126,11 +130,27 @@ async function requestDriveCode(): Promise<string> {
 		})
 		client.requestCode()
 	})
+	try {
+		return await codeFlow
+	} finally {
+		codeFlow = null
+	}
 }
 
 export async function ensureDriveToken(): Promise<string> {
 	if (hasFreshDriveToken() && cachedToken) return cachedToken.token
 	vaultProven = null
+
+	// Prefer the invisible refresh first: a popup is only warranted when the
+	// grant itself is gone (first connect, revoked access).
+	if (typeof navigator !== "undefined" && !navigator.onLine) {
+		throw new Error("You're offline — reconnect to sync with Google Drive.")
+	}
+	try {
+		return await ensureDriveTokenSilent()
+	} catch (cause) {
+		if (!(cause instanceof AuthNeededError)) throw cause
+	}
 
 	const response = await fetch("/api/auth/exchange", {
 		method: "POST",
