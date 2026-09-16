@@ -484,7 +484,7 @@ export default function DataSettingsPage() {
 															<IconifyIcon icon="lucide:cloud-download" />
 															{busy === "drive-pull"
 																? "Reading…"
-																: "Restore data from your Drive"}
+																: "Restore from Drive"}
 														</Button>
 														<Button
 															className="w-full sm:w-auto"
@@ -496,7 +496,7 @@ export default function DataSettingsPage() {
 															<IconifyIcon icon="lucide:cloud-upload" />
 															{busy === "drive-push"
 																? "Writing…"
-																: "Save data to your Drive"}
+																: "Save to Drive"}
 														</Button>
 													</>
 												) : (
