@@ -231,6 +231,12 @@ async function finishCycle(outcome: DriveSyncResult, announced: boolean): Promis
 			conflictAt: null,
 			error: null,
 		})
+		if (announced) {
+			emit({
+				key: `pulled-${times.lastSyncAt}`,
+				title: "Saved to Drive.",
+			})
+		}
 	} else if (outcome.outcome === "pulled") {
 		set({
 			kind: "up-to-date",
@@ -244,7 +250,7 @@ async function finishCycle(outcome: DriveSyncResult, announced: boolean): Promis
 		if (announced) {
 			emit({
 				key: `pulled-${times.lastSyncAt}`,
-				title: "Updated from Google Drive.",
+				title: "Restored from Drive.",
 			})
 		}
 	} else if (outcome.outcome === "conflict") {
