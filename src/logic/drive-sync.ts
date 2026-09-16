@@ -8,10 +8,12 @@ import {
 	downloadBackupFile,
 	ensureDriveToken,
 	findBackupFile,
+	getClockSkewMs,
 	getFileMeta,
 	isDriveConfigured,
 	uploadBackupFile,
 } from "@/data/google-drive"
+import { isRemoteNewer } from "@/logic/shared"
 
 export { wasVaultProven } from "@/data/google-drive"
 
@@ -110,7 +112,7 @@ export async function syncDrive(): Promise<DriveSyncResult> {
 	}
 
 	const localDirty = lastHash ? localHash !== lastHash : true
-	const remoteDirty = lastSyncAt ? new Date(remoteMeta.modifiedTime) > new Date(lastSyncAt) : true
+	const remoteDirty = isRemoteNewer(remoteMeta.modifiedTime, lastSyncAt, getClockSkewMs())
 	await db.meta.put({ key: REMOTE_TIME_KEY, value: remoteMeta.modifiedTime })
 	if (!localDirty && !remoteDirty) return { outcome: "up-to-date" }
 	if (localDirty && remoteDirty) {

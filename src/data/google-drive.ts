@@ -174,11 +174,23 @@ export async function disconnectDrive(): Promise<void> {
 
 export type DriveFileMeta = { id: string; modifiedTime: string; size?: string }
 
+let clockSkewMs = 0
+
+/** Device clock minus true time, learned from Google's Date header. */
+export function getClockSkewMs(): number {
+	return clockSkewMs
+}
+
 async function driveFetch(path: string, token: string, init?: RequestInit) {
 	const response = await fetch(`https://www.googleapis.com${path}`, {
 		...init,
 		headers: { Authorization: `Bearer ${token}`, ...(init?.headers ?? {}) },
 	})
+	const serverDate = response.headers.get("date")
+	if (serverDate) {
+		const skew = Date.now() - Date.parse(serverDate)
+		clockSkewMs = Number.isFinite(skew) && Math.abs(skew) > 30_000 ? skew : 0
+	}
 	if (response.status === 401 || response.status === 403) {
 		cachedToken = null
 		throw new Error("Google Drive needs reconnecting — connect again and retry.")

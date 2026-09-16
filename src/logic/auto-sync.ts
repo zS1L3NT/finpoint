@@ -8,6 +8,7 @@ import {
 	AuthNeededError,
 	ensureDriveTokenSilent,
 	findBackupFile,
+	getClockSkewMs,
 	getFileMeta,
 	hasFreshDriveToken,
 	isDriveConfigured,
@@ -19,6 +20,7 @@ import {
 	pullDrive,
 	pushDrive,
 } from "@/logic/drive-sync"
+import { isRemoteNewer } from "@/logic/shared"
 
 export type SyncActivity = "checking" | "pushing" | "pulling" | null
 
@@ -308,9 +310,11 @@ async function cycle(reason: "boot" | "dirty" | "focus" | "online"): Promise<voi
 					await pushDrive()
 					return { outcome: "pushed" } as DriveSyncResult
 				}
-				const remoteDirty = status.lastSyncAt
-					? new Date(remote.modifiedTime) > new Date(status.lastSyncAt)
-					: true
+				const remoteDirty = isRemoteNewer(
+					remote.modifiedTime,
+					status.lastSyncAt,
+					getClockSkewMs(),
+				)
 				if (!localDirty && !remoteDirty) return { outcome: "up-to-date" } as DriveSyncResult
 				if (localDirty && remoteDirty)
 					return {

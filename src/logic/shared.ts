@@ -39,6 +39,18 @@ export function inputToStored(input: string): string {
 	return input.replace("T", " ")
 }
 
+/** True when the Drive copy postdates the last sync. skewMs corrects a wrong
+ * device clock using server-observed time (see getClockSkewMs): positive when
+ * this device runs ahead. */
+export function isRemoteNewer(
+	remoteModifiedTime: string,
+	lastSyncAt: string | null,
+	skewMs = 0,
+): boolean {
+	if (!lastSyncAt) return true
+	return new Date(remoteModifiedTime).getTime() > new Date(lastSyncAt).getTime() - skewMs
+}
+
 /** ISO timestamp -> "just now", "5 min ago", … (locale-aware). */
 export function formatRelativeTime(iso: string, now: number = Date.now()): string {
 	const seconds = Math.round((new Date(iso).getTime() - now) / 1000)
