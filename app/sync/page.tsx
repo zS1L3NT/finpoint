@@ -7,6 +7,16 @@ import { toast } from "sonner"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import {
 	Card,
@@ -232,14 +242,6 @@ export default function DataSettingsPage() {
 		} finally {
 			setBusy(null)
 		}
-	}
-
-	const handleDrivePush = () => {
-		if (!confirmingPush) {
-			setConfirmingPush(true)
-			return
-		}
-		void resolveDrivePush()
 	}
 
 	const handleDrivePull = () => {
@@ -478,7 +480,7 @@ export default function DataSettingsPage() {
 															type="button"
 															variant="outline"
 															disabled={busy !== null}
-															onClick={() => void resolveDrivePush()}
+															onClick={() => setConfirmingPush(true)}
 														>
 															<IconifyIcon icon="lucide:cloud-upload" />
 															{busy === "drive-push"
@@ -495,14 +497,12 @@ export default function DataSettingsPage() {
 															disabled={
 																busy !== null || !driveConnected
 															}
-															onClick={() => handleDrivePush()}
+															onClick={() => setConfirmingPush(true)}
 														>
 															<IconifyIcon icon="lucide:cloud-upload" />
 															{busy === "drive-push"
 																? "Writing…"
-																: confirmingPush
-																	? "Click again to save to Drive"
-																	: "Save to Drive"}
+																: "Save to Drive"}
 														</Button>
 														<Button
 															className="w-full sm:w-auto"
@@ -758,6 +758,27 @@ export default function DataSettingsPage() {
 					</Card>
 				</div>
 			</PageContent>
+
+			<AlertDialog open={confirmingPush} onOpenChange={setConfirmingPush}>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>Replace the Google Drive backup?</AlertDialogTitle>
+						<AlertDialogDescription>
+							This replaces the Finpoint data in Google Drive with the data on this
+							browser. Changes that exist only in Drive will be lost.
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel>Cancel</AlertDialogCancel>
+						<AlertDialogAction
+							variant="destructive"
+							onClick={() => void resolveDrivePush()}
+						>
+							Replace Drive backup
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
 		</>
 	)
 }
