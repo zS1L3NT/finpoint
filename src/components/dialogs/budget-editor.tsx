@@ -2,7 +2,7 @@ import { useForm } from "@tanstack/react-form"
 import { usePathname } from "next/navigation"
 import { toast } from "sonner"
 import AmountField from "@/components/form/amount-field"
-import DateField from "@/components/form/date-field"
+import DateRange from "@/components/form/date-range"
 import TextField from "@/components/form/text-field"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import { Button } from "@/components/ui/button"
@@ -145,31 +145,36 @@ export default function BudgetEditorDialog({
 							)}
 						</form.Field>
 						<form.Field name="start_date">
-							{field => (
-								<DateField
-									id={field.name}
-									label="Start date"
-									value={field.state.value}
-									errors={mergeErrors(field.state.meta.errors, field.name)}
-									onChange={value => {
-										field.handleChange(value)
-										clearApiError(field.name)
-									}}
-								/>
-							)}
-						</form.Field>
-						<form.Field name="end_date">
-							{field => (
-								<DateField
-									id={field.name}
-									label="End date"
-									value={field.state.value}
-									errors={mergeErrors(field.state.meta.errors, field.name)}
-									onChange={value => {
-										field.handleChange(value)
-										clearApiError(field.name)
-									}}
-								/>
+							{startField => (
+								<form.Field name="end_date">
+									{endField => (
+										<DateRange
+											id="budget_edit_date_range"
+											label="Date range"
+											value={{
+												start: startField.state.value || null,
+												end: endField.state.value || null,
+											}}
+											className="md:col-span-2"
+											errors={[
+												...mergeErrors(
+													startField.state.meta.errors,
+													startField.name,
+												),
+												...mergeErrors(
+													endField.state.meta.errors,
+													endField.name,
+												),
+											]}
+											onChange={range => {
+												startField.handleChange(range.start ?? "")
+												endField.handleChange(range.end ?? "")
+												clearApiError(startField.name)
+												clearApiError(endField.name)
+											}}
+										/>
+									)}
+								</form.Field>
 							)}
 						</form.Field>
 					</FieldGroup>

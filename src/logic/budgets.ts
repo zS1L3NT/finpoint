@@ -72,8 +72,8 @@ function validateBudget(input: {
 	const amount = v.amount(input.amount, "amount")
 	const start_date = v.date(input.start_date, "start_date", "Enter a valid start date.")
 	const end_date = v.date(input.end_date, "end_date", "Enter a valid end date.")
-	if (start_date && end_date && end_date <= start_date) {
-		v.reject("end_date", "The end date must be after the start date.")
+	if (start_date && end_date && end_date < start_date) {
+		v.reject("end_date", "The end date must be on or after the start date.")
 	}
 	v.throwIfInvalid()
 

@@ -45,6 +45,8 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 				params.set("month", monthName)
 				params.set("year", yearValue)
 				params.delete("day")
+				params.delete("start_date")
+				params.delete("end_date")
 				return params
 			})
 		} else {

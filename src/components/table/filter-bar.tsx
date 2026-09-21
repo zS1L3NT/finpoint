@@ -6,9 +6,20 @@ import { cn } from "@/lib/utils"
 export const FILTER_CONTROL_CLASS =
 	"border-border bg-input/20 text-foreground hover:bg-muted dark:bg-input/30 dark:hover:bg-muted"
 
-export function FilterBar({ children }: { children: React.ReactNode }) {
+export function FilterBar({
+	children,
+	className,
+}: {
+	children: React.ReactNode
+	className?: string
+}) {
 	return (
-		<div className="grid w-full grid-cols-2 gap-2 lg:grid-cols-[repeat(4,max-content)]">
+		<div
+			className={cn(
+				"grid w-full grid-cols-2 gap-2 lg:grid-cols-[repeat(4,max-content)]",
+				className,
+			)}
+		>
 			{children}
 		</div>
 	)

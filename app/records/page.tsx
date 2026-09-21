@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation"
 import { useCallback, useMemo, useState } from "react"
 import RecordCreatorDialog from "@/components/dialogs/record-creator"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
-import DateField from "@/components/form/date-field"
+import DateRange from "@/components/form/date-range"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
@@ -78,8 +78,7 @@ export default function RecordsPage() {
 	)
 	const activeFilterCount = [
 		searchParams.get("query"),
-		startDate,
-		endDate,
+		startDate ?? endDate,
 		isAllocated,
 		categoryIds.length ? "categories" : null,
 		bucketId ?? bucketGroup ?? (showUnbucketed ? "unbucketed" : null),
@@ -277,7 +276,7 @@ function RecordFilters({
 	}
 
 	return (
-		<FilterBar>
+		<FilterBar className="sm:flex sm:flex-wrap">
 			<CategoryFilter
 				categories={categories}
 				selectedIds={categoryIds}
@@ -356,21 +355,12 @@ function RecordFilters({
 				</SelectContent>
 			</Select>
 
-			<DateField
-				id="records_start_date"
-				value={startDate ?? ""}
-				className="min-w-0 sm:w-40"
+			<DateRange
+				id="records_date_range"
+				value={{ start: startDate, end: endDate }}
+				className="sm:w-40"
 				triggerClassName={FILTER_CONTROL_CLASS}
-				placeholder="Start date"
-				onChange={date => onChange({ start_date: date || null })}
-			/>
-			<DateField
-				id="records_end_date"
-				value={endDate ?? ""}
-				className="min-w-0 sm:w-40"
-				triggerClassName={FILTER_CONTROL_CLASS}
-				placeholder="End date"
-				onChange={date => onChange({ end_date: date || null })}
+				onChange={value => onChange({ start_date: value.start, end_date: value.end })}
 			/>
 
 			<ClearFiltersButton count={activeFilterCount} onClear={onClear} />

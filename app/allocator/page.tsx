@@ -7,7 +7,7 @@ import { useMemo, useState } from "react"
 import AllocatorTabs from "@/components/allocator-tabs"
 import RecordCreatorDialog from "@/components/dialogs/record-creator"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
-import DateField from "@/components/form/date-field"
+import DateRange from "@/components/form/date-range"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
@@ -82,8 +82,7 @@ export default function AllocatorPage() {
 	const activeFilterCount = [
 		searchParams.get("query"),
 		accountId === "all" ? "" : accountId,
-		startDate,
-		endDate,
+		startDate ?? endDate,
 	].filter(Boolean).length
 	const clearFilters = () =>
 		setParams({
@@ -197,22 +196,17 @@ export default function AllocatorPage() {
 										</SelectGroup>
 									</SelectContent>
 								</Select>
-								<DateField
-									id="allocator_start_date"
-									value={startDate ?? ""}
-									className="min-w-0 sm:w-40"
+								<DateRange
+									id="allocator_date_range"
+									value={{ start: startDate, end: endDate }}
+									className="sm:w-40"
 									triggerClassName={FILTER_CONTROL_CLASS}
-									placeholder="Start date"
-									onChange={date => updateFilters({ start_date: date || null })}
-								/>
-
-								<DateField
-									id="allocator_end_date"
-									value={endDate ?? ""}
-									className="min-w-0 sm:w-40"
-									triggerClassName={FILTER_CONTROL_CLASS}
-									placeholder="End date"
-									onChange={date => updateFilters({ end_date: date || null })}
+									onChange={range =>
+										updateFilters({
+											start_date: range.start,
+											end_date: range.end,
+										})
+									}
 								/>
 								<ClearFiltersButton
 									count={activeFilterCount}

@@ -14,7 +14,8 @@ export type MonthlyFilters = {
 	bucket_group?: string | null
 	show_unbucketed?: boolean
 	treatment?: string | null
-	day?: number | null
+	start_date?: string | null
+	end_date?: string | null
 }
 
 export async function getMonthlyRecords(month: string, year: number, filters: MonthlyFilters = {}) {
@@ -28,10 +29,23 @@ export async function getMonthlyRecords(month: string, year: number, filters: Mo
 
 	const rawCategoryIds = (filters.category_ids ?? "").split(",").filter(Boolean)
 	const category_ids = await expandCategoryIdsForMonthly(rawCategoryIds)
+	const startDate = filters.start_date ?? date.toFormat("yyyy-MM-dd")
+	const endDate = filters.end_date ?? date.endOf("month").toFormat("yyyy-MM-dd")
+	const rangeStart = DateTime.fromFormat(startDate, "yyyy-MM-dd")
+	const rangeEnd = DateTime.fromFormat(endDate, "yyyy-MM-dd")
+	if (
+		!rangeStart.isValid ||
+		!rangeEnd.isValid ||
+		!rangeStart.hasSame(date, "month") ||
+		!rangeEnd.hasSame(date, "month") ||
+		rangeEnd < rangeStart
+	) {
+		throw new Error("Invalid date range.")
+	}
 
-	let records = await listRecords({
-		start_date: date.toFormat("yyyy-MM-dd"),
-		end_date: date.endOf("month").toFormat("yyyy-MM-dd"),
+	const records = await listRecords({
+		start_date: startDate,
+		end_date: endDate,
 		is_allocated: filters.is_allocated ?? null,
 		category_ids,
 		bucket_id: filters.bucket_id ?? null,
@@ -39,12 +53,6 @@ export async function getMonthlyRecords(month: string, year: number, filters: Mo
 		show_unbucketed: !!filters.show_unbucketed,
 		treatment: filters.treatment ?? null,
 	})
-
-	if (filters.day) {
-		if (filters.day < 1 || filters.day > (date.daysInMonth ?? 31))
-			throw new Error("Invalid day.")
-		records = records.filter(r => Number(r.datetime.slice(8, 10)) === filters.day)
-	}
 
 	// listRecords returns enriched rows; rebuild analytics shapes for summarize().
 	const toAnalytics = (r: (typeof records)[number]) => ({
@@ -101,7 +109,8 @@ export async function getMonthlyRecords(month: string, year: number, filters: Mo
 			bucket_group: filters.bucket_group ?? null,
 			show_unbucketed: !!filters.show_unbucketed,
 			treatment: filters.treatment ?? null,
-			day: filters.day ?? null,
+			start_date: filters.start_date ?? null,
+			end_date: filters.end_date ?? null,
 		},
 	}
 }

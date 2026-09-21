@@ -4,7 +4,7 @@ import { useLiveQuery } from "dexie-react-hooks"
 import { useSearchParams } from "next/navigation"
 import { useMemo, useState } from "react"
 import PendingStatementDialog from "@/components/dialogs/pending-statement"
-import DateField from "@/components/form/date-field"
+import DateRange from "@/components/form/date-range"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
@@ -45,8 +45,7 @@ export default function StatementsPage() {
 		searchParams.get("query"),
 		accountId === "all" ? "" : accountId,
 		isPending,
-		startDate,
-		endDate,
+		startDate ?? endDate,
 	].filter(Boolean).length
 	const clearFilters = () =>
 		setParams({
@@ -152,21 +151,17 @@ export default function StatementsPage() {
 										</SelectGroup>
 									</SelectContent>
 								</Select>
-								<DateField
-									id="statements_start_date"
-									value={startDate ?? ""}
-									className="min-w-0 sm:w-40"
+								<DateRange
+									id="statements_date_range"
+									value={{ start: startDate, end: endDate }}
+									className="sm:w-40"
 									triggerClassName={FILTER_CONTROL_CLASS}
-									placeholder="Start date"
-									onChange={date => updateFilters({ start_date: date || null })}
-								/>
-								<DateField
-									id="statements_end_date"
-									value={endDate ?? ""}
-									className="min-w-0 sm:w-40"
-									triggerClassName={FILTER_CONTROL_CLASS}
-									placeholder="End date"
-									onChange={date => updateFilters({ end_date: date || null })}
+									onChange={value =>
+										updateFilters({
+											start_date: value.start,
+											end_date: value.end,
+										})
+									}
 								/>
 								<ClearFiltersButton
 									count={activeFilterCount}

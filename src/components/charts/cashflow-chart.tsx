@@ -1,4 +1,5 @@
 import { useReducedMotion } from "framer-motion"
+import { DateTime } from "luxon"
 import { useRouter } from "next/navigation"
 import {
 	type ActiveDotProps,
@@ -46,11 +47,15 @@ export default function CashflowChart({
 	const projectionChange = colorChange(data, "projected_spending", target)
 	const openDay = (state: { activeLabel?: number | string } | null) => {
 		if (!state?.activeLabel) return
+		const selected = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
+			.set({ day: Number(state.activeLabel) })
+			.toFormat("yyyy-MM-dd")
 		void router.push(
 			pathMonthlyRecords({
 				month,
 				year: String(year),
-				day: String(Number(state.activeLabel)),
+				start_date: selected,
+				end_date: selected,
 			}),
 		)
 	}

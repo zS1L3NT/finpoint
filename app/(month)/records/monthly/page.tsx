@@ -7,6 +7,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
+import DateRange from "@/components/form/date-range"
 import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
 import RecordAmount from "@/components/record-amount"
 import SelectionBar from "@/components/selection-bar"
@@ -55,7 +56,8 @@ type Filters = {
 	bucket_group?: string
 	show_unbucketed?: string | boolean
 	treatment?: string
-	day?: string | number
+	start_date?: string
+	end_date?: string
 }
 
 export default function MonthlyRecordsPage() {
@@ -82,6 +84,7 @@ export default function MonthlyRecordsPage() {
 	const yearParam = searchParams.get("year")
 	const year =
 		yearParam !== null && Number.isFinite(Number(yearParam)) ? Number(yearParam) : now.year
+	const date = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
 	const categoryIdsParam = searchParams.get("category_ids")
 	const isAllocated = searchParams.get("is_allocated")
 	const bucketId = searchParams.get("bucket_id")
@@ -89,12 +92,13 @@ export default function MonthlyRecordsPage() {
 	const showUnbucketedParam = searchParams.get("show_unbucketed")
 	const showUnbucketed = showUnbucketedParam === "1" || showUnbucketedParam === "true"
 	const treatment = searchParams.get("treatment")
-	const dayParam = searchParams.get("day")
-	const day =
-		dayParam !== null && dayParam !== "" && Number.isFinite(Number(dayParam))
-			? Number(dayParam)
+	const legacyDay = Number(searchParams.get("day"))
+	const legacyDate =
+		Number.isInteger(legacyDay) && legacyDay >= 1 && legacyDay <= (date.daysInMonth ?? 0)
+			? date.set({ day: legacyDay }).toFormat("yyyy-MM-dd")
 			: null
-	const date = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
+	const startDate = searchParams.get("start_date") ?? legacyDate
+	const endDate = searchParams.get("end_date") ?? legacyDate
 	const animateContent = useTabTransition()
 
 	const filterKey = JSON.stringify([
@@ -104,7 +108,8 @@ export default function MonthlyRecordsPage() {
 		bucketGroup,
 		showUnbucketedParam,
 		treatment,
-		dayParam,
+		startDate,
+		endDate,
 	])
 	const data = useLiveQuery(
 		() =>
@@ -115,7 +120,8 @@ export default function MonthlyRecordsPage() {
 				bucket_group: bucketGroup,
 				show_unbucketed: showUnbucketed,
 				treatment,
-				day,
+				start_date: startDate,
+				end_date: endDate,
 			}).catch(() => null),
 		[month, year, filterKey],
 	)
@@ -143,11 +149,13 @@ export default function MonthlyRecordsPage() {
 	if (bucketGroup) filters.bucket_group = bucketGroup
 	if (showUnbucketedParam) filters.show_unbucketed = showUnbucketedParam
 	if (treatment) filters.treatment = treatment
-	if (dayParam) filters.day = dayParam
+	if (startDate) filters.start_date = startDate
+	if (endDate) filters.end_date = endDate
 
 	const visit = (changes: Partial<Filters> = {}, nextDate = date) => {
 		const merged: Partial<Filters> = { ...filters, ...changes }
 		const next = new URLSearchParams(searchParams.toString())
+		next.delete("day")
 		next.set("month", nextDate.toFormat("MMMM"))
 		next.set("year", String(nextDate.year))
 		for (const key of [
@@ -157,7 +165,8 @@ export default function MonthlyRecordsPage() {
 			"bucket_group",
 			"show_unbucketed",
 			"treatment",
-			"day",
+			"start_date",
+			"end_date",
 		] as const) {
 			const value = merged[key]
 			if (value === "" || value === false || value === undefined || value === null) {
@@ -431,7 +440,7 @@ function MonthlyRecordFilters({
 		filters.is_allocated,
 		bucketScope === "all" ? null : bucketScope,
 		filters.treatment,
-		filters.day,
+		filters.start_date ?? filters.end_date,
 	].filter(Boolean).length
 
 	const changeBucketScope = (scope: string) => {
@@ -451,21 +460,15 @@ function MonthlyRecordFilters({
 			className="flex flex-col gap-3 rounded-lg border bg-muted/20 p-3"
 			aria-labelledby="monthly-record-filters"
 		>
-			<div className="flex flex-wrap items-start justify-between gap-2">
-				<div>
-					<h3 id="monthly-record-filters" className="text-sm font-medium">
-						Filter this month
-					</h3>
-					<p className="text-xs text-muted-foreground">
-						{filters.day
-							? `Showing ${date.set({ day: Number(filters.day) }).toFormat("d LLL")}. `
-							: ""}
-						The list and totals update together.
-					</p>
-				</div>
-				{filters.day ? <Badge variant="secondary">Day {filters.day}</Badge> : null}
+			<div>
+				<h3 id="monthly-record-filters" className="text-sm font-medium">
+					Filter this month
+				</h3>
+				<p className="text-xs text-muted-foreground">
+					The list and totals update together.
+				</p>
 			</div>
-			<FilterBar>
+			<FilterBar className="sm:flex sm:flex-wrap">
 				<CategoryFilter
 					categories={categories}
 					selectedIds={categoryIds}
@@ -547,6 +550,24 @@ function MonthlyRecordFilters({
 						</SelectGroup>
 					</SelectContent>
 				</Select>
+
+				<DateRange
+					id="monthly_records_date_range"
+					value={{
+						start: filters.start_date ?? null,
+						end: filters.end_date ?? null,
+					}}
+					minimum={date.startOf("month").toFormat("yyyy-MM-dd")}
+					maximum={date.endOf("month").toFormat("yyyy-MM-dd")}
+					className="sm:w-40"
+					triggerClassName={FILTER_CONTROL_CLASS}
+					onChange={value =>
+						onChange({
+							start_date: value.start ?? undefined,
+							end_date: value.end ?? undefined,
+						})
+					}
+				/>
 				<ClearFiltersButton count={activeFilterCount} onClear={onClear} />
 			</FilterBar>
 		</section>
