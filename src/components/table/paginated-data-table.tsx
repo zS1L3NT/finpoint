@@ -57,11 +57,11 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 	const enter = live ? { opacity: 0, y: 12 } : false
 
 	return (
-		<div className="flex flex-col gap-4">
+		<div className="@container/table flex min-w-0 flex-col gap-4">
 			{header ? <PaginationHeader {...header} /> : null}
 
 			{mobileRow ? (
-				<div className="min-w-0 divide-y overflow-hidden rounded-lg border bg-card md:hidden">
+				<div className="min-w-0 divide-y overflow-hidden rounded-lg border bg-card @5xl/table:hidden">
 					<AnimatePresence initial={false}>
 						{loading ? (
 							Array.from({ length: 4 }).map((_, index) => (
@@ -92,7 +92,7 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 			<div
 				className={cn(
 					"overflow-hidden rounded-lg border bg-card",
-					mobileRow ? "hidden md:block" : null,
+					mobileRow ? "hidden @5xl/table:block" : null,
 				)}
 			>
 				<Table className="table-fixed overflow-hidden">
