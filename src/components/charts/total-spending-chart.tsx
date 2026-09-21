@@ -37,12 +37,17 @@ export default function TotalSpendingChart({
 	return (
 		<div className="grid gap-2">
 			<ChartContainer
-				className="h-48 w-full aspect-auto cursor-crosshair sm:h-54"
+				className="h-48 w-full aspect-auto cursor-pointer sm:h-54"
 				config={{
 					surplus: { label: "Surplus / Shortfall", color: "var(--color-white)" },
 				}}
 			>
-				<ComposedChart data={data} onClick={openDay} accessibilityLayer>
+				<ComposedChart
+					data={data}
+					onClick={openDay}
+					style={{ cursor: "pointer" }}
+					accessibilityLayer
+				>
 					<defs>
 						<linearGradient id={fillId} x1="0" y1="0" x2="0" y2="1">
 							<stop

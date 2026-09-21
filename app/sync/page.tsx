@@ -26,6 +26,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from "@/components/ui/item"
 import { Skeleton } from "@/components/ui/skeleton"
 import { db } from "@/data/db"
@@ -573,15 +574,30 @@ export default function DataSettingsPage() {
 										Replace everything in this browser with a backup file you
 										saved earlier.
 									</p>
-									<input
+									<Input
 										ref={fileInputRef}
 										type="file"
 										accept=".json,application/json"
 										aria-label="Finpoint backup file"
+										className="hidden"
 										onChange={event =>
 											setImportFile(event.currentTarget.files?.[0] ?? null)
 										}
 									/>
+									<div className="flex flex-wrap items-center gap-3">
+										<Button
+											type="button"
+											variant="outline"
+											disabled={busy !== null}
+											onClick={() => fileInputRef.current?.click()}
+										>
+											<IconifyIcon icon="lucide:upload" />
+											Choose file
+										</Button>
+										<span className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
+											{importFile ? importFile.name : "No file selected."}
+										</span>
+									</div>
 									{importFile ? (
 										<Item variant="outline">
 											<ItemMedia>

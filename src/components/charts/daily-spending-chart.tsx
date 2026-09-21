@@ -55,12 +55,17 @@ export default function DailySpendingChart({
 				))}
 			</div>
 			<ChartContainer
-				className="h-64 w-full aspect-auto cursor-crosshair sm:h-72"
+				className="h-64 w-full aspect-auto cursor-pointer sm:h-72"
 				config={Object.fromEntries(
 					buckets.map(bucket => [bucket.id, { label: bucket.name, color: bucket.color }]),
 				)}
 			>
-				<LineChart data={rows} onClick={openDay} accessibilityLayer>
+				<LineChart
+					data={rows}
+					onClick={openDay}
+					style={{ cursor: "pointer" }}
+					accessibilityLayer
+				>
 					<CartesianGrid vertical={false} />
 					<XAxis dataKey="day" interval={interval} tickMargin={8} />
 					<YAxis

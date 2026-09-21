@@ -3,7 +3,8 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
-export const FILTER_CONTROL_CLASS = "border-border bg-input/20 text-foreground dark:bg-input/30"
+export const FILTER_CONTROL_CLASS =
+	"border-border bg-input/20 text-foreground hover:bg-muted dark:bg-input/30 dark:hover:bg-muted"
 
 export function FilterBar({ children }: { children: React.ReactNode }) {
 	return (

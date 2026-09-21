@@ -148,7 +148,6 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 										animate={{ opacity: 1, y: 0 }}
 										exit={{ opacity: 0, y: -12 }}
 										data-state={selectedIds?.includes(row.id) && "selected"}
-										className="cursor-pointer"
 									>
 										{row.getVisibleCells().map(cell => (
 											<TableCell

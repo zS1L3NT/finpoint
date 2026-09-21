@@ -732,7 +732,7 @@ function BucketStatus({
 									type="button"
 									aria-pressed={activeScope === bucket.id}
 									onClick={() => setScope(bucket.id)}
-									className="min-w-0 rounded text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+									className="min-w-0 cursor-pointer rounded text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 								>
 									<Badge
 										variant="outline"

@@ -2,7 +2,7 @@
 
 import { useForm, useStore } from "@tanstack/react-form"
 import { useLiveQuery } from "dexie-react-hooks"
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { toast } from "sonner"
 import SelectField from "@/components/form/select-field"
 import TextField from "@/components/form/text-field"
@@ -31,6 +31,7 @@ const BANKS_REQUIRING_ADDITIONAL_INFO = ["ocbc", "revolut"]
 export default function ImporterPage() {
 	const [files, setFiles] = useState<File[]>([])
 	const [fileInputKey, setFileInputKey] = useState(0)
+	const fileInputRef = useRef<HTMLInputElement>(null)
 	const { mergeErrors, clearApiError, setApiErrors } = useApiFormErrors()
 	const accounts = useLiveQuery(() => listAccounts(), []) ?? []
 
@@ -231,9 +232,11 @@ export default function ImporterPage() {
 											</FieldLabel>
 											<Input
 												key={fileInputKey}
+												ref={fileInputRef}
 												id={field.name}
 												name="files[]"
 												type="file"
+												className="hidden"
 												multiple={
 													!BANKS_REQUIRING_ADDITIONAL_INFO.includes(bank)
 												}
@@ -255,6 +258,23 @@ export default function ImporterPage() {
 													clearApiError(field.name)
 												}}
 											/>
+											<div className="flex flex-wrap items-center gap-3">
+												<Button
+													type="button"
+													variant="outline"
+													onClick={() => fileInputRef.current?.click()}
+												>
+													<IconifyIcon icon="lucide:upload" />
+													{BANKS_REQUIRING_ADDITIONAL_INFO.includes(bank)
+														? "Choose file"
+														: "Choose files"}
+												</Button>
+												<span className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
+													{files.length
+														? `${files.length} file${files.length === 1 ? "" : "s"} selected`
+														: "No files selected."}
+												</span>
+											</div>
 											<FieldError errors={errors} />
 										</Field>
 									)

@@ -76,7 +76,7 @@ export default function CashflowChart({
 					Cumulative spending · SGD
 				</p>
 				<ChartContainer
-					className="h-72 w-full aspect-auto cursor-crosshair sm:h-80"
+					className="h-72 w-full aspect-auto cursor-pointer sm:h-80"
 					config={{
 						spending: { label: "Usage", color: "var(--color-emerald-500)" },
 						projected_spending: {
@@ -85,7 +85,12 @@ export default function CashflowChart({
 						},
 					}}
 				>
-					<AreaChart data={data} onClick={openDay} accessibilityLayer>
+					<AreaChart
+						data={data}
+						onClick={openDay}
+						style={{ cursor: "pointer" }}
+						accessibilityLayer
+					>
 						<defs>
 							<linearGradient id="actual-line" x1="0" y1="0" x2="1" y2="0">
 								<stop
