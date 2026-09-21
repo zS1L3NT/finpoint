@@ -729,8 +729,12 @@ export function generateTestData(): FinpointExport {
 
 	return {
 		app: "finpoint",
-		version: 1,
+		version: 2,
 		exported_at: new Date().toISOString(),
+		settings: {
+			default_filter_start_date: null,
+			default_filter_end_date_today: false,
+		},
 		tables,
 	}
 }

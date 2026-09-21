@@ -2,7 +2,7 @@
 // Google Drive appDataFolder. Manual JSON backup/restore stays untouched.
 
 import { db } from "@/data/db"
-import { exportData, importData, parseImportFile } from "@/data/export-import"
+import { exportData, type FinpointExport, importData, parseImportFile } from "@/data/export-import"
 import {
 	disconnectDrive,
 	downloadBackupFile,
@@ -42,11 +42,18 @@ async function metaGet(key: string): Promise<string | null> {
 	return (await db.meta.get(key))?.value ?? null
 }
 
-async function hashTables(tables: unknown): Promise<string> {
+async function hashSnapshot(
+	snapshot: Pick<FinpointExport, "settings" | "tables">,
+): Promise<string> {
 	// Sort rows so the hash survives an export -> import -> export round trip
 	// (IndexedDB returns rows in key order, not insertion order).
 	const normalized: Record<string, unknown[]> = {}
-	for (const [key, rows] of Object.entries(tables as Record<string, unknown[]>)) {
+	const synced =
+		snapshot.settings.default_filter_start_date ||
+		snapshot.settings.default_filter_end_date_today
+			? { ...snapshot.tables, __settings__: [snapshot.settings] }
+			: snapshot.tables
+	for (const [key, rows] of Object.entries(synced)) {
 		normalized[key] = [...rows].sort((a, b) => (JSON.stringify(a) < JSON.stringify(b) ? -1 : 1))
 	}
 	const bytes = new TextEncoder().encode(JSON.stringify(normalized))
@@ -73,9 +80,13 @@ export async function driveLocalDirty(): Promise<boolean> {
 	const snapshot = await exportData()
 	const lastHash = await metaGet(LAST_HASH_KEY)
 	if (!lastHash) {
-		return Object.values(snapshot.tables).some(rows => Array.isArray(rows) && rows.length > 0)
+		return (
+			snapshot.settings.default_filter_start_date != null ||
+			snapshot.settings.default_filter_end_date_today ||
+			Object.values(snapshot.tables).some(rows => Array.isArray(rows) && rows.length > 0)
+		)
 	}
-	return (await hashTables(snapshot.tables)) !== lastHash
+	return (await hashSnapshot(snapshot)) !== lastHash
 }
 
 export async function syncDrive(): Promise<DriveSyncResult> {
@@ -83,7 +94,7 @@ export async function syncDrive(): Promise<DriveSyncResult> {
 
 	const token = await ensureDriveToken()
 	const snapshot = await exportData()
-	const localHash = await hashTables(snapshot.tables)
+	const localHash = await hashSnapshot(snapshot)
 
 	const [storedFileId, lastSyncAt, lastHash] = await Promise.all([
 		metaGet(FILE_ID_KEY),
@@ -102,7 +113,13 @@ export async function syncDrive(): Promise<DriveSyncResult> {
 			(sum, rows) => sum + (Array.isArray(rows) ? rows.length : 0),
 			0,
 		)
-		if (!total) return { outcome: "empty" }
+		if (
+			!total &&
+			snapshot.settings.default_filter_start_date == null &&
+			!snapshot.settings.default_filter_end_date_today
+		) {
+			return { outcome: "empty" }
+		}
 		const uploaded = await uploadBackupFile(token, JSON.stringify(snapshot), null)
 		const now = new Date().toISOString()
 		await Promise.all([
@@ -134,7 +151,7 @@ export async function pushDrive(): Promise<void> {
 
 	const token = await ensureDriveToken()
 	const snapshot = await exportData()
-	const localHash = await hashTables(snapshot.tables)
+	const localHash = await hashSnapshot(snapshot)
 
 	const storedFileId = await metaGet(FILE_ID_KEY)
 	let fileId = storedFileId
@@ -166,7 +183,7 @@ export async function pullDrive(): Promise<void> {
 	await Promise.all([
 		db.meta.put({ key: FILE_ID_KEY, value: fileId }),
 		db.meta.put({ key: LAST_SYNC_KEY, value: now }),
-		db.meta.put({ key: LAST_HASH_KEY, value: await hashTables(snapshot.tables) }),
+		db.meta.put({ key: LAST_HASH_KEY, value: await hashSnapshot(snapshot) }),
 		db.meta.put({ key: REMOTE_TIME_KEY, value: meta?.modifiedTime ?? now }),
 	])
 }

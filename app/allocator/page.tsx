@@ -1,6 +1,7 @@
 "use client"
 
 import { useLiveQuery } from "dexie-react-hooks"
+import { DateTime } from "luxon"
 import { useSearchParams } from "next/navigation"
 import { useMemo, useState } from "react"
 import AllocatorTabs from "@/components/allocator-tabs"
@@ -26,8 +27,8 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select"
-import { START_DATE } from "@/constants"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
+import { useDefaultFilterEndDateToday, useDefaultFilterStartDate } from "@/hooks/use-settings"
 import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
 import { cn, formatCurrency } from "@/lib/utils"
 import { listAccounts } from "@/logic/accounts"
@@ -39,6 +40,8 @@ import { CategoryWithChildren, Record, Statement } from "@/types"
 
 export default function AllocatorPage() {
 	const searchParams = useSearchParams()
+	const defaultFilterStartDate = useDefaultFilterStartDate()
+	const defaultFilterEndDateToday = useDefaultFilterEndDateToday()
 	const accountId = searchParams.get("account_id") ?? "all"
 	const startDate = searchParams.get("start_date")
 	const endDate = searchParams.get("end_date")
@@ -247,7 +250,13 @@ export default function AllocatorPage() {
 				<RecordSearchSheet
 					title="Attach to pending record"
 					placeholder="Search pending records..."
-					filters={{ start_date: START_DATE, is_allocated: "false" }}
+					filters={{
+						start_date: defaultFilterStartDate ?? undefined,
+						end_date: defaultFilterEndDateToday
+							? DateTime.now().toFormat("yyyy-MM-dd")
+							: undefined,
+						is_allocated: "false",
+					}}
 					isOpen={isAttachingRecord}
 					setIsOpen={setIsAttachingRecord}
 					handler={async record => {

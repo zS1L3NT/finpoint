@@ -42,14 +42,15 @@ import {
 import { FieldGroup } from "@/components/ui/field"
 import { Progress } from "@/components/ui/progress"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { START_DATE } from "@/constants"
 import { useHistory } from "@/history"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { useDialogCloseAnimation } from "@/hooks/use-dialog-close-animation"
 import { useFetch } from "@/hooks/use-fetch"
+import { useDefaultFilterEndDateToday, useDefaultFilterStartDate } from "@/hooks/use-settings"
 import { cn, formatCurrency, formatDatetime, round2dp } from "@/lib/utils"
 import { ConflictError, deleteRecord, recordCompletions, updateRecord } from "@/logic/records"
 import { ValidationError } from "@/logic/validate"
+import { pathRecords } from "@/routes"
 import { Allocation, CategoryWithChildren, Record, Statement } from "@/types"
 
 export default function RecordEditorDialog({
@@ -69,6 +70,11 @@ export default function RecordEditorDialog({
 }) {
 	const { open, setIsOpen, onOpenChangeComplete } = useDialogCloseAnimation(isOpen, onOpenChange)
 	const { navigateBack } = useHistory()
+	const defaultFilterStartDate = useDefaultFilterStartDate()
+	const defaultFilterEndDateToday = useDefaultFilterEndDateToday()
+	const defaultFilterEndDate = defaultFilterEndDateToday
+		? DateTime.now().toFormat("yyyy-MM-dd")
+		: undefined
 
 	const completions = useFetch(() => recordCompletions(), {
 		titles: [],
@@ -150,7 +156,14 @@ export default function RecordEditorDialog({
 			if (location.pathname === `/records/${record.id}`) {
 				navigateBack({
 					name: "Records",
-					url: `/records?start_date=${START_DATE}&end_date=${DateTime.now().toFormat("yyyy-MM-dd")}`,
+					url: pathRecords(
+						defaultFilterStartDate || defaultFilterEndDate
+							? {
+									start_date: defaultFilterStartDate ?? undefined,
+									end_date: defaultFilterEndDate,
+								}
+							: undefined,
+					),
 				})
 			}
 		} catch {
@@ -180,7 +193,8 @@ export default function RecordEditorDialog({
 			filters={{
 				is_allocable: "true",
 				exclude_ids: formStatements.map(s => s.id).join(","),
-				start_date: START_DATE,
+				start_date: defaultFilterStartDate ?? undefined,
+				end_date: defaultFilterEndDate,
 			}}
 			isOpen={isAttachingStatement}
 			setIsOpen={setIsAttachingStatement}

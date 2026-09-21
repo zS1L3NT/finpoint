@@ -118,8 +118,13 @@ export type MetaRow = {
 	value: string
 }
 
+export type SettingsRow = {
+	key: string
+	value: string | null
+}
+
 export const DB_NAME = "finpoint"
-export const DB_VERSION = 1
+export const DB_VERSION = 2
 
 class FinpointDB extends Dexie {
 	accounts!: Table<AccountRow, string>
@@ -133,6 +138,7 @@ class FinpointDB extends Dexie {
 	bucket_defaults!: Table<BucketDefaultRow, [string, string]>
 	bucket_targets!: Table<BucketTargetRow, [string, string]>
 	analytics_months!: Table<AnalyticsMonthRow, string>
+	settings!: Table<SettingsRow, string>
 	meta!: Table<MetaRow, string>
 
 	constructor() {
@@ -154,6 +160,10 @@ class FinpointDB extends Dexie {
 			bucket_targets: "[bucket_id+month], bucket_id, month",
 			analytics_months: "month",
 			meta: "key",
+		})
+
+		this.version(2).stores({
+			settings: "key",
 		})
 	}
 }

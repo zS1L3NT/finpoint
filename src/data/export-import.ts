@@ -6,8 +6,14 @@
 
 import { DateTime } from "luxon"
 import { db } from "@/data/db"
+import {
+	DEFAULT_SETTINGS,
+	type FinpointSettings,
+	readSettings,
+	replaceSettings,
+} from "@/data/settings"
 
-export const EXPORT_VERSION = 1
+export const EXPORT_VERSION = 2
 
 type TableName =
 	| "accounts"
@@ -36,10 +42,13 @@ export const TABLES: TableName[] = [
 	"analytics_months",
 ]
 
+export const SYNC_TABLES = [...TABLES, "settings"] as const
+
 export type FinpointExport = {
 	app: "finpoint"
 	version: number
 	exported_at: string
+	settings: FinpointSettings
 	tables: Record<TableName, unknown[]>
 }
 
@@ -52,6 +61,7 @@ export async function exportData(): Promise<FinpointExport> {
 		app: "finpoint",
 		version: EXPORT_VERSION,
 		exported_at: new Date().toISOString(),
+		settings: await readSettings(),
 		tables,
 	}
 }
@@ -81,18 +91,34 @@ export function parseImportFile(text: string): FinpointExport {
 			throw new Error("This backup file looks incomplete.")
 		}
 	}
-	return parsed as FinpointExport
+	const startDate = parsed.settings?.default_filter_start_date
+	if (startDate != null && !/^\d{4}-\d{2}-\d{2}$/.test(startDate)) {
+		throw new Error("This backup contains an invalid default filter date.")
+	}
+	const endDateToday = parsed.settings?.default_filter_end_date_today
+	if (endDateToday != null && typeof endDateToday !== "boolean") {
+		throw new Error("This backup contains an invalid default end-date setting.")
+	}
+	return {
+		...(parsed as Omit<FinpointExport, "settings">),
+		settings: { ...DEFAULT_SETTINGS, ...parsed.settings },
+	}
 }
 
 export async function importData(data: FinpointExport): Promise<void> {
-	await db.transaction("rw", [...TABLES.map(table => db.table(table)), db.meta], async () => {
-		for (const table of TABLES) {
-			await db.table(table).clear()
-			const rows = data.tables[table]
-			if (rows.length) await db.table(table).bulkAdd(rows)
-		}
-		await db.meta.put({ key: "seeded_v1", value: "1" })
-	})
+	await db.transaction(
+		"rw",
+		[...TABLES.map(table => db.table(table)), db.settings, db.meta],
+		async () => {
+			for (const table of TABLES) {
+				await db.table(table).clear()
+				const rows = data.tables[table]
+				if (rows.length) await db.table(table).bulkAdd(rows)
+			}
+			await replaceSettings(data.settings)
+			await db.meta.put({ key: "seeded_v1", value: "1" })
+		},
+	)
 }
 
 export async function clearAllData(): Promise<void> {

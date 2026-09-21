@@ -52,6 +52,7 @@ export default function RecordSearchSheet({
 				query: query || null,
 				exclude_budget_id: filters?.exclude_budget_id ?? null,
 				start_date: includeOlder ? null : (filters?.start_date ?? null),
+				end_date: filters?.end_date ?? null,
 				is_allocated: filters?.is_allocated ?? null,
 			})
 		}, [
@@ -60,6 +61,7 @@ export default function RecordSearchSheet({
 			includeOlder,
 			filters?.exclude_budget_id,
 			filters?.start_date,
+			filters?.end_date,
 			filters?.is_allocated,
 		]) ?? []
 

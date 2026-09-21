@@ -3,7 +3,7 @@
 // auto never pulls into a dirty browser and never resolves conflicts.
 
 import { db } from "@/data/db"
-import { TABLES } from "@/data/export-import"
+import { SYNC_TABLES } from "@/data/export-import"
 import {
 	AuthNeededError,
 	ensureDriveTokenSilent,
@@ -394,7 +394,7 @@ function flushOnHide(): void {
 export function startAutoSync(): void {
 	if (started || typeof window === "undefined") return
 	started = true
-	for (const table of TABLES) {
+	for (const table of SYNC_TABLES) {
 		db.table(table).hook("creating", () => markDirty())
 		db.table(table).hook("updating", () => markDirty())
 		db.table(table).hook("deleting", () => markDirty())

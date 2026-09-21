@@ -17,8 +17,8 @@ import {
 	SidebarMenuItem,
 	useSidebar,
 } from "@/components/ui/sidebar"
-import { START_DATE } from "@/constants"
 import { useHistory } from "@/history"
+import { useDefaultFilterEndDateToday, useDefaultFilterStartDate } from "@/hooks/use-settings"
 import { useSyncStatus } from "@/hooks/use-sync-status"
 import {
 	pathAccounts,
@@ -29,6 +29,7 @@ import {
 	pathDataSettings,
 	pathImporter,
 	pathRecords,
+	pathSettings,
 	pathStatements,
 } from "@/routes"
 
@@ -76,6 +77,11 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 	const { handleClear } = useHistory()
 	const { isMobile, setOpenMobile } = useSidebar()
 	const pathname = usePathname()
+	const defaultFilterStartDate = useDefaultFilterStartDate()
+	const defaultFilterEndDateToday = useDefaultFilterEndDateToday()
+	const defaultFilterEndDate = defaultFilterEndDateToday
+		? DateTime.now().toFormat("yyyy-MM-dd")
+		: undefined
 	const handleSidebarLink = () => {
 		handleClear()
 
@@ -100,16 +106,23 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 			label: "Manage",
 			items: [
 				{
-					to: pathAllocator({ start_date: START_DATE }),
+					to: pathAllocator({
+						start_date: defaultFilterStartDate ?? undefined,
+						end_date: defaultFilterEndDate,
+					}),
 					icon: "lucide:link",
 					label: "Allocator",
 					active: pathname.startsWith("/allocator"),
 				},
 				{
-					to: pathRecords({
-						start_date: START_DATE,
-						end_date: DateTime.now().toFormat("yyyy-MM-dd"),
-					}),
+					to: pathRecords(
+						defaultFilterStartDate || defaultFilterEndDate
+							? {
+									start_date: defaultFilterStartDate ?? undefined,
+									end_date: defaultFilterEndDate,
+								}
+							: undefined,
+					),
 					icon: "lucide:receipt-text",
 					label: "Records",
 					active: pathname.startsWith("/records"),
@@ -159,6 +172,12 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 					icon: "lucide:refresh-cw",
 					label: "Sync",
 					active: pathname.startsWith("/sync"),
+				},
+				{
+					to: pathSettings(),
+					icon: "lucide:settings-2",
+					label: "Settings",
+					active: pathname.startsWith("/settings"),
 				},
 			],
 		},
