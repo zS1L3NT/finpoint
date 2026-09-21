@@ -1,4 +1,4 @@
-// Mirrors `Api\ImporterController` (dbs/uob/revolut) in TypeScript.
+// Mirrors `Api\ImporterController` (dbs/ocbc/uob/revolut) in TypeScript.
 // CSV via PapaParse, XLSX via SheetJS — replaces `maatwebsite/excel`.
 
 import Papa from "papaparse"
@@ -76,6 +76,35 @@ function parseDayMonthYear(value: string | null | undefined): string {
 		throw new ValidationError({ files: ["Invalid CSV Format: bad date."] })
 	}
 	return `${year}-${month}-${day.padStart(2, "0")} 00:00`
+}
+
+function parseDayMonthYearSlashes(value: string | null | undefined): string {
+	if (!value)
+		throw new ValidationError({ files: ["Invalid CSV Format: missing transaction date."] })
+	const match = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(value.trim())
+	if (!match) throw new ValidationError({ files: ["Invalid CSV Format: bad date."] })
+	const [, day, month, year] = match
+	return `${year}-${month?.padStart(2, "0")}-${day?.padStart(2, "0")} 00:00`
+}
+
+async function selectedAccount(accountId: string, accountName: string | undefined, bank: string) {
+	const id = accountId.trim()
+	if (!id) {
+		throw new ValidationError({
+			[accountName === undefined ? "account_select" : "account_id"]: ["Select an account."],
+		})
+	}
+
+	if (accountName !== undefined) {
+		if (!accountName.trim()) {
+			throw new ValidationError({ account_name: ["Enter an account name."] })
+		}
+		await ensureAccount(id, accountName.trim(), bank)
+	} else if (!(await db.accounts.get(id))) {
+		throw new ValidationError({ account_select: ["Select an account."] })
+	}
+
+	return id
 }
 
 function combine(header: Row, row: Row): Record<string, string | null> {
@@ -292,19 +321,54 @@ export async function importUob(files: File[]): Promise<ImportResult> {
 	return { imported, reindexed, skipped }
 }
 
+export async function importOcbc(
+	file: File | null,
+	accountId: string,
+	accountName?: string,
+): Promise<ImportResult> {
+	if (!file) throw new ValidationError({ files: ["Select a file."] })
+	const id = await selectedAccount(accountId, accountName, "OCBC")
+
+	const data = await readFile(file)
+	const header = data.shift() ?? []
+	const expected = [
+		"Transaction date",
+		"Value date",
+		"Description",
+		"Withdrawals(SGD)",
+		"Deposits(SGD)",
+	]
+	if (!expected.every(column => header.includes(column))) {
+		throw new ValidationError({ files: ["Invalid CSV Format: missing OCBC columns."] })
+	}
+
+	const rows: Parsed[] = []
+	for (const row of data) {
+		const statement = combine(header, row)
+		const withdrawal = Number((statement["Withdrawals(SGD)"] ?? "0").replace(/,/g, ""))
+		const deposit = Number((statement["Deposits(SGD)"] ?? "0").replace(/,/g, ""))
+		if (Number.isNaN(withdrawal) || Number.isNaN(deposit)) {
+			throw new ValidationError({ files: ["Invalid CSV Format: bad amount."] })
+		}
+		rows.push({
+			account_id: id,
+			datetime: parseDayMonthYearSlashes(statement["Transaction date"]),
+			description: (statement.Description ?? "").replace(/\s+/g, " ").trim(),
+			amount: round2(withdrawal !== 0 ? -withdrawal : deposit),
+			is_pending: 0,
+		})
+	}
+
+	return upsertIndexed(rows, true)
+}
+
 export async function importRevolut(
 	file: File | null,
 	accountId: string,
 	accountName?: string,
 ): Promise<ImportResult> {
 	if (!file) throw new ValidationError({ files: ["Select a file."] })
-	if (!accountId.trim()) throw new ValidationError({ account_id: ["Select an account."] })
-
-	if (accountName?.trim()) {
-		await ensureAccount(accountId.trim(), accountName.trim(), "Revolut")
-	} else if (!(await db.accounts.get(accountId.trim()))) {
-		throw new ValidationError({ account_id: ["Select an account."] })
-	}
+	const id = await selectedAccount(accountId, accountName, "Revolut")
 
 	const data = await readFile(file)
 	const header = data.shift() ?? []
@@ -327,7 +391,7 @@ export async function importRevolut(
 		const datetime =
 			started.length === 16 ? `${started.slice(0, 10)} ${started.slice(11)}` : started
 		const candidate = {
-			account_id: accountId.trim(),
+			account_id: id,
 			datetime,
 			description: statement.Description ?? "",
 			amount: round2(Number(statement.Amount ?? 0) - Number(statement.Fee ?? 0)),

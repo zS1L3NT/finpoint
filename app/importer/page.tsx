@@ -23,10 +23,10 @@ import { Input } from "@/components/ui/input"
 import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from "@/components/ui/item"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { listAccounts } from "@/logic/accounts"
-import { importDbs, importRevolut, importUob } from "@/logic/importer"
+import { importDbs, importOcbc, importRevolut, importUob } from "@/logic/importer"
 import { ValidationError } from "@/logic/validate"
 
-const BANKS_REQUIRING_ADDITIONAL_INFO = ["revolut"]
+const BANKS_REQUIRING_ADDITIONAL_INFO = ["ocbc", "revolut"]
 
 export default function ImporterPage() {
 	const [files, setFiles] = useState<File[]>([])
@@ -50,16 +50,16 @@ export default function ImporterPage() {
 
 			try {
 				const isNewAccount = value.account_select === "new"
+				const accountId = isNewAccount ? value.account_id : value.account_select
+				const accountName = isNewAccount ? value.account_name : undefined
 				const data =
 					value.bank === "dbs"
 						? await importDbs(files)
 						: value.bank === "uob"
 							? await importUob(files)
-							: await importRevolut(
-									files[0] ?? null,
-									isNewAccount ? value.account_id : value.account_select,
-									isNewAccount ? value.account_name : undefined,
-								)
+							: value.bank === "ocbc"
+								? await importOcbc(files[0] ?? null, accountId, accountName)
+								: await importRevolut(files[0] ?? null, accountId, accountName)
 				toast.success(`Imported successful`, {
 					description: (
 						<>
@@ -127,12 +127,19 @@ export default function ImporterPage() {
 										placeholder="Select your bank"
 										items={[
 											{ value: "dbs", label: "DBS" },
+											{ value: "ocbc", label: "OCBC" },
 											{ value: "uob", label: "UOB" },
 											{ value: "revolut", label: "Revolut" },
 										]}
 										onChange={value => {
 											field.handleChange(value)
+											form.setFieldValue("account_select", "")
+											form.setFieldValue("account_id", "")
+											form.setFieldValue("account_name", "")
 											clearApiError(field.name)
+											clearApiError("account_select")
+											clearApiError("account_id")
+											clearApiError("account_name")
 										}}
 									/>
 								)}
@@ -146,7 +153,10 @@ export default function ImporterPage() {
 												id={field.name}
 												label="Account"
 												value={field.state.value}
-												errors={[]}
+												errors={mergeErrors(
+													field.state.meta.errors,
+													field.name,
+												)}
 												items={[
 													...accounts
 														.filter(

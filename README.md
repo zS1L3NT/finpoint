@@ -48,6 +48,7 @@ I've also hosted Finpoint on my personal subdomain at https://finpoint.zectan.co
 - Statements
   - Import Statements from
     - DBS
+    - OCBC
     - UOB
     - Revolut
   - CSV, XLS and XLSX support
