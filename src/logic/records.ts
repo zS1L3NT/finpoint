@@ -4,7 +4,11 @@
 import { db } from "@/data/db"
 import { inputToStored, newId, round2 } from "@/logic/shared"
 import { ValidationError, Validator } from "@/logic/validate"
-import type { AnalyticsTreatment } from "@/types"
+import type { Allocation, AnalyticsTreatment, Record as AppRecord, Statement } from "@/types"
+
+export type RecordDetail = AppRecord & {
+	statements: Array<Statement & { pivot: Allocation }>
+}
 
 export type RecordFilters = {
 	query?: string | null
@@ -183,28 +187,50 @@ export async function listRecords(filters: RecordFilters = {}) {
 	return enriched
 }
 
-export async function getRecord(id: string) {
+export async function getRecord(id: string): Promise<RecordDetail> {
 	const row = await db.records.get(id)
 	if (!row) throw new Error("Record not found.")
 	const enriched = (await enrichRecords([row]))[0]
 	if (!enriched) throw new Error("Record not found.")
 	const allocations = await db.allocations.where("record_id").equals(id).toArray()
 	const statementIds = allocations.map(a => a.statement_id)
-	const statements = statementIds.length
-		? await db.statements.where("id").anyOf(statementIds).toArray()
-		: []
+	const [statements, statementAllocations, accountRows] = await Promise.all([
+		statementIds.length ? db.statements.where("id").anyOf(statementIds).toArray() : [],
+		statementIds.length
+			? db.allocations.where("statement_id").anyOf(statementIds).toArray()
+			: [],
+		db.accounts.toArray(),
+	])
 	const amountByStatement = new Map(allocations.map(a => [a.statement_id, a.amount]))
-	const accounts = new Map((await db.accounts.toArray()).map(a => [a.id, a]))
+	const totalsByStatement = new Map<string, { sum: number; count: number }>()
+	for (const allocation of statementAllocations) {
+		const total = totalsByStatement.get(allocation.statement_id) ?? { sum: 0, count: 0 }
+		total.sum = round2(total.sum + allocation.amount)
+		total.count++
+		totalsByStatement.set(allocation.statement_id, total)
+	}
+	const accounts = new Map(accountRows.map(a => [a.id, a]))
 
 	return {
 		...enriched,
 		statements: statements
-			.map(statement => ({
-				...statement,
-				is_pending: statement.is_pending === 1,
-				pivot: { amount: amountByStatement.get(statement.id) ?? 0 },
-				account: accounts.get(statement.account_id) ?? null,
-			}))
+			.map(statement => {
+				const total = totalsByStatement.get(statement.id) ?? { sum: 0, count: 0 }
+				return {
+					...statement,
+					allocable_amount: round2(statement.amount - total.sum),
+					allocation_count: total.count,
+					is_pending: statement.is_pending === 1,
+					is_unallocated: total.count === 0,
+					pivot: { amount: amountByStatement.get(statement.id) ?? 0 },
+					account: accounts.get(statement.account_id) ?? {
+						id: statement.account_id,
+						name: statement.account_id,
+						balance: 0,
+						bank: "",
+					},
+				}
+			})
 			.sort(
 				(a, b) =>
 					b.datetime.localeCompare(a.datetime) ||
