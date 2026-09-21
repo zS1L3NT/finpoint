@@ -1,13 +1,69 @@
-import { CircleQuestionMark } from "lucide-react"
-import { DynamicIcon, type IconName, iconNames } from "lucide-react/dynamic"
+import { CircleQuestionMark, type LucideIcon } from "lucide-react"
+import type { IconName } from "lucide-react/dynamic"
+import dynamicIconImports from "lucide-react/dynamicIconImports"
+import { useEffect, useState } from "react"
 import { ICONS } from "@/components/icons"
 
-export const ICON_NAMES = iconNames
+export const ICON_NAMES = Object.keys(dynamicIconImports) as IconName[]
 
-const iconNameSet = new Set<string>(iconNames)
+const iconNameSet = new Set<string>(ICON_NAMES)
+const loadedIcons = new Map<IconName, LucideIcon>()
+const loadingIcons = new Map<IconName, Promise<LucideIcon>>()
 
 function normalize(name: string) {
 	return name.trim().replace(/^lucide:/, "")
+}
+
+function loadIcon(name: IconName) {
+	const loaded = loadedIcons.get(name)
+	if (loaded) return Promise.resolve(loaded)
+
+	const loading = loadingIcons.get(name)
+	if (loading) return loading
+
+	const promise = dynamicIconImports[name]()
+		.then(module => {
+			loadedIcons.set(name, module.default)
+			loadingIcons.delete(name)
+			return module.default
+		})
+		.catch(cause => {
+			loadingIcons.delete(name)
+			throw cause
+		})
+	loadingIcons.set(name, promise)
+	return promise
+}
+
+export async function preloadCategoryIcons(icons: string[]) {
+	await Promise.allSettled(
+		[...new Set(icons.map(normalize))]
+			.filter(name => !ICONS[name] && iconNameSet.has(name))
+			.map(name => loadIcon(name as IconName)),
+	)
+}
+
+function DynamicUiIcon({
+	name,
+	...props
+}: { name: IconName } & Omit<React.ComponentProps<"svg">, "name">) {
+	const [Component, setComponent] = useState<LucideIcon | null>(
+		() => loadedIcons.get(name) ?? null,
+	)
+
+	useEffect(() => {
+		let cancelled = false
+		loadIcon(name)
+			.then(icon => {
+				if (!cancelled) setComponent(() => icon)
+			})
+			.catch(() => undefined)
+		return () => {
+			cancelled = true
+		}
+	}, [name])
+
+	return Component ? <Component {...props} /> : <CircleQuestionMark {...props} />
 }
 
 /** Drop-in for the old Iconify runtime icon: bundled SVG, same props. */
@@ -18,14 +74,10 @@ export function UiIcon({ icon, ...props }: { icon?: string | null } & React.Comp
 
 	if (Component) return <Component {...props} />
 	if (!iconNameSet.has(name)) return <CircleQuestionMark {...props} />
+	const Loaded = loadedIcons.get(name as IconName)
+	if (Loaded) return <Loaded {...props} />
 
-	return (
-		<DynamicIcon
-			{...props}
-			name={name as IconName}
-			fallback={() => <CircleQuestionMark {...props} />}
-		/>
-	)
+	return <DynamicUiIcon key={name} {...props} name={name as IconName} />
 }
 
 export default function Icon({

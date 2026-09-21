@@ -3,6 +3,7 @@
 import { Analytics } from "@vercel/analytics/react"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { useEffect, useState } from "react"
+import { preloadCategoryIcons } from "@/components/icon"
 import AppSidebar from "@/components/layout/app-sidebar"
 import ShellHeader from "@/components/layout/shell-header"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
@@ -14,6 +15,7 @@ import { HistoryProvider } from "@/history"
 import { initializeAppearance } from "@/hooks/use-appearance"
 import { useSyncToasts } from "@/hooks/use-sync-toasts"
 import { startAutoSync } from "@/logic/auto-sync"
+import { listCategoryIconNames } from "@/logic/categories"
 
 function Boot() {
 	useSyncToasts()
@@ -24,6 +26,8 @@ function Boot() {
 		initializeAppearance("system")
 		db.open()
 			.then(() => seedIfEmpty())
+			.then(() => listCategoryIconNames())
+			.then(preloadCategoryIcons)
 			.then(() => {
 				if (!cancelled) startAutoSync()
 			})

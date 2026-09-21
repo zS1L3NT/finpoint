@@ -36,6 +36,10 @@ function cleanInput(input: CategoryInput) {
 	return { ...dto, id }
 }
 
+export async function listCategoryIconNames() {
+	return [...new Set((await db.categories.toArray()).map(category => category.icon))]
+}
+
 export async function listCategories() {
 	const categories = await db.categories.toArray()
 	const buckets = await db.buckets.toArray()
