@@ -48,6 +48,7 @@ export default function AmountField({
 			setText(raw)
 			const next = Number(raw)
 			if (!Number.isNaN(next)) {
+				synced.current = next
 				onChange(next)
 			}
 		}
