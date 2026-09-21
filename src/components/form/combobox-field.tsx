@@ -12,6 +12,7 @@ type Props<T> = FormFieldProps & {
 	value: T | null
 	placeholder?: string
 	emptyText?: string
+	limit?: number
 	items: T[]
 	getItemId: (item: T) => string
 	getItemString: (item: T) => string
@@ -29,6 +30,7 @@ export default function ComboboxField<T>({
 	value,
 	placeholder,
 	emptyText = "No items found.",
+	limit,
 	items,
 	getItemId,
 	getItemString,
@@ -53,6 +55,7 @@ export default function ComboboxField<T>({
 				value={value}
 				onValueChange={onChange}
 				disabled={disabled}
+				limit={limit}
 				autoHighlight
 			>
 				<ComboboxInput

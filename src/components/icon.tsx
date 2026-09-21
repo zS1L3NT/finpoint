@@ -1,16 +1,31 @@
 import { CircleQuestionMark } from "lucide-react"
+import { DynamicIcon, type IconName, iconNames } from "lucide-react/dynamic"
 import { ICONS } from "@/components/icons"
 
-function resolve(name: string) {
-	const value = name.trim().replace(/^lucide:/, "")
-	return ICONS[value] ?? CircleQuestionMark
+export const ICON_NAMES = iconNames
+
+const iconNameSet = new Set<string>(iconNames)
+
+function normalize(name: string) {
+	return name.trim().replace(/^lucide:/, "")
 }
 
 /** Drop-in for the old Iconify runtime icon: bundled SVG, same props. */
 export function UiIcon({ icon, ...props }: { icon?: string | null } & React.ComponentProps<"svg">) {
 	if (!icon?.trim()) return null
-	const Component = resolve(icon)
-	return <Component {...props} />
+	const name = normalize(icon)
+	const Component = ICONS[name]
+
+	if (Component) return <Component {...props} />
+	if (!iconNameSet.has(name)) return <CircleQuestionMark {...props} />
+
+	return (
+		<DynamicIcon
+			{...props}
+			name={name as IconName}
+			fallback={() => <CircleQuestionMark {...props} />}
+		/>
+	)
 }
 
 export default function Icon({

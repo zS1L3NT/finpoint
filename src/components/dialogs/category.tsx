@@ -4,7 +4,7 @@ import { toast } from "sonner"
 import ComboboxField from "@/components/form/combobox-field"
 import SelectField from "@/components/form/select-field"
 import TextField from "@/components/form/text-field"
-import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
+import Icon, { ICON_NAMES, UiIcon as IconifyIcon } from "@/components/icon"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import {
@@ -35,6 +35,11 @@ type CategoryFormValues = {
 }
 
 const NO_DEFAULT = "no_default"
+const ICON_OPTION_LIMIT = 50
+
+function iconLabel(icon: string) {
+	return icon.replaceAll("-", " ")
+}
 
 function isChildCategory(category: Category | CategoryWithChildren | null) {
 	return category?.parent_category_id !== null
@@ -68,6 +73,10 @@ export default function CategoryDialog({
 	const [values, setValues] = useState<CategoryFormValues>(EMPTY_FORM_VALUES)
 	const { getApiFieldErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
 	const parentOptions = categories.filter(option => option.id !== category?.id)
+	const iconOptions =
+		values.icon && !ICON_NAMES.includes(values.icon as (typeof ICON_NAMES)[number])
+			? [values.icon, ...ICON_NAMES]
+			: ICON_NAMES
 	const bucketEligible = canUseDefaultBucket(values.analytics_treatment || null)
 	const defaultBucketName = values.default_bucket_id
 		? (buckets.find(bucket => bucket.id === values.default_bucket_id)?.name ??
@@ -186,12 +195,24 @@ export default function CategoryDialog({
 								onChange={value => setValue("parent_category_id", value?.id ?? "")}
 							/>
 						) : null}
-						<TextField
+						<ComboboxField
 							id="icon"
 							label="Icon"
-							value={values.icon}
+							value={iconOptions.find(icon => icon === values.icon) ?? null}
 							errors={getApiFieldErrors("icon")}
-							onChange={value => setValue("icon", value)}
+							placeholder="Search Lucide icons"
+							emptyText="No icons found."
+							limit={ICON_OPTION_LIMIT}
+							items={iconOptions}
+							getItemId={icon => icon}
+							getItemString={iconLabel}
+							renderItem={icon => (
+								<div className="flex items-center gap-2 capitalize">
+									<IconifyIcon icon={icon} />
+									{iconLabel(icon)}
+								</div>
+							)}
+							onChange={value => setValue("icon", value ?? "")}
 						/>
 						<TextField
 							id="color"
