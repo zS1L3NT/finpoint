@@ -34,7 +34,7 @@ A spending plan with a custom date period and amount. Budget membership can be m
 _Avoid_: Spending bucket, monthly target
 
 **Spending bucket**:
-A persistent, optional planning group for personal spending, such as Daily, Recurring, Irregular, or Holiday. A bucket can have a default monthly target and a target override for a specific month. Only Records whose effective treatment is Spending contribute to bucket totals.
+A persistent, optional planning group for personal spending, such as Daily, Recurring, Irregular, or Travel. A bucket can have a default monthly target and a target override for a specific month. Only Records whose effective treatment is Spending contribute to bucket totals.
 _Avoid_: Budget, category, treatment
 
 **Monthly target**:

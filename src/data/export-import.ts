@@ -117,15 +117,18 @@ export async function importData(data: FinpointExport): Promise<void> {
 			}
 			await replaceSettings(data.settings)
 			await db.meta.put({ key: "seeded_v1", value: "1" })
+			await db.meta.put({ key: "seeded_v2", value: "1" })
 		},
 	)
 }
 
 export async function clearAllData(): Promise<void> {
-	await db.transaction("rw", [...TABLES.map(table => db.table(table))], async () => {
+	await db.transaction("rw", [...TABLES.map(table => db.table(table)), db.meta], async () => {
 		for (const table of TABLES) {
 			await db.table(table).clear()
 		}
+		await db.meta.delete("seeded_v1")
+		await db.meta.delete("seeded_v2")
 	})
 }
 

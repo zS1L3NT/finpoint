@@ -5,7 +5,10 @@
 // the RNG is seeded so every load produces the same workspace.
 
 import { DateTime } from "luxon"
+import { DEFAULT_BUCKETS, DEFAULT_CATEGORIES } from "@/data/defaults"
 import type { FinpointExport } from "@/data/export-import"
+import { slugify } from "@/logic/shared"
+import type { AnalyticsTreatment } from "@/types"
 
 function mulberry32(seed: number) {
 	let state = seed
@@ -38,228 +41,16 @@ function stamp(day: DateTime, hour: number, minute: number): string {
 	return `${day.toFormat("yyyy-MM-dd")} ${pad(hour)}:${pad(minute)}`
 }
 
-type DemoCategory = {
-	id: string
-	name: string
-	icon: string
-	color: string
-	parent: string | null
-	treatment: "income" | "spending" | "saving_investment" | "neutral" | "automatic"
-}
+const CATEGORIES = DEFAULT_CATEGORIES.map(category => ({
+	id: slugify(category.name),
+	...category,
+	bucket_id: category.bucket ? `demo-${category.bucket.toLowerCase()}` : null,
+}))
 
-const CATEGORIES: DemoCategory[] = [
-	{
-		id: "salary",
-		name: "Salary",
-		icon: "dollar-sign",
-		color: "#01BFA5",
-		parent: "transfer",
-		treatment: "income",
-	},
-	{
-		id: "transfer",
-		name: "Transfer",
-		icon: "arrow-left-right",
-		color: "#01BFA5",
-		parent: null,
-		treatment: "neutral",
-	},
-	{
-		id: "investment",
-		name: "Investment",
-		icon: "chart-candlestick",
-		color: "#01BFA5",
-		parent: "transfer",
-		treatment: "saving_investment",
-	},
-	{
-		id: "gift",
-		name: "Gift",
-		icon: "gift",
-		color: "#64DD17",
-		parent: "leisure-hobby",
-		treatment: "automatic",
-	},
-	{
-		id: "restaurant",
-		name: "Restaurant",
-		icon: "soup",
-		color: "#F44336",
-		parent: "food-drinks",
-		treatment: "spending",
-	},
-	{
-		id: "coffee",
-		name: "Coffee",
-		icon: "coffee",
-		color: "#F44336",
-		parent: "food-drinks",
-		treatment: "spending",
-	},
-	{
-		id: "grocery",
-		name: "Grocery",
-		icon: "apple",
-		color: "#F44336",
-		parent: "food-drinks",
-		treatment: "spending",
-	},
-	{
-		id: "food-drinks",
-		name: "Food & Drinks",
-		icon: "utensils",
-		color: "#F44336",
-		parent: null,
-		treatment: "spending",
-	},
-	{
-		id: "train-bus",
-		name: "Train & Bus",
-		icon: "train-front",
-		color: "#AB47BD",
-		parent: "transport",
-		treatment: "spending",
-	},
-	{
-		id: "taxi",
-		name: "Taxi",
-		icon: "car-taxi-front",
-		color: "#AB47BD",
-		parent: "transport",
-		treatment: "spending",
-	},
-	{
-		id: "transport",
-		name: "Transport",
-		icon: "navigation",
-		color: "#AB47BD",
-		parent: null,
-		treatment: "spending",
-	},
-	{
-		id: "membership",
-		name: "Membership",
-		icon: "id-card",
-		color: "#64DD17",
-		parent: "leisure-hobby",
-		treatment: "spending",
-	},
-	{
-		id: "multimedia",
-		name: "Multimedia",
-		icon: "folder-code",
-		color: "#546CFE",
-		parent: "electronics-software",
-		treatment: "spending",
-	},
-	{
-		id: "electronics-software",
-		name: "Electronics & Software",
-		icon: "cpu",
-		color: "#546CFE",
-		parent: null,
-		treatment: "spending",
-	},
-	{
-		id: "clothes",
-		name: "Clothes",
-		icon: "shirt",
-		color: "#4FC3F7",
-		parent: "clothing-footwear",
-		treatment: "spending",
-	},
-	{
-		id: "clothing-footwear",
-		name: "Clothing & Footwear",
-		icon: "shopping-bag",
-		color: "#4FC3F7",
-		parent: null,
-		treatment: "spending",
-	},
-	{
-		id: "healthcare",
-		name: "Healthcare",
-		icon: "hospital",
-		color: "#FFB300",
-		parent: "health-personal-care",
-		treatment: "spending",
-	},
-	{
-		id: "health-personal-care",
-		name: "Health & Personal Care",
-		icon: "heart-pulse",
-		color: "#FFB300",
-		parent: null,
-		treatment: "spending",
-	},
-	{
-		id: "movie",
-		name: "Movie",
-		icon: "film",
-		color: "#64DD17",
-		parent: "leisure-hobby",
-		treatment: "spending",
-	},
-	{
-		id: "leisure-hobby",
-		name: "Leisure & Hobby",
-		icon: "party-popper",
-		color: "#64DD17",
-		parent: null,
-		treatment: "spending",
-	},
-	{
-		id: "airplane",
-		name: "Airplane",
-		icon: "plane",
-		color: "#AB47BD",
-		parent: "transport",
-		treatment: "spending",
-	},
-	{
-		id: "other",
-		name: "Other",
-		icon: "circle-question-mark",
-		color: "#9E9E9E",
-		parent: null,
-		treatment: "spending",
-	},
-]
-
-const BUCKETS = [
-	{
-		id: "demo-daily",
-		name: "Daily",
-		color: "#38bdf8",
-		group: "core",
-		pace_kind: "daily",
-		display_order: 10,
-	},
-	{
-		id: "demo-recurring",
-		name: "Recurring",
-		color: "#a78bfa",
-		group: "core",
-		pace_kind: "recurring",
-		display_order: 20,
-	},
-	{
-		id: "demo-irregular",
-		name: "Irregular",
-		color: "#fbbf24",
-		group: "outlier",
-		pace_kind: "none",
-		display_order: 30,
-	},
-	{
-		id: "demo-holiday",
-		name: "Holiday",
-		color: "#fb7185",
-		group: "outlier",
-		pace_kind: "none",
-		display_order: 40,
-	},
-] as const
+const BUCKETS = DEFAULT_BUCKETS.map(bucket => ({
+	id: `demo-${bucket.name.toLowerCase()}`,
+	...bucket,
+}))
 
 type Meal = {
 	category: string
@@ -273,7 +64,7 @@ type Meal = {
 
 const DAILY: Meal[] = [
 	{
-		category: "restaurant",
+		category: "dining-out",
 		titles: [
 			"Din Tai Fung",
 			"Sushi Express",
@@ -289,7 +80,7 @@ const DAILY: Meal[] = [
 		account: "demo-uob-card",
 	},
 	{
-		category: "coffee",
+		category: "dining-out",
 		titles: ["Flash Coffee", "Luckin Coffee", "Kopi Uncle", "Starbucks"],
 		amount: [2.5, 8.5],
 		people: ["", "Jia Le"],
@@ -298,7 +89,7 @@ const DAILY: Meal[] = [
 		account: "demo-uob-card",
 	},
 	{
-		category: "grocery",
+		category: "groceries",
 		titles: ["FairPrice Run", "Sheng Siong Top-up", "CS Fresh", "Don Don Donki"],
 		amount: [12, 95],
 		people: ["", "Rong Xin"],
@@ -307,7 +98,7 @@ const DAILY: Meal[] = [
 		account: "demo-dbs-savings",
 	},
 	{
-		category: "train-bus",
+		category: "transport",
 		titles: ["MRT Top-up", "SimplyGo Bus", "MRT Fare"],
 		amount: [1.1, 10],
 		people: [""],
@@ -316,7 +107,7 @@ const DAILY: Meal[] = [
 		account: "demo-dbs-savings",
 	},
 	{
-		category: "taxi",
+		category: "transport",
 		titles: ["Grab Ride", "Gojek Ride", "Tada Ride"],
 		amount: [8, 32],
 		people: ["Rong Xin", ""],
@@ -328,8 +119,8 @@ const DAILY: Meal[] = [
 
 const RECURRING: Meal[] = [
 	{
-		category: "membership",
-		titles: ["Anytime Fitness", "Spotify Family", "iCloud+ 200GB"],
+		category: "bills-utilities",
+		titles: ["Mobile Plan", "Spotify Family", "iCloud+ 200GB"],
 		amount: [4.9, 58],
 		people: [""],
 		locations: [""],
@@ -337,8 +128,8 @@ const RECURRING: Meal[] = [
 		account: "demo-uob-card",
 	},
 	{
-		category: "multimedia",
-		titles: ["Steam Game", "App Store", "Notion Plus"],
+		category: "bills-utilities",
+		titles: ["Netflix", "App Store Subscription", "Notion Plus"],
 		amount: [6, 45],
 		people: [""],
 		locations: [""],
@@ -355,7 +146,7 @@ const RECURRING: Meal[] = [
 		account: "demo-dbs-savings",
 	},
 	{
-		category: "clothes",
+		category: "shopping",
 		titles: ["Uniqlo Basics", "Shopee Haul", "Charles & Keith"],
 		amount: [19, 150],
 		people: ["", "Jia Le"],
@@ -364,12 +155,12 @@ const RECURRING: Meal[] = [
 		account: "demo-uob-card",
 	},
 	{
-		category: "movie",
-		titles: ["GV Movie Night", "Cathay Cineplex", "Netflix Top-up"],
+		category: "entertainment",
+		titles: ["GV Movie Night", "Cathay Cineplex", "Concert Ticket"],
 		amount: [11, 32],
 		people: ["Rong Xin", "Wei Ming", ""],
 		locations: ["Bugis+", "Suntec", ""],
-		bucket: "demo-daily",
+		bucket: "demo-irregular",
 		account: "demo-uob-card",
 	},
 ]
@@ -402,9 +193,9 @@ export function generateTestData(): FinpointExport {
 			name: c.name,
 			icon: c.icon,
 			color: c.color,
-			parent_category_id: c.parent,
+			parent_category_id: null,
 			analytics_treatment: c.treatment,
-			default_bucket_id: null as string | null,
+			default_bucket_id: c.bucket_id,
 		})),
 		records: [] as {
 			id: string
@@ -415,7 +206,7 @@ export function generateTestData(): FinpointExport {
 			datetime: string
 			amount: number
 			category_id: string
-			analytics_treatment: DemoCategory["treatment"]
+			analytics_treatment: AnalyticsTreatment
 			analytics_treatment_source: "category" | "manual"
 			bucket_id: string | null
 			bucket_source: "category" | "manual" | null
@@ -508,7 +299,11 @@ export function generateTestData(): FinpointExport {
 			analytics_treatment: category.treatment,
 			analytics_treatment_source: "category",
 			bucket_id: input.bucket,
-			bucket_source: input.bucket ? "manual" : null,
+			bucket_source: input.bucket
+				? input.bucket === category.bucket_id
+					? "category"
+					: "manual"
+				: null,
 			revision: 1,
 		})
 
@@ -559,6 +354,103 @@ export function generateTestData(): FinpointExport {
 		for (let i = 0; i < meals; i++) addMeal(pick(DAILY), day)
 		if (rand() < 0.3) addMeal(pick(RECURRING), day)
 
+		if (day.day === 1) {
+			addRecord({
+				title: "Monthly Rent",
+				people: "",
+				location: "",
+				description: "Housing payment",
+				day,
+				amount: -1400,
+				category: "housing",
+				bucket: "demo-recurring",
+				allocate: "full",
+				account: "demo-dbs-savings",
+			})
+		}
+		if (day.day === 10) {
+			addRecord({
+				title: "Utilities Bill",
+				people: "",
+				location: "",
+				description: "Electricity and water",
+				day,
+				amount: -between(95, 145),
+				category: "bills-utilities",
+				bucket: "demo-recurring",
+				allocate: "full",
+				account: "demo-dbs-savings",
+			})
+		}
+		if (day.day === 15) {
+			addRecord({
+				title: "Health Insurance Premium",
+				people: "",
+				location: "",
+				description: "Monthly premium",
+				day,
+				amount: -65,
+				category: "insurance",
+				bucket: "demo-recurring",
+				allocate: "full",
+				account: "demo-dbs-savings",
+			})
+		}
+		if (day.day === 18) {
+			addRecord({
+				title: "Birthday Gift",
+				people: "",
+				location: "",
+				description: "",
+				day,
+				amount: -between(30, 80),
+				category: "gifts-donations",
+				bucket: "demo-irregular",
+				allocate: "full",
+				account: "demo-uob-card",
+			})
+		}
+		if (day.day === 22) {
+			addRecord({
+				title: "Bank Service Fee",
+				people: "",
+				location: "",
+				description: "",
+				day,
+				amount: -2.5,
+				category: "other",
+				bucket: null,
+				allocate: "full",
+				account: "demo-dbs-savings",
+			})
+		}
+		if (day.day === 7) {
+			addRecord({
+				title: "Transfer to Vault",
+				people: "",
+				location: "",
+				description: "Between own accounts",
+				day,
+				amount: -250,
+				category: "transfer",
+				bucket: null,
+				allocate: "full",
+				account: "demo-dbs-savings",
+			})
+			addRecord({
+				title: "Transfer from Savings",
+				people: "",
+				location: "",
+				description: "Between own accounts",
+				day,
+				amount: 250,
+				category: "transfer",
+				bucket: null,
+				allocate: "full",
+				account: "demo-revolut",
+			})
+		}
+
 		if (day.day === 25) {
 			addRecord({
 				title: "Monthly Salary",
@@ -567,7 +459,7 @@ export function generateTestData(): FinpointExport {
 				description: "Payroll credit",
 				day,
 				amount: between(4200, 5200),
-				category: "salary",
+				category: "income",
 				bucket: null,
 				allocate: "full",
 				account: "demo-dbs-savings",
@@ -581,7 +473,7 @@ export function generateTestData(): FinpointExport {
 				description: "Auto-invest",
 				day,
 				amount: -500,
-				category: "investment",
+				category: "savings-investments",
 				bucket: null,
 				allocate: "full",
 				account: "demo-dbs-savings",
@@ -589,16 +481,16 @@ export function generateTestData(): FinpointExport {
 		}
 	}
 
-	// Holiday trip cluster two months back
+	// Travel trip cluster two months back
 	const trip = today.minus({ months: 2 }).set({ day: 12 })
-	const holiday: [string, string, [number, number], string][] = [
-		["Scoot to Tokyo", "airplane", [380, 460], "demo-uob-card"],
-		["Shibuya Hotel", "other", [520, 640], "demo-uob-card"],
-		["Ichiran Ramen", "restaurant", [18, 35], "demo-revolut"],
-		["Don Quijote Haul", "clothes", [90, 210], "demo-revolut"],
-		["TeamLab Tickets", "movie", [45, 60], "demo-revolut"],
+	const travel: [string, string, [number, number], string][] = [
+		["Scoot to Tokyo", "travel", [380, 460], "demo-uob-card"],
+		["Shibuya Hotel", "travel", [520, 640], "demo-uob-card"],
+		["Ichiran Ramen", "dining-out", [18, 35], "demo-revolut"],
+		["Don Quijote Haul", "shopping", [90, 210], "demo-revolut"],
+		["TeamLab Tickets", "entertainment", [45, 60], "demo-revolut"],
 	]
-	holiday.forEach(([title, category, range, account], i) => {
+	travel.forEach(([title, category, range, account], i) => {
 		addRecord({
 			title,
 			people: i < 2 ? "Rong Xin" : "",
@@ -607,7 +499,7 @@ export function generateTestData(): FinpointExport {
 			day: trip.plus({ days: i }),
 			amount: -between(range[0], range[1]),
 			category,
-			bucket: "demo-holiday",
+			bucket: "demo-travel",
 			allocate: "full",
 			account,
 		})
@@ -641,7 +533,7 @@ export function generateTestData(): FinpointExport {
 		description: "",
 		day: pendingDay,
 		amount: -14.5,
-		category: "restaurant",
+		category: "dining-out",
 		bucket: "demo-daily",
 		allocate: "none",
 		account: "demo-dbs-savings",
@@ -664,7 +556,7 @@ export function generateTestData(): FinpointExport {
 		end_date: trip.plus({ days: 6 }).toFormat("yyyy-MM-dd"),
 		automatic: false,
 	})
-	for (const record of tables.records.filter(r => r.bucket_id === "demo-holiday").slice(0, 5)) {
+	for (const record of tables.records.filter(r => r.bucket_id === "demo-travel").slice(0, 5)) {
 		tables.budget_records.push({ budget_id: "demo-budget-trip", record_id: record.id })
 	}
 	const autoMonth = today.minus({ months: 1 }).startOf("month")
@@ -692,9 +584,9 @@ export function generateTestData(): FinpointExport {
 	}
 	const monthlyTarget: Record<string, number> = {
 		"demo-daily": 950,
-		"demo-recurring": 220,
+		"demo-recurring": 1800,
 		"demo-irregular": 400,
-		"demo-holiday": 0,
+		"demo-travel": 0,
 	}
 	for (const key of monthKeys) {
 		for (const bucket of BUCKETS) {
