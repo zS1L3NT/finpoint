@@ -26,7 +26,7 @@ import { listAccounts } from "@/logic/accounts"
 import { importDbs, importOcbc, importRevolut, importUob } from "@/logic/importer"
 import { ValidationError } from "@/logic/validate"
 
-const BANKS_REQUIRING_ADDITIONAL_INFO = ["ocbc", "revolut"]
+const BANKS_REQUIRING_ADDITIONAL_INFO = ["revolut"]
 
 export default function ImporterPage() {
 	const [files, setFiles] = useState<File[]>([])
@@ -59,7 +59,7 @@ export default function ImporterPage() {
 						: value.bank === "uob"
 							? await importUob(files)
 							: value.bank === "ocbc"
-								? await importOcbc(files[0] ?? null, accountId, accountName)
+								? await importOcbc(files)
 								: await importRevolut(files[0] ?? null, accountId, accountName)
 				toast.success(`Imported successful`, {
 					description: (

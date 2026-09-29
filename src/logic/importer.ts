@@ -321,45 +321,61 @@ export async function importUob(files: File[]): Promise<ImportResult> {
 	return { imported, reindexed, skipped }
 }
 
-export async function importOcbc(
-	file: File | null,
-	accountId: string,
-	accountName?: string,
-): Promise<ImportResult> {
-	if (!file) throw new ValidationError({ files: ["Select a file."] })
-	const id = await selectedAccount(accountId, accountName, "OCBC")
+export async function importOcbc(files: File[]): Promise<ImportResult> {
+	if (!files.length) throw new ValidationError({ files: ["Select at least one file."] })
 
-	const data = await readFile(file)
-	const header = data.shift() ?? []
-	const expected = [
-		"Transaction date",
-		"Value date",
-		"Description",
-		"Withdrawals(SGD)",
-		"Deposits(SGD)",
-	]
-	if (!expected.every(column => header.includes(column))) {
-		throw new ValidationError({ files: ["Invalid CSV Format: missing OCBC columns."] })
-	}
+	let imported = 0
+	let reindexed = 0
+	let skipped = 0
 
-	const rows: Parsed[] = []
-	for (const row of data) {
-		const statement = combine(header, row)
-		const withdrawal = Number((statement["Withdrawals(SGD)"] ?? "0").replace(/,/g, ""))
-		const deposit = Number((statement["Deposits(SGD)"] ?? "0").replace(/,/g, ""))
-		if (Number.isNaN(withdrawal) || Number.isNaN(deposit)) {
-			throw new ValidationError({ files: ["Invalid CSV Format: bad amount."] })
+	for (const file of files) {
+		const data = await readFile(file)
+		const details = data.shift()
+		const account = /^OCBC\s+(.+?)\s+(\d[\d-]*)$/.exec(details?.[1]?.trim() ?? "")
+		if (details?.[0] !== "Account details for:" || !account) {
+			throw new ValidationError({
+				files: ["Invalid CSV Format: missing OCBC account details."],
+			})
 		}
-		rows.push({
-			account_id: id,
-			datetime: parseDayMonthYearSlashes(statement["Transaction date"]),
-			description: (statement.Description ?? "").replace(/\s+/g, " ").trim(),
-			amount: round2(withdrawal !== 0 ? -withdrawal : deposit),
-			is_pending: 0,
-		})
-	}
+		const accountId = account[2]?.replace(/-/g, "") ?? ""
+		const accountName = account[1] ?? ""
+		const headerIndex = data.findIndex(row => row[0] === "Transaction date")
+		const header = headerIndex === -1 ? [] : (data[headerIndex] ?? [])
+		const expected = [
+			"Transaction date",
+			"Value date",
+			"Description",
+			"Withdrawals(SGD)",
+			"Deposits(SGD)",
+		]
+		if (!expected.every(column => header.includes(column))) {
+			throw new ValidationError({ files: ["Invalid CSV Format: missing OCBC columns."] })
+		}
 
-	return upsertIndexed(rows, true)
+		const rows: Parsed[] = []
+		for (const row of data.slice(headerIndex + 1)) {
+			const statement = combine(header, row)
+			const withdrawal = Number((statement["Withdrawals(SGD)"] ?? "0").replace(/,/g, ""))
+			const deposit = Number((statement["Deposits(SGD)"] ?? "0").replace(/,/g, ""))
+			if (Number.isNaN(withdrawal) || Number.isNaN(deposit)) {
+				throw new ValidationError({ files: ["Invalid CSV Format: bad amount."] })
+			}
+			rows.push({
+				account_id: accountId,
+				datetime: parseDayMonthYearSlashes(statement["Transaction date"]),
+				description: (statement.Description ?? "").replace(/\s+/g, " ").trim(),
+				amount: round2(withdrawal !== 0 ? -withdrawal : deposit),
+				is_pending: 0,
+			})
+		}
+
+		await ensureAccount(accountId, accountName, "OCBC")
+		const result = await upsertIndexed(rows, true)
+		imported += result.imported
+		reindexed += result.reindexed
+		skipped += result.skipped
+	}
+	return { imported, reindexed, skipped }
 }
 
 export async function importRevolut(
