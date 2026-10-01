@@ -5,6 +5,7 @@ import { DateTime } from "luxon"
 import Link from "next/link"
 import { type ReactNode, useMemo } from "react"
 import CashflowChart, { CashflowPoint } from "@/components/charts/cashflow-chart"
+import CategoryHistoryChart from "@/components/charts/category-history-chart"
 import DailySpendingChart from "@/components/charts/daily-spending-chart"
 import TotalSpendingChart from "@/components/charts/total-spending-chart"
 import WeekdayBars from "@/components/charts/weekday-bars"
@@ -34,6 +35,7 @@ import {
 	getBucketDaily,
 	getDashboard,
 	getPaceView,
+	type SpendingHistoryMonth,
 } from "@/logic/dashboard"
 import { pathMonthlyRecords } from "@/routes"
 import { AnalyticsSummary, Bucket } from "@/types"
@@ -91,6 +93,7 @@ type DashboardData = {
 	weekday: WeekdayBreakdown
 	future_records_count: number
 	comparison_months: number
+	comparison_history: SpendingHistoryMonth[]
 }
 
 type WeekdayStat = {
@@ -388,6 +391,15 @@ export default function DashboardPage() {
 							<TotalSpendingChart data={series} month={month} year={year} />
 						</CardContent>
 					</Card>
+
+					<CategoryHistoryChart
+						months={data.comparison_history}
+						comparisonMonths={comparisonMonths}
+						through={period.through}
+						bucketIds={null}
+						label={null}
+						control={null}
+					/>
 
 					<WeekdayCard weekday={weekday} />
 

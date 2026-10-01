@@ -12,10 +12,24 @@ import {
 	db,
 	type RecordRow,
 } from "@/data/db"
-import { type AnalyticsRecord, summarize } from "@/logic/analytics"
+import { type AnalyticsRecord, contribution, summarize } from "@/logic/analytics"
 import { expandCategoryIdsForMonthly } from "@/logic/monthly-shared"
 
 export type DashboardInput = { month: string; year: number; comparison_months?: number }
+
+export type SpendingHistoryMonth = {
+	month: string
+	included: boolean
+	reason: string
+	current: boolean
+	categories: {
+		id: string
+		name: string
+		color: string
+		spending: number
+		bucket_spending: Record<string, number>
+	}[]
+}
 
 function normalizeComparisonMonths(value = 3): number {
 	return Math.min(24, Math.max(1, Math.trunc(Number.isFinite(value) ? value : 3)))
@@ -185,9 +199,69 @@ function comparisonSummaries(
 							? "Complete"
 							: "Recorded history; coverage unconfirmed",
 			summary: summarize(items),
+			items,
 		})
 	}
 	return out
+}
+
+function buildSpendingHistory(
+	date: DateTime,
+	currentItems: AnalyticsRecord[],
+	comparisons: ReturnType<typeof comparisonSummaries>,
+): SpendingHistoryMonth[] {
+	const buildBreakdown = (items: AnalyticsRecord[]) => {
+		const totals = new Map<
+			string,
+			{ name: string; color: string; cents: number; buckets: Record<string, number> }
+		>()
+		for (const item of items) {
+			const category = item.category_parent ?? item.category
+			const cents = contribution(item.analytics_treatment, item.amount).spending
+			if (!category || cents <= 0) continue
+			const value = totals.get(category.id) ?? {
+				name: category.name,
+				color: category.color,
+				cents: 0,
+				buckets: {},
+			}
+			value.cents += cents
+			const bucket = item.bucket_id ?? "unbucketed"
+			value.buckets[bucket] = (value.buckets[bucket] ?? 0) + cents
+			totals.set(category.id, value)
+		}
+		return {
+			categories: [...totals].map(([id, value]) => ({
+				id,
+				name: value.name,
+				color: value.color,
+				spending: value.cents / 100,
+				bucket_spending: Object.fromEntries(
+					Object.entries(value.buckets).map(([id, cents]) => [id, cents / 100]),
+				),
+			})),
+		}
+	}
+	const selected = {
+		month: date.toFormat("MMM yyyy"),
+		included: true,
+		reason: "Selected month",
+		current: true,
+		...buildBreakdown(currentItems),
+	}
+	return [
+		...comparisons
+			.slice()
+			.reverse()
+			.map(({ items, month, included, reason }) => ({
+				month,
+				included,
+				reason,
+				current: false,
+				...buildBreakdown(items),
+			})),
+		selected,
+	]
 }
 
 export async function getDashboard(input: DashboardInput) {
@@ -255,7 +329,7 @@ export async function getDashboard(input: DashboardInput) {
 		projection.daily_spending,
 	)
 	const categories = buildCategories(summary, included)
-
+	const comparisonHistory = buildSpendingHistory(date, actualRecords, comparisonMonths)
 
 	return {
 		month: date.monthLong,
@@ -273,6 +347,7 @@ export async function getDashboard(input: DashboardInput) {
 		summary,
 		comparison,
 		comparison_months: comparisonMonthCount,
+		comparison_history: comparisonHistory,
 		series,
 		projection,
 		buckets: bucketsWithSpending,
