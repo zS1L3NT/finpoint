@@ -1,6 +1,5 @@
 "use client"
 
-import type { ReactNode } from "react"
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart"
@@ -22,13 +21,11 @@ export default function CategoryHistoryChart({
 	comparisonMonths,
 	through,
 	bucketIds,
-	label,
 }: {
 	months: SpendingHistoryMonth[]
 	comparisonMonths: number
 	through: string | null
 	bucketIds: string[] | null
-	label: ReactNode
 }) {
 	const scopedMonths = months.map(month => ({
 		...month,
@@ -67,7 +64,6 @@ export default function CategoryHistoryChart({
 			<CardHeader>
 				<CardTitle className="flex flex-wrap items-center gap-2 text-base">
 					Category spending mix
-					{label}
 				</CardTitle>
 				<CardDescription>
 					Share of gross spending compared with the previous {comparisonMonths} months.
@@ -76,13 +72,13 @@ export default function CategoryHistoryChart({
 						` Previous months include the full month; the selected month includes days 1–${Number(through.slice(-2))} only.`}
 				</CardDescription>
 			</CardHeader>
-			<CardContent className="grid gap-3">
+			<CardContent className="flex min-h-0 flex-1 flex-col gap-3">
 				{totalSpending > 0 ? (
 					<>
-						<div className="w-full overflow-x-auto overflow-y-hidden">
+						<div className="relative min-h-80 w-full flex-1 overflow-x-auto overflow-y-hidden sm:min-h-[360px]">
 							<ChartContainer
 								config={config}
-								className="h-80 w-full aspect-auto sm:h-[360px]"
+								className="absolute inset-0 h-full w-full aspect-auto"
 								style={{ minWidth: Math.max(420, months.length * 78) }}
 							>
 								<BarChart

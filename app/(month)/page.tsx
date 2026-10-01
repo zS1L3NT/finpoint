@@ -336,18 +336,12 @@ export default function DashboardPage() {
 								onChange={value => setScope(value ?? "all")}
 							/>
 						</div>
-						<div className="grid gap-5 lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)]">
+						<div className="grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)] 2xl:grid-cols-[minmax(0,3fr)_minmax(18rem,1fr)]">
 							<CategoryHistoryChart
 								months={data.comparison_history}
 								comparisonMonths={comparisonMonths}
 								through={period.through}
 								bucketIds={scope === "all" ? null : scopedBucketIds}
-								label={
-									<ScopeLabel
-										scope={scope === "all" ? "Total" : scopeLabel}
-										color={scopeColor}
-									/>
-								}
 							/>
 							<BucketStatus
 								buckets={buckets}
