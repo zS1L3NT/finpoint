@@ -14,12 +14,7 @@ export function FilterBar({
 	className?: string
 }) {
 	return (
-		<div
-			className={cn(
-				"grid w-full grid-cols-2 gap-2 lg:grid-cols-[repeat(4,max-content)]",
-				className,
-			)}
-		>
+		<div className={cn("grid w-full grid-cols-2 gap-2 sm:flex sm:flex-wrap", className)}>
 			{children}
 		</div>
 	)
@@ -34,17 +29,16 @@ export function ClearFiltersButton({
 	onClear: () => void
 	className?: string
 }) {
-	if (!count) return null
-
 	return (
 		<Button
 			type="button"
 			variant="outline"
 			className={cn("w-full sm:w-40", FILTER_CONTROL_CLASS, className)}
+			disabled={!count}
 			onClick={onClear}
 		>
 			<IconifyIcon icon="lucide:list-filter-x" /> Clear
-			<Badge variant="secondary">{count}</Badge>
+			{count ? <Badge variant="secondary">{count}</Badge> : null}
 		</Button>
 	)
 }
