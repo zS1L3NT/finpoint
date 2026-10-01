@@ -188,6 +188,7 @@ function comparisonSummaries(
 			(items.length === 0 && (coverage?.coverage ?? "unknown") !== "complete")
 		out.push({
 			month: month.toFormat("MMM yyyy"),
+			start: month.toFormat("yyyy-MM-dd"),
 			included: !excluded,
 			reason: coverage?.excluded_from_comparisons
 				? "Excluded manually"
@@ -355,7 +356,12 @@ export async function getDashboard(input: DashboardInput) {
 		projection,
 		buckets: bucketsWithSpending,
 		categories,
-		weekday: buildWeekday(summary, included),
+		weekday: buildWeekday(
+			date,
+			isFuture ? 0 : (date.daysInMonth ?? 30),
+			summary,
+			historyMonths.filter(m => m.included),
+		),
 		future_records_count: futureRecords.length,
 	}
 }
@@ -536,30 +542,43 @@ function weekdayOf(dateString: string): string {
 }
 
 function buildWeekday(
+	date: DateTime,
+	daysInMonth: number,
 	summary: ReturnType<typeof summarize>,
-	included: { summary: ReturnType<typeof summarize> }[],
+	included: ReturnType<typeof comparisonSummaries>,
 ) {
-	const days = summary.daily
+	function occurrences(start: DateTime, days: number, weekday: number) {
+		const first = ((weekday - start.weekday + 7) % 7) + 1
+		return first > days ? 0 : Math.floor((days - first) / 7) + 1
+	}
 
-	const stats = WEEKDAYS.map(name => {
-		const monthDays = days.filter(d => weekdayOf(d.date) === name)
-		const spending = monthDays.reduce((sum, d) => sum + d.spending, 0)
-		const baseline = included.length
-			? included.reduce((sum, m) => {
-					const monthSpending = m.summary.daily
-						.filter(d => weekdayOf(d.date) === name)
-						.reduce((daySum, d) => daySum + d.spending, 0)
-					return sum + monthSpending / included.length
-				}, 0)
-			: 0
+	const stats = WEEKDAYS.map((name, index) => {
+		const days = occurrences(date, daysInMonth, index + 1)
+		const spending = summary.daily
+			.filter(d => weekdayOf(d.date) === name)
+			.reduce((sum, d) => sum + d.spending, 0)
+		const baselineDays = included.reduce((sum, m) => {
+			const start = DateTime.fromISO(m.start)
+			return sum + occurrences(start, start.daysInMonth ?? 30, index + 1)
+		}, 0)
+		const baseline = included.reduce(
+			(sum, m) =>
+				sum +
+				m.summary.daily
+					.filter(d => weekdayOf(d.date) === name)
+					.reduce((total, d) => total + d.spending, 0),
+			0,
+		)
 		return {
 			day: name,
-			spending: Math.round(spending * 100) / 100,
-			baseline: Math.round(baseline * 100) / 100,
+			spending: days ? Math.round((spending / days) * 100) / 100 : null,
+			baseline: baselineDays ? Math.round((baseline / baselineDays) * 100) / 100 : null,
+			days,
+			baseline_days: baselineDays,
 		}
 	})
 
-	return { stats }
+	return { stats, comparison_count: included.length }
 }
 
 function avg(values: (number | null)[]): number | null {

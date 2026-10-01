@@ -98,12 +98,15 @@ type DashboardData = {
 
 type WeekdayStat = {
 	day: string
-	spending: number
-	baseline: number
+	spending: number | null
+	baseline: number | null
+	days: number
+	baseline_days: number
 }
 
 type WeekdayBreakdown = {
 	stats: WeekdayStat[]
+	comparison_count: number
 }
 
 type PaceData = {
@@ -492,11 +495,15 @@ function WeekdayCard({ weekday }: { weekday: WeekdayBreakdown }) {
 			<CardHeader>
 				<ScopedCardTitle scope="Total">Spending by weekday</ScopedCardTitle>
 				<CardDescription>
-					All spending buckets grouped by weekday, against the 3-month usual
+					Spending on each weekday ÷ its occurrences in the month, including zero-spend
+					days.
+					{weekday.comparison_count
+						? ` Compared with ${weekday.comparison_count} previous full months, using all occurrences of the same weekday.`
+						: " No comparison history available."}
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
-				<WeekdayBars stats={weekday.stats} />
+				<WeekdayBars stats={weekday.stats} comparisonCount={weekday.comparison_count} />
 			</CardContent>
 		</Card>
 	)
