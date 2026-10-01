@@ -75,7 +75,7 @@ export default function CategoryHistoryChart({
 		<Card>
 			<CardHeader>
 				<CardTitle className="flex flex-wrap items-center gap-2 text-base">
-					Spending by category across months
+					Category spending mix
 					{label}
 				</CardTitle>
 				<CardDescription>

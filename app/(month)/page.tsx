@@ -10,7 +10,7 @@ import DailySpendingChart from "@/components/charts/daily-spending-chart"
 import TotalSpendingChart from "@/components/charts/total-spending-chart"
 import WeekdayBars from "@/components/charts/weekday-bars"
 import BucketDialog from "@/components/dialogs/bucket"
-import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
+import { UiIcon as IconifyIcon } from "@/components/icon"
 import { FILTER_CONTROL_CLASS } from "@/components/table/filter-bar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -358,13 +358,38 @@ export default function DashboardPage() {
 							/>
 						</div>
 						<div className="grid gap-5 xl:grid-cols-[minmax(0,3fr)_minmax(18rem,2fr)]">
-							<CategoryBreakdown
-								categories={scopedCategories}
-								total={scopedTotal}
-								month={month}
-								year={year}
-								scope={scope}
-								comparisonCount={comparison.count}
+							<CategoryHistoryChart
+								months={data.comparison_history}
+								comparisonMonths={comparisonMonths}
+								through={period.through}
+								bucketIds={historyBucketIds}
+								label={
+									<ScopeLabel
+										scope={
+											historyScope === "all"
+												? "Total"
+												: ["core", "outlier", "other"].includes(
+															historyScope,
+														)
+													? historyScope.charAt(0).toUpperCase() +
+														historyScope.slice(1)
+													: (buckets.find(
+															bucket => bucket.id === historyScope,
+														)?.name ?? "Total")
+										}
+										color={
+											buckets.find(bucket => bucket.id === historyScope)
+												?.color
+										}
+									/>
+								}
+								control={
+									<ScopeSelect
+										value={historyScope}
+										buckets={buckets}
+										onChange={setHistoryScope}
+									/>
+								}
 							/>
 							<BucketStatus
 								buckets={buckets}
@@ -405,34 +430,6 @@ export default function DashboardPage() {
 							<TotalSpendingChart data={series} month={month} year={year} />
 						</CardContent>
 					</Card>
-
-					<CategoryHistoryChart
-						months={data.comparison_history}
-						comparisonMonths={comparisonMonths}
-						through={period.through}
-						bucketIds={historyBucketIds}
-						label={
-							<ScopeLabel
-								scope={
-									historyScope === "all"
-										? "Total"
-										: ["core", "outlier", "other"].includes(historyScope)
-											? historyScope.charAt(0).toUpperCase() +
-												historyScope.slice(1)
-											: (buckets.find(bucket => bucket.id === historyScope)
-													?.name ?? "Total")
-								}
-								color={buckets.find(bucket => bucket.id === historyScope)?.color}
-							/>
-						}
-						control={
-							<ScopeSelect
-								value={historyScope}
-								buckets={buckets}
-								onChange={setHistoryScope}
-							/>
-						}
-					/>
 
 					<WeekdayCard weekday={weekday} />
 
@@ -622,117 +619,6 @@ function PendingValue({ label, value }: { label: string; value: number }) {
 			<p className="text-[0.6875rem] font-medium text-muted-foreground">{label}</p>
 			<p className="mt-0.5 font-semibold tabular-nums">{formatCurrency(value)}</p>
 		</div>
-	)
-}
-
-function CategoryBreakdown({
-	categories,
-	total,
-	month,
-	year,
-	scope,
-	comparisonCount,
-}: {
-	categories: DashboardCategory[]
-	total: number
-	month: string
-	year: number
-	scope: string
-	comparisonCount: number
-}) {
-	const max = Math.max(
-		...categories
-			.slice(0, 8)
-			.flatMap(category => [
-				Math.abs(category.spending),
-				category.comparison === null
-					? 0
-					: Math.abs(category.spending - category.comparison),
-			]),
-		1,
-	)
-	return (
-		<Card>
-			<CardHeader>
-				<CardTitle>Categories</CardTitle>
-				<CardDescription>
-					Ranked net spending
-					{comparisonCount ? ` · Change from ${comparisonCount}-month average` : ""}
-				</CardDescription>
-			</CardHeader>
-			<CardContent className="grid gap-1">
-				{categories.length ? (
-					categories.slice(0, 8).map(category => {
-						const usual =
-							category.comparison === null
-								? null
-								: category.spending - category.comparison
-						return (
-							<Link
-								key={category.id}
-								href={pathMonthlyRecords({
-									month,
-									year: String(year),
-									category_ids: category.id,
-									bucket_id: !["all", "core", "outlier", "other"].includes(scope)
-										? scope
-										: undefined,
-									bucket_group: ["core", "outlier", "other"].includes(scope)
-										? scope
-										: undefined,
-								})}
-								className="group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-md px-2 py-2 hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-							>
-								<div className="min-w-0">
-									<div className="flex items-center gap-2">
-										<Icon {...category} size={11} />
-										<span className="truncate font-medium">
-											{category.name}
-										</span>
-									</div>
-									<div className="mt-1.5 grid gap-1">
-										<div
-											className="h-1 overflow-hidden rounded-full bg-muted"
-											title={`${formatCurrency(category.spending)} this month`}
-										>
-											<div
-												className="h-full rounded-full bg-emerald-500"
-												style={{
-													width: `${(Math.abs(category.spending) / max) * 100}%`,
-												}}
-											/>
-										</div>
-										{usual === null ? null : (
-											<div
-												className="h-1 overflow-hidden rounded-full bg-muted"
-												title={`${formatCurrency(usual)} usual`}
-											>
-												<div
-													className="h-full rounded-full bg-muted-foreground/35"
-													style={{
-														width: `${(Math.abs(usual) / max) * 100}%`,
-													}}
-												/>
-											</div>
-										)}
-									</div>
-								</div>
-								<span className="tabular-nums">
-									{formatCurrency(category.spending)}
-								</span>
-							</Link>
-						)
-					})
-				) : (
-					<p className="py-8 text-center text-muted-foreground">
-						No spending in this scope.
-					</p>
-				)}
-				<p className="mt-3 text-xs text-muted-foreground">
-					Select a Category to inspect the matching Records.
-				</p>
-			</CardContent>
-		</Card>
 	)
 }
 
