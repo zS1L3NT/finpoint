@@ -11,6 +11,7 @@ import {
 	YAxis,
 } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { useHistory } from "@/history"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { formatCurrency } from "@/lib/utils"
 import { pathMonthlyRecords } from "@/routes"
@@ -42,6 +43,7 @@ export default function CashflowChart({
 	const isMobile = useIsMobile()
 	const reduceMotion = useReducedMotion()
 	const router = useRouter()
+	const { handlePush } = useHistory()
 	const interval = isMobile ? Math.max(Math.floor(data.length / 4), 0) : "preserveStartEnd"
 	const actualChange = colorChange(data, "spending", target)
 	const projectionChange = colorChange(data, "projected_spending", target)
@@ -50,6 +52,7 @@ export default function CashflowChart({
 		const selected = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
 			.set({ day: Number(state.activeLabel) })
 			.toFormat("yyyy-MM-dd")
+		handlePush("overview")()
 		void router.push(
 			pathMonthlyRecords({
 				month,

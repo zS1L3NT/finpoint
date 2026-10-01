@@ -2,6 +2,7 @@ import { DateTime } from "luxon"
 import { useRouter } from "next/navigation"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { useHistory } from "@/history"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { formatCurrency } from "@/lib/utils"
 import { pathMonthlyRecords } from "@/routes"
@@ -27,12 +28,14 @@ export default function DailySpendingChart({
 }) {
 	const isMobile = useIsMobile()
 	const router = useRouter()
+	const { handlePush } = useHistory()
 	const interval = isMobile ? Math.max(Math.floor(rows.length / 4), 0) : "preserveStartEnd"
 	const openDay = (state: { activeLabel?: number | string } | null) => {
 		if (!state?.activeLabel) return
 		const selected = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
 			.set({ day: Number(state.activeLabel) })
 			.toFormat("yyyy-MM-dd")
+		handlePush("overview")()
 		void router.push(
 			pathMonthlyRecords({
 				month,

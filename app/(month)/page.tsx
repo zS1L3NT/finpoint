@@ -26,6 +26,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useHistory } from "@/history"
 import { useMonthParams } from "@/hooks/use-month-params"
 import { usePersistentState } from "@/hooks/use-persistent-state"
 import { useSettings } from "@/hooks/use-settings"
@@ -128,6 +129,7 @@ type BucketDailyData = {
 }
 
 export default function DashboardPage() {
+	const { handlePush } = useHistory()
 	const { month, year } = useMonthParams()
 	const animateContent = useTabTransition()
 	const settings = useSettings()
@@ -268,6 +270,7 @@ export default function DashboardPage() {
 							{summary.unbucketed_count ? (
 								<Button variant="outline" size="sm" asChild>
 									<Link
+										onClick={handlePush("overview")}
 										href={pathMonthlyRecords({
 											month,
 											year: String(year),
@@ -587,6 +590,7 @@ function BucketStatus({
 	activeScope: string
 	setScope: (scope: string) => void
 }) {
+	const { handlePush } = useHistory()
 	return (
 		<Card className="min-w-0">
 			<CardHeader>
@@ -671,7 +675,10 @@ function BucketStatus({
 					)
 				})}
 				<Button variant="outline" size="sm" asChild>
-					<Link href={pathMonthlyRecords({ month, year: String(year) })}>
+					<Link
+						onClick={handlePush("overview")}
+						href={pathMonthlyRecords({ month, year: String(year) })}
+					>
 						Manage monthly Records
 					</Link>
 				</Button>
@@ -717,6 +724,7 @@ function InvestmentRow({
 	month: string
 	year: number
 }) {
+	const { handlePush } = useHistory()
 	const net = Math.round((summary.contributions - summary.withdrawals) * 100) / 100
 	const rate = summary.income > 0 ? (net / summary.income) * 100 : null
 	return (
@@ -732,6 +740,7 @@ function InvestmentRow({
 				</div>
 				<Button variant="outline" size="sm" asChild>
 					<Link
+						onClick={handlePush("overview")}
 						href={pathMonthlyRecords({
 							month,
 							year: String(year),

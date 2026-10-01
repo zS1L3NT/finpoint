@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation"
 import { useId } from "react"
 import { Area, CartesianGrid, ComposedChart, Line, ReferenceLine, XAxis, YAxis } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { useHistory } from "@/history"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn, formatCurrency } from "@/lib/utils"
 import { pathMonthlyRecords } from "@/routes"
@@ -20,6 +21,7 @@ export default function TotalSpendingChart({
 }) {
 	const isMobile = useIsMobile()
 	const router = useRouter()
+	const { handlePush } = useHistory()
 	const fillId = `surplus-fill-${useId().replace(/:/g, "")}`
 	const interval = isMobile ? Math.max(Math.floor(data.length / 4), 0) : "preserveStartEnd"
 	const axis = surplusAxis(data)
@@ -29,6 +31,7 @@ export default function TotalSpendingChart({
 		const selected = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
 			.set({ day: Number(state.activeLabel) })
 			.toFormat("yyyy-MM-dd")
+		handlePush("overview")()
 		void router.push(
 			pathMonthlyRecords({
 				month,
