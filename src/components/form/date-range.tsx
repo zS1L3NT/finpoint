@@ -105,6 +105,7 @@ export default function DateRange({
 					<Calendar
 						mode="range"
 						defaultMonth={
+							draft?.to ??
 							draft?.from ??
 							(minimumDate.isValid ? minimumDate.toJSDate() : undefined)
 						}
