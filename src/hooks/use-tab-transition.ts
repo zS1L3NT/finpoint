@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 
 let armed = false
 
-/** Arm the next month-tab content to fade in. Called by tab clicks. */
+/** Arm the next month-tab content to fade in. Called by tabs and dashboard shortcuts. */
 export function armTabTransition(): void {
 	armed = true
 }
@@ -14,7 +14,7 @@ function consumeTabTransition(): boolean {
 }
 
 /**
- * True when this mount was triggered by a month-tab click. Month content
+ * True when this mount was triggered by navigation within the month shell. Month content
  * animates only then — fresh arrivals already play the shell transition,
  * so animating both would read as a double render.
  */

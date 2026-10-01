@@ -30,7 +30,7 @@ import { useHistory } from "@/history"
 import { useMonthParams } from "@/hooks/use-month-params"
 import { usePersistentState } from "@/hooks/use-persistent-state"
 import { useSettings } from "@/hooks/use-settings"
-import { useTabTransition } from "@/hooks/use-tab-transition"
+import { armTabTransition, useTabTransition } from "@/hooks/use-tab-transition"
 import { cn, formatCurrency } from "@/lib/utils"
 import {
 	getBucketDaily,
@@ -270,7 +270,10 @@ export default function DashboardPage() {
 							{summary.unbucketed_count ? (
 								<Button variant="outline" size="sm" asChild>
 									<Link
-										onClick={handlePush("overview")}
+										onClick={() => {
+											armTabTransition()
+											handlePush("overview")()
+										}}
 										href={pathMonthlyRecords({
 											month,
 											year: String(year),
@@ -676,7 +679,10 @@ function BucketStatus({
 				})}
 				<Button variant="outline" size="sm" asChild>
 					<Link
-						onClick={handlePush("overview")}
+						onClick={() => {
+							armTabTransition()
+							handlePush("overview")()
+						}}
 						href={pathMonthlyRecords({ month, year: String(year) })}
 					>
 						Manage monthly Records
@@ -740,7 +746,10 @@ function InvestmentRow({
 				</div>
 				<Button variant="outline" size="sm" asChild>
 					<Link
-						onClick={handlePush("overview")}
+						onClick={() => {
+							armTabTransition()
+							handlePush("overview")()
+						}}
 						href={pathMonthlyRecords({
 							month,
 							year: String(year),
