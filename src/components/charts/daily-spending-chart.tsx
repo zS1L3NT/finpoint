@@ -80,10 +80,16 @@ export default function DailySpendingChart({
 					<ChartTooltip
 						content={
 							<ChartTooltipContent
-								labelFormatter={label => `${month} ${label}`}
-								formatter={(value, name) => (
+								labelFormatter={(label, payload) =>
+									`${month} ${payload[0]?.payload.day ?? label}`
+								}
+								formatter={(value, name, item) => (
 									<div className="flex min-w-40 items-center justify-between gap-4">
-										<span className="text-muted-foreground">
+										<span className="flex items-center gap-2 text-muted-foreground">
+											<span
+												className="size-2 shrink-0 rounded-full"
+												style={{ backgroundColor: item.color }}
+											/>
 											{String(name)}
 										</span>
 										<span className="font-medium tabular-nums">

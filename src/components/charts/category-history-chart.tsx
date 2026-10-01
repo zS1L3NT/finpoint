@@ -323,8 +323,12 @@ function HistoryTooltip({
 				const details = month.seriesDetails[key] ?? []
 				return (
 					<div key={key} className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 py-0.5">
-						<span className="truncate text-muted-foreground">
-							{config[key]?.label ?? key}
+						<span className="flex min-w-0 items-center gap-2 text-muted-foreground">
+							<span
+								className="size-2 shrink-0 rounded-full"
+								style={{ backgroundColor: config[key]?.color }}
+							/>
+							<span className="truncate">{config[key]?.label ?? key}</span>
 						</span>
 						<span className="font-medium tabular-nums">
 							{formatCurrency(value)} ·{" "}
@@ -334,8 +338,12 @@ function HistoryTooltip({
 							<div className="col-span-2 ml-2 mt-1 grid gap-0.5 border-l pl-2">
 								{details.map(item => (
 									<p key={item.id} className="flex justify-between gap-3">
-										<span className="truncate text-muted-foreground">
-											{item.name}
+										<span className="flex min-w-0 items-center gap-2 text-muted-foreground">
+											<span
+												className="size-2 shrink-0 rounded-full"
+												style={{ backgroundColor: item.color }}
+											/>
+											<span className="truncate">{item.name}</span>
 										</span>
 										<span className="tabular-nums">
 											{formatCurrency(item.spending)} ·{" "}
