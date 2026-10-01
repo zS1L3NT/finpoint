@@ -2,14 +2,7 @@
 
 import type { ReactNode } from "react"
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
-import {
-	Card,
-	CardAction,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart"
 import { formatCurrency } from "@/lib/utils"
 import type { SpendingHistoryMonth } from "@/logic/dashboard"
@@ -30,14 +23,12 @@ export default function CategoryHistoryChart({
 	through,
 	bucketIds,
 	label,
-	control,
 }: {
 	months: SpendingHistoryMonth[]
 	comparisonMonths: number
 	through: string | null
 	bucketIds: string[] | null
 	label: ReactNode
-	control: ReactNode
 }) {
 	const scopedMonths = months.map(month => ({
 		...month,
@@ -84,7 +75,6 @@ export default function CategoryHistoryChart({
 					{through &&
 						` Previous months include the full month; the selected month includes days 1–${Number(through.slice(-2))} only.`}
 				</CardDescription>
-				<CardAction>{control}</CardAction>
 			</CardHeader>
 			<CardContent className="grid gap-3">
 				{totalSpending > 0 ? (

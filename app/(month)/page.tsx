@@ -148,17 +148,6 @@ export default function DashboardPage() {
 			? value
 			: "all"
 	const scope = validScope(storedScope)
-	const [storedHistoryScope, setHistoryScope] = usePersistentState(
-		"finpoint.dashboard.history-scope",
-		"all",
-	)
-	const historyScope = validScope(storedHistoryScope)
-	const historyBucketIds =
-		historyScope === "all"
-			? null
-			: ["core", "outlier", "other"].includes(historyScope)
-				? buckets.filter(bucket => bucket.group === historyScope).map(bucket => bucket.id)
-				: [historyScope]
 	const dailyBucket =
 		buckets.find(bucket => bucket.pace_kind === "daily") ??
 		buckets.find(bucket => bucket.name.toLowerCase() === "daily") ??
@@ -224,25 +213,15 @@ export default function DashboardPage() {
 		)
 	}
 	const { period, summary, comparison, series, weekday, future_records_count } = data
-	const scopedCategories = categories
-		.map(category => {
-			const spending = scopedBucketIds.reduce(
-				(total, bucketId) => total + (category.bucket_spending[bucketId] ?? 0),
+	const scopedTotal = categories.reduce(
+		(total, category) =>
+			total +
+			scopedBucketIds.reduce(
+				(sum, bucketId) => sum + (category.bucket_spending[bucketId] ?? 0),
 				0,
-			)
-			const baseline = scopedBucketIds.reduce(
-				(total, bucketId) => total + (category.baseline_bucket_spending[bucketId] ?? 0),
-				0,
-			)
-			return {
-				...category,
-				spending,
-				comparison: comparison.count ? spending - baseline : null,
-			}
-		})
-		.filter(category => category.spending !== 0 || category.comparison !== 0)
-		.sort((a, b) => b.spending - a.spending)
-	const scopedTotal = scopedCategories.reduce((total, category) => total + category.spending, 0)
+			),
+		0,
+	)
 	const scopeLabel = ["all", "core", "outlier", "other"].includes(scope)
 		? scope === "all"
 			? "All spending"
@@ -362,32 +341,11 @@ export default function DashboardPage() {
 								months={data.comparison_history}
 								comparisonMonths={comparisonMonths}
 								through={period.through}
-								bucketIds={historyBucketIds}
+								bucketIds={scope === "all" ? null : scopedBucketIds}
 								label={
 									<ScopeLabel
-										scope={
-											historyScope === "all"
-												? "Total"
-												: ["core", "outlier", "other"].includes(
-															historyScope,
-														)
-													? historyScope.charAt(0).toUpperCase() +
-														historyScope.slice(1)
-													: (buckets.find(
-															bucket => bucket.id === historyScope,
-														)?.name ?? "Total")
-										}
-										color={
-											buckets.find(bucket => bucket.id === historyScope)
-												?.color
-										}
-									/>
-								}
-								control={
-									<ScopeSelect
-										value={historyScope}
-										buckets={buckets}
-										onChange={setHistoryScope}
+										scope={scope === "all" ? "Total" : scopeLabel}
+										color={scopeColor}
 									/>
 								}
 							/>
