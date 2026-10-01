@@ -38,7 +38,7 @@ import { listCategories } from "@/logic/categories"
 import { getMonthlyRecords } from "@/logic/monthly"
 import { ConflictError, getRecord, updateRecordBuckets } from "@/logic/records"
 import { ValidationError } from "@/logic/validate"
-import { pathImporter, pathRecord } from "@/routes"
+import { pathImporter, pathRecord, pathRecords } from "@/routes"
 import {
 	Allocation,
 	AnalyticsSummary,
@@ -341,7 +341,7 @@ export default function MonthlyRecordsPage() {
 				</SelectionBar>
 				{records.length ? (
 					<section className="grid gap-4" aria-labelledby="actual-records">
-						<div className="flex items-center justify-between gap-3">
+						<div className="flex flex-wrap items-center justify-between gap-3">
 							<div>
 								<h3 id="actual-records" className="text-lg font-semibold">
 									{period.is_future
@@ -353,19 +353,32 @@ export default function MonthlyRecordsPage() {
 									{records.length === 1 ? "" : "s"}
 								</p>
 							</div>
-							<label className="flex items-center gap-2 text-sm">
-								<Checkbox
-									checked={
-										selected.length === records.length && records.length > 0
-											? true
-											: selected.length
-												? "indeterminate"
-												: false
-									}
-									onCheckedChange={value => toggleAll(value === true)}
-								/>{" "}
-								Select all
-							</label>
+							<div className="flex flex-wrap items-center gap-3">
+								<Button variant="outline" size="sm" asChild>
+									<Link
+										href={pathRecords({
+											start_date:
+												date.startOf("month").toISODate() ?? undefined,
+											end_date: date.endOf("month").toISODate() ?? undefined,
+										})}
+									>
+										Open in Records <IconifyIcon icon="lucide:arrow-up-right" />
+									</Link>
+								</Button>
+								<label className="flex items-center gap-2 text-sm">
+									<Checkbox
+										checked={
+											selected.length === records.length && records.length > 0
+												? true
+												: selected.length
+													? "indeterminate"
+													: false
+										}
+										onCheckedChange={value => toggleAll(value === true)}
+									/>{" "}
+									Select all
+								</label>
+							</div>
 						</div>
 						{Object.entries(actualGroups).map(([day, dayRecords]) => (
 							<DayGroup

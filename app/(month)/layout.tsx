@@ -12,7 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useMonthParams } from "@/hooks/use-month-params"
 import { armTabTransition } from "@/hooks/use-tab-transition"
 import { cn } from "@/lib/utils"
-import { pathDashboard, pathMonthlyRecords, pathRecords } from "@/routes"
+import { pathDashboard, pathMonthlyRecords } from "@/routes"
 
 /**
  * Persistent shell for the Overview / Monthly Records tabs. The title, month
@@ -147,21 +147,6 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 								Monthly Records
 							</Link>
 						</nav>
-						{isMonthly ? (
-							<div className="flex flex-wrap gap-2 sm:mb-2">
-								<Button variant="outline" className="h-9 sm:h-7" asChild>
-									<Link
-										href={pathRecords({
-											start_date:
-												date.startOf("month").toISODate() ?? undefined,
-											end_date: date.endOf("month").toISODate() ?? undefined,
-										})}
-									>
-										Open in Records <IconifyIcon icon="lucide:arrow-up-right" />
-									</Link>
-								</Button>
-							</div>
-						) : null}
 					</div>
 				</header>
 
