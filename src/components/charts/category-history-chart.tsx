@@ -72,7 +72,7 @@ export default function CategoryHistoryChart({
 		selected && Object.values(selected.seriesValues).every(value => value === 0)
 
 	return (
-		<Card>
+		<Card className="min-w-0">
 			<CardHeader>
 				<CardTitle className="flex flex-wrap items-center gap-2 text-base">
 					Category spending mix

@@ -357,7 +357,7 @@ export default function DashboardPage() {
 								onChange={value => setScope(value ?? "all")}
 							/>
 						</div>
-						<div className="grid gap-5 xl:grid-cols-[minmax(0,3fr)_minmax(18rem,2fr)]">
+						<div className="grid gap-5 lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)]">
 							<CategoryHistoryChart
 								months={data.comparison_history}
 								comparisonMonths={comparisonMonths}
@@ -636,9 +636,9 @@ function BucketStatus({
 	setScope: (scope: string) => void
 }) {
 	return (
-		<Card>
+		<Card className="min-w-0">
 			<CardHeader>
-				<div className="flex items-start justify-between gap-3">
+				<div className="flex flex-wrap items-start justify-between gap-3">
 					<div>
 						<CardTitle>Buckets</CardTitle>
 						<CardDescription>Persistent groups · Monthly targets</CardDescription>
@@ -669,7 +669,7 @@ function BucketStatus({
 									"bg-muted/60 ring-1 ring-foreground/20",
 							)}
 						>
-							<div className="flex items-center justify-between gap-3">
+							<div className="flex flex-wrap items-center justify-between gap-2">
 								<button
 									type="button"
 									aria-pressed={activeScope === bucket.id}
@@ -693,9 +693,9 @@ function BucketStatus({
 							{usage !== null ? (
 								<BucketUsageBar name={bucket.name} usage={usage} />
 							) : null}
-							<div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+							<div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
 								<span className="capitalize">{bucket.group}</span>
-								<div className="flex items-center gap-2">
+								<div className="flex flex-wrap items-center gap-2">
 									<span>
 										{bucket.target === null
 											? "No target"
