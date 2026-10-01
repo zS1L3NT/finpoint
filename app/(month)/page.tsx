@@ -145,6 +145,17 @@ export default function DashboardPage() {
 			? value
 			: "all"
 	const scope = validScope(storedScope)
+	const [storedHistoryScope, setHistoryScope] = usePersistentState(
+		"finpoint.dashboard.history-scope",
+		"all",
+	)
+	const historyScope = validScope(storedHistoryScope)
+	const historyBucketIds =
+		historyScope === "all"
+			? null
+			: ["core", "outlier", "other"].includes(historyScope)
+				? buckets.filter(bucket => bucket.group === historyScope).map(bucket => bucket.id)
+				: [historyScope]
 	const dailyBucket =
 		buckets.find(bucket => bucket.pace_kind === "daily") ??
 		buckets.find(bucket => bucket.name.toLowerCase() === "daily") ??
@@ -396,9 +407,15 @@ export default function DashboardPage() {
 						months={data.comparison_history}
 						comparisonMonths={comparisonMonths}
 						through={period.through}
-						bucketIds={null}
+						bucketIds={historyBucketIds}
 						label={null}
-						control={null}
+						control={
+							<ScopeSelect
+								value={historyScope}
+								buckets={buckets}
+								onChange={setHistoryScope}
+							/>
+						}
 					/>
 
 					<WeekdayCard weekday={weekday} />
