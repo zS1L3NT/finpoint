@@ -58,6 +58,21 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 		<>
 			<PageContent className={isMonthly ? "gap-5 md:gap-7" : "gap-7 md:gap-9"}>
 				<header className="grid gap-5">
+					{isMonthly ? (
+						<Button
+							variant="outline"
+							size="sm"
+							className="w-fit max-w-full self-start"
+							asChild
+						>
+							<Link
+								href={pathDashboard({ month, year: String(year) })}
+								onClick={armTabTransition}
+							>
+								<IconifyIcon icon="lucide:arrow-left" /> Back to overview
+							</Link>
+						</Button>
+					) : null}
 					<div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
 						<div>
 							<p className="text-xs font-medium tracking-[0.18em] text-muted-foreground uppercase">
@@ -134,14 +149,6 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 						</nav>
 						{isMonthly ? (
 							<div className="flex flex-wrap gap-2 sm:mb-2">
-								<Button variant="outline" className="h-9 sm:h-7" asChild>
-									<Link
-										href={pathDashboard({ month, year: String(year) })}
-										onClick={armTabTransition}
-									>
-										<IconifyIcon icon="lucide:arrow-left" /> Back to overview
-									</Link>
-								</Button>
 								<Button variant="outline" className="h-9 sm:h-7" asChild>
 									<Link
 										href={pathRecords({
