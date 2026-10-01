@@ -133,20 +133,27 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 							</Link>
 						</nav>
 						{isMonthly ? (
-							<Button
-								variant="outline"
-								className="h-9 w-full sm:mb-2 sm:h-7 sm:w-auto"
-								asChild
-							>
-								<Link
-									href={pathRecords({
-										start_date: date.startOf("month").toISODate() ?? undefined,
-										end_date: date.endOf("month").toISODate() ?? undefined,
-									})}
-								>
-									Open in Records <IconifyIcon icon="lucide:arrow-up-right" />
-								</Link>
-							</Button>
+							<div className="flex flex-wrap gap-2 sm:mb-2">
+								<Button variant="outline" className="h-9 sm:h-7" asChild>
+									<Link
+										href={pathDashboard({ month, year: String(year) })}
+										onClick={armTabTransition}
+									>
+										<IconifyIcon icon="lucide:arrow-left" /> Back to overview
+									</Link>
+								</Button>
+								<Button variant="outline" className="h-9 sm:h-7" asChild>
+									<Link
+										href={pathRecords({
+											start_date:
+												date.startOf("month").toISODate() ?? undefined,
+											end_date: date.endOf("month").toISODate() ?? undefined,
+										})}
+									>
+										Open in Records <IconifyIcon icon="lucide:arrow-up-right" />
+									</Link>
+								</Button>
+							</div>
 						) : null}
 					</div>
 				</header>
