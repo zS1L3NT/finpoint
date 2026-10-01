@@ -82,7 +82,7 @@ export default function CategoryHistoryChart({
 					Share of gross spending compared with the previous {comparisonMonths} months.
 					Refunds are excluded.
 					{through &&
-						` Current and previous months include days 1–${Number(through.slice(-2))} only.`}
+						` Previous months include the full month; the selected month includes days 1–${Number(through.slice(-2))} only.`}
 				</CardDescription>
 				<CardAction>{control}</CardAction>
 			</CardHeader>

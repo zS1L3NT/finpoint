@@ -329,7 +329,10 @@ export async function getDashboard(input: DashboardInput) {
 		projection.daily_spending,
 	)
 	const categories = buildCategories(summary, included)
-	const comparisonHistory = buildSpendingHistory(date, actualRecords, comparisonMonths)
+	const historyMonths = isCurrent
+		? comparisonSummaries(date, today, false, tables, null, comparisonMonthCount)
+		: comparisonMonths
+	const comparisonHistory = buildSpendingHistory(date, actualRecords, historyMonths)
 
 	return {
 		month: date.monthLong,
