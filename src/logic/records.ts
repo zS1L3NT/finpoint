@@ -15,6 +15,8 @@ export type RecordFilters = {
 	exclude_budget_id?: string | null
 	start_date?: string | null
 	end_date?: string | null
+	min_amount?: string | null
+	max_amount?: string | null
 	is_allocated?: string | null
 	category_ids?: string[] | null
 	bucket_id?: string | null
@@ -140,6 +142,14 @@ export async function listRecords(filters: RecordFilters = {}) {
 	const { start_date, end_date } = filters
 	if (start_date) rows = rows.filter(r => r.datetime.slice(0, 10) >= start_date)
 	if (end_date) rows = rows.filter(r => r.datetime.slice(0, 10) <= end_date)
+	const minAmount = filters.min_amount ? Number(filters.min_amount) : null
+	const maxAmount = filters.max_amount ? Number(filters.max_amount) : null
+	if (minAmount !== null && Number.isFinite(minAmount)) {
+		rows = rows.filter(r => r.amount >= minAmount)
+	}
+	if (maxAmount !== null && Number.isFinite(maxAmount)) {
+		rows = rows.filter(r => r.amount <= maxAmount)
+	}
 	if (filters.category_ids?.length) {
 		const expanded = new Set(await expandCategoryIds(filters.category_ids))
 		rows = rows.filter(r => expanded.has(r.category_id))

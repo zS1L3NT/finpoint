@@ -19,6 +19,8 @@ export type StatementFilters = {
 	exclude_ids?: string | null
 	start_date?: string | null
 	end_date?: string | null
+	min_amount?: string | null
+	max_amount?: string | null
 	is_allocable?: string | null
 	is_pending?: string | null
 	is_unallocated?: string | null
@@ -106,6 +108,14 @@ export async function listStatements(filters: StatementFilters = {}) {
 	const { start_date, end_date } = filters
 	if (start_date) rows = rows.filter(s => s.datetime.slice(0, 10) >= start_date)
 	if (end_date) rows = rows.filter(s => s.datetime.slice(0, 10) <= end_date)
+	const minAmount = filters.min_amount ? Number(filters.min_amount) : null
+	const maxAmount = filters.max_amount ? Number(filters.max_amount) : null
+	if (minAmount !== null && Number.isFinite(minAmount)) {
+		rows = rows.filter(s => s.amount >= minAmount)
+	}
+	if (maxAmount !== null && Number.isFinite(maxAmount)) {
+		rows = rows.filter(s => s.amount <= maxAmount)
+	}
 	if (filters.is_pending === "true") rows = rows.filter(s => s.is_pending === 1)
 	if (filters.is_pending === "false") rows = rows.filter(s => s.is_pending === 0)
 

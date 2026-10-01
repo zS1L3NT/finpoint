@@ -9,6 +9,7 @@ import DateRange from "@/components/form/date-range"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
+import AmountFilter from "@/components/table/amount-filter"
 import CategoryFilter from "@/components/table/category-filter"
 import { ClearFiltersButton, FILTER_CONTROL_CLASS, FilterBar } from "@/components/table/filter-bar"
 import PaginatedDataTable from "@/components/table/paginated-data-table"
@@ -38,6 +39,8 @@ export default function RecordsPage() {
 	const searchParams = useSearchParams()
 	const startDate = searchParams.get("start_date")
 	const endDate = searchParams.get("end_date")
+	const minAmount = searchParams.get("min_amount")
+	const maxAmount = searchParams.get("max_amount")
 	const isAllocated = searchParams.get("is_allocated")
 	const bucketId = searchParams.get("bucket_id")
 	const bucketGroup = searchParams.get("bucket_group")
@@ -66,6 +69,8 @@ export default function RecordsPage() {
 				query: null,
 				start_date: null,
 				end_date: null,
+				min_amount: null,
+				max_amount: null,
 				is_allocated: null,
 				category_ids: null,
 				bucket_id: null,
@@ -79,6 +84,7 @@ export default function RecordsPage() {
 	const activeFilterCount = [
 		searchParams.get("query"),
 		startDate ?? endDate,
+		minAmount ?? maxAmount,
 		isAllocated,
 		categoryIds.length ? "categories" : null,
 		bucketId ?? bucketGroup ?? (showUnbucketed ? "unbucketed" : null),
@@ -91,6 +97,8 @@ export default function RecordsPage() {
 				query: query || null,
 				start_date: startDate,
 				end_date: endDate,
+				min_amount: minAmount,
+				max_amount: maxAmount,
 				is_allocated: isAllocated,
 				category_ids: categoryIds.length ? categoryIds : null,
 				bucket_id: bucketId,
@@ -102,6 +110,8 @@ export default function RecordsPage() {
 			query,
 			startDate,
 			endDate,
+			minAmount,
+			maxAmount,
 			isAllocated,
 			categoryIdsParam,
 			bucketId,
@@ -131,6 +141,8 @@ export default function RecordsPage() {
 					buckets={buckets}
 					startDate={startDate}
 					endDate={endDate}
+					minAmount={minAmount}
+					maxAmount={maxAmount}
 					isAllocated={isAllocated}
 					bucketId={bucketId}
 					bucketGroup={bucketGroup}
@@ -153,6 +165,8 @@ export default function RecordsPage() {
 			buckets,
 			startDate,
 			endDate,
+			minAmount,
+			maxAmount,
 			isAllocated,
 			bucketId,
 			bucketGroup,
@@ -229,6 +243,8 @@ function RecordFilters({
 	buckets,
 	startDate,
 	endDate,
+	minAmount,
+	maxAmount,
 	isAllocated,
 	bucketId,
 	bucketGroup,
@@ -243,6 +259,8 @@ function RecordFilters({
 	buckets: Bucket[]
 	startDate: string | null
 	endDate: string | null
+	minAmount: string | null
+	maxAmount: string | null
 	isAllocated: string | null
 	bucketId: string | null
 	bucketGroup: string | null
@@ -361,6 +379,11 @@ function RecordFilters({
 				className="sm:w-40"
 				triggerClassName={FILTER_CONTROL_CLASS}
 				onChange={value => onChange({ start_date: value.start, end_date: value.end })}
+			/>
+
+			<AmountFilter
+				value={{ min: minAmount, max: maxAmount }}
+				onChange={value => onChange({ min_amount: value.min, max_amount: value.max })}
 			/>
 
 			<ClearFiltersButton count={activeFilterCount} onClear={onClear} />

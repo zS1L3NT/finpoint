@@ -11,6 +11,7 @@ import DateRange from "@/components/form/date-range"
 import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
 import RecordAmount from "@/components/record-amount"
 import SelectionBar from "@/components/selection-bar"
+import AmountFilter from "@/components/table/amount-filter"
 import CategoryFilter from "@/components/table/category-filter"
 import { ClearFiltersButton, FILTER_CONTROL_CLASS, FilterBar } from "@/components/table/filter-bar"
 import { Badge } from "@/components/ui/badge"
@@ -58,6 +59,8 @@ type Filters = {
 	treatment?: string
 	start_date?: string
 	end_date?: string
+	min_amount?: string
+	max_amount?: string
 }
 
 export default function MonthlyRecordsPage() {
@@ -99,6 +102,8 @@ export default function MonthlyRecordsPage() {
 			: null
 	const startDate = searchParams.get("start_date") ?? legacyDate
 	const endDate = searchParams.get("end_date") ?? legacyDate
+	const minAmount = searchParams.get("min_amount")
+	const maxAmount = searchParams.get("max_amount")
 	const animateContent = useTabTransition()
 
 	const filterKey = JSON.stringify([
@@ -110,6 +115,8 @@ export default function MonthlyRecordsPage() {
 		treatment,
 		startDate,
 		endDate,
+		minAmount,
+		maxAmount,
 	])
 	const data = useLiveQuery(
 		() =>
@@ -122,6 +129,8 @@ export default function MonthlyRecordsPage() {
 				treatment,
 				start_date: startDate,
 				end_date: endDate,
+				min_amount: minAmount,
+				max_amount: maxAmount,
 			}).catch(() => null),
 		[month, year, filterKey],
 	)
@@ -151,6 +160,8 @@ export default function MonthlyRecordsPage() {
 	if (treatment) filters.treatment = treatment
 	if (startDate) filters.start_date = startDate
 	if (endDate) filters.end_date = endDate
+	if (minAmount) filters.min_amount = minAmount
+	if (maxAmount) filters.max_amount = maxAmount
 
 	const visit = (changes: Partial<Filters> = {}, nextDate = date) => {
 		const merged: Partial<Filters> = { ...filters, ...changes }
@@ -167,6 +178,8 @@ export default function MonthlyRecordsPage() {
 			"treatment",
 			"start_date",
 			"end_date",
+			"min_amount",
+			"max_amount",
 		] as const) {
 			const value = merged[key]
 			if (value === "" || value === false || value === undefined || value === null) {
@@ -441,6 +454,7 @@ function MonthlyRecordFilters({
 		bucketScope === "all" ? null : bucketScope,
 		filters.treatment,
 		filters.start_date ?? filters.end_date,
+		filters.min_amount ?? filters.max_amount,
 	].filter(Boolean).length
 
 	const changeBucketScope = (scope: string) => {
@@ -565,6 +579,15 @@ function MonthlyRecordFilters({
 						onChange({
 							start_date: value.start ?? undefined,
 							end_date: value.end ?? undefined,
+						})
+					}
+				/>
+				<AmountFilter
+					value={{ min: filters.min_amount ?? null, max: filters.max_amount ?? null }}
+					onChange={value =>
+						onChange({
+							min_amount: value.min ?? undefined,
+							max_amount: value.max ?? undefined,
 						})
 					}
 				/>

@@ -16,6 +16,8 @@ export type MonthlyFilters = {
 	treatment?: string | null
 	start_date?: string | null
 	end_date?: string | null
+	min_amount?: string | null
+	max_amount?: string | null
 }
 
 export async function getMonthlyRecords(month: string, year: number, filters: MonthlyFilters = {}) {
@@ -46,6 +48,8 @@ export async function getMonthlyRecords(month: string, year: number, filters: Mo
 	const records = await listRecords({
 		start_date: startDate,
 		end_date: endDate,
+		min_amount: filters.min_amount ?? null,
+		max_amount: filters.max_amount ?? null,
 		is_allocated: filters.is_allocated ?? null,
 		category_ids,
 		bucket_id: filters.bucket_id ?? null,
@@ -111,6 +115,8 @@ export async function getMonthlyRecords(month: string, year: number, filters: Mo
 			treatment: filters.treatment ?? null,
 			start_date: filters.start_date ?? null,
 			end_date: filters.end_date ?? null,
+			min_amount: filters.min_amount ?? null,
+			max_amount: filters.max_amount ?? null,
 		},
 	}
 }

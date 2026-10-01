@@ -8,6 +8,7 @@ import DateRange from "@/components/form/date-range"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
+import AmountFilter from "@/components/table/amount-filter"
 import { ClearFiltersButton, FILTER_CONTROL_CLASS, FilterBar } from "@/components/table/filter-bar"
 import PaginatedDataTable from "@/components/table/paginated-data-table"
 import { useStatementColumns, useStatementMobileRow } from "@/components/table/statement-columns"
@@ -35,6 +36,8 @@ export default function StatementsPage() {
 	const isPending = searchParams.get("is_pending")
 	const startDate = searchParams.get("start_date")
 	const endDate = searchParams.get("end_date")
+	const minAmount = searchParams.get("min_amount")
+	const maxAmount = searchParams.get("max_amount")
 
 	const { query, page, pageSize, handleQueryChange, handlePageSizeChange, setParams } =
 		usePaginatedTableState()
@@ -46,6 +49,7 @@ export default function StatementsPage() {
 		accountId === "all" ? "" : accountId,
 		isPending,
 		startDate ?? endDate,
+		minAmount ?? maxAmount,
 	].filter(Boolean).length
 	const clearFilters = () =>
 		setParams({
@@ -54,6 +58,8 @@ export default function StatementsPage() {
 			is_pending: null,
 			start_date: null,
 			end_date: null,
+			min_amount: null,
+			max_amount: null,
 			page: null,
 		})
 
@@ -66,8 +72,10 @@ export default function StatementsPage() {
 				is_pending: isPending,
 				start_date: startDate,
 				end_date: endDate,
+				min_amount: minAmount,
+				max_amount: maxAmount,
 			}),
-		[query, accountId, isPending, startDate, endDate],
+		[query, accountId, isPending, startDate, endDate, minAmount, maxAmount],
 	)
 	const statements = statementsQuery ?? []
 	const paginated = useMemo(
@@ -160,6 +168,15 @@ export default function StatementsPage() {
 										updateFilters({
 											start_date: value.start,
 											end_date: value.end,
+										})
+									}
+								/>
+								<AmountFilter
+									value={{ min: minAmount, max: maxAmount }}
+									onChange={value =>
+										updateFilters({
+											min_amount: value.min,
+											max_amount: value.max,
 										})
 									}
 								/>
