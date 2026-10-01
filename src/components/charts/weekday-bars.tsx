@@ -59,23 +59,27 @@ export default function WeekdayBars({
 					<ChartTooltip
 						content={
 							<ChartTooltipContent
-								labelFormatter={label =>
-									`Average spending per ${WEEKDAYS[String(label)]}`
-								}
+								labelFormatter={label => `Average per ${WEEKDAYS[String(label)]}`}
 								formatter={(value, name, item) => (
-									<div className="flex min-w-40 items-center justify-between gap-4">
-										<span className="text-muted-foreground">
+									<div className="grid w-full min-w-52 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2">
+										<span
+											className="size-2 rounded-full"
+											style={{
+												backgroundColor: item.color,
+												opacity: item.dataKey === "baseline" ? 0.35 : 1,
+											}}
+										/>
+										<div className="text-muted-foreground">
 											{String(name)}
-											<span className="block text-[10px]">
+											<p className="text-[10px]">
 												{item.dataKey === "spending"
 													? item.payload.days
 													: item.payload.baseline_days}{" "}
 												{WEEKDAYS[item.payload.day]}s
-											</span>
-										</span>
-										<span className="font-medium tabular-nums">
-											{formatCurrency(Number(value))} /{" "}
-											{WEEKDAYS[item.payload.day]}
+											</p>
+										</div>
+										<span className="text-right font-medium tabular-nums">
+											{formatCurrency(Number(value))}
 										</span>
 									</div>
 								)}
