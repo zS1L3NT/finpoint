@@ -46,11 +46,13 @@ export default function SettingsPage() {
 		settings !== undefined &&
 		(startDate !== saved || endDateToday !== settings.default_filter_end_date_today)
 	const handleSave = async () => {
+		if (!settings) return
 		setSaving(true)
 		try {
 			await updateSettings({
 				default_filter_start_date: startDate || null,
 				default_filter_end_date_today: endDateToday,
+				dashboard_comparison_months: settings.dashboard_comparison_months,
 			})
 			toast.success("Default filters saved.")
 		} catch (cause) {

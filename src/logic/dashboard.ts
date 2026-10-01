@@ -15,7 +15,11 @@ import {
 import { type AnalyticsRecord, summarize } from "@/logic/analytics"
 import { expandCategoryIdsForMonthly } from "@/logic/monthly-shared"
 
-export type DashboardInput = { month: string; year: number }
+export type DashboardInput = { month: string; year: number; comparison_months?: number }
+
+function normalizeComparisonMonths(value = 3): number {
+	return Math.min(24, Math.max(1, Math.trunc(Number.isFinite(value) ? value : 3)))
+}
 
 export function monthStart(month: string, year: number): DateTime {
 	const date = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
@@ -150,9 +154,10 @@ function comparisonSummaries(
 	isCurrent: boolean,
 	tables: LoadedTables,
 	scopeIds: string[] | null,
+	comparisonMonths: number,
 ) {
 	const out = []
-	for (let offset = 1; offset <= 3; offset++) {
+	for (let offset = 1; offset <= comparisonMonths; offset++) {
 		const month = date.minus({ months: offset }).startOf("month")
 		const coverage = tables.coverages.get(month.toFormat("yyyy-MM-dd"))
 		const endDay = isCurrent
@@ -186,6 +191,7 @@ function comparisonSummaries(
 }
 
 export async function getDashboard(input: DashboardInput) {
+	const comparisonMonthCount = normalizeComparisonMonths(input.comparison_months)
 	const date = monthStart(input.month, input.year)
 	const today = DateTime.now().startOf("day")
 	const isCurrent = date.hasSame(today, "month")
@@ -212,7 +218,14 @@ export async function getDashboard(input: DashboardInput) {
 	const summary = summarize(actualRecords)
 	const futureSummary = summarize(futureRecords)
 
-	const comparisonMonths = comparisonSummaries(date, today, isCurrent, tables, null)
+	const comparisonMonths = comparisonSummaries(
+		date,
+		today,
+		isCurrent,
+		tables,
+		null,
+		comparisonMonthCount,
+	)
 
 	const included = comparisonMonths.filter(m => m.included)
 	const comparison = buildComparison(summary, included)
@@ -243,6 +256,7 @@ export async function getDashboard(input: DashboardInput) {
 	)
 	const categories = buildCategories(summary, included)
 
+
 	return {
 		month: date.monthLong,
 		year: date.year,
@@ -258,6 +272,7 @@ export async function getDashboard(input: DashboardInput) {
 		},
 		summary,
 		comparison,
+		comparison_months: comparisonMonthCount,
 		series,
 		projection,
 		buckets: bucketsWithSpending,
@@ -267,7 +282,13 @@ export async function getDashboard(input: DashboardInput) {
 	}
 }
 
-export async function getPaceView(month: string, year: number, scope: string) {
+export async function getPaceView(
+	month: string,
+	year: number,
+	scope: string,
+	comparisonMonths = 3,
+) {
+	comparisonMonths = normalizeComparisonMonths(comparisonMonths)
 	const date = monthStart(month, year)
 	const today = DateTime.now().startOf("day")
 	const isCurrent = date.hasSame(today, "month")
@@ -296,8 +317,15 @@ export async function getPaceView(month: string, year: number, scope: string) {
 
 	const summary = summarize(actualRecords)
 	const futureSummary = summarize(futureRecords)
-	const comparisonMonths = comparisonSummaries(date, today, isCurrent, tables, scopeIds)
-	const included = comparisonMonths.filter(m => m.included)
+	const comparisonSummariesForPace = comparisonSummaries(
+		date,
+		today,
+		isCurrent,
+		tables,
+		scopeIds,
+		comparisonMonths,
+	)
+	const included = comparisonSummariesForPace.filter(m => m.included)
 
 	const scopedBucketRows = scopeIds
 		? tables.bucketRows.filter(b => scopeIds.includes(b.id))

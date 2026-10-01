@@ -27,9 +27,14 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { useMonthParams } from "@/hooks/use-month-params"
 import { usePersistentState } from "@/hooks/use-persistent-state"
+import { useSettings } from "@/hooks/use-settings"
 import { useTabTransition } from "@/hooks/use-tab-transition"
 import { cn, formatCurrency } from "@/lib/utils"
-import { getBucketDaily, getDashboard, getPaceView } from "@/logic/dashboard"
+import {
+	getBucketDaily,
+	getDashboard,
+	getPaceView,
+} from "@/logic/dashboard"
 import { pathMonthlyRecords } from "@/routes"
 import { AnalyticsSummary, Bucket } from "@/types"
 
@@ -85,6 +90,7 @@ type DashboardData = {
 	categories: DashboardCategory[]
 	weekday: WeekdayBreakdown
 	future_records_count: number
+	comparison_months: number
 }
 
 type WeekdayStat = {
@@ -118,9 +124,12 @@ type BucketDailyData = {
 export default function DashboardPage() {
 	const { month, year } = useMonthParams()
 	const animateContent = useTabTransition()
-	const data = useLiveQuery(() => getDashboard({ month, year }), [month, year]) as unknown as
-		| DashboardData
-		| undefined
+	const settings = useSettings()
+	const comparisonMonths = settings?.dashboard_comparison_months ?? 3
+	const data = useLiveQuery(
+		() => getDashboard({ month, year, comparison_months: comparisonMonths }),
+		[month, year, comparisonMonths],
+	) as unknown as DashboardData | undefined
 	const buckets = data?.buckets ?? []
 	const categories = data?.categories ?? []
 	const [storedScope, setScope] = usePersistentState("finpoint.dashboard.scope", "all")
@@ -139,8 +148,8 @@ export default function DashboardPage() {
 		null
 	const dailyBucketId = dailyBucket?.id ?? null
 	const paceData = useLiveQuery(
-		() => getPaceView(month, year, dailyBucketId ?? "all"),
-		[month, year, dailyBucketId],
+		() => getPaceView(month, year, dailyBucketId ?? "all", comparisonMonths),
+		[month, year, dailyBucketId, comparisonMonths],
 	) as unknown as PaceData | undefined
 	const bucketDailyData = useLiveQuery(
 		() => getBucketDaily(month, year),
