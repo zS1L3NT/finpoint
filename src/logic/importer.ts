@@ -115,7 +115,22 @@ function combine(header: Row, row: Row): Record<string, string | null> {
 	return out
 }
 
-async function upsertIndexed(rows: Parsed[] & { index?: number }[], withIndex: boolean) {
+function descriptionKey(description: string | null | undefined): string {
+	const value = description ?? ""
+	const trimmed = value.trim()
+	return trimmed === "" || trimmed === "-" ? "" : value
+}
+
+// Older DBS imports kept "-" in individual references before joining them.
+function dbsDescriptionKey(description: string | null | undefined): string {
+	return (description ?? "").split(", ").map(descriptionKey).filter(Boolean).join(", ")
+}
+
+async function upsertIndexed(
+	rows: Parsed[] & { index?: number }[],
+	withIndex: boolean,
+	normalizeDescription: (description: string | null | undefined) => string,
+) {
 	let imported = 0
 	let reindexed = 0
 	let skipped = 0
@@ -123,7 +138,12 @@ async function upsertIndexed(rows: Parsed[] & { index?: number }[], withIndex: b
 	type Meta = { data: Parsed; unique_key: string }
 	const metas: Meta[] = rows.map(row => ({
 		data: row,
-		unique_key: [row.account_id, row.datetime, row.description, String(row.amount)].join("\n"),
+		unique_key: [
+			row.account_id,
+			row.datetime,
+			normalizeDescription(row.description),
+			String(row.amount),
+		].join("\n"),
 	}))
 	const duplicateCounts = new Map<string, number>()
 	for (const meta of metas) {
@@ -137,6 +157,8 @@ async function upsertIndexed(rows: Parsed[] & { index?: number }[], withIndex: b
 	}
 	const duplicateIndexes = new Map(duplicateCounts)
 	const unmatched = new Map<string, { data: Parsed; raw: Parsed; index: number }[]>()
+	const sameDescription = (actual: string, expected: string) =>
+		normalizeDescription(actual) === normalizeDescription(expected)
 
 	for (const meta of metas) {
 		const data = { ...meta.data }
@@ -157,7 +179,7 @@ async function upsertIndexed(rows: Parsed[] & { index?: number }[], withIndex: b
 			.equals([data.account_id, data.datetime])
 			.filter(
 				s =>
-					s.description === data.description &&
+					sameDescription(s.description, data.description) &&
 					s.amount === data.amount &&
 					s.is_pending === (data.is_pending ?? 0),
 			)
@@ -194,7 +216,7 @@ async function upsertIndexed(rows: Parsed[] & { index?: number }[], withIndex: b
 			.equals([raw.account_id, raw.datetime])
 			.filter(
 				s =>
-					s.description === raw.description &&
+					sameDescription(s.description, raw.description) &&
 					s.amount === raw.amount &&
 					s.is_pending === 0,
 			)
@@ -256,7 +278,7 @@ export async function importDbs(files: File[]): Promise<ImportResult> {
 				statement["Client Reference"],
 				statement["Additional Reference"],
 			]
-				.filter(v => v && v.trim() !== "")
+				.filter(v => v && v.trim() !== "" && v.trim() !== "-")
 				.join(", ")
 			const debit = statement["Debit Amount"] ? Number(statement["Debit Amount"]) : null
 			const credit = statement["Credit Amount"] ? Number(statement["Credit Amount"]) : null
@@ -268,7 +290,7 @@ export async function importDbs(files: File[]): Promise<ImportResult> {
 				is_pending: 0,
 			})
 		}
-		const result = await upsertIndexed(rows, true)
+		const result = await upsertIndexed(rows, true, dbsDescriptionKey)
 		imported += result.imported
 		reindexed += result.reindexed
 		skipped += result.skipped
@@ -308,12 +330,12 @@ export async function importUob(files: File[]): Promise<ImportResult> {
 			rows.push({
 				account_id: accountId,
 				datetime,
-				description: statement["Transaction Description"] ?? "",
+				description: descriptionKey(statement["Transaction Description"]),
 				amount: round2(withdrawal !== 0 ? -withdrawal : deposit),
 				is_pending: 0,
 			})
 		}
-		const result = await upsertIndexed(rows, true)
+		const result = await upsertIndexed(rows, true, descriptionKey)
 		imported += result.imported
 		reindexed += result.reindexed
 		skipped += result.skipped
@@ -363,14 +385,16 @@ export async function importOcbc(files: File[]): Promise<ImportResult> {
 			rows.push({
 				account_id: accountId,
 				datetime: parseDayMonthYearSlashes(statement["Transaction date"]),
-				description: (statement.Description ?? "").replace(/\s+/g, " ").trim(),
+				description: descriptionKey(
+					(statement.Description ?? "").replace(/\s+/g, " ").trim(),
+				),
 				amount: round2(withdrawal !== 0 ? -withdrawal : deposit),
 				is_pending: 0,
 			})
 		}
 
 		await ensureAccount(accountId, accountName, "OCBC")
-		const result = await upsertIndexed(rows, true)
+		const result = await upsertIndexed(rows, true, descriptionKey)
 		imported += result.imported
 		reindexed += result.reindexed
 		skipped += result.skipped
@@ -409,7 +433,7 @@ export async function importRevolut(
 		const candidate = {
 			account_id: id,
 			datetime,
-			description: statement.Description ?? "",
+			description: descriptionKey(statement.Description),
 			amount: round2(Number(statement.Amount ?? 0) - Number(statement.Fee ?? 0)),
 			is_pending: statement.State === "PENDING" ? asPending(true) : asPending(false),
 		}
@@ -418,7 +442,7 @@ export async function importRevolut(
 			.equals([candidate.account_id, candidate.datetime])
 			.filter(
 				s =>
-					s.description === candidate.description &&
+					descriptionKey(s.description) === candidate.description &&
 					s.amount === candidate.amount &&
 					s.is_pending === candidate.is_pending,
 			)
