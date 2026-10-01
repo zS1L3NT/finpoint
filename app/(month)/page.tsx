@@ -408,7 +408,20 @@ export default function DashboardPage() {
 						comparisonMonths={comparisonMonths}
 						through={period.through}
 						bucketIds={historyBucketIds}
-						label={null}
+						label={
+							<ScopeLabel
+								scope={
+									historyScope === "all"
+										? "Total"
+										: ["core", "outlier", "other"].includes(historyScope)
+											? historyScope.charAt(0).toUpperCase() +
+												historyScope.slice(1)
+											: (buckets.find(bucket => bucket.id === historyScope)
+													?.name ?? "Total")
+								}
+								color={buckets.find(bucket => bucket.id === historyScope)?.color}
+							/>
+						}
 						control={
 							<ScopeSelect
 								value={historyScope}
