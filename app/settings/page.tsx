@@ -181,6 +181,7 @@ export default function SettingsPage() {
 							>
 								<ToggleGroup
 									id="dashboard_comparison_preset"
+									className="max-w-fit"
 									type="single"
 									value={
 										["1", "3", "6", "12"].includes(comparisonMonths)
