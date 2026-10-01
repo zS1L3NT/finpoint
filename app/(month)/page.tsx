@@ -403,9 +403,7 @@ export default function DashboardPage() {
 
 					<WeekdayCard weekday={weekday} />
 
-					{summary.contributions || summary.withdrawals ? (
-						<InvestmentRow summary={summary} month={month} year={year} />
-					) : null}
+					<InvestmentRow summary={summary} month={month} year={year} />
 				</>
 			)}
 		</div>
@@ -844,15 +842,17 @@ function InvestmentRow({
 	month: string
 	year: number
 }) {
+	const net = Math.round((summary.contributions - summary.withdrawals) * 100) / 100
+	const rate = summary.income > 0 ? (net / summary.income) * 100 : null
 	return (
-		<Card size="sm">
-			<CardContent className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+		<section className="grid gap-4" aria-labelledby="investment-title">
+			<div className="flex flex-wrap items-center justify-between gap-3">
 				<div>
-					<p className="font-medium">Saving and investment movements</p>
-					<p className="text-xs text-muted-foreground">
-						Contributions {formatCurrency(summary.contributions)} · Withdrawals{" "}
-						{formatCurrency(summary.withdrawals)} · Net{" "}
-						{formatCurrency(summary.contributions - summary.withdrawals)}
+					<h3 id="investment-title" className="text-lg font-semibold">
+						Saving and investment movements
+					</h3>
+					<p className="text-sm text-muted-foreground">
+						Recorded contributions and withdrawals for this month
 					</p>
 				</div>
 				<Button variant="outline" size="sm" asChild>
@@ -866,8 +866,39 @@ function InvestmentRow({
 						View Records
 					</Link>
 				</Button>
-			</CardContent>
-		</Card>
+			</div>
+			<MetricGrid>
+				<DashboardMetric
+					icon="lucide:arrow-up-right"
+					label="Contributions"
+					value={formatCurrency(summary.contributions)}
+					detail="Money put into savings and investments"
+				/>
+				<DashboardMetric
+					icon="lucide:arrow-down-left"
+					label="Withdrawals"
+					value={formatCurrency(summary.withdrawals)}
+					detail="Money taken out of savings and investments"
+				/>
+				<DashboardMetric
+					icon="lucide:scale"
+					label="Net contributions"
+					value={formatCurrency(net)}
+					detail="Contributions less withdrawals"
+					tone={net > 0 ? "positive" : net < 0 ? "negative" : "neutral"}
+				/>
+				<DashboardMetric
+					icon="lucide:percent"
+					label="Net contributions / income"
+					value={rate === null ? "—" : `${rate.toFixed(1)}%`}
+					detail={
+						rate === null
+							? "No positive net income"
+							: "Net contributions as a share of income"
+					}
+				/>
+			</MetricGrid>
+		</section>
 	)
 }
 
