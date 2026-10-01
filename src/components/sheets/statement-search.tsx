@@ -110,7 +110,7 @@ export default function StatementSearchSheet({
 							<Input
 								id="statement-search-query"
 								type="search"
-								placeholder={placeholder ?? "Search statements..."}
+								placeholder={placeholder ?? "Search descriptions..."}
 								value={query}
 								onChange={event => setQuery(event.target.value)}
 							/>

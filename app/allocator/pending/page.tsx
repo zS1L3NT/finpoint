@@ -256,7 +256,7 @@ export default function AllocatorPendingPage() {
 								</p>
 							</div>
 							<Input
-								placeholder="Search pending Statements..."
+								placeholder="Search descriptions..."
 								value={queueQuery}
 								onChange={event => setQueueQuery(event.target.value)}
 							/>
@@ -404,7 +404,7 @@ export default function AllocatorPendingPage() {
 											</p>
 										</div>
 										<Input
-											placeholder="Search imported Statements..."
+											placeholder="Search descriptions..."
 											value={candidateQuery}
 											onChange={event =>
 												setCandidateQuery(event.target.value)

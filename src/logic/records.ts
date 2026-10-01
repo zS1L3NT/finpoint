@@ -135,8 +135,7 @@ export async function listRecords(filters: RecordFilters = {}) {
 				record.title.toLowerCase().includes(q) ||
 				(record.people ?? "").toLowerCase().includes(q) ||
 				(record.location ?? "").toLowerCase().includes(q) ||
-				(record.description ?? "").toLowerCase().includes(q) ||
-				String(record.amount).includes(q),
+				(record.description ?? "").toLowerCase().includes(q),
 		)
 	}
 	const { start_date, end_date } = filters

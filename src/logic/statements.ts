@@ -89,16 +89,7 @@ export async function listStatements(filters: StatementFilters = {}) {
 
 	const q = (filters.query ?? "").trim().toLowerCase()
 	if (q) {
-		const accounts = new Map((await db.accounts.toArray()).map(a => [a.id, a]))
-		rows = rows.filter(statement => {
-			const account = accounts.get(statement.account_id)
-			return (
-				statement.description.toLowerCase().includes(q) ||
-				String(statement.amount).includes(q) ||
-				(account?.id.toLowerCase().includes(q) ?? false) ||
-				(account?.name.toLowerCase().includes(q) ?? false)
-			)
-		})
+		rows = rows.filter(statement => statement.description.toLowerCase().includes(q))
 	}
 	if (filters.account_id) rows = rows.filter(s => s.account_id === filters.account_id)
 	if (filters.exclude_ids) {
@@ -318,9 +309,7 @@ export async function replacementCandidates(
 	}
 	if (options.query?.trim()) {
 		const q = options.query.trim().toLowerCase()
-		rows = rows.filter(
-			s => s.description.toLowerCase().includes(q) || String(s.amount).includes(q),
-		)
+		rows = rows.filter(s => s.description.toLowerCase().includes(q))
 	}
 
 	const pendingShape = { ...pending, is_pending: true }

@@ -133,7 +133,7 @@ export default function RecordsPage() {
 			onQueryChange: handleQueryChange,
 			pageSize,
 			onPageSizeChange: handlePageSizeChange,
-			searchPlaceholder: "Search all records...",
+			searchPlaceholder: "Search title, people, location, description...",
 			filters: (
 				<RecordFilters
 					categories={categories}

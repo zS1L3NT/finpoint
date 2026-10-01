@@ -109,7 +109,7 @@ export default function StatementsPage() {
 						onQueryChange: handleQueryChange,
 						pageSize,
 						onPageSizeChange: handlePageSizeChange,
-						searchPlaceholder: "Search all statements...",
+						searchPlaceholder: "Search descriptions...",
 						filters: (
 							<FilterBar>
 								<Select

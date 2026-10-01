@@ -23,16 +23,11 @@ export default function AccountPage({ params }: { params: Promise<{ id: string }
 	const [isEditingAccount, setIsEditingAccount] = useState(false)
 	const [editingStatement, setEditingStatement] = useState<Statement | null>(null)
 
-	const { query, page, pageSize, handleQueryChange, handlePageSizeChange } =
-		usePaginatedTableState()
+	const { page, pageSize } = usePaginatedTableState()
 
 	const account = useLiveQuery(() => (id ? getAccount(id).catch(() => null) : null), [id])
 	const accounts = useLiveQuery(() => listAccounts(), []) ?? []
-	const statements =
-		useLiveQuery(
-			() => listStatements({ query: query || null, account_id: id ?? null }),
-			[query, id],
-		) ?? []
+	const statements = useLiveQuery(() => listStatements({ account_id: id ?? null }), [id]) ?? []
 	const paginated = useMemo(
 		() => paginateItems(statements, parsePage(page), parsePageSize(pageSize)),
 		[statements, page, pageSize],
@@ -97,13 +92,6 @@ export default function AccountPage({ params }: { params: Promise<{ id: string }
 				<PaginatedDataTable
 					paginated={paginated}
 					columns={columns}
-					header={{
-						query,
-						onQueryChange: handleQueryChange,
-						pageSize,
-						onPageSizeChange: handlePageSizeChange,
-						searchPlaceholder: "Search account statements...",
-					}}
 					footer={{
 						summary: `Showing ${paginated.data.length} of ${paginated.total} statements.`,
 					}}

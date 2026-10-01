@@ -35,7 +35,7 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 }: {
 	paginated: Paginated<TData>
 	columns: ColumnDef<TData, TValue>[]
-	header: React.ComponentProps<typeof PaginationHeader>
+	header?: React.ComponentProps<typeof PaginationHeader>
 	footer: { summary: React.ReactNode }
 	selectedIds?: string[]
 	emptyMessage?: string
@@ -48,7 +48,7 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 		getCoreRowModel: getCoreRowModel(),
 		getRowId: row => row.id,
 	})
-	const skeletonRows = Math.min(Math.max(Number(header.pageSize) || 8, 3), 12)
+	const skeletonRows = Math.min(Math.max(Number(header?.pageSize) || 8, 3), 12)
 	// First arrival renders instantly; later list updates animate out/in.
 	const [live, setLive] = useState(false)
 	useEffect(() => {

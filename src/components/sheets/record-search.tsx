@@ -93,7 +93,9 @@ export default function RecordSearchSheet({
 							<Input
 								id="record-search-query"
 								type="search"
-								placeholder={placeholder ?? "Search records..."}
+								placeholder={
+									placeholder ?? "Search title, people, location, description..."
+								}
 								value={query}
 								onChange={event => setQuery(event.target.value)}
 							/>
