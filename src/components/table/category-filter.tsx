@@ -63,22 +63,24 @@ export default function CategoryFilter({
 						value.toLowerCase().includes(search.trim().toLowerCase()) ? 1 : 0
 					}
 				>
-					<CommandInput
-						placeholder="Search categories..."
-						className={selectedIds.length ? "pr-6" : undefined}
-					/>
-					{selectedIds.length ? (
-						<Button
-							type="button"
-							variant="ghost"
-							size="icon-xs"
-							className="absolute top-2 right-2 z-10"
-							aria-label="Clear categories"
-							onClick={() => onChange([])}
-						>
-							<IconifyIcon icon="lucide:x" />
-						</Button>
-					) : null}
+					<div className="relative">
+						<CommandInput
+							placeholder="Search categories..."
+							className={selectedIds.length ? "pr-6" : undefined}
+						/>
+						{selectedIds.length ? (
+							<Button
+								type="button"
+								variant="ghost"
+								size="icon-xs"
+								className="absolute top-2.5 right-2.5 z-10"
+								aria-label="Clear categories"
+								onClick={() => onChange([])}
+							>
+								<IconifyIcon icon="lucide:x" />
+							</Button>
+						) : null}
+					</div>
 					<CommandList>
 						<CommandEmpty>No categories found.</CommandEmpty>
 						<CommandGroup>
