@@ -731,7 +731,7 @@ function InvestmentRow({
 	year: number
 }) {
 	const { handlePush } = useHistory()
-	const net = Math.round((summary.contributions - summary.withdrawals) * 100) / 100
+	const net = Math.round((summary.withdrawals - summary.contributions) * 100) / 100
 	const rate = summary.income > 0 ? (net / summary.income) * 100 : null
 	return (
 		<section className="grid gap-4" aria-labelledby="investment-title">
@@ -777,7 +777,7 @@ function InvestmentRow({
 					icon="lucide:scale"
 					label="Net contributions"
 					value={formatCurrency(net)}
-					detail="Contributions less withdrawals"
+					detail="Withdrawals less contributions"
 					tone={net > 0 ? "positive" : net < 0 ? "negative" : "neutral"}
 				/>
 				<DashboardMetric
