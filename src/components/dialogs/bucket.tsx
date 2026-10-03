@@ -79,12 +79,8 @@ export default function BucketDialog({
 						pace_kind: group === "outlier" ? "none" : paceKind,
 					})
 
-			const targetMonth =
-				targetScope === "default"
-					? (selectedMonth.plus({ month: 1 }).toISODate() ?? "")
-					: (selectedMonth.toISODate() ?? "")
 			await setBucketTarget(saved.id, {
-				month: targetMonth,
+				month: selectedMonth.toISODate() ?? "",
 				amount: noTarget ? null : target,
 				scope: targetScope as "month" | "default",
 			})
@@ -115,7 +111,7 @@ export default function BucketDialog({
 					<DialogTitle>{bucket ? `Edit ${bucket.name}` : "Create bucket"}</DialogTitle>
 					<DialogDescription>
 						Buckets persist across months. The target can apply only to {month} {year}{" "}
-						or become the default from the following month.
+						or become the default from that month onward.
 					</DialogDescription>
 				</DialogHeader>
 				<form
@@ -199,7 +195,7 @@ export default function BucketDialog({
 								{ value: "month", label: `${month} ${year} only` },
 								{
 									value: "default",
-									label: `Default from ${selectedMonth.plus({ month: 1 }).toFormat("MMMM yyyy")}`,
+									label: `${month} ${year} onward`,
 								},
 							]}
 							onChange={setTargetScope}

@@ -93,7 +93,10 @@ export async function setBucketTarget(
 	if (scope === "month") {
 		await db.bucket_targets.put({ bucket_id: bucketId, month, amount })
 	} else {
-		await db.bucket_defaults.put({ bucket_id: bucketId, effective_month: month, amount })
+		await db.transaction("rw", db.bucket_defaults, db.bucket_targets, async () => {
+			await db.bucket_defaults.put({ bucket_id: bucketId, effective_month: month, amount })
+			await db.bucket_targets.delete([bucketId, month])
+		})
 	}
 }
 
