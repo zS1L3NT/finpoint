@@ -12,7 +12,6 @@ import DailySpendingChart from "@/components/charts/daily-spending-chart"
 import Sparkline from "@/components/charts/sparkline"
 import SpendingCalendar from "@/components/charts/spending-calendar"
 import TotalSpendingChart from "@/components/charts/total-spending-chart"
-import TrendChart from "@/components/charts/trend-chart"
 import WeekdayBars from "@/components/charts/weekday-bars"
 import BucketDialog from "@/components/dialogs/bucket"
 import { UiIcon as IconifyIcon } from "@/components/icon"
@@ -38,7 +37,7 @@ import { useSettings } from "@/hooks/use-settings"
 import { armTabTransition, useTabTransition } from "@/hooks/use-tab-transition"
 import { cn, formatCurrency } from "@/lib/utils"
 import { getDashboardView, type SpendingHistoryMonth, type TrendMonth } from "@/logic/dashboard"
-import { pathDashboard, pathMonthlyRecords } from "@/routes"
+import { pathMonthlyRecords } from "@/routes"
 import { AnalyticsSummary, Bucket } from "@/types"
 
 type DashboardBucket = Bucket & {
@@ -244,10 +243,6 @@ export default function DashboardPage() {
 			pathMonthlyRecords({ month, year: String(year), start_date: date, end_date: date }),
 		)
 	}
-	const openMonth = (key: string) => {
-		const target = DateTime.fromFormat(key, "yyyy-MM")
-		router.push(pathDashboard({ month: target.monthLong ?? month, year: String(target.year) }))
-	}
 	return (
 		<div
 			className={cn(
@@ -324,21 +319,6 @@ export default function DashboardPage() {
 							/>
 						</CardContent>
 					</Card>
-
-					{trend.length > 1 ? (
-						<Card>
-							<CardHeader className="border-b">
-								<ScopedCardTitle scope="Total">Income vs spending</ScopedCardTitle>
-								<CardDescription>
-									The last {trend.length} months side by side, with the surplus or
-									shortfall each month. Select a month to open it.
-								</CardDescription>
-							</CardHeader>
-							<CardContent>
-								<TrendChart months={trend} onSelect={openMonth} />
-							</CardContent>
-						</Card>
-					) : null}
 
 					<section className="grid gap-4" aria-labelledby="spending-breakdown-title">
 						<div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">

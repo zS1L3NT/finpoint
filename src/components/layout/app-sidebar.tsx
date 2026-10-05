@@ -263,7 +263,7 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 									<img src="/favicon.svg" alt="" className="size-5" />
 								</span>
 								<span className="grid leading-tight">
-									<span className="text-sm font-semibold">Finpoint</span>
+									<span className="text-base font-semibold">Finpoint</span>
 									<span className="text-[0.6875rem] text-sidebar-foreground/60">
 										Local-first finance
 									</span>
@@ -296,7 +296,6 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 										asChild
 										isActive={item.active}
 										tooltip={item.label}
-										className="h-9 text-sm"
 									>
 										<Link href={item.to} onClick={handleSidebarLink}>
 											<IconifyIcon icon={item.icon} />
