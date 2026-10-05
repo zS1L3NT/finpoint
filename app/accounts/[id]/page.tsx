@@ -2,18 +2,20 @@
 
 import { useLiveQuery } from "dexie-react-hooks"
 import { use, useMemo, useState } from "react"
-import { DetailSummary, DetailSummaryItem } from "@/components/detail-summary"
 import AccountDialog from "@/components/dialogs/account"
 import PendingStatementDialog from "@/components/dialogs/pending-statement"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
+import { Metric, MetricGrid } from "@/components/metric"
 import PaginatedDataTable from "@/components/table/paginated-data-table"
 import { byDay } from "@/components/table/row-groups"
 import { useStatementColumns, useStatementMobileRow } from "@/components/table/statement-columns"
 import { Button } from "@/components/ui/button"
 import { useOpenRow } from "@/hooks/use-open-row"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
+import { bankMeta } from "@/lib/banks"
+import { formatCurrency, formatDatetime } from "@/lib/utils"
 import { getAccount, listAccounts } from "@/logic/accounts"
 import { paginateItems, parsePage, parsePageSize } from "@/logic/pagination"
 import { listStatements } from "@/logic/statements"
@@ -64,7 +66,7 @@ export default function AccountPage({ params }: { params: Promise<{ id: string }
 			<PageContent>
 				<PageHeader
 					title={account.name}
-					subtitle={`${account.bank} account`}
+					subtitle={`${bankMeta(account.bank).label} account · ID ${account.id}`}
 					description="Account details"
 					icon="lucide:landmark"
 					actions={
@@ -85,14 +87,41 @@ export default function AccountPage({ params }: { params: Promise<{ id: string }
 					}}
 				/>
 
-				<DetailSummary columns={2} footer={<span>Account ID · {account.id}</span>}>
-					<DetailSummaryItem icon="lucide:landmark" label="Bank" value={account.bank} />
-					<DetailSummaryItem
+				<MetricGrid>
+					<Metric
 						icon="lucide:credit-card"
 						label="Statements"
-						value={account.statements_count ?? 0}
+						value={account.statements_count.toLocaleString()}
+						detail={
+							account.last_activity
+								? `Last activity ${formatDatetime(account.last_activity)}`
+								: "No activity yet"
+						}
 					/>
-				</DetailSummary>
+					<Metric
+						icon="lucide:link-2-off"
+						label="Unallocated"
+						value={account.unallocated_count.toLocaleString()}
+						detail={
+							account.pending_count
+								? `${account.pending_count} pending Statement${account.pending_count === 1 ? "" : "s"}`
+								: "No pending Statements"
+						}
+						tone={account.unallocated_count ? "negative" : "positive"}
+					/>
+					<Metric
+						icon="lucide:arrow-down-left"
+						label="Money in · 30 days"
+						value={formatCurrency(account.inflow_30d)}
+						detail="Imported and pending Statements"
+					/>
+					<Metric
+						icon="lucide:arrow-up-right"
+						label="Money out · 30 days"
+						value={formatCurrency(account.outflow_30d)}
+						detail={`Net ${formatCurrency(account.inflow_30d - account.outflow_30d)}`}
+					/>
+				</MetricGrid>
 
 				<PaginatedDataTable
 					paginated={paginated}

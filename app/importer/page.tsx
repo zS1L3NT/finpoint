@@ -22,6 +22,7 @@ import {
 import { Field, FieldError } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
+import { BANKS } from "@/lib/banks"
 import { cn } from "@/lib/utils"
 import { listAccounts } from "@/logic/accounts"
 import { importDbs, importOcbc, importRevolut, importUob } from "@/logic/importer"
@@ -29,19 +30,6 @@ import { ValidationError } from "@/logic/validate"
 import { pathAllocator } from "@/routes"
 
 const BANKS_REQUIRING_ADDITIONAL_INFO = ["revolut"]
-
-const BANKS = [
-	{ value: "dbs", label: "DBS", short: "DBS", color: "#e60000", formats: "CSV · many files" },
-	{ value: "ocbc", label: "OCBC", short: "OC", color: "#d4111a", formats: "CSV · many files" },
-	{ value: "uob", label: "UOB", short: "UOB", color: "#0b3b8c", formats: "XLS · many files" },
-	{
-		value: "revolut",
-		label: "Revolut",
-		short: "R",
-		color: "#191c1f",
-		formats: "CSV · one account",
-	},
-]
 
 const ACCEPT = [
 	".csv",
