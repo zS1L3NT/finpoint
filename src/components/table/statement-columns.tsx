@@ -59,7 +59,6 @@ function StatementAmount({
 	return (
 		<span className="grid justify-items-end gap-0.5 text-right">
 			<span className={cn("font-medium tabular-nums", amountTone(statement.amount))}>
-				{statement.amount > 0 ? "+" : ""}
 				{formatCurrency(statement.amount)}
 			</span>
 			{amount === "allocated" ? (
@@ -134,7 +133,7 @@ export function useStatementColumns<TStatement extends StatementRow>({
 				cell: ({ row }) => (
 					<div className="min-w-0">
 						<p className="flex items-center gap-1.5">
-							<span className="truncate font-medium">
+							<span className="min-w-0 truncate font-medium">
 								{row.original.description || "No description"}
 							</span>
 							<StatementBadges
@@ -198,7 +197,7 @@ export function useStatementMobileRow<TStatement extends StatementRow>({
 					{leading?.(statement)}
 					<div className="min-w-0 flex-1">
 						<p className="flex items-center gap-1.5">
-							<span className="truncate font-medium">
+							<span className="min-w-0 truncate font-medium">
 								{statement.description || "No description"}
 							</span>
 							<StatementBadges

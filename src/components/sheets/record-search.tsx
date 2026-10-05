@@ -13,7 +13,7 @@ import {
 	SheetTrigger,
 } from "@/components/ui/sheet"
 import { Skeleton } from "@/components/ui/skeleton"
-import { cn, formatCurrency, parseDatetime } from "@/lib/utils"
+import { classForCurrency, cn, formatCurrency, parseDatetime } from "@/lib/utils"
 import { listRecords } from "@/logic/records"
 import { round2 } from "@/logic/shared"
 import { Record } from "@/types"
@@ -260,7 +260,12 @@ function RecordOption({
 				</span>
 			</span>
 			<span className="grid justify-items-end gap-0.5">
-				<span className="text-sm font-semibold tabular-nums">
+				<span
+					className={cn(
+						"text-sm font-semibold tabular-nums",
+						classForCurrency(record.amount),
+					)}
+				>
 					{formatCurrency(record.amount)}
 				</span>
 				<span className="text-[0.6875rem] text-muted-foreground tabular-nums">

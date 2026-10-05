@@ -5,7 +5,7 @@ import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useHistory } from "@/history"
-import { cn, formatCurrency, parseDatetime } from "@/lib/utils"
+import { classForCurrency, cn, formatCurrency, parseDatetime } from "@/lib/utils"
 import { pathRecord } from "@/routes"
 import type { Allocation, Record } from "@/types"
 
@@ -21,9 +21,9 @@ type RecordTableOptions<TRecord extends RecordRow> = {
 	grouped?: boolean
 }
 
-/** Money in: green. Money out: plain ink, since most rows are spending. */
+/** Money in green, money out red: the app-wide currency colours. */
 export function amountTone(value: number) {
-	return value > 0 ? "text-emerald-700 dark:text-emerald-400" : "text-foreground"
+	return classForCurrency(value)
 }
 
 export function formatRowTime(datetime: string, grouped: boolean) {
@@ -43,7 +43,7 @@ function pendingReason(record: Record) {
 	return "Pending"
 }
 
-function PendingBadge({ record }: { record: Record }) {
+export function PendingBadge({ record }: { record: Record }) {
 	if (!record.is_pending) return null
 	return (
 		<Badge variant="warning" className="shrink-0" title={pendingReason(record)}>
@@ -52,7 +52,7 @@ function PendingBadge({ record }: { record: Record }) {
 	)
 }
 
-function RecordAmountCell({
+export function RecordAmountCell({
 	record,
 	value,
 	showAllocated,
@@ -64,11 +64,10 @@ function RecordAmountCell({
 	return (
 		<span className="grid justify-items-end gap-0.5 text-right">
 			<span className={cn("font-medium tabular-nums", amountTone(value))}>
-				{value > 0 ? "+" : ""}
 				{formatCurrency(value)}
 			</span>
 			{showAllocated && record.allocated_amount !== record.amount ? (
-				<span className="text-[0.6875rem] text-muted-foreground tabular-nums">
+				<span className="hidden text-[0.6875rem] text-muted-foreground tabular-nums sm:block">
 					{formatCurrency(record.allocated_amount)} allocated
 				</span>
 			) : null}
@@ -155,7 +154,9 @@ export function useRecordColumns<TRecord extends RecordRow>({
 						<Icon {...row.original.category} size={14} />
 						<div className="min-w-0 flex-1">
 							<p className="flex items-center gap-1.5">
-								<span className="truncate font-medium">{row.original.title}</span>
+								<span className="min-w-0 truncate font-medium">
+									{row.original.title}
+								</span>
 								<PendingBadge record={row.original} />
 							</p>
 							<p className="truncate text-muted-foreground">
@@ -170,7 +171,10 @@ export function useRecordColumns<TRecord extends RecordRow>({
 				header: "Description",
 				meta: { width: "hidden w-1/4 xl:table-cell" },
 				cell: ({ row }) => (
-					<p className="line-clamp-2 break-words text-muted-foreground">
+					<p
+						className="truncate text-muted-foreground"
+						title={row.original.description ?? undefined}
+					>
 						{row.original.description}
 					</p>
 				),
@@ -235,7 +239,7 @@ export function useRecordMobileRow<TRecord extends RecordRow>({
 					<Icon {...record.category} size={14} />
 					<div className="min-w-0 flex-1">
 						<p className="flex items-center gap-1.5">
-							<span className="truncate font-medium">{record.title}</span>
+							<span className="min-w-0 truncate font-medium">{record.title}</span>
 							<PendingBadge record={record} />
 						</p>
 						<p className="truncate text-xs text-muted-foreground">

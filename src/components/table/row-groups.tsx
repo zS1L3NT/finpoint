@@ -1,5 +1,5 @@
 import { DateTime } from "luxon"
-import { cn, formatCurrency } from "@/lib/utils"
+import { classForCurrency, formatCurrency } from "@/lib/utils"
 
 export type RowGroup<TData> = {
 	key: (row: TData) => string
@@ -50,14 +50,9 @@ export function byDay<TData extends { datetime: string; amount: number }>(): Row
 			return (
 				<div className="flex items-center justify-between gap-3 text-xs">
 					<span className="font-medium text-foreground">{dayLabel(key)}</span>
-					<span
-						className={cn(
-							"tabular-nums text-muted-foreground",
-							net > 0 && "text-emerald-700 dark:text-emerald-400",
-						)}
-					>
-						{rows.length} · {net > 0 ? "+" : ""}
-						{formatCurrency(net)}
+					<span className="tabular-nums text-muted-foreground">
+						{rows.length} ·{" "}
+						<span className={classForCurrency(net)}>{formatCurrency(net)}</span>
 					</span>
 				</div>
 			)
