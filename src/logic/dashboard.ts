@@ -3,7 +3,6 @@
 
 import { DateTime } from "luxon"
 import {
-	type AllocationRow,
 	type AnalyticsMonthRow,
 	type BucketDefaultRow,
 	type BucketRow,
@@ -14,6 +13,12 @@ import {
 } from "@/data/db"
 import { type AnalyticsRecord, contribution, summarize } from "@/logic/analytics"
 import { expandCategoryIdsForMonthly } from "@/logic/monthly-shared"
+import {
+	type AllocationTally,
+	isPendingRecord,
+	pendingStatementIds,
+	tallyAllocations,
+} from "@/logic/pending"
 
 export type DashboardInput = { month: string; year: number; comparison_months?: number }
 
@@ -52,12 +57,12 @@ function toAnalyticsRecords(
 		bucket_id: string | null
 		category_id: string
 	}[],
-	allocatedByRecord: Map<string, { sum: number; count: number }>,
+	allocatedByRecord: Map<string, AllocationTally>,
 	categories: Map<string, CategoryRow>,
 	buckets: Map<string, BucketRow>,
 ): AnalyticsRecord[] {
 	const items: (AnalyticsRecord | null)[] = rows.map(row => {
-		const entry = allocatedByRecord.get(row.id) ?? { sum: 0, count: 0 }
+		const entry = allocatedByRecord.get(row.id)
 		const category = categories.get(row.category_id)
 		if (!category) return null
 		const parent = category.parent_category_id
@@ -70,7 +75,7 @@ function toAnalyticsRecords(
 			datetime: row.datetime,
 			analytics_treatment: row.analytics_treatment,
 			bucket_id: row.bucket_id,
-			is_pending: entry.sum !== row.amount || entry.count === 0,
+			is_pending: isPendingRecord(row.amount, entry),
 			category: {
 				id: category.id,
 				name: category.name,
@@ -96,19 +101,6 @@ function toAnalyticsRecords(
 	return items.filter((r): r is AnalyticsRecord => r !== null)
 }
 
-function summarizeAllocations(
-	allocations: AllocationRow[],
-): Map<string, { sum: number; count: number }> {
-	const map = new Map<string, { sum: number; count: number }>()
-	for (const allocation of allocations) {
-		const entry = map.get(allocation.record_id) ?? { sum: 0, count: 0 }
-		entry.sum = Math.round((entry.sum + allocation.amount) * 100) / 100
-		entry.count++
-		map.set(allocation.record_id, entry)
-	}
-	return map
-}
-
 /** Range check on the "yyyy-MM-dd" prefix; callers format the bounds once, not per record. */
 function inRange(datetime: string, start: string, end: string): boolean {
 	const day = datetime.slice(0, 10)
@@ -119,7 +111,7 @@ const ISO_DAY = "yyyy-MM-dd"
 
 type LoadedTables = {
 	records: RecordRow[]
-	allocated: Map<string, { sum: number; count: number }>
+	allocated: Map<string, AllocationTally>
 	categories: Map<string, CategoryRow>
 	buckets: Map<string, BucketRow>
 	bucketRows: BucketRow[]
@@ -129,7 +121,7 @@ type LoadedTables = {
 }
 
 async function loadDashboardTables(): Promise<LoadedTables> {
-	const [allRecords, allocations, coverages, categories, buckets, targets, defaults] =
+	const [allRecords, allocations, coverages, categories, buckets, targets, defaults, pending] =
 		await Promise.all([
 			db.records.toArray(),
 			db.allocations.toArray(),
@@ -138,11 +130,12 @@ async function loadDashboardTables(): Promise<LoadedTables> {
 			db.buckets.toArray(),
 			db.bucket_targets.toArray(),
 			db.bucket_defaults.toArray(),
+			pendingStatementIds(),
 		])
 
 	return {
 		records: allRecords,
-		allocated: summarizeAllocations(allocations),
+		allocated: tallyAllocations(allocations, pending),
 		categories: new Map(categories.map(c => [c.id, c])),
 		buckets: new Map(buckets.map(b => [b.id, b])),
 		bucketRows: buckets,

@@ -2,6 +2,7 @@
 // `Api\CompletionsController`, and `Record::appQuery`.
 
 import { db } from "@/data/db"
+import { isPendingRecord, pendingStatementIds, tallyAllocations } from "@/logic/pending"
 import { inputToStored, newId, round2 } from "@/logic/shared"
 import { ValidationError, Validator } from "@/logic/validate"
 import type { Allocation, AnalyticsTreatment, Record as AppRecord, Statement } from "@/types"
@@ -60,23 +61,17 @@ export async function enrichRecords(
 ) {
 	const categories = new Map((await db.categories.toArray()).map(c => [c.id, c]))
 	const buckets = new Map((await db.buckets.toArray()).map(b => [b.id, b]))
-	const allocations = await db.allocations.toArray()
-	const byRecord = new Map<string, { sum: number; count: number }>()
-	for (const allocation of allocations) {
-		const entry = byRecord.get(allocation.record_id) ?? { sum: 0, count: 0 }
-		entry.sum = round2(entry.sum + allocation.amount)
-		entry.count++
-		byRecord.set(allocation.record_id, entry)
-	}
+	const byRecord = tallyAllocations(await db.allocations.toArray(), await pendingStatementIds())
 	return rows.map(row => {
-		const entry = byRecord.get(row.id) ?? { sum: 0, count: 0 }
-		const allocated_amount = entry.sum
+		const entry = byRecord.get(row.id)
+		const allocated_amount = entry?.sum ?? 0
 		const category = categories.get(row.category_id)
 		return {
 			...row,
 			allocated_amount,
-			statement_count: entry.count,
-			is_pending: allocated_amount !== row.amount || entry.count === 0,
+			statement_count: entry?.count ?? 0,
+			pending_statement_count: entry?.pending ?? 0,
+			is_pending: isPendingRecord(row.amount, entry),
 			subtitle: subtitle(row.people, row.location),
 			category: category
 				? {
@@ -178,9 +173,9 @@ export async function listRecords(filters: RecordFilters = {}) {
 
 	const allocation = filters.is_allocated
 	if (allocation === "1" || allocation === "true") {
-		enriched = enriched.filter(r => r.allocated_amount === r.amount && r.statement_count > 0)
+		enriched = enriched.filter(r => !r.is_pending)
 	} else if (allocation === "0" || allocation === "false") {
-		enriched = enriched.filter(r => !(r.allocated_amount === r.amount && r.statement_count > 0))
+		enriched = enriched.filter(r => r.is_pending)
 	}
 
 	enriched.sort(
