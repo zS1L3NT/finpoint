@@ -287,6 +287,7 @@ export default function AllocatorPage() {
 				<RecordSearchSheet
 					title="Attach to pending record"
 					placeholder="Search pending records..."
+					target={selectedAmount}
 					filters={{
 						start_date: defaultFilterStartDate ?? undefined,
 						end_date: defaultFilterEndDateToday

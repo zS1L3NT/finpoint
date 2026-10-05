@@ -1,13 +1,9 @@
 import { useLiveQuery } from "dexie-react-hooks"
-import { useEffect, useState } from "react"
-import AllocateBar from "@/components/allocate-bar"
+import { useDeferredValue, useEffect, useState } from "react"
 import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
-import DataTable from "@/components/table/data-table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Field, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import {
 	Sheet,
 	SheetContent,
@@ -16,20 +12,19 @@ import {
 	SheetTitle,
 	SheetTrigger,
 } from "@/components/ui/sheet"
-import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
-import { formatDatetime } from "@/lib/utils"
+import { Skeleton } from "@/components/ui/skeleton"
+import { cn, formatCurrency, parseDatetime } from "@/lib/utils"
 import { listRecords } from "@/logic/records"
+import { round2 } from "@/logic/shared"
 import { Record } from "@/types"
 
-const ATTACHMENT_TABLE_WIDTHS = {
-	AMOUNT_BAR: "w-56",
-	ACTIONS: "w-24",
-}
+const PAGE = 40
 
 export default function RecordSearchSheet({
 	title,
 	placeholder,
 	filters,
+	target,
 	isOpen,
 	setIsOpen,
 	handler,
@@ -38,198 +33,248 @@ export default function RecordSearchSheet({
 	title: string
 	placeholder?: string
 	filters?: globalThis.Record<string, string | undefined>
+	/** Amount being attached; Records whose remaining amount equals it are surfaced first. */
+	target?: number
 	isOpen: boolean
 	setIsOpen: (isOpen: boolean) => void
 	handler: (record: Record) => Promise<void>
 	trigger?: React.ReactNode
 }) {
 	const [query, setQuery] = useState("")
+	// Typing stays responsive; the list catches up at lower priority.
+	const deferredQuery = useDeferredValue(query)
 	const [includeOlder, setIncludeOlder] = useState(false)
-	const records =
-		useLiveQuery(() => {
-			if (!isOpen) return []
-			return listRecords({
-				query: query || null,
-				exclude_budget_id: filters?.exclude_budget_id ?? null,
-				start_date: includeOlder ? null : (filters?.start_date ?? null),
-				end_date: filters?.end_date ?? null,
-				is_allocated: filters?.is_allocated ?? null,
-			})
-		}, [
-			isOpen,
-			query,
-			includeOlder,
-			filters?.exclude_budget_id,
-			filters?.start_date,
-			filters?.end_date,
-			filters?.is_allocated,
-		]) ?? []
+	const [limit, setLimit] = useState(PAGE)
+	const [attachingId, setAttachingId] = useState<string | null>(null)
+	const records = useLiveQuery(() => {
+		if (!isOpen) return []
+		return listRecords({
+			query: deferredQuery || null,
+			exclude_budget_id: filters?.exclude_budget_id ?? null,
+			start_date: includeOlder ? null : (filters?.start_date ?? null),
+			end_date: filters?.end_date ?? null,
+			is_allocated: filters?.is_allocated ?? null,
+		})
+	}, [
+		isOpen,
+		deferredQuery,
+		includeOlder,
+		filters?.exclude_budget_id,
+		filters?.start_date,
+		filters?.end_date,
+		filters?.is_allocated,
+	])
 
 	useEffect(() => {
 		if (!isOpen) {
 			setQuery("")
 			setIncludeOlder(false)
+			setLimit(PAGE)
+			setAttachingId(null)
 		}
 	}, [isOpen])
+
+	const remainingOf = (record: Record) => round2(record.amount - record.allocated_amount)
+	const isMatch = (record: Record) =>
+		target !== undefined && target !== 0 && remainingOf(record) === round2(target)
+	const sorted = records
+		? target === undefined
+			? records
+			: [...records.filter(isMatch), ...records.filter(record => !isMatch(record))]
+		: undefined
+	const visible = sorted?.slice(0, limit) ?? []
+	const matches = sorted?.filter(isMatch).length ?? 0
 
 	return (
 		<Sheet open={isOpen} onOpenChange={setIsOpen}>
 			{trigger && <SheetTrigger asChild>{trigger}</SheetTrigger>}
-			<SheetContent
-				side="right"
-				className="md:data-[side=right]:w-full md:data-[side=right]:max-w-4xl"
-			>
-				<SheetHeader className="gap-2 border-b">
-					<SheetTitle>{title}</SheetTitle>
+			<SheetContent side="right" className="gap-0 md:data-[side=right]:max-w-xl">
+				<SheetHeader className="gap-1 border-b p-4 pr-12 md:px-6">
+					<SheetTitle className="text-base">{title}</SheetTitle>
 					<SheetDescription>
-						Choose a record to attach. Allocation progress is shown for context.
+						{target !== undefined ? (
+							<>
+								Attaching{" "}
+								<span className="font-medium text-foreground tabular-nums">
+									{formatCurrency(target)}
+								</span>
+								{matches
+									? ` · ${matches} Record${matches === 1 ? "" : "s"} need exactly this`
+									: ". Select the Record it belongs to."}
+							</>
+						) : (
+							"Select the Record to attach."
+						)}
 					</SheetDescription>
 				</SheetHeader>
 
-				<div className="flex flex-1 flex-col gap-4 overflow-y-hidden p-4 md:p-6">
-					<Field>
-						<FieldLabel htmlFor="record-search-query">Search records</FieldLabel>
-						<div className="flex flex-col gap-2 sm:flex-row">
-							<Input
-								id="record-search-query"
-								type="search"
-								placeholder={
-									placeholder ?? "Search title, people, location, description..."
-								}
-								value={query}
-								onChange={event => setQuery(event.target.value)}
-							/>
-							{filters?.start_date ? (
+				<div className="flex items-center gap-2 border-b px-4 py-3 md:px-6">
+					<div className="relative flex-1">
+						<IconifyIcon
+							icon="lucide:search"
+							className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground"
+						/>
+						<Input
+							type="search"
+							autoFocus
+							aria-label="Search records"
+							placeholder={placeholder ?? "Search title, people, location..."}
+							className="pl-8"
+							value={query}
+							onChange={event => {
+								setQuery(event.target.value)
+								setLimit(PAGE)
+							}}
+						/>
+					</div>
+					{filters?.start_date ? (
+						<Button
+							type="button"
+							variant={includeOlder ? "secondary" : "outline"}
+							aria-pressed={includeOlder}
+							onClick={() => setIncludeOlder(value => !value)}
+						>
+							<IconifyIcon icon="lucide:history" data-icon="inline-start" />
+							<span className="hidden sm:inline">Include older</span>
+							<span className="sm:hidden">Older</span>
+						</Button>
+					) : null}
+				</div>
+
+				<div
+					className={cn(
+						"flex-1 overflow-y-auto overscroll-contain",
+						deferredQuery !== query && "opacity-70 transition-opacity",
+					)}
+				>
+					{sorted === undefined ? (
+						<div className="grid gap-px p-2">
+							{Array.from({ length: 6 }).map((_, index) => (
+								<Skeleton key={index} className="h-16 w-full" />
+							))}
+						</div>
+					) : visible.length === 0 ? (
+						<div className="grid place-items-center gap-2 px-6 py-16 text-center text-sm text-muted-foreground">
+							<IconifyIcon icon="lucide:search-x" className="size-6" />
+							No matching Records.
+							{filters?.start_date && !includeOlder ? (
 								<Button
-									type="button"
-									variant={includeOlder ? "secondary" : "outline"}
-									aria-pressed={includeOlder}
-									className="sm:shrink-0"
-									onClick={() => setIncludeOlder(value => !value)}
+									variant="link"
+									size="sm"
+									onClick={() => setIncludeOlder(true)}
 								>
-									<IconifyIcon icon="lucide:history" data-icon="inline-start" />
-									Include older
+									Search older Records too
 								</Button>
 							) : null}
 						</div>
-					</Field>
-
-					<ScrollArea className="flex-1 overflow-y-hidden">
-						<DataTable
-							data={records}
-							columns={[
-								{
-									header: "Record",
-									cell: ({ row }) => (
-										<div className="flex items-start gap-3">
-											<Icon {...row.original.category} size={18} />
-											<div className="min-w-0 flex-1">
-												<p className="font-medium break-words">
-													{row.original.is_pending ? (
-														<Badge variant="warning" className="mr-1">
-															Pending
-														</Badge>
-													) : null}
-													{row.original.title}
-												</p>
-												<p className="text-muted-foreground break-words">
-													{row.original.category.name}
-													{row.original.subtitle
-														? ` · ${row.original.subtitle}`
-														: ""}
-												</p>
-											</div>
-										</div>
-									),
-								},
-								{
-									header: "Date & Time",
-									meta: { width: TABLE_WIDTH_CLASSNAMES.DATETIME },
-									cell: ({ row }) => (
-										<span className="text-muted-foreground">
-											{formatDatetime(row.original.datetime)}
-										</span>
-									),
-								},
-								{
-									header: "Allocation",
-									meta: { width: ATTACHMENT_TABLE_WIDTHS.AMOUNT_BAR },
-									cell: ({ row }) => (
-										<AllocateBar
-											title="Allocated"
-											value={row.original.allocated_amount}
-											total={row.original.amount}
-										/>
-									),
-								},
-								{
-									id: "actions",
-									meta: { width: ATTACHMENT_TABLE_WIDTHS.ACTIONS },
-									cell: ({ row }) => (
-										<Button
-											size="sm"
-											onClick={async () => {
-												await handler(row.original)
-											}}
-										>
-											<IconifyIcon
-												icon="lucide:link-2"
-												data-icon="inline-start"
-											/>
-											Attach
-										</Button>
-									),
-								},
-							]}
-							mobileRow={({ original: record }) => (
-								<div className="flex flex-col gap-3">
-									<div className="flex items-start gap-3">
-										<Icon {...record.category} size={20} />
-										<div className="min-w-0 flex-1">
-											<p className="font-medium break-words">
-												{record.is_pending ? (
-													<Badge variant="warning" className="mr-1">
-														Pending
-													</Badge>
-												) : null}
-												{record.title}
-											</p>
-											<p className="text-xs text-muted-foreground">
-												{record.category.name} ·{" "}
-												{formatDatetime(record.datetime)}
-											</p>
-										</div>
-									</div>
-									{record.description ? (
-										<p className="line-clamp-2 text-xs text-muted-foreground break-words">
-											{record.description}
-										</p>
-									) : null}
-									<AllocateBar
-										title="Allocated"
-										value={record.allocated_amount}
-										total={record.amount}
-									/>
-									<Button
-										size="sm"
-										className="w-full"
-										onClick={async () => {
-											await handler(record)
+					) : (
+						<ul className="grid gap-px p-2">
+							{visible.map(record => (
+								<li key={record.id}>
+									<RecordOption
+										record={record}
+										remaining={remainingOf(record)}
+										match={isMatch(record)}
+										busy={attachingId === record.id}
+										disabled={attachingId !== null}
+										onSelect={async () => {
+											setAttachingId(record.id)
+											try {
+												await handler(record)
+											} finally {
+												setAttachingId(null)
+											}
 										}}
+									/>
+								</li>
+							))}
+							{sorted.length > visible.length ? (
+								<li className="p-2">
+									<Button
+										variant="ghost"
+										className="w-full"
+										onClick={() => setLimit(value => value + PAGE)}
 									>
-										<IconifyIcon
-											icon="lucide:link-2"
-											data-icon="inline-start"
-										/>
-										Attach record
+										Show more ({sorted.length - visible.length} left)
 									</Button>
-								</div>
-							)}
-							emptyMessage="No matching records found."
-						/>
-					</ScrollArea>
+								</li>
+							) : null}
+						</ul>
+					)}
 				</div>
 			</SheetContent>
 		</Sheet>
+	)
+}
+
+function RecordOption({
+	record,
+	remaining,
+	match,
+	busy,
+	disabled,
+	onSelect,
+}: {
+	record: Record
+	remaining: number
+	match: boolean
+	busy: boolean
+	disabled: boolean
+	onSelect: () => void
+}) {
+	const progress =
+		record.amount === 0 ? 0 : Math.min(Math.abs(record.allocated_amount / record.amount), 1)
+	const date = parseDatetime(record.datetime)
+	return (
+		<button
+			type="button"
+			disabled={disabled}
+			onClick={onSelect}
+			className={cn(
+				"group grid w-full cursor-pointer grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-muted focus-visible:bg-muted focus-visible:outline-none disabled:cursor-default",
+				match && "bg-emerald-500/5 ring-1 ring-emerald-500/30 ring-inset",
+				disabled && !busy && "opacity-60",
+			)}
+		>
+			<Icon icon={record.category.icon} color={record.category.color} size={16} />
+			<span className="min-w-0">
+				<span className="flex items-center gap-1.5">
+					<span className="truncate text-sm font-medium">{record.title}</span>
+					{match ? (
+						<Badge className="shrink-0 bg-emerald-500/15 text-emerald-700 dark:text-emerald-400">
+							Exact match
+						</Badge>
+					) : null}
+				</span>
+				<span className="block truncate text-xs text-muted-foreground">
+					{date.isValid ? date.toFormat("d MMM yyyy") : record.datetime}
+					{" · "}
+					{record.category.name}
+					{record.subtitle ? ` · ${record.subtitle}` : ""}
+				</span>
+				<span className="mt-1.5 block h-1 w-full overflow-hidden rounded-full bg-muted group-hover:bg-background">
+					<span
+						className="block h-full rounded-full bg-foreground/50"
+						style={{ width: `${progress * 100}%` }}
+					/>
+				</span>
+			</span>
+			<span className="grid justify-items-end gap-0.5">
+				<span className="text-sm font-semibold tabular-nums">
+					{formatCurrency(record.amount)}
+				</span>
+				<span className="text-[0.6875rem] text-muted-foreground tabular-nums">
+					{busy ? (
+						<IconifyIcon icon="lucide:loader-circle" className="size-3 animate-spin" />
+					) : remaining !== 0 ? (
+						`${formatCurrency(Math.abs(remaining))} left`
+					) : record.pending_statement_count ? (
+						"Awaiting bank statement"
+					) : (
+						"Fully allocated"
+					)}
+				</span>
+			</span>
+		</button>
 	)
 }
