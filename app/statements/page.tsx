@@ -11,6 +11,7 @@ import PageHeader from "@/components/layout/page-header"
 import AmountFilter from "@/components/table/amount-filter"
 import { ClearFiltersButton, FILTER_CONTROL_CLASS, FilterBar } from "@/components/table/filter-bar"
 import PaginatedDataTable from "@/components/table/paginated-data-table"
+import { byDay } from "@/components/table/row-groups"
 import { useStatementColumns, useStatementMobileRow } from "@/components/table/statement-columns"
 import { Button } from "@/components/ui/button"
 import {
@@ -21,11 +22,13 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select"
+import { useOpenRow } from "@/hooks/use-open-row"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { cn } from "@/lib/utils"
 import { listAccounts } from "@/logic/accounts"
 import { paginateItems, parsePage, parsePageSize } from "@/logic/pagination"
 import { listStatements } from "@/logic/statements"
+import { pathStatement } from "@/routes"
 import type { Statement } from "@/types"
 
 export default function StatementsPage() {
@@ -85,11 +88,14 @@ export default function StatementsPage() {
 	const columns = useStatementColumns<Statement>({
 		pageName: "Statements",
 		onEdit: setEditingStatement,
+		grouped: true,
 	})
 	const mobileRow = useStatementMobileRow<Statement>({
 		pageName: "Statements",
 		onEdit: setEditingStatement,
+		grouped: true,
 	})
+	const openStatement = useOpenRow<Statement>(pathStatement, "Statements")
 
 	return (
 		<>
@@ -203,6 +209,8 @@ export default function StatementsPage() {
 						summary: `Showing ${paginated.data.length} of ${paginated.total} statements.`,
 					}}
 					mobileRow={mobileRow}
+					groupBy={byDay<Statement>()}
+					onRowClick={openStatement}
 					emptyMessage="No statements found."
 					loading={statementsQuery === undefined}
 				/>

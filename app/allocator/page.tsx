@@ -17,6 +17,7 @@ import RecordSearchSheet from "@/components/sheets/record-search"
 import AmountFilter from "@/components/table/amount-filter"
 import { ClearFiltersButton, FILTER_CONTROL_CLASS, FilterBar } from "@/components/table/filter-bar"
 import PaginatedDataTable from "@/components/table/paginated-data-table"
+import { byDay } from "@/components/table/row-groups"
 import { useStatementColumns, useStatementMobileRow } from "@/components/table/statement-columns"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -120,10 +121,18 @@ export default function AllocatorPage() {
 	const statementColumns = useStatementColumns<Statement>({
 		amount: "allocable",
 		pageName: "Allocator",
+		grouped: true,
 	})
+	const toggleStatement = (statement: Statement) =>
+		setSelectedStatements(prev =>
+			prev.some(s => s.id === statement.id)
+				? prev.filter(s => s.id !== statement.id)
+				: [...prev, statement],
+		)
 	const statementMobileRow = useStatementMobileRow<Statement>({
 		amount: "allocable",
 		pageName: "Allocator",
+		grouped: true,
 		leading: statement => (
 			<Checkbox
 				checked={!!selectedStatements.find(s => s.id === statement.id)}
@@ -263,6 +272,8 @@ export default function AllocatorPage() {
 					}}
 					selectedIds={selectedStatements.map(s => s.id)}
 					mobileRow={statementMobileRow}
+					groupBy={byDay<Statement>()}
+					onRowClick={toggleStatement}
 					emptyMessage="No statements found."
 					loading={statementsQuery === undefined}
 				/>

@@ -21,12 +21,12 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card"
+import { useOpenRow } from "@/hooks/use-open-row"
 import { useRecordEditor } from "@/hooks/use-record-editor"
-import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
 import { cn, formatCurrency, parseDate, parseDatetime, round2dp } from "@/lib/utils"
 import { attachBudgetRecord, detachBudgetRecord, getBudget } from "@/logic/budgets"
 import { listCategories } from "@/logic/categories"
-import { pathBudgets } from "@/routes"
+import { pathBudgets, pathRecord } from "@/routes"
 import type { Budget, CategoryWithChildren, Record } from "@/types"
 
 export default function BudgetPage({ params }: { params: Promise<{ id: string }> }) {
@@ -76,20 +76,34 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 
 	const recordColumns = useRecordColumns<Record>({
 		pageName: `Budget ${budget?.id ?? ""}`,
-		actionWidth: TABLE_WIDTH_CLASSNAMES.ACTIONS_OPEN_DETACH,
 		onEdit: handleEdit,
 		extraActions: record => (
-			<Button variant="destructive" size="sm" onClick={() => detach(record)}>
-				<IconifyIcon icon="lucide:link-2-off" /> Detach
+			<Button
+				variant="ghost"
+				size="icon-sm"
+				title="Detach from budget"
+				aria-label={`Detach ${record.title}`}
+				className="text-destructive hover:text-destructive"
+				onClick={() => detach(record)}
+			>
+				<IconifyIcon icon="lucide:link-2-off" />
 			</Button>
 		),
 	})
+	const openRecord = useOpenRow<Record>(pathRecord, `Budget ${budget?.id ?? ""}`)
 	const recordMobileRow = useRecordMobileRow<Record>({
 		pageName: `Budget ${budget?.id ?? ""}`,
 		onEdit: handleEdit,
 		extraActions: record => (
-			<Button variant="destructive" size="sm" onClick={() => detach(record)}>
-				<IconifyIcon icon="lucide:link-2-off" /> Detach
+			<Button
+				variant="ghost"
+				size="icon-sm"
+				title="Detach from budget"
+				aria-label={`Detach ${record.title}`}
+				className="text-destructive hover:text-destructive"
+				onClick={() => detach(record)}
+			>
+				<IconifyIcon icon="lucide:link-2-off" />
 			</Button>
 		),
 	})
@@ -283,6 +297,7 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 							data={records}
 							columns={recordColumns}
 							mobileRow={recordMobileRow}
+							onRowClick={openRecord}
 							emptyMessage="No records found."
 						/>
 					</CardContent>

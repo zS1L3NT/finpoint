@@ -15,12 +15,13 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useFetch } from "@/hooks/use-fetch"
+import { useOpenRow } from "@/hooks/use-open-row"
 import { treatmentLabel } from "@/lib/analytics"
 import { formatDatetime } from "@/lib/utils"
 import { listAccounts } from "@/logic/accounts"
 import { listCategories } from "@/logic/categories"
 import { getRecord } from "@/logic/records"
-import { pathRecords } from "@/routes"
+import { pathRecords, pathStatement } from "@/routes"
 import type { Allocation, Statement } from "@/types"
 
 export default function RecordPage({ params }: { params: Promise<{ id: string }> }) {
@@ -36,6 +37,7 @@ export default function RecordPage({ params }: { params: Promise<{ id: string }>
 		pageName: `Record ${data?.id ?? ""}`,
 		onEdit: setEditingStatement,
 	})
+	const openStatement = useOpenRow<Statement>(pathStatement, `Record ${data?.id ?? ""}`)
 	const mobileRow = useStatementMobileRow<Statement & { pivot: Allocation }>({
 		amount: "allocated",
 		pageName: `Record ${data?.id ?? ""}`,
@@ -141,6 +143,7 @@ export default function RecordPage({ params }: { params: Promise<{ id: string }>
 							data={typedStatements}
 							columns={columns}
 							mobileRow={mobileRow}
+							onRowClick={openStatement}
 							emptyMessage="No statements found."
 						/>
 					</CardContent>

@@ -9,13 +9,15 @@ import { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import PaginatedDataTable from "@/components/table/paginated-data-table"
+import { byDay } from "@/components/table/row-groups"
 import { useStatementColumns, useStatementMobileRow } from "@/components/table/statement-columns"
 import { Button } from "@/components/ui/button"
+import { useOpenRow } from "@/hooks/use-open-row"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { getAccount, listAccounts } from "@/logic/accounts"
 import { paginateItems, parsePage, parsePageSize } from "@/logic/pagination"
 import { listStatements } from "@/logic/statements"
-import { pathAccounts } from "@/routes"
+import { pathAccounts, pathStatement } from "@/routes"
 import type { Statement } from "@/types"
 
 export default function AccountPage({ params }: { params: Promise<{ id: string }> }) {
@@ -37,12 +39,15 @@ export default function AccountPage({ params }: { params: Promise<{ id: string }
 		showAccount: false,
 		pageName: `Account ${account?.name ?? ""}`,
 		onEdit: setEditingStatement,
+		grouped: true,
 	})
 	const mobileRow = useStatementMobileRow<Statement>({
 		showAccount: false,
 		pageName: `Account ${account?.name ?? ""}`,
 		onEdit: setEditingStatement,
+		grouped: true,
 	})
+	const openStatement = useOpenRow<Statement>(pathStatement, `Account ${account?.name ?? ""}`)
 
 	if (!account) {
 		return (
@@ -96,6 +101,8 @@ export default function AccountPage({ params }: { params: Promise<{ id: string }
 						summary: `Showing ${paginated.data.length} of ${paginated.total} statements.`,
 					}}
 					mobileRow={mobileRow}
+					groupBy={byDay<Statement>()}
+					onRowClick={openStatement}
 					emptyMessage="No statements found."
 				/>
 			</PageContent>
