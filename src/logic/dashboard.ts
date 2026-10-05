@@ -109,10 +109,13 @@ function summarizeAllocations(
 	return map
 }
 
-function inMonth(datetime: string, start: DateTime, end: DateTime): boolean {
+/** Range check on the "yyyy-MM-dd" prefix; callers format the bounds once, not per record. */
+function inRange(datetime: string, start: string, end: string): boolean {
 	const day = datetime.slice(0, 10)
-	return day >= start.toFormat("yyyy-MM-dd") && day <= end.toFormat("yyyy-MM-dd")
+	return day >= start && day <= end
 }
+
+const ISO_DAY = "yyyy-MM-dd"
 
 type LoadedTables = {
 	records: RecordRow[]
@@ -178,8 +181,10 @@ function comparisonSummaries(
 			? Math.min(today.day ?? 1, month.daysInMonth ?? 28)
 			: (month.daysInMonth ?? 28)
 		const end = month.set({ day: endDay }).endOf("day")
+		const startKey = month.toFormat(ISO_DAY)
+		const endKey = end.toFormat(ISO_DAY)
 		const rows = tables.records.filter(
-			r => inMonth(r.datetime, month, end) && inScope(r.bucket_id, scopeIds),
+			r => inRange(r.datetime, startKey, endKey) && inScope(r.bucket_id, scopeIds),
 		)
 		const items = toAnalyticsRecords(rows, tables.allocated, tables.categories, tables.buckets)
 		const excluded =
@@ -265,7 +270,7 @@ function buildSpendingHistory(
 	]
 }
 
-export async function getDashboard(input: DashboardInput) {
+export async function getDashboard(input: DashboardInput, preloaded?: LoadedTables) {
 	const comparisonMonthCount = normalizeComparisonMonths(input.comparison_months)
 	const date = monthStart(input.month, input.year)
 	const today = DateTime.now().startOf("day")
@@ -273,11 +278,14 @@ export async function getDashboard(input: DashboardInput) {
 	const isFuture = date.startOf("month") > today.startOf("month")
 	const actualEnd = isCurrent ? today.endOf("day") : date.endOf("month")
 
-	const tables = await loadDashboardTables()
+	const tables = preloaded ?? (await loadDashboardTables())
+	const actualEndKey = actualEnd.toFormat(ISO_DAY)
 
 	const monthStartDay = date.startOf("month")
 	const monthEndDay = date.endOf("month")
-	const monthRecords = tables.records.filter(r => inMonth(r.datetime, monthStartDay, monthEndDay))
+	const monthStartKey = monthStartDay.toFormat(ISO_DAY)
+	const monthEndKey = monthEndDay.toFormat(ISO_DAY)
+	const monthRecords = tables.records.filter(r => inRange(r.datetime, monthStartKey, monthEndKey))
 	const analyticsAll = toAnalyticsRecords(
 		monthRecords,
 		tables.allocated,
@@ -287,8 +295,9 @@ export async function getDashboard(input: DashboardInput) {
 
 	const actualRecords = isFuture
 		? []
-		: analyticsAll.filter(r => DateTime.fromFormat(r.datetime, "yyyy-MM-dd HH:mm") <= actualEnd)
-	const futureRecords = analyticsAll.filter(r => !actualRecords.includes(r))
+		: analyticsAll.filter(r => r.datetime.slice(0, 10) <= actualEndKey)
+	const actualIds = new Set(actualRecords.map(r => r.id))
+	const futureRecords = analyticsAll.filter(r => !actualIds.has(r.id))
 
 	const summary = summarize(actualRecords)
 	const futureSummary = summarize(futureRecords)
@@ -371,6 +380,7 @@ export async function getPaceView(
 	year: number,
 	scope: string,
 	comparisonMonths = 3,
+	preloaded?: LoadedTables,
 ) {
 	comparisonMonths = normalizeComparisonMonths(comparisonMonths)
 	const date = monthStart(month, year)
@@ -379,13 +389,14 @@ export async function getPaceView(
 	const isFuture = date.startOf("month") > today.startOf("month")
 	const actualEnd = isCurrent ? today.endOf("day") : date.endOf("month")
 
-	const tables = await loadDashboardTables()
+	const tables = preloaded ?? (await loadDashboardTables())
 	const scopeIds = scopeBucketIds(scope, tables.bucketRows)
+	const monthStartKey = date.startOf("month").toFormat(ISO_DAY)
+	const monthEndKey = date.endOf("month").toFormat(ISO_DAY)
+	const actualEndKey = actualEnd.toFormat(ISO_DAY)
 
 	const monthRecords = tables.records.filter(
-		r =>
-			inMonth(r.datetime, date.startOf("month"), date.endOf("month")) &&
-			inScope(r.bucket_id, scopeIds),
+		r => inRange(r.datetime, monthStartKey, monthEndKey) && inScope(r.bucket_id, scopeIds),
 	)
 	const analyticsAll = toAnalyticsRecords(
 		monthRecords,
@@ -396,8 +407,9 @@ export async function getPaceView(
 
 	const actualRecords = isFuture
 		? []
-		: analyticsAll.filter(r => DateTime.fromFormat(r.datetime, "yyyy-MM-dd HH:mm") <= actualEnd)
-	const futureRecords = analyticsAll.filter(r => !actualRecords.includes(r))
+		: analyticsAll.filter(r => r.datetime.slice(0, 10) <= actualEndKey)
+	const actualIds = new Set(actualRecords.map(r => r.id))
+	const futureRecords = analyticsAll.filter(r => !actualIds.has(r.id))
 
 	const summary = summarize(actualRecords)
 	const futureSummary = summarize(futureRecords)
@@ -474,6 +486,7 @@ export async function getPaceView(
 export async function getBucketDaily(
 	month: string,
 	year: number,
+	preloaded?: LoadedTables,
 ): Promise<{
 	rows: Record<string, number | null>[]
 	buckets: { id: string; name: string; color: string }[]
@@ -485,13 +498,14 @@ export async function getBucketDaily(
 	const daysInMonth = date.daysInMonth ?? 30
 	const elapsed = isFuture ? 0 : isCurrent ? (today.day ?? daysInMonth) : daysInMonth
 
-	const tables = await loadDashboardTables()
+	const tables = preloaded ?? (await loadDashboardTables())
+	const monthKey = date.toFormat("yyyy-MM")
 	const active = tables.bucketRows.filter(b => !b.archived)
 	const spent = new Map<string, number>()
 	const unbucketed = new Map<number, number>()
 	for (const record of tables.records) {
 		const day = Number(record.datetime.slice(8, 10))
-		if (record.datetime.slice(0, 7) !== date.toFormat("yyyy-MM") || day > elapsed) continue
+		if (record.datetime.slice(0, 7) !== monthKey || day > elapsed) continue
 		const outflow =
 			record.analytics_treatment === "spending" ||
 			(record.analytics_treatment === "automatic" && record.amount < 0)
@@ -848,3 +862,76 @@ function buildCategories(
 }
 
 export { expandCategoryIdsForMonthly }
+
+export type TrendMonth = {
+	key: string
+	label: string
+	income: number
+	spending: number
+	surplus: number
+	current: boolean
+	partial: boolean
+}
+
+/** Income vs spending for the trailing `count` months ending at the selected month. */
+function buildTrend(date: DateTime, today: DateTime, tables: LoadedTables, count = 12) {
+	const byMonth = new Map<string, RecordRow[]>()
+	for (const record of tables.records) {
+		const key = record.datetime.slice(0, 7)
+		const list = byMonth.get(key)
+		if (list) list.push(record)
+		else byMonth.set(key, [record])
+	}
+	const todayKey = today.toFormat(ISO_DAY)
+	const months: TrendMonth[] = []
+	for (let offset = count - 1; offset >= 0; offset--) {
+		const month = date.minus({ months: offset }).startOf("month")
+		if (month > today) continue
+		const key = month.toFormat("yyyy-MM")
+		const partial = month.hasSame(today, "month")
+		const rows = (byMonth.get(key) ?? []).filter(
+			r => !partial || r.datetime.slice(0, 10) <= todayKey,
+		)
+		const summary = summarize(
+			toAnalyticsRecords(rows, tables.allocated, tables.categories, tables.buckets),
+		)
+		months.push({
+			key,
+			label: month.toFormat("MMM yy"),
+			income: summary.income,
+			spending: summary.spending,
+			surplus: summary.surplus,
+			current: month.hasSame(date, "month"),
+			partial,
+		})
+	}
+	// Months before the first Record are not "zero" months, just untracked.
+	const first = months.findIndex(month => byMonth.has(month.key))
+	return first === -1 ? [] : months.slice(first)
+}
+
+/**
+ * Everything the Overview tab renders, read from one table load. The page used
+ * to run three live queries that each scanned every table on every change.
+ */
+export async function getDashboardView(input: DashboardInput) {
+	const tables = await loadDashboardTables()
+	const dashboard = await getDashboard(input, tables)
+	const dailyBucket =
+		dashboard.buckets.find(bucket => bucket.pace_kind === "daily") ??
+		dashboard.buckets.find(bucket => bucket.name.toLowerCase() === "daily") ??
+		null
+	const [pace, bucketDaily] = await Promise.all([
+		getPaceView(
+			input.month,
+			input.year,
+			dailyBucket?.id ?? "all",
+			dashboard.comparison_months,
+			tables,
+		),
+		getBucketDaily(input.month, input.year, tables),
+	])
+	const date = monthStart(input.month, input.year)
+	const trend = buildTrend(date, DateTime.now().startOf("day"), tables)
+	return { dashboard, pace, bucketDaily, dailyBucketId: dailyBucket?.id ?? null, trend }
+}

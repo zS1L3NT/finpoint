@@ -3,11 +3,16 @@
 import { useLiveQuery } from "dexie-react-hooks"
 import { DateTime } from "luxon"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { type ReactNode, useMemo } from "react"
 import CashflowChart, { CashflowPoint } from "@/components/charts/cashflow-chart"
 import CategoryHistoryChart from "@/components/charts/category-history-chart"
+import CategoryMovers from "@/components/charts/category-movers"
 import DailySpendingChart from "@/components/charts/daily-spending-chart"
+import Sparkline from "@/components/charts/sparkline"
+import SpendingCalendar from "@/components/charts/spending-calendar"
 import TotalSpendingChart from "@/components/charts/total-spending-chart"
+import TrendChart from "@/components/charts/trend-chart"
 import WeekdayBars from "@/components/charts/weekday-bars"
 import BucketDialog from "@/components/dialogs/bucket"
 import { UiIcon as IconifyIcon } from "@/components/icon"
@@ -32,13 +37,8 @@ import { usePersistentState } from "@/hooks/use-persistent-state"
 import { useSettings } from "@/hooks/use-settings"
 import { armTabTransition, useTabTransition } from "@/hooks/use-tab-transition"
 import { cn, formatCurrency } from "@/lib/utils"
-import {
-	getBucketDaily,
-	getDashboard,
-	getPaceView,
-	type SpendingHistoryMonth,
-} from "@/logic/dashboard"
-import { pathMonthlyRecords } from "@/routes"
+import { getDashboardView, type SpendingHistoryMonth, type TrendMonth } from "@/logic/dashboard"
+import { pathDashboard, pathMonthlyRecords } from "@/routes"
 import { AnalyticsSummary, Bucket } from "@/types"
 
 type DashboardBucket = Bucket & {
@@ -133,11 +133,15 @@ export default function DashboardPage() {
 	const { month, year } = useMonthParams()
 	const animateContent = useTabTransition()
 	const settings = useSettings()
+	const router = useRouter()
 	const comparisonMonths = settings?.dashboard_comparison_months ?? 3
-	const data = useLiveQuery(
-		() => getDashboard({ month, year, comparison_months: comparisonMonths }),
+	// One live query, one table load: the three separate queries this replaced
+	// each re-scanned every table whenever anything changed.
+	const view = useLiveQuery(
+		() => getDashboardView({ month, year, comparison_months: comparisonMonths }),
 		[month, year, comparisonMonths],
-	) as unknown as DashboardData | undefined
+	)
+	const data = view?.dashboard as unknown as DashboardData | undefined
 	const buckets = data?.buckets ?? []
 	const categories = data?.categories ?? []
 	const [storedScope, setScope] = usePersistentState("finpoint.dashboard.scope", "all")
@@ -154,15 +158,9 @@ export default function DashboardPage() {
 		buckets.find(bucket => bucket.pace_kind === "daily") ??
 		buckets.find(bucket => bucket.name.toLowerCase() === "daily") ??
 		null
-	const dailyBucketId = dailyBucket?.id ?? null
-	const paceData = useLiveQuery(
-		() => getPaceView(month, year, dailyBucketId ?? "all", comparisonMonths),
-		[month, year, dailyBucketId, comparisonMonths],
-	) as unknown as PaceData | undefined
-	const bucketDailyData = useLiveQuery(
-		() => getBucketDaily(month, year),
-		[month, year],
-	) as unknown as BucketDailyData | undefined
+	const paceData = view?.pace as unknown as PaceData | undefined
+	const bucketDailyData = view?.bucketDaily as unknown as BucketDailyData | undefined
+	const trend = view?.trend ?? []
 	const scopedBucketIds = useMemo(() => {
 		if (scope === "all") return [...buckets.map(bucket => bucket.id), "unbucketed"]
 		if (scope === "core" || scope === "outlier" || scope === "other") {
@@ -237,9 +235,19 @@ export default function DashboardPage() {
 	const highestSpendingDay = paceData.highestSpendingDay
 	const dailyLines = bucketDailyData.buckets.map(bucket => ({
 		...bucket,
-		width: bucket.id === dailyBucketId ? 2.5 : 2,
 		dashed: bucket.id === "unbucketed",
 	}))
+	const openDay = (date: string) => {
+		armTabTransition()
+		handlePush("overview")()
+		router.push(
+			pathMonthlyRecords({ month, year: String(year), start_date: date, end_date: date }),
+		)
+	}
+	const openMonth = (key: string) => {
+		const target = DateTime.fromFormat(key, "yyyy-MM")
+		router.push(pathDashboard({ month: target.monthLong ?? month, year: String(target.year) }))
+	}
 	return (
 		<div
 			className={cn(
@@ -261,7 +269,7 @@ export default function DashboardPage() {
 				</Card>
 			) : (
 				<>
-					<SummaryBand summary={summary} comparison={comparison} />
+					<SummaryBand summary={summary} comparison={comparison} trend={trend} />
 					{summary.unbucketed_count ? (
 						<div
 							className="flex flex-wrap gap-2"
@@ -317,6 +325,21 @@ export default function DashboardPage() {
 						</CardContent>
 					</Card>
 
+					{trend.length > 1 ? (
+						<Card>
+							<CardHeader className="border-b">
+								<ScopedCardTitle scope="Total">Income vs spending</ScopedCardTitle>
+								<CardDescription>
+									The last {trend.length} months side by side, with the surplus or
+									shortfall each month. Select a month to open it.
+								</CardDescription>
+							</CardHeader>
+							<CardContent>
+								<TrendChart months={trend} onSelect={openMonth} />
+							</CardContent>
+						</Card>
+					) : null}
+
 					<section className="grid gap-4" aria-labelledby="spending-breakdown-title">
 						<div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
 							<div>
@@ -358,6 +381,41 @@ export default function DashboardPage() {
 							/>
 						</div>
 					</section>
+
+					<div className="grid gap-5 lg:grid-cols-2">
+						<Card className="min-w-0">
+							<CardHeader>
+								<ScopedCardTitle scope="Total">Spending calendar</ScopedCardTitle>
+								<CardDescription>
+									Stronger colour means more spending. Select a day to open its
+									Records.
+								</CardDescription>
+							</CardHeader>
+							<CardContent>
+								<SpendingCalendar
+									month={month}
+									year={year}
+									daily={summary.daily}
+									through={period.through}
+									onSelect={openDay}
+								/>
+							</CardContent>
+						</Card>
+						<Card className="min-w-0">
+							<CardHeader>
+								<ScopedCardTitle scope="Total">Biggest changes</ScopedCardTitle>
+								<CardDescription>
+									Categories that moved most against your usual spending.
+								</CardDescription>
+							</CardHeader>
+							<CardContent>
+								<CategoryMovers
+									categories={categories}
+									comparisonCount={comparison.count}
+								/>
+							</CardContent>
+						</Card>
+					</div>
 
 					<Card>
 						<CardHeader className="border-b">
@@ -506,9 +564,11 @@ function ScopeLabel({ scope, color }: { scope: string; color?: string }) {
 function SummaryBand({
 	summary,
 	comparison,
+	trend,
 }: {
 	summary: AnalyticsSummary
 	comparison: Comparison
+	trend: TrendMonth[]
 }) {
 	const surplusLabel =
 		summary.surplus > 0 ? "Surplus" : summary.surplus < 0 ? "Shortfall" : "Balance"
@@ -521,12 +581,18 @@ function SummaryBand({
 					label="Total income"
 					value={formatCurrency(summary.income)}
 					detail={comparisonText(comparison.income, comparison.count)}
+					delta={deltaOf(comparison.income, comparison.count, "up")}
+					spark={trend.map(month => month.income)}
+					sparkColor="var(--income)"
 				/>
 				<DashboardMetric
 					icon="lucide:receipt-text"
 					label={summary.spending < 0 ? "Total net refund" : "Total spending"}
 					value={formatCurrency(Math.abs(summary.spending))}
 					detail={comparisonText(comparison.spending, comparison.count)}
+					delta={deltaOf(comparison.spending, comparison.count, "down")}
+					spark={trend.map(month => month.spending)}
+					sparkColor="var(--spending)"
 				/>
 				<DashboardMetric
 					icon="lucide:scale"
@@ -534,6 +600,9 @@ function SummaryBand({
 					value={formatCurrency(Math.abs(summary.surplus))}
 					detail="Income less personal spending"
 					tone={tone}
+					delta={deltaOf(comparison.surplus, comparison.count, "up")}
+					spark={trend.map(month => month.surplus)}
+					sparkColor="var(--foreground)"
 				/>
 				<DashboardMetric
 					icon="lucide:percent"
@@ -913,53 +982,87 @@ function MetricGrid({ className, children }: { className?: string; children: Rea
 	)
 }
 
+type Delta = { text: string; good: boolean }
+
+/** Signed change vs the comparison average; `better` says which direction is good. */
+function deltaOf(value: ComparisonValue, count: number, better: "up" | "down"): Delta | undefined {
+	if (!count || value.difference === null || Math.abs(value.difference) < 0.005) return undefined
+	const up = value.difference > 0
+	return {
+		text: `${up ? "↑" : "↓"} ${formatCurrency(Math.abs(value.difference)).replace(/\.\d\d$/, "")}`,
+		good: up === (better === "up"),
+	}
+}
+
 function DashboardMetric({
 	icon,
 	label,
 	value,
 	detail,
 	tone = "neutral",
+	delta,
+	spark,
+	sparkColor,
 }: {
 	icon: string
 	label: string
 	value: string
 	detail: string
 	tone?: "positive" | "negative" | "neutral"
+	delta?: Delta
+	spark?: number[]
+	sparkColor?: string
 }) {
 	return (
 		<div
 			className={cn(
-				"grid min-h-28 content-between bg-card p-4",
-				tone === "positive" && "bg-emerald-950 text-emerald-50",
-				tone === "negative" && "bg-red-950 text-red-50",
+				"relative grid min-h-28 content-between bg-card p-4",
+				tone !== "neutral" &&
+					"before:absolute before:inset-x-0 before:top-0 before:h-0.5 before:content-['']",
+				tone === "positive" && "before:bg-emerald-500",
+				tone === "negative" && "before:bg-red-500",
 			)}
 		>
-			<div
-				className={cn(
-					"flex items-center gap-2 text-xs font-medium text-muted-foreground",
-					tone !== "neutral" && "text-white/65",
-				)}
-			>
-				<span
-					className={cn(
-						"grid size-7 place-items-center rounded-lg border bg-background text-foreground shadow-xs",
-						tone !== "neutral" && "border-white/10 bg-white/10 text-white",
-					)}
-				>
+			<div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+				<span className="grid size-7 place-items-center rounded-lg border bg-background text-foreground shadow-xs">
 					<IconifyIcon icon={icon} className="size-3.5" />
 				</span>
 				{label}
+				{delta ? (
+					<span
+						title={delta.good ? "Better than average" : "Worse than average"}
+						className={cn(
+							"ml-auto rounded-full px-1.5 py-0.5 text-[0.6875rem] font-semibold whitespace-nowrap tabular-nums",
+							delta.good
+								? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+								: "bg-red-500/10 text-red-700 dark:text-red-400",
+						)}
+					>
+						{delta.text}
+					</span>
+				) : null}
 			</div>
-			<div className="mt-4">
-				<p className="text-2xl font-semibold tracking-tight tabular-nums">{value}</p>
-				<p
-					className={cn(
-						"mt-1 text-xs text-muted-foreground",
-						tone !== "neutral" && "text-white/65",
-					)}
-				>
-					{detail}
-				</p>
+			<div className="mt-4 flex items-end justify-between gap-3">
+				<div className="min-w-0">
+					<p
+						className={cn(
+							"text-2xl font-semibold tracking-tight tabular-nums",
+							tone === "positive" && "text-emerald-700 dark:text-emerald-400",
+							tone === "negative" && "text-red-700 dark:text-red-400",
+						)}
+					>
+						{value}
+					</p>
+					<p className="mt-1 text-xs text-muted-foreground">{detail}</p>
+				</div>
+				{spark && spark.length > 1 ? (
+					<Sparkline
+						values={spark}
+						color={sparkColor}
+						label={`${label}, last ${spark.length} months`}
+						className="mb-1 hidden shrink-0 text-muted-foreground xl:block"
+					/>
+				) : null}
 			</div>
 		</div>
 	)
