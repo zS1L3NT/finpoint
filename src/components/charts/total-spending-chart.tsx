@@ -2,6 +2,7 @@ import { DateTime } from "luxon"
 import { useRouter } from "next/navigation"
 import { useId } from "react"
 import { Area, CartesianGrid, ComposedChart, Line, ReferenceLine, XAxis, YAxis } from "recharts"
+import { useChartIntro } from "@/components/charts/chart-intro"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { useHistory } from "@/history"
 import { useIsMobile } from "@/hooks/use-mobile"
@@ -20,6 +21,7 @@ export default function TotalSpendingChart({
 	month: string
 	year: number
 }) {
+	const intro = useChartIntro()
 	const isMobile = useIsMobile()
 	const router = useRouter()
 	const { handlePush } = useHistory()
@@ -107,7 +109,7 @@ export default function TotalSpendingChart({
 						activeDot={false}
 						tooltipType="none"
 						legendType="none"
-						isAnimationActive={false}
+						{...intro}
 					/>
 					<Line
 						dataKey="surplus"
@@ -115,7 +117,7 @@ export default function TotalSpendingChart({
 						stroke="var(--color-surplus)"
 						strokeWidth={2.5}
 						dot={false}
-						isAnimationActive={false}
+						{...intro}
 					/>
 				</ComposedChart>
 			</ChartContainer>

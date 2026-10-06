@@ -2,6 +2,7 @@ import { DateTime } from "luxon"
 import { useRouter } from "next/navigation"
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import BucketBadge from "@/components/bucket-badge"
+import { useChartIntro } from "@/components/charts/chart-intro"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { useHistory } from "@/history"
 import { useIsMobile } from "@/hooks/use-mobile"
@@ -28,6 +29,7 @@ export default function DailySpendingChart({
 	month: string
 	year: number
 }) {
+	const intro = useChartIntro()
 	const isMobile = useIsMobile()
 	const router = useRouter()
 	const { handlePush } = useHistory()
@@ -120,7 +122,7 @@ export default function DailySpendingChart({
 							stroke="var(--card)"
 							strokeWidth={1}
 							radius={index === buckets.length - 1 ? [3, 3, 0, 0] : 0}
-							isAnimationActive={false}
+							{...intro}
 						/>
 					))}
 				</BarChart>

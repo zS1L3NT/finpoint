@@ -1,7 +1,5 @@
-import { useReducedMotion } from "framer-motion"
 import { DateTime } from "luxon"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
 import {
 	type ActiveDotProps,
 	Area,
@@ -11,6 +9,7 @@ import {
 	XAxis,
 	YAxis,
 } from "recharts"
+import { useChartIntro } from "@/components/charts/chart-intro"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { useHistory } from "@/history"
 import { useIsMobile } from "@/hooks/use-mobile"
@@ -43,12 +42,9 @@ export default function CashflowChart({
 	showProjection: boolean
 }) {
 	const isMobile = useIsMobile()
-	const reduceMotion = useReducedMotion()
-	// Animate the intro once per month. Left on, Recharts replays the 700ms
-	// path animation on every resize (e.g. each sidebar toggle).
-	const introKey = `${month}-${year}`
-	const [introPlayed, setIntroPlayed] = useState<string | null>(null)
-	const animate = !reduceMotion && introPlayed !== introKey
+	// Animate the intro once per month. Left on, Recharts replays the path
+	// animation on every resize (e.g. each sidebar toggle).
+	const intro = useChartIntro(`${month}-${year}`)
 	const router = useRouter()
 	const { handlePush } = useHistory()
 	const interval = isMobile ? Math.max(Math.floor(data.length / 4), 0) : "preserveStartEnd"
@@ -173,10 +169,8 @@ export default function CashflowChart({
 						<ChartTooltip content={tooltip} />
 						<Area
 							key={`actual-${month}-${year}`}
-							isAnimationActive={animate}
-							onAnimationEnd={() => setIntroPlayed(introKey)}
-							animationDuration={700}
-							animationEasing="ease-out"
+							{...intro}
+							onAnimationEnd={showProjection ? undefined : intro.onAnimationEnd}
 							dataKey="spending"
 							name="Usage"
 							stroke="url(#actual-line)"
@@ -196,10 +190,8 @@ export default function CashflowChart({
 						{showProjection ? (
 							<Area
 								key={`projection-${month}-${year}`}
-								isAnimationActive={animate}
-								animationBegin={140}
-								animationDuration={700}
-								animationEasing="ease-out"
+								{...intro}
+								animationBegin={100}
 								dataKey="projected_spending"
 								name="Usage (projection)"
 								stroke="url(#projection-line)"

@@ -1,4 +1,5 @@
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
+import { useChartIntro } from "@/components/charts/chart-intro"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { formatCurrency } from "@/lib/utils"
@@ -30,6 +31,7 @@ export default function WeekdayBars({
 	}[]
 	comparisonCount: number
 }) {
+	const intro = useChartIntro()
 	const isMobile = useIsMobile()
 	const baselineLabel = `Previous ${comparisonCount} ${comparisonCount === 1 ? "month" : "months"}`
 
@@ -91,7 +93,7 @@ export default function WeekdayBars({
 						name="This month"
 						fill="var(--color-emerald-500)"
 						radius={[4, 4, 0, 0]}
-						isAnimationActive={false}
+						{...intro}
 					/>
 					<Bar
 						dataKey="baseline"
@@ -99,7 +101,7 @@ export default function WeekdayBars({
 						fill="var(--color-muted-foreground)"
 						fillOpacity={0.35}
 						radius={[4, 4, 0, 0]}
-						isAnimationActive={false}
+						{...intro}
 					/>
 				</BarChart>
 			</ChartContainer>

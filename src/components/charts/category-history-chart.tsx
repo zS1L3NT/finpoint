@@ -1,6 +1,7 @@
 "use client"
 
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
+import { useChartIntro } from "@/components/charts/chart-intro"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart"
 import { formatCurrency } from "@/lib/utils"
@@ -27,6 +28,7 @@ export default function CategoryHistoryChart({
 	through: string | null
 	bucketIds: string[] | null
 }) {
+	const intro = useChartIntro()
 	const scopedMonths = months.map(month => ({
 		...month,
 		categories: month.categories
@@ -118,7 +120,7 @@ export default function CategoryHistoryChart({
 											fill={item.color}
 											fillOpacity={0.88}
 											maxBarSize={64}
-											isAnimationActive={false}
+											{...intro}
 										/>
 									))}
 								</BarChart>
