@@ -7,7 +7,15 @@ import {
 } from "@tanstack/react-table"
 import { AnimatePresence } from "framer-motion"
 import { Fragment, memo, useEffect, useState } from "react"
-import { groupStarts, isInteractiveTarget, type RowGroup } from "@/components/table/row-groups"
+import {
+	GroupHeaderRow,
+	groupStarts,
+	isInteractiveTarget,
+	MOBILE_LIST_CLASS,
+	MOBILE_ROW_CLASS,
+	MobileGroupHeader,
+	type RowGroup,
+} from "@/components/table/row-groups"
 import {
 	Table,
 	TableBody,
@@ -56,6 +64,13 @@ function DataTable<TData extends { id: string }, TValue>({
 		rows.map(row => row.original),
 		groupBy,
 	)
+	const columnInfo = table.getVisibleLeafColumns().map(column => ({
+		id: column.id,
+		className:
+			column.columnDef.meta && "width" in column.columnDef.meta
+				? `${column.columnDef.meta.width}`
+				: undefined,
+	}))
 	const clickRow = (row: TData) => (event: React.MouseEvent) => {
 		if (onRowClick && !isInteractiveTarget(event.target)) onRowClick(row)
 	}
@@ -65,7 +80,12 @@ function DataTable<TData extends { id: string }, TValue>({
 			{header ? header : null}
 
 			{mobileRow ? (
-				<div className="min-w-0 divide-y overflow-hidden rounded-lg border bg-card @5xl/table:hidden">
+				<div
+					className={cn(
+						MOBILE_LIST_CLASS,
+						"min-w-0 divide-y overflow-hidden rounded-lg border bg-card @5xl/table:hidden",
+					)}
+				>
 					<AnimatePresence initial={false}>
 						{rows.length ? (
 							rows.map((row, index) => {
@@ -73,9 +93,11 @@ function DataTable<TData extends { id: string }, TValue>({
 								return (
 									<Fragment key={row.id}>
 										{group && groupBy ? (
-											<div className="bg-muted/50 px-3 py-1.5">
-												{groupBy.header(group.key, group.rows)}
-											</div>
+											<MobileGroupHeader
+												group={groupBy}
+												groupKey={group.key}
+												rows={group.rows}
+											/>
 										) : null}
 										<div
 											data-state={selectedIds?.includes(row.id) && "selected"}
@@ -83,7 +105,8 @@ function DataTable<TData extends { id: string }, TValue>({
 												onRowClick ? clickRow(row.original) : undefined
 											}
 											className={cn(
-												"min-w-0 overflow-hidden px-3 py-2.5 text-sm data-[state=selected]:bg-muted",
+												MOBILE_ROW_CLASS,
+												"px-3 py-2.5 text-sm data-[state=selected]:bg-muted",
 												onRowClick && "cursor-pointer active:bg-muted/60",
 											)}
 										>
@@ -93,7 +116,7 @@ function DataTable<TData extends { id: string }, TValue>({
 								)
 							})
 						) : (
-							<div className="p-8 text-center text-sm text-muted-foreground">
+							<div className="col-span-full p-8 text-center text-sm text-muted-foreground">
 								{emptyMessage}
 							</div>
 						)}
@@ -140,14 +163,12 @@ function DataTable<TData extends { id: string }, TValue>({
 									return (
 										<Fragment key={row.id}>
 											{group && groupBy ? (
-												<TableRow className="bg-muted/40 hover:bg-muted/40">
-													<TableCell
-														colSpan={columns.length}
-														className="py-1.5"
-													>
-														{groupBy.header(group.key, group.rows)}
-													</TableCell>
-												</TableRow>
+												<GroupHeaderRow
+													group={groupBy}
+													groupKey={group.key}
+													rows={group.rows}
+													columns={columnInfo}
+												/>
 											) : null}
 											<TableRow
 												key={row.id}

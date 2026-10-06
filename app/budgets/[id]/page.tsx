@@ -23,12 +23,11 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card"
-import { useOpenRow } from "@/hooks/use-open-row"
 import { useRecordEditor } from "@/hooks/use-record-editor"
 import { formatCurrency, parseDate, parseDatetime, round2dp } from "@/lib/utils"
 import { attachBudgetRecord, detachBudgetRecord, getBudget } from "@/logic/budgets"
 import { listCategories } from "@/logic/categories"
-import { pathBudgets, pathRecord } from "@/routes"
+import { pathBudgets } from "@/routes"
 import type { Budget, CategoryWithChildren, Record } from "@/types"
 
 export default function BudgetPage({ params }: { params: Promise<{ id: string }> }) {
@@ -93,7 +92,6 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 			</Button>
 		),
 	})
-	const openRecord = useOpenRow<Record>(pathRecord, `Budget ${budget?.id ?? ""}`)
 	const recordMobileRow = useRecordMobileRow<Record>({
 		grouped: true,
 		pageName: `Budget ${budget?.id ?? ""}`,
@@ -312,8 +310,7 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 							data={records}
 							columns={recordColumns}
 							mobileRow={recordMobileRow}
-							onRowClick={openRecord}
-							groupBy={byDay<Record>()}
+							groupBy={byDay<Record>("Record")}
 							emptyMessage="No records found."
 						/>
 					</CardContent>

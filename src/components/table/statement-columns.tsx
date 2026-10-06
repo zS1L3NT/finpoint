@@ -192,28 +192,31 @@ export function useStatementMobileRow<TStatement extends StatementRow>({
 		() => (row: Row<TStatement>) => {
 			const statement = row.original
 			const time = formatRowTime(statement.datetime, grouped)
+			// Three cells (main, amount, actions) for the list's shared subgrid.
 			return (
-				<div className="flex min-w-0 items-center gap-3">
-					{leading?.(statement)}
-					<div className="min-w-0 flex-1">
-						<p className="flex items-center gap-1.5">
-							<span className="min-w-0 truncate font-medium">
-								{statement.description || "No description"}
-							</span>
-							<StatementBadges
-								statement={statement}
-								showUnallocated={amount !== "allocable"}
-							/>
-						</p>
-						<p className="truncate text-xs text-muted-foreground">
-							{[showAccount ? statement.account.name : null, time]
-								.filter(Boolean)
-								.join(" · ")}
-						</p>
+				<>
+					<div className="flex min-w-0 items-center gap-3">
+						{leading?.(statement)}
+						<div className="min-w-0 flex-1">
+							<p className="flex items-center gap-1.5">
+								<span className="min-w-0 truncate font-medium">
+									{statement.description || "No description"}
+								</span>
+								<StatementBadges
+									statement={statement}
+									showUnallocated={amount !== "allocable"}
+								/>
+							</p>
+							<p className="truncate text-xs text-muted-foreground">
+								{[showAccount ? statement.account.name : null, time]
+									.filter(Boolean)
+									.join(" · ")}
+							</p>
+						</div>
 					</div>
 					<StatementAmount statement={statement} amount={amount} />
 					<StatementActions statement={statement} options={{ pageName, onEdit }} />
-				</div>
+				</>
 			)
 		},
 		[amount, showAccount, pageName, leading, onEdit, grouped],
