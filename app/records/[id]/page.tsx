@@ -2,6 +2,7 @@
 
 import { useLiveQuery } from "dexie-react-hooks"
 import { use, useState } from "react"
+import BucketBadge from "@/components/bucket-badge"
 import { DetailSummary, DetailSummaryItem } from "@/components/detail-summary"
 import PendingStatementDialog from "@/components/dialogs/pending-statement"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
@@ -15,13 +16,12 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useFetch } from "@/hooks/use-fetch"
-import { useOpenRow } from "@/hooks/use-open-row"
 import { treatmentLabel } from "@/lib/analytics"
 import { formatDatetime } from "@/lib/utils"
 import { listAccounts } from "@/logic/accounts"
 import { listCategories } from "@/logic/categories"
 import { getRecord } from "@/logic/records"
-import { pathRecords, pathStatement } from "@/routes"
+import { pathRecords } from "@/routes"
 import type { Allocation, Statement } from "@/types"
 
 export default function RecordPage({ params }: { params: Promise<{ id: string }> }) {
@@ -37,7 +37,6 @@ export default function RecordPage({ params }: { params: Promise<{ id: string }>
 		pageName: `Record ${data?.id ?? ""}`,
 		onEdit: setEditingStatement,
 	})
-	const openStatement = useOpenRow<Statement>(pathStatement, `Record ${data?.id ?? ""}`)
 	const mobileRow = useStatementMobileRow<Statement & { pivot: Allocation }>({
 		amount: "allocated",
 		pageName: `Record ${data?.id ?? ""}`,
@@ -103,9 +102,15 @@ export default function RecordPage({ params }: { params: Promise<{ id: string }>
 
 				<DetailSummary
 					footer={
-						<div className="flex flex-wrap gap-x-5 gap-y-1">
+						<div className="flex flex-wrap items-center gap-x-5 gap-y-1">
 							<span>Treatment · {treatmentLabel(record.analytics_treatment)}</span>
-							<span>Spending bucket · {record.bucket?.name ?? "No bucket"}</span>
+							<span className="flex items-center gap-1.5">
+								Spending bucket ·{" "}
+								<BucketBadge
+									name={record.bucket?.name ?? "No bucket"}
+									color={record.bucket?.color}
+								/>
+							</span>
 						</div>
 					}
 				>
@@ -143,7 +148,6 @@ export default function RecordPage({ params }: { params: Promise<{ id: string }>
 							data={typedStatements}
 							columns={columns}
 							mobileRow={mobileRow}
-							onRowClick={openStatement}
 							emptyMessage="No statements found."
 						/>
 					</CardContent>

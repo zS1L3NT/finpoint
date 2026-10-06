@@ -9,7 +9,15 @@ import { AnimatePresence } from "framer-motion"
 import { Fragment, memo, useEffect, useState } from "react"
 import PaginationFooter from "@/components/table/pagination-footer"
 import PaginationHeader from "@/components/table/pagination-header"
-import { groupStarts, isInteractiveTarget, type RowGroup } from "@/components/table/row-groups"
+import {
+	GroupHeaderRow,
+	groupStarts,
+	isInteractiveTarget,
+	MOBILE_LIST_CLASS,
+	MOBILE_ROW_CLASS,
+	MobileGroupHeader,
+	type RowGroup,
+} from "@/components/table/row-groups"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
 	Table,
@@ -65,6 +73,13 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 		rows.map(row => row.original),
 		groupBy,
 	)
+	const columnInfo = table.getVisibleLeafColumns().map(column => ({
+		id: column.id,
+		className:
+			column.columnDef.meta && "width" in column.columnDef.meta
+				? `${column.columnDef.meta.width}`
+				: undefined,
+	}))
 	const clickRow = (row: TData) => (event: React.MouseEvent) => {
 		if (onRowClick && !isInteractiveTarget(event.target)) onRowClick(row)
 	}
@@ -74,11 +89,16 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 			{header ? <PaginationHeader {...header} /> : null}
 
 			{mobileRow ? (
-				<div className="min-w-0 divide-y overflow-hidden rounded-lg border bg-card @5xl/table:hidden">
+				<div
+					className={cn(
+						MOBILE_LIST_CLASS,
+						"min-w-0 divide-y overflow-hidden rounded-lg border bg-card @5xl/table:hidden",
+					)}
+				>
 					<AnimatePresence initial={false}>
 						{loading ? (
 							Array.from({ length: 4 }).map((_, index) => (
-								<div key={index} className="grid gap-1.5 px-3 py-2.5">
+								<div key={index} className="col-span-full grid gap-1.5 px-3 py-2.5">
 									<Skeleton className="h-4 w-2/3" />
 									<Skeleton className="h-3 w-1/3" />
 								</div>
@@ -89,9 +109,11 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 								return (
 									<Fragment key={row.id}>
 										{group && groupBy ? (
-											<div className="bg-muted/50 px-3 py-1.5">
-												{groupBy.header(group.key, group.rows)}
-											</div>
+											<MobileGroupHeader
+												group={groupBy}
+												groupKey={group.key}
+												rows={group.rows}
+											/>
 										) : null}
 										<div
 											data-state={selectedIds?.includes(row.id) && "selected"}
@@ -99,7 +121,8 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 												onRowClick ? clickRow(row.original) : undefined
 											}
 											className={cn(
-												"min-w-0 overflow-hidden px-3 py-2.5 text-sm data-[state=selected]:bg-muted",
+												MOBILE_ROW_CLASS,
+												"px-3 py-2.5 text-sm data-[state=selected]:bg-muted",
 												onRowClick && "cursor-pointer active:bg-muted/60",
 											)}
 										>
@@ -109,7 +132,7 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 								)
 							})
 						) : (
-							<div className="p-8 text-center text-sm text-muted-foreground">
+							<div className="col-span-full p-8 text-center text-sm text-muted-foreground">
 								{emptyMessage}
 							</div>
 						)}
@@ -173,14 +196,12 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 									return (
 										<Fragment key={row.id}>
 											{group && groupBy ? (
-												<TableRow className="bg-muted/40 hover:bg-muted/40">
-													<TableCell
-														colSpan={columns.length}
-														className="py-1.5"
-													>
-														{groupBy.header(group.key, group.rows)}
-													</TableCell>
-												</TableRow>
+												<GroupHeaderRow
+													group={groupBy}
+													groupKey={group.key}
+													rows={group.rows}
+													columns={columnInfo}
+												/>
 											) : null}
 											<TableRow
 												key={row.id}

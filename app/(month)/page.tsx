@@ -5,6 +5,7 @@ import { DateTime } from "luxon"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { type ReactNode, useMemo } from "react"
+import BucketBadge from "@/components/bucket-badge"
 import CashflowChart, { CashflowPoint } from "@/components/charts/cashflow-chart"
 import CategoryHistoryChart from "@/components/charts/category-history-chart"
 import CategoryMovers from "@/components/charts/category-movers"
@@ -16,7 +17,6 @@ import BucketDialog from "@/components/dialogs/bucket"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import { Metric as DashboardMetric, type Delta, MetricGrid } from "@/components/metric"
 import { FILTER_CONTROL_CLASS } from "@/components/table/filter-bar"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -520,24 +520,12 @@ function ScopedCardTitle({
 }
 
 function ScopeLabel({ scope, color }: { scope: string; color?: string }) {
-	if (scope === "Total") {
-		return (
-			<Badge
-				variant="outline"
-				style={{ borderColor: "var(--foreground)", color: "var(--foreground)" }}
-			>
-				Total
-			</Badge>
-		)
-	}
-	const bucketColor = color ?? (scope === "Daily" ? "var(--color-emerald-500)" : null)
-
-	return bucketColor ? (
-		<Badge variant="outline" style={{ borderColor: bucketColor, color: bucketColor }}>
-			{scope}
-		</Badge>
-	) : (
-		<Badge variant="secondary">{scope}</Badge>
+	if (scope === "Total") return <BucketBadge name="Total" color="var(--foreground)" />
+	return (
+		<BucketBadge
+			name={scope}
+			color={color ?? (scope === "Daily" ? "var(--color-emerald-500)" : null)}
+		/>
 	)
 }
 
@@ -684,12 +672,7 @@ function BucketStatus({
 									onClick={() => setScope(bucket.id)}
 									className="min-w-0 cursor-pointer rounded text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 								>
-									<Badge
-										variant="outline"
-										style={{ borderColor: bucket.color, color: bucket.color }}
-									>
-										{bucket.name}
-									</Badge>
+									<BucketBadge name={bucket.name} color={bucket.color} />
 								</button>
 								<span className="font-medium tabular-nums">
 									{formatCurrency(bucket.spending)}

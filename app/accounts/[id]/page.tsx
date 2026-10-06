@@ -12,14 +12,13 @@ import PaginatedDataTable from "@/components/table/paginated-data-table"
 import { byDay } from "@/components/table/row-groups"
 import { useStatementColumns, useStatementMobileRow } from "@/components/table/statement-columns"
 import { Button } from "@/components/ui/button"
-import { useOpenRow } from "@/hooks/use-open-row"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { bankMeta } from "@/lib/banks"
 import { formatCurrency, formatDatetime } from "@/lib/utils"
 import { getAccount, listAccounts } from "@/logic/accounts"
 import { paginateItems, parsePage, parsePageSize } from "@/logic/pagination"
 import { listStatements } from "@/logic/statements"
-import { pathAccounts, pathStatement } from "@/routes"
+import { pathAccounts } from "@/routes"
 import type { Statement } from "@/types"
 
 export default function AccountPage({ params }: { params: Promise<{ id: string }> }) {
@@ -49,7 +48,6 @@ export default function AccountPage({ params }: { params: Promise<{ id: string }
 		onEdit: setEditingStatement,
 		grouped: true,
 	})
-	const openStatement = useOpenRow<Statement>(pathStatement, `Account ${account?.name ?? ""}`)
 
 	if (!account) {
 		return (
@@ -130,8 +128,7 @@ export default function AccountPage({ params }: { params: Promise<{ id: string }
 						summary: `Showing ${paginated.data.length} of ${paginated.total} statements.`,
 					}}
 					mobileRow={mobileRow}
-					groupBy={byDay<Statement>()}
-					onRowClick={openStatement}
+					groupBy={byDay<Statement>("Statement")}
 					emptyMessage="No statements found."
 				/>
 			</PageContent>

@@ -8,6 +8,7 @@ import { expandCategoryIdsForMonthly } from "@/logic/monthly-shared"
 import { listRecords } from "@/logic/records"
 
 export type MonthlyFilters = {
+	query?: string | null
 	category_ids?: string | null
 	is_allocated?: string | null
 	bucket_id?: string | null
@@ -46,6 +47,7 @@ export async function getMonthlyRecords(month: string, year: number, filters: Mo
 	}
 
 	const records = await listRecords({
+		query: filters.query ?? null,
 		start_date: startDate,
 		end_date: endDate,
 		min_amount: filters.min_amount ?? null,
@@ -107,6 +109,7 @@ export async function getMonthlyRecords(month: string, year: number, filters: Mo
 		summary: summarize(actualRecords.map(toAnalytics)),
 		buckets,
 		filters: {
+			query: filters.query ?? null,
 			category_ids: filters.category_ids ?? null,
 			is_allocated: filters.is_allocated ?? null,
 			bucket_id: filters.bucket_id ?? null,
