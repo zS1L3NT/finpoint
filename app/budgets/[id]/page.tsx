@@ -259,9 +259,9 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 											</div>
 											<div className="ml-10 h-1.5 overflow-hidden rounded-full bg-muted">
 												<div
-													className="h-full rounded-full"
+													className="h-full origin-left rounded-full transition-transform duration-300 ease-out"
 													style={{
-														width: `${category.share}%`,
+														transform: `scaleX(${category.share / 100})`,
 														backgroundColor: category.color,
 													}}
 												/>
