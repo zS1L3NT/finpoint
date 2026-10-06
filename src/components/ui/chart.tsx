@@ -113,7 +113,11 @@ ${colorConfig
   )
 }
 
-const ChartTooltip = RechartsPrimitive.Tooltip
+// Recharts glides the tooltip box after the cursor over 400ms by default, which reads as
+// lag on every hover; a tooltip that follows the pointer should track it directly.
+function ChartTooltip(props: React.ComponentProps<typeof RechartsPrimitive.Tooltip>) {
+  return <RechartsPrimitive.Tooltip isAnimationActive={false} {...props} />
+}
 
 function ChartTooltipContent({
   active,
