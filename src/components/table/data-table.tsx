@@ -5,7 +5,7 @@ import {
 	type Row,
 	useReactTable,
 } from "@tanstack/react-table"
-import { Fragment, memo, useEffect, useState } from "react"
+import { Fragment, memo } from "react"
 import {
 	GroupHeaderRow,
 	groupStarts,
@@ -23,7 +23,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table"
-import { TRANSITION } from "@/lib/motion"
+import { rowEnter, staggerDelay } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 
 function DataTable<TData extends { id: string }, TValue>({
@@ -53,12 +53,6 @@ function DataTable<TData extends { id: string }, TValue>({
 		getCoreRowModel: getCoreRowModel(),
 		getRowId: row => row.id,
 	})
-	// First arrival renders instantly; later list updates animate out/in.
-	const [live, setLive] = useState(false)
-	useEffect(() => {
-		setLive(true)
-	}, [])
-	const enter = live ? { opacity: 0, y: 6 } : false
 	const rows = table.getRowModel().rows
 	const starts = groupStarts(
 		rows.map(row => row.original),
@@ -101,9 +95,10 @@ function DataTable<TData extends { id: string }, TValue>({
 									<div
 										data-state={selectedIds?.includes(row.id) && "selected"}
 										onClick={onRowClick ? clickRow(row.original) : undefined}
+										style={{ animationDelay: `${staggerDelay(index)}s` }}
 										className={cn(
 											MOBILE_ROW_CLASS,
-											"px-3 py-2.5 text-sm transition-colors duration-100 data-[state=selected]:bg-muted",
+											"animate-in fade-in slide-in-from-bottom-2 px-3 py-2.5 text-sm transition-colors duration-100 ease-out [animation-duration:300ms] [animation-fill-mode:backwards] data-[state=selected]:bg-muted",
 											onRowClick && "cursor-pointer active:bg-muted/60",
 										)}
 									>
@@ -167,10 +162,7 @@ function DataTable<TData extends { id: string }, TValue>({
 										) : null}
 										<TableRow
 											key={row.id}
-											layout="position"
-											initial={enter}
-											animate={{ opacity: 1, y: 0 }}
-											transition={TRANSITION.fast}
+											{...rowEnter(index)}
 											data-state={selectedIds?.includes(row.id) && "selected"}
 											onClick={
 												onRowClick ? clickRow(row.original) : undefined
@@ -201,7 +193,7 @@ function DataTable<TData extends { id: string }, TValue>({
 								)
 							})
 						) : (
-							<TableRow layout layoutId="empty">
+							<TableRow>
 								<TableCell
 									colSpan={columns.length}
 									className="h-24 text-center text-muted-foreground"

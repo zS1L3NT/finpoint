@@ -35,3 +35,13 @@ export const SPRING = {
 	/** A touch of bounce for celebratory or tactile moments only. */
 	lively: { type: "spring", duration: 0.4, bounce: 0.15 },
 } satisfies Record<string, Transition>
+
+/** Delay for the nth item of a cascading entrance; the cap keeps long lists from dragging on. */
+export const staggerDelay = (index: number, step = 0.025, cap = 14) => Math.min(index, cap) * step
+
+/** Props for a table row that rises into place as its data arrives, cascading down the list. */
+export const rowEnter = (index: number) => ({
+	initial: { opacity: 0, y: 10 },
+	animate: { opacity: 1, y: 0 },
+	transition: { duration: 0.34, ease: EASE_OUT, delay: staggerDelay(index) },
+})
