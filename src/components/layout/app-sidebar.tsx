@@ -235,8 +235,8 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 				},
 				{
 					to: pathDataSettings(),
-					icon: "lucide:refresh-cw",
-					label: "Sync",
+					icon: "lucide:database",
+					label: "Data",
 					active: pathname.startsWith("/sync"),
 				},
 				{
@@ -288,7 +288,11 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 			<SidebarContent>
 				{groups.map(group => (
 					<SidebarGroup key={group.label}>
-						<SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+						{/* Collapsed labels fade out and slide up over the previous group's
+						last item, so they must not swallow its hover and clicks. */}
+						<SidebarGroupLabel className="group-data-[collapsible=icon]:pointer-events-none">
+							{group.label}
+						</SidebarGroupLabel>
 						<SidebarMenu>
 							{group.items.map(item => (
 								<SidebarMenuItem key={item.label}>
