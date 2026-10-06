@@ -3,6 +3,7 @@
 import { useLiveQuery } from "dexie-react-hooks"
 import Link from "next/link"
 import { useState } from "react"
+import BucketBadge from "@/components/bucket-badge"
 import CategoryDialog from "@/components/dialogs/category"
 import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
@@ -196,19 +197,15 @@ function CategoryTile({
 				</Button>
 			</div>
 
-			{bucket || category.analytics_treatment === null ? (
-				<p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-					{bucket ? (
-						<>
-							<span
-								className="size-2 rounded-full"
-								style={{ backgroundColor: bucket.color }}
-							/>
-							{bucket.name} bucket
-						</>
-					) : (
-						treatmentLabel(category.analytics_treatment)
-					)}
+			{bucket ? (
+				<BucketBadge
+					name={bucket.name}
+					color={bucket.color}
+					title="Default spending bucket"
+				/>
+			) : category.analytics_treatment === null ? (
+				<p className="text-xs text-muted-foreground">
+					{treatmentLabel(category.analytics_treatment)}
 				</p>
 			) : null}
 

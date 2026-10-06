@@ -437,10 +437,10 @@ export default function DataSettingsPage() {
 		<>
 			<PageContent>
 				<PageHeader
-					title="Sync"
+					title="Data"
 					subtitle="Your data lives in this browser. Back it up automatically to your own Google Drive, or to a file you keep."
-					description="Data"
-					icon="lucide:refresh-cw"
+					description="Backup & sync"
+					icon="lucide:database"
 				/>
 
 				<div className="grid max-w-5xl gap-6">

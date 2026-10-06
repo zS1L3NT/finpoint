@@ -4,21 +4,19 @@ import { useLiveQuery } from "dexie-react-hooks"
 import { DateTime } from "luxon"
 import Link from "next/link"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useEffect, useMemo, useState } from "react"
-import { toast } from "sonner"
+import { useEffect, useState } from "react"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
 import DateRange from "@/components/form/date-range"
-import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
-import { Metric, MetricGrid } from "@/components/metric"
-import SelectionBar from "@/components/selection-bar"
+import { UiIcon as IconifyIcon } from "@/components/icon"
 import AmountFilter from "@/components/table/amount-filter"
 import CategoryFilter from "@/components/table/category-filter"
+import DataTable from "@/components/table/data-table"
 import { ClearFiltersButton, FILTER_CONTROL_CLASS, FilterBar } from "@/components/table/filter-bar"
-import { formatRowTime, PendingBadge, RecordAmountCell } from "@/components/table/record-columns"
-import { dayLabel, isInteractiveTarget } from "@/components/table/row-groups"
+import { useRecordColumns, useRecordMobileRow } from "@/components/table/record-columns"
+import { byDay } from "@/components/table/row-groups"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
+import { Input } from "@/components/ui/input"
 import {
 	Select,
 	SelectContent,
@@ -30,28 +28,17 @@ import {
 	SelectValue,
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useHistory } from "@/history"
 import { useFetch } from "@/hooks/use-fetch"
+import { useRecordEditor } from "@/hooks/use-record-editor"
 import { useTabTransition } from "@/hooks/use-tab-transition"
-import { treatmentLabel } from "@/lib/analytics"
-import { cn, formatCurrency } from "@/lib/utils"
+import { cn } from "@/lib/utils"
 import { listCategories } from "@/logic/categories"
 import { getMonthlyRecords } from "@/logic/monthly"
-import { ConflictError, getRecord, updateRecordBuckets } from "@/logic/records"
-import { ValidationError } from "@/logic/validate"
-import { pathImporter, pathRecord, pathRecords } from "@/routes"
-import {
-	Allocation,
-	AnalyticsSummary,
-	Bucket,
-	CategoryWithChildren,
-	Record,
-	Statement,
-} from "@/types"
-
-type EditableRecord = Record & { statements: (Statement & { pivot?: Allocation })[] }
+import { pathImporter, pathRecords } from "@/routes"
+import { Bucket, CategoryWithChildren, Record } from "@/types"
 
 type Filters = {
+	query?: string
 	category_ids?: string
 	is_allocated?: string
 	bucket_id?: string
@@ -63,6 +50,22 @@ type Filters = {
 	min_amount?: string
 	max_amount?: string
 }
+
+const FILTER_KEYS = [
+	"query",
+	"category_ids",
+	"is_allocated",
+	"bucket_id",
+	"bucket_group",
+	"show_unbucketed",
+	"treatment",
+	"start_date",
+	"end_date",
+	"min_amount",
+	"max_amount",
+] as const
+
+const byRecordDay = byDay<Record>("Record")
 
 export default function MonthlyRecordsPage() {
 	const searchParams = useSearchParams()
@@ -89,6 +92,7 @@ export default function MonthlyRecordsPage() {
 	const year =
 		yearParam !== null && Number.isFinite(Number(yearParam)) ? Number(yearParam) : now.year
 	const date = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
+	const query = searchParams.get("query")
 	const categoryIdsParam = searchParams.get("category_ids")
 	const isAllocated = searchParams.get("is_allocated")
 	const bucketId = searchParams.get("bucket_id")
@@ -108,6 +112,7 @@ export default function MonthlyRecordsPage() {
 	const animateContent = useTabTransition()
 
 	const filterKey = JSON.stringify([
+		query,
 		categoryIdsParam,
 		isAllocated,
 		bucketId,
@@ -122,6 +127,7 @@ export default function MonthlyRecordsPage() {
 	const data = useLiveQuery(
 		() =>
 			getMonthlyRecords(month, year, {
+				query,
 				category_ids: categoryIdsParam,
 				is_allocated: isAllocated,
 				bucket_id: bucketId,
@@ -136,23 +142,23 @@ export default function MonthlyRecordsPage() {
 		[month, year, filterKey],
 	)
 	const categories = useFetch(() => listCategories(), [])
-	const [selected, setSelected] = useState<string[]>([])
-	const [destination, setDestination] = useState("")
-	const [submitting, setSubmitting] = useState(false)
-	const [editingRecord, setEditingRecord] = useState<EditableRecord | null>(null)
-	const [loadingRecordId, setLoadingRecordId] = useState<string | null>(null)
-	const records = useMemo(() => data?.records ?? [], [data])
-	const futureRecords = useMemo(() => data?.future_records ?? [], [data])
-	const actualGroups = useMemo(() => groupRecords(records), [records])
-	const futureGroups = useMemo(() => groupRecords(futureRecords), [futureRecords])
-	const selectedRecords = records.filter(record => selected.includes(record.id))
-	const ineligible = selectedRecords.filter(record => !canUseBucket(record))
-
-	useEffect(() => {
-		setSelected(current => current.filter(id => records.some(record => record.id === id)))
-	}, [records])
+	const { editingRecord, handleEdit, setEditingRecord } = useRecordEditor()
+	const columns = useRecordColumns<Record>({
+		pageName: "Monthly Records",
+		onEdit: handleEdit,
+		grouped: true,
+		showBucket: true,
+	})
+	const mobileRow = useRecordMobileRow<Record>({
+		pageName: "Monthly Records",
+		onEdit: handleEdit,
+		grouped: true,
+	})
+	const records = data?.records ?? []
+	const futureRecords = data?.future_records ?? []
 
 	const filters: Filters = {}
+	if (query) filters.query = query
 	if (categoryIdsParam) filters.category_ids = categoryIdsParam
 	if (isAllocated) filters.is_allocated = isAllocated
 	if (bucketId) filters.bucket_id = bucketId
@@ -170,18 +176,7 @@ export default function MonthlyRecordsPage() {
 		next.delete("day")
 		next.set("month", nextDate.toFormat("MMMM"))
 		next.set("year", String(nextDate.year))
-		for (const key of [
-			"category_ids",
-			"is_allocated",
-			"bucket_id",
-			"bucket_group",
-			"show_unbucketed",
-			"treatment",
-			"start_date",
-			"end_date",
-			"min_amount",
-			"max_amount",
-		] as const) {
+		for (const key of FILTER_KEYS) {
 			const value = merged[key]
 			if (value === "" || value === false || value === undefined || value === null) {
 				next.delete(key)
@@ -192,43 +187,7 @@ export default function MonthlyRecordsPage() {
 		setSearchParams(next)
 	}
 
-	const assign = async (targetBucketId: string | null) => {
-		if (!selectedRecords.length) return
-		setSubmitting(true)
-		try {
-			await updateRecordBuckets(
-				selectedRecords.map(record => ({ id: record.id, revision: record.revision })),
-				targetBucketId,
-			)
-			toast.success(
-				`${selectedRecords.length} Record${selectedRecords.length === 1 ? "" : "s"} updated.`,
-			)
-			setSelected([])
-		} catch (cause) {
-			if (cause instanceof ValidationError || cause instanceof ConflictError) {
-				toast.error(cause.message)
-			} else {
-				toast.error("Unable to update the selected Records.")
-			}
-		} finally {
-			setSubmitting(false)
-		}
-	}
-
 	const clearFilters = () => setSearchParams({ month, year: String(year) })
-	const toggleAll = (checked: boolean) =>
-		setSelected(checked ? records.map(record => record.id) : [])
-	const editRecord = async (record: Record) => {
-		setLoadingRecordId(record.id)
-		try {
-			const detail = await getRecord(record.id)
-			setEditingRecord(detail as unknown as EditableRecord)
-		} catch {
-			toast.error("Unable to open this Record for editing.")
-		} finally {
-			setLoadingRecordId(null)
-		}
-	}
 
 	if (data === undefined) {
 		return (
@@ -272,7 +231,7 @@ export default function MonthlyRecordsPage() {
 		return <p className="text-sm text-muted-foreground">Monthly records not found.</p>
 	}
 
-	const { summary, buckets, period } = data
+	const { buckets, period } = data
 
 	return (
 		<>
@@ -282,15 +241,6 @@ export default function MonthlyRecordsPage() {
 					animateContent && "animate-in fade-in slide-in-from-bottom-2 duration-500",
 				)}
 			>
-				{!period.is_future && records.length ? (
-					<PeriodSummary
-						summary={summary}
-						date={date}
-						period={period}
-						count={records.length}
-					/>
-				) : null}
-
 				<MonthlyRecordFilters
 					date={date}
 					categories={categories}
@@ -300,55 +250,6 @@ export default function MonthlyRecordsPage() {
 					onClear={clearFilters}
 				/>
 
-				<SelectionBar
-					open={selected.length > 0}
-					summary={`${selected.length} selected`}
-					message={
-						ineligible.length ? (
-							<p className="text-amber-700 dark:text-amber-400">
-								{ineligible.length} selected Record
-								{ineligible.length === 1 ? "" : "s"} must be classified as spending
-								before assigning a bucket. Edit the Record and choose a Treatment
-								override first.
-							</p>
-						) : undefined
-					}
-				>
-					<Select
-						value={destination}
-						disabled={ineligible.length > 0}
-						onValueChange={value => setDestination(value ?? "")}
-					>
-						<SelectTrigger className="w-full sm:w-48">
-							<SelectValue placeholder="Choose bucket" />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectGroup>
-								{buckets.map(bucket => (
-									<SelectItem key={bucket.id} value={bucket.id}>
-										{bucket.name}
-									</SelectItem>
-								))}
-							</SelectGroup>
-						</SelectContent>
-					</Select>
-					<Button
-						disabled={!destination || submitting || ineligible.length > 0}
-						onClick={() => void assign(destination)}
-					>
-						Assign bucket
-					</Button>
-					<Button
-						variant="outline"
-						disabled={submitting}
-						onClick={() => void assign(null)}
-					>
-						Remove bucket
-					</Button>
-					<Button variant="ghost" onClick={() => setSelected([])}>
-						Clear
-					</Button>
-				</SelectionBar>
 				{records.length ? (
 					<section className="grid gap-4" aria-labelledby="actual-records">
 						<div className="flex flex-wrap items-center justify-between gap-3">
@@ -363,46 +264,23 @@ export default function MonthlyRecordsPage() {
 									{records.length === 1 ? "" : "s"}
 								</p>
 							</div>
-							<div className="flex flex-wrap items-center gap-3">
-								<Button variant="outline" size="sm" asChild>
-									<Link
-										href={pathRecords({
-											start_date:
-												date.startOf("month").toISODate() ?? undefined,
-											end_date: date.endOf("month").toISODate() ?? undefined,
-										})}
-									>
-										Open in Records <IconifyIcon icon="lucide:arrow-up-right" />
-									</Link>
-								</Button>
-								<label className="flex items-center gap-2 text-sm">
-									<Checkbox
-										checked={
-											selected.length === records.length && records.length > 0
-												? true
-												: selected.length
-													? "indeterminate"
-													: false
-										}
-										onCheckedChange={value => toggleAll(value === true)}
-									/>{" "}
-									Select all
-								</label>
-							</div>
+							<Button variant="outline" size="sm" asChild>
+								<Link
+									href={pathRecords({
+										start_date: date.startOf("month").toISODate() ?? undefined,
+										end_date: date.endOf("month").toISODate() ?? undefined,
+									})}
+								>
+									Open in Records <IconifyIcon icon="lucide:arrow-up-right" />
+								</Link>
+							</Button>
 						</div>
-						<div className="overflow-hidden rounded-lg border bg-card">
-							{Object.entries(actualGroups).map(([day, dayRecords]) => (
-								<DayGroup
-									key={day}
-									date={day}
-									records={dayRecords}
-									selected={selected}
-									setSelected={setSelected}
-									onEdit={editRecord}
-									loadingRecordId={loadingRecordId}
-								/>
-							))}
-						</div>
+						<DataTable
+							data={records}
+							columns={columns}
+							mobileRow={mobileRow}
+							groupBy={byRecordDay}
+						/>
 					</section>
 				) : !period.is_future ? (
 					<EmptyRecords
@@ -419,19 +297,13 @@ export default function MonthlyRecordsPage() {
 								Excluded from actual totals.
 							</p>
 						</div>
-						<div className="overflow-hidden rounded-lg border bg-card opacity-80">
-							{Object.entries(futureGroups).map(([day, dayRecords]) => (
-								<DayGroup
-									key={day}
-									date={day}
-									records={dayRecords}
-									selected={[]}
-									setSelected={() => undefined}
-									onEdit={editRecord}
-									loadingRecordId={loadingRecordId}
-									selectable={false}
-								/>
-							))}
+						<div className="opacity-80">
+							<DataTable
+								data={futureRecords}
+								columns={columns}
+								mobileRow={mobileRow}
+								groupBy={byRecordDay}
+							/>
 						</div>
 					</section>
 				) : null}
@@ -474,7 +346,10 @@ function MonthlyRecordFilters({
 			: filters.bucket_group
 				? `group:${filters.bucket_group}`
 				: "all"
+	const [query, setQuery] = useState(filters.query ?? "")
+	useEffect(() => setQuery(filters.query ?? ""), [filters.query])
 	const activeFilterCount = [
+		filters.query,
 		categoryIds.length ? "category" : null,
 		filters.is_allocated,
 		bucketScope === "all" ? null : bucketScope,
@@ -505,8 +380,25 @@ function MonthlyRecordFilters({
 					Filter this month
 				</h3>
 				<p className="text-xs text-muted-foreground">
-					The list and totals update together.
+					Search and narrow down this month's Records.
 				</p>
+			</div>
+			<div className="relative w-full md:w-sm">
+				<IconifyIcon
+					icon="lucide:search"
+					className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground"
+				/>
+				<Input
+					type="search"
+					aria-label="Search Records"
+					className="border-border bg-input/20 pl-8 dark:bg-input/30"
+					placeholder="Search title, people, location, description..."
+					value={query}
+					onChange={event => {
+						setQuery(event.target.value)
+						onChange({ query: event.target.value || undefined })
+					}}
+				/>
 			</div>
 			<FilterBar className="sm:flex sm:flex-wrap">
 				<CategoryFilter
@@ -623,222 +515,6 @@ function MonthlyRecordFilters({
 	)
 }
 
-function DayGroup({
-	date,
-	records,
-	selected,
-	setSelected,
-	onEdit,
-	loadingRecordId,
-	selectable = true,
-}: {
-	date: string
-	records: Record[]
-	selected: string[]
-	setSelected: React.Dispatch<React.SetStateAction<string[]>>
-	onEdit: (record: Record) => Promise<void>
-	loadingRecordId: string | null
-	selectable?: boolean
-}) {
-	const { handlePush } = useHistory()
-	const router = useRouter()
-	const income = records.reduce((sum, record) => sum + contribution(record).income, 0)
-	const spending = records.reduce((sum, record) => sum + contribution(record).spending, 0)
-	const allSelected = records.every(record => selected.includes(record.id))
-	const toggle = (record: Record, value: boolean) =>
-		setSelected(current =>
-			value ? [...current, record.id] : current.filter(id => id !== record.id),
-		)
-	return (
-		<div role="rowgroup" className="border-b last:border-b-0">
-			<div className="flex items-center gap-3 bg-muted/40 px-3 py-1.5 text-xs">
-				{selectable ? (
-					<Checkbox
-						aria-label={`Select Records on ${date}`}
-						checked={
-							allSelected
-								? true
-								: records.some(record => selected.includes(record.id))
-									? "indeterminate"
-									: false
-						}
-						onCheckedChange={value =>
-							setSelected(current =>
-								value === true
-									? [
-											...new Set([
-												...current,
-												...records.map(record => record.id),
-											]),
-										]
-									: current.filter(
-											id => !records.some(record => record.id === id),
-										),
-							)
-						}
-					/>
-				) : null}
-				<span className="font-medium">{dayLabel(date)}</span>
-				<span className="ml-auto flex gap-3 text-muted-foreground tabular-nums">
-					{income ? (
-						<span className="text-creative">+{formatCurrency(income)}</span>
-					) : null}
-					{spending ? (
-						<span className="text-destructive">{formatCurrency(-spending)}</span>
-					) : null}
-				</span>
-			</div>
-			<ul className="divide-y">
-				{records.map(record => {
-					const time = formatRowTime(record.datetime, true)
-					const checked = selected.includes(record.id)
-					return (
-						<li
-							key={record.id}
-							data-state={checked ? "selected" : undefined}
-							onClick={event => {
-								if (isInteractiveTarget(event.target)) return
-								handlePush("Monthly Records")()
-								router.push(pathRecord(record.id))
-							}}
-							className="flex min-w-0 cursor-pointer items-center gap-3 px-3 py-2.5 text-sm hover:bg-muted/40 data-[state=selected]:bg-muted"
-						>
-							{selectable ? (
-								<Checkbox
-									aria-label={`Select ${record.title}`}
-									checked={checked}
-									onCheckedChange={value => toggle(record, value === true)}
-								/>
-							) : null}
-							<Icon {...record.category} size={14} />
-							<div className="min-w-0 flex-1">
-								<p className="flex items-center gap-1.5">
-									<span className="min-w-0 truncate font-medium">
-										{record.title}
-									</span>
-									<PendingBadge record={record} />
-								</p>
-								<p className="truncate text-xs text-muted-foreground">
-									{[record.category.name, record.subtitle, time]
-										.filter(Boolean)
-										.join(" · ")}
-								</p>
-							</div>
-							<span
-								className="hidden shrink-0 items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs text-muted-foreground md:flex"
-								title={treatmentLabel(record.analytics_treatment)}
-							>
-								<span
-									className="size-2 rounded-full"
-									style={{
-										backgroundColor: record.bucket?.color ?? "var(--border)",
-									}}
-								/>
-								{record.bucket?.name ??
-									(canUseBucket(record)
-										? "No bucket"
-										: treatmentLabel(record.analytics_treatment))}
-							</span>
-							<span className="shrink-0 sm:w-28">
-								<RecordAmountCell
-									record={record}
-									value={record.amount}
-									showAllocated={record.is_pending}
-								/>
-							</span>
-							<div className="flex shrink-0 items-center gap-0.5">
-								<Button
-									variant="ghost"
-									size="icon-sm"
-									title="Edit"
-									aria-label={`Edit ${record.title}`}
-									aria-busy={loadingRecordId === record.id}
-									onClick={() => {
-										if (!loadingRecordId) void onEdit(record)
-									}}
-								>
-									<IconifyIcon
-										icon={
-											loadingRecordId === record.id
-												? "lucide:loader-circle"
-												: "lucide:pencil"
-										}
-									/>
-								</Button>
-								<Button
-									variant="ghost"
-									size="icon-sm"
-									title="Open"
-									className="hidden sm:inline-flex"
-									asChild
-								>
-									<Link
-										href={pathRecord(record.id)}
-										aria-label={`Open ${record.title}`}
-										onClick={handlePush("Monthly Records")}
-									>
-										<IconifyIcon icon="lucide:chevron-right" />
-									</Link>
-								</Button>
-							</div>
-						</li>
-					)
-				})}
-			</ul>
-		</div>
-	)
-}
-
-function PeriodSummary({
-	summary,
-	date,
-	period,
-	count,
-}: {
-	summary: AnalyticsSummary
-	date: DateTime
-	period: { is_current: boolean; is_future: boolean; through: string | null }
-	count: number
-}) {
-	const activeDays = summary.daily.filter(day => day.spending > 0).length
-	const elapsedDays =
-		period.is_current && period.through
-			? DateTime.fromISO(period.through).day
-			: date.daysInMonth
-	return (
-		<MetricGrid>
-			<Metric
-				icon="lucide:circle-dollar-sign"
-				label="Income"
-				value={formatCurrency(summary.income)}
-				detail={`${count} Record${count === 1 ? "" : "s"} shown`}
-			/>
-			<Metric
-				icon="lucide:receipt-text"
-				label="Net spending"
-				value={formatCurrency(summary.spending)}
-				detail={
-					summary.refunds
-						? `After ${formatCurrency(summary.refunds)} refunds`
-						: "No refunds"
-				}
-			/>
-			<Metric
-				icon="lucide:flame"
-				label="Per spending day"
-				value={activeDays ? formatCurrency(summary.spending / activeDays) : "—"}
-				detail={`${activeDays} day${activeDays === 1 ? "" : "s"} with spending`}
-			/>
-			<Metric
-				icon="lucide:calendar-days"
-				label="Per calendar day"
-				value={elapsedDays ? formatCurrency(summary.spending / elapsedDays) : "—"}
-				detail={`${elapsedDays ?? 0} day${elapsedDays === 1 ? "" : "s"} so far`}
-			/>
-		</MetricGrid>
-	)
-}
-
 function EmptyRecords({ filtered, onClear }: { filtered: boolean; onClear: () => void }) {
 	if (filtered) {
 		return (
@@ -870,29 +546,5 @@ function EmptyRecords({ filtered, onClear }: { filtered: boolean; onClear: () =>
 				</Button>
 			</CardContent>
 		</Card>
-	)
-}
-
-function groupRecords(records: Record[]) {
-	return records.reduce<{ [date: string]: Record[] }>((groups, record) => {
-		const date = record.datetime.slice(0, 10)
-		groups[date] ??= []
-		groups[date].push(record)
-		return groups
-	}, {})
-}
-
-function contribution(record: Record) {
-	if (record.analytics_treatment === "income") return { income: record.amount, spending: 0 }
-	if (record.analytics_treatment === "spending") return { income: 0, spending: -record.amount }
-	if (record.analytics_treatment === "automatic")
-		return { income: Math.max(record.amount, 0), spending: Math.max(-record.amount, 0) }
-	return { income: 0, spending: 0 }
-}
-
-function canUseBucket(record: Record) {
-	return (
-		record.analytics_treatment === "spending" ||
-		(record.analytics_treatment === "automatic" && record.amount < 0)
 	)
 }

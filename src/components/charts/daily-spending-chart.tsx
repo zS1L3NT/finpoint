@@ -1,6 +1,7 @@
 import { DateTime } from "luxon"
 import { useRouter } from "next/navigation"
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
+import BucketBadge from "@/components/bucket-badge"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { useHistory } from "@/history"
 import { useIsMobile } from "@/hooks/use-mobile"
@@ -50,18 +51,9 @@ export default function DailySpendingChart({
 
 	return (
 		<div className="grid gap-3">
-			<div className="flex flex-wrap gap-x-4 gap-y-1.5">
+			<div className="flex flex-wrap gap-1.5">
 				{buckets.map(bucket => (
-					<span
-						key={bucket.id}
-						className="flex items-center gap-1.5 text-xs text-muted-foreground"
-					>
-						<span
-							className="size-2 rounded-full"
-							style={{ backgroundColor: bucket.color }}
-						/>
-						{bucket.name}
-					</span>
+					<BucketBadge key={bucket.id} name={bucket.name} color={bucket.color} />
 				))}
 			</div>
 			<ChartContainer

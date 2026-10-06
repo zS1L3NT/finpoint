@@ -1,10 +1,22 @@
 import { DateTime } from "luxon"
-import { classForCurrency, formatCurrency } from "@/lib/utils"
+import { TableCell, TableRow } from "@/components/ui/table"
+import { classForCurrency, cn, formatCurrency } from "@/lib/utils"
 
 export type RowGroup<TData> = {
 	key: (row: TData) => string
-	header: (key: string, rows: TData[]) => React.ReactNode
+	/** Left side of the group header, e.g. the day and how many rows it holds. */
+	label: (key: string, rows: TData[]) => React.ReactNode
+	/** Subtotal shown in the Amount column so it lines up with the row amounts. */
+	total?: (rows: TData[]) => number
 }
+
+/**
+ * Mobile lists share three columns across every row via subgrid, so a group's
+ * subtotal sits exactly under the row amounts and clear of the row actions.
+ * Mobile rows render as `[main, amount, actions]`.
+ */
+export const MOBILE_LIST_CLASS = "grid grid-cols-[minmax(0,1fr)_auto_auto]"
+export const MOBILE_ROW_CLASS = "col-span-full grid grid-cols-subgrid items-center gap-x-3"
 
 /** Index of each group's first row → that group's key and members, in display order. */
 export function groupStarts<TData>(rows: TData[], group: RowGroup<TData> | undefined) {
@@ -22,8 +34,83 @@ export function groupStarts<TData>(rows: TData[], group: RowGroup<TData> | undef
 	return starts
 }
 
-/** Clicks on controls inside a clickable row must not also open the row. */
+function GroupTotal({ value }: { value: number }) {
+	return (
+		<span
+			className={cn("block text-right font-semibold tabular-nums", classForCurrency(value))}
+		>
+			{formatCurrency(value)}
+		</span>
+	)
+}
+
+/**
+ * Desktop group header: one cell per column (keeping each column's responsive
+ * visibility), the label in the first and the subtotal in the Amount column.
+ */
+export function GroupHeaderRow<TData>({
+	group,
+	groupKey,
+	rows,
+	columns,
+}: {
+	group: RowGroup<TData>
+	groupKey: string
+	rows: TData[]
+	columns: { id: string; className?: string }[]
+}) {
+	const hasTotal = !!group.total && columns.some(column => column.id === "amount")
+	if (!hasTotal) {
+		return (
+			<TableRow className="bg-muted/40 hover:bg-muted/40">
+				<TableCell colSpan={columns.length} className="py-1.5">
+					{group.label(groupKey, rows)}
+				</TableCell>
+			</TableRow>
+		)
+	}
+	return (
+		<TableRow className="bg-muted/40 hover:bg-muted/40">
+			{columns.map((column, index) => (
+				<TableCell
+					key={column.id}
+					className={cn("py-1.5", index === 0 && "overflow-visible", column.className)}
+				>
+					{index === 0 ? group.label(groupKey, rows) : null}
+					{column.id === "amount" && group.total ? (
+						<GroupTotal value={group.total(rows)} />
+					) : null}
+				</TableCell>
+			))}
+		</TableRow>
+	)
+}
+
+/** Mobile group header: same three subgrid columns as the rows beneath it. */
+export function MobileGroupHeader<TData>({
+	group,
+	groupKey,
+	rows,
+}: {
+	group: RowGroup<TData>
+	groupKey: string
+	rows: TData[]
+}) {
+	return (
+		<div className={cn(MOBILE_ROW_CLASS, "bg-muted/50 px-3 py-1.5 text-sm")}>
+			<div className="min-w-0">{group.label(groupKey, rows)}</div>
+			{group.total ? <GroupTotal value={group.total(rows)} /> : <span />}
+			<span />
+		</div>
+	)
+}
+
+/**
+ * Clicks on controls inside a clickable row must not also trigger the row, and
+ * neither must the click that ends a text selection.
+ */
 export function isInteractiveTarget(target: EventTarget | null) {
+	if (typeof window !== "undefined" && window.getSelection()?.toString()) return true
 	return (
 		target instanceof Element &&
 		!!target.closest("a, button, input, label, select, textarea, [role='checkbox']")
@@ -42,20 +129,20 @@ export function dayLabel(day: string) {
 }
 
 /** Day group: records and statements are listed newest first, so a day prefix groups them. */
-export function byDay<TData extends { datetime: string; amount: number }>(): RowGroup<TData> {
+export function byDay<TData extends { datetime: string; amount: number }>(
+	noun: string,
+): RowGroup<TData> {
 	return {
 		key: row => row.datetime.slice(0, 10),
-		header: (key, rows) => {
-			const net = rows.reduce((sum, row) => sum + row.amount, 0)
-			return (
-				<div className="flex items-center justify-between gap-3 text-xs">
-					<span className="font-medium text-foreground">{dayLabel(key)}</span>
-					<span className="tabular-nums text-muted-foreground">
-						{rows.length} ·{" "}
-						<span className={classForCurrency(net)}>{formatCurrency(net)}</span>
-					</span>
-				</div>
-			)
-		},
+		label: (key, rows) => (
+			<span className="flex items-baseline gap-2 text-xs">
+				<span className="font-semibold text-foreground">{dayLabel(key)}</span>
+				<span className="text-muted-foreground tabular-nums">
+					{rows.length} {noun}
+					{rows.length === 1 ? "" : "s"}
+				</span>
+			</span>
+		),
+		total: rows => rows.reduce((sum, row) => sum + row.amount, 0),
 	}
 }

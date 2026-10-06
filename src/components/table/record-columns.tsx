@@ -1,10 +1,12 @@
 import type { CellContext, ColumnDef, Row } from "@tanstack/react-table"
 import Link from "next/link"
 import { useMemo, useState } from "react"
+import BucketBadge from "@/components/bucket-badge"
 import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useHistory } from "@/history"
+import { treatmentLabel } from "@/lib/analytics"
 import { classForCurrency, cn, formatCurrency, parseDatetime } from "@/lib/utils"
 import { pathRecord } from "@/routes"
 import type { Allocation, Record } from "@/types"
@@ -19,6 +21,8 @@ type RecordTableOptions<TRecord extends RecordRow> = {
 	onEdit?: (record: TRecord) => void | Promise<unknown>
 	/** Rows sit under day headers, so only the time is shown. */
 	grouped?: boolean
+	/** Adds a spending bucket column (desktop only). */
+	showBucket?: boolean
 }
 
 /** Money in green, money out red: the app-wide currency colours. */
@@ -49,6 +53,19 @@ export function PendingBadge({ record }: { record: Record }) {
 		<Badge variant="warning" className="shrink-0" title={pendingReason(record)}>
 			Pending
 		</Badge>
+	)
+}
+
+function RecordBucket({ record }: { record: Record }) {
+	if (record.bucket) return <BucketBadge name={record.bucket.name} color={record.bucket.color} />
+	const spending =
+		record.analytics_treatment === "spending" ||
+		(record.analytics_treatment === "automatic" && record.amount < 0)
+	if (spending) return <BucketBadge name="No bucket" color={null} />
+	return (
+		<span className="text-xs text-muted-foreground">
+			{treatmentLabel(record.analytics_treatment)}
+		</span>
 	)
 }
 
@@ -144,6 +161,7 @@ export function useRecordColumns<TRecord extends RecordRow>({
 	extraActions,
 	onEdit,
 	grouped = false,
+	showBucket = false,
 }: RecordTableOptions<TRecord>): ColumnDef<TRecord>[] {
 	return useMemo(
 		(): ColumnDef<TRecord>[] => [
@@ -179,6 +197,16 @@ export function useRecordColumns<TRecord extends RecordRow>({
 					</p>
 				),
 			},
+			...(showBucket
+				? [
+						{
+							id: "bucket",
+							header: "Bucket",
+							meta: { width: "hidden w-36 lg:table-cell" },
+							cell: ({ row }) => <RecordBucket record={row.original} />,
+						} satisfies ColumnDef<TRecord>,
+					]
+				: []),
 			{
 				header: grouped ? "Time" : "Date",
 				meta: { width: grouped ? "w-24" : "w-36" },
@@ -213,7 +241,7 @@ export function useRecordColumns<TRecord extends RecordRow>({
 				cell: RecordActionsCell,
 			},
 		],
-		[amount, pageName, extraActions, onEdit, grouped],
+		[amount, pageName, extraActions, onEdit, grouped, showBucket],
 	)
 }
 
@@ -233,20 +261,23 @@ export function useRecordMobileRow<TRecord extends RecordRow>({
 			const value = amount === "allocated" ? (record.pivot?.amount ?? 0) : record.amount
 			const time = formatRowTime(record.datetime, grouped)
 
+			// Three cells (main, amount, actions) for the list's shared subgrid.
 			return (
-				<div className="flex min-w-0 items-center gap-3">
-					{leading?.(record)}
-					<Icon {...record.category} size={14} />
-					<div className="min-w-0 flex-1">
-						<p className="flex items-center gap-1.5">
-							<span className="min-w-0 truncate font-medium">{record.title}</span>
-							<PendingBadge record={record} />
-						</p>
-						<p className="truncate text-xs text-muted-foreground">
-							{[record.category.name, record.subtitle, time]
-								.filter(Boolean)
-								.join(" · ")}
-						</p>
+				<>
+					<div className="flex min-w-0 items-center gap-3">
+						{leading?.(record)}
+						<Icon {...record.category} size={14} />
+						<div className="min-w-0 flex-1">
+							<p className="flex items-center gap-1.5">
+								<span className="min-w-0 truncate font-medium">{record.title}</span>
+								<PendingBadge record={record} />
+							</p>
+							<p className="truncate text-xs text-muted-foreground">
+								{[record.category.name, record.subtitle, time]
+									.filter(Boolean)
+									.join(" · ")}
+							</p>
+						</div>
 					</div>
 					<RecordAmountCell
 						record={record}
@@ -254,7 +285,7 @@ export function useRecordMobileRow<TRecord extends RecordRow>({
 						showAllocated={amount === "amount" && record.is_pending}
 					/>
 					<RecordActions record={record} options={{ pageName, extraActions, onEdit }} />
-				</div>
+				</>
 			)
 		},
 		[amount, pageName, extraActions, leading, onEdit, grouped],
