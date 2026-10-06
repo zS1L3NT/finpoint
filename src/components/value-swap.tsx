@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * Crossfades a displayed value when it changes (e.g. the month switches): a small
- * rise with a touch of blur. Silent on first mount; the exit is quicker and smaller.
+ * rise. Silent on first mount; the exit is quicker and smaller.
  */
 export default function ValueSwap({
 	value,
@@ -24,12 +24,11 @@ export default function ValueSwap({
 				<motion.span
 					key={value}
 					className="inline-block max-w-full tabular-nums"
-					initial={{ opacity: 0, y: 4, filter: "blur(2px)" }}
-					animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+					initial={{ opacity: 0, y: 4 }}
+					animate={{ opacity: 1, y: 0 }}
 					exit={{
 						opacity: 0,
 						y: -3,
-						filter: "blur(2px)",
 						transition: { duration: DURATION.instant, ease: EASE_OUT },
 					}}
 					transition={{ duration: DURATION.base - 0.04, ease: EASE_OUT }}
