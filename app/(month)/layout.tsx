@@ -1,5 +1,6 @@
 "use client"
 
+import { motion } from "framer-motion"
 import { DateTime } from "luxon"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -11,7 +12,8 @@ import { MonthPicker } from "@/components/ui/monthpicker"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { useHistory } from "@/history"
 import { useMonthParams } from "@/hooks/use-month-params"
-import { armTabTransition } from "@/hooks/use-tab-transition"
+import { armMonthTransition, armTabTransition } from "@/hooks/use-tab-transition"
+import { SPRING } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 import { pathDashboard, pathMonthlyRecords } from "@/routes"
 
@@ -40,6 +42,8 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 		: `${isCurrent ? `Through ${today.toFormat("d MMM")}` : isFuture ? "Future month" : "Full month"} · SGD · Based on Record dates`
 
 	const changeMonth = (next: DateTime) => {
+		if (next.hasSame(date, "month")) return
+		armMonthTransition(next > date ? 1 : -1)
 		const monthName = next.toFormat("MMMM")
 		const yearValue = String(next.year)
 		if (isMonthly) {
@@ -132,36 +136,45 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 							className="flex min-w-0 border-b sm:flex-1"
 							aria-label="Monthly finance views"
 						>
-							<Link
-								className={cn(
-									"border-b-2 px-4 py-2 text-sm hover:text-foreground",
-									isMonthly
-										? "border-transparent text-muted-foreground"
-										: "border-foreground font-medium",
-								)}
-								href={pathDashboard({ month, year: String(year) })}
-								onClick={() => {
-									handleClear()
-									armTabTransition()
-								}}
-							>
-								Overview
-							</Link>
-							<Link
-								className={cn(
-									"border-b-2 px-4 py-2 text-sm hover:text-foreground",
-									isMonthly
-										? "border-foreground font-medium"
-										: "border-transparent text-muted-foreground",
-								)}
-								href={pathMonthlyRecords({ month, year: String(year) })}
-								onClick={() => {
-									handleClear()
-									armTabTransition()
-								}}
-							>
-								Monthly Records
-							</Link>
+							{(
+								[
+									[
+										"Overview",
+										false,
+										pathDashboard({ month, year: String(year) }),
+									],
+									[
+										"Monthly Records",
+										true,
+										pathMonthlyRecords({ month, year: String(year) }),
+									],
+								] as const
+							).map(([label, monthly, href]) => {
+								const active = monthly === isMonthly
+								return (
+									<Link
+										key={label}
+										className={cn(
+											"relative px-4 py-2 text-sm transition-colors duration-150 ease-out hover:text-foreground",
+											active ? "font-medium" : "text-muted-foreground",
+										)}
+										href={href}
+										onClick={() => {
+											handleClear()
+											armTabTransition()
+										}}
+									>
+										{label}
+										{active ? (
+											<motion.span
+												layoutId="month-tab-indicator"
+												transition={SPRING.snappy}
+												className="absolute inset-x-0 bottom-0 h-0.5 bg-foreground"
+											/>
+										) : null}
+									</Link>
+								)
+							})}
 						</nav>
 					</div>
 				</header>
