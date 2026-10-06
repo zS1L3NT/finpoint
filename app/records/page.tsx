@@ -27,7 +27,6 @@ import {
 	SelectValue,
 } from "@/components/ui/select"
 import { useFetch } from "@/hooks/use-fetch"
-import { useOpenRow } from "@/hooks/use-open-row"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { useRecordEditor } from "@/hooks/use-record-editor"
 import { cn } from "@/lib/utils"
@@ -35,7 +34,6 @@ import { listBuckets } from "@/logic/buckets"
 import { listCategories } from "@/logic/categories"
 import { paginateItems, parsePage, parsePageSize } from "@/logic/pagination"
 import { listRecords } from "@/logic/records"
-import { pathRecord } from "@/routes"
 import { Bucket, CategoryWithChildren, Record } from "@/types"
 
 export default function RecordsPage() {
@@ -138,7 +136,6 @@ export default function RecordsPage() {
 		onEdit: handleEdit,
 		grouped: true,
 	})
-	const openRecord = useOpenRow<Record>(pathRecord, "Records")
 	const tableHeader = useMemo(
 		() => ({
 			query,
@@ -211,8 +208,7 @@ export default function RecordsPage() {
 					header={tableHeader}
 					footer={tableFooter}
 					mobileRow={mobileRow}
-					groupBy={byDay<Record>()}
-					onRowClick={openRecord}
+					groupBy={byDay<Record>("Record")}
 					emptyMessage="No records found."
 					loading={recordsQuery === undefined}
 				/>
