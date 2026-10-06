@@ -6,9 +6,10 @@ import {
 	useReactTable,
 } from "@tanstack/react-table"
 import { AnimatePresence } from "framer-motion"
-import { memo, useEffect, useState } from "react"
+import { Fragment, memo, useEffect, useState } from "react"
 import PaginationFooter from "@/components/table/pagination-footer"
 import PaginationHeader from "@/components/table/pagination-header"
+import { groupStarts, isInteractiveTarget, type RowGroup } from "@/components/table/row-groups"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
 	Table,
@@ -32,6 +33,8 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 	emptyMessage = "No results.",
 	mobileRow,
 	loading,
+	groupBy,
+	onRowClick,
 }: {
 	paginated: Paginated<TData>
 	columns: ColumnDef<TData, TValue>[]
@@ -41,6 +44,8 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 	emptyMessage?: string
 	mobileRow?: (row: Row<TData>) => React.ReactNode
 	loading?: boolean
+	groupBy?: RowGroup<TData>
+	onRowClick?: (row: TData) => void
 }) {
 	const table = useReactTable({
 		data: paginated.data,
@@ -55,6 +60,14 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 		if (!loading) setLive(true)
 	}, [loading])
 	const enter = live ? { opacity: 0, y: 12 } : false
+	const rows = table.getRowModel().rows
+	const starts = groupStarts(
+		rows.map(row => row.original),
+		groupBy,
+	)
+	const clickRow = (row: TData) => (event: React.MouseEvent) => {
+		if (onRowClick && !isInteractiveTarget(event.target)) onRowClick(row)
+	}
 
 	return (
 		<div className="@container/table flex min-w-0 flex-col gap-4">
@@ -70,16 +83,31 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 									<Skeleton className="h-3 w-1/3" />
 								</div>
 							))
-						) : table.getRowModel().rows.length ? (
-							table.getRowModel().rows.map(row => (
-								<div
-									key={row.id}
-									data-state={selectedIds?.includes(row.id) && "selected"}
-									className="min-w-0 overflow-hidden px-3 py-2.5 text-sm data-[state=selected]:bg-muted"
-								>
-									{mobileRow(row)}
-								</div>
-							))
+						) : rows.length ? (
+							rows.map((row, index) => {
+								const group = starts.get(index)
+								return (
+									<Fragment key={row.id}>
+										{group && groupBy ? (
+											<div className="bg-muted/50 px-3 py-1.5">
+												{groupBy.header(group.key, group.rows)}
+											</div>
+										) : null}
+										<div
+											data-state={selectedIds?.includes(row.id) && "selected"}
+											onClick={
+												onRowClick ? clickRow(row.original) : undefined
+											}
+											className={cn(
+												"min-w-0 overflow-hidden px-3 py-2.5 text-sm data-[state=selected]:bg-muted",
+												onRowClick && "cursor-pointer active:bg-muted/60",
+											)}
+										>
+											{mobileRow(row)}
+										</div>
+									</Fragment>
+								)
+							})
 						) : (
 							<div className="p-8 text-center text-sm text-muted-foreground">
 								{emptyMessage}
@@ -138,35 +166,56 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 									))}
 								</TableRow>
 							))
-						) : table.getRowModel().rows.length ? (
+						) : rows.length ? (
 							<AnimatePresence initial={false}>
-								{table.getRowModel().rows.map(row => (
-									<TableRow
-										key={row.id}
-										layout="position"
-										initial={enter}
-										animate={{ opacity: 1, y: 0 }}
-										exit={{ opacity: 0, y: -12 }}
-										data-state={selectedIds?.includes(row.id) && "selected"}
-									>
-										{row.getVisibleCells().map(cell => (
-											<TableCell
-												key={cell.id}
-												className={
-													cell.column.columnDef.meta &&
-													"width" in cell.column.columnDef.meta
-														? `${cell.column.columnDef.meta?.width}`
-														: undefined
+								{rows.map((row, index) => {
+									const group = starts.get(index)
+									return (
+										<Fragment key={row.id}>
+											{group && groupBy ? (
+												<TableRow className="bg-muted/40 hover:bg-muted/40">
+													<TableCell
+														colSpan={columns.length}
+														className="py-1.5"
+													>
+														{groupBy.header(group.key, group.rows)}
+													</TableCell>
+												</TableRow>
+											) : null}
+											<TableRow
+												key={row.id}
+												layout="position"
+												initial={enter}
+												animate={{ opacity: 1, y: 0 }}
+												exit={{ opacity: 0, y: -12 }}
+												data-state={
+													selectedIds?.includes(row.id) && "selected"
 												}
+												onClick={
+													onRowClick ? clickRow(row.original) : undefined
+												}
+												className={cn(onRowClick && "cursor-pointer")}
 											>
-												{flexRender(
-													cell.column.columnDef.cell,
-													cell.getContext(),
-												)}
-											</TableCell>
-										))}
-									</TableRow>
-								))}
+												{row.getVisibleCells().map(cell => (
+													<TableCell
+														key={cell.id}
+														className={
+															cell.column.columnDef.meta &&
+															"width" in cell.column.columnDef.meta
+																? `${cell.column.columnDef.meta?.width}`
+																: undefined
+														}
+													>
+														{flexRender(
+															cell.column.columnDef.cell,
+															cell.getContext(),
+														)}
+													</TableCell>
+												))}
+											</TableRow>
+										</Fragment>
+									)
+								})}
 							</AnimatePresence>
 						) : (
 							<TableRow layout layoutId="empty">

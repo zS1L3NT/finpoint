@@ -1,6 +1,7 @@
 // Mirrors `Api\BudgetController` + `Api\BudgetRecordController` + `Budget::appQuery`.
 
 import { db } from "@/data/db"
+import { enrichRecords } from "@/logic/records"
 import { newId, round2 } from "@/logic/shared"
 import { Validator } from "@/logic/validate"
 
@@ -47,17 +48,15 @@ export async function getBudget(id: string) {
 				.anyOf(links.map(l => l.record_id))
 				.toArray()
 		: []
-	const categories = new Map((await db.categories.toArray()).map(c => [c.id, c]))
-	const buckets = new Map((await db.buckets.toArray()).map(b => [b.id, b]))
+	// Same read model as the Records list, so pending state and subtitles match.
+	const enriched = (await enrichRecords(records)).sort((x, y) =>
+		y.datetime.localeCompare(x.datetime),
+	)
 
 	return {
 		...budget,
 		used_amount: round2(records.reduce((sum, r) => sum + r.amount, 0)),
-		records: records.map(record => ({
-			...record,
-			category: categories.get(record.category_id) ?? null,
-			bucket: record.bucket_id ? (buckets.get(record.bucket_id) ?? null) : null,
-		})),
+		records: enriched,
 	}
 }
 

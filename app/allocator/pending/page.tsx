@@ -17,15 +17,6 @@ import PaginationFooter from "@/components/table/pagination-footer"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import {
-	Card,
-	CardAction,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card"
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
 import { Input } from "@/components/ui/input"
 import {
@@ -383,26 +374,54 @@ export default function AllocatorPendingPage() {
 										Back to pending Statements
 									</Button>
 									<div className="flex flex-col gap-2">
-										<div>
-											<h3
-												id="candidate-title"
-												className="font-heading text-base font-medium"
-											>
-												Imported Statements
-											</h3>
-											<p className="truncate text-xs/relaxed text-muted-foreground">
-												For {selectedPendingStatement.description} ·{" "}
+										<div className="grid gap-3 rounded-xl border border-dashed bg-amber-500/5 p-4">
+											<p className="flex items-center gap-1.5 text-xs font-medium text-amber-700 dark:text-amber-400">
+												<IconifyIcon
+													icon="lucide:circle-dashed"
+													className="size-3.5"
+												/>
+												Replacing pending Statement
+											</p>
+											<div className="flex items-start justify-between gap-3">
+												<div className="min-w-0">
+													<p className="truncate font-semibold">
+														{selectedPendingStatement.description}
+													</p>
+													<p className="text-xs text-muted-foreground">
+														{selectedPendingStatement.account.name} ·{" "}
+														{formatDatetime(
+															selectedPendingStatement.datetime,
+														)}{" "}
+														·{" "}
+														{selectedPendingStatement.allocation_count}{" "}
+														Allocation
+														{selectedPendingStatement.allocation_count ===
+														1
+															? ""
+															: "s"}{" "}
+														carry over
+													</p>
+												</div>
 												<span
-													className={classForCurrency(
-														selectedPendingStatement.amount,
+													className={cn(
+														"shrink-0 text-lg font-semibold tabular-nums",
+														classForCurrency(
+															selectedPendingStatement.amount,
+														),
 													)}
 												>
 													{formatCurrency(
 														selectedPendingStatement.amount,
 													)}
 												</span>
-											</p>
+											</div>
 										</div>
+										<h3
+											id="candidate-title"
+											className="font-heading text-base font-medium"
+										>
+											Imported Statements it could become
+										</h3>
 										<Input
 											placeholder="Search descriptions..."
 											value={candidateQuery}
@@ -546,42 +565,58 @@ function PendingCard({
 }) {
 	const allocated = round2dp(statement.amount - statement.allocable_amount)
 	return (
-		<Card
-			size="sm"
+		<button
+			type="button"
+			onClick={onSelect}
+			aria-pressed={selected}
 			className={cn(
-				"transition-[box-shadow,background-color] duration-200 motion-reduce:transition-none",
-				selected && "bg-muted/30 ring-2 ring-ring",
+				"group grid w-full cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 rounded-lg border bg-card px-3 py-2.5 text-left transition-colors hover:bg-muted/50",
+				selected && "border-foreground/40 bg-muted/60 ring-1 ring-foreground/20",
 			)}
 		>
-			<CardHeader>
-				<CardTitle className="line-clamp-2">{statement.description}</CardTitle>
-				<CardDescription>
+			<span className="min-w-0">
+				<span className="block truncate text-sm font-medium">{statement.description}</span>
+				<span className="block truncate text-xs text-muted-foreground">
 					{statement.account.name} · {formatDatetime(statement.datetime)}
-				</CardDescription>
-				<CardAction>
-					<span className={cn("font-semibold", classForCurrency(statement.amount))}>
-						{formatCurrency(statement.amount)}
-					</span>
-				</CardAction>
-			</CardHeader>
-			<CardContent className="flex flex-wrap gap-1.5">
-				<Badge variant="outline">{formatCurrency(allocated)} allocated</Badge>
-				<Badge variant="outline">
+				</span>
+			</span>
+			<span className="flex items-center gap-1">
+				<span
+					className={cn(
+						"text-sm font-semibold tabular-nums",
+						classForCurrency(statement.amount),
+					)}
+				>
+					{formatCurrency(statement.amount)}
+				</span>
+				<IconifyIcon
+					icon="lucide:chevron-right"
+					className={cn(
+						"size-4 text-muted-foreground transition-transform",
+						selected && "translate-x-0.5 text-foreground",
+					)}
+				/>
+			</span>
+			<span className="col-span-2 flex flex-wrap gap-1.5 text-[0.6875rem] text-muted-foreground">
+				<span>
 					{statement.allocation_count} Allocation
-					{statement.allocation_count === 1 ? "" : "s"}
-				</Badge>
-				<Badge variant={statement.suggestion_count ? "secondary" : "warning"}>
+					{statement.allocation_count === 1 ? "" : "s"} · {formatCurrency(allocated)}
+				</span>
+				<span aria-hidden>·</span>
+				<span
+					className={cn(
+						"font-medium",
+						statement.suggestion_count
+							? "text-emerald-700 dark:text-emerald-400"
+							: "text-amber-700 dark:text-amber-400",
+					)}
+				>
 					{statement.suggestion_count
-						? `${statement.suggestion_count} suggestion${statement.suggestion_count === 1 ? "" : "s"}`
-						: "No suggestions"}
-				</Badge>
-			</CardContent>
-			<CardFooter className="justify-end">
-				<Button size="sm" variant={selected ? "secondary" : "outline"} onClick={onSelect}>
-					Compare
-				</Button>
-			</CardFooter>
-		</Card>
+						? `${statement.suggestion_count} suggested match${statement.suggestion_count === 1 ? "" : "es"}`
+						: "No suggested match"}
+				</span>
+			</span>
+		</button>
 	)
 }
 
@@ -669,31 +704,38 @@ function CandidateResults({
 							delay: reduceMotion ? 0 : Math.min(index * 0.035, 0.14),
 						}}
 					>
-						<Card size="sm">
-							<CardHeader>
-								<CardTitle className="line-clamp-2">
-									{statement.description}
-								</CardTitle>
-								<CardDescription>
-									{formatDatetime(statement.datetime)}
-								</CardDescription>
-								<CardAction>
+						<div
+							className={cn(
+								"grid gap-3 rounded-lg border bg-card p-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center",
+								statement.can_replace &&
+									statement.is_exact_amount &&
+									"border-emerald-500/40 bg-emerald-500/5",
+							)}
+						>
+							<div className="min-w-0">
+								<div className="flex items-center justify-between gap-3">
+									<p className="truncate text-sm font-medium">
+										{statement.description}
+									</p>
 									<span
 										className={cn(
-											"font-semibold",
+											"shrink-0 text-sm font-semibold tabular-nums",
 											classForCurrency(statement.amount),
 										)}
 									>
 										{formatCurrency(statement.amount)}
 									</span>
-								</CardAction>
-							</CardHeader>
-							<CardContent className="flex flex-col gap-2">
-								<div className="flex flex-wrap gap-1.5">
+								</div>
+								<div className="mt-1 flex flex-wrap items-center gap-1.5 text-[0.6875rem]">
+									<span className="text-muted-foreground">
+										{formatDatetime(statement.datetime)}
+									</span>
 									<Badge
-										variant={
-											statement.is_exact_amount ? "secondary" : "outline"
-										}
+										variant="outline"
+										className={cn(
+											statement.is_exact_amount &&
+												"border-emerald-500/40 text-emerald-700 dark:text-emerald-400",
+										)}
 									>
 										{statement.is_exact_amount
 											? "Same amount"
@@ -702,28 +744,32 @@ function CandidateResults({
 									<Badge variant="outline">
 										{dateDifferenceLabel(statement.day_difference)}
 									</Badge>
-									{!statement.can_replace ? (
-										<Badge variant="destructive">Cannot replace</Badge>
-									) : null}
 								</div>
-								{statement.disabled_reason ? (
-									<p className="text-xs/relaxed text-destructive">
-										{statement.disabled_reason}
-									</p>
-								) : (
-									<p className="text-xs/relaxed text-muted-foreground">
-										{formatCurrency(statement.remaining_allocable_amount)}{" "}
-										remains allocable after replacement.
-									</p>
-								)}
-							</CardContent>
-							<CardFooter className="justify-end gap-1.5">
-								<Button variant="outline" size="sm" asChild>
+								<p
+									className={cn(
+										"mt-1.5 text-xs",
+										statement.disabled_reason
+											? "text-destructive"
+											: "text-muted-foreground",
+									)}
+								>
+									{statement.disabled_reason ??
+										`${formatCurrency(statement.remaining_allocable_amount)} stays allocable after replacing.`}
+								</p>
+							</div>
+							<div className="flex items-center justify-end gap-1">
+								<Button
+									variant="ghost"
+									size="icon-sm"
+									title="Open Statement"
+									asChild
+								>
 									<Link
 										href={pathStatement(statement.id)}
+										aria-label="Open Statement"
 										onClick={handlePush("Allocator")}
 									>
-										Open
+										<IconifyIcon icon="lucide:external-link" />
 									</Link>
 								</Button>
 								<Button
@@ -732,10 +778,10 @@ function CandidateResults({
 									onClick={() => onReview(statement)}
 								>
 									<IconifyIcon icon="lucide:replace" data-icon="inline-start" />
-									Review replacement
+									Replace
 								</Button>
-							</CardFooter>
-						</Card>
+							</div>
+						</div>
 					</motion.div>
 				))}
 			</div>

@@ -190,6 +190,13 @@ export default function RecordEditorDialog({
 		<StatementSearchSheet
 			title="Attach statements to record"
 			placeholder="Search unattached statements..."
+			target={
+				Math.round(
+					(Number(analytics.amount) -
+						formStatements.reduce((sum, s) => sum + Number(s.amount), 0)) *
+						100,
+				) / 100
+			}
 			filters={{
 				is_allocable: "true",
 				exclude_ids: formStatements.map(s => s.id).join(","),

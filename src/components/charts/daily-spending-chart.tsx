@@ -1,6 +1,6 @@
 import { DateTime } from "luxon"
 import { useRouter } from "next/navigation"
-import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { useHistory } from "@/history"
 import { useIsMobile } from "@/hooks/use-mobile"
@@ -70,19 +70,29 @@ export default function DailySpendingChart({
 					buckets.map(bucket => [bucket.id, { label: bucket.name, color: bucket.color }]),
 				)}
 			>
-				<LineChart
+				<BarChart
 					data={rows}
+					barCategoryGap={isMobile ? 1 : 3}
 					onClick={openDay}
 					style={{ cursor: "pointer" }}
 					accessibilityLayer
 				>
 					<CartesianGrid vertical={false} />
-					<XAxis dataKey="day" interval={interval} tickMargin={8} />
+					<XAxis
+						dataKey="day"
+						interval={interval}
+						tickMargin={8}
+						tickLine={false}
+						axisLine={false}
+					/>
 					<YAxis
+						tickLine={false}
+						axisLine={false}
 						width={isMobile ? 44 : 64}
 						tickFormatter={value => formatCurrency(Number(value)).replace(/\.00$/, "")}
 					/>
 					<ChartTooltip
+						cursor={{ fill: "var(--muted)", fillOpacity: 0.6 }}
 						content={
 							<ChartTooltipContent
 								labelFormatter={(label, payload) =>
@@ -105,19 +115,23 @@ export default function DailySpendingChart({
 							/>
 						}
 					/>
-					{buckets.map(bucket => (
-						<Line
+					{buckets.map((bucket, index) => (
+						// Stacked so a day's bar height is its total outflow; the
+						// 1px card-coloured stroke keeps adjacent segments apart.
+						<Bar
 							key={bucket.id}
 							dataKey={bucket.id}
 							name={bucket.name}
-							stroke={bucket.color}
-							strokeWidth={bucket.width ?? 2}
-							strokeDasharray={bucket.dashed ? "4 4" : undefined}
-							dot={false}
+							stackId="day"
+							fill={bucket.color}
+							fillOpacity={bucket.dashed ? 0.55 : 1}
+							stroke="var(--card)"
+							strokeWidth={1}
+							radius={index === buckets.length - 1 ? [3, 3, 0, 0] : 0}
 							isAnimationActive={false}
 						/>
 					))}
-				</LineChart>
+				</BarChart>
 			</ChartContainer>
 		</div>
 	)

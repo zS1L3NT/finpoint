@@ -1,6 +1,6 @@
 "use client"
 
-import { XIcon } from "lucide-react"
+import { MonitorIcon, MoonIcon, SunIcon, XIcon } from "lucide-react"
 import { DateTime } from "luxon"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -9,15 +9,18 @@ import { Button } from "@/components/ui/button"
 import {
 	Sidebar,
 	SidebarContent,
+	SidebarFooter,
 	SidebarGroup,
 	SidebarGroupLabel,
 	SidebarHeader,
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
+	SidebarRail,
 	useSidebar,
 } from "@/components/ui/sidebar"
 import { useHistory } from "@/history"
+import { type Appearance, useAppearance } from "@/hooks/use-appearance"
 import { useDefaultFilterEndDateToday, useDefaultFilterStartDate } from "@/hooks/use-settings"
 import { useSyncStatus } from "@/hooks/use-sync-status"
 import {
@@ -33,7 +36,7 @@ import {
 	pathStatements,
 } from "@/routes"
 
-function SyncDot() {
+function useSyncIndicator() {
 	const sync = useSyncStatus()
 	if (!sync.configured) return null
 	const tone: string =
@@ -70,7 +73,70 @@ function SyncDot() {
 										: sync.kind === "error"
 											? (sync.error ?? "Sync failed")
 											: "In sync"
-	return <span title={title} className={`ml-auto size-2 shrink-0 rounded-full ${tone}`} />
+	return { tone, title }
+}
+
+function SyncDot() {
+	const indicator = useSyncIndicator()
+	if (!indicator) return null
+	return (
+		<span
+			title={indicator.title}
+			className={`ml-auto size-2 shrink-0 rounded-full group-data-[collapsible=icon]:absolute group-data-[collapsible=icon]:top-1 group-data-[collapsible=icon]:right-1 group-data-[collapsible=icon]:size-1.5 ${indicator.tone}`}
+		/>
+	)
+}
+
+type AppearanceOption = { value: Appearance; label: string; icon: typeof SunIcon }
+
+const SYSTEM_APPEARANCE: AppearanceOption = { value: "system", label: "System", icon: MonitorIcon }
+const APPEARANCES: AppearanceOption[] = [
+	{ value: "light", label: "Light", icon: SunIcon },
+	{ value: "dark", label: "Dark", icon: MoonIcon },
+	SYSTEM_APPEARANCE,
+]
+
+function AppearanceSwitch() {
+	const { appearance, updateAppearance } = useAppearance()
+	const index = APPEARANCES.findIndex(item => item.value === appearance)
+	const current = APPEARANCES[index] ?? SYSTEM_APPEARANCE
+	const next = APPEARANCES[(index + 1) % APPEARANCES.length] ?? SYSTEM_APPEARANCE
+	const Current = current.icon
+	return (
+		<>
+			<div
+				role="radiogroup"
+				aria-label="Appearance"
+				className="grid grid-cols-3 gap-0.5 rounded-lg bg-sidebar-accent p-0.5 group-data-[collapsible=icon]:hidden"
+			>
+				{APPEARANCES.map(item => (
+					<button
+						key={item.value}
+						type="button"
+						role="radio"
+						aria-checked={appearance === item.value}
+						title={item.label}
+						onClick={() => updateAppearance(item.value)}
+						className="flex h-7 cursor-pointer items-center justify-center gap-1.5 rounded-md text-xs text-sidebar-foreground/70 transition-colors hover:text-sidebar-foreground aria-checked:bg-sidebar aria-checked:text-sidebar-foreground aria-checked:shadow-xs"
+					>
+						<item.icon className="size-3.5" />
+						<span className="sr-only sm:not-sr-only">{item.label}</span>
+					</button>
+				))}
+			</div>
+			<SidebarMenu className="hidden group-data-[collapsible=icon]:flex">
+				<SidebarMenuItem>
+					<SidebarMenuButton
+						tooltip={`Appearance: ${current.label} (switch to ${next.label})`}
+						onClick={() => updateAppearance(next.value)}
+					>
+						<Current />
+						<span>Appearance</span>
+					</SidebarMenuButton>
+				</SidebarMenuItem>
+			</SidebarMenu>
+		</>
+	)
 }
 
 export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
@@ -184,7 +250,7 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 	]
 
 	return (
-		<Sidebar collapsible="offcanvas" variant="floating" {...props}>
+		<Sidebar collapsible="icon" variant="floating" {...props}>
 			<SidebarHeader className="flex-row items-center">
 				<SidebarMenu className="min-w-0 flex-1">
 					<SidebarMenuItem>
@@ -193,10 +259,15 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 							className="data-[slot=sidebar-menu-button]:h-auto! data-[slot=sidebar-menu-button]:py-1.5!"
 						>
 							<Link href={pathDashboard()} onClick={handleSidebarLink}>
-								<span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-zinc-900">
+								<span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-zinc-900 group-data-[collapsible=icon]:size-4 group-data-[collapsible=icon]:bg-transparent">
 									<img src="/favicon.svg" alt="" className="size-5" />
 								</span>
-								<span className="text-base font-semibold">Finpoint</span>
+								<span className="grid leading-tight">
+									<span className="text-base font-semibold">Finpoint</span>
+									<span className="text-[0.6875rem] text-sidebar-foreground/60">
+										Local-first finance
+									</span>
+								</span>
 							</Link>
 						</SidebarMenuButton>
 					</SidebarMenuItem>
@@ -216,15 +287,16 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 			</SidebarHeader>
 			<SidebarContent>
 				{groups.map(group => (
-					<SidebarGroup
-						key={group.label}
-						className="group-data-[collapsible=icon]:hidden"
-					>
+					<SidebarGroup key={group.label}>
 						<SidebarGroupLabel>{group.label}</SidebarGroupLabel>
 						<SidebarMenu>
 							{group.items.map(item => (
 								<SidebarMenuItem key={item.label}>
-									<SidebarMenuButton asChild isActive={item.active}>
+									<SidebarMenuButton
+										asChild
+										isActive={item.active}
+										tooltip={item.label}
+									>
 										<Link href={item.to} onClick={handleSidebarLink}>
 											<IconifyIcon icon={item.icon} />
 											<span>{item.label}</span>
@@ -237,6 +309,13 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 					</SidebarGroup>
 				))}
 			</SidebarContent>
+			<SidebarFooter>
+				<AppearanceSwitch />
+				<p className="hidden px-2 text-[0.6875rem] text-sidebar-foreground/50 md:block group-data-[collapsible=icon]:hidden">
+					<kbd className="font-sans">Ctrl/⌘ B</kbd> to collapse
+				</p>
+			</SidebarFooter>
+			<SidebarRail />
 		</Sidebar>
 	)
 }

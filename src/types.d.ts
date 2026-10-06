@@ -79,6 +79,8 @@ export type Record = {
 	amount: number
 	allocated_amount: number
 	is_pending: boolean
+	/** Allocated statements that are still Pending Statements. */
+	pending_statement_count?: number
 	category: Category
 	analytics_treatment: AnalyticsTreatment
 	analytics_treatment_source: "category" | "manual"

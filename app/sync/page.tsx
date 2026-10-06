@@ -17,6 +17,7 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
 	Card,
@@ -27,7 +28,6 @@ import {
 	CardTitle,
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from "@/components/ui/item"
 import { Skeleton } from "@/components/ui/skeleton"
 import { db } from "@/data/db"
 import {
@@ -41,6 +41,7 @@ import {
 import { seedIfEmpty } from "@/data/seed"
 import { generateTestData } from "@/data/test-data"
 import { useSyncStatus } from "@/hooks/use-sync-status"
+import { cn } from "@/lib/utils"
 import { ingestManualResult, resetSyncDisplay } from "@/logic/auto-sync"
 import {
 	disconnectDriveSync,
@@ -53,39 +54,111 @@ import { formatRelativeTime } from "@/logic/shared"
 import { pathPrivacy, pathTerms } from "@/routes"
 
 const COUNT_ROWS = [
-	["accounts", "Accounts"],
-	["statements", "Statements"],
-	["records", "Records"],
-	["categories", "Categories"],
-	["budgets", "Budgets"],
-	["buckets", "Spending buckets"],
+	["accounts", "Accounts", "lucide:landmark"],
+	["statements", "Statements", "lucide:credit-card"],
+	["records", "Records", "lucide:receipt-text"],
+	["categories", "Categories", "lucide:tag"],
+	["budgets", "Budgets", "lucide:piggy-bank"],
+	["buckets", "Buckets", "lucide:wallet-cards"],
 ] as const
 
-function DataCounts({ counts }: { counts: Record<string, number> | null }) {
-	if (!counts) {
-		return (
-			<ul className="grid gap-2 text-sm sm:grid-cols-2">
-				{Array.from({ length: 6 }).map((_, index) => (
-					<li
-						key={index}
-						className="flex items-center justify-between gap-3 border-b py-1.5"
-					>
-						<Skeleton className="h-4 w-24" />
-						<Skeleton className="h-4 w-10" />
-					</li>
-				))}
-			</ul>
-		)
-	}
+type StatusTone = {
+	tone: keyof typeof STATUS_TONES
+	icon: string
+	title: string
+	detail: string
+}
+
+const STATUS_TONES = {
+	good: {
+		tile: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+		ring: "border-emerald-500/30",
+	},
+	busy: { tile: "bg-sky-500/10 text-sky-600 dark:text-sky-400", ring: "border-sky-500/30" },
+	warning: {
+		tile: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+		ring: "border-amber-500/40 bg-amber-500/5",
+	},
+	danger: { tile: "bg-red-500/10 text-red-600 dark:text-red-400", ring: "border-red-500/40" },
+	neutral: { tile: "bg-muted text-muted-foreground", ring: "" },
+}
+
+function MethodHeader({
+	icon,
+	title,
+	description,
+	badge,
+	active,
+}: {
+	icon: string
+	title: string
+	description: string
+	badge?: string
+	active?: boolean
+}) {
 	return (
-		<ul className="grid gap-2 text-sm sm:grid-cols-2">
-			{COUNT_ROWS.map(([key, label]) => (
-				<li key={key} className="flex items-center justify-between gap-3 border-b py-1.5">
-					<span className="text-muted-foreground">{label}</span>
-					<span className="font-medium tabular-nums">{counts[key] ?? 0}</span>
-				</li>
-			))}
-		</ul>
+		<CardHeader className="flex flex-row items-start gap-3 border-b py-4">
+			<span className="grid size-9 shrink-0 place-items-center rounded-lg border bg-background">
+				<IconifyIcon icon={icon} className="size-4" />
+			</span>
+			<div className="grid min-w-0 flex-1 gap-1">
+				<CardTitle className="flex items-center gap-2">
+					{title}
+					{badge ? (
+						<Badge variant={active ? "default" : "secondary"}>{badge}</Badge>
+					) : null}
+				</CardTitle>
+				<CardDescription>{description}</CardDescription>
+			</div>
+		</CardHeader>
+	)
+}
+
+function StateRow({ tone, label, value }: { tone: string; label: string; value: string }) {
+	return (
+		<div className="flex items-center justify-between gap-3 border-b py-1.5 last:border-b-0">
+			<dt className="flex items-center gap-2 text-muted-foreground">
+				<span className={cn("size-2 shrink-0 rounded-full", tone)} />
+				{label}
+			</dt>
+			<dd className="font-medium tabular-nums">{value}</dd>
+		</div>
+	)
+}
+
+function WorkspaceRow({
+	icon,
+	title,
+	description,
+	destructive,
+	children,
+}: {
+	icon: string
+	title: string
+	description: string
+	destructive?: boolean
+	children: React.ReactNode
+}) {
+	return (
+		<div className="flex flex-col gap-3 border-b px-4 py-4 last:border-b-0 sm:flex-row sm:items-center sm:justify-between md:px-6">
+			<div className="flex items-start gap-3">
+				<span
+					className={cn(
+						"grid size-9 shrink-0 place-items-center rounded-lg border bg-background",
+						destructive && "border-destructive/30 text-destructive",
+					)}
+				>
+					<IconifyIcon icon={icon} className="size-4" />
+				</span>
+				<div className="min-w-0">
+					<p className={cn("text-sm font-medium", destructive && "text-destructive")}>
+						{title}
+					</p>
+					<p className="mt-0.5 max-w-xl text-xs text-muted-foreground">{description}</p>
+				</div>
+			</div>
+			<div className="flex shrink-0 gap-2 sm:justify-end">{children}</div>
+		</div>
 	)
 }
 
@@ -97,6 +170,7 @@ export default function DataSettingsPage() {
 	const [confirmingPush, setConfirmingPush] = useState(false)
 	const [confirmingPull, setConfirmingPull] = useState(false)
 	const [now, setNow] = useState(() => Date.now())
+	const [dragging, setDragging] = useState(false)
 	const sync = useSyncStatus()
 	const fileInputRef = useRef<HTMLInputElement>(null)
 	const counts =
@@ -271,18 +345,6 @@ export default function DataSettingsPage() {
 	const driveConnected = sync.lastSyncAt != null
 	const driveTeaser = sync.configured && sync.kind === "never-synced"
 	const syncConflict = sync.kind === "conflict"
-	const browserTone =
-		sync.kind === "never-synced"
-			? "bg-zinc-400"
-			: sync.localDirty
-				? "bg-amber-500"
-				: "bg-emerald-500"
-	const browserLabel =
-		sync.kind === "never-synced"
-			? "Not yet synced"
-			: sync.localDirty
-				? "Unsaved changes"
-				: "No unsaved changes"
 	const driveState: { tone: string; label: string } =
 		sync.kind === "conflict"
 			? { tone: "bg-amber-500", label: "Needs your decision" }
@@ -295,41 +357,208 @@ export default function DataSettingsPage() {
 						: sync.remoteModifiedTime
 							? { tone: "bg-emerald-500", label: "Up to date" }
 							: { tone: "bg-zinc-400", label: "No copy yet" }
+	const activityLabel =
+		sync.activity === "checking"
+			? "Checking Drive"
+			: sync.activity === "pushing"
+				? "Writing to Drive"
+				: "Reading from Drive"
+	const status: StatusTone = driveUnconfigured
+		? {
+				tone: "neutral",
+				icon: "lucide:hard-drive",
+				title: "Saved in this browser only",
+				detail: "Download a backup file below to keep a copy somewhere safe.",
+			}
+		: sync.activity
+			? {
+					tone: "busy",
+					icon: "lucide:refresh-cw",
+					title: `${activityLabel}…`,
+					detail:
+						sync.activityStartedAt != null
+							? `Started ${Math.max(0, Math.round((now - sync.activityStartedAt) / 1000))}s ago`
+							: "Just started",
+				}
+			: driveTeaser
+				? {
+						tone: "neutral",
+						icon: "lucide:cloud-off",
+						title: "Not backed up yet",
+						detail: "Connect your own Google Drive to keep every device in sync.",
+					}
+				: syncConflict
+					? {
+							tone: "warning",
+							icon: "lucide:git-compare-arrows",
+							title: "Needs your decision",
+							detail: `This browser and Google Drive both changed${sync.conflictAt ? ` (Drive copy from ${new Date(sync.conflictAt).toLocaleString()})` : ""}. Keep one; the other is replaced.`,
+						}
+					: sync.kind === "needs-auth"
+						? {
+								tone: "danger",
+								icon: "lucide:key-round",
+								title: "Reconnect Google Drive",
+								detail: "Sign-in expired, so background sync has paused.",
+							}
+						: sync.kind === "error"
+							? {
+									tone: "danger",
+									icon: "lucide:triangle-alert",
+									title: "Sync failed",
+									detail: sync.error ?? "Try again in a moment.",
+								}
+							: sync.kind === "offline"
+								? {
+										tone: "neutral",
+										icon: "lucide:wifi-off",
+										title: "Offline",
+										detail: sync.localDirty
+											? "Your changes will sync when you're back online."
+											: "Nothing waiting to sync.",
+									}
+								: sync.localDirty
+									? {
+											tone: "busy",
+											icon: "lucide:cloud-upload",
+											title: "Changes waiting to sync",
+											detail: "They're saved here and will reach Drive shortly.",
+										}
+									: {
+											tone: "good",
+											icon: "lucide:cloud-check",
+											title: "In sync with Google Drive",
+											detail: sync.lastCheckAt
+												? `Last checked ${formatRelativeTime(sync.lastCheckAt, now)}`
+												: "Everything is backed up.",
+										}
 
 	return (
 		<>
 			<PageContent>
 				<PageHeader
 					title="Sync"
-					subtitle="Two separate backup systems: sync with your own Google Drive, or keep a backup file yourself. Both hold the same data shown above."
-					description="Settings"
-					icon="lucide:database"
+					subtitle="Your data lives in this browser. Back it up automatically to your own Google Drive, or to a file you keep."
+					description="Data"
+					icon="lucide:refresh-cw"
 				/>
 
-				<div className="grid max-w-5xl gap-6 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start">
-					<div className="grid gap-6">
-						<Card>
-							<CardHeader className="border-b">
-								<CardTitle>Your data on this browser</CardTitle>
-								<CardDescription>
-									Everything below lives in this browser. Both backup systems
-									below save exactly this.
-								</CardDescription>
-							</CardHeader>
-							<CardContent>
-								<DataCounts counts={counts} />
-							</CardContent>
-						</Card>
+				<div className="grid max-w-5xl gap-6">
+					<section
+						aria-live="polite"
+						className={cn(
+							"grid gap-5 rounded-xl border bg-card p-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-center md:p-6",
+							STATUS_TONES[status.tone].ring,
+						)}
+					>
+						<div className="flex items-start gap-4">
+							<span
+								className={cn(
+									"grid size-12 shrink-0 place-items-center rounded-xl",
+									STATUS_TONES[status.tone].tile,
+								)}
+							>
+								<IconifyIcon
+									icon={status.icon}
+									className={cn(
+										"size-6",
+										sync.activity && "animate-spin [animation-duration:2s]",
+									)}
+								/>
+							</span>
+							<div className="min-w-0">
+								<h3 className="text-lg font-semibold tracking-tight md:text-xl">
+									{status.title}
+								</h3>
+								<p className="mt-0.5 text-sm text-muted-foreground">
+									{status.detail}
+								</p>
+							</div>
+						</div>
+						{driveUnconfigured ? null : (
+							<div className="flex flex-wrap gap-2 md:justify-end">
+								{syncConflict ? (
+									<>
+										<Button
+											type="button"
+											variant="outline"
+											disabled={busy !== null}
+											onClick={() => void resolveDrivePull()}
+										>
+											<IconifyIcon icon="lucide:cloud-download" />
+											{busy === "drive-pull" ? "Reading…" : "Keep Drive copy"}
+										</Button>
+										<Button
+											type="button"
+											disabled={busy !== null}
+											onClick={() => setConfirmingPush(true)}
+										>
+											<IconifyIcon icon="lucide:monitor-check" />
+											{busy === "drive-push"
+												? "Writing…"
+												: "Keep this browser"}
+										</Button>
+									</>
+								) : (
+									<Button
+										type="button"
+										size="lg"
+										disabled={busy !== null}
+										onClick={() => void handleDriveSync()}
+									>
+										<IconifyIcon
+											icon={driveTeaser ? "lucide:link" : "lucide:refresh-cw"}
+										/>
+										{busy === "drive"
+											? "Syncing…"
+											: driveTeaser
+												? "Connect Google Drive"
+												: sync.kind === "needs-auth"
+													? "Reconnect"
+													: "Sync now"}
+									</Button>
+								)}
+							</div>
+						)}
+					</section>
 
-						<Card>
-							<CardHeader className="border-b">
-								<CardTitle>Automatic sync</CardTitle>
-								<CardDescription>
-									Stored in your own Drive's hidden app folder — we never see it.
-									Save data to your Drive, or restore data from your Drive.
-								</CardDescription>
-							</CardHeader>
-							<CardContent className="space-y-3 text-sm">
+					<section
+						aria-label="Data in this browser"
+						className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border bg-border sm:grid-cols-3 lg:grid-cols-6"
+					>
+						{COUNT_ROWS.map(([key, label, icon]) => (
+							<div key={key} className="grid gap-1 bg-card px-4 py-3">
+								<span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+									<IconifyIcon icon={icon} className="size-3.5" />
+									{label}
+								</span>
+								{counts ? (
+									<span className="text-xl font-semibold tabular-nums">
+										{(counts[key] ?? 0).toLocaleString()}
+									</span>
+								) : (
+									<Skeleton className="h-7 w-12" />
+								)}
+							</div>
+						))}
+					</section>
+
+					<div className="grid gap-6 lg:grid-cols-2">
+						<Card className="gap-0 py-0">
+							<MethodHeader
+								icon="lucide:cloud"
+								title="Google Drive"
+								description="Automatic. Stored in a hidden app folder in your own Drive. Finpoint never sees it."
+								badge={
+									driveUnconfigured
+										? "Not available"
+										: driveTeaser
+											? "Not connected"
+											: "Connected"
+								}
+								active={!driveUnconfigured && !driveTeaser}
+							/>
+							<CardContent className="grid flex-1 content-start gap-3 py-4 text-sm">
 								{driveUnconfigured ? (
 									process.env.NODE_ENV === "development" ? (
 										<ol className="grid list-decimal gap-2 pl-5 text-muted-foreground">
@@ -337,441 +566,272 @@ export default function DataSettingsPage() {
 												Create a Web OAuth client in Google Cloud Console.
 											</li>
 											<li>
-												Add this site as an authorized JavaScript origin for
-												that client.
+												Add this site as an authorised JavaScript origin.
 											</li>
 											<li>
-												Set <code>VITE_GOOGLE_CLIENT_ID</code> to the client
-												ID and restart.
+												Set <code>NEXT_PUBLIC_GOOGLE_CLIENT_ID</code> in{" "}
+												<code>.env</code> and restart.
 											</li>
 										</ol>
 									) : (
 										<p className="text-muted-foreground">
-											Google Drive sync isn't available in this version of
-											Finpoint. Your file backup below works regardless.
+											Drive sync isn't enabled on this deployment. Backup
+											files work regardless.
 										</p>
 									)
 								) : driveTeaser ? (
 									<p className="text-muted-foreground">
-										Keep this browser in sync across your devices using your own
-										Google Drive — we never see it.
+										Connect once and Finpoint keeps this browser and your other
+										devices in step in the background.
 									</p>
 								) : (
-									<>
-										<ul className="grid gap-2">
-											<li className="flex items-center justify-between gap-3 border-b py-1.5">
-												<span className="flex items-center gap-2 text-muted-foreground">
-													<span
-														className={`size-2 shrink-0 rounded-full ${browserTone}`}
-													/>
-													This browser
-												</span>
-												<span className="font-medium">{browserLabel}</span>
-											</li>
-											<li className="flex items-center justify-between gap-3 border-b py-1.5">
-												<span className="flex items-center gap-2 text-muted-foreground">
-													<span
-														className={`size-2 shrink-0 rounded-full ${driveState.tone}`}
-													/>
-													Google Drive
-												</span>
-												<span className="font-medium">
-													{driveState.label}
-												</span>
-											</li>
-											<li
-												className="flex items-center justify-between gap-3 border-b py-1.5"
-												aria-live="polite"
-											>
-												{sync.activity ? (
-													<>
-														<span className="flex items-center gap-2 text-muted-foreground">
-															<span className="size-2 shrink-0 animate-pulse rounded-full bg-sky-500" />
-															{sync.activity === "checking"
-																? "Checking Drive"
-																: sync.activity === "pushing"
-																	? "Writing to Drive"
-																	: "Reading from Drive"}
-														</span>
-														<span className="font-medium tabular-nums text-muted-foreground">
-															{sync.activityStartedAt != null
-																? `${Math.max(0, Math.round((now - sync.activityStartedAt) / 1000))}s`
-																: "now"}
-														</span>
-													</>
-												) : (
-													<>
-														<span className="flex items-center gap-2 text-muted-foreground">
-															<span className="size-2 shrink-0 rounded-full bg-zinc-400" />
-															Last checked
-														</span>
-														{sync.lastCheckAt ? (
-															<span
-																className="font-medium tabular-nums"
-																title={new Date(
-																	sync.lastCheckAt,
-																).toLocaleString()}
-															>
-																{formatRelativeTime(
-																	sync.lastCheckAt,
-																	now,
-																)}
-															</span>
-														) : (
-															<span className="font-medium text-muted-foreground">
-																Never
-															</span>
-														)}
-													</>
-												)}
-											</li>
-										</ul>
-										{syncConflict ? (
-											<p className="rounded-md border border-amber-500/40 bg-amber-500/10 p-3">
-												This browser and Google Drive both changed (Drive
-												copy from{" "}
-												{sync.conflictAt
-													? new Date(sync.conflictAt).toLocaleString()
-													: "recently"}
-												). Writing overwrites Drive; reading replaces this
-												browser — the loser is replaced.
-											</p>
-										) : null}
-									</>
+									<dl className="grid gap-2">
+										<StateRow
+											tone={
+												sync.localDirty ? "bg-amber-500" : "bg-emerald-500"
+											}
+											label="This browser"
+											value={sync.localDirty ? "Unsaved changes" : "Saved"}
+										/>
+										<StateRow
+											tone={driveState.tone}
+											label="Google Drive"
+											value={driveState.label}
+										/>
+										<StateRow
+											tone="bg-zinc-400"
+											label="Last checked"
+											value={
+												sync.lastCheckAt
+													? formatRelativeTime(sync.lastCheckAt, now)
+													: "Never"
+											}
+										/>
+									</dl>
 								)}
 							</CardContent>
-							<CardFooter className="flex flex-wrap gap-2 border-t bg-muted/20">
-								{driveUnconfigured ? null : (
-									<>
-										<Button
-											className="w-full sm:w-auto"
-											type="button"
-											disabled={busy !== null || driveUnconfigured}
-											onClick={() => void handleDriveSync()}
-										>
-											{driveTeaser ? (
-												<IconifyIcon icon="lucide:link" />
-											) : (
-												<IconifyIcon icon="lucide:refresh-cw" />
-											)}
-											{busy === "drive"
-												? "Syncing…"
-												: driveTeaser
-													? "Connect Google Drive"
-													: "Sync now"}
-										</Button>
-										{!driveTeaser && (
-											<>
-												{syncConflict ? (
-													<>
-														<Button
-															className="w-full sm:w-auto"
-															type="button"
-															variant="outline"
-															disabled={busy !== null}
-															onClick={() => void resolveDrivePull()}
-														>
-															<IconifyIcon icon="lucide:cloud-download" />
-															{busy === "drive-pull"
-																? "Reading…"
-																: "Restore from Drive"}
-														</Button>
-														<Button
-															className="w-full sm:w-auto"
-															type="button"
-															variant="outline"
-															disabled={busy !== null}
-															onClick={() => setConfirmingPush(true)}
-														>
-															<IconifyIcon icon="lucide:cloud-upload" />
-															{busy === "drive-push"
-																? "Writing…"
-																: "Save to Drive"}
-														</Button>
-													</>
-												) : (
-													<>
-														<Button
-															className="w-full sm:w-auto"
-															type="button"
-															variant="outline"
-															disabled={
-																busy !== null || !driveConnected
-															}
-															onClick={() => setConfirmingPush(true)}
-														>
-															<IconifyIcon icon="lucide:cloud-upload" />
-															{busy === "drive-push"
-																? "Writing…"
-																: "Save to Drive"}
-														</Button>
-														<Button
-															className="w-full sm:w-auto"
-															type="button"
-															variant="outline"
-															disabled={
-																busy !== null || !driveConnected
-															}
-															onClick={() => handleDrivePull()}
-														>
-															<IconifyIcon icon="lucide:cloud-download" />
-															{busy === "drive-pull"
-																? "Reading…"
-																: confirmingPull
-																	? "Click again to restore from Drive"
-																	: "Restore from Drive"}
-														</Button>
-													</>
-												)}
-												<Button
-													className="w-full sm:w-auto"
-													type="button"
-													variant="outline"
-													disabled={busy !== null || !driveConnected}
-													onClick={() => void handleDriveDisconnect()}
-												>
-													{busy === "drive-disconnect"
-														? "Disconnecting…"
-														: "Disconnect"}
-												</Button>
-											</>
-										)}
-									</>
-								)}
-							</CardFooter>
-						</Card>
-
-						<Card>
-							<CardHeader className="border-b">
-								<CardTitle>Manual sync</CardTitle>
-								<CardDescription>
-									Manual and offline. Download a backup file you keep, and restore
-									it here later or on another device.
-								</CardDescription>
-							</CardHeader>
-							<CardContent className="space-y-6">
-								<div className="space-y-3">
-									<p className="text-sm font-medium">
-										Download from this browser
-									</p>
-									<p className="text-sm text-muted-foreground">
-										Save everything on this browser into one file.
-									</p>
+							{driveUnconfigured || driveTeaser ? null : (
+								<CardFooter className="flex flex-wrap gap-2 border-t py-3">
 									<Button
 										type="button"
-										disabled={busy !== null || total === 0}
-										onClick={() => void handleExport()}
+										variant="outline"
+										size="sm"
+										disabled={busy !== null || !driveConnected}
+										onClick={() => setConfirmingPush(true)}
 									>
-										<IconifyIcon icon="lucide:download" />
-										{busy === "export"
-											? "Downloading…"
-											: `Download backup (${total} items)`}
+										<IconifyIcon icon="lucide:cloud-upload" />
+										{busy === "drive-push" ? "Writing…" : "Overwrite Drive"}
 									</Button>
-								</div>
-								<div className="space-y-3 border-t pt-6">
-									<p className="text-sm font-medium">Restore into this browser</p>
-									<p className="text-sm text-muted-foreground">
-										Replace everything in this browser with a backup file you
-										saved earlier.
-									</p>
-									<Input
-										ref={fileInputRef}
-										type="file"
-										accept=".json,application/json"
-										aria-label="Finpoint backup file"
-										className="hidden"
-										onChange={event =>
-											setImportFile(event.currentTarget.files?.[0] ?? null)
-										}
+									<Button
+										type="button"
+										variant="outline"
+										size="sm"
+										disabled={busy !== null || !driveConnected}
+										onClick={() => handleDrivePull()}
+									>
+										<IconifyIcon icon="lucide:cloud-download" />
+										{busy === "drive-pull"
+											? "Reading…"
+											: confirmingPull
+												? "Click again to replace this browser"
+												: "Restore from Drive"}
+									</Button>
+									<Button
+										type="button"
+										variant="ghost"
+										size="sm"
+										className="sm:ml-auto"
+										disabled={busy !== null || !driveConnected}
+										onClick={() => void handleDriveDisconnect()}
+									>
+										{busy === "drive-disconnect"
+											? "Disconnecting…"
+											: "Disconnect"}
+									</Button>
+								</CardFooter>
+							)}
+						</Card>
+
+						<Card className="gap-0 py-0">
+							<MethodHeader
+								icon="lucide:file-json"
+								title="Backup file"
+								description="Manual. Download one file you keep, and restore it here or on another device."
+							/>
+							<CardContent className="grid gap-4 py-4">
+								<Button
+									type="button"
+									className="w-full"
+									disabled={busy !== null || total === 0}
+									onClick={() => void handleExport()}
+								>
+									<IconifyIcon icon="lucide:download" />
+									{busy === "export"
+										? "Downloading…"
+										: `Download backup · ${total.toLocaleString()} items`}
+								</Button>
+								<Input
+									ref={fileInputRef}
+									type="file"
+									accept=".json,application/json"
+									aria-label="Finpoint backup file"
+									className="hidden"
+									onChange={event =>
+										setImportFile(event.currentTarget.files?.[0] ?? null)
+									}
+								/>
+								<button
+									type="button"
+									disabled={busy !== null}
+									onClick={() => fileInputRef.current?.click()}
+									onDragOver={event => {
+										event.preventDefault()
+										setDragging(true)
+									}}
+									onDragLeave={() => setDragging(false)}
+									onDrop={event => {
+										event.preventDefault()
+										setDragging(false)
+										const file = event.dataTransfer.files?.[0]
+										if (file) setImportFile(file)
+									}}
+									className={cn(
+										"grid cursor-pointer place-items-center gap-1.5 rounded-lg border border-dashed px-4 py-6 text-center text-sm transition-colors hover:bg-muted/50",
+										dragging && "border-foreground bg-muted/60",
+									)}
+								>
+									<IconifyIcon
+										icon={importFile ? "lucide:file-check" : "lucide:upload"}
+										className="size-5 text-muted-foreground"
 									/>
-									<div className="flex flex-wrap items-center gap-3">
-										<Button
-											type="button"
-											variant="outline"
-											disabled={busy !== null}
-											onClick={() => fileInputRef.current?.click()}
-										>
-											<IconifyIcon icon="lucide:upload" />
-											Choose file
-										</Button>
-										<span className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
-											{importFile ? importFile.name : "No file selected."}
+									{importFile ? (
+										<>
+											<span className="max-w-full truncate font-medium">
+												{importFile.name}
+											</span>
+											<span className="text-xs text-muted-foreground">
+												{(importFile.size / 1024).toFixed(1)} KB · choose
+												another
+											</span>
+										</>
+									) : (
+										<>
+											<span className="font-medium">
+												Restore from a backup file
+											</span>
+											<span className="text-xs text-muted-foreground">
+												Drop it here or click to choose
+											</span>
+										</>
+									)}
+								</button>
+								{importFile ? (
+									<div className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-amber-500/10 px-3 py-2 text-xs">
+										<span>Restoring replaces everything in this browser.</span>
+										<span className="flex gap-1.5">
+											<Button
+												type="button"
+												variant="ghost"
+												size="sm"
+												onClick={() => {
+													setImportFile(null)
+													if (fileInputRef.current)
+														fileInputRef.current.value = ""
+												}}
+											>
+												Cancel
+											</Button>
+											<Button
+												type="button"
+												size="sm"
+												disabled={busy !== null}
+												onClick={() => void handleImport()}
+											>
+												{busy === "import" ? "Restoring…" : "Restore"}
+											</Button>
 										</span>
 									</div>
-									{importFile ? (
-										<Item variant="outline">
-											<ItemMedia>
-												<IconifyIcon
-													icon="lucide:file-json"
-													className="size-5"
-												/>
-											</ItemMedia>
-											<ItemContent>
-												<ItemTitle>{importFile.name}</ItemTitle>
-												<ItemDescription>
-													{(importFile.size / 1024).toFixed(2)} KB ·
-													restoring replaces everything you have now
-												</ItemDescription>
-											</ItemContent>
-										</Item>
-									) : null}
-									<Button
-										type="button"
-										variant="outline"
-										disabled={busy !== null || !importFile}
-										onClick={() => void handleImport()}
-									>
-										<IconifyIcon icon="lucide:upload" />
-										{busy === "import" ? "Restoring…" : "Restore from file"}
-									</Button>
-								</div>
+								) : null}
 							</CardContent>
 						</Card>
-						<Card>
-							<CardHeader className="border-b">
-								<CardTitle>Try demo data</CardTitle>
-								<CardDescription>
-									Load a ready-made workspace with 3 accounts, 5 months of
-									records, allocations, budgets, and buckets — the fastest way to
-									see what Finpoint can do. This replaces all current data in this
-									browser.
-								</CardDescription>
-							</CardHeader>
-							<CardContent>
-								<ul className="grid gap-2 text-sm sm:grid-cols-2">
-									{[
-										["400+ records", "daily life, salary, investments"],
-										["470+ statements", "40+ waiting to be matched"],
-										["2 budgets", "a trip and a monthly plan"],
-										["Practice inbox", "unfinished items to complete"],
-									].map(([title, detail]) => (
-										<li
-											key={title}
-											className="flex items-center justify-between gap-3 border-b py-1.5"
-										>
-											<span className="font-medium">{title}</span>
-											<span className="text-right text-muted-foreground">
-												{detail}
-											</span>
-										</li>
-									))}
-								</ul>
-							</CardContent>
-							<CardFooter className="border-t bg-muted/20">
-								<Button
-									type="button"
-									className="w-full sm:ml-auto sm:w-auto"
-									disabled={busy !== null}
-									onClick={() => {
-										if (confirmingDemo) void handleDemo()
-										else setConfirmingDemo(true)
-									}}
-								>
-									<IconifyIcon icon="lucide:sparkles" />
-									{busy === "demo"
-										? "Loading…"
-										: confirmingDemo
-											? "Click again to replace everything with demo data"
-											: "Load demo data"}
-								</Button>
-								{confirmingDemo && busy !== "demo" ? (
-									<Button
-										type="button"
-										variant="outline"
-										onClick={() => setConfirmingDemo(false)}
-									>
-										Cancel
-									</Button>
-								) : null}
-							</CardFooter>
-						</Card>
-
-						<Card className="border-destructive/40">
-							<CardHeader className="border-b">
-								<CardTitle className="text-destructive">Danger zone</CardTitle>
-								<CardDescription>
-									Clear the entire workspace in this browser, then restore the
-									default categories and buckets.
-								</CardDescription>
-							</CardHeader>
-							<CardFooter className="bg-muted/20">
-								<Button
-									type="button"
-									variant="destructive"
-									className="w-full sm:ml-auto sm:w-auto"
-									disabled={busy !== null}
-									onClick={() => {
-										if (confirmingClear) void handleClear()
-										else setConfirmingClear(true)
-									}}
-								>
-									<IconifyIcon icon="lucide:trash-2" />
-									{busy === "clear"
-										? "Clearing…"
-										: confirmingClear
-											? "Click again to confirm clearing everything"
-											: "Clear all data"}
-								</Button>
-								{confirmingClear && busy !== "clear" ? (
-									<Button
-										type="button"
-										variant="outline"
-										onClick={() => setConfirmingClear(false)}
-									>
-										Cancel
-									</Button>
-								) : null}
-							</CardFooter>
-						</Card>
-
-						<p className="text-center text-xs text-muted-foreground">
-							<Link href={pathPrivacy()} className="underline">
-								Privacy Policy
-							</Link>{" "}
-							·{" "}
-							<Link href={pathTerms()} className="underline">
-								Terms of Service
-							</Link>
-						</p>
 					</div>
 
-					<Card className="bg-muted/20" size="sm">
-						<CardHeader>
-							<CardTitle>How storage works</CardTitle>
-							<CardDescription>A quick note on where things live.</CardDescription>
+					<Card className="gap-0 py-0">
+						<CardHeader className="border-b py-4">
+							<CardTitle>Workspace</CardTitle>
 						</CardHeader>
-						<CardContent>
-							<ol className="grid gap-4 text-sm">
-								<li className="flex gap-3">
-									<span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-foreground text-xs text-background">
-										1
-									</span>
-									<span>
-										Everything is saved in this browser on this device — no
-										account, no server, nobody else sees it.
-									</span>
-								</li>
-								<li className="flex gap-3">
-									<span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-foreground text-xs text-background">
-										2
-									</span>
-									<span>
-										Automatic sync: write this browser to your own Google Drive
-										and read it back on another device. Finpoint never sees it.
-									</span>
-								</li>
-								<li className="flex gap-3">
-									<span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-foreground text-xs text-background">
-										3
-									</span>
-									<span>
-										Manual sync: download a file yourself and restore it here
-										later. Nothing leaves your hands.
-									</span>
-								</li>
-							</ol>
-						</CardContent>
+						<WorkspaceRow
+							icon="lucide:sparkles"
+							title="Try demo data"
+							description="3 accounts, 5 months of Records, 470+ Statements (40+ waiting to be matched), 2 budgets and buckets. Replaces everything in this browser."
+						>
+							{confirmingDemo && busy !== "demo" ? (
+								<Button
+									type="button"
+									variant="ghost"
+									onClick={() => setConfirmingDemo(false)}
+								>
+									Cancel
+								</Button>
+							) : null}
+							<Button
+								type="button"
+								variant={confirmingDemo ? "default" : "outline"}
+								disabled={busy !== null}
+								onClick={() => {
+									if (confirmingDemo) void handleDemo()
+									else setConfirmingDemo(true)
+								}}
+							>
+								{busy === "demo"
+									? "Loading…"
+									: confirmingDemo
+										? "Replace with demo data"
+										: "Load demo data"}
+							</Button>
+						</WorkspaceRow>
+						<WorkspaceRow
+							icon="lucide:trash-2"
+							title="Clear all data"
+							description="Delete everything in this browser, then restore the default categories and buckets."
+							destructive
+						>
+							{confirmingClear && busy !== "clear" ? (
+								<Button
+									type="button"
+									variant="ghost"
+									onClick={() => setConfirmingClear(false)}
+								>
+									Cancel
+								</Button>
+							) : null}
+							<Button
+								type="button"
+								variant="destructive"
+								disabled={busy !== null}
+								onClick={() => {
+									if (confirmingClear) void handleClear()
+									else setConfirmingClear(true)
+								}}
+							>
+								{busy === "clear"
+									? "Clearing…"
+									: confirmingClear
+										? "Yes, clear everything"
+										: "Clear all data"}
+							</Button>
+						</WorkspaceRow>
 					</Card>
+
+					<p className="text-center text-xs text-muted-foreground">
+						<Link href={pathPrivacy()} className="underline">
+							Privacy Policy
+						</Link>{" "}
+						·{" "}
+						<Link href={pathTerms()} className="underline">
+							Terms of Service
+						</Link>
+					</p>
 				</div>
 			</PageContent>
 
