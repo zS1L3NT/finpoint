@@ -1,5 +1,6 @@
 "use client"
 
+import { motion } from "framer-motion"
 import { MonitorIcon, MoonIcon, SunIcon, XIcon } from "lucide-react"
 import { DateTime } from "luxon"
 import Link from "next/link"
@@ -23,6 +24,7 @@ import { useHistory } from "@/history"
 import { type Appearance, useAppearance } from "@/hooks/use-appearance"
 import { useDefaultFilterEndDateToday, useDefaultFilterStartDate } from "@/hooks/use-settings"
 import { useSyncStatus } from "@/hooks/use-sync-status"
+import { SPRING } from "@/lib/motion"
 import {
 	pathAccounts,
 	pathAllocator,
@@ -39,9 +41,10 @@ import {
 function useSyncIndicator() {
 	const sync = useSyncStatus()
 	if (!sync.configured) return null
+	const busy = sync.activity != null
 	const tone: string =
 		sync.activity != null
-			? "bg-sky-500 animate-pulse"
+			? "bg-sky-500"
 			: sync.kind === "conflict"
 				? "bg-amber-500"
 				: sync.kind === "needs-auth" || sync.kind === "error"
@@ -73,7 +76,7 @@ function useSyncIndicator() {
 										: sync.kind === "error"
 											? (sync.error ?? "Sync failed")
 											: "In sync"
-	return { tone, title }
+	return { tone, title, busy }
 }
 
 function SyncDot() {
@@ -82,8 +85,12 @@ function SyncDot() {
 	return (
 		<span
 			title={indicator.title}
-			className={`ml-auto size-2 shrink-0 rounded-full group-data-[collapsible=icon]:absolute group-data-[collapsible=icon]:top-1 group-data-[collapsible=icon]:right-1 group-data-[collapsible=icon]:size-1.5 ${indicator.tone}`}
-		/>
+			className={`relative ml-auto size-2 shrink-0 rounded-full transition-colors duration-300 ease-out group-data-[collapsible=icon]:absolute group-data-[collapsible=icon]:top-1 group-data-[collapsible=icon]:right-1 group-data-[collapsible=icon]:size-1.5 ${indicator.tone}`}
+		>
+			{indicator.busy ? (
+				<span className="absolute inset-0 animate-ping rounded-full bg-sky-500/60 motion-reduce:hidden" />
+			) : null}
+		</span>
 	)
 }
 
@@ -117,10 +124,17 @@ function AppearanceSwitch() {
 						aria-checked={appearance === item.value}
 						title={item.label}
 						onClick={() => updateAppearance(item.value)}
-						className="flex h-7 cursor-pointer items-center justify-center gap-1.5 rounded-md text-xs text-sidebar-foreground/70 transition-colors hover:text-sidebar-foreground aria-checked:bg-sidebar aria-checked:text-sidebar-foreground aria-checked:shadow-xs"
+						className="relative flex h-7 cursor-pointer items-center justify-center gap-1.5 rounded-md text-xs text-sidebar-foreground/70 transition-colors duration-150 ease-out hover:text-sidebar-foreground aria-checked:text-sidebar-foreground"
 					>
-						<item.icon className="size-3.5" />
-						<span className="sr-only sm:not-sr-only">{item.label}</span>
+						{appearance === item.value ? (
+							<motion.span
+								layoutId="appearance-thumb"
+								transition={SPRING.snappy}
+								className="absolute inset-0 rounded-md bg-sidebar shadow-xs"
+							/>
+						) : null}
+						<item.icon className="relative size-3.5" />
+						<span className="sr-only relative sm:not-sr-only">{item.label}</span>
 					</button>
 				))}
 			</div>
