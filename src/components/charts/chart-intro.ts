@@ -6,7 +6,7 @@ import { useState } from "react"
  * plays once per `introKey` (mount by default), never on hover, resize or data
  * refreshes. Recharts only accepts named easings, so `ease-out` is the strongest on offer.
  */
-export const CHART_INTRO_MS = 400
+export const CHART_INTRO_MS = 650
 
 export function useChartIntro(introKey = "mount") {
 	const reduceMotion = useReducedMotion()
