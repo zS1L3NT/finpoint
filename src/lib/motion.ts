@@ -1,4 +1,5 @@
 import type { Transition } from "framer-motion"
+import type { CSSProperties } from "react"
 
 /**
  * Shared motion vocabulary, mirroring the CSS tokens in `src/app.css` so framer-motion
@@ -36,12 +37,44 @@ export const SPRING = {
 	lively: { type: "spring", duration: 0.4, bounce: 0.15 },
 } satisfies Record<string, Transition>
 
-/** Delay for the nth item of a cascading entrance; the cap keeps long lists from dragging on. */
-export const staggerDelay = (index: number, step = 0.025, cap = 14) => Math.min(index, cap) * step
+/**
+ * How many rows cascade in on arrival. Anything past this is below the fold, so it appears with
+ * the page: capping only the delay would make every remaining row start fading in at once.
+ */
+export const ROW_CASCADE_LIMIT = 12
+const ROW_STEP = 0.03
 
-/** Props for a table row that rises into place as its data arrives, cascading down the list. */
-export const rowEnter = (index: number) => ({
-	initial: { opacity: 0, y: 10 },
-	animate: { opacity: 1, y: 0 },
-	transition: { duration: 0.34, ease: EASE_OUT, delay: staggerDelay(index) },
-})
+/**
+ * Props for a table row. While `cascade` is on (the first moments after data arrives) the rows
+ * on screen rise in one after another; afterwards, rows that join (paging, filtering, typing in
+ * search) just fade, so ongoing changes stay calm.
+ */
+export const rowEnter = (index: number, cascade: boolean) => {
+	if (index >= ROW_CASCADE_LIMIT) return { initial: false as const }
+	if (!cascade) {
+		return {
+			initial: { opacity: 0 },
+			animate: { opacity: 1 },
+			transition: { duration: 0.18, ease: EASE_OUT },
+		}
+	}
+	return {
+		initial: { opacity: 0, y: 10 },
+		animate: { opacity: 1, y: 0 },
+		transition: { duration: 0.34, ease: EASE_OUT, delay: index * ROW_STEP },
+	}
+}
+
+/** The same entrance as {@link rowEnter} for plain elements (the mobile list), as CSS. */
+export const rowEnterCss = (
+	index: number,
+	cascade: boolean,
+): { className?: string; style?: CSSProperties } => {
+	if (index >= ROW_CASCADE_LIMIT) return {}
+	if (!cascade) return { className: "animate-in fade-in ease-out [animation-duration:180ms]" }
+	return {
+		className:
+			"animate-in fade-in slide-in-from-bottom-2 ease-out [animation-duration:340ms] [animation-fill-mode:backwards]",
+		style: { animationDelay: `${index * ROW_STEP}s` },
+	}
+}

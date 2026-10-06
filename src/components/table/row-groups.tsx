@@ -1,5 +1,7 @@
 import { DateTime } from "luxon"
+import { useState } from "react"
 import { TableCell, TableRow } from "@/components/ui/table"
+import { rowEnterCss } from "@/lib/motion"
 import { classForCurrency, cn, formatCurrency } from "@/lib/utils"
 
 export type RowGroup<TData> = {
@@ -53,16 +55,19 @@ export function GroupHeaderRow<TData>({
 	groupKey,
 	rows,
 	columns,
+	enter,
 }: {
 	group: RowGroup<TData>
 	groupKey: string
 	rows: TData[]
 	columns: { id: string; className?: string }[]
+	/** Entrance props shared with the group's first row, so the header never arrives alone. */
+	enter?: Partial<React.ComponentProps<typeof TableRow>>
 }) {
 	const hasTotal = !!group.total && columns.some(column => column.id === "amount")
 	if (!hasTotal) {
 		return (
-			<TableRow className="bg-muted/40 hover:bg-muted/40">
+			<TableRow className="bg-muted/40 hover:bg-muted/40" {...enter}>
 				<TableCell colSpan={columns.length} className="py-1.5">
 					{group.label(groupKey, rows)}
 				</TableCell>
@@ -70,7 +75,7 @@ export function GroupHeaderRow<TData>({
 		)
 	}
 	return (
-		<TableRow className="bg-muted/40 hover:bg-muted/40">
+		<TableRow className="bg-muted/40 hover:bg-muted/40" {...enter}>
 			{columns.map((column, index) => (
 				<TableCell
 					key={column.id}
@@ -86,18 +91,48 @@ export function GroupHeaderRow<TData>({
 	)
 }
 
+/**
+ * A mobile list row. Its entrance is decided once, at mount: swapping animation classes on a
+ * mounted row would restart the animation, so later renders must never change it.
+ */
+export function MobileRow({
+	index,
+	cascade,
+	className,
+	style,
+	...props
+}: React.ComponentProps<"div"> & { index: number; cascade: boolean }) {
+	const [enter] = useState(() => rowEnterCss(index, cascade))
+	return (
+		<div
+			{...props}
+			className={cn(MOBILE_ROW_CLASS, className, enter.className)}
+			style={{ ...enter.style, ...style }}
+		/>
+	)
+}
+
 /** Mobile group header: same three subgrid columns as the rows beneath it. */
 export function MobileGroupHeader<TData>({
 	group,
 	groupKey,
 	rows,
+	index,
+	cascade,
 }: {
 	group: RowGroup<TData>
 	groupKey: string
 	rows: TData[]
+	/** Position of the group's first row; headers enter together with it. */
+	index: number
+	cascade: boolean
 }) {
+	const [enter] = useState(() => rowEnterCss(index, cascade))
 	return (
-		<div className={cn(MOBILE_ROW_CLASS, "bg-muted/50 px-3 py-1.5 text-sm")}>
+		<div
+			className={cn(MOBILE_ROW_CLASS, "bg-muted/50 px-3 py-1.5 text-sm", enter.className)}
+			style={enter.style}
+		>
 			<div className="min-w-0">{group.label(groupKey, rows)}</div>
 			{group.total ? <GroupTotal value={group.total(rows)} /> : <span />}
 			<span />
