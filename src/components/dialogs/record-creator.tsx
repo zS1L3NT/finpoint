@@ -1,6 +1,7 @@
 import { useForm, useStore } from "@tanstack/react-form"
 import { AnimatePresence, motion } from "framer-motion"
 import { DateTime } from "luxon"
+import { useState } from "react"
 import { toast } from "sonner"
 import AmountField from "@/components/form/amount-field"
 import ComboboxField from "@/components/form/combobox-field"
@@ -35,7 +36,7 @@ import { ValidationError } from "@/logic/validate"
 import { CategoryWithChildren, Statement } from "@/types"
 
 export default function RecordCreatorDialog({
-	statements,
+	statements: statementsProp,
 	categories,
 	clear,
 	isOpen,
@@ -49,6 +50,12 @@ export default function RecordCreatorDialog({
 	setIsOpen: (isOpen: boolean) => void
 	trigger?: React.ReactElement
 }) {
+	// Parents clear the selection right after a successful create; keep the last open list so
+	// the attached statements don't vanish while the dialog fades out.
+	const [openStatements, setOpenStatements] = useState(statementsProp)
+	if (isOpen && openStatements !== statementsProp) setOpenStatements(statementsProp)
+	const statements = isOpen ? statementsProp : openStatements
+
 	const completions = useFetch(() => recordCompletions(), {
 		titles: [],
 		locations: [],
@@ -338,80 +345,116 @@ export default function RecordCreatorDialog({
 						<p className="text-sm font-semibold">Statements Attached</p>
 
 						<ScrollArea className="h-fit max-h-200">
-							<div className="space-y-2">
-								{statements.map((statement, index) => (
-									<div key={statement.id} className="p-0.5">
-										<form.Field name={`statements[${index}].amount` as const}>
-											{field => {
-												const errors = mergeErrors(
-													field.state.meta.errors,
-													field.name,
-												)
-												const allocable = statement.allocable_amount
-
-												const percent =
-													allocable === 0
-														? 0
-														: (field.state.value / allocable) * 100
-
-												return (
-													<Card
-														className={cn(
-															errors.length
-																? "border-destructive/50"
-																: null,
-														)}
-													>
-														<CardHeader>
-															<CardTitle className="text-sm leading-5">
-																{statement.description}
-															</CardTitle>
-															<CardDescription>
-																{formatDatetime(statement.datetime)}
-															</CardDescription>
-														</CardHeader>
-														<CardContent className="flex flex-col gap-4">
-															<AmountField
-																id={field.name}
-																label="Amount"
-																value={field.state.value}
-																errors={errors}
-																suffix={`of ${formatCurrency(allocable)}`}
-																onChange={value => {
-																	field.handleChange(value)
-																	clearApiError(field.name)
-																}}
-															/>
-															<Progress
-																value={percent}
-																className={cn(
-																	percent > 100
-																		? "text-red-400"
-																		: null,
-																)}
-															/>
-														</CardContent>
-													</Card>
-												)
+							<div className="relative flex flex-col gap-2">
+								<AnimatePresence initial={false} mode="popLayout">
+									{statements.map((statement, index) => (
+										<motion.div
+											key={statement.id}
+											className="p-0.5"
+											layout
+											initial={{ opacity: 0, y: 6 }}
+											animate={{
+												opacity: 1,
+												y: 0,
+												transition: TRANSITION.base,
 											}}
-										</form.Field>
-									</div>
-								))}
+											exit={{
+												opacity: 0,
+												scale: 0.98,
+												transition: TRANSITION.fast,
+											}}
+											transition={{ layout: SPRING.snappy }}
+										>
+											<form.Field
+												name={`statements[${index}].amount` as const}
+											>
+												{field => {
+													const errors = mergeErrors(
+														field.state.meta.errors,
+														field.name,
+													)
+													const allocable = statement.allocable_amount
+
+													const percent =
+														allocable === 0
+															? 0
+															: (field.state.value / allocable) * 100
+
+													return (
+														<Card
+															className={cn(
+																errors.length
+																	? "border-destructive/50"
+																	: null,
+															)}
+														>
+															<CardHeader>
+																<CardTitle className="text-sm leading-5">
+																	{statement.description}
+																</CardTitle>
+																<CardDescription>
+																	{formatDatetime(
+																		statement.datetime,
+																	)}
+																</CardDescription>
+															</CardHeader>
+															<CardContent className="flex flex-col gap-4">
+																<AmountField
+																	id={field.name}
+																	label="Amount"
+																	value={field.state.value}
+																	errors={errors}
+																	suffix={`of ${formatCurrency(allocable)}`}
+																	onChange={value => {
+																		field.handleChange(value)
+																		clearApiError(field.name)
+																	}}
+																/>
+																<Progress
+																	value={percent}
+																	className={cn(
+																		"transition-colors",
+																		percent > 100
+																			? "text-red-400"
+																			: null,
+																	)}
+																/>
+															</CardContent>
+														</Card>
+													)
+												}}
+											</form.Field>
+										</motion.div>
+									))}
+								</AnimatePresence>
 							</div>
 
-							{!statements.length && (
-								<Empty className="border border-dashed">
-									<EmptyHeader>
-										<EmptyMedia variant="icon">
-											<IconifyIcon icon="lucide:credit-card" />
-										</EmptyMedia>
-										<EmptyTitle>No Statements</EmptyTitle>
-										<EmptyDescription>
-											No statements selected for allocation.
-										</EmptyDescription>
-									</EmptyHeader>
-								</Empty>
-							)}
+							<AnimatePresence initial={false}>
+								{!statements.length && (
+									<motion.div
+										key="empty"
+										initial={{ opacity: 0, y: 6 }}
+										animate={{ opacity: 1, y: 0, transition: TRANSITION.base }}
+										exit={{
+											opacity: 0,
+											scale: 0.98,
+											transition: TRANSITION.fast,
+										}}
+									>
+										<Empty className="border border-dashed">
+											<EmptyHeader>
+												<EmptyMedia variant="icon">
+													<IconifyIcon icon="lucide:credit-card" />
+												</EmptyMedia>
+												<EmptyTitle>No Statements</EmptyTitle>
+												<EmptyDescription>
+													No statements selected for allocation.
+												</EmptyDescription>
+											</EmptyHeader>
+										</Empty>
+									</motion.div>
+								)}
+							</AnimatePresence>
 						</ScrollArea>
 					</div>
 				</form>
