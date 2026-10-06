@@ -29,7 +29,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select"
-import { Skeleton } from "@/components/ui/skeleton"
 import { useHistory } from "@/history"
 import { useMonthParams } from "@/hooks/use-month-params"
 import { usePersistentState } from "@/hooks/use-persistent-state"
@@ -169,49 +168,7 @@ export default function DashboardPage() {
 		return [scope]
 	}, [scope, buckets])
 
-	if (!data || !paceData || !bucketDailyData) {
-		return (
-			<div className="grid gap-7 md:gap-9">
-				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-					{Array.from({ length: 4 }).map((_, index) => (
-						<Card key={index}>
-							<CardContent className="grid gap-2">
-								<Skeleton className="h-3 w-20" />
-								<Skeleton className="h-7 w-28" />
-								<Skeleton className="h-3 w-24" />
-							</CardContent>
-						</Card>
-					))}
-				</div>
-
-				<Card>
-					<CardHeader className="border-b">
-						<Skeleton className="h-5 w-32" />
-						<Skeleton className="h-4 w-80 max-w-full" />
-					</CardHeader>
-					<CardContent>
-						<Skeleton className="h-64 w-full" />
-					</CardContent>
-				</Card>
-
-				<section className="grid gap-4">
-					<div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-						<div className="grid gap-2">
-							<Skeleton className="h-6 w-48" />
-							<Skeleton className="h-4 w-40" />
-						</div>
-						<Skeleton className="h-9 w-full sm:w-52" />
-					</div>
-					<div className="grid gap-2">
-						<Skeleton className="h-14 w-full" />
-						<Skeleton className="h-14 w-full" />
-						<Skeleton className="h-14 w-full" />
-						<Skeleton className="h-14 w-full" />
-					</div>
-				</section>
-			</div>
-		)
-	}
+	if (!data || !paceData || !bucketDailyData) return null
 	const { period, summary, comparison, series, weekday, future_records_count } = data
 	const scopedTotal = categories.reduce(
 		(total, category) =>

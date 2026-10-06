@@ -27,7 +27,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select"
-import { Skeleton } from "@/components/ui/skeleton"
 import { useFetch } from "@/hooks/use-fetch"
 import { useRecordEditor } from "@/hooks/use-record-editor"
 import { useMonthTransition } from "@/hooks/use-tab-transition"
@@ -190,43 +189,7 @@ export default function MonthlyRecordsPage() {
 
 	const clearFilters = () => setSearchParams({ month, year: String(year) })
 
-	if (data === undefined) {
-		return (
-			<div className="grid gap-5 md:gap-7">
-				<div className="flex min-w-0 flex-col gap-2 md:flex-row md:flex-wrap">
-					<Skeleton className="h-10 w-full md:w-sm" />
-					<div className="flex gap-2">
-						<Skeleton className="h-9 w-32" />
-						<Skeleton className="h-9 w-32" />
-						<Skeleton className="hidden h-9 w-32 sm:block" />
-					</div>
-				</div>
-
-				<div className="overflow-hidden rounded-lg border bg-card">
-					<div className="grid grid-cols-[1fr_auto] items-center gap-3 border-b px-4 py-3 sm:grid-cols-[2fr_1fr_1fr_auto]">
-						<Skeleton className="h-4 w-3/4" />
-						<Skeleton className="hidden h-4 w-24 sm:block" />
-						<Skeleton className="hidden h-4 w-20 sm:block" />
-						<Skeleton className="h-4 w-16" />
-					</div>
-					{Array.from({ length: 6 }).map((_, index) => (
-						<div
-							key={index}
-							className="grid grid-cols-[1fr_auto] items-center gap-3 border-b px-4 py-3 last:border-b-0 sm:grid-cols-[2fr_1fr_1fr_auto]"
-						>
-							<div className="grid gap-1.5">
-								<Skeleton className="h-4 w-2/3" />
-								<Skeleton className="h-3 w-1/3" />
-							</div>
-							<Skeleton className="hidden h-4 w-24 sm:block" />
-							<Skeleton className="hidden h-4 w-20 sm:block" />
-							<Skeleton className="h-8 w-16" />
-						</div>
-					))}
-				</div>
-			</div>
-		)
-	}
+	if (data === undefined) return null
 
 	if (data === null) {
 		return <p className="text-sm text-muted-foreground">Monthly records not found.</p>

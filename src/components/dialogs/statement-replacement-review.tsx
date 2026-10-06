@@ -23,7 +23,6 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog"
 import { Separator } from "@/components/ui/separator"
-import { Skeleton } from "@/components/ui/skeleton"
 import { classForCurrency, cn, formatCurrency, formatDatetime } from "@/lib/utils"
 import { getRecord } from "@/logic/records"
 import { replacementReview, replacePendingStatement } from "@/logic/statements"
@@ -266,12 +265,7 @@ export default function StatementReplacementReviewDialog({
 							</AlertDescription>
 						</Alert>
 					</div>
-				) : (
-					<div className="grid gap-3 sm:grid-cols-2">
-						<Skeleton className="h-48" />
-						<Skeleton className="h-48" />
-					</div>
-				)}
+				) : null}
 
 				<DialogFooter>
 					<DialogClose

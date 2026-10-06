@@ -11,7 +11,6 @@ import PageHeader from "@/components/layout/page-header"
 import { dayLabel, isInteractiveTarget } from "@/components/table/row-groups"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Skeleton } from "@/components/ui/skeleton"
 import { useHistory } from "@/history"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { bankMeta } from "@/lib/banks"
@@ -53,13 +52,7 @@ export default function AccountsPage() {
 					/>
 				</div>
 
-				{accounts === undefined ? (
-					<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-						{["a", "b", "c"].map(key => (
-							<Skeleton key={key} className="h-48 rounded-xl" />
-						))}
-					</div>
-				) : accounts.length === 0 ? (
+				{accounts === undefined ? null : accounts.length === 0 ? (
 					<p className="rounded-xl border border-dashed p-10 text-center text-sm text-muted-foreground">
 						{query
 							? "No accounts match your search."

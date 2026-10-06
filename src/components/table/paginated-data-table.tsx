@@ -17,7 +17,6 @@ import {
 	MobileGroupHeader,
 	type RowGroup,
 } from "@/components/table/row-groups"
-import { Skeleton } from "@/components/ui/skeleton"
 import {
 	Table,
 	TableBody,
@@ -29,8 +28,6 @@ import {
 import { rowEnter, staggerDelay } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 import { Paginated } from "@/types"
-
-const SKELETON_WIDTHS = ["w-full", "w-3/4", "w-1/2"] as const
 
 function PaginatedDataTable<TData extends { id: string }, TValue>({
 	paginated,
@@ -61,7 +58,6 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 		getCoreRowModel: getCoreRowModel(),
 		getRowId: row => row.id,
 	})
-	const skeletonRows = Math.min(Math.max(Number(header?.pageSize) || 8, 3), 12)
 	const rows = table.getRowModel().rows
 	const starts = groupStarts(
 		rows.map(row => row.original),
@@ -89,14 +85,7 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 						"min-w-0 divide-y overflow-hidden rounded-lg border bg-card @5xl/table:hidden",
 					)}
 				>
-					{loading ? (
-						Array.from({ length: 4 }).map((_, index) => (
-							<div key={index} className="col-span-full grid gap-1.5 px-3 py-2.5">
-								<Skeleton className="h-4 w-2/3" />
-								<Skeleton className="h-3 w-1/3" />
-							</div>
-						))
-					) : rows.length ? (
+					{loading ? null : rows.length ? (
 						rows.map((row, index) => {
 							const group = starts.get(index)
 							return (
@@ -162,25 +151,8 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 							</TableRow>
 						))}
 					</TableHeader>
-					<TableBody key={loading ? "skeleton" : "rows"}>
-						{loading ? (
-							Array.from({ length: skeletonRows }).map((_, row) => (
-								<TableRow key={row}>
-									{columns.map((_, cell) => (
-										<TableCell key={cell}>
-											<Skeleton
-												className={cn(
-													"h-4",
-													SKELETON_WIDTHS[
-														(row + cell) % SKELETON_WIDTHS.length
-													],
-												)}
-											/>
-										</TableCell>
-									))}
-								</TableRow>
-							))
-						) : rows.length ? (
+					<TableBody key={loading ? "loading" : "rows"}>
+						{loading ? null : rows.length ? (
 							rows.map((row, index) => {
 								const group = starts.get(index)
 								return (
@@ -238,7 +210,7 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 
 			{footer ? (
 				<PaginationFooter
-					summary={loading ? <Skeleton className="h-4 w-44" /> : footer.summary}
+					summary={loading ? null : footer.summary}
 					page={paginated.current_page}
 					lastPage={
 						typeof paginated.last_page === "number"

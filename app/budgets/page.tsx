@@ -14,7 +14,6 @@ import PaginationHeader from "@/components/table/pagination-header"
 import { isInteractiveTarget } from "@/components/table/row-groups"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Skeleton } from "@/components/ui/skeleton"
 import { useHistory } from "@/history"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { SPRING } from "@/lib/motion"
@@ -60,13 +59,7 @@ export default function BudgetsPage() {
 					}
 				/>
 
-				{budgets === undefined ? (
-					<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-						{["a", "b", "c"].map(key => (
-							<Skeleton key={key} className="h-44 rounded-xl" />
-						))}
-					</div>
-				) : budgets.length === 0 ? (
+				{budgets === undefined ? null : budgets.length === 0 ? (
 					<p className="rounded-xl border border-dashed p-10 text-center text-sm text-muted-foreground">
 						{query ? "No budgets match your search." : "No budgets yet."}
 					</p>

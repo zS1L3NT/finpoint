@@ -110,6 +110,9 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 		),
 	})
 
+	// undefined means the live query is still resolving; only null is genuinely missing.
+	if (data === undefined) return null
+
 	if (!budget) {
 		return (
 			<>
