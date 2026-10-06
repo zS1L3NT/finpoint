@@ -4,7 +4,7 @@ import { useLiveQuery } from "dexie-react-hooks"
 import { DateTime } from "luxon"
 import Link from "next/link"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
 import DateRange from "@/components/form/date-range"
 import { UiIcon as IconifyIcon } from "@/components/icon"
@@ -30,7 +30,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { useFetch } from "@/hooks/use-fetch"
 import { useRecordEditor } from "@/hooks/use-record-editor"
-import { useTabTransition } from "@/hooks/use-tab-transition"
+import { useMonthTransition, useTabTransition } from "@/hooks/use-tab-transition"
 import { cn } from "@/lib/utils"
 import { listCategories } from "@/logic/categories"
 import { getMonthlyRecords } from "@/logic/monthly"
@@ -110,6 +110,8 @@ export default function MonthlyRecordsPage() {
 	const minAmount = searchParams.get("min_amount")
 	const maxAmount = searchParams.get("max_amount")
 	const animateContent = useTabTransition()
+	const contentRef = useRef<HTMLDivElement>(null)
+	useMonthTransition(contentRef, `${month}-${year}`)
 
 	const filterKey = JSON.stringify([
 		query,
@@ -236,9 +238,10 @@ export default function MonthlyRecordsPage() {
 	return (
 		<>
 			<div
+				ref={contentRef}
 				className={cn(
 					"grid gap-5 md:gap-7",
-					animateContent && "animate-in fade-in slide-in-from-bottom-2 duration-500",
+					animateContent && "animate-in fade-in duration-150 ease-out",
 				)}
 			>
 				<MonthlyRecordFilters
