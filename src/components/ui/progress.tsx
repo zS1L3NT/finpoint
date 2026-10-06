@@ -23,13 +23,13 @@ function Progress({
     >
       <ProgressPrimitive.Indicator
         data-slot="progress-indicator"
-        className="size-full flex-1 bg-current transition-all"
+        className="size-full flex-1 bg-current transition-transform duration-500 ease-out"
         style={{ transform: `translateX(-${100 - baseProgress}%)` }}
       />
       {excessProgress > 0 ? (
         <div
           data-slot="progress-excess-indicator"
-          className="absolute inset-0 bg-destructive transition-all"
+          className="absolute inset-0 bg-destructive transition-transform duration-500 ease-out"
           style={{ transform: `translateX(-${100 - excessProgress}%)` }}
         />
       ) : null}
