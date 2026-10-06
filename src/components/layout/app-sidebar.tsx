@@ -124,17 +124,17 @@ function AppearanceSwitch() {
 						aria-checked={appearance === item.value}
 						title={item.label}
 						onClick={() => updateAppearance(item.value)}
-						className="relative flex h-7 cursor-pointer items-center justify-center gap-1.5 rounded-md text-xs text-sidebar-foreground/70 transition-colors duration-150 ease-out hover:text-sidebar-foreground aria-checked:text-sidebar-foreground"
+						className="relative isolate flex h-7 cursor-pointer items-center justify-center gap-1.5 rounded-md text-xs text-sidebar-foreground/70 transition-colors duration-150 ease-out hover:text-sidebar-foreground aria-checked:text-sidebar-foreground"
 					>
 						{appearance === item.value ? (
 							<motion.span
 								layoutId="appearance-thumb"
 								transition={SPRING.snappy}
-								className="absolute inset-0 rounded-md bg-sidebar shadow-xs"
+								className="absolute inset-0 -z-10 rounded-md bg-sidebar shadow-xs"
 							/>
 						) : null}
-						<item.icon className="relative size-3.5" />
-						<span className="sr-only relative sm:not-sr-only">{item.label}</span>
+						<item.icon className="size-3.5" />
+						<span className="sr-only sm:not-sr-only">{item.label}</span>
 					</button>
 				))}
 			</div>
