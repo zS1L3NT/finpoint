@@ -2,6 +2,7 @@
 
 import { useForm, useStore } from "@tanstack/react-form"
 import { useLiveQuery } from "dexie-react-hooks"
+import { AnimatePresence, motion } from "framer-motion"
 import Link from "next/link"
 import { useRef, useState } from "react"
 import { toast } from "sonner"
@@ -23,6 +24,7 @@ import { Field, FieldError } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { BANKS } from "@/lib/banks"
+import { SPRING, TRANSITION } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 import { listAccounts } from "@/logic/accounts"
 import { importDbs, importOcbc, importRevolut, importUob } from "@/logic/importer"
@@ -44,13 +46,24 @@ function Step({
 	number,
 	title,
 	children,
+	animate,
 }: {
 	number: number
 	title: string
 	children: React.ReactNode
+	/** Fade the step in when it appears conditionally after the first paint. */
+	animate?: boolean
 }) {
+	const Section = animate ? motion.section : "section"
 	return (
-		<section className="grid gap-3">
+		<Section
+			className="grid gap-3"
+			{...(animate && {
+				initial: { opacity: 0, y: 6 },
+				animate: { opacity: 1, y: 0 },
+				transition: TRANSITION.base,
+			})}
+		>
 			<h3 className="flex items-center gap-2 text-sm font-medium">
 				<span className="grid size-5 place-items-center rounded-full bg-foreground text-[0.6875rem] text-background">
 					{number}
@@ -58,7 +71,7 @@ function Step({
 				{title}
 			</h3>
 			{children}
-		</section>
+		</Section>
 	)
 }
 
@@ -148,7 +161,12 @@ export default function ImporterPage() {
 					}}
 				>
 					{result ? (
-						<div className="flex flex-col gap-3 rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+						<motion.div
+							initial={{ opacity: 0, y: -6 }}
+							animate={{ opacity: 1, y: 0 }}
+							transition={TRANSITION.base}
+							className="flex flex-col gap-3 rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4 sm:flex-row sm:items-center sm:justify-between"
+						>
 							<div className="flex items-start gap-3">
 								<span className="grid size-9 shrink-0 place-items-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
 									<IconifyIcon icon="lucide:circle-check" className="size-5" />
@@ -171,7 +189,7 @@ export default function ImporterPage() {
 									</Link>
 								</Button>
 							) : null}
-						</div>
+						</motion.div>
 					) : null}
 
 					<Card>
@@ -211,7 +229,7 @@ export default function ImporterPage() {
 															clearApiError("account_id")
 															clearApiError("account_name")
 														}}
-														className="flex cursor-pointer items-center gap-2.5 rounded-lg border bg-background px-3 py-2.5 text-left text-sm transition-colors hover:bg-muted aria-checked:border-foreground aria-checked:ring-1 aria-checked:ring-foreground"
+														className="group/bank flex cursor-pointer items-center gap-2.5 rounded-lg border bg-background px-3 py-2.5 text-left text-sm transition-[background-color,border-color,box-shadow,transform] duration-150 ease-out hover:bg-muted active:scale-[0.98] aria-checked:border-foreground aria-checked:ring-1 aria-checked:ring-foreground"
 													>
 														<span
 															className="grid size-7 shrink-0 place-items-center rounded-md text-[0.625rem] font-bold text-white"
@@ -219,7 +237,7 @@ export default function ImporterPage() {
 														>
 															{item.short}
 														</span>
-														<span className="grid">
+														<span className="grid min-w-0 flex-1">
 															<span className="font-medium">
 																{item.label}
 															</span>
@@ -227,6 +245,10 @@ export default function ImporterPage() {
 																{item.formats}
 															</span>
 														</span>
+														<IconifyIcon
+															icon="lucide:check"
+															className="size-4 shrink-0 scale-75 opacity-0 transition-[opacity,transform] duration-150 ease-out group-aria-checked/bank:scale-100 group-aria-checked/bank:opacity-100"
+														/>
 													</button>
 												))}
 											</div>
@@ -237,7 +259,7 @@ export default function ImporterPage() {
 							</form.Field>
 
 							{BANKS_REQUIRING_ADDITIONAL_INFO.includes(bank) && (
-								<Step number={2} title="Account">
+								<Step number={2} title="Account" animate>
 									<form.Field name="account_select">
 										{field => (
 											<SelectField
@@ -324,6 +346,7 @@ export default function ImporterPage() {
 
 									return (
 										<Step
+											animate
 											number={
 												BANKS_REQUIRING_ADDITIONAL_INFO.includes(bank)
 													? 3
@@ -368,14 +391,19 @@ export default function ImporterPage() {
 														)
 													}}
 													className={cn(
-														"grid cursor-pointer place-items-center gap-1.5 rounded-lg border border-dashed px-4 py-8 text-center text-sm transition-colors hover:bg-muted/50",
-														dragging && "border-foreground bg-muted/60",
+														"grid cursor-pointer place-items-center gap-1.5 rounded-lg border border-dashed px-4 py-8 text-center text-sm transition-[background-color,border-color,transform] duration-150 ease-out hover:bg-muted/50 active:scale-[0.99]",
+														dragging &&
+															"scale-[1.01] border-foreground bg-muted/60",
 														errors.length && "border-destructive",
 													)}
 												>
 													<IconifyIcon
 														icon="lucide:file-up"
-														className="size-6 text-muted-foreground"
+														className={cn(
+															"size-6 text-muted-foreground transition-[transform,color] duration-150 ease-out",
+															dragging &&
+																"-translate-y-1 text-foreground",
+														)}
 													/>
 													<span className="font-medium">
 														Drop{" "}
@@ -390,38 +418,56 @@ export default function ImporterPage() {
 											</Field>
 											{files.length ? (
 												<ul className="grid gap-1.5">
-													{files.map(file => (
-														<li
-															key={`${file.name}-${file.size}`}
-															className="flex items-center gap-2.5 rounded-lg border px-3 py-2 text-sm"
-														>
-															<IconifyIcon
-																icon="lucide:file-spreadsheet"
-																className="size-4 shrink-0 text-muted-foreground"
-															/>
-															<span className="min-w-0 flex-1 truncate">
-																{file.name}
-															</span>
-															<span className="text-xs text-muted-foreground tabular-nums">
-																{(file.size / 1024).toFixed(1)} KB
-															</span>
-															<Button
-																type="button"
-																variant="ghost"
-																size="icon-sm"
-																aria-label={`Remove ${file.name}`}
-																onClick={() =>
-																	pick(
-																		files.filter(
-																			item => item !== file,
-																		),
-																	)
-																}
+													<AnimatePresence
+														initial={false}
+														mode="popLayout"
+													>
+														{files.map(file => (
+															<motion.li
+																key={`${file.name}-${file.size}`}
+																layout="position"
+																initial={{ opacity: 0, y: 4 }}
+																animate={{ opacity: 1, y: 0 }}
+																exit={{
+																	opacity: 0,
+																	transition: TRANSITION.fast,
+																}}
+																transition={{
+																	...TRANSITION.base,
+																	layout: SPRING.snappy,
+																}}
+																className="flex items-center gap-2.5 rounded-lg border px-3 py-2 text-sm"
 															>
-																<IconifyIcon icon="lucide:x" />
-															</Button>
-														</li>
-													))}
+																<IconifyIcon
+																	icon="lucide:file-spreadsheet"
+																	className="size-4 shrink-0 text-muted-foreground"
+																/>
+																<span className="min-w-0 flex-1 truncate">
+																	{file.name}
+																</span>
+																<span className="text-xs text-muted-foreground tabular-nums">
+																	{(file.size / 1024).toFixed(1)}{" "}
+																	KB
+																</span>
+																<Button
+																	type="button"
+																	variant="ghost"
+																	size="icon-sm"
+																	aria-label={`Remove ${file.name}`}
+																	onClick={() =>
+																		pick(
+																			files.filter(
+																				item =>
+																					item !== file,
+																			),
+																		)
+																	}
+																>
+																	<IconifyIcon icon="lucide:x" />
+																</Button>
+															</motion.li>
+														))}
+													</AnimatePresence>
 												</ul>
 											) : null}
 										</Step>
