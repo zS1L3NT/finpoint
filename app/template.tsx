@@ -12,7 +12,7 @@ export default function Template({ children }: { children: React.ReactNode }) {
 	const key = pathname === "/" || pathname === "/records/monthly" ? "month" : pathname
 
 	return (
-		<div key={key} className="animate-in fade-in slide-in-from-bottom-1 duration-200 ease-out">
+		<div key={key} className="animate-in fade-in slide-in-from-bottom-2 duration-300 ease-out">
 			{children}
 		</div>
 	)
