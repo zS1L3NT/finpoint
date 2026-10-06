@@ -9,6 +9,15 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
+    /*
+     * Motion tokens. Tailwind's stock curves are too soft to feel responsive, so the
+     * names are redefined: ease-out for anything entering or reacting to input,
+     * ease-in-out for things already on screen moving, ease-drawer for edge sheets.
+     */
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+    --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);
     --radius-sm: calc(var(--radius) - 4px);
@@ -245,6 +254,25 @@
         @apply font-sans;
         scrollbar-gutter: stable;
     }
+
+	/*
+	 * Reduced motion keeps fades (they still explain state changes) but drops the
+	 * movement: every tw-animate enter/exit transform collapses to its resting value.
+	 */
+	@media (prefers-reduced-motion: reduce) {
+		*,
+		::before,
+		::after {
+			--tw-enter-scale: 1 !important;
+			--tw-exit-scale: 1 !important;
+			--tw-enter-translate-x: 0 !important;
+			--tw-enter-translate-y: 0 !important;
+			--tw-exit-translate-x: 0 !important;
+			--tw-exit-translate-y: 0 !important;
+			--tw-enter-blur: 0 !important;
+			--tw-exit-blur: 0 !important;
+		}
+	}
 
 	html body[data-scroll-locked] {
 		--removed-body-scroll-bar-size: 0px !important;
