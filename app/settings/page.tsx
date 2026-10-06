@@ -25,7 +25,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select"
-import { Skeleton } from "@/components/ui/skeleton"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { useSettings } from "@/hooks/use-settings"
 import { updateSettings } from "@/logic/settings"
@@ -102,13 +101,7 @@ export default function SettingsPage() {
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
-					{settings === undefined ? (
-						<div className="grid gap-2">
-							<Skeleton className="h-4 w-36" />
-							<Skeleton className="h-9 w-full max-w-xs" />
-							<Skeleton className="h-3 w-full max-w-md" />
-						</div>
-					) : (
+					{settings === undefined ? null : (
 						<div className="grid max-w-md gap-5">
 							<DateField
 								id="default_filter_start_date"
@@ -166,13 +159,7 @@ export default function SettingsPage() {
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
-					{settings === undefined ? (
-						<div className="grid gap-2">
-							<Skeleton className="h-4 w-36" />
-							<Skeleton className="h-8 w-56" />
-							<Skeleton className="h-7 w-24" />
-						</div>
-					) : (
+					{settings === undefined ? null : (
 						<div className="grid max-w-md gap-5">
 							<FormField
 								id="dashboard_comparison_preset"

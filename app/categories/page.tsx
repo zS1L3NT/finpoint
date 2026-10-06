@@ -11,7 +11,6 @@ import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Skeleton } from "@/components/ui/skeleton"
 import { useHistory } from "@/history"
 import { canUseDefaultBucket, treatmentLabel } from "@/lib/analytics"
 import { SPRING } from "@/lib/motion"
@@ -73,13 +72,7 @@ export default function CategoriesPage() {
 					/>
 				</div>
 
-				{categoriesQuery === undefined ? (
-					<div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-						{["a", "b", "c", "d", "e", "f"].map(key => (
-							<Skeleton key={key} className="h-28 rounded-xl" />
-						))}
-					</div>
-				) : visible.length === 0 ? (
+				{categoriesQuery === undefined ? null : visible.length === 0 ? (
 					<p className="rounded-xl border border-dashed p-10 text-center text-sm text-muted-foreground">
 						{query ? "No categories match your search." : "No categories yet."}
 					</p>

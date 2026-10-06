@@ -28,7 +28,6 @@ import {
 	CardTitle,
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Skeleton } from "@/components/ui/skeleton"
 import { db } from "@/data/db"
 import {
 	clearAllData,
@@ -546,7 +545,7 @@ export default function DataSettingsPage() {
 										{(counts[key] ?? 0).toLocaleString()}
 									</span>
 								) : (
-									<Skeleton className="h-7 w-12" />
+									<span className="invisible text-xl font-semibold">0</span>
 								)}
 							</div>
 						))}

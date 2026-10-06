@@ -112,16 +112,16 @@ export default function AllocatorPendingPage() {
 	}, [candidateQuery, candidateQueryParam])
 
 	const accounts = useLiveQuery(() => listAccounts(), []) ?? []
-	const pending =
-		useLiveQuery(
-			() =>
-				listStatements({
-					query: queueQueryParam || null,
-					account_id: accountId === "all" ? null : accountId,
-					is_pending: "true",
-				}),
-			[queueQueryParam, accountId],
-		) ?? []
+	const pendingQuery = useLiveQuery(
+		() =>
+			listStatements({
+				query: queueQueryParam || null,
+				account_id: accountId === "all" ? null : accountId,
+				is_pending: "true",
+			}),
+		[queueQueryParam, accountId],
+	)
+	const pending = pendingQuery ?? []
 	const allPending = useLiveQuery(() => listStatements({ is_pending: "true" }), []) ?? []
 	const imports =
 		useLiveQuery(
@@ -320,7 +320,7 @@ export default function AllocatorPendingPage() {
 									))}
 								</AnimatePresence>
 							</div>
-						) : (
+						) : pendingQuery === undefined ? null : (
 							<Empty className="border">
 								<EmptyHeader>
 									<EmptyMedia variant="icon">

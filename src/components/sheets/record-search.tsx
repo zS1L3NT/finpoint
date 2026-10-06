@@ -12,7 +12,6 @@ import {
 	SheetTitle,
 	SheetTrigger,
 } from "@/components/ui/sheet"
-import { Skeleton } from "@/components/ui/skeleton"
 import { classForCurrency, cn, formatCurrency, parseDatetime } from "@/lib/utils"
 import { listRecords } from "@/logic/records"
 import { round2 } from "@/logic/shared"
@@ -147,13 +146,7 @@ export default function RecordSearchSheet({
 						deferredQuery !== query && "opacity-70 transition-opacity",
 					)}
 				>
-					{sorted === undefined ? (
-						<div className="grid gap-px p-2">
-							{Array.from({ length: 6 }).map((_, index) => (
-								<Skeleton key={index} className="h-16 w-full" />
-							))}
-						</div>
-					) : visible.length === 0 ? (
+					{sorted === undefined ? null : visible.length === 0 ? (
 						<div className="grid place-items-center gap-2 px-6 py-16 text-center text-sm text-muted-foreground">
 							<IconifyIcon icon="lucide:search-x" className="size-6" />
 							No matching Records.
