@@ -30,7 +30,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { useFetch } from "@/hooks/use-fetch"
 import { useRecordEditor } from "@/hooks/use-record-editor"
-import { useMonthTransition, useTabTransition } from "@/hooks/use-tab-transition"
+import { useMonthTransition } from "@/hooks/use-tab-transition"
 import { cn } from "@/lib/utils"
 import { listCategories } from "@/logic/categories"
 import { getMonthlyRecords } from "@/logic/monthly"
@@ -109,7 +109,6 @@ export default function MonthlyRecordsPage() {
 	const endDate = searchParams.get("end_date") ?? legacyDate
 	const minAmount = searchParams.get("min_amount")
 	const maxAmount = searchParams.get("max_amount")
-	const animateContent = useTabTransition()
 	const contentRef = useRef<HTMLDivElement>(null)
 	useMonthTransition(contentRef, `${month}-${year}`)
 
@@ -237,13 +236,7 @@ export default function MonthlyRecordsPage() {
 
 	return (
 		<>
-			<div
-				ref={contentRef}
-				className={cn(
-					"grid gap-5 md:gap-7",
-					animateContent && "animate-in fade-in duration-150 ease-out",
-				)}
-			>
+			<div ref={contentRef} className={cn("reveal grid gap-5 md:gap-7")}>
 				<MonthlyRecordFilters
 					date={date}
 					categories={categories}

@@ -34,7 +34,7 @@ import { useHistory } from "@/history"
 import { useMonthParams } from "@/hooks/use-month-params"
 import { usePersistentState } from "@/hooks/use-persistent-state"
 import { useSettings } from "@/hooks/use-settings"
-import { armTabTransition, useMonthTransition, useTabTransition } from "@/hooks/use-tab-transition"
+import { armTabTransition, useMonthTransition } from "@/hooks/use-tab-transition"
 import { cn, formatCurrency } from "@/lib/utils"
 import { getDashboardView, type SpendingHistoryMonth, type TrendMonth } from "@/logic/dashboard"
 import { pathMonthlyRecords } from "@/routes"
@@ -130,7 +130,6 @@ type BucketDailyData = {
 export default function DashboardPage() {
 	const { handlePush } = useHistory()
 	const { month, year } = useMonthParams()
-	const animateContent = useTabTransition()
 	const contentRef = useRef<HTMLDivElement>(null)
 	useMonthTransition(contentRef, `${month}-${year}`)
 	const settings = useSettings()
@@ -246,13 +245,7 @@ export default function DashboardPage() {
 		)
 	}
 	return (
-		<div
-			ref={contentRef}
-			className={cn(
-				"grid gap-7 md:gap-9",
-				animateContent && "animate-in fade-in duration-150 ease-out",
-			)}
-		>
+		<div ref={contentRef} className={cn("reveal grid gap-7 md:gap-9")}>
 			{period.is_future ? (
 				<Card>
 					<CardHeader>

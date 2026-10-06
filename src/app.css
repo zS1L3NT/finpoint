@@ -241,6 +241,40 @@
         oklch(0.552 0.016 285.938);
 }
 
+/*
+ * Staggered reveal for a page's top-level sections, played once when its content mounts
+ * (after the loading skeleton). The delays are explicit so the cascade stays short.
+ */
+@keyframes reveal {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+}
+
+@keyframes reveal-fade {
+    from {
+        opacity: 0;
+    }
+}
+
+.reveal > * {
+    animation: reveal 480ms var(--ease-out) backwards;
+}
+
+.reveal > :nth-child(2) { animation-delay: 70ms; }
+.reveal > :nth-child(3) { animation-delay: 140ms; }
+.reveal > :nth-child(4) { animation-delay: 210ms; }
+.reveal > :nth-child(5) { animation-delay: 280ms; }
+.reveal > :nth-child(6) { animation-delay: 350ms; }
+.reveal > :nth-child(n + 7) { animation-delay: 420ms; }
+
+@media (prefers-reduced-motion: reduce) {
+    .reveal > * {
+        animation-name: reveal-fade;
+    }
+}
+
 @layer base {
     * {
         @apply border-border outline-ring/50;
