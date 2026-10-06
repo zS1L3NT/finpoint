@@ -1,3 +1,8 @@
+"use client"
+
+import { motion, useReducedMotion } from "framer-motion"
+import { DURATION, EASE_OUT } from "@/lib/motion"
+
 /**
  * Tiny inline trend line for stat tiles. Plain SVG (no Recharts, no resize
  * observer) so a row of them costs nothing when the layout changes.
@@ -13,6 +18,7 @@ export default function Sparkline({
 	label: string
 	className?: string
 }) {
+	const reduceMotion = useReducedMotion()
 	if (values.length < 2) return null
 	const width = 96
 	const height = 28
@@ -45,7 +51,10 @@ export default function Sparkline({
 					strokeDasharray="2 2"
 				/>
 			) : null}
-			<polyline
+			<motion.polyline
+				initial={reduceMotion ? false : { pathLength: 0 }}
+				animate={{ pathLength: 1 }}
+				transition={{ duration: DURATION.slow + 0.1, ease: EASE_OUT }}
 				points={points}
 				fill="none"
 				stroke={color}
@@ -53,7 +62,10 @@ export default function Sparkline({
 				strokeLinecap="round"
 				strokeLinejoin="round"
 			/>
-			<circle
+			<motion.circle
+				initial={reduceMotion ? false : { opacity: 0 }}
+				animate={{ opacity: 1 }}
+				transition={{ duration: DURATION.base, delay: DURATION.slow, ease: EASE_OUT }}
 				cx={x(last)}
 				cy={y(values[last] ?? 0)}
 				r={2.75}
