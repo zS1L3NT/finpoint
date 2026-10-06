@@ -55,7 +55,9 @@ export default function StatementReplacementReviewDialog({
 	const [isSubmitting, setIsSubmitting] = useState(false)
 
 	useEffect(() => {
-		if (!open || !statement || !pendingStatement) {
+		// While closing, keep the last review on screen; it's cleared once the exit completes.
+		if (!open) return
+		if (!statement || !pendingStatement) {
 			setReview(null)
 			setError(null)
 			return
@@ -131,7 +133,16 @@ export default function StatementReplacementReviewDialog({
 	}
 
 	return (
-		<Dialog open={open} onOpenChange={onOpenChange}>
+		<Dialog
+			open={open}
+			onOpenChange={onOpenChange}
+			onOpenChangeComplete={isOpen => {
+				if (!isOpen) {
+					setReview(null)
+					setError(null)
+				}
+			}}
+		>
 			<DialogContent className="md:max-w-3xl">
 				<DialogHeader className="gap-1">
 					<DialogTitle>Review Statement replacement</DialogTitle>
