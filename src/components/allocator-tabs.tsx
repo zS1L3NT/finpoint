@@ -12,7 +12,7 @@ export default function AllocatorTabs({ active }: { active: "allocate" | "replac
 		<nav className="flex border-b" aria-label="Allocator views">
 			<Link
 				className={cn(
-					"border-b-2 px-4 py-2 text-sm",
+					"border-b-2 px-4 py-2 text-sm transition-colors duration-150 ease-out",
 					active === "allocate"
 						? "border-foreground font-medium"
 						: "border-transparent text-muted-foreground hover:text-foreground",
@@ -28,7 +28,7 @@ export default function AllocatorTabs({ active }: { active: "allocate" | "replac
 			</Link>
 			<Link
 				className={cn(
-					"border-b-2 px-4 py-2 text-sm",
+					"border-b-2 px-4 py-2 text-sm transition-colors duration-150 ease-out",
 					active === "replace"
 						? "border-foreground font-medium"
 						: "border-transparent text-muted-foreground hover:text-foreground",
