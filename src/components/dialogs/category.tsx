@@ -56,8 +56,8 @@ const EMPTY_FORM_VALUES: CategoryFormValues = {
 
 export default function CategoryDialog({
 	open,
-	mode,
-	category,
+	mode: modeProp,
+	category: categoryProp,
 	categories,
 	onOpenChange,
 }: {
@@ -67,6 +67,13 @@ export default function CategoryDialog({
 	categories: (Category | CategoryWithChildren)[]
 	onOpenChange: (open: boolean) => void
 }) {
+	// Parents clear mode/category the moment the dialog closes; keep the last open content
+	// so the title and fields don't flip while the exit animation plays.
+	const [snapshot, setSnapshot] = useState({ mode: modeProp, category: categoryProp })
+	if (open && (snapshot.mode !== modeProp || snapshot.category !== categoryProp)) {
+		setSnapshot({ mode: modeProp, category: categoryProp })
+	}
+	const { mode, category } = open ? { mode: modeProp, category: categoryProp } : snapshot
 	const isEditing = mode === "edit" && category !== null
 	const buckets = useLiveQuery(() => listBuckets(), []) ?? []
 	const canEditParentCategory = !isEditing || isChildCategory(category)
