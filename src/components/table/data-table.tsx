@@ -24,6 +24,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table"
+import { TRANSITION } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 
 function DataTable<TData extends { id: string }, TValue>({
@@ -58,7 +59,7 @@ function DataTable<TData extends { id: string }, TValue>({
 	useEffect(() => {
 		setLive(true)
 	}, [])
-	const enter = live ? { opacity: 0, y: 12 } : false
+	const enter = live ? { opacity: 0, y: 6 } : false
 	const rows = table.getRowModel().rows
 	const starts = groupStarts(
 		rows.map(row => row.original),
@@ -86,41 +87,37 @@ function DataTable<TData extends { id: string }, TValue>({
 						"min-w-0 divide-y overflow-hidden rounded-lg border bg-card @5xl/table:hidden",
 					)}
 				>
-					<AnimatePresence initial={false}>
-						{rows.length ? (
-							rows.map((row, index) => {
-								const group = starts.get(index)
-								return (
-									<Fragment key={row.id}>
-										{group && groupBy ? (
-											<MobileGroupHeader
-												group={groupBy}
-												groupKey={group.key}
-												rows={group.rows}
-											/>
-										) : null}
-										<div
-											data-state={selectedIds?.includes(row.id) && "selected"}
-											onClick={
-												onRowClick ? clickRow(row.original) : undefined
-											}
-											className={cn(
-												MOBILE_ROW_CLASS,
-												"px-3 py-2.5 text-sm data-[state=selected]:bg-muted",
-												onRowClick && "cursor-pointer active:bg-muted/60",
-											)}
-										>
-											{mobileRow(row)}
-										</div>
-									</Fragment>
-								)
-							})
-						) : (
-							<div className="col-span-full p-8 text-center text-sm text-muted-foreground">
-								{emptyMessage}
-							</div>
-						)}
-					</AnimatePresence>
+					{rows.length ? (
+						rows.map((row, index) => {
+							const group = starts.get(index)
+							return (
+								<Fragment key={row.id}>
+									{group && groupBy ? (
+										<MobileGroupHeader
+											group={groupBy}
+											groupKey={group.key}
+											rows={group.rows}
+										/>
+									) : null}
+									<div
+										data-state={selectedIds?.includes(row.id) && "selected"}
+										onClick={onRowClick ? clickRow(row.original) : undefined}
+										className={cn(
+											MOBILE_ROW_CLASS,
+											"px-3 py-2.5 text-sm transition-colors duration-100 data-[state=selected]:bg-muted",
+											onRowClick && "cursor-pointer active:bg-muted/60",
+										)}
+									>
+										{mobileRow(row)}
+									</div>
+								</Fragment>
+							)
+						})
+					) : (
+						<div className="col-span-full p-8 text-center text-sm text-muted-foreground">
+							{emptyMessage}
+						</div>
+					)}
 				</div>
 			) : null}
 
@@ -175,7 +172,8 @@ function DataTable<TData extends { id: string }, TValue>({
 												layout="position"
 												initial={enter}
 												animate={{ opacity: 1, y: 0 }}
-												exit={{ opacity: 0, y: -12 }}
+												exit={{ opacity: 0 }}
+												transition={TRANSITION.fast}
 												data-state={
 													selectedIds?.includes(row.id) && "selected"
 												}
