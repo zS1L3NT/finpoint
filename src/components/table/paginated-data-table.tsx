@@ -13,8 +13,8 @@ import {
 	groupStarts,
 	isInteractiveTarget,
 	MOBILE_LIST_CLASS,
-	MOBILE_ROW_CLASS,
 	MobileGroupHeader,
+	MobileRow,
 	type RowGroup,
 } from "@/components/table/row-groups"
 import {
@@ -25,7 +25,8 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table"
-import { rowEnter, staggerDelay } from "@/lib/motion"
+import { useRowCascade } from "@/hooks/use-row-cascade"
+import { rowEnter } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 import { Paginated } from "@/types"
 
@@ -52,6 +53,7 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 	groupBy?: RowGroup<TData>
 	onRowClick?: (row: TData) => void
 }) {
+	const cascade = useRowCascade(loading)
 	const table = useReactTable({
 		data: paginated.data,
 		columns,
@@ -95,20 +97,22 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 											group={groupBy}
 											groupKey={group.key}
 											rows={group.rows}
+											index={index}
+											cascade={cascade}
 										/>
 									) : null}
-									<div
+									<MobileRow
+										index={index}
+										cascade={cascade}
 										data-state={selectedIds?.includes(row.id) && "selected"}
 										onClick={onRowClick ? clickRow(row.original) : undefined}
-										style={{ animationDelay: `${staggerDelay(index)}s` }}
 										className={cn(
-											MOBILE_ROW_CLASS,
-											"animate-in fade-in slide-in-from-bottom-2 px-3 py-2.5 text-sm transition-colors duration-100 ease-out [animation-duration:300ms] [animation-fill-mode:backwards] data-[state=selected]:bg-muted",
+											"px-3 py-2.5 text-sm transition-colors duration-100 data-[state=selected]:bg-muted",
 											onRowClick && "cursor-pointer active:bg-muted/60",
 										)}
 									>
 										{mobileRow(row)}
-									</div>
+									</MobileRow>
 								</Fragment>
 							)
 						})
@@ -163,11 +167,12 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 												groupKey={group.key}
 												rows={group.rows}
 												columns={columnInfo}
+												enter={rowEnter(index, cascade)}
 											/>
 										) : null}
 										<TableRow
 											key={row.id}
-											{...rowEnter(index)}
+											{...rowEnter(index, cascade)}
 											data-state={selectedIds?.includes(row.id) && "selected"}
 											onClick={
 												onRowClick ? clickRow(row.original) : undefined
