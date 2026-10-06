@@ -47,13 +47,13 @@ export default function CategoryMovers({
 			</div>
 			{movers.map(category => {
 				const difference = category.comparison ?? 0
-				const width = (Math.abs(difference) / max) * 50
+				const scale = Math.abs(difference) / max
 				const up = difference > 0
 				const average = category.spending - difference
 				return (
 					<div
 						key={category.id}
-						className="grid grid-cols-[minmax(0,9rem)_minmax(0,1fr)] items-center gap-3 rounded-md px-1 py-1.5 hover:bg-muted/50 sm:grid-cols-[minmax(0,11rem)_minmax(0,1fr)]"
+						className="grid grid-cols-[minmax(0,9rem)_minmax(0,1fr)] items-center gap-3 rounded-md px-1 py-1.5 transition-colors duration-150 hover:bg-muted/50 sm:grid-cols-[minmax(0,11rem)_minmax(0,1fr)]"
 						title={`${category.name}: ${formatCurrency(category.spending)} vs ${formatCurrency(average)} average`}
 					>
 						<span className="flex min-w-0 items-center gap-2 text-sm">
@@ -69,12 +69,12 @@ export default function CategoryMovers({
 							<span className="absolute inset-y-0 left-1/2 w-px bg-border" />
 							<span
 								className={cn(
-									"absolute top-1/2 h-3 -translate-y-1/2",
+									"absolute top-1/2 h-3 w-1/2 transition-transform duration-300 ease-out",
 									up
-										? "left-1/2 rounded-r-[4px] bg-chart-8"
-										: "right-1/2 rounded-l-[4px] bg-chart-1",
+										? "left-1/2 origin-left rounded-r-[4px] bg-chart-8"
+										: "right-1/2 origin-right rounded-l-[4px] bg-chart-1",
 								)}
-								style={{ width: `${width}%` }}
+								style={{ transform: `translateY(-50%) scaleX(${scale})` }}
 							/>
 							<span
 								className={cn(
