@@ -47,6 +47,7 @@ import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { useDialogCloseAnimation } from "@/hooks/use-dialog-close-animation"
 import { useFetch } from "@/hooks/use-fetch"
 import { useDefaultFilterEndDateToday, useDefaultFilterStartDate } from "@/hooks/use-settings"
+import { SPRING, TRANSITION } from "@/lib/motion"
 import { cn, formatCurrency, formatDatetime, round2dp } from "@/lib/utils"
 import { ConflictError, deleteRecord, recordCompletions, updateRecord } from "@/logic/records"
 import { ValidationError } from "@/logic/validate"
@@ -336,10 +337,20 @@ export default function RecordEditorDialog({
 							<AnimatePresence>
 								{isPendingAmount && (
 									<motion.div
-										layout="position"
+										className="overflow-hidden"
 										initial={{ opacity: 0, height: 0, marginTop: -16 }}
-										animate={{ opacity: 1, height: "auto" }}
-										exit={{ opacity: 0, height: 0, marginTop: -16 }}
+										animate={{ opacity: 1, height: "auto", marginTop: 0 }}
+										exit={{
+											opacity: 0,
+											height: 0,
+											marginTop: -16,
+											transition: TRANSITION.fast,
+										}}
+										transition={{
+											height: SPRING.smooth,
+											marginTop: SPRING.smooth,
+											opacity: TRANSITION.base,
+										}}
 									>
 										<Alert className="mt-4 max-w-md border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-50">
 											<IconifyIcon icon="lucide:triangle-alert" />
@@ -561,7 +572,10 @@ export default function RecordEditorDialog({
 							<IconifyIcon icon="lucide:trash-2" /> Delete
 						</Button>
 						{submitError ? (
-							<p className="text-xs text-destructive" aria-live="polite">
+							<p
+								className="fade-in animate-in text-xs text-destructive duration-150 ease-out"
+								aria-live="polite"
+							>
 								{submitError}
 							</p>
 						) : null}
