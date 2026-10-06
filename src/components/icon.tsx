@@ -3,6 +3,7 @@ import type { IconName } from "lucide-react/dynamic"
 import dynamicIconImports from "lucide-react/dynamicIconImports"
 import { useEffect, useState } from "react"
 import { ICONS } from "@/components/icons"
+import { cn } from "@/lib/utils"
 
 export const ICON_NAMES = Object.keys(dynamicIconImports) as IconName[]
 
@@ -50,12 +51,16 @@ function DynamicUiIcon({
 	const [Component, setComponent] = useState<LucideIcon | null>(
 		() => loadedIcons.get(name) ?? null,
 	)
+	// Fade in only when the icon resolves after mount, so cached icons never flash.
+	const [resolvedLate, setResolvedLate] = useState(false)
 
 	useEffect(() => {
 		let cancelled = false
 		loadIcon(name)
 			.then(icon => {
-				if (!cancelled) setComponent(() => icon)
+				if (cancelled) return
+				setResolvedLate(true)
+				setComponent(() => icon)
 			})
 			.catch(() => undefined)
 		return () => {
@@ -63,7 +68,17 @@ function DynamicUiIcon({
 		}
 	}, [name])
 
-	return Component ? <Component {...props} /> : <CircleQuestionMark {...props} />
+	// Reserve the icon's box while loading instead of flashing a question mark.
+	if (!Component) return <svg aria-hidden {...props} />
+	return (
+		<Component
+			{...props}
+			className={cn(
+				resolvedLate && "animate-in fade-in duration-150 ease-out",
+				props.className,
+			)}
+		/>
+	)
 }
 
 /** Drop-in for the old Iconify runtime icon: bundled SVG, same props. */
