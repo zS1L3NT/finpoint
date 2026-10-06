@@ -229,7 +229,7 @@ export default function AllocatorPendingPage() {
 				<div className="grid min-w-0 gap-4 md:grid-cols-[minmax(18rem,2fr)_minmax(0,3fr)]">
 					<section
 						className={cn(
-							"min-w-0 flex-col gap-4",
+							"relative min-w-0 flex-col gap-4",
 							selectedPendingStatement ? "hidden md:flex" : "flex",
 						)}
 						aria-labelledby="pending-queue-title"
@@ -350,7 +350,8 @@ export default function AllocatorPendingPage() {
 						)}
 						aria-labelledby="candidate-title"
 					>
-						<AnimatePresence mode="wait" initial={false}>
+						{/* popLayout crossfades in place: working down the queue never waits on an exit. */}
+						<AnimatePresence mode="popLayout" initial={false}>
 							{selectedPendingStatement ? (
 								<motion.div
 									key={selectedPendingStatement.id}
