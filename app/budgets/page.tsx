@@ -1,6 +1,7 @@
 "use client"
 
 import { useLiveQuery } from "dexie-react-hooks"
+import { motion } from "framer-motion"
 import { DateTime } from "luxon"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
@@ -16,6 +17,7 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useHistory } from "@/history"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
+import { SPRING } from "@/lib/motion"
 import { cn, formatCurrency, parseDate } from "@/lib/utils"
 import { listBudgets } from "@/logic/budgets"
 import { pathBudget } from "@/routes"
@@ -77,12 +79,22 @@ export default function BudgetsPage() {
 									{state.label} · {items.length}
 								</h3>
 								<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-									{items.map(budget => (
-										<BudgetCard
+									{items.map((budget, index) => (
+										<motion.div
 											key={budget.id}
-											budget={budget}
-											onEdit={() => setEditingBudget(budget)}
-										/>
+											className="grid"
+											initial={{ opacity: 0, y: 6 }}
+											animate={{ opacity: 1, y: 0 }}
+											transition={{
+												...SPRING.smooth,
+												delay: Math.min(index, 7) * 0.03,
+											}}
+										>
+											<BudgetCard
+												budget={budget}
+												onEdit={() => setEditingBudget(budget)}
+											/>
+										</motion.div>
 									))}
 								</div>
 							</section>
@@ -153,7 +165,7 @@ function BudgetCard({ budget, onEdit }: { budget: Budget; onEdit: () => void }) 
 
 	return (
 		<article
-			className="group relative grid cursor-pointer gap-4 rounded-xl border bg-card p-4 transition-shadow hover:shadow-md"
+			className="group relative grid cursor-pointer gap-4 rounded-xl border bg-card p-4 transition-[box-shadow,transform] duration-150 ease-out hover:shadow-md active:scale-[0.99]"
 			onClick={event => {
 				if (!isInteractiveTarget(event.target)) open()
 			}}
@@ -202,14 +214,14 @@ function BudgetCard({ budget, onEdit }: { budget: Budget; onEdit: () => void }) 
 				<div className="relative h-2 w-full rounded-full bg-muted">
 					<div
 						className={cn(
-							"h-full rounded-full",
+							"h-full origin-left rounded-full transition-transform duration-300 ease-out",
 							over
 								? "bg-destructive"
 								: pace !== null && usage / 100 > pace + 0.05
 									? "bg-amber-500"
 									: "bg-foreground/70",
 						)}
-						style={{ width: `${Math.min(usage, 100)}%` }}
+						style={{ transform: `scaleX(${Math.min(usage, 100) / 100})` }}
 					/>
 					{pace !== null ? (
 						<span
