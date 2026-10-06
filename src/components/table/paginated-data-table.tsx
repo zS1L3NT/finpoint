@@ -5,7 +5,6 @@ import {
 	type Row,
 	useReactTable,
 } from "@tanstack/react-table"
-import { AnimatePresence } from "framer-motion"
 import { Fragment, memo, useEffect, useState } from "react"
 import PaginationFooter from "@/components/table/pagination-footer"
 import PaginationHeader from "@/components/table/pagination-header"
@@ -187,55 +186,50 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 								</TableRow>
 							))
 						) : rows.length ? (
-							<AnimatePresence initial={false}>
-								{rows.map((row, index) => {
-									const group = starts.get(index)
-									return (
-										<Fragment key={row.id}>
-											{group && groupBy ? (
-												<GroupHeaderRow
-													group={groupBy}
-													groupKey={group.key}
-													rows={group.rows}
-													columns={columnInfo}
-												/>
-											) : null}
-											<TableRow
-												key={row.id}
-												layout="position"
-												initial={enter}
-												animate={{ opacity: 1, y: 0 }}
-												exit={{ opacity: 0 }}
-												transition={TRANSITION.fast}
-												data-state={
-													selectedIds?.includes(row.id) && "selected"
-												}
-												onClick={
-													onRowClick ? clickRow(row.original) : undefined
-												}
-												className={cn(onRowClick && "cursor-pointer")}
-											>
-												{row.getVisibleCells().map(cell => (
-													<TableCell
-														key={cell.id}
-														className={
-															cell.column.columnDef.meta &&
-															"width" in cell.column.columnDef.meta
-																? `${cell.column.columnDef.meta?.width}`
-																: undefined
-														}
-													>
-														{flexRender(
-															cell.column.columnDef.cell,
-															cell.getContext(),
-														)}
-													</TableCell>
-												))}
-											</TableRow>
-										</Fragment>
-									)
-								})}
-							</AnimatePresence>
+							rows.map((row, index) => {
+								const group = starts.get(index)
+								return (
+									<Fragment key={row.id}>
+										{group && groupBy ? (
+											<GroupHeaderRow
+												group={groupBy}
+												groupKey={group.key}
+												rows={group.rows}
+												columns={columnInfo}
+											/>
+										) : null}
+										<TableRow
+											key={row.id}
+											layout="position"
+											initial={enter}
+											animate={{ opacity: 1, y: 0 }}
+											transition={TRANSITION.fast}
+											data-state={selectedIds?.includes(row.id) && "selected"}
+											onClick={
+												onRowClick ? clickRow(row.original) : undefined
+											}
+											className={cn(onRowClick && "cursor-pointer")}
+										>
+											{row.getVisibleCells().map(cell => (
+												<TableCell
+													key={cell.id}
+													className={
+														cell.column.columnDef.meta &&
+														"width" in cell.column.columnDef.meta
+															? `${cell.column.columnDef.meta?.width}`
+															: undefined
+													}
+												>
+													{flexRender(
+														cell.column.columnDef.cell,
+														cell.getContext(),
+													)}
+												</TableCell>
+											))}
+										</TableRow>
+									</Fragment>
+								)
+							})
 						) : (
 							<TableRow layout layoutId="empty">
 								<TableCell
