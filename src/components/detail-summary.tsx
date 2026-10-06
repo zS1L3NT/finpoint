@@ -1,5 +1,6 @@
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import { Card } from "@/components/ui/card"
+import ValueSwap from "@/components/value-swap"
 import { cn } from "@/lib/utils"
 
 export function DetailSummary({
@@ -49,7 +50,13 @@ export function DetailSummaryItem({
 				<IconifyIcon icon={icon} className="size-3.5" />
 				{label}
 			</p>
-			<div className="mt-2 min-w-0 text-base font-semibold tracking-tight">{value}</div>
+			<div className="mt-2 min-w-0 text-base font-semibold tracking-tight">
+				{typeof value === "string" || typeof value === "number" ? (
+					<ValueSwap value={value} />
+				) : (
+					value
+				)}
+			</div>
 			{detail ? <div className="mt-1 text-xs text-muted-foreground">{detail}</div> : null}
 		</div>
 	)
