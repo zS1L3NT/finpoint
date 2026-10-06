@@ -462,58 +462,6 @@ export async function deleteRecord(id: string) {
 	})
 }
 
-export async function updateRecordBuckets(
-	items: { id: string; revision: number }[],
-	bucketId: string | null,
-) {
-	if (!items.length) throw new ValidationError({ records: ["Select at least one record."] })
-
-	if (bucketId) {
-		const bucket = await db.buckets.get(bucketId)
-		if (!bucket) throw new ValidationError({ bucket_id: ["Invalid bucket."] })
-		if (bucket.archived)
-			throw new ValidationError({ bucket_id: ["Archived buckets cannot receive Records."] })
-	}
-
-	return db.transaction("rw", [db.records], async () => {
-		const rows = await db.records
-			.where("id")
-			.anyOf(items.map(i => i.id))
-			.toArray()
-		const byId = new Map(rows.map(r => [r.id, r]))
-		const stale = items.filter(item => (byId.get(item.id)?.revision ?? -1) !== item.revision)
-		if (stale.length) {
-			throw new ConflictError(
-				"Some Records changed while you were working.",
-				stale.map(s => s.id),
-			)
-		}
-		if (bucketId) {
-			const ineligible = rows.filter(
-				record =>
-					record.analytics_treatment !== "spending" &&
-					!(record.analytics_treatment === "automatic" && record.amount < 0),
-			)
-			if (ineligible.length) {
-				throw new ValidationError({
-					records: [
-						`${ineligible.length} selected Record(s) are not classified as spending.`,
-					],
-				})
-			}
-		}
-		for (const record of rows) {
-			await db.records.update(record.id, {
-				bucket_id: bucketId,
-				bucket_source: bucketId ? "manual" : null,
-				revision: record.revision + 1,
-			})
-		}
-
-		return { updated: rows.length }
-	})
-}
-
 export async function recordCompletions() {
 	const records = await db.records.toArray()
 
