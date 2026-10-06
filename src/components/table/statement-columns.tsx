@@ -1,13 +1,12 @@
 import type { CellContext, ColumnDef, Row } from "@tanstack/react-table"
 import Link from "next/link"
 import { useMemo } from "react"
-import AllocateBar from "@/components/allocate-bar"
 import { UiIcon as IconifyIcon } from "@/components/icon"
+import { amountTone, formatRowTime } from "@/components/table/record-columns"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useHistory } from "@/history"
-import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
-import { classForCurrency, formatCurrency, formatDatetime, round2dp } from "@/lib/utils"
+import { cn, formatCurrency, round2dp } from "@/lib/utils"
 import { pathStatement } from "@/routes"
 import type { Allocation, Statement } from "@/types"
 
@@ -18,38 +17,106 @@ type StatementTableOptions<TStatement extends StatementRow> = {
 	showAccount?: boolean
 	pageName?: string
 	onEdit?: (statement: TStatement) => void
+	/** Rows sit under day headers, so only the time is shown. */
+	grouped?: boolean
+}
+
+function StatementBadges({
+	statement,
+	showUnallocated,
+}: {
+	statement: Statement
+	showUnallocated: boolean
+}) {
+	return (
+		<>
+			{statement.is_pending ? (
+				<Badge
+					variant="warning"
+					className="shrink-0"
+					title="Handwritten placeholder until the bank row is imported"
+				>
+					Pending
+				</Badge>
+			) : null}
+			{showUnallocated && statement.is_unallocated ? (
+				<Badge variant="outline" className="shrink-0 text-muted-foreground">
+					Unallocated
+				</Badge>
+			) : null}
+		</>
+	)
+}
+
+function StatementAmount({
+	statement,
+	amount,
+}: {
+	statement: StatementRow
+	amount: StatementTableOptions<StatementRow>["amount"]
+}) {
+	const allocable = round2dp(statement.allocable_amount)
+	return (
+		<span className="grid justify-items-end gap-0.5 text-right">
+			<span className={cn("font-medium tabular-nums", amountTone(statement.amount))}>
+				{formatCurrency(statement.amount)}
+			</span>
+			{amount === "allocated" ? (
+				<span className="text-[0.6875rem] text-muted-foreground tabular-nums">
+					{formatCurrency(statement.pivot?.amount ?? 0)} here
+				</span>
+			) : allocable !== statement.amount && (amount === "allocable" || allocable !== 0) ? (
+				<span className="text-[0.6875rem] text-muted-foreground tabular-nums">
+					{allocable === 0 ? "Fully allocated" : `${formatCurrency(allocable)} allocable`}
+				</span>
+			) : null}
+		</span>
+	)
+}
+
+function StatementActions<TStatement extends StatementRow>({
+	statement,
+	options,
+}: {
+	statement: TStatement
+	options: StatementTableOptions<TStatement>
+}) {
+	const { handlePush } = useHistory()
+	const { pageName, onEdit } = options
+	return (
+		<div className="flex shrink-0 items-center justify-end gap-0.5">
+			{onEdit && statement.is_pending ? (
+				<Button
+					variant="ghost"
+					size="icon-sm"
+					title="Edit"
+					aria-label="Edit pending statement"
+					onClick={() => onEdit(statement)}
+				>
+					<IconifyIcon icon="lucide:pencil" />
+				</Button>
+			) : null}
+			<Button variant="ghost" size="icon-sm" title="Open" asChild>
+				<Link
+					href={pathStatement(statement.id)}
+					aria-label="Open statement"
+					onClick={pageName ? handlePush(pageName) : undefined}
+				>
+					<IconifyIcon icon="lucide:chevron-right" />
+				</Link>
+			</Button>
+		</div>
+	)
 }
 
 function StatementActionsCell<TStatement extends StatementRow>({
 	row,
 	column,
 }: CellContext<TStatement, unknown>) {
-	const { handlePush } = useHistory()
-	const { pageName, onEdit } = (
-		column.columnDef.meta as { statementActions: StatementTableOptions<TStatement> }
-	).statementActions
-	return (
-		<div className="flex items-center justify-end gap-1.5">
-			{onEdit && row.original.is_pending ? (
-				<Button
-					variant="outline"
-					size="sm"
-					className="w-[4.25rem]"
-					onClick={() => onEdit(row.original)}
-				>
-					<IconifyIcon icon="lucide:pencil" /> Edit
-				</Button>
-			) : null}
-			<Button variant="outline" size="sm" asChild>
-				<Link
-					href={pathStatement(row.original.id)}
-					onClick={pageName ? handlePush(pageName) : undefined}
-				>
-					Open
-				</Link>
-			</Button>
-		</div>
-	)
+	const { statementActions } = column.columnDef.meta as {
+		statementActions: StatementTableOptions<TStatement>
+	}
+	return <StatementActions statement={row.original} options={statementActions} />
 }
 
 export function useStatementColumns<TStatement extends StatementRow>({
@@ -57,80 +124,57 @@ export function useStatementColumns<TStatement extends StatementRow>({
 	showAccount = true,
 	pageName,
 	onEdit,
+	grouped = false,
 }: StatementTableOptions<TStatement>): ColumnDef<TStatement>[] {
 	return useMemo(
 		(): ColumnDef<TStatement>[] => [
-			...(showAccount
-				? [
-						{
-							header: "Account",
-							meta: { width: TABLE_WIDTH_CLASSNAMES.ACCOUNT },
-							cell: ({ row }) => row.original.account.name,
-						} satisfies ColumnDef<TStatement>,
-					]
-				: []),
 			{
-				header: "Date & Time",
-				meta: { width: TABLE_WIDTH_CLASSNAMES.DATETIME },
+				header: "Statement",
 				cell: ({ row }) => (
-					<span className="text-muted-foreground">
-						{formatDatetime(row.original.datetime)}
+					<div className="min-w-0">
+						<p className="flex items-center gap-1.5">
+							<span className="min-w-0 truncate font-medium">
+								{row.original.description || "No description"}
+							</span>
+							<StatementBadges
+								statement={row.original}
+								showUnallocated={amount !== "allocable"}
+							/>
+						</p>
+						{showAccount ? (
+							<p className="flex items-center gap-1 truncate text-muted-foreground">
+								<IconifyIcon icon="lucide:landmark" className="size-3 shrink-0" />
+								{row.original.account.name}
+							</p>
+						) : null}
+					</div>
+				),
+			},
+			{
+				header: grouped ? "Time" : "Date",
+				meta: { width: grouped ? "w-24" : "w-36" },
+				cell: ({ row }) => (
+					<span className="text-muted-foreground tabular-nums">
+						{formatRowTime(row.original.datetime, grouped)}
 					</span>
 				),
 			},
 			{
-				header: "Amount",
-				meta: {
-					width:
-						amount === "amount"
-							? TABLE_WIDTH_CLASSNAMES.AMOUNT
-							: TABLE_WIDTH_CLASSNAMES.AMOUNT_BAR,
-				},
-				cell: ({ row }) =>
-					amount === "allocable" ? (
-						<AllocateBar
-							title="Allocable"
-							value={round2dp(row.original.allocable_amount)}
-							total={row.original.amount}
-						/>
-					) : amount === "allocated" ? (
-						<AllocateBar
-							title="Allocated"
-							value={row.original.pivot?.amount ?? 0}
-							total={row.original.amount}
-						/>
-					) : (
-						<span className={classForCurrency(row.original.amount)}>
-							{formatCurrency(row.original.amount)}
-						</span>
-					),
-			},
-			{
-				header: "Description",
-				meta: { width: TABLE_WIDTH_CLASSNAMES.STATEMENT },
-				cell: ({ row }) => (
-					<div className="whitespace-pre-line break-words text-muted-foreground">
-						{row.original.is_pending ? (
-							<Badge variant="warning" className="mr-1">
-								Pending
-							</Badge>
-						) : null}
-						{row.original.description || "-"}
-					</div>
-				),
+				id: "amount",
+				header: () => <span className="block text-right">Amount</span>,
+				meta: { width: "w-40" },
+				cell: ({ row }) => <StatementAmount statement={row.original} amount={amount} />,
 			},
 			{
 				id: "actions",
 				meta: {
 					statementActions: { pageName, onEdit },
-					width: onEdit
-						? TABLE_WIDTH_CLASSNAMES.ACTIONS_EDIT_OPEN
-						: TABLE_WIDTH_CLASSNAMES.ACTIONS_FIXED_OPEN,
+					width: onEdit ? "w-24" : "w-14",
 				},
 				cell: StatementActionsCell,
 			},
 		],
-		[amount, showAccount, pageName, onEdit],
+		[amount, showAccount, pageName, onEdit, grouped],
 	)
 }
 
@@ -140,84 +184,38 @@ export function useStatementMobileRow<TStatement extends StatementRow>({
 	pageName,
 	leading,
 	onEdit,
+	grouped = false,
 }: StatementTableOptions<TStatement> & {
 	leading?: (statement: TStatement) => React.ReactNode
 }): (row: Row<TStatement>) => React.ReactNode {
-	const { handlePush } = useHistory()
-
 	return useMemo(
 		() => (row: Row<TStatement>) => {
 			const statement = row.original
-			const actions = (
-				<div className="flex shrink-0 items-center justify-end gap-1.5">
-					{onEdit && statement.is_pending ? (
-						<Button
-							variant="outline"
-							size="sm"
-							className="w-[4.25rem]"
-							onClick={() => onEdit(statement)}
-						>
-							<IconifyIcon icon="lucide:pencil" /> Edit
-						</Button>
-					) : null}
-					<Button variant="outline" size="sm" asChild>
-						<Link
-							href={pathStatement(statement.id)}
-							onClick={pageName ? handlePush(pageName) : undefined}
-						>
-							Open
-						</Link>
-					</Button>
-				</div>
-			)
-
+			const time = formatRowTime(statement.datetime, grouped)
 			return (
-				<div className="grid min-w-0 gap-2">
-					<div className="flex min-w-0 items-start gap-3">
-						{leading?.(statement)}
-						<div className="min-w-0 flex-1">
-							<p className="truncate font-medium">
-								{statement.is_pending ? (
-									<Badge variant="warning" className="mr-1">
-										Pending
-									</Badge>
-								) : null}
-								{showAccount
-									? statement.account.name
-									: statement.description || "Statement"}
-							</p>
-							{showAccount ? (
-								<p className="truncate text-xs text-muted-foreground">
-									{statement.description || "No description"}
-								</p>
-							) : null}
-							<p className="truncate text-xs text-muted-foreground">
-								{formatDatetime(statement.datetime)}
-							</p>
-						</div>
-						{amount === "amount" ? (
-							<span className={classForCurrency(statement.amount)}>
-								{formatCurrency(statement.amount)}
+				<div className="flex min-w-0 items-center gap-3">
+					{leading?.(statement)}
+					<div className="min-w-0 flex-1">
+						<p className="flex items-center gap-1.5">
+							<span className="min-w-0 truncate font-medium">
+								{statement.description || "No description"}
 							</span>
-						) : null}
+							<StatementBadges
+								statement={statement}
+								showUnallocated={amount !== "allocable"}
+							/>
+						</p>
+						<p className="truncate text-xs text-muted-foreground">
+							{[showAccount ? statement.account.name : null, time]
+								.filter(Boolean)
+								.join(" · ")}
+						</p>
 					</div>
-
-					{amount === "allocable" || amount === "allocated" ? (
-						<AllocateBar
-							title={amount === "allocable" ? "Allocable" : "Allocated"}
-							value={
-								amount === "allocable"
-									? round2dp(statement.allocable_amount)
-									: (statement.pivot?.amount ?? 0)
-							}
-							total={statement.amount}
-						/>
-					) : null}
-
-					<div className="flex items-center justify-end gap-1.5">{actions}</div>
+					<StatementAmount statement={statement} amount={amount} />
+					<StatementActions statement={statement} options={{ pageName, onEdit }} />
 				</div>
 			)
 		},
-		[amount, showAccount, pageName, leading, onEdit, handlePush],
+		[amount, showAccount, pageName, leading, onEdit, grouped],
 	)
 }

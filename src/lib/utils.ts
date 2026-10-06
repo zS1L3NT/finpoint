@@ -27,11 +27,12 @@ export const formatDatetime = (value: string) => {
 	}
 }
 
+// Constructing an Intl.NumberFormat is far costlier than formatting with one;
+// tables and chart axes call this thousands of times per render.
+const currencyFormat = new Intl.NumberFormat("en-SG", { style: "currency", currency: "SGD" })
+
 export const formatCurrency = (amount: number) => {
-	return new Intl.NumberFormat("en-SG", {
-		style: "currency",
-		currency: "SGD",
-	}).format(amount)
+	return currencyFormat.format(amount)
 }
 
 export const classForCurrency = (amount: number) => {

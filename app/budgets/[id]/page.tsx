@@ -9,9 +9,11 @@ import RecordEditorDialog from "@/components/dialogs/record-editor"
 import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
+import { Metric, MetricGrid } from "@/components/metric"
 import RecordSearchSheet from "@/components/sheets/record-search"
 import DataTable from "@/components/table/data-table"
 import { useRecordColumns, useRecordMobileRow } from "@/components/table/record-columns"
+import { byDay } from "@/components/table/row-groups"
 import { Button } from "@/components/ui/button"
 import {
 	Card,
@@ -21,12 +23,12 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card"
+import { useOpenRow } from "@/hooks/use-open-row"
 import { useRecordEditor } from "@/hooks/use-record-editor"
-import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
-import { cn, formatCurrency, parseDate, parseDatetime, round2dp } from "@/lib/utils"
+import { formatCurrency, parseDate, parseDatetime, round2dp } from "@/lib/utils"
 import { attachBudgetRecord, detachBudgetRecord, getBudget } from "@/logic/budgets"
 import { listCategories } from "@/logic/categories"
-import { pathBudgets } from "@/routes"
+import { pathBudgets, pathRecord } from "@/routes"
 import type { Budget, CategoryWithChildren, Record } from "@/types"
 
 export default function BudgetPage({ params }: { params: Promise<{ id: string }> }) {
@@ -75,21 +77,37 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 	}
 
 	const recordColumns = useRecordColumns<Record>({
+		grouped: true,
 		pageName: `Budget ${budget?.id ?? ""}`,
-		actionWidth: TABLE_WIDTH_CLASSNAMES.ACTIONS_OPEN_DETACH,
 		onEdit: handleEdit,
 		extraActions: record => (
-			<Button variant="destructive" size="sm" onClick={() => detach(record)}>
-				<IconifyIcon icon="lucide:link-2-off" /> Detach
+			<Button
+				variant="ghost"
+				size="icon-sm"
+				title="Detach from budget"
+				aria-label={`Detach ${record.title}`}
+				className="text-destructive hover:text-destructive"
+				onClick={() => detach(record)}
+			>
+				<IconifyIcon icon="lucide:link-2-off" />
 			</Button>
 		),
 	})
+	const openRecord = useOpenRow<Record>(pathRecord, `Budget ${budget?.id ?? ""}`)
 	const recordMobileRow = useRecordMobileRow<Record>({
+		grouped: true,
 		pageName: `Budget ${budget?.id ?? ""}`,
 		onEdit: handleEdit,
 		extraActions: record => (
-			<Button variant="destructive" size="sm" onClick={() => detach(record)}>
-				<IconifyIcon icon="lucide:link-2-off" /> Detach
+			<Button
+				variant="ghost"
+				size="icon-sm"
+				title="Detach from budget"
+				aria-label={`Detach ${record.title}`}
+				className="text-destructive hover:text-destructive"
+				onClick={() => detach(record)}
+			>
+				<IconifyIcon icon="lucide:link-2-off" />
 			</Button>
 		),
 	})
@@ -137,51 +155,57 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 					back={{ name: "Budgets", url: pathBudgets() }}
 				/>
 
-				<Card className="gap-0 overflow-hidden py-0">
-					<div className="grid sm:grid-cols-2 xl:grid-cols-4">
-						<BudgetMetric
-							icon="lucide:wallet-cards"
-							label="Budget usage"
-							value={formatCurrency(analytics.spent)}
-							detail={`${analytics.elapsedPercent}% of ${formatCurrency(budget.amount)}`}
-							tone={analytics.spent > budget.amount ? "negative" : "positive"}
-						/>
-						<BudgetMetric
-							icon="lucide:chart-no-axes-combined"
-							label="Projected usage"
-							value={formatCurrency(analytics.projectedSpending)}
-							detail={`${formatCurrency(Math.abs(budget.amount - analytics.projectedSpending))} ${analytics.projectedSpending > budget.amount ? "over" : "under"} limit`}
-							tone={
-								analytics.projectedSpending > budget.amount ? "negative" : "neutral"
-							}
-						/>
-						<BudgetMetric
-							icon="lucide:gauge"
-							label="Daily usage pace"
-							value={`${formatCurrency(analytics.currentPace)} / day`}
-							detail={`Target pace ${formatCurrency(analytics.targetPace)} / day`}
-						/>
-						<BudgetMetric
-							icon="lucide:route"
-							label="Recommended pace"
-							value={
-								analytics.recommendedPace === null
-									? "Window complete"
-									: `${formatCurrency(analytics.recommendedPace)} / day`
-							}
-							detail={
-								analytics.remainingDays
-									? `${analytics.remainingDays} day${analytics.remainingDays === 1 ? "" : "s"} remaining`
-									: "Final usage shown"
-							}
-						/>
-					</div>
-				</Card>
+				<MetricGrid>
+					<Metric
+						icon="lucide:wallet-cards"
+						label="Spent"
+						value={formatCurrency(analytics.spent)}
+						detail={`${analytics.elapsedPercent}% of ${formatCurrency(budget.amount)}`}
+						tone={analytics.spent > budget.amount ? "negative" : "neutral"}
+					/>
+					<Metric
+						icon="lucide:scale"
+						label={analytics.spent > budget.amount ? "Over budget" : "Remaining"}
+						value={formatCurrency(Math.abs(budget.amount - analytics.spent))}
+						detail={
+							analytics.remainingDays
+								? `${analytics.remainingDays} day${analytics.remainingDays === 1 ? "" : "s"} left in window`
+								: "Window complete"
+						}
+						tone={analytics.spent > budget.amount ? "negative" : "positive"}
+					/>
+					<Metric
+						icon="lucide:chart-no-axes-combined"
+						label="Projected"
+						value={formatCurrency(analytics.projectedSpending)}
+						detail={`${formatCurrency(Math.abs(budget.amount - analytics.projectedSpending))} ${analytics.projectedSpending > budget.amount ? "over" : "under"} limit`}
+						tone={analytics.projectedSpending > budget.amount ? "negative" : "neutral"}
+						delta={
+							analytics.remainingDays
+								? {
+										text:
+											analytics.projectedSpending > budget.amount
+												? "Over pace"
+												: "On pace",
+										good: analytics.projectedSpending <= budget.amount,
+									}
+								: undefined
+						}
+					/>
+					<Metric
+						icon="lucide:gauge"
+						label={
+							analytics.recommendedPace === null ? "Daily pace" : "Recommended pace"
+						}
+						value={`${formatCurrency(analytics.recommendedPace ?? analytics.currentPace)} / day`}
+						detail={`Now ${formatCurrency(analytics.currentPace)} / day · target ${formatCurrency(analytics.targetPace)}`}
+					/>
+				</MetricGrid>
 
 				<div className="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)]">
 					<Card>
 						<CardHeader className="border-b">
-							<CardTitle>Spending over time</CardTitle>
+							<CardTitle className="text-base">Spending over time</CardTitle>
 							<CardDescription>
 								Cumulative usage against the budget limit, including the current
 								pace projection.
@@ -206,7 +230,7 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 
 					<Card>
 						<CardHeader className="border-b">
-							<CardTitle>Spending by category</CardTitle>
+							<CardTitle className="text-base">Spending by category</CardTitle>
 							<CardDescription>
 								Where this budget’s outgoing Records went.
 							</CardDescription>
@@ -258,7 +282,12 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 
 				<Card>
 					<CardHeader>
-						<CardTitle>Attached records</CardTitle>
+						<CardTitle className="text-base">
+							Attached Records
+							<span className="ml-2 text-sm font-normal text-muted-foreground">
+								{records.length}
+							</span>
+						</CardTitle>
 						<CardDescription>
 							Records that currently contribute to this budget.
 						</CardDescription>
@@ -283,6 +312,8 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 							data={records}
 							columns={recordColumns}
 							mobileRow={recordMobileRow}
+							onRowClick={openRecord}
+							groupBy={byDay<Record>()}
 							emptyMessage="No records found."
 						/>
 					</CardContent>
@@ -301,37 +332,6 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 				/>
 			) : null}
 		</>
-	)
-}
-
-function BudgetMetric({
-	icon,
-	label,
-	value,
-	detail,
-	tone = "neutral",
-}: {
-	icon: string
-	label: string
-	value: string
-	detail: string
-	tone?: "positive" | "negative" | "neutral"
-}) {
-	return (
-		<div
-			className={cn(
-				"min-w-0 border-b p-5 last:border-b-0 sm:odd:border-r sm:[&:nth-last-child(-n+2)]:border-b-0 xl:border-r xl:border-b-0 xl:last:border-r-0",
-				tone === "positive" && "bg-emerald-950/35",
-				tone === "negative" && "bg-rose-950/40",
-			)}
-		>
-			<div className="flex items-center gap-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-				<IconifyIcon icon={icon} className="size-4" />
-				{label}
-			</div>
-			<p className="mt-3 text-xl font-semibold tracking-tight tabular-nums">{value}</p>
-			<p className="mt-1 text-xs text-muted-foreground">{detail}</p>
-		</div>
 	)
 }
 

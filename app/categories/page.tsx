@@ -8,12 +8,13 @@ import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Skeleton } from "@/components/ui/skeleton"
 import { useHistory } from "@/history"
 import { canUseDefaultBucket, treatmentLabel } from "@/lib/analytics"
 import { listCategories } from "@/logic/categories"
 import { pathRecords } from "@/routes"
-import { Category, CategoryWithChildren } from "@/types"
+import type { AnalyticsTreatment, Category, CategoryWithChildren } from "@/types"
 
 type CategoryDialogState =
 	| { mode: "create" }
@@ -23,14 +24,24 @@ type CategoryDialogState =
 export default function CategoriesPage() {
 	const [dialogState, setDialogState] = useState<CategoryDialogState>(null)
 	const { handlePush } = useHistory()
-	const categories = useLiveQuery(() => listCategories(), []) ?? []
+	const categoriesQuery = useLiveQuery(() => listCategories(), [])
+	const categories = (categoriesQuery ?? []) as CategoryWithChildren[]
+	const [query, setQuery] = useState("")
+	const needle = query.trim().toLowerCase()
+	const visible = needle
+		? categories.filter(
+				category =>
+					category.name.toLowerCase().includes(needle) ||
+					category.children.some(child => child.name.toLowerCase().includes(needle)),
+			)
+		: categories
 
 	return (
 		<>
 			<PageContent>
 				<PageHeader
 					title="Categories"
-					subtitle="Manage top-level categories and their nested children."
+					subtitle="Categories give Records meaning and supply their default treatment and spending bucket."
 					description="Category map"
 					icon="lucide:tag"
 					actions={
@@ -44,27 +55,74 @@ export default function CategoriesPage() {
 					}
 				/>
 
-				<Card>
-					<CardHeader>
-						<CardTitle>Category Tree</CardTitle>
-						<CardDescription>
-							Review each category’s defaults, edit it, or open its Records.
-						</CardDescription>
-					</CardHeader>
-					<CardContent className="px-0">
-						{categories.length ? (
-							<CategoryTree
-								categories={categories}
-								onFindRecords={handlePush("Categories")}
-								onEdit={category => setDialogState({ mode: "edit", category })}
-							/>
-						) : (
-							<div className="px-4 py-8 text-center text-muted-foreground">
-								No categories found.
-							</div>
-						)}
-					</CardContent>
-				</Card>
+				<div className="relative max-w-sm">
+					<IconifyIcon
+						icon="lucide:search"
+						className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground"
+					/>
+					<Input
+						type="search"
+						aria-label="Search categories"
+						placeholder="Search categories..."
+						className="pl-8"
+						value={query}
+						onChange={event => setQuery(event.target.value)}
+					/>
+				</div>
+
+				{categoriesQuery === undefined ? (
+					<div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+						{["a", "b", "c", "d", "e", "f"].map(key => (
+							<Skeleton key={key} className="h-28 rounded-xl" />
+						))}
+					</div>
+				) : visible.length === 0 ? (
+					<p className="rounded-xl border border-dashed p-10 text-center text-sm text-muted-foreground">
+						{query ? "No categories match your search." : "No categories yet."}
+					</p>
+				) : (
+					SECTIONS.map(section => {
+						const items = visible.filter(
+							category =>
+								(category.analytics_treatment ?? "automatic") === section.value,
+						)
+						if (!items.length) return null
+						const records = items.reduce(
+							(sum, category) =>
+								sum +
+								category.records_count +
+								category.children.reduce(
+									(total, child) => total + child.records_count,
+									0,
+								),
+							0,
+						)
+						return (
+							<section key={section.value} className="grid gap-3">
+								<h3 className="flex items-baseline gap-2 text-sm font-medium">
+									{section.label}
+									<span className="text-xs font-normal text-muted-foreground">
+										{items.length}{" "}
+										{items.length === 1 ? "category" : "categories"} ·{" "}
+										{records.toLocaleString()} Records
+									</span>
+								</h3>
+								<div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+									{items.map(category => (
+										<CategoryTile
+											key={category.id}
+											category={category}
+											onEdit={edit =>
+												setDialogState({ mode: "edit", category: edit })
+											}
+											onFindRecords={handlePush("Categories")}
+										/>
+									))}
+								</div>
+							</section>
+						)
+					})
+				)}
 			</PageContent>
 
 			<CategoryDialog
@@ -82,89 +140,100 @@ export default function CategoriesPage() {
 	)
 }
 
-function CategoryTree({
-	categories,
-	onFindRecords,
-	onEdit,
-}: {
-	categories: (Category | CategoryWithChildren)[]
-	onFindRecords: () => void
-	onEdit: (category: Category | CategoryWithChildren) => void
-}) {
-	return (
-		<div className="flex flex-col divide-y">
-			{categories.map(category => (
-				<CategoryTreeItem
-					key={category.id}
-					category={category}
-					onFindRecords={onFindRecords}
-					onEdit={onEdit}
-				/>
-			))}
-		</div>
-	)
-}
+const SECTIONS: { value: AnalyticsTreatment; label: string }[] = [
+	{ value: "spending", label: "Spending" },
+	{ value: "income", label: "Income" },
+	{ value: "saving_investment", label: "Saving & investment" },
+	{ value: "neutral", label: "Transfers & neutral" },
+	{ value: "automatic", label: "Automatic by direction" },
+]
 
-function CategoryTreeItem({
+function CategoryTile({
 	category,
-	onFindRecords,
 	onEdit,
+	onFindRecords,
 }: {
-	category: Category | CategoryWithChildren
-	onFindRecords: () => void
+	category: CategoryWithChildren
 	onEdit: (category: Category | CategoryWithChildren) => void
+	onFindRecords: () => void
 }) {
+	const bucket = canUseDefaultBucket(category.analytics_treatment)
+		? category.default_bucket
+		: null
+	const childRecords = category.children.reduce((sum, child) => sum + child.records_count, 0)
 	return (
-		<div className="flex flex-col">
-			<div className="group flex flex-col gap-2.5 px-4 py-3 transition-colors hover:bg-muted/40 sm:flex-row sm:items-center sm:gap-3">
-				<div className="flex w-full min-w-0 flex-1 items-center gap-3">
-					<Icon {...category} size={14} />
-					<div className="grid min-w-0 flex-1 gap-1">
-						<p className="truncate font-medium">{category.name}</p>
-						<p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-							<IconifyIcon icon="lucide:tag" className="size-3.5" />
-							<span className="truncate">
-								{`${category.analytics_treatment ? treatmentLabel(category.analytics_treatment) : "No default treatment"}${canUseDefaultBucket(category.analytics_treatment) ? ` · ${category.default_bucket?.name ?? "No default bucket"}` : ""}`}
-							</span>
-						</p>
-						<p className="text-xs text-muted-foreground">
-							{category.records_count}{" "}
-							{category.records_count === 1 ? "Record" : "Records"}
-						</p>
-					</div>
-					{"children" in category ? (
-						<span className="hidden shrink-0 text-xs text-muted-foreground sm:inline">
-							{category.children.length} child
-							{category.children.length === 1 ? "" : "ren"}
+		<article className="group grid content-start gap-3 rounded-xl border bg-card p-4 transition-shadow hover:shadow-md">
+			<div className="flex items-start gap-3">
+				<button
+					type="button"
+					className="flex min-w-0 flex-1 cursor-pointer items-center gap-3 text-left"
+					onClick={() => onEdit(category)}
+					aria-label={`Edit ${category.name}`}
+				>
+					<Icon {...category} size={16} />
+					<span className="min-w-0">
+						<span className="block truncate font-medium">{category.name}</span>
+						<span className="block text-xs text-muted-foreground tabular-nums">
+							{(category.records_count + childRecords).toLocaleString()}{" "}
+							{category.records_count + childRecords === 1 ? "Record" : "Records"}
 						</span>
-					) : null}
-				</div>
-
-				<div className="flex shrink-0 justify-end gap-1.5 self-end sm:self-auto">
-					<Button variant="outline" size="sm" onClick={() => onEdit(category)}>
-						<IconifyIcon icon="lucide:pencil" /> Edit
-					</Button>
-					<Button variant="outline" size="sm" asChild>
-						<Link
-							href={pathRecords({ category_ids: category.id })}
-							aria-label={`Open records for ${category.name}`}
-							onClick={onFindRecords}
-						>
-							Open in records
-						</Link>
-					</Button>
-				</div>
+					</span>
+				</button>
+				<Button
+					variant="ghost"
+					size="icon-sm"
+					title="Open Records"
+					className="opacity-60 group-hover:opacity-100"
+					asChild
+				>
+					<Link
+						href={pathRecords({ category_ids: category.id })}
+						aria-label={`Open Records for ${category.name}`}
+						onClick={onFindRecords}
+					>
+						<IconifyIcon icon="lucide:arrow-up-right" />
+					</Link>
+				</Button>
 			</div>
 
-			{"children" in category ? (
-				<div className="ml-6 border-l border-border/60">
-					<CategoryTree
-						categories={category.children}
-						onFindRecords={onFindRecords}
-						onEdit={onEdit}
-					/>
+			{bucket || category.analytics_treatment === null ? (
+				<p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+					{bucket ? (
+						<>
+							<span
+								className="size-2 rounded-full"
+								style={{ backgroundColor: bucket.color }}
+							/>
+							{bucket.name} bucket
+						</>
+					) : (
+						treatmentLabel(category.analytics_treatment)
+					)}
+				</p>
+			) : null}
+
+			{category.children.length ? (
+				<div className="flex flex-wrap gap-1.5 border-t pt-3">
+					{category.children.map(child => (
+						<button
+							key={child.id}
+							type="button"
+							onClick={() => onEdit(child)}
+							title={`${child.records_count} Records · edit`}
+							className="flex cursor-pointer items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs hover:bg-muted"
+						>
+							<span
+								className="size-2 rounded-full"
+								style={{ backgroundColor: child.color }}
+							/>
+							{child.name}
+							<span className="text-muted-foreground tabular-nums">
+								{child.records_count}
+							</span>
+						</button>
+					))}
 				</div>
 			) : null}
-		</div>
+		</article>
 	)
 }

@@ -22,7 +22,7 @@ An external financial account whose activity is imported into Finpoint. Accounts
 _Avoid_: User account, login account
 
 **Pending Record**:
-A record whose allocated statement amounts do not tally with the record amount. Pending records are useful when the real-world activity is known before the bank statements are fully confirmed.
+A record whose allocated statement amounts do not tally with the record amount, or that is allocated to any Pending Statement (its imported bank row has not arrived yet). Pending records are useful when the real-world activity is known before the bank statements are fully confirmed.
 _Avoid_: Draft record, unconfirmed record
 
 **Pending Statement**:

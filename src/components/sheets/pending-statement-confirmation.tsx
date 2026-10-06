@@ -1,12 +1,9 @@
 import { useLiveQuery } from "dexie-react-hooks"
 import { useEffect, useState } from "react"
 import StatementReplacementReviewDialog from "@/components/dialogs/statement-replacement-review"
-import DataTable from "@/components/table/data-table"
+import { UiIcon as IconifyIcon } from "@/components/icon"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Field, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import {
 	Sheet,
 	SheetContent,
@@ -15,8 +12,8 @@ import {
 	SheetTitle,
 	SheetTrigger,
 } from "@/components/ui/sheet"
-import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
-import { classForCurrency, formatCurrency, formatDatetime } from "@/lib/utils"
+import { classForCurrency, cn, formatCurrency, formatDatetime } from "@/lib/utils"
+import { round2 } from "@/logic/shared"
 import { listStatements } from "@/logic/statements"
 import type { Statement } from "@/types"
 
@@ -60,107 +57,99 @@ export default function PendingStatementConfirmationSheet({
 		<>
 			<Sheet open={isOpen} onOpenChange={setIsOpen}>
 				<SheetTrigger asChild>{trigger}</SheetTrigger>
-				<SheetContent
-					side="right"
-					className="md:data-[side=right]:w-full md:data-[side=right]:max-w-4xl"
-				>
-					<SheetHeader className="gap-2 border-b">
-						<SheetTitle>Replace pending Statement</SheetTitle>
+				<SheetContent side="right" className="gap-0 md:data-[side=right]:max-w-xl">
+					<SheetHeader className="gap-1 border-b p-4 pr-12 md:px-6">
+						<SheetTitle className="text-base">Replace a pending Statement</SheetTitle>
 						<SheetDescription>
-							{statement
-								? `${statement.description} · ${formatCurrency(statement.amount)}`
-								: "Select one fully unallocated imported Statement."}
+							{statement ? (
+								<>
+									Choose the placeholder that{" "}
+									<span className="font-medium text-foreground">
+										{statement.description}
+									</span>{" "}
+									(
+									<span className={classForCurrency(statement.amount)}>
+										{formatCurrency(statement.amount)}
+									</span>
+									) should replace. Its Allocations carry over.
+								</>
+							) : (
+								"Select one fully unallocated imported Statement."
+							)}
 						</SheetDescription>
 					</SheetHeader>
 
-					<div className="flex flex-1 flex-col gap-4 overflow-y-hidden p-4 md:p-6">
-						<Field>
-							<FieldLabel htmlFor="pending-statement-search-query">
-								Search pending Statements
-							</FieldLabel>
+					<div className="border-b px-4 py-3 md:px-6">
+						<div className="relative">
+							<IconifyIcon
+								icon="lucide:search"
+								className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground"
+							/>
 							<Input
-								id="pending-statement-search-query"
 								type="search"
+								autoFocus
+								aria-label="Search pending Statements"
 								placeholder="Search descriptions and amounts..."
+								className="pl-8"
 								value={query}
 								onChange={event => setQuery(event.target.value)}
 							/>
-						</Field>
+						</div>
+					</div>
 
-						<ScrollArea className="flex-1 overflow-y-hidden">
-							<DataTable
-								data={statements}
-								columns={[
-									{
-										header: "Date & Time",
-										meta: { width: TABLE_WIDTH_CLASSNAMES.DATETIME },
-										cell: ({ row }) => (
-											<span className="text-muted-foreground">
-												{formatDatetime(row.original.datetime)}
-											</span>
-										),
-									},
-									{
-										header: "Amount",
-										meta: { width: TABLE_WIDTH_CLASSNAMES.AMOUNT },
-										cell: ({ row }) => (
-											<span className={classForCurrency(row.original.amount)}>
-												{formatCurrency(row.original.amount)}
-											</span>
-										),
-									},
-									{
-										header: "Description",
-										meta: { width: TABLE_WIDTH_CLASSNAMES.STATEMENT },
-										cell: ({ row }) => (
-											<div className="whitespace-pre-line break-words text-muted-foreground">
-												<Badge variant="warning" className="mr-1">
-													Pending
-												</Badge>
-												{row.original.description}
-											</div>
-										),
-									},
-									{
-										header: "Allocations",
-										cell: ({ row }) => row.original.allocation_count,
-									},
-									{
-										id: "actions",
-										meta: {
-											width: TABLE_WIDTH_CLASSNAMES.ACTIONS_FIXED_ATTACH,
-										},
-										cell: ({ row }) => (
-											<Button size="sm" onClick={() => review(row.original)}>
-												Review
-											</Button>
-										),
-									},
-								]}
-								mobileRow={({ original }) => (
-									<div className="flex items-start justify-between gap-3">
-										<div className="min-w-0">
-											<p className="truncate font-medium">
-												{original.description}
-											</p>
-											<p className="text-xs text-muted-foreground">
-												{formatDatetime(original.datetime)} ·{" "}
-												{original.allocation_count} Allocation(s)
-											</p>
-										</div>
-										<div className="flex shrink-0 flex-col items-end gap-1.5">
-											<span className={classForCurrency(original.amount)}>
-												{formatCurrency(original.amount)}
-											</span>
-											<Button size="sm" onClick={() => review(original)}>
-												Review
-											</Button>
-										</div>
-									</div>
-								)}
-								emptyMessage="No pending Statements found for this Account."
-							/>
-						</ScrollArea>
+					<div className="flex-1 overflow-y-auto overscroll-contain">
+						{statements.length === 0 ? (
+							<p className="px-6 py-16 text-center text-sm text-muted-foreground">
+								No pending Statements for this Account.
+							</p>
+						) : (
+							<ul className="grid gap-px p-2">
+								{statements.map(pending => {
+									const exact =
+										!!statement &&
+										round2(pending.amount) === round2(statement.amount)
+									return (
+										<li key={pending.id}>
+											<button
+												type="button"
+												onClick={() => review(pending)}
+												className={cn(
+													"grid w-full cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-muted",
+													exact &&
+														"bg-emerald-500/5 ring-1 ring-emerald-500/30 ring-inset",
+												)}
+											>
+												<span className="min-w-0">
+													<span className="flex items-center gap-1.5">
+														<span className="min-w-0 truncate text-sm font-medium">
+															{pending.description}
+														</span>
+														{exact ? (
+															<Badge className="shrink-0 bg-emerald-500/15 text-emerald-700 dark:text-emerald-400">
+																Same amount
+															</Badge>
+														) : null}
+													</span>
+													<span className="block truncate text-xs text-muted-foreground">
+														{formatDatetime(pending.datetime)} ·{" "}
+														{pending.allocation_count} Allocation
+														{pending.allocation_count === 1 ? "" : "s"}
+													</span>
+												</span>
+												<span
+													className={cn(
+														"text-sm font-semibold tabular-nums",
+														classForCurrency(pending.amount),
+													)}
+												>
+													{formatCurrency(pending.amount)}
+												</span>
+											</button>
+										</li>
+									)
+								})}
+							</ul>
+						)}
 					</div>
 				</SheetContent>
 			</Sheet>

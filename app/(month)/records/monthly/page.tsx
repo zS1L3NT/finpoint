@@ -9,12 +9,13 @@ import { toast } from "sonner"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
 import DateRange from "@/components/form/date-range"
 import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
-import RecordAmount from "@/components/record-amount"
+import { Metric, MetricGrid } from "@/components/metric"
 import SelectionBar from "@/components/selection-bar"
 import AmountFilter from "@/components/table/amount-filter"
 import CategoryFilter from "@/components/table/category-filter"
 import { ClearFiltersButton, FILTER_CONTROL_CLASS, FilterBar } from "@/components/table/filter-bar"
-import { Badge } from "@/components/ui/badge"
+import { formatRowTime, PendingBadge, RecordAmountCell } from "@/components/table/record-columns"
+import { dayLabel, isInteractiveTarget } from "@/components/table/row-groups"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -33,7 +34,7 @@ import { useHistory } from "@/history"
 import { useFetch } from "@/hooks/use-fetch"
 import { useTabTransition } from "@/hooks/use-tab-transition"
 import { treatmentLabel } from "@/lib/analytics"
-import { cn, formatCurrency, formatDatetime } from "@/lib/utils"
+import { cn, formatCurrency } from "@/lib/utils"
 import { listCategories } from "@/logic/categories"
 import { getMonthlyRecords } from "@/logic/monthly"
 import { ConflictError, getRecord, updateRecordBuckets } from "@/logic/records"
@@ -281,6 +282,15 @@ export default function MonthlyRecordsPage() {
 					animateContent && "animate-in fade-in slide-in-from-bottom-2 duration-500",
 				)}
 			>
+				{!period.is_future && records.length ? (
+					<PeriodSummary
+						summary={summary}
+						date={date}
+						period={period}
+						count={records.length}
+					/>
+				) : null}
+
 				<MonthlyRecordFilters
 					date={date}
 					categories={categories}
@@ -380,18 +390,19 @@ export default function MonthlyRecordsPage() {
 								</label>
 							</div>
 						</div>
-						{Object.entries(actualGroups).map(([day, dayRecords]) => (
-							<DayGroup
-								key={day}
-								date={day}
-								records={dayRecords}
-								selected={selected}
-								setSelected={setSelected}
-								onEdit={editRecord}
-								loadingRecordId={loadingRecordId}
-							/>
-						))}
-						<PeriodFooter summary={summary} date={date} period={period} />
+						<div className="overflow-hidden rounded-lg border bg-card">
+							{Object.entries(actualGroups).map(([day, dayRecords]) => (
+								<DayGroup
+									key={day}
+									date={day}
+									records={dayRecords}
+									selected={selected}
+									setSelected={setSelected}
+									onEdit={editRecord}
+									loadingRecordId={loadingRecordId}
+								/>
+							))}
+						</div>
 					</section>
 				) : !period.is_future ? (
 					<EmptyRecords
@@ -408,18 +419,20 @@ export default function MonthlyRecordsPage() {
 								Excluded from actual totals.
 							</p>
 						</div>
-						{Object.entries(futureGroups).map(([day, dayRecords]) => (
-							<DayGroup
-								key={day}
-								date={day}
-								records={dayRecords}
-								selected={[]}
-								setSelected={() => undefined}
-								onEdit={editRecord}
-								loadingRecordId={loadingRecordId}
-								selectable={false}
-							/>
-						))}
+						<div className="overflow-hidden rounded-lg border bg-card opacity-80">
+							{Object.entries(futureGroups).map(([day, dayRecords]) => (
+								<DayGroup
+									key={day}
+									date={day}
+									records={dayRecords}
+									selected={[]}
+									setSelected={() => undefined}
+									onEdit={editRecord}
+									loadingRecordId={loadingRecordId}
+									selectable={false}
+								/>
+							))}
+						</div>
 					</section>
 				) : null}
 			</div>
@@ -628,134 +641,164 @@ function DayGroup({
 	selectable?: boolean
 }) {
 	const { handlePush } = useHistory()
+	const router = useRouter()
 	const income = records.reduce((sum, record) => sum + contribution(record).income, 0)
 	const spending = records.reduce((sum, record) => sum + contribution(record).spending, 0)
 	const allSelected = records.every(record => selected.includes(record.id))
+	const toggle = (record: Record, value: boolean) =>
+		setSelected(current =>
+			value ? [...current, record.id] : current.filter(id => id !== record.id),
+		)
 	return (
-		<Card className="gap-0 py-0">
-			<div className="flex flex-col gap-2 bg-muted/35 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-				<div className="flex items-center gap-3">
-					{selectable ? (
-						<Checkbox
-							aria-label={`Select Records on ${date}`}
-							checked={
-								allSelected
-									? true
-									: records.some(record => selected.includes(record.id))
-										? "indeterminate"
-										: false
-							}
-							onCheckedChange={value =>
-								setSelected(current =>
-									value === true
-										? [
-												...new Set([
-													...current,
-													...records.map(record => record.id),
-												]),
-											]
-										: current.filter(
-												id => !records.some(record => record.id === id),
-											),
-								)
-							}
-						/>
+		<div role="rowgroup" className="border-b last:border-b-0">
+			<div className="flex items-center gap-3 bg-muted/40 px-3 py-1.5 text-xs">
+				{selectable ? (
+					<Checkbox
+						aria-label={`Select Records on ${date}`}
+						checked={
+							allSelected
+								? true
+								: records.some(record => selected.includes(record.id))
+									? "indeterminate"
+									: false
+						}
+						onCheckedChange={value =>
+							setSelected(current =>
+								value === true
+									? [
+											...new Set([
+												...current,
+												...records.map(record => record.id),
+											]),
+										]
+									: current.filter(
+											id => !records.some(record => record.id === id),
+										),
+							)
+						}
+					/>
+				) : null}
+				<span className="font-medium">{dayLabel(date)}</span>
+				<span className="ml-auto flex gap-3 text-muted-foreground tabular-nums">
+					{income ? (
+						<span className="text-creative">+{formatCurrency(income)}</span>
 					) : null}
-					<div>
-						<p className="font-medium">
-							{DateTime.fromISO(date).toFormat("cccc, d MMMM")}
-						</p>
-						<p className="text-xs text-muted-foreground">
-							{records.length} Record{records.length === 1 ? "" : "s"}
-						</p>
-					</div>
-				</div>
-				<p className="text-xs text-muted-foreground tabular-nums">
-					{income ? `Income ${formatCurrency(income)} · ` : ""}Spending{" "}
-					{formatCurrency(spending)} · Net {formatCurrency(income - spending)}
-				</p>
+					{spending ? (
+						<span className="text-destructive">{formatCurrency(-spending)}</span>
+					) : null}
+				</span>
 			</div>
-			<div className="divide-y">
-				{records.map(record => (
-					<div key={record.id} className="flex items-start gap-3 px-4 py-3.5">
-						{selectable ? (
-							<Checkbox
-								className="mt-1"
-								aria-label={`Select ${record.title}`}
-								checked={selected.includes(record.id)}
-								onCheckedChange={value =>
-									setSelected(current =>
-										value === true
-											? [...current, record.id]
-											: current.filter(id => id !== record.id),
-									)
-								}
-							/>
-						) : null}
-						<Icon {...record.category} size={14} />
-						<div className="grid min-w-0 flex-1 gap-1">
-							<p className="font-medium leading-5">
-								{record.is_pending ? (
-									<Badge variant="warning" className="mr-1">
-										Pending
-									</Badge>
-								) : null}
-								{record.title}
-							</p>
-							{record.subtitle ? (
-								<p className="truncate text-sm text-foreground/75">
-									{record.subtitle}
-								</p>
+			<ul className="divide-y">
+				{records.map(record => {
+					const time = formatRowTime(record.datetime, true)
+					const checked = selected.includes(record.id)
+					return (
+						<li
+							key={record.id}
+							data-state={checked ? "selected" : undefined}
+							onClick={event => {
+								if (isInteractiveTarget(event.target)) return
+								handlePush("Monthly Records")()
+								router.push(pathRecord(record.id))
+							}}
+							className="flex min-w-0 cursor-pointer items-center gap-3 px-3 py-2.5 text-sm hover:bg-muted/40 data-[state=selected]:bg-muted"
+						>
+							{selectable ? (
+								<Checkbox
+									aria-label={`Select ${record.title}`}
+									checked={checked}
+									onCheckedChange={value => toggle(record, value === true)}
+								/>
 							) : null}
-							<p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-								<IconifyIcon icon="lucide:calendar-clock" className="size-3.5" />
-								{formatDatetime(record.datetime)}
-							</p>
-							<p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-								<IconifyIcon icon="lucide:tag" className="size-3.5" />
-								{`${treatmentLabel(record.analytics_treatment)} · ${record.bucket?.name ?? "No bucket"}`}
-							</p>
-						</div>
-						<div className="flex shrink-0 flex-col items-end gap-2 sm:flex-row sm:items-center">
-							<RecordAmount record={record} />
-							<div className="flex gap-1.5">
+							<Icon {...record.category} size={14} />
+							<div className="min-w-0 flex-1">
+								<p className="flex items-center gap-1.5">
+									<span className="min-w-0 truncate font-medium">
+										{record.title}
+									</span>
+									<PendingBadge record={record} />
+								</p>
+								<p className="truncate text-xs text-muted-foreground">
+									{[record.category.name, record.subtitle, time]
+										.filter(Boolean)
+										.join(" · ")}
+								</p>
+							</div>
+							<span
+								className="hidden shrink-0 items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs text-muted-foreground md:flex"
+								title={treatmentLabel(record.analytics_treatment)}
+							>
+								<span
+									className="size-2 rounded-full"
+									style={{
+										backgroundColor: record.bucket?.color ?? "var(--border)",
+									}}
+								/>
+								{record.bucket?.name ??
+									(canUseBucket(record)
+										? "No bucket"
+										: treatmentLabel(record.analytics_treatment))}
+							</span>
+							<span className="shrink-0 sm:w-28">
+								<RecordAmountCell
+									record={record}
+									value={record.amount}
+									showAllocated={record.is_pending}
+								/>
+							</span>
+							<div className="flex shrink-0 items-center gap-0.5">
 								<Button
-									variant="outline"
-									size="sm"
+									variant="ghost"
+									size="icon-sm"
+									title="Edit"
+									aria-label={`Edit ${record.title}`}
 									aria-busy={loadingRecordId === record.id}
 									onClick={() => {
 										if (!loadingRecordId) void onEdit(record)
 									}}
-									className="w-[4.25rem]"
 								>
-									<IconifyIcon icon="lucide:pencil" />
-									Edit
+									<IconifyIcon
+										icon={
+											loadingRecordId === record.id
+												? "lucide:loader-circle"
+												: "lucide:pencil"
+										}
+									/>
 								</Button>
-								<Button variant="outline" size="sm" asChild>
+								<Button
+									variant="ghost"
+									size="icon-sm"
+									title="Open"
+									className="hidden sm:inline-flex"
+									asChild
+								>
 									<Link
 										href={pathRecord(record.id)}
+										aria-label={`Open ${record.title}`}
 										onClick={handlePush("Monthly Records")}
 									>
-										Open
+										<IconifyIcon icon="lucide:chevron-right" />
 									</Link>
 								</Button>
 							</div>
-						</div>
-					</div>
-				))}
-			</div>
-		</Card>
+						</li>
+					)
+				})}
+			</ul>
+		</div>
 	)
 }
 
-function PeriodFooter({
+function PeriodSummary({
 	summary,
 	date,
 	period,
+	count,
 }: {
 	summary: AnalyticsSummary
 	date: DateTime
 	period: { is_current: boolean; is_future: boolean; through: string | null }
+	count: number
 }) {
 	const activeDays = summary.daily.filter(day => day.spending > 0).length
 	const elapsedDays =
@@ -763,27 +806,36 @@ function PeriodFooter({
 			? DateTime.fromISO(period.through).day
 			: date.daysInMonth
 	return (
-		<div className="grid gap-3 rounded-lg border bg-muted/20 p-4 sm:grid-cols-4">
-			<Metric label="Income" value={formatCurrency(summary.income)} />
-			<Metric label="Net spending" value={formatCurrency(summary.spending)} />
+		<MetricGrid>
 			<Metric
-				label="Per active spending day"
-				value={activeDays ? formatCurrency(summary.spending / activeDays) : "—"}
+				icon="lucide:circle-dollar-sign"
+				label="Income"
+				value={formatCurrency(summary.income)}
+				detail={`${count} Record${count === 1 ? "" : "s"} shown`}
 			/>
 			<Metric
+				icon="lucide:receipt-text"
+				label="Net spending"
+				value={formatCurrency(summary.spending)}
+				detail={
+					summary.refunds
+						? `After ${formatCurrency(summary.refunds)} refunds`
+						: "No refunds"
+				}
+			/>
+			<Metric
+				icon="lucide:flame"
+				label="Per spending day"
+				value={activeDays ? formatCurrency(summary.spending / activeDays) : "—"}
+				detail={`${activeDays} day${activeDays === 1 ? "" : "s"} with spending`}
+			/>
+			<Metric
+				icon="lucide:calendar-days"
 				label="Per calendar day"
 				value={elapsedDays ? formatCurrency(summary.spending / elapsedDays) : "—"}
+				detail={`${elapsedDays ?? 0} day${elapsedDays === 1 ? "" : "s"} so far`}
 			/>
-		</div>
-	)
-}
-
-function Metric({ label, value }: { label: string; value: string }) {
-	return (
-		<div>
-			<p className="text-xs text-muted-foreground">{label}</p>
-			<p className="font-semibold tabular-nums">{value}</p>
-		</div>
+		</MetricGrid>
 	)
 }
 

@@ -1,119 +1,79 @@
 "use client"
 
-import type { CellContext } from "@tanstack/react-table"
 import { useLiveQuery } from "dexie-react-hooks"
-import Link from "next/link"
-import { useMemo, useState } from "react"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
 import AccountDialog from "@/components/dialogs/account"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
-import PaginatedDataTable from "@/components/table/paginated-data-table"
+import { dayLabel, isInteractiveTarget } from "@/components/table/row-groups"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Skeleton } from "@/components/ui/skeleton"
 import { useHistory } from "@/history"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
-import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
-import { listAccounts } from "@/logic/accounts"
-import { paginateItems, parsePage, parsePageSize } from "@/logic/pagination"
-import { pathAccount } from "@/routes"
+import { bankMeta } from "@/lib/banks"
+import { cn, formatCurrency } from "@/lib/utils"
+import { type AccountActivity, listAccounts } from "@/logic/accounts"
+import { pathAccount, pathAllocator } from "@/routes"
 import type { Account } from "@/types"
 
+type AccountRow = Account & AccountActivity
+
 export default function AccountsPage() {
-	const { handlePush } = useHistory()
 	const [editingAccount, setEditingAccount] = useState<Account | null>(null)
-
-	const { query, page, pageSize, handleQueryChange, handlePageSizeChange } =
-		usePaginatedTableState()
-
-	const accounts = useLiveQuery(() => listAccounts(query), [query]) ?? []
-	const paginated = useMemo(
-		() => paginateItems(accounts, parsePage(page), parsePageSize(pageSize)),
-		[accounts, page, pageSize],
-	)
+	const { query, handleQueryChange } = usePaginatedTableState()
+	const accounts = useLiveQuery(() => listAccounts(query), [query])
 
 	return (
 		<>
 			<PageContent>
 				<PageHeader
 					title="Accounts"
-					subtitle="Manage imported bank accounts and their display names."
+					subtitle="Bank accounts whose activity you import. Accounts are created automatically by the Importer."
 					description="Account directory"
 					icon="lucide:landmark"
 				/>
 
-				<PaginatedDataTable
-					paginated={paginated}
-					columns={[
-						{
-							header: "Account",
-							meta: { width: TABLE_WIDTH_CLASSNAMES.ACCOUNT },
-							cell: ({ row }) => row.original.name,
-						},
-						{
-							header: "Bank",
-							meta: { width: TABLE_WIDTH_CLASSNAMES.BANK },
-							cell: ({ row }) => <div className="pe-8">{row.original.bank}</div>,
-						},
-						{
-							header: "Statements",
-							meta: { width: TABLE_WIDTH_CLASSNAMES.STATEMENT_COUNT },
-							cell: ({ row }) => (
-								<div className="pe-8">{row.original.statements_count ?? 0}</div>
-							),
-						},
-						{
-							id: "actions",
-							meta: {
-								onEdit: setEditingAccount,
-								width: TABLE_WIDTH_CLASSNAMES.ACTIONS_EDIT_OPEN,
-							},
-							cell: AccountActionsCell,
-						},
-					]}
-					header={{
-						query,
-						onQueryChange: handleQueryChange,
-						pageSize,
-						onPageSizeChange: handlePageSizeChange,
-						searchPlaceholder: "Search accounts...",
-					}}
-					footer={{
-						summary: `Showing ${paginated.data.length} of ${paginated.total} accounts.`,
-					}}
-					mobileRow={({ original: account }) => (
-						<div className="grid gap-2">
-							<div className="flex items-start justify-between gap-3">
-								<div className="min-w-0">
-									<p className="font-medium break-words">{account.name}</p>
-									<p className="text-xs text-muted-foreground">{account.bank}</p>
-								</div>
-							</div>
-							<div className="flex items-center justify-between gap-3">
-								<p className="text-xs text-muted-foreground">
-									{account.statements_count ?? 0} statements
-								</p>
-								<div className="flex gap-1.5">
-									<Button
-										variant="outline"
-										size="sm"
-										onClick={() => setEditingAccount(account)}
-									>
-										<IconifyIcon icon="lucide:pencil" /> Edit
-									</Button>
-									<Button variant="outline" size="sm" asChild>
-										<Link
-											href={pathAccount(account.id)}
-											onClick={handlePush("Accounts")}
-										>
-											Open
-										</Link>
-									</Button>
-								</div>
-							</div>
-						</div>
-					)}
-					emptyMessage="No accounts found."
-				/>
+				<div className="relative max-w-sm">
+					<IconifyIcon
+						icon="lucide:search"
+						className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground"
+					/>
+					<Input
+						type="search"
+						aria-label="Search accounts"
+						placeholder="Search accounts..."
+						className="pl-8"
+						value={query}
+						onChange={event => handleQueryChange(event.target.value)}
+					/>
+				</div>
+
+				{accounts === undefined ? (
+					<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+						{["a", "b", "c"].map(key => (
+							<Skeleton key={key} className="h-48 rounded-xl" />
+						))}
+					</div>
+				) : accounts.length === 0 ? (
+					<p className="rounded-xl border border-dashed p-10 text-center text-sm text-muted-foreground">
+						{query
+							? "No accounts match your search."
+							: "No accounts yet. Import a bank export to create one."}
+					</p>
+				) : (
+					<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+						{accounts.map(account => (
+							<AccountCard
+								key={account.id}
+								account={account}
+								onEdit={() => setEditingAccount(account)}
+							/>
+						))}
+					</div>
+				)}
 			</PageContent>
 
 			{editingAccount ? (
@@ -129,19 +89,96 @@ export default function AccountsPage() {
 	)
 }
 
-function AccountActionsCell({ row, column }: CellContext<Account, unknown>) {
+function AccountCard({ account, onEdit }: { account: AccountRow; onEdit: () => void }) {
+	const router = useRouter()
 	const { handlePush } = useHistory()
-	const { onEdit } = column.columnDef.meta as { onEdit: (value: Account) => void }
+	const bank = bankMeta(account.bank)
+	const net = account.inflow_30d - account.outflow_30d
+	const open = () => {
+		handlePush("Accounts")()
+		router.push(pathAccount(account.id))
+	}
+
 	return (
-		<div className="flex justify-end gap-1.5">
-			<Button variant="outline" size="sm" onClick={() => onEdit(row.original)}>
-				<IconifyIcon icon="lucide:pencil" /> Edit
-			</Button>
-			<Button variant="outline" size="sm" asChild>
-				<Link href={pathAccount(row.original.id)} onClick={handlePush("Accounts")}>
-					Open
-				</Link>
-			</Button>
-		</div>
+		<article
+			className="group grid cursor-pointer content-start gap-4 rounded-xl border bg-card p-4 transition-shadow hover:shadow-md"
+			onClick={event => {
+				if (!isInteractiveTarget(event.target)) open()
+			}}
+		>
+			<header className="flex items-start gap-3">
+				<span
+					className="grid size-10 shrink-0 place-items-center rounded-lg text-xs font-bold text-white"
+					style={{ backgroundColor: bank.color }}
+				>
+					{bank.short}
+				</span>
+				<div className="min-w-0 flex-1">
+					<h3 className="truncate font-semibold">{account.name}</h3>
+					<p className="truncate text-xs text-muted-foreground">
+						{bank.label}
+						{account.last_activity
+							? ` · last activity ${dayLabel(account.last_activity.slice(0, 10)).toLowerCase()}`
+							: " · no activity yet"}
+					</p>
+				</div>
+				<Button
+					variant="ghost"
+					size="icon-sm"
+					title="Rename"
+					aria-label={`Rename ${account.name}`}
+					className="-mt-1 -mr-1 opacity-60 group-hover:opacity-100"
+					onClick={onEdit}
+				>
+					<IconifyIcon icon="lucide:pencil" />
+				</Button>
+			</header>
+
+			<div className="grid grid-cols-2 gap-3 rounded-lg bg-muted/40 p-3 text-xs">
+				<div>
+					<p className="text-muted-foreground">In · 30 days</p>
+					<p className="mt-0.5 text-sm font-semibold text-creative tabular-nums">
+						{formatCurrency(account.inflow_30d)}
+					</p>
+				</div>
+				<div>
+					<p className="text-muted-foreground">Out · 30 days</p>
+					<p className="mt-0.5 text-sm font-semibold text-destructive tabular-nums">
+						{formatCurrency(-account.outflow_30d)}
+					</p>
+				</div>
+				<div className="col-span-2 flex items-center justify-between border-t pt-2">
+					<span className="text-muted-foreground">Net</span>
+					<span
+						className={cn(
+							"font-medium tabular-nums",
+							net < 0 ? "text-destructive" : net > 0 ? "text-creative" : undefined,
+						)}
+					>
+						{formatCurrency(net)}
+					</span>
+				</div>
+			</div>
+
+			<footer className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+				<span>{account.statements_count.toLocaleString()} Statements</span>
+				{account.unallocated_count ? (
+					<a
+						href={pathAllocator({ account_id: account.id })}
+						onClick={event => {
+							event.preventDefault()
+							handlePush("Accounts")()
+							router.push(pathAllocator({ account_id: account.id }))
+						}}
+						className="font-medium text-amber-700 hover:underline dark:text-amber-400"
+					>
+						{account.unallocated_count} unallocated
+					</a>
+				) : (
+					<span className="text-creative">All allocated</span>
+				)}
+				{account.pending_count ? <span>{account.pending_count} pending</span> : null}
+			</footer>
+		</article>
 	)
 }

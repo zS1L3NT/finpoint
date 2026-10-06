@@ -1,6 +1,7 @@
 import { useReducedMotion } from "framer-motion"
 import { DateTime } from "luxon"
 import { useRouter } from "next/navigation"
+import { useState } from "react"
 import {
 	type ActiveDotProps,
 	Area,
@@ -43,6 +44,11 @@ export default function CashflowChart({
 }) {
 	const isMobile = useIsMobile()
 	const reduceMotion = useReducedMotion()
+	// Animate the intro once per month. Left on, Recharts replays the 700ms
+	// path animation on every resize (e.g. each sidebar toggle).
+	const introKey = `${month}-${year}`
+	const [introPlayed, setIntroPlayed] = useState<string | null>(null)
+	const animate = !reduceMotion && introPlayed !== introKey
 	const router = useRouter()
 	const { handlePush } = useHistory()
 	const interval = isMobile ? Math.max(Math.floor(data.length / 4), 0) : "preserveStartEnd"
@@ -167,7 +173,8 @@ export default function CashflowChart({
 						<ChartTooltip content={tooltip} />
 						<Area
 							key={`actual-${month}-${year}`}
-							isAnimationActive={!reduceMotion}
+							isAnimationActive={animate}
+							onAnimationEnd={() => setIntroPlayed(introKey)}
 							animationDuration={700}
 							animationEasing="ease-out"
 							dataKey="spending"
@@ -189,7 +196,7 @@ export default function CashflowChart({
 						{showProjection ? (
 							<Area
 								key={`projection-${month}-${year}`}
-								isAnimationActive={!reduceMotion}
+								isAnimationActive={animate}
 								animationBegin={140}
 								animationDuration={700}
 								animationEasing="ease-out"

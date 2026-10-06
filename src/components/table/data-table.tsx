@@ -6,7 +6,8 @@ import {
 	useReactTable,
 } from "@tanstack/react-table"
 import { AnimatePresence } from "framer-motion"
-import { memo, useEffect, useState } from "react"
+import { Fragment, memo, useEffect, useState } from "react"
+import { groupStarts, isInteractiveTarget, type RowGroup } from "@/components/table/row-groups"
 import {
 	Table,
 	TableBody,
@@ -25,6 +26,8 @@ function DataTable<TData extends { id: string }, TValue>({
 	emptyMessage,
 	getRowClassName,
 	mobileRow,
+	groupBy,
+	onRowClick,
 }: {
 	data: TData[]
 	columns: ColumnDef<TData, TValue>[]
@@ -33,6 +36,8 @@ function DataTable<TData extends { id: string }, TValue>({
 	emptyMessage?: string
 	getRowClassName?: (row: Row<TData>) => string | undefined
 	mobileRow?: (row: Row<TData>) => React.ReactNode
+	groupBy?: RowGroup<TData>
+	onRowClick?: (row: TData) => void
 }) {
 	const table = useReactTable({
 		data,
@@ -46,6 +51,14 @@ function DataTable<TData extends { id: string }, TValue>({
 		setLive(true)
 	}, [])
 	const enter = live ? { opacity: 0, y: 12 } : false
+	const rows = table.getRowModel().rows
+	const starts = groupStarts(
+		rows.map(row => row.original),
+		groupBy,
+	)
+	const clickRow = (row: TData) => (event: React.MouseEvent) => {
+		if (onRowClick && !isInteractiveTarget(event.target)) onRowClick(row)
+	}
 
 	return (
 		<div className="@container/table flex min-w-0 flex-col gap-4">
@@ -54,16 +67,31 @@ function DataTable<TData extends { id: string }, TValue>({
 			{mobileRow ? (
 				<div className="min-w-0 divide-y overflow-hidden rounded-lg border bg-card @5xl/table:hidden">
 					<AnimatePresence initial={false}>
-						{table.getRowModel().rows.length ? (
-							table.getRowModel().rows.map(row => (
-								<div
-									key={row.id}
-									data-state={selectedIds?.includes(row.id) && "selected"}
-									className="min-w-0 overflow-hidden px-3 py-2.5 text-sm data-[state=selected]:bg-muted"
-								>
-									{mobileRow(row)}
-								</div>
-							))
+						{rows.length ? (
+							rows.map((row, index) => {
+								const group = starts.get(index)
+								return (
+									<Fragment key={row.id}>
+										{group && groupBy ? (
+											<div className="bg-muted/50 px-3 py-1.5">
+												{groupBy.header(group.key, group.rows)}
+											</div>
+										) : null}
+										<div
+											data-state={selectedIds?.includes(row.id) && "selected"}
+											onClick={
+												onRowClick ? clickRow(row.original) : undefined
+											}
+											className={cn(
+												"min-w-0 overflow-hidden px-3 py-2.5 text-sm data-[state=selected]:bg-muted",
+												onRowClick && "cursor-pointer active:bg-muted/60",
+											)}
+										>
+											{mobileRow(row)}
+										</div>
+									</Fragment>
+								)
+							})
 						) : (
 							<div className="p-8 text-center text-sm text-muted-foreground">
 								{emptyMessage}
@@ -106,35 +134,58 @@ function DataTable<TData extends { id: string }, TValue>({
 					</TableHeader>
 					<TableBody>
 						<AnimatePresence initial={false}>
-							{table.getRowModel().rows.length ? (
-								table.getRowModel().rows.map(row => (
-									<TableRow
-										key={row.id}
-										layout="position"
-										initial={enter}
-										animate={{ opacity: 1, y: 0 }}
-										exit={{ opacity: 0, y: -12 }}
-										data-state={selectedIds?.includes(row.id) && "selected"}
-										className={cn(getRowClassName?.(row))}
-									>
-										{row.getVisibleCells().map(cell => (
-											<TableCell
-												key={cell.id}
-												className={
-													cell.column.columnDef.meta &&
-													"width" in cell.column.columnDef.meta
-														? `${cell.column.columnDef.meta?.width}`
-														: undefined
+							{rows.length ? (
+								rows.map((row, index) => {
+									const group = starts.get(index)
+									return (
+										<Fragment key={row.id}>
+											{group && groupBy ? (
+												<TableRow className="bg-muted/40 hover:bg-muted/40">
+													<TableCell
+														colSpan={columns.length}
+														className="py-1.5"
+													>
+														{groupBy.header(group.key, group.rows)}
+													</TableCell>
+												</TableRow>
+											) : null}
+											<TableRow
+												key={row.id}
+												layout="position"
+												initial={enter}
+												animate={{ opacity: 1, y: 0 }}
+												exit={{ opacity: 0, y: -12 }}
+												data-state={
+													selectedIds?.includes(row.id) && "selected"
 												}
-											>
-												{flexRender(
-													cell.column.columnDef.cell,
-													cell.getContext(),
+												onClick={
+													onRowClick ? clickRow(row.original) : undefined
+												}
+												className={cn(
+													onRowClick && "cursor-pointer",
+													getRowClassName?.(row),
 												)}
-											</TableCell>
-										))}
-									</TableRow>
-								))
+											>
+												{row.getVisibleCells().map(cell => (
+													<TableCell
+														key={cell.id}
+														className={
+															cell.column.columnDef.meta &&
+															"width" in cell.column.columnDef.meta
+																? `${cell.column.columnDef.meta?.width}`
+																: undefined
+														}
+													>
+														{flexRender(
+															cell.column.columnDef.cell,
+															cell.getContext(),
+														)}
+													</TableCell>
+												))}
+											</TableRow>
+										</Fragment>
+									)
+								})
 							) : (
 								<TableRow layout layoutId="empty">
 									<TableCell
