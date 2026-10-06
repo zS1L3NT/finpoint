@@ -59,6 +59,16 @@ export function useMonthTransition(ref: RefObject<HTMLElement | null>, monthKey:
 			},
 			{ duration: DURATION.base, ease: EASE_OUT },
 		)
-		return () => controls.stop()
+		// A lingering inline transform would make this element the containing block for
+		// fixed descendants (e.g. the selection bar), so hand styling back once done.
+		const reset = () => {
+			element.style.removeProperty("transform")
+			element.style.removeProperty("opacity")
+		}
+		controls.then(reset, reset)
+		return () => {
+			controls.stop()
+			reset()
+		}
 	}, [ref, monthKey])
 }
