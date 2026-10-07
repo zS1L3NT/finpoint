@@ -2,1124 +2,689 @@
 	"fps": 30,
 	"width": 1920,
 	"height": 1080,
-	"durationInFrames": 34387,
+	"durationInFrames": 21080,
 	"chapters": [
 		{
 			"id": "start",
-			"title": "What does Finpoint do?",
-			"group": "Start here",
+			"title": "Why Finpoint?",
+			"group": "The basics",
 			"startFrame": 0,
-			"durationInFrames": 2100,
+			"durationInFrames": 1934,
 			"segments": [
 				{
-					"label": "The problem",
-					"text": "Your bank shows that money moved, but not what it was really for. One supermarket payment might be groceries and a gift. One dinner payment might include your friends’ shares.",
+					"id": "bank",
+					"text": "Your bank keeps a record of every payment you make. What it can’t tell you is what each payment was really for.",
 					"from": 0,
-					"durationInFrames": 434,
-					"audio": "guide-audio/start-0.mp3"
+					"durationInFrames": 264,
+					"audio": "guide-audio/start-bank.mp3"
 				},
 				{
-					"label": "The idea",
-					"text": "Finpoint links each bank amount to your own explanations, then turns those explanations into spending and plans. You only need one purchase to start.",
-					"from": 434,
-					"durationInFrames": 350,
-					"audio": "guide-audio/start-1.mp3"
+					"id": "split",
+					"text": "Say you spent $80 at the supermarket. $50 of that was groceries, and $30 was a birthday gift for a friend. Your bank shows one $80 payment. But to you, those are two very different things.",
+					"from": 264,
+					"durationInFrames": 423,
+					"audio": "guide-audio/start-split.mp3"
 				},
 				{
-					"label": "Step 1",
-					"text": "Try the sample lunch lesson.",
-					"from": 784,
-					"durationInFrames": 117,
-					"audio": "guide-audio/start-2.mp3"
+					"id": "dinner",
+					"text": "Or you paid $90 for dinner with a friend, and they sent you $60 back for their share. Your bank shows two rows: money out, and money in. What dinner really cost you was $30.",
+					"from": 687,
+					"durationInFrames": 378,
+					"audio": "guide-audio/start-dinner.mp3"
 				},
 				{
-					"label": "Step 2",
-					"text": "Import a bank CSV, or restore a backup.",
-					"from": 901,
-					"durationInFrames": 155,
-					"audio": "guide-audio/start-3.mp3"
+					"id": "explain",
+					"text": "Finpoint closes that gap. It keeps your bank’s rows exactly as they are, and lets you explain them in your own words: groceries, $50. A gift, $30. Your share of dinner, $30.",
+					"from": 1065,
+					"durationInFrames": 424,
+					"audio": "guide-audio/start-explain.mp3"
 				},
 				{
-					"label": "Step 3",
-					"text": "Explain one bank row.",
-					"from": 1056,
-					"durationInFrames": 111,
-					"audio": "guide-audio/start-4.mp3"
-				},
-				{
-					"label": "Step 4",
-					"text": "Download a backup.",
-					"from": 1167,
-					"durationInFrames": 103,
-					"audio": "guide-audio/start-5.mp3"
-				},
-				{
-					"label": "Check your result",
-					"text": "You can say where one bank amount went, and find it again.",
-					"from": 1270,
-					"durationInFrames": 169,
-					"audio": "guide-audio/start-6.mp3"
-				},
-				{
-					"label": "Watch out",
-					"text": "An empty Dashboard is normal at first. Imported bank rows don’t count until you explain them.",
-					"from": 1439,
-					"durationInFrames": 243,
-					"audio": "guide-audio/start-7.mp3"
-				},
-				{
-					"label": "Example",
-					"text": "Alex paid $12 for lunch. The bank shows −$12. Alex adds a Lunch Record for −$12, and an Allocation of −$12 connects them.",
-					"from": 1682,
-					"durationInFrames": 418,
-					"audio": "guide-audio/start-8.mp3"
+					"id": "built",
+					"text": "Everything else in Finpoint, from spending charts to budgets, is built on those explanations. So using Finpoint comes down to three things: bring in your bank activity, explain it, and see where your money really went.",
+					"from": 1489,
+					"durationInFrames": 445,
+					"audio": "guide-audio/start-built.mp3"
 				}
 			]
 		},
 		{
 			"id": "model",
 			"title": "Statements, Records and Allocations",
-			"group": "Start here",
-			"startFrame": 2100,
-			"durationInFrames": 2421,
+			"group": "The basics",
+			"startFrame": 1934,
+			"durationInFrames": 2187,
 			"segments": [
 				{
-					"label": "The problem",
-					"text": "Bank rows and real-life purchases don’t always match one for one.",
+					"id": "three",
+					"text": "Finpoint uses three words for this, and they’re worth getting to know: Statements, Records and Allocations.",
 					"from": 0,
-					"durationInFrames": 282,
-					"audio": "guide-audio/model-0.mp3"
+					"durationInFrames": 302,
+					"audio": "guide-audio/model-three.mp3"
 				},
 				{
-					"label": "The idea",
-					"text": "A Statement is one row from your bank. A Record is your explanation of what happened. An Allocation links an amount from a Statement to a Record. An Account is where money sits, not your login. Money paid is negative, and money received is positive.",
-					"from": 282,
-					"durationInFrames": 531,
-					"audio": "guide-audio/model-1.mp3"
+					"id": "statement",
+					"text": "A Statement is one row from your bank, exactly as your bank reports it. Like that $80 supermarket payment.",
+					"from": 302,
+					"durationInFrames": 242,
+					"audio": "guide-audio/model-statement.mp3"
 				},
 				{
-					"label": "Step 1",
-					"text": "Read the Statement’s amount and description.",
-					"from": 813,
-					"durationInFrames": 134,
-					"audio": "guide-audio/model-2.mp3"
+					"id": "record",
+					"text": "A Record is your explanation of what happened. Groceries for $50 is a Record. The gift for $30 is another.",
+					"from": 544,
+					"durationInFrames": 262,
+					"audio": "guide-audio/model-record.mp3"
 				},
 				{
-					"label": "Step 2",
-					"text": "Decide what it really was.",
-					"from": 947,
-					"durationInFrames": 115,
-					"audio": "guide-audio/model-3.mp3"
-				},
-				{
-					"label": "Step 3",
-					"text": "Create a Record that explains it.",
-					"from": 1062,
-					"durationInFrames": 124,
-					"audio": "guide-audio/model-4.mp3"
-				},
-				{
-					"label": "Step 4",
-					"text": "Allocate the amount. One Statement can feed several Records, and one Record can combine several Statements.",
-					"from": 1186,
-					"durationInFrames": 264,
-					"audio": "guide-audio/model-5.mp3"
-				},
-				{
-					"label": "Check your result",
-					"text": "A Record is complete when it has an Allocation, its Allocation total equals its amount, and none of its Statements are Pending.",
-					"from": 1450,
-					"durationInFrames": 297,
-					"audio": "guide-audio/model-6.mp3"
-				},
-				{
-					"label": "Watch out",
-					"text": "Two bank rows don’t always mean two Records. A payment and its repayment can explain one shared purchase.",
-					"from": 1747,
-					"durationInFrames": 269,
-					"audio": "guide-audio/model-7.mp3"
-				},
-				{
-					"label": "Example",
-					"text": "Statement −$12, Allocation −$12, Lunch Record −$12. Your Account balance and your Dashboard spending answer different questions.",
-					"from": 2016,
+					"id": "allocation",
+					"text": "An Allocation connects a Statement to a Record, and says how much of the Statement belongs there. Here, $50 of the supermarket payment is allocated to Groceries, and the other $30 to the gift.",
+					"from": 806,
 					"durationInFrames": 405,
-					"audio": "guide-audio/model-8.mp3"
-				}
-			]
-		},
-		{
-			"id": "workspace",
-			"title": "Starting fresh, or restoring",
-			"group": "Start here",
-			"startFrame": 4521,
-			"durationInFrames": 2158,
-			"segments": [
-				{
-					"label": "The problem",
-					"text": "A new workspace comes with starter Categories and spending buckets, but no bank activity yet.",
-					"from": 0,
-					"durationInFrames": 298,
-					"audio": "guide-audio/workspace-0.mp3"
+					"audio": "guide-audio/model-allocation.mp3"
 				},
 				{
-					"label": "The idea",
-					"text": "Everything is stored in this browser, on this device. The starter defaults are yours to edit. You can learn with practice lessons first, or restore a backup you already have.",
-					"from": 298,
-					"durationInFrames": 372,
-					"audio": "guide-audio/workspace-1.mp3"
+					"id": "split",
+					"text": "That’s the first pattern: one Statement, split into several Records. It’s how you untangle a mixed shopping trip.",
+					"from": 1211,
+					"durationInFrames": 229,
+					"audio": "guide-audio/model-split.mp3"
 				},
 				{
-					"label": "Step 1",
-					"text": "New here? Open Importer and choose your bank.",
-					"from": 670,
-					"durationInFrames": 154,
-					"audio": "guide-audio/workspace-2.mp3"
+					"id": "combine",
+					"text": "The second pattern goes the other way: several Statements, combined into one Record. Your $90 dinner payment and your friend’s $60 transfer both belong to one Dinner Record, which comes to your real share: $30.",
+					"from": 1440,
+					"durationInFrames": 475,
+					"audio": "guide-audio/model-combine.mp3"
 				},
 				{
-					"label": "Step 2",
-					"text": "Have a backup? Open Sync and restore it.",
-					"from": 824,
-					"durationInFrames": 153,
-					"audio": "guide-audio/workspace-3.mp3"
-				},
-				{
-					"label": "Step 3",
-					"text": "Export your current data first if you want to keep it. Restoring replaces it; it doesn’t merge.",
-					"from": 977,
-					"durationInFrames": 250,
-					"audio": "guide-audio/workspace-4.mp3"
-				},
-				{
-					"label": "Step 4",
-					"text": "Use Help in the top bar any time, without leaving a form.",
-					"from": 1227,
-					"durationInFrames": 174,
-					"audio": "guide-audio/workspace-5.mp3"
-				},
-				{
-					"label": "Check your result",
-					"text": "Your Accounts, Statements or restored Records show up in their lists.",
-					"from": 1401,
-					"durationInFrames": 191,
-					"audio": "guide-audio/workspace-6.mp3"
-				},
-				{
-					"label": "Watch out",
-					"text": "Load demo data is not a tutorial. It replaces your data. Use the practice lessons instead.",
-					"from": 1592,
-					"durationInFrames": 256,
-					"audio": "guide-audio/workspace-7.mp3"
-				},
-				{
-					"label": "Example",
-					"text": "In practice, you can explain a −$12 lunch without uploading anything or changing your real Account balance.",
-					"from": 1848,
-					"durationInFrames": 310,
-					"audio": "guide-audio/workspace-8.mp3"
+					"id": "simple",
+					"text": "And most of the time, it’s simply one to one. A $12 lunch is one Statement, explained by one Lunch Record.",
+					"from": 1915,
+					"durationInFrames": 272,
+					"audio": "guide-audio/model-simple.mp3"
 				}
 			]
 		},
 		{
 			"id": "import",
-			"title": "Importing bank activity",
-			"group": "Everyday use",
-			"startFrame": 6679,
-			"durationInFrames": 2306,
+			"title": "Importing your bank statements",
+			"group": "The basics",
+			"startFrame": 4121,
+			"durationInFrames": 1981,
 			"segments": [
 				{
-					"label": "The problem",
-					"text": "Finpoint can only read a bank file in a format it supports. Each row becomes one of your Statements.",
+					"id": "intro",
+					"text": "Finpoint starts from your bank’s own records. You download them from your bank, then bring them into Finpoint.",
 					"from": 0,
-					"durationInFrames": 321,
-					"audio": "guide-audio/import-0.mp3"
+					"durationInFrames": 271,
+					"audio": "guide-audio/import-intro.mp3"
 				},
 				{
-					"label": "The idea",
-					"text": "Importer supports CSV exports from DBS, OCBC, UOB and Revolut. It creates Statements, not finished Records. Missing Accounts are created as you go. Revolut takes one file at a time, and asks which Account it belongs to.",
-					"from": 321,
-					"durationInFrames": 557,
-					"audio": "guide-audio/import-1.mp3"
+					"id": "banks",
+					"text": "Finpoint can read exports from DBS, OCBC, UOB and Revolut. Depending on the bank, that’s a CSV file or an Excel spreadsheet.",
+					"from": 271,
+					"durationInFrames": 324,
+					"audio": "guide-audio/import-banks.mp3"
 				},
 				{
-					"label": "Step 1",
-					"text": "Export a CSV from your bank. Don’t edit its columns.",
-					"from": 878,
-					"durationInFrames": 172,
-					"audio": "guide-audio/import-2.mp3"
+					"id": "accounts",
+					"text": "Each Statement belongs to an Account, which simply mirrors one of your bank accounts. Import your OCBC 360 Account and your UOB savings account, and Finpoint keeps their Statements apart, using the account details inside each file.",
+					"from": 595,
+					"durationInFrames": 512,
+					"audio": "guide-audio/import-accounts.mp3"
 				},
 				{
-					"label": "Step 2",
-					"text": "Open Importer, pick your bank, and choose the file.",
-					"from": 1050,
-					"durationInFrames": 150,
-					"audio": "guide-audio/import-3.mp3"
+					"id": "revolut",
+					"text": "Some exports, like Revolut’s, don’t say which account they came from. For those, Finpoint asks you to pick or name the account.",
+					"from": 1107,
+					"durationInFrames": 249,
+					"audio": "guide-audio/import-revolut.mp3"
 				},
 				{
-					"label": "Step 3",
-					"text": "Import, then read the inserted, re-indexed and unchanged counts.",
-					"from": 1200,
-					"durationInFrames": 192,
-					"audio": "guide-audio/import-4.mp3"
+					"id": "download",
+					"text": "Download a CSV or Excel export from your bank, once for each account you want in Finpoint.",
+					"step": 1,
+					"steps": 4,
+					"from": 1356,
+					"durationInFrames": 212,
+					"audio": "guide-audio/import-download.mp3"
 				},
 				{
-					"label": "Step 4",
-					"text": "Check the new rows in Statements.",
-					"from": 1392,
-					"durationInFrames": 123,
-					"audio": "guide-audio/import-5.mp3"
+					"id": "choose",
+					"text": "Open Importer, choose your bank, and add your files.",
+					"step": 2,
+					"steps": 4,
+					"from": 1568,
+					"durationInFrames": 112,
+					"audio": "guide-audio/import-choose.mp3"
 				},
 				{
-					"label": "Check your result",
-					"text": "The rows you expected are there, with the right dates and signs.",
-					"from": 1515,
-					"durationInFrames": 174,
-					"audio": "guide-audio/import-6.mp3"
+					"id": "result",
+					"text": "Choose Import, and check how many new Statements came in.",
+					"step": 3,
+					"steps": 4,
+					"from": 1680,
+					"durationInFrames": 119,
+					"audio": "guide-audio/import-result.mp3"
 				},
 				{
-					"label": "Watch out",
-					"text": "If an import fails, check the bank you picked and the file. A PDF or a renamed spreadsheet won’t work.",
-					"from": 1689,
-					"durationInFrames": 258,
-					"audio": "guide-audio/import-7.mp3"
+					"id": "next",
+					"text": "Your new Statements are now waiting in Allocator. That’s where we’ll go next.",
+					"step": 4,
+					"steps": 4,
+					"from": 1799,
+					"durationInFrames": 182,
+					"audio": "guide-audio/import-next.mp3"
+				}
+			]
+		},
+		{
+			"id": "allocator",
+			"title": "Meet the Allocator",
+			"group": "The basics",
+			"startFrame": 6102,
+			"durationInFrames": 968,
+			"segments": [
+				{
+					"id": "list",
+					"text": "Allocator is where you’ll spend most of your time in Finpoint. It lists every Statement that still has money left to explain, newest first.",
+					"from": 0,
+					"durationInFrames": 320,
+					"audio": "guide-audio/allocator-list.mp3"
 				},
 				{
-					"label": "Example",
-					"text": "Alex imports a salary of +$3,000 and a lunch of −$12. Neither one is explained until Alex creates Records.",
-					"from": 1947,
-					"durationInFrames": 359,
-					"audio": "guide-audio/import-8.mp3"
+					"id": "left",
+					"text": "When only part of a Statement has been explained, Allocator shows how much is left. Once a Statement is fully explained, it leaves the list.",
+					"from": 320,
+					"durationInFrames": 282,
+					"audio": "guide-audio/allocator-left.mp3"
+				},
+				{
+					"id": "pages",
+					"text": "Two other pages help you look things up. Statements lists every bank row, explained or not. Records lists your explanations. Allocator only shows what’s still waiting.",
+					"from": 602,
+					"durationInFrames": 366,
+					"audio": "guide-audio/allocator-pages.mp3"
 				}
 			]
 		},
 		{
 			"id": "lunch",
 			"title": "Explaining your first purchase",
-			"group": "Everyday use",
-			"startFrame": 8985,
-			"durationInFrames": 1928,
+			"group": "The basics",
+			"startFrame": 7070,
+			"durationInFrames": 1154,
 			"segments": [
 				{
-					"label": "The problem",
-					"text": "The lunch Statement says −$12, but the Dashboard only counts what a Record explains.",
+					"id": "select",
+					"text": "Let’s explain a $12 lunch. In Allocator, click the lunch Statement to select it. A bar appears with what you can do next.",
+					"step": 1,
+					"steps": 4,
 					"from": 0,
-					"durationInFrames": 310,
-					"audio": "guide-audio/lunch-0.mp3"
+					"durationInFrames": 320,
+					"audio": "guide-audio/lunch-select.mp3"
 				},
 				{
-					"label": "The idea",
-					"text": "Allocator lists the bank amounts you haven’t explained yet. Pick one and create a Record with a title, an amount and a Category. Finpoint suggests the Allocation for you.",
-					"from": 310,
-					"durationInFrames": 364,
-					"audio": "guide-audio/lunch-1.mp3"
+					"id": "create",
+					"text": "Choose Create Record. A new Record opens with the Statement already attached, and its amount filled in.",
+					"step": 2,
+					"steps": 4,
+					"from": 320,
+					"durationInFrames": 211,
+					"audio": "guide-audio/lunch-create.mp3"
 				},
 				{
-					"label": "Step 1",
-					"text": "Open Allocator and pick the lunch Statement.",
-					"from": 674,
-					"durationInFrames": 142,
-					"audio": "guide-audio/lunch-2.mp3"
+					"id": "fill",
+					"text": "Give it a title, like Lunch, and pick a Category, like Dining Out.",
+					"step": 3,
+					"steps": 4,
+					"from": 531,
+					"durationInFrames": 136,
+					"audio": "guide-audio/lunch-fill.mp3"
 				},
 				{
-					"label": "Step 2",
-					"text": "Create a Record called Lunch: Paid $12, in a food Category.",
-					"from": 816,
-					"durationInFrames": 192,
-					"audio": "guide-audio/lunch-3.mp3"
+					"id": "ignore",
+					"text": "You’ll also see Treatment and Spending bucket. Leave those alone for now: your Category fills them in, and we’ll come back to them later.",
+					"from": 667,
+					"durationInFrames": 269,
+					"audio": "guide-audio/lunch-ignore.mp3"
 				},
 				{
-					"label": "Step 3",
-					"text": "Check the Allocation is −$12, then save.",
-					"from": 1008,
-					"durationInFrames": 165,
-					"audio": "guide-audio/lunch-4.mp3"
-				},
-				{
-					"label": "Check your result",
-					"text": "The Record is complete, and the lunch Statement leaves Allocator.",
-					"from": 1173,
-					"durationInFrames": 176,
-					"audio": "guide-audio/lunch-5.mp3"
-				},
-				{
-					"label": "Watch out",
-					"text": "If the Record says Pending, compare its amount with its Allocations, and fix whichever is wrong.",
-					"from": 1349,
-					"durationInFrames": 240,
-					"audio": "guide-audio/lunch-6.mp3"
-				},
-				{
-					"label": "Example",
-					"text": "−$12 from the bank, −$12 allocated, a −$12 Lunch. Nothing remaining, and no difference.",
-					"from": 1589,
-					"durationInFrames": 339,
-					"audio": "guide-audio/lunch-7.mp3"
-				}
-			]
-		},
-		{
-			"id": "backup-first",
-			"title": "Protecting your work",
-			"group": "Start here",
-			"startFrame": 10913,
-			"durationInFrames": 1731,
-			"segments": [
-				{
-					"label": "The problem",
-					"text": "Your data is saved in this browser. Clearing browser storage, or changing devices, can lose it.",
-					"from": 0,
-					"durationInFrames": 299,
-					"audio": "guide-audio/backup-first-0.mp3"
-				},
-				{
-					"label": "The idea",
-					"text": "A Finpoint backup is a separate copy of your data, saved as a JSON file. The browser downloads it. Requesting a download isn’t proof, so find the file yourself.",
-					"from": 299,
-					"durationInFrames": 379,
-					"audio": "guide-audio/backup-first-1.mp3"
-				},
-				{
-					"label": "Step 1",
-					"text": "In Sync, choose Download backup.",
-					"from": 678,
-					"durationInFrames": 123,
-					"audio": "guide-audio/backup-first-2.mp3"
-				},
-				{
-					"label": "Step 2",
-					"text": "Find the file, and keep it somewhere safe.",
-					"from": 801,
-					"durationInFrames": 137,
-					"audio": "guide-audio/backup-first-3.mp3"
-				},
-				{
-					"label": "Step 3",
-					"text": "Keep an older backup before you restore anything.",
-					"from": 938,
-					"durationInFrames": 147,
-					"audio": "guide-audio/backup-first-4.mp3"
-				},
-				{
-					"label": "Check your result",
-					"text": "You’ve found the backup file. Clicking the button alone doesn’t confirm that.",
-					"from": 1085,
-					"durationInFrames": 196,
-					"audio": "guide-audio/backup-first-5.mp3"
-				},
-				{
-					"label": "Watch out",
-					"text": "Never clear browser storage until you have a backup you’ve checked.",
-					"from": 1281,
-					"durationInFrames": 176,
-					"audio": "guide-audio/backup-first-6.mp3"
-				},
-				{
-					"label": "Example",
-					"text": "After explaining Lunch, Alex exports a backup. Restoring it later replaces what’s in this browser.",
-					"from": 1457,
-					"durationInFrames": 274,
-					"audio": "guide-audio/backup-first-7.mp3"
+					"id": "save",
+					"text": "Choose Create Record to save. The lunch Statement leaves Allocator, because it’s fully explained.",
+					"step": 4,
+					"steps": 4,
+					"from": 936,
+					"durationInFrames": 218,
+					"audio": "guide-audio/lunch-save.mp3"
 				}
 			]
 		},
 		{
 			"id": "split",
 			"title": "Splitting one payment",
-			"group": "Everyday use",
-			"startFrame": 12644,
-			"durationInFrames": 2280,
+			"group": "The basics",
+			"startFrame": 8224,
+			"durationInFrames": 1226,
 			"segments": [
 				{
-					"label": "The problem",
-					"text": "One −$80 supermarket Statement was really $60 of groceries and a $20 gift. Put it all in one Category, and that difference hides.",
+					"id": "select",
+					"text": "Back to the $80 supermarket trip. Select it in Allocator, and choose Create Record.",
+					"step": 1,
+					"steps": 4,
 					"from": 0,
-					"durationInFrames": 427,
-					"audio": "guide-audio/split-0.mp3"
+					"durationInFrames": 249,
+					"audio": "guide-audio/split-select.mp3"
 				},
 				{
-					"label": "The idea",
-					"text": "Create two Records, and allocate part of the Statement to each. The bank row stays whole, and you get two clear explanations.",
-					"from": 427,
-					"durationInFrames": 290,
-					"audio": "guide-audio/split-1.mp3"
+					"id": "amount",
+					"text": "Call it Groceries, and change both the Record’s amount and the Statement’s Allocation to $50. The other $30 stays unexplained for now.",
+					"step": 2,
+					"steps": 4,
+					"from": 249,
+					"durationInFrames": 305,
+					"audio": "guide-audio/split-amount.mp3"
 				},
 				{
-					"label": "Step 1",
-					"text": "Create Groceries for −$60, from the −$80 Statement.",
-					"from": 717,
-					"durationInFrames": 210,
-					"audio": "guide-audio/split-2.mp3"
+					"id": "left",
+					"text": "Save, and the supermarket Statement stays in Allocator, with $30 left.",
+					"step": 3,
+					"steps": 4,
+					"from": 554,
+					"durationInFrames": 172,
+					"audio": "guide-audio/split-left.mp3"
 				},
 				{
-					"label": "Step 2",
-					"text": "−$20 is left. Create Gift for −$20, and allocate it.",
-					"from": 927,
-					"durationInFrames": 224,
-					"audio": "guide-audio/split-3.mp3"
+					"id": "gift",
+					"text": "Select it again, and create a second Record, Birthday gift, for the remaining $30. Finpoint fills that amount in for you.",
+					"step": 4,
+					"steps": 4,
+					"from": 726,
+					"durationInFrames": 253,
+					"audio": "guide-audio/split-gift.mp3"
 				},
 				{
-					"label": "Step 3",
-					"text": "Check both Records, and that $0 remains.",
-					"from": 1151,
-					"durationInFrames": 161,
-					"audio": "guide-audio/split-4.mp3"
-				},
-				{
-					"label": "Check your result",
-					"text": "−$60 plus −$20 equals −$80. Both Records are complete, and the Statement is fully used.",
-					"from": 1312,
-					"durationInFrames": 327,
-					"audio": "guide-audio/split-5.mp3"
-				},
-				{
-					"label": "Watch out",
-					"text": "You can’t allocate more than a Statement has left. Fix the Allocations; don’t invent bank rows.",
-					"from": 1639,
-					"durationInFrames": 244,
-					"audio": "guide-audio/split-6.mp3"
-				},
-				{
-					"label": "Example",
-					"text": "One Statement of −$80 becomes Groceries −$60 and Gift −$20. One bank row, two useful explanations.",
-					"from": 1883,
-					"durationInFrames": 397,
-					"audio": "guide-audio/split-7.mp3"
+					"id": "done",
+					"text": "Now one Statement is explained by two Records: $50 of groceries, and a $30 gift.",
+					"from": 979,
+					"durationInFrames": 247,
+					"audio": "guide-audio/split-done.mp3"
 				}
 			]
 		},
 		{
 			"id": "repayment",
-			"title": "A shared dinner and repayment",
-			"group": "Everyday use",
-			"startFrame": 14924,
-			"durationInFrames": 2040,
+			"title": "Combining payments into one Record",
+			"group": "The basics",
+			"startFrame": 9450,
+			"durationInFrames": 986,
 			"segments": [
 				{
-					"label": "The problem",
-					"text": "Alex pays $90 for dinner. Later, Alex receives $60 back from friends. Alex’s own cost is $30, not $90.",
+					"id": "select",
+					"text": "Now the shared dinner. In Allocator, select both Statements: the $90 you paid, and the $60 your friend sent back. The bar shows their total: $30.",
+					"step": 1,
+					"steps": 2,
 					"from": 0,
-					"durationInFrames": 415,
-					"audio": "guide-audio/repayment-0.mp3"
+					"durationInFrames": 439,
+					"audio": "guide-audio/repayment-select.mp3"
 				},
 				{
-					"label": "The idea",
-					"text": "One Shared dinner Record can combine the payment and the repayment. The money back isn’t income. It reduces Alex’s share.",
-					"from": 415,
-					"durationInFrames": 290,
-					"audio": "guide-audio/repayment-1.mp3"
+					"id": "create",
+					"text": "Choose Create Record, and call it Dinner with Sam. Both Statements are attached, and the Record comes to $30, your real share.",
+					"step": 2,
+					"steps": 2,
+					"from": 439,
+					"durationInFrames": 255,
+					"audio": "guide-audio/repayment-create.mp3"
 				},
 				{
-					"label": "Step 1",
-					"text": "Create Shared dinner for −$30.",
-					"from": 705,
-					"durationInFrames": 140,
-					"audio": "guide-audio/repayment-2.mp3"
-				},
-				{
-					"label": "Step 2",
-					"text": "Allocate −$90 from the dinner payment.",
-					"from": 845,
-					"durationInFrames": 156,
-					"audio": "guide-audio/repayment-3.mp3"
-				},
-				{
-					"label": "Step 3",
-					"text": "Allocate +$60 from the repayment.",
-					"from": 1001,
-					"durationInFrames": 142,
-					"audio": "guide-audio/repayment-4.mp3"
-				},
-				{
-					"label": "Check your result",
-					"text": "−$90 + $60 = −$30. Both Statements are explained, and the Record is complete.",
-					"from": 1143,
-					"durationInFrames": 314,
-					"audio": "guide-audio/repayment-5.mp3"
-				},
-				{
-					"label": "Watch out",
-					"text": "Before the repayment arrives, the Record may show Pending. That alone doesn’t mean someone owes you.",
-					"from": 1457,
-					"durationInFrames": 231,
-					"audio": "guide-audio/repayment-6.mp3"
-				},
-				{
-					"label": "Example",
-					"text": "Payment −$90 and repayment +$60 go into one Shared dinner Record. It shows Alex’s −$30 share.",
-					"from": 1688,
-					"durationInFrames": 352,
-					"audio": "guide-audio/repayment-7.mp3"
+					"id": "done",
+					"text": "Save, and two bank rows are explained by a single Record. Your spending shows the $30 you really spent, not $90.",
+					"from": 694,
+					"durationInFrames": 292,
+					"audio": "guide-audio/repayment-done.mp3"
 				}
 			]
 		},
 		{
-			"id": "treatments",
-			"title": "Refunds, transfers and savings",
-			"group": "Understand the numbers",
-			"startFrame": 16964,
-			"durationInFrames": 2672,
+			"id": "dashboard",
+			"title": "Where your numbers come from",
+			"group": "The basics",
+			"startFrame": 10436,
+			"durationInFrames": 1081,
 			"segments": [
 				{
-					"label": "The problem",
-					"text": "A plus or minus sign doesn’t tell you whether money was income, spending, savings or a transfer.",
+					"id": "records",
+					"text": "With a few Records saved, your Dashboard starts to fill in. Everything on it is calculated from Records, never directly from Statements.",
 					"from": 0,
-					"durationInFrames": 331,
-					"audio": "guide-audio/treatments-0.mp3"
+					"durationInFrames": 334,
+					"audio": "guide-audio/dashboard-records.mp3"
 				},
 				{
-					"label": "The idea",
-					"text": "Treatment tells the Dashboard how to count a Record. Income is for salary. Spending covers purchases and their refunds. Saving or investment is money to and from savings. Transfer or neutral is money moving between your own Accounts. Automatic just follows the sign.",
-					"from": 331,
-					"durationInFrames": 578,
-					"audio": "guide-audio/treatments-1.mp3"
+					"id": "empty",
+					"text": "That’s why importing alone leaves the Dashboard empty. A Statement only counts once you’ve explained it.",
+					"from": 334,
+					"durationInFrames": 210,
+					"audio": "guide-audio/dashboard-empty.mp3"
 				},
 				{
-					"label": "Step 1",
-					"text": "Use Income for salary, and Spending for purchases and refunds.",
-					"from": 909,
-					"durationInFrames": 182,
-					"audio": "guide-audio/treatments-2.mp3"
+					"id": "real",
+					"text": "And because it uses your explanations, the Dashboard shows what you really spent: $30 on dinner, not $90, and groceries apart from the gift.",
+					"from": 544,
+					"durationInFrames": 316,
+					"audio": "guide-audio/dashboard-real.mp3"
 				},
 				{
-					"label": "Step 2",
-					"text": "For a transfer, combine the −$200 and +$200 into one $0 Record, as Transfer or neutral.",
-					"from": 1091,
-					"durationInFrames": 332,
-					"audio": "guide-audio/treatments-3.mp3"
-				},
-				{
-					"label": "Step 3",
-					"text": "Use Saving or investment for contributions and withdrawals.",
-					"from": 1423,
-					"durationInFrames": 182,
-					"audio": "guide-audio/treatments-4.mp3"
-				},
-				{
-					"label": "Check your result",
-					"text": "A +$20 refund lowers your net spending. Savings contributions show as positive amounts.",
-					"from": 1605,
-					"durationInFrames": 268,
-					"audio": "guide-audio/treatments-5.mp3"
-				},
-				{
-					"label": "Watch out",
-					"text": "A −$250 saving net means more cash went into savings than came out. It isn’t an investment loss.",
-					"from": 1873,
-					"durationInFrames": 305,
-					"audio": "guide-audio/treatments-6.mp3"
-				},
-				{
-					"label": "Example",
-					"text": "Put in $300 and take out $50: contributions $300, withdrawals $50, net −$250. The +$3,000 salary is separate income.",
-					"from": 2178,
-					"durationInFrames": 494,
-					"audio": "guide-audio/treatments-7.mp3"
+					"id": "categories",
+					"text": "Your spending is broken down by Category, so the Categories you choose shape everything you see here.",
+					"from": 860,
+					"durationInFrames": 221,
+					"audio": "guide-audio/dashboard-categories.mp3"
 				}
 			]
 		},
 		{
 			"id": "pending",
-			"title": "Why a Record is Pending",
-			"group": "Fix a problem",
-			"startFrame": 19636,
-			"durationInFrames": 2303,
+			"title": "Pending Records",
+			"group": "Going further",
+			"startFrame": 11517,
+			"durationInFrames": 1854,
 			"segments": [
 				{
-					"label": "The problem",
-					"text": "A Record is Pending when its amounts don’t match, its Allocations are missing, or one of its Statements is Pending.",
+					"id": "when",
+					"text": "Sometimes you know about spending before your bank shows all of it. Finpoint lets you record it anyway.",
 					"from": 0,
-					"durationInFrames": 331,
-					"audio": "guide-audio/pending-0.mp3"
+					"durationInFrames": 255,
+					"audio": "guide-audio/pending-when.mp3"
 				},
 				{
-					"label": "The idea",
-					"text": "A Pending Record is an explanation that doesn’t add up yet. A Pending Statement is a placeholder for bank activity you’re still waiting for. Even if the amounts match, the Record stays Pending until that placeholder is replaced.",
-					"from": 331,
-					"durationInFrames": 488,
-					"audio": "guide-audio/pending-1.mp3"
+					"id": "concert",
+					"text": "Say you paid $200 for two concert tickets, and your friend Jo will pay you back $100 next week. You can already create the Record for your $100 share, from the $200 payment.",
+					"from": 255,
+					"durationInFrames": 402,
+					"audio": "guide-audio/pending-concert.mp3"
 				},
 				{
-					"label": "Step 1",
-					"text": "Open the Record and compare its amount with its Allocations.",
-					"from": 819,
-					"durationInFrames": 171,
-					"audio": "guide-audio/pending-2.mp3"
-				},
-				{
-					"label": "Step 2",
-					"text": "If lunch really cost $12, change the Record from −$10 to −$12.",
-					"from": 990,
-					"durationInFrames": 253,
-					"audio": "guide-audio/pending-3.mp3"
-				},
-				{
-					"label": "Step 3",
-					"text": "When the real bank row arrives, replace the Pending Statement instead of allocating twice.",
-					"from": 1243,
-					"durationInFrames": 228,
-					"audio": "guide-audio/pending-4.mp3"
-				},
-				{
-					"label": "Check your result",
-					"text": "There’s at least one Allocation, the total matches the Record, and no allocated Statement is Pending.",
-					"from": 1471,
+					"id": "flag",
+					"text": "The amounts don’t match yet, $100 against $200. Finpoint warns you, and saves the Record as Pending.",
+					"from": 657,
 					"durationInFrames": 254,
-					"audio": "guide-audio/pending-5.mp3"
+					"audio": "guide-audio/pending-flag.mp3"
 				},
 				{
-					"label": "Watch out",
-					"text": "Fix the facts, not just the label. A Pending Record is still saved.",
-					"from": 1725,
-					"durationInFrames": 190,
-					"audio": "guide-audio/pending-6.mp3"
+					"id": "list",
+					"text": "Pending Records are marked in your Records list, so nothing gets forgotten.",
+					"from": 911,
+					"durationInFrames": 153,
+					"audio": "guide-audio/pending-list.mp3"
 				},
 				{
-					"label": "Example",
-					"text": "The Record says −$10, but the Allocation is −$12. Change the Record to −$12, and the difference drops to $0.",
-					"from": 1915,
-					"durationInFrames": 388,
-					"audio": "guide-audio/pending-7.mp3"
+					"id": "attach",
+					"text": "When Jo’s $100 arrives, select it in Allocator and choose Attach to Record. Finpoint suggests the Pending Record it matches exactly.",
+					"from": 1064,
+					"durationInFrames": 320,
+					"audio": "guide-audio/pending-attach.mp3"
+				},
+				{
+					"id": "complete",
+					"text": "Save, and the Record now combines both payments. The amounts match, so it’s no longer Pending.",
+					"from": 1384,
+					"durationInFrames": 197,
+					"audio": "guide-audio/pending-complete.mp3"
+				},
+				{
+					"id": "meaning",
+					"text": "It works the same for a deposit now and the balance later. Pending simply means: this explanation doesn’t add up yet.",
+					"from": 1581,
+					"durationInFrames": 273,
+					"audio": "guide-audio/pending-meaning.mp3"
 				}
 			]
 		},
 		{
-			"id": "find",
-			"title": "Finding and fixing mistakes",
-			"group": "Fix a problem",
-			"startFrame": 21939,
-			"durationInFrames": 1836,
+			"id": "pending-statements",
+			"title": "Pending Statements",
+			"group": "Going further",
+			"startFrame": 13371,
+			"durationInFrames": 1468,
 			"segments": [
 				{
-					"label": "The problem",
-					"text": "Something you saved seems to be missing. Usually filters or the month are hiding it. An empty list doesn’t mean your data is gone.",
+					"id": "why",
+					"text": "Some banks take days to show a card payment. If you want it explained today, create a Pending Statement: a placeholder for a bank row you’re expecting.",
 					"from": 0,
-					"durationInFrames": 368,
-					"audio": "guide-audio/find-0.mp3"
+					"durationInFrames": 345,
+					"audio": "guide-audio/pending-statements-why.mp3"
 				},
 				{
-					"label": "The idea",
-					"text": "Records show your explanations. Statements show every bank row. Allocator only shows amounts left to explain. Use search and filters to narrow the right list.",
-					"from": 368,
-					"durationInFrames": 358,
-					"audio": "guide-audio/find-1.mp3"
+					"id": "create",
+					"text": "On the Statements page, choose Create Pending Statement. Pick the account, then enter the amount and a short description.",
+					"step": 1,
+					"steps": 4,
+					"from": 345,
+					"durationInFrames": 232,
+					"audio": "guide-audio/pending-statements-create.mp3"
 				},
 				{
-					"label": "Step 1",
-					"text": "Check the month and date range, and clear filters.",
-					"from": 726,
-					"durationInFrames": 150,
-					"audio": "guide-audio/find-2.mp3"
+					"id": "explain",
+					"text": "It appears in Allocator, marked Pending. Explain it like any other Statement. The Record counts straight away, but stays Pending while it relies on a placeholder.",
+					"step": 2,
+					"steps": 4,
+					"from": 577,
+					"durationInFrames": 304,
+					"audio": "guide-audio/pending-statements-explain.mp3"
 				},
 				{
-					"label": "Step 2",
-					"text": "Look in Statements for rows Allocator no longer shows.",
-					"from": 876,
-					"durationInFrames": 161,
-					"audio": "guide-audio/find-3.mp3"
+					"id": "replace",
+					"text": "When the real bank row is imported, open Replace Pending in Allocator. Pick the placeholder, and Finpoint suggests the imported Statements it could become.",
+					"step": 3,
+					"steps": 4,
+					"from": 881,
+					"durationInFrames": 309,
+					"audio": "guide-audio/pending-statements-replace.mp3"
 				},
 				{
-					"label": "Step 3",
-					"text": "Open the item, edit it, then check its totals again.",
-					"from": 1037,
-					"durationInFrames": 162,
-					"audio": "guide-audio/find-4.mp3"
-				},
-				{
-					"label": "Check your result",
-					"text": "The fixed item shows up where you expect, still linked to its bank row.",
-					"from": 1199,
-					"durationInFrames": 187,
-					"audio": "guide-audio/find-5.mp3"
-				},
-				{
-					"label": "Watch out",
-					"text": "Renaming doesn’t fix a wrong amount. Keep a backup before big changes.",
-					"from": 1386,
-					"durationInFrames": 196,
-					"audio": "guide-audio/find-6.mp3"
-				},
-				{
-					"label": "Example",
-					"text": "To find payments over $50, choose Paid and type 50. No minus sign needed.",
-					"from": 1582,
-					"durationInFrames": 254,
-					"audio": "guide-audio/find-7.mp3"
+					"id": "review",
+					"text": "Choose Replace. The Allocations move to the real Statement, the placeholder disappears, and nothing is counted twice.",
+					"step": 4,
+					"steps": 4,
+					"from": 1190,
+					"durationInFrames": 278,
+					"audio": "guide-audio/pending-statements-review.mp3"
 				}
 			]
 		},
 		{
 			"id": "categories",
-			"title": "Category, treatment and bucket",
-			"group": "Plan your money",
-			"startFrame": 23775,
-			"durationInFrames": 1879,
+			"title": "Categories",
+			"group": "Going further",
+			"startFrame": 14839,
+			"durationInFrames": 1039,
 			"segments": [
 				{
-					"label": "The problem",
-					"text": "Three settings describe every Record. Mixing them up makes totals confusing.",
+					"id": "most",
+					"text": "Categories are the most important choice you make on a Record. They say what it was for, and the Dashboard breaks your spending down by them.",
 					"from": 0,
-					"durationInFrames": 284,
-					"audio": "guide-audio/categories-0.mp3"
+					"durationInFrames": 303,
+					"audio": "guide-audio/categories-most.mp3"
 				},
 				{
-					"label": "The idea",
-					"text": "Category is what it’s for. Treatment is how totals count it. A bucket is an optional planning group, like Daily or Recurring. A Category can set defaults, and a Record can override them.",
-					"from": 284,
-					"durationInFrames": 421,
-					"audio": "guide-audio/categories-1.mp3"
+					"id": "examples",
+					"text": "Lunch and dinner with friends are Dining Out. The supermarket run is Groceries. The birthday gift goes under Gifts and Donations. Finpoint starts you with a sensible set, and you can rename them or add your own.",
+					"from": 303,
+					"durationInFrames": 406,
+					"audio": "guide-audio/categories-examples.mp3"
 				},
 				{
-					"label": "Step 1",
-					"text": "In Categories, create the labels you need.",
-					"from": 705,
-					"durationInFrames": 138,
-					"audio": "guide-audio/categories-2.mp3"
-				},
-				{
-					"label": "Step 2",
-					"text": "Give each Category a treatment and a default bucket.",
-					"from": 843,
-					"durationInFrames": 159,
-					"audio": "guide-audio/categories-3.mp3"
-				},
-				{
-					"label": "Step 3",
-					"text": "On a Record, check whether those defaults were overridden.",
-					"from": 1002,
-					"durationInFrames": 161,
-					"audio": "guide-audio/categories-4.mp3"
-				},
-				{
-					"label": "Check your result",
-					"text": "Lunch can be Food, Spending and Daily all at once: three different choices.",
-					"from": 1163,
-					"durationInFrames": 213,
-					"audio": "guide-audio/categories-5.mp3"
-				},
-				{
-					"label": "Watch out",
-					"text": "Changing a Category doesn’t update Records whose choices were set by hand.",
-					"from": 1376,
-					"durationInFrames": 210,
-					"audio": "guide-audio/categories-6.mp3"
-				},
-				{
-					"label": "Example",
-					"text": "Lunch: Category Food, treatment Spending, bucket Daily. Rent is Spending too, but in the Recurring bucket.",
-					"from": 1586,
-					"durationInFrames": 293,
-					"audio": "guide-audio/categories-7.mp3"
+					"id": "defaults",
+					"text": "Each Category also carries two defaults: a treatment, and a spending bucket. That’s why you could ignore those fields earlier. The Category fills them in.",
+					"from": 709,
+					"durationInFrames": 330,
+					"audio": "guide-audio/categories-defaults.mp3"
 				}
 			]
 		},
 		{
-			"id": "targets",
-			"title": "Monthly bucket targets",
-			"group": "Plan your money",
-			"startFrame": 25654,
-			"durationInFrames": 1798,
+			"id": "treatments",
+			"title": "Treatments",
+			"group": "Advanced",
+			"startFrame": 15878,
+			"durationInFrames": 1012,
 			"segments": [
 				{
-					"label": "The problem",
-					"text": "You want to compare a month’s spending with a plan, without moving any money.",
+					"id": "what",
+					"text": "Treatment decides how the Dashboard counts a Record: as income, as spending, as saving, or not at all.",
 					"from": 0,
-					"durationInFrames": 252,
-					"audio": "guide-audio/targets-0.mp3"
+					"durationInFrames": 261,
+					"audio": "guide-audio/treatments-what.mp3"
 				},
 				{
-					"label": "The idea",
-					"text": "A target is a monthly comparison for a bucket. A default carries forward from the month you set it. A target for only one month overrides it. Targets never reserve cash or block spending.",
-					"from": 252,
-					"durationInFrames": 411,
-					"audio": "guide-audio/targets-1.mp3"
+					"id": "examples",
+					"text": "Your salary is Income. Lunch and groceries are Spending, and so is a refund, which lowers what you spent. Moving $500 into savings is Saving or investment. And moving money between your own accounts is a Transfer, which isn’t counted at all.",
+					"from": 261,
+					"durationInFrames": 507,
+					"audio": "guide-audio/treatments-examples.mp3"
 				},
 				{
-					"label": "Step 1",
-					"text": "On the Dashboard, pick the month first.",
-					"from": 663,
-					"durationInFrames": 127,
-					"audio": "guide-audio/targets-2.mp3"
+					"id": "override",
+					"text": "Your Category sets the treatment for you. Change it on a single Record only when that Record is an exception.",
+					"from": 768,
+					"durationInFrames": 244,
+					"audio": "guide-audio/treatments-override.mp3"
+				}
+			]
+		},
+		{
+			"id": "buckets",
+			"title": "Spending buckets and monthly targets",
+			"group": "Advanced",
+			"startFrame": 16890,
+			"durationInFrames": 1220,
+			"segments": [
+				{
+					"id": "what",
+					"text": "A spending bucket groups your spending for monthly planning. Think of it as a monthly budget that repeats. Finpoint starts you with four: Daily, Recurring, Irregular and Travel.",
+					"from": 0,
+					"durationInFrames": 428,
+					"audio": "guide-audio/buckets-what.mp3"
 				},
 				{
-					"label": "Step 2",
-					"text": "Choose this month only, or from this month onward.",
-					"from": 790,
-					"durationInFrames": 153,
-					"audio": "guide-audio/targets-3.mp3"
+					"id": "daily",
+					"text": "Daily is the one to watch. It holds everyday spending, like food and transport, and the Dashboard paces it through the month.",
+					"from": 428,
+					"durationInFrames": 257,
+					"audio": "guide-audio/buckets-daily.mp3"
 				},
 				{
-					"label": "Step 3",
-					"text": "Compare the bucket’s spending with its target.",
-					"from": 943,
-					"durationInFrames": 135,
-					"audio": "guide-audio/targets-4.mp3"
+					"id": "target",
+					"text": "Give a bucket a monthly target, say $500 for Daily. You can set it for one month only, or from this month onward.",
+					"from": 685,
+					"durationInFrames": 257,
+					"audio": "guide-audio/buckets-target.mp3"
 				},
 				{
-					"label": "Check your result",
-					"text": "Daily spending of $127 against a $500 target leaves $373.",
-					"from": 1078,
-					"durationInFrames": 303,
-					"audio": "guide-audio/targets-5.mp3"
-				},
-				{
-					"label": "Example",
-					"text": "A $500 default starts in October and carries on. A $600 target just for October wins in October, and later months go back to $500.",
-					"from": 1381,
-					"durationInFrames": 417,
-					"audio": "guide-audio/targets-6.mp3"
+					"id": "compare",
+					"text": "The Dashboard then shows how this month is going against the target. Targets don’t move any money. They’re simply a comparison.",
+					"from": 942,
+					"durationInFrames": 278,
+					"audio": "guide-audio/buckets-compare.mp3"
 				}
 			]
 		},
 		{
 			"id": "budgets",
 			"title": "Budgets for trips and events",
-			"group": "Plan your money",
-			"startFrame": 27452,
-			"durationInFrames": 1638,
+			"group": "Advanced",
+			"startFrame": 18110,
+			"durationInFrames": 950,
 			"segments": [
 				{
-					"label": "The problem",
-					"text": "A trip can cross months and several categories. A monthly bucket doesn’t fit it.",
+					"id": "what",
+					"text": "A Budget is for spending with its own start and end, like a week in Bali, or a wedding.",
 					"from": 0,
-					"durationInFrames": 284,
-					"audio": "guide-audio/budgets-0.mp3"
+					"durationInFrames": 256,
+					"audio": "guide-audio/budgets-what.mp3"
 				},
 				{
-					"label": "The idea",
-					"text": "A Budget has its own amount, its own dates, and its own attached Records. It’s a separate view from the Dashboard’s totals.",
-					"from": 284,
-					"durationInFrames": 279,
-					"audio": "guide-audio/budgets-1.mp3"
+					"id": "create",
+					"text": "Create one with a name, an amount and its dates. Leave Automatic attach on, and Records dated inside the period are attached for you: the ones you already have, and new ones as you add them.",
+					"from": 256,
+					"durationInFrames": 371,
+					"audio": "guide-audio/budgets-create.mp3"
 				},
 				{
-					"label": "Step 1",
-					"text": "In Budgets, create one with an amount and dates.",
-					"from": 563,
-					"durationInFrames": 150,
-					"audio": "guide-audio/budgets-2.mp3"
-				},
-				{
-					"label": "Step 2",
-					"text": "Leave Automatic attach on, or turn it off to choose Records yourself.",
-					"from": 713,
-					"durationInFrames": 191,
-					"audio": "guide-audio/budgets-3.mp3"
-				},
-				{
-					"label": "Step 3",
-					"text": "After changing dates, review the attached Records.",
-					"from": 904,
-					"durationInFrames": 155,
-					"audio": "guide-audio/budgets-4.mp3"
-				},
-				{
-					"label": "Check your result",
-					"text": "The trip’s Records are attached, and fall inside the Budget’s dates.",
-					"from": 1059,
-					"durationInFrames": 183,
-					"audio": "guide-audio/budgets-5.mp3"
-				},
-				{
-					"label": "Watch out",
-					"text": "A Budget total doesn’t have to match Dashboard spending.",
-					"from": 1242,
-					"durationInFrames": 162,
-					"audio": "guide-audio/budgets-6.mp3"
-				},
-				{
-					"label": "Example",
-					"text": "Use a Budget for a week-long holiday. Use the Travel bucket for the monthly view.",
-					"from": 1404,
-					"durationInFrames": 234,
-					"audio": "guide-audio/budgets-7.mp3"
-				}
-			]
-		},
-		{
-			"id": "dashboard",
-			"title": "Reading the Dashboard",
-			"group": "Understand the numbers",
-			"startFrame": 29090,
-			"durationInFrames": 2060,
-			"segments": [
-				{
-					"label": "The problem",
-					"text": "The charts depend on the month and on your Records, so they won’t match your bank balances.",
-					"from": 0,
-					"durationInFrames": 267,
-					"audio": "guide-audio/dashboard-0.mp3"
-				},
-				{
-					"label": "The idea",
-					"text": "The Dashboard summarizes your Records by treatment, then by Category and bucket. Monthly Records shows the Records behind each number. Pending Records already count, so tidy them first.",
-					"from": 267,
-					"durationInFrames": 416,
-					"audio": "guide-audio/dashboard-1.mp3"
-				},
-				{
-					"label": "Step 1",
-					"text": "Pick the month.",
-					"from": 683,
-					"durationInFrames": 93,
-					"audio": "guide-audio/dashboard-2.mp3"
-				},
-				{
-					"label": "Step 2",
-					"text": "Read income, spending, refunds and surplus.",
-					"from": 776,
-					"durationInFrames": 156,
-					"audio": "guide-audio/dashboard-3.mp3"
-				},
-				{
-					"label": "Step 3",
-					"text": "Use Monthly Records to trace any surprise.",
-					"from": 932,
-					"durationInFrames": 145,
-					"audio": "guide-audio/dashboard-4.mp3"
-				},
-				{
-					"label": "Check your result",
-					"text": "Income is $3,000. Gross spending is $147, minus $20 of refunds, so net spending is $127. Surplus is $2,873.",
-					"from": 1077,
-					"durationInFrames": 490,
-					"audio": "guide-audio/dashboard-5.mp3"
-				},
-				{
-					"label": "Watch out",
-					"text": "If a number looks wrong, check the month first, then the Record’s treatment.",
-					"from": 1567,
-					"durationInFrames": 182,
-					"audio": "guide-audio/dashboard-6.mp3"
-				},
-				{
-					"label": "Example",
-					"text": "A saving net of −$250 shows on its own line. It doesn’t mean income fell, or that you lost money.",
-					"from": 1749,
-					"durationInFrames": 311,
-					"audio": "guide-audio/dashboard-7.mp3"
+					"id": "own",
+					"text": "A Budget is its own small dashboard for that period: what you’ve spent, what’s left, and your pace. It’s separate from your monthly Dashboard, and doesn’t change it.",
+					"from": 627,
+					"durationInFrames": 323,
+					"audio": "guide-audio/budgets-own.mp3"
 				}
 			]
 		},
 		{
 			"id": "sync",
 			"title": "Backups and Google Drive",
-			"group": "Fix a problem",
-			"startFrame": 31150,
-			"durationInFrames": 1855,
+			"group": "Your data",
+			"startFrame": 19060,
+			"durationInFrames": 1224,
 			"segments": [
 				{
-					"label": "The problem",
-					"text": "With two devices, you need a copy you can trust, and to know which copy is current.",
+					"id": "local",
+					"text": "Finpoint keeps your data in this browser, on this device. There’s no Finpoint database, and your finances never pass through our servers, so we never see them.",
 					"from": 0,
-					"durationInFrames": 279,
-					"audio": "guide-audio/sync-0.mp3"
+					"durationInFrames": 376,
+					"audio": "guide-audio/sync-local.mp3"
 				},
 				{
-					"label": "The idea",
-					"text": "Your data lives locally. A backup file is a separate copy. Google Drive sync is optional, and shares one workspace across devices. The sign-in broker never sees your financial data.",
-					"from": 279,
-					"durationInFrames": 430,
-					"audio": "guide-audio/sync-1.mp3"
+					"id": "file",
+					"text": "That means keeping a copy is up to you, and there are two ways. The first is a backup file. Download it from the Data page whenever you like, and restore it later, on this device or a new one.",
+					"from": 376,
+					"durationInFrames": 373,
+					"audio": "guide-audio/sync-file.mp3"
 				},
 				{
-					"label": "Step 1",
-					"text": "In Sync, download a backup and find the file.",
-					"from": 709,
-					"durationInFrames": 147,
-					"audio": "guide-audio/sync-2.mp3"
+					"id": "drive",
+					"text": "The second is Google Drive. Connect it once, and Finpoint keeps a copy in a hidden folder in your own Drive, automatically, so your devices stay in step.",
+					"from": 749,
+					"durationInFrames": 325,
+					"audio": "guide-audio/sync-drive.mp3"
 				},
 				{
-					"label": "Step 2",
-					"text": "Connect Google Drive only if you want sync.",
-					"from": 856,
-					"durationInFrames": 141,
-					"audio": "guide-audio/sync-3.mp3"
-				},
-				{
-					"label": "Step 3",
-					"text": "If there’s a conflict, back up first, then choose which copy to keep.",
-					"from": 997,
-					"durationInFrames": 181,
-					"audio": "guide-audio/sync-4.mp3"
-				},
-				{
-					"label": "Check your result",
-					"text": "Up to date in Sync, and a backup you’ve found. Keep both.",
-					"from": 1178,
-					"durationInFrames": 187,
-					"audio": "guide-audio/sync-5.mp3"
-				},
-				{
-					"label": "Watch out",
-					"text": "Don’t keep overwriting a conflict just to clear the warning. You choose a whole copy; nothing is merged.",
-					"from": 1365,
-					"durationInFrames": 260,
-					"audio": "guide-audio/sync-6.mp3"
-				},
-				{
-					"label": "Example",
-					"text": "Your practice progress stays in this browser, without going into your backup or Drive.",
-					"from": 1625,
-					"durationInFrames": 230,
-					"audio": "guide-audio/sync-7.mp3"
+					"id": "yours",
+					"text": "Either way, your data only goes to places you control.",
+					"from": 1074,
+					"durationInFrames": 150,
+					"audio": "guide-audio/sync-yours.mp3"
 				}
 			]
 		},
 		{
 			"id": "routine",
 			"title": "Your routine",
-			"group": "Everyday use",
-			"startFrame": 33005,
-			"durationInFrames": 1382,
+			"group": "Your data",
+			"startFrame": 20284,
+			"durationInFrames": 796,
 			"segments": [
 				{
-					"label": "The problem",
-					"text": "Don’t try to perfect everything at once. A short routine works better.",
+					"id": "loop",
+					"text": "Here’s a routine that works. Import your latest statements. Explain what’s new in Allocator. Check anything Pending. Then glance at your Dashboard.",
 					"from": 0,
-					"durationInFrames": 237,
-					"audio": "guide-audio/routine-0.mp3"
+					"durationInFrames": 346,
+					"audio": "guide-audio/routine-loop.mp3"
 				},
 				{
-					"label": "The idea",
-					"text": "Each visit: import new activity, explain what’s left, inspect anything Pending, review the month, and protect it all with a backup.",
-					"from": 237,
-					"durationInFrames": 315,
-					"audio": "guide-audio/routine-1.mp3"
-				},
-				{
-					"label": "Step 1",
-					"text": "Import your latest bank CSV.",
-					"from": 552,
-					"durationInFrames": 127,
-					"audio": "guide-audio/routine-2.mp3"
-				},
-				{
-					"label": "Step 2",
-					"text": "Explain new amounts in Allocator.",
-					"from": 679,
-					"durationInFrames": 127,
-					"audio": "guide-audio/routine-3.mp3"
-				},
-				{
-					"label": "Step 3",
-					"text": "Review the month, then check Sync.",
-					"from": 806,
-					"durationInFrames": 120,
-					"audio": "guide-audio/routine-4.mp3"
-				},
-				{
-					"label": "Check your result",
-					"text": "You can follow any bank amount to its explanation, and get your work back if you need it.",
-					"from": 926,
+					"id": "backup",
+					"text": "If you’ve connected Google Drive, you’re backed up automatically. If not, download a backup every so often.",
+					"from": 346,
 					"durationInFrames": 221,
-					"audio": "guide-audio/routine-5.mp3"
+					"audio": "guide-audio/routine-backup.mp3"
 				},
 				{
-					"label": "Example",
-					"text": "Import, explain one purchase, fix one Pending Record, review the month, and check your backup.",
-					"from": 1147,
-					"durationInFrames": 235,
-					"audio": "guide-audio/routine-6.mp3"
+					"id": "help",
+					"text": "And whenever you’re unsure, open Help from any page or form. Every chapter of this guide is there, with pictures.",
+					"from": 567,
+					"durationInFrames": 229,
+					"audio": "guide-audio/routine-help.mp3"
 				}
 			]
 		}

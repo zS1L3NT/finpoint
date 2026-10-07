@@ -46,7 +46,7 @@ export function EmptyGuide({
 								? pathImporter()
 								: queueClear
 									? pathStatements()
-									: pathHelp(noRecords ? "lunch" : "find")
+									: pathHelp(noRecords ? "lunch" : "allocator")
 						}
 					>
 						{noImports

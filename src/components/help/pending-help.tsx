@@ -10,7 +10,7 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog"
-import { getGuideTopic } from "@/lib/guide-content"
+import { getGuideChapter } from "@/lib/guide"
 import { formatCurrency } from "@/lib/utils"
 import { round2 } from "@/logic/shared"
 
@@ -63,7 +63,7 @@ export function PendingHelp({
 						round2(amount - allocated) !== 0 &&
 						" It also uses a Pending Statement, which still needs replacement with the real imported activity."}
 				</p>
-				<GuideArticle topic={getGuideTopic("pending")} compact />
+				<GuideArticle chapter={getGuideChapter("pending")} compact />
 			</DialogContent>
 		</Dialog>
 	)

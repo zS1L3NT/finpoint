@@ -25,9 +25,6 @@ function clock(frame: number) {
 	return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`
 }
 
-const labelTone = (label: string) =>
-	label === "Check your result" ? color.record : label === "Watch out" ? color.pending : undefined
-
 export default function GuideVideoPage() {
 	const params = useSearchParams()
 	const requested = timeline.chapters.find(item => item.id === params.get("chapter"))
@@ -45,7 +42,7 @@ export default function GuideVideoPage() {
 				title="Finpoint, from the beginning"
 				description="Narrated video guide"
 				icon="lucide:video"
-				subtitle={`17 chapters · ${clock(timeline.durationInFrames)} total · pick a chapter or resume where you paused. Nothing plays until you press play.`}
+				subtitle={`${timeline.chapters.length} chapters · ${clock(timeline.durationInFrames)} total · pick a chapter or resume where you paused. Nothing plays until you press play.`}
 				actions={
 					<Button asChild variant="outline" size="lg" className="min-h-11">
 						<Link href={pathHelp()}>All help topics</Link>
@@ -121,28 +118,29 @@ export default function GuideVideoPage() {
 								</Button>
 							</div>
 						</div>
-						<ol className="flex flex-col gap-5 text-sm leading-6">
+						<ol className="flex flex-col gap-4 text-sm leading-6">
 							{active.segments.map(segment => (
 								<li
 									key={segment.audio}
-									className="border-l-2 pl-4"
-									style={{
-										borderColor: labelTone(segment.label) ?? "var(--border)",
-									}}
+									className="flex gap-3 border-l-2 pl-4"
+									style={{ borderColor: segment.step ? accent : "var(--border)" }}
 								>
-									<h4
-										className="mb-1 text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase"
-										style={{ color: labelTone(segment.label) }}
-									>
-										{segment.label}
-									</h4>
+									{segment.step ? (
+										<span
+											className="font-semibold tabular-nums"
+											style={{ color: accent }}
+										>
+											{segment.step}.
+										</span>
+									) : null}
 									<p>{segment.text}</p>
 								</li>
 							))}
 						</ol>
 						<p className="mt-6 text-xs leading-5 text-muted-foreground">
-							Illustrated explanations with sample amounts and a synthetic voice.
-							These are teaching diagrams, not recordings of your workspace.
+							Illustrations and real Finpoint screens filled with fictional sample
+							data, narrated by a synthetic voice. They are not recordings of your
+							workspace.
 						</p>
 					</section>
 				</div>

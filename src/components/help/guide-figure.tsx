@@ -3,7 +3,7 @@
 import { Thumbnail } from "@remotion/player"
 import { Play } from "lucide-react"
 import Link from "next/link"
-import { SceneStill, type StillBeat, still, stillFrame } from "@/components/help/film/scene-still"
+import { SceneStill, stillFrame } from "@/components/help/film/scene-still"
 import { color } from "@/components/help/film/theme"
 import timeline from "@/lib/guide-video-timeline.json"
 import { cn } from "@/lib/utils"
@@ -20,7 +20,7 @@ export default function GuideFigure({
 	className,
 }: {
 	topic: string
-	beat: StillBeat
+	beat: string
 	caption?: React.ReactNode
 	className?: string
 }) {
@@ -31,14 +31,14 @@ export default function GuideFigure({
 			<Link
 				href={pathHelpVideo(topic)}
 				className="group relative block overflow-hidden rounded-xl ring-1 ring-border"
-				style={{ aspectRatio: `${still.width} / ${still.height}`, background: color.night }}
+				style={{ aspectRatio: `${found.width} / ${found.height}`, background: color.night }}
 				aria-label="Watch this in the video guide"
 			>
 				<Thumbnail
 					component={SceneStill}
-					inputProps={{ chapterId: topic, beat }}
-					compositionWidth={still.width}
-					compositionHeight={still.height}
+					inputProps={{ chapterId: topic, beatId: beat }}
+					compositionWidth={found.width}
+					compositionHeight={found.height}
 					frameToDisplay={found.frame}
 					durationInFrames={found.segment.durationInFrames}
 					fps={timeline.fps}

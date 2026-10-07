@@ -7,7 +7,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { tmpdir } from "node:os"
 import { dirname, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
-import { filmChapters as guideTopics, filmSections as guideSections } from "../../src/lib/guide-video-script"
+import { guideChapters, stepOf } from "../../src/lib/guide"
 
 const fps = 30
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..")
@@ -20,9 +20,9 @@ const voice = { voice: "af_heart", lang: "en-us", speed: 0.95 }
 const pause = {
 	leadIn: 0.2,
 	afterTitle: 0.8,
-	afterLabel: 0.5,
 	betweenSentences: 0.38,
-	betweenSections: 0.85,
+	betweenBeats: 0.85,
+	betweenSteps: 0.7,
 	betweenChapters: 1.6,
 }
 
@@ -125,31 +125,36 @@ const timestamp = (seconds: number) => {
 }
 
 // 1. Plan every segment: its spoken parts and the pause after each one.
-const plan = guideTopics.flatMap((topic, chapterIndex) =>
-	guideSections(topic).map((section, sectionIndex, all) => {
-		const body = sentences(section.text)
-		const last = sectionIndex === all.length - 1
+const plan = guideChapters.flatMap((chapter, chapterIndex) =>
+	chapter.beats.map((beat, beatIndex, all) => {
+		const body = sentences(beat.say)
+		const last = beatIndex === all.length - 1
+		const next = all[beatIndex + 1]
 		const parts = [
-			...(sectionIndex === 0
-				? [{ text: spoken(topic.title), pauseAfter: pause.afterTitle, words: 0 }]
+			...(beatIndex === 0
+				? [{ text: spoken(chapter.title), pauseAfter: pause.afterTitle, words: 0 }]
 				: []),
-			{ text: spoken(`${section.label}.`), pauseAfter: pause.afterLabel, words: 0 },
 			...body.map((tokens, index) => ({
 				text: spoken(tokens.join(" ")),
 				words: tokens.length,
 				pauseAfter:
 					index < body.length - 1
 						? pause.betweenSentences
-						: last && chapterIndex < guideTopics.length - 1
+						: last && chapterIndex < guideChapters.length - 1
 							? pause.betweenChapters
-							: pause.betweenSections,
+							: beat.step && next?.step
+								? pause.betweenSteps
+								: pause.betweenBeats,
 			})),
 		]
-		const file = `${topic.id}-${sectionIndex}.mp3`
+		const file = `${chapter.id}-${beat.id}.mp3`
 		const key = JSON.stringify({ voice, pause, parts, leadIn: pause.leadIn })
-		return { topic, section, sectionIndex, file, parts, body, key }
+		return { chapter, beat, beatIndex, file, parts, body, key }
 	}),
 )
+
+// Forget clips that are no longer part of the guide.
+for (const file of Object.keys(cache)) if (!plan.some(item => item.file === file)) delete cache[file]
 
 // 2. Speak whatever changed.
 const stale = plan.filter(
@@ -188,20 +193,21 @@ if (stale.length) {
 			const item = stale[index]
 			if (item) cache[item.file] = { key: item.key, duration: clip.duration, parts: clip.parts }
 		})
-		writeFileSync(cacheFile, `${JSON.stringify(cache, null, "\t")}\n`)
 	} finally {
 		rmSync(temporary, { recursive: true, force: true })
 	}
 }
 
+writeFileSync(cacheFile, `${JSON.stringify(cache, null, "\t")}\n`)
+
 // 3. Timeline, word cues, captions and transcript, all from the measured sentence positions.
 let cursor = 0
 let captions = "WEBVTT\n\n"
 const cues: Record<string, number[]> = {}
-const chapters = guideTopics.map(topic => {
+const chapters = guideChapters.map(chapter => {
 	const startFrame = cursor
 	const segments = plan
-		.filter(item => item.topic === topic)
+		.filter(item => item.chapter === chapter)
 		.map(item => {
 			const clip = cache[item.file]
 			if (!clip) throw new Error(`Missing narration for ${item.file}`)
@@ -224,17 +230,17 @@ const chapters = guideTopics.map(topic => {
 			clip.parts.forEach((part, index) => {
 				const words = item.parts[index]
 				const text =
-					index === 0 && item.sectionIndex === 0
-						? topic.title
-						: index < item.parts.length - item.body.length
-							? item.section.label
-							: (item.body[index - (item.parts.length - item.body.length)] ?? []).join(" ")
+					index < item.parts.length - item.body.length
+						? chapter.title
+						: (item.body[index - (item.parts.length - item.body.length)] ?? []).join(" ")
 				if (words)
 					captions += `${timestamp(segmentStart + part.start)} --> ${timestamp(segmentStart + part.end + 0.2)}\n${text}\n\n`
 			})
+			const step = stepOf(chapter, item.beat.id)
 			const segment = {
-				label: item.section.label,
-				text: item.section.text,
+				id: item.beat.id,
+				text: item.beat.say,
+				...(step ? { step: step.number, steps: step.total } : {}),
 				from: cursor - startFrame,
 				durationInFrames,
 				audio,
@@ -242,11 +248,11 @@ const chapters = guideTopics.map(topic => {
 			cursor += durationInFrames
 			return segment
 		})
-	console.log(`${guideTopics.indexOf(topic) + 1}/${guideTopics.length}: ${topic.title}`)
+	console.log(`${guideChapters.indexOf(chapter) + 1}/${guideChapters.length}: ${chapter.title}`)
 	return {
-		id: topic.id,
-		title: topic.title,
-		group: topic.group,
+		id: chapter.id,
+		title: chapter.title,
+		group: chapter.level,
 		startFrame,
 		durationInFrames: cursor - startFrame,
 		segments,
@@ -269,7 +275,7 @@ writeFileSync(
 	chapters
 		.map(
 			chapter =>
-				`${chapter.title}\n\n${chapter.segments.map(segment => `${segment.label}\n${segment.text}`).join("\n\n")}`,
+				`${chapter.title}\n\n${chapter.segments.map(segment => ('step' in segment ? `${segment.step}. ` : '') + segment.text).join("\n\n")}`,
 		)
 		.join("\n\n————————\n\n"),
 )

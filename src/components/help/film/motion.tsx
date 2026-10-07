@@ -11,12 +11,12 @@ export const useReduced = () => useContext(ReducedMotion)
 
 const normalize = (word: string) => word.toLowerCase().replace(/[^a-z0-9$−+]/g, "")
 
-/**
- * The frame on which `match` is spoken in the current segment, so visuals land on the word that
- * introduces them. `nth` picks a later occurrence; a missing word falls back to `fallback`.
- */
-export function useCue(match: string, { nth = 0, offset = 0, fallback = 0 } = {}) {
-	const { words, frames } = useContext(Cues)
+/** The frame on which `match` is spoken among `words`, or `fallback` if it never is. */
+export function cueFrame(
+	{ words, frames }: { words: string[]; frames: number[] },
+	match: string,
+	{ nth = 0, offset = 0, fallback = 0 } = {},
+) {
 	const target = normalize(match)
 	let seen = 0
 	for (let index = 0; index < words.length; index++) {
@@ -26,6 +26,17 @@ export function useCue(match: string, { nth = 0, offset = 0, fallback = 0 } = {}
 		}
 	}
 	return fallback + offset
+}
+
+/**
+ * The frame on which `match` is spoken in the current segment, so visuals land on the word that
+ * introduces them. `nth` picks a later occurrence; a missing word falls back to `fallback`.
+ */
+export function useCue(
+	match: string,
+	options: { nth?: number; offset?: number; fallback?: number } = {},
+) {
+	return cueFrame(useContext(Cues), match, options)
 }
 
 /** 0 → 1 over `duration` frames from `at`, on the app's strong ease-out. */

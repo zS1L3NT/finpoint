@@ -4,8 +4,8 @@ Implemented 7 October 2026. Preserve the editable `video/` Remotion project, sha
 
 | Entry | Delivered behavior |
 | --- | --- |
-| `/help` | Search 17 question-led articles; video and practice entry; separate article progress, sample completion, and real-world checklist. |
-| `/help/video` | 17 chapters, about 19 minutes, 16:9; local Kokoro narration from a spoken script (`src/lib/guide-video-script.ts`), illustrated amounts, chapter selection, pause/resume, matching transcript, downloadable transcript/captions. |
+| `/help` | 16 chapters in four levels, each a picture-led article built from the video's own moments; search; video and practice entry; separate reading progress, sample completion, and real-world checklist. |
+| `/help/video` | 16 chapters, about 12 minutes, 16:9; local Kokoro narration; illustrated scenes and filmed walkthroughs of real Finpoint screens (captured by `video/scripts/capture.ts`); chapter selection, pause/resume, matching transcript, downloadable transcript/captions. |
 | `/help/practice` | Four fictional exercises: lunch, Pending repair, split payment, shared dinner/repayment. Save, pause, resume, or restart without creating financial data. |
 | Header and form Help | Contextual article overlay with question selector; closes back to the existing inputs. Forms include Records, pending Statements, Budgets, and Categories. |
 | Pending/empty states | Explain the saved Record difference or missing Allocations; next actions for no imports, available amounts, a clear queue, and filtered-out Records. |
@@ -15,7 +15,7 @@ Each topic teaches problem → explanation → example → steps → result chec
 
 ## Editable structure
 
-- Teaching source: `src/lib/guide-content.ts`.
+- Teaching source: `src/lib/guide.ts` (chapters and beats shared by the video and the Help articles).
 - Article/help presentation: `src/components/help/guide-article.tsx`, `context-help.tsx`.
 - Practice flow: `app/help/practice/page.tsx`; pure arithmetic and validation: `src/logic/practice.ts`.
 - Learning state: `src/logic/learning.ts` → `src/data/learning.ts`.

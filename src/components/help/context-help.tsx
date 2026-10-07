@@ -16,20 +16,20 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { getGuideTopic, guideTopics } from "@/lib/guide-content"
+import { getGuideChapter, guideChapters } from "@/lib/guide"
 import { cn } from "@/lib/utils"
 import { pathHelp } from "@/routes"
 
 function topicForPath(path: string) {
-	if (path.startsWith("/importer") || path.startsWith("/statements")) return "import"
+	if (path.startsWith("/importer")) return "import"
+	if (path.startsWith("/statements")) return "pending-statements"
 	if (path.startsWith("/sync")) return "sync"
 	if (path.startsWith("/budgets")) return "budgets"
 	if (path.startsWith("/categories")) return "categories"
-	if (path.startsWith("/allocator/pending")) return "pending"
-	if (path.startsWith("/allocator")) return "lunch"
+	if (path.startsWith("/allocator/pending")) return "pending-statements"
+	if (path.startsWith("/allocator")) return "allocator"
 	if (path.startsWith("/records")) return "pending"
 	if (path === "/") return "dashboard"
-	if (path.startsWith("/settings")) return "routine"
 	return "start"
 }
 
@@ -50,7 +50,7 @@ export function ContextHelp({
 	const pathname = usePathname()
 	const [open, setOpen] = useState(false)
 	const [selected, setSelected] = useState<string | null>(null)
-	const topic = getGuideTopic(selected ?? topicId ?? topicForPath(pathname))
+	const topic = getGuideChapter(selected ?? topicId ?? topicForPath(pathname))
 	const trigger =
 		variant === "form" ? (
 			<Button
@@ -96,7 +96,7 @@ export function ContextHelp({
 				<DialogHeader className="gap-1 pr-8">
 					<p className="flex items-center gap-1.5 text-xs font-medium tracking-[0.14em] text-muted-foreground uppercase">
 						<CircleHelp className="size-3.5" />
-						{topic.group}
+						{topic.level}
 					</p>
 					<DialogTitle className="text-lg leading-6 text-balance">
 						{topic.title}
@@ -112,14 +112,14 @@ export function ContextHelp({
 						onChange={event => setSelected(event.target.value)}
 						className="h-9 w-full rounded-md border bg-background px-2.5 text-sm text-foreground"
 					>
-						{guideTopics.map(item => (
+						{guideChapters.map(item => (
 							<option key={item.id} value={item.id}>
 								{item.title}
 							</option>
 						))}
 					</select>
 				</label>
-				<GuideArticle topic={topic} compact />
+				<GuideArticle chapter={topic} compact />
 				<div className="mt-auto flex flex-col gap-4 border-t pt-4">
 					<div className="flex items-center justify-between gap-2">
 						<Button asChild variant="ghost" size="sm" className="-ml-2">

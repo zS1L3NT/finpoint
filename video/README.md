@@ -1,25 +1,33 @@
 # Finpoint beginner video
 
-Keep this editable Remotion project for the next design/animation pass. The in-app player and exported film use the same 16:9 composition and local narration: 17 short chapters with illustrated fictional examples and a synthetic voice.
+Keep this editable Remotion project for the next design/animation pass. The in-app player and exported film use the same 16:9 composition and local narration: 16 short chapters mixing illustrations with real Finpoint screens, fictional sample data and a synthetic voice.
 
 ## Sources
 
-- `../src/lib/guide-video-script.ts`: the narration. Written to be heard, so it is shorter than the Help articles in `../src/lib/guide-content.ts` but covers the same chapters (same ids). Scenes time visuals to words in this copy.
-- `../src/components/help/guide-film.tsx`: chapter structure. Each chapter opens on a title card, then plays problem → idea → steps → check → watch out (optional) → example layers that crossfade into one another.
+- `../src/lib/guide.ts`: the guide itself. Chapters in four levels (The basics, Going further, Advanced, Your data), each a sequence of beats. A beat's `say` is narrated and captioned in the video and becomes an illustrated paragraph in the Help article; `detail` is article-only; `step` beats form a numbered tutorial. Introduce one idea per chapter, in the order a new user meets it.
+- `../src/components/help/guide-film.tsx`: chapter structure. Each chapter opens on its title, then plays its beats as crossfading layers: an illustrated **stage** (narration left, scene right) or a filmed **demo** (real Finpoint screen, narration as subtitles).
 - `../src/components/help/film/`: the motion system.
-  - `theme.ts`: colours, easing and frame geometry. Every domain object keeps one colour for the whole film: Statement blue, Allocation violet, Record green, Pending amber.
-  - `motion.tsx`: `useCue` (the frame a word is spoken), `Rise`, `Pop`, `CountUp`, `Roll`, and segment crossfades.
-  - `kit.tsx`: Statement, Record and Allocation cards, flow connectors, tiles, files and windows.
-  - `captions.tsx`: word-by-word narration captions, with domain terms in their colours.
-  - `chrome.tsx`: backdrop, header, segment labels and title cards.
-  - `scenes.tsx`: bespoke problem, explanation, example and (some) result visuals for each chapter, plus step icons. Restyle here while preserving domain meaning.
-- `../src/lib/guide-video-timeline.json`: generated narration timings.
-- `../src/lib/guide-video-cues.json`: generated word timings, so visuals land on the word that introduces them.
-- `../public/guide-audio/`: local narration clips, one per section.
-- `narration.json`: cache of each clip's settings and measured sentence positions, so unchanged clips are reused.
-- `src/root.tsx`: editable `FinpointGuide` composition.
+  - `scenes.tsx`: the registry of every beat's picture, keyed by chapter and beat id, plus the illustrated scenes. A demo is a list of moments: which screenshot, where the camera looks, where the cursor goes and clicks, what is highlighted, each starting on a spoken word.
+  - `demo.tsx`: plays those moments over the real screenshots (camera, cursor, click ripples, highlight rings, notes).
+  - `theme.ts`, `motion.tsx`, `kit.tsx`, `captions.tsx`, `chrome.tsx`: colours and geometry, word cues and animation helpers, cards and connectors, word-by-word captions, title cards and header.
+  - `scene-still.tsx`: a beat's finished picture, used as the Help article illustrations.
+- `../src/lib/guide-video-timeline.json`, `../src/lib/guide-video-cues.json`: generated narration and word timings.
+- `../src/lib/guide-video-shots.json`, `../public/guide-shots/`: generated real-UI screenshots and the boxes of the controls the demos point at.
+- `../public/guide-audio/`: narration clips, one per beat. `narration.json` caches their settings and sentence positions.
+- `src/root.tsx`: the `FinpointGuide` composition.
 
 Install dependencies with `bun install` in both the repository root and this folder. Run `npm run dev` here for Remotion Studio; run it in the root for Finpoint on port 5173.
+
+## Recapture the real UI
+
+The demos use screenshots of a real Finpoint workspace, filled by importing fictional bank exports through the Importer and then following the guide's story (lunch, the split supermarket trip, the shared dinner, the concert repayment, a pending statement and its replacement, a bucket target, …). Recapture after UI changes:
+
+```sh
+bun run build && npx next start --port 5174   # in another terminal
+bun video/scripts/capture.ts                  # CHROMIUM=/path/to/chrome to use a specific browser
+```
+
+It rewrites `public/guide-shots/` and `src/lib/guide-video-shots.json`. Box names (`lunch`, `create`, `allocation`, …) are what `scenes.tsx` refers to, so keep them stable; the script warns when a box can't be found. Check the affected chapters in Remotion Studio afterwards.
 
 ## Regenerate narration
 
@@ -40,7 +48,7 @@ curl -LO https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-fil
 
 Set `KOKORO_DIR` (or `KOKORO_PYTHON`) to use a setup elsewhere. Each sentence is spoken separately and laid out with fixed pauses (after the title, after each section label, between sentences, sections and chapters), all set at the top of `scripts/narrate.ts`. Changing the voice, speed or pauses regenerates every clip; otherwise only changed sections are re-spoken. The script writes the timeline, word cues, transcript and sentence-level WebVTT captions together.
 
-Re-render after changing copy or audio. Scenes fall back to fixed delays when a cued word disappears from the copy, so check the affected chapter in Remotion Studio.
+Re-render after changing copy or audio. Visuals and camera moves start on words in the narration and fall back to fixed delays when a word disappears, so check the affected chapter in Remotion Studio after rewording.
 
 ## Export
 

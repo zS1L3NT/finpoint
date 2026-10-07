@@ -231,7 +231,11 @@ export default function PendingStatementDialog({
 						</Button>
 					</div>
 				</DialogFooter>
-				<ContextHelp topic="pending" label="How this form works" variant="form" />
+				<ContextHelp
+					topic="pending-statements"
+					label="How this form works"
+					variant="form"
+				/>
 			</DialogContent>
 		</Dialog>
 	)

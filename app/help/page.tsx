@@ -23,7 +23,7 @@ import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { getGuideTopic, guideTopics } from "@/lib/guide-content"
+import { getGuideChapter, guideChapters, guideLevels } from "@/lib/guide"
 import timeline from "@/lib/guide-video-timeline.json"
 import { cn } from "@/lib/utils"
 import { getLearningOverview, markGuideReviewed } from "@/logic/learning"
@@ -90,7 +90,7 @@ function milestones(overview: Overview) {
 				: learning.backupRequestedAt
 					? "Downloaded · confirm you found the file"
 					: "Download a backup and find the file",
-			href: pathHelp("backup-first"),
+			href: pathHelp("sync"),
 		},
 	]
 }
@@ -124,8 +124,8 @@ function VideoCard() {
 				Finpoint, from the beginning
 			</span>
 			<span className="relative mt-1 max-w-md text-sm text-white/70">
-				Watch a $12 lunch become a Record, then follow Alex through splits, refunds, Pending
-				fixes and backups.
+				Real Finpoint screens, step by step: import your bank, explain a purchase, split a
+				payment and keep your data safe.
 			</span>
 		</Link>
 	)
@@ -229,56 +229,68 @@ function PracticeLessons({ overview }: { overview: Overview }) {
 }
 
 function Questions({ overview, query }: { overview?: Overview; query: string }) {
-	const matches = guideTopics.filter(item =>
-		`${item.title} ${item.keywords} ${item.problem} ${item.explanation} ${item.fix}`
+	const matches = guideChapters.filter(item =>
+		`${item.title} ${item.keywords} ${item.summary} ${item.beats.map(beat => `${beat.say} ${beat.detail ?? ""}`).join(" ")}`
 			.toLowerCase()
 			.includes(query),
 	)
 	if (!matches.length)
 		return (
 			<p className="text-sm text-muted-foreground" aria-live="polite">
-				No matching guide. Try “amount”, “Pending”, “import”, or “backup”.
+				No matching chapter. Try “split”, “Pending”, “import”, or “backup”.
 			</p>
 		)
 	return (
 		<section className="flex flex-col gap-3" aria-live="polite">
-			{!query && <h3 className="text-base font-semibold">Browse by question</h3>}
+			{!query && <h3 className="text-base font-semibold">The guide, chapter by chapter</h3>}
 			<div className="grid gap-x-8 gap-y-6 md:grid-cols-2">
-				{[...new Set(matches.map(item => item.group))].map(group => (
-					<div key={group} className="min-w-0">
-						<h4 className="mb-1 flex items-center gap-2 text-xs font-semibold tracking-[0.14em] text-muted-foreground uppercase">
-							<span
-								className="size-1.5 rounded-full"
-								style={{ background: accentFor(group) }}
-							/>
-							{group}
-						</h4>
-						<ul className="divide-y">
-							{matches
-								.filter(item => item.group === group)
-								.map(item => (
-									<li key={item.id}>
-										<Link
-											href={pathHelp(item.id)}
-											className="group flex min-h-12 items-center justify-between gap-3 py-2.5 text-sm"
-										>
-											<span className="group-hover:underline group-hover:underline-offset-4">
-												{item.title}
-											</span>
-											{overview?.learning.reviewed.includes(item.id) ? (
-												<Check
-													className="size-4 shrink-0 text-creative"
-													aria-label="Reviewed"
-												/>
-											) : (
-												<ArrowRight className="size-4 shrink-0 text-muted-foreground transition-transform duration-150 ease-out group-hover:translate-x-0.5" />
-											)}
-										</Link>
-									</li>
-								))}
-						</ul>
-					</div>
-				))}
+				{guideLevels
+					.filter(level => matches.some(item => item.level === level))
+					.map(group => (
+						<div key={group} className="min-w-0">
+							<h4 className="mb-1 flex items-center gap-2 text-xs font-semibold tracking-[0.14em] text-muted-foreground uppercase">
+								<span
+									className="size-1.5 rounded-full"
+									style={{ background: accentFor(group) }}
+								/>
+								{group}
+							</h4>
+							<ul className="divide-y">
+								{matches
+									.filter(item => item.level === group)
+									.map(item => (
+										<li key={item.id}>
+											<Link
+												href={pathHelp(item.id)}
+												className="group flex min-h-12 items-start justify-between gap-3 py-3 text-sm"
+											>
+												<span className="w-6 shrink-0 text-muted-foreground tabular-nums">
+													{String(
+														guideChapters.indexOf(item) + 1,
+													).padStart(2, "0")}
+												</span>
+												<span className="flex min-w-0 flex-1 flex-col gap-0.5">
+													<span className="font-medium group-hover:underline group-hover:underline-offset-4">
+														{item.title}
+													</span>
+													<span className="text-xs leading-5 text-muted-foreground">
+														{item.summary}
+													</span>
+												</span>
+												{overview?.learning.reviewed.includes(item.id) ? (
+													<Check
+														className="size-4 shrink-0 text-creative"
+														aria-label="Reviewed"
+													/>
+												) : (
+													<ArrowRight className="size-4 shrink-0 text-muted-foreground transition-transform duration-150 ease-out group-hover:translate-x-0.5" />
+												)}
+											</Link>
+										</li>
+									))}
+							</ul>
+						</div>
+					))}
 			</div>
 		</section>
 	)
@@ -287,7 +299,7 @@ function Questions({ overview, query }: { overview?: Overview; query: string }) 
 export default function HelpPage() {
 	const params = useSearchParams()
 	const topicId = params.get("topic")
-	const topic = topicId ? getGuideTopic(topicId) : null
+	const topic = topicId ? getGuideChapter(topicId) : null
 	const [search, setSearch] = useState("")
 	const overview = useLiveQuery(getLearningOverview, [])
 	const query = search.trim().toLowerCase()
@@ -302,17 +314,17 @@ export default function HelpPage() {
 					className="-mb-2 w-fit text-muted-foreground"
 				>
 					<Link href={pathHelp()}>
-						<ArrowLeft /> All questions
+						<ArrowLeft /> All chapters
 					</Link>
 				</Button>
 				<PageHeader
 					title={topic.title}
-					description={topic.group}
+					description={topic.level}
 					icon="lucide:circle-help"
-					subtitle="One question, concrete steps, and a way to check the result."
+					subtitle={topic.summary}
 				/>
 				<div className="flex max-w-3xl flex-col gap-6">
-					<GuideArticle topic={topic} />
+					<GuideArticle chapter={topic} />
 					<div className="flex flex-col items-start gap-2 border-t pt-5">
 						<Button
 							variant={

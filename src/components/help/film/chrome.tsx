@@ -71,6 +71,7 @@ export function Backdrop({ tint, seed }: { tint: string; seed: number }) {
 
 export function Header({
 	number,
+	total,
 	group,
 	title,
 	tint,
@@ -80,6 +81,7 @@ export function Header({
 	segments,
 }: {
 	number: number
+	total: number
 	group: string
 	title: string
 	tint: string
@@ -116,7 +118,7 @@ export function Header({
 					}}
 				>
 					<span style={font.numbers}>{String(number).padStart(2, "0")}</span>
-					<span style={{ color: color.faint }}> / 17 · </span>
+					<span style={{ color: color.faint }}> / {total} · </span>
 					{group}
 				</div>
 				<div

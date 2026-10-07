@@ -30,13 +30,12 @@ export const font = {
 	numbers: { fontVariantNumeric: "tabular-nums", fontFeatureSettings: '"tnum", "cv11"' },
 } as const
 
-/** One accent per guide group, used for the ambient light and chapter chrome. */
+/** One accent per guide level, used for the ambient light and chapter chrome. */
 export const groupAccent: Record<string, string> = {
-	"Start here": color.statement,
-	"Everyday use": color.record,
-	"Understand the numbers": color.allocation,
-	"Plan your money": color.pink,
-	"Fix a problem": color.pending,
+	"The basics": color.statement,
+	"Going further": color.record,
+	Advanced: color.allocation,
+	"Your data": color.pending,
 }
 
 export const accentFor = (group: string) => groupAccent[group] ?? color.statement

@@ -1,5 +1,5 @@
 import { readLearningValue, readLearningWorkspace, updateLearningValue } from "@/data/learning"
-import { guideTopics } from "@/lib/guide-content"
+import { guideChapters } from "@/lib/guide"
 import { isPendingRecord, tallyAllocations } from "@/logic/pending"
 import {
 	initialPractice,
@@ -55,7 +55,7 @@ function parseState(value: string | undefined): LearningState {
 			"backupLocatedAt",
 		] as const)
 			state[key] = typeof raw[key] === "string" ? raw[key] : null
-		state.reviewed = guideTopics
+		state.reviewed = guideChapters
 			.filter(topic => Array.isArray(raw.reviewed) && raw.reviewed.includes(topic.id))
 			.map(topic => topic.id)
 		for (const lesson of practiceLessons) {
@@ -129,7 +129,7 @@ export async function markWorkspaceUsed() {
 	await updateLearning(state => ({ ...state, workspaceUsed: true }))
 }
 export async function markGuideReviewed(id: string) {
-	if (!guideTopics.some(topic => topic.id === id)) return
+	if (!guideChapters.some(topic => topic.id === id)) return
 	await updateLearning(state => ({ ...state, reviewed: [...new Set([...state.reviewed, id])] }))
 }
 export async function savePracticeProgress(
