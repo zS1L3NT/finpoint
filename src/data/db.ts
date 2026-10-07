@@ -124,7 +124,7 @@ export type SettingsRow = {
 }
 
 export const DB_NAME = "finpoint"
-export const DB_VERSION = 2
+export const DB_VERSION = 3
 
 class FinpointDB extends Dexie {
 	accounts!: Table<AccountRow, string>
@@ -140,6 +140,8 @@ class FinpointDB extends Dexie {
 	analytics_months!: Table<AnalyticsMonthRow, string>
 	settings!: Table<SettingsRow, string>
 	meta!: Table<MetaRow, string>
+	/** Browser-only learning progress. Deliberately excluded from financial exports and sync. */
+	learning!: Table<MetaRow, string>
 
 	constructor() {
 		super(DB_NAME)
@@ -164,6 +166,10 @@ class FinpointDB extends Dexie {
 
 		this.version(2).stores({
 			settings: "key",
+		})
+
+		this.version(3).stores({
+			learning: "key",
 		})
 	}
 }

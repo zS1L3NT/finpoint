@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation"
 import AppHeader from "@/components/layout/app-header"
 
 const TITLES: { match: (pathname: string) => boolean; title: string }[] = [
+	{ match: pathname => pathname.startsWith("/help"), title: "Help & guides" },
 	{ match: pathname => pathname === "/", title: "Dashboard" },
 	{ match: pathname => pathname.startsWith("/records/monthly"), title: "Monthly Records" },
 	{ match: pathname => pathname.startsWith("/records/"), title: "Record" },

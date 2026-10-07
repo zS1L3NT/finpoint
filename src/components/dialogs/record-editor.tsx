@@ -9,6 +9,7 @@ import DatetimeField from "@/components/form/datetime-field"
 import RecordAnalyticsFields from "@/components/form/record-analytics-fields"
 import TextField from "@/components/form/text-field"
 import TextareaField from "@/components/form/textarea-field"
+import { ContextHelp } from "@/components/help/context-help"
 import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
 import StatementSearchSheet from "@/components/sheets/statement-search"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -49,6 +50,7 @@ import { useFetch } from "@/hooks/use-fetch"
 import { useDefaultFilterEndDateToday, useDefaultFilterStartDate } from "@/hooks/use-settings"
 import { SPRING, TRANSITION } from "@/lib/motion"
 import { cn, formatCurrency, formatDatetime, round2dp } from "@/lib/utils"
+import { trackRecordSaved } from "@/logic/learning"
 import { ConflictError, deleteRecord, recordCompletions, updateRecord } from "@/logic/records"
 import { ValidationError } from "@/logic/validate"
 import { pathRecords } from "@/routes"
@@ -130,6 +132,7 @@ export default function RecordEditorDialog({
 					revision: record.revision,
 					statements: value.statements,
 				})
+				void trackRecordSaved(record.id).catch(() => undefined)
 				setIsOpen(false)
 			} catch (cause) {
 				if (cause instanceof ValidationError) {
@@ -248,6 +251,9 @@ export default function RecordEditorDialog({
 						Update the record details and its statement allocations.
 					</DialogDescription>
 				</DialogHeader>
+				<div className="flex justify-end">
+					<ContextHelp topic="pending" label="Help with this form" />
+				</div>
 
 				<form
 					id="record-editor-form"

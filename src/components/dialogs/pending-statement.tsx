@@ -6,6 +6,7 @@ import AmountField from "@/components/form/amount-field"
 import DatetimeField from "@/components/form/datetime-field"
 import SelectField from "@/components/form/select-field"
 import TextareaField from "@/components/form/textarea-field"
+import { ContextHelp } from "@/components/help/context-help"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import { Button } from "@/components/ui/button"
 import {
@@ -155,6 +156,9 @@ export default function PendingStatementDialog({
 							: "Add handwritten account activity now and replace it when the imported statement arrives."}
 					</DialogDescription>
 				</DialogHeader>
+				<div className="flex justify-end">
+					<ContextHelp topic="pending" label="Help with this form" />
+				</div>
 
 				<form
 					id="pending-statement-form"

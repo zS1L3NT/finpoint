@@ -14,6 +14,7 @@ import SpendingCalendar from "@/components/charts/spending-calendar"
 import TotalSpendingChart from "@/components/charts/total-spending-chart"
 import WeekdayBars from "@/components/charts/weekday-bars"
 import BucketDialog from "@/components/dialogs/bucket"
+import { WelcomeGuide } from "@/components/help/welcome-guide"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import { Metric as DashboardMetric, type Delta, MetricGrid } from "@/components/metric"
 import { FILTER_CONTROL_CLASS } from "@/components/table/filter-bar"
@@ -203,6 +204,7 @@ export default function DashboardPage() {
 	}
 	return (
 		<div ref={contentRef} className={cn("reveal grid gap-7 md:gap-9")}>
+			<WelcomeGuide />
 			{period.is_future ? (
 				<Card>
 					<CardHeader>
