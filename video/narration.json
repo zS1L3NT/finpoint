@@ -40,8 +40,8 @@
 		]
 	},
 	"start-dinner.mp3": {
-		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenSentences\":0.38,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Or you paid ninety dollars for dinner with a friend, and they sent you sixty dollars back for their share.\",\"words\":18,\"pauseAfter\":0.38},{\"text\":\"Your bank shows two rows:\",\"words\":5,\"pauseAfter\":0.38},{\"text\":\"money out, and money in.\",\"words\":5,\"pauseAfter\":0.38},{\"text\":\"What dinner really cost you was thirty dollars.\",\"words\":7,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
-		"duration": 12.593,
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenSentences\":0.38,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Or you paid ninety dollars for dinner with a friend, and they sent you sixty dollars back for their share.\",\"words\":18,\"pauseAfter\":0.38},{\"text\":\"Your bank shows two entries:\",\"words\":5,\"pauseAfter\":0.38},{\"text\":\"money out, and money in.\",\"words\":5,\"pauseAfter\":0.38},{\"text\":\"What dinner really cost you was thirty dollars.\",\"words\":7,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 12.675416666666667,
 		"parts": [
 			{
 				"start": 0.2,
@@ -49,21 +49,21 @@
 			},
 			{
 				"start": 6.083458333333334,
-				"end": 7.504541666666666
+				"end": 7.5869583333333335
 			},
 			{
-				"start": 7.884541666666667,
-				"end": 9.254666666666667
+				"start": 7.966958333333334,
+				"end": 9.337083333333334
 			},
 			{
-				"start": 9.634666666666668,
-				"end": 11.743000000000002
+				"start": 9.717083333333335,
+				"end": 11.82541666666667
 			}
 		]
 	},
 	"start-explain.mp3": {
-		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenSentences\":0.38,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Finpoint closes that gap.\",\"words\":4,\"pauseAfter\":0.38},{\"text\":\"It keeps your bank’s rows exactly as they are, and lets you explain them in your own words:\",\"words\":18,\"pauseAfter\":0.38},{\"text\":\"groceries, fifty dollars.\",\"words\":2,\"pauseAfter\":0.38},{\"text\":\"A gift, thirty dollars.\",\"words\":3,\"pauseAfter\":0.38},{\"text\":\"Your share of dinner, thirty dollars.\",\"words\":5,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
-		"duration": 14.122875,
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenSentences\":0.38,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Finpoint closes that gap.\",\"words\":4,\"pauseAfter\":0.38},{\"text\":\"It keeps your bank activity exactly as your bank reports it, and lets you explain it in your own words:\",\"words\":20,\"pauseAfter\":0.38},{\"text\":\"groceries, fifty dollars.\",\"words\":2,\"pauseAfter\":0.38},{\"text\":\"A gift, thirty dollars.\",\"words\":3,\"pauseAfter\":0.38},{\"text\":\"Your share of dinner, thirty dollars.\",\"words\":5,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 14.950833333333334,
 		"parts": [
 			{
 				"start": 0.2,
@@ -71,19 +71,19 @@
 			},
 			{
 				"start": 2.1205000000000003,
-				"end": 7.036791666666668
+				"end": 7.864750000000001
 			},
 			{
-				"start": 7.416791666666667,
-				"end": 9.052583333333333
+				"start": 8.24475,
+				"end": 9.880541666666666
 			},
 			{
-				"start": 9.432583333333334,
-				"end": 10.898791666666668
+				"start": 10.260541666666667,
+				"end": 11.72675
 			},
 			{
-				"start": 11.278791666666667,
-				"end": 13.272875
+				"start": 12.10675,
+				"end": 14.100833333333334
 			}
 		]
 	},
@@ -124,16 +124,16 @@
 		]
 	},
 	"model-statement.mp3": {
-		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenSentences\":0.38,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"A Statement is one row from your bank, exactly as your bank reports it.\",\"words\":14,\"pauseAfter\":0.38},{\"text\":\"Like that eighty dollars supermarket payment.\",\"words\":5,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
-		"duration": 8.057125,
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenSentences\":0.38,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"A Statement is one entry of bank activity, exactly as your bank reports it.\",\"words\":14,\"pauseAfter\":0.38},{\"text\":\"Like that eighty dollars supermarket payment.\",\"words\":5,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 8.507833333333334,
 		"parts": [
 			{
 				"start": 0.2,
-				"end": 4.526458333333333
+				"end": 4.977166666666667
 			},
 			{
-				"start": 4.906458333333333,
-				"end": 7.207125
+				"start": 5.357166666666667,
+				"end": 7.657833333333334
 			}
 		]
 	},
@@ -360,8 +360,8 @@
 		]
 	},
 	"allocator-pages.mp3": {
-		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenSentences\":0.38,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Two other pages help you look things up.\",\"words\":8,\"pauseAfter\":0.38},{\"text\":\"Statements lists every bank row, explained or not.\",\"words\":8,\"pauseAfter\":0.38},{\"text\":\"Records lists your explanations.\",\"words\":4,\"pauseAfter\":0.38},{\"text\":\"Allocator only shows what’s still waiting.\",\"words\":6,\"pauseAfter\":1.6}],\"leadIn\":0.2}",
-		"duration": 12.193375,
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenSentences\":0.38,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Two other pages help you look things up.\",\"words\":8,\"pauseAfter\":0.38},{\"text\":\"Statements lists all your bank activity, explained or not.\",\"words\":9,\"pauseAfter\":0.38},{\"text\":\"Records lists your explanations.\",\"words\":4,\"pauseAfter\":0.38},{\"text\":\"Allocator only shows what’s still waiting.\",\"words\":6,\"pauseAfter\":1.6}],\"leadIn\":0.2}",
+		"duration": 12.4355,
 		"parts": [
 			{
 				"start": 0.2,
@@ -369,15 +369,15 @@
 			},
 			{
 				"start": 2.739375,
-				"end": 5.900833333333333
+				"end": 6.142958333333333
 			},
 			{
-				"start": 6.280833333333334,
-				"end": 8.082875000000001
+				"start": 6.522958333333333,
+				"end": 8.325
 			},
 			{
-				"start": 8.462875,
-				"end": 10.593375
+				"start": 8.705,
+				"end": 10.8355
 			}
 		]
 	},
@@ -502,16 +502,16 @@
 		]
 	},
 	"split-gift.mp3": {
-		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenSentences\":0.38,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Select it again, and create a second Record, Birthday gift, for the remaining thirty dollars.\",\"words\":14,\"pauseAfter\":0.38},{\"text\":\"Finpoint fills that amount in for you.\",\"words\":7,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
-		"duration": 8.412833333333333,
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenSentences\":0.38,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Select it again, and create a second Record, Birthday gift, for the thirty dollars left to allocate.\",\"words\":16,\"pauseAfter\":0.38},{\"text\":\"Finpoint fills that amount in for you.\",\"words\":7,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 9.000708333333334,
 		"parts": [
 			{
 				"start": 0.2,
-				"end": 5.338583333333333
+				"end": 5.926458333333334
 			},
 			{
-				"start": 5.718583333333333,
-				"end": 7.562833333333333
+				"start": 6.3064583333333335,
+				"end": 8.150708333333334
 			}
 		]
 	},
@@ -574,16 +574,16 @@
 		]
 	},
 	"repayment-done.mp3": {
-		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenSentences\":0.38,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Save, and two bank rows are explained by a single Record.\",\"words\":11,\"pauseAfter\":0.38},{\"text\":\"Your spending shows the thirty dollars you really spent, not ninety dollars.\",\"words\":10,\"pauseAfter\":1.6}],\"leadIn\":0.2}",
-		"duration": 9.712416666666666,
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenSentences\":0.38,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Save, and two Statements are explained by a single Record.\",\"words\":10,\"pauseAfter\":0.38},{\"text\":\"Your spending shows the thirty dollars you really spent, not ninety dollars.\",\"words\":10,\"pauseAfter\":1.6}],\"leadIn\":0.2}",
+		"duration": 9.759583333333333,
 		"parts": [
 			{
 				"start": 0.2,
-				"end": 3.488375
+				"end": 3.535541666666667
 			},
 			{
-				"start": 3.868375,
-				"end": 8.112416666666666
+				"start": 3.915541666666667,
+				"end": 8.159583333333334
 			}
 		]
 	},
@@ -746,8 +746,8 @@
 		]
 	},
 	"pending-statements-why.mp3": {
-		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenSentences\":0.38,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Pending Statements\",\"pauseAfter\":0.8,\"words\":0},{\"text\":\"Some banks take days to show a card payment.\",\"words\":9,\"pauseAfter\":0.38},{\"text\":\"If you want it explained today, create a Pending Statement:\",\"words\":10,\"pauseAfter\":0.38},{\"text\":\"a placeholder for a bank row you’re expecting.\",\"words\":8,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
-		"duration": 11.470041666666667,
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenSentences\":0.38,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Pending Statements\",\"pauseAfter\":0.8,\"words\":0},{\"text\":\"Some banks take days to show a card payment.\",\"words\":9,\"pauseAfter\":0.38},{\"text\":\"If you want it explained today, create a Pending Statement:\",\"words\":10,\"pauseAfter\":0.38},{\"text\":\"a placeholder for bank activity you’re expecting.\",\"words\":7,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 11.795458333333332,
 		"parts": [
 			{
 				"start": 0.2,
@@ -763,7 +763,7 @@
 			},
 			{
 				"start": 8.341666666666667,
-				"end": 10.620041666666667
+				"end": 10.945458333333333
 			}
 		]
 	},
@@ -800,16 +800,16 @@
 		]
 	},
 	"pending-statements-replace.mp3": {
-		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenSentences\":0.38,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"When the real bank row is imported, open Replace Pending in Allocator.\",\"words\":12,\"pauseAfter\":0.38},{\"text\":\"Pick the placeholder, and Finpoint suggests the imported Statements it could become.\",\"words\":12,\"pauseAfter\":0.7}],\"leadIn\":0.2}",
-		"duration": 10.280125,
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenSentences\":0.38,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"When the real Statement is imported, open Replace Pending in Allocator.\",\"words\":11,\"pauseAfter\":0.38},{\"text\":\"Pick the placeholder, and Finpoint suggests the imported Statements it could become.\",\"words\":12,\"pauseAfter\":0.7}],\"leadIn\":0.2}",
+		"duration": 10.338166666666666,
 		"parts": [
 			{
 				"start": 0.2,
-				"end": 4.451125
+				"end": 4.509166666666667
 			},
 			{
-				"start": 4.831125,
-				"end": 9.580124999999999
+				"start": 4.889166666666667,
+				"end": 9.638166666666667
 			}
 		]
 	},
@@ -908,7 +908,7 @@
 		]
 	},
 	"treatments-examples.mp3": {
-		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenSentences\":0.38,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Your salary is Income.\",\"words\":4,\"pauseAfter\":0.38},{\"text\":\"Lunch and groceries are Spending, and so is a refund, which lowers what you spent.\",\"words\":15,\"pauseAfter\":0.38},{\"text\":\"Moving five hundred dollars into savings is Saving or investment.\",\"words\":8,\"pauseAfter\":0.38},{\"text\":\"And moving money between your own accounts is a Transfer, which isn’t counted at all.\",\"words\":15,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenSentences\":0.38,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Your salary is Income.\",\"words\":4,\"pauseAfter\":0.38},{\"text\":\"Lunch and groceries are Spending, and so is a refund, which lowers what you spent.\",\"words\":15,\"pauseAfter\":0.38},{\"text\":\"Moving five hundred dollars into savings is Saving or investment.\",\"words\":6,\"pauseAfter\":0.38},{\"text\":\"And moving money between your own accounts is a Transfer, which isn’t counted at all.\",\"words\":15,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
 		"duration": 16.884958333333334,
 		"parts": [
 			{

@@ -59,11 +59,11 @@ export const guideChapters: GuideChapter[] = [
 			},
 			{
 				id: "dinner",
-				say: "Or you paid $90 for dinner with a friend, and they sent you $60 back for their share. Your bank shows two rows: money out, and money in. What dinner really cost you was $30.",
+				say: "Or you paid $90 for dinner with a friend, and they sent you $60 back for their share. Your bank shows two entries: money out, and money in. What dinner really cost you was $30.",
 			},
 			{
 				id: "explain",
-				say: "Finpoint closes that gap. It keeps your bank’s rows exactly as they are, and lets you explain them in your own words: groceries, $50. A gift, $30. Your share of dinner, $30.",
+				say: "Finpoint closes that gap. It keeps your bank activity exactly as your bank reports it, and lets you explain it in your own words: groceries, $50. A gift, $30. Your share of dinner, $30.",
 			},
 			{
 				id: "built",
@@ -76,7 +76,7 @@ export const guideChapters: GuideChapter[] = [
 		title: "Statements, Records and Allocations",
 		level: "The basics",
 		summary:
-			"The three words behind everything: bank rows, your explanations, and the links between them.",
+			"The three words behind everything: bank activity, your explanations, and the links between them.",
 		keywords: "statement record allocation terms concepts link split combine transaction",
 		destination: "allocator",
 		beats: [
@@ -86,7 +86,7 @@ export const guideChapters: GuideChapter[] = [
 			},
 			{
 				id: "statement",
-				say: "A Statement is one row from your bank, exactly as your bank reports it. Like that $80 supermarket payment.",
+				say: "A Statement is one entry of bank activity, exactly as your bank reports it. Like that $80 supermarket payment.",
 			},
 			{
 				id: "record",
@@ -151,7 +151,7 @@ export const guideChapters: GuideChapter[] = [
 				id: "result",
 				step: true,
 				say: "Choose Import, and check how many new Statements came in.",
-				detail: "Importing an overlapping file again is safe: rows Finpoint already has are skipped.",
+				detail: "Importing an overlapping file again is safe: Statements Finpoint already has are skipped.",
 			},
 			{
 				id: "next",
@@ -178,8 +178,8 @@ export const guideChapters: GuideChapter[] = [
 			},
 			{
 				id: "pages",
-				say: "Two other pages help you look things up. Statements lists every bank row, explained or not. Records lists your explanations. Allocator only shows what’s still waiting.",
-				detail: "If something seems to be missing, check the date range and filters first. A fully explained bank row no longer appears in Allocator, but it’s always in Statements.",
+				say: "Two other pages help you look things up. Statements lists all your bank activity, explained or not. Records lists your explanations. Allocator only shows what’s still waiting.",
+				detail: "If something seems to be missing, check the date range and filters first. A fully allocated Statement no longer appears in Allocator, but it’s always in the Statements list.",
 			},
 		],
 	},
@@ -244,7 +244,7 @@ export const guideChapters: GuideChapter[] = [
 			{
 				id: "gift",
 				step: true,
-				say: "Select it again, and create a second Record, Birthday gift, for the remaining $30. Finpoint fills that amount in for you.",
+				say: "Select it again, and create a second Record, Birthday gift, for the $30 left to allocate. Finpoint fills that amount in for you.",
 			},
 			{
 				id: "done",
@@ -273,7 +273,7 @@ export const guideChapters: GuideChapter[] = [
 			},
 			{
 				id: "done",
-				say: "Save, and two bank rows are explained by a single Record. Your spending shows the $30 you really spent, not $90.",
+				say: "Save, and two Statements are explained by a single Record. Your spending shows the $30 you really spent, not $90.",
 				detail: "The money your friend sent back isn’t income. It belongs to the dinner, so it simply reduces what the dinner cost you.",
 			},
 		],
@@ -352,14 +352,14 @@ export const guideChapters: GuideChapter[] = [
 		title: "Pending Statements",
 		level: "Going further",
 		summary:
-			"Add a placeholder for a bank row that hasn’t arrived, then replace it when it does.",
+			"Add a placeholder for bank activity that hasn’t arrived, then replace it when it does.",
 		keywords:
 			"pending statement placeholder handwritten replace pending card payment not yet exported",
 		destination: "statements",
 		beats: [
 			{
 				id: "why",
-				say: "Some banks take days to show a card payment. If you want it explained today, create a Pending Statement: a placeholder for a bank row you’re expecting.",
+				say: "Some banks take days to show a card payment. If you want it explained today, create a Pending Statement: a placeholder for bank activity you’re expecting.",
 			},
 			{
 				id: "create",
@@ -374,7 +374,7 @@ export const guideChapters: GuideChapter[] = [
 			{
 				id: "replace",
 				step: true,
-				say: "When the real bank row is imported, open Replace Pending in Allocator. Pick the placeholder, and Finpoint suggests the imported Statements it could become.",
+				say: "When the real Statement is imported, open Replace Pending in Allocator. Pick the placeholder, and Finpoint suggests the imported Statements it could become.",
 			},
 			{
 				id: "review",
@@ -422,7 +422,7 @@ export const guideChapters: GuideChapter[] = [
 			},
 			{
 				id: "examples",
-				say: "Your salary is Income. Lunch and groceries are Spending, and so is a refund, which lowers what you spent. Moving $500 into savings is Saving or investment. And moving money between your own accounts is a Transfer, which isn’t counted at all.",
+				say: "Your salary is Income. Lunch and groceries are Spending, and so is a refund, which lowers what you spent. Moving $500 into savings is Saving/investment. And moving money between your own accounts is a Transfer, which isn’t counted at all.",
 			},
 			{
 				id: "override",

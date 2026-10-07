@@ -131,7 +131,7 @@ function LunchFlow({
 										color: color.dim,
 									}}
 								>
-									Remaining
+									Left to allocate
 									<Meter
 										value={1 - settle}
 										tint={color.statement}
@@ -385,7 +385,7 @@ function LunchProblem() {
 						label="Dashboard · Spending"
 						value={<span style={font.numbers}>$0</span>}
 						tint={color.spending}
-						sub="Counts Records, not bank rows"
+						sub="Counts Records, not Statements"
 					/>
 				</Rise>
 			</At>
@@ -634,8 +634,8 @@ function RepaymentProblem() {
 const lanes: [string, LucideIcon, string][] = [
 	["Income", TrendingUp, color.income],
 	["Spending", ShoppingBasket, color.spending],
-	["Saving / investment", PiggyBank, color.saving],
-	["Transfer / neutral", ArrowDownUp, color.neutral],
+	["Saving/investment", PiggyBank, color.saving],
+	["Transfer/neutral", ArrowDownUp, color.neutral],
 ]
 
 function TreatmentsHelps({ items: show = true }: { items?: boolean }) {
@@ -703,7 +703,7 @@ function FindHelps() {
 		["Records", "Your explanations", BadgeCheck, color.record, useAt("Records", 0)],
 		[
 			"Statements",
-			"Every bank row, even fully allocated",
+			"All your bank activity, even fully allocated",
 			Import,
 			color.statement,
 			useAt("Statements", 20),
@@ -1288,7 +1288,7 @@ function StartExplain() {
 	return (
 		<>
 			<At x={0} y={0} w={380}>
-				<Kicker tint={color.statement}>Your bank’s rows, untouched</Kicker>
+				<Kicker tint={color.statement}>Your bank activity, untouched</Kicker>
 			</At>
 			<At x={560} y={0} w={392}>
 				<Rise at={(at[0] ?? 0) - 10}>
@@ -2198,7 +2198,7 @@ export const scenes: Record<string, Record<string, SceneEntry>> = {
 				focus: "allocable",
 				zoom: 2,
 				highlight: "allocable",
-				note: { box: "allocable", text: "Still to explain" },
+				note: { box: "allocable", text: "Left to allocate" },
 			},
 		]),
 		pages: FindHelps,
@@ -2277,11 +2277,11 @@ export const scenes: Record<string, Record<string, SceneEntry>> = {
 		gift: demo([
 			{ shot: "gift-filled", focus: "full" },
 			{
-				at: "remaining",
+				at: "left",
 				shot: "gift-filled",
 				focus: "allocation",
 				highlight: "allocation",
-				note: { box: "allocation", text: "The remaining $30" },
+				note: { box: "allocation", text: "$30 left to allocate" },
 			},
 		]),
 		done: () => (

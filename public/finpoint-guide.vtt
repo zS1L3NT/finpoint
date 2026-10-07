@@ -24,542 +24,542 @@ But to you, those are two very different things.
 00:00:23.100 --> 00:00:28.803
 Or you paid $90 for dinner with a friend, and they sent you $60 back for their share.
 
-00:00:28.983 --> 00:00:30.605
-Your bank shows two rows:
+00:00:28.983 --> 00:00:30.687
+Your bank shows two entries:
 
-00:00:30.785 --> 00:00:32.355
+00:00:30.867 --> 00:00:32.437
 money out, and money in.
 
-00:00:32.535 --> 00:00:34.843
+00:00:32.617 --> 00:00:34.925
 What dinner really cost you was $30.
 
-00:00:35.700 --> 00:00:37.441
+00:00:35.800 --> 00:00:37.541
 Finpoint closes that gap.
 
-00:00:37.621 --> 00:00:42.737
-It keeps your bank’s rows exactly as they are, and lets you explain them in your own words:
+00:00:37.721 --> 00:00:43.665
+It keeps your bank activity exactly as your bank reports it, and lets you explain it in your own words:
 
-00:00:42.917 --> 00:00:44.753
+00:00:43.845 --> 00:00:45.681
 groceries, $50.
 
-00:00:44.933 --> 00:00:46.599
+00:00:45.861 --> 00:00:47.527
 A gift, $30.
 
-00:00:46.779 --> 00:00:48.973
+00:00:47.707 --> 00:00:49.901
 Your share of dinner, $30.
 
-00:00:49.833 --> 00:00:55.631
+00:00:50.767 --> 00:00:56.564
 Everything else in Finpoint, from spending charts to budgets, is built on those explanations.
 
-00:00:55.811 --> 00:00:58.548
+00:00:56.744 --> 00:00:59.481
 So using Finpoint comes down to three things:
 
-00:00:58.728 --> 00:01:03.035
+00:00:59.661 --> 00:01:03.968
 bring in your bank activity, explain it, and see where your money really went.
 
-00:01:04.667 --> 00:01:06.981
+00:01:05.600 --> 00:01:07.914
 Statements, Records and Allocations
 
-00:01:07.581 --> 00:01:11.343
+00:01:08.514 --> 00:01:12.276
 Finpoint uses three words for this, and they’re worth getting to know:
 
-00:01:11.523 --> 00:01:13.867
+00:01:12.456 --> 00:01:14.800
 Statements, Records and Allocations.
 
-00:01:14.733 --> 00:01:19.260
-A Statement is one row from your bank, exactly as your bank reports it.
+00:01:15.667 --> 00:01:20.644
+A Statement is one entry of bank activity, exactly as your bank reports it.
 
-00:01:19.440 --> 00:01:21.940
+00:01:20.824 --> 00:01:23.325
 Like that $80 supermarket payment.
 
-00:01:22.800 --> 00:01:25.527
+00:01:24.200 --> 00:01:26.927
 A Record is your explanation of what happened.
 
-00:01:25.707 --> 00:01:28.281
+00:01:27.107 --> 00:01:29.681
 Groceries for $50 is a Record.
 
-00:01:28.461 --> 00:01:30.659
+00:01:29.861 --> 00:01:32.059
 The gift for $30 is another.
 
-00:01:31.533 --> 00:01:37.027
+00:01:32.933 --> 00:01:38.427
 An Allocation connects a Statement to a Record, and says how much of the Statement belongs there.
 
-00:01:37.207 --> 00:01:44.176
+00:01:38.607 --> 00:01:45.576
 Here, $50 of the supermarket payment is allocated to Groceries, and the other $30 to the gift.
 
-00:01:45.033 --> 00:01:46.478
+00:01:46.433 --> 00:01:47.878
 That’s the first pattern:
 
-00:01:46.658 --> 00:01:49.284
+00:01:48.058 --> 00:01:50.684
 one Statement, split into several Records.
 
-00:01:49.464 --> 00:01:51.791
+00:01:50.864 --> 00:01:53.191
 It’s how you untangle a mixed shopping trip.
 
-00:01:52.667 --> 00:01:54.820
+00:01:54.067 --> 00:01:56.220
 The second pattern goes the other way:
 
-00:01:55.000 --> 00:01:57.876
+00:01:56.399 --> 00:01:59.276
 several Statements, combined into one Record.
 
-00:01:58.056 --> 00:02:06.374
+00:01:59.456 --> 00:02:07.774
 Your $90 dinner payment and your friend’s $60 transfer both belong to one Dinner Record, which comes to your real share:
 
-00:02:06.554 --> 00:02:07.624
+00:02:07.954 --> 00:02:09.024
 $30.
 
-00:02:08.500 --> 00:02:11.182
+00:02:09.900 --> 00:02:12.582
 And most of the time, it’s simply one to one.
 
-00:02:11.362 --> 00:02:15.948
+00:02:12.762 --> 00:02:17.348
 A $12 lunch is one Statement, explained by one Lunch Record.
 
-00:02:17.567 --> 00:02:19.279
+00:02:18.967 --> 00:02:20.679
 Importing your bank statements
 
-00:02:19.879 --> 00:02:22.285
+00:02:21.279 --> 00:02:23.685
 Finpoint starts from your bank’s own records.
 
-00:02:22.465 --> 00:02:25.736
+00:02:23.865 --> 00:02:27.136
 You download them from your bank, then bring them into Finpoint.
 
-00:02:26.600 --> 00:02:32.112
+00:02:28.000 --> 00:02:33.512
 Finpoint can read exports from DBS, OCBC, UOB and Revolut.
 
-00:02:32.292 --> 00:02:36.544
+00:02:33.692 --> 00:02:37.944
 Depending on the bank, that’s a CSV file or an Excel spreadsheet.
 
-00:02:37.400 --> 00:02:42.079
+00:02:38.800 --> 00:02:43.479
 Each Statement belongs to an Account, which simply mirrors one of your bank accounts.
 
-00:02:42.259 --> 00:02:53.599
+00:02:43.659 --> 00:02:54.999
 Import your OCBC 360 Account and your UOB savings account, and Finpoint keeps their Statements apart, using the account details inside each file.
 
-00:02:54.467 --> 00:02:58.460
+00:02:55.867 --> 00:02:59.860
 Some exports, like Revolut’s, don’t say which account they came from.
 
-00:02:58.640 --> 00:03:01.903
+00:03:00.040 --> 00:03:03.303
 For those, Finpoint asks you to pick or name the account.
 
-00:03:02.767 --> 00:03:09.123
+00:03:04.167 --> 00:03:10.523
 Download a CSV or Excel export from your bank, once for each account you want in Finpoint.
 
-00:03:09.833 --> 00:03:12.834
+00:03:11.233 --> 00:03:14.234
 Open Importer, choose your bank, and add your files.
 
-00:03:13.567 --> 00:03:16.807
+00:03:14.967 --> 00:03:18.207
 Choose Import, and check how many new Statements came in.
 
-00:03:17.533 --> 00:03:20.407
+00:03:18.933 --> 00:03:21.807
 Your new Statements are now waiting in Allocator.
 
-00:03:20.587 --> 00:03:22.000
+00:03:21.987 --> 00:03:23.400
 That’s where we’ll go next.
 
-00:03:23.600 --> 00:03:24.877
+00:03:25.000 --> 00:03:26.277
 Meet the Allocator
 
-00:03:25.477 --> 00:03:28.763
+00:03:26.877 --> 00:03:30.163
 Allocator is where you’ll spend most of your time in Finpoint.
 
-00:03:28.943 --> 00:03:33.395
+00:03:30.343 --> 00:03:34.795
 It lists every Statement that still has money left to explain, newest first.
 
-00:03:34.267 --> 00:03:39.201
+00:03:35.667 --> 00:03:40.601
 When only part of a Statement has been explained, Allocator shows how much is left.
 
-00:03:39.381 --> 00:03:42.808
+00:03:40.781 --> 00:03:44.208
 Once a Statement is fully explained, it leaves the list.
 
-00:03:43.667 --> 00:03:46.026
+00:03:45.067 --> 00:03:47.426
 Two other pages help you look things up.
 
-00:03:46.206 --> 00:03:49.568
-Statements lists every bank row, explained or not.
+00:03:47.606 --> 00:03:51.210
+Statements lists all your bank activity, explained or not.
 
-00:03:49.748 --> 00:03:51.750
+00:03:51.390 --> 00:03:53.392
 Records lists your explanations.
 
-00:03:51.930 --> 00:03:54.260
+00:03:53.572 --> 00:03:55.902
 Allocator only shows what’s still waiting.
 
-00:03:55.867 --> 00:03:57.630
+00:03:57.533 --> 00:03:59.297
 Explaining your first purchase
 
-00:03:58.230 --> 00:04:00.205
+00:03:59.897 --> 00:04:01.872
 Let’s explain a $12 lunch.
 
-00:04:00.385 --> 00:04:03.375
+00:04:02.052 --> 00:04:05.042
 In Allocator, click the lunch Statement to select it.
 
-00:04:03.555 --> 00:04:05.820
+00:04:05.222 --> 00:04:07.487
 A bar appears with what you can do next.
 
-00:04:06.533 --> 00:04:07.916
+00:04:08.200 --> 00:04:09.582
 Choose Create Record.
 
-00:04:08.096 --> 00:04:12.853
+00:04:09.762 --> 00:04:14.519
 A new Record opens with the Statement already attached, and its amount filled in.
 
-00:04:13.567 --> 00:04:17.222
+00:04:15.233 --> 00:04:18.889
 Give it a title, like Lunch, and pick a Category, like Dining Out.
 
-00:04:18.100 --> 00:04:20.748
+00:04:19.767 --> 00:04:22.414
 You’ll also see Treatment and Spending bucket.
 
-00:04:20.928 --> 00:04:22.582
+00:04:22.594 --> 00:04:24.249
 Leave those alone for now:
 
-00:04:22.762 --> 00:04:26.202
+00:04:24.429 --> 00:04:27.869
 your Category fills them in, and we’ll come back to them later.
 
-00:04:27.067 --> 00:04:28.848
+00:04:28.733 --> 00:04:30.515
 Choose Create Record to save.
 
-00:04:29.028 --> 00:04:32.706
+00:04:30.695 --> 00:04:34.373
 The lunch Statement leaves Allocator, because it’s fully explained.
 
-00:04:34.333 --> 00:04:35.737
+00:04:36.000 --> 00:04:37.404
 Splitting one payment
 
-00:04:36.337 --> 00:04:38.764
+00:04:38.004 --> 00:04:40.430
 Back to the $80 supermarket trip.
 
-00:04:38.944 --> 00:04:41.914
+00:04:40.610 --> 00:04:43.581
 Select it in Allocator, and choose Create Record.
 
-00:04:42.633 --> 00:04:48.697
+00:04:44.300 --> 00:04:50.364
 Call it Groceries, and change both the Record’s amount and the Statement’s Allocation to $50.
 
-00:04:48.877 --> 00:04:52.067
+00:04:50.544 --> 00:04:53.734
 The other $30 stays unexplained for now.
 
-00:04:52.800 --> 00:04:57.819
+00:04:54.467 --> 00:04:59.486
 Save, and the supermarket Statement stays in Allocator, with $30 left.
 
-00:04:58.533 --> 00:05:03.872
-Select it again, and create a second Record, Birthday gift, for the remaining $30.
+00:05:00.200 --> 00:05:06.126
+Select it again, and create a second Record, Birthday gift, for the $30 left to allocate.
 
-00:05:04.052 --> 00:05:06.096
+00:05:06.306 --> 00:05:08.351
 Finpoint fills that amount in for you.
 
-00:05:06.967 --> 00:05:10.027
+00:05:09.233 --> 00:05:12.294
 Now one Statement is explained by two Records:
 
-00:05:10.207 --> 00:05:13.570
+00:05:12.474 --> 00:05:15.837
 $50 of groceries, and a $30 gift.
 
-00:05:15.200 --> 00:05:17.504
+00:05:17.467 --> 00:05:19.771
 Combining payments into one Record
 
-00:05:18.104 --> 00:05:19.395
+00:05:20.371 --> 00:05:21.662
 Now the shared dinner.
 
-00:05:19.575 --> 00:05:21.961
+00:05:21.842 --> 00:05:24.227
 In Allocator, select both Statements:
 
-00:05:22.141 --> 00:05:26.156
+00:05:24.407 --> 00:05:28.422
 the $90 you paid, and the $60 your friend sent back.
 
-00:05:26.336 --> 00:05:27.879
+00:05:28.602 --> 00:05:30.146
 The bar shows their total:
 
-00:05:28.059 --> 00:05:29.129
+00:05:30.326 --> 00:05:31.396
 $30.
 
-00:05:29.833 --> 00:05:32.612
+00:05:32.100 --> 00:05:34.879
 Choose Create Record, and call it Dinner with Sam.
 
-00:05:32.792 --> 00:05:37.459
+00:05:35.059 --> 00:05:39.726
 Both Statements are attached, and the Record comes to $30, your real share.
 
-00:05:38.333 --> 00:05:41.822
-Save, and two bank rows are explained by a single Record.
+00:05:40.600 --> 00:05:44.136
+Save, and two Statements are explained by a single Record.
 
-00:05:42.002 --> 00:05:46.446
+00:05:44.316 --> 00:05:48.760
 Your spending shows the $30 you really spent, not $90.
 
-00:05:48.067 --> 00:05:49.449
+00:05:50.367 --> 00:05:51.749
 Where your numbers come from
 
-00:05:50.049 --> 00:05:53.434
+00:05:52.349 --> 00:05:55.734
 With a few Records saved, your Dashboard starts to fill in.
 
-00:05:53.614 --> 00:05:58.340
+00:05:55.914 --> 00:06:00.640
 Everything on it is calculated from Records, never directly from Statements.
 
-00:05:59.200 --> 00:06:02.357
+00:06:01.500 --> 00:06:04.657
 That’s why importing alone leaves the Dashboard empty.
 
-00:06:02.537 --> 00:06:05.338
+00:06:04.837 --> 00:06:07.638
 A Statement only counts once you’ve explained it.
 
-00:06:06.200 --> 00:06:10.843
+00:06:08.500 --> 00:06:13.143
 And because it uses your explanations, the Dashboard shows what you really spent:
 
-00:06:11.023 --> 00:06:15.856
+00:06:13.323 --> 00:06:18.156
 $30 on dinner, not $90, and groceries apart from the gift.
 
-00:06:16.733 --> 00:06:22.490
+00:06:19.033 --> 00:06:24.790
 Your spending is broken down by Category, so the Categories you choose shape everything you see here.
 
-00:06:24.100 --> 00:06:25.348
+00:06:26.400 --> 00:06:27.648
 Pending Records
 
-00:06:25.948 --> 00:06:29.319
+00:06:28.248 --> 00:06:31.619
 Sometimes you know about spending before your bank shows all of it.
 
-00:06:29.499 --> 00:06:31.719
+00:06:31.799 --> 00:06:34.019
 Finpoint lets you record it anyway.
 
-00:06:32.600 --> 00:06:39.441
+00:06:34.900 --> 00:06:41.741
 Say you paid $200 for two concert tickets, and your friend Jo will pay you back $100 next week.
 
-00:06:39.621 --> 00:06:45.134
+00:06:41.921 --> 00:06:47.434
 You can already create the Record for your $100 share, from the $200 payment.
 
-00:06:46.000 --> 00:06:50.185
+00:06:48.300 --> 00:06:52.485
 The amounts don’t match yet, $100 against $200.
 
-00:06:50.365 --> 00:06:53.603
+00:06:52.665 --> 00:06:55.903
 Finpoint warns you, and saves the Record as Pending.
 
-00:06:54.467 --> 00:06:58.705
+00:06:56.767 --> 00:07:01.005
 Pending Records are marked in your Records list, so nothing gets forgotten.
 
-00:06:59.567 --> 00:07:05.514
+00:07:01.867 --> 00:07:07.814
 When Jo’s $100 arrives, select it in Allocator and choose Attach to Record.
 
-00:07:05.694 --> 00:07:09.372
+00:07:07.994 --> 00:07:11.672
 Finpoint suggests the Pending Record it matches exactly.
 
-00:07:10.233 --> 00:07:13.194
+00:07:12.533 --> 00:07:15.494
 Save, and the Record now combines both payments.
 
-00:07:13.374 --> 00:07:15.938
+00:07:15.674 --> 00:07:18.238
 The amounts match, so it’s no longer Pending.
 
-00:07:16.800 --> 00:07:20.352
+00:07:19.100 --> 00:07:22.652
 It works the same for a deposit now and the balance later.
 
-00:07:20.532 --> 00:07:21.938
+00:07:22.832 --> 00:07:24.238
 Pending simply means:
 
-00:07:22.118 --> 00:07:24.278
+00:07:24.418 --> 00:07:26.578
 this explanation doesn’t add up yet.
 
-00:07:25.900 --> 00:07:27.140
+00:07:28.200 --> 00:07:29.440
 Pending Statements
 
-00:07:27.740 --> 00:07:30.313
+00:07:30.040 --> 00:07:32.613
 Some banks take days to show a card payment.
 
-00:07:30.493 --> 00:07:33.862
+00:07:32.793 --> 00:07:36.162
 If you want it explained today, create a Pending Statement:
 
-00:07:34.042 --> 00:07:36.520
-a placeholder for a bank row you’re expecting.
+00:07:36.342 --> 00:07:39.145
+a placeholder for bank activity you’re expecting.
 
-00:07:37.400 --> 00:07:40.706
+00:07:40.000 --> 00:07:43.306
 On the Statements page, choose Create Pending Statement.
 
-00:07:40.886 --> 00:07:44.419
+00:07:43.486 --> 00:07:47.019
 Pick the account, then enter the amount and a short description.
 
-00:07:45.133 --> 00:07:47.457
+00:07:47.733 --> 00:07:50.057
 It appears in Allocator, marked Pending.
 
-00:07:47.637 --> 00:07:49.686
+00:07:50.237 --> 00:07:52.286
 Explain it like any other Statement.
 
-00:07:49.866 --> 00:07:54.559
+00:07:52.466 --> 00:07:57.159
 The Record counts straight away, but stays Pending while it relies on a placeholder.
 
-00:07:55.267 --> 00:07:59.718
-When the real bank row is imported, open Replace Pending in Allocator.
+00:07:57.867 --> 00:08:02.376
+When the real Statement is imported, open Replace Pending in Allocator.
 
-00:07:59.898 --> 00:08:04.847
+00:08:02.556 --> 00:08:07.505
 Pick the placeholder, and Finpoint suggests the imported Statements it could become.
 
-00:08:05.567 --> 00:08:06.699
+00:08:08.233 --> 00:08:09.366
 Choose Replace.
 
-00:08:06.879 --> 00:08:13.210
+00:08:09.546 --> 00:08:15.877
 The Allocations move to the real Statement, the placeholder disappears, and nothing is counted twice.
 
-00:08:14.833 --> 00:08:15.765
+00:08:17.500 --> 00:08:18.432
 Categories
 
-00:08:16.365 --> 00:08:19.835
+00:08:19.032 --> 00:08:22.502
 Categories are the most important choice you make on a Record.
 
-00:08:20.015 --> 00:08:24.065
+00:08:22.682 --> 00:08:26.732
 They say what it was for, and the Dashboard breaks your spending down by them.
 
-00:08:24.933 --> 00:08:27.324
+00:08:27.600 --> 00:08:29.991
 Lunch and dinner with friends are Dining Out.
 
-00:08:27.504 --> 00:08:29.661
+00:08:30.171 --> 00:08:32.328
 The supermarket run is Groceries.
 
-00:08:29.841 --> 00:08:32.737
+00:08:32.508 --> 00:08:35.404
 The birthday gift goes under Gifts and Donations.
 
-00:08:32.917 --> 00:08:37.585
+00:08:35.584 --> 00:08:40.251
 Finpoint starts you with a sensible set, and you can rename them or add your own.
 
-00:08:38.467 --> 00:08:41.158
+00:08:41.133 --> 00:08:43.824
 Each Category also carries two defaults:
 
-00:08:41.338 --> 00:08:43.405
+00:08:44.004 --> 00:08:46.072
 a treatment, and a spending bucket.
 
-00:08:43.585 --> 00:08:45.979
+00:08:46.252 --> 00:08:48.646
 That’s why you could ignore those fields earlier.
 
-00:08:46.159 --> 00:08:47.850
+00:08:48.826 --> 00:08:50.517
 The Category fills them in.
 
-00:08:49.467 --> 00:08:50.349
+00:08:52.133 --> 00:08:53.015
 Treatments
 
-00:08:50.949 --> 00:08:53.927
+00:08:53.615 --> 00:08:56.593
 Treatment decides how the Dashboard counts a Record:
 
-00:08:54.107 --> 00:08:57.297
+00:08:56.773 --> 00:08:59.964
 as income, as spending, as saving, or not at all.
 
-00:08:58.167 --> 00:08:59.727
+00:09:00.833 --> 00:09:02.394
 Your salary is Income.
 
-00:08:59.907 --> 00:09:04.915
+00:09:02.574 --> 00:09:07.581
 Lunch and groceries are Spending, and so is a refund, which lowers what you spent.
 
-00:09:05.095 --> 00:09:09.293
-Moving $500 into savings is Saving or investment.
+00:09:07.761 --> 00:09:11.960
+Moving $500 into savings is Saving/investment.
 
-00:09:09.473 --> 00:09:14.202
+00:09:12.140 --> 00:09:16.868
 And moving money between your own accounts is a Transfer, which isn’t counted at all.
 
-00:09:15.067 --> 00:09:17.383
+00:09:17.733 --> 00:09:20.050
 Your Category sets the treatment for you.
 
-00:09:17.563 --> 00:09:21.573
+00:09:20.230 --> 00:09:24.240
 Change it on a single Record only when that Record is an exception.
 
-00:09:23.200 --> 00:09:25.412
+00:09:25.867 --> 00:09:28.079
 Spending buckets and monthly targets
 
-00:09:26.012 --> 00:09:29.098
+00:09:28.679 --> 00:09:31.765
 A spending bucket groups your spending for monthly planning.
 
-00:09:29.278 --> 00:09:31.972
+00:09:31.945 --> 00:09:34.639
 Think of it as a monthly budget that repeats.
 
-00:09:32.152 --> 00:09:33.835
+00:09:34.819 --> 00:09:36.502
 Finpoint starts you with four:
 
-00:09:34.015 --> 00:09:36.584
+00:09:36.682 --> 00:09:39.250
 Daily, Recurring, Irregular and Travel.
 
-00:09:37.467 --> 00:09:39.237
+00:09:40.133 --> 00:09:41.903
 Daily is the one to watch.
 
-00:09:39.417 --> 00:09:45.151
+00:09:42.083 --> 00:09:47.818
 It holds everyday spending, like food and transport, and the Dashboard paces it through the month.
 
-00:09:46.033 --> 00:09:50.109
+00:09:48.700 --> 00:09:52.775
 Give a bucket a monthly target, say $500 for Daily.
 
-00:09:50.289 --> 00:09:53.719
+00:09:52.955 --> 00:09:56.386
 You can set it for one month only, or from this month onward.
 
-00:09:54.600 --> 00:09:58.504
+00:09:57.267 --> 00:10:01.171
 The Dashboard then shows how this month is going against the target.
 
-00:09:58.684 --> 00:10:00.377
+00:10:01.351 --> 00:10:03.043
 Targets don’t move any money.
 
-00:10:00.557 --> 00:10:02.242
+00:10:03.223 --> 00:10:04.908
 They’re simply a comparison.
 
-00:10:03.867 --> 00:10:05.628
+00:10:06.533 --> 00:10:08.295
 Budgets for trips and events
 
-00:10:06.228 --> 00:10:11.533
+00:10:08.895 --> 00:10:14.200
 A Budget is for spending with its own start and end, like a week in Bali, or a wedding.
 
-00:10:12.400 --> 00:10:15.288
+00:10:15.067 --> 00:10:17.955
 Create one with a name, an amount and its dates.
 
-00:10:15.468 --> 00:10:20.735
+00:10:18.135 --> 00:10:23.401
 Leave Automatic attach on, and Records dated inside the period are attached for you:
 
-00:10:20.915 --> 00:10:23.898
+00:10:23.581 --> 00:10:26.565
 the ones you already have, and new ones as you add them.
 
-00:10:24.767 --> 00:10:28.002
+00:10:27.433 --> 00:10:30.669
 A Budget is its own small dashboard for that period:
 
-00:10:28.182 --> 00:10:30.503
+00:10:30.849 --> 00:10:33.170
 what you’ve spent, what’s left, and your pace.
 
-00:10:30.683 --> 00:10:33.916
+00:10:33.350 --> 00:10:36.583
 It’s separate from your monthly Dashboard, and doesn’t change it.
 
-00:10:35.533 --> 00:10:37.127
+00:10:38.200 --> 00:10:39.794
 Backups and Google Drive
 
-00:10:37.727 --> 00:10:41.129
+00:10:40.394 --> 00:10:43.796
 Finpoint keeps your data in this browser, on this device.
 
-00:10:41.309 --> 00:10:47.207
+00:10:43.976 --> 00:10:49.873
 There’s no Finpoint database, and your finances never pass through our servers, so we never see them.
 
-00:10:48.067 --> 00:10:51.538
+00:10:50.733 --> 00:10:54.205
 That means keeping a copy is up to you, and there are two ways.
 
-00:10:51.718 --> 00:10:53.525
+00:10:54.385 --> 00:10:56.192
 The first is a backup file.
 
-00:10:53.705 --> 00:10:59.617
+00:10:56.372 --> 00:11:02.284
 Download it from the Data page whenever you like, and restore it later, on this device or a new one.
 
-00:11:00.500 --> 00:11:02.365
+00:11:03.167 --> 00:11:05.031
 The second is Google Drive.
 
-00:11:02.545 --> 00:11:10.468
+00:11:05.211 --> 00:11:13.134
 Connect it once, and Finpoint keeps a copy in a hidden folder in your own Drive, automatically, so your devices stay in step.
 
-00:11:11.333 --> 00:11:14.712
+00:11:14.000 --> 00:11:17.378
 Either way, your data only goes to places you control.
 
-00:11:16.333 --> 00:11:17.356
+00:11:19.000 --> 00:11:20.022
 Your routine
 
-00:11:17.956 --> 00:11:19.559
+00:11:20.622 --> 00:11:22.226
 Here’s a routine that works.
 
-00:11:19.739 --> 00:11:21.531
+00:11:22.406 --> 00:11:24.198
 Import your latest statements.
 
-00:11:21.711 --> 00:11:23.599
+00:11:24.378 --> 00:11:26.266
 Explain what’s new in Allocator.
 
-00:11:23.779 --> 00:11:25.151
+00:11:26.446 --> 00:11:27.817
 Check anything Pending.
 
-00:11:25.331 --> 00:11:27.006
+00:11:27.997 --> 00:11:29.673
 Then glance at your Dashboard.
 
-00:11:27.867 --> 00:11:31.469
+00:11:30.533 --> 00:11:34.136
 If you’ve connected Google Drive, you’re backed up automatically.
 
-00:11:31.649 --> 00:11:34.365
+00:11:34.316 --> 00:11:37.031
 If not, download a backup every so often.
 
-00:11:35.233 --> 00:11:38.886
+00:11:37.900 --> 00:11:41.552
 And whenever you’re unsure, open Help from any page or form.
 
-00:11:39.066 --> 00:11:42.012
+00:11:41.732 --> 00:11:44.679
 Every chapter of this guide is there, with pictures.

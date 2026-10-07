@@ -2,14 +2,14 @@
 	"fps": 30,
 	"width": 1920,
 	"height": 1080,
-	"durationInFrames": 21080,
+	"durationInFrames": 21160,
 	"chapters": [
 		{
 			"id": "start",
 			"title": "Why Finpoint?",
 			"group": "The basics",
 			"startFrame": 0,
-			"durationInFrames": 1934,
+			"durationInFrames": 1962,
 			"segments": [
 				{
 					"id": "bank",
@@ -27,22 +27,22 @@
 				},
 				{
 					"id": "dinner",
-					"text": "Or you paid $90 for dinner with a friend, and they sent you $60 back for their share. Your bank shows two rows: money out, and money in. What dinner really cost you was $30.",
+					"text": "Or you paid $90 for dinner with a friend, and they sent you $60 back for their share. Your bank shows two entries: money out, and money in. What dinner really cost you was $30.",
 					"from": 687,
-					"durationInFrames": 378,
+					"durationInFrames": 381,
 					"audio": "guide-audio/start-dinner.mp3"
 				},
 				{
 					"id": "explain",
-					"text": "Finpoint closes that gap. It keeps your bank’s rows exactly as they are, and lets you explain them in your own words: groceries, $50. A gift, $30. Your share of dinner, $30.",
-					"from": 1065,
-					"durationInFrames": 424,
+					"text": "Finpoint closes that gap. It keeps your bank activity exactly as your bank reports it, and lets you explain it in your own words: groceries, $50. A gift, $30. Your share of dinner, $30.",
+					"from": 1068,
+					"durationInFrames": 449,
 					"audio": "guide-audio/start-explain.mp3"
 				},
 				{
 					"id": "built",
 					"text": "Everything else in Finpoint, from spending charts to budgets, is built on those explanations. So using Finpoint comes down to three things: bring in your bank activity, explain it, and see where your money really went.",
-					"from": 1489,
+					"from": 1517,
 					"durationInFrames": 445,
 					"audio": "guide-audio/start-built.mp3"
 				}
@@ -52,8 +52,8 @@
 			"id": "model",
 			"title": "Statements, Records and Allocations",
 			"group": "The basics",
-			"startFrame": 1934,
-			"durationInFrames": 2187,
+			"startFrame": 1962,
+			"durationInFrames": 2201,
 			"segments": [
 				{
 					"id": "three",
@@ -64,43 +64,43 @@
 				},
 				{
 					"id": "statement",
-					"text": "A Statement is one row from your bank, exactly as your bank reports it. Like that $80 supermarket payment.",
+					"text": "A Statement is one entry of bank activity, exactly as your bank reports it. Like that $80 supermarket payment.",
 					"from": 302,
-					"durationInFrames": 242,
+					"durationInFrames": 256,
 					"audio": "guide-audio/model-statement.mp3"
 				},
 				{
 					"id": "record",
 					"text": "A Record is your explanation of what happened. Groceries for $50 is a Record. The gift for $30 is another.",
-					"from": 544,
+					"from": 558,
 					"durationInFrames": 262,
 					"audio": "guide-audio/model-record.mp3"
 				},
 				{
 					"id": "allocation",
 					"text": "An Allocation connects a Statement to a Record, and says how much of the Statement belongs there. Here, $50 of the supermarket payment is allocated to Groceries, and the other $30 to the gift.",
-					"from": 806,
+					"from": 820,
 					"durationInFrames": 405,
 					"audio": "guide-audio/model-allocation.mp3"
 				},
 				{
 					"id": "split",
 					"text": "That’s the first pattern: one Statement, split into several Records. It’s how you untangle a mixed shopping trip.",
-					"from": 1211,
+					"from": 1225,
 					"durationInFrames": 229,
 					"audio": "guide-audio/model-split.mp3"
 				},
 				{
 					"id": "combine",
 					"text": "The second pattern goes the other way: several Statements, combined into one Record. Your $90 dinner payment and your friend’s $60 transfer both belong to one Dinner Record, which comes to your real share: $30.",
-					"from": 1440,
+					"from": 1454,
 					"durationInFrames": 475,
 					"audio": "guide-audio/model-combine.mp3"
 				},
 				{
 					"id": "simple",
 					"text": "And most of the time, it’s simply one to one. A $12 lunch is one Statement, explained by one Lunch Record.",
-					"from": 1915,
+					"from": 1929,
 					"durationInFrames": 272,
 					"audio": "guide-audio/model-simple.mp3"
 				}
@@ -110,7 +110,7 @@
 			"id": "import",
 			"title": "Importing your bank statements",
 			"group": "The basics",
-			"startFrame": 4121,
+			"startFrame": 4163,
 			"durationInFrames": 1981,
 			"segments": [
 				{
@@ -183,8 +183,8 @@
 			"id": "allocator",
 			"title": "Meet the Allocator",
 			"group": "The basics",
-			"startFrame": 6102,
-			"durationInFrames": 968,
+			"startFrame": 6144,
+			"durationInFrames": 976,
 			"segments": [
 				{
 					"id": "list",
@@ -202,9 +202,9 @@
 				},
 				{
 					"id": "pages",
-					"text": "Two other pages help you look things up. Statements lists every bank row, explained or not. Records lists your explanations. Allocator only shows what’s still waiting.",
+					"text": "Two other pages help you look things up. Statements lists all your bank activity, explained or not. Records lists your explanations. Allocator only shows what’s still waiting.",
 					"from": 602,
-					"durationInFrames": 366,
+					"durationInFrames": 374,
 					"audio": "guide-audio/allocator-pages.mp3"
 				}
 			]
@@ -213,7 +213,7 @@
 			"id": "lunch",
 			"title": "Explaining your first purchase",
 			"group": "The basics",
-			"startFrame": 7070,
+			"startFrame": 7120,
 			"durationInFrames": 1154,
 			"segments": [
 				{
@@ -265,8 +265,8 @@
 			"id": "split",
 			"title": "Splitting one payment",
 			"group": "The basics",
-			"startFrame": 8224,
-			"durationInFrames": 1226,
+			"startFrame": 8274,
+			"durationInFrames": 1244,
 			"segments": [
 				{
 					"id": "select",
@@ -297,17 +297,17 @@
 				},
 				{
 					"id": "gift",
-					"text": "Select it again, and create a second Record, Birthday gift, for the remaining $30. Finpoint fills that amount in for you.",
+					"text": "Select it again, and create a second Record, Birthday gift, for the $30 left to allocate. Finpoint fills that amount in for you.",
 					"step": 4,
 					"steps": 4,
 					"from": 726,
-					"durationInFrames": 253,
+					"durationInFrames": 271,
 					"audio": "guide-audio/split-gift.mp3"
 				},
 				{
 					"id": "done",
 					"text": "Now one Statement is explained by two Records: $50 of groceries, and a $30 gift.",
-					"from": 979,
+					"from": 997,
 					"durationInFrames": 247,
 					"audio": "guide-audio/split-done.mp3"
 				}
@@ -317,8 +317,8 @@
 			"id": "repayment",
 			"title": "Combining payments into one Record",
 			"group": "The basics",
-			"startFrame": 9450,
-			"durationInFrames": 986,
+			"startFrame": 9518,
+			"durationInFrames": 987,
 			"segments": [
 				{
 					"id": "select",
@@ -340,9 +340,9 @@
 				},
 				{
 					"id": "done",
-					"text": "Save, and two bank rows are explained by a single Record. Your spending shows the $30 you really spent, not $90.",
+					"text": "Save, and two Statements are explained by a single Record. Your spending shows the $30 you really spent, not $90.",
 					"from": 694,
-					"durationInFrames": 292,
+					"durationInFrames": 293,
 					"audio": "guide-audio/repayment-done.mp3"
 				}
 			]
@@ -351,7 +351,7 @@
 			"id": "dashboard",
 			"title": "Where your numbers come from",
 			"group": "The basics",
-			"startFrame": 10436,
+			"startFrame": 10505,
 			"durationInFrames": 1081,
 			"segments": [
 				{
@@ -388,7 +388,7 @@
 			"id": "pending",
 			"title": "Pending Records",
 			"group": "Going further",
-			"startFrame": 11517,
+			"startFrame": 11586,
 			"durationInFrames": 1854,
 			"segments": [
 				{
@@ -446,14 +446,14 @@
 			"id": "pending-statements",
 			"title": "Pending Statements",
 			"group": "Going further",
-			"startFrame": 13371,
-			"durationInFrames": 1468,
+			"startFrame": 13440,
+			"durationInFrames": 1479,
 			"segments": [
 				{
 					"id": "why",
-					"text": "Some banks take days to show a card payment. If you want it explained today, create a Pending Statement: a placeholder for a bank row you’re expecting.",
+					"text": "Some banks take days to show a card payment. If you want it explained today, create a Pending Statement: a placeholder for bank activity you’re expecting.",
 					"from": 0,
-					"durationInFrames": 345,
+					"durationInFrames": 354,
 					"audio": "guide-audio/pending-statements-why.mp3"
 				},
 				{
@@ -461,7 +461,7 @@
 					"text": "On the Statements page, choose Create Pending Statement. Pick the account, then enter the amount and a short description.",
 					"step": 1,
 					"steps": 4,
-					"from": 345,
+					"from": 354,
 					"durationInFrames": 232,
 					"audio": "guide-audio/pending-statements-create.mp3"
 				},
@@ -470,17 +470,17 @@
 					"text": "It appears in Allocator, marked Pending. Explain it like any other Statement. The Record counts straight away, but stays Pending while it relies on a placeholder.",
 					"step": 2,
 					"steps": 4,
-					"from": 577,
+					"from": 586,
 					"durationInFrames": 304,
 					"audio": "guide-audio/pending-statements-explain.mp3"
 				},
 				{
 					"id": "replace",
-					"text": "When the real bank row is imported, open Replace Pending in Allocator. Pick the placeholder, and Finpoint suggests the imported Statements it could become.",
+					"text": "When the real Statement is imported, open Replace Pending in Allocator. Pick the placeholder, and Finpoint suggests the imported Statements it could become.",
 					"step": 3,
 					"steps": 4,
-					"from": 881,
-					"durationInFrames": 309,
+					"from": 890,
+					"durationInFrames": 311,
 					"audio": "guide-audio/pending-statements-replace.mp3"
 				},
 				{
@@ -488,7 +488,7 @@
 					"text": "Choose Replace. The Allocations move to the real Statement, the placeholder disappears, and nothing is counted twice.",
 					"step": 4,
 					"steps": 4,
-					"from": 1190,
+					"from": 1201,
 					"durationInFrames": 278,
 					"audio": "guide-audio/pending-statements-review.mp3"
 				}
@@ -498,7 +498,7 @@
 			"id": "categories",
 			"title": "Categories",
 			"group": "Going further",
-			"startFrame": 14839,
+			"startFrame": 14919,
 			"durationInFrames": 1039,
 			"segments": [
 				{
@@ -528,7 +528,7 @@
 			"id": "treatments",
 			"title": "Treatments",
 			"group": "Advanced",
-			"startFrame": 15878,
+			"startFrame": 15958,
 			"durationInFrames": 1012,
 			"segments": [
 				{
@@ -540,7 +540,7 @@
 				},
 				{
 					"id": "examples",
-					"text": "Your salary is Income. Lunch and groceries are Spending, and so is a refund, which lowers what you spent. Moving $500 into savings is Saving or investment. And moving money between your own accounts is a Transfer, which isn’t counted at all.",
+					"text": "Your salary is Income. Lunch and groceries are Spending, and so is a refund, which lowers what you spent. Moving $500 into savings is Saving/investment. And moving money between your own accounts is a Transfer, which isn’t counted at all.",
 					"from": 261,
 					"durationInFrames": 507,
 					"audio": "guide-audio/treatments-examples.mp3"
@@ -558,7 +558,7 @@
 			"id": "buckets",
 			"title": "Spending buckets and monthly targets",
 			"group": "Advanced",
-			"startFrame": 16890,
+			"startFrame": 16970,
 			"durationInFrames": 1220,
 			"segments": [
 				{
@@ -595,7 +595,7 @@
 			"id": "budgets",
 			"title": "Budgets for trips and events",
 			"group": "Advanced",
-			"startFrame": 18110,
+			"startFrame": 18190,
 			"durationInFrames": 950,
 			"segments": [
 				{
@@ -625,7 +625,7 @@
 			"id": "sync",
 			"title": "Backups and Google Drive",
 			"group": "Your data",
-			"startFrame": 19060,
+			"startFrame": 19140,
 			"durationInFrames": 1224,
 			"segments": [
 				{
@@ -662,7 +662,7 @@
 			"id": "routine",
 			"title": "Your routine",
 			"group": "Your data",
-			"startFrame": 20284,
+			"startFrame": 20364,
 			"durationInFrames": 796,
 			"segments": [
 				{

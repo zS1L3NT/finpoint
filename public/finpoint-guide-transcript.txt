@@ -4,9 +4,9 @@ Your bank keeps a record of every payment you make. What it can’t tell you is 
 
 Say you spent $80 at the supermarket. $50 of that was groceries, and $30 was a birthday gift for a friend. Your bank shows one $80 payment. But to you, those are two very different things.
 
-Or you paid $90 for dinner with a friend, and they sent you $60 back for their share. Your bank shows two rows: money out, and money in. What dinner really cost you was $30.
+Or you paid $90 for dinner with a friend, and they sent you $60 back for their share. Your bank shows two entries: money out, and money in. What dinner really cost you was $30.
 
-Finpoint closes that gap. It keeps your bank’s rows exactly as they are, and lets you explain them in your own words: groceries, $50. A gift, $30. Your share of dinner, $30.
+Finpoint closes that gap. It keeps your bank activity exactly as your bank reports it, and lets you explain it in your own words: groceries, $50. A gift, $30. Your share of dinner, $30.
 
 Everything else in Finpoint, from spending charts to budgets, is built on those explanations. So using Finpoint comes down to three things: bring in your bank activity, explain it, and see where your money really went.
 
@@ -16,7 +16,7 @@ Statements, Records and Allocations
 
 Finpoint uses three words for this, and they’re worth getting to know: Statements, Records and Allocations.
 
-A Statement is one row from your bank, exactly as your bank reports it. Like that $80 supermarket payment.
+A Statement is one entry of bank activity, exactly as your bank reports it. Like that $80 supermarket payment.
 
 A Record is your explanation of what happened. Groceries for $50 is a Record. The gift for $30 is another.
 
@@ -56,7 +56,7 @@ Allocator is where you’ll spend most of your time in Finpoint. It lists every 
 
 When only part of a Statement has been explained, Allocator shows how much is left. Once a Statement is fully explained, it leaves the list.
 
-Two other pages help you look things up. Statements lists every bank row, explained or not. Records lists your explanations. Allocator only shows what’s still waiting.
+Two other pages help you look things up. Statements lists all your bank activity, explained or not. Records lists your explanations. Allocator only shows what’s still waiting.
 
 ————————
 
@@ -82,7 +82,7 @@ Splitting one payment
 
 3. Save, and the supermarket Statement stays in Allocator, with $30 left.
 
-4. Select it again, and create a second Record, Birthday gift, for the remaining $30. Finpoint fills that amount in for you.
+4. Select it again, and create a second Record, Birthday gift, for the $30 left to allocate. Finpoint fills that amount in for you.
 
 Now one Statement is explained by two Records: $50 of groceries, and a $30 gift.
 
@@ -94,7 +94,7 @@ Combining payments into one Record
 
 2. Choose Create Record, and call it Dinner with Sam. Both Statements are attached, and the Record comes to $30, your real share.
 
-Save, and two bank rows are explained by a single Record. Your spending shows the $30 you really spent, not $90.
+Save, and two Statements are explained by a single Record. Your spending shows the $30 you really spent, not $90.
 
 ————————
 
@@ -130,13 +130,13 @@ It works the same for a deposit now and the balance later. Pending simply means:
 
 Pending Statements
 
-Some banks take days to show a card payment. If you want it explained today, create a Pending Statement: a placeholder for a bank row you’re expecting.
+Some banks take days to show a card payment. If you want it explained today, create a Pending Statement: a placeholder for bank activity you’re expecting.
 
 1. On the Statements page, choose Create Pending Statement. Pick the account, then enter the amount and a short description.
 
 2. It appears in Allocator, marked Pending. Explain it like any other Statement. The Record counts straight away, but stays Pending while it relies on a placeholder.
 
-3. When the real bank row is imported, open Replace Pending in Allocator. Pick the placeholder, and Finpoint suggests the imported Statements it could become.
+3. When the real Statement is imported, open Replace Pending in Allocator. Pick the placeholder, and Finpoint suggests the imported Statements it could become.
 
 4. Choose Replace. The Allocations move to the real Statement, the placeholder disappears, and nothing is counted twice.
 
@@ -156,7 +156,7 @@ Treatments
 
 Treatment decides how the Dashboard counts a Record: as income, as spending, as saving, or not at all.
 
-Your salary is Income. Lunch and groceries are Spending, and so is a refund, which lowers what you spent. Moving $500 into savings is Saving or investment. And moving money between your own accounts is a Transfer, which isn’t counted at all.
+Your salary is Income. Lunch and groceries are Spending, and so is a refund, which lowers what you spent. Moving $500 into savings is Saving/investment. And moving money between your own accounts is a Transfer, which isn’t counted at all.
 
 Your Category sets the treatment for you. Change it on a single Record only when that Record is an exception.
 
