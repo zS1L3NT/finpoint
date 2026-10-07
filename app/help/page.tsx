@@ -1,7 +1,18 @@
 "use client"
 
 import { useLiveQuery } from "dexie-react-hooks"
-import { ArrowRight, Check, Play, Search } from "lucide-react"
+import {
+	ArrowLeft,
+	ArrowRight,
+	Check,
+	Gift,
+	type LucideIcon,
+	Play,
+	Search,
+	TriangleAlert,
+	Users,
+	Utensils,
+} from "lucide-react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { useState } from "react"
@@ -10,15 +21,268 @@ import { accentFor, color } from "@/components/help/film/theme"
 import { GuideArticle } from "@/components/help/guide-article"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { getGuideTopic, guideTopics } from "@/lib/guide-content"
 import timeline from "@/lib/guide-video-timeline.json"
+import { cn } from "@/lib/utils"
 import { getLearningOverview, markGuideReviewed } from "@/logic/learning"
 import { practiceLessons } from "@/logic/practice"
 import { pathHelp, pathHelpPractice, pathHelpVideo } from "@/routes"
+
+type Overview = Awaited<ReturnType<typeof getLearningOverview>>
+
+const lessonIcons: Record<string, LucideIcon> = {
+	lunch: Utensils,
+	pending: TriangleAlert,
+	split: Gift,
+	repayment: Users,
+}
+
+const minutes = Math.round(timeline.durationInFrames / timeline.fps / 60)
+
+/** The five things a new workspace needs, read from saved data and the user's own confirmations. */
+function milestones(overview: Overview) {
+	const { learning } = overview
+	const nextLesson = practiceLessons.find(lesson => !learning.completed.includes(lesson.id))
+	return [
+		{
+			label: "Bring in bank activity",
+			done: Boolean(learning.lastImportAt && overview.statements > 0),
+			value:
+				learning.lastImportAt && overview.statements > 0
+					? "Imported · Statements are present"
+					: `${overview.statements} Statements · no guided import yet`,
+			href: pathHelp("import"),
+		},
+		{
+			label: "Explain your activity",
+			done: overview.recordStatus === "complete",
+			value:
+				overview.recordStatus === "complete"
+					? "Your saved Record still tallies"
+					: overview.recordStatus === "pending"
+						? "Your Record needs an Allocation check"
+						: overview.recordStatus === "missing"
+							? "Your earlier Record is missing"
+							: `${overview.records} Records · save one to track this`,
+			href: pathHelp("lunch"),
+		},
+		{
+			label: "Review your month",
+			done: Boolean(learning.reviewedMonth),
+			value: learning.reviewedMonth
+				? `${learning.reviewedMonth} reviewed (confirmed by you)`
+				: "Check Dashboard and Monthly Records",
+			href: pathHelp("dashboard"),
+		},
+		{
+			label: "Practice the core workflow",
+			done: learning.completed.length >= practiceLessons.length,
+			value: `${learning.completed.length} of ${practiceLessons.length} sample lessons`,
+			href: pathHelpPractice(nextLesson?.id ?? "lunch"),
+		},
+		{
+			label: "Protect your data",
+			done: Boolean(learning.backupLocatedAt),
+			value: learning.backupLocatedAt
+				? "Backup located (confirmed by you)"
+				: learning.backupRequestedAt
+					? "Downloaded · confirm you found the file"
+					: "Download a backup and find the file",
+			href: pathHelp("backup-first"),
+		},
+	]
+}
+
+function VideoCard() {
+	return (
+		<Link
+			href={pathHelpVideo()}
+			className="group relative flex min-h-56 flex-col justify-end overflow-hidden rounded-2xl p-6 text-white ring-1 ring-border transition-shadow duration-200 ease-out hover:shadow-xl"
+			style={{
+				background: `radial-gradient(90% 110% at 0% 0%, ${accentFor("Start here")}66, transparent 60%), radial-gradient(80% 100% at 100% 100%, ${color.allocation}55, transparent 60%), ${color.night}`,
+			}}
+		>
+			<span
+				aria-hidden
+				className="absolute inset-0 opacity-40"
+				style={{
+					backgroundImage:
+						"radial-gradient(rgba(255,255,255,0.18) 1px, transparent 1.2px)",
+					backgroundSize: "22px 22px",
+					maskImage: "radial-gradient(70% 70% at 70% 30%, black, transparent)",
+				}}
+			/>
+			<span className="absolute top-6 right-6 grid size-14 place-items-center rounded-full bg-white text-black shadow-lg transition-transform duration-200 ease-out group-hover:scale-105">
+				<Play className="size-6 translate-x-0.5 fill-current" />
+			</span>
+			<span className="relative text-xs font-semibold tracking-[0.16em] text-white/70 uppercase">
+				Video guide · {timeline.chapters.length} chapters · {minutes} min
+			</span>
+			<span className="relative mt-1.5 text-2xl font-semibold tracking-tight">
+				Finpoint, from the beginning
+			</span>
+			<span className="relative mt-1 max-w-md text-sm text-white/70">
+				Watch a $12 lunch become a Record, then follow Alex through splits, refunds, Pending
+				fixes and backups.
+			</span>
+		</Link>
+	)
+}
+
+function Progress({ overview }: { overview: Overview }) {
+	const items = milestones(overview)
+	const done = items.filter(item => item.done).length
+	return (
+		<section className="flex flex-col gap-3">
+			<div className="flex items-baseline justify-between gap-4">
+				<h3 className="text-base font-semibold">Your first steps</h3>
+				<span className="text-sm text-muted-foreground tabular-nums">
+					{done} of {items.length} done
+				</span>
+			</div>
+			<ol className="grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
+				{items.map((item, index) => (
+					<li key={item.label}>
+						<Link
+							href={item.href}
+							className={cn(
+								"flex h-full flex-col gap-3 rounded-xl border bg-card p-4 transition-colors duration-150 hover:bg-muted/50",
+								item.done && "border-transparent bg-muted/40",
+							)}
+						>
+							<span
+								className={cn(
+									"grid size-7 place-items-center rounded-full border text-xs font-semibold tabular-nums",
+									item.done && "border-transparent bg-creative text-white",
+								)}
+							>
+								{item.done ? <Check className="size-4" /> : index + 1}
+							</span>
+							<span className="flex flex-col gap-1">
+								<span className="text-sm font-medium">{item.label}</span>
+								<span className="text-xs leading-5 text-muted-foreground">
+									{item.value}
+								</span>
+							</span>
+						</Link>
+					</li>
+				))}
+			</ol>
+			<p className="text-xs text-muted-foreground">
+				Saved data and your own confirmations are tracked separately. Existing data doesn’t
+				tick these off on its own.
+			</p>
+		</section>
+	)
+}
+
+function PracticeLessons({ overview }: { overview: Overview }) {
+	const next = practiceLessons.find(lesson => !overview.learning.completed.includes(lesson.id))
+	return (
+		<section className="flex flex-col gap-3">
+			<div>
+				<h3 className="text-base font-semibold">Practice with sample data</h3>
+				<p className="text-sm text-muted-foreground">
+					Lessons use sample values only. Your financial data stays untouched.
+				</p>
+			</div>
+			<div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
+				{practiceLessons.map(lesson => {
+					const Icon = lessonIcons[lesson.id] ?? Utensils
+					const completed = overview.learning.completed.includes(lesson.id)
+					const upNext = lesson.id === next?.id
+					return (
+						<Link
+							key={lesson.id}
+							href={pathHelpPractice(lesson.id)}
+							className={cn(
+								"group flex items-center gap-4 rounded-xl border bg-card p-4 transition-colors duration-150 hover:bg-muted/50",
+								upNext && "ring-2 ring-foreground/10",
+							)}
+						>
+							<span className="grid size-10 shrink-0 place-items-center rounded-lg bg-muted">
+								<Icon className="size-5" />
+							</span>
+							<span className="flex min-w-0 flex-1 flex-col">
+								<span className="text-sm font-medium">{lesson.title}</span>
+								<span className="text-xs text-muted-foreground">
+									{completed
+										? "Completed · replay any time"
+										: upNext
+											? "Up next"
+											: "Not started"}
+								</span>
+							</span>
+							{completed ? (
+								<Check className="size-4 shrink-0 text-creative" />
+							) : (
+								<ArrowRight className="size-4 shrink-0 text-muted-foreground transition-transform duration-150 ease-out group-hover:translate-x-0.5" />
+							)}
+						</Link>
+					)
+				})}
+			</div>
+		</section>
+	)
+}
+
+function Questions({ overview, query }: { overview?: Overview; query: string }) {
+	const matches = guideTopics.filter(item =>
+		`${item.title} ${item.keywords} ${item.problem} ${item.explanation} ${item.fix}`
+			.toLowerCase()
+			.includes(query),
+	)
+	if (!matches.length)
+		return (
+			<p className="text-sm text-muted-foreground" aria-live="polite">
+				No matching guide. Try “amount”, “Pending”, “import”, or “backup”.
+			</p>
+		)
+	return (
+		<section className="flex flex-col gap-3" aria-live="polite">
+			{!query && <h3 className="text-base font-semibold">Browse by question</h3>}
+			<div className="grid gap-x-8 gap-y-6 md:grid-cols-2">
+				{[...new Set(matches.map(item => item.group))].map(group => (
+					<div key={group} className="min-w-0">
+						<h4 className="mb-1 flex items-center gap-2 text-xs font-semibold tracking-[0.14em] text-muted-foreground uppercase">
+							<span
+								className="size-1.5 rounded-full"
+								style={{ background: accentFor(group) }}
+							/>
+							{group}
+						</h4>
+						<ul className="divide-y">
+							{matches
+								.filter(item => item.group === group)
+								.map(item => (
+									<li key={item.id}>
+										<Link
+											href={pathHelp(item.id)}
+											className="group flex min-h-12 items-center justify-between gap-3 py-2.5 text-sm"
+										>
+											<span className="group-hover:underline group-hover:underline-offset-4">
+												{item.title}
+											</span>
+											{overview?.learning.reviewed.includes(item.id) ? (
+												<Check
+													className="size-4 shrink-0 text-creative"
+													aria-label="Reviewed"
+												/>
+											) : (
+												<ArrowRight className="size-4 shrink-0 text-muted-foreground transition-transform duration-150 ease-out group-hover:translate-x-0.5" />
+											)}
+										</Link>
+									</li>
+								))}
+						</ul>
+					</div>
+				))}
+			</div>
+		</section>
+	)
+}
 
 export default function HelpPage() {
 	const params = useSearchParams()
@@ -27,41 +291,35 @@ export default function HelpPage() {
 	const [search, setSearch] = useState("")
 	const overview = useLiveQuery(getLearningOverview, [])
 	const query = search.trim().toLowerCase()
-	const matches = guideTopics.filter(item =>
-		`${item.title} ${item.keywords} ${item.problem} ${item.explanation} ${item.fix}`
-			.toLowerCase()
-			.includes(query),
-	)
-	const nextLesson = practiceLessons.find(
-		lesson => !overview?.learning.completed.includes(lesson.id),
-	)
-	return (
-		<PageContent>
-			<PageHeader
-				title={topic?.title ?? "Help & guides"}
-				description={topic?.group ?? "Learn Finpoint"}
-				icon="lucide:circle-help"
-				subtitle={
-					topic
-						? "One question, concrete steps, and a way to check the result."
-						: "Start with one purchase. Learn at your own pace, and come back whenever you need help."
-				}
-				actions={
-					<Button asChild variant="outline" size="lg" className="min-h-11">
-						<Link href={pathHelpVideo()}>Watch the video guide</Link>
-					</Button>
-				}
-			/>
-			{topic ? (
+
+	if (topic)
+		return (
+			<PageContent>
+				<Button
+					asChild
+					variant="ghost"
+					size="sm"
+					className="-mb-2 w-fit text-muted-foreground"
+				>
+					<Link href={pathHelp()}>
+						<ArrowLeft /> All questions
+					</Link>
+				</Button>
+				<PageHeader
+					title={topic.title}
+					description={topic.group}
+					icon="lucide:circle-help"
+					subtitle="One question, concrete steps, and a way to check the result."
+				/>
 				<div className="flex max-w-3xl flex-col gap-6">
-					<Button asChild variant="outline" size="lg" className="min-h-11 w-fit">
-						<Link href={pathHelp()}>Back to all questions</Link>
-					</Button>
 					<GuideArticle topic={topic} />
 					<div className="flex flex-col items-start gap-2 border-t pt-5">
 						<Button
-							size="lg"
-							className="min-h-11"
+							variant={
+								overview?.learning.reviewed.includes(topic.id)
+									? "outline"
+									: "default"
+							}
 							disabled={!overview || overview.learning.reviewed.includes(topic.id)}
 							onClick={() =>
 								void markGuideReviewed(topic.id).catch(() =>
@@ -74,233 +332,59 @@ export default function HelpPage() {
 									<Check /> Reviewed
 								</>
 							) : (
-								"Mark this guide as reviewed"
+								"Mark as reviewed"
 							)}
 						</Button>
-						<p className="text-sm text-muted-foreground">
-							This remembers that you read the guide. It does not certify your
-							financial data.
+						<p className="text-xs text-muted-foreground">
+							This remembers that you read the guide. It doesn’t check your financial
+							data.
 						</p>
 					</div>
 				</div>
-			) : (
-				<div className="flex flex-col gap-6">
-					<div className="max-w-3xl">
-						<label htmlFor="guide-search" className="mb-2 block text-sm font-medium">
-							What are you trying to do?
+			</PageContent>
+		)
+
+	return (
+		<PageContent>
+			<div className="grid items-stretch gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,28rem)]">
+				<div className="flex flex-col justify-center gap-6">
+					<PageHeader
+						title="How can we help?"
+						description="Help & guides"
+						icon="lucide:circle-help"
+						subtitle="Start with one purchase. Learn at your own pace, and come back whenever something looks off."
+					/>
+					<div className="relative max-w-xl">
+						<label htmlFor="guide-search" className="sr-only">
+							Search the guides
 						</label>
-						<div className="relative">
-							<Search className="pointer-events-none absolute top-3.5 left-3 size-4 text-muted-foreground" />
-							<Input
-								id="guide-search"
-								type="search"
-								value={search}
-								onChange={event => setSearch(event.target.value)}
-								placeholder="Search: Pending, import, refund, backup…"
-								className="min-h-11 pl-10 text-sm"
-							/>
-						</div>
+						<Search className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-muted-foreground" />
+						<Input
+							id="guide-search"
+							type="search"
+							value={search}
+							onChange={event => setSearch(event.target.value)}
+							placeholder="Search: Pending, import, refund, backup…"
+							className="h-12 rounded-xl pl-11 text-base md:text-sm"
+						/>
 					</div>
-					{!query && (
-						<>
-							<Link
-								href={pathHelpVideo()}
-								className="group relative flex flex-col gap-6 overflow-hidden rounded-2xl p-6 text-white ring-1 ring-border sm:flex-row sm:items-center sm:p-8"
-								style={{
-									background: `radial-gradient(80% 120% at 0% 0%, ${accentFor("Start here")}55, transparent 60%), radial-gradient(70% 110% at 100% 100%, ${color.allocation}40, transparent 60%), ${color.night}`,
-								}}
-							>
-								<span className="grid size-16 shrink-0 place-items-center rounded-full bg-white text-black shadow-lg transition-transform duration-200 ease-out group-hover:scale-105">
-									<Play className="size-7 translate-x-0.5 fill-current" />
-								</span>
-								<span className="flex min-w-0 flex-1 flex-col gap-1">
-									<span className="text-xs font-semibold tracking-[0.16em] text-white/70 uppercase">
-										Video guide · {timeline.chapters.length} chapters ·{" "}
-										{Math.round(timeline.durationInFrames / timeline.fps / 60)}{" "}
-										min
-									</span>
-									<span className="text-xl font-semibold tracking-tight sm:text-2xl">
-										Finpoint, from the beginning
-									</span>
-									<span className="text-sm text-white/70">
-										Watch a $12 lunch become a Record, then follow Alex through
-										splits, refunds, Pending fixes and backups.
-									</span>
-								</span>
-								<ArrowRight className="hidden size-5 shrink-0 text-white/70 transition-transform duration-200 ease-out group-hover:translate-x-1 sm:block" />
-							</Link>
-							<Card>
-								<CardHeader>
-									<CardTitle>
-										{nextLesson
-											? "Your next practice lesson"
-											: "You’ve completed all four practice lessons"}
-									</CardTitle>
-									<CardDescription className="text-sm leading-6">
-										Sample lessons keep your financial data separate. You can
-										pause, resume, or replay them.
-									</CardDescription>
-								</CardHeader>
-								<CardContent className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-									<p className="text-sm">
-										{nextLesson?.title ??
-											"Revisit a lesson below whenever you want a refresher."}
-									</p>
-									<Button asChild size="lg" className="min-h-11">
-										<Link href={pathHelpPractice(nextLesson?.id ?? "lunch")}>
-											{nextLesson
-												? "Start or resume practice"
-												: "Replay lunch"}
-											<ArrowRight />
-										</Link>
-									</Button>
-								</CardContent>
-							</Card>
-							<Card>
-								<CardHeader>
-									<CardTitle>Your starting checklist</CardTitle>
-									<CardDescription className="text-sm leading-6">
-										Saved results, your confirmations, and reading progress are
-										separate. Existing data does not automatically complete this
-										checklist.
-									</CardDescription>
-								</CardHeader>
-								<CardContent>
-									{overview && (
-										<ul className="divide-y text-sm">
-											{[
-												{
-													label: "Bring in bank activity",
-													value:
-														overview.learning.lastImportAt &&
-														overview.statements > 0
-															? "Import completed · Statements are present"
-															: `${overview.statements} Statements present · no guided import recorded`,
-													href: pathHelp("import"),
-												},
-												{
-													label: "Explain your activity",
-													value:
-														overview.recordStatus === "complete"
-															? "Your saved Record still tallies"
-															: overview.recordStatus === "pending"
-																? "Your saved Record needs an Allocation check"
-																: overview.recordStatus ===
-																		"missing"
-																	? "Your earlier Record is missing · choose another"
-																	: `${overview.records} Records present · save one to track this step`,
-													href: pathHelp("lunch"),
-												},
-												{
-													label: "Review your month",
-													value: overview.learning.reviewedMonth
-														? overview.learning.reviewedMonth +
-															" review (confirmed by you)"
-														: "Review Dashboard and Monthly Records, then confirm",
-													href: pathHelp("dashboard"),
-												},
-												{
-													label: "Practice the core workflow",
-													value: `${overview.learning.completed.length} of 4 sample lessons completed`,
-													href: pathHelpPractice(
-														nextLesson?.id ?? "lunch",
-													),
-												},
-												{
-													label: "Protect your data",
-													value: overview.learning.backupLocatedAt
-														? "File located (confirmed by you)"
-														: overview.learning.backupRequestedAt
-															? "Download requested · confirm you located the file"
-															: "Request a backup, then locate your exported file",
-													href: pathHelp("backup-first"),
-												},
-											].map(item => (
-												<li
-													key={item.label}
-													className="flex flex-col gap-1 py-3 sm:flex-row sm:justify-between sm:gap-4"
-												>
-													<Link
-														href={item.href}
-														className="font-medium underline decoration-border underline-offset-4 hover:decoration-foreground"
-													>
-														{item.label}
-													</Link>
-													<span className="text-muted-foreground">
-														{item.value}
-													</span>
-												</li>
-											))}
-										</ul>
-									)}
-								</CardContent>
-							</Card>
-						</>
-					)}
-					<div className="grid gap-6 lg:grid-cols-2" aria-live="polite">
-						{[...new Set(matches.map(item => item.group))].map(group => (
-							<section key={group} className="min-w-0">
-								<h3 className="mb-2 text-base font-semibold">{group}</h3>
-								<ul className="divide-y rounded-lg border bg-card px-4">
-									{matches
-										.filter(item => item.group === group)
-										.map(item => (
-											<li key={item.id}>
-												<Link
-													href={pathHelp(item.id)}
-													className="flex min-h-14 items-center justify-between gap-3 py-3 text-sm hover:underline"
-												>
-													<span>{item.title}</span>
-													{overview?.learning.reviewed.includes(
-														item.id,
-													) ? (
-														<Check
-															className="size-4 shrink-0"
-															aria-label="Reviewed"
-														/>
-													) : (
-														<ArrowRight className="size-4 shrink-0 text-muted-foreground" />
-													)}
-												</Link>
-											</li>
-										))}
-								</ul>
-							</section>
-						))}
-						{!matches.length && (
-							<p className="text-sm text-muted-foreground">
-								No matching guide. Try “amount”, “Pending”, “import”, or “backup”.
-							</p>
-						)}
+				</div>
+				{!query && <VideoCard />}
+			</div>
+			{query ? (
+				<Questions overview={overview} query={query} />
+			) : (
+				<>
+					{overview && <Progress overview={overview} />}
+					<div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_minmax(0,28rem)]">
+						<Questions overview={overview} query="" />
+						{overview && <PracticeLessons overview={overview} />}
 					</div>
-					{!query && (
-						<section>
-							<h3 className="mb-3 text-base font-semibold">
-								Try it with sample data
-							</h3>
-							<div className="grid gap-3 sm:grid-cols-2">
-								{practiceLessons.map(lesson => (
-									<Link
-										key={lesson.id}
-										href={pathHelpPractice(lesson.id)}
-										className="flex min-h-14 items-center justify-between gap-3 rounded-lg border p-4 text-sm hover:bg-muted/50"
-									>
-										<span>{lesson.title}</span>
-										<Badge variant="outline">
-											{overview?.learning.completed.includes(lesson.id)
-												? "Completed"
-												: "Practice"}
-										</Badge>
-									</Link>
-								))}
-							</div>
-						</section>
-					)}
-					<p className="text-sm text-muted-foreground">
-						Learning progress stays in this browser. It is not included in financial
+					<p className="text-xs text-muted-foreground">
+						Learning progress stays in this browser. It isn’t included in financial
 						backups or Google Drive sync.
 					</p>
-				</div>
+				</>
 			)}
 		</PageContent>
 	)
