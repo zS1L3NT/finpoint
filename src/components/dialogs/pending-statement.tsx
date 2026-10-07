@@ -156,9 +156,6 @@ export default function PendingStatementDialog({
 							: "Add handwritten account activity now and replace it when the imported statement arrives."}
 					</DialogDescription>
 				</DialogHeader>
-				<div className="flex justify-end">
-					<ContextHelp topic="pending" label="Help with this form" />
-				</div>
 
 				<form
 					id="pending-statement-form"
@@ -234,6 +231,7 @@ export default function PendingStatementDialog({
 						</Button>
 					</div>
 				</DialogFooter>
+				<ContextHelp topic="pending" label="How this form works" variant="form" />
 			</DialogContent>
 		</Dialog>
 	)

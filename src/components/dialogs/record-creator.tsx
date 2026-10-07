@@ -149,9 +149,6 @@ export default function RecordCreatorDialog({
 						Allocate {statements.length} selected statement(s) to a new record.
 					</DialogDescription>
 				</DialogHeader>
-				<div className="flex justify-end">
-					<ContextHelp topic="lunch" label="Help with this form" />
-				</div>
 
 				<form
 					id="allocate-record-form"
@@ -477,6 +474,7 @@ export default function RecordCreatorDialog({
 						Create Record
 					</Button>
 				</DialogFooter>
+				<ContextHelp topic="lunch" label="How this form works" variant="form" />
 			</DialogContent>
 		</Dialog>
 	)

@@ -251,9 +251,6 @@ export default function RecordEditorDialog({
 						Update the record details and its statement allocations.
 					</DialogDescription>
 				</DialogHeader>
-				<div className="flex justify-end">
-					<ContextHelp topic="pending" label="Help with this form" />
-				</div>
 
 				<form
 					id="record-editor-form"
@@ -634,6 +631,7 @@ export default function RecordEditorDialog({
 						Save changes
 					</Button>
 				</DialogFooter>
+				<ContextHelp topic="pending" label="How this form works" variant="form" />
 			</DialogContent>
 		</Dialog>
 	)

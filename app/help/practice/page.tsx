@@ -172,7 +172,11 @@ function Practice({
 									<strong>Allocation:</strong> the part assigned to this Record.{" "}
 									<strong>Record:</strong> your explanation.
 								</p>
-								<ContextHelp topic={lesson.topic} label="Explain these amounts" />
+								<ContextHelp
+									topic={lesson.topic}
+									label="Explain these amounts"
+									variant="inline"
+								/>
 								<FieldGroup>
 									{state.draft.map((value, index) => (
 										<Field
@@ -372,7 +376,11 @@ function Practice({
 								samples use confirmed Statements. A Statement can still have a
 								remainder for another Record.
 							</p>
-							<ContextHelp topic={lesson.topic} label="Explain this lesson" />
+							<ContextHelp
+								topic={lesson.topic}
+								label="Explain this lesson"
+								variant="inline"
+							/>
 						</CardContent>
 					</Card>
 					<section>

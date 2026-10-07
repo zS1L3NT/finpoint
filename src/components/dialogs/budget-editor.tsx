@@ -106,9 +106,6 @@ export default function BudgetEditorDialog({
 						assignment.
 					</DialogDescription>
 				</DialogHeader>
-				<div className="flex justify-end">
-					<ContextHelp topic="budgets" label="Help with this form" />
-				</div>
 
 				<form
 					id="budget-edit-form"
@@ -225,6 +222,7 @@ export default function BudgetEditorDialog({
 						Save changes
 					</Button>
 				</DialogFooter>
+				<ContextHelp topic="budgets" label="How this form works" variant="form" />
 			</DialogContent>
 		</Dialog>
 	)

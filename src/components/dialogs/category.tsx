@@ -169,9 +169,6 @@ export default function CategoryDialog({
 							: "Create a new top-level category or nest it under an existing one."}
 					</DialogDescription>
 				</DialogHeader>
-				<div className="flex justify-end">
-					<ContextHelp topic="categories" label="Help with this form" />
-				</div>
 
 				<form id="category-form" className="flex flex-col gap-4" onSubmit={handleSubmit}>
 					<FieldGroup className="grid gap-4 md:grid-cols-2">
@@ -322,6 +319,7 @@ export default function CategoryDialog({
 						{isEditing ? "Save changes" : "Create category"}
 					</Button>
 				</DialogFooter>
+				<ContextHelp topic="categories" label="How this form works" variant="form" />
 			</DialogContent>
 		</Dialog>
 	)

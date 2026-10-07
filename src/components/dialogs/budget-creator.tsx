@@ -80,9 +80,6 @@ export default function BudgetCreatorDialog({
 						land inside the budget period.
 					</DialogDescription>
 				</DialogHeader>
-				<div className="flex justify-end">
-					<ContextHelp topic="budgets" label="Help with this form" />
-				</div>
 
 				<form
 					id="budget-create-form"
@@ -191,6 +188,7 @@ export default function BudgetCreatorDialog({
 						Create budget
 					</Button>
 				</DialogFooter>
+				<ContextHelp topic="budgets" label="How this form works" variant="form" />
 			</DialogContent>
 		</Dialog>
 	)
