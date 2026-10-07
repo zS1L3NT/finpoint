@@ -13,7 +13,7 @@ Step 2
 Import a bank CSV, or restore a backup.
 
 Step 3
-Explain one bank row.
+Explain one Statement.
 
 Step 4
 Download a backup.
@@ -22,7 +22,7 @@ Check your result
 You can say where one bank amount went, and find it again.
 
 Watch out
-An empty Dashboard is normal at first. Imported bank rows don’t count until you explain them.
+An empty Dashboard is normal at first. Imported Statements don’t count until you explain them.
 
 Example
 Alex paid $12 for lunch. The bank shows −$12. Alex adds a Lunch Record for −$12, and an Allocation of −$12 connects them.
@@ -32,10 +32,10 @@ Alex paid $12 for lunch. The bank shows −$12. Alex adds a Lunch Record for −
 Statements, Records and Allocations
 
 The problem
-Bank rows and real-life purchases don’t always match one for one.
+Statements and real-life purchases don’t always match one for one.
 
 The idea
-A Statement is one row from your bank. A Record is your explanation of what happened. An Allocation links an amount from a Statement to a Record. An Account is where money sits, not your login. Money paid is negative, and money received is positive.
+A Statement is one entry of bank activity. A Record is your explanation of what happened. An Allocation links an amount from a Statement to a Record. An Account is where money sits, not your login. Money paid is negative, and money received is positive.
 
 Step 1
 Read the Statement’s amount and description.
@@ -53,7 +53,7 @@ Check your result
 A Record is complete when it has an Allocation, its Allocation total equals its amount, and none of its Statements are Pending.
 
 Watch out
-Two bank rows don’t always mean two Records. A payment and its repayment can explain one shared purchase.
+Two Statements don’t always mean two Records. A payment and its repayment can explain one shared purchase.
 
 Example
 Statement −$12, Allocation −$12, Lunch Record −$12. Your Account balance and your Dashboard spending answer different questions.
@@ -146,7 +146,7 @@ Watch out
 If the Record says Pending, compare its amount with its Allocations, and fix whichever is wrong.
 
 Example
-−$12 from the bank, −$12 allocated, a −$12 Lunch. Nothing remaining, and no difference.
+−$12 from the bank, −$12 allocated, a −$12 Lunch. Nothing left to allocate, and no difference.
 
 ————————
 
@@ -184,7 +184,7 @@ The problem
 One −$80 supermarket Statement was really $60 of groceries and a $20 gift. Put it all in one Category, and that difference hides.
 
 The idea
-Create two Records, and allocate part of the Statement to each. The bank row stays whole, and you get two clear explanations.
+Create two Records, and allocate part of the Statement to each. The Statement stays whole, and you get two clear explanations.
 
 Step 1
 Create Groceries for −$60, from the −$80 Statement.
@@ -199,10 +199,10 @@ Check your result
 −$60 plus −$20 equals −$80. Both Records are complete, and the Statement is fully used.
 
 Watch out
-You can’t allocate more than a Statement has left. Fix the Allocations; don’t invent bank rows.
+You can’t allocate more than a Statement has left. Fix the Allocations; don’t invent bank activity.
 
 Example
-One Statement of −$80 becomes Groceries −$60 and Gift −$20. One bank row, two useful explanations.
+One Statement of −$80 becomes Groceries −$60 and Gift −$20. One Statement, two useful explanations.
 
 ————————
 
@@ -252,7 +252,7 @@ Step 3
 Use Saving or investment for contributions and withdrawals.
 
 Check your result
-A +$20 refund lowers your net spending. Savings contributions show as positive amounts.
+A +$20 refund lowers your net spending. Saving or investment contributions show as positive amounts.
 
 Watch out
 A −$250 saving net means more cash went into savings than came out. It isn’t an investment loss.
@@ -277,7 +277,7 @@ Step 2
 If lunch really cost $12, change the Record from −$10 to −$12.
 
 Step 3
-When the real bank row arrives, replace the Pending Statement instead of allocating twice.
+When the real Statement arrives, replace the Pending Statement instead of allocating twice.
 
 Check your result
 There’s at least one Allocation, the total matches the Record, and no allocated Statement is Pending.
@@ -296,7 +296,7 @@ The problem
 Something you saved seems to be missing. Usually filters or the month are hiding it. An empty list doesn’t mean your data is gone.
 
 The idea
-Records show your explanations. Statements show every bank row. Allocator only shows amounts left to explain. Use search and filters to narrow the right list.
+Records show your explanations. Statements show all your bank activity. Allocator only shows amounts left to explain. Use search and filters to narrow the right list.
 
 Step 1
 Check the month and date range, and clear filters.
@@ -308,7 +308,7 @@ Step 3
 Open the item, edit it, then check its totals again.
 
 Check your result
-The fixed item shows up where you expect, still linked to its bank row.
+The fixed item shows up where you expect, still linked to its Statement.
 
 Watch out
 Renaming doesn’t fix a wrong amount. Keep a backup before big changes.
@@ -346,7 +346,7 @@ Lunch: Category Food, treatment Spending, bucket Daily. Rent is Spending too, bu
 
 ————————
 
-Monthly bucket targets
+Monthly targets
 
 The problem
 You want to compare a month’s spending with a plan, without moving any money.

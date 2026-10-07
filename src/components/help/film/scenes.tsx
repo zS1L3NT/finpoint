@@ -392,7 +392,7 @@ function StartExample() {
 // ─── 02 · Statements, Records, Allocations ──────────────────────────────────────────────
 
 function ModelProblem() {
-	const rows = useAt("Bank", 0)
+	const rows = useAt("Statements", 0)
 	const life = useAt("real-life", 20)
 	const match = useAt("match", 40)
 	const left = [
@@ -424,7 +424,7 @@ function ModelProblem() {
 			))}
 			<At x={0} y={0}>
 				<Rise at={rows}>
-					<Kicker tint={color.statement}>Bank rows</Kicker>
+					<Kicker tint={color.statement}>Statements</Kicker>
 				</Rise>
 			</At>
 			<At x={600} y={0}>
@@ -1101,7 +1101,7 @@ function LunchHelps() {
 }
 
 function LunchExample() {
-	const remaining = useAt("remaining", 120)
+	const remaining = useAt("left", 120)
 	return (
 		<LunchFlow
 			statementAt={useAt("bank", 0)}
@@ -1927,7 +1927,7 @@ function TreatmentsCheck() {
 					label="Contributions"
 					tint={color.saving}
 					value={<span style={font.numbers}>$300</span>}
-					sub="Shown as a positive magnitude"
+					sub="Shown as a positive amount"
 				/>
 			</Rise>
 		</At>

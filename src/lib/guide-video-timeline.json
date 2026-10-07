@@ -2,14 +2,14 @@
 	"fps": 30,
 	"width": 1920,
 	"height": 1080,
-	"durationInFrames": 34387,
+	"durationInFrames": 34440,
 	"chapters": [
 		{
 			"id": "start",
 			"title": "What does Finpoint do?",
 			"group": "Start here",
 			"startFrame": 0,
-			"durationInFrames": 2100,
+			"durationInFrames": 2101,
 			"segments": [
 				{
 					"label": "The problem",
@@ -41,7 +41,7 @@
 				},
 				{
 					"label": "Step 3",
-					"text": "Explain one bank row.",
+					"text": "Explain one Statement.",
 					"from": 1056,
 					"durationInFrames": 111,
 					"audio": "guide-audio/start-4.mp3"
@@ -62,15 +62,15 @@
 				},
 				{
 					"label": "Watch out",
-					"text": "An empty Dashboard is normal at first. Imported bank rows don’t count until you explain them.",
+					"text": "An empty Dashboard is normal at first. Imported Statements don’t count until you explain them.",
 					"from": 1439,
-					"durationInFrames": 243,
+					"durationInFrames": 244,
 					"audio": "guide-audio/start-7.mp3"
 				},
 				{
 					"label": "Example",
 					"text": "Alex paid $12 for lunch. The bank shows −$12. Alex adds a Lunch Record for −$12, and an Allocation of −$12 connects them.",
-					"from": 1682,
+					"from": 1683,
 					"durationInFrames": 418,
 					"audio": "guide-audio/start-8.mp3"
 				}
@@ -80,69 +80,69 @@
 			"id": "model",
 			"title": "Statements, Records and Allocations",
 			"group": "Start here",
-			"startFrame": 2100,
-			"durationInFrames": 2421,
+			"startFrame": 2101,
+			"durationInFrames": 2428,
 			"segments": [
 				{
 					"label": "The problem",
-					"text": "Bank rows and real-life purchases don’t always match one for one.",
+					"text": "Statements and real-life purchases don’t always match one for one.",
 					"from": 0,
-					"durationInFrames": 282,
+					"durationInFrames": 279,
 					"audio": "guide-audio/model-0.mp3"
 				},
 				{
 					"label": "The idea",
-					"text": "A Statement is one row from your bank. A Record is your explanation of what happened. An Allocation links an amount from a Statement to a Record. An Account is where money sits, not your login. Money paid is negative, and money received is positive.",
-					"from": 282,
-					"durationInFrames": 531,
+					"text": "A Statement is one entry of bank activity. A Record is your explanation of what happened. An Allocation links an amount from a Statement to a Record. An Account is where money sits, not your login. Money paid is negative, and money received is positive.",
+					"from": 279,
+					"durationInFrames": 545,
 					"audio": "guide-audio/model-1.mp3"
 				},
 				{
 					"label": "Step 1",
 					"text": "Read the Statement’s amount and description.",
-					"from": 813,
+					"from": 824,
 					"durationInFrames": 134,
 					"audio": "guide-audio/model-2.mp3"
 				},
 				{
 					"label": "Step 2",
 					"text": "Decide what it really was.",
-					"from": 947,
+					"from": 958,
 					"durationInFrames": 115,
 					"audio": "guide-audio/model-3.mp3"
 				},
 				{
 					"label": "Step 3",
 					"text": "Create a Record that explains it.",
-					"from": 1062,
+					"from": 1073,
 					"durationInFrames": 124,
 					"audio": "guide-audio/model-4.mp3"
 				},
 				{
 					"label": "Step 4",
 					"text": "Allocate the amount. One Statement can feed several Records, and one Record can combine several Statements.",
-					"from": 1186,
+					"from": 1197,
 					"durationInFrames": 264,
 					"audio": "guide-audio/model-5.mp3"
 				},
 				{
 					"label": "Check your result",
 					"text": "A Record is complete when it has an Allocation, its Allocation total equals its amount, and none of its Statements are Pending.",
-					"from": 1450,
+					"from": 1461,
 					"durationInFrames": 297,
 					"audio": "guide-audio/model-6.mp3"
 				},
 				{
 					"label": "Watch out",
-					"text": "Two bank rows don’t always mean two Records. A payment and its repayment can explain one shared purchase.",
-					"from": 1747,
-					"durationInFrames": 269,
+					"text": "Two Statements don’t always mean two Records. A payment and its repayment can explain one shared purchase.",
+					"from": 1758,
+					"durationInFrames": 265,
 					"audio": "guide-audio/model-7.mp3"
 				},
 				{
 					"label": "Example",
 					"text": "Statement −$12, Allocation −$12, Lunch Record −$12. Your Account balance and your Dashboard spending answer different questions.",
-					"from": 2016,
+					"from": 2023,
 					"durationInFrames": 405,
 					"audio": "guide-audio/model-8.mp3"
 				}
@@ -152,7 +152,7 @@
 			"id": "workspace",
 			"title": "Starting fresh, or restoring",
 			"group": "Start here",
-			"startFrame": 4521,
+			"startFrame": 4529,
 			"durationInFrames": 2158,
 			"segments": [
 				{
@@ -224,7 +224,7 @@
 			"id": "import",
 			"title": "Importing bank activity",
 			"group": "Everyday use",
-			"startFrame": 6679,
+			"startFrame": 6687,
 			"durationInFrames": 2306,
 			"segments": [
 				{
@@ -296,8 +296,8 @@
 			"id": "lunch",
 			"title": "Explaining your first purchase",
 			"group": "Everyday use",
-			"startFrame": 8985,
-			"durationInFrames": 1928,
+			"startFrame": 8993,
+			"durationInFrames": 1942,
 			"segments": [
 				{
 					"label": "The problem",
@@ -350,9 +350,9 @@
 				},
 				{
 					"label": "Example",
-					"text": "−$12 from the bank, −$12 allocated, a −$12 Lunch. Nothing remaining, and no difference.",
+					"text": "−$12 from the bank, −$12 allocated, a −$12 Lunch. Nothing left to allocate, and no difference.",
 					"from": 1589,
-					"durationInFrames": 339,
+					"durationInFrames": 353,
 					"audio": "guide-audio/lunch-7.mp3"
 				}
 			]
@@ -361,7 +361,7 @@
 			"id": "backup-first",
 			"title": "Protecting your work",
 			"group": "Start here",
-			"startFrame": 10913,
+			"startFrame": 10935,
 			"durationInFrames": 1731,
 			"segments": [
 				{
@@ -426,8 +426,8 @@
 			"id": "split",
 			"title": "Splitting one payment",
 			"group": "Everyday use",
-			"startFrame": 12644,
-			"durationInFrames": 2280,
+			"startFrame": 12666,
+			"durationInFrames": 2285,
 			"segments": [
 				{
 					"label": "The problem",
@@ -438,7 +438,7 @@
 				},
 				{
 					"label": "The idea",
-					"text": "Create two Records, and allocate part of the Statement to each. The bank row stays whole, and you get two clear explanations.",
+					"text": "Create two Records, and allocate part of the Statement to each. The Statement stays whole, and you get two clear explanations.",
 					"from": 427,
 					"durationInFrames": 290,
 					"audio": "guide-audio/split-1.mp3"
@@ -473,16 +473,16 @@
 				},
 				{
 					"label": "Watch out",
-					"text": "You can’t allocate more than a Statement has left. Fix the Allocations; don’t invent bank rows.",
+					"text": "You can’t allocate more than a Statement has left. Fix the Allocations; don’t invent bank activity.",
 					"from": 1639,
-					"durationInFrames": 244,
+					"durationInFrames": 251,
 					"audio": "guide-audio/split-6.mp3"
 				},
 				{
 					"label": "Example",
-					"text": "One Statement of −$80 becomes Groceries −$60 and Gift −$20. One bank row, two useful explanations.",
-					"from": 1883,
-					"durationInFrames": 397,
+					"text": "One Statement of −$80 becomes Groceries −$60 and Gift −$20. One Statement, two useful explanations.",
+					"from": 1890,
+					"durationInFrames": 395,
 					"audio": "guide-audio/split-7.mp3"
 				}
 			]
@@ -491,7 +491,7 @@
 			"id": "repayment",
 			"title": "A shared dinner and repayment",
 			"group": "Everyday use",
-			"startFrame": 14924,
+			"startFrame": 14951,
 			"durationInFrames": 2040,
 			"segments": [
 				{
@@ -556,8 +556,8 @@
 			"id": "treatments",
 			"title": "Refunds, transfers and savings",
 			"group": "Understand the numbers",
-			"startFrame": 16964,
-			"durationInFrames": 2672,
+			"startFrame": 16991,
+			"durationInFrames": 2702,
 			"segments": [
 				{
 					"label": "The problem",
@@ -596,22 +596,22 @@
 				},
 				{
 					"label": "Check your result",
-					"text": "A +$20 refund lowers your net spending. Savings contributions show as positive amounts.",
+					"text": "A +$20 refund lowers your net spending. Saving or investment contributions show as positive amounts.",
 					"from": 1605,
-					"durationInFrames": 268,
+					"durationInFrames": 298,
 					"audio": "guide-audio/treatments-5.mp3"
 				},
 				{
 					"label": "Watch out",
 					"text": "A −$250 saving net means more cash went into savings than came out. It isn’t an investment loss.",
-					"from": 1873,
+					"from": 1903,
 					"durationInFrames": 305,
 					"audio": "guide-audio/treatments-6.mp3"
 				},
 				{
 					"label": "Example",
 					"text": "Put in $300 and take out $50: contributions $300, withdrawals $50, net −$250. The +$3,000 salary is separate income.",
-					"from": 2178,
+					"from": 2208,
 					"durationInFrames": 494,
 					"audio": "guide-audio/treatments-7.mp3"
 				}
@@ -621,8 +621,8 @@
 			"id": "pending",
 			"title": "Why a Record is Pending",
 			"group": "Fix a problem",
-			"startFrame": 19636,
-			"durationInFrames": 2303,
+			"startFrame": 19693,
+			"durationInFrames": 2300,
 			"segments": [
 				{
 					"label": "The problem",
@@ -654,29 +654,29 @@
 				},
 				{
 					"label": "Step 3",
-					"text": "When the real bank row arrives, replace the Pending Statement instead of allocating twice.",
+					"text": "When the real Statement arrives, replace the Pending Statement instead of allocating twice.",
 					"from": 1243,
-					"durationInFrames": 228,
+					"durationInFrames": 225,
 					"audio": "guide-audio/pending-4.mp3"
 				},
 				{
 					"label": "Check your result",
 					"text": "There’s at least one Allocation, the total matches the Record, and no allocated Statement is Pending.",
-					"from": 1471,
+					"from": 1468,
 					"durationInFrames": 254,
 					"audio": "guide-audio/pending-5.mp3"
 				},
 				{
 					"label": "Watch out",
 					"text": "Fix the facts, not just the label. A Pending Record is still saved.",
-					"from": 1725,
+					"from": 1722,
 					"durationInFrames": 190,
 					"audio": "guide-audio/pending-6.mp3"
 				},
 				{
 					"label": "Example",
 					"text": "The Record says −$10, but the Allocation is −$12. Change the Record to −$12, and the difference drops to $0.",
-					"from": 1915,
+					"from": 1912,
 					"durationInFrames": 388,
 					"audio": "guide-audio/pending-7.mp3"
 				}
@@ -686,8 +686,8 @@
 			"id": "find",
 			"title": "Finding and fixing mistakes",
 			"group": "Fix a problem",
-			"startFrame": 21939,
-			"durationInFrames": 1836,
+			"startFrame": 21993,
+			"durationInFrames": 1845,
 			"segments": [
 				{
 					"label": "The problem",
@@ -698,50 +698,50 @@
 				},
 				{
 					"label": "The idea",
-					"text": "Records show your explanations. Statements show every bank row. Allocator only shows amounts left to explain. Use search and filters to narrow the right list.",
+					"text": "Records show your explanations. Statements show all your bank activity. Allocator only shows amounts left to explain. Use search and filters to narrow the right list.",
 					"from": 368,
-					"durationInFrames": 358,
+					"durationInFrames": 366,
 					"audio": "guide-audio/find-1.mp3"
 				},
 				{
 					"label": "Step 1",
 					"text": "Check the month and date range, and clear filters.",
-					"from": 726,
+					"from": 734,
 					"durationInFrames": 150,
 					"audio": "guide-audio/find-2.mp3"
 				},
 				{
 					"label": "Step 2",
 					"text": "Look in Statements for rows Allocator no longer shows.",
-					"from": 876,
+					"from": 884,
 					"durationInFrames": 161,
 					"audio": "guide-audio/find-3.mp3"
 				},
 				{
 					"label": "Step 3",
 					"text": "Open the item, edit it, then check its totals again.",
-					"from": 1037,
+					"from": 1045,
 					"durationInFrames": 162,
 					"audio": "guide-audio/find-4.mp3"
 				},
 				{
 					"label": "Check your result",
-					"text": "The fixed item shows up where you expect, still linked to its bank row.",
-					"from": 1199,
-					"durationInFrames": 187,
+					"text": "The fixed item shows up where you expect, still linked to its Statement.",
+					"from": 1207,
+					"durationInFrames": 188,
 					"audio": "guide-audio/find-5.mp3"
 				},
 				{
 					"label": "Watch out",
 					"text": "Renaming doesn’t fix a wrong amount. Keep a backup before big changes.",
-					"from": 1386,
+					"from": 1395,
 					"durationInFrames": 196,
 					"audio": "guide-audio/find-6.mp3"
 				},
 				{
 					"label": "Example",
 					"text": "To find payments over $50, choose Paid and type 50. No minus sign needed.",
-					"from": 1582,
+					"from": 1591,
 					"durationInFrames": 254,
 					"audio": "guide-audio/find-7.mp3"
 				}
@@ -751,7 +751,7 @@
 			"id": "categories",
 			"title": "Category, treatment and bucket",
 			"group": "Plan your money",
-			"startFrame": 23775,
+			"startFrame": 23838,
 			"durationInFrames": 1879,
 			"segments": [
 				{
@@ -814,57 +814,57 @@
 		},
 		{
 			"id": "targets",
-			"title": "Monthly bucket targets",
+			"title": "Monthly targets",
 			"group": "Plan your money",
-			"startFrame": 25654,
-			"durationInFrames": 1798,
+			"startFrame": 25717,
+			"durationInFrames": 1788,
 			"segments": [
 				{
 					"label": "The problem",
 					"text": "You want to compare a month’s spending with a plan, without moving any money.",
 					"from": 0,
-					"durationInFrames": 252,
+					"durationInFrames": 242,
 					"audio": "guide-audio/targets-0.mp3"
 				},
 				{
 					"label": "The idea",
 					"text": "A target is a monthly comparison for a bucket. A default carries forward from the month you set it. A target for only one month overrides it. Targets never reserve cash or block spending.",
-					"from": 252,
+					"from": 242,
 					"durationInFrames": 411,
 					"audio": "guide-audio/targets-1.mp3"
 				},
 				{
 					"label": "Step 1",
 					"text": "On the Dashboard, pick the month first.",
-					"from": 663,
+					"from": 653,
 					"durationInFrames": 127,
 					"audio": "guide-audio/targets-2.mp3"
 				},
 				{
 					"label": "Step 2",
 					"text": "Choose this month only, or from this month onward.",
-					"from": 790,
+					"from": 780,
 					"durationInFrames": 153,
 					"audio": "guide-audio/targets-3.mp3"
 				},
 				{
 					"label": "Step 3",
 					"text": "Compare the bucket’s spending with its target.",
-					"from": 943,
+					"from": 933,
 					"durationInFrames": 135,
 					"audio": "guide-audio/targets-4.mp3"
 				},
 				{
 					"label": "Check your result",
 					"text": "Daily spending of $127 against a $500 target leaves $373.",
-					"from": 1078,
+					"from": 1068,
 					"durationInFrames": 303,
 					"audio": "guide-audio/targets-5.mp3"
 				},
 				{
 					"label": "Example",
 					"text": "A $500 default starts in October and carries on. A $600 target just for October wins in October, and later months go back to $500.",
-					"from": 1381,
+					"from": 1371,
 					"durationInFrames": 417,
 					"audio": "guide-audio/targets-6.mp3"
 				}
@@ -874,7 +874,7 @@
 			"id": "budgets",
 			"title": "Budgets for trips and events",
 			"group": "Plan your money",
-			"startFrame": 27452,
+			"startFrame": 27505,
 			"durationInFrames": 1638,
 			"segments": [
 				{
@@ -939,7 +939,7 @@
 			"id": "dashboard",
 			"title": "Reading the Dashboard",
 			"group": "Understand the numbers",
-			"startFrame": 29090,
+			"startFrame": 29143,
 			"durationInFrames": 2060,
 			"segments": [
 				{
@@ -1004,7 +1004,7 @@
 			"id": "sync",
 			"title": "Backups and Google Drive",
 			"group": "Fix a problem",
-			"startFrame": 31150,
+			"startFrame": 31203,
 			"durationInFrames": 1855,
 			"segments": [
 				{
@@ -1069,7 +1069,7 @@
 			"id": "routine",
 			"title": "Your routine",
 			"group": "Everyday use",
-			"startFrame": 33005,
+			"startFrame": 33058,
 			"durationInFrames": 1382,
 			"segments": [
 				{

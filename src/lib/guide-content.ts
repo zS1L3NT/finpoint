@@ -49,9 +49,9 @@ export const guideTopics: GuideTopic[] = [
 		group: "Start here",
 		keywords: "transaction terminology account balance link money paid received sign",
 		destination: "allocator",
-		problem: "Bank rows and real-life purchases do not always match one for one.",
+		problem: "Statements and real-life purchases do not always match one for one.",
 		explanation:
-			"A Statement is one account activity entry. A Record is your explanation of an activity. An Allocation assigns an amount from a Statement to a Record. An Account identifies the financial source, not your login. Money paid is negative; money received is positive.",
+			"A Statement is one account activity entry. A Record is your explanation of an activity. An Allocation assigns an amount from a Statement to a Record. An Account identifies the financial source, not your login. Money paid is negative, so paying $12 shows as −$12. Money received is positive, so receiving $60 shows as +$60.",
 		steps: [
 			"Read the Statement amount and description.",
 			"Choose what that activity means in real life.",
@@ -59,7 +59,7 @@ export const guideTopics: GuideTopic[] = [
 			"Allocate the appropriate signed amount. A Statement can feed several Records, and a Record can combine several Statements.",
 		],
 		check: "A complete Record has at least one Allocation, its Allocation total equals its amount, and none of its Statements are Pending.",
-		fix: "Do not create a second explanation just because there are two bank rows. A payment and repayment may explain one shared purchase.",
+		fix: "Do not create a second explanation just because there are two Statements. A payment and repayment may explain one shared purchase.",
 		example:
 			"Statement −$12 → Allocation −$12 → Lunch Record −$12. An Account balance and the Dashboard spending total answer different questions.",
 	},
@@ -98,9 +98,9 @@ export const guideTopics: GuideTopic[] = [
 			"Export a CSV from your supported bank. Keep its original columns.",
 			"Open Importer, select the bank, and select the file or files. For Revolut, choose or create the Account.",
 			"Submit the import and read the inserted, re-indexed, and unchanged counts.",
-			"Open Statements to check dates, amounts, and Account. Then open Allocator to explain the remaining amounts.",
+			"Open Statements to check dates, amounts, and Account. Then open Allocator to explain the amounts left to allocate.",
 		],
-		check: "The expected bank rows are visible with the correct signs and dates.",
+		check: "The expected Statements are visible with the correct signs and dates.",
 		fix: "If import fails, check the selected bank and original CSV format. A PDF or renamed spreadsheet is not the same format. If no rows are inserted, inspect skipped counts and filters before importing repeatedly.",
 		example:
 			"Alex imports a bank CSV containing a salary of +$3,000 and a lunch payment of −$12. Neither has a personal explanation until Alex creates Records.",
@@ -114,17 +114,17 @@ export const guideTopics: GuideTopic[] = [
 		problem:
 			"The imported lunch Statement says −$12, but the Dashboard needs the Record that explains it.",
 		explanation:
-			"Allocator shows Statements with amounts still available to allocate. Create a Record from the relevant Statement, give it a useful title, date, amount, and Category, and check the proposed Allocation before saving.",
+			"Allocator shows Statements with amounts left to allocate. Create a Record from the relevant Statement, give it a useful title, date, amount, and Category, and check the proposed Allocation before saving.",
 		steps: [
 			"Open Allocator and choose the lunch Statement.",
-			"Create a Record titled Lunch. Use Paid $12, represented as −$12, and select the appropriate food Category.",
+			"Create a Record titled Lunch and enter Paid $12. Money paid is negative, so Finpoint shows it as −$12. Select the appropriate food Category.",
 			"Check that the Allocation from the lunch Statement is −$12. Review treatment and bucket defaults.",
 			"Save, reopen the Record, and confirm its amount and Allocation total both equal −$12.",
 		],
-		check: "The Record is complete and the fully allocated lunch Statement leaves the remaining-amount list.",
+		check: "The Record is complete. The lunch Statement has $0 left to allocate, so it leaves Allocator.",
 		fix: "If the Record is Pending, compare its amount with the saved Allocation total. Correct the amount or missing Allocation based on what actually happened.",
 		example:
-			"−$12 bank activity → −$12 allocated → −$12 Lunch. Statement remaining: $0. Record difference: $0.",
+			"−$12 bank activity → −$12 allocated → −$12 Lunch. Left to allocate: $0. Record difference: $0.",
 	},
 	{
 		id: "backup-first",
@@ -159,14 +159,14 @@ export const guideTopics: GuideTopic[] = [
 			"Create two Records and allocate part of the same Statement to each. Allocations keep the bank link while Records explain the separate purposes. Their total should use the available Statement amount without exceeding it.",
 		steps: [
 			"Create Groceries for −$60 and allocate −$60 from the −$80 Statement.",
-			"The Statement has −$20 left to allocate. Create Gift for −$20 and allocate that remainder.",
+			"The Statement has −$20 left to allocate. Create Gift for −$20 and allocate the rest.",
 			"Choose the correct Category and treatment for each Record.",
-			"Check both Records and confirm the Statement has $0 remaining.",
+			"Check both Records and confirm the Statement has $0 left to allocate.",
 		],
 		check: "−$60 plus −$20 equals −$80. Both Records tally and the Statement is fully allocated.",
 		fix: "An Allocation larger than the available amount is rejected. Reduce it or remove an incorrect existing Allocation; do not invent extra bank activity.",
 		example:
-			"One Statement −$80 → Groceries −$60 and Gift −$20. You keep one bank row and two useful explanations.",
+			"One Statement −$80 → Groceries −$60 and Gift −$20. You keep one Statement and two useful explanations.",
 	},
 	{
 		id: "repayment",
@@ -203,11 +203,11 @@ export const guideTopics: GuideTopic[] = [
 		steps: [
 			"Use Income for salary, and Spending for purchases and their refunds.",
 			"For a transfer between your own Accounts, combine −$200 and +$200 into a $0 Record with Allocations; use Transfer/neutral.",
-			"Use Saving/investment for contributions and withdrawals.",
+			"Use Saving/investment for contributions to and withdrawals from savings.",
 			"Review the effective treatment on the Record rather than guessing from its Category name.",
 		],
-		check: "A +$20 Spending refund reduces net spending. Saving contributions display as positive magnitudes; net saving movement uses the cash perspective.",
-		fix: "A −$250 savings net means more cash went out to savings than came back. It is not evidence of a portfolio loss. A $0 Record without any Allocations is still Pending.",
+		check: "A +$20 Spending refund reduces net spending, so $147 of gross spending becomes $127.",
+		fix: "Saving/investment contributions show as positive amounts, while the net shows the cash direction. A −$250 net means more cash went out to savings than came back. It is not evidence of a portfolio loss. A $0 Record without any Allocations is still Pending.",
 		example:
 			"Contribution −$300 and withdrawal +$50 produce contributions $300, withdrawals $50, and net −$250. Salary +$3,000 is separate income.",
 	},
@@ -224,7 +224,7 @@ export const guideTopics: GuideTopic[] = [
 		steps: [
 			"Open the Record and compare its amount, Allocation total, Allocation count, and Pending Statements.",
 			"For a −$10 Record with a −$12 Allocation, correct the Record to −$12 if the lunch really cost $12.",
-			"For missing bank activity, keep a pending Statement only when it represents the actual expected activity.",
+			"For missing bank activity, keep a Pending Statement only when it represents the actual expected activity.",
 			"When the real Statement arrives, use the Pending Statement replacement flow and verify its Allocations instead of allocating it twice.",
 		],
 		check: "At least one Allocation exists, its total matches the Record, and none of its allocated Statements are Pending.",
@@ -241,12 +241,12 @@ export const guideTopics: GuideTopic[] = [
 		problem:
 			"A saved item may be outside your filters, fully allocated, or in a different month. An empty list does not always mean your data is gone.",
 		explanation:
-			"Records, Statements, and Allocator show different things. Allocator focuses on remaining amounts. Use search, Account or Category filters, dates, and Pending filters to narrow the appropriate list. Amount filters use Paid or Received with a positive value.",
+			"Records, Statements, and Allocator show different things. Allocator focuses on amounts left to allocate. Use search, Account or Category filters, dates, and Pending filters to narrow the appropriate list. Amount filters use Paid or Received with a positive value.",
 		steps: [
 			"Check the selected month and date range first. Clear restrictive filters when searching.",
-			"Look for a fully allocated bank row in Statements rather than only Allocator.",
+			"Look for a fully allocated Statement in the Statements list, not only in Allocator.",
 			"Open the Record or Statement detail and use its edit actions. Review linked Allocations before changing amounts or removing data.",
-			"Save and recheck both the Record total and the Statement remainder.",
+			"Save and recheck both the Record total and the Statement amount left to allocate.",
 		],
 		check: "The corrected item appears in the intended date range and its links still explain the activity.",
 		fix: "Changing a title does not fix a wrong amount. Changing a Record amount may leave it Pending until the Allocations agree. Destructive removal should be deliberate; keep a backup before large corrections.",
@@ -276,16 +276,16 @@ export const guideTopics: GuideTopic[] = [
 	},
 	{
 		id: "targets",
-		title: "How do monthly bucket targets work?",
+		title: "How do monthly targets work?",
 		group: "Plan your money",
 		keywords: "target onward override monthly daily pace recurring coverage projection",
 		destination: "dashboard",
 		problem:
 			"You need a monthly comparison for a spending group, without moving money or changing bank balances.",
 		explanation:
-			"A bucket target is a planning comparison. A default applies from the selected month onward. A target set for only one month overrides the default for that month. Targets do not reserve cash or block spending.",
+			"A monthly target is a planning comparison for one spending bucket. A default applies from the selected month onward. A target set for only one month overrides the default for that month. Targets do not reserve cash or block spending.",
 		steps: [
-			"Choose the correct month on the Dashboard before editing a bucket target.",
+			"Choose the correct month on the Dashboard before editing a monthly target.",
 			"Choose whether the amount is for this month only or from this month onward.",
 			"Review the bucket’s target and spending in the selected month.",
 			"Use pace and projection as estimates, and check month coverage before comparing with earlier months.",
@@ -329,14 +329,14 @@ export const guideTopics: GuideTopic[] = [
 			"The Dashboard summarizes Records by effective treatment, shows spending by Category and bucket, and provides pace and comparisons. Monthly Records lets you inspect the Records behind the selected month. Pending Records can still contribute to analytics, so review unresolved explanations before relying on totals.",
 		steps: [
 			"Choose the intended month and inspect its coverage information.",
-			"Read Income, gross spending, refunds, net spending, surplus, and saving movements with their labels.",
+			"Read Income, gross spending, refunds, net spending, surplus, and Saving/investment movements with their labels.",
 			"Use Monthly Records to trace an unexpected amount back to its Record, Category, treatment, date, and Allocations.",
 			"Review history comparisons and future Records in context; partial months and projections are not completed outcomes.",
 		],
 		check: "With income $3,000, gross spending $147, and refunds $20, net spending is $127. Surplus is $2,873, or about 95.8% of income.",
 		fix: "If a total is surprising, first check the selected month and the actual Record treatment. Then inspect Pending Records and coverage. A chart is a summary of the workspace, not a bank reconciliation guarantee.",
 		example:
-			"Saving net −$250 is displayed separately. It does not mean income fell or investments lost $250.",
+			"Saving/investment net −$250 is displayed separately. It does not mean income fell or investments lost $250.",
 	},
 	{
 		id: "sync",
@@ -368,10 +368,10 @@ export const guideTopics: GuideTopic[] = [
 		problem:
 			"A repeatable short routine is easier than trying to perfect the entire workspace in one sitting.",
 		explanation:
-			"Import new activity, explain remaining amounts, inspect Pending items, review the month, and protect the result. You can return to any video chapter, search the Help articles, or replay a practice lesson without restarting all onboarding.",
+			"Import new activity, explain amounts left to allocate, inspect Pending items, review the month, and protect the result. You can return to any video chapter, search the Help articles, or replay a practice lesson without restarting all onboarding.",
 		steps: [
 			"Import your latest supported bank CSV and check the result counts.",
-			"Use Allocator for unexplained amounts; use Records to review incomplete explanations and pending Statements separately.",
+			"Use Allocator for unexplained amounts; use Records to review incomplete explanations and Pending Statements separately.",
 			"Review the correct month in Dashboard and Monthly Records. Check treatments, buckets, targets, and Budget membership when relevant.",
 			"Check Sync and keep backups. Settings lets you adjust default date filters and comparison history to suit your routine.",
 		],

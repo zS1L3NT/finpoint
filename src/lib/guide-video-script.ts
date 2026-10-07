@@ -26,11 +26,11 @@ export const filmChapters: FilmChapter[] = [
 		steps: [
 			"Try the sample lunch lesson.",
 			"Import a bank CSV, or restore a backup.",
-			"Explain one bank row.",
+			"Explain one Statement.",
 			"Download a backup.",
 		],
 		check: "You can say where one bank amount went, and find it again.",
-		watch: "An empty Dashboard is normal at first. Imported bank rows don’t count until you explain them.",
+		watch: "An empty Dashboard is normal at first. Imported Statements don’t count until you explain them.",
 		example:
 			"Alex paid $12 for lunch. The bank shows −$12. Alex adds a Lunch Record for −$12, and an Allocation of −$12 connects them.",
 	},
@@ -38,8 +38,8 @@ export const filmChapters: FilmChapter[] = [
 		id: "model",
 		title: "Statements, Records and Allocations",
 		group: "Start here",
-		problem: "Bank rows and real-life purchases don’t always match one for one.",
-		idea: "A Statement is one row from your bank. A Record is your explanation of what happened. An Allocation links an amount from a Statement to a Record. An Account is where money sits, not your login. Money paid is negative, and money received is positive.",
+		problem: "Statements and real-life purchases don’t always match one for one.",
+		idea: "A Statement is one entry of bank activity. A Record is your explanation of what happened. An Allocation links an amount from a Statement to a Record. An Account is where money sits, not your login. Money paid is negative, and money received is positive.",
 		steps: [
 			"Read the Statement’s amount and description.",
 			"Decide what it really was.",
@@ -47,7 +47,7 @@ export const filmChapters: FilmChapter[] = [
 			"Allocate the amount. One Statement can feed several Records, and one Record can combine several Statements.",
 		],
 		check: "A Record is complete when it has an Allocation, its Allocation total equals its amount, and none of its Statements are Pending.",
-		watch: "Two bank rows don’t always mean two Records. A payment and its repayment can explain one shared purchase.",
+		watch: "Two Statements don’t always mean two Records. A payment and its repayment can explain one shared purchase.",
 		example:
 			"Statement −$12, Allocation −$12, Lunch Record −$12. Your Account balance and your Dashboard spending answer different questions.",
 	},
@@ -102,7 +102,7 @@ export const filmChapters: FilmChapter[] = [
 		check: "The Record is complete, and the lunch Statement leaves Allocator.",
 		watch: "If the Record says Pending, compare its amount with its Allocations, and fix whichever is wrong.",
 		example:
-			"−$12 from the bank, −$12 allocated, a −$12 Lunch. Nothing remaining, and no difference.",
+			"−$12 from the bank, −$12 allocated, a −$12 Lunch. Nothing left to allocate, and no difference.",
 	},
 	{
 		id: "backup-first",
@@ -127,16 +127,16 @@ export const filmChapters: FilmChapter[] = [
 		group: "Everyday use",
 		problem:
 			"One −$80 supermarket Statement was really $60 of groceries and a $20 gift. Put it all in one Category, and that difference hides.",
-		idea: "Create two Records, and allocate part of the Statement to each. The bank row stays whole, and you get two clear explanations.",
+		idea: "Create two Records, and allocate part of the Statement to each. The Statement stays whole, and you get two clear explanations.",
 		steps: [
 			"Create Groceries for −$60, from the −$80 Statement.",
 			"−$20 is left. Create Gift for −$20, and allocate it.",
 			"Check both Records, and that $0 remains.",
 		],
 		check: "−$60 plus −$20 equals −$80. Both Records are complete, and the Statement is fully used.",
-		watch: "You can’t allocate more than a Statement has left. Fix the Allocations; don’t invent bank rows.",
+		watch: "You can’t allocate more than a Statement has left. Fix the Allocations; don’t invent bank activity.",
 		example:
-			"One Statement of −$80 becomes Groceries −$60 and Gift −$20. One bank row, two useful explanations.",
+			"One Statement of −$80 becomes Groceries −$60 and Gift −$20. One Statement, two useful explanations.",
 	},
 	{
 		id: "repayment",
@@ -167,7 +167,7 @@ export const filmChapters: FilmChapter[] = [
 			"For a transfer, combine the −$200 and +$200 into one $0 Record, as Transfer or neutral.",
 			"Use Saving or investment for contributions and withdrawals.",
 		],
-		check: "A +$20 refund lowers your net spending. Savings contributions show as positive amounts.",
+		check: "A +$20 refund lowers your net spending. Saving or investment contributions show as positive amounts.",
 		watch: "A −$250 saving net means more cash went into savings than came out. It isn’t an investment loss.",
 		example:
 			"Put in $300 and take out $50: contributions $300, withdrawals $50, net −$250. The +$3,000 salary is separate income.",
@@ -182,7 +182,7 @@ export const filmChapters: FilmChapter[] = [
 		steps: [
 			"Open the Record and compare its amount with its Allocations.",
 			"If lunch really cost $12, change the Record from −$10 to −$12.",
-			"When the real bank row arrives, replace the Pending Statement instead of allocating twice.",
+			"When the real Statement arrives, replace the Pending Statement instead of allocating twice.",
 		],
 		check: "There’s at least one Allocation, the total matches the Record, and no allocated Statement is Pending.",
 		watch: "Fix the facts, not just the label. A Pending Record is still saved.",
@@ -195,13 +195,13 @@ export const filmChapters: FilmChapter[] = [
 		group: "Fix a problem",
 		problem:
 			"Something you saved seems to be missing. Usually filters or the month are hiding it. An empty list doesn’t mean your data is gone.",
-		idea: "Records show your explanations. Statements show every bank row. Allocator only shows amounts left to explain. Use search and filters to narrow the right list.",
+		idea: "Records show your explanations. Statements show all your bank activity. Allocator only shows amounts left to explain. Use search and filters to narrow the right list.",
 		steps: [
 			"Check the month and date range, and clear filters.",
 			"Look in Statements for rows Allocator no longer shows.",
 			"Open the item, edit it, then check its totals again.",
 		],
-		check: "The fixed item shows up where you expect, still linked to its bank row.",
+		check: "The fixed item shows up where you expect, still linked to its Statement.",
 		watch: "Renaming doesn’t fix a wrong amount. Keep a backup before big changes.",
 		example: "To find payments over $50, choose Paid and type 50. No minus sign needed.",
 	},
@@ -223,7 +223,7 @@ export const filmChapters: FilmChapter[] = [
 	},
 	{
 		id: "targets",
-		title: "Monthly bucket targets",
+		title: "Monthly targets",
 		group: "Plan your money",
 		problem: "You want to compare a month’s spending with a plan, without moving any money.",
 		idea: "A target is a monthly comparison for a bucket. A default carries forward from the month you set it. A target for only one month overrides it. Targets never reserve cash or block spending.",
