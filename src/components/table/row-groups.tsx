@@ -1,7 +1,7 @@
+import { motion } from "framer-motion"
 import { DateTime } from "luxon"
-import { useState } from "react"
 import { TableCell, TableRow } from "@/components/ui/table"
-import { rowEnterCss } from "@/lib/motion"
+import { type RowEntrance, rowEnter } from "@/lib/motion"
 import { classForCurrency, cn, formatCurrency } from "@/lib/utils"
 
 export type RowGroup<TData> = {
@@ -91,23 +91,18 @@ export function GroupHeaderRow<TData>({
 	)
 }
 
-/**
- * A mobile list row. Its entrance is decided once, at mount: swapping animation classes on a
- * mounted row would restart the animation, so later renders must never change it.
- */
+/** A mobile list row, animated like a desktop table row. */
 export function MobileRow({
 	index,
-	cascade,
+	entrance,
 	className,
-	style,
 	...props
-}: React.ComponentProps<"div"> & { index: number; cascade: boolean }) {
-	const [enter] = useState(() => rowEnterCss(index, cascade))
+}: React.ComponentProps<typeof motion.div> & { index: number; entrance: RowEntrance }) {
 	return (
-		<div
+		<motion.div
+			{...rowEnter(index, entrance)}
 			{...props}
-			className={cn(MOBILE_ROW_CLASS, className, enter.className)}
-			style={{ ...enter.style, ...style }}
+			className={cn(MOBILE_ROW_CLASS, className)}
 		/>
 	)
 }
@@ -118,25 +113,24 @@ export function MobileGroupHeader<TData>({
 	groupKey,
 	rows,
 	index,
-	cascade,
+	entrance,
 }: {
 	group: RowGroup<TData>
 	groupKey: string
 	rows: TData[]
 	/** Position of the group's first row; headers enter together with it. */
 	index: number
-	cascade: boolean
+	entrance: RowEntrance
 }) {
-	const [enter] = useState(() => rowEnterCss(index, cascade))
 	return (
-		<div
-			className={cn(MOBILE_ROW_CLASS, "bg-muted/50 px-3 py-1.5 text-sm", enter.className)}
-			style={enter.style}
+		<motion.div
+			{...rowEnter(index, entrance)}
+			className={cn(MOBILE_ROW_CLASS, "bg-muted/50 px-3 py-1.5 text-sm")}
 		>
 			<div className="min-w-0">{group.label(groupKey, rows)}</div>
 			{group.total ? <GroupTotal value={group.total(rows)} /> : <span />}
 			<span />
-		</div>
+		</motion.div>
 	)
 }
 
