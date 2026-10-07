@@ -36,11 +36,19 @@ export const SPRING = {
 	lively: { type: "spring", duration: 0.4, bounce: 0.15 },
 } satisfies Record<string, Transition>
 
+/** The shortest row any table renders (a compact row, ~37px), used to count rows on screen. */
+const SHORTEST_ROW = 34
+
 /**
- * How many rows cascade in on arrival. Anything past this is below the fold, so it appears with
- * the page: capping only the delay would make every remaining row start fading in at once.
+ * How many rows cascade in on arrival: every row that can fit on this screen, plus a couple of
+ * spare. Anything past that is below the fold, so it appears with the page: capping only the
+ * delay would make every remaining row start fading in at once.
  */
-export const ROW_CASCADE_LIMIT = 12
+export const rowCascadeLimit = () =>
+	typeof window === "undefined" ? 24 : Math.ceil(window.innerHeight / SHORTEST_ROW) + 2
+
+/** The whole cascade lands within this window however tall the screen, so big screens stay quick. */
+const CASCADE_SPAN = { cascade: 0.5, refilter: 0.3 }
 
 /**
  * How a table's rows enter:
@@ -53,7 +61,8 @@ export type RowEntrance = "cascade" | "refilter" | "fade"
 
 /** Motion props for a table row (or its group header); rows past the fold do not animate. */
 export const rowEnter = (index: number, entrance: RowEntrance) => {
-	if (index >= ROW_CASCADE_LIMIT) return { initial: false as const }
+	const limit = rowCascadeLimit()
+	if (index >= limit) return { initial: false as const }
 	if (entrance === "fade") {
 		return {
 			initial: { opacity: 0 },
@@ -68,7 +77,7 @@ export const rowEnter = (index: number, entrance: RowEntrance) => {
 		transition: {
 			duration: refilter ? 0.24 : 0.34,
 			ease: EASE_OUT,
-			delay: index * (refilter ? 0.02 : 0.03),
+			delay: index * Math.min(refilter ? 0.02 : 0.03, CASCADE_SPAN[entrance] / limit),
 		},
 	}
 }
