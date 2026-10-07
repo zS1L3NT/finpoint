@@ -61,554 +61,553 @@ model-5
 Step 4. Allocate the appropriate signed amount. A Statement can feed several Records, and a Record can combine several Statements.
 
 model-6
-00:02:04.933 --> 00:02:12.367
-Check your result. A complete Record has at least one Allocation, and its Allocation total equals its amount.
+00:02:04.933 --> 00:02:14.167
+Check your result. A complete Record has at least one Allocation, its Allocation total equals its amount, and none of its Statements are Pending.
 
 model-7
-00:02:12.367 --> 00:02:22.167
+00:02:14.167 --> 00:02:23.967
 If something looks wrong. Do not create a second explanation just because there are two bank rows. A payment and repayment may explain one shared purchase.
 
 model-8
-00:02:22.167 --> 00:02:35.667
+00:02:23.967 --> 00:02:37.467
 Example. Statement −$12 → Allocation −$12 → Lunch Record −$12. An Account balance and the Dashboard spending total answer different questions.
 
 workspace-0
-00:02:35.667 --> 00:02:45.433
+00:02:37.467 --> 00:02:47.233
 How do I start or restore a workspace?. The problem. A new workspace has starter Categories and spending buckets, but no personal bank activity.
 
 workspace-1
-00:02:45.433 --> 00:02:59.467
+00:02:47.233 --> 00:03:01.267
 How Finpoint helps. Finpoint stores financial data in this browser on this device. The starter Categories and buckets are editable planning defaults. You can learn using the isolated practice lessons before importing your own data.
 
 workspace-2
-00:02:59.467 --> 00:03:04.700
+00:03:01.267 --> 00:03:06.500
 Step 1. For a new workspace, open Importer and choose your bank.
 
 workspace-3
-00:03:04.700 --> 00:03:16.133
-Step 2. If you already have a Finpoint JSON backup, open Sync and under Manual sync, choose your JSON file with Choose file, then use Restore from file.
+00:03:06.500 --> 00:03:18.733
+Step 2. If you already have a Finpoint JSON backup, open Sync and under Backup file, click Restore from a backup file, choose the JSON file, then use Restore.
 
 workspace-4
-00:03:16.133 --> 00:03:26.233
+00:03:18.733 --> 00:03:28.833
 Step 3. Before restoring, export the current workspace if you need to keep it. Restore replaces financial data; it does not merge two workspaces.
 
 workspace-5
-00:03:26.233 --> 00:03:32.333
+00:03:28.833 --> 00:03:34.933
 Step 4. Use Help in the top bar whenever you need an explanation without leaving a form.
 
 workspace-6
-00:03:32.333 --> 00:03:39.167
+00:03:34.933 --> 00:03:41.767
 Check your result. Your expected Accounts, Statements, or restored Records appear in their lists.
 
 workspace-7
-00:03:39.167 --> 00:03:51.367
+00:03:41.767 --> 00:03:53.967
 If something looks wrong. Do not use Load demo data as a safe tutorial in your own workspace: it replaces financial data. Help & guides practice is separate and uses sample values only.
 
 workspace-8
-00:03:51.367 --> 00:03:58.933
+00:03:53.967 --> 00:04:01.533
 Example. A beginner can practice a −$12 lunch without uploading files or changing an Account balance.
 
 import-0
-00:03:58.933 --> 00:04:08.100
+00:04:01.533 --> 00:04:10.700
 How do I import bank activity?. The problem. A bank file has to match a supported format before Finpoint can turn its rows into Statements.
 
 import-1
-00:04:08.100 --> 00:04:28.967
+00:04:10.700 --> 00:04:31.567
 How Finpoint helps. Importer supports DBS, OCBC, UOB, and Revolut CSV exports. Importing loads Statements, not finished Records. Missing Accounts can be created during import. Revolut asks for Account details and accepts one file; the other supported importers allow multiple files.
 
 import-2
-00:04:28.967 --> 00:04:35.167
+00:04:31.567 --> 00:04:37.767
 Step 1. Export a CSV from your supported bank. Keep its original columns.
 
 import-3
-00:04:35.167 --> 00:04:43.700
+00:04:37.767 --> 00:04:46.300
 Step 2. Open Importer, select the bank, and select the file or files. For Revolut, choose or create the Account.
 
 import-4
-00:04:43.700 --> 00:04:50.133
+00:04:46.300 --> 00:04:52.733
 Step 3. Submit the import and read the inserted, re-indexed, and unchanged counts.
 
 import-5
-00:04:50.133 --> 00:04:58.667
+00:04:52.733 --> 00:05:01.267
 Step 4. Open Statements to check dates, amounts, and Account. Then open Allocator to explain the remaining amounts.
 
 import-6
-00:04:58.667 --> 00:05:04.333
+00:05:01.267 --> 00:05:06.933
 Check your result. The expected bank rows are visible with the correct signs and dates.
 
 import-7
-00:05:04.333 --> 00:05:19.433
+00:05:06.933 --> 00:05:22.033
 If something looks wrong. If import fails, check the selected bank and original CSV format. A PDF or renamed spreadsheet is not the same format. If no rows are inserted, inspect skipped counts and filters before importing repeatedly.
 
 import-8
-00:05:19.433 --> 00:05:32.167
+00:05:22.033 --> 00:05:34.767
 Example. Alex imports a bank CSV containing a salary of +$3,000 and a lunch payment of −$12. Neither has a personal explanation until Alex creates Records.
 
 lunch-0
-00:05:32.167 --> 00:05:42.133
+00:05:34.767 --> 00:05:44.733
 How do I explain my first purchase?. The problem. The imported lunch Statement says −$12, but the Dashboard needs the Record that explains it.
 
 lunch-1
-00:05:42.133 --> 00:05:57.167
+00:05:44.733 --> 00:05:59.767
 How Finpoint helps. Allocator shows Statements with amounts still available to allocate. Create a Record from the relevant Statement, give it a useful title, date, amount, and Category, and check the proposed Allocation before saving.
 
 lunch-2
-00:05:57.167 --> 00:06:01.500
+00:05:59.767 --> 00:06:04.100
 Step 1. Open Allocator and choose the lunch Statement.
 
 lunch-3
-00:06:01.500 --> 00:06:11.533
+00:06:04.100 --> 00:06:14.133
 Step 2. Create a Record titled Lunch. Use Paid $12, represented as −$12, and select the appropriate food Category.
 
 lunch-4
-00:06:11.533 --> 00:06:19.567
+00:06:14.133 --> 00:06:22.167
 Step 3. Check that the Allocation from the lunch Statement is −$12. Review treatment and bucket defaults.
 
 lunch-5
-00:06:19.567 --> 00:06:27.567
+00:06:22.167 --> 00:06:30.167
 Step 4. Save, reopen the Record, and confirm its amount and Allocation total both equal −$12.
 
 lunch-6
-00:06:27.567 --> 00:06:34.400
+00:06:30.167 --> 00:06:37.000
 Check your result. The Record is complete and the fully allocated lunch Statement leaves the remaining-amount list.
 
 lunch-7
-00:06:34.400 --> 00:06:45.067
+00:06:37.000 --> 00:06:47.667
 If something looks wrong. If the Record is Pending, compare its amount with the saved Allocation total. Correct the amount or missing Allocation based on what actually happened.
 
 lunch-8
-00:06:45.067 --> 00:06:58.867
+00:06:47.667 --> 00:07:01.467
 Example. −$12 bank activity → −$12 allocated → −$12 Lunch. Statement remaining: $0. Record difference: $0.
 
 backup-first-0
-00:06:58.867 --> 00:07:08.767
+00:07:01.467 --> 00:07:11.367
 How do I protect my first results?. The problem. Automatically saved browser data can still be lost if you clear browser storage or change devices.
 
 backup-first-1
-00:07:08.767 --> 00:07:24.633
+00:07:11.367 --> 00:07:27.233
 How Finpoint helps. Saving a Record writes to this browser. A Finpoint JSON backup gives you a separate copy of financial data and settings. Requesting a download cannot prove that the file was kept successfully, so check your Downloads folder yourself.
 
 backup-first-2
-00:07:24.633 --> 00:07:30.167
-Step 1. Open Sync and under Manual sync, choose Download backup.
+00:07:27.233 --> 00:07:32.800
+Step 1. Open Sync and under Backup file, choose Download backup.
 
 backup-first-3
-00:07:30.167 --> 00:07:36.800
+00:07:32.800 --> 00:07:39.433
 Step 2. Find the downloaded Finpoint JSON file and keep it somewhere you can find again.
 
 backup-first-4
-00:07:36.800 --> 00:07:42.833
-Step 3. Keep an earlier backup before using Restore from file or replacing data.
+00:07:39.433 --> 00:07:45.000
+Step 3. Keep an earlier backup before choosing Restore or replacing data.
 
 backup-first-5
-00:07:42.833 --> 00:07:49.200
+00:07:45.000 --> 00:07:51.367
 Step 4. If you choose Google Drive sync, review its status and any conflicts separately.
 
 backup-first-6
-00:07:49.200 --> 00:07:56.433
+00:07:51.367 --> 00:07:58.600
 Check your result. You have located the downloaded backup file; a button click alone does not confirm that.
 
 backup-first-7
-00:07:56.433 --> 00:08:08.100
+00:07:58.600 --> 00:08:10.267
 If something looks wrong. If the browser blocks a download, allow it and request the export again. Never clear storage until you have a usable backup or have confirmed the intended synced copy.
 
 backup-first-8
-00:08:08.100 --> 00:08:19.167
-Example. After explaining Lunch, Alex exports a backup. Later, Restore from file can restore that financial workspace, replacing whatever is currently there.
+00:08:10.267 --> 00:08:20.400
+Example. After explaining Lunch, Alex exports a backup. Later, restoring that file replaces the financial workspace currently in this browser.
 
 split-0
-00:08:19.167 --> 00:08:33.333
+00:08:20.400 --> 00:08:34.567
 How do I split one payment into different purchases?. The problem. One −$80 supermarket Statement includes $60 of groceries and a $20 gift. Putting everything in one Category hides the distinction.
 
 split-1
-00:08:33.333 --> 00:08:47.367
+00:08:34.567 --> 00:08:48.600
 How Finpoint helps. Create two Records and allocate part of the same Statement to each. Allocations keep the bank link while Records explain the separate purposes. Their total should use the available Statement amount without exceeding it.
 
 split-2
-00:08:47.367 --> 00:08:55.533
+00:08:48.600 --> 00:08:56.767
 Step 1. Create Groceries for −$60 and allocate −$60 from the −$80 Statement.
 
 split-3
-00:08:55.533 --> 00:09:04.033
+00:08:56.767 --> 00:09:05.267
 Step 2. The Statement has −$20 left to allocate. Create Gift for −$20 and allocate that remainder.
 
 split-4
-00:09:04.033 --> 00:09:09.000
+00:09:05.267 --> 00:09:10.233
 Step 3. Choose the correct Category and treatment for each Record.
 
 split-5
-00:09:09.000 --> 00:09:14.700
+00:09:10.233 --> 00:09:15.933
 Step 4. Check both Records and confirm the Statement has $0 remaining.
 
 split-6
-00:09:14.700 --> 00:09:23.967
+00:09:15.933 --> 00:09:25.200
 Check your result. −$60 plus −$20 equals −$80. Both Records tally and the Statement is fully allocated.
 
 split-7
-00:09:23.967 --> 00:09:35.133
+00:09:25.200 --> 00:09:36.367
 If something looks wrong. An Allocation larger than the available amount is rejected. Reduce it or remove an incorrect existing Allocation; do not invent extra bank activity.
 
 split-8
-00:09:35.133 --> 00:09:46.500
+00:09:36.367 --> 00:09:47.733
 Example. One Statement −$80 → Groceries −$60 and Gift −$20. You keep one bank row and two useful explanations.
 
 repayment-0
-00:09:46.500 --> 00:09:59.267
+00:09:47.733 --> 00:10:00.500
 How do I record a shared dinner and repayment?. The problem. Alex pays $90 for dinner and later receives $60 from friends. Alex’s own cost is $30, not $90.
 
 repayment-1
-00:09:59.267 --> 00:10:13.233
+00:10:00.500 --> 00:10:14.467
 How Finpoint helps. One shared-dinner Record can combine the payment and repayment Statements. Record the amount you are explaining after the repayment. Money received back for the same dinner does not have to become a separate Income Record.
 
 repayment-2
-00:10:13.233 --> 00:10:19.900
+00:10:14.467 --> 00:10:21.133
 Step 1. Create Shared dinner with amount −$30 and an appropriate spending Category.
 
 repayment-3
-00:10:19.900 --> 00:10:25.100
+00:10:21.133 --> 00:10:26.333
 Step 2. Allocate −$90 from the dinner payment Statement.
 
 repayment-4
-00:10:25.100 --> 00:10:31.900
+00:10:26.333 --> 00:10:33.133
 Step 3. Allocate +$60 from the friends’ repayment Statement to the same Record.
 
 repayment-5
-00:10:31.900 --> 00:10:37.367
+00:10:33.133 --> 00:10:38.600
 Step 4. Save and check that the Allocation total is −$30.
 
 repayment-6
-00:10:37.367 --> 00:10:46.033
+00:10:38.600 --> 00:10:47.267
 Check your result. −$90 + $60 = −$30. Both Statements are explained and the Record tallies.
 
 repayment-7
-00:10:46.033 --> 00:10:59.300
-If something looks wrong. Until the repayment is available, the Record may be Pending. Pending is an amount-matching status; it does not by itself prove that someone owes you money. Use your notes to explain the situation.
+00:10:47.267 --> 00:11:01.433
+If something looks wrong. Until the repayment is available, the Record may be Pending because amounts differ or a Statement is still Pending. The status does not by itself prove that someone owes you money. Use your notes to explain the situation.
 
 repayment-8
-00:10:59.300 --> 00:11:10.467
+00:11:01.433 --> 00:11:12.600
 Example. Payment −$90 → Shared dinner ← Repayment +$60. The Record shows Alex’s −$30 share.
 
 treatments-0
-00:11:10.467 --> 00:11:21.933
+00:11:12.600 --> 00:11:24.067
 Are refunds, transfers, and savings spending?. The problem. The sign of money movement alone does not tell you whether it is income, spending, savings, or a transfer.
 
 treatments-1
-00:11:21.933 --> 00:11:38.533
+00:11:24.067 --> 00:11:40.667
 How Finpoint helps. Treatment tells the Dashboard how to count a Record. Income, Spending, Saving/investment, and Transfer/neutral have different meanings. Automatic follows the amount direction. A Category can supply the default, and a Record can override it.
 
 treatments-2
-00:11:38.533 --> 00:11:44.400
+00:11:40.667 --> 00:11:46.533
 Step 1. Use Income for salary, and Spending for purchases and their refunds.
 
 treatments-3
-00:11:44.400 --> 00:11:56.267
+00:11:46.533 --> 00:11:58.400
 Step 2. For a transfer between your own Accounts, combine −$200 and +$200 into a $0 Record with Allocations; use Transfer/neutral.
 
 treatments-4
-00:11:56.267 --> 00:12:01.267
+00:11:58.400 --> 00:12:03.400
 Step 3. Use Saving/investment for contributions and withdrawals.
 
 treatments-5
-00:12:01.267 --> 00:12:07.633
+00:12:03.400 --> 00:12:09.767
 Step 4. Review the effective treatment on the Record rather than guessing from its Category name.
 
 treatments-6
-00:12:07.633 --> 00:12:19.667
+00:12:09.767 --> 00:12:21.800
 Check your result. A +$20 Spending refund reduces net spending. Saving contributions display as positive magnitudes; net saving movement uses the cash perspective.
 
 treatments-7
-00:12:19.667 --> 00:12:33.300
+00:12:21.800 --> 00:12:35.433
 If something looks wrong. A −$250 savings net means more cash went out to savings than came back. It is not evidence of a portfolio loss. A $0 Record without any Allocations is still Pending.
 
 treatments-8
-00:12:33.300 --> 00:12:49.667
+00:12:35.433 --> 00:12:51.800
 Example. Contribution −$300 and withdrawal +$50 produce contributions $300, withdrawals $50, and net −$250. Salary +$3,000 is separate income.
 
 pending-0
-00:12:49.667 --> 00:13:00.300
-Why is my Record Pending, and how do I fix it?. The problem. Pending can refer to a Record that does not tally, or to a pending Statement. These are different checks.
+00:12:51.800 --> 00:13:02.867
+Why is my Record Pending, and how do I fix it?. The problem. A Record can be Pending because amounts differ, Allocations are missing, or an allocated Statement is Pending.
 
 pending-1
-00:13:00.300 --> 00:13:15.067
-How Finpoint helps. A Record is Pending when it has no Allocations or their total differs from its amount. A pending Statement is a placeholder or supported imported pending bank activity. A Record can tally while still being linked to a pending Statement.
+00:13:02.867 --> 00:13:21.033
+How Finpoint helps. A Record is Pending when it has no Allocations, their total differs from its amount, or any allocated Statement is Pending. A Pending Statement is a placeholder for bank activity still to arrive. Even when amounts tally, the Record stays Pending until that placeholder is replaced.
 
 pending-2
-00:13:15.067 --> 00:13:21.800
-Step 1. Open the Record and compare its amount, Allocation total, and Allocation count.
+00:13:21.033 --> 00:13:29.033
+Step 1. Open the Record and compare its amount, Allocation total, Allocation count, and Pending Statements.
 
 pending-3
-00:13:21.800 --> 00:13:32.133
+00:13:29.033 --> 00:13:39.367
 Step 2. For a −$10 Record with a −$12 Allocation, correct the Record to −$12 if the lunch really cost $12.
 
 pending-4
-00:13:32.133 --> 00:13:40.200
+00:13:39.367 --> 00:13:47.433
 Step 3. For missing bank activity, keep a pending Statement only when it represents the actual expected activity.
 
 pending-5
-00:13:40.200 --> 00:13:49.600
-Step 4. When the real bank row arrives, use the pending-Statement replacement flow and verify the resulting links instead of allocating it twice.
+00:13:47.433 --> 00:13:56.800
+Step 4. When the real Statement arrives, use the Pending Statement replacement flow and verify its Allocations instead of allocating it twice.
 
 pending-6
-00:13:49.600 --> 00:13:57.867
-Check your result. At least one Allocation exists and its total matches the Record. Also review pending Statements separately.
+00:13:56.800 --> 00:14:05.433
+Check your result. At least one Allocation exists, its total matches the Record, and none of its allocated Statements are Pending.
 
 pending-7
-00:13:57.867 --> 00:14:11.633
+00:14:05.433 --> 00:14:19.200
 If something looks wrong. Correct the facts, not just the status. A mismatch is a valid saved state, not a failed save. If the real amount differs from the placeholder, inspect the affected Record after replacement.
 
 pending-8
-00:14:11.633 --> 00:14:24.500
+00:14:19.200 --> 00:14:32.067
 Example. Record −$10; Allocation −$12; difference $2. Change the Record to −$12 when that is the correct purchase amount, then save and check again.
 
 find-0
-00:14:24.500 --> 00:14:37.600
+00:14:32.067 --> 00:14:45.167
 How do I find, edit, or remove a mistake?. The problem. A saved item may be outside your filters, fully allocated, or in a different month. An empty list does not always mean your data is gone.
 
 find-1
-00:14:37.600 --> 00:14:56.200
+00:14:45.167 --> 00:15:03.767
 How Finpoint helps. Records, Statements, and Allocator show different things. Allocator focuses on remaining amounts. Use search, Account or Category filters, dates, and Pending filters to narrow the appropriate list. Amount filters use Paid or Received with a positive value.
 
 find-2
-00:14:56.200 --> 00:15:02.800
+00:15:03.767 --> 00:15:10.367
 Step 1. Check the selected month and date range first. Clear restrictive filters when searching.
 
 find-3
-00:15:02.800 --> 00:15:08.800
+00:15:10.367 --> 00:15:16.367
 Step 2. Look for a fully allocated bank row in Statements rather than only Allocator.
 
 find-4
-00:15:08.800 --> 00:15:18.000
+00:15:16.367 --> 00:15:25.567
 Step 3. Open the Record or Statement detail and use its edit actions. Review linked Allocations before changing amounts or removing data.
 
 find-5
-00:15:18.000 --> 00:15:23.200
+00:15:25.567 --> 00:15:30.767
 Step 4. Save and recheck both the Record total and the Statement remainder.
 
 find-6
-00:15:23.200 --> 00:15:30.100
+00:15:30.767 --> 00:15:37.667
 Check your result. The corrected item appears in the intended date range and its links still explain the activity.
 
 find-7
-00:15:30.100 --> 00:15:43.600
+00:15:37.667 --> 00:15:51.167
 If something looks wrong. Changing a title does not fix a wrong amount. Changing a Record amount may leave it Pending until the Allocations agree. Destructive removal should be deliberate; keep a backup before large corrections.
 
 find-8
-00:15:43.600 --> 00:15:53.033
+00:15:51.167 --> 00:16:00.600
 Example. To find payments over $50, select Paid and enter 50. You do not need to type a negative sign into the amount filter.
 
 categories-0
-00:15:53.033 --> 00:16:04.400
+00:16:00.600 --> 00:16:11.967
 What is the difference between Category, treatment, and bucket?. The problem. Three controls describe different aspects of the same Record. Mixing them up makes totals confusing.
 
 categories-1
-00:16:04.400 --> 00:16:23.633
+00:16:11.967 --> 00:16:31.200
 How Finpoint helps. Category describes what a Record is for. Treatment determines how analytics count it. A spending bucket is an optional planning group. Starter buckets are Daily, Recurring, Irregular, and Travel. A Category can provide treatment and bucket defaults; a Record can use its own choices.
 
 categories-2
-00:16:23.633 --> 00:16:28.533
+00:16:31.200 --> 00:16:36.100
 Step 1. Open Categories to create or edit the labels you need.
 
 categories-3
-00:16:28.533 --> 00:16:34.133
+00:16:36.100 --> 00:16:41.700
 Step 2. Set a sensible treatment and optional default bucket on the Category.
 
 categories-4
-00:16:34.133 --> 00:16:41.733
+00:16:41.700 --> 00:16:49.300
 Step 3. When editing a Record, check whether its treatment and bucket follow the Category or are manually selected.
 
 categories-5
-00:16:41.733 --> 00:16:50.300
+00:16:49.300 --> 00:16:57.867
 Step 4. Use bucket management on the Dashboard to maintain planning groups. Archiving a bucket preserves existing Records.
 
 categories-6
-00:16:50.300 --> 00:16:58.900
+00:16:57.867 --> 00:17:06.467
 Check your result. Lunch can be a food Category, Spending treatment, and Daily bucket. These are three complementary choices.
 
 categories-7
-00:16:58.900 --> 00:17:09.900
+00:17:06.467 --> 00:17:17.467
 If something looks wrong. A renamed Category does not automatically mean every manually overridden Record now has its defaults. Inspect the affected Record’s actual choices.
 
 categories-8
-00:17:09.900 --> 00:17:19.467
+00:17:17.467 --> 00:17:27.033
 Example. Category: food. Treatment: Spending. Bucket: Daily. A rent Record can also be Spending while belonging to Recurring.
 
 targets-0
-00:17:19.467 --> 00:17:29.267
+00:17:27.033 --> 00:17:36.833
 How do monthly bucket targets work?. The problem. You need a monthly comparison for a spending group, without moving money or changing bank balances.
 
 targets-1
-00:17:29.267 --> 00:17:43.300
+00:17:36.833 --> 00:17:50.867
 How Finpoint helps. A bucket target is a planning comparison. A default applies from the selected month onward. A target set for only one month overrides the default for that month. Targets do not reserve cash or block spending.
 
 targets-2
-00:17:43.300 --> 00:17:48.833
+00:17:50.867 --> 00:17:56.400
 Step 1. Choose the correct month on the Dashboard before editing a bucket target.
 
 targets-3
-00:17:48.833 --> 00:17:54.133
+00:17:56.400 --> 00:18:01.700
 Step 2. Choose whether the amount is for this month only or from this month onward.
 
 targets-4
-00:17:54.133 --> 00:17:59.233
+00:18:01.700 --> 00:18:06.800
 Step 3. Review the bucket’s target and spending in the selected month.
 
 targets-5
-00:17:59.233 --> 00:18:06.833
+00:18:06.800 --> 00:18:14.400
 Step 4. Use pace and projection as estimates, and check month coverage before comparing with earlier months.
 
 targets-6
-00:18:06.833 --> 00:18:16.767
+00:18:14.400 --> 00:18:24.333
 Check your result. Daily spending $127 against a $500 target leaves $373 in the planning comparison.
 
 targets-7
-00:18:16.767 --> 00:18:28.100
+00:18:24.333 --> 00:18:35.667
 If something looks wrong. If the target seems wrong, inspect a month-specific override and the effective month of the default. Removing an override allows the applicable default to show again.
 
 targets-8
-00:18:28.100 --> 00:18:41.133
+00:18:35.667 --> 00:18:48.700
 Example. A $500 default beginning in October carries forward. A $600 October-only target takes precedence in October, while later months use $500 unless changed.
 
 budgets-0
-00:18:41.133 --> 00:18:51.767
+00:18:48.700 --> 00:18:59.333
 When should I use a Budget instead of a bucket?. The problem. A trip or event may span a custom period and several Categories, rather than a regular monthly spending group.
 
 budgets-1
-00:18:51.767 --> 00:19:07.133
+00:18:59.333 --> 00:19:14.700
 How Finpoint helps. A Budget has its own amount, start and end dates, and attached Records. Its chart uses signed amounts from attached Records within the relevant date windows. This is a different view from the Dashboard’s treatment-based spending totals.
 
 budgets-2
-00:19:07.133 --> 00:19:12.233
+00:19:14.700 --> 00:19:19.800
 Step 1. Open Budgets and create a Budget with an amount and date range.
 
 budgets-3
-00:19:12.233 --> 00:19:22.233
+00:19:19.800 --> 00:19:29.800
 Step 2. Choose automatic attachment if you want all existing Records in that range attached at creation, and newly created Records attached when they qualify.
 
 budgets-4
-00:19:22.233 --> 00:19:29.067
+00:19:29.800 --> 00:19:36.633
 Step 3. Review the actual attached Records; manually attach or remove Records when needed.
 
 budgets-5
-00:19:29.067 --> 00:19:38.567
+00:19:36.633 --> 00:19:46.133
 Step 4. Check membership again after editing dates, Records, or the Budget. Updates do not automatically rebuild existing membership.
 
 budgets-6
-00:19:38.567 --> 00:19:45.200
+00:19:46.133 --> 00:19:52.767
 Check your result. The intended event Records are attached and fall inside the period used by the chart.
 
 budgets-7
-00:19:45.200 --> 00:19:57.300
+00:19:52.767 --> 00:20:04.867
 If something looks wrong. An unexpected Budget total may come from a missing attachment, an out-of-window date, or signed income or transfer amounts. It need not equal the Dashboard Spending number.
 
 budgets-8
-00:19:57.300 --> 00:20:05.767
+00:20:04.867 --> 00:20:13.333
 Example. Use a Budget for a week-long holiday with selected Records. Use the Travel bucket for the broader monthly planning view.
 
 dashboard-0
-00:20:05.767 --> 00:20:18.267
+00:20:13.333 --> 00:20:25.833
 How do I read the Dashboard and Monthly Records?. The problem. Useful charts depend on the month, coverage, Record dates, and treatments. Bank balances are not the same as these totals.
 
 dashboard-1
-00:20:18.267 --> 00:20:39.067
+00:20:25.833 --> 00:20:46.633
 How Finpoint helps. The Dashboard summarizes Records by effective treatment, shows spending by Category and bucket, and provides pace and comparisons. Monthly Records lets you inspect the Records behind the selected month. Pending Records can still contribute to analytics, so review unresolved explanations before relying on totals.
 
 dashboard-2
-00:20:39.067 --> 00:20:44.267
+00:20:46.633 --> 00:20:51.833
 Step 1. Choose the intended month and inspect its coverage information.
 
 dashboard-3
-00:20:44.267 --> 00:20:52.800
+00:20:51.833 --> 00:21:00.367
 Step 2. Read Income, gross spending, refunds, net spending, surplus, and saving movements with their labels.
 
 dashboard-4
-00:20:52.800 --> 00:21:02.167
+00:21:00.367 --> 00:21:09.733
 Step 3. Use Monthly Records to trace an unexpected amount back to its Record, Category, treatment, date, and Allocations.
 
 dashboard-5
-00:21:02.167 --> 00:21:11.000
+00:21:09.733 --> 00:21:18.567
 Step 4. Review history comparisons and future Records in context; partial months and projections are not completed outcomes.
 
 dashboard-6
-00:21:11.000 --> 00:21:28.567
+00:21:18.567 --> 00:21:36.133
 Check your result. With income $3,000, gross spending $147, and refunds $20, net spending is $127. Surplus is $2,873, or about 95.8% of income.
 
 dashboard-7
-00:21:28.567 --> 00:21:43.033
+00:21:36.133 --> 00:21:50.600
 If something looks wrong. If a total is surprising, first check the selected month and the actual Record treatment. Then inspect Pending Records and coverage. A chart is a summary of the workspace, not a bank reconciliation guarantee.
 
 dashboard-8
-00:21:43.033 --> 00:21:52.767
+00:21:50.600 --> 00:22:00.333
 Example. Saving net −$250 is displayed separately. It does not mean income fell or investments lost $250.
 
 sync-0
-00:21:52.767 --> 00:22:03.100
+00:22:00.333 --> 00:22:10.667
 How do backups and Google Drive sync work?. The problem. You want a recoverable copy or another device to share the workspace, and need to know which copy is current.
 
 sync-1
-00:22:03.100 --> 00:22:25.000
+00:22:10.667 --> 00:22:32.567
 How Finpoint helps. Financial data is stored locally. JSON export is a separate backup. Optional Google Drive sync shares a workspace copy through your connected Drive. Finpoint’s authentication broker handles sign-in, not your financial table contents. Learning progress stays on this browser and is excluded from financial backups and Drive sync.
 
 sync-2
-00:22:25.000 --> 00:22:31.067
+00:22:32.567 --> 00:22:38.633
 Step 1. Open Sync, export a backup, and locate the downloaded file.
 
 sync-3
-00:22:31.067 --> 00:22:37.167
+00:22:38.633 --> 00:22:44.733
 Step 2. Connect Drive only if you want sync, then read the status after changes.
 
 sync-4
-00:22:37.167 --> 00:22:45.567
+00:22:44.733 --> 00:22:53.133
 Step 3. For Offline, reconnect and let the status update. For authentication errors, reconnect Google Drive.
 
 sync-5
-00:22:45.567 --> 00:22:56.167
+00:22:53.133 --> 00:23:03.733
 Step 4. For a conflict, export the current local copy first, inspect the local and remote choices, then explicitly choose the copy you intend to keep.
 
 sync-6
-00:22:56.167 --> 00:23:04.167
+00:23:03.733 --> 00:23:11.733
 Check your result. A confirmed Up to date status and a located backup answer different questions. Keep both when appropriate.
 
 sync-7
-00:23:04.167 --> 00:23:18.733
-If something looks wrong. Do not repeatedly overwrite a conflict just to remove the warning. Restore from file and Load demo data replace financial data. A stale tutorial milestone cannot prove your current financial workspace is complete.
+00:23:11.733 --> 00:23:26.500
+If something looks wrong. Do not repeatedly overwrite a conflict just to remove the warning. Restoring a backup and loading demo data replace financial data. A stale tutorial milestone cannot prove your current financial workspace is complete.
 
 sync-8
-00:23:18.733 --> 00:23:28.900
+00:23:26.500 --> 00:23:36.667
 Example. A practice lesson can remember its completion on this browser without adding sample Records to your financial backup or uploading practice values to Drive.
 
 routine-0
-00:23:28.900 --> 00:23:38.167
+00:23:36.667 --> 00:23:45.933
 What should I do each time I return?. The problem. A repeatable short routine is easier than trying to perfect the entire workspace in one sitting.
 
 routine-1
-00:23:38.167 --> 00:23:55.100
+00:23:45.933 --> 00:24:02.867
 How Finpoint helps. Import new activity, explain remaining amounts, inspect Pending items, review the month, and protect the result. You can return to any video chapter, search the Help articles, or replay a practice lesson without restarting all onboarding.
 
 routine-2
-00:23:55.100 --> 00:24:00.800
+00:24:02.867 --> 00:24:08.567
 Step 1. Import your latest supported bank CSV and check the result counts.
 
 routine-3
-00:24:00.800 --> 00:24:09.533
+00:24:08.567 --> 00:24:17.300
 Step 2. Use Allocator for unexplained amounts; use Records to review incomplete explanations and pending Statements separately.
 
 routine-4
-00:24:09.533 --> 00:24:19.333
+00:24:17.300 --> 00:24:27.100
 Step 3. Review the correct month in Dashboard and Monthly Records. Check treatments, buckets, targets, and Budget membership when relevant.
 
 routine-5
-00:24:19.333 --> 00:24:28.067
+00:24:27.100 --> 00:24:35.833
 Step 4. Check Sync and keep backups. Settings lets you adjust default date filters and comparison history to suit your routine.
 
 routine-6
-00:24:28.067 --> 00:24:36.100
+00:24:35.833 --> 00:24:43.867
 Check your result. You can follow the bank amount to the explanation, understand the summary, and recover your saved work.
 
 routine-7
-00:24:36.100 --> 00:24:49.433
+00:24:43.867 --> 00:24:57.200
 If something looks wrong. If you get stuck, open Help without leaving your current form. Search using the problem you see, such as ‘Pending’, ‘refund’, or ‘missing Record’. Use practice to rehearse the fix.
 
 routine-8
-00:24:49.433 --> 00:24:59.933
+00:24:57.200 --> 00:25:07.700
 Example. A normal session can be: import, explain one remaining purchase, fix one Pending Record, review this month, check backup and sync.
-

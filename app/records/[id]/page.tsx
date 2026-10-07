@@ -72,6 +72,7 @@ export default function RecordPage({ params }: { params: Promise<{ id: string }>
 									amount={record.amount}
 									allocated={record.allocated_amount}
 									count={typedStatements.length}
+									pendingCount={record.pending_statement_count ?? 0}
 								/>
 							)}
 							{record.is_pending && (

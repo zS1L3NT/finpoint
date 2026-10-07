@@ -1,5 +1,6 @@
 import { readLearningValue, readLearningWorkspace, updateLearningValue } from "@/data/learning"
 import { guideTopics } from "@/lib/guide-content"
+import { isPendingRecord, tallyAllocations } from "@/logic/pending"
 import {
 	initialPractice,
 	type PracticeId,
@@ -99,9 +100,19 @@ async function updateLearning(update: (state: LearningState) => LearningState) {
 
 export async function getLearningOverview() {
 	const learning = await getLearning()
-	const workspace = await readLearningWorkspace(learning.lastRecordId)
+	const { record, allocations, pendingStatements, ...workspace } = await readLearningWorkspace(
+		learning.lastRecordId,
+	)
+	const tally = tallyAllocations(allocations, pendingStatements).get(record?.id ?? "")
 	return {
 		...workspace,
+		recordStatus: !learning.lastRecordId
+			? "not-started"
+			: !record
+				? "missing"
+				: isPendingRecord(record.amount, tally)
+					? "pending"
+					: "complete",
 		learning,
 		eligible:
 			workspace.ready &&

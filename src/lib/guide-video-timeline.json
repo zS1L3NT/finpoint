@@ -2,7 +2,7 @@
 	"fps": 30,
 	"width": 1080,
 	"height": 1080,
-	"durationInFrames": 44998,
+	"durationInFrames": 45231,
 	"chapters": [
 		{
 			"id": "start",
@@ -81,7 +81,7 @@
 			"title": "What are Statements, Records, and Allocations?",
 			"group": "Start here",
 			"startFrame": 2309,
-			"durationInFrames": 2361,
+			"durationInFrames": 2415,
 			"segments": [
 				{
 					"label": "The problem",
@@ -127,22 +127,22 @@
 				},
 				{
 					"label": "Check your result",
-					"text": "A complete Record has at least one Allocation, and its Allocation total equals its amount.",
+					"text": "A complete Record has at least one Allocation, its Allocation total equals its amount, and none of its Statements are Pending.",
 					"from": 1439,
-					"durationInFrames": 223,
+					"durationInFrames": 277,
 					"audio": "guide-audio/model-6.mp3"
 				},
 				{
 					"label": "If something looks wrong",
 					"text": "Do not create a second explanation just because there are two bank rows. A payment and repayment may explain one shared purchase.",
-					"from": 1662,
+					"from": 1716,
 					"durationInFrames": 294,
 					"audio": "guide-audio/model-7.mp3"
 				},
 				{
 					"label": "Example",
 					"text": "Statement −$12 → Allocation −$12 → Lunch Record −$12. An Account balance and the Dashboard spending total answer different questions.",
-					"from": 1956,
+					"from": 2010,
 					"durationInFrames": 405,
 					"audio": "guide-audio/model-8.mp3"
 				}
@@ -152,8 +152,8 @@
 			"id": "workspace",
 			"title": "How do I start or restore a workspace?",
 			"group": "Start here",
-			"startFrame": 4670,
-			"durationInFrames": 2498,
+			"startFrame": 4724,
+			"durationInFrames": 2522,
 			"segments": [
 				{
 					"label": "The problem",
@@ -178,43 +178,43 @@
 				},
 				{
 					"label": "Step 2",
-					"text": "If you already have a Finpoint JSON backup, open Sync and under Manual sync, choose your JSON file with Choose file, then use Restore from file.",
+					"text": "If you already have a Finpoint JSON backup, open Sync and under Backup file, click Restore from a backup file, choose the JSON file, then use Restore.",
 					"from": 871,
-					"durationInFrames": 343,
+					"durationInFrames": 367,
 					"audio": "guide-audio/workspace-3.mp3"
 				},
 				{
 					"label": "Step 3",
 					"text": "Before restoring, export the current workspace if you need to keep it. Restore replaces financial data; it does not merge two workspaces.",
-					"from": 1214,
+					"from": 1238,
 					"durationInFrames": 303,
 					"audio": "guide-audio/workspace-4.mp3"
 				},
 				{
 					"label": "Step 4",
 					"text": "Use Help in the top bar whenever you need an explanation without leaving a form.",
-					"from": 1517,
+					"from": 1541,
 					"durationInFrames": 183,
 					"audio": "guide-audio/workspace-5.mp3"
 				},
 				{
 					"label": "Check your result",
 					"text": "Your expected Accounts, Statements, or restored Records appear in their lists.",
-					"from": 1700,
+					"from": 1724,
 					"durationInFrames": 205,
 					"audio": "guide-audio/workspace-6.mp3"
 				},
 				{
 					"label": "If something looks wrong",
 					"text": "Do not use Load demo data as a safe tutorial in your own workspace: it replaces financial data. Help & guides practice is separate and uses sample values only.",
-					"from": 1905,
+					"from": 1929,
 					"durationInFrames": 366,
 					"audio": "guide-audio/workspace-7.mp3"
 				},
 				{
 					"label": "Example",
 					"text": "A beginner can practice a −$12 lunch without uploading files or changing an Account balance.",
-					"from": 2271,
+					"from": 2295,
 					"durationInFrames": 227,
 					"audio": "guide-audio/workspace-8.mp3"
 				}
@@ -224,7 +224,7 @@
 			"id": "import",
 			"title": "How do I import bank activity?",
 			"group": "Everyday use",
-			"startFrame": 7168,
+			"startFrame": 7246,
 			"durationInFrames": 2797,
 			"segments": [
 				{
@@ -296,7 +296,7 @@
 			"id": "lunch",
 			"title": "How do I explain my first purchase?",
 			"group": "Everyday use",
-			"startFrame": 9965,
+			"startFrame": 10043,
 			"durationInFrames": 2601,
 			"segments": [
 				{
@@ -368,8 +368,8 @@
 			"id": "backup-first",
 			"title": "How do I protect my first results?",
 			"group": "Start here",
-			"startFrame": 12566,
-			"durationInFrames": 2409,
+			"startFrame": 12644,
+			"durationInFrames": 2368,
 			"segments": [
 				{
 					"label": "The problem",
@@ -387,51 +387,51 @@
 				},
 				{
 					"label": "Step 1",
-					"text": "Open Sync and under Manual sync, choose Download backup.",
+					"text": "Open Sync and under Backup file, choose Download backup.",
 					"from": 773,
-					"durationInFrames": 166,
+					"durationInFrames": 167,
 					"audio": "guide-audio/backup-first-2.mp3"
 				},
 				{
 					"label": "Step 2",
 					"text": "Find the downloaded Finpoint JSON file and keep it somewhere you can find again.",
-					"from": 939,
+					"from": 940,
 					"durationInFrames": 199,
 					"audio": "guide-audio/backup-first-3.mp3"
 				},
 				{
 					"label": "Step 3",
-					"text": "Keep an earlier backup before using Restore from file or replacing data.",
-					"from": 1138,
-					"durationInFrames": 181,
+					"text": "Keep an earlier backup before choosing Restore or replacing data.",
+					"from": 1139,
+					"durationInFrames": 167,
 					"audio": "guide-audio/backup-first-4.mp3"
 				},
 				{
 					"label": "Step 4",
 					"text": "If you choose Google Drive sync, review its status and any conflicts separately.",
-					"from": 1319,
+					"from": 1306,
 					"durationInFrames": 191,
 					"audio": "guide-audio/backup-first-5.mp3"
 				},
 				{
 					"label": "Check your result",
 					"text": "You have located the downloaded backup file; a button click alone does not confirm that.",
-					"from": 1510,
+					"from": 1497,
 					"durationInFrames": 217,
 					"audio": "guide-audio/backup-first-6.mp3"
 				},
 				{
 					"label": "If something looks wrong",
 					"text": "If the browser blocks a download, allow it and request the export again. Never clear storage until you have a usable backup or have confirmed the intended synced copy.",
-					"from": 1727,
+					"from": 1714,
 					"durationInFrames": 350,
 					"audio": "guide-audio/backup-first-7.mp3"
 				},
 				{
 					"label": "Example",
-					"text": "After explaining Lunch, Alex exports a backup. Later, Restore from file can restore that financial workspace, replacing whatever is currently there.",
-					"from": 2077,
-					"durationInFrames": 332,
+					"text": "After explaining Lunch, Alex exports a backup. Later, restoring that file replaces the financial workspace currently in this browser.",
+					"from": 2064,
+					"durationInFrames": 304,
 					"audio": "guide-audio/backup-first-8.mp3"
 				}
 			]
@@ -440,7 +440,7 @@
 			"id": "split",
 			"title": "How do I split one payment into different purchases?",
 			"group": "Everyday use",
-			"startFrame": 14975,
+			"startFrame": 15012,
 			"durationInFrames": 2620,
 			"segments": [
 				{
@@ -512,8 +512,8 @@
 			"id": "repayment",
 			"title": "How do I record a shared dinner and repayment?",
 			"group": "Everyday use",
-			"startFrame": 17595,
-			"durationInFrames": 2519,
+			"startFrame": 17632,
+			"durationInFrames": 2546,
 			"segments": [
 				{
 					"label": "The problem",
@@ -566,15 +566,15 @@
 				},
 				{
 					"label": "If something looks wrong",
-					"text": "Until the repayment is available, the Record may be Pending. Pending is an amount-matching status; it does not by itself prove that someone owes you money. Use your notes to explain the situation.",
+					"text": "Until the repayment is available, the Record may be Pending because amounts differ or a Statement is still Pending. The status does not by itself prove that someone owes you money. Use your notes to explain the situation.",
 					"from": 1786,
-					"durationInFrames": 398,
+					"durationInFrames": 425,
 					"audio": "guide-audio/repayment-7.mp3"
 				},
 				{
 					"label": "Example",
 					"text": "Payment −$90 → Shared dinner ← Repayment +$60. The Record shows Alex’s −$30 share.",
-					"from": 2184,
+					"from": 2211,
 					"durationInFrames": 335,
 					"audio": "guide-audio/repayment-8.mp3"
 				}
@@ -584,7 +584,7 @@
 			"id": "treatments",
 			"title": "Are refunds, transfers, and savings spending?",
 			"group": "Understand the numbers",
-			"startFrame": 20114,
+			"startFrame": 20178,
 			"durationInFrames": 2976,
 			"segments": [
 				{
@@ -656,69 +656,69 @@
 			"id": "pending",
 			"title": "Why is my Record Pending, and how do I fix it?",
 			"group": "Fix a problem",
-			"startFrame": 23090,
-			"durationInFrames": 2845,
+			"startFrame": 23154,
+			"durationInFrames": 3008,
 			"segments": [
 				{
 					"label": "The problem",
-					"text": "Pending can refer to a Record that does not tally, or to a pending Statement. These are different checks.",
+					"text": "A Record can be Pending because amounts differ, Allocations are missing, or an allocated Statement is Pending.",
 					"from": 0,
-					"durationInFrames": 319,
+					"durationInFrames": 332,
 					"audio": "guide-audio/pending-0.mp3"
 				},
 				{
 					"label": "How Finpoint helps",
-					"text": "A Record is Pending when it has no Allocations or their total differs from its amount. A pending Statement is a placeholder or supported imported pending bank activity. A Record can tally while still being linked to a pending Statement.",
-					"from": 319,
-					"durationInFrames": 443,
+					"text": "A Record is Pending when it has no Allocations, their total differs from its amount, or any allocated Statement is Pending. A Pending Statement is a placeholder for bank activity still to arrive. Even when amounts tally, the Record stays Pending until that placeholder is replaced.",
+					"from": 332,
+					"durationInFrames": 545,
 					"audio": "guide-audio/pending-1.mp3"
 				},
 				{
 					"label": "Step 1",
-					"text": "Open the Record and compare its amount, Allocation total, and Allocation count.",
-					"from": 762,
-					"durationInFrames": 202,
+					"text": "Open the Record and compare its amount, Allocation total, Allocation count, and Pending Statements.",
+					"from": 877,
+					"durationInFrames": 240,
 					"audio": "guide-audio/pending-2.mp3"
 				},
 				{
 					"label": "Step 2",
 					"text": "For a −$10 Record with a −$12 Allocation, correct the Record to −$12 if the lunch really cost $12.",
-					"from": 964,
+					"from": 1117,
 					"durationInFrames": 310,
 					"audio": "guide-audio/pending-3.mp3"
 				},
 				{
 					"label": "Step 3",
 					"text": "For missing bank activity, keep a pending Statement only when it represents the actual expected activity.",
-					"from": 1274,
+					"from": 1427,
 					"durationInFrames": 242,
 					"audio": "guide-audio/pending-4.mp3"
 				},
 				{
 					"label": "Step 4",
-					"text": "When the real bank row arrives, use the pending-Statement replacement flow and verify the resulting links instead of allocating it twice.",
-					"from": 1516,
-					"durationInFrames": 282,
+					"text": "When the real Statement arrives, use the Pending Statement replacement flow and verify its Allocations instead of allocating it twice.",
+					"from": 1669,
+					"durationInFrames": 281,
 					"audio": "guide-audio/pending-5.mp3"
 				},
 				{
 					"label": "Check your result",
-					"text": "At least one Allocation exists and its total matches the Record. Also review pending Statements separately.",
-					"from": 1798,
-					"durationInFrames": 248,
+					"text": "At least one Allocation exists, its total matches the Record, and none of its allocated Statements are Pending.",
+					"from": 1950,
+					"durationInFrames": 259,
 					"audio": "guide-audio/pending-6.mp3"
 				},
 				{
 					"label": "If something looks wrong",
 					"text": "Correct the facts, not just the status. A mismatch is a valid saved state, not a failed save. If the real amount differs from the placeholder, inspect the affected Record after replacement.",
-					"from": 2046,
+					"from": 2209,
 					"durationInFrames": 413,
 					"audio": "guide-audio/pending-7.mp3"
 				},
 				{
 					"label": "Example",
 					"text": "Record −$10; Allocation −$12; difference $2. Change the Record to −$12 when that is the correct purchase amount, then save and check again.",
-					"from": 2459,
+					"from": 2622,
 					"durationInFrames": 386,
 					"audio": "guide-audio/pending-8.mp3"
 				}
@@ -728,7 +728,7 @@
 			"id": "find",
 			"title": "How do I find, edit, or remove a mistake?",
 			"group": "Fix a problem",
-			"startFrame": 25935,
+			"startFrame": 26162,
 			"durationInFrames": 2656,
 			"segments": [
 				{
@@ -800,7 +800,7 @@
 			"id": "categories",
 			"title": "What is the difference between Category, treatment, and bucket?",
 			"group": "Plan your money",
-			"startFrame": 28591,
+			"startFrame": 28818,
 			"durationInFrames": 2593,
 			"segments": [
 				{
@@ -872,7 +872,7 @@
 			"id": "targets",
 			"title": "How do monthly bucket targets work?",
 			"group": "Plan your money",
-			"startFrame": 31184,
+			"startFrame": 31411,
 			"durationInFrames": 2450,
 			"segments": [
 				{
@@ -944,7 +944,7 @@
 			"id": "budgets",
 			"title": "When should I use a Budget instead of a bucket?",
 			"group": "Plan your money",
-			"startFrame": 33634,
+			"startFrame": 33861,
 			"durationInFrames": 2539,
 			"segments": [
 				{
@@ -1016,7 +1016,7 @@
 			"id": "dashboard",
 			"title": "How do I read the Dashboard and Monthly Records?",
 			"group": "Understand the numbers",
-			"startFrame": 36173,
+			"startFrame": 36400,
 			"durationInFrames": 3210,
 			"segments": [
 				{
@@ -1088,8 +1088,8 @@
 			"id": "sync",
 			"title": "How do backups and Google Drive sync work?",
 			"group": "Fix a problem",
-			"startFrame": 39383,
-			"durationInFrames": 2884,
+			"startFrame": 39610,
+			"durationInFrames": 2890,
 			"segments": [
 				{
 					"label": "The problem",
@@ -1142,15 +1142,15 @@
 				},
 				{
 					"label": "If something looks wrong",
-					"text": "Do not repeatedly overwrite a conflict just to remove the warning. Restore from file and Load demo data replace financial data. A stale tutorial milestone cannot prove your current financial workspace is complete.",
+					"text": "Do not repeatedly overwrite a conflict just to remove the warning. Restoring a backup and loading demo data replace financial data. A stale tutorial milestone cannot prove your current financial workspace is complete.",
 					"from": 2142,
-					"durationInFrames": 437,
+					"durationInFrames": 443,
 					"audio": "guide-audio/sync-7.mp3"
 				},
 				{
 					"label": "Example",
 					"text": "A practice lesson can remember its completion on this browser without adding sample Records to your financial backup or uploading practice values to Drive.",
-					"from": 2579,
+					"from": 2585,
 					"durationInFrames": 305,
 					"audio": "guide-audio/sync-8.mp3"
 				}
@@ -1160,7 +1160,7 @@
 			"id": "routine",
 			"title": "What should I do each time I return?",
 			"group": "Everyday use",
-			"startFrame": 42267,
+			"startFrame": 42500,
 			"durationInFrames": 2731,
 			"segments": [
 				{

@@ -58,7 +58,7 @@ export const guideTopics: GuideTopic[] = [
 			"Create or select the Record that explains it.",
 			"Allocate the appropriate signed amount. A Statement can feed several Records, and a Record can combine several Statements.",
 		],
-		check: "A complete Record has at least one Allocation, and its Allocation total equals its amount.",
+		check: "A complete Record has at least one Allocation, its Allocation total equals its amount, and none of its Statements are Pending.",
 		fix: "Do not create a second explanation just because there are two bank rows. A payment and repayment may explain one shared purchase.",
 		example:
 			"Statement −$12 → Allocation −$12 → Lunch Record −$12. An Account balance and the Dashboard spending total answer different questions.",
@@ -75,7 +75,7 @@ export const guideTopics: GuideTopic[] = [
 			"Finpoint stores financial data in this browser on this device. The starter Categories and buckets are editable planning defaults. You can learn using the isolated practice lessons before importing your own data.",
 		steps: [
 			"For a new workspace, open Importer and choose your bank.",
-			"If you already have a Finpoint JSON backup, open Sync and under Manual sync, choose your JSON file with Choose file, then use Restore from file.",
+			"If you already have a Finpoint JSON backup, open Sync and under Backup file, click Restore from a backup file, choose the JSON file, then use Restore.",
 			"Before restoring, export the current workspace if you need to keep it. Restore replaces financial data; it does not merge two workspaces.",
 			"Use Help in the top bar whenever you need an explanation without leaving a form.",
 		],
@@ -137,15 +137,15 @@ export const guideTopics: GuideTopic[] = [
 		explanation:
 			"Saving a Record writes to this browser. A Finpoint JSON backup gives you a separate copy of financial data and settings. Requesting a download cannot prove that the file was kept successfully, so check your Downloads folder yourself.",
 		steps: [
-			"Open Sync and under Manual sync, choose Download backup.",
+			"Open Sync and under Backup file, choose Download backup.",
 			"Find the downloaded Finpoint JSON file and keep it somewhere you can find again.",
-			"Keep an earlier backup before using Restore from file or replacing data.",
+			"Keep an earlier backup before choosing Restore or replacing data.",
 			"If you choose Google Drive sync, review its status and any conflicts separately.",
 		],
 		check: "You have located the downloaded backup file; a button click alone does not confirm that.",
 		fix: "If the browser blocks a download, allow it and request the export again. Never clear storage until you have a usable backup or have confirmed the intended synced copy.",
 		example:
-			"After explaining Lunch, Alex exports a backup. Later, Restore from file can restore that financial workspace, replacing whatever is currently there.",
+			"After explaining Lunch, Alex exports a backup. Later, restoring that file replaces the financial workspace currently in this browser.",
 	},
 	{
 		id: "split",
@@ -185,7 +185,7 @@ export const guideTopics: GuideTopic[] = [
 			"Save and check that the Allocation total is −$30.",
 		],
 		check: "−$90 + $60 = −$30. Both Statements are explained and the Record tallies.",
-		fix: "Until the repayment is available, the Record may be Pending. Pending is an amount-matching status; it does not by itself prove that someone owes you money. Use your notes to explain the situation.",
+		fix: "Until the repayment is available, the Record may be Pending because amounts differ or a Statement is still Pending. The status does not by itself prove that someone owes you money. Use your notes to explain the situation.",
 		example:
 			"Payment −$90 → Shared dinner ← Repayment +$60. The Record shows Alex’s −$30 share.",
 	},
@@ -218,16 +218,16 @@ export const guideTopics: GuideTopic[] = [
 		keywords: "mismatch difference unallocated pending statement replace placeholder zero",
 		destination: "records",
 		problem:
-			"Pending can refer to a Record that does not tally, or to a pending Statement. These are different checks.",
+			"A Record can be Pending because amounts differ, Allocations are missing, or an allocated Statement is Pending.",
 		explanation:
-			"A Record is Pending when it has no Allocations or their total differs from its amount. A pending Statement is a placeholder or supported imported pending bank activity. A Record can tally while still being linked to a pending Statement.",
+			"A Record is Pending when it has no Allocations, their total differs from its amount, or any allocated Statement is Pending. A Pending Statement is a placeholder for bank activity still to arrive. Even when amounts tally, the Record stays Pending until that placeholder is replaced.",
 		steps: [
-			"Open the Record and compare its amount, Allocation total, and Allocation count.",
+			"Open the Record and compare its amount, Allocation total, Allocation count, and Pending Statements.",
 			"For a −$10 Record with a −$12 Allocation, correct the Record to −$12 if the lunch really cost $12.",
 			"For missing bank activity, keep a pending Statement only when it represents the actual expected activity.",
-			"When the real bank row arrives, use the pending-Statement replacement flow and verify the resulting links instead of allocating it twice.",
+			"When the real Statement arrives, use the Pending Statement replacement flow and verify its Allocations instead of allocating it twice.",
 		],
-		check: "At least one Allocation exists and its total matches the Record. Also review pending Statements separately.",
+		check: "At least one Allocation exists, its total matches the Record, and none of its allocated Statements are Pending.",
 		fix: "Correct the facts, not just the status. A mismatch is a valid saved state, not a failed save. If the real amount differs from the placeholder, inspect the affected Record after replacement.",
 		example:
 			"Record −$10; Allocation −$12; difference $2. Change the Record to −$12 when that is the correct purchase amount, then save and check again.",
@@ -355,7 +355,7 @@ export const guideTopics: GuideTopic[] = [
 			"For a conflict, export the current local copy first, inspect the local and remote choices, then explicitly choose the copy you intend to keep.",
 		],
 		check: "A confirmed Up to date status and a located backup answer different questions. Keep both when appropriate.",
-		fix: "Do not repeatedly overwrite a conflict just to remove the warning. Restore from file and Load demo data replace financial data. A stale tutorial milestone cannot prove your current financial workspace is complete.",
+		fix: "Do not repeatedly overwrite a conflict just to remove the warning. Restoring a backup and loading demo data replace financial data. A stale tutorial milestone cannot prove your current financial workspace is complete.",
 		example:
 			"A practice lesson can remember its completion on this browser without adding sample Records to your financial backup or uploading practice values to Drive.",
 	},

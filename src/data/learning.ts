@@ -26,9 +26,8 @@ export async function readLearningWorkspace(recordId: string | null) {
 	const allocations = record
 		? await db.allocations.where("record_id").equals(record.id).toArray()
 		: []
-	const allocationCents = allocations.reduce(
-		(sum, allocation) => sum + Math.round(allocation.amount * 100),
-		0,
+	const allocatedStatements = await db.statements.bulkGet(
+		allocations.map(item => item.statement_id),
 	)
 	return {
 		ready: !!seed,
@@ -36,12 +35,10 @@ export async function readLearningWorkspace(recordId: string | null) {
 		statements,
 		records,
 		budgets,
-		recordStatus: !recordId
-			? "not-started"
-			: !record
-				? "missing"
-				: allocations.length > 0 && allocationCents === Math.round(record.amount * 100)
-					? "complete"
-					: "pending",
+		record,
+		allocations,
+		pendingStatements: new Set(
+			allocatedStatements.flatMap(item => (item?.is_pending === 1 ? [item.id] : [])),
+		),
 	}
 }

@@ -72,7 +72,7 @@ These are user problems and workflow fixes. They are not a software bug-fix list
 | Record | Your explanation of a meaningful expense, income, transfer, or adjustment. | “Lunch,” $12 paid. | It does not have to equal one Statement. |
 | Allocation | How much of a Statement belongs to a Record. | All $12 belongs to Lunch. | Creating an Allocation does not spend money again. |
 | Allocable amount | The part of a Statement still available to assign. | $20 remains after allocating $60 of an $80 payment. | This is not an Account balance. |
-| Pending Record | Its Allocations do not yet tally with its amount, or it has no Statements allocated. | A $30 dinner Record currently allocated only the $90 payment. | It is not automatically a debt or a forecast. |
+| Pending Record | Its Allocations do not tally, none exist, or any allocated Statement is Pending. | A $30 dinner Record currently allocated only the $90 payment. | Matching amounts still need confirmed Statements; the status does not automatically mean a debt or forecast. |
 | Pending Statement | Activity marked pending; a user can create a handwritten placeholder before imported activity arrives. | A known $25 transport charge awaiting import. | This is a different kind of pending from an incomplete Record. Supported Revolut imports can also carry pending status. |
 | Category | What the Record is for. | Dining Out. | It can supply defaults, but is not itself a treatment or bucket. |
 | Treatment | How the Record affects the totals. | Spending. | Automatic by direction cannot infer a refund or transfer's purpose. |
@@ -139,7 +139,7 @@ These anchors preserve meaning. The production model should write natural connec
 
 **Proof:** open the resulting Record and show its Statement. Explain why it no longer needs Allocation in the working queue. Importing alone did not create the meaningful Record or populate spending analytics for that item.
 
-**First backup:** Sync → Manual sync → Download backup. Show the file arriving in downloads. Its JSON format is a Finpoint backup, not another bank export.
+**First backup:** Sync → Backup file → Download backup. Show the file arriving in downloads. Its JSON format is a Finpoint backup, not another bank export.
 
 **Practice pause:** “Try the salary Statement next. Should the amount be paid out or received, and which Category fits?” Answer: +3000, Income. This can be a short assisted repeat rather than another full form tour.
 
@@ -197,7 +197,7 @@ Show these states side by side before the replacement walkthrough:
 | State | Record amount | Allocations | Meaning |
 |---|---:|---:|---|
 | Record created before account activity is available | −25 | None | Pending Record: the explanation exists but account activity is not yet allocated. |
-| Handwritten Pending Statement allocated in full | −25 | −25 from a Pending Statement | The Record can be Complete, while the Statement still awaits imported replacement. |
+| Handwritten Pending Statement allocated in full | −25 | −25 from a Pending Statement | The Record stays Pending while the Statement awaits imported replacement, even though amounts tally. |
 | Imported Statement replaces the placeholder | −25 | Same −25 Allocation, now belonging to the imported Statement | The explanation is preserved; the placeholder is removed. |
 
 **Walkthrough:**
@@ -214,7 +214,7 @@ Show these states side by side before the replacement walkthrough:
 
 Replacement needs the same Account and a fully unallocated imported destination. Existing Allocations must fit its direction and capacity. Amounts do not always need to be identical; use equal amounts for the beginner demonstration, then mention that differences require review. Suggestions help you choose; they are not automatic confirmation.
 
-Do not describe a Complete Record as proof that the bank has finalized its activity. Pending Statement status is still separate.
+A Pending Statement keeps its allocated Records Pending. Matching amounts are necessary for completion, but the placeholder must also be replaced by confirmed imported activity.
 
 ### S11: finding and correcting work
 
@@ -378,7 +378,7 @@ Use a **separate scene reset** for the holiday-dinner bucket override and hypoth
 | D. Supermarket partly allocated | Split explanation | Exactly $20 remains. |
 | E. Dinner before repayment | Pending Record | Record −30; Allocation −90; Pending label. |
 | F. Dinner after repayment | Many Statements to one Record | Allocations −90 and +60; Complete. |
-| G. Transport placeholder allocated | Pending distinction | Record can be Complete while its Statement remains Pending. |
+| G. Transport placeholder allocated | Pending distinction | The Record tallies but stays Pending while its Statement remains Pending. |
 | H. Imported transport available | Replacement review | Imported destination is fully unallocated and from the same Account. |
 | I. Finished fixture | Totals and recap | Counts and totals above agree. |
 | J. Separate prepared history | Charts and comparisons | At least several labelled months; explicitly a different dataset. |
@@ -394,7 +394,7 @@ These can appear immediately after the relevant demonstration and be exported as
 | Import fails. | Check selected bank, expected export format, and required Revolut Account details; read the displayed error. | Correct file and Account path imports successfully. Do not suggest renaming a PDF to CSV. |
 | I imported but spending totals did not appear. | Create or complete the meaningful Records and check the month. | Dashboard reflects applicable Records, not raw unexplained Statements. |
 | My Record is Pending. | Compare Record amount to signed Allocation sum; check for no allocated Statements. | Correct amount/Allocations or leave pending while real activity is absent. |
-| My Record is Complete but the Statement is Pending. | Inspect the Statement's pending status. | Understand that the placeholder still needs later replacement. |
+| My Record tallies but stays Pending. | Inspect the Statement's pending status. | Replace the placeholder with confirmed imported activity before expecting completion. |
 | I cannot allocate this much. | Check the Statement's remaining allocable amount and money direction. | A valid amount fits the Statement without exceeding its remaining capacity. |
 | A pending replacement is unavailable. | Check Account, imported status, existing Allocations, and capacity; broaden candidate search. | Choose the correct eligible import; do not force a merely similar candidate. |
 | I cannot find a Record/Statement. | Clear search and relevant filters; check selected month and default date settings. | Hidden activity reappears if the filter caused it. |
@@ -511,7 +511,7 @@ The plan uses current local implementation as its authority where README wording
 **Mandatory rehearsal checks before treating this as a recording script:**
 
 - Confirm the $30 Dinner Record can be demonstrated with −90 initially and +60 later, and verify visible pending/complete states.
-- Confirm a zero-amount Transfer Record with both Statements, and the distinction between Complete Record and Pending Statement.
+- Confirm a zero-amount Transfer Record with both Statements, and verify that a Pending Statement keeps its allocated Record Pending.
 - Rehearse a partial Statement split, refund treatment, and exact-amount filter behavior through the live UI.
 - Use one real supported export layout with fictional contents; verify bank-specific format handling and reimport counts.
 - Verify Category default behavior, monthly-target precedence, and the manual Budget's $127 result.

@@ -18,10 +18,12 @@ export function PendingHelp({
 	amount,
 	allocated,
 	count,
+	pendingCount,
 }: {
 	amount: number
 	allocated: number
 	count: number
+	pendingCount: number
 }) {
 	return (
 		<Dialog>
@@ -48,11 +50,18 @@ export function PendingHelp({
 					<dd>{formatCurrency(round2(amount - allocated))}</dd>
 					<dt>Allocations</dt>
 					<dd>{count}</dd>
+					<dt>Pending Statements</dt>
+					<dd>{pendingCount}</dd>
 				</dl>
 				<p className="text-sm leading-6">
 					{count === 0
 						? "This Record has no Allocations. Even a $0 Record needs at least one Allocation to be complete."
-						: "The saved Allocation total does not match the Record amount. Correct the Record or its Allocations according to what actually happened, then save again."}
+						: round2(amount - allocated) !== 0
+							? "The saved Allocation total does not match the Record amount. Correct the Record or its Allocations according to what actually happened, then save again."
+							: "The amounts tally, but this Record uses a Pending Statement. It stays Pending until the real imported activity replaces the placeholder."}
+					{pendingCount > 0 &&
+						round2(amount - allocated) !== 0 &&
+						" It also uses a Pending Statement, which still needs replacement with the real imported activity."}
 				</p>
 				<GuideArticle topic={getGuideTopic("pending")} compact />
 			</DialogContent>
