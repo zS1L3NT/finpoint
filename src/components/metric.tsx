@@ -1,5 +1,6 @@
 import Sparkline from "@/components/charts/sparkline"
 import { UiIcon as IconifyIcon } from "@/components/icon"
+import ValueSwap from "@/components/value-swap"
 import { cn } from "@/lib/utils"
 
 export type Delta = { text: string; good: boolean }
@@ -68,7 +69,7 @@ export function Metric({
 								: "bg-red-500/10 text-red-700 dark:text-red-400",
 						)}
 					>
-						{delta.text}
+						<ValueSwap value={delta.text} />
 					</span>
 				) : null}
 			</div>
@@ -81,7 +82,7 @@ export function Metric({
 							tone === "negative" && "text-red-700 dark:text-red-400",
 						)}
 					>
-						{value}
+						<ValueSwap value={value} />
 					</p>
 					<p className="mt-1 text-xs text-muted-foreground">{detail}</p>
 				</div>

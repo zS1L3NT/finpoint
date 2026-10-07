@@ -219,7 +219,10 @@ export default function BucketDialog({
 						) : null}
 					</FieldGroup>
 					{Object.values(errors).flat().length ? (
-						<p className="text-sm text-destructive" role="alert">
+						<p
+							className="fade-in slide-in-from-top-1 animate-in text-sm text-destructive duration-150 ease-out"
+							role="alert"
+						>
 							{Object.values(errors).flat().join(" ")}
 						</p>
 					) : null}

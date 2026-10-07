@@ -49,6 +49,9 @@ export default function AccountPage({ params }: { params: Promise<{ id: string }
 		grouped: true,
 	})
 
+	// undefined means the live query is still resolving; only null is genuinely missing.
+	if (account === undefined) return null
+
 	if (!account) {
 		return (
 			<>

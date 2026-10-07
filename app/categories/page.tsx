@@ -1,6 +1,7 @@
 "use client"
 
 import { useLiveQuery } from "dexie-react-hooks"
+import { motion } from "framer-motion"
 import Link from "next/link"
 import { useState } from "react"
 import BucketBadge from "@/components/bucket-badge"
@@ -10,9 +11,9 @@ import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Skeleton } from "@/components/ui/skeleton"
 import { useHistory } from "@/history"
 import { canUseDefaultBucket, treatmentLabel } from "@/lib/analytics"
+import { SPRING } from "@/lib/motion"
 import { listCategories } from "@/logic/categories"
 import { pathRecords } from "@/routes"
 import type { AnalyticsTreatment, Category, CategoryWithChildren } from "@/types"
@@ -71,13 +72,7 @@ export default function CategoriesPage() {
 					/>
 				</div>
 
-				{categoriesQuery === undefined ? (
-					<div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-						{["a", "b", "c", "d", "e", "f"].map(key => (
-							<Skeleton key={key} className="h-28 rounded-xl" />
-						))}
-					</div>
-				) : visible.length === 0 ? (
+				{categoriesQuery === undefined ? null : visible.length === 0 ? (
 					<p className="rounded-xl border border-dashed p-10 text-center text-sm text-muted-foreground">
 						{query ? "No categories match your search." : "No categories yet."}
 					</p>
@@ -109,15 +104,25 @@ export default function CategoriesPage() {
 									</span>
 								</h3>
 								<div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-									{items.map(category => (
-										<CategoryTile
+									{items.map((category, index) => (
+										<motion.div
 											key={category.id}
-											category={category}
-											onEdit={edit =>
-												setDialogState({ mode: "edit", category: edit })
-											}
-											onFindRecords={handlePush("Categories")}
-										/>
+											className="grid"
+											initial={{ opacity: 0, y: 6 }}
+											animate={{ opacity: 1, y: 0 }}
+											transition={{
+												...SPRING.smooth,
+												delay: Math.min(index, 7) * 0.03,
+											}}
+										>
+											<CategoryTile
+												category={category}
+												onEdit={edit =>
+													setDialogState({ mode: "edit", category: edit })
+												}
+												onFindRecords={handlePush("Categories")}
+											/>
+										</motion.div>
 									))}
 								</div>
 							</section>
@@ -163,7 +168,7 @@ function CategoryTile({
 		: null
 	const childRecords = category.children.reduce((sum, child) => sum + child.records_count, 0)
 	return (
-		<article className="group grid content-start gap-3 rounded-xl border bg-card p-4 transition-shadow hover:shadow-md">
+		<article className="group grid content-start gap-3 rounded-xl border bg-card p-4 transition-[box-shadow,transform] duration-150 ease-out hover:shadow-md">
 			<div className="flex items-start gap-3">
 				<button
 					type="button"

@@ -1,5 +1,7 @@
+import { motion } from "framer-motion"
 import { DateTime } from "luxon"
 import { TableCell, TableRow } from "@/components/ui/table"
+import { type RowEntrance, rowEnter } from "@/lib/motion"
 import { classForCurrency, cn, formatCurrency } from "@/lib/utils"
 
 export type RowGroup<TData> = {
@@ -53,16 +55,19 @@ export function GroupHeaderRow<TData>({
 	groupKey,
 	rows,
 	columns,
+	enter,
 }: {
 	group: RowGroup<TData>
 	groupKey: string
 	rows: TData[]
 	columns: { id: string; className?: string }[]
+	/** Entrance props shared with the group's first row, so the header never arrives alone. */
+	enter?: Partial<React.ComponentProps<typeof TableRow>>
 }) {
 	const hasTotal = !!group.total && columns.some(column => column.id === "amount")
 	if (!hasTotal) {
 		return (
-			<TableRow className="bg-muted/40 hover:bg-muted/40">
+			<TableRow className="bg-muted/40 hover:bg-muted/40" {...enter}>
 				<TableCell colSpan={columns.length} className="py-1.5">
 					{group.label(groupKey, rows)}
 				</TableCell>
@@ -70,7 +75,7 @@ export function GroupHeaderRow<TData>({
 		)
 	}
 	return (
-		<TableRow className="bg-muted/40 hover:bg-muted/40">
+		<TableRow className="bg-muted/40 hover:bg-muted/40" {...enter}>
 			{columns.map((column, index) => (
 				<TableCell
 					key={column.id}
@@ -86,22 +91,46 @@ export function GroupHeaderRow<TData>({
 	)
 }
 
+/** A mobile list row, animated like a desktop table row. */
+export function MobileRow({
+	index,
+	entrance,
+	className,
+	...props
+}: React.ComponentProps<typeof motion.div> & { index: number; entrance: RowEntrance }) {
+	return (
+		<motion.div
+			{...rowEnter(index, entrance)}
+			{...props}
+			className={cn(MOBILE_ROW_CLASS, className)}
+		/>
+	)
+}
+
 /** Mobile group header: same three subgrid columns as the rows beneath it. */
 export function MobileGroupHeader<TData>({
 	group,
 	groupKey,
 	rows,
+	index,
+	entrance,
 }: {
 	group: RowGroup<TData>
 	groupKey: string
 	rows: TData[]
+	/** Position of the group's first row; headers enter together with it. */
+	index: number
+	entrance: RowEntrance
 }) {
 	return (
-		<div className={cn(MOBILE_ROW_CLASS, "bg-muted/50 px-3 py-1.5 text-sm")}>
+		<motion.div
+			{...rowEnter(index, entrance)}
+			className={cn(MOBILE_ROW_CLASS, "bg-muted/50 px-3 py-1.5 text-sm")}
+		>
 			<div className="min-w-0">{group.label(groupKey, rows)}</div>
 			{group.total ? <GroupTotal value={group.total(rows)} /> : <span />}
 			<span />
-		</div>
+		</motion.div>
 	)
 }
 

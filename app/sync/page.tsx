@@ -28,7 +28,6 @@ import {
 	CardTitle,
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Skeleton } from "@/components/ui/skeleton"
 import { db } from "@/data/db"
 import {
 	clearAllData,
@@ -118,7 +117,12 @@ function StateRow({ tone, label, value }: { tone: string; label: string; value: 
 	return (
 		<div className="flex items-center justify-between gap-3 border-b py-1.5 last:border-b-0">
 			<dt className="flex items-center gap-2 text-muted-foreground">
-				<span className={cn("size-2 shrink-0 rounded-full", tone)} />
+				<span
+					className={cn(
+						"size-2 shrink-0 rounded-full transition-colors duration-200 ease-out",
+						tone,
+					)}
+				/>
 				{label}
 			</dt>
 			<dd className="font-medium tabular-nums">{value}</dd>
@@ -447,14 +451,14 @@ export default function DataSettingsPage() {
 					<section
 						aria-live="polite"
 						className={cn(
-							"grid gap-5 rounded-xl border bg-card p-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-center md:p-6",
+							"grid gap-5 rounded-xl border bg-card p-5 transition-colors duration-200 ease-out md:grid-cols-[minmax(0,1fr)_auto] md:items-center md:p-6",
 							STATUS_TONES[status.tone].ring,
 						)}
 					>
 						<div className="flex items-start gap-4">
 							<span
 								className={cn(
-									"grid size-12 shrink-0 place-items-center rounded-xl",
+									"grid size-12 shrink-0 place-items-center rounded-xl transition-colors duration-200 ease-out",
 									STATUS_TONES[status.tone].tile,
 								)}
 							>
@@ -462,11 +466,15 @@ export default function DataSettingsPage() {
 									icon={status.icon}
 									className={cn(
 										"size-6",
-										sync.activity && "animate-spin [animation-duration:2s]",
+										sync.activity &&
+											"animate-spin [animation-duration:2s] motion-reduce:animate-none",
 									)}
 								/>
 							</span>
-							<div className="min-w-0">
+							<div
+								key={status.title}
+								className="min-w-0 animate-in duration-200 ease-out fade-in-0 slide-in-from-bottom-1"
+							>
 								<h3 className="text-lg font-semibold tracking-tight md:text-xl">
 									{status.title}
 								</h3>
@@ -537,7 +545,7 @@ export default function DataSettingsPage() {
 										{(counts[key] ?? 0).toLocaleString()}
 									</span>
 								) : (
-									<Skeleton className="h-7 w-12" />
+									<span className="invisible text-xl font-semibold">0</span>
 								)}
 							</div>
 						))}
@@ -696,13 +704,16 @@ export default function DataSettingsPage() {
 										if (file) setImportFile(file)
 									}}
 									className={cn(
-										"grid cursor-pointer place-items-center gap-1.5 rounded-lg border border-dashed px-4 py-6 text-center text-sm transition-colors hover:bg-muted/50",
-										dragging && "border-foreground bg-muted/60",
+										"grid cursor-pointer place-items-center gap-1.5 rounded-lg border border-dashed px-4 py-6 text-center text-sm transition-[background-color,border-color,transform] duration-150 ease-out hover:bg-muted/50 active:scale-[0.99] disabled:active:scale-100",
+										dragging && "scale-[1.01] border-foreground bg-muted/60",
 									)}
 								>
 									<IconifyIcon
 										icon={importFile ? "lucide:file-check" : "lucide:upload"}
-										className="size-5 text-muted-foreground"
+										className={cn(
+											"size-5 text-muted-foreground transition-[transform,color] duration-150 ease-out",
+											dragging && "-translate-y-1 text-foreground",
+										)}
 									/>
 									{importFile ? (
 										<>
@@ -726,7 +737,7 @@ export default function DataSettingsPage() {
 									)}
 								</button>
 								{importFile ? (
-									<div className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-amber-500/10 px-3 py-2 text-xs">
+									<div className="flex animate-in flex-wrap items-center justify-between gap-2 rounded-lg bg-amber-500/10 px-3 py-2 text-xs duration-200 ease-out fade-in-0 slide-in-from-top-1">
 										<span>Restoring replaces everything in this browser.</span>
 										<span className="flex gap-1.5">
 											<Button
@@ -769,6 +780,7 @@ export default function DataSettingsPage() {
 								<Button
 									type="button"
 									variant="ghost"
+									className="animate-in duration-150 ease-out fade-in-0"
 									onClick={() => setConfirmingDemo(false)}
 								>
 									Cancel
@@ -800,6 +812,7 @@ export default function DataSettingsPage() {
 								<Button
 									type="button"
 									variant="ghost"
+									className="animate-in duration-150 ease-out fade-in-0"
 									onClick={() => setConfirmingClear(false)}
 								>
 									Cancel

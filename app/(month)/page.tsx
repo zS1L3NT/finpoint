@@ -4,7 +4,7 @@ import { useLiveQuery } from "dexie-react-hooks"
 import { DateTime } from "luxon"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { type ReactNode, useMemo } from "react"
+import { type ReactNode, useMemo, useRef } from "react"
 import BucketBadge from "@/components/bucket-badge"
 import CashflowChart, { CashflowPoint } from "@/components/charts/cashflow-chart"
 import CategoryHistoryChart from "@/components/charts/category-history-chart"
@@ -29,12 +29,11 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select"
-import { Skeleton } from "@/components/ui/skeleton"
 import { useHistory } from "@/history"
 import { useMonthParams } from "@/hooks/use-month-params"
 import { usePersistentState } from "@/hooks/use-persistent-state"
 import { useSettings } from "@/hooks/use-settings"
-import { armTabTransition, useTabTransition } from "@/hooks/use-tab-transition"
+import { armTabTransition, useMonthTransition } from "@/hooks/use-tab-transition"
 import { cn, formatCurrency } from "@/lib/utils"
 import { getDashboardView, type SpendingHistoryMonth, type TrendMonth } from "@/logic/dashboard"
 import { pathMonthlyRecords } from "@/routes"
@@ -130,7 +129,8 @@ type BucketDailyData = {
 export default function DashboardPage() {
 	const { handlePush } = useHistory()
 	const { month, year } = useMonthParams()
-	const animateContent = useTabTransition()
+	const contentRef = useRef<HTMLDivElement>(null)
+	useMonthTransition(contentRef, `${month}-${year}`)
 	const settings = useSettings()
 	const router = useRouter()
 	const comparisonMonths = settings?.dashboard_comparison_months ?? 3
@@ -168,49 +168,7 @@ export default function DashboardPage() {
 		return [scope]
 	}, [scope, buckets])
 
-	if (!data || !paceData || !bucketDailyData) {
-		return (
-			<div className="grid gap-7 md:gap-9">
-				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-					{Array.from({ length: 4 }).map((_, index) => (
-						<Card key={index}>
-							<CardContent className="grid gap-2">
-								<Skeleton className="h-3 w-20" />
-								<Skeleton className="h-7 w-28" />
-								<Skeleton className="h-3 w-24" />
-							</CardContent>
-						</Card>
-					))}
-				</div>
-
-				<Card>
-					<CardHeader className="border-b">
-						<Skeleton className="h-5 w-32" />
-						<Skeleton className="h-4 w-80 max-w-full" />
-					</CardHeader>
-					<CardContent>
-						<Skeleton className="h-64 w-full" />
-					</CardContent>
-				</Card>
-
-				<section className="grid gap-4">
-					<div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-						<div className="grid gap-2">
-							<Skeleton className="h-6 w-48" />
-							<Skeleton className="h-4 w-40" />
-						</div>
-						<Skeleton className="h-9 w-full sm:w-52" />
-					</div>
-					<div className="grid gap-2">
-						<Skeleton className="h-14 w-full" />
-						<Skeleton className="h-14 w-full" />
-						<Skeleton className="h-14 w-full" />
-						<Skeleton className="h-14 w-full" />
-					</div>
-				</section>
-			</div>
-		)
-	}
+	if (!data || !paceData || !bucketDailyData) return null
 	const { period, summary, comparison, series, weekday, future_records_count } = data
 	const scopedTotal = categories.reduce(
 		(total, category) =>
@@ -244,12 +202,7 @@ export default function DashboardPage() {
 		)
 	}
 	return (
-		<div
-			className={cn(
-				"grid gap-7 md:gap-9",
-				animateContent && "animate-in fade-in slide-in-from-bottom-2 duration-500",
-			)}
-		>
+		<div ref={contentRef} className={cn("reveal grid gap-7 md:gap-9")}>
 			{period.is_future ? (
 				<Card>
 					<CardHeader>
@@ -737,17 +690,17 @@ function BucketUsageBar({ name, usage }: { name: string; usage: number }) {
 			aria-label={`${name} target usage`}
 			aria-valuemin={0}
 			aria-valuenow={Math.round(usage)}
-			className="flex h-1 w-full overflow-hidden rounded-full bg-muted"
+			className="relative h-1 w-full overflow-hidden rounded-full bg-muted"
 		>
 			{excess ? (
 				<div
-					className="h-full bg-destructive transition-[width]"
-					style={{ width: `${excess}%` }}
+					className="absolute inset-0 origin-left bg-destructive transition-transform duration-300 ease-out"
+					style={{ transform: `scaleX(${excess / 100})` }}
 				/>
 			) : null}
 			<div
-				className="h-full bg-foreground/60 transition-[width]"
-				style={{ width: `${withinTarget}%` }}
+				className="absolute inset-0 origin-right bg-foreground/60 transition-transform duration-300 ease-out"
+				style={{ transform: `scaleX(${withinTarget / 100})` }}
 			/>
 		</div>
 	)

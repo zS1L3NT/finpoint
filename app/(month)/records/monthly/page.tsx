@@ -4,7 +4,7 @@ import { useLiveQuery } from "dexie-react-hooks"
 import { DateTime } from "luxon"
 import Link from "next/link"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
 import DateRange from "@/components/form/date-range"
 import { UiIcon as IconifyIcon } from "@/components/icon"
@@ -27,10 +27,9 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select"
-import { Skeleton } from "@/components/ui/skeleton"
 import { useFetch } from "@/hooks/use-fetch"
 import { useRecordEditor } from "@/hooks/use-record-editor"
-import { useTabTransition } from "@/hooks/use-tab-transition"
+import { useMonthTransition } from "@/hooks/use-tab-transition"
 import { cn } from "@/lib/utils"
 import { listCategories } from "@/logic/categories"
 import { getMonthlyRecords } from "@/logic/monthly"
@@ -109,7 +108,8 @@ export default function MonthlyRecordsPage() {
 	const endDate = searchParams.get("end_date") ?? legacyDate
 	const minAmount = searchParams.get("min_amount")
 	const maxAmount = searchParams.get("max_amount")
-	const animateContent = useTabTransition()
+	const contentRef = useRef<HTMLDivElement>(null)
+	useMonthTransition(contentRef, `${month}-${year}`)
 
 	const filterKey = JSON.stringify([
 		query,
@@ -189,43 +189,7 @@ export default function MonthlyRecordsPage() {
 
 	const clearFilters = () => setSearchParams({ month, year: String(year) })
 
-	if (data === undefined) {
-		return (
-			<div className="grid gap-5 md:gap-7">
-				<div className="flex min-w-0 flex-col gap-2 md:flex-row md:flex-wrap">
-					<Skeleton className="h-10 w-full md:w-sm" />
-					<div className="flex gap-2">
-						<Skeleton className="h-9 w-32" />
-						<Skeleton className="h-9 w-32" />
-						<Skeleton className="hidden h-9 w-32 sm:block" />
-					</div>
-				</div>
-
-				<div className="overflow-hidden rounded-lg border bg-card">
-					<div className="grid grid-cols-[1fr_auto] items-center gap-3 border-b px-4 py-3 sm:grid-cols-[2fr_1fr_1fr_auto]">
-						<Skeleton className="h-4 w-3/4" />
-						<Skeleton className="hidden h-4 w-24 sm:block" />
-						<Skeleton className="hidden h-4 w-20 sm:block" />
-						<Skeleton className="h-4 w-16" />
-					</div>
-					{Array.from({ length: 6 }).map((_, index) => (
-						<div
-							key={index}
-							className="grid grid-cols-[1fr_auto] items-center gap-3 border-b px-4 py-3 last:border-b-0 sm:grid-cols-[2fr_1fr_1fr_auto]"
-						>
-							<div className="grid gap-1.5">
-								<Skeleton className="h-4 w-2/3" />
-								<Skeleton className="h-3 w-1/3" />
-							</div>
-							<Skeleton className="hidden h-4 w-24 sm:block" />
-							<Skeleton className="hidden h-4 w-20 sm:block" />
-							<Skeleton className="h-8 w-16" />
-						</div>
-					))}
-				</div>
-			</div>
-		)
-	}
+	if (data === undefined) return null
 
 	if (data === null) {
 		return <p className="text-sm text-muted-foreground">Monthly records not found.</p>
@@ -235,12 +199,7 @@ export default function MonthlyRecordsPage() {
 
 	return (
 		<>
-			<div
-				className={cn(
-					"grid gap-5 md:gap-7",
-					animateContent && "animate-in fade-in slide-in-from-bottom-2 duration-500",
-				)}
-			>
+			<div ref={contentRef} className={cn("reveal grid gap-5 md:gap-7")}>
 				<MonthlyRecordFilters
 					date={date}
 					categories={categories}

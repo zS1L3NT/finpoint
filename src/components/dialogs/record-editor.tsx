@@ -47,6 +47,7 @@ import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { useDialogCloseAnimation } from "@/hooks/use-dialog-close-animation"
 import { useFetch } from "@/hooks/use-fetch"
 import { useDefaultFilterEndDateToday, useDefaultFilterStartDate } from "@/hooks/use-settings"
+import { SPRING, TRANSITION } from "@/lib/motion"
 import { cn, formatCurrency, formatDatetime, round2dp } from "@/lib/utils"
 import { ConflictError, deleteRecord, recordCompletions, updateRecord } from "@/logic/records"
 import { ValidationError } from "@/logic/validate"
@@ -336,10 +337,20 @@ export default function RecordEditorDialog({
 							<AnimatePresence>
 								{isPendingAmount && (
 									<motion.div
-										layout="position"
+										className="overflow-hidden"
 										initial={{ opacity: 0, height: 0, marginTop: -16 }}
-										animate={{ opacity: 1, height: "auto" }}
-										exit={{ opacity: 0, height: 0, marginTop: -16 }}
+										animate={{ opacity: 1, height: "auto", marginTop: 0 }}
+										exit={{
+											opacity: 0,
+											height: 0,
+											marginTop: -16,
+											transition: TRANSITION.fast,
+										}}
+										transition={{
+											height: SPRING.smooth,
+											marginTop: SPRING.smooth,
+											opacity: TRANSITION.base,
+										}}
 									>
 										<Alert className="mt-4 max-w-md border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-50">
 											<IconifyIcon icon="lucide:triangle-alert" />
@@ -441,116 +452,153 @@ export default function RecordEditorDialog({
 
 						<div className="flex flex-col gap-2">
 							<ScrollArea className="h-fit max-h-200">
-								<div className="space-y-2">
-									{formStatements.map(({ id }, index) => (
-										<div key={id} className="p-0.5">
-											<form.Field
-												name={`statements[${index}].amount` as const}
+								<div className="relative flex flex-col gap-2">
+									<AnimatePresence initial={false} mode="popLayout">
+										{formStatements.map(({ id }, index) => (
+											<motion.div
+												key={id}
+												className="p-0.5"
+												layout
+												initial={{ opacity: 0, y: 6 }}
+												animate={{
+													opacity: 1,
+													y: 0,
+													transition: TRANSITION.base,
+												}}
+												exit={{
+													opacity: 0,
+													scale: 0.98,
+													transition: TRANSITION.fast,
+												}}
+												transition={{ layout: SPRING.snappy }}
 											>
-												{field => {
-													// biome-ignore lint/style/noNonNullAssertion: All full statement objects must be cached
-													const statement = statementCache.find(
-														s => s.id === id,
-													)!
+												<form.Field
+													name={`statements[${index}].amount` as const}
+												>
+													{field => {
+														// biome-ignore lint/style/noNonNullAssertion: All full statement objects must be cached
+														const statement = statementCache.find(
+															s => s.id === id,
+														)!
 
-													const errors = mergeErrors(
-														field.state.meta.errors,
-														field.name,
-													)
-													const allocable = round2dp(
-														statement.allocable_amount +
-															(statement.pivot?.amount ?? 0),
-													)
+														const errors = mergeErrors(
+															field.state.meta.errors,
+															field.name,
+														)
+														const allocable = round2dp(
+															statement.allocable_amount +
+																(statement.pivot?.amount ?? 0),
+														)
 
-													const percent =
-														allocable === 0
-															? 0
-															: (field.state.value / allocable) * 100
+														const percent =
+															allocable === 0
+																? 0
+																: (field.state.value / allocable) *
+																	100
 
-													return (
-														<Card
-															className={cn(
-																errors.length
-																	? "border-destructive/50"
-																	: null,
-															)}
-														>
-															<CardHeader>
-																<CardTitle className="text-sm leading-5">
-																	{statement.description}
-																</CardTitle>
-																<CardDescription>
-																	{formatDatetime(
-																		statement.datetime,
-																	)}
-																</CardDescription>
-																<CardAction className="text-sm font-semibold">
-																	<Button
-																		type="button"
-																		variant="destructive"
-																		onClick={() => {
-																			form.setFieldValue(
-																				"statements",
-																				form
-																					.getFieldValue(
-																						"statements",
-																					)
-																					.filter(
-																						s =>
-																							s.id !==
-																							id,
-																					),
+														return (
+															<Card
+																className={cn(
+																	errors.length
+																		? "border-destructive/50"
+																		: null,
+																)}
+															>
+																<CardHeader>
+																	<CardTitle className="text-sm leading-5">
+																		{statement.description}
+																	</CardTitle>
+																	<CardDescription>
+																		{formatDatetime(
+																			statement.datetime,
+																		)}
+																	</CardDescription>
+																	<CardAction className="text-sm font-semibold">
+																		<Button
+																			type="button"
+																			variant="destructive"
+																			onClick={() => {
+																				form.setFieldValue(
+																					"statements",
+																					form
+																						.getFieldValue(
+																							"statements",
+																						)
+																						.filter(
+																							s =>
+																								s.id !==
+																								id,
+																						),
+																				)
+																			}}
+																		>
+																			<IconifyIcon icon="lucide:trash" />
+																		</Button>
+																	</CardAction>
+																</CardHeader>
+																<CardContent className="flex flex-col gap-4">
+																	<AmountField
+																		id={field.name}
+																		label="Amount"
+																		value={field.state.value}
+																		errors={errors}
+																		suffix={`of ${formatCurrency(allocable)}`}
+																		onChange={value => {
+																			field.handleChange(
+																				value,
+																			)
+																			clearApiError(
+																				field.name,
 																			)
 																		}}
-																	>
-																		<IconifyIcon icon="lucide:trash" />
-																	</Button>
-																</CardAction>
-															</CardHeader>
-															<CardContent className="flex flex-col gap-4">
-																<AmountField
-																	id={field.name}
-																	label="Amount"
-																	value={field.state.value}
-																	errors={errors}
-																	suffix={`of ${formatCurrency(allocable)}`}
-																	onChange={value => {
-																		field.handleChange(value)
-																		clearApiError(field.name)
-																	}}
-																/>
-																<Progress
-																	value={percent}
-																	className={cn(
-																		percent > 100
-																			? "text-red-400"
-																			: null,
-																	)}
-																/>
-															</CardContent>
-														</Card>
-													)
-												}}
-											</form.Field>
-										</div>
-									))}
+																	/>
+																	<Progress
+																		value={percent}
+																		className={cn(
+																			"transition-colors",
+																			percent > 100
+																				? "text-red-400"
+																				: null,
+																		)}
+																	/>
+																</CardContent>
+															</Card>
+														)
+													}}
+												</form.Field>
+											</motion.div>
+										))}
+									</AnimatePresence>
 								</div>
 							</ScrollArea>
 
-							{!formStatements.length && (
-								<Empty className="border border-dashed">
-									<EmptyHeader>
-										<EmptyMedia variant="icon">
-											<IconifyIcon icon="lucide:credit-card" />
-										</EmptyMedia>
-										<EmptyTitle>No Statements</EmptyTitle>
-										<EmptyDescription>
-											No statements selected for allocation.
-										</EmptyDescription>
-									</EmptyHeader>
-									<EmptyContent>{attachStatementsSheet}</EmptyContent>
-								</Empty>
-							)}
+							<AnimatePresence initial={false}>
+								{!formStatements.length && (
+									<motion.div
+										key="empty"
+										initial={{ opacity: 0, y: 6 }}
+										animate={{ opacity: 1, y: 0, transition: TRANSITION.base }}
+										exit={{
+											opacity: 0,
+											scale: 0.98,
+											transition: TRANSITION.fast,
+										}}
+									>
+										<Empty className="border border-dashed">
+											<EmptyHeader>
+												<EmptyMedia variant="icon">
+													<IconifyIcon icon="lucide:credit-card" />
+												</EmptyMedia>
+												<EmptyTitle>No Statements</EmptyTitle>
+												<EmptyDescription>
+													No statements selected for allocation.
+												</EmptyDescription>
+											</EmptyHeader>
+											<EmptyContent>{attachStatementsSheet}</EmptyContent>
+										</Empty>
+									</motion.div>
+								)}
+							</AnimatePresence>
 						</div>
 					</div>
 				</form>
@@ -561,7 +609,10 @@ export default function RecordEditorDialog({
 							<IconifyIcon icon="lucide:trash-2" /> Delete
 						</Button>
 						{submitError ? (
-							<p className="text-xs text-destructive" aria-live="polite">
+							<p
+								className="fade-in animate-in text-xs text-destructive duration-150 ease-out"
+								aria-live="polite"
+							>
 								{submitError}
 							</p>
 						) : null}
