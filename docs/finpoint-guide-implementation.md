@@ -1,6 +1,6 @@
 # Implemented beginner guide — handoff
 
-Implemented 7 October 2026. Preserve the editable `video/` Remotion project, shared composition, narration clips, timeline, and rendered output for the next AI. The shared branch is `codex/finpoint-learning-guide`; presentation refinements can be committed to that branch.
+Implemented 7 October 2026. Preserve the editable `video/` Remotion project, shared composition, narration clips, timeline, and rendered output for the next AI. The shared branch is `ai/finpoint-learning-guide`; presentation refinements can be committed to that branch.
 
 | Entry | Delivered behavior |
 | --- | --- |
