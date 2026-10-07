@@ -1,5 +1,4 @@
 import type { Transition } from "framer-motion"
-import type { CSSProperties } from "react"
 
 /**
  * Shared motion vocabulary, mirroring the CSS tokens in `src/app.css` so framer-motion
@@ -42,39 +41,34 @@ export const SPRING = {
  * the page: capping only the delay would make every remaining row start fading in at once.
  */
 export const ROW_CASCADE_LIMIT = 12
-const ROW_STEP = 0.03
 
 /**
- * Props for a table row. While `cascade` is on (the first moments after data arrives) the rows
- * on screen rise in one after another; afterwards, rows that join (paging, filtering, typing in
- * search) just fade, so ongoing changes stay calm.
+ * How a table's rows enter:
+ * - `cascade`: first arrival of the data; the rows on screen rise in one after another.
+ * - `refilter`: the rows changed on the same page (filters, search, edits that add or remove
+ *   rows); the same rise, but quicker and shorter so repeated changes stay light.
+ * - `fade`: everything else (a new page, rows joining later); a plain brief fade.
  */
-export const rowEnter = (index: number, cascade: boolean) => {
+export type RowEntrance = "cascade" | "refilter" | "fade"
+
+/** Motion props for a table row (or its group header); rows past the fold do not animate. */
+export const rowEnter = (index: number, entrance: RowEntrance) => {
 	if (index >= ROW_CASCADE_LIMIT) return { initial: false as const }
-	if (!cascade) {
+	if (entrance === "fade") {
 		return {
 			initial: { opacity: 0 },
 			animate: { opacity: 1 },
 			transition: { duration: 0.18, ease: EASE_OUT },
 		}
 	}
+	const refilter = entrance === "refilter"
 	return {
-		initial: { opacity: 0, y: 10 },
+		initial: { opacity: 0, y: refilter ? 6 : 10 },
 		animate: { opacity: 1, y: 0 },
-		transition: { duration: 0.34, ease: EASE_OUT, delay: index * ROW_STEP },
-	}
-}
-
-/** The same entrance as {@link rowEnter} for plain elements (the mobile list), as CSS. */
-export const rowEnterCss = (
-	index: number,
-	cascade: boolean,
-): { className?: string; style?: CSSProperties } => {
-	if (index >= ROW_CASCADE_LIMIT) return {}
-	if (!cascade) return { className: "animate-in fade-in ease-out [animation-duration:180ms]" }
-	return {
-		className:
-			"animate-in fade-in slide-in-from-bottom-2 ease-out [animation-duration:340ms] [animation-fill-mode:backwards]",
-		style: { animationDelay: `${index * ROW_STEP}s` },
+		transition: {
+			duration: refilter ? 0.24 : 0.34,
+			ease: EASE_OUT,
+			delay: index * (refilter ? 0.02 : 0.03),
+		},
 	}
 }

@@ -25,7 +25,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table"
-import { useRowCascade } from "@/hooks/use-row-cascade"
+import { useRowEntrance } from "@/hooks/use-row-cascade"
 import { rowEnter } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 import { Paginated } from "@/types"
@@ -53,7 +53,6 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 	groupBy?: RowGroup<TData>
 	onRowClick?: (row: TData) => void
 }) {
-	const cascade = useRowCascade(loading)
 	const table = useReactTable({
 		data: paginated.data,
 		columns,
@@ -61,6 +60,11 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 		getRowId: row => row.id,
 	})
 	const rows = table.getRowModel().rows
+	const { entrance, rowsKey } = useRowEntrance(
+		loading ?? false,
+		rows.map(row => row.id).join("|"),
+		`${paginated.current_page}:${paginated.per_page}`,
+	)
 	const starts = groupStarts(
 		rows.map(row => row.original),
 		groupBy,
@@ -87,23 +91,25 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 						"min-w-0 divide-y overflow-hidden rounded-lg border bg-card @5xl/table:hidden",
 					)}
 				>
-					{loading ? null : rows.length ? (
-						rows.map((row, index) => {
-							const group = starts.get(index)
-							return (
-								<Fragment key={row.id}>
-									{group && groupBy ? (
+					<Fragment key={rowsKey}>
+						{loading ? null : rows.length ? (
+							rows.flatMap((row, index) => {
+								const group = starts.get(index)
+								return [
+									group && groupBy ? (
 										<MobileGroupHeader
+											key={`group-${group.key}`}
 											group={groupBy}
 											groupKey={group.key}
 											rows={group.rows}
 											index={index}
-											cascade={cascade}
+											entrance={entrance}
 										/>
-									) : null}
+									) : null,
 									<MobileRow
+										key={row.id}
 										index={index}
-										cascade={cascade}
+										entrance={entrance}
 										data-state={selectedIds?.includes(row.id) && "selected"}
 										onClick={onRowClick ? clickRow(row.original) : undefined}
 										className={cn(
@@ -112,15 +118,18 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 										)}
 									>
 										{mobileRow(row)}
-									</MobileRow>
-								</Fragment>
-							)
-						})
-					) : (
-						<div className="col-span-full p-8 text-center text-sm text-muted-foreground">
-							{emptyMessage}
-						</div>
-					)}
+									</MobileRow>,
+								]
+							})
+						) : (
+							<div
+								key="empty"
+								className="col-span-full p-8 text-center text-sm text-muted-foreground"
+							>
+								{emptyMessage}
+							</div>
+						)}
+					</Fragment>
 				</div>
 			) : null}
 
@@ -156,23 +165,24 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 						))}
 					</TableHeader>
 					<TableBody key={loading ? "loading" : "rows"}>
-						{loading ? null : rows.length ? (
-							rows.map((row, index) => {
-								const group = starts.get(index)
-								return (
-									<Fragment key={row.id}>
-										{group && groupBy ? (
+						<Fragment key={rowsKey}>
+							{loading ? null : rows.length ? (
+								rows.flatMap((row, index) => {
+									const group = starts.get(index)
+									return [
+										group && groupBy ? (
 											<GroupHeaderRow
+												key={`group-${group.key}`}
 												group={groupBy}
 												groupKey={group.key}
 												rows={group.rows}
 												columns={columnInfo}
-												enter={rowEnter(index, cascade)}
+												enter={rowEnter(index, entrance)}
 											/>
-										) : null}
+										) : null,
 										<TableRow
 											key={row.id}
-											{...rowEnter(index, cascade)}
+											{...rowEnter(index, entrance)}
 											data-state={selectedIds?.includes(row.id) && "selected"}
 											onClick={
 												onRowClick ? clickRow(row.original) : undefined
@@ -195,20 +205,20 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 													)}
 												</TableCell>
 											))}
-										</TableRow>
-									</Fragment>
-								)
-							})
-						) : (
-							<TableRow>
-								<TableCell
-									colSpan={columns.length}
-									className="h-24 text-center text-muted-foreground"
-								>
-									{emptyMessage}
-								</TableCell>
-							</TableRow>
-						)}
+										</TableRow>,
+									]
+								})
+							) : (
+								<TableRow key="empty">
+									<TableCell
+										colSpan={columns.length}
+										className="h-24 text-center text-muted-foreground"
+									>
+										{emptyMessage}
+									</TableCell>
+								</TableRow>
+							)}
+						</Fragment>
 					</TableBody>
 				</Table>
 			</div>
