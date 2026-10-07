@@ -5,8 +5,16 @@ Keep this editable Remotion project for the next design/animation pass. The in-a
 ## Sources
 
 - `../src/lib/guide-content.ts`: shared teaching copy for articles and narration.
-- `../src/components/help/guide-film.tsx`: scene layout, diagrams, and motion. Restyle here while preserving domain meaning.
+- `../src/components/help/guide-film.tsx`: chapter structure. Each chapter opens on a title card, then plays problem → explanation → steps → check → fix → example layers that crossfade into one another.
+- `../src/components/help/film/`: the motion system.
+  - `theme.ts`: colours, easing and frame geometry. Every domain object keeps one colour for the whole film: Statement blue, Allocation violet, Record green, Pending amber.
+  - `motion.tsx`: `useCue` (the frame a word is spoken), `Rise`, `Pop`, `CountUp`, `Roll`, and segment crossfades.
+  - `kit.tsx`: Statement, Record and Allocation cards, flow connectors, tiles, files and windows.
+  - `captions.tsx`: word-by-word narration captions, with domain terms in their colours.
+  - `chrome.tsx`: backdrop, header, segment labels and title cards.
+  - `scenes.tsx`: bespoke problem, explanation, example and (some) result visuals for each chapter, plus step icons. Restyle here while preserving domain meaning.
 - `../src/lib/guide-video-timeline.json`: generated narration timings.
+- `../src/lib/guide-video-cues.json`: generated word timings, so visuals land on the word that introduces them.
 - `../public/guide-audio/`: 153 local narration clips.
 - `src/root.tsx`: editable `FinpointGuide` composition.
 
@@ -20,7 +28,13 @@ From the repository root:
 bun video/scripts/narrate.ts
 ```
 
-Uses macOS `say` (Samantha, 155 words/minute) and FFmpeg/FFprobe at `/opt/homebrew/bin`. Adjust those paths for another environment. Unchanged clips are reused; remove the audio clips before regenerating every clip with a different voice. The script updates the timeline, transcript, and WebVTT captions together. Re-render after changing copy or audio.
+Uses macOS `say` (Samantha, 155 words/minute) and FFmpeg/FFprobe at `/opt/homebrew/bin`. Adjust those paths for another environment. Unchanged clips are reused; remove the audio clips before regenerating every clip with a different voice. The script updates the timeline, transcript, and WebVTT captions together. Then refresh the word cues (needs FFmpeg/FFprobe on `PATH`; it measures sentence pauses in each clip):
+
+```sh
+bun video/scripts/cues.ts
+```
+
+Re-render after changing copy or audio. Scenes fall back to fixed delays when a cued word disappears from the copy, so check the affected chapter in Remotion Studio.
 
 ## Export
 

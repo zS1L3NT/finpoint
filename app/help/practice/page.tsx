@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { Skeleton } from "@/components/ui/skeleton"
 import { formatCurrency } from "@/lib/utils"
 import { getLearning, resetPracticeProgress, savePracticeProgress } from "@/logic/learning"
 import {
@@ -33,15 +32,13 @@ export default function PracticePage() {
 	const learning = useLiveQuery(getLearning, [])
 	return (
 		<PageContent>
-			{learning ? (
+			{learning && (
 				<Practice
 					key={lesson.id}
 					lesson={lesson}
 					initial={learning.practice[lesson.id] ?? initialPractice(lesson.id)}
 					returnTo={returnTo}
 				/>
-			) : (
-				<Skeleton className="h-96 w-full" />
 			)}
 		</PageContent>
 	)

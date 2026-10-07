@@ -1,11 +1,12 @@
 "use client"
 
 import { useLiveQuery } from "dexie-react-hooks"
-import { ArrowRight, Check, Search } from "lucide-react"
+import { ArrowRight, Check, Play, Search } from "lucide-react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { useState } from "react"
 import { toast } from "sonner"
+import { accentFor, color } from "@/components/help/film/theme"
 import { GuideArticle } from "@/components/help/guide-article"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
@@ -13,8 +14,8 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Skeleton } from "@/components/ui/skeleton"
 import { getGuideTopic, guideTopics } from "@/lib/guide-content"
+import timeline from "@/lib/guide-video-timeline.json"
 import { getLearningOverview, markGuideReviewed } from "@/logic/learning"
 import { practiceLessons } from "@/logic/practice"
 import { pathHelp, pathHelpPractice, pathHelpVideo } from "@/routes"
@@ -102,6 +103,32 @@ export default function HelpPage() {
 					</div>
 					{!query && (
 						<>
+							<Link
+								href={pathHelpVideo()}
+								className="group relative flex flex-col gap-6 overflow-hidden rounded-2xl p-6 text-white ring-1 ring-border sm:flex-row sm:items-center sm:p-8"
+								style={{
+									background: `radial-gradient(80% 120% at 0% 0%, ${accentFor("Start here")}55, transparent 60%), radial-gradient(70% 110% at 100% 100%, ${color.allocation}40, transparent 60%), ${color.night}`,
+								}}
+							>
+								<span className="grid size-16 shrink-0 place-items-center rounded-full bg-white text-black shadow-lg transition-transform duration-200 ease-out group-hover:scale-105">
+									<Play className="size-7 translate-x-0.5 fill-current" />
+								</span>
+								<span className="flex min-w-0 flex-1 flex-col gap-1">
+									<span className="text-xs font-semibold tracking-[0.16em] text-white/70 uppercase">
+										Video guide · {timeline.chapters.length} chapters ·{" "}
+										{Math.round(timeline.durationInFrames / timeline.fps / 60)}{" "}
+										min
+									</span>
+									<span className="text-xl font-semibold tracking-tight sm:text-2xl">
+										Finpoint, from the beginning
+									</span>
+									<span className="text-sm text-white/70">
+										Watch a $12 lunch become a Record, then follow Alex through
+										splits, refunds, Pending fixes and backups.
+									</span>
+								</span>
+								<ArrowRight className="hidden size-5 shrink-0 text-white/70 transition-transform duration-200 ease-out group-hover:translate-x-1 sm:block" />
+							</Link>
 							<Card>
 								<CardHeader>
 									<CardTitle>
@@ -139,9 +166,7 @@ export default function HelpPage() {
 									</CardDescription>
 								</CardHeader>
 								<CardContent>
-									{!overview ? (
-										<Skeleton className="h-32 w-full" />
-									) : (
+									{overview && (
 										<ul className="divide-y text-sm">
 											{[
 												{

@@ -1,399 +1,479 @@
 import { Audio } from "@remotion/media"
+import { type LucideIcon, TriangleAlert } from "lucide-react"
+import type { ReactNode } from "react"
 import { AbsoluteFill, interpolate, Sequence, staticFile, useCurrentFrame } from "remotion"
-import { getVideoChapter } from "../../lib/guide-video"
+import cueFile from "../../lib/guide-video-cues.json"
 import timeline from "../../lib/guide-video-timeline.json"
+import { Spoken } from "./film/captions"
+import { Backdrop, Header, labelTint, SegmentLabel, TitleCard } from "./film/chrome"
+import { Card, CheckMark, IconTile, useWobble } from "./film/kit"
+import { Cues, ReducedMotion, Rise, useLayer, useProgress, useReduced } from "./film/motion"
+import { type Beat, BeatStart, scenes } from "./film/scenes"
+import { accentFor, alpha, color, font, layout } from "./film/theme"
 
 type Chapter = (typeof timeline.chapters)[number]
 type Segment = Chapter["segments"][number]
 
-const ink = "#172f2b"
-const green = "#235c4e"
-const paper = "#f5f7f3"
+const cueMap = cueFile as Record<string, number[]>
+/** Frames a finished segment lingers under the next one, so cuts read as soft crossfades. */
+const OVERLAP = 12
 
-function AmountDiagram({
-	id,
-	label,
-	reducedMotion,
+const wordsOf = (segment: Segment) => segment.text.split(/\s+/).filter(Boolean)
+
+function SegmentCues({
+	segment,
+	shift = 0,
+	children,
 }: {
-	id: string
-	label: string
-	reducedMotion: boolean
+	segment: Segment
+	shift?: number
+	children: ReactNode
 }) {
-	const frame = useCurrentFrame()
-	const sets: Record<string, { labels: string[]; amounts: string[]; footer: string }> = {
-		model: {
-			labels: ["Statement", "Allocation", "Record"],
-			amounts: ["−$12", "−$12", "−$12"],
-			footer: "Bank activity → assigned amount → your explanation",
-		},
-		lunch: {
-			labels: ["Lunch payment", "Allocation", "Lunch Record"],
-			amounts: ["−$12", "−$12", "−$12"],
-			footer: "$0 remaining · $0 difference",
-		},
-		split: {
-			labels: ["Supermarket", "Groceries", "Gift"],
-			amounts: ["−$80", "−$60", "−$20"],
-			footer: "−$60 + −$20 = −$80",
-		},
-		repayment: {
-			labels: ["Paid", "Received back", "Your share"],
-			amounts: ["−$90", "+$60", "−$30"],
-			footer: "−$90 + $60 = −$30",
-		},
-		pending: {
-			labels: ["Record", "Allocation", "Difference"],
-			amounts: [
-				label === "Check your result" ? "−$12" : "−$10",
-				"−$12",
-				label === "Check your result" ? "$0" : "$2",
-			],
-			footer:
-				label === "Check your result"
-					? "After correction: the Record tallies"
-					: "Before correction: saved, but Pending",
-		},
-		treatments: {
-			labels: ["Contributions", "Withdrawals", "Cash net"],
-			amounts: ["$300", "$50", "−$250"],
-			footer: "Money moved to savings · not a portfolio return",
-		},
-		targets: {
-			labels: ["Monthly target", "Spending", "Remaining"],
-			amounts: ["$500", "$127", "$373"],
-			footer: "A planning comparison · not reserved cash",
-		},
-		dashboard: {
-			labels: ["Income", "Net spending", "Surplus"],
-			amounts: ["$3,000", "$127", "$2,873"],
-			footer: "$147 gross − $20 refunds = $127 spending",
-		},
-	}
-	const diagram = id === "dashboard" && label === "Example" ? sets.treatments : sets[id]
-	if (!diagram) return null
+	const frames = (cueMap[segment.audio] ?? []).map(frame => frame + shift)
+	return <Cues.Provider value={{ words: wordsOf(segment), frames }}>{children}</Cues.Provider>
+}
+
+function Stage({ children }: { children: ReactNode }) {
 	return (
-		<div style={{ position: "absolute", left: 64, right: 64, bottom: 102 }}>
-			<div style={{ display: "flex", gap: 16 }}>
-				{diagram.labels.map((name, index) => (
-					<div
-						key={name}
-						style={{
-							flex: 1,
-							minWidth: 0,
-							border: "1px solid #c9d5cf",
-							borderRadius: 18,
-							background: "#ffffff",
-							padding: "23px 16px",
-							opacity: reducedMotion
-								? 1
-								: interpolate(frame, [index * 14, index * 14 + 15], [0, 1], {
-										extrapolateLeft: "clamp",
-										extrapolateRight: "clamp",
-									}),
-							transform: reducedMotion
-								? "none"
-								: `translateY(${interpolate(frame, [index * 14, index * 14 + 15], [10, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })}px)`,
-						}}
-					>
-						<div
-							style={{
-								fontSize: 44,
-								lineHeight: 1.15,
-								marginBottom: 12,
-								color: green,
-								overflowWrap: "anywhere",
-							}}
-						>
-							{name}
-						</div>
-						<div
-							style={{
-								fontSize: 56,
-								fontWeight: 650,
-								fontVariantNumeric: "tabular-nums",
-								whiteSpace: "nowrap",
-							}}
-						>
-							{diagram.amounts[index]}
-						</div>
-					</div>
-				))}
-			</div>
-			<div
-				style={{
-					marginTop: 20,
-					fontSize: 44,
-					lineHeight: 1.2,
-					color: green,
-					textAlign: "center",
-				}}
-			>
-				{diagram.footer}
-			</div>
+		<div
+			style={{
+				position: "absolute",
+				left: layout.gutter,
+				top: layout.stageTop,
+				width: layout.size - layout.gutter * 2,
+				height: layout.stageHeight,
+			}}
+		>
+			{children}
 		</div>
 	)
 }
 
-function TeachingPanel({
-	chapter,
-	segment,
-	number,
-	sectionNumber,
-	reducedMotion,
-}: {
-	chapter: Chapter
-	segment: Segment
-	number: number
-	sectionNumber: number
-	reducedMotion: boolean
-}) {
-	const frame = useCurrentFrame()
-	const opacity = 1
-	const hasDiagram =
-		[
-			"model",
-			"lunch",
-			"split",
-			"repayment",
-			"pending",
-			"treatments",
-			"targets",
-			"dashboard",
-		].includes(chapter.id) && ["Example", "Check your result"].includes(segment.label)
+function Caption({ children }: { children: ReactNode }) {
 	return (
-		<AbsoluteFill
+		<div
 			style={{
-				background: paper,
-				color: ink,
-				fontFamily: "Inter, system-ui, sans-serif",
-				padding: 64,
+				position: "absolute",
+				left: layout.gutter,
+				right: layout.gutter,
+				top: layout.captionTop,
 			}}
 		>
-			<Audio src={staticFile(segment.audio)} />
+			{children}
+		</div>
+	)
+}
+
+/** Problem, explanation, example and (when a chapter has one) result: a scene plus live caption. */
+function SceneLayer({
+	segment,
+	beat: Scene,
+	tint,
+	start = 0,
+}: {
+	segment: Segment
+	beat: Beat
+	tint: string
+	start?: number
+}) {
+	const style = useLayer(segment.durationInFrames)
+	const visible = useProgress(start - 6, 16)
+	return (
+		<SegmentCues segment={segment}>
+			<BeatStart.Provider value={start}>
+				<AbsoluteFill style={{ ...style, opacity: style.opacity * visible }}>
+					<SegmentLabel
+						label={segment.label}
+						tint={labelTint(segment.label, tint)}
+						at={start}
+					/>
+					<Stage>
+						<Scene />
+					</Stage>
+					<Caption>
+						<Spoken />
+					</Caption>
+				</AbsoluteFill>
+			</BeatStart.Provider>
+		</SegmentCues>
+	)
+}
+
+/** The result and fix moments without a bespoke visual: a big sign, then the words themselves. */
+function NoticeLayer({ segment, tint }: { segment: Segment; tint: string }) {
+	const style = useLayer(segment.durationInFrames)
+	const check = segment.label === "Check your result"
+	const wobble = useWobble(10)
+	const tone = labelTint(segment.label, tint)
+	const glow = useProgress(4, 30)
+	return (
+		<SegmentCues segment={segment}>
+			<AbsoluteFill style={style}>
+				<AbsoluteFill
+					style={{
+						background: `radial-gradient(50% 40% at 50% 40%, ${alpha(tone, 0.16 * glow)}, transparent 70%)`,
+					}}
+				/>
+				<SegmentLabel label={segment.label} tint={tone} />
+				<div
+					style={{
+						position: "absolute",
+						left: layout.gutter,
+						right: layout.gutter,
+						top: 250,
+						bottom: 90,
+						display: "flex",
+						flexDirection: "column",
+						justifyContent: "center",
+						gap: 44,
+					}}
+				>
+					<div style={{ transform: `rotate(${wobble}deg)`, width: "fit-content" }}>
+						{check ? (
+							<CheckMark at={6} size={150} />
+						) : (
+							<Rise at={4} from={0.6} y={0}>
+								<IconTile icon={TriangleAlert} tint={tone} size={150} />
+							</Rise>
+						)}
+					</div>
+					<Spoken
+						size={segment.text.length > 170 ? 46 : 54}
+						maxChars={150}
+						weight={650}
+						lineHeight={1.24}
+					/>
+				</div>
+			</AbsoluteFill>
+		</SegmentCues>
+	)
+}
+
+function StepRow({
+	index,
+	segment,
+	shift,
+	icon,
+	tint,
+	state,
+	size,
+}: {
+	index: number
+	segment: Segment
+	shift: number
+	icon: LucideIcon
+	tint: string
+	state: number
+	size: number
+}) {
+	// state: <0 upcoming, 0..1 becoming active, 1 active, >1 done (1 → 2 while settling).
+	const active = Math.max(0, Math.min(state, 2 - state, 1))
+	const done = state > 1
+	const reduced = useReduced()
+	return (
+		<div style={{ display: "flex", gap: 26, alignItems: "stretch" }}>
 			<div
 				style={{
 					display: "flex",
-					justifyContent: "space-between",
-					fontSize: 24,
-					fontWeight: 600,
-					color: green,
+					flexDirection: "column",
+					alignItems: "center",
+					width: 56,
 				}}
 			>
-				<span>FINPOINT / BEGINNER GUIDE</span>
-				<span>{String(number).padStart(2, "0")} / 17</span>
-			</div>
-			<div
-				style={{
-					marginTop: 35,
-					paddingBottom: 30,
-					borderBottom: "2px solid #d7dfd9",
-					fontSize: 48,
-					fontWeight: 650,
-					letterSpacing: -1.2,
-					lineHeight: 1.18,
-				}}
-			>
-				{chapter.title}
-			</div>
-			<div style={{ opacity, marginTop: 38 }}>
-				<div style={{ fontSize: 27, color: green, marginBottom: 20, fontWeight: 600 }}>
-					{segment.label}
+				<div
+					style={{
+						width: 56,
+						height: 56,
+						borderRadius: 99,
+						display: "grid",
+						placeItems: "center",
+						fontSize: 24,
+						fontWeight: 750,
+						color: active > 0.5 || done ? color.night : color.dim,
+						background: done
+							? color.record
+							: active > 0
+								? tint
+								: "rgba(255,255,255,0.06)",
+						boxShadow:
+							active > 0
+								? `0 0 ${36 * active}px ${alpha(tint, 0.6)}`
+								: `inset 0 0 0 1.5px ${color.line}`,
+						transform: reduced ? undefined : `scale(${1 + active * 0.12})`,
+						...font.numbers,
+					}}
+				>
+					{done ? "✓" : index + 1}
 				</div>
 				<div
 					style={{
-						fontSize: segment.text.length > 370 ? 39 : 44,
-						lineHeight: 1.38,
-						letterSpacing: -0.5,
-						maxWidth: 952,
+						flex: 1,
+						width: 3,
+						marginTop: 8,
+						borderRadius: 3,
+						background: done ? alpha(color.record, 0.5) : color.line,
+						minHeight: 18,
 					}}
-				>
-					{segment.text.split(/([−+]?\$[\d,]+(?:\.\d+)?)/g).map((part, index) =>
-						/^[−+]?\$/.test(part) ? (
-							<span key={`${index}-${part}`} style={{ whiteSpace: "nowrap" }}>
-								{part}
-							</span>
-						) : (
-							part
-						),
-					)}
-				</div>
-			</div>
-			{hasDiagram && (
-				<AmountDiagram
-					id={chapter.id}
-					label={segment.label}
-					reducedMotion={reducedMotion}
 				/>
-			)}
-			<div
+			</div>
+			<Card
+				tint={active > 0 ? tint : undefined}
+				glow={active * 0.4}
 				style={{
-					position: "absolute",
-					bottom: 40,
-					left: 64,
-					right: 64,
+					flex: 1,
+					padding: "22px 28px",
+					marginBottom: 18,
 					display: "flex",
-					justifyContent: "space-between",
-					fontSize: 22,
-					color: green,
+					gap: 24,
+					alignItems: "center",
+					...(active > 0 ? {} : { background: "transparent", boxShadow: "none" }),
+					opacity: 0.4 + 0.6 * active + (done ? 0.12 : 0),
+					transform: reduced ? undefined : `translateX(${active * 8}px)`,
 				}}
 			>
-				<span>Illustrated guide · fictional examples</span>
-				<span>
-					{sectionNumber + 1} / {chapter.segments.length}
-				</span>
-			</div>
+				<div style={{ flex: 1 }}>
+					{active > 0 ? (
+						<SegmentCues segment={segment} shift={shift}>
+							<Spoken size={size} maxChars={400} lineHeight={1.3} />
+						</SegmentCues>
+					) : (
+						<p
+							style={{
+								margin: 0,
+								fontSize: size,
+								fontWeight: 600,
+								lineHeight: 1.3,
+								letterSpacing: "-0.015em",
+								color: done ? color.dim : color.ink,
+							}}
+						>
+							{segment.text}
+						</p>
+					)}
+				</div>
+				{active > 0 && (
+					<div
+						style={{
+							opacity: active,
+							transform: reduced
+								? undefined
+								: `scale(${0.6 + 0.4 * active}) rotate(${(1 - active) * -20}deg)`,
+						}}
+					>
+						<IconTile icon={icon} tint={tint} size={84} />
+					</div>
+				)}
+			</Card>
+		</div>
+	)
+}
+
+/** All four steps stay on screen; the one being read lifts forward while finished ones tick off. */
+function StepsLayer({
+	steps,
+	icons,
+	tint,
+}: {
+	steps: Segment[]
+	icons: LucideIcon[]
+	tint: string
+}) {
+	const frame = useCurrentFrame()
+	const first = steps[0]?.from ?? 0
+	const last = steps[steps.length - 1]
+	const end = last ? last.from + last.durationInFrames - first : 0
+	const style = useLayer(end)
+	const total = steps.reduce((sum, step) => sum + step.text.length, 0)
+	const size = total > 380 ? 29 : total > 260 ? 32 : 36
+	return (
+		<AbsoluteFill style={style}>
+			<SegmentLabel label="Steps" tint={tint} />
 			<div
 				style={{
 					position: "absolute",
-					bottom: 0,
-					left: 0,
-					width: `${((sectionNumber + Math.min(1, frame / segment.durationInFrames)) / chapter.segments.length) * 100}%`,
-					height: 8,
-					background: green,
+					left: layout.gutter,
+					right: layout.gutter,
+					top: 236,
+					bottom: 60,
+					display: "flex",
+					flexDirection: "column",
+					justifyContent: "center",
 				}}
-			/>
+			>
+				{steps.map((step, index) => {
+					const from = step.from - first
+					const until = from + step.durationInFrames
+					const state =
+						frame < from - 8
+							? -1
+							: frame < until - 6
+								? interpolate(frame, [from - 8, from + 6], [0, 1], {
+										extrapolateRight: "clamp",
+									})
+								: index === steps.length - 1
+									? 1
+									: interpolate(frame, [until - 6, until + 8], [1, 2], {
+											extrapolateRight: "clamp",
+										})
+					return (
+						<StepRow
+							key={step.audio}
+							index={index}
+							segment={step}
+							shift={from}
+							icon={icons[index] ?? TriangleAlert}
+							tint={tint}
+							state={state}
+							size={size}
+						/>
+					)
+				})}
+			</div>
 		</AbsoluteFill>
 	)
 }
 
-export function GuideChapter({
-	id,
-	reducedMotion = false,
-}: {
-	id: string
-	reducedMotion?: boolean
-}) {
-	const chapter = getVideoChapter(id)
-	const number = timeline.chapters.indexOf(chapter) + 1
+function ChapterProgress({ chapter, tint }: { chapter: Chapter; tint: string }) {
+	const frame = useCurrentFrame()
 	return (
-		<AbsoluteFill>
-			{chapter.segments.map((segment, index) => (
+		<div
+			style={{
+				position: "absolute",
+				left: 0,
+				right: 0,
+				bottom: 0,
+				height: 6,
+				background: "rgba(255,255,255,0.06)",
+			}}
+		>
+			<div
+				style={{
+					width: `${Math.min(1, frame / chapter.durationInFrames) * 100}%`,
+					height: "100%",
+					background: `linear-gradient(90deg, ${alpha(tint, 0.4)}, ${tint})`,
+					boxShadow: `0 0 16px ${tint}`,
+				}}
+			/>
+		</div>
+	)
+}
+
+export function GuideChapter({ chapter, number }: { chapter: Chapter; number: number }) {
+	const frame = useCurrentFrame()
+	const tint = accentFor(chapter.group)
+	const scene = scenes[chapter.id]
+	const segments = chapter.segments
+	const [problem, helps, s1, s2, s3, s4, check, wrong, example] = segments
+	const firstWord = (problem && cueMap[problem.audio]?.[0]) ?? 60
+	const index = Math.max(
+		0,
+		segments.findIndex(item => frame >= item.from && frame < item.from + item.durationInFrames),
+	)
+	const current = segments[index]
+	const segmentProgress = current ? (frame - current.from) / current.durationInFrames : 0
+	const steps = [s1, s2, s3, s4].filter((step): step is Segment => Boolean(step))
+	const layer = (segment: Segment | undefined, content: ReactNode, length?: number) =>
+		segment && (
+			<Sequence
+				key={segment.audio}
+				from={segment.from}
+				durationInFrames={(length ?? segment.durationInFrames) + OVERLAP}
+				premountFor={15}
+			>
+				{content}
+			</Sequence>
+		)
+	return (
+		<AbsoluteFill
+			style={{
+				fontFamily: '"Inter Variable", Inter, system-ui, sans-serif',
+				color: color.ink,
+			}}
+		>
+			<Backdrop tint={tint} seed={number} />
+			{segments.map(segment => (
 				<Sequence
 					key={segment.audio}
 					from={segment.from}
 					durationInFrames={segment.durationInFrames}
-					premountFor={timeline.fps}
 				>
-					<TeachingPanel
-						chapter={chapter}
-						segment={segment}
-						number={number}
-						sectionNumber={index}
-						reducedMotion={reducedMotion}
-					/>
+					<Audio src={staticFile(segment.audio)} />
 				</Sequence>
 			))}
+			{scene &&
+				problem &&
+				layer(
+					problem,
+					<SceneLayer
+						segment={problem}
+						beat={scene.problem}
+						tint={tint}
+						start={firstWord}
+					/>,
+				)}
+			{scene &&
+				helps &&
+				layer(helps, <SceneLayer segment={helps} beat={scene.helps} tint={tint} />)}
+			{scene &&
+				s1 &&
+				layer(
+					s1,
+					<StepsLayer steps={steps} icons={scene.steps} tint={tint} />,
+					steps.reduce((sum, step) => sum + step.durationInFrames, 0),
+				)}
+			{check &&
+				layer(
+					check,
+					scene?.check ? (
+						<SceneLayer segment={check} beat={scene.check} tint={tint} />
+					) : (
+						<NoticeLayer segment={check} tint={tint} />
+					),
+				)}
+			{wrong && layer(wrong, <NoticeLayer segment={wrong} tint={tint} />)}
+			{scene &&
+				example &&
+				layer(example, <SceneLayer segment={example} beat={scene.example} tint={tint} />)}
+			<Header
+				number={number}
+				group={chapter.group}
+				title={chapter.title}
+				tint={tint}
+				at={firstWord - 8}
+				segment={index}
+				segmentProgress={segmentProgress}
+				segments={segments.length}
+			/>
+			<TitleCard
+				number={number}
+				group={chapter.group}
+				title={chapter.title}
+				tint={tint}
+				until={firstWord}
+				first={number === 1}
+			/>
+			<ChapterProgress chapter={chapter} tint={tint} />
 		</AbsoluteFill>
 	)
 }
 
 // Chapters have independent timeline nodes so another designer can replace their visuals.
 export function GuideFilm({ reducedMotion = false }: { reducedMotion?: boolean }) {
-	const chapter = (id: string) => getVideoChapter(id)
 	return (
-		<AbsoluteFill>
-			<Sequence
-				from={chapter("start").startFrame}
-				durationInFrames={chapter("start").durationInFrames}
-			>
-				<GuideChapter id="start" reducedMotion={reducedMotion} />
-			</Sequence>
-			<Sequence
-				from={chapter("model").startFrame}
-				durationInFrames={chapter("model").durationInFrames}
-			>
-				<GuideChapter id="model" reducedMotion={reducedMotion} />
-			</Sequence>
-			<Sequence
-				from={chapter("workspace").startFrame}
-				durationInFrames={chapter("workspace").durationInFrames}
-			>
-				<GuideChapter id="workspace" reducedMotion={reducedMotion} />
-			</Sequence>
-			<Sequence
-				from={chapter("import").startFrame}
-				durationInFrames={chapter("import").durationInFrames}
-			>
-				<GuideChapter id="import" reducedMotion={reducedMotion} />
-			</Sequence>
-			<Sequence
-				from={chapter("lunch").startFrame}
-				durationInFrames={chapter("lunch").durationInFrames}
-			>
-				<GuideChapter id="lunch" reducedMotion={reducedMotion} />
-			</Sequence>
-			<Sequence
-				from={chapter("backup-first").startFrame}
-				durationInFrames={chapter("backup-first").durationInFrames}
-			>
-				<GuideChapter id="backup-first" reducedMotion={reducedMotion} />
-			</Sequence>
-			<Sequence
-				from={chapter("split").startFrame}
-				durationInFrames={chapter("split").durationInFrames}
-			>
-				<GuideChapter id="split" reducedMotion={reducedMotion} />
-			</Sequence>
-			<Sequence
-				from={chapter("repayment").startFrame}
-				durationInFrames={chapter("repayment").durationInFrames}
-			>
-				<GuideChapter id="repayment" reducedMotion={reducedMotion} />
-			</Sequence>
-			<Sequence
-				from={chapter("treatments").startFrame}
-				durationInFrames={chapter("treatments").durationInFrames}
-			>
-				<GuideChapter id="treatments" reducedMotion={reducedMotion} />
-			</Sequence>
-			<Sequence
-				from={chapter("pending").startFrame}
-				durationInFrames={chapter("pending").durationInFrames}
-			>
-				<GuideChapter id="pending" reducedMotion={reducedMotion} />
-			</Sequence>
-			<Sequence
-				from={chapter("find").startFrame}
-				durationInFrames={chapter("find").durationInFrames}
-			>
-				<GuideChapter id="find" reducedMotion={reducedMotion} />
-			</Sequence>
-			<Sequence
-				from={chapter("categories").startFrame}
-				durationInFrames={chapter("categories").durationInFrames}
-			>
-				<GuideChapter id="categories" reducedMotion={reducedMotion} />
-			</Sequence>
-			<Sequence
-				from={chapter("targets").startFrame}
-				durationInFrames={chapter("targets").durationInFrames}
-			>
-				<GuideChapter id="targets" reducedMotion={reducedMotion} />
-			</Sequence>
-			<Sequence
-				from={chapter("budgets").startFrame}
-				durationInFrames={chapter("budgets").durationInFrames}
-			>
-				<GuideChapter id="budgets" reducedMotion={reducedMotion} />
-			</Sequence>
-			<Sequence
-				from={chapter("dashboard").startFrame}
-				durationInFrames={chapter("dashboard").durationInFrames}
-			>
-				<GuideChapter id="dashboard" reducedMotion={reducedMotion} />
-			</Sequence>
-			<Sequence
-				from={chapter("sync").startFrame}
-				durationInFrames={chapter("sync").durationInFrames}
-			>
-				<GuideChapter id="sync" reducedMotion={reducedMotion} />
-			</Sequence>
-			<Sequence
-				from={chapter("routine").startFrame}
-				durationInFrames={chapter("routine").durationInFrames}
-			>
-				<GuideChapter id="routine" reducedMotion={reducedMotion} />
-			</Sequence>
-		</AbsoluteFill>
+		<ReducedMotion.Provider value={reducedMotion}>
+			<AbsoluteFill style={{ background: color.night }}>
+				{timeline.chapters.map((chapter, index) => (
+					<Sequence
+						key={chapter.id}
+						from={chapter.startFrame}
+						durationInFrames={chapter.durationInFrames}
+						name={chapter.title}
+						premountFor={30}
+					>
+						<GuideChapter chapter={chapter} number={index + 1} />
+					</Sequence>
+				))}
+			</AbsoluteFill>
+		</ReducedMotion.Provider>
 	)
 }

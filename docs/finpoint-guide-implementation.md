@@ -19,7 +19,7 @@ Each topic teaches problem → explanation → example → steps → result chec
 - Article/help presentation: `src/components/help/guide-article.tsx`, `context-help.tsx`.
 - Practice flow: `app/help/practice/page.tsx`; pure arithmetic and validation: `src/logic/practice.ts`.
 - Learning state: `src/logic/learning.ts` → `src/data/learning.ts`.
-- Scenes and motion: `src/components/help/guide-film.tsx`.
+- Scenes and motion: `src/components/help/guide-film.tsx` (chapter structure) and `src/components/help/film/` (theme, motion helpers, card kit, captions, per-chapter scenes). Word timings: `src/lib/guide-video-cues.json`, from `video/scripts/cues.ts`.
 - Player/chapter navigation: `src/components/help/guide-video-player.tsx`, `app/help/video/page.tsx`.
 - Narration/export commands: `video/README.md`, `video/scripts/narrate.ts`.
 - Rendered film: `video/out/finpoint-beginner-guide.mp4`. Output is ignored by Git; do not discard it when handing off.

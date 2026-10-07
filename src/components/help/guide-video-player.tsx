@@ -1,6 +1,6 @@
 "use client"
 
-import { Player, type PlayerRef } from "@remotion/player"
+import { Player, type PlayerRef, Thumbnail } from "@remotion/player"
 import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import { GuideFilm } from "@/components/help/guide-film"
@@ -75,7 +75,26 @@ export default function GuideVideoPlayer({
 			initialFrame={startFrame}
 			controls
 			showVolumeControls
-			style={{ width: "100%", borderRadius: 12, overflow: "hidden" }}
+			showPosterWhenUnplayed
+			renderPoster={() => (
+				// Before the first play, hold on the chapter's finished title card instead of its
+				// empty opening frame.
+				<Thumbnail
+					component={GuideFilm}
+					inputProps={{ reducedMotion: true }}
+					frameToDisplay={
+						timeline.chapters.some(chapter => chapter.startFrame === startFrame)
+							? startFrame + 60
+							: startFrame
+					}
+					durationInFrames={timeline.durationInFrames}
+					fps={timeline.fps}
+					compositionWidth={timeline.width}
+					compositionHeight={timeline.height}
+					style={{ width: "100%", height: "100%", pointerEvents: "none" }}
+				/>
+			)}
+			style={{ width: "100%", height: "100%" }}
 			acknowledgeRemotionLicense
 		/>
 	)
