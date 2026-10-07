@@ -1,6 +1,7 @@
 "use client"
 
 import { useLiveQuery } from "dexie-react-hooks"
+import { motion } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import AccountDialog from "@/components/dialogs/account"
@@ -10,10 +11,10 @@ import PageHeader from "@/components/layout/page-header"
 import { dayLabel, isInteractiveTarget } from "@/components/table/row-groups"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Skeleton } from "@/components/ui/skeleton"
 import { useHistory } from "@/history"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { bankMeta } from "@/lib/banks"
+import { SPRING } from "@/lib/motion"
 import { cn, formatCurrency } from "@/lib/utils"
 import { type AccountActivity, listAccounts } from "@/logic/accounts"
 import { pathAccount, pathAllocator } from "@/routes"
@@ -51,13 +52,7 @@ export default function AccountsPage() {
 					/>
 				</div>
 
-				{accounts === undefined ? (
-					<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-						{["a", "b", "c"].map(key => (
-							<Skeleton key={key} className="h-48 rounded-xl" />
-						))}
-					</div>
-				) : accounts.length === 0 ? (
+				{accounts === undefined ? null : accounts.length === 0 ? (
 					<p className="rounded-xl border border-dashed p-10 text-center text-sm text-muted-foreground">
 						{query
 							? "No accounts match your search."
@@ -65,12 +60,19 @@ export default function AccountsPage() {
 					</p>
 				) : (
 					<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-						{accounts.map(account => (
-							<AccountCard
+						{accounts.map((account, index) => (
+							<motion.div
 								key={account.id}
-								account={account}
-								onEdit={() => setEditingAccount(account)}
-							/>
+								className="grid"
+								initial={{ opacity: 0, y: 6 }}
+								animate={{ opacity: 1, y: 0 }}
+								transition={{ ...SPRING.smooth, delay: Math.min(index, 7) * 0.03 }}
+							>
+								<AccountCard
+									account={account}
+									onEdit={() => setEditingAccount(account)}
+								/>
+							</motion.div>
 						))}
 					</div>
 				)}
@@ -101,7 +103,7 @@ function AccountCard({ account, onEdit }: { account: AccountRow; onEdit: () => v
 
 	return (
 		<article
-			className="group grid cursor-pointer content-start gap-4 rounded-xl border bg-card p-4 transition-shadow hover:shadow-md"
+			className="group grid cursor-pointer content-start gap-4 rounded-xl border bg-card p-4 transition-[box-shadow,transform] duration-150 ease-out hover:shadow-md active:scale-[0.99]"
 			onClick={event => {
 				if (!isInteractiveTarget(event.target)) open()
 			}}

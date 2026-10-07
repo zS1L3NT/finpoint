@@ -5,8 +5,7 @@ import {
 	type Row,
 	useReactTable,
 } from "@tanstack/react-table"
-import { AnimatePresence } from "framer-motion"
-import { Fragment, memo, useEffect, useState } from "react"
+import { Fragment, memo } from "react"
 import PaginationFooter from "@/components/table/pagination-footer"
 import PaginationHeader from "@/components/table/pagination-header"
 import {
@@ -14,11 +13,10 @@ import {
 	groupStarts,
 	isInteractiveTarget,
 	MOBILE_LIST_CLASS,
-	MOBILE_ROW_CLASS,
 	MobileGroupHeader,
+	MobileRow,
 	type RowGroup,
 } from "@/components/table/row-groups"
-import { Skeleton } from "@/components/ui/skeleton"
 import {
 	Table,
 	TableBody,
@@ -27,10 +25,10 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table"
+import { useRowEntrance } from "@/hooks/use-row-cascade"
+import { rowEnter } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 import { Paginated } from "@/types"
-
-const SKELETON_WIDTHS = ["w-full", "w-3/4", "w-1/2"] as const
 
 function PaginatedDataTable<TData extends { id: string }, TValue>({
 	paginated,
@@ -61,14 +59,12 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 		getCoreRowModel: getCoreRowModel(),
 		getRowId: row => row.id,
 	})
-	const skeletonRows = Math.min(Math.max(Number(header?.pageSize) || 8, 3), 12)
-	// First arrival renders instantly; later list updates animate out/in.
-	const [live, setLive] = useState(false)
-	useEffect(() => {
-		if (!loading) setLive(true)
-	}, [loading])
-	const enter = live ? { opacity: 0, y: 12 } : false
 	const rows = table.getRowModel().rows
+	const { entrance, rowsKey } = useRowEntrance(
+		loading ?? false,
+		rows.map(row => row.id).join("|"),
+		`${paginated.current_page}:${paginated.per_page}`,
+	)
 	const starts = groupStarts(
 		rows.map(row => row.original),
 		groupBy,
@@ -95,48 +91,45 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 						"min-w-0 divide-y overflow-hidden rounded-lg border bg-card @5xl/table:hidden",
 					)}
 				>
-					<AnimatePresence initial={false}>
-						{loading ? (
-							Array.from({ length: 4 }).map((_, index) => (
-								<div key={index} className="col-span-full grid gap-1.5 px-3 py-2.5">
-									<Skeleton className="h-4 w-2/3" />
-									<Skeleton className="h-3 w-1/3" />
-								</div>
-							))
-						) : rows.length ? (
-							rows.map((row, index) => {
+					<Fragment key={rowsKey}>
+						{loading ? null : rows.length ? (
+							rows.flatMap((row, index) => {
 								const group = starts.get(index)
-								return (
-									<Fragment key={row.id}>
-										{group && groupBy ? (
-											<MobileGroupHeader
-												group={groupBy}
-												groupKey={group.key}
-												rows={group.rows}
-											/>
-										) : null}
-										<div
-											data-state={selectedIds?.includes(row.id) && "selected"}
-											onClick={
-												onRowClick ? clickRow(row.original) : undefined
-											}
-											className={cn(
-												MOBILE_ROW_CLASS,
-												"px-3 py-2.5 text-sm data-[state=selected]:bg-muted",
-												onRowClick && "cursor-pointer active:bg-muted/60",
-											)}
-										>
-											{mobileRow(row)}
-										</div>
-									</Fragment>
-								)
+								return [
+									group && groupBy ? (
+										<MobileGroupHeader
+											key={`group-${group.key}`}
+											group={groupBy}
+											groupKey={group.key}
+											rows={group.rows}
+											index={index}
+											entrance={entrance}
+										/>
+									) : null,
+									<MobileRow
+										key={row.id}
+										index={index}
+										entrance={entrance}
+										data-state={selectedIds?.includes(row.id) && "selected"}
+										onClick={onRowClick ? clickRow(row.original) : undefined}
+										className={cn(
+											"px-3 py-2.5 text-sm transition-colors duration-100 data-[state=selected]:bg-muted",
+											onRowClick && "cursor-pointer active:bg-muted/60",
+										)}
+									>
+										{mobileRow(row)}
+									</MobileRow>,
+								]
 							})
 						) : (
-							<div className="col-span-full p-8 text-center text-sm text-muted-foreground">
+							<div
+								key="empty"
+								className="col-span-full p-8 text-center text-sm text-muted-foreground"
+							>
 								{emptyMessage}
 							</div>
 						)}
-					</AnimatePresence>
+					</Fragment>
 				</div>
 			) : null}
 
@@ -171,90 +164,68 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 							</TableRow>
 						))}
 					</TableHeader>
-					<TableBody key={loading ? "skeleton" : "rows"}>
-						{loading ? (
-							Array.from({ length: skeletonRows }).map((_, row) => (
-								<TableRow key={row}>
-									{columns.map((_, cell) => (
-										<TableCell key={cell}>
-											<Skeleton
-												className={cn(
-													"h-4",
-													SKELETON_WIDTHS[
-														(row + cell) % SKELETON_WIDTHS.length
-													],
-												)}
-											/>
-										</TableCell>
-									))}
-								</TableRow>
-							))
-						) : rows.length ? (
-							<AnimatePresence initial={false}>
-								{rows.map((row, index) => {
+					<TableBody key={loading ? "loading" : "rows"}>
+						<Fragment key={rowsKey}>
+							{loading ? null : rows.length ? (
+								rows.flatMap((row, index) => {
 									const group = starts.get(index)
-									return (
-										<Fragment key={row.id}>
-											{group && groupBy ? (
-												<GroupHeaderRow
-													group={groupBy}
-													groupKey={group.key}
-													rows={group.rows}
-													columns={columnInfo}
-												/>
-											) : null}
-											<TableRow
-												key={row.id}
-												layout="position"
-												initial={enter}
-												animate={{ opacity: 1, y: 0 }}
-												exit={{ opacity: 0, y: -12 }}
-												data-state={
-													selectedIds?.includes(row.id) && "selected"
-												}
-												onClick={
-													onRowClick ? clickRow(row.original) : undefined
-												}
-												className={cn(onRowClick && "cursor-pointer")}
-											>
-												{row.getVisibleCells().map(cell => (
-													<TableCell
-														key={cell.id}
-														className={
-															cell.column.columnDef.meta &&
-															"width" in cell.column.columnDef.meta
-																? `${cell.column.columnDef.meta?.width}`
-																: undefined
-														}
-													>
-														{flexRender(
-															cell.column.columnDef.cell,
-															cell.getContext(),
-														)}
-													</TableCell>
-												))}
-											</TableRow>
-										</Fragment>
-									)
-								})}
-							</AnimatePresence>
-						) : (
-							<TableRow layout layoutId="empty">
-								<TableCell
-									colSpan={columns.length}
-									className="h-24 text-center text-muted-foreground"
-								>
-									{emptyMessage}
-								</TableCell>
-							</TableRow>
-						)}
+									return [
+										group && groupBy ? (
+											<GroupHeaderRow
+												key={`group-${group.key}`}
+												group={groupBy}
+												groupKey={group.key}
+												rows={group.rows}
+												columns={columnInfo}
+												enter={rowEnter(index, entrance)}
+											/>
+										) : null,
+										<TableRow
+											key={row.id}
+											{...rowEnter(index, entrance)}
+											data-state={selectedIds?.includes(row.id) && "selected"}
+											onClick={
+												onRowClick ? clickRow(row.original) : undefined
+											}
+											className={cn(onRowClick && "cursor-pointer")}
+										>
+											{row.getVisibleCells().map(cell => (
+												<TableCell
+													key={cell.id}
+													className={
+														cell.column.columnDef.meta &&
+														"width" in cell.column.columnDef.meta
+															? `${cell.column.columnDef.meta?.width}`
+															: undefined
+													}
+												>
+													{flexRender(
+														cell.column.columnDef.cell,
+														cell.getContext(),
+													)}
+												</TableCell>
+											))}
+										</TableRow>,
+									]
+								})
+							) : (
+								<TableRow key="empty">
+									<TableCell
+										colSpan={columns.length}
+										className="h-24 text-center text-muted-foreground"
+									>
+										{emptyMessage}
+									</TableCell>
+								</TableRow>
+							)}
+						</Fragment>
 					</TableBody>
 				</Table>
 			</div>
 
 			{footer ? (
 				<PaginationFooter
-					summary={loading ? <Skeleton className="h-4 w-44" /> : footer.summary}
+					summary={loading ? null : footer.summary}
 					page={paginated.current_page}
 					lastPage={
 						typeof paginated.last_page === "number"

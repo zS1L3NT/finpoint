@@ -81,14 +81,15 @@ export default function SpendingCalendar({
 						: `${date.toFormat("d MMMM")}: ${formatCurrency(spending)} spent${entry?.records ? ` across ${entry.records} Record${entry.records === 1 ? "" : "s"}` : ""}`
 					return (
 						<button
-							key={key}
+							// Keyed by day number so a month change fades the heat colour in place.
+							key={index}
 							type="button"
 							title={label}
 							aria-label={label}
 							disabled={future}
 							onClick={() => onSelect(key)}
 							className={cn(
-								"group relative flex aspect-square min-h-9 cursor-pointer flex-col justify-between rounded-md p-1 text-left transition-[box-shadow,transform] hover:z-10 hover:scale-[1.06] hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-default disabled:opacity-40 disabled:hover:scale-100 disabled:hover:shadow-none sm:p-1.5",
+								"group relative flex aspect-square min-h-9 cursor-pointer flex-col justify-between rounded-md p-1 text-left transition-[background-color,box-shadow,transform] duration-150 ease-out hover:z-10 hover:scale-[1.04] hover:shadow-md active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-default disabled:opacity-40 disabled:hover:scale-100 disabled:hover:shadow-none disabled:active:scale-100 sm:p-1.5",
 								INK[level],
 								future && "border border-dashed bg-transparent",
 							)}

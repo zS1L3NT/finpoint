@@ -1,7 +1,7 @@
 "use client"
 
 import { useLiveQuery } from "dexie-react-hooks"
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
+import { AnimatePresence, motion } from "framer-motion"
 import Link from "next/link"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
@@ -28,6 +28,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select"
 import { useHistory } from "@/history"
+import { SPRING, TRANSITION } from "@/lib/motion"
 import { classForCurrency, cn, formatCurrency, formatDatetime, round2dp } from "@/lib/utils"
 import { listAccounts } from "@/logic/accounts"
 import { paginateItems, parsePage, parsePageSize } from "@/logic/pagination"
@@ -71,7 +72,6 @@ export default function AllocatorPendingPage() {
 	const [queueQuery, setQueueQuery] = useState(queueQueryParam)
 	const [candidateQuery, setCandidateQuery] = useState(candidateQueryParam)
 	const [reviewStatement, setReviewStatement] = useState<Statement | null>(null)
-	const reduceMotion = useReducedMotion()
 
 	const updateParams = (
 		changes: globalThis.Record<string, string | number | null>,
@@ -112,16 +112,16 @@ export default function AllocatorPendingPage() {
 	}, [candidateQuery, candidateQueryParam])
 
 	const accounts = useLiveQuery(() => listAccounts(), []) ?? []
-	const pending =
-		useLiveQuery(
-			() =>
-				listStatements({
-					query: queueQueryParam || null,
-					account_id: accountId === "all" ? null : accountId,
-					is_pending: "true",
-				}),
-			[queueQueryParam, accountId],
-		) ?? []
+	const pendingQuery = useLiveQuery(
+		() =>
+			listStatements({
+				query: queueQueryParam || null,
+				account_id: accountId === "all" ? null : accountId,
+				is_pending: "true",
+			}),
+		[queueQueryParam, accountId],
+	)
+	const pending = pendingQuery ?? []
 	const allPending = useLiveQuery(() => listStatements({ is_pending: "true" }), []) ?? []
 	const imports =
 		useLiveQuery(
@@ -229,7 +229,7 @@ export default function AllocatorPendingPage() {
 				<div className="grid min-w-0 gap-4 md:grid-cols-[minmax(18rem,2fr)_minmax(0,3fr)]">
 					<section
 						className={cn(
-							"min-w-0 flex-col gap-4",
+							"relative min-w-0 flex-col gap-4",
 							selectedPendingStatement ? "hidden md:flex" : "flex",
 						)}
 						aria-labelledby="pending-queue-title"
@@ -292,20 +292,21 @@ export default function AllocatorPendingPage() {
 
 						{pendingStatements.data.length ? (
 							<div className="flex flex-col gap-2">
-								<AnimatePresence initial={false}>
-									{pendingStatements.data.map((statement, index) => (
+								<AnimatePresence initial={false} mode="popLayout">
+									{pendingStatements.data.map(statement => (
 										<motion.div
 											layout="position"
 											key={statement.id}
-											initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+											initial={{ opacity: 0, y: 6 }}
 											animate={{ opacity: 1, y: 0 }}
-											exit={reduceMotion ? undefined : { opacity: 0, y: -6 }}
+											exit={{
+												opacity: 0,
+												scale: 0.97,
+												transition: TRANSITION.fast,
+											}}
 											transition={{
-												duration: reduceMotion ? 0 : 0.18,
-												delay: reduceMotion
-													? 0
-													: Math.min(index * 0.025, 0.1),
-												ease: "easeOut",
+												...TRANSITION.base,
+												layout: SPRING.snappy,
 											}}
 										>
 											<PendingCard
@@ -319,7 +320,7 @@ export default function AllocatorPendingPage() {
 									))}
 								</AnimatePresence>
 							</div>
-						) : (
+						) : pendingQuery === undefined ? null : (
 							<Empty className="border">
 								<EmptyHeader>
 									<EmptyMedia variant="icon">
@@ -349,17 +350,15 @@ export default function AllocatorPendingPage() {
 						)}
 						aria-labelledby="candidate-title"
 					>
-						<AnimatePresence mode="wait" initial={false}>
+						{/* popLayout crossfades in place: working down the queue never waits on an exit. */}
+						<AnimatePresence mode="popLayout" initial={false}>
 							{selectedPendingStatement ? (
 								<motion.div
 									key={selectedPendingStatement.id}
-									initial={reduceMotion ? false : { opacity: 0, x: 12 }}
+									initial={{ opacity: 0, x: 10 }}
 									animate={{ opacity: 1, x: 0 }}
-									exit={reduceMotion ? undefined : { opacity: 0, x: -8 }}
-									transition={{
-										duration: reduceMotion ? 0 : 0.18,
-										ease: "easeOut",
-									}}
+									exit={{ opacity: 0, x: -6, transition: TRANSITION.fast }}
+									transition={TRANSITION.base}
 									className="flex flex-col gap-4"
 								>
 									<Button
@@ -486,13 +485,10 @@ export default function AllocatorPendingPage() {
 							) : (
 								<motion.div
 									key="empty"
-									initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+									initial={{ opacity: 0, y: 6 }}
 									animate={{ opacity: 1, y: 0 }}
-									exit={reduceMotion ? undefined : { opacity: 0, y: -6 }}
-									transition={{
-										duration: reduceMotion ? 0 : 0.16,
-										ease: "easeOut",
-									}}
+									exit={{ opacity: 0, y: -4, transition: TRANSITION.fast }}
+									transition={TRANSITION.base}
 								>
 									<Empty className="min-h-72 border">
 										<EmptyHeader>
@@ -592,7 +588,7 @@ function PendingCard({
 				<IconifyIcon
 					icon="lucide:chevron-right"
 					className={cn(
-						"size-4 text-muted-foreground transition-transform",
+						"size-4 text-muted-foreground transition-transform duration-200 ease-out",
 						selected && "translate-x-0.5 text-foreground",
 					)}
 				/>
@@ -636,9 +632,8 @@ function CandidateResults({
 	onPage: (page: number) => void
 }) {
 	const { handlePush } = useHistory()
-	const reduceMotion = useReducedMotion()
-	const initial = reduceMotion ? false : { opacity: 0, y: 8 }
-	const transition = { duration: reduceMotion ? 0 : 0.18, ease: "easeOut" as const }
+	const initial = { opacity: 0, y: 6 }
+	const transition = TRANSITION.base
 	if (error)
 		return (
 			<motion.div initial={initial} animate={{ opacity: 1, y: 0 }} transition={transition}>
@@ -693,16 +688,11 @@ function CandidateResults({
 			className="flex flex-col gap-3"
 		>
 			<div className="flex flex-col gap-2">
-				{data.data.map((statement, index) => (
+				{data.data.map(statement => (
 					<motion.div
 						key={statement.id}
 						layout="position"
-						initial={initial}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{
-							...transition,
-							delay: reduceMotion ? 0 : Math.min(index * 0.035, 0.14),
-						}}
+						transition={{ layout: SPRING.snappy }}
 					>
 						<div
 							className={cn(

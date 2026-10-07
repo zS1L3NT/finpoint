@@ -9,6 +9,7 @@ import {
 	XAxis,
 	YAxis,
 } from "recharts"
+import { useChartIntro } from "@/components/charts/chart-intro"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { formatCurrency, parseDatetime, round2dp } from "@/lib/utils"
@@ -33,6 +34,7 @@ export default function BudgetProgressChart({
 	limit: number
 	asOf: DateTime
 }) {
+	const intro = useChartIntro()
 	const isMobile = useIsMobile()
 	const data = useMemo(() => buildSeries(records, start, end, asOf), [records, start, end, asOf])
 	const interval = isMobile ? Math.max(Math.floor(data.length / 3), 0) : "preserveStartEnd"
@@ -126,7 +128,7 @@ export default function BudgetProgressChart({
 						}
 					/>
 					<Area
-						isAnimationActive={false}
+						{...intro}
 						dataKey="usage"
 						name="Usage"
 						stroke="url(#budget-usage-line)"
@@ -144,7 +146,7 @@ export default function BudgetProgressChart({
 						)}
 					/>
 					<Area
-						isAnimationActive={false}
+						{...intro}
 						dataKey="projection"
 						name="Usage (projection)"
 						stroke="url(#budget-projection-line)"
