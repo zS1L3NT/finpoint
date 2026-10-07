@@ -2426,7 +2426,6 @@ function CategoriesHelps() {
 				<Rise at={useContext(BeatStart)}>
 					<RecordCard
 						title="Lunch"
-						amount={-12}
 						icon={Utensils}
 						glow={0.3}
 						chips={facets.map(([name, , value, tint], index) => (
