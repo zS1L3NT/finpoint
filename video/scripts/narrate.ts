@@ -119,7 +119,7 @@ try {
 			"\t",
 		) + "\n",
 	)
-	writeFileSync(resolve(root, "public/finpoint-guide.vtt"), captions)
+	writeFileSync(resolve(root, "public/finpoint-guide.vtt"), captions.trimEnd() + "\n")
 	writeFileSync(
 		resolve(root, "public/finpoint-guide-transcript.txt"),
 		chapters

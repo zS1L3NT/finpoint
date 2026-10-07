@@ -136,8 +136,8 @@ Provide help next to the confusing concept, using the user's current numbers whe
 
 | Location | Trigger | Proposed answer / action |
 |---|---|---|
-| Record Pending badge | “Why Pending?” | Show Record amount, allocated sum, and the difference. If there are no Allocations, state that explicitly, including for a zero-amount Record. Open its editor for review. |
-| Pending Statement badge | “What happens next?” | Explain imported replacement, with a separate warning that Record completion is a different question. |
+| Record Pending badge | “Why Pending?” | Show Record amount, allocated sum, difference, and Pending Statement count. Explain missing Allocations, amount mismatch, or awaiting a real Statement, including for a zero-amount Record. Open its editor for review. |
+| Pending Statement badge | “What happens next?” | Explain imported replacement. Allocated Records stay Pending until the placeholder is replaced, even when their amounts tally. |
 | Allocation field | “What am I assigning?” | Show Statement amount, already allocated amount, and remaining capacity. Explain paid/received direction. |
 | Category/treatment/bucket fields | “How are these different?” | “Category: what it was for. Treatment: how it affects totals. Bucket: which spending group.” Show the dinner example. |
 | Treatment selector | “Help me choose” | Ask the user about purpose and show examples; never automatically relabel the Record. |

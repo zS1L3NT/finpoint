@@ -29,8 +29,8 @@ Follow Alex through a fictional month. Use this order:
 - A Statement is account activity; a Record is its meaningful explanation; an Allocation assigns an amount between them. Do not rename Records “transactions.”
 - One Statement can explain several Records; several Statements can explain one Record.
 - Paid amounts are negative in Record/Allocation forms; received amounts are positive. Amount filters instead accept positive inputs under Paid/Received.
-- A Record is Pending when its Allocations do not tally or none exist. This is not automatically a debt indicator.
-- A fully allocated Record can be Complete even when its Statement is still Pending.
+- A Record is Pending when its Allocations do not tally, none exist, or any allocated Statement is Pending. This is not automatically a debt indicator.
+- A fully allocated Record stays Pending while any of its Statements are Pending, even when its amounts tally.
 - A placeholder replacement preserves Allocations and removes the Pending Statement. It must not create a duplicate expense.
 - Income/spending analytics are based on Records. Importing Statements alone does not explain them.
 - Pending Records can already contribute to totals. Future-dated activity has separate actual/projection handling.

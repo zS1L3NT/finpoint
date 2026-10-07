@@ -39,11 +39,14 @@ export function ContextHelp({
 	label?: string
 }) {
 	const pathname = usePathname()
+	const [open, setOpen] = useState(false)
 	const [selected, setSelected] = useState<string | null>(null)
 	const topic = getGuideTopic(selected ?? topicId ?? topicForPath(pathname))
 	return (
 		<Dialog
+			open={open}
 			onOpenChange={open => {
+				setOpen(open)
 				if (!open) setSelected(null)
 			}}
 		>
@@ -86,7 +89,15 @@ export function ContextHelp({
 						}
 					/>
 					<Button asChild variant="outline" size="lg" className="min-h-11">
-						<Link href={pathHelp(topic.id)}>Open full guide (leave this page)</Link>
+						<Link
+							href={pathHelp(topic.id)}
+							onClick={() => {
+								setOpen(false)
+								setSelected(null)
+							}}
+						>
+							Open full guide (leave this page)
+						</Link>
 					</Button>
 				</div>
 			</DialogContent>

@@ -370,9 +370,10 @@ function Practice({
 								<strong>Record:</strong> the activity you are explaining.
 							</p>
 							<p>
-								A Record is complete when it has at least one Allocation and its
-								amount equals their total. A Statement can still have a remainder
-								for another Record.
+								A Record is complete when it has at least one Allocation, its amount
+								equals their total, and none of its Statements are Pending. These
+								samples use confirmed Statements. A Statement can still have a
+								remainder for another Record.
 							</p>
 							<ContextHelp topic={lesson.topic} label="Explain this lesson" />
 						</CardContent>
