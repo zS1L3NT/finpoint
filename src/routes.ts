@@ -26,6 +26,22 @@ export const pathDataSettings = () => "/sync"
 export const pathSettings = () => "/settings"
 export const pathPrivacy = () => "/privacy"
 export const pathTerms = () => "/terms"
+export const pathHelp = (topic?: string) => withQuery("/help", { topic })
+export const pathHelpVideo = (chapter?: string) => withQuery("/help/video", { chapter })
+export const pathHelpPractice = (lesson?: string, returnTo?: string) =>
+	withQuery("/help/practice", { lesson, return_to: returnTo })
+
+/** Practice may return only to an app learning page or the Dashboard. */
+export function practiceReturnPath(value: string | null): string {
+	if (!value?.startsWith("/") || value.startsWith("//")) return pathHelp()
+	try {
+		const url = new URL(value, "https://finpoint.local")
+		if (["/", "/help", "/help/video"].includes(url.pathname)) return url.pathname + url.search
+	} catch {
+		return pathHelp()
+	}
+	return pathHelp()
+}
 
 function withQuery(path: string, query?: Record<string, string | undefined>): string {
 	if (!query) return path

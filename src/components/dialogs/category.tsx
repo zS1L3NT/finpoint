@@ -4,6 +4,7 @@ import { toast } from "sonner"
 import ComboboxField from "@/components/form/combobox-field"
 import SelectField from "@/components/form/select-field"
 import TextField from "@/components/form/text-field"
+import { ContextHelp } from "@/components/help/context-help"
 import Icon, { ICON_NAMES, UiIcon as IconifyIcon } from "@/components/icon"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -168,6 +169,9 @@ export default function CategoryDialog({
 							: "Create a new top-level category or nest it under an existing one."}
 					</DialogDescription>
 				</DialogHeader>
+				<div className="flex justify-end">
+					<ContextHelp topic="categories" label="Help with this form" />
+				</div>
 
 				<form id="category-form" className="flex flex-col gap-4" onSubmit={handleSubmit}>
 					<FieldGroup className="grid gap-4 md:grid-cols-2">

@@ -6,6 +6,7 @@ import { useCallback, useMemo, useState } from "react"
 import RecordCreatorDialog from "@/components/dialogs/record-creator"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
 import DateRange from "@/components/form/date-range"
+import { EmptyGuide } from "@/components/help/empty-guide"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
@@ -212,6 +213,9 @@ export default function RecordsPage() {
 					emptyMessage="No records found."
 					loading={recordsQuery === undefined}
 				/>
+				{recordsQuery !== undefined && paginated.total === 0 && (
+					<EmptyGuide kind="records" onClear={clearFilters} />
+				)}
 			</PageContent>
 
 			{editingRecord ? (

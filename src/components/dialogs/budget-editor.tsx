@@ -4,6 +4,7 @@ import { toast } from "sonner"
 import AmountField from "@/components/form/amount-field"
 import DateRange from "@/components/form/date-range"
 import TextField from "@/components/form/text-field"
+import { ContextHelp } from "@/components/help/context-help"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -105,6 +106,9 @@ export default function BudgetEditorDialog({
 						assignment.
 					</DialogDescription>
 				</DialogHeader>
+				<div className="flex justify-end">
+					<ContextHelp topic="budgets" label="Help with this form" />
+				</div>
 
 				<form
 					id="budget-edit-form"
