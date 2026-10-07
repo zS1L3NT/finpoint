@@ -3,6 +3,7 @@ import { type LucideIcon, TriangleAlert } from "lucide-react"
 import type { ReactNode } from "react"
 import { AbsoluteFill, interpolate, Sequence, staticFile, useCurrentFrame } from "remotion"
 import cueFile from "../../lib/guide-video-cues.json"
+import { filmLabels } from "../../lib/guide-video-script"
 import timeline from "../../lib/guide-video-timeline.json"
 import { Spoken } from "./film/captions"
 import { Backdrop, Header, labelTint, SegmentLabel, TitleCard } from "./film/chrome"
@@ -38,10 +39,12 @@ function Stage({ children }: { children: ReactNode }) {
 		<div
 			style={{
 				position: "absolute",
-				left: layout.gutter,
+				left: layout.stageLeft,
 				top: layout.stageTop,
-				width: layout.size - layout.gutter * 2,
-				height: layout.stageHeight,
+				width: 952,
+				height: 520,
+				transform: `scale(${layout.stageScale})`,
+				transformOrigin: "0 0",
 			}}
 		>
 			{children}
@@ -55,8 +58,12 @@ function Caption({ children }: { children: ReactNode }) {
 			style={{
 				position: "absolute",
 				left: layout.gutter,
-				right: layout.gutter,
-				top: layout.captionTop,
+				top: layout.columnTop + 60,
+				bottom: 120,
+				width: layout.columnWidth,
+				display: "flex",
+				flexDirection: "column",
+				justifyContent: "center",
 			}}
 		>
 			{children}
@@ -91,7 +98,7 @@ function SceneLayer({
 						<Scene />
 					</Stage>
 					<Caption>
-						<Spoken />
+						<Spoken size={48} maxChars={150} lineHeight={1.28} />
 					</Caption>
 				</AbsoluteFill>
 			</BeatStart.Provider>
@@ -102,7 +109,7 @@ function SceneLayer({
 /** The result and fix moments without a bespoke visual: a big sign, then the words themselves. */
 function NoticeLayer({ segment, tint }: { segment: Segment; tint: string }) {
 	const style = useLayer(segment.durationInFrames)
-	const check = segment.label === "Check your result"
+	const check = segment.label === filmLabels.check
 	const wobble = useWobble(10)
 	const tone = labelTint(segment.label, tint)
 	const glow = useProgress(4, 30)
@@ -119,27 +126,27 @@ function NoticeLayer({ segment, tint }: { segment: Segment; tint: string }) {
 					style={{
 						position: "absolute",
 						left: layout.gutter,
-						right: layout.gutter,
+						right: layout.gutter + 120,
 						top: 250,
-						bottom: 90,
+						bottom: 110,
 						display: "flex",
-						flexDirection: "column",
-						justifyContent: "center",
-						gap: 44,
+						alignItems: "center",
+						gap: 72,
 					}}
 				>
 					<div style={{ transform: `rotate(${wobble}deg)`, width: "fit-content" }}>
 						{check ? (
-							<CheckMark at={6} size={150} />
+							<CheckMark at={6} size={220} />
 						) : (
 							<Rise at={4} from={0.6} y={0}>
-								<IconTile icon={TriangleAlert} tint={tone} size={150} />
+								<IconTile icon={TriangleAlert} tint={tone} size={220} />
 							</Rise>
 						)}
 					</div>
 					<Spoken
-						size={segment.text.length > 170 ? 46 : 54}
-						maxChars={150}
+						size={segment.text.length > 120 ? 58 : 66}
+						maxChars={200}
+						style={{ flex: 1 }}
 						weight={650}
 						lineHeight={1.24}
 					/>
@@ -284,7 +291,7 @@ function StepsLayer({
 	const end = last ? last.from + last.durationInFrames - first : 0
 	const style = useLayer(end)
 	const total = steps.reduce((sum, step) => sum + step.text.length, 0)
-	const size = total > 380 ? 29 : total > 260 ? 32 : 36
+	const size = total > 260 ? 38 : 44
 	return (
 		<AbsoluteFill style={style}>
 			<SegmentLabel label="Steps" tint={tint} />
@@ -292,9 +299,9 @@ function StepsLayer({
 				style={{
 					position: "absolute",
 					left: layout.gutter,
-					right: layout.gutter,
+					right: layout.gutter + 160,
 					top: 236,
-					bottom: 60,
+					bottom: 80,
 					display: "flex",
 					flexDirection: "column",
 					justifyContent: "center",
@@ -363,7 +370,14 @@ export function GuideChapter({ chapter, number }: { chapter: Chapter; number: nu
 	const tint = accentFor(chapter.group)
 	const scene = scenes[chapter.id]
 	const segments = chapter.segments
-	const [problem, helps, s1, s2, s3, s4, check, wrong, example] = segments
+	const find = (label: string) => segments.find(item => item.label === label)
+	const problem = find(filmLabels.problem)
+	const helps = find(filmLabels.idea)
+	const check = find(filmLabels.check)
+	const wrong = find(filmLabels.watch)
+	const example = find(filmLabels.example)
+	const steps = segments.filter(item => item.label.startsWith("Step "))
+	const s1 = steps[0]
 	const firstWord = (problem && cueMap[problem.audio]?.[0]) ?? 60
 	const index = Math.max(
 		0,
@@ -371,7 +385,6 @@ export function GuideChapter({ chapter, number }: { chapter: Chapter; number: nu
 	)
 	const current = segments[index]
 	const segmentProgress = current ? (frame - current.from) / current.durationInFrames : 0
-	const steps = [s1, s2, s3, s4].filter((step): step is Segment => Boolean(step))
 	const layer = (segment: Segment | undefined, content: ReactNode, length?: number) =>
 		segment && (
 			<Sequence

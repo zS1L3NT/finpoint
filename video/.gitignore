@@ -5,3 +5,6 @@ dist
 
 # Ignore the output video from Git but not videos you import into src/.
 out
+
+# Local Kokoro model and Python environment for narration.
+.kokoro

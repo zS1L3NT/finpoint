@@ -47,13 +47,19 @@ export const ease = {
 	inOut: Easing.bezier(0.77, 0, 0.175, 1),
 }
 
-/** Frame geometry. The film is square so it stays legible in the app's phone layout. */
+/**
+ * Frame geometry for the 16:9 film. Narration reads down a left column; the scene plays on a
+ * 952 × 520 stage on the right, scaled up to fill it.
+ */
 export const layout = {
-	size: 1080,
-	gutter: 64,
-	stageTop: 236,
-	stageHeight: 520,
-	captionTop: 792,
+	width: 1920,
+	height: 1080,
+	gutter: 88,
+	columnTop: 236,
+	columnWidth: 700,
+	stageScale: 1.1,
+	stageLeft: 1920 - 88 - 952 * 1.1,
+	stageTop: 300,
 } as const
 
 /** `−$1,234` / `+$60` / `$0`, using a real minus sign like the rest of the guide copy. */

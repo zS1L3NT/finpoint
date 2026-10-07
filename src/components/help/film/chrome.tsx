@@ -165,18 +165,14 @@ export function Header({
 
 const labelIcons: Record<string, LucideIcon> = {
 	"The problem": CircleHelp,
-	"How Finpoint helps": Lightbulb,
+	"The idea": Lightbulb,
 	"Check your result": CircleCheck,
-	"If something looks wrong": TriangleAlert,
+	"Watch out": TriangleAlert,
 	Example: BookOpen,
 }
 
 export const labelTint = (label: string, accent: string) =>
-	label === "Check your result"
-		? color.record
-		: label === "If something looks wrong"
-			? color.pending
-			: accent
+	label === "Check your result" ? color.record : label === "Watch out" ? color.pending : accent
 
 /** The segment's eyebrow: what kind of moment this is (problem, steps, check…). */
 export function SegmentLabel({
@@ -196,7 +192,7 @@ export function SegmentLabel({
 			style={{
 				position: "absolute",
 				left: layout.gutter,
-				top: 158,
+				top: 160,
 				display: "flex",
 				alignItems: "center",
 				gap: 12,

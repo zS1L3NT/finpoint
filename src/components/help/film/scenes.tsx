@@ -1536,7 +1536,7 @@ const SplitHelps = () => (
 	<SplitFlow
 		statementAt={useAt("Create", 0)}
 		firstAt={useAt("allocate", 40)}
-		secondAt={useAt("Records", 80, { nth: 1 })}
+		secondAt={useAt("explanations", 80)}
 	/>
 )
 const SplitExample = () => (
@@ -1571,7 +1571,7 @@ function RepaymentFlow({
 			/>
 			<At x={0} y={10} w={320}>
 				<Rise at={payAt}>
-					<StatementCard title="DINNER" amount={-90} meta="Paid · 4 Oct" compact />
+					<StatementCard title="DINNER" amount={-90} meta="4 Oct" compact />
 				</Rise>
 			</At>
 			<At x={0} y={250} w={320}>
@@ -1579,7 +1579,7 @@ function RepaymentFlow({
 					<StatementCard
 						title="PAYNOW"
 						amount={60}
-						meta="Received · 6 Oct"
+						meta="6 Oct"
 						compact
 						tint={color.income}
 					/>
@@ -1698,7 +1698,7 @@ const RepaymentHelps = () => (
 		payAt={useAt("payment", 0)}
 		backAt={useAt("repayment", 20)}
 		recordAt={useAt("Record", 40)}
-		totalAt={useAt("received", 120)}
+		totalAt={useAt("reduces", 120)}
 	/>
 )
 const RepaymentExample = () => (
@@ -3098,7 +3098,7 @@ function DashboardCheck() {
 
 function DashboardExample() {
 	const saving = useAt("Saving", 0)
-	const not = useAt("not", 60)
+	const not = useAt("fell", 60)
 	return (
 		<>
 			<At

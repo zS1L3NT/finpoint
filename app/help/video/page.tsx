@@ -26,11 +26,7 @@ function clock(frame: number) {
 }
 
 const labelTone = (label: string) =>
-	label === "Check your result"
-		? color.record
-		: label === "If something looks wrong"
-			? color.pending
-			: undefined
+	label === "Check your result" ? color.record : label === "Watch out" ? color.pending : undefined
 
 export default function GuideVideoPage() {
 	const params = useSearchParams()
@@ -59,12 +55,12 @@ export default function GuideVideoPage() {
 			<div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_23rem]">
 				<div className="flex min-w-0 flex-col gap-5">
 					<div
-						className="mx-auto w-full max-w-3xl rounded-2xl p-1.5 shadow-2xl ring-1 ring-border transition-[background] duration-500"
+						className="mx-auto w-full max-w-5xl rounded-2xl p-1.5 shadow-2xl ring-1 ring-border transition-[background] duration-500"
 						style={{
 							background: `linear-gradient(140deg, ${accent}55, ${color.night} 45%, ${color.night})`,
 						}}
 					>
-						<div className="aspect-square w-full overflow-hidden rounded-xl bg-[#08080a]">
+						<div className="aspect-video w-full overflow-hidden rounded-xl bg-[#08080a]">
 							{learning && (
 								<VideoPlayer
 									seekVersion={seekVersion}
@@ -74,7 +70,7 @@ export default function GuideVideoPage() {
 							)}
 						</div>
 					</div>
-					<div className="mx-auto flex w-full max-w-3xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+					<div className="mx-auto flex w-full max-w-5xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 						<div className="min-w-0">
 							<p
 								className="text-xs font-semibold tracking-[0.16em] uppercase"
@@ -105,7 +101,7 @@ export default function GuideVideoPage() {
 						</div>
 					</div>
 					<section
-						className="mx-auto w-full max-w-3xl rounded-2xl border bg-card p-5 sm:p-7"
+						className="mx-auto w-full max-w-5xl rounded-2xl border bg-card p-5 sm:p-7"
 						aria-label="Current chapter transcript"
 					>
 						<div className="mb-5 flex flex-wrap items-center justify-between gap-3">

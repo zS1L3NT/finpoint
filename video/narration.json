@@ -1,0 +1,2394 @@
+{
+	"start-0.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"What does Finpoint do?\",\"pauseAfter\":0.8,\"words\":0},{\"text\":\"The problem.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Your bank shows that money moved, but not what it was really for.\",\"words\":13,\"pauseAfter\":0.38},{\"text\":\"One supermarket payment might be groceries and a gift.\",\"words\":9,\"pauseAfter\":0.38},{\"text\":\"One dinner payment might include your friends’ shares.\",\"words\":8,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 14.445291666666666,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.3803333333333332
+			},
+			{
+				"start": 2.1803333333333335,
+				"end": 2.9114583333333335
+			},
+			{
+				"start": 3.4114583333333335,
+				"end": 6.84175
+			},
+			{
+				"start": 7.22175,
+				"end": 10.497666666666667
+			},
+			{
+				"start": 10.877666666666666,
+				"end": 13.595291666666666
+			}
+		]
+	},
+	"start-1.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"The idea.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Finpoint links each bank amount to your own explanations, then turns those explanations into spending and plans.\",\"words\":17,\"pauseAfter\":0.38},{\"text\":\"You only need one purchase to start.\",\"words\":7,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 11.637125,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9215
+			},
+			{
+				"start": 1.4215,
+				"end": 8.411458333333332
+			},
+			{
+				"start": 8.791458333333333,
+				"end": 10.787125
+			}
+		]
+	},
+	"start-2.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 1.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Try the sample lunch lesson.\",\"words\":5,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 3.8725833333333335,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9325833333333333
+			},
+			{
+				"start": 1.4325833333333333,
+				"end": 3.0225833333333334
+			}
+		]
+	},
+	"start-3.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 2.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Import a bank C S V, or restore a backup.\",\"words\":8,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 5.135916666666667,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9529583333333334
+			},
+			{
+				"start": 1.4529583333333334,
+				"end": 4.285916666666667
+			}
+		]
+	},
+	"start-4.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 3.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Explain one bank row.\",\"words\":4,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 3.671875,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9719583333333333
+			},
+			{
+				"start": 1.4719583333333333,
+				"end": 2.821875
+			}
+		]
+	},
+	"start-5.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 4.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Download a backup.\",\"words\":3,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 3.417875,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.97875
+			},
+			{
+				"start": 1.47875,
+				"end": 2.567875
+			}
+		]
+	},
+	"start-6.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Check your result.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"You can say where one bank amount went, and find it again.\",\"words\":12,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 5.610041666666667,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.164125
+			},
+			{
+				"start": 1.664125,
+				"end": 4.760041666666667
+			}
+		]
+	},
+	"start-7.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Watch out.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"An empty Dashboard is normal at first.\",\"words\":7,\"pauseAfter\":0.38},{\"text\":\"Imported bank rows don’t count until you explain them.\",\"words\":9,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 8.077625,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9587916666666667
+			},
+			{
+				"start": 1.4587916666666667,
+				"end": 3.682833333333333
+			},
+			{
+				"start": 4.062833333333333,
+				"end": 7.227625
+			}
+		]
+	},
+	"start-8.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Example.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Alex paid twelve dollars for lunch.\",\"words\":5,\"pauseAfter\":0.38},{\"text\":\"The bank shows minus twelve dollars.\",\"words\":4,\"pauseAfter\":0.38},{\"text\":\"Alex adds a Lunch Record for minus twelve dollars and an Allocation of minus twelve dollars connects them.\",\"words\":14,\"pauseAfter\":1.6}],\"leadIn\":0.2}",
+		"duration": 13.907958333333333,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.8597916666666667
+			},
+			{
+				"start": 1.3597916666666665,
+				"end": 3.308583333333333
+			},
+			{
+				"start": 3.688583333333333,
+				"end": 5.648416666666666
+			},
+			{
+				"start": 6.028416666666667,
+				"end": 12.307958333333334
+			}
+		]
+	},
+	"model-0.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Statements, Records and Allocations\",\"pauseAfter\":0.8,\"words\":0},{\"text\":\"The problem.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Bank rows and real-life purchases don’t always match one for one.\",\"words\":11,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 9.388916666666667,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 2.3142500000000004
+			},
+			{
+				"start": 3.11425,
+				"end": 3.845375
+			},
+			{
+				"start": 4.345375000000001,
+				"end": 8.538916666666667
+			}
+		]
+	},
+	"model-1.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"The idea.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"A Statement is one row from your bank.\",\"words\":8,\"pauseAfter\":0.38},{\"text\":\"A Record is your explanation of what happened.\",\"words\":8,\"pauseAfter\":0.38},{\"text\":\"An Allocation links an amount from a Statement to a Record.\",\"words\":11,\"pauseAfter\":0.38},{\"text\":\"An Account is where money sits, not your login.\",\"words\":9,\"pauseAfter\":0.38},{\"text\":\"Money paid is negative, and money received is positive.\",\"words\":9,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 17.68725,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9215
+			},
+			{
+				"start": 1.4215,
+				"end": 3.509125
+			},
+			{
+				"start": 3.889125,
+				"end": 6.416541666666667
+			},
+			{
+				"start": 6.796541666666666,
+				"end": 10.189083333333333
+			},
+			{
+				"start": 10.569083333333333,
+				"end": 13.1175
+			},
+			{
+				"start": 13.4975,
+				"end": 16.83725
+			}
+		]
+	},
+	"model-2.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 1.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Read the Statement’s amount and description.\",\"words\":6,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 4.459666666666666,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9325833333333333
+			},
+			{
+				"start": 1.4325833333333333,
+				"end": 3.6096666666666666
+			}
+		]
+	},
+	"model-3.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 2.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Decide what it really was.\",\"words\":5,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 3.8328333333333333,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9529583333333334
+			},
+			{
+				"start": 1.4529583333333334,
+				"end": 2.9828333333333337
+			}
+		]
+	},
+	"model-4.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 3.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Create a Record that explains it.\",\"words\":6,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 4.122916666666667,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9719583333333333
+			},
+			{
+				"start": 1.4719583333333333,
+				"end": 3.2729166666666667
+			}
+		]
+	},
+	"model-5.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 4.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Allocate the amount.\",\"words\":3,\"pauseAfter\":0.38},{\"text\":\"One Statement can feed several Records, and one Record can combine several Statements.\",\"words\":13,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 8.797708333333333,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.97875
+			},
+			{
+				"start": 1.47875,
+				"end": 2.5517916666666665
+			},
+			{
+				"start": 2.9317916666666664,
+				"end": 7.947708333333333
+			}
+		]
+	},
+	"model-6.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Check your result.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"A Record is complete when it has an Allocation, its Allocation total equals its amount, and none of its Statements are Pending.\",\"words\":22,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 9.899125,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.164125
+			},
+			{
+				"start": 1.664125,
+				"end": 9.049125
+			}
+		]
+	},
+	"model-7.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Watch out.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Two bank rows don’t always mean two Records.\",\"words\":8,\"pauseAfter\":0.38},{\"text\":\"A payment and its repayment can explain one shared purchase.\",\"words\":10,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 8.9435,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9587916666666667
+			},
+			{
+				"start": 1.4587916666666667,
+				"end": 4.113916666666666
+			},
+			{
+				"start": 4.493916666666666,
+				"end": 8.093499999999999
+			}
+		]
+	},
+	"model-8.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Example.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Statement minus twelve dollars Allocation minus twelve dollars Lunch Record minus twelve dollars.\",\"words\":7,\"pauseAfter\":0.38},{\"text\":\"Your Account balance and your Dashboard spending answer different questions.\",\"words\":10,\"pauseAfter\":1.6}],\"leadIn\":0.2}",
+		"duration": 13.493583333333333,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.8597916666666667
+			},
+			{
+				"start": 1.3597916666666665,
+				"end": 7.657416666666666
+			},
+			{
+				"start": 8.037416666666667,
+				"end": 11.893583333333334
+			}
+		]
+	},
+	"workspace-0.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Starting fresh, or restoring\",\"pauseAfter\":0.8,\"words\":0},{\"text\":\"The problem.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"A new workspace comes with starter Categories and spending buckets, but no bank activity yet.\",\"words\":15,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 9.923625,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.8000833333333333
+			},
+			{
+				"start": 2.6000833333333335,
+				"end": 3.3312083333333335
+			},
+			{
+				"start": 3.8312083333333335,
+				"end": 9.073625
+			}
+		]
+	},
+	"workspace-1.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"The idea.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Everything is stored in this browser, on this device.\",\"words\":9,\"pauseAfter\":0.38},{\"text\":\"The starter defaults are yours to edit.\",\"words\":7,\"pauseAfter\":0.38},{\"text\":\"You can learn with practice lessons first, or restore a backup you already have.\",\"words\":14,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 12.378,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9215
+			},
+			{
+				"start": 1.4215,
+				"end": 4.286375
+			},
+			{
+				"start": 4.666375,
+				"end": 6.806666666666667
+			},
+			{
+				"start": 7.186666666666667,
+				"end": 11.528
+			}
+		]
+	},
+	"workspace-2.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 1.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"New here?\",\"words\":2,\"pauseAfter\":0.38},{\"text\":\"Open Importer and choose your bank.\",\"words\":6,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 5.114916666666667,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9325833333333333
+			},
+			{
+				"start": 1.4325833333333333,
+				"end": 2.0736666666666665
+			},
+			{
+				"start": 2.453666666666667,
+				"end": 4.264916666666667
+			}
+		]
+	},
+	"workspace-3.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 2.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Have a backup?\",\"words\":3,\"pauseAfter\":0.38},{\"text\":\"Open Sync and restore it.\",\"words\":5,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 5.066916666666667,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9529583333333334
+			},
+			{
+				"start": 1.4529583333333334,
+				"end": 2.3140833333333335
+			},
+			{
+				"start": 2.6940833333333334,
+				"end": 4.216916666666666
+			}
+		]
+	},
+	"workspace-4.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 3.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Export your current data first if you want to keep it.\",\"words\":11,\"pauseAfter\":0.38},{\"text\":\"Restoring replaces it;\",\"words\":3,\"pauseAfter\":0.38},{\"text\":\"it doesn’t merge.\",\"words\":3,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 8.301041666666666,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9719583333333333
+			},
+			{
+				"start": 1.4719583333333333,
+				"end": 4.3834583333333335
+			},
+			{
+				"start": 4.763458333333333,
+				"end": 6.162708333333334
+			},
+			{
+				"start": 6.542708333333334,
+				"end": 7.451041666666667
+			}
+		]
+	},
+	"workspace-5.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 4.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Use Help in the top bar any time, without leaving a form.\",\"words\":12,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 5.772708333333333,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.97875
+			},
+			{
+				"start": 1.47875,
+				"end": 4.9227083333333335
+			}
+		]
+	},
+	"workspace-6.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Check your result.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Your Accounts, Statements or restored Records show up in their lists.\",\"words\":11,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 6.3355,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.164125
+			},
+			{
+				"start": 1.664125,
+				"end": 5.4855
+			}
+		]
+	},
+	"workspace-7.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Watch out.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Load demo data is not a tutorial.\",\"words\":7,\"pauseAfter\":0.38},{\"text\":\"It replaces your data.\",\"words\":4,\"pauseAfter\":0.38},{\"text\":\"Use the practice lessons instead.\",\"words\":5,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 8.515875,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9587916666666667
+			},
+			{
+				"start": 1.4587916666666667,
+				"end": 3.77025
+			},
+			{
+				"start": 4.15025,
+				"end": 5.457791666666666
+			},
+			{
+				"start": 5.837791666666666,
+				"end": 7.665875
+			}
+		]
+	},
+	"workspace-8.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Example.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"In practice, you can explain a minus twelve dollars lunch without uploading anything or changing your real Account balance.\",\"words\":17,\"pauseAfter\":1.6}],\"leadIn\":0.2}",
+		"duration": 10.301916666666667,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.8597916666666667
+			},
+			{
+				"start": 1.3597916666666665,
+				"end": 8.701916666666667
+			}
+		]
+	},
+	"import-0.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Importing bank activity\",\"pauseAfter\":0.8,\"words\":0},{\"text\":\"The problem.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Finpoint can only read a bank file in a format it supports.\",\"words\":12,\"pauseAfter\":0.38},{\"text\":\"Each row becomes one of your Statements.\",\"words\":7,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 10.669041666666667,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.6199583333333334
+			},
+			{
+				"start": 2.4199583333333337,
+				"end": 3.1510833333333337
+			},
+			{
+				"start": 3.6510833333333337,
+				"end": 7.338625
+			},
+			{
+				"start": 7.718625000000001,
+				"end": 9.819041666666667
+			}
+		]
+	},
+	"import-1.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"The idea.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Importer supports C S V exports from D B S, O C B C, U O B and Revolut.\",\"words\":10,\"pauseAfter\":0.38},{\"text\":\"It creates Statements, not finished Records.\",\"words\":6,\"pauseAfter\":0.38},{\"text\":\"Missing Accounts are created as you go.\",\"words\":7,\"pauseAfter\":0.38},{\"text\":\"Revolut takes one file at a time, and asks which Account it belongs to.\",\"words\":14,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 18.55025,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9215
+			},
+			{
+				"start": 1.4215,
+				"end": 7.601625
+			},
+			{
+				"start": 7.981625,
+				"end": 10.367666666666667
+			},
+			{
+				"start": 10.747666666666667,
+				"end": 13.068541666666668
+			},
+			{
+				"start": 13.448541666666667,
+				"end": 17.70025
+			}
+		]
+	},
+	"import-2.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 1.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Export a C S V from your bank.\",\"words\":6,\"pauseAfter\":0.38},{\"text\":\"Don’t edit its columns.\",\"words\":4,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 5.731916666666667,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9325833333333333
+			},
+			{
+				"start": 1.4325833333333333,
+				"end": 3.20525
+			},
+			{
+				"start": 3.5852500000000003,
+				"end": 4.881916666666667
+			}
+		]
+	},
+	"import-3.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 2.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Open Importer, pick your bank, and choose the file.\",\"words\":9,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 4.978208333333333,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9529583333333334
+			},
+			{
+				"start": 1.4529583333333334,
+				"end": 4.128208333333333
+			}
+		]
+	},
+	"import-4.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 3.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Import, then read the inserted, re-indexed and unchanged counts.\",\"words\":9,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 6.381708333333333,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9719583333333333
+			},
+			{
+				"start": 1.4719583333333333,
+				"end": 5.5317083333333334
+			}
+		]
+	},
+	"import-5.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 4.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Check the new rows in Statements.\",\"words\":6,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 4.072958333333333,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.97875
+			},
+			{
+				"start": 1.47875,
+				"end": 3.2229583333333336
+			}
+		]
+	},
+	"import-6.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Check your result.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"The rows you expected are there, with the right dates and signs.\",\"words\":12,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 5.780833333333334,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.164125
+			},
+			{
+				"start": 1.664125,
+				"end": 4.930833333333333
+			}
+		]
+	},
+	"import-7.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Watch out.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"If an import fails, check the bank you picked and the file.\",\"words\":12,\"pauseAfter\":0.38},{\"text\":\"A P D F or a renamed spreadsheet won’t work.\",\"words\":8,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 8.59725,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9587916666666667
+			},
+			{
+				"start": 1.4587916666666667,
+				"end": 4.610666666666667
+			},
+			{
+				"start": 4.990666666666667,
+				"end": 7.74725
+			}
+		]
+	},
+	"import-8.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Example.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Alex imports a salary of plus three thousand dollars and a lunch of minus twelve dollars.\",\"words\":11,\"pauseAfter\":0.38},{\"text\":\"Neither one is explained until Alex creates Records.\",\"words\":8,\"pauseAfter\":1.6}],\"leadIn\":0.2}",
+		"duration": 11.951083333333333,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.8597916666666667
+			},
+			{
+				"start": 1.3597916666666665,
+				"end": 6.6888749999999995
+			},
+			{
+				"start": 7.068874999999999,
+				"end": 10.351083333333332
+			}
+		]
+	},
+	"lunch-0.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Explaining your first purchase\",\"pauseAfter\":0.8,\"words\":0},{\"text\":\"The problem.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"The lunch Statement says minus twelve dollars but the Dashboard only counts what a Record explains.\",\"words\":14,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 10.30275,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.7636666666666667
+			},
+			{
+				"start": 2.563666666666667,
+				"end": 3.2947916666666672
+			},
+			{
+				"start": 3.7947916666666672,
+				"end": 9.45275
+			}
+		]
+	},
+	"lunch-1.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"The idea.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Allocator lists the bank amounts you haven’t explained yet.\",\"words\":9,\"pauseAfter\":0.38},{\"text\":\"Pick one and create a Record with a title, an amount and a Category.\",\"words\":14,\"pauseAfter\":0.38},{\"text\":\"Finpoint suggests the Allocation for you.\",\"words\":6,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 12.104208333333334,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9215
+			},
+			{
+				"start": 1.4215,
+				"end": 4.337875
+			},
+			{
+				"start": 4.717874999999999,
+				"end": 8.558458333333332
+			},
+			{
+				"start": 8.938458333333333,
+				"end": 11.254208333333333
+			}
+		]
+	},
+	"lunch-2.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 1.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Open Allocator and pick the lunch Statement.\",\"words\":7,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 4.709791666666667,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9325833333333333
+			},
+			{
+				"start": 1.4325833333333333,
+				"end": 3.8597916666666663
+			}
+		]
+	},
+	"lunch-3.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 2.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Create a Record called Lunch:\",\"words\":5,\"pauseAfter\":0.38},{\"text\":\"Paid twelve dollars in a food Category.\",\"words\":6,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 6.369541666666667,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9529583333333334
+			},
+			{
+				"start": 1.4529583333333334,
+				"end": 2.9714166666666664
+			},
+			{
+				"start": 3.3514166666666663,
+				"end": 5.519541666666666
+			}
+		]
+	},
+	"lunch-4.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 3.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Check the Allocation is minus twelve dollars then save.\",\"words\":7,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 5.472458333333333,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9719583333333333
+			},
+			{
+				"start": 1.4719583333333333,
+				"end": 4.622458333333333
+			}
+		]
+	},
+	"lunch-5.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Check your result.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"The Record is complete, and the lunch Statement leaves Allocator.\",\"words\":10,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 5.8449583333333335,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.164125
+			},
+			{
+				"start": 1.664125,
+				"end": 4.994958333333334
+			}
+		]
+	},
+	"lunch-6.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Watch out.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"If the Record says Pending, compare its amount with its Allocations, and fix whichever is wrong.\",\"words\":16,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 7.9987916666666665,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9587916666666667
+			},
+			{
+				"start": 1.4587916666666667,
+				"end": 7.148791666666667
+			}
+		]
+	},
+	"lunch-7.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Example.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"minus twelve dollars from the bank, minus twelve dollars allocated, a minus twelve dollars Lunch.\",\"words\":9,\"pauseAfter\":0.38},{\"text\":\"Nothing remaining, and no difference.\",\"words\":5,\"pauseAfter\":1.6}],\"leadIn\":0.2}",
+		"duration": 11.292791666666666,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.8597916666666667
+			},
+			{
+				"start": 1.3597916666666665,
+				"end": 7.269625
+			},
+			{
+				"start": 7.6496249999999995,
+				"end": 9.692791666666666
+			}
+		]
+	},
+	"backup-first-0.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Protecting your work\",\"pauseAfter\":0.8,\"words\":0},{\"text\":\"The problem.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Your data is saved in this browser.\",\"words\":7,\"pauseAfter\":0.38},{\"text\":\"Clearing browser storage, or changing devices, can lose it.\",\"words\":9,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 9.93825,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.2576666666666667
+			},
+			{
+				"start": 2.057666666666667,
+				"end": 2.788791666666667
+			},
+			{
+				"start": 3.288791666666667,
+				"end": 5.241291666666667
+			},
+			{
+				"start": 5.621291666666667,
+				"end": 9.08825
+			}
+		]
+	},
+	"backup-first-1.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"The idea.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"A Finpoint backup is a separate copy of your data, saved as a Jason file.\",\"words\":15,\"pauseAfter\":0.38},{\"text\":\"The browser downloads it.\",\"words\":4,\"pauseAfter\":0.38},{\"text\":\"Requesting a download isn’t proof, so find the file yourself.\",\"words\":10,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 12.606875,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9215
+			},
+			{
+				"start": 1.4215,
+				"end": 6.029083333333333
+			},
+			{
+				"start": 6.409083333333333,
+				"end": 7.7279583333333335
+			},
+			{
+				"start": 8.107958333333332,
+				"end": 11.756874999999999
+			}
+		]
+	},
+	"backup-first-2.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 1.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"In Sync, choose Download backup.\",\"words\":5,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 4.074041666666667,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9325833333333333
+			},
+			{
+				"start": 1.4325833333333333,
+				"end": 3.2240416666666665
+			}
+		]
+	},
+	"backup-first-3.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 2.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Find the file, and keep it somewhere safe.\",\"words\":8,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 4.559291666666667,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9529583333333334
+			},
+			{
+				"start": 1.4529583333333334,
+				"end": 3.709291666666667
+			}
+		]
+	},
+	"backup-first-4.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 3.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Keep an older backup before you restore anything.\",\"words\":8,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 4.872583333333333,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9719583333333333
+			},
+			{
+				"start": 1.4719583333333333,
+				"end": 4.022583333333333
+			}
+		]
+	},
+	"backup-first-5.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Check your result.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"You’ve found the backup file.\",\"words\":5,\"pauseAfter\":0.38},{\"text\":\"Clicking the button alone doesn’t confirm that.\",\"words\":7,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 6.519125,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.164125
+			},
+			{
+				"start": 1.664125,
+				"end": 3.009291666666667
+			},
+			{
+				"start": 3.389291666666667,
+				"end": 5.669125
+			}
+		]
+	},
+	"backup-first-6.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Watch out.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Never clear browser storage until you have a backup you’ve checked.\",\"words\":11,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 5.843208333333333,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9587916666666667
+			},
+			{
+				"start": 1.4587916666666667,
+				"end": 4.9932083333333335
+			}
+		]
+	},
+	"backup-first-7.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Example.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"After explaining Lunch, Alex exports a backup.\",\"words\":7,\"pauseAfter\":0.38},{\"text\":\"Restoring it later replaces what’s in this browser.\",\"words\":8,\"pauseAfter\":1.6}],\"leadIn\":0.2}",
+		"duration": 9.101416666666667,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.8597916666666667
+			},
+			{
+				"start": 1.3597916666666665,
+				"end": 4.292041666666666
+			},
+			{
+				"start": 4.672041666666666,
+				"end": 7.501416666666666
+			}
+		]
+	},
+	"split-0.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Splitting one payment\",\"pauseAfter\":0.8,\"words\":0},{\"text\":\"The problem.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"One minus eighty dollars supermarket Statement was really sixty dollars of groceries and a twenty dollars gift.\",\"words\":13,\"pauseAfter\":0.38},{\"text\":\"Put it all in one Category, and that difference hides.\",\"words\":10,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 14.231583333333333,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.4040833333333333
+			},
+			{
+				"start": 2.2040833333333336,
+				"end": 2.9352083333333336
+			},
+			{
+				"start": 3.4352083333333336,
+				"end": 10.14075
+			},
+			{
+				"start": 10.52075,
+				"end": 13.381583333333333
+			}
+		]
+	},
+	"split-1.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"The idea.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Create two Records, and allocate part of the Statement to each.\",\"words\":11,\"pauseAfter\":0.38},{\"text\":\"The bank row stays whole, and you get two clear explanations.\",\"words\":11,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 9.640375,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9215
+			},
+			{
+				"start": 1.4215,
+				"end": 4.9506250000000005
+			},
+			{
+				"start": 5.3306249999999995,
+				"end": 8.790375
+			}
+		]
+	},
+	"split-2.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 1.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Create Groceries for minus sixty dollars from the minus eighty dollars Statement.\",\"words\":8,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 6.9759166666666665,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9325833333333333
+			},
+			{
+				"start": 1.4325833333333333,
+				"end": 6.125916666666667
+			}
+		]
+	},
+	"split-3.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 2.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"minus twenty dollars is left.\",\"words\":3,\"pauseAfter\":0.38},{\"text\":\"Create Gift for minus twenty dollars and allocate it.\",\"words\":7,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 7.456041666666667,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9529583333333334
+			},
+			{
+				"start": 1.4529583333333334,
+				"end": 3.1870833333333333
+			},
+			{
+				"start": 3.5670833333333336,
+				"end": 6.606041666666667
+			}
+		]
+	},
+	"split-4.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 3.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Check both Records, and that zero dollars remains.\",\"words\":7,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 5.340291666666666,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9719583333333333
+			},
+			{
+				"start": 1.4719583333333333,
+				"end": 4.490291666666667
+			}
+		]
+	},
+	"split-5.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Check your result.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"minus sixty dollars plus minus twenty dollars equals minus eighty dollars.\",\"words\":5,\"pauseAfter\":0.38},{\"text\":\"Both Records are complete, and the Statement is fully used.\",\"words\":10,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 10.889208333333332,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.164125
+			},
+			{
+				"start": 1.664125,
+				"end": 6.394791666666667
+			},
+			{
+				"start": 6.774791666666667,
+				"end": 10.039208333333335
+			}
+		]
+	},
+	"split-6.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Watch out.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"You can’t allocate more than a Statement has left.\",\"words\":9,\"pauseAfter\":0.38},{\"text\":\"Fix the Allocations;\",\"words\":3,\"pauseAfter\":0.38},{\"text\":\"don’t invent bank rows.\",\"words\":4,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 8.116041666666666,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9587916666666667
+			},
+			{
+				"start": 1.4587916666666667,
+				"end": 3.9412916666666664
+			},
+			{
+				"start": 4.321291666666666,
+				"end": 5.504333333333333
+			},
+			{
+				"start": 5.884333333333333,
+				"end": 7.266041666666666
+			}
+		]
+	},
+	"split-7.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Example.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"One Statement of minus eighty dollars becomes Groceries minus sixty dollars and Gift minus twenty dollars.\",\"words\":10,\"pauseAfter\":0.38},{\"text\":\"One bank row, two useful explanations.\",\"words\":6,\"pauseAfter\":1.6}],\"leadIn\":0.2}",
+		"duration": 13.205333333333334,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.8597916666666667
+			},
+			{
+				"start": 1.3597916666666665,
+				"end": 8.677458333333334
+			},
+			{
+				"start": 9.057458333333333,
+				"end": 11.605333333333332
+			}
+		]
+	},
+	"repayment-0.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"A shared dinner and repayment\",\"pauseAfter\":0.8,\"words\":0},{\"text\":\"The problem.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Alex pays ninety dollars for dinner.\",\"words\":5,\"pauseAfter\":0.38},{\"text\":\"Later, Alex receives sixty dollars back from friends.\",\"words\":7,\"pauseAfter\":0.38},{\"text\":\"Alex’s own cost is thirty dollars not ninety dollars.\",\"words\":7,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 13.80325,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.7366666666666666
+			},
+			{
+				"start": 2.536666666666667,
+				"end": 3.267791666666667
+			},
+			{
+				"start": 3.767791666666667,
+				"end": 5.782333333333334
+			},
+			{
+				"start": 6.162333333333334,
+				"end": 9.223875
+			},
+			{
+				"start": 9.603875,
+				"end": 12.95325
+			}
+		]
+	},
+	"repayment-1.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"The idea.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"One Shared dinner Record can combine the payment and the repayment.\",\"words\":11,\"pauseAfter\":0.38},{\"text\":\"The money back isn’t income.\",\"words\":5,\"pauseAfter\":0.38},{\"text\":\"It reduces Alex’s share.\",\"words\":4,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 9.657125,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9215
+			},
+			{
+				"start": 1.4215,
+				"end": 5.08
+			},
+			{
+				"start": 5.46,
+				"end": 6.8825
+			},
+			{
+				"start": 7.2625,
+				"end": 8.807125
+			}
+		]
+	},
+	"repayment-2.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 1.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Create Shared dinner for minus thirty dollars.\",\"words\":5,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 4.63375,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9325833333333333
+			},
+			{
+				"start": 1.4325833333333333,
+				"end": 3.7837500000000004
+			}
+		]
+	},
+	"repayment-3.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 2.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Allocate minus ninety dollars from the dinner payment.\",\"words\":6,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 5.180208333333334,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9529583333333334
+			},
+			{
+				"start": 1.4529583333333334,
+				"end": 4.330208333333333
+			}
+		]
+	},
+	"repayment-4.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 3.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Allocate plus sixty dollars from the repayment.\",\"words\":5,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 4.728916666666667,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9719583333333333
+			},
+			{
+				"start": 1.4719583333333333,
+				"end": 3.8789166666666666
+			}
+		]
+	},
+	"repayment-5.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Check your result.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"minus ninety dollars plus sixty dollars equals minus thirty dollars.\",\"words\":5,\"pauseAfter\":0.38},{\"text\":\"Both Statements are explained, and the Record is complete.\",\"words\":9,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 10.447375,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.164125
+			},
+			{
+				"start": 1.664125,
+				"end": 6.019458333333334
+			},
+			{
+				"start": 6.3994583333333335,
+				"end": 9.597375
+			}
+		]
+	},
+	"repayment-6.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Watch out.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Before the repayment arrives, the Record may show Pending.\",\"words\":9,\"pauseAfter\":0.38},{\"text\":\"That alone doesn’t mean someone owes you.\",\"words\":7,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 7.69675,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9587916666666667
+			},
+			{
+				"start": 1.4587916666666667,
+				"end": 4.608416666666667
+			},
+			{
+				"start": 4.988416666666667,
+				"end": 6.84675
+			}
+		]
+	},
+	"repayment-7.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Example.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Payment minus ninety dollars and repayment plus sixty dollars go into one Shared dinner Record.\",\"words\":11,\"pauseAfter\":0.38},{\"text\":\"It shows Alex’s minus thirty dollars share.\",\"words\":5,\"pauseAfter\":1.6}],\"leadIn\":0.2}",
+		"duration": 11.706625,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.8597916666666667
+			},
+			{
+				"start": 1.3597916666666665,
+				"end": 7.3285
+			},
+			{
+				"start": 7.7085,
+				"end": 10.106625
+			}
+		]
+	},
+	"treatments-0.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Refunds, transfers and savings\",\"pauseAfter\":0.8,\"words\":0},{\"text\":\"The problem.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"A plus or minus sign doesn’t tell you whether money was income, spending, savings or a transfer.\",\"words\":17,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 11.008416666666667,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 2.1752083333333334
+			},
+			{
+				"start": 2.9752083333333337,
+				"end": 3.7063333333333337
+			},
+			{
+				"start": 4.206333333333333,
+				"end": 10.158416666666668
+			}
+		]
+	},
+	"treatments-1.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"The idea.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Treatment tells the Dashboard how to count a Record.\",\"words\":9,\"pauseAfter\":0.38},{\"text\":\"Income is for salary.\",\"words\":4,\"pauseAfter\":0.38},{\"text\":\"Spending covers purchases and their refunds.\",\"words\":6,\"pauseAfter\":0.38},{\"text\":\"Saving or investment is money to and from savings.\",\"words\":9,\"pauseAfter\":0.38},{\"text\":\"Transfer or neutral is money moving between your own Accounts.\",\"words\":10,\"pauseAfter\":0.38},{\"text\":\"Automatic just follows the sign.\",\"words\":5,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 19.259416666666667,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9215
+			},
+			{
+				"start": 1.4215,
+				"end": 4.0146250000000006
+			},
+			{
+				"start": 4.394625,
+				"end": 5.659583333333333
+			},
+			{
+				"start": 6.039583333333333,
+				"end": 8.554416666666667
+			},
+			{
+				"start": 8.934416666666666,
+				"end": 12.170083333333332
+			},
+			{
+				"start": 12.550083333333331,
+				"end": 16.213041666666665
+			},
+			{
+				"start": 16.593041666666664,
+				"end": 18.409416666666665
+			}
+		]
+	},
+	"treatments-2.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 1.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Use Income for salary, and Spending for purchases and refunds.\",\"words\":10,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 6.061791666666666,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9325833333333333
+			},
+			{
+				"start": 1.4325833333333333,
+				"end": 5.211791666666667
+			}
+		]
+	},
+	"treatments-3.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 2.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"For a transfer, combine the minus two hundred dollars and plus two hundred dollars into one zero dollars Record, as Transfer or neutral.\",\"words\":16,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 11.037166666666666,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9529583333333334
+			},
+			{
+				"start": 1.4529583333333334,
+				"end": 10.187166666666666
+			}
+		]
+	},
+	"treatments-4.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 3.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Use Saving or investment for contributions and withdrawals.\",\"words\":8,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 6.06125,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9719583333333333
+			},
+			{
+				"start": 1.4719583333333333,
+				"end": 5.21125
+			}
+		]
+	},
+	"treatments-5.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Check your result.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"A plus twenty dollars refund lowers your net spending.\",\"words\":7,\"pauseAfter\":0.38},{\"text\":\"Savings contributions show as positive amounts.\",\"words\":6,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 8.909916666666666,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.164125
+			},
+			{
+				"start": 1.664125,
+				"end": 4.706666666666667
+			},
+			{
+				"start": 5.086666666666667,
+				"end": 8.059916666666666
+			}
+		]
+	},
+	"treatments-6.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Watch out.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"A minus two hundred fifty dollars saving net means more cash went into savings than came out.\",\"words\":13,\"pauseAfter\":0.38},{\"text\":\"It isn’t an investment loss.\",\"words\":5,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 10.151208333333333,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9587916666666667
+			},
+			{
+				"start": 1.4587916666666667,
+				"end": 7.358125
+			},
+			{
+				"start": 7.738125,
+				"end": 9.301208333333333
+			}
+		]
+	},
+	"treatments-7.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Example.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Put in three hundred dollars and take out fifty dollars:\",\"words\":7,\"pauseAfter\":0.38},{\"text\":\"contributions three hundred dollars withdrawals fifty dollars net minus two hundred fifty dollars.\",\"words\":6,\"pauseAfter\":0.38},{\"text\":\"The plus three thousand dollars salary is separate income.\",\"words\":6,\"pauseAfter\":1.6}],\"leadIn\":0.2}",
+		"duration": 16.443,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.8597916666666667
+			},
+			{
+				"start": 1.3597916666666665,
+				"end": 4.538791666666667
+			},
+			{
+				"start": 4.9187916666666665,
+				"end": 11.294583333333332
+			},
+			{
+				"start": 11.674583333333333,
+				"end": 14.843
+			}
+		]
+	},
+	"pending-0.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Why a Record is Pending\",\"pauseAfter\":0.8,\"words\":0},{\"text\":\"The problem.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"A Record is Pending when its amounts don’t match, its Allocations are missing, or one of its Statements is Pending.\",\"words\":20,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 11.026541666666667,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.4368333333333332
+			},
+			{
+				"start": 2.2368333333333332,
+				"end": 2.9679583333333333
+			},
+			{
+				"start": 3.4679583333333333,
+				"end": 10.176541666666667
+			}
+		]
+	},
+	"pending-1.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"The idea.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"A Pending Record is an explanation that doesn’t add up yet.\",\"words\":11,\"pauseAfter\":0.38},{\"text\":\"A Pending Statement is a placeholder for bank activity you’re still waiting for.\",\"words\":13,\"pauseAfter\":0.38},{\"text\":\"Even if the amounts match, the Record stays Pending until that placeholder is replaced.\",\"words\":14,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 16.256958333333333,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9215
+			},
+			{
+				"start": 1.4215,
+				"end": 4.931333333333333
+			},
+			{
+				"start": 5.311333333333334,
+				"end": 9.945166666666667
+			},
+			{
+				"start": 10.325166666666668,
+				"end": 15.406958333333336
+			}
+		]
+	},
+	"pending-2.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 1.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Open the Record and compare its amount with its Allocations.\",\"words\":10,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 5.676541666666667,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9325833333333333
+			},
+			{
+				"start": 1.4325833333333333,
+				"end": 4.8265416666666665
+			}
+		]
+	},
+	"pending-3.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 2.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"If lunch really cost twelve dollars change the Record from minus ten dollars to minus twelve dollars.\",\"words\":12,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 8.405541666666666,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9529583333333334
+			},
+			{
+				"start": 1.4529583333333334,
+				"end": 7.555541666666667
+			}
+		]
+	},
+	"pending-4.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 3.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"When the real bank row arrives, replace the Pending Statement instead of allocating twice.\",\"words\":14,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 7.5995,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9719583333333333
+			},
+			{
+				"start": 1.4719583333333333,
+				"end": 6.7495
+			}
+		]
+	},
+	"pending-5.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Check your result.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"There’s at least one Allocation, the total matches the Record, and no allocated Statement is Pending.\",\"words\":16,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 8.464,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.164125
+			},
+			{
+				"start": 1.664125,
+				"end": 7.614
+			}
+		]
+	},
+	"pending-6.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Watch out.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Fix the facts, not just the label.\",\"words\":7,\"pauseAfter\":0.38},{\"text\":\"A Pending Record is still saved.\",\"words\":6,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 6.316458333333333,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9587916666666667
+			},
+			{
+				"start": 1.4587916666666667,
+				"end": 3.2881666666666667
+			},
+			{
+				"start": 3.668166666666667,
+				"end": 5.466458333333334
+			}
+		]
+	},
+	"pending-7.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Example.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"The Record says minus ten dollars but the Allocation is minus twelve dollars.\",\"words\":9,\"pauseAfter\":0.38},{\"text\":\"Change the Record to minus twelve dollars and the difference drops to zero dollars.\",\"words\":11,\"pauseAfter\":1.6}],\"leadIn\":0.2}",
+		"duration": 12.904333333333334,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.8597916666666667
+			},
+			{
+				"start": 1.3597916666666665,
+				"end": 6.138125
+			},
+			{
+				"start": 6.5181249999999995,
+				"end": 11.304333333333332
+			}
+		]
+	},
+	"find-0.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Finding and fixing mistakes\",\"pauseAfter\":0.8,\"words\":0},{\"text\":\"The problem.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Something you saved seems to be missing.\",\"words\":7,\"pauseAfter\":0.38},{\"text\":\"Usually filters or the month are hiding it.\",\"words\":8,\"pauseAfter\":0.38},{\"text\":\"An empty list doesn’t mean your data is gone.\",\"words\":9,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 12.262708333333334,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.704125
+			},
+			{
+				"start": 2.504125,
+				"end": 3.23525
+			},
+			{
+				"start": 3.73525,
+				"end": 5.768083333333333
+			},
+			{
+				"start": 6.148083333333334,
+				"end": 8.557291666666668
+			},
+			{
+				"start": 8.937291666666667,
+				"end": 11.412708333333335
+			}
+		]
+	},
+	"find-1.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"The idea.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Records show your explanations.\",\"words\":4,\"pauseAfter\":0.38},{\"text\":\"Statements show every bank row.\",\"words\":5,\"pauseAfter\":0.38},{\"text\":\"Allocator only shows amounts left to explain.\",\"words\":7,\"pauseAfter\":0.38},{\"text\":\"Use search and filters to narrow the right list.\",\"words\":9,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 11.932875,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9215
+			},
+			{
+				"start": 1.4215,
+				"end": 3.0987083333333336
+			},
+			{
+				"start": 3.4787083333333335,
+				"end": 5.230041666666667
+			},
+			{
+				"start": 5.6100416666666675,
+				"end": 8.145916666666668
+			},
+			{
+				"start": 8.525916666666667,
+				"end": 11.082875000000001
+			}
+		]
+	},
+	"find-2.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 1.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Check the month and date range, and clear filters.\",\"words\":9,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 4.984541666666667,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9325833333333333
+			},
+			{
+				"start": 1.4325833333333333,
+				"end": 4.134541666666666
+			}
+		]
+	},
+	"find-3.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 2.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Look in Statements for rows Allocator no longer shows.\",\"words\":9,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 5.341166666666667,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9529583333333334
+			},
+			{
+				"start": 1.4529583333333334,
+				"end": 4.4911666666666665
+			}
+		]
+	},
+	"find-4.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 3.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Open the item, edit it, then check its totals again.\",\"words\":10,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 5.385041666666667,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9719583333333333
+			},
+			{
+				"start": 1.4719583333333333,
+				"end": 4.535041666666666
+			}
+		]
+	},
+	"find-5.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Check your result.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"The fixed item shows up where you expect, still linked to its bank row.\",\"words\":14,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 6.220875,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.164125
+			},
+			{
+				"start": 1.664125,
+				"end": 5.370875
+			}
+		]
+	},
+	"find-6.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Watch out.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Renaming doesn’t fix a wrong amount.\",\"words\":6,\"pauseAfter\":0.38},{\"text\":\"Keep a backup before big changes.\",\"words\":6,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 6.504375,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9587916666666667
+			},
+			{
+				"start": 1.4587916666666667,
+				"end": 3.328333333333333
+			},
+			{
+				"start": 3.708333333333333,
+				"end": 5.654375
+			}
+		]
+	},
+	"find-7.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Example.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"To find payments over fifty dollars choose Paid and type 50.\",\"words\":10,\"pauseAfter\":0.38},{\"text\":\"No minus sign needed.\",\"words\":4,\"pauseAfter\":1.6}],\"leadIn\":0.2}",
+		"duration": 8.436833333333333,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.8597916666666667
+			},
+			{
+				"start": 1.3597916666666665,
+				"end": 5.081291666666666
+			},
+			{
+				"start": 5.461291666666666,
+				"end": 6.836833333333333
+			}
+		]
+	},
+	"categories-0.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Category, treatment and bucket\",\"pauseAfter\":0.8,\"words\":0},{\"text\":\"The problem.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Three settings describe every Record.\",\"words\":5,\"pauseAfter\":0.38},{\"text\":\"Mixing them up makes totals confusing.\",\"words\":6,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 9.457,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 2.031
+			},
+			{
+				"start": 2.8310000000000004,
+				"end": 3.5621250000000004
+			},
+			{
+				"start": 4.062125,
+				"end": 6.060041666666667
+			},
+			{
+				"start": 6.440041666666667,
+				"end": 8.607
+			}
+		]
+	},
+	"categories-1.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"The idea.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Category is what it’s for.\",\"words\":5,\"pauseAfter\":0.38},{\"text\":\"Treatment is how totals count it.\",\"words\":6,\"pauseAfter\":0.38},{\"text\":\"A bucket is an optional planning group, like Daily or Recurring.\",\"words\":11,\"pauseAfter\":0.38},{\"text\":\"A Category can set defaults, and a Record can override them.\",\"words\":11,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 14.017125,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9215
+			},
+			{
+				"start": 1.4215,
+				"end": 2.9270416666666668
+			},
+			{
+				"start": 3.3070416666666667,
+				"end": 5.1883333333333335
+			},
+			{
+				"start": 5.568333333333333,
+				"end": 9.306166666666666
+			},
+			{
+				"start": 9.686166666666667,
+				"end": 13.167125
+			}
+		]
+	},
+	"categories-2.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 1.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"In Categories, create the labels you need.\",\"words\":7,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 4.588208333333333,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9325833333333333
+			},
+			{
+				"start": 1.4325833333333333,
+				"end": 3.7382083333333336
+			}
+		]
+	},
+	"categories-3.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 2.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Give each Category a treatment and a default bucket.\",\"words\":9,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 5.2715,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9529583333333334
+			},
+			{
+				"start": 1.4529583333333334,
+				"end": 4.4215
+			}
+		]
+	},
+	"categories-4.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 3.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"On a Record, check whether those defaults were overridden.\",\"words\":9,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 5.335333333333334,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9719583333333333
+			},
+			{
+				"start": 1.4719583333333333,
+				"end": 4.485333333333333
+			}
+		]
+	},
+	"categories-5.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Check your result.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Lunch can be Food, Spending and Daily all at once:\",\"words\":10,\"pauseAfter\":0.38},{\"text\":\"three different choices.\",\"words\":3,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 7.0906666666666665,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.164125
+			},
+			{
+				"start": 1.664125,
+				"end": 4.6461250000000005
+			},
+			{
+				"start": 5.026125,
+				"end": 6.240666666666667
+			}
+		]
+	},
+	"categories-6.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Watch out.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Changing a Category doesn’t update Records whose choices were set by hand.\",\"words\":12,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 6.984,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9587916666666667
+			},
+			{
+				"start": 1.4587916666666667,
+				"end": 6.1339999999999995
+			}
+		]
+	},
+	"categories-7.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Example.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Lunch:\",\"words\":1,\"pauseAfter\":0.38},{\"text\":\"Category Food, treatment Spending, bucket Daily.\",\"words\":6,\"pauseAfter\":0.38},{\"text\":\"Rent is Spending too, but in the Recurring bucket.\",\"words\":9,\"pauseAfter\":1.6}],\"leadIn\":0.2}",
+		"duration": 9.754125,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.8597916666666667
+			},
+			{
+				"start": 1.3597916666666665,
+				"end": 1.9360833333333332
+			},
+			{
+				"start": 2.3160833333333333,
+				"end": 5.051708333333334
+			},
+			{
+				"start": 5.431708333333333,
+				"end": 8.154125
+			}
+		]
+	},
+	"targets-0.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Monthly bucket targets\",\"pauseAfter\":0.8,\"words\":0},{\"text\":\"The problem.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"You want to compare a month’s spending with a plan, without moving any money.\",\"words\":14,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 8.386833333333334,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.6042916666666667
+			},
+			{
+				"start": 2.404291666666667,
+				"end": 3.135416666666667
+			},
+			{
+				"start": 3.635416666666667,
+				"end": 7.536833333333334
+			}
+		]
+	},
+	"targets-1.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"The idea.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"A target is a monthly comparison for a bucket.\",\"words\":9,\"pauseAfter\":0.38},{\"text\":\"A default carries forward from the month you set it.\",\"words\":10,\"pauseAfter\":0.38},{\"text\":\"A target for only one month overrides it.\",\"words\":8,\"pauseAfter\":0.38},{\"text\":\"Targets never reserve cash or block spending.\",\"words\":7,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 13.6715,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9215
+			},
+			{
+				"start": 1.4215,
+				"end": 4.36175
+			},
+			{
+				"start": 4.74175,
+				"end": 7.114458333333333
+			},
+			{
+				"start": 7.494458333333332,
+				"end": 9.832374999999999
+			},
+			{
+				"start": 10.212374999999998,
+				"end": 12.821499999999999
+			}
+		]
+	},
+	"targets-2.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 1.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"On the Dashboard, pick the month first.\",\"words\":7,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 4.231208333333333,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9325833333333333
+			},
+			{
+				"start": 1.4325833333333333,
+				"end": 3.3812083333333334
+			}
+		]
+	},
+	"targets-3.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 2.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Choose this month only, or from this month onward.\",\"words\":9,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 5.0689166666666665,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9529583333333334
+			},
+			{
+				"start": 1.4529583333333334,
+				"end": 4.218916666666667
+			}
+		]
+	},
+	"targets-4.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 3.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Compare the bucket’s spending with its target.\",\"words\":7,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 4.48025,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9719583333333333
+			},
+			{
+				"start": 1.4719583333333333,
+				"end": 3.6302499999999998
+			}
+		]
+	},
+	"targets-5.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Check your result.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Daily spending of one hundred twenty seven dollars against a five hundred dollars target leaves three hundred seventy three dollars.\",\"words\":10,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 10.075041666666667,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.164125
+			},
+			{
+				"start": 1.664125,
+				"end": 9.225041666666666
+			}
+		]
+	},
+	"targets-6.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Example.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"A five hundred dollars default starts in October and carries on.\",\"words\":9,\"pauseAfter\":0.38},{\"text\":\"A six hundred dollars target just for October wins in October, and later months go back to five hundred dollars.\",\"words\":16,\"pauseAfter\":1.6}],\"leadIn\":0.2}",
+		"duration": 13.875708333333334,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.8597916666666667
+			},
+			{
+				"start": 1.3597916666666665,
+				"end": 5.033791666666667
+			},
+			{
+				"start": 5.413791666666667,
+				"end": 12.275708333333334
+			}
+		]
+	},
+	"budgets-0.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Budgets for trips and events\",\"pauseAfter\":0.8,\"words\":0},{\"text\":\"The problem.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"A trip can cross months and several categories.\",\"words\":8,\"pauseAfter\":0.38},{\"text\":\"A monthly bucket doesn’t fit it.\",\"words\":6,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 9.460458333333333,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.7614583333333333
+			},
+			{
+				"start": 2.5614583333333334,
+				"end": 3.2925833333333334
+			},
+			{
+				"start": 3.7925833333333334,
+				"end": 6.490083333333333
+			},
+			{
+				"start": 6.8700833333333335,
+				"end": 8.610458333333334
+			}
+		]
+	},
+	"budgets-1.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"The idea.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"A Budget has its own amount, its own dates, and its own attached Records.\",\"words\":14,\"pauseAfter\":0.38},{\"text\":\"It’s a separate view from the Dashboard’s totals.\",\"words\":8,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 9.282625,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9215
+			},
+			{
+				"start": 1.4215,
+				"end": 5.730333333333333
+			},
+			{
+				"start": 6.110333333333333,
+				"end": 8.432625
+			}
+		]
+	},
+	"budgets-2.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 1.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"In Budgets, create one with an amount and dates.\",\"words\":9,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 4.9987916666666665,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9325833333333333
+			},
+			{
+				"start": 1.4325833333333333,
+				"end": 4.148791666666667
+			}
+		]
+	},
+	"budgets-3.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 2.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Leave Automatic attach on, or turn it off to choose Records yourself.\",\"words\":12,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 6.346291666666667,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9529583333333334
+			},
+			{
+				"start": 1.4529583333333334,
+				"end": 5.496291666666666
+			}
+		]
+	},
+	"budgets-4.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 3.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"After changing dates, review the attached Records.\",\"words\":7,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 5.134708333333333,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9719583333333333
+			},
+			{
+				"start": 1.4719583333333333,
+				"end": 4.284708333333333
+			}
+		]
+	},
+	"budgets-5.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Check your result.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"The trip’s Records are attached, and fall inside the Budget’s dates.\",\"words\":11,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 6.078625,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.164125
+			},
+			{
+				"start": 1.664125,
+				"end": 5.228625
+			}
+		]
+	},
+	"budgets-6.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Watch out.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"A Budget total doesn’t have to match Dashboard spending.\",\"words\":9,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 5.39575,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9587916666666667
+			},
+			{
+				"start": 1.4587916666666667,
+				"end": 4.54575
+			}
+		]
+	},
+	"budgets-7.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Example.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Use a Budget for a week-long holiday.\",\"words\":7,\"pauseAfter\":0.38},{\"text\":\"Use the Travel bucket for the monthly view.\",\"words\":8,\"pauseAfter\":1.6}],\"leadIn\":0.2}",
+		"duration": 7.783333333333333,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.8597916666666667
+			},
+			{
+				"start": 1.3597916666666665,
+				"end": 3.5525416666666665
+			},
+			{
+				"start": 3.9325416666666664,
+				"end": 6.183333333333334
+			}
+		]
+	},
+	"dashboard-0.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Reading the Dashboard\",\"pauseAfter\":0.8,\"words\":0},{\"text\":\"The problem.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"The charts depend on the month and on your Records, so they won’t match your bank balances.\",\"words\":17,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 8.872041666666666,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.2382499999999999
+			},
+			{
+				"start": 2.03825,
+				"end": 2.769375
+			},
+			{
+				"start": 3.269375,
+				"end": 8.022041666666667
+			}
+		]
+	},
+	"dashboard-1.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"The idea.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"The Dashboard summarizes your Records by treatment, then by Category and bucket.\",\"words\":12,\"pauseAfter\":0.38},{\"text\":\"Monthly Records shows the Records behind each number.\",\"words\":8,\"pauseAfter\":0.38},{\"text\":\"Pending Records already count, so tidy them first.\",\"words\":8,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 13.842291666666666,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9215
+			},
+			{
+				"start": 1.4215,
+				"end": 6.09125
+			},
+			{
+				"start": 6.4712499999999995,
+				"end": 9.685416666666667
+			},
+			{
+				"start": 10.065416666666666,
+				"end": 12.992291666666667
+			}
+		]
+	},
+	"dashboard-2.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 1.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Pick the month.\",\"words\":3,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 3.083083333333333,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9325833333333333
+			},
+			{
+				"start": 1.4325833333333333,
+				"end": 2.233083333333333
+			}
+		]
+	},
+	"dashboard-3.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 2.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Read income, spending, refunds and surplus.\",\"words\":6,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 5.1785,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9529583333333334
+			},
+			{
+				"start": 1.4529583333333334,
+				"end": 4.3285
+			}
+		]
+	},
+	"dashboard-4.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 3.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Use Monthly Records to trace any surprise.\",\"words\":7,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 4.8155833333333335,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9719583333333333
+			},
+			{
+				"start": 1.4719583333333333,
+				"end": 3.9655833333333335
+			}
+		]
+	},
+	"dashboard-5.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Check your result.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Income is three thousand dollars.\",\"words\":3,\"pauseAfter\":0.38},{\"text\":\"Gross spending is one hundred forty seven dollars minus twenty dollars of refunds, so net spending is one hundred twenty seven dollars.\",\"words\":13,\"pauseAfter\":0.38},{\"text\":\"Surplus is two thousand eight hundred seventy three dollars.\",\"words\":3,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 16.32004166666667,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.164125
+			},
+			{
+				"start": 1.664125,
+				"end": 3.489416666666667
+			},
+			{
+				"start": 3.869416666666667,
+				"end": 12.019458333333333
+			},
+			{
+				"start": 12.399458333333335,
+				"end": 15.470041666666669
+			}
+		]
+	},
+	"dashboard-6.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Watch out.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"If a number looks wrong, check the month first, then the Record’s treatment.\",\"words\":13,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 6.054833333333334,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9587916666666667
+			},
+			{
+				"start": 1.4587916666666667,
+				"end": 5.204833333333333
+			}
+		]
+	},
+	"dashboard-7.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Example.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"A saving net of minus two hundred fifty dollars shows on its own line.\",\"words\":10,\"pauseAfter\":0.38},{\"text\":\"It doesn’t mean income fell, or that you lost money.\",\"words\":10,\"pauseAfter\":1.6}],\"leadIn\":0.2}",
+		"duration": 10.359208333333333,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.8597916666666667
+			},
+			{
+				"start": 1.3597916666666665,
+				"end": 5.621375
+			},
+			{
+				"start": 6.0013749999999995,
+				"end": 8.759208333333333
+			}
+		]
+	},
+	"sync-0.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Backups and Google Drive\",\"pauseAfter\":0.8,\"words\":0},{\"text\":\"The problem.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"With two devices, you need a copy you can trust, and to know which copy is current.\",\"words\":17,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 9.295666666666667,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.5936249999999998
+			},
+			{
+				"start": 2.393625,
+				"end": 3.12475
+			},
+			{
+				"start": 3.62475,
+				"end": 8.445666666666666
+			}
+		]
+	},
+	"sync-1.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"The idea.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Your data lives locally.\",\"words\":4,\"pauseAfter\":0.38},{\"text\":\"A backup file is a separate copy.\",\"words\":7,\"pauseAfter\":0.38},{\"text\":\"Google Drive sync is optional, and shares one workspace across devices.\",\"words\":11,\"pauseAfter\":0.38},{\"text\":\"The sign-in broker never sees your financial data.\",\"words\":8,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 14.300875,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9215
+			},
+			{
+				"start": 1.4215,
+				"end": 2.900708333333333
+			},
+			{
+				"start": 3.280708333333333,
+				"end": 5.21175
+			},
+			{
+				"start": 5.591749999999999,
+				"end": 10.042874999999999
+			},
+			{
+				"start": 10.422875,
+				"end": 13.450875
+			}
+		]
+	},
+	"sync-2.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 1.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"In Sync, download a backup and find the file.\",\"words\":9,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 4.872041666666667,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9325833333333333
+			},
+			{
+				"start": 1.4325833333333333,
+				"end": 4.0220416666666665
+			}
+		]
+	},
+	"sync-3.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 2.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Connect Google Drive only if you want sync.\",\"words\":8,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 4.677375,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9529583333333334
+			},
+			{
+				"start": 1.4529583333333334,
+				"end": 3.827375
+			}
+		]
+	},
+	"sync-4.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 3.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"If there’s a conflict, back up first, then choose which copy to keep.\",\"words\":13,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 6.028375,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9719583333333333
+			},
+			{
+				"start": 1.4719583333333333,
+				"end": 5.178375
+			}
+		]
+	},
+	"sync-5.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Check your result.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Up to date in Sync, and a backup you’ve found.\",\"words\":10,\"pauseAfter\":0.38},{\"text\":\"Keep both.\",\"words\":2,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 6.219166666666666,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.164125
+			},
+			{
+				"start": 1.664125,
+				"end": 4.2158750000000005
+			},
+			{
+				"start": 4.595875,
+				"end": 5.369166666666667
+			}
+		]
+	},
+	"sync-6.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Watch out.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Don’t keep overwriting a conflict just to clear the warning.\",\"words\":10,\"pauseAfter\":0.38},{\"text\":\"You choose a whole copy;\",\"words\":5,\"pauseAfter\":0.38},{\"text\":\"nothing is merged.\",\"words\":3,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 8.638291666666667,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9587916666666667
+			},
+			{
+				"start": 1.4587916666666667,
+				"end": 4.616291666666667
+			},
+			{
+				"start": 4.996291666666667,
+				"end": 6.2627500000000005
+			},
+			{
+				"start": 6.64275,
+				"end": 7.788291666666667
+			}
+		]
+	},
+	"sync-7.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Example.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Your practice progress stays in this browser, without going into your backup or Drive.\",\"words\":14,\"pauseAfter\":1.6}],\"leadIn\":0.2}",
+		"duration": 7.650125,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.8597916666666667
+			},
+			{
+				"start": 1.3597916666666665,
+				"end": 6.0501249999999995
+			}
+		]
+	},
+	"routine-0.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Your routine\",\"pauseAfter\":0.8,\"words\":0},{\"text\":\"The problem.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Don’t try to perfect everything at once.\",\"words\":7,\"pauseAfter\":0.38},{\"text\":\"A short routine works better.\",\"words\":5,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 7.8985,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.0223333333333333
+			},
+			{
+				"start": 1.8223333333333334,
+				"end": 2.5534583333333334
+			},
+			{
+				"start": 3.0534583333333334,
+				"end": 5.1102083333333335
+			},
+			{
+				"start": 5.490208333333333,
+				"end": 7.0485
+			}
+		]
+	},
+	"routine-1.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"The idea.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Each visit:\",\"words\":2,\"pauseAfter\":0.38},{\"text\":\"import new activity, explain what’s left, inspect anything Pending, review the month, and protect it all with a backup.\",\"words\":19,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 10.480083333333333,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9215
+			},
+			{
+				"start": 1.4215,
+				"end": 2.21625
+			},
+			{
+				"start": 2.59625,
+				"end": 9.630083333333333
+			}
+		]
+	},
+	"routine-2.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 1.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Import your latest bank C S V.\",\"words\":5,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 4.202791666666666,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9325833333333333
+			},
+			{
+				"start": 1.4325833333333333,
+				"end": 3.3527916666666666
+			}
+		]
+	},
+	"routine-3.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 2.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Explain new amounts in Allocator.\",\"words\":5,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 4.20275,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9529583333333334
+			},
+			{
+				"start": 1.4529583333333334,
+				"end": 3.3527500000000003
+			}
+		]
+	},
+	"routine-4.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Step 3.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Review the month, then check Sync.\",\"words\":6,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 3.990625,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9719583333333333
+			},
+			{
+				"start": 1.4719583333333333,
+				"end": 3.140625
+			}
+		]
+	},
+	"routine-5.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Check your result.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"You can follow any bank amount to its explanation, and get your work back if you need it.\",\"words\":18,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 7.337125,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.164125
+			},
+			{
+				"start": 1.664125,
+				"end": 6.487125000000001
+			}
+		]
+	},
+	"routine-6.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"afterLabel\":0.5,\"betweenSentences\":0.38,\"betweenSections\":0.85,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Example.\",\"pauseAfter\":0.5,\"words\":0},{\"text\":\"Import, explain one purchase, fix one Pending Record, review the month, and check your backup.\",\"words\":15,\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 7.819416666666666,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.8597916666666667
+			},
+			{
+				"start": 1.3597916666666665,
+				"end": 6.969416666666667
+			}
+		]
+	}
+}
