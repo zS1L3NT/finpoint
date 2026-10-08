@@ -7,17 +7,34 @@ import {
 	Receipt,
 	TriangleAlert,
 } from "lucide-react"
-import type { CSSProperties, ReactNode } from "react"
+import {
+	type CSSProperties,
+	createContext,
+	type ReactNode,
+	useContext,
+	useLayoutEffect,
+	useState,
+} from "react"
 import { interpolate, useCurrentFrame } from "remotion"
 import { useProgress, useReduced } from "./motion"
 import { alpha, color, font, money } from "./theme"
 
-/** Absolutely positioned block inside a 952 × 520 stage. */
+/**
+ * The 952 × 520 stage a scene draws on, so connectors can measure where its cards landed. It is
+ * held in state rather than a ref, so connectors measure again once the stage has mounted.
+ */
+export const StageRoot = createContext<HTMLDivElement | null>(null)
+
+/**
+ * Absolutely positioned block inside a 952 × 520 stage. Name it with `anchor` and a `Link` can
+ * connect to its edges wherever its content makes it end up.
+ */
 export function At({
 	x,
 	y,
 	w,
 	h,
+	anchor,
 	children,
 	style,
 }: {
@@ -25,11 +42,15 @@ export function At({
 	y: number
 	w?: number
 	h?: number
+	anchor?: string
 	children: ReactNode
 	style?: CSSProperties
 }) {
 	return (
-		<div style={{ position: "absolute", left: x, top: y, width: w, height: h, ...style }}>
+		<div
+			data-anchor={anchor}
+			style={{ position: "absolute", left: x, top: y, width: w, height: h, ...style }}
+		>
 			{children}
 		</div>
 	)
@@ -193,10 +214,20 @@ export function Status({ pending, at = 0 }: { pending: boolean; at?: number }) {
 
 const amountStyle = (size: number): CSSProperties => ({
 	...font.numbers,
+	flexShrink: 0,
 	fontSize: size,
 	fontWeight: 700,
 	letterSpacing: "-0.02em",
 	whiteSpace: "nowrap",
+})
+
+/** Card titles wrap onto a second line rather than run under the amount or get cut off. */
+const titleStyle = (compact?: boolean): CSSProperties => ({
+	fontSize: compact ? 24 : 30,
+	fontWeight: 650,
+	lineHeight: 1.18,
+	textWrap: "balance",
+	overflowWrap: "break-word",
 })
 
 /** A bank row: what the Account says happened. */
@@ -229,28 +260,18 @@ export function StatementCard({
 				style={{
 					display: "flex",
 					alignItems: "center",
-					gap: 20,
-					padding: compact ? "18px 22px" : "24px 26px",
+					gap: compact ? 16 : 20,
+					padding: compact ? "18px 20px" : "24px 26px",
 				}}
 			>
 				<IconTile
 					icon={Landmark}
 					tint={pending ? color.pending : tint}
-					size={compact ? 52 : 60}
+					size={compact ? 48 : 60}
 				/>
 				<div style={{ flex: 1, minWidth: 0 }}>
-					<div
-						style={{
-							fontSize: compact ? 27 : 31,
-							fontWeight: 650,
-							whiteSpace: "nowrap",
-							overflow: "hidden",
-							textOverflow: "ellipsis",
-						}}
-					>
-						{title}
-					</div>
-					<div style={{ fontSize: 21, color: color.dim, marginTop: 4 }}>
+					<div style={titleStyle(compact)}>{title}</div>
+					<div style={{ fontSize: 21, lineHeight: 1.25, color: color.dim, marginTop: 4 }}>
 						{pending ? "Pending Statement" : meta}
 					</div>
 				</div>
@@ -292,28 +313,29 @@ export function RecordCard({
 				style={{
 					display: "flex",
 					alignItems: "center",
-					gap: 20,
-					padding: compact ? "18px 22px" : "24px 26px",
+					gap: compact ? 16 : 20,
+					padding: compact ? "18px 20px" : "24px 26px",
 				}}
 			>
-				<IconTile icon={icon} tint={color.record} size={compact ? 52 : 60} />
+				<IconTile icon={icon} tint={color.record} size={compact ? 48 : 60} />
 				<div style={{ flex: 1, minWidth: 0 }}>
+					<div style={titleStyle(compact)}>{title}</div>
 					<div
 						style={{
-							fontSize: compact ? 27 : 31,
-							fontWeight: 650,
-							whiteSpace: "nowrap",
+							display: "flex",
+							flexWrap: "wrap",
+							gap: 8,
+							marginTop: 8,
+							alignItems: "center",
 						}}
 					>
-						{title}
-					</div>
-					<div style={{ display: "flex", gap: 8, marginTop: 8, alignItems: "center" }}>
 						{chips ?? <span style={{ fontSize: 21, color: color.dim }}>Record</span>}
 					</div>
 				</div>
 				<div
 					style={{
 						display: "flex",
+						flexShrink: 0,
 						flexDirection: "column",
 						alignItems: "flex-end",
 						gap: 10,
@@ -335,11 +357,13 @@ export function AllocationTag({
 	amount,
 	at = 0,
 	label = "Allocation",
+	tint = color.allocation,
 	style,
 }: {
 	amount: ReactNode
 	at?: number
 	label?: string
+	tint?: string
 	style?: CSSProperties
 }) {
 	const progress = useProgress(at, 16)
@@ -351,8 +375,8 @@ export function AllocationTag({
 				gap: 10,
 				padding: "10px 18px 10px 12px",
 				borderRadius: 999,
-				background: `linear-gradient(180deg, ${alpha(color.allocation, 0.3)}, ${alpha(color.allocation, 0.16)}), ${color.raised}`,
-				boxShadow: `inset 0 0 0 1.5px ${alpha(color.allocation, 0.6)}, 0 10px 30px ${alpha(color.allocation, 0.25)}`,
+				background: `linear-gradient(180deg, ${alpha(tint, 0.3)}, ${alpha(tint, 0.16)}), ${color.raised}`,
+				boxShadow: `inset 0 0 0 1.5px ${alpha(tint, 0.6)}, 0 10px 30px ${alpha(tint, 0.25)}`,
 				color: color.ink,
 				fontSize: 24,
 				fontWeight: 650,
@@ -369,13 +393,13 @@ export function AllocationTag({
 					width: 32,
 					height: 32,
 					borderRadius: 99,
-					background: color.allocation,
+					background: tint,
 					color: color.night,
 				}}
 			>
 				<Link2 size={19} strokeWidth={2.6} />
 			</span>
-			{label && <span style={{ color: color.allocation, fontWeight: 600 }}>{label}</span>}
+			{label && <span style={{ color: tint, fontWeight: 600 }}>{label}</span>}
 			<span style={font.numbers}>{amount}</span>
 		</div>
 	)
@@ -410,9 +434,12 @@ export function Flow({
 	pulses = true,
 	width = 4,
 	dashed = false,
+	controls,
 }: {
 	from: Point
 	to: Point
+	/** Bezier handles, when the curve should leave and enter along particular directions. */
+	controls?: { c1: Point; c2: Point }
 	at?: number
 	duration?: number
 	tint?: string
@@ -424,7 +451,7 @@ export function Flow({
 	const frame = useCurrentFrame()
 	const reduced = useReduced()
 	const drawn = useProgress(at, duration)
-	const { c1, c2 } = bezier(from, to, vertical)
+	const { c1, c2 } = controls ?? bezier(from, to, vertical)
 	const d = `M ${from.x} ${from.y} C ${c1.x} ${c1.y}, ${c2.x} ${c2.y}, ${to.x} ${to.y}`
 	const live = pulses && !reduced && drawn >= 1
 	return (
@@ -481,6 +508,147 @@ export function Flow({
 					)
 				})}
 		</svg>
+	)
+}
+
+type Side = "left" | "right" | "top" | "bottom"
+
+const normals: Record<Side, Point> = {
+	left: { x: -1, y: 0 },
+	right: { x: 1, y: 0 },
+	top: { x: 0, y: -1 },
+	bottom: { x: 0, y: 1 },
+}
+
+/** Handles that leave `a` straight out of its side and arrive at `b` straight into its side. */
+function handles(a: Point, b: Point, start: Side, end: Side) {
+	const reach = Math.max(36, Math.hypot(b.x - a.x, b.y - a.y) * 0.45)
+	return {
+		c1: { x: a.x + normals[start].x * reach, y: a.y + normals[start].y * reach },
+		c2: { x: b.x + normals[end].x * reach, y: b.y + normals[end].y * reach },
+	}
+}
+
+function edge(rect: DOMRect, root: DOMRect, ratio: number, side: Side): Point {
+	const x = (rect.left - root.left) / ratio
+	const y = (rect.top - root.top) / ratio
+	const w = rect.width / ratio
+	const h = rect.height / ratio
+	if (side === "left") return { x, y: y + h / 2 }
+	if (side === "right") return { x: x + w, y: y + h / 2 }
+	if (side === "top") return { x: x + w / 2, y }
+	return { x: x + w / 2, y: y + h }
+}
+
+/**
+ * A connector between two anchored blocks, drawn from edge to edge of where they actually are, with
+ * a dot at each end so it visibly plugs in. `tag` sits on the middle of the curve.
+ */
+export function Link({
+	from,
+	to,
+	fromSide,
+	toSide,
+	at = 0,
+	tint = color.allocation,
+	tag,
+	tagAt,
+	dashed,
+	pulses,
+}: {
+	from: string
+	to: string
+	fromSide?: Side
+	toSide?: Side
+	at?: number
+	tint?: string
+	tag?: ReactNode
+	tagAt?: number
+	dashed?: boolean
+	pulses?: boolean
+}) {
+	const root = useContext(StageRoot)
+	const [points, setPoints] = useState<{
+		a: Point
+		b: Point
+		start: Side
+		end: Side
+	} | null>(null)
+	useLayoutEffect(() => {
+		const stage = root
+		if (!stage) return
+		const a = stage.querySelector(`[data-anchor="${from}"]`)
+		const b = stage.querySelector(`[data-anchor="${to}"]`)
+		if (!a || !b) return
+		const box = stage.getBoundingClientRect()
+		const ratio = box.width / 952 || 1
+		const ra = a.getBoundingClientRect()
+		const rb = b.getBoundingClientRect()
+		const dx = (rb.left + rb.width / 2 - ra.left - ra.width / 2) / ratio
+		const dy = (rb.top + rb.height / 2 - ra.top - ra.height / 2) / ratio
+		const vertical = Math.abs(dy) > Math.abs(dx) * 1.2
+		const start: Side =
+			fromSide ?? (vertical ? (dy > 0 ? "bottom" : "top") : dx > 0 ? "right" : "left")
+		const end: Side =
+			toSide ?? (vertical ? (dy > 0 ? "top" : "bottom") : dx > 0 ? "left" : "right")
+		const next = { a: edge(ra, box, ratio, start), b: edge(rb, box, ratio, end), start, end }
+		setPoints(previous =>
+			previous &&
+			previous.start === next.start &&
+			previous.end === next.end &&
+			Math.abs(previous.a.x - next.a.x) < 0.5 &&
+			Math.abs(previous.a.y - next.a.y) < 0.5 &&
+			Math.abs(previous.b.x - next.b.x) < 0.5 &&
+			Math.abs(previous.b.y - next.b.y) < 0.5
+				? previous
+				: next,
+		)
+	})
+	const drawn = useProgress(at, 22)
+	if (!points) return null
+	const controls = handles(points.a, points.b, points.start, points.end)
+	const middle = pointOn(points.a, controls.c1, controls.c2, points.b, 0.5)
+	return (
+		<>
+			<Flow
+				from={points.a}
+				to={points.b}
+				controls={controls}
+				at={at}
+				tint={tint}
+				dashed={dashed}
+				pulses={pulses}
+			/>
+			<svg
+				width={952}
+				height={520}
+				style={{
+					position: "absolute",
+					inset: 0,
+					overflow: "visible",
+					pointerEvents: "none",
+				}}
+				aria-hidden
+			>
+				{[points.a, points.b].map(point => (
+					<circle
+						key={`${point.x},${point.y}`}
+						cx={point.x}
+						cy={point.y}
+						r={6}
+						fill={color.night}
+						stroke={tint}
+						strokeWidth={3}
+						opacity={drawn}
+					/>
+				))}
+			</svg>
+			{tag !== undefined && (
+				<div style={{ position: "absolute", left: middle.x, top: middle.y }}>
+					<AllocationTag amount={tag} label="" at={tagAt ?? at + 12} tint={tint} />
+				</div>
+			)}
+		</>
 	)
 }
 

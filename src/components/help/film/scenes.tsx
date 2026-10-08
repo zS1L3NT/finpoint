@@ -31,17 +31,16 @@ import {
 } from "lucide-react"
 import { createContext, type FC, type ReactNode, useContext } from "react"
 import { interpolate, useCurrentFrame } from "remotion"
-import { type DemoKey } from "./demo"
+import type { DemoKey, DemoScene } from "./demo"
 import {
-	AllocationTag,
 	At,
 	BrowserWindow,
 	Card,
 	Chip,
 	FileDoc,
-	Flow,
 	IconTile,
 	Kicker,
+	Link,
 	Meter,
 	RecordCard,
 	StatementCard,
@@ -111,8 +110,16 @@ function LunchFlow({
 	const settle = useProgress(settled ?? Number.MAX_SAFE_INTEGER, 30)
 	return (
 		<>
-			<Flow from={{ x: 300, y: 140 }} to={{ x: 520, y: 380 }} at={allocationAt} />
-			<At x={0} y={40} w={470}>
+			<Link
+				from="statement"
+				to="record"
+				fromSide="bottom"
+				toSide="left"
+				at={allocationAt}
+				tag="−$12"
+				tagAt={allocationAt + 10}
+			/>
+			<At x={0} y={40} w={470} anchor="statement">
 				<Rise at={statementAt}>
 					<StatementCard
 						title={merchant}
@@ -153,10 +160,7 @@ function LunchFlow({
 					/>
 				</Rise>
 			</At>
-			<At x={410} y={260} w={0}>
-				<AllocationTag amount="−$12" at={allocationAt + 10} />
-			</At>
-			<At x={482} y={300} w={470}>
+			<At x={482} y={300} w={470} anchor="record">
 				<Rise at={recordAt}>
 					<RecordCard
 						title="Lunch"
@@ -216,20 +220,10 @@ function StartHelps() {
 	const bars = [0.55, 0.8, 0.4, 0.95, 0.65]
 	return (
 		<>
-			<Flow
-				from={{ x: 286, y: 220 }}
-				to={{ x: 333, y: 220 }}
-				at={explain}
-				tint={color.record}
-			/>
-			<Flow
-				from={{ x: 619, y: 220 }}
-				to={{ x: 666, y: 220 }}
-				at={show}
-				tint={color.allocation}
-			/>
+			<Link from="step-0" to="step-1" at={explain} tint={color.record} pulses={false} />
+			<Link from="step-1" to="step-2" at={show} tint={color.allocation} pulses={false} />
 			{columns.map(([title, icon, tint, at], index) => (
-				<At key={title} x={index * 333} y={20} w={286}>
+				<At key={title} x={index * 333} y={20} w={286} anchor={`step-${index}`}>
 					<Rise at={at}>
 						<Card tint={tint} glow={0.2} style={{ padding: 26, height: 400 }}>
 							<IconTile icon={icon} tint={tint} />
@@ -366,20 +360,20 @@ function LunchProblem() {
 	const record = useAt("Record", 70)
 	return (
 		<>
-			<Flow
-				from={{ x: 420, y: 180 }}
-				to={{ x: 560, y: 180 }}
+			<Link
+				from="statement"
+				to="dashboard"
 				at={dashboard}
 				tint={color.danger}
 				dashed
 				pulses={false}
 			/>
-			<At x={0} y={100} w={420}>
+			<At x={0} y={100} w={420} anchor="statement">
 				<Rise at={statement}>
 					<StatementCard title="KOPI & CO" amount={-12} meta="OCBC · 3 Oct" glow={0.3} />
 				</Rise>
 			</At>
-			<At x={560} y={60} w={392}>
+			<At x={560} y={60} w={392} anchor="dashboard">
 				<Rise at={dashboard}>
 					<Tile
 						label="Dashboard · Spending"
@@ -416,9 +410,25 @@ function SplitFlow({
 	)
 	return (
 		<>
-			<Flow from={{ x: 380, y: 150 }} to={{ x: 220, y: 330 }} at={firstAt} vertical />
-			<Flow from={{ x: 572, y: 150 }} to={{ x: 732, y: 330 }} at={secondAt} vertical />
-			<At x={226} y={0} w={500}>
+			<Link
+				from="statement"
+				to="groceries"
+				fromSide="bottom"
+				toSide="top"
+				at={firstAt}
+				tag="−$50"
+				tagAt={firstAt + 10}
+			/>
+			<Link
+				from="statement"
+				to="gift"
+				fromSide="bottom"
+				toSide="top"
+				at={secondAt}
+				tag="−$30"
+				tagAt={secondAt + 10}
+			/>
+			<At x={226} y={0} w={500} anchor="statement">
 				<Rise at={statementAt}>
 					<StatementCard
 						title="NTUC FAIRPRICE"
@@ -457,13 +467,7 @@ function SplitFlow({
 					/>
 				</Rise>
 			</At>
-			<At x={276} y={238} w={0}>
-				<AllocationTag amount="−$50" at={firstAt + 10} />
-			</At>
-			<At x={676} y={238} w={0}>
-				<AllocationTag amount="−$30" at={secondAt + 10} />
-			</At>
-			<At x={0} y={330} w={440}>
+			<At x={0} y={330} w={440} anchor="groceries">
 				<Rise at={firstAt + 14}>
 					<RecordCard
 						title="Groceries"
@@ -473,7 +477,7 @@ function SplitFlow({
 					/>
 				</Rise>
 			</At>
-			<At x={512} y={330} w={440}>
+			<At x={512} y={330} w={440} anchor="gift">
 				<Rise at={secondAt + 14}>
 					<RecordCard
 						title="Birthday gift"
@@ -500,19 +504,29 @@ function RepaymentFlow({
 }) {
 	return (
 		<>
-			<Flow from={{ x: 320, y: 60 }} to={{ x: 552, y: 170 }} at={recordAt} />
-			<Flow
-				from={{ x: 320, y: 300 }}
-				to={{ x: 552, y: 220 }}
+			<Link
+				from="dinner"
+				to="record"
+				toSide="left"
+				at={recordAt}
+				tag="−$90"
+				tagAt={recordAt + 10}
+			/>
+			<Link
+				from="paynow"
+				to="record"
+				toSide="left"
 				at={backAt + 10}
 				tint={color.income}
+				tag="+$60"
+				tagAt={backAt + 20}
 			/>
-			<At x={0} y={10} w={320}>
+			<At x={0} y={10} w={350} anchor="dinner">
 				<Rise at={payAt}>
 					<StatementCard title="DINNER" amount={-90} meta="10 Oct" compact />
 				</Rise>
 			</At>
-			<At x={0} y={250} w={320}>
+			<At x={0} y={250} w={350} anchor="paynow">
 				<Rise at={backAt}>
 					<StatementCard
 						title="PAYNOW"
@@ -523,13 +537,7 @@ function RepaymentFlow({
 					/>
 				</Rise>
 			</At>
-			<At x={436} y={100} w={0}>
-				<AllocationTag amount="−$90" label="" at={recordAt + 10} />
-			</At>
-			<At x={436} y={268} w={0}>
-				<AllocationTag amount="+$60" label="" at={backAt + 20} />
-			</At>
-			<At x={552} y={110} w={400}>
+			<At x={572} y={110} w={380} anchor="record">
 				<Rise at={recordAt}>
 					<RecordCard
 						title="Dinner with Sam"
@@ -634,8 +642,8 @@ function RepaymentProblem() {
 const lanes: [string, LucideIcon, string][] = [
 	["Income", TrendingUp, color.income],
 	["Spending", ShoppingBasket, color.spending],
-	["Saving/investment", PiggyBank, color.saving],
-	["Transfer/neutral", ArrowDownUp, color.neutral],
+	["Saving/\u200binvestment", PiggyBank, color.saving],
+	["Transfer/\u200bneutral", ArrowDownUp, color.neutral],
 ]
 
 function TreatmentsHelps({ items: show = true }: { items?: boolean }) {
@@ -645,12 +653,12 @@ function TreatmentsHelps({ items: show = true }: { items?: boolean }) {
 		useAt("Saving", 40),
 		useAt("Transfer", 60),
 	]
-	const items: [number, string, number][] = [
-		[0, "Salary +$3,000", 0],
-		[1, "Lunch −$12", 1],
-		[1, "Refund +$20", 1],
-		[2, "To savings −$500", 2],
-		[3, "Own transfer $0", 3],
+	const items: [number, string, string][] = [
+		[0, "Salary", "+$3,000"],
+		[1, "Lunch", "−$12"],
+		[1, "Refund", "+$20"],
+		[2, "To savings", "−$500"],
+		[3, "Own transfer", "$0"],
 	]
 	return (
 		<>
@@ -672,20 +680,28 @@ function TreatmentsHelps({ items: show = true }: { items?: boolean }) {
 							<div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
 								{(show ? items : [])
 									.filter(([lane]) => lane === index)
-									.map(([, label], row) => (
+									.map(([, label, amount], row) => (
 										<Pop key={label} at={(at[index] ?? 0) + 14 + row * 10}>
 											<div
 												style={{
+													display: "flex",
+													flexWrap: "wrap",
+													justifyContent: "space-between",
+													gap: "2px 10px",
 													padding: "12px 14px",
 													borderRadius: 14,
 													fontSize: 21,
 													fontWeight: 650,
+													lineHeight: 1.25,
 													background: alpha(tint, 0.16),
 													boxShadow: `inset 0 0 0 1.5px ${alpha(tint, 0.4)}`,
 													...font.numbers,
 												}}
 											>
-												{label}
+												<span>{label}</span>
+												<span style={{ whiteSpace: "nowrap" }}>
+													{amount}
+												</span>
 											</div>
 										</Pop>
 									))}
@@ -982,26 +998,15 @@ function SyncHelps() {
 	const broker = useAt("broker", 140)
 	return (
 		<>
-			<Flow
-				from={{ x: 330, y: 120 }}
-				to={{ x: 620, y: 120 }}
-				at={drive + 10}
-				tint={color.record}
-			/>
-			<Flow
-				from={{ x: 620, y: 150 }}
-				to={{ x: 330, y: 150 }}
-				at={drive + 24}
-				tint={color.record}
-			/>
-			<Flow
-				from={{ x: 165, y: 230 }}
-				to={{ x: 165, y: 330 }}
+			<Link from="browser" to="drive" at={drive + 10} tint={color.record} />
+			<Link
+				from="browser"
+				to="backup"
 				at={backup + 6}
 				tint={color.statement}
-				vertical
+				pulses={false}
 			/>
-			<At x={0} y={20} w={330}>
+			<At x={0} y={20} w={330} anchor="browser">
 				<Rise at={local}>
 					<Card
 						tint={color.statement}
@@ -1020,28 +1025,30 @@ function SyncHelps() {
 					</Card>
 				</Rise>
 			</At>
-			<At x={60} y={330}>
+			<At x={60} y={330} anchor="backup">
 				<Rise at={backup + 16}>
 					<FileDoc ext="JSON" name="Separate backup" tint={color.statement} size={0.85} />
 				</Rise>
 			</At>
 			<At x={620} y={20} w={332}>
 				<Rise at={drive}>
-					<Card
-						tint={color.record}
-						glow={0.3}
-						style={{ padding: 26, textAlign: "center" }}
-					>
-						<IconTile
-							icon={CloudUpload}
+					<div data-anchor="drive">
+						<Card
 							tint={color.record}
-							size={80}
-							style={{ margin: "0 auto" }}
-						/>
-						<div style={{ fontSize: 28, fontWeight: 700, marginTop: 14 }}>
-							Your Google Drive
-						</div>
-					</Card>
+							glow={0.3}
+							style={{ padding: 26, textAlign: "center" }}
+						>
+							<IconTile
+								icon={CloudUpload}
+								tint={color.record}
+								size={80}
+								style={{ margin: "0 auto" }}
+							/>
+							<div style={{ fontSize: 28, fontWeight: 700, marginTop: 14 }}>
+								Your Google Drive
+							</div>
+						</Card>
+					</div>
 				</Rise>
 				<Rise
 					at={drive + 30}
@@ -1141,6 +1148,7 @@ function Loop({ at, words }: { at: number[]; words?: boolean }) {
 								tint={tint}
 								size={index === lit ? 92 : 80}
 								style={{
+									background: `linear-gradient(145deg, ${alpha(tint, 0.32)}, ${alpha(tint, 0.1)}), ${color.night}`,
 									boxShadow:
 										index === lit
 											? `0 0 40px ${alpha(tint, 0.7)}, inset 0 0 0 2px ${tint}`
@@ -1282,12 +1290,12 @@ function StartExplain() {
 	const rows: [string, number, string, number, string, string][] = [
 		["NTUC FAIRPRICE", -80, "Groceries", -50, "groceries", color.record],
 		["NTUC FAIRPRICE", 0, "Birthday gift", -30, "gift", color.pink],
-		["SAKURA DINING", -90, "Dinner, my share", -30, "dinner", color.record],
+		["SAKURA DINING", -90, "Dinner, my share", -30, "dinner-record", color.record],
 	]
 	const at = [useAt("groceries", 60), useAt("gift", 90), useAt("dinner", 120)]
 	return (
 		<>
-			<At x={0} y={0} w={380}>
+			<At x={0} y={0} w={540} style={{ whiteSpace: "nowrap" }}>
 				<Kicker tint={color.statement}>Your bank activity, untouched</Kicker>
 			</At>
 			<At x={560} y={0} w={392}>
@@ -1297,22 +1305,28 @@ function StartExplain() {
 			</At>
 			<At x={0} y={44} w={380} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
 				<Rise at={start}>
-					<StatementCard title="NTUC FAIRPRICE" amount={-80} compact />
+					<div data-anchor="supermarket">
+						<StatementCard title="NTUC FAIRPRICE" amount={-80} compact />
+					</div>
 				</Rise>
 				<Rise at={start + 8} style={{ marginTop: 96 }}>
-					<StatementCard title="SAKURA DINING" amount={-90} compact />
+					<div data-anchor="dinner">
+						<StatementCard title="SAKURA DINING" amount={-90} compact />
+					</div>
 				</Rise>
 				<Rise at={start + 16}>
-					<StatementCard
-						title="PAYNOW FROM SAM"
-						amount={60}
-						compact
-						tint={color.income}
-					/>
+					<div data-anchor="paynow">
+						<StatementCard
+							title="PAYNOW FROM SAM"
+							amount={60}
+							compact
+							tint={color.income}
+						/>
+					</div>
 				</Rise>
 			</At>
-			{rows.map(([, , title, amount, , tint], index) => (
-				<At key={title} x={560} y={44 + index * 128} w={392}>
+			{rows.map(([, , title, amount, key, tint], index) => (
+				<At key={title} x={560} y={44 + index * 128} w={392} anchor={key}>
 					<Rise at={at[index] ?? 0} x={30} y={0}>
 						<RecordCard
 							title={title}
@@ -1323,14 +1337,15 @@ function StartExplain() {
 					</Rise>
 				</At>
 			))}
-			<Flow from={{ x: 380, y: 90 }} to={{ x: 560, y: 90 }} at={(at[0] ?? 0) + 4} />
-			<Flow from={{ x: 380, y: 90 }} to={{ x: 560, y: 218 }} at={(at[1] ?? 0) + 4} />
-			<Flow from={{ x: 380, y: 250 }} to={{ x: 560, y: 346 }} at={(at[2] ?? 0) + 4} />
-			<Flow
-				from={{ x: 380, y: 372 }}
-				to={{ x: 560, y: 346 }}
+			<Link from="supermarket" to="groceries" at={(at[0] ?? 0) + 4} pulses={false} />
+			<Link from="supermarket" to="gift" at={(at[1] ?? 0) + 4} pulses={false} />
+			<Link from="dinner" to="dinner-record" at={(at[2] ?? 0) + 4} pulses={false} />
+			<Link
+				from="paynow"
+				to="dinner-record"
 				at={(at[2] ?? 0) + 14}
 				tint={color.income}
+				pulses={false}
 			/>
 		</>
 	)
@@ -1411,7 +1426,7 @@ function ImportIntro() {
 	const bring = useAt("bring", 90)
 	return (
 		<>
-			<At x={0} y={60} w={300}>
+			<At x={0} y={60} w={300} anchor="bank">
 				<Rise at={start}>
 					<BrowserWindow url="your bank" tint={color.statement} style={{ height: 300 }}>
 						<div
@@ -1455,13 +1470,8 @@ function ImportIntro() {
 					</BrowserWindow>
 				</Rise>
 			</At>
-			<Flow
-				from={{ x: 300, y: 210 }}
-				to={{ x: 380, y: 210 }}
-				at={download}
-				tint={color.statement}
-			/>
-			<At x={380} y={70} w={240} style={{ display: "flex", gap: 10 }}>
+			<Link from="bank" to="files" at={download} tint={color.statement} pulses={false} />
+			<At x={380} y={70} w={240} anchor="files" style={{ display: "flex", gap: 10 }}>
 				<Pop at={download + 10}>
 					<FileDoc ext="CSV" tint={color.record} size={0.9} />
 				</Pop>
@@ -1469,12 +1479,7 @@ function ImportIntro() {
 					<FileDoc ext="XLS" tint={color.record} size={0.9} />
 				</Pop>
 			</At>
-			<Flow
-				from={{ x: 640, y: 210 }}
-				to={{ x: 720, y: 210 }}
-				at={bring}
-				tint={color.record}
-			/>
+			<Link from="files" to="finpoint" at={bring} tint={color.record} pulses={false} />
 			<At
 				x={720}
 				y={110}
@@ -1482,7 +1487,9 @@ function ImportIntro() {
 				style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}
 			>
 				<Pop at={bring + 10}>
-					<IconTile icon={Import} tint={color.allocation} size={140} />
+					<div data-anchor="finpoint">
+						<IconTile icon={Import} tint={color.allocation} size={140} />
+					</div>
 				</Pop>
 				<Rise at={bring + 20}>
 					<div style={{ fontSize: 28, fontWeight: 700 }}>Finpoint</div>
@@ -1518,7 +1525,7 @@ function AccountsScene() {
 						<Card
 							tint={color.statement}
 							glow={0.2}
-							style={{ padding: 24, height: 420 }}
+							style={{ padding: 24, minHeight: 420 }}
 						>
 							<div style={{ display: "flex", alignItems: "center", gap: 14 }}>
 								<IconTile icon={Wallet} tint={color.statement} size={56} />
@@ -1597,7 +1604,13 @@ function DashFromRecords() {
 	const never = useAt("never", 90)
 	return (
 		<>
-			<At x={0} y={20} w={330} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+			<At
+				x={0}
+				y={20}
+				w={400}
+				anchor="records"
+				style={{ display: "flex", flexDirection: "column", gap: 14 }}
+			>
 				<Kicker tint={color.record}>Records</Kicker>
 				{(
 					[
@@ -1612,16 +1625,12 @@ function DashFromRecords() {
 					</Rise>
 				))}
 			</At>
-			<Flow
-				from={{ x: 330, y: 230 }}
-				to={{ x: 560, y: 230 }}
-				at={records}
-				tint={color.record}
-			/>
+			<Link from="records" to="tiles" at={records} tint={color.record} />
 			<At
-				x={560}
+				x={580}
 				y={60}
-				w={392}
+				w={372}
+				anchor="tiles"
 				style={{ display: "flex", flexDirection: "column", gap: 18 }}
 			>
 				<Rise at={records + 10}>
@@ -1701,21 +1710,22 @@ function SofaPending() {
 	const pending = useAt("Pending", 90)
 	return (
 		<>
-			<Flow from={{ x: 380, y: 90 }} to={{ x: 560, y: 220 }} at={deposit + 10} />
-			<Flow
-				from={{ x: 380, y: 350 }}
-				to={{ x: 560, y: 250 }}
+			<Link from="deposit" to="sofa" toSide="left" at={deposit + 10} />
+			<Link
+				from="balance"
+				to="sofa"
+				toSide="left"
 				at={balance + 10}
 				dashed
 				pulses={false}
 				tint={color.pending}
 			/>
-			<At x={0} y={40} w={380}>
+			<At x={0} y={40} w={380} anchor="deposit">
 				<Rise at={deposit}>
 					<StatementCard title="SOFA DEPOSIT" amount={-50} compact meta="Paid today" />
 				</Rise>
 			</At>
-			<At x={0} y={300} w={380}>
+			<At x={0} y={300} w={380} anchor="balance">
 				<Rise at={balance}>
 					<div
 						style={{
@@ -1734,7 +1744,7 @@ function SofaPending() {
 					</div>
 				</Rise>
 			</At>
-			<At x={560} y={170} w={392}>
+			<At x={560} y={170} w={392} anchor="sofa">
 				<Rise at={start}>
 					<RecordCard
 						title="Sofa"
@@ -1764,7 +1774,16 @@ function PendingGap() {
 						<IconTile icon={Wallet} tint={color.record} size={70} />
 						<div>
 							<div style={{ fontSize: 22, color: color.dim }}>Today, by card</div>
-							<div style={{ ...big, ...font.numbers }}>−$35 burger</div>
+							<div
+								style={{
+									...big,
+									...font.numbers,
+									fontSize: 36,
+									whiteSpace: "nowrap",
+								}}
+							>
+								−$35 burger
+							</div>
 						</div>
 					</Card>
 				</Rise>
@@ -1825,9 +1844,17 @@ function CategoryExamples() {
 			{groups.map(([name, items, tint, at], index) => (
 				<At key={name} x={index * 324} y={20} w={304}>
 					<Rise at={Math.max(start, at)} y={40}>
-						<Card tint={tint} glow={0.3} style={{ padding: 24, height: 330 }}>
+						<Card tint={tint} glow={0.3} style={{ padding: 16, minHeight: 330 }}>
 							<Kicker tint={tint}>Category</Kicker>
-							<div style={{ fontSize: 34, fontWeight: 750, margin: "10px 0 20px" }}>
+							<div
+								style={{
+									fontSize: 32,
+									fontWeight: 750,
+									lineHeight: 1.15,
+									margin: "10px 0 18px",
+									textWrap: "balance",
+								}}
+							>
 								{name}
 							</div>
 							<div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -1900,7 +1927,7 @@ function LocalOnly() {
 	const cross = useProgress(never, 20)
 	return (
 		<>
-			<At x={0} y={40} w={460}>
+			<At x={0} y={40} w={460} anchor="browser">
 				<Rise at={start}>
 					<BrowserWindow
 						url="This browser · this device"
@@ -1925,9 +1952,9 @@ function LocalOnly() {
 					</BrowserWindow>
 				</Rise>
 			</At>
-			<Flow
-				from={{ x: 460, y: 230 }}
-				to={{ x: 620, y: 230 }}
+			<Link
+				from="browser"
+				to="server"
 				at={server}
 				dashed
 				pulses={false}
@@ -1940,7 +1967,10 @@ function LocalOnly() {
 				style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}
 			>
 				<Rise at={server}>
-					<div style={{ position: "relative", opacity: 1 - cross * 0.4 }}>
+					<div
+						data-anchor="server"
+						style={{ position: "relative", opacity: 1 - cross * 0.4 }}
+					>
 						<IconTile icon={Server} tint={color.neutral} size={140} />
 						<svg
 							viewBox="0 0 140 140"
@@ -2105,9 +2135,9 @@ function HelpEverywhere() {
 // ─── Registry ──────────────────────────────────────────────────────────────────────────
 
 /** A beat's picture: an illustrated scene, or a filmed walk through real Finpoint screens. */
-export type SceneEntry = Beat | { demo: DemoKey[] }
+export type SceneEntry = Beat | { demo: DemoScene }
 
-const demo = (keys: DemoKey[]): SceneEntry => ({ demo: keys })
+const demo = (take: string, keys: DemoKey[]): SceneEntry => ({ demo: { take, keys } })
 
 export const scenes: Record<string, Record<string, SceneEntry>> = {
 	start: {
@@ -2161,42 +2191,39 @@ export const scenes: Record<string, Record<string, SceneEntry>> = {
 	},
 	import: {
 		intro: ImportIntro,
-		banks: demo([
-			{ shot: "importer", focus: "banks" },
-			{ at: "CSV", shot: "importer", focus: "banks", highlight: ["ocbc", "uob"] },
+		banks: demo("import", [
+			{ hold: "start", focus: "card" },
+			{ at: "DBS", hold: "start", focus: "banks", highlight: "banks" },
 		]),
 		accounts: AccountsScene,
-		revolut: demo([
-			{ shot: "importer-revolut", focus: "revolut" },
-			{ at: "pick", shot: "importer-revolut", focus: "account", highlight: "account" },
+		revolut: demo("revolut", [
+			{ hold: "start", focus: "banks" },
+			{ at: "Revolut", play: "account", focus: "banks" },
+			{ at: "pick", hold: "account", focus: "banks", highlight: "account" },
 		]),
 		download: DownloadStep,
-		choose: demo([
-			{ shot: "importer", focus: "banks" },
-			{ at: "bank", shot: "importer", focus: "banks", cursor: "ocbc", click: true },
-			{ at: "files", shot: "importer-ready", focus: "files", highlight: "files" },
+		choose: demo("import", [
+			{ hold: "start", focus: "card" },
+			{ at: 0, play: "bank", focus: "card", speed: 1.3 },
+			{ at: "add", play: "files", focus: "card", speed: 1.6 },
 		]),
-		result: demo([
-			{ shot: "importer-ready", focus: "submit", cursor: "submit", click: true },
-			{ at: "check", shot: "importer-done", focus: "result", highlight: "result" },
+		result: demo("import", [
+			{ hold: "files", focus: "card" },
+			{ at: "Import", play: "result" },
+			{ at: "check", hold: "result", highlight: "result" },
 		]),
-		next: demo([
-			{ shot: "importer-done", focus: "allocate", cursor: "allocate", click: true },
-			{ at: "Allocator", shot: "allocator", focus: "list", zoom: 1.25 },
+		next: demo("import", [
+			{ hold: "result", highlight: "allocate" },
+			{ at: "waiting", play: "allocator" },
 		]),
 	},
 	allocator: {
-		list: demo([
-			{ shot: "allocator" },
-			{ at: "lists", shot: "allocator", focus: "list", highlight: "list", zoom: 1.3 },
-		]),
-		left: demo([
-			{ shot: "split-remaining", focus: "supermarket", zoom: 1.6 },
+		list: demo("allocator", [{ hold: "start" }, { at: "lists", play: "scrolled" }]),
+		left: demo("split", [
+			{ hold: "left" },
 			{
 				at: "left",
-				shot: "split-remaining",
-				focus: "allocable",
-				zoom: 2,
+				hold: "left",
 				highlight: "allocable",
 				note: { box: "allocable", text: "Left to allocate" },
 			},
@@ -2204,82 +2231,58 @@ export const scenes: Record<string, Record<string, SceneEntry>> = {
 		pages: FindHelps,
 	},
 	lunch: {
-		select: demo([
-			{ shot: "allocator", focus: "lunch", zoom: 1.7 },
+		select: demo("lunch", [
+			{ hold: "start" },
+			{ at: "lunch", play: "row" },
+			{ at: "click", play: "selected" },
+			{ at: "bar", hold: "selected", highlight: "bar" },
+		]),
+		create: demo("lunch", [
+			{ hold: "selected", highlight: "create" },
+			{ at: "Create", play: "creator" },
+			{ at: "attached", hold: "creator", highlight: "attached" },
+			{ at: "amount", hold: "creator", highlight: "amount" },
+		]),
+		fill: demo("lunch", [{ hold: "creator" }, { at: 0, play: "filled", speed: 1.6 }]),
+		ignore: demo("lunch", [
+			{ hold: "filled" },
+			{ at: "Treatment", play: "analytics", focus: "analytics" },
 			{
-				at: "click",
-				shot: "allocator",
-				focus: "lunch",
-				zoom: 1.7,
-				cursor: "lunch",
-				click: true,
-			},
-			{ at: "bar", shot: "lunch-selected", focus: "bar", highlight: "bar" },
-		]),
-		create: demo([
-			{ shot: "lunch-selected", focus: "bar", cursor: "create", click: true },
-			{ at: "opens", shot: "lunch-creator", focus: "full" },
-			{ at: "attached", shot: "lunch-creator", focus: "attached", highlight: "attached" },
-			{ at: "amount", shot: "lunch-creator", focus: "amount", highlight: "amount" },
-		]),
-		fill: demo([
-			{ shot: "lunch-creator", focus: "title" },
-			{ at: "title", shot: "lunch-filled", focus: "title", highlight: "title" },
-			{ at: "Category", shot: "lunch-filled", focus: "category", highlight: "category" },
-		]),
-		ignore: demo([
-			{
-				shot: "lunch-filled",
+				at: "Category",
+				hold: "analytics",
 				focus: "analytics",
 				highlight: "analytics",
 				note: { box: "analytics", text: "Filled in by your Category" },
 			},
 		]),
-		save: demo([
-			{ shot: "lunch-filled", focus: "submit", cursor: "submit", click: true },
-			{ at: "leaves", shot: "lunch-done", focus: "list", zoom: 1.2 },
+		save: demo("lunch", [
+			{ hold: "analytics", focus: "analytics" },
+			{ at: "save", play: "saved" },
 		]),
 	},
 	split: {
-		select: demo([
-			{ shot: "lunch-done", focus: "supermarket", zoom: 1.7 },
+		select: demo("split", [{ hold: "start" }, { at: "Select", play: "creator" }]),
+		amount: demo("split", [
+			{ hold: "creator" },
+			{ at: "Call", play: "filled", speed: 1.5 },
 			{
-				at: "Select",
-				shot: "lunch-done",
-				focus: "supermarket",
-				zoom: 1.7,
-				cursor: "supermarket",
-				click: true,
-			},
-			{ at: "Create", shot: "groceries-creator", focus: "full" },
-		]),
-		amount: demo([
-			{ shot: "groceries-filled", focus: "full" },
-			{ at: "amount", shot: "groceries-filled", focus: "amount", highlight: "amount" },
-			{
-				at: "Allocation",
-				shot: "groceries-filled",
-				focus: "allocation",
-				highlight: "allocation",
+				at: "unexplained",
+				hold: "filled",
+				highlight: ["amount", "allocation"],
 				note: { box: "allocation", text: "$50 of $80" },
 			},
 		]),
-		left: demo([
-			{ shot: "split-remaining", focus: "supermarket", zoom: 1.6 },
-			{
-				at: "left",
-				shot: "split-remaining",
-				focus: "allocable",
-				zoom: 2,
-				highlight: "allocable",
-			},
+		left: demo("split", [
+			{ hold: "filled" },
+			{ at: "Save", play: "left", speed: 1.2 },
+			{ at: "left", hold: "left", highlight: "allocable" },
 		]),
-		gift: demo([
-			{ shot: "gift-filled", focus: "full" },
+		gift: demo("split", [
+			{ hold: "left" },
+			{ at: "Select", play: "gift", speed: 1.5 },
 			{
-				at: "left",
-				shot: "gift-filled",
-				focus: "allocation",
+				at: "fills",
+				hold: "gift",
 				highlight: "allocation",
 				note: { box: "allocation", text: "$30 left to allocate" },
 			},
@@ -2293,34 +2296,20 @@ export const scenes: Record<string, Record<string, SceneEntry>> = {
 		),
 	},
 	repayment: {
-		select: demo([
-			{ shot: "lunch-done", focus: "dinner", zoom: 1.6 },
-			{
-				at: "$90",
-				shot: "lunch-done",
-				focus: "dinner",
-				zoom: 1.6,
-				cursor: "dinner",
-				click: true,
-			},
-			{
-				at: "$60",
-				shot: "dinner-selected",
-				focus: "paynow",
-				zoom: 1.6,
-				cursor: "paynow",
-				click: true,
-			},
-			{ at: "total", shot: "dinner-selected", focus: "bar", highlight: "bar" },
+		select: demo("combine", [
+			{ hold: "start" },
+			{ at: "Allocator", play: "rows" },
+			{ at: "$90", play: "dinner" },
+			{ at: "$60", play: "selected" },
+			{ at: "total", hold: "selected", highlight: "bar" },
 		]),
-		create: demo([
-			{ shot: "dinner-filled", focus: "full" },
-			{ at: "attached", shot: "dinner-filled", focus: "attached", highlight: "attached" },
+		create: demo("combine", [
+			{ hold: "selected" },
+			{ at: "Choose", play: "filled", speed: 1.5 },
 			{
 				at: "comes",
-				shot: "dinner-filled",
-				focus: "amount",
-				highlight: "amount",
+				hold: "filled",
+				highlight: ["attached", "amount"],
 				note: { box: "amount", text: "−$90 + $60 = −$30" },
 			},
 		]),
@@ -2336,134 +2325,125 @@ export const scenes: Record<string, Record<string, SceneEntry>> = {
 	dashboard: {
 		records: DashFromRecords,
 		empty: LunchProblem,
-		real: demo([
-			{ shot: "dashboard" },
-			{ at: "spent", shot: "dashboard", focus: "metrics", highlight: "spending" },
+		real: demo("dashboard", [
+			{ hold: "start" },
+			{ at: "spent", play: "spending", focus: "metrics", highlight: "spending" },
 		]),
-		categories: demo([
-			{ shot: "dashboard-breakdown", focus: "breakdown" },
-			{ at: "Category", shot: "dashboard-breakdown", focus: "mix", highlight: "mix" },
+		categories: demo("dashboard", [
+			{ hold: "spending", focus: "metrics" },
+			{ at: "broken", play: "breakdown" },
+			{ at: "Categories", hold: "breakdown", highlight: "mix" },
 		]),
 	},
 	pending: {
 		when: PendingWhen,
-		concert: demo([
-			{ shot: "concert-pending", focus: "full" },
-			{ at: "$100", shot: "concert-pending", focus: "amount", highlight: "amount" },
-			{
-				at: "$200",
-				nth: 1,
-				shot: "concert-pending",
-				focus: "attached",
-				highlight: "allocation",
-			},
+		concert: demo("pending", [
+			{ hold: "start" },
+			{ at: "$200", play: "creator", speed: 1.2 },
+			{ at: "back", play: "flag", speed: 1.6 },
+			{ at: "share", hold: "flag", highlight: ["amount", "attached"] },
 		]),
-		flag: demo([{ shot: "concert-pending", focus: "pending", highlight: "pending" }]),
-		list: demo([
+		flag: demo("pending", [
+			{ hold: "flag", highlight: ["amount", "attached"] },
+			{ at: "warns", hold: "flag", focus: "pending", highlight: "pending" },
+		]),
+		list: demo("pending", [
+			{ hold: "flag" },
+			{ at: 0, play: "records", speed: 1.5 },
 			{
-				shot: "records-pending",
-				focus: "badge",
-				zoom: 1.8,
+				at: "marked",
+				hold: "records",
 				highlight: "badge",
 				note: { box: "badge", text: "Waiting for the rest" },
 			},
 		]),
-		attach: demo([
-			{ shot: "repayment-selected", focus: "paynow", zoom: 1.6 },
-			{
-				at: "Attach",
-				shot: "repayment-selected",
-				focus: "attach",
-				cursor: "attach",
-				click: true,
-			},
-			{ at: "suggests", shot: "attach-sheet", focus: "sheet", highlight: "concert" },
+		attach: demo("attach", [
+			{ hold: "start" },
+			{ at: "select", play: "selected" },
+			{ at: "Attach", play: "sheet" },
+			{ at: "suggests", hold: "sheet", highlight: "concert" },
 		]),
-		complete: demo([
-			{ shot: "attach-editor", focus: "full" },
-			{ at: "combines", shot: "attach-editor", focus: "attached", highlight: "attached" },
+		complete: demo("attach", [
+			{ hold: "sheet" },
+			{ at: 0, play: "editor" },
+			{ at: "combines", hold: "editor", highlight: "attached" },
 		]),
 		meaning: SofaPending,
 	},
 	"pending-statements": {
 		why: PendingGap,
-		create: demo([
-			{ shot: "statements", focus: "create", cursor: "create", click: true },
-			{ at: "Pick", shot: "pending-statement", focus: "dialog", highlight: "account" },
+		create: demo("placeholder", [
+			{ hold: "start", highlight: "create" },
+			{ at: 0, play: "filled", speed: 1.7 },
+			{ at: "description", hold: "filled", highlight: ["account", "amount", "description"] },
+		]),
+		explain: demo("placeholder", [
+			{ hold: "filled" },
+			{ at: 0, play: "allocator", speed: 1.2 },
 			{
-				at: "amount",
-				shot: "pending-statement",
-				focus: "dialog",
-				highlight: ["amount", "description"],
+				at: "marked",
+				hold: "allocator",
+				highlight: "badge",
+				note: { box: "badge", text: "Counts now, stays Pending" },
 			},
 		]),
-		explain: demo([
-			{ shot: "pending-statement-row", focus: "badge", zoom: 1.8, highlight: "badge" },
+		replace: demo("replace", [
+			{ hold: "start" },
+			{ at: "open", play: "candidates" },
+			{ at: "suggests", hold: "candidates", highlight: "candidate" },
 		]),
-		replace: demo([
-			{ shot: "replace-pending", focus: "pending" },
-			{ at: "Pick", shot: "replace-pending", focus: "pending", highlight: "pending" },
-			{ at: "suggests", shot: "replace-pending", focus: "candidate", highlight: "candidate" },
-		]),
-		review: demo([
-			{ shot: "replace-pending", focus: "replace", cursor: "replace", click: true },
-			{
-				at: "move",
-				shot: "replace-review",
-				focus: "dialog",
-				highlight: ["source", "destination"],
-			},
+		review: demo("replace", [
+			{ hold: "candidates", highlight: "replace" },
+			{ at: "Choose", play: "review" },
+			{ at: "disappears", play: "done" },
 		]),
 	},
 	categories: {
-		most: demo([
-			{ shot: "categories" },
-			{ at: "Dashboard", shot: "categories", focus: "grid", zoom: 1.1 },
-		]),
+		most: demo("categories", [{ hold: "start" }, { at: "Dashboard", play: "hover" }]),
 		examples: CategoryExamples,
-		defaults: demo([
-			{ shot: "category-dialog", focus: "full" },
-			{ at: "defaults", shot: "category-dialog", focus: "defaults", highlight: "defaults" },
+		defaults: demo("categories", [
+			{ hold: "hover" },
+			{ at: "Category", play: "defaults" },
+			{ at: "treatment", hold: "defaults", highlight: "defaults" },
 		]),
 	},
 	treatments: {
 		what: () => <TreatmentsHelps items={false} />,
 		examples: () => <TreatmentsHelps />,
-		override: demo([{ shot: "lunch-filled", focus: "analytics", highlight: "analytics" }]),
+		override: demo("lunch", [
+			{ hold: "analytics", focus: "analytics", highlight: "analytics" },
+		]),
 	},
 	buckets: {
 		what: BucketsScene,
 		daily: TargetsCheck,
-		target: demo([
-			{ shot: "bucket-dialog", focus: "full" },
-			{ at: "$500", shot: "bucket-dialog", focus: "target", highlight: "target" },
-			{ at: "onward", shot: "bucket-dialog", focus: "applies", highlight: "applies" },
+		target: demo("buckets", [
+			{ hold: "start" },
+			{ at: "Give", play: "target", speed: 1.5 },
+			{ at: "one", play: "scope", speed: 1.3 },
+			{ at: "onward", hold: "scope", highlight: "applies" },
 		]),
-		compare: demo([
-			{ shot: "dashboard-target", focus: "card" },
-			{
-				at: "target",
-				shot: "dashboard-target",
-				focus: "daily",
-				highlight: "daily",
-				zoom: 1.5,
-			},
+		compare: demo("buckets", [
+			{ hold: "scope" },
+			{ at: 0, play: "saved" },
+			{ at: "target", hold: "saved", highlight: "daily" },
 		]),
 	},
 	budgets: {
 		what: BudgetsProblem,
-		create: demo([
-			{ shot: "budget-create", focus: "full" },
-			{ at: "dates", shot: "budget-create", focus: "range", highlight: "range" },
-			{ at: "Automatic", shot: "budget-create", focus: "automatic", highlight: "automatic" },
+		create: demo("budgets", [
+			{ hold: "start" },
+			{ at: "Create", play: "dates", speed: 1.3 },
+			{ at: "Automatic", play: "automatic" },
+			{ at: "attached", hold: "automatic", highlight: "automatic" },
 		]),
 		own: BudgetsHelps,
 	},
 	sync: {
 		local: LocalOnly,
-		file: demo([
-			{ shot: "data", focus: "file" },
-			{ at: "Download", shot: "data", focus: "download", highlight: "download" },
+		file: demo("data", [
+			{ hold: "start", highlight: "file" },
+			{ at: "Download", play: "download", highlight: "download" },
 		]),
 		drive: SyncHelps,
 		yours: YourPlaces,

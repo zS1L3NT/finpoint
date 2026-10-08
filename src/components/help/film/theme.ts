@@ -55,16 +55,19 @@ export const layout = {
 	height: 1080,
 	gutter: 88,
 	columnTop: 236,
-	columnWidth: 700,
+	columnWidth: 640,
 	stageScale: 1.1,
 	stageLeft: 1920 - 88 - 952 * 1.1,
 	stageTop: 300,
+	/** Top of the filmed screen on demo beats, just under the header. */
+	demoTop: 128,
 } as const
 
 /** `−$1,234` / `+$60` / `$0`, using a real minus sign like the rest of the guide copy. */
 export function money(value: number, { signed = true }: { signed?: boolean } = {}) {
-	const digits = Math.abs(Math.round(value)).toLocaleString("en-US")
-	if (!signed || value === 0) return `$${digits}`
+	const rounded = Math.round(value)
+	const digits = Math.abs(rounded).toLocaleString("en-US")
+	if (!signed || rounded === 0) return `$${digits}`
 	return `${value < 0 ? "−" : "+"}$${digits}`
 }
 

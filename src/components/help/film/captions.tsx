@@ -47,7 +47,7 @@ function paginate(words: string[], maxChars: number) {
 
 /**
  * Narration as type: the words light up as they are spoken, domain terms take their colour,
- * and long passages turn over a page at a time.
+ * and long passages turn over a page at a time, the old page clearing before the next arrives.
  */
 export function Spoken({
 	size = 42,
@@ -78,17 +78,22 @@ export function Spoken({
 		<div style={{ display: "grid", ...style }}>
 			{pages.map((page, index) => {
 				if (index < active - 1 || index > active) return null
+				// The first page waits out the crossfade from the previous beat's words.
 				const enter =
 					index === 0
-						? 1
-						: interpolate(frame, [startOf(page), startOf(page) + 12], [0, 1], {
+						? interpolate(frame, [8, 18], [0, 1], {
+								extrapolateLeft: "clamp",
+								extrapolateRight: "clamp",
+								easing: ease.out,
+							})
+						: interpolate(frame, [startOf(page) + 2, startOf(page) + 14], [0, 1], {
 								extrapolateLeft: "clamp",
 								extrapolateRight: "clamp",
 								easing: ease.out,
 							})
 				const next = pages[index + 1]
 				const leave = next
-					? interpolate(frame, [startOf(next), startOf(next) + 10], [0, 1], {
+					? interpolate(frame, [startOf(next) - 6, startOf(next) + 2], [0, 1], {
 							extrapolateLeft: "clamp",
 							extrapolateRight: "clamp",
 							easing: ease.out,

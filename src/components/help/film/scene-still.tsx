@@ -1,8 +1,10 @@
+import { useState } from "react"
 import { AbsoluteFill } from "remotion"
 import cueFile from "../../../lib/guide-video-cues.json"
 import timeline from "../../../lib/guide-video-timeline.json"
 import { Backdrop } from "./chrome"
 import { demoFrame, UiDemo } from "./demo"
+import { StageRoot } from "./kit"
 import { Cues } from "./motion"
 import { BeatStart, scenes } from "./scenes"
 import { accentFor, color } from "./theme"
@@ -29,6 +31,7 @@ export function SceneStill({ chapterId, beatId }: { chapterId: string; beatId: s
 	const chapter = timeline.chapters.find(item => item.id === chapterId)
 	const found = stillFrame(chapterId, beatId)
 	const entry = scenes[chapterId]?.[beatId]
+	const [stage, setStage] = useState<HTMLDivElement | null>(null)
 	if (!chapter || !found || !entry) return null
 	const { segment } = found
 	const firstWord = chapter.segments[0] === segment ? (cueMap[segment.audio]?.[0] ?? 0) : 0
@@ -48,8 +51,9 @@ export function SceneStill({ chapterId, beatId }: { chapterId: string; beatId: s
 			>
 				{"demo" in entry ? (
 					<UiDemo
-						keys={entry.demo}
+						scene={entry.demo}
 						tint={tint}
+						still
 						style={{ borderRadius: 0, boxShadow: "none" }}
 					/>
 				) : (
@@ -57,6 +61,7 @@ export function SceneStill({ chapterId, beatId }: { chapterId: string; beatId: s
 						<Backdrop tint={tint} seed={timeline.chapters.indexOf(chapter) + 1} />
 						<BeatStart.Provider value={firstWord}>
 							<div
+								ref={setStage}
 								style={{
 									position: "absolute",
 									left: 44,
@@ -65,10 +70,12 @@ export function SceneStill({ chapterId, beatId }: { chapterId: string; beatId: s
 									height: 520,
 								}}
 							>
-								{(() => {
-									const Scene = entry
-									return <Scene />
-								})()}
+								<StageRoot.Provider value={stage}>
+									{(() => {
+										const Scene = entry
+										return <Scene />
+									})()}
+								</StageRoot.Provider>
 							</div>
 						</BeatStart.Provider>
 					</>

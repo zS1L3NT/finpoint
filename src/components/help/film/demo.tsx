@@ -1,77 +1,84 @@
+import { Video } from "@remotion/media"
 import { type CSSProperties, useContext } from "react"
-import { Img, interpolate, staticFile, useCurrentFrame } from "remotion"
-import shotFile from "../../../lib/guide-video-shots.json"
+import { Img, interpolate, Sequence, staticFile, useCurrentFrame, useVideoConfig } from "remotion"
+import takeFile from "../../../lib/guide-video-takes.json"
 import { Cues, cueFrame, useReduced } from "./motion"
 import { alpha, color, ease } from "./theme"
 
 type Box = [number, number, number, number]
-type Shot = { width: number; height: number; boxes: Record<string, number[]> }
-const shotMap = shotFile as Record<string, Shot>
+type Marker = { t: number; boxes: Record<string, number[]> }
+type Take = { width: number; height: number; duration: number; markers: Record<string, Marker> }
+const takeMap = takeFile as Record<string, Take>
 
 /**
- * One moment of a real-UI demonstration. From `at` (a spoken word, or frames from the start), the
- * camera frames `focus` on screenshot `shot`; the cursor glides to `cursor` and clicks if asked,
- * and `highlight` rings controls while `note` labels one of them.
+ * One moment of a filmed demonstration. From `at` (a spoken word, or frames from the start) the
+ * take either plays on to marker `play` or rests on marker `hold`; the camera frames `focus`
+ * (a control recorded at that marker), and `highlight` rings controls while `note` labels one.
  */
 export type DemoKey = {
 	at?: string | number
 	nth?: number
-	shot: string
+	play?: string
+	/** Where `play` starts: the previous key's moment, or the take's start for the first key. */
+	from?: string
+	/** Playback speed for long, repetitive stretches like typing. */
+	speed?: number
+	hold?: string
 	focus?: string
 	zoom?: number
-	cursor?: string
-	click?: boolean
 	highlight?: string | string[]
 	note?: { box: string; text: string }
 }
 
-/** The demo window inside the 16:9 film. */
-export const demoFrame = { width: 1744, height: 724 } as const
+/** A beat filmed in one continuous take of the real app. */
+export type DemoScene = { take: string; keys: DemoKey[] }
+
+/** The demo window inside the 16:9 film: the same shape as the 1600 × 900 recordings. */
+export const demoFrame = { width: 1440, height: 810 } as const
 
 type Camera = { scale: number; x: number; y: number }
 
-const boxOf = (shot: string, key?: string): Box | null => {
-	const box = key ? shotMap[shot]?.boxes[key] : undefined
+/** Width of the app's sidebar in the recordings. */
+const sidebar = 290
+const fallbackTake: Take = { width: 1600, height: 900, duration: 0, markers: {} }
+const markerOf = (key: DemoKey) => key.play ?? key.hold ?? "start"
+
+function boxOf(take: Take, marker: string, key?: string): Box | null {
+	const box = key ? take.markers[marker]?.boxes[key] : undefined
 	return box && box.length === 4 ? (box as Box) : null
 }
 
-function cameraFor(key: DemoKey, frame: { width: number; height: number }): Camera {
-	const shot = shotMap[key.shot] ?? { width: 1440, height: 900, boxes: {} }
-	const fit = frame.width / shot.width
-	if (key.focus === "full") {
-		const scale = Math.min(frame.width / shot.width, frame.height / shot.height)
-		return { scale, x: shot.width / 2, y: shot.height / 2 }
+/**
+ * Where the camera rests for a key. It only ever pushes in a little, in fixed steps, so the frame
+ * stays readable and moves feel deliberate rather than restless.
+ */
+function cameraFor(take: Take, key: DemoKey, size: { width: number; height: number }): Camera {
+	const fit = Math.min(size.width / take.width, size.height / take.height)
+	const whole = { scale: fit, x: take.width / 2, y: take.height / 2 }
+	const box = boxOf(take, markerOf(key), key.focus)
+	if (!box) return whole
+	const [left, top, width, height] = box
+	const wanted = Math.min(
+		(size.width * 0.65) / (width * fit),
+		(size.height * 0.65) / (height * fit),
+	)
+	const zoom = key.zoom ?? Math.floor(Math.min(1.5, Math.max(1, wanted)) * 4) / 4
+	if (zoom <= 1) return whole
+	const scale = fit * zoom
+	const halfW = size.width / (2 * scale)
+	const halfH = size.height / (2 * scale)
+	let x = Math.min(Math.max(left + width / 2, halfW), take.width - halfW)
+	// Never cut through the sidebar: show all of it, or start the frame where it ends.
+	const edge = x - halfW
+	if (edge > 0 && edge < sidebar) {
+		const fitsBeside = left - 24 >= sidebar && left + width <= sidebar + halfW * 2
+		x = fitsBeside ? sidebar + halfW : halfW
 	}
-	const box = boxOf(key.shot, key.focus)
-	let scale = fit
-	let x = shot.width / 2
-	let y = frame.height / (2 * fit)
-	if (box) {
-		const [left, top, width, height] = box
-		scale =
-			key.zoom ??
-			Math.min(
-				2.1,
-				Math.max(
-					fit,
-					Math.min((frame.width * 0.62) / width, (frame.height * 0.62) / height),
-				),
-			)
-		x = left + width / 2
-		y = top + height / 2
+	return {
+		scale,
+		x,
+		y: Math.min(Math.max(top + height / 2, halfH), take.height - halfH),
 	}
-	// Never show past the edges of the screenshot.
-	const halfW = frame.width / (2 * scale)
-	const halfH = frame.height / (2 * scale)
-	x =
-		shot.width * scale <= frame.width
-			? shot.width / 2
-			: Math.min(Math.max(x, halfW), shot.width - halfW)
-	y =
-		shot.height * scale <= frame.height
-			? shot.height / 2
-			: Math.min(Math.max(y, halfH), shot.height - halfH)
-	return { scale, x, y }
 }
 
 const mix = (a: Camera, b: Camera, t: number): Camera => ({
@@ -80,147 +87,123 @@ const mix = (a: Camera, b: Camera, t: number): Camera => ({
 	y: a.y + (b.y - a.y) * t,
 })
 
-function Cursor({ x, y, press }: { x: number; y: number; press: number }) {
-	return (
-		<svg
-			width={40}
-			height={40}
-			viewBox="0 0 24 24"
-			style={{
-				position: "absolute",
-				left: x - 6,
-				top: y - 4,
-				transform: `scale(${1 - press * 0.15})`,
-				transformOrigin: "6px 4px",
-				filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.35))",
-			}}
-			aria-hidden
-		>
-			<path
-				d="M5 3 L5 19.5 L9.5 15.5 L12.4 21.6 L15.3 20.3 L12.5 14.3 L18.6 14.3 Z"
-				fill="#ffffff"
-				stroke="#111111"
-				strokeWidth={1.4}
-				strokeLinejoin="round"
-			/>
-		</svg>
-	)
+/** Lays the keys out in time: each starts on its cue, but never before the clip before it ends. */
+function schedule(
+	take: Take,
+	keys: DemoKey[],
+	cueAt: (key: DemoKey, index: number) => number,
+	fps: number,
+) {
+	const frameOf = (marker: string) => Math.round((take.markers[marker]?.t ?? 0) * fps)
+	const plan: {
+		key: DemoKey
+		start: number
+		end: number
+		from: number
+		to: number
+		/** The marker shown before the clip plays, and after. */
+		before: string
+		after: string
+	}[] = []
+	keys.forEach((key, index) => {
+		const previous = plan[index - 1]
+		const cue = index === 0 ? 0 : cueAt(key, index)
+		const start = Math.max(cue, previous?.end ?? 0)
+		const after = markerOf(key)
+		const before = !key.play ? after : (key.from ?? previous?.after ?? "start")
+		const from = frameOf(before)
+		const to = frameOf(after)
+		const length = Math.max(0, Math.round((to - from) / (key.speed ?? 1)))
+		plan.push({ key, start, end: start + length, from, to, before, after })
+	})
+	return plan
 }
 
-/** A real Finpoint screen, filmed: camera moves, cursor, clicks and highlights, keyed to the narration. */
+const poster = (take: string, marker: string) => staticFile(`guide-takes/${take}/${marker}.jpg`)
+
+/**
+ * A real Finpoint screen, filmed in one take: it plays the recording between moments the
+ * narration names, rests on them in between, and frames and rings the controls being talked about.
+ */
 export function UiDemo({
-	keys,
+	scene,
 	frame: size = demoFrame,
 	tint = color.allocation,
+	still = false,
 	style,
 }: {
-	keys: DemoKey[]
+	scene: DemoScene
 	frame?: { width: number; height: number }
 	tint?: string
+	/** Draws only the final moment, for pictures in Help articles. */
+	still?: boolean
 	style?: CSSProperties
 }) {
-	const frame = useCurrentFrame()
+	const current = useCurrentFrame()
+	const { fps } = useVideoConfig()
 	const reduced = useReduced()
 	const cues = useContext(Cues)
-	const times = keys.map((key, index) =>
-		index === 0
-			? 0
-			: typeof key.at === "number"
+	const take = takeMap[scene.take] ?? fallbackTake
+	const plan = schedule(
+		take,
+		scene.keys,
+		(key, index) =>
+			typeof key.at === "number"
 				? key.at
 				: cueFrame(cues, key.at ?? "", { nth: key.nth, fallback: index * 60 }),
+		fps,
 	)
+	const frame = still ? 1e7 : current
 	let active = 0
-	times.forEach((time, index) => {
-		if (frame >= time) active = index
+	plan.forEach((step, index) => {
+		if (frame >= step.start) active = index
 	})
-	const current = keys[active] ?? keys[0]
-	if (!current) return null
-	const previous = keys[Math.max(0, active - 1)] ?? current
-	const since = frame - (times[active] ?? 0)
-	const move = reduced
-		? 1
-		: interpolate(since, [0, 26], [0, 1], {
-				extrapolateLeft: "clamp",
-				extrapolateRight: "clamp",
-				easing: ease.inOut,
-			})
-	const camera =
-		active === 0
-			? cameraFor(current, size)
-			: mix(cameraFor(previous, size), cameraFor(current, size), move)
+	const step = plan[active]
+	if (!step) return null
+
+	// The camera eases from wherever it was when each key began, so moves never jump.
+	let camera = cameraFor(take, plan[0]?.key ?? step.key, size)
+	for (let index = 1; index <= active; index++) {
+		const item = plan[index]
+		const next = plan[index + 1]
+		if (!item) break
+		const target = cameraFor(take, item.key, size)
+		const length = Math.min(75, Math.max(36, item.end - item.start))
+		const until = index === active ? frame : (next?.start ?? frame)
+		const progress = reduced
+			? 1
+			: interpolate(until - item.start, [0, length], [0, 1], {
+					extrapolateLeft: "clamp",
+					extrapolateRight: "clamp",
+					easing: ease.inOut,
+				})
+		camera = mix(camera, target, progress)
+	}
 	const project = ([x, y]: [number, number]) => ({
 		x: size.width / 2 + (x - camera.x) * camera.scale,
 		y: size.height / 2 + (y - camera.y) * camera.scale,
 	})
-	const fade = interpolate(since, [0, 10], [0, 1], {
-		extrapolateLeft: "clamp",
-		extrapolateRight: "clamp",
-	})
-	const layers =
-		active > 0 && previous.shot !== current.shot
-			? [
-					{ shot: previous.shot, opacity: 1 },
-					{ shot: current.shot, opacity: fade },
-				]
-			: [{ shot: current.shot, opacity: 1 }]
 
-	// The cursor glides between the latest two targets it was given.
-	const cursorKeys = keys
-		.map((key, index) => ({ key, time: times[index] ?? 0 }))
-		.filter(({ key, time }) => key.cursor && time <= frame && key.shot === current.shot)
-	const target = cursorKeys[cursorKeys.length - 1]
-	const before = cursorKeys[cursorKeys.length - 2]
-	const centre = (shot: string, key?: string): [number, number] | null => {
-		const box = boxOf(shot, key)
-		return box ? [box[0] + box[2] * 0.42, box[1] + box[3] * 0.55] : null
-	}
-	let cursor: { x: number; y: number; press: number; ripple: number } | null = null
-	if (target) {
-		const end = centre(target.key.shot, target.key.cursor)
-		const start = before ? centre(before.key.shot, before.key.cursor) : null
-		const glide = interpolate(frame - target.time, [0, 22], [0, 1], {
-			extrapolateLeft: "clamp",
-			extrapolateRight: "clamp",
-			easing: ease.inOut,
-		})
-		if (end) {
-			const from = start ?? [end[0] + 220, end[1] + 160]
-			const point = project([
-				from[0] + (end[0] - from[0]) * glide,
-				from[1] + (end[1] - from[1]) * glide,
-			])
-			const clickAt = target.time + 24
-			const press = target.key.click
-				? interpolate(frame, [clickAt, clickAt + 4, clickAt + 10], [0, 1, 0], {
-						extrapolateLeft: "clamp",
-						extrapolateRight: "clamp",
-					})
-				: 0
-			const ripple = target.key.click
-				? interpolate(frame, [clickAt, clickAt + 20], [0, 1], {
-						extrapolateLeft: "clamp",
-						extrapolateRight: "clamp",
-					})
-				: 0
-			cursor = { ...point, press, ripple }
-		}
-	}
-
-	const ring = interpolate(since, [14, 28], [0, 1], {
-		extrapolateLeft: "clamp",
-		extrapolateRight: "clamp",
-		easing: ease.out,
-	})
+	// Rest on the latest moment reached; a playing clip covers it until it reaches the next one.
+	const playing = !still && frame < step.end
+	const resting = playing ? step.before : step.after
+	const settled = still
+		? 1
+		: interpolate(frame - step.end, [6, 22], [0, 1], {
+				extrapolateLeft: "clamp",
+				extrapolateRight: "clamp",
+				easing: ease.out,
+			})
 	const highlights = (
-		Array.isArray(current.highlight)
-			? current.highlight
-			: current.highlight
-				? [current.highlight]
+		Array.isArray(step.key.highlight)
+			? step.key.highlight
+			: step.key.highlight
+				? [step.key.highlight]
 				: []
 	)
-		.map(key => boxOf(current.shot, key))
+		.map(key => boxOf(take, markerOf(step.key), key))
 		.filter((box): box is Box => Boolean(box))
-	const noteBox = current.note ? boxOf(current.shot, current.note.box) : null
+	const noteBox = step.key.note ? boxOf(take, markerOf(step.key), step.key.note.box) : null
 
 	return (
 		<div
@@ -229,99 +212,131 @@ export function UiDemo({
 				width: size.width,
 				height: size.height,
 				overflow: "hidden",
-				borderRadius: 22,
-				background: "#ffffff",
+				borderRadius: 20,
+				background: color.night,
 				boxShadow: `0 40px 90px rgba(0,0,0,0.55), 0 0 0 1.5px ${color.line}`,
 				...style,
 			}}
 		>
-			{layers.map(layer => {
-				const shot = shotMap[layer.shot] ?? { width: 1440, height: 900, boxes: {} }
-				return (
-					<Img
-						key={layer.shot}
-						src={staticFile(`guide-shots/${layer.shot}.jpg`)}
-						style={{
-							position: "absolute",
-							left: 0,
-							top: 0,
-							width: shot.width,
-							height: shot.height,
-							maxWidth: "none",
-							opacity: layer.opacity,
-							transformOrigin: "0 0",
-							transform: `translate(${size.width / 2 - camera.x * camera.scale}px, ${size.height / 2 - camera.y * camera.scale}px) scale(${camera.scale})`,
-						}}
-					/>
-				)
-			})}
-			{highlights.map(box => {
-				const a = project([box[0], box[1]])
-				const b = project([box[0] + box[2], box[1] + box[3]])
-				const pad = 8
-				return (
-					<div
-						key={box.join()}
-						style={{
-							position: "absolute",
-							left: a.x - pad,
-							top: a.y - pad,
-							width: b.x - a.x + pad * 2,
-							height: b.y - a.y + pad * 2,
-							borderRadius: 14,
-							boxShadow: `0 0 0 4px ${tint}, 0 0 0 ${10 * ring}px ${alpha(tint, 0.18)}, 0 0 40px ${alpha(tint, 0.45)}`,
-							opacity: ring,
-							transform: `scale(${1.04 - 0.04 * ring})`,
-						}}
-					/>
-				)
-			})}
-			{noteBox && current.note && (
-				<div
-					style={(() => {
-						const a = project([noteBox[0], noteBox[1]])
-						const b = project([noteBox[0] + noteBox[2], noteBox[1] + noteBox[3]])
-						const below = b.y + 120 < size.height
-						return {
-							position: "absolute",
-							left: Math.min(Math.max(24, a.x), size.width - 560),
-							top: below ? b.y + 22 : a.y - 92,
-							maxWidth: 540,
-							padding: "16px 22px",
-							borderRadius: 16,
-							background: color.night,
-							color: color.ink,
-							fontSize: 28,
-							fontWeight: 600,
-							lineHeight: 1.3,
-							boxShadow: `0 18px 40px rgba(0,0,0,0.45), inset 0 0 0 2px ${tint}`,
-							opacity: ring,
-							transform: `translateY(${(1 - ring) * (below ? -10 : 10)}px)`,
-						} satisfies CSSProperties
-					})()}
-				>
-					{current.note.text}
-				</div>
-			)}
-			{cursor && (
-				<>
-					{cursor.ripple > 0 && cursor.ripple < 1 && (
+			<div
+				style={{
+					position: "absolute",
+					left: 0,
+					top: 0,
+					width: take.width,
+					height: take.height,
+					transformOrigin: "0 0",
+					transform: `translate(${size.width / 2 - camera.x * camera.scale}px, ${size.height / 2 - camera.y * camera.scale}px) scale(${camera.scale})`,
+				}}
+			>
+				<Img
+					src={poster(scene.take, resting)}
+					style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
+				/>
+				{!still &&
+					plan.map(item =>
+						item.end > item.start ? (
+							<Sequence
+								key={`${item.start}-${markerOf(item.key)}`}
+								from={item.start}
+								durationInFrames={item.end - item.start}
+								premountFor={20}
+							>
+								<Video
+									src={staticFile(`guide-takes/${scene.take}.mp4`)}
+									trimBefore={item.from}
+									playbackRate={item.key.speed ?? 1}
+									muted
+									style={{
+										position: "absolute",
+										inset: 0,
+										width: "100%",
+										height: "100%",
+									}}
+								/>
+							</Sequence>
+						) : null,
+					)}
+			</div>
+			{!playing &&
+				highlights.map(box => {
+					const a = project([box[0], box[1]])
+					const b = project([box[0] + box[2], box[1] + box[3]])
+					const pad = 6
+					return (
 						<div
+							key={box.join()}
 							style={{
 								position: "absolute",
-								left: cursor.x - 40 * cursor.ripple,
-								top: cursor.y - 40 * cursor.ripple,
-								width: 80 * cursor.ripple,
-								height: 80 * cursor.ripple,
-								borderRadius: 999,
-								border: `4px solid ${tint}`,
-								opacity: 1 - cursor.ripple,
+								left: a.x - pad,
+								top: a.y - pad,
+								width: b.x - a.x + pad * 2,
+								height: b.y - a.y + pad * 2,
+								borderRadius: 12,
+								boxShadow: `0 0 0 3px ${tint}, 0 0 0 ${9 * settled}px ${alpha(tint, 0.16)}, 0 0 36px ${alpha(tint, 0.4)}`,
+								opacity: settled,
 							}}
 						/>
-					)}
-					<Cursor x={cursor.x} y={cursor.y} press={cursor.press} />
-				</>
+					)
+				})}
+			{!playing && noteBox && step.key.note && (
+				<Note
+					text={step.key.note.text}
+					box={[
+						project([noteBox[0], noteBox[1]]),
+						project([noteBox[0] + noteBox[2], noteBox[1] + noteBox[3]]),
+					]}
+					size={size}
+					tint={tint}
+					progress={settled}
+				/>
 			)}
+		</div>
+	)
+}
+
+/** A label pinned beside a control, kept inside the frame whichever side the control is on. */
+function Note({
+	text,
+	box: [a, b],
+	size,
+	tint,
+	progress,
+}: {
+	text: string
+	box: [{ x: number; y: number }, { x: number; y: number }]
+	size: { width: number; height: number }
+	tint: string
+	progress: number
+}) {
+	const margin = 24
+	const below = b.y + 110 < size.height
+	const rightHalf = (a.x + b.x) / 2 > size.width / 2
+	return (
+		<div
+			style={{
+				position: "absolute",
+				...(rightHalf
+					? { right: Math.max(margin, size.width - b.x) }
+					: { left: Math.max(margin, a.x) }),
+				...(below
+					? { top: b.y + 18 }
+					: { bottom: Math.max(margin, size.height - a.y + 18) }),
+				maxWidth: Math.min(520, size.width - margin * 2),
+				padding: "14px 20px",
+				borderRadius: 14,
+				background: alpha(color.raised, 0.96),
+				color: color.ink,
+				fontSize: 26,
+				fontWeight: 600,
+				lineHeight: 1.3,
+				textWrap: "balance",
+				boxShadow: `0 18px 40px rgba(0,0,0,0.5), inset 0 0 0 2px ${tint}`,
+				opacity: progress,
+				transform: `translateY(${(1 - progress) * (below ? -8 : 8)}px)`,
+			}}
+		>
+			{text}
 		</div>
 	)
 }

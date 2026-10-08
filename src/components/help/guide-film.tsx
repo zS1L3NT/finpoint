@@ -1,11 +1,12 @@
 import { Audio } from "@remotion/media"
-import type { ReactNode } from "react"
+import { type ReactNode, useState } from "react"
 import { AbsoluteFill, Sequence, staticFile, useCurrentFrame } from "remotion"
 import cueFile from "../../lib/guide-video-cues.json"
 import timeline from "../../lib/guide-video-timeline.json"
 import { Spoken } from "./film/captions"
 import { Backdrop, Header, TitleCard } from "./film/chrome"
-import { type DemoKey, demoFrame, UiDemo } from "./film/demo"
+import { type DemoScene, demoFrame, UiDemo } from "./film/demo"
+import { StageRoot } from "./film/kit"
 import { Cues, ReducedMotion, useLayer, useProgress, useReduced } from "./film/motion"
 import { type Beat, BeatStart, scenes } from "./film/scenes"
 import { accentFor, alpha, color, font, layout } from "./film/theme"
@@ -103,6 +104,7 @@ function StageLayer({
 }) {
 	const style = useLayer(segment.durationInFrames)
 	const visible = useProgress(start - 6, 16)
+	const [stage, setStage] = useState<HTMLDivElement | null>(null)
 	return (
 		<SegmentCues segment={segment}>
 			<BeatStart.Provider value={start}>
@@ -128,6 +130,7 @@ function StageLayer({
 						<Spoken size={48} maxChars={150} lineHeight={1.28} />
 					</div>
 					<div
+						ref={setStage}
 						style={{
 							position: "absolute",
 							left: layout.stageLeft,
@@ -138,7 +141,9 @@ function StageLayer({
 							transformOrigin: "0 0",
 						}}
 					>
-						<Scene />
+						<StageRoot.Provider value={stage}>
+							<Scene />
+						</StageRoot.Provider>
 					</div>
 				</AbsoluteFill>
 			</BeatStart.Provider>
@@ -149,12 +154,12 @@ function StageLayer({
 /** A filmed beat: the real Finpoint screen fills the frame, with the narration as subtitles. */
 function DemoLayer({
 	segment,
-	keys,
+	scene,
 	tint,
 	start,
 }: {
 	segment: Segment
-	keys: DemoKey[]
+	scene: DemoScene
 	tint: string
 	start: number
 }) {
@@ -167,18 +172,18 @@ function DemoLayer({
 					style={{
 						position: "absolute",
 						left: (layout.width - demoFrame.width) / 2,
-						top: 146,
+						top: layout.demoTop,
 					}}
 				>
-					<UiDemo keys={keys} tint={tint} />
+					<UiDemo scene={scene} tint={tint} />
 				</div>
 				<div
 					style={{
 						position: "absolute",
 						left: (layout.width - demoFrame.width) / 2,
 						right: (layout.width - demoFrame.width) / 2,
-						top: 146 + demoFrame.height + 20,
-						bottom: 22,
+						top: layout.demoTop + demoFrame.height + 10,
+						bottom: 14,
 						display: "flex",
 						alignItems: "center",
 						justifyContent: "center",
@@ -267,7 +272,7 @@ export function GuideChapter({ chapter, number }: { chapter: Chapter; number: nu
 						{"demo" in entry ? (
 							<DemoLayer
 								segment={segment}
-								keys={entry.demo}
+								scene={entry.demo}
 								tint={tint}
 								start={start}
 							/>
