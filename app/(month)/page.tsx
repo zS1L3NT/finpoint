@@ -34,6 +34,7 @@ import { useMonthParams } from "@/hooks/use-month-params"
 import { STALE_MONTH_CLASS, useMonthTransition } from "@/hooks/use-month-transition"
 import { usePersistentState } from "@/hooks/use-persistent-state"
 import { useSettings } from "@/hooks/use-settings"
+import { useStagedMount } from "@/hooks/use-staged-mount"
 import { cn, formatCurrency } from "@/lib/utils"
 import { getDashboardView, type SpendingHistoryMonth, type TrendMonth } from "@/logic/dashboard"
 import { pathMonthlyRecords } from "@/routes"
@@ -163,6 +164,9 @@ export default function DashboardPage() {
 	const paceData = view?.pace as unknown as PaceData | undefined
 	const bucketDailyData = view?.bucketDaily as unknown as BucketDailyData | undefined
 	const trend = view?.trend ?? []
+	// The summary and pace chart paint first; the sections below the fold then mount one per
+	// frame. Mounting every chart in one commit blocked arrival for ~300ms in production.
+	const stage = useStagedMount(6, !!data && !!paceData && !!bucketDailyData)
 	const scopedBucketIds = useMemo(() => {
 		if (scope === "all") return [...buckets.map(bucket => bucket.id), "unbucketed"]
 		if (scope === "core" || scope === "outlier" || scope === "other") {
@@ -274,116 +278,128 @@ export default function DashboardPage() {
 						</CardContent>
 					</Card>
 
-					<section className="grid gap-4" aria-labelledby="spending-breakdown-title">
-						<div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-							<div>
-								<div className="flex items-center gap-2">
-									<h3
-										id="spending-breakdown-title"
-										className="text-lg font-semibold"
-									>
-										Spending breakdown
-									</h3>
-									<ScopeLabel
-										scope={scope === "all" ? "Total" : scopeLabel}
-										color={scopeColor}
-									/>
+					{stage > 0 ? (
+						<section className="grid gap-4" aria-labelledby="spending-breakdown-title">
+							<div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+								<div>
+									<div className="flex items-center gap-2">
+										<h3
+											id="spending-breakdown-title"
+											className="text-lg font-semibold"
+										>
+											Spending breakdown
+										</h3>
+										<ScopeLabel
+											scope={scope === "all" ? "Total" : scopeLabel}
+											color={scopeColor}
+										/>
+									</div>
+									<p className="text-sm text-muted-foreground">
+										{scopeLabel} · {formatCurrency(scopedTotal)}
+									</p>
 								</div>
-								<p className="text-sm text-muted-foreground">
-									{scopeLabel} · {formatCurrency(scopedTotal)}
-								</p>
+								<ScopeSelect
+									value={scope}
+									buckets={buckets}
+									onChange={value => setScope(value ?? "all")}
+								/>
 							</div>
-							<ScopeSelect
-								value={scope}
-								buckets={buckets}
-								onChange={value => setScope(value ?? "all")}
-							/>
-						</div>
-						<div className="grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)] 2xl:grid-cols-[minmax(0,3fr)_minmax(18rem,1fr)]">
-							<CategoryHistoryChart
-								months={data.comparison_history}
-								comparisonMonths={comparisonMonths}
-								through={period.through}
-								bucketIds={scope === "all" ? null : scopedBucketIds}
-							/>
-							<BucketStatus
-								buckets={buckets}
-								month={month}
-								year={year}
-								activeScope={scope}
-								setScope={setScope}
-							/>
-						</div>
-					</section>
-
-					<div className="grid gap-5 lg:grid-cols-2">
-						<Card className="min-w-0">
-							<CardHeader>
-								<ScopedCardTitle scope="Total">Spending calendar</ScopedCardTitle>
-								<CardDescription>
-									Stronger colour means more spending. Select a day to open its
-									Records.
-								</CardDescription>
-							</CardHeader>
-							<CardContent>
-								<SpendingCalendar
+							<div className="grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)] 2xl:grid-cols-[minmax(0,3fr)_minmax(18rem,1fr)]">
+								<CategoryHistoryChart
+									months={data.comparison_history}
+									comparisonMonths={comparisonMonths}
+									through={period.through}
+									bucketIds={scope === "all" ? null : scopedBucketIds}
+								/>
+								<BucketStatus
+									buckets={buckets}
 									month={month}
 									year={year}
-									daily={summary.daily}
-									through={period.through}
-									onSelect={openDay}
+									activeScope={scope}
+									setScope={setScope}
 								/>
-							</CardContent>
-						</Card>
-						<Card className="min-w-0">
-							<CardHeader>
-								<ScopedCardTitle scope="Total">Biggest changes</ScopedCardTitle>
+							</div>
+						</section>
+					) : null}
+
+					{stage > 1 ? (
+						<div className="grid gap-5 lg:grid-cols-2">
+							<Card className="min-w-0">
+								<CardHeader>
+									<ScopedCardTitle scope="Total">
+										Spending calendar
+									</ScopedCardTitle>
+									<CardDescription>
+										Stronger colour means more spending. Select a day to open
+										its Records.
+									</CardDescription>
+								</CardHeader>
+								<CardContent>
+									<SpendingCalendar
+										month={month}
+										year={year}
+										daily={summary.daily}
+										through={period.through}
+										onSelect={openDay}
+									/>
+								</CardContent>
+							</Card>
+							<Card className="min-w-0">
+								<CardHeader>
+									<ScopedCardTitle scope="Total">Biggest changes</ScopedCardTitle>
+									<CardDescription>
+										Categories that moved most against your usual spending.
+									</CardDescription>
+								</CardHeader>
+								<CardContent>
+									<CategoryMovers
+										categories={categories}
+										comparisonCount={comparison.count}
+									/>
+								</CardContent>
+							</Card>
+						</div>
+					) : null}
+
+					{stage > 2 ? (
+						<Card>
+							<CardHeader className="border-b">
+								<ScopedCardTitle scope="Total">Spending by day</ScopedCardTitle>
 								<CardDescription>
-									Categories that moved most against your usual spending.
+									All spending buckets, split into daily outflow. Select a day to
+									open its Records.
 								</CardDescription>
 							</CardHeader>
 							<CardContent>
-								<CategoryMovers
-									categories={categories}
-									comparisonCount={comparison.count}
+								<DailySpendingChart
+									rows={bucketDailyData.rows}
+									buckets={dailyLines}
+									month={month}
+									year={year}
 								/>
 							</CardContent>
 						</Card>
-					</div>
+					) : null}
 
-					<Card>
-						<CardHeader className="border-b">
-							<ScopedCardTitle scope="Total">Spending by day</ScopedCardTitle>
-							<CardDescription>
-								All spending buckets, split into daily outflow. Select a day to open
-								its Records.
-							</CardDescription>
-						</CardHeader>
-						<CardContent>
-							<DailySpendingChart
-								rows={bucketDailyData.rows}
-								buckets={dailyLines}
-								month={month}
-								year={year}
-							/>
-						</CardContent>
-					</Card>
+					{stage > 3 ? (
+						<Card>
+							<CardHeader>
+								<ScopedCardTitle scope="Total">Surplus / Shortfall</ScopedCardTitle>
+								<CardDescription>
+									Cumulative income minus personal spending across every bucket
+								</CardDescription>
+							</CardHeader>
+							<CardContent>
+								<TotalSpendingChart data={series} month={month} year={year} />
+							</CardContent>
+						</Card>
+					) : null}
 
-					<Card>
-						<CardHeader>
-							<ScopedCardTitle scope="Total">Surplus / Shortfall</ScopedCardTitle>
-							<CardDescription>
-								Cumulative income minus personal spending across every bucket
-							</CardDescription>
-						</CardHeader>
-						<CardContent>
-							<TotalSpendingChart data={series} month={month} year={year} />
-						</CardContent>
-					</Card>
+					{stage > 4 ? <WeekdayCard weekday={weekday} /> : null}
 
-					<WeekdayCard weekday={weekday} />
-
-					<InvestmentRow summary={summary} month={month} year={year} />
+					{stage > 5 ? (
+						<InvestmentRow summary={summary} month={month} year={year} />
+					) : null}
 				</>
 			)}
 		</div>
