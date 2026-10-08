@@ -1,8 +1,8 @@
 "use client"
 
 // Client-side replacement for the Inertia search/pagination helper.
-// Search text stays local (debounced by the table); page + page size live in
-// the URL search params so links stay shareable.
+// Search text, page and page size live in the URL search params so links stay
+// shareable. Typing in search edits one history entry rather than adding one per key.
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
@@ -26,14 +26,16 @@ export function usePaginatedTableState() {
 	const page = searchParams.get("page") ?? "1"
 
 	const setParams = useCallback(
-		(changes: Record<string, string | null>) => {
+		(changes: Record<string, string | null>, { replace = false } = {}) => {
 			const next = new URLSearchParams(searchParams.toString())
 			for (const [key, value] of Object.entries(changes)) {
 				if (value === null || value === "") next.delete(key)
 				else next.set(key, value)
 			}
 			const suffix = next.toString()
-			router.push(suffix ? `${pathname}?${suffix}` : pathname, { scroll: false })
+			const href = suffix ? `${pathname}?${suffix}` : pathname
+			if (replace) router.replace(href, { scroll: false })
+			else router.push(href, { scroll: false })
 		},
 		[searchParams, router, pathname],
 	)
@@ -41,9 +43,14 @@ export function usePaginatedTableState() {
 	const handleQueryChange = useCallback(
 		(value: string) => {
 			setQuery(value)
-			setParams({ query: value || null, page: null })
+			// The first keystroke starts a search (one Back undoes it); refining it
+			// replaces that entry.
+			setParams(
+				{ query: value || null, page: null },
+				{ replace: !!searchParams.get("query") },
+			)
 		},
-		[setParams],
+		[setParams, searchParams],
 	)
 
 	const handlePageSizeChange = useCallback(

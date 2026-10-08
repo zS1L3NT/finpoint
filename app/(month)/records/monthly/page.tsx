@@ -70,13 +70,18 @@ export default function MonthlyRecordsPage() {
 	const searchParams = useSearchParams()
 	const router = useRouter()
 	const pathname = usePathname()
-	const pushParams = (next: URLSearchParams) => {
+	const pushParams = (next: URLSearchParams, replace = false) => {
 		const suffix = next.toString()
-		router.push(suffix ? pathname + "?" + suffix : pathname, { scroll: false })
+		const href = suffix ? pathname + "?" + suffix : pathname
+		if (replace) router.replace(href, { scroll: false })
+		else router.push(href, { scroll: false })
 	}
-	const setSearchParams = (init: URLSearchParams | globalThis.Record<string, string>) => {
+	const setSearchParams = (
+		init: URLSearchParams | globalThis.Record<string, string>,
+		replace = false,
+	) => {
 		if (init instanceof URLSearchParams) {
-			pushParams(init)
+			pushParams(init, replace)
 			return
 		}
 		const next = new URLSearchParams()
@@ -173,12 +178,13 @@ export default function MonthlyRecordsPage() {
 	if (minAmount) filters.min_amount = minAmount
 	if (maxAmount) filters.max_amount = maxAmount
 
-	const visit = (changes: Partial<Filters> = {}, nextDate = date) => {
+	/** `replace` edits the current history entry, for refinements like typing in search. */
+	const visit = (changes: Partial<Filters> = {}, replace = false) => {
 		const merged: Partial<Filters> = { ...filters, ...changes }
 		const next = new URLSearchParams(searchParams.toString())
 		next.delete("day")
-		next.set("month", nextDate.toFormat("MMMM"))
-		next.set("year", String(nextDate.year))
+		next.set("month", date.toFormat("MMMM"))
+		next.set("year", String(date.year))
 		for (const key of FILTER_KEYS) {
 			const value = merged[key]
 			if (value === "" || value === false || value === undefined || value === null) {
@@ -187,7 +193,7 @@ export default function MonthlyRecordsPage() {
 				next.set(key, key === "show_unbucketed" && value === true ? "1" : String(value))
 			}
 		}
-		setSearchParams(next)
+		setSearchParams(next, replace)
 	}
 
 	const clearFilters = () => setSearchParams({ month, year: String(year) })
@@ -212,7 +218,7 @@ export default function MonthlyRecordsPage() {
 					categories={categories}
 					buckets={buckets}
 					filters={filters}
-					onChange={changes => visit(changes)}
+					onChange={visit}
 					onClear={clearFilters}
 				/>
 
@@ -301,7 +307,7 @@ function MonthlyRecordFilters({
 	categories: CategoryWithChildren[]
 	buckets: Bucket[]
 	filters: Filters
-	onChange: (changes: Partial<Filters>) => void
+	onChange: (changes: Partial<Filters>, replace?: boolean) => void
 	onClear: () => void
 }) {
 	const categoryIds = filters.category_ids?.split(",").filter(Boolean) ?? []
@@ -362,7 +368,9 @@ function MonthlyRecordFilters({
 					value={query}
 					onChange={event => {
 						setQuery(event.target.value)
-						onChange({ query: event.target.value || undefined })
+						// The first keystroke starts a search (one Back undoes it);
+						// refining it edits that entry instead of piling up history.
+						onChange({ query: event.target.value || undefined }, !!filters.query)
 					}}
 				/>
 			</div>
