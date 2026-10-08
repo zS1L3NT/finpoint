@@ -227,7 +227,12 @@ export default function DashboardPage() {
 				</Card>
 			) : (
 				<>
-					<SummaryBand summary={summary} comparison={comparison} trend={trend} />
+					<SummaryBand
+						summary={summary}
+						comparison={comparison}
+						trend={trend}
+						through={period.through}
+					/>
 					{summary.unbucketed_count ? (
 						<div
 							className="flex flex-wrap gap-2"
@@ -503,11 +508,15 @@ function SummaryBand({
 	summary,
 	comparison,
 	trend,
+	through,
 }: {
 	summary: AnalyticsSummary
 	comparison: Comparison
 	trend: TrendMonth[]
+	/** Last actual day while the month is running; trend points then cover days 1 to it. */
+	through: string | null
 }) {
+	const sparkPeriod = through ? `days 1–${DateTime.fromISO(through).day}` : undefined
 	const surplusLabel =
 		summary.surplus > 0 ? "Surplus" : summary.surplus < 0 ? "Shortfall" : "Balance"
 	const tone = summary.surplus > 0 ? "positive" : summary.surplus < 0 ? "negative" : "neutral"
@@ -522,6 +531,7 @@ function SummaryBand({
 					delta={deltaOf(comparison.income, comparison.count, "up")}
 					spark={trend.map(month => month.income)}
 					sparkColor="var(--income)"
+					sparkPeriod={sparkPeriod}
 				/>
 				<DashboardMetric
 					icon="lucide:receipt-text"
@@ -531,6 +541,7 @@ function SummaryBand({
 					delta={deltaOf(comparison.spending, comparison.count, "down")}
 					spark={trend.map(month => month.spending)}
 					sparkColor="var(--spending)"
+					sparkPeriod={sparkPeriod}
 				/>
 				<DashboardMetric
 					icon="lucide:scale"
@@ -541,6 +552,7 @@ function SummaryBand({
 					delta={deltaOf(comparison.surplus, comparison.count, "up")}
 					spark={trend.map(month => month.surplus)}
 					sparkColor="var(--foreground)"
+					sparkPeriod={sparkPeriod}
 				/>
 				<DashboardMetric
 					icon="lucide:percent"

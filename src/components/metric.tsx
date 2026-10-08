@@ -34,6 +34,7 @@ export function Metric({
 	delta,
 	spark,
 	sparkColor,
+	sparkPeriod,
 }: {
 	icon: string
 	label: string
@@ -43,6 +44,8 @@ export function Metric({
 	delta?: Delta
 	spark?: number[]
 	sparkColor?: string
+	/** What each sparkline point covers, when not the whole month (e.g. "days 1–8"). */
+	sparkPeriod?: string
 }) {
 	return (
 		<div
@@ -90,7 +93,7 @@ export function Metric({
 					<Sparkline
 						values={spark}
 						color={sparkColor}
-						label={`${label}, last ${spark.length} months`}
+						label={`${label}, ${sparkPeriod ? `${sparkPeriod} of each of ` : ""}the last ${spark.length} months`}
 						className="mb-1 hidden shrink-0 text-muted-foreground xl:block"
 					/>
 				) : null}
