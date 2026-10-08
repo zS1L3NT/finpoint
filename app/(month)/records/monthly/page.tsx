@@ -28,8 +28,8 @@ import {
 	SelectValue,
 } from "@/components/ui/select"
 import { useFetch } from "@/hooks/use-fetch"
+import { STALE_MONTH_CLASS, useMonthTransition } from "@/hooks/use-month-transition"
 import { useRecordEditor } from "@/hooks/use-record-editor"
-import { useMonthTransition } from "@/hooks/use-tab-transition"
 import { cn } from "@/lib/utils"
 import { listCategories } from "@/logic/categories"
 import { getMonthlyRecords } from "@/logic/monthly"
@@ -109,7 +109,6 @@ export default function MonthlyRecordsPage() {
 	const minAmount = searchParams.get("min_amount")
 	const maxAmount = searchParams.get("max_amount")
 	const contentRef = useRef<HTMLDivElement>(null)
-	useMonthTransition(contentRef, `${month}-${year}`)
 
 	const filterKey = JSON.stringify([
 		query,
@@ -154,6 +153,10 @@ export default function MonthlyRecordsPage() {
 		onEdit: handleEdit,
 		grouped: true,
 	})
+	// Until the new month's query lands, the live query keeps the previous month's data.
+	const dataKey = data ? `${data.month}-${data.year}` : null
+	const stale = dataKey !== null && dataKey !== `${month}-${year}`
+	useMonthTransition(contentRef, dataKey)
 	const records = data?.records ?? []
 	const futureRecords = data?.future_records ?? []
 
@@ -199,7 +202,11 @@ export default function MonthlyRecordsPage() {
 
 	return (
 		<>
-			<div ref={contentRef} className={cn("reveal grid gap-5 md:gap-7")}>
+			<div
+				ref={contentRef}
+				aria-busy={stale}
+				className={cn("reveal grid gap-5 md:gap-7", stale && STALE_MONTH_CLASS)}
+			>
 				<MonthlyRecordFilters
 					date={date}
 					categories={categories}

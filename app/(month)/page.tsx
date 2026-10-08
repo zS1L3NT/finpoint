@@ -31,9 +31,9 @@ import {
 } from "@/components/ui/select"
 import { useHistory } from "@/history"
 import { useMonthParams } from "@/hooks/use-month-params"
+import { STALE_MONTH_CLASS, useMonthTransition } from "@/hooks/use-month-transition"
 import { usePersistentState } from "@/hooks/use-persistent-state"
 import { useSettings } from "@/hooks/use-settings"
-import { armTabTransition, useMonthTransition } from "@/hooks/use-tab-transition"
 import { cn, formatCurrency } from "@/lib/utils"
 import { getDashboardView, type SpendingHistoryMonth, type TrendMonth } from "@/logic/dashboard"
 import { pathMonthlyRecords } from "@/routes"
@@ -130,7 +130,6 @@ export default function DashboardPage() {
 	const { handlePush } = useHistory()
 	const { month, year } = useMonthParams()
 	const contentRef = useRef<HTMLDivElement>(null)
-	useMonthTransition(contentRef, `${month}-${year}`)
 	const settings = useSettings()
 	const router = useRouter()
 	const comparisonMonths = settings?.dashboard_comparison_months ?? 3
@@ -141,6 +140,10 @@ export default function DashboardPage() {
 		[month, year, comparisonMonths],
 	)
 	const data = view?.dashboard as unknown as DashboardData | undefined
+	// Until the new month's query lands, the live query keeps the previous month's data.
+	const dataKey = data ? `${data.month}-${data.year}` : null
+	const stale = dataKey !== null && dataKey !== `${month}-${year}`
+	useMonthTransition(contentRef, dataKey)
 	const buckets = data?.buckets ?? []
 	const categories = data?.categories ?? []
 	const [storedScope, setScope] = usePersistentState("finpoint.dashboard.scope", "all")
@@ -195,14 +198,17 @@ export default function DashboardPage() {
 		dashed: bucket.id === "unbucketed",
 	}))
 	const openDay = (date: string) => {
-		armTabTransition()
 		handlePush("overview")()
 		router.push(
 			pathMonthlyRecords({ month, year: String(year), start_date: date, end_date: date }),
 		)
 	}
 	return (
-		<div ref={contentRef} className={cn("reveal grid gap-7 md:gap-9")}>
+		<div
+			ref={contentRef}
+			aria-busy={stale}
+			className={cn("reveal grid gap-7 md:gap-9", stale && STALE_MONTH_CLASS)}
+		>
 			{period.is_future ? (
 				<Card>
 					<CardHeader>
@@ -223,25 +229,20 @@ export default function DashboardPage() {
 							className="flex flex-wrap gap-2"
 							aria-label="Records needing attention"
 						>
-							{summary.unbucketed_count ? (
-								<Button variant="outline" size="sm" asChild>
-									<Link
-										onClick={() => {
-											armTabTransition()
-											handlePush("overview")()
-										}}
-										href={pathMonthlyRecords({
-											month,
-											year: String(year),
-											show_unbucketed: "true",
-										})}
-									>
-										<IconifyIcon icon="lucide:inbox" />{" "}
-										{summary.unbucketed_count} unbucketed spending Record
-										{summary.unbucketed_count === 1 ? "" : "s"}
-									</Link>
-								</Button>
-							) : null}
+							<Button variant="outline" size="sm" asChild>
+								<Link
+									onClick={handlePush("overview")}
+									href={pathMonthlyRecords({
+										month,
+										year: String(year),
+										show_unbucketed: "true",
+									})}
+								>
+									<IconifyIcon icon="lucide:inbox" /> {summary.unbucketed_count}{" "}
+									unbucketed spending Record
+									{summary.unbucketed_count === 1 ? "" : "s"}
+								</Link>
+							</Button>
 						</div>
 					) : null}
 
@@ -664,10 +665,7 @@ function BucketStatus({
 				})}
 				<Button variant="outline" size="sm" asChild>
 					<Link
-						onClick={() => {
-							armTabTransition()
-							handlePush("overview")()
-						}}
+						onClick={handlePush("overview")}
 						href={pathMonthlyRecords({ month, year: String(year) })}
 					>
 						Manage monthly Records
@@ -731,10 +729,7 @@ function InvestmentRow({
 				</div>
 				<Button variant="outline" size="sm" asChild>
 					<Link
-						onClick={() => {
-							armTabTransition()
-							handlePush("overview")()
-						}}
+						onClick={handlePush("overview")}
 						href={pathMonthlyRecords({
 							month,
 							year: String(year),
