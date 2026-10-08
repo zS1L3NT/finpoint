@@ -14,7 +14,14 @@ export function FilterBar({
 	className?: string
 }) {
 	return (
-		<div className={cn("grid w-full grid-cols-2 gap-2 sm:flex sm:flex-wrap", className)}>
+		<div
+			className={cn(
+				// From sm up, controls share each row (a smaller basis, growing to fill but never
+				// below their content), so a full set fits one line instead of orphaning Clear.
+				"grid w-full grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:*:min-w-fit sm:*:max-w-56 sm:*:shrink-0 sm:*:grow sm:*:basis-32",
+				className,
+			)}
+		>
 			{children}
 		</div>
 	)

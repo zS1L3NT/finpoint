@@ -50,14 +50,15 @@ export function Metric({
 	return (
 		<div
 			className={cn(
-				"relative grid min-h-28 min-w-0 content-between bg-card p-3 sm:p-4",
+				"relative grid min-h-28 min-w-0 content-start bg-card p-3 sm:p-4",
 				tone !== "neutral" &&
 					"before:absolute before:inset-x-0 before:top-0 before:h-0.5 before:content-['']",
 				tone === "positive" && "before:bg-emerald-500",
 				tone === "negative" && "before:bg-red-500",
 			)}
 		>
-			<div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-medium text-muted-foreground">
+			{/* min-h matches the delta chip, so tiles with and without one keep values level. */}
+			<div className="flex min-h-5 flex-wrap items-center gap-x-2 gap-y-1 text-xs font-medium text-muted-foreground">
 				<span className="hidden size-7 place-items-center rounded-lg border bg-background text-foreground shadow-xs sm:grid">
 					<IconifyIcon icon={icon} className="size-3.5" />
 				</span>
