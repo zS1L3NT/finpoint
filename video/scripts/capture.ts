@@ -4,19 +4,16 @@
 // on screen then) that the video's camera and highlights are keyed to, and a poster frame per
 // marker for holds and Help article pictures.
 //
-// Run from the repository root against a production build:
-//   bun run build && npx next start --port 5174   (in another terminal)
-//   bun video/scripts/capture.ts                  (CHROMIUM=/path/to/chrome to pick a browser)
-import { spawnSync } from "node:child_process"
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
+// Everything is generated from this file, so the takes can be rebuilt after any UI or theme change:
+//   bun run build && bun video/scripts/capture.ts   (or `bun run video:build` for the whole film)
+// It serves the build itself on port 5174 (set FINPOINT_URL to use a running app) and finds a
+// browser (CHROMIUM=/path/to/chrome to pick one).
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
-import { dirname, resolve } from "node:path"
-import { fileURLToPath } from "node:url"
+import { resolve } from "node:path"
 import { type CDPSession, chromium, type Locator, type Page } from "playwright"
-import * as XLSX from "xlsx"
+import { chromiumPath, root, runFfmpeg, serveApp } from "./tools"
 
-const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..")
-const base = process.env.FINPOINT_URL ?? "http://localhost:5174"
 const outDir = resolve(root, "public/guide-takes")
 /** 16:9 like the video frame, so the camera never has to crop the app to fit. */
 const viewport = { width: 1600, height: 900 }
@@ -31,24 +28,34 @@ type Marker = { t: number; boxes: Record<string, Box> }
 const takes: Record<string, { width: number; height: number; duration: number; markers: Record<string, Marker> }> = {}
 
 // ─── Fictional bank exports ───────────────────────────────────────────────────────────────
+//
+// Only the guide's own story is ever on screen: each chapter's Statements arrive just before
+// its take, so Allocator never shows rows the narration doesn't talk about.
 
 type Row = [string, string, number]
-const ocbcRows: Row[] = [
-	["01/10/2026", "SALARY ACME PTE LTD", 3000],
+/** The first import: what the basics chapters explain, one by one. */
+const story: Row[] = [
 	["03/10/2026", "KOPI & CO RAFFLES PL", -12],
 	["05/10/2026", "NTUC FAIRPRICE BEDOK", -80],
-	["06/10/2026", "SISTIC CONCERT TIX", -200],
-	["08/10/2026", "COLD STORAGE CENTRAL", -23.4],
 	["10/10/2026", "SAKURA DINING", -90],
-	["11/10/2026", "PAYNOW FROM SAM TAN", 60],
-	["12/10/2026", "GRAB RIDE", -14.5],
-	["14/10/2026", "NETFLIX.COM", -19.98],
-	["15/10/2026", "SHOPEE SINGAPORE", -45.9],
-	["17/10/2026", "SP SERVICES", -120.4],
-	["18/10/2026", "TRANSFER TO UOB SAVINGS", -500],
+	// Sam pays their share back a week after dinner.
+	["17/10/2026", "PAYNOW FROM SAM TAN", 60],
 ]
+const salary: Row = ["01/10/2026", "SALARY ACME PTE LTD", 3000]
+const concert: Row = ["06/10/2026", "SISTIC CONCERT TIX", -200]
 const repayment: Row = ["13/10/2026", "PAYNOW FROM JO LIM", 100]
 const burger: Row = ["19/10/2026", "BURGER JOINT TANJONG PAGAR", -35]
+/** Last month, explained off camera, so the Dashboard has a month to compare with. */
+const september: [...Row, string, string][] = [
+	["01/09/2026", "SALARY ACME PTE LTD", 3000, "Salary", "Income"],
+	["04/09/2026", "SHENG SIONG BEDOK", -64.2, "Groceries", "Groceries"],
+	["08/09/2026", "TOAST BOX TAMPINES", -9.5, "Breakfast", "Dining Out"],
+	["12/09/2026", "GRAB RIDE", -18, "Taxi home", "Transport"],
+	["15/09/2026", "SP SERVICES", -96.3, "Electricity", "Bills & Utilities"],
+	["19/09/2026", "SUSHIRO TAMPINES", -42, "Dinner", "Dining Out"],
+	["21/09/2026", "FAIRPRICE XTRA", -38.4, "Groceries", "Groceries"],
+	["27/09/2026", "UNIQLO BUGIS", -59.9, "Jeans", "Shopping"],
+]
 
 function ocbcCsv(rows: Row[]) {
 	return [
@@ -65,23 +72,6 @@ function ocbcCsv(rows: Row[]) {
 			].join(","),
 		),
 	].join("\n")
-}
-
-function uobXls(path: string) {
-	const sheet = XLSX.utils.aoa_to_sheet([
-		["United Overseas Bank Limited"],
-		["Account Transaction Details"],
-		[""],
-		[""],
-		["Account Number:", "3021234567"],
-		["Account Type:", "Uniplus Savings"],
-		["Statement Period:", "01 Oct 2026 To 20 Oct 2026"],
-		["Transaction Date", "Transaction Description", "Withdrawal", "Deposit"],
-		["18 Oct 2026", "TRANSFER FROM OCBC 360", 0, 500],
-	])
-	const book = XLSX.utils.book_new()
-	XLSX.utils.book_append_sheet(book, sheet, "Statement")
-	XLSX.writeFile(book, path, { bookType: "xls" })
 }
 
 // ─── The on-screen cursor ─────────────────────────────────────────────────────────────────
@@ -181,6 +171,9 @@ function installCursor() {
 
 // ─── Recording ────────────────────────────────────────────────────────────────────────────
 
+/** `TAKES=dashboard,budgets` re-records only those takes; the rest of the story still plays. */
+const only = process.env.TAKES?.split(",").filter(Boolean)
+
 class Take {
 	private frames: { t: number; file: string }[] = []
 	private markers: Record<string, Marker> = {}
@@ -197,7 +190,13 @@ class Take {
 		mkdirSync(this.dir, { recursive: true })
 	}
 
+	/** Whether this take is being recorded, or only played to reach the next one. */
+	get recording() {
+		return !only || only.includes(this.name)
+	}
+
 	async start() {
+		if (!this.recording) return
 		const context = this.page.context()
 		this.cdp = await context.newCDPSession(this.page)
 		this.cdp.on("Page.screencastFrame", async event => {
@@ -221,6 +220,7 @@ class Take {
 
 	/** Remembers this moment and where the named controls are on screen right now. */
 	async mark(name: string, targets: Record<string, Locator> = {}) {
+		if (!this.recording) return
 		await this.page.waitForTimeout(450)
 		const boxes: Record<string, Box> = {}
 		for (const [key, locator] of Object.entries(targets)) {
@@ -228,7 +228,13 @@ class Take {
 				.first()
 				.boundingBox({ timeout: 300 })
 				.catch(() => null)
-			if (box) boxes[key] = [box.x, box.y, box.width, box.height].map(Math.round) as Box
+			// Only the part on screen: a control half scrolled away must not pull the frame off it.
+			const left = Math.max(0, box?.x ?? 0)
+			const top = Math.max(0, box?.y ?? 0)
+			const right = Math.min(viewport.width, (box?.x ?? 0) + (box?.width ?? 0))
+			const bottom = Math.min(viewport.height, (box?.y ?? 0) + (box?.height ?? 0))
+			if (box && right > left && bottom > top)
+				boxes[key] = [left, top, right - left, bottom - top].map(Math.round) as Box
 			else console.warn(`  ! ${this.name}/${name}: no box for ${key}`)
 		}
 		this.markers[name] = { t: Date.now() / 1000 - this.t0, boxes }
@@ -237,6 +243,7 @@ class Take {
 	}
 
 	async stop() {
+		if (!this.recording) return
 		await this.page.waitForTimeout(600)
 		await this.cdp?.send("Page.stopScreencast").catch(() => {})
 		await this.cdp?.detach().catch(() => {})
@@ -251,40 +258,38 @@ class Take {
 		const listFile = resolve(this.dir, "frames.txt")
 		writeFileSync(listFile, `${list}\nfile '${last?.file}'\n`)
 		const video = resolve(outDir, `${this.name}.mp4`)
-		const encode = spawnSync(
-			"ffmpeg",
-			[
-				"-hide_banner",
-				"-loglevel",
-				"error",
-				"-y",
-				"-f",
-				"concat",
-				"-safe",
-				"0",
-				"-i",
-				listFile,
-				"-vf",
-				`fps=${fps},format=yuv420p`,
-				"-c:v",
-				"libx264",
-				"-preset",
-				"slow",
-				"-crf",
-				"21",
-				"-tune",
-				"stillimage",
-				"-movflags",
-				"+faststart",
-				video,
-			],
-			{ encoding: "utf8" },
-		)
+		const encode = runFfmpeg([
+			"-hide_banner",
+			"-loglevel",
+			"error",
+			"-y",
+			"-f",
+			"concat",
+			"-safe",
+			"0",
+			"-i",
+			listFile,
+			"-r",
+			String(fps),
+			"-pix_fmt",
+			"yuv420p",
+			"-c:v",
+			"libx264",
+			"-preset",
+			"slow",
+			"-crf",
+			"21",
+			"-tune",
+			"stillimage",
+			"-movflags",
+			"+faststart",
+			video,
+		])
 		if (encode.status !== 0) throw new Error(`ffmpeg: ${encode.stderr}`)
 		// Posters come from the encoded video itself, so a hold matches the playing frame exactly.
 		mkdirSync(resolve(outDir, this.name), { recursive: true })
 		for (const [name, marker] of Object.entries(this.markers)) {
-			spawnSync("ffmpeg", [
+			runFfmpeg([
 				"-hide_banner",
 				"-loglevel",
 				"error",
@@ -346,11 +351,15 @@ async function type(page: Page, text: string) {
 	await page.waitForTimeout(250)
 }
 
-/** Scrolls the page gently until `target` sits comfortably in view. */
-async function scrollTo(page: Page, target: Locator) {
+/**
+ * Scrolls the page gently until `target` sits comfortably in view: its middle at `middle` of the
+ * screen, or its top at `top` when given (for sections that should fill the screen below them).
+ */
+async function scrollTo(page: Page, target: Locator, { middle = 0.55, top }: { middle?: number; top?: number } = {}) {
 	const box = await target.first().boundingBox()
 	if (!box) return
-	const distance = box.y + box.height / 2 - viewport.height * 0.55
+	const distance =
+		top === undefined ? box.y + box.height / 2 - viewport.height * middle : box.y - viewport.height * top
 	if (Math.abs(distance) < 40) return
 	await page.evaluate(
 		([dy, ms]) =>
@@ -368,6 +377,8 @@ const selectionBar = (page: Page) =>
 		.getByRole("button", { name: "Create Record" })
 		.locator("xpath=ancestor::*[contains(@class,'fixed') or contains(@class,'sticky')][1]")
 
+let base = ""
+
 async function go(page: Page, path: string) {
 	await page.goto(`${base}${path}`, { waitUntil: "load" })
 	await page.waitForTimeout(1500)
@@ -379,12 +390,28 @@ async function via(page: Page, label: string) {
 	await page.waitForTimeout(1200)
 }
 
-async function importOcbc(page: Page, file: string) {
+/** Imports an OCBC export off camera. Rows already imported are skipped by the Importer. */
+async function importOcbc(page: Page, name: string, rows: Row[]) {
+	const file = resolve(work, name)
+	writeFileSync(file, ocbcCsv(rows))
 	await go(page, "/importer")
 	await page.getByRole("radio", { name: /OCBC/ }).click()
 	await page.locator('input[type="file"]').setInputFiles(file)
 	await page.getByRole("button", { name: /^Import/ }).click()
 	await page.getByText(/new statements? imported|already here/).first().waitFor()
+}
+
+/** Explains one Statement off camera with a single Record. */
+async function explain(page: Page, text: string, title: string, category: string) {
+	await row(page, text).click()
+	await page.getByRole("button", { name: "Create Record" }).click()
+	await dialog(page).getByText("Statements Attached").waitFor()
+	await dialog(page).locator("#title").fill(title)
+	await dialog(page).locator("#category_id").click()
+	await dialog(page).locator("#category_id").fill(category)
+	await page.getByRole("option", { name: category }).first().click()
+	await dialog(page).getByRole("button", { name: "Create Record" }).click()
+	await closed(page)
 }
 
 async function pick(page: Page, field: Locator, query: string, option: RegExp | string) {
@@ -422,21 +449,17 @@ async function closed(page: Page) {
 // ─── The story ────────────────────────────────────────────────────────────────────────────
 
 const work = mkdtempSync(resolve(tmpdir(), "finpoint-capture-"))
-rmSync(outDir, { recursive: true, force: true })
+if (!only) rmSync(outDir, { recursive: true, force: true })
 mkdirSync(outDir, { recursive: true })
-const files = {
-	first: resolve(work, "ocbc-october.csv"),
-	second: resolve(work, "ocbc-october-2.csv"),
-	third: resolve(work, "ocbc-october-3.csv"),
-	uob: resolve(work, "uob-october.xls"),
-}
-writeFileSync(files.first, ocbcCsv(ocbcRows))
-writeFileSync(files.second, ocbcCsv([...ocbcRows, repayment]))
-writeFileSync(files.third, ocbcCsv([...ocbcRows, repayment, burger]))
-uobXls(files.uob)
+if (only)
+	Object.assign(takes, JSON.parse(readFileSync(resolve(root, "src/lib/guide-video-takes.json"), "utf8")))
+const firstExport = resolve(work, "ocbc-october.csv")
+writeFileSync(firstExport, ocbcCsv(story))
 
+const server = await serveApp()
+base = server.base
 const browser = await chromium.launch({
-	...(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {}),
+	executablePath: chromiumPath(chromium.executablePath()),
 	// Screencasts follow this flag, not the context's scale.
 	args: [`--force-device-scale-factor=${scale}`],
 })
@@ -485,30 +508,34 @@ try {
 	await go(page, "/importer")
 	await take("import", async t => {
 		const ocbc = page.getByRole("radio", { name: /OCBC/ })
+		const card = page.getByText("Upload statements").locator("xpath=ancestor::*[@data-slot='card'][1]")
 		await t.mark("start", {
 			banks: page.getByRole("radiogroup", { name: "Bank" }),
 			ocbc,
 			uob: page.getByRole("radio", { name: /UOB/ }),
-			card: page.getByText("Upload statements").locator("xpath=ancestor::*[@data-slot='card'][1]"),
+			card,
 		})
 		await press(page, ocbc)
-		await t.mark("bank", { banks: page.getByRole("radiogroup", { name: "Bank" }), ocbc })
+		await t.mark("bank", { banks: page.getByRole("radiogroup", { name: "Bank" }), ocbc, card })
 		const chooser = page.waitForEvent("filechooser")
 		await press(page, page.getByText(/Drop bank exports here/).first())
-		await (await chooser).setFiles(files.first)
+		await (await chooser).setFiles(firstExport)
 		await page.waitForTimeout(500)
 		await t.mark("files", {
 			files: page.getByText("ocbc-october.csv").first().locator("xpath=.."),
 			submit: page.getByRole("button", { name: /^Import/ }),
-			card: page.getByText("Upload statements").locator("xpath=ancestor::*[@data-slot='card'][1]"),
+			card,
 		})
 		await press(page, page.getByRole("button", { name: /^Import/ }))
 		await page.getByText(/new statements? imported/).first().waitFor()
+		const allocate = page
+			.getByRole("link", { name: /Allocate them/ })
+			.or(page.getByRole("button", { name: /Allocate them/ }))
 		await t.mark("result", {
 			result: page.getByText(/new statements? imported/).first().locator("xpath=ancestor::*[contains(@class,'rounded')][1]"),
-			allocate: page.getByRole("link", { name: /Allocate them/ }).or(page.getByRole("button", { name: /Allocate them/ })),
+			allocate,
 		})
-		await press(page, page.getByRole("link", { name: /Allocate them/ }).or(page.getByRole("button", { name: /Allocate them/ })))
+		await press(page, allocate)
 		await page.waitForTimeout(1200)
 		await t.mark("allocator", { list: page.locator("table").first() })
 	})
@@ -523,19 +550,13 @@ try {
 			banks: page.getByRole("radiogroup", { name: "Bank" }),
 		})
 	})
-	// The UOB savings account, off camera.
-	await go(page, "/importer")
-	await page.getByRole("radio", { name: /UOB/ }).click()
-	await page.locator('input[type="file"]').setInputFiles(files.uob)
-	await page.getByRole("button", { name: /^Import/ }).click()
-	await page.getByText(/new statements? imported/).first().waitFor()
 
-	// 4 · The Allocator
+	// 4 · The Allocator: only the four story Statements are waiting.
 	await go(page, "/allocator")
 	await take("allocator", async t => {
 		await t.mark("start", { list: page.locator("table").first(), heading: page.getByRole("heading", { name: "Allocator" }) })
-		await glide(page, page.locator("table").first(), { dy: 0.3 })
-		await scrollTo(page, row(page, "KOPI & CO"))
+		await glide(page, row(page, "PAYNOW FROM SAM"), { dx: 0.3, ms: 700 })
+		await glide(page, row(page, "KOPI & CO"), { dx: 0.3, ms: 1100 })
 		await t.mark("scrolled", { list: page.locator("table").first(), amount: row(page, "NTUC FAIRPRICE").locator("td").last() })
 	})
 
@@ -543,7 +564,7 @@ try {
 	await go(page, "/allocator")
 	await take("lunch", async t => {
 		await t.mark("start", { list: page.locator("table").first() })
-		await scrollTo(page, row(page, "KOPI & CO"))
+		await glide(page, row(page, "KOPI & CO"), { dx: 0.3 })
 		await t.mark("row", { lunch: row(page, "KOPI & CO") })
 		await press(page, row(page, "KOPI & CO"), { dx: 0.3 })
 		await t.mark("selected", { lunch: row(page, "KOPI & CO"), bar: selectionBar(page), create: page.getByRole("button", { name: "Create Record" }) })
@@ -563,8 +584,7 @@ try {
 
 	// 6 · Splitting one payment
 	await take("split", async t => {
-		await t.mark("start", { list: page.locator("table").first() })
-		await scrollTo(page, row(page, "NTUC FAIRPRICE"))
+		await t.mark("start", { list: page.locator("table").first(), supermarket: row(page, "NTUC FAIRPRICE") })
 		await press(page, row(page, "NTUC FAIRPRICE"), { dx: 0.3 })
 		await press(page, page.getByRole("button", { name: "Create Record" }))
 		await dialog(page).getByText("Statements Attached").waitFor()
@@ -577,7 +597,6 @@ try {
 		await t.mark("filled", creator(page))
 		await press(page, creator(page).submit)
 		await closed(page)
-		await scrollTo(page, row(page, "NTUC FAIRPRICE"))
 		await glide(page, row(page, "NTUC FAIRPRICE").getByText(/allocable/), { ms: 600 })
 		await t.mark("left", { supermarket: row(page, "NTUC FAIRPRICE"), allocable: row(page, "NTUC FAIRPRICE").getByText(/allocable/) })
 		await press(page, row(page, "NTUC FAIRPRICE"), { dx: 0.3 })
@@ -595,7 +614,7 @@ try {
 	// 7 · Combining payments
 	await take("combine", async t => {
 		await t.mark("start", { list: page.locator("table").first() })
-		await scrollTo(page, row(page, "SAKURA DINING"))
+		await glide(page, row(page, "SAKURA DINING"), { dx: 0.3 })
 		await t.mark("rows", { dinner: row(page, "SAKURA DINING"), paynow: row(page, "PAYNOW FROM SAM") })
 		await press(page, row(page, "SAKURA DINING"), { dx: 0.3 })
 		await t.mark("dinner", { dinner: row(page, "SAKURA DINING"), paynow: row(page, "PAYNOW FROM SAM") })
@@ -610,43 +629,53 @@ try {
 		await press(page, creator(page).submit)
 		await closed(page)
 		await t.mark("saved", { list: page.locator("table").first() })
+		await via(page, "Records")
+		await t.mark("record", {
+			list: page.locator("table").first(),
+			dinner: row(page, "Dinner with Sam"),
+		})
 	})
 
-	// The salary, off camera, so the Dashboard has income.
-	await page.evaluate(() => window.scrollTo(0, 0))
-	await row(page, "SALARY ACME").click()
-	await page.getByRole("button", { name: "Create Record" }).click()
-	await dialog(page).locator("#title").fill("Salary")
-	await dialog(page).locator("#category_id").click()
-	await dialog(page).locator("#category_id").fill("Income")
-	await page.getByRole("option", { name: "Income" }).first().click()
-	await dialog(page).getByRole("button", { name: "Create Record" }).click()
-	await closed(page)
+	// The salary, a transfer into savings and last month, explained off camera, so the Dashboard
+	// has income, a saving and a month to compare with.
+	await importOcbc(page, "ocbc-history.csv", [
+		salary,
+		["18/10/2026", "TRANSFER TO UOB SAVINGS", -500],
+		...september.map(([date, description, amount]) => [date, description, amount] as Row),
+	])
+	await go(page, "/allocator")
+	await explain(page, "TRANSFER TO UOB", "To savings", "Savings & Investments")
+	for (const [, description, , title, category] of september) await explain(page, description, title, category)
+	await explain(page, "SALARY ACME", "Salary", "Income")
 
-	// 8 · The Dashboard
+	// 8 · The Dashboard, from the top down to the Category breakdown and the savings section.
 	await go(page, "/?month=October&year=2026")
 	await take("dashboard", async t => {
-		await t.mark("start", {
-			metrics: page.getByText("Total spending").first().locator("xpath=ancestor::*[contains(@class,'grid')][1]"),
-			spending: page.getByText("Total spending").first().locator("xpath=ancestor::*[@data-slot='card'][1]"),
-		})
-		await glide(page, page.getByText("Total spending").first())
-		await t.mark("spending", {
-			metrics: page.getByText("Total spending").first().locator("xpath=ancestor::*[contains(@class,'grid')][1]"),
-			spending: page.getByText("Total spending").first().locator("xpath=ancestor::*[@data-slot='card'][1]"),
-		})
-		await scrollTo(page, page.locator("#spending-breakdown-title"))
+		// A metric's label shares its line with a comparison badge, so match it loosely.
+		const metric = (label: string) =>
+			page.getByText(label).first().locator("xpath=ancestor::div[contains(@class,'min-h-28')][1]")
+		const breakdown = page.locator("#spending-breakdown-title").locator("xpath=ancestor::section[1]")
+		const mix = page.getByText("Category spending mix").first().locator("xpath=ancestor::*[@data-slot='card'][1]")
+		await t.mark("start", { income: metric("Total income"), spending: metric("Total spending") })
+		await glide(page, metric("Total spending"))
+		await t.mark("spending", { income: metric("Total income"), spending: metric("Total spending") })
+		await scrollTo(page, breakdown, { top: 0.06 })
+		await glide(page, mix.getByText("Groceries", { exact: true }).last())
 		await t.mark("breakdown", {
-			breakdown: page.locator("#spending-breakdown-title").locator("xpath=ancestor::section[1]"),
-			mix: page.getByText("Category spending mix").first().locator("xpath=ancestor::*[@data-slot='card'][1]"),
+			breakdown,
+			mix,
+			legend: mix.getByText("Groceries", { exact: true }).last().locator("xpath=.."),
 		})
+		const saving = page.locator("#investment-title").locator("xpath=ancestor::section[1]")
+		await scrollTo(page, saving, { top: 0.12 })
+		await t.mark("saving", { saving })
 	})
 
 	// 9 · Pending Records
+	await importOcbc(page, "ocbc-concert.csv", [concert])
 	await go(page, "/allocator")
 	await take("pending", async t => {
 		await t.mark("start", { list: page.locator("table").first() })
-		await scrollTo(page, row(page, "SISTIC CONCERT"))
 		await press(page, row(page, "SISTIC CONCERT"), { dx: 0.3 })
 		await press(page, page.getByRole("button", { name: "Create Record" }))
 		await dialog(page).getByText("Statements Attached").waitFor()
@@ -665,11 +694,10 @@ try {
 			badge: row(page, "Concert with Jo").getByText("Pending").first(),
 		})
 	})
-	await importOcbc(page, files.second)
+	await importOcbc(page, "ocbc-repayment.csv", [repayment])
 	await go(page, "/allocator")
 	await take("attach", async t => {
 		await t.mark("start", { list: page.locator("table").first() })
-		await scrollTo(page, row(page, "PAYNOW FROM JO"))
 		await press(page, row(page, "PAYNOW FROM JO"), { dx: 0.3 })
 		await t.mark("selected", {
 			paynow: row(page, "PAYNOW FROM JO"),
@@ -684,13 +712,14 @@ try {
 		await press(page, sheet.getByText("Concert with Jo").first())
 		await page.getByText("Edit Record").first().waitFor()
 		await page.waitForTimeout(700)
-		await t.mark("editor", {
-			...creator(page),
-			attached: dialog(page).getByText("PAYNOW FROM JO").first().locator("xpath=ancestor::*[@data-slot='card'][1]"),
-		})
+		const attached = dialog(page).getByText("PAYNOW FROM JO").first().locator("xpath=ancestor::*[@data-slot='card'][1]")
+		await attached.scrollIntoViewIfNeeded()
+		await t.mark("editor", { ...creator(page), attached })
 		await press(page, creator(page).submit)
 		await closed(page)
 		await t.mark("saved", { list: page.locator("table").first() })
+		await via(page, "Records")
+		await t.mark("complete", { list: page.locator("table").first(), concert: row(page, "Concert with Jo") })
 	})
 
 	// 10 · Pending Statements
@@ -726,14 +755,20 @@ try {
 		await press(page, creator(page).title)
 		await type(page, "Burger with Mia")
 		await pick(page, creator(page).category, "Dining", "Dining Out")
+		await t.mark("creator", creator(page))
 		await press(page, creator(page).submit)
 		await closed(page)
 		await t.mark("explained", { list: page.locator("table").first() })
+		await via(page, "Records")
+		await t.mark("records", {
+			burger: row(page, "Burger with Mia"),
+			badge: row(page, "Burger with Mia").getByText("Pending").first(),
+		})
 	})
-	await importOcbc(page, files.third)
+	await importOcbc(page, "ocbc-burger.csv", [burger])
 	await go(page, "/allocator")
 	await take("replace", async t => {
-		await t.mark("start", { tabs: page.getByRole("tablist").first() })
+		await t.mark("start")
 		await press(page, page.getByRole("tab", { name: "Replace Pending" }).or(page.getByRole("link", { name: "Replace Pending" })))
 		await page.waitForTimeout(900)
 		await press(page, page.getByText("Burger with Mia").first())
@@ -792,7 +827,7 @@ try {
 		await t.mark("saved", { card, daily: card.getByText("Daily", { exact: true }).first().locator("xpath=ancestor::*[contains(@class,'rounded')][1]") })
 	})
 
-	// 14 · Budgets
+	// 14 · Budgets: a Bali trip from 28 Oct to 4 Nov, created and opened.
 	await go(page, "/budgets")
 	await take("budgets", async t => {
 		await t.mark("start")
@@ -802,11 +837,23 @@ try {
 		await press(page, form.locator("#name"))
 		await type(page, "Bali trip")
 		await setAmount(page, form.locator("#amount"), "1200")
-		await glide(page, form.locator("#budget_create_date_range"))
+		await press(page, form.locator("#budget_create_date_range"))
+		await page.waitForTimeout(400)
+		await press(page, page.getByRole("button", { name: /October 28(th)?, 2026/ }).first())
+		const november = page.getByRole("button", { name: /November 4(th)?, 2026/ }).first()
+		if (!(await november.isVisible().catch(() => false)))
+			await press(page, page.getByRole("button", { name: /next month/i }).first())
+		await press(page, page.getByRole("button", { name: /November 4(th)?, 2026/ }).first())
+		await press(page, page.getByRole("button", { name: "Apply", exact: true }))
+		await page.waitForTimeout(300)
 		await t.mark("dates", { dialog: form, range: form.locator("#budget_create_date_range") })
 		const automatic = form.getByText("Automatic attach").first().locator("xpath=ancestor::*[@data-slot='field'][1]")
 		await glide(page, automatic)
 		await t.mark("automatic", { dialog: form, automatic })
+		await press(page, form.getByRole("button", { name: "Create budget" }))
+		await closed(page)
+		await page.waitForTimeout(1200)
+		await t.mark("created", { heading: page.getByRole("heading", { name: "Bali trip" }).first() })
 	})
 
 	// 15 · Backups
@@ -822,6 +869,7 @@ try {
 	writeFileSync(resolve(root, "src/lib/guide-video-takes.json"), `${JSON.stringify(takes, null, "\t")}\n`)
 } finally {
 	await browser.close()
+	server.stop()
 	rmSync(work, { recursive: true, force: true })
 }
 console.log(`Recorded ${Object.keys(takes).length} takes into public/guide-takes.`)

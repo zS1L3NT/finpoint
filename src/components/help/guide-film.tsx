@@ -1,13 +1,13 @@
 import { Audio } from "@remotion/media"
-import { type ReactNode, useState } from "react"
-import { AbsoluteFill, Sequence, staticFile, useCurrentFrame } from "remotion"
+import { createContext, type ReactNode, useContext, useState } from "react"
+import { AbsoluteFill, interpolate, Sequence, staticFile, useCurrentFrame } from "remotion"
 import cueFile from "../../lib/guide-video-cues.json"
 import timeline from "../../lib/guide-video-timeline.json"
 import { Spoken } from "./film/captions"
 import { Backdrop, Header, TitleCard } from "./film/chrome"
 import { type DemoScene, demoFrame, UiDemo } from "./film/demo"
 import { StageRoot } from "./film/kit"
-import { Cues, ReducedMotion, useLayer, useProgress, useReduced } from "./film/motion"
+import { Cues, cueFrame, ReducedMotion, useLayer, useProgress, useReduced } from "./film/motion"
 import { type Beat, BeatStart, scenes } from "./film/scenes"
 import { accentFor, alpha, color, font, layout } from "./film/theme"
 
@@ -15,7 +15,7 @@ type Chapter = (typeof timeline.chapters)[number]
 type Segment = Chapter["segments"][number]
 
 const cueMap = cueFile as Record<string, number[]>
-/** Frames a finished beat lingers under the next one, so cuts read as soft crossfades. */
+/** Frames a finished picture or caption lingers under the next one, so cuts read as soft crossfades. */
 const OVERLAP = 12
 
 const wordsOf = (segment: Segment) => segment.text.split(/\s+/).filter(Boolean)
@@ -90,84 +90,176 @@ function StepPill({ segment, tint, at = 0 }: { segment: Segment; tint: string; a
 	)
 }
 
-/** An illustrated beat: narration down the left, the scene on the stage to the right. */
-function StageLayer({
-	segment,
-	Scene,
-	tint,
-	start,
-}: {
-	segment: Segment
-	Scene: Beat
-	tint: string
-	start: number
-}) {
-	const style = useLayer(segment.durationInFrames)
-	const visible = useProgress(start - 6, 16)
-	const [stage, setStage] = useState<HTMLDivElement | null>(null)
-	return (
-		<SegmentCues segment={segment}>
-			<BeatStart.Provider value={start}>
-				<AbsoluteFill style={{ ...style, opacity: style.opacity * visible }}>
-					<div
-						style={{
-							position: "absolute",
-							left: layout.gutter,
-							top: layout.columnTop,
-							bottom: 120,
-							width: layout.columnWidth,
-							display: "flex",
-							flexDirection: "column",
-							justifyContent: "center",
-							gap: 28,
-						}}
-					>
-						{segment.step ? (
-							<div>
-								<StepPill segment={segment} tint={tint} at={start} />
-							</div>
-						) : null}
-						<Spoken size={48} maxChars={150} lineHeight={1.28} />
-					</div>
-					<div
-						ref={setStage}
-						style={{
-							position: "absolute",
-							left: layout.stageLeft,
-							top: layout.stageTop,
-							width: 952,
-							height: 520,
-							transform: `scale(${layout.stageScale})`,
-							transformOrigin: "0 0",
-						}}
-					>
-						<StageRoot.Provider value={stage}>
-							<Scene />
-						</StageRoot.Provider>
-					</div>
-				</AbsoluteFill>
-			</BeatStart.Provider>
-		</SegmentCues>
+/** Fades captions in on arrival and out at `end`, without moving them. */
+function useFade(end: number) {
+	const frame = useCurrentFrame()
+	return Math.min(
+		interpolate(frame, [0, 10], [0, 1], {
+			extrapolateLeft: "clamp",
+			extrapolateRight: "clamp",
+		}),
+		interpolate(frame, [end - 2, end + OVERLAP - 2], [1, 0], {
+			extrapolateLeft: "clamp",
+			extrapolateRight: "clamp",
+		}),
 	)
 }
 
-/** A filmed beat: the real Finpoint screen fills the frame, with the narration as subtitles. */
-function DemoLayer({
+/** One beat's narration: down the left column beside a diagram, or as subtitles under a demo. */
+function Narration({
 	segment,
-	scene,
+	kind,
 	tint,
 	start,
 }: {
 	segment: Segment
-	scene: DemoScene
+	kind: "stage" | "demo"
 	tint: string
 	start: number
 }) {
-	const style = useLayer(segment.durationInFrames)
-	const visible = useProgress(start - 6, 16)
+	const opacity = useFade(segment.durationInFrames) * useProgress(start - 6, 16)
+	if (kind === "stage")
+		return (
+			<div
+				style={{
+					position: "absolute",
+					left: layout.gutter,
+					top: layout.columnTop,
+					bottom: 120,
+					width: layout.columnWidth,
+					display: "flex",
+					flexDirection: "column",
+					justifyContent: "center",
+					gap: 28,
+					opacity,
+				}}
+			>
+				{segment.step ? (
+					<div>
+						<StepPill segment={segment} tint={tint} at={start} />
+					</div>
+				) : null}
+				<Spoken size={48} maxChars={150} lineHeight={1.28} />
+			</div>
+		)
 	return (
-		<SegmentCues segment={segment}>
-			<AbsoluteFill style={{ ...style, opacity: style.opacity * visible }}>
+		<div
+			style={{
+				position: "absolute",
+				left: (layout.width - demoFrame.width) / 2,
+				right: (layout.width - demoFrame.width) / 2,
+				top: layout.demoTop + demoFrame.height + 10,
+				bottom: 14,
+				display: "flex",
+				alignItems: "center",
+				justifyContent: "center",
+				gap: 32,
+				opacity,
+			}}
+		>
+			{segment.step ? <StepPill segment={segment} tint={tint} at={start} /> : null}
+			<Spoken
+				size={40}
+				maxChars={segment.step ? 72 : 92}
+				lineHeight={1.25}
+				align={segment.step ? "left" : "center"}
+				style={{ flex: segment.step ? 1 : undefined }}
+			/>
+		</div>
+	)
+}
+
+/**
+ * Consecutive beats that show the same thing: one filmed take, or one diagram. A run stays mounted
+ * for all of its beats, so the app (or the diagram) never fades, jumps or restarts while the
+ * viewer is following one task; only the narration changes underneath it.
+ */
+type Run = {
+	from: number
+	durationInFrames: number
+	segments: Segment[]
+	/** Where the first segment's visuals may start (after the title card for a chapter's first). */
+	start: number
+} & ({ kind: "demo"; scene: DemoScene } | { kind: "stage"; Scene: Beat })
+
+function runsOf(chapter: Chapter, firstWord: number): Run[] {
+	const runs: Run[] = []
+	chapter.segments.forEach((segment, position) => {
+		const entry = scenes[chapter.id]?.[segment.id]
+		if (!entry) return
+		const last = runs[runs.length - 1]
+		const end = segment.from + segment.durationInFrames
+		if ("demo" in entry) {
+			const joins = last?.kind === "demo" && last.scene.take === entry.demo.take
+			const offset = joins && last ? segment.from - last.from : 0
+			// Each key's cue becomes a frame within the run, found in this beat's own words.
+			const cues = { words: wordsOf(segment), frames: cueMap[segment.audio] ?? [] }
+			const keys = entry.demo.keys.map((key, index) => ({
+				...key,
+				at:
+					offset +
+					(index === 0
+						? 0
+						: typeof key.at === "number"
+							? key.at
+							: cueFrame(cues, key.at ?? "", { nth: key.nth, fallback: index * 60 })),
+				nth: undefined,
+			}))
+			if (joins && last?.kind === "demo") {
+				last.scene = { take: last.scene.take, keys: [...last.scene.keys, ...keys] }
+				last.segments.push(segment)
+				last.durationInFrames = end - last.from
+				return
+			}
+			runs.push({
+				kind: "demo",
+				scene: { take: entry.demo.take, keys },
+				segments: [segment],
+				from: segment.from,
+				durationInFrames: segment.durationInFrames,
+				start: position === 0 ? firstWord : 0,
+			})
+			return
+		}
+		if (last?.kind === "stage" && last.Scene === entry) {
+			last.segments.push(segment)
+			last.durationInFrames = end - last.from
+			return
+		}
+		runs.push({
+			kind: "stage",
+			Scene: entry,
+			segments: [segment],
+			from: segment.from,
+			durationInFrames: segment.durationInFrames,
+			start: position === 0 ? firstWord : 0,
+		})
+	})
+	return runs
+}
+
+/** The words of every beat in a run, timed from the run's start. */
+function RunCues({ run, children }: { run: Run; children: ReactNode }) {
+	const words: string[] = []
+	const frames: number[] = []
+	for (const segment of run.segments) {
+		words.push(...wordsOf(segment))
+		frames.push(...(cueMap[segment.audio] ?? []).map(frame => frame + segment.from - run.from))
+	}
+	return <Cues.Provider value={{ words, frames }}>{children}</Cues.Provider>
+}
+
+const Tint = createContext<string>(color.statement)
+
+/** The picture of a run: an illustrated stage on the right, or the filmed app. */
+function Picture({ run }: { run: Run }) {
+	const style = useLayer(run.durationInFrames)
+	const visible = useProgress(run.start - 6, 16)
+	const [stage, setStage] = useState<HTMLDivElement | null>(null)
+	const tint = useContext(Tint)
+	return (
+		<AbsoluteFill style={{ ...style, opacity: style.opacity * visible }}>
+			{run.kind === "demo" ? (
 				<div
 					style={{
 						position: "absolute",
@@ -175,32 +267,31 @@ function DemoLayer({
 						top: layout.demoTop,
 					}}
 				>
-					<UiDemo scene={scene} tint={tint} />
+					<UiDemo scene={run.scene} tint={tint} until={run.durationInFrames} />
 				</div>
-				<div
-					style={{
-						position: "absolute",
-						left: (layout.width - demoFrame.width) / 2,
-						right: (layout.width - demoFrame.width) / 2,
-						top: layout.demoTop + demoFrame.height + 10,
-						bottom: 14,
-						display: "flex",
-						alignItems: "center",
-						justifyContent: "center",
-						gap: 32,
-					}}
-				>
-					{segment.step ? <StepPill segment={segment} tint={tint} at={start} /> : null}
-					<Spoken
-						size={40}
-						maxChars={segment.step ? 76 : 96}
-						lineHeight={1.25}
-						align={segment.step ? "left" : "center"}
-						style={{ flex: segment.step ? 1 : undefined }}
-					/>
-				</div>
-			</AbsoluteFill>
-		</SegmentCues>
+			) : (
+				<RunCues run={run}>
+					<BeatStart.Provider value={run.start}>
+						<div
+							ref={setStage}
+							style={{
+								position: "absolute",
+								left: layout.stageLeft,
+								top: layout.stageTop,
+								width: 952,
+								height: 520,
+								transform: `scale(${layout.stageScale})`,
+								transformOrigin: "0 0",
+							}}
+						>
+							<StageRoot.Provider value={stage}>
+								<run.Scene />
+							</StageRoot.Provider>
+						</div>
+					</BeatStart.Provider>
+				</RunCues>
+			)}
+		</AbsoluteFill>
 	)
 }
 
@@ -241,6 +332,7 @@ export function GuideChapter({ chapter, number }: { chapter: Chapter; number: nu
 	)
 	const current = segments[index]
 	const segmentProgress = current ? (frame - current.from) / current.durationInFrames : 0
+	const runs = runsOf(chapter, firstWord)
 	return (
 		<AbsoluteFill
 			style={{
@@ -258,30 +350,36 @@ export function GuideChapter({ chapter, number }: { chapter: Chapter; number: nu
 					<Audio src={staticFile(segment.audio)} />
 				</Sequence>
 			))}
-			{segments.map((segment, position) => {
-				const entry = scenes[chapter.id]?.[segment.id]
-				if (!entry) return null
-				const start = position === 0 ? firstWord : 0
-				return (
+			<Tint.Provider value={tint}>
+				{runs.map(run => (
 					<Sequence
-						key={`${segment.audio}-layer`}
-						from={segment.from}
-						durationInFrames={segment.durationInFrames + OVERLAP}
+						key={`${run.from}-picture`}
+						from={run.from}
+						durationInFrames={run.durationInFrames + OVERLAP}
 						premountFor={15}
 					>
-						{"demo" in entry ? (
-							<DemoLayer
-								segment={segment}
-								scene={entry.demo}
-								tint={tint}
-								start={start}
-							/>
-						) : (
-							<StageLayer segment={segment} Scene={entry} tint={tint} start={start} />
-						)}
+						<Picture run={run} />
 					</Sequence>
-				)
-			})}
+				))}
+				{runs.flatMap(run =>
+					run.segments.map(segment => (
+						<Sequence
+							key={`${segment.audio}-narration`}
+							from={segment.from}
+							durationInFrames={segment.durationInFrames + OVERLAP}
+						>
+							<SegmentCues segment={segment}>
+								<Narration
+									segment={segment}
+									kind={run.kind}
+									tint={tint}
+									start={segment === run.segments[0] ? run.start : 0}
+								/>
+							</SegmentCues>
+						</Sequence>
+					)),
+				)}
+			</Tint.Provider>
 			<Header
 				number={number}
 				total={timeline.chapters.length}

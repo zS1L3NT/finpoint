@@ -132,7 +132,7 @@ export function Spoken({
 									<span
 										style={{
 											color: term ?? color.ink,
-											opacity: 0.3 + 0.7 * lit,
+											opacity: 0.45 + 0.55 * lit,
 											fontWeight: amount ? 750 : undefined,
 											whiteSpace: amount ? "nowrap" : undefined,
 											...(amount ? font.numbers : {}),

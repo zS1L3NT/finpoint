@@ -48,7 +48,7 @@ import {
 	Tile,
 } from "./kit"
 import { CountUp, Pop, Rise, Roll, useCue, useProgress, useReduced, useSpring } from "./motion"
-import { alpha, color, font, money } from "./theme"
+import { alpha, color, ease, font, money } from "./theme"
 
 export type Beat = FC
 
@@ -113,13 +113,13 @@ function LunchFlow({
 			<Link
 				from="statement"
 				to="record"
-				fromSide="bottom"
+				fromSide="right"
 				toSide="left"
 				at={allocationAt}
 				tag="−$12"
 				tagAt={allocationAt + 10}
 			/>
-			<At x={0} y={40} w={470} anchor="statement">
+			<At x={0} y={120} w={420} anchor="statement">
 				<Rise at={statementAt}>
 					<StatementCard
 						title={merchant}
@@ -160,7 +160,7 @@ function LunchFlow({
 					/>
 				</Rise>
 			</At>
-			<At x={482} y={300} w={470} anchor="record">
+			<At x={532} y={120} w={420} anchor="record">
 				<Rise at={recordAt}>
 					<RecordCard
 						title="Lunch"
@@ -210,8 +210,9 @@ function StartProblem() {
 
 function StartHelps() {
 	const bank = useAt("bring", 0)
-	const explain = useAt("explain", 40, { nth: 1 })
-	const show = useAt("see", 80)
+	// The link into "Explain it" waits until the bank rows have arrived in the first card.
+	const explain = Math.max(useAt("explain", 40), bank + 30)
+	const show = Math.max(useAt("see", 80), explain + 20)
 	const columns: [string, LucideIcon, string, number][] = [
 		["Bring in bank activity", Import, color.statement, bank],
 		["Explain it", Tags, color.record, explain],
@@ -398,10 +399,18 @@ function SplitFlow({
 	statementAt,
 	firstAt,
 	secondAt,
+	groceriesAt = firstAt + 14,
+	giftAt = secondAt + 14,
+	badge,
 }: {
 	statementAt: number
+	/** When each Allocation connects the Statement to its Record. */
 	firstAt: number
 	secondAt: number
+	/** When each Record appears, if before its Allocation. */
+	groceriesAt?: number
+	giftAt?: number
+	badge?: ReactNode
 }) {
 	const remaining = interpolate(
 		useProgress(firstAt + 12, 24) + useProgress(secondAt + 12, 24),
@@ -413,8 +422,8 @@ function SplitFlow({
 			<Link
 				from="statement"
 				to="groceries"
-				fromSide="bottom"
-				toSide="top"
+				fromSide="right"
+				toSide="left"
 				at={firstAt}
 				tag="−$50"
 				tagAt={firstAt + 10}
@@ -422,13 +431,13 @@ function SplitFlow({
 			<Link
 				from="statement"
 				to="gift"
-				fromSide="bottom"
-				toSide="top"
+				fromSide="right"
+				toSide="left"
 				at={secondAt}
 				tag="−$30"
 				tagAt={secondAt + 10}
 			/>
-			<At x={226} y={0} w={500} anchor="statement">
+			<At x={0} y={100} w={430} anchor="statement">
 				<Rise at={statementAt}>
 					<StatementCard
 						title="NTUC FAIRPRICE"
@@ -467,8 +476,8 @@ function SplitFlow({
 					/>
 				</Rise>
 			</At>
-			<At x={0} y={330} w={440} anchor="groceries">
-				<Rise at={firstAt + 14}>
+			<At x={552} y={10} w={400} anchor="groceries">
+				<Rise at={groceriesAt} x={30} y={0}>
 					<RecordCard
 						title="Groceries"
 						amount={-50}
@@ -477,8 +486,8 @@ function SplitFlow({
 					/>
 				</Rise>
 			</At>
-			<At x={512} y={330} w={440} anchor="gift">
-				<Rise at={secondAt + 14}>
+			<At x={552} y={250} w={400} anchor="gift">
+				<Rise at={giftAt} x={30} y={0}>
 					<RecordCard
 						title="Birthday gift"
 						amount={-30}
@@ -487,6 +496,42 @@ function SplitFlow({
 					/>
 				</Rise>
 			</At>
+			{badge}
+		</>
+	)
+}
+
+/**
+ * The model chapter's Statement, Records and Allocations, built up across four beats on one
+ * diagram: the Statement, then its two Records, then the Allocations between them, then the name
+ * of the pattern. Nothing is rebuilt between beats.
+ */
+function ModelSplit() {
+	const start = useContext(BeatStart)
+	const exactly = useAt("exactly", 40)
+	const groceries = useAt("Groceries", 120)
+	const gift = useAt("gift", 160)
+	const first = useAt("allocated", 220)
+	const second = useAt("other", 250)
+	const pattern = useAt("pattern", 300)
+	return (
+		<>
+			<At x={0} y={330} w={430}>
+				<Rise at={exactly}>
+					<div style={{ display: "flex", gap: 12 }}>
+						<Chip tint={color.statement}>From your bank</Chip>
+						<Chip tint={color.statement}>Never edited</Chip>
+					</div>
+				</Rise>
+			</At>
+			<SplitFlow
+				statementAt={start}
+				groceriesAt={groceries}
+				giftAt={gift}
+				firstAt={Math.max(first, gift + 20)}
+				secondAt={Math.max(second, gift + 40)}
+				badge={<PatternBadge at={pattern}>1 Statement → several Records</PatternBadge>}
+			/>
 		</>
 	)
 }
@@ -517,7 +562,6 @@ function RepaymentFlow({
 				to="record"
 				toSide="left"
 				at={backAt + 10}
-				tint={color.income}
 				tag="+$60"
 				tagAt={backAt + 20}
 			/>
@@ -528,13 +572,7 @@ function RepaymentFlow({
 			</At>
 			<At x={0} y={250} w={350} anchor="paynow">
 				<Rise at={backAt}>
-					<StatementCard
-						title="PAYNOW"
-						amount={60}
-						meta="11 Oct"
-						compact
-						tint={color.income}
-					/>
+					<StatementCard title="PAYNOW FROM SAM" amount={60} meta="17 Oct" compact />
 				</Rise>
 			</At>
 			<At x={572} y={110} w={380} anchor="record">
@@ -547,7 +585,11 @@ function RepaymentFlow({
 						right={
 							<Roll
 								at={backAt + 24}
-								before={<span style={{ ...big, fontSize: 34 }}>−$90</span>}
+								before={
+									<span style={{ ...big, fontSize: 34, color: color.dim }}>
+										−$90
+									</span>
+								}
 								after={
 									<span style={{ ...big, fontSize: 34, color: color.record }}>
 										−$30
@@ -562,7 +604,7 @@ function RepaymentFlow({
 			<At x={0} y={410} w={952} style={{ textAlign: "center" }}>
 				<Rise at={totalAt}>
 					<div style={{ ...font.numbers, fontSize: 40, fontWeight: 750 }}>
-						−$90 <span style={{ color: color.income }}>+ $60</span> ={" "}
+						<span style={{ color: color.statement }}>−$90 + $60</span> ={" "}
 						<span style={{ color: color.record }}>−$30</span>
 						<span
 							style={{
@@ -584,19 +626,30 @@ function RepaymentFlow({
 function RepaymentProblem() {
 	const pay = useAt("paid", 0)
 	const back = useAt("back", 40)
-	const own = useAt("really", 80)
+	const later = useAt("later", 60)
+	const own = useAt("really", 100)
 	return (
 		<>
 			<At x={0} y={20} w={460} style={{ display: "flex", flexDirection: "column", gap: 24 }}>
 				<Rise at={pay} x={-30} y={0}>
-					<StatementCard title="DINNER" amount={-90} meta="You pay for the table" />
+					<StatementCard
+						title="SAKURA DINING"
+						amount={-90}
+						meta="10 Oct · You pay for the table"
+					/>
+				</Rise>
+				<Rise at={later} y={10}>
+					<div style={{ display: "flex", justifyContent: "center" }}>
+						<Chip tint={color.pending} size={24}>
+							A week later
+						</Chip>
+					</div>
 				</Rise>
 				<Rise at={back} x={-30} y={0}>
 					<StatementCard
-						title="PAYNOW"
+						title="PAYNOW FROM SAM"
 						amount={60}
-						meta="Sam pays you back"
-						tint={color.income}
+						meta="17 Oct · Sam pays you back"
 					/>
 				</Rise>
 			</At>
@@ -647,11 +700,15 @@ const lanes: [string, LucideIcon, string][] = [
 ]
 
 function TreatmentsHelps({ items: show = true }: { items?: boolean }) {
+	// Lanes arrive in the order they're named; the first beat names Transfer as "not at all".
+	const income = useAt("income", 0)
+	const spending = Math.max(useAt("spending", 20), income + 6)
+	const saving = Math.max(useAt("saving", 40), spending + 6)
 	const at = [
-		useAt("Income", 0),
-		useAt("Spending", 20),
-		useAt("Saving", 40),
-		useAt("Transfer", 60),
+		income,
+		spending,
+		saving,
+		Math.max(useAt(show ? "Transfer" : "not", 60), saving + 6),
 	]
 	const items: [number, string, string][] = [
 		[0, "Salary", "+$3,000"],
@@ -826,8 +883,8 @@ function TargetsCheck() {
 
 function DateRange({
 	at,
-	from = 3,
-	to = 10,
+	from = 0,
+	to = 7,
 	label,
 }: {
 	at: number
@@ -995,7 +1052,7 @@ function SyncHelps() {
 	const local = useAt("locally", 0)
 	const backup = useAt("backup", 40)
 	const drive = useAt("Drive", 70)
-	const broker = useAt("broker", 140)
+	const broker = useAt("never", 140)
 	return (
 		<>
 			<Link from="browser" to="drive" at={drive + 10} tint={color.record} />
@@ -1065,7 +1122,7 @@ function SyncHelps() {
 					>
 						<IconTile icon={Lock} tint={color.neutral} size={56} />
 						<div style={{ fontSize: 24, lineHeight: 1.35 }}>
-							The sign-in broker never sees your financial tables
+							Finpoint’s servers never receive your financial data
 						</div>
 					</Card>
 				</Rise>
@@ -1082,12 +1139,38 @@ const routine: [string, LucideIcon, string][] = [
 	["Back up", Download, color.record],
 ]
 
-function Loop({ at, words }: { at: number[]; words?: boolean }) {
+/**
+ * The routine as a ring. Each step lights up as it is named and the arc grows smoothly to it;
+ * nodes keep one size (the lit one glows rather than grows) so nothing shifts on the ring, and
+ * labels sit outside the ring so the arc never runs through them.
+ */
+function Loop({ at: cues, words }: { at: number[]; words?: boolean }) {
 	const frame = useCurrentFrame()
+	// Steps always light in order around the ring, even if a cue word is missing.
+	const at = cues.reduce<number[]>(
+		(list, value, index) => [
+			...list,
+			index ? Math.max(value, (list[index - 1] ?? 0) + 20) : value,
+		],
+		[],
+	)
 	const reduced = useReduced()
-	const spin = useProgress(at[0] ?? 0, 40)
+	const radius = 190
+	const center = { x: 476, y: 260 }
 	const lit = at.reduce((count, value) => (frame >= value ? count + 1 : count), 0) - 1
-	const center = { x: 476, y: 250 }
+	// How far round the arc has grown: up to the node most recently named, eased between nodes.
+	const reach = at.reduce(
+		(sum, value) =>
+			sum +
+			interpolate(frame, [value, value + (reduced ? 1 : 24)], [0, 1], {
+				extrapolateLeft: "clamp",
+				extrapolateRight: "clamp",
+				easing: ease.out,
+			}),
+		0,
+	)
+	const arc = Math.max(0, reach - 1) / routine.length
+	const done = reach >= routine.length
 	return (
 		<>
 			<svg
@@ -1099,7 +1182,7 @@ function Loop({ at, words }: { at: number[]; words?: boolean }) {
 				<circle
 					cx={center.x}
 					cy={center.y}
-					r={200}
+					r={radius}
 					stroke={color.line}
 					strokeWidth={4}
 					fill="none"
@@ -1107,75 +1190,78 @@ function Loop({ at, words }: { at: number[]; words?: boolean }) {
 				<circle
 					cx={center.x}
 					cy={center.y}
-					r={200}
+					r={radius}
 					stroke={color.record}
 					strokeWidth={5}
 					fill="none"
 					pathLength={1}
-					strokeDasharray="1 1"
-					strokeDashoffset={1 - (spin * Math.max(0, lit + 1)) / routine.length}
+					strokeDasharray={`${done ? 1 : arc} 1`}
 					transform={`rotate(-90 ${center.x} ${center.y})`}
 					strokeLinecap="round"
 				/>
-				{!reduced && spin >= 1 && (
-					<circle
-						cx={center.x + Math.cos(frame / 30 - Math.PI / 2) * 200}
-						cy={center.y + Math.sin(frame / 30 - Math.PI / 2) * 200}
-						r={9}
-						fill={color.ink}
-						style={{ filter: `drop-shadow(0 0 10px ${color.record})` }}
-					/>
-				)}
 			</svg>
 			{routine.map(([label, icon, tint], index) => {
 				const angle = (index / routine.length) * Math.PI * 2 - Math.PI / 2
+				const x = center.x + Math.cos(angle) * radius
+				const y = center.y + Math.sin(angle) * radius
+				const outward = Math.cos(angle)
+				const size = 80
 				return (
-					<At
-						key={label}
-						x={center.x + Math.cos(angle) * 200 - 80}
-						y={center.y + Math.sin(angle) * 200 - 46}
-						w={160}
-						style={{
-							display: "flex",
-							flexDirection: "column",
-							alignItems: "center",
-							gap: 8,
-						}}
-					>
-						<Pop at={at[index] ?? 0}>
-							<IconTile
-								icon={icon}
-								tint={tint}
-								size={index === lit ? 92 : 80}
-								style={{
-									background: `linear-gradient(145deg, ${alpha(tint, 0.32)}, ${alpha(tint, 0.1)}), ${color.night}`,
-									boxShadow:
-										index === lit
-											? `0 0 40px ${alpha(tint, 0.7)}, inset 0 0 0 2px ${tint}`
-											: undefined,
-								}}
-							/>
-						</Pop>
-						{words !== false && (
-							<Rise at={(at[index] ?? 0) + 4}>
-								<div
+					<div key={label}>
+						<At x={x - size / 2} y={y - size / 2} w={size}>
+							<Pop at={at[index] ?? 0}>
+								<IconTile
+									icon={icon}
+									tint={tint}
+									size={size}
 									style={{
-										fontSize: 22,
-										fontWeight: 700,
-										whiteSpace: "nowrap",
-										padding: "4px 12px",
-										borderRadius: 99,
-										background: alpha(color.night, 0.8),
+										background: `linear-gradient(145deg, ${alpha(tint, 0.32)}, ${alpha(tint, 0.1)}), ${color.night}`,
+										boxShadow:
+											index === lit
+												? `0 0 40px ${alpha(tint, 0.7)}, inset 0 0 0 2.5px ${tint}`
+												: `inset 0 0 0 1.5px ${alpha(tint, 0.5)}`,
 									}}
-								>
-									{label}
-								</div>
-							</Rise>
+								/>
+							</Pop>
+						</At>
+						{words !== false && (
+							<At
+								x={
+									Math.abs(outward) < 0.3
+										? x - 120
+										: outward > 0
+											? x + size / 2 + 14
+											: x - size / 2 - 14 - 240
+								}
+								y={Math.abs(outward) < 0.3 ? y - size / 2 - 50 : y - 18}
+								w={240}
+								style={{
+									textAlign:
+										Math.abs(outward) < 0.3
+											? "center"
+											: outward > 0
+												? "left"
+												: "right",
+								}}
+							>
+								<Rise at={(at[index] ?? 0) + 4} y={8}>
+									<span
+										style={{
+											fontSize: 24,
+											fontWeight: 700,
+											whiteSpace: "nowrap",
+											color: index === lit ? color.ink : color.dim,
+										}}
+									>
+										{label}
+									</span>
+								</Rise>
+							</At>
 						)}
-					</At>
+					</div>
 				)
 			})}
-			<At x={center.x - 110} y={center.y - 40} w={220} style={{ textAlign: "center" }}>
+			<At x={center.x - 110} y={center.y - 44} w={220} style={{ textAlign: "center" }}>
 				<Rise at={(at[0] ?? 0) + 10}>
 					<RotateCcw size={46} color={color.record} />
 					<div style={{ fontSize: 22, color: color.dim, marginTop: 4 }}>Each visit</div>
@@ -1316,12 +1402,7 @@ function StartExplain() {
 				</Rise>
 				<Rise at={start + 16}>
 					<div data-anchor="paynow">
-						<StatementCard
-							title="PAYNOW FROM SAM"
-							amount={60}
-							compact
-							tint={color.income}
-						/>
+						<StatementCard title="PAYNOW FROM SAM" amount={60} compact />
 					</div>
 				</Rise>
 			</At>
@@ -1340,71 +1421,8 @@ function StartExplain() {
 			<Link from="supermarket" to="groceries" at={(at[0] ?? 0) + 4} pulses={false} />
 			<Link from="supermarket" to="gift" at={(at[1] ?? 0) + 4} pulses={false} />
 			<Link from="dinner" to="dinner-record" at={(at[2] ?? 0) + 4} pulses={false} />
-			<Link
-				from="paynow"
-				to="dinner-record"
-				at={(at[2] ?? 0) + 14}
-				tint={color.income}
-				pulses={false}
-			/>
+			<Link from="paynow" to="dinner-record" at={(at[2] ?? 0) + 14} pulses={false} />
 		</>
-	)
-}
-
-function ModelStatement() {
-	const start = useContext(BeatStart)
-	const exactly = useAt("exactly", 40)
-	return (
-		<At x={176} y={90} w={600} style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-			<Rise at={start}>
-				<Kicker tint={color.statement}>Statement</Kicker>
-			</Rise>
-			<Rise at={start + 6}>
-				<StatementCard
-					title="NTUC FAIRPRICE BEDOK"
-					amount={-80}
-					meta="OCBC 360 Account · 5 Oct"
-					glow={0.5}
-				/>
-			</Rise>
-			<Rise at={exactly}>
-				<div style={{ display: "flex", gap: 12 }}>
-					<Chip tint={color.statement}>From your bank</Chip>
-					<Chip tint={color.statement}>Never edited</Chip>
-				</div>
-			</Rise>
-		</At>
-	)
-}
-
-function ModelRecords() {
-	const start = useContext(BeatStart)
-	const groceries = useAt("Groceries", 40)
-	const gift = useAt("gift", 80)
-	return (
-		<At x={176} y={40} w={600} style={{ display: "flex", flexDirection: "column", gap: 22 }}>
-			<Rise at={start}>
-				<Kicker tint={color.record}>Records</Kicker>
-			</Rise>
-			<Rise at={groceries}>
-				<RecordCard
-					title="Groceries"
-					amount={-50}
-					icon={ShoppingBasket}
-					glow={0.4}
-					chips={<Chip tint={color.pink}>Groceries</Chip>}
-				/>
-			</Rise>
-			<Rise at={gift}>
-				<RecordCard
-					title="Birthday gift"
-					amount={-30}
-					icon={Gift}
-					glow={0.4}
-					chips={<Chip tint={color.pink}>Gifts</Chip>}
-				/>
-			</Rise>
-		</At>
 	)
 }
 
@@ -1565,7 +1583,7 @@ function DownloadStep() {
 	const start = useContext(BeatStart)
 	const each = useAt("each", 40)
 	return (
-		<At x={76} y={40} w={800} style={{ display: "flex", flexDirection: "column", gap: 26 }}>
+		<At x={56} y={20} w={840} style={{ display: "flex", flexDirection: "column", gap: 26 }}>
 			{(
 				[
 					["OCBC 360 Account", "ocbc-october.csv", "CSV"],
@@ -1576,16 +1594,18 @@ function DownloadStep() {
 					<Card
 						tint={color.statement}
 						style={{
-							padding: "20px 26px",
+							padding: "20px 48px 20px 26px",
 							display: "flex",
 							alignItems: "center",
-							gap: 24,
+							gap: 28,
 						}}
 					>
 						<IconTile icon={Wallet} tint={color.statement} size={60} />
 						<div style={{ flex: 1, fontSize: 28, fontWeight: 650 }}>{account}</div>
 						<Download size={30} color={color.dim} />
-						<FileDoc ext={ext} name={file} tint={color.record} size={0.65} />
+						<div style={{ width: 150, display: "flex", justifyContent: "center" }}>
+							<FileDoc ext={ext} name={file} tint={color.record} size={0.6} />
+						</div>
 					</Card>
 				</Rise>
 			))}
@@ -1602,51 +1622,63 @@ function DashFromRecords() {
 	const start = useContext(BeatStart)
 	const records = useAt("Records", 30)
 	const never = useAt("never", 90)
+	const rows: [string, number, string][] = [
+		["Lunch", -12, "spending"],
+		["Groceries", -50, "spending"],
+		["Birthday gift", -30, "spending"],
+		["Dinner with Sam", -30, "spending"],
+		["Salary", 3000, "income"],
+	]
 	return (
 		<>
-			<At
-				x={0}
-				y={20}
-				w={400}
-				anchor="records"
-				style={{ display: "flex", flexDirection: "column", gap: 14 }}
-			>
-				<Kicker tint={color.record}>Records</Kicker>
-				{(
-					[
-						["Groceries", -50],
-						["Birthday gift", -30],
-						["Dinner with Sam", -30],
-						["Salary", 3000],
-					] as const
-				).map(([title, amount], index) => (
+			<At x={0} y={0} w={360} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+				<Kicker tint={color.record}>Records · October</Kicker>
+				{rows.map(([title, amount], index) => (
 					<Rise key={title} at={start + index * 6} x={-20} y={0}>
-						<RecordCard title={title} amount={amount} compact />
+						<div data-anchor={`record-${index}`}>
+							<RecordCard title={title} amount={amount} compact />
+						</div>
 					</Rise>
 				))}
 			</At>
-			<Link from="records" to="tiles" at={records} tint={color.record} />
+			{rows.map(([title, , tile], index) => (
+				<Link
+					key={title}
+					from={`record-${index}`}
+					to={tile}
+					fromSide="right"
+					toSide="left"
+					at={records + index * 6}
+					tint={tile === "income" ? color.income : color.spending}
+					pulses={false}
+				/>
+			))}
 			<At
-				x={580}
-				y={60}
-				w={372}
-				anchor="tiles"
-				style={{ display: "flex", flexDirection: "column", gap: 18 }}
+				x={600}
+				y={40}
+				w={352}
+				style={{ display: "flex", flexDirection: "column", gap: 70 }}
 			>
 				<Rise at={records + 10}>
-					<Tile
-						label="Spending · October"
-						tint={color.spending}
-						value={<CountUp value={110} at={records + 10} signed={false} />}
-					/>
+					<div data-anchor="spending">
+						<Tile
+							label="Spending · October"
+							tint={color.spending}
+							value={<CountUp value={122} at={records + 10} signed={false} />}
+						/>
+					</div>
 				</Rise>
-				<Rise at={records + 22}>
-					<Tile
-						label="Income · October"
-						tint={color.income}
-						value={<CountUp value={3000} at={records + 22} signed={false} />}
-					/>
+				<Rise at={records + 34}>
+					<div data-anchor="income">
+						<Tile
+							label="Income · October"
+							tint={color.income}
+							value={<CountUp value={3000} at={records + 34} signed={false} />}
+						/>
+					</div>
 				</Rise>
+			</At>
+			<At x={600} y={450} w={352} style={{ display: "flex", justifyContent: "center" }}>
 				<Rise at={never}>
 					<Chip tint={color.danger} size={22}>
 						Statements alone don’t count
@@ -1703,58 +1735,63 @@ function PendingWhen() {
 	)
 }
 
-function SofaPending() {
+/** The two reasons a Record is Pending: amounts that don't match, or bank activity still expected. */
+function PendingReasons() {
 	const start = useContext(BeatStart)
-	const deposit = useAt("deposit", 20)
-	const balance = useAt("balance", 50)
-	const pending = useAt("Pending", 90)
+	const mismatch = Math.max(start, useAt("match", 20))
+	const expected = Math.max(mismatch + 20, useAt("relies", 80))
+	const reasons: [string, number, ReactNode][] = [
+		[
+			"Amounts don’t match yet",
+			mismatch,
+			<>
+				<StatementCard title="SISTIC CONCERT" amount={-200} compact />
+				<RecordCard
+					title="Concert with Jo"
+					amount={-100}
+					compact
+					icon={Users}
+					status={<Status pending at={mismatch + 16} />}
+				/>
+			</>,
+		],
+		[
+			"Bank activity still expected",
+			expected,
+			<>
+				<StatementCard title="SOFA DEPOSIT" amount={-50} compact />
+				<StatementCard title="Balance on delivery" amount={-150} compact pending />
+				<RecordCard
+					title="Sofa"
+					amount={-200}
+					compact
+					icon={House}
+					status={<Status pending at={expected + 16} />}
+				/>
+			</>,
+		],
+	]
 	return (
 		<>
-			<Link from="deposit" to="sofa" toSide="left" at={deposit + 10} />
-			<Link
-				from="balance"
-				to="sofa"
-				toSide="left"
-				at={balance + 10}
-				dashed
-				pulses={false}
-				tint={color.pending}
-			/>
-			<At x={0} y={40} w={380} anchor="deposit">
-				<Rise at={deposit}>
-					<StatementCard title="SOFA DEPOSIT" amount={-50} compact meta="Paid today" />
-				</Rise>
-			</At>
-			<At x={0} y={300} w={380} anchor="balance">
-				<Rise at={balance}>
-					<div
-						style={{
-							border: `2.5px dashed ${alpha(color.pending, 0.6)}`,
-							borderRadius: 26,
-						}}
-					>
-						<StatementCard
-							title="Balance on delivery"
-							amount={-150}
-							compact
-							meta="Not paid yet"
-							pending
-							style={{ background: "transparent", boxShadow: "none" }}
-						/>
-					</div>
-				</Rise>
-			</At>
-			<At x={560} y={170} w={392} anchor="sofa">
-				<Rise at={start}>
-					<RecordCard
-						title="Sofa"
-						amount={-200}
-						icon={House}
-						glow={0.3}
-						status={<Status pending at={pending} />}
-					/>
-				</Rise>
-			</At>
+			{reasons.map(([title, at, body], index) => (
+				<At key={title} x={index * 488} y={0} w={464}>
+					<Rise at={at} y={30}>
+						<Card tint={color.pending} glow={0.2} style={{ padding: 22 }}>
+							<Kicker tint={color.pending}>{title}</Kicker>
+							<div
+								style={{
+									display: "flex",
+									flexDirection: "column",
+									gap: 10,
+									marginTop: 14,
+								}}
+							>
+								{body}
+							</div>
+						</Card>
+					</Rise>
+				</At>
+			))}
 		</>
 	)
 }
@@ -1896,7 +1933,7 @@ function BucketsScene() {
 		<>
 			{buckets.map(([name, categories, tint, at], index) => (
 				<At key={name} x={index * 240} y={40} w={224}>
-					<Rise at={Math.max(start, at)} y={40}>
+					<Rise at={Math.min(Math.max(start, at), start + 12 + index * 8)} y={40}>
 						<Card tint={tint} glow={0.25} style={{ padding: 22, height: 380 }}>
 							<IconTile icon={Target} tint={tint} size={56} />
 							<div style={{ fontSize: 30, fontWeight: 750, margin: "16px 0 6px" }}>
@@ -2149,25 +2186,11 @@ export const scenes: Record<string, Record<string, SceneEntry>> = {
 	},
 	model: {
 		three: ModelHelps,
-		statement: ModelStatement,
-		record: ModelRecords,
-		allocation: () => (
-			<SplitFlow
-				statementAt={useAt("Statement", 0)}
-				firstAt={useAt("Groceries", 40)}
-				secondAt={useAt("gift", 80)}
-			/>
-		),
-		split: () => (
-			<>
-				<SplitFlow
-					statementAt={useContext(BeatStart)}
-					firstAt={useContext(BeatStart) + 6}
-					secondAt={useContext(BeatStart) + 12}
-				/>
-				<PatternBadge at={useAt("one", 10)}>1 Statement → several Records</PatternBadge>
-			</>
-		),
+		// One diagram for four beats: it builds up rather than being redrawn.
+		statement: ModelSplit,
+		record: ModelSplit,
+		allocation: ModelSplit,
+		split: ModelSplit,
 		combine: () => (
 			<>
 				<RepaymentFlow
@@ -2182,18 +2205,21 @@ export const scenes: Record<string, Record<string, SceneEntry>> = {
 			</>
 		),
 		simple: () => (
-			<LunchFlow
-				statementAt={useAt("Statement", 20)}
-				recordAt={useAt("Lunch", 50, { nth: 1 })}
-				allocationAt={useAt("explained", 60)}
-			/>
+			<>
+				<LunchFlow
+					statementAt={useAt("Statement", 20)}
+					recordAt={useAt("Lunch", 50, { nth: 1 })}
+					allocationAt={useAt("Lunch", 60, { nth: 1, offset: 12 })}
+				/>
+				<PatternBadge at={useAt("one", 30)}>1 Statement → 1 Record</PatternBadge>
+			</>
 		),
 	},
 	import: {
 		intro: ImportIntro,
 		banks: demo("import", [
 			{ hold: "start", focus: "card" },
-			{ at: "DBS", hold: "start", focus: "banks", highlight: "banks" },
+			{ at: "DBS", hold: "start", focus: "card", highlight: "banks" },
 		]),
 		accounts: AccountsScene,
 		revolut: demo("revolut", [
@@ -2204,23 +2230,25 @@ export const scenes: Record<string, Record<string, SceneEntry>> = {
 		download: DownloadStep,
 		choose: demo("import", [
 			{ hold: "start", focus: "card" },
-			{ at: 0, play: "bank", focus: "card", speed: 1.3 },
-			{ at: "add", play: "files", focus: "card", speed: 1.6 },
+			{ at: "choose", play: "bank", focus: "card", highlight: "ocbc" },
+			{ at: "add", play: "files", focus: "card", highlight: "files" },
 		]),
 		result: demo("import", [
-			{ hold: "files", focus: "card" },
-			{ at: "Import", play: "result" },
-			{ at: "check", hold: "result", highlight: "result" },
+			{ at: "Import", play: "result", focus: "card" },
+			{ at: "check", hold: "result", focus: "card", highlight: "result" },
 		]),
 		next: demo("import", [
-			{ hold: "result", highlight: "allocate" },
+			{ hold: "result", focus: "card", highlight: "allocate" },
 			{ at: "waiting", play: "allocator" },
 		]),
 	},
 	allocator: {
-		list: demo("allocator", [{ hold: "start" }, { at: "lists", play: "scrolled" }]),
+		list: demo("allocator", [
+			{ hold: "start" },
+			{ at: "lists", play: "scrolled", highlight: "list" },
+		]),
 		left: demo("split", [
-			{ hold: "left" },
+			{ hold: "left", focus: "supermarket" },
 			{
 				at: "left",
 				hold: "left",
@@ -2233,38 +2261,43 @@ export const scenes: Record<string, Record<string, SceneEntry>> = {
 	lunch: {
 		select: demo("lunch", [
 			{ hold: "start" },
-			{ at: "lunch", play: "row" },
+			{ at: "lunch", play: "row", highlight: "lunch" },
 			{ at: "click", play: "selected" },
 			{ at: "bar", hold: "selected", highlight: "bar" },
 		]),
 		create: demo("lunch", [
-			{ hold: "selected", highlight: "create" },
-			{ at: "Create", play: "creator" },
+			{ highlight: "create", hold: "selected" },
+			{ at: "Create", play: "creator", focus: "dialog" },
 			{ at: "attached", hold: "creator", highlight: "attached" },
 			{ at: "amount", hold: "creator", highlight: "amount" },
 		]),
-		fill: demo("lunch", [{ hold: "creator" }, { at: 0, play: "filled", speed: 1.6 }]),
+		fill: demo("lunch", [
+			{ hold: "creator" },
+			{ at: "title", play: "filled", focus: "dialog", highlight: ["title", "category"] },
+		]),
 		ignore: demo("lunch", [
 			{ hold: "filled" },
 			{ at: "Treatment", play: "analytics", focus: "analytics" },
 			{
 				at: "Category",
 				hold: "analytics",
-				focus: "analytics",
 				highlight: "analytics",
 				note: { box: "analytics", text: "Filled in by your Category" },
 			},
 		]),
 		save: demo("lunch", [
-			{ hold: "analytics", focus: "analytics" },
-			{ at: "save", play: "saved" },
+			{ hold: "analytics" },
+			{ at: "save", play: "saved", highlight: "list" },
 		]),
 	},
 	split: {
-		select: demo("split", [{ hold: "start" }, { at: "Select", play: "creator" }]),
+		select: demo("split", [
+			{ hold: "start", highlight: "supermarket" },
+			{ at: "Select", play: "creator", focus: "dialog" },
+		]),
 		amount: demo("split", [
 			{ hold: "creator" },
-			{ at: "Call", play: "filled", speed: 1.5 },
+			{ at: "Call", play: "filled", focus: "dialog" },
 			{
 				at: "unexplained",
 				hold: "filled",
@@ -2274,12 +2307,12 @@ export const scenes: Record<string, Record<string, SceneEntry>> = {
 		]),
 		left: demo("split", [
 			{ hold: "filled" },
-			{ at: "Save", play: "left", speed: 1.2 },
+			{ at: "Save", play: "left" },
 			{ at: "left", hold: "left", highlight: "allocable" },
 		]),
 		gift: demo("split", [
 			{ hold: "left" },
-			{ at: "Select", play: "gift", speed: 1.5 },
+			{ at: "Select", play: "gift", focus: "dialog" },
 			{
 				at: "fills",
 				hold: "gift",
@@ -2287,6 +2320,7 @@ export const scenes: Record<string, Record<string, SceneEntry>> = {
 				note: { box: "allocation", text: "$30 left to allocate" },
 			},
 		]),
+		save: demo("split", [{ hold: "gift" }, { at: "Save", play: "saved", highlight: "list" }]),
 		done: () => (
 			<SplitFlow
 				statementAt={useContext(BeatStart)}
@@ -2298,14 +2332,14 @@ export const scenes: Record<string, Record<string, SceneEntry>> = {
 	repayment: {
 		select: demo("combine", [
 			{ hold: "start" },
-			{ at: "Allocator", play: "rows" },
+			{ at: "Allocator", play: "rows", highlight: ["dinner", "paynow"] },
 			{ at: "$90", play: "dinner" },
 			{ at: "$60", play: "selected" },
 			{ at: "total", hold: "selected", highlight: "bar" },
 		]),
 		create: demo("combine", [
 			{ hold: "selected" },
-			{ at: "Choose", play: "filled", speed: 1.5 },
+			{ at: "Choose", play: "filled", focus: "dialog" },
 			{
 				at: "comes",
 				hold: "filled",
@@ -2313,43 +2347,55 @@ export const scenes: Record<string, Record<string, SceneEntry>> = {
 				note: { box: "amount", text: "−$90 + $60 = −$30" },
 			},
 		]),
-		done: () => (
-			<RepaymentFlow
-				payAt={useContext(BeatStart)}
-				backAt={useContext(BeatStart) + 10}
-				recordAt={useAt("single", 20)}
-				totalAt={useAt("$30", 60)}
-			/>
-		),
+		done: demo("combine", [
+			{ hold: "filled" },
+			{ at: "Save", play: "saved" },
+			{
+				at: "single",
+				play: "record",
+				highlight: "dinner",
+				note: { box: "dinner", text: "−$30: your real share" },
+			},
+		]),
 	},
 	dashboard: {
 		records: DashFromRecords,
 		empty: LunchProblem,
 		real: demo("dashboard", [
 			{ hold: "start" },
-			{ at: "spent", play: "spending", focus: "metrics", highlight: "spending" },
+			{
+				at: "spent",
+				play: "spending",
+				highlight: "spending",
+				note: { box: "spending", text: "Lunch + Groceries + Gift + Dinner = $122" },
+			},
 		]),
 		categories: demo("dashboard", [
-			{ hold: "spending", focus: "metrics" },
+			{ hold: "spending" },
 			{ at: "broken", play: "breakdown" },
-			{ at: "Categories", hold: "breakdown", highlight: "mix" },
+			{
+				at: "Categories",
+				hold: "breakdown",
+				highlight: "mix",
+				note: { box: "legend", text: "One colour per Category" },
+			},
 		]),
 	},
 	pending: {
 		when: PendingWhen,
 		concert: demo("pending", [
 			{ hold: "start" },
-			{ at: "$200", play: "creator", speed: 1.2 },
-			{ at: "back", play: "flag", speed: 1.6 },
+			{ at: "$200", play: "creator", focus: "dialog" },
+			{ at: "back", play: "flag", focus: "dialog" },
 			{ at: "share", hold: "flag", highlight: ["amount", "attached"] },
 		]),
 		flag: demo("pending", [
-			{ hold: "flag", highlight: ["amount", "attached"] },
-			{ at: "warns", hold: "flag", focus: "pending", highlight: "pending" },
+			{ hold: "flag" },
+			{ at: "warns", hold: "flag", highlight: "pending" },
 		]),
 		list: demo("pending", [
 			{ hold: "flag" },
-			{ at: 0, play: "records", speed: 1.5 },
+			{ at: 0, play: "records" },
 			{
 				at: "marked",
 				hold: "records",
@@ -2359,30 +2405,39 @@ export const scenes: Record<string, Record<string, SceneEntry>> = {
 		]),
 		attach: demo("attach", [
 			{ hold: "start" },
-			{ at: "select", play: "selected" },
+			{ at: "select", play: "selected", highlight: "paynow" },
 			{ at: "Attach", play: "sheet" },
 			{ at: "suggests", hold: "sheet", highlight: "concert" },
 		]),
 		complete: demo("attach", [
 			{ hold: "sheet" },
-			{ at: 0, play: "editor" },
+			{ at: 0, play: "editor", focus: "dialog" },
 			{ at: "combines", hold: "editor", highlight: "attached" },
+			{
+				at: "Save",
+				play: "complete",
+				highlight: "concert",
+				note: { box: "concert", text: "No longer Pending" },
+			},
 		]),
-		meaning: SofaPending,
+		meaning: PendingReasons,
 	},
 	"pending-statements": {
 		why: PendingGap,
 		create: demo("placeholder", [
 			{ hold: "start", highlight: "create" },
-			{ at: 0, play: "filled", speed: 1.7 },
+			{ at: "choose", play: "filled", focus: "dialog" },
 			{ at: "description", hold: "filled", highlight: ["account", "amount", "description"] },
 		]),
 		explain: demo("placeholder", [
 			{ hold: "filled" },
-			{ at: 0, play: "allocator", speed: 1.2 },
+			{ at: 0, play: "allocator" },
+			{ at: "marked", hold: "allocator", highlight: "badge" },
+			{ at: "Explain", play: "creator", focus: "dialog", speed: 4 },
 			{
-				at: "marked",
-				hold: "allocator",
+				at: "counts",
+				play: "records",
+				speed: 2,
 				highlight: "badge",
 				note: { box: "badge", text: "Counts now, stays Pending" },
 			},
@@ -2403,13 +2458,17 @@ export const scenes: Record<string, Record<string, SceneEntry>> = {
 		examples: CategoryExamples,
 		defaults: demo("categories", [
 			{ hold: "hover" },
-			{ at: "Category", play: "defaults" },
+			{ at: "Category", play: "defaults", focus: "defaults" },
 			{ at: "treatment", hold: "defaults", highlight: "defaults" },
 		]),
 	},
 	treatments: {
 		what: () => <TreatmentsHelps items={false} />,
 		examples: () => <TreatmentsHelps />,
+		dashboard: demo("dashboard", [
+			{ hold: "spending", highlight: ["income", "spending"] },
+			{ at: "Saving", play: "saving", highlight: "saving" },
+		]),
 		override: demo("lunch", [
 			{ hold: "analytics", focus: "analytics", highlight: "analytics" },
 		]),
@@ -2419,8 +2478,8 @@ export const scenes: Record<string, Record<string, SceneEntry>> = {
 		daily: TargetsCheck,
 		target: demo("buckets", [
 			{ hold: "start" },
-			{ at: "Give", play: "target", speed: 1.5 },
-			{ at: "one", play: "scope", speed: 1.3 },
+			{ at: "Give", play: "target", focus: "dialog" },
+			{ at: "one", play: "scope", focus: "dialog" },
 			{ at: "onward", hold: "scope", highlight: "applies" },
 		]),
 		compare: demo("buckets", [
@@ -2433,9 +2492,9 @@ export const scenes: Record<string, Record<string, SceneEntry>> = {
 		what: BudgetsProblem,
 		create: demo("budgets", [
 			{ hold: "start" },
-			{ at: "Create", play: "dates", speed: 1.3 },
-			{ at: "Automatic", play: "automatic" },
-			{ at: "attached", hold: "automatic", highlight: "automatic" },
+			{ at: "Create", play: "dates", focus: "dialog", highlight: "range" },
+			{ at: "Automatic", play: "automatic", focus: "dialog", highlight: "automatic" },
+			{ at: "new", play: "created" },
 		]),
 		own: BudgetsHelps,
 	},

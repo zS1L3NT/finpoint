@@ -59,7 +59,7 @@ export const guideChapters: GuideChapter[] = [
 			},
 			{
 				id: "dinner",
-				say: "Or you paid $90 for dinner with a friend, and they sent you $60 back for their share. Your bank shows two entries: money out, and money in. What dinner really cost you was $30.",
+				say: "Or you paid $90 for dinner with a friend, and they only sent their $60 share back a week later. Your bank shows two entries, a week apart: money out, and money in. What dinner really cost you was $30.",
 			},
 			{
 				id: "explain",
@@ -247,6 +247,11 @@ export const guideChapters: GuideChapter[] = [
 				say: "Select it again, and create a second Record, Birthday gift, for the $30 left to allocate. Finpoint fills that amount in for you.",
 			},
 			{
+				id: "save",
+				step: true,
+				say: "Save, and the supermarket Statement leaves Allocator, because it’s now fully explained.",
+			},
+			{
 				id: "done",
 				say: "Now one Statement is explained by two Records: $50 of groceries, and a $30 gift.",
 			},
@@ -338,11 +343,11 @@ export const guideChapters: GuideChapter[] = [
 			},
 			{
 				id: "complete",
-				say: "Save, and the Record now combines both payments. The amounts match, so it’s no longer Pending.",
+				say: "The Record now combines both payments. Save, and because the amounts match, it’s no longer Pending.",
 			},
 			{
 				id: "meaning",
-				say: "It works the same for a deposit now and the balance later. Pending simply means: this explanation doesn’t add up yet.",
+				say: "So a Record is Pending for one of two reasons. Its amounts don’t match yet, like the concert. Or it relies on bank activity you’re still expecting, like a sofa balance due on delivery. Either way, Pending means the Record isn’t fully confirmed yet.",
 				detail: "A Record with no Statements at all is Pending too. Open any Pending Record and choose Why Pending? to see exactly what doesn’t add up.",
 			},
 		],
@@ -423,6 +428,10 @@ export const guideChapters: GuideChapter[] = [
 			{
 				id: "examples",
 				say: "Your salary is Income. Lunch and groceries are Spending, and so is a refund, which lowers what you spent. Moving $500 into savings is Saving/investment. And moving money between your own accounts is a Transfer, which isn’t counted at all.",
+			},
+			{
+				id: "dashboard",
+				say: "On the Dashboard, Income and Spending make up your totals and charts. Saving and investment is kept out of them, in its own section at the bottom. And Transfers don’t appear at all.",
 			},
 			{
 				id: "override",
@@ -522,11 +531,11 @@ export const guideChapters: GuideChapter[] = [
 		beats: [
 			{
 				id: "loop",
-				say: "Here’s a routine that works. Import your latest statements. Explain what’s new in Allocator. Check anything Pending. Then glance at your Dashboard.",
+				say: "Here’s a routine that works. Import your latest statements. Explain what’s new in Allocator. Check anything Pending. Glance at your Dashboard. And keep a backup.",
 			},
 			{
 				id: "backup",
-				say: "If you’ve connected Google Drive, you’re backed up automatically. If not, download a backup every so often.",
+				say: "With Google Drive connected, that happens automatically. If not, download a backup file every so often.",
 			},
 			{
 				id: "help",

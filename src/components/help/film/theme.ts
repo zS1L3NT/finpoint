@@ -60,7 +60,7 @@ export const layout = {
 	stageLeft: 1920 - 88 - 952 * 1.1,
 	stageTop: 300,
 	/** Top of the filmed screen on demo beats, just under the header. */
-	demoTop: 128,
+	demoTop: 148,
 } as const
 
 /** `−$1,234` / `+$60` / `$0`, using a real minus sign like the rest of the guide copy. */

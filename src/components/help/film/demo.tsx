@@ -34,7 +34,9 @@ export type DemoKey = {
 export type DemoScene = { take: string; keys: DemoKey[] }
 
 /** The demo window inside the 16:9 film: the same shape as the 1600 × 900 recordings. */
-export const demoFrame = { width: 1440, height: 810 } as const
+export const demoFrame = { width: 1344, height: 756 } as const
+/** The fastest a recording is sped up to keep pace with the narration. */
+const maxSpeed = 2.5
 
 type Camera = { scale: number; x: number; y: number }
 
@@ -49,8 +51,8 @@ function boxOf(take: Take, marker: string, key?: string): Box | null {
 }
 
 /**
- * Where the camera rests for a key. It only ever pushes in a little, in fixed steps, so the frame
- * stays readable and moves feel deliberate rather than restless.
+ * Where the camera rests for a key. It pushes in, in fixed steps, until the control fills about
+ * two thirds of the frame, so forms are readable without the camera feeling restless.
  */
 function cameraFor(take: Take, key: DemoKey, size: { width: number; height: number }): Camera {
 	const fit = Math.min(size.width / take.width, size.height / take.height)
@@ -62,7 +64,7 @@ function cameraFor(take: Take, key: DemoKey, size: { width: number; height: numb
 		(size.width * 0.65) / (width * fit),
 		(size.height * 0.65) / (height * fit),
 	)
-	const zoom = key.zoom ?? Math.floor(Math.min(1.5, Math.max(1, wanted)) * 4) / 4
+	const zoom = key.zoom ?? Math.floor(Math.min(1.75, Math.max(1, wanted)) * 4) / 4
 	if (zoom <= 1) return whole
 	const scale = fit * zoom
 	const halfW = size.width / (2 * scale)
@@ -87,34 +89,46 @@ const mix = (a: Camera, b: Camera, t: number): Camera => ({
 	y: a.y + (b.y - a.y) * t,
 })
 
-/** Lays the keys out in time: each starts on its cue, but never before the clip before it ends. */
+/**
+ * Lays the keys out in time: each starts on its cue, but never before the clip before it ends.
+ * A clip that would still be playing when the next key is spoken is sped up to arrive on time,
+ * so a re-recorded take with different pacing still lines up with the narration.
+ */
 function schedule(
 	take: Take,
 	keys: DemoKey[],
 	cueAt: (key: DemoKey, index: number) => number,
 	fps: number,
+	until: number,
 ) {
 	const frameOf = (marker: string) => Math.round((take.markers[marker]?.t ?? 0) * fps)
+	const cues = keys.map((key, index) => (index === 0 ? 0 : cueAt(key, index)))
 	const plan: {
 		key: DemoKey
 		start: number
 		end: number
 		from: number
 		to: number
+		speed: number
 		/** The marker shown before the clip plays, and after. */
 		before: string
 		after: string
 	}[] = []
 	keys.forEach((key, index) => {
 		const previous = plan[index - 1]
-		const cue = index === 0 ? 0 : cueAt(key, index)
-		const start = Math.max(cue, previous?.end ?? 0)
+		const start = Math.max(cues[index] ?? 0, previous?.end ?? 0)
 		const after = markerOf(key)
 		const before = !key.play ? after : (key.from ?? previous?.after ?? "start")
 		const from = frameOf(before)
 		const to = frameOf(after)
-		const length = Math.max(0, Math.round((to - from) / (key.speed ?? 1)))
-		plan.push({ key, start, end: start + length, from, to, before, after })
+		// Arrive a little before the next cue (or the end of the beat), leaving a moment to settle.
+		const next = (cues[index + 1] ?? until) - 8
+		// A key's own `speed` is a floor; fitting only ever speeds a clip up further, to `maxSpeed`.
+		let speed = key.speed ?? 1
+		if (to > from && next > start && start + (to - from) / speed > next)
+			speed = Math.max(speed, Math.min(maxSpeed, (to - from) / (next - start)))
+		const length = Math.max(0, Math.round((to - from) / speed))
+		plan.push({ key, start, end: start + length, from, to, speed, before, after })
 	})
 	return plan
 }
@@ -130,6 +144,7 @@ export function UiDemo({
 	frame: size = demoFrame,
 	tint = color.allocation,
 	still = false,
+	until = Number.MAX_SAFE_INTEGER,
 	style,
 }: {
 	scene: DemoScene
@@ -137,6 +152,8 @@ export function UiDemo({
 	tint?: string
 	/** Draws only the final moment, for pictures in Help articles. */
 	still?: boolean
+	/** How many frames the demo is on screen, so its last clip finishes in time. */
+	until?: number
 	style?: CSSProperties
 }) {
 	const current = useCurrentFrame()
@@ -152,6 +169,7 @@ export function UiDemo({
 				? key.at
 				: cueFrame(cues, key.at ?? "", { nth: key.nth, fallback: index * 60 }),
 		fps,
+		until,
 	)
 	const frame = still ? 1e7 : current
 	let active = 0
@@ -161,13 +179,21 @@ export function UiDemo({
 	const step = plan[active]
 	if (!step) return null
 
-	// The camera eases from wherever it was when each key began, so moves never jump.
-	let camera = cameraFor(take, plan[0]?.key ?? step.key, size)
+	// The camera eases from wherever it was when each key began, so moves never jump. A hold
+	// without its own focus keeps the camera where it is: the screen hasn't changed, so neither
+	// should the view.
+	const targets: Camera[] = []
+	plan.forEach((item, index) => {
+		const previous = targets[index - 1]
+		const keep = previous && !item.key.play && !item.key.focus && item.key.zoom === undefined
+		targets.push(keep ? previous : cameraFor(take, item.key, size))
+	})
+	let camera = targets[0] ?? cameraFor(take, step.key, size)
 	for (let index = 1; index <= active; index++) {
 		const item = plan[index]
 		const next = plan[index + 1]
-		if (!item) break
-		const target = cameraFor(take, item.key, size)
+		const target = targets[index]
+		if (!item || !target) break
 		const length = Math.min(75, Math.max(36, item.end - item.start))
 		const until = index === active ? frame : (next?.start ?? frame)
 		const progress = reduced
@@ -245,7 +271,7 @@ export function UiDemo({
 								<Video
 									src={staticFile(`guide-takes/${scene.take}.mp4`)}
 									trimBefore={item.from}
-									playbackRate={item.key.speed ?? 1}
+									playbackRate={item.speed}
 									muted
 									style={{
 										position: "absolute",
@@ -260,9 +286,17 @@ export function UiDemo({
 			</div>
 			{!playing &&
 				highlights.map(box => {
-					const a = project([box[0], box[1]])
-					const b = project([box[0] + box[2], box[1] + box[3]])
+					// Rings stay fully inside the frame, even around a control at its edge.
 					const pad = 6
+					const inset = pad + 6
+					const clampX = (x: number) => Math.min(Math.max(x, inset), size.width - inset)
+					const clampY = (y: number) => Math.min(Math.max(y, inset), size.height - inset)
+					const raw = [
+						project([box[0], box[1]]),
+						project([box[0] + box[2], box[1] + box[3]]),
+					]
+					const a = { x: clampX(raw[0]?.x ?? 0), y: clampY(raw[0]?.y ?? 0) }
+					const b = { x: clampX(raw[1]?.x ?? 0), y: clampY(raw[1]?.y ?? 0) }
 					return (
 						<div
 							key={box.join()}

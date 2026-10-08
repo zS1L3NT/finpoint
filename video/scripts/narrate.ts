@@ -1,16 +1,16 @@
 // Local, reproducible narration with Kokoro. Run from the repository root with Bun:
 //   bun video/scripts/narrate.ts
-// Speaks every sentence separately, lays them out with deliberate pauses, then writes the
-// timeline, word cues, WebVTT captions and transcript together. Unchanged clips are reused.
+// Speaks each beat in one breath so it flows like a person talking, lays beats out with deliberate
+// pauses, then writes the timeline, word cues, WebVTT captions and transcript together. Unchanged
+// clips are reused.
 import { spawnSync } from "node:child_process"
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
-import { dirname, resolve } from "node:path"
-import { fileURLToPath } from "node:url"
+import { resolve } from "node:path"
 import { guideChapters, stepOf } from "../../src/lib/guide"
+import { ffmpeg, root } from "./tools"
 
 const fps = 30
-const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..")
 const audioDir = resolve(root, "public/guide-audio")
 const cacheFile = resolve(root, "video/narration.json")
 
@@ -20,7 +20,6 @@ const voice = { voice: "af_heart", lang: "en-us", speed: 0.95 }
 const pause = {
 	leadIn: 0.2,
 	afterTitle: 0.8,
-	betweenSentences: 0.38,
 	betweenBeats: 0.85,
 	betweenSteps: 0.7,
 	betweenChapters: 1.6,
@@ -30,6 +29,7 @@ const model = process.env.KOKORO_DIR ?? resolve(root, "video/.kokoro")
 const python = process.env.KOKORO_PYTHON ?? resolve(model, ".venv/bin/python")
 mkdirSync(audioDir, { recursive: true })
 
+/** `parts` holds where each spoken sentence landed: the chapter title first, then the beat's. */
 type Cached = { key: string; duration: number; parts: { start: number; end: number }[] }
 const cache: Record<string, Cached> = existsSync(cacheFile)
 	? JSON.parse(readFileSync(cacheFile, "utf8"))
@@ -124,32 +124,30 @@ const timestamp = (seconds: number) => {
 	return `${pad(Math.floor(milliseconds / 3600000))}:${pad(Math.floor(milliseconds / 60000) % 60)}:${pad(Math.floor(milliseconds / 1000) % 60)}.${pad(milliseconds % 1000, 3)}`
 }
 
-// 1. Plan every segment: its spoken parts and the pause after each one.
+// 1. Plan every segment: the chapter title (on a chapter's first beat), then the whole beat as one
+// utterance, each followed by its pause. Sentence weights help find the sentences in the audio.
 const plan = guideChapters.flatMap((chapter, chapterIndex) =>
 	chapter.beats.map((beat, beatIndex, all) => {
 		const body = sentences(beat.say)
 		const last = beatIndex === all.length - 1
 		const next = all[beatIndex + 1]
 		const parts = [
-			...(beatIndex === 0
-				? [{ text: spoken(chapter.title), pauseAfter: pause.afterTitle, words: 0 }]
-				: []),
-			...body.map((tokens, index) => ({
-				text: spoken(tokens.join(" ")),
-				words: tokens.length,
+			...(beatIndex === 0 ? [{ text: spoken(chapter.title), pauseAfter: pause.afterTitle }] : []),
+			{
+				text: body.map(tokens => spoken(tokens.join(" "))).join(" "),
+				weights: body.map(tokens => tokens.reduce((sum, token) => sum + weight(token), 0)),
 				pauseAfter:
-					index < body.length - 1
-						? pause.betweenSentences
-						: last && chapterIndex < guideChapters.length - 1
-							? pause.betweenChapters
-							: beat.step && next?.step
-								? pause.betweenSteps
-								: pause.betweenBeats,
-			})),
+					last && chapterIndex < guideChapters.length - 1
+						? pause.betweenChapters
+						: beat.step && next?.step
+							? pause.betweenSteps
+							: pause.betweenBeats,
+			},
 		]
+		const titleParts = beatIndex === 0 ? 1 : 0
 		const file = `${chapter.id}-${beat.id}.mp3`
 		const key = JSON.stringify({ voice, pause, parts, leadIn: pause.leadIn })
-		return { chapter, beat, beatIndex, file, parts, body, key }
+		return { chapter, beat, beatIndex, file, parts, body, key, titleParts }
 	}),
 )
 
@@ -172,12 +170,13 @@ if (stale.length) {
 			jobFile,
 			JSON.stringify({
 				...voice,
+				ffmpeg: ffmpeg(),
 				model: resolve(model, "kokoro-v1.0.onnx"),
 				voices: resolve(model, "voices-v1.0.bin"),
 				segments: stale.map(item => ({
 					file: resolve(audioDir, item.file),
 					leadIn: pause.leadIn,
-					parts: item.parts.map(({ text, pauseAfter }) => ({ text, pauseAfter })),
+					parts: item.parts,
 				})),
 			}),
 		)
@@ -212,7 +211,7 @@ const chapters = guideChapters.map(chapter => {
 			const clip = cache[item.file]
 			if (!clip) throw new Error(`Missing narration for ${item.file}`)
 			const durationInFrames = Math.ceil(clip.duration * fps)
-			const sentenceParts = clip.parts.slice(item.parts.length - item.body.length)
+			const sentenceParts = clip.parts.slice(item.titleParts)
 			const audio = `guide-audio/${item.file}`
 			cues[audio] = item.body.flatMap((tokens, index) => {
 				const part = sentenceParts[index]
@@ -228,13 +227,11 @@ const chapters = guideChapters.map(chapter => {
 			})
 			const segmentStart = cursor / fps
 			clip.parts.forEach((part, index) => {
-				const words = item.parts[index]
 				const text =
-					index < item.parts.length - item.body.length
+					index < item.titleParts
 						? chapter.title
-						: (item.body[index - (item.parts.length - item.body.length)] ?? []).join(" ")
-				if (words)
-					captions += `${timestamp(segmentStart + part.start)} --> ${timestamp(segmentStart + part.end + 0.2)}\n${text}\n\n`
+						: (item.body[index - item.titleParts] ?? []).join(" ")
+				captions += `${timestamp(segmentStart + part.start)} --> ${timestamp(segmentStart + part.end + 0.2)}\n${text}\n\n`
 			})
 			const step = stepOf(chapter, item.beat.id)
 			const segment = {

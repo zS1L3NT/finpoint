@@ -8,7 +8,10 @@
 		"start": "next start",
 		"lint": "biome check --write",
 		"lint:check": "biome check",
-		"types:check": "tsc --noEmit"
+		"types:check": "tsc --noEmit",
+		"video:capture": "bun video/scripts/capture.ts",
+		"video:narrate": "bun video/scripts/narrate.ts",
+		"video:build": "bun video/scripts/build.ts"
 	},
 	"dependencies": {
 		"@base-ui/react": "^1.4.0",
