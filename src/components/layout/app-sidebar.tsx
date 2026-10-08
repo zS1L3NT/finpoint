@@ -32,6 +32,7 @@ import {
 	pathCategories,
 	pathDashboard,
 	pathDataSettings,
+	pathHelp,
 	pathImporter,
 	pathRecords,
 	pathSettings,
@@ -258,6 +259,17 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 					icon: "lucide:settings-2",
 					label: "Settings",
 					active: pathname.startsWith("/settings"),
+				},
+			],
+		},
+		{
+			label: "Learn",
+			items: [
+				{
+					to: pathHelp(),
+					icon: "lucide:circle-help",
+					label: "Help & guides",
+					active: pathname.startsWith("/help"),
 				},
 			],
 		},

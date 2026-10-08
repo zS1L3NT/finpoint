@@ -9,6 +9,7 @@ import DatetimeField from "@/components/form/datetime-field"
 import RecordAnalyticsFields from "@/components/form/record-analytics-fields"
 import TextField from "@/components/form/text-field"
 import TextareaField from "@/components/form/textarea-field"
+import { ContextHelp } from "@/components/help/context-help"
 import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -31,6 +32,7 @@ import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { useFetch } from "@/hooks/use-fetch"
 import { SPRING, TRANSITION } from "@/lib/motion"
 import { cn, formatCurrency, formatDatetime, parseDatetime, round2dp } from "@/lib/utils"
+import { trackRecordSaved } from "@/logic/learning"
 import { createRecord, recordCompletions } from "@/logic/records"
 import { ValidationError } from "@/logic/validate"
 import { CategoryWithChildren, Statement } from "@/types"
@@ -87,7 +89,7 @@ export default function RecordCreatorDialog({
 		},
 		onSubmit: async ({ value }) => {
 			try {
-				await createRecord({
+				const created = await createRecord({
 					title: value.title,
 					people: value.people,
 					location: value.location,
@@ -100,6 +102,7 @@ export default function RecordCreatorDialog({
 					bucket_source: value.bucket_source,
 					statements: value.statements,
 				})
+				void trackRecordSaved(created.id).catch(() => undefined)
 				setIsOpen(false)
 				clear?.()
 			} catch (cause) {
@@ -471,6 +474,7 @@ export default function RecordCreatorDialog({
 						Create Record
 					</Button>
 				</DialogFooter>
+				<ContextHelp topic="lunch" label="How this form works" variant="form" />
 			</DialogContent>
 		</Dialog>
 	)

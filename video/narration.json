@@ -1,0 +1,1222 @@
+{
+	"start-bank.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Why Finpoint?\",\"pauseAfter\":0.8},{\"text\":\"Your bank keeps a record of every payment you make. What it can’t tell you is what each payment was really for.\",\"weights\":[15,14],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 8.705,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.1002916666666667
+			},
+			{
+				"start": 1.9002916666666667,
+				"end": 4.490291666666667
+			},
+			{
+				"start": 5.010291666666666,
+				"end": 7.855
+			}
+		]
+	},
+	"start-split.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Say you spent eighty dollars at the supermarket. fifty dollars of that was groceries, and thirty dollars was a birthday gift for a friend. Your bank shows one eighty dollars payment. But to you, those are two very different things.\",\"weights\":[13,24,11,15],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 14.907583333333333,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 2.56
+			},
+			{
+				"start": 3.1300000000000003,
+				"end": 8
+			},
+			{
+				"start": 8.6,
+				"end": 10.85
+			},
+			{
+				"start": 11.34,
+				"end": 14.057583333333332
+			}
+		]
+	},
+	"start-dinner.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Or you paid ninety dollars for dinner with a friend, and they only sent their sixty dollars share back a week later. Your bank shows two entries, a week apart: money out, and money in. What dinner really cost you was thirty dollars.\",\"weights\":[32,12,8,12],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 14.9255,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 6.16
+			},
+			{
+				"start": 6.83,
+				"end": 9.469999999999999
+			},
+			{
+				"start": 9.819999999999999,
+				"end": 11.239999999999998
+			},
+			{
+				"start": 11.799999999999999,
+				"end": 14.0755
+			}
+		]
+	},
+	"start-explain.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Finpoint closes that gap. It keeps your bank activity exactly as your bank reports it, and lets you explain it in your own words: groceries, fifty dollars. A gift, thirty dollars. Your share of dinner, thirty dollars.\",\"weights\":[6,29,8,7.4,11],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 15.184083333333334,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.8299999999999998
+			},
+			{
+				"start": 2.37,
+				"end": 7.83
+			},
+			{
+				"start": 8.29,
+				"end": 9.989999999999998
+			},
+			{
+				"start": 10.43,
+				"end": 11.959999999999999
+			},
+			{
+				"start": 12.299999999999999,
+				"end": 14.334083333333332
+			}
+		]
+	},
+	"start-built.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Everything else in Finpoint, from spending charts to budgets, is built on those explanations. So using Finpoint comes down to three things: bring in your bank activity, explain it, and see where your money really went.\",\"weights\":[27,12,23],\"pauseAfter\":1.6}],\"leadIn\":0.2}",
+		"duration": 15.160791666666666,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 5.74
+			},
+			{
+				"start": 6.32,
+				"end": 8.969999999999999
+			},
+			{
+				"start": 9.379999999999999,
+				"end": 13.560791666666667
+			}
+		]
+	},
+	"model-three.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Statements, Records and Allocations\",\"pauseAfter\":0.8},{\"text\":\"Finpoint uses three words for this, and they’re worth getting to know: Statements, Records and Allocations.\",\"weights\":[18,11],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 10.161041666666666,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 2.3142500000000004
+			},
+			{
+				"start": 3.11425,
+				"end": 6.57425
+			},
+			{
+				"start": 7.04425,
+				"end": 9.311041666666668
+			}
+		]
+	},
+	"model-statement.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"A Statement is one entry of bank activity, exactly as your bank reports it. Like that eighty dollars supermarket payment.\",\"weights\":[25.4,13],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 8.664416666666666,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 4.97
+			},
+			{
+				"start": 5.46,
+				"end": 7.814416666666667
+			}
+		]
+	},
+	"model-record.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"A Record is your explanation of what happened. Groceries for fifty dollars is a Record. The gift for thirty dollars is another.\",\"weights\":[14.4,12,11],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 8.91325,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 2.5700000000000003
+			},
+			{
+				"start": 3.1100000000000003,
+				"end": 5.48
+			},
+			{
+				"start": 5.97,
+				"end": 8.06325
+			}
+		]
+	},
+	"model-allocation.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"An Allocation connects a Statement to a Record, and says how much of the Statement belongs there. Here, fifty dollars of the supermarket payment is allocated to Groceries, and the other thirty dollars to the gift.\",\"weights\":[29,36],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 13.762458333333333,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 5.49
+			},
+			{
+				"start": 6.19,
+				"end": 12.912458333333333
+			}
+		]
+	},
+	"model-split.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"That’s the first pattern: one Statement, split into several Records. It’s how you untangle a mixed shopping trip.\",\"weights\":[6,14,12],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 7.554666666666667,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.32
+			},
+			{
+				"start": 1.67,
+				"end": 3.98
+			},
+			{
+				"start": 4.46,
+				"end": 6.704666666666667
+			}
+		]
+	},
+	"model-combine.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"The second pattern goes the other way: several Statements, combined into one Record. Your ninety dollars dinner payment and your friend’s sixty dollars transfer both belong to one Dinner Record, which comes to your real share: thirty dollars.\",\"weights\":[11,16,39,4],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 15.631791666666667,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.94
+			},
+			{
+				"start": 2.46,
+				"end": 5.12
+			},
+			{
+				"start": 5.74,
+				"end": 13.41
+			},
+			{
+				"start": 13.91,
+				"end": 14.781791666666665
+			}
+		]
+	},
+	"model-simple.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"And most of the time, it’s simply one to one. A twelve dollars lunch is one Statement, explained by one Lunch Record.\",\"weights\":[15,22.4],\"pauseAfter\":1.6}],\"leadIn\":0.2}",
+		"duration": 9.074041666666666,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 2.54
+			},
+			{
+				"start": 3.1500000000000004,
+				"end": 7.4740416666666665
+			}
+		]
+	},
+	"import-intro.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Importing your bank statements\",\"pauseAfter\":0.8},{\"text\":\"Finpoint starts from your bank’s own records. You download them from your bank, then bring them into Finpoint.\",\"weights\":[9,15],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 9.111958333333334,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.7123333333333333
+			},
+			{
+				"start": 2.5123333333333333,
+				"end": 4.782333333333334
+			},
+			{
+				"start": 5.242333333333333,
+				"end": 8.261958333333332
+			}
+		]
+	},
+	"import-banks.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Finpoint can read exports from D B S, O C B C, U O B and Revolut. Depending on the bank, that’s a C S V file or an Excel spreadsheet.\",\"weights\":[26.2,21.2],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 11.201833333333333,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 5.62
+			},
+			{
+				"start": 6.23,
+				"end": 10.351833333333333
+			}
+		]
+	},
+	"import-accounts.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Each Statement belongs to an Account, which simply mirrors one of your bank accounts. Import your O C B C 360 Account and your U O B savings account, and Finpoint keeps their Statements apart, using the account details inside each file.\",\"weights\":[23,46.8],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 17.1075,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 4.51
+			},
+			{
+				"start": 5.180000000000001,
+				"end": 16.2575
+			}
+		]
+	},
+	"import-revolut.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Some exports, like Revolut’s, don’t say which account they came from. For those, Finpoint asks you to pick or name the account.\",\"weights\":[20,16],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 8.564791666666666,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 3.8400000000000003
+			},
+			{
+				"start": 4.38,
+				"end": 7.714791666666667
+			}
+		]
+	},
+	"import-download.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Download a C S V or Excel export from your bank, once for each account you want in Finpoint.\",\"weights\":[27.2],\"pauseAfter\":0.7}],\"leadIn\":0.2}",
+		"duration": 7.055958333333334,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 6.355958333333334
+			}
+		]
+	},
+	"import-choose.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Open Importer, choose your bank, and add your files.\",\"weights\":[16],\"pauseAfter\":0.7}],\"leadIn\":0.2}",
+		"duration": 3.7003333333333335,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 3.0003333333333333
+			}
+		]
+	},
+	"import-result.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Choose Import, and check how many new Statements came in.\",\"weights\":[17],\"pauseAfter\":0.7}],\"leadIn\":0.2}",
+		"duration": 3.940625,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 3.240625
+			}
+		]
+	},
+	"import-next.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Your new Statements are now waiting in Allocator. That’s where we’ll go next.\",\"weights\":[15,6],\"pauseAfter\":1.6}],\"leadIn\":0.2}",
+		"duration": 5.9187916666666665,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 2.7
+			},
+			{
+				"start": 3.1500000000000004,
+				"end": 4.318791666666667
+			}
+		]
+	},
+	"allocator-list.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Meet the Allocator\",\"pauseAfter\":0.8},{\"text\":\"Allocator is where you’ll spend most of your time in Finpoint. It lists every Statement that still has money left to explain, newest first.\",\"weights\":[17,21],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 10.915708333333333,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.2764583333333333
+			},
+			{
+				"start": 2.0764583333333335,
+				"end": 5.116458333333334
+			},
+			{
+				"start": 5.706458333333334,
+				"end": 10.065708333333333
+			}
+		]
+	},
+	"allocator-left.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"When only part of a Statement has been explained, Allocator shows how much is left. Once a Statement is fully explained, it leaves the list.\",\"weights\":[24,18],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 9.477458333333333,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 4.8100000000000005
+			},
+			{
+				"start": 5.390000000000001,
+				"end": 8.627458333333333
+			}
+		]
+	},
+	"allocator-pages.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Two other pages help you look things up. Statements lists all your bank activity, explained or not. Records lists your explanations. Allocator only shows what’s still waiting.\",\"weights\":[10,17,8,11],\"pauseAfter\":1.6}],\"leadIn\":0.2}",
+		"duration": 12.984,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 2.23
+			},
+			{
+				"start": 2.6900000000000004,
+				"end": 6.21
+			},
+			{
+				"start": 6.65,
+				"end": 8.53
+			},
+			{
+				"start": 9.069999999999999,
+				"end": 11.383999999999999
+			}
+		]
+	},
+	"lunch-select.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Explaining your first purchase\",\"pauseAfter\":0.8},{\"text\":\"Let’s explain a twelve dollars lunch. In Allocator, click the lunch Statement to select it. A bar appears with what you can do next.\",\"weights\":[9,16,10.4],\"pauseAfter\":0.7}],\"leadIn\":0.2}",
+		"duration": 11.156333333333333,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.7636666666666667
+			},
+			{
+				"start": 2.563666666666667,
+				"end": 4.543666666666667
+			},
+			{
+				"start": 5.003666666666668,
+				"end": 7.793666666666668
+			},
+			{
+				"start": 8.303666666666668,
+				"end": 10.456333333333333
+			}
+		]
+	},
+	"lunch-create.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Choose Create Record. A new Record opens with the Statement already attached, and its amount filled in.\",\"weights\":[6,25.4],\"pauseAfter\":0.7}],\"leadIn\":0.2}",
+		"duration": 6.976541666666667,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.38
+			},
+			{
+				"start": 1.8699999999999999,
+				"end": 6.276541666666667
+			}
+		]
+	},
+	"lunch-fill.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Give it a title, like Lunch, and pick a Category, like Dining Out.\",\"weights\":[24],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 4.505708333333334,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 3.6557083333333336
+			}
+		]
+	},
+	"lunch-ignore.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"You’ll also see Treatment and Spending bucket. Leave those alone for now: your Category fills them in, and we’ll come back to them later.\",\"weights\":[11,10,18],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 8.913916666666667,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 2.56
+			},
+			{
+				"start": 3.14,
+				"end": 4.58
+			},
+			{
+				"start": 4.930000000000001,
+				"end": 8.063916666666666
+			}
+		]
+	},
+	"lunch-save.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Choose Create Record to save. The lunch Statement leaves Allocator, because it’s fully explained.\",\"weights\":[9,21],\"pauseAfter\":1.6}],\"leadIn\":0.2}",
+		"duration": 7.419291666666667,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.8399999999999999
+			},
+			{
+				"start": 2.37,
+				"end": 5.8192916666666665
+			}
+		]
+	},
+	"split-select.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Splitting one payment\",\"pauseAfter\":0.8},{\"text\":\"Back to the eighty dollars supermarket trip. Select it in Allocator, and choose Create Record.\",\"weights\":[12,16],\"pauseAfter\":0.7}],\"leadIn\":0.2}",
+		"duration": 8.469916666666666,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.4040833333333333
+			},
+			{
+				"start": 2.2040833333333336,
+				"end": 4.344083333333334
+			},
+			{
+				"start": 4.804083333333334,
+				"end": 7.769916666666667
+			}
+		]
+	},
+	"split-amount.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Call it Groceries, and change both the Record’s amount and the Statement’s Allocation to fifty dollars. The other thirty dollars stays unexplained for now.\",\"weights\":[29,14],\"pauseAfter\":0.7}],\"leadIn\":0.2}",
+		"duration": 10.458791666666666,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 6.26
+			},
+			{
+				"start": 6.83,
+				"end": 9.758791666666665
+			}
+		]
+	},
+	"split-left.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Save, and the supermarket Statement stays in Allocator, with thirty dollars left.\",\"weights\":[25],\"pauseAfter\":0.7}],\"leadIn\":0.2}",
+		"duration": 5.718875,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 5.018875
+			}
+		]
+	},
+	"split-gift.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Select it again, and create a second Record, Birthday gift, for the thirty dollars left to allocate. Finpoint fills that amount in for you.\",\"weights\":[31,9],\"pauseAfter\":0.7}],\"leadIn\":0.2}",
+		"duration": 9.002916666666666,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 5.72
+			},
+			{
+				"start": 6.3,
+				"end": 8.302916666666667
+			}
+		]
+	},
+	"split-done.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Now one Statement is explained by two Records: fifty dollars of groceries, and a thirty dollars gift.\",\"weights\":[15,16],\"pauseAfter\":1.6}],\"leadIn\":0.2}",
+		"duration": 8.391166666666667,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 2.98
+			},
+			{
+				"start": 3.46,
+				"end": 6.791166666666667
+			}
+		]
+	},
+	"repayment-select.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Combining payments into one Record\",\"pauseAfter\":0.8},{\"text\":\"Now the shared dinner. In Allocator, select both Statements: the ninety dollars you paid, and the sixty dollars your friend sent back. The bar shows their total: thirty dollars.\",\"weights\":[6,13,19,7,4],\"pauseAfter\":0.7}],\"leadIn\":0.2}",
+		"duration": 14.910458333333333,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 2.3043750000000003
+			},
+			{
+				"start": 3.104375,
+				"end": 4.304375
+			},
+			{
+				"start": 4.804375,
+				"end": 6.994375
+			},
+			{
+				"start": 7.384375,
+				"end": 11.094375
+			},
+			{
+				"start": 11.654375000000002,
+				"end": 13.114374999999999
+			},
+			{
+				"start": 13.364374999999999,
+				"end": 14.210458333333335
+			}
+		]
+	},
+	"repayment-create.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Choose Create Record, and call it Dinner with Sam. Both Statements are attached, and the Record comes to thirty dollars your real share.\",\"weights\":[14,26],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 8.87875,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 2.98
+			},
+			{
+				"start": 3.5500000000000003,
+				"end": 8.02875
+			}
+		]
+	},
+	"repayment-done.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Save, and two Statements are explained by a single Record. Your spending shows the thirty dollars you really spent, not ninety dollars.\",\"weights\":[19,20],\"pauseAfter\":1.6}],\"leadIn\":0.2}",
+		"duration": 10.047208333333334,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 3.5100000000000002
+			},
+			{
+				"start": 4.11,
+				"end": 8.447208333333332
+			}
+		]
+	},
+	"dashboard-records.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Where your numbers come from\",\"pauseAfter\":0.8},{\"text\":\"With a few Records saved, your Dashboard starts to fill in. Everything on it is calculated from Records, never directly from Statements.\",\"weights\":[15,24],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 11.178291666666667,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.382125
+			},
+			{
+				"start": 2.182125,
+				"end": 5.432125
+			},
+			{
+				"start": 6.042125,
+				"end": 10.328291666666665
+			}
+		]
+	},
+	"dashboard-empty.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"That’s why importing alone leaves the Dashboard empty. A Statement only counts once you’ve explained it.\",\"weights\":[15,15.4],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 7.133,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 3.14
+			},
+			{
+				"start": 3.71,
+				"end": 6.283
+			}
+		]
+	},
+	"dashboard-real.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"And because it uses your explanations, the Dashboard shows what you really spent: thirty dollars on dinner, not ninety dollars and groceries apart from the gift.\",\"weights\":[23,24],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 10.636791666666667,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 4.66
+			},
+			{
+				"start": 5.26,
+				"end": 9.786791666666666
+			}
+		]
+	},
+	"dashboard-categories.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Your spending is broken down by Category, so the Categories you choose shape everything you see here.\",\"weights\":[32],\"pauseAfter\":1.6}],\"leadIn\":0.2}",
+		"duration": 7.35625,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 5.7562500000000005
+			}
+		]
+	},
+	"pending-when.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Pending Records\",\"pauseAfter\":0.8},{\"text\":\"Sometimes you know about spending before your bank shows all of it. Finpoint lets you record it anyway.\",\"weights\":[19,10],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 8.270083333333334,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.2478749999999998
+			},
+			{
+				"start": 2.047875,
+				"end": 5.057874999999999
+			},
+			{
+				"start": 5.567875,
+				"end": 7.4200833333333325
+			}
+		]
+	},
+	"pending-concert.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Say you paid two hundred dollars for two concert tickets, and your friend Jo will pay you back one hundred dollars next week. You can already create the Record for your one hundred dollars share, from the two hundred dollars payment.\",\"weights\":[31,30],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 13.651916666666667,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 7
+			},
+			{
+				"start": 7.61,
+				"end": 12.801916666666665
+			}
+		]
+	},
+	"pending-flag.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"The amounts don’t match yet, one hundred dollars against two hundred dollars. Finpoint warns you, and saves the Record as Pending.\",\"weights\":[20,14],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 8.688583333333334,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 4.16
+			},
+			{
+				"start": 4.7,
+				"end": 7.838583333333333
+			}
+		]
+	},
+	"pending-list.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Pending Records are marked in your Records list, so nothing gets forgotten.\",\"weights\":[21],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 5.090583333333333,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 4.240583333333333
+			}
+		]
+	},
+	"pending-attach.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"When Jo’s one hundred dollars arrives, select it in Allocator and choose Attach to Record. Finpoint suggests the Pending Record it matches exactly.\",\"weights\":[28,15],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 10.909208333333334,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 5.99
+			},
+			{
+				"start": 6.7,
+				"end": 10.059208333333332
+			}
+		]
+	},
+	"pending-complete.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"The Record now combines both payments. Save, and because the amounts match, it’s no longer Pending.\",\"weights\":[10,18],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 6.9795,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 2.2600000000000002
+			},
+			{
+				"start": 2.7600000000000002,
+				"end": 6.1295
+			}
+		]
+	},
+	"pending-meaning.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"So a Record is Pending for one of two reasons. Its amounts don’t match yet, like the concert. Or it relies on bank activity you’re still expecting, like a sofa balance due on delivery. Either way, Pending means the Record isn’t fully confirmed yet.\",\"weights\":[14,12,31,17],\"pauseAfter\":1.6}],\"leadIn\":0.2}",
+		"duration": 17.591125,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 2.7
+			},
+			{
+				"start": 3.1900000000000004,
+				"end": 5.73
+			},
+			{
+				"start": 6.25,
+				"end": 11.62
+			},
+			{
+				"start": 12.33,
+				"end": 15.991124999999998
+			}
+		]
+	},
+	"pending-statements-why.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Pending Statements\",\"pauseAfter\":0.8},{\"text\":\"Some banks take days to show a card payment. If you want it explained today, create a Pending Statement: a placeholder for bank activity you’re expecting.\",\"weights\":[12,19,16],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 12.257791666666666,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.240125
+			},
+			{
+				"start": 2.040125,
+				"end": 4.610125
+			},
+			{
+				"start": 5.140125,
+				"end": 8.380125
+			},
+			{
+				"start": 8.890125,
+				"end": 11.407791666666666
+			}
+		]
+	},
+	"pending-statements-create.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"On the Statements page, choose Create Pending Statement. Pick the account, then enter the amount and a short description.\",\"weights\":[17,17],\"pauseAfter\":0.7}],\"leadIn\":0.2}",
+		"duration": 7.9085,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 3.22
+			},
+			{
+				"start": 3.79,
+				"end": 7.2085
+			}
+		]
+	},
+	"pending-statements-explain.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"It appears in Allocator, marked Pending. Explain it like any other Statement. The Record counts straight away, but stays Pending while it relies on a placeholder.\",\"weights\":[13,12,23],\"pauseAfter\":0.7}],\"leadIn\":0.2}",
+		"duration": 10.793291666666667,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 2.56
+			},
+			{
+				"start": 3.1100000000000003,
+				"end": 5
+			},
+			{
+				"start": 5.57,
+				"end": 10.093291666666666
+			}
+		]
+	},
+	"pending-statements-replace.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"When the real Statement is imported, open Replace Pending in Allocator. Pick the placeholder, and Finpoint suggests the imported Statements it could become.\",\"weights\":[23,24],\"pauseAfter\":0.7}],\"leadIn\":0.2}",
+		"duration": 10.67975,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 4.58
+			},
+			{
+				"start": 5.25,
+				"end": 9.97975
+			}
+		]
+	},
+	"pending-statements-review.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Choose Replace. The Allocations move to the real Statement, the placeholder disappears, and nothing is counted twice.\",\"weights\":[5,31],\"pauseAfter\":1.6}],\"leadIn\":0.2}",
+		"duration": 9.099958333333333,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.1300000000000001
+			},
+			{
+				"start": 1.65,
+				"end": 7.499958333333334
+			}
+		]
+	},
+	"categories-most.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Categories\",\"pauseAfter\":0.8},{\"text\":\"Categories are the most important choice you make on a Record. They say what it was for, and the Dashboard breaks your spending down by them.\",\"weights\":[20,18],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 10.118625,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.9315416666666667
+			},
+			{
+				"start": 1.7315416666666665,
+				"end": 4.861541666666667
+			},
+			{
+				"start": 5.461541666666666,
+				"end": 9.268625
+			}
+		]
+	},
+	"categories-examples.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Lunch and dinner with friends are Dining Out. The supermarket run is Groceries. The birthday gift goes under Gifts and Donations. Finpoint starts you with a sensible set, and you can rename them or add your own.\",\"weights\":[11,10,12,22],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 14.508083333333333,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 2.5900000000000003
+			},
+			{
+				"start": 3.04,
+				"end": 5.1000000000000005
+			},
+			{
+				"start": 5.57,
+				"end": 8.43
+			},
+			{
+				"start": 9.02,
+				"end": 13.658083333333332
+			}
+		]
+	},
+	"categories-defaults.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Each Category also carries two defaults: a treatment, and a spending bucket. That’s why you could ignore those fields earlier. The Category fills them in.\",\"weights\":[13,10,12,8],\"pauseAfter\":1.6}],\"leadIn\":0.2}",
+		"duration": 11.233083333333333,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 2.7
+			},
+			{
+				"start": 3.04,
+				"end": 4.930000000000001
+			},
+			{
+				"start": 5.47,
+				"end": 7.82
+			},
+			{
+				"start": 8.25,
+				"end": 9.633083333333333
+			}
+		]
+	},
+	"treatments-what.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Treatments\",\"pauseAfter\":0.8},{\"text\":\"Treatment decides how the Dashboard counts a Record: as income, as spending, as saving, or not at all.\",\"weights\":[14,17],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 9.159083333333333,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 0.8820833333333333
+			},
+			{
+				"start": 1.6820833333333334,
+				"end": 4.1120833333333335
+			},
+			{
+				"start": 4.682083333333333,
+				"end": 8.309083333333334
+			}
+		]
+	},
+	"treatments-examples.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Your salary is Income. Lunch and groceries are Spending, and so is a refund, which lowers what you spent. Moving five hundred dollars into savings is Saving or investment. And moving money between your own accounts is a Transfer, which isn’t counted at all.\",\"weights\":[8,23,19,22],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 17.548708333333334,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.6099999999999999
+			},
+			{
+				"start": 2.12,
+				"end": 7.29
+			},
+			{
+				"start": 7.94,
+				"end": 11.879999999999999
+			},
+			{
+				"start": 12.36,
+				"end": 16.698708333333332
+			}
+		]
+	},
+	"treatments-override.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Your Category sets the treatment for you. Change it on a single Record only when that Record is an exception.\",\"weights\":[11,20],\"pauseAfter\":1.6}],\"leadIn\":0.2}",
+		"duration": 7.996833333333333,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 2.18
+			},
+			{
+				"start": 2.6900000000000004,
+				"end": 6.396833333333333
+			}
+		]
+	},
+	"buckets-what.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Spending buckets and monthly targets\",\"pauseAfter\":0.8},{\"text\":\"A spending bucket groups your spending for monthly planning. Think of it as a monthly budget that repeats. Finpoint starts you with four: Daily, Recurring, Irregular and Travel.\",\"weights\":[14.4,12,7,14],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 14.79625,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 2.212166666666667
+			},
+			{
+				"start": 3.0121666666666673,
+				"end": 5.9221666666666675
+			},
+			{
+				"start": 6.482166666666668,
+				"end": 8.812166666666666
+			},
+			{
+				"start": 9.352166666666667,
+				"end": 10.932166666666667
+			},
+			{
+				"start": 11.302166666666666,
+				"end": 13.946250000000001
+			}
+		]
+	},
+	"buckets-daily.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Daily is the one to watch. It holds everyday spending, like food and transport, and the Dashboard paces it through the month.\",\"weights\":[8,26],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 8.502541666666668,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.76
+			},
+			{
+				"start": 2.3000000000000003,
+				"end": 7.652541666666667
+			}
+		]
+	},
+	"buckets-target.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Give a bucket a monthly target, say five hundred dollars for Daily. You can set it for one month only, or from this month onward.\",\"weights\":[21,17],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 8.665,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 4.04
+			},
+			{
+				"start": 4.62,
+				"end": 7.815
+			}
+		]
+	},
+	"buckets-compare.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"The Dashboard then shows how this month is going against the target. Targets don’t move any money. They’re simply a comparison.\",\"weights\":[15,9,9],\"pauseAfter\":1.6}],\"leadIn\":0.2}",
+		"duration": 8.988875,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 3.6100000000000003
+			},
+			{
+				"start": 4.14,
+				"end": 5.63
+			},
+			{
+				"start": 6.0200000000000005,
+				"end": 7.3888750000000005
+			}
+		]
+	},
+	"budgets-what.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Budgets for trips and events\",\"pauseAfter\":0.8},{\"text\":\"A Budget is for spending with its own start and end, like a week in Bali, or a wedding.\",\"weights\":[26.4],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 8.516208333333333,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.7614583333333333
+			},
+			{
+				"start": 2.5614583333333334,
+				"end": 7.6662083333333335
+			}
+		]
+	},
+	"budgets-create.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Create one with a name, an amount and its dates. Leave Automatic attach on, and Records dated inside the period are attached for you: the ones you already have, and new ones as you add them.\",\"weights\":[16,29,18],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 13.11775,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 3.1100000000000003
+			},
+			{
+				"start": 3.74,
+				"end": 8.809999999999999
+			},
+			{
+				"start": 9.33,
+				"end": 12.26775
+			}
+		]
+	},
+	"budgets-own.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"A Budget is its own small dashboard for that period: what you’ve spent, what’s left, and your pace. It’s separate from your monthly Dashboard, and doesn’t change it.\",\"weights\":[14.4,12,17],\"pauseAfter\":1.6}],\"leadIn\":0.2}",
+		"duration": 11.195041666666667,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 3.16
+			},
+			{
+				"start": 3.6500000000000004,
+				"end": 6.04
+			},
+			{
+				"start": 6.61,
+				"end": 9.595041666666665
+			}
+		]
+	},
+	"sync-local.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Backups and Google Drive\",\"pauseAfter\":0.8},{\"text\":\"Finpoint keeps your data in this browser, on this device. There’s no Finpoint database, and your finances never pass through our servers, so we never see them.\",\"weights\":[16,29],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 12.751875,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.5936249999999998
+			},
+			{
+				"start": 2.393625,
+				"end": 5.613625000000001
+			},
+			{
+				"start": 6.213625,
+				"end": 11.901875
+			}
+		]
+	},
+	"sync-file.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"That means keeping a copy is up to you, and there are two ways. The first is a backup file. Download it from the Data page whenever you like, and restore it later, on this device or a new one.\",\"weights\":[19,8,34],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 12.879125,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 3.62
+			},
+			{
+				"start": 4.22,
+				"end": 5.75
+			},
+			{
+				"start": 6.17,
+				"end": 12.029124999999999
+			}
+		]
+	},
+	"sync-drive.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"The second is Google Drive. Connect it once, and Finpoint keeps a copy in a hidden folder in your own Drive, automatically, so your devices stay in step.\",\"weights\":[8,40],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 10.781833333333333,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.8499999999999999
+			},
+			{
+				"start": 2.3600000000000003,
+				"end": 9.931833333333332
+			}
+		]
+	},
+	"sync-yours.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Either way, your data only goes to places you control.\",\"weights\":[16],\"pauseAfter\":1.6}],\"leadIn\":0.2}",
+		"duration": 4.97825,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 3.37825
+			}
+		]
+	},
+	"routine-loop.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Your routine\",\"pauseAfter\":0.8},{\"text\":\"Here’s a routine that works. Import your latest statements. Explain what’s new in Allocator. Check anything Pending. Glance at your Dashboard. And keep a backup.\",\"weights\":[8,8,9,6,6,5],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 12.540458333333333,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 1.0223333333333333
+			},
+			{
+				"start": 1.8223333333333334,
+				"end": 3.312333333333333
+			},
+			{
+				"start": 3.6623333333333337,
+				"end": 5.142333333333333
+			},
+			{
+				"start": 5.582333333333333,
+				"end": 7.422333333333333
+			},
+			{
+				"start": 7.812333333333333,
+				"end": 8.942333333333334
+			},
+			{
+				"start": 9.342333333333332,
+				"end": 10.552333333333333
+			},
+			{
+				"start": 10.802333333333333,
+				"end": 11.690458333333332
+			}
+		]
+	},
+	"routine-backup.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"With Google Drive connected, that happens automatically. If not, download a backup file every so often.\",\"weights\":[18,16],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 7.73075,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 3.3800000000000003
+			},
+			{
+				"start": 3.96,
+				"end": 6.88075
+			}
+		]
+	},
+	"routine-help.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"And whenever you’re unsure, open Help from any page or form. Every chapter of this guide is there, with pictures.\",\"weights\":[20,17],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 8.001041666666667,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 3.68
+			},
+			{
+				"start": 4.3100000000000005,
+				"end": 7.151041666666667
+			}
+		]
+	},
+	"split-save.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Save, and the supermarket Statement leaves Allocator, because it’s now fully explained.\",\"weights\":[29],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 6.069416666666666,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 5.219416666666667
+			}
+		]
+	},
+	"treatments-dashboard.mp3": {
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"On the Dashboard, Income and Spending make up your totals and charts. Saving and investment is kept out of them, in its own section at the bottom. And Transfers don’t appear at all.\",\"weights\":[19,21,8],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
+		"duration": 12.033416666666668,
+		"parts": [
+			{
+				"start": 0.2,
+				"end": 4.08
+			},
+			{
+				"start": 4.63,
+				"end": 8.92
+			},
+			{
+				"start": 9.469999999999999,
+				"end": 11.183416666666666
+			}
+		]
+	}
+}

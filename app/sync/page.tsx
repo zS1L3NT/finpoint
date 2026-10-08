@@ -49,6 +49,7 @@ import {
 	syncDrive,
 	wasVaultProven,
 } from "@/logic/drive-sync"
+import { trackBackupRequested } from "@/logic/learning"
 import { formatRelativeTime } from "@/logic/shared"
 import { pathPrivacy, pathTerms } from "@/routes"
 
@@ -195,6 +196,7 @@ export default function DataSettingsPage() {
 		setBusy("export")
 		try {
 			downloadExport(await exportData())
+			void trackBackupRequested().catch(() => undefined)
 			toast.success("Backup file downloaded.")
 		} catch {
 			toast.error("Couldn't save backup file.")

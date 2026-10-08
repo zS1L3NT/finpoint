@@ -4,6 +4,7 @@ import { toast } from "sonner"
 import ComboboxField from "@/components/form/combobox-field"
 import SelectField from "@/components/form/select-field"
 import TextField from "@/components/form/text-field"
+import { ContextHelp } from "@/components/help/context-help"
 import Icon, { ICON_NAMES, UiIcon as IconifyIcon } from "@/components/icon"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -318,6 +319,7 @@ export default function CategoryDialog({
 						{isEditing ? "Save changes" : "Create category"}
 					</Button>
 				</DialogFooter>
+				<ContextHelp topic="categories" label="How this form works" variant="form" />
 			</DialogContent>
 		</Dialog>
 	)
