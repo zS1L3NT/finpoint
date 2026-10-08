@@ -242,37 +242,8 @@
 }
 
 /*
- * Skeletons stay invisible for the first 150ms. Local data usually resolves inside that window,
- * so quick loads go straight to the content reveal instead of flashing placeholders first;
- * slower loads fade the skeleton in and then pulse it.
- */
-@keyframes skeleton-in {
-    from {
-        opacity: 0;
-    }
-}
-
-@keyframes skeleton-pulse {
-    50% {
-        opacity: 0.5;
-    }
-}
-
-.skeleton-delayed {
-    animation:
-        skeleton-in 200ms var(--ease-out) 150ms backwards,
-        skeleton-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) 350ms infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .skeleton-delayed {
-        animation: skeleton-in 200ms 150ms backwards;
-    }
-}
-
-/*
- * Staggered reveal for a page's top-level sections, played once when its content mounts
- * (after the loading skeleton). The delays are explicit so the cascade stays short.
+ * Staggered reveal for a page's top-level sections, played once when its data first arrives
+ * (nothing renders before then). The delays are explicit so the cascade stays short.
  */
 @keyframes reveal {
     from {
