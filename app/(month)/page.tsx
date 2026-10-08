@@ -715,19 +715,22 @@ function BucketUsageBar({ name, usage }: { name: string; usage: number }) {
 			role="progressbar"
 			aria-label={`${name} target usage`}
 			aria-valuemin={0}
+			aria-valuemax={Math.max(100, Math.round(usage))}
 			aria-valuenow={Math.round(usage)}
+			aria-valuetext={`${Math.round(usage)}% of target`}
 			className="relative h-1 w-full overflow-hidden rounded-full bg-muted"
 		>
+			{/* Usage fills from the left; past the target the overage takes the far end in red. */}
+			<div
+				className="absolute inset-0 origin-left bg-foreground/60 transition-transform duration-300 ease-out"
+				style={{ transform: `scaleX(${withinTarget / 100})` }}
+			/>
 			{excess ? (
 				<div
-					className="absolute inset-0 origin-left bg-destructive transition-transform duration-300 ease-out"
+					className="absolute inset-0 origin-right bg-destructive transition-transform duration-300 ease-out"
 					style={{ transform: `scaleX(${excess / 100})` }}
 				/>
 			) : null}
-			<div
-				className="absolute inset-0 origin-right bg-foreground/60 transition-transform duration-300 ease-out"
-				style={{ transform: `scaleX(${withinTarget / 100})` }}
-			/>
 		</div>
 	)
 }
