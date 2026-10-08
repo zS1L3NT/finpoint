@@ -4,7 +4,7 @@ Your bank keeps a record of every payment you make. What it can’t tell you is 
 
 Say you spent $80 at the supermarket. $50 of that was groceries, and $30 was a birthday gift for a friend. Your bank shows one $80 payment. But to you, those are two very different things.
 
-Or you paid $90 for dinner with a friend, and they sent you $60 back for their share. Your bank shows two entries: money out, and money in. What dinner really cost you was $30.
+Or you paid $90 for dinner with a friend, and they only sent their $60 share back a week later. Your bank shows two entries, a week apart: money out, and money in. What dinner really cost you was $30.
 
 Finpoint closes that gap. It keeps your bank activity exactly as your bank reports it, and lets you explain it in your own words: groceries, $50. A gift, $30. Your share of dinner, $30.
 
@@ -84,6 +84,8 @@ Splitting one payment
 
 4. Select it again, and create a second Record, Birthday gift, for the $30 left to allocate. Finpoint fills that amount in for you.
 
+5. Save, and the supermarket Statement leaves Allocator, because it’s now fully explained.
+
 Now one Statement is explained by two Records: $50 of groceries, and a $30 gift.
 
 ————————
@@ -122,9 +124,9 @@ Pending Records are marked in your Records list, so nothing gets forgotten.
 
 When Jo’s $100 arrives, select it in Allocator and choose Attach to Record. Finpoint suggests the Pending Record it matches exactly.
 
-Save, and the Record now combines both payments. The amounts match, so it’s no longer Pending.
+The Record now combines both payments. Save, and because the amounts match, it’s no longer Pending.
 
-It works the same for a deposit now and the balance later. Pending simply means: this explanation doesn’t add up yet.
+So a Record is Pending for one of two reasons. Its amounts don’t match yet, like the concert. Or it relies on bank activity you’re still expecting, like a sofa balance due on delivery. Either way, Pending means the Record isn’t fully confirmed yet.
 
 ————————
 
@@ -157,6 +159,8 @@ Treatments
 Treatment decides how the Dashboard counts a Record: as income, as spending, as saving, or not at all.
 
 Your salary is Income. Lunch and groceries are Spending, and so is a refund, which lowers what you spent. Moving $500 into savings is Saving/investment. And moving money between your own accounts is a Transfer, which isn’t counted at all.
+
+On the Dashboard, Income and Spending make up your totals and charts. Saving and investment is kept out of them, in its own section at the bottom. And Transfers don’t appear at all.
 
 Your Category sets the treatment for you. Change it on a single Record only when that Record is an exception.
 
@@ -198,8 +202,8 @@ Either way, your data only goes to places you control.
 
 Your routine
 
-Here’s a routine that works. Import your latest statements. Explain what’s new in Allocator. Check anything Pending. Then glance at your Dashboard.
+Here’s a routine that works. Import your latest statements. Explain what’s new in Allocator. Check anything Pending. Glance at your Dashboard. And keep a backup.
 
-If you’ve connected Google Drive, you’re backed up automatically. If not, download a backup every so often.
+With Google Drive connected, that happens automatically. If not, download a backup file every so often.
 
 And whenever you’re unsure, open Help from any page or form. Every chapter of this guide is there, with pictures.
