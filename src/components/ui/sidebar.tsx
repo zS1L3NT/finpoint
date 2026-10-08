@@ -220,8 +220,10 @@ function Sidebar({
         className={cn(
           // No width transition: animating the gap reflows the whole page (and
           // every responsive chart) on each frame. The gap snaps; the panel
-          // below slides on the compositor via transform.
-          "relative w-(--sidebar-width) bg-transparent",
+          // below slides on the compositor via transform. On collapse the snap
+          // waits for the panel to finish shrinking, so the panel never sweeps
+          // over the content (expanding snaps first and the panel grows into it).
+          "relative w-(--sidebar-width) bg-transparent transition-[width] duration-0 group-data-[state=collapsed]:delay-250",
           "group-data-[collapsible=offcanvas]:w-0",
           "group-data-[side=right]:rotate-180",
           variant === "floating" || variant === "inset"
