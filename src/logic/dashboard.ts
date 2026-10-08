@@ -866,7 +866,11 @@ export type TrendMonth = {
 	partial: boolean
 }
 
-/** Income vs spending for the trailing `count` months ending at the selected month. */
+/**
+ * Income vs spending for the trailing `count` months ending at the selected month. While the
+ * selected month is still running, every month is cut at the same day of the month, so the
+ * sparkline compares like with like (as the comparison text does) instead of ending in a cliff.
+ */
 function buildTrend(date: DateTime, today: DateTime, tables: LoadedTables, count = 12) {
 	const byMonth = new Map<string, RecordRow[]>()
 	for (const record of tables.records) {
@@ -876,14 +880,20 @@ function buildTrend(date: DateTime, today: DateTime, tables: LoadedTables, count
 		else byMonth.set(key, [record])
 	}
 	const todayKey = today.toFormat(ISO_DAY)
+	const toDate = date.hasSame(today, "month")
 	const months: TrendMonth[] = []
 	for (let offset = count - 1; offset >= 0; offset--) {
 		const month = date.minus({ months: offset }).startOf("month")
 		if (month > today) continue
 		const key = month.toFormat("yyyy-MM")
 		const partial = month.hasSame(today, "month")
+		const cutoff = toDate
+			? month.set({ day: Math.min(today.day, month.daysInMonth ?? 28) }).toFormat(ISO_DAY)
+			: partial
+				? todayKey
+				: null
 		const rows = (byMonth.get(key) ?? []).filter(
-			r => !partial || r.datetime.slice(0, 10) <= todayKey,
+			r => cutoff === null || r.datetime.slice(0, 10) <= cutoff,
 		)
 		const summary = summarize(
 			toAnalyticsRecords(rows, tables.allocated, tables.categories, tables.buckets),

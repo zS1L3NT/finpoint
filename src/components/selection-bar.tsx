@@ -1,4 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion"
+import { useSidebar } from "@/components/ui/sidebar"
 import { DURATION, EASE_OUT, SPRING } from "@/lib/motion"
 
 export default function SelectionBar({
@@ -12,6 +13,14 @@ export default function SelectionBar({
 	children: React.ReactNode
 	message?: React.ReactNode
 }) {
+	const { state, isMobile } = useSidebar()
+	// Centre over the content column rather than the window, so the bar never runs under the
+	// floating sidebar (its gap is the icon rail plus padding when collapsed).
+	const sidebarGap = isMobile
+		? "0px"
+		: state === "expanded"
+			? "var(--sidebar-width)"
+			: "calc(var(--sidebar-width-icon) + 1rem)"
 	return (
 		<AnimatePresence>
 			{open ? (
@@ -26,6 +35,7 @@ export default function SelectionBar({
 						transition: { duration: DURATION.instant, ease: EASE_OUT },
 					}}
 					transition={SPRING.snappy}
+					style={{ left: `calc(${sidebarGap} + 0.75rem)` }}
 					className="fixed inset-x-3 top-[calc(var(--header-height)+0.75rem)] z-40 mx-auto flex max-w-4xl flex-col gap-3 rounded-2xl border bg-background/95 p-3 shadow-2xl backdrop-blur-md motion-reduce:transform-none motion-reduce:transition-none"
 					aria-live="polite"
 				>

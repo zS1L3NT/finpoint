@@ -4,8 +4,10 @@ import { Suspense } from "react"
 import "@/app.css"
 import Providers from "./providers"
 
+// No `title` here on purpose: ShellHeader owns the tab title (it depends on the route and the
+// selected month), and a metadata title would be re-applied over it on every client navigation.
 export const metadata: Metadata = {
-	title: "Finpoint",
+	applicationName: "Finpoint",
 	description: "Local-first personal finance tracker. Your data stays in your browser.",
 	manifest: "/manifest.json",
 	icons: {
@@ -15,7 +17,7 @@ export const metadata: Metadata = {
 		],
 		apple: "/apple-touch-icon.png",
 	},
-	appleWebApp: { capable: true },
+	appleWebApp: { capable: true, title: "Finpoint" },
 }
 
 export const viewport: Viewport = {

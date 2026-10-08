@@ -22,6 +22,27 @@ function compact(value: number) {
 	return `$${Math.round(value)}`
 }
 
+/** Linear-interpolated quantile of an ascending list. */
+function quantile(sorted: number[], q: number) {
+	const position = (sorted.length - 1) * q
+	const lower = sorted[Math.floor(position)] ?? 0
+	const upper = sorted[Math.ceil(position)] ?? lower
+	return lower + (upper - lower) * (position - Math.floor(position))
+}
+
+/**
+ * Top of the colour ramp: the month's largest day, unless it is an outlier past the
+ * Tukey fence (Q3 + 1.5 IQR), in which case the fence. One big purchase then shares the
+ * top shade instead of flattening every ordinary day into the lightest one.
+ */
+function rampCap(sorted: number[]) {
+	const max = sorted.at(-1) ?? 0
+	if (sorted.length < 4) return max
+	const q1 = quantile(sorted, 0.25)
+	const q3 = quantile(sorted, 0.75)
+	return Math.min(max, q3 + 1.5 * (q3 - q1))
+}
+
 /**
  * Month-as-calendar heatmap of daily spending. Rhythm (weekends, paydays,
  * one-off spikes) reads at a glance in a way a 31-point line cannot.
@@ -44,17 +65,15 @@ export default function SpendingCalendar({
 	const byDate = new Map(daily.map(day => [day.date, day]))
 	const max = Math.max(...daily.map(day => day.spending), 0)
 	const leading = start.weekday - 1
-	// Quantile steps over the month's spending days, so one large purchase
-	// does not flatten every other day into the lowest shade.
+	// Shade is proportional to the amount (so near-equal days always match), up to a cap
+	// that ignores outliers; anything past the cap takes the top shade.
 	const sorted = daily
 		.map(day => day.spending)
 		.filter(value => value > 0)
 		.sort((a, b) => a - b)
-	const thresholds = LEVELS.slice(1, STEPS).map(
-		level => sorted[Math.floor((level / STEPS) * sorted.length)] ?? 0,
-	)
+	const cap = rampCap(sorted)
 	const step = (value: number) =>
-		value <= 0 ? 0 : 1 + thresholds.filter(threshold => value >= threshold).length
+		value <= 0 ? 0 : Math.min(STEPS, Math.max(1, Math.ceil((value / cap) * STEPS)))
 	const spendDays = daily.filter(day => day.spending > 0).length
 	const total = daily.reduce((sum, day) => sum + Math.max(day.spending, 0), 0)
 
@@ -120,7 +139,7 @@ export default function SpendingCalendar({
 							style={{ backgroundColor: `var(--heat-${level})` }}
 						/>
 					))}
-					{max > 0 ? compact(max) : "—"}
+					{max > 0 ? `${compact(cap)}${max > cap ? "+" : ""}` : "—"}
 				</span>
 			</div>
 		</div>

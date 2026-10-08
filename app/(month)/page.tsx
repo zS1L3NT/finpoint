@@ -31,9 +31,10 @@ import {
 } from "@/components/ui/select"
 import { useHistory } from "@/history"
 import { useMonthParams } from "@/hooks/use-month-params"
+import { STALE_MONTH_CLASS, useMonthTransition } from "@/hooks/use-month-transition"
 import { usePersistentState } from "@/hooks/use-persistent-state"
 import { useSettings } from "@/hooks/use-settings"
-import { armTabTransition, useMonthTransition } from "@/hooks/use-tab-transition"
+import { useStagedMount } from "@/hooks/use-staged-mount"
 import { cn, formatCurrency } from "@/lib/utils"
 import { getDashboardView, type SpendingHistoryMonth, type TrendMonth } from "@/logic/dashboard"
 import { pathMonthlyRecords } from "@/routes"
@@ -130,7 +131,6 @@ export default function DashboardPage() {
 	const { handlePush } = useHistory()
 	const { month, year } = useMonthParams()
 	const contentRef = useRef<HTMLDivElement>(null)
-	useMonthTransition(contentRef, `${month}-${year}`)
 	const settings = useSettings()
 	const router = useRouter()
 	const comparisonMonths = settings?.dashboard_comparison_months ?? 3
@@ -141,6 +141,10 @@ export default function DashboardPage() {
 		[month, year, comparisonMonths],
 	)
 	const data = view?.dashboard as unknown as DashboardData | undefined
+	// Until the new month's query lands, the live query keeps the previous month's data.
+	const dataKey = data ? `${data.month}-${data.year}` : null
+	const stale = dataKey !== null && dataKey !== `${month}-${year}`
+	useMonthTransition(contentRef, dataKey)
 	const buckets = data?.buckets ?? []
 	const categories = data?.categories ?? []
 	const [storedScope, setScope] = usePersistentState("finpoint.dashboard.scope", "all")
@@ -160,6 +164,9 @@ export default function DashboardPage() {
 	const paceData = view?.pace as unknown as PaceData | undefined
 	const bucketDailyData = view?.bucketDaily as unknown as BucketDailyData | undefined
 	const trend = view?.trend ?? []
+	// The summary and pace chart paint first; the sections below the fold then mount one per
+	// frame. Mounting every chart in one commit blocked arrival for ~300ms in production.
+	const stage = useStagedMount(6, !!data && !!paceData && !!bucketDailyData)
 	const scopedBucketIds = useMemo(() => {
 		if (scope === "all") return [...buckets.map(bucket => bucket.id), "unbucketed"]
 		if (scope === "core" || scope === "outlier" || scope === "other") {
@@ -195,14 +202,17 @@ export default function DashboardPage() {
 		dashed: bucket.id === "unbucketed",
 	}))
 	const openDay = (date: string) => {
-		armTabTransition()
 		handlePush("overview")()
 		router.push(
 			pathMonthlyRecords({ month, year: String(year), start_date: date, end_date: date }),
 		)
 	}
 	return (
-		<div ref={contentRef} className={cn("reveal grid gap-7 md:gap-9")}>
+		<div
+			ref={contentRef}
+			aria-busy={stale}
+			className={cn("reveal grid gap-7 md:gap-9", stale && STALE_MONTH_CLASS)}
+		>
 			{period.is_future ? (
 				<Card>
 					<CardHeader>
@@ -217,31 +227,31 @@ export default function DashboardPage() {
 				</Card>
 			) : (
 				<>
-					<SummaryBand summary={summary} comparison={comparison} trend={trend} />
+					<SummaryBand
+						summary={summary}
+						comparison={comparison}
+						trend={trend}
+						through={period.through}
+					/>
 					{summary.unbucketed_count ? (
 						<div
 							className="flex flex-wrap gap-2"
 							aria-label="Records needing attention"
 						>
-							{summary.unbucketed_count ? (
-								<Button variant="outline" size="sm" asChild>
-									<Link
-										onClick={() => {
-											armTabTransition()
-											handlePush("overview")()
-										}}
-										href={pathMonthlyRecords({
-											month,
-											year: String(year),
-											show_unbucketed: "true",
-										})}
-									>
-										<IconifyIcon icon="lucide:inbox" />{" "}
-										{summary.unbucketed_count} unbucketed spending Record
-										{summary.unbucketed_count === 1 ? "" : "s"}
-									</Link>
-								</Button>
-							) : null}
+							<Button variant="outline" size="sm" asChild>
+								<Link
+									onClick={handlePush("overview")}
+									href={pathMonthlyRecords({
+										month,
+										year: String(year),
+										show_unbucketed: "true",
+									})}
+								>
+									<IconifyIcon icon="lucide:inbox" /> {summary.unbucketed_count}{" "}
+									unbucketed spending Record
+									{summary.unbucketed_count === 1 ? "" : "s"}
+								</Link>
+							</Button>
 						</div>
 					) : null}
 
@@ -273,116 +283,128 @@ export default function DashboardPage() {
 						</CardContent>
 					</Card>
 
-					<section className="grid gap-4" aria-labelledby="spending-breakdown-title">
-						<div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-							<div>
-								<div className="flex items-center gap-2">
-									<h3
-										id="spending-breakdown-title"
-										className="text-lg font-semibold"
-									>
-										Spending breakdown
-									</h3>
-									<ScopeLabel
-										scope={scope === "all" ? "Total" : scopeLabel}
-										color={scopeColor}
-									/>
+					{stage > 0 ? (
+						<section className="grid gap-4" aria-labelledby="spending-breakdown-title">
+							<div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+								<div>
+									<div className="flex items-center gap-2">
+										<h3
+											id="spending-breakdown-title"
+											className="text-lg font-semibold"
+										>
+											Spending breakdown
+										</h3>
+										<ScopeLabel
+											scope={scope === "all" ? "Total" : scopeLabel}
+											color={scopeColor}
+										/>
+									</div>
+									<p className="text-sm text-muted-foreground">
+										{scopeLabel} · {formatCurrency(scopedTotal)}
+									</p>
 								</div>
-								<p className="text-sm text-muted-foreground">
-									{scopeLabel} · {formatCurrency(scopedTotal)}
-								</p>
+								<ScopeSelect
+									value={scope}
+									buckets={buckets}
+									onChange={value => setScope(value ?? "all")}
+								/>
 							</div>
-							<ScopeSelect
-								value={scope}
-								buckets={buckets}
-								onChange={value => setScope(value ?? "all")}
-							/>
-						</div>
-						<div className="grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)] 2xl:grid-cols-[minmax(0,3fr)_minmax(18rem,1fr)]">
-							<CategoryHistoryChart
-								months={data.comparison_history}
-								comparisonMonths={comparisonMonths}
-								through={period.through}
-								bucketIds={scope === "all" ? null : scopedBucketIds}
-							/>
-							<BucketStatus
-								buckets={buckets}
-								month={month}
-								year={year}
-								activeScope={scope}
-								setScope={setScope}
-							/>
-						</div>
-					</section>
-
-					<div className="grid gap-5 lg:grid-cols-2">
-						<Card className="min-w-0">
-							<CardHeader>
-								<ScopedCardTitle scope="Total">Spending calendar</ScopedCardTitle>
-								<CardDescription>
-									Stronger colour means more spending. Select a day to open its
-									Records.
-								</CardDescription>
-							</CardHeader>
-							<CardContent>
-								<SpendingCalendar
+							<div className="grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)] 2xl:grid-cols-[minmax(0,3fr)_minmax(18rem,1fr)]">
+								<CategoryHistoryChart
+									months={data.comparison_history}
+									comparisonMonths={comparisonMonths}
+									through={period.through}
+									bucketIds={scope === "all" ? null : scopedBucketIds}
+								/>
+								<BucketStatus
+									buckets={buckets}
 									month={month}
 									year={year}
-									daily={summary.daily}
-									through={period.through}
-									onSelect={openDay}
+									activeScope={scope}
+									setScope={setScope}
 								/>
-							</CardContent>
-						</Card>
-						<Card className="min-w-0">
-							<CardHeader>
-								<ScopedCardTitle scope="Total">Biggest changes</ScopedCardTitle>
+							</div>
+						</section>
+					) : null}
+
+					{stage > 1 ? (
+						<div className="grid gap-5 lg:grid-cols-2">
+							<Card className="min-w-0">
+								<CardHeader>
+									<ScopedCardTitle scope="Total">
+										Spending calendar
+									</ScopedCardTitle>
+									<CardDescription>
+										Stronger colour means more spending. Select a day to open
+										its Records.
+									</CardDescription>
+								</CardHeader>
+								<CardContent>
+									<SpendingCalendar
+										month={month}
+										year={year}
+										daily={summary.daily}
+										through={period.through}
+										onSelect={openDay}
+									/>
+								</CardContent>
+							</Card>
+							<Card className="min-w-0">
+								<CardHeader>
+									<ScopedCardTitle scope="Total">Biggest changes</ScopedCardTitle>
+									<CardDescription>
+										Categories that moved most against your usual spending.
+									</CardDescription>
+								</CardHeader>
+								<CardContent>
+									<CategoryMovers
+										categories={categories}
+										comparisonCount={comparison.count}
+									/>
+								</CardContent>
+							</Card>
+						</div>
+					) : null}
+
+					{stage > 2 ? (
+						<Card>
+							<CardHeader className="border-b">
+								<ScopedCardTitle scope="Total">Spending by day</ScopedCardTitle>
 								<CardDescription>
-									Categories that moved most against your usual spending.
+									All spending buckets, split into daily outflow. Select a day to
+									open its Records.
 								</CardDescription>
 							</CardHeader>
 							<CardContent>
-								<CategoryMovers
-									categories={categories}
-									comparisonCount={comparison.count}
+								<DailySpendingChart
+									rows={bucketDailyData.rows}
+									buckets={dailyLines}
+									month={month}
+									year={year}
 								/>
 							</CardContent>
 						</Card>
-					</div>
+					) : null}
 
-					<Card>
-						<CardHeader className="border-b">
-							<ScopedCardTitle scope="Total">Spending by day</ScopedCardTitle>
-							<CardDescription>
-								All spending buckets, split into daily outflow. Select a day to open
-								its Records.
-							</CardDescription>
-						</CardHeader>
-						<CardContent>
-							<DailySpendingChart
-								rows={bucketDailyData.rows}
-								buckets={dailyLines}
-								month={month}
-								year={year}
-							/>
-						</CardContent>
-					</Card>
+					{stage > 3 ? (
+						<Card>
+							<CardHeader>
+								<ScopedCardTitle scope="Total">Surplus / Shortfall</ScopedCardTitle>
+								<CardDescription>
+									Cumulative income minus personal spending across every bucket
+								</CardDescription>
+							</CardHeader>
+							<CardContent>
+								<TotalSpendingChart data={series} month={month} year={year} />
+							</CardContent>
+						</Card>
+					) : null}
 
-					<Card>
-						<CardHeader>
-							<ScopedCardTitle scope="Total">Surplus / Shortfall</ScopedCardTitle>
-							<CardDescription>
-								Cumulative income minus personal spending across every bucket
-							</CardDescription>
-						</CardHeader>
-						<CardContent>
-							<TotalSpendingChart data={series} month={month} year={year} />
-						</CardContent>
-					</Card>
+					{stage > 4 ? <WeekdayCard weekday={weekday} /> : null}
 
-					<WeekdayCard weekday={weekday} />
-
-					<InvestmentRow summary={summary} month={month} year={year} />
+					{stage > 5 ? (
+						<InvestmentRow summary={summary} month={month} year={year} />
+					) : null}
 				</>
 			)}
 		</div>
@@ -486,11 +508,15 @@ function SummaryBand({
 	summary,
 	comparison,
 	trend,
+	through,
 }: {
 	summary: AnalyticsSummary
 	comparison: Comparison
 	trend: TrendMonth[]
+	/** Last actual day while the month is running; trend points then cover days 1 to it. */
+	through: string | null
 }) {
+	const sparkPeriod = through ? `days 1–${DateTime.fromISO(through).day}` : undefined
 	const surplusLabel =
 		summary.surplus > 0 ? "Surplus" : summary.surplus < 0 ? "Shortfall" : "Balance"
 	const tone = summary.surplus > 0 ? "positive" : summary.surplus < 0 ? "negative" : "neutral"
@@ -505,6 +531,7 @@ function SummaryBand({
 					delta={deltaOf(comparison.income, comparison.count, "up")}
 					spark={trend.map(month => month.income)}
 					sparkColor="var(--income)"
+					sparkPeriod={sparkPeriod}
 				/>
 				<DashboardMetric
 					icon="lucide:receipt-text"
@@ -514,6 +541,7 @@ function SummaryBand({
 					delta={deltaOf(comparison.spending, comparison.count, "down")}
 					spark={trend.map(month => month.spending)}
 					sparkColor="var(--spending)"
+					sparkPeriod={sparkPeriod}
 				/>
 				<DashboardMetric
 					icon="lucide:scale"
@@ -524,6 +552,7 @@ function SummaryBand({
 					delta={deltaOf(comparison.surplus, comparison.count, "up")}
 					spark={trend.map(month => month.surplus)}
 					sparkColor="var(--foreground)"
+					sparkPeriod={sparkPeriod}
 				/>
 				<DashboardMetric
 					icon="lucide:percent"
@@ -664,10 +693,7 @@ function BucketStatus({
 				})}
 				<Button variant="outline" size="sm" asChild>
 					<Link
-						onClick={() => {
-							armTabTransition()
-							handlePush("overview")()
-						}}
+						onClick={handlePush("overview")}
 						href={pathMonthlyRecords({ month, year: String(year) })}
 					>
 						Manage monthly Records
@@ -689,19 +715,22 @@ function BucketUsageBar({ name, usage }: { name: string; usage: number }) {
 			role="progressbar"
 			aria-label={`${name} target usage`}
 			aria-valuemin={0}
+			aria-valuemax={Math.max(100, Math.round(usage))}
 			aria-valuenow={Math.round(usage)}
+			aria-valuetext={`${Math.round(usage)}% of target`}
 			className="relative h-1 w-full overflow-hidden rounded-full bg-muted"
 		>
+			{/* Usage fills from the left; past the target the overage takes the far end in red. */}
+			<div
+				className="absolute inset-0 origin-left bg-foreground/60 transition-transform duration-300 ease-out"
+				style={{ transform: `scaleX(${withinTarget / 100})` }}
+			/>
 			{excess ? (
 				<div
-					className="absolute inset-0 origin-left bg-destructive transition-transform duration-300 ease-out"
+					className="absolute inset-0 origin-right bg-destructive transition-transform duration-300 ease-out"
 					style={{ transform: `scaleX(${excess / 100})` }}
 				/>
 			) : null}
-			<div
-				className="absolute inset-0 origin-right bg-foreground/60 transition-transform duration-300 ease-out"
-				style={{ transform: `scaleX(${withinTarget / 100})` }}
-			/>
 		</div>
 	)
 }
@@ -731,10 +760,7 @@ function InvestmentRow({
 				</div>
 				<Button variant="outline" size="sm" asChild>
 					<Link
-						onClick={() => {
-							armTabTransition()
-							handlePush("overview")()
-						}}
+						onClick={handlePush("overview")}
 						href={pathMonthlyRecords({
 							month,
 							year: String(year),
