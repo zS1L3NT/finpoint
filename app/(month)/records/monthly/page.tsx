@@ -254,12 +254,13 @@ export default function MonthlyRecordsPage() {
 							groupBy={byRecordDay}
 						/>
 					</section>
-				) : !period.is_future ? (
+				) : futureRecords.length ? null : (
 					<EmptyRecords
 						filtered={Object.keys(filters).length > 0}
+						future={period.is_future}
 						onClear={clearFilters}
 					/>
-				) : null}
+				)}
 
 				{futureRecords.length ? (
 					<section className="grid gap-4">
@@ -489,7 +490,15 @@ function MonthlyRecordFilters({
 	)
 }
 
-function EmptyRecords({ filtered, onClear }: { filtered: boolean; onClear: () => void }) {
+function EmptyRecords({
+	filtered,
+	future,
+	onClear,
+}: {
+	filtered: boolean
+	future: boolean
+	onClear: () => void
+}) {
 	if (filtered) {
 		return (
 			<Card>
@@ -502,6 +511,21 @@ function EmptyRecords({ filtered, onClear }: { filtered: boolean; onClear: () =>
 						Clear filters
 					</Button>
 				</CardContent>
+			</Card>
+		)
+	}
+
+	if (future) {
+		// Same framing as the Overview tab for a month that has not started.
+		return (
+			<Card>
+				<CardHeader>
+					<CardTitle>Future-dated Records</CardTitle>
+					<CardDescription>
+						No Records have been entered for this month. Actual results and comparisons
+						begin when the month starts.
+					</CardDescription>
+				</CardHeader>
 			</Card>
 		)
 	}
