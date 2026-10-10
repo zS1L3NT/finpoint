@@ -22,6 +22,12 @@ import {
 
 export type DashboardInput = { month: string; year: number; comparison_months?: number }
 
+export type PaceHistoryMonth = {
+	month: string
+	offset: number
+	spending: number[]
+}
+
 export type SpendingHistoryMonth = {
 	month: string
 	included: boolean
@@ -444,6 +450,31 @@ export async function getPaceView(
 		actualEnd.day,
 		projection.daily_spending,
 	)
+	// Full calendar months, independent of the comparison-average window.
+	const history: PaceHistoryMonth[] = comparisonSummaries(
+		date,
+		today,
+		false,
+		tables,
+		scopeIds,
+		2,
+	).flatMap((month, index) => {
+		if (!month.included) return []
+		let cumulative = 0
+		const days = DateTime.fromISO(month.start).daysInMonth ?? 30
+		return [
+			{
+				month: month.month,
+				offset: index + 1,
+				spending: Array.from({ length: days }, (_, day) => {
+					cumulative +=
+						month.summary.daily.find(item => Number(item.date.slice(-2)) === day + 1)
+							?.spending ?? 0
+					return Math.round(cumulative * 100) / 100
+				}),
+			},
+		]
+	})
 	const pace = bucketsBuilt.find(
 		b => b.pace_kind === "daily" && b.target !== null && b.target > 0,
 	)
@@ -455,6 +486,7 @@ export async function getPaceView(
 
 	return {
 		series,
+		history,
 		projection,
 		paceBucket: pace ? { id: pace.id, name: pace.name, target: pace.target } : null,
 		completedMonth:
