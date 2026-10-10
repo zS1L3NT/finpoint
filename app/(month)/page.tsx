@@ -37,8 +37,8 @@ import { useSettings } from "@/hooks/use-settings"
 import { useStagedMount } from "@/hooks/use-staged-mount"
 import { cn, formatCurrency } from "@/lib/utils"
 import {
+	type CashflowHistoryMonth,
 	getDashboardView,
-	type PaceHistoryMonth,
 	type SpendingHistoryMonth,
 	type TrendMonth,
 } from "@/logic/dashboard"
@@ -99,6 +99,7 @@ type DashboardData = {
 	future_records_count: number
 	comparison_months: number
 	comparison_history: SpendingHistoryMonth[]
+	history: CashflowHistoryMonth[]
 }
 
 type WeekdayStat = {
@@ -116,7 +117,7 @@ type WeekdayBreakdown = {
 
 type PaceData = {
 	series: CashflowPoint[]
-	history: PaceHistoryMonth[]
+	history: CashflowHistoryMonth[]
 	projection: Projection
 	paceBucket: { id: string; name: string; target: number | null } | null
 	completedMonth: {
@@ -402,7 +403,12 @@ export default function DashboardPage() {
 								</CardDescription>
 							</CardHeader>
 							<CardContent>
-								<TotalSpendingChart data={series} month={month} year={year} />
+								<TotalSpendingChart
+									data={series}
+									history={data.history}
+									month={month}
+									year={year}
+								/>
 							</CardContent>
 						</Card>
 					) : null}

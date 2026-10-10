@@ -22,10 +22,11 @@ import {
 
 export type DashboardInput = { month: string; year: number; comparison_months?: number }
 
-export type PaceHistoryMonth = {
+export type CashflowHistoryMonth = {
 	month: string
 	offset: number
 	spending: number[]
+	surplus: number[]
 }
 
 export type SpendingHistoryMonth = {
@@ -210,6 +211,44 @@ function comparisonSummaries(
 	return out
 }
 
+function buildCashflowHistory(
+	date: DateTime,
+	today: DateTime,
+	tables: LoadedTables,
+	scopeIds: string[] | null,
+): CashflowHistoryMonth[] {
+	// Full calendar months, ordered oldest first, independent of the comparison-average window.
+	return comparisonSummaries(date, today, false, tables, scopeIds, 2)
+		.flatMap((month, index) => {
+			if (!month.included) return []
+			let spending = 0
+			let income = 0
+			const cumulative = Array.from(
+				{ length: DateTime.fromISO(month.start).daysInMonth ?? 30 },
+				(_, day) => {
+					const entry = month.summary.daily.find(
+						item => Number(item.date.slice(-2)) === day + 1,
+					)
+					spending += entry?.spending ?? 0
+					income += entry?.income ?? 0
+					return {
+						spending: Math.round(spending * 100) / 100,
+						surplus: Math.round((income - spending) * 100) / 100,
+					}
+				},
+			)
+			return [
+				{
+					month: month.month,
+					offset: index + 1,
+					spending: cumulative.map(point => point.spending),
+					surplus: cumulative.map(point => point.surplus),
+				},
+			]
+		})
+		.reverse()
+}
+
 function buildSpendingHistory(
 	date: DateTime,
 	currentItems: AnalyticsRecord[],
@@ -360,6 +399,7 @@ export async function getDashboard(input: DashboardInput, preloaded?: LoadedTabl
 		comparison,
 		comparison_months: comparisonMonthCount,
 		comparison_history: comparisonHistory,
+		history: buildCashflowHistory(date, today, tables, null),
 		series,
 		projection,
 		buckets: bucketsWithSpending,
@@ -450,31 +490,7 @@ export async function getPaceView(
 		actualEnd.day,
 		projection.daily_spending,
 	)
-	// Full calendar months, independent of the comparison-average window.
-	const history: PaceHistoryMonth[] = comparisonSummaries(
-		date,
-		today,
-		false,
-		tables,
-		scopeIds,
-		2,
-	).flatMap((month, index) => {
-		if (!month.included) return []
-		let cumulative = 0
-		const days = DateTime.fromISO(month.start).daysInMonth ?? 30
-		return [
-			{
-				month: month.month,
-				offset: index + 1,
-				spending: Array.from({ length: days }, (_, day) => {
-					cumulative +=
-						month.summary.daily.find(item => Number(item.date.slice(-2)) === day + 1)
-							?.spending ?? 0
-					return Math.round(cumulative * 100) / 100
-				}),
-			},
-		]
-	})
+	const history = buildCashflowHistory(date, today, tables, scopeIds)
 	const pace = bucketsBuilt.find(
 		b => b.pace_kind === "daily" && b.target !== null && b.target > 0,
 	)
