@@ -867,11 +867,17 @@ export type TrendMonth = {
 }
 
 /**
- * Income vs spending for the trailing `count` months ending at the selected month. While the
+ * Income vs spending for the selected month and the `comparisonMonths` before it (the same
+ * window the comparison text averages over). While the
  * selected month is still running, every month is cut at the same day of the month, so the
  * sparkline compares like with like (as the comparison text does) instead of ending in a cliff.
  */
-function buildTrend(date: DateTime, today: DateTime, tables: LoadedTables, count = 12) {
+function buildTrend(
+	date: DateTime,
+	today: DateTime,
+	tables: LoadedTables,
+	comparisonMonths: number,
+) {
 	const byMonth = new Map<string, RecordRow[]>()
 	for (const record of tables.records) {
 		const key = record.datetime.slice(0, 7)
@@ -882,7 +888,7 @@ function buildTrend(date: DateTime, today: DateTime, tables: LoadedTables, count
 	const todayKey = today.toFormat(ISO_DAY)
 	const toDate = date.hasSame(today, "month")
 	const months: TrendMonth[] = []
-	for (let offset = count - 1; offset >= 0; offset--) {
+	for (let offset = comparisonMonths; offset >= 0; offset--) {
 		const month = date.minus({ months: offset }).startOf("month")
 		if (month > today) continue
 		const key = month.toFormat("yyyy-MM")
@@ -935,6 +941,11 @@ export async function getDashboardView(input: DashboardInput) {
 		getBucketDaily(input.month, input.year, tables),
 	])
 	const date = monthStart(input.month, input.year)
-	const trend = buildTrend(date, DateTime.now().startOf("day"), tables)
+	const trend = buildTrend(
+		date,
+		DateTime.now().startOf("day"),
+		tables,
+		dashboard.comparison_months,
+	)
 	return { dashboard, pace, bucketDaily, dailyBucketId: dailyBucket?.id ?? null, trend }
 }
