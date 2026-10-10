@@ -36,7 +36,12 @@ import { usePersistentState } from "@/hooks/use-persistent-state"
 import { useSettings } from "@/hooks/use-settings"
 import { useStagedMount } from "@/hooks/use-staged-mount"
 import { cn, formatCurrency } from "@/lib/utils"
-import { getDashboardView, type SpendingHistoryMonth, type TrendMonth } from "@/logic/dashboard"
+import {
+	getDashboardView,
+	type PaceHistoryMonth,
+	type SpendingHistoryMonth,
+	type TrendMonth,
+} from "@/logic/dashboard"
 import { pathMonthlyRecords } from "@/routes"
 import { AnalyticsSummary, Bucket } from "@/types"
 
@@ -111,6 +116,7 @@ type WeekdayBreakdown = {
 
 type PaceData = {
 	series: CashflowPoint[]
+	history: PaceHistoryMonth[]
 	projection: Projection
 	paceBucket: { id: string; name: string; target: number | null } | null
 	completedMonth: {
@@ -269,6 +275,7 @@ export default function DashboardPage() {
 						<CardContent>
 							<CashflowChart
 								data={paceSeries}
+								history={paceData.history}
 								month={month}
 								year={year}
 								target={paceTarget?.target ?? null}
