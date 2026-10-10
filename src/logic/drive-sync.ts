@@ -50,8 +50,7 @@ async function hashSnapshot(
 	const normalized: Record<string, unknown[]> = {}
 	const synced =
 		snapshot.settings.default_filter_start_date ||
-		snapshot.settings.default_filter_end_date_today ||
-		snapshot.settings.dashboard_comparison_months !== 3
+		snapshot.settings.default_filter_end_date_today
 			? { ...snapshot.tables, __settings__: [snapshot.settings] }
 			: snapshot.tables
 	for (const [key, rows] of Object.entries(synced)) {
@@ -84,7 +83,6 @@ export async function driveLocalDirty(): Promise<boolean> {
 		return (
 			snapshot.settings.default_filter_start_date != null ||
 			snapshot.settings.default_filter_end_date_today ||
-			snapshot.settings.dashboard_comparison_months !== 3 ||
 			Object.values(snapshot.tables).some(rows => Array.isArray(rows) && rows.length > 0)
 		)
 	}
@@ -118,8 +116,7 @@ export async function syncDrive(): Promise<DriveSyncResult> {
 		if (
 			!total &&
 			snapshot.settings.default_filter_start_date == null &&
-			!snapshot.settings.default_filter_end_date_today &&
-			snapshot.settings.dashboard_comparison_months === 3
+			!snapshot.settings.default_filter_end_date_today
 		) {
 			return { outcome: "empty" }
 		}
