@@ -6,7 +6,6 @@ import { useChartIntro } from "@/components/charts/chart-intro"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { useHistory } from "@/history"
 import { useIsMobile } from "@/hooks/use-mobile"
-import { armTabTransition } from "@/hooks/use-tab-transition"
 import { cn, formatCurrency } from "@/lib/utils"
 import { pathMonthlyRecords } from "@/routes"
 
@@ -34,7 +33,6 @@ export default function TotalSpendingChart({
 		const selected = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
 			.set({ day: Number(state.activeLabel) })
 			.toFormat("yyyy-MM-dd")
-		armTabTransition()
 		handlePush("overview")()
 		void router.push(
 			pathMonthlyRecords({

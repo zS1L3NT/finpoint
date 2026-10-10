@@ -28,8 +28,8 @@ import {
 	SelectValue,
 } from "@/components/ui/select"
 import { useFetch } from "@/hooks/use-fetch"
+import { STALE_MONTH_CLASS, useMonthTransition } from "@/hooks/use-month-transition"
 import { useRecordEditor } from "@/hooks/use-record-editor"
-import { useMonthTransition } from "@/hooks/use-tab-transition"
 import { cn } from "@/lib/utils"
 import { listCategories } from "@/logic/categories"
 import { getMonthlyRecords } from "@/logic/monthly"
@@ -70,13 +70,18 @@ export default function MonthlyRecordsPage() {
 	const searchParams = useSearchParams()
 	const router = useRouter()
 	const pathname = usePathname()
-	const pushParams = (next: URLSearchParams) => {
+	const pushParams = (next: URLSearchParams, replace = false) => {
 		const suffix = next.toString()
-		router.push(suffix ? pathname + "?" + suffix : pathname, { scroll: false })
+		const href = suffix ? pathname + "?" + suffix : pathname
+		if (replace) router.replace(href, { scroll: false })
+		else router.push(href, { scroll: false })
 	}
-	const setSearchParams = (init: URLSearchParams | globalThis.Record<string, string>) => {
+	const setSearchParams = (
+		init: URLSearchParams | globalThis.Record<string, string>,
+		replace = false,
+	) => {
 		if (init instanceof URLSearchParams) {
-			pushParams(init)
+			pushParams(init, replace)
 			return
 		}
 		const next = new URLSearchParams()
@@ -109,7 +114,6 @@ export default function MonthlyRecordsPage() {
 	const minAmount = searchParams.get("min_amount")
 	const maxAmount = searchParams.get("max_amount")
 	const contentRef = useRef<HTMLDivElement>(null)
-	useMonthTransition(contentRef, `${month}-${year}`)
 
 	const filterKey = JSON.stringify([
 		query,
@@ -154,6 +158,10 @@ export default function MonthlyRecordsPage() {
 		onEdit: handleEdit,
 		grouped: true,
 	})
+	// Until the new month's query lands, the live query keeps the previous month's data.
+	const dataKey = data ? `${data.month}-${data.year}` : null
+	const stale = dataKey !== null && dataKey !== `${month}-${year}`
+	useMonthTransition(contentRef, dataKey)
 	const records = data?.records ?? []
 	const futureRecords = data?.future_records ?? []
 
@@ -170,12 +178,13 @@ export default function MonthlyRecordsPage() {
 	if (minAmount) filters.min_amount = minAmount
 	if (maxAmount) filters.max_amount = maxAmount
 
-	const visit = (changes: Partial<Filters> = {}, nextDate = date) => {
+	/** `replace` edits the current history entry, for refinements like typing in search. */
+	const visit = (changes: Partial<Filters> = {}, replace = false) => {
 		const merged: Partial<Filters> = { ...filters, ...changes }
 		const next = new URLSearchParams(searchParams.toString())
 		next.delete("day")
-		next.set("month", nextDate.toFormat("MMMM"))
-		next.set("year", String(nextDate.year))
+		next.set("month", date.toFormat("MMMM"))
+		next.set("year", String(date.year))
 		for (const key of FILTER_KEYS) {
 			const value = merged[key]
 			if (value === "" || value === false || value === undefined || value === null) {
@@ -184,7 +193,7 @@ export default function MonthlyRecordsPage() {
 				next.set(key, key === "show_unbucketed" && value === true ? "1" : String(value))
 			}
 		}
-		setSearchParams(next)
+		setSearchParams(next, replace)
 	}
 
 	const clearFilters = () => setSearchParams({ month, year: String(year) })
@@ -199,13 +208,17 @@ export default function MonthlyRecordsPage() {
 
 	return (
 		<>
-			<div ref={contentRef} className={cn("reveal grid gap-5 md:gap-7")}>
+			<div
+				ref={contentRef}
+				aria-busy={stale}
+				className={cn("reveal grid gap-5 md:gap-7", stale && STALE_MONTH_CLASS)}
+			>
 				<MonthlyRecordFilters
 					date={date}
 					categories={categories}
 					buckets={buckets}
 					filters={filters}
-					onChange={changes => visit(changes)}
+					onChange={visit}
 					onClear={clearFilters}
 				/>
 
@@ -241,12 +254,13 @@ export default function MonthlyRecordsPage() {
 							groupBy={byRecordDay}
 						/>
 					</section>
-				) : !period.is_future ? (
+				) : futureRecords.length ? null : (
 					<EmptyRecords
 						filtered={Object.keys(filters).length > 0}
+						future={period.is_future}
 						onClear={clearFilters}
 					/>
-				) : null}
+				)}
 
 				{futureRecords.length ? (
 					<section className="grid gap-4">
@@ -294,7 +308,7 @@ function MonthlyRecordFilters({
 	categories: CategoryWithChildren[]
 	buckets: Bucket[]
 	filters: Filters
-	onChange: (changes: Partial<Filters>) => void
+	onChange: (changes: Partial<Filters>, replace?: boolean) => void
 	onClear: () => void
 }) {
 	const categoryIds = filters.category_ids?.split(",").filter(Boolean) ?? []
@@ -355,7 +369,9 @@ function MonthlyRecordFilters({
 					value={query}
 					onChange={event => {
 						setQuery(event.target.value)
-						onChange({ query: event.target.value || undefined })
+						// The first keystroke starts a search (one Back undoes it);
+						// refining it edits that entry instead of piling up history.
+						onChange({ query: event.target.value || undefined }, !!filters.query)
 					}}
 				/>
 			</div>
@@ -474,7 +490,15 @@ function MonthlyRecordFilters({
 	)
 }
 
-function EmptyRecords({ filtered, onClear }: { filtered: boolean; onClear: () => void }) {
+function EmptyRecords({
+	filtered,
+	future,
+	onClear,
+}: {
+	filtered: boolean
+	future: boolean
+	onClear: () => void
+}) {
 	if (filtered) {
 		return (
 			<Card>
@@ -487,6 +511,21 @@ function EmptyRecords({ filtered, onClear }: { filtered: boolean; onClear: () =>
 						Clear filters
 					</Button>
 				</CardContent>
+			</Card>
+		)
+	}
+
+	if (future) {
+		// Same framing as the Overview tab for a month that has not started.
+		return (
+			<Card>
+				<CardHeader>
+					<CardTitle>Future-dated Records</CardTitle>
+					<CardDescription>
+						No Records have been entered for this month. Actual results and comparisons
+						begin when the month starts.
+					</CardDescription>
+				</CardHeader>
 			</Card>
 		)
 	}

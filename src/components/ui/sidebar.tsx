@@ -137,7 +137,7 @@ function SidebarProvider({
           } as React.CSSProperties
         }
         className={cn(
-          "group/sidebar-wrapper flex min-h-svh w-full has-data-[variant=inset]:bg-sidebar",
+          "group/sidebar-wrapper flex min-h-svh w-full overflow-x-clip has-data-[variant=inset]:bg-sidebar",
           className
         )}
         {...props}
@@ -219,8 +219,9 @@ function Sidebar({
         data-slot="sidebar-gap"
         className={cn(
           // No width transition: animating the gap reflows the whole page (and
-          // every responsive chart) on each frame. The gap snaps; the panel
-          // below slides on the compositor via transform.
+          // every responsive chart) on each frame. The gap snaps once and
+          // SidebarInset slides from its old position to the new one on the
+          // compositor, in step with the panel.
           "relative w-(--sidebar-width) bg-transparent",
           "group-data-[collapsible=offcanvas]:w-0",
           "group-data-[side=right]:rotate-180",
@@ -306,8 +307,34 @@ function SidebarRail({ className, ...props }: React.ComponentProps<"button">) {
 }
 
 function SidebarInset({ className, ...props }: React.ComponentProps<"main">) {
+  const { state } = useSidebar()
+  const ref = React.useRef<HTMLElement>(null)
+  const left = React.useRef<number | null>(null)
+
+  // FLIP: the gap has already snapped to its new width, so start the content
+  // where it was and slide it into place alongside the panel's width transition.
+  React.useLayoutEffect(() => {
+    const element = ref.current
+    if (!element) return
+    const previous = left.current
+    const next = element.getBoundingClientRect().left
+    left.current = next
+    if (
+      previous === null ||
+      previous === next ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      return
+    }
+    element.animate(
+      [{ transform: `translateX(${previous - next}px)` }, { transform: "none" }],
+      { duration: 250, easing: "cubic-bezier(0.32, 0.72, 0, 1)" }
+    )
+  }, [state])
+
   return (
     <main
+      ref={ref}
       data-slot="sidebar-inset"
       className={cn(
         "relative flex w-full flex-1 flex-col bg-background md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow-sm md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2",

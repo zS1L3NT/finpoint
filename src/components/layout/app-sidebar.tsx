@@ -178,7 +178,8 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 					to: pathDashboard(),
 					icon: "lucide:chart-area",
 					label: "Dashboard",
-					active: pathname === "/",
+					// Monthly Records is the Dashboard's second tab, not part of Records.
+					active: pathname === "/" || pathname.startsWith("/records/monthly"),
 				},
 			],
 		},
@@ -205,7 +206,8 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 					),
 					icon: "lucide:receipt-text",
 					label: "Records",
-					active: pathname.startsWith("/records"),
+					active:
+						pathname.startsWith("/records") && !pathname.startsWith("/records/monthly"),
 				},
 				{
 					to: pathStatements(),

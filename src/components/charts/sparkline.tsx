@@ -40,6 +40,7 @@ export default function Sparkline({
 			role="img"
 			aria-label={label}
 		>
+			<title>{label}</title>
 			{min < 0 && max > 0 ? (
 				<line
 					x1={pad}

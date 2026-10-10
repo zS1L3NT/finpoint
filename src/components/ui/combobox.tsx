@@ -55,6 +55,7 @@ function ComboboxInput({
   disabled = false,
   showTrigger = true,
   showClear = false,
+  onKeyDown,
   ...props
 }: ComboboxPrimitive.Input.Props & {
   showTrigger?: boolean
@@ -64,6 +65,15 @@ function ComboboxInput({
     <InputGroup className={cn("w-auto", className)}>
       <ComboboxPrimitive.Input
         render={<InputGroupInput disabled={disabled} />}
+        onKeyDown={event => {
+          onKeyDown?.(event)
+          // With the popup closed, Base UI's Escape wipes the value and stops the
+          // event, so a surrounding dialog never closes. Let Escape bubble instead;
+          // clearing stays on the clear button.
+          if (event.key === "Escape" && event.currentTarget.getAttribute("aria-expanded") !== "true") {
+            event.preventBaseUIHandler()
+          }
+        }}
         {...props}
       />
       <InputGroupAddon align="inline-end">

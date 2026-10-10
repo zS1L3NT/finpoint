@@ -12,7 +12,7 @@ import { MonthPicker } from "@/components/ui/monthpicker"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { useHistory } from "@/history"
 import { useMonthParams } from "@/hooks/use-month-params"
-import { armMonthTransition, armTabTransition } from "@/hooks/use-tab-transition"
+import { armMonthTransition } from "@/hooks/use-month-transition"
 import { SPRING } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 import { pathDashboard, pathMonthlyRecords } from "@/routes"
@@ -73,10 +73,7 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 							className="w-fit max-w-full self-start"
 							disabled={isNavigatingBack}
 							aria-busy={isNavigatingBack}
-							onClick={() => {
-								armTabTransition()
-								navigateBack(back)
-							}}
+							onClick={() => navigateBack(back)}
 						>
 							<IconifyIcon
 								icon={
@@ -159,10 +156,7 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 											active ? "font-medium" : "text-muted-foreground",
 										)}
 										href={href}
-										onClick={() => {
-											handleClear()
-											armTabTransition()
-										}}
+										onClick={handleClear}
 									>
 										{label}
 										{active ? (
