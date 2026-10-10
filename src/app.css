@@ -217,12 +217,13 @@
     --chart-6: #008300;
     --chart-7: #9085e9;
     --chart-8: #e66767;
+    /* Same direction as light mode: darker means more spending. */
     --heat-0: oklch(0.274 0.006 286.033);
-    --heat-1: #104281;
-    --heat-2: #184f95;
+    --heat-1: #86b6ef;
+    --heat-2: #3987e5;
     --heat-3: #256abf;
-    --heat-4: #3987e5;
-    --heat-5: #86b6ef;
+    --heat-4: #184f95;
+    --heat-5: #104281;
     --sidebar:
         oklch(0.21 0.006 285.885);
     --sidebar-foreground:

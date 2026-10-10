@@ -6,15 +6,15 @@ import { cn, formatCurrency } from "@/lib/utils"
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 const STEPS = 5
 const LEVELS = Array.from({ length: STEPS + 1 }, (_, level) => level)
-// Ink per heat step: light steps 3+ are dark fills; in dark mode the ramp
-// inverts, so only the brightest step needs dark ink.
+// Ink per heat step: steps 3+ are dark fills in both themes; dark mode's
+// step 1 is a light fill, so it needs dark ink.
 const INK = [
 	"text-muted-foreground",
-	"text-foreground",
+	"text-foreground dark:text-zinc-950",
 	"text-foreground dark:text-white",
 	"text-white",
 	"text-white",
-	"text-white dark:text-zinc-950",
+	"text-white",
 ]
 
 function compact(value: number) {
