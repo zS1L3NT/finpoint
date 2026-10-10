@@ -15,7 +15,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 import { useHistory } from "@/history"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { formatCurrency } from "@/lib/utils"
-import type { PaceHistoryMonth } from "@/logic/dashboard"
+import type { CashflowHistoryMonth } from "@/logic/dashboard"
 import { pathMonthlyRecords } from "@/routes"
 
 export type CashflowPoint = {
@@ -37,7 +37,7 @@ export default function CashflowChart({
 	showProjection,
 }: {
 	data: CashflowPoint[]
-	history: PaceHistoryMonth[]
+	history: CashflowHistoryMonth[]
 	month: string
 	year: number
 	target: number | null
