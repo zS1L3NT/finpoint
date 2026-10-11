@@ -7,16 +7,19 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 import { useHistory } from "@/history"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn, formatCurrency } from "@/lib/utils"
+import type { CashflowHistoryMonth } from "@/logic/dashboard"
 import { pathMonthlyRecords } from "@/routes"
 
 type SurplusPoint = { day: number; surplus: number | null }
 
 export default function TotalSpendingChart({
 	data,
+	history,
 	month,
 	year,
 }: {
 	data: SurplusPoint[]
+	history: CashflowHistoryMonth[]
 	month: string
 	year: number
 }) {
@@ -26,10 +29,31 @@ export default function TotalSpendingChart({
 	const { handlePush } = useHistory()
 	const fillId = `surplus-fill-${useId().replace(/:/g, "")}`
 	const interval = isMobile ? Math.max(Math.floor(data.length / 4), 0) : "preserveStartEnd"
-	const axis = surplusAxis(data)
+	const historyLines = history.map(item => ({
+		...item,
+		key: `previous_${item.offset}`,
+		opacity: item.offset === 1 ? 0.6 : 0.3,
+		dash: item.offset === 1 ? "4 4" : "1 5",
+	}))
+	const chartData = Array.from(
+		{ length: Math.max(data.length, ...history.map(item => item.surplus.length)) },
+		(_, index) => ({
+			day: index + 1,
+			surplus: data[index]?.surplus ?? null,
+			...Object.fromEntries(
+				historyLines.map(item => [item.key, item.surplus[index] ?? null]),
+			),
+		}),
+	)
+	const axis = surplusAxis([
+		...data,
+		...history.flatMap(item =>
+			item.surplus.map((surplus, index) => ({ day: index + 1, surplus })),
+		),
+	])
 	const zeroOffset = surplusZeroOffset(data)
 	const openDay = (state: { activeLabel?: number | string } | null) => {
-		if (!state?.activeLabel) return
+		if (!state?.activeLabel || Number(state.activeLabel) > data.length) return
 		const selected = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
 			.set({ day: Number(state.activeLabel) })
 			.toFormat("yyyy-MM-dd")
@@ -47,13 +71,13 @@ export default function TotalSpendingChart({
 	return (
 		<div className="grid gap-2">
 			<ChartContainer
-				className="h-48 w-full aspect-auto cursor-pointer sm:h-54"
+				className="h-72 w-full aspect-auto cursor-pointer sm:h-80"
 				config={{
 					surplus: { label: "Surplus / Shortfall", color: "var(--color-white)" },
 				}}
 			>
 				<ComposedChart
-					data={data}
+					data={chartData}
 					onClick={openDay}
 					style={{ cursor: "pointer" }}
 					accessibilityLayer
@@ -84,7 +108,9 @@ export default function TotalSpendingChart({
 					<ChartTooltip
 						content={
 							<ChartTooltipContent
-								labelFormatter={label => `${month} ${label}`}
+								labelFormatter={(_, payload) =>
+									`${month} ${payload[0]?.payload.day}`
+								}
 								formatter={(value, name) => (
 									<div className="flex min-w-40 items-center justify-between gap-4">
 										<span className="text-muted-foreground">
@@ -98,6 +124,25 @@ export default function TotalSpendingChart({
 							/>
 						}
 					/>
+					{historyLines.map(item => (
+						<Line
+							key={item.key}
+							dataKey={item.key}
+							name={item.month}
+							stroke="var(--foreground)"
+							strokeOpacity={item.opacity}
+							strokeWidth={2}
+							strokeDasharray={item.dash}
+							strokeLinecap="round"
+							dot={false}
+							activeDot={{
+								r: 4,
+								fill: "var(--foreground)",
+								fillOpacity: item.opacity,
+							}}
+							isAnimationActive={false}
+						/>
+					))}
 					<Area
 						dataKey="surplus"
 						baseValue={0}
@@ -120,6 +165,24 @@ export default function TotalSpendingChart({
 				</ComposedChart>
 			</ChartContainer>
 			<div className="flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
+				{historyLines.map(item => (
+					<span key={item.key} className="flex items-center gap-1.5">
+						<svg width="20" height="4" aria-hidden="true">
+							<line
+								x1="1"
+								y1="2"
+								x2="19"
+								y2="2"
+								stroke="var(--foreground)"
+								strokeOpacity={item.opacity}
+								strokeWidth={2}
+								strokeDasharray={item.dash}
+								strokeLinecap="round"
+							/>
+						</svg>
+						{item.month}
+					</span>
+				))}
 				<LegendItem color="bg-emerald-500" label="Surplus above $0" />
 				<LegendItem color="bg-rose-500" label="Shortfall below $0" />
 				<LegendItem color="bg-white" label="Total balance" />
