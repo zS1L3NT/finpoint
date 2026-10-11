@@ -5,7 +5,7 @@ import { useChartIntro } from "@/components/charts/chart-intro"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart"
 import { formatCurrency } from "@/lib/utils"
-import type { SpendingHistoryMonth } from "@/logic/dashboard"
+import { BREAKDOWN_MONTHS, type SpendingHistoryMonth } from "@/logic/dashboard"
 
 type SpendingSeries = SpendingHistoryMonth["categories"][number]
 type ChartSeries = SpendingSeries & { key: string; members: SpendingSeries[]; total: number }
@@ -19,12 +19,10 @@ const otherColor = "var(--muted-foreground)"
 
 export default function CategoryHistoryChart({
 	months,
-	comparisonMonths,
 	through,
 	bucketIds,
 }: {
 	months: SpendingHistoryMonth[]
-	comparisonMonths: number
 	through: string | null
 	bucketIds: string[] | null
 }) {
@@ -68,7 +66,7 @@ export default function CategoryHistoryChart({
 					Category spending mix
 				</CardTitle>
 				<CardDescription>
-					Share of gross spending compared with the previous {comparisonMonths} months.
+					Share of gross spending compared with the previous {BREAKDOWN_MONTHS} months.
 					Refunds are excluded.
 					{through &&
 						` Previous months include the full month; the selected month includes days 1–${Number(through.slice(-2))} only.`}

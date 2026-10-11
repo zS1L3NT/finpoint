@@ -33,10 +33,14 @@ import { useHistory } from "@/history"
 import { useMonthParams } from "@/hooks/use-month-params"
 import { STALE_MONTH_CLASS, useMonthTransition } from "@/hooks/use-month-transition"
 import { usePersistentState } from "@/hooks/use-persistent-state"
-import { useSettings } from "@/hooks/use-settings"
 import { useStagedMount } from "@/hooks/use-staged-mount"
 import { cn, formatCurrency } from "@/lib/utils"
-import { getDashboardView, type SpendingHistoryMonth, type TrendMonth } from "@/logic/dashboard"
+import {
+	type CashflowHistoryMonth,
+	getDashboardView,
+	type SpendingHistoryMonth,
+	type TrendMonth,
+} from "@/logic/dashboard"
 import { pathMonthlyRecords } from "@/routes"
 import { AnalyticsSummary, Bucket } from "@/types"
 
@@ -92,8 +96,8 @@ type DashboardData = {
 	categories: DashboardCategory[]
 	weekday: WeekdayBreakdown
 	future_records_count: number
-	comparison_months: number
 	comparison_history: SpendingHistoryMonth[]
+	history: CashflowHistoryMonth[]
 }
 
 type WeekdayStat = {
@@ -111,6 +115,7 @@ type WeekdayBreakdown = {
 
 type PaceData = {
 	series: CashflowPoint[]
+	history: CashflowHistoryMonth[]
 	projection: Projection
 	paceBucket: { id: string; name: string; target: number | null } | null
 	completedMonth: {
@@ -131,15 +136,10 @@ export default function DashboardPage() {
 	const { handlePush } = useHistory()
 	const { month, year } = useMonthParams()
 	const contentRef = useRef<HTMLDivElement>(null)
-	const settings = useSettings()
 	const router = useRouter()
-	const comparisonMonths = settings?.dashboard_comparison_months ?? 3
 	// One live query, one table load: the three separate queries this replaced
 	// each re-scanned every table whenever anything changed.
-	const view = useLiveQuery(
-		() => getDashboardView({ month, year, comparison_months: comparisonMonths }),
-		[month, year, comparisonMonths],
-	)
+	const view = useLiveQuery(() => getDashboardView({ month, year }), [month, year])
 	const data = view?.dashboard as unknown as DashboardData | undefined
 	// Until the new month's query lands, the live query keeps the previous month's data.
 	const dataKey = data ? `${data.month}-${data.year}` : null
@@ -269,6 +269,7 @@ export default function DashboardPage() {
 						<CardContent>
 							<CashflowChart
 								data={paceSeries}
+								history={paceData.history}
 								month={month}
 								year={year}
 								target={paceTarget?.target ?? null}
@@ -312,7 +313,6 @@ export default function DashboardPage() {
 							<div className="grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)] 2xl:grid-cols-[minmax(0,3fr)_minmax(18rem,1fr)]">
 								<CategoryHistoryChart
 									months={data.comparison_history}
-									comparisonMonths={comparisonMonths}
 									through={period.through}
 									bucketIds={scope === "all" ? null : scopedBucketIds}
 								/>
@@ -395,7 +395,12 @@ export default function DashboardPage() {
 								</CardDescription>
 							</CardHeader>
 							<CardContent>
-								<TotalSpendingChart data={series} month={month} year={year} />
+								<TotalSpendingChart
+									data={series}
+									history={data.history}
+									month={month}
+									year={year}
+								/>
 							</CardContent>
 						</Card>
 					) : null}
