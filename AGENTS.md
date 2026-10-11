@@ -23,6 +23,13 @@
 ## Generated / Ignored Files
 - Biome ignores `src/components/ui/**/*`.
 
+## Project Graph
+- Use `graphify-out/graph.json` to locate relevant symbols and dependencies before architecture or change-impact investigations; verify findings against current source.
+- After every task that changes code, tests, or configuration (including renames and deletions), refresh the graph after the final edits and verification, before committing, updating a PR, or reporting completion. One refresh may cover the task's batch of edits.
+- Run `graphify update .` for structural code changes. If documents or images changed, or the command reports pending semantic extraction, use the graphify skill with `--update` to refresh those too. Use the graphify skill for initial setup when the tool or graph is missing; no API key is required.
+- Include updated `graph.json`, `GRAPH_REPORT.md`, `manifest.json`, and `.graphify_labels.json` from `graphify-out/` with the source changes. Review graph health warnings and report any unresolved refresh failure explicitly.
+- Keep graph caches, machine-specific paths, and HTML visualizations local. The graph belongs in repository tooling, outside `public/` and application routes.
+
 ## Domain Language
 - Read `CONTEXT.md` for canonical domain terms and avoided aliases.
 - Most domain tables use string primary keys, not auto-increment integers.
