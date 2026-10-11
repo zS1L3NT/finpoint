@@ -21,6 +21,7 @@ import {
 } from "@/logic/pending"
 
 export const COMPARISON_MONTHS = 2
+export const BREAKDOWN_MONTHS = 4
 
 export type DashboardInput = { month: string; year: number }
 
@@ -169,9 +170,10 @@ function comparisonSummaries(
 	isCurrent: boolean,
 	tables: LoadedTables,
 	scopeIds: string[] | null,
+	months = COMPARISON_MONTHS,
 ) {
 	const out = []
-	for (let offset = 1; offset <= COMPARISON_MONTHS; offset++) {
+	for (let offset = 1; offset <= months; offset++) {
 		const month = date.minus({ months: offset }).startOf("month")
 		const coverage = tables.coverages.get(month.toFormat("yyyy-MM-dd"))
 		const endDay = isCurrent
@@ -369,7 +371,11 @@ export async function getDashboard(input: DashboardInput, preloaded?: LoadedTabl
 	const historyMonths = isCurrent
 		? comparisonSummaries(date, today, false, tables, null)
 		: comparisonMonths
-	const comparisonHistory = buildSpendingHistory(date, actualRecords, historyMonths)
+	const comparisonHistory = buildSpendingHistory(
+		date,
+		actualRecords,
+		comparisonSummaries(date, today, false, tables, null, BREAKDOWN_MONTHS),
+	)
 
 	return {
 		month: date.monthLong,

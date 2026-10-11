@@ -71,7 +71,7 @@ export default function TotalSpendingChart({
 	return (
 		<div className="grid gap-2">
 			<ChartContainer
-				className="h-48 w-full aspect-auto cursor-pointer sm:h-54"
+				className="h-72 w-full aspect-auto cursor-pointer sm:h-80"
 				config={{
 					surplus: { label: "Surplus / Shortfall", color: "var(--color-white)" },
 				}}
