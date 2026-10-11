@@ -108,7 +108,9 @@ export default function TotalSpendingChart({
 					<ChartTooltip
 						content={
 							<ChartTooltipContent
-								labelFormatter={label => `${month} ${label}`}
+								labelFormatter={(_, payload) =>
+									`${month} ${payload[0]?.payload.day}`
+								}
 								formatter={(value, name) => (
 									<div className="flex min-w-40 items-center justify-between gap-4">
 										<span className="text-muted-foreground">

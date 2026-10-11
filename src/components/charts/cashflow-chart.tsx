@@ -87,7 +87,7 @@ export default function CashflowChart({
 
 	const tooltip = (
 		<ChartTooltipContent
-			labelFormatter={label => `${month} ${label}`}
+			labelFormatter={(_, payload) => `${month} ${payload[0]?.payload.day}`}
 			formatter={(value, name) => (
 				<div className="flex min-w-40 items-center justify-between gap-4">
 					<span className="text-muted-foreground">{seriesLabel(name)}</span>
