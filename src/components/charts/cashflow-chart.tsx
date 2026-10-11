@@ -3,9 +3,8 @@ import { useRouter } from "next/navigation"
 import {
 	type ActiveDotProps,
 	Area,
+	AreaChart,
 	CartesianGrid,
-	ComposedChart,
-	Line,
 	ReferenceLine,
 	XAxis,
 	YAxis,
@@ -15,7 +14,6 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 import { useHistory } from "@/history"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { formatCurrency } from "@/lib/utils"
-import type { CashflowHistoryMonth } from "@/logic/dashboard"
 import { pathMonthlyRecords } from "@/routes"
 
 export type CashflowPoint = {
@@ -29,7 +27,6 @@ export type CashflowPoint = {
 
 export default function CashflowChart({
 	data,
-	history,
 	month,
 	year,
 	target,
@@ -37,7 +34,6 @@ export default function CashflowChart({
 	showProjection,
 }: {
 	data: CashflowPoint[]
-	history: CashflowHistoryMonth[]
 	month: string
 	year: number
 	target: number | null
@@ -50,27 +46,11 @@ export default function CashflowChart({
 	const intro = useChartIntro(`${month}-${year}`)
 	const router = useRouter()
 	const { handlePush } = useHistory()
-	const historyLines = history.map(item => ({
-		...item,
-		key: `previous_${item.offset}`,
-		opacity: item.offset === 1 ? 0.6 : 0.3,
-		dash: item.offset === 1 ? "4 4" : "1 5",
-	}))
-	const chartData = Array.from(
-		{ length: Math.max(data.length, ...history.map(item => item.spending.length)) },
-		(_, index) => ({
-			...data[index],
-			day: index + 1,
-			...Object.fromEntries(
-				historyLines.map(item => [item.key, item.spending[index] ?? null]),
-			),
-		}),
-	)
 	const interval = isMobile ? Math.max(Math.floor(data.length / 4), 0) : "preserveStartEnd"
 	const actualChange = colorChange(data, "spending", target)
 	const projectionChange = colorChange(data, "projected_spending", target)
 	const openDay = (state: { activeLabel?: number | string } | null) => {
-		if (!state?.activeLabel || Number(state.activeLabel) > data.length) return
+		if (!state?.activeLabel) return
 		const selected = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
 			.set({ day: Number(state.activeLabel) })
 			.toFormat("yyyy-MM-dd")
@@ -87,7 +67,7 @@ export default function CashflowChart({
 
 	const tooltip = (
 		<ChartTooltipContent
-			labelFormatter={(_, payload) => `${month} ${payload[0]?.payload.day}`}
+			labelFormatter={label => `${month} ${label}`}
 			formatter={(value, name) => (
 				<div className="flex min-w-40 items-center justify-between gap-4">
 					<span className="text-muted-foreground">{seriesLabel(name)}</span>
@@ -115,8 +95,8 @@ export default function CashflowChart({
 						},
 					}}
 				>
-					<ComposedChart
-						data={chartData}
+					<AreaChart
+						data={data}
 						onClick={openDay}
 						style={{ cursor: "pointer" }}
 						accessibilityLayer
@@ -185,25 +165,6 @@ export default function CashflowChart({
 							/>
 						) : null}
 						<ChartTooltip content={tooltip} />
-						{historyLines.map(item => (
-							<Line
-								key={item.key}
-								dataKey={item.key}
-								name={item.month}
-								stroke="var(--foreground)"
-								strokeOpacity={item.opacity}
-								strokeWidth={2}
-								strokeDasharray={item.dash}
-								strokeLinecap="round"
-								dot={false}
-								activeDot={{
-									r: 4,
-									fill: "var(--foreground)",
-									fillOpacity: item.opacity,
-								}}
-								isAnimationActive={false}
-							/>
-						))}
 						<Area
 							key={`actual-${month}-${year}`}
 							{...intro}
@@ -250,27 +211,9 @@ export default function CashflowChart({
 								}
 							/>
 						) : null}
-					</ComposedChart>
+					</AreaChart>
 				</ChartContainer>
 				<div className="mt-2 flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
-					{historyLines.map(item => (
-						<span key={item.key} className="flex items-center gap-1.5">
-							<svg width="20" height="4" aria-hidden="true">
-								<line
-									x1="1"
-									y1="2"
-									x2="19"
-									y2="2"
-									stroke="var(--foreground)"
-									strokeOpacity={item.opacity}
-									strokeWidth={2}
-									strokeDasharray={item.dash}
-									strokeLinecap="round"
-								/>
-							</svg>
-							{item.month}
-						</span>
-					))}
 					<LegendItem color="bg-emerald-500" label="Usage" />
 					<LegendItem color="bg-rose-500" label="Exceed" />
 					{showProjection ? (
@@ -333,9 +276,6 @@ export default function CashflowChart({
 				{showProjection
 					? "The dashed line extends the current gross spending pace and includes later-dated Records already entered. Select a day to open its Records."
 					: "The solid line shows the completed month. Select a day to open its Records."}
-				{history.length
-					? " Faint dashed and dotted lines show the previous two months by day of month."
-					: ""}
 			</p>
 		</div>
 	)

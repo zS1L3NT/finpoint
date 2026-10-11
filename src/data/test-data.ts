@@ -626,6 +626,7 @@ export function generateTestData(): FinpointExport {
 		settings: {
 			default_filter_start_date: null,
 			default_filter_end_date_today: false,
+			dashboard_comparison_months: 3,
 		},
 		tables,
 	}

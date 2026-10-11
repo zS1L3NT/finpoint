@@ -99,13 +99,16 @@ export function parseImportFile(text: string): FinpointExport {
 	if (endDateToday != null && typeof endDateToday !== "boolean") {
 		throw new Error("This backup contains an invalid default end-date setting.")
 	}
+	const comparisonMonths = parsed.settings?.dashboard_comparison_months
+	if (
+		comparisonMonths !== undefined &&
+		(!Number.isInteger(comparisonMonths) || comparisonMonths < 1 || comparisonMonths > 24)
+	) {
+		throw new Error("This backup contains an invalid dashboard comparison period.")
+	}
 	return {
 		...(parsed as Omit<FinpointExport, "settings">),
-		settings: {
-			default_filter_start_date: startDate ?? DEFAULT_SETTINGS.default_filter_start_date,
-			default_filter_end_date_today:
-				endDateToday ?? DEFAULT_SETTINGS.default_filter_end_date_today,
-		},
+		settings: { ...DEFAULT_SETTINGS, ...parsed.settings },
 	}
 }
 

@@ -7,6 +7,10 @@ export async function getSettings(): Promise<FinpointSettings> {
 
 export async function updateSettings(settings: FinpointSettings): Promise<void> {
 	const v = new Validator()
+	const comparisonMonths = settings.dashboard_comparison_months
+	if (!Number.isInteger(comparisonMonths) || comparisonMonths < 1 || comparisonMonths > 24) {
+		v.reject("dashboard_comparison_months", "Choose a whole number from 1 to 24 months.")
+	}
 	const date = settings.default_filter_start_date
 		? v.date(settings.default_filter_start_date, "default_filter_start_date")
 		: null
@@ -26,5 +30,6 @@ export async function updateSettings(settings: FinpointSettings): Promise<void> 
 	await replaceSettings({
 		default_filter_start_date: date,
 		default_filter_end_date_today: settings.default_filter_end_date_today,
+		dashboard_comparison_months: comparisonMonths,
 	})
 }

@@ -16,6 +16,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 import {
 	Select,
 	SelectContent,
@@ -24,6 +25,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { useSettings } from "@/hooks/use-settings"
 import { updateSettings } from "@/logic/settings"
 
@@ -31,12 +33,14 @@ export default function SettingsPage() {
 	const settings = useSettings()
 	const [startDate, setStartDate] = useState("")
 	const [endDateToday, setEndDateToday] = useState(false)
+	const [comparisonMonths, setComparisonMonths] = useState("3")
 	const [saving, setSaving] = useState(false)
 
 	useEffect(() => {
 		if (settings) {
 			setStartDate(settings.default_filter_start_date ?? "")
 			setEndDateToday(settings.default_filter_end_date_today)
+			setComparisonMonths(String(settings.dashboard_comparison_months))
 		}
 	}, [settings])
 
@@ -44,6 +48,8 @@ export default function SettingsPage() {
 	const changed =
 		settings !== undefined &&
 		(startDate !== saved || endDateToday !== settings.default_filter_end_date_today)
+	const changedComparison =
+		settings !== undefined && Number(comparisonMonths) !== settings.dashboard_comparison_months
 	const handleSaveFilters = async () => {
 		if (!settings) return
 		setSaving(true)
@@ -51,8 +57,25 @@ export default function SettingsPage() {
 			await updateSettings({
 				default_filter_start_date: startDate || null,
 				default_filter_end_date_today: endDateToday,
+				dashboard_comparison_months: settings.dashboard_comparison_months,
 			})
 			toast.success("Default filters saved.")
+		} catch (cause) {
+			toast.error(cause instanceof Error ? cause.message : "Could not save settings.")
+		} finally {
+			setSaving(false)
+		}
+	}
+	const handleSaveComparison = async () => {
+		if (!settings) return
+		setSaving(true)
+		try {
+			await updateSettings({
+				default_filter_start_date: settings.default_filter_start_date,
+				default_filter_end_date_today: settings.default_filter_end_date_today,
+				dashboard_comparison_months: Number(comparisonMonths),
+			})
+			toast.success("Dashboard analytics settings saved.")
 		} catch (cause) {
 			toast.error(cause instanceof Error ? cause.message : "Could not save settings.")
 		} finally {
@@ -64,7 +87,7 @@ export default function SettingsPage() {
 		<PageContent>
 			<PageHeader
 				title="Settings"
-				subtitle="Choose how Finpoint opens your everyday workspaces."
+				subtitle="Choose how Finpoint opens your everyday workspaces and compares dashboard activity."
 				description="Preferences"
 				icon="lucide:settings-2"
 			/>
@@ -123,6 +146,73 @@ export default function SettingsPage() {
 						onClick={() => void handleSaveFilters()}
 					>
 						{saving ? "Saving…" : "Save default filters"}
+					</Button>
+				</CardFooter>
+			</Card>
+
+			<Card className="max-w-3xl overflow-hidden">
+				<CardHeader className="border-b">
+					<CardTitle>Dashboard analytics</CardTitle>
+					<CardDescription>
+						Choose how many earlier months the dashboard uses to compare income,
+						spending and category trends.
+					</CardDescription>
+				</CardHeader>
+				<CardContent>
+					{settings === undefined ? null : (
+						<div className="grid max-w-md gap-5">
+							<FormField
+								id="dashboard_comparison_preset"
+								label="Compare against previous months"
+								description="Choose a common period or enter any whole number from 1 to 24."
+							>
+								<ToggleGroup
+									id="dashboard_comparison_preset"
+									className="max-w-fit"
+									type="single"
+									value={
+										["1", "3", "6", "12"].includes(comparisonMonths)
+											? comparisonMonths
+											: ""
+									}
+									onValueChange={value => {
+										if (value) setComparisonMonths(value)
+									}}
+									aria-label="Dashboard comparison period"
+								>
+									{[1, 3, 6, 12].map(months => (
+										<ToggleGroupItem key={months} value={String(months)}>
+											{months} {months === 1 ? "month" : "months"}
+										</ToggleGroupItem>
+									))}
+								</ToggleGroup>
+							</FormField>
+							<FormField
+								id="dashboard_comparison_months"
+								label="Custom number of months"
+								description="The dashboard compares the selected month with this many months before it."
+							>
+								<Input
+									id="dashboard_comparison_months"
+									className="max-w-28"
+									type="number"
+									min={1}
+									max={24}
+									step={1}
+									value={comparisonMonths}
+									onChange={event => setComparisonMonths(event.target.value)}
+								/>
+							</FormField>
+						</div>
+					)}
+				</CardContent>
+				<CardFooter className="justify-end border-t bg-muted/20">
+					<Button
+						type="button"
+						disabled={!changedComparison || saving || settings === undefined}
+						onClick={() => void handleSaveComparison()}
+					>
+						{saving ? "Saving…" : "Save dashboard settings"}
 					</Button>
 				</CardFooter>
 			</Card>

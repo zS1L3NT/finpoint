@@ -20,17 +20,7 @@ import {
 	tallyAllocations,
 } from "@/logic/pending"
 
-export const COMPARISON_MONTHS = 2
-export const BREAKDOWN_MONTHS = 4
-
-export type DashboardInput = { month: string; year: number }
-
-export type CashflowHistoryMonth = {
-	month: string
-	offset: number
-	spending: number[]
-	surplus: number[]
-}
+export type DashboardInput = { month: string; year: number; comparison_months?: number }
 
 export type SpendingHistoryMonth = {
 	month: string
@@ -44,6 +34,10 @@ export type SpendingHistoryMonth = {
 		spending: number
 		bucket_spending: Record<string, number>
 	}[]
+}
+
+function normalizeComparisonMonths(value = 3): number {
+	return Math.min(24, Math.max(1, Math.trunc(Number.isFinite(value) ? value : 3)))
 }
 
 export function monthStart(month: string, year: number): DateTime {
@@ -170,10 +164,10 @@ function comparisonSummaries(
 	isCurrent: boolean,
 	tables: LoadedTables,
 	scopeIds: string[] | null,
-	months = COMPARISON_MONTHS,
+	comparisonMonths: number,
 ) {
 	const out = []
-	for (let offset = 1; offset <= months; offset++) {
+	for (let offset = 1; offset <= comparisonMonths; offset++) {
 		const month = date.minus({ months: offset }).startOf("month")
 		const coverage = tables.coverages.get(month.toFormat("yyyy-MM-dd"))
 		const endDay = isCurrent
@@ -208,44 +202,6 @@ function comparisonSummaries(
 		})
 	}
 	return out
-}
-
-function buildCashflowHistory(
-	date: DateTime,
-	today: DateTime,
-	tables: LoadedTables,
-	scopeIds: string[] | null,
-): CashflowHistoryMonth[] {
-	// Full calendar months, ordered oldest first, independent of the comparison-average window.
-	return comparisonSummaries(date, today, false, tables, scopeIds)
-		.flatMap((month, index) => {
-			if (!month.included) return []
-			let spending = 0
-			let income = 0
-			const cumulative = Array.from(
-				{ length: DateTime.fromISO(month.start).daysInMonth ?? 30 },
-				(_, day) => {
-					const entry = month.summary.daily.find(
-						item => Number(item.date.slice(-2)) === day + 1,
-					)
-					spending += entry?.spending ?? 0
-					income += entry?.income ?? 0
-					return {
-						spending: Math.round(spending * 100) / 100,
-						surplus: Math.round((income - spending) * 100) / 100,
-					}
-				},
-			)
-			return [
-				{
-					month: month.month,
-					offset: index + 1,
-					spending: cumulative.map(point => point.spending),
-					surplus: cumulative.map(point => point.surplus),
-				},
-			]
-		})
-		.reverse()
 }
 
 function buildSpendingHistory(
@@ -308,6 +264,7 @@ function buildSpendingHistory(
 }
 
 export async function getDashboard(input: DashboardInput, preloaded?: LoadedTables) {
+	const comparisonMonthCount = normalizeComparisonMonths(input.comparison_months)
 	const date = monthStart(input.month, input.year)
 	const today = DateTime.now().startOf("day")
 	const isCurrent = date.hasSame(today, "month")
@@ -338,7 +295,14 @@ export async function getDashboard(input: DashboardInput, preloaded?: LoadedTabl
 	const summary = summarize(actualRecords)
 	const futureSummary = summarize(futureRecords)
 
-	const comparisonMonths = comparisonSummaries(date, today, isCurrent, tables, null)
+	const comparisonMonths = comparisonSummaries(
+		date,
+		today,
+		isCurrent,
+		tables,
+		null,
+		comparisonMonthCount,
+	)
 
 	const included = comparisonMonths.filter(m => m.included)
 	const comparison = buildComparison(summary, included)
@@ -369,13 +333,9 @@ export async function getDashboard(input: DashboardInput, preloaded?: LoadedTabl
 	)
 	const categories = buildCategories(summary, included)
 	const historyMonths = isCurrent
-		? comparisonSummaries(date, today, false, tables, null)
+		? comparisonSummaries(date, today, false, tables, null, comparisonMonthCount)
 		: comparisonMonths
-	const comparisonHistory = buildSpendingHistory(
-		date,
-		actualRecords,
-		comparisonSummaries(date, today, false, tables, null, BREAKDOWN_MONTHS),
-	)
+	const comparisonHistory = buildSpendingHistory(date, actualRecords, historyMonths)
 
 	return {
 		month: date.monthLong,
@@ -392,8 +352,8 @@ export async function getDashboard(input: DashboardInput, preloaded?: LoadedTabl
 		},
 		summary,
 		comparison,
+		comparison_months: comparisonMonthCount,
 		comparison_history: comparisonHistory,
-		history: buildCashflowHistory(date, today, tables, null),
 		series,
 		projection,
 		buckets: bucketsWithSpending,
@@ -412,8 +372,10 @@ export async function getPaceView(
 	month: string,
 	year: number,
 	scope: string,
+	comparisonMonths = 3,
 	preloaded?: LoadedTables,
 ) {
+	comparisonMonths = normalizeComparisonMonths(comparisonMonths)
 	const date = monthStart(month, year)
 	const today = DateTime.now().startOf("day")
 	const isCurrent = date.hasSame(today, "month")
@@ -444,7 +406,14 @@ export async function getPaceView(
 
 	const summary = summarize(actualRecords)
 	const futureSummary = summarize(futureRecords)
-	const comparisonSummariesForPace = comparisonSummaries(date, today, isCurrent, tables, scopeIds)
+	const comparisonSummariesForPace = comparisonSummaries(
+		date,
+		today,
+		isCurrent,
+		tables,
+		scopeIds,
+		comparisonMonths,
+	)
 	const included = comparisonSummariesForPace.filter(m => m.included)
 
 	const scopedBucketRows = scopeIds
@@ -475,7 +444,6 @@ export async function getPaceView(
 		actualEnd.day,
 		projection.daily_spending,
 	)
-	const history = buildCashflowHistory(date, today, tables, scopeIds)
 	const pace = bucketsBuilt.find(
 		b => b.pace_kind === "daily" && b.target !== null && b.target > 0,
 	)
@@ -487,7 +455,6 @@ export async function getPaceView(
 
 	return {
 		series,
-		history,
 		projection,
 		paceBucket: pace ? { id: pace.id, name: pace.name, target: pace.target } : null,
 		completedMonth:
@@ -900,12 +867,17 @@ export type TrendMonth = {
 }
 
 /**
- * Income vs spending for the selected month and the two months before it (the same
+ * Income vs spending for the selected month and the `comparisonMonths` before it (the same
  * window the comparison text averages over). While the
  * selected month is still running, every month is cut at the same day of the month, so the
  * sparkline compares like with like (as the comparison text does) instead of ending in a cliff.
  */
-function buildTrend(date: DateTime, today: DateTime, tables: LoadedTables) {
+function buildTrend(
+	date: DateTime,
+	today: DateTime,
+	tables: LoadedTables,
+	comparisonMonths: number,
+) {
 	const byMonth = new Map<string, RecordRow[]>()
 	for (const record of tables.records) {
 		const key = record.datetime.slice(0, 7)
@@ -916,7 +888,7 @@ function buildTrend(date: DateTime, today: DateTime, tables: LoadedTables) {
 	const todayKey = today.toFormat(ISO_DAY)
 	const toDate = date.hasSame(today, "month")
 	const months: TrendMonth[] = []
-	for (let offset = COMPARISON_MONTHS; offset >= 0; offset--) {
+	for (let offset = comparisonMonths; offset >= 0; offset--) {
 		const month = date.minus({ months: offset }).startOf("month")
 		if (month > today) continue
 		const key = month.toFormat("yyyy-MM")
@@ -959,10 +931,21 @@ export async function getDashboardView(input: DashboardInput) {
 		dashboard.buckets.find(bucket => bucket.name.toLowerCase() === "daily") ??
 		null
 	const [pace, bucketDaily] = await Promise.all([
-		getPaceView(input.month, input.year, dailyBucket?.id ?? "all", tables),
+		getPaceView(
+			input.month,
+			input.year,
+			dailyBucket?.id ?? "all",
+			dashboard.comparison_months,
+			tables,
+		),
 		getBucketDaily(input.month, input.year, tables),
 	])
 	const date = monthStart(input.month, input.year)
-	const trend = buildTrend(date, DateTime.now().startOf("day"), tables)
+	const trend = buildTrend(
+		date,
+		DateTime.now().startOf("day"),
+		tables,
+		dashboard.comparison_months,
+	)
 	return { dashboard, pace, bucketDaily, dailyBucketId: dailyBucket?.id ?? null, trend }
 }
