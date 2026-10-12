@@ -39,7 +39,7 @@ export type CategoryRow = {
 	color: string
 	parent_category_id: string | null
 	analytics_treatment: AnalyticsTreatment | null
-	default_bucket_id: string | null
+	default_monthly_budget_id: string | null
 }
 
 export type RecordRow = {
@@ -54,8 +54,8 @@ export type RecordRow = {
 	category_id: string
 	analytics_treatment: AnalyticsTreatment
 	analytics_treatment_source: "category" | "manual"
-	bucket_id: string | null
-	bucket_source: "category" | "manual" | null
+	monthly_budget_id: string | null
+	monthly_budget_source: "category" | "manual" | null
 	revision: number
 }
 
@@ -81,7 +81,7 @@ export type BudgetRecordRow = {
 	record_id: string
 }
 
-export type BucketRow = {
+export type MonthlyBudgetRow = {
 	id: string
 	name: string
 	color: string
@@ -91,15 +91,15 @@ export type BucketRow = {
 	archived: boolean
 }
 
-export type BucketDefaultRow = {
-	bucket_id: string
+export type MonthlyBudgetDefaultRow = {
+	monthly_budget_id: string
 	/** "yyyy-MM-dd" (first of month) */
 	effective_month: string
 	amount: number | null
 }
 
-export type BucketTargetRow = {
-	bucket_id: string
+export type MonthlyBudgetAmountRow = {
+	monthly_budget_id: string
 	/** "yyyy-MM-dd" (first of month) */
 	month: string
 	amount: number | null
@@ -124,7 +124,7 @@ export type SettingsRow = {
 }
 
 export const DB_NAME = "finpoint"
-export const DB_VERSION = 2
+export const DB_VERSION = 4
 
 class FinpointDB extends Dexie {
 	accounts!: Table<AccountRow, string>
@@ -134,9 +134,9 @@ class FinpointDB extends Dexie {
 	allocations!: Table<AllocationRow, [string, string]>
 	budgets!: Table<BudgetRow, string>
 	budget_records!: Table<BudgetRecordRow, [string, string]>
-	buckets!: Table<BucketRow, string>
-	bucket_defaults!: Table<BucketDefaultRow, [string, string]>
-	bucket_targets!: Table<BucketTargetRow, [string, string]>
+	monthly_budgets!: Table<MonthlyBudgetRow, string>
+	monthly_budget_defaults!: Table<MonthlyBudgetDefaultRow, [string, string]>
+	monthly_budget_amounts!: Table<MonthlyBudgetAmountRow, [string, string]>
 	analytics_months!: Table<AnalyticsMonthRow, string>
 	settings!: Table<SettingsRow, string>
 	meta!: Table<MetaRow, string>
@@ -165,6 +165,52 @@ class FinpointDB extends Dexie {
 		this.version(2).stores({
 			settings: "key",
 		})
+		this.version(3)
+			.stores({
+				records: "id, datetime, category_id, monthly_budget_id, analytics_treatment",
+				monthly_budgets: "id, &name, display_order",
+				monthly_budget_defaults:
+					"[monthly_budget_id+effective_month], monthly_budget_id, effective_month",
+				monthly_budget_amounts: "[monthly_budget_id+month], monthly_budget_id, month",
+			})
+			.upgrade(async transaction => {
+				await transaction
+					.table("monthly_budgets")
+					.bulkPut(await transaction.table("buckets").toArray())
+				for (const [legacy, canonical] of [
+					["bucket_defaults", "monthly_budget_defaults"],
+					["bucket_targets", "monthly_budget_amounts"],
+				] as const) {
+					const rows = await transaction.table(legacy).toArray()
+					await transaction.table(canonical).bulkPut(
+						rows.map(({ bucket_id, ...row }) => ({
+							...row,
+							monthly_budget_id: bucket_id,
+						})),
+					)
+				}
+				await transaction
+					.table("records")
+					.toCollection()
+					.modify(row => {
+						row.monthly_budget_id = row.bucket_id ?? null
+						row.monthly_budget_source = row.bucket_source ?? null
+						delete row.bucket_id
+						delete row.bucket_source
+					})
+				await transaction
+					.table("categories")
+					.toCollection()
+					.modify(row => {
+						row.default_monthly_budget_id = row.default_bucket_id ?? null
+						delete row.default_bucket_id
+					})
+			})
+		this.version(4)
+			.stores({ buckets: null, bucket_defaults: null, bucket_targets: null })
+			.upgrade(() => {
+				// The preceding migration copied every legacy row before these stores are removed.
+			})
 	}
 }
 

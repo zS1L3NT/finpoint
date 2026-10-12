@@ -2,6 +2,7 @@ import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import { useChartIntro } from "@/components/charts/chart-intro"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { formatChartCurrency } from "@/lib/chart-currency"
 import { formatCurrency } from "@/lib/utils"
 
 const WEEKDAYS: Record<string, string> = {
@@ -14,13 +15,11 @@ const WEEKDAYS: Record<string, string> = {
 	Sun: "Sunday",
 }
 
-function compactCurrency(value: number): string {
-	return formatCurrency(value).replace(/\.00$/, "")
-}
-
 export default function WeekdayBars({
 	stats,
 	comparisonCount,
+	month,
+	year,
 }: {
 	stats: {
 		day: string
@@ -30,8 +29,10 @@ export default function WeekdayBars({
 		baseline_days: number
 	}[]
 	comparisonCount: number
+	month?: string
+	year?: number
 }) {
-	const intro = useChartIntro()
+	const intro = useChartIntro(month ? `${month}-${year}` : "mount")
 	const isMobile = useIsMobile()
 	const baselineLabel = `Previous ${comparisonCount} ${comparisonCount === 1 ? "month" : "months"}`
 
@@ -48,16 +49,27 @@ export default function WeekdayBars({
 				</span>
 			</div>
 			<ChartContainer
-				className="h-64 w-full aspect-auto sm:h-72"
+				className="h-48 w-full min-w-0 aspect-auto [&_.recharts-surface:focus-visible]:outline-2 [&_.recharts-surface:focus-visible]:outline-ring sm:h-64"
 				config={{
 					spending: { label: "This month", color: "var(--color-emerald-500)" },
 					baseline: { label: baselineLabel, color: "var(--color-muted-foreground)" },
 				}}
 			>
-				<BarChart data={stats} accessibilityLayer barCategoryGap="28%">
+				<BarChart
+					data={stats}
+					margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
+					accessibilityLayer
+					barCategoryGap="28%"
+				>
 					<CartesianGrid vertical={false} />
-					<XAxis dataKey="day" tickMargin={8} tickLine={false} axisLine={false} />
-					<YAxis width={isMobile ? 44 : 64} tickFormatter={compactCurrency} />
+					<XAxis
+						height={24}
+						dataKey="day"
+						tickMargin={isMobile ? 4 : 8}
+						tickLine={false}
+						axisLine={false}
+					/>
+					<YAxis width={isMobile ? 40 : 48} tickFormatter={formatChartCurrency} />
 					<ChartTooltip
 						content={
 							<ChartTooltipContent

@@ -2,13 +2,13 @@
 
 import { useLiveQuery } from "dexie-react-hooks"
 import { use, useState } from "react"
-import BucketBadge from "@/components/bucket-badge"
 import { DetailSummary, DetailSummaryItem } from "@/components/detail-summary"
 import PendingStatementDialog from "@/components/dialogs/pending-statement"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
 import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
+import MonthlyBudgetBadge from "@/components/monthly-budget-badge"
 import RecordAmount from "@/components/record-amount"
 import DataTable from "@/components/table/data-table"
 import { useStatementColumns, useStatementMobileRow } from "@/components/table/statement-columns"
@@ -108,10 +108,10 @@ export default function RecordPage({ params }: { params: Promise<{ id: string }>
 						<div className="flex flex-wrap items-center gap-x-5 gap-y-1">
 							<span>Treatment · {treatmentLabel(record.analytics_treatment)}</span>
 							<span className="flex items-center gap-1.5">
-								Spending bucket ·{" "}
-								<BucketBadge
-									name={record.bucket?.name ?? "No bucket"}
-									color={record.bucket?.color}
+								Monthly budget ·{" "}
+								<MonthlyBudgetBadge
+									name={record.monthly_budget?.name ?? "Unbudgeted"}
+									color={record.monthly_budget?.color}
 								/>
 							</span>
 						</div>

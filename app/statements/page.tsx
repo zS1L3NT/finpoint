@@ -35,6 +35,7 @@ export default function StatementsPage() {
 	const searchParams = useSearchParams()
 	const accountId = searchParams.get("account_id") ?? "all"
 	const isPending = searchParams.get("is_pending")
+	const isUnallocated = searchParams.get("is_unallocated")
 	const startDate = searchParams.get("start_date")
 	const endDate = searchParams.get("end_date")
 	const minAmount = searchParams.get("min_amount")
@@ -49,6 +50,7 @@ export default function StatementsPage() {
 		searchParams.get("query"),
 		accountId === "all" ? "" : accountId,
 		isPending,
+		isUnallocated,
 		startDate ?? endDate,
 		minAmount ?? maxAmount,
 	].filter(Boolean).length
@@ -57,6 +59,7 @@ export default function StatementsPage() {
 			query: null,
 			account_id: null,
 			is_pending: null,
+			is_unallocated: null,
 			start_date: null,
 			end_date: null,
 			min_amount: null,
@@ -71,12 +74,13 @@ export default function StatementsPage() {
 				query: query || null,
 				account_id: accountId === "all" ? null : accountId,
 				is_pending: isPending,
+				is_unallocated: isUnallocated,
 				start_date: startDate,
 				end_date: endDate,
 				min_amount: minAmount,
 				max_amount: maxAmount,
 			}),
-		[query, accountId, isPending, startDate, endDate, minAmount, maxAmount],
+		[query, accountId, isPending, isUnallocated, startDate, endDate, minAmount, maxAmount],
 	)
 	const statements = statementsQuery ?? []
 	const paginated = useMemo(
@@ -159,6 +163,27 @@ export default function StatementsPage() {
 											<SelectItem value="all">Any status</SelectItem>
 											<SelectItem value="true">Pending</SelectItem>
 											<SelectItem value="false">Imported</SelectItem>
+										</SelectGroup>
+									</SelectContent>
+								</Select>
+								<Select
+									value={isUnallocated ?? "all"}
+									onValueChange={value =>
+										updateFilters({
+											is_unallocated: value === "all" ? null : value,
+										})
+									}
+								>
+									<SelectTrigger
+										className={cn("w-full sm:w-40", FILTER_CONTROL_CLASS)}
+									>
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent align="start" variant="filter">
+										<SelectGroup>
+											<SelectItem value="all">Any allocation</SelectItem>
+											<SelectItem value="true">Unallocated</SelectItem>
+											<SelectItem value="false">Allocated</SelectItem>
 										</SelectGroup>
 									</SelectContent>
 								</Select>

@@ -53,8 +53,16 @@ async function hashSnapshot(
 		snapshot.settings.default_filter_end_date_today
 			? { ...snapshot.tables, __settings__: [snapshot.settings] }
 			: snapshot.tables
-	for (const [key, rows] of Object.entries(synced)) {
-		normalized[key] = [...rows].sort((a, b) => (JSON.stringify(a) < JSON.stringify(b) ? -1 : 1))
+	for (const [key, rows] of Object.entries(synced).sort(([a], [b]) => a.localeCompare(b))) {
+		normalized[key] = rows
+			.map(row =>
+				Object.fromEntries(
+					Object.entries(row as Record<string, unknown>).sort(([a], [b]) =>
+						a.localeCompare(b),
+					),
+				),
+			)
+			.sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)))
 	}
 	const bytes = new TextEncoder().encode(JSON.stringify(normalized))
 	const digest = await crypto.subtle.digest("SHA-256", bytes)

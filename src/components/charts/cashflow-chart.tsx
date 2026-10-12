@@ -14,9 +14,15 @@ import { useChartIntro } from "@/components/charts/chart-intro"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { useHistory } from "@/history"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { formatChartCurrency } from "@/lib/chart-currency"
 import { formatCurrency } from "@/lib/utils"
 import type { CashflowHistoryMonth } from "@/logic/dashboard"
 import { pathMonthlyRecords } from "@/routes"
+
+const mobileAmount = new Intl.NumberFormat("en-SG", {
+	notation: "compact",
+	maximumFractionDigits: 0,
+})
 
 export type CashflowPoint = {
 	day: number
@@ -106,7 +112,7 @@ export default function CashflowChart({
 					Cumulative spending · SGD
 				</p>
 				<ChartContainer
-					className="h-72 w-full aspect-auto cursor-pointer sm:h-80"
+					className="h-52 w-full min-w-0 aspect-auto [&_.recharts-surface:focus-visible]:outline-2 [&_.recharts-surface:focus-visible]:outline-ring cursor-pointer sm:h-64"
 					config={{
 						spending: { label: "Usage", color: "var(--color-emerald-500)" },
 						projected_spending: {
@@ -117,6 +123,7 @@ export default function CashflowChart({
 				>
 					<ComposedChart
 						data={chartData}
+						margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
 						onClick={openDay}
 						style={{ cursor: "pointer" }}
 						accessibilityLayer
@@ -167,9 +174,26 @@ export default function CashflowChart({
 								/>
 							</linearGradient>
 						</defs>
-						<CartesianGrid strokeDasharray="3 3" vertical />
-						<XAxis dataKey="day" interval={interval} tickMargin={8} />
-						<YAxis width={isMobile ? 44 : 64} tickFormatter={compactCurrency} />
+						<CartesianGrid strokeDasharray="3 3" vertical={false} />
+						<XAxis
+							dataKey="day"
+							interval={interval}
+							height={24}
+							tickMargin={isMobile ? 4 : 8}
+						/>
+						<YAxis
+							width={isMobile ? 32 : 48}
+							tick={{ fontSize: isMobile ? 10 : 12 }}
+							tickMargin={isMobile ? 2 : 8}
+							tickLine={false}
+							axisLine={false}
+							tickFormatter={
+								isMobile
+									? value =>
+											`${value < 0 ? "−" : ""}${mobileAmount.format(Math.abs(value)).toLowerCase()}`
+									: formatChartCurrency
+							}
+						/>
 						<ReferenceLine y={0} stroke="var(--border)" />
 						{target !== null ? (
 							<ReferenceLine
@@ -400,11 +424,6 @@ function colorChange(
 	}
 
 	return 100
-}
-
-function compactCurrency(value: number) {
-	if (Math.abs(value) >= 1000) return `$${(value / 1000).toFixed(1)}k`
-	return `$${value}`
 }
 
 function seriesLabel(name: number | string | undefined) {

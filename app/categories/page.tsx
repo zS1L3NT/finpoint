@@ -4,15 +4,15 @@ import { useLiveQuery } from "dexie-react-hooks"
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { useState } from "react"
-import BucketBadge from "@/components/bucket-badge"
 import CategoryDialog from "@/components/dialogs/category"
 import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
+import MonthlyBudgetBadge from "@/components/monthly-budget-badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useHistory } from "@/history"
-import { canUseDefaultBucket, treatmentLabel } from "@/lib/analytics"
+import { canUseDefaultMonthlyBudget, treatmentLabel } from "@/lib/analytics"
 import { SPRING } from "@/lib/motion"
 import { listCategories } from "@/logic/categories"
 import { pathRecords } from "@/routes"
@@ -43,7 +43,7 @@ export default function CategoriesPage() {
 			<PageContent>
 				<PageHeader
 					title="Categories"
-					subtitle="Categories give Records meaning and supply their default treatment and spending bucket."
+					subtitle="Categories give Records meaning and supply their default treatment and monthly budget."
 					description="Category map"
 					icon="lucide:tag"
 					actions={
@@ -163,8 +163,8 @@ function CategoryTile({
 	onEdit: (category: Category | CategoryWithChildren) => void
 	onFindRecords: () => void
 }) {
-	const bucket = canUseDefaultBucket(category.analytics_treatment)
-		? category.default_bucket
+	const monthlyBudget = canUseDefaultMonthlyBudget(category.analytics_treatment)
+		? category.default_monthly_budget
 		: null
 	const childRecords = category.children.reduce((sum, child) => sum + child.records_count, 0)
 	return (
@@ -202,11 +202,11 @@ function CategoryTile({
 				</Button>
 			</div>
 
-			{bucket ? (
-				<BucketBadge
-					name={bucket.name}
-					color={bucket.color}
-					title="Default spending bucket"
+			{monthlyBudget ? (
+				<MonthlyBudgetBadge
+					name={monthlyBudget.name}
+					color={monthlyBudget.color}
+					title="Default monthly budget"
 				/>
 			) : category.analytics_treatment === null ? (
 				<p className="text-xs text-muted-foreground">

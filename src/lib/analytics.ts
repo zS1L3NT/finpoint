@@ -1,6 +1,6 @@
 import type { AnalyticsTreatment } from "@/types"
 
-export function canUseDefaultBucket(treatment: AnalyticsTreatment | null | undefined) {
+export function canUseDefaultMonthlyBudget(treatment: AnalyticsTreatment | null | undefined) {
 	return treatment === "spending" || treatment === "automatic" || treatment == null
 }
 

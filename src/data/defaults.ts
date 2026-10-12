@@ -1,6 +1,6 @@
 import type { AnalyticsTreatment } from "@/types"
 
-export const DEFAULT_BUCKETS = [
+export const DEFAULT_MONTHLY_BUDGETS = [
 	{ name: "Daily", color: "#38bdf8", group: "core", pace_kind: "daily", display_order: 10 },
 	{
 		name: "Recurring",
@@ -18,93 +18,111 @@ export const DEFAULT_CATEGORIES: {
 	icon: string
 	color: string
 	treatment: AnalyticsTreatment
-	bucket: string | null
+	monthly_budget: string | null
 }[] = [
 	{
 		name: "Housing",
 		icon: "house",
 		color: "#5C6BC0",
 		treatment: "spending",
-		bucket: "Recurring",
+		monthly_budget: "Recurring",
 	},
 	{
 		name: "Bills & Utilities",
 		icon: "receipt",
 		color: "#7986CB",
 		treatment: "spending",
-		bucket: "Recurring",
+		monthly_budget: "Recurring",
 	},
-	{ name: "Groceries", icon: "apple", color: "#EF6C00", treatment: "spending", bucket: "Daily" },
+	{
+		name: "Groceries",
+		icon: "apple",
+		color: "#EF6C00",
+		treatment: "spending",
+		monthly_budget: "Daily",
+	},
 	{
 		name: "Dining Out",
 		icon: "utensils",
 		color: "#F44336",
 		treatment: "spending",
-		bucket: "Daily",
+		monthly_budget: "Daily",
 	},
 	{
 		name: "Transport",
 		icon: "navigation",
 		color: "#AB47BD",
 		treatment: "spending",
-		bucket: "Daily",
+		monthly_budget: "Daily",
 	},
 	{
 		name: "Healthcare",
 		icon: "heart-pulse",
 		color: "#FFB300",
 		treatment: "spending",
-		bucket: "Irregular",
+		monthly_budget: "Irregular",
 	},
 	{
 		name: "Insurance",
 		icon: "shield-check",
 		color: "#26A69A",
 		treatment: "spending",
-		bucket: "Recurring",
+		monthly_budget: "Recurring",
 	},
 	{
 		name: "Shopping",
 		icon: "shopping-bag",
 		color: "#4FC3F7",
 		treatment: "spending",
-		bucket: "Irregular",
+		monthly_budget: "Irregular",
 	},
 	{
 		name: "Entertainment",
 		icon: "party-popper",
 		color: "#64DD17",
 		treatment: "spending",
-		bucket: "Irregular",
+		monthly_budget: "Irregular",
 	},
 	{
 		name: "Gifts & Donations",
 		icon: "gift",
 		color: "#EC407A",
 		treatment: "spending",
-		bucket: "Irregular",
+		monthly_budget: "Irregular",
 	},
-	{ name: "Travel", icon: "plane", color: "#FB7185", treatment: "spending", bucket: "Travel" },
-	{ name: "Income", icon: "dollar-sign", color: "#01BFA5", treatment: "income", bucket: null },
+	{
+		name: "Travel",
+		icon: "plane",
+		color: "#FB7185",
+		treatment: "spending",
+		monthly_budget: "Travel",
+	},
+	{
+		name: "Income",
+		icon: "dollar-sign",
+		color: "#01BFA5",
+		treatment: "income",
+		monthly_budget: null,
+	},
 	{
 		name: "Savings & Investments",
 		icon: "chart-candlestick",
 		color: "#26A69A",
 		treatment: "saving_investment",
-		bucket: null,
+		monthly_budget: null,
 	},
 	{
 		name: "Transfer",
 		icon: "arrow-left-right",
 		color: "#78909C",
 		treatment: "neutral",
-		bucket: null,
+		monthly_budget: null,
 	},
 	{
 		name: "Other",
 		icon: "circle-question-mark",
 		color: "#9E9E9E",
 		treatment: "spending",
-		bucket: null,
+		monthly_budget: null,
 	},
 ]

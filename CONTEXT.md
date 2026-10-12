@@ -33,20 +33,20 @@ _Avoid_: Draft statement, estimated record
 A spending plan with a custom date period and amount. Budget membership can be manual, or automatic when records fall within the budget period; records may still be attached or detached outside the period.
 _Avoid_: Spending bucket, monthly target
 
-**Spending bucket**:
-A persistent, optional planning group for personal spending, such as Daily, Recurring, Irregular, or Travel. A bucket can have a default monthly target and a target override for a specific month. Only Records whose effective treatment is Spending contribute to bucket totals.
-_Avoid_: Budget, category, treatment
+**Monthly Budget**:
+A reusable spending plan for calendar months, such as Daily, Recurring, Irregular, or Travel. It has an optional default amount that applies from an effective month and an optional amount override for one month. An explicit null means no comparison amount; zero is a valid amount. Only Records whose effective treatment is Spending contribute to its totals. Archived Monthly Budgets retain historical assignments.
+_Avoid_: Bucket, spending bucket, monthly target, custom-period budget
 
-**Monthly target**:
-An optional comparison amount for a spending bucket in a calendar month. It does not reserve cash, carry a balance, or change a Record's accounting treatment.
-_Avoid_: Budget, limit, allowance
+**Monthly Budget amount**:
+The comparison amount for a Monthly Budget in a selected calendar month. A month override takes precedence over the latest eligible default amount. It does not reserve cash, carry a balance, or change a Record's accounting treatment.
+_Avoid_: Target, limit, allowance
 
 **Treatment**:
 The accounting role of a Record: Income, Spending, Saving/investment, Transfer/neutral, or Automatic by amount direction. A Category supplies the normal default and a Record may override it for an exception.
 _Avoid_: Bucket, category type
 
 **Category**:
-A category gives a Record user-facing meaning and supplies its usual treatment and optional default spending bucket. The defaults reduce repeated input; the Category, treatment, and bucket remain separate concepts.
+A category gives a Record user-facing meaning and supplies its usual treatment and optional default Monthly Budget. The defaults reduce repeated input; the Category, treatment, and Monthly Budget remain separate concepts.
 _Avoid_: Budget category, bucket, treatment
 
 **Subcategory**:
@@ -61,8 +61,8 @@ Domain expert: "Call it a statement. A statement is the imported account activit
 Developer: "Why is this record still pending?"
 Domain expert: "Its allocated statements do not tally with the record amount yet."
 
-Developer: "Should dining go under a budget or spending bucket?"
-Domain expert: "Use a spending bucket for persistent monthly planning. Use a budget when the plan has its own custom period."
+Developer: "Should dining go under a Budget or Monthly Budget?"
+Domain expert: "Use a Monthly Budget for reusable calendar-month planning. Use a budget when the plan has its own custom period."
 
-Developer: "Why do Category, treatment, and bucket all exist?"
-Domain expert: "The Category describes the Record, its treatment controls totals, and its optional bucket groups personal spending. Category defaults normally fill the other two."
+Developer: "Why do Category, treatment, and Monthly Budget all exist?"
+Domain expert: "The Category describes the Record, its treatment controls totals, and its optional Monthly Budget groups personal spending. Category defaults normally fill the other two."

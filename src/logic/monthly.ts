@@ -11,9 +11,10 @@ export type MonthlyFilters = {
 	query?: string | null
 	category_ids?: string | null
 	is_allocated?: string | null
-	bucket_id?: string | null
-	bucket_group?: string | null
-	show_unbucketed?: boolean
+	monthly_budget_id?: string | null
+	monthly_budget_group?: string | null
+	show_unbudgeted?: boolean
+	effective_spending?: boolean
 	treatment?: string | null
 	start_date?: string | null
 	end_date?: string | null
@@ -54,9 +55,10 @@ export async function getMonthlyRecords(month: string, year: number, filters: Mo
 		max_amount: filters.max_amount ?? null,
 		is_allocated: filters.is_allocated ?? null,
 		category_ids,
-		bucket_id: filters.bucket_id ?? null,
-		bucket_group: filters.bucket_group ?? null,
-		show_unbucketed: !!filters.show_unbucketed,
+		monthly_budget_id: filters.monthly_budget_id ?? null,
+		monthly_budget_group: filters.monthly_budget_group ?? null,
+		show_unbudgeted: !!filters.show_unbudgeted,
+		effective_spending: !!filters.effective_spending,
 		treatment: filters.treatment ?? null,
 	})
 
@@ -66,7 +68,7 @@ export async function getMonthlyRecords(month: string, year: number, filters: Mo
 		amount: r.amount,
 		datetime: r.datetime,
 		analytics_treatment: r.analytics_treatment,
-		bucket_id: r.bucket_id,
+		monthly_budget_id: r.monthly_budget_id,
 		is_pending: r.is_pending,
 		category: r.category
 			? {
@@ -77,22 +79,22 @@ export async function getMonthlyRecords(month: string, year: number, filters: Mo
 				}
 			: null,
 		category_parent: null,
-		bucket: r.bucket
+		monthly_budget: r.monthly_budget
 			? {
-					id: r.bucket.id,
-					name: r.bucket.name,
-					color: r.bucket.color,
-					group: r.bucket.group,
-					pace_kind: r.bucket.pace_kind,
-					display_order: r.bucket.display_order,
-					archived: r.bucket.archived,
+					id: r.monthly_budget.id,
+					name: r.monthly_budget.name,
+					color: r.monthly_budget.color,
+					group: r.monthly_budget.group,
+					pace_kind: r.monthly_budget.pace_kind,
+					display_order: r.monthly_budget.display_order,
+					archived: r.monthly_budget.archived,
 				}
 			: null,
 	})
 
 	const actualRecords = isFuture ? [] : records.filter(r => r.datetime.slice(0, 10) <= actualEnd)
 	const futureRecords = records.filter(r => !actualRecords.includes(r))
-	const buckets = (await db.buckets.toArray())
+	const monthlyBudgets = (await db.monthly_budgets.toArray())
 		.filter(b => !b.archived)
 		.sort((a, b) => a.display_order - b.display_order)
 
@@ -107,14 +109,15 @@ export async function getMonthlyRecords(month: string, year: number, filters: Mo
 		records: actualRecords,
 		future_records: futureRecords,
 		summary: summarize(actualRecords.map(toAnalytics)),
-		buckets,
+		monthlyBudgets,
 		filters: {
 			query: filters.query ?? null,
 			category_ids: filters.category_ids ?? null,
 			is_allocated: filters.is_allocated ?? null,
-			bucket_id: filters.bucket_id ?? null,
-			bucket_group: filters.bucket_group ?? null,
-			show_unbucketed: !!filters.show_unbucketed,
+			monthly_budget_id: filters.monthly_budget_id ?? null,
+			monthly_budget_group: filters.monthly_budget_group ?? null,
+			show_unbudgeted: !!filters.show_unbudgeted,
+			effective_spending: !!filters.effective_spending,
 			treatment: filters.treatment ?? null,
 			start_date: filters.start_date ?? null,
 			end_date: filters.end_date ?? null,

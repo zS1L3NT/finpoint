@@ -2,39 +2,44 @@ import { useLiveQuery } from "dexie-react-hooks"
 import SelectField from "@/components/form/select-field"
 import { FieldGroup } from "@/components/ui/field"
 import { treatmentLabel } from "@/lib/analytics"
-import { listBuckets } from "@/logic/buckets"
+import { listMonthlyBudgets } from "@/logic/monthly-budgets"
 import { AnalyticsTreatment } from "@/types"
 
 const CATEGORY_DEFAULT = "category_default"
+const UNBUDGETED = "unbudgeted"
 
 export default function RecordAnalyticsFields({
 	treatment,
 	categoryTreatment,
 	amount,
-	bucketId,
-	bucketSource,
-	categoryBucketId,
+	monthlyBudgetId,
+	monthlyBudgetSource,
+	categoryMonthlyBudgetId,
 	onTreatmentChange,
-	onBucketChange,
+	onMonthlyBudgetChange,
 }: {
 	treatment: string
 	categoryTreatment: AnalyticsTreatment | null | undefined
 	amount: number
-	bucketId: string
-	bucketSource: "category" | "manual"
-	categoryBucketId: string | null | undefined
+	monthlyBudgetId: string
+	monthlyBudgetSource: "category" | "manual"
+	categoryMonthlyBudgetId: string | null | undefined
 	onTreatmentChange: (value: string) => void
-	onBucketChange: (value: string, source: "category" | "manual") => void
+	onMonthlyBudgetChange: (value: string, source: "category" | "manual") => void
 }) {
-	const buckets = useLiveQuery(() => listBuckets(), []) ?? []
+	const monthlyBudgets = useLiveQuery(() => listMonthlyBudgets(), []) ?? []
 	const effectiveTreatment = (treatment || categoryTreatment || "automatic") as AnalyticsTreatment
-	const bucketEligible = canUseBucket(effectiveTreatment, amount)
-	const categoryBucket = buckets.find(bucket => bucket.id === categoryBucketId)
+	const monthlyBudgetEligible = canUseMonthlyBudget(effectiveTreatment, amount)
+	const categoryMonthlyBudget = monthlyBudgets.find(
+		monthlyBudget => monthlyBudget.id === categoryMonthlyBudgetId,
+	)
 	const treatmentValue = treatment || (categoryTreatment ? CATEGORY_DEFAULT : "")
-	const bucketValue =
-		bucketSource === "category" && categoryBucketId && bucketId === categoryBucketId
+	const monthlyBudgetValue =
+		monthlyBudgetSource === "category" &&
+		categoryMonthlyBudgetId &&
+		monthlyBudgetId === categoryMonthlyBudgetId
 			? CATEGORY_DEFAULT
-			: bucketId
+			: monthlyBudgetId || UNBUDGETED
 
 	return (
 		<div className="grid gap-4 rounded-lg border p-4">
@@ -64,40 +69,48 @@ export default function RecordAnalyticsFields({
 						const treatment = value === CATEGORY_DEFAULT ? "" : value
 						onTreatmentChange(treatment)
 						if (
-							!canUseBucket(
+							!canUseMonthlyBudget(
 								(treatment ||
 									categoryTreatment ||
 									"automatic") as AnalyticsTreatment,
 								amount,
 							)
 						)
-							onBucketChange("", "manual")
+							onMonthlyBudgetChange("", "manual")
 					}}
 				/>
 				<SelectField
-					id="bucket_id"
-					label="Spending bucket"
-					disabled={!bucketEligible}
-					value={bucketValue}
-					placeholder="No default bucket"
+					id="monthly_budget_id"
+					label="Monthly budget"
+					disabled={!monthlyBudgetEligible}
+					value={monthlyBudgetValue}
+					placeholder="Unbudgeted"
 					items={[
-						...(categoryBucketId !== undefined
+						{ value: UNBUDGETED, label: "Unbudgeted" },
+						...(categoryMonthlyBudgetId !== undefined
 							? [
 									{
 										value: CATEGORY_DEFAULT,
-										label: `Category default · ${categoryBucket?.name ?? (categoryBucketId ? "Default bucket" : "No default bucket")}`,
+										label: `Category default · ${categoryMonthlyBudget?.name ?? (categoryMonthlyBudgetId ? "Default monthly budget" : "Unbudgeted")}`,
 									},
 								]
 							: []),
-						...buckets
-							.filter(bucket => !bucket.archived)
-							.map(bucket => ({ value: bucket.id, label: bucket.name })),
+						...monthlyBudgets
+							.filter(monthlyBudget => !monthlyBudget.archived)
+							.map(monthlyBudget => ({
+								value: monthlyBudget.id,
+								label: monthlyBudget.name,
+							})),
 					]}
 					onChange={value => {
 						if (!value) return
 
-						onBucketChange(
-							value === CATEGORY_DEFAULT ? (categoryBucketId ?? "") : value,
+						onMonthlyBudgetChange(
+							value === CATEGORY_DEFAULT
+								? (categoryMonthlyBudgetId ?? "")
+								: value === UNBUDGETED
+									? ""
+									: value,
 							value === CATEGORY_DEFAULT ? "category" : "manual",
 						)
 					}}
@@ -107,6 +120,6 @@ export default function RecordAnalyticsFields({
 	)
 }
 
-function canUseBucket(treatment: AnalyticsTreatment, amount: number) {
+function canUseMonthlyBudget(treatment: AnalyticsTreatment, amount: number) {
 	return treatment === "spending" || (treatment === "automatic" && amount < 0)
 }
