@@ -10,10 +10,13 @@
   - `src/routes.ts` centralizes all route paths; `app/api/auth/*` are Route Handlers for the Google OAuth broker only (exchange/token/logout) — financial data never touches them.
   - Overview + Monthly Records share the `(month)` route-group shell (title, month nav, tabs mount once, content swaps below), so tab switches never remount the header.
 - React Compiler is enabled in `next.config.ts`.
+- Keep validation errors as `ValidationError` with Laravel-shaped `{ field: string[] }` maps so forms keep working unchanged. Validate all fields through `Validator` in `src/logic/validate.ts` (`text`, `amount`, `date`, `datetime`, `oneOf`, `slug`); never hand-roll `errors` maps in domain modules.
+- For Dexie schema changes, bump the version and add an `upgrade` block; never rewrite old migration blocks.
+- Ephemeral UI state stays in component state or search params; anything that must survive reloads belongs in IndexedDB. Pages take no props; filters and pagination live in URL search params so views stay shareable.
 
-## Code Style
-- Read `STYLE.md` for code style rules.
-- Put future code-style changes in `STYLE.md`, not `AGENTS.md`.
+## Conventions
+- Code style lives in `STYLE.md`: read it before writing code, and add new style rules there.
+- Commit, branch, and pull request rules live in `COMMIT.md`: read it before any commit, branch, or PR.
 
 ## Commands
 - Use `bun install` for a fresh clone.
@@ -33,6 +36,9 @@
 ## Domain Language
 - Read `CONTEXT.md` for canonical domain terms and avoided aliases.
 - Most domain tables use string primary keys, not auto-increment integers.
+
+## Agent Behavior
+- Before changing the shape of a shared helper API in a meaningful way, such as converting a plain column factory into a hook, consult the user first unless they explicitly asked for that refactor.
 
 ## Verification
 - This project does not have an automated test suite.
