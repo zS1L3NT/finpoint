@@ -97,7 +97,11 @@ export async function setMonthlyBudgetAmount(
 		v.throwIfInvalid()
 	}
 
-	if (scope === "month") {
+	if (scope === "keep") return
+
+	if (scope === "inherit") {
+		await db.monthly_budget_amounts.delete([monthlyBudgetId, month])
+	} else if (scope === "month") {
 		await db.monthly_budget_amounts.put({ monthly_budget_id: monthlyBudgetId, month, amount })
 	} else {
 		await db.transaction(
@@ -113,6 +117,22 @@ export async function setMonthlyBudgetAmount(
 				await db.monthly_budget_amounts.delete([monthlyBudgetId, month])
 			},
 		)
+	}
+}
+
+export async function getMonthlyBudgetAmountSource(monthlyBudgetId: string, month: string) {
+	const override = await db.monthly_budget_amounts.get([monthlyBudgetId, month])
+	const defaults = (
+		await db.monthly_budget_defaults
+			.where("monthly_budget_id")
+			.equals(monthlyBudgetId)
+			.toArray()
+	).sort((a, b) => a.effective_month.localeCompare(b.effective_month))
+
+	return {
+		override: override ?? null,
+		default: defaults.filter(row => row.effective_month <= month).at(-1) ?? null,
+		nextDefault: defaults.find(row => row.effective_month > month) ?? null,
 	}
 }
 
@@ -190,9 +210,18 @@ function validateAmount(
 	const month = v.date(input.month, "month", "Invalid month.")
 	const date = DateTime.fromISO(month)
 	if (!date.isValid || date.day !== 1) v.reject("month", "Choose the first day of a valid month.")
-	const scope = v.oneOf(input.scope, "scope", ["month", "default"] as const, "Invalid scope.")
+	const scope = v.oneOf(
+		input.scope,
+		"scope",
+		["month", "default", "keep", "inherit"] as const,
+		"Invalid scope.",
+	)
 	const amount =
-		input.amount === null || input.amount === undefined || input.amount === ""
+		scope === "keep" ||
+		scope === "inherit" ||
+		input.amount === null ||
+		input.amount === undefined ||
+		input.amount === ""
 			? null
 			: v.amount(input.amount, "amount", "Amount must be zero or more.")
 	if (amount !== null && amount < 0) v.reject("amount", "Amount must be zero or more.")

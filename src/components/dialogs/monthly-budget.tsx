@@ -1,3 +1,4 @@
+import { useLiveQuery } from "dexie-react-hooks"
 import { DateTime } from "luxon"
 import { useState } from "react"
 import { toast } from "sonner"
@@ -17,7 +18,8 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
-import { upsertMonthlyBudget } from "@/logic/monthly-budgets"
+import { formatCurrency } from "@/lib/utils"
+import { getMonthlyBudgetAmountSource, upsertMonthlyBudget } from "@/logic/monthly-budgets"
 import { ValidationError } from "@/logic/validate"
 import { MonthlyBudget } from "@/types"
 
@@ -42,10 +44,23 @@ export default function MonthlyBudgetDialog({
 	const [paceKind, setPaceKind] = useState(monthlyBudget?.pace_kind ?? "none")
 	const [amount, setAmount] = useState(monthlyBudget?.amount ?? 0)
 	const [noAmount, setNoAmount] = useState(monthlyBudget?.amount === null)
-	const [amountScope, setAmountScope] = useState(monthlyBudget ? "month" : "default")
+	const [amountScope, setAmountScope] = useState(monthlyBudget ? "keep" : "default")
 	const [archived, setArchived] = useState(monthlyBudget?.archived ?? false)
 	const [errors, setErrors] = useState<{ [key: string]: string[] }>({})
 	const [submitting, setSubmitting] = useState(false)
+
+	const source = useLiveQuery(
+		() =>
+			open && monthlyBudget
+				? getMonthlyBudgetAmountSource(monthlyBudget.id, selectedMonth.toISODate() ?? "")
+				: null,
+		[open, monthlyBudget?.id, month, year],
+	)
+	const monthLabel = `${month} ${year}`
+	const defaultLabel = source?.default
+		? `${source.default.amount === null ? "No monthly amount" : formatCurrency(source.default.amount)} · Default since ${DateTime.fromISO(source.default.effective_month).toFormat("MMMM yyyy")}`
+		: "No default amount set"
+	const amountEditable = amountScope === "month" || amountScope === "default"
 
 	const reset = () => {
 		setName(monthlyBudget?.name ?? "")
@@ -54,7 +69,7 @@ export default function MonthlyBudgetDialog({
 		setPaceKind(monthlyBudget?.pace_kind ?? "none")
 		setAmount(monthlyBudget?.amount ?? 0)
 		setNoAmount(monthlyBudget?.amount === null)
-		setAmountScope(monthlyBudget ? "month" : "default")
+		setAmountScope(monthlyBudget ? "keep" : "default")
 		setArchived(monthlyBudget?.archived ?? false)
 		setErrors({})
 	}
@@ -102,100 +117,146 @@ export default function MonthlyBudgetDialog({
 						{monthlyBudget ? `Edit ${monthlyBudget.name}` : "Create monthly budget"}
 					</DialogTitle>
 					<DialogDescription>
-						Monthly budgets persist across months. The amount can apply only to {month}{" "}
-						{year} or become the default from that month onward.
+						Name, colour, group and forecast settings apply across all months. Choose
+						separately how the amount applies to {monthLabel}.
 					</DialogDescription>
 				</DialogHeader>
-				<form
-					className="grid gap-5"
-					onSubmit={event => {
-						event.preventDefault()
-						void submit()
-					}}
-				>
-					<FieldGroup>
-						<TextField
-							id="monthly-budget-name"
-							label="Name"
-							value={name}
-							errors={fieldErrors(errors.name)}
-							onChange={setName}
-						/>
-						<Field>
-							<FieldLabel htmlFor="monthly-budget-color">Colour</FieldLabel>
-							<div className="flex items-center gap-2">
-								<input
-									id="monthly-budget-color"
-									type="color"
-									value={color}
-									onChange={event => setColor(event.target.value)}
-									className="h-8 w-12 cursor-pointer rounded border bg-transparent p-1"
-								/>
-								<span className="text-xs text-muted-foreground">{color}</span>
-							</div>
-						</Field>
-						<SelectField
-							id="monthly-budget-group"
-							label="Group"
-							value={group}
-							items={[
-								{ value: "core", label: "Core" },
-								{ value: "outlier", label: "Outlier" },
-								{ value: "other", label: "Other" },
-							]}
-							errors={fieldErrors(errors.group)}
-							onChange={value => setGroup(value as MonthlyBudget["group"])}
-						/>
-						<SelectField
-							id="monthly-budget-pace"
-							label="Pacing"
-							value={group === "outlier" ? "none" : paceKind}
-							disabled={group === "outlier"}
-							description={
-								group === "outlier"
-									? "Outlier monthly budgets are not paced."
-									: undefined
-							}
-							items={[
-								{ value: "none", label: "No pacing" },
-								{ value: "daily", label: "Daily" },
-								{ value: "recurring", label: "Recurring" },
-							]}
-							errors={fieldErrors(errors.pace_kind)}
-							onChange={value => setPaceKind(value as MonthlyBudget["pace_kind"])}
-						/>
-						<AmountField
-							id="monthly-budget-amount"
-							label="Monthly amount"
-							value={amount}
-							min={0}
-							disabled={noAmount}
-							errors={fieldErrors(errors.amount)}
-							onChange={setAmount}
-						/>
-						<Field orientation="horizontal">
-							<Checkbox
-								id="monthly-budget-no-amount"
-								checked={noAmount}
-								onCheckedChange={value => setNoAmount(value === true)}
+				{!monthlyBudget || source ? (
+					<form
+						className="reveal grid gap-5"
+						onSubmit={event => {
+							event.preventDefault()
+							void submit()
+						}}
+					>
+						<FieldGroup className="grid grid-cols-[minmax(0,1fr)_auto]">
+							<TextField
+								id="monthly-budget-name"
+								label="Name"
+								value={name}
+								errors={fieldErrors(errors.name)}
+								onChange={setName}
 							/>
-							<FieldLabel htmlFor="monthly-budget-no-amount">
-								No monthly amount
-							</FieldLabel>
-						</Field>
-						<SelectField
-							id="monthly-budget-amount-scope"
-							label="Apply monthly amount to"
-							value={amountScope}
-							items={[
-								{ value: "month", label: `${month} ${year} only` },
-								{
-									value: "default",
-									label: `Default from ${month} ${year} onward`,
-								},
-							]}
-							onChange={setAmountScope}
-						/>
+							<Field>
+								<FieldLabel htmlFor="monthly-budget-color">Colour</FieldLabel>
+								<div className="flex items-center gap-2">
+									<input
+										id="monthly-budget-color"
+										type="color"
+										value={color}
+										onChange={event => setColor(event.target.value)}
+										className="h-8 w-12 cursor-pointer rounded border bg-transparent p-1"
+									/>
+									<span className="text-xs text-muted-foreground">{color}</span>
+								</div>
+							</Field>
+							<SelectField
+								id="monthly-budget-group"
+								label="Group"
+								className="col-span-2"
+								value={group}
+								items={[
+									{ value: "core", label: "Core" },
+									{ value: "outlier", label: "Outlier" },
+									{ value: "other", label: "Other" },
+								]}
+								errors={fieldErrors(errors.group)}
+								onChange={value => setGroup(value as MonthlyBudget["group"])}
+							/>
+							<SelectField
+								id="monthly-budget-pace"
+								label="Spending forecast"
+								className="col-span-2"
+								value={group === "outlier" ? "none" : paceKind}
+								disabled={group === "outlier"}
+								description={
+									group === "outlier"
+										? "Outlier budgets use recorded amounts only."
+										: paceKind === "daily"
+											? "Use this budget’s daily spending average to estimate its month-end total."
+											: paceKind === "recurring"
+												? "Use recorded and future-dated spending only. This does not create recurring Records."
+												: "Show recorded spending without a daily estimate for this budget."
+								}
+								items={[
+									{ value: "none", label: "Recorded amounts only" },
+									{ value: "daily", label: "Estimate from daily spending" },
+									{ value: "recurring", label: "Recurring / scheduled spending" },
+								]}
+								errors={fieldErrors(errors.pace_kind)}
+								onChange={value => setPaceKind(value as MonthlyBudget["pace_kind"])}
+							/>
+						</FieldGroup>
+						<FieldGroup className="rounded-lg border bg-muted/20 p-3">
+							<div className="grid gap-1 text-sm" aria-live="polite">
+								<p className="font-medium">Amount for {monthLabel}</p>
+								{monthlyBudget && source ? (
+									<>
+										<p className="text-muted-foreground">
+											{source.override
+												? `${source.override.amount === null ? "No monthly amount" : formatCurrency(source.override.amount)} · Override for ${monthLabel} only`
+												: `Following default: ${defaultLabel}`}
+										</p>
+										{source.override ? (
+											<p className="text-xs text-muted-foreground">
+												{defaultLabel}
+											</p>
+										) : null}
+									</>
+								) : null}
+							</div>
+							<SelectField
+								id="monthly-budget-amount-scope"
+								label="Amount rule"
+								value={amountScope}
+								items={[
+									...(monthlyBudget
+										? [
+												{ value: "keep", label: "Keep current rule" },
+												{
+													value: "inherit",
+													label: "Follow default amount",
+												},
+											]
+										: []),
+									{ value: "month", label: `Override ${monthLabel} only` },
+									{ value: "default", label: `Set default from ${monthLabel}` },
+								]}
+								description={
+									amountScope === "keep"
+										? "Saving keeps the amount and its existing rule unchanged."
+										: amountScope === "inherit"
+											? `Remove this month’s override and use the default. ${defaultLabel}.`
+											: amountScope === "month"
+												? `Change ${monthLabel} only. The default stays unchanged.`
+												: `Set the default starting ${monthLabel}.${source?.nextDefault ? ` The next default starts in ${DateTime.fromISO(source.nextDefault.effective_month).toFormat("MMMM yyyy")}.` : ""} Remove this month’s override; other month overrides stay unchanged.`
+								}
+								onChange={setAmountScope}
+							/>
+							{amountEditable ? (
+								<>
+									<AmountField
+										id="monthly-budget-amount"
+										label="Monthly amount"
+										value={amount}
+										min={0}
+										disabled={noAmount}
+										errors={fieldErrors(errors.amount)}
+										onChange={setAmount}
+									/>
+									<Field orientation="horizontal">
+										<Checkbox
+											id="monthly-budget-no-amount"
+											checked={noAmount}
+											onCheckedChange={value => setNoAmount(value === true)}
+										/>
+										<FieldLabel htmlFor="monthly-budget-no-amount">
+											No monthly amount
+										</FieldLabel>
+									</Field>
+								</>
+							) : null}
+						</FieldGroup>
 						{monthlyBudget ? (
 							<Field orientation="horizontal">
 								<Checkbox
@@ -213,32 +274,32 @@ export default function MonthlyBudgetDialog({
 								</div>
 							</Field>
 						) : null}
-					</FieldGroup>
-					{Object.values(errors).flat().length ? (
-						<p
-							className="fade-in slide-in-from-top-1 animate-in text-sm text-destructive duration-150 ease-out"
-							role="alert"
-						>
-							{Object.values(errors).flat().join(" ")}
-						</p>
-					) : null}
-					<DialogFooter>
-						<DialogClose
-							render={
-								<Button type="button" variant="outline">
-									Cancel
-								</Button>
-							}
-						/>
-						<Button type="submit" disabled={submitting}>
-							{submitting
-								? "Saving…"
-								: monthlyBudget
-									? "Save changes"
-									: "Create monthly budget"}
-						</Button>
-					</DialogFooter>
-				</form>
+						{Object.values(errors).flat().length ? (
+							<p
+								className="fade-in slide-in-from-top-1 animate-in text-sm text-destructive duration-150 ease-out"
+								role="alert"
+							>
+								{Object.values(errors).flat().join(" ")}
+							</p>
+						) : null}
+						<DialogFooter>
+							<DialogClose
+								render={
+									<Button type="button" variant="outline">
+										Cancel
+									</Button>
+								}
+							/>
+							<Button type="submit" disabled={submitting}>
+								{submitting
+									? "Saving…"
+									: monthlyBudget
+										? "Save changes"
+										: "Create monthly budget"}
+							</Button>
+						</DialogFooter>
+					</form>
+				) : null}
 			</DialogContent>
 		</Dialog>
 	)
