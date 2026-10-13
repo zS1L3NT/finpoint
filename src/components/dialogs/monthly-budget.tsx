@@ -21,7 +21,6 @@ import { upsertMonthlyBudget } from "@/logic/monthly-budgets"
 import { ValidationError } from "@/logic/validate"
 import { MonthlyBudget } from "@/types"
 
-type EditableMonthlyBudget = MonthlyBudget & { amount?: number | null }
 const fieldErrors = (errors?: string[]) => errors?.map(message => ({ message }))
 
 export default function MonthlyBudgetDialog({
@@ -30,7 +29,7 @@ export default function MonthlyBudgetDialog({
 	year,
 	trigger,
 }: {
-	monthlyBudget?: EditableMonthlyBudget
+	monthlyBudget?: MonthlyBudget
 	month: string
 	year: number
 	trigger: React.ReactElement

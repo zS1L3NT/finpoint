@@ -39,8 +39,8 @@ export default function CashflowChart({
 	history,
 	month,
 	year,
-	target,
-	targetLabel,
+	amount,
+	amountLabel,
 	showProjection,
 	recordFilters,
 }: {
@@ -49,8 +49,8 @@ export default function CashflowChart({
 	month: string
 	year: number
 	recordFilters?: Record<string, string | undefined>
-	target: number | null
-	targetLabel: string | null
+	amount: number | null
+	amountLabel: string | null
 	showProjection: boolean
 }) {
 	const isMobile = useIsMobile()
@@ -76,8 +76,8 @@ export default function CashflowChart({
 		}),
 	)
 	const ticks = dayTicks(data.length)
-	const actualChange = colorChange(data, "spending", target)
-	const projectionChange = colorChange(data, "projected_spending", target)
+	const actualChange = colorChange(data, "spending", amount)
+	const projectionChange = colorChange(data, "projected_spending", amount)
 	const openDay = (state: { activeLabel?: number | string } | null) => {
 		if (!state?.activeLabel || Number(state.activeLabel) > data.length) return
 		const selected = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
@@ -200,13 +200,13 @@ export default function CashflowChart({
 							}
 						/>
 						<ReferenceLine y={0} stroke="var(--border)" />
-						{target !== null ? (
+						{amount !== null ? (
 							<ReferenceLine
-								y={target}
+								y={amount}
 								stroke="var(--muted-foreground)"
 								strokeDasharray="4 4"
 								label={{
-									value: `${targetLabel ?? "Monthly"} target`,
+									value: `${amountLabel ?? "Monthly"} amount`,
 									position: "insideTopRight",
 									fill: "var(--muted-foreground)",
 									fontSize: 11,
@@ -247,7 +247,7 @@ export default function CashflowChart({
 								<StatefulActiveDot
 									{...props}
 									field="spending"
-									threshold={target}
+									threshold={amount}
 									within="var(--color-emerald-500)"
 									exceeded="var(--color-rose-500)"
 								/>
@@ -271,7 +271,7 @@ export default function CashflowChart({
 										<StatefulActiveDot
 											{...props}
 											field="projected_spending"
-											threshold={target}
+											threshold={amount}
 											within="var(--color-amber-400)"
 											exceeded="var(--color-orange-500)"
 										/>
@@ -403,24 +403,24 @@ function LegendItem({ color, label }: { color: string; label: string }) {
 function colorChange(
 	data: CashflowPoint[],
 	field: "spending" | "projected_spending",
-	target: number | null,
+	amount: number | null,
 ) {
-	if (target === null) return 100
+	if (amount === null) return 100
 	const points = data.flatMap((point, index) => {
 		const value = point[field]
 		return value === null ? [] : [{ index, value }]
 	})
 	const first = points[0]
 	if (!first) return 100
-	if (first.value > target) return 0
+	if (first.value > amount) return 0
 
 	for (let index = 1; index < points.length; index += 1) {
 		const previous = points[index - 1]
 		const current = points[index]
-		if (!previous || !current || current.value <= target) continue
+		if (!previous || !current || current.value <= amount) continue
 
 		const change = current.value - previous.value
-		const progress = change > 0 ? (target - previous.value) / change : 1
+		const progress = change > 0 ? (amount - previous.value) / change : 1
 		const crossing = previous.index + (current.index - previous.index) * progress
 		const last = points[points.length - 1]
 		const visibleSpan = last ? last.index - first.index : 0

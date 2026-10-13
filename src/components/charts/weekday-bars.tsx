@@ -18,8 +18,6 @@ const WEEKDAYS: Record<string, string> = {
 export default function WeekdayBars({
 	stats,
 	comparisonCount,
-	month,
-	year,
 }: {
 	stats: {
 		day: string
@@ -29,10 +27,8 @@ export default function WeekdayBars({
 		baseline_days: number
 	}[]
 	comparisonCount: number
-	month?: string
-	year?: number
 }) {
-	const intro = useChartIntro(month ? `${month}-${year}` : "mount")
+	const intro = useChartIntro("mount")
 	const isMobile = useIsMobile()
 	const baselineLabel = `Previous ${comparisonCount} ${comparisonCount === 1 ? "month" : "months"}`
 

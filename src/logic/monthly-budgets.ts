@@ -1,11 +1,11 @@
-// Mirrors `Api\MonthlyBudgetController` + monthly_budget target/default handling.
+// Mirrors `Api\MonthlyBudgetController` + monthly_budget amount/default handling.
 
 import { DateTime } from "luxon"
-import { db } from "@/data/db"
+import { db, type MonthlyBudgetDefaultRow } from "@/data/db"
 import { newId } from "@/logic/shared"
 import { Validator } from "@/logic/validate"
 
-const GROUPS = ["core", "outlier", "other"] as const
+export const MONTHLY_BUDGET_GROUPS = ["core", "outlier", "other"] as const
 const PACE_KINDS = ["daily", "recurring", "none"] as const
 
 export async function listMonthlyBudgets() {
@@ -13,20 +13,7 @@ export async function listMonthlyBudgets() {
 	const rows = (await db.monthly_budgets.toArray()).sort(
 		(a, b) => a.display_order - b.display_order,
 	)
-	return Promise.all(
-		rows.map(async row => {
-			const defaults = await db.monthly_budget_defaults
-				.where("monthly_budget_id")
-				.equals(row.id)
-				.toArray()
-			const default_amount =
-				defaults
-					.filter(d => d.effective_month <= month)
-					.sort((a, b) => b.effective_month.localeCompare(a.effective_month))[0]
-					?.amount ?? null
-			return { ...row, default_amount, amount: await amountFor(row.id, month) }
-		}),
-	)
+	return Promise.all(rows.map(async row => ({ ...row, amount: await amountFor(row.id, month) })))
 }
 
 export async function createMonthlyBudget(input: {
@@ -38,7 +25,7 @@ export async function createMonthlyBudget(input: {
 	const v = new Validator()
 	const name = v.text(input.name, "name")
 	const color = v.text(input.color, "color")
-	const group = v.oneOf(input.group, "group", GROUPS, "Invalid group.")
+	const group = v.oneOf(input.group, "group", MONTHLY_BUDGET_GROUPS, "Invalid group.")
 	const pace_kind = v.oneOf(input.pace_kind, "pace_kind", PACE_KINDS, "Invalid pace.")
 	v.throwIfInvalid()
 
@@ -68,29 +55,28 @@ export async function updateMonthlyBudget(
 	id: string,
 	input: { name: string; color: string; group: string; pace_kind: string; archived: boolean },
 ) {
-	const existing = await db.monthly_budgets.get(id)
-	if (!existing) throw new Error("Monthly budget not found.")
-
 	const v = new Validator()
 	const name = v.text(input.name, "name")
 	const color = v.text(input.color, "color")
+	const group = v.oneOf(input.group, "group", MONTHLY_BUDGET_GROUPS)
+	const pace_kind = v.oneOf(input.pace_kind, "pace_kind", PACE_KINDS)
 	v.throwIfInvalid()
+
+	const existing = await db.monthly_budgets.get(id)
+	if (!existing) throw new Error("Monthly budget not found.")
 
 	const clash = await db.monthly_budgets.where("name").equals(name).first()
 	if (clash && clash.id !== id) {
 		v.reject("name", "This monthly budget name is already taken.")
 		v.throwIfInvalid()
 	}
-	const group = v.oneOf(input.group, "group", GROUPS) ?? existing.group
-	let pace_kind = v.oneOf(input.pace_kind, "pace_kind", PACE_KINDS) ?? existing.pace_kind
-	v.throwIfInvalid()
-	if (group === "outlier") pace_kind = "none"
 
+	const savedGroup = group ?? existing.group
 	await db.monthly_budgets.update(id, {
 		name,
 		color,
-		group,
-		pace_kind,
+		group: savedGroup,
+		pace_kind: savedGroup === "outlier" ? "none" : (pace_kind ?? existing.pace_kind),
 		archived: !!input.archived,
 	})
 	const saved = await db.monthly_budgets.get(id)
@@ -103,19 +89,13 @@ export async function setMonthlyBudgetAmount(
 	monthlyBudgetId: string,
 	input: { month: string; amount: unknown; scope: string },
 ) {
-	const v = new Validator()
-	const month = v.date(input.month, "month", "Invalid month.")
-	const date = DateTime.fromISO(month)
-	if (!date.isValid || date.day !== 1) v.reject("month", "Choose the first day of a valid month.")
-	const scope = v.oneOf(input.scope, "scope", ["month", "default"] as const, "Invalid scope.")
-	const amount =
-		input.amount === null || input.amount === undefined || input.amount === ""
-			? null
-			: v.amount(input.amount, "amount", "Amount must be zero or more.")
-	if (amount !== null && amount < 0) v.reject("amount", "Amount must be zero or more.")
-	if (!(await db.monthly_budgets.get(monthlyBudgetId)))
+	const { month, scope, amount } = validateAmount(input)
+
+	if (!(await db.monthly_budgets.get(monthlyBudgetId))) {
+		const v = new Validator()
 		v.reject("monthly_budget_id", "Monthly budget not found.")
-	v.throwIfInvalid()
+		v.throwIfInvalid()
+	}
 
 	if (scope === "month") {
 		await db.monthly_budget_amounts.put({ monthly_budget_id: monthlyBudgetId, month, amount })
@@ -144,11 +124,7 @@ export async function amountFor(monthlyBudgetId: string, month: string): Promise
 		.where("monthly_budget_id")
 		.equals(monthlyBudgetId)
 		.toArray()
-	const eligible = defaults
-		.filter(d => d.effective_month <= month)
-		.sort((a, b) => (a.effective_month < b.effective_month ? 1 : -1))
-
-	return eligible[0]?.amount ?? null
+	return defaultAmountFor(defaults, monthlyBudgetId, month)
 }
 
 export async function upsertMonthlyBudget(input: {
@@ -165,18 +141,9 @@ export async function upsertMonthlyBudget(input: {
 	const v = new Validator()
 	v.text(input.name, "name")
 	v.text(input.color, "color")
-	v.oneOf(input.group, "group", GROUPS)
+	v.oneOf(input.group, "group", MONTHLY_BUDGET_GROUPS)
 	v.oneOf(input.pace_kind, "pace_kind", PACE_KINDS)
-	const month = v.date(input.month, "month", "Invalid month.")
-	const date = DateTime.fromISO(month)
-	if (!date.isValid || date.day !== 1) v.reject("month", "Choose the first day of a valid month.")
-	v.oneOf(input.scope, "scope", ["month", "default"] as const)
-	const amount =
-		input.amount === null || input.amount === undefined || input.amount === ""
-			? null
-			: v.amount(input.amount, "amount", "Amount must be zero or more.")
-	if (amount !== null && amount < 0) v.reject("amount", "Amount must be zero or more.")
-	v.throwIfInvalid()
+	const { month, amount } = validateAmount(input, v)
 
 	const saved = await db.transaction(
 		"rw",
@@ -196,4 +163,39 @@ export async function upsertMonthlyBudget(input: {
 	)
 
 	return saved
+}
+
+export function isMonthlyBudgetGroup(
+	scope: string,
+): scope is (typeof MONTHLY_BUDGET_GROUPS)[number] {
+	return MONTHLY_BUDGET_GROUPS.some(group => group === scope)
+}
+
+export function defaultAmountFor(
+	defaults: MonthlyBudgetDefaultRow[],
+	monthlyBudgetId: string,
+	month: string,
+): number | null {
+	return (
+		defaults
+			.filter(d => d.monthly_budget_id === monthlyBudgetId && d.effective_month <= month)
+			.sort((a, b) => b.effective_month.localeCompare(a.effective_month))[0]?.amount ?? null
+	)
+}
+
+function validateAmount(
+	input: { month: string; amount: unknown; scope: string },
+	v = new Validator(),
+) {
+	const month = v.date(input.month, "month", "Invalid month.")
+	const date = DateTime.fromISO(month)
+	if (!date.isValid || date.day !== 1) v.reject("month", "Choose the first day of a valid month.")
+	const scope = v.oneOf(input.scope, "scope", ["month", "default"] as const, "Invalid scope.")
+	const amount =
+		input.amount === null || input.amount === undefined || input.amount === ""
+			? null
+			: v.amount(input.amount, "amount", "Amount must be zero or more.")
+	if (amount !== null && amount < 0) v.reject("amount", "Amount must be zero or more.")
+	v.throwIfInvalid()
+	return { month, scope, amount }
 }

@@ -69,7 +69,7 @@ export default function StatementsPage() {
 			page: null,
 		})
 
-	const accounts = useLiveQuery(() => listAccounts(), []) ?? []
+	const accounts = useLiveQuery(() => listAccounts(), [])
 	const statementsQuery = useLiveQuery(
 		() =>
 			listStatements({
@@ -99,6 +99,8 @@ export default function StatementsPage() {
 		onEdit: setEditingStatement,
 		grouped: true,
 	})
+
+	if (accounts === undefined || statementsQuery === undefined) return null
 
 	return (
 		<>

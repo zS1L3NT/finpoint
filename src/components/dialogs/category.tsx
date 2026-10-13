@@ -75,7 +75,7 @@ export default function CategoryDialog({
 	}
 	const { mode, category } = open ? { mode: modeProp, category: categoryProp } : snapshot
 	const isEditing = mode === "edit" && category !== null
-	const monthlyBudgets = useLiveQuery(() => listMonthlyBudgets(), []) ?? []
+	const monthlyBudgets = useLiveQuery(() => listMonthlyBudgets(), [])
 	const canEditParentCategory = !isEditing || isChildCategory(category)
 	const [values, setValues] = useState<CategoryFormValues>(EMPTY_FORM_VALUES)
 	const { getApiFieldErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
@@ -86,7 +86,7 @@ export default function CategoryDialog({
 			: ICON_NAMES
 	const monthlyBudgetEligible = canUseDefaultMonthlyBudget(values.analytics_treatment || null)
 	const defaultMonthlyBudgetName = values.default_monthly_budget_id
-		? (monthlyBudgets.find(
+		? (monthlyBudgets?.find(
 				monthlyBudget => monthlyBudget.id === values.default_monthly_budget_id,
 			)?.name ??
 			category?.default_monthly_budget?.name ??
@@ -158,6 +158,8 @@ export default function CategoryDialog({
 			toast.error("Unable to delete this category.")
 		}
 	}
+
+	if (monthlyBudgets === undefined) return null
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>

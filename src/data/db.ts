@@ -11,6 +11,7 @@
 //  3. Keep old version blocks untouched so existing browsers upgrade cleanly.
 
 import Dexie, { type Table } from "dexie"
+import { hashLegacySnapshot, hashSnapshot } from "@/data/snapshot-hash"
 import type { AnalyticsTreatment } from "@/types"
 
 export type AccountRow = {
@@ -174,6 +175,36 @@ class FinpointDB extends Dexie {
 				monthly_budget_amounts: "[monthly_budget_id+month], monthly_budget_id, month",
 			})
 			.upgrade(async transaction => {
+				const tables: Record<string, unknown[]> = {}
+				for (const table of [
+					"accounts",
+					"statements",
+					"categories",
+					"records",
+					"allocations",
+					"budgets",
+					"budget_records",
+					"buckets",
+					"bucket_defaults",
+					"bucket_targets",
+					"analytics_months",
+				]) {
+					tables[table] = await transaction.table(table).toArray()
+				}
+				const settings = {
+					default_filter_start_date:
+						(await transaction.table("settings").get("default_filter_start_date"))
+							?.value ?? null,
+					default_filter_end_date_today:
+						(await transaction.table("settings").get("default_filter_end_date_today"))
+							?.value === "true",
+				}
+				const lastHash = await transaction.table("meta").get("drive_last_hash")
+				// Convert only a clean baseline: unsynced edits must still trigger conflicts.
+				const clean =
+					lastHash &&
+					lastHash.value ===
+						(await Dexie.waitFor(hashLegacySnapshot({ settings, tables })))
 				await transaction
 					.table("monthly_budgets")
 					.bulkPut(await transaction.table("buckets").toArray())
@@ -205,6 +236,22 @@ class FinpointDB extends Dexie {
 						row.default_monthly_budget_id = row.default_bucket_id ?? null
 						delete row.default_bucket_id
 					})
+				if (clean) {
+					for (const [legacy, canonical] of [
+						["buckets", "monthly_budgets"],
+						["bucket_defaults", "monthly_budget_defaults"],
+						["bucket_targets", "monthly_budget_amounts"],
+						["records", "records"],
+						["categories", "categories"],
+					] as const) {
+						delete tables[legacy]
+						tables[canonical] = await transaction.table(canonical).toArray()
+					}
+					await transaction.table("meta").put({
+						key: "drive_last_hash",
+						value: await Dexie.waitFor(hashSnapshot({ settings, tables })),
+					})
+				}
 			})
 		this.version(4)
 			.stores({ buckets: null, bucket_defaults: null, bucket_targets: null })

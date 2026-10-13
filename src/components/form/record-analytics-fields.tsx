@@ -27,7 +27,8 @@ export default function RecordAnalyticsFields({
 	onTreatmentChange: (value: string) => void
 	onMonthlyBudgetChange: (value: string, source: "category" | "manual") => void
 }) {
-	const monthlyBudgets = useLiveQuery(() => listMonthlyBudgets(), []) ?? []
+	const monthlyBudgets = useLiveQuery(() => listMonthlyBudgets(), [])
+	if (monthlyBudgets === undefined) return null
 	const effectiveTreatment = (treatment || categoryTreatment || "automatic") as AnalyticsTreatment
 	const monthlyBudgetEligible = canUseMonthlyBudget(effectiveTreatment, amount)
 	const categoryMonthlyBudget = monthlyBudgets.find(

@@ -143,7 +143,6 @@ export type MonthlyBudget = {
 	display_order: number
 	archived: boolean
 	amount?: number | null
-	default_amount?: number | null
 }
 
 export type AnalyticsSummary = {

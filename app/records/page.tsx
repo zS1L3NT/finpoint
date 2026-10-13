@@ -193,6 +193,8 @@ export default function RecordsPage() {
 		[paginated],
 	)
 
+	if (recordsQuery === undefined) return null
+
 	return (
 		<>
 			<PageContent>

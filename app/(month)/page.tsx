@@ -4,7 +4,7 @@ import { useLiveQuery } from "dexie-react-hooks"
 import { DateTime } from "luxon"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
-import { type ReactNode, useMemo, useRef } from "react"
+import { type ReactNode, useRef } from "react"
 import CashflowChart from "@/components/charts/cashflow-chart"
 import CategoryHistoryChart from "@/components/charts/category-history-chart"
 import CategoryMovers from "@/components/charts/category-movers"
@@ -69,81 +69,49 @@ export default function DashboardPage() {
 	const stale = dataKey !== null && dataKey !== `${month}-${year}`
 	useMonthTransition(contentRef, dataKey)
 	const budgets = data?.monthlyBudgets ?? []
-	const categories = data?.categories ?? []
 	const setScope = (value: string) => {
 		const params = Object.fromEntries(searchParams.entries())
 		if (value === "all") delete params.scope
 		else params.scope = value
 		router.replace(pathDashboard(params), { scroll: false })
 	}
-	const validScope = (value: string) =>
-		value === "all" ||
-		value === "core" ||
-		value === "outlier" ||
-		value === "other" ||
-		budgets.some(budget => budget.id === value)
-			? value
-			: "all"
-	const scope = validScope(storedScope)
-	const dailyBudget =
-		budgets.find(budget => budget.pace_kind === "daily") ??
-		budgets.find(budget => budget.name.toLowerCase() === "daily") ??
-		null
 	const paceData = view?.pace
 	const monthlyBudgetDailyData = view?.monthlyBudgetDaily
 	// The summary and pace chart paint first; the sections below the fold then mount one per
 	// frame. Mounting every chart in one commit blocked arrival for ~300ms in production.
 	const stage = useStagedMount(6, !!data && !!paceData && !!monthlyBudgetDailyData)
-	const scopedBudgetIds = useMemo(() => {
-		if (scope === "all") return [...budgets.map(budget => budget.id), "unbudgeted"]
-		if (scope === "core" || scope === "outlier" || scope === "other") {
-			return budgets.filter(budget => budget.group === scope).map(budget => budget.id)
-		}
-		return [scope]
-	}, [scope, budgets])
-
-	if (!data || !paceData || !monthlyBudgetDailyData) return null
+	if (!view || !data || !paceData || !monthlyBudgetDailyData) return null
+	const {
+		scope,
+		scopedBudgetIds,
+		scopedCategories,
+		scopedComparisonCount,
+		scopedDaily,
+		scopeLabel,
+		scopeColor,
+		scopeFilters,
+		paceFilters,
+		dailyMonthlyBudget: dailyBudget,
+	} = view
 	const { period, summary, series, weekday, future_records_count } = data
 	const comparison = data.comparison
-	const scopedCategories = categories.map(category => ({
-		...category,
-		spending: scopedBudgetIds.reduce(
-			(sum, id) => sum + (category.monthly_budget_spending[id] ?? 0),
-			0,
-		),
-		outflow: scopedBudgetIds.reduce(
-			(sum, id) => sum + (category.monthly_budget_outflow[id] ?? 0),
-			0,
-		),
-		refunds: scopedBudgetIds.reduce(
-			(sum, id) => sum + (category.monthly_budget_refunds[id] ?? 0),
-			0,
-		),
-		records: scopedBudgetIds.reduce(
-			(sum, id) => sum + (category.monthly_budget_records[id] ?? 0),
-			0,
-		),
-	}))
-	const scopeLabel = ["all", "core", "outlier", "other"].includes(scope)
-		? scope === "all"
-			? "All spending"
-			: scope.charAt(0).toUpperCase() + scope.slice(1)
-		: (budgets.find(budget => budget.id === scope)?.name ?? "Monthly budget")
-	const scopeColor = budgets.find(budget => budget.id === scope)?.color
-	// Carried into every chart's Records link so the selected budget stays filtered.
-	const scopeFilters = {
-		monthly_budget_id: budgets.some(budget => budget.id === scope) ? scope : undefined,
-		monthly_budget_group: ["core", "outlier", "other"].includes(scope) ? scope : undefined,
-	}
 	const paceSeries = paceData.series
 	const paceProjection = paceData.projection
-	const paceTarget = paceData.paceMonthlyBudget
+	const paceAmount = paceData.paceMonthlyBudget
 	const completedMonth = paceData.completedMonth
 	const highestSpendingDay = paceData.highestSpendingDay
 	const dailyLines = monthlyBudgetDailyData.monthlyBudgets.map(budget => ({
 		...budget,
 		dashed: budget.id === "unbudgeted",
 	}))
+	const categoryRecordHref = (id: string) =>
+		pathMonthlyRecords({
+			month,
+			year: String(year),
+			category_ids: id,
+			effective_spending: "true",
+			...scopeFilters,
+		})
 	const openDay = (date: string) => {
 		handlePush("overview")()
 		router.push(
@@ -203,12 +171,12 @@ export default function DashboardPage() {
 							<div className="grid gap-4 py-3">
 								<div>
 									<p className="text-xs text-muted-foreground">
-										{paceTarget?.name ?? "Monthly budget"} planned amount
+										{paceAmount?.name ?? "Monthly budget"} planned amount
 									</p>
 									<p className="mt-2 text-2xl font-semibold tabular-nums">
-										{paceTarget?.amount == null
+										{paceAmount?.amount == null
 											? "Not set"
-											: formatCurrency(paceTarget.amount)}
+											: formatCurrency(paceAmount.amount)}
 									</p>
 								</div>
 								<p className="text-xs leading-relaxed text-muted-foreground">
@@ -232,17 +200,17 @@ export default function DashboardPage() {
 									history={paceData.history}
 									month={month}
 									year={year}
-									target={paceTarget?.amount ?? null}
-									targetLabel={paceTarget?.name ?? null}
+									amount={paceAmount?.amount ?? null}
+									amountLabel={paceAmount?.name ?? null}
 									showProjection={paceProjection.available}
-									recordFilters={scopeFilters}
+									recordFilters={paceFilters}
 								/>
 								<PaceSummary
 									projection={paceProjection}
 									completedMonth={completedMonth}
 									highestSpendingDay={highestSpendingDay}
 									spending={paceData.spending}
-									amount={paceTarget?.amount ?? null}
+									amount={paceAmount?.amount ?? null}
 									remaining={paceData.remaining}
 								/>
 							</>
@@ -272,7 +240,7 @@ export default function DashboardPage() {
 					<CardContent className="flex flex-1 flex-col">
 						<MonthlyBudgetUsage
 							budgets={budgets}
-							unbudgeted={categories.reduce(
+							unbudgeted={data.categories.reduce(
 								(sum, category) =>
 									sum + (category.monthly_budget_spending.unbudgeted ?? 0),
 								0,
@@ -334,15 +302,7 @@ export default function DashboardPage() {
 								<CardContent>
 									<CategorySpendingMix
 										categories={scopedCategories}
-										recordHref={id =>
-											pathMonthlyRecords({
-												month,
-												year: String(year),
-												category_ids: id,
-												effective_spending: "true",
-												...scopeFilters,
-											})
-										}
+										recordHref={categoryRecordHref}
 									/>
 								</CardContent>
 							</Card>
@@ -363,7 +323,10 @@ export default function DashboardPage() {
 						<div className="grid gap-5 lg:grid-cols-2">
 							<Card className="min-w-0">
 								<CardHeader>
-									<ScopedCardTitle scope="Total">
+									<ScopedCardTitle
+										scope={scope === "all" ? "Total" : scopeLabel}
+										color={scopeColor}
+									>
 										Spending calendar
 									</ScopedCardTitle>
 									<CardDescription>
@@ -375,7 +338,7 @@ export default function DashboardPage() {
 									<SpendingCalendar
 										month={month}
 										year={year}
-										daily={summary.daily}
+										daily={scopedDaily}
 										through={period.through}
 										onSelect={openDay}
 									/>
@@ -383,15 +346,21 @@ export default function DashboardPage() {
 							</Card>
 							<Card className="min-w-0">
 								<CardHeader>
-									<ScopedCardTitle scope="Total">Biggest changes</ScopedCardTitle>
+									<ScopedCardTitle
+										scope={scope === "all" ? "Total" : scopeLabel}
+										color={scopeColor}
+									>
+										Biggest changes
+									</ScopedCardTitle>
 									<CardDescription>
 										Categories that moved most against your usual spending.
 									</CardDescription>
 								</CardHeader>
 								<CardContent>
 									<CategoryMovers
-										categories={categories}
-										comparisonCount={comparison.count}
+										categories={scopedCategories}
+										comparisonCount={scopedComparisonCount}
+										recordHref={categoryRecordHref}
 									/>
 								</CardContent>
 							</Card>
@@ -411,7 +380,6 @@ export default function DashboardPage() {
 									history={data.history}
 									month={month}
 									year={year}
-									recordFilters={scopeFilters}
 								/>
 							</CardContent>
 						</Card>
@@ -431,7 +399,6 @@ export default function DashboardPage() {
 									monthlyBudgets={dailyLines}
 									month={month}
 									year={year}
-									recordFilters={scopeFilters}
 								/>
 							</CardContent>
 						</Card>

@@ -19,13 +19,11 @@ export default function TotalSpendingChart({
 	history,
 	month,
 	year,
-	recordFilters,
 }: {
 	data: SurplusPoint[]
 	history: CashflowHistoryMonth[]
 	month: string
 	year: number
-	recordFilters?: Record<string, string | undefined>
 }) {
 	const intro = useChartIntro(`${month}-${year}`)
 	const isMobile = useIsMobile()
@@ -68,7 +66,6 @@ export default function TotalSpendingChart({
 				year: String(year),
 				start_date: selected,
 				end_date: selected,
-				...recordFilters,
 			}),
 		)
 	}

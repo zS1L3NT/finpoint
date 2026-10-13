@@ -13,6 +13,7 @@ import {
 	type StatementRow,
 } from "@/data/db"
 import { type AnalyticsRecord, contribution, summarize } from "@/logic/analytics"
+import { defaultAmountFor, isMonthlyBudgetGroup } from "@/logic/monthly-budgets"
 import { expandCategoryIdsForMonthly } from "@/logic/monthly-shared"
 import {
 	type AllocationTally,
@@ -126,7 +127,7 @@ type LoadedTables = {
 	categories: Map<string, CategoryRow>
 	monthlyBudgets: Map<string, MonthlyBudgetRow>
 	monthly_budgetRows: MonthlyBudgetRow[]
-	targets: MonthlyBudgetAmountRow[]
+	amounts: MonthlyBudgetAmountRow[]
 	defaults: MonthlyBudgetDefaultRow[]
 	coverages: Map<string, AnalyticsMonthRow>
 }
@@ -138,7 +139,7 @@ async function loadDashboardTables(): Promise<LoadedTables> {
 		coverages,
 		categories,
 		monthlyBudgets,
-		targets,
+		amounts,
 		defaults,
 		pending,
 		statements,
@@ -162,7 +163,7 @@ async function loadDashboardTables(): Promise<LoadedTables> {
 		categories: new Map(categories.map(c => [c.id, c])),
 		monthlyBudgets: new Map(monthlyBudgets.map(b => [b.id, b])),
 		monthly_budgetRows: monthlyBudgets,
-		targets,
+		amounts,
 		defaults,
 		coverages: new Map(coverages.map(c => [c.month, c])),
 	}
@@ -174,7 +175,7 @@ export function scopeMonthlyBudgetIds(
 	monthlyBudgets: MonthlyBudgetRow[],
 ): string[] | null {
 	if (scope === "all") return null
-	if (scope === "core" || scope === "outlier" || scope === "other") {
+	if (isMonthlyBudgetGroup(scope)) {
 		return monthlyBudgets.filter(b => b.group === scope).map(b => b.id)
 	}
 	return [scope]
@@ -333,7 +334,10 @@ function buildSpendingHistory(
 	]
 }
 
-export async function getDashboard(input: DashboardInput, preloaded?: LoadedTables) {
+export async function getDashboard(
+	input: DashboardInput & { scope?: string },
+	preloaded?: LoadedTables,
+) {
 	const date = monthStart(input.month, input.year)
 	const today = DateTime.now().startOf("day")
 	const isCurrent = date.hasSame(today, "month")
@@ -373,8 +377,9 @@ export async function getDashboard(input: DashboardInput, preloaded?: LoadedTabl
 		summary,
 		included,
 		tables.monthly_budgetRows,
-		tables.targets,
+		tables.amounts,
 		tables.defaults,
+		input.scope,
 	)
 	const projection = buildProjection(
 		date,
@@ -501,10 +506,11 @@ export async function getPaceView(
 		summary,
 		included,
 		scopedMonthlyBudgetRows,
-		tables.targets,
+		tables.amounts,
 		tables.defaults,
+		scope,
 	)
-	const groupScope = scope === "core" || scope === "outlier" || scope === "other"
+	const groupScope = isMonthlyBudgetGroup(scope)
 	const amounts = monthlyBudgetsBuilt.filter(b => b.amount !== null)
 	const pace = groupScope
 		? {
@@ -836,7 +842,7 @@ function buildProjection(
 	const paceMonthlyBudget = monthlyBudgets.find(
 		b => b.pace_kind === "daily" && b.amount !== null && b.amount >= 0,
 	)
-	const paceTarget = paceMonthlyBudget?.amount ?? null
+	const paceAmount = paceMonthlyBudget?.amount ?? null
 	const futureMonthlyBudgets = new Map(futureSummary.monthlyBudgets.map(b => [b.id, b]))
 	const scheduledMonthlyBudgetSpending = paceMonthlyBudget
 		? (paceMonthlyBudget.scheduled_spending ??
@@ -852,16 +858,16 @@ function buildProjection(
 		scheduled_spending: Math.round(futureSummary.spending * 100) / 100,
 		remaining_days: remainingDays,
 		monthly_budget:
-			paceMonthlyBudget && paceTarget !== null
+			paceMonthlyBudget && paceAmount !== null
 				? {
 						id: paceMonthlyBudget.id,
 						name: paceMonthlyBudget.name,
 						remaining:
-							paceTarget -
+							paceAmount -
 							paceMonthlyBudget.spending -
 							scheduledMonthlyBudgetSpending,
 						spent: paceMonthlyBudget.spending,
-						amount: paceTarget,
+						amount: paceAmount,
 						projected:
 							Math.round(
 								(paceMonthlyBudget.spending +
@@ -871,12 +877,12 @@ function buildProjection(
 							) / 100,
 						usage_pace:
 							Math.round((paceMonthlyBudget.spending / elapsedDays) * 100) / 100,
-						target_pace:
-							Math.round((paceTarget / (date.daysInMonth ?? 30)) * 100) / 100,
+						amount_pace:
+							Math.round((paceAmount / (date.daysInMonth ?? 30)) * 100) / 100,
 						recommended_pace: remainingDays
 							? Math.round(
 									Math.max(
-										(paceTarget -
+										(paceAmount -
 											paceMonthlyBudget.spending -
 											scheduledMonthlyBudgetSpending) /
 											remainingDays,
@@ -894,8 +900,9 @@ function buildMonthlyBudgets(
 	summary: ReturnType<typeof summarize>,
 	included: { summary: ReturnType<typeof summarize> }[],
 	monthly_budgetRows: MonthlyBudgetRow[],
-	targets: MonthlyBudgetAmountRow[],
+	amounts: MonthlyBudgetAmountRow[],
 	defaults: MonthlyBudgetDefaultRow[],
+	selectedId?: string,
 ) {
 	const current = new Map(summary.monthlyBudgets.map(b => [b.id, b]))
 	const baseline = new Map<string, number>()
@@ -911,36 +918,20 @@ function buildMonthlyBudgets(
 
 	const monthKey = date.toFormat("yyyy-MM-dd")
 	const monthlyBudgets = monthly_budgetRows
-		.filter(b => !b.archived || current.has(b.id))
+		.filter(b => !b.archived || current.has(b.id) || b.id === selectedId)
 		.sort((a, b) => a.display_order - b.display_order)
 	const out = []
 	for (const monthly_budget of monthlyBudgets) {
-		const override = targets.find(
+		const override = amounts.find(
 			t => t.monthly_budget_id === monthly_budget.id && t.month === monthKey,
 		)
-		let amount = override ? override.amount : null
-		if (amount === undefined) amount = null
-		if (override === undefined) {
-			const eligible = defaults
-				.filter(
-					d => d.monthly_budget_id === monthly_budget.id && d.effective_month <= monthKey,
-				)
-				.sort((a, b) => (a.effective_month < b.effective_month ? 1 : -1))
-			amount = eligible[0]?.amount ?? null
-		}
+		const amount = override
+			? override.amount
+			: defaultAmountFor(defaults, monthly_budget.id, monthKey)
 		const spending = Number(current.get(monthly_budget.id)?.spending ?? 0)
 		out.push({
 			...monthly_budget,
 			spending,
-			default_amount:
-				defaults
-					.filter(
-						d =>
-							d.monthly_budget_id === monthly_budget.id &&
-							d.effective_month <= monthKey,
-					)
-					.sort((a, b) => b.effective_month.localeCompare(a.effective_month))[0]
-					?.amount ?? null,
 			amount: amount === null || amount === undefined ? null : Number(amount),
 			remaining: amount === null || amount === undefined ? null : Number(amount) - spending,
 			comparison: baseline.has(monthly_budget.id)
@@ -1022,64 +1013,6 @@ function buildCategories(
 
 export { expandCategoryIdsForMonthly }
 
-export type TrendMonth = {
-	key: string
-	label: string
-	income: number
-	spending: number
-	surplus: number
-	current: boolean
-	partial: boolean
-}
-
-/**
- * Income vs spending for the selected month and the two months before it (the same
- * window the comparison text averages over). While the
- * selected month is still running, every month is cut at the same day of the month, so the
- * sparkline compares like with like (as the comparison text does) instead of ending in a cliff.
- */
-function buildTrend(date: DateTime, today: DateTime, tables: LoadedTables) {
-	const byMonth = new Map<string, RecordRow[]>()
-	for (const record of tables.records) {
-		const key = record.datetime.slice(0, 7)
-		const list = byMonth.get(key)
-		if (list) list.push(record)
-		else byMonth.set(key, [record])
-	}
-	const todayKey = today.toFormat(ISO_DAY)
-	const toDate = date.hasSame(today, "month")
-	const months: TrendMonth[] = []
-	for (let offset = COMPARISON_MONTHS; offset >= 0; offset--) {
-		const month = date.minus({ months: offset }).startOf("month")
-		if (month > today) continue
-		const key = month.toFormat("yyyy-MM")
-		const partial = month.hasSame(today, "month")
-		const cutoff = toDate
-			? month.set({ day: Math.min(today.day, month.daysInMonth ?? 28) }).toFormat(ISO_DAY)
-			: partial
-				? todayKey
-				: null
-		const rows = (byMonth.get(key) ?? []).filter(
-			r => cutoff === null || r.datetime.slice(0, 10) <= cutoff,
-		)
-		const summary = summarize(
-			toAnalyticsRecords(rows, tables.allocated, tables.categories, tables.monthlyBudgets),
-		)
-		months.push({
-			key,
-			label: month.toFormat("MMM yy"),
-			income: summary.income,
-			spending: summary.spending,
-			surplus: summary.surplus,
-			current: month.hasSame(date, "month"),
-			partial,
-		})
-	}
-	// Months before the first Record are not "zero" months, just untracked.
-	const first = months.findIndex(month => byMonth.has(month.key))
-	return first === -1 ? [] : months.slice(first)
-}
-
 /**
  * Everything the Overview tab renders, read from one table load. The page used
  * to run three live queries that each scanned every table on every change.
@@ -1094,13 +1027,31 @@ export async function getDashboardView(input: DashboardInput & { scope?: string 
 		) ??
 		null
 	const scope =
-		input.scope &&
-		(input.scope === "core" ||
-			input.scope === "outlier" ||
-			input.scope === "other" ||
-			dashboard.monthlyBudgets.some(b => b.id === input.scope))
+		input.scope && (isMonthlyBudgetGroup(input.scope) || tables.monthlyBudgets.has(input.scope))
 			? input.scope
 			: "all"
+	const selectedBudget = tables.monthlyBudgets.get(scope)
+	const scopedBudgetIds = scopeMonthlyBudgetIds(scope, tables.monthly_budgetRows)
+	const scopeLabel =
+		scope === "all"
+			? "All spending"
+			: isMonthlyBudgetGroup(scope)
+				? scope.charAt(0).toUpperCase() + scope.slice(1)
+				: (selectedBudget?.name ?? "Monthly budget")
+	const scopeFilters = {
+		monthly_budget_id: selectedBudget?.id,
+		monthly_budget_group: isMonthlyBudgetGroup(scope) ? scope : undefined,
+	}
+	const scoped =
+		scope === "all"
+			? dashboard
+			: await getDashboard(input, {
+					...tables,
+					records: tables.records.filter(r =>
+						inScope(r.monthly_budget_id, scopedBudgetIds),
+					),
+				})
+
 	const [pace, monthlyBudgetDaily] = await Promise.all([
 		getPaceView(
 			input.month,
@@ -1110,13 +1061,20 @@ export async function getDashboardView(input: DashboardInput & { scope?: string 
 		),
 		getMonthlyBudgetDaily(input.month, input.year, tables),
 	])
-	const date = monthStart(input.month, input.year)
-	const trend = buildTrend(date, DateTime.now().startOf("day"), tables)
+
 	return {
 		dashboard,
 		pace,
 		monthlyBudgetDaily,
-		dailyMonthlyBudgetId: dailyMonthlyBudget?.id ?? null,
-		trend,
+		scope,
+		scopedBudgetIds,
+		scopedCategories: scoped.categories,
+		scopedComparisonCount: scoped.comparison.count,
+		scopedDaily: scoped.summary.daily,
+		scopeLabel,
+		scopeColor: selectedBudget?.color,
+		scopeFilters,
+		paceFilters: scope === "all" ? { monthly_budget_id: dailyMonthlyBudget?.id } : scopeFilters,
+		dailyMonthlyBudget,
 	}
 }

@@ -585,12 +585,12 @@ export function generateTestData(): FinpointExport {
 		tables.budget_records.push({ budget_id: "demo-budget-daily", record_id: record.id })
 	}
 
-	// MonthlyBudget targets for recent months + defaults
+	// MonthlyBudget amounts for recent months + defaults
 	const monthKeys: string[] = []
 	for (let back = 4; back >= 0; back--) {
 		monthKeys.push(today.minus({ months: back }).startOf("month").toFormat("yyyy-MM-dd"))
 	}
-	const monthlyTarget: Record<string, number> = {
+	const monthlyAmounts: Record<string, number> = {
 		"demo-daily": 950,
 		"demo-recurring": 1800,
 		"demo-irregular": 400,
@@ -601,7 +601,7 @@ export function generateTestData(): FinpointExport {
 			tables.monthly_budget_amounts.push({
 				monthly_budget_id: monthly_budget.id,
 				month: key,
-				amount: monthlyTarget[monthly_budget.id] ?? null,
+				amount: monthlyAmounts[monthly_budget.id] ?? null,
 			})
 		}
 	}
