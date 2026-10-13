@@ -1044,10 +1044,10 @@
     "semantic_hash": "2565b20282baaf00e93bd5129a78b0c6"
   },
   "tests/importer.test.ts": {
-    "mtime": 1791919784.5411563,
-    "seen": 1791920320.5498095,
-    "ast_hash": "8ebe372cd519b944233fe09cfe1c0daa",
-    "semantic_hash": "8ebe372cd519b944233fe09cfe1c0daa"
+    "mtime": 1791920868.5524578,
+    "seen": 1791920887.701453,
+    "ast_hash": "d06b167aa0681b98ce3220fdcc984e2e",
+    "semantic_hash": ""
   },
   "tsconfig.json": {
     "mtime": 1791919784.5411563,

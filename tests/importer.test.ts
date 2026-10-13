@@ -1,38 +1,10 @@
-import { beforeEach, expect, mock, test } from "bun:test"
-import type { StatementRow } from "@/data/db"
+import { beforeEach, expect, test } from "bun:test"
+import Dexie from "dexie"
+import { indexedDB, IDBKeyRange } from "fake-indexeddb"
 
-const statements: StatementRow[] = []
-
-mock.module("@/data/db", () => ({
-	db: {
-		statements: {
-			where: () => ({
-				equals: ([accountId, datetime]: [string, string]) => ({
-						filter: (matches: (statement: StatementRow) => boolean) => ({
-						first: async () =>
-							statements.find(
-								statement =>
-									statement.account_id === accountId &&
-									statement.datetime === datetime &&
-									matches(statement),
-							),
-					}),
-				}),
-			}),
-				add: async (statement: StatementRow) => {
-				statements.push(statement)
-			},
-				update: async (id: string, changes: Partial<StatementRow>) => {
-				const statement = statements.find(row => row.id === id)
-				if (statement) Object.assign(statement, changes)
-			},
-		},
-	},
-	asPending: (pending: boolean) => (pending ? 1 : 0),
-}))
-
-mock.module("@/logic/accounts", () => ({ ensureAccount: async () => {} }))
-
+Dexie.dependencies.indexedDB = indexedDB
+Dexie.dependencies.IDBKeyRange = IDBKeyRange
+const { db } = await import("@/data/db")
 const { importDbs, importOcbc, importRevolut, importUob } = await import("@/logic/importer")
 
 function dbsFile(reference: string, clientReference = "", count = 1) {
@@ -75,19 +47,19 @@ function revolutFile(description: string, state = "COMPLETED") {
 	return new File([csv], "revolut.csv", { type: "text/csv" })
 }
 
-beforeEach(() => {
-	statements.length = 0
+beforeEach(async () => {
+	for (const table of db.tables) await table.clear()
 })
 
 test("DBS overlapping exports treat a dash and blank reference as the same Statement", async () => {
 	expect(await importDbs([dbsFile("-")])).toEqual({ imported: 1, reindexed: 0, skipped: 0 })
 	expect(await importDbs([dbsFile("")])).toEqual({ imported: 0, reindexed: 0, skipped: 1 })
-	expect(statements).toHaveLength(1)
-	expect(statements[0]?.description).toBe("")
+	expect(await db.statements.count()).toBe(1)
+	expect((await db.statements.toArray())[0]?.description).toBe("")
 })
 
 test("DBS blank references match an existing Statement saved with a dash", async () => {
-	statements.push({
+	await db.statements.add({
 		id: "legacy",
 		account_id: "123456",
 		datetime: "2026-07-31 00:00",
@@ -98,11 +70,11 @@ test("DBS blank references match an existing Statement saved with a dash", async
 	})
 
 	expect(await importDbs([dbsFile("")])).toEqual({ imported: 0, reindexed: 0, skipped: 1 })
-	expect(statements.map(statement => statement.id)).toEqual(["legacy"])
+	expect(await db.statements.toCollection().primaryKeys()).toEqual(["legacy"])
 })
 
 test("DBS ignores a dash beside another reference when matching older Statements", async () => {
-	statements.push({
+	await db.statements.add({
 		id: "legacy",
 		account_id: "123456",
 		datetime: "2026-07-31 00:00",
@@ -117,23 +89,33 @@ test("DBS ignores a dash beside another reference when matching older Statements
 		reindexed: 0,
 		skipped: 1,
 	})
-	expect(statements.map(statement => statement.id)).toEqual(["legacy"])
+	expect(await db.statements.toCollection().primaryKeys()).toEqual(["legacy"])
 })
 
 test("DBS still imports Statements with different real descriptions", async () => {
 	expect(await importDbs([dbsFile("Salary")])).toEqual({ imported: 1, reindexed: 0, skipped: 0 })
 	expect(await importDbs([dbsFile("")])).toEqual({ imported: 1, reindexed: 0, skipped: 0 })
-	expect(statements).toHaveLength(2)
+	expect(await db.statements.count()).toBe(2)
 })
 
 test("DBS preserves repeated blank-description Statements within one export", async () => {
 	expect(await importDbs([dbsFile("", "", 2)])).toEqual({ imported: 2, reindexed: 0, skipped: 0 })
-	expect(statements.map(statement => statement.description)).toEqual(["#2", "#1"])
+	expect(
+		(await db.statements.toCollection().sortBy("index"))
+			.reverse()
+			.map(statement => statement.description),
+	).toEqual(["#2", "#1"])
 	expect(await importDbs([dbsFile("", "", 2)])).toEqual({ imported: 0, reindexed: 0, skipped: 2 })
 })
 
 for (const bank of [
-	{ name: "UOB", file: uobFile, importFile: (file: File) => importUob([file]), time: "00:00", index: 1 },
+	{
+		name: "UOB",
+		file: uobFile,
+		importFile: (file: File) => importUob([file]),
+		time: "00:00",
+		index: 1,
+	},
 	{
 		name: "OCBC",
 		file: ocbcFile,
@@ -160,12 +142,12 @@ for (const bank of [
 			reindexed: 0,
 			skipped: 1,
 		})
-		expect(statements).toHaveLength(1)
-		expect(statements[0]?.description).toBe("")
+		expect(await db.statements.count()).toBe(1)
+		expect((await db.statements.toArray())[0]?.description).toBe("")
 	})
 
 	test(`${bank.name} blank descriptions match a Statement previously saved with a dash`, async () => {
-		statements.push({
+		await db.statements.add({
 			id: "legacy",
 			account_id: "123456",
 			datetime: `2026-07-31 ${bank.time}`,
@@ -180,7 +162,7 @@ for (const bank of [
 			reindexed: 0,
 			skipped: 1,
 		})
-		expect(statements.map(statement => statement.id)).toEqual(["legacy"])
+		expect(await db.statements.toCollection().primaryKeys()).toEqual(["legacy"])
 	})
 }
 
@@ -195,5 +177,9 @@ test("Revolut still distinguishes pending and completed Statements with blank de
 		reindexed: 0,
 		skipped: 0,
 	})
-	expect(statements.map(statement => statement.is_pending)).toEqual([1, 0])
+	expect(
+		(await db.statements.orderBy("is_pending").reverse().toArray()).map(
+			statement => statement.is_pending,
+		),
+	).toEqual([1, 0])
 })
