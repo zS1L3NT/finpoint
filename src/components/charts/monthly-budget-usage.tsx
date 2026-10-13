@@ -60,8 +60,8 @@ export default function MonthlyBudgetUsage({
 
 	return (
 		<div className="@container flex h-full flex-col gap-4">
-			<div className="grid content-start gap-5 @[34rem]:grid-cols-[11rem_1fr] @[34rem]:items-start">
-				<div className="relative mx-auto size-52 shrink-0 @[34rem]:size-44">
+			<div className="grid flex-1 content-center gap-5 @[48rem]:grid-cols-[auto_minmax(0,30rem)] @[48rem]:items-center @[48rem]:justify-center @[48rem]:gap-12">
+				<div className="relative mx-auto size-52 shrink-0 @[28rem]:size-64 @[48rem]:size-72">
 					<svg
 						viewBox="0 0 240 240"
 						className="size-full overflow-visible"
@@ -164,11 +164,11 @@ export default function MonthlyBudgetUsage({
 						className="pointer-events-none absolute inset-[18%] flex min-w-0 flex-col items-center justify-center text-center"
 						aria-live="polite"
 					>
-						<p className="max-w-[5.5rem] truncate text-[11px] text-muted-foreground">
+						<p className="max-w-full truncate text-[11px] text-muted-foreground @[28rem]:text-xs @[48rem]:text-sm">
 							{item?.name ?? "Monthly plan"}
 						</p>
 						<p
-							className="mt-1 max-w-full text-lg font-semibold tracking-tight tabular-nums"
+							className="mt-1 max-w-full text-lg font-semibold tracking-tight tabular-nums @[28rem]:text-xl @[48rem]:text-2xl"
 							aria-label={
 								item?.amount === null
 									? "No planned amount"
@@ -177,18 +177,18 @@ export default function MonthlyBudgetUsage({
 						>
 							{item?.amount === null ? "—" : centerCurrency(item?.amount ?? planned)}
 						</p>
-						<p className="mt-1 text-[11px] text-muted-foreground">
+						<p className="mt-1 text-[11px] text-muted-foreground @[28rem]:text-xs">
 							{item?.amount === null ? "No planned amount" : "planned"}
 						</p>
 						<p
-							className="mt-1 max-w-full text-xs tabular-nums"
+							className="mt-1 max-w-full text-xs tabular-nums @[48rem]:text-sm"
 							aria-label={`${formatCurrency(item?.spending ?? spending)} spent`}
 						>
 							{centerCurrency(item?.spending ?? spending)} spent
 						</p>
 					</div>
 				</div>
-				<div className="grid content-start gap-2">
+				<div className="grid content-start gap-2 @[36rem]:grid-cols-2 @[48rem]:grid-cols-1">
 					{budgets.map(budget => (
 						<div
 							key={budget.id}

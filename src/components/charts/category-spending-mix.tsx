@@ -35,13 +35,13 @@ export default function CategorySpendingMix({
 						className="group grid gap-1.5 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 					>
 						<div className="flex items-center justify-between gap-3 text-xs">
-							<span className="truncate font-medium group-hover:underline">
+							<span className="min-w-0 truncate font-medium group-hover:underline">
 								{category.name}
 							</span>
 							<span className="shrink-0 tabular-nums">
 								{formatCurrency(value)}{" "}
 								<span className="ml-1 text-muted-foreground">
-									{`${share.toFixed(0)}% of expenses`}
+									{`${share.toFixed(0)}%`}
 								</span>
 							</span>
 						</div>
@@ -66,8 +66,7 @@ export default function CategorySpendingMix({
 				</p>
 			) : null}
 			<p className="text-[11px] leading-relaxed text-muted-foreground">
-				Shares show expenses before refunds. Refunds are shown separately; every category
-				with spending or refunds appears. Select a category to review its Records.
+				Shares exclude refunds.
 			</p>
 		</div>
 	)

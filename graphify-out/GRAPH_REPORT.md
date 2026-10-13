@@ -1,17 +1,17 @@
 # Graph Report - t3-b88747ce  (2026-10-13)
 
 ## Corpus Check
-- 185 files · ~109,234 words
+- 185 files · ~109,197 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 9 file(s) not represented in the graph (top: (none) 5, .example 1, .lock 1)
 
 ## Summary
-- 1454 nodes · 5569 edges · 70 communities (61 shown, 9 thin omitted)
+- 1454 nodes · 5570 edges · 71 communities (61 shown, 10 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 63 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `6b692429`
+- Built from commit: `e7f73347`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -34,6 +34,7 @@
 - Correctness Lint Rules
 - db.ts
 - allocator-tabs.tsx
+- use-persistent-state.ts
 - utils.ts
 - auto-sync.ts
 - importer/page.tsx
@@ -88,7 +89,7 @@
 ## God Nodes (most connected - your core abstractions)
 1. `cn()` - 303 edges
 2. `Button()` - 108 edges
-3. `react` - 87 edges
+3. `react` - 88 edges
 4. `formatCurrency()` - 73 edges
 5. `RecordEditorDialog()` - 62 edges
 6. `RecordCreatorDialog()` - 46 edges
@@ -118,7 +119,7 @@
 - **Separate meaning, accounting and spending planning** — context_category, context_treatment, context_monthly_budget, context_record [EXTRACTED 1.00]
 - **Imported activity explained by managed records** — context_statement, context_allocation, context_record [EXTRACTED 1.00]
 
-## Communities (70 total, 9 thin omitted)
+## Communities (71 total, 10 thin omitted)
 
 ### Community 0 - "(month)/page.tsx"
 Cohesion: 0.06
@@ -194,7 +195,7 @@ Nodes (6): AllocatorTabs(), useDefaultFilterEndDateToday(), useDefaultFilterStar
 
 ### Community 19 - "utils.ts"
 Cohesion: 0.05
-Nodes (99): BudgetPage(), getBudgetAnalytics(), getCategoryData(), Legend(), BUDGET_STATES, BudgetCard(), BudgetsPage(), BudgetState (+91 more)
+Nodes (97): BudgetPage(), getBudgetAnalytics(), getCategoryData(), Legend(), BUDGET_STATES, BudgetCard(), BudgetsPage(), BudgetState (+89 more)
 
 ### Community 20 - "auto-sync.ts"
 Cohesion: 0.14
@@ -367,19 +368,19 @@ Nodes (4): Google Drive sync, JSON backup and restore, Local-first finance track
 ## Knowledge Gaps
 - **76 isolated node(s):** `@fontsource-variable/inter`, `react-dom`, `shadcn`, `tailwindcss`, `tw-animate-css` (+71 more)
   These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 494 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **9 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **10 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `cn()` connect `cn` to `(month)/page.tsx`, `Button`, `sidebar.tsx`, `motion.ts`, `app-sidebar.tsx`, `category-filter.tsx`, `pagination.tsx`, `formatCurrency`, `sync/page.tsx`, `shell-header.tsx`, `providers.tsx`, `allocator-tabs.tsx`, `utils.ts`, `importer/page.tsx`, `combobox.tsx`, `paginated-data-table.tsx`?**
-  _High betweenness centrality (0.149) - this node is a cross-community bridge._
+  _High betweenness centrality (0.148) - this node is a cross-community bridge._
 - **What connects `@fontsource-variable/inter`, `react-dom`, `shadcn` to the rest of the system?**
   _76 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `(month)/page.tsx` be split into smaller, more focused modules?**
   _Cohesion score 0.0579647917561185 - nodes in this community are weakly interconnected._
-- **Why does `react` connect `utils.ts` to `(month)/page.tsx`, `Button`, `cn`, `sidebar.tsx`, `motion.ts`, `category-filter.tsx`, `pagination.tsx`, `sync/page.tsx`, `formatCurrency`, `package.json`, `providers.tsx`, `shell-header.tsx`, `auto-sync.ts`, `importer/page.tsx`, `combobox.tsx`, `paginated-data-table.tsx`, `use-appearance.tsx`?**
-  _High betweenness centrality (0.049) - this node is a cross-community bridge._
+- **Why does `react` connect `utils.ts` to `(month)/page.tsx`, `Button`, `cn`, `sidebar.tsx`, `motion.ts`, `category-filter.tsx`, `pagination.tsx`, `sync/page.tsx`, `formatCurrency`, `package.json`, `providers.tsx`, `shell-header.tsx`, `use-persistent-state.ts`, `auto-sync.ts`, `importer/page.tsx`, `combobox.tsx`, `paginated-data-table.tsx`, `use-appearance.tsx`?**
+  _High betweenness centrality (0.051) - this node is a cross-community bridge._
 - **Should `Button` be split into smaller, more focused modules?**
   _Cohesion score 0.07556891369686561 - nodes in this community are weakly interconnected._
 - **Why does `Button()` connect `Button` to `(month)/page.tsx`, `cn`, `sidebar.tsx`, `app-sidebar.tsx`, `category-filter.tsx`, `pagination.tsx`, `formatCurrency`, `sync/page.tsx`, `shell-header.tsx`, `utils.ts`, `importer/page.tsx`, `combobox.tsx`?**

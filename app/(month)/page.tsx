@@ -246,7 +246,7 @@ export default function DashboardPage() {
 							/>
 						</div>
 					</CardHeader>
-					<CardContent className="flex-1">
+					<CardContent className="flex flex-1 flex-col">
 						<MonthlyBudgetUsage
 							budgets={budgets}
 							unbudgeted={categories.reduce(
@@ -280,29 +280,11 @@ export default function DashboardPage() {
 			{!period.is_future ? (
 				<>
 					{stage > 0 ? (
-						<div className="grid items-start gap-5 lg:grid-cols-2">
+						<div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
 							<Card className="min-w-0">
 								<CardHeader>
-									<ScopedCardTitle scope="Total">
-										Surplus / Shortfall
-									</ScopedCardTitle>
-									<CardDescription>
-										Cumulative income minus all personal spending
-									</CardDescription>
-								</CardHeader>
-								<CardContent>
-									<TotalSpendingChart
-										data={series}
-										history={data.history}
-										month={month}
-										year={year}
-									/>
-								</CardContent>
-							</Card>
-							<Card className="min-w-0">
-								<CardHeader>
-									<div className="flex flex-wrap items-center justify-between gap-2">
-										<CardTitle>Category mix</CardTitle>
+									<div className="flex flex-col gap-2 @[28rem]/card-header:flex-row @[28rem]/card-header:items-center @[28rem]/card-header:justify-between">
+										<CardTitle>Categories this month</CardTitle>
 										<ScopeSelect
 											value={scope}
 											budgets={budgets}
@@ -353,33 +335,36 @@ export default function DashboardPage() {
 									/>
 								</CardContent>
 							</Card>
-						</div>
-					) : null}
-					{stage > 1 ? (
-						<section className="grid gap-4" aria-labelledby="spending-breakdown-title">
-							<div className="flex flex-wrap items-center justify-between gap-3">
-								<div>
-									<h3
-										id="spending-breakdown-title"
-										className="text-base font-semibold"
-									>
-										Category history
-									</h3>
-									<p className="mt-1 text-xs text-muted-foreground">
-										{scopeLabel} · Compare the same spending scope over time
-									</p>
-								</div>
-								<ScopeLabel
-									scope={scope === "all" ? "Total" : scopeLabel}
-									color={scopeColor}
-								/>
-							</div>
 							<CategoryHistoryChart
 								months={data.comparison_history}
 								through={period.through}
 								monthlyBudgetIds={scope === "all" ? null : scopedBudgetIds}
+								badge={
+									<ScopeLabel
+										scope={scope === "all" ? "Total" : scopeLabel}
+										color={scopeColor}
+									/>
+								}
 							/>
-						</section>
+						</div>
+					) : null}
+					{stage > 0 ? (
+						<Card className="min-w-0">
+							<CardHeader>
+								<ScopedCardTitle scope="Total">Surplus / Shortfall</ScopedCardTitle>
+								<CardDescription>
+									Cumulative income minus all personal spending
+								</CardDescription>
+							</CardHeader>
+							<CardContent>
+								<TotalSpendingChart
+									data={series}
+									history={data.history}
+									month={month}
+									year={year}
+								/>
+							</CardContent>
+						</Card>
 					) : null}
 					{stage > 1 ? (
 						<div className="grid gap-5 lg:grid-cols-2">
@@ -460,7 +445,7 @@ function ScopeSelect({
 }) {
 	return (
 		<Select value={value} onValueChange={item => onChange(item ?? "all")}>
-			<SelectTrigger className={cn("w-full sm:w-52", FILTER_CONTROL_CLASS)}>
+			<SelectTrigger className={cn("w-full @[28rem]/card-header:w-52", FILTER_CONTROL_CLASS)}>
 				<IconifyIcon icon="lucide:wallet-cards" />
 				<SelectValue />
 			</SelectTrigger>

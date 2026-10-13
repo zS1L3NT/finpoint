@@ -73,7 +73,7 @@ export default function TotalSpendingChart({
 	return (
 		<div className="grid gap-2">
 			<ChartContainer
-				className="h-52 w-full min-w-0 aspect-auto [&_.recharts-surface:focus-visible]:outline-2 [&_.recharts-surface:focus-visible]:outline-ring cursor-pointer sm:h-64"
+				className="h-52 w-full min-w-0 aspect-auto [&_.recharts-surface:focus-visible]:outline-2 [&_.recharts-surface:focus-visible]:outline-ring cursor-pointer sm:h-64 xl:h-72"
 				config={{
 					surplus: { label: "Surplus / Shortfall", color: "var(--color-white)" },
 				}}

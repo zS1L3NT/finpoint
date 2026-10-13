@@ -1,5 +1,6 @@
 "use client"
 
+import type { ReactNode } from "react"
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import { useChartIntro } from "@/components/charts/chart-intro"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -22,10 +23,12 @@ export default function CategoryHistoryChart({
 	months,
 	through,
 	monthlyBudgetIds,
+	badge,
 }: {
 	months: SpendingHistoryMonth[]
 	through: string | null
 	monthlyBudgetIds: string[] | null
+	badge: ReactNode
 }) {
 	const intro = useChartIntro(months.find(month => month.current)?.month)
 	const isMobile = useIsMobile()
@@ -62,16 +65,16 @@ export default function CategoryHistoryChart({
 		selected && Object.values(selected.seriesValues).every(value => value === 0)
 
 	return (
-		<Card className="min-w-0">
+		<Card className="h-full min-w-0">
 			<CardHeader>
 				<CardTitle className="flex flex-wrap items-center gap-2 text-base">
-					Category spending mix
+					Category trend
+					{badge}
 				</CardTitle>
 				<CardDescription>
-					Share of gross spending compared with the previous {BREAKDOWN_MONTHS} months.
-					Refunds are excluded.
+					Share of gross spending vs previous {BREAKDOWN_MONTHS} months · refunds excluded
 					{through &&
-						` Previous months include the full month; the selected month includes days 1–${Number(through.slice(-2))} only.`}
+						` · selected days 1–${Number(through.slice(-2))}; prior months in full`}
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="flex min-h-0 flex-1 flex-col gap-3">
