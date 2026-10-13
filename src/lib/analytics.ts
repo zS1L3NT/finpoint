@@ -1,15 +1,18 @@
 import type { AnalyticsTreatment } from "@/types"
 
-export function canUseDefaultBucket(treatment: AnalyticsTreatment | null | undefined) {
+export function canUseDefaultMonthlyBudget(treatment: AnalyticsTreatment | null | undefined) {
 	return treatment === "spending" || treatment === "automatic" || treatment == null
 }
 
+/** The one set of treatment names every form, filter, and list shows. */
+export const TREATMENTS: { value: AnalyticsTreatment; label: string }[] = [
+	{ value: "income", label: "Income" },
+	{ value: "spending", label: "Spending" },
+	{ value: "saving_investment", label: "Saving / investment" },
+	{ value: "neutral", label: "Transfer / excluded" },
+	{ value: "automatic", label: "Automatic by direction" },
+]
+
 export function treatmentLabel(treatment: AnalyticsTreatment | null | undefined) {
-	return {
-		income: "Income",
-		spending: "Spending",
-		saving_investment: "Saving/investment",
-		neutral: "Transfer/neutral",
-		automatic: "Automatic by direction",
-	}[treatment ?? "automatic"]
+	return TREATMENTS.find(item => item.value === (treatment ?? "automatic"))?.label ?? ""
 }

@@ -1,15 +1,16 @@
 import { DateTime } from "luxon"
 import { useRouter } from "next/navigation"
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
-import BucketBadge from "@/components/bucket-badge"
 import { useChartIntro } from "@/components/charts/chart-intro"
+import MonthlyBudgetBadge from "@/components/monthly-budget-badge"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { useHistory } from "@/history"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { formatChartCurrency } from "@/lib/chart-currency"
 import { formatCurrency } from "@/lib/utils"
 import { pathMonthlyRecords } from "@/routes"
 
-export type BucketLine = {
+export type MonthlyBudgetLine = {
 	id: string
 	name: string
 	color: string
@@ -19,16 +20,16 @@ export type BucketLine = {
 
 export default function DailySpendingChart({
 	rows,
-	buckets,
+	monthlyBudgets,
 	month,
 	year,
 }: {
 	rows: Record<string, number | null>[]
-	buckets: BucketLine[]
+	monthlyBudgets: MonthlyBudgetLine[]
 	month: string
 	year: number
 }) {
-	const intro = useChartIntro()
+	const intro = useChartIntro(`${month}-${year}`)
 	const isMobile = useIsMobile()
 	const router = useRouter()
 	const { handlePush } = useHistory()
@@ -52,18 +53,26 @@ export default function DailySpendingChart({
 	return (
 		<div className="grid gap-3">
 			<div className="flex flex-wrap gap-1.5">
-				{buckets.map(bucket => (
-					<BucketBadge key={bucket.id} name={bucket.name} color={bucket.color} />
+				{monthlyBudgets.map(monthlyBudget => (
+					<MonthlyBudgetBadge
+						key={monthlyBudget.id}
+						name={monthlyBudget.name}
+						color={monthlyBudget.color}
+					/>
 				))}
 			</div>
 			<ChartContainer
-				className="h-64 w-full aspect-auto cursor-pointer sm:h-72"
+				className="h-48 w-full min-w-0 aspect-auto [&_.recharts-surface:focus-visible]:outline-2 [&_.recharts-surface:focus-visible]:outline-ring cursor-pointer sm:h-64"
 				config={Object.fromEntries(
-					buckets.map(bucket => [bucket.id, { label: bucket.name, color: bucket.color }]),
+					monthlyBudgets.map(monthlyBudget => [
+						monthlyBudget.id,
+						{ label: monthlyBudget.name, color: monthlyBudget.color },
+					]),
 				)}
 			>
 				<BarChart
 					data={rows}
+					margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
 					barCategoryGap={isMobile ? 1 : 3}
 					onClick={openDay}
 					style={{ cursor: "pointer" }}
@@ -73,15 +82,16 @@ export default function DailySpendingChart({
 					<XAxis
 						dataKey="day"
 						interval={interval}
-						tickMargin={8}
+						height={24}
+						tickMargin={isMobile ? 4 : 8}
 						tickLine={false}
 						axisLine={false}
 					/>
 					<YAxis
 						tickLine={false}
 						axisLine={false}
-						width={isMobile ? 44 : 64}
-						tickFormatter={value => formatCurrency(Number(value)).replace(/\.00$/, "")}
+						width={isMobile ? 40 : 48}
+						tickFormatter={formatChartCurrency}
 					/>
 					<ChartTooltip
 						cursor={{ fill: "var(--muted)", fillOpacity: 0.6 }}
@@ -107,19 +117,19 @@ export default function DailySpendingChart({
 							/>
 						}
 					/>
-					{buckets.map((bucket, index) => (
+					{monthlyBudgets.map((monthlyBudget, index) => (
 						// Stacked so a day's bar height is its total outflow; the
 						// 1px card-coloured stroke keeps adjacent segments apart.
 						<Bar
-							key={bucket.id}
-							dataKey={bucket.id}
-							name={bucket.name}
+							key={monthlyBudget.id}
+							dataKey={monthlyBudget.id}
+							name={monthlyBudget.name}
 							stackId="day"
-							fill={bucket.color}
-							fillOpacity={bucket.dashed ? 0.55 : 1}
+							fill={monthlyBudget.color}
+							fillOpacity={monthlyBudget.dashed ? 0.55 : 1}
 							stroke="var(--card)"
 							strokeWidth={1}
-							radius={index === buckets.length - 1 ? [3, 3, 0, 0] : 0}
+							radius={index === monthlyBudgets.length - 1 ? [3, 3, 0, 0] : 0}
 							{...intro}
 						/>
 					))}

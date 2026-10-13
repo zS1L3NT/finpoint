@@ -1,6 +1,8 @@
 "use client"
 
+import Link from "next/link"
 import { UiIcon } from "@/components/icon"
+import { useHistory } from "@/history"
 import { cn, formatCurrency } from "@/lib/utils"
 
 type Mover = {
@@ -19,12 +21,15 @@ type Mover = {
 export default function CategoryMovers({
 	categories,
 	comparisonCount,
+	recordHref,
 	limit = 6,
 }: {
 	categories: Mover[]
 	comparisonCount: number
+	recordHref: (id: string) => string
 	limit?: number
 }) {
+	const { handlePush } = useHistory()
 	const movers = categories
 		.filter(category => category.comparison !== null && Math.abs(category.comparison) >= 0.5)
 		.sort((a, b) => Math.abs(b.comparison ?? 0) - Math.abs(a.comparison ?? 0))
@@ -51,9 +56,11 @@ export default function CategoryMovers({
 				const up = difference > 0
 				const average = category.spending - difference
 				return (
-					<div
+					<Link
 						key={category.id}
-						className="grid grid-cols-[minmax(0,9rem)_minmax(0,1fr)] items-center gap-3 rounded-md px-1 py-1.5 transition-colors duration-150 hover:bg-muted/50 sm:grid-cols-[minmax(0,11rem)_minmax(0,1fr)]"
+						href={recordHref(category.id)}
+						onClick={handlePush("overview")}
+						className="grid grid-cols-[minmax(0,9rem)_minmax(0,1fr)] items-center gap-3 rounded-md px-1 py-1.5 transition-colors duration-150 hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:grid-cols-[minmax(0,11rem)_minmax(0,1fr)]"
 						title={`${category.name}: ${formatCurrency(category.spending)} vs ${formatCurrency(average)} average`}
 					>
 						<span className="flex min-w-0 items-center gap-2 text-sm">
@@ -86,7 +93,7 @@ export default function CategoryMovers({
 								{formatCurrency(Math.abs(difference))}
 							</span>
 						</div>
-					</div>
+					</Link>
 				)
 			})}
 			<p className="px-1 pt-1 text-xs text-muted-foreground">

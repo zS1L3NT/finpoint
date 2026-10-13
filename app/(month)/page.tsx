@@ -3,19 +3,21 @@
 import { useLiveQuery } from "dexie-react-hooks"
 import { DateTime } from "luxon"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { type ReactNode, useMemo, useRef } from "react"
-import BucketBadge from "@/components/bucket-badge"
-import CashflowChart, { CashflowPoint } from "@/components/charts/cashflow-chart"
+import { useRouter, useSearchParams } from "next/navigation"
+import { type ReactNode, useRef } from "react"
+import CashflowChart from "@/components/charts/cashflow-chart"
 import CategoryHistoryChart from "@/components/charts/category-history-chart"
 import CategoryMovers from "@/components/charts/category-movers"
+import CategorySpendingMix from "@/components/charts/category-spending-mix"
 import DailySpendingChart from "@/components/charts/daily-spending-chart"
+import MonthlyBudgetUsage from "@/components/charts/monthly-budget-usage"
 import SpendingCalendar from "@/components/charts/spending-calendar"
 import TotalSpendingChart from "@/components/charts/total-spending-chart"
 import WeekdayBars from "@/components/charts/weekday-bars"
-import BucketDialog from "@/components/dialogs/bucket"
+import MonthlyBudgetDialog from "@/components/dialogs/monthly-budget"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import { Metric as DashboardMetric, type Delta, MetricGrid } from "@/components/metric"
+import MonthlyBudgetBadge from "@/components/monthly-budget-badge"
 import { FILTER_CONTROL_CLASS } from "@/components/table/filter-bar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -32,306 +34,303 @@ import {
 import { useHistory } from "@/history"
 import { useMonthParams } from "@/hooks/use-month-params"
 import { STALE_MONTH_CLASS, useMonthTransition } from "@/hooks/use-month-transition"
-import { usePersistentState } from "@/hooks/use-persistent-state"
 import { useStagedMount } from "@/hooks/use-staged-mount"
 import { cn, formatCurrency } from "@/lib/utils"
-import {
-	type CashflowHistoryMonth,
-	getDashboardView,
-	type SpendingHistoryMonth,
-	type TrendMonth,
-} from "@/logic/dashboard"
-import { pathMonthlyRecords } from "@/routes"
-import { AnalyticsSummary, Bucket } from "@/types"
+import { getDashboardView, type TrendMonth } from "@/logic/dashboard"
+import { pathDashboard, pathMonthlyRecords, pathStatements } from "@/routes"
+import { AnalyticsSummary } from "@/types"
 
-type DashboardBucket = Bucket & {
-	spending: number
-	target: number | null
-	remaining: number | null
-	comparison: number | null
-}
-
-type DashboardCategory = AnalyticsSummary["categories"][number] & {
-	share: number | null
-	comparison: number | null
-	baseline_bucket_spending: { [bucketId: string]: number }
-}
-
-type Comparison = {
-	count: number
-	income: ComparisonValue
-	spending: ComparisonValue
-	surplus: ComparisonValue
-	surplus_rate: ComparisonValue
-}
-
-type ComparisonValue = { average: number | null; difference: number | null }
-
-type Projection = {
-	available: boolean
-	daily_spending: number | null
-	projected_spending: number | null
-	scheduled_spending: number
-	remaining_days: number
-	bucket: {
-		name: string
-		spent: number
-		target: number
-		projected: number
-		usage_pace: number
-		target_pace: number
-		recommended_pace: number | null
-	} | null
-}
-
-type DashboardData = {
-	month: string
-	year: number
-	period: { is_current: boolean; is_future: boolean; through: string | null; label: string }
-	summary: AnalyticsSummary
-	comparison: Comparison
-	series: CashflowPoint[]
-	projection: Projection
-	buckets: DashboardBucket[]
-	categories: DashboardCategory[]
-	weekday: WeekdayBreakdown
-	future_records_count: number
-	comparison_history: SpendingHistoryMonth[]
-	history: CashflowHistoryMonth[]
-}
-
-type WeekdayStat = {
-	day: string
-	spending: number | null
-	baseline: number | null
-	days: number
-	baseline_days: number
-}
-
-type WeekdayBreakdown = {
-	stats: WeekdayStat[]
-	comparison_count: number
-}
-
-type PaceData = {
-	series: CashflowPoint[]
-	history: CashflowHistoryMonth[]
-	projection: Projection
-	paceBucket: { id: string; name: string; target: number | null } | null
-	completedMonth: {
-		spending: number
-		spending_per_day: number
-		target: number | null
-		target_difference: number | null
-	} | null
-	highestSpendingDay: { date: string; spending: number } | null
-}
-
-type BucketDailyData = {
-	rows: Record<string, number | null>[]
-	buckets: { id: string; name: string; color: string }[]
-}
+type DashboardView = Awaited<ReturnType<typeof getDashboardView>>
+type DashboardData = DashboardView["dashboard"]
+type DashboardMonthlyBudget = DashboardData["monthlyBudgets"][number]
+type Comparison = DashboardData["comparison"]
+type ComparisonValue = Comparison["income"]
+type Projection = DashboardView["pace"]["projection"]
+type PaceData = DashboardView["pace"]
+type WeekdayBreakdown = DashboardData["weekday"]
 
 export default function DashboardPage() {
 	const { handlePush } = useHistory()
 	const { month, year } = useMonthParams()
 	const contentRef = useRef<HTMLDivElement>(null)
 	const router = useRouter()
+	const searchParams = useSearchParams()
+	const storedScope = searchParams.get("scope") ?? "all"
 	// One live query, one table load: the three separate queries this replaced
 	// each re-scanned every table whenever anything changed.
-	const view = useLiveQuery(() => getDashboardView({ month, year }), [month, year])
-	const data = view?.dashboard as unknown as DashboardData | undefined
+	const view = useLiveQuery(
+		() => getDashboardView({ month, year, scope: storedScope }),
+		[month, year, storedScope],
+	)
+	const data = view?.dashboard
 	// Until the new month's query lands, the live query keeps the previous month's data.
 	const dataKey = data ? `${data.month}-${data.year}` : null
 	const stale = dataKey !== null && dataKey !== `${month}-${year}`
 	useMonthTransition(contentRef, dataKey)
-	const buckets = data?.buckets ?? []
-	const categories = data?.categories ?? []
-	const [storedScope, setScope] = usePersistentState("finpoint.dashboard.scope", "all")
-	const validScope = (value: string) =>
-		value === "all" ||
-		value === "core" ||
-		value === "outlier" ||
-		value === "other" ||
-		buckets.some(bucket => bucket.id === value)
-			? value
-			: "all"
-	const scope = validScope(storedScope)
-	const dailyBucket =
-		buckets.find(bucket => bucket.pace_kind === "daily") ??
-		buckets.find(bucket => bucket.name.toLowerCase() === "daily") ??
-		null
-	const paceData = view?.pace as unknown as PaceData | undefined
-	const bucketDailyData = view?.bucketDaily as unknown as BucketDailyData | undefined
-	const trend = view?.trend ?? []
+	const budgets = data?.monthlyBudgets ?? []
+	const setScope = (value: string) => {
+		const params = Object.fromEntries(searchParams.entries())
+		if (value === "all") delete params.scope
+		else params.scope = value
+		router.replace(pathDashboard(params), { scroll: false })
+	}
+	const paceData = view?.pace
+	const monthlyBudgetDailyData = view?.monthlyBudgetDaily
 	// The summary and pace chart paint first; the sections below the fold then mount one per
 	// frame. Mounting every chart in one commit blocked arrival for ~300ms in production.
-	const stage = useStagedMount(6, !!data && !!paceData && !!bucketDailyData)
-	const scopedBucketIds = useMemo(() => {
-		if (scope === "all") return [...buckets.map(bucket => bucket.id), "unbucketed"]
-		if (scope === "core" || scope === "outlier" || scope === "other") {
-			return buckets.filter(bucket => bucket.group === scope).map(bucket => bucket.id)
-		}
-		return [scope]
-	}, [scope, buckets])
-
-	if (!data || !paceData || !bucketDailyData) return null
-	const { period, summary, comparison, series, weekday, future_records_count } = data
-	const scopedTotal = categories.reduce(
-		(total, category) =>
-			total +
-			scopedBucketIds.reduce(
-				(sum, bucketId) => sum + (category.bucket_spending[bucketId] ?? 0),
-				0,
-			),
-		0,
-	)
-	const scopeLabel = ["all", "core", "outlier", "other"].includes(scope)
-		? scope === "all"
-			? "All spending"
-			: scope.charAt(0).toUpperCase() + scope.slice(1)
-		: (buckets.find(bucket => bucket.id === scope)?.name ?? "Bucket")
-	const scopeColor = buckets.find(bucket => bucket.id === scope)?.color
+	const stage = useStagedMount(6, !!data && !!paceData && !!monthlyBudgetDailyData)
+	if (!view || !data || !paceData || !monthlyBudgetDailyData) return null
+	const {
+		scope,
+		scopedBudgetIds,
+		scopedCategories,
+		scopedComparisonCount,
+		scopedDaily,
+		scopeLabel,
+		scopeColor,
+		scopeFilters,
+		paceFilters,
+		dailyMonthlyBudget: dailyBudget,
+	} = view
+	const { period, summary, series, weekday, future_records_count } = data
+	const comparison = data.comparison
 	const paceSeries = paceData.series
 	const paceProjection = paceData.projection
-	const paceTarget = paceData.paceBucket
+	const paceAmount = paceData.paceMonthlyBudget
 	const completedMonth = paceData.completedMonth
 	const highestSpendingDay = paceData.highestSpendingDay
-	const dailyLines = bucketDailyData.buckets.map(bucket => ({
-		...bucket,
-		dashed: bucket.id === "unbucketed",
+	const dailyLines = monthlyBudgetDailyData.monthlyBudgets.map(budget => ({
+		...budget,
+		dashed: budget.id === "unbudgeted",
 	}))
+	const categoryRecordHref = (id: string) =>
+		pathMonthlyRecords({
+			month,
+			year: String(year),
+			category_ids: id,
+			effective_spending: "true",
+			...scopeFilters,
+		})
 	const openDay = (date: string) => {
 		handlePush("overview")()
 		router.push(
-			pathMonthlyRecords({ month, year: String(year), start_date: date, end_date: date }),
+			pathMonthlyRecords({
+				month,
+				year: String(year),
+				start_date: date,
+				end_date: date,
+				...scopeFilters,
+			}),
 		)
 	}
 	return (
 		<div
 			ref={contentRef}
 			aria-busy={stale}
-			className={cn("reveal grid gap-7 md:gap-9", stale && STALE_MONTH_CLASS)}
+			className={cn("reveal grid gap-5 md:gap-6", stale && STALE_MONTH_CLASS)}
 		>
 			{period.is_future ? (
-				<Card>
-					<CardHeader>
-						<CardTitle>Future-dated Records</CardTitle>
+				<div className="rounded-xl border bg-muted/30 px-4 py-3 text-sm">
+					<p className="font-medium">
+						Plan for {month} {year}
+					</p>
+					<p className="mt-1 text-xs text-muted-foreground">
+						{future_records_count} future-dated Records · Actual results begin when the
+						month starts. Monthly budgets remain editable.
+					</p>
+				</div>
+			) : (
+				<SummaryBand
+					summary={summary}
+					comparison={comparison}
+					trend={view.trend}
+					through={period.through}
+				/>
+			)}
+			<div className="flex flex-wrap items-center justify-between gap-2">
+				<div className="min-w-0 flex-1 basis-full sm:basis-auto">
+					<ReviewLinks data={data} month={month} year={year} />
+				</div>
+				<ScopeSelect value={scope} budgets={budgets} onChange={setScope} />
+			</div>
+			<div className="grid gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+				<Card className="min-w-0">
+					<CardHeader className="border-b">
+						<ScopedCardTitle
+							scope={scope === "all" ? (dailyBudget?.name ?? "Total") : scopeLabel}
+							color={scope === "all" ? dailyBudget?.color : scopeColor}
+						>
+							Spending pace
+						</ScopedCardTitle>
 						<CardDescription>
-							{future_records_count
-								? `${future_records_count} Record${future_records_count === 1 ? "" : "s"} have been entered for this month.`
-								: "No Records have been entered for this month."}{" "}
-							Actual results and comparisons begin when the month starts.
+							{period.is_future
+								? "Planned amount and future-dated spending. No recorded pace yet."
+								: paceProjection.available
+									? "If recorded daily spending continues, plus scheduled spending."
+									: "Recorded spending against the monthly plan."}
 						</CardDescription>
 					</CardHeader>
-				</Card>
-			) : (
-				<>
-					<SummaryBand
-						summary={summary}
-						comparison={comparison}
-						trend={trend}
-						through={period.through}
-					/>
-					{summary.unbucketed_count ? (
-						<div
-							className="flex flex-wrap gap-2"
-							aria-label="Records needing attention"
-						>
-							<Button variant="outline" size="sm" asChild>
-								<Link
-									onClick={handlePush("overview")}
-									href={pathMonthlyRecords({
-										month,
-										year: String(year),
-										show_unbucketed: "true",
-									})}
-								>
-									<IconifyIcon icon="lucide:inbox" /> {summary.unbucketed_count}{" "}
-									unbucketed spending Record
-									{summary.unbucketed_count === 1 ? "" : "s"}
-								</Link>
-							</Button>
-						</div>
-					) : null}
-
-					<Card>
-						<CardHeader className="border-b">
-							<ScopedCardTitle scope="Daily" color={dailyBucket?.color}>
-								Spending pace
-							</ScopedCardTitle>
-							<CardDescription>
-								{paceProjection.available
-									? "Daily-bucket spending against its monthly target, with projected month-end usage."
-									: "Completed Daily-bucket spending against its monthly target."}
-							</CardDescription>
-						</CardHeader>
-						<CardContent>
-							<CashflowChart
-								data={paceSeries}
-								history={paceData.history}
-								month={month}
-								year={year}
-								target={paceTarget?.target ?? null}
-								targetLabel={paceTarget?.name ?? null}
-								showProjection={paceProjection.available}
-							/>
-							<PaceSummary
-								projection={paceProjection}
-								completedMonth={completedMonth}
-								highestSpendingDay={highestSpendingDay}
-							/>
-						</CardContent>
-					</Card>
-
-					{stage > 0 ? (
-						<section className="grid gap-4" aria-labelledby="spending-breakdown-title">
-							<div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+					<CardContent>
+						{period.is_future ? (
+							<div className="grid gap-4 py-3">
 								<div>
-									<div className="flex items-center gap-2">
-										<h3
-											id="spending-breakdown-title"
-											className="text-lg font-semibold"
-										>
-											Spending breakdown
-										</h3>
-										<ScopeLabel
-											scope={scope === "all" ? "Total" : scopeLabel}
-											color={scopeColor}
-										/>
-									</div>
-									<p className="text-sm text-muted-foreground">
-										{scopeLabel} · {formatCurrency(scopedTotal)}
+									<p className="text-xs text-muted-foreground">
+										{paceAmount?.name ?? "Monthly budget"} planned amount
+									</p>
+									<p className="mt-2 text-2xl font-semibold tabular-nums">
+										{paceAmount?.amount == null
+											? "Not set"
+											: formatCurrency(paceAmount.amount)}
 									</p>
 								</div>
-								<ScopeSelect
-									value={scope}
-									buckets={buckets}
-									onChange={value => setScope(value ?? "all")}
-								/>
+								<p className="text-xs leading-relaxed text-muted-foreground">
+									Recorded pace and remaining daily capacity start when the month
+									begins. Review future-dated Records as you plan.
+								</p>
+								<Button variant="outline" size="sm" asChild>
+									<Link
+										onClick={handlePush("overview")}
+										href={pathMonthlyRecords({ month, year: String(year) })}
+									>
+										Review {future_records_count} future-dated Records{" "}
+										<IconifyIcon icon="lucide:arrow-up-right" />
+									</Link>
+								</Button>
 							</div>
-							<div className="grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)] 2xl:grid-cols-[minmax(0,3fr)_minmax(18rem,1fr)]">
-								<CategoryHistoryChart
-									months={data.comparison_history}
-									through={period.through}
-									bucketIds={scope === "all" ? null : scopedBucketIds}
-								/>
-								<BucketStatus
-									buckets={buckets}
+						) : (
+							<>
+								<CashflowChart
+									data={paceSeries}
+									history={paceData.history}
 									month={month}
 									year={year}
-									activeScope={scope}
-									setScope={setScope}
+									amount={paceAmount?.amount ?? null}
+									amountLabel={paceAmount?.name ?? null}
+									showProjection={paceProjection.available}
+									recordFilters={paceFilters}
 								/>
+								<PaceSummary
+									projection={paceProjection}
+									completedMonth={completedMonth}
+									highestSpendingDay={highestSpendingDay}
+									spending={paceData.spending}
+									amount={paceAmount?.amount ?? null}
+									remaining={paceData.remaining}
+								/>
+							</>
+						)}
+					</CardContent>
+				</Card>
+				<Card className="min-w-0">
+					<CardHeader>
+						<div className="flex items-start justify-between gap-3">
+							<div>
+								<CardTitle>Monthly budgets</CardTitle>
+								<CardDescription className="mt-1">
+									Segment size = planned share · Fill = amount used
+								</CardDescription>
 							</div>
-						</section>
+							<MonthlyBudgetDialog
+								month={month}
+								year={year}
+								trigger={
+									<Button variant="outline" size="sm">
+										<IconifyIcon icon="lucide:plus" /> New
+									</Button>
+								}
+							/>
+						</div>
+					</CardHeader>
+					<CardContent className="flex flex-1 flex-col">
+						<MonthlyBudgetUsage
+							budgets={budgets}
+							unbudgeted={data.categories.reduce(
+								(sum, category) =>
+									sum + (category.monthly_budget_spending.unbudgeted ?? 0),
+								0,
+							)}
+							selected={budgets.some(budget => budget.id === scope) ? scope : null}
+							onSelect={setScope}
+							edit={budget => (
+								<MonthlyBudgetDialog
+									monthlyBudget={budgets.find(item => item.id === budget.id)}
+									month={month}
+									year={year}
+									trigger={
+										<Button
+											variant="ghost"
+											size="sm"
+											className="min-h-8"
+											onClick={event => event.stopPropagation()}
+											aria-label={`Edit ${budget.name}`}
+										>
+											Edit
+										</Button>
+									}
+								/>
+							)}
+						/>
+					</CardContent>
+				</Card>
+			</div>
+			{!period.is_future ? (
+				<>
+					{stage > 0 ? (
+						<div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+							<Card className="min-w-0">
+								<CardHeader>
+									<ScopedCardTitle
+										scope={scope === "all" ? "Total" : scopeLabel}
+										color={scopeColor}
+									>
+										Categories this month
+									</ScopedCardTitle>
+									<CardDescription>
+										{scopeLabel} ·{" "}
+										{formatCurrency(
+											scopedCategories.reduce(
+												(sum, category) => sum + category.outflow,
+												0,
+											),
+										)}{" "}
+										expenses ·{" "}
+										{formatCurrency(
+											scopedCategories.reduce(
+												(sum, category) => sum + category.refunds,
+												0,
+											),
+										)}{" "}
+										refunds
+									</CardDescription>
+								</CardHeader>
+								<CardContent>
+									<CategorySpendingMix
+										categories={scopedCategories}
+										recordHref={categoryRecordHref}
+									/>
+								</CardContent>
+							</Card>
+							<CategoryHistoryChart
+								months={data.comparison_history}
+								through={period.through}
+								monthlyBudgetIds={scope === "all" ? null : scopedBudgetIds}
+								badge={
+									<ScopeLabel
+										scope={scope === "all" ? "Total" : scopeLabel}
+										color={scopeColor}
+									/>
+								}
+							/>
+						</div>
 					) : null}
-
 					{stage > 1 ? (
 						<div className="grid gap-5 lg:grid-cols-2">
 							<Card className="min-w-0">
 								<CardHeader>
-									<ScopedCardTitle scope="Total">
+									<ScopedCardTitle
+										scope={scope === "all" ? "Total" : scopeLabel}
+										color={scopeColor}
+									>
 										Spending calendar
 									</ScopedCardTitle>
 									<CardDescription>
@@ -343,7 +342,7 @@ export default function DashboardPage() {
 									<SpendingCalendar
 										month={month}
 										year={year}
-										daily={summary.daily}
+										daily={scopedDaily}
 										through={period.through}
 										onSelect={openDay}
 									/>
@@ -351,47 +350,32 @@ export default function DashboardPage() {
 							</Card>
 							<Card className="min-w-0">
 								<CardHeader>
-									<ScopedCardTitle scope="Total">Biggest changes</ScopedCardTitle>
+									<ScopedCardTitle
+										scope={scope === "all" ? "Total" : scopeLabel}
+										color={scopeColor}
+									>
+										Biggest changes
+									</ScopedCardTitle>
 									<CardDescription>
 										Categories that moved most against your usual spending.
 									</CardDescription>
 								</CardHeader>
 								<CardContent>
 									<CategoryMovers
-										categories={categories}
-										comparisonCount={comparison.count}
+										categories={scopedCategories}
+										comparisonCount={scopedComparisonCount}
+										recordHref={categoryRecordHref}
 									/>
 								</CardContent>
 							</Card>
 						</div>
 					) : null}
-
 					{stage > 2 ? (
-						<Card>
-							<CardHeader className="border-b">
-								<ScopedCardTitle scope="Total">Spending by day</ScopedCardTitle>
-								<CardDescription>
-									All spending buckets, split into daily outflow. Select a day to
-									open its Records.
-								</CardDescription>
-							</CardHeader>
-							<CardContent>
-								<DailySpendingChart
-									rows={bucketDailyData.rows}
-									buckets={dailyLines}
-									month={month}
-									year={year}
-								/>
-							</CardContent>
-						</Card>
-					) : null}
-
-					{stage > 3 ? (
-						<Card>
+						<Card className="min-w-0">
 							<CardHeader>
 								<ScopedCardTitle scope="Total">Surplus / Shortfall</ScopedCardTitle>
 								<CardDescription>
-									Cumulative income minus personal spending across every bucket
+									Cumulative income minus all personal spending
 								</CardDescription>
 							</CardHeader>
 							<CardContent>
@@ -404,30 +388,51 @@ export default function DashboardPage() {
 							</CardContent>
 						</Card>
 					) : null}
+					{stage > 3 ? (
+						<Card>
+							<CardHeader className="border-b">
+								<ScopedCardTitle scope="Total">Spending by day</ScopedCardTitle>
+								<CardDescription>
+									Net daily spending across all monthly budgets, including
+									refunds. Select a day to open its Records.
+								</CardDescription>
+							</CardHeader>
+							<CardContent>
+								<DailySpendingChart
+									rows={monthlyBudgetDailyData.rows}
+									monthlyBudgets={dailyLines}
+									month={month}
+									year={year}
+								/>
+							</CardContent>
+						</Card>
+					) : null}
 
 					{stage > 4 ? <WeekdayCard weekday={weekday} /> : null}
-
 					{stage > 5 ? (
 						<InvestmentRow summary={summary} month={month} year={year} />
 					) : null}
 				</>
-			)}
+			) : null}
 		</div>
 	)
 }
 
 function ScopeSelect({
 	value,
-	buckets,
+	budgets,
 	onChange,
 }: {
 	value: string
-	buckets: DashboardBucket[]
+	budgets: DashboardMonthlyBudget[]
 	onChange: (value: string) => void
 }) {
 	return (
 		<Select value={value} onValueChange={item => onChange(item ?? "all")}>
-			<SelectTrigger className={cn("w-full sm:w-52", FILTER_CONTROL_CLASS)}>
+			<SelectTrigger
+				aria-label="Spending scope"
+				className={cn("w-full sm:w-52", FILTER_CONTROL_CLASS)}
+			>
 				<IconifyIcon icon="lucide:wallet-cards" />
 				<SelectValue />
 			</SelectTrigger>
@@ -437,22 +442,22 @@ function ScopeSelect({
 				</SelectGroup>
 				<SelectSeparator />
 				<SelectGroup>
-					<SelectLabel>Bucket groups</SelectLabel>
+					<SelectLabel>Budget groups</SelectLabel>
 					<SelectItem value="core">Core</SelectItem>
 					<SelectItem value="outlier">Outlier</SelectItem>
 					<SelectItem value="other">Other</SelectItem>
 				</SelectGroup>
-				{buckets.length ? <SelectSeparator /> : null}
-				{buckets.length ? (
+				{budgets.length ? <SelectSeparator /> : null}
+				{budgets.length ? (
 					<SelectGroup>
-						<SelectLabel>Specific bucket</SelectLabel>
-						{buckets.map(bucket => (
-							<SelectItem key={bucket.id} value={bucket.id}>
+						<SelectLabel>Specific monthly budget</SelectLabel>
+						{budgets.map(budget => (
+							<SelectItem key={budget.id} value={budget.id}>
 								<span
 									className="size-2 rounded-full"
-									style={{ backgroundColor: bucket.color }}
+									style={{ backgroundColor: budget.color }}
 								/>
-								{bucket.name}
+								{budget.name}
 							</SelectItem>
 						))}
 					</SelectGroup>
@@ -477,6 +482,12 @@ function WeekdayCard({ weekday }: { weekday: WeekdayBreakdown }) {
 			</CardHeader>
 			<CardContent>
 				<WeekdayBars stats={weekday.stats} comparisonCount={weekday.comparison_count} />
+				{weekday.weekend ? (
+					<p className="mt-3 text-xs text-muted-foreground">
+						Weekend days average {formatCurrency(weekday.weekend.weekend_average)} vs{" "}
+						{formatCurrency(weekday.weekend.weekday_average)} on weekdays this month.
+					</p>
+				) : null}
 			</CardContent>
 		</Card>
 	)
@@ -487,7 +498,7 @@ function ScopedCardTitle({
 	color,
 	children,
 }: {
-	scope: "Daily" | "Total"
+	scope: string
 	color?: string
 	children: ReactNode
 }) {
@@ -500,9 +511,9 @@ function ScopedCardTitle({
 }
 
 function ScopeLabel({ scope, color }: { scope: string; color?: string }) {
-	if (scope === "Total") return <BucketBadge name="Total" color="var(--foreground)" />
+	if (scope === "Total") return <MonthlyBudgetBadge name="Total" color="var(--foreground)" />
 	return (
-		<BucketBadge
+		<MonthlyBudgetBadge
 			name={scope}
 			color={color ?? (scope === "Daily" ? "var(--color-emerald-500)" : null)}
 		/>
@@ -573,170 +584,7 @@ function SummaryBand({
 					tone={tone}
 				/>
 			</MetricGrid>
-			{summary.pending_count > 0 ? (
-				<div className="grid gap-3 border-t bg-amber-500/5 px-4 py-3 sm:grid-cols-[minmax(12rem,1.2fr)_repeat(3,minmax(0,1fr))] sm:items-center">
-					<div className="flex items-start gap-2.5">
-						<span className="mt-0.5 grid size-7 shrink-0 place-items-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
-							<IconifyIcon icon="lucide:circle-dashed" className="size-3.5" />
-						</span>
-						<div>
-							<p className="text-xs font-medium">Pending amounts included</p>
-							<p className="mt-0.5 text-xs text-muted-foreground">
-								Full Record values awaiting complete allocation
-							</p>
-						</div>
-					</div>
-					<PendingValue label="Income" value={summary.pending_income} />
-					<PendingValue label="Spending" value={summary.pending_gross_spending} />
-					<PendingValue label="Refunds" value={summary.pending_refunds} />
-				</div>
-			) : null}
 		</Card>
-	)
-}
-
-function PendingValue({ label, value }: { label: string; value: number }) {
-	return (
-		<div className="rounded-lg border bg-background/70 px-3 py-2">
-			<p className="text-[0.6875rem] font-medium text-muted-foreground">{label}</p>
-			<p className="mt-0.5 font-semibold tabular-nums">{formatCurrency(value)}</p>
-		</div>
-	)
-}
-
-function BucketStatus({
-	buckets,
-	month,
-	year,
-	activeScope,
-	setScope,
-}: {
-	buckets: DashboardBucket[]
-	month: string
-	year: number
-	activeScope: string
-	setScope: (scope: string) => void
-}) {
-	const { handlePush } = useHistory()
-	return (
-		<Card className="min-w-0">
-			<CardHeader>
-				<div className="flex flex-wrap items-start justify-between gap-3">
-					<div>
-						<CardTitle>Buckets</CardTitle>
-						<CardDescription>Persistent groups · Monthly targets</CardDescription>
-					</div>
-					<BucketDialog
-						month={month}
-						year={year}
-						trigger={
-							<Button variant="outline" size="sm">
-								<IconifyIcon icon="lucide:plus" /> New
-							</Button>
-						}
-					/>
-				</div>
-			</CardHeader>
-			<CardContent className="grid gap-3">
-				{buckets.map(bucket => {
-					const usage =
-						bucket.target && bucket.target > 0
-							? (bucket.spending / bucket.target) * 100
-							: null
-					return (
-						<div
-							key={bucket.id}
-							className={cn(
-								"grid gap-2 rounded-md border px-3 py-3 transition-colors",
-								activeScope === bucket.id &&
-									"bg-muted/60 ring-1 ring-foreground/20",
-							)}
-						>
-							<div className="flex flex-wrap items-center justify-between gap-2">
-								<button
-									type="button"
-									aria-pressed={activeScope === bucket.id}
-									onClick={() => setScope(bucket.id)}
-									className="min-w-0 cursor-pointer rounded text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-								>
-									<BucketBadge name={bucket.name} color={bucket.color} />
-								</button>
-								<span className="font-medium tabular-nums">
-									{formatCurrency(bucket.spending)}
-									{bucket.target !== null
-										? ` / ${formatCurrency(bucket.target)}`
-										: ""}
-								</span>
-							</div>
-							{usage !== null ? (
-								<BucketUsageBar name={bucket.name} usage={usage} />
-							) : null}
-							<div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
-								<span className="capitalize">{bucket.group}</span>
-								<div className="flex flex-wrap items-center gap-2">
-									<span>
-										{bucket.target === null
-											? "No target"
-											: bucket.remaining !== null && bucket.remaining >= 0
-												? `${formatCurrency(bucket.remaining)} remaining`
-												: `Over by ${formatCurrency(Math.abs(bucket.remaining ?? 0))}`}
-									</span>
-									<BucketDialog
-										bucket={bucket}
-										month={month}
-										year={year}
-										trigger={
-											<Button variant="ghost" size="xs">
-												Edit
-											</Button>
-										}
-									/>
-								</div>
-							</div>
-						</div>
-					)
-				})}
-				<Button variant="outline" size="sm" asChild>
-					<Link
-						onClick={handlePush("overview")}
-						href={pathMonthlyRecords({ month, year: String(year) })}
-					>
-						Manage monthly Records
-					</Link>
-				</Button>
-			</CardContent>
-		</Card>
-	)
-}
-
-function BucketUsageBar({ name, usage }: { name: string; usage: number }) {
-	const displayedUsage = Math.max(usage, 0)
-	const scale = Math.max(displayedUsage, 100)
-	const withinTarget = (Math.min(displayedUsage, 100) / scale) * 100
-	const excess = (Math.max(displayedUsage - 100, 0) / scale) * 100
-
-	return (
-		<div
-			role="progressbar"
-			aria-label={`${name} target usage`}
-			aria-valuemin={0}
-			aria-valuemax={Math.max(100, Math.round(usage))}
-			aria-valuenow={Math.round(usage)}
-			aria-valuetext={`${Math.round(usage)}% of target`}
-			className="relative h-1 w-full overflow-hidden rounded-full bg-muted"
-		>
-			{/* Usage fills from the left; past the target the overage takes the far end in red. */}
-			<div
-				className="absolute inset-0 origin-left bg-foreground/60 transition-transform duration-300 ease-out"
-				style={{ transform: `scaleX(${withinTarget / 100})` }}
-			/>
-			{excess ? (
-				<div
-					className="absolute inset-0 origin-right bg-destructive transition-transform duration-300 ease-out"
-					style={{ transform: `scaleX(${excess / 100})` }}
-				/>
-			) : null}
-		</div>
 	)
 }
 
@@ -815,104 +663,228 @@ function PaceSummary({
 	projection,
 	completedMonth,
 	highestSpendingDay,
+	spending,
+	amount,
+	remaining,
 }: {
 	projection: Projection
 	completedMonth: PaceData["completedMonth"]
 	highestSpendingDay: PaceData["highestSpendingDay"]
+	spending: number
+	amount: number | null
+	remaining: number | null
 }) {
-	if (!projection.available) {
-		if (!completedMonth) return null
-
-		const targetDifference = completedMonth.target_difference
-
-		return (
-			<MetricGrid className="mt-3">
-				<DashboardMetric
-					icon="lucide:receipt-text"
-					label="Final month spending"
-					value={formatCurrency(completedMonth.spending)}
-					detail="Final Daily-bucket total"
-				/>
-				<DashboardMetric
-					icon="lucide:circle-check-big"
-					label="Final target result"
-					value={
-						targetDifference === null
-							? "No target"
-							: Math.abs(targetDifference) < 0.005
-								? "On target"
-								: `${formatCurrency(Math.abs(targetDifference))} ${targetDifference > 0 ? "under" : "over"}`
-					}
-					detail={
-						completedMonth.target === null
-							? "No Daily target was set"
-							: `Against ${formatCurrency(completedMonth.target)} target`
-					}
-				/>
-				<DashboardMetric
-					icon="lucide:calendar-days"
-					label="Spending per day"
-					value={`${formatCurrency(completedMonth.spending_per_day)} / day`}
-					detail="Full-month total ÷ calendar days"
-				/>
-				<DashboardMetric
-					icon="lucide:flame"
-					label="Highest-spend day"
-					value={highestSpendingDay ? formatCurrency(highestSpendingDay.spending) : "—"}
-					detail={
-						highestSpendingDay
-							? DateTime.fromISO(highestSpendingDay.date).toFormat("d MMMM")
-							: "No spending recorded"
-					}
-				/>
-			</MetricGrid>
-		)
+	const budget = projection.monthly_budget
+	const result = completedMonth?.amount_difference ?? null
+	const highest = {
+		icon: "lucide:flame",
+		label: "Highest-spend day",
+		value: highestSpendingDay ? formatCurrency(highestSpendingDay.spending) : "—",
+		detail: highestSpendingDay
+			? DateTime.fromISO(highestSpendingDay.date).toFormat("d MMMM")
+			: "No spending yet",
 	}
-	const bucket = projection.bucket
 	const daysLeft = `${projection.remaining_days} day${projection.remaining_days === 1 ? "" : "s"} left`
+	const stats = projection.available
+		? [
+				highest,
+				{
+					icon: "lucide:gauge",
+					label: budget ? `${budget.name} usage pace` : "Usage pace",
+					value: budget
+						? `${formatCurrency(budget.usage_pace)} / day`
+						: "No paced budget",
+					detail: budget
+						? `Projected ${formatCurrency(budget.projected)}`
+						: "Set a daily-paced monthly budget",
+				},
+				{
+					icon: "lucide:chart-no-axes-combined",
+					label: "Projected month-end",
+					value: formatCurrency(projection.projected_spending ?? 0),
+					detail: `${formatCurrency(projection.daily_spending ?? 0)} daily pace${projection.scheduled_spending ? ` + ${formatCurrency(projection.scheduled_spending)} scheduled` : ""}`,
+				},
+				{
+					icon: "lucide:circle-gauge",
+					label: "Recommended pace",
+					value:
+						budget?.recommended_pace == null
+							? "—"
+							: `${formatCurrency(budget.recommended_pace)} / day`,
+					detail: !budget
+						? `${daysLeft} · No planned amount`
+						: budget.remaining < 0
+							? `${formatCurrency(-budget.remaining)} over after scheduled spending`
+							: budget.remaining === 0
+								? "Plan used up"
+								: `${daysLeft} · To finish within ${formatCurrency(budget.amount)}`,
+				},
+			]
+		: !completedMonth
+			? [
+					highest,
+					{
+						icon: "lucide:receipt-text",
+						label: "Spent so far",
+						value: formatCurrency(spending),
+						detail: "Recorded spending in this scope",
+					},
+					{
+						icon: "lucide:clipboard-list",
+						label: "Planned",
+						value: amount === null ? "Not set" : formatCurrency(amount),
+						detail: "Monthly budget amount",
+					},
+					{
+						icon: "lucide:wallet",
+						label: remaining !== null && remaining < 0 ? "Over plan" : "Remaining",
+						value: remaining === null ? "—" : formatCurrency(Math.abs(remaining)),
+						detail:
+							amount === null ? "No planned amount" : "Plan less recorded spending",
+					},
+				]
+			: [
+					highest,
+					{
+						icon: "lucide:receipt-text",
+						label: "Final month spending",
+						value: formatCurrency(completedMonth.spending),
+						detail: "Recorded for the whole month",
+					},
+					{
+						icon: "lucide:circle-check-big",
+						label: "Final plan result",
+						value:
+							result === null
+								? "No planned amount"
+								: Math.abs(result) < 0.005
+									? "On plan"
+									: `${formatCurrency(Math.abs(result))} ${result > 0 ? "under" : "over"}`,
+						detail:
+							completedMonth.amount == null
+								? "Set a monthly amount to compare"
+								: `Against ${formatCurrency(completedMonth.amount)} planned`,
+					},
+					{
+						icon: "lucide:calendar-days",
+						label: "Spending per day",
+						value: `${formatCurrency(completedMonth.spending_per_day)} / day`,
+						detail: "Full-month total ÷ calendar days",
+					},
+				]
+	// Four across only when the card is wide enough for the values; two by two otherwise.
 	return (
-		<MetricGrid className="mt-3">
-			<DashboardMetric
-				icon="lucide:chart-no-axes-combined"
-				label="Projected month-end"
-				value={formatCurrency(projection.projected_spending ?? 0)}
-				detail={`${formatCurrency(projection.daily_spending ?? 0)} daily pace${projection.scheduled_spending ? ` + ${formatCurrency(projection.scheduled_spending)} scheduled` : ""}`}
-			/>
-			<DashboardMetric
-				icon="lucide:gauge"
-				label={bucket ? `${bucket.name} usage pace` : "Usage pace"}
-				value={bucket ? `${formatCurrency(bucket.usage_pace)} / day` : "No paced bucket"}
-				detail={
-					bucket
-						? `Projected ${formatCurrency(bucket.projected)}`
-						: "Add a target to a daily-paced bucket"
-				}
-			/>
-			<DashboardMetric
-				icon="lucide:circle-gauge"
-				label="Recommended pace"
-				value={
-					bucket?.recommended_pace === null || !bucket
-						? "—"
-						: `${formatCurrency(bucket.recommended_pace)} / day`
-				}
-				detail={
-					bucket
-						? `${daysLeft} · To finish within ${formatCurrency(bucket.target)}`
-						: `${daysLeft} · No target available`
-				}
-			/>
-			<DashboardMetric
-				icon="lucide:flame"
-				label="Highest-spend day"
-				value={highestSpendingDay ? formatCurrency(highestSpendingDay.spending) : "—"}
-				detail={
-					highestSpendingDay
-						? DateTime.fromISO(highestSpendingDay.date).toFormat("d MMMM")
-						: "No spending yet"
-				}
-			/>
-		</MetricGrid>
+		<div className="@container mt-3">
+			<MetricGrid className="lg:grid-cols-2 @[52rem]:grid-cols-4 lg:@[52rem]:grid-cols-4">
+				{stats.map(stat => (
+					<DashboardMetric key={stat.label} {...stat} />
+				))}
+			</MetricGrid>
+		</div>
+	)
+}
+
+function ReviewLinks({ data, month, year }: { data: DashboardData; month: string; year: number }) {
+	const { handlePush } = useHistory()
+	const date = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
+	const start = date.startOf("month").toISODate() ?? ""
+	const end = date.endOf("month").toISODate() ?? ""
+	// Keep the hit area steady: shrinking a pressed link loses clicks near its edges.
+	return (
+		<div className="flex flex-wrap items-center gap-2" aria-label="Review this month">
+			{data.review.pending_records > 0 ? (
+				<Button
+					variant="outline"
+					size="sm"
+					className="active:not-aria-[haspopup]:scale-100"
+					asChild
+				>
+					<Link
+						onClick={handlePush("overview")}
+						href={pathMonthlyRecords({
+							month,
+							year: String(year),
+							is_allocated: "false",
+						})}
+					>
+						<IconifyIcon icon="lucide:circle-dashed" />
+						{data.review.pending_records} Pending Record
+						{data.review.pending_records === 1 ? "" : "s"}
+					</Link>
+				</Button>
+			) : null}
+
+			{data.review.pending_statements > 0 ? (
+				<Button
+					variant="outline"
+					size="sm"
+					className="active:not-aria-[haspopup]:scale-100"
+					asChild
+				>
+					<Link
+						onClick={handlePush("overview")}
+						href={pathStatements({
+							start_date: start,
+							end_date: end,
+							is_pending: "true",
+						})}
+					>
+						<IconifyIcon icon="lucide:circle-dashed" />
+						{data.review.pending_statements} Pending Statement
+						{data.review.pending_statements === 1 ? "" : "s"}
+					</Link>
+				</Button>
+			) : null}
+			{data.review.unallocated_statements > 0 ? (
+				<Button
+					variant="outline"
+					size="sm"
+					className="active:not-aria-[haspopup]:scale-100"
+					asChild
+				>
+					<Link
+						onClick={handlePush("overview")}
+						href={pathStatements({
+							start_date: start,
+							end_date: end,
+							is_unallocated: "true",
+							is_pending: "false",
+						})}
+					>
+						<IconifyIcon icon="lucide:inbox" />
+						{data.review.unallocated_statements} unallocated Statement
+						{data.review.unallocated_statements === 1 ? "" : "s"}
+					</Link>
+				</Button>
+			) : null}
+			{data.summary.unbudgeted_count > 0 ? (
+				<Button
+					variant="outline"
+					size="sm"
+					className="active:not-aria-[haspopup]:scale-100"
+					asChild
+				>
+					<Link
+						onClick={handlePush("overview")}
+						href={pathMonthlyRecords({
+							month,
+							year: String(year),
+							show_unbudgeted: "true",
+							effective_spending: "true",
+						})}
+					>
+						<IconifyIcon icon="lucide:wallet" />
+						{data.summary.unbudgeted_count} unbudgeted spending Record
+						{data.summary.unbudgeted_count === 1 ? "" : "s"}
+					</Link>
+				</Button>
+			) : null}
+			{data.summary.pending_count > 0 ? (
+				<span className="basis-full text-[11px] text-muted-foreground">
+					Pending Record values count in totals.
+				</span>
+			) : null}
+		</div>
 	)
 }
 
@@ -929,7 +901,7 @@ function deltaOf(value: ComparisonValue, count: number, better: "up" | "down"): 
 function comparisonText(value: ComparisonValue, count: number) {
 	if (!count || value.difference === null) return "No comparison history"
 	if (Math.abs(value.difference) < 0.005) return `Same as ${count}-month average`
-	return `${formatCurrency(Math.abs(value.difference))} ${value.difference > 0 ? "above" : "below"} ${count}-month average`
+	return `${formatCurrency(Math.abs(value.difference))} ${value.difference > 0 ? "above" : "below"} ${count}-mo avg`
 }
 
 function comparisonRateText(value: ComparisonValue, count: number) {

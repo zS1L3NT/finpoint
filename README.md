@@ -36,12 +36,12 @@ I've also hosted Finpoint on my personal subdomain at https://finpoint.zectan.co
   - Monthly income, spending and surplus or shortfall
   - Daily spending pace and previous-month comparisons
   - Spending by day and weekday
-  - Category and spending bucket breakdowns
-  - Monthly spending bucket targets
+  - Category and Monthly Budget breakdowns
+  - Reusable Monthly Budgets with monthly amount overrides
   - Pending Record and Statement summaries
 - Records
   - Create, update and delete Records
-  - Assign Categories, spending buckets and accounting treatments
+  - Assign Categories, Monthly Budgets and accounting treatments
   - Attach one or more Statements through Allocations
   - Search, filter and paginate Records
   - Monthly Records view with month navigation
@@ -65,11 +65,11 @@ I've also hosted Finpoint on my personal subdomain at https://finpoint.zectan.co
   - Categories
     - Nested subcategories
     - Default accounting treatments
-    - Default spending buckets
-  - Spending buckets
+    - Default Monthly Budgets
+  - Monthly Budgets
     - Core, outlier and custom groups
     - Daily, recurring or unpaced spending
-    - Default monthly targets and month-specific overrides
+    - Default Monthly Budget amounts and month-specific overrides
   - Budgets
     - Custom date periods and amounts
     - Automatic or manual Record membership

@@ -16,7 +16,7 @@ const SECTIONS: { heading: string; body: string[] }[] = [
 	{
 		heading: "Financial data stays on your device",
 		body: [
-			"Accounts, statements, records, allocations, budgets, categories, and spending buckets are saved only in this browser on this device. They are never uploaded to us, because there is nowhere to upload them to — the app has no backend.",
+			"Accounts, statements, records, allocations, budgets, categories, and monthly budgets are saved only in this browser on this device. They are never uploaded to us, because there is nowhere to upload them to — the app has no backend.",
 			"Clearing your browser's site data deletes this data. Uninstalling or resetting the browser does the same. Keep a backup if the data matters to you.",
 		],
 	},

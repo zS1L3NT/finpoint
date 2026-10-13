@@ -14,9 +14,16 @@ import { useChartIntro } from "@/components/charts/chart-intro"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { useHistory } from "@/history"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { formatChartCurrency } from "@/lib/chart-currency"
+import { dayTicks } from "@/lib/chart-days"
 import { formatCurrency } from "@/lib/utils"
 import type { CashflowHistoryMonth } from "@/logic/dashboard"
 import { pathMonthlyRecords } from "@/routes"
+
+const mobileAmount = new Intl.NumberFormat("en-SG", {
+	notation: "compact",
+	maximumFractionDigits: 0,
+})
 
 export type CashflowPoint = {
 	day: number
@@ -32,16 +39,18 @@ export default function CashflowChart({
 	history,
 	month,
 	year,
-	target,
-	targetLabel,
+	amount,
+	amountLabel,
 	showProjection,
+	recordFilters,
 }: {
 	data: CashflowPoint[]
 	history: CashflowHistoryMonth[]
 	month: string
 	year: number
-	target: number | null
-	targetLabel: string | null
+	recordFilters?: Record<string, string | undefined>
+	amount: number | null
+	amountLabel: string | null
 	showProjection: boolean
 }) {
 	const isMobile = useIsMobile()
@@ -66,9 +75,9 @@ export default function CashflowChart({
 			),
 		}),
 	)
-	const interval = isMobile ? Math.max(Math.floor(data.length / 4), 0) : "preserveStartEnd"
-	const actualChange = colorChange(data, "spending", target)
-	const projectionChange = colorChange(data, "projected_spending", target)
+	const ticks = dayTicks(data.length)
+	const actualChange = colorChange(data, "spending", amount)
+	const projectionChange = colorChange(data, "projected_spending", amount)
 	const openDay = (state: { activeLabel?: number | string } | null) => {
 		if (!state?.activeLabel || Number(state.activeLabel) > data.length) return
 		const selected = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
@@ -81,6 +90,7 @@ export default function CashflowChart({
 				year: String(year),
 				start_date: selected,
 				end_date: selected,
+				...recordFilters,
 			}),
 		)
 	}
@@ -106,7 +116,7 @@ export default function CashflowChart({
 					Cumulative spending · SGD
 				</p>
 				<ChartContainer
-					className="h-72 w-full aspect-auto cursor-pointer sm:h-80"
+					className="h-52 w-full min-w-0 aspect-auto [&_.recharts-surface:focus-visible]:outline-2 [&_.recharts-surface:focus-visible]:outline-ring cursor-pointer sm:h-64"
 					config={{
 						spending: { label: "Usage", color: "var(--color-emerald-500)" },
 						projected_spending: {
@@ -117,6 +127,7 @@ export default function CashflowChart({
 				>
 					<ComposedChart
 						data={chartData}
+						margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
 						onClick={openDay}
 						style={{ cursor: "pointer" }}
 						accessibilityLayer
@@ -167,17 +178,35 @@ export default function CashflowChart({
 								/>
 							</linearGradient>
 						</defs>
-						<CartesianGrid strokeDasharray="3 3" vertical />
-						<XAxis dataKey="day" interval={interval} tickMargin={8} />
-						<YAxis width={isMobile ? 44 : 64} tickFormatter={compactCurrency} />
+						<CartesianGrid strokeDasharray="3 3" vertical={false} />
+						<XAxis
+							dataKey="day"
+							ticks={ticks}
+							interval={0}
+							height={24}
+							tickMargin={isMobile ? 4 : 8}
+						/>
+						<YAxis
+							width={isMobile ? 32 : 48}
+							tick={{ fontSize: isMobile ? 10 : 12 }}
+							tickMargin={isMobile ? 2 : 8}
+							tickLine={false}
+							axisLine={false}
+							tickFormatter={
+								isMobile
+									? value =>
+											`${value < 0 ? "−" : ""}${mobileAmount.format(Math.abs(value)).toLowerCase()}`
+									: formatChartCurrency
+							}
+						/>
 						<ReferenceLine y={0} stroke="var(--border)" />
-						{target !== null ? (
+						{amount !== null ? (
 							<ReferenceLine
-								y={target}
+								y={amount}
 								stroke="var(--muted-foreground)"
 								strokeDasharray="4 4"
 								label={{
-									value: `${targetLabel ?? "Monthly"} target`,
+									value: `${amountLabel ?? "Monthly"} amount`,
 									position: "insideTopRight",
 									fill: "var(--muted-foreground)",
 									fontSize: 11,
@@ -218,7 +247,7 @@ export default function CashflowChart({
 								<StatefulActiveDot
 									{...props}
 									field="spending"
-									threshold={target}
+									threshold={amount}
 									within="var(--color-emerald-500)"
 									exceeded="var(--color-rose-500)"
 								/>
@@ -242,7 +271,7 @@ export default function CashflowChart({
 										<StatefulActiveDot
 											{...props}
 											field="projected_spending"
-											threshold={target}
+											threshold={amount}
 											within="var(--color-amber-400)"
 											exceeded="var(--color-orange-500)"
 										/>
@@ -332,7 +361,7 @@ export default function CashflowChart({
 			<p className="text-xs text-muted-foreground">
 				{showProjection
 					? "The dashed line extends the current gross spending pace and includes later-dated Records already entered. Select a day to open its Records."
-					: "The solid line shows the completed month. Select a day to open its Records."}
+					: "The solid line shows recorded spending. Select a day to open its Records."}
 				{history.length
 					? " Faint dashed and dotted lines show the previous two months by day of month."
 					: ""}
@@ -374,24 +403,24 @@ function LegendItem({ color, label }: { color: string; label: string }) {
 function colorChange(
 	data: CashflowPoint[],
 	field: "spending" | "projected_spending",
-	target: number | null,
+	amount: number | null,
 ) {
-	if (target === null) return 100
+	if (amount === null) return 100
 	const points = data.flatMap((point, index) => {
 		const value = point[field]
 		return value === null ? [] : [{ index, value }]
 	})
 	const first = points[0]
 	if (!first) return 100
-	if (first.value > target) return 0
+	if (first.value > amount) return 0
 
 	for (let index = 1; index < points.length; index += 1) {
 		const previous = points[index - 1]
 		const current = points[index]
-		if (!previous || !current || current.value <= target) continue
+		if (!previous || !current || current.value <= amount) continue
 
 		const change = current.value - previous.value
-		const progress = change > 0 ? (target - previous.value) / change : 1
+		const progress = change > 0 ? (amount - previous.value) / change : 1
 		const crossing = previous.index + (current.index - previous.index) * progress
 		const last = points[points.length - 1]
 		const visibleSpan = last ? last.index - first.index : 0
@@ -400,11 +429,6 @@ function colorChange(
 	}
 
 	return 100
-}
-
-function compactCurrency(value: number) {
-	if (Math.abs(value) >= 1000) return `$${(value / 1000).toFixed(1)}k`
-	return `$${value}`
 }
 
 function seriesLabel(name: number | string | undefined) {

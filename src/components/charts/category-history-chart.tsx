@@ -1,9 +1,11 @@
 "use client"
 
+import type { ReactNode } from "react"
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import { useChartIntro } from "@/components/charts/chart-intro"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart"
+import { useIsMobile } from "@/hooks/use-mobile"
 import { formatCurrency } from "@/lib/utils"
 import { BREAKDOWN_MONTHS, type SpendingHistoryMonth } from "@/logic/dashboard"
 
@@ -20,23 +22,26 @@ const otherColor = "var(--muted-foreground)"
 export default function CategoryHistoryChart({
 	months,
 	through,
-	bucketIds,
+	monthlyBudgetIds,
+	badge,
 }: {
 	months: SpendingHistoryMonth[]
 	through: string | null
-	bucketIds: string[] | null
+	monthlyBudgetIds: string[] | null
+	badge: ReactNode
 }) {
-	const intro = useChartIntro()
+	const intro = useChartIntro(months.find(month => month.current)?.month)
+	const isMobile = useIsMobile()
 	const scopedMonths = months.map(month => ({
 		...month,
 		categories: month.categories
 			.map(category => ({
 				...category,
 				spending:
-					bucketIds === null
+					monthlyBudgetIds === null
 						? category.spending
-						: bucketIds.reduce(
-								(sum, id) => sum + (category.bucket_spending[id] ?? 0),
+						: monthlyBudgetIds.reduce(
+								(sum, id) => sum + (category.monthly_budget_spending[id] ?? 0),
 								0,
 							),
 			}))
@@ -60,30 +65,33 @@ export default function CategoryHistoryChart({
 		selected && Object.values(selected.seriesValues).every(value => value === 0)
 
 	return (
-		<Card className="min-w-0">
+		<Card className="h-full min-w-0">
 			<CardHeader>
 				<CardTitle className="flex flex-wrap items-center gap-2 text-base">
-					Category spending mix
+					Category trend
+					{badge}
 				</CardTitle>
 				<CardDescription>
-					Share of gross spending compared with the previous {BREAKDOWN_MONTHS} months.
-					Refunds are excluded.
+					Share of gross spending vs previous {BREAKDOWN_MONTHS} months · refunds excluded
 					{through &&
-						` Previous months include the full month; the selected month includes days 1–${Number(through.slice(-2))} only.`}
+						` · selected days 1–${Number(through.slice(-2))}; prior months in full`}
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="flex min-h-0 flex-1 flex-col gap-3">
 				{totalSpending > 0 ? (
 					<>
-						<div className="relative min-h-80 w-full flex-1 overflow-x-auto overflow-y-hidden sm:min-h-[360px]">
+						<div className="relative min-h-60 w-full flex-1 overflow-x-auto overflow-y-hidden sm:min-h-72">
 							<ChartContainer
 								config={config}
-								className="absolute inset-0 h-full w-full aspect-auto"
-								style={{ minWidth: Math.max(420, months.length * 78) }}
+								className="absolute inset-0 h-full w-full aspect-auto [&_.recharts-surface:focus-visible]:outline-2 [&_.recharts-surface:focus-visible]:outline-ring"
+								style={{
+									minWidth: Math.max(320, months.length * (isMobile ? 54 : 64)),
+								}}
 							>
 								<BarChart
 									data={chartData}
-									margin={{ top: 8, right: 12, bottom: 8, left: 4 }}
+									margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
+									accessibilityLayer
 									stackOffset="expand"
 								>
 									<CartesianGrid vertical={false} />
@@ -98,7 +106,7 @@ export default function CategoryHistoryChart({
 									<YAxis
 										type="number"
 										domain={[0, 1]}
-										width={64}
+										width={isMobile ? 36 : 44}
 										tickLine={false}
 										axisLine={false}
 										tickFormatter={value =>
@@ -218,7 +226,7 @@ function prepareSeries(items: (SpendingSeries & { total: number })[]): ChartSeri
 			name: `Other (${other.length})`,
 			color: otherColor,
 			spending: total,
-			bucket_spending: {},
+			monthly_budget_spending: {},
 			total,
 			key: "series-other",
 			members: other,
