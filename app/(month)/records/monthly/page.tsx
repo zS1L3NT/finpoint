@@ -455,11 +455,15 @@ function MonthlyRecordFilters({
 							<SelectItem value="all">Any treatment</SelectItem>
 							<SelectItem value="income">Income</SelectItem>
 							<SelectItem value="spending">Spending</SelectItem>
-							<SelectItem value="effective_spending">Counted as spending</SelectItem>
 							<SelectItem value="saving_investment">Saving / investment</SelectItem>
 							<SelectItem value="neutral">Excluded</SelectItem>
 							<SelectItem value="automatic">Automatic</SelectItem>
 						</SelectGroup>
+						{/* Only set by the Overview's links, so the list matches the total clicked. */}
+						<SelectSeparator />
+						<SelectItem value="effective_spending" disabled>
+							Counted as spending
+						</SelectItem>
 					</SelectContent>
 				</Select>
 
