@@ -116,7 +116,7 @@ export default function CashflowChart({
 					Cumulative spending · SGD
 				</p>
 				<ChartContainer
-					className="h-52 w-full min-w-0 aspect-auto [&_.recharts-surface:focus-visible]:outline-2 [&_.recharts-surface:focus-visible]:outline-ring cursor-pointer sm:h-64"
+					className="h-72 w-full min-w-0 aspect-auto [&_.recharts-surface:focus-visible]:outline-2 [&_.recharts-surface:focus-visible]:outline-ring cursor-pointer sm:h-80"
 					config={{
 						spending: { label: "Usage", color: "var(--color-emerald-500)" },
 						projected_spending: {

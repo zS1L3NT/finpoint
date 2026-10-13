@@ -72,15 +72,16 @@ export default function CategoryHistoryChart({
 					{badge}
 				</CardTitle>
 				<CardDescription>
-					Share of gross spending vs previous {BREAKDOWN_MONTHS} months · refunds excluded
+					Each category's share of spending, compared with the previous {BREAKDOWN_MONTHS}{" "}
+					months. Refunds are excluded.
 					{through &&
-						` · selected days 1–${Number(through.slice(-2))}; prior months in full`}
+						` This month covers days 1–${Number(through.slice(-2))}; earlier months are shown in full.`}
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="flex min-h-0 flex-1 flex-col gap-3">
 				{totalSpending > 0 ? (
 					<>
-						<div className="relative min-h-60 w-full flex-1 overflow-x-auto overflow-y-hidden sm:min-h-72">
+						<div className="relative min-h-80 w-full flex-1 overflow-x-auto overflow-y-hidden sm:min-h-[360px]">
 							<ChartContainer
 								config={config}
 								className="absolute inset-0 h-full w-full aspect-auto [&_.recharts-surface:focus-visible]:outline-2 [&_.recharts-surface:focus-visible]:outline-ring"

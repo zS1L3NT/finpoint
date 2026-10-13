@@ -62,7 +62,7 @@ export default function DailySpendingChart({
 				))}
 			</div>
 			<ChartContainer
-				className="h-48 w-full min-w-0 aspect-auto [&_.recharts-surface:focus-visible]:outline-2 [&_.recharts-surface:focus-visible]:outline-ring cursor-pointer sm:h-64"
+				className="h-64 w-full min-w-0 aspect-auto [&_.recharts-surface:focus-visible]:outline-2 [&_.recharts-surface:focus-visible]:outline-ring cursor-pointer sm:h-72"
 				config={Object.fromEntries(
 					monthlyBudgets.map(monthlyBudget => [
 						monthlyBudget.id,

@@ -399,9 +399,6 @@ export async function getDashboard(
 		projection.daily_spending,
 	)
 	const categories = buildCategories(summary, included)
-	const historyMonths = isCurrent
-		? comparisonSummaries(date, today, false, tables, null)
-		: comparisonMonths
 	const comparisonHistory = buildSpendingHistory(
 		date,
 		actualRecords,
@@ -445,14 +442,6 @@ export async function getDashboard(
 		projection,
 		monthlyBudgets: monthlyBudgetsWithSpending,
 		categories,
-		weekday: buildWeekday(
-			date,
-			isFuture ? 0 : isCurrent ? today.day : (date.daysInMonth ?? 30),
-			summary,
-			historyMonths.filter(m => m.included),
-			actualRecords.filter(r => contribution(r.analytics_treatment, r.amount).spending > 0)
-				.length,
-		),
 		future_records_count: futureRecords.length,
 	}
 }
@@ -647,81 +636,6 @@ export async function getMonthlyBudgetDaily(
 	})
 
 	return { rows, monthlyBudgets }
-}
-
-const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const
-
-function weekdayOf(dateString: string): string {
-	// summary.daily dates are "yyyy-MM-dd"; luxon weekday: 1 = Monday.
-	const weekday = DateTime.fromFormat(dateString, "yyyy-MM-dd").weekday ?? 1
-	return WEEKDAYS[weekday - 1] ?? "Mon"
-}
-
-function buildWeekday(
-	date: DateTime,
-	daysInMonth: number,
-	summary: ReturnType<typeof summarize>,
-	included: ReturnType<typeof comparisonSummaries>,
-	spendingRecords: number,
-) {
-	function occurrences(start: DateTime, days: number, weekday: number) {
-		const first = ((weekday - start.weekday + 7) % 7) + 1
-		return first > days ? 0 : Math.floor((days - first) / 7) + 1
-	}
-
-	const stats = WEEKDAYS.map((name, index) => {
-		const days = occurrences(date, daysInMonth, index + 1)
-		const spending = summary.daily
-			.filter(d => weekdayOf(d.date) === name)
-			.reduce((sum, d) => sum + d.spending, 0)
-		const baselineDays = included.reduce((sum, m) => {
-			const start = DateTime.fromISO(m.start)
-			return sum + occurrences(start, start.daysInMonth ?? 30, index + 1)
-		}, 0)
-		const baseline = included.reduce(
-			(sum, m) =>
-				sum +
-				m.summary.daily
-					.filter(d => weekdayOf(d.date) === name)
-					.reduce((total, d) => total + d.spending, 0),
-			0,
-		)
-		return {
-			day: name,
-			spending: days ? Math.round((spending / days) * 100) / 100 : null,
-			baseline: baselineDays ? Math.round((baseline / baselineDays) * 100) / 100 : null,
-			days,
-			baseline_days: baselineDays,
-		}
-	})
-
-	// Only reported with enough observations and a meaningful (>= 15%) gap.
-	const observed = Array.from({ length: daysInMonth }, (_, i) => {
-		const day = date.plus({ days: i })
-		return {
-			weekend: day.weekday >= 6,
-			spending: summary.daily.find(d => d.date === day.toFormat(ISO_DAY))?.spending ?? 0,
-		}
-	})
-	const weekends = observed.filter(d => d.weekend)
-	const weekdays = observed.filter(d => !d.weekend)
-	const average = (days: typeof observed) =>
-		days.reduce((sum, d) => sum + d.spending, 0) / days.length
-	let weekend: { weekend_average: number; weekday_average: number } | null = null
-	if (weekends.length >= 4 && weekdays.length >= 10 && spendingRecords >= 8) {
-		const weekendAverage = average(weekends)
-		const weekdayAverage = average(weekdays)
-		if (
-			Math.abs(weekendAverage - weekdayAverage) >=
-			0.15 * Math.max(weekendAverage, weekdayAverage)
-		)
-			weekend = {
-				weekend_average: Math.round(weekendAverage * 100) / 100,
-				weekday_average: Math.round(weekdayAverage * 100) / 100,
-			}
-	}
-
-	return { stats, comparison_count: included.length, weekend }
 }
 
 function avg(values: (number | null)[]): number | null {

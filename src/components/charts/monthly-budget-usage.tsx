@@ -171,14 +171,14 @@ export default function MonthlyBudgetUsage({
 							className="mt-1 max-w-full text-lg font-semibold tracking-tight tabular-nums @[28rem]:text-xl @[48rem]:text-2xl"
 							aria-label={
 								item?.amount === null
-									? "No planned amount"
+									? "No amount set"
 									: `${formatCurrency(item?.amount ?? planned)} planned`
 							}
 						>
 							{item?.amount === null ? "—" : centerCurrency(item?.amount ?? planned)}
 						</p>
 						<p className="mt-1 text-[11px] text-muted-foreground @[28rem]:text-xs">
-							{item?.amount === null ? "No planned amount" : "planned"}
+							{item?.amount === null ? "No amount set" : "planned"}
 						</p>
 						<p
 							className="mt-1 max-w-full text-xs tabular-nums @[48rem]:text-sm"
@@ -231,7 +231,7 @@ export default function MonthlyBudgetUsage({
 										{formatCurrency(budget.spending)}
 									</span>{" "}
 									{budget.amount === null
-										? "used · no plan"
+										? "used · no amount set"
 										: budget.spending < 0
 											? "net refund"
 											: `of ${formatCurrency(budget.amount)}`}
@@ -272,7 +272,7 @@ export default function MonthlyBudgetUsage({
 				</span>
 				{withoutAmount !== 0 ? (
 					<span>
-						No plan{" "}
+						No amount set{" "}
 						<strong className="font-medium text-foreground tabular-nums">
 							{formatCurrency(withoutAmount)}
 						</strong>

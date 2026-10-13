@@ -35,7 +35,7 @@ I've also hosted Finpoint on my personal subdomain at https://finpoint.zectan.co
 - Dashboard
   - Monthly income, spending and surplus or shortfall
   - Daily spending pace and previous-month comparisons
-  - Spending by day and weekday
+  - Spending by day
   - Category and Monthly Budget breakdowns
   - Reusable Monthly Budgets with monthly amount overrides
   - Pending Record and Statement summaries

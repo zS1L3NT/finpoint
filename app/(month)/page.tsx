@@ -13,7 +13,6 @@ import DailySpendingChart from "@/components/charts/daily-spending-chart"
 import MonthlyBudgetUsage from "@/components/charts/monthly-budget-usage"
 import SpendingCalendar from "@/components/charts/spending-calendar"
 import TotalSpendingChart from "@/components/charts/total-spending-chart"
-import WeekdayBars from "@/components/charts/weekday-bars"
 import MonthlyBudgetDialog from "@/components/dialogs/monthly-budget"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import { Metric as DashboardMetric, type Delta, MetricGrid } from "@/components/metric"
@@ -47,7 +46,6 @@ type Comparison = DashboardData["comparison"]
 type ComparisonValue = Comparison["income"]
 type Projection = DashboardView["pace"]["projection"]
 type PaceData = DashboardView["pace"]
-type WeekdayBreakdown = DashboardData["weekday"]
 
 export default function DashboardPage() {
 	const { handlePush } = useHistory()
@@ -78,7 +76,7 @@ export default function DashboardPage() {
 	const monthlyBudgetDailyData = view?.monthlyBudgetDaily
 	// The summary and pace chart paint first; the sections below the fold then mount one per
 	// frame. Mounting every chart in one commit blocked arrival for ~300ms in production.
-	const stage = useStagedMount(6, !!data && !!paceData && !!monthlyBudgetDailyData)
+	const stage = useStagedMount(5, !!data && !!paceData && !!monthlyBudgetDailyData)
 	if (!view || !data || !paceData || !monthlyBudgetDailyData) return null
 	const {
 		scope,
@@ -92,7 +90,7 @@ export default function DashboardPage() {
 		paceFilters,
 		dailyMonthlyBudget: dailyBudget,
 	} = view
-	const { period, summary, series, weekday, future_records_count } = data
+	const { period, summary, series, future_records_count } = data
 	const comparison = data.comparison
 	const paceSeries = paceData.series
 	const paceProjection = paceData.projection
@@ -408,8 +406,7 @@ export default function DashboardPage() {
 						</Card>
 					) : null}
 
-					{stage > 4 ? <WeekdayCard weekday={weekday} /> : null}
-					{stage > 5 ? (
+					{stage > 4 ? (
 						<InvestmentRow summary={summary} month={month} year={year} />
 					) : null}
 				</>
@@ -464,32 +461,6 @@ function ScopeSelect({
 				) : null}
 			</SelectContent>
 		</Select>
-	)
-}
-
-function WeekdayCard({ weekday }: { weekday: WeekdayBreakdown }) {
-	return (
-		<Card>
-			<CardHeader>
-				<ScopedCardTitle scope="Total">Spending by weekday</ScopedCardTitle>
-				<CardDescription>
-					Spending on each weekday ÷ its occurrences in the month, including zero-spend
-					days.
-					{weekday.comparison_count
-						? ` Compared with ${weekday.comparison_count} previous full months, using all occurrences of the same weekday.`
-						: " No comparison history available."}
-				</CardDescription>
-			</CardHeader>
-			<CardContent>
-				<WeekdayBars stats={weekday.stats} comparisonCount={weekday.comparison_count} />
-				{weekday.weekend ? (
-					<p className="mt-3 text-xs text-muted-foreground">
-						Weekend days average {formatCurrency(weekday.weekend.weekend_average)} vs{" "}
-						{formatCurrency(weekday.weekend.weekday_average)} on weekdays this month.
-					</p>
-				) : null}
-			</CardContent>
-		</Card>
 	)
 }
 
@@ -712,7 +683,7 @@ function PaceSummary({
 							? "—"
 							: `${formatCurrency(budget.recommended_pace)} / day`,
 					detail: !budget
-						? `${daysLeft} · No planned amount`
+						? `${daysLeft} · No amount set`
 						: budget.remaining < 0
 							? `${formatCurrency(-budget.remaining)} over after scheduled spending`
 							: budget.remaining === 0
@@ -739,8 +710,7 @@ function PaceSummary({
 						icon: "lucide:wallet",
 						label: remaining !== null && remaining < 0 ? "Over plan" : "Remaining",
 						value: remaining === null ? "—" : formatCurrency(Math.abs(remaining)),
-						detail:
-							amount === null ? "No planned amount" : "Plan less recorded spending",
+						detail: amount === null ? "No amount set" : "Plan less recorded spending",
 					},
 				]
 			: [
@@ -756,7 +726,7 @@ function PaceSummary({
 						label: "Final plan result",
 						value:
 							result === null
-								? "No planned amount"
+								? "No amount set"
 								: Math.abs(result) < 0.005
 									? "On plan"
 									: `${formatCurrency(Math.abs(result))} ${result > 0 ? "under" : "over"}`,
@@ -901,7 +871,7 @@ function deltaOf(value: ComparisonValue, count: number, better: "up" | "down"): 
 function comparisonText(value: ComparisonValue, count: number) {
 	if (!count || value.difference === null) return "No comparison history"
 	if (Math.abs(value.difference) < 0.005) return `Same as ${count}-month average`
-	return `${formatCurrency(Math.abs(value.difference))} ${value.difference > 0 ? "above" : "below"} ${count}-mo avg`
+	return `${formatCurrency(Math.abs(value.difference))} ${value.difference > 0 ? "above" : "below"} ${count}-month average`
 }
 
 function comparisonRateText(value: ComparisonValue, count: number) {

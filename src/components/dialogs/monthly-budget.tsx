@@ -180,7 +180,7 @@ export default function MonthlyBudgetDialog({
 								onCheckedChange={value => setNoAmount(value === true)}
 							/>
 							<FieldLabel htmlFor="monthly-budget-no-amount">
-								No monthly amount
+								No amount set
 							</FieldLabel>
 						</Field>
 						<SelectField

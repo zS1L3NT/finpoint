@@ -1,7 +1,7 @@
 import { useLiveQuery } from "dexie-react-hooks"
 import SelectField from "@/components/form/select-field"
 import { FieldGroup } from "@/components/ui/field"
-import { TREATMENTS, treatmentLabel } from "@/lib/analytics"
+import { canUseMonthlyBudget, TREATMENTS, treatmentLabel } from "@/lib/analytics"
 import { listMonthlyBudgets } from "@/logic/monthly-budgets"
 import { AnalyticsTreatment } from "@/types"
 
@@ -115,8 +115,4 @@ export default function RecordAnalyticsFields({
 			</FieldGroup>
 		</div>
 	)
-}
-
-function canUseMonthlyBudget(treatment: AnalyticsTreatment, amount: number) {
-	return treatment === "spending" || (treatment === "automatic" && amount < 0)
 }

@@ -1,5 +1,10 @@
 import type { AnalyticsTreatment } from "@/types"
 
+/** Only Records that count as spending can be assigned to a Monthly Budget. */
+export function canUseMonthlyBudget(treatment: AnalyticsTreatment, amount: number) {
+	return treatment === "spending" || (treatment === "automatic" && amount < 0)
+}
+
 export function canUseDefaultMonthlyBudget(treatment: AnalyticsTreatment | null | undefined) {
 	return treatment === "spending" || treatment === "automatic" || treatment == null
 }
