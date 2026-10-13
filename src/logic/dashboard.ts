@@ -1013,6 +1013,64 @@ function buildCategories(
 
 export { expandCategoryIdsForMonthly }
 
+export type TrendMonth = {
+	key: string
+	label: string
+	income: number
+	spending: number
+	surplus: number
+	current: boolean
+	partial: boolean
+}
+
+/**
+ * Income vs spending for the selected month and the two months before it (the same
+ * window the comparison text averages over). While the
+ * selected month is still running, every month is cut at the same day of the month, so the
+ * sparkline compares like with like (as the comparison text does) instead of ending in a cliff.
+ */
+function buildTrend(date: DateTime, today: DateTime, tables: LoadedTables) {
+	const byMonth = new Map<string, RecordRow[]>()
+	for (const record of tables.records) {
+		const key = record.datetime.slice(0, 7)
+		const list = byMonth.get(key)
+		if (list) list.push(record)
+		else byMonth.set(key, [record])
+	}
+	const todayKey = today.toFormat(ISO_DAY)
+	const toDate = date.hasSame(today, "month")
+	const months: TrendMonth[] = []
+	for (let offset = COMPARISON_MONTHS; offset >= 0; offset--) {
+		const month = date.minus({ months: offset }).startOf("month")
+		if (month > today) continue
+		const key = month.toFormat("yyyy-MM")
+		const partial = month.hasSame(today, "month")
+		const cutoff = toDate
+			? month.set({ day: Math.min(today.day, month.daysInMonth ?? 28) }).toFormat(ISO_DAY)
+			: partial
+				? todayKey
+				: null
+		const rows = (byMonth.get(key) ?? []).filter(
+			r => cutoff === null || r.datetime.slice(0, 10) <= cutoff,
+		)
+		const summary = summarize(
+			toAnalyticsRecords(rows, tables.allocated, tables.categories, tables.monthlyBudgets),
+		)
+		months.push({
+			key,
+			label: month.toFormat("MMM yy"),
+			income: summary.income,
+			spending: summary.spending,
+			surplus: summary.surplus,
+			current: month.hasSame(date, "month"),
+			partial,
+		})
+	}
+	// Months before the first Record are not "zero" months, just untracked.
+	const first = months.findIndex(month => byMonth.has(month.key))
+	return first === -1 ? [] : months.slice(first)
+}
+
 /**
  * Everything the Overview tab renders, read from one table load. The page used
  * to run three live queries that each scanned every table on every change.
@@ -1062,10 +1120,14 @@ export async function getDashboardView(input: DashboardInput & { scope?: string 
 		getMonthlyBudgetDaily(input.month, input.year, tables),
 	])
 
+	const date = monthStart(input.month, input.year)
+	const trend = buildTrend(date, DateTime.now().startOf("day"), tables)
+
 	return {
 		dashboard,
 		pace,
 		monthlyBudgetDaily,
+		trend,
 		scope,
 		scopedBudgetIds,
 		scopedCategories: scoped.categories,

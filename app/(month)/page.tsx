@@ -31,13 +31,12 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select"
-import ValueSwap from "@/components/value-swap"
 import { useHistory } from "@/history"
 import { useMonthParams } from "@/hooks/use-month-params"
 import { STALE_MONTH_CLASS, useMonthTransition } from "@/hooks/use-month-transition"
 import { useStagedMount } from "@/hooks/use-staged-mount"
 import { cn, formatCurrency } from "@/lib/utils"
-import { getDashboardView } from "@/logic/dashboard"
+import { getDashboardView, type TrendMonth } from "@/logic/dashboard"
 import { pathDashboard, pathMonthlyRecords, pathStatements } from "@/routes"
 import { AnalyticsSummary } from "@/types"
 
@@ -141,7 +140,12 @@ export default function DashboardPage() {
 					</p>
 				</div>
 			) : (
-				<SummaryBand summary={summary} comparison={comparison} />
+				<SummaryBand
+					summary={summary}
+					comparison={comparison}
+					trend={view.trend}
+					through={period.through}
+				/>
 			)}
 			<div className="flex flex-wrap items-center justify-between gap-2">
 				<div className="min-w-0 flex-1 basis-full sm:basis-auto">
@@ -519,79 +523,67 @@ function ScopeLabel({ scope, color }: { scope: string; color?: string }) {
 function SummaryBand({
 	summary,
 	comparison,
+	trend,
+	through,
 }: {
 	summary: AnalyticsSummary
 	comparison: Comparison
+	trend: TrendMonth[]
+	/** Last actual day while the month is running; trend points then cover days 1 to it. */
+	through: string | null
 }) {
+	const sparkPeriod = through ? `days 1–${DateTime.fromISO(through).day}` : undefined
 	const surplusLabel =
 		summary.surplus > 0 ? "Surplus" : summary.surplus < 0 ? "Shortfall" : "Balance"
-	const stats = [
-		{
-			label: "Income",
-			value: formatCurrency(summary.income),
-			detail: comparisonText(comparison.income, comparison.count),
-			delta: deltaOf(comparison.income, comparison.count, "up"),
-			tone: "neutral",
-		},
-		{
-			label: summary.spending < 0 ? "Net refund" : "Spending",
-			value: formatCurrency(Math.abs(summary.spending)),
-			detail: comparisonText(comparison.spending, comparison.count),
-			delta: deltaOf(comparison.spending, comparison.count, "down"),
-			tone: "neutral",
-		},
-		{
-			label: surplusLabel,
-			value: formatCurrency(Math.abs(summary.surplus)),
-			detail: "Income less personal spending",
-			delta: deltaOf(comparison.surplus, comparison.count, "up"),
-			tone: summary.surplus > 0 ? "positive" : summary.surplus < 0 ? "negative" : "neutral",
-		},
-		{
-			label: "Surplus rate",
-			value: summary.surplus_rate === null ? "—" : `${summary.surplus_rate.toFixed(1)}%`,
-			detail:
-				summary.surplus_rate === null
-					? "No positive net income"
-					: comparisonRateText(comparison.surplus_rate, comparison.count),
-			delta: undefined,
-			tone: "neutral",
-		},
-	]
+	const tone = summary.surplus > 0 ? "positive" : summary.surplus < 0 ? "negative" : "neutral"
 	return (
 		<Card className="gap-0 overflow-hidden py-0">
-			<div className="grid grid-cols-2 gap-px bg-border lg:grid-cols-4">
-				{stats.map(stat => (
-					<div key={stat.label} className="min-w-0 bg-card px-3 py-3">
-						<div className="flex flex-wrap items-center justify-between gap-1 text-[11px] text-muted-foreground">
-							<span>{stat.label}</span>
-							{stat.delta ? (
-								<span
-									className={cn(
-										"rounded-full px-1.5 py-0.5 text-[10px] font-medium tabular-nums",
-										stat.delta.good
-											? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
-											: "bg-red-500/10 text-red-700 dark:text-red-400",
-									)}
-								>
-									<ValueSwap value={stat.delta.text} />
-								</span>
-							) : null}
-						</div>
-						<p
-							className={cn(
-								"mt-2 text-xl font-semibold tracking-tight tabular-nums",
-								stat.tone === "positive" &&
-									"text-emerald-700 dark:text-emerald-400",
-								stat.tone === "negative" && "text-destructive",
-							)}
-						>
-							<ValueSwap value={stat.value} />
-						</p>
-						<p className="mt-1 text-[11px] text-muted-foreground">{stat.detail}</p>
-					</div>
-				))}
-			</div>
+			<MetricGrid className="rounded-none border-0">
+				<DashboardMetric
+					icon="lucide:circle-dollar-sign"
+					label="Total income"
+					value={formatCurrency(summary.income)}
+					detail={comparisonText(comparison.income, comparison.count)}
+					delta={deltaOf(comparison.income, comparison.count, "up")}
+					spark={trend.map(month => month.income)}
+					sparkColor="var(--income)"
+					sparkPeriod={sparkPeriod}
+				/>
+				<DashboardMetric
+					icon="lucide:receipt-text"
+					label={summary.spending < 0 ? "Total net refund" : "Total spending"}
+					value={formatCurrency(Math.abs(summary.spending))}
+					detail={comparisonText(comparison.spending, comparison.count)}
+					delta={deltaOf(comparison.spending, comparison.count, "down")}
+					spark={trend.map(month => month.spending)}
+					sparkColor="var(--spending)"
+					sparkPeriod={sparkPeriod}
+				/>
+				<DashboardMetric
+					icon="lucide:scale"
+					label={`Total ${surplusLabel.toLowerCase()}`}
+					value={formatCurrency(Math.abs(summary.surplus))}
+					detail="Income less personal spending"
+					tone={tone}
+					delta={deltaOf(comparison.surplus, comparison.count, "up")}
+					spark={trend.map(month => month.surplus)}
+					sparkColor="var(--foreground)"
+					sparkPeriod={sparkPeriod}
+				/>
+				<DashboardMetric
+					icon="lucide:percent"
+					label="Total surplus rate"
+					value={
+						summary.surplus_rate === null ? "—" : `${summary.surplus_rate.toFixed(1)}%`
+					}
+					detail={
+						summary.surplus_rate === null
+							? "No positive net income"
+							: comparisonRateText(comparison.surplus_rate, comparison.count)
+					}
+					tone={tone}
+				/>
+			</MetricGrid>
 		</Card>
 	)
 }
