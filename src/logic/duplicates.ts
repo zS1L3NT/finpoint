@@ -7,16 +7,20 @@ const GENERIC = new Set(
 	"fast payment othr debit purchase via to paynow uen mobile qx qxvia nets qr xx s".split(" "),
 )
 
-// Exact meaningful token bags permit bank word reordering without a fuzzy threshold.
-// Date sequences and mixed reference IDs are anchors: their internal order must agree.
+// Exact word bags permit bank word reordering without a fuzzy threshold.
+// Numeric sequences and mixed reference IDs retain their internal order.
 // Split spacing-sensitive prefix tokens consistently; retain every digit and token count.
 function descriptionIdentity(description: string) {
-	const tokens = description.toLowerCase().match(/[a-z]+|\d+/g) ?? []
-	return tokens.filter(token => !GENERIC.has(token)).sort()
+	return (
+		description
+			.toLowerCase()
+			.replace(/\(\s*qxvia(?=\s+paynow[-\s]+(?:mobile|uen)\b)/g, "(qx via")
+			.match(/[a-z]+|\d+/g) ?? []
+	).sort()
 }
 
 function descriptionAnchors(description: string) {
-	return [
+	return `${(description.match(/\d+/g) ?? []).join("|")}::${[
 		...(description
 			.toLowerCase()
 			.replace(/\bs(?=\d{1,2}[/.-])/g, "s ")
@@ -24,7 +28,7 @@ function descriptionAnchors(description: string) {
 		...(description.match(/\d{1,4}[/.-]\d{1,2}[/.-]\d{1,4}/g) ?? []),
 	]
 		.sort()
-		.join("|")
+		.join("|")}`
 }
 
 function strongMatch(a: string, b: string) {
@@ -32,7 +36,7 @@ function strongMatch(a: string, b: string) {
 	const right = descriptionIdentity(b)
 	return (
 		descriptionAnchors(a) === descriptionAnchors(b) &&
-		left.some(token => /^[a-z]+$/.test(token)) &&
+		left.some(token => /^[a-z]+$/.test(token) && !GENERIC.has(token)) &&
 		left.length > 0 &&
 		left.join("|") === right.join("|")
 	)

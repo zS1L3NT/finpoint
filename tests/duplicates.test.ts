@@ -295,3 +295,21 @@ test("stale statement changes and invalid sources cannot mutate selected data", 
 	await expect(fixDuplicates({ survivor_id: "a", delete_ids: ["missing"] })).rejects.toThrow()
 	await expect(fixDuplicates({ survivor_id: "a", delete_ids: ["b", "b"] })).rejects.toThrow()
 })
+
+test("numeric reference sequences retain internal order", async () => {
+	await db.statements.bulkAdd([
+		statement("a", "FAST PAYMENT OTHR REF 1234-5678 via PayNow-UEN to DSE SERVICE PTE."),
+		statement("b", "FAST PAYMENT OTHR REF 5678-1234 via PayNow-UEN to DSE SERVICE PTE."),
+	])
+	expect(await duplicateGroups()).toEqual([])
+})
+test("banking vocabulary in recipient names remains meaningful", async () => {
+	for (const word of ["MOBILE", "NETS", "QR", "S", "UEN", "PAYNOW"]) {
+		await db.statements.clear()
+		await db.statements.bulkAdd([
+			statement("a", `FAST PAYMENT OTHR via PayNow-UEN to DSE ${word} SERVICE PTE.`),
+			statement("b", "FAST PAYMENT OTHR via PayNow-UEN to DSE SERVICE PTE."),
+		])
+		expect(await duplicateGroups()).toEqual([])
+	}
+})
