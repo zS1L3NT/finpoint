@@ -504,12 +504,37 @@ export async function getPaceView(
 		tables.targets,
 		tables.defaults,
 	)
+	const groupScope = scope === "core" || scope === "outlier" || scope === "other"
+	const amounts = monthlyBudgetsBuilt.filter(b => b.amount !== null)
+	const pace = groupScope
+		? {
+				id: scope,
+				name: scope.charAt(0).toUpperCase() + scope.slice(1),
+				amount: amounts.length
+					? amounts.reduce((sum, b) => sum + (b.amount ?? 0), 0)
+					: null,
+				spending: summary.spending,
+				pace_kind:
+					monthlyBudgetsBuilt.length &&
+					monthlyBudgetsBuilt.every(b => b.pace_kind === "daily")
+						? "daily"
+						: "none",
+			}
+		: scope === "all"
+			? monthlyBudgetsBuilt.find(
+					b => b.pace_kind === "daily" && b.amount !== null && b.amount >= 0,
+				)
+			: monthlyBudgetsBuilt[0]
 	const projection = buildProjection(
 		date,
 		summary,
 		futureSummary,
-		monthlyBudgetsBuilt,
-		isCurrent,
+		scope === "all"
+			? monthlyBudgetsBuilt
+			: pace
+				? [{ ...pace, scheduled_spending: futureSummary.spending }]
+				: [],
+		isCurrent && (scope === "all" || pace?.pace_kind === "daily"),
 		isFuture,
 		actualEnd.day ?? 1,
 	)
@@ -522,9 +547,6 @@ export async function getPaceView(
 		projection.daily_spending,
 	)
 	const history = buildCashflowHistory(date, today, tables, scopeIds)
-	const pace = monthlyBudgetsBuilt.find(
-		b => b.pace_kind === "daily" && b.amount !== null && b.amount >= 0,
-	)
 	const highestSpendingDay = summary.daily.reduce<(typeof summary.daily)[number] | null>(
 		(highest, day) =>
 			day.spending > 0 && (!highest || day.spending > highest.spending) ? day : highest,
@@ -536,6 +558,9 @@ export async function getPaceView(
 		history,
 		projection,
 		paceMonthlyBudget: pace ? { id: pace.id, name: pace.name, amount: pace.amount } : null,
+		spending: Math.round(summary.spending * 100) / 100,
+		remaining:
+			pace?.amount == null ? null : Math.round((pace.amount - summary.spending) * 100) / 100,
 		completedMonth:
 			!isCurrent && !isFuture
 				? {
@@ -790,6 +815,7 @@ function buildProjection(
 		spending: number
 		id: string
 		name: string
+		scheduled_spending?: number
 	}[],
 	isCurrent: boolean,
 	isFuture: boolean,
@@ -813,7 +839,8 @@ function buildProjection(
 	const paceTarget = paceMonthlyBudget?.amount ?? null
 	const futureMonthlyBudgets = new Map(futureSummary.monthlyBudgets.map(b => [b.id, b]))
 	const scheduledMonthlyBudgetSpending = paceMonthlyBudget
-		? Number(futureMonthlyBudgets.get(paceMonthlyBudget.id)?.spending ?? 0)
+		? (paceMonthlyBudget.scheduled_spending ??
+			Number(futureMonthlyBudgets.get(paceMonthlyBudget.id)?.spending ?? 0))
 		: 0
 	return {
 		available: true,
@@ -1057,7 +1084,7 @@ function buildTrend(date: DateTime, today: DateTime, tables: LoadedTables) {
  * Everything the Overview tab renders, read from one table load. The page used
  * to run three live queries that each scanned every table on every change.
  */
-export async function getDashboardView(input: DashboardInput) {
+export async function getDashboardView(input: DashboardInput & { scope?: string }) {
 	const tables = await loadDashboardTables()
 	const dashboard = await getDashboard(input, tables)
 	const dailyMonthlyBudget =
@@ -1066,8 +1093,21 @@ export async function getDashboardView(input: DashboardInput) {
 			monthly_budget => monthly_budget.name.toLowerCase() === "daily",
 		) ??
 		null
+	const scope =
+		input.scope &&
+		(input.scope === "core" ||
+			input.scope === "outlier" ||
+			input.scope === "other" ||
+			dashboard.monthlyBudgets.some(b => b.id === input.scope))
+			? input.scope
+			: "all"
 	const [pace, monthlyBudgetDaily] = await Promise.all([
-		getPaceView(input.month, input.year, dailyMonthlyBudget?.id ?? "all", tables),
+		getPaceView(
+			input.month,
+			input.year,
+			scope === "all" ? (dailyMonthlyBudget?.id ?? "all") : scope,
+			tables,
+		),
 		getMonthlyBudgetDaily(input.month, input.year, tables),
 	])
 	const date = monthStart(input.month, input.year)

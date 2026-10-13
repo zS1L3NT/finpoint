@@ -53,10 +53,8 @@ export const HistoryProvider = ({ children }: { children: React.ReactNode }) => 
 				latest: history[history.length - 1] ?? null,
 				isNavigatingBack,
 				handlePush: name => () => {
-					setHistory(history => [
-						...history,
-						{ name, url: pathname + window.location.search },
-					])
+					const url = pathname + window.location.search
+					setHistory(history => [...history, { name, url }])
 				},
 				handlePop: () => {
 					setHistory(history => history.slice(0, -1))

@@ -358,7 +358,7 @@ export default function CashflowChart({
 			<p className="text-xs text-muted-foreground">
 				{showProjection
 					? "The dashed line extends the current gross spending pace and includes later-dated Records already entered. Select a day to open its Records."
-					: "The solid line shows the completed month. Select a day to open its Records."}
+					: "The solid line shows recorded spending. Select a day to open its Records."}
 				{history.length
 					? " Faint dashed and dotted lines show the previous two months by day of month."
 					: ""}

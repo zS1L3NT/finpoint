@@ -55,9 +55,14 @@ export default function DashboardPage() {
 	const { month, year } = useMonthParams()
 	const contentRef = useRef<HTMLDivElement>(null)
 	const router = useRouter()
+	const searchParams = useSearchParams()
+	const storedScope = searchParams.get("scope") ?? "all"
 	// One live query, one table load: the three separate queries this replaced
 	// each re-scanned every table whenever anything changed.
-	const view = useLiveQuery(() => getDashboardView({ month, year }), [month, year])
+	const view = useLiveQuery(
+		() => getDashboardView({ month, year, scope: storedScope }),
+		[month, year, storedScope],
+	)
 	const data = view?.dashboard
 	// Until the new month's query lands, the live query keeps the previous month's data.
 	const dataKey = data ? `${data.month}-${data.year}` : null
@@ -65,8 +70,6 @@ export default function DashboardPage() {
 	useMonthTransition(contentRef, dataKey)
 	const budgets = data?.monthlyBudgets ?? []
 	const categories = data?.categories ?? []
-	const searchParams = useSearchParams()
-	const storedScope = searchParams.get("scope") ?? "all"
 	const setScope = (value: string) => {
 		const params = Object.fromEntries(searchParams.entries())
 		if (value === "all") delete params.scope
@@ -161,13 +164,18 @@ export default function DashboardPage() {
 			) : (
 				<SummaryBand summary={summary} comparison={comparison} />
 			)}
-			<ReviewLinks data={data} month={month} year={year} />
-			<div className="grid gap-5 xl:grid-cols-2">
+			<div className="flex flex-wrap items-center justify-between gap-2">
+				<div className="min-w-0 flex-1 basis-full sm:basis-auto">
+					<ReviewLinks data={data} month={month} year={year} />
+				</div>
+				<ScopeSelect value={scope} budgets={budgets} onChange={setScope} />
+			</div>
+			<div className="grid gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
 				<Card className="min-w-0">
 					<CardHeader className="border-b">
 						<ScopedCardTitle
-							scope={dailyBudget?.name ?? "Total"}
-							color={dailyBudget?.color}
+							scope={scope === "all" ? (dailyBudget?.name ?? "Total") : scopeLabel}
+							color={scope === "all" ? dailyBudget?.color : scopeColor}
 						>
 							Spending pace
 						</ScopedCardTitle>
@@ -221,6 +229,9 @@ export default function DashboardPage() {
 									projection={paceProjection}
 									completedMonth={completedMonth}
 									highestSpendingDay={highestSpendingDay}
+									spending={paceData.spending}
+									amount={paceTarget?.amount ?? null}
+									remaining={paceData.remaining}
 								/>
 							</>
 						)}
@@ -266,6 +277,7 @@ export default function DashboardPage() {
 											variant="ghost"
 											size="sm"
 											className="min-h-8"
+											onClick={event => event.stopPropagation()}
 											aria-label={`Edit ${budget.name}`}
 										>
 											Edit
@@ -283,14 +295,12 @@ export default function DashboardPage() {
 						<div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
 							<Card className="min-w-0">
 								<CardHeader>
-									<div className="flex flex-col gap-2 @[28rem]/card-header:flex-row @[28rem]/card-header:items-center @[28rem]/card-header:justify-between">
-										<CardTitle>Categories this month</CardTitle>
-										<ScopeSelect
-											value={scope}
-											budgets={budgets}
-											onChange={value => setScope(value ?? "all")}
-										/>
-									</div>
+									<ScopedCardTitle
+										scope={scope === "all" ? "Total" : scopeLabel}
+										color={scopeColor}
+									>
+										Categories this month
+									</ScopedCardTitle>
 									<CardDescription>
 										{scopeLabel} ·{" "}
 										{formatCurrency(
@@ -348,24 +358,6 @@ export default function DashboardPage() {
 							/>
 						</div>
 					) : null}
-					{stage > 0 ? (
-						<Card className="min-w-0">
-							<CardHeader>
-								<ScopedCardTitle scope="Total">Surplus / Shortfall</ScopedCardTitle>
-								<CardDescription>
-									Cumulative income minus all personal spending
-								</CardDescription>
-							</CardHeader>
-							<CardContent>
-								<TotalSpendingChart
-									data={series}
-									history={data.history}
-									month={month}
-									year={year}
-								/>
-							</CardContent>
-						</Card>
-					) : null}
 					{stage > 1 ? (
 						<div className="grid gap-5 lg:grid-cols-2">
 							<Card className="min-w-0">
@@ -405,6 +397,24 @@ export default function DashboardPage() {
 						</div>
 					) : null}
 					{stage > 2 ? (
+						<Card className="min-w-0">
+							<CardHeader>
+								<ScopedCardTitle scope="Total">Surplus / Shortfall</ScopedCardTitle>
+								<CardDescription>
+									Cumulative income minus all personal spending
+								</CardDescription>
+							</CardHeader>
+							<CardContent>
+								<TotalSpendingChart
+									data={series}
+									history={data.history}
+									month={month}
+									year={year}
+								/>
+							</CardContent>
+						</Card>
+					) : null}
+					{stage > 3 ? (
 						<Card>
 							<CardHeader className="border-b">
 								<ScopedCardTitle scope="Total">Spending by day</ScopedCardTitle>
@@ -445,7 +455,10 @@ function ScopeSelect({
 }) {
 	return (
 		<Select value={value} onValueChange={item => onChange(item ?? "all")}>
-			<SelectTrigger className={cn("w-full @[28rem]/card-header:w-52", FILTER_CONTROL_CLASS)}>
+			<SelectTrigger
+				aria-label="Spending scope"
+				className={cn("w-full sm:w-52", FILTER_CONTROL_CLASS)}
+			>
 				<IconifyIcon icon="lucide:wallet-cards" />
 				<SelectValue />
 			</SelectTrigger>
@@ -688,12 +701,17 @@ function PaceSummary({
 	projection,
 	completedMonth,
 	highestSpendingDay,
+	spending,
+	amount,
+	remaining,
 }: {
 	projection: Projection
 	completedMonth: PaceData["completedMonth"]
 	highestSpendingDay: PaceData["highestSpendingDay"]
+	spending: number
+	amount: number | null
+	remaining: number | null
 }) {
-	if (!projection.available && !completedMonth) return null
 	const budget = projection.monthly_budget
 	const result = completedMonth?.amount_difference ?? null
 	const stats = projection.available
@@ -732,36 +750,66 @@ function PaceSummary({
 								: `${projection.remaining_days} days left to stay within plan`,
 				},
 			]
-		: [
-				{
-					label: "Highest-spend day",
-					value: highestSpendingDay ? formatCurrency(highestSpendingDay.spending) : "—",
-					detail: highestSpendingDay
-						? DateTime.fromISO(highestSpendingDay.date).toFormat("d MMM")
-						: "No spending recorded",
-				},
-				{
-					label: "Recorded month spending",
-					value: formatCurrency(completedMonth?.spending ?? 0),
-					detail: "Selected pace scope",
-				},
-				{
-					label: "Plan result",
-					value:
-						result === null
-							? "No planned amount"
-							: `${formatCurrency(Math.abs(result))} ${result >= 0 ? "remaining" : "over"}`,
-					detail:
-						completedMonth?.amount == null
-							? "Set a monthly amount to compare"
-							: `${formatCurrency(completedMonth.amount)} planned`,
-				},
-				{
-					label: "Spending per day",
-					value: `${formatCurrency(completedMonth?.spending_per_day ?? 0)} / day`,
-					detail: "Full-month total ÷ calendar days",
-				},
-			]
+		: !completedMonth
+			? [
+					{
+						label: "Highest-spend day",
+						value: highestSpendingDay
+							? formatCurrency(highestSpendingDay.spending)
+							: "—",
+						detail: highestSpendingDay
+							? DateTime.fromISO(highestSpendingDay.date).toFormat("d MMM")
+							: "No spending recorded",
+					},
+					{
+						label: "Spent so far",
+						value: formatCurrency(spending),
+						detail: "Recorded spending in this scope",
+					},
+					{
+						label: "Planned",
+						value: amount === null ? "Not set" : formatCurrency(amount),
+						detail: "Monthly budget amount",
+					},
+					{
+						label: remaining !== null && remaining < 0 ? "Over plan" : "Remaining",
+						value: remaining === null ? "—" : formatCurrency(Math.abs(remaining)),
+						detail:
+							amount === null ? "No planned amount" : "Plan less recorded spending",
+					},
+				]
+			: [
+					{
+						label: "Highest-spend day",
+						value: highestSpendingDay
+							? formatCurrency(highestSpendingDay.spending)
+							: "—",
+						detail: highestSpendingDay
+							? DateTime.fromISO(highestSpendingDay.date).toFormat("d MMM")
+							: "No spending recorded",
+					},
+					{
+						label: "Recorded month spending",
+						value: formatCurrency(completedMonth?.spending ?? 0),
+						detail: "Selected pace scope",
+					},
+					{
+						label: "Plan result",
+						value:
+							result === null
+								? "No planned amount"
+								: `${formatCurrency(Math.abs(result))} ${result >= 0 ? "remaining" : "over"}`,
+						detail:
+							completedMonth?.amount == null
+								? "Set a monthly amount to compare"
+								: `${formatCurrency(completedMonth.amount)} planned`,
+					},
+					{
+						label: "Spending per day",
+						value: `${formatCurrency(completedMonth?.spending_per_day ?? 0)} / day`,
+						detail: "Full-month total ÷ calendar days",
+					},
+				]
 	return (
 		<div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 border-t pt-3">
 			{stats.map(stat => (
@@ -784,10 +832,16 @@ function ReviewLinks({ data, month, year }: { data: DashboardData; month: string
 	const date = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
 	const start = date.startOf("month").toISODate() ?? ""
 	const end = date.endOf("month").toISODate() ?? ""
+	// Keep the hit area steady: shrinking a pressed link loses clicks near its edges.
 	return (
 		<div className="flex flex-wrap items-center gap-2" aria-label="Review this month">
 			{data.review.pending_records > 0 ? (
-				<Button variant="outline" size="sm" asChild>
+				<Button
+					variant="outline"
+					size="sm"
+					className="active:not-aria-[haspopup]:scale-100"
+					asChild
+				>
 					<Link
 						onClick={handlePush("overview")}
 						href={pathMonthlyRecords({
@@ -804,7 +858,12 @@ function ReviewLinks({ data, month, year }: { data: DashboardData; month: string
 			) : null}
 
 			{data.review.pending_statements > 0 ? (
-				<Button variant="outline" size="sm" asChild>
+				<Button
+					variant="outline"
+					size="sm"
+					className="active:not-aria-[haspopup]:scale-100"
+					asChild
+				>
 					<Link
 						onClick={handlePush("overview")}
 						href={pathStatements({
@@ -820,7 +879,12 @@ function ReviewLinks({ data, month, year }: { data: DashboardData; month: string
 				</Button>
 			) : null}
 			{data.review.unallocated_statements > 0 ? (
-				<Button variant="outline" size="sm" asChild>
+				<Button
+					variant="outline"
+					size="sm"
+					className="active:not-aria-[haspopup]:scale-100"
+					asChild
+				>
 					<Link
 						onClick={handlePush("overview")}
 						href={pathStatements({
@@ -837,7 +901,12 @@ function ReviewLinks({ data, month, year }: { data: DashboardData; month: string
 				</Button>
 			) : null}
 			{data.summary.unbudgeted_count > 0 ? (
-				<Button variant="outline" size="sm" asChild>
+				<Button
+					variant="outline"
+					size="sm"
+					className="active:not-aria-[haspopup]:scale-100"
+					asChild
+				>
 					<Link
 						onClick={handlePush("overview")}
 						href={pathMonthlyRecords({
@@ -854,7 +923,7 @@ function ReviewLinks({ data, month, year }: { data: DashboardData; month: string
 				</Button>
 			) : null}
 			{data.summary.pending_count > 0 ? (
-				<span className="text-[11px] text-muted-foreground">
+				<span className="basis-full text-[11px] text-muted-foreground">
 					Pending Record values count in totals.
 				</span>
 			) : null}

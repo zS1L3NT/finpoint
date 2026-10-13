@@ -55,7 +55,7 @@ export default function MonthlyBudgetUsage({
 			return { budget, start, end }
 		})
 	const select = (budgetId: string) => {
-		onSelect(budgetId)
+		onSelect(selected === budgetId ? "all" : budgetId)
 	}
 
 	return (
@@ -193,9 +193,17 @@ export default function MonthlyBudgetUsage({
 						<div
 							key={budget.id}
 							className={cn(
-								"min-w-0 rounded-lg border border-border/70 bg-muted/20 px-3 py-2 transition-colors motion-reduce:transition-none",
+								"relative min-w-0 cursor-pointer rounded-lg border border-border/70 bg-muted/20 px-3 py-2 transition-colors hover:bg-muted/50 motion-reduce:transition-none",
 								active === budget.id && "border-border bg-muted/50",
 							)}
+							style={
+								selected === budget.id
+									? {
+											borderColor: budget.color,
+											boxShadow: `0 0 0 1px ${budget.color}`,
+										}
+									: undefined
+							}
 							onMouseEnter={() => setHovered(budget.id)}
 							onMouseLeave={() => setHovered(null)}
 						>
@@ -206,7 +214,7 @@ export default function MonthlyBudgetUsage({
 									onClick={() => select(budget.id)}
 									onFocus={() => setHovered(budget.id)}
 									onBlur={() => setHovered(null)}
-									className="flex min-h-8 min-w-0 flex-1 cursor-pointer items-center gap-2 rounded text-left text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+									className="flex min-h-8 min-w-0 flex-1 cursor-pointer items-center gap-2 rounded text-left text-sm font-medium after:absolute after:inset-0 after:rounded-lg focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-ring"
 								>
 									<span
 										className="size-2 shrink-0 rounded-full"
@@ -214,7 +222,7 @@ export default function MonthlyBudgetUsage({
 									/>
 									<span className="truncate">{budget.name}</span>
 								</button>
-								{edit(budget)}
+								<div className="relative">{edit(budget)}</div>
 							</div>
 
 							<div className="flex flex-wrap items-baseline justify-between gap-x-2 text-xs">
