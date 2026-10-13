@@ -123,7 +123,7 @@ export default function MonthlyBudgetDialog({
 				</DialogHeader>
 				{!monthlyBudget || source ? (
 					<form
-						className="reveal grid gap-5"
+						className="grid gap-5"
 						onSubmit={event => {
 							event.preventDefault()
 							void submit()
