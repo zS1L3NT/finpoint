@@ -238,7 +238,7 @@ export default function AllocatorPendingPage() {
 							<div>
 								<h3
 									id="pending-queue-title"
-									className="font-heading text-base font-medium"
+									className="font-heading text-sm font-semibold"
 								>
 									Pending Statements
 								</h3>
@@ -417,7 +417,7 @@ export default function AllocatorPendingPage() {
 										</div>
 										<h3
 											id="candidate-title"
-											className="font-heading text-base font-medium"
+											className="font-heading text-sm font-semibold"
 										>
 											Imported Statements it could become
 										</h3>

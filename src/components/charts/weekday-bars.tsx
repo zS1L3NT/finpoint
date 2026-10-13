@@ -81,7 +81,7 @@ export default function WeekdayBars({
 										/>
 										<div className="text-muted-foreground">
 											{String(name)}
-											<p className="text-[10px]">
+											<p className="text-[11px]">
 												{item.dataKey === "spending"
 													? item.payload.days
 													: item.payload.baseline_days}{" "}

@@ -233,7 +233,7 @@ export default function MonthlyRecordsPage() {
 					<section className="grid gap-4" aria-labelledby="actual-records">
 						<div className="flex flex-wrap items-center justify-between gap-3">
 							<div>
-								<h3 id="actual-records" className="text-lg font-semibold">
+								<h3 id="actual-records" className="text-sm font-semibold">
 									{period.is_future
 										? "Future-dated Records"
 										: "Recorded activity"}
@@ -272,7 +272,7 @@ export default function MonthlyRecordsPage() {
 				{futureRecords.length ? (
 					<section className="grid gap-4">
 						<div>
-							<h3 className="text-lg font-semibold">Later this month</h3>
+							<h3 className="text-sm font-semibold">Later this month</h3>
 							<p className="text-sm text-muted-foreground">
 								Excluded from actual totals.
 							</p>

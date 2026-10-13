@@ -475,7 +475,7 @@ export default function DataSettingsPage() {
 								key={status.title}
 								className="min-w-0 animate-in duration-200 ease-out fade-in-0 slide-in-from-bottom-1"
 							>
-								<h3 className="text-lg font-semibold tracking-tight md:text-xl">
+								<h3 className="text-base font-semibold tracking-tight">
 									{status.title}
 								</h3>
 								<p className="mt-0.5 text-sm text-muted-foreground">
@@ -541,11 +541,11 @@ export default function DataSettingsPage() {
 									{label}
 								</span>
 								{counts ? (
-									<span className="text-xl font-semibold tabular-nums">
+									<span className="text-lg font-semibold tabular-nums">
 										{(counts[key] ?? 0).toLocaleString()}
 									</span>
 								) : (
-									<span className="invisible text-xl font-semibold">0</span>
+									<span className="invisible text-lg font-semibold">0</span>
 								)}
 							</div>
 						))}

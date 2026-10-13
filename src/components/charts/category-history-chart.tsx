@@ -67,7 +67,7 @@ export default function CategoryHistoryChart({
 	return (
 		<Card className="h-full min-w-0">
 			<CardHeader>
-				<CardTitle className="flex flex-wrap items-center gap-2 text-base">
+				<CardTitle className="flex flex-wrap items-center gap-2">
 					Category trend
 					{badge}
 				</CardTitle>

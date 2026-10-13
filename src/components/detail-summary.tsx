@@ -46,7 +46,7 @@ export function DetailSummaryItem({
 }) {
 	return (
 		<div className="min-w-0 p-4 sm:p-5">
-			<p className="flex items-center gap-2 text-[10px] font-medium tracking-[0.14em] text-muted-foreground uppercase">
+			<p className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
 				<IconifyIcon icon={icon} className="size-3.5" />
 				{label}
 			</p>

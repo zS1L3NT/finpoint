@@ -21904,7 +21904,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/not-found.tsx",
-      "source_location": "L28",
+      "source_location": "L26",
       "weight": 1.0
     },
     {
@@ -21916,7 +21916,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/not-found.tsx",
-      "source_location": "L29",
+      "source_location": "L27",
       "weight": 1.0
     },
     {
@@ -21928,7 +21928,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/not-found.tsx",
-      "source_location": "L34",
+      "source_location": "L32",
       "weight": 1.0
     },
     {
@@ -83775,5 +83775,5 @@
       "source_file": "CONTEXT.md"
     }
   ],
-  "built_at_commit": "0b1bfd313f854dfd898ba640ed0cd59e720a9cbf"
+  "built_at_commit": "ea1c56deeb9f49f7479edd484072d377dd306791"
 }

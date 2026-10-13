@@ -494,7 +494,7 @@ function ScopedCardTitle({
 	children: ReactNode
 }) {
 	return (
-		<CardTitle className="flex items-center gap-2 text-base">
+		<CardTitle className="flex items-center gap-2">
 			{children}
 			<ScopeLabel scope={scope} color={color} />
 		</CardTitle>
@@ -595,7 +595,7 @@ function InvestmentRow({
 		<section className="grid gap-4" aria-labelledby="investment-title">
 			<div className="flex flex-wrap items-center justify-between gap-3">
 				<div>
-					<h3 id="investment-title" className="text-lg font-semibold">
+					<h3 id="investment-title" className="text-sm font-semibold">
 						Saving and investment movements
 					</h3>
 					<p className="text-sm text-muted-foreground">

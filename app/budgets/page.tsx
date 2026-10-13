@@ -188,7 +188,7 @@ function BudgetCard({ budget, onEdit }: { budget: Budget; onEdit: () => void }) 
 
 			<div className="grid gap-2">
 				<div className="flex items-end justify-between gap-3">
-					<p className="text-2xl font-semibold tracking-tight tabular-nums">
+					<p className="text-xl font-semibold tracking-tight tabular-nums">
 						{formatCurrency(spent)}
 						<span className="text-sm font-normal text-muted-foreground">
 							{" "}
