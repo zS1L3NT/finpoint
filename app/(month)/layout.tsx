@@ -57,7 +57,12 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 				return params
 			})
 		} else {
-			setSearchParams({ month: monthName, year: yearValue })
+			// Keep the Overview's selected budget across months.
+			setSearchParams(previous => ({
+				month: monthName,
+				year: yearValue,
+				scope: previous.get("scope") ?? undefined,
+			}))
 		}
 	}
 

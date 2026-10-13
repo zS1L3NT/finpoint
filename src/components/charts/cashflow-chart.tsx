@@ -42,11 +42,13 @@ export default function CashflowChart({
 	target,
 	targetLabel,
 	showProjection,
+	recordFilters,
 }: {
 	data: CashflowPoint[]
 	history: CashflowHistoryMonth[]
 	month: string
 	year: number
+	recordFilters?: Record<string, string | undefined>
 	target: number | null
 	targetLabel: string | null
 	showProjection: boolean
@@ -88,6 +90,7 @@ export default function CashflowChart({
 				year: String(year),
 				start_date: selected,
 				end_date: selected,
+				...recordFilters,
 			}),
 		)
 	}

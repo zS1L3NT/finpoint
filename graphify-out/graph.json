@@ -1950,7 +1950,7 @@
       "file_type": "code",
       "norm_label": "scopeselect()",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L447"
+      "source_location": "L450"
     },
     {
       "id": "app_month_records_monthly_page_monthlyrecordfilters",
@@ -7926,7 +7926,7 @@
       "file_type": "code",
       "norm_label": "comparisonratetext()",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L950"
+      "source_location": "L953"
     },
     {
       "id": "app_month_page_comparisontext",
@@ -7938,7 +7938,7 @@
       "file_type": "code",
       "norm_label": "comparisontext()",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L944"
+      "source_location": "L947"
     },
     {
       "id": "app_month_page_dashboardpage",
@@ -7962,7 +7962,7 @@
       "file_type": "code",
       "norm_label": "deltaof()",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L935"
+      "source_location": "L938"
     },
     {
       "id": "app_month_page_investmentrow",
@@ -7974,7 +7974,7 @@
       "file_type": "code",
       "norm_label": "investmentrow()",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L629"
+      "source_location": "L632"
     },
     {
       "id": "app_month_page_pacesummary",
@@ -7986,7 +7986,7 @@
       "file_type": "code",
       "norm_label": "pacesummary()",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L700"
+      "source_location": "L703"
     },
     {
       "id": "app_month_page_reviewlinks",
@@ -7998,7 +7998,7 @@
       "file_type": "code",
       "norm_label": "reviewlinks()",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L830"
+      "source_location": "L833"
     },
     {
       "id": "app_month_page_scopedcardtitle",
@@ -8010,7 +8010,7 @@
       "file_type": "code",
       "norm_label": "scopedcardtitle()",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L522"
+      "source_location": "L525"
     },
     {
       "id": "app_month_page_scopelabel",
@@ -8022,7 +8022,7 @@
       "file_type": "code",
       "norm_label": "scopelabel()",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L539"
+      "source_location": "L542"
     },
     {
       "id": "app_month_page_summaryband",
@@ -8034,7 +8034,7 @@
       "file_type": "code",
       "norm_label": "summaryband()",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L549"
+      "source_location": "L552"
     },
     {
       "id": "app_month_page_weekdaycard",
@@ -8046,7 +8046,7 @@
       "file_type": "code",
       "norm_label": "weekdaycard()",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L496"
+      "source_location": "L499"
     },
     {
       "id": "src_components_charts_budget_progress_chart_budgetactivedot",
@@ -8130,7 +8130,7 @@
       "file_type": "code",
       "norm_label": "colorchange()",
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L400"
+      "source_location": "L403"
     },
     {
       "id": "src_components_charts_cashflow_chart_currencyordash",
@@ -8142,7 +8142,7 @@
       "file_type": "code",
       "norm_label": "currencyordash()",
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L436"
+      "source_location": "L439"
     },
     {
       "id": "src_components_charts_cashflow_chart_legenditem",
@@ -8154,7 +8154,7 @@
       "file_type": "code",
       "norm_label": "legenditem()",
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L391"
+      "source_location": "L394"
     },
     {
       "id": "src_components_charts_cashflow_chart_serieslabel",
@@ -8166,7 +8166,7 @@
       "file_type": "code",
       "norm_label": "serieslabel()",
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L431"
+      "source_location": "L434"
     },
     {
       "id": "src_components_charts_cashflow_chart_statefulactivedot",
@@ -8178,7 +8178,7 @@
       "file_type": "code",
       "norm_label": "statefulactivedot()",
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L370"
+      "source_location": "L373"
     },
     {
       "id": "src_components_charts_category_history_chart_aggregateseries",
@@ -8394,7 +8394,7 @@
       "file_type": "code",
       "norm_label": "legenditem()",
       "source_file": "src/components/charts/total-spending-chart.tsx",
-      "source_location": "L204"
+      "source_location": "L207"
     },
     {
       "id": "src_components_charts_total_spending_chart_nicestep",
@@ -8406,7 +8406,7 @@
       "file_type": "code",
       "norm_label": "nicestep()",
       "source_file": "src/components/charts/total-spending-chart.tsx",
-      "source_location": "L250"
+      "source_location": "L253"
     },
     {
       "id": "src_components_charts_total_spending_chart_roundtick",
@@ -8418,7 +8418,7 @@
       "file_type": "code",
       "norm_label": "roundtick()",
       "source_file": "src/components/charts/total-spending-chart.tsx",
-      "source_location": "L267"
+      "source_location": "L270"
     },
     {
       "id": "src_components_charts_total_spending_chart_surplusaxis",
@@ -8430,7 +8430,7 @@
       "file_type": "code",
       "norm_label": "surplusaxis()",
       "source_file": "src/components/charts/total-spending-chart.tsx",
-      "source_location": "L225"
+      "source_location": "L228"
     },
     {
       "id": "src_components_charts_total_spending_chart_surpluszerooffset",
@@ -8442,7 +8442,7 @@
       "file_type": "code",
       "norm_label": "surpluszerooffset()",
       "source_file": "src/components/charts/total-spending-chart.tsx",
-      "source_location": "L271"
+      "source_location": "L274"
     },
     {
       "id": "src_components_charts_total_spending_chart_totalspendingchart",
@@ -20351,6 +20351,18 @@
     },
     {
       "source": "app_month_layout_monthlayout",
+      "target": "src_components_ui_button_group_buttongroup",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "app/(month)/layout.tsx",
+      "source_location": "L102",
+      "weight": 1.0
+    },
+    {
+      "source": "app_month_layout_monthlayout",
       "target": "src_components_ui_popover_popover",
       "relation": "calls",
       "_origin": "ast",
@@ -20358,7 +20370,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/layout.tsx",
-      "source_location": "L105",
+      "source_location": "L110",
       "weight": 1.0
     },
     {
@@ -20370,7 +20382,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/layout.tsx",
-      "source_location": "L106",
+      "source_location": "L111",
       "weight": 1.0
     },
     {
@@ -20382,7 +20394,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/layout.tsx",
-      "source_location": "L112",
+      "source_location": "L117",
       "weight": 1.0
     },
     {
@@ -20394,7 +20406,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/layout.tsx",
-      "source_location": "L113",
+      "source_location": "L118",
       "weight": 1.0
     },
     {
@@ -20406,7 +20418,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/layout.tsx",
-      "source_location": "L146",
+      "source_location": "L151",
       "weight": 1.0
     },
     {
@@ -20418,7 +20430,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/layout.tsx",
-      "source_location": "L154",
+      "source_location": "L159",
       "weight": 1.0
     },
     {
@@ -20478,7 +20490,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/layout.tsx",
-      "source_location": "L66",
+      "source_location": "L71",
       "weight": 1.0
     },
     {
@@ -20490,19 +20502,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/layout.tsx",
-      "source_location": "L69",
-      "weight": 1.0
-    },
-    {
-      "source": "app_month_layout_monthlayout",
-      "target": "src_components_ui_button_group_buttongroup",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "app/(month)/layout.tsx",
-      "source_location": "L97",
+      "source_location": "L74",
       "weight": 1.0
     },
     {
@@ -20514,7 +20514,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L947",
+      "source_location": "L950",
       "weight": 1.0
     },
     {
@@ -20526,7 +20526,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L145",
+      "source_location": "L150",
       "weight": 1.0
     },
     {
@@ -20538,7 +20538,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L152",
+      "source_location": "L163",
       "weight": 1.0
     },
     {
@@ -20550,7 +20550,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L165",
+      "source_location": "L176",
       "weight": 1.0
     },
     {
@@ -20562,7 +20562,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L169",
+      "source_location": "L180",
       "weight": 1.0
     },
     {
@@ -20574,7 +20574,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L171",
+      "source_location": "L182",
       "weight": 1.0
     },
     {
@@ -20586,7 +20586,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L174",
+      "source_location": "L185",
       "weight": 1.0
     },
     {
@@ -20598,7 +20598,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L175",
+      "source_location": "L186",
       "weight": 1.0
     },
     {
@@ -20610,7 +20610,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L176",
+      "source_location": "L187",
       "weight": 1.0
     },
     {
@@ -20622,7 +20622,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L182",
+      "source_location": "L193",
       "weight": 1.0
     },
     {
@@ -20634,7 +20634,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L190",
+      "source_location": "L201",
       "weight": 1.0
     },
     {
@@ -20646,7 +20646,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L200",
+      "source_location": "L211",
       "weight": 1.0
     },
     {
@@ -20658,7 +20658,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L207",
+      "source_location": "L218",
       "weight": 1.0
     },
     {
@@ -20670,7 +20670,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L219",
+      "source_location": "L230",
       "weight": 1.0
     },
     {
@@ -20682,7 +20682,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L228",
+      "source_location": "L240",
       "weight": 1.0
     },
     {
@@ -20694,7 +20694,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L244",
+      "source_location": "L256",
       "weight": 1.0
     },
     {
@@ -20706,7 +20706,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L249",
+      "source_location": "L261",
       "weight": 1.0
     },
     {
@@ -20718,7 +20718,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L261",
+      "source_location": "L273",
       "weight": 1.0
     },
     {
@@ -20730,7 +20730,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L323",
+      "source_location": "L335",
       "weight": 1.0
     },
     {
@@ -20742,7 +20742,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L348",
+      "source_location": "L349",
       "weight": 1.0
     },
     {
@@ -20754,7 +20754,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L353",
+      "source_location": "L354",
       "weight": 1.0
     },
     {
@@ -20766,7 +20766,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L374",
+      "source_location": "L375",
       "weight": 1.0
     },
     {
@@ -20778,7 +20778,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L391",
+      "source_location": "L392",
       "weight": 1.0
     },
     {
@@ -20790,7 +20790,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L408",
+      "source_location": "L409",
       "weight": 1.0
     },
     {
@@ -20802,7 +20802,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L427",
+      "source_location": "L429",
       "weight": 1.0
     },
     {
@@ -20814,7 +20814,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L437",
+      "source_location": "L440",
       "weight": 1.0
     },
     {
@@ -20826,7 +20826,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L439",
+      "source_location": "L442",
       "weight": 1.0
     },
     {
@@ -20910,7 +20910,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L939",
+      "source_location": "L942",
       "weight": 1.0
     },
     {
@@ -20922,24 +20922,12 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L638",
+      "source_location": "L641",
       "weight": 1.0
     },
     {
       "source": "app_month_page_investmentrow",
       "target": "src_components_ui_button_button",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "app/(month)/page.tsx",
-      "source_location": "L652",
-      "weight": 1.0
-    },
-    {
-      "source": "app_month_page_investmentrow",
-      "target": "src_routes_pathmonthlyrecords",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -20951,6 +20939,18 @@
     },
     {
       "source": "app_month_page_investmentrow",
+      "target": "src_routes_pathmonthlyrecords",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "app/(month)/page.tsx",
+      "source_location": "L658",
+      "weight": 1.0
+    },
+    {
+      "source": "app_month_page_investmentrow",
       "target": "src_components_metric_metricgrid",
       "relation": "calls",
       "_origin": "ast",
@@ -20958,7 +20958,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L665",
+      "source_location": "L668",
       "weight": 1.0
     },
     {
@@ -20970,7 +20970,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L669",
+      "source_location": "L672",
       "weight": 1.0
     },
     {
@@ -20982,7 +20982,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L721",
+      "source_location": "L724",
       "weight": 1.0
     },
     {
@@ -20994,7 +20994,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L831",
+      "source_location": "L834",
       "weight": 1.0
     },
     {
@@ -21006,7 +21006,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L839",
+      "source_location": "L842",
       "weight": 1.0
     },
     {
@@ -21018,7 +21018,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L847",
+      "source_location": "L850",
       "weight": 1.0
     },
     {
@@ -21030,7 +21030,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L869",
+      "source_location": "L872",
       "weight": 1.0
     },
     {
@@ -21042,7 +21042,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L532",
+      "source_location": "L535",
       "weight": 1.0
     },
     {
@@ -21054,7 +21054,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L534",
+      "source_location": "L537",
       "weight": 1.0
     },
     {
@@ -21066,7 +21066,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L540",
+      "source_location": "L543",
       "weight": 1.0
     },
     {
@@ -21078,7 +21078,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L457",
+      "source_location": "L460",
       "weight": 1.0
     },
     {
@@ -21090,24 +21090,12 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L458",
+      "source_location": "L461",
       "weight": 1.0
     },
     {
       "source": "app_month_page_scopeselect",
       "target": "src_lib_utils_cn",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "app/(month)/page.tsx",
-      "source_location": "L460",
-      "weight": 1.0
-    },
-    {
-      "source": "app_month_page_scopeselect",
-      "target": "src_components_ui_select_selectvalue",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -21119,19 +21107,7 @@
     },
     {
       "source": "app_month_page_scopeselect",
-      "target": "src_components_ui_select_selectcontent",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "app/(month)/page.tsx",
-      "source_location": "L465",
-      "weight": 1.0
-    },
-    {
-      "source": "app_month_page_scopeselect",
-      "target": "src_components_ui_select_selectgroup",
+      "target": "src_components_ui_select_selectvalue",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -21143,19 +21119,19 @@
     },
     {
       "source": "app_month_page_scopeselect",
-      "target": "src_components_ui_select_selectitem",
+      "target": "src_components_ui_select_selectcontent",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L467",
+      "source_location": "L468",
       "weight": 1.0
     },
     {
       "source": "app_month_page_scopeselect",
-      "target": "src_components_ui_select_selectseparator",
+      "target": "src_components_ui_select_selectgroup",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -21167,6 +21143,30 @@
     },
     {
       "source": "app_month_page_scopeselect",
+      "target": "src_components_ui_select_selectitem",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "app/(month)/page.tsx",
+      "source_location": "L470",
+      "weight": 1.0
+    },
+    {
+      "source": "app_month_page_scopeselect",
+      "target": "src_components_ui_select_selectseparator",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "app/(month)/page.tsx",
+      "source_location": "L472",
+      "weight": 1.0
+    },
+    {
+      "source": "app_month_page_scopeselect",
       "target": "src_components_ui_select_selectlabel",
       "relation": "calls",
       "_origin": "ast",
@@ -21174,7 +21174,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L471",
+      "source_location": "L474",
       "weight": 1.0
     },
     {
@@ -21186,7 +21186,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L561",
+      "source_location": "L564",
       "weight": 1.0
     },
     {
@@ -21198,7 +21198,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L562",
+      "source_location": "L565",
       "weight": 1.0
     },
     {
@@ -21210,7 +21210,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L563",
+      "source_location": "L566",
       "weight": 1.0
     },
     {
@@ -21222,7 +21222,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L586",
+      "source_location": "L589",
       "weight": 1.0
     },
     {
@@ -21234,7 +21234,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L592",
+      "source_location": "L595",
       "weight": 1.0
     },
     {
@@ -21246,7 +21246,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L600",
+      "source_location": "L603",
       "weight": 1.0
     },
     {
@@ -21258,7 +21258,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L607",
+      "source_location": "L610",
       "weight": 1.0
     },
     {
@@ -21270,7 +21270,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L498",
+      "source_location": "L501",
       "weight": 1.0
     },
     {
@@ -21282,7 +21282,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L499",
+      "source_location": "L502",
       "weight": 1.0
     },
     {
@@ -21294,7 +21294,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L500",
+      "source_location": "L503",
       "weight": 1.0
     },
     {
@@ -21306,7 +21306,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L501",
+      "source_location": "L504",
       "weight": 1.0
     },
     {
@@ -21318,7 +21318,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L509",
+      "source_location": "L512",
       "weight": 1.0
     },
     {
@@ -21330,7 +21330,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L510",
+      "source_location": "L513",
       "weight": 1.0
     },
     {
@@ -21342,7 +21342,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L513",
+      "source_location": "L516",
       "weight": 1.0
     },
     {
@@ -24486,7 +24486,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L100",
+      "source_location": "L103",
       "weight": 1.0
     },
     {
@@ -24498,7 +24498,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L102",
+      "source_location": "L105",
       "weight": 1.0
     },
     {
@@ -24510,7 +24510,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L115",
+      "source_location": "L118",
       "weight": 1.0
     },
     {
@@ -24522,7 +24522,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L213",
+      "source_location": "L216",
       "weight": 1.0
     },
     {
@@ -24534,7 +24534,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L244",
+      "source_location": "L247",
       "weight": 1.0
     },
     {
@@ -24546,7 +24546,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L300",
+      "source_location": "L303",
       "weight": 1.0
     },
     {
@@ -24558,7 +24558,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L334",
+      "source_location": "L337",
       "weight": 1.0
     },
     {
@@ -24570,7 +24570,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L54",
+      "source_location": "L56",
       "weight": 1.0
     },
     {
@@ -24582,7 +24582,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L57",
+      "source_location": "L59",
       "weight": 1.0
     },
     {
@@ -24594,7 +24594,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L59",
+      "source_location": "L61",
       "weight": 1.0
     },
     {
@@ -24606,7 +24606,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L76",
+      "source_location": "L78",
       "weight": 1.0
     },
     {
@@ -24618,7 +24618,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L77",
+      "source_location": "L79",
       "weight": 1.0
     },
     {
@@ -24630,7 +24630,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L86",
+      "source_location": "L88",
       "weight": 1.0
     },
     {
@@ -24642,7 +24642,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L96",
+      "source_location": "L99",
       "weight": 1.0
     },
     {
@@ -24654,7 +24654,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L437",
+      "source_location": "L440",
       "weight": 1.0
     },
     {
@@ -24899,6 +24899,18 @@
     },
     {
       "source": "src_components_charts_daily_spending_chart_dailyspendingchart",
+      "target": "src_components_ui_chart_charttooltipcontent",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/charts/daily-spending-chart.tsx",
+      "source_location": "L102",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_charts_daily_spending_chart_dailyspendingchart",
       "target": "src_lib_utils_formatcurrency",
       "relation": "calls",
       "_origin": "ast",
@@ -24906,7 +24918,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/daily-spending-chart.tsx",
-      "source_location": "L113",
+      "source_location": "L116",
       "weight": 1.0
     },
     {
@@ -24918,7 +24930,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/daily-spending-chart.tsx",
-      "source_location": "L32",
+      "source_location": "L34",
       "weight": 1.0
     },
     {
@@ -24930,7 +24942,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/daily-spending-chart.tsx",
-      "source_location": "L33",
+      "source_location": "L35",
       "weight": 1.0
     },
     {
@@ -24942,7 +24954,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/daily-spending-chart.tsx",
-      "source_location": "L35",
+      "source_location": "L37",
       "weight": 1.0
     },
     {
@@ -24954,7 +24966,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/daily-spending-chart.tsx",
-      "source_location": "L44",
+      "source_location": "L46",
       "weight": 1.0
     },
     {
@@ -24966,7 +24978,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/daily-spending-chart.tsx",
-      "source_location": "L57",
+      "source_location": "L60",
       "weight": 1.0
     },
     {
@@ -24978,24 +24990,12 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/daily-spending-chart.tsx",
-      "source_location": "L64",
+      "source_location": "L67",
       "weight": 1.0
     },
     {
       "source": "src_components_charts_daily_spending_chart_dailyspendingchart",
       "target": "src_components_ui_chart_charttooltip",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/charts/daily-spending-chart.tsx",
-      "source_location": "L96",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_charts_daily_spending_chart_dailyspendingchart",
-      "target": "src_components_ui_chart_charttooltipcontent",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -25146,7 +25146,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/total-spending-chart.tsx",
-      "source_location": "L214",
+      "source_location": "L217",
       "weight": 1.0
     },
     {
@@ -25158,7 +25158,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/total-spending-chart.tsx",
-      "source_location": "L236",
+      "source_location": "L239",
       "weight": 1.0
     },
     {
@@ -25170,7 +25170,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/total-spending-chart.tsx",
-      "source_location": "L241",
+      "source_location": "L244",
       "weight": 1.0
     },
     {
@@ -25182,7 +25182,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/total-spending-chart.tsx",
-      "source_location": "L118",
+      "source_location": "L121",
       "weight": 1.0
     },
     {
@@ -25194,7 +25194,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/total-spending-chart.tsx",
-      "source_location": "L120",
+      "source_location": "L123",
       "weight": 1.0
     },
     {
@@ -25206,7 +25206,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/total-spending-chart.tsx",
-      "source_location": "L130",
+      "source_location": "L133",
       "weight": 1.0
     },
     {
@@ -25218,7 +25218,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/total-spending-chart.tsx",
-      "source_location": "L196",
+      "source_location": "L199",
       "weight": 1.0
     },
     {
@@ -25230,7 +25230,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/total-spending-chart.tsx",
-      "source_location": "L28",
+      "source_location": "L30",
       "weight": 1.0
     },
     {
@@ -25242,7 +25242,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/total-spending-chart.tsx",
-      "source_location": "L29",
+      "source_location": "L31",
       "weight": 1.0
     },
     {
@@ -25254,7 +25254,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/total-spending-chart.tsx",
-      "source_location": "L31",
+      "source_location": "L33",
       "weight": 1.0
     },
     {
@@ -25266,7 +25266,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/total-spending-chart.tsx",
-      "source_location": "L33",
+      "source_location": "L35",
       "weight": 1.0
     },
     {
@@ -25278,7 +25278,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/total-spending-chart.tsx",
-      "source_location": "L50",
+      "source_location": "L52",
       "weight": 1.0
     },
     {
@@ -25290,7 +25290,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/total-spending-chart.tsx",
-      "source_location": "L56",
+      "source_location": "L58",
       "weight": 1.0
     },
     {
@@ -25302,7 +25302,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/total-spending-chart.tsx",
-      "source_location": "L64",
+      "source_location": "L66",
       "weight": 1.0
     },
     {
@@ -25314,7 +25314,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/total-spending-chart.tsx",
-      "source_location": "L75",
+      "source_location": "L78",
       "weight": 1.0
     },
     {
@@ -69407,17 +69407,6 @@
     },
     {
       "source": "app_month_page",
-      "target": "app_month_page_scopeselect",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "app/(month)/page.tsx",
-      "source_location": "L447",
-      "weight": 1.0
-    },
-    {
-      "source": "app_month_page",
       "target": "app_month_page_dashboarddata",
       "relation": "contains",
       "_origin": "ast",
@@ -69425,6 +69414,17 @@
       "confidence_score": 1.0,
       "source_file": "app/(month)/page.tsx",
       "source_location": "L45",
+      "weight": 1.0
+    },
+    {
+      "source": "app_month_page",
+      "target": "app_month_page_scopeselect",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "app/(month)/page.tsx",
+      "source_location": "L450",
       "weight": 1.0
     },
     {
@@ -69479,7 +69479,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L496",
+      "source_location": "L499",
       "weight": 1.0
     },
     {
@@ -69512,7 +69512,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L522",
+      "source_location": "L525",
       "weight": 1.0
     },
     {
@@ -69534,7 +69534,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L539",
+      "source_location": "L542",
       "weight": 1.0
     },
     {
@@ -69545,7 +69545,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L549",
+      "source_location": "L552",
       "weight": 1.0
     },
     {
@@ -69556,7 +69556,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L629",
+      "source_location": "L632",
       "weight": 1.0
     },
     {
@@ -69567,7 +69567,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L700",
+      "source_location": "L703",
       "weight": 1.0
     },
     {
@@ -69578,7 +69578,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L830",
+      "source_location": "L833",
       "weight": 1.0
     },
     {
@@ -69589,7 +69589,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L935",
+      "source_location": "L938",
       "weight": 1.0
     },
     {
@@ -69600,7 +69600,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L944",
+      "source_location": "L947",
       "weight": 1.0
     },
     {
@@ -69611,7 +69611,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L950",
+      "source_location": "L953",
       "weight": 1.0
     },
     {
@@ -72196,7 +72196,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L370",
+      "source_location": "L373",
       "weight": 1.0
     },
     {
@@ -72207,7 +72207,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L391",
+      "source_location": "L394",
       "weight": 1.0
     },
     {
@@ -72218,7 +72218,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L400",
+      "source_location": "L403",
       "weight": 1.0
     },
     {
@@ -72229,7 +72229,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L431",
+      "source_location": "L434",
       "weight": 1.0
     },
     {
@@ -72240,7 +72240,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L436",
+      "source_location": "L439",
       "weight": 1.0
     },
     {
@@ -72581,7 +72581,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/total-spending-chart.tsx",
-      "source_location": "L204",
+      "source_location": "L207",
       "weight": 1.0
     },
     {
@@ -72592,7 +72592,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/total-spending-chart.tsx",
-      "source_location": "L225",
+      "source_location": "L228",
       "weight": 1.0
     },
     {
@@ -72603,7 +72603,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/total-spending-chart.tsx",
-      "source_location": "L250",
+      "source_location": "L253",
       "weight": 1.0
     },
     {
@@ -72614,7 +72614,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/total-spending-chart.tsx",
-      "source_location": "L267",
+      "source_location": "L270",
       "weight": 1.0
     },
     {
@@ -72625,7 +72625,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/total-spending-chart.tsx",
-      "source_location": "L271",
+      "source_location": "L274",
       "weight": 1.0
     },
     {
@@ -83172,5 +83172,5 @@
       "source_file": "CONTEXT.md"
     }
   ],
-  "built_at_commit": "74de5f88a7da2590bb68ab5401e82a9aa74c9205"
+  "built_at_commit": "a5253b29f529d862a6d645a9b260d65c1c91cbdf"
 }

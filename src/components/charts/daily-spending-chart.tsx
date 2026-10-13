@@ -23,11 +23,13 @@ export default function DailySpendingChart({
 	monthlyBudgets,
 	month,
 	year,
+	recordFilters,
 }: {
 	rows: Record<string, number | null>[]
 	monthlyBudgets: MonthlyBudgetLine[]
 	month: string
 	year: number
+	recordFilters?: Record<string, string | undefined>
 }) {
 	const intro = useChartIntro(`${month}-${year}`)
 	const isMobile = useIsMobile()
@@ -46,6 +48,7 @@ export default function DailySpendingChart({
 				year: String(year),
 				start_date: selected,
 				end_date: selected,
+				...recordFilters,
 			}),
 		)
 	}

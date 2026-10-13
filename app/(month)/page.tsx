@@ -130,6 +130,11 @@ export default function DashboardPage() {
 			: scope.charAt(0).toUpperCase() + scope.slice(1)
 		: (budgets.find(budget => budget.id === scope)?.name ?? "Monthly budget")
 	const scopeColor = budgets.find(budget => budget.id === scope)?.color
+	// Carried into every chart's Records link so the selected budget stays filtered.
+	const scopeFilters = {
+		monthly_budget_id: budgets.some(budget => budget.id === scope) ? scope : undefined,
+		monthly_budget_group: ["core", "outlier", "other"].includes(scope) ? scope : undefined,
+	}
 	const paceSeries = paceData.series
 	const paceProjection = paceData.projection
 	const paceTarget = paceData.paceMonthlyBudget
@@ -142,7 +147,13 @@ export default function DashboardPage() {
 	const openDay = (date: string) => {
 		handlePush("overview")()
 		router.push(
-			pathMonthlyRecords({ month, year: String(year), start_date: date, end_date: date }),
+			pathMonthlyRecords({
+				month,
+				year: String(year),
+				start_date: date,
+				end_date: date,
+				...scopeFilters,
+			}),
 		)
 	}
 	return (
@@ -224,6 +235,7 @@ export default function DashboardPage() {
 									target={paceTarget?.amount ?? null}
 									targetLabel={paceTarget?.name ?? null}
 									showProjection={paceProjection.available}
+									recordFilters={scopeFilters}
 								/>
 								<PaceSummary
 									projection={paceProjection}
@@ -328,18 +340,7 @@ export default function DashboardPage() {
 												year: String(year),
 												category_ids: id,
 												effective_spending: "true",
-												monthly_budget_id: budgets.some(
-													budget => budget.id === scope,
-												)
-													? scope
-													: undefined,
-												monthly_budget_group: [
-													"core",
-													"outlier",
-													"other",
-												].includes(scope)
-													? scope
-													: undefined,
+												...scopeFilters,
 											})
 										}
 									/>
@@ -410,6 +411,7 @@ export default function DashboardPage() {
 									history={data.history}
 									month={month}
 									year={year}
+									recordFilters={scopeFilters}
 								/>
 							</CardContent>
 						</Card>
@@ -429,6 +431,7 @@ export default function DashboardPage() {
 									monthlyBudgets={dailyLines}
 									month={month}
 									year={year}
+									recordFilters={scopeFilters}
 								/>
 							</CardContent>
 						</Card>
