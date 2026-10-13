@@ -1,17 +1,17 @@
 # Graph Report - t3-b88747ce  (2026-10-14)
 
 ## Corpus Check
-- 186 files · ~109,584 words
+- 186 files · ~109,593 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 9 file(s) not represented in the graph (top: (none) 5, .example 1, .lock 1)
 
 ## Summary
-- 1461 nodes · 5605 edges · 80 communities (71 shown, 9 thin omitted)
+- 1461 nodes · 5606 edges · 78 communities (69 shown, 9 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 61 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `012469d8`
+- Built from commit: `376411a0`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -23,7 +23,7 @@
 - Application Architecture
 - monthly/page.tsx
 - app-sidebar.tsx
-- pending/page.tsx
+- budgets/[id]/page.tsx
 - dashboard.ts
 - TypeScript Compiler Configuration
 - Runtime Dependencies
@@ -51,7 +51,6 @@
 - use-appearance.tsx
 - Validator
 - cashflow-chart.tsx
-- chart.tsx
 - sidebar.tsx
 - google-drive.ts
 - JavaScript Formatting Rules
@@ -86,7 +85,6 @@
 - Search Crawler Policy
 - monthly-budget-usage.tsx
 - spending-calendar.tsx
-- history.tsx
 - Repository Code Style
 - hashSnapshot
 - Finance Feature Overview
@@ -128,7 +126,7 @@
 - **Separate meaning, accounting and spending planning** — context_category, context_treatment, context_monthly_budget, context_record [EXTRACTED 1.00]
 - **Imported activity explained by managed records** — context_statement, context_allocation, context_record [EXTRACTED 1.00]
 
-## Communities (80 total, 9 thin omitted)
+## Communities (78 total, 9 thin omitted)
 
 ### Community 0 - "lucide-react"
 Cohesion: 0.22
@@ -136,7 +134,7 @@ Nodes (11): lucide-react, react-day-picker, buttonVariants, Calendar(), Calendar
 
 ### Community 1 - "Button"
 Cohesion: 0.08
-Nodes (100): CandidateResults(), CategoriesPage(), CategoryDialogState, CategoryTile(), SECTIONS, class-variance-authority, sonner, @tanstack/react-form (+92 more)
+Nodes (99): CandidateResults(), CategoriesPage(), CategoryDialogState, CategoryTile(), SECTIONS, class-variance-authority, sonner, @tanstack/react-form (+91 more)
 
 ### Community 2 - "cn"
 Cohesion: 0.08
@@ -158,9 +156,9 @@ Nodes (15): ScopeSelect(), byRecordDay, FILTER_KEYS, Filters, MonthlyRecordFilte
 Cohesion: 0.19
 Nodes (23): NotFound(), AppearanceOption, APPEARANCES, AppearanceSwitch(), AppSidebar(), SyncDot(), SYSTEM_APPEARANCE, useSyncIndicator() (+15 more)
 
-### Community 7 - "pending/page.tsx"
-Cohesion: 0.08
-Nodes (92): AccountPage(), AccountCard(), AccountRow, AccountsPage(), AllocatorPage(), AllocatorPendingPage(), CandidatePage, PendingCard() (+84 more)
+### Community 7 - "budgets/[id]/page.tsx"
+Cohesion: 0.12
+Nodes (50): BudgetPage(), getBudgetAnalytics(), getCategoryData(), Legend(), DashboardPage(), ScopedCardTitle(), ScopeLabel(), WeekdayCard() (+42 more)
 
 ### Community 8 - "dashboard.ts"
 Cohesion: 0.15
@@ -200,7 +198,7 @@ Nodes (15): AccountRow, AnalyticsMonthRow, BudgetRecordRow, BudgetRow, CategoryR
 
 ### Community 17 - "(month)/page.tsx"
 Cohesion: 0.13
-Nodes (18): Comparison, comparisonRateText(), comparisonText(), ComparisonValue, DashboardData, DashboardMonthlyBudget, DashboardView, deltaOf() (+10 more)
+Nodes (20): Comparison, comparisonRateText(), comparisonText(), ComparisonValue, DashboardData, DashboardMonthlyBudget, DashboardView, deltaOf() (+12 more)
 
 ### Community 18 - "category-history-chart.tsx"
 Cohesion: 0.24
@@ -223,8 +221,8 @@ Cohesion: 0.09
 Nodes (21): aliases, components, hooks, lib, ui, utils, iconLibrary, menuAccent (+13 more)
 
 ### Community 23 - "utils.ts"
-Cohesion: 0.07
-Nodes (69): BUDGET_STATES, BudgetCard(), formatBudgetDateWindow(), InvestmentRow(), radix-ui, react, AllocateBar(), CategoryMovers() (+61 more)
+Cohesion: 0.06
+Nodes (110): AccountPage(), AccountCard(), AccountRow, AccountsPage(), AllocatorPage(), AllocatorPendingPage(), CandidatePage, PendingCard() (+102 more)
 
 ### Community 24 - "test-data.ts"
 Cohesion: 0.18
@@ -235,8 +233,8 @@ Cohesion: 0.11
 Nodes (21): AmountFilter(), readRange(), ComboboxChip(), ComboboxChips(), ComboboxChipsInput(), ComboboxClear(), ComboboxGroup(), ComboboxInput() (+13 more)
 
 ### Community 26 - "paginated-data-table.tsx"
-Cohesion: 0.11
-Nodes (42): framer-motion, @tanstack/react-table, DataTable(), PaginatedDataTable(), pageHref(), pageWindow(), PaginationFooter(), GroupHeaderRow() (+34 more)
+Cohesion: 0.10
+Nodes (46): framer-motion, @tanstack/react-table, Sparkline(), Delta, Metric(), DataTable(), PaginatedDataTable(), pageHref() (+38 more)
 
 ### Community 27 - "Domain View Types"
 Cohesion: 0.11
@@ -270,10 +268,6 @@ Nodes (18): updateAccount(), validateBudget(), CategoryInput, cleanInput(), crea
 Cohesion: 0.31
 Nodes (9): CashflowChart(), CashflowPoint, colorChange(), currencyOrDash(), LegendItem(), mobileAmount, seriesLabel(), StatefulActiveDot() (+1 more)
 
-### Community 35 - "chart.tsx"
-Cohesion: 0.22
-Nodes (10): ChartConfig, ChartContext, ChartContextProps, ChartLegendContent(), ChartStyle(), getPayloadConfigFromPayload(), INITIAL_DIMENSION, THEMES (+2 more)
-
 ### Community 36 - "sidebar.tsx"
 Cohesion: 0.11
 Nodes (23): AppHeader(), SidebarContent(), SidebarContext, SidebarContextProps, SidebarGroup(), SidebarGroupAction(), SidebarGroupContent(), SidebarInput() (+15 more)
@@ -303,8 +297,8 @@ Cohesion: 0.18
 Nodes (11): noAdjacentSpacesInRegex, noBannedTypes, noExtraBooleanCast, noUselessCatch, noUselessThisAlias, noUselessTypeConstraint, rules, noFloatingPromises (+3 more)
 
 ### Community 43 - "daily-spending-chart.tsx"
-Cohesion: 0.24
-Nodes (16): recharts, BudgetActiveDot(), BudgetProgressChart(), BudgetProgressPoint, buildSeries(), colorChange(), CHART_INTRO_MS, useChartIntro() (+8 more)
+Cohesion: 0.15
+Nodes (26): recharts, BudgetActiveDot(), BudgetProgressChart(), BudgetProgressPoint, buildSeries(), colorChange(), CHART_INTRO_MS, useChartIntro() (+18 more)
 
 ### Community 44 - "next"
 Cohesion: 0.19
@@ -390,10 +384,6 @@ Nodes (6): arc(), centerCurrency(), MonthlyBudgetUsage(), MonthlyBudgetUsageItem
 Cohesion: 0.36
 Nodes (7): compact(), INK, LEVELS, quantile(), rampCap(), SpendingCalendar(), WEEKDAYS
 
-### Community 72 - "history.tsx"
-Cohesion: 0.40
-Nodes (4): getStoredHistory(), HistoryContext, HistoryItem, HistoryProvider()
-
 ### Community 77 - "Repository Code Style"
 Cohesion: 0.27
 Nodes (10): APIs, Arguments, And Props, Code Style, Consistency, Core, Earning Its Place, Finpoint Style Additions, Grouping And Order, React / TypeScript Style (+2 more)
@@ -422,17 +412,17 @@ Nodes (4): Google Drive sync, JSON backup and restore, Local-first finance track
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `cn()` connect `cn` to `lucide-react`, `Button`, `monthly/page.tsx`, `app-sidebar.tsx`, `pending/page.tsx`, `sync/page.tsx`, `allocator-tabs.tsx`, `(month)/page.tsx`, `date-range.tsx`, `importer/page.tsx`, `utils.ts`, `AmountFilter`, `paginated-data-table.tsx`, `providers.tsx`, `chart.tsx`, `sidebar.tsx`, `category-filter.tsx`, `daily-spending-chart.tsx`, `next`, `total-spending-chart.tsx`, `monthly-budget-usage.tsx`, `spending-calendar.tsx`?**
+- **Why does `cn()` connect `cn` to `lucide-react`, `Button`, `monthly/page.tsx`, `app-sidebar.tsx`, `budgets/[id]/page.tsx`, `sync/page.tsx`, `allocator-tabs.tsx`, `(month)/page.tsx`, `date-range.tsx`, `importer/page.tsx`, `utils.ts`, `AmountFilter`, `paginated-data-table.tsx`, `providers.tsx`, `sidebar.tsx`, `category-filter.tsx`, `daily-spending-chart.tsx`, `next`, `total-spending-chart.tsx`, `monthly-budget-usage.tsx`, `spending-calendar.tsx`?**
   _High betweenness centrality (0.138) - this node is a cross-community bridge._
 - **What connects `@fontsource-variable/inter`, `react-dom`, `shadcn` to the rest of the system?**
   _76 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Button` be split into smaller, more focused modules?**
-  _Cohesion score 0.07566437007874016 - nodes in this community are weakly interconnected._
-- **Why does `react` connect `utils.ts` to `lucide-react`, `Button`, `cn`, `monthly/page.tsx`, `pending/page.tsx`, `sync/page.tsx`, `package.json`, `(month)/page.tsx`, `category-history-chart.tsx`, `date-range.tsx`, `auto-sync.ts`, `importer/page.tsx`, `AmountFilter`, `paginated-data-table.tsx`, `providers.tsx`, `use-appearance.tsx`, `chart.tsx`, `sidebar.tsx`, `category-filter.tsx`, `daily-spending-chart.tsx`, `next`, `total-spending-chart.tsx`, `monthly-budget-usage.tsx`, `history.tsx`?**
+  _Cohesion score 0.0758655168103987 - nodes in this community are weakly interconnected._
+- **Why does `react` connect `utils.ts` to `lucide-react`, `Button`, `cn`, `monthly/page.tsx`, `budgets/[id]/page.tsx`, `sync/page.tsx`, `package.json`, `(month)/page.tsx`, `category-history-chart.tsx`, `date-range.tsx`, `auto-sync.ts`, `importer/page.tsx`, `AmountFilter`, `paginated-data-table.tsx`, `providers.tsx`, `use-appearance.tsx`, `sidebar.tsx`, `category-filter.tsx`, `daily-spending-chart.tsx`, `next`, `total-spending-chart.tsx`, `monthly-budget-usage.tsx`?**
   _High betweenness centrality (0.049) - this node is a cross-community bridge._
 - **Should `cn` be split into smaller, more focused modules?**
   _Cohesion score 0.07575757575757576 - nodes in this community are weakly interconnected._
-- **Why does `Button()` connect `Button` to `lucide-react`, `cn`, `sidebar.tsx`, `monthly/page.tsx`, `app-sidebar.tsx`, `pending/page.tsx`, `category-filter.tsx`, `sync/page.tsx`, `next`, `(month)/page.tsx`, `date-range.tsx`, `importer/page.tsx`, `utils.ts`, `AmountFilter`, `paginated-data-table.tsx`?**
+- **Why does `Button()` connect `Button` to `lucide-react`, `cn`, `sidebar.tsx`, `monthly/page.tsx`, `app-sidebar.tsx`, `budgets/[id]/page.tsx`, `category-filter.tsx`, `sync/page.tsx`, `next`, `(month)/page.tsx`, `date-range.tsx`, `importer/page.tsx`, `utils.ts`, `AmountFilter`, `paginated-data-table.tsx`?**
   _High betweenness centrality (0.030) - this node is a cross-community bridge._
 - **Should `Application Architecture` be split into smaller, more focused modules?**
   _Cohesion score 0.09956709956709957 - nodes in this community are weakly interconnected._

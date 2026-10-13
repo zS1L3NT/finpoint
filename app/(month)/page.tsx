@@ -676,64 +676,67 @@ function PaceSummary({
 }) {
 	const budget = projection.monthly_budget
 	const result = completedMonth?.amount_difference ?? null
+	const highest = {
+		icon: "lucide:flame",
+		label: "Highest-spend day",
+		value: highestSpendingDay ? formatCurrency(highestSpendingDay.spending) : "—",
+		detail: highestSpendingDay
+			? DateTime.fromISO(highestSpendingDay.date).toFormat("d MMMM")
+			: "No spending yet",
+	}
+	const daysLeft = `${projection.remaining_days} day${projection.remaining_days === 1 ? "" : "s"} left`
 	const stats = projection.available
 		? [
+				highest,
 				{
-					label: "Highest-spend day",
-					value: highestSpendingDay ? formatCurrency(highestSpendingDay.spending) : "—",
-					detail: highestSpendingDay
-						? DateTime.fromISO(highestSpendingDay.date).toFormat("d MMM")
-						: "No spending yet",
-				},
-				{
-					label: "Recorded usage pace",
+					icon: "lucide:gauge",
+					label: budget ? `${budget.name} usage pace` : "Usage pace",
 					value: budget
 						? `${formatCurrency(budget.usage_pace)} / day`
 						: "No paced budget",
-					detail: budget ? budget.name : "Set a daily-paced monthly budget",
+					detail: budget
+						? `Projected ${formatCurrency(budget.projected)}`
+						: "Set a daily-paced monthly budget",
 				},
 				{
-					label: "If this pace continues",
+					icon: "lucide:chart-no-axes-combined",
+					label: "Projected month-end",
 					value: formatCurrency(projection.projected_spending ?? 0),
-					detail: `${formatCurrency(projection.daily_spending ?? 0)} / recorded day${projection.scheduled_spending ? ` + ${formatCurrency(projection.scheduled_spending)} scheduled` : ""}`,
+					detail: `${formatCurrency(projection.daily_spending ?? 0)} daily pace${projection.scheduled_spending ? ` + ${formatCurrency(projection.scheduled_spending)} scheduled` : ""}`,
 				},
 				{
+					icon: "lucide:circle-gauge",
 					label: "Recommended pace",
 					value:
 						budget?.recommended_pace == null
 							? "—"
 							: `${formatCurrency(budget.recommended_pace)} / day`,
 					detail: !budget
-						? "No planned amount"
+						? `${daysLeft} · No planned amount`
 						: budget.remaining < 0
 							? `${formatCurrency(-budget.remaining)} over after scheduled spending`
 							: budget.remaining === 0
-								? "Plan exhausted"
-								: `${projection.remaining_days} days left to stay within plan`,
+								? "Plan used up"
+								: `${daysLeft} · To finish within ${formatCurrency(budget.amount)}`,
 				},
 			]
 		: !completedMonth
 			? [
+					highest,
 					{
-						label: "Highest-spend day",
-						value: highestSpendingDay
-							? formatCurrency(highestSpendingDay.spending)
-							: "—",
-						detail: highestSpendingDay
-							? DateTime.fromISO(highestSpendingDay.date).toFormat("d MMM")
-							: "No spending recorded",
-					},
-					{
+						icon: "lucide:receipt-text",
 						label: "Spent so far",
 						value: formatCurrency(spending),
 						detail: "Recorded spending in this scope",
 					},
 					{
+						icon: "lucide:clipboard-list",
 						label: "Planned",
 						value: amount === null ? "Not set" : formatCurrency(amount),
 						detail: "Monthly budget amount",
 					},
 					{
+						icon: "lucide:wallet",
 						label: remaining !== null && remaining < 0 ? "Over plan" : "Remaining",
 						value: remaining === null ? "—" : formatCurrency(Math.abs(remaining)),
 						detail:
@@ -741,50 +744,42 @@ function PaceSummary({
 					},
 				]
 			: [
+					highest,
 					{
-						label: "Highest-spend day",
-						value: highestSpendingDay
-							? formatCurrency(highestSpendingDay.spending)
-							: "—",
-						detail: highestSpendingDay
-							? DateTime.fromISO(highestSpendingDay.date).toFormat("d MMM")
-							: "No spending recorded",
+						icon: "lucide:receipt-text",
+						label: "Final month spending",
+						value: formatCurrency(completedMonth.spending),
+						detail: "Recorded for the whole month",
 					},
 					{
-						label: "Recorded month spending",
-						value: formatCurrency(completedMonth?.spending ?? 0),
-						detail: "Selected pace scope",
-					},
-					{
-						label: "Plan result",
+						icon: "lucide:circle-check-big",
+						label: "Final plan result",
 						value:
 							result === null
 								? "No planned amount"
-								: `${formatCurrency(Math.abs(result))} ${result >= 0 ? "remaining" : "over"}`,
+								: Math.abs(result) < 0.005
+									? "On plan"
+									: `${formatCurrency(Math.abs(result))} ${result > 0 ? "under" : "over"}`,
 						detail:
-							completedMonth?.amount == null
+							completedMonth.amount == null
 								? "Set a monthly amount to compare"
-								: `${formatCurrency(completedMonth.amount)} planned`,
+								: `Against ${formatCurrency(completedMonth.amount)} planned`,
 					},
 					{
+						icon: "lucide:calendar-days",
 						label: "Spending per day",
-						value: `${formatCurrency(completedMonth?.spending_per_day ?? 0)} / day`,
+						value: `${formatCurrency(completedMonth.spending_per_day)} / day`,
 						detail: "Full-month total ÷ calendar days",
 					},
 				]
+	// Four across only when the card is wide enough for the values; two by two otherwise.
 	return (
-		<div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 border-t pt-3">
-			{stats.map(stat => (
-				<div key={stat.label} className="min-w-0">
-					<p className="text-[11px] text-muted-foreground">{stat.label}</p>
-					<p className="mt-1 text-sm font-semibold tracking-tight tabular-nums">
-						{stat.value}
-					</p>
-					<p className="mt-0.5 text-[11px] leading-relaxed text-muted-foreground">
-						{stat.detail}
-					</p>
-				</div>
-			))}
+		<div className="@container mt-3">
+			<MetricGrid className="lg:grid-cols-2 @[52rem]:grid-cols-4 lg:@[52rem]:grid-cols-4">
+				{stats.map(stat => (
+					<DashboardMetric key={stat.label} {...stat} />
+				))}
+			</MetricGrid>
 		</div>
 	)
 }
