@@ -56,7 +56,7 @@ export default function AccountPage({ params }: { params: Promise<{ id: string }
 		return (
 			<>
 				<PageContent>
-					<p className="text-sm text-muted-foreground">Account not found.</p>
+					<p className="text-xs text-muted-foreground">Account not found.</p>
 				</PageContent>
 			</>
 		)

@@ -97,7 +97,7 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 							<h2 className="mt-1 text-xl font-semibold tracking-tight md:text-2xl">
 								{month} {year}
 							</h2>
-							<p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
+							<p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>
 						</div>
 						<ButtonGroup className="w-full sm:w-fit">
 							<Button

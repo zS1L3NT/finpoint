@@ -17,7 +17,7 @@ export default function NotFound() {
 					<h2 className="text-xl font-semibold tracking-tight md:text-2xl">
 						Page not found
 					</h2>
-					<p className="text-sm text-muted-foreground">
+					<p className="text-xs text-muted-foreground">
 						This link doesn't lead anywhere in Finpoint. It may be mistyped or out of
 						date. Your data is untouched; it stays in this browser.
 					</p>

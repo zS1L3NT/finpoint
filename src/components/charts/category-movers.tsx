@@ -38,7 +38,7 @@ export default function CategoryMovers({
 
 	if (!comparisonCount || !movers.length) {
 		return (
-			<p className="py-6 text-center text-sm text-muted-foreground">
+			<p className="py-6 text-center text-xs text-muted-foreground">
 				Not enough history to compare categories yet.
 			</p>
 		)

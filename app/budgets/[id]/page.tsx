@@ -117,7 +117,7 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 		return (
 			<>
 				<PageContent>
-					<p className="text-sm text-muted-foreground">Budget not found.</p>
+					<p className="text-xs text-muted-foreground">Budget not found.</p>
 				</PageContent>
 			</>
 		)
@@ -273,7 +273,7 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 									))}
 								</div>
 							) : (
-								<p className="py-10 text-center text-sm text-muted-foreground">
+								<p className="py-10 text-center text-xs text-muted-foreground">
 									No outgoing Records in this budget.
 								</p>
 							)}

@@ -383,7 +383,7 @@ export default function AllocatorPendingPage() {
 											</p>
 											<div className="flex items-start justify-between gap-3">
 												<div className="min-w-0">
-													<p className="truncate font-semibold">
+													<p className="truncate text-sm font-semibold">
 														{selectedPendingStatement.description}
 													</p>
 													<p className="text-xs text-muted-foreground">

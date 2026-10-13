@@ -208,7 +208,7 @@ export default function MonthlyRecordsPage() {
 	if (data === undefined) return null
 
 	if (data === null) {
-		return <p className="text-sm text-muted-foreground">Monthly records not found.</p>
+		return <p className="text-xs text-muted-foreground">Monthly records not found.</p>
 	}
 
 	const { monthlyBudgets, period } = data
@@ -238,7 +238,7 @@ export default function MonthlyRecordsPage() {
 										? "Future-dated Records"
 										: "Recorded activity"}
 								</h3>
-								<p className="text-sm text-muted-foreground">
+								<p className="text-xs text-muted-foreground">
 									{records.length} Record
 									{records.length === 1 ? "" : "s"}
 								</p>
@@ -273,7 +273,7 @@ export default function MonthlyRecordsPage() {
 					<section className="grid gap-4">
 						<div>
 							<h3 className="text-sm font-semibold">Later this month</h3>
-							<p className="text-sm text-muted-foreground">
+							<p className="text-xs text-muted-foreground">
 								Excluded from actual totals.
 							</p>
 						</div>
@@ -360,7 +360,7 @@ function MonthlyRecordFilters({
 			aria-labelledby="monthly-record-filters"
 		>
 			<div>
-				<h3 id="monthly-record-filters" className="text-sm font-medium">
+				<h3 id="monthly-record-filters" className="text-sm font-semibold">
 					Filter this month
 				</h3>
 				<p className="text-xs text-muted-foreground">

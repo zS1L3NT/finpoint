@@ -53,7 +53,7 @@ export default function AccountsPage() {
 				</div>
 
 				{accounts === undefined ? null : accounts.length === 0 ? (
-					<p className="rounded-xl border border-dashed p-10 text-center text-sm text-muted-foreground">
+					<p className="rounded-xl border border-dashed p-10 text-center text-xs text-muted-foreground">
 						{query
 							? "No accounts match your search."
 							: "No accounts yet. Import a bank export to create one."}
@@ -116,7 +116,7 @@ function AccountCard({ account, onEdit }: { account: AccountRow; onEdit: () => v
 					{bank.short}
 				</span>
 				<div className="min-w-0 flex-1">
-					<h3 className="truncate font-semibold">{account.name}</h3>
+					<h3 className="truncate text-sm font-semibold">{account.name}</h3>
 					<p className="truncate text-xs text-muted-foreground">
 						{bank.label}
 						{account.last_activity

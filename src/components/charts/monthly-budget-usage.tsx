@@ -251,7 +251,7 @@ export default function MonthlyBudgetUsage({
 						</div>
 					))}
 					{!budgets.length ? (
-						<p className="text-sm text-muted-foreground">
+						<p className="text-xs text-muted-foreground">
 							Create a monthly budget to plan your spending.
 						</p>
 					) : null}

@@ -132,10 +132,10 @@ export default function DashboardPage() {
 			{period.is_future ? (
 				<div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border bg-muted/20 p-4">
 					<div>
-						<p className="font-medium">
+						<p className="text-sm font-semibold">
 							Plan for {month} {year}
 						</p>
-						<p className="mt-1 text-sm text-muted-foreground">
+						<p className="mt-1 text-xs text-muted-foreground">
 							Set your monthly amounts below. Spending results begin on 1 {month}.
 						</p>
 					</div>
@@ -598,7 +598,7 @@ function InvestmentRow({
 					<h3 id="investment-title" className="text-sm font-semibold">
 						Saving and investment movements
 					</h3>
-					<p className="text-sm text-muted-foreground">
+					<p className="text-xs text-muted-foreground">
 						Recorded contributions and withdrawals for this month
 					</p>
 				</div>

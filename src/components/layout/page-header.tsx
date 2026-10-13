@@ -52,7 +52,7 @@ export default function PageHeader({
 						{title}
 					</h2>
 					{subtitle ? (
-						<div className="max-w-prose text-sm text-muted-foreground whitespace-pre-line break-words">
+						<div className="max-w-prose text-xs text-muted-foreground whitespace-pre-line break-words">
 							{subtitle}
 						</div>
 					) : null}

@@ -48,7 +48,7 @@ export default function StatementPage({ params }: { params: Promise<{ id: string
 		return (
 			<>
 				<PageContent>
-					<p className="text-sm text-muted-foreground">Statement not found.</p>
+					<p className="text-xs text-muted-foreground">Statement not found.</p>
 				</PageContent>
 			</>
 		)

@@ -1,33 +1,33 @@
 {
   "app/(month)/layout.tsx": {
-    "mtime": 1791924825.6248307,
-    "seen": 1791924883.7800114,
-    "ast_hash": "6328c6d8c849ecc8077c11514b4260d2",
+    "mtime": 1791925630.5058577,
+    "seen": 1791925745.4164453,
+    "ast_hash": "9dd9eda5de516dfa9eb896a727fdd575",
     "semantic_hash": ""
   },
   "app/(month)/page.tsx": {
-    "mtime": 1791924848.2168953,
-    "seen": 1791924883.7800164,
-    "ast_hash": "7e72d96a8c13a359d9f132da705d35c1",
+    "mtime": 1791925630.4978578,
+    "seen": 1791925745.416451,
+    "ast_hash": "5da053ca8881ca02c47fa020fd41dbe6",
     "semantic_hash": ""
   },
   "app/(month)/records/monthly/page.tsx": {
-    "mtime": 1791924825.6288307,
-    "seen": 1791924883.7800188,
-    "ast_hash": "5a94db3ea6900a75a026b8c2ecbf3d44",
+    "mtime": 1791925630.5058577,
+    "seen": 1791925745.4164543,
+    "ast_hash": "f1c98ad6bc8397ffcc098b83099501eb",
     "semantic_hash": ""
   },
   "app/accounts/[id]/page.tsx": {
-    "mtime": 1791920502.8339155,
-    "seen": 1791920826.9018831,
-    "ast_hash": "0e4e556741c079853d847367b270d4e5",
-    "semantic_hash": "0e4e556741c079853d847367b270d4e5"
+    "mtime": 1791925630.5298576,
+    "seen": 1791925745.416457,
+    "ast_hash": "a9fb8473ab11fa189714e7c477197cde",
+    "semantic_hash": ""
   },
   "app/accounts/page.tsx": {
-    "mtime": 1791920502.8339155,
-    "seen": 1791920826.9018855,
-    "ast_hash": "df29164e111a390de62a47a089c2b103",
-    "semantic_hash": "df29164e111a390de62a47a089c2b103"
+    "mtime": 1791925630.5218577,
+    "seen": 1791925745.4164596,
+    "ast_hash": "518f7d3c493ef25a21275b37a7f57e59",
+    "semantic_hash": ""
   },
   "app/allocator/page.tsx": {
     "mtime": 1791920502.8339155,
@@ -36,9 +36,9 @@
     "semantic_hash": "bf262f7a5056e08090ef32da5e45c16d"
   },
   "app/allocator/pending/page.tsx": {
-    "mtime": 1791924825.6288307,
-    "seen": 1791924883.780026,
-    "ast_hash": "7f12a6a2ac6b64a168252ea33722ffe3",
+    "mtime": 1791925630.5418577,
+    "seen": 1791925745.416466,
+    "ast_hash": "c17df7847650e71bca4c872665fd1ea6",
     "semantic_hash": ""
   },
   "app/api/auth/exchange/route.ts": {
@@ -60,28 +60,28 @@
     "semantic_hash": "96cc4dd0279ebe7c859ea54c00d86d5d"
   },
   "app/budgets/[id]/page.tsx": {
-    "mtime": 1791924825.6288307,
-    "seen": 1791924883.780031,
-    "ast_hash": "4799371cea11857d2c458dd4dc6a98fa",
+    "mtime": 1791925630.5258577,
+    "seen": 1791925745.4164784,
+    "ast_hash": "944a0a9a50147c24b30d3352e477f24f",
     "semantic_hash": ""
   },
   "app/budgets/page.tsx": {
-    "mtime": 1791924825.6288307,
-    "seen": 1791924883.7800322,
-    "ast_hash": "a71f0a02904e13c9db8305952cbc4bf6",
+    "mtime": 1791925630.5138576,
+    "seen": 1791925745.4164808,
+    "ast_hash": "b84bce427205ac92f1e0afd8bb51d5de",
     "semantic_hash": ""
   },
   "app/categories/page.tsx": {
-    "mtime": 1791920502.8299155,
-    "seen": 1791920826.9018984,
-    "ast_hash": "49cabcdd773a9e65b8b4eac5229091ce",
+    "mtime": 1791925630.5178578,
+    "seen": 1791925745.4164834,
+    "ast_hash": "7dc49da299eb2cf99418e1291c8b1f89",
     "semantic_hash": ""
   },
   "app/importer/page.tsx": {
-    "mtime": 1791920502.8299155,
-    "seen": 1791920826.9018998,
-    "ast_hash": "39013fcb36728404ff4df39eee558aa6",
-    "semantic_hash": "39013fcb36728404ff4df39eee558aa6"
+    "mtime": 1791925630.5458577,
+    "seen": 1791925745.4164855,
+    "ast_hash": "477799b10f4782eb098dde949c9104a7",
+    "semantic_hash": ""
   },
   "app/layout.tsx": {
     "mtime": 1791920502.8299155,
@@ -90,27 +90,27 @@
     "semantic_hash": "46aebabee59220a4bc3994a3df2dc5ed"
   },
   "app/not-found.tsx": {
-    "mtime": 1791924825.6288307,
-    "seen": 1791924883.7800367,
-    "ast_hash": "5d88761dcadfd32131136bd125e5d704",
+    "mtime": 1791925630.5338578,
+    "seen": 1791925745.416491,
+    "ast_hash": "03a782b824728cf613e5c3fb6ae19d99",
     "semantic_hash": ""
   },
   "app/privacy/page.tsx": {
-    "mtime": 1791920502.8299155,
-    "seen": 1791920826.9019039,
+    "mtime": 1791925686.6458716,
+    "seen": 1791925745.4164937,
     "ast_hash": "c6be110e1a7791e2c19830d3da6f0b60",
     "semantic_hash": "c6be110e1a7791e2c19830d3da6f0b60"
   },
   "app/providers.tsx": {
-    "mtime": 1791920502.8339155,
-    "seen": 1791920826.901905,
-    "ast_hash": "8c8a23946aaf322081d695cc852ea89e",
-    "semantic_hash": "8c8a23946aaf322081d695cc852ea89e"
+    "mtime": 1791925630.5338578,
+    "seen": 1791925745.4164963,
+    "ast_hash": "98e4998b0be58a666cae2809fb117a9a",
+    "semantic_hash": ""
   },
   "app/records/[id]/page.tsx": {
-    "mtime": 1791920502.8339155,
-    "seen": 1791920826.9019067,
-    "ast_hash": "3298640497925befec22baab408fbf74",
+    "mtime": 1791925630.5258577,
+    "seen": 1791925745.4164987,
+    "ast_hash": "38e3037320f36f3ef390dad2703c16b0",
     "semantic_hash": ""
   },
   "app/records/page.tsx": {
@@ -126,10 +126,10 @@
     "semantic_hash": "f209a90cd642cce9e1286e9d8a6959fa"
   },
   "app/statements/[id]/page.tsx": {
-    "mtime": 1791920502.8339155,
-    "seen": 1791920826.901911,
-    "ast_hash": "0b68ffbabc8048e602429e1c8a721874",
-    "semantic_hash": "0b68ffbabc8048e602429e1c8a721874"
+    "mtime": 1791925630.5298576,
+    "seen": 1791925745.4165072,
+    "ast_hash": "ba786dbb54df89434af2e57211eac8a7",
+    "semantic_hash": ""
   },
   "app/statements/page.tsx": {
     "mtime": 1791920502.8339155,
@@ -138,9 +138,9 @@
     "semantic_hash": ""
   },
   "app/sync/page.tsx": {
-    "mtime": 1791924825.6288307,
-    "seen": 1791924883.7800457,
-    "ast_hash": "69fc71a30497e1ef206815bc98e7387f",
+    "mtime": 1791925646.069862,
+    "seen": 1791925745.4165127,
+    "ast_hash": "0905327c73029c64897f67b76f03a748",
     "semantic_hash": ""
   },
   "app/template.tsx": {
@@ -150,8 +150,8 @@
     "semantic_hash": "1fbab4a8d02e635d23d15874b6e5c3fd"
   },
   "app/terms/page.tsx": {
-    "mtime": 1791920502.8339155,
-    "seen": 1791920826.9019167,
+    "mtime": 1791925686.6458716,
+    "seen": 1791925745.4165182,
     "ast_hash": "7e36e8e5e5ccdcdca7e63031dbdb724a",
     "semantic_hash": "7e36e8e5e5ccdcdca7e63031dbdb724a"
   },
@@ -168,8 +168,8 @@
     "semantic_hash": "7d8a33d5aa042f85737cd2f3334ae040"
   },
   "next-env.d.ts": {
-    "mtime": 1791924698.008398,
-    "seen": 1791924883.780051,
+    "mtime": 1791925686.6458716,
+    "seen": 1791925745.4165268,
     "ast_hash": "8195d2c60ce847a459ae9d308d6a5724",
     "semantic_hash": ""
   },
@@ -222,15 +222,15 @@
     "semantic_hash": ""
   },
   "src/components/charts/category-history-chart.tsx": {
-    "mtime": 1791924825.6328306,
-    "seen": 1791924883.7800612,
-    "ast_hash": "2a5156c2143e827919e3dd8e2835d947",
+    "mtime": 1791925630.5378578,
+    "seen": 1791925745.4165509,
+    "ast_hash": "42047d75a7c94be5d669485ea3c03741",
     "semantic_hash": ""
   },
   "src/components/charts/category-movers.tsx": {
-    "mtime": 1791920502.8299155,
-    "seen": 1791920826.9019349,
-    "ast_hash": "d545202dd82068ea0b58c2141c144eac",
+    "mtime": 1791925630.5378578,
+    "seen": 1791925745.4165518,
+    "ast_hash": "9c618ad6e5c41d26fb0b4656d53b2b0a",
     "semantic_hash": ""
   },
   "src/components/charts/chart-intro.ts": {
@@ -414,9 +414,9 @@
     "semantic_hash": ""
   },
   "src/components/layout/page-header.tsx": {
-    "mtime": 1791924825.6368306,
-    "seen": 1791924883.7800968,
-    "ast_hash": "5081d621af5418980273356b9593c1fc",
+    "mtime": 1791925630.5098577,
+    "seen": 1791925745.416588,
+    "ast_hash": "af28ae78d3d4963a0a3c754ee77eaa8a",
     "semantic_hash": ""
   },
   "src/components/layout/shell-header.tsx": {
@@ -1134,21 +1134,21 @@
     "semantic_hash": "7d68975fc0bbc7e6ba0e9a6120651af6"
   },
   "src/components/charts/category-spending-mix.tsx": {
-    "mtime": 1791920502.8299155,
-    "seen": 1791920826.9019363,
-    "ast_hash": "8a09d3c044e07104044bf92938dfe5cc",
+    "mtime": 1791925630.5378578,
+    "seen": 1791925745.4165533,
+    "ast_hash": "ba425ba7222157fe1010583148b87f5a",
     "semantic_hash": ""
   },
   "src/components/charts/monthly-budget-usage.tsx": {
-    "mtime": 1791924825.6328306,
-    "seen": 1791924883.7800665,
-    "ast_hash": "f41802529727de4a5bbaf4af9c7116fa",
+    "mtime": 1791925630.5418577,
+    "seen": 1791925745.4165568,
+    "ast_hash": "9d987ff893406d739f5eea933ae870d8",
     "semantic_hash": ""
   },
   "src/components/dialogs/monthly-budget.tsx": {
-    "mtime": 1791924824.396827,
-    "seen": 1791924883.7800767,
-    "ast_hash": "dedfd90998c065fb9d7b1ba016baaa29",
+    "mtime": 1791925591.1058455,
+    "seen": 1791925745.4165673,
+    "ast_hash": "1a6260c2b43013c7d1b07e4315730081",
     "semantic_hash": ""
   },
   "src/components/monthly-budget-badge.tsx": {

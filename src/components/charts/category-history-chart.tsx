@@ -134,7 +134,7 @@ export default function CategoryHistoryChart({
 						</div>
 					</>
 				) : (
-					<p className="py-10 text-center text-sm text-muted-foreground">
+					<p className="py-10 text-center text-xs text-muted-foreground">
 						No spending in the available months.
 					</p>
 				)}
