@@ -77,8 +77,8 @@ export default function RecordCreatorDialog({
 			),
 			category_id: "",
 			analytics_treatment: "",
-			bucket_id: "",
-			bucket_source: "category" as "category" | "manual",
+			monthly_budget_id: "",
+			monthly_budget_source: "category" as "category" | "manual",
 			description: "",
 			statements: statements.map(statement => ({
 				id: statement.id,
@@ -96,8 +96,8 @@ export default function RecordCreatorDialog({
 					amount: value.amount,
 					category_id: value.category_id,
 					analytics_treatment: value.analytics_treatment || null,
-					bucket_id: value.bucket_id || null,
-					bucket_source: value.bucket_source,
+					monthly_budget_id: value.monthly_budget_id || null,
+					monthly_budget_source: value.monthly_budget_source,
 					statements: value.statements,
 				})
 				setIsOpen(false)
@@ -122,8 +122,8 @@ export default function RecordCreatorDialog({
 		treatment: state.values.analytics_treatment,
 		categoryId: state.values.category_id,
 		amount: state.values.amount,
-		bucketId: state.values.bucket_id,
-		bucketSource: state.values.bucket_source,
+		monthlyBudgetId: state.values.monthly_budget_id,
+		monthlyBudgetSource: state.values.monthly_budget_source,
 	}))
 	const analyticsCategory = categoriesFlat.find(category => category.id === analytics.categoryId)
 
@@ -293,16 +293,14 @@ export default function RecordCreatorDialog({
 										)}
 										onChange={value => {
 											field.handleChange(value?.id ?? "")
-											if (value?.default_bucket_id) {
-												form.setFieldValue(
-													"bucket_id",
-													value.default_bucket_id,
-												)
-												form.setFieldValue("bucket_source", "category")
-											} else if (
-												form.getFieldValue("bucket_source") === "category"
+											if (
+												form.getFieldValue("monthly_budget_source") ===
+												"category"
 											) {
-												form.setFieldValue("bucket_id", "")
+												form.setFieldValue(
+													"monthly_budget_id",
+													value?.default_monthly_budget_id ?? "",
+												)
 											}
 											clearApiError(field.name)
 										}}
@@ -328,15 +326,15 @@ export default function RecordCreatorDialog({
 							treatment={analytics.treatment}
 							categoryTreatment={analyticsCategory?.analytics_treatment}
 							amount={analytics.amount}
-							bucketId={analytics.bucketId}
-							bucketSource={analytics.bucketSource}
-							categoryBucketId={analyticsCategory?.default_bucket_id}
+							monthlyBudgetId={analytics.monthlyBudgetId}
+							monthlyBudgetSource={analytics.monthlyBudgetSource}
+							categoryMonthlyBudgetId={analyticsCategory?.default_monthly_budget_id}
 							onTreatmentChange={value =>
 								form.setFieldValue("analytics_treatment", value)
 							}
-							onBucketChange={(value, source) => {
-								form.setFieldValue("bucket_id", value)
-								form.setFieldValue("bucket_source", source)
+							onMonthlyBudgetChange={(value, source) => {
+								form.setFieldValue("monthly_budget_id", value)
+								form.setFieldValue("monthly_budget_source", source)
 							}}
 						/>
 					</div>

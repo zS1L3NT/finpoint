@@ -11,6 +11,7 @@
 //  3. Keep old version blocks untouched so existing browsers upgrade cleanly.
 
 import Dexie, { type Table } from "dexie"
+import { hashLegacySnapshot, hashSnapshot } from "@/data/snapshot-hash"
 import type { AnalyticsTreatment } from "@/types"
 
 export type AccountRow = {
@@ -32,6 +33,8 @@ export type StatementRow = {
 	is_pending: number
 }
 
+export type DuplicateDismissalRow = { statement_id: string; other_statement_id: string }
+
 export type CategoryRow = {
 	id: string
 	name: string
@@ -39,7 +42,7 @@ export type CategoryRow = {
 	color: string
 	parent_category_id: string | null
 	analytics_treatment: AnalyticsTreatment | null
-	default_bucket_id: string | null
+	default_monthly_budget_id: string | null
 }
 
 export type RecordRow = {
@@ -54,8 +57,8 @@ export type RecordRow = {
 	category_id: string
 	analytics_treatment: AnalyticsTreatment
 	analytics_treatment_source: "category" | "manual"
-	bucket_id: string | null
-	bucket_source: "category" | "manual" | null
+	monthly_budget_id: string | null
+	monthly_budget_source: "category" | "manual" | null
 	revision: number
 }
 
@@ -81,7 +84,7 @@ export type BudgetRecordRow = {
 	record_id: string
 }
 
-export type BucketRow = {
+export type MonthlyBudgetRow = {
 	id: string
 	name: string
 	color: string
@@ -91,15 +94,15 @@ export type BucketRow = {
 	archived: boolean
 }
 
-export type BucketDefaultRow = {
-	bucket_id: string
+export type MonthlyBudgetDefaultRow = {
+	monthly_budget_id: string
 	/** "yyyy-MM-dd" (first of month) */
 	effective_month: string
 	amount: number | null
 }
 
-export type BucketTargetRow = {
-	bucket_id: string
+export type MonthlyBudgetAmountRow = {
+	monthly_budget_id: string
 	/** "yyyy-MM-dd" (first of month) */
 	month: string
 	amount: number | null
@@ -124,22 +127,20 @@ export type SettingsRow = {
 }
 
 export const DB_NAME = "finpoint"
-export const DB_VERSION = 3
-
-export type DuplicateDismissalRow = { statement_id: string; other_statement_id: string }
+export const DB_VERSION = 5
 
 class FinpointDB extends Dexie {
-	duplicate_dismissals!: Table<DuplicateDismissalRow, [string, string]>
 	accounts!: Table<AccountRow, string>
 	statements!: Table<StatementRow, string>
+	duplicate_dismissals!: Table<DuplicateDismissalRow, [string, string]>
 	categories!: Table<CategoryRow, string>
 	records!: Table<RecordRow, string>
 	allocations!: Table<AllocationRow, [string, string]>
 	budgets!: Table<BudgetRow, string>
 	budget_records!: Table<BudgetRecordRow, [string, string]>
-	buckets!: Table<BucketRow, string>
-	bucket_defaults!: Table<BucketDefaultRow, [string, string]>
-	bucket_targets!: Table<BucketTargetRow, [string, string]>
+	monthly_budgets!: Table<MonthlyBudgetRow, string>
+	monthly_budget_defaults!: Table<MonthlyBudgetDefaultRow, [string, string]>
+	monthly_budget_amounts!: Table<MonthlyBudgetAmountRow, [string, string]>
 	analytics_months!: Table<AnalyticsMonthRow, string>
 	settings!: Table<SettingsRow, string>
 	meta!: Table<MetaRow, string>
@@ -170,11 +171,134 @@ class FinpointDB extends Dexie {
 		})
 		this.version(3)
 			.stores({
+				records: "id, datetime, category_id, monthly_budget_id, analytics_treatment",
+				monthly_budgets: "id, &name, display_order",
+				monthly_budget_defaults:
+					"[monthly_budget_id+effective_month], monthly_budget_id, effective_month",
+				monthly_budget_amounts: "[monthly_budget_id+month], monthly_budget_id, month",
+			})
+			.upgrade(async transaction => {
+				const tables: Record<string, unknown[]> = {}
+				for (const table of [
+					"accounts",
+					"statements",
+					"categories",
+					"records",
+					"allocations",
+					"budgets",
+					"budget_records",
+					"buckets",
+					"bucket_defaults",
+					"bucket_targets",
+					"analytics_months",
+				]) {
+					tables[table] = await transaction.table(table).toArray()
+				}
+				const settings = {
+					default_filter_start_date:
+						(await transaction.table("settings").get("default_filter_start_date"))
+							?.value ?? null,
+					default_filter_end_date_today:
+						(await transaction.table("settings").get("default_filter_end_date_today"))
+							?.value === "true",
+				}
+				const lastHash = await transaction.table("meta").get("drive_last_hash")
+				// Convert only a clean baseline: unsynced edits must still trigger conflicts.
+				const clean =
+					lastHash &&
+					lastHash.value ===
+						(await Dexie.waitFor(hashLegacySnapshot({ settings, tables })))
+				await transaction
+					.table("monthly_budgets")
+					.bulkPut(await transaction.table("buckets").toArray())
+				for (const [legacy, canonical] of [
+					["bucket_defaults", "monthly_budget_defaults"],
+					["bucket_targets", "monthly_budget_amounts"],
+				] as const) {
+					const rows = await transaction.table(legacy).toArray()
+					await transaction.table(canonical).bulkPut(
+						rows.map(({ bucket_id, ...row }) => ({
+							...row,
+							monthly_budget_id: bucket_id,
+						})),
+					)
+				}
+				await transaction
+					.table("records")
+					.toCollection()
+					.modify(row => {
+						row.monthly_budget_id = row.bucket_id ?? null
+						row.monthly_budget_source = row.bucket_source ?? null
+						delete row.bucket_id
+						delete row.bucket_source
+					})
+				await transaction
+					.table("categories")
+					.toCollection()
+					.modify(row => {
+						row.default_monthly_budget_id = row.default_bucket_id ?? null
+						delete row.default_bucket_id
+					})
+				if (clean) {
+					for (const [legacy, canonical] of [
+						["buckets", "monthly_budgets"],
+						["bucket_defaults", "monthly_budget_defaults"],
+						["bucket_targets", "monthly_budget_amounts"],
+						["records", "records"],
+						["categories", "categories"],
+					] as const) {
+						delete tables[legacy]
+						tables[canonical] = await transaction.table(canonical).toArray()
+					}
+					await transaction.table("meta").put({
+						key: "drive_last_hash",
+						value: await Dexie.waitFor(hashSnapshot({ settings, tables })),
+					})
+				}
+			})
+		this.version(4)
+			.stores({ buckets: null, bucket_defaults: null, bucket_targets: null })
+			.upgrade(() => {
+				// The preceding migration copied every legacy row before these stores are removed.
+			})
+		this.version(5)
+			.stores({
 				duplicate_dismissals:
 					"[statement_id+other_statement_id], statement_id, other_statement_id",
 			})
-			.upgrade(() => {
-				// New table starts empty; existing financial data needs no conversion.
+			.upgrade(async transaction => {
+				const tables: Record<string, unknown[]> = {}
+				for (const name of [
+					"accounts",
+					"statements",
+					"categories",
+					"records",
+					"allocations",
+					"budgets",
+					"budget_records",
+					"monthly_budgets",
+					"monthly_budget_defaults",
+					"monthly_budget_amounts",
+					"analytics_months",
+				])
+					tables[name] = await transaction.table(name).toArray()
+				const settings = {
+					default_filter_start_date:
+						(await transaction.table("settings").get("default_filter_start_date"))
+							?.value ?? null,
+					default_filter_end_date_today:
+						(await transaction.table("settings").get("default_filter_end_date_today"))
+							?.value === "true",
+				}
+				const lastHash = await transaction.table("meta").get("drive_last_hash")
+				// Adding an empty table must not turn a clean Drive baseline into unsynced edits.
+				if (lastHash?.value === (await Dexie.waitFor(hashSnapshot({ settings, tables })))) {
+					tables.duplicate_dismissals = []
+					await transaction.table("meta").put({
+						key: "drive_last_hash",
+						value: await Dexie.waitFor(hashSnapshot({ settings, tables })),
+					})
+				}
 			})
 	}
 }

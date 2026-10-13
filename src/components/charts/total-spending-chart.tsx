@@ -6,6 +6,8 @@ import { useChartIntro } from "@/components/charts/chart-intro"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { useHistory } from "@/history"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { formatChartCurrency } from "@/lib/chart-currency"
+import { dayTicks } from "@/lib/chart-days"
 import { cn, formatCurrency } from "@/lib/utils"
 import type { CashflowHistoryMonth } from "@/logic/dashboard"
 import { pathMonthlyRecords } from "@/routes"
@@ -23,12 +25,12 @@ export default function TotalSpendingChart({
 	month: string
 	year: number
 }) {
-	const intro = useChartIntro()
+	const intro = useChartIntro(`${month}-${year}`)
 	const isMobile = useIsMobile()
 	const router = useRouter()
 	const { handlePush } = useHistory()
 	const fillId = `surplus-fill-${useId().replace(/:/g, "")}`
-	const interval = isMobile ? Math.max(Math.floor(data.length / 4), 0) : "preserveStartEnd"
+	const ticks = dayTicks(data.length)
 	const historyLines = history.map(item => ({
 		...item,
 		key: `previous_${item.offset}`,
@@ -71,13 +73,14 @@ export default function TotalSpendingChart({
 	return (
 		<div className="grid gap-2">
 			<ChartContainer
-				className="h-72 w-full aspect-auto cursor-pointer sm:h-80"
+				className="h-52 w-full min-w-0 aspect-auto [&_.recharts-surface:focus-visible]:outline-2 [&_.recharts-surface:focus-visible]:outline-ring cursor-pointer sm:h-64 xl:h-72"
 				config={{
 					surplus: { label: "Surplus / Shortfall", color: "var(--color-white)" },
 				}}
 			>
 				<ComposedChart
 					data={chartData}
+					margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
 					onClick={openDay}
 					style={{ cursor: "pointer" }}
 					accessibilityLayer
@@ -97,12 +100,19 @@ export default function TotalSpendingChart({
 						</linearGradient>
 					</defs>
 					<CartesianGrid vertical={false} />
-					<XAxis dataKey="day" interval={interval} tickMargin={8} />
+					<XAxis
+						dataKey="day"
+						ticks={ticks}
+						interval={0}
+						height={24}
+						tickMargin={isMobile ? 4 : 8}
+					/>
 					<YAxis
 						domain={axis.domain}
 						ticks={axis.ticks}
-						width={isMobile ? 44 : 64}
-						tickFormatter={value => formatCurrency(Number(value)).replace(/\.00$/, "")}
+						interval={0}
+						width={isMobile ? 40 : 48}
+						tickFormatter={formatChartCurrency}
 					/>
 					<ReferenceLine y={0} stroke="var(--border)" strokeWidth={1.5} />
 					<ChartTooltip

@@ -11,7 +11,7 @@ export type CategoryInput = {
 	color: string
 	parent_category_id?: string | null
 	analytics_treatment?: string | null
-	default_bucket_id?: string | null
+	default_monthly_budget_id?: string | null
 }
 
 function cleanInput(input: CategoryInput) {
@@ -29,7 +29,7 @@ function cleanInput(input: CategoryInput) {
 					"Invalid treatment.",
 				)
 			: null,
-		default_bucket_id: input.default_bucket_id ?? null,
+		default_monthly_budget_id: input.default_monthly_budget_id ?? null,
 	}
 	const id = v.slug(dto.name)
 	v.throwIfInvalid()
@@ -42,8 +42,8 @@ export async function listCategoryIconNames() {
 
 export async function listCategories() {
 	const categories = await db.categories.toArray()
-	const buckets = await db.buckets.toArray()
-	const bucketById = new Map(buckets.map(b => [b.id, b]))
+	const monthlyBudgets = await db.monthly_budgets.toArray()
+	const monthly_budgetById = new Map(monthlyBudgets.map(b => [b.id, b]))
 	const counts = new Map<string, number>()
 	await db.records.each(record => {
 		counts.set(record.category_id, (counts.get(record.category_id) ?? 0) + 1)
@@ -63,8 +63,8 @@ export async function listCategories() {
 		children_count: childCounts.get(category.id) ?? 0,
 		can_delete:
 			(counts.get(category.id) ?? 0) === 0 && (childCounts.get(category.id) ?? 0) === 0,
-		default_bucket: category.default_bucket_id
-			? (bucketById.get(category.default_bucket_id) ?? null)
+		default_monthly_budget: category.default_monthly_budget_id
+			? (monthly_budgetById.get(category.default_monthly_budget_id) ?? null)
 			: null,
 	}))
 	const childrenByParent = new Map<string, typeof withMeta>()
@@ -102,8 +102,13 @@ export async function createCategory(input: CategoryInput) {
 			throw new ValidationError({ parent_category_id: ["Invalid parent category."] })
 		}
 	}
-	if (dto.default_bucket_id && !(await db.buckets.get(dto.default_bucket_id))) {
-		throw new ValidationError({ default_bucket_id: ["Invalid bucket."] })
+	if (
+		dto.default_monthly_budget_id &&
+		!(await db.monthly_budgets.get(dto.default_monthly_budget_id))
+	) {
+		const v = new Validator()
+		v.reject("default_monthly_budget_id", "Monthly budget not found.")
+		v.throwIfInvalid()
 	}
 	const row = { id, ...dto }
 	await db.categories.add(row)
@@ -135,6 +140,15 @@ export async function updateCategory(currentId: string, input: CategoryInput) {
 				parent_category_id: ["A category cannot be its own parent."],
 			})
 		}
+	}
+
+	if (
+		dto.default_monthly_budget_id &&
+		!(await db.monthly_budgets.get(dto.default_monthly_budget_id))
+	) {
+		const v = new Validator()
+		v.reject("default_monthly_budget_id", "Invalid monthly budget.")
+		v.throwIfInvalid()
 	}
 
 	return db.transaction("rw", [db.categories, db.records], async () => {

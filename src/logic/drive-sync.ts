@@ -2,7 +2,7 @@
 // Google Drive appDataFolder. Manual JSON backup/restore stays untouched.
 
 import { db } from "@/data/db"
-import { exportData, type FinpointExport, importData, parseImportFile } from "@/data/export-import"
+import { exportData, importData, parseImportFile } from "@/data/export-import"
 import {
 	disconnectDrive,
 	downloadBackupFile,
@@ -13,6 +13,7 @@ import {
 	isDriveConfigured,
 	uploadBackupFile,
 } from "@/data/google-drive"
+import { hashSnapshot } from "@/data/snapshot-hash"
 import { isRemoteNewer } from "@/logic/shared"
 
 export { wasVaultProven } from "@/data/google-drive"
@@ -40,25 +41,6 @@ export type DriveStatus = {
 
 async function metaGet(key: string): Promise<string | null> {
 	return (await db.meta.get(key))?.value ?? null
-}
-
-async function hashSnapshot(
-	snapshot: Pick<FinpointExport, "settings" | "tables">,
-): Promise<string> {
-	// Sort rows so the hash survives an export -> import -> export round trip
-	// (IndexedDB returns rows in key order, not insertion order).
-	const normalized: Record<string, unknown[]> = {}
-	const synced =
-		snapshot.settings.default_filter_start_date ||
-		snapshot.settings.default_filter_end_date_today
-			? { ...snapshot.tables, __settings__: [snapshot.settings] }
-			: snapshot.tables
-	for (const [key, rows] of Object.entries(synced)) {
-		normalized[key] = [...rows].sort((a, b) => (JSON.stringify(a) < JSON.stringify(b) ? -1 : 1))
-	}
-	const bytes = new TextEncoder().encode(JSON.stringify(normalized))
-	const digest = await crypto.subtle.digest("SHA-256", bytes)
-	return [...new Uint8Array(digest)].map(b => b.toString(16).padStart(2, "0")).join("")
 }
 
 export async function driveStatus(): Promise<DriveStatus> {
@@ -183,7 +165,7 @@ export async function pullDrive(): Promise<void> {
 	await Promise.all([
 		db.meta.put({ key: FILE_ID_KEY, value: fileId }),
 		db.meta.put({ key: LAST_SYNC_KEY, value: now }),
-		db.meta.put({ key: LAST_HASH_KEY, value: await hashSnapshot(snapshot) }),
+		db.meta.put({ key: LAST_HASH_KEY, value: await hashSnapshot(await exportData()) }),
 		db.meta.put({ key: REMOTE_TIME_KEY, value: meta?.modifiedTime ?? now }),
 	])
 }

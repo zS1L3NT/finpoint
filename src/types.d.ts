@@ -85,9 +85,9 @@ export type Record = {
 	analytics_treatment: AnalyticsTreatment
 	analytics_treatment_source: "category" | "manual"
 	revision: number
-	bucket_id: string | null
-	bucket_source: "category" | "manual" | null
-	bucket?: Bucket | null
+	monthly_budget_id: string | null
+	monthly_budget_source: "category" | "manual" | null
+	monthly_budget?: MonthlyBudget | null
 }
 
 export type AnalyticsTreatment =
@@ -112,8 +112,8 @@ export type Category = {
 	can_delete: boolean
 	records_count: number
 	analytics_treatment: AnalyticsTreatment | null
-	default_bucket_id: string | null
-	default_bucket?: Bucket | null
+	default_monthly_budget_id: string | null
+	default_monthly_budget?: MonthlyBudget | null
 }
 
 export type CategoryWithChildren = Category & {
@@ -134,7 +134,7 @@ export type Budget = {
 	automatic: boolean
 }
 
-export type Bucket = {
+export type MonthlyBudget = {
 	id: string
 	name: string
 	color: string
@@ -142,6 +142,7 @@ export type Bucket = {
 	pace_kind: "daily" | "recurring" | "none"
 	display_order: number
 	archived: boolean
+	amount?: number | null
 }
 
 export type AnalyticsSummary = {
@@ -158,7 +159,7 @@ export type AnalyticsSummary = {
 	pending_gross_spending: number
 	pending_refunds: number
 	pending_count: number
-	unbucketed_count: number
+	unbudgeted_count: number
 	daily: Array<{
 		date: string
 		income: number
@@ -174,8 +175,10 @@ export type AnalyticsSummary = {
 		icon: string
 		color: string
 		spending: number
+		outflow: number
+		refunds: number
 		records: number
-		bucket_spending: { [bucketId: string]: number }
+		monthly_budget_spending: { [monthly_budgetId: string]: number }
 	}>
-	buckets: Array<Bucket & { spending: number; records: number }>
+	monthlyBudgets: Array<MonthlyBudget & { spending: number; records: number }>
 }

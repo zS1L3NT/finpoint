@@ -17,46 +17,45 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
-import { createBucket, setBucketTarget, updateBucket } from "@/logic/buckets"
+import { upsertMonthlyBudget } from "@/logic/monthly-budgets"
 import { ValidationError } from "@/logic/validate"
-import { Bucket } from "@/types"
+import { MonthlyBudget } from "@/types"
 
-type EditableBucket = Bucket & { target?: number | null }
 const fieldErrors = (errors?: string[]) => errors?.map(message => ({ message }))
 
-export default function BucketDialog({
-	bucket,
+export default function MonthlyBudgetDialog({
+	monthlyBudget,
 	month,
 	year,
 	trigger,
 }: {
-	bucket?: EditableBucket
+	monthlyBudget?: MonthlyBudget
 	month: string
 	year: number
 	trigger: React.ReactElement
 }) {
 	const selectedMonth = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy").startOf("month")
 	const [open, setOpen] = useState(false)
-	const [name, setName] = useState(bucket?.name ?? "")
-	const [color, setColor] = useState(bucket?.color ?? "#64748b")
-	const [group, setGroup] = useState(bucket?.group ?? "core")
-	const [paceKind, setPaceKind] = useState(bucket?.pace_kind ?? "none")
-	const [target, setTarget] = useState(bucket?.target ?? 0)
-	const [noTarget, setNoTarget] = useState(bucket?.target === null)
-	const [targetScope, setTargetScope] = useState("month")
-	const [archived, setArchived] = useState(bucket?.archived ?? false)
+	const [name, setName] = useState(monthlyBudget?.name ?? "")
+	const [color, setColor] = useState(monthlyBudget?.color ?? "#64748b")
+	const [group, setGroup] = useState(monthlyBudget?.group ?? "core")
+	const [paceKind, setPaceKind] = useState(monthlyBudget?.pace_kind ?? "none")
+	const [amount, setAmount] = useState(monthlyBudget?.amount ?? 0)
+	const [noAmount, setNoAmount] = useState(monthlyBudget?.amount === null)
+	const [amountScope, setAmountScope] = useState(monthlyBudget ? "month" : "default")
+	const [archived, setArchived] = useState(monthlyBudget?.archived ?? false)
 	const [errors, setErrors] = useState<{ [key: string]: string[] }>({})
 	const [submitting, setSubmitting] = useState(false)
 
 	const reset = () => {
-		setName(bucket?.name ?? "")
-		setColor(bucket?.color ?? "#64748b")
-		setGroup(bucket?.group ?? "core")
-		setPaceKind(bucket?.pace_kind ?? "none")
-		setTarget(bucket?.target ?? 0)
-		setNoTarget(bucket?.target === null)
-		setTargetScope("month")
-		setArchived(bucket?.archived ?? false)
+		setName(monthlyBudget?.name ?? "")
+		setColor(monthlyBudget?.color ?? "#64748b")
+		setGroup(monthlyBudget?.group ?? "core")
+		setPaceKind(monthlyBudget?.pace_kind ?? "none")
+		setAmount(monthlyBudget?.amount ?? 0)
+		setNoAmount(monthlyBudget?.amount === null)
+		setAmountScope(monthlyBudget ? "month" : "default")
+		setArchived(monthlyBudget?.archived ?? false)
 		setErrors({})
 	}
 
@@ -64,25 +63,16 @@ export default function BucketDialog({
 		setSubmitting(true)
 		setErrors({})
 		try {
-			const saved = bucket
-				? await updateBucket(bucket.id, {
-						name,
-						color,
-						group,
-						pace_kind: group === "outlier" ? "none" : paceKind,
-						archived,
-					})
-				: await createBucket({
-						name,
-						color,
-						group,
-						pace_kind: group === "outlier" ? "none" : paceKind,
-					})
-
-			await setBucketTarget(saved.id, {
+			await upsertMonthlyBudget({
+				id: monthlyBudget?.id,
+				name,
+				color,
+				group,
+				pace_kind: group === "outlier" ? "none" : paceKind,
+				archived,
 				month: selectedMonth.toISODate() ?? "",
-				amount: noTarget ? null : target,
-				scope: targetScope as "month" | "default",
+				amount: noAmount ? null : amount,
+				scope: amountScope,
 			})
 
 			setOpen(false)
@@ -90,7 +80,7 @@ export default function BucketDialog({
 			if (cause instanceof ValidationError) {
 				setErrors(cause.errors)
 			} else {
-				toast.error("Unable to save this bucket.")
+				toast.error("Unable to save this monthly budget.")
 			}
 		} finally {
 			setSubmitting(false)
@@ -108,10 +98,12 @@ export default function BucketDialog({
 			<DialogTrigger render={trigger} />
 			<DialogContent className="md:max-w-lg">
 				<DialogHeader>
-					<DialogTitle>{bucket ? `Edit ${bucket.name}` : "Create bucket"}</DialogTitle>
+					<DialogTitle>
+						{monthlyBudget ? `Edit ${monthlyBudget.name}` : "Create monthly budget"}
+					</DialogTitle>
 					<DialogDescription>
-						Buckets persist across months. The target can apply only to {month} {year}{" "}
-						or become the default from that month onward.
+						Monthly budgets persist across months. The amount can apply only to {month}{" "}
+						{year} or become the default from that month onward.
 					</DialogDescription>
 				</DialogHeader>
 				<form
@@ -123,17 +115,17 @@ export default function BucketDialog({
 				>
 					<FieldGroup>
 						<TextField
-							id="bucket-name"
+							id="monthly-budget-name"
 							label="Name"
 							value={name}
 							errors={fieldErrors(errors.name)}
 							onChange={setName}
 						/>
 						<Field>
-							<FieldLabel htmlFor="bucket-color">Colour</FieldLabel>
+							<FieldLabel htmlFor="monthly-budget-color">Colour</FieldLabel>
 							<div className="flex items-center gap-2">
 								<input
-									id="bucket-color"
+									id="monthly-budget-color"
 									type="color"
 									value={color}
 									onChange={event => setColor(event.target.value)}
@@ -143,7 +135,7 @@ export default function BucketDialog({
 							</div>
 						</Field>
 						<SelectField
-							id="bucket-group"
+							id="monthly-budget-group"
 							label="Group"
 							value={group}
 							items={[
@@ -152,15 +144,17 @@ export default function BucketDialog({
 								{ value: "other", label: "Other" },
 							]}
 							errors={fieldErrors(errors.group)}
-							onChange={value => setGroup(value as Bucket["group"])}
+							onChange={value => setGroup(value as MonthlyBudget["group"])}
 						/>
 						<SelectField
-							id="bucket-pace"
+							id="monthly-budget-pace"
 							label="Pacing"
 							value={group === "outlier" ? "none" : paceKind}
 							disabled={group === "outlier"}
 							description={
-								group === "outlier" ? "Outlier buckets are not paced." : undefined
+								group === "outlier"
+									? "Outlier monthly budgets are not paced."
+									: undefined
 							}
 							items={[
 								{ value: "none", label: "No pacing" },
@@ -168,48 +162,50 @@ export default function BucketDialog({
 								{ value: "recurring", label: "Recurring" },
 							]}
 							errors={fieldErrors(errors.pace_kind)}
-							onChange={value => setPaceKind(value as Bucket["pace_kind"])}
+							onChange={value => setPaceKind(value as MonthlyBudget["pace_kind"])}
 						/>
 						<AmountField
-							id="bucket-target"
-							label="Target"
-							value={target}
+							id="monthly-budget-amount"
+							label="Monthly amount"
+							value={amount}
 							min={0}
-							disabled={noTarget}
+							disabled={noAmount}
 							errors={fieldErrors(errors.amount)}
-							onChange={setTarget}
+							onChange={setAmount}
 						/>
 						<Field orientation="horizontal">
 							<Checkbox
-								id="bucket-no-target"
-								checked={noTarget}
-								onCheckedChange={value => setNoTarget(value === true)}
+								id="monthly-budget-no-amount"
+								checked={noAmount}
+								onCheckedChange={value => setNoAmount(value === true)}
 							/>
-							<FieldLabel htmlFor="bucket-no-target">No target</FieldLabel>
+							<FieldLabel htmlFor="monthly-budget-no-amount">
+								No monthly amount
+							</FieldLabel>
 						</Field>
 						<SelectField
-							id="bucket-target-scope"
-							label="Target applies to"
-							value={targetScope}
+							id="monthly-budget-amount-scope"
+							label="Apply monthly amount to"
+							value={amountScope}
 							items={[
 								{ value: "month", label: `${month} ${year} only` },
 								{
 									value: "default",
-									label: `${month} ${year} onward`,
+									label: `Default from ${month} ${year} onward`,
 								},
 							]}
-							onChange={setTargetScope}
+							onChange={setAmountScope}
 						/>
-						{bucket ? (
+						{monthlyBudget ? (
 							<Field orientation="horizontal">
 								<Checkbox
-									id="bucket-archived"
+									id="monthly-budget-archived"
 									checked={archived}
 									onCheckedChange={value => setArchived(value === true)}
 								/>
 								<div>
-									<FieldLabel htmlFor="bucket-archived">
-										Archive bucket
+									<FieldLabel htmlFor="monthly-budget-archived">
+										Archive monthly budget
 									</FieldLabel>
 									<p className="text-xs text-muted-foreground">
 										Existing Record assignments remain intact.
@@ -235,7 +231,11 @@ export default function BucketDialog({
 							}
 						/>
 						<Button type="submit" disabled={submitting}>
-							{submitting ? "Saving…" : bucket ? "Save changes" : "Create bucket"}
+							{submitting
+								? "Saving…"
+								: monthlyBudget
+									? "Save changes"
+									: "Create monthly budget"}
 						</Button>
 					</DialogFooter>
 				</form>

@@ -1,8 +1,8 @@
 import type { CellContext, ColumnDef, Row } from "@tanstack/react-table"
 import Link from "next/link"
 import { useMemo, useState } from "react"
-import BucketBadge from "@/components/bucket-badge"
 import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
+import MonthlyBudgetBadge from "@/components/monthly-budget-badge"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useHistory } from "@/history"
@@ -21,8 +21,8 @@ type RecordTableOptions<TRecord extends RecordRow> = {
 	onEdit?: (record: TRecord) => void | Promise<unknown>
 	/** Rows sit under day headers, so only the time is shown. */
 	grouped?: boolean
-	/** Adds a spending bucket column (desktop only). */
-	showBucket?: boolean
+	/** Adds a monthly budget column (desktop only). */
+	showMonthlyBudget?: boolean
 }
 
 /** Money in green, money out red: the app-wide currency colours. */
@@ -56,12 +56,18 @@ export function PendingBadge({ record }: { record: Record }) {
 	)
 }
 
-function RecordBucket({ record }: { record: Record }) {
-	if (record.bucket) return <BucketBadge name={record.bucket.name} color={record.bucket.color} />
+function RecordMonthlyBudget({ record }: { record: Record }) {
+	if (record.monthly_budget)
+		return (
+			<MonthlyBudgetBadge
+				name={record.monthly_budget.name}
+				color={record.monthly_budget.color}
+			/>
+		)
 	const spending =
 		record.analytics_treatment === "spending" ||
 		(record.analytics_treatment === "automatic" && record.amount < 0)
-	if (spending) return <BucketBadge name="No bucket" color={null} />
+	if (spending) return <MonthlyBudgetBadge name="Unbudgeted" color={null} />
 	return (
 		<span className="text-xs text-muted-foreground">
 			{treatmentLabel(record.analytics_treatment)}
@@ -161,7 +167,7 @@ export function useRecordColumns<TRecord extends RecordRow>({
 	extraActions,
 	onEdit,
 	grouped = false,
-	showBucket = false,
+	showMonthlyBudget = false,
 }: RecordTableOptions<TRecord>): ColumnDef<TRecord>[] {
 	return useMemo(
 		(): ColumnDef<TRecord>[] => [
@@ -197,13 +203,13 @@ export function useRecordColumns<TRecord extends RecordRow>({
 					</p>
 				),
 			},
-			...(showBucket
+			...(showMonthlyBudget
 				? [
 						{
-							id: "bucket",
-							header: "Bucket",
+							id: "monthlyBudget",
+							header: "Monthly budget",
 							meta: { width: "hidden w-36 lg:table-cell" },
-							cell: ({ row }) => <RecordBucket record={row.original} />,
+							cell: ({ row }) => <RecordMonthlyBudget record={row.original} />,
 						} satisfies ColumnDef<TRecord>,
 					]
 				: []),
@@ -241,7 +247,7 @@ export function useRecordColumns<TRecord extends RecordRow>({
 				cell: RecordActionsCell,
 			},
 		],
-		[amount, pageName, extraActions, onEdit, grouped, showBucket],
+		[amount, pageName, extraActions, onEdit, grouped, showMonthlyBudget],
 	)
 }
 

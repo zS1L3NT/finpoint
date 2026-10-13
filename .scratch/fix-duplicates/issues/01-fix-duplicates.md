@@ -26,3 +26,8 @@
 - `npm run dev` browser smoke checks passed for both existing workflow tabs, suggested groups, manual selection, pending exclusion, pair dismissal/restore across reload, allocated-survivor preservation, allocation movement, and multiple-source selection. Affected record verified Pending in its details. Mobile page and confirmation dialog fit the viewport. Dev server stopped afterward.
 - Standards review: no material findings. Spec review: two matcher findings fixed and independently verified (numeric reference order and meaningful recipient words); no remaining findings.
 - Final graph refresh includes implementation, setup instructions, spec, and ticket. No PR or remote issue created.
+
+## PR preparation
+
+- Integrated current main, preserving its monthly-budget migrations. Duplicate dismissals now use database version 5 and backup version 4; earlier backups receive an empty dismissal table.
+- Rechecked migration from database versions 2 and 4, financial-data preservation, and clean/unsynced Drive baselines: 33 tests and 93 assertions pass. Lint, TypeScript, and production build pass after integration.

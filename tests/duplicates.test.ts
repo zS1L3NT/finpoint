@@ -48,14 +48,8 @@ test("PayNow reordered wording matches while conflicting references and recipien
 			"a",
 			"FAST PAYMENT OTHR-EPOSSP SNLR0877606BNTV4A0 via PayNow-UEN to DSE SERVICE PTE.",
 		),
-		statement(
-			"b",
-			"FAST PAYMENT OTHR-EPOSSP SNLR0877606BNTV4A0 to DSE SERVICE PTE.via PayNow-UEN",
-		),
-		statement(
-			"c",
-			"FAST PAYMENT OTHR-EPOSSP SNLR0877607BNTV4A0 to DSE SERVICE PTE.via PayNow-UEN",
-		),
+		statement("b", "FAST PAYMENT OTHR-EPOSSP SNLR0877606BNTV4A0 to DSE SERVICE PTE.via PayNow-UEN"),
+		statement("c", "FAST PAYMENT OTHR-EPOSSP SNLR0877607BNTV4A0 to DSE SERVICE PTE.via PayNow-UEN"),
 		statement(
 			"d",
 			"FAST PAYMENT OTHR-EPOSSP SNLR0877606BNTV4A0 to OTHER SERVICE PTE.via PayNow-UEN",
@@ -91,8 +85,8 @@ test("move allocations without changing survivor fields or records, and clean di
 		description: null,
 		analytics_treatment: "spending",
 		analytics_treatment_source: "manual",
-		bucket_id: null,
-		bucket_source: null,
+		monthly_budget_id: null,
+		monthly_budget_source: null,
 		revision: 1,
 	})
 	const record = await db.records.get("r")
@@ -165,27 +159,103 @@ test("backup restore, earlier backups and reset include the dismissal table", as
 	const old = JSON.parse(JSON.stringify(backup))
 	old.version = 2
 	delete old.tables.duplicate_dismissals
+	for (const [current, legacy] of [
+		["monthly_budgets", "buckets"],
+		["monthly_budget_defaults", "bucket_defaults"],
+		["monthly_budget_amounts", "bucket_targets"],
+	]) {
+		old.tables[legacy] = old.tables[current]
+		delete old.tables[current]
+	}
 	await importData(parseImportFile(JSON.stringify(old)))
 	expect(await db.duplicate_dismissals.count()).toBe(0)
+	const versionThree = JSON.parse(JSON.stringify(backup))
+	versionThree.version = 3
+	delete versionThree.tables.duplicate_dismissals
+	expect(parseImportFile(JSON.stringify(versionThree)).tables.duplicate_dismissals).toEqual([])
 	expect(SYNC_TABLES).toContain("duplicate_dismissals")
 })
-test("schema version two upgrades with financial data intact", async () => {
+test("schema version four upgrades with financial data intact", async () => {
 	const schemas = Object.fromEntries(
 		db.tables
 			.filter(t => t.name !== "duplicate_dismissals")
-			.map(t => [
-				t.name,
-				[t.schema.primKey.src, ...t.schema.indexes.map(i => i.src)].join(","),
-			]),
+			.map(t => [t.name, [t.schema.primKey.src, ...t.schema.indexes.map(i => i.src)].join(",")]),
 	)
 	await db.delete()
 	const legacy = new Dexie("finpoint")
-	legacy.version(2).stores(schemas)
+	legacy.version(4).stores(schemas)
 	await legacy.table("statements").put(statement("a"))
 	legacy.close()
 	await db.open()
-	expect(db.verno).toBe(3)
+	expect(db.verno).toBe(5)
 	expect(await db.statements.get("a")).toEqual(statement("a"))
+	expect(await db.duplicate_dismissals.count()).toBe(0)
+})
+
+test("dismissal migration preserves clean and dirty Drive baselines", async () => {
+	const { exportData } = await import("../src/data/export-import")
+	const { hashSnapshot } = await import("../src/data/snapshot-hash")
+	for (const clean of [true, false]) {
+		await db.statements.put(statement("a"))
+		const backup = await exportData()
+		const tables: Record<string, unknown[]> = { ...backup.tables }
+		delete tables.duplicate_dismissals
+		const baseline = clean
+			? await hashSnapshot({ settings: backup.settings, tables })
+			: "unsynced-baseline"
+		const schemas = Object.fromEntries(
+			db.tables
+				.filter(t => t.name !== "duplicate_dismissals")
+				.map(t => [t.name, [t.schema.primKey.src, ...t.schema.indexes.map(i => i.src)].join(",")]),
+		)
+		await db.delete()
+		const legacy = new Dexie("finpoint")
+		legacy.version(4).stores(schemas)
+		for (const [name, rows] of Object.entries(tables))
+			if (rows.length) await legacy.table(name).bulkAdd(rows)
+		await legacy.table("meta").put({ key: "drive_last_hash", value: baseline })
+		legacy.close()
+		await db.open()
+		expect((await db.meta.get("drive_last_hash"))?.value).toBe(
+			clean ? await hashSnapshot(await exportData()) : baseline,
+		)
+	}
+})
+
+test("version two database upgrades preserve legacy monthly budget data", async () => {
+	await db.delete()
+	const legacy = new Dexie("finpoint")
+	legacy.version(2).stores({
+		accounts: "id",
+		statements: "id",
+		categories: "id",
+		records: "id",
+		allocations: "[statement_id+record_id]",
+		budgets: "id",
+		budget_records: "[budget_id+record_id]",
+		buckets: "id",
+		bucket_defaults: "[bucket_id+effective_month]",
+		bucket_targets: "[bucket_id+month]",
+		analytics_months: "month",
+		settings: "key",
+		meta: "key",
+	})
+	await legacy.table("statements").put(statement("a"))
+	await legacy
+		.table("buckets")
+		.put({
+			id: "monthly",
+			name: "Daily",
+			color: "#000000",
+			group: "core",
+			pace_kind: "daily",
+			display_order: 1,
+			archived: false,
+		})
+	legacy.close()
+	await db.open()
+	expect(await db.statements.get("a")).toEqual(statement("a"))
+	expect((await db.monthly_budgets.get("monthly"))?.name).toBe("Daily")
 	expect(await db.duplicate_dismissals.count()).toBe(0)
 })
 
@@ -198,10 +268,7 @@ test("screenshots preserve PayNow mixed references and method reordering", async
 				"EPOSSPSNLR",
 			),
 		),
-		statement(
-			"b",
-			"FAST PAYMENT OTHR-EPOSSPSNLR0877606BNTV4A0 to DSE SERVICE PTE.via PayNow-UEN",
-		),
+		statement("b", "FAST PAYMENT OTHR-EPOSSPSNLR0877606BNTV4A0 to DSE SERVICE PTE.via PayNow-UEN"),
 		statement("c", "FAST PAYMENT OTHR-OTHR to YEX KWXX WAX (QXvia PayNow-Mobile"),
 		statement("d", "FAST PAYMENT OTHR-OTHR via PayNow-Mobile to YEX KWXX WAX (QX"),
 	])
@@ -231,8 +298,8 @@ test("record allocation deficits use the existing pending rule", async () => {
 		description: null,
 		analytics_treatment: "spending",
 		analytics_treatment_source: "manual",
-		bucket_id: null,
-		bucket_source: null,
+		monthly_budget_id: null,
+		monthly_budget_source: null,
 		revision: 1,
 	})
 	await db.allocations.bulkAdd([
@@ -261,7 +328,7 @@ test("replacement and pending deletion clean dismissal references", async () => 
 	await deletePendingStatement("q")
 	expect(await db.duplicate_dismissals.count()).toBe(0)
 })
-test("version three backups require dismissal data", async () => {
+test("version four backups require dismissal data", async () => {
 	const { exportData, parseImportFile } = await import("../src/data/export-import")
 	const backup = JSON.parse(JSON.stringify(await exportData()))
 	delete backup.tables.duplicate_dismissals

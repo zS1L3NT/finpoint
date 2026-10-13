@@ -1,405 +1,438 @@
 # Graph Report - t3-c0745187  (2026-10-14)
 
 ## Corpus Check
-- 200 files · ~112,437 words
+- 205 files · ~115,550 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 9 file(s) not represented in the graph (top: (none) 5, .example 1, .lock 1)
 
 ## Summary
-- 1510 nodes · 5737 edges · 74 communities (66 shown, 8 thin omitted)
-- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 60 edges (avg confidence: 0.85)
+- 1535 nodes · 5828 edges · 83 communities (72 shown, 11 thin omitted)
+- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 69 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
-- Record Forms and Dialogs
-- Accounts and Workflow Views
-- Sidebar and Route Navigation
-- Budget Tables and Pagination
-- History and Financial Charts
-- Shared Interface Components
-- Financial Domain and Architecture
-- Monthly Dashboard Views
+- Button Components
+- Utils Components
+- Pending Page
+- App Sidebar
+- Budgets Page
+- Cn Components
 - Dashboard Aggregation
 - TypeScript Compiler Settings
-- Statement Replacement Review
-- Amount and Input Filters
-- Monthly Record Tables
-- Application Package Metadata
-- Runtime Dependencies
-- Database Schema and Import Tests
-- Lint Safety Rules
-- Record and Allocation Logic
-- Domain Validation and Buckets
-- Lint Correctness Rules
+- Daily Spending Chart
+- Application Route Views
+- Application Dependencies
+- Domain Validation
+- Sync Page
+- Lint and Formatting Rules
 - Background Drive Sync
-- Data Settings and Alerts
-- Bank Statement Importing
-- Category Filters and Popovers
-- Statement Replacement Logic
-- Component Generator Settings
-- Date Range Controls
-- Statement Selection Sheets
-- Sidebar Interface Primitives
-- Seed and Generated Data
+- Application Dependencies
+- Lint and Formatting Rules
+- Records and Allocations
+- Statements Components
+- Category Filter
+- Input Components
+- Project Agent Instructions
+- Components Components
 - Drive Sync Operations
-- Financial Domain Types
-- Google OAuth and Auth
-- Statement Display Utilities
-- Budget Detail Views
-- Data Backup and Settings
-- Duplicate Resolution Rules
-- Google Drive Persistence
-- Formatting Configuration
-- Category History Charts
-- Icon and Category Displays
-- Project Graph Maintenance
-- Biome Configuration
-- Lint Rule Configuration
-- Code Style Guide
-- Web App Manifest
-- Development Dependencies
-- Duplicate Workflow Specification
+- Shared Components
+- Database Schema and Migrations
+- Next Components
+- Sidebar Components
+- Importer Components
+- Types.D Components
+- Duplicate Feature Specification
+- Auth Vault
+- Date Range
+- Google Drive
+- Data Backup and Restore
+- Lint and Formatting Rules
+- Financial Domain Vocabulary
+- Pagination Footer
+- Project Agent Instructions
+- Lint and Formatting Rules
+- Lint and Formatting Rules
+- Cashflow Chart
 - Duplicate Detection and Cleanup
-- Local Agent Workflow Rules
-- Formatter Rules
-- Optional Native Dependencies
-- Project Commands
-- Style Lint Rules
-- Brand Icon Concept
-- Brand Icon Shadow
-- Signed Commit Conventions
+- Code Style Guide
+- Manifest Components
+- Category History Chart
+- Application Dependencies
+- Duplicate Feature Specification
+- Total Spending Chart
 - Local Markdown Tracker
-- Brand Vector Icon
+- Lint and Formatting Rules
+- Signed Commit Conventions
+- Records Components
+- Importer.Test Components
+- Monthly Budget Usage
+- Spending Calendar
+- Application Dependencies
+- Application Dependencies
+- Lint and Formatting Rules
+- Shell Header
+- Finpoint Icon Concept
+- Finpoint Icon With Charcoal Shadow
+- Local Markdown Tracker
+- Finpoint Components
 - Domain Documentation Rules
-- Apple Touch Icon
-- JPEG Favicon
-- PNG Favicon
-- SVG Favicon
-- Small App Icon
-- Large App Icon
+- Google Drive Sync
 - Duplicate Feature Ticket
-- Development Server Workflow
-- Brand Icon Prompt
-- Code Verification Commands
-- String Domain Keys
-- Crawler Policy
+- F Monogram Icon
+- Jpg Favicon Icon
+- Png Favicon Icon
+- Svg Favicon Icon
+- F Monogram Icon
+- F Monogram Icon
+- Use Persistent State
+- Project Agent Instructions
+- Finpoint App Icon
+- Project Agent Instructions
+- Project Agent Instructions
+- Unrestricted Crawler Policy
+- Generated Demo Data
+- Progressive Web Application
 
 ## God Nodes (most connected - your core abstractions)
-1. `cn()` - 301 edges
+1. `cn()` - 302 edges
 2. `Button()` - 112 edges
-3. `react` - 87 edges
-4. `formatCurrency()` - 73 edges
+3. `react` - 89 edges
+4. `formatCurrency()` - 76 edges
 5. `RecordEditorDialog()` - 62 edges
 6. `RecordCreatorDialog()` - 46 edges
 7. `UiIcon()` - 45 edges
 8. `DataSettingsPage()` - 41 edges
-9. `ValidationError` - 40 edges
-10. `PageContent()` - 40 edges
+9. `PageContent()` - 40 edges
+10. `next` - 40 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `Boot()` --indirect_call--> `preloadCategoryIcons()`  [INFERRED]
   app/providers.tsx → src/components/icon.tsx
 - `BudgetState` --calls--> `parseDate()`  [EXTRACTED]
   app/budgets/page.tsx → src/lib/utils.ts
-- `AccountPage()` --calls--> `AccountDialog()`  [EXTRACTED]
-  app/accounts/[id]/page.tsx → src/components/dialogs/account.tsx
-- `AccountPage()` --calls--> `PendingStatementDialog()`  [EXTRACTED]
-  app/accounts/[id]/page.tsx → src/components/dialogs/pending-statement.tsx
-- `AccountPage()` --calls--> `Metric()`  [EXTRACTED]
-  app/accounts/[id]/page.tsx → src/components/metric.tsx
+- `PendingCard()` --calls--> `classForCurrency()`  [EXTRACTED]
+  app/allocator/pending/page.tsx → src/lib/utils.ts
+- `PendingCard()` --calls--> `cn()`  [EXTRACTED]
+  app/allocator/pending/page.tsx → src/lib/utils.ts
+- `PendingCard()` --calls--> `formatCurrency()`  [EXTRACTED]
+  app/allocator/pending/page.tsx → src/lib/utils.ts
 
 ## Import Cycles
 - None detected.
 
 ## Hyperedges (group relationships)
-- **Separate meaning, accounting and spending planning** — context_category, context_treatment, context_spending_bucket, context_record [EXTRACTED 1.00]
+- **Separate meaning, accounting and spending planning** — context_category, context_treatment, context_monthly_budget, context_record [EXTRACTED 1.00]
 - **Imported activity explained by managed records** — context_statement, context_allocation, context_record [EXTRACTED 1.00]
 
-## Communities (74 total, 8 thin omitted)
+## Communities (83 total, 11 thin omitted)
 
-### Community 0 - "Record Forms and Dialogs"
-Cohesion: 0.07
-Nodes (101): DuplicateReviewDialog(), CandidateResults(), CategoriesPage(), CategoryDialogState, CategoryTile(), SECTIONS, class-variance-authority, react (+93 more)
-
-### Community 1 - "Accounts and Workflow Views"
-Cohesion: 0.12
-Nodes (64): AccountPage(), AccountCard(), AccountRow, AccountsPage(), DuplicateGroupCard(), FixDuplicatesPage(), AllocatorPage(), AllocatorPendingPage() (+56 more)
-
-### Community 2 - "Sidebar and Route Navigation"
+### Community 0 - "Button Components"
 Cohesion: 0.06
-Nodes (67): metadata, RootLayout(), viewport, NotFound(), Boot(), Providers(), AppHeader(), AppearanceOption (+59 more)
+Nodes (113): DuplicateReviewDialog(), CandidateResults(), class-variance-authority, react, sonner, @tanstack/react-form, AccountDialog(), BudgetCreatorDialog() (+105 more)
 
-### Community 3 - "Budget Tables and Pagination"
+### Community 1 - "Utils Components"
+Cohesion: 0.06
+Nodes (97): AccountPage(), AccountRow, AccountsPage(), BudgetPage(), getBudgetAnalytics(), getCategoryData(), Legend(), CategoriesPage() (+89 more)
+
+### Community 2 - "Pending Page"
+Cohesion: 0.11
+Nodes (61): DuplicateGroupCard(), FixDuplicatesPage(), AllocatorPage(), AllocatorPendingPage(), CandidatePage, PendingCard(), ScopeSelect(), byRecordDay (+53 more)
+
+### Community 3 - "App Sidebar"
+Cohesion: 0.06
+Nodes (66): metadata, RootLayout(), viewport, NotFound(), Boot(), Providers(), lucide-react, @vercel/analytics (+58 more)
+
+### Community 4 - "Budgets Page"
+Cohesion: 0.11
+Nodes (43): AccountCard(), BUDGET_STATES, BudgetCard(), BudgetsPage(), BudgetState, formatBudgetDateWindow(), framer-motion, @tanstack/react-table (+35 more)
+
+### Community 5 - "Cn Components"
 Cohesion: 0.08
-Nodes (54): BUDGET_STATES, BudgetCard(), BudgetsPage(), BudgetState, formatBudgetDateWindow(), framer-motion, @tanstack/react-table, DataTable() (+46 more)
+Nodes (37): radix-ui, Amount(), AlertAction(), ButtonGroup(), ButtonGroupSeparator(), ButtonGroupText(), buttonGroupVariants, DropdownMenuCheckboxItem() (+29 more)
 
-### Community 4 - "History and Financial Charts"
-Cohesion: 0.09
-Nodes (48): luxon, recharts, BudgetActiveDot(), BudgetProgressChart(), BudgetProgressPoint, buildSeries(), colorChange(), CashflowChart() (+40 more)
-
-### Community 5 - "Shared Interface Components"
-Cohesion: 0.08
-Nodes (36): radix-ui, AlertAction(), ButtonGroup(), ButtonGroupSeparator(), ButtonGroupText(), buttonGroupVariants, DropdownMenuCheckboxItem(), DropdownMenuContent() (+28 more)
-
-### Community 6 - "Financial Domain and Architecture"
-Cohesion: 0.07
-Nodes (31): Background Drive sync, CONTEXT.md, Dexie IndexedDB, First-run seed, Generated test data, JSON export/import, Installed Next.js documentation, React Compiler (+23 more)
-
-### Community 7 - "Monthly Dashboard Views"
-Cohesion: 0.09
-Nodes (36): PendingCard(), BucketDailyData, BucketUsageBar(), Comparison, comparisonRateText(), comparisonText(), ComparisonValue, DashboardBucket (+28 more)
-
-### Community 8 - "Dashboard Aggregation"
+### Community 6 - "Dashboard Aggregation"
 Cohesion: 0.13
-Nodes (34): AnalyticsRecord, AnalyticsSummary, contribution(), summarize(), avg(), buildBuckets(), buildCashflowHistory(), buildCategories() (+26 more)
+Nodes (36): AnalyticsRecord, AnalyticsSummary, contribution(), summarize(), avg(), BREAKDOWN_MONTHS, buildCashflowHistory(), buildCategories() (+28 more)
 
-### Community 9 - "TypeScript Compiler Settings"
+### Community 7 - "TypeScript Compiler Settings"
 Cohesion: 0.06
 Nodes (33): compilerOptions, allowJs, allowSyntheticDefaultImports, allowUnusedLabels, esModuleInterop, forceConsistentCasingInFileNames, incremental, isolatedModules (+25 more)
 
-### Community 10 - "Statement Replacement Review"
-Cohesion: 0.20
-Nodes (27): BucketStatus(), WeekdayCard(), EmptyRecords(), metadata, PrivacyPage(), SECTIONS, RecordPage(), MethodHeader() (+19 more)
-
-### Community 11 - "Amount and Input Filters"
-Cohesion: 0.11
-Nodes (26): AmountFilter(), AmountRange, COMPARISONS, describe(), Draft, readRange(), upperBound(), ComboboxChip() (+18 more)
-
-### Community 12 - "Monthly Record Tables"
+### Community 8 - "Daily Spending Chart"
 Cohesion: 0.15
-Nodes (24): byRecordDay, FILTER_KEYS, Filters, MonthlyRecordsPage(), StatementPage(), BucketBadge(), formatRowTime(), PendingBadge() (+16 more)
+Nodes (26): recharts, BudgetActiveDot(), BudgetProgressChart(), BudgetProgressPoint, buildSeries(), colorChange(), CHART_INTRO_MS, useChartIntro() (+18 more)
 
-### Community 13 - "Application Package Metadata"
-Cohesion: 0.07
-Nodes (29): private, $schema, type, @biomejs/biome, clsx, cmdk, @fontsource-variable/inter, lightningcss-linux-x64-gnu (+21 more)
+### Community 9 - "Application Route Views"
+Cohesion: 0.12
+Nodes (28): Comparison, comparisonRateText(), comparisonText(), ComparisonValue, DashboardData, DashboardMonthlyBudget, DashboardPage(), DashboardView (+20 more)
 
-### Community 14 - "Runtime Dependencies"
+### Community 10 - "Application Dependencies"
 Cohesion: 0.07
 Nodes (30): dependencies, @base-ui/react, class-variance-authority, clsx, cmdk, dexie, dexie-react-hooks, @fontsource-variable/inter (+22 more)
 
-### Community 15 - "Database Schema and Import Tests"
-Cohesion: 0.08
-Nodes (19): dexie, fake-indexeddb, AccountRow, AllocationRow, AnalyticsMonthRow, BucketDefaultRow, BucketRow, BucketTargetRow (+11 more)
+### Community 11 - "Domain Validation"
+Cohesion: 0.23
+Nodes (20): updateAccount(), validateBudget(), CategoryInput, cleanInput(), createCategory(), TREATMENTS, updateCategory(), dismissDuplicatePair() (+12 more)
 
-### Community 16 - "Lint Safety Rules"
+### Community 12 - "Sync Page"
+Cohesion: 0.14
+Nodes (26): COUNT_ROWS, DataSettingsPage(), StateRow(), STATUS_TONES, StatusTone, WorkspaceRow(), AlertDialog(), AlertDialogAction() (+18 more)
+
+### Community 13 - "Lint and Formatting Rules"
 Cohesion: 0.07
 Nodes (28): suspicious, noAssignInExpressions, noAsyncPromiseExecutor, noCatchAssign, noClassAssign, noCompareNegZero, noControlCharactersInRegex, noDebugger (+20 more)
 
-### Community 17 - "Record and Allocation Logic"
-Cohesion: 0.12
-Nodes (23): db, getMonthlyRecords(), MonthlyFilters, expandCategoryIdsForMonthly(), isPendingRecord(), analyticsValues(), budgetCovers(), ConflictError (+15 more)
+### Community 14 - "Background Drive Sync"
+Cohesion: 0.14
+Nodes (26): isDriveConfigured(), useSyncStatus(), cycle(), emit(), eventListeners, finishCycle(), flushOnHide(), getSyncSnapshot() (+18 more)
 
-### Community 18 - "Domain Validation and Buckets"
-Cohesion: 0.21
-Nodes (17): updateAccount(), createBucket(), GROUPS, PACE_KINDS, setBucketTarget(), updateBucket(), validateBudget(), cleanInput() (+9 more)
+### Community 15 - "Application Dependencies"
+Cohesion: 0.07
+Nodes (26): private, $schema, type, @biomejs/biome, clsx, cmdk, @fontsource-variable/inter, jose (+18 more)
 
-### Community 19 - "Lint Correctness Rules"
+### Community 16 - "Lint and Formatting Rules"
 Cohesion: 0.08
 Nodes (26): noConstantCondition, noConstAssign, noEmptyCharacterClassInRegex, noEmptyPattern, noGlobalObjectCalls, noInvalidBuiltinInstantiation, noInvalidConstructorSuper, noNonoctalDecimalEscape (+18 more)
 
-### Community 20 - "Background Drive Sync"
-Cohesion: 0.13
-Nodes (24): useSyncStatus(), emit(), eventListeners, finishCycle(), flushOnHide(), getSyncSnapshot(), ingestManualResult(), markDirty() (+16 more)
+### Community 17 - "Records and Allocations"
+Cohesion: 0.12
+Nodes (20): AllocationRow, BudgetFilters, createBudget(), getMonthlyRecords(), MonthlyFilters, expandCategoryIdsForMonthly(), AllocationTally, pendingStatementIds() (+12 more)
 
-### Community 21 - "Data Settings and Alerts"
-Cohesion: 0.16
-Nodes (22): COUNT_ROWS, DataSettingsPage(), StateRow(), STATUS_TONES, StatusTone, WorkspaceRow(), AlertDialog(), AlertDialogAction() (+14 more)
+### Community 18 - "Statements Components"
+Cohesion: 0.17
+Nodes (22): countSuggestions(), asPending(), removeStatementDismissals(), dayDifference(), ensureCanReplace(), maskDescription(), ReplacementAllocation, replacementComparison() (+14 more)
 
-### Community 22 - "Bank Statement Importing"
-Cohesion: 0.23
-Nodes (22): ImporterPage(), Step(), asPending(), ensureAccount(), combine(), dbsDescriptionKey(), descriptionKey(), importDbs() (+14 more)
+### Community 19 - "Category Filter"
+Cohesion: 0.17
+Nodes (21): MonthLayout(), @base-ui/react, DateField(), Props, CategoryFilter(), CategoryFilterItem(), Command(), CommandEmpty() (+13 more)
 
-### Community 23 - "Category Filters and Popovers"
-Cohesion: 0.18
-Nodes (20): MonthLayout(), @base-ui/react, DateField(), Props, CategoryFilter(), CategoryFilterItem(), Command(), CommandEmpty() (+12 more)
+### Community 20 - "Input Components"
+Cohesion: 0.34
+Nodes (17): PendingStatementConfirmationSheet(), RecordOption(), RecordSearchSheet(), StatementOption(), StatementSearchSheet(), Input(), Sheet(), SheetContent() (+9 more)
 
-### Community 24 - "Statement Replacement Logic"
-Cohesion: 0.19
-Nodes (20): countSuggestions(), removeStatementDismissals(), dayDifference(), ensureCanReplace(), maskDescription(), ReplacementAllocation, replacementComparison(), replacementReason() (+12 more)
+### Community 21 - "Project Agent Instructions"
+Cohesion: 0.10
+Nodes (10): Background Drive sync, CONTEXT.md, Dexie IndexedDB, First-run seed, Generated test data, JSON export/import, Installed Next.js documentation, React Compiler (+2 more)
 
-### Community 25 - "Component Generator Settings"
+### Community 22 - "Components Components"
 Cohesion: 0.09
 Nodes (21): aliases, components, hooks, lib, ui, utils, iconLibrary, menuAccent (+13 more)
 
-### Community 26 - "Date Range Controls"
-Cohesion: 0.13
-Nodes (17): lucide-react, react-day-picker, DateRangeValue, formatRange(), Props, rangeFromValue(), FALLBACK_ICON_NAME, ICONS (+9 more)
+### Community 23 - "Drive Sync Operations"
+Cohesion: 0.23
+Nodes (19): FinpointDB, exportData(), downloadBackupFile(), driveFetch(), findBackupFile(), getClockSkewMs(), getFileMeta(), uploadBackupFile() (+11 more)
 
-### Community 27 - "Statement Selection Sheets"
-Cohesion: 0.37
-Nodes (14): PendingStatementConfirmationSheet(), RecordSearchSheet(), StatementSearchSheet(), Input(), Sheet(), SheetContent(), SheetDescription(), SheetHeader() (+6 more)
+### Community 24 - "Shared Components"
+Cohesion: 0.16
+Nodes (17): DEFAULT_CATEGORIES, DEFAULT_MONTHLY_BUDGETS, EXPORT_VERSION, FinpointExport, BANK_BLURB, between(), CATEGORIES, DAILY (+9 more)
 
-### Community 28 - "Sidebar Interface Primitives"
+### Community 25 - "Database Schema and Migrations"
+Cohesion: 0.10
+Nodes (18): AccountRow, AnalyticsMonthRow, BudgetRecordRow, BudgetRow, CategoryRow, DB_NAME, DB_VERSION, DuplicateDismissalRow (+10 more)
+
+### Community 26 - "Next Components"
+Cohesion: 0.16
+Nodes (11): nextConfig, luxon, next, CategoryMovers(), Mover, CategorySpendingMix(), HistoryContext, HistoryItem (+3 more)
+
+### Community 27 - "Sidebar Components"
 Cohesion: 0.15
 Nodes (17): SidebarContext, SidebarContextProps, SidebarGroupAction(), SidebarGroupContent(), SidebarInput(), SidebarMenuAction(), SidebarMenuBadge(), SidebarMenuButton() (+9 more)
 
-### Community 29 - "Seed and Generated Data"
-Cohesion: 0.18
-Nodes (15): DEFAULT_BUCKETS, DEFAULT_CATEGORIES, BANK_BLURB, between(), BUCKETS, CATEGORIES, DAILY, generateTestData() (+7 more)
+### Community 28 - "Importer Components"
+Cohesion: 0.25
+Nodes (18): papaparse, xlsx, ensureAccount(), combine(), dbsDescriptionKey(), descriptionKey(), importDbs(), importOcbc() (+10 more)
 
-### Community 30 - "Drive Sync Operations"
-Cohesion: 0.34
-Nodes (18): exportData(), downloadBackupFile(), driveFetch(), findBackupFile(), getClockSkewMs(), getFileMeta(), isDriveConfigured(), uploadBackupFile() (+10 more)
-
-### Community 31 - "Financial Domain Types"
+### Community 29 - "Types.D Components"
 Cohesion: 0.11
-Nodes (18): Account, Allocation, AnalyticsSummary, AnalyticsTreatment, Appearance, Bucket, Budget, Category (+10 more)
+Nodes (18): Account, Allocation, AnalyticsSummary, AnalyticsTreatment, Appearance, Budget, Category, CategoryWithChildren (+10 more)
 
-### Community 32 - "Google OAuth and Auth"
-Cohesion: 0.29
-Nodes (14): POST(), POST(), POST(), jose, AUTH_COOKIE_NAME, authCookie(), authCookieConfig(), clientIp() (+6 more)
+### Community 30 - "Duplicate Feature Specification"
+Cohesion: 0.11
+Nodes (18): Drive Baseline Migration, Duplicate Dismissal Migration, Duplicate Allocation Resolution, Atomic Statement Cleanup, Dismissal Migration and Backup, Desktop and Mobile Smoke Checks, Conservative Duplicate Suggestions, Pair-specific Dismissals (+10 more)
 
-### Community 33 - "Statement Display Utilities"
-Cohesion: 0.18
-Nodes (12): AllocateBar(), RecordAmount(), StatementOption(), amountTone(), StatementAmount(), StatementBadges(), StatementRow, StatementTableOptions (+4 more)
+### Community 31 - "Auth Vault"
+Cohesion: 0.32
+Nodes (13): POST(), POST(), POST(), AUTH_COOKIE_NAME, authCookie(), authCookieConfig(), clientIp(), encryptionKey() (+5 more)
 
-### Community 34 - "Budget Detail Views"
-Cohesion: 0.24
-Nodes (15): BudgetPage(), getBudgetAnalytics(), getCategoryData(), Legend(), Sparkline(), Icon(), Delta, Metric() (+7 more)
+### Community 32 - "Date Range"
+Cohesion: 0.16
+Nodes (14): react-day-picker, DateRangeValue, formatRange(), Props, rangeFromValue(), buttonVariants, Calendar(), CalendarDayButton() (+6 more)
 
-### Community 35 - "Data Backup and Settings"
-Cohesion: 0.18
-Nodes (14): clearAllData(), downloadExport(), EXPORT_VERSION, FinpointExport, importData(), parseImportFile(), SYNC_TABLES, tableCounts() (+6 more)
-
-### Community 36 - "Duplicate Resolution Rules"
-Cohesion: 0.12
-Nodes (16): Duplicate Allocation Resolution, Atomic Statement Cleanup, Dismissal Migration and Backup, Desktop and Mobile Smoke Checks, Conservative Duplicate Suggestions, Pair-specific Dismissals, Duplicate Eligibility, Grouped Statement Review (+8 more)
-
-### Community 37 - "Google Drive Persistence"
+### Community 33 - "Google Drive"
 Cohesion: 0.20
-Nodes (14): AuthNeededError, cacheToken(), CodeResponse, DRIVE_FILENAME, DRIVE_SCOPE, DriveFileMeta, ensureDriveToken(), ensureDriveTokenSilent() (+6 more)
+Nodes (14): AuthNeededError, cacheToken(), CodeResponse, disconnectDrive(), DRIVE_FILENAME, DRIVE_SCOPE, DriveFileMeta, ensureDriveToken() (+6 more)
 
-### Community 38 - "Formatting Configuration"
+### Community 34 - "Data Backup and Restore"
+Cohesion: 0.25
+Nodes (10): db, importData(), parseImportFile(), SYNC_TABLES, TableName, TABLES, DEFAULT_SETTINGS, FinpointSettings (+2 more)
+
+### Community 35 - "Lint and Formatting Rules"
 Cohesion: 0.15
 Nodes (13): arrowParentheses, bracketSameLine, bracketSpacing, jsxQuoteStyle, quoteProperties, quoteStyle, semicolons, trailingCommas (+5 more)
 
-### Community 39 - "Category History Charts"
-Cohesion: 0.24
-Nodes (11): aggregateSeries(), CategoryHistoryChart(), ChartMonth, ChartSeries, HistoryTooltip(), MonthTick(), prepareMonths(), prepareSeries() (+3 more)
+### Community 36 - "Financial Domain Vocabulary"
+Cohesion: 0.23
+Nodes (13): Account, Allocation, Budget, Category, Finpoint, Monthly Budget, Monthly Budget amount, Pending Record (+5 more)
 
-### Community 40 - "Icon and Category Displays"
-Cohesion: 0.27
-Nodes (10): CategoryMovers(), Mover, DynamicUiIcon(), iconNameSet, loadedIcons, loadIcon(), loadingIcons, normalize() (+2 more)
+### Community 37 - "Pagination Footer"
+Cohesion: 0.38
+Nodes (11): pageHref(), pageWindow(), PaginationFooter(), Pagination(), PaginationContent(), PaginationEllipsis(), PaginationItem(), PaginationLink() (+3 more)
 
-### Community 41 - "Project Graph Maintenance"
+### Community 38 - "Project Agent Instructions"
 Cohesion: 0.20
 Nodes (9): Graph health warnings, graphify-out/graph.json, graphify-out/.graphify_labels.json, graphify-out/manifest.json, graphify-out/GRAPH_REPORT.md, graphify skill, graphify update ., Local graph artifacts (+1 more)
 
-### Community 42 - "Biome Configuration"
+### Community 39 - "Lint and Formatting Rules"
 Cohesion: 0.18
 Nodes (10): source, assist, actions, files, includes, linter, enabled, overrides (+2 more)
 
-### Community 43 - "Lint Rule Configuration"
+### Community 40 - "Lint and Formatting Rules"
 Cohesion: 0.18
 Nodes (11): noAdjacentSpacesInRegex, noBannedTypes, noExtraBooleanCast, noUselessCatch, noUselessThisAlias, noUselessTypeConstraint, rules, noFloatingPromises (+3 more)
 
-### Community 44 - "Code Style Guide"
-Cohesion: 0.18
+### Community 41 - "Cashflow Chart"
+Cohesion: 0.31
+Nodes (9): CashflowChart(), CashflowPoint, colorChange(), currencyOrDash(), LegendItem(), mobileAmount, seriesLabel(), StatefulActiveDot() (+1 more)
+
+### Community 42 - "Duplicate Detection and Cleanup"
+Cohesion: 0.25
+Nodes (10): StatementRow, descriptionAnchors(), descriptionIdentity(), DuplicateGroup, duplicateGroups(), duplicateReview(), FixDuplicatesInput, GENERIC (+2 more)
+
+### Community 43 - "Code Style Guide"
+Cohesion: 0.27
 Nodes (10): APIs, Arguments, And Props, Code Style, Consistency, Core, Earning Its Place, Finpoint Style Additions, Grouping And Order, React / TypeScript Style (+2 more)
 
-### Community 45 - "Web App Manifest"
+### Community 44 - "Manifest Components"
 Cohesion: 0.20
 Nodes (9): background_color, description, display, icons, name, scope, short_name, start_url (+1 more)
 
-### Community 46 - "Development Dependencies"
+### Community 45 - "Category History Chart"
+Cohesion: 0.31
+Nodes (9): aggregateSeries(), CategoryHistoryChart(), ChartMonth, ChartSeries, HistoryTooltip(), MonthTick(), prepareMonths(), prepareSeries() (+1 more)
+
+### Community 46 - "Application Dependencies"
 Cohesion: 0.22
 Nodes (9): devDependencies, @biomejs/biome, fake-indexeddb, @tailwindcss/postcss, @types/luxon, @types/node, @types/papaparse, @types/react (+1 more)
 
-### Community 47 - "Duplicate Workflow Specification"
+### Community 47 - "Duplicate Feature Specification"
 Cohesion: 0.22
 Nodes (8): Fix duplicate bank statements, Further Notes, Implementation Decisions, Out of Scope, Problem Statement, Solution, Testing Decisions, User Stories
 
-### Community 48 - "Duplicate Detection and Cleanup"
-Cohesion: 0.31
-Nodes (8): descriptionAnchors(), descriptionIdentity(), DuplicateGroup, duplicateGroups(), duplicateReview(), FixDuplicatesInput, GENERIC, strongMatch()
+### Community 48 - "Total Spending Chart"
+Cohesion: 0.36
+Nodes (8): LegendItem(), niceStep(), roundTick(), surplusAxis(), SurplusPoint, surplusZeroOffset(), TotalSpendingChart(), CashflowHistoryMonth
 
-### Community 49 - "Local Agent Workflow Rules"
+### Community 49 - "Local Markdown Tracker"
 Cohesion: 0.25
 Nodes (8): Local Agent Skills, Domain and Importer Tests, Domain Documentation Conflicts, Single-context Domain Docs, Local Tracker Operations, Spec and Ticket Files, Ticket Lifecycle, Local Markdown Issue Tracker
 
-### Community 50 - "Formatter Rules"
+### Community 50 - "Lint and Formatting Rules"
 Cohesion: 0.25
 Nodes (8): formatter, attributePosition, enabled, formatWithErrors, indentStyle, indentWidth, lineEnding, lineWidth
 
-### Community 51 - "Optional Native Dependencies"
+### Community 51 - "Signed Commit Conventions"
+Cohesion: 0.25
+Nodes (4): Branches, Commit Guide, Commits, Pull Requests
+
+### Community 52 - "Records Components"
+Cohesion: 0.32
+Nodes (8): Allocator, Budgets, Categories, Dashboard, Statement-allocation-record model, Monthly Budgets, Records, Statement importer
+
+### Community 54 - "Monthly Budget Usage"
+Cohesion: 0.39
+Nodes (6): arc(), centerCurrency(), MonthlyBudgetUsage(), MonthlyBudgetUsageItem, compactAmount, formatChartCurrency()
+
+### Community 55 - "Spending Calendar"
+Cohesion: 0.36
+Nodes (7): compact(), INK, LEVELS, quantile(), rampCap(), SpendingCalendar(), WEEKDAYS
+
+### Community 56 - "Application Dependencies"
 Cohesion: 0.29
 Nodes (7): optionalDependencies, lightningcss-linux-x64-gnu, lightningcss-win32-x64-msvc, @rollup/rollup-linux-x64-gnu, @rollup/rollup-win32-x64-msvc, @tailwindcss/oxide-linux-x64-gnu, @tailwindcss/oxide-win32-x64-msvc
 
-### Community 52 - "Project Commands"
+### Community 57 - "Application Dependencies"
 Cohesion: 0.29
 Nodes (7): scripts, build, dev, lint, lint:check, start, types:check
 
-### Community 53 - "Style Lint Rules"
+### Community 58 - "Lint and Formatting Rules"
 Cohesion: 0.33
 Nodes (6): style, noNamespace, noNonNullAssertion, useArrayLiterals, useAsConstAssertion, useBlockStatements
 
-### Community 54 - "Brand Icon Concept"
+### Community 59 - "Shell Header"
+Cohesion: 0.53
+Nodes (4): AppHeader(), ShellHeader(), TITLES, SidebarTrigger()
+
+### Community 60 - "Finpoint Icon Concept"
 Cohesion: 0.40
 Nodes (5): Finpoint icon concept, Charcoal shadow halo, Circular point, Rounded F monogram, Off-white icon fill
 
-### Community 55 - "Brand Icon Shadow"
+### Community 61 - "Finpoint Icon With Charcoal Shadow"
 Cohesion: 0.40
 Nodes (5): Finpoint icon with charcoal shadow, Charcoal shadow halo, Circular point, Rounded F monogram, Off-white icon fill
 
-### Community 56 - "Signed Commit Conventions"
-Cohesion: 0.40
-Nodes (4): Branches, Commit Guide, Commits, Pull Requests
-
-### Community 57 - "Local Markdown Tracker"
+### Community 62 - "Local Markdown Tracker"
 Cohesion: 0.40
 Nodes (4): Files, Issue tracker: Local Markdown, Skill operations, Status and dependencies
 
-### Community 58 - "Brand Vector Icon"
+### Community 63 - "Finpoint Components"
 Cohesion: 0.50
 Nodes (4): Finpoint, Circular point, Rounded F monogram, Off-white icon fill
 
-### Community 59 - "Domain Documentation Rules"
+### Community 64 - "Domain Documentation Rules"
 Cohesion: 0.50
 Nodes (3): Before exploration, Domain docs, Writing
 
-### Community 61 - "Apple Touch Icon"
+### Community 66 - "Google Drive Sync"
+Cohesion: 0.50
+Nodes (4): Google Drive sync, JSON backup and restore, Local-first finance tracking, Sync conflict handling
+
+### Community 67 - "Duplicate Feature Ticket"
+Cohesion: 0.50
+Nodes (3): 01: Review and fix duplicate bank statements in Workflows, Completion evidence, PR preparation
+
+### Community 68 - "F Monogram Icon"
 Cohesion: 0.67
 Nodes (3): Circular dot beside F, Rounded F letterform, F monogram icon
 
-### Community 62 - "JPEG Favicon"
+### Community 69 - "Jpg Favicon Icon"
 Cohesion: 0.67
 Nodes (3): JPG favicon dot, JPG favicon F letterform, JPG favicon icon
 
-### Community 63 - "PNG Favicon"
+### Community 70 - "Png Favicon Icon"
 Cohesion: 0.67
 Nodes (3): PNG favicon dot, PNG favicon F letterform, PNG favicon icon
 
-### Community 64 - "SVG Favicon"
+### Community 71 - "Svg Favicon Icon"
 Cohesion: 0.67
 Nodes (3): SVG favicon dot, SVG favicon F letterform, SVG favicon icon
 
-### Community 65 - "Small App Icon"
+### Community 72 - "F Monogram Icon"
 Cohesion: 0.67
 Nodes (3): Circular dot beside F, Rounded F letterform, F monogram icon
 
-### Community 66 - "Large App Icon"
+### Community 73 - "F Monogram Icon"
 Cohesion: 0.67
 Nodes (3): Circular dot beside F, Rounded F letterform, F monogram icon
 
 ## Knowledge Gaps
-- **88 isolated node(s):** `@biomejs/biome`, `@fontsource-variable/inter`, `lightningcss-linux-x64-gnu`, `lightningcss-win32-x64-msvc`, `react-dom` (+83 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 527 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **8 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **97 isolated node(s):** `@biomejs/biome`, `@fontsource-variable/inter`, `lightningcss-linux-x64-gnu`, `lightningcss-win32-x64-msvc`, `react-dom` (+92 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 532 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **11 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `cn()` connect `Shared Interface Components` to `Record Forms and Dialogs`, `Accounts and Workflow Views`, `Statement Display Utilities`, `Budget Tables and Pagination`, `Sidebar and Route Navigation`, `History and Financial Charts`, `Budget Detail Views`, `Monthly Dashboard Views`, `Icon and Category Displays`, `Statement Replacement Review`, `Amount and Input Filters`, `Monthly Record Tables`, `Data Settings and Alerts`, `Bank Statement Importing`, `Category Filters and Popovers`, `Date Range Controls`, `Statement Selection Sheets`, `Sidebar Interface Primitives`?**
-  _High betweenness centrality (0.132) - this node is a cross-community bridge._
+- **Why does `cn()` connect `Cn Components` to `Button Components`, `Utils Components`, `Pending Page`, `App Sidebar`, `Budgets Page`, `Date Range`, `Pagination Footer`, `Daily Spending Chart`, `Application Route Views`, `Shell Header`, `Sync Page`, `Total Spending Chart`, `Category Filter`, `Input Components`, `Monthly Budget Usage`, `Spending Calendar`, `Next Components`, `Sidebar Components`?**
+  _High betweenness centrality (0.154) - this node is a cross-community bridge._
 - **What connects `@biomejs/biome`, `@fontsource-variable/inter`, `lightningcss-linux-x64-gnu` to the rest of the system?**
-  _88 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `Record Forms and Dialogs` be split into smaller, more focused modules?**
-  _Cohesion score 0.06778309409888357 - nodes in this community are weakly interconnected._
-- **Why does `react` connect `Record Forms and Dialogs` to `Accounts and Workflow Views`, `Sidebar and Route Navigation`, `Budget Tables and Pagination`, `History and Financial Charts`, `Shared Interface Components`, `Monthly Dashboard Views`, `Statement Replacement Review`, `Amount and Input Filters`, `Monthly Record Tables`, `Application Package Metadata`, `Background Drive Sync`, `Data Settings and Alerts`, `Category Filters and Popovers`, `Date Range Controls`, `Statement Selection Sheets`, `Sidebar Interface Primitives`, `Statement Display Utilities`, `Budget Detail Views`, `Icon and Category Displays`?**
-  _High betweenness centrality (0.076) - this node is a cross-community bridge._
-- **Should `Accounts and Workflow Views` be split into smaller, more focused modules?**
-  _Cohesion score 0.11921946003742315 - nodes in this community are weakly interconnected._
-- **Why does `dependencies` connect `Runtime Dependencies` to `Application Package Metadata`?**
-  _High betweenness centrality (0.030) - this node is a cross-community bridge._
-- **Should `Sidebar and Route Navigation` be split into smaller, more focused modules?**
-  _Cohesion score 0.05740740740740741 - nodes in this community are weakly interconnected._
+  _97 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `Button Components` be split into smaller, more focused modules?**
+  _Cohesion score 0.06276074732450572 - nodes in this community are weakly interconnected._
+- **Why does `react` connect `Button Components` to `Utils Components`, `Pending Page`, `App Sidebar`, `Budgets Page`, `Cn Components`, `Daily Spending Chart`, `Application Route Views`, `Sync Page`, `Background Drive Sync`, `Application Dependencies`, `Category Filter`, `Input Components`, `Next Components`, `Sidebar Components`, `Date Range`, `Pagination Footer`, `Category History Chart`, `Total Spending Chart`, `Monthly Budget Usage`, `Shell Header`, `Use Persistent State`?**
+  _High betweenness centrality (0.050) - this node is a cross-community bridge._
+- **Should `Utils Components` be split into smaller, more focused modules?**
+  _Cohesion score 0.06090322580645161 - nodes in this community are weakly interconnected._
+- **Why does `luxon` connect `Next Components` to `Button Components`, `Utils Components`, `Pending Page`, `App Sidebar`, `Budgets Page`, `Date Range`, `Data Backup and Restore`, `Dashboard Aggregation`, `Daily Spending Chart`, `Application Route Views`, `Cashflow Chart`, `Application Dependencies`, `Total Spending Chart`, `Records and Allocations`, `Category Filter`, `Spending Calendar`, `Shared Components`, `Database Schema and Migrations`?**
+  _High betweenness centrality (0.027) - this node is a cross-community bridge._
+- **Should `Pending Page` be split into smaller, more focused modules?**
+  _Cohesion score 0.10938007140538786 - nodes in this community are weakly interconnected._

@@ -58,7 +58,7 @@ const COUNT_ROWS = [
 	["records", "Records", "lucide:receipt-text"],
 	["categories", "Categories", "lucide:tag"],
 	["budgets", "Budgets", "lucide:piggy-bank"],
-	["buckets", "Buckets", "lucide:wallet-cards"],
+	["monthly_budgets", "Monthly budgets", "lucide:wallet-cards"],
 ] as const
 
 type StatusTone = {
@@ -774,7 +774,7 @@ export default function DataSettingsPage() {
 						<WorkspaceRow
 							icon="lucide:sparkles"
 							title="Try demo data"
-							description="3 accounts, 5 months of Records, 470+ Statements (40+ waiting to be matched), 2 budgets and buckets. Replaces everything in this browser."
+							description="3 accounts, 5 months of Records, 470+ Statements (40+ waiting to be matched), 2 budgets and monthly budgets. Replaces everything in this browser."
 						>
 							{confirmingDemo && busy !== "demo" ? (
 								<Button
@@ -805,7 +805,7 @@ export default function DataSettingsPage() {
 						<WorkspaceRow
 							icon="lucide:trash-2"
 							title="Clear all data"
-							description="Delete everything in this browser, then restore the default categories and buckets."
+							description="Delete everything in this browser, then restore the default categories and monthly budgets."
 							destructive
 						>
 							{confirmingClear && busy !== "clear" ? (

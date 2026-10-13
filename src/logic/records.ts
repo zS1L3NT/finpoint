@@ -1,7 +1,8 @@
-// Mirrors `Api\RecordController`, `Api\RecordBucketController`,
+// Mirrors `Api\RecordController`, `Api\RecordMonthlyBudgetController`,
 // `Api\CompletionsController`, and `Record::appQuery`.
 
 import { db } from "@/data/db"
+import { contribution } from "@/logic/analytics"
 import { isPendingRecord, pendingStatementIds, tallyAllocations } from "@/logic/pending"
 import { inputToStored, newId, round2 } from "@/logic/shared"
 import { ValidationError, Validator } from "@/logic/validate"
@@ -20,9 +21,10 @@ export type RecordFilters = {
 	max_amount?: string | null
 	is_allocated?: string | null
 	category_ids?: string[] | null
-	bucket_id?: string | null
-	bucket_group?: string | null
-	show_unbucketed?: boolean
+	monthly_budget_id?: string | null
+	monthly_budget_group?: string | null
+	show_unbudgeted?: boolean
+	effective_spending?: boolean
 	treatment?: string | null
 }
 
@@ -54,13 +56,13 @@ export async function enrichRecords(
 		category_id: string
 		analytics_treatment: AnalyticsTreatment
 		analytics_treatment_source: "category" | "manual"
-		bucket_id: string | null
-		bucket_source: "category" | "manual" | null
+		monthly_budget_id: string | null
+		monthly_budget_source: "category" | "manual" | null
 		revision: number
 	}[],
 ) {
 	const categories = new Map((await db.categories.toArray()).map(c => [c.id, c]))
-	const buckets = new Map((await db.buckets.toArray()).map(b => [b.id, b]))
+	const monthlyBudgets = new Map((await db.monthly_budgets.toArray()).map(b => [b.id, b]))
 	const byRecord = tallyAllocations(await db.allocations.toArray(), await pendingStatementIds())
 	return rows.map(row => {
 		const entry = byRecord.get(row.id)
@@ -81,8 +83,8 @@ export async function enrichRecords(
 							| null,
 						can_delete: false,
 						records_count: 0,
-						default_bucket: category.default_bucket_id
-							? (buckets.get(category.default_bucket_id) ?? null)
+						default_monthly_budget: category.default_monthly_budget_id
+							? (monthlyBudgets.get(category.default_monthly_budget_id) ?? null)
 							: null,
 					}
 				: {
@@ -92,12 +94,14 @@ export async function enrichRecords(
 						color: "#9E9E9E",
 						parent_category_id: null,
 						analytics_treatment: null,
-						default_bucket_id: null,
+						default_monthly_budget_id: null,
 						can_delete: false,
 						records_count: 0,
-						default_bucket: null,
+						default_monthly_budget: null,
 					},
-			bucket: row.bucket_id ? (buckets.get(row.bucket_id) ?? null) : null,
+			monthly_budget: row.monthly_budget_id
+				? (monthlyBudgets.get(row.monthly_budget_id) ?? null)
+				: null,
 		}
 	})
 }
@@ -148,14 +152,19 @@ export async function listRecords(filters: RecordFilters = {}) {
 		const expanded = new Set(await expandCategoryIds(filters.category_ids))
 		rows = rows.filter(r => expanded.has(r.category_id))
 	}
-	if (filters.bucket_id) rows = rows.filter(r => r.bucket_id === filters.bucket_id)
-	if (filters.bucket_group) {
-		const buckets = new Map((await db.buckets.toArray()).map(b => [b.id, b]))
+	if (filters.monthly_budget_id)
+		rows = rows.filter(r => r.monthly_budget_id === filters.monthly_budget_id)
+	if (filters.monthly_budget_group) {
+		const monthlyBudgets = new Map((await db.monthly_budgets.toArray()).map(b => [b.id, b]))
 		rows = rows.filter(
-			r => r.bucket_id && buckets.get(r.bucket_id)?.group === filters.bucket_group,
+			r =>
+				r.monthly_budget_id &&
+				monthlyBudgets.get(r.monthly_budget_id)?.group === filters.monthly_budget_group,
 		)
 	}
-	if (filters.show_unbucketed) rows = rows.filter(r => r.bucket_id === null)
+	if (filters.show_unbudgeted) rows = rows.filter(r => r.monthly_budget_id === null)
+	if (filters.effective_spending)
+		rows = rows.filter(r => contribution(r.analytics_treatment, r.amount).spending !== 0)
 	if (filters.treatment) rows = rows.filter(r => r.analytics_treatment === filters.treatment)
 	if (filters.exclude_budget_id) {
 		const attached = new Set(
@@ -256,8 +265,8 @@ export type RecordInput = {
 	amount: number
 	category_id: string
 	analytics_treatment?: string | null
-	bucket_id?: string | null
-	bucket_source?: string | null
+	monthly_budget_id?: string | null
+	monthly_budget_source?: string | null
 	statements?: RecordStatementInput[]
 }
 
@@ -278,13 +287,17 @@ function validateRecordInput(input: RecordInput) {
 
 async function analyticsValues(
 	input: RecordInput,
-	category: { id: string; analytics_treatment: string | null; default_bucket_id: string | null },
-	existingBucketId: string | null = null,
+	category: {
+		id: string
+		analytics_treatment: string | null
+		default_monthly_budget_id: string | null
+	},
+	existingMonthlyBudgetId?: string | null,
 ): Promise<{
 	analytics_treatment: AnalyticsTreatment
 	analytics_treatment_source: "category" | "manual"
-	bucket_id: string | null
-	bucket_source: "category" | "manual" | null
+	monthly_budget_id: string | null
+	monthly_budget_source: "category" | "manual" | null
 }> {
 	const explicitTreatment = input.analytics_treatment || null
 	const treatment = (explicitTreatment ??
@@ -292,22 +305,24 @@ async function analyticsValues(
 		"automatic") as AnalyticsTreatment
 	const eligible =
 		treatment === "spending" || (treatment === "automatic" && Number(input.amount) < 0)
-	const requestedBucket =
-		"bucket_id" in input
-			? input.bucket_id || null
-			: (existingBucketId ?? category.default_bucket_id)
-	const bucketId = eligible ? requestedBucket : null
-	const requestedSource = input.bucket_source ?? null
-	const bucketSource = !bucketId
+	const requestedMonthlyBudget =
+		"monthly_budget_id" in input
+			? input.monthly_budget_id || null
+			: existingMonthlyBudgetId === undefined
+				? category.default_monthly_budget_id
+				: existingMonthlyBudgetId
+	const monthly_budgetId = eligible ? requestedMonthlyBudget : null
+	const requestedSource = input.monthly_budget_source ?? null
+	const monthly_budgetSource = !monthly_budgetId
 		? null
-		: requestedSource === "category" && bucketId === category.default_bucket_id
+		: requestedSource === "category" && monthly_budgetId === category.default_monthly_budget_id
 			? "category"
 			: "manual"
 	return {
 		analytics_treatment: treatment,
 		analytics_treatment_source: explicitTreatment ? "manual" : "category",
-		bucket_id: bucketId,
-		bucket_source: bucketSource as "category" | "manual" | null,
+		monthly_budget_id: monthly_budgetId,
+		monthly_budget_source: monthly_budgetSource as "category" | "manual" | null,
 	}
 }
 
@@ -427,7 +442,7 @@ export async function updateRecord(id: string, input: RecordInput & { revision?:
 	await validateAllocations(statements, prior)
 
 	return db.transaction("rw", [db.records, db.allocations], async () => {
-		const analytics = await analyticsValues(dto, category, existing.bucket_id)
+		const analytics = await analyticsValues(dto, category, existing.monthly_budget_id)
 		await db.records.update(id, {
 			title: dto.title.trim(),
 			people: dto.people?.trim() || null,
