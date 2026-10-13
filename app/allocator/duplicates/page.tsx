@@ -13,9 +13,17 @@ import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import { ClearFiltersButton, FILTER_CONTROL_CLASS, FilterBar } from "@/components/table/filter-bar"
 import PaginationFooter from "@/components/table/pagination-footer"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { PendingBadge } from "@/components/table/record-columns"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import {
+	Card,
+	CardAction,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card"
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
 import { Input } from "@/components/ui/input"
 import {
@@ -167,38 +175,64 @@ export default function FixDuplicatesPage() {
 					</FilterBar>
 					<p className="text-xs/relaxed text-muted-foreground">
 						Same account · same day · same amount
-						{view === "all" ? " · descriptions not compared" : ""}
+						{view === "all" ? " · any description" : " · similar description"}
 					</p>
 				</div>
 			</div>
 			{affected !== null && affectedRecords !== undefined ? (
-				<Alert role="status" className="pr-12">
-					<IconifyIcon icon="lucide:circle-check" />
-					<AlertTitle>Duplicates deleted</AlertTitle>
-					<AlertDescription>
-						<p>Check these Records; any that lost an Allocation may now be pending.</p>
-						{affectedRecords.length ? (
-							<div className="flex flex-wrap gap-2">
-								{affectedRecords
-									.filter(r => !!r)
-									.map(r => (
-										<Badge key={r.id} variant="outline" asChild>
-											<Link href={pathRecord(r.id)}>{r.title}</Link>
-										</Badge>
-									))}
-							</div>
-						) : null}
-					</AlertDescription>
-					<Button
-						variant="ghost"
-						size="icon-sm"
-						aria-label="Dismiss result"
-						className="absolute top-2 right-2"
-						onClick={() => setAffected(null)}
-					>
-						<IconifyIcon icon="lucide:x" />
-					</Button>
-				</Alert>
+				<Card size="sm" role="status">
+					<CardHeader>
+						<CardTitle className="flex items-center gap-2">
+							<IconifyIcon icon="lucide:circle-check" className="text-emerald-500" />
+							Duplicates deleted
+						</CardTitle>
+						<CardDescription>
+							{affectedRecords.length
+								? "Records stay; review any that are now pending."
+								: "No Records were affected."}
+						</CardDescription>
+						<CardAction>
+							<Button
+								variant="ghost"
+								size="icon-sm"
+								aria-label="Dismiss result"
+								onClick={() => setAffected(null)}
+							>
+								<IconifyIcon icon="lucide:x" />
+							</Button>
+						</CardAction>
+					</CardHeader>
+					{affectedRecords.length ? (
+						<CardContent className="flex flex-col gap-3">
+							{affectedRecords
+								.filter(r => !!r)
+								.map(r => (
+									<div
+										key={r.id}
+										className="flex items-center justify-between gap-3"
+									>
+										<div className="flex min-w-0 items-center gap-2">
+											<Link
+												href={pathRecord(r.id)}
+												className="min-w-0 break-words font-medium underline-offset-4 hover:underline"
+											>
+												{r.title}
+											</Link>
+											<PendingBadge record={r} />
+										</div>
+										<span
+											className={cn(
+												"shrink-0 font-medium tabular-nums",
+												classForCurrency(r.amount),
+											)}
+										>
+											{formatCurrency(r.amount)}
+										</span>
+									</div>
+								))}
+						</CardContent>
+					) : null}
+				</Card>
 			) : null}
 			{groups === undefined || dismissals === undefined || accounts === undefined ? null : (
 				<motion.div
