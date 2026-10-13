@@ -380,3 +380,11 @@ test("banking vocabulary in recipient names remains meaningful", async () => {
 		expect(await duplicateGroups()).toEqual([])
 	}
 })
+test("groups report allocation counts per statement", async () => {
+	await db.statements.bulkAdd([statement("a"), statement("b")])
+	await db.allocations.bulkAdd([
+		{ statement_id: "b", record_id: "r1", amount: -4 },
+		{ statement_id: "b", record_id: "r2", amount: -6 },
+	])
+	expect((await duplicateGroups())[0]?.allocations).toEqual({ a: 0, b: 2 })
+})

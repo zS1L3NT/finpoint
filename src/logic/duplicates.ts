@@ -57,7 +57,12 @@ function pairIds(a: string, b: string): [string, string] {
 	return a < b ? [a, b] : [b, a]
 }
 
-export type DuplicateGroup = { id: string; statements: StatementRow[]; pairs: [string, string][] }
+export type DuplicateGroup = {
+	id: string
+	statements: StatementRow[]
+	pairs: [string, string][]
+	allocations: Record<string, number>
+}
 
 export async function duplicateGroups(manual = false): Promise<DuplicateGroup[]> {
 	const rows = (await db.statements.toArray())
@@ -110,9 +115,19 @@ export async function duplicateGroups(manual = false): Promise<DuplicateGroup[]>
 				id: first,
 				statements: bucket.filter(s => connected.has(s.id)),
 				pairs: pairs.filter(([a, b]) => connected.has(a) && connected.has(b)),
+				allocations: {},
 			})
 		}
 	}
+	const grouped = groups.flatMap(g => g.statements.map(s => s.id))
+	const allocationCounts: Record<string, number> = {}
+	if (grouped.length)
+		for (const a of await db.allocations.where("statement_id").anyOf(grouped).toArray())
+			allocationCounts[a.statement_id] = (allocationCounts[a.statement_id] ?? 0) + 1
+	for (const g of groups)
+		g.allocations = Object.fromEntries(
+			g.statements.map(s => [s.id, allocationCounts[s.id] ?? 0]),
+		)
 	return groups.sort((a, b) =>
 		(b.statements[0]?.datetime ?? "").localeCompare(a.statements[0]?.datetime ?? ""),
 	)

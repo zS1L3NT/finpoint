@@ -168,8 +168,8 @@
     "semantic_hash": "7d8a33d5aa042f85737cd2f3334ae040"
   },
   "next-env.d.ts": {
-    "mtime": 1791920332.7522898,
-    "seen": 1791921004.5005915,
+    "mtime": 1791924463.1352146,
+    "seen": 1791924771.5059695,
     "ast_hash": "8195d2c60ce847a459ae9d308d6a5724",
     "semantic_hash": "8195d2c60ce847a459ae9d308d6a5724"
   },
@@ -1146,10 +1146,10 @@
     "semantic_hash": "3c235855ad39d2373aae98e20a2a2b15"
   },
   "app/allocator/duplicates/page.tsx": {
-    "mtime": 1791920364.1486187,
-    "seen": 1791921127.2475138,
-    "ast_hash": "64f63aeb042ba9a8cc653eb2562ad2c4",
-    "semantic_hash": "64f63aeb042ba9a8cc653eb2562ad2c4"
+    "mtime": 1791924712.8444548,
+    "seen": 1791924771.5059395,
+    "ast_hash": "a000785476bdacef884bfe6a4f792ee5",
+    "semantic_hash": ""
   },
   "src/logic/duplicate-dismissals.ts": {
     "mtime": 1791920364.160619,
@@ -1158,16 +1158,16 @@
     "semantic_hash": "a212f50287af9536a5e7280fde75cc06"
   },
   "src/logic/duplicates.ts": {
-    "mtime": 1791920684.7393079,
-    "seen": 1791921127.247693,
-    "ast_hash": "5d1d96caa601abafd73bf45c06f85548",
-    "semantic_hash": "5d1d96caa601abafd73bf45c06f85548"
+    "mtime": 1791924697.3883955,
+    "seen": 1791924771.5061255,
+    "ast_hash": "ac997b2455fe8fd2fce923eb3ec3a952",
+    "semantic_hash": ""
   },
   "tests/duplicates.test.ts": {
-    "mtime": 1791922597.0415246,
-    "seen": 1791922651.0259314,
-    "ast_hash": "b313b556b9e70dc2f24e1a407256af1b",
-    "semantic_hash": "b313b556b9e70dc2f24e1a407256af1b"
+    "mtime": 1791924042.1576128,
+    "seen": 1791924771.5061412,
+    "ast_hash": "b89cb1382d03286e3bb7a7ef7ba955be",
+    "semantic_hash": ""
   },
   ".scratch/fix-duplicates/issues/01-fix-duplicates.md": {
     "mtime": 1791922550.6381469,
@@ -1228,5 +1228,17 @@
     "seen": 1791922651.0258946,
     "ast_hash": "4aa4f9e18521d3407cfb3dafe81f9ca5",
     "semantic_hash": "4aa4f9e18521d3407cfb3dafe81f9ca5"
+  },
+  "src/components/dialogs/duplicate-review.tsx": {
+    "mtime": 1791924720.3204827,
+    "seen": 1791924771.5059984,
+    "ast_hash": "ae2f475f02ee0c4774a0f603cd418049",
+    "semantic_hash": ""
+  },
+  ".scratch/fix-duplicates/design.md": {
+    "mtime": 1791923998.6777198,
+    "seen": 1791924771.5061445,
+    "ast_hash": "6d2444c31c837286ad3bb4528328afa4",
+    "semantic_hash": ""
   }
 }
