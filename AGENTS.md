@@ -41,8 +41,20 @@
 - Before changing the shape of a shared helper API in a meaningful way, such as converting a plain column factory into a hook, consult the user first unless they explicitly asked for that refactor.
 
 ## Verification
-- This project does not have an automated test suite.
+- Run `bun test` for the domain and importer tests, which use Dexie with in-memory IndexedDB.
 - When asked to verify with `npm run dev`, run it directly, smoke-test the relevant local route, and stop the dev server afterwards.
+
+## Agent skills
+
+### Issue tracker
+
+Before creating, reading, or resolving specs and tickets, read
+`docs/agents/issue-tracker.md`. Work is tracked locally under `.scratch/`.
+
+### Domain docs
+
+Before domain exploration, read `docs/agents/domain.md`.
+This repo uses a single-context layout with `CONTEXT.md` as its vocabulary authority.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
