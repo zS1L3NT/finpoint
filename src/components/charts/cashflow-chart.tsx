@@ -15,6 +15,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 import { useHistory } from "@/history"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { formatChartCurrency } from "@/lib/chart-currency"
+import { dayTicks } from "@/lib/chart-days"
 import { formatCurrency } from "@/lib/utils"
 import type { CashflowHistoryMonth } from "@/logic/dashboard"
 import { pathMonthlyRecords } from "@/routes"
@@ -72,7 +73,7 @@ export default function CashflowChart({
 			),
 		}),
 	)
-	const interval = isMobile ? Math.max(Math.floor(data.length / 4), 0) : "preserveStartEnd"
+	const ticks = dayTicks(data.length)
 	const actualChange = colorChange(data, "spending", target)
 	const projectionChange = colorChange(data, "projected_spending", target)
 	const openDay = (state: { activeLabel?: number | string } | null) => {
@@ -177,7 +178,8 @@ export default function CashflowChart({
 						<CartesianGrid strokeDasharray="3 3" vertical={false} />
 						<XAxis
 							dataKey="day"
-							interval={interval}
+							ticks={ticks}
+							interval={0}
 							height={24}
 							tickMargin={isMobile ? 4 : 8}
 						/>

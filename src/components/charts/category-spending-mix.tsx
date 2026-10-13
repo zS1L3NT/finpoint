@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { useHistory } from "@/history"
 import { formatCurrency } from "@/lib/utils"
 
 export default function CategorySpendingMix({
@@ -16,6 +17,7 @@ export default function CategorySpendingMix({
 	}[]
 	recordHref: (id: string) => string
 }) {
+	const { handlePush } = useHistory()
 	const total = categories.reduce((sum, category) => sum + category.outflow, 0)
 	const rows = categories
 		.filter(category => category.records > 0)
@@ -29,6 +31,7 @@ export default function CategorySpendingMix({
 					<Link
 						key={category.id}
 						href={recordHref(category.id)}
+						onClick={handlePush("overview")}
 						className="group grid gap-1.5 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 					>
 						<div className="flex items-center justify-between gap-3 text-xs">

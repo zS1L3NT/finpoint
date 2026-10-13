@@ -22,6 +22,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select"
+import { useHistory } from "@/history"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { cn } from "@/lib/utils"
 import { listAccounts } from "@/logic/accounts"
@@ -30,6 +31,7 @@ import { listStatements } from "@/logic/statements"
 import type { Statement } from "@/types"
 
 export default function StatementsPage() {
+	const { latest } = useHistory()
 	const [isCreatingStatement, setIsCreatingStatement] = useState(false)
 	const [editingStatement, setEditingStatement] = useState<Statement | null>(null)
 	const searchParams = useSearchParams()
@@ -106,6 +108,7 @@ export default function StatementsPage() {
 					subtitle="Review imported and handwritten pending statements with their allocated records."
 					description="Account activity"
 					icon="lucide:credit-card"
+					back={latest ?? undefined}
 				/>
 
 				<PaginatedDataTable

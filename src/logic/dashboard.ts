@@ -24,13 +24,6 @@ import {
 export const COMPARISON_MONTHS = 2
 export const BREAKDOWN_MONTHS = 4
 
-export type DashboardInsight = {
-	type: "category_change" | "daily_capacity" | "weekend_pattern" | "review"
-	title: string
-	description: string
-	evidence: Record<string, string | number>
-}
-
 export type DashboardInput = { month: string; year: number }
 
 export type CashflowHistoryMonth = {
@@ -424,86 +417,9 @@ export async function getDashboard(input: DashboardInput, preloaded?: LoadedTabl
 				!tables.allocatedStatementIds.has(s.id),
 		).length,
 	}
-	const insights: DashboardInsight[] = []
-	if (!isFuture && included.length) {
-		const changes = categories
-			.filter(c => c.comparison !== null && Math.abs(c.comparison) >= 1)
-			.sort((a, b) => Math.abs(b.comparison ?? 0) - Math.abs(a.comparison ?? 0))
-		const change = changes[0]
-		if (change)
-			insights.push({
-				type: "category_change",
-				title: `${change.name} spending ${(change.comparison ?? 0) > 0 ? "rose" : "fell"}`,
-				description: "Compared with eligible previous months over the same elapsed days.",
-				evidence: {
-					category_id: change.id,
-					difference: Math.round((change.comparison ?? 0) * 100) / 100,
-					baseline_months: included.length,
-					elapsed_days: isCurrent ? today.day : (date.daysInMonth ?? 30),
-				},
-			})
-	}
-	if (projection.monthly_budget && projection.remaining_days > 0)
-		insights.push({
-			type: "daily_capacity",
-			title: `${projection.monthly_budget.name}: remaining capacity`,
-			description:
-				projection.monthly_budget.remaining < 0
-					? "Recorded and scheduled spending exceed the planned amount. No remaining daily capacity."
-					: projection.monthly_budget.remaining === 0
-						? "Recorded and scheduled spending exhaust the planned amount. No remaining daily capacity."
-						: "Remaining amount after recorded spending and scheduled future spending, spread over the remaining days.",
-			evidence: {
-				monthly_budget_id: projection.monthly_budget.id,
-				remaining: projection.monthly_budget.remaining,
-				daily_capacity: projection.monthly_budget.recommended_pace ?? 0,
-				remaining_days: projection.remaining_days,
-				scheduled_spending:
-					futureSummary.monthlyBudgets.find(b => b.id === projection.monthly_budget?.id)
-						?.spending ?? 0,
-			},
-		})
-	const elapsed = isFuture ? 0 : isCurrent ? today.day : (date.daysInMonth ?? 30)
-	const observed = Array.from({ length: elapsed }, (_, i) => ({
-		weekend: date.plus({ days: i }).weekday >= 6,
-		spending:
-			summary.daily.find(d => d.date === date.plus({ days: i }).toFormat(ISO_DAY))
-				?.spending ?? 0,
-	}))
-	const weekends = observed.filter(d => d.weekend)
-	const weekdays = observed.filter(d => !d.weekend)
-	if (
-		weekends.length >= 4 &&
-		weekdays.length >= 10 &&
-		actualRecords.filter(r => contribution(r.analytics_treatment, r.amount).spending > 0)
-			.length >= 8
-	) {
-		const weekendAverage = weekends.reduce((sum, d) => sum + d.spending, 0) / weekends.length
-		const weekdayAverage = weekdays.reduce((sum, d) => sum + d.spending, 0) / weekdays.length
-		if (weekendAverage > weekdayAverage && weekendAverage > 0)
-			insights.push({
-				type: "weekend_pattern",
-				title: "Weekend spending runs higher",
-				description: "Consider reserving more of the remaining amount for weekends.",
-				evidence: {
-					weekend_daily: Math.round(weekendAverage * 100) / 100,
-					weekday_daily: Math.round(weekdayAverage * 100) / 100,
-					weekend_days: weekends.length,
-					weekday_days: weekdays.length,
-				},
-			})
-	}
-	if (review.pending_records || review.unallocated_statements)
-		insights.push({
-			type: "review",
-			title: "Activity needs review",
-			description: "Allocate imported statements and check pending records for this month.",
-			evidence: review,
-		})
 
 	return {
 		review,
-		insights,
 		month: date.monthLong,
 		year: date.year,
 		period: {
@@ -529,6 +445,8 @@ export async function getDashboard(input: DashboardInput, preloaded?: LoadedTabl
 			isFuture ? 0 : isCurrent ? today.day : (date.daysInMonth ?? 30),
 			summary,
 			historyMonths.filter(m => m.included),
+			actualRecords.filter(r => contribution(r.analytics_treatment, r.amount).spending > 0)
+				.length,
 		),
 		future_records_count: futureRecords.length,
 	}
@@ -713,6 +631,7 @@ function buildWeekday(
 	daysInMonth: number,
 	summary: ReturnType<typeof summarize>,
 	included: ReturnType<typeof comparisonSummaries>,
+	spendingRecords: number,
 ) {
 	function occurrences(start: DateTime, days: number, weekday: number) {
 		const first = ((weekday - start.weekday + 7) % 7) + 1
@@ -745,7 +664,33 @@ function buildWeekday(
 		}
 	})
 
-	return { stats, comparison_count: included.length }
+	// Only reported with enough observations and a meaningful (>= 15%) gap.
+	const observed = Array.from({ length: daysInMonth }, (_, i) => {
+		const day = date.plus({ days: i })
+		return {
+			weekend: day.weekday >= 6,
+			spending: summary.daily.find(d => d.date === day.toFormat(ISO_DAY))?.spending ?? 0,
+		}
+	})
+	const weekends = observed.filter(d => d.weekend)
+	const weekdays = observed.filter(d => !d.weekend)
+	const average = (days: typeof observed) =>
+		days.reduce((sum, d) => sum + d.spending, 0) / days.length
+	let weekend: { weekend_average: number; weekday_average: number } | null = null
+	if (weekends.length >= 4 && weekdays.length >= 10 && spendingRecords >= 8) {
+		const weekendAverage = average(weekends)
+		const weekdayAverage = average(weekdays)
+		if (
+			Math.abs(weekendAverage - weekdayAverage) >=
+			0.15 * Math.max(weekendAverage, weekdayAverage)
+		)
+			weekend = {
+				weekend_average: Math.round(weekendAverage * 100) / 100,
+				weekday_average: Math.round(weekdayAverage * 100) / 100,
+			}
+	}
+
+	return { stats, comparison_count: included.length, weekend }
 }
 
 function avg(values: (number | null)[]): number | null {

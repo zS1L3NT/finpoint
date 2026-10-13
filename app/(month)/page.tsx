@@ -162,58 +162,8 @@ export default function DashboardPage() {
 				<SummaryBand summary={summary} comparison={comparison} />
 			)}
 			<ReviewLinks data={data} month={month} year={year} />
-			<div className="grid items-start gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)]">
-				<Card className="min-w-0 lg:order-2">
-					<CardHeader>
-						<div className="flex items-start justify-between gap-3">
-							<div>
-								<CardTitle>Monthly budgets</CardTitle>
-								<CardDescription className="mt-1">
-									Segment size = planned share · Fill = amount used
-								</CardDescription>
-							</div>
-							<MonthlyBudgetDialog
-								month={month}
-								year={year}
-								trigger={
-									<Button variant="outline" size="sm">
-										<IconifyIcon icon="lucide:plus" /> New
-									</Button>
-								}
-							/>
-						</div>
-					</CardHeader>
-					<CardContent>
-						<MonthlyBudgetUsage
-							budgets={budgets}
-							unbudgeted={categories.reduce(
-								(sum, category) =>
-									sum + (category.monthly_budget_spending.unbudgeted ?? 0),
-								0,
-							)}
-							selected={budgets.some(budget => budget.id === scope) ? scope : null}
-							onSelect={setScope}
-							edit={budget => (
-								<MonthlyBudgetDialog
-									monthlyBudget={budgets.find(item => item.id === budget.id)}
-									month={month}
-									year={year}
-									trigger={
-										<Button
-											variant="ghost"
-											size="sm"
-											className="min-h-8"
-											aria-label={`Edit ${budget.name}`}
-										>
-											Edit
-										</Button>
-									}
-								/>
-							)}
-						/>
-					</CardContent>
-				</Card>
-				<Card className="min-w-0 lg:order-1">
+			<div className="grid gap-5 xl:grid-cols-2">
+				<Card className="min-w-0">
 					<CardHeader className="border-b">
 						<ScopedCardTitle
 							scope={dailyBudget?.name ?? "Total"}
@@ -274,6 +224,56 @@ export default function DashboardPage() {
 								/>
 							</>
 						)}
+					</CardContent>
+				</Card>
+				<Card className="min-w-0">
+					<CardHeader>
+						<div className="flex items-start justify-between gap-3">
+							<div>
+								<CardTitle>Monthly budgets</CardTitle>
+								<CardDescription className="mt-1">
+									Segment size = planned share · Fill = amount used
+								</CardDescription>
+							</div>
+							<MonthlyBudgetDialog
+								month={month}
+								year={year}
+								trigger={
+									<Button variant="outline" size="sm">
+										<IconifyIcon icon="lucide:plus" /> New
+									</Button>
+								}
+							/>
+						</div>
+					</CardHeader>
+					<CardContent className="flex-1">
+						<MonthlyBudgetUsage
+							budgets={budgets}
+							unbudgeted={categories.reduce(
+								(sum, category) =>
+									sum + (category.monthly_budget_spending.unbudgeted ?? 0),
+								0,
+							)}
+							selected={budgets.some(budget => budget.id === scope) ? scope : null}
+							onSelect={setScope}
+							edit={budget => (
+								<MonthlyBudgetDialog
+									monthlyBudget={budgets.find(item => item.id === budget.id)}
+									month={month}
+									year={year}
+									trigger={
+										<Button
+											variant="ghost"
+											size="sm"
+											className="min-h-8"
+											aria-label={`Edit ${budget.name}`}
+										>
+											Edit
+										</Button>
+									}
+								/>
+							)}
+						/>
 					</CardContent>
 				</Card>
 			</div>
@@ -355,7 +355,6 @@ export default function DashboardPage() {
 							</Card>
 						</div>
 					) : null}
-					{stage > 1 ? <HabitInsights data={data} month={month} year={year} /> : null}
 					{stage > 1 ? (
 						<section className="grid gap-4" aria-labelledby="spending-breakdown-title">
 							<div className="flex flex-wrap items-center justify-between gap-3">
@@ -511,6 +510,12 @@ function WeekdayCard({ weekday }: { weekday: WeekdayBreakdown }) {
 			</CardHeader>
 			<CardContent>
 				<WeekdayBars stats={weekday.stats} comparisonCount={weekday.comparison_count} />
+				{weekday.weekend ? (
+					<p className="mt-3 text-xs text-muted-foreground">
+						Weekend days average {formatCurrency(weekday.weekend.weekend_average)} vs{" "}
+						{formatCurrency(weekday.weekend.weekday_average)} on weekdays this month.
+					</p>
+				) : null}
 			</CardContent>
 		</Card>
 	)
@@ -709,9 +714,11 @@ function PaceSummary({
 	const stats = projection.available
 		? [
 				{
-					label: "If this pace continues",
-					value: formatCurrency(projection.projected_spending ?? 0),
-					detail: `${formatCurrency(projection.daily_spending ?? 0)} / recorded day${projection.scheduled_spending ? ` + ${formatCurrency(projection.scheduled_spending)} scheduled` : ""}`,
+					label: "Highest-spend day",
+					value: highestSpendingDay ? formatCurrency(highestSpendingDay.spending) : "—",
+					detail: highestSpendingDay
+						? DateTime.fromISO(highestSpendingDay.date).toFormat("d MMM")
+						: "No spending yet",
 				},
 				{
 					label: "Recorded usage pace",
@@ -721,22 +728,33 @@ function PaceSummary({
 					detail: budget ? budget.name : "Set a daily-paced monthly budget",
 				},
 				{
-					label: "Remaining daily capacity",
+					label: "If this pace continues",
+					value: formatCurrency(projection.projected_spending ?? 0),
+					detail: `${formatCurrency(projection.daily_spending ?? 0)} / recorded day${projection.scheduled_spending ? ` + ${formatCurrency(projection.scheduled_spending)} scheduled` : ""}`,
+				},
+				{
+					label: "Recommended pace",
 					value:
 						budget?.recommended_pace == null
 							? "—"
 							: `${formatCurrency(budget.recommended_pace)} / day`,
-					detail: `${projection.remaining_days} days left${budget ? " · within recorded plan" : " · no planned amount"}`,
+					detail: !budget
+						? "No planned amount"
+						: budget.remaining < 0
+							? `${formatCurrency(-budget.remaining)} over after scheduled spending`
+							: budget.remaining === 0
+								? "Plan exhausted"
+								: `${projection.remaining_days} days left to stay within plan`,
 				},
+			]
+		: [
 				{
 					label: "Highest-spend day",
 					value: highestSpendingDay ? formatCurrency(highestSpendingDay.spending) : "—",
 					detail: highestSpendingDay
 						? DateTime.fromISO(highestSpendingDay.date).toFormat("d MMM")
-						: "No spending yet",
+						: "No spending recorded",
 				},
-			]
-		: [
 				{
 					label: "Recorded month spending",
 					value: formatCurrency(completedMonth?.spending ?? 0),
@@ -758,13 +776,6 @@ function PaceSummary({
 					value: `${formatCurrency(completedMonth?.spending_per_day ?? 0)} / day`,
 					detail: "Full-month total ÷ calendar days",
 				},
-				{
-					label: "Highest-spend day",
-					value: highestSpendingDay ? formatCurrency(highestSpendingDay.spending) : "—",
-					detail: highestSpendingDay
-						? DateTime.fromISO(highestSpendingDay.date).toFormat("d MMM")
-						: "No spending recorded",
-				},
 			]
 	return (
 		<div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 border-t pt-3">
@@ -780,86 +791,6 @@ function PaceSummary({
 				</div>
 			))}
 		</div>
-	)
-}
-
-function HabitInsights({
-	data,
-	month,
-	year,
-}: {
-	data: DashboardData
-	month: string
-	year: number
-}) {
-	const { handlePush } = useHistory()
-	const insights = data.insights.filter(insight => insight.type !== "review")
-	if (!insights.length) return null
-	return (
-		<section className="grid gap-3" aria-label="Spending insights">
-			<div>
-				<h3 className="text-base font-semibold">Worth a look</h3>
-				<p className="mt-1 text-xs text-muted-foreground">
-					Based on recorded activity
-					{data.review.pending_records > 0
-						? " · Pending values can change these results"
-						: ""}
-				</p>
-			</div>
-			<div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-				{insights.map(insight => {
-					const evidence = insight.evidence
-					const value =
-						insight.type === "category_change"
-							? `${formatCurrency(Math.abs(Number(evidence.difference)))} ${Number(evidence.difference) > 0 ? "more" : "less"}`
-							: insight.type === "daily_capacity"
-								? Number(evidence.remaining) < 0
-									? `${formatCurrency(-Number(evidence.remaining))} over planned amount`
-									: Number(evidence.remaining) === 0
-										? "Planned amount exhausted"
-										: `${formatCurrency(Number(evidence.daily_capacity))} / remaining day`
-								: `${formatCurrency(Number(evidence.weekend_daily))} / weekend day`
-					const detail =
-						insight.type === "category_change"
-							? `${evidence.baseline_months} eligible previous months · days 1–${evidence.elapsed_days}`
-							: insight.type === "daily_capacity"
-								? `${evidence.remaining_days} days left · ${formatCurrency(Number(evidence.scheduled_spending))} scheduled`
-								: `${formatCurrency(Number(evidence.weekday_daily))} / weekday · ${evidence.weekend_days} weekend and ${evidence.weekday_days} weekday observations`
-					return (
-						<Card key={insight.type} size="sm">
-							<CardContent>
-								<p className="text-xs font-medium">{insight.title}</p>
-								<p className="mt-2 text-base font-semibold tabular-nums">{value}</p>
-								<p className="mt-1 text-[11px] text-muted-foreground">{detail}</p>
-								<p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-									{insight.description}
-								</p>
-								<Link
-									onClick={handlePush("overview")}
-									href={pathMonthlyRecords({
-										month,
-										year: String(year),
-										effective_spending: "true",
-										category_ids:
-											insight.type === "category_change"
-												? String(evidence.category_id)
-												: undefined,
-										monthly_budget_id:
-											insight.type === "daily_capacity"
-												? String(evidence.monthly_budget_id)
-												: undefined,
-									})}
-									className="mt-3 inline-flex items-center gap-1 rounded text-xs font-medium hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-								>
-									Review Records{" "}
-									<IconifyIcon icon="lucide:arrow-up-right" className="size-3" />
-								</Link>
-							</CardContent>
-						</Card>
-					)
-				})}
-			</div>
-		</section>
 	)
 }
 

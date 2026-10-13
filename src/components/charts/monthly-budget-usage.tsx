@@ -35,7 +35,7 @@ export default function MonthlyBudgetUsage({
 	const planned = budgets.reduce((sum, budget) => sum + Math.max(budget.amount ?? 0, 0), 0)
 	const spending = budgets.reduce((sum, budget) => sum + budget.spending, 0)
 	const withoutAmount = budgets.reduce(
-		(sum, budget) => sum + ((budget.amount ?? 0) <= 0 ? budget.spending : 0),
+		(sum, budget) => sum + (budget.amount === null ? budget.spending : 0),
 		0,
 	)
 	const overspend = budgets.reduce(
@@ -59,9 +59,9 @@ export default function MonthlyBudgetUsage({
 	}
 
 	return (
-		<div className="@container grid gap-4">
-			<div className="grid items-center gap-4 @[34rem]:grid-cols-[14rem_minmax(0,1fr)]">
-				<div className="relative mx-auto size-48 shrink-0">
+		<div className="@container flex h-full flex-col gap-4">
+			<div className="grid content-start gap-5 @[34rem]:grid-cols-[11rem_1fr] @[34rem]:items-start">
+				<div className="relative mx-auto size-52 shrink-0 @[34rem]:size-44">
 					<svg
 						viewBox="0 0 240 240"
 						className="size-full overflow-visible"
@@ -188,7 +188,7 @@ export default function MonthlyBudgetUsage({
 						</p>
 					</div>
 				</div>
-				<div className="grid gap-2">
+				<div className="grid content-start gap-2">
 					{budgets.map(budget => (
 						<div
 							key={budget.id}
@@ -217,47 +217,29 @@ export default function MonthlyBudgetUsage({
 								{edit(budget)}
 							</div>
 
-							<div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 text-xs">
-								<div className="min-w-0">
-									<p className="font-medium tabular-nums">
-										{formatCurrency(budget.spending)}{" "}
-										<span className="font-normal text-muted-foreground">
-											used
-										</span>
-									</p>
-									<p className="mt-0.5 text-muted-foreground tabular-nums">
-										{budget.amount === null
-											? "No planned amount"
-											: `of ${formatCurrency(budget.amount)} planned`}
-									</p>
-								</div>
-								<div className="text-right">
+							<div className="flex flex-wrap items-baseline justify-between gap-x-2 text-xs">
+								<p className="min-w-0 text-muted-foreground tabular-nums">
+									<span className="font-medium text-foreground">
+										{formatCurrency(budget.spending)}
+									</span>{" "}
+									{budget.amount === null
+										? "used · no plan"
+										: budget.spending < 0
+											? "net refund"
+											: `of ${formatCurrency(budget.amount)}`}
+								</p>
+								{budget.remaining !== null ? (
 									<p
 										className={cn(
-											"font-medium tabular-nums",
-											(budget.remaining ?? 0) < 0 && "text-destructive",
+											"shrink-0 tabular-nums text-muted-foreground",
+											budget.remaining < 0 && "font-medium text-destructive",
 										)}
 									>
-										{budget.remaining === null
-											? "—"
-											: formatCurrency(Math.abs(budget.remaining))}
+										{formatCurrency(Math.abs(budget.remaining))}{" "}
+										{budget.remaining < 0 ? "over" : "left"}
 									</p>
-									<p className="mt-0.5 text-muted-foreground">
-										{(budget.remaining ?? 0) < 0 ? "over" : "remaining"}
-									</p>
-								</div>
+								) : null}
 							</div>
-							{budget.amount === null ||
-							budget.amount === 0 ||
-							budget.spending < 0 ? (
-								<p className="mt-1 text-[11px] text-muted-foreground">
-									{budget.spending < 0
-										? "Net refund · ring fill is zero"
-										: budget.amount === 0
-											? "Zero planned · outside ring"
-											: "No planned amount · outside ring"}
-								</p>
-							) : null}
 						</div>
 					))}
 					{!budgets.length ? (
@@ -267,9 +249,9 @@ export default function MonthlyBudgetUsage({
 					) : null}
 				</div>
 			</div>
-			<div className="grid gap-2 rounded-lg border bg-muted/20 px-3 py-3 text-xs text-muted-foreground">
+			<p className="mt-auto flex flex-wrap gap-x-3 gap-y-1 rounded-lg border bg-muted/20 px-3 py-2 text-xs text-muted-foreground">
 				<span>
-					Budgeted spending{" "}
+					Budgeted{" "}
 					<strong className="font-medium text-foreground tabular-nums">
 						{formatCurrency(spending)}
 					</strong>
@@ -282,19 +264,16 @@ export default function MonthlyBudgetUsage({
 				</span>
 				{withoutAmount !== 0 ? (
 					<span>
-						Assigned without a planned amount{" "}
+						No plan{" "}
 						<strong className="font-medium text-foreground tabular-nums">
 							{formatCurrency(withoutAmount)}
-						</strong>{" "}
-						· outside ring
+						</strong>
 					</span>
 				) : null}
 				{overspend > 0 ? (
-					<span className="text-destructive">
-						Over planned amounts by {formatCurrency(overspend)} · outer accent
-					</span>
+					<span className="text-destructive">Over by {formatCurrency(overspend)}</span>
 				) : null}
-			</div>
+			</p>
 		</div>
 	)
 }
