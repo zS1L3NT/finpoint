@@ -180,10 +180,10 @@
     "semantic_hash": "bf7ca2f47c30818c5bd7854793471330"
   },
   "package.json": {
-    "mtime": 1791920364.160619,
-    "seen": 1791921127.2475462,
-    "ast_hash": "5f662d5157bdc6567cb6006e17f404d1",
-    "semantic_hash": "5f662d5157bdc6567cb6006e17f404d1"
+    "mtime": 1791923146.0768085,
+    "seen": 1791923216.2515347,
+    "ast_hash": "ec19363cb1f5340c43203b43386e2168",
+    "semantic_hash": ""
   },
   "postcss.config.mjs": {
     "mtime": 1791906856.2103584,
