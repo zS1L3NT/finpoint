@@ -13,9 +13,10 @@ import {
 	replaceSettings,
 } from "@/data/settings"
 
-export const EXPORT_VERSION = 2
+export const EXPORT_VERSION = 3
 
 type TableName =
+	| "duplicate_dismissals"
 	| "accounts"
 	| "statements"
 	| "categories"
@@ -29,6 +30,7 @@ type TableName =
 	| "analytics_months"
 
 export const TABLES: TableName[] = [
+	"duplicate_dismissals",
 	"accounts",
 	"statements",
 	"categories",
@@ -86,6 +88,9 @@ export function parseImportFile(text: string): FinpointExport {
 	if ((parsed.version ?? 0) > EXPORT_VERSION) {
 		throw new Error("This backup was made by a newer Finpoint version.")
 	}
+	if ((parsed.version ?? 0) < 3 && parsed.tables.duplicate_dismissals === undefined) {
+		parsed.tables.duplicate_dismissals = []
+	}
 	for (const table of TABLES) {
 		if (!Array.isArray(parsed.tables?.[table])) {
 			throw new Error("This backup file looks incomplete.")
@@ -116,7 +121,7 @@ export async function importData(data: FinpointExport): Promise<void> {
 		async () => {
 			for (const table of TABLES) {
 				await db.table(table).clear()
-				const rows = data.tables[table]
+				const rows = data.tables[table] ?? []
 				if (rows.length) await db.table(table).bulkAdd(rows)
 			}
 			await replaceSettings(data.settings)

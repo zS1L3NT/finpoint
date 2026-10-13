@@ -2,14 +2,18 @@ import { DateTime } from "luxon"
 import Link from "next/link"
 import { useDefaultFilterEndDateToday, useDefaultFilterStartDate } from "@/hooks/use-settings"
 import { cn } from "@/lib/utils"
-import { pathAllocator, pathAllocatorPending } from "@/routes"
+import { pathAllocator, pathAllocatorDuplicates, pathAllocatorPending } from "@/routes"
 
-export default function AllocatorTabs({ active }: { active: "allocate" | "replace" }) {
+export default function AllocatorTabs({
+	active,
+}: {
+	active: "allocate" | "replace" | "duplicates"
+}) {
 	const defaultFilterStartDate = useDefaultFilterStartDate()
 	const defaultFilterEndDateToday = useDefaultFilterEndDateToday()
 
 	return (
-		<nav className="flex border-b" aria-label="Allocator views">
+		<nav className="flex overflow-x-auto border-b" aria-label="Workflow views">
 			<Link
 				className={cn(
 					"border-b-2 px-4 py-2 text-sm transition-colors duration-150 ease-out",
@@ -36,6 +40,17 @@ export default function AllocatorTabs({ active }: { active: "allocate" | "replac
 				href={pathAllocatorPending()}
 			>
 				Replace Pending
+			</Link>
+			<Link
+				className={cn(
+					"shrink-0 border-b-2 px-4 py-2 text-sm transition-colors duration-150 ease-out",
+					active === "duplicates"
+						? "border-foreground font-medium"
+						: "border-transparent text-muted-foreground hover:text-foreground",
+				)}
+				href={pathAllocatorDuplicates()}
+			>
+				Fix Duplicates
 			</Link>
 		</nav>
 	)

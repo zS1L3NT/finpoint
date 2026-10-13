@@ -124,9 +124,12 @@ export type SettingsRow = {
 }
 
 export const DB_NAME = "finpoint"
-export const DB_VERSION = 2
+export const DB_VERSION = 3
+
+export type DuplicateDismissalRow = { statement_id: string; other_statement_id: string }
 
 class FinpointDB extends Dexie {
+	duplicate_dismissals!: Table<DuplicateDismissalRow, [string, string]>
 	accounts!: Table<AccountRow, string>
 	statements!: Table<StatementRow, string>
 	categories!: Table<CategoryRow, string>
@@ -165,6 +168,14 @@ class FinpointDB extends Dexie {
 		this.version(2).stores({
 			settings: "key",
 		})
+		this.version(3)
+			.stores({
+				duplicate_dismissals:
+					"[statement_id+other_statement_id], statement_id, other_statement_id",
+			})
+			.upgrade(() => {
+				// New table starts empty; existing financial data needs no conversion.
+			})
 	}
 }
 

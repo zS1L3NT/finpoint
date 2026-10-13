@@ -150,7 +150,7 @@ export default function AllocatorPage() {
 		<>
 			<PageContent>
 				<PageHeader
-					title="Allocator"
+					title="Workflows"
 					subtitle="Allocate statements to records and replace handwritten pending statements."
 					description="Allocation workspace"
 					icon="lucide:link"
