@@ -29,6 +29,7 @@ import {
 import { useFetch } from "@/hooks/use-fetch"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { useRecordEditor } from "@/hooks/use-record-editor"
+import { TREATMENTS } from "@/lib/analytics"
 import { cn } from "@/lib/utils"
 import { listCategories } from "@/logic/categories"
 import { listMonthlyBudgets } from "@/logic/monthly-budgets"
@@ -363,11 +364,11 @@ function RecordFilters({
 				<SelectContent align="start" variant="filter">
 					<SelectGroup>
 						<SelectItem value="all">Any treatment</SelectItem>
-						<SelectItem value="income">Income</SelectItem>
-						<SelectItem value="spending">Spending</SelectItem>
-						<SelectItem value="saving_investment">Saving / investment</SelectItem>
-						<SelectItem value="neutral">Excluded</SelectItem>
-						<SelectItem value="automatic">Automatic</SelectItem>
+						{TREATMENTS.map(item => (
+							<SelectItem key={item.value} value={item.value}>
+								{item.label}
+							</SelectItem>
+						))}
 					</SelectGroup>
 				</SelectContent>
 			</Select>

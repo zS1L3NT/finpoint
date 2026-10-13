@@ -146,13 +146,9 @@ export default function CategoriesPage() {
 	)
 }
 
-const SECTIONS: { value: AnalyticsTreatment; label: string }[] = [
-	{ value: "spending", label: "Spending" },
-	{ value: "income", label: "Income" },
-	{ value: "saving_investment", label: "Saving & investment" },
-	{ value: "neutral", label: "Transfers & neutral" },
-	{ value: "automatic", label: "Automatic by direction" },
-]
+const SECTIONS = (
+	["spending", "income", "saving_investment", "neutral", "automatic"] as AnalyticsTreatment[]
+).map(value => ({ value, label: treatmentLabel(value) }))
 
 function CategoryTile({
 	category,

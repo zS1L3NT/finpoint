@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dialog"
 import { FieldGroup } from "@/components/ui/field"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
-import { canUseDefaultMonthlyBudget, treatmentLabel } from "@/lib/analytics"
+import { canUseDefaultMonthlyBudget, TREATMENTS, treatmentLabel } from "@/lib/analytics"
 import { cn } from "@/lib/utils"
 import { createCategory, deleteCategory, updateCategory } from "@/logic/categories"
 import { listMonthlyBudgets } from "@/logic/monthly-budgets"
@@ -264,11 +264,7 @@ export default function CategoryDialog({
 							value={values.analytics_treatment || NO_DEFAULT}
 							items={[
 								{ value: NO_DEFAULT, label: "No default treatment" },
-								{ value: "income", label: "Income" },
-								{ value: "spending", label: "Spending" },
-								{ value: "saving_investment", label: "Saving/investment" },
-								{ value: "neutral", label: "Transfer/neutral" },
-								{ value: "automatic", label: "Automatic by direction" },
+								...TREATMENTS,
 							]}
 							errors={getApiFieldErrors("analytics_treatment")}
 							onChange={value => {

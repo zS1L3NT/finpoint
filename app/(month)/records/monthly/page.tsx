@@ -30,6 +30,7 @@ import {
 import { useFetch } from "@/hooks/use-fetch"
 import { STALE_MONTH_CLASS, useMonthTransition } from "@/hooks/use-month-transition"
 import { useRecordEditor } from "@/hooks/use-record-editor"
+import { TREATMENTS } from "@/lib/analytics"
 import { cn } from "@/lib/utils"
 import { listCategories } from "@/logic/categories"
 import { getMonthlyRecords } from "@/logic/monthly"
@@ -453,11 +454,11 @@ function MonthlyRecordFilters({
 					<SelectContent align="start" variant="filter">
 						<SelectGroup>
 							<SelectItem value="all">Any treatment</SelectItem>
-							<SelectItem value="income">Income</SelectItem>
-							<SelectItem value="spending">Spending</SelectItem>
-							<SelectItem value="saving_investment">Saving / investment</SelectItem>
-							<SelectItem value="neutral">Excluded</SelectItem>
-							<SelectItem value="automatic">Automatic</SelectItem>
+							{TREATMENTS.map(item => (
+								<SelectItem key={item.value} value={item.value}>
+									{item.label}
+								</SelectItem>
+							))}
 						</SelectGroup>
 						{/* Only set by the Overview's links, so the list matches the total clicked. */}
 						<SelectSeparator />

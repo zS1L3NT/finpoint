@@ -1,7 +1,7 @@
 import { useLiveQuery } from "dexie-react-hooks"
 import SelectField from "@/components/form/select-field"
 import { FieldGroup } from "@/components/ui/field"
-import { treatmentLabel } from "@/lib/analytics"
+import { TREATMENTS, treatmentLabel } from "@/lib/analytics"
 import { listMonthlyBudgets } from "@/logic/monthly-budgets"
 import { AnalyticsTreatment } from "@/types"
 
@@ -60,11 +60,7 @@ export default function RecordAnalyticsFields({
 									},
 								]
 							: []),
-						{ value: "income", label: "Income" },
-						{ value: "spending", label: "Spending" },
-						{ value: "saving_investment", label: "Saving/investment" },
-						{ value: "neutral", label: "Transfer/neutral" },
-						{ value: "automatic", label: "Automatic by direction" },
+						...TREATMENTS,
 					]}
 					onChange={value => {
 						const treatment = value === CATEGORY_DEFAULT ? "" : value
