@@ -369,24 +369,6 @@ export default function DashboardPage() {
 						</div>
 					) : null}
 					{stage > 2 ? (
-						<Card className="min-w-0">
-							<CardHeader>
-								<ScopedCardTitle scope="Total">Surplus / Shortfall</ScopedCardTitle>
-								<CardDescription>
-									Cumulative income minus all personal spending
-								</CardDescription>
-							</CardHeader>
-							<CardContent>
-								<TotalSpendingChart
-									data={series}
-									history={data.history}
-									month={month}
-									year={year}
-								/>
-							</CardContent>
-						</Card>
-					) : null}
-					{stage > 3 ? (
 						<Card>
 							<CardHeader className="border-b">
 								<ScopedCardTitle scope="Total">Spending by day</ScopedCardTitle>
@@ -399,6 +381,24 @@ export default function DashboardPage() {
 								<DailySpendingChart
 									rows={monthlyBudgetDailyData.rows}
 									monthlyBudgets={dailyLines}
+									month={month}
+									year={year}
+								/>
+							</CardContent>
+						</Card>
+					) : null}
+					{stage > 3 ? (
+						<Card className="min-w-0">
+							<CardHeader>
+								<ScopedCardTitle scope="Total">Surplus / Shortfall</ScopedCardTitle>
+								<CardDescription>
+									Cumulative income minus all personal spending
+								</CardDescription>
+							</CardHeader>
+							<CardContent>
+								<TotalSpendingChart
+									data={series}
+									history={data.history}
 									month={month}
 									year={year}
 								/>

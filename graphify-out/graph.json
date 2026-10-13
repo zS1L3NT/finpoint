@@ -20771,19 +20771,19 @@
     },
     {
       "source": "app_month_page_dashboardpage",
-      "target": "src_components_charts_total_spending_chart_totalspendingchart",
+      "target": "src_components_charts_daily_spending_chart_dailyspendingchart",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L380",
+      "source_location": "L381",
       "weight": 1.0
     },
     {
       "source": "app_month_page_dashboardpage",
-      "target": "src_components_charts_daily_spending_chart_dailyspendingchart",
+      "target": "src_components_charts_total_spending_chart_totalspendingchart",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -83137,5 +83137,5 @@
       "source_file": "CONTEXT.md"
     }
   ],
-  "built_at_commit": "6a18d6e23625f99d06bcdfd8f5618a1cb9bdb570"
+  "built_at_commit": "d4db100e49620d88a7aa818d00307f66e0925832"
 }
