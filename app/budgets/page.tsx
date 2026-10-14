@@ -60,7 +60,7 @@ export default function BudgetsPage() {
 				/>
 
 				{budgets === undefined ? null : budgets.length === 0 ? (
-					<p className="rounded-xl border border-dashed p-10 text-center text-sm text-muted-foreground">
+					<p className="rounded-xl border border-dashed p-10 text-center text-xs text-muted-foreground">
 						{query ? "No budgets match your search." : "No budgets yet."}
 					</p>
 				) : (
@@ -68,7 +68,7 @@ export default function BudgetsPage() {
 						const items = budgets.filter(budget => budgetState(budget) === state.value)
 						return items.length ? (
 							<section key={state.value} className="grid gap-3">
-								<h3 className="text-sm font-medium text-muted-foreground">
+								<h3 className="text-sm font-semibold text-muted-foreground">
 									{state.label} · {items.length}
 								</h3>
 								<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -169,7 +169,7 @@ function BudgetCard({ budget, onEdit }: { budget: Budget; onEdit: () => void }) 
 		>
 			<header className="flex items-start justify-between gap-3">
 				<div className="min-w-0">
-					<h4 className="truncate font-semibold">{budget.name}</h4>
+					<h4 className="truncate text-sm font-semibold">{budget.name}</h4>
 					<p className="mt-0.5 text-xs text-muted-foreground">
 						{formatBudgetDateWindow(budget)}
 					</p>
@@ -188,7 +188,7 @@ function BudgetCard({ budget, onEdit }: { budget: Budget; onEdit: () => void }) 
 
 			<div className="grid gap-2">
 				<div className="flex items-end justify-between gap-3">
-					<p className="text-2xl font-semibold tracking-tight tabular-nums">
+					<p className="text-xl font-semibold tracking-tight tabular-nums">
 						{formatCurrency(spent)}
 						<span className="text-sm font-normal text-muted-foreground">
 							{" "}

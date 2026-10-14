@@ -91,13 +91,13 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 					) : null}
 					<div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
 						<div>
-							<p className="text-xs font-medium tracking-[0.18em] text-muted-foreground uppercase">
+							<p className="text-xs font-medium text-muted-foreground">
 								{isMonthly ? "Monthly Records" : "Monthly overview"}
 							</p>
-							<h2 className="mt-1 text-3xl font-semibold tracking-tight">
+							<h2 className="mt-1 text-xl font-semibold tracking-tight md:text-2xl">
 								{month} {year}
 							</h2>
-							<p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
+							<p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>
 						</div>
 						<ButtonGroup className="w-full sm:w-fit">
 							<Button

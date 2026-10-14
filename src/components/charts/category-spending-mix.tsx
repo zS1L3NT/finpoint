@@ -61,7 +61,7 @@ export default function CategorySpendingMix({
 				)
 			})}
 			{!rows.length ? (
-				<p className="text-sm text-muted-foreground">
+				<p className="text-xs text-muted-foreground">
 					No spending or refunds recorded in this scope.
 				</p>
 			) : null}

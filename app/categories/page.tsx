@@ -73,7 +73,7 @@ export default function CategoriesPage() {
 				</div>
 
 				{categoriesQuery === undefined ? null : visible.length === 0 ? (
-					<p className="rounded-xl border border-dashed p-10 text-center text-sm text-muted-foreground">
+					<p className="rounded-xl border border-dashed p-10 text-center text-xs text-muted-foreground">
 						{query ? "No categories match your search." : "No categories yet."}
 					</p>
 				) : (
@@ -95,7 +95,7 @@ export default function CategoriesPage() {
 						)
 						return (
 							<section key={section.value} className="grid gap-3">
-								<h3 className="flex items-baseline gap-2 text-sm font-medium">
+								<h3 className="flex items-baseline gap-2 text-sm font-semibold">
 									{section.label}
 									<span className="text-xs font-normal text-muted-foreground">
 										{items.length}{" "}

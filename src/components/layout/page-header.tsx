@@ -44,15 +44,15 @@ export default function PageHeader({
 				) : null}
 
 				<div className="flex min-w-0 flex-col gap-1">
-					<div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground md:tracking-[0.22em]">
-						<IconifyIcon icon={Icon} className="size-3" />
+					<div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+						<IconifyIcon icon={Icon} className="size-3.5" />
 						{description}
 					</div>
-					<h2 className="text-2xl font-semibold tracking-tight break-words md:text-3xl">
+					<h2 className="text-xl font-semibold tracking-tight break-words md:text-2xl">
 						{title}
 					</h2>
 					{subtitle ? (
-						<div className="max-w-2xl text-sm text-muted-foreground whitespace-pre-line break-words">
+						<div className="max-w-prose text-xs text-muted-foreground whitespace-pre-line break-words">
 							{subtitle}
 						</div>
 					) : null}

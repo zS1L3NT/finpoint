@@ -130,14 +130,26 @@ export default function DashboardPage() {
 			className={cn("reveal grid gap-5 md:gap-6", stale && STALE_MONTH_CLASS)}
 		>
 			{period.is_future ? (
-				<div className="rounded-xl border bg-muted/30 px-4 py-3 text-sm">
-					<p className="font-medium">
-						Plan for {month} {year}
-					</p>
-					<p className="mt-1 text-xs text-muted-foreground">
-						{future_records_count} future-dated Records · Actual results begin when the
-						month starts. Monthly budgets remain editable.
-					</p>
+				<div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border bg-muted/20 p-4">
+					<div>
+						<p className="text-sm font-semibold">
+							Plan for {month} {year}
+						</p>
+						<p className="mt-1 text-xs text-muted-foreground">
+							Set your monthly amounts below. Spending results begin on 1 {month}.
+						</p>
+					</div>
+					<Button variant="outline" size="sm" asChild>
+						<Link
+							onClick={handlePush("overview")}
+							href={pathMonthlyRecords({ month, year: String(year) })}
+						>
+							{future_records_count
+								? `Review ${future_records_count} future-dated Records`
+								: "Plan Records"}
+							<IconifyIcon icon="lucide:arrow-up-right" />
+						</Link>
+					</Button>
 				</div>
 			) : (
 				<SummaryBand
@@ -149,78 +161,57 @@ export default function DashboardPage() {
 			)}
 			<div className="flex flex-wrap items-center justify-between gap-2">
 				<div className="min-w-0 flex-1 basis-full sm:basis-auto">
-					<ReviewLinks data={data} month={month} year={year} />
+					{!period.is_future ? (
+						<ReviewLinks data={data} month={month} year={year} />
+					) : null}
 				</div>
 				<ScopeSelect value={scope} budgets={budgets} onChange={setScope} />
 			</div>
-			<div className="grid gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-				<Card className="min-w-0">
-					<CardHeader className="border-b">
-						<ScopedCardTitle
-							scope={scope === "all" ? (dailyBudget?.name ?? "Total") : scopeLabel}
-							color={scope === "all" ? dailyBudget?.color : scopeColor}
-						>
-							Spending pace
-						</ScopedCardTitle>
-						<CardDescription>
-							{period.is_future
-								? "Planned amount and future-dated spending. No recorded pace yet."
-								: paceProjection.available
+			<div
+				className={cn(
+					"grid gap-5",
+					!period.is_future && "xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]",
+				)}
+			>
+				{!period.is_future ? (
+					<Card className="min-w-0">
+						<CardHeader className="border-b">
+							<ScopedCardTitle
+								scope={
+									scope === "all" ? (dailyBudget?.name ?? "Total") : scopeLabel
+								}
+								color={scope === "all" ? dailyBudget?.color : scopeColor}
+							>
+								Spending forecast
+							</ScopedCardTitle>
+							<CardDescription>
+								{paceProjection.available
 									? "If recorded daily spending continues, plus scheduled spending."
 									: "Recorded spending against the monthly plan."}
-						</CardDescription>
-					</CardHeader>
-					<CardContent>
-						{period.is_future ? (
-							<div className="grid gap-4 py-3">
-								<div>
-									<p className="text-xs text-muted-foreground">
-										{paceAmount?.name ?? "Monthly budget"} planned amount
-									</p>
-									<p className="mt-2 text-2xl font-semibold tabular-nums">
-										{paceAmount?.amount == null
-											? "Not set"
-											: formatCurrency(paceAmount.amount)}
-									</p>
-								</div>
-								<p className="text-xs leading-relaxed text-muted-foreground">
-									Recorded pace and remaining daily capacity start when the month
-									begins. Review future-dated Records as you plan.
-								</p>
-								<Button variant="outline" size="sm" asChild>
-									<Link
-										onClick={handlePush("overview")}
-										href={pathMonthlyRecords({ month, year: String(year) })}
-									>
-										Review {future_records_count} future-dated Records{" "}
-										<IconifyIcon icon="lucide:arrow-up-right" />
-									</Link>
-								</Button>
-							</div>
-						) : (
-							<>
-								<CashflowChart
-									data={paceSeries}
-									history={paceData.history}
-									month={month}
-									year={year}
-									amount={paceAmount?.amount ?? null}
-									amountLabel={paceAmount?.name ?? null}
-									showProjection={paceProjection.available}
-									recordFilters={paceFilters}
-								/>
-								<PaceSummary
-									projection={paceProjection}
-									completedMonth={completedMonth}
-									highestSpendingDay={highestSpendingDay}
-									spending={paceData.spending}
-									amount={paceAmount?.amount ?? null}
-									remaining={paceData.remaining}
-								/>
-							</>
-						)}
-					</CardContent>
-				</Card>
+							</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<CashflowChart
+								data={paceSeries}
+								history={paceData.history}
+								month={month}
+								year={year}
+								amount={paceAmount?.amount ?? null}
+								amountLabel={paceAmount?.name ?? null}
+								showProjection={paceProjection.available}
+								recordFilters={paceFilters}
+							/>
+							<PaceSummary
+								projection={paceProjection}
+								completedMonth={completedMonth}
+								highestSpendingDay={highestSpendingDay}
+								spending={paceData.spending}
+								amount={paceAmount?.amount ?? null}
+								remaining={paceData.remaining}
+							/>
+						</CardContent>
+					</Card>
+				) : null}
 				<Card className="min-w-0">
 					<CardHeader>
 						<div className="flex items-start justify-between gap-3">
@@ -503,7 +494,7 @@ function ScopedCardTitle({
 	children: ReactNode
 }) {
 	return (
-		<CardTitle className="flex items-center gap-2 text-base">
+		<CardTitle className="flex items-center gap-2">
 			{children}
 			<ScopeLabel scope={scope} color={color} />
 		</CardTitle>
@@ -604,10 +595,10 @@ function InvestmentRow({
 		<section className="grid gap-4" aria-labelledby="investment-title">
 			<div className="flex flex-wrap items-center justify-between gap-3">
 				<div>
-					<h3 id="investment-title" className="text-lg font-semibold">
+					<h3 id="investment-title" className="text-sm font-semibold">
 						Saving and investment movements
 					</h3>
-					<p className="text-sm text-muted-foreground">
+					<p className="text-xs text-muted-foreground">
 						Recorded contributions and withdrawals for this month
 					</p>
 				</div>

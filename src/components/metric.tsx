@@ -50,7 +50,7 @@ export function Metric({
 	return (
 		<div
 			className={cn(
-				"relative grid min-h-28 min-w-0 content-start bg-card p-3 sm:p-4",
+				"relative grid min-h-24 min-w-0 content-start bg-card p-3 sm:p-4",
 				tone !== "neutral" &&
 					"before:absolute before:inset-x-0 before:top-0 before:h-0.5 before:content-['']",
 				tone === "positive" && "before:bg-emerald-500",
@@ -77,11 +77,11 @@ export function Metric({
 					</span>
 				) : null}
 			</div>
-			<div className="mt-4 flex items-end justify-between gap-3">
+			<div className="mt-3 flex items-end justify-between gap-3">
 				<div className="min-w-0">
 					<p
 						className={cn(
-							"text-xl font-semibold tracking-tight tabular-nums sm:text-2xl",
+							"text-lg font-semibold tracking-tight tabular-nums sm:text-xl",
 							tone === "positive" && "text-emerald-700 dark:text-emerald-400",
 							tone === "negative" && "text-red-700 dark:text-red-400",
 						)}

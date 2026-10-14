@@ -67,7 +67,7 @@ export default function CategoryHistoryChart({
 	return (
 		<Card className="h-full min-w-0">
 			<CardHeader>
-				<CardTitle className="flex flex-wrap items-center gap-2 text-base">
+				<CardTitle className="flex flex-wrap items-center gap-2">
 					Category trend
 					{badge}
 				</CardTitle>
@@ -134,7 +134,7 @@ export default function CategoryHistoryChart({
 						</div>
 					</>
 				) : (
-					<p className="py-10 text-center text-sm text-muted-foreground">
+					<p className="py-10 text-center text-xs text-muted-foreground">
 						No spending in the available months.
 					</p>
 				)}

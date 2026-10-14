@@ -155,7 +155,7 @@ function WorkspaceRow({
 					<IconifyIcon icon={icon} className="size-4" />
 				</span>
 				<div className="min-w-0">
-					<p className={cn("text-sm font-medium", destructive && "text-destructive")}>
+					<p className={cn("text-sm font-semibold", destructive && "text-destructive")}>
 						{title}
 					</p>
 					<p className="mt-0.5 max-w-xl text-xs text-muted-foreground">{description}</p>
@@ -475,10 +475,8 @@ export default function DataSettingsPage() {
 								key={status.title}
 								className="min-w-0 animate-in duration-200 ease-out fade-in-0 slide-in-from-bottom-1"
 							>
-								<h3 className="text-lg font-semibold tracking-tight md:text-xl">
-									{status.title}
-								</h3>
-								<p className="mt-0.5 text-sm text-muted-foreground">
+								<h3 className="text-sm font-semibold">{status.title}</h3>
+								<p className="mt-0.5 text-xs text-muted-foreground">
 									{status.detail}
 								</p>
 							</div>
@@ -541,11 +539,11 @@ export default function DataSettingsPage() {
 									{label}
 								</span>
 								{counts ? (
-									<span className="text-xl font-semibold tabular-nums">
+									<span className="text-lg font-semibold tabular-nums">
 										{(counts[key] ?? 0).toLocaleString()}
 									</span>
 								) : (
-									<span className="invisible text-xl font-semibold">0</span>
+									<span className="invisible text-lg font-semibold">0</span>
 								)}
 							</div>
 						))}
@@ -566,7 +564,7 @@ export default function DataSettingsPage() {
 								}
 								active={!driveUnconfigured && !driveTeaser}
 							/>
-							<CardContent className="grid flex-1 content-start gap-3 py-4 text-sm">
+							<CardContent className="grid flex-1 content-start gap-3 py-4 text-xs">
 								{driveUnconfigured ? (
 									process.env.NODE_ENV === "development" ? (
 										<ol className="grid list-decimal gap-2 pl-5 text-muted-foreground">

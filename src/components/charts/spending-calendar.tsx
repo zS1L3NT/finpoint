@@ -114,11 +114,11 @@ export default function SpendingCalendar({
 							)}
 							style={future ? undefined : { backgroundColor: `var(--heat-${level})` }}
 						>
-							<span className="text-[0.625rem] leading-none font-medium tabular-nums opacity-80 sm:text-[0.6875rem]">
+							<span className="text-[0.6875rem] leading-none font-medium tabular-nums opacity-80">
 								{index + 1}
 							</span>
 							{level > 0 ? (
-								<span className="hidden text-[0.625rem] leading-none font-semibold tabular-nums sm:block">
+								<span className="hidden text-[0.6875rem] leading-none font-semibold tabular-nums sm:block">
 									{compact(spending)}
 								</span>
 							) : null}

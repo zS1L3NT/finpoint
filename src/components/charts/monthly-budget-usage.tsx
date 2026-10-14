@@ -60,7 +60,7 @@ export default function MonthlyBudgetUsage({
 
 	return (
 		<div className="@container flex h-full flex-col gap-4">
-			<div className="grid flex-1 content-center gap-5 @[48rem]:grid-cols-[auto_minmax(0,30rem)] @[48rem]:items-center @[48rem]:justify-center @[48rem]:gap-12">
+			<div className="grid gap-5 @[48rem]:grid-cols-[auto_minmax(0,30rem)] @[48rem]:items-center @[48rem]:justify-center @[48rem]:gap-12">
 				<div className="relative mx-auto size-52 shrink-0 @[28rem]:size-64 @[48rem]:size-72">
 					<svg
 						viewBox="0 0 240 240"
@@ -164,11 +164,11 @@ export default function MonthlyBudgetUsage({
 						className="pointer-events-none absolute inset-[18%] flex min-w-0 flex-col items-center justify-center text-center"
 						aria-live="polite"
 					>
-						<p className="max-w-full truncate text-[11px] text-muted-foreground @[28rem]:text-xs @[48rem]:text-sm">
+						<p className="max-w-full truncate text-[11px] text-muted-foreground @[28rem]:text-xs">
 							{item?.name ?? "Monthly plan"}
 						</p>
 						<p
-							className="mt-1 max-w-full text-lg font-semibold tracking-tight tabular-nums @[28rem]:text-xl @[48rem]:text-2xl"
+							className="mt-1 max-w-full text-lg font-semibold tracking-tight tabular-nums @[28rem]:text-xl"
 							aria-label={
 								item?.amount === null
 									? "No planned amount"
@@ -181,7 +181,7 @@ export default function MonthlyBudgetUsage({
 							{item?.amount === null ? "No planned amount" : "planned"}
 						</p>
 						<p
-							className="mt-1 max-w-full text-xs tabular-nums @[48rem]:text-sm"
+							className="mt-1 max-w-full text-xs tabular-nums"
 							aria-label={`${formatCurrency(item?.spending ?? spending)} spent`}
 						>
 							{centerCurrency(item?.spending ?? spending)} spent
@@ -251,7 +251,7 @@ export default function MonthlyBudgetUsage({
 						</div>
 					))}
 					{!budgets.length ? (
-						<p className="text-sm text-muted-foreground">
+						<p className="text-xs text-muted-foreground">
 							Create a monthly budget to plan your spending.
 						</p>
 					) : null}

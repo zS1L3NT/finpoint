@@ -64,7 +64,7 @@ function Step({
 				transition: TRANSITION.base,
 			})}
 		>
-			<h3 className="flex items-center gap-2 text-sm font-medium">
+			<h3 className="flex items-center gap-2 text-sm font-semibold">
 				<span className="grid size-5 place-items-center rounded-full bg-foreground text-[0.6875rem] text-background">
 					{number}
 				</span>
@@ -172,7 +172,7 @@ export default function ImporterPage() {
 									<IconifyIcon icon="lucide:circle-check" className="size-5" />
 								</span>
 								<div>
-									<p className="font-medium">
+									<p className="text-sm font-semibold">
 										{result.imported} new statement
 										{result.imported === 1 ? "" : "s"} imported
 									</p>

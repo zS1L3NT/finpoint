@@ -238,7 +238,7 @@ export default function AllocatorPendingPage() {
 							<div>
 								<h3
 									id="pending-queue-title"
-									className="font-heading text-base font-medium"
+									className="font-heading text-sm font-semibold"
 								>
 									Pending Statements
 								</h3>
@@ -383,7 +383,7 @@ export default function AllocatorPendingPage() {
 											</p>
 											<div className="flex items-start justify-between gap-3">
 												<div className="min-w-0">
-													<p className="truncate font-semibold">
+													<p className="truncate text-sm font-semibold">
 														{selectedPendingStatement.description}
 													</p>
 													<p className="text-xs text-muted-foreground">
@@ -417,7 +417,7 @@ export default function AllocatorPendingPage() {
 										</div>
 										<h3
 											id="candidate-title"
-											className="font-heading text-base font-medium"
+											className="font-heading text-sm font-semibold"
 										>
 											Imported Statements it could become
 										</h3>

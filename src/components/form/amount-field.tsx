@@ -130,7 +130,7 @@ export default function AmountField({
 							type="button"
 							variant="ghost"
 							size="xs"
-							className="absolute top-1/2 right-1 h-5 px-1.5 font-mono text-[0.625rem] -translate-y-1/2"
+							className="absolute top-1/2 right-1 h-5 px-1.5 font-mono text-[0.6875rem] -translate-y-1/2"
 							aria-label={negative ? "Make amount positive" : "Make amount negative"}
 							title={negative ? "Make amount positive" : "Make amount negative"}
 							disabled={disabled}
