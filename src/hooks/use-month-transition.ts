@@ -57,4 +57,4 @@ export function useMonthTransition(
  * Classes for month content whose data still belongs to the previous month: it dims after a
  * short delay, so quick loads swap straight in and slow ones read as loading, not as wrong numbers.
  */
-export const STALE_MONTH_CLASS = "opacity-50 transition-opacity delay-150 duration-200"
+export const STALE_MONTH_CLASS = "opacity-50 transition-opacity delay-150 duration-200 ease-out"

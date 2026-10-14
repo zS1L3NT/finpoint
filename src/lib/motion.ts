@@ -11,9 +11,6 @@ export const EASE_OUT = [0.23, 1, 0.32, 1] as const
 /** Strong ease-in-out: things already on screen moving to a new place. */
 export const EASE_IN_OUT = [0.77, 0, 0.175, 1] as const
 
-/** iOS-like drawer curve for edge sheets. */
-export const EASE_DRAWER = [0.32, 0.72, 0, 1] as const
-
 /** Durations in seconds. UI motion stays under 300ms; frequent actions sit at the low end. */
 export const DURATION = {
 	instant: 0.12,
@@ -51,6 +48,15 @@ export const ROW_CASCADE_LIMIT = 12
  */
 export type RowEntrance = "cascade" | "refilter" | "fade"
 
+/** Per-row timings of the table entrance, in seconds. */
+const ROW_FADE_DURATION = 0.18
+const ROW_REFILTER_DURATION = 0.24
+const ROW_CASCADE_DURATION = 0.28
+const ROW_REFILTER_STAGGER = 0.02
+const ROW_CASCADE_STAGGER = 0.03
+const ROW_REFILTER_RISE = 6
+const ROW_CASCADE_RISE = 10
+
 /** Motion props for a table row (or its group header); rows past the fold do not animate. */
 export const rowEnter = (index: number, entrance: RowEntrance) => {
 	if (index >= ROW_CASCADE_LIMIT) return { initial: false as const }
@@ -58,17 +64,36 @@ export const rowEnter = (index: number, entrance: RowEntrance) => {
 		return {
 			initial: { opacity: 0 },
 			animate: { opacity: 1 },
-			transition: { duration: 0.18, ease: EASE_OUT },
+			transition: { duration: ROW_FADE_DURATION, ease: EASE_OUT },
 		}
 	}
 	const refilter = entrance === "refilter"
 	return {
-		initial: { opacity: 0, y: refilter ? 6 : 10 },
+		initial: { opacity: 0, y: refilter ? ROW_REFILTER_RISE : ROW_CASCADE_RISE },
 		animate: { opacity: 1, y: 0 },
 		transition: {
-			duration: refilter ? 0.24 : 0.34,
+			duration: refilter ? ROW_REFILTER_DURATION : ROW_CASCADE_DURATION,
 			ease: EASE_OUT,
-			delay: index * (refilter ? 0.02 : 0.03),
+			delay: index * (refilter ? ROW_REFILTER_STAGGER : ROW_CASCADE_STAGGER),
 		},
 	}
 }
+
+/** Motion props for a card in a grid: a short rise, staggered over the first few cards. */
+export const cardEnter = (index: number) => ({
+	initial: { opacity: 0, y: 6 },
+	animate: { opacity: 1, y: 0 },
+	transition: { ...SPRING.smooth, delay: Math.min(index, 7) * 0.03 },
+})
+
+/** Motion props for a block that collapses to nothing: height and margin close together. */
+export const COLLAPSE_MOTION = {
+	initial: { opacity: 0, height: 0, marginTop: -16 },
+	animate: { opacity: 1, height: "auto", marginTop: 0 },
+	exit: { opacity: 0, height: 0, marginTop: -16, transition: TRANSITION.fast },
+	transition: {
+		height: SPRING.smooth,
+		marginTop: SPRING.smooth,
+		opacity: TRANSITION.base,
+	},
+} as const

@@ -73,8 +73,9 @@ export default function SettingsPage() {
 				<CardHeader className="border-b">
 					<CardTitle>Default filters</CardTitle>
 					<CardDescription>
-						Choose the date range used when Records and Allocator open. Leave the start
-						date empty and keep today's end date off to show everything by default.
+						Choose the date range used when Records and Allocate to Records open. Leave
+						the start date empty and keep today's end date off to show everything by
+						default.
 					</CardDescription>
 				</CardHeader>
 				<CardContent>

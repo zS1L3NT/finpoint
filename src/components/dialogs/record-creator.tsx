@@ -1,4 +1,5 @@
 import { useForm, useStore } from "@tanstack/react-form"
+import { useLiveQuery } from "dexie-react-hooks"
 import { AnimatePresence, motion } from "framer-motion"
 import { DateTime } from "luxon"
 import { useState } from "react"
@@ -28,12 +29,11 @@ import { FieldGroup } from "@/components/ui/field"
 import { Progress } from "@/components/ui/progress"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
-import { useFetch } from "@/hooks/use-fetch"
-import { SPRING, TRANSITION } from "@/lib/motion"
-import { cn, formatCurrency, formatDatetime, parseDatetime, round2dp } from "@/lib/utils"
+import { COLLAPSE_MOTION, SPRING, TRANSITION } from "@/lib/motion"
+import { cn, formatCurrency, formatDatetime, parseDatetime, pluralize, round2 } from "@/lib/utils"
 import { createRecord, recordCompletions } from "@/logic/records"
 import { ValidationError } from "@/logic/validate"
-import { CategoryWithChildren, Statement } from "@/types"
+import type { CategoryWithChildren, Statement } from "@/types"
 
 export default function RecordCreatorDialog({
 	statements: statementsProp,
@@ -56,11 +56,11 @@ export default function RecordCreatorDialog({
 	if (isOpen && openStatements !== statementsProp) setOpenStatements(statementsProp)
 	const statements = isOpen ? statementsProp : openStatements
 
-	const completions = useFetch(() => recordCompletions(), {
+	const completions = useLiveQuery(() => recordCompletions(), []) ?? {
 		titles: [],
 		locations: [],
 		peoples: [],
-	})
+	}
 
 	const { mergeErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
 
@@ -72,7 +72,7 @@ export default function RecordCreatorDialog({
 			people: "",
 			location: "",
 			datetime: inferAllocatorDatetime(statements),
-			amount: round2dp(
+			amount: round2(
 				statements.reduce((acc, statement) => acc + statement.allocable_amount, 0),
 			),
 			category_id: "",
@@ -82,7 +82,7 @@ export default function RecordCreatorDialog({
 			description: "",
 			statements: statements.map(statement => ({
 				id: statement.id,
-				amount: round2dp(statement.allocable_amount),
+				amount: round2(statement.allocable_amount),
 			})),
 		},
 		onSubmit: async ({ value }) => {
@@ -115,8 +115,8 @@ export default function RecordCreatorDialog({
 	const isPendingAmount = useStore(
 		form.store,
 		state =>
-			round2dp(state.values.statements.reduce((acc, el) => acc + el.amount, 0)) !==
-			round2dp(state.values.amount),
+			round2(state.values.statements.reduce((acc, el) => acc + el.amount, 0)) !==
+			round2(state.values.amount),
 	)
 	const analytics = useStore(form.store, state => ({
 		treatment: state.values.analytics_treatment,
@@ -143,7 +143,7 @@ export default function RecordCreatorDialog({
 				<DialogHeader>
 					<DialogTitle>Create New Record</DialogTitle>
 					<DialogDescription>
-						Allocate {statements.length} selected statement(s) to a new record.
+						Allocate {pluralize(statements.length, "statement")} to a new record.
 					</DialogDescription>
 				</DialogHeader>
 
@@ -208,7 +208,7 @@ export default function RecordCreatorDialog({
 								{field => (
 									<DatetimeField
 										id={field.name}
-										label="Date & Time"
+										label="Date and time"
 										value={field.state.value}
 										errors={mergeErrors(field.state.meta.errors, field.name)}
 										onChange={value => {
@@ -234,22 +234,7 @@ export default function RecordCreatorDialog({
 							</form.Field>
 							<AnimatePresence>
 								{isPendingAmount && (
-									<motion.div
-										className="overflow-hidden"
-										initial={{ opacity: 0, height: 0, marginTop: -16 }}
-										animate={{ opacity: 1, height: "auto", marginTop: 0 }}
-										exit={{
-											opacity: 0,
-											height: 0,
-											marginTop: -16,
-											transition: TRANSITION.fast,
-										}}
-										transition={{
-											height: SPRING.smooth,
-											marginTop: SPRING.smooth,
-											opacity: TRANSITION.base,
-										}}
-									>
+									<motion.div className="overflow-hidden" {...COLLAPSE_MOTION}>
 										<Alert className="mt-4 max-w-md border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-50">
 											<IconifyIcon icon="lucide:triangle-alert" />
 											<AlertTitle>
@@ -340,7 +325,7 @@ export default function RecordCreatorDialog({
 					</div>
 
 					<div className="flex flex-col gap-4">
-						<p className="text-sm font-semibold">Statements Attached</p>
+						<p className="text-sm font-semibold">Statement allocations</p>
 
 						<ScrollArea className="h-fit max-h-200">
 							<div className="relative flex flex-col gap-2">

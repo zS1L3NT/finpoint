@@ -4,6 +4,10 @@ export function canUseDefaultMonthlyBudget(treatment: AnalyticsTreatment | null 
 	return treatment === "spending" || treatment === "automatic" || treatment == null
 }
 
+export function canUseMonthlyBudget(treatment: AnalyticsTreatment, amount: number) {
+	return treatment === "spending" || (treatment === "automatic" && amount < 0)
+}
+
 /** The one set of treatment names every form, filter, and list shows. */
 export const TREATMENTS: { value: AnalyticsTreatment; label: string }[] = [
 	{ value: "income", label: "Income" },

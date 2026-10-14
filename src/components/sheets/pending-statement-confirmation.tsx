@@ -12,8 +12,7 @@ import {
 	SheetTitle,
 	SheetTrigger,
 } from "@/components/ui/sheet"
-import { classForCurrency, cn, formatCurrency, formatDatetime } from "@/lib/utils"
-import { round2 } from "@/logic/shared"
+import { classForCurrency, cn, formatCurrency, formatDatetime, round2 } from "@/lib/utils"
 import { listStatements } from "@/logic/statements"
 import type { Statement } from "@/types"
 
@@ -157,8 +156,8 @@ export default function PendingStatementConfirmationSheet({
 			<StatementReplacementReviewDialog
 				statement={statement}
 				pendingStatement={pendingStatement}
-				open={!!pendingStatement && !isOpen}
-				onOpenChange={open => {
+				isOpen={!!pendingStatement && !isOpen}
+				setIsOpen={open => {
 					if (!open) {
 						setPendingStatement(null)
 						setIsOpen(true)

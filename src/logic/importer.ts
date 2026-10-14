@@ -25,7 +25,7 @@ async function readFile(file: File): Promise<Row[]> {
 		const text = await file.text()
 		const parsed = Papa.parse<string[]>(text.trim(), { skipEmptyLines: true })
 		if (parsed.errors.length) {
-			throw new ValidationError({ files: ["Invalid CSV Format: unable to parse file."] })
+			throw new ValidationError({ files: ["Could not read this CSV file."] })
 		}
 		return parsed.data.map(row => row.map(value => (value === "" ? null : value)))
 	}
@@ -34,7 +34,7 @@ async function readFile(file: File): Promise<Row[]> {
 		const workbook = XLSX.read(buffer, { type: "array" })
 		const sheetName = workbook.SheetNames[0]
 		const sheet = sheetName ? workbook.Sheets[sheetName] : undefined
-		if (!sheet) throw new ValidationError({ files: ["Invalid CSV Format: empty workbook."] })
+		if (!sheet) throw new ValidationError({ files: ["This Excel file has no worksheets."] })
 		const rows = XLSX.utils.sheet_to_json<unknown[]>(sheet, {
 			header: 1,
 			raw: true,
@@ -50,8 +50,7 @@ async function readFile(file: File): Promise<Row[]> {
 
 function parseDayMonthYear(value: string | null | undefined): string {
 	// "27 May 2026" -> "2026-05-27 00:00"
-	if (!value)
-		throw new ValidationError({ files: ["Invalid CSV Format: missing transaction date."] })
+	if (!value) throw new ValidationError({ files: ["A statement date is missing."] })
 	const months: Record<string, string> = {
 		jan: "01",
 		feb: "02",
@@ -67,22 +66,21 @@ function parseDayMonthYear(value: string | null | undefined): string {
 		dec: "12",
 	}
 	const parts = value.trim().split(/\s+/)
-	if (parts.length !== 3) throw new ValidationError({ files: ["Invalid CSV Format: bad date."] })
+	if (parts.length !== 3) throw new ValidationError({ files: ["A statement date is invalid."] })
 	const day = parts[0] ?? ""
 	const mon = parts[1] ?? ""
 	const year = parts[2] ?? ""
 	const month = months[mon.slice(0, 3).toLowerCase()]
 	if (!month || !day || !year) {
-		throw new ValidationError({ files: ["Invalid CSV Format: bad date."] })
+		throw new ValidationError({ files: ["A statement date is invalid."] })
 	}
 	return `${year}-${month}-${day.padStart(2, "0")} 00:00`
 }
 
 function parseDayMonthYearSlashes(value: string | null | undefined): string {
-	if (!value)
-		throw new ValidationError({ files: ["Invalid CSV Format: missing transaction date."] })
+	if (!value) throw new ValidationError({ files: ["A statement date is missing."] })
 	const match = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(value.trim())
-	if (!match) throw new ValidationError({ files: ["Invalid CSV Format: bad date."] })
+	if (!match) throw new ValidationError({ files: ["A statement date is invalid."] })
 	const [, day, month, year] = match
 	return `${year}-${month?.padStart(2, "0")}-${day?.padStart(2, "0")} 00:00`
 }
@@ -254,12 +252,12 @@ export async function importDbs(files: File[]): Promise<ImportResult> {
 		const data = await readFile(file)
 		const details = data.shift()
 		if (!details || details[0] !== "Account Details For:") {
-			throw new ValidationError({ files: ["Invalid CSV Format: Missing Account details."] })
+			throw new ValidationError({ files: ["Account details are missing from this export."] })
 		}
 		const info = (details[1] ?? "").split(" ")
 		const accountId = (info[1] ?? "").replace(/-/g, "")
 		if (!accountId)
-			throw new ValidationError({ files: ["Invalid CSV Format: Missing Account details."] })
+			throw new ValidationError({ files: ["Account details are missing from this export."] })
 		await ensureAccount(accountId, info[0] ?? accountId, "DBS")
 
 		for (let i = 0; i < 7; i++) data.shift() // statement-as-at … ledger-balance blanks
@@ -269,7 +267,7 @@ export async function importDbs(files: File[]): Promise<ImportResult> {
 			const statement = combine(header, row)
 			if (statement.Status !== "Settled") {
 				throw new ValidationError({
-					files: ["Invalid CSV Format: Unsettled transaction found."],
+					files: ["This export contains an unsettled statement."],
 				})
 			}
 			const datetime = parseDayMonthYear(statement["Transaction Date"])
@@ -310,12 +308,14 @@ export async function importUob(files: File[]): Promise<ImportResult> {
 		for (let i = 0; i < 4; i++) data.shift()
 		const numberRow = data.shift()
 		if (!numberRow || numberRow[0] !== "Account Number:") {
-			throw new ValidationError({ files: ["Invalid CSV Format: Missing Account Number."] })
+			throw new ValidationError({
+				files: ["The account number is missing from this export."],
+			})
 		}
 		const accountId = numberRow[1] ?? ""
 		const typeRow = data.shift()
 		if (!typeRow || typeRow[0] !== "Account Type:") {
-			throw new ValidationError({ files: ["Invalid CSV Format: Missing Account Type."] })
+			throw new ValidationError({ files: ["The account type is missing from this export."] })
 		}
 		await ensureAccount(accountId, typeRow[1] ?? accountId, "UOB")
 		data.shift() // statement period
@@ -356,7 +356,7 @@ export async function importOcbc(files: File[]): Promise<ImportResult> {
 		const account = /^OCBC\s+(.+?)\s+(\d[\d-]*)$/.exec(details?.[1]?.trim() ?? "")
 		if (details?.[0] !== "Account details for:" || !account) {
 			throw new ValidationError({
-				files: ["Invalid CSV Format: missing OCBC account details."],
+				files: ["OCBC account details are missing from this export."],
 			})
 		}
 		const accountId = account[2]?.replace(/-/g, "") ?? ""
@@ -371,7 +371,9 @@ export async function importOcbc(files: File[]): Promise<ImportResult> {
 			"Deposits(SGD)",
 		]
 		if (!expected.every(column => header.includes(column))) {
-			throw new ValidationError({ files: ["Invalid CSV Format: missing OCBC columns."] })
+			throw new ValidationError({
+				files: ["Required OCBC columns are missing from this export."],
+			})
 		}
 
 		const rows: Parsed[] = []
@@ -380,7 +382,7 @@ export async function importOcbc(files: File[]): Promise<ImportResult> {
 			const withdrawal = Number((statement["Withdrawals(SGD)"] ?? "0").replace(/,/g, ""))
 			const deposit = Number((statement["Deposits(SGD)"] ?? "0").replace(/,/g, ""))
 			if (Number.isNaN(withdrawal) || Number.isNaN(deposit)) {
-				throw new ValidationError({ files: ["Invalid CSV Format: bad amount."] })
+				throw new ValidationError({ files: ["A statement amount is invalid."] })
 			}
 			rows.push({
 				account_id: accountId,
@@ -423,7 +425,7 @@ export async function importRevolut(
 		}
 		if (statement.State !== "COMPLETED" && statement.State !== "PENDING") {
 			throw new ValidationError({
-				files: ["Invalid CSV Format: Incompleted transaction found."],
+				files: ["This export contains a statement with an unsupported status."],
 			})
 		}
 		// "2026-05-27 14:03:22" -> "2026-05-27 14:03"

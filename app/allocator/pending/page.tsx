@@ -29,7 +29,14 @@ import {
 import WorkflowTabs from "@/components/workflow-tabs"
 import { useHistory } from "@/history"
 import { SPRING, TRANSITION } from "@/lib/motion"
-import { classForCurrency, cn, formatCurrency, formatDatetime, round2dp } from "@/lib/utils"
+import {
+	classForCurrency,
+	cn,
+	formatCurrency,
+	formatDatetime,
+	pluralize,
+	round2,
+} from "@/lib/utils"
 import { listAccounts } from "@/logic/accounts"
 import { paginateItems, parsePage, parsePageSize } from "@/logic/pagination"
 import { replacementComparison, replacementReason, sameDirection } from "@/logic/replacements"
@@ -336,11 +343,13 @@ export default function AllocatorPendingPage() {
 							</Empty>
 						)}
 
-						<PaginationFooter
-							summary={`Showing ${pendingStatements.data.length} of ${pendingStatements.total} pending Statements.`}
-							page={pendingStatements.current_page}
-							lastPage={pendingStatements.last_page ?? 1}
-						/>
+						{pendingQuery !== undefined && (
+							<PaginationFooter
+								summary={`Showing ${pendingStatements.data.length} of ${pluralize(pendingStatements.total, "pending Statement")}.`}
+								page={pendingStatements.current_page}
+								lastPage={pendingStatements.last_page ?? 1}
+							/>
+						)}
 					</section>
 
 					<section
@@ -403,7 +412,7 @@ export default function AllocatorPendingPage() {
 												</div>
 												<span
 													className={cn(
-														"shrink-0 text-lg font-semibold tabular-nums",
+														"shrink-0 text-lg font-semibold tracking-tight tabular-nums",
 														classForCurrency(
 															selectedPendingStatement.amount,
 														),
@@ -470,9 +479,6 @@ export default function AllocatorPendingPage() {
 									<CandidateResults
 										data={candidates ?? null}
 										error={null}
-										showLoading={
-											candidates === undefined && !!selectedPendingStatement
-										}
 										scope={candidateScope}
 										onReview={setReviewStatement}
 										onPage={page =>
@@ -512,8 +518,8 @@ export default function AllocatorPendingPage() {
 			<StatementReplacementReviewDialog
 				statement={reviewStatement}
 				pendingStatement={selectedPendingStatement}
-				open={!!reviewStatement}
-				onOpenChange={open => {
+				isOpen={!!reviewStatement}
+				setIsOpen={open => {
 					if (!open) setReviewStatement(null)
 				}}
 				onConfirmed={afterReplacement}
@@ -559,7 +565,7 @@ function PendingCard({
 	selected: boolean
 	onSelect: () => void
 }) {
-	const allocated = round2dp(statement.amount - statement.allocable_amount)
+	const allocated = round2(statement.amount - statement.allocable_amount)
 	return (
 		<button
 			type="button"
@@ -619,14 +625,12 @@ function PendingCard({
 function CandidateResults({
 	data,
 	error,
-	showLoading,
 	scope,
 	onReview,
 	onPage,
 }: {
 	data: CandidatePage | null
 	error: string | null
-	showLoading: boolean
 	scope: string
 	onReview: (statement: Statement) => void
 	onPage: (page: number) => void
@@ -644,18 +648,7 @@ function CandidateResults({
 				</Alert>
 			</motion.div>
 		)
-	if (!data)
-		return showLoading ? (
-			<motion.div
-				initial={{ opacity: 0 }}
-				animate={{ opacity: 1 }}
-				transition={transition}
-				className="flex items-center gap-2 py-4 text-xs text-muted-foreground"
-			>
-				<IconifyIcon icon="lucide:loader-circle" className="animate-spin" />
-				Finding imported Statements…
-			</motion.div>
-		) : null
+	if (!data) return null
 	if (!data.data.length)
 		return (
 			<motion.div initial={initial} animate={{ opacity: 1, y: 0 }} transition={transition}>
@@ -777,7 +770,7 @@ function CandidateResults({
 			</div>
 			<div className="flex flex-col gap-2 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
 				<span>
-					Showing {data.data.length} of {data.total} imported Statements.
+					Showing {data.data.length} of {pluralize(data.total, "imported Statement")}.
 				</span>
 				<div className="flex gap-1.5">
 					<Button

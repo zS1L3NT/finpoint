@@ -16,11 +16,11 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useHistory } from "@/history"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
-import { SPRING } from "@/lib/motion"
+import { cardEnter } from "@/lib/motion"
 import { cn, formatCurrency, parseDate } from "@/lib/utils"
 import { listBudgets } from "@/logic/budgets"
 import { pathBudget } from "@/routes"
-import { Budget } from "@/types"
+import type { Budget } from "@/types"
 
 export default function BudgetsPage() {
 	const [isCreatingBudget, setIsCreatingBudget] = useState(false)
@@ -76,12 +76,7 @@ export default function BudgetsPage() {
 										<motion.div
 											key={budget.id}
 											className="grid"
-											initial={{ opacity: 0, y: 6 }}
-											animate={{ opacity: 1, y: 0 }}
-											transition={{
-												...SPRING.smooth,
-												delay: Math.min(index, 7) * 0.03,
-											}}
+											{...cardEnter(index)}
 										>
 											<BudgetCard
 												budget={budget}
@@ -158,7 +153,7 @@ function BudgetCard({ budget, onEdit }: { budget: Budget; onEdit: () => void }) 
 
 	return (
 		<article
-			className="group relative grid cursor-pointer gap-4 rounded-xl border bg-card p-4 transition-[box-shadow,transform] duration-150 ease-out hover:shadow-md active:scale-[0.99]"
+			className="group relative grid cursor-pointer gap-4 rounded-xl border bg-card p-4 transition-[box-shadow,transform] duration-150 ease-out hover:shadow-md active:scale-[0.99] motion-reduce:transition-none motion-reduce:active:scale-100"
 			onClick={event => {
 				if (!isInteractiveTarget(event.target)) open()
 			}}
@@ -207,7 +202,7 @@ function BudgetCard({ budget, onEdit }: { budget: Budget; onEdit: () => void }) 
 				<div className="relative h-2 w-full rounded-full bg-muted">
 					<div
 						className={cn(
-							"h-full origin-left rounded-full transition-transform duration-300 ease-out",
+							"h-full origin-left rounded-full transition-transform duration-300 ease-out motion-reduce:transition-none",
 							over
 								? "bg-destructive"
 								: pace !== null && usage / 100 > pace + 0.05

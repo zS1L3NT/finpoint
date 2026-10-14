@@ -70,7 +70,7 @@ function useSyncIndicator() {
 							: sync.kind === "offline"
 								? "Offline"
 								: sync.kind === "local-changes"
-									? "Unsaved changes"
+									? "Changes waiting to sync"
 									: sync.kind === "never-synced"
 										? "Not connected yet"
 										: sync.kind === "error"

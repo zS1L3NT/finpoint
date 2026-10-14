@@ -53,7 +53,7 @@ export function Metric({
 				"relative grid min-h-24 min-w-0 content-start bg-card p-3 sm:p-4",
 				tone !== "neutral" &&
 					"before:absolute before:inset-x-0 before:top-0 before:h-0.5 before:content-['']",
-				tone === "positive" && "before:bg-emerald-500",
+				tone === "positive" && "before:bg-creative",
 				tone === "negative" && "before:bg-red-500",
 			)}
 		>
@@ -69,7 +69,7 @@ export function Metric({
 						className={cn(
 							"ml-auto rounded-full px-1.5 py-0.5 text-[0.6875rem] font-semibold whitespace-nowrap tabular-nums",
 							delta.good
-								? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+								? "bg-creative/10 text-creative"
 								: "bg-red-500/10 text-red-700 dark:text-red-400",
 						)}
 					>
@@ -82,7 +82,7 @@ export function Metric({
 					<p
 						className={cn(
 							"text-lg font-semibold tracking-tight tabular-nums sm:text-xl",
-							tone === "positive" && "text-emerald-700 dark:text-emerald-400",
+							tone === "positive" && "text-creative",
 							tone === "negative" && "text-red-700 dark:text-red-400",
 						)}
 					>

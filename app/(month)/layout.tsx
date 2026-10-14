@@ -15,7 +15,7 @@ import { useMonthParams } from "@/hooks/use-month-params"
 import { armMonthTransition } from "@/hooks/use-month-transition"
 import { SPRING } from "@/lib/motion"
 import { cn } from "@/lib/utils"
-import { pathDashboard, pathMonthlyRecords } from "@/routes"
+import { pathDashboard, pathMonthlyRecords, pathRecords } from "@/routes"
 
 /**
  * Persistent shell for the Overview / Monthly Records tabs. The title, month
@@ -27,7 +27,7 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 	const pathname = usePathname()
 	const { latest, isNavigatingBack, navigateBack, handleClear } = useHistory()
 	const back = latest?.url.split("?")[0] === pathDashboard() ? latest : null
-	const isMonthly = pathname.startsWith("/records/")
+	const isMonthly = pathname.startsWith(`${pathRecords()}/`)
 
 	const today = DateTime.now().startOf("day")
 	const isCurrent = date.hasSame(today, "month")

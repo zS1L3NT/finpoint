@@ -14,7 +14,6 @@ import { useRecordColumns, useRecordMobileRow } from "@/components/table/record-
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { useFetch } from "@/hooks/use-fetch"
 import { useRecordEditor } from "@/hooks/use-record-editor"
 import { formatDatetime } from "@/lib/utils"
 import { listAccounts } from "@/logic/accounts"
@@ -28,7 +27,7 @@ export default function StatementPage({ params }: { params: Promise<{ id: string
 	const [isEditingStatement, setIsEditingStatement] = useState(false)
 	const data = useLiveQuery(() => (id ? getStatement(id).catch(() => null) : null), [id])
 	const accounts = useLiveQuery(() => listAccounts(), []) ?? []
-	const categories = useFetch(() => listCategories(), [])
+	const categories = useLiveQuery(() => listCategories(), []) ?? []
 	const { editingRecord, handleEdit, setEditingRecord } = useRecordEditor()
 	const columns = useRecordColumns<Record & { pivot: Allocation }>({
 		amount: "allocated",
@@ -55,7 +54,6 @@ export default function StatementPage({ params }: { params: Promise<{ id: string
 	}
 
 	const { records, ...statement } = data
-	const typedRecords = records as unknown as (Record & { pivot: Allocation })[]
 
 	return (
 		<>
@@ -97,7 +95,7 @@ export default function StatementPage({ params }: { params: Promise<{ id: string
 				<DetailSummary
 					footer={
 						statement.is_pending ? (
-							<span>Status · Handwritten pending Statement</span>
+							<span>Status · Pending Statement</span>
 						) : (
 							<span>Imported day index · {statement.index}</span>
 						)
@@ -127,7 +125,7 @@ export default function StatementPage({ params }: { params: Promise<{ id: string
 					/>
 					<DetailSummaryItem
 						icon="lucide:calendar-clock"
-						label="Date & Time"
+						label="Date and time"
 						value={formatDatetime(statement.datetime)}
 					/>
 				</DetailSummary>
@@ -139,7 +137,7 @@ export default function StatementPage({ params }: { params: Promise<{ id: string
 					</CardHeader>
 					<CardContent>
 						<DataTable
-							data={typedRecords}
+							data={records}
 							columns={columns}
 							mobileRow={mobileRow}
 							emptyMessage="No records found."

@@ -1,6 +1,10 @@
 // Shared pure helpers for the logic layer: ids, money math, datetime shapes.
 // Validation lives in `@/logic/validate` — import ValidationError from there.
 
+import { round2 } from "@/lib/utils"
+
+export { round2 }
+
 export function slugify(value: string): string {
 	return value
 		.toLowerCase()
@@ -10,11 +14,15 @@ export function slugify(value: string): string {
 		.replace(/^-+|-+$/g, "")
 }
 
-export function round2(value: number): number {
-	return Math.round(value * 100) / 100
-}
+export const TREATMENT_VALUES = [
+	"income",
+	"spending",
+	"saving_investment",
+	"neutral",
+	"automatic",
+] as const
 
-/** Exact decimal math via integer cents (mirrors PHP cents() helpers). */
+/** Exact decimal math via integer cents. */
 export function toCents(value: number | string): number {
 	const raw = String(value).trim()
 	const negative = raw.startsWith("-")

@@ -15,7 +15,7 @@ Every line earns its place by carrying behavior, clarity, reuse, or a constraint
 - Delete props, branches, imports, wrappers, and helpers that carry nothing.
 - Write one-off logic inline. Abstract only for real reuse or where the repo already has a matching shared pattern.
 - Keep simple logic simple, free of defensive layers and line-heavy rewrites.
-- Treat comments as code with intent. Keep those recording rationale, workflow notes, constraints, temporary options, domain caveats, or non-obvious positioning; remove only the stale, misleading, or boilerplate.
+- Treat comments as code with intent. Keep those recording rationale, workflow notes, constraints, temporary options, domain caveats, or non-obvious positioning; remove only the stale, misleading, or boilerplate. Describe present purpose; mention removed stacks (Laravel, Inertia, Vite) only where that history explains a current decision.
 
 ### Grouping And Order
 
@@ -48,10 +48,10 @@ Every line earns its place by carrying behavior, clarity, reuse, or a constraint
 
 ## React / TypeScript Style
 
-- Group imports in the local order: external libraries, local components, UI primitives, constants/history/hooks, libs, types, generated routes/helpers.
-- Use `type` imports where the repo does, and match its React type style (`React.ReactNode` vs imported `ReactNode`).
+- Group imports in the local order: external libraries, local components, UI primitives, constants/history/hooks, libs, types, routes/helpers.
+- Use `import type` for type-only dependencies and `React.X` for React types.
 - Use small inline prop types for one-off components and named types for reused/shared surfaces, matching nearby files.
-- Order props by how the component reads: core data, external data collections, open/state controls, callbacks/actions, then optional trigger/render/config.
+- Order props by how the component reads: core data, external data collections, open/state controls, callbacks/actions, then optional trigger/render/config. Controlled dialog/sheet props use `isOpen`/`setIsOpen`.
 - Common component flow: history/navigation helpers, fetch/query hooks, local state, form/error helpers, effects, derived values, form/table setup, handlers, selected JSX fragments, return.
 - Reach for `useMemo`, `useCallback`, and extra helper components only when the codebase already does or identity/performance constraints are real.
 - A variable holding a JSX fragment earns its place when it makes a large return readable.
@@ -63,9 +63,9 @@ Every line earns its place by carrying behavior, clarity, reuse, or a constraint
 
 Project-specific code style rules preserved from the previous guide.
 
-- Frontend TS/TSX uses tabs via Biome; PHP uses Pint / 4 spaces.
-- Inspect equivalent existing flows before implementing. Mirror local controller, route, page, form, dialog, and table patterns.
-- Do not reinvent local UI/data patterns. Reuse existing components/helpers, or extract the smallest shared helper that matches the local style.
+- TS/TSX uses tabs via Biome.
+- Inspect equivalent existing flows before implementing. Mirror local route, page, form, dialog, and table patterns.
+- Keep one implementation per shared domain rule/helper. Reuse existing components/helpers, or extract the smallest shared helper that matches the local style.
 - When a display rule changes globally, centralize it in the shared table/component/utility path when practical.
 - Keep code dense and direct: avoid one-time-use variables, derived structures, extra scopes, callback blocks, and helper names unless they materially improve readability.
 - Prefer shorter expressions and fewer lines while preserving clarity.
@@ -73,5 +73,23 @@ Project-specific code style rules preserved from the previous guide.
 - Code scoped to one component should stay in that component file.
 - Generic logic that is not specific to one hook/component/page belongs in an appropriate shared utility.
 
-- Every `.ts`/`.tsx` filename is kebab-case (`export-import.ts`, never `exportImport.ts`). The only exception is `vite-env.d.ts`, which keeps Vite's conventional name.
+- Every `.ts`/`.tsx` filename is kebab-case (`export-import.ts`). Use camelCase locals; retain snake_case for persisted fields.
 - Logic functions read in three blocks separated by blank lines: validate input, fetch/persist via Dexie, then return.
+- Form dialogs surface `ValidationError` through `useApiFormErrors`.
+- Build application route strings with `src/routes.ts` helpers.
+- Make logic return types describe the actual data, including nullability and allocation pivots, rather than using `as unknown as` in UI.
+
+## Copy
+
+- Use sentence-case labels and British spelling, including “Colour”. Make nouns and verbs count-aware; use `pluralize` for counted nouns.
+- Instructions name the current visible page/tab label; financial labels name the computed quantity. Shared Record copy applies to every treatment.
+- Reserve “unsaved” for unpersisted edits; persisted changes awaiting Drive use “Changes waiting to sync”.
+- Privacy/storage copy distinguishes financial data from auth data and lists the cookies actually used. Import errors name the actual file format.
+
+## Motion and polish
+
+- Keep motion values/presets reused across files in `src/lib/motion.ts`. Timed UI motion lasts at most 300ms per animation; chart data intro is 450ms. Springs use the shared presets.
+- Specify an explicit duration and `ease-out` with app-owned CSS `transition-*` classes; make transform transitions respect reduced motion.
+- Interactive list rows give colour press feedback without scaling. Removing rows on the same page preserves row identity and does not replay the entrance cascade.
+- Changing numbers use `tabular-nums`; use `tracking-tight` only at `text-lg` and larger, and write 11px micro text as `text-[0.6875rem]`.
+- Positive money uses the `creative` token. Icons over user-chosen colours choose a contrasting foreground.

@@ -13,6 +13,11 @@ import {
 } from "@/logic/replacements"
 import { inputToStored, newId, round2, toCents } from "@/logic/shared"
 import { ValidationError, Validator } from "@/logic/validate"
+import type { Allocation, Record as AppRecord, Statement } from "@/types"
+
+export type StatementDetail = Statement & {
+	records: Array<AppRecord & { pivot: Allocation }>
+}
 
 export type StatementFilters = {
 	query?: string | null
@@ -223,7 +228,7 @@ function ensureAllocationsFit(amount: number, allocations: number[]) {
 	}
 }
 
-export async function getStatement(id: string) {
+export async function getStatement(id: string): Promise<StatementDetail> {
 	const row = await db.statements.get(id)
 	if (!row) throw new Error("Statement not found.")
 	const enriched = (await enrich([row]))[0]

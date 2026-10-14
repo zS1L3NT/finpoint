@@ -4,6 +4,9 @@ import { db } from "@/data/db"
 import { enrichRecords } from "@/logic/records"
 import { newId, round2 } from "@/logic/shared"
 import { Validator } from "@/logic/validate"
+import type { Record as AppRecord, Budget } from "@/types"
+
+export type BudgetDetail = Budget & { records: AppRecord[] }
 
 export type BudgetFilters = { query?: string | null }
 
@@ -38,7 +41,7 @@ export async function listBudgets(filters: BudgetFilters = {}) {
 	return enriched
 }
 
-export async function getBudget(id: string) {
+export async function getBudget(id: string): Promise<BudgetDetail> {
 	const budget = await db.budgets.get(id)
 	if (!budget) throw new Error("Budget not found.")
 	const links = await db.budget_records.where("budget_id").equals(id).toArray()

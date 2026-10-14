@@ -309,7 +309,3 @@ export const db = new FinpointDB()
 export function asPending(value: boolean): number {
 	return value ? 1 : 0
 }
-
-export function isPendingRow(row: { is_pending: number }): boolean {
-	return row.is_pending === 1
-}

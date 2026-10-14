@@ -19,13 +19,12 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
-import { SPRING, TRANSITION } from "@/lib/motion"
+import { useApiFormErrors } from "@/hooks/use-api-form-errors"
+import { COLLAPSE_MOTION } from "@/lib/motion"
 import { formatCurrency } from "@/lib/utils"
 import { getMonthlyBudgetAmountSource, upsertMonthlyBudget } from "@/logic/monthly-budgets"
 import { ValidationError } from "@/logic/validate"
-import { MonthlyBudget } from "@/types"
-
-const fieldErrors = (errors?: string[]) => errors?.map(message => ({ message }))
+import type { MonthlyBudget } from "@/types"
 
 export default function MonthlyBudgetDialog({
 	monthlyBudget,
@@ -48,7 +47,7 @@ export default function MonthlyBudgetDialog({
 	const [noAmount, setNoAmount] = useState(monthlyBudget?.amount === null)
 	const [amountScope, setAmountScope] = useState<string | null>(null)
 	const [archived, setArchived] = useState(monthlyBudget?.archived ?? false)
-	const [errors, setErrors] = useState<{ [key: string]: string[] }>({})
+	const { apiErrors, getApiFieldErrors, resetApiErrors, setApiErrors } = useApiFormErrors()
 	const [submitting, setSubmitting] = useState(false)
 
 	const source = useLiveQuery(
@@ -88,12 +87,12 @@ export default function MonthlyBudgetDialog({
 		setNoAmount(monthlyBudget?.amount === null)
 		setAmountScope(null)
 		setArchived(monthlyBudget?.archived ?? false)
-		setErrors({})
+		resetApiErrors()
 	}
 
 	const submit = async () => {
 		setSubmitting(true)
-		setErrors({})
+		resetApiErrors()
 		try {
 			await upsertMonthlyBudget({
 				id: monthlyBudget?.id,
@@ -110,7 +109,7 @@ export default function MonthlyBudgetDialog({
 			setOpen(false)
 		} catch (cause) {
 			if (cause instanceof ValidationError) {
-				setErrors(cause.errors)
+				setApiErrors(cause.errors)
 			} else {
 				toast.error("Unable to save this monthly budget.")
 			}
@@ -151,7 +150,7 @@ export default function MonthlyBudgetDialog({
 								id="monthly-budget-name"
 								label="Name"
 								value={name}
-								errors={fieldErrors(errors.name)}
+								errors={getApiFieldErrors("name")}
 								onChange={setName}
 							/>
 							<Field>
@@ -177,7 +176,7 @@ export default function MonthlyBudgetDialog({
 									{ value: "outlier", label: "Outlier" },
 									{ value: "other", label: "Other" },
 								]}
-								errors={fieldErrors(errors.group)}
+								errors={getApiFieldErrors("group")}
 								onChange={value => setGroup(value as MonthlyBudget["group"])}
 							/>
 							<SelectField
@@ -200,7 +199,7 @@ export default function MonthlyBudgetDialog({
 									{ value: "daily", label: "Estimate from daily spending" },
 									{ value: "recurring", label: "Recurring / scheduled spending" },
 								]}
-								errors={fieldErrors(errors.pace_kind)}
+								errors={getApiFieldErrors("pace_kind")}
 								onChange={value => setPaceKind(value as MonthlyBudget["pace_kind"])}
 							/>
 						</FieldGroup>
@@ -235,22 +234,7 @@ export default function MonthlyBudgetDialog({
 							/>
 							<AnimatePresence initial={false}>
 								{(scope === "month" || scope === "default") && (
-									<motion.div
-										className="overflow-hidden"
-										initial={{ opacity: 0, height: 0, marginTop: -16 }}
-										animate={{ opacity: 1, height: "auto", marginTop: 0 }}
-										exit={{
-											opacity: 0,
-											height: 0,
-											marginTop: -16,
-											transition: TRANSITION.fast,
-										}}
-										transition={{
-											height: SPRING.smooth,
-											marginTop: SPRING.smooth,
-											opacity: TRANSITION.base,
-										}}
-									>
+									<motion.div className="overflow-hidden" {...COLLAPSE_MOTION}>
 										<FieldGroup>
 											<AmountField
 												id="monthly-budget-amount"
@@ -258,7 +242,7 @@ export default function MonthlyBudgetDialog({
 												value={amount}
 												min={0}
 												disabled={noAmount}
-												errors={fieldErrors(errors.amount)}
+												errors={getApiFieldErrors("amount")}
 												onChange={setAmount}
 											/>
 											<Field orientation="horizontal">
@@ -295,12 +279,12 @@ export default function MonthlyBudgetDialog({
 								</div>
 							</Field>
 						) : null}
-						{Object.values(errors).flat().length ? (
+						{Object.values(apiErrors).flat().length ? (
 							<p
 								className="fade-in slide-in-from-top-1 animate-in text-sm text-destructive duration-150 ease-out"
 								role="alert"
 							>
-								{Object.values(errors).flat().join(" ")}
+								{Object.values(apiErrors).flat().join(" ")}
 							</p>
 						) : null}
 						<DialogFooter>

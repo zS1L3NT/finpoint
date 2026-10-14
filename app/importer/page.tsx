@@ -25,7 +25,7 @@ import { Input } from "@/components/ui/input"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { BANKS } from "@/lib/banks"
 import { SPRING, TRANSITION } from "@/lib/motion"
-import { cn } from "@/lib/utils"
+import { cn, pluralize } from "@/lib/utils"
 import { listAccounts } from "@/logic/accounts"
 import { importDbs, importOcbc, importRevolut, importUob } from "@/logic/importer"
 import { ValidationError } from "@/logic/validate"
@@ -114,12 +114,15 @@ export default function ImporterPage() {
 							: value.bank === "ocbc"
 								? await importOcbc(files)
 								: await importRevolut(files[0] ?? null, accountId, accountName)
-				toast.success(`Imported successful`, {
+				toast.success("Import complete.", {
 					description: (
 						<>
-							<p>Inserted {data.imported} statements.</p>
-							<p>Re-indexed {data.reindexed} existing statements.</p>
-							<p>Skipped {data.skipped} unchanged statements.</p>
+							<p>Imported {pluralize(data.imported, "statement")}.</p>
+							<p>
+								Updated statement order for {pluralize(data.reindexed, "statement")}
+								.
+							</p>
+							<p>Skipped {pluralize(data.skipped, "statement")}.</p>
 						</>
 					),
 				})
@@ -229,7 +232,7 @@ export default function ImporterPage() {
 															clearApiError("account_id")
 															clearApiError("account_name")
 														}}
-														className="group/bank flex cursor-pointer items-center gap-2.5 rounded-lg border bg-background px-3 py-2.5 text-left text-sm transition-[background-color,border-color,box-shadow,transform] duration-150 ease-out hover:bg-muted active:scale-[0.98] aria-checked:border-foreground aria-checked:ring-1 aria-checked:ring-foreground"
+														className="group/bank flex cursor-pointer items-center gap-2.5 rounded-lg border bg-background px-3 py-2.5 text-left text-sm transition-[background-color,border-color,box-shadow,transform] duration-150 ease-out hover:bg-muted active:scale-[0.98] motion-reduce:transition-none motion-reduce:active:scale-100 aria-checked:border-foreground aria-checked:ring-1 aria-checked:ring-foreground"
 													>
 														<span
 															className="grid size-7 shrink-0 place-items-center rounded-md text-[0.625rem] font-bold text-white"
@@ -315,7 +318,7 @@ export default function ImporterPage() {
 												{field => (
 													<TextField
 														id={field.name}
-														label="Account Name"
+														label="Account name"
 														value={field.state.value}
 														errors={mergeErrors(
 															field.state.meta.errors,
@@ -391,7 +394,7 @@ export default function ImporterPage() {
 														)
 													}}
 													className={cn(
-														"grid cursor-pointer place-items-center gap-1.5 rounded-lg border border-dashed px-4 py-8 text-center text-sm transition-[background-color,border-color,transform] duration-150 ease-out hover:bg-muted/50 active:scale-[0.99]",
+														"grid cursor-pointer place-items-center gap-1.5 rounded-lg border border-dashed px-4 py-8 text-center text-sm transition-[background-color,border-color,transform] duration-150 ease-out hover:bg-muted/50 active:scale-[0.99] motion-reduce:transition-none motion-reduce:scale-100 motion-reduce:active:scale-100",
 														dragging &&
 															"scale-[1.01] border-foreground bg-muted/60",
 														errors.length && "border-destructive",

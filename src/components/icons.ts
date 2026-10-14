@@ -125,8 +125,6 @@ import {
 	X as XIcon,
 } from "lucide-react"
 
-export const FALLBACK_ICON_NAME = "circle-question-mark"
-
 export const ICONS: Record<string, LucideIcon> = {
 	apple: AppleIcon,
 	"arrow-down": ArrowDownIcon,

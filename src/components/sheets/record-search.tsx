@@ -12,10 +12,9 @@ import {
 	SheetTitle,
 	SheetTrigger,
 } from "@/components/ui/sheet"
-import { classForCurrency, cn, formatCurrency, parseDatetime } from "@/lib/utils"
+import { classForCurrency, cn, formatCurrency, parseDatetime, pluralize, round2 } from "@/lib/utils"
 import { listRecords } from "@/logic/records"
-import { round2 } from "@/logic/shared"
-import { Record } from "@/types"
+import type { Record } from "@/types"
 
 const PAGE = 40
 
@@ -93,12 +92,12 @@ export default function RecordSearchSheet({
 					<SheetDescription>
 						{target !== undefined ? (
 							<>
-								Attaching{" "}
+								Allocating{" "}
 								<span className="font-medium text-foreground tabular-nums">
 									{formatCurrency(target)}
 								</span>
 								{matches
-									? ` · ${matches} Record${matches === 1 ? "" : "s"} need exactly this`
+									? ` · ${pluralize(matches, "Record")} with exactly this amount remaining`
 									: ". Select the Record it belongs to."}
 							</>
 						) : (
@@ -224,7 +223,7 @@ function RecordOption({
 			disabled={disabled}
 			onClick={onSelect}
 			className={cn(
-				"group grid w-full cursor-pointer grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-muted focus-visible:bg-muted focus-visible:outline-none disabled:cursor-default",
+				"group grid w-full cursor-pointer grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors duration-150 ease-out hover:bg-muted active:bg-muted/60 focus-visible:bg-muted focus-visible:outline-none disabled:cursor-default",
 				match && "bg-emerald-500/5 ring-1 ring-emerald-500/30 ring-inset",
 				disabled && !busy && "opacity-60",
 			)}

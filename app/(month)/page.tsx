@@ -4,7 +4,7 @@ import { useLiveQuery } from "dexie-react-hooks"
 import { DateTime } from "luxon"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
-import { type ReactNode, useRef } from "react"
+import { useRef } from "react"
 import CashflowChart from "@/components/charts/cashflow-chart"
 import CategoryHistoryChart from "@/components/charts/category-history-chart"
 import CategoryMovers from "@/components/charts/category-movers"
@@ -35,10 +35,10 @@ import { useHistory } from "@/history"
 import { useMonthParams } from "@/hooks/use-month-params"
 import { STALE_MONTH_CLASS, useMonthTransition } from "@/hooks/use-month-transition"
 import { useStagedMount } from "@/hooks/use-staged-mount"
-import { cn, formatCurrency } from "@/lib/utils"
+import { cn, formatCurrency, pluralize } from "@/lib/utils"
 import { getDashboardView, type TrendMonth } from "@/logic/dashboard"
 import { pathAllocator, pathDashboard, pathMonthlyRecords, pathStatements } from "@/routes"
-import { AnalyticsSummary } from "@/types"
+import type { AnalyticsSummary } from "@/types"
 
 type DashboardView = Awaited<ReturnType<typeof getDashboardView>>
 type DashboardData = DashboardView["dashboard"]
@@ -145,7 +145,7 @@ export default function DashboardPage() {
 							href={pathMonthlyRecords({ month, year: String(year) })}
 						>
 							{future_records_count
-								? `Review ${future_records_count} future-dated Records`
+								? `Review ${pluralize(future_records_count, "future-dated Record")}`
 								: "Plan Records"}
 							<IconifyIcon icon="lucide:arrow-up-right" />
 						</Link>
@@ -276,7 +276,7 @@ export default function DashboardPage() {
 									>
 										Categories this month
 									</ScopedCardTitle>
-									<CardDescription>
+									<CardDescription className="tabular-nums">
 										{scopeLabel} ·{" "}
 										{formatCurrency(
 											scopedCategories.reduce(
@@ -491,7 +491,7 @@ function ScopedCardTitle({
 }: {
 	scope: string
 	color?: string
-	children: ReactNode
+	children: React.ReactNode
 }) {
 	return (
 		<CardTitle className="flex items-center gap-2">
@@ -630,19 +630,19 @@ function InvestmentRow({
 				/>
 				<DashboardMetric
 					icon="lucide:scale"
-					label="Net contributions"
+					label="Net withdrawals"
 					value={formatCurrency(net)}
 					detail="Withdrawals less contributions"
 					tone={net > 0 ? "positive" : net < 0 ? "negative" : "neutral"}
 				/>
 				<DashboardMetric
 					icon="lucide:percent"
-					label="Net contributions / income"
+					label="Net withdrawals / income"
 					value={rate === null ? "—" : `${rate.toFixed(1)}%`}
 					detail={
 						rate === null
 							? "No positive net income"
-							: "Net contributions as a share of income"
+							: "Net withdrawals as a share of income"
 					}
 				/>
 			</MetricGrid>
@@ -870,7 +870,7 @@ function ReviewLinks({ data, month, year }: { data: DashboardData; month: string
 				</Button>
 			) : null}
 			{data.summary.pending_count > 0 ? (
-				<span className="basis-full text-[11px] text-muted-foreground">
+				<span className="basis-full text-[0.6875rem] text-muted-foreground">
 					Pending Record values count in totals.
 				</span>
 			) : null}

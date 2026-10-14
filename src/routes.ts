@@ -1,4 +1,4 @@
-// Client-side route paths (replaces the generated `@/wayfinder/routes`).
+// Client-side route paths.
 // Keep all route strings in one place so pages/components never hardcode URLs.
 
 export const pathDashboard = (query?: Record<string, string | undefined>) => withQuery("/", query)

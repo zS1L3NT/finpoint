@@ -55,7 +55,7 @@ export default function Sparkline({
 			<motion.polyline
 				initial={reduceMotion ? false : { pathLength: 0 }}
 				animate={{ pathLength: 1 }}
-				transition={{ duration: DURATION.slow + 0.1, ease: EASE_OUT }}
+				transition={{ duration: DURATION.slow, ease: EASE_OUT }}
 				points={points}
 				fill="none"
 				stroke={color}
@@ -66,7 +66,7 @@ export default function Sparkline({
 			<motion.circle
 				initial={reduceMotion ? false : { opacity: 0 }}
 				animate={{ opacity: 1 }}
-				transition={{ duration: DURATION.base, delay: DURATION.slow, ease: EASE_OUT }}
+				transition={{ duration: DURATION.base, delay: 0.2, ease: EASE_OUT }}
 				cx={x(last)}
 				cy={y(values[last] ?? 0)}
 				r={2.75}

@@ -24,7 +24,7 @@ import { useDialogCloseAnimation } from "@/hooks/use-dialog-close-animation"
 import { deleteBudget, updateBudget } from "@/logic/budgets"
 import { ValidationError } from "@/logic/validate"
 import { pathBudget, pathBudgets } from "@/routes"
-import { Budget } from "@/types"
+import type { Budget } from "@/types"
 
 export default function BudgetEditorDialog({
 	budget,

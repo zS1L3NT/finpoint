@@ -12,10 +12,9 @@ import {
 	SheetTitle,
 	SheetTrigger,
 } from "@/components/ui/sheet"
-import { classForCurrency, cn, formatCurrency, parseDatetime } from "@/lib/utils"
-import { round2 } from "@/logic/shared"
+import { classForCurrency, cn, formatCurrency, parseDatetime, pluralize, round2 } from "@/lib/utils"
 import { listStatements } from "@/logic/statements"
-import { Statement } from "@/types"
+import type { Statement } from "@/types"
 
 const PAGE = 40
 
@@ -111,11 +110,11 @@ export default function StatementSearchSheet({
 									{formatCurrency(target)}
 								</span>
 								{matches
-									? ` · ${matches} Statement${matches === 1 ? "" : "s"} match exactly`
-									: ". Select every Statement that pays for it."}
+									? ` · ${pluralize(matches, "Statement")} with exactly this amount remaining`
+									: ". Select the statements to allocate to this record."}
 							</>
 						) : (
-							"Select every Statement that pays for this Record."
+							"Select the statements to allocate to this record."
 						)}
 					</SheetDescription>
 				</SheetHeader>
@@ -202,8 +201,7 @@ export default function StatementSearchSheet({
 				{attachedIds.length ? (
 					<div className="flex items-center justify-between gap-3 border-t px-4 py-3 text-sm md:px-6">
 						<span className="text-muted-foreground">
-							{attachedIds.length} Statement{attachedIds.length === 1 ? "" : "s"}{" "}
-							attached
+							{pluralize(attachedIds.length, "Statement")} selected for allocation
 						</span>
 						<Button onClick={() => setIsOpen(false)}>Done</Button>
 					</div>
@@ -230,7 +228,7 @@ function StatementOption({
 			type="button"
 			onClick={onSelect}
 			className={cn(
-				"grid w-full cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-muted focus-visible:bg-muted focus-visible:outline-none",
+				"grid w-full cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors duration-150 ease-out hover:bg-muted active:bg-muted/60 focus-visible:bg-muted focus-visible:outline-none",
 				match && "bg-emerald-500/5 ring-1 ring-emerald-500/30 ring-inset",
 			)}
 		>

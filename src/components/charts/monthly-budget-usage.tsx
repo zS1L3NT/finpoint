@@ -1,6 +1,6 @@
 "use client"
 
-import { type ReactNode, useId, useState } from "react"
+import { useId, useState } from "react"
 import { formatChartCurrency } from "@/lib/chart-currency"
 import { cn, formatCurrency } from "@/lib/utils"
 
@@ -24,7 +24,7 @@ export default function MonthlyBudgetUsage({
 	unbudgeted: number
 	selected: string | null
 	onSelect: (id: string) => void
-	edit: (budget: MonthlyBudgetUsageItem) => ReactNode
+	edit: (budget: MonthlyBudgetUsageItem) => React.ReactNode
 }) {
 	const id = useId().replaceAll(":", "")
 	const [hovered, setHovered] = useState<string | null>(null)
@@ -164,7 +164,7 @@ export default function MonthlyBudgetUsage({
 						className="pointer-events-none absolute inset-[18%] flex min-w-0 flex-col items-center justify-center text-center"
 						aria-live="polite"
 					>
-						<p className="max-w-full truncate text-[11px] text-muted-foreground @[28rem]:text-xs">
+						<p className="max-w-full truncate text-[0.6875rem] text-muted-foreground @[28rem]:text-xs">
 							{item?.name ?? "Monthly plan"}
 						</p>
 						<p
@@ -177,7 +177,7 @@ export default function MonthlyBudgetUsage({
 						>
 							{item?.amount === null ? "—" : centerCurrency(item?.amount ?? planned)}
 						</p>
-						<p className="mt-1 text-[11px] text-muted-foreground @[28rem]:text-xs">
+						<p className="mt-1 text-[0.6875rem] text-muted-foreground @[28rem]:text-xs">
 							{item?.amount === null ? "No planned amount" : "planned"}
 						</p>
 						<p
@@ -193,7 +193,7 @@ export default function MonthlyBudgetUsage({
 						<div
 							key={budget.id}
 							className={cn(
-								"relative min-w-0 cursor-pointer rounded-lg border border-border/70 bg-muted/20 px-3 py-2 transition-colors hover:bg-muted/50 motion-reduce:transition-none",
+								"relative min-w-0 cursor-pointer rounded-lg border border-border/70 bg-muted/20 px-3 py-2 transition-colors duration-150 ease-out hover:bg-muted/50 motion-reduce:transition-none",
 								active === budget.id && "border-border bg-muted/50",
 							)}
 							style={

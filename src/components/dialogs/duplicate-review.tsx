@@ -33,13 +33,13 @@ import { pathRecord } from "@/routes"
 
 export default function DuplicateReviewDialog({
 	input,
-	open,
-	onOpenChange,
+	isOpen,
+	setIsOpen,
 	onFixed,
 }: {
 	input: FixDuplicatesInput | null
-	open: boolean
-	onOpenChange: (open: boolean) => void
+	isOpen: boolean
+	setIsOpen: (isOpen: boolean) => void
 	onFixed: () => void
 }) {
 	const review = useLiveQuery(
@@ -70,7 +70,7 @@ export default function DuplicateReviewDialog({
 		setError("")
 		try {
 			await fixDuplicates({ ...input, allocation_source_id: effectiveSource })
-			onOpenChange(false)
+			setIsOpen(false)
 			onFixed()
 		} catch (cause) {
 			setError(cause instanceof Error ? cause.message : "Unable to fix duplicates.")
@@ -81,13 +81,13 @@ export default function DuplicateReviewDialog({
 
 	return (
 		<Dialog
-			open={open}
+			open={isOpen}
 			onOpenChange={next => {
 				if (!next && isSubmitting) return
-				onOpenChange(next)
+				setIsOpen(next)
 			}}
-			onOpenChangeComplete={isOpen => {
-				if (!isOpen) {
+			onOpenChangeComplete={opened => {
+				if (!opened) {
 					setSource("")
 					setError("")
 				}
@@ -218,7 +218,7 @@ export default function DuplicateReviewDialog({
 															</Badge>
 															<span
 																className={cn(
-																	"font-medium",
+																	"font-medium tabular-nums",
 																	classForCurrency(a.amount),
 																)}
 															>

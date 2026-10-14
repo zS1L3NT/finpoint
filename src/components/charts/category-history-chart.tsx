@@ -1,6 +1,5 @@
 "use client"
 
-import type { ReactNode } from "react"
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import { useChartIntro } from "@/components/charts/chart-intro"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -28,7 +27,7 @@ export default function CategoryHistoryChart({
 	months: SpendingHistoryMonth[]
 	through: string | null
 	monthlyBudgetIds: string[] | null
-	badge: ReactNode
+	badge: React.ReactNode
 }) {
 	const intro = useChartIntro(months.find(month => month.current)?.month)
 	const isMobile = useIsMobile()
@@ -265,7 +264,7 @@ function MonthTick({
 	const month = data.find(item => item.month === payload?.value)
 	return (
 		<g transform={`translate(${x},${y})`}>
-			<text textAnchor="middle" className="fill-foreground text-[11px]">
+			<text textAnchor="middle" className="fill-foreground text-[0.6875rem]">
 				<tspan x={0} dy="1em">
 					{month?.month ?? payload?.value}
 				</tspan>

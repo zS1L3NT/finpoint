@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import { FormField, type FormFieldProps } from "@/components/form/field"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { cn, round2dp } from "@/lib/utils"
+import { cn, round2 } from "@/lib/utils"
 
 type Props = FormFieldProps & {
 	value: number
@@ -59,7 +59,7 @@ export default function AmountField({
 			max ?? Number.POSITIVE_INFINITY,
 			Math.max(
 				min ?? Number.NEGATIVE_INFINITY,
-				round2dp((Number(text) || 0) + 0.01 * direction),
+				round2((Number(text) || 0) + 0.01 * direction),
 			),
 		)
 		setText(`${next}`)
