@@ -41,8 +41,3 @@ export const pluralize = (count: number, noun: string) =>
 export const classForCurrency = (amount: number) => {
 	return amount < 0 ? "text-destructive" : amount > 0 ? "text-creative" : "text-foreground"
 }
-
-export const withMethod = (formData: FormData, method: "PUT" | "PATCH" | "DELETE") => {
-	formData.set("_method", method)
-	return formData
-}

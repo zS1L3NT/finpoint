@@ -5,7 +5,7 @@ import { db, type MonthlyBudgetDefaultRow } from "@/data/db"
 import { newId } from "@/logic/shared"
 import { Validator } from "@/logic/validate"
 
-export const MONTHLY_BUDGET_GROUPS = ["core", "outlier", "other"] as const
+const MONTHLY_BUDGET_GROUPS = ["core", "outlier", "other"] as const
 const PACE_KINDS = ["daily", "recurring", "none"] as const
 
 export async function listMonthlyBudgets() {
@@ -16,7 +16,7 @@ export async function listMonthlyBudgets() {
 	return Promise.all(rows.map(async row => ({ ...row, amount: await amountFor(row.id, month) })))
 }
 
-export async function createMonthlyBudget(input: {
+async function createMonthlyBudget(input: {
 	name: string
 	color: string
 	group: string
@@ -51,7 +51,7 @@ export async function createMonthlyBudget(input: {
 	return row
 }
 
-export async function updateMonthlyBudget(
+async function updateMonthlyBudget(
 	id: string,
 	input: { name: string; color: string; group: string; pace_kind: string; archived: boolean },
 ) {
@@ -85,7 +85,7 @@ export async function updateMonthlyBudget(
 	return saved
 }
 
-export async function setMonthlyBudgetAmount(
+async function setMonthlyBudgetAmount(
 	monthlyBudgetId: string,
 	input: { month: string; amount: unknown; scope: string },
 ) {

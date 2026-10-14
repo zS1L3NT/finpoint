@@ -26,7 +26,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select"
-import { useFetch } from "@/hooks/use-fetch"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { useRecordEditor } from "@/hooks/use-record-editor"
 import { TREATMENTS } from "@/lib/analytics"
@@ -54,8 +53,8 @@ export default function RecordsPage() {
 		[categoryIdsParam],
 	)
 
-	const categories = useFetch(() => listCategories(), [])
-	const monthlyBudgets = useFetch(() => listMonthlyBudgets(), [])
+	const categories = useLiveQuery(() => listCategories(), []) ?? []
+	const monthlyBudgets = useLiveQuery(() => listMonthlyBudgets(), []) ?? []
 	const { editingRecord, handleEdit, setEditingRecord } = useRecordEditor()
 	const { query, page, pageSize, handleQueryChange, handlePageSizeChange, setParams } =
 		usePaginatedTableState()

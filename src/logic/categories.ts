@@ -2,6 +2,7 @@
 
 import { db } from "@/data/db"
 import { ValidationError, Validator } from "@/logic/validate"
+import type { CategoryWithChildren } from "@/types"
 
 const TREATMENTS = ["income", "spending", "saving_investment", "neutral", "automatic"] as const
 
@@ -40,7 +41,7 @@ export async function listCategoryIconNames() {
 	return [...new Set((await db.categories.toArray()).map(category => category.icon))]
 }
 
-export async function listCategories() {
+export async function listCategories(): Promise<CategoryWithChildren[]> {
 	const categories = await db.categories.toArray()
 	const monthlyBudgets = await db.monthly_budgets.toArray()
 	const monthly_budgetById = new Map(monthlyBudgets.map(b => [b.id, b]))

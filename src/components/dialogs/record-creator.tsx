@@ -1,4 +1,5 @@
 import { useForm, useStore } from "@tanstack/react-form"
+import { useLiveQuery } from "dexie-react-hooks"
 import { AnimatePresence, motion } from "framer-motion"
 import { DateTime } from "luxon"
 import { useState } from "react"
@@ -28,7 +29,6 @@ import { FieldGroup } from "@/components/ui/field"
 import { Progress } from "@/components/ui/progress"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
-import { useFetch } from "@/hooks/use-fetch"
 import { SPRING, TRANSITION } from "@/lib/motion"
 import { cn, formatCurrency, formatDatetime, parseDatetime, round2dp } from "@/lib/utils"
 import { createRecord, recordCompletions } from "@/logic/records"
@@ -56,11 +56,11 @@ export default function RecordCreatorDialog({
 	if (isOpen && openStatements !== statementsProp) setOpenStatements(statementsProp)
 	const statements = isOpen ? statementsProp : openStatements
 
-	const completions = useFetch(() => recordCompletions(), {
+	const completions = useLiveQuery(() => recordCompletions(), []) ?? {
 		titles: [],
 		locations: [],
 		peoples: [],
-	})
+	}
 
 	const { mergeErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
 

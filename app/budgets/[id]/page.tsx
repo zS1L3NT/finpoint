@@ -36,13 +36,12 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 		() => (id ? getBudget(id).catch(() => null) : Promise.resolve(null)),
 		[id],
 	)
-	const categories =
-		useLiveQuery(() => listCategories() as unknown as Promise<CategoryWithChildren[]>, []) ?? []
+	const categories = useLiveQuery(() => listCategories(), []) ?? []
 	const [isEditingBudget, setIsEditingBudget] = useState(false)
 	const [isAttachingRecord, setIsAttachingRecord] = useState(false)
 	const { editingRecord, handleEdit, setEditingRecord } = useRecordEditor()
 	const budget = (data ?? null) as Budget | null
-	const records = useMemo(() => (data?.records ?? []) as unknown as Record[], [data])
+	const records = useMemo(() => data?.records ?? [], [data])
 	const budgetStart = parseDate(budget?.start_date ?? "2000-01-01")
 	const budgetEnd = parseDate(budget?.end_date ?? "2000-01-01")
 	const now = DateTime.now()
