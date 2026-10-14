@@ -512,8 +512,8 @@ export default function AllocatorPendingPage() {
 			<StatementReplacementReviewDialog
 				statement={reviewStatement}
 				pendingStatement={selectedPendingStatement}
-				open={!!reviewStatement}
-				onOpenChange={open => {
+				isOpen={!!reviewStatement}
+				setIsOpen={open => {
 					if (!open) setReviewStatement(null)
 				}}
 				onConfirmed={afterReplacement}

@@ -315,8 +315,8 @@ export default function FixDuplicatesPage() {
 			)}
 			<DuplicateReviewDialog
 				input={review}
-				open={review !== null}
-				onOpenChange={open => {
+				isOpen={review !== null}
+				setIsOpen={open => {
 					if (!open) setReview(null)
 				}}
 				onFixed={() => setReview(null)}

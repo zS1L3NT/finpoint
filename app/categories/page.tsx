@@ -132,11 +132,11 @@ export default function CategoriesPage() {
 			</PageContent>
 
 			<CategoryDialog
-				open={dialogState !== null}
+				isOpen={dialogState !== null}
 				mode={dialogState?.mode ?? "create"}
 				category={dialogState?.mode === "edit" ? dialogState.category : null}
 				categories={categories}
-				onOpenChange={open => {
+				setIsOpen={open => {
 					if (!open) {
 						setDialogState(null)
 					}

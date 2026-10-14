@@ -156,8 +156,8 @@ export default function PendingStatementConfirmationSheet({
 			<StatementReplacementReviewDialog
 				statement={statement}
 				pendingStatement={pendingStatement}
-				open={!!pendingStatement && !isOpen}
-				onOpenChange={open => {
+				isOpen={!!pendingStatement && !isOpen}
+				setIsOpen={open => {
 					if (!open) {
 						setPendingStatement(null)
 						setIsOpen(true)
