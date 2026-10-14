@@ -403,7 +403,7 @@ export default function AllocatorPendingPage() {
 												</div>
 												<span
 													className={cn(
-														"shrink-0 text-lg font-semibold tabular-nums",
+														"shrink-0 text-lg font-semibold tracking-tight tabular-nums",
 														classForCurrency(
 															selectedPendingStatement.amount,
 														),
