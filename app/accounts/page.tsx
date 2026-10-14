@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input"
 import { useHistory } from "@/history"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { bankMeta } from "@/lib/banks"
-import { SPRING } from "@/lib/motion"
+import { cardEnter } from "@/lib/motion"
 import { cn, formatCurrency } from "@/lib/utils"
 import { type AccountActivity, listAccounts } from "@/logic/accounts"
 import { pathAccount, pathAllocator } from "@/routes"
@@ -61,13 +61,7 @@ export default function AccountsPage() {
 				) : (
 					<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
 						{accounts.map((account, index) => (
-							<motion.div
-								key={account.id}
-								className="grid"
-								initial={{ opacity: 0, y: 6 }}
-								animate={{ opacity: 1, y: 0 }}
-								transition={{ ...SPRING.smooth, delay: Math.min(index, 7) * 0.03 }}
-							>
+							<motion.div key={account.id} className="grid" {...cardEnter(index)}>
 								<AccountCard
 									account={account}
 									onEdit={() => setEditingAccount(account)}
@@ -103,7 +97,7 @@ function AccountCard({ account, onEdit }: { account: AccountRow; onEdit: () => v
 
 	return (
 		<article
-			className="group grid cursor-pointer content-start gap-4 rounded-xl border bg-card p-4 transition-[box-shadow,transform] duration-150 ease-out hover:shadow-md active:scale-[0.99]"
+			className="group grid cursor-pointer content-start gap-4 rounded-xl border bg-card p-4 transition-[box-shadow,transform] duration-150 ease-out hover:shadow-md active:scale-[0.99] motion-reduce:transition-none motion-reduce:active:scale-100"
 			onClick={event => {
 				if (!isInteractiveTarget(event.target)) open()
 			}}

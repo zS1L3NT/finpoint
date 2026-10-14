@@ -19,7 +19,7 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
-import { SPRING, TRANSITION } from "@/lib/motion"
+import { COLLAPSE_MOTION } from "@/lib/motion"
 import { formatCurrency } from "@/lib/utils"
 import { getMonthlyBudgetAmountSource, upsertMonthlyBudget } from "@/logic/monthly-budgets"
 import { ValidationError } from "@/logic/validate"
@@ -235,22 +235,7 @@ export default function MonthlyBudgetDialog({
 							/>
 							<AnimatePresence initial={false}>
 								{(scope === "month" || scope === "default") && (
-									<motion.div
-										className="overflow-hidden"
-										initial={{ opacity: 0, height: 0, marginTop: -16 }}
-										animate={{ opacity: 1, height: "auto", marginTop: 0 }}
-										exit={{
-											opacity: 0,
-											height: 0,
-											marginTop: -16,
-											transition: TRANSITION.fast,
-										}}
-										transition={{
-											height: SPRING.smooth,
-											marginTop: SPRING.smooth,
-											opacity: TRANSITION.base,
-										}}
-									>
+									<motion.div className="overflow-hidden" {...COLLAPSE_MOTION}>
 										<FieldGroup>
 											<AmountField
 												id="monthly-budget-amount"
