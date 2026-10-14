@@ -164,7 +164,7 @@ export default function MonthlyBudgetUsage({
 						className="pointer-events-none absolute inset-[18%] flex min-w-0 flex-col items-center justify-center text-center"
 						aria-live="polite"
 					>
-						<p className="max-w-full truncate text-[11px] text-muted-foreground @[28rem]:text-xs">
+						<p className="max-w-full truncate text-[0.6875rem] text-muted-foreground @[28rem]:text-xs">
 							{item?.name ?? "Monthly plan"}
 						</p>
 						<p
@@ -177,7 +177,7 @@ export default function MonthlyBudgetUsage({
 						>
 							{item?.amount === null ? "—" : centerCurrency(item?.amount ?? planned)}
 						</p>
-						<p className="mt-1 text-[11px] text-muted-foreground @[28rem]:text-xs">
+						<p className="mt-1 text-[0.6875rem] text-muted-foreground @[28rem]:text-xs">
 							{item?.amount === null ? "No planned amount" : "planned"}
 						</p>
 						<p

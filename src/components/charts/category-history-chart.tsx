@@ -265,7 +265,7 @@ function MonthTick({
 	const month = data.find(item => item.month === payload?.value)
 	return (
 		<g transform={`translate(${x},${y})`}>
-			<text textAnchor="middle" className="fill-foreground text-[11px]">
+			<text textAnchor="middle" className="fill-foreground text-[0.6875rem]">
 				<tspan x={0} dy="1em">
 					{month?.month ?? payload?.value}
 				</tspan>
