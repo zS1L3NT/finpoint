@@ -470,9 +470,6 @@ export default function AllocatorPendingPage() {
 									<CandidateResults
 										data={candidates ?? null}
 										error={null}
-										showLoading={
-											candidates === undefined && !!selectedPendingStatement
-										}
 										scope={candidateScope}
 										onReview={setReviewStatement}
 										onPage={page =>
@@ -619,14 +616,12 @@ function PendingCard({
 function CandidateResults({
 	data,
 	error,
-	showLoading,
 	scope,
 	onReview,
 	onPage,
 }: {
 	data: CandidatePage | null
 	error: string | null
-	showLoading: boolean
 	scope: string
 	onReview: (statement: Statement) => void
 	onPage: (page: number) => void
@@ -644,18 +639,7 @@ function CandidateResults({
 				</Alert>
 			</motion.div>
 		)
-	if (!data)
-		return showLoading ? (
-			<motion.div
-				initial={{ opacity: 0 }}
-				animate={{ opacity: 1 }}
-				transition={transition}
-				className="flex items-center gap-2 py-4 text-xs text-muted-foreground"
-			>
-				<IconifyIcon icon="lucide:loader-circle" className="animate-spin" />
-				Finding imported Statements…
-			</motion.div>
-		) : null
+	if (!data) return null
 	if (!data.data.length)
 		return (
 			<motion.div initial={initial} animate={{ opacity: 1, y: 0 }} transition={transition}>

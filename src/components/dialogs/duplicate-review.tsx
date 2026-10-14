@@ -218,7 +218,7 @@ export default function DuplicateReviewDialog({
 															</Badge>
 															<span
 																className={cn(
-																	"font-medium",
+																	"font-medium tabular-nums",
 																	classForCurrency(a.amount),
 																)}
 															>

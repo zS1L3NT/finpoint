@@ -276,7 +276,7 @@ export default function DashboardPage() {
 									>
 										Categories this month
 									</ScopedCardTitle>
-									<CardDescription>
+									<CardDescription className="tabular-nums">
 										{scopeLabel} ·{" "}
 										{formatCurrency(
 											scopedCategories.reduce(

@@ -260,15 +260,15 @@
 }
 
 .reveal > * {
-    animation: reveal 480ms var(--ease-out) backwards;
+    animation: reveal 300ms var(--ease-out) backwards;
 }
 
-.reveal > :nth-child(2) { animation-delay: 70ms; }
-.reveal > :nth-child(3) { animation-delay: 140ms; }
-.reveal > :nth-child(4) { animation-delay: 210ms; }
-.reveal > :nth-child(5) { animation-delay: 280ms; }
-.reveal > :nth-child(6) { animation-delay: 350ms; }
-.reveal > :nth-child(n + 7) { animation-delay: 420ms; }
+.reveal > :nth-child(2) { animation-delay: 50ms; }
+.reveal > :nth-child(3) { animation-delay: 100ms; }
+.reveal > :nth-child(4) { animation-delay: 150ms; }
+.reveal > :nth-child(5) { animation-delay: 200ms; }
+.reveal > :nth-child(6) { animation-delay: 250ms; }
+.reveal > :nth-child(n + 7) { animation-delay: 300ms; }
 
 @media (prefers-reduced-motion: reduce) {
     .reveal > * {

@@ -229,7 +229,7 @@ export default function StatementReplacementReviewDialog({
 											</div>
 											<span
 												className={cn(
-													"shrink-0 font-medium",
+													"shrink-0 font-medium tabular-nums",
 													classForCurrency(record.allocation_amount),
 												)}
 											>
@@ -344,7 +344,7 @@ function Amount({ label, amount }: { label: string; amount: number }) {
 	return (
 		<div className="flex flex-col gap-0.5">
 			<span className="text-muted-foreground">{label}</span>
-			<span className={cn("font-semibold", classForCurrency(amount))}>
+			<span className={cn("font-semibold tabular-nums", classForCurrency(amount))}>
 				{formatCurrency(amount)}
 			</span>
 		</div>

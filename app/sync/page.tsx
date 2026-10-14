@@ -704,7 +704,7 @@ export default function DataSettingsPage() {
 										if (file) setImportFile(file)
 									}}
 									className={cn(
-										"grid cursor-pointer place-items-center gap-1.5 rounded-lg border border-dashed px-4 py-6 text-center text-sm transition-[background-color,border-color,transform] duration-150 ease-out hover:bg-muted/50 active:scale-[0.99] disabled:active:scale-100",
+										"grid cursor-pointer place-items-center gap-1.5 rounded-lg border border-dashed px-4 py-6 text-center text-sm transition-[background-color,border-color,transform] duration-150 ease-out hover:bg-muted/50 active:scale-[0.99] motion-reduce:transition-none motion-reduce:scale-100 motion-reduce:active:scale-100 disabled:active:scale-100",
 										dragging && "scale-[1.01] border-foreground bg-muted/60",
 									)}
 								>

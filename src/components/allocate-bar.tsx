@@ -11,7 +11,7 @@ export default function AllocateBar({
 }) {
 	const percent = total === 0 ? 0 : (value / total) * 100
 	return (
-		<div className="flex flex-col gap-2">
+		<div className="flex flex-col gap-2 tabular-nums">
 			<div className="flex justify-between">
 				<span>{title}</span>
 				<div>
@@ -32,12 +32,12 @@ export default function AllocateBar({
 				className="relative h-1 w-full overflow-hidden rounded-md bg-muted"
 			>
 				<div
-					className="h-full origin-left bg-current transition-transform duration-300 ease-out"
+					className="h-full origin-left bg-current transition-transform duration-300 ease-out motion-reduce:transition-none"
 					style={{ transform: `scaleX(${Math.min(Math.max(percent, 0), 100) / 100})` }}
 				/>
 				{percent > 100 ? (
 					<div
-						className="absolute inset-0 origin-left bg-destructive transition-transform duration-300 ease-out"
+						className="absolute inset-0 origin-left bg-destructive transition-transform duration-300 ease-out motion-reduce:transition-none"
 						style={{ transform: `scaleX(${Math.min(percent - 100, 100) / 100})` }}
 					/>
 				) : null}

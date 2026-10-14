@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useHistory } from "@/history"
 import { canUseDefaultMonthlyBudget, treatmentLabel } from "@/lib/analytics"
-import { SPRING } from "@/lib/motion"
+import { cardEnter } from "@/lib/motion"
 import { listCategories } from "@/logic/categories"
 import { pathRecords } from "@/routes"
 import type { AnalyticsTreatment, Category, CategoryWithChildren } from "@/types"
@@ -108,12 +108,7 @@ export default function CategoriesPage() {
 										<motion.div
 											key={category.id}
 											className="grid"
-											initial={{ opacity: 0, y: 6 }}
-											animate={{ opacity: 1, y: 0 }}
-											transition={{
-												...SPRING.smooth,
-												delay: Math.min(index, 7) * 0.03,
-											}}
+											{...cardEnter(index)}
 										>
 											<CategoryTile
 												category={category}
@@ -164,7 +159,7 @@ function CategoryTile({
 		: null
 	const childRecords = category.children.reduce((sum, child) => sum + child.records_count, 0)
 	return (
-		<article className="group grid content-start gap-3 rounded-xl border bg-card p-4 transition-[box-shadow,transform] duration-150 ease-out hover:shadow-md">
+		<article className="group grid content-start gap-3 rounded-xl border bg-card p-4 transition-shadow duration-150 ease-out hover:shadow-md">
 			<div className="flex items-start gap-3">
 				<button
 					type="button"
