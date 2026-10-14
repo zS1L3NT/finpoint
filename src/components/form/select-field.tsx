@@ -11,7 +11,7 @@ import {
 type Props = FormFieldProps & {
 	value: string
 	placeholder?: string
-	items: { value: string; label: string }[]
+	items: { value: string; label: string; disabled?: boolean }[]
 	onChange: (value: string) => void
 }
 
@@ -45,7 +45,11 @@ export default function SelectField({
 				<SelectContent>
 					<SelectGroup>
 						{items.map(item => (
-							<SelectItem key={item.value} value={item.value}>
+							<SelectItem
+								key={item.value}
+								value={item.value}
+								disabled={item.disabled}
+							>
 								{item.label}
 							</SelectItem>
 						))}
