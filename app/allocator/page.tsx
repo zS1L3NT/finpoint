@@ -4,7 +4,6 @@ import { useLiveQuery } from "dexie-react-hooks"
 import { DateTime } from "luxon"
 import { useSearchParams } from "next/navigation"
 import { useMemo, useState } from "react"
-import AllocatorTabs from "@/components/allocator-tabs"
 import RecordCreatorDialog from "@/components/dialogs/record-creator"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
 import DateRange from "@/components/form/date-range"
@@ -29,6 +28,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select"
+import WorkflowTabs from "@/components/workflow-tabs"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { useDefaultFilterEndDateToday, useDefaultFilterStartDate } from "@/hooks/use-settings"
 import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
@@ -150,13 +150,13 @@ export default function AllocatorPage() {
 		<>
 			<PageContent>
 				<PageHeader
-					title="Allocator"
+					title="Workflows"
 					subtitle="Allocate statements to records and replace handwritten pending statements."
 					description="Allocation workspace"
 					icon="lucide:link"
 				/>
 
-				<AllocatorTabs active="allocate" />
+				<WorkflowTabs active="allocate" />
 
 				<PaginatedDataTable
 					paginated={paginated}

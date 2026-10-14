@@ -29,6 +29,14 @@ _Avoid_: Draft record, unconfirmed record
 A handwritten placeholder for account activity that has not appeared in an imported bank feed yet. A pending statement may be allocated like any statement. When the imported statement arrives, it replaces one pending statement and inherits its allocations unchanged.
 _Avoid_: Draft statement, estimated record
 
+**Duplicate Statement**:
+An imported statement that repeats another imported statement on the same account, day, and amount, usually because the bank changed its description between exports. Fixing duplicates keeps one statement and deletes the others; Allocations follow the kept statement.
+_Avoid_: Survivor, double import, match
+
+**Separate pair**:
+Two same-day statements the user marked as not duplicates, so they are no longer suggested together. Marking is per pair and can be restored.
+_Avoid_: Ignored match, false positive
+
 **Budget**:
 A spending plan with a custom date period and amount. Budget membership can be manual, or automatic when records fall within the budget period; records may still be attached or detached outside the period.
 _Avoid_: Spending bucket, monthly target

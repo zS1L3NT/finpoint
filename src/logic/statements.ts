@@ -2,6 +2,7 @@
 // and `Statement::appQuery` (filters, ordering, derived amounts).
 
 import { asPending, db } from "@/data/db"
+import { removeStatementDismissals } from "@/logic/duplicates"
 import { enrichRecords } from "@/logic/records"
 import {
 	dayDifference,
@@ -206,7 +207,10 @@ export async function deletePendingStatement(id: string) {
 		})
 	}
 
-	await db.statements.delete(id)
+	await db.transaction("rw", [db.statements, db.duplicate_dismissals], async () => {
+		await removeStatementDismissals([id])
+		await db.statements.delete(id)
+	})
 }
 
 function ensureAllocationsFit(amount: number, allocations: number[]) {
@@ -252,35 +256,40 @@ export async function getStatement(id: string) {
 }
 
 export async function replacePendingStatement(statementId: string, pendingId: string) {
-	return db.transaction("rw", [db.statements, db.allocations], async () => {
-		const statement = await db.statements.get(statementId)
-		const pending = await db.statements.get(pendingId)
-		if (!statement || !pending) throw new Error("Statement not found.")
-		const statementAllocations = await db.allocations
-			.where("statement_id")
-			.equals(statementId)
-			.toArray()
-		const pendingAllocations = await db.allocations
-			.where("statement_id")
-			.equals(pendingId)
-			.toArray()
-		ensureCanReplace(
-			{ ...statement, is_pending: statement.is_pending === 1 },
-			{ ...pending, is_pending: pending.is_pending === 1 },
-			pendingAllocations,
-			statementAllocations,
-		)
+	return db.transaction(
+		"rw",
+		[db.statements, db.allocations, db.duplicate_dismissals],
+		async () => {
+			const statement = await db.statements.get(statementId)
+			const pending = await db.statements.get(pendingId)
+			if (!statement || !pending) throw new Error("Statement not found.")
+			const statementAllocations = await db.allocations
+				.where("statement_id")
+				.equals(statementId)
+				.toArray()
+			const pendingAllocations = await db.allocations
+				.where("statement_id")
+				.equals(pendingId)
+				.toArray()
+			ensureCanReplace(
+				{ ...statement, is_pending: statement.is_pending === 1 },
+				{ ...pending, is_pending: pending.is_pending === 1 },
+				pendingAllocations,
+				statementAllocations,
+			)
 
-		await db.allocations
-			.where("statement_id")
-			.equals(pendingId)
-			.modify({ statement_id: statementId })
-		await db.statements.delete(pendingId)
-		const replacement = await db.statements.get(statementId)
-		if (!replacement) throw new Error("Statement not found.")
+			await db.allocations
+				.where("statement_id")
+				.equals(pendingId)
+				.modify({ statement_id: statementId })
+			await removeStatementDismissals([pendingId])
+			await db.statements.delete(pendingId)
+			const replacement = await db.statements.get(statementId)
+			if (!replacement) throw new Error("Statement not found.")
 
-		return replacement
-	})
+			return replacement
+		},
+	)
 }
 
 export async function replacementCandidates(

@@ -1,0 +1,404 @@
+import { indexedDB, IDBKeyRange } from "fake-indexeddb"
+import Dexie from "dexie"
+Dexie.dependencies.indexedDB = indexedDB
+Dexie.dependencies.IDBKeyRange = IDBKeyRange
+import { beforeEach, expect, test } from "bun:test"
+import type { StatementRow } from "../src/data/db"
+const { db } = await import("../src/data/db")
+const { duplicateGroups, dismissDuplicatePair, restoreDuplicatePair, fixDuplicates } = await import(
+	"../src/logic/duplicates"
+)
+
+const statement = (
+	id: string,
+	description = "DEBIT PURCHASE xx-7962 SHENG SIONG SUPERMARKET -S 03/10/26",
+	overrides: Partial<StatementRow> = {},
+): StatementRow => ({
+	id,
+	description,
+	account_id: "a",
+	amount: -10,
+	datetime: "2026-10-03 12:00",
+	index: 0,
+	is_pending: 0,
+	...overrides,
+})
+beforeEach(async () => {
+	for (const table of db.tables) await table.clear()
+	await db.accounts.add({ id: "a", name: "FRANK", balance: 0, bank: "OCBC" })
+})
+test("spacing changes form groups and dismissals affect only one pair", async () => {
+	await db.statements.bulkAdd([
+		statement("a"),
+		statement("b", "DEBIT PURCHASE xx-7962 SHENG SIONG SUPERMARKET -S03/10/26"),
+		statement("c"),
+	])
+	expect((await duplicateGroups())[0]?.pairs).toHaveLength(3)
+	await dismissDuplicatePair("b", "a")
+	expect((await duplicateGroups())[0]?.pairs).toHaveLength(2)
+	expect(await db.duplicate_dismissals.toArray()).toEqual([
+		{ statement_id: "a", other_statement_id: "b" },
+	])
+	await restoreDuplicatePair("a", "b")
+	expect((await duplicateGroups())[0]?.pairs).toHaveLength(3)
+})
+test("PayNow reordered wording matches while conflicting references and recipients do not", async () => {
+	await db.statements.bulkAdd([
+		statement(
+			"a",
+			"FAST PAYMENT OTHR-EPOSSP SNLR0877606BNTV4A0 via PayNow-UEN to DSE SERVICE PTE.",
+		),
+		statement("b", "FAST PAYMENT OTHR-EPOSSP SNLR0877606BNTV4A0 to DSE SERVICE PTE.via PayNow-UEN"),
+		statement("c", "FAST PAYMENT OTHR-EPOSSP SNLR0877607BNTV4A0 to DSE SERVICE PTE.via PayNow-UEN"),
+		statement(
+			"d",
+			"FAST PAYMENT OTHR-EPOSSP SNLR0877606BNTV4A0 to OTHER SERVICE PTE.via PayNow-UEN",
+		),
+		statement("e", "NETS QR DING JI NETS QR PURCHASE 91594501"),
+	])
+	expect((await duplicateGroups()).map(g => g.statements.map(s => s.id))).toEqual([["a", "b"]])
+})
+test("eligibility excludes pending, other dates/accounts/amounts", async () => {
+	await db.statements.bulkAdd([
+		statement("a"),
+		statement("b", undefined, { is_pending: 1 }),
+		statement("c", undefined, { datetime: "2026-10-04 12:00" }),
+		statement("d", undefined, { account_id: "b" }),
+		statement("e", undefined, { amount: 10 }),
+	])
+	expect(await duplicateGroups()).toEqual([])
+	await expect(fixDuplicates({ keep_id: "a", delete_ids: ["b"] })).rejects.toThrow()
+	expect(await db.statements.count()).toBe(5)
+})
+test("move allocations without changing kept fields or records, and clean dismissals", async () => {
+	await db.statements.bulkAdd([statement("a"), statement("b")])
+	await dismissDuplicatePair("a", "b")
+	await db.allocations.add({ statement_id: "b", record_id: "r", amount: -7 })
+	await db.records.add({
+		id: "r",
+		title: "Lunch",
+		amount: -10,
+		datetime: "2026-10-03 12:00",
+		category_id: "c",
+		people: null,
+		location: null,
+		description: null,
+		analytics_treatment: "spending",
+		analytics_treatment_source: "manual",
+		monthly_budget_id: null,
+		monthly_budget_source: null,
+		revision: 1,
+	})
+	const record = await db.records.get("r")
+	await fixDuplicates({ keep_id: "a", delete_ids: ["b"] })
+	expect(await db.statements.get("a")).toEqual(statement("a"))
+	expect(await db.records.get("r")).toEqual(record)
+	expect(await db.allocations.toArray()).toEqual([
+		{ statement_id: "a", record_id: "r", amount: -7 },
+	])
+	expect(await db.duplicate_dismissals.count()).toBe(0)
+})
+test("allocated kept statement wins, including shared record allocations", async () => {
+	await db.statements.bulkAdd([statement("a"), statement("b")])
+	await db.allocations.bulkAdd([
+		{ statement_id: "a", record_id: "r", amount: -5 },
+		{ statement_id: "b", record_id: "r", amount: -5 },
+	])
+	await fixDuplicates({ keep_id: "a", delete_ids: ["b"] })
+	expect(await db.allocations.toArray()).toEqual([
+		{ statement_id: "a", record_id: "r", amount: -5 },
+	])
+})
+test("multiple sources require explicit choice; invalid allocation rollback", async () => {
+	await db.statements.bulkAdd([statement("a"), statement("b"), statement("c")])
+	await db.allocations.bulkAdd([
+		{ statement_id: "b", record_id: "r", amount: -10 },
+		{ statement_id: "c", record_id: "s", amount: -10 },
+	])
+	await expect(fixDuplicates({ keep_id: "a", delete_ids: ["b", "c"] })).rejects.toThrow()
+	expect(await db.statements.count()).toBe(3)
+	await db.allocations.put({ statement_id: "b", record_id: "r", amount: -11 })
+	await expect(
+		fixDuplicates({ keep_id: "a", delete_ids: ["b", "c"], allocation_source_id: "b" }),
+	).rejects.toThrow()
+	expect(await db.statements.count()).toBe(3)
+	await fixDuplicates({ keep_id: "a", delete_ids: ["b", "c"], allocation_source_id: "c" })
+	expect(await db.allocations.toArray()).toEqual([
+		{ statement_id: "a", record_id: "s", amount: -10 },
+	])
+})
+
+test("reference and date internals are not treated as reorderable words", async () => {
+	await db.statements.bulkAdd([
+		statement("a", "FAST PAYMENT OTHR AB12CD34 via PayNow-UEN to DSE SERVICE PTE."),
+		statement("b", "FAST PAYMENT OTHR CD34AB12 via PayNow-UEN to DSE SERVICE PTE."),
+		statement("c", "DEBIT PURCHASE SHENG SIONG -S 03/10/26"),
+		statement("d", "DEBIT PURCHASE SHENG SIONG -S 10/03/26"),
+	])
+	expect(await duplicateGroups()).toEqual([])
+})
+test("generic wording alone cannot create a strong match", async () => {
+	await db.statements.bulkAdd([
+		statement("a", "FAST PAYMENT OTHR via PayNow-UEN"),
+		statement("b", "FAST PAYMENT OTHR PayNow-UEN via"),
+	])
+	expect(await duplicateGroups()).toEqual([])
+	expect(await duplicateGroups(true)).toHaveLength(1)
+})
+test("backup restore, earlier backups and reset include the dismissal table", async () => {
+	const { exportData, importData, parseImportFile, clearAllData, SYNC_TABLES } = await import(
+		"../src/data/export-import"
+	)
+	await db.statements.bulkAdd([statement("a"), statement("b")])
+	await dismissDuplicatePair("a", "b")
+	const backup = await exportData()
+	await clearAllData()
+	expect(await db.duplicate_dismissals.count()).toBe(0)
+	await importData(parseImportFile(JSON.stringify(backup)))
+	expect(await db.duplicate_dismissals.count()).toBe(1)
+	const old = JSON.parse(JSON.stringify(backup))
+	old.version = 2
+	delete old.tables.duplicate_dismissals
+	for (const [current, legacy] of [
+		["monthly_budgets", "buckets"],
+		["monthly_budget_defaults", "bucket_defaults"],
+		["monthly_budget_amounts", "bucket_targets"],
+	]) {
+		old.tables[legacy] = old.tables[current]
+		delete old.tables[current]
+	}
+	await importData(parseImportFile(JSON.stringify(old)))
+	expect(await db.duplicate_dismissals.count()).toBe(0)
+	const versionThree = JSON.parse(JSON.stringify(backup))
+	versionThree.version = 3
+	delete versionThree.tables.duplicate_dismissals
+	expect(parseImportFile(JSON.stringify(versionThree)).tables.duplicate_dismissals).toEqual([])
+	expect(SYNC_TABLES).toContain("duplicate_dismissals")
+})
+test("schema version four upgrades with financial data intact", async () => {
+	const schemas = Object.fromEntries(
+		db.tables
+			.filter(t => t.name !== "duplicate_dismissals")
+			.map(t => [t.name, [t.schema.primKey.src, ...t.schema.indexes.map(i => i.src)].join(",")]),
+	)
+	await db.delete()
+	const legacy = new Dexie("finpoint")
+	legacy.version(4).stores(schemas)
+	await legacy.table("statements").put(statement("a"))
+	legacy.close()
+	await db.open()
+	expect(db.verno).toBe(5)
+	expect(await db.statements.get("a")).toEqual(statement("a"))
+	expect(await db.duplicate_dismissals.count()).toBe(0)
+})
+
+test("dismissal migration preserves clean and dirty Drive baselines", async () => {
+	const { exportData } = await import("../src/data/export-import")
+	const { hashSnapshot } = await import("../src/data/snapshot-hash")
+	for (const clean of [true, false]) {
+		await db.statements.put(statement("a"))
+		const backup = await exportData()
+		const tables: Record<string, unknown[]> = { ...backup.tables }
+		delete tables.duplicate_dismissals
+		const baseline = clean
+			? await hashSnapshot({ settings: backup.settings, tables })
+			: "unsynced-baseline"
+		const schemas = Object.fromEntries(
+			db.tables
+				.filter(t => t.name !== "duplicate_dismissals")
+				.map(t => [t.name, [t.schema.primKey.src, ...t.schema.indexes.map(i => i.src)].join(",")]),
+		)
+		await db.delete()
+		const legacy = new Dexie("finpoint")
+		legacy.version(4).stores(schemas)
+		for (const [name, rows] of Object.entries(tables))
+			if (rows.length) await legacy.table(name).bulkAdd(rows)
+		await legacy.table("meta").put({ key: "drive_last_hash", value: baseline })
+		legacy.close()
+		await db.open()
+		expect((await db.meta.get("drive_last_hash"))?.value).toBe(
+			clean ? await hashSnapshot(await exportData()) : baseline,
+		)
+	}
+})
+
+test("version two database upgrades preserve legacy monthly budget data", async () => {
+	await db.delete()
+	const legacy = new Dexie("finpoint")
+	legacy.version(2).stores({
+		accounts: "id",
+		statements: "id",
+		categories: "id",
+		records: "id",
+		allocations: "[statement_id+record_id]",
+		budgets: "id",
+		budget_records: "[budget_id+record_id]",
+		buckets: "id",
+		bucket_defaults: "[bucket_id+effective_month]",
+		bucket_targets: "[bucket_id+month]",
+		analytics_months: "month",
+		settings: "key",
+		meta: "key",
+	})
+	await legacy.table("statements").put(statement("a"))
+	await legacy
+		.table("buckets")
+		.put({
+			id: "monthly",
+			name: "Daily",
+			color: "#000000",
+			group: "core",
+			pace_kind: "daily",
+			display_order: 1,
+			archived: false,
+		})
+	legacy.close()
+	await db.open()
+	expect(await db.statements.get("a")).toEqual(statement("a"))
+	expect((await db.monthly_budgets.get("monthly"))?.name).toBe("Daily")
+	expect(await db.duplicate_dismissals.count()).toBe(0)
+})
+
+test("screenshots preserve PayNow mixed references and method reordering", async () => {
+	await db.statements.bulkAdd([
+		statement(
+			"a",
+			"FAST PAYMENT OTHR-EPOSSP SNLR0877606BNTV4A0 via PayNow-UEN to DSE SERVICE PTE.".replace(
+				"EPOSSP SNLR",
+				"EPOSSPSNLR",
+			),
+		),
+		statement("b", "FAST PAYMENT OTHR-EPOSSPSNLR0877606BNTV4A0 to DSE SERVICE PTE.via PayNow-UEN"),
+		statement("c", "FAST PAYMENT OTHR-OTHR to YEX KWXX WAX (QXvia PayNow-Mobile"),
+		statement("d", "FAST PAYMENT OTHR-OTHR via PayNow-Mobile to YEX KWXX WAX (QX"),
+	])
+	expect((await duplicateGroups()).map(g => g.statements.map(s => s.id))).toEqual([
+		["a", "b"],
+		["c", "d"],
+	])
+})
+test("short mixed references cannot be rearranged internally", async () => {
+	await db.statements.bulkAdd([
+		statement("a", "FAST PAYMENT AB12 via PayNow-UEN to DSE SERVICE"),
+		statement("b", "FAST PAYMENT 12AB via PayNow-UEN to DSE SERVICE"),
+	])
+	expect(await duplicateGroups()).toEqual([])
+})
+test("record allocation deficits use the existing pending rule", async () => {
+	const { getRecord } = await import("../src/logic/records")
+	await db.statements.bulkAdd([statement("a"), statement("b")])
+	await db.records.add({
+		id: "r",
+		title: "Lunch",
+		amount: -10,
+		datetime: "2026-10-03 12:00",
+		category_id: "c",
+		people: null,
+		location: null,
+		description: null,
+		analytics_treatment: "spending",
+		analytics_treatment_source: "manual",
+		monthly_budget_id: null,
+		monthly_budget_source: null,
+		revision: 1,
+	})
+	await db.allocations.bulkAdd([
+		{ statement_id: "a", record_id: "r", amount: -5 },
+		{ statement_id: "b", record_id: "r", amount: -5 },
+	])
+	expect((await getRecord("r")).is_pending).toBe(false)
+	await fixDuplicates({ keep_id: "a", delete_ids: ["b"] })
+	expect((await getRecord("r")).is_pending).toBe(true)
+})
+test("replacement and pending deletion clean dismissal references", async () => {
+	const { replacePendingStatement, deletePendingStatement } = await import(
+		"../src/logic/statements"
+	)
+	await db.statements.bulkAdd([
+		statement("a"),
+		statement("p", undefined, { is_pending: 1 }),
+		statement("q", undefined, { is_pending: 1 }),
+	])
+	await db.duplicate_dismissals.bulkAdd([
+		{ statement_id: "a", other_statement_id: "p" },
+		{ statement_id: "a", other_statement_id: "q" },
+	])
+	await replacePendingStatement("a", "p")
+	expect(await db.duplicate_dismissals.count()).toBe(1)
+	await deletePendingStatement("q")
+	expect(await db.duplicate_dismissals.count()).toBe(0)
+})
+test("version four backups require dismissal data", async () => {
+	const { exportData, parseImportFile } = await import("../src/data/export-import")
+	const backup = JSON.parse(JSON.stringify(await exportData()))
+	delete backup.tables.duplicate_dismissals
+	expect(() => parseImportFile(JSON.stringify(backup))).toThrow("incomplete")
+})
+
+test("backups restore dismissal pairs in order and drop orphaned pairs", async () => {
+	const { exportData, parseImportFile } = await import("../src/data/export-import")
+	await db.statements.bulkAdd([statement("a"), statement("b")])
+	const backup = JSON.parse(JSON.stringify(await exportData()))
+	backup.tables.duplicate_dismissals = [
+		{ statement_id: "b", other_statement_id: "a" },
+		{ statement_id: "a", other_statement_id: "b" },
+		{ statement_id: "a", other_statement_id: "missing" },
+	]
+	expect(parseImportFile(JSON.stringify(backup)).tables.duplicate_dismissals).toEqual([
+		{ statement_id: "a", other_statement_id: "b" },
+	])
+})
+
+test("unallocated duplicates delete without changing any kept field", async () => {
+	const survivor = statement("a", "Chosen imported description", {
+		index: 5,
+		datetime: "2026-10-03 08:55",
+	})
+	await db.statements.bulkAdd([
+		survivor,
+		statement("b", "Different bank description", { index: 8, datetime: "2026-10-03 15:00" }),
+	])
+	await fixDuplicates({ keep_id: "a", delete_ids: ["b"] })
+	expect(await db.statements.toArray()).toEqual([survivor])
+})
+test("stale statement changes and invalid sources cannot mutate selected data", async () => {
+	await db.statements.bulkAdd([statement("a"), statement("b")])
+	await db.allocations.add({ statement_id: "b", record_id: "r", amount: 10 })
+	await expect(fixDuplicates({ keep_id: "a", delete_ids: ["b"] })).rejects.toThrow()
+	expect(await db.allocations.count()).toBe(1)
+	await db.allocations.put({ statement_id: "b", record_id: "r", amount: -10 })
+	await expect(
+		fixDuplicates({ keep_id: "a", delete_ids: ["b"], allocation_source_id: "missing" }),
+	).rejects.toThrow()
+	await db.statements.update("b", { datetime: "2026-10-04 12:00" })
+	await expect(fixDuplicates({ keep_id: "a", delete_ids: ["b"] })).rejects.toThrow()
+	expect(await db.statements.count()).toBe(2)
+	await expect(fixDuplicates({ keep_id: "a", delete_ids: ["missing"] })).rejects.toThrow()
+	await expect(fixDuplicates({ keep_id: "a", delete_ids: ["b", "b"] })).rejects.toThrow()
+})
+
+test("numeric reference sequences retain internal order", async () => {
+	await db.statements.bulkAdd([
+		statement("a", "FAST PAYMENT OTHR REF 1234-5678 via PayNow-UEN to DSE SERVICE PTE."),
+		statement("b", "FAST PAYMENT OTHR REF 5678-1234 via PayNow-UEN to DSE SERVICE PTE."),
+	])
+	expect(await duplicateGroups()).toEqual([])
+})
+test("banking vocabulary in recipient names remains meaningful", async () => {
+	for (const word of ["MOBILE", "NETS", "QR", "S", "UEN", "PAYNOW"]) {
+		await db.statements.clear()
+		await db.statements.bulkAdd([
+			statement("a", `FAST PAYMENT OTHR via PayNow-UEN to DSE ${word} SERVICE PTE.`),
+			statement("b", "FAST PAYMENT OTHR via PayNow-UEN to DSE SERVICE PTE."),
+		])
+		expect(await duplicateGroups()).toEqual([])
+	}
+})
+test("groups report allocation counts per statement", async () => {
+	await db.statements.bulkAdd([statement("a"), statement("b")])
+	await db.allocations.bulkAdd([
+		{ statement_id: "b", record_id: "r1", amount: -4 },
+		{ statement_id: "b", record_id: "r2", amount: -6 },
+	])
+	expect((await duplicateGroups())[0]?.allocationCounts).toEqual({ a: 0, b: 2 })
+})

@@ -176,6 +176,7 @@ const BANK_BLURB: Record<string, string[]> = {
 export function generateTestData(): FinpointExport {
 	const today = DateTime.now().startOf("day")
 	const tables = {
+		duplicate_dismissals: [],
 		accounts: [
 			{ id: "demo-dbs-savings", name: "Everyday Savings", balance: 12480.55, bank: "DBS" },
 			{ id: "demo-uob-card", name: "One Card", balance: -842.2, bank: "UOB" },
