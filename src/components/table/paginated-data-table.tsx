@@ -113,7 +113,7 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 										data-state={selectedIds?.includes(row.id) && "selected"}
 										onClick={onRowClick ? clickRow(row.original) : undefined}
 										className={cn(
-											"px-3 py-2.5 text-sm transition-colors duration-100 data-[state=selected]:bg-muted",
+											"px-3 py-2.5 text-sm transition-colors duration-150 ease-out data-[state=selected]:bg-muted",
 											onRowClick && "cursor-pointer active:bg-muted/60",
 										)}
 									>
@@ -187,7 +187,9 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 											onClick={
 												onRowClick ? clickRow(row.original) : undefined
 											}
-											className={cn(onRowClick && "cursor-pointer")}
+											className={cn(
+												onRowClick && "cursor-pointer active:bg-muted/60",
+											)}
 										>
 											{row.getVisibleCells().map(cell => (
 												<TableCell

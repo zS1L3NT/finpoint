@@ -60,7 +60,7 @@ export default function CategoryMovers({
 						key={category.id}
 						href={recordHref(category.id)}
 						onClick={handlePush("overview")}
-						className="grid grid-cols-[minmax(0,9rem)_minmax(0,1fr)] items-center gap-3 rounded-md px-1 py-1.5 transition-colors duration-150 hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:grid-cols-[minmax(0,11rem)_minmax(0,1fr)]"
+						className="grid grid-cols-[minmax(0,9rem)_minmax(0,1fr)] items-center gap-3 rounded-md px-1 py-1.5 transition-colors duration-150 ease-out hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:grid-cols-[minmax(0,11rem)_minmax(0,1fr)]"
 						title={`${category.name}: ${formatCurrency(category.spending)} vs ${formatCurrency(average)} average`}
 					>
 						<span className="flex min-w-0 items-center gap-2 text-sm">
@@ -76,7 +76,7 @@ export default function CategoryMovers({
 							<span className="absolute inset-y-0 left-1/2 w-px bg-border" />
 							<span
 								className={cn(
-									"absolute top-1/2 h-3 w-1/2 transition-transform duration-300 ease-out",
+									"absolute top-1/2 h-3 w-1/2 transition-transform duration-300 ease-out motion-reduce:transition-none",
 									up
 										? "left-1/2 origin-left rounded-r-[4px] bg-chart-8"
 										: "right-1/2 origin-right rounded-l-[4px] bg-chart-1",
