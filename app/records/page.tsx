@@ -34,7 +34,7 @@ import { listCategories } from "@/logic/categories"
 import { listMonthlyBudgets } from "@/logic/monthly-budgets"
 import { paginateItems, parsePage, parsePageSize } from "@/logic/pagination"
 import { listRecords } from "@/logic/records"
-import { CategoryWithChildren, MonthlyBudget, Record } from "@/types"
+import type { CategoryWithChildren, MonthlyBudget, Record } from "@/types"
 
 export default function RecordsPage() {
 	const searchParams = useSearchParams()

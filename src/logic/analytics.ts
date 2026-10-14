@@ -215,15 +215,15 @@ export function summarize(records: AnalyticsRecord[]): AnalyticsSummary {
 			cat.outflow += Math.max(value.spending, 0)
 			cat.refunds += Math.max(-value.spending, 0)
 			cat.records++
-			const monthly_budgetKey = record.monthly_budget_id ?? "unbudgeted"
-			cat.monthly_budget_spending[monthly_budgetKey] =
-				(cat.monthly_budget_spending[monthly_budgetKey] ?? 0) + value.spending
-			cat.monthly_budget_outflow[monthly_budgetKey] =
-				(cat.monthly_budget_outflow[monthly_budgetKey] ?? 0) + Math.max(value.spending, 0)
-			cat.monthly_budget_refunds[monthly_budgetKey] =
-				(cat.monthly_budget_refunds[monthly_budgetKey] ?? 0) + Math.max(-value.spending, 0)
-			cat.monthly_budget_records[monthly_budgetKey] =
-				(cat.monthly_budget_records[monthly_budgetKey] ?? 0) + 1
+			const monthlyBudgetKey = record.monthly_budget_id ?? "unbudgeted"
+			cat.monthly_budget_spending[monthlyBudgetKey] =
+				(cat.monthly_budget_spending[monthlyBudgetKey] ?? 0) + value.spending
+			cat.monthly_budget_outflow[monthlyBudgetKey] =
+				(cat.monthly_budget_outflow[monthlyBudgetKey] ?? 0) + Math.max(value.spending, 0)
+			cat.monthly_budget_refunds[monthlyBudgetKey] =
+				(cat.monthly_budget_refunds[monthlyBudgetKey] ?? 0) + Math.max(-value.spending, 0)
+			cat.monthly_budget_records[monthlyBudgetKey] =
+				(cat.monthly_budget_records[monthlyBudgetKey] ?? 0) + 1
 
 			if (record.monthly_budget) {
 				let monthly_budget = summary.monthlyBudgets[record.monthly_budget.id]

@@ -28,7 +28,7 @@ import {
 import { useRowEntrance } from "@/hooks/use-row-cascade"
 import { rowEnter } from "@/lib/motion"
 import { cn } from "@/lib/utils"
-import { Paginated } from "@/types"
+import type { Paginated } from "@/types"
 
 function PaginatedDataTable<TData extends { id: string }, TValue>({
 	paginated,

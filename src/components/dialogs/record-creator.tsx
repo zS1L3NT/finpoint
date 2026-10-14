@@ -33,7 +33,7 @@ import { SPRING, TRANSITION } from "@/lib/motion"
 import { cn, formatCurrency, formatDatetime, parseDatetime, round2 } from "@/lib/utils"
 import { createRecord, recordCompletions } from "@/logic/records"
 import { ValidationError } from "@/logic/validate"
-import { CategoryWithChildren, Statement } from "@/types"
+import type { CategoryWithChildren, Statement } from "@/types"
 
 export default function RecordCreatorDialog({
 	statements: statementsProp,

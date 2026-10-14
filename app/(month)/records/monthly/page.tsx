@@ -34,7 +34,7 @@ import { cn } from "@/lib/utils"
 import { listCategories } from "@/logic/categories"
 import { getMonthlyRecords } from "@/logic/monthly"
 import { pathImporter, pathRecords } from "@/routes"
-import { CategoryWithChildren, MonthlyBudget, Record } from "@/types"
+import type { CategoryWithChildren, MonthlyBudget, Record } from "@/types"
 
 type Filters = {
 	query?: string

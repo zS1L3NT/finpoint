@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/sheet"
 import { classForCurrency, cn, formatCurrency, parseDatetime, round2 } from "@/lib/utils"
 import { listStatements } from "@/logic/statements"
-import { Statement } from "@/types"
+import type { Statement } from "@/types"
 
 const PAGE = 40
 

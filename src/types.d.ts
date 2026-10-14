@@ -147,7 +147,7 @@ export type AnalyticsSummary = {
 		outflow: number
 		refunds: number
 		records: number
-		monthly_budget_spending: { [monthly_budgetId: string]: number }
+		monthly_budget_spending: { [monthlyBudgetId: string]: number }
 	}>
 	monthlyBudgets: Array<MonthlyBudget & { spending: number; records: number }>
 }

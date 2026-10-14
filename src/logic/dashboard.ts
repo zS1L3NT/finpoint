@@ -126,7 +126,7 @@ type LoadedTables = {
 	allocated: Map<string, AllocationTally>
 	categories: Map<string, CategoryRow>
 	monthlyBudgets: Map<string, MonthlyBudgetRow>
-	monthly_budgetRows: MonthlyBudgetRow[]
+	monthlyBudgetRows: MonthlyBudgetRow[]
 	amounts: MonthlyBudgetAmountRow[]
 	defaults: MonthlyBudgetDefaultRow[]
 	coverages: Map<string, AnalyticsMonthRow>
@@ -162,7 +162,7 @@ async function loadDashboardTables(): Promise<LoadedTables> {
 		allocated: tallyAllocations(allocations, pending),
 		categories: new Map(categories.map(c => [c.id, c])),
 		monthlyBudgets: new Map(monthlyBudgets.map(b => [b.id, b])),
-		monthly_budgetRows: monthlyBudgets,
+		monthlyBudgetRows: monthlyBudgets,
 		amounts,
 		defaults,
 		coverages: new Map(coverages.map(c => [c.month, c])),
@@ -181,8 +181,8 @@ export function scopeMonthlyBudgetIds(
 	return [scope]
 }
 
-function inScope(monthly_budgetId: string | null, scopeIds: string[] | null): boolean {
-	return scopeIds === null || (monthly_budgetId !== null && scopeIds.includes(monthly_budgetId))
+function inScope(monthlyBudgetId: string | null, scopeIds: string[] | null): boolean {
+	return scopeIds === null || (monthlyBudgetId !== null && scopeIds.includes(monthlyBudgetId))
 }
 
 function comparisonSummaries(
@@ -376,7 +376,7 @@ export async function getDashboard(
 		date,
 		summary,
 		included,
-		tables.monthly_budgetRows,
+		tables.monthlyBudgetRows,
 		tables.amounts,
 		tables.defaults,
 		input.scope,
@@ -470,7 +470,7 @@ export async function getPaceView(
 	const actualEnd = isCurrent ? today.endOf("day") : date.endOf("month")
 
 	const tables = preloaded ?? (await loadDashboardTables())
-	const scopeIds = scopeMonthlyBudgetIds(scope, tables.monthly_budgetRows)
+	const scopeIds = scopeMonthlyBudgetIds(scope, tables.monthlyBudgetRows)
 	const monthStartKey = date.startOf("month").toFormat(ISO_DAY)
 	const monthEndKey = date.endOf("month").toFormat(ISO_DAY)
 	const actualEndKey = actualEnd.toFormat(ISO_DAY)
@@ -499,8 +499,8 @@ export async function getPaceView(
 	const included = comparisonSummariesForPace.filter(m => m.included)
 
 	const scopedMonthlyBudgetRows = scopeIds
-		? tables.monthly_budgetRows.filter(b => scopeIds.includes(b.id))
-		: tables.monthly_budgetRows
+		? tables.monthlyBudgetRows.filter(b => scopeIds.includes(b.id))
+		: tables.monthlyBudgetRows
 	const monthlyBudgetsBuilt = buildMonthlyBudgets(
 		date,
 		summary,
@@ -603,7 +603,7 @@ export async function getMonthlyBudgetDaily(
 
 	const tables = preloaded ?? (await loadDashboardTables())
 	const monthKey = date.toFormat("yyyy-MM")
-	const active = tables.monthly_budgetRows
+	const active = tables.monthlyBudgetRows
 	const spent = new Map<string, number>()
 	const unbudgeted = new Map<number, number>()
 	for (const record of tables.records) {
@@ -899,7 +899,7 @@ function buildMonthlyBudgets(
 	date: DateTime,
 	summary: ReturnType<typeof summarize>,
 	included: { summary: ReturnType<typeof summarize> }[],
-	monthly_budgetRows: MonthlyBudgetRow[],
+	monthlyBudgetRows: MonthlyBudgetRow[],
 	amounts: MonthlyBudgetAmountRow[],
 	defaults: MonthlyBudgetDefaultRow[],
 	selectedId?: string,
@@ -917,7 +917,7 @@ function buildMonthlyBudgets(
 	for (const [id, total] of baseline) baseline.set(id, total / Math.max(included.length, 1))
 
 	const monthKey = date.toFormat("yyyy-MM-dd")
-	const monthlyBudgets = monthly_budgetRows
+	const monthlyBudgets = monthlyBudgetRows
 		.filter(b => !b.archived || current.has(b.id) || b.id === selectedId)
 		.sort((a, b) => a.display_order - b.display_order)
 	const out = []
@@ -971,13 +971,11 @@ function buildCategories(
 	const baselineMonthlyBudgets = new Map<string, Record<string, number>>()
 	for (const [id, items] of baselineGroups) {
 		baseline.set(id, items.reduce((s, i) => s + i.spending, 0) / Math.max(included.length, 1))
-		const monthly_budgetIds = new Set(
-			items.flatMap(i => Object.keys(i.monthly_budget_spending)),
-		)
+		const monthlyBudgetIds = new Set(items.flatMap(i => Object.keys(i.monthly_budget_spending)))
 		const perMonthlyBudget: Record<string, number> = {}
-		for (const monthly_budgetId of monthly_budgetIds) {
-			perMonthlyBudget[monthly_budgetId] =
-				items.reduce((s, i) => s + (i.monthly_budget_spending[monthly_budgetId] ?? 0), 0) /
+		for (const monthlyBudgetId of monthlyBudgetIds) {
+			perMonthlyBudget[monthlyBudgetId] =
+				items.reduce((s, i) => s + (i.monthly_budget_spending[monthlyBudgetId] ?? 0), 0) /
 				Math.max(included.length, 1)
 		}
 		baselineMonthlyBudgets.set(id, perMonthlyBudget)
@@ -1089,7 +1087,7 @@ export async function getDashboardView(input: DashboardInput & { scope?: string 
 			? input.scope
 			: "all"
 	const selectedBudget = tables.monthlyBudgets.get(scope)
-	const scopedBudgetIds = scopeMonthlyBudgetIds(scope, tables.monthly_budgetRows)
+	const scopedBudgetIds = scopeMonthlyBudgetIds(scope, tables.monthlyBudgetRows)
 	const scopeLabel =
 		scope === "all"
 			? "All spending"

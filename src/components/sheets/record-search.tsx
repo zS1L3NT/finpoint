@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/sheet"
 import { classForCurrency, cn, formatCurrency, parseDatetime, round2 } from "@/lib/utils"
 import { listRecords } from "@/logic/records"
-import { Record } from "@/types"
+import type { Record } from "@/types"
 
 const PAGE = 40
 

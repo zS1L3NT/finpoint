@@ -4,7 +4,7 @@ import { useLiveQuery } from "dexie-react-hooks"
 import { AnimatePresence, motion } from "framer-motion"
 import Link from "next/link"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { type ReactNode, useState } from "react"
+import { useState } from "react"
 import { toast } from "sonner"
 import DuplicateReviewDialog from "@/components/dialogs/duplicate-review"
 import { UiIcon as IconifyIcon } from "@/components/icon"
@@ -332,7 +332,7 @@ function GroupHeader({
 }: {
 	accountName: string
 	statement?: DuplicateStatement
-	children?: ReactNode
+	children?: React.ReactNode
 }) {
 	return (
 		<div className="flex items-start justify-between gap-3 text-sm">

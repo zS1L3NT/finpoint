@@ -314,18 +314,18 @@ async function analyticsValues(
 			: existingMonthlyBudgetId === undefined
 				? category.default_monthly_budget_id
 				: existingMonthlyBudgetId
-	const monthly_budgetId = eligible ? requestedMonthlyBudget : null
+	const monthlyBudgetId = eligible ? requestedMonthlyBudget : null
 	const requestedSource = input.monthly_budget_source ?? null
-	const monthly_budgetSource = !monthly_budgetId
+	const monthlyBudgetSource = !monthlyBudgetId
 		? null
-		: requestedSource === "category" && monthly_budgetId === category.default_monthly_budget_id
+		: requestedSource === "category" && monthlyBudgetId === category.default_monthly_budget_id
 			? "category"
 			: "manual"
 	return {
 		analytics_treatment: treatment,
 		analytics_treatment_source: explicitTreatment ? "manual" : "category",
-		monthly_budget_id: monthly_budgetId,
-		monthly_budget_source: monthly_budgetSource as "category" | "manual" | null,
+		monthly_budget_id: monthlyBudgetId,
+		monthly_budget_source: monthlyBudgetSource as "category" | "manual" | null,
 	}
 }
 

@@ -52,7 +52,7 @@ import { cn, formatCurrency, formatDatetime, round2 } from "@/lib/utils"
 import { ConflictError, deleteRecord, recordCompletions, updateRecord } from "@/logic/records"
 import { ValidationError } from "@/logic/validate"
 import { pathRecord, pathRecords } from "@/routes"
-import { Allocation, CategoryWithChildren, Record, Statement } from "@/types"
+import type { Allocation, CategoryWithChildren, Record, Statement } from "@/types"
 
 export default function RecordEditorDialog({
 	record,

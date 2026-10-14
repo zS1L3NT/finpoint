@@ -43,7 +43,7 @@ export async function listCategoryIconNames() {
 export async function listCategories(): Promise<CategoryWithChildren[]> {
 	const categories = await db.categories.toArray()
 	const monthlyBudgets = await db.monthly_budgets.toArray()
-	const monthly_budgetById = new Map(monthlyBudgets.map(b => [b.id, b]))
+	const monthlyBudgetById = new Map(monthlyBudgets.map(b => [b.id, b]))
 	const counts = new Map<string, number>()
 	await db.records.each(record => {
 		counts.set(record.category_id, (counts.get(record.category_id) ?? 0) + 1)
@@ -64,7 +64,7 @@ export async function listCategories(): Promise<CategoryWithChildren[]> {
 		can_delete:
 			(counts.get(category.id) ?? 0) === 0 && (childCounts.get(category.id) ?? 0) === 0,
 		default_monthly_budget: category.default_monthly_budget_id
-			? (monthly_budgetById.get(category.default_monthly_budget_id) ?? null)
+			? (monthlyBudgetById.get(category.default_monthly_budget_id) ?? null)
 			: null,
 	}))
 	const childrenByParent = new Map<string, typeof withMeta>()

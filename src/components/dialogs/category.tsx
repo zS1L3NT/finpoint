@@ -23,7 +23,7 @@ import { cn } from "@/lib/utils"
 import { createCategory, deleteCategory, updateCategory } from "@/logic/categories"
 import { listMonthlyBudgets } from "@/logic/monthly-budgets"
 import { ValidationError } from "@/logic/validate"
-import { AnalyticsTreatment, Category, CategoryWithChildren } from "@/types"
+import type { AnalyticsTreatment, Category, CategoryWithChildren } from "@/types"
 
 type CategoryFormValues = {
 	name: string
