@@ -15,7 +15,7 @@ Every line earns its place by carrying behavior, clarity, reuse, or a constraint
 - Delete props, branches, imports, wrappers, and helpers that carry nothing.
 - Write one-off logic inline. Abstract only for real reuse or where the repo already has a matching shared pattern.
 - Keep simple logic simple, free of defensive layers and line-heavy rewrites.
-- Comments describe present purpose, constraints, or rationale; migration history belongs only where it explains a current decision.
+- Treat comments as code with intent. Keep those recording rationale, workflow notes, constraints, temporary options, domain caveats, or non-obvious positioning; remove only the stale, misleading, or boilerplate. Describe present purpose; mention removed stacks (Laravel, Inertia, Vite) only where that history explains a current decision.
 
 ### Grouping And Order
 
