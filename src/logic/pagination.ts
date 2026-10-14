@@ -1,4 +1,4 @@
-// Client-side pagination (replaces Laravel's `->paginate()`).
+// Client-side pagination.
 // Every list page filters in `logic/*`, then slices here so the table
 // component keeps its existing `Paginated<T>` shape.
 

@@ -22,7 +22,7 @@ export const TREATMENT_VALUES = [
 	"automatic",
 ] as const
 
-/** Exact decimal math via integer cents (mirrors PHP cents() helpers). */
+/** Exact decimal math via integer cents. */
 export function toCents(value: number | string): number {
 	const raw = String(value).trim()
 	const negative = raw.startsWith("-")

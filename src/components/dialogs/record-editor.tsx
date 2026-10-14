@@ -51,7 +51,7 @@ import { SPRING, TRANSITION } from "@/lib/motion"
 import { cn, formatCurrency, formatDatetime, round2 } from "@/lib/utils"
 import { ConflictError, deleteRecord, recordCompletions, updateRecord } from "@/logic/records"
 import { ValidationError } from "@/logic/validate"
-import { pathRecords } from "@/routes"
+import { pathRecord, pathRecords } from "@/routes"
 import { Allocation, CategoryWithChildren, Record, Statement } from "@/types"
 
 export default function RecordEditorDialog({
@@ -155,7 +155,7 @@ export default function RecordEditorDialog({
 			await deleteRecord(record.id)
 			setIsOpen(false)
 
-			if (location.pathname === `/records/${record.id}`) {
+			if (location.pathname === pathRecord(record.id)) {
 				navigateBack({
 					name: "Records",
 					url: pathRecords(
