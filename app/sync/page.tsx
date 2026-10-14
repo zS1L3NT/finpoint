@@ -539,11 +539,13 @@ export default function DataSettingsPage() {
 									{label}
 								</span>
 								{counts ? (
-									<span className="text-lg font-semibold tabular-nums">
+									<span className="text-lg font-semibold tracking-tight tabular-nums">
 										{(counts[key] ?? 0).toLocaleString()}
 									</span>
 								) : (
-									<span className="invisible text-lg font-semibold">0</span>
+									<span className="invisible text-lg font-semibold tracking-tight">
+										0
+									</span>
 								)}
 							</div>
 						))}

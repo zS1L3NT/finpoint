@@ -52,7 +52,7 @@ export default function CategorySpendingMix({
 							/>
 						</div>
 						{category.refunds > 0 ? (
-							<p className="text-[11px] text-muted-foreground">
+							<p className="text-[0.6875rem] text-muted-foreground">
 								{formatCurrency(category.refunds)} refunded ·{" "}
 								{formatCurrency(category.spending)} net
 							</p>
@@ -65,7 +65,7 @@ export default function CategorySpendingMix({
 					No spending or refunds recorded in this scope.
 				</p>
 			) : null}
-			<p className="text-[11px] leading-relaxed text-muted-foreground">
+			<p className="text-[0.6875rem] leading-relaxed text-muted-foreground">
 				Shares exclude refunds.
 			</p>
 		</div>

@@ -870,7 +870,7 @@ function ReviewLinks({ data, month, year }: { data: DashboardData; month: string
 				</Button>
 			) : null}
 			{data.summary.pending_count > 0 ? (
-				<span className="basis-full text-[11px] text-muted-foreground">
+				<span className="basis-full text-[0.6875rem] text-muted-foreground">
 					Pending Record values count in totals.
 				</span>
 			) : null}

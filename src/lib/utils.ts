@@ -42,6 +42,15 @@ export const classForCurrency = (amount: number) => {
 	return amount < 0 ? "text-destructive" : amount > 0 ? "text-creative" : "text-foreground"
 }
 
+// Readable ink over a user-chosen hex colour: dark ink on light colours, white on dark.
+export const inkOn = (hex: string) => {
+	const channel = (i: number) => parseInt(hex.replace("#", "").slice(i, i + 2), 16) / 255
+	const linear = (v: number) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4)
+	const luminance =
+		0.2126 * linear(channel(0)) + 0.7152 * linear(channel(2)) + 0.0722 * linear(channel(4))
+	return luminance > 0.179 ? "text-zinc-950" : "text-white"
+}
+
 export const withMethod = (formData: FormData, method: "PUT" | "PATCH" | "DELETE") => {
 	formData.set("_method", method)
 	return formData
