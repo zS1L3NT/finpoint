@@ -30,7 +30,8 @@ export default function AccountPage({ params }: { params: Promise<{ id: string }
 
 	const account = useLiveQuery(() => (id ? getAccount(id).catch(() => null) : null), [id])
 	const accounts = useLiveQuery(() => listAccounts(), []) ?? []
-	const statements = useLiveQuery(() => listStatements({ account_id: id ?? null }), [id]) ?? []
+	const statementsQuery = useLiveQuery(() => listStatements({ account_id: id ?? null }), [id])
+	const statements = statementsQuery ?? []
 	const paginated = useMemo(
 		() => paginateItems(statements, parsePage(page), parsePageSize(pageSize)),
 		[statements, page, pageSize],
@@ -127,6 +128,7 @@ export default function AccountPage({ params }: { params: Promise<{ id: string }
 				<PaginatedDataTable
 					paginated={paginated}
 					columns={columns}
+					loading={statementsQuery === undefined}
 					footer={{
 						summary: `Showing ${paginated.data.length} of ${paginated.total} statements.`,
 					}}
