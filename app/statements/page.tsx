@@ -182,6 +182,7 @@ export default function StatementsPage() {
 									<SelectTrigger
 										className={cn("w-full sm:w-40", FILTER_CONTROL_CLASS)}
 									>
+										<IconifyIcon icon="lucide:circle-check-big" />
 										<SelectValue />
 									</SelectTrigger>
 									<SelectContent align="start" variant="filter">

@@ -37,7 +37,7 @@ import { STALE_MONTH_CLASS, useMonthTransition } from "@/hooks/use-month-transit
 import { useStagedMount } from "@/hooks/use-staged-mount"
 import { cn, formatCurrency } from "@/lib/utils"
 import { getDashboardView, type TrendMonth } from "@/logic/dashboard"
-import { pathDashboard, pathMonthlyRecords, pathStatements } from "@/routes"
+import { pathAllocator, pathDashboard, pathMonthlyRecords, pathStatements } from "@/routes"
 import { AnalyticsSummary } from "@/types"
 
 type DashboardView = Awaited<ReturnType<typeof getDashboardView>>
@@ -835,10 +835,9 @@ function ReviewLinks({ data, month, year }: { data: DashboardData; month: string
 				>
 					<Link
 						onClick={handlePush("overview")}
-						href={pathStatements({
+						href={pathAllocator({
 							start_date: start,
 							end_date: end,
-							is_unallocated: "true",
 							is_pending: "false",
 						})}
 					>
