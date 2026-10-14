@@ -42,11 +42,11 @@ A spending plan with a custom date period and amount. Budget membership can be m
 _Avoid_: Spending bucket, monthly target
 
 **Monthly Budget**:
-A reusable spending plan for calendar months, such as Daily, Recurring, Irregular, or Travel. It has an optional default amount that applies from an effective month and an optional amount override for one month. An explicit null means no comparison amount; zero is a valid amount. Only Records whose effective treatment is Spending contribute to its totals. Archived Monthly Budgets retain historical assignments.
+A reusable spending plan for calendar months, such as Daily, Recurring, Irregular, or Travel. Each month takes its amount from one of three amount rules (see Monthly Budget amount). An explicit null means no comparison amount; zero is a valid amount. Only Records whose effective treatment is Spending contribute to its totals. Archived Monthly Budgets retain historical assignments.
 _Avoid_: Bucket, spending bucket, monthly target, custom-period budget
 
 **Monthly Budget amount**:
-The comparison amount for a Monthly Budget in a selected calendar month. A month override takes precedence over the latest eligible default amount. It does not reserve cash, carry a balance, or change a Record's accounting treatment.
+The comparison amount for a Monthly Budget in a selected calendar month. A month takes one of three amount rules. **Default**: the month has no amount of its own and looks back to the latest Override default at or before it; unavailable when no earlier Override default exists. **Override one month**: an amount for that month only; months looking back for the default skip it. **Override default**: a default amount that applies from its month onward; months looking back stop at the latest one they reach. A month's own Override one month wins, then the latest Override default at or before it, otherwise there is no amount. It does not reserve cash, carry a balance, or change a Record's accounting treatment.
 _Avoid_: Target, limit, allowance
 
 **Treatment**:

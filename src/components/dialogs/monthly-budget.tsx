@@ -59,12 +59,9 @@ export default function MonthlyBudgetDialog({
 		[monthlyBudget?.id, month, year],
 	)
 	const monthLabel = `${month} ${year}`
-	const defaultLabel = source?.default
-		? `${source.default.amount === null ? "No monthly amount" : formatCurrency(source.default.amount)} · Default since ${DateTime.fromISO(source.default.effective_month).toFormat("MMMM yyyy")}`
-		: "No default amount set"
 	const scope =
-		amountScope ?? (!monthlyBudget ? "default" : source?.override ? "month" : "inherit")
-	const amountEditable = scope === "month" || scope === "default"
+		amountScope ??
+		(!monthlyBudget ? "default" : source?.override || !source?.default ? "month" : "inherit")
 
 	const reset = () => {
 		setName(monthlyBudget?.name ?? "")
@@ -202,26 +199,25 @@ export default function MonthlyBudgetDialog({
 										? [
 												{
 													value: "inherit",
-													label: "Use default amount",
+													label: "Default",
+													disabled: source?.default === null,
 												},
 											]
 										: []),
-									{ value: "month", label: `Override ${monthLabel} only` },
-									{ value: "default", label: `Set default from ${monthLabel}` },
+									{ value: "month", label: "Override one month" },
+									{ value: "default", label: "Override default" },
 								]}
 								description={
-									scope === "inherit"
-										? source?.default
-											? `Use the default: ${defaultLabel}.`
-											: `No default amount set, so ${monthLabel} has no amount.`
+									scope === "inherit" && source?.default
+										? `Use the default from ${DateTime.fromISO(source.default.effective_month).toFormat("MMMM yyyy")}: ${source.default.amount === null ? "No monthly amount" : formatCurrency(source.default.amount)}.`
 										: scope === "month"
-											? `Change ${monthLabel} only. The default stays unchanged.`
-											: `Set the default starting ${monthLabel}.${source?.nextDefault ? ` The next default starts in ${DateTime.fromISO(source.nextDefault.effective_month).toFormat("MMMM yyyy")}.` : ""} Other month overrides stay unchanged.`
+											? `Change ${monthLabel} only. Other months skip this when looking back for the default.`
+											: `Set the default from ${monthLabel} onward. Earlier defaults stop applying from here.${source?.nextDefault ? ` It applies until ${DateTime.fromISO(source.nextDefault.effective_month).toFormat("MMMM yyyy")}, when the next default starts.` : ""}`
 								}
 								onChange={setAmountScope}
 							/>
 							<AnimatePresence initial={false}>
-								{amountEditable && (
+								{(scope === "month" || scope === "default") && (
 									<motion.div
 										className="overflow-hidden"
 										initial={{ opacity: 0, height: 0, marginTop: -16 }}
