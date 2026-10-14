@@ -556,7 +556,7 @@ export default function DataSettingsPage() {
 							<MethodHeader
 								icon="lucide:cloud"
 								title="Google Drive"
-								description="Automatic. Stored in a hidden app folder in your own Drive. Your financial data never passes through Finpoint’s server."
+								description="Automatic. Stored in a hidden app folder in your own Drive. Your financial data never passes through Finpoint's server."
 								badge={
 									driveUnconfigured
 										? "Not available"
