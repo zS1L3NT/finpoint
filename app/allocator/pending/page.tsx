@@ -29,7 +29,7 @@ import {
 import WorkflowTabs from "@/components/workflow-tabs"
 import { useHistory } from "@/history"
 import { SPRING, TRANSITION } from "@/lib/motion"
-import { classForCurrency, cn, formatCurrency, formatDatetime, round2dp } from "@/lib/utils"
+import { classForCurrency, cn, formatCurrency, formatDatetime, round2 } from "@/lib/utils"
 import { listAccounts } from "@/logic/accounts"
 import { paginateItems, parsePage, parsePageSize } from "@/logic/pagination"
 import { replacementComparison, replacementReason, sameDirection } from "@/logic/replacements"
@@ -559,7 +559,7 @@ function PendingCard({
 	selected: boolean
 	onSelect: () => void
 }) {
-	const allocated = round2dp(statement.amount - statement.allocable_amount)
+	const allocated = round2(statement.amount - statement.allocable_amount)
 	return (
 		<button
 			type="button"

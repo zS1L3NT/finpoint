@@ -48,7 +48,7 @@ import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { useDialogCloseAnimation } from "@/hooks/use-dialog-close-animation"
 import { useDefaultFilterEndDateToday, useDefaultFilterStartDate } from "@/hooks/use-settings"
 import { SPRING, TRANSITION } from "@/lib/motion"
-import { cn, formatCurrency, formatDatetime, round2dp } from "@/lib/utils"
+import { cn, formatCurrency, formatDatetime, round2 } from "@/lib/utils"
 import { ConflictError, deleteRecord, recordCompletions, updateRecord } from "@/logic/records"
 import { ValidationError } from "@/logic/validate"
 import { pathRecords } from "@/routes"
@@ -176,8 +176,8 @@ export default function RecordEditorDialog({
 	const isPendingAmount = useStore(
 		form.store,
 		state =>
-			round2dp(state.values.statements.reduce((acc, el) => acc + el.amount, 0)) !==
-			round2dp(state.values.amount),
+			round2(state.values.statements.reduce((acc, el) => acc + el.amount, 0)) !==
+			round2(state.values.amount),
 	)
 	const analytics = useStore(form.store, state => ({
 		treatment: state.values.analytics_treatment,
@@ -484,7 +484,7 @@ export default function RecordEditorDialog({
 															field.state.meta.errors,
 															field.name,
 														)
-														const allocable = round2dp(
+														const allocable = round2(
 															statement.allocable_amount +
 																(statement.pivot?.amount ?? 0),
 														)

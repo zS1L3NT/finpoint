@@ -6,7 +6,7 @@ export const cn = (...inputs: ClassValue[]) => {
 	return twMerge(clsx(inputs))
 }
 
-export const round2dp = (number: number) => {
+export const round2 = (number: number) => {
 	return Math.round(number * 100) / 100
 }
 

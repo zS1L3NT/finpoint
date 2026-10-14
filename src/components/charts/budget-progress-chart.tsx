@@ -12,7 +12,7 @@ import {
 import { useChartIntro } from "@/components/charts/chart-intro"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { useIsMobile } from "@/hooks/use-mobile"
-import { formatCurrency, parseDatetime, round2dp } from "@/lib/utils"
+import { formatCurrency, parseDatetime, round2 } from "@/lib/utils"
 import type { Record } from "@/types"
 
 type BudgetProgressPoint = {
@@ -207,7 +207,7 @@ function buildSeries(records: Record[], start: DateTime, end: DateTime, asOf: Da
 		if (record.amount >= 0 || date < start.startOf("day") || date > end.endOf("day")) continue
 		const key = date.toISODate()
 		if (!key) continue
-		spendingByDay.set(key, round2dp((spendingByDay.get(key) ?? 0) - record.amount))
+		spendingByDay.set(key, round2((spendingByDay.get(key) ?? 0) - record.amount))
 	}
 
 	let cumulative = 0
@@ -215,7 +215,7 @@ function buildSeries(records: Record[], start: DateTime, end: DateTime, asOf: Da
 	for (let index = 0; index < dayCount; index += 1) {
 		const date = start.plus({ days: index })
 		if (index < elapsedDayCount) {
-			cumulative = round2dp(cumulative + (spendingByDay.get(date.toISODate() ?? "") ?? 0))
+			cumulative = round2(cumulative + (spendingByDay.get(date.toISODate() ?? "") ?? 0))
 			actual.push(cumulative)
 		} else {
 			actual.push(null)
@@ -230,7 +230,7 @@ function buildSeries(records: Record[], start: DateTime, end: DateTime, asOf: Da
 			date: start.plus({ days: index }).toFormat("d MMM"),
 			usage: actual[index] ?? null,
 			projection: showProjection
-				? round2dp(cumulative + dailyPace * (index + 1 - elapsedDayCount))
+				? round2(cumulative + dailyPace * (index + 1 - elapsedDayCount))
 				: null,
 		}
 	})

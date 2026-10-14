@@ -12,9 +12,8 @@ import {
 	SheetTitle,
 	SheetTrigger,
 } from "@/components/ui/sheet"
-import { classForCurrency, cn, formatCurrency, parseDatetime } from "@/lib/utils"
+import { classForCurrency, cn, formatCurrency, parseDatetime, round2 } from "@/lib/utils"
 import { listRecords } from "@/logic/records"
-import { round2 } from "@/logic/shared"
 import { Record } from "@/types"
 
 const PAGE = 40

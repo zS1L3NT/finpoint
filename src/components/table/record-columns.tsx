@@ -6,7 +6,7 @@ import MonthlyBudgetBadge from "@/components/monthly-budget-badge"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useHistory } from "@/history"
-import { treatmentLabel } from "@/lib/analytics"
+import { canUseMonthlyBudget, treatmentLabel } from "@/lib/analytics"
 import { classForCurrency, cn, formatCurrency, parseDatetime } from "@/lib/utils"
 import { pathRecord } from "@/routes"
 import type { Allocation, Record } from "@/types"
@@ -64,10 +64,8 @@ function RecordMonthlyBudget({ record }: { record: Record }) {
 				color={record.monthly_budget.color}
 			/>
 		)
-	const spending =
-		record.analytics_treatment === "spending" ||
-		(record.analytics_treatment === "automatic" && record.amount < 0)
-	if (spending) return <MonthlyBudgetBadge name="Unbudgeted" color={null} />
+	if (canUseMonthlyBudget(record.analytics_treatment, record.amount))
+		return <MonthlyBudgetBadge name="Unbudgeted" color={null} />
 	return (
 		<span className="text-xs text-muted-foreground">
 			{treatmentLabel(record.analytics_treatment)}

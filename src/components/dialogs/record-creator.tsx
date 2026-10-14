@@ -30,7 +30,7 @@ import { Progress } from "@/components/ui/progress"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { SPRING, TRANSITION } from "@/lib/motion"
-import { cn, formatCurrency, formatDatetime, parseDatetime, round2dp } from "@/lib/utils"
+import { cn, formatCurrency, formatDatetime, parseDatetime, round2 } from "@/lib/utils"
 import { createRecord, recordCompletions } from "@/logic/records"
 import { ValidationError } from "@/logic/validate"
 import { CategoryWithChildren, Statement } from "@/types"
@@ -72,7 +72,7 @@ export default function RecordCreatorDialog({
 			people: "",
 			location: "",
 			datetime: inferAllocatorDatetime(statements),
-			amount: round2dp(
+			amount: round2(
 				statements.reduce((acc, statement) => acc + statement.allocable_amount, 0),
 			),
 			category_id: "",
@@ -82,7 +82,7 @@ export default function RecordCreatorDialog({
 			description: "",
 			statements: statements.map(statement => ({
 				id: statement.id,
-				amount: round2dp(statement.allocable_amount),
+				amount: round2(statement.allocable_amount),
 			})),
 		},
 		onSubmit: async ({ value }) => {
@@ -115,8 +115,8 @@ export default function RecordCreatorDialog({
 	const isPendingAmount = useStore(
 		form.store,
 		state =>
-			round2dp(state.values.statements.reduce((acc, el) => acc + el.amount, 0)) !==
-			round2dp(state.values.amount),
+			round2(state.values.statements.reduce((acc, el) => acc + el.amount, 0)) !==
+			round2(state.values.amount),
 	)
 	const analytics = useStore(form.store, state => ({
 		treatment: state.values.analytics_treatment,

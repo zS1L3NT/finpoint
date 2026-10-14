@@ -1,10 +1,9 @@
 // Mirrors `Api\CategoryController` (index/store/update/destroy).
 
 import { db } from "@/data/db"
+import { TREATMENT_VALUES } from "@/logic/shared"
 import { ValidationError, Validator } from "@/logic/validate"
 import type { CategoryWithChildren } from "@/types"
-
-const TREATMENTS = ["income", "spending", "saving_investment", "neutral", "automatic"] as const
 
 export type CategoryInput = {
 	name: string
@@ -26,7 +25,7 @@ function cleanInput(input: CategoryInput) {
 			? v.oneOf(
 					input.analytics_treatment,
 					"analytics_treatment",
-					TREATMENTS,
+					TREATMENT_VALUES,
 					"Invalid treatment.",
 				)
 			: null,
@@ -107,9 +106,7 @@ export async function createCategory(input: CategoryInput) {
 		dto.default_monthly_budget_id &&
 		!(await db.monthly_budgets.get(dto.default_monthly_budget_id))
 	) {
-		const v = new Validator()
-		v.reject("default_monthly_budget_id", "Monthly budget not found.")
-		v.throwIfInvalid()
+		throw new ValidationError({ default_monthly_budget_id: ["Monthly budget not found."] })
 	}
 	const row = { id, ...dto }
 	await db.categories.add(row)
@@ -147,9 +144,7 @@ export async function updateCategory(currentId: string, input: CategoryInput) {
 		dto.default_monthly_budget_id &&
 		!(await db.monthly_budgets.get(dto.default_monthly_budget_id))
 	) {
-		const v = new Validator()
-		v.reject("default_monthly_budget_id", "Invalid monthly budget.")
-		v.throwIfInvalid()
+		throw new ValidationError({ default_monthly_budget_id: ["Monthly budget not found."] })
 	}
 
 	return db.transaction("rw", [db.categories, db.records], async () => {
