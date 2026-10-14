@@ -343,11 +343,13 @@ export default function AllocatorPendingPage() {
 							</Empty>
 						)}
 
-						<PaginationFooter
-							summary={`Showing ${pendingStatements.data.length} of ${pluralize(pendingStatements.total, "pending Statement")}.`}
-							page={pendingStatements.current_page}
-							lastPage={pendingStatements.last_page ?? 1}
-						/>
+						{pendingQuery !== undefined && (
+							<PaginationFooter
+								summary={`Showing ${pendingStatements.data.length} of ${pluralize(pendingStatements.total, "pending Statement")}.`}
+								page={pendingStatements.current_page}
+								lastPage={pendingStatements.last_page ?? 1}
+							/>
+						)}
 					</section>
 
 					<section
