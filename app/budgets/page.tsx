@@ -20,7 +20,7 @@ import { cardEnter } from "@/lib/motion"
 import { cn, formatCurrency, parseDate } from "@/lib/utils"
 import { listBudgets } from "@/logic/budgets"
 import { pathBudget } from "@/routes"
-import { Budget } from "@/types"
+import type { Budget } from "@/types"
 
 export default function BudgetsPage() {
 	const [isCreatingBudget, setIsCreatingBudget] = useState(false)

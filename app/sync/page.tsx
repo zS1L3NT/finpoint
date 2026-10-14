@@ -28,17 +28,6 @@ import {
 	CardTitle,
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { db } from "@/data/db"
-import {
-	clearAllData,
-	downloadExport,
-	exportData,
-	importData,
-	parseImportFile,
-	tableCounts,
-} from "@/data/export-import"
-import { seedIfEmpty } from "@/data/seed"
-import { generateTestData } from "@/data/test-data"
 import { useSyncStatus } from "@/hooks/use-sync-status"
 import { cn } from "@/lib/utils"
 import { ingestManualResult, resetSyncDisplay } from "@/logic/auto-sync"
@@ -50,6 +39,13 @@ import {
 	wasVaultProven,
 } from "@/logic/drive-sync"
 import { formatRelativeTime } from "@/logic/shared"
+import {
+	clearWorkspace,
+	countWorkspaceRows,
+	exportWorkspace,
+	importWorkspace,
+	loadDemoWorkspace,
+} from "@/logic/workspace"
 import { pathPrivacy, pathTerms } from "@/routes"
 
 const COUNT_ROWS = [
@@ -177,12 +173,7 @@ export default function DataSettingsPage() {
 	const [dragging, setDragging] = useState(false)
 	const sync = useSyncStatus()
 	const fileInputRef = useRef<HTMLInputElement>(null)
-	const counts =
-		useLiveQuery(async () => {
-			// Re-run whenever any table changes by depending on a cheap aggregate.
-			await db.statements.toCollection().count()
-			return tableCounts()
-		}, []) ?? null
+	const counts = useLiveQuery(() => countWorkspaceRows(), []) ?? null
 
 	const total = counts ? Object.values(counts).reduce((sum, count) => sum + count, 0) : 0
 
@@ -194,7 +185,7 @@ export default function DataSettingsPage() {
 	const handleExport = async () => {
 		setBusy("export")
 		try {
-			downloadExport(await exportData())
+			await exportWorkspace()
 			toast.success("Backup file downloaded.")
 		} catch {
 			toast.error("Couldn't save backup file.")
@@ -210,8 +201,7 @@ export default function DataSettingsPage() {
 		}
 		setBusy("import")
 		try {
-			const text = await importFile.text()
-			await importData(parseImportFile(text))
+			await importWorkspace(await importFile.text())
 			toast.success("Backup file restored.")
 			setImportFile(null)
 			if (fileInputRef.current) fileInputRef.current.value = ""
@@ -229,8 +219,7 @@ export default function DataSettingsPage() {
 		}
 		setBusy("clear")
 		try {
-			await clearAllData()
-			await seedIfEmpty()
+			await clearWorkspace()
 			toast.success("Workspace cleared.")
 			setConfirmingClear(false)
 		} catch {
@@ -247,7 +236,7 @@ export default function DataSettingsPage() {
 		}
 		setBusy("demo")
 		try {
-			await importData(generateTestData())
+			await loadDemoWorkspace()
 			toast.success("Demo workspace loaded.")
 			setConfirmingDemo(false)
 		} catch {

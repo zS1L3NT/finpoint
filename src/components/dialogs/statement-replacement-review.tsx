@@ -39,14 +39,14 @@ type ReplacementReview = Omit<Awaited<ReturnType<typeof replacementReview>>, "al
 export default function StatementReplacementReviewDialog({
 	statement,
 	pendingStatement,
-	open,
-	onOpenChange,
+	isOpen,
+	setIsOpen,
 	onConfirmed,
 }: {
 	statement: Statement | null
 	pendingStatement: Statement | null
-	open: boolean
-	onOpenChange: (open: boolean) => void
+	isOpen: boolean
+	setIsOpen: (isOpen: boolean) => void
 	onConfirmed: () => void
 }) {
 	const [review, setReview] = useState<ReplacementReview | null>(null)
@@ -55,7 +55,7 @@ export default function StatementReplacementReviewDialog({
 
 	useEffect(() => {
 		// While closing, keep the last review on screen; it's cleared once the exit completes.
-		if (!open) return
+		if (!isOpen) return
 		if (!statement || !pendingStatement) {
 			setReview(null)
 			setError(null)
@@ -104,7 +104,7 @@ export default function StatementReplacementReviewDialog({
 		return () => {
 			cancelled = true
 		}
-	}, [open, statement, pendingStatement])
+	}, [isOpen, statement, pendingStatement])
 
 	const handleReplace = async () => {
 		if (!review?.can_replace || isSubmitting) return
@@ -116,7 +116,7 @@ export default function StatementReplacementReviewDialog({
 				description: "Its Allocations now belong to the imported Statement.",
 			})
 			setIsSubmitting(false)
-			onOpenChange(false)
+			setIsOpen(false)
 			onConfirmed()
 		} catch (cause) {
 			const message =
@@ -133,10 +133,10 @@ export default function StatementReplacementReviewDialog({
 
 	return (
 		<Dialog
-			open={open}
-			onOpenChange={onOpenChange}
-			onOpenChangeComplete={isOpen => {
-				if (!isOpen) {
+			open={isOpen}
+			onOpenChange={setIsOpen}
+			onOpenChangeComplete={opened => {
+				if (!opened) {
 					setReview(null)
 					setError(null)
 				}

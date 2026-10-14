@@ -1,19 +1,7 @@
 export type Appearance = "light" | "dark" | "system"
 
-export type SharedPageProps = {
-	appearance: Appearance
-	sidebarOpen: boolean
-}
-
-export type PaginatedLink = {
-	active: boolean
-	label: string
-	url: string | null
-}
-
 export type Paginated<T> = {
 	data: T[]
-	links: PaginatedLink[]
 	total: number
 	per_page: number
 	current_page: number
@@ -55,19 +43,6 @@ export type StatementReplacementCandidate = Statement & {
 	disabled_reason: string | null
 }
 
-export type StatementReplacementReview = {
-	pending_statement: Statement
-	statement: Statement
-	allocations: Array<Record & { allocation_amount: number }>
-	amount_difference: number
-	day_difference: number
-	is_exact_amount: boolean
-	allocated_amount: number
-	remaining_allocable_amount: number
-	can_replace: boolean
-	disabled_reason: string | null
-}
-
 export type Record = {
 	id: string
 	datetime: string
@@ -96,12 +71,6 @@ export type AnalyticsTreatment =
 	| "saving_investment"
 	| "neutral"
 	| "automatic"
-
-export type RecordCompletions = {
-	titles: string[]
-	locations: string[]
-	peoples: string[]
-}
 
 export type Category = {
 	id: string
@@ -178,7 +147,7 @@ export type AnalyticsSummary = {
 		outflow: number
 		refunds: number
 		records: number
-		monthly_budget_spending: { [monthly_budgetId: string]: number }
+		monthly_budget_spending: { [monthlyBudgetId: string]: number }
 	}>
 	monthlyBudgets: Array<MonthlyBudget & { spending: number; records: number }>
 }

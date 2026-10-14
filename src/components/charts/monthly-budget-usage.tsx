@@ -1,6 +1,6 @@
 "use client"
 
-import { type ReactNode, useId, useState } from "react"
+import { useId, useState } from "react"
 import { formatChartCurrency } from "@/lib/chart-currency"
 import { cn, formatCurrency } from "@/lib/utils"
 
@@ -24,7 +24,7 @@ export default function MonthlyBudgetUsage({
 	unbudgeted: number
 	selected: string | null
 	onSelect: (id: string) => void
-	edit: (budget: MonthlyBudgetUsageItem) => ReactNode
+	edit: (budget: MonthlyBudgetUsageItem) => React.ReactNode
 }) {
 	const id = useId().replaceAll(":", "")
 	const [hovered, setHovered] = useState<string | null>(null)

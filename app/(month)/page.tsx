@@ -4,7 +4,7 @@ import { useLiveQuery } from "dexie-react-hooks"
 import { DateTime } from "luxon"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
-import { type ReactNode, useRef } from "react"
+import { useRef } from "react"
 import CashflowChart from "@/components/charts/cashflow-chart"
 import CategoryHistoryChart from "@/components/charts/category-history-chart"
 import CategoryMovers from "@/components/charts/category-movers"
@@ -38,7 +38,7 @@ import { useStagedMount } from "@/hooks/use-staged-mount"
 import { cn, formatCurrency, pluralize } from "@/lib/utils"
 import { getDashboardView, type TrendMonth } from "@/logic/dashboard"
 import { pathAllocator, pathDashboard, pathMonthlyRecords, pathStatements } from "@/routes"
-import { AnalyticsSummary } from "@/types"
+import type { AnalyticsSummary } from "@/types"
 
 type DashboardView = Awaited<ReturnType<typeof getDashboardView>>
 type DashboardData = DashboardView["dashboard"]
@@ -491,7 +491,7 @@ function ScopedCardTitle({
 }: {
 	scope: string
 	color?: string
-	children: ReactNode
+	children: React.ReactNode
 }) {
 	return (
 		<CardTitle className="flex items-center gap-2">

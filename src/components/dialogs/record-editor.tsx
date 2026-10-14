@@ -1,4 +1,5 @@
 import { useForm, useStore } from "@tanstack/react-form"
+import { useLiveQuery } from "dexie-react-hooks"
 import { AnimatePresence, motion } from "framer-motion"
 import { DateTime } from "luxon"
 import { useEffect, useState } from "react"
@@ -45,14 +46,13 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { useHistory } from "@/history"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { useDialogCloseAnimation } from "@/hooks/use-dialog-close-animation"
-import { useFetch } from "@/hooks/use-fetch"
 import { useDefaultFilterEndDateToday, useDefaultFilterStartDate } from "@/hooks/use-settings"
 import { COLLAPSE_MOTION, SPRING, TRANSITION } from "@/lib/motion"
-import { cn, formatCurrency, formatDatetime, round2dp } from "@/lib/utils"
+import { cn, formatCurrency, formatDatetime, round2 } from "@/lib/utils"
 import { ConflictError, deleteRecord, recordCompletions, updateRecord } from "@/logic/records"
 import { ValidationError } from "@/logic/validate"
-import { pathRecords } from "@/routes"
-import { Allocation, CategoryWithChildren, Record, Statement } from "@/types"
+import { pathRecord, pathRecords } from "@/routes"
+import type { Allocation, CategoryWithChildren, Record, Statement } from "@/types"
 
 export default function RecordEditorDialog({
 	record,
@@ -77,11 +77,11 @@ export default function RecordEditorDialog({
 		? DateTime.now().toFormat("yyyy-MM-dd")
 		: undefined
 
-	const completions = useFetch(() => recordCompletions(), {
+	const completions = useLiveQuery(() => recordCompletions(), []) ?? {
 		titles: [],
 		locations: [],
 		peoples: [],
-	})
+	}
 
 	const [statementCache, setStatementCache] = useState<(Statement & { pivot?: Allocation })[]>([])
 	const [isAttachingStatement, setIsAttachingStatement] = useState(false)
@@ -155,7 +155,7 @@ export default function RecordEditorDialog({
 			await deleteRecord(record.id)
 			setIsOpen(false)
 
-			if (location.pathname === `/records/${record.id}`) {
+			if (location.pathname === pathRecord(record.id)) {
 				navigateBack({
 					name: "Records",
 					url: pathRecords(
@@ -176,8 +176,8 @@ export default function RecordEditorDialog({
 	const isPendingAmount = useStore(
 		form.store,
 		state =>
-			round2dp(state.values.statements.reduce((acc, el) => acc + el.amount, 0)) !==
-			round2dp(state.values.amount),
+			round2(state.values.statements.reduce((acc, el) => acc + el.amount, 0)) !==
+			round2(state.values.amount),
 	)
 	const analytics = useStore(form.store, state => ({
 		treatment: state.values.analytics_treatment,
@@ -469,7 +469,7 @@ export default function RecordEditorDialog({
 															field.state.meta.errors,
 															field.name,
 														)
-														const allocable = round2dp(
+														const allocable = round2(
 															statement.allocable_amount +
 																(statement.pivot?.amount ?? 0),
 														)

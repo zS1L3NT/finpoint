@@ -1,9 +1,9 @@
 // Mirrors `Api\CategoryController` (index/store/update/destroy).
 
 import { db } from "@/data/db"
+import { TREATMENT_VALUES } from "@/logic/shared"
 import { ValidationError, Validator } from "@/logic/validate"
-
-const TREATMENTS = ["income", "spending", "saving_investment", "neutral", "automatic"] as const
+import type { CategoryWithChildren } from "@/types"
 
 export type CategoryInput = {
 	name: string
@@ -25,7 +25,7 @@ function cleanInput(input: CategoryInput) {
 			? v.oneOf(
 					input.analytics_treatment,
 					"analytics_treatment",
-					TREATMENTS,
+					TREATMENT_VALUES,
 					"Invalid treatment.",
 				)
 			: null,
@@ -40,10 +40,10 @@ export async function listCategoryIconNames() {
 	return [...new Set((await db.categories.toArray()).map(category => category.icon))]
 }
 
-export async function listCategories() {
+export async function listCategories(): Promise<CategoryWithChildren[]> {
 	const categories = await db.categories.toArray()
 	const monthlyBudgets = await db.monthly_budgets.toArray()
-	const monthly_budgetById = new Map(monthlyBudgets.map(b => [b.id, b]))
+	const monthlyBudgetById = new Map(monthlyBudgets.map(b => [b.id, b]))
 	const counts = new Map<string, number>()
 	await db.records.each(record => {
 		counts.set(record.category_id, (counts.get(record.category_id) ?? 0) + 1)
@@ -64,7 +64,7 @@ export async function listCategories() {
 		can_delete:
 			(counts.get(category.id) ?? 0) === 0 && (childCounts.get(category.id) ?? 0) === 0,
 		default_monthly_budget: category.default_monthly_budget_id
-			? (monthly_budgetById.get(category.default_monthly_budget_id) ?? null)
+			? (monthlyBudgetById.get(category.default_monthly_budget_id) ?? null)
 			: null,
 	}))
 	const childrenByParent = new Map<string, typeof withMeta>()
@@ -106,9 +106,7 @@ export async function createCategory(input: CategoryInput) {
 		dto.default_monthly_budget_id &&
 		!(await db.monthly_budgets.get(dto.default_monthly_budget_id))
 	) {
-		const v = new Validator()
-		v.reject("default_monthly_budget_id", "Monthly budget not found.")
-		v.throwIfInvalid()
+		throw new ValidationError({ default_monthly_budget_id: ["Monthly budget not found."] })
 	}
 	const row = { id, ...dto }
 	await db.categories.add(row)
@@ -146,9 +144,7 @@ export async function updateCategory(currentId: string, input: CategoryInput) {
 		dto.default_monthly_budget_id &&
 		!(await db.monthly_budgets.get(dto.default_monthly_budget_id))
 	) {
-		const v = new Validator()
-		v.reject("default_monthly_budget_id", "Invalid monthly budget.")
-		v.throwIfInvalid()
+		throw new ValidationError({ default_monthly_budget_id: ["Monthly budget not found."] })
 	}
 
 	return db.transaction("rw", [db.categories, db.records], async () => {

@@ -1,6 +1,5 @@
 "use client"
 
-// Client-side replacement for the Inertia search/pagination helper.
 // Search text, page and page size live in the URL search params so links stay
 // shareable. Typing in search edits one history entry rather than adding one per key.
 

@@ -5,8 +5,8 @@
 // sealed inside an httpOnly cookie, never in JS. Set
 // NEXT_PUBLIC_GOOGLE_CLIENT_ID to enable.
 
-export const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.appdata"
-export const DRIVE_FILENAME = "finpoint-backup.json"
+const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.appdata"
+const DRIVE_FILENAME = "finpoint-backup.json"
 
 type CodeResponse = {
 	code?: string
@@ -32,7 +32,7 @@ declare global {
 	}
 }
 
-export function googleClientId(): string {
+function googleClientId(): string {
 	return process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? ""
 }
 

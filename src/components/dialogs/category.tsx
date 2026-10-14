@@ -23,7 +23,7 @@ import { cn } from "@/lib/utils"
 import { createCategory, deleteCategory, updateCategory } from "@/logic/categories"
 import { listMonthlyBudgets } from "@/logic/monthly-budgets"
 import { ValidationError } from "@/logic/validate"
-import { AnalyticsTreatment, Category, CategoryWithChildren } from "@/types"
+import type { AnalyticsTreatment, Category, CategoryWithChildren } from "@/types"
 
 type CategoryFormValues = {
 	name: string
@@ -55,25 +55,25 @@ const EMPTY_FORM_VALUES: CategoryFormValues = {
 }
 
 export default function CategoryDialog({
-	open,
+	isOpen,
 	mode: modeProp,
 	category: categoryProp,
 	categories,
-	onOpenChange,
+	setIsOpen,
 }: {
-	open: boolean
+	isOpen: boolean
 	mode: "create" | "edit"
 	category: Category | CategoryWithChildren | null
 	categories: (Category | CategoryWithChildren)[]
-	onOpenChange: (open: boolean) => void
+	setIsOpen: (isOpen: boolean) => void
 }) {
 	// Parents clear mode/category the moment the dialog closes; keep the last open content
 	// so the title and fields don't flip while the exit animation plays.
 	const [snapshot, setSnapshot] = useState({ mode: modeProp, category: categoryProp })
-	if (open && (snapshot.mode !== modeProp || snapshot.category !== categoryProp)) {
+	if (isOpen && (snapshot.mode !== modeProp || snapshot.category !== categoryProp)) {
 		setSnapshot({ mode: modeProp, category: categoryProp })
 	}
-	const { mode, category } = open ? { mode: modeProp, category: categoryProp } : snapshot
+	const { mode, category } = isOpen ? { mode: modeProp, category: categoryProp } : snapshot
 	const isEditing = mode === "edit" && category !== null
 	const monthlyBudgets = useLiveQuery(() => listMonthlyBudgets(), [])
 	const canEditParentCategory = !isEditing || isChildCategory(category)
@@ -94,7 +94,7 @@ export default function CategoryDialog({
 		: "Unbudgeted"
 
 	useEffect(() => {
-		if (!open) {
+		if (!isOpen) {
 			return
 		}
 
@@ -111,7 +111,7 @@ export default function CategoryDialog({
 				: EMPTY_FORM_VALUES,
 		)
 		resetApiErrors()
-	}, [open, category, resetApiErrors])
+	}, [isOpen, category, resetApiErrors])
 
 	const setValue = <TKey extends keyof CategoryFormValues>(
 		field: TKey,
@@ -137,7 +137,7 @@ export default function CategoryDialog({
 			} else {
 				await createCategory(input)
 			}
-			onOpenChange(false)
+			setIsOpen(false)
 		} catch (cause) {
 			if (cause instanceof ValidationError) {
 				setApiErrors(cause.errors)
@@ -153,7 +153,7 @@ export default function CategoryDialog({
 		}
 		try {
 			await deleteCategory(category.id)
-			onOpenChange(false)
+			setIsOpen(false)
 		} catch {
 			toast.error("Unable to delete this category.")
 		}
@@ -162,7 +162,7 @@ export default function CategoryDialog({
 	if (monthlyBudgets === undefined) return null
 
 	return (
-		<Dialog open={open} onOpenChange={onOpenChange}>
+		<Dialog open={isOpen} onOpenChange={setIsOpen}>
 			<DialogContent className="md:max-w-lg">
 				<DialogHeader>
 					<DialogTitle>{isEditing ? "Edit Category" : "Create Category"}</DialogTitle>

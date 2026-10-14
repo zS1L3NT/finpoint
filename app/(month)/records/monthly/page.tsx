@@ -27,7 +27,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select"
-import { useFetch } from "@/hooks/use-fetch"
 import { STALE_MONTH_CLASS, useMonthTransition } from "@/hooks/use-month-transition"
 import { useRecordEditor } from "@/hooks/use-record-editor"
 import { TREATMENTS } from "@/lib/analytics"
@@ -35,7 +34,7 @@ import { cn } from "@/lib/utils"
 import { listCategories } from "@/logic/categories"
 import { getMonthlyRecords } from "@/logic/monthly"
 import { pathImporter, pathRecords } from "@/routes"
-import { CategoryWithChildren, MonthlyBudget, Record } from "@/types"
+import type { CategoryWithChildren, MonthlyBudget, Record } from "@/types"
 
 type Filters = {
 	query?: string
@@ -151,7 +150,7 @@ export default function MonthlyRecordsPage() {
 			}).catch(() => null),
 		[month, year, filterKey],
 	)
-	const categories = useFetch(() => listCategories(), [])
+	const categories = useLiveQuery(() => listCategories(), []) ?? []
 	const { editingRecord, handleEdit, setEditingRecord } = useRecordEditor()
 	const columns = useRecordColumns<Record>({
 		pageName: "Monthly Records",

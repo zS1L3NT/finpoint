@@ -6,7 +6,7 @@ export const cn = (...inputs: ClassValue[]) => {
 	return twMerge(clsx(inputs))
 }
 
-export const round2dp = (number: number) => {
+export const round2 = (number: number) => {
 	return Math.round(number * 100) / 100
 }
 
@@ -49,9 +49,4 @@ export const inkOn = (hex: string) => {
 	const luminance =
 		0.2126 * linear(channel(0)) + 0.7152 * linear(channel(2)) + 0.0722 * linear(channel(4))
 	return luminance > 0.179 ? "text-zinc-950" : "text-white"
-}
-
-export const withMethod = (formData: FormData, method: "PUT" | "PATCH" | "DELETE") => {
-	formData.set("_method", method)
-	return formData
 }

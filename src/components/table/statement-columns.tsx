@@ -6,7 +6,7 @@ import { amountTone, formatRowTime } from "@/components/table/record-columns"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useHistory } from "@/history"
-import { cn, formatCurrency, round2dp } from "@/lib/utils"
+import { cn, formatCurrency, round2 } from "@/lib/utils"
 import { pathStatement } from "@/routes"
 import type { Allocation, Statement } from "@/types"
 
@@ -55,7 +55,7 @@ function StatementAmount({
 	statement: StatementRow
 	amount: StatementTableOptions<StatementRow>["amount"]
 }) {
-	const allocable = round2dp(statement.allocable_amount)
+	const allocable = round2(statement.allocable_amount)
 	return (
 		<span className="grid justify-items-end gap-0.5 text-right">
 			<span className={cn("font-medium tabular-nums", amountTone(statement.amount))}>

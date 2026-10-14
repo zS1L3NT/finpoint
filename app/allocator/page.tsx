@@ -30,15 +30,15 @@ import {
 } from "@/components/ui/select"
 import WorkflowTabs from "@/components/workflow-tabs"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
+import { useRecordEditor } from "@/hooks/use-record-editor"
 import { useDefaultFilterEndDateToday, useDefaultFilterStartDate } from "@/hooks/use-settings"
 import { TABLE_WIDTH_CLASSNAMES } from "@/lib/table-width-classnames"
 import { cn, formatCurrency, pluralize } from "@/lib/utils"
 import { listAccounts } from "@/logic/accounts"
 import { listCategories } from "@/logic/categories"
 import { paginateItems, parsePage, parsePageSize } from "@/logic/pagination"
-import { getRecord } from "@/logic/records"
 import { listStatements } from "@/logic/statements"
-import { CategoryWithChildren, Record, Statement } from "@/types"
+import type { Statement } from "@/types"
 
 export default function AllocatorPage() {
 	const searchParams = useSearchParams()
@@ -55,8 +55,7 @@ export default function AllocatorPage() {
 		usePaginatedTableState()
 
 	const accounts = useLiveQuery(() => listAccounts(), []) ?? []
-	const categories =
-		useLiveQuery(() => listCategories() as unknown as Promise<CategoryWithChildren[]>, []) ?? []
+	const categories = useLiveQuery(() => listCategories(), []) ?? []
 	const statementsQuery = useLiveQuery(
 		() =>
 			listStatements({
@@ -81,9 +80,7 @@ export default function AllocatorPage() {
 	const [isCreatingRecord, setIsCreatingRecord] = useState(false)
 	const [isAttachingRecord, setIsAttachingRecord] = useState(false)
 	const [isReplacingPendingStatement, setIsReplacingPendingStatement] = useState(false)
-	const [editingRecord, setEditingRecord] = useState<
-		(Record & { statements: Statement[] }) | null
-	>(null)
+	const { editingRecord, handleEdit, setEditingRecord } = useRecordEditor()
 	const updateFilters = (changes: { [key: string]: string | null }) => {
 		setParams({ ...changes, page: null })
 	}
@@ -309,8 +306,7 @@ export default function AllocatorPage() {
 					isOpen={isAttachingRecord}
 					setIsOpen={setIsAttachingRecord}
 					handler={async record => {
-						const data = await getRecord(record.id)
-						setEditingRecord(data as unknown as Record & { statements: Statement[] })
+						await handleEdit(record)
 						setIsAttachingRecord(false)
 					}}
 					trigger={

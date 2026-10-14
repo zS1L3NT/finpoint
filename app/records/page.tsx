@@ -26,7 +26,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select"
-import { useFetch } from "@/hooks/use-fetch"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { useRecordEditor } from "@/hooks/use-record-editor"
 import { TREATMENTS } from "@/lib/analytics"
@@ -35,7 +34,7 @@ import { listCategories } from "@/logic/categories"
 import { listMonthlyBudgets } from "@/logic/monthly-budgets"
 import { paginateItems, parsePage, parsePageSize } from "@/logic/pagination"
 import { listRecords } from "@/logic/records"
-import { CategoryWithChildren, MonthlyBudget, Record } from "@/types"
+import type { CategoryWithChildren, MonthlyBudget, Record } from "@/types"
 
 export default function RecordsPage() {
 	const searchParams = useSearchParams()
@@ -54,8 +53,8 @@ export default function RecordsPage() {
 		[categoryIdsParam],
 	)
 
-	const categories = useFetch(() => listCategories(), [])
-	const monthlyBudgets = useFetch(() => listMonthlyBudgets(), [])
+	const categories = useLiveQuery(() => listCategories(), []) ?? []
+	const monthlyBudgets = useLiveQuery(() => listMonthlyBudgets(), []) ?? []
 	const { editingRecord, handleEdit, setEditingRecord } = useRecordEditor()
 	const { query, page, pageSize, handleQueryChange, handlePageSizeChange, setParams } =
 		usePaginatedTableState()

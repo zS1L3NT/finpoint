@@ -15,7 +15,6 @@ import { useStatementColumns, useStatementMobileRow } from "@/components/table/s
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { useFetch } from "@/hooks/use-fetch"
 import { treatmentLabel } from "@/lib/analytics"
 import { formatDatetime } from "@/lib/utils"
 import { listAccounts } from "@/logic/accounts"
@@ -28,7 +27,7 @@ export default function RecordPage({ params }: { params: Promise<{ id: string }>
 	const { id } = use(params)
 	const data = useLiveQuery(() => (id ? getRecord(id).catch(() => null) : null), [id])
 	const accounts = useLiveQuery(() => listAccounts(), [])
-	const categories = useFetch(() => listCategories(), [])
+	const categories = useLiveQuery(() => listCategories(), []) ?? []
 
 	const [isEditingRecord, setIsEditingRecord] = useState(false)
 	const [editingStatement, setEditingStatement] = useState<Statement | null>(null)
@@ -57,7 +56,6 @@ export default function RecordPage({ params }: { params: Promise<{ id: string }>
 	}
 
 	const { statements, ...record } = data
-	const typedStatements = statements as unknown as (Statement & { pivot: Allocation })[]
 
 	return (
 		<>
@@ -86,7 +84,7 @@ export default function RecordPage({ params }: { params: Promise<{ id: string }>
 					actions={
 						<RecordEditorDialog
 							record={record}
-							statements={typedStatements}
+							statements={statements}
 							categories={categories}
 							isOpen={isEditingRecord}
 							setIsOpen={setIsEditingRecord}
@@ -146,7 +144,7 @@ export default function RecordPage({ params }: { params: Promise<{ id: string }>
 					</CardHeader>
 					<CardContent>
 						<DataTable
-							data={typedStatements}
+							data={statements}
 							columns={columns}
 							mobileRow={mobileRow}
 							emptyMessage="No statements found."

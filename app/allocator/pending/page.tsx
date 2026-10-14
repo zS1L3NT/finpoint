@@ -35,7 +35,7 @@ import {
 	formatCurrency,
 	formatDatetime,
 	pluralize,
-	round2dp,
+	round2,
 } from "@/lib/utils"
 import { listAccounts } from "@/logic/accounts"
 import { paginateItems, parsePage, parsePageSize } from "@/logic/pagination"
@@ -516,8 +516,8 @@ export default function AllocatorPendingPage() {
 			<StatementReplacementReviewDialog
 				statement={reviewStatement}
 				pendingStatement={selectedPendingStatement}
-				open={!!reviewStatement}
-				onOpenChange={open => {
+				isOpen={!!reviewStatement}
+				setIsOpen={open => {
 					if (!open) setReviewStatement(null)
 				}}
 				onConfirmed={afterReplacement}
@@ -563,7 +563,7 @@ function PendingCard({
 	selected: boolean
 	onSelect: () => void
 }) {
-	const allocated = round2dp(statement.amount - statement.allocable_amount)
+	const allocated = round2(statement.amount - statement.allocable_amount)
 	return (
 		<button
 			type="button"

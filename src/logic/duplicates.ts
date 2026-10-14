@@ -59,6 +59,8 @@ export function pairKey(a: string, b: string) {
 	return JSON.stringify(pairIds(a, b))
 }
 
+export type DuplicateStatement = StatementRow
+
 export type DuplicateGroup = {
 	id: string
 	statements: StatementRow[]

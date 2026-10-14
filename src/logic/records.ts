@@ -2,9 +2,10 @@
 // `Api\CompletionsController`, and `Record::appQuery`.
 
 import { db } from "@/data/db"
+import { canUseMonthlyBudget } from "@/lib/analytics"
 import { contribution } from "@/logic/analytics"
 import { isPendingRecord, pendingStatementIds, tallyAllocations } from "@/logic/pending"
-import { inputToStored, newId, round2 } from "@/logic/shared"
+import { inputToStored, newId, round2, TREATMENT_VALUES } from "@/logic/shared"
 import { ValidationError, Validator } from "@/logic/validate"
 import type { Allocation, AnalyticsTreatment, Record as AppRecord, Statement } from "@/types"
 
@@ -270,8 +271,6 @@ export type RecordInput = {
 	statements?: RecordStatementInput[]
 }
 
-const TREATMENTS = ["income", "spending", "saving_investment", "neutral", "automatic"] as const
-
 function validateRecordInput(input: RecordInput) {
 	const v = new Validator()
 	const title = v.text(input.title, "title")
@@ -279,7 +278,12 @@ function validateRecordInput(input: RecordInput) {
 	const amount = v.amount(input.amount, "amount")
 	const category_id = v.text(input.category_id, "category_id", "Select a category.")
 	if (input.analytics_treatment) {
-		v.oneOf(input.analytics_treatment, "analytics_treatment", TREATMENTS, "Invalid treatment.")
+		v.oneOf(
+			input.analytics_treatment,
+			"analytics_treatment",
+			TREATMENT_VALUES,
+			"Invalid treatment.",
+		)
 	}
 	v.throwIfInvalid()
 	return { ...input, title, datetime, amount, category_id }
@@ -303,26 +307,25 @@ async function analyticsValues(
 	const treatment = (explicitTreatment ??
 		category.analytics_treatment ??
 		"automatic") as AnalyticsTreatment
-	const eligible =
-		treatment === "spending" || (treatment === "automatic" && Number(input.amount) < 0)
+	const eligible = canUseMonthlyBudget(treatment, Number(input.amount))
 	const requestedMonthlyBudget =
 		"monthly_budget_id" in input
 			? input.monthly_budget_id || null
 			: existingMonthlyBudgetId === undefined
 				? category.default_monthly_budget_id
 				: existingMonthlyBudgetId
-	const monthly_budgetId = eligible ? requestedMonthlyBudget : null
+	const monthlyBudgetId = eligible ? requestedMonthlyBudget : null
 	const requestedSource = input.monthly_budget_source ?? null
-	const monthly_budgetSource = !monthly_budgetId
+	const monthlyBudgetSource = !monthlyBudgetId
 		? null
-		: requestedSource === "category" && monthly_budgetId === category.default_monthly_budget_id
+		: requestedSource === "category" && monthlyBudgetId === category.default_monthly_budget_id
 			? "category"
 			: "manual"
 	return {
 		analytics_treatment: treatment,
 		analytics_treatment_source: explicitTreatment ? "manual" : "category",
-		monthly_budget_id: monthly_budgetId,
-		monthly_budget_source: monthly_budgetSource as "category" | "manual" | null,
+		monthly_budget_id: monthlyBudgetId,
+		monthly_budget_source: monthlyBudgetSource as "category" | "manual" | null,
 	}
 }
 
@@ -330,7 +333,7 @@ async function validateAllocations(
 	statements: RecordStatementInput[],
 	existing: Map<string, number> = new Map(),
 ) {
-	const errors: Record<string, string[]> = {}
+	const v = new Validator()
 	const ids = statements.map(s => s.id)
 	const rows = ids.length ? await db.statements.where("id").anyOf(ids).toArray() : []
 	const byId = new Map(rows.map(r => [r.id, r]))
@@ -345,33 +348,29 @@ async function validateAllocations(
 	statements.forEach((item, index) => {
 		const statement = byId.get(item.id)
 		if (!statement) {
-			errors[`statements.${index}.id`] = ["Invalid statement."]
+			v.reject(`statements.${index}.id`, "Invalid statement.")
 			return
 		}
 		const amount = round2(Number(item.amount))
 		if (!Number.isFinite(amount)) {
-			errors[`statements.${index}.amount`] = ["Enter a valid amount."]
+			v.reject(`statements.${index}.amount`, "Enter a valid amount.")
 			return
 		}
 		const prior = existing.get(item.id) ?? 0
 		const allocable = round2(statement.amount - (sums.get(item.id) ?? 0) + prior)
 		if (statement.amount > 0) {
-			if (amount <= 0) errors[`statements.${index}.amount`] = ["The amount must be positive."]
+			if (amount <= 0) v.reject(`statements.${index}.amount`, "The amount must be positive.")
 			else if (round2(allocable - amount) < 0) {
-				errors[`statements.${index}.amount`] = [
-					"This amount exceeds what can be allocated.",
-				]
+				v.reject(`statements.${index}.amount`, "This amount exceeds what can be allocated.")
 			}
 		} else if (statement.amount < 0) {
-			if (amount >= 0) errors[`statements.${index}.amount`] = ["The amount must be negative."]
+			if (amount >= 0) v.reject(`statements.${index}.amount`, "The amount must be negative.")
 			else if (round2(allocable - amount) > 0) {
-				errors[`statements.${index}.amount`] = [
-					"This amount exceeds what can be allocated.",
-				]
+				v.reject(`statements.${index}.amount`, "This amount exceeds what can be allocated.")
 			}
 		}
 	})
-	if (Object.keys(errors).length) throw new ValidationError(errors)
+	v.throwIfInvalid()
 }
 
 function budgetCovers(budget: { start_date: string; end_date: string }, datetime: string): boolean {
