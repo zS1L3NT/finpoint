@@ -33,6 +33,8 @@ export type StatementRow = {
 	is_pending: number
 }
 
+export type DuplicateDismissalRow = { statement_id: string; other_statement_id: string }
+
 export type CategoryRow = {
 	id: string
 	name: string
@@ -125,11 +127,12 @@ export type SettingsRow = {
 }
 
 export const DB_NAME = "finpoint"
-export const DB_VERSION = 4
+export const DB_VERSION = 5
 
 class FinpointDB extends Dexie {
 	accounts!: Table<AccountRow, string>
 	statements!: Table<StatementRow, string>
+	duplicate_dismissals!: Table<DuplicateDismissalRow, [string, string]>
 	categories!: Table<CategoryRow, string>
 	records!: Table<RecordRow, string>
 	allocations!: Table<AllocationRow, [string, string]>
@@ -257,6 +260,46 @@ class FinpointDB extends Dexie {
 			.stores({ buckets: null, bucket_defaults: null, bucket_targets: null })
 			.upgrade(() => {
 				// The preceding migration copied every legacy row before these stores are removed.
+			})
+		this.version(5)
+			.stores({
+				duplicate_dismissals:
+					"[statement_id+other_statement_id], statement_id, other_statement_id",
+			})
+			.upgrade(async transaction => {
+				const tables: Record<string, unknown[]> = {}
+				// Frozen v4 snapshot shape: later TABLES additions must not change this hash.
+				for (const name of [
+					"accounts",
+					"statements",
+					"categories",
+					"records",
+					"allocations",
+					"budgets",
+					"budget_records",
+					"monthly_budgets",
+					"monthly_budget_defaults",
+					"monthly_budget_amounts",
+					"analytics_months",
+				])
+					tables[name] = await transaction.table(name).toArray()
+				const settings = {
+					default_filter_start_date:
+						(await transaction.table("settings").get("default_filter_start_date"))
+							?.value ?? null,
+					default_filter_end_date_today:
+						(await transaction.table("settings").get("default_filter_end_date_today"))
+							?.value === "true",
+				}
+				const lastHash = await transaction.table("meta").get("drive_last_hash")
+				// Adding an empty table must not turn a clean Drive baseline into unsynced edits.
+				if (lastHash?.value === (await Dexie.waitFor(hashSnapshot({ settings, tables })))) {
+					tables.duplicate_dismissals = []
+					await transaction.table("meta").put({
+						key: "drive_last_hash",
+						value: await Dexie.waitFor(hashSnapshot({ settings, tables })),
+					})
+				}
 			})
 	}
 }
