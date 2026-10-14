@@ -136,8 +136,22 @@ export function parseImportFile(text: string): FinpointExport {
 	if (endDateToday != null && typeof endDateToday !== "boolean") {
 		throw new Error("This backup contains an invalid default end-date setting.")
 	}
+	const statementIds = new Set((parsed.tables.statements as { id?: unknown }[]).map(s => s.id))
+	const dismissals = new Map<string, { statement_id: string; other_statement_id: string }>()
+	for (const row of parsed.tables.duplicate_dismissals as Record<string, unknown>[]) {
+		const { statement_id: a, other_statement_id: b } = row
+		if (typeof a !== "string" || typeof b !== "string" || a === b) continue
+		if (!statementIds.has(a) || !statementIds.has(b)) continue
+		// Dismissals are keyed by the ordered pair, so restore that order for hand-edited backups.
+		const [statement_id, other_statement_id] = a < b ? [a, b] : [b, a]
+		dismissals.set(JSON.stringify([statement_id, other_statement_id]), {
+			statement_id,
+			other_statement_id,
+		})
+	}
 	return {
 		...(parsed as Omit<FinpointExport, "settings">),
+		tables: { ...parsed.tables, duplicate_dismissals: [...dismissals.values()] },
 		settings: {
 			default_filter_start_date: startDate ?? DEFAULT_SETTINGS.default_filter_start_date,
 			default_filter_end_date_today:

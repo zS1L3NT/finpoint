@@ -4,7 +4,7 @@ import { useDefaultFilterEndDateToday, useDefaultFilterStartDate } from "@/hooks
 import { cn } from "@/lib/utils"
 import { pathAllocator, pathAllocatorDuplicates, pathAllocatorPending } from "@/routes"
 
-export default function AllocatorTabs({
+export default function WorkflowTabs({
 	active,
 }: {
 	active: "allocate" | "replace" | "duplicates"
@@ -16,7 +16,7 @@ export default function AllocatorTabs({
 		<nav className="flex overflow-x-auto border-b" aria-label="Workflow views">
 			<Link
 				className={cn(
-					"border-b-2 px-4 py-2 text-sm transition-colors duration-150 ease-out",
+					"shrink-0 border-b-2 px-4 py-2 text-sm transition-colors duration-150 ease-out",
 					active === "allocate"
 						? "border-foreground font-medium"
 						: "border-transparent text-muted-foreground hover:text-foreground",
@@ -32,7 +32,7 @@ export default function AllocatorTabs({
 			</Link>
 			<Link
 				className={cn(
-					"border-b-2 px-4 py-2 text-sm transition-colors duration-150 ease-out",
+					"shrink-0 border-b-2 px-4 py-2 text-sm transition-colors duration-150 ease-out",
 					active === "replace"
 						? "border-foreground font-medium"
 						: "border-transparent text-muted-foreground hover:text-foreground",

@@ -67,10 +67,10 @@ test("eligibility excludes pending, other dates/accounts/amounts", async () => {
 		statement("e", undefined, { amount: 10 }),
 	])
 	expect(await duplicateGroups()).toEqual([])
-	await expect(fixDuplicates({ survivor_id: "a", delete_ids: ["b"] })).rejects.toThrow()
+	await expect(fixDuplicates({ keep_id: "a", delete_ids: ["b"] })).rejects.toThrow()
 	expect(await db.statements.count()).toBe(5)
 })
-test("move allocations without changing survivor fields or records, and clean dismissals", async () => {
+test("move allocations without changing kept fields or records, and clean dismissals", async () => {
 	await db.statements.bulkAdd([statement("a"), statement("b")])
 	await dismissDuplicatePair("a", "b")
 	await db.allocations.add({ statement_id: "b", record_id: "r", amount: -7 })
@@ -90,7 +90,7 @@ test("move allocations without changing survivor fields or records, and clean di
 		revision: 1,
 	})
 	const record = await db.records.get("r")
-	expect(await fixDuplicates({ survivor_id: "a", delete_ids: ["b"] })).toEqual(["r"])
+	await fixDuplicates({ keep_id: "a", delete_ids: ["b"] })
 	expect(await db.statements.get("a")).toEqual(statement("a"))
 	expect(await db.records.get("r")).toEqual(record)
 	expect(await db.allocations.toArray()).toEqual([
@@ -98,13 +98,13 @@ test("move allocations without changing survivor fields or records, and clean di
 	])
 	expect(await db.duplicate_dismissals.count()).toBe(0)
 })
-test("allocated survivor wins, including shared record allocations", async () => {
+test("allocated kept statement wins, including shared record allocations", async () => {
 	await db.statements.bulkAdd([statement("a"), statement("b")])
 	await db.allocations.bulkAdd([
 		{ statement_id: "a", record_id: "r", amount: -5 },
 		{ statement_id: "b", record_id: "r", amount: -5 },
 	])
-	await fixDuplicates({ survivor_id: "a", delete_ids: ["b"] })
+	await fixDuplicates({ keep_id: "a", delete_ids: ["b"] })
 	expect(await db.allocations.toArray()).toEqual([
 		{ statement_id: "a", record_id: "r", amount: -5 },
 	])
@@ -115,14 +115,14 @@ test("multiple sources require explicit choice; invalid allocation rollback", as
 		{ statement_id: "b", record_id: "r", amount: -10 },
 		{ statement_id: "c", record_id: "s", amount: -10 },
 	])
-	await expect(fixDuplicates({ survivor_id: "a", delete_ids: ["b", "c"] })).rejects.toThrow()
+	await expect(fixDuplicates({ keep_id: "a", delete_ids: ["b", "c"] })).rejects.toThrow()
 	expect(await db.statements.count()).toBe(3)
 	await db.allocations.put({ statement_id: "b", record_id: "r", amount: -11 })
 	await expect(
-		fixDuplicates({ survivor_id: "a", delete_ids: ["b", "c"], allocation_source_id: "b" }),
+		fixDuplicates({ keep_id: "a", delete_ids: ["b", "c"], allocation_source_id: "b" }),
 	).rejects.toThrow()
 	expect(await db.statements.count()).toBe(3)
-	await fixDuplicates({ survivor_id: "a", delete_ids: ["b", "c"], allocation_source_id: "c" })
+	await fixDuplicates({ keep_id: "a", delete_ids: ["b", "c"], allocation_source_id: "c" })
 	expect(await db.allocations.toArray()).toEqual([
 		{ statement_id: "a", record_id: "s", amount: -10 },
 	])
@@ -307,7 +307,7 @@ test("record allocation deficits use the existing pending rule", async () => {
 		{ statement_id: "b", record_id: "r", amount: -5 },
 	])
 	expect((await getRecord("r")).is_pending).toBe(false)
-	await fixDuplicates({ survivor_id: "a", delete_ids: ["b"] })
+	await fixDuplicates({ keep_id: "a", delete_ids: ["b"] })
 	expect((await getRecord("r")).is_pending).toBe(true)
 })
 test("replacement and pending deletion clean dismissal references", async () => {
@@ -335,7 +335,21 @@ test("version four backups require dismissal data", async () => {
 	expect(() => parseImportFile(JSON.stringify(backup))).toThrow("incomplete")
 })
 
-test("unallocated duplicates delete without changing any survivor field", async () => {
+test("backups restore dismissal pairs in order and drop orphaned pairs", async () => {
+	const { exportData, parseImportFile } = await import("../src/data/export-import")
+	await db.statements.bulkAdd([statement("a"), statement("b")])
+	const backup = JSON.parse(JSON.stringify(await exportData()))
+	backup.tables.duplicate_dismissals = [
+		{ statement_id: "b", other_statement_id: "a" },
+		{ statement_id: "a", other_statement_id: "b" },
+		{ statement_id: "a", other_statement_id: "missing" },
+	]
+	expect(parseImportFile(JSON.stringify(backup)).tables.duplicate_dismissals).toEqual([
+		{ statement_id: "a", other_statement_id: "b" },
+	])
+})
+
+test("unallocated duplicates delete without changing any kept field", async () => {
 	const survivor = statement("a", "Chosen imported description", {
 		index: 5,
 		datetime: "2026-10-03 08:55",
@@ -344,23 +358,23 @@ test("unallocated duplicates delete without changing any survivor field", async 
 		survivor,
 		statement("b", "Different bank description", { index: 8, datetime: "2026-10-03 15:00" }),
 	])
-	expect(await fixDuplicates({ survivor_id: "a", delete_ids: ["b"] })).toEqual([])
+	await fixDuplicates({ keep_id: "a", delete_ids: ["b"] })
 	expect(await db.statements.toArray()).toEqual([survivor])
 })
 test("stale statement changes and invalid sources cannot mutate selected data", async () => {
 	await db.statements.bulkAdd([statement("a"), statement("b")])
 	await db.allocations.add({ statement_id: "b", record_id: "r", amount: 10 })
-	await expect(fixDuplicates({ survivor_id: "a", delete_ids: ["b"] })).rejects.toThrow()
+	await expect(fixDuplicates({ keep_id: "a", delete_ids: ["b"] })).rejects.toThrow()
 	expect(await db.allocations.count()).toBe(1)
 	await db.allocations.put({ statement_id: "b", record_id: "r", amount: -10 })
 	await expect(
-		fixDuplicates({ survivor_id: "a", delete_ids: ["b"], allocation_source_id: "missing" }),
+		fixDuplicates({ keep_id: "a", delete_ids: ["b"], allocation_source_id: "missing" }),
 	).rejects.toThrow()
 	await db.statements.update("b", { datetime: "2026-10-04 12:00" })
-	await expect(fixDuplicates({ survivor_id: "a", delete_ids: ["b"] })).rejects.toThrow()
+	await expect(fixDuplicates({ keep_id: "a", delete_ids: ["b"] })).rejects.toThrow()
 	expect(await db.statements.count()).toBe(2)
-	await expect(fixDuplicates({ survivor_id: "a", delete_ids: ["missing"] })).rejects.toThrow()
-	await expect(fixDuplicates({ survivor_id: "a", delete_ids: ["b", "b"] })).rejects.toThrow()
+	await expect(fixDuplicates({ keep_id: "a", delete_ids: ["missing"] })).rejects.toThrow()
+	await expect(fixDuplicates({ keep_id: "a", delete_ids: ["b", "b"] })).rejects.toThrow()
 })
 
 test("numeric reference sequences retain internal order", async () => {
@@ -386,5 +400,5 @@ test("groups report allocation counts per statement", async () => {
 		{ statement_id: "b", record_id: "r1", amount: -4 },
 		{ statement_id: "b", record_id: "r2", amount: -6 },
 	])
-	expect((await duplicateGroups())[0]?.allocations).toEqual({ a: 0, b: 2 })
+	expect((await duplicateGroups())[0]?.allocationCounts).toEqual({ a: 0, b: 2 })
 })

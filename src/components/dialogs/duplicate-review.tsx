@@ -22,8 +22,13 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog"
-import { classForCurrency, cn, formatCurrency, formatDatetime } from "@/lib/utils"
-import { duplicateReview, type FixDuplicatesInput, fixDuplicates } from "@/logic/duplicates"
+import { classForCurrency, cn, formatCurrency, formatDatetime, pluralize } from "@/lib/utils"
+import {
+	allocationOutcome,
+	duplicateReview,
+	type FixDuplicatesInput,
+	fixDuplicates,
+} from "@/logic/duplicates"
 import { pathRecord } from "@/routes"
 
 export default function DuplicateReviewDialog({
@@ -35,35 +40,25 @@ export default function DuplicateReviewDialog({
 	input: FixDuplicatesInput | null
 	open: boolean
 	onOpenChange: (open: boolean) => void
-	onFixed: (recordIds: string[]) => void
+	onFixed: () => void
 }) {
 	const review = useLiveQuery(
 		() =>
-			input
-				? duplicateReview([input.survivor_id, ...input.delete_ids])
-				: Promise.resolve(null),
-		[input?.survivor_id, input?.delete_ids.join(",")],
+			input ? duplicateReview([input.keep_id, ...input.delete_ids]) : Promise.resolve(null),
+		[input?.keep_id, input?.delete_ids.join(",")],
 	)
 	const [source, setSource] = useState("")
 	const [isSubmitting, setIsSubmitting] = useState(false)
 	const [error, setError] = useState("")
 
-	const survivorAllocated = !!review?.allocations.some(a => a.statement_id === input?.survivor_id)
-	const sources = [
-		...new Set(
-			review?.allocations
-				.filter(a => a.statement_id !== input?.survivor_id)
-				.map(a => a.statement_id) ?? [],
-		),
-	]
-	const mustChoose = !survivorAllocated && sources.length > 1
-	const effectiveSource = survivorAllocated
-		? input?.survivor_id
-		: sources.length === 1
-			? sources[0]
-			: source
-	const survivor = review?.statements.find(s => s.id === input?.survivor_id)
-	const deleted = review?.statements.filter(s => s.id !== input?.survivor_id) ?? []
+	const {
+		keptAllocated,
+		sources,
+		mustChoose,
+		source: effectiveSource,
+	} = allocationOutcome(input?.keep_id ?? "", review?.allocations ?? [], source || undefined)
+	const kept = review?.statements.find(s => s.id === input?.keep_id)
+	const deleted = review?.statements.filter(s => s.id !== input?.keep_id) ?? []
 	const countFor = (id: string) =>
 		review?.allocations.filter(a => a.statement_id === id).length ?? 0
 	const descriptionFor = (id: string) => review?.statements.find(s => s.id === id)?.description
@@ -74,12 +69,9 @@ export default function DuplicateReviewDialog({
 		setIsSubmitting(true)
 		setError("")
 		try {
-			const recordIds = await fixDuplicates({
-				...input,
-				allocation_source_id: effectiveSource || undefined,
-			})
+			await fixDuplicates({ ...input, allocation_source_id: effectiveSource })
 			onOpenChange(false)
-			onFixed(recordIds)
+			onFixed()
 		} catch (cause) {
 			setError(cause instanceof Error ? cause.message : "Unable to fix duplicates.")
 		} finally {
@@ -112,14 +104,14 @@ export default function DuplicateReviewDialog({
 
 				{review ? (
 					<div className="flex flex-col gap-4">
-						{survivor ? (
+						{kept ? (
 							<section className="flex flex-col gap-2">
 								<h3 className="font-medium">Keep</h3>
 								<StatementTile
 									tone="keep"
-									description={survivor.description}
-									datetime={survivor.datetime}
-									allocationCount={countFor(survivor.id)}
+									description={kept.description}
+									datetime={kept.datetime}
+									allocationCount={countFor(kept.id)}
 								/>
 							</section>
 						) : null}
@@ -141,7 +133,7 @@ export default function DuplicateReviewDialog({
 							<IconifyIcon icon="lucide:info" />
 							<AlertTitle>Allocations</AlertTitle>
 							<AlertDescription>
-								{survivorAllocated
+								{keptAllocated
 									? "Keep the kept Statement’s Allocations. Remove every deleted Statement’s Allocations."
 									: sources.length === 0
 										? "No Allocations to move or remove."
@@ -220,7 +212,7 @@ export default function DuplicateReviewDialog({
 																{a.statement_id !== effectiveSource
 																	? "Removed"
 																	: a.statement_id ===
-																			input?.survivor_id
+																			input?.keep_id
 																		? "Stays"
 																		: "Moves"}
 															</Badge>
@@ -271,8 +263,7 @@ export default function DuplicateReviewDialog({
 							className={isSubmitting ? "animate-spin" : undefined}
 							data-icon="inline-start"
 						/>
-						Delete {input?.delete_ids.length ?? 0} Statement
-						{input?.delete_ids.length === 1 ? "" : "s"}
+						Delete {pluralize(input?.delete_ids.length ?? 0, "Statement")}
 					</Button>
 				</DialogFooter>
 			</DialogContent>
@@ -300,9 +291,7 @@ function StatementTile({
 			<p className="whitespace-pre-wrap break-words font-medium">{description}</p>
 			<div className="flex flex-wrap items-center gap-2 text-muted-foreground">
 				{datetime ? <span>{formatDatetime(datetime)}</span> : null}
-				<Badge variant="outline">
-					{allocationCount} Allocation{allocationCount === 1 ? "" : "s"}
-				</Badge>
+				<Badge variant="outline">{pluralize(allocationCount, "Allocation")}</Badge>
 			</div>
 		</>
 	)

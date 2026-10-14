@@ -268,6 +268,7 @@ class FinpointDB extends Dexie {
 			})
 			.upgrade(async transaction => {
 				const tables: Record<string, unknown[]> = {}
+				// Frozen v4 snapshot shape: later TABLES additions must not change this hash.
 				for (const name of [
 					"accounts",
 					"statements",

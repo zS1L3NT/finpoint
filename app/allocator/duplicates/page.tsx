@@ -4,26 +4,16 @@ import { useLiveQuery } from "dexie-react-hooks"
 import { AnimatePresence, motion } from "framer-motion"
 import Link from "next/link"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useState } from "react"
+import { type ReactNode, useState } from "react"
 import { toast } from "sonner"
-import AllocatorTabs from "@/components/allocator-tabs"
 import DuplicateReviewDialog from "@/components/dialogs/duplicate-review"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import { ClearFiltersButton, FILTER_CONTROL_CLASS, FilterBar } from "@/components/table/filter-bar"
 import PaginationFooter from "@/components/table/pagination-footer"
-import { PendingBadge } from "@/components/table/record-columns"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import {
-	Card,
-	CardAction,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card"
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
 import { Input } from "@/components/ui/input"
 import {
@@ -34,8 +24,17 @@ import {
 	SelectValue,
 } from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import WorkflowTabs from "@/components/workflow-tabs"
+import type { StatementRow } from "@/data/db"
 import { SPRING, TRANSITION } from "@/lib/motion"
-import { classForCurrency, cn, formatCurrency, parseDate, parseDatetime } from "@/lib/utils"
+import {
+	classForCurrency,
+	cn,
+	formatCurrency,
+	parseDate,
+	parseDatetime,
+	pluralize,
+} from "@/lib/utils"
 import { listAccounts } from "@/logic/accounts"
 import {
 	type DuplicateGroup,
@@ -43,34 +42,64 @@ import {
 	dismissedDuplicatePairs,
 	duplicateGroups,
 	type FixDuplicatesInput,
+	pairKey,
 	restoreDuplicatePair,
 } from "@/logic/duplicates"
 import { paginateItems, parsePage, parsePageSize } from "@/logic/pagination"
-import { getRecord } from "@/logic/records"
-import { pathRecord, pathStatement } from "@/routes"
+import { pathStatement } from "@/routes"
+
+const VIEWS = {
+	suggested: {
+		label: "Suggested duplicates",
+		hint: "similar description",
+		icon: "lucide:copy-check",
+		emptyTitle: "No duplicates found",
+		emptyDescription:
+			"Bank exports look clean. Switch to All same-day Statements to check by hand.",
+	},
+	all: {
+		label: "All same-day Statements",
+		hint: "any description",
+		icon: "lucide:calendar-search",
+		emptyTitle: "No same-day Statements",
+		emptyDescription: "No two Statements share an account, day and amount.",
+	},
+	dismissed: {
+		label: "Marked separate",
+		hint: "marked not duplicates",
+		icon: "lucide:split",
+		emptyTitle: "Nothing marked separate",
+		emptyDescription: "Pairs you mark as not duplicates appear here.",
+	},
+} as const
+
+const CARD_MOTION = {
+	layout: "position",
+	initial: { opacity: 0, y: 6 },
+	animate: { opacity: 1, y: 0 },
+	exit: { opacity: 0, scale: 0.97, transition: TRANSITION.fast },
+	transition: { ...TRANSITION.base, layout: SPRING.snappy },
+} as const
 
 export default function FixDuplicatesPage() {
 	const params = useSearchParams()
 	const router = useRouter()
 	const pathname = usePathname()
-	const view =
-		params.get("view") === "all"
-			? "all"
-			: params.get("view") === "dismissed"
-				? "dismissed"
-				: "suggested"
+	const viewParam = params.get("view")
+	const view = viewParam === "all" || viewParam === "dismissed" ? viewParam : "suggested"
 	const query = params.get("query") ?? ""
 	const accountId = params.get("account_id") ?? ""
 	const accounts = useLiveQuery(() => listAccounts(), [])
-	const groups = useLiveQuery(() => duplicateGroups(view === "all"), [view])
-	const dismissals = useLiveQuery(() => dismissedDuplicatePairs(), [])
-	const [review, setReview] = useState<FixDuplicatesInput | null>(null)
-	const [affected, setAffected] = useState<string[] | null>(null)
-	const [busy, setBusy] = useState(false)
-	const affectedRecords = useLiveQuery(
-		() => Promise.all((affected ?? []).map(id => getRecord(id).catch(() => null))),
-		[affected?.join(",")],
+	const groups = useLiveQuery(
+		async () => (view === "dismissed" ? [] : duplicateGroups(view === "all")),
+		[view],
 	)
+	const dismissals = useLiveQuery(
+		async () => (view === "dismissed" ? dismissedDuplicatePairs() : []),
+		[view],
+	)
+	const [review, setReview] = useState<FixDuplicatesInput | null>(null)
+	const [busy, setBusy] = useState(false)
 
 	const updateParams = (changes: Record<string, string>) => {
 		const next = new URLSearchParams(params)
@@ -93,21 +122,32 @@ export default function FixDuplicatesPage() {
 			setBusy(false)
 		}
 	}
-	const matches = (statements: DuplicateGroup["statements"]) =>
+	const matches = (statements: StatementRow[]) =>
 		(!accountId || statements[0]?.account_id === accountId) &&
 		(!query || statements.some(s => s.description.toLowerCase().includes(query.toLowerCase())))
-	const groupPage = paginateItems(
-		(groups ?? []).filter(g => matches(g.statements)),
-		parsePage(params.get("page")),
-		parsePageSize(params.get("per_page"), 10),
-	)
-	const dismissalPage = paginateItems(
-		(dismissals ?? []).filter(p => matches(p.statements)),
-		parsePage(params.get("page")),
-		parsePageSize(params.get("per_page"), 10),
-	)
-	const page = view === "dismissed" ? dismissalPage : groupPage
+	const pageNumber = parsePage(params.get("page"))
+	const pageSize = parsePageSize(params.get("per_page"), 10)
+	const page =
+		view === "dismissed"
+			? {
+					kind: "pairs" as const,
+					...paginateItems(
+						(dismissals ?? []).filter(p => matches(p.statements)),
+						pageNumber,
+						pageSize,
+					),
+				}
+			: {
+					kind: "groups" as const,
+					...paginateItems(
+						(groups ?? []).filter(g => matches(g.statements)),
+						pageNumber,
+						pageSize,
+					),
+				}
 	const filterCount = [query, accountId].filter(Boolean).length
+	const accountName = (statement?: StatementRow) =>
+		accounts?.find(a => a.id === statement?.account_id)?.name ?? "Account"
 
 	return (
 		<PageContent>
@@ -117,7 +157,7 @@ export default function FixDuplicatesPage() {
 				description="Statement cleanup"
 				icon="lucide:copy-check"
 			/>
-			<AllocatorTabs active="duplicates" />
+			<WorkflowTabs active="duplicates" />
 			<div className="flex flex-col gap-2">
 				<Input
 					aria-label="Search statement descriptions"
@@ -140,9 +180,11 @@ export default function FixDuplicatesPage() {
 								<SelectValue />
 							</SelectTrigger>
 							<SelectContent align="start" variant="filter">
-								<SelectItem value="suggested">Suggested duplicates</SelectItem>
-								<SelectItem value="all">All same-day matches</SelectItem>
-								<SelectItem value="dismissed">Marked separate</SelectItem>
+								{Object.entries(VIEWS).map(([value, v]) => (
+									<SelectItem key={value} value={value}>
+										{v.label}
+									</SelectItem>
+								))}
 							</SelectContent>
 						</Select>
 						<Select
@@ -174,66 +216,10 @@ export default function FixDuplicatesPage() {
 						/>
 					</FilterBar>
 					<p className="text-xs/relaxed text-muted-foreground">
-						Same account · same day · same amount
-						{view === "all" ? " · any description" : " · similar description"}
+						Same account · same day · same amount · {VIEWS[view].hint}
 					</p>
 				</div>
 			</div>
-			{affected !== null && affectedRecords !== undefined ? (
-				<Card size="sm" role="status">
-					<CardHeader>
-						<CardTitle className="flex items-center gap-2">
-							<IconifyIcon icon="lucide:circle-check" className="text-emerald-500" />
-							Duplicates deleted
-						</CardTitle>
-						<CardDescription>
-							{affectedRecords.length
-								? "Records stay; review any that are now pending."
-								: "No Records were affected."}
-						</CardDescription>
-						<CardAction>
-							<Button
-								variant="ghost"
-								size="icon-sm"
-								aria-label="Dismiss result"
-								onClick={() => setAffected(null)}
-							>
-								<IconifyIcon icon="lucide:x" />
-							</Button>
-						</CardAction>
-					</CardHeader>
-					{affectedRecords.length ? (
-						<CardContent className="flex flex-col gap-3">
-							{affectedRecords
-								.filter(r => !!r)
-								.map(r => (
-									<div
-										key={r.id}
-										className="flex items-center justify-between gap-3"
-									>
-										<div className="flex min-w-0 items-center gap-2">
-											<Link
-												href={pathRecord(r.id)}
-												className="min-w-0 break-words font-medium underline-offset-4 hover:underline"
-											>
-												{r.title}
-											</Link>
-											<PendingBadge record={r} />
-										</div>
-										<span
-											className={cn(
-												"shrink-0 font-medium tabular-nums",
-												classForCurrency(r.amount),
-											)}
-										>
-											{formatCurrency(r.amount)}
-										</span>
-									</div>
-								))}
-						</CardContent>
-					) : null}
-				</Card>
-			) : null}
 			{groups === undefined || dismissals === undefined || accounts === undefined ? null : (
 				<motion.div
 					initial={{ opacity: 0, y: 6 }}
@@ -242,40 +228,17 @@ export default function FixDuplicatesPage() {
 					className="grid gap-4"
 				>
 					<AnimatePresence initial={false} mode="popLayout">
-						{view === "dismissed"
-							? dismissalPage.data.map(pair => (
+						{page.kind === "pairs"
+							? page.data.map(pair => (
 									<motion.section
-										key={`dismissed-${pair.statements.map(s => s.id).join("|")}`}
-										layout="position"
-										initial={{ opacity: 0, y: 6 }}
-										animate={{ opacity: 1, y: 0 }}
-										exit={{
-											opacity: 0,
-											scale: 0.97,
-											transition: TRANSITION.fast,
-										}}
-										transition={{ ...TRANSITION.base, layout: SPRING.snappy }}
+										key={`dismissed-${pairKey(pair.statements[0].id, pair.statements[1].id)}`}
+										{...CARD_MOTION}
 										className="grid gap-3 rounded-xl border bg-card p-4"
 									>
-										<div className="flex items-start justify-between gap-3 text-sm">
-											<h2 className="font-medium">
-												{accounts.find(
-													a => a.id === pair.statements[0].account_id,
-												)?.name ?? "Account"}{" "}
-												·{" "}
-												{parseDate(
-													pair.statements[0].datetime.slice(0, 10),
-												).toFormat("d MMM y")}
-											</h2>
-											<span
-												className={cn(
-													"shrink-0 font-semibold tabular-nums",
-													classForCurrency(pair.statements[0].amount),
-												)}
-											>
-												{formatCurrency(pair.statements[0].amount)}
-											</span>
-										</div>
+										<GroupHeader
+											accountName={accountName(pair.statements[0])}
+											statement={pair.statements[0]}
+										/>
 										{pair.statements.map(s => (
 											<Link
 												key={s.id}
@@ -310,27 +273,15 @@ export default function FixDuplicatesPage() {
 										</Button>
 									</motion.section>
 								))
-							: groupPage.data.map(group => (
+							: page.data.map(group => (
 									<motion.div
-										key={`${view}-${group.statements.map(s => s.id).join(",")}-${group.pairs.map(p => p.join(":")).join(",")}`}
-										layout="position"
-										initial={{ opacity: 0, y: 6 }}
-										animate={{ opacity: 1, y: 0 }}
-										exit={{
-											opacity: 0,
-											scale: 0.97,
-											transition: TRANSITION.fast,
-										}}
-										transition={{ ...TRANSITION.base, layout: SPRING.snappy }}
+										key={`${view}-${group.statements.map(s => s.id).join(",")}-${group.pairs.map(p => pairKey(...p)).join(",")}`}
+										{...CARD_MOTION}
 									>
 										<DuplicateGroupCard
 											group={group}
-											manual={view === "all"}
-											accountName={
-												accounts.find(
-													a => a.id === group.statements[0]?.account_id,
-												)?.name ?? "Account"
-											}
+											ignoreDescriptions={view === "all"}
+											accountName={accountName(group.statements[0])}
 											busy={busy}
 											onReview={setReview}
 											onDismiss={(a, b) =>
@@ -344,37 +295,19 @@ export default function FixDuplicatesPage() {
 						<Empty className="border">
 							<EmptyHeader>
 								<EmptyMedia variant="icon">
-									<IconifyIcon
-										icon={
-											view === "dismissed"
-												? "lucide:split"
-												: view === "all"
-													? "lucide:calendar-search"
-													: "lucide:copy-check"
-										}
-									/>
+									<IconifyIcon icon={VIEWS[view].icon} />
 								</EmptyMedia>
-								<EmptyTitle>
-									{view === "dismissed"
-										? "Nothing marked separate"
-										: view === "all"
-											? "No same-day matches"
-											: "No duplicates found"}
-								</EmptyTitle>
+								<EmptyTitle>{VIEWS[view].emptyTitle}</EmptyTitle>
 								<EmptyDescription>
 									{filterCount
 										? "No groups match these filters."
-										: view === "dismissed"
-											? "Pairs you mark as not duplicates appear here."
-											: view === "all"
-												? "No two Statements share an account, day and amount."
-												: "Bank exports look clean. Switch to All same-day matches to check by hand."}
+										: VIEWS[view].emptyDescription}
 								</EmptyDescription>
 							</EmptyHeader>
 						</Empty>
 					) : null}
 					<PaginationFooter
-						summary={`Showing ${page.data.length} of ${page.total} ${view === "dismissed" ? "pairs" : "groups"}`}
+						summary={`Showing ${page.data.length} of ${page.total} ${page.kind}`}
 						page={page.current_page}
 						lastPage={page.last_page ?? 1}
 					/>
@@ -386,73 +319,78 @@ export default function FixDuplicatesPage() {
 				onOpenChange={open => {
 					if (!open) setReview(null)
 				}}
-				onFixed={ids => {
-					setAffected(ids)
-					setReview(null)
-				}}
+				onFixed={() => setReview(null)}
 			/>
 		</PageContent>
 	)
 }
 
+function GroupHeader({
+	accountName,
+	statement,
+	children,
+}: {
+	accountName: string
+	statement?: StatementRow
+	children?: ReactNode
+}) {
+	return (
+		<div className="flex items-start justify-between gap-3 text-sm">
+			<div className="flex flex-wrap items-center gap-2">
+				<h2 className="font-medium">
+					{accountName} ·{" "}
+					{parseDate((statement?.datetime ?? "").slice(0, 10)).toFormat("d MMM y")}
+				</h2>
+				{children}
+			</div>
+			<span
+				className={cn(
+					"shrink-0 font-semibold tabular-nums",
+					classForCurrency(statement?.amount ?? 0),
+				)}
+			>
+				{formatCurrency(statement?.amount ?? 0)}
+			</span>
+		</div>
+	)
+}
+
 function DuplicateGroupCard({
 	group,
-	manual,
+	ignoreDescriptions,
 	accountName,
 	busy,
 	onReview,
 	onDismiss,
 }: {
 	group: DuplicateGroup
-	manual: boolean
+	ignoreDescriptions: boolean
 	accountName: string
 	busy: boolean
 	onReview: (input: FixDuplicatesInput) => void
 	onDismiss: (a: string, b: string) => void
 }) {
-	const [survivor, setSurvivor] = useState("")
+	const [kept, setKept] = useState("")
 	const [deleted, setDeleted] = useState<string[]>([])
-	const canDelete = (preserved: string, id: string) =>
-		preserved !== id &&
-		(manual ||
-			group.pairs.some(
-				([a, b]) => (a === preserved && b === id) || (b === preserved && a === id),
-			))
+	const canDelete = (keepId: string, id: string) =>
+		keepId !== id &&
+		(ignoreDescriptions || group.pairs.some(p => pairKey(...p) === pairKey(keepId, id)))
 	return (
 		<section className="grid gap-4 rounded-xl border bg-card p-4">
-			<div className="flex items-start justify-between gap-3 text-sm">
-				<div className="flex flex-wrap items-center gap-2">
-					<h2 className="font-medium">
-						{accountName} ·{" "}
-						{parseDate((group.statements[0]?.datetime ?? "").slice(0, 10)).toFormat(
-							"d MMM y",
-						)}
-					</h2>
-					{group.statements.length > 2 ? (
-						<Badge variant="outline">{group.statements.length} Statements</Badge>
-					) : null}
-				</div>
-				<span
-					className={cn(
-						"shrink-0 font-semibold tabular-nums",
-						classForCurrency(group.statements[0]?.amount ?? 0),
-					)}
-				>
-					{formatCurrency(group.statements[0]?.amount ?? 0)}
-				</span>
-			</div>
+			<GroupHeader accountName={accountName} statement={group.statements[0]}>
+				{group.statements.length > 2 ? (
+					<Badge variant="outline">{group.statements.length} Statements</Badge>
+				) : null}
+			</GroupHeader>
 			<div className="grid gap-2">
 				{group.statements.map(s => (
 					<div
 						key={s.id}
 						className={cn(
 							"grid min-w-0 gap-3 rounded-lg border p-3 transition-colors duration-150 ease-out sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start",
-							survivor === s.id && "border-emerald-500/40 bg-emerald-500/5",
+							kept === s.id && "border-emerald-500/40 bg-emerald-500/5",
 							deleted.includes(s.id) && "border-destructive/40 bg-destructive/5",
-							survivor &&
-								survivor !== s.id &&
-								!canDelete(survivor, s.id) &&
-								"opacity-60",
+							kept && kept !== s.id && !canDelete(kept, s.id) && "opacity-60",
 						)}
 					>
 						<div className="min-w-0">
@@ -471,11 +409,11 @@ function DuplicateGroupCard({
 							</Link>
 							<p className="mt-1 text-xs text-muted-foreground">
 								{parseDatetime(s.datetime).toFormat("HH:mm")} ·{" "}
-								{group.allocations[s.id]
-									? `${group.allocations[s.id]} Allocation${group.allocations[s.id] === 1 ? "" : "s"}`
+								{group.allocationCounts[s.id]
+									? pluralize(group.allocationCounts[s.id] ?? 0, "Allocation")
 									: "No Allocations"}
 							</p>
-							{survivor && survivor !== s.id && !canDelete(survivor, s.id) ? (
+							{kept && kept !== s.id && !canDelete(kept, s.id) ? (
 								<p className="mt-1.5 text-xs text-muted-foreground">
 									Not suggested as a duplicate of the kept Statement
 								</p>
@@ -486,20 +424,16 @@ function DuplicateGroupCard({
 								type="single"
 								aria-label={`Action for ${s.description}`}
 								value={
-									survivor === s.id
-										? "keep"
-										: deleted.includes(s.id)
-											? "delete"
-											: ""
+									kept === s.id ? "keep" : deleted.includes(s.id) ? "delete" : ""
 								}
 								disabled={busy}
 								className="border bg-transparent"
 								onValueChange={value => {
 									if (value === "keep") {
-										setSurvivor(s.id)
+										setKept(s.id)
 										setDeleted(deleted.filter(id => canDelete(s.id, id)))
-									} else if (survivor === s.id) {
-										setSurvivor("")
+									} else if (kept === s.id) {
+										setKept("")
 										setDeleted([])
 									} else
 										setDeleted(
@@ -515,17 +449,17 @@ function DuplicateGroupCard({
 								<ToggleGroupItem
 									value="delete"
 									aria-label={`Delete ${s.description}`}
-									disabled={!survivor || !canDelete(survivor, s.id)}
+									disabled={!kept || !canDelete(kept, s.id)}
 								>
 									Delete
 								</ToggleGroupItem>
 							</ToggleGroup>
-							{!manual && survivor && canDelete(survivor, s.id) ? (
+							{!ignoreDescriptions && kept && canDelete(kept, s.id) ? (
 								<Button
 									variant="ghost"
 									size="sm"
 									disabled={busy}
-									onClick={() => onDismiss(survivor, s.id)}
+									onClick={() => onDismiss(kept, s.id)}
 								>
 									<IconifyIcon icon="lucide:split" data-icon="inline-start" />
 									Not a duplicate
@@ -538,11 +472,11 @@ function DuplicateGroupCard({
 			<div className="flex flex-wrap items-center justify-between gap-3">
 				<div className="flex flex-wrap items-center gap-2">
 					<p className="text-xs text-muted-foreground">
-						{survivor
+						{kept
 							? `Keep 1 · delete ${deleted.length}`
 							: "Choose the Statement to keep"}
 					</p>
-					{!manual && !survivor && group.statements.length === 2 ? (
+					{!ignoreDescriptions && !kept && group.statements.length === 2 ? (
 						<Button
 							variant="ghost"
 							size="sm"
@@ -559,8 +493,8 @@ function DuplicateGroupCard({
 				</div>
 				<Button
 					className="ml-auto"
-					disabled={busy || !survivor || !deleted.length}
-					onClick={() => onReview({ survivor_id: survivor, delete_ids: deleted })}
+					disabled={busy || !kept || !deleted.length}
+					onClick={() => onReview({ keep_id: kept, delete_ids: deleted })}
 				>
 					<IconifyIcon icon="lucide:trash-2" data-icon="inline-start" />
 					Review deletion

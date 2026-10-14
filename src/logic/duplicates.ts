@@ -1,5 +1,4 @@
 import { db, type StatementRow } from "@/data/db"
-import { removeStatementDismissals } from "@/logic/duplicate-dismissals"
 import { toCents } from "@/logic/shared"
 import { Validator } from "@/logic/validate"
 
@@ -42,14 +41,13 @@ function strongMatch(a: string, b: string) {
 	)
 }
 
+function sameDayKey(row: StatementRow) {
+	return JSON.stringify([row.account_id, row.datetime.slice(0, 10), toCents(row.amount)])
+}
+
 function eligible(a: StatementRow, b: StatementRow) {
 	return (
-		a.id !== b.id &&
-		a.is_pending === 0 &&
-		b.is_pending === 0 &&
-		a.account_id === b.account_id &&
-		a.datetime.slice(0, 10) === b.datetime.slice(0, 10) &&
-		toCents(a.amount) === toCents(b.amount)
+		a.id !== b.id && a.is_pending === 0 && b.is_pending === 0 && sameDayKey(a) === sameDayKey(b)
 	)
 }
 
@@ -57,28 +55,31 @@ function pairIds(a: string, b: string): [string, string] {
 	return a < b ? [a, b] : [b, a]
 }
 
+export function pairKey(a: string, b: string) {
+	return JSON.stringify(pairIds(a, b))
+}
+
 export type DuplicateGroup = {
 	id: string
 	statements: StatementRow[]
 	pairs: [string, string][]
-	allocations: Record<string, number>
+	allocationCounts: Record<string, number>
 }
 
-export async function duplicateGroups(manual = false): Promise<DuplicateGroup[]> {
+export async function duplicateGroups(ignoreDescriptions = false): Promise<DuplicateGroup[]> {
 	const rows = (await db.statements.toArray())
 		.filter(s => s.is_pending === 0)
 		.sort((a, b) => a.id.localeCompare(b.id))
 	const dismissed = new Set(
 		(await db.duplicate_dismissals.toArray()).map(p =>
-			JSON.stringify([p.statement_id, p.other_statement_id]),
+			pairKey(p.statement_id, p.other_statement_id),
 		),
 	)
 	const buckets = new Map<string, StatementRow[]>()
 	for (const row of rows) {
-		const key = JSON.stringify([row.account_id, row.datetime.slice(0, 10), toCents(row.amount)])
-		const bucket = buckets.get(key) ?? []
+		const bucket = buckets.get(sameDayKey(row)) ?? []
 		bucket.push(row)
-		buckets.set(key, bucket)
+		buckets.set(sameDayKey(row), bucket)
 	}
 	const groups: DuplicateGroup[] = []
 	for (const bucket of buckets.values()) {
@@ -90,8 +91,8 @@ export async function duplicateGroups(manual = false): Promise<DuplicateGroup[]>
 				if (
 					a &&
 					b &&
-					(manual ||
-						(!dismissed.has(JSON.stringify(pairIds(a.id, b.id))) &&
+					(ignoreDescriptions ||
+						(!dismissed.has(pairKey(a.id, b.id)) &&
 							strongMatch(a.description, b.description)))
 				)
 					pairs.push(pairIds(a.id, b.id))
@@ -115,19 +116,17 @@ export async function duplicateGroups(manual = false): Promise<DuplicateGroup[]>
 				id: first,
 				statements: bucket.filter(s => connected.has(s.id)),
 				pairs: pairs.filter(([a, b]) => connected.has(a) && connected.has(b)),
-				allocations: {},
+				allocationCounts: {},
 			})
 		}
 	}
 	const grouped = groups.flatMap(g => g.statements.map(s => s.id))
-	const allocationCounts: Record<string, number> = {}
+	const counts: Record<string, number> = {}
 	if (grouped.length)
 		for (const a of await db.allocations.where("statement_id").anyOf(grouped).toArray())
-			allocationCounts[a.statement_id] = (allocationCounts[a.statement_id] ?? 0) + 1
+			counts[a.statement_id] = (counts[a.statement_id] ?? 0) + 1
 	for (const g of groups)
-		g.allocations = Object.fromEntries(
-			g.statements.map(s => [s.id, allocationCounts[s.id] ?? 0]),
-		)
+		g.allocationCounts = Object.fromEntries(g.statements.map(s => [s.id, counts[s.id] ?? 0]))
 	return groups.sort((a, b) =>
 		(b.statements[0]?.datetime ?? "").localeCompare(a.statements[0]?.datetime ?? ""),
 	)
@@ -169,10 +168,38 @@ export async function restoreDuplicatePair(first: string, second: string) {
 	await db.duplicate_dismissals.delete(pairIds(a, b))
 }
 
+export async function removeStatementDismissals(ids: string[]) {
+	if (!ids.length) return
+	await db.duplicate_dismissals.where("statement_id").anyOf(ids).delete()
+	await db.duplicate_dismissals.where("other_statement_id").anyOf(ids).delete()
+}
+
 export type FixDuplicatesInput = {
-	survivor_id: string
+	keep_id: string
 	delete_ids: string[]
 	allocation_source_id?: string
+}
+
+// The kept Statement's own Allocations win; otherwise a lone allocated duplicate moves,
+// and several allocated duplicates need the user's chosen source.
+export function allocationOutcome(
+	keepId: string,
+	allocations: { statement_id: string }[],
+	chosenSource?: string,
+) {
+	const keptAllocated = allocations.some(a => a.statement_id === keepId)
+	const sources = [
+		...new Set(allocations.filter(a => a.statement_id !== keepId).map(a => a.statement_id)),
+	]
+	const mustChoose = !keptAllocated && sources.length > 1
+	const source = keptAllocated
+		? keepId
+		: sources.length === 1
+			? sources[0]
+			: mustChoose
+				? chosenSource
+				: undefined
+	return { keptAllocated, sources, mustChoose, source }
 }
 
 export async function duplicateReview(ids: string[]) {
@@ -186,20 +213,18 @@ export async function duplicateReview(ids: string[]) {
 	}
 }
 
-export async function fixDuplicates(input: FixDuplicatesInput): Promise<string[]> {
+export async function fixDuplicates(input: FixDuplicatesInput) {
 	const v = new Validator()
-	const survivorId = v.text(input.survivor_id, "survivor_id")
-	const deletedIds = (Array.isArray(input.delete_ids) ? input.delete_ids : []).map(id =>
-		v.text(id, "delete_ids"),
-	)
+	const keepId = v.text(input.keep_id, "keep_id")
+	const deletedIds = input.delete_ids.map(id => v.text(id, "delete_ids"))
 	if (
 		!deletedIds.length ||
 		new Set(deletedIds).size !== deletedIds.length ||
-		deletedIds.includes(survivorId)
+		deletedIds.includes(keepId)
 	)
 		v.reject(
 			"delete_ids",
-			"Select distinct duplicate statements to delete, excluding the preserved statement.",
+			"Select distinct duplicate statements to delete, excluding the kept statement.",
 		)
 	const sourceId =
 		input.allocation_source_id === undefined
@@ -207,50 +232,40 @@ export async function fixDuplicates(input: FixDuplicatesInput): Promise<string[]
 			: v.text(input.allocation_source_id, "allocation_source_id")
 	v.throwIfInvalid()
 
-	return db.transaction(
+	await db.transaction(
 		"rw",
 		[db.statements, db.allocations, db.duplicate_dismissals],
 		async () => {
-			const survivor = await db.statements.get(survivorId)
+			const kept = await db.statements.get(keepId)
 			const deleted = await db.statements.bulkGet(deletedIds)
-			if (!survivor || deleted.some(s => !s || !eligible(survivor, s)))
+			if (!kept || deleted.some(s => !s || !eligible(kept, s))) {
 				v.reject(
 					"statements",
 					"Statements changed. Choose imported statements with the same account, day, and signed amount.",
 				)
-			v.throwIfInvalid()
-			if (!survivor) throw new Error("Statement unavailable.")
+				return v.throwIfInvalid()
+			}
 			const allocations = await db.allocations
 				.where("statement_id")
-				.anyOf([survivorId, ...deletedIds])
+				.anyOf([keepId, ...deletedIds])
 				.toArray()
-			const survivorAllocated = allocations.some(a => a.statement_id === survivorId)
-			const sources = [
-				...new Set(
-					allocations.filter(a => a.statement_id !== survivorId).map(a => a.statement_id),
-				),
-			]
-			let source = survivorAllocated
-				? survivorId
-				: sources.length === 1
-					? sources[0]
-					: sourceId
-			if (
-				sourceId &&
-				(survivorAllocated ? sourceId !== survivorId : !sources.includes(sourceId))
+			const { keptAllocated, sources, mustChoose, source } = allocationOutcome(
+				keepId,
+				allocations,
+				sourceId,
 			)
+			if (sourceId && (keptAllocated ? sourceId !== keepId : !sources.includes(sourceId)))
 				v.reject(
 					"allocation_source_id",
 					"Choose an allocated statement from this selection.",
 				)
-			if (!survivorAllocated && sources.length > 1 && !sourceId)
+			if (mustChoose && !sourceId)
 				v.reject(
 					"allocation_source_id",
 					"Choose which statement's allocations to preserve.",
 				)
-			if (!sources.length && !survivorAllocated) source = undefined
 			const moved =
-				source && source !== survivorId
+				source && source !== keepId
 					? allocations.filter(a => a.statement_id === source)
 					: []
 			const cents = moved.map(a => toCents(a.amount))
@@ -259,21 +274,20 @@ export async function fixDuplicates(input: FixDuplicatesInput): Promise<string[]
 					a =>
 						!Number.isFinite(a) ||
 						a === 0 ||
-						Math.sign(a) !== Math.sign(toCents(survivor.amount)),
+						Math.sign(a) !== Math.sign(toCents(kept.amount)),
 				) ||
-				Math.abs(cents.reduce((sum, a) => sum + a, 0)) > Math.abs(toCents(survivor.amount))
+				Math.abs(cents.reduce((sum, a) => sum + a, 0)) > Math.abs(toCents(kept.amount))
 			)
 				v.reject(
 					"allocation_source_id",
-					"The selected allocations have an invalid direction or exceed the preserved statement's capacity.",
+					"The selected allocations have an invalid direction or exceed the kept statement's capacity.",
 				)
 			v.throwIfInvalid()
 			await db.allocations.where("statement_id").anyOf(deletedIds).delete()
 			if (moved.length)
-				await db.allocations.bulkAdd(moved.map(a => ({ ...a, statement_id: survivorId })))
+				await db.allocations.bulkAdd(moved.map(a => ({ ...a, statement_id: keepId })))
 			await removeStatementDismissals(deletedIds)
 			await db.statements.bulkDelete(deletedIds)
-			return [...new Set(allocations.map(a => a.record_id))].sort()
 		},
 	)
 }

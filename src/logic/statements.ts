@@ -2,7 +2,7 @@
 // and `Statement::appQuery` (filters, ordering, derived amounts).
 
 import { asPending, db } from "@/data/db"
-import { removeStatementDismissals } from "@/logic/duplicate-dismissals"
+import { removeStatementDismissals } from "@/logic/duplicates"
 import { enrichRecords } from "@/logic/records"
 import {
 	dayDifference,

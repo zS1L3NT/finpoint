@@ -5,7 +5,6 @@ import { AnimatePresence, motion } from "framer-motion"
 import Link from "next/link"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
-import AllocatorTabs from "@/components/allocator-tabs"
 import StatementReplacementReviewDialog, {
 	dateDifferenceLabel,
 } from "@/components/dialogs/statement-replacement-review"
@@ -27,6 +26,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select"
+import WorkflowTabs from "@/components/workflow-tabs"
 import { useHistory } from "@/history"
 import { SPRING, TRANSITION } from "@/lib/motion"
 import { classForCurrency, cn, formatCurrency, formatDatetime, round2dp } from "@/lib/utils"
@@ -213,7 +213,7 @@ export default function AllocatorPendingPage() {
 					description="Allocation workspace"
 					icon="lucide:link"
 				/>
-				<AllocatorTabs active="replace" />
+				<WorkflowTabs active="replace" />
 
 				{selectionMissing ? (
 					<Alert>
