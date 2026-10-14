@@ -25,7 +25,6 @@ import {
 } from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import WorkflowTabs from "@/components/workflow-tabs"
-import type { StatementRow } from "@/data/db"
 import { SPRING, TRANSITION } from "@/lib/motion"
 import {
 	classForCurrency,
@@ -38,6 +37,7 @@ import {
 import { listAccounts } from "@/logic/accounts"
 import {
 	type DuplicateGroup,
+	type DuplicateStatement,
 	dismissDuplicatePair,
 	dismissedDuplicatePairs,
 	duplicateGroups,
@@ -122,7 +122,7 @@ export default function FixDuplicatesPage() {
 			setBusy(false)
 		}
 	}
-	const matches = (statements: StatementRow[]) =>
+	const matches = (statements: DuplicateStatement[]) =>
 		(!accountId || statements[0]?.account_id === accountId) &&
 		(!query || statements.some(s => s.description.toLowerCase().includes(query.toLowerCase())))
 	const pageNumber = parsePage(params.get("page"))
@@ -146,7 +146,7 @@ export default function FixDuplicatesPage() {
 					),
 				}
 	const filterCount = [query, accountId].filter(Boolean).length
-	const accountName = (statement?: StatementRow) =>
+	const accountName = (statement?: DuplicateStatement) =>
 		accounts?.find(a => a.id === statement?.account_id)?.name ?? "Account"
 
 	return (
@@ -331,7 +331,7 @@ function GroupHeader({
 	children,
 }: {
 	accountName: string
-	statement?: StatementRow
+	statement?: DuplicateStatement
 	children?: ReactNode
 }) {
 	return (
