@@ -46,7 +46,7 @@ A reusable spending plan for calendar months, such as Daily, Recurring, Irregula
 _Avoid_: Bucket, spending bucket, monthly target, custom-period budget
 
 **Monthly Budget amount**:
-The comparison amount for a Monthly Budget in a selected calendar month. A month takes one of three amount rules. **Default**: the month has no amount of its own and looks back to the latest Override default at or before it; unavailable when no earlier Override default exists. **Override one month**: an amount for that month only; months looking back for the default skip it. **Override default**: a default amount that applies from its month onward; months looking back stop at the latest one they reach. A month's own Override one month wins, then the latest Override default at or before it, otherwise there is no amount. It does not reserve cash, carry a balance, or change a Record's accounting treatment.
+The comparison amount for a Monthly Budget in a selected calendar month. Each month has exactly one of three amount rules. **Default**: the month has no amount of its own and looks back to the latest Override default in an earlier month; unavailable when no earlier Override default exists. **Override one month**: an amount for that month only; months looking back skip it. **Override default**: a default amount that applies from its month onward; months looking back stop at the latest one they reach. Changing a month's rule replaces its previous rule for that month only; changing a month away from Override default makes later months look further back. It does not reserve cash, carry a balance, or change a Record's accounting treatment.
 _Avoid_: Target, limit, allowance
 
 **Treatment**:

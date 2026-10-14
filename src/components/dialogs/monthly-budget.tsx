@@ -61,7 +61,23 @@ export default function MonthlyBudgetDialog({
 	const monthLabel = `${month} ${year}`
 	const scope =
 		amountScope ??
-		(!monthlyBudget ? "default" : source?.override || !source?.default ? "month" : "inherit")
+		(!monthlyBudget
+			? "default"
+			: source?.override
+				? "month"
+				: source?.ownDefault
+					? "default"
+					: source?.previousDefault
+						? "inherit"
+						: "month")
+	const defaultRemovalDescription =
+		source?.ownDefault && scope !== "default"
+			? source.previousDefault
+				? ` Later months use the default from ${DateTime.fromISO(source.previousDefault.effective_month).toFormat("MMMM yyyy")} instead.`
+				: source.nextDefault
+					? ` Later months have no amount until ${DateTime.fromISO(source.nextDefault.effective_month).toFormat("MMMM yyyy")}.`
+					: " Later months have no amount."
+			: ""
 
 	const reset = () => {
 		setName(monthlyBudget?.name ?? "")
@@ -200,7 +216,7 @@ export default function MonthlyBudgetDialog({
 												{
 													value: "inherit",
 													label: "Default",
-													disabled: source?.default === null,
+													disabled: source?.previousDefault === null,
 												},
 											]
 										: []),
@@ -208,11 +224,12 @@ export default function MonthlyBudgetDialog({
 									{ value: "default", label: "Override default" },
 								]}
 								description={
-									scope === "inherit" && source?.default
-										? `Use the default from ${DateTime.fromISO(source.default.effective_month).toFormat("MMMM yyyy")}: ${source.default.amount === null ? "No monthly amount" : formatCurrency(source.default.amount)}.`
+									(scope === "inherit" && source?.previousDefault
+										? `Use the default from ${DateTime.fromISO(source.previousDefault.effective_month).toFormat("MMMM yyyy")}: ${source.previousDefault.amount === null ? "No monthly amount" : formatCurrency(source.previousDefault.amount)}.`
 										: scope === "month"
 											? `Change ${monthLabel} only. Other months skip this when looking back for the default.`
-											: `Set the default from ${monthLabel} onward. Earlier defaults stop applying from here.${source?.nextDefault ? ` It applies until ${DateTime.fromISO(source.nextDefault.effective_month).toFormat("MMMM yyyy")}, when the next default starts.` : ""}`
+											: `Set the default from ${monthLabel} onward. Earlier defaults stop applying from here.${source?.nextDefault ? ` It applies until ${DateTime.fromISO(source.nextDefault.effective_month).toFormat("MMMM yyyy")}, when the next default starts.` : ""}`) +
+									defaultRemovalDescription
 								}
 								onChange={setAmountScope}
 							/>

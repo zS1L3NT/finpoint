@@ -97,25 +97,26 @@ export async function setMonthlyBudgetAmount(
 		v.throwIfInvalid()
 	}
 
-	if (scope === "inherit") {
-		await db.monthly_budget_amounts.delete([monthlyBudgetId, month])
-	} else if (scope === "month") {
-		await db.monthly_budget_amounts.put({ monthly_budget_id: monthlyBudgetId, month, amount })
-	} else {
-		await db.transaction(
-			"rw",
-			db.monthly_budget_defaults,
-			db.monthly_budget_amounts,
-			async () => {
-				await db.monthly_budget_defaults.put({
-					monthly_budget_id: monthlyBudgetId,
-					effective_month: month,
-					amount,
-				})
-				await db.monthly_budget_amounts.delete([monthlyBudgetId, month])
-			},
-		)
-	}
+	await db.transaction("rw", db.monthly_budget_defaults, db.monthly_budget_amounts, async () => {
+		if (scope === "default") {
+			await db.monthly_budget_defaults.put({
+				monthly_budget_id: monthlyBudgetId,
+				effective_month: month,
+				amount,
+			})
+		} else {
+			await db.monthly_budget_defaults.delete([monthlyBudgetId, month])
+		}
+		if (scope === "month") {
+			await db.monthly_budget_amounts.put({
+				monthly_budget_id: monthlyBudgetId,
+				month,
+				amount,
+			})
+		} else {
+			await db.monthly_budget_amounts.delete([monthlyBudgetId, month])
+		}
+	})
 }
 
 export async function getMonthlyBudgetAmountSource(monthlyBudgetId: string, month: string) {
@@ -129,7 +130,8 @@ export async function getMonthlyBudgetAmountSource(monthlyBudgetId: string, mont
 
 	return {
 		override: override ?? null,
-		default: defaults.filter(row => row.effective_month <= month).at(-1) ?? null,
+		ownDefault: defaults.find(row => row.effective_month === month) ?? null,
+		previousDefault: defaults.filter(row => row.effective_month < month).at(-1) ?? null,
 		nextDefault: defaults.find(row => row.effective_month > month) ?? null,
 	}
 }
