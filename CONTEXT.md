@@ -14,7 +14,7 @@ A user-managed financial entry that represents the meaningful expense, income, t
 _Avoid_: Transaction, entry, ledger item
 
 **Allocation**:
-The assignment of part or all of a statement amount to a record. Allocations are what connect imported account activity to the records that explain it.
+The assignment of part or all of a Statement amount to a Record. Use allocate/allocation for this connection; attach/detach describes Budget membership. “Match” describes an amount comparison, not an allocation.
 _Avoid_: Link, match, reconciliation
 
 **Account**:
@@ -22,11 +22,11 @@ An external financial account whose activity is imported into Finpoint. Accounts
 _Avoid_: User account, login account
 
 **Pending Record**:
-A record whose allocated statement amounts do not tally with the record amount, or that is allocated to any Pending Statement (its imported bank row has not arrived yet). Pending records are useful when the real-world activity is known before the bank statements are fully confirmed.
+A record whose allocated statement amounts do not tally with the record amount, or that is allocated to any Pending Statement (its account activity is not confirmed yet). Pending records are useful when the real-world activity is known before the bank statements are fully confirmed.
 _Avoid_: Draft record, unconfirmed record
 
 **Pending Statement**:
-A handwritten placeholder for account activity that has not appeared in an imported bank feed yet. A pending statement may be allocated like any statement. When the imported statement arrives, it replaces one pending statement and inherits its allocations unchanged.
+A Statement whose account activity is not confirmed yet, whether entered manually or imported with a pending bank status. Pending describes confirmation state, not provenance. A Pending Statement may be allocated like any Statement; replacing it with a confirmed Statement preserves its allocations.
 _Avoid_: Draft statement, estimated record
 
 **Duplicate Statement**:
