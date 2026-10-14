@@ -1,4 +1,5 @@
 import { useLiveQuery } from "dexie-react-hooks"
+import { AnimatePresence, motion } from "framer-motion"
 import { DateTime } from "luxon"
 import { useState } from "react"
 import { toast } from "sonner"
@@ -18,6 +19,7 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
+import { SPRING, TRANSITION } from "@/lib/motion"
 import { formatCurrency } from "@/lib/utils"
 import { getMonthlyBudgetAmountSource, upsertMonthlyBudget } from "@/logic/monthly-budgets"
 import { ValidationError } from "@/logic/validate"
@@ -44,23 +46,25 @@ export default function MonthlyBudgetDialog({
 	const [paceKind, setPaceKind] = useState(monthlyBudget?.pace_kind ?? "none")
 	const [amount, setAmount] = useState(monthlyBudget?.amount ?? 0)
 	const [noAmount, setNoAmount] = useState(monthlyBudget?.amount === null)
-	const [amountScope, setAmountScope] = useState(monthlyBudget ? "keep" : "default")
+	const [amountScope, setAmountScope] = useState<string | null>(null)
 	const [archived, setArchived] = useState(monthlyBudget?.archived ?? false)
 	const [errors, setErrors] = useState<{ [key: string]: string[] }>({})
 	const [submitting, setSubmitting] = useState(false)
 
 	const source = useLiveQuery(
 		() =>
-			open && monthlyBudget
+			monthlyBudget
 				? getMonthlyBudgetAmountSource(monthlyBudget.id, selectedMonth.toISODate() ?? "")
 				: null,
-		[open, monthlyBudget?.id, month, year],
+		[monthlyBudget?.id, month, year],
 	)
 	const monthLabel = `${month} ${year}`
 	const defaultLabel = source?.default
 		? `${source.default.amount === null ? "No monthly amount" : formatCurrency(source.default.amount)} · Default since ${DateTime.fromISO(source.default.effective_month).toFormat("MMMM yyyy")}`
 		: "No default amount set"
-	const amountEditable = amountScope === "month" || amountScope === "default"
+	const scope =
+		amountScope ?? (!monthlyBudget ? "default" : source?.override ? "month" : "inherit")
+	const amountEditable = scope === "month" || scope === "default"
 
 	const reset = () => {
 		setName(monthlyBudget?.name ?? "")
@@ -69,7 +73,7 @@ export default function MonthlyBudgetDialog({
 		setPaceKind(monthlyBudget?.pace_kind ?? "none")
 		setAmount(monthlyBudget?.amount ?? 0)
 		setNoAmount(monthlyBudget?.amount === null)
-		setAmountScope(monthlyBudget ? "keep" : "default")
+		setAmountScope(null)
 		setArchived(monthlyBudget?.archived ?? false)
 		setErrors({})
 	}
@@ -87,7 +91,7 @@ export default function MonthlyBudgetDialog({
 				archived,
 				month: selectedMonth.toISODate() ?? "",
 				amount: noAmount ? null : amount,
-				scope: amountScope,
+				scope,
 			})
 
 			setOpen(false)
@@ -171,7 +175,7 @@ export default function MonthlyBudgetDialog({
 								disabled={group === "outlier"}
 								description={
 									group === "outlier"
-										? "Outlier budgets use recorded amounts only."
+										? "Outlier monthly budgets use recorded amounts only."
 										: paceKind === "daily"
 											? "Use this budget’s daily spending average to estimate its month-end total."
 											: paceKind === "recurring"
@@ -188,34 +192,17 @@ export default function MonthlyBudgetDialog({
 							/>
 						</FieldGroup>
 						<FieldGroup className="rounded-lg border bg-muted/20 p-3">
-							<div className="grid gap-1 text-sm" aria-live="polite">
-								<p className="font-medium">Amount for {monthLabel}</p>
-								{monthlyBudget && source ? (
-									<>
-										<p className="text-muted-foreground">
-											{source.override
-												? `${source.override.amount === null ? "No monthly amount" : formatCurrency(source.override.amount)} · Override for ${monthLabel} only`
-												: `Following default: ${defaultLabel}`}
-										</p>
-										{source.override ? (
-											<p className="text-xs text-muted-foreground">
-												{defaultLabel}
-											</p>
-										) : null}
-									</>
-								) : null}
-							</div>
+							<p className="text-sm font-medium">Amount for {monthLabel}</p>
 							<SelectField
 								id="monthly-budget-amount-scope"
 								label="Amount rule"
-								value={amountScope}
+								value={scope}
 								items={[
 									...(monthlyBudget
 										? [
-												{ value: "keep", label: "Keep current rule" },
 												{
 													value: "inherit",
-													label: "Follow default amount",
+													label: "Use default amount",
 												},
 											]
 										: []),
@@ -223,39 +210,60 @@ export default function MonthlyBudgetDialog({
 									{ value: "default", label: `Set default from ${monthLabel}` },
 								]}
 								description={
-									amountScope === "keep"
-										? "Saving keeps the amount and its existing rule unchanged."
-										: amountScope === "inherit"
-											? `Remove this month’s override and use the default. ${defaultLabel}.`
-											: amountScope === "month"
-												? `Change ${monthLabel} only. The default stays unchanged.`
-												: `Set the default starting ${monthLabel}.${source?.nextDefault ? ` The next default starts in ${DateTime.fromISO(source.nextDefault.effective_month).toFormat("MMMM yyyy")}.` : ""} Remove this month’s override; other month overrides stay unchanged.`
+									scope === "inherit"
+										? source?.default
+											? `Use the default: ${defaultLabel}.`
+											: `No default amount set, so ${monthLabel} has no amount.`
+										: scope === "month"
+											? `Change ${monthLabel} only. The default stays unchanged.`
+											: `Set the default starting ${monthLabel}.${source?.nextDefault ? ` The next default starts in ${DateTime.fromISO(source.nextDefault.effective_month).toFormat("MMMM yyyy")}.` : ""} Other month overrides stay unchanged.`
 								}
 								onChange={setAmountScope}
 							/>
-							{amountEditable ? (
-								<>
-									<AmountField
-										id="monthly-budget-amount"
-										label="Monthly amount"
-										value={amount}
-										min={0}
-										disabled={noAmount}
-										errors={fieldErrors(errors.amount)}
-										onChange={setAmount}
-									/>
-									<Field orientation="horizontal">
-										<Checkbox
-											id="monthly-budget-no-amount"
-											checked={noAmount}
-											onCheckedChange={value => setNoAmount(value === true)}
-										/>
-										<FieldLabel htmlFor="monthly-budget-no-amount">
-											No monthly amount
-										</FieldLabel>
-									</Field>
-								</>
-							) : null}
+							<AnimatePresence initial={false}>
+								{amountEditable && (
+									<motion.div
+										className="overflow-hidden"
+										initial={{ opacity: 0, height: 0, marginTop: -16 }}
+										animate={{ opacity: 1, height: "auto", marginTop: 0 }}
+										exit={{
+											opacity: 0,
+											height: 0,
+											marginTop: -16,
+											transition: TRANSITION.fast,
+										}}
+										transition={{
+											height: SPRING.smooth,
+											marginTop: SPRING.smooth,
+											opacity: TRANSITION.base,
+										}}
+									>
+										<FieldGroup>
+											<AmountField
+												id="monthly-budget-amount"
+												label="Monthly amount"
+												value={amount}
+												min={0}
+												disabled={noAmount}
+												errors={fieldErrors(errors.amount)}
+												onChange={setAmount}
+											/>
+											<Field orientation="horizontal">
+												<Checkbox
+													id="monthly-budget-no-amount"
+													checked={noAmount}
+													onCheckedChange={value =>
+														setNoAmount(value === true)
+													}
+												/>
+												<FieldLabel htmlFor="monthly-budget-no-amount">
+													No monthly amount
+												</FieldLabel>
+											</Field>
+										</FieldGroup>
+									</motion.div>
+								)}
+							</AnimatePresence>
 						</FieldGroup>
 						{monthlyBudget ? (
 							<Field orientation="horizontal">

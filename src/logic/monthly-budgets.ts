@@ -97,8 +97,6 @@ export async function setMonthlyBudgetAmount(
 		v.throwIfInvalid()
 	}
 
-	if (scope === "keep") return
-
 	if (scope === "inherit") {
 		await db.monthly_budget_amounts.delete([monthlyBudgetId, month])
 	} else if (scope === "month") {
@@ -213,11 +211,10 @@ function validateAmount(
 	const scope = v.oneOf(
 		input.scope,
 		"scope",
-		["month", "default", "keep", "inherit"] as const,
+		["month", "default", "inherit"] as const,
 		"Invalid scope.",
 	)
 	const amount =
-		scope === "keep" ||
 		scope === "inherit" ||
 		input.amount === null ||
 		input.amount === undefined ||

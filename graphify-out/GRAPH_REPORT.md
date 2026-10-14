@@ -1,17 +1,17 @@
 # Graph Report - t3-7b03443b  (2026-10-14)
 
 ## Corpus Check
-- 186 files · ~109,864 words
+- 186 files · ~109,845 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 9 file(s) not represented in the graph (top: (none) 5, .example 1, .lock 1)
 
 ## Summary
-- 1462 nodes · 5613 edges · 73 communities (63 shown, 10 thin omitted)
+- 1462 nodes · 5617 edges · 73 communities (63 shown, 10 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 61 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `aa33312e`
+- Built from commit: `e83ea02c`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -388,7 +388,7 @@ _Questions this graph is uniquely positioned to answer:_
 - **What connects `@fontsource-variable/inter`, `react-dom`, `shadcn` to the rest of the system?**
   _76 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `record-editor.tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.07741046831955922 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.07768595041322314 - nodes in this community are weakly interconnected._
 - **Why does `react` connect `react` to `record-search.tsx`, `record-editor.tsx`, `cn`, `chart.tsx`, `app-sidebar.tsx`, `formatCurrency`, `category-filter.tsx`, `use-persistent-state.ts`, `sync/page.tsx`, `category-history-chart.tsx`, `package.json`, `(month)/page.tsx`, `total-spending-chart.tsx`, `utils.ts`, `auto-sync.ts`, `Button`, `amount-filter.tsx`, `budgets/page.tsx`?**
   _High betweenness centrality (0.048) - this node is a cross-community bridge._
 - **Should `cn` be split into smaller, more focused modules?**
