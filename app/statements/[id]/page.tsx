@@ -97,7 +97,7 @@ export default function StatementPage({ params }: { params: Promise<{ id: string
 				<DetailSummary
 					footer={
 						statement.is_pending ? (
-							<span>Status · Handwritten pending Statement</span>
+							<span>Status · Pending Statement</span>
 						) : (
 							<span>Imported day index · {statement.index}</span>
 						)
@@ -127,7 +127,7 @@ export default function StatementPage({ params }: { params: Promise<{ id: string
 					/>
 					<DetailSummaryItem
 						icon="lucide:calendar-clock"
-						label="Date & Time"
+						label="Date and time"
 						value={formatDatetime(statement.datetime)}
 					/>
 				</DetailSummary>

@@ -29,7 +29,14 @@ import {
 import WorkflowTabs from "@/components/workflow-tabs"
 import { useHistory } from "@/history"
 import { SPRING, TRANSITION } from "@/lib/motion"
-import { classForCurrency, cn, formatCurrency, formatDatetime, round2dp } from "@/lib/utils"
+import {
+	classForCurrency,
+	cn,
+	formatCurrency,
+	formatDatetime,
+	pluralize,
+	round2dp,
+} from "@/lib/utils"
 import { listAccounts } from "@/logic/accounts"
 import { paginateItems, parsePage, parsePageSize } from "@/logic/pagination"
 import { replacementComparison, replacementReason, sameDirection } from "@/logic/replacements"
@@ -337,7 +344,7 @@ export default function AllocatorPendingPage() {
 						)}
 
 						<PaginationFooter
-							summary={`Showing ${pendingStatements.data.length} of ${pendingStatements.total} pending Statements.`}
+							summary={`Showing ${pendingStatements.data.length} of ${pluralize(pendingStatements.total, "pending Statement")}.`}
 							page={pendingStatements.current_page}
 							lastPage={pendingStatements.last_page ?? 1}
 						/>
@@ -777,7 +784,7 @@ function CandidateResults({
 			</div>
 			<div className="flex flex-col gap-2 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
 				<span>
-					Showing {data.data.length} of {data.total} imported Statements.
+					Showing {data.data.length} of {pluralize(data.total, "imported Statement")}.
 				</span>
 				<div className="flex gap-1.5">
 					<Button

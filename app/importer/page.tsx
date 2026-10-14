@@ -25,7 +25,7 @@ import { Input } from "@/components/ui/input"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { BANKS } from "@/lib/banks"
 import { SPRING, TRANSITION } from "@/lib/motion"
-import { cn } from "@/lib/utils"
+import { cn, pluralize } from "@/lib/utils"
 import { listAccounts } from "@/logic/accounts"
 import { importDbs, importOcbc, importRevolut, importUob } from "@/logic/importer"
 import { ValidationError } from "@/logic/validate"
@@ -114,12 +114,15 @@ export default function ImporterPage() {
 							: value.bank === "ocbc"
 								? await importOcbc(files)
 								: await importRevolut(files[0] ?? null, accountId, accountName)
-				toast.success(`Imported successful`, {
+				toast.success("Import complete.", {
 					description: (
 						<>
-							<p>Inserted {data.imported} statements.</p>
-							<p>Re-indexed {data.reindexed} existing statements.</p>
-							<p>Skipped {data.skipped} unchanged statements.</p>
+							<p>Imported {pluralize(data.imported, "statement")}.</p>
+							<p>
+								Updated statement order for {pluralize(data.reindexed, "statement")}
+								.
+							</p>
+							<p>Skipped {pluralize(data.skipped, "statement")}.</p>
 						</>
 					),
 				})
@@ -315,7 +318,7 @@ export default function ImporterPage() {
 												{field => (
 													<TextField
 														id={field.name}
-														label="Account Name"
+														label="Account name"
 														value={field.state.value}
 														errors={mergeErrors(
 															field.state.meta.errors,

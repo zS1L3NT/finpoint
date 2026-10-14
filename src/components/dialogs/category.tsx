@@ -185,7 +185,7 @@ export default function CategoryDialog({
 						{canEditParentCategory ? (
 							<ComboboxField
 								id="parent_category_id"
-								label="Parent Category"
+								label="Parent category"
 								value={
 									parentOptions.find(
 										option => option.id === values.parent_category_id,
@@ -227,7 +227,7 @@ export default function CategoryDialog({
 						/>
 						<TextField
 							id="color"
-							label="Color"
+							label="Colour"
 							value={values.color}
 							errors={getApiFieldErrors("color")}
 							onChange={value => setValue("color", value)}

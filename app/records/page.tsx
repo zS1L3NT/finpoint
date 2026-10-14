@@ -30,7 +30,7 @@ import { useFetch } from "@/hooks/use-fetch"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { useRecordEditor } from "@/hooks/use-record-editor"
 import { TREATMENTS } from "@/lib/analytics"
-import { cn } from "@/lib/utils"
+import { cn, pluralize } from "@/lib/utils"
 import { listCategories } from "@/logic/categories"
 import { listMonthlyBudgets } from "@/logic/monthly-budgets"
 import { paginateItems, parsePage, parsePageSize } from "@/logic/pagination"
@@ -189,7 +189,7 @@ export default function RecordsPage() {
 	)
 	const tableFooter = useMemo(
 		() => ({
-			summary: `Showing ${paginated.data.length} of ${paginated.total} records.`,
+			summary: `Showing ${paginated.data.length} of ${pluralize(paginated.total, "record")}.`,
 		}),
 		[paginated],
 	)

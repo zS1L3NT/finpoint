@@ -134,7 +134,7 @@ export default function RecordPage({ params }: { params: Promise<{ id: string }>
 					/>
 					<DetailSummaryItem
 						icon="lucide:calendar-clock"
-						label="Date & Time"
+						label="Date and time"
 						value={formatDatetime(record.datetime)}
 					/>
 				</DetailSummary>
@@ -142,9 +142,7 @@ export default function RecordPage({ params }: { params: Promise<{ id: string }>
 				<Card>
 					<CardHeader>
 						<CardTitle>Statements</CardTitle>
-						<CardDescription>
-							Allocated statements attached to this record.
-						</CardDescription>
+						<CardDescription>Statements allocated to this record.</CardDescription>
 					</CardHeader>
 					<CardContent>
 						<DataTable

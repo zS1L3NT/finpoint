@@ -195,7 +195,7 @@ export default function TotalSpendingChart({
 				))}
 				<LegendItem color="bg-emerald-500" label="Surplus above $0" />
 				<LegendItem color="bg-rose-500" label="Shortfall below $0" />
-				<LegendItem color="bg-white" label="Total balance" />
+				<LegendItem color="bg-white" label="Surplus / shortfall" />
 			</div>
 		</div>
 	)

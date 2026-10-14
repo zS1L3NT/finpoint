@@ -190,8 +190,8 @@ export default function RecordEditorDialog({
 	const formStatements = useStore(form.store, state => state.values.statements)
 	const attachStatementsSheet = (
 		<StatementSearchSheet
-			title="Attach statements to record"
-			placeholder="Search unattached statements..."
+			title="Allocate statements to record"
+			placeholder="Search statements with amounts available to allocate..."
 			target={
 				Math.round(
 					(Number(analytics.amount) -
@@ -223,7 +223,7 @@ export default function RecordEditorDialog({
 			trigger={
 				<Button variant="outline" className="w-fit">
 					<IconifyIcon icon="lucide:link-2" />
-					Attach Statement
+					Allocate statement
 				</Button>
 			}
 		/>
@@ -311,7 +311,7 @@ export default function RecordEditorDialog({
 								{field => (
 									<DatetimeField
 										id={field.name}
-										label="Date & Time"
+										label="Date and time"
 										value={field.state.value}
 										errors={mergeErrors(field.state.meta.errors, field.name)}
 										onChange={value => {
@@ -444,7 +444,7 @@ export default function RecordEditorDialog({
 
 					<div className="flex flex-col gap-4">
 						<div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-							<p className="text-sm font-semibold">Statements Attached</p>
+							<p className="text-sm font-semibold">Statement allocations</p>
 
 							{!!formStatements.length && attachStatementsSheet}
 						</div>

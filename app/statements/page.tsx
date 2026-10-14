@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/select"
 import { useHistory } from "@/history"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
-import { cn } from "@/lib/utils"
+import { cn, pluralize } from "@/lib/utils"
 import { listAccounts } from "@/logic/accounts"
 import { paginateItems, parsePage, parsePageSize } from "@/logic/pagination"
 import { listStatements } from "@/logic/statements"
@@ -107,7 +107,7 @@ export default function StatementsPage() {
 			<PageContent>
 				<PageHeader
 					title="Statements"
-					subtitle="Review imported and handwritten pending statements with their allocated records."
+					subtitle="Review imported and pending statements with their allocated records."
 					description="Account activity"
 					icon="lucide:credit-card"
 					back={latest ?? undefined}
@@ -234,7 +234,7 @@ export default function StatementsPage() {
 						),
 					}}
 					footer={{
-						summary: `Showing ${paginated.data.length} of ${paginated.total} statements.`,
+						summary: `Showing ${paginated.data.length} of ${pluralize(paginated.total, "statement")}.`,
 					}}
 					mobileRow={mobileRow}
 					groupBy={byDay<Statement>("Statement")}
