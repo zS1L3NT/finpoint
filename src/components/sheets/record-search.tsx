@@ -12,7 +12,7 @@ import {
 	SheetTitle,
 	SheetTrigger,
 } from "@/components/ui/sheet"
-import { classForCurrency, cn, formatCurrency, parseDatetime } from "@/lib/utils"
+import { classForCurrency, cn, formatCurrency, parseDatetime, pluralize } from "@/lib/utils"
 import { listRecords } from "@/logic/records"
 import { round2 } from "@/logic/shared"
 import { Record } from "@/types"
@@ -93,12 +93,12 @@ export default function RecordSearchSheet({
 					<SheetDescription>
 						{target !== undefined ? (
 							<>
-								Attaching{" "}
+								Allocating{" "}
 								<span className="font-medium text-foreground tabular-nums">
 									{formatCurrency(target)}
 								</span>
 								{matches
-									? ` · ${matches} Record${matches === 1 ? "" : "s"} need exactly this`
+									? ` · ${pluralize(matches, "Record")} with exactly this amount remaining`
 									: ". Select the Record it belongs to."}
 							</>
 						) : (

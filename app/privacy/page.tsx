@@ -9,14 +9,14 @@ const SECTIONS: { heading: string; body: string[] }[] = [
 	{
 		heading: "Overview",
 		body: [
-			"Finpoint is a local-first personal finance tracker. There is no Finpoint account, no Finpoint server, and no database of yours on our side. Your financial entries live in your own browser's storage (IndexedDB) on your own device.",
+			"Finpoint is a local-first personal finance tracker. Your financial data stays in this browser unless you back it up to your own Google Drive or a file. It is never sent to Finpoint's server.",
 			"We collect, receive, and store none of your financial data. What little technical data is processed to deliver the app is described below.",
 		],
 	},
 	{
 		heading: "Financial data stays on your device",
 		body: [
-			"Accounts, statements, records, allocations, budgets, categories, and monthly budgets are saved only in this browser on this device. They are never uploaded to us, because there is nowhere to upload them to — the app has no backend.",
+			"Accounts, statements, records, allocations, budgets, categories, and monthly budgets are saved in this browser on this device. You can back them up to your own Google Drive or a file. Your financial data never passes through Finpoint's server.",
 			"Clearing your browser's site data deletes this data. Uninstalling or resetting the browser does the same. Keep a backup if the data matters to you.",
 		],
 	},
@@ -25,7 +25,7 @@ const SECTIONS: { heading: string; body: string[] }[] = [
 		body: [
 			"Backup file (download / restore): the file you download contains everything above in plain JSON. It goes wherever you put it — your disk, your cloud, your messages. Whoever holds the file can read it, so treat it like a bank statement.",
 			"Google Drive sync (optional): if you connect it, the app writes the same plain-JSON backup to a hidden app folder in your own Google Drive and reads it back on your other devices. The file is not encrypted beyond what Google Drive itself provides, so Google — like anyone with access to your Drive — could read it. It is your Drive, under your Google account and Google's Privacy Policy.",
-			"Drive sign-in uses Google with the minimum scope needed (access to the app's own folder only, not your whole Drive). The access token lives only in your browser's memory while syncing and is sent only to Google. We never receive it and cannot access your Drive.",
+			"Our sign-in endpoint exchanges and refreshes Google tokens. The browser uses the access token to read and write the app's backup folder in your Drive. Your financial data does not pass through the sign-in endpoint.",
 		],
 	},
 	{
@@ -33,7 +33,7 @@ const SECTIONS: { heading: string; body: string[] }[] = [
 		body: [
 			"To spare you from re-approving Google every hour, connecting offers an optional lasting sign-in. Your browser sends a one-time code to our small auth endpoint, which exchanges it with Google and returns the lasting grant sealed inside an encrypted, httpOnly cookie (about 30 days) that JavaScript cannot read.",
 			"What the server holds: nothing but that sealed grant, inside a cookie that lives in your browser — there is no account database, and your financial data never passes through our server at all. The grant covers only the app's own Drive folder.",
-			"Logging out (Disconnect in Sync settings, or revoking Finpoint in your Google account's third-party access page) deletes the cookie and tells Google to invalidate the grant.",
+			"Logging out (Disconnect on the Data page, or revoking Finpoint in your Google account's third-party access page) deletes the cookie and tells Google to invalidate the grant.",
 		],
 	},
 	{
@@ -42,13 +42,13 @@ const SECTIONS: { heading: string; body: string[] }[] = [
 			"Hosting: the app is served as static files. Our hosting provider necessarily processes standard connection data (such as IP address) to deliver the page, per its own privacy policy.",
 			"Usage telemetry: the app includes Vercel Analytics and Speed Insights, which collect aggregate, privacy-friendly telemetry such as pages visited and page-load performance. They do not receive your financial data. See Vercel's Privacy Policy for details.",
 			"Google scripts: connecting Drive sync loads Google's sign-in library from Google's servers; Google may process technical data per its policies at that point.",
-			"We set no tracking cookies, run no ads, and sell no data — there is nothing to sell. The only cookie of ours is the optional encrypted sign-in grant described above.",
+			"We use cookies for appearance, sidebar preferences, and optional Google Drive sign-in. We set no tracking cookies, run no ads, and sell no data.",
 		],
 	},
 	{
 		heading: "Your control",
 		body: [
-			"Access and delete everything locally at any time: use Clear all data in Settings, clear the browser's site data, disconnect Google Drive, or delete the backup file from your Drive's app folder.",
+			"Access and delete everything locally at any time: use Clear all data on the Data page, clear the browser's site data, disconnect Google Drive, or delete the backup file from your Drive's app folder.",
 			"Because we hold no copy of your data, there is nothing for us to export or erase on request — that is the point of the design.",
 		],
 	},

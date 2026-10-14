@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input"
 import { useHistory } from "@/history"
 import { canUseDefaultMonthlyBudget, treatmentLabel } from "@/lib/analytics"
 import { cardEnter } from "@/lib/motion"
+import { pluralize } from "@/lib/utils"
 import { listCategories } from "@/logic/categories"
 import { pathRecords } from "@/routes"
 import type { AnalyticsTreatment, Category, CategoryWithChildren } from "@/types"
@@ -212,7 +213,7 @@ function CategoryTile({
 							key={child.id}
 							type="button"
 							onClick={() => onEdit(child)}
-							title={`${child.records_count} Records · edit`}
+							title={`${pluralize(child.records_count, "Record")} · edit`}
 							className="flex cursor-pointer items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs hover:bg-muted"
 						>
 							<span

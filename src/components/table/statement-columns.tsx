@@ -34,7 +34,7 @@ function StatementBadges({
 				<Badge
 					variant="warning"
 					className="shrink-0"
-					title="Handwritten placeholder until the bank row is imported"
+					title="Account activity awaiting confirmation"
 				>
 					Pending
 				</Badge>

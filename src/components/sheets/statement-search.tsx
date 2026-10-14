@@ -12,7 +12,7 @@ import {
 	SheetTitle,
 	SheetTrigger,
 } from "@/components/ui/sheet"
-import { classForCurrency, cn, formatCurrency, parseDatetime } from "@/lib/utils"
+import { classForCurrency, cn, formatCurrency, parseDatetime, pluralize } from "@/lib/utils"
 import { round2 } from "@/logic/shared"
 import { listStatements } from "@/logic/statements"
 import { Statement } from "@/types"
@@ -111,11 +111,11 @@ export default function StatementSearchSheet({
 									{formatCurrency(target)}
 								</span>
 								{matches
-									? ` · ${matches} Statement${matches === 1 ? "" : "s"} match exactly`
-									: ". Select every Statement that pays for it."}
+									? ` · ${pluralize(matches, "Statement")} with exactly this amount remaining`
+									: ". Select the statements to allocate to this record."}
 							</>
 						) : (
-							"Select every Statement that pays for this Record."
+							"Select the statements to allocate to this record."
 						)}
 					</SheetDescription>
 				</SheetHeader>
@@ -202,8 +202,7 @@ export default function StatementSearchSheet({
 				{attachedIds.length ? (
 					<div className="flex items-center justify-between gap-3 border-t px-4 py-3 text-sm md:px-6">
 						<span className="text-muted-foreground">
-							{attachedIds.length} Statement{attachedIds.length === 1 ? "" : "s"}{" "}
-							attached
+							{pluralize(attachedIds.length, "Statement")} selected for allocation
 						</span>
 						<Button onClick={() => setIsOpen(false)}>Done</Button>
 					</div>

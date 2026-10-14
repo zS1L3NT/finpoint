@@ -32,7 +32,7 @@ export default function DatetimeField({
 	disabled,
 	className,
 	value,
-	placeholder = "Select date & time",
+	placeholder = "Select date and time",
 	onChange,
 }: Props) {
 	const selected = parseValue(value)

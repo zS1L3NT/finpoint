@@ -14,7 +14,7 @@ import { useStatementColumns, useStatementMobileRow } from "@/components/table/s
 import { Button } from "@/components/ui/button"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { bankMeta } from "@/lib/banks"
-import { formatCurrency, formatDatetime } from "@/lib/utils"
+import { formatCurrency, formatDatetime, pluralize } from "@/lib/utils"
 import { getAccount, listAccounts } from "@/logic/accounts"
 import { paginateItems, parsePage, parsePageSize } from "@/logic/pagination"
 import { listStatements } from "@/logic/statements"
@@ -130,7 +130,7 @@ export default function AccountPage({ params }: { params: Promise<{ id: string }
 					columns={columns}
 					loading={statementsQuery === undefined}
 					footer={{
-						summary: `Showing ${paginated.data.length} of ${paginated.total} statements.`,
+						summary: `Showing ${paginated.data.length} of ${pluralize(paginated.total, "statement")}.`,
 					}}
 					mobileRow={mobileRow}
 					groupBy={byDay<Statement>("Statement")}

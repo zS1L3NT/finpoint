@@ -151,7 +151,7 @@ export default function PendingStatementDialog({
 					</DialogTitle>
 					<DialogDescription>
 						{isEditing
-							? "Update the handwritten statement details. Existing allocations remain unchanged."
+							? "Update the pending statement details. Existing allocations remain unchanged."
 							: "Add handwritten account activity now and replace it when the imported statement arrives."}
 					</DialogDescription>
 				</DialogHeader>
@@ -176,7 +176,7 @@ export default function PendingStatementDialog({
 						/>
 						<DatetimeField
 							id="datetime"
-							label="Date & Time"
+							label="Date and time"
 							value={values.datetime}
 							errors={getApiFieldErrors("datetime")}
 							onChange={value => setValue("datetime", value)}

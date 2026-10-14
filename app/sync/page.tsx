@@ -556,7 +556,7 @@ export default function DataSettingsPage() {
 							<MethodHeader
 								icon="lucide:cloud"
 								title="Google Drive"
-								description="Automatic. Stored in a hidden app folder in your own Drive. Finpoint never sees it."
+								description="Automatic. Stored in a hidden app folder in your own Drive. Your financial data never passes through Finpoint’s server."
 								badge={
 									driveUnconfigured
 										? "Not available"
@@ -599,7 +599,11 @@ export default function DataSettingsPage() {
 												sync.localDirty ? "bg-amber-500" : "bg-emerald-500"
 											}
 											label="This browser"
-											value={sync.localDirty ? "Unsaved changes" : "Saved"}
+											value={
+												sync.localDirty
+													? "Changes waiting to sync"
+													: "Saved locally"
+											}
 										/>
 										<StateRow
 											tone={driveState.tone}
@@ -774,7 +778,7 @@ export default function DataSettingsPage() {
 						<WorkspaceRow
 							icon="lucide:sparkles"
 							title="Try demo data"
-							description="3 accounts, 5 months of Records, 470+ Statements (40+ waiting to be matched), 2 budgets and monthly budgets. Replaces everything in this browser."
+							description="3 accounts, 5 months of Records, 470+ Statements (40+ waiting to be allocated), 2 budgets and monthly budgets. Replaces everything in this browser."
 						>
 							{confirmingDemo && busy !== "demo" ? (
 								<Button

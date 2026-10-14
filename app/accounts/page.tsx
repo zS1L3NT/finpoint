@@ -15,7 +15,7 @@ import { useHistory } from "@/history"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { bankMeta } from "@/lib/banks"
 import { cardEnter } from "@/lib/motion"
-import { cn, formatCurrency } from "@/lib/utils"
+import { cn, formatCurrency, pluralize } from "@/lib/utils"
 import { type AccountActivity, listAccounts } from "@/logic/accounts"
 import { pathAccount, pathAllocator } from "@/routes"
 import type { Account } from "@/types"
@@ -157,7 +157,12 @@ function AccountCard({ account, onEdit }: { account: AccountRow; onEdit: () => v
 			</div>
 
 			<footer className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-				<span>{account.statements_count.toLocaleString()} Statements</span>
+				<span>
+					{pluralize(account.statements_count, "Statement").replace(
+						String(account.statements_count),
+						account.statements_count.toLocaleString(),
+					)}
+				</span>
 				{account.unallocated_count ? (
 					<a
 						href={pathAllocator({ account_id: account.id })}

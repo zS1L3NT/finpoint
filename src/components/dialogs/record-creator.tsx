@@ -30,7 +30,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { useFetch } from "@/hooks/use-fetch"
 import { COLLAPSE_MOTION, SPRING, TRANSITION } from "@/lib/motion"
-import { cn, formatCurrency, formatDatetime, parseDatetime, round2dp } from "@/lib/utils"
+import { cn, formatCurrency, formatDatetime, parseDatetime, pluralize, round2dp } from "@/lib/utils"
 import { createRecord, recordCompletions } from "@/logic/records"
 import { ValidationError } from "@/logic/validate"
 import { CategoryWithChildren, Statement } from "@/types"
@@ -143,7 +143,7 @@ export default function RecordCreatorDialog({
 				<DialogHeader>
 					<DialogTitle>Create New Record</DialogTitle>
 					<DialogDescription>
-						Allocate {statements.length} selected statement(s) to a new record.
+						Allocate {pluralize(statements.length, "statement")} to a new record.
 					</DialogDescription>
 				</DialogHeader>
 
@@ -208,7 +208,7 @@ export default function RecordCreatorDialog({
 								{field => (
 									<DatetimeField
 										id={field.name}
-										label="Date & Time"
+										label="Date and time"
 										value={field.state.value}
 										errors={mergeErrors(field.state.meta.errors, field.name)}
 										onChange={value => {
@@ -325,7 +325,7 @@ export default function RecordCreatorDialog({
 					</div>
 
 					<div className="flex flex-col gap-4">
-						<p className="text-sm font-semibold">Statements Attached</p>
+						<p className="text-sm font-semibold">Statement allocations</p>
 
 						<ScrollArea className="h-fit max-h-200">
 							<div className="relative flex flex-col gap-2">
