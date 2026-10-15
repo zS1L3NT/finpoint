@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import WorkflowTabs from "@/components/workflow-tabs"
-import { SPRING, TRANSITION } from "@/lib/motion"
+import { cardEnter, SPRING, TRANSITION } from "@/lib/motion"
 import {
 	classForCurrency,
 	cn,
@@ -75,10 +75,7 @@ const VIEWS = {
 
 const CARD_MOTION = {
 	layout: "position",
-	initial: { opacity: 0, y: 6 },
-	animate: { opacity: 1, y: 0 },
 	exit: { opacity: 0, scale: 0.97, transition: TRANSITION.fast },
-	transition: { ...TRANSITION.base, layout: SPRING.snappy },
 } as const
 
 export default function FixDuplicatesPage() {
@@ -227,12 +224,18 @@ export default function FixDuplicatesPage() {
 					transition={TRANSITION.base}
 					className="grid gap-4"
 				>
-					<AnimatePresence initial={false} mode="popLayout">
+					<AnimatePresence mode="popLayout">
 						{page.kind === "pairs"
-							? page.data.map(pair => (
+							? page.data.map((pair, index) => (
 									<motion.section
 										key={`dismissed-${pairKey(pair.statements[0].id, pair.statements[1].id)}`}
 										{...CARD_MOTION}
+										{...cardEnter(index)}
+										data-slot="duplicate-group-item"
+										transition={{
+											...cardEnter(index).transition,
+											layout: SPRING.snappy,
+										}}
 										className="grid gap-3 rounded-xl border bg-card p-4"
 									>
 										<GroupHeader
@@ -273,10 +276,16 @@ export default function FixDuplicatesPage() {
 										</Button>
 									</motion.section>
 								))
-							: page.data.map(group => (
+							: page.data.map((group, index) => (
 									<motion.div
 										key={`${view}-${group.statements.map(s => s.id).join(",")}-${group.pairs.map(p => pairKey(...p)).join(",")}`}
 										{...CARD_MOTION}
+										{...cardEnter(index)}
+										data-slot="duplicate-group-item"
+										transition={{
+											...cardEnter(index).transition,
+											layout: SPRING.snappy,
+										}}
 									>
 										<DuplicateGroupCard
 											group={group}

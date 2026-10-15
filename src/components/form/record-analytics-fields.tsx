@@ -15,6 +15,7 @@ export default function RecordAnalyticsFields({
 	monthlyBudgetId,
 	monthlyBudgetSource,
 	categoryMonthlyBudgetId,
+	monthlyBudgets: monthlyBudgetsProp,
 	onTreatmentChange,
 	onMonthlyBudgetChange,
 }: {
@@ -24,14 +25,19 @@ export default function RecordAnalyticsFields({
 	monthlyBudgetId: string
 	monthlyBudgetSource: "category" | "manual"
 	categoryMonthlyBudgetId: string | null | undefined
+	/** Prepared Monthly Budget lookup from the opening dialog; falls back to its own live query. */
+	monthlyBudgets?: Awaited<ReturnType<typeof listMonthlyBudgets>>
 	onTreatmentChange: (value: string) => void
 	onMonthlyBudgetChange: (value: string, source: "category" | "manual") => void
 }) {
-	const monthlyBudgets = useLiveQuery(() => listMonthlyBudgets(), [])
-	if (monthlyBudgets === undefined) return null
+	const queriedMonthlyBudgets = useLiveQuery(
+		() => (monthlyBudgetsProp === undefined ? listMonthlyBudgets() : undefined),
+		[monthlyBudgetsProp === undefined],
+	)
+	const monthlyBudgets = monthlyBudgetsProp ?? queriedMonthlyBudgets
 	const effectiveTreatment = (treatment || categoryTreatment || "automatic") as AnalyticsTreatment
 	const monthlyBudgetEligible = canUseMonthlyBudget(effectiveTreatment, amount)
-	const categoryMonthlyBudget = monthlyBudgets.find(
+	const categoryMonthlyBudget = monthlyBudgets?.find(
 		monthlyBudget => monthlyBudget.id === categoryMonthlyBudgetId,
 	)
 	const treatmentValue = treatment || (categoryTreatment ? CATEGORY_DEFAULT : "")
@@ -80,8 +86,8 @@ export default function RecordAnalyticsFields({
 					id="monthly_budget_id"
 					label="Monthly budget"
 					disabled={!monthlyBudgetEligible}
-					value={monthlyBudgetValue}
-					placeholder="Unbudgeted"
+					value={monthlyBudgets === undefined ? "" : monthlyBudgetValue}
+					placeholder={monthlyBudgets === undefined ? "Monthly budget" : "Unbudgeted"}
 					items={[
 						{ value: UNBUDGETED, label: "Unbudgeted" },
 						...(categoryMonthlyBudgetId !== undefined
@@ -92,11 +98,15 @@ export default function RecordAnalyticsFields({
 									},
 								]
 							: []),
-						...monthlyBudgets
-							.filter(monthlyBudget => !monthlyBudget.archived)
+						...(monthlyBudgets ?? [])
+							.filter(
+								monthlyBudget =>
+									!monthlyBudget.archived || monthlyBudget.id === monthlyBudgetId,
+							)
 							.map(monthlyBudget => ({
 								value: monthlyBudget.id,
 								label: monthlyBudget.name,
+								disabled: monthlyBudget.archived,
 							})),
 					]}
 					onChange={value => {

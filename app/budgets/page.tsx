@@ -64,8 +64,13 @@ export default function BudgetsPage() {
 						{query ? "No budgets match your search." : "No budgets yet."}
 					</p>
 				) : (
-					BUDGET_STATES.map(state => {
+					BUDGET_STATES.map((state, stateIndex) => {
 						const items = budgets.filter(budget => budgetState(budget) === state.value)
+						const offset = budgets.filter(budget =>
+							BUDGET_STATES.slice(0, stateIndex).some(
+								previous => budgetState(budget) === previous.value,
+							),
+						).length
 						return items.length ? (
 							<section key={state.value} className="grid gap-3">
 								<h3 className="text-sm font-semibold text-muted-foreground">
@@ -75,8 +80,8 @@ export default function BudgetsPage() {
 									{items.map((budget, index) => (
 										<motion.div
 											key={budget.id}
-											className="grid"
-											{...cardEnter(index)}
+											className="grid min-w-0 grid-cols-1"
+											{...cardEnter(offset + index)}
 										>
 											<BudgetCard
 												budget={budget}
@@ -153,7 +158,7 @@ function BudgetCard({ budget, onEdit }: { budget: Budget; onEdit: () => void }) 
 
 	return (
 		<article
-			className="group relative grid cursor-pointer gap-4 rounded-xl border bg-card p-4 transition-[box-shadow,transform] duration-150 ease-out hover:shadow-md active:scale-[0.99] motion-reduce:transition-none motion-reduce:active:scale-100"
+			className="group relative grid min-w-0 grid-cols-1 cursor-pointer gap-4 rounded-xl border bg-card p-4 transition-[box-shadow,transform] duration-150 ease-out hover:shadow-md active:scale-[0.99] motion-reduce:transition-none motion-reduce:active:scale-100"
 			onClick={event => {
 				if (!isInteractiveTarget(event.target)) open()
 			}}

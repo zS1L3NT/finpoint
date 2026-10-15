@@ -20,7 +20,7 @@ export default function PageHeader({
 	back?: HistoryItem
 }) {
 	const { latest, isNavigatingBack, navigateBack } = useHistory()
-	const backTarget = back ? (latest ?? back) : null
+	const backTarget = latest ?? back ?? null
 
 	return (
 		<div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
@@ -39,7 +39,7 @@ export default function PageHeader({
 							icon={isNavigatingBack ? "lucide:loader-circle" : "lucide:arrow-left"}
 							className={isNavigatingBack ? "animate-spin" : undefined}
 						/>
-						Back to {backTarget.name}
+						<span className="truncate">Back to {backTarget.name}</span>
 					</Button>
 				) : null}
 
