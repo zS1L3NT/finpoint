@@ -122,11 +122,18 @@ test("display.sparkline polyline draws progressively then settles", async ({ pag
 	const reduced = test.info().project.name === "reduced-motion"
 	const button = page.getByRole("button", { name: "Show trend" })
 	await button.scrollIntoViewIfNeeded()
+	// Sample from before the click until 800ms after the polyline first mounts, so slow
+	// action scheduling cannot use up the window.
 	const sampler = await page.evaluateHandle(() => {
 		const values: { time: number; dasharray: string; dashoffset: string }[] = []
+		let markReady = () => undefined as void
+		const ready = new Promise<void>(resolve => {
+			markReady = resolve
+		})
 		const finished = new Promise<{ time: number; dasharray: string; dashoffset: string }[]>(
-			resolve => {
+			(resolve, reject) => {
 				const start = performance.now()
+				let mountedAt: number | null = null
 				const tick = (now: number) => {
 					const line = document.querySelector(
 						'section[aria-label="Trend entrance"] svg polyline',
@@ -136,14 +143,18 @@ test("display.sparkline polyline draws progressively then settles", async ({ pag
 						dasharray: line?.getAttribute("stroke-dasharray") ?? "gone",
 						dashoffset: line?.getAttribute("stroke-dashoffset") ?? "gone",
 					})
-					if (now - start > 800) resolve(values)
+					markReady()
+					if (line && mountedAt === null) mountedAt = now
+					if (mountedAt !== null && now - mountedAt > 800) resolve(values)
+					else if (now - start > 10_000) reject(new Error("Trend polyline never mounted"))
 					else requestAnimationFrame(tick)
 				}
 				requestAnimationFrame(tick)
 			},
 		)
-		return { finished }
+		return { ready, finished }
 	})
+	await sampler.evaluate(state => state.ready)
 	await button.click()
 	let samples: { time: number; dasharray: string; dashoffset: string }[]
 	try {
@@ -184,20 +195,49 @@ test("display.sparkline fixtures fit narrow viewports with visible strokes", asy
 				viewport.width + 1,
 			)
 		}
-		const stroke = await svg
-			.locator("polyline")
-			.evaluate(element => getComputedStyle(element).stroke)
-		const background = await svg.evaluate(
-			element => getComputedStyle(element.parentElement ?? element).backgroundColor,
+		const paint = await svg.locator("polyline").evaluate(element => {
+			const alpha = (color: string) => {
+				const canvas = document.createElement("canvas")
+				canvas.width = canvas.height = 1
+				const context = canvas.getContext("2d")
+				if (!context) throw new Error("Canvas is required to resolve colours")
+				context.fillStyle = "rgba(0,0,0,0)"
+				context.fillStyle = color
+				context.fillRect(0, 0, 1, 1)
+				return [...context.getImageData(0, 0, 1, 1).data]
+			}
+			let backdrop = "rgba(0, 0, 0, 0)"
+			for (
+				let node: Element | null = element.parentElement;
+				node;
+				node = node.parentElement
+			) {
+				const color = getComputedStyle(node).backgroundColor
+				if ((alpha(color)[3] ?? 0) > 0) {
+					backdrop = color
+					break
+				}
+			}
+			const style = getComputedStyle(element)
+			return {
+				stroke: alpha(style.stroke),
+				backdrop: alpha(backdrop),
+				width: Number.parseFloat(style.strokeWidth),
+				opacity: Number(style.strokeOpacity) * Number(style.opacity),
+			}
+		})
+		expect(paint.stroke[3], `${name}: stroke colour is opaque`).toBeGreaterThan(0)
+		expect(paint.width, `${name}: stroke has width`).toBeGreaterThan(0)
+		expect(paint.opacity, `${name}: stroke is not faded out`).toBeGreaterThan(0.5)
+		expect(paint.stroke.slice(0, 3), `${name}: stroke differs from its backdrop`).not.toEqual(
+			paint.backdrop.slice(0, 3),
 		)
-		expect(stroke, `${name}: stroke is painted`).not.toBe("none")
-		expect(background, `${name}: backdrop is resolved`).not.toBe("")
 	}
-	const region = page.getByRole("region", { name: "Sparklines" })
-	if ((await region.count()) > 0)
-		expect(
-			await region.evaluate(element => element.scrollWidth - element.clientWidth),
-		).toBeLessThanOrEqual(1)
+	const region = page.getByRole("region", { name: "Sparkline boundaries", exact: true })
+	await expect(region).toBeVisible()
+	expect(
+		await region.evaluate(element => element.scrollWidth - element.clientWidth),
+	).toBeLessThanOrEqual(1)
 })
 
 test("display.summary long and missing values fit each viewport and changing values settle after keyboard action", async ({

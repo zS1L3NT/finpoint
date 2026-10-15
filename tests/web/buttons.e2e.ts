@@ -24,7 +24,7 @@ const routes = [
 ]
 
 for (const route of routes) {
-	test(`enabled visible buttons on ${route} expose pointer and keyboard semantics`, async ({
+	test(`enabled visible buttons on ${route} pass a pointer, Tab-reachability and actionability audit`, async ({
 		page,
 		workspace,
 	}) => {

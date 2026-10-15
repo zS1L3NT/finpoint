@@ -111,8 +111,16 @@ for (const destination of ["overview", "budget"] as const) {
 	}) => {
 		await seedWorkspace(page)
 		await page.goto(destination === "overview" ? "/records" : "/budgets")
+		// Before hydration the trigger does nothing, so retry until the sheet is open.
 		if (destination === "overview" && isMobile)
-			await page.locator('header [data-slot="sidebar-trigger"]').click()
+			await expect(async () => {
+				await page.locator('header [data-slot="sidebar-trigger"]').click()
+				await expect(
+					page.getByRole("dialog", { name: "Sidebar", exact: true }),
+				).toBeVisible({
+					timeout: 2000,
+				})
+			}).toPass()
 		const titles = destination === "overview" ? overviewCharts : ["Spending over time"]
 		const frames = await chartFrames(page, titles, async () => {
 			if (destination === "overview")
@@ -166,12 +174,35 @@ for (const destination of ["overview", "budget"] as const) {
 				has: page.locator('[data-slot="card-title"]').filter({ hasText: titles[0] }),
 			})
 			.getByRole("application")
+		// Observe from before the interaction, so a replay that finishes quickly is still caught.
+		const watcher = await page.evaluateHandle(() => {
+			const state = { replayed: false, stop: () => undefined as void }
+			const check = () => {
+				if (document.querySelector('clipPath[id^="animationClipPath"]'))
+					state.replayed = true
+			}
+			const observer = new MutationObserver(check)
+			observer.observe(document.body, { subtree: true, childList: true, attributes: true })
+			state.stop = () => observer.disconnect()
+			return state
+		})
 		await chart.hover()
-		await expect(page.locator('clipPath[id^="animationClipPath"]')).toHaveCount(0)
+		// Intro animations start within a frame; 600ms covers a delayed restart.
+		await page.waitForTimeout(600)
 		if (!isMobile) {
+			const width = await chart.evaluate(element => element.getBoundingClientRect().width)
 			await page.locator('header [data-slot="sidebar-trigger"]').click()
-			await expect(page.locator('clipPath[id^="animationClipPath"]')).toHaveCount(0)
+			await expect
+				.poll(() => chart.evaluate(element => element.getBoundingClientRect().width))
+				.not.toBe(width)
+			await page.waitForTimeout(600)
 		}
+		const replayed = await watcher.evaluate(state => {
+			state.stop()
+			return state.replayed
+		})
+		await watcher.dispose()
+		expect(replayed, "hover and resize never restart the grow-in").toBe(false)
 	})
 }
 
@@ -215,9 +246,27 @@ test("charts.progress budget usage tooltip reconciles actual and projected spend
 		})
 	})
 	await page.reload()
-	await expect(page.getByText("Spent", { exact: true }).locator("..")).toContainText("$0.00")
+	// With a zero plan, the spent amount and every usage value are unchanged.
+	const spent = page.getByText("Spent", { exact: true }).locator("..")
+	await expect(spent).toContainText("$117.53")
+	await expect(spent).toContainText("$0.00")
 	await expect(page.locator("main")).not.toContainText(/NaN|Infinity/)
-	await expect(application).toBeVisible()
+	await application.focus()
+	for (let index = 0; index < 4; index++) await page.keyboard.press("ArrowRight")
+	await expect(tooltip).toContainText("5 Oct")
+	await expect(tooltip).toContainText("$84.20")
+	for (let index = 0; index < 5; index++) await page.keyboard.press("ArrowRight")
+	await expect(tooltip).toContainText("10 Oct")
+	await expect(tooltip).toContainText("$117.53")
+	for (let index = 0; index < 21; index++) await page.keyboard.press("ArrowRight")
+	await expect(tooltip).toContainText("31 Oct")
+	await expect(tooltip).toContainText("$242.90")
+	// Every plotted path stays finite.
+	const paths = await chart
+		.locator("svg path")
+		.evaluateAll(elements => elements.map(element => element.getAttribute("d") ?? ""))
+	expect(paths.length).toBeGreaterThan(0)
+	for (const path of paths) expect(path).not.toMatch(/NaN|Infinity/)
 })
 
 test("charts.containment every dense chart fits the viewport with usable graph surfaces", async ({

@@ -3267,10 +3267,10 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"UI-FACET-BADGE",
 	],
 	"src/components/ui/progress.tsx#export.Progress.behaviour": [
-		"progress clamps at 100 and flags excess above it",
+		"progress clamps its base bar and flags only values above 100",
 	],
 	"src/components/ui/progress.tsx#primitive.consumer": [
-		"progress clamps at 100 and flags excess above it",
+		"progress clamps its base bar and flags only values above 100",
 	],
 	"src/components/ui/scroll-area.tsx#export.ScrollArea.behaviour": [
 		"scroll area scrolls its viewport",
@@ -3753,35 +3753,35 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"charts.empty no history gives zero metrics and useful chart explanations",
 	],
 	"src/components/charts/total-spending-chart.tsx#chart.responsive": [
-		"chart-edges containment maps every dense card to its source file and fits",
+		"chart-edges containment: every dense card renders values and fits",
 		"chart-edges tooltips stay numeric and inside every viewport",
 	],
 	"src/components/charts/cashflow-chart.tsx#chart.responsive": [
-		"chart-edges containment maps every dense card to its source file and fits",
+		"chart-edges containment: every dense card renders values and fits",
 		"chart-edges tooltips stay numeric and inside every viewport",
 	],
 	"src/components/charts/daily-spending-chart.tsx#chart.responsive": [
-		"chart-edges containment maps every dense card to its source file and fits",
+		"chart-edges containment: every dense card renders values and fits",
 		"chart-edges tooltips stay numeric and inside every viewport",
 	],
 	"src/components/charts/weekday-bars.tsx#chart.responsive": [
-		"chart-edges containment maps every dense card to its source file and fits",
+		"chart-edges containment: every dense card renders values and fits",
 		"chart-edges tooltips stay numeric and inside every viewport",
 	],
 	"src/components/charts/category-history-chart.tsx#chart.responsive": [
-		"chart-edges containment maps every dense card to its source file and fits",
+		"chart-edges containment: every dense card renders values and fits",
 		"chart-edges tooltips stay numeric and inside every viewport",
 	],
 	"src/components/charts/budget-progress-chart.tsx#chart.responsive": [
-		"chart-edges containment maps every dense card to its source file and fits",
+		"chart-edges containment: every dense card renders values and fits",
 		"chart-edges tooltips stay numeric and inside every viewport",
 	],
 	"src/components/charts/category-spending-mix.tsx#chart.responsive": [
-		"chart-edges containment maps every dense card to its source file and fits",
+		"chart-edges containment: every dense card renders values and fits",
 		"chart-edges dense long category name stays truncated and readable",
 	],
 	"src/components/charts/category-movers.tsx#chart.responsive": [
-		"chart-edges containment maps every dense card to its source file and fits",
+		"chart-edges containment: every dense card renders values and fits",
 		"chart-edges dense long category name stays truncated and readable",
 		"chart-edges calendar and movers drills work by keyboard",
 	],
@@ -3789,14 +3789,14 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"chart-edges movers liveRecordamount bar transitions on record update",
 	],
 	"src/components/charts/monthly-budget-usage.tsx#chart.responsive": [
-		"chart-edges containment maps every dense card to its source file and fits",
+		"chart-edges containment: every dense card renders values and fits",
 		"chart-edges dense long category name stays truncated and readable",
 	],
 	"src/components/charts/monthly-budget-usage.tsx#chart.motion": [
 		"chart-edges monthly budget donut dims siblings smoothly on focus",
 	],
 	"src/components/charts/spending-calendar.tsx#chart.responsive": [
-		"chart-edges containment maps every dense card to its source file and fits",
+		"chart-edges containment: every dense card renders values and fits",
 		"chart-edges dense long category name stays truncated and readable",
 		"chart-edges calendar and movers drills work by keyboard",
 	],
@@ -3998,7 +3998,7 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"src/components/ui/progress.tsx#primitive.responsive": [
 		"harness sections fit the viewport width",
-		"progress clamps at 100 and flags excess above it",
+		"progress clamps its base bar and flags only values above 100",
 	],
 	"src/components/ui/scroll-area.tsx#primitive.responsive": [
 		"harness sections fit the viewport width",

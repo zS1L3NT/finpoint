@@ -89,7 +89,7 @@ test("data.statement cells retain pending, allocation, zero and signed amount me
 			open.onsuccess = () => resolve(open.result)
 		})
 		await new Promise<void>((resolve, reject) => {
-			const transaction = database.transaction("statements", "readwrite")
+			const transaction = database.transaction(["statements", "allocations"], "readwrite")
 			transaction.oncomplete = () => {
 				database.close()
 				resolve()
@@ -104,15 +104,46 @@ test("data.statement cells retain pending, allocation, zero and signed amount me
 				index: 1,
 				is_pending: 0,
 			})
+			// A Statement that is only partly allocated: -60 with -25 assigned leaves -35.
+			transaction.objectStore("statements").put({
+				id: "t1-s-part-alloc",
+				account_id: "t1-acc-dbs",
+				datetime: "2026-10-14 12:00",
+				description: "Partly allocated groceries",
+				amount: -60,
+				index: 1,
+				is_pending: 0,
+			})
+			transaction.objectStore("allocations").put({
+				statement_id: "t1-s-part-alloc",
+				record_id: "t1-r-groceries",
+				amount: -25,
+			})
 		})
 	})
 	await page.goto("/statements?per_page=100")
 	const data = getScenario("populated").tables
-	for (const id of [IDS.statements.pending, "t1-s-partial", "t1-s-refund", "t1-s-zero"]) {
-		const statement =
-			id === "t1-s-zero"
-				? { description: "Zero imported balance row", amount: 0, is_pending: 0 }
-				: data.statements.find(row => row.id === id)
+	const added: Record<string, { description: string; amount: number; is_pending: number }> = {
+		"t1-s-zero": { description: "Zero imported balance row", amount: 0, is_pending: 0 },
+		"t1-s-part-alloc": {
+			description: "Partly allocated groceries",
+			amount: -60,
+			is_pending: 0,
+		},
+	}
+	const allocations = [
+		...data.allocations,
+		{ statement_id: "t1-s-part-alloc", record_id: "t1-r-groceries", amount: -25 },
+	]
+	let partlyAllocated = 0
+	for (const id of [
+		IDS.statements.pending,
+		"t1-s-partial",
+		"t1-s-refund",
+		"t1-s-zero",
+		"t1-s-part-alloc",
+	]) {
+		const statement = added[id] ?? data.statements.find(row => row.id === id)
 		if (!statement) throw new Error(`Missing fixture ${id}`)
 		const link = page
 			.getByRole("link", { name: "Open statement", exact: true })
@@ -127,16 +158,19 @@ test("data.statement cells retain pending, allocation, zero and signed amount me
 		if (statement.is_pending)
 			await expect(row.getByText("Pending", { exact: true })).toBeVisible()
 		else await expect(row.getByText("Pending", { exact: true })).toHaveCount(0)
-		const allocation = data.allocations
+		const allocation = allocations
 			.filter(item => item.statement_id === id)
 			.reduce((sum, item) => sum + item.amount, 0)
 		if (allocation === statement.amount && statement.amount !== 0)
 			await expect(row.getByText("Unallocated", { exact: true })).toHaveCount(0)
 		const remaining = Math.round((statement.amount - allocation) * 100) / 100
-		if (allocation !== 0 && remaining !== 0)
+		if (allocation !== 0 && remaining !== 0) {
+			partlyAllocated++
 			await expect(row).toContainText(
 				`${remaining < 0 ? "-" : ""}$${Math.abs(remaining).toFixed(2)} allocable`,
 			)
+		}
 		await expectPointerCursor(link)
 	}
+	expect(partlyAllocated, "the partly allocated case was checked").toBe(1)
 })

@@ -160,7 +160,15 @@ for (const key of Object.keys(IDS.records) as (keyof typeof IDS.records)[]) {
 			data.categories.find(row => row.id === record.category_id)?.name ??
 				"Missing category fixture",
 		)
-		await expect(page.getByText(/Treatment ·/)).toBeVisible()
+		// Independent expectation, not the product's own label lookup.
+		const treatment = {
+			income: "Income",
+			spending: "Spending",
+			saving_investment: "Saving / investment",
+			neutral: "Transfer / excluded",
+			automatic: "Automatic by direction",
+		}[record.analytics_treatment ?? "automatic"]
+		await expect(page.getByText(/Treatment ·/)).toHaveText(`Treatment · ${treatment}`)
 		await expect(page.getByText(/Monthly budget ·/)).toContainText(
 			record.monthly_budget_id
 				? (data.monthly_budgets.find(row => row.id === record.monthly_budget_id)?.name ??

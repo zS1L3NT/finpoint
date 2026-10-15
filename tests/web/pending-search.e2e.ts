@@ -62,10 +62,39 @@ test("Pending selection resets an unsettled candidate search without replaying i
 	const candidate = page.locator('section[aria-labelledby="candidate-title"]')
 	const search = candidate.getByPlaceholder("Search descriptions...")
 	await expect(search).toBeVisible()
+	// Record when the query was typed and when the next Statement was chosen, to prove the
+	// selection changed while the 300ms search callback was still pending.
+	await page.evaluate(() => {
+		document.addEventListener(
+			"click",
+			event => {
+				const target =
+					event.target instanceof Element ? event.target.closest("button") : null
+				// On mobile, leaving the candidate panel is the first selection change.
+				const text = target?.textContent?.trim() ?? ""
+				if (
+					!Reflect.has(window, "__selectedAt") &&
+					(text.startsWith("Dense pending 26") || text === "Back to pending Statements")
+				)
+					Reflect.set(window, "__selectedAt", performance.now())
+			},
+			{ capture: true },
+		)
+		document.addEventListener(
+			"input",
+			() => Reflect.set(window, "__filledAt", performance.now()),
+			{ capture: true },
+		)
+	})
 	await search.fill("never matches another Statement")
 	if (isMobile)
 		await page.getByRole("button", { name: "Back to pending Statements", exact: true }).click()
 	await page.getByRole("button", { name: /^Dense pending 26\b/ }).click()
+	const gap = await page.evaluate(
+		() =>
+			Number(Reflect.get(window, "__selectedAt")) - Number(Reflect.get(window, "__filledAt")),
+	)
+	expect(gap, "the selection changed before the search callback could fire").toBeLessThan(300)
 	await expect(page).toHaveURL(new RegExp(`pending_statement_id=${next.id}`))
 	await expect(candidate.getByText("Dense pending 26", { exact: true }).first()).toBeVisible()
 	// The outgoing panel remains mounted briefly during its exit transition.
