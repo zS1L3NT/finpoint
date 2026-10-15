@@ -28,7 +28,7 @@ export default function AllocateBar({
 				role="progressbar"
 				aria-valuemin={0}
 				aria-valuemax={100}
-				aria-valuenow={Math.round(percent)}
+				aria-valuenow={Math.round(Math.min(Math.max(percent, 0), 100))}
 				className="relative h-1 w-full overflow-hidden rounded-md bg-muted"
 			>
 				<div

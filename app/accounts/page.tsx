@@ -61,7 +61,11 @@ export default function AccountsPage() {
 				) : (
 					<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
 						{accounts.map((account, index) => (
-							<motion.div key={account.id} className="grid" {...cardEnter(index)}>
+							<motion.div
+								key={account.id}
+								className="grid min-w-0 grid-cols-1"
+								{...cardEnter(index)}
+							>
 								<AccountCard
 									account={account}
 									onEdit={() => setEditingAccount(account)}
@@ -97,10 +101,14 @@ function AccountCard({ account, onEdit }: { account: AccountRow; onEdit: () => v
 
 	return (
 		<article
-			className="group grid cursor-pointer content-start gap-4 rounded-xl border bg-card p-4 transition-[box-shadow,transform] duration-150 ease-out hover:shadow-md active:scale-[0.99] motion-reduce:transition-none motion-reduce:active:scale-100"
+			className="group grid min-w-0 grid-cols-1 cursor-pointer content-start gap-4 rounded-xl border bg-card p-4 transition-[box-shadow,transform] duration-150 ease-out hover:shadow-md active:scale-[0.99] motion-reduce:transition-none motion-reduce:active:scale-100"
 			onClick={event => {
 				if (!isInteractiveTarget(event.target)) open()
 			}}
+			onKeyDown={event => {
+				if (event.key === "Enter" && event.target === event.currentTarget) open()
+			}}
+			tabIndex={0}
 		>
 			<header className="flex items-start gap-3">
 				<span

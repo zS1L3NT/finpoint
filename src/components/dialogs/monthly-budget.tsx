@@ -127,185 +127,197 @@ export default function MonthlyBudgetDialog({
 			}}
 		>
 			<DialogTrigger render={trigger} />
-			<DialogContent className="md:max-w-lg">
-				<DialogHeader>
-					<DialogTitle>
-						{monthlyBudget ? `Edit ${monthlyBudget.name}` : "Create monthly budget"}
-					</DialogTitle>
-					<DialogDescription>
-						Name, colour, group and forecast settings apply across all months. Choose
-						separately how the amount applies to {monthLabel}.
-					</DialogDescription>
-				</DialogHeader>
-				{!monthlyBudget || source ? (
-					<form
-						className="grid gap-5"
-						onSubmit={event => {
-							event.preventDefault()
-							void submit()
-						}}
-					>
-						<FieldGroup className="grid grid-cols-[minmax(0,1fr)_auto]">
-							<TextField
-								id="monthly-budget-name"
-								label="Name"
-								value={name}
-								errors={getApiFieldErrors("name")}
-								onChange={setName}
-							/>
-							<Field>
-								<FieldLabel htmlFor="monthly-budget-color">Colour</FieldLabel>
-								<div className="flex items-center gap-2">
-									<input
-										id="monthly-budget-color"
-										type="color"
-										value={color}
-										onChange={event => setColor(event.target.value)}
-										className="h-8 w-12 cursor-pointer rounded border bg-transparent p-1"
-									/>
-									<span className="text-xs text-muted-foreground">{color}</span>
-								</div>
-							</Field>
-							<SelectField
-								id="monthly-budget-group"
-								label="Group"
-								className="col-span-2"
-								value={group}
-								items={[
-									{ value: "core", label: "Core" },
-									{ value: "outlier", label: "Outlier" },
-									{ value: "other", label: "Other" },
-								]}
-								errors={getApiFieldErrors("group")}
-								onChange={value => setGroup(value as MonthlyBudget["group"])}
-							/>
-							<SelectField
-								id="monthly-budget-pace"
-								label="Spending forecast"
-								className="col-span-2"
-								value={group === "outlier" ? "none" : paceKind}
-								disabled={group === "outlier"}
-								description={
-									group === "outlier"
-										? "Outlier monthly budgets use recorded amounts only."
-										: paceKind === "daily"
-											? "Use this budget’s daily spending average to estimate its month-end total."
-											: paceKind === "recurring"
-												? "Use recorded and future-dated spending only. This does not create recurring Records."
-												: "Show recorded spending without a daily estimate for this budget."
-								}
-								items={[
-									{ value: "none", label: "Recorded amounts only" },
-									{ value: "daily", label: "Estimate from daily spending" },
-									{ value: "recurring", label: "Recurring / scheduled spending" },
-								]}
-								errors={getApiFieldErrors("pace_kind")}
-								onChange={value => setPaceKind(value as MonthlyBudget["pace_kind"])}
-							/>
-						</FieldGroup>
-						<FieldGroup className="rounded-lg border bg-muted/20 p-3">
-							<p className="text-sm font-medium">Amount for {monthLabel}</p>
-							<SelectField
-								id="monthly-budget-amount-scope"
-								label="Amount rule"
-								value={scope}
-								items={[
-									...(monthlyBudget
-										? [
-												{
-													value: "inherit",
-													label: "Default",
-													disabled: source?.previousDefault === null,
-												},
-											]
-										: []),
-									{ value: "month", label: "Override one month" },
-									{ value: "default", label: "Override default" },
-								]}
-								description={
-									(scope === "inherit" && source?.previousDefault
-										? `Use the default from ${DateTime.fromISO(source.previousDefault.effective_month).toFormat("MMMM yyyy")}: ${source.previousDefault.amount === null ? "No monthly amount" : formatCurrency(source.previousDefault.amount)}.`
-										: scope === "month"
-											? `Change ${monthLabel} only. Other months skip this when looking back for the default.`
-											: `Set the default from ${monthLabel} onward. Earlier defaults stop applying from here.${source?.nextDefault ? ` It applies until ${DateTime.fromISO(source.nextDefault.effective_month).toFormat("MMMM yyyy")}, when the next default starts.` : ""}`) +
-									defaultRemovalDescription
-								}
-								onChange={setAmountScope}
-							/>
-							<AnimatePresence initial={false}>
-								{(scope === "month" || scope === "default") && (
-									<motion.div className="overflow-hidden" {...COLLAPSE_MOTION}>
-										<FieldGroup>
-											<AmountField
-												id="monthly-budget-amount"
-												label="Monthly amount"
-												value={amount}
-												min={0}
-												disabled={noAmount}
-												errors={getApiFieldErrors("amount")}
-												onChange={setAmount}
-											/>
-											<Field orientation="horizontal">
-												<Checkbox
-													id="monthly-budget-no-amount"
-													checked={noAmount}
-													onCheckedChange={value =>
-														setNoAmount(value === true)
-													}
-												/>
-												<FieldLabel htmlFor="monthly-budget-no-amount">
-													No monthly amount
-												</FieldLabel>
-											</Field>
-										</FieldGroup>
-									</motion.div>
-								)}
-							</AnimatePresence>
-						</FieldGroup>
-						{monthlyBudget ? (
-							<Field orientation="horizontal">
-								<Checkbox
-									id="monthly-budget-archived"
-									checked={archived}
-									onCheckedChange={value => setArchived(value === true)}
+			{!monthlyBudget || source !== undefined ? (
+				<DialogContent className="md:max-w-lg">
+					<DialogHeader>
+						<DialogTitle>
+							{monthlyBudget ? `Edit ${monthlyBudget.name}` : "Create monthly budget"}
+						</DialogTitle>
+						<DialogDescription>
+							Name, colour, group and forecast settings apply across all months.
+							Choose separately how the amount applies to {monthLabel}.
+						</DialogDescription>
+					</DialogHeader>
+					{!monthlyBudget || source ? (
+						<form
+							className="grid gap-5"
+							onSubmit={event => {
+								event.preventDefault()
+								void submit()
+							}}
+						>
+							<FieldGroup className="grid grid-cols-[minmax(0,1fr)_auto]">
+								<TextField
+									id="monthly-budget-name"
+									label="Name"
+									value={name}
+									errors={getApiFieldErrors("name")}
+									onChange={setName}
 								/>
-								<div>
-									<FieldLabel htmlFor="monthly-budget-archived">
-										Archive monthly budget
-									</FieldLabel>
-									<p className="text-xs text-muted-foreground">
-										Existing Record assignments remain intact.
-									</p>
-								</div>
-							</Field>
-						) : null}
-						{Object.values(apiErrors).flat().length ? (
-							<p
-								className="fade-in slide-in-from-top-1 animate-in text-sm text-destructive duration-150 ease-out"
-								role="alert"
-							>
-								{Object.values(apiErrors).flat().join(" ")}
-							</p>
-						) : null}
-						<DialogFooter>
-							<DialogClose
-								render={
-									<Button type="button" variant="outline">
-										Cancel
-									</Button>
-								}
-							/>
-							<Button type="submit" disabled={submitting}>
-								{submitting
-									? "Saving…"
-									: monthlyBudget
-										? "Save changes"
-										: "Create monthly budget"}
-							</Button>
-						</DialogFooter>
-					</form>
-				) : null}
-			</DialogContent>
+								<Field>
+									<FieldLabel htmlFor="monthly-budget-color">Colour</FieldLabel>
+									<div className="flex items-center gap-2">
+										<input
+											id="monthly-budget-color"
+											type="color"
+											value={color}
+											onChange={event => setColor(event.target.value)}
+											className="h-8 w-12 cursor-pointer rounded border bg-transparent p-1"
+										/>
+										<span className="text-xs text-muted-foreground">
+											{color}
+										</span>
+									</div>
+								</Field>
+								<SelectField
+									id="monthly-budget-group"
+									label="Group"
+									className="col-span-2"
+									value={group}
+									items={[
+										{ value: "core", label: "Core" },
+										{ value: "outlier", label: "Outlier" },
+										{ value: "other", label: "Other" },
+									]}
+									errors={getApiFieldErrors("group")}
+									onChange={value => setGroup(value as MonthlyBudget["group"])}
+								/>
+								<SelectField
+									id="monthly-budget-pace"
+									label="Spending forecast"
+									className="col-span-2"
+									value={group === "outlier" ? "none" : paceKind}
+									disabled={group === "outlier"}
+									description={
+										group === "outlier"
+											? "Outlier monthly budgets use recorded amounts only."
+											: paceKind === "daily"
+												? "Use this budget’s daily spending average to estimate its month-end total."
+												: paceKind === "recurring"
+													? "Use recorded and future-dated spending only. This does not create recurring Records."
+													: "Show recorded spending without a daily estimate for this budget."
+									}
+									items={[
+										{ value: "none", label: "Recorded amounts only" },
+										{ value: "daily", label: "Estimate from daily spending" },
+										{
+											value: "recurring",
+											label: "Recurring / scheduled spending",
+										},
+									]}
+									errors={getApiFieldErrors("pace_kind")}
+									onChange={value =>
+										setPaceKind(value as MonthlyBudget["pace_kind"])
+									}
+								/>
+							</FieldGroup>
+							<FieldGroup className="rounded-lg border bg-muted/20 p-3">
+								<p className="text-sm font-medium">Amount for {monthLabel}</p>
+								<SelectField
+									id="monthly-budget-amount-scope"
+									label="Amount rule"
+									value={scope}
+									items={[
+										...(monthlyBudget
+											? [
+													{
+														value: "inherit",
+														label: "Default",
+														disabled: source?.previousDefault === null,
+													},
+												]
+											: []),
+										{ value: "month", label: "Override one month" },
+										{ value: "default", label: "Override default" },
+									]}
+									description={
+										(scope === "inherit" && source?.previousDefault
+											? `Use the default from ${DateTime.fromISO(source.previousDefault.effective_month).toFormat("MMMM yyyy")}: ${source.previousDefault.amount === null ? "No monthly amount" : formatCurrency(source.previousDefault.amount)}.`
+											: scope === "month"
+												? `Change ${monthLabel} only. Other months skip this when looking back for the default.`
+												: `Set the default from ${monthLabel} onward. Earlier defaults stop applying from here.${source?.nextDefault ? ` It applies until ${DateTime.fromISO(source.nextDefault.effective_month).toFormat("MMMM yyyy")}, when the next default starts.` : ""}`) +
+										defaultRemovalDescription
+									}
+									onChange={setAmountScope}
+								/>
+								<AnimatePresence initial={false}>
+									{(scope === "month" || scope === "default") && (
+										<motion.div
+											className="overflow-hidden"
+											{...COLLAPSE_MOTION}
+										>
+											<FieldGroup>
+												<AmountField
+													id="monthly-budget-amount"
+													label="Monthly amount"
+													value={amount}
+													min={0}
+													disabled={noAmount}
+													errors={getApiFieldErrors("amount")}
+													onChange={setAmount}
+												/>
+												<Field orientation="horizontal">
+													<Checkbox
+														id="monthly-budget-no-amount"
+														checked={noAmount}
+														onCheckedChange={value =>
+															setNoAmount(value === true)
+														}
+													/>
+													<FieldLabel htmlFor="monthly-budget-no-amount">
+														No monthly amount
+													</FieldLabel>
+												</Field>
+											</FieldGroup>
+										</motion.div>
+									)}
+								</AnimatePresence>
+							</FieldGroup>
+							{monthlyBudget ? (
+								<Field orientation="horizontal">
+									<Checkbox
+										id="monthly-budget-archived"
+										checked={archived}
+										onCheckedChange={value => setArchived(value === true)}
+									/>
+									<div>
+										<FieldLabel htmlFor="monthly-budget-archived">
+											Archive monthly budget
+										</FieldLabel>
+										<p className="text-xs text-muted-foreground">
+											Existing Record assignments remain intact.
+										</p>
+									</div>
+								</Field>
+							) : null}
+							{Object.values(apiErrors).flat().length ? (
+								<p
+									className="fade-in slide-in-from-top-1 animate-in text-sm text-destructive duration-150 ease-out"
+									role="alert"
+								>
+									{Object.values(apiErrors).flat().join(" ")}
+								</p>
+							) : null}
+							<DialogFooter>
+								<DialogClose
+									render={
+										<Button type="button" variant="outline">
+											Cancel
+										</Button>
+									}
+								/>
+								<Button type="submit" disabled={submitting}>
+									{submitting
+										? "Saving…"
+										: monthlyBudget
+											? "Save changes"
+											: "Create monthly budget"}
+								</Button>
+							</DialogFooter>
+						</form>
+					) : null}
+				</DialogContent>
+			) : null}
 		</Dialog>
 	)
 }
