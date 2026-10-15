@@ -1,0 +1,232 @@
+import { expect, test } from "@playwright/test"
+import { expectPointerCursor, sampleVisibleRowAnimations } from "./support/assertions"
+
+test.use({ baseURL: "http://127.0.0.1:5174" })
+test.beforeEach(async ({ page }) => {
+	await page.goto("/display.html", { waitUntil: "commit" })
+	await expect(page.getByRole("heading", { name: "Display components" })).toBeVisible()
+})
+
+test("display.allocation zero negative full excess and opposite signs remain finite and bounded", async ({
+	page,
+}) => {
+	for (const [title, percent, amount] of [
+		["Zero", 0, "$0.00 / $0.00"],
+		["Partial negative", 40, "-$10.00 / -$25.00"],
+		["Full", 100, "$25.00 / $25.00"],
+		["Excess", 100, "-$75.00 / -$50.00"],
+		["Opposite sign", 0, "$10.00 / -$25.00"],
+	] as const) {
+		const bar = page.getByTestId(`allocation-${title}`)
+		await expect(bar).toContainText(amount)
+		await expect(bar.getByRole("progressbar")).toHaveAttribute("aria-valuenow", String(percent))
+		const scale = await bar
+			.getByRole("progressbar")
+			.locator(":scope > div")
+			.first()
+			.evaluate(element => new DOMMatrixReadOnly(getComputedStyle(element).transform).a)
+		expect(scale).toBeCloseTo(percent / 100, 2)
+	}
+	await expect(
+		page.getByTestId("allocation-Excess").getByRole("progressbar").locator(":scope > div"),
+	).toHaveCount(2)
+})
+
+test("display.sparkline missing flat negative mixed and dense values have correct finite endpoints", async ({
+	page,
+}) => {
+	for (const name of ["Empty", "Single"])
+		await expect(page.getByTestId(`sparkline-${name}`).locator("svg")).toHaveCount(0)
+	for (const [name, count, lastY, zeroLine] of [
+		["Zero", 3, 25, false],
+		["Negative", 3, 7.4, false],
+		["Mixed", 3, 3, true],
+		["Dense", 100, 3 + (1 - (-200 + 300) / 600) * 22, true],
+	] as const) {
+		const svg = page.getByRole("img", { name, exact: true })
+		const serialized = await svg.locator("polyline").getAttribute("points")
+		if (!serialized) throw new Error(`${name}: no data marks`)
+		const points = serialized.split(" ").map(point => point.split(",").map(Number))
+		expect(points).toHaveLength(count)
+		expect(points.flat().every(Number.isFinite)).toBe(true)
+		expect(points.at(-1)?.[0]).toBe(93)
+		expect(points.at(-1)?.[1]).toBeCloseTo(lastY, 2)
+		await expect(svg.locator("circle")).toHaveAttribute("cx", "93")
+		await expect(svg.locator("line")).toHaveCount(zeroLine ? 1 : 0)
+		const box = await svg.boundingBox()
+		expect(box?.width).toBe(96)
+		expect(box?.height).toBe(28)
+	}
+})
+
+test("display.amount and badge optional states preserve signs pending values and colour fallback", async ({
+	page,
+}) => {
+	await expect(page.getByTestId("pending-amount")).toHaveText("-$25.00[-$10.00]")
+	await expect(page.getByTestId("confirmed-amount")).toHaveText("$20.00")
+	await expect(page.getByTestId("zero-amount")).toHaveText("$0.00")
+	const badges = page.getByRole("region", { name: "Budget badges" })
+	for (const label of ["Unbudgeted", "No colour"])
+		await expect(badges.getByText(label).locator(":scope > span")).toHaveCSS(
+			"border-top-style",
+			"solid",
+		)
+	const colour = badges.locator("span[title]")
+	await expect(colour.locator(":scope > span").first()).toHaveCSS(
+		"background-color",
+		"rgb(56, 189, 248)",
+	)
+	await expect(colour).toHaveAttribute("title", /早餐/)
+	const overflow = await badges.evaluate(element => element.scrollWidth - element.clientWidth)
+	expect(overflow).toBeLessThanOrEqual(1)
+})
+
+test("display.icons missing invalid prefixed and dynamic icons retain real SVG output and reserved size", async ({
+	page,
+}) => {
+	await expect(page.getByTestId("empty-icon").locator("svg")).toHaveCount(0)
+	for (const name of ["Known icon", "Dynamic icon", "Fallback icon"])
+		await expect(page.locator(`svg[aria-label="${name}"] path`)).not.toHaveCount(0)
+	await expect(page.locator('svg[aria-label="Fallback icon"]')).toHaveClass(
+		/lucide-circle-question-mark/,
+	)
+	const coloured = page.getByTestId("colour-icon").locator("div")
+	await expect(coloured).toHaveCSS("width", "32px")
+	await expect(coloured).toHaveCSS("background-color", "rgb(239, 108, 0)")
+	await expect(coloured.locator("svg")).toHaveAttribute("width", "16")
+})
+
+test("display.sparkline entrance respects reduced motion and draws the final data endpoint", async ({
+	page,
+}) => {
+	const button = page.getByRole("button", { name: "Show trend" })
+	await button.scrollIntoViewIfNeeded()
+	const samples = await sampleVisibleRowAnimations(
+		page,
+		'section[aria-label="Trend entrance"] svg circle',
+		() => button.click(),
+	)
+	expect(samples).toHaveLength(1)
+	const frames = samples[0]?.frames ?? []
+	expect(frames.at(-1)?.opacity).toBe(1)
+	if (test.info().project.name === "reduced-motion")
+		expect(frames.every(frame => frame.opacity === 1 && frame.transform === "none")).toBe(true)
+	else expect(Math.min(...frames.map(frame => frame.opacity))).toBeLessThan(0.95)
+	await expect(page.getByRole("img", { name: "New trend" }).locator("circle")).toHaveAttribute(
+		"cy",
+		"3",
+	)
+})
+
+test("display.sparkline polyline draws progressively then settles", async ({ page }) => {
+	const reduced = test.info().project.name === "reduced-motion"
+	const button = page.getByRole("button", { name: "Show trend" })
+	await button.scrollIntoViewIfNeeded()
+	const sampler = await page.evaluateHandle(() => {
+		const values: { time: number; dasharray: string; dashoffset: string }[] = []
+		const finished = new Promise<{ time: number; dasharray: string; dashoffset: string }[]>(
+			resolve => {
+				const start = performance.now()
+				const tick = (now: number) => {
+					const line = document.querySelector(
+						'section[aria-label="Trend entrance"] svg polyline',
+					)
+					values.push({
+						time: now - start,
+						dasharray: line?.getAttribute("stroke-dasharray") ?? "gone",
+						dashoffset: line?.getAttribute("stroke-dashoffset") ?? "gone",
+					})
+					if (now - start > 800) resolve(values)
+					else requestAnimationFrame(tick)
+				}
+				requestAnimationFrame(tick)
+			},
+		)
+		return { finished }
+	})
+	await button.click()
+	let samples: { time: number; dasharray: string; dashoffset: string }[]
+	try {
+		samples = await sampler.evaluate(state => state.finished)
+	} finally {
+		await sampler.dispose()
+	}
+	expect(samples.length).toBeGreaterThan(5)
+	const arrays = samples.map(sample => sample.dasharray)
+	expect(arrays.includes("gone"), "sampler captures the pre-mount reveal").toBe(true)
+	const mounted = arrays.filter(entry => entry !== "gone")
+	expect(mounted.length, "polyline mounts").toBeGreaterThan(5)
+	const first = Number(mounted[0]?.split(" ")[0])
+	const last = Number(mounted.at(-1)?.split(" ")[0])
+	if (reduced) expect(first, "reduced motion draws immediately").toBe(1)
+	else expect(first, "polyline starts undrawn").toBeLessThan(1)
+	expect(last, "polyline ends fully drawn").toBeCloseTo(1, 2)
+	const tail = mounted.slice(-3).map(entry => Number(entry.split(" ")[0]))
+	expect(new Set(tail).size, "polyline stroke settles").toBe(1)
+	if (reduced) expect(new Set(mounted).size, "reduced motion stays drawn").toBeLessThanOrEqual(2)
+	else expect(new Set(mounted).size, "polyline stroke progresses").toBeGreaterThan(2)
+	await expect(page.getByRole("img", { name: "New trend" }).locator("circle")).toHaveAttribute(
+		"cy",
+		"3",
+	)
+})
+
+test("display.sparkline fixtures fit narrow viewports with visible strokes", async ({ page }) => {
+	const viewport = page.viewportSize()
+	for (const name of ["Zero", "Negative", "Mixed", "Dense"]) {
+		const svg = page.getByRole("img", { name, exact: true })
+		await expect(svg, `${name}: sparkline renders`).toBeVisible()
+		const box = await svg.boundingBox()
+		expect(box, `${name}: sparkline is laid out`).not.toBeNull()
+		if (box && viewport) {
+			expect(box.x, `${name}: inside the left edge`).toBeGreaterThanOrEqual(-1)
+			expect(box.x + box.width, `${name}: inside the right edge`).toBeLessThanOrEqual(
+				viewport.width + 1,
+			)
+		}
+		const stroke = await svg
+			.locator("polyline")
+			.evaluate(element => getComputedStyle(element).stroke)
+		const background = await svg.evaluate(
+			element => getComputedStyle(element.parentElement ?? element).backgroundColor,
+		)
+		expect(stroke, `${name}: stroke is painted`).not.toBe("none")
+		expect(background, `${name}: backdrop is resolved`).not.toBe("")
+	}
+	const region = page.getByRole("region", { name: "Sparklines" })
+	if ((await region.count()) > 0)
+		expect(
+			await region.evaluate(element => element.scrollWidth - element.clientWidth),
+		).toBeLessThanOrEqual(1)
+})
+
+test("display.summary long and missing values fit each viewport and changing values settle after keyboard action", async ({
+	page,
+}) => {
+	const summary = page.getByRole("region", { name: "Detail summary" })
+	await expect(summary).toContainText("Allocated -$10.00")
+	await expect(summary).toContainText("Missing optional values remain readable")
+	await expect(summary).toContainText("早餐")
+	expect(
+		await summary.evaluate(element => element.scrollWidth - element.clientWidth),
+	).toBeLessThanOrEqual(1)
+	const button = page.getByRole("button", { name: "Change value" })
+	await expectPointerCursor(button)
+	await button.focus()
+	const samples = await sampleVisibleRowAnimations(
+		page,
+		'section[aria-label="Changing value"] > span > span:has(> span[data-value="-$25.00"])',
+		async () => {
+			await page.keyboard.press("Enter")
+		},
+	)
+	const entered = samples.find(sample => sample.text === "SPAN -$25.00")
+	expect(entered).toBeDefined()
+	expect(entered?.frames.at(-1)?.opacity).toBe(1)
+	if (test.info().project.name === "reduced-motion")
+		expect(new Set(entered?.frames.map(frame => frame.transform)).size).toBe(1)
+	else expect(Math.min(...(entered?.frames.map(frame => frame.opacity) ?? []))).toBeLessThan(0.95)
+	await expect(
+		page.getByRole("region", { name: "Changing value" }).locator("span").first(),
+	).toHaveText("-$25.00")
+})

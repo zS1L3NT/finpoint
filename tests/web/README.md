@@ -1,0 +1,118 @@
+# Browser regression tests
+
+Install dependencies with `bun install`, then install Chromium with `bunx playwright install chromium`.
+On a Linux machine missing browser libraries, use `bunx playwright install --with-deps chromium`.
+
+Run `bun run test:web` for the local matrix, or `bun run test:web --project=chromium` for a desktop pass.
+Use `bun run test:web:headed --project=chromium` to watch a run and `bun run test:web:report` to open its report.
+## What to run
+
+Run the tests that cover what you changed, not the whole matrix. A full run is about 2,200 cases
+(every file in 5 projects) on one worker, at roughly 3 seconds each against the dev server. That is
+about 2 hours. A scoped run is usually a few minutes.
+
+- Changed a shared UI primitive (`src/components/ui/*`): `widgets.e2e.ts`, plus the e2e files that grep
+  finds using its `data-slot` or role. Add `editors.e2e.ts` and `modal-regressions.e2e.ts` for dialogs,
+  sheets and popups.
+- Changed a route or page: `pages.e2e.ts`, `route-contracts.e2e.ts`, and the files that `goto` that route.
+- Changed history or navigation: `history-regressions.e2e.ts`, `keyboard-navigation.e2e.ts`, `navigation-motion.e2e.ts`.
+- Changed charts: `charts.e2e.ts`, `chart-edges.e2e.ts`, `chart-motion.e2e.ts`.
+- Changed motion: the relevant files above with `--project=chromium --project=reduced-motion`.
+- Changed layout: add `--project=mobile` and `--project=tall-desktop`.
+- Changed a test helper in `support/`: every file importing it, in `chromium` at least.
+
+Default to `--project=chromium --project=mobile`. Add `dark` only for colour changes.
+Run the full matrix only when asked, or before a release.
+Only one browser run at a time in a shared checkout: concurrent runs starve animation frames.
+The default is one worker: native animation checks need enough browser frames during short fades.
+Concurrent runs have missed intermediate frames on this host; the assertions and zero-retry policy stay the same.
+Filter a case with `--grep "case name"`, or pass a path such as `tests/web/modal-regressions.e2e.ts`.
+
+Playwright starts the Next.js app with `npm run dev` on port 5173 when needed.
+It also starts the Vite component harness with `npm run test:web:harness` on port 5174.
+Vite serves the real shared components outside application routes. Both servers stop after testing when Playwright starts them.
+Playwright reuses existing servers without stopping them. In a shared checkout, the coordinating agent owns the
+long-running server; do not launch another instance. Browser contexts have isolated storage.
+No CI workflow is configured. Retries are disabled so regressions remain visible.
+
+The shared Select adapter discovers labels from literal `SelectItem` descendants, including groups
+and arrays. Custom components wrapping items and Radix-only content properties are not supported;
+current application consumers use plain items and the adapter's supported placement properties.
+
+For a verification run against frozen production bundles, run `bun run build` and
+`bun run test:web:harness:build`, then start `bun run start --port 5173` and
+`bun run test:web:harness:preview` in separate terminals. Run the matrix with
+`PLAYWRIGHT_EXTERNAL_SERVERS=1 bun run test:web`. Stop those two servers after the run.
+This avoids development reloads changing source while animation frames are sampled.
+
+The default projects are `chromium` (1440×900), `tall-desktop` (1920×1440), `mobile` (390×844 with touch),
+`dark`, and `reduced-motion`. Normal projects retain all application animations. Reduced motion uses the
+browser preference and tests the application's response; it does not inject CSS to suppress animation.
+For additional engines, install `bunx playwright install --with-deps firefox webkit`, then run
+`PLAYWRIGHT_BROWSERS=all bun run test:web --project=firefox --project=webkit`.
+
+Keep cases under `tests/web/` with the `.e2e.ts` suffix. Bun's unit test discovery must not collect them.
+Playwright records failure screenshots and retains failure traces in `test-results/`; the HTML report is
+in `playwright-report/`. Both directories are ignored. Open a trace with
+`bunx playwright show-trace test-results/<case>/trace.zip`.
+
+## Fixtures
+
+Import `test`, `expect`, and `seedWorkspace` from `./support/fixtures`. Request the `workspace` fixture
+for automatic seeding, with `test.use({ workspaceScenario: "dense" })` when needed. Alternatively call
+`await seedWorkspace(page, "empty")` explicitly. Scenarios are `empty`, `populated`, and `dense`;
+`support/data.ts` exports stable `IDS`. Seeding replaces real IndexedDB data in the test context after
+application boot and reloads. It does not add a production endpoint or use Google services.
+
+The test clock pins `Date` while browser timers, `performance`, and `requestAnimationFrame` remain native.
+Use the shared Date-only helper to change the calendar date, including before navigation or reload.
+Do not use Playwright's clock in these tests. Its replacement animation callbacks run on timers instead of browser paint frames.
+Motion assertions need native frames to measure the rendered entrance.
+
+## Rendered assertions
+
+`support/assertions.ts` exports these focused helpers:
+
+- `expectVisibleBackdrop(page)` checks viewport coverage and the rendered background's alpha and opacity.
+- `expectPointerCursor(button)` checks that a visible, enabled control computes to `cursor: pointer`.
+  Test keyboard activation and the resulting behaviour separately.
+- `expectPopupEntrance(page, open)` installs frame sampling before `open()`. It checks the whole popup's
+  entrance, stable initial child transforms/opacity, and transient overflow against settled overflow.
+  Tall mobile content may remain scrollable. Use it for opening an editor before revealing conditional fields.
+- `expectDropdownPreservesScroll(page, open, scrollContainer?)` checks existing overflow styles, layout
+  width and real pointer scrolling after opening the menu. Desktop uses wheel input; mobile uses a
+  trusted touch swipe. The fixture must have enough content to scroll.
+  Pass the app's existing scroll container when it owns scrolling instead of the document.
+- `sampleVisibleRowAnimations(page, selector, reveal)` collects every matching element occupying the
+  viewport during requestAnimationFrame samples, including initially transparent rows. It returns text
+  labels, opacity, transforms, overflow and animation start times for diagnostics.
+- `expectVisibleRowCascade(samples, minimumRows)` requires every sampled row to enter and settle, with
+  staggered progress. Pass at least `13` for the tall-desktop regression. Never slice the rows to twelve.
+
+Sampling callbacks must act in the current document: click a client-side navigation link, open a popup,
+or reveal data. A full `page.goto` or reload destroys the sampler and fails the test. Choose a selector
+whose matching rows are absent before reveal, so existing content is not mistaken for a new entrance.
+Row sampling observes at least 400ms; popup sampling observes at least 1 second to catch delayed initial children. Both require 200ms of stable rendered values after active animations finish.
+After the action completes, a 10-second deadline fails if content never appears or never settles.
+Wait for hydration and relevant live data before calling a helper. The helper waits for fonts and existing finite animations before sampling.
+Frame sampling starts before the action. Missing, disappearing, and undersampled elements fail the assertion.
+The sampler records CSS `transform`, `translate`, `scale`, and `rotate` separately and normalises identity transforms.
+It excludes elements hidden by CSS clipping, including Base UI native selects. It keeps opacity-zero entrances observable and leaves application animations enabled.
+Use `expectReducedRowMovement(samples, minimumRows)` for reduced-motion rows. It requires real laid-out content, settled opacity, no native positional animation, and no interpolated or replayed movement. Motion may snap the initial positional pose to its final pose while retaining an opacity fade.
+The popup helper checks that reduced motion suppresses movement and leaves the popup fully visible.
+Attach returned samples with `test.info().attach` when diagnosing a failure.
+
+Sheet loading tests hold real IndexedDB transactions and observe the application's pending native
+read requests. Dexie can answer a warm query from memory, so these tests invalidate its table cache
+through the installed storage-mutation protocol before requiring a delayed read. The fixture changes
+no stored values or rendered results. A blocked independent probe alone does not prove the UI is waiting.
+
+Run `bun run types:web` to check browser tests, shared assertions, the Vite harness, and Playwright configuration.
+Run `bun lint:check` for a read-only Biome check, including browser tests.
+The application type check remains `bun types:check`.
+
+Configuration follows the [Playwright configuration guide](https://playwright.dev/docs/test-configuration)
+and [web server lifecycle guide](https://playwright.dev/docs/test-webserver), plus the installed Next.js
+Playwright guide under `node_modules/next/dist/docs/01-app/02-guides/testing/playwright.md`.
+
+`tests/web/tall-budget-motion.e2e.ts` runs only in the tall desktop project: the Budget detail chart places its related table below the initial fold on the other configured viewports. General consumer motion cases have no conditional skips.
