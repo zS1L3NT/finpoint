@@ -32,9 +32,9 @@ export default function CategorySpendingMix({
 						key={category.id}
 						href={recordHref(category.id)}
 						onClick={handlePush("overview")}
-						className="group grid gap-1.5 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+						className="group grid min-w-0 gap-1.5 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 					>
-						<div className="flex items-center justify-between gap-3 text-xs">
+						<div className="flex min-w-0 items-center justify-between gap-3 text-xs">
 							<span className="min-w-0 truncate font-medium group-hover:underline">
 								{category.name}
 							</span>

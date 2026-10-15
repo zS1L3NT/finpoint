@@ -26,6 +26,7 @@ function ComboboxTrigger({
 }: ComboboxPrimitive.Trigger.Props) {
   return (
     <ComboboxPrimitive.Trigger
+      tabIndex={0}
       data-slot="combobox-trigger"
       className={cn("cursor-pointer [&_svg:not([class*='size-'])]:size-3.5", className)}
       {...props}
@@ -39,6 +40,7 @@ function ComboboxTrigger({
 function ComboboxClear({ className, ...props }: ComboboxPrimitive.Clear.Props) {
   return (
     <ComboboxPrimitive.Clear
+      tabIndex={0}
       data-slot="combobox-clear"
       render={<InputGroupButton variant="ghost" size="icon-xs" />}
       className={cn(className)}

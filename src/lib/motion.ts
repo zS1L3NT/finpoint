@@ -34,12 +34,6 @@ export const SPRING = {
 } satisfies Record<string, Transition>
 
 /**
- * How many rows cascade in on arrival. Anything past this is below the fold, so it appears with
- * the page: capping only the delay would make every remaining row start fading in at once.
- */
-export const ROW_CASCADE_LIMIT = 12
-
-/**
  * How a table's rows enter:
  * - `cascade`: first arrival of the data; the rows on screen rise in one after another.
  * - `refilter`: the rows changed on the same page (filters, search, edits that add or remove
@@ -52,14 +46,13 @@ export type RowEntrance = "cascade" | "refilter" | "fade"
 const ROW_FADE_DURATION = 0.18
 const ROW_REFILTER_DURATION = 0.24
 const ROW_CASCADE_DURATION = 0.28
-const ROW_REFILTER_STAGGER = 0.02
-const ROW_CASCADE_STAGGER = 0.03
+/** Compress the stagger smoothly so every item enters, even in very long lists. */
+const cascadeDelay = (index: number) => (0.45 * index) / (index + 15)
 const ROW_REFILTER_RISE = 6
 const ROW_CASCADE_RISE = 10
 
-/** Motion props for a table row (or its group header); rows past the fold do not animate. */
+/** Motion props for every table row (or its group header), with a bounded stagger. */
 export const rowEnter = (index: number, entrance: RowEntrance) => {
-	if (index >= ROW_CASCADE_LIMIT) return { initial: false as const }
 	if (entrance === "fade") {
 		return {
 			initial: { opacity: 0 },
@@ -74,16 +67,16 @@ export const rowEnter = (index: number, entrance: RowEntrance) => {
 		transition: {
 			duration: refilter ? ROW_REFILTER_DURATION : ROW_CASCADE_DURATION,
 			ease: EASE_OUT,
-			delay: index * (refilter ? ROW_REFILTER_STAGGER : ROW_CASCADE_STAGGER),
+			delay: cascadeDelay(index) * (refilter ? 2 / 3 : 1),
 		},
 	}
 }
 
-/** Motion props for a card in a grid: a short rise, staggered over the first few cards. */
+/** Motion props for a card in a grid: a short rise with the same bounded cascade as rows. */
 export const cardEnter = (index: number) => ({
 	initial: { opacity: 0, y: 6 },
 	animate: { opacity: 1, y: 0 },
-	transition: { ...SPRING.smooth, delay: Math.min(index, 7) * 0.03 },
+	transition: { ...TRANSITION.base, delay: cascadeDelay(index) },
 })
 
 /** Motion props for a block that collapses to nothing: height and margin close together. */

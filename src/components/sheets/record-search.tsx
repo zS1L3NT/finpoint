@@ -44,42 +44,57 @@ export default function RecordSearchSheet({
 	const [includeOlder, setIncludeOlder] = useState(false)
 	const [limit, setLimit] = useState(PAGE)
 	const [attachingId, setAttachingId] = useState<string | null>(null)
-	const records = useLiveQuery(() => {
-		if (!isOpen) return []
-		return listRecords({
-			query: deferredQuery || null,
-			exclude_budget_id: filters?.exclude_budget_id ?? null,
-			start_date: includeOlder ? null : (filters?.start_date ?? null),
-			end_date: filters?.end_date ?? null,
-			is_allocated: filters?.is_allocated ?? null,
-		})
-	}, [
-		isOpen,
-		deferredQuery,
-		includeOlder,
-		filters?.exclude_budget_id,
-		filters?.start_date,
-		filters?.end_date,
-		filters?.is_allocated,
-	])
-
+	const [epoch, setEpoch] = useState(0)
 	useEffect(() => {
 		if (!isOpen) {
+			setEpoch(value => value + 1)
 			setQuery("")
 			setIncludeOlder(false)
 			setLimit(PAGE)
 			setAttachingId(null)
 		}
 	}, [isOpen])
+	const excludeBudgetId = filters?.exclude_budget_id ?? null
+	const startDate = includeOlder ? null : (filters?.start_date ?? null)
+	const endDate = filters?.end_date ?? null
+	const isAllocated = filters?.is_allocated ?? null
+	// Cache tag for the current filter set; readiness gates on the opening
+	// epoch only, so prior rows stay mounted (dimmed) while a new read resolves.
+	const queryKey = `${deferredQuery}|${includeOlder}|${excludeBudgetId ?? ""}|${startDate ?? ""}|${endDate ?? ""}|${isAllocated ?? ""}`
+	const data = useLiveQuery(async () => {
+		if (!isOpen) return null
+		const rows = await listRecords({
+			query: deferredQuery || null,
+			exclude_budget_id: excludeBudgetId,
+			start_date: startDate,
+			end_date: endDate,
+			is_allocated: isAllocated,
+		})
+		return { epoch, key: queryKey, rows }
+	}, [
+		isOpen,
+		epoch,
+		deferredQuery,
+		includeOlder,
+		excludeBudgetId,
+		startDate,
+		endDate,
+		isAllocated,
+	])
+	const current =
+		isOpen && data !== undefined && data !== null && data.epoch === epoch ? data : undefined
+	const records = current?.rows
+	const stale = current !== undefined && (deferredQuery !== query || current.key !== queryKey)
 
 	const remainingOf = (record: Record) => round2(record.amount - record.allocated_amount)
 	const isMatch = (record: Record) =>
 		target !== undefined && target !== 0 && remainingOf(record) === round2(target)
-	const sorted = records
-		? target === undefined
-			? records
-			: [...records.filter(isMatch), ...records.filter(record => !isMatch(record))]
-		: undefined
+	const sorted =
+		records === undefined
+			? undefined
+			: target === undefined
+				? records
+				: [...records.filter(isMatch), ...records.filter(record => !isMatch(record))]
 	const visible = sorted?.slice(0, limit) ?? []
 	const matches = sorted?.filter(isMatch).length ?? 0
 
@@ -142,7 +157,7 @@ export default function RecordSearchSheet({
 				<div
 					className={cn(
 						"flex-1 overflow-y-auto overscroll-contain",
-						deferredQuery !== query && "opacity-70 transition-opacity",
+						stale && "opacity-70 transition-opacity",
 					)}
 				>
 					{sorted === undefined ? null : visible.length === 0 ? (
