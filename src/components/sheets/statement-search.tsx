@@ -44,45 +44,65 @@ export default function StatementSearchSheet({
 	const [includeOlder, setIncludeOlder] = useState(false)
 	const [limit, setLimit] = useState(PAGE)
 	const [attachedIds, setAttachedIds] = useState<string[]>([])
-	const results = useLiveQuery(() => {
-		if (!isOpen) return []
-		return listStatements({
-			query: deferredQuery || null,
-			account_id: filters?.account_id ?? null,
-			exclude_ids: filters?.exclude_ids ?? null,
-			start_date: includeOlder ? null : (filters?.start_date ?? null),
-			end_date: filters?.end_date ?? null,
-			is_allocable: filters?.is_allocable ?? null,
-			is_pending: filters?.is_pending ?? null,
-			is_unallocated: filters?.is_unallocated ?? null,
-		})
-	}, [
-		isOpen,
-		deferredQuery,
-		includeOlder,
-		filters?.account_id,
-		filters?.exclude_ids,
-		filters?.start_date,
-		filters?.end_date,
-		filters?.is_allocable,
-		filters?.is_pending,
-		filters?.is_unallocated,
-	])
-
+	const [epoch, setEpoch] = useState(0)
 	useEffect(() => {
 		if (!isOpen) {
+			setEpoch(value => value + 1)
 			setQuery("")
 			setIncludeOlder(false)
 			setLimit(PAGE)
 			setAttachedIds([])
 		}
 	}, [isOpen])
+	const accountId = filters?.account_id ?? null
+	const excludeIds = filters?.exclude_ids ?? null
+	const startDate = includeOlder ? null : (filters?.start_date ?? null)
+	const endDate = filters?.end_date ?? null
+	const isAllocable = filters?.is_allocable ?? null
+	const isPending = filters?.is_pending ?? null
+	const isUnallocated = filters?.is_unallocated ?? null
+	// Cache tag for the current filter set; readiness gates on the opening
+	// epoch only, so prior rows stay mounted (dimmed) while a new read resolves.
+	const queryKey = `${deferredQuery}|${includeOlder}|${accountId ?? ""}|${excludeIds ?? ""}|${startDate ?? ""}|${endDate ?? ""}|${isAllocable ?? ""}|${isPending ?? ""}|${isUnallocated ?? ""}`
+	const data = useLiveQuery(async () => {
+		if (!isOpen) return null
+		const rows = await listStatements({
+			query: deferredQuery || null,
+			account_id: accountId,
+			exclude_ids: excludeIds,
+			start_date: startDate,
+			end_date: endDate,
+			is_allocable: isAllocable,
+			is_pending: isPending,
+			is_unallocated: isUnallocated,
+		})
+		return { epoch, key: queryKey, rows }
+	}, [
+		isOpen,
+		epoch,
+		deferredQuery,
+		includeOlder,
+		accountId,
+		excludeIds,
+		startDate,
+		endDate,
+		isAllocable,
+		isPending,
+		isUnallocated,
+	])
+	const current =
+		isOpen && data !== undefined && data !== null && data.epoch === epoch ? data : undefined
+	const results = current?.rows
+	const stale = current !== undefined && (deferredQuery !== query || current.key !== queryKey)
 
 	const isMatch = (statement: Statement) =>
 		target !== undefined &&
 		target !== 0 &&
 		round2(statement.allocable_amount) === round2(target)
-	const remaining = results?.filter(statement => !attachedIds.includes(statement.id))
+	const remaining =
+		results === undefined
+			? undefined
+			: results.filter(statement => !attachedIds.includes(statement.id))
 	const sorted = remaining
 		? [...remaining.filter(isMatch), ...remaining.filter(statement => !isMatch(statement))]
 		: undefined
@@ -155,7 +175,7 @@ export default function StatementSearchSheet({
 				<div
 					className={cn(
 						"flex-1 overflow-y-auto overscroll-contain",
-						deferredQuery !== query && "opacity-70 transition-opacity",
+						stale && "opacity-70 transition-opacity",
 					)}
 				>
 					{sorted === undefined ? null : visible.length === 0 ? (

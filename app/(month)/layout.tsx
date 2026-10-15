@@ -26,7 +26,7 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 	const { month, year, date, setSearchParams } = useMonthParams()
 	const pathname = usePathname()
 	const { latest, isNavigatingBack, navigateBack, handleClear } = useHistory()
-	const back = latest?.url.split("?")[0] === pathDashboard() ? latest : null
+	const back = latest
 	const isMonthly = pathname.startsWith(`${pathRecords()}/`)
 
 	const today = DateTime.now().startOf("day")
@@ -70,7 +70,7 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 		<>
 			<PageContent className={isMonthly ? "gap-5 md:gap-7" : "gap-7 md:gap-9"}>
 				<header className="grid gap-5">
-					{isMonthly && back ? (
+					{back ? (
 						<Button
 							type="button"
 							variant="outline"
@@ -86,7 +86,7 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 								}
 								className={isNavigatingBack ? "animate-spin" : undefined}
 							/>
-							Back to {back.name}
+							<span className="truncate">Back to {back.name}</span>
 						</Button>
 					) : null}
 					<div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">

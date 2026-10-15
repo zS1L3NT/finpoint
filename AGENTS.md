@@ -42,6 +42,7 @@
 
 ## Verification
 - Run `bun test` for the domain and importer tests, which use Dexie with in-memory IndexedDB.
+- Browser tests (`tests/web/`, Playwright) are scoped to what you change: run the files and projects that exercise the components, routes, or helpers you touched, and make them pass. Do not run the full matrix by default; it is about 2,200 cases across 5 projects on one worker and takes about 2 hours. See `tests/web/README.md` for how to pick cases.
 - When asked to verify with `npm run dev`, run it directly, smoke-test the relevant local route, and stop the dev server afterwards.
 
 ## Agent skills

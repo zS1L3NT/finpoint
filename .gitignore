@@ -13,3 +13,7 @@
 !/graphify-out/GRAPH_REPORT.md
 !/graphify-out/manifest.json
 !/graphify-out/.graphify_labels.json
+/test-results/
+/playwright-report/
+/playwright/.cache/
+/blob-report/

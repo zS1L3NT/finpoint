@@ -4,7 +4,7 @@ import { useLiveQuery } from "dexie-react-hooks"
 import { AnimatePresence, motion } from "framer-motion"
 import Link from "next/link"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import StatementReplacementReviewDialog, {
 	dateDifferenceLabel,
 } from "@/components/dialogs/statement-replacement-review"
@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/select"
 import WorkflowTabs from "@/components/workflow-tabs"
 import { useHistory } from "@/history"
-import { SPRING, TRANSITION } from "@/lib/motion"
+import { cardEnter, SPRING, TRANSITION } from "@/lib/motion"
 import {
 	classForCurrency,
 	cn,
@@ -79,6 +79,8 @@ export default function AllocatorPendingPage() {
 	const [queueQuery, setQueueQuery] = useState(queueQueryParam)
 	const [candidateQuery, setCandidateQuery] = useState(candidateQueryParam)
 	const [reviewStatement, setReviewStatement] = useState<Statement | null>(null)
+	const queueTimer = useRef<number | undefined>(undefined)
+	const candidateTimer = useRef<number | undefined>(undefined)
 
 	const updateParams = (
 		changes: globalThis.Record<string, string | number | null>,
@@ -102,21 +104,20 @@ export default function AllocatorPendingPage() {
 	useEffect(() => {
 		if (queueQuery === queueQueryParam) return
 		const timer = window.setTimeout(() => {
-			updateParams(
-				{ query: queueQuery || null, page: null, pending_statement_id: null },
-				true,
-			)
+			updateParams({ query: queueQuery || null, page: null })
 		}, 300)
+		queueTimer.current = timer
 		return () => window.clearTimeout(timer)
-	}, [queueQuery, queueQueryParam])
+	}, [queueQuery, queueQueryParam, searchParams])
 
 	useEffect(() => {
 		if (candidateQuery === candidateQueryParam) return
 		const timer = window.setTimeout(() => {
 			updateParams({ candidate_query: candidateQuery || null, candidate_page: null })
 		}, 300)
+		candidateTimer.current = timer
 		return () => window.clearTimeout(timer)
-	}, [candidateQuery, candidateQueryParam])
+	}, [candidateQuery, candidateQueryParam, searchParams])
 
 	const accounts = useLiveQuery(() => listAccounts(), []) ?? []
 	const pendingQuery = useLiveQuery(
@@ -179,9 +180,14 @@ export default function AllocatorPendingPage() {
 		[selectedPendingStatement?.id, candidateQueryParam, candidateScope, candidatePage],
 	)
 
-	const selectPending = (statement: PendingReplacementStatement | null) => {
+	const selectPending = (statement: PendingReplacementStatement | null, query = queueQuery) => {
+		window.clearTimeout(queueTimer.current)
+		window.clearTimeout(candidateTimer.current)
 		setReviewStatement(null)
+		setCandidateQuery("")
 		updateParams({
+			query: query || null,
+			page: null,
 			pending_statement_id: statement?.id ?? null,
 			candidate_page: null,
 			candidate_query: null,
@@ -256,7 +262,11 @@ export default function AllocatorPendingPage() {
 							<Input
 								placeholder="Search descriptions..."
 								value={queueQuery}
-								onChange={event => setQueueQuery(event.target.value)}
+								onChange={event => {
+									setQueueQuery(event.target.value)
+									if (pendingStatementId || candidateQueryParam)
+										selectPending(null, queueQueryParam)
+								}}
 							/>
 							<FilterBar>
 								<Select
@@ -299,20 +309,20 @@ export default function AllocatorPendingPage() {
 
 						{pendingStatements.data.length ? (
 							<div className="flex flex-col gap-2">
-								<AnimatePresence initial={false} mode="popLayout">
-									{pendingStatements.data.map(statement => (
+								<AnimatePresence mode="popLayout">
+									{pendingStatements.data.map((statement, index) => (
 										<motion.div
 											layout="position"
 											key={statement.id}
-											initial={{ opacity: 0, y: 6 }}
-											animate={{ opacity: 1, y: 0 }}
+											{...cardEnter(index)}
+											data-slot="pending-queue-item"
 											exit={{
 												opacity: 0,
 												scale: 0.97,
 												transition: TRANSITION.fast,
 											}}
 											transition={{
-												...TRANSITION.base,
+												...cardEnter(index).transition,
 												layout: SPRING.snappy,
 											}}
 										>
@@ -681,11 +691,13 @@ function CandidateResults({
 			className="flex flex-col gap-3"
 		>
 			<div className="flex flex-col gap-2">
-				{data.data.map(statement => (
+				{data.data.map((statement, index) => (
 					<motion.div
 						key={statement.id}
+						data-slot="pending-candidate-item"
 						layout="position"
-						transition={{ layout: SPRING.snappy }}
+						{...cardEnter(index)}
+						transition={{ ...cardEnter(index).transition, layout: SPRING.snappy }}
 					>
 						<div
 							className={cn(

@@ -78,11 +78,18 @@ export default function CategoriesPage() {
 						{query ? "No categories match your search." : "No categories yet."}
 					</p>
 				) : (
-					SECTIONS.map(section => {
+					SECTIONS.map((section, sectionIndex) => {
 						const items = visible.filter(
 							category =>
 								(category.analytics_treatment ?? "automatic") === section.value,
 						)
+						const offset = visible.filter(category =>
+							SECTIONS.slice(0, sectionIndex).some(
+								previous =>
+									(category.analytics_treatment ?? "automatic") ===
+									previous.value,
+							),
+						).length
 						if (!items.length) return null
 						const records = items.reduce(
 							(sum, category) =>
@@ -108,8 +115,8 @@ export default function CategoriesPage() {
 									{items.map((category, index) => (
 										<motion.div
 											key={category.id}
-											className="grid"
-											{...cardEnter(index)}
+											className="grid min-w-0 grid-cols-1"
+											{...cardEnter(offset + index)}
 										>
 											<CategoryTile
 												category={category}
@@ -160,7 +167,7 @@ function CategoryTile({
 		: null
 	const childRecords = category.children.reduce((sum, child) => sum + child.records_count, 0)
 	return (
-		<article className="group grid content-start gap-3 rounded-xl border bg-card p-4 transition-shadow duration-150 ease-out hover:shadow-md">
+		<article className="group grid min-w-0 grid-cols-1 content-start gap-3 rounded-xl border bg-card p-4 transition-shadow duration-150 ease-out hover:shadow-md">
 			<div className="flex items-start gap-3">
 				<button
 					type="button"
@@ -214,13 +221,13 @@ function CategoryTile({
 							type="button"
 							onClick={() => onEdit(child)}
 							title={`${pluralize(child.records_count, "Record")} · edit`}
-							className="flex cursor-pointer items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs hover:bg-muted"
+							className="flex min-w-0 max-w-full cursor-pointer items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs hover:bg-muted"
 						>
 							<span
-								className="size-2 rounded-full"
+								className="size-2 shrink-0 rounded-full"
 								style={{ backgroundColor: child.color }}
 							/>
-							{child.name}
+							<span className="truncate">{child.name}</span>
 							<span className="text-muted-foreground tabular-nums">
 								{child.records_count}
 							</span>
