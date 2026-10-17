@@ -178,7 +178,7 @@ test("backup restore, earlier backups and reset include the dismissal table", as
 test("schema version four upgrades with financial data intact", async () => {
 	const schemas = Object.fromEntries(
 		db.tables
-			.filter(t => t.name !== "duplicate_dismissals")
+			.filter(t => !["duplicate_dismissals", "statement_rules", "statement_rule_runs"].includes(t.name))
 			.map(t => [t.name, [t.schema.primKey.src, ...t.schema.indexes.map(i => i.src)].join(",")]),
 	)
 	await db.delete()
@@ -187,7 +187,7 @@ test("schema version four upgrades with financial data intact", async () => {
 	await legacy.table("statements").put(statement("a"))
 	legacy.close()
 	await db.open()
-	expect(db.verno).toBe(5)
+	expect(db.verno).toBe(6)
 	expect(await db.statements.get("a")).toEqual(statement("a"))
 	expect(await db.duplicate_dismissals.count()).toBe(0)
 })
@@ -200,12 +200,14 @@ test("dismissal migration preserves clean and dirty Drive baselines", async () =
 		const backup = await exportData()
 		const tables: Record<string, unknown[]> = { ...backup.tables }
 		delete tables.duplicate_dismissals
+		delete tables.statement_rules
+		delete tables.statement_rule_runs
 		const baseline = clean
 			? await hashSnapshot({ settings: backup.settings, tables })
 			: "unsynced-baseline"
 		const schemas = Object.fromEntries(
 			db.tables
-				.filter(t => t.name !== "duplicate_dismissals")
+				.filter(t => !["duplicate_dismissals", "statement_rules", "statement_rule_runs"].includes(t.name))
 				.map(t => [t.name, [t.schema.primKey.src, ...t.schema.indexes.map(i => i.src)].join(",")]),
 		)
 		await db.delete()
