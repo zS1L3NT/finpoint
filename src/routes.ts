@@ -23,6 +23,8 @@ export const pathRecord = (id: string) => `/records/${id}`
 export const pathBudgets = (query?: Record<string, string | undefined>) =>
 	withQuery("/budgets", query)
 export const pathBudget = (id: string) => `/budgets/${id}`
+export const pathStatementRules = (query?: Record<string, string | undefined>) =>
+	withQuery("/statement-rules", query)
 export const pathCategories = () => "/categories"
 export const pathDataSettings = () => "/sync"
 export const pathSettings = () => "/settings"

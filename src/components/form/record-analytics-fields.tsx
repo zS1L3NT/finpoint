@@ -16,6 +16,8 @@ export default function RecordAnalyticsFields({
 	monthlyBudgetSource,
 	categoryMonthlyBudgetId,
 	monthlyBudgets: monthlyBudgetsProp,
+	treatmentSuggestions,
+	monthlyBudgetSuggestions,
 	onTreatmentChange,
 	onMonthlyBudgetChange,
 }: {
@@ -27,6 +29,8 @@ export default function RecordAnalyticsFields({
 	categoryMonthlyBudgetId: string | null | undefined
 	/** Prepared Monthly Budget lookup from the opening dialog; falls back to its own live query. */
 	monthlyBudgets?: Awaited<ReturnType<typeof listMonthlyBudgets>>
+	treatmentSuggestions?: React.ReactNode
+	monthlyBudgetSuggestions?: React.ReactNode
 	onTreatmentChange: (value: string) => void
 	onMonthlyBudgetChange: (value: string, source: "category" | "manual") => void
 }) {
@@ -82,6 +86,7 @@ export default function RecordAnalyticsFields({
 							onMonthlyBudgetChange("", "manual")
 					}}
 				/>
+				{treatmentSuggestions}
 				<SelectField
 					id="monthly_budget_id"
 					label="Monthly budget"
@@ -122,6 +127,7 @@ export default function RecordAnalyticsFields({
 						)
 					}}
 				/>
+				{monthlyBudgetSuggestions}
 			</FieldGroup>
 		</div>
 	)

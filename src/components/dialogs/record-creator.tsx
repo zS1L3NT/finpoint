@@ -2,12 +2,13 @@ import { useForm, useStore } from "@tanstack/react-form"
 import { useLiveQuery } from "dexie-react-hooks"
 import { AnimatePresence, motion } from "framer-motion"
 import { DateTime } from "luxon"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import AmountField from "@/components/form/amount-field"
 import ComboboxField from "@/components/form/combobox-field"
 import DatetimeField from "@/components/form/datetime-field"
 import RecordAnalyticsFields from "@/components/form/record-analytics-fields"
+import RuleSuggestions from "@/components/form/rule-suggestions"
 import TextField from "@/components/form/text-field"
 import TextareaField from "@/components/form/textarea-field"
 import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
@@ -29,12 +30,19 @@ import { FieldGroup } from "@/components/ui/field"
 import { Progress } from "@/components/ui/progress"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
+import { canUseMonthlyBudget, treatmentLabel } from "@/lib/analytics"
 import { COLLAPSE_MOTION, SPRING, TRANSITION } from "@/lib/motion"
 import { cn, formatCurrency, formatDatetime, parseDatetime, pluralize, round2 } from "@/lib/utils"
 import { listMonthlyBudgets } from "@/logic/monthly-budgets"
 import { createRecord, recordCompletions } from "@/logic/records"
+import {
+	type RuleRecommendation,
+	recommendationAutofill,
+	statementRecommendations,
+} from "@/logic/statement-rules"
 import { ValidationError } from "@/logic/validate"
-import type { CategoryWithChildren, Statement } from "@/types"
+import type { AnalyticsTreatment, CategoryWithChildren, Statement } from "@/types"
+import type { RuleField } from "@/types/statement-rules"
 
 export default function RecordCreatorDialog({
 	statements: statementsProp,
@@ -65,6 +73,20 @@ export default function RecordCreatorDialog({
 	// Resolve the Monthly Budget lookup before the popup mounts so the
 	// Analytics select keeps its laid-out label from the first frame.
 	const monthlyBudgets = useLiveQuery(() => listMonthlyBudgets(), [])
+
+	const recommendationKey = `${isOpen}:${statements.map(s => s.id).join(",")}`
+	const recommendationQuery = useLiveQuery(
+		async () => ({
+			key: recommendationKey,
+			items: isOpen ? await statementRecommendations(statements.map(s => s.id)) : [],
+		}),
+		[recommendationKey],
+	)
+	const recommendations =
+		recommendationQuery?.key === recommendationKey ? recommendationQuery.items : undefined
+	const ruleSession = useRef("")
+	const appliedAutofill = useRef(false)
+	const touchedFields = useRef(new Set<RuleField>())
 
 	const { mergeErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
 
@@ -131,6 +153,97 @@ export default function RecordCreatorDialog({
 	}))
 	const analyticsCategory = categoriesFlat.find(category => category.id === analytics.categoryId)
 
+	const applyRecommendation = (item: Pick<RuleRecommendation, "field" | "value">) => {
+		form.setFieldValue(item.field, item.value ?? "")
+		clearApiError(item.field)
+		if (
+			item.field === "category_id" &&
+			form.getFieldValue("monthly_budget_source") === "category"
+		) {
+			form.setFieldValue(
+				"monthly_budget_id",
+				categoriesFlat.find(c => c.id === item.value)?.default_monthly_budget_id ?? "",
+			)
+		}
+		if (item.field === "monthly_budget_id")
+			form.setFieldValue("monthly_budget_source", "manual")
+		if (
+			item.field === "analytics_treatment" &&
+			!canUseMonthlyBudget(item.value as AnalyticsTreatment, form.getFieldValue("amount"))
+		) {
+			form.setFieldValue("monthly_budget_id", "")
+			form.setFieldValue("monthly_budget_source", "manual")
+		}
+	}
+	useEffect(() => {
+		if (!isOpen) {
+			ruleSession.current = ""
+			return
+		}
+		const session = statements.map(s => s.id).join(",") || "empty"
+		if (ruleSession.current !== session) {
+			ruleSession.current = session
+			appliedAutofill.current = false
+			touchedFields.current.clear()
+			form.reset()
+		}
+		if (recommendations === undefined || appliedAutofill.current) return
+		appliedAutofill.current = true
+		const values = recommendationAutofill(recommendations)
+		for (const field of [
+			"category_id",
+			"analytics_treatment",
+			"monthly_budget_id",
+			"title",
+			"location",
+		] as const) {
+			if (!(field in values) || touchedFields.current.has(field)) continue
+			if (field === "monthly_budget_id") {
+				const category = categoriesFlat.find(
+					c => c.id === form.getFieldValue("category_id"),
+				)
+				if (
+					!canUseMonthlyBudget(
+						(form.getFieldValue("analytics_treatment") ||
+							category?.analytics_treatment ||
+							"automatic") as AnalyticsTreatment,
+						form.getFieldValue("amount"),
+					)
+				)
+					continue
+			}
+			applyRecommendation({ field, value: values[field] ?? null })
+		}
+	}, [isOpen, statements, recommendations, form, categoriesFlat, applyRecommendation])
+	const ruleSuggestions = (field: RuleField) => (
+		<RuleSuggestions
+			field={field}
+			recommendations={recommendations ?? []}
+			label={value =>
+				field === "category_id"
+					? (categoriesFlat.find(c => c.id === value)?.name ?? value ?? "")
+					: field === "analytics_treatment"
+						? treatmentLabel(value as AnalyticsTreatment)
+						: field === "monthly_budget_id"
+							? (monthlyBudgets?.find(b => b.id === value)?.name ?? "Unbudgeted")
+							: (value ?? "")
+			}
+			disabled={
+				field === "monthly_budget_id" &&
+				!canUseMonthlyBudget(
+					(analytics.treatment ||
+						analyticsCategory?.analytics_treatment ||
+						"automatic") as AnalyticsTreatment,
+					analytics.amount,
+				)
+			}
+			onApply={item => {
+				touchedFields.current.add(field)
+				applyRecommendation(item)
+			}}
+		/>
+	)
+
 	return (
 		<Dialog
 			open={isOpen}
@@ -176,12 +289,14 @@ export default function RecordCreatorDialog({
 												field.name,
 											)}
 											onChange={value => {
+												touchedFields.current.add("title")
 												field.handleChange(value)
 												clearApiError(field.name)
 											}}
 										/>
 									)}
 								</form.Field>
+								{ruleSuggestions("title")}
 								<form.Field name="people">
 									{field => (
 										<TextField
@@ -212,12 +327,14 @@ export default function RecordCreatorDialog({
 												field.name,
 											)}
 											onChange={value => {
+												touchedFields.current.add("location")
 												field.handleChange(value)
 												clearApiError(field.name)
 											}}
 										/>
 									)}
 								</form.Field>
+								{ruleSuggestions("location")}
 								<form.Field name="datetime">
 									{field => (
 										<DatetimeField
@@ -304,6 +421,7 @@ export default function RecordCreatorDialog({
 												</div>
 											)}
 											onChange={value => {
+												touchedFields.current.add("category_id")
 												field.handleChange(value?.id ?? "")
 												if (
 													form.getFieldValue("monthly_budget_source") ===
@@ -319,6 +437,7 @@ export default function RecordCreatorDialog({
 										/>
 									)}
 								</form.Field>
+								{ruleSuggestions("category_id")}
 								<form.Field name="description">
 									{field => (
 										<TextareaField
@@ -347,10 +466,14 @@ export default function RecordCreatorDialog({
 									analyticsCategory?.default_monthly_budget_id
 								}
 								monthlyBudgets={monthlyBudgets}
-								onTreatmentChange={value =>
+								treatmentSuggestions={ruleSuggestions("analytics_treatment")}
+								monthlyBudgetSuggestions={ruleSuggestions("monthly_budget_id")}
+								onTreatmentChange={value => {
+									touchedFields.current.add("analytics_treatment")
 									form.setFieldValue("analytics_treatment", value)
-								}
+								}}
 								onMonthlyBudgetChange={(value, source) => {
+									touchedFields.current.add("monthly_budget_id")
 									form.setFieldValue("monthly_budget_id", value)
 									form.setFieldValue("monthly_budget_source", source)
 								}}

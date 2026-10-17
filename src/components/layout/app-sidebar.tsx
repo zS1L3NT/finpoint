@@ -35,6 +35,7 @@ import {
 	pathImporter,
 	pathRecords,
 	pathSettings,
+	pathStatementRules,
 	pathStatements,
 } from "@/routes"
 
@@ -214,6 +215,12 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 					icon: "lucide:credit-card",
 					label: "Statements",
 					active: pathname.startsWith("/statements"),
+				},
+				{
+					to: pathStatementRules(),
+					icon: "lucide:list-filter",
+					label: "Statement rules",
+					active: pathname.startsWith("/statement-rules"),
 				},
 				{
 					to: pathAccounts(),
