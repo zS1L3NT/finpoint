@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils"
 type Props = FormFieldProps & {
 	value: string
 	placeholder?: string
+	autopopulatedTime?: boolean
 	onChange: (value: string) => void
 }
 
@@ -34,6 +35,7 @@ export default function DatetimeField({
 	className,
 	value,
 	placeholder = "Select date and time",
+	autopopulatedTime = false,
 	onChange,
 }: Props) {
 	const selected = parseValue(value)
@@ -129,12 +131,16 @@ export default function DatetimeField({
 					disabled={disabled}
 					onChange={event => updateTime(event.target.value)}
 					aria-invalid={invalid}
-					aria-describedby={autopopulated && !invalid ? `${id}-autopopulated` : undefined}
+					aria-describedby={
+						autopopulated && autopopulatedTime && !invalid
+							? `${id}-autopopulated`
+							: undefined
+					}
 					className={cn(
 						"min-w-0 max-w-full appearance-none [max-inline-size:100%] [min-inline-size:0]",
 						invalid
 							? "border-destructive"
-							: autopopulated
+							: autopopulated && autopopulatedTime
 								? "border-emerald-600 dark:border-emerald-400"
 								: null,
 					)}

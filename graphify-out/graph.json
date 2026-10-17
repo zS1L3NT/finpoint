@@ -2024,7 +2024,7 @@
       "file_type": "code",
       "norm_label": "datetimefield()",
       "source_file": "src/components/form/datetime-field.tsx",
-      "source_location": "L27"
+      "source_location": "L28"
     },
     {
       "id": "src_components_form_datetime_field_parsevalue",
@@ -2036,7 +2036,7 @@
       "file_type": "code",
       "norm_label": "parsevalue()",
       "source_file": "src/components/form/datetime-field.tsx",
-      "source_location": "L16"
+      "source_location": "L17"
     },
     {
       "id": "src_components_form_datetime_field_toinputvalue",
@@ -2048,7 +2048,7 @@
       "file_type": "code",
       "norm_label": "toinputvalue()",
       "source_file": "src/components/form/datetime-field.tsx",
-      "source_location": "L25"
+      "source_location": "L26"
     },
     {
       "id": "src_components_form_field_formfield",
@@ -29318,6 +29318,18 @@
     },
     {
       "source": "src_components_dialogs_record_creator_recordcreatordialog",
+      "target": "src_logic_records_createrecord",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/dialogs/record-creator.tsx",
+      "source_location": "L103",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_dialogs_record_creator_recordcreatordialog",
       "target": "src_components_ui_dialog_dialog",
       "relation": "calls",
       "_origin": "ast",
@@ -29325,7 +29337,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/record-creator.tsx",
-      "source_location": "L135",
+      "source_location": "L144",
       "weight": 1.0
     },
     {
@@ -29337,7 +29349,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/record-creator.tsx",
-      "source_location": "L145",
+      "source_location": "L154",
       "weight": 1.0
     },
     {
@@ -29349,7 +29361,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/record-creator.tsx",
-      "source_location": "L147",
+      "source_location": "L156",
       "weight": 1.0
     },
     {
@@ -29361,7 +29373,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/record-creator.tsx",
-      "source_location": "L148",
+      "source_location": "L157",
       "weight": 1.0
     },
     {
@@ -29373,7 +29385,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/record-creator.tsx",
-      "source_location": "L149",
+      "source_location": "L158",
       "weight": 1.0
     },
     {
@@ -29385,7 +29397,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/record-creator.tsx",
-      "source_location": "L150",
+      "source_location": "L159",
       "weight": 1.0
     },
     {
@@ -29397,7 +29409,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/record-creator.tsx",
-      "source_location": "L151",
+      "source_location": "L160",
       "weight": 1.0
     },
     {
@@ -29409,7 +29421,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/record-creator.tsx",
-      "source_location": "L166",
+      "source_location": "L175",
       "weight": 1.0
     },
     {
@@ -29421,7 +29433,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/record-creator.tsx",
-      "source_location": "L169",
+      "source_location": "L178",
       "weight": 1.0
     },
     {
@@ -29433,7 +29445,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/record-creator.tsx",
-      "source_location": "L223",
+      "source_location": "L232",
       "weight": 1.0
     },
     {
@@ -29445,7 +29457,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/record-creator.tsx",
-      "source_location": "L247",
+      "source_location": "L257",
       "weight": 1.0
     },
     {
@@ -29457,7 +29469,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/record-creator.tsx",
-      "source_location": "L273",
+      "source_location": "L283",
       "weight": 1.0
     },
     {
@@ -29469,7 +29481,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/record-creator.tsx",
-      "source_location": "L275",
+      "source_location": "L285",
       "weight": 1.0
     },
     {
@@ -29481,7 +29493,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/record-creator.tsx",
-      "source_location": "L279",
+      "source_location": "L289",
       "weight": 1.0
     },
     {
@@ -29493,7 +29505,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/record-creator.tsx",
-      "source_location": "L290",
+      "source_location": "L300",
       "weight": 1.0
     },
     {
@@ -29505,7 +29517,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/record-creator.tsx",
-      "source_location": "L309",
+      "source_location": "L319",
       "weight": 1.0
     },
     {
@@ -29517,7 +29529,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/record-creator.tsx",
-      "source_location": "L314",
+      "source_location": "L324",
       "weight": 1.0
     },
     {
@@ -29529,7 +29541,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/record-creator.tsx",
-      "source_location": "L336",
+      "source_location": "L346",
       "weight": 1.0
     },
     {
@@ -29541,7 +29553,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/record-creator.tsx",
-      "source_location": "L352",
+      "source_location": "L362",
       "weight": 1.0
     },
     {
@@ -29553,7 +29565,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/record-creator.tsx",
-      "source_location": "L375",
+      "source_location": "L385",
       "weight": 1.0
     },
     {
@@ -29565,7 +29577,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/record-creator.tsx",
-      "source_location": "L413",
+      "source_location": "L423",
       "weight": 1.0
     },
     {
@@ -29577,7 +29589,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/record-creator.tsx",
-      "source_location": "L420",
+      "source_location": "L430",
       "weight": 1.0
     },
     {
@@ -29589,7 +29601,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/record-creator.tsx",
-      "source_location": "L421",
+      "source_location": "L431",
       "weight": 1.0
     },
     {
@@ -29601,7 +29613,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/record-creator.tsx",
-      "source_location": "L424",
+      "source_location": "L434",
       "weight": 1.0
     },
     {
@@ -29613,7 +29625,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/record-creator.tsx",
-      "source_location": "L425",
+      "source_location": "L435",
       "weight": 1.0
     },
     {
@@ -29625,7 +29637,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/record-creator.tsx",
-      "source_location": "L430",
+      "source_location": "L440",
       "weight": 1.0
     },
     {
@@ -29637,7 +29649,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/record-creator.tsx",
-      "source_location": "L436",
+      "source_location": "L446",
       "weight": 1.0
     },
     {
@@ -29649,7 +29661,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/record-creator.tsx",
-      "source_location": "L446",
+      "source_location": "L456",
       "weight": 1.0
     },
     {
@@ -29661,7 +29673,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/record-creator.tsx",
-      "source_location": "L481",
+      "source_location": "L491",
       "weight": 1.0
     },
     {
@@ -29673,7 +29685,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/record-creator.tsx",
-      "source_location": "L482",
+      "source_location": "L492",
       "weight": 1.0
     },
     {
@@ -29685,7 +29697,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/record-creator.tsx",
-      "source_location": "L483",
+      "source_location": "L493",
       "weight": 1.0
     },
     {
@@ -29697,7 +29709,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/record-creator.tsx",
-      "source_location": "L486",
+      "source_location": "L496",
       "weight": 1.0
     },
     {
@@ -29709,7 +29721,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/record-creator.tsx",
-      "source_location": "L487",
+      "source_location": "L497",
       "weight": 1.0
     },
     {
@@ -29721,7 +29733,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/record-creator.tsx",
-      "source_location": "L499",
+      "source_location": "L509",
       "weight": 1.0
     },
     {
@@ -29733,7 +29745,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/record-creator.tsx",
-      "source_location": "L500",
+      "source_location": "L510",
       "weight": 1.0
     },
     {
@@ -29745,7 +29757,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/record-creator.tsx",
-      "source_location": "L502",
+      "source_location": "L512",
       "weight": 1.0
     },
     {
@@ -29793,7 +29805,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/record-creator.tsx",
-      "source_location": "L78",
+      "source_location": "L71",
       "weight": 1.0
     },
     {
@@ -29805,19 +29817,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/record-creator.tsx",
-      "source_location": "L79",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_dialogs_record_creator_recordcreatordialog",
-      "target": "src_logic_records_createrecord",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/dialogs/record-creator.tsx",
-      "source_location": "L94",
+      "source_location": "L88",
       "weight": 1.0
     },
     {
@@ -31257,7 +31257,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/form/datetime-field.tsx",
-      "source_location": "L115",
+      "source_location": "L117",
       "weight": 1.0
     },
     {
@@ -31269,7 +31269,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/form/datetime-field.tsx",
-      "source_location": "L124",
+      "source_location": "L126",
       "weight": 1.0
     },
     {
@@ -31281,7 +31281,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/form/datetime-field.tsx",
-      "source_location": "L39",
+      "source_location": "L41",
       "weight": 1.0
     },
     {
@@ -31293,7 +31293,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/form/datetime-field.tsx",
-      "source_location": "L58",
+      "source_location": "L60",
       "weight": 1.0
     },
     {
@@ -31305,7 +31305,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/form/datetime-field.tsx",
-      "source_location": "L75",
+      "source_location": "L77",
       "weight": 1.0
     },
     {
@@ -31317,7 +31317,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/form/datetime-field.tsx",
-      "source_location": "L85",
+      "source_location": "L87",
       "weight": 1.0
     },
     {
@@ -31329,7 +31329,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/form/datetime-field.tsx",
-      "source_location": "L86",
+      "source_location": "L88",
       "weight": 1.0
     },
     {
@@ -31341,7 +31341,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/form/datetime-field.tsx",
-      "source_location": "L88",
+      "source_location": "L90",
       "weight": 1.0
     },
     {
@@ -31353,7 +31353,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/form/datetime-field.tsx",
-      "source_location": "L96",
+      "source_location": "L98",
       "weight": 1.0
     },
     {
@@ -41013,7 +41013,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/logic/record-defaults.ts",
-      "source_location": "L7",
+      "source_location": "L13",
       "weight": 1.0
     },
     {
@@ -79451,7 +79451,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/form/datetime-field.tsx",
-      "source_location": "L16",
+      "source_location": "L17",
       "weight": 1.0
     },
     {
@@ -79462,7 +79462,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/form/datetime-field.tsx",
-      "source_location": "L25",
+      "source_location": "L26",
       "weight": 1.0
     },
     {
@@ -79473,7 +79473,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/form/datetime-field.tsx",
-      "source_location": "L27",
+      "source_location": "L28",
       "weight": 1.0
     },
     {
@@ -90991,5 +90991,5 @@
       "source_file": "AGENTS.md"
     }
   ],
-  "built_at_commit": "de9bdb323c7ce8a8387dd7d9fccba16def217194"
+  "built_at_commit": "6735eeed951e72c1e21fd96fd2ed23f45e50a67e"
 }

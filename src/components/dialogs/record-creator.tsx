@@ -68,6 +68,15 @@ export default function RecordCreatorDialog({
 
 	const { mergeErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
 
+	const inferredDatetime = inferRecordDatetime(statements)
+	const datetimeAutopopulated =
+		inferredDatetime.source === "description"
+			? inferredDatetime.hasTime
+				? "Date and time inferred from the statement description."
+				: "Date inferred from the statement description."
+			: inferredDatetime.hasTime
+				? "Date and time copied from the statement."
+				: "Date copied from the statement date."
 	const categoriesFlat = categories.flatMap(category => [category, ...category.children])
 
 	const form = useForm({
@@ -75,7 +84,7 @@ export default function RecordCreatorDialog({
 			title: "",
 			people: "",
 			location: "",
-			datetime: inferRecordDatetime(statements),
+			datetime: inferredDatetime.value,
 			amount: round2(
 				statements.reduce((acc, statement) => acc + statement.allocable_amount, 0),
 			),
@@ -223,11 +232,12 @@ export default function RecordCreatorDialog({
 										<DatetimeField
 											id={field.name}
 											label="Date and time"
+											autopopulatedTime={inferredDatetime.hasTime}
 											autopopulated={
 												!!statements.length &&
 												!!field.state.value &&
 												!field.state.meta.isDirty
-													? "Autopopulated from statement dates or descriptions. Check before saving."
+													? datetimeAutopopulated
 													: undefined
 											}
 											value={field.state.value}
