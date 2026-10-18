@@ -56,7 +56,7 @@ export const rowEnter = (index: number, entrance: RowEntrance) => {
 	if (entrance === "fade") {
 		return {
 			initial: { opacity: 0 },
-			animate: { opacity: 1 },
+			animate: { opacity: 1, y: 0 },
 			transition: { duration: ROW_FADE_DURATION, ease: EASE_OUT },
 		}
 	}

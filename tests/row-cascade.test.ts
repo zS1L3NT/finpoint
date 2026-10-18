@@ -21,6 +21,10 @@ describe("isPureRemoval", () => {
 })
 
 describe("bounded row and card cascade", () => {
+	test("fading resets the rise when filtering interrupts an entrance", () => {
+		expect(rowEnter(70, "fade").animate).toEqual({ opacity: 1, y: 0 })
+	})
+
 	for (const entrance of ["cascade", "refilter"] as const) {
 		test(`${entrance} includes tall viewport rows without an index cutoff`, () => {
 			let previous = -1
