@@ -4829,7 +4829,7 @@
       "file_type": "code",
       "norm_label": "arc()",
       "source_file": "src/components/charts/monthly-budget-usage.tsx",
-      "source_location": "L293"
+      "source_location": "L289"
     },
     {
       "id": "src_components_charts_monthly_budget_usage_centercurrency",
@@ -4841,7 +4841,7 @@
       "file_type": "code",
       "norm_label": "centercurrency()",
       "source_file": "src/components/charts/monthly-budget-usage.tsx",
-      "source_location": "L289"
+      "source_location": "L285"
     },
     {
       "id": "src_components_charts_monthly_budget_usage_monthlybudgetusage",
@@ -27765,7 +27765,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/monthly-budget-usage.tsx",
-      "source_location": "L290",
+      "source_location": "L286",
       "weight": 1.0
     },
     {
@@ -27777,7 +27777,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/monthly-budget-usage.tsx",
-      "source_location": "L290",
+      "source_location": "L286",
       "weight": 1.0
     },
     {
@@ -82215,7 +82215,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/monthly-budget-usage.tsx",
-      "source_location": "L289",
+      "source_location": "L285",
       "weight": 1.0
     },
     {
@@ -82226,7 +82226,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/monthly-budget-usage.tsx",
-      "source_location": "L293",
+      "source_location": "L289",
       "weight": 1.0
     },
     {
@@ -94760,5 +94760,5 @@
       "source_file": "AGENTS.md"
     }
   ],
-  "built_at_commit": "5054317bc443ba528c82c143ea1c18671deb6c13"
+  "built_at_commit": "0d8033c586f3d6577400dcbaa05de5d818f248eb"
 }

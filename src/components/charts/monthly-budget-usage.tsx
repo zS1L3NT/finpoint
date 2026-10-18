@@ -193,8 +193,8 @@ export default function MonthlyBudgetUsage({
 						<div
 							key={budget.id}
 							className={cn(
-								"relative min-w-0 cursor-pointer rounded-lg border border-border/70 bg-muted/20 px-3 py-2 transition-colors duration-150 ease-out hover:bg-muted/50 motion-reduce:transition-none",
-								active === budget.id && "border-border bg-muted/50",
+								"relative min-w-0 cursor-pointer rounded-lg border border-border/70 bg-muted/20 px-3 py-2 transition-colors duration-150 ease-out motion-reduce:transition-none",
+								selected === budget.id && "border-border bg-muted/50",
 							)}
 							style={
 								selected === budget.id
@@ -204,16 +204,12 @@ export default function MonthlyBudgetUsage({
 										}
 									: undefined
 							}
-							onMouseEnter={() => setHovered(budget.id)}
-							onMouseLeave={() => setHovered(null)}
 						>
 							<div className="flex items-center justify-between gap-2">
 								<button
 									type="button"
 									aria-pressed={selected === budget.id}
 									onClick={() => select(budget.id)}
-									onFocus={() => setHovered(budget.id)}
-									onBlur={() => setHovered(null)}
 									className="flex min-h-8 min-w-0 flex-1 cursor-pointer items-center gap-2 rounded text-left text-sm font-medium after:absolute after:inset-0 after:rounded-lg focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-ring"
 								>
 									<span
