@@ -9,6 +9,7 @@ import { amountTone } from "@/components/table/record-columns"
 import { Button } from "@/components/ui/button"
 import {
 	Dialog,
+	DialogBody,
 	DialogClose,
 	DialogContent,
 	DialogDescription,
@@ -187,227 +188,242 @@ export default function StatementRuleDialog({
 					</DialogDescription>
 				</DialogHeader>
 
-				<div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,0.85fr)]">
-					<form
-						id="statement-rule-form"
-						className="grid content-start gap-6"
-						onSubmit={handleSubmit}
-					>
-						<TextField
-							id="rule-name"
-							label="Name"
-							placeholder="e.g. Spotify subscription"
-							value={name}
-							errors={getApiFieldErrors("name")}
-							onChange={value => {
-								setName(value)
-								clearApiError("name")
-							}}
-						/>
-
-						<section className="grid gap-3">
-							<header className="flex min-h-8 items-center justify-between gap-3">
-								<h3 className="text-sm font-medium">When the description</h3>
-								{conditions.length > 1 ? (
-									<ToggleGroup
-										type="single"
-										aria-label="How conditions combine"
-										value={mode}
-										onValueChange={value => {
-											if (value) setMode(value as "all" | "any")
-										}}
-									>
-										<ToggleGroupItem value="all">Matches all</ToggleGroupItem>
-										<ToggleGroupItem value="any">Matches any</ToggleGroupItem>
-									</ToggleGroup>
-								) : null}
-							</header>
-							{conditions.map((condition, i) => (
-								<div key={condition.key} className="grid gap-2">
-									{i > 0 ? (
-										<span className="text-xs text-muted-foreground">
-											{mode === "all" ? "and" : "or"}
-										</span>
-									) : null}
-									<div className="flex items-start gap-2">
-										<SelectField
-											id={`rule-operator-${condition.key}`}
-											className="w-36 shrink-0 sm:w-40"
-											value={condition.operator}
-											items={RULE_OPERATORS}
-											onChange={value =>
-												setCondition(condition.key, {
-													operator: value as RuleCondition["operator"],
-												})
-											}
-										/>
-										<Input
-											aria-label="Text to look for"
-											placeholder={
-												condition.operator === "regex"
-													? "e.g. ^(GRAB|GOJEK)"
-													: "e.g. SPOTIFY"
-											}
-											className="font-mono"
-											value={condition.value}
-											aria-invalid={
-												!!apiErrors[`conditions.items.${i}.value`] ||
-												(condition.operator === "regex" &&
-													!!condition.value.trim() &&
-													!conditionPattern(condition))
-											}
-											onChange={event =>
-												setCondition(condition.key, {
-													value: event.target.value,
-												})
-											}
-										/>
-										<Button
-											type="button"
-											variant="ghost"
-											size="icon"
-											aria-label="Remove condition"
-											className={cn(conditions.length === 1 && "invisible")}
-											onClick={() =>
-												setConditions(rows =>
-													rows.filter(row => row.key !== condition.key),
-												)
-											}
-										>
-											<UiIcon icon="lucide:x" />
-										</Button>
-									</div>
-								</div>
-							))}
-							<FieldError
-								errors={[...new Set(conditionErrors)].map(message => ({ message }))}
+				<DialogBody>
+					<div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,0.85fr)]">
+						<form
+							id="statement-rule-form"
+							className="grid content-start gap-6"
+							onSubmit={handleSubmit}
+						>
+							<TextField
+								id="rule-name"
+								label="Name"
+								placeholder="e.g. Spotify subscription"
+								value={name}
+								errors={getApiFieldErrors("name")}
+								onChange={value => {
+									setName(value)
+									clearApiError("name")
+								}}
 							/>
-							<Button
-								type="button"
-								variant="ghost"
-								size="sm"
-								className="w-fit"
-								onClick={() =>
-									setConditions(rows => [
-										...rows,
-										{
-											operator: "contains",
-											value: "",
-											key: crypto.randomUUID(),
-										},
-									])
-								}
-							>
-								<UiIcon icon="lucide:plus" /> Add condition
-							</Button>
-						</section>
 
-						<section className="grid gap-3">
-							<header>
-								<h3 className="text-sm font-medium">Prepare the Record</h3>
-								<p className="text-xs text-muted-foreground">
-									Suggest offers a one-click chip under the field. Autofill fills
-									the field when the record creator opens.
-								</p>
-							</header>
-							<div className="grid gap-3">
-								{RULE_FIELDS.map(({ value: field, label }) => (
-									<div
-										key={field}
-										className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 gap-y-1.5 sm:grid-cols-[7rem_minmax(0,1fr)_auto]"
-									>
-										<label
-											htmlFor={`rule-${field}`}
-											className="self-center text-sm sm:self-start sm:pt-1.5 sm:text-muted-foreground"
-										>
-											{label}
-										</label>
-										{/* Phones put the label beside its mode toggle, the value underneath. */}
-										<div className="order-last col-span-2 sm:order-none sm:col-span-1">
-											{valueInput(field)}
-										</div>
+							<section className="grid gap-3">
+								<header className="flex min-h-8 items-center justify-between gap-3">
+									<h3 className="text-sm font-medium">When the description</h3>
+									{conditions.length > 1 ? (
 										<ToggleGroup
 											type="single"
-											aria-label={`How to use the ${label.toLowerCase()}`}
-											className="p-0.5"
-											disabled={!actions[field]}
-											value={actions[field]?.mode ?? ""}
+											aria-label="How conditions combine"
+											value={mode}
 											onValueChange={value => {
-												if (value)
-													setAction(
-														field,
-														actions[field]?.value,
-														value as RuleMode,
-													)
+												if (value) setMode(value as "all" | "any")
 											}}
 										>
-											<ToggleGroupItem value="suggest">
-												Suggest
+											<ToggleGroupItem value="all">
+												Matches all
 											</ToggleGroupItem>
-											<ToggleGroupItem value="autofill">
-												Autofill
+											<ToggleGroupItem value="any">
+												Matches any
 											</ToggleGroupItem>
 										</ToggleGroup>
+									) : null}
+								</header>
+								{conditions.map((condition, i) => (
+									<div key={condition.key} className="grid gap-2">
+										{i > 0 ? (
+											<span className="text-xs text-muted-foreground">
+												{mode === "all" ? "and" : "or"}
+											</span>
+										) : null}
+										<div className="flex items-start gap-2">
+											<SelectField
+												id={`rule-operator-${condition.key}`}
+												className="w-36 shrink-0 sm:w-40"
+												value={condition.operator}
+												items={RULE_OPERATORS}
+												onChange={value =>
+													setCondition(condition.key, {
+														operator:
+															value as RuleCondition["operator"],
+													})
+												}
+											/>
+											<Input
+												aria-label="Text to look for"
+												placeholder={
+													condition.operator === "regex"
+														? "e.g. ^(GRAB|GOJEK)"
+														: "e.g. SPOTIFY"
+												}
+												className="font-mono"
+												value={condition.value}
+												aria-invalid={
+													!!apiErrors[`conditions.items.${i}.value`] ||
+													(condition.operator === "regex" &&
+														!!condition.value.trim() &&
+														!conditionPattern(condition))
+												}
+												onChange={event =>
+													setCondition(condition.key, {
+														value: event.target.value,
+													})
+												}
+											/>
+											<Button
+												type="button"
+												variant="ghost"
+												size="icon"
+												aria-label="Remove condition"
+												className={cn(
+													conditions.length === 1 && "invisible",
+												)}
+												onClick={() =>
+													setConditions(rows =>
+														rows.filter(
+															row => row.key !== condition.key,
+														),
+													)
+												}
+											>
+												<UiIcon icon="lucide:x" />
+											</Button>
+										</div>
 									</div>
 								))}
-							</div>
-							<FieldError errors={getApiFieldErrors("actions")} />
-						</section>
-					</form>
+								<FieldError
+									errors={[...new Set(conditionErrors)].map(message => ({
+										message,
+									}))}
+								/>
+								<Button
+									type="button"
+									variant="ghost"
+									size="sm"
+									className="w-fit"
+									onClick={() =>
+										setConditions(rows => [
+											...rows,
+											{
+												operator: "contains",
+												value: "",
+												key: crypto.randomUUID(),
+											},
+										])
+									}
+								>
+									<UiIcon icon="lucide:plus" /> Add condition
+								</Button>
+							</section>
 
-					<aside className="grid max-h-[28rem] min-h-72 grid-rows-[auto_minmax(0,1fr)] content-start gap-3 rounded-lg bg-muted/40 p-3 md:max-h-[32rem]">
-						<header className="grid gap-2">
-							<h3 className="text-sm font-medium tabular-nums">
-								{ready && matches !== undefined
-									? pluralize(matches.length, "matching Statement")
-									: "Matching Statements"}
-							</h3>
-							<p className="text-xs text-muted-foreground">
-								Creating a Record from any of these Statements fills in the fields
-								on the left.
-							</p>
-						</header>
-						<div className="-mx-1 overflow-y-auto px-1">
-							{!ready ? (
-								<p className="py-8 text-center text-xs text-muted-foreground">
-									Type some text to look for and matching Statements appear here.
-								</p>
-							) : matches === undefined ? null : matches.length === 0 ? (
-								<p className="py-8 text-center text-xs text-muted-foreground">
-									No Statements match these conditions.
-								</p>
-							) : (
-								<ul className="divide-y">
-									{matches.slice(0, PREVIEW_LIMIT).map(s => (
-										<li key={s.id} className="flex items-start gap-3 py-2">
-											<span className="min-w-0 flex-1">
-												<span className="block font-mono text-xs break-all">
-													{highlight(s.description, patterns)}
-												</span>
-												<span className="text-[0.6875rem] text-muted-foreground">
-													{s.account.name} · {formatDatetime(s.datetime)}
-												</span>
-											</span>
-											<span
-												className={cn(
-													"shrink-0 text-xs font-medium tabular-nums",
-													amountTone(s.amount),
-												)}
+							<section className="grid gap-3">
+								<header>
+									<h3 className="text-sm font-medium">Prepare the Record</h3>
+									<p className="text-xs text-muted-foreground">
+										Suggest offers a one-click chip under the field. Autofill
+										fills the field when the record creator opens.
+									</p>
+								</header>
+								<div className="grid gap-3">
+									{RULE_FIELDS.map(({ value: field, label }) => (
+										<div
+											key={field}
+											className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 gap-y-1.5 sm:grid-cols-[7rem_minmax(0,1fr)_auto]"
+										>
+											<label
+												htmlFor={`rule-${field}`}
+												className="self-center text-sm sm:self-start sm:pt-1.5 sm:text-muted-foreground"
 											>
-												{formatCurrency(s.amount)}
-											</span>
-										</li>
+												{label}
+											</label>
+											{/* Phones put the label beside its mode toggle, the value underneath. */}
+											<div className="order-last col-span-2 sm:order-none sm:col-span-1">
+												{valueInput(field)}
+											</div>
+											<ToggleGroup
+												type="single"
+												aria-label={`How to use the ${label.toLowerCase()}`}
+												className="p-0.5"
+												disabled={!actions[field]}
+												value={actions[field]?.mode ?? ""}
+												onValueChange={value => {
+													if (value)
+														setAction(
+															field,
+															actions[field]?.value,
+															value as RuleMode,
+														)
+												}}
+											>
+												<ToggleGroupItem value="suggest">
+													Suggest
+												</ToggleGroupItem>
+												<ToggleGroupItem value="autofill">
+													Autofill
+												</ToggleGroupItem>
+											</ToggleGroup>
+										</div>
 									))}
-									{matches.length > PREVIEW_LIMIT ? (
-										<li className="py-2 text-center text-xs text-muted-foreground">
-											and {matches.length - PREVIEW_LIMIT} more
-										</li>
-									) : null}
-								</ul>
-							)}
-						</div>
-					</aside>
-				</div>
+								</div>
+								<FieldError errors={getApiFieldErrors("actions")} />
+							</section>
+						</form>
+
+						<aside className="grid max-h-[28rem] min-h-72 grid-rows-[auto_minmax(0,1fr)] content-start gap-3 rounded-lg bg-muted/40 p-3 md:max-h-[32rem]">
+							<header className="grid gap-2">
+								<h3 className="text-sm font-medium tabular-nums">
+									{ready && matches !== undefined
+										? pluralize(matches.length, "matching Statement")
+										: "Matching Statements"}
+								</h3>
+								<p className="text-xs text-muted-foreground">
+									Creating a Record from any of these Statements fills in the
+									fields on the left.
+								</p>
+							</header>
+							<div className="-mx-1 overflow-y-auto px-1">
+								{!ready ? (
+									<p className="py-8 text-center text-xs text-muted-foreground">
+										Type some text to look for and matching Statements appear
+										here.
+									</p>
+								) : matches === undefined ? null : matches.length === 0 ? (
+									<p className="py-8 text-center text-xs text-muted-foreground">
+										No Statements match these conditions.
+									</p>
+								) : (
+									<ul className="divide-y">
+										{matches.slice(0, PREVIEW_LIMIT).map(s => (
+											<li key={s.id} className="flex items-start gap-3 py-2">
+												<span className="min-w-0 flex-1">
+													<span className="block font-mono text-xs break-all">
+														{highlight(s.description, patterns)}
+													</span>
+													<span className="text-[0.6875rem] text-muted-foreground">
+														{s.account.name} ·{" "}
+														{formatDatetime(s.datetime)}
+													</span>
+												</span>
+												<span
+													className={cn(
+														"shrink-0 text-xs font-medium tabular-nums",
+														amountTone(s.amount),
+													)}
+												>
+													{formatCurrency(s.amount)}
+												</span>
+											</li>
+										))}
+										{matches.length > PREVIEW_LIMIT ? (
+											<li className="py-2 text-center text-xs text-muted-foreground">
+												and {matches.length - PREVIEW_LIMIT} more
+											</li>
+										) : null}
+									</ul>
+								)}
+							</div>
+						</aside>
+					</div>
+				</DialogBody>
 
 				<DialogFooter>
 					{rule ? (

@@ -3,9 +3,11 @@
 import * as React from "react"
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 import { XIcon } from "lucide-react"
+import { ScrollArea as ScrollAreaPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { ScrollBar } from "@/components/ui/scroll-area"
 
 function Dialog({ onOpenChange, ...props }: DialogPrimitive.Root.Props) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} onOpenChange={(open, details) => {
@@ -62,7 +64,7 @@ function DialogContent({
       <DialogPrimitive.Popup
         data-slot="dialog-content"
         className={cn(
-          "fixed inset-x-3 top-1/2 z-50 grid max-h-[calc(100svh-1.5rem)] min-w-0 -translate-y-1/2 gap-4 overflow-x-hidden overflow-y-auto rounded-xl bg-popover p-4 text-sm text-popover-foreground shadow-2xl ring-1 ring-foreground/10 outline-none transition-[opacity,transform] duration-200 ease-out data-ending-style:duration-150 starting:opacity-0 data-starting-style:opacity-0 data-ending-style:opacity-0 starting:transform-[translateY(6px)] data-starting-style:transform-[translateY(6px)] data-ending-style:transform-[translateY(6px)] motion-reduce:transition-none motion-reduce:transform-none motion-reduce:starting:transform-none motion-reduce:data-starting-style:transform-none motion-reduce:starting:opacity-100 motion-reduce:data-starting-style:opacity-100 [&>*]:min-w-0 md:right-auto md:left-1/2 md:max-h-[calc(100svh-2rem)] md:w-full md:max-w-sm md:-translate-x-1/2",
+          "fixed inset-x-3 top-1/2 z-50 grid max-h-[calc(100svh-1.5rem)] min-w-0 -translate-y-1/2 gap-4 overflow-x-hidden overflow-y-auto rounded-xl has-[>[data-slot=dialog-body]]:grid-rows-[auto_minmax(0,1fr)_auto] has-[>[data-slot=dialog-body]]:overflow-y-hidden bg-popover p-4 text-sm text-popover-foreground shadow-2xl ring-1 ring-foreground/10 outline-none transition-[opacity,transform] duration-200 ease-out data-ending-style:duration-150 starting:opacity-0 data-starting-style:opacity-0 data-ending-style:opacity-0 starting:transform-[translateY(6px)] data-starting-style:transform-[translateY(6px)] data-ending-style:transform-[translateY(6px)] motion-reduce:transition-none motion-reduce:transform-none motion-reduce:starting:transform-none motion-reduce:data-starting-style:transform-none motion-reduce:starting:opacity-100 motion-reduce:data-starting-style:opacity-100 [&>*]:min-w-0 md:right-auto md:left-1/2 md:max-h-[calc(100svh-2rem)] md:w-full md:max-w-sm md:-translate-x-1/2",
           className
         )}
         {...props}
@@ -83,6 +85,25 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
       className={cn("flex min-w-0 flex-col gap-2", className)}
       {...props}
     />
+  )
+}
+
+/** Scrolls between a pinned header and footer with an always-drawn scrollbar, so tall forms show they continue. */
+function DialogBody({ className, children, ...props }: React.ComponentProps<"div">) {
+  return (
+    <ScrollAreaPrimitive.Root
+      data-slot="dialog-body"
+      type="always"
+      className="relative -mx-4 -my-1 min-h-0"
+    >
+      <ScrollAreaPrimitive.Viewport
+        className={cn("size-full overscroll-contain px-4 py-1 [&>div]:block!", className)}
+        {...props}
+      >
+        {children}
+      </ScrollAreaPrimitive.Viewport>
+      <ScrollBar className="data-vertical:w-2 [&>[data-slot=scroll-area-thumb]]:bg-muted-foreground/40" />
+    </ScrollAreaPrimitive.Root>
   )
 }
 
@@ -145,6 +166,7 @@ function DialogDescription({
 
 export {
   Dialog,
+  DialogBody,
   DialogClose,
   DialogContent,
   DialogDescription,
