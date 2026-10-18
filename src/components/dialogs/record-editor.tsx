@@ -5,12 +5,12 @@ import { DateTime } from "luxon"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import AmountField from "@/components/form/amount-field"
-import ComboboxField from "@/components/form/combobox-field"
+import CategoryField from "@/components/form/category-field"
 import DatetimeField from "@/components/form/datetime-field"
 import RecordAnalyticsFields from "@/components/form/record-analytics-fields"
 import TextField from "@/components/form/text-field"
 import TextareaField from "@/components/form/textarea-field"
-import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
+import { UiIcon as IconifyIcon } from "@/components/icon"
 import StatementSearchSheet from "@/components/sheets/statement-search"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -378,33 +378,14 @@ export default function RecordEditorDialog({
 								</AnimatePresence>
 								<form.Field name="category_id">
 									{field => (
-										<ComboboxField
+										<CategoryField
 											id={field.name}
 											label="Category"
-											value={
-												categoriesFlat.find(
-													category => category.id === field.state.value,
-												) ?? null
-											}
+											value={field.state.value}
+											categories={categories}
 											errors={mergeErrors(
 												field.state.meta.errors,
 												field.name,
-											)}
-											placeholder="Select category"
-											emptyText="No categories found."
-											items={categoriesFlat}
-											getItemId={category => category.id}
-											getItemString={category => category.name}
-											renderItem={category => (
-												<div
-													className={cn(
-														"flex items-center gap-1",
-														category.parent_category_id ? "pl-2" : null,
-													)}
-												>
-													<Icon {...category} size={10} />
-													{category.name}
-												</div>
 											)}
 											onChange={value => {
 												field.handleChange(value?.id ?? "")

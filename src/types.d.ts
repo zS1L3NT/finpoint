@@ -170,16 +170,10 @@ export type StatementRule = {
 	id: string
 	name: string
 	enabled: boolean
+	/** Chosen once at creation: false limits the rule to Statements imported after `created_at`. */
+	include_existing: boolean
 	conditions: { mode: "all" | "any"; items: RuleCondition[] }
 	actions: RuleActions
 	created_at: string
 	updated_at: string
-}
-/** Which Statements a rule applies to, judged against the Statements known when it was created. */
-export type RuleDataset = "existing" | "new" | "both"
-export type RuleRun = {
-	rule_id: string
-	dataset: RuleDataset
-	known_statement_ids: string[]
-	ran_at: string
 }

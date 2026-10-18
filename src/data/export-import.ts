@@ -17,7 +17,6 @@ export const EXPORT_VERSION = 5
 
 type TableName =
 	| "statement_rules"
-	| "statement_rule_runs"
 	| "accounts"
 	| "statements"
 	| "duplicate_dismissals"
@@ -33,7 +32,6 @@ type TableName =
 
 export const TABLES: TableName[] = [
 	"statement_rules",
-	"statement_rule_runs",
 	"accounts",
 	"statements",
 	"duplicate_dismissals",
@@ -123,7 +121,6 @@ export function parseImportFile(text: string): FinpointExport {
 	}
 	if (parsed && parsed.tables && [1, 2, 3, 4].includes(originalVersion ?? 0)) {
 		parsed.tables.statement_rules = []
-		parsed.tables.statement_rule_runs = []
 		if (parsed.version === 4) parsed.version = EXPORT_VERSION
 	}
 	if (parsed?.app !== "finpoint" || typeof parsed !== "object" || !parsed.tables) {

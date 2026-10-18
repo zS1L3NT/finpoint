@@ -18,6 +18,8 @@ export default function RecordAnalyticsFields({
 	monthlyBudgets: monthlyBudgetsProp,
 	treatmentSuggestions,
 	monthlyBudgetSuggestions,
+	treatmentAutopopulated,
+	monthlyBudgetAutopopulated,
 	onTreatmentChange,
 	onMonthlyBudgetChange,
 }: {
@@ -31,6 +33,8 @@ export default function RecordAnalyticsFields({
 	monthlyBudgets?: Awaited<ReturnType<typeof listMonthlyBudgets>>
 	treatmentSuggestions?: React.ReactNode
 	monthlyBudgetSuggestions?: React.ReactNode
+	treatmentAutopopulated?: string
+	monthlyBudgetAutopopulated?: string
 	onTreatmentChange: (value: string) => void
 	onMonthlyBudgetChange: (value: string, source: "category" | "manual") => void
 }) {
@@ -59,6 +63,7 @@ export default function RecordAnalyticsFields({
 				<SelectField
 					id="analytics_treatment"
 					label="Treatment"
+					autopopulated={treatmentAutopopulated}
 					value={treatmentValue}
 					placeholder="No default treatment"
 					items={[
@@ -90,6 +95,7 @@ export default function RecordAnalyticsFields({
 				<SelectField
 					id="monthly_budget_id"
 					label="Monthly budget"
+					autopopulated={monthlyBudgetAutopopulated}
 					disabled={!monthlyBudgetEligible}
 					value={monthlyBudgets === undefined ? "" : monthlyBudgetValue}
 					placeholder={monthlyBudgets === undefined ? "Monthly budget" : "Unbudgeted"}

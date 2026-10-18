@@ -1,5 +1,8 @@
 import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field"
 
+/** Border for an input whose value was filled in for the user. */
+export const AUTOPOPULATED_BORDER = "border-emerald-600 dark:border-emerald-400"
+
 export type FieldErrorItem = { message?: string }
 
 export type FormFieldProps = {

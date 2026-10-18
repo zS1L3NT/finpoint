@@ -178,7 +178,7 @@ test("backup restore, earlier backups and reset include the dismissal table", as
 test("schema version four upgrades with financial data intact", async () => {
 	const schemas = Object.fromEntries(
 		db.tables
-			.filter(t => !["duplicate_dismissals", "statement_rules", "statement_rule_runs"].includes(t.name))
+			.filter(t => !["duplicate_dismissals", "statement_rules"].includes(t.name))
 			.map(t => [t.name, [t.schema.primKey.src, ...t.schema.indexes.map(i => i.src)].join(",")]),
 	)
 	await db.delete()
@@ -201,13 +201,12 @@ test("dismissal migration preserves clean and dirty Drive baselines", async () =
 		const tables: Record<string, unknown[]> = { ...backup.tables }
 		delete tables.duplicate_dismissals
 		delete tables.statement_rules
-		delete tables.statement_rule_runs
 		const baseline = clean
 			? await hashSnapshot({ settings: backup.settings, tables })
 			: "unsynced-baseline"
 		const schemas = Object.fromEntries(
 			db.tables
-				.filter(t => !["duplicate_dismissals", "statement_rules", "statement_rule_runs"].includes(t.name))
+				.filter(t => !["duplicate_dismissals", "statement_rules"].includes(t.name))
 				.map(t => [t.name, [t.schema.primKey.src, ...t.schema.indexes.map(i => i.src)].join(",")]),
 		)
 		await db.delete()

@@ -32,6 +32,7 @@ const statement = (id: string, overrides: Partial<StatementRow> = {}): Statement
 const input = (overrides: Partial<RuleInput> = {}): RuleInput => ({
 	name: "Coffee",
 	enabled: true,
+	include_existing: true,
 	conditions: { mode: "all", items: [{ operator: "contains", value: "COFFEE" }] },
 	actions: {
 		title: { mode: "suggest", value: "Coffee" },
@@ -85,52 +86,49 @@ test("conditions compare the description as literal, case-insensitive text", () 
 	expect(matchesStatement(both("all"), s)).toBe(false)
 	expect(matchesStatement(both("any"), s)).toBe(true)
 })
-test("datasets split Statements by arrival relative to the rule's creation, not bank date", async () => {
+test("new-only rules reach Statements imported after creation, judged by import time not bank date", async () => {
 	await db.statements.add(statement("old"))
-	const rule = await saveStatementRule(input(), "existing")
-	await db.statements.add(statement("new", { datetime: "2020-01-01 00:00" }))
-	expect((await previewStatementRule(rule, rule.id, "existing")).map(s => s.id)).toEqual(["old"])
-	expect((await previewStatementRule(rule, rule.id, "new")).map(s => s.id)).toEqual(["new"])
-	expect((await previewStatementRule(rule, undefined, "new")).map(s => s.id)).toEqual([])
-	expect(await statementRecommendations(["new"])).toEqual([])
-	expect(await statementRecommendations(["old"])).toHaveLength(2)
-	expect((await listStatementRules())[0]).toMatchObject({ dataset: "existing", matches: 1 })
-	await saveStatementRule(input(), "new", rule.id)
+	const rule = await saveStatementRule(input({ include_existing: false }))
+	await db.statements.add(
+		statement("new", {
+			datetime: "2020-01-01 00:00",
+			imported_at: new Date(Date.parse(rule.created_at) + 1).toISOString(),
+		}),
+	)
+	expect(
+		(await previewStatementRule(rule)).map(s => [s.id, s.applies]).sort(),
+	).toEqual([
+		["new", true],
+		["old", false],
+	])
 	expect(await statementRecommendations(["old"])).toEqual([])
 	expect(await statementRecommendations(["new"])).toHaveLength(2)
-	await saveStatementRule(input(), "both", rule.id)
-	expect(await statementRecommendations(["old", "new"])).toHaveLength(2)
-	await db.statements.add(statement("later"))
-	expect(await statementRecommendations(["later"])).toHaveLength(2)
+	expect((await listStatementRules())[0]).toMatchObject({ matches: 1 })
+	// The choice is fixed at creation; edits keep it.
+	await saveStatementRule(input({ include_existing: true }), rule.id)
+	expect((await db.statement_rules.get(rule.id))?.include_existing).toBe(false)
+	expect(
+		(await previewStatementRule({ ...input(), include_existing: false })).every(s => !s.applies),
+	).toBe(true)
+	const all = await saveStatementRule(input({ name: "All" }))
+	expect(all.include_existing).toBe(true)
+	expect((await statementRecommendations(["old"])).map(r => r.rule_name)).toEqual(["All", "All"])
 	expect(await db.records.count()).toBe(0)
 })
-test("earlier rules win autofill per field, explicit null is kept, suggestions all show", async () => {
-	await db.statements.add(statement("s"))
-	await saveStatementRule(
-		input({
-			actions: {
-				title: { mode: "autofill", value: "First" },
-				monthly_budget_id: { mode: "autofill", value: null },
-			},
-		}),
-		"both",
-	)
-	await saveStatementRule(
-		input({
-			actions: {
-				title: { mode: "autofill", value: "Later" },
-				location: { mode: "suggest", value: "Cafe" },
-			},
-		}),
-		"both",
-	)
-	const result = await statementRecommendations(["s"])
-	expect(recommendationAutofill(result)).toEqual({ title: "First", monthly_budget_id: null })
-	expect(result.filter(r => r.mode === "suggest").map(r => r.value)).toEqual(["Cafe"])
+test("importing and adding pending Statements stamps the import time", async () => {
+	const { createPendingStatement } = await import("../src/logic/statements")
+	const before = new Date().toISOString()
+	const row = await createPendingStatement({
+		account_id: "a",
+		datetime: "2026-10-18T12:00",
+		description: "Coffee",
+		amount: -5,
+	})
+	expect((await db.statements.get(row.id))?.imported_at! >= before).toBe(true)
 })
-test("paused rules and changed statements do not recommend; delete clears run state", async () => {
+test("paused rules and changed statements do not recommend; delete removes the rule", async () => {
 	await db.statements.add(statement("s"))
-	const rule = await saveStatementRule(input(), "both")
+	const rule = await saveStatementRule(input())
 	await db.statements.update("s", { description: "Tea" })
 	expect(await statementRecommendations(["s"])).toEqual([])
 	await db.statements.update("s", { description: "Coffee" })
@@ -139,7 +137,7 @@ test("paused rules and changed statements do not recommend; delete clears run st
 	await setStatementRuleEnabled(rule.id, true)
 	expect(await statementRecommendations(["s"])).toHaveLength(2)
 	await deleteStatementRule(rule.id)
-	expect(await db.statement_rule_runs.get(rule.id)).toBeUndefined()
+	expect(await db.statement_rules.get(rule.id)).toBeUndefined()
 })
 test("validation rejects bad operators, blank text, empty actions and missing references", async () => {
 	await expect(
@@ -152,7 +150,6 @@ test("validation rejects bad operators, blank text, empty actions and missing re
 				},
 				actions: {},
 			}),
-			"both",
 		),
 	).rejects.toMatchObject({
 		name: "ValidationError",
@@ -165,30 +162,29 @@ test("validation rejects bad operators, blank text, empty actions and missing re
 	})
 	const missingCategory = await saveStatementRule(
 		input({ actions: { category_id: { mode: "autofill", value: "missing" } } }),
-		"both",
 	).catch(cause => cause)
 	expect(missingCategory.message).toContain("category")
-	await expect(saveStatementRule(input(), "later" as "both")).rejects.toThrow()
+	await expect(
+		saveStatementRule(input({ include_existing: "yes" as unknown as boolean })),
+	).rejects.toThrow()
 	expect(await db.statement_rules.count()).toBe(0)
 })
-test("backups, Drive tables, legacy restore and reset include rules and run state", async () => {
+test("backups, Drive tables, legacy restore and reset include rules", async () => {
 	await db.statements.add(statement("s"))
-	await saveStatementRule(input(), "both")
+	await saveStatementRule(input())
 	const backup = await exportData()
 	await clearAllData()
 	await importData(backup)
 	expect(await statementRecommendations(["s"])).toHaveLength(2)
 	expect(SYNC_TABLES).toContain("statement_rules")
-	expect(SYNC_TABLES).toContain("statement_rule_runs")
 	const legacy = JSON.parse(JSON.stringify(backup))
 	legacy.version = 4
 	delete legacy.tables.statement_rules
-	delete legacy.tables.statement_rule_runs
 	await importData(parseImportFile(JSON.stringify(legacy)))
 	expect(await db.statement_rules.count()).toBe(0)
 	expect(await db.statements.count()).toBe(1)
 	await clearAllData()
-	expect(await db.statement_rule_runs.count()).toBe(0)
+	expect(await db.statement_rules.count()).toBe(0)
 })
 test("version five upgrade preserves financial rows and clean or dirty Drive baseline", async () => {
 	const { hashSnapshot } = await import("../src/data/snapshot-hash")
@@ -197,11 +193,10 @@ test("version five upgrade preserves financial rows and clean or dirty Drive bas
 		const backup = await exportData()
 		const tables: Record<string, unknown[]> = { ...backup.tables }
 		delete tables.statement_rules
-		delete tables.statement_rule_runs
 		const baseline = clean ? await hashSnapshot({ settings: backup.settings, tables }) : "dirty"
 		const schema = Object.fromEntries(
 			db.tables
-				.filter(t => !["statement_rules", "statement_rule_runs"].includes(t.name))
+				.filter(t => !["statement_rules"].includes(t.name))
 				.map(t => [
 					t.name,
 					[t.schema.primKey.src, ...t.schema.indexes.map(i => i.src)].join(","),

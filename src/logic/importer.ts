@@ -223,6 +223,7 @@ async function upsertIndexed(
 				...data,
 				is_pending: data.is_pending ?? 0,
 				index: withIndex ? index : 0,
+				imported_at: new Date().toISOString(),
 			})
 		}
 	}
@@ -256,7 +257,13 @@ async function upsertIndexed(
 		}
 		for (const item of remaining) {
 			imported++
-			await db.statements.add({ id: newId(), ...item.data, is_pending: 0, index: item.index })
+			await db.statements.add({
+				id: newId(),
+				...item.data,
+				is_pending: 0,
+				index: item.index,
+				imported_at: new Date().toISOString(),
+			})
 		}
 	}
 

@@ -1,6 +1,8 @@
 import { useLiveQuery } from "dexie-react-hooks"
+import { DateTime } from "luxon"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
+import CategoryField from "@/components/form/category-field"
 import SelectField from "@/components/form/select-field"
 import TextField from "@/components/form/text-field"
 import { UiIcon } from "@/components/icon"
@@ -26,20 +28,12 @@ import {
 	deleteStatementRule,
 	type listStatementRules,
 	previewStatementRule,
-	RULE_DATASETS,
 	RULE_FIELDS,
 	RULE_OPERATORS,
 	saveStatementRule,
 } from "@/logic/statement-rules"
 import { ValidationError } from "@/logic/validate"
-import type {
-	CategoryWithChildren,
-	RuleActions,
-	RuleCondition,
-	RuleDataset,
-	RuleField,
-	RuleMode,
-} from "@/types"
+import type { CategoryWithChildren, RuleActions, RuleCondition, RuleField, RuleMode } from "@/types"
 
 type Rule = Awaited<ReturnType<typeof listStatementRules>>[number]
 
@@ -69,7 +63,7 @@ export default function StatementRuleDialog({
 	const [mode, setMode] = useState<"all" | "any">("all")
 	const [conditions, setConditions] = useState<(RuleCondition & { key: string })[]>([])
 	const [actions, setActions] = useState<RuleActions>({})
-	const [dataset, setDataset] = useState<RuleDataset>("both")
+	const [includeExisting, setIncludeExisting] = useState(true)
 	const { apiErrors, getApiFieldErrors, clearApiError, resetApiErrors, setApiErrors } =
 		useApiFormErrors()
 
@@ -84,21 +78,24 @@ export default function StatementRuleDialog({
 			})),
 		)
 		setActions(rule?.actions ?? {})
-		setDataset(rule?.dataset ?? "both")
+		setIncludeExisting(rule?.include_existing ?? true)
 		resetApiErrors()
 	}, [isOpen, rule, resetApiErrors])
 
 	const input = {
 		name,
 		enabled: rule?.enabled ?? true,
+		include_existing: includeExisting,
 		conditions: { mode, items: conditions.map(({ operator, value }) => ({ operator, value })) },
 		actions,
 	}
 	const ready = conditions.some(c => c.value.trim())
 	const matches = useLiveQuery(
-		() => (isOpen && ready ? previewStatementRule(input, rule?.id, dataset) : []),
-		[isOpen, JSON.stringify(input.conditions), rule?.id, dataset],
+		() =>
+			isOpen && ready ? previewStatementRule({ ...input, created_at: rule?.created_at }) : [],
+		[isOpen, JSON.stringify(input.conditions), includeExisting, rule?.created_at],
 	)
+	const reached = matches?.filter(s => s.applies).length ?? 0
 	const needles = conditions
 		.filter(c => c.operator !== "not_contains" && c.value.trim())
 		.map(c => c.value.trim().toLowerCase())
@@ -121,7 +118,7 @@ export default function StatementRuleDialog({
 	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault()
 		try {
-			await saveStatementRule(input, dataset, rule?.id)
+			await saveStatementRule(input, rule?.id)
 			setIsOpen(false)
 		} catch (cause) {
 			if (cause instanceof ValidationError) {
@@ -158,15 +155,14 @@ export default function StatementRuleDialog({
 			/>
 		)
 		return field === "category_id" ? (
-			select(
-				categories.flatMap(c => [
-					{ value: c.id, label: c.name },
-					...c.children.map(child => ({
-						value: child.id,
-						label: `${c.name} › ${child.name}`,
-					})),
-				]),
-			)
+			<CategoryField
+				id={`rule-${field}`}
+				value={actions.category_id?.value ?? ""}
+				categories={categories}
+				placeholder="Not set"
+				errors={getApiFieldErrors(`actions.${field}.value`)}
+				onChange={category => setAction(field, category?.id)}
+			/>
 		) : field === "analytics_treatment" ? (
 			select(TREATMENTS)
 		) : field === "monthly_budget_id" ? (
@@ -199,7 +195,11 @@ export default function StatementRuleDialog({
 				</DialogHeader>
 
 				<div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,0.85fr)]">
-					<form id="statement-rule-form" className="grid gap-6" onSubmit={handleSubmit}>
+					<form
+						id="statement-rule-form"
+						className="grid content-start gap-6"
+						onSubmit={handleSubmit}
+					>
 						<TextField
 							id="rule-name"
 							label="Name"
@@ -362,36 +362,38 @@ export default function StatementRuleDialog({
 									? pluralize(matches.length, "matching Statement")
 									: "Matching Statements"}
 							</h3>
-							<ToggleGroup
-								type="single"
-								aria-label="Statements this rule applies to"
-								className="w-full"
-								value={dataset}
-								onValueChange={value => {
-									if (value) setDataset(value as RuleDataset)
-								}}
-							>
-								{RULE_DATASETS.map(d => (
-									<ToggleGroupItem
-										key={d.value}
-										value={d.value}
-										className="flex-1"
+							{rule ? (
+								<p className="text-xs text-muted-foreground">
+									{rule.include_existing
+										? "Applies to existing Statements and every Statement imported later."
+										: `Applies to Statements imported since ${DateTime.fromISO(rule.created_at).toFormat("d MMM y")}: ${reached} so far.`}
+								</p>
+							) : (
+								<>
+									<ToggleGroup
+										type="single"
+										aria-label="Existing Statements"
+										className="w-full"
+										value={includeExisting ? "include" : "skip"}
+										onValueChange={value => {
+											if (value) setIncludeExisting(value === "include")
+										}}
 									>
-										{d.label}
-									</ToggleGroupItem>
-								))}
-							</ToggleGroup>
-							<p className="text-xs text-muted-foreground">
-								{dataset === "both"
-									? "Applies to every Statement, including future imports."
-									: dataset === "existing"
-										? rule
-											? "Applies only to Statements that existed when this rule was created."
-											: "Applies only to Statements already imported."
-										: rule
-											? "Applies only to Statements imported after this rule was created."
-											: "Applies only to Statements you import from now on."}
-							</p>
+										<ToggleGroupItem value="include" className="flex-1">
+											Existing and new
+										</ToggleGroupItem>
+										<ToggleGroupItem value="skip" className="flex-1">
+											New only
+										</ToggleGroupItem>
+									</ToggleGroup>
+									<p className="text-xs text-muted-foreground">
+										{includeExisting
+											? "These Statements and every Statement imported later get suggestions."
+											: "Only Statements imported from now on get suggestions. Existing matches are shown for reference."}{" "}
+										You can't change this after creating the rule.
+									</p>
+								</>
+							)}
 						</header>
 						<div className="-mx-1 overflow-y-auto px-1">
 							{!ready ? (
@@ -400,32 +402,45 @@ export default function StatementRuleDialog({
 								</p>
 							) : matches === undefined ? null : matches.length === 0 ? (
 								<p className="py-8 text-center text-xs text-muted-foreground">
-									{dataset === "new"
-										? "No new Statements match yet."
-										: "No Statements match these conditions."}
+									No Statements match these conditions.
 								</p>
 							) : (
 								<ul className="divide-y">
-									{matches.slice(0, PREVIEW_LIMIT).map(s => (
-										<li key={s.id} className="flex items-start gap-3 py-2">
-											<span className="min-w-0 flex-1">
-												<span className="block font-mono text-xs break-all">
-													{highlight(s.description, needles)}
-												</span>
-												<span className="text-[0.6875rem] text-muted-foreground">
-													{s.account.name} · {formatDatetime(s.datetime)}
-												</span>
-											</span>
-											<span
+									{matches
+										.toSorted((a, b) => Number(b.applies) - Number(a.applies))
+										.slice(0, PREVIEW_LIMIT)
+										.map(s => (
+											<li
+												key={s.id}
+												title={
+													s.applies
+														? undefined
+														: "Imported before this rule; no suggestions"
+												}
 												className={cn(
-													"shrink-0 text-xs font-medium tabular-nums",
-													amountTone(s.amount),
+													"flex items-start gap-3 py-2",
+													!s.applies && "opacity-50",
 												)}
 											>
-												{formatCurrency(s.amount)}
-											</span>
-										</li>
-									))}
+												<span className="min-w-0 flex-1">
+													<span className="block font-mono text-xs break-all">
+														{highlight(s.description, needles)}
+													</span>
+													<span className="text-[0.6875rem] text-muted-foreground">
+														{s.account.name} ·{" "}
+														{formatDatetime(s.datetime)}
+													</span>
+												</span>
+												<span
+													className={cn(
+														"shrink-0 text-xs font-medium tabular-nums",
+														amountTone(s.amount),
+													)}
+												>
+													{formatCurrency(s.amount)}
+												</span>
+											</li>
+										))}
 									{matches.length > PREVIEW_LIMIT ? (
 										<li className="py-2 text-center text-xs text-muted-foreground">
 											and {matches.length - PREVIEW_LIMIT} more

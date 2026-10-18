@@ -97,6 +97,7 @@ test("DBS still imports Statements with different real descriptions", async () =
 	expect(await importDbs([dbsFile("Salary")])).toEqual({ imported: 1, reindexed: 0, skipped: 0 })
 	expect(await importDbs([dbsFile("")])).toEqual({ imported: 1, reindexed: 0, skipped: 0 })
 	expect(await db.statements.count()).toBe(2)
+	expect((await db.statements.toArray()).every(s => s.imported_at)).toBe(true)
 })
 
 test("DBS preserves repeated blank-description Statements within one export", async () => {
@@ -106,6 +107,7 @@ test("DBS preserves repeated blank-description Statements within one export", as
 			.reverse()
 			.map(statement => statement.description),
 	).toEqual(["#2", "#1"])
+	expect((await db.statements.toArray()).every(s => s.imported_at)).toBe(true)
 	expect(await importDbs([dbsFile("", "", 2)])).toEqual({ imported: 0, reindexed: 0, skipped: 2 })
 })
 

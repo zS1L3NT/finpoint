@@ -4,13 +4,13 @@ import { AnimatePresence, motion } from "framer-motion"
 import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import AmountField from "@/components/form/amount-field"
-import ComboboxField from "@/components/form/combobox-field"
+import CategoryField from "@/components/form/category-field"
 import DatetimeField from "@/components/form/datetime-field"
 import RecordAnalyticsFields from "@/components/form/record-analytics-fields"
 import RuleSuggestions, { ruleValueLabel } from "@/components/form/rule-suggestions"
 import TextField from "@/components/form/text-field"
 import TextareaField from "@/components/form/textarea-field"
-import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
+import { UiIcon as IconifyIcon } from "@/components/icon"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -86,6 +86,8 @@ export default function RecordCreatorDialog({
 	const ruleSession = useRef("")
 	const appliedAutofill = useRef(false)
 	const touchedFields = useRef(new Set<RuleField>())
+	// Rule name per autofilled field; editing the field drops its note.
+	const [autofilledBy, setAutofilledBy] = useState<Partial<Record<RuleField, string>>>({})
 
 	const { mergeErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
 
@@ -193,11 +195,13 @@ export default function RecordCreatorDialog({
 			ruleSession.current = session
 			appliedAutofill.current = false
 			touchedFields.current.clear()
+			setAutofilledBy({})
 			form.reset()
 		}
 		if (recommendations === undefined || appliedAutofill.current) return
 		appliedAutofill.current = true
 		const values = recommendationAutofill(recommendations)
+		const applied: Partial<Record<RuleField, string>> = {}
 		for (const field of [
 			"category_id",
 			"analytics_treatment",
@@ -221,8 +225,22 @@ export default function RecordCreatorDialog({
 					continue
 			}
 			applyRecommendation({ field, value: values[field] ?? null })
+			applied[field] = recommendations.find(
+				r => r.mode === "autofill" && r.field === field,
+			)?.rule_name
 		}
+		setAutofilledBy(applied)
 	}, [isOpen, statements, recommendations, form, categoriesFlat, applyRecommendation])
+	const touch = (field: RuleField) => {
+		touchedFields.current.add(field)
+		setAutofilledBy(current => {
+			const next = { ...current }
+			delete next[field]
+			return next
+		})
+	}
+	const autofillNote = (field: RuleField) =>
+		autofilledBy[field] ? `Autofilled by the “${autofilledBy[field]}” rule.` : undefined
 	const ruleSuggestions = (field: RuleField) => (
 		<RuleSuggestions
 			field={field}
@@ -238,7 +256,7 @@ export default function RecordCreatorDialog({
 				)
 			}
 			onApply={item => {
-				touchedFields.current.add(field)
+				touch(field)
 				applyRecommendation(item)
 			}}
 		/>
@@ -282,6 +300,7 @@ export default function RecordCreatorDialog({
 										<TextField
 											id={field.name}
 											label="Title"
+											autopopulated={autofillNote("title")}
 											value={field.state.value}
 											suggestions={completions?.titles ?? []}
 											errors={mergeErrors(
@@ -289,7 +308,7 @@ export default function RecordCreatorDialog({
 												field.name,
 											)}
 											onChange={value => {
-												touchedFields.current.add("title")
+												touch("title")
 												field.handleChange(value)
 												clearApiError(field.name)
 											}}
@@ -320,6 +339,7 @@ export default function RecordCreatorDialog({
 										<TextField
 											id={field.name}
 											label="Location"
+											autopopulated={autofillNote("location")}
 											value={field.state.value}
 											suggestions={completions?.locations ?? []}
 											errors={mergeErrors(
@@ -327,7 +347,7 @@ export default function RecordCreatorDialog({
 												field.name,
 											)}
 											onChange={value => {
-												touchedFields.current.add("location")
+												touch("location")
 												field.handleChange(value)
 												clearApiError(field.name)
 											}}
@@ -405,36 +425,18 @@ export default function RecordCreatorDialog({
 								</AnimatePresence>
 								<form.Field name="category_id">
 									{field => (
-										<ComboboxField
+										<CategoryField
 											id={field.name}
 											label="Category"
-											value={
-												categoriesFlat.find(
-													category => category.id === field.state.value,
-												) ?? null
-											}
+											autopopulated={autofillNote("category_id")}
+											value={field.state.value}
+											categories={categories}
 											errors={mergeErrors(
 												field.state.meta.errors,
 												field.name,
 											)}
-											placeholder="Select category"
-											emptyText="No categories found."
-											items={categoriesFlat}
-											getItemId={category => category.id}
-											getItemString={category => category.name}
-											renderItem={category => (
-												<div
-													className={cn(
-														"flex items-center gap-1",
-														category.parent_category_id ? "pl-2" : null,
-													)}
-												>
-													<Icon {...category} size={10} />
-													{category.name}
-												</div>
-											)}
 											onChange={value => {
-												touchedFields.current.add("category_id")
+												touch("category_id")
 												field.handleChange(value?.id ?? "")
 												if (
 													form.getFieldValue("monthly_budget_source") ===
@@ -481,12 +483,14 @@ export default function RecordCreatorDialog({
 								monthlyBudgets={monthlyBudgets}
 								treatmentSuggestions={ruleSuggestions("analytics_treatment")}
 								monthlyBudgetSuggestions={ruleSuggestions("monthly_budget_id")}
+								treatmentAutopopulated={autofillNote("analytics_treatment")}
+								monthlyBudgetAutopopulated={autofillNote("monthly_budget_id")}
 								onTreatmentChange={value => {
-									touchedFields.current.add("analytics_treatment")
+									touch("analytics_treatment")
 									form.setFieldValue("analytics_treatment", value)
 								}}
 								onMonthlyBudgetChange={(value, source) => {
-									touchedFields.current.add("monthly_budget_id")
+									touch("monthly_budget_id")
 									form.setFieldValue("monthly_budget_id", value)
 									form.setFieldValue("monthly_budget_source", source)
 								}}

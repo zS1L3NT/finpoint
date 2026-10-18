@@ -16,7 +16,6 @@ import { listCategories } from "@/logic/categories"
 import { listMonthlyBudgets } from "@/logic/monthly-budgets"
 import {
 	listStatementRules,
-	RULE_DATASETS,
 	RULE_FIELDS,
 	RULE_OPERATORS,
 	setStatementRuleEnabled,
@@ -136,7 +135,12 @@ function RuleCard({
 					</span>
 					<span className="block text-xs text-muted-foreground tabular-nums">
 						{rule.enabled
-							? `${pluralize(rule.matches, "matching Statement")}${rule.dataset === "both" ? "" : ` · ${RULE_DATASETS.find(d => d.value === rule.dataset)?.label}`}`
+							? pluralize(
+									rule.matches,
+									rule.include_existing
+										? "matching Statement"
+										: "new matching Statement",
+								)
 							: "Paused"}
 					</span>
 				</button>

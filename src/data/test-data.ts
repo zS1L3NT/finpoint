@@ -177,7 +177,6 @@ export function generateTestData(): FinpointExport {
 	const today = DateTime.now().startOf("day")
 	const tables = {
 		statement_rules: [],
-		statement_rule_runs: [],
 		duplicate_dismissals: [],
 		accounts: [
 			{ id: "demo-dbs-savings", name: "Everyday Savings", balance: 12480.55, bank: "DBS" },

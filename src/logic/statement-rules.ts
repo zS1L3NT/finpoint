@@ -2,7 +2,7 @@ import { db, type StatementRow } from "@/data/db"
 import { newId, TREATMENT_VALUES } from "@/logic/shared"
 import { listStatements } from "@/logic/statements"
 import { ValidationError, Validator } from "@/logic/validate"
-import type { RuleCondition, RuleDataset, RuleField, RuleRun, StatementRule } from "@/types"
+import type { RuleCondition, RuleField, StatementRule } from "@/types"
 
 export const RULE_FIELDS: { value: RuleField; label: string }[] = [
 	{ value: "title", label: "Title" },
@@ -16,11 +16,6 @@ export const RULE_OPERATORS: { value: RuleCondition["operator"]; label: string }
 	{ value: "not_contains", label: "doesn't contain" },
 	{ value: "starts_with", label: "starts with" },
 	{ value: "equals", label: "is exactly" },
-]
-export const RULE_DATASETS: { value: RuleDataset; label: string }[] = [
-	{ value: "both", label: "All" },
-	{ value: "existing", label: "Existing only" },
-	{ value: "new", label: "New only" },
 ]
 
 export function matchesStatement(
@@ -48,15 +43,14 @@ export function matchesStatement(
 	)
 }
 
-/** Statements in a dataset; without a run every current Statement counts as existing. */
-function inDataset<T extends { id: string }>(
-	statements: T[],
-	run: RuleRun | undefined,
-	dataset: RuleDataset,
+/** Rules without existing Statements only reach Statements imported after the rule was created. */
+export function appliesTo(
+	rule: Pick<StatementRule, "include_existing" | "created_at">,
+	statement: Pick<StatementRow, "imported_at">,
 ) {
-	const known = new Set(run?.known_statement_ids ?? statements.map(s => s.id))
-	return statements.filter(
-		s => dataset === "both" || (dataset === "existing") === known.has(s.id),
+	return (
+		rule.include_existing ||
+		(statement.imported_at !== undefined && statement.imported_at >= rule.created_at)
 	)
 }
 
@@ -64,29 +58,23 @@ const byCreation = (a: StatementRule, b: StatementRule) =>
 	a.created_at.localeCompare(b.created_at) || a.id.localeCompare(b.id)
 
 export async function listStatementRules() {
-	const [rules, runs, statements] = await Promise.all([
+	const [rules, statements] = await Promise.all([
 		db.statement_rules.toArray(),
-		db.statement_rule_runs.toArray(),
 		db.statements.toArray(),
 	])
-	return rules.sort(byCreation).map(rule => {
-		const run = runs.find(r => r.rule_id === rule.id)
-		const dataset = run?.dataset ?? "both"
-		return {
-			...rule,
-			dataset,
-			matches: inDataset(statements, run, dataset).filter(s => matchesStatement(rule, s))
-				.length,
-		}
-	})
+	return rules.sort(byCreation).map(rule => ({
+		...rule,
+		matches: statements.filter(s => matchesStatement(rule, s) && appliesTo(rule, s)).length,
+	}))
 }
 
 export type RuleInput = Omit<StatementRule, "id" | "created_at" | "updated_at">
-export async function saveStatementRule(input: RuleInput, dataset: RuleDataset, id?: string) {
+export async function saveStatementRule(input: RuleInput, id?: string) {
 	const v = new Validator()
 	const name = v.text(input.name, "name", "Name this rule.")
 	if (typeof input.enabled !== "boolean") v.reject("enabled", "Choose whether this rule is on.")
-	v.oneOf(dataset, "dataset", ["existing", "new", "both"])
+	if (typeof input.include_existing !== "boolean")
+		v.reject("include_existing", "Choose whether existing Statements are included.")
 	v.oneOf(input.conditions?.mode, "conditions.mode", ["all", "any"])
 	if (!Array.isArray(input.conditions?.items) || !input.conditions.items.length)
 		v.reject("conditions", "Add at least one condition.")
@@ -116,13 +104,7 @@ export async function saveStatementRule(input: RuleInput, dataset: RuleDataset, 
 
 	return db.transaction(
 		"rw",
-		[
-			db.statement_rules,
-			db.statement_rule_runs,
-			db.statements,
-			db.categories,
-			db.monthly_budgets,
-		],
+		[db.statement_rules, db.categories, db.monthly_budgets],
 		async () => {
 			if (
 				input.actions.category_id &&
@@ -142,21 +124,14 @@ export async function saveStatementRule(input: RuleInput, dataset: RuleDataset, 
 				id: id ?? newId(),
 				name,
 				enabled: input.enabled,
+				// Fixed at creation, so editing never moves which Statements count as new.
+				include_existing: existing?.include_existing ?? input.include_existing,
 				conditions: input.conditions,
 				actions: input.actions,
 				created_at: existing?.created_at ?? new Date().toISOString(),
 				updated_at: new Date().toISOString(),
 			}
 			await db.statement_rules.put(rule)
-			// "New" stays relative to the Statements known when the rule was first saved.
-			const run = await db.statement_rule_runs.get(rule.id)
-			await db.statement_rule_runs.put({
-				rule_id: rule.id,
-				dataset,
-				known_statement_ids:
-					run?.known_statement_ids ?? (await db.statements.toCollection().primaryKeys()),
-				ran_at: new Date().toISOString(),
-			})
 			return rule
 		},
 	)
@@ -167,19 +142,22 @@ export async function setStatementRuleEnabled(id: string, enabled: boolean) {
 }
 
 export async function deleteStatementRule(id: string) {
-	await db.transaction("rw", [db.statement_rules, db.statement_rule_runs], async () => {
-		await db.statement_rules.delete(id)
-		await db.statement_rule_runs.delete(id)
-	})
+	await db.statement_rules.delete(id)
 }
 
+/** Every matching Statement, flagged by whether the rule reaches it; unsaved rules start now. */
 export async function previewStatementRule(
-	rule: Pick<StatementRule, "conditions">,
-	id: string | undefined,
-	dataset: RuleDataset,
+	rule: Pick<StatementRule, "conditions" | "include_existing"> & { created_at?: string },
 ) {
-	const run = id ? await db.statement_rule_runs.get(id) : undefined
-	return inDataset(await listStatements(), run, dataset).filter(s => matchesStatement(rule, s))
+	const created_at = rule.created_at ?? new Date().toISOString()
+	const applies = new Map(
+		(await db.statements.toArray())
+			.filter(s => matchesStatement(rule, s))
+			.map(s => [s.id, appliesTo({ ...rule, created_at }, s)]),
+	)
+	return (await listStatements())
+		.filter(s => applies.has(s.id))
+		.map(s => ({ ...s, applies: applies.get(s.id) === true }))
 }
 
 export type RuleRecommendation = {
@@ -195,15 +173,10 @@ export async function statementRecommendations(
 ): Promise<RuleRecommendation[]> {
 	if (!statementIds.length) return []
 	const statements = (await db.statements.bulkGet(statementIds)).filter(s => s !== undefined)
-	const runs = await db.statement_rule_runs.toArray()
 	const result: RuleRecommendation[] = []
 	for (const rule of (await db.statement_rules.toArray()).sort(byCreation)) {
 		if (!rule.enabled) continue
-		const run = runs.find(r => r.rule_id === rule.id)
-		if (
-			!inDataset(statements, run, run?.dataset ?? "both").some(s => matchesStatement(rule, s))
-		)
-			continue
+		if (!statements.some(s => matchesStatement(rule, s) && appliesTo(rule, s))) continue
 		for (const { value: field } of RULE_FIELDS) {
 			const action = rule.actions[field]
 			if (!action) continue

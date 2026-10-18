@@ -12,7 +12,7 @@
 
 import Dexie, { type Table } from "dexie"
 import { hashLegacySnapshot, hashSnapshot } from "@/data/snapshot-hash"
-import type { AnalyticsTreatment, RuleRun, StatementRule } from "@/types"
+import type { AnalyticsTreatment, StatementRule } from "@/types"
 
 export type AccountRow = {
 	id: string
@@ -31,6 +31,8 @@ export type StatementRow = {
 	index: number
 	/** 0 | 1 (boolean stored as number so it can be indexed) */
 	is_pending: number
+	/** ISO time the Statement entered Finpoint; absent on Statements that predate statement rules. */
+	imported_at?: string
 }
 
 export type DuplicateDismissalRow = { statement_id: string; other_statement_id: string }
@@ -131,7 +133,6 @@ export const DB_VERSION = 6
 
 class FinpointDB extends Dexie {
 	statement_rules!: Table<StatementRule, string>
-	statement_rule_runs!: Table<RuleRun, string>
 	accounts!: Table<AccountRow, string>
 	statements!: Table<StatementRow, string>
 	duplicate_dismissals!: Table<DuplicateDismissalRow, [string, string]>
@@ -304,7 +305,7 @@ class FinpointDB extends Dexie {
 				}
 			})
 		this.version(6)
-			.stores({ statement_rules: "id", statement_rule_runs: "rule_id" })
+			.stores({ statement_rules: "id" })
 			.upgrade(async transaction => {
 				const tables: Record<string, unknown[]> = {}
 				for (const name of [
@@ -333,7 +334,6 @@ class FinpointDB extends Dexie {
 				const lastHash = await transaction.table("meta").get("drive_last_hash")
 				if (lastHash?.value === (await Dexie.waitFor(hashSnapshot({ settings, tables })))) {
 					tables.statement_rules = []
-					tables.statement_rule_runs = []
 					await transaction.table("meta").put({
 						key: "drive_last_hash",
 						value: await Dexie.waitFor(hashSnapshot({ settings, tables })),
