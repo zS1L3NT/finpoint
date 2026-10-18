@@ -193,7 +193,7 @@ export default function MonthlyBudgetUsage({
 						<div
 							key={budget.id}
 							className={cn(
-								"relative min-w-0 cursor-pointer rounded-lg border border-border/70 bg-muted/20 px-3 py-2 transition-colors duration-150 ease-out motion-reduce:transition-none",
+								"relative min-w-0 cursor-pointer rounded-lg border border-border/70 bg-muted/20 px-3 py-2 transition-colors duration-150 ease-out hover:bg-muted/50 motion-reduce:transition-none",
 								selected === budget.id && "border-border bg-muted/50",
 							)}
 							style={
