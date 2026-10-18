@@ -2,7 +2,7 @@
 // and `Statement::appQuery` (filters, ordering, derived amounts).
 
 import { asPending, db } from "@/data/db"
-import { removeStatementDismissals } from "@/logic/duplicates"
+import { duplicateStatementIds, removeStatementDismissals } from "@/logic/duplicates"
 import { enrichRecords } from "@/logic/records"
 import {
 	dayDifference,
@@ -60,6 +60,7 @@ async function enrich(
 ) {
 	const accounts = new Map((await db.accounts.toArray()).map(a => [a.id, a]))
 	const allocations = await db.allocations.toArray()
+	const duplicates = await duplicateStatementIds()
 	const byStatement = new Map<string, { sum: number; count: number }>()
 	for (const allocation of allocations) {
 		const entry = byStatement.get(allocation.statement_id) ?? { sum: 0, count: 0 }
@@ -80,6 +81,7 @@ async function enrich(
 			allocation_count: entry.count,
 			is_pending: statement.is_pending === 1,
 			is_unallocated: entry.count === 0,
+			is_duplicate: duplicates.has(statement.id),
 			account: accounts.get(statement.account_id) ?? {
 				id: statement.account_id,
 				name: statement.account_id,

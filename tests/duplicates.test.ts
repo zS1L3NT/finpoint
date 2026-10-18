@@ -8,6 +8,7 @@ const { db } = await import("../src/data/db")
 const { duplicateGroups, dismissDuplicatePair, restoreDuplicatePair, fixDuplicates } = await import(
 	"../src/logic/duplicates"
 )
+const { listStatements, getStatement } = await import("../src/logic/statements")
 
 const statement = (
 	id: string,
@@ -27,6 +28,26 @@ beforeEach(async () => {
 	for (const table of db.tables) await table.clear()
 	await db.accounts.add({ id: "a", name: "FRANK", balance: 0, bank: "OCBC" })
 })
+test("duplicate warnings survive filtering and clear when separated or fixed", async () => {
+	await db.statements.bulkAdd([
+		statement("a", "DEBIT PURCHASE xx-7962 SHENG SIONG SUPERMARKET -S 03/10/26"),
+		statement("b", "DEBIT PURCHASE xx-7962 SHENG SIONG SUPERMARKET -S03/10/26"),
+		statement("pending", undefined, { is_pending: 1 }),
+		statement("unrelated", "COFFEE GARDEN"),
+	])
+	const filtered = await listStatements({ query: "-S 03", is_pending: "false" })
+	expect(filtered.map(s => [s.id, s.is_duplicate])).toEqual([["a", true]])
+	expect((await getStatement("b")).is_duplicate).toBe(true)
+	expect((await getStatement("pending")).is_duplicate).toBe(false)
+	expect((await getStatement("unrelated")).is_duplicate).toBe(false)
+	await dismissDuplicatePair("a", "b")
+	expect((await listStatements()).every(s => !s.is_duplicate)).toBe(true)
+	await restoreDuplicatePair("a", "b")
+	expect((await getStatement("a")).is_duplicate).toBe(true)
+	await fixDuplicates({ keep_id: "a", delete_ids: ["b"] })
+	expect((await getStatement("a")).is_duplicate).toBe(false)
+})
+
 test("spacing changes form groups and dismissals affect only one pair", async () => {
 	await db.statements.bulkAdd([
 		statement("a"),

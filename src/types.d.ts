@@ -26,6 +26,7 @@ export type Statement = {
 	allocation_count: number
 	is_pending: boolean
 	is_unallocated: boolean
+	is_duplicate: boolean
 	account: Account
 }
 
