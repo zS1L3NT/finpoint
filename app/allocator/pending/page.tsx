@@ -223,8 +223,8 @@ export default function AllocatorPendingPage() {
 				<PageHeader
 					title="Workflows"
 					subtitle="Replace pending statements with imported activity."
-					description="Allocation workspace"
-					icon="lucide:link"
+					description="Statement replacement"
+					icon="lucide:replace"
 				/>
 				<WorkflowTabs active="replace" />
 
@@ -245,20 +245,9 @@ export default function AllocatorPendingPage() {
 							"relative min-w-0 flex-col gap-4",
 							selectedPendingStatement ? "hidden md:flex" : "flex",
 						)}
-						aria-labelledby="pending-queue-title"
+						aria-label="Pending statements"
 					>
 						<div className="flex flex-col gap-2">
-							<div>
-								<h3
-									id="pending-queue-title"
-									className="font-heading text-sm font-semibold"
-								>
-									Pending Statements
-								</h3>
-								<p className="text-xs/relaxed text-muted-foreground">
-									Oldest first · all Allocation states
-								</p>
-							</div>
 							<Input
 								placeholder="Search descriptions..."
 								value={queueQuery}

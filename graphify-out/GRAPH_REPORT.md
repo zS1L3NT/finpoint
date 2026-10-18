@@ -1,7 +1,7 @@
 # Graph Report - finpoint  (2026-10-18)
 
 ## Corpus Check
-- 200 files · ~123,192 words
+- 200 files · ~123,172 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 8 file(s) not represented in the graph (top: (none) 4, .example 1, .lock 1)
 
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `a344e507`
+- Built from commit: `5054317b`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
