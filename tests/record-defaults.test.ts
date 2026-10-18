@@ -7,6 +7,14 @@ const statement = (description: string, datetime = "2026-10-18 12:30") => ({
 	index: 0,
 })
 
+test("record date is inferred from a bank date attached to a letter prefix", () => {
+	expect(
+		inferRecordDatetime([
+			statement("DEBIT PURCHASE xx-2563 FRESH LAUNDRY - NUS S28/09/26", "2026-09-30 00:00"),
+		]),
+	).toEqual({ value: "2026-09-28T00:00", source: "description", hasTime: false })
+})
+
 for (const description of ["CARD 17OCT", "CARD 17oct", "CARD 17/10/26", "CARD 17/10/2026"]) {
 	test(`record date is inferred from ${description}`, () => {
 		expect(inferRecordDatetime([statement(description)]).value).toBe("2026-10-17T00:00")

@@ -15,7 +15,7 @@ export function inferRecordDatetime(
 
 		const describedDates = [
 			...statement.description.matchAll(
-				/\b(\d{2}(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)|\d{2}\/\d{2}\/(?:\d{4}|\d{2}))(?=\b|T\d{2}:)(?:[ T]+([01]\d|2[0-3]):([0-5]\d)(?::[0-5]\d)?\b)?/gi,
+				/(\b\d{2}(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)|(?<!\d)\d{2}\/\d{2}\/(?:\d{4}|\d{2}))(?=\b|T\d{2}:)(?:[ T]+([01]\d|2[0-3]):([0-5]\d)(?::[0-5]\d)?\b)?/gi,
 			),
 		].flatMap(([, dateText = "", hour, minute]) => {
 			const numeric = dateText.includes("/")
