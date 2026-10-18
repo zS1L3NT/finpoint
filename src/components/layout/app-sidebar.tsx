@@ -217,12 +217,6 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 					active: pathname.startsWith("/statements"),
 				},
 				{
-					to: pathStatementRules(),
-					icon: "lucide:wand-sparkles",
-					label: "Statement rules",
-					active: pathname.startsWith("/statement-rules"),
-				},
-				{
 					to: pathAccounts(),
 					icon: "lucide:landmark",
 					label: "Accounts",
@@ -244,6 +238,12 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 					icon: "lucide:tag",
 					label: "Categories",
 					active: pathname.startsWith("/categories"),
+				},
+				{
+					to: pathStatementRules(),
+					icon: "lucide:wand-sparkles",
+					label: "Rules",
+					active: pathname.startsWith("/statement-rules"),
 				},
 			],
 		},
