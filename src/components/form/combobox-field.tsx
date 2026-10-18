@@ -1,4 +1,4 @@
-import { FormField, type FormFieldProps } from "@/components/form/field"
+import { AUTOPOPULATED_BORDER, FormField, type FormFieldProps } from "@/components/form/field"
 import {
 	Combobox,
 	ComboboxContent,
@@ -24,6 +24,7 @@ export default function ComboboxField<T>({
 	id,
 	label,
 	description,
+	autopopulated,
 	errors,
 	disabled,
 	className,
@@ -38,12 +39,14 @@ export default function ComboboxField<T>({
 	onChange,
 }: Props<T>) {
 	const invalid = !!errors?.length
+	const hinted = !!autopopulated && !invalid
 
 	return (
 		<FormField
 			id={id}
 			label={label}
 			description={description}
+			autopopulated={autopopulated}
 			errors={errors}
 			disabled={disabled}
 			className={className}
@@ -63,6 +66,8 @@ export default function ComboboxField<T>({
 					placeholder={placeholder}
 					disabled={disabled}
 					aria-invalid={invalid}
+					aria-describedby={hinted ? `${id}-autopopulated` : undefined}
+					className={hinted ? AUTOPOPULATED_BORDER : undefined}
 					showClear
 				/>
 				<ComboboxContent>

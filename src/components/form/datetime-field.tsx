@@ -1,5 +1,5 @@
 import { DateTime } from "luxon"
-import { FormField, type FormFieldProps } from "@/components/form/field"
+import { AUTOPOPULATED_BORDER, FormField, type FormFieldProps } from "@/components/form/field"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
@@ -101,7 +101,7 @@ export default function DatetimeField({
 									invalid
 										? "border-destructive"
 										: autopopulated
-											? "border-emerald-600 dark:border-emerald-400"
+											? AUTOPOPULATED_BORDER
 											: null,
 								)}
 							>
@@ -141,7 +141,7 @@ export default function DatetimeField({
 						invalid
 							? "border-destructive"
 							: autopopulated && autopopulatedTime
-								? "border-emerald-600 dark:border-emerald-400"
+								? AUTOPOPULATED_BORDER
 								: null,
 					)}
 				/>

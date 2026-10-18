@@ -16,6 +16,10 @@ export default function RecordAnalyticsFields({
 	monthlyBudgetSource,
 	categoryMonthlyBudgetId,
 	monthlyBudgets: monthlyBudgetsProp,
+	treatmentSuggestions,
+	monthlyBudgetSuggestions,
+	treatmentAutopopulated,
+	monthlyBudgetAutopopulated,
 	onTreatmentChange,
 	onMonthlyBudgetChange,
 }: {
@@ -27,6 +31,10 @@ export default function RecordAnalyticsFields({
 	categoryMonthlyBudgetId: string | null | undefined
 	/** Prepared Monthly Budget lookup from the opening dialog; falls back to its own live query. */
 	monthlyBudgets?: Awaited<ReturnType<typeof listMonthlyBudgets>>
+	treatmentSuggestions?: React.ReactNode
+	monthlyBudgetSuggestions?: React.ReactNode
+	treatmentAutopopulated?: string
+	monthlyBudgetAutopopulated?: string
 	onTreatmentChange: (value: string) => void
 	onMonthlyBudgetChange: (value: string, source: "category" | "manual") => void
 }) {
@@ -55,6 +63,7 @@ export default function RecordAnalyticsFields({
 				<SelectField
 					id="analytics_treatment"
 					label="Treatment"
+					autopopulated={treatmentAutopopulated}
 					value={treatmentValue}
 					placeholder="No default treatment"
 					items={[
@@ -82,9 +91,11 @@ export default function RecordAnalyticsFields({
 							onMonthlyBudgetChange("", "manual")
 					}}
 				/>
+				{treatmentSuggestions}
 				<SelectField
 					id="monthly_budget_id"
 					label="Monthly budget"
+					autopopulated={monthlyBudgetAutopopulated}
 					disabled={!monthlyBudgetEligible}
 					value={monthlyBudgets === undefined ? "" : monthlyBudgetValue}
 					placeholder={monthlyBudgets === undefined ? "Monthly budget" : "Unbudgeted"}
@@ -122,6 +133,7 @@ export default function RecordAnalyticsFields({
 						)
 					}}
 				/>
+				{monthlyBudgetSuggestions}
 			</FieldGroup>
 		</div>
 	)

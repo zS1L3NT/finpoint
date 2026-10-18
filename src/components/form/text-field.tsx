@@ -1,4 +1,4 @@
-import { FormField, type FormFieldProps } from "@/components/form/field"
+import { AUTOPOPULATED_BORDER, FormField, type FormFieldProps } from "@/components/form/field"
 import {
 	Combobox,
 	ComboboxContent,
@@ -20,6 +20,7 @@ export default function TextField({
 	id,
 	label,
 	description,
+	autopopulated,
 	errors,
 	disabled,
 	className,
@@ -30,12 +31,14 @@ export default function TextField({
 	onChange,
 }: Props) {
 	const invalid = !!errors?.length
+	const hinted = !!autopopulated && !invalid
 
 	return (
 		<FormField
 			id={id}
 			label={label}
 			description={description}
+			autopopulated={autopopulated}
 			errors={errors}
 			disabled={disabled}
 			className={className}
@@ -56,6 +59,8 @@ export default function TextField({
 						disabled={disabled}
 						onChange={e => onChange(e.target.value)}
 						aria-invalid={invalid}
+						aria-describedby={hinted ? `${id}-autopopulated` : undefined}
+						className={hinted ? AUTOPOPULATED_BORDER : undefined}
 						showTrigger={false}
 					/>
 					<ComboboxContent className="w-fit min-w-0">
@@ -82,6 +87,8 @@ export default function TextField({
 					disabled={disabled}
 					onChange={e => onChange(e.target.value)}
 					aria-invalid={invalid}
+					aria-describedby={hinted ? `${id}-autopopulated` : undefined}
+					className={hinted ? AUTOPOPULATED_BORDER : undefined}
 				/>
 			)}
 		</FormField>

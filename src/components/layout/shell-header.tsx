@@ -16,6 +16,7 @@ import {
 	pathPrivacy,
 	pathRecords,
 	pathSettings,
+	pathStatementRules,
 	pathStatements,
 	pathTerms,
 } from "@/routes"
@@ -31,6 +32,7 @@ const TITLES: { match: (pathname: string) => boolean; title: string }[] = [
 	{ match: pathname => pathname.startsWith(pathAccounts()), title: "Accounts" },
 	{ match: pathname => pathname.startsWith(`${pathBudgets()}/`), title: "Budget" },
 	{ match: pathname => pathname.startsWith(pathBudgets()), title: "Budgets" },
+	{ match: pathname => pathname.startsWith(pathStatementRules()), title: "Statement rules" },
 	{ match: pathname => pathname.startsWith(pathCategories()), title: "Categories" },
 	{ match: pathname => pathname.startsWith(pathImporter()), title: "Importer" },
 	{ match: pathname => pathname.startsWith(pathAllocator()), title: "Workflows" },

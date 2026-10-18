@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import { FormField, type FormFieldProps } from "@/components/form/field"
+import { AUTOPOPULATED_BORDER, FormField, type FormFieldProps } from "@/components/form/field"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { cn, round2 } from "@/lib/utils"
@@ -131,7 +131,7 @@ export default function AmountField({
 							invalid
 								? "border-destructive"
 								: autopopulatedHint
-									? "border-emerald-600 dark:border-emerald-400"
+									? AUTOPOPULATED_BORDER
 									: null,
 						)}
 					/>

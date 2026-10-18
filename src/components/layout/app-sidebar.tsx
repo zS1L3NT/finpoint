@@ -35,6 +35,7 @@ import {
 	pathImporter,
 	pathRecords,
 	pathSettings,
+	pathStatementRules,
 	pathStatements,
 } from "@/routes"
 
@@ -237,6 +238,12 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 					icon: "lucide:tag",
 					label: "Categories",
 					active: pathname.startsWith("/categories"),
+				},
+				{
+					to: pathStatementRules(),
+					icon: "lucide:wand-sparkles",
+					label: "Rules",
+					active: pathname.startsWith("/statement-rules"),
 				},
 			],
 		},

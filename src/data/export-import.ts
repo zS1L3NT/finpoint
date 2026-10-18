@@ -13,9 +13,10 @@ import {
 	replaceSettings,
 } from "@/data/settings"
 
-export const EXPORT_VERSION = 4
+export const EXPORT_VERSION = 5
 
 type TableName =
+	| "statement_rules"
 	| "accounts"
 	| "statements"
 	| "duplicate_dismissals"
@@ -30,6 +31,7 @@ type TableName =
 	| "analytics_months"
 
 export const TABLES: TableName[] = [
+	"statement_rules",
 	"accounts",
 	"statements",
 	"duplicate_dismissals",
@@ -82,6 +84,7 @@ export function downloadExport(data: FinpointExport): void {
 
 export function parseImportFile(text: string): FinpointExport {
 	const parsed = JSON.parse(text) as Partial<FinpointExport>
+	const originalVersion = parsed?.version
 	if (parsed && [1, 2, 3].includes(parsed.version ?? 0) && parsed.tables) {
 		parsed.tables.duplicate_dismissals ??= []
 		if (parsed.version === 3) parsed.version = EXPORT_VERSION
@@ -115,6 +118,10 @@ export function parseImportFile(text: string): FinpointExport {
 				return { ...row, default_monthly_budget_id: default_bucket_id ?? null }
 			})
 		parsed.version = EXPORT_VERSION
+	}
+	if (parsed && parsed.tables && [1, 2, 3, 4].includes(originalVersion ?? 0)) {
+		parsed.tables.statement_rules = []
+		if (parsed.version === 4) parsed.version = EXPORT_VERSION
 	}
 	if (parsed?.app !== "finpoint" || typeof parsed !== "object" || !parsed.tables) {
 		throw new Error("This file is not a Finpoint backup.")
