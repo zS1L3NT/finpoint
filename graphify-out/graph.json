@@ -89,7 +89,7 @@
       "file_type": "code",
       "norm_label": "rule",
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L39"
+      "source_location": "L40"
     },
     {
       "id": "src_components_form_amount_field_props",
@@ -2093,7 +2093,7 @@
       "file_type": "code",
       "norm_label": "highlight()",
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L456"
+      "source_location": "L466"
     },
     {
       "id": "src_components_dialogs_statement_rule_statementruledialog",
@@ -2105,7 +2105,7 @@
       "file_type": "code",
       "norm_label": "statementruledialog()",
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L45"
+      "source_location": "L46"
     },
     {
       "id": "src_components_form_amount_field_amountfield",
@@ -31665,7 +31665,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L115",
+      "source_location": "L118",
       "weight": 1.0
     },
     {
@@ -31677,7 +31677,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L128",
+      "source_location": "L131",
       "weight": 1.0
     },
     {
@@ -31689,7 +31689,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L141",
+      "source_location": "L144",
       "weight": 1.0
     },
     {
@@ -31701,7 +31701,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L152",
+      "source_location": "L155",
       "weight": 1.0
     },
     {
@@ -31713,7 +31713,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L170",
+      "source_location": "L173",
       "weight": 1.0
     },
     {
@@ -31725,7 +31725,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L181",
+      "source_location": "L191",
       "weight": 1.0
     },
     {
@@ -31737,7 +31737,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L182",
+      "source_location": "L192",
       "weight": 1.0
     },
     {
@@ -31749,7 +31749,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L183",
+      "source_location": "L193",
       "weight": 1.0
     },
     {
@@ -31761,7 +31761,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L184",
+      "source_location": "L194",
       "weight": 1.0
     },
     {
@@ -31773,7 +31773,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L185",
+      "source_location": "L195",
       "weight": 1.0
     },
     {
@@ -31785,7 +31785,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L191",
+      "source_location": "L201",
       "weight": 1.0
     },
     {
@@ -31797,7 +31797,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L214",
+      "source_location": "L224",
       "weight": 1.0
     },
     {
@@ -31809,7 +31809,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L222",
+      "source_location": "L232",
       "weight": 1.0
     },
     {
@@ -31821,7 +31821,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L251",
+      "source_location": "L261",
       "weight": 1.0
     },
     {
@@ -31833,7 +31833,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L272",
+      "source_location": "L282",
       "weight": 1.0
     },
     {
@@ -31845,7 +31845,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L277",
+      "source_location": "L287",
       "weight": 1.0
     },
     {
@@ -31857,7 +31857,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L288",
+      "source_location": "L298",
       "weight": 1.0
     },
     {
@@ -31869,7 +31869,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L293",
+      "source_location": "L303",
       "weight": 1.0
     },
     {
@@ -31881,7 +31881,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L375",
+      "source_location": "L385",
       "weight": 1.0
     },
     {
@@ -31893,7 +31893,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L399",
+      "source_location": "L409",
       "weight": 1.0
     },
     {
@@ -31905,7 +31905,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L403",
+      "source_location": "L413",
       "weight": 1.0
     },
     {
@@ -31917,7 +31917,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L409",
+      "source_location": "L419",
       "weight": 1.0
     },
     {
@@ -31929,7 +31929,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L412",
+      "source_location": "L422",
       "weight": 1.0
     },
     {
@@ -31941,7 +31941,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L428",
+      "source_location": "L438",
       "weight": 1.0
     },
     {
@@ -31953,7 +31953,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L439",
+      "source_location": "L449",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_dialogs_statement_rule_statementruledialog",
+      "target": "src_logic_records_recordcompletions",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/dialogs/statement-rule.tsx",
+      "source_location": "L59",
       "weight": 1.0
     },
     {
@@ -31965,7 +31977,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L68",
+      "source_location": "L71",
       "weight": 1.0
     },
     {
@@ -31977,7 +31989,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L92",
+      "source_location": "L95",
       "weight": 1.0
     },
     {
@@ -31989,7 +32001,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L95",
+      "source_location": "L98",
       "weight": 1.0
     },
     {
@@ -56360,7 +56372,7 @@
     },
     {
       "source": "src_components_dialogs_statement_rule",
-      "target": "src_logic_statement_rules_conditionpattern",
+      "target": "src_logic_records_recordcompletions",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -56368,6 +56380,18 @@
       "context": "import",
       "source_file": "src/components/dialogs/statement-rule.tsx",
       "source_location": "L27",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_dialogs_statement_rule",
+      "target": "src_logic_statement_rules_conditionpattern",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/dialogs/statement-rule.tsx",
+      "source_location": "L28",
       "weight": 1.0
     },
     {
@@ -56379,7 +56403,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L27",
+      "source_location": "L28",
       "weight": 1.0
     },
     {
@@ -56391,7 +56415,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L27",
+      "source_location": "L28",
       "weight": 1.0
     },
     {
@@ -56403,7 +56427,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L27",
+      "source_location": "L28",
       "weight": 1.0
     },
     {
@@ -56415,7 +56439,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L27",
+      "source_location": "L28",
       "weight": 1.0
     },
     {
@@ -56427,7 +56451,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L27",
+      "source_location": "L28",
       "weight": 1.0
     },
     {
@@ -56439,7 +56463,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L27",
+      "source_location": "L28",
       "weight": 1.0
     },
     {
@@ -56451,7 +56475,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L36",
+      "source_location": "L37",
       "weight": 1.0
     },
     {
@@ -72383,7 +72407,7 @@
     },
     {
       "source": "src_components_dialogs_statement_rule",
-      "target": "src_logic_statement_rules",
+      "target": "src_logic_records",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -72391,6 +72415,18 @@
       "context": "import",
       "source_file": "src/components/dialogs/statement-rule.tsx",
       "source_location": "L27",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_dialogs_statement_rule",
+      "target": "src_logic_statement_rules",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/dialogs/statement-rule.tsx",
+      "source_location": "L28",
       "weight": 1.0
     },
     {
@@ -72414,7 +72450,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L36",
+      "source_location": "L37",
       "weight": 1.0
     },
     {
@@ -72426,7 +72462,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L37",
+      "source_location": "L38",
       "type_only": true,
       "weight": 1.0
     },
@@ -82688,7 +82724,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L39",
+      "source_location": "L40",
       "weight": 1.0
     },
     {
@@ -82699,7 +82735,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L45",
+      "source_location": "L46",
       "weight": 1.0
     },
     {
@@ -82710,7 +82746,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/dialogs/statement-rule.tsx",
-      "source_location": "L456",
+      "source_location": "L466",
       "weight": 1.0
     },
     {
@@ -94760,5 +94796,5 @@
       "source_file": "AGENTS.md"
     }
   ],
-  "built_at_commit": "0d8033c586f3d6577400dcbaa05de5d818f248eb"
+  "built_at_commit": "10cf1f3aa6fec6692071b67d13d904b92ebb05a4"
 }

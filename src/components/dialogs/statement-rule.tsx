@@ -24,6 +24,7 @@ import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { TREATMENTS } from "@/lib/analytics"
 import { cn, formatCurrency, formatDatetime, pluralize } from "@/lib/utils"
 import type { listMonthlyBudgets } from "@/logic/monthly-budgets"
+import { recordCompletions } from "@/logic/records"
 import {
 	conditionPattern,
 	deleteStatementRule,
@@ -55,6 +56,8 @@ export default function StatementRuleDialog({
 	isOpen: boolean
 	setIsOpen: (isOpen: boolean) => void
 }) {
+	const completions = useLiveQuery(() => recordCompletions(), [])
+
 	// Keep the last open rule so the title and fields hold still during the exit animation.
 	const [snapshot, setSnapshot] = useState(ruleProp)
 	if (isOpen && snapshot !== ruleProp) setSnapshot(ruleProp)
@@ -171,6 +174,13 @@ export default function StatementRuleDialog({
 				id={`rule-${field}`}
 				placeholder="Not set"
 				value={value ?? ""}
+				suggestions={
+					field === "title"
+						? (completions?.titles ?? [])
+						: field === "location"
+							? (completions?.locations ?? [])
+							: (completions?.peoples ?? [])
+				}
 				errors={getApiFieldErrors(`actions.${field}.value`)}
 				onChange={next => setAction(field, next || undefined)}
 			/>

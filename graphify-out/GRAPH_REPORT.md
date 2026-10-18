@@ -1,17 +1,17 @@
 # Graph Report - finpoint  (2026-10-18)
 
 ## Corpus Check
-- 200 files · ~123,159 words
+- 200 files · ~123,194 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 8 file(s) not represented in the graph (top: (none) 4, .example 1, .lock 1)
 
 ## Summary
-- 1601 nodes · 6396 edges · 76 communities (69 shown, 7 thin omitted)
+- 1601 nodes · 6399 edges · 76 communities (69 shown, 7 thin omitted)
 - Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 104 edges (avg confidence: 0.84)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `0d8033c5`
+- Built from commit: `10cf1f3a`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -414,7 +414,7 @@ _Questions this graph is uniquely positioned to answer:_
 - **What connects `@fontsource-variable/inter`, `react-dom`, `shadcn` to the rest of the system?**
   _73 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `record-editor.tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.0758655168103987 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.07611548556430446 - nodes in this community are weakly interconnected._
 - **Why does `react` connect `Button` to `record-editor.tsx`, `statement-replacement-review.tsx`, `(month)/page.tsx`, `PaginationFooter`, `sidebar.tsx`, `combobox.tsx`, `sync/page.tsx`, `motion.ts`, `auto-sync.ts`, `importer/page.tsx`, `lucide-react`, `package.json`, `routes.ts`, `paginated-data-table.tsx`, `cn`, `use-appearance.tsx`, `providers.tsx`?**
   _High betweenness centrality (0.054) - this node is a cross-community bridge._
 - **Should `statement-replacement-review.tsx` be split into smaller, more focused modules?**
