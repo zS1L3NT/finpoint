@@ -1,5 +1,6 @@
 import { beforeEach, expect, test } from "bun:test"
 import Dexie from "dexie"
+import * as XLSX from "xlsx"
 import { indexedDB, IDBKeyRange } from "fake-indexeddb"
 
 Dexie.dependencies.indexedDB = indexedDB
@@ -183,3 +184,98 @@ test("Revolut still distinguishes pending and completed Statements with blank de
 		),
 	).toEqual([1, 0])
 })
+
+async function replaceFile(file: File, from: string, to: string) {
+	return new File([(await file.text()).replace(from, to)], file.name, { type: file.type })
+}
+
+for (const bank of [
+	{ name: "DBS", file: () => dbsFile("SHOP"), date: "31 Jul 2026", importFile: importDbs },
+	{ name: "UOB", file: () => uobFile("SHOP"), date: "31 Jul 2026", importFile: importUob },
+	{ name: "OCBC", file: () => ocbcFile("SHOP"), date: "31/07/2026", importFile: importOcbc },
+]) {
+	test(`${bank.name} accepts dd/MM/yy dates`, async () => {
+		await bank.importFile([await replaceFile(bank.file(), bank.date, "17/10/26")])
+		expect((await db.statements.toArray())[0]?.datetime).toBe("2026-10-17 00:00")
+	})
+
+	test(`${bank.name} rejects impossible dates and rolls back all files`, async () => {
+		await expect(
+			bank.importFile([bank.file(), await replaceFile(bank.file(), bank.date, "31/02/26")]),
+		).rejects.toThrow("date is invalid")
+		expect(await db.statements.count()).toBe(0)
+		expect(await db.accounts.count()).toBe(0)
+	})
+
+	test(`${bank.name} handles comma amounts`, async () => {
+		await bank.importFile([await replaceFile(bank.file(), "0.12", '"1,234.56"')])
+		expect((await db.statements.toArray())[0]?.amount).toBe(1234.56)
+	})
+
+	test(`${bank.name} rejects non-finite amounts`, async () => {
+		await expect(
+			bank.importFile([await replaceFile(bank.file(), "0.12", "Infinity")]),
+		).rejects.toThrow("amount is invalid")
+		expect(await db.statements.count()).toBe(0)
+	})
+
+	test(`${bank.name} rejects missing columns`, async () => {
+		await expect(
+			bank.importFile([
+				await replaceFile(
+					bank.file(),
+					bank.name === "OCBC" ? "Transaction date" : "Transaction Date",
+					"Unknown",
+				),
+			]),
+		).rejects.toThrow()
+	})
+}
+
+test("Revolut counts reverted statements as skipped", async () => {
+	expect(await importRevolut(revolutFile("SHOP", "REVERTED"), "123456", "Account")).toEqual({
+		imported: 0,
+		reindexed: 0,
+		skipped: 1,
+	})
+})
+
+test("Revolut rejects invalid dates without creating an account", async () => {
+	await expect(
+		importRevolut(
+			await replaceFile(revolutFile("SHOP"), "2026-07-31", "2026-02-31"),
+			"123456",
+			"Account",
+		),
+	).rejects.toThrow("date is invalid")
+	expect(await db.accounts.count()).toBe(0)
+})
+
+test("Revolut handles comma amounts and fees in the shared pipeline", async () => {
+	await importRevolut(
+		await replaceFile(revolutFile("SHOP"), "0.12,0", '"1,234.56",1.56'),
+		"123456",
+		"Account",
+	)
+	expect((await db.statements.toArray())[0]?.amount).toBe(1233)
+})
+
+for (const bookType of ["xls", "xlsx"] as const) {
+	test(`UOB reads real Excel date cells in ${bookType}`, async () => {
+		const sheet = XLSX.utils.aoa_to_sheet([
+			["Account Number:", "123456"],
+			["Account Type:", "Savings"],
+			["Transaction Date", "Transaction Description", "Withdrawal", "Deposit"],
+			[46312, "SHOP", null, 12.34],
+		])
+		sheet.A4 = { t: "n", v: 46312, z: "dd/mm/yyyy" }
+		const workbook = XLSX.utils.book_new()
+		XLSX.utils.book_append_sheet(workbook, sheet, "Statements")
+		const file = new File(
+			[XLSX.write(workbook, { type: "array", bookType })],
+			`uob.${bookType}`,
+		)
+		await importUob([file])
+		expect((await db.statements.toArray())[0]?.datetime).toBe("2026-10-17 00:00")
+	})
+}

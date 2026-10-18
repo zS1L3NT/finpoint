@@ -17,6 +17,7 @@ export default function AmountField({
 	id,
 	label,
 	description,
+	autopopulated,
 	errors,
 	disabled,
 	className,
@@ -32,6 +33,7 @@ export default function AmountField({
 
 	const canBeNegative = min === undefined || min < 0
 	const invalid = !!errors?.length
+	const autopopulatedHint = text === `${value}` ? autopopulated : undefined
 	const negative = text.startsWith("-")
 
 	const commitText = (raw: string) => {
@@ -87,6 +89,7 @@ export default function AmountField({
 			id={id}
 			label={label}
 			description={description}
+			autopopulated={autopopulatedHint}
 			errors={errors}
 			disabled={disabled}
 			className={className}
@@ -118,11 +121,18 @@ export default function AmountField({
 							}
 						}}
 						aria-invalid={invalid}
+						aria-describedby={
+							autopopulatedHint && !invalid ? `${id}-autopopulated` : undefined
+						}
 						disabled={disabled}
 						className={cn(
 							"pl-6",
 							canBeNegative ? "pr-10" : null,
-							invalid ? "border-destructive" : null,
+							invalid
+								? "border-destructive"
+								: autopopulatedHint
+									? "border-emerald-600 dark:border-emerald-400"
+									: null,
 						)}
 					/>
 					{canBeNegative ? (
