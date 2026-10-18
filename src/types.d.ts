@@ -160,6 +160,7 @@ export type RuleCondition = {
 export type RuleMode = "suggest" | "autofill"
 export type RuleActions = {
 	title?: { mode: RuleMode; value: string }
+	people?: { mode: RuleMode; value: string }
 	location?: { mode: RuleMode; value: string }
 	category_id?: { mode: RuleMode; value: string }
 	analytics_treatment?: { mode: RuleMode; value: AnalyticsTreatment }

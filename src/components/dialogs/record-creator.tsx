@@ -208,6 +208,7 @@ export default function RecordCreatorDialog({
 			"analytics_treatment",
 			"monthly_budget_id",
 			"title",
+			"people",
 			"location",
 		] as const) {
 			if (!(field in values) || touchedFields.current.has(field)) continue
@@ -323,6 +324,7 @@ export default function RecordCreatorDialog({
 											<TextField
 												id={field.name}
 												label="People"
+												autopopulated={autofillNote("people")}
 												value={field.state.value}
 												suggestions={completions?.peoples ?? []}
 												errors={mergeErrors(
@@ -331,11 +333,13 @@ export default function RecordCreatorDialog({
 												)}
 												onChange={value => {
 													field.handleChange(value)
+													touch("people")
 													clearApiError(field.name)
 												}}
 											/>
 										)}
 									</form.Field>
+									{ruleSuggestions("people")}
 									<form.Field name="location">
 										{field => (
 											<TextField

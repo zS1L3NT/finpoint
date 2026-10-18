@@ -113,6 +113,15 @@ test("paused rules and changed statements do not recommend; delete removes the r
 	await deleteStatementRule(rule.id)
 	expect(await db.statement_rules.get(rule.id)).toBeUndefined()
 })
+test("rules can fill people alongside the other text fields", async () => {
+	await db.statements.add(statement("s"))
+	await saveStatementRule(
+		input({ actions: { people: { mode: "autofill", value: "Alex" } } }),
+	)
+	expect(recommendationAutofill(await statementRecommendations(["s"]))).toEqual({
+		people: "Alex",
+	})
+})
 test("validation rejects bad operators, blank text, empty actions and missing references", async () => {
 	await expect(
 		saveStatementRule(

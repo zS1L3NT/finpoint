@@ -6,6 +6,7 @@ import type { RuleCondition, RuleField, StatementRule } from "@/types"
 
 export const RULE_FIELDS: { value: RuleField; label: string }[] = [
 	{ value: "title", label: "Title" },
+	{ value: "people", label: "People" },
 	{ value: "location", label: "Location" },
 	{ value: "category_id", label: "Category" },
 	{ value: "analytics_treatment", label: "Treatment" },
