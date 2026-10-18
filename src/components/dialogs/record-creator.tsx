@@ -1,7 +1,6 @@
 import { useForm, useStore } from "@tanstack/react-form"
 import { useLiveQuery } from "dexie-react-hooks"
 import { AnimatePresence, motion } from "framer-motion"
-import { DateTime } from "luxon"
 import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import AmountField from "@/components/form/amount-field"
@@ -32,8 +31,9 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { canUseMonthlyBudget } from "@/lib/analytics"
 import { COLLAPSE_MOTION, SPRING, TRANSITION } from "@/lib/motion"
-import { cn, formatCurrency, formatDatetime, parseDatetime, pluralize, round2 } from "@/lib/utils"
+import { cn, formatCurrency, formatDatetime, pluralize, round2 } from "@/lib/utils"
 import { listMonthlyBudgets } from "@/logic/monthly-budgets"
+import { inferRecordDatetime } from "@/logic/record-defaults"
 import { createRecord, recordCompletions } from "@/logic/records"
 import {
 	type RuleRecommendation,
@@ -89,6 +89,15 @@ export default function RecordCreatorDialog({
 
 	const { mergeErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
 
+	const inferredDatetime = inferRecordDatetime(statements)
+	const datetimeAutopopulated =
+		inferredDatetime.source === "description"
+			? inferredDatetime.hasTime
+				? "Date and time inferred from the statement description."
+				: "Date inferred from the statement description."
+			: inferredDatetime.hasTime
+				? "Date and time copied from the statement."
+				: "Date copied from the statement date."
 	const categoriesFlat = categories.flatMap(category => [category, ...category.children])
 
 	const form = useForm({
@@ -96,7 +105,7 @@ export default function RecordCreatorDialog({
 			title: "",
 			people: "",
 			location: "",
-			datetime: inferAllocatorDatetime(statements),
+			datetime: inferredDatetime.value,
 			amount: round2(
 				statements.reduce((acc, statement) => acc + statement.allocable_amount, 0),
 			),
@@ -331,6 +340,14 @@ export default function RecordCreatorDialog({
 										<DatetimeField
 											id={field.name}
 											label="Date and time"
+											autopopulatedTime={inferredDatetime.hasTime}
+											autopopulated={
+												!!statements.length &&
+												!!field.state.value &&
+												!field.state.meta.isDirty
+													? datetimeAutopopulated
+													: undefined
+											}
 											value={field.state.value}
 											errors={mergeErrors(
 												field.state.meta.errors,
@@ -348,6 +365,11 @@ export default function RecordCreatorDialog({
 										<AmountField
 											id={field.name}
 											label="Amount"
+											autopopulated={
+												statements.length && !field.state.meta.isDirty
+													? "Autopopulated from the available statement amounts."
+													: undefined
+											}
 											value={field.state.value}
 											errors={mergeErrors(
 												field.state.meta.errors,
@@ -614,46 +636,4 @@ export default function RecordCreatorDialog({
 			)}
 		</Dialog>
 	)
-}
-
-function inferAllocatorDatetime(statements: Statement[]) {
-	const DESCRIPTION_DATE_REGEX = /\b\d{2}(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\b/
-
-	const describedDates = statements.flatMap(statement => {
-		const match = statement.description.match(DESCRIPTION_DATE_REGEX)?.[0]
-		if (!match) {
-			return []
-		}
-
-		const statementDate = parseDatetime(statement.datetime)
-		if (!statementDate.isValid) {
-			return []
-		}
-
-		let describedDate = DateTime.fromFormat(
-			`${statementDate.year}-${match.slice(0, 2)}${match.slice(2).toLowerCase()}`,
-			"yyyy-ddMMM",
-		).startOf("day")
-
-		if (!describedDate.isValid) {
-			return []
-		}
-
-		if (describedDate.toMillis() > statementDate.endOf("day").toMillis()) {
-			describedDate = describedDate.minus({ years: 1 })
-		}
-
-		return [describedDate]
-	})
-
-	const earliestDate =
-		[...describedDates].sort((a, b) => a.toMillis() - b.toMillis())[0] ??
-		statements
-			.flatMap(statement => {
-				const statementDate = parseDatetime(statement.datetime)
-				return statementDate.isValid ? [statementDate] : []
-			})
-			.sort((a, b) => a.toMillis() - b.toMillis())[0]
-
-	return earliestDate ? earliestDate.toFormat("yyyy-MM-dd'T'HH:mm") : ""
 }
