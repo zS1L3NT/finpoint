@@ -32,7 +32,6 @@ const statement = (id: string, overrides: Partial<StatementRow> = {}): Statement
 const input = (overrides: Partial<RuleInput> = {}): RuleInput => ({
 	name: "Coffee",
 	enabled: true,
-	include_existing: true,
 	conditions: { mode: "all", items: [{ operator: "contains", value: "COFFEE" }] },
 	actions: {
 		title: { mode: "suggest", value: "Coffee" },
@@ -86,45 +85,18 @@ test("conditions compare the description as literal, case-insensitive text", () 
 	expect(matchesStatement(both("all"), s)).toBe(false)
 	expect(matchesStatement(both("any"), s)).toBe(true)
 })
-test("new-only rules reach Statements imported after creation, judged by import time not bank date", async () => {
+test("rules apply to every matching Statement whenever a Record is created", async () => {
 	await db.statements.add(statement("old"))
-	const rule = await saveStatementRule(input({ include_existing: false }))
-	await db.statements.add(
-		statement("new", {
-			datetime: "2020-01-01 00:00",
-			imported_at: new Date(Date.parse(rule.created_at) + 1).toISOString(),
-		}),
-	)
-	expect(
-		(await previewStatementRule(rule)).map(s => [s.id, s.applies]).sort(),
-	).toEqual([
-		["new", true],
-		["old", false],
-	])
-	expect(await statementRecommendations(["old"])).toEqual([])
+	const rule = await saveStatementRule(input())
+	await db.statements.add(statement("new", { datetime: "2020-01-01 00:00" }))
+	await db.statements.add(statement("tea", { description: "Tea house" }))
+	expect((await previewStatementRule(rule)).map(s => s.id).sort()).toEqual(["new", "old"])
+	expect((await listStatementRules())[0]).toMatchObject({ matches: 2 })
+	expect(await statementRecommendations(["old"])).toHaveLength(2)
 	expect(await statementRecommendations(["new"])).toHaveLength(2)
-	expect((await listStatementRules())[0]).toMatchObject({ matches: 1 })
-	// The choice is fixed at creation; edits keep it.
-	await saveStatementRule(input({ include_existing: true }), rule.id)
-	expect((await db.statement_rules.get(rule.id))?.include_existing).toBe(false)
-	expect(
-		(await previewStatementRule({ ...input(), include_existing: false })).every(s => !s.applies),
-	).toBe(true)
-	const all = await saveStatementRule(input({ name: "All" }))
-	expect(all.include_existing).toBe(true)
-	expect((await statementRecommendations(["old"])).map(r => r.rule_name)).toEqual(["All", "All"])
+	expect(await statementRecommendations(["tea"])).toEqual([])
+	expect(await statementRecommendations(["tea", "new"])).toHaveLength(2)
 	expect(await db.records.count()).toBe(0)
-})
-test("importing and adding pending Statements stamps the import time", async () => {
-	const { createPendingStatement } = await import("../src/logic/statements")
-	const before = new Date().toISOString()
-	const row = await createPendingStatement({
-		account_id: "a",
-		datetime: "2026-10-18T12:00",
-		description: "Coffee",
-		amount: -5,
-	})
-	expect((await db.statements.get(row.id))?.imported_at! >= before).toBe(true)
 })
 test("paused rules and changed statements do not recommend; delete removes the rule", async () => {
 	await db.statements.add(statement("s"))
@@ -164,9 +136,6 @@ test("validation rejects bad operators, blank text, empty actions and missing re
 		input({ actions: { category_id: { mode: "autofill", value: "missing" } } }),
 	).catch(cause => cause)
 	expect(missingCategory.message).toContain("category")
-	await expect(
-		saveStatementRule(input({ include_existing: "yes" as unknown as boolean })),
-	).rejects.toThrow()
 	expect(await db.statement_rules.count()).toBe(0)
 })
 test("backups, Drive tables, legacy restore and reset include rules", async () => {

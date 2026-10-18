@@ -134,14 +134,7 @@ function RuleCard({
 						{rule.name}
 					</span>
 					<span className="block text-xs text-muted-foreground tabular-nums">
-						{rule.enabled
-							? pluralize(
-									rule.matches,
-									rule.include_existing
-										? "matching Statement"
-										: "new matching Statement",
-								)
-							: "Paused"}
+						{rule.enabled ? pluralize(rule.matches, "matching Statement") : "Paused"}
 					</span>
 				</button>
 				<Button

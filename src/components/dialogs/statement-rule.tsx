@@ -1,5 +1,4 @@
 import { useLiveQuery } from "dexie-react-hooks"
-import { DateTime } from "luxon"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import CategoryField from "@/components/form/category-field"
@@ -63,7 +62,6 @@ export default function StatementRuleDialog({
 	const [mode, setMode] = useState<"all" | "any">("all")
 	const [conditions, setConditions] = useState<(RuleCondition & { key: string })[]>([])
 	const [actions, setActions] = useState<RuleActions>({})
-	const [includeExisting, setIncludeExisting] = useState(true)
 	const { apiErrors, getApiFieldErrors, clearApiError, resetApiErrors, setApiErrors } =
 		useApiFormErrors()
 
@@ -78,24 +76,20 @@ export default function StatementRuleDialog({
 			})),
 		)
 		setActions(rule?.actions ?? {})
-		setIncludeExisting(rule?.include_existing ?? true)
 		resetApiErrors()
 	}, [isOpen, rule, resetApiErrors])
 
 	const input = {
 		name,
 		enabled: rule?.enabled ?? true,
-		include_existing: includeExisting,
 		conditions: { mode, items: conditions.map(({ operator, value }) => ({ operator, value })) },
 		actions,
 	}
 	const ready = conditions.some(c => c.value.trim())
 	const matches = useLiveQuery(
-		() =>
-			isOpen && ready ? previewStatementRule({ ...input, created_at: rule?.created_at }) : [],
-		[isOpen, JSON.stringify(input.conditions), includeExisting, rule?.created_at],
+		() => (isOpen && ready ? previewStatementRule(input) : []),
+		[isOpen, JSON.stringify(input.conditions)],
 	)
-	const reached = matches?.filter(s => s.applies).length ?? 0
 	const needles = conditions
 		.filter(c => c.operator !== "not_contains" && c.value.trim())
 		.map(c => c.value.trim().toLowerCase())
@@ -362,38 +356,10 @@ export default function StatementRuleDialog({
 									? pluralize(matches.length, "matching Statement")
 									: "Matching Statements"}
 							</h3>
-							{rule ? (
-								<p className="text-xs text-muted-foreground">
-									{rule.include_existing
-										? "Applies to existing Statements and every Statement imported later."
-										: `Applies to Statements imported since ${DateTime.fromISO(rule.created_at).toFormat("d MMM y")}: ${reached} so far.`}
-								</p>
-							) : (
-								<>
-									<ToggleGroup
-										type="single"
-										aria-label="Existing Statements"
-										className="w-full"
-										value={includeExisting ? "include" : "skip"}
-										onValueChange={value => {
-											if (value) setIncludeExisting(value === "include")
-										}}
-									>
-										<ToggleGroupItem value="include" className="flex-1">
-											Existing and new
-										</ToggleGroupItem>
-										<ToggleGroupItem value="skip" className="flex-1">
-											New only
-										</ToggleGroupItem>
-									</ToggleGroup>
-									<p className="text-xs text-muted-foreground">
-										{includeExisting
-											? "These Statements and every Statement imported later get suggestions."
-											: "Only Statements imported from now on get suggestions. Existing matches are shown for reference."}{" "}
-										You can't change this after creating the rule.
-									</p>
-								</>
-							)}
+							<p className="text-xs text-muted-foreground">
+								Creating a Record from any of these Statements fills in the fields
+								on the left.
+							</p>
 						</header>
 						<div className="-mx-1 overflow-y-auto px-1">
 							{!ready ? (
@@ -406,41 +372,26 @@ export default function StatementRuleDialog({
 								</p>
 							) : (
 								<ul className="divide-y">
-									{matches
-										.toSorted((a, b) => Number(b.applies) - Number(a.applies))
-										.slice(0, PREVIEW_LIMIT)
-										.map(s => (
-											<li
-												key={s.id}
-												title={
-													s.applies
-														? undefined
-														: "Imported before this rule; no suggestions"
-												}
+									{matches.slice(0, PREVIEW_LIMIT).map(s => (
+										<li key={s.id} className="flex items-start gap-3 py-2">
+											<span className="min-w-0 flex-1">
+												<span className="block font-mono text-xs break-all">
+													{highlight(s.description, needles)}
+												</span>
+												<span className="text-[0.6875rem] text-muted-foreground">
+													{s.account.name} · {formatDatetime(s.datetime)}
+												</span>
+											</span>
+											<span
 												className={cn(
-													"flex items-start gap-3 py-2",
-													!s.applies && "opacity-50",
+													"shrink-0 text-xs font-medium tabular-nums",
+													amountTone(s.amount),
 												)}
 											>
-												<span className="min-w-0 flex-1">
-													<span className="block font-mono text-xs break-all">
-														{highlight(s.description, needles)}
-													</span>
-													<span className="text-[0.6875rem] text-muted-foreground">
-														{s.account.name} ·{" "}
-														{formatDatetime(s.datetime)}
-													</span>
-												</span>
-												<span
-													className={cn(
-														"shrink-0 text-xs font-medium tabular-nums",
-														amountTone(s.amount),
-													)}
-												>
-													{formatCurrency(s.amount)}
-												</span>
-											</li>
-										))}
+												{formatCurrency(s.amount)}
+											</span>
+										</li>
+									))}
 									{matches.length > PREVIEW_LIMIT ? (
 										<li className="py-2 text-center text-xs text-muted-foreground">
 											and {matches.length - PREVIEW_LIMIT} more

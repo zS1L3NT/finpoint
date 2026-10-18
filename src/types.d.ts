@@ -170,8 +170,6 @@ export type StatementRule = {
 	id: string
 	name: string
 	enabled: boolean
-	/** Chosen once at creation: false limits the rule to Statements imported after `created_at`. */
-	include_existing: boolean
 	conditions: { mode: "all" | "any"; items: RuleCondition[] }
 	actions: RuleActions
 	created_at: string

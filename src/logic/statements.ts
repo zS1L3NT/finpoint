@@ -169,7 +169,6 @@ export async function createPendingStatement(input: StatementInput) {
 		amount: dto.amount,
 		index: 0,
 		is_pending: asPending(true),
-		imported_at: new Date().toISOString(),
 	}
 	await db.statements.add(row)
 

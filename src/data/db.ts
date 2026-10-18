@@ -31,8 +31,6 @@ export type StatementRow = {
 	index: number
 	/** 0 | 1 (boolean stored as number so it can be indexed) */
 	is_pending: number
-	/** ISO time the Statement entered Finpoint; absent on Statements that predate statement rules. */
-	imported_at?: string
 }
 
 export type DuplicateDismissalRow = { statement_id: string; other_statement_id: string }

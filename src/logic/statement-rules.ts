@@ -43,17 +43,6 @@ export function matchesStatement(
 	)
 }
 
-/** Rules without existing Statements only reach Statements imported after the rule was created. */
-export function appliesTo(
-	rule: Pick<StatementRule, "include_existing" | "created_at">,
-	statement: Pick<StatementRow, "imported_at">,
-) {
-	return (
-		rule.include_existing ||
-		(statement.imported_at !== undefined && statement.imported_at >= rule.created_at)
-	)
-}
-
 const byCreation = (a: StatementRule, b: StatementRule) =>
 	a.created_at.localeCompare(b.created_at) || a.id.localeCompare(b.id)
 
@@ -64,7 +53,7 @@ export async function listStatementRules() {
 	])
 	return rules.sort(byCreation).map(rule => ({
 		...rule,
-		matches: statements.filter(s => matchesStatement(rule, s) && appliesTo(rule, s)).length,
+		matches: statements.filter(s => matchesStatement(rule, s)).length,
 	}))
 }
 
@@ -73,8 +62,6 @@ export async function saveStatementRule(input: RuleInput, id?: string) {
 	const v = new Validator()
 	const name = v.text(input.name, "name", "Name this rule.")
 	if (typeof input.enabled !== "boolean") v.reject("enabled", "Choose whether this rule is on.")
-	if (typeof input.include_existing !== "boolean")
-		v.reject("include_existing", "Choose whether existing Statements are included.")
 	v.oneOf(input.conditions?.mode, "conditions.mode", ["all", "any"])
 	if (!Array.isArray(input.conditions?.items) || !input.conditions.items.length)
 		v.reject("conditions", "Add at least one condition.")
@@ -124,8 +111,6 @@ export async function saveStatementRule(input: RuleInput, id?: string) {
 				id: id ?? newId(),
 				name,
 				enabled: input.enabled,
-				// Fixed at creation, so editing never moves which Statements count as new.
-				include_existing: existing?.include_existing ?? input.include_existing,
 				conditions: input.conditions,
 				actions: input.actions,
 				created_at: existing?.created_at ?? new Date().toISOString(),
@@ -145,19 +130,11 @@ export async function deleteStatementRule(id: string) {
 	await db.statement_rules.delete(id)
 }
 
-/** Every matching Statement, flagged by whether the rule reaches it; unsaved rules start now. */
-export async function previewStatementRule(
-	rule: Pick<StatementRule, "conditions" | "include_existing"> & { created_at?: string },
-) {
-	const created_at = rule.created_at ?? new Date().toISOString()
-	const applies = new Map(
-		(await db.statements.toArray())
-			.filter(s => matchesStatement(rule, s))
-			.map(s => [s.id, appliesTo({ ...rule, created_at }, s)]),
+export async function previewStatementRule(rule: Pick<StatementRule, "conditions">) {
+	const ids = new Set(
+		(await db.statements.toArray()).filter(s => matchesStatement(rule, s)).map(s => s.id),
 	)
-	return (await listStatements())
-		.filter(s => applies.has(s.id))
-		.map(s => ({ ...s, applies: applies.get(s.id) === true }))
+	return (await listStatements()).filter(s => ids.has(s.id))
 }
 
 export type RuleRecommendation = {
@@ -176,7 +153,7 @@ export async function statementRecommendations(
 	const result: RuleRecommendation[] = []
 	for (const rule of (await db.statement_rules.toArray()).sort(byCreation)) {
 		if (!rule.enabled) continue
-		if (!statements.some(s => matchesStatement(rule, s) && appliesTo(rule, s))) continue
+		if (!statements.some(s => matchesStatement(rule, s))) continue
 		for (const { value: field } of RULE_FIELDS) {
 			const action = rule.actions[field]
 			if (!action) continue
