@@ -2,7 +2,7 @@ import { db, type StatementRow } from "@/data/db"
 import { newId, TREATMENT_VALUES } from "@/logic/shared"
 import { listStatements } from "@/logic/statements"
 import { ValidationError, Validator } from "@/logic/validate"
-import type { RuleCondition, RuleDataset, RuleField, StatementRule } from "@/types/statement-rules"
+import type { RuleCondition, RuleDataset, RuleField, RuleRun, StatementRule } from "@/types"
 
 export const RULE_FIELDS: { value: RuleField; label: string }[] = [
 	{ value: "title", label: "Title" },
@@ -11,93 +11,95 @@ export const RULE_FIELDS: { value: RuleField; label: string }[] = [
 	{ value: "analytics_treatment", label: "Treatment" },
 	{ value: "monthly_budget_id", label: "Monthly budget" },
 ]
-export const CONDITION_FIELDS: { value: RuleCondition["field"]; label: string }[] = [
-	{ value: "description", label: "Description" },
-	{ value: "amount", label: "Amount" },
-	{ value: "date", label: "Date" },
-	{ value: "is_pending", label: "Pending status" },
+export const RULE_OPERATORS: { value: RuleCondition["operator"]; label: string }[] = [
+	{ value: "contains", label: "contains" },
+	{ value: "not_contains", label: "doesn't contain" },
+	{ value: "starts_with", label: "starts with" },
+	{ value: "equals", label: "is exactly" },
 ]
-export function conditionOperators(field: RuleCondition["field"]): RuleCondition["operator"][] {
-	return field === "description"
-		? ["contains", "not_contains", "equals", "starts_with"]
-		: field === "is_pending"
-			? ["equals"]
-			: ["equals", "gte", "lte"]
-}
+export const RULE_DATASETS: { value: RuleDataset; label: string }[] = [
+	{ value: "both", label: "All" },
+	{ value: "existing", label: "Existing only" },
+	{ value: "new", label: "New only" },
+]
+
 export function matchesStatement(
-	rule: Pick<StatementRule, "account_ids" | "conditions">,
-	statement: StatementRow,
+	rule: Pick<StatementRule, "conditions">,
+	statement: Pick<StatementRow, "description">,
 ): boolean {
-	if (rule.account_ids.length && !rule.account_ids.includes(statement.account_id)) return false
-	if (!rule.conditions.items.length) return false
-	const results = rule.conditions.items.map(condition => {
-		const value = condition.value.trim().toLowerCase()
-		if (!value || !conditionOperators(condition.field).includes(condition.operator))
-			return false
-		const actual =
-			condition.field === "description"
-				? statement.description.toLowerCase()
-				: condition.field === "amount"
-					? statement.amount
-					: condition.field === "date"
-						? statement.datetime.slice(0, 10)
-						: String(statement.is_pending === 1)
-		const expected = condition.field === "amount" ? Number(value) : value
-		switch (condition.operator) {
+	const description = statement.description.toLowerCase()
+	const results = rule.conditions.items.map(({ operator, value }) => {
+		const needle = value.trim().toLowerCase()
+		if (!needle) return false
+		switch (operator) {
 			case "contains":
-				return String(actual).includes(value)
+				return description.includes(needle)
 			case "not_contains":
-				return !String(actual).includes(value)
+				return !description.includes(needle)
 			case "starts_with":
-				return String(actual).startsWith(value)
+				return description.startsWith(needle)
 			case "equals":
-				return actual === expected
-			case "gte":
-				return actual >= expected
-			case "lte":
-				return actual <= expected
+				return description === needle
 		}
 	})
-	return rule.conditions.mode === "all" ? results.every(Boolean) : results.some(Boolean)
-}
-
-export async function listStatementRules() {
-	return (await db.statement_rules.toArray()).sort(
-		(a, b) => a.priority - b.priority || a.id.localeCompare(b.id),
+	return (
+		results.length > 0 &&
+		(rule.conditions.mode === "all" ? results.every(Boolean) : results.some(Boolean))
 	)
 }
 
+/** Statements in a dataset; without a run every current Statement counts as existing. */
+function inDataset<T extends { id: string }>(
+	statements: T[],
+	run: RuleRun | undefined,
+	dataset: RuleDataset,
+) {
+	const known = new Set(run?.known_statement_ids ?? statements.map(s => s.id))
+	return statements.filter(
+		s => dataset === "both" || (dataset === "existing") === known.has(s.id),
+	)
+}
+
+const byCreation = (a: StatementRule, b: StatementRule) =>
+	a.created_at.localeCompare(b.created_at) || a.id.localeCompare(b.id)
+
+export async function listStatementRules() {
+	const [rules, runs, statements] = await Promise.all([
+		db.statement_rules.toArray(),
+		db.statement_rule_runs.toArray(),
+		db.statements.toArray(),
+	])
+	return rules.sort(byCreation).map(rule => {
+		const run = runs.find(r => r.rule_id === rule.id)
+		const dataset = run?.dataset ?? "both"
+		return {
+			...rule,
+			dataset,
+			matches: inDataset(statements, run, dataset).filter(s => matchesStatement(rule, s))
+				.length,
+		}
+	})
+}
+
 export type RuleInput = Omit<StatementRule, "id" | "created_at" | "updated_at">
-export async function saveStatementRule(input: RuleInput, id?: string) {
+export async function saveStatementRule(input: RuleInput, dataset: RuleDataset, id?: string) {
 	const v = new Validator()
-	const name = v.text(input.name, "name")
-	if (typeof input.enabled !== "boolean")
-		v.reject("enabled", "Choose whether this rule is enabled.")
-	if (!Number.isSafeInteger(input.priority) || input.priority < 0)
-		v.reject("priority", "Enter a non-negative whole number.")
+	const name = v.text(input.name, "name", "Name this rule.")
+	if (typeof input.enabled !== "boolean") v.reject("enabled", "Choose whether this rule is on.")
+	v.oneOf(dataset, "dataset", ["existing", "new", "both"])
 	v.oneOf(input.conditions?.mode, "conditions.mode", ["all", "any"])
 	if (!Array.isArray(input.conditions?.items) || !input.conditions.items.length)
 		v.reject("conditions", "Add at least one condition.")
-	for (const [i, condition] of (Array.isArray(input.conditions?.items)
-		? input.conditions.items
-		: []
-	).entries()) {
-		const field = `conditions.items.${i}`
+	for (const [i, condition] of (input.conditions?.items ?? []).entries()) {
 		v.oneOf(
-			condition.field,
-			`${field}.field`,
-			CONDITION_FIELDS.map(f => f.value),
+			condition.operator,
+			`conditions.items.${i}.operator`,
+			RULE_OPERATORS.map(o => o.value),
 		)
-		v.oneOf(condition.operator, `${field}.operator`, conditionOperators(condition.field))
-		v.text(condition.value, `${field}.value`)
-		if (condition.field === "amount" && !Number.isFinite(Number(condition.value)))
-			v.reject(`${field}.value`, "Enter a valid amount.")
-		if (condition.field === "date") v.date(condition.value, `${field}.value`)
-		if (condition.field === "is_pending")
-			v.oneOf(condition.value, `${field}.value`, ["true", "false"])
+		v.text(condition.value, `conditions.items.${i}.value`, "Enter text to look for.")
 	}
 	if (!Object.keys(input.actions ?? {}).length)
-		v.reject("actions", "Choose at least one field to suggest or autofill.")
+		v.reject("actions", "Fill in at least one record field.")
 	for (const [field, action] of Object.entries(input.actions ?? {})) {
 		v.oneOf(
 			field,
@@ -106,12 +108,10 @@ export async function saveStatementRule(input: RuleInput, id?: string) {
 		)
 		v.oneOf(action?.mode, `actions.${field}.mode`, ["suggest", "autofill"])
 		if (!(field === "monthly_budget_id" && action?.value === null))
-			v.text(action?.value, `actions.${field}.value`)
+			v.text(action?.value, `actions.${field}.value`, "Enter a value.")
 		if (field === "analytics_treatment")
 			v.oneOf(action?.value, `actions.${field}.value`, TREATMENT_VALUES)
 	}
-	if (!Array.isArray(input.account_ids) || input.account_ids.some(id => typeof id !== "string"))
-		v.reject("account_ids", "Select valid accounts.")
 	v.throwIfInvalid()
 
 	return db.transaction(
@@ -120,14 +120,10 @@ export async function saveStatementRule(input: RuleInput, id?: string) {
 			db.statement_rules,
 			db.statement_rule_runs,
 			db.statements,
-			db.accounts,
 			db.categories,
 			db.monthly_budgets,
 		],
 		async () => {
-			for (const accountId of input.account_ids)
-				if (!(await db.accounts.get(accountId)))
-					v.reject("account_ids", "Select an existing account.")
 			if (
 				input.actions.category_id &&
 				!(await db.categories.get(input.actions.category_id.value))
@@ -143,24 +139,31 @@ export async function saveStatementRule(input: RuleInput, id?: string) {
 			if (id && !existing)
 				throw new ValidationError({ name: ["This rule no longer exists."] })
 			const rule: StatementRule = {
-				...input,
-				name,
 				id: id ?? newId(),
+				name,
+				enabled: input.enabled,
+				conditions: input.conditions,
+				actions: input.actions,
 				created_at: existing?.created_at ?? new Date().toISOString(),
 				updated_at: new Date().toISOString(),
 			}
 			await db.statement_rules.put(rule)
+			// "New" stays relative to the Statements known when the rule was first saved.
 			const run = await db.statement_rule_runs.get(rule.id)
 			await db.statement_rule_runs.put({
 				rule_id: rule.id,
+				dataset,
 				known_statement_ids:
 					run?.known_statement_ids ?? (await db.statements.toCollection().primaryKeys()),
-				matched_statement_ids: [],
-				ran_at: null,
+				ran_at: new Date().toISOString(),
 			})
 			return rule
 		},
 	)
+}
+
+export async function setStatementRuleEnabled(id: string, enabled: boolean) {
+	await db.statement_rules.update(id, { enabled, updated_at: new Date().toISOString() })
 }
 
 export async function deleteStatementRule(id: string) {
@@ -170,57 +173,13 @@ export async function deleteStatementRule(id: string) {
 	})
 }
 
-async function datasetStatements(ruleId: string | undefined, dataset: RuleDataset) {
-	const statements = await db.statements.toArray()
-	const run = ruleId ? await db.statement_rule_runs.get(ruleId) : undefined
-	const known = new Set(run?.known_statement_ids ?? statements.map(s => s.id))
-	return statements.filter(
-		s => dataset === "both" || (dataset === "existing" ? known.has(s.id) : !known.has(s.id)),
-	)
-}
-
 export async function previewStatementRule(
-	rule: RuleInput,
+	rule: Pick<StatementRule, "conditions">,
 	id: string | undefined,
 	dataset: RuleDataset,
-	query = "",
 ) {
-	const rows = (await datasetStatements(id, dataset)).filter(s => matchesStatement(rule, s))
-	const ids = new Set(rows.map(s => s.id))
-	return (await listStatements({ query })).filter(s => ids.has(s.id))
-}
-
-export async function runStatementRule(id: string, dataset: RuleDataset) {
-	const v = new Validator()
-	v.oneOf(dataset, "dataset", ["existing", "new", "both"])
-	v.throwIfInvalid()
-	return db.transaction(
-		"rw",
-		[db.statement_rules, db.statement_rule_runs, db.statements],
-		async () => {
-			const rule = await db.statement_rules.get(id)
-			if (!rule?.enabled)
-				throw new ValidationError({ rule: ["Enable this rule before running it."] })
-			const rows = await datasetStatements(id, dataset)
-			const selected = new Set(rows.map(s => s.id))
-			const run = await db.statement_rule_runs.get(id)
-			const matches = rows.filter(s => matchesStatement(rule, s)).map(s => s.id)
-			await db.statement_rule_runs.put({
-				rule_id: id,
-				known_statement_ids: [
-					...new Set([...(run?.known_statement_ids ?? []), ...selected]),
-				],
-				matched_statement_ids: [
-					...new Set([
-						...(run?.matched_statement_ids ?? []).filter(id => !selected.has(id)),
-						...matches,
-					]),
-				],
-				ran_at: new Date().toISOString(),
-			})
-			return { scanned: rows.length, matched: matches.length }
-		},
-	)
+	const run = id ? await db.statement_rule_runs.get(id) : undefined
+	return inDataset(await listStatements(), run, dataset).filter(s => matchesStatement(rule, s))
 }
 
 export type RuleRecommendation = {
@@ -230,20 +189,21 @@ export type RuleRecommendation = {
 	mode: "suggest" | "autofill"
 	value: string | null
 }
+/** Earlier rules win autofill conflicts; every suggestion stays available. */
 export async function statementRecommendations(
 	statementIds: string[],
 ): Promise<RuleRecommendation[]> {
 	if (!statementIds.length) return []
-	const selected = new Set(statementIds)
-	const statements = await db.statements.bulkGet(statementIds)
-	const runs = new Map((await db.statement_rule_runs.toArray()).map(run => [run.rule_id, run]))
+	const statements = (await db.statements.bulkGet(statementIds)).filter(s => s !== undefined)
+	const runs = await db.statement_rule_runs.toArray()
 	const result: RuleRecommendation[] = []
-	for (const rule of await listStatementRules()) {
+	for (const rule of (await db.statement_rules.toArray()).sort(byCreation)) {
 		if (!rule.enabled) continue
-		const eligible = new Set(
-			runs.get(rule.id)?.matched_statement_ids.filter(id => selected.has(id)) ?? [],
+		const run = runs.find(r => r.rule_id === rule.id)
+		if (
+			!inDataset(statements, run, run?.dataset ?? "both").some(s => matchesStatement(rule, s))
 		)
-		if (!statements.some(s => s && eligible.has(s.id) && matchesStatement(rule, s))) continue
+			continue
 		for (const { value: field } of RULE_FIELDS) {
 			const action = rule.actions[field]
 			if (!action) continue

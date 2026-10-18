@@ -12,8 +12,7 @@
 
 import Dexie, { type Table } from "dexie"
 import { hashLegacySnapshot, hashSnapshot } from "@/data/snapshot-hash"
-import type { AnalyticsTreatment } from "@/types"
-import type { RuleRun, StatementRule } from "@/types/statement-rules"
+import type { AnalyticsTreatment, RuleRun, StatementRule } from "@/types"
 
 export type AccountRow = {
 	id: string
@@ -305,7 +304,7 @@ class FinpointDB extends Dexie {
 				}
 			})
 		this.version(6)
-			.stores({ statement_rules: "id, priority", statement_rule_runs: "rule_id" })
+			.stores({ statement_rules: "id", statement_rule_runs: "rule_id" })
 			.upgrade(async transaction => {
 				const tables: Record<string, unknown[]> = {}
 				for (const name of [

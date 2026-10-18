@@ -8,10 +8,11 @@ import type { RuleInput } from "../src/logic/statement-rules"
 const { db } = await import("../src/data/db")
 const {
 	saveStatementRule,
-	runStatementRule,
 	previewStatementRule,
+	listStatementRules,
 	statementRecommendations,
 	recommendationAutofill,
+	setStatementRuleEnabled,
 	deleteStatementRule,
 	matchesStatement,
 } = await import("../src/logic/statement-rules")
@@ -31,12 +32,7 @@ const statement = (id: string, overrides: Partial<StatementRow> = {}): Statement
 const input = (overrides: Partial<RuleInput> = {}): RuleInput => ({
 	name: "Coffee",
 	enabled: true,
-	priority: 10,
-	account_ids: ["a"],
-	conditions: {
-		mode: "all",
-		items: [{ field: "description", operator: "contains", value: "COFFEE" }],
-	},
+	conditions: { mode: "all", items: [{ operator: "contains", value: "COFFEE" }] },
 	actions: {
 		title: { mode: "suggest", value: "Coffee" },
 		category_id: { mode: "autofill", value: "food" },
@@ -56,115 +52,112 @@ beforeEach(async () => {
 		default_monthly_budget_id: null,
 	})
 })
-test("conditions support literal case-insensitive text, signed amounts, dates, status and account scope", () => {
-	const rule = input({
-		conditions: {
-			mode: "all",
-			items: [
-				{ field: "description", operator: "contains", value: "COFFEE" },
-				{ field: "amount", operator: "lte", value: "-3" },
-				{ field: "date", operator: "gte", value: "2026-10-01" },
-				{ field: "is_pending", operator: "equals", value: "false" },
-			],
-		},
-	})
-	expect(matchesStatement(rule, statement("s"))).toBe(true)
-	expect(matchesStatement(rule, statement("s", { account_id: "other" }))).toBe(false)
-	expect(matchesStatement(rule, statement("s", { amount: 5 }))).toBe(false)
-	expect(matchesStatement(rule, statement("s", { is_pending: 1 }))).toBe(false)
-	expect(
-		matchesStatement(
-			{ ...rule, conditions: { ...rule.conditions, mode: "any" } },
-			statement("s", { amount: 5 }),
-		),
-	).toBe(true)
-	expect(
-		matchesStatement(input({ conditions: { mode: "any", items: [] } }), statement("s")),
-	).toBe(false)
+test("conditions compare the description as literal, case-insensitive text", () => {
+	const s = statement("s")
+	expect(matchesStatement(input(), s)).toBe(true)
+	expect(matchesStatement(input(), statement("s", { description: "Tea" }))).toBe(false)
+	expect(matchesStatement(input({ conditions: { mode: "any", items: [] } }), s)).toBe(false)
 	for (const [operator, value, result] of [
 		["equals", "some coffee shop", true],
-		["starts_with", "some", true],
+		["equals", "coffee", false],
+		["starts_with", "SOME", true],
+		["starts_with", "coffee", false],
 		["not_contains", "tea", true],
 		["contains", ".*", false],
+		["contains", "   ", false],
 	] as const)
 		expect(
 			matchesStatement(
-				input({
-					conditions: { mode: "all", items: [{ field: "description", operator, value }] },
-				}),
-				statement("s"),
+				input({ conditions: { mode: "all", items: [{ operator, value }] } }),
+				s,
 			),
 		).toBe(result)
+	const both = (mode: "all" | "any") =>
+		input({
+			conditions: {
+				mode,
+				items: [
+					{ operator: "contains", value: "coffee" },
+					{ operator: "contains", value: "tea" },
+				],
+			},
+		})
+	expect(matchesStatement(both("all"), s)).toBe(false)
+	expect(matchesStatement(both("any"), s)).toBe(true)
 })
-test("run dataset is transient; new statements are identified by arrival, not bank date", async () => {
+test("datasets split Statements by arrival relative to the rule's creation, not bank date", async () => {
 	await db.statements.add(statement("old"))
-	const rule = await saveStatementRule(input())
-	expect(rule).not.toHaveProperty("scope")
+	const rule = await saveStatementRule(input(), "existing")
 	await db.statements.add(statement("new", { datetime: "2020-01-01 00:00" }))
 	expect((await previewStatementRule(rule, rule.id, "existing")).map(s => s.id)).toEqual(["old"])
 	expect((await previewStatementRule(rule, rule.id, "new")).map(s => s.id)).toEqual(["new"])
-	expect(await statementRecommendations(["old", "new"])).toEqual([])
-	expect(await runStatementRule(rule.id, "new")).toEqual({ scanned: 1, matched: 1 })
+	expect((await previewStatementRule(rule, undefined, "new")).map(s => s.id)).toEqual([])
+	expect(await statementRecommendations(["new"])).toEqual([])
+	expect(await statementRecommendations(["old"])).toHaveLength(2)
+	expect((await listStatementRules())[0]).toMatchObject({ dataset: "existing", matches: 1 })
+	await saveStatementRule(input(), "new", rule.id)
 	expect(await statementRecommendations(["old"])).toEqual([])
 	expect(await statementRecommendations(["new"])).toHaveLength(2)
-	expect(await previewStatementRule(rule, rule.id, "new")).toEqual([])
-	expect(await runStatementRule(rule.id, "both")).toEqual({ scanned: 2, matched: 2 })
+	await saveStatementRule(input(), "both", rule.id)
+	expect(await statementRecommendations(["old", "new"])).toHaveLength(2)
+	await db.statements.add(statement("later"))
+	expect(await statementRecommendations(["later"])).toHaveLength(2)
 	expect(await db.records.count()).toBe(0)
 })
-test("priority resolves autofill per field, preserves explicit null, and keeps suggestions", async () => {
+test("earlier rules win autofill per field, explicit null is kept, suggestions all show", async () => {
 	await db.statements.add(statement("s"))
-	const later = await saveStatementRule(
+	await saveStatementRule(
 		input({
-			priority: 20,
-			actions: {
-				title: { mode: "autofill", value: "Later" },
-				location: { mode: "suggest", value: "Cafe" },
-			},
-		}),
-	)
-	const first = await saveStatementRule(
-		input({
-			priority: 1,
 			actions: {
 				title: { mode: "autofill", value: "First" },
 				monthly_budget_id: { mode: "autofill", value: null },
 			},
 		}),
+		"both",
 	)
-	await runStatementRule(later.id, "both")
-	await runStatementRule(first.id, "both")
+	await saveStatementRule(
+		input({
+			actions: {
+				title: { mode: "autofill", value: "Later" },
+				location: { mode: "suggest", value: "Cafe" },
+			},
+		}),
+		"both",
+	)
 	const result = await statementRecommendations(["s"])
 	expect(recommendationAutofill(result)).toEqual({ title: "First", monthly_budget_id: null })
 	expect(result.filter(r => r.mode === "suggest").map(r => r.value)).toEqual(["Cafe"])
 })
-test("edits invalidate runs, disabled rules and changed statements do not recommend", async () => {
+test("paused rules and changed statements do not recommend; delete clears run state", async () => {
 	await db.statements.add(statement("s"))
-	const rule = await saveStatementRule(input())
-	await runStatementRule(rule.id, "both")
+	const rule = await saveStatementRule(input(), "both")
 	await db.statements.update("s", { description: "Tea" })
 	expect(await statementRecommendations(["s"])).toEqual([])
 	await db.statements.update("s", { description: "Coffee" })
-	await saveStatementRule(input({ enabled: false }), rule.id)
+	await setStatementRuleEnabled(rule.id, false)
 	expect(await statementRecommendations(["s"])).toEqual([])
-	const failure = await runStatementRule(rule.id, "both").catch(cause => cause)
-	expect(failure.message).toContain("Enable")
+	await setStatementRuleEnabled(rule.id, true)
+	expect(await statementRecommendations(["s"])).toHaveLength(2)
 	await deleteStatementRule(rule.id)
 	expect(await db.statement_rule_runs.get(rule.id)).toBeUndefined()
 })
-test("validation rejects invalid fields, operators, amounts, actions and references atomically", async () => {
+test("validation rejects bad operators, blank text, empty actions and missing references", async () => {
 	await expect(
 		saveStatementRule(
 			input({
+				name: " ",
 				conditions: {
 					mode: "all",
-					items: [{ field: "amount", operator: "contains", value: "no" }],
+					items: [{ operator: "gte" as "contains", value: " " }],
 				},
 				actions: {},
 			}),
+			"both",
 		),
 	).rejects.toMatchObject({
 		name: "ValidationError",
 		errors: expect.objectContaining({
+			name: expect.any(Array),
 			"conditions.items.0.operator": expect.any(Array),
 			"conditions.items.0.value": expect.any(Array),
 			actions: expect.any(Array),
@@ -172,15 +165,15 @@ test("validation rejects invalid fields, operators, amounts, actions and referen
 	})
 	const missingCategory = await saveStatementRule(
 		input({ actions: { category_id: { mode: "autofill", value: "missing" } } }),
+		"both",
 	).catch(cause => cause)
 	expect(missingCategory.message).toContain("category")
-	await expect(saveStatementRule(input({ priority: -1 }))).rejects.toThrow()
+	await expect(saveStatementRule(input(), "later" as "both")).rejects.toThrow()
 	expect(await db.statement_rules.count()).toBe(0)
 })
 test("backups, Drive tables, legacy restore and reset include rules and run state", async () => {
 	await db.statements.add(statement("s"))
-	const rule = await saveStatementRule(input())
-	await runStatementRule(rule.id, "both")
+	await saveStatementRule(input(), "both")
 	const backup = await exportData()
 	await clearAllData()
 	await importData(backup)

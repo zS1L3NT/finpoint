@@ -218,7 +218,7 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 				},
 				{
 					to: pathStatementRules(),
-					icon: "lucide:list-filter",
+					icon: "lucide:wand-sparkles",
 					label: "Statement rules",
 					active: pathname.startsWith("/statement-rules"),
 				},

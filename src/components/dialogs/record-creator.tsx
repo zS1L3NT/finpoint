@@ -8,7 +8,7 @@ import AmountField from "@/components/form/amount-field"
 import ComboboxField from "@/components/form/combobox-field"
 import DatetimeField from "@/components/form/datetime-field"
 import RecordAnalyticsFields from "@/components/form/record-analytics-fields"
-import RuleSuggestions from "@/components/form/rule-suggestions"
+import RuleSuggestions, { ruleValueLabel } from "@/components/form/rule-suggestions"
 import TextField from "@/components/form/text-field"
 import TextareaField from "@/components/form/textarea-field"
 import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
@@ -30,7 +30,7 @@ import { FieldGroup } from "@/components/ui/field"
 import { Progress } from "@/components/ui/progress"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
-import { canUseMonthlyBudget, treatmentLabel } from "@/lib/analytics"
+import { canUseMonthlyBudget } from "@/lib/analytics"
 import { COLLAPSE_MOTION, SPRING, TRANSITION } from "@/lib/motion"
 import { cn, formatCurrency, formatDatetime, parseDatetime, pluralize, round2 } from "@/lib/utils"
 import { listMonthlyBudgets } from "@/logic/monthly-budgets"
@@ -41,8 +41,7 @@ import {
 	statementRecommendations,
 } from "@/logic/statement-rules"
 import { ValidationError } from "@/logic/validate"
-import type { AnalyticsTreatment, CategoryWithChildren, Statement } from "@/types"
-import type { RuleField } from "@/types/statement-rules"
+import type { AnalyticsTreatment, CategoryWithChildren, RuleField, Statement } from "@/types"
 
 export default function RecordCreatorDialog({
 	statements: statementsProp,
@@ -219,15 +218,7 @@ export default function RecordCreatorDialog({
 		<RuleSuggestions
 			field={field}
 			recommendations={recommendations ?? []}
-			label={value =>
-				field === "category_id"
-					? (categoriesFlat.find(c => c.id === value)?.name ?? value ?? "")
-					: field === "analytics_treatment"
-						? treatmentLabel(value as AnalyticsTreatment)
-						: field === "monthly_budget_id"
-							? (monthlyBudgets?.find(b => b.id === value)?.name ?? "Unbudgeted")
-							: (value ?? "")
-			}
+			label={value => ruleValueLabel(field, value, categories, monthlyBudgets)}
 			disabled={
 				field === "monthly_budget_id" &&
 				!canUseMonthlyBudget(

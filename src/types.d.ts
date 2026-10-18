@@ -151,3 +151,35 @@ export type AnalyticsSummary = {
 	}>
 	monthlyBudgets: Array<MonthlyBudget & { spending: number; records: number }>
 }
+
+/** Rules only read the Statement description; text comparisons ignore case. */
+export type RuleCondition = {
+	operator: "contains" | "not_contains" | "starts_with" | "equals"
+	value: string
+}
+export type RuleMode = "suggest" | "autofill"
+export type RuleActions = {
+	title?: { mode: RuleMode; value: string }
+	location?: { mode: RuleMode; value: string }
+	category_id?: { mode: RuleMode; value: string }
+	analytics_treatment?: { mode: RuleMode; value: AnalyticsTreatment }
+	monthly_budget_id?: { mode: RuleMode; value: string | null }
+}
+export type RuleField = keyof RuleActions
+export type StatementRule = {
+	id: string
+	name: string
+	enabled: boolean
+	conditions: { mode: "all" | "any"; items: RuleCondition[] }
+	actions: RuleActions
+	created_at: string
+	updated_at: string
+}
+/** Which Statements a rule applies to, judged against the Statements known when it was created. */
+export type RuleDataset = "existing" | "new" | "both"
+export type RuleRun = {
+	rule_id: string
+	dataset: RuleDataset
+	known_statement_ids: string[]
+	ran_at: string
+}
