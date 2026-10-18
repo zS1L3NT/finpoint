@@ -222,7 +222,7 @@ export default function AllocatorPendingPage() {
 			<PageContent>
 				<PageHeader
 					title="Workflows"
-					subtitle="Compare pending Statements with imported activity, then move Allocations to the correct Statement."
+					subtitle="Replace pending statements with imported activity."
 					description="Allocation workspace"
 					icon="lucide:link"
 				/>

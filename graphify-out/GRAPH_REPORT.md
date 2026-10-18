@@ -1,17 +1,17 @@
 # Graph Report - finpoint  (2026-10-18)
 
 ## Corpus Check
-- 200 files · ~123,185 words
+- 200 files · ~123,192 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 8 file(s) not represented in the graph (top: (none) 4, .example 1, .lock 1)
 
 ## Summary
-- 1601 nodes · 6393 edges · 76 communities (69 shown, 7 thin omitted)
+- 1601 nodes · 6396 edges · 76 communities (69 shown, 7 thin omitted)
 - Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 104 edges (avg confidence: 0.84)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `9a193ef6`
+- Built from commit: `a344e507`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -92,7 +92,7 @@
 - Domain docs
 
 ## God Nodes (most connected - your core abstractions)
-1. `cn()` - 318 edges
+1. `cn()` - 320 edges
 2. `Button()` - 118 edges
 3. `react` - 89 edges
 4. `formatCurrency()` - 81 edges
@@ -138,8 +138,8 @@ Cohesion: 0.05
 Nodes (91): Comparison, comparisonRateText(), comparisonText(), ComparisonValue, DashboardData, DashboardMonthlyBudget, DashboardPage(), DashboardView (+83 more)
 
 ### Community 3 - "statements.ts"
-Cohesion: 0.15
-Nodes (25): countSuggestions(), duplicateStatementIds(), removeStatementDismissals(), dayDifference(), ensureCanReplace(), maskDescription(), ReplacementAllocation, replacementComparison() (+17 more)
+Cohesion: 0.12
+Nodes (30): countSuggestions(), asPending(), AnalyticsRecord, AnalyticsSummary, duplicateStatementIds(), removeStatementDismissals(), dayDifference(), ensureCanReplace() (+22 more)
 
 ### Community 4 - "sidebar.tsx"
 Cohesion: 0.13
@@ -154,20 +154,20 @@ Cohesion: 0.16
 Nodes (23): COUNT_ROWS, DataSettingsPage(), StateRow(), STATUS_TONES, StatusTone, WorkspaceRow(), AlertDialog(), AlertDialogAction() (+15 more)
 
 ### Community 7 - "motion.ts"
-Cohesion: 0.21
-Nodes (13): framer-motion, Sparkline(), Delta, Metric(), ValueSwap(), STALE_MONTH_CLASS, takeMonthDirection(), useMonthTransition() (+5 more)
+Cohesion: 0.16
+Nodes (16): framer-motion, Sparkline(), Delta, Metric(), ValueSwap(), STALE_MONTH_CLASS, takeMonthDirection(), useMonthTransition() (+8 more)
 
 ### Community 8 - "Validator"
-Cohesion: 0.20
-Nodes (22): MonthlyBudgetDefaultRow, updateAccount(), validateBudget(), cleanInput(), dismissDuplicatePair(), eligible(), fixDuplicates(), restoreDuplicatePair() (+14 more)
+Cohesion: 0.24
+Nodes (19): updateAccount(), validateBudget(), cleanInput(), dismissDuplicatePair(), eligible(), fixDuplicates(), restoreDuplicatePair(), createMonthlyBudget() (+11 more)
 
 ### Community 9 - "dashboard.ts"
 Cohesion: 0.11
-Nodes (42): db, AnalyticsRecord, AnalyticsSummary, contribution(), summarize(), avg(), buildCashflowHistory(), buildCategories() (+34 more)
+Nodes (42): db, contribution(), summarize(), avg(), buildCashflowHistory(), buildCategories(), buildComparison(), buildMonthlyBudgets() (+34 more)
 
 ### Community 10 - "importer/page.tsx"
-Cohesion: 0.16
-Nodes (27): ACCEPT, BANKS_REQUIRING_ADDITIONAL_INFO, ImporterPage(), Step(), BANKS, ensureAccount(), NO_ACTIVITY, combine() (+19 more)
+Cohesion: 0.19
+Nodes (25): ACCEPT, BANKS_REQUIRING_ADDITIONAL_INFO, ImporterPage(), Step(), BANKS, ensureAccount(), combine(), dbsDescriptionKey() (+17 more)
 
 ### Community 11 - "compilerOptions"
 Cohesion: 0.06
@@ -194,8 +194,8 @@ Cohesion: 0.22
 Nodes (19): ReviewLinks(), Template(), ShellHeader(), TITLES, WorkflowTabs(), useMonthParams(), pathAccounts(), pathAllocator() (+11 more)
 
 ### Community 17 - "paginated-data-table.tsx"
-Cohesion: 0.25
-Nodes (23): @tanstack/react-table, DataTable(), PaginatedDataTable(), GroupHeaderRow(), groupStarts(), GroupTotal(), isInteractiveTarget(), MOBILE_LIST_CLASS (+15 more)
+Cohesion: 0.29
+Nodes (21): @tanstack/react-table, DataTable(), PaginatedDataTable(), PaginationHeader(), GroupHeaderRow(), groupStarts(), GroupTotal(), isInteractiveTarget() (+13 more)
 
 ### Community 18 - "suspicious"
 Cohesion: 0.07
@@ -227,7 +227,7 @@ Nodes (13): APIs, Arguments, And Props, Code Style, Consistency, Copy, Core, Ear
 
 ### Community 25 - "records.ts"
 Cohesion: 0.11
-Nodes (27): PendingCard(), getBudgetAnalytics(), getCategoryData(), round2(), AccountActivity, attachBudgetRecord(), BudgetDetail, BudgetFilters (+19 more)
+Nodes (27): PendingCard(), getCategoryData(), round2(), AccountActivity, NO_ACTIVITY, attachBudgetRecord(), BudgetDetail, BudgetFilters (+19 more)
 
 ### Community 26 - "components.json"
 Cohesion: 0.09
@@ -258,8 +258,8 @@ Cohesion: 0.38
 Nodes (11): pageHref(), pageWindow(), PaginationFooter(), Pagination(), PaginationContent(), PaginationEllipsis(), PaginationItem(), PaginationLink() (+3 more)
 
 ### Community 33 - "db.ts"
-Cohesion: 0.06
-Nodes (32): dexie, fake-indexeddb, xlsx, AccountRow, AllocationRow, AnalyticsMonthRow, asPending(), BudgetRecordRow (+24 more)
+Cohesion: 0.07
+Nodes (31): dexie, fake-indexeddb, xlsx, AccountRow, AllocationRow, AnalyticsMonthRow, BudgetRecordRow, BudgetRow (+23 more)
 
 ### Community 34 - "auto-sync.ts"
 Cohesion: 0.14
@@ -410,7 +410,7 @@ Nodes (3): Before exploration, Domain docs, Writing
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `cn()` connect `cn` to `record-editor.tsx`, `statement-replacement-review.tsx`, `(month)/page.tsx`, `PaginationFooter`, `sidebar.tsx`, `combobox.tsx`, `sync/page.tsx`, `motion.ts`, `importer/page.tsx`, `lucide-react`, `routes.ts`, `paginated-data-table.tsx`, `Button`, `records.ts`, `providers.tsx`, `app-sidebar.tsx`?**
-  _High betweenness centrality (0.152) - this node is a cross-community bridge._
+  _High betweenness centrality (0.153) - this node is a cross-community bridge._
 - **What connects `@fontsource-variable/inter`, `react-dom`, `shadcn` to the rest of the system?**
   _73 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `record-editor.tsx` be split into smaller, more focused modules?**
