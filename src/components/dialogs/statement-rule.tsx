@@ -24,6 +24,7 @@ import { TREATMENTS } from "@/lib/analytics"
 import { cn, formatCurrency, formatDatetime, pluralize } from "@/lib/utils"
 import type { listMonthlyBudgets } from "@/logic/monthly-budgets"
 import {
+	conditionPattern,
 	deleteStatementRule,
 	type listStatementRules,
 	previewStatementRule,
@@ -90,9 +91,7 @@ export default function StatementRuleDialog({
 		() => (isOpen && ready ? previewStatementRule(input) : []),
 		[isOpen, JSON.stringify(input.conditions)],
 	)
-	const needles = conditions
-		.filter(c => c.operator !== "not_contains" && c.value.trim())
-		.map(c => c.value.trim().toLowerCase())
+	const patterns = conditions.flatMap(c => conditionPattern(c) ?? [])
 
 	const setCondition = (key: string, patch: Partial<RuleCondition>) => {
 		setConditions(rows => rows.map(row => (row.key === key ? { ...row, ...patch } : row)))
@@ -244,11 +243,18 @@ export default function StatementRuleDialog({
 										/>
 										<Input
 											aria-label="Text to look for"
-											placeholder="e.g. SPOTIFY"
+											placeholder={
+												condition.operator === "regex"
+													? "e.g. ^(GRAB|GOJEK)"
+													: "e.g. SPOTIFY"
+											}
 											className="font-mono"
 											value={condition.value}
 											aria-invalid={
-												!!apiErrors[`conditions.items.${i}.value`]
+												!!apiErrors[`conditions.items.${i}.value`] ||
+												(condition.operator === "regex" &&
+													!!condition.value.trim() &&
+													!conditionPattern(condition))
 											}
 											onChange={event =>
 												setCondition(condition.key, {
@@ -376,7 +382,7 @@ export default function StatementRuleDialog({
 										<li key={s.id} className="flex items-start gap-3 py-2">
 											<span className="min-w-0 flex-1">
 												<span className="block font-mono text-xs break-all">
-													{highlight(s.description, needles)}
+													{highlight(s.description, patterns)}
 												</span>
 												<span className="text-[0.6875rem] text-muted-foreground">
 													{s.account.name} · {formatDatetime(s.datetime)}
@@ -430,21 +436,25 @@ export default function StatementRuleDialog({
 	)
 }
 
-/** Marks every case-insensitive occurrence of the looked-for text. */
-function highlight(text: string, needles: string[]) {
-	if (!needles.length) return text
-	const pattern = needles
-		.toSorted((a, b) => b.length - a.length)
-		.map(n => n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
-		.join("|")
-	// Splitting on a capture group puts the matched text at every odd index.
-	return text.split(new RegExp(`(${pattern})`, "gi")).map((part, i) =>
-		i % 2 ? (
-			<mark key={i} className="rounded-sm bg-primary/15 text-foreground">
-				{part}
+/** Marks every stretch of text a condition matched. */
+function highlight(text: string, patterns: RegExp[]) {
+	const marked = new Array<boolean>(text.length).fill(false)
+	for (const pattern of patterns)
+		for (const match of text.matchAll(new RegExp(pattern.source, "gi")))
+			marked.fill(true, match.index, match.index + match[0].length)
+	const parts: { text: string; mark: boolean; start: number }[] = []
+	for (const [i, mark] of marked.entries()) {
+		const last = parts.at(-1)
+		if (last?.mark === mark) last.text += text.charAt(i)
+		else parts.push({ text: text.charAt(i), mark, start: i })
+	}
+	return parts.map(p =>
+		p.mark ? (
+			<mark key={p.start} className="rounded-sm bg-primary/15 text-foreground">
+				{p.text}
 			</mark>
 		) : (
-			part
+			p.text
 		),
 	)
 }

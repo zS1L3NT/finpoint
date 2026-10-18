@@ -13,30 +13,32 @@ export const RULE_FIELDS: { value: RuleField; label: string }[] = [
 ]
 export const RULE_OPERATORS: { value: RuleCondition["operator"]; label: string }[] = [
 	{ value: "contains", label: "contains" },
-	{ value: "not_contains", label: "doesn't contain" },
-	{ value: "starts_with", label: "starts with" },
 	{ value: "equals", label: "is exactly" },
+	{ value: "regex", label: "matches regex" },
 ]
+
+/** Case-insensitive pattern for a condition; null while it is blank or an invalid regex. */
+export function conditionPattern({ operator, value }: RuleCondition) {
+	const text = value.trim()
+	if (!text) return null
+	const literal = text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+	try {
+		return new RegExp(
+			operator === "regex" ? text : operator === "equals" ? `^${literal}$` : literal,
+			"i",
+		)
+	} catch {
+		return null
+	}
+}
 
 export function matchesStatement(
 	rule: Pick<StatementRule, "conditions">,
 	statement: Pick<StatementRow, "description">,
 ): boolean {
-	const description = statement.description.toLowerCase()
-	const results = rule.conditions.items.map(({ operator, value }) => {
-		const needle = value.trim().toLowerCase()
-		if (!needle) return false
-		switch (operator) {
-			case "contains":
-				return description.includes(needle)
-			case "not_contains":
-				return !description.includes(needle)
-			case "starts_with":
-				return description.startsWith(needle)
-			case "equals":
-				return description === needle
-		}
-	})
+	const results = rule.conditions.items.map(
+		condition => conditionPattern(condition)?.test(statement.description) ?? false,
+	)
 	return (
 		results.length > 0 &&
 		(rule.conditions.mode === "all" ? results.every(Boolean) : results.some(Boolean))
@@ -71,7 +73,12 @@ export async function saveStatementRule(input: RuleInput, id?: string) {
 			`conditions.items.${i}.operator`,
 			RULE_OPERATORS.map(o => o.value),
 		)
-		v.text(condition.value, `conditions.items.${i}.value`, "Enter text to look for.")
+		if (
+			v.text(condition.value, `conditions.items.${i}.value`, "Enter text to look for.") &&
+			condition.operator === "regex" &&
+			!conditionPattern(condition)
+		)
+			v.reject(`conditions.items.${i}.value`, "Enter a valid regular expression.")
 	}
 	if (!Object.keys(input.actions ?? {}).length)
 		v.reject("actions", "Fill in at least one record field.")

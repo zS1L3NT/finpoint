@@ -154,7 +154,7 @@ export type AnalyticsSummary = {
 
 /** Rules only read the Statement description; text comparisons ignore case. */
 export type RuleCondition = {
-	operator: "contains" | "not_contains" | "starts_with" | "equals"
+	operator: "contains" | "equals" | "regex"
 	value: string
 }
 export type RuleMode = "suggest" | "autofill"

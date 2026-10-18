@@ -60,10 +60,12 @@ test("conditions compare the description as literal, case-insensitive text", () 
 	for (const [operator, value, result] of [
 		["equals", "some coffee shop", true],
 		["equals", "coffee", false],
-		["starts_with", "SOME", true],
-		["starts_with", "coffee", false],
-		["not_contains", "tea", true],
+		["equals", "SOME COFFEE SHOP", true],
 		["contains", ".*", false],
+		["regex", "^some\\s+coffee", true],
+		["regex", "^coffee", false],
+		["regex", "(tea|coffee) shop$", true],
+		["regex", "[unclosed", false],
 		["contains", "   ", false],
 	] as const)
 		expect(
@@ -131,6 +133,13 @@ test("validation rejects bad operators, blank text, empty actions and missing re
 			"conditions.items.0.value": expect.any(Array),
 			actions: expect.any(Array),
 		}),
+	})
+	await expect(
+		saveStatementRule(
+			input({ conditions: { mode: "all", items: [{ operator: "regex", value: "(GRAB" }] } }),
+		),
+	).rejects.toMatchObject({
+		errors: { "conditions.items.0.value": ["Enter a valid regular expression."] },
 	})
 	const missingCategory = await saveStatementRule(
 		input({ actions: { category_id: { mode: "autofill", value: "missing" } } }),
