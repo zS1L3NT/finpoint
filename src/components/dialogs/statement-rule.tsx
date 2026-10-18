@@ -252,8 +252,8 @@ export default function StatementRuleDialog({
 												aria-label="Text to look for"
 												placeholder={
 													condition.operator === "regex"
-														? "e.g. ^(GRAB|GOJEK)"
-														: "e.g. SPOTIFY"
+														? "e.g. grab|gojek|tada|ryde"
+														: "e.g. spotify"
 												}
 												className="font-mono"
 												value={condition.value}
