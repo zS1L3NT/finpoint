@@ -1,8 +1,8 @@
 {
   "app/(month)/layout.tsx": {
-    "mtime": 1792057879.4396307,
-    "seen": 1792664412.0210288,
-    "ast_hash": "41fb7d552db3b3c8ce335782b9ddfb15",
+    "mtime": 1792692573.088388,
+    "seen": 1792692988.249085,
+    "ast_hash": "ac207bc08f2ca3121e58fd34b68be744",
     "semantic_hash": ""
   },
   "app/(month)/page.tsx": {
@@ -168,9 +168,9 @@
     "semantic_hash": "7d8a33d5aa042f85737cd2f3334ae040"
   },
   "next-env.d.ts": {
-    "mtime": 1792656994.6227207,
-    "seen": 1792664412.0211196,
-    "ast_hash": "aa94238a90e7d04b7a47ecc3145ba6a0",
+    "mtime": 1792692983.3121967,
+    "seen": 1792692988.2491791,
+    "ast_hash": "8195d2c60ce847a459ae9d308d6a5724",
     "semantic_hash": ""
   },
   "next.config.ts": {
@@ -1470,10 +1470,10 @@
     "semantic_hash": ""
   },
   "tests/web/README.md": {
-    "mtime": 1792662938.816676,
-    "seen": 1792664440.6300442,
+    "mtime": 1792692788.3442416,
+    "seen": 1792693002.0486746,
     "ast_hash": "",
-    "semantic_hash": "e1bae6ecfe407ee3d7d84fa83913bac7"
+    "semantic_hash": "36232109af30ea911880feaae6fa4f5c"
   },
   "tests/web/harness/display.html": {
     "mtime": 1792058838.8595316,
@@ -1485,6 +1485,12 @@
     "mtime": 1792058838.8595316,
     "seen": 1792664412.0217063,
     "ast_hash": "b194223f1f3b81550d206761165adf60",
+    "semantic_hash": ""
+  },
+  "tests/web/month-hydration.e2e.ts": {
+    "mtime": 1792692702.2802858,
+    "seen": 1792692988.2494624,
+    "ast_hash": "c4671d69ced98498491bccadea4d99af",
     "semantic_hash": ""
   }
 }

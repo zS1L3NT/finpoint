@@ -7,7 +7,7 @@ Run `bun run test:web` for the local matrix, or `bun run test:web --project=chro
 Use `bun run test:web:headed --project=chromium` to watch a run and `bun run test:web:report` to open its report.
 ## What to run
 
-Run the tests that cover what you changed, not the whole matrix. The listed matrix is 806 cases
+Run the tests that cover what you changed, not the whole matrix. The listed matrix is 811 cases
 (measured with `bunx playwright test --list`; 2,186 before the test consolidation), every file in
 5 projects on one worker. Compatible cases that share a fixture and journey now run as `test.step`
 groups inside one test with a single seed, saving the per-case browser context, seeding, and
