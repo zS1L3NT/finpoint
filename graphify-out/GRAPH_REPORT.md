@@ -1,9 +1,9 @@
-# Graph Report - finpoint  (2026-10-18)
+# Graph Report - t3-288252c8  (2026-10-22)
 
 ## Corpus Check
 - 200 files · ~123,194 words
 - Verdict: corpus is large enough that graph structure adds value.
-- Unclassified: 8 file(s) not represented in the graph (top: (none) 4, .example 1, .lock 1)
+- Unclassified: 9 file(s) not represented in the graph (top: (none) 5, .example 1, .lock 1)
 
 ## Summary
 - 1601 nodes · 6399 edges · 76 communities (69 shown, 7 thin omitted)
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `10cf1f3a`
+- Built from commit: `ea648569`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -28,7 +28,7 @@
 - dashboard.ts
 - importer/page.tsx
 - compilerOptions
-- lucide-react
+- providers.tsx
 - package.json
 - dependencies
 - Project Shape
@@ -44,10 +44,10 @@
 - records.ts
 - components.json
 - Commands
-- use-appearance.tsx
-- providers.tsx
-- test-data.ts
 - app-sidebar.tsx
+- use-appearance.tsx
+- test-data.ts
+- lucide-react
 - PaginationFooter
 - db.ts
 - auto-sync.ts
@@ -173,9 +173,9 @@ Nodes (25): ACCEPT, BANKS_REQUIRING_ADDITIONAL_INFO, ImporterPage(), Step(), BAN
 Cohesion: 0.06
 Nodes (33): compilerOptions, allowJs, allowSyntheticDefaultImports, allowUnusedLabels, esModuleInterop, forceConsistentCasingInFileNames, incremental, isolatedModules (+25 more)
 
-### Community 12 - "lucide-react"
-Cohesion: 0.22
-Nodes (8): lucide-react, ICONS, ButtonVariant, Month, MonthCal(), MonthCalProps, MonthPicker(), MONTHS
+### Community 12 - "providers.tsx"
+Cohesion: 0.14
+Nodes (19): metadata, RootLayout(), viewport, Boot(), Providers(), @vercel/analytics, @vercel/speed-insights, preloadCategoryIcons() (+11 more)
 
 ### Community 13 - "package.json"
 Cohesion: 0.07
@@ -237,21 +237,21 @@ Nodes (21): aliases, components, hooks, lib, ui, utils, iconLibrary, menuAccent 
 Cohesion: 0.38
 Nodes (7): Biome (biome check --write), bun install, bun lint (write-mode), bun lint:check, bun run build, bun types:check, Commands
 
-### Community 28 - "use-appearance.tsx"
+### Community 28 - "app-sidebar.tsx"
+Cohesion: 0.18
+Nodes (21): AppearanceOption, APPEARANCES, AppearanceSwitch(), AppSidebar(), SyncDot(), SYSTEM_APPEARANCE, useSyncIndicator(), SidebarContent() (+13 more)
+
+### Community 29 - "use-appearance.tsx"
 Cohesion: 0.23
 Nodes (15): Toaster(), Appearance, applyAppearance(), getStoredAppearance(), handleSystemThemeChange(), initializeAppearance(), isDarkMode(), listeners (+7 more)
-
-### Community 29 - "providers.tsx"
-Cohesion: 0.14
-Nodes (19): metadata, RootLayout(), viewport, Boot(), Providers(), @vercel/analytics, @vercel/speed-insights, preloadCategoryIcons() (+11 more)
 
 ### Community 30 - "test-data.ts"
 Cohesion: 0.15
 Nodes (18): DEFAULT_CATEGORIES, DEFAULT_MONTHLY_BUDGETS, EXPORT_VERSION, FinpointExport, seedIfEmpty(), BANK_BLURB, between(), CATEGORIES (+10 more)
 
-### Community 31 - "app-sidebar.tsx"
-Cohesion: 0.18
-Nodes (21): AppearanceOption, APPEARANCES, AppearanceSwitch(), AppSidebar(), SyncDot(), SYSTEM_APPEARANCE, useSyncIndicator(), SidebarContent() (+13 more)
+### Community 31 - "lucide-react"
+Cohesion: 0.22
+Nodes (8): lucide-react, ICONS, ButtonVariant, Month, MonthCal(), MonthCalProps, MonthPicker(), MONTHS
 
 ### Community 32 - "PaginationFooter"
 Cohesion: 0.38
@@ -409,17 +409,17 @@ Nodes (3): Before exploration, Domain docs, Writing
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `cn()` connect `cn` to `record-editor.tsx`, `statement-replacement-review.tsx`, `(month)/page.tsx`, `PaginationFooter`, `sidebar.tsx`, `combobox.tsx`, `sync/page.tsx`, `motion.ts`, `importer/page.tsx`, `lucide-react`, `routes.ts`, `paginated-data-table.tsx`, `Button`, `records.ts`, `providers.tsx`, `app-sidebar.tsx`?**
+- **Why does `cn()` connect `cn` to `record-editor.tsx`, `statement-replacement-review.tsx`, `(month)/page.tsx`, `PaginationFooter`, `sidebar.tsx`, `combobox.tsx`, `sync/page.tsx`, `motion.ts`, `importer/page.tsx`, `providers.tsx`, `routes.ts`, `paginated-data-table.tsx`, `Button`, `records.ts`, `app-sidebar.tsx`, `lucide-react`?**
   _High betweenness centrality (0.153) - this node is a cross-community bridge._
 - **What connects `@fontsource-variable/inter`, `react-dom`, `shadcn` to the rest of the system?**
   _73 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `record-editor.tsx` be split into smaller, more focused modules?**
   _Cohesion score 0.07611548556430446 - nodes in this community are weakly interconnected._
-- **Why does `react` connect `Button` to `record-editor.tsx`, `statement-replacement-review.tsx`, `(month)/page.tsx`, `PaginationFooter`, `sidebar.tsx`, `combobox.tsx`, `sync/page.tsx`, `motion.ts`, `auto-sync.ts`, `importer/page.tsx`, `lucide-react`, `package.json`, `routes.ts`, `paginated-data-table.tsx`, `cn`, `use-appearance.tsx`, `providers.tsx`?**
+- **Why does `react` connect `Button` to `record-editor.tsx`, `statement-replacement-review.tsx`, `(month)/page.tsx`, `PaginationFooter`, `sidebar.tsx`, `combobox.tsx`, `sync/page.tsx`, `motion.ts`, `auto-sync.ts`, `importer/page.tsx`, `providers.tsx`, `package.json`, `routes.ts`, `paginated-data-table.tsx`, `cn`, `use-appearance.tsx`, `lucide-react`?**
   _High betweenness centrality (0.054) - this node is a cross-community bridge._
 - **Should `statement-replacement-review.tsx` be split into smaller, more focused modules?**
   _Cohesion score 0.1403921568627451 - nodes in this community are weakly interconnected._
-- **Why does `next` connect `Button` to `record-editor.tsx`, `statement-replacement-review.tsx`, `(month)/page.tsx`, `PaginationFooter`, `sync/page.tsx`, `auth-vault.ts`, `importer/page.tsx`, `package.json`, `routes.ts`, `providers.tsx`, `app-sidebar.tsx`?**
+- **Why does `next` connect `Button` to `record-editor.tsx`, `statement-replacement-review.tsx`, `(month)/page.tsx`, `PaginationFooter`, `sync/page.tsx`, `auth-vault.ts`, `importer/page.tsx`, `providers.tsx`, `package.json`, `routes.ts`, `app-sidebar.tsx`?**
   _High betweenness centrality (0.046) - this node is a cross-community bridge._
 - **Should `(month)/page.tsx` be split into smaller, more focused modules?**
   _Cohesion score 0.050288820931022764 - nodes in this community are weakly interconnected._
