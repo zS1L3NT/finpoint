@@ -104,107 +104,115 @@ async function chartFrames(page: Page, titles: string[], open: () => Promise<voi
 	}
 }
 
-for (const destination of ["overview", "budget"] as const) {
-	test(`charts.intro ${destination} grows real graph marks once and respects reduced motion`, async ({
-		page,
-		isMobile,
-	}) => {
-		await seedWorkspace(page)
-		await page.goto(destination === "overview" ? "/records" : "/budgets")
-		// Before hydration the trigger does nothing, so retry until the sheet is open.
-		if (destination === "overview" && isMobile)
-			await expect(async () => {
-				await page.locator('header [data-slot="sidebar-trigger"]').click()
-				await expect(
-					page.getByRole("dialog", { name: "Sidebar", exact: true }),
-				).toBeVisible({
-					timeout: 2000,
-				})
-			}).toPass()
-		const titles = destination === "overview" ? overviewCharts : ["Spending over time"]
-		const frames = await chartFrames(page, titles, async () => {
-			if (destination === "overview")
-				await page
-					.getByRole("link", { name: "Dashboard", exact: true })
-					.filter({ visible: true })
-					.click()
-			else await page.getByRole("heading", { name: "October Buffer", exact: true }).click()
-		})
-		await test.info().attach("graph-frame-counts", {
-			body: JSON.stringify(
-				Object.fromEntries(
-					Object.entries(frames).map(([title, samples]) => [
-						title,
-						{
-							frames: samples.length,
-							distinct: new Set(samples.map(frame => frame.geometry)).size,
-						},
-					]),
-				),
-			),
-			contentType: "application/json",
-		})
-		const reduced = await page.evaluate(
-			() => matchMedia("(prefers-reduced-motion: reduce)").matches,
-		)
-		for (const title of titles) {
-			const samples = frames[title] ?? []
-			expect(samples.length, `${title}: actual plotted frames`).toBeGreaterThan(3)
-			expect(
-				samples.every(frame => !/NaN|Infinity/.test(frame.geometry)),
-				title,
-			).toBe(true)
-			const unique = new Set(samples.map(frame => frame.geometry))
-			if (reduced) expect(unique.size, `${title}: reduced motion avoids graph growth`).toBe(1)
-			else
-				expect(
-					unique.size,
-					`${title}: intermediate graph geometry before settling`,
-				).toBeGreaterThan(2)
-			const settled = samples.filter(frame => frame.time > (samples.at(-1)?.time ?? 0) - 200)
-			expect(
-				new Set(settled.map(frame => frame.geometry)).size,
-				`${title}: graph settles`,
-			).toBe(1)
-		}
-		// Hover and sidebar resize may update geometry; they must not restart the grow-in clip.
-		const chart = page
-			.locator('[data-slot="card"]')
-			.filter({
-				has: page.locator('[data-slot="card-title"]').filter({ hasText: titles[0] }),
+test("charts intro journeys share one seed", async ({ page, isMobile }) => {
+	test.setTimeout(150_000)
+	await seedWorkspace(page)
+	for (const destination of ["overview", "budget"] as const) {
+		await test.step(`charts.intro ${destination} grows real graph marks once and respects reduced motion`, async () => {
+			await page.goto(destination === "overview" ? "/records" : "/budgets")
+			// Before hydration the trigger does nothing, so retry until the sheet is open.
+			if (destination === "overview" && isMobile)
+				await expect(async () => {
+					await page.locator('header [data-slot="sidebar-trigger"]').click()
+					await expect(
+						page.getByRole("dialog", { name: "Sidebar", exact: true }),
+					).toBeVisible({
+						timeout: 2000,
+					})
+				}).toPass()
+			const titles = destination === "overview" ? overviewCharts : ["Spending over time"]
+			const frames = await chartFrames(page, titles, async () => {
+				if (destination === "overview")
+					await page
+						.getByRole("link", { name: "Dashboard", exact: true })
+						.filter({ visible: true })
+						.click()
+				else
+					await page.getByRole("heading", { name: "October Buffer", exact: true }).click()
 			})
-			.getByRole("application")
-		// Observe from before the interaction, so a replay that finishes quickly is still caught.
-		const watcher = await page.evaluateHandle(() => {
-			const state = { replayed: false, stop: () => undefined as void }
-			const check = () => {
-				if (document.querySelector('clipPath[id^="animationClipPath"]'))
-					state.replayed = true
+			await test.info().attach("graph-frame-counts", {
+				body: JSON.stringify(
+					Object.fromEntries(
+						Object.entries(frames).map(([title, samples]) => [
+							title,
+							{
+								frames: samples.length,
+								distinct: new Set(samples.map(frame => frame.geometry)).size,
+							},
+						]),
+					),
+				),
+				contentType: "application/json",
+			})
+			const reduced = await page.evaluate(
+				() => matchMedia("(prefers-reduced-motion: reduce)").matches,
+			)
+			for (const title of titles) {
+				const samples = frames[title] ?? []
+				expect(samples.length, `${title}: actual plotted frames`).toBeGreaterThan(3)
+				expect(
+					samples.every(frame => !/NaN|Infinity/.test(frame.geometry)),
+					title,
+				).toBe(true)
+				const unique = new Set(samples.map(frame => frame.geometry))
+				if (reduced)
+					expect(unique.size, `${title}: reduced motion avoids graph growth`).toBe(1)
+				else
+					expect(
+						unique.size,
+						`${title}: intermediate graph geometry before settling`,
+					).toBeGreaterThan(2)
+				const settled = samples.filter(
+					frame => frame.time > (samples.at(-1)?.time ?? 0) - 200,
+				)
+				expect(
+					new Set(settled.map(frame => frame.geometry)).size,
+					`${title}: graph settles`,
+				).toBe(1)
 			}
-			const observer = new MutationObserver(check)
-			observer.observe(document.body, { subtree: true, childList: true, attributes: true })
-			state.stop = () => observer.disconnect()
-			return state
-		})
-		await chart.hover()
-		// Intro animations start within a frame; 600ms covers a delayed restart.
-		await page.waitForTimeout(600)
-		if (!isMobile) {
-			const width = await chart.evaluate(element => element.getBoundingClientRect().width)
-			await page.locator('header [data-slot="sidebar-trigger"]').click()
-			await expect
-				.poll(() => chart.evaluate(element => element.getBoundingClientRect().width))
-				.not.toBe(width)
+			// Hover and sidebar resize may update geometry; they must not restart the grow-in clip.
+			const chart = page
+				.locator('[data-slot="card"]')
+				.filter({
+					has: page.locator('[data-slot="card-title"]').filter({ hasText: titles[0] }),
+				})
+				.getByRole("application")
+			// Observe from before the interaction, so a replay that finishes quickly is still caught.
+			const watcher = await page.evaluateHandle(() => {
+				const state = { replayed: false, stop: () => undefined as void }
+				const check = () => {
+					if (document.querySelector('clipPath[id^="animationClipPath"]'))
+						state.replayed = true
+				}
+				const observer = new MutationObserver(check)
+				observer.observe(document.body, {
+					subtree: true,
+					childList: true,
+					attributes: true,
+				})
+				state.stop = () => observer.disconnect()
+				return state
+			})
+			await chart.hover()
+			// Intro animations start within a frame; 600ms covers a delayed restart.
 			await page.waitForTimeout(600)
-		}
-		const replayed = await watcher.evaluate(state => {
-			state.stop()
-			return state.replayed
+			if (!isMobile) {
+				const width = await chart.evaluate(element => element.getBoundingClientRect().width)
+				await page.locator('header [data-slot="sidebar-trigger"]').click()
+				await expect
+					.poll(() => chart.evaluate(element => element.getBoundingClientRect().width))
+					.not.toBe(width)
+				await page.waitForTimeout(600)
+			}
+			const replayed = await watcher.evaluate(state => {
+				state.stop()
+				return state.replayed
+			})
+			await watcher.dispose()
+			expect(replayed, "hover and resize never restart the grow-in").toBe(false)
 		})
-		await watcher.dispose()
-		expect(replayed, "hover and resize never restart the grow-in").toBe(false)
-	})
-}
+	}
+})
 
 test("charts.progress budget usage tooltip reconciles actual and projected spending even with a zero plan", async ({
 	page,

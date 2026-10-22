@@ -1,15 +1,40 @@
+import type { Page } from "@playwright/test"
 import {
 	expectReducedRowMovement,
 	expectVisibleRowCascade,
 	sampleVisibleRowAnimations,
 } from "./support/assertions"
-import { expect, test } from "./support/fixtures"
+import { expect, seedWorkspace, test } from "./support/fixtures"
 
-test.describe("page and item entrances", () => {
-	test.use({ workspaceScenario: "dense" })
+// Steps that assert history behaviour reset the provider first: clearing
+// localStorage then navigating starts each step with the empty history a
+// fresh context would have, so earlier steps never pollute later origins.
+async function resetHistory(page: Page, url: string) {
+	await page.evaluate(() => localStorage.clear())
+	await page.goto(url)
+	await expect.poll(() => page.evaluate(() => localStorage.getItem("history"))).not.toBeNull()
+}
+
+test("entrance motion shares one dense seed", async ({ page }) => {
+	await seedWorkspace(page, "dense")
+	await test.step("page fades during client navigation", async () => {
+		await page.goto("/privacy")
+		const samples = await sampleVisibleRowAnimations(
+			page,
+			'main > .animate-in:has(a[href="/privacy"])',
+			async () => {
+				await page.getByRole("link", { name: "Terms of Service", exact: true }).click()
+			},
+		)
+		expect(samples.length).toBe(1)
+		for (const sample of samples) {
+			expect(Math.min(...sample.frames.map(frame => frame.opacity))).toBeLessThan(0.95)
+			expect(sample.frames.at(-1)?.opacity).toBe(1)
+			expect(new Set(sample.frames.map(frame => frame.transform)).size).toBe(1)
+		}
+	})
 	for (const height of [1440, 2160]) {
-		test(`every visible row cascades at 1920x${height}`, async ({ page, workspace }) => {
-			void workspace
+		await test.step(`every visible row cascades at 1920x${height}`, async () => {
 			await page.setViewportSize({ width: 1920, height })
 			await page.goto("/accounts")
 			await expect(page.locator("main article").first()).toBeVisible()
@@ -28,9 +53,7 @@ test.describe("page and item entrances", () => {
 			})
 		})
 	}
-
-	test("visible card grid items cascade beyond twelve", async ({ page, workspace }) => {
-		void workspace
+	await test.step("visible card grid items cascade beyond twelve", async () => {
 		await page.setViewportSize({ width: 1920, height: 2160 })
 		await page.goto("/records")
 		await expect(page.locator("tbody tr").first()).toBeVisible()
@@ -48,32 +71,16 @@ test.describe("page and item entrances", () => {
 			contentType: "application/json",
 		})
 	})
-
-	test("page fades during client navigation", async ({ page }) => {
-		await page.goto("/privacy")
-		const samples = await sampleVisibleRowAnimations(
-			page,
-			'main > .animate-in:has(a[href="/privacy"])',
-			async () => {
-				await page.getByRole("link", { name: "Terms of Service", exact: true }).click()
-			},
-		)
-		expect(samples.length).toBe(1)
-		for (const sample of samples) {
-			expect(Math.min(...sample.frames.map(frame => frame.opacity))).toBeLessThan(0.95)
-			expect(sample.frames.at(-1)?.opacity).toBe(1)
-			expect(new Set(sample.frames.map(frame => frame.transform)).size).toBe(1)
-		}
-	})
 })
 
-test.describe("navigation history", () => {
-	test("category drill and nested detail return to exact filtered origins", async ({
-		page,
-		workspace,
-	}) => {
+test("navigation history journeys share one seed with history resets", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	await test.step("category drill and nested detail return to exact filtered origins", async () => {
 		void workspace
-		await page.goto("/categories?query=Groceries")
+		await resetHistory(page, "/categories?query=Groceries")
 		await page.getByRole("link", { name: "Open Records for Groceries", exact: true }).click()
 		await expect(page).toHaveURL(/\/records\?category_ids=t1-cat-groceries$/)
 		await expect(
@@ -94,23 +101,20 @@ test.describe("navigation history", () => {
 		await page.getByRole("button", { name: "Back to Categories", exact: true }).click()
 		await expect(page).toHaveURL(/\/categories\?query=Groceries$/)
 	})
-
 	for (const [route, name, fallback] of [
 		["/accounts/t1-acc-dbs", "Accounts", "/accounts"],
 		["/budgets/t1-b-manual", "Budgets", "/budgets"],
 		["/records/t1-r-partial", "Records", "/records"],
 		["/statements/t1-s-pending", "Statements", "/statements"],
 	] as const) {
-		test(`direct ${name} detail has a working fallback`, async ({ page, workspace }) => {
-			void workspace
-			await page.goto(route)
+		await test.step(`direct ${name} detail has a working fallback`, async () => {
+			await resetHistory(page, route)
 			await page.getByRole("button", { name: new RegExp(`^Back to ${name}$`, "i") }).click()
 			await expect(page).toHaveURL(new RegExp(`${fallback}(\\?|$)`))
 		})
 	}
-
-	test("ordinary static-page links preserve nested back history", async ({ page }) => {
-		await page.goto("/sync")
+	await test.step("ordinary static-page links preserve nested back history", async () => {
+		await resetHistory(page, "/sync")
 		await page.getByRole("link", { name: "Privacy Policy", exact: true }).click()
 		await expect(page.getByRole("button", { name: /^Back to / })).toBeVisible()
 		await page.getByRole("link", { name: "Terms of Service", exact: true }).click()
@@ -121,64 +125,66 @@ test.describe("navigation history", () => {
 	})
 })
 
-test("cancelled ordinary links do not add a back destination", async ({ page }) => {
-	await page.goto("/privacy")
-	const link = page.getByRole("link", { name: "Terms of Service", exact: true })
-	await link.evaluate(element =>
-		element.addEventListener("click", event => event.preventDefault(), { once: true }),
-	)
-	await link.click()
-	await expect(page).toHaveURL(/\/privacy$/)
-	await expect(page.getByRole("button", { name: /^Back to / })).toHaveCount(0)
-	// A subsequent real navigation must record exactly one origin.
-	await link.click()
-	await page.getByRole("button", { name: "Back to Privacy Policy", exact: true }).click()
-	await expect(page).toHaveURL(/\/privacy$/)
-	await expect(page.getByRole("button", { name: /^Back to / })).toHaveCount(0)
-})
-
-test("sidebar and month tabs clear drill history", async ({ page, isMobile }) => {
-	await page.goto("/privacy")
-	await page.getByRole("link", { name: "Terms of Service", exact: true }).click()
-	await expect(page.getByRole("button", { name: /^Back to / })).toBeVisible()
-	if (isMobile) await page.locator('header [data-slot="sidebar-trigger"]').click()
-	// Desktop and mobile sidebars both render a Dashboard link; only one is visible.
-	await page
-		.getByRole("link", { name: "Dashboard", exact: true })
-		.filter({ visible: true })
-		.click()
-	await expect(page.getByRole("button", { name: /^Back to / })).toHaveCount(0)
-	await page
-		.getByRole("navigation", { name: "Monthly finance views" })
-		.getByRole("link", { name: "Monthly Records", exact: true })
-		.click()
-	await expect(page).toHaveURL(/\/records\/monthly/)
-	await expect(page.getByRole("button", { name: /^Back to / })).toHaveCount(0)
-})
-
-test("chart drill and nested Record return through filtered overview", async ({
+test("history clearing journeys share one seed with history resets", async ({
 	page,
 	workspace,
+	isMobile,
 }) => {
 	void workspace
-	const origin = "/?month=October&year=2026&scope=all"
-	await page.goto(origin)
-	await page.getByRole("button", { name: /^5 October: \$84.20 spent/ }).click()
-	await expect(page).toHaveURL(/start_date=2026-10-05/)
-	const back = page.getByRole("button", { name: /^Back to overview$/i })
-	await expect(back).toBeVisible()
-	const backBox = await back.boundingBox()
-	const headingBox = await page
-		.getByRole("heading", { name: "October 2026", level: 2 })
-		.boundingBox()
-	if (!backBox || !headingBox) throw new Error("Back and month heading must have layout boxes")
-	expect(backBox.y + backBox.height).toBeLessThan(headingBox.y)
-	const monthly = page.url()
-	await page.getByRole("link", { name: "Open FairPrice Run", exact: true }).click()
-	await page.getByRole("button", { name: /^Back to / }).click()
-	await expect(page).toHaveURL(monthly)
-	await back.click()
-	await expect(page).toHaveURL(origin)
+	await test.step("cancelled ordinary links do not add a back destination", async () => {
+		await resetHistory(page, "/privacy")
+		const link = page.getByRole("link", { name: "Terms of Service", exact: true })
+		await link.evaluate(element =>
+			element.addEventListener("click", event => event.preventDefault(), { once: true }),
+		)
+		await link.click()
+		await expect(page).toHaveURL(/\/privacy$/)
+		await expect(page.getByRole("button", { name: /^Back to / })).toHaveCount(0)
+		// A subsequent real navigation must record exactly one origin.
+		await link.click()
+		await page.getByRole("button", { name: "Back to Privacy Policy", exact: true }).click()
+		await expect(page).toHaveURL(/\/privacy$/)
+		await expect(page.getByRole("button", { name: /^Back to / })).toHaveCount(0)
+	})
+	await test.step("sidebar and month tabs clear drill history", async () => {
+		await resetHistory(page, "/privacy")
+		await page.getByRole("link", { name: "Terms of Service", exact: true }).click()
+		await expect(page.getByRole("button", { name: /^Back to / })).toBeVisible()
+		if (isMobile) await page.locator('header [data-slot="sidebar-trigger"]').click()
+		// Desktop and mobile sidebars both render a Dashboard link; only one is visible.
+		await page
+			.getByRole("link", { name: "Dashboard", exact: true })
+			.filter({ visible: true })
+			.click()
+		await expect(page.getByRole("button", { name: /^Back to / })).toHaveCount(0)
+		await page
+			.getByRole("navigation", { name: "Monthly finance views" })
+			.getByRole("link", { name: "Monthly Records", exact: true })
+			.click()
+		await expect(page).toHaveURL(/\/records\/monthly/)
+		await expect(page.getByRole("button", { name: /^Back to / })).toHaveCount(0)
+	})
+	await test.step("chart drill and nested Record return through filtered overview", async () => {
+		const origin = "/?month=October&year=2026&scope=all"
+		await resetHistory(page, origin)
+		await page.getByRole("button", { name: /^5 October: \$84.20 spent/ }).click()
+		await expect(page).toHaveURL(/start_date=2026-10-05/)
+		const back = page.getByRole("button", { name: /^Back to overview$/i })
+		await expect(back).toBeVisible()
+		const backBox = await back.boundingBox()
+		const headingBox = await page
+			.getByRole("heading", { name: "October 2026", level: 2 })
+			.boundingBox()
+		if (!backBox || !headingBox)
+			throw new Error("Back and month heading must have layout boxes")
+		expect(backBox.y + backBox.height).toBeLessThan(headingBox.y)
+		const monthly = page.url()
+		await page.getByRole("link", { name: "Open FairPrice Run", exact: true }).click()
+		await page.getByRole("button", { name: /^Back to / }).click()
+		await expect(page).toHaveURL(monthly)
+		await back.click()
+		await expect(page).toHaveURL(origin)
+	})
 })
 
 test("detaching a budget Record preserves the remaining row without replaying its entrance", async ({

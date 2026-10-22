@@ -84,8 +84,9 @@ async function expectWheelScrollsPageWhileOpen(page: Page) {
 		.toBeGreaterThan(10)
 }
 
-test.describe("form fields", () => {
-	test("amount commits typed value, rejects invalid text and 3dp", async ({ page }) => {
+test("widget group form fields shares one harness page", async ({ page }) => {
+	test.setTimeout(150000)
+	await test.step("amount commits typed value, rejects invalid text and 3dp", async () => {
 		await gotoForms(page)
 		const input = page.locator("#harness-amount")
 		await input.fill("99.99")
@@ -96,7 +97,7 @@ test.describe("form fields", () => {
 		await expect(page.getByTestId("amount-value")).toHaveText("Amount value: 99.99")
 	})
 
-	test("amount ArrowUp/ArrowDown step by 0.01", async ({ page }) => {
+	await test.step("amount ArrowUp/ArrowDown step by 0.01", async () => {
 		await gotoForms(page)
 		await page.locator("#harness-amount").click()
 		await page.keyboard.press("ArrowUp")
@@ -105,9 +106,7 @@ test.describe("form fields", () => {
 		await expect(page.getByTestId("amount-value")).toHaveText("Amount value: 12.5")
 	})
 
-	test("amount sign toggle flips sign; min=0 field hides toggle and rejects minus", async ({
-		page,
-	}) => {
+	await test.step("amount sign toggle flips sign; min=0 field hides toggle and rejects minus", async () => {
 		await gotoForms(page)
 		const toggle = page.getByRole("button", { name: "Make amount negative" })
 		await toggle.click()
@@ -123,7 +122,7 @@ test.describe("form fields", () => {
 		await expect(page.getByTestId("amount-capped-value")).toHaveText("Capped value: 5")
 	})
 
-	test("text field types; suggestions filter and select", async ({ page }) => {
+	await test.step("text field types; suggestions filter and select", async () => {
 		await gotoForms(page)
 		await page.getByLabel("Title", { exact: true }).fill("Dinner")
 		await expect(page.getByTestId("title-value")).toHaveText("Title value: Dinner")
@@ -136,7 +135,7 @@ test.describe("form fields", () => {
 		await expect(page.getByTestId("suggested-value")).toHaveText("Suggested value: Dessert")
 	})
 
-	test("textarea records long values", async ({ page }) => {
+	await test.step("textarea records long values", async () => {
 		await gotoForms(page)
 		const long = `note ${"x".repeat(200)}`
 		await page.getByLabel("Notes").fill(long)
@@ -144,7 +143,7 @@ test.describe("form fields", () => {
 		await expect(page.getByLabel("Notes")).toHaveValue(long)
 	})
 
-	test("select picks an option; disabled option stays unselected", async ({ page }) => {
+	await test.step("select picks an option; disabled option stays unselected", async () => {
 		await gotoForms(page)
 		await page.locator("#harness-direction").click()
 		await page.getByRole("option", { name: "Income" }).click()
@@ -161,7 +160,7 @@ test.describe("form fields", () => {
 		await expect(page.getByTestId("direction-value")).toHaveText("Direction value: income")
 	})
 
-	test("select opens and closes from the keyboard", async ({ page }) => {
+	await test.step("select opens and closes from the keyboard", async () => {
 		await gotoForms(page)
 		await page.locator("#harness-direction").focus()
 		await page.keyboard.press("Enter")
@@ -170,7 +169,7 @@ test.describe("form fields", () => {
 		await expect(page.getByRole("listbox")).toBeHidden()
 	})
 
-	test("combobox field filters, picks, clears and shows empty text", async ({ page }) => {
+	await test.step("combobox field filters, picks, clears and shows empty text", async () => {
 		await gotoForms(page)
 		await page.locator("#harness-payee").click()
 		await page.locator("#harness-payee").type("Gro")
@@ -187,7 +186,7 @@ test.describe("form fields", () => {
 		await expect(page.getByText("No payees found.")).toBeVisible()
 	})
 
-	test("date field picks a day from the calendar and clears", async ({ page }) => {
+	await test.step("date field picks a day from the calendar and clears", async () => {
 		await gotoForms(page)
 		await page.locator("#harness-date").click()
 		const popover = page.locator('[data-slot="popover-content"]')
@@ -202,7 +201,7 @@ test.describe("form fields", () => {
 		await expect(page.getByTestId("date-value")).toHaveText("Date value: empty")
 	})
 
-	test("date range applies a day and clears back to null", async ({ page }) => {
+	await test.step("date range applies a day and clears back to null", async () => {
 		await gotoForms(page)
 		await expect(page.locator("#harness-range")).toContainText("1–30 Sep 2026")
 		await page.locator("#harness-range").click()
@@ -221,7 +220,7 @@ test.describe("form fields", () => {
 		await expect(page.getByTestId("range-value")).toHaveText("Range value: null to null")
 	})
 
-	test("datetime field edits time and picks a new date", async ({ page }) => {
+	await test.step("datetime field edits time and picks a new date", async () => {
 		await gotoForms(page)
 		await page.locator("#harness-datetime-time").fill("10:45")
 		await expect(page.getByTestId("datetime-value")).toHaveText(
@@ -237,7 +236,7 @@ test.describe("form fields", () => {
 		)
 	})
 
-	test("record analytics treatment gates the monthly budget control", async ({ page }) => {
+	await test.step("record analytics treatment gates the monthly budget control", async () => {
 		await gotoForms(page)
 		await page.locator("#analytics_treatment").click()
 		await page.getByRole("option", { name: "Income", exact: true }).click()
@@ -250,7 +249,7 @@ test.describe("form fields", () => {
 		await expect(page.locator("#monthly_budget_id")).toBeEnabled()
 	})
 
-	test("field validation errors render as alerts", async ({ page }) => {
+	await test.step("field validation errors render as alerts", async () => {
 		await gotoForms(page)
 		await expect(page.getByTestId("harness-forms").getByRole("alert")).toContainText(
 			"Enter a title",
@@ -258,10 +257,8 @@ test.describe("form fields", () => {
 	})
 })
 
-test.describe("buttons, groups, checkbox, toggle", () => {
-	test("enabled buttons count clicks, work from keyboard and show pointer cursor", async ({
-		page,
-	}) => {
+test("widget group buttons and selection shares one harness page", async ({ page }) => {
+	await test.step("enabled buttons count clicks, work from keyboard and show pointer cursor", async () => {
 		await gotoPrimitives(page)
 		const counter = page.getByRole("button", { name: "Count clicks" })
 		await counter.click()
@@ -276,7 +273,7 @@ test.describe("buttons, groups, checkbox, toggle", () => {
 		expect(cursor).toBe("pointer")
 	})
 
-	test("disabled button stays disabled and ignores programmatic clicks", async ({ page }) => {
+	await test.step("disabled button stays disabled and ignores programmatic clicks", async () => {
 		await gotoPrimitives(page)
 		const disabled = page.getByRole("button", { name: "Disabled action" })
 		await expect(disabled).toBeDisabled()
@@ -284,7 +281,7 @@ test.describe("buttons, groups, checkbox, toggle", () => {
 		await expect(page.getByTestId("button-clicks")).toHaveText("Button clicks: 0")
 	})
 
-	test("button group exposes a group role with separator and label", async ({ page }) => {
+	await test.step("button group exposes a group role with separator and label", async () => {
 		await gotoPrimitives(page)
 		const group = page.getByTestId("primitive-button-group")
 		await expect(group.getByRole("group")).toBeVisible()
@@ -295,7 +292,7 @@ test.describe("buttons, groups, checkbox, toggle", () => {
 		await expect(page.getByTestId("button-clicks")).toHaveText("Button clicks: 1")
 	})
 
-	test("checkbox toggles by label and Space; disabled stays off", async ({ page }) => {
+	await test.step("checkbox toggles by label and Space; disabled stays off", async () => {
 		await gotoPrimitives(page)
 		await page.getByText("Accept terms").click()
 		await expect(page.getByTestId("checkbox-value")).toHaveText("Checkbox: checked")
@@ -310,7 +307,7 @@ test.describe("buttons, groups, checkbox, toggle", () => {
 		expect(cursor).toBe("pointer")
 	})
 
-	test("toggle group selects a value; disabled item stays disabled", async ({ page }) => {
+	await test.step("toggle group selects a value; disabled item stays disabled", async () => {
 		await gotoPrimitives(page)
 		const week = page.getByRole("radio", { name: "Week view" })
 		await week.evaluate(element => element.scrollIntoView({ block: "center" }))
@@ -320,8 +317,8 @@ test.describe("buttons, groups, checkbox, toggle", () => {
 	})
 })
 
-test.describe("calendar, month picker, command", () => {
-	test("calendar selects a day and navigates months", async ({ page }) => {
+test("widget group calendar and command shares one harness page", async ({ page }) => {
+	await test.step("calendar selects a day and navigates months", async () => {
 		await gotoPrimitives(page)
 		const section = page.getByTestId("primitive-calendar")
 		await section.getByRole("button", { name: /September 21st, 2026/ }).click()
@@ -330,9 +327,7 @@ test.describe("calendar, month picker, command", () => {
 		await expect(section.getByText("October 2026")).toBeVisible()
 	})
 
-	test("month picker selects a month; bounded picker disables out-of-range months", async ({
-		page,
-	}) => {
+	await test.step("month picker selects a month; bounded picker disables out-of-range months", async () => {
 		await gotoPrimitives(page)
 		const section = page.getByTestId("primitive-monthpicker")
 		await section.getByRole("button", { name: "Oct", exact: true }).first().click()
@@ -344,7 +339,7 @@ test.describe("calendar, month picker, command", () => {
 		await expect(bounded.getByRole("button", { name: "Jan" })).toBeDisabled()
 	})
 
-	test("command filters, selects and reports an empty state", async ({ page }) => {
+	await test.step("command filters, selects and reports an empty state", async () => {
 		await gotoPrimitives(page)
 		// cmdk renders its input with role=combobox (not textbox), so label
 		// queries miss it; the accessible name is still exact.
@@ -358,7 +353,7 @@ test.describe("calendar, month picker, command", () => {
 		await expect(page.getByText("No fruit found.")).toBeVisible()
 	})
 
-	test("command highlights an item from the keyboard", async ({ page }) => {
+	await test.step("command highlights an item from the keyboard", async () => {
 		await gotoPrimitives(page)
 		await page.getByRole("combobox", { name: "Search fruit" }).focus()
 		const selected = page.locator('[data-slot="command-item"][data-selected="true"]')
@@ -371,7 +366,7 @@ test.describe("calendar, month picker, command", () => {
 		await expect(selected).toHaveText(first ?? "")
 	})
 
-	test("command dialog opens and closes from an item", async ({ page }) => {
+	await test.step("command dialog opens and closes from an item", async () => {
 		await gotoPrimitives(page)
 		await page.getByRole("button", { name: "Open command dialog" }).click()
 		await expect(page.getByRole("dialog")).toBeVisible()
@@ -381,8 +376,9 @@ test.describe("calendar, month picker, command", () => {
 	})
 })
 
-test.describe("tooltip, popover, select, combobox", () => {
-	test("tooltip appears on hover and on focus", async ({ page }) => {
+test("widget group tooltip and selection primitives shares one harness page", async ({ page }) => {
+	test.setTimeout(120000)
+	await test.step("tooltip appears on hover and on focus", async () => {
 		await gotoPrimitives(page)
 		await page.getByRole("button", { name: "Hover target" }).hover()
 		await expect(page.getByText("Harness tooltip body")).toBeVisible()
@@ -396,7 +392,7 @@ test.describe("tooltip, popover, select, combobox", () => {
 		await expect(page.getByText("Harness tooltip body")).toBeVisible()
 	})
 
-	test("popover opens, keeps page overflow intact and closes on Escape", async ({ page }) => {
+	await test.step("popover opens, keeps page overflow intact and closes on Escape", async () => {
 		await gotoPrimitives(page)
 		const before = await page.evaluate(() => getComputedStyle(document.body).overflow)
 		await page.getByRole("button", { name: "Open popover" }).click()
@@ -409,7 +405,7 @@ test.describe("tooltip, popover, select, combobox", () => {
 		await expect(page.getByText("Popover title")).toBeHidden()
 	})
 
-	test("select primitive picks a value and marks disabled items", async ({ page }) => {
+	await test.step("select primitive picks a value and marks disabled items", async () => {
 		await gotoPrimitives(page)
 		await page.locator("#harness-select").click()
 		// Scope to the open popup: the always-mounted command list also exposes
@@ -431,7 +427,7 @@ test.describe("tooltip, popover, select, combobox", () => {
 		await expect(page.getByTestId("select-value")).toHaveText("Select value: banana")
 	})
 
-	test("combobox primitive filters, selects and clears", async ({ page }) => {
+	await test.step("combobox primitive filters, selects and clears", async () => {
 		await gotoPrimitives(page)
 		// "Fruit combobox" is a substring of the grouped/collection labels,
 		// so scope to the exact accessible name.
@@ -442,7 +438,7 @@ test.describe("tooltip, popover, select, combobox", () => {
 		await expect(page.getByTestId("combobox-value")).toHaveText("Combobox value: Banana")
 	})
 
-	test("combobox collection renders the filtered items", async ({ page }) => {
+	await test.step("combobox collection renders the filtered items", async () => {
 		await gotoPrimitives(page)
 		await page.getByLabel("Collection fruit combobox").click()
 		await page.getByLabel("Collection fruit combobox").type("Cher")
@@ -454,7 +450,7 @@ test.describe("tooltip, popover, select, combobox", () => {
 		)
 	})
 
-	test("multi combobox chips accumulate picks", async ({ page }) => {
+	await test.step("multi combobox chips accumulate picks", async () => {
 		await gotoPrimitives(page)
 		await expect(page.getByTestId("combobox-multi-value")).toHaveText("Multi value: Apple")
 		await page.getByLabel("Add fruit").click()
@@ -466,8 +462,8 @@ test.describe("tooltip, popover, select, combobox", () => {
 	})
 })
 
-test.describe("dropdown menu", () => {
-	test("items, checkbox, radio and sub-menu all act on state", async ({ page }) => {
+test("widget group dropdown menu shares one harness page", async ({ page }) => {
+	await test.step("items, checkbox, radio and sub-menu all act on state", async () => {
 		await gotoPrimitives(page)
 		const openMenu = async () => {
 			await page.getByRole("button", { name: "Open menu" }).click()
@@ -502,7 +498,7 @@ test.describe("dropdown menu", () => {
 		await expect(page.getByTestId("dropdown-value")).toContainText("Menu: export")
 	})
 
-	test("dropdown closes on Escape and leaves page scroll intact", async ({ page }) => {
+	await test.step("dropdown closes on Escape and leaves page scroll intact", async () => {
 		await gotoPrimitives(page)
 		const overflowBefore = await page.evaluate(() => getComputedStyle(document.body).overflow)
 		await page.getByRole("button", { name: "Open menu" }).click()
@@ -520,8 +516,8 @@ test.describe("dropdown menu", () => {
 	})
 })
 
-test.describe("modal layers and backdrops", () => {
-	test("alert dialog confirms and cancels with a visible backdrop", async ({ page }) => {
+test("widget group modal layers shares one harness page", async ({ page }) => {
+	await test.step("alert dialog confirms and cancels with a visible backdrop", async () => {
 		await gotoPrimitives(page)
 		await page.getByRole("button", { name: "Delete workspace" }).click()
 		await expect(page.getByRole("alertdialog")).toBeVisible()
@@ -536,9 +532,7 @@ test.describe("modal layers and backdrops", () => {
 		await expect(page.getByTestId("alert-decision")).toHaveText("Alert decision: confirmed")
 	})
 
-	test("dialog opens with backdrop and closes on Escape with scroll restored", async ({
-		page,
-	}) => {
+	await test.step("dialog opens with backdrop and closes on Escape with scroll restored", async () => {
 		await gotoPrimitives(page)
 		await page.getByRole("button", { name: "Open dialog" }).click()
 		await expect(page.getByRole("dialog", { name: "Harness dialog" })).toBeVisible()
@@ -555,7 +549,7 @@ test.describe("modal layers and backdrops", () => {
 		expect(scrolled).toBeGreaterThan(0)
 	})
 
-	test("sheet opens with backdrop and closes from its close button", async ({ page }) => {
+	await test.step("sheet opens with backdrop and closes from its close button", async () => {
 		await gotoPrimitives(page)
 		await page.getByRole("button", { name: "Open sheet" }).click()
 		const sheet = page.getByRole("dialog", { name: "Harness sheet" })
@@ -577,7 +571,7 @@ test.describe("modal layers and backdrops", () => {
 		await expect(page.getByRole("dialog", { name: "Harness sheet" })).toBeHidden()
 	})
 
-	test("alerts render both variants with title, description and action", async ({ page }) => {
+	await test.step("alerts render both variants with title, description and action", async () => {
 		await gotoPrimitives(page)
 		const section = page.getByTestId("primitive-alert")
 		await expect(section.getByRole("alert").first()).toBeVisible()
@@ -587,8 +581,9 @@ test.describe("modal layers and backdrops", () => {
 	})
 })
 
-test.describe("display primitives", () => {
-	test("badge, card and empty render their content", async ({ page }) => {
+test("widget group display primitives shares one harness page", async ({ page }) => {
+	test.setTimeout(120000)
+	await test.step("badge, card and empty render their content", async () => {
 		await gotoPrimitives(page)
 		await expect(page.getByTestId("primitive-badge").getByText("Over budget")).toBeVisible()
 		await expect(page.getByTestId("primitive-badge").getByText("Pending")).toBeVisible()
@@ -600,7 +595,7 @@ test.describe("display primitives", () => {
 		await expect(empty.getByText("Add the first record to populate this view.")).toBeVisible()
 	})
 
-	test("progress clamps its base bar and flags only values above 100", async ({ page }) => {
+	await test.step("progress clamps its base bar and flags only values above 100", async () => {
 		await gotoPrimitives(page)
 		// Scope to the dynamic bar: the harness also renders a static over-limit bar.
 		const bar = page.getByRole("progressbar", { name: "Budget progress", exact: true })
@@ -625,7 +620,7 @@ test.describe("display primitives", () => {
 			.toBe("translateX(-50%)")
 	})
 
-	test("scroll area scrolls its viewport", async ({ page }) => {
+	await test.step("scroll area scrolls its viewport", async () => {
 		await gotoPrimitives(page)
 		const viewport = page.locator('[data-slot="scroll-area-viewport"]').first()
 		await expect(page.getByText("Scrollable row 20")).toBeAttached()
@@ -636,7 +631,7 @@ test.describe("display primitives", () => {
 		expect(top).toBe(60)
 	})
 
-	test("separators render in both orientations", async ({ page }) => {
+	await test.step("separators render in both orientations", async () => {
 		await gotoPrimitives(page)
 		const section = page.getByTestId("primitive-separator")
 		await expect(section.locator('[data-slot="separator"]')).toHaveCount(2)
@@ -652,7 +647,7 @@ test.describe("display primitives", () => {
 		await expect(section.getByText("Below separator")).toBeVisible()
 	})
 
-	test("table shows caption, rows and footer totals", async ({ page }) => {
+	await test.step("table shows caption, rows and footer totals", async () => {
 		await gotoPrimitives(page)
 		const section = page.getByTestId("primitive-table")
 		await expect(section.getByText("Demo spending by payee.")).toBeVisible()
@@ -660,7 +655,7 @@ test.describe("display primitives", () => {
 		await expect(section.getByText("Total")).toBeVisible()
 	})
 
-	test("pagination marks the active page and labels navigation", async ({ page }) => {
+	await test.step("pagination marks the active page and labels navigation", async () => {
 		await gotoPrimitives(page)
 		const nav = page.getByRole("navigation", { name: "pagination" })
 		await expect(nav).toBeVisible()
@@ -669,7 +664,7 @@ test.describe("display primitives", () => {
 		await expect(nav.getByRole("link", { name: "Go to next page" })).toBeVisible()
 	})
 
-	test("input group types, clears and shows addon content", async ({ page }) => {
+	await test.step("input group types, clears and shows addon content", async () => {
 		await gotoPrimitives(page)
 		const section = page.getByTestId("primitive-input-group")
 		await section.getByLabel("Grouped amount").fill("42")
@@ -680,7 +675,7 @@ test.describe("display primitives", () => {
 		await expect(section.getByLabel("Grouped notes")).toBeVisible()
 	})
 
-	test("item group renders titles, descriptions and actions", async ({ page }) => {
+	await test.step("item group renders titles, descriptions and actions", async () => {
 		await gotoPrimitives(page)
 		const section = page.getByTestId("primitive-item")
 		await expect(section.getByRole("list")).toBeVisible()
@@ -691,7 +686,7 @@ test.describe("display primitives", () => {
 		await expect(page.getByTestId("item-opens")).toHaveText("Item opens: 1")
 	})
 
-	test("label focuses its control and mirrors textarea state", async ({ page }) => {
+	await test.step("label focuses its control and mirrors textarea state", async () => {
 		await gotoPrimitives(page)
 		await page.getByText("Atom label").click()
 		await expect(page.locator("#primitive-label-input")).toBeFocused()
@@ -699,7 +694,7 @@ test.describe("display primitives", () => {
 		await expect(page.getByTestId("label-value")).toHaveText("Label input: hello")
 	})
 
-	test("field primitives render label, error, legend and separator copy", async ({ page }) => {
+	await test.step("field primitives render label, error, legend and separator copy", async () => {
 		await gotoPrimitives(page)
 		const section = page.getByTestId("primitive-field")
 		await expect(section.getByText("Field label")).toBeVisible()
@@ -723,8 +718,8 @@ const sidebarScope = async (page: Page, isMobile: boolean) => {
 	return dialog
 }
 
-test.describe("sidebar primitives", () => {
-	test("menu and sub-menu buttons report selection", async ({ page, isMobile }) => {
+test("widget group sidebar primitives shares one harness page", async ({ page, isMobile }) => {
+	await test.step("menu and sub-menu buttons report selection", async () => {
 		await gotoPrimitives(page)
 		const section = await sidebarScope(page, isMobile)
 		await section.getByRole("button", { name: "Statements", exact: true }).click()
@@ -734,10 +729,7 @@ test.describe("sidebar primitives", () => {
 		await expect(page.getByTestId("sidebar-value")).toContainText("choice: monthly")
 	})
 
-	test("badge, skeleton, input, group action and menu action behave", async ({
-		page,
-		isMobile,
-	}) => {
+	await test.step("badge, skeleton, input, group action and menu action behave", async () => {
 		await gotoPrimitives(page)
 		const section = await sidebarScope(page, isMobile)
 		await expect(section.getByText("12")).toBeVisible()
@@ -759,7 +751,7 @@ test.describe("sidebar primitives", () => {
 		expect(cursor).toBe("pointer")
 	})
 
-	test("trigger collapses on desktop and sheets on mobile", async ({ page }) => {
+	await test.step("trigger collapses on desktop and sheets on mobile", async () => {
 		await gotoPrimitives(page)
 		const wide = await page.evaluate(() => window.innerWidth >= 768)
 		const trigger = page.locator('[data-slot="sidebar-trigger"]')
@@ -784,8 +776,8 @@ test.describe("sidebar primitives", () => {
 	})
 })
 
-test.describe("chart, sonner, theme, layout", () => {
-	test("chart container renders axes and legend entries", async ({ page }) => {
+test("widget group chart sonner theme and layout shares one harness page", async ({ page }) => {
+	await test.step("chart container renders axes and legend entries", async () => {
 		await gotoPrimitives(page)
 		const section = page.getByTestId("primitive-chart")
 		await expect(section.locator('[data-slot="chart"] svg')).toBeVisible()
@@ -793,7 +785,7 @@ test.describe("chart, sonner, theme, layout", () => {
 		await expect(section.getByText("Spending")).toBeVisible()
 	})
 
-	test("sonner shows success and error toasts", async ({ page }) => {
+	await test.step("sonner shows success and error toasts", async () => {
 		await gotoPrimitives(page)
 		await page.getByRole("button", { name: "Show success toast" }).click()
 		await expect(page.getByText("Saved demo record")).toBeVisible()
@@ -801,7 +793,7 @@ test.describe("chart, sonner, theme, layout", () => {
 		await expect(page.getByText("Demo import failed")).toBeVisible()
 	})
 
-	test("dark theme toggle keeps content readable", async ({ page }) => {
+	await test.step("dark theme toggle keeps content readable", async () => {
 		await gotoPrimitives(page)
 		// The harness boots dark when the OS/project prefers it, so the dark
 		// project starts with the real dark class applied.
@@ -816,7 +808,7 @@ test.describe("chart, sonner, theme, layout", () => {
 		await expect(page.locator("html.dark")).toHaveCount(prefersDark ? 1 : 0)
 	})
 
-	test("harness sections fit the viewport width", async ({ page }) => {
+	await test.step("harness sections fit the viewport width", async () => {
 		await gotoForms(page)
 		const formsOverflow = await page.evaluate(
 			() => document.documentElement.scrollWidth - window.innerWidth,
@@ -830,8 +822,8 @@ test.describe("chart, sonner, theme, layout", () => {
 	})
 })
 
-test.describe("select subexports and long list", () => {
-	test("group label and separator render with the options", async ({ page }) => {
+test("widget group select long list shares one harness page", async ({ page }) => {
+	await test.step("group label and separator render with the options", async () => {
 		await gotoPrimitives(page)
 		await page.locator("#harness-select").click()
 		// Scope to the open popup: the page also renders a cmdk suggestion
@@ -843,7 +835,7 @@ test.describe("select subexports and long list", () => {
 		await expect(content).toBeHidden()
 	})
 
-	test("long list exposes scroll buttons and selects a far item", async ({ page }) => {
+	await test.step("long list exposes scroll buttons and selects a far item", async () => {
 		await gotoPrimitives(page)
 		await page.locator("#harness-select-long").click()
 		const content = page.locator('[data-slot="select-content"]')
@@ -865,33 +857,33 @@ test.describe("select subexports and long list", () => {
 		await expect(page.getByTestId("select-long-value")).toHaveText("Long select value: long-40")
 		await expect(page.locator("#harness-select-long")).toContainText("Long item 40")
 	})
-
-	test("long list selects a far item by tap opening and keyboard jump on touch", async ({
-		page,
-		hasTouch,
-	}) => {
-		test.skip(!hasTouch, "touch-only behaviour: hover arrows stay suppressed")
-		await gotoPrimitives(page)
-		await page.locator("#harness-select-long").tap()
-		const content = page.locator('[data-slot="select-content"]')
-		const list = content.locator('[data-slot="select-viewport"]')
-		await expect(list).toBeVisible()
-		// Touch opens suppress the hover-only arrows.
-		await expect(content.locator('[data-slot="select-scroll-down-button"]')).toHaveCount(0)
-		await expect(content.locator('[data-slot="select-scroll-up-button"]')).toHaveCount(0)
-		// This proves tap opening plus keyboard scrolling only: End jumps to the
-		// last option through real key handling and scrolls the List there.
-		// Genuine touch-drag scrolling is not asserted here.
-		await page.keyboard.press("End")
-		const scrolled = await list.evaluate(element => element.scrollTop)
-		expect(scrolled).toBeGreaterThan(0)
-		await content.getByRole("option", { name: "Long item 40", exact: true }).tap()
-		await expect(page.getByTestId("select-long-value")).toHaveText("Long select value: long-40")
-	})
 })
 
-test.describe("combobox subexports, trigger, clear and chips", () => {
-	test("trigger opens the list and clear resets the value", async ({ page }) => {
+test("long list selects a far item by tap opening and keyboard jump on touch", async ({
+	page,
+	hasTouch,
+}) => {
+	test.skip(!hasTouch, "touch-only behaviour: hover arrows stay suppressed")
+	await gotoPrimitives(page)
+	await page.locator("#harness-select-long").tap()
+	const content = page.locator('[data-slot="select-content"]')
+	const list = content.locator('[data-slot="select-viewport"]')
+	await expect(list).toBeVisible()
+	// Touch opens suppress the hover-only arrows.
+	await expect(content.locator('[data-slot="select-scroll-down-button"]')).toHaveCount(0)
+	await expect(content.locator('[data-slot="select-scroll-up-button"]')).toHaveCount(0)
+	// This proves tap opening plus keyboard scrolling only: End jumps to the
+	// last option through real key handling and scrolls the List there.
+	// Genuine touch-drag scrolling is not asserted here.
+	await page.keyboard.press("End")
+	const scrolled = await list.evaluate(element => element.scrollTop)
+	expect(scrolled).toBeGreaterThan(0)
+	await content.getByRole("option", { name: "Long item 40", exact: true }).tap()
+	await expect(page.getByTestId("select-long-value")).toHaveText("Long select value: long-40")
+})
+
+test("widget group combobox subexports shares one harness page", async ({ page }) => {
+	await test.step("trigger opens the list and clear resets the value", async () => {
 		await gotoPrimitives(page)
 		const section = page.getByTestId("primitive-combobox")
 		const input = page.getByLabel("Fruit combobox", { exact: true })
@@ -916,7 +908,7 @@ test.describe("combobox subexports, trigger, clear and chips", () => {
 		await expect(page.getByTestId("combobox-value")).toHaveText("Combobox value: none")
 	})
 
-	test("grouped combobox shows its label and separator", async ({ page }) => {
+	await test.step("grouped combobox shows its label and separator", async () => {
 		await gotoPrimitives(page)
 		await page.getByLabel("Grouped fruit combobox").click()
 		await expect(page.getByText("Grouped fruit")).toBeVisible()
@@ -924,7 +916,7 @@ test.describe("combobox subexports, trigger, clear and chips", () => {
 		await page.keyboard.press("Escape")
 	})
 
-	test("chip remove drops only that pick", async ({ page }) => {
+	await test.step("chip remove drops only that pick", async () => {
 		await gotoPrimitives(page)
 		await page.getByLabel("Add fruit").click()
 		await page.getByLabel("Add fruit").type("Ban")
@@ -939,7 +931,7 @@ test.describe("combobox subexports, trigger, clear and chips", () => {
 		await expect(page.getByTestId("combobox-multi-value")).toHaveText("Multi value: Apple")
 	})
 
-	test("combobox field selects the highlighted match from the keyboard", async ({ page }) => {
+	await test.step("combobox field selects the highlighted match from the keyboard", async () => {
 		await gotoForms(page)
 		await page.locator("#harness-payee").click()
 		await page.locator("#harness-payee").type("Gro")
@@ -949,8 +941,8 @@ test.describe("combobox subexports, trigger, clear and chips", () => {
 	})
 })
 
-test.describe("command structure and keyboard", () => {
-	test("groups, separator and shortcuts render with accessible names", async ({ page }) => {
+test("widget group command structure shares one harness page", async ({ page }) => {
+	await test.step("groups, separator and shortcuts render with accessible names", async () => {
 		await gotoPrimitives(page)
 		const section = page.getByTestId("primitive-command")
 		await expect(section.getByText("Fruit", { exact: true })).toBeVisible()
@@ -959,7 +951,7 @@ test.describe("command structure and keyboard", () => {
 		await expect(section.locator('[data-slot="command-shortcut"]')).toHaveCount(5)
 	})
 
-	test("ArrowDown highlights the first enabled item", async ({ page }) => {
+	await test.step("ArrowDown highlights the first enabled item", async () => {
 		await gotoPrimitives(page)
 		const section = page.getByTestId("primitive-command")
 		await section.getByRole("combobox", { name: "Search fruit" }).focus()
@@ -972,10 +964,8 @@ test.describe("command structure and keyboard", () => {
 	})
 })
 
-test.describe("widget keyboard and cursor edges", () => {
-	test("toggle activates from the keyboard and keeps the disabled item unselected", async ({
-		page,
-	}) => {
+test("widget group widget keyboard and cursor shares one harness page", async ({ page }) => {
+	await test.step("toggle activates from the keyboard and keeps the disabled item unselected", async () => {
 		await gotoPrimitives(page)
 		const day = page.getByRole("radio", { name: "Day view" })
 		const week = page.getByRole("radio", { name: "Week view" })
@@ -994,7 +984,7 @@ test.describe("widget keyboard and cursor edges", () => {
 		expect(cursor).toBe("pointer")
 	})
 
-	test("disabled checkbox ignores label clicks", async ({ page }) => {
+	await test.step("disabled checkbox ignores label clicks", async () => {
 		await gotoPrimitives(page)
 		await expect(page.locator("#harness-check-disabled")).toBeDisabled()
 		// Force a DOM activation like the disabled-button test does: even then
@@ -1006,7 +996,7 @@ test.describe("widget keyboard and cursor edges", () => {
 		await expect(page.getByTestId("checkbox-value")).toHaveText("Checkbox: unchecked")
 	})
 
-	test("button group separator orientation and pointer cursors", async ({ page }) => {
+	await test.step("button group separator orientation and pointer cursors", async () => {
 		await gotoPrimitives(page)
 		const group = page.getByTestId("primitive-button-group")
 		await expect(group.locator('[data-slot="button-group-separator"]')).toHaveCount(1)
@@ -1024,7 +1014,7 @@ test.describe("widget keyboard and cursor edges", () => {
 		await expect(page.getByTestId("button-clicks")).toHaveText("Button clicks: 1")
 	})
 
-	test("calendar arrow keys move focus and Home/End jump", async ({ page }) => {
+	await test.step("calendar arrow keys move focus and Home/End jump", async () => {
 		await gotoPrimitives(page)
 		const section = page.getByTestId("primitive-calendar")
 		// Tab from a nearby control reaches the selected day through the real
@@ -1060,10 +1050,8 @@ test.describe("widget keyboard and cursor edges", () => {
 	})
 })
 
-test.describe("modal dismissal semantics", () => {
-	test("alert dialog dismisses on Escape without deciding; actions record decisions", async ({
-		page,
-	}) => {
+test("widget group modal dismissal shares one harness page", async ({ page }) => {
+	await test.step("alert dialog dismisses on Escape without deciding; actions record decisions", async () => {
 		await gotoPrimitives(page)
 		await page.getByRole("button", { name: "Delete workspace" }).click()
 		await expect(page.getByRole("alertdialog")).toBeVisible()
@@ -1077,7 +1065,7 @@ test.describe("modal dismissal semantics", () => {
 		await expect(page.getByTestId("alert-decision")).toHaveText("Alert decision: cancelled")
 	})
 
-	test("sheet dismisses from Escape", async ({ page }) => {
+	await test.step("sheet dismisses from Escape", async () => {
 		await gotoPrimitives(page)
 		await page.getByRole("button", { name: "Open sheet" }).click()
 		await expect(page.getByRole("dialog", { name: "Harness sheet" })).toBeVisible()
@@ -1085,7 +1073,7 @@ test.describe("modal dismissal semantics", () => {
 		await expect(page.getByRole("dialog", { name: "Harness sheet" })).toBeHidden()
 	})
 
-	test("dialog dismisses from its footer close button", async ({ page }) => {
+	await test.step("dialog dismisses from its footer close button", async () => {
 		await gotoPrimitives(page)
 		await page.getByRole("button", { name: "Open dialog" }).click()
 		await expect(page.getByRole("dialog", { name: "Harness dialog" })).toBeVisible()
@@ -1093,7 +1081,7 @@ test.describe("modal dismissal semantics", () => {
 		await expect(page.getByTestId("dialog-value")).toHaveText("Dialog open: no")
 	})
 
-	test("popover exposes its description copy", async ({ page }) => {
+	await test.step("popover exposes its description copy", async () => {
 		await gotoPrimitives(page)
 		await page.getByRole("button", { name: "Open popover" }).click()
 		await expect(page.getByText("Popover description text.")).toBeVisible()
@@ -1102,8 +1090,9 @@ test.describe("modal dismissal semantics", () => {
 	})
 })
 
-test.describe("display primitive edges", () => {
-	test("alerts expose both variants and a pointer action", async ({ page }) => {
+test("widget group display primitive edges shares one harness page", async ({ page, isMobile }) => {
+	test.setTimeout(240000)
+	await test.step("alerts expose both variants and a pointer action", async () => {
 		await gotoPrimitives(page)
 		const section = page.getByTestId("primitive-alert")
 		await expect(section.getByRole("alert")).toHaveCount(2)
@@ -1113,14 +1102,14 @@ test.describe("display primitive edges", () => {
 		expect(cursor).toBe("pointer")
 	})
 
-	test("field groups and fieldset carry group semantics", async ({ page }) => {
+	await test.step("field groups and fieldset carry group semantics", async () => {
 		await gotoPrimitives(page)
 		const section = page.getByTestId("primitive-field")
 		await expect(section.getByRole("group")).toHaveCount(3)
 		await expect(section.getByRole("group", { name: "Fieldset legend" })).toBeVisible()
 	})
 
-	test("item separator and action cursor", async ({ page }) => {
+	await test.step("item separator and action cursor", async () => {
 		await gotoPrimitives(page)
 		const section = page.getByTestId("primitive-item")
 		await expect(section.locator('[data-slot="item-separator"]')).toHaveCount(1)
@@ -1130,7 +1119,7 @@ test.describe("display primitive edges", () => {
 		expect(cursor).toBe("pointer")
 	})
 
-	test("scroll area exposes scrollbar and thumb while scrolling", async ({ page }) => {
+	await test.step("scroll area exposes scrollbar and thumb while scrolling", async () => {
 		await gotoPrimitives(page)
 		// The hover-type scrollbar only mounts during hover/scroll interaction.
 		const viewport = page.locator('[data-slot="scroll-area-viewport"]').first()
@@ -1144,16 +1133,13 @@ test.describe("display primitive edges", () => {
 		await expect(page.locator('[data-slot="scroll-area-thumb"]').first()).toBeAttached()
 	})
 
-	test("pagination exposes its ellipsis", async ({ page }) => {
+	await test.step("pagination exposes its ellipsis", async () => {
 		await gotoPrimitives(page)
 		const section = page.getByTestId("primitive-pagination")
 		await expect(section.locator('[data-slot="pagination-ellipsis"]')).toHaveCount(1)
 	})
 
-	test("sidebar readonly display renders badge, footer, label and separator", async ({
-		page,
-		isMobile,
-	}) => {
+	await test.step("sidebar readonly display renders badge, footer, label and separator", async () => {
 		await gotoPrimitives(page)
 		const section = await sidebarScope(page, isMobile)
 		await expect(section.getByText("Workspace")).toBeVisible()
@@ -1162,7 +1148,7 @@ test.describe("display primitive edges", () => {
 		await expect(section.locator('[data-slot="sidebar-group-content"]')).toHaveCount(1)
 	})
 
-	test("sonner toast dismisses from its close button", async ({ page }) => {
+	await test.step("sonner toast dismisses from its close button", async () => {
 		await gotoPrimitives(page)
 		await page.getByRole("button", { name: "Show success toast" }).click()
 		await expect(page.getByText("Saved demo record")).toBeVisible()
@@ -1170,9 +1156,7 @@ test.describe("display primitive edges", () => {
 		await expect(page.getByText("Saved demo record")).toBeHidden()
 	})
 
-	test("date picker preserves page scroll while open and dismisses with Escape", async ({
-		page,
-	}) => {
+	await test.step("date picker preserves page scroll while open and dismisses with Escape", async () => {
 		await gotoForms(page)
 		const before = await page.evaluate(() => [
 			getComputedStyle(document.body).overflow,
@@ -1200,9 +1184,7 @@ test.describe("display primitive edges", () => {
 		expect(after).toEqual(before)
 	})
 
-	test("combobox field preserves page scroll while open and dismisses with Escape", async ({
-		page,
-	}) => {
+	await test.step("combobox field preserves page scroll while open and dismisses with Escape", async () => {
 		await gotoForms(page)
 		// The shared dropdown helper asserts overflow and real wheel scrolling
 		// while the intended listbox is open, not after it closes.
@@ -1212,9 +1194,7 @@ test.describe("display primitive edges", () => {
 		await expect(page.getByRole("listbox")).toHaveCount(0)
 	})
 
-	test("date range preserves page scroll while open and dismisses with Escape", async ({
-		page,
-	}) => {
+	await test.step("date range preserves page scroll while open and dismisses with Escape", async () => {
 		await gotoForms(page)
 		const before = await page.evaluate(() => [
 			getComputedStyle(document.body).overflow,
@@ -1237,7 +1217,7 @@ test.describe("display primitive edges", () => {
 		)
 	})
 
-	test("form picker triggers open from the keyboard and close with Escape", async ({ page }) => {
+	await test.step("form picker triggers open from the keyboard and close with Escape", async () => {
 		await gotoForms(page)
 		await page.locator("#harness-direction").focus()
 		await page.keyboard.press("Enter")
@@ -1281,9 +1261,7 @@ test.describe("display primitive edges", () => {
 		await expect(page.getByTestId("date-value")).toHaveText("Date value: 2026-09-15")
 	})
 
-	test("record analytics selects preserve page scroll while open and dismiss with Escape", async ({
-		page,
-	}) => {
+	await test.step("record analytics selects preserve page scroll while open and dismiss with Escape", async () => {
 		await gotoForms(page)
 		await expectDropdownPreservesScroll(page, () =>
 			page.locator("#analytics_treatment").click(),
@@ -1296,9 +1274,7 @@ test.describe("display primitive edges", () => {
 		)
 	})
 
-	test("form labels activate their controls and invalid input links its error", async ({
-		page,
-	}) => {
+	await test.step("form labels activate their controls and invalid input links its error", async () => {
 		await gotoForms(page)
 		// Every field label resolves to exactly one control through htmlFor.
 		for (const name of [
@@ -1347,7 +1323,7 @@ test.describe("display primitive edges", () => {
 		await expect(field.getByRole("alert")).toContainText("Enter a title")
 	})
 
-	test("long field values stay inside the viewport width", async ({ page }) => {
+	await test.step("long field values stay inside the viewport width", async () => {
 		await gotoForms(page)
 		// Wrappable realistic copy: an unbroken 200-character token would
 		// overflow the test-only readout paragraph itself, which proves nothing
@@ -1362,7 +1338,7 @@ test.describe("display primitive edges", () => {
 		await expect(page.getByTestId("title-value")).toContainText("lorem ipsum")
 	})
 
-	test("disabled form fields stay disabled and keep their values", async ({ page }) => {
+	await test.step("disabled form fields stay disabled and keep their values", async () => {
 		await gotoForms(page)
 		for (const [label, id] of [
 			["Disabled date", "harness-date-disabled"],
@@ -1411,7 +1387,7 @@ test.describe("display primitive edges", () => {
 		)
 	})
 
-	test("long optional select shows empty placeholder, fits popup and picks", async ({ page }) => {
+	await test.step("long optional select shows empty placeholder, fits popup and picks", async () => {
 		await gotoForms(page)
 		await expect(page.getByTestId("choice-value")).toHaveText("Choice value: none")
 		await expect(page.locator("#harness-choice")).toContainText("Choose an option")

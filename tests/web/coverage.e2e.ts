@@ -218,14 +218,21 @@ function collectTests(path: string, text: string, declarations: Map<string, stri
 	function disabled(node: ts.Node): boolean {
 		if (
 			ts.isCallExpression(node) &&
-			/^(?:test(?:\.info\(\))?\.(?:skip|fixme)|testInfo\.(?:skip|fixme))$/.test(
+			/^(?:test(?:\.info\(\))?\.(?:skip|fixme)|test\.step\.(?:skip|fixme)|testInfo\.(?:skip|fixme))$/.test(
 				node.expression.getText(source),
 			)
 		)
 			return true
 		return node.getChildren(source).some(disabled)
 	}
-	function visit(node: ts.Node, env: Map<string, Value>) {
+	function visit(node: ts.Node, env: Map<string, Value>, active: boolean) {
+		// Only recognised test/describe/step callbacks are entered below. A
+		// nested function declaration is not evidence that its body ever runs.
+		if (ts.isFunctionLike(node)) return
+		if (ts.isIfStatement(node) && node.expression.kind === ts.SyntaxKind.FalseKeyword) {
+			if (node.elseStatement) visit(node.elseStatement, env, active)
+			return
+		}
 		if (ts.isForOfStatement(node)) {
 			const values = value(node.expression, env)
 			const binding = ts.isVariableDeclarationList(node.initializer)
@@ -244,28 +251,63 @@ function collectTests(path: string, text: string, declarations: Map<string, stri
 						)
 							scope.set(element.name.text, item[index])
 					})
-				visit(node.statement, scope)
+				visit(node.statement, scope, active)
 			}
 			return
 		}
 		if (ts.isCallExpression(node)) {
 			const callee = node.expression.getText(source)
-			if (/^test\.describe\.(?:skip|fixme|only)$/.test(callee)) return
-			if (callee === "test" && node.arguments[0] && !disabled(node)) {
-				const title = value(node.arguments[0], env)
-				if (typeof title === "string") {
-					const id = title.match(/^\[([^\]]+)\]/)?.[1] ?? title
-					const references = declarations.get(id) ?? []
-					references.push(
-						`${path}:${source.getLineAndCharacterOfPosition(node.pos).line + 1}`,
-					)
-					declarations.set(id, references)
-				}
+			// Pruned branches never run, so nothing inside them is executable
+			// evidence — including nested step aliases from skipped parents.
+			if (
+				/^test\.describe\.(?:skip|fixme|only)$/.test(callee) ||
+				/^test\.(?:skip|fixme|only)$/.test(callee) ||
+				/^test\.step\.(?:skip|fixme)$/.test(callee)
+			)
+				return
+			// Grouped tests keep the legacy case title as a static test.step
+			// name. Steps resolve through the same static scope as tests
+			// (including static for…of loops), so a combined test preserves
+			// the exact executable IDs the behaviour ledger references. A
+			// step only counts with enabled executable test ancestry: a step
+			// in an uncalled helper or outside any test never runs. A step
+			// that is itself skipped or lives in a skipped suite cannot
+			// cover a component, exactly like a skipped test.
+			if (callee === "test.describe") {
+				visitCallback(node, env, false)
+				return
+			}
+			if (callee === "test.step") {
+				if (!active || disabled(node)) return
+				if (node.arguments[0]) record(node, env)
+				visitCallback(node, env, true)
+				return
+			}
+			if (callee === "test" && node.arguments[0]) {
+				if (disabled(node)) return
+				record(node, env)
+				visitCallback(node, env, true)
+				return
 			}
 		}
-		ts.forEachChild(node, child => visit(child, env))
+		ts.forEachChild(node, child => visit(child, env, active))
 	}
-	visit(source, new Map())
+	function visitCallback(node: ts.CallExpression, env: Map<string, Value>, active: boolean) {
+		for (const argument of node.arguments) {
+			if (ts.isArrowFunction(argument) || ts.isFunctionExpression(argument))
+				visit(argument.body, env, active)
+		}
+	}
+	function record(node: ts.CallExpression, env: Map<string, Value>) {
+		const title = node.arguments[0] ? value(node.arguments[0], env) : undefined
+		if (typeof title === "string") {
+			const id = title.match(/^\[([^\]]+)\]/)?.[1] ?? title
+			const references = declarations.get(id) ?? []
+			references.push(`${path}:${source.getLineAndCharacterOfPosition(node.pos).line + 1}`)
+			declarations.set(id, references)
+		}
+	}
+	visit(source, new Map(), false)
 }
 
 function declaredTests() {
@@ -286,6 +328,33 @@ test("[UI-INVENTORY-PARSER] static generated titles resolve but skipped cases ca
 		const cases = [{ name: "first" }, { name: "second" }]
 		for (const entry of cases) test(\`case \${entry.name}\`, async () => { expect(true).toBe(true) })
 		for (const [name, count] of [["third", 2]] as const) test(\`case \${name} \${count}\`, async () => {})
+		test("grouped", async () => {
+			function unusedNested() { test.step("must-not-map-nested-helper", () => {}) }
+			const unusedArrow = () => test.step("must-not-map-nested-arrow", () => {})
+			if (false) await test.step("must-not-map-false-branch", async () => {})
+			await test.step("grouped first", async () => {})
+			await test.step(\`grouped \${"second"}\`, async () => {})
+		})
+		for (const name of ["alpha", "beta"] as const) test("looped group", async () => {
+			await test.step(\`looped \${name} step\`, async () => {})
+		})
+		test("skipped group", async () => {
+			await test.step.skip("skipped step", async () => {})
+		})
+		test.skip("skipped parent", () => {
+			test.step("must-not-map-skipped-parent", () => {})
+		})
+		test("conditional parent with step", () => {
+			test.skip(true, "unsupported project")
+			test.step("must-not-map-conditional-parent", () => {})
+		})
+		test.only("only parent", () => {
+			test.step("must-not-map-only-parent", () => {})
+		})
+		function uncalledHelper() {
+			test.step("must-not-map-helper", () => {})
+		}
+		void uncalledHelper
 		test.skip("skip", () => {})
 		test.fixme("fixme", () => {})
 		test("conditional", () => { test.skip(true, "unsupported project") })
@@ -294,7 +363,17 @@ test("[UI-INVENTORY-PARSER] static generated titles resolve but skipped cases ca
 	`,
 		declarations,
 	)
-	expect([...declarations.keys()]).toEqual(["case first", "case second", "case third 2"])
+	expect([...declarations.keys()]).toEqual([
+		"case first",
+		"case second",
+		"case third 2",
+		"grouped",
+		"grouped first",
+		"grouped second",
+		"looped group",
+		"looped alpha step",
+		"looped beta step",
+	])
 })
 
 test("[UI-INVENTORY-FILES] every component and app file has an explicit owner and classification", () => {
