@@ -123,6 +123,10 @@ test("navigation history journeys share one seed with history resets", async ({
 		// A successful Back unmounts its own button mid-tap on touch
 		// viewports while the navigation still commits, hanging the tap on
 		// the detached target. Bound the tap and keep the strict URL proof.
+		// TODO: the hang mechanism is inferred from a completion-less trace, not
+		// proven (e.g. actionability retry vs post-action wait). If a real mobile
+		// Back defect ever hides behind this catch, split tap and navigation
+		// proof instead.
 		await page
 			.getByRole("button", { name: /^Back to / })
 			.click({ timeout: 5000 })

@@ -55,13 +55,26 @@ export default function AllocatorPendingPage() {
 	const searchParams = useSearchParams()
 	const router = useRouter()
 	const pathname = usePathname()
+	// Latest pushed params. Debounce timers close over render-scope searchParams;
+	// when a rapid selectPending push has not committed yet, a firing timer would
+	// rebuild from the stale base and resurrect just-cleared params.
+	const latestParams = useRef<URLSearchParams | null>(null)
+	// True while a pushParams navigation has not committed yet. Timers prefer the
+	// ref base only in that window; otherwise the committed params are truth, so
+	// navigation that bypasses pushParams (footer Links, Back/Forward) can never
+	// be overwritten by a stale-forward mirror.
+	const navigationPending = useRef(false)
 	const pushParams = (next: URLSearchParams) => {
+		// Dedupe against the last intent, not the committed URL: during a slow
+		// commit a fast revert (e.g. Account X, then All) must still push.
+		const previous = (
+			navigationPending.current && latestParams.current ? latestParams.current : searchParams
+		).toString()
 		latestParams.current = next
+		if (next.toString() === previous) return
+		navigationPending.current = true
 		const suffix = next.toString()
-		const target = suffix ? `${pathname}?${suffix}` : pathname
-		// Identical-URL pushes only churn history; real changes always differ.
-		if (target !== `${pathname}${window.location.search}`)
-			router.push(target, { scroll: false })
+		router.push(suffix ? `${pathname}?${suffix}` : pathname, { scroll: false })
 	}
 	const setSearchParams = (init: URLSearchParams | Record<string, string>) => {
 		if (init instanceof URLSearchParams) {
@@ -85,10 +98,6 @@ export default function AllocatorPendingPage() {
 	const [reviewStatement, setReviewStatement] = useState<Statement | null>(null)
 	const queueTimer = useRef<number | undefined>(undefined)
 	const candidateTimer = useRef<number | undefined>(undefined)
-	// Latest pushed params. Debounce timers close over render-scope searchParams;
-	// when a rapid selectPending push has not committed yet, a firing timer would
-	// rebuild from the stale base and resurrect just-cleared params.
-	const latestParams = useRef<URLSearchParams | null>(null)
 
 	const updateParams = (
 		changes: globalThis.Record<string, string | number | null>,
@@ -110,6 +119,27 @@ export default function AllocatorPendingPage() {
 	useEffect(() => setQueueQuery(queueQueryParam), [queueQueryParam])
 	useEffect(() => setCandidateQuery(candidateQueryParam), [candidateQueryParam])
 
+	// Invalidate the intent mirror once its commit lands; treat any other
+	// committed change (footer Links, Back/Forward) as authoritative.
+	useEffect(() => {
+		if (latestParams.current?.toString() === searchParams.toString()) {
+			latestParams.current = null
+			navigationPending.current = false
+		} else if (!navigationPending.current) {
+			latestParams.current = null
+		}
+	}, [searchParams])
+
+	// Back/Forward is authoritative even mid-flight: drop any pending intent.
+	useEffect(() => {
+		const onPopState = () => {
+			latestParams.current = null
+			navigationPending.current = false
+		}
+		window.addEventListener("popstate", onPopState)
+		return () => window.removeEventListener("popstate", onPopState)
+	}, [])
+
 	useEffect(() => {
 		if (queueQuery === queueQueryParam) return
 		const timer = window.setTimeout(() => {
@@ -126,7 +156,7 @@ export default function AllocatorPendingPage() {
 					candidate_query: null,
 				},
 				false,
-				latestParams.current,
+				navigationPending.current ? latestParams.current : null,
 			)
 			setCandidateQuery("")
 		}, 300)
@@ -140,7 +170,7 @@ export default function AllocatorPendingPage() {
 			updateParams(
 				{ candidate_query: candidateQuery || null, candidate_page: null },
 				false,
-				latestParams.current,
+				navigationPending.current ? latestParams.current : null,
 			)
 		}, 300)
 		candidateTimer.current = timer
@@ -292,7 +322,11 @@ export default function AllocatorPendingPage() {
 								value={queueQuery}
 								onChange={event => {
 									setQueueQuery(event.target.value)
-									setCandidateQuery("")
+									// Cancel a pending candidate commit rather than resetting
+									// its buffer: the queue commit below resets the buffer
+									// itself, so this avoids one extra navigation mid-typing
+									// without leaving stale candidate text unsearched.
+									window.clearTimeout(candidateTimer.current)
 								}}
 							/>
 							<FilterBar>

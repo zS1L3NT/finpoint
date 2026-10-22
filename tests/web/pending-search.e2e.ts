@@ -115,6 +115,11 @@ test("pending queue and candidate search journeys share one dense workspace", as
 				.click()
 			// Let the Back commit land and the candidate panel finish exiting
 			// before typing: keystrokes during the transition race the commit.
+			// Mobile-only: other projects show both panels, so typing there also
+			// exercises clearing the live selection (asserted below); the mobile
+			// run only proves character retention and history bounds.
+			// The 30s budget covers cold-commit latency on dev servers; the
+			// committed-URL assertions that follow stay strict.
 			await expect(page).not.toHaveURL(/pending_statement_id=/, { timeout: 30000 })
 			await page.waitForTimeout(500)
 		}
@@ -132,5 +137,52 @@ test("pending queue and candidate search journeys share one dense workspace", as
 		// One selection-clear navigation and one debounced query navigation are
 		// sufficient; repeated clear intents must not add an entry per character.
 		expect((await page.evaluate(() => history.length)) - historyLength).toBeLessThanOrEqual(2)
+	})
+	await test.step("Queue pagination survives a candidate search commit", async () => {
+		// Regression: timer-built URLs must not drop params from navigation that
+		// bypasses the intent mirror (footer Links, Back/Forward). Paginate AFTER
+		// the last pushParams push (selection): without invalidation the mirror
+		// still holds the pre-pagination params and the timer commit drops
+		// page=2. Each action waits for its commit.
+		await page.goto("/allocator/pending?per_page=2")
+		await page
+			.getByRole("button", { name: /^Dense pending \d+/ })
+			.first()
+			.click()
+		await expect(page).toHaveURL(/pending_statement_id=/)
+		const selected = new URL(page.url()).searchParams.get("pending_statement_id")
+		if (isMobile) {
+			// The queue (and its footer) hides behind the selection on mobile,
+			// so paginate by navigating with the selection preserved.
+			await page.goto(`/allocator/pending?per_page=2&page=2&pending_statement_id=${selected}`)
+		} else {
+			await page.getByRole("link", { name: "Go to next page", exact: true }).click()
+		}
+		await expect(page).toHaveURL(/[?&]page=2(&|$)/)
+		const candidate = page
+			.locator('section[aria-labelledby="candidate-title"]')
+			.getByPlaceholder("Search descriptions...")
+		await expect(candidate).toBeVisible()
+		await candidate.fill("Dense Record")
+		await expect(page).toHaveURL(/candidate_query=Dense\+Record/)
+		await expect(page).toHaveURL(/[?&]page=2(&|$)/)
+		await expect(page).toHaveURL(/pending_statement_id=/)
+	})
+	await test.step("Browser Back followed by queue typing does not restore the account filter", async () => {
+		// Same stale-mirror hazard via popstate instead of Links.
+		await page.goto("/allocator/pending")
+		// Single combobox on this route (probed): the account filter trigger.
+		// Display names are not zero-padded ("Dense Account 1", id t1-d-acc-01).
+		await page.getByRole("combobox").first().click()
+		await page.getByRole("option", { name: "Dense Account 1", exact: true }).click()
+		await expect(page).toHaveURL(/account_id=t1-d-acc-01/)
+		await page.goBack()
+		await expect(page).not.toHaveURL(/account_id=/)
+		const search = page
+			.locator('section[aria-labelledby="pending-queue-title"]')
+			.getByPlaceholder("Search descriptions...")
+		await search.pressSequentially("Dense pending 26", { delay: 10 })
+		await expect(page).toHaveURL(/query=Dense\+pending\+26/)
+		await expect(page).not.toHaveURL(/account_id=/)
 	})
 })
