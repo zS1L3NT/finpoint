@@ -23,7 +23,7 @@ export default function PageHeader({
 	const backTarget = latest ?? back ?? null
 
 	return (
-		<div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+		<div className="flex flex-col gap-4 @2xl/page:flex-row @2xl/page:items-end @2xl/page:justify-between">
 			<div className="flex min-w-0 flex-col gap-4">
 				{backTarget ? (
 					<Button
@@ -60,7 +60,7 @@ export default function PageHeader({
 			</div>
 
 			{actions ? (
-				<div className="flex w-full shrink-0 flex-col gap-2 sm:flex-row sm:flex-wrap md:w-auto md:justify-end">
+				<div className="flex w-full shrink-0 flex-col gap-2 sm:flex-row sm:flex-wrap @2xl/page:w-auto @2xl/page:justify-end">
 					{actions}
 				</div>
 			) : null}

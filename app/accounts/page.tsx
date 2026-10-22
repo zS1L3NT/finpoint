@@ -59,7 +59,7 @@ export default function AccountsPage() {
 							: "No accounts yet. Import a bank export to create one."}
 					</p>
 				) : (
-					<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+					<div className="grid gap-4 @2xl/page:grid-cols-2 @5xl/page:grid-cols-3">
 						{accounts.map((account, index) => (
 							<motion.div
 								key={account.id}
@@ -141,13 +141,13 @@ function AccountCard({ account, onEdit }: { account: AccountRow; onEdit: () => v
 			<div className="grid grid-cols-2 gap-3 rounded-lg bg-muted/40 p-3 text-xs">
 				<div>
 					<p className="text-muted-foreground">In · 30 days</p>
-					<p className="mt-0.5 text-sm font-semibold text-creative tabular-nums">
+					<p className="mt-0.5 text-sm font-semibold text-creative tabular-nums whitespace-nowrap">
 						{formatCurrency(account.inflow_30d)}
 					</p>
 				</div>
 				<div>
 					<p className="text-muted-foreground">Out · 30 days</p>
-					<p className="mt-0.5 text-sm font-semibold text-destructive tabular-nums">
+					<p className="mt-0.5 text-sm font-semibold text-destructive tabular-nums whitespace-nowrap">
 						{formatCurrency(-account.outflow_30d)}
 					</p>
 				</div>

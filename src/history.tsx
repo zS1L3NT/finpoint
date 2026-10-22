@@ -1,7 +1,7 @@
 "use client"
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { createContext, useContext, useEffect, useRef, useState } from "react"
+import { createContext, startTransition, useContext, useEffect, useRef, useState } from "react"
 
 export type HistoryItem = { name: string; url: string }
 
@@ -201,10 +201,14 @@ export const HistoryProvider = ({ children }: { children: React.ReactNode }) => 
 				isNavigatingBack,
 				handlePush: name => () => {
 					const url = pathname + window.location.search
-					setHistorySync(history => [
-						...(history.at(-1)?.url === url ? history.slice(0, -1) : history),
-						{ name, url },
-					])
+					// Commit the Back entry with the route transition, so the outgoing
+					// page does not reveal its own Back button while the destination loads.
+					startTransition(() => {
+						setHistorySync(history => [
+							...(history.at(-1)?.url === url ? history.slice(0, -1) : history),
+							{ name, url },
+						])
+					})
 				},
 				handlePop: () => {
 					setHistorySync(history => history.slice(0, -1))
