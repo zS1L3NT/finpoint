@@ -56,8 +56,12 @@ export default function AllocatorPendingPage() {
 	const router = useRouter()
 	const pathname = usePathname()
 	const pushParams = (next: URLSearchParams) => {
+		latestParams.current = next
 		const suffix = next.toString()
-		router.push(suffix ? `${pathname}?${suffix}` : pathname, { scroll: false })
+		const target = suffix ? `${pathname}?${suffix}` : pathname
+		// Identical-URL pushes only churn history; real changes always differ.
+		if (target !== `${pathname}${window.location.search}`)
+			router.push(target, { scroll: false })
 	}
 	const setSearchParams = (init: URLSearchParams | Record<string, string>) => {
 		if (init instanceof URLSearchParams) {
@@ -81,12 +85,17 @@ export default function AllocatorPendingPage() {
 	const [reviewStatement, setReviewStatement] = useState<Statement | null>(null)
 	const queueTimer = useRef<number | undefined>(undefined)
 	const candidateTimer = useRef<number | undefined>(undefined)
+	// Latest pushed params. Debounce timers close over render-scope searchParams;
+	// when a rapid selectPending push has not committed yet, a firing timer would
+	// rebuild from the stale base and resurrect just-cleared params.
+	const latestParams = useRef<URLSearchParams | null>(null)
 
 	const updateParams = (
 		changes: globalThis.Record<string, string | number | null>,
 		clearCandidate = false,
+		base: URLSearchParams | null = null,
 	) => {
-		const next = new URLSearchParams(searchParams.toString())
+		const next = new URLSearchParams((base ?? searchParams).toString())
 		for (const [key, value] of Object.entries(changes)) {
 			if (value === null || value === "") next.delete(key)
 			else next.set(key, String(value))
@@ -104,7 +113,22 @@ export default function AllocatorPendingPage() {
 	useEffect(() => {
 		if (queueQuery === queueQueryParam) return
 		const timer = window.setTimeout(() => {
-			updateParams({ query: queueQuery || null, page: null })
+			// Typing a new queue query abandons any selection and candidate
+			// search, so clear those params in the same commit instead of
+			// pushing per keystroke (a push storm lets a slow response
+			// overwrite the query commit out of order).
+			updateParams(
+				{
+					query: queueQuery || null,
+					page: null,
+					pending_statement_id: null,
+					candidate_page: null,
+					candidate_query: null,
+				},
+				false,
+				latestParams.current,
+			)
+			setCandidateQuery("")
 		}, 300)
 		queueTimer.current = timer
 		return () => window.clearTimeout(timer)
@@ -113,7 +137,11 @@ export default function AllocatorPendingPage() {
 	useEffect(() => {
 		if (candidateQuery === candidateQueryParam) return
 		const timer = window.setTimeout(() => {
-			updateParams({ candidate_query: candidateQuery || null, candidate_page: null })
+			updateParams(
+				{ candidate_query: candidateQuery || null, candidate_page: null },
+				false,
+				latestParams.current,
+			)
 		}, 300)
 		candidateTimer.current = timer
 		return () => window.clearTimeout(timer)
@@ -264,8 +292,7 @@ export default function AllocatorPendingPage() {
 								value={queueQuery}
 								onChange={event => {
 									setQueueQuery(event.target.value)
-									if (pendingStatementId || candidateQueryParam)
-										selectPending(null, queueQueryParam)
+									setCandidateQuery("")
 								}}
 							/>
 							<FilterBar>

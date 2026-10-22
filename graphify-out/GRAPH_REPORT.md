@@ -1,7 +1,9 @@
 # Graph Report - t3-9755e75b  (2026-10-23)
 
 ## Corpus Check
-- cluster-only mode — file stats not available
+- 236 files · ~188,126 words
+- Verdict: corpus is large enough that graph structure adds value.
+- Unclassified: 9 file(s) not represented in the graph (top: (none) 5, .example 1, .lock 1)
 
 ## Summary
 - 1781 nodes · 7048 edges · 92 communities (84 shown, 8 thin omitted)
@@ -9,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `bdf15b70`
+- Built from commit: `cf72d4c1`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -114,17 +116,17 @@
 7. `UiIcon()` - 49 edges
 8. `RecordCreatorDialog()` - 47 edges
 9. `round2()` - 46 edges
-10. `Card()` - 41 edges
+10. `next` - 41 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `Finpoint Style Additions` --references--> `ValidationError`  [INFERRED]
-  STYLE.md → src/logic/validate.ts
-- `Finpoint Style Additions` --references--> `useApiFormErrors()`  [INFERRED]
-  STYLE.md → src/hooks/use-api-form-errors.ts
 - `What to run` --references--> `SelectItem()`  [INFERRED]
   tests/web/README.md → src/components/ui/select.tsx
+- `Finpoint Style Additions` --references--> `useApiFormErrors()`  [INFERRED]
+  STYLE.md → src/hooks/use-api-form-errors.ts
 - `Copy` --references--> `pluralize()`  [INFERRED]
   STYLE.md → src/lib/utils.ts
+- `Finpoint Style Additions` --references--> `ValidationError`  [INFERRED]
+  STYLE.md → src/logic/validate.ts
 - `Fixtures` --references--> `seedWorkspace()`  [INFERRED]
   tests/web/README.md → tests/web/support/fixtures.ts
 
@@ -475,7 +477,7 @@ Cohesion: 0.22
 Nodes (8): Browser regression tests, Static behaviour coverage ledger, Fixtures, Shared-fixture test step groups, Native motion frames and zero retries, Rendered assertions, Scoped affected browser checks, What to run
 
 ## Knowledge Gaps
-- **76 isolated node(s):** `React Compiler (enabled)`, `Root Suspense (keeps routes static)`, `Static content pages (privacy, terms) are server components`, `bun install`, `bun run build` (+71 more)
+- **76 isolated node(s):** `@fontsource-variable/inter`, `shadcn`, `tailwindcss`, `tw-animate-css`, `@biomejs/biome` (+71 more)
   These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 579 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **8 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -483,16 +485,16 @@ Nodes (8): Browser regression tests, Static behaviour coverage ledger, Fixtures,
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `cn()` connect `cn` to `record-editor.tsx`, `sync/page.tsx`, `daily-spending-chart.tsx`, `amount-filter.tsx`, `pending/page.tsx`, `ValidationError`, `Button`, `utils.ts`, `monthly-budget-usage.tsx`, `category-filter.tsx`, `luxon`, `paginated-data-table.tsx`, `pagination.tsx`, `total-spending-chart.tsx`, `(month)/page.tsx`, `app-sidebar.tsx`, `combobox.tsx`?**
-  _High betweenness centrality (0.105) - this node is a cross-community bridge._
-- **What connects `React Compiler (enabled)`, `Root Suspense (keeps routes static)`, `Static content pages (privacy, terms) are server components` to the rest of the system?**
+  _High betweenness centrality (0.100) - this node is a cross-community bridge._
+- **What connects `@fontsource-variable/inter`, `shadcn`, `tailwindcss` to the rest of the system?**
   _76 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `record-editor.tsx` be split into smaller, more focused modules?**
   _Cohesion score 0.05368402089713565 - nodes in this community are weakly interconnected._
-- **Why does `@playwright/test` connect `@playwright/test` to `coverage.e2e.ts`, `widgets.e2e.ts`, `sheet-loading.e2e.ts`, `fixtures.ts`, `package.json`, `editors.e2e.ts`, `workflows.e2e.ts`, `assertions.ts`?**
-  _High betweenness centrality (0.084) - this node is a cross-community bridge._
+- **Why does `react` connect `utils.ts` to `record-editor.tsx`, `sync/page.tsx`, `daily-spending-chart.tsx`, `cn`, `package.json`, `category-filter.tsx`, `paginated-data-table.tsx`, `total-spending-chart.tsx`, `auto-sync.ts`, `(month)/page.tsx`, `app/layout.tsx`, `app-sidebar.tsx`, `combobox.tsx`, `amount-filter.tsx`, `pending/page.tsx`, `next`, `Button`, `monthly-budget-usage.tsx`, `luxon`, `pagination.tsx`?**
+  _High betweenness centrality (0.077) - this node is a cross-community bridge._
 - **Should `daily-spending-chart.tsx` be split into smaller, more focused modules?**
   _Cohesion score 0.1361344537815126 - nodes in this community are weakly interconnected._
-- **Why does `react` connect `utils.ts` to `record-editor.tsx`, `sync/page.tsx`, `daily-spending-chart.tsx`, `cn`, `package.json`, `category-filter.tsx`, `paginated-data-table.tsx`, `total-spending-chart.tsx`, `auto-sync.ts`, `(month)/page.tsx`, `app/layout.tsx`, `app-sidebar.tsx`, `combobox.tsx`, `amount-filter.tsx`, `pending/page.tsx`, `next`, `Button`, `monthly-budget-usage.tsx`, `luxon`, `pagination.tsx`?**
-  _High betweenness centrality (0.078) - this node is a cross-community bridge._
+- **Why does `@playwright/test` connect `@playwright/test` to `coverage.e2e.ts`, `widgets.e2e.ts`, `sheet-loading.e2e.ts`, `fixtures.ts`, `package.json`, `editors.e2e.ts`, `workflows.e2e.ts`, `assertions.ts`?**
+  _High betweenness centrality (0.077) - this node is a cross-community bridge._
 - **Should `cn` be split into smaller, more focused modules?**
   _Cohesion score 0.08164556962025317 - nodes in this community are weakly interconnected._

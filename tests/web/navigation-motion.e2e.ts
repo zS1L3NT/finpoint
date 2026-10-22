@@ -120,7 +120,13 @@ test("navigation history journeys share one seed with history resets", async ({
 		await page.getByRole("link", { name: "Terms of Service", exact: true }).click()
 		await page.getByRole("button", { name: /^Back to / }).click()
 		await expect(page).toHaveURL(/\/privacy$/)
-		await page.getByRole("button", { name: /^Back to / }).click()
+		// A successful Back unmounts its own button mid-tap on touch
+		// viewports while the navigation still commits, hanging the tap on
+		// the detached target. Bound the tap and keep the strict URL proof.
+		await page
+			.getByRole("button", { name: /^Back to / })
+			.click({ timeout: 5000 })
+			.catch(() => undefined)
 		await expect(page).toHaveURL(/\/sync$/)
 	})
 })

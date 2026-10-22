@@ -197,11 +197,22 @@ test("charts intro journeys share one seed", async ({ page, isMobile }) => {
 			// Intro animations start within a frame; 600ms covers a delayed restart.
 			await page.waitForTimeout(600)
 			if (!isMobile) {
+				const viewport = page.viewportSize()
+				// Wide viewports cap content width (container mx-auto), which absorbs
+				// the sidebar toggle before it reaches the chart. Narrow below the
+				// cap first so the toggle genuinely resizes the chart; restoring
+				// afterwards is a second observed resize, not silent cleanup.
+				const narrowed = viewport !== null && viewport.width > 1600
+				if (narrowed && viewport)
+					await page.setViewportSize({ width: 1500, height: viewport.height })
 				const width = await chart.evaluate(element => element.getBoundingClientRect().width)
 				await page.locator('header [data-slot="sidebar-trigger"]').click()
 				await expect
 					.poll(() => chart.evaluate(element => element.getBoundingClientRect().width))
 					.not.toBe(width)
+				await page.waitForTimeout(600)
+				if (narrowed && viewport)
+					await page.setViewportSize({ width: viewport.width, height: viewport.height })
 				await page.waitForTimeout(600)
 			}
 			const replayed = await watcher.evaluate(state => {

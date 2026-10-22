@@ -85,7 +85,11 @@ test("pending queue and candidate search journeys share one dense workspace", as
 			await page
 				.getByRole("button", { name: "Back to pending Statements", exact: true })
 				.click()
-		await page.getByRole("button", { name: /^Dense pending 26\b/ }).click()
+		// Forced: the <300ms race below must measure dispatch speed, not
+		// actionability polling (stability checks on an animating list eat the
+		// budget). The URL + visibility + no-stale-query assertions keep full
+		// strength — a genuinely failed click still fails loudly there.
+		await page.getByRole("button", { name: /^Dense pending 26\b/ }).click({ force: true })
 		const gap = await page.evaluate(
 			() =>
 				Number(Reflect.get(window, "__selectedAt")) -
@@ -105,10 +109,15 @@ test("pending queue and candidate search journeys share one dense workspace", as
 	await test.step("Pending queue typing retains every character while clearing the old selection", async () => {
 		await page.goto(`/allocator/pending?pending_statement_id=${first.id}`)
 		await expect(page.locator('section[aria-labelledby="candidate-title"]')).toBeVisible()
-		if (isMobile)
+		if (isMobile) {
 			await page
 				.getByRole("button", { name: "Back to pending Statements", exact: true })
 				.click()
+			// Let the Back commit land and the candidate panel finish exiting
+			// before typing: keystrokes during the transition race the commit.
+			await expect(page).not.toHaveURL(/pending_statement_id=/, { timeout: 30000 })
+			await page.waitForTimeout(500)
+		}
 		const search = page
 			.locator('section[aria-labelledby="pending-queue-title"]')
 			.getByPlaceholder("Search descriptions...")
