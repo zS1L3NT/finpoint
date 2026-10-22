@@ -239,11 +239,11 @@ export default function AllocatorPendingPage() {
 					</Alert>
 				) : null}
 
-				<div className="grid min-w-0 gap-4 md:grid-cols-[minmax(18rem,2fr)_minmax(0,3fr)]">
+				<div className="grid min-w-0 gap-4 @4xl/page:grid-cols-[minmax(18rem,2fr)_minmax(0,3fr)]">
 					<section
 						className={cn(
 							"relative min-w-0 flex-col gap-4",
-							selectedPendingStatement ? "hidden md:flex" : "flex",
+							selectedPendingStatement ? "hidden @4xl/page:flex" : "flex",
 						)}
 						aria-label="Pending statements"
 					>
@@ -354,7 +354,7 @@ export default function AllocatorPendingPage() {
 					<section
 						className={cn(
 							"min-w-0 flex-col gap-4",
-							selectedPendingStatement ? "flex" : "hidden md:flex",
+							selectedPendingStatement ? "flex" : "hidden @4xl/page:flex",
 						)}
 						aria-labelledby="candidate-title"
 					>
@@ -371,7 +371,7 @@ export default function AllocatorPendingPage() {
 								>
 									<Button
 										variant="outline"
-										className="w-fit md:hidden"
+										className="w-fit @4xl/page:hidden"
 										onClick={() => selectPending(null)}
 									>
 										<IconifyIcon

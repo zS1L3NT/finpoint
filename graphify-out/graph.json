@@ -2993,7 +2993,7 @@
       "file_type": "code",
       "norm_label": "detailsummaryitem()",
       "source_file": "src/components/detail-summary.tsx",
-      "source_location": "L36"
+      "source_location": "L39"
     },
     {
       "id": "src_components_dialogs_duplicate_review_duplicatereviewdialog",
@@ -27038,18 +27038,6 @@
     },
     {
       "source": "src_components_allocate_bar_allocatebar",
-      "target": "src_lib_utils_classforcurrency",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/allocate-bar.tsx",
-      "source_location": "L18",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_allocate_bar_allocatebar",
       "target": "src_lib_utils_cn",
       "relation": "calls",
       "_origin": "ast",
@@ -27057,7 +27045,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/allocate-bar.tsx",
-      "source_location": "L18",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_allocate_bar_allocatebar",
+      "target": "src_lib_utils_classforcurrency",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/allocate-bar.tsx",
+      "source_location": "L21",
       "weight": 1.0
     },
     {
@@ -27069,7 +27069,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/allocate-bar.tsx",
-      "source_location": "L19",
+      "source_location": "L24",
       "weight": 1.0
     },
     {
@@ -28173,7 +28173,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/detail-summary.tsx",
-      "source_location": "L55",
+      "source_location": "L58",
       "weight": 1.0
     },
     {
@@ -82471,7 +82471,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/detail-summary.tsx",
-      "source_location": "L36",
+      "source_location": "L39",
       "weight": 1.0
     },
     {
@@ -94796,5 +94796,5 @@
       "source_file": "AGENTS.md"
     }
   ],
-  "built_at_commit": "ea64856993416683a815e1794ad6f61371c3013e"
+  "built_at_commit": "ca53ff9e517833807ac98e7c456dbac2bbefd3c5"
 }

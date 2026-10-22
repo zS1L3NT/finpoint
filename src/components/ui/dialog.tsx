@@ -42,7 +42,7 @@ function DialogOverlay({
     <DialogPrimitive.Backdrop
       data-slot="dialog-overlay"
       className={cn(
-        "fixed inset-0 isolate z-50 bg-black/20 transition-opacity duration-200 ease-out data-ending-style:duration-150 starting:opacity-0 data-starting-style:opacity-0 data-ending-style:opacity-0 motion-reduce:transition-none",
+        "fixed inset-0 isolate z-50 bg-black/50 transition-opacity duration-200 ease-out data-ending-style:duration-150 starting:opacity-0 data-starting-style:opacity-0 data-ending-style:opacity-0 motion-reduce:transition-none",
         className
       )}
       {...props}
@@ -64,7 +64,7 @@ function DialogContent({
       <DialogPrimitive.Popup
         data-slot="dialog-content"
         className={cn(
-          "fixed inset-x-3 top-1/2 z-50 grid max-h-[calc(100svh-1.5rem)] min-w-0 -translate-y-1/2 gap-4 overflow-x-hidden overflow-y-auto rounded-xl has-[>[data-slot=dialog-body]]:grid-rows-[auto_minmax(0,1fr)_auto] has-[>[data-slot=dialog-body]]:overflow-y-hidden bg-popover p-4 text-sm text-popover-foreground shadow-2xl ring-1 ring-foreground/10 outline-none transition-[opacity,transform] duration-200 ease-out data-ending-style:duration-150 starting:opacity-0 data-starting-style:opacity-0 data-ending-style:opacity-0 starting:transform-[translateY(6px)] data-starting-style:transform-[translateY(6px)] data-ending-style:transform-[translateY(6px)] motion-reduce:transition-none motion-reduce:transform-none motion-reduce:starting:transform-none motion-reduce:data-starting-style:transform-none motion-reduce:starting:opacity-100 motion-reduce:data-starting-style:opacity-100 [&>*]:min-w-0 md:right-auto md:left-1/2 md:max-h-[calc(100svh-2rem)] md:w-[calc(100%-2rem)] md:max-w-sm md:-translate-x-1/2",
+          "fixed top-1/2 left-[50vw] z-50 grid max-h-[calc(100svh-1.5rem)] min-w-0 w-[calc(100vw-1.5rem)] -translate-x-1/2 -translate-y-1/2 gap-4 overflow-x-hidden overflow-y-auto rounded-xl has-[>[data-slot=dialog-body]]:grid-rows-[auto_minmax(0,1fr)_auto] has-[>[data-slot=dialog-body]]:overflow-y-hidden bg-popover p-4 text-sm text-popover-foreground shadow-2xl ring-1 ring-foreground/10 outline-none transition-[opacity,transform] duration-200 ease-out data-ending-style:duration-150 starting:opacity-0 data-starting-style:opacity-0 data-ending-style:opacity-0 starting:transform-[translateY(6px)] data-starting-style:transform-[translateY(6px)] data-ending-style:transform-[translateY(6px)] motion-reduce:transition-none motion-reduce:transform-none motion-reduce:starting:transform-none motion-reduce:data-starting-style:transform-none motion-reduce:starting:opacity-100 motion-reduce:data-starting-style:opacity-100 [&>*]:min-w-0 md:max-h-[calc(100svh-2rem)] md:w-[calc(100vw-2rem)] md:max-w-sm",
           className
         )}
         {...props}

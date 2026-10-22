@@ -68,7 +68,7 @@ export default function StatementRulesPage() {
 						</Button>
 					</motion.div>
 				) : (
-					<div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+					<div className="grid gap-3 @2xl/page:grid-cols-2 @5xl/page:grid-cols-3">
 						{rules.map((rule, index) => (
 							<motion.div
 								key={rule.id}

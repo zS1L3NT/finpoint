@@ -203,7 +203,7 @@ export default function ImporterPage() {
 							</CardDescription>
 						</CardHeader>
 
-						<CardContent className="space-y-6">
+						<CardContent className="@container/importer space-y-6">
 							<form.Field name="bank">
 								{field => {
 									const errors = mergeErrors(field.state.meta.errors, field.name)
@@ -212,7 +212,7 @@ export default function ImporterPage() {
 											<div
 												role="radiogroup"
 												aria-label="Bank"
-												className="grid grid-cols-2 gap-2 sm:grid-cols-4"
+												className="grid grid-cols-1 gap-2 @xs/importer:grid-cols-2 @3xl/importer:grid-cols-4"
 											>
 												{BANKS.map(item => (
 													<button

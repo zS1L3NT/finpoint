@@ -111,7 +111,7 @@ export default function CategoriesPage() {
 										{records.toLocaleString()} Records
 									</span>
 								</h3>
-								<div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+								<div className="grid gap-3 @2xl/page:grid-cols-2 @5xl/page:grid-cols-3">
 									{items.map((category, index) => (
 										<motion.div
 											key={category.id}
