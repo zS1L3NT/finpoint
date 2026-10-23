@@ -7,7 +7,7 @@ import { openReplacementSheet } from "../support/sheets"
 
 test("search sheets: filter, allocate, attach and reopen", async ({ page, workspace }) => {
 	void workspace
-	await test.step("Statement search sheet: filter, allocate, Done returns to editor and unsaved allocation is cancelled", async () => {
+	await test.step("Statement search sheet: filters and allocates Statements, returns to the editor with Done and cancels an unsaved Allocation", async () => {
 		void workspace
 		const dialog = await openEditor(page, `/records/${record.id}`, "Edit Record", "Edit Record")
 		await dialog.getByRole("button", { name: "Allocate statement", exact: true }).click()
@@ -33,7 +33,7 @@ test("search sheets: filter, allocate, attach and reopen", async ({ page, worksp
 		).toBeVisible()
 		await expect(reopened).not.toContainText(imported.description)
 	})
-	await test.step("Record search sheet: query miss and hit, attach persists, Escape closes and click reopens", async () => {
+	await test.step("Record search sheet: handles query misses and hits, persists attachment, closes with Escape and reopens by click", async () => {
 		void workspace
 		await page.goto(`/budgets/${budget.id}`)
 		const trigger = page.getByRole("button", { name: "Attach Record", exact: true })
@@ -55,12 +55,12 @@ test("search sheets: filter, allocate, attach and reopen", async ({ page, worksp
 	})
 })
 
-test("review sheets: selected descriptions, cancel restores and choices retain", async ({
+test("review sheets: show selected descriptions, restore cancelled sheets and retain choices", async ({
 	page,
 	workspace,
 }) => {
 	void workspace
-	await test.step("replacement review: selected descriptions and cancel restores sheet", async () => {
+	await test.step("replacement review: shows selected descriptions and restores the sheet on cancel", async () => {
 		void workspace
 		const sheet = await openReplacementSheet(page)
 		await expectVisibleBackdrop(page)
@@ -86,7 +86,7 @@ test("review sheets: selected descriptions, cancel restores and choices retain",
 		await page.keyboard.press("Escape")
 		await expect(sheet).not.toBeVisible()
 	})
-	await test.step("duplicate review: explicit keep and delete, cancel and reopen retain choices", async () => {
+	await test.step("duplicate review: shows explicit keep and delete choices and retains them after cancel and reopen", async () => {
 		void workspace
 		await page.goto("/allocator/duplicates")
 		// Review stays disabled until both a kept and a deleted Statement are chosen.
@@ -329,7 +329,7 @@ async function expectSilentSheet(
 	await expect(sheet.locator('[data-slot="skeleton"]')).toHaveCount(0)
 }
 
-test("Pending confirmation sheet: stays silent while held after closed time, then resolves", async ({
+test("pending confirmation sheet: stays silent while held after closed time, then resolves", async ({
 	page,
 	workspace,
 }) => {
@@ -509,7 +509,7 @@ async function seedPendingSearch(page: Page) {
 	})
 }
 
-test("Pending confirmation sheet: keeps prior rows while a held query change resolves", async ({
+test("pending confirmation sheet: keeps prior rows while a held query change resolves", async ({
 	page,
 	workspace,
 }) => {
@@ -538,7 +538,7 @@ test("Pending confirmation sheet: keeps prior rows while a held query change res
 	await expect(sheet.getByText("Card lunch placeholder")).toHaveCount(0)
 })
 
-test("Pending confirmation sheet: clears prior rows when reopened for another Statement", async ({
+test("pending confirmation sheet: clears prior rows when reopened for another Statement", async ({
 	page,
 	workspace,
 }) => {
@@ -709,13 +709,13 @@ test.describe("dense workspace", () => {
 
 	// One dense seed for the whole queue/candidate journey: every step navigates
 	// fresh, so URL, alert and history assertions keep their original meaning.
-	test("Pending queue and candidate search: typing, selection, pagination and Back behaviour", async ({
+	test("pending queue and candidate search: preserve typing, selection, pagination and Back behaviour", async ({
 		page,
 		workspace,
 		isMobile,
 	}) => {
 		void workspace
-		await test.step("Pending queue: typing clears a missing selection and dismisses its availability alert", async () => {
+		await test.step("pending queue: typing clears a missing selection and dismisses its availability alert", async () => {
 			await page.goto(
 				"/allocator/pending?pending_statement_id=deleted-pending-statement&candidate_query=stale&candidate_page=2",
 			)
@@ -739,7 +739,7 @@ test.describe("dense workspace", () => {
 			await expect(page).toHaveURL(/query=Dense\+pending\+26/)
 			await expect(page.getByRole("button", { name: /^Dense pending 26\b/ })).toBeVisible()
 		})
-		await test.step("Pending queue: typing clears an orphan candidate query without discarding the queue buffer", async () => {
+		await test.step("pending queue: typing clears an orphan candidate query without discarding the queue buffer", async () => {
 			await page.goto("/allocator/pending?candidate_query=stale&candidate_page=2")
 			const search = page
 				.locator('section[aria-labelledby="pending-queue-title"]')
@@ -756,7 +756,7 @@ test.describe("dense workspace", () => {
 				2,
 			)
 		})
-		await test.step("Pending selection: resets an unsettled candidate search without replaying it on the next Statement", async () => {
+		await test.step("pending selection: resets an unsettled candidate search without replaying it on the next Statement", async () => {
 			await page.goto(`/allocator/pending?pending_statement_id=${first.id}`)
 			const candidate = page.locator('section[aria-labelledby="candidate-title"]')
 			const search = candidate.getByPlaceholder("Search descriptions...")
@@ -826,7 +826,7 @@ test.describe("dense workspace", () => {
 			await expect(search).toHaveValue("")
 			await expect(page).not.toHaveURL(/candidate_query=/)
 		})
-		await test.step("Pending queue: typing retains every character while clearing the old selection", async () => {
+		await test.step("pending queue: typing retains every character while clearing the old selection", async () => {
 			await page.goto(`/allocator/pending?pending_statement_id=${first.id}`)
 			await expect(page.locator('section[aria-labelledby="candidate-title"]')).toBeVisible()
 			if (isMobile) {
@@ -892,7 +892,7 @@ test.describe("dense workspace", () => {
 			await expect(page).toHaveURL(/[?&]page=2(&|$)/)
 			await expect(page).toHaveURL(/pending_statement_id=/)
 		})
-		await test.step("Browser Back: queue typing does not restore the account filter", async () => {
+		await test.step("browser Back: queue typing does not restore the Account filter", async () => {
 			// Same stale-mirror hazard via popstate instead of Links.
 			await page.goto("/allocator/pending")
 			// Single combobox on this route (probed): the account filter trigger.
@@ -915,7 +915,7 @@ test.describe("dense workspace", () => {
 test.describe("dense workspace", () => {
 	test.use({ workspaceScenario: "dense" })
 
-	test("Pending queue search: typing on while an earlier query commits keeps every character", async ({
+	test("pending queue search: typing on while an earlier query commits keeps every character", async ({
 		page,
 		workspace,
 	}) => {

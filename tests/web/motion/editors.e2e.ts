@@ -18,7 +18,7 @@ import { expectPopupEntrance, sampleVisibleRowAnimations } from "../support/moti
 // one editor at a time in step order.
 const editors = [
 	{
-		name: "account update",
+		name: "Account editor",
 		route: "/accounts",
 		trigger: `Rename ${account.name}`,
 		title: "Edit Account",
@@ -26,7 +26,7 @@ const editors = [
 		value: account.name,
 	},
 	{
-		name: "budget create",
+		name: "Budget creator",
 		route: "/budgets",
 		trigger: "New Budget",
 		title: "Create Budget",
@@ -34,7 +34,7 @@ const editors = [
 		value: "",
 	},
 	{
-		name: "budget update",
+		name: "Budget editor",
 		route: `/budgets/${budget.id}`,
 		trigger: "Edit Budget",
 		title: "Edit Budget",
@@ -42,7 +42,7 @@ const editors = [
 		value: budget.name,
 	},
 	{
-		name: "category create",
+		name: "Category creator",
 		route: "/categories",
 		trigger: "Create Category",
 		title: "Create Category",
@@ -50,7 +50,7 @@ const editors = [
 		value: "",
 	},
 	{
-		name: "category update",
+		name: "Category editor",
 		route: "/categories",
 		trigger: "Edit Groceries",
 		title: "Edit Category",
@@ -58,7 +58,7 @@ const editors = [
 		value: "Groceries",
 	},
 	{
-		name: "monthly budget create",
+		name: "Monthly Budget creator",
 		route: "/?month=October&year=2026",
 		trigger: "New",
 		title: "Create monthly budget",
@@ -66,7 +66,7 @@ const editors = [
 		value: "",
 	},
 	{
-		name: "monthly budget update",
+		name: "Monthly Budget editor",
 		route: "/?month=October&year=2026",
 		trigger: "Edit Daily",
 		title: "Edit Daily",
@@ -74,7 +74,7 @@ const editors = [
 		value: "Daily",
 	},
 	{
-		name: "pending statement create",
+		name: "Pending Statement creator",
 		route: "/statements",
 		trigger: "Create Pending Statement",
 		title: "Create Pending Statement",
@@ -82,7 +82,7 @@ const editors = [
 		value: "",
 	},
 	{
-		name: "pending statement update",
+		name: "Pending Statement editor",
 		route: `/statements/${pending.id}`,
 		trigger: "Edit Pending Statement",
 		title: "Edit Pending Statement",
@@ -90,7 +90,7 @@ const editors = [
 		value: pending.description,
 	},
 	{
-		name: "record create",
+		name: "Record creator",
 		route: "/records",
 		trigger: "Create Pending Record",
 		title: "Create New Record",
@@ -98,7 +98,7 @@ const editors = [
 		value: "",
 	},
 	{
-		name: "record update",
+		name: "Record editor",
 		route: `/records/${record.id}`,
 		trigger: "Edit Record",
 		title: "Edit Record",

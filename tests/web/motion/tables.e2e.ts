@@ -63,7 +63,7 @@ const denseRowConsumers: MotionConsumer[] = [
 		dense: true,
 	},
 	{
-		name: "Future Monthly Records",
+		name: "future Monthly Records",
 		origin: "/?month=October&year=2026",
 		action: "month-tab",
 		target: "Monthly Records",
@@ -73,7 +73,7 @@ const denseRowConsumers: MotionConsumer[] = [
 		future: true,
 	},
 	{
-		name: "Pending queue",
+		name: "pending queue",
 		origin: "/allocator",
 		action: "workflow",
 		target: "Replace Pending",
@@ -118,7 +118,7 @@ const populatedConsumers: MotionConsumer[] = [
 		dense: false,
 	},
 	{
-		name: "Duplicate groups",
+		name: "duplicate groups",
 		origin: "/allocator",
 		action: "workflow",
 		target: "Fix Duplicates",
@@ -126,7 +126,7 @@ const populatedConsumers: MotionConsumer[] = [
 		dense: false,
 	},
 	{
-		name: "Separate pairs",
+		name: "separate pairs",
 		origin: "/allocator/duplicates",
 		action: "view",
 		target: "Marked separate",
@@ -134,7 +134,7 @@ const populatedConsumers: MotionConsumer[] = [
 		dense: false,
 	},
 	{
-		name: "Replacement candidates",
+		name: "replacement candidates",
 		origin: "/allocator/pending",
 		action: "pending",
 		target: "Pasar malam snacks",
@@ -382,7 +382,7 @@ test("table refilter from no results: visible results enter with an entrance", {
 	}
 })
 
-test("table rows: Records, Statements, Monthly Records, Future Monthly Records, Pending queue and Allocate enter as a cascade in the viewport", {
+test("table rows: Records, Statements, Monthly Records, future Monthly Records, pending queue and Allocate enter as a cascade in the viewport", {
 	tag: ["@tall", "@light", "@reduced-motion"],
 }, async ({ page, isMobile }) => {
 	test.setTimeout(180000)
@@ -393,7 +393,7 @@ test("table rows: Records, Statements, Monthly Records, Future Monthly Records, 
 	}
 })
 
-test("table rows: Account Statements, Record Statements, Statement Records, Duplicate groups, Separate pairs and Replacement candidates enter as a cascade in the viewport", {
+test("table rows: Account Statements, Record Statements, Statement Records, duplicate groups, separate pairs and replacement candidates enter as a cascade in the viewport", {
 	tag: ["@tall", "@reduced-motion"],
 }, async ({ page, isMobile }) => {
 	test.setTimeout(150000)

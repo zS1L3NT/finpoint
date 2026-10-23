@@ -63,10 +63,11 @@ and `--project`. `--project` replaces the phase defaults and applies to both pha
 of `full`. Anything else (positional paths, `--config`, `--shard`) is refused; run
 single files ad-hoc with `bun run test:web -- <path>` instead.
 
-Measured on 23 October 2026, 12-core Linux host without a GPU: the gate is 307 runs and took
-12 min 12 s including the production build (6 workers). The full run (327 gate runs in
-parallel, then 89 motion runs on 1 worker) took 27 min 22 s; every run passed. The
-pre-reorganisation suite (354 runs, 1 worker) took 36 min on the developer's Mac.
+The gate is 313 runs (desktop and mobile); a full run is 333 gate runs on all five projects,
+then 89 motion runs (`bunx playwright test --list`, 24 October 2026). On a 12-core Linux host
+without a GPU the gate took about 11 min including the production build (6 workers). On the
+developer's Mac a full run took about 16 min (7 min gate phase, 8.5 min motion phase). The
+pre-reorganisation suite (354 runs, 1 worker) took 36 min on that Mac.
 
 Only one runner at a time: it takes a lock at `test-results/.suite-lock/pid` and refuses
 to start while that file exists. A lock left by a crashed run is never cleared
@@ -121,9 +122,12 @@ terms (`Record`, `Statement`, `Budget`, `Monthly Budget`, `Account`, `Category`,
 `Pending Statement`, `Allocation`) with their capitals everywhere else lowercase.
 Quoted labels keep their on-screen spelling. The behaviour is a present-tense
 lowercase sentence saying what is proven. Grouped tests (several steps, one seed)
-use `<subject>: <comma-separated summary of the steps>`. Titles carry no bracketed
+use `<subject>: <present-tense summary of the steps>`. Titles carry no bracketed
 codes, no dotted prefixes, and no implementation phrasing. Loop-generated titles keep
-their template variables and stay unique across the suite. There are no
+their template variables and stay unique across the suite; a loop value that becomes the
+subject follows the same rules (`Account editor`, `Records table`), with a separate display
+field when assertions need a different spelling. Renaming a title means renaming its ID in
+`component-inventory.ts` too; the ledger gate fails otherwise. There are no
 `test.describe` wrappers except to scope `test.use` (for example a harness section);
 the folder already names the tier and the file names the area.
 

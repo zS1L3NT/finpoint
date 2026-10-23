@@ -2,7 +2,7 @@ import { expectPointerCursor } from "../support/assertions"
 import { IDS } from "../support/data"
 import { expect, test } from "../support/fixtures"
 
-test("chrome buttons: keyboard month navigation and create button, sidebar trigger toggle, Account card Enter opens detail", {
+test("chrome buttons: navigate months and create Records by keyboard, toggle the sidebar and open Account details with Enter", {
 	tag: ["@reduced-motion"],
 }, async ({ page, workspace, isMobile }) => {
 	void workspace
@@ -105,7 +105,7 @@ test("sidebar rail: Enter collapses and Space expands the sidebar", {
 // reviews are cancelled, selections are cleared), so step order is free. The
 // small-viewport step runs last because it resizes the viewport for the rest
 // of the test.
-test("allocator keyboard flows: selection and dialog, duplicate review, disabled replace action and small-viewport clear", async ({
+test("allocator keyboard flows: open selected Records in a dialog, review duplicates, disable invalid replacement and clear selections on small viewports", async ({
 	page,
 	workspace,
 }) => {

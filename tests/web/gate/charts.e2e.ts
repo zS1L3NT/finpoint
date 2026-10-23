@@ -118,7 +118,7 @@ test("overview charts: every dense chart fits the viewport with usable graph sur
 	}
 })
 
-test("dense overview: cards render values and fit, and a long category name stays truncated and readable", {
+test("dense overview: cards render values and fit, and a long Category name stays truncated and readable", {
 	tag: ["@tall"],
 }, async ({ page }) => {
 	test.setTimeout(150_000)
@@ -144,7 +144,7 @@ test("dense overview: cards render values and fit, and a long category name stay
 		).toBeLessThanOrEqual(1)
 		await expect(progress).not.toContainText(/NaN|Infinity/)
 	})
-	await test.step("category mix: a dense long category name stays truncated and readable", async () => {
+	await test.step("Category mix: a dense long Category name stays truncated and readable", async () => {
 		const name = `Dense ${"早餐 café ☕ ".repeat(12).trim()}`
 		await page.evaluate(
 			async ({ categoryId, name }) => {
@@ -199,7 +199,7 @@ test("dense overview: cards render values and fit, and a long category name stay
 	})
 })
 
-test("populated charts: tooltips stay numeric, drills work by keyboard and a record save updates the mover amount", {
+test("populated charts: tooltips stay numeric, drills work by keyboard and a Record save updates the mover amount", {
 	tag: ["@tall", "@light"],
 }, async ({ page }) => {
 	test.setTimeout(150_000)
@@ -265,7 +265,7 @@ test("populated charts: tooltips stay numeric, drills work by keyboard and a rec
 		await page.keyboard.press("Enter")
 		await expect(page).toHaveURL(new RegExp(`category_ids=${IDS.categories.rent}`))
 	})
-	await test.step("biggest changes: a saved record amount updates the mover row and keeps its drill link and row node", async () => {
+	await test.step("biggest changes: a saved Record amount updates the mover row and keeps its drill link and row node", async () => {
 		// Baseline comparators: September spending for daily-budget categories so the
 		// Groceries mover row exists with a comparison before the live update (same
 		// raw-IDB pattern as charts.refund). The update stays in the same scope so
@@ -372,12 +372,12 @@ test.describe("pinned overview date", () => {
 	// Six populated overview journeys share one seed. Every step navigates back to
 	// the overview first, so scope params or record-list drills from an earlier
 	// step never leak into the next one.
-	test("overview: summary, calendar, budgets, category mix, movers and month change reconcile", {
+	test("overview: summary, calendar, Budgets, Category mix, movers and month change reconcile", {
 		tag: ["@reduced-motion"],
 	}, async ({ page, isMobile }) => {
 		test.setTimeout(120_000)
 		await seedWorkspace(page)
-		await test.step("overview summary: income, refunds and exclusions reconcile across metrics and category mix", async () => {
+		await test.step("overview summary: income, refunds and exclusions reconcile across metrics and Category mix", async () => {
 			await page.goto(overview)
 			await expect(metric(page, "Total income")).toContainText("$5,203.50")
 			await expect(metric(page, "Total spending")).toContainText("$286.63")
@@ -450,7 +450,7 @@ test.describe("pinned overview date", () => {
 				card(page, "Categories this month").getByRole("link", { name: /Shopping/ }),
 			).toBeVisible()
 		})
-		await test.step("category mix: drilldown carries treatment and category filters", async () => {
+		await test.step("Category mix: drilldown carries Treatment and Category filters", async () => {
 			await page.goto(overview)
 			await card(page, "Categories this month")
 				.getByRole("link", { name: /Groceries/ })
@@ -464,7 +464,7 @@ test.describe("pinned overview date", () => {
 				page.getByRole("link", { name: "Open Monthly Salary", exact: true }),
 			).toHaveCount(0)
 		})
-		await test.step("biggest changes: category change title and drilldown reconcile with the previous month", async () => {
+		await test.step("biggest changes: Category change title and drilldown reconcile with the previous month", async () => {
 			await page.goto(overview)
 			const housing = card(page, "Biggest changes").getByRole("link", { name: /Housing/ })
 			await expect(housing).toHaveAttribute("title", "Housing: $0.00 vs $1,400.00 average")
@@ -597,7 +597,7 @@ test.describe("pinned overview date", () => {
 		await expect(card(page, "Spending calendar")).toContainText("0 spending days · $0.00")
 	})
 
-	test("net refund: long category name and excluded treatment retain numeric meaning", async ({
+	test("net refund: long Category name and excluded Treatment retain numeric meaning", async ({
 		page,
 	}) => {
 		await seedWorkspace(page)

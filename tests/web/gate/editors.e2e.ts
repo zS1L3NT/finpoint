@@ -18,7 +18,7 @@ import { expect, seedWorkspace, test } from "../support/fixtures"
 // one editor at a time in step order.
 const editors = [
 	{
-		name: "account update",
+		name: "Account editor",
 		route: "/accounts",
 		trigger: `Rename ${account.name}`,
 		title: "Edit Account",
@@ -26,7 +26,7 @@ const editors = [
 		value: account.name,
 	},
 	{
-		name: "budget create",
+		name: "Budget creator",
 		route: "/budgets",
 		trigger: "New Budget",
 		title: "Create Budget",
@@ -34,7 +34,7 @@ const editors = [
 		value: "",
 	},
 	{
-		name: "budget update",
+		name: "Budget editor",
 		route: `/budgets/${budget.id}`,
 		trigger: "Edit Budget",
 		title: "Edit Budget",
@@ -42,7 +42,7 @@ const editors = [
 		value: budget.name,
 	},
 	{
-		name: "category create",
+		name: "Category creator",
 		route: "/categories",
 		trigger: "Create Category",
 		title: "Create Category",
@@ -50,7 +50,7 @@ const editors = [
 		value: "",
 	},
 	{
-		name: "category update",
+		name: "Category editor",
 		route: "/categories",
 		trigger: "Edit Groceries",
 		title: "Edit Category",
@@ -58,7 +58,7 @@ const editors = [
 		value: "Groceries",
 	},
 	{
-		name: "monthly budget create",
+		name: "Monthly Budget creator",
 		route: "/?month=October&year=2026",
 		trigger: "New",
 		title: "Create monthly budget",
@@ -66,7 +66,7 @@ const editors = [
 		value: "",
 	},
 	{
-		name: "monthly budget update",
+		name: "Monthly Budget editor",
 		route: "/?month=October&year=2026",
 		trigger: "Edit Daily",
 		title: "Edit Daily",
@@ -74,7 +74,7 @@ const editors = [
 		value: "Daily",
 	},
 	{
-		name: "pending statement create",
+		name: "Pending Statement creator",
 		route: "/statements",
 		trigger: "Create Pending Statement",
 		title: "Create Pending Statement",
@@ -82,7 +82,7 @@ const editors = [
 		value: "",
 	},
 	{
-		name: "pending statement update",
+		name: "Pending Statement editor",
 		route: `/statements/${pending.id}`,
 		trigger: "Edit Pending Statement",
 		title: "Edit Pending Statement",
@@ -90,7 +90,7 @@ const editors = [
 		value: pending.description,
 	},
 	{
-		name: "record create",
+		name: "Record creator",
 		route: "/records",
 		trigger: "Create Pending Record",
 		title: "Create New Record",
@@ -98,7 +98,7 @@ const editors = [
 		value: "",
 	},
 	{
-		name: "record update",
+		name: "Record editor",
 		route: `/records/${record.id}`,
 		trigger: "Edit Record",
 		title: "Edit Record",
@@ -209,9 +209,9 @@ test("Account editor: required name and unicode rename persist after reload", as
 	)
 })
 
-test("Budget editors: creator validation and editor persistence", async ({ page, workspace }) => {
+test("Budget editors: validate creation and persist edits", async ({ page, workspace }) => {
 	void workspace
-	await test.step("Budget creator: blank name and range errors, negative rejected, zero and single-day range persist", async () => {
+	await test.step("Budget creator: rejects blank names, missing ranges and negative amounts, and persists zero and a single-day range", async () => {
 		void workspace
 		const dialog = await openEditor(page, "/budgets", "New Budget", "Create Budget")
 		await dialog.getByRole("button", { name: "Create budget", exact: true }).click()
@@ -234,7 +234,7 @@ test("Budget editors: creator validation and editor persistence", async ({ page,
 		await expect(update.getByLabel("Amount", { exact: true })).toHaveValue("0")
 		await expect(update.getByLabel("Date range", { exact: true })).not.toContainText("Any date")
 	})
-	await test.step("Budget editor: prepopulated period and amount, clearing range fails, long name and zero persist", async () => {
+	await test.step("Budget editor: prepopulates period and amount, rejects a cleared range, and persists a long name and zero", async () => {
 		void workspace
 		const route = `/budgets/${budget.id}`
 		const dialog = await openEditor(page, route, "Edit Budget", "Edit Budget")
@@ -268,12 +268,12 @@ test("Budget editors: creator validation and editor persistence", async ({ page,
 	})
 })
 
-test("Category editors: treatment defaults, archived options and persistence", async ({
+test("Category editors: persist Treatment defaults and exclude archived options", async ({
 	page,
 	workspace,
 }) => {
 	void workspace
-	await test.step("Category editor: Spending default Monthly Budget, archived options absent, Income clears budget and blank validation", async () => {
+	await test.step("Category editor: offers a Spending default Monthly Budget, excludes archived options, clears the Budget for Income and validates a blank name", async () => {
 		void workspace
 		const dialog = await openEditor(page, "/categories", "Edit Groceries", "Edit Category")
 		await expect(dialog.getByLabel("Treatment", { exact: true })).toContainText("Spending")
@@ -344,12 +344,12 @@ test("Category editors: treatment defaults, archived options and persistence", a
 	})
 })
 
-test("Monthly Budget editors: creator validation and override persistence", async ({
+test("Monthly Budget editors: validate creation and persist overrides", async ({
 	page,
 	workspace,
 }) => {
 	void workspace
-	await test.step("Monthly Budget creator: blank errors, zero amount and null are distinct persisted values", async () => {
+	await test.step("Monthly Budget creator: rejects blank input and persists distinct zero and null amounts", async () => {
 		void workspace
 		const dialog = await openEditor(
 			page,
@@ -411,7 +411,7 @@ test("Monthly Budget editors: creator validation and override persistence", asyn
 	})
 })
 
-test("Pending Statement editors: creator validation and editor persistence", async ({
+test("Pending Statement editors: validate creation and persist edits", async ({
 	page,
 	workspace,
 }) => {
@@ -448,7 +448,7 @@ test("Pending Statement editors: creator validation and editor persistence", asy
 			.fill(longText.trim())
 		await expect(page.getByRole("main")).toContainText(longText.trim())
 	})
-	await test.step("Pending Statement editor: original description, Allocation protection, zero fails and negative persists", async () => {
+	await test.step("Pending Statement editor: prepopulates its description, protects Allocations, rejects zero and persists a negative amount", async () => {
 		void workspace
 		const route = `/statements/${pending.id}`
 		const dialog = await openEditor(
@@ -486,14 +486,14 @@ test("Pending Statement editors: creator validation and editor persistence", asy
 	})
 })
 
-test("Record creator: required fields, category defaults and persistence", async ({
+test("Record creator: validates required fields, applies Category defaults and persists values", async ({
 	page,
 	workspace,
 }) => {
 	test.setTimeout(90_000)
 	void workspace
 	for (const amount of ["-12.34", "0"]) {
-		await test.step(`Record creator: required fields, category defaults, amount ${amount} and long text persist`, async () => {
+		await test.step(`Record creator: validates required fields, applies Category defaults, and persists amount ${amount} and long text`, async () => {
 			void workspace
 			const text = `${longText}(${amount})`
 			const dialog = await openEditor(
@@ -618,7 +618,7 @@ test("Record editor: null optional fields, long title, sign and penny keyboard s
 	).toHaveValue("0.01")
 })
 
-test("archived Monthly Budgets: archival persistence and historical assignment", async ({
+test("archived Monthly Budgets: retain archival state and historical assignments", async ({
 	page,
 }) => {
 	await seedWorkspace(page)
@@ -709,7 +709,7 @@ test.describe("long content", () => {
 			["/?month=October&year=2026", "New", "Create monthly budget", "Name"],
 			["/statements", "Create Pending Statement", "Create Pending Statement", "Description"],
 		] as const) {
-			await test.step(`long ${title} editor: Unicode content and keyboard cancellation reachable`, async () => {
+			await test.step(`long ${title} editor: keeps Unicode content and keyboard cancellation reachable`, async () => {
 				await page.goto(route)
 				await page.getByRole("button", { name: trigger, exact: true }).click()
 				const dialog = page.getByRole("dialog", { name: title, exact: true })
@@ -728,7 +728,7 @@ test.describe("long content", () => {
 		page,
 	}) => {
 		for (const kind of ["duplicate", "replacement"] as const) {
-			await test.step(`long ${kind} review: long imported descriptions and usable footer`, async () => {
+			await test.step(`long ${kind} review: keeps long imported descriptions readable and its footer usable`, async () => {
 				await page.evaluate(async description => {
 					const database = await new Promise<IDBDatabase>((resolve, reject) => {
 						const open = indexedDB.open("finpoint")

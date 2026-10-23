@@ -165,11 +165,16 @@ test.describe("pinned 15 October 2026 date", () => {
 	}) => {
 		test.setTimeout(90_000)
 		await seedWorkspace(page, "dense")
-		for (const [route, noun, search] of [
-			["/records", "record", "Search title, people, location, description..."],
-			["/statements", "statement", "Search descriptions..."],
+		for (const [route, noun, search, subject] of [
+			[
+				"/records",
+				"record",
+				"Search title, people, location, description...",
+				"Records table",
+			],
+			["/statements", "statement", "Search descriptions...", "Statements table"],
 		] as const) {
-			await test.step(`${noun} table: keeps search in the URL and moves between pages`, async () => {
+			await test.step(`${subject}: keeps search in the URL and moves between pages`, async () => {
 				await page.goto(`${route}?per_page=10`)
 				await expect(
 					page.getByText(new RegExp(`Showing 10 of \\d+ ${noun}s\\.`)),
@@ -216,7 +221,7 @@ test.describe("pinned 15 October 2026 date", () => {
 			await expect(page.getByText("Showing 10 of 60 records.", { exact: true })).toBeVisible()
 		})
 	})
-	test("Records table: category selection narrows Records and survives reload", async ({
+	test("Records table: Category selection narrows Records and survives reload", async ({
 		page,
 	}) => {
 		await seedWorkspace(page)
@@ -361,7 +366,7 @@ test("Records lists: later and future Records keep amounts and drills, long Reco
 	})
 })
 
-test("Statements table: signed same-day subtotal and account rows distinguish pending edits from imported activity", async ({
+test("Statements table: signed same-day subtotal and Account rows distinguish pending edits from imported activity", async ({
 	page,
 }) => {
 	await seedWorkspace(page)
@@ -407,7 +412,7 @@ test("Statements table: signed same-day subtotal and account rows distinguish pe
 	})
 })
 
-test("Statement cells: retain pending, allocation, zero and signed amount meaning", async ({
+test("Statement cells: retain pending, Allocation, zero and signed amount meaning", async ({
 	page,
 }) => {
 	await seedWorkspace(page)

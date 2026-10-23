@@ -5,7 +5,7 @@ import { expectPopupEntrance, sampleVisibleRowAnimations } from "../support/moti
 // App modal surfaces share one populated seed. None of them persists: dialogs
 // are escaped, reviews are cancelled, and sheets only reopen. Every step
 // navigates fresh.
-test("app modal surfaces: popup entrances and fades", {
+test("app modal surfaces: animate popup entrances and fades", {
 	tag: ["@reduced-motion"],
 }, async ({ page, workspace }) => {
 	void workspace

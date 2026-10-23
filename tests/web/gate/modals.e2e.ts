@@ -5,7 +5,10 @@ import { expect, test } from "../support/fixtures"
 // App modal surfaces share one populated seed. None of them persists: dialogs
 // are escaped, reviews are cancelled, and sheets only reopen. Every step
 // navigates fresh.
-test("app modal surfaces: backdrops, Escape reopen and focus", async ({ page, workspace }) => {
+test("app modal surfaces: show backdrops, restore focus and reopen after Escape", async ({
+	page,
+	workspace,
+}) => {
 	void workspace
 	await test.step("Category editor: focus returns and repeated reopening works", async () => {
 		await page.goto("/categories", { waitUntil: "domcontentloaded" })
@@ -179,9 +182,9 @@ test.describe("dense workspace", () => {
 	// One dense seed for all scroll contracts. Every step navigates fresh, so
 	// open popups never leak between filters. The harness SelectField case
 	// lives in gate/components.
-	test("records filters: preserves the page scrollbar while open", async ({ page }) => {
+	test("Records filters: preserve the page scrollbar while open", async ({ page }) => {
 		for (const label of ["Any monthly budget", "Any treatment", "Any status"] as const) {
-			await test.step(`records filter ${label}: preserves the page scrollbar while open`, async () => {
+			await test.step(`Records filter ${label}: preserves the page scrollbar while open`, async () => {
 				// Each app filter is a distinct combobox consumer on the dense records
 				// route; the shared harness case above covers the editor SelectField.
 				await page.goto("/records?per_page=100")

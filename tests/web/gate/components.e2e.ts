@@ -374,7 +374,7 @@ test.describe("harness widgets section", () => {
 		await setDateOnly(page, new Date("2026-10-15T12:00:00+08:00"))
 	})
 
-	test("form fields: amount, text, textarea, select, combobox, date, date range, datetime and treatment inputs commit values and validation renders alerts", async ({
+	test("form fields: amount, text, textarea, select, combobox, date, date range, datetime and Treatment inputs commit values and validation renders alerts", async ({
 		page,
 	}) => {
 		test.setTimeout(150000)
@@ -549,7 +549,7 @@ test.describe("harness widgets section", () => {
 			)
 		})
 
-		await test.step("Record analytics: treatment gates the Monthly Budget control", async () => {
+		await test.step("Record analytics: Treatment gates the Monthly Budget control", async () => {
 			await gotoForms(page)
 			await page.locator("#analytics_treatment").click()
 			await page.getByRole("option", { name: "Income", exact: true }).click()
@@ -2056,10 +2056,10 @@ test.describe("harness display section", () => {
 	})
 
 	// Read-only primitive checks share one page load: no step mutates the page.
-	test("display components: allocation, sparkline, amount, icon and narrow fit values render correctly", {
+	test("display components: Allocation, sparkline, amount, icon and narrow fit values render correctly", {
 		tag: ["@light"],
 	}, async ({ page }) => {
-		await test.step("allocation bar: zero, negative, full, excess and opposite-sign values stay finite and bounded", async () => {
+		await test.step("Allocation bar: zero, negative, full, excess and opposite-sign values stay finite and bounded", async () => {
 			for (const [title, percent, amount] of [
 				["Zero", 0, "$0.00 / $0.00"],
 				["Partial negative", 40, "-$10.00 / -$25.00"],

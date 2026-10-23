@@ -257,7 +257,7 @@ test("browser traversal: distinguishes the same detail URL entered from two filt
 	await expect(page).toHaveURL(firstOrigin)
 })
 
-test("month shell: browser Back removes self-target and Forward restores its chart origin", async ({
+test("monthly shell: browser Back removes self-target and Forward restores its chart origin", async ({
 	page,
 	workspace,
 }) => {
@@ -575,7 +575,7 @@ test("keyboard origins: Records, Statements, Accounts, Budgets and Categories dr
 		await expect(page).toHaveURL(/\/statements\/t1-s-free-1/)
 		await keyboardBack(page, "Back to Statements", origin)
 	})
-	await test.step("Accounts card: keyboard card to detail to Back keeps exact origin", async () => {
+	await test.step("Account card: keyboard card to detail to Back keeps exact origin", async () => {
 		const origin = "/accounts?query=One+Card"
 		await reset(origin)
 		const card = page
@@ -587,7 +587,7 @@ test("keyboard origins: Records, Statements, Accounts, Budgets and Categories dr
 		await expect(page).toHaveURL(/\/accounts\/t1-acc-uob/)
 		await keyboardBack(page, "Back to Accounts", origin)
 	})
-	await test.step("Budgets card: keyboard card Enter to detail to Back keeps exact origin", async () => {
+	await test.step("Budget card: keyboard card Enter to detail to Back keeps exact origin", async () => {
 		const origin = "/budgets?query=October+Buffer"
 		await reset(origin)
 		const card = page.locator("article", { hasText: "October Buffer" }).first()
@@ -624,12 +624,12 @@ test("keyboard origins: Records, Statements, Accounts, Budgets and Categories dr
 	})
 })
 
-test("navigation history: category drill, fallbacks and static links preserve history", async ({
+test("navigation history: Category drill, fallbacks and static links preserve history", async ({
 	page,
 	workspace,
 }) => {
 	void workspace
-	await test.step("category drill: nested detail returns to exact filtered origins", async () => {
+	await test.step("Category drill: nested detail returns to exact filtered origins", async () => {
 		void workspace
 		await resetHistory(page, "/categories?query=Groceries")
 		await page.getByRole("link", { name: "Open Records for Groceries", exact: true }).click()
@@ -753,7 +753,7 @@ test("history clearing: cancelled links, sidebar, tabs and chart drills clear or
 	})
 })
 
-test("Back button: pressed the moment a drilled Record appears, returns to its origin", async ({
+test("Back button: returns to its origin when pressed as soon as a drilled Record appears", async ({
 	page,
 	workspace,
 }) => {

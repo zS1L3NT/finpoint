@@ -2330,135 +2330,135 @@ export const notApplicable: Record<string, string> = {
 /** Reviewed assertion mappings. Passing browser evidence is separate; unmapped cases fail by default. */
 export const behaviourCoverage: Record<string, string[]> = {
 	"src/components/dialogs/account.tsx#editor.open": [
-		"account update: backdrop, values, cursors, fit and keyboard reopen work",
-		"account update: popup enters as a whole",
+		"Account editor: backdrop, values, cursors, fit and keyboard reopen work",
+		"Account editor: popup enters as a whole",
 	],
 	"src/components/dialogs/account.tsx#export.default.behaviour": [
-		"account update: backdrop, values, cursors, fit and keyboard reopen work",
-		"account update: popup enters as a whole",
+		"Account editor: backdrop, values, cursors, fit and keyboard reopen work",
+		"Account editor: popup enters as a whole",
 		"Account editor: required name and unicode rename persist after reload",
 	],
 	"src/components/dialogs/account.tsx#editor.validation": [
 		"Account editor: required name and unicode rename persist after reload",
 	],
 	"src/components/dialogs/budget-creator.tsx#editor.open": [
-		"budget create: backdrop, values, cursors, fit and keyboard reopen work",
-		"budget create: popup enters as a whole",
+		"Budget creator: backdrop, values, cursors, fit and keyboard reopen work",
+		"Budget creator: popup enters as a whole",
 	],
 	"src/components/dialogs/budget-creator.tsx#export.default.behaviour": [
-		"budget create: backdrop, values, cursors, fit and keyboard reopen work",
-		"budget create: popup enters as a whole",
-		"Budget creator: blank name and range errors, negative rejected, zero and single-day range persist",
+		"Budget creator: backdrop, values, cursors, fit and keyboard reopen work",
+		"Budget creator: popup enters as a whole",
+		"Budget creator: rejects blank names, missing ranges and negative amounts, and persists zero and a single-day range",
 	],
 	"src/components/dialogs/budget-creator.tsx#editor.validation": [
-		"Budget creator: blank name and range errors, negative rejected, zero and single-day range persist",
+		"Budget creator: rejects blank names, missing ranges and negative amounts, and persists zero and a single-day range",
 	],
 	"src/components/dialogs/budget-editor.tsx#editor.open": [
-		"budget update: backdrop, values, cursors, fit and keyboard reopen work",
-		"budget update: popup enters as a whole",
+		"Budget editor: backdrop, values, cursors, fit and keyboard reopen work",
+		"Budget editor: popup enters as a whole",
 	],
 	"src/components/dialogs/budget-editor.tsx#export.default.behaviour": [
-		"budget update: backdrop, values, cursors, fit and keyboard reopen work",
-		"budget update: popup enters as a whole",
-		"Budget editor: prepopulated period and amount, clearing range fails, long name and zero persist",
+		"Budget editor: backdrop, values, cursors, fit and keyboard reopen work",
+		"Budget editor: popup enters as a whole",
+		"Budget editor: prepopulates period and amount, rejects a cleared range, and persists a long name and zero",
 	],
 	"src/components/dialogs/budget-editor.tsx#editor.validation": [
-		"Budget editor: prepopulated period and amount, clearing range fails, long name and zero persist",
+		"Budget editor: prepopulates period and amount, rejects a cleared range, and persists a long name and zero",
 	],
 	"src/components/dialogs/category.tsx#editor.open": [
-		"category update: backdrop, values, cursors, fit and keyboard reopen work",
-		"category update: popup enters as a whole",
+		"Category editor: backdrop, values, cursors, fit and keyboard reopen work",
+		"Category editor: popup enters as a whole",
 	],
 	"src/components/dialogs/category.tsx#export.default.behaviour": [
-		"category update: backdrop, values, cursors, fit and keyboard reopen work",
-		"category update: popup enters as a whole",
-		"Category editor: Spending default Monthly Budget, archived options absent, Income clears budget and blank validation",
+		"Category editor: backdrop, values, cursors, fit and keyboard reopen work",
+		"Category editor: popup enters as a whole",
+		"Category editor: offers a Spending default Monthly Budget, excludes archived options, clears the Budget for Income and validates a blank name",
 		"Category creator: required identity, icon, colour and defaults persist",
 	],
 	"src/components/dialogs/category.tsx#editor.validation": [
-		"Category editor: Spending default Monthly Budget, archived options absent, Income clears budget and blank validation",
+		"Category editor: offers a Spending default Monthly Budget, excludes archived options, clears the Budget for Income and validates a blank name",
 		"Category creator: required identity, icon, colour and defaults persist",
 	],
 	"src/components/dialogs/monthly-budget.tsx#editor.open": [
-		"monthly budget update: backdrop, values, cursors, fit and keyboard reopen work",
-		"monthly budget update: popup enters as a whole",
+		"Monthly Budget editor: backdrop, values, cursors, fit and keyboard reopen work",
+		"Monthly Budget editor: popup enters as a whole",
 	],
 	"src/components/dialogs/monthly-budget.tsx#export.default.behaviour": [
-		"monthly budget update: backdrop, values, cursors, fit and keyboard reopen work",
-		"monthly budget update: popup enters as a whole",
-		"Monthly Budget creator: blank errors, zero amount and null are distinct persisted values",
+		"Monthly Budget editor: backdrop, values, cursors, fit and keyboard reopen work",
+		"Monthly Budget editor: popup enters as a whole",
+		"Monthly Budget creator: rejects blank input and persists distinct zero and null amounts",
 		"Monthly Budget editor: zero override persists after reload",
 		"Monthly Budget editor: inherited amount reveals smoothly after override action",
 	],
 	"src/components/dialogs/monthly-budget.tsx#editor.validation": [
-		"Monthly Budget creator: blank errors, zero amount and null are distinct persisted values",
+		"Monthly Budget creator: rejects blank input and persists distinct zero and null amounts",
 		"Monthly Budget editor: zero override persists after reload",
 		"Monthly Budget editor: inherited amount reveals smoothly after override action",
 	],
 	"src/components/dialogs/pending-statement.tsx#editor.open": [
-		"pending statement update: backdrop, values, cursors, fit and keyboard reopen work",
-		"pending statement update: popup enters as a whole",
+		"Pending Statement editor: backdrop, values, cursors, fit and keyboard reopen work",
+		"Pending Statement editor: popup enters as a whole",
 	],
 	"src/components/dialogs/pending-statement.tsx#export.default.behaviour": [
-		"pending statement update: backdrop, values, cursors, fit and keyboard reopen work",
-		"pending statement update: popup enters as a whole",
+		"Pending Statement editor: backdrop, values, cursors, fit and keyboard reopen work",
+		"Pending Statement editor: popup enters as a whole",
 		"Pending Statement creator: required Account, description and negative amount persist",
-		"Pending Statement editor: original description, Allocation protection, zero fails and negative persists",
+		"Pending Statement editor: prepopulates its description, protects Allocations, rejects zero and persists a negative amount",
 	],
 	"src/components/dialogs/pending-statement.tsx#editor.validation": [
 		"Pending Statement creator: required Account, description and negative amount persist",
-		"Pending Statement editor: original description, Allocation protection, zero fails and negative persists",
+		"Pending Statement editor: prepopulates its description, protects Allocations, rejects zero and persists a negative amount",
 	],
 	"src/components/dialogs/record-creator.tsx#editor.open": [
-		"record create: backdrop, values, cursors, fit and keyboard reopen work",
-		"record create: popup enters as a whole",
+		"Record creator: backdrop, values, cursors, fit and keyboard reopen work",
+		"Record creator: popup enters as a whole",
 	],
 	"src/components/dialogs/record-creator.tsx#export.default.behaviour": [
-		"record create: backdrop, values, cursors, fit and keyboard reopen work",
-		"record create: popup enters as a whole",
-		"Record creator: required fields, category defaults, amount -12.34 and long text persist",
+		"Record creator: backdrop, values, cursors, fit and keyboard reopen work",
+		"Record creator: popup enters as a whole",
+		"Record creator: validates required fields, applies Category defaults, and persists amount -12.34 and long text",
 		"Record creator: pending warning reveals and collapses smoothly for amount -12.34",
-		"Record creator: required fields, category defaults, amount 0 and long text persist",
+		"Record creator: validates required fields, applies Category defaults, and persists amount 0 and long text",
 		"Record creator: pending warning reveals and collapses smoothly for amount 0",
 		"Record creator: clearing the selected date shows date validation and archived Monthly Budgets stay unavailable",
 	],
 	"src/components/dialogs/record-creator.tsx#editor.validation": [
-		"Record creator: required fields, category defaults, amount -12.34 and long text persist",
+		"Record creator: validates required fields, applies Category defaults, and persists amount -12.34 and long text",
 		"Record creator: pending warning reveals and collapses smoothly for amount -12.34",
-		"Record creator: required fields, category defaults, amount 0 and long text persist",
+		"Record creator: validates required fields, applies Category defaults, and persists amount 0 and long text",
 		"Record creator: pending warning reveals and collapses smoothly for amount 0",
 		"Record creator: clearing the selected date shows date validation and archived Monthly Budgets stay unavailable",
 	],
 	"src/components/dialogs/record-editor.tsx#editor.open": [
-		"record update: backdrop, values, cursors, fit and keyboard reopen work",
-		"record update: popup enters as a whole",
+		"Record editor: backdrop, values, cursors, fit and keyboard reopen work",
+		"Record editor: popup enters as a whole",
 	],
 	"src/components/dialogs/record-editor.tsx#export.default.behaviour": [
-		"record update: backdrop, values, cursors, fit and keyboard reopen work",
-		"record update: popup enters as a whole",
+		"Record editor: backdrop, values, cursors, fit and keyboard reopen work",
+		"Record editor: popup enters as a whole",
 		"Record editor: null optional fields, long title, sign and penny keyboard steps persist",
 	],
 	"src/components/dialogs/record-editor.tsx#editor.validation": [
 		"Record editor: null optional fields, long title, sign and penny keyboard steps persist",
 	],
 	"src/components/dialogs/duplicate-review.tsx#export.default.behaviour": [
-		"duplicate review: explicit keep and delete, cancel and reopen retain choices",
+		"duplicate review: shows explicit keep and delete choices and retains them after cancel and reopen",
 		"Duplicate Statement review: popup enters as a whole",
 	],
 	"src/components/dialogs/duplicate-review.tsx#editor.open": [
-		"duplicate review: explicit keep and delete, cancel and reopen retain choices",
+		"duplicate review: shows explicit keep and delete choices and retains them after cancel and reopen",
 		"Duplicate Statement review: popup enters as a whole",
 	],
 	"src/components/dialogs/statement-replacement-review.tsx#export.default.behaviour": [
-		"replacement review: selected descriptions and cancel restores sheet",
+		"replacement review: shows selected descriptions and restores the sheet on cancel",
 		"replacement review: review enters through intermediate opacity",
 	],
 	"src/components/dialogs/statement-replacement-review.tsx#editor.open": [
-		"replacement review: selected descriptions and cancel restores sheet",
+		"replacement review: shows selected descriptions and restores the sheet on cancel",
 		"replacement review: review enters through intermediate opacity",
 	],
 	"src/components/dialogs/monthly-budget.tsx#monthly-budget.amount": [
-		"Monthly Budget creator: blank errors, zero amount and null are distinct persisted values",
+		"Monthly Budget creator: rejects blank input and persists distinct zero and null amounts",
 		"Monthly Budget editor: zero override persists after reload",
 		"Monthly Budget editor: inherited amount reveals smoothly after override action",
 	],
@@ -2534,11 +2534,11 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"src/components/form/date-range.tsx#export.default.behaviour": [
 		"date range: applies a day and clears back to null",
-		"Budget creator: blank name and range errors, negative rejected, zero and single-day range persist",
+		"Budget creator: rejects blank names, missing ranges and negative amounts, and persists zero and a single-day range",
 	],
 	"src/components/form/date-range.tsx#field.input": [
 		"date range: applies a day and clears back to null",
-		"Budget creator: blank name and range errors, negative rejected, zero and single-day range persist",
+		"Budget creator: rejects blank names, missing ranges and negative amounts, and persists zero and a single-day range",
 	],
 	"src/components/form/date-range.tsx#field.options": [
 		"date range: applies a day and clears back to null",
@@ -2565,19 +2565,19 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"Account editor: required name and unicode rename persist after reload",
 	],
 	"src/components/form/record-analytics-fields.tsx#export.default.behaviour": [
-		"Record analytics: treatment gates the Monthly Budget control",
-		"Category editor: Spending default Monthly Budget, archived options absent, Income clears budget and blank validation",
+		"Record analytics: Treatment gates the Monthly Budget control",
+		"Category editor: offers a Spending default Monthly Budget, excludes archived options, clears the Budget for Income and validates a blank name",
 		"Record editor: long Monthly Budget option can be picked, cleared and disabled by Treatment",
 	],
 	"src/components/form/record-analytics-fields.tsx#monthly-budget.archived": [
-		"Record analytics: treatment gates the Monthly Budget control",
+		"Record analytics: Treatment gates the Monthly Budget control",
 		"Record creator: clearing the selected date shows date validation and archived Monthly Budgets stay unavailable",
 	],
 	"src/components/form/record-analytics-fields.tsx#field.input": [
-		"Record analytics: treatment gates the Monthly Budget control",
+		"Record analytics: Treatment gates the Monthly Budget control",
 	],
 	"src/components/form/record-analytics-fields.tsx#field.options": [
-		"Record analytics: treatment gates the Monthly Budget control",
+		"Record analytics: Treatment gates the Monthly Budget control",
 		"Record analytics: selects preserve page scroll while open and dismiss with Escape",
 		"Record editor: long Monthly Budget option can be picked, cleared and disabled by Treatment",
 	],
@@ -2610,21 +2610,21 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"chart tooltips: Spending over time keyboard navigation exposes actual numeric values",
 	],
 	"src/components/charts/category-spending-mix.tsx#export.default.behaviour": [
-		"overview summary: income, refunds and exclusions reconcile across metrics and category mix",
-		"net refund: long category name and excluded treatment retain numeric meaning",
-		"category mix: drilldown carries treatment and category filters",
+		"overview summary: income, refunds and exclusions reconcile across metrics and Category mix",
+		"net refund: long Category name and excluded Treatment retain numeric meaning",
+		"Category mix: drilldown carries Treatment and Category filters",
 	],
 	"src/components/charts/category-spending-mix.tsx#chart.values": [
-		"overview summary: income, refunds and exclusions reconcile across metrics and category mix",
-		"net refund: long category name and excluded treatment retain numeric meaning",
-		"category mix: drilldown carries treatment and category filters",
+		"overview summary: income, refunds and exclusions reconcile across metrics and Category mix",
+		"net refund: long Category name and excluded Treatment retain numeric meaning",
+		"Category mix: drilldown carries Treatment and Category filters",
 	],
 	"src/components/charts/category-movers.tsx#export.default.behaviour": [
-		"biggest changes: category change title and drilldown reconcile with the previous month",
+		"biggest changes: Category change title and drilldown reconcile with the previous month",
 		"empty overview: no history gives zero metrics and useful chart explanations",
 	],
 	"src/components/charts/category-movers.tsx#chart.values": [
-		"biggest changes: category change title and drilldown reconcile with the previous month",
+		"biggest changes: Category change title and drilldown reconcile with the previous month",
 		"empty overview: no history gives zero metrics and useful chart explanations",
 	],
 	"src/components/charts/monthly-budget-usage.tsx#export.default.behaviour": [
@@ -2649,15 +2649,15 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"overview metrics: month change updates values and the accessible sparkline period",
 	],
 	"src/components/metric.tsx#export.Metric.behaviour": [
-		"overview summary: income, refunds and exclusions reconcile across metrics and category mix",
+		"overview summary: income, refunds and exclusions reconcile across metrics and Category mix",
 		"empty overview: no history gives zero metrics and useful chart explanations",
 	],
 	"src/components/metric.tsx#export.MetricGrid.behaviour": [
-		"overview summary: income, refunds and exclusions reconcile across metrics and category mix",
+		"overview summary: income, refunds and exclusions reconcile across metrics and Category mix",
 		"empty overview: no history gives zero metrics and useful chart explanations",
 	],
 	"src/components/metric.tsx#display.values": [
-		"overview summary: income, refunds and exclusions reconcile across metrics and category mix",
+		"overview summary: income, refunds and exclusions reconcile across metrics and Category mix",
 		"empty overview: no history gives zero metrics and useful chart explanations",
 	],
 	"src/components/value-swap.tsx#export.default.behaviour": [
@@ -2709,12 +2709,12 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"Record editor: long Monthly Budget option can be picked, cleared and disabled by Treatment",
 	],
 	"src/components/allocate-bar.tsx#export.default.behaviour": [
-		"allocate bar: not, partial and fully allocated states show finite values",
-		"allocation bar: zero, negative, full, excess and opposite-sign values stay finite and bounded",
+		"Allocation bar: not, partial and fully allocated states show finite values",
+		"Allocation bar: zero, negative, full, excess and opposite-sign values stay finite and bounded",
 	],
 	"src/components/allocate-bar.tsx#display.values": [
-		"allocate bar: not, partial and fully allocated states show finite values",
-		"allocation bar: zero, negative, full, excess and opposite-sign values stay finite and bounded",
+		"Allocation bar: not, partial and fully allocated states show finite values",
+		"Allocation bar: zero, negative, full, excess and opposite-sign values stay finite and bounded",
 	],
 	"src/components/selection-bar.tsx#export.default.behaviour": [
 		"Record search sheet: selected Statements allocate to a Pending Record",
@@ -2723,23 +2723,23 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"Record search sheet: selected Statements allocate to a Pending Record",
 	],
 	"src/components/sheets/record-search.tsx#export.default.behaviour": [
-		"Record search sheet: query miss and hit, attach persists, Escape closes and click reopens",
+		"Record search sheet: handles query misses and hits, persists attachment, closes with Escape and reopens by click",
 	],
 	"src/components/sheets/record-search.tsx#display.interaction": [
-		"Record search sheet: query miss and hit, attach persists, Escape closes and click reopens",
+		"Record search sheet: handles query misses and hits, persists attachment, closes with Escape and reopens by click",
 	],
 	"src/components/sheets/statement-search.tsx#export.default.behaviour": [
-		"Statement search sheet: filter, allocate, Done returns to editor and unsaved allocation is cancelled",
+		"Statement search sheet: filters and allocates Statements, returns to the editor with Done and cancels an unsaved Allocation",
 	],
 	"src/components/sheets/statement-search.tsx#display.interaction": [
-		"Statement search sheet: filter, allocate, Done returns to editor and unsaved allocation is cancelled",
+		"Statement search sheet: filters and allocates Statements, returns to the editor with Done and cancels an unsaved Allocation",
 	],
 	"src/components/sheets/pending-statement-confirmation.tsx#export.default.behaviour": [
-		"replacement review: selected descriptions and cancel restores sheet",
+		"replacement review: shows selected descriptions and restores the sheet on cancel",
 		"replacement review: review enters through intermediate opacity",
 	],
 	"src/components/sheets/pending-statement-confirmation.tsx#display.interaction": [
-		"replacement review: selected descriptions and cancel restores sheet",
+		"replacement review: shows selected descriptions and restores the sheet on cancel",
 		"replacement review: review enters through intermediate opacity",
 	],
 	"src/components/table/amount-filter.tsx#export.default.behaviour": [
@@ -2749,29 +2749,29 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"amount control: paid zero is applied through the UI",
 	],
 	"src/components/table/category-filter.tsx#export.default.behaviour": [
-		"Records table: category selection narrows Records and survives reload",
+		"Records table: Category selection narrows Records and survives reload",
 	],
 	"src/components/table/category-filter.tsx#table.interaction": [
-		"Records table: category selection narrows Records and survives reload",
+		"Records table: Category selection narrows Records and survives reload",
 	],
 	"src/components/table/filter-bar.tsx#export.ClearFiltersButton.behaviour": [
-		"Records table: category selection narrows Records and survives reload",
+		"Records table: Category selection narrows Records and survives reload",
 	],
 	"src/components/table/filter-bar.tsx#export.FilterBar.behaviour": [
-		"Records table: category selection narrows Records and survives reload",
+		"Records table: Category selection narrows Records and survives reload",
 	],
 	"src/components/table/filter-bar.tsx#table.interaction": [
-		"Records table: category selection narrows Records and survives reload",
+		"Records table: Category selection narrows Records and survives reload",
 	],
 	"src/components/table/paginated-data-table.tsx#export.default.behaviour": [
-		"record table: keeps search in the URL and moves between pages",
+		"Records table: keeps search in the URL and moves between pages",
 	],
 	"src/components/table/paginated-data-table.tsx#table.interaction": [
-		"record table: keeps search in the URL and moves between pages",
+		"Records table: keeps search in the URL and moves between pages",
 	],
 	"src/components/table/paginated-data-table.tsx#table.motion": [
-		"record table: keeps search in the URL and moves between pages",
-		"statement table: keeps search in the URL and moves between pages",
+		"Records table: keeps search in the URL and moves between pages",
+		"Statements table: keeps search in the URL and moves between pages",
 		"table paging /records: first page shows five rows and next page moves the URL to page 2",
 		"table paging /records: new page fades without restarting the rise",
 		"table paging /statements: first page shows five rows and next page moves the URL to page 2",
@@ -2780,16 +2780,16 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"Statements: every visible item animates in the actual viewport",
 	],
 	"src/components/table/pagination-footer.tsx#export.default.behaviour": [
-		"record table: keeps search in the URL and moves between pages",
+		"Records table: keeps search in the URL and moves between pages",
 	],
 	"src/components/table/pagination-footer.tsx#table.interaction": [
-		"record table: keeps search in the URL and moves between pages",
+		"Records table: keeps search in the URL and moves between pages",
 	],
 	"src/components/table/pagination-header.tsx#export.default.behaviour": [
-		"record table: keeps search in the URL and moves between pages",
+		"Records table: keeps search in the URL and moves between pages",
 	],
 	"src/components/table/pagination-header.tsx#table.rows": [
-		"record table: keeps search in the URL and moves between pages",
+		"Records table: keeps search in the URL and moves between pages",
 	],
 	"src/components/table/data-table.tsx#export.default.behaviour": [
 		"Records table: same-day subtotal includes positive and negative Records",
@@ -2800,9 +2800,9 @@ export const behaviourCoverage: Record<string, string[]> = {
 	"src/components/table/data-table.tsx#table.interaction": [
 		"Budget detail: detaching a Record keeps the remaining row node and persists the detachment",
 		"Budget detail: remaining row does not replay its entrance after detaching",
-		"record table: keeps search in the URL and moves between pages",
-		"statement table: keeps search in the URL and moves between pages",
-		"Records table: category selection narrows Records and survives reload",
+		"Records table: keeps search in the URL and moves between pages",
+		"Statements table: keeps search in the URL and moves between pages",
+		"Records table: Category selection narrows Records and survives reload",
 	],
 	"src/components/table/data-table.tsx#table.motion": [
 		"Records: every visible item animates in the actual viewport",
@@ -2845,8 +2845,8 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"Records table: long title and optional Record values survive list drill and reload",
 	],
 	"src/components/table/record-columns.tsx#table.interaction": [
-		"record table: keeps search in the URL and moves between pages",
-		"Records table: category selection narrows Records and survives reload",
+		"Records table: keeps search in the URL and moves between pages",
+		"Records table: Category selection narrows Records and survives reload",
 		"multifilter Unicode origin: returns exactly after reload",
 		"Records table: long title and optional Record values survive list drill and reload",
 	],
@@ -3431,10 +3431,10 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"pagination: marks the active page and labels navigation",
 	],
 	"src/components/ui/pagination.tsx#export.PaginationContent.behaviour": [
-		"record table: keeps search in the URL and moves between pages",
+		"Records table: keeps search in the URL and moves between pages",
 	],
 	"src/components/ui/pagination.tsx#export.PaginationItem.behaviour": [
-		"record table: keeps search in the URL and moves between pages",
+		"Records table: keeps search in the URL and moves between pages",
 	],
 	"src/components/ui/chart.tsx#export.ChartContainer.behaviour": [
 		"chart: legend and keyboard tooltip keep series values and configured colours",
@@ -3518,13 +3518,13 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"facet skeleton: pulse changes opacity through frames while placeholder geometry stays stable",
 	],
 	"src/components/layout/page-header.tsx#export.default.behaviour": [
-		"category drill: nested detail returns to exact filtered origins",
+		"Category drill: nested detail returns to exact filtered origins",
 	],
 	"src/components/layout/page-header.tsx#display.interaction": [
-		"category drill: nested detail returns to exact filtered origins",
+		"Category drill: nested detail returns to exact filtered origins",
 	],
 	"src/components/layout/page-header.tsx#display.values": [
-		"category drill: nested detail returns to exact filtered origins",
+		"Category drill: nested detail returns to exact filtered origins",
 	],
 	"src/components/workflow-tabs.tsx#export.default.behaviour": [
 		"workflow tabs: navigate by keyboard and Allocate keeps the default date filter",
@@ -3567,8 +3567,8 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"app/statements/page.tsx#route.data": [
 		"/statements page: resolves to its useful empty state",
-		"statement table: keeps search in the URL and moves between pages",
-		"Statement cells: retain pending, allocation, zero and signed amount meaning",
+		"Statements table: keeps search in the URL and moves between pages",
+		"Statement cells: retain pending, Allocation, zero and signed amount meaning",
 		"/statements page: stays silent while the database opens, then reveals its data",
 		"Statement detail: long pending description stays readable on list and detail with confirmation state",
 		"Statements table: signed same-day Statements show their exact grouped subtotal",
@@ -3605,8 +3605,8 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"app/records/page.tsx#route.data": [
 		"/records page: resolves to its useful empty state",
-		"record table: keeps search in the URL and moves between pages",
-		"Records table: category selection narrows Records and survives reload",
+		"Records table: keeps search in the URL and moves between pages",
+		"Records table: Category selection narrows Records and survives reload",
 		"Records table: zero is a real amount filter and paid and received ranges retain sign",
 		"/records page: stays silent while the database opens, then reveals its data",
 		"Records table: long title and optional Record values survive list drill and reload",
@@ -3626,12 +3626,12 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"/categories page: stays silent while the database opens, then reveals its data",
 	],
 	"app/(month)/page.tsx#route.data": [
-		"overview summary: income, refunds and exclusions reconcile across metrics and category mix",
+		"overview summary: income, refunds and exclusions reconcile across metrics and Category mix",
 		"empty overview: no history gives zero metrics and useful chart explanations",
 		"Monthly Budget card: null amount and zero plan remain distinct when scope changes",
 		"Monthly Budget rows: zero and null plans never display invalid percentages",
 		"spending calendar: daily amount, zero and refund days drill into exact Records",
-		"biggest changes: category change title and drilldown reconcile with the previous month",
+		"biggest changes: Category change title and drilldown reconcile with the previous month",
 	],
 	"app/(month)/records/monthly/page.tsx#route.data": [
 		"/records/monthly?month=October&year=2026 page: resolves to its useful empty state",
@@ -3640,11 +3640,11 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"app/accounts/[id]/page.tsx#route.navigation": [
 		"direct Accounts detail: has a working fallback",
-		"Accounts card: keyboard card to detail to Back keeps exact origin",
+		"Account card: keyboard card to detail to Back keeps exact origin",
 	],
 	"app/budgets/[id]/page.tsx#route.navigation": [
 		"direct Budgets detail: has a working fallback",
-		"Budgets card: keyboard card Enter to detail to Back keeps exact origin",
+		"Budget card: keyboard card Enter to detail to Back keeps exact origin",
 	],
 	"app/records/[id]/page.tsx#route.navigation": [
 		"direct Records detail: has a working fallback",
@@ -3658,10 +3658,10 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"Statements list: keyboard filtered list to detail to Back keeps exact origin",
 	],
 	"app/budgets/page.tsx#route.navigation": [
-		"Budgets card: keyboard card Enter to detail to Back keeps exact origin",
+		"Budget card: keyboard card Enter to detail to Back keeps exact origin",
 	],
 	"app/accounts/page.tsx#route.navigation": [
-		"Accounts card: keyboard card to detail to Back keeps exact origin",
+		"Account card: keyboard card to detail to Back keeps exact origin",
 	],
 	"app/allocator/page.tsx#route.navigation": [
 		"allocator: keyboard selection opens Create Record and Clear removes the selection",
@@ -3881,8 +3881,8 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"sidebar display: renders badge, footer, label and separator",
 	],
 	"src/components/allocate-bar.tsx#allocation.amount": [
-		"allocate bar: not, partial and fully allocated states show finite values",
-		"allocation bar: zero, negative, full, excess and opposite-sign values stay finite and bounded",
+		"Allocation bar: not, partial and fully allocated states show finite values",
+		"Allocation bar: zero, negative, full, excess and opposite-sign values stay finite and bounded",
 	],
 	"src/components/charts/sparkline.tsx#chart.values": [
 		"sparkline: missing, flat, negative, mixed and dense values have correct finite endpoints",
@@ -3939,27 +3939,27 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"src/components/charts/category-spending-mix.tsx#chart.responsive": [
 		"dense overview cards: every card renders values and fits the viewport",
-		"category mix: a dense long category name stays truncated and readable",
+		"Category mix: a dense long Category name stays truncated and readable",
 	],
 	"src/components/charts/category-movers.tsx#chart.responsive": [
 		"dense overview cards: every card renders values and fits the viewport",
-		"category mix: a dense long category name stays truncated and readable",
+		"Category mix: a dense long Category name stays truncated and readable",
 		"calendar and movers: day and mover drills work by keyboard",
 	],
 	"src/components/charts/category-movers.tsx#chart.motion": [
-		"biggest changes: a saved record amount updates the mover row and keeps its drill link and row node",
-		"biggest changes: the mover bar scale transitions on record update",
+		"biggest changes: a saved Record amount updates the mover row and keeps its drill link and row node",
+		"biggest changes: the mover bar scale transitions on Record update",
 	],
 	"src/components/charts/monthly-budget-usage.tsx#chart.responsive": [
 		"dense overview cards: every card renders values and fits the viewport",
-		"category mix: a dense long category name stays truncated and readable",
+		"Category mix: a dense long Category name stays truncated and readable",
 	],
 	"src/components/charts/monthly-budget-usage.tsx#chart.motion": [
 		"Monthly Budget donut: sibling segments dim smoothly on focus",
 	],
 	"src/components/charts/spending-calendar.tsx#chart.responsive": [
 		"dense overview cards: every card renders values and fits the viewport",
-		"category mix: a dense long category name stays truncated and readable",
+		"Category mix: a dense long Category name stays truncated and readable",
 		"calendar and movers: day and mover drills work by keyboard",
 	],
 	"src/components/charts/spending-calendar.tsx#chart.motion": [
@@ -3997,20 +3997,20 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"allocator selection: multiple selections retain their values after cancelling keyboard creation",
 	],
 	"src/components/sheets/record-search.tsx#display.values": [
-		"Record search sheet: query miss and hit, attach persists, Escape closes and click reopens",
+		"Record search sheet: handles query misses and hits, persists attachment, closes with Escape and reopens by click",
 	],
 	"src/components/sheets/statement-search.tsx#display.values": [
-		"Statement search sheet: filter, allocate, Done returns to editor and unsaved allocation is cancelled",
+		"Statement search sheet: filters and allocates Statements, returns to the editor with Done and cancels an unsaved Allocation",
 	],
 	"src/components/sheets/pending-statement-confirmation.tsx#display.values": [
-		"replacement review: selected descriptions and cancel restores sheet",
+		"replacement review: shows selected descriptions and restores the sheet on cancel",
 		"replacement review: review enters through intermediate opacity",
 	],
 	"src/components/table/statement-columns.tsx#table.interaction": [
-		"statement table: keeps search in the URL and moves between pages",
+		"Statements table: keeps search in the URL and moves between pages",
 	],
 	"src/components/table/statement-columns.tsx#table.rows": [
-		"Statement cells: retain pending, allocation, zero and signed amount meaning",
+		"Statement cells: retain pending, Allocation, zero and signed amount meaning",
 		"/statements page: resolves to its useful empty state",
 		"Statement detail: long pending description stays readable on list and detail with confirmation state",
 		"Statements table: signed same-day Statements show their exact grouped subtotal",
@@ -4024,37 +4024,37 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"table paging /statements: new page fades without restarting the rise",
 	],
 	"src/components/table/paginated-data-table.tsx#table.rows": [
-		"record table: keeps search in the URL and moves between pages",
-		"statement table: keeps search in the URL and moves between pages",
+		"Records table: keeps search in the URL and moves between pages",
+		"Statements table: keeps search in the URL and moves between pages",
 	],
 	"src/components/dialogs/account.tsx#editor.long": [
 		"Account editor: required name and unicode rename persist after reload",
 	],
 	"src/components/dialogs/budget-creator.tsx#editor.long": [
-		"long Create Budget editor: Unicode content and keyboard cancellation reachable",
+		"long Create Budget editor: keeps Unicode content and keyboard cancellation reachable",
 	],
 	"src/components/dialogs/category.tsx#editor.long": [
-		"long Create Category editor: Unicode content and keyboard cancellation reachable",
+		"long Create Category editor: keeps Unicode content and keyboard cancellation reachable",
 	],
 	"src/components/dialogs/monthly-budget.tsx#editor.long": [
-		"long Create monthly budget editor: Unicode content and keyboard cancellation reachable",
+		"long Create monthly budget editor: keeps Unicode content and keyboard cancellation reachable",
 	],
 	"src/components/dialogs/pending-statement.tsx#editor.long": [
-		"long Create Pending Statement editor: Unicode content and keyboard cancellation reachable",
+		"long Create Pending Statement editor: keeps Unicode content and keyboard cancellation reachable",
 	],
 	"src/components/dialogs/duplicate-review.tsx#editor.long": [
-		"long duplicate review: long imported descriptions and usable footer",
+		"long duplicate review: keeps long imported descriptions readable and its footer usable",
 	],
 	"src/components/dialogs/statement-replacement-review.tsx#editor.long": [
-		"long replacement review: long imported descriptions and usable footer",
+		"long replacement review: keeps long imported descriptions readable and its footer usable",
 	],
 	"src/components/dialogs/budget-editor.tsx#editor.long": [
-		"Budget editor: prepopulated period and amount, clearing range fails, long name and zero persist",
+		"Budget editor: prepopulates period and amount, rejects a cleared range, and persists a long name and zero",
 	],
 	"src/components/dialogs/record-creator.tsx#editor.long": [
-		"Record creator: required fields, category defaults, amount -12.34 and long text persist",
+		"Record creator: validates required fields, applies Category defaults, and persists amount -12.34 and long text",
 		"Record creator: pending warning reveals and collapses smoothly for amount -12.34",
-		"Record creator: required fields, category defaults, amount 0 and long text persist",
+		"Record creator: validates required fields, applies Category defaults, and persists amount 0 and long text",
 		"Record creator: pending warning reveals and collapses smoothly for amount 0",
 	],
 	"src/components/dialogs/record-editor.tsx#editor.long": [
@@ -4065,7 +4065,7 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"Monthly Budget editor: inherited amount reveals smoothly after override action",
 	],
 	"src/components/dialogs/record-creator.tsx#editor.conditional": [
-		"Record creator: required fields, category defaults, amount -12.34 and long text persist",
+		"Record creator: validates required fields, applies Category defaults, and persists amount -12.34 and long text",
 		"Record creator: pending warning reveals and collapses smoothly for amount -12.34",
 		"Record creator: clearing the selected date shows date validation and archived Monthly Budgets stay unavailable",
 	],
@@ -4075,14 +4075,14 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"Record editor: opens with initial content already laid out",
 	],
 	"src/components/dialogs/category.tsx#editor.conditional": [
-		"Category editor: Spending default Monthly Budget, archived options absent, Income clears budget and blank validation",
+		"Category editor: offers a Spending default Monthly Budget, excludes archived options, clears the Budget for Income and validates a blank name",
 	],
 	"src/components/dialogs/duplicate-review.tsx#editor.validation": [
-		"duplicate review: explicit keep and delete, cancel and reopen retain choices",
+		"duplicate review: shows explicit keep and delete choices and retains them after cancel and reopen",
 		"Duplicate Statement review: popup enters as a whole",
 	],
 	"src/components/dialogs/statement-replacement-review.tsx#editor.validation": [
-		"replacement review: selected descriptions and cancel restores sheet",
+		"replacement review: shows selected descriptions and restores the sheet on cancel",
 		"replacement review: review enters through intermediate opacity",
 	],
 	"src/components/form/text-field.tsx#field.options": [
@@ -4508,7 +4508,7 @@ export const scenarioProjectExemptions: Record<string, Record<string, string>> =
 			"Functional gate half of a split test; its motion assertions run in the reduced-motion project from the motion half; src/components/charts/sparkline.tsx",
 	},
 	"src/components/charts/category-movers.tsx#chart.motion": {
-		"biggest changes: a saved record amount updates the mover row and keeps its drill link and row node":
+		"biggest changes: a saved Record amount updates the mover row and keeps its drill link and row node":
 			"Functional gate half of a split test; its motion assertions run in the reduced-motion project from the motion half; src/components/charts/category-movers.tsx",
 	},
 	"src/components/table/statement-columns.tsx#table.motion": {
@@ -4542,9 +4542,9 @@ export const scenarioProjectExemptions: Record<string, Record<string, string>> =
 			"Functional gate half of a split test; its motion assertions run in the reduced-motion project from the motion half; src/components/table/paginated-data-table.tsx",
 		"table paging /records: first page shows five rows and next page moves the URL to page 2":
 			"Functional gate half of a split test; its motion assertions run in the reduced-motion project from the motion half; src/components/table/paginated-data-table.tsx",
-		"record table: keeps search in the URL and moves between pages":
+		"Records table: keeps search in the URL and moves between pages":
 			"Page-change identity and URL state do not vary by configuration; src/components/table/paginated-data-table.tsx",
-		"statement table: keeps search in the URL and moves between pages":
+		"Statements table: keeps search in the URL and moves between pages":
 			"Page-change identity and URL state do not vary by configuration; src/components/table/paginated-data-table.tsx",
 	},
 	"src/components/table/record-columns.tsx#table.motion": {

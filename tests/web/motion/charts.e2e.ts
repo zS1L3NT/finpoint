@@ -107,7 +107,7 @@ function tailStable(values: string[], count = 3) {
 	return values.length >= count && new Set(values.slice(-count)).size === 1
 }
 
-test("chart intro: overview and budget charts grow once and hover or resize never replays the grow-in", {
+test("chart intro: overview and Budget charts grow once and hover or resize never replays the grow-in", {
 	tag: ["@tall", "@light", "@reduced-motion"],
 }, async ({ page, isMobile }) => {
 	test.setTimeout(150_000)
@@ -230,7 +230,7 @@ test("chart intro: overview and budget charts grow once and hover or resize neve
 	}
 })
 
-test("Budget donut: focus dims sibling segments in a smooth transition", {
+test("Monthly Budget donut: focus dims sibling segments in a smooth transition", {
 	tag: ["@tall", "@reduced-motion"],
 }, async ({ page }) => {
 	test.setTimeout(150_000)
@@ -401,7 +401,7 @@ test("populated charts: calendar heat and mover bars transition in place", {
 			expect(distinct(values), "reduced motion recolors immediately").toBeLessThanOrEqual(2)
 		else expect(distinct(values), "day heat transitions in place").toBeGreaterThan(2)
 	})
-	await test.step("biggest changes: the mover bar scale transitions on record update", async () => {
+	await test.step("biggest changes: the mover bar scale transitions on Record update", async () => {
 		const reduced = test.info().project.name === "reduced-motion"
 		// Baseline comparators: September spending for daily-budget categories so the
 		// Groceries mover row exists with a comparison before the live update (same

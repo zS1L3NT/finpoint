@@ -747,7 +747,7 @@ test("monthly headers: hydrate with a browser date different from the server", a
 	}
 })
 
-test("record facets: long Monthly Budget option picks and clears, category history separates unavailable months", async ({
+test("Record facets: long Monthly Budget option picks and clears, Category history separates unavailable months", async ({
 	page,
 }) => {
 	await seedWorkspace(page)

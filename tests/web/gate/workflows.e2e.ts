@@ -156,7 +156,7 @@ test("allocator: exact Statements allocate to a new Record and persist across re
 	expect(google.length).toBe(0)
 })
 
-test("Record creator: under-allocation warns that the Record stays Pending", async ({
+test("Record creator: an insufficient Allocation warns that the Record stays Pending", async ({
 	page,
 	workspace,
 }) => {
@@ -191,7 +191,7 @@ test("Record creator: under-allocation warns that the Record stays Pending", asy
 	await expect(page.locator("main").getByText("Pending", { exact: true }).first()).toBeVisible()
 })
 
-test("Record creator: over-allocation is blocked with a useful message and no mutation", async ({
+test("Record creator: an excessive Allocation is blocked with a useful message and no mutation", async ({
 	page,
 	workspace,
 }) => {
@@ -226,7 +226,7 @@ test("Record creator: over-allocation is blocked with a useful message and no mu
 	expect(await countStore(page, "records")).toBe(before)
 })
 
-test("allocate bar: not, partial and fully allocated states show finite values", async ({
+test("Allocation bar: not, partial and fully allocated states show finite values", async ({
 	page,
 	workspace,
 }) => {
