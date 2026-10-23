@@ -1,3 +1,5 @@
+import { Combobox as ComboboxPrimitive } from "@base-ui/react"
+import { useState } from "react"
 import { FormField, type FormFieldProps } from "@/components/form/field"
 import {
 	Combobox,
@@ -38,6 +40,19 @@ export default function ComboboxField<T>({
 	onChange,
 }: Props<T>) {
 	const invalid = !!errors?.length
+	// Filter here instead of in Base UI: Base UI 1.4 freezes the typed query while the
+	// popup exits after a pick, but only unfreezes it once the popup unmounts, so
+	// reopening during that exit kept filtering by the old query whatever was typed.
+	// This mirror freezes on a pick the same way and unfreezes whenever it reopens.
+	const { contains } = ComboboxPrimitive.useFilter()
+	const [query, setQuery] = useState(() => (value === null ? "" : getItemString(value)))
+	const [frozenQuery, setFrozenQuery] = useState<string | null>(null)
+	const activeQuery = frozenQuery ?? query.trim()
+	const matches =
+		activeQuery === ""
+			? items
+			: items.filter(item => contains(item, activeQuery, getItemString))
+	const filteredItems = limit === undefined ? matches : matches.slice(0, limit)
 
 	return (
 		<FormField
@@ -54,6 +69,14 @@ export default function ComboboxField<T>({
 				itemToStringValue={getItemId}
 				value={value}
 				onValueChange={onChange}
+				filteredItems={filteredItems}
+				onInputValueChange={(next, details) => {
+					if (details.reason === "item-press") setFrozenQuery(query.trim())
+					setQuery(next)
+				}}
+				onOpenChange={open => {
+					if (open) setFrozenQuery(null)
+				}}
 				disabled={disabled}
 				limit={limit}
 				autoHighlight

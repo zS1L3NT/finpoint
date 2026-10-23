@@ -1,17 +1,17 @@
 # Graph Report - t3-9755e75b  (2026-10-24)
 
 ## Corpus Check
-- 239 files · ~208,444 words
+- 239 files · ~208,711 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 9 file(s) not represented in the graph (top: (none) 5, .example 1, .lock 1)
 
 ## Summary
-- 1915 nodes · 7328 edges · 94 communities (84 shown, 10 thin omitted)
+- 1915 nodes · 7330 edges · 94 communities (84 shown, 10 thin omitted)
 - Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 121 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `e0d9414b`
+- Built from commit: `a6bc518c`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -112,7 +112,7 @@
 1. `cn()` - 309 edges
 2. `PrimitivesSection()` - 184 edges
 3. `Button()` - 119 edges
-4. `react` - 93 edges
+4. `react` - 94 edges
 5. `formatCurrency()` - 79 edges
 6. `RecordEditorDialog()` - 63 edges
 7. `UiIcon()` - 49 edges
@@ -164,15 +164,15 @@ Nodes (54): typescript, vite, @vitejs/plugin-react, 1. Restructure fidelity — 
 
 ### Community 5 - "cn"
 Cohesion: 0.09
-Nodes (60): radix-ui, AlertAction(), AlertDialogTrigger(), ChartLegendContent(), DropdownMenu(), DropdownMenuCheckboxItem(), DropdownMenuContent(), DropdownMenuGroup() (+52 more)
+Nodes (63): radix-ui, AlertAction(), AlertDialogTrigger(), ChartLegendContent(), DropdownMenu(), DropdownMenuCheckboxItem(), DropdownMenuContent(), DropdownMenuGroup() (+55 more)
 
 ### Community 6 - "dashboard.ts"
 Cohesion: 0.17
 Nodes (29): avg(), buildCashflowHistory(), buildCategories(), buildComparison(), buildMonthlyBudgets(), buildProjection(), buildSeries(), buildSpendingHistory() (+21 more)
 
 ### Community 7 - "(month)/layout.tsx"
-Cohesion: 0.11
-Nodes (33): BudgetState, MonthLayout(), luxon, react-day-picker, DateField(), Props, DateRange(), DateRangeValue (+25 more)
+Cohesion: 0.12
+Nodes (30): BudgetState, MonthLayout(), luxon, react-day-picker, DateField(), Props, DateRange(), DateRangeValue (+22 more)
 
 ### Community 8 - "db.ts"
 Cohesion: 0.11
@@ -200,7 +200,7 @@ Nodes (23): dexie-react-hooks, react, PendingStatementConfirmationSheet(), Recor
 
 ### Community 14 - "combobox.tsx"
 Cohesion: 0.11
-Nodes (24): Props, ComboboxChip(), ComboboxChips(), ComboboxChipsInput(), ComboboxClear(), ComboboxCollection(), ComboboxContent(), ComboboxEmpty() (+16 more)
+Nodes (25): @base-ui/react, Props, ComboboxChip(), ComboboxChips(), ComboboxChipsInput(), ComboboxClear(), ComboboxCollection(), ComboboxContent() (+17 more)
 
 ### Community 15 - "(month)/page.tsx"
 Cohesion: 0.08
@@ -220,7 +220,7 @@ Nodes (28): suspicious, noAssignInExpressions, noAsyncPromiseExecutor, noCatchAs
 
 ### Community 19 - "package.json"
 Cohesion: 0.07
-Nodes (28): private, $schema, type, babel-plugin-react-compiler, @base-ui/react, @biomejs/biome, clsx, cmdk (+20 more)
+Nodes (27): private, $schema, type, babel-plugin-react-compiler, @biomejs/biome, clsx, cmdk, @fontsource-variable/inter (+19 more)
 
 ### Community 20 - "Separator"
 Cohesion: 0.21
@@ -497,6 +497,6 @@ _Questions this graph is uniquely positioned to answer:_
 - **Should `sidebar.tsx` be split into smaller, more focused modules?**
   _Cohesion score 0.058363858363858365 - nodes in this community are weakly interconnected._
 - **Why does `react` connect `Button` to `pending/page.tsx`, `record-editor.tsx`, `sidebar.tsx`, `paginated-data-table.tsx`, `cn`, `(month)/layout.tsx`, `combobox.tsx`, `(month)/page.tsx`, `package.json`, `Separator`, `auto-sync.ts`, `sync/page.tsx`, `records/[id]/page.tsx`, `total-spending-chart.tsx`, `allocator/page.tsx`, `app.tsx`, `PaginationFooter`, `utils.ts`, `budgets/[id]/page.tsx`, `category-filter.tsx`?**
-  _High betweenness centrality (0.070) - this node is a cross-community bridge._
+  _High betweenness centrality (0.071) - this node is a cross-community bridge._
 - **Should `ledger.e2e.ts` be split into smaller, more focused modules?**
   _Cohesion score 0.05427547363031234 - nodes in this community are weakly interconnected._

@@ -1829,6 +1829,30 @@ test("modal focus: containment and restoration hold for dialog, sheet and alert"
 	}
 })
 
+test("combobox field: reopening while the list fades out filters by the new search", async ({
+	page,
+}) => {
+	await page.goto(`${HARNESS_URL}/?section=forms`)
+	// Slow animations 20x so the 100ms exit lasts long enough to reopen inside it on any
+	// host; Base UI 1.4 otherwise kept filtering by the previous search until unmount.
+	const cdp = await page.context().newCDPSession(page)
+	await cdp.send("Animation.enable")
+	await cdp.send("Animation.setPlaybackRate", { playbackRate: 0.05 })
+	const input = page.locator("#harness-payee")
+	await input.click()
+	await input.pressSequentially("Gro")
+	await page.getByRole("option", { name: "Groceries" }).click()
+	await expect(page.getByTestId("payee-value")).toHaveText("Payee value: Groceries")
+	await page.locator('[data-slot="combobox-clear"]').click({ force: true })
+	await input.click({ force: true })
+	await input.pressSequentially("zzz")
+	await expect(page.getByText("No payees found.")).toBeVisible()
+	await input.fill("")
+	await input.pressSequentially("Tra")
+	await expect(page.getByRole("option", { name: "Transport" })).toBeVisible()
+	await expect(page.getByRole("option", { name: "Groceries" })).toHaveCount(0)
+})
+
 test("select field: preserves the page scrollbar while open", async ({ page }) => {
 	await page.goto(`${HARNESS_URL}/?section=forms`)
 	// The composed harness uses the same SelectField as all editors.
