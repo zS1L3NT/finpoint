@@ -1,9 +1,26 @@
+import type { Page } from "@playwright/test"
 import {
 	expectReducedRowMovement,
 	expectVisibleRowCascade,
 	sampleVisibleRowAnimations,
 } from "./support/assertions"
 import { expect, seedWorkspace, test } from "./support/fixtures"
+
+// The sidebar reads its mobile detection in a mount effect: a trigger tap
+// before hydration toggles the invisible desktop state instead of opening the
+// sheet, and a tap swallowed under load does the same visibly-nothing thing.
+// History hydration commits in the same mount pass (its provider wraps the
+// sidebar's), so wait for its localStorage marker first, then retry the tap
+// boundedly. The subsequent link wait remains the strict proof.
+async function openMobileSidebar(page: Page) {
+	await expect.poll(() => page.evaluate(() => localStorage.getItem("history"))).not.toBeNull()
+	const trigger = page.locator('header [data-slot="sidebar-trigger"]')
+	for (let attempt = 0; attempt < 3; attempt++) {
+		await trigger.click()
+		await page.waitForTimeout(500)
+		if ((await page.getByRole("dialog").count()) > 0) break
+	}
+}
 
 test("table refilter entrances share one dense seed", {
 	tag: ["@tall", "@light", "@motion"],
@@ -88,7 +105,7 @@ test("table.groups visible day headers enter with their grouped Records", {
 }, async ({ page, isMobile }) => {
 	await seedWorkspace(page, "dense")
 	await page.goto("/accounts")
-	if (isMobile) await page.locator('header [data-slot="sidebar-trigger"]').click()
+	if (isMobile) await openMobileSidebar(page)
 	const samples = await sampleVisibleRowAnimations(
 		page,
 		'tbody tr:not(:has(a[href^="/records/"])), div.grid-cols-subgrid:not(:has(a[href^="/records/"]))',

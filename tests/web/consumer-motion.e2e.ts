@@ -1,3 +1,4 @@
+import type { Page } from "@playwright/test"
 import {
 	expectReducedRowMovement,
 	expectVisibleRowCascade,
@@ -5,6 +6,24 @@ import {
 } from "./support/assertions"
 import { setDateOnly } from "./support/date-only"
 import { expect, seedWorkspace, test } from "./support/fixtures"
+
+// The sidebar reads its mobile detection in a mount effect: a trigger tap
+// before hydration toggles the invisible desktop state instead of opening the
+// sheet, and a tap swallowed under load does the same visibly-nothing thing.
+// History hydration commits in the same mount pass (its provider wraps the
+// sidebar's), so wait for its localStorage marker first, then retry the tap
+// boundedly. The visible dialog below stays the strict proof: a genuinely
+// broken sheet still fails there.
+async function openMobileSidebar(page: Page) {
+	await expect.poll(() => page.evaluate(() => localStorage.getItem("history"))).not.toBeNull()
+	const trigger = page.locator('header [data-slot="sidebar-trigger"]')
+	for (let attempt = 0; attempt < 3; attempt++) {
+		await trigger.click()
+		await page.waitForTimeout(500)
+		if ((await page.getByRole("dialog").count()) > 0) break
+	}
+	await expect(page.getByRole("dialog")).toBeVisible()
+}
 
 const recordRows =
 	'main table:has(a[href^="/records/"]) tbody tr:has(a[href^="/records/"]), main div:has(> div.grid-cols-subgrid a[href^="/records/"]) > div.grid-cols-subgrid:has(a[href^="/records/"])'
@@ -199,8 +218,7 @@ test("motion dense consumers share one dense seed", {
 			await page.goto(consumer.origin)
 			await expect(page.locator("main h2").first()).toBeVisible()
 			if (consumer.action === "sidebar" && isMobile) {
-				await page.locator('header [data-slot="sidebar-trigger"]').click()
-				await expect(page.getByRole("dialog")).toBeVisible()
+				await openMobileSidebar(page)
 			}
 			const samples = await sampleVisibleRowAnimations(page, consumer.selector, async () => {
 				if (consumer.action === "sidebar")
@@ -328,8 +346,7 @@ test("motion populated consumers share one populated seed", { tag: ["@tall", "@m
 			await page.goto(consumer.origin)
 			await expect(page.locator("main h2").first()).toBeVisible()
 			if (consumer.action === "sidebar" && isMobile) {
-				await page.locator('header [data-slot="sidebar-trigger"]').click()
-				await expect(page.getByRole("dialog")).toBeVisible()
+				await openMobileSidebar(page)
 			}
 			const samples = await sampleVisibleRowAnimations(page, consumer.selector, async () => {
 				if (consumer.action === "sidebar")
