@@ -12,6 +12,9 @@ import {
 	routeInventory,
 	scenarioDescriptions,
 	scenarioFamilies,
+	scenarioProjectExemptions,
+	scenarioProjectLexiconExemptions,
+	scenarioProjects,
 } from "./component-inventory"
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..")
@@ -129,7 +132,14 @@ function runtimeExports(path: string): string[] {
 }
 
 // Resolve only static syntax; never execute the test file or product code.
-function collectTests(path: string, text: string, declarations: Map<string, string[]>) {
+export type TestSelection = { path: string; test: string; tags: string[]; motion: boolean }
+
+function collectTests(
+	path: string,
+	text: string,
+	declarations: Map<string, string[]>,
+	selections: Map<string, TestSelection[]>,
+) {
 	const source = ts.createSourceFile(path, text, ts.ScriptTarget.Latest, true)
 	const constants = new Map<string, ts.Expression>()
 	for (const statement of source.statements) {
@@ -215,6 +225,104 @@ function collectTests(path: string, text: string, declarations: Map<string, stri
 		}
 		return undefined
 	}
+	function unwrap(node: ts.Expression): ts.Expression {
+		while (
+			ts.isAsExpression(node) ||
+			ts.isParenthesizedExpression(node) ||
+			ts.isSatisfiesExpression(node)
+		)
+			node = node.expression
+		return node
+	}
+	// Tag details are a static object literal in the second argument:
+	// test(title, { tag: "@motion" }, …), test(title, { tag: ["@tall"] }, …),
+	// test(title, { tag: group === "core" ? ["@tall"] : [] }, …) or
+	// test(title, { tag: tags }, …) with tags bound through a static for…of.
+	// Anything else in the second argument is the callback, not details.
+	function detailsTags(
+		argument: ts.Expression | undefined,
+		scope: Map<string, Value>,
+		here: string,
+	): string[] {
+		if (!argument) return []
+		const unwrapped = unwrap(argument)
+		if (ts.isConditionalExpression(unwrapped))
+			return [
+				...new Set([
+					...detailsTags(unwrapped.whenTrue, scope, here),
+					...detailsTags(unwrapped.whenFalse, scope, here),
+				]),
+			]
+		if (!ts.isObjectLiteralExpression(unwrapped)) return []
+		const tag = unwrapped.properties.find(
+			(property): property is ts.PropertyAssignment | ts.ShorthandPropertyAssignment =>
+				(ts.isPropertyAssignment(property) &&
+					(ts.isIdentifier(property.name) || ts.isStringLiteralLike(property.name)) &&
+					property.name.text === "tag") ||
+				(ts.isShorthandPropertyAssignment(property) && property.name.text === "tag"),
+		)
+		if (!tag) return []
+		return tagValues(
+			ts.isShorthandPropertyAssignment(tag) ? tag.name : tag.initializer,
+			scope,
+			here,
+		)
+	}
+	function tagValues(node: ts.Expression, scope: Map<string, Value>, here: string): string[] {
+		const unwrapped = unwrap(node)
+		if (ts.isConditionalExpression(unwrapped))
+			return [
+				...new Set([
+					...tagValues(unwrapped.whenTrue, scope, here),
+					...tagValues(unwrapped.whenFalse, scope, here),
+				]),
+			]
+		const resolved = value(unwrapped, scope)
+		if (typeof resolved === "string") return [resolved]
+		if (Array.isArray(resolved) && resolved.every(item => typeof item === "string"))
+			return [...new Set(resolved)]
+		throw new Error(
+			`${here}: unresolved test tag expression; tags must be static string literals`,
+		)
+	}
+	const motionPattern =
+		/expectPopupEntrance|expectReducedRowMovement|prefers-reduced-motion|"reduced-motion"|reducedMotion/
+	function fileFunctions(): Map<string, string> {
+		const bodies = new Map<string, string>()
+		for (const statement of source.statements) {
+			if (ts.isFunctionDeclaration(statement) && statement.name)
+				bodies.set(statement.name.text, statement.getText(source))
+			else if (ts.isVariableStatement(statement))
+				for (const declaration of statement.declarationList.declarations) {
+					if (
+						ts.isIdentifier(declaration.name) &&
+						/^[A-Za-z_][A-Za-z0-9_]*$/.test(declaration.name.text) &&
+						declaration.initializer &&
+						(ts.isArrowFunction(declaration.initializer) ||
+							ts.isFunctionExpression(declaration.initializer))
+					)
+						bodies.set(declaration.name.text, declaration.initializer.getText(source))
+				}
+		}
+		return bodies
+	}
+	const helpers = fileFunctions()
+	function mentionsMotion(callback: ts.Node): boolean {
+		let combined = callback.getText(source)
+		const used = new Set<string>()
+		let changed = true
+		while (changed) {
+			changed = false
+			for (const [name, body] of helpers) {
+				if (!used.has(name) && new RegExp(`\\b${name}\\b`).test(combined)) {
+					used.add(name)
+					combined += `\n${body}`
+					changed = true
+				}
+			}
+		}
+		return motionPattern.test(combined)
+	}
 	function disabled(node: ts.Node): boolean {
 		if (
 			ts.isCallExpression(node) &&
@@ -225,12 +333,18 @@ function collectTests(path: string, text: string, declarations: Map<string, stri
 			return true
 		return node.getChildren(source).some(disabled)
 	}
-	function visit(node: ts.Node, env: Map<string, Value>, active: boolean) {
+	function visit(
+		node: ts.Node,
+		env: Map<string, Value>,
+		active: boolean,
+		tags: string[],
+		currentTest: string | null,
+	) {
 		// Only recognised test/describe/step callbacks are entered below. A
 		// nested function declaration is not evidence that its body ever runs.
 		if (ts.isFunctionLike(node)) return
 		if (ts.isIfStatement(node) && node.expression.kind === ts.SyntaxKind.FalseKeyword) {
-			if (node.elseStatement) visit(node.elseStatement, env, active)
+			if (node.elseStatement) visit(node.elseStatement, env, active, tags, currentTest)
 			return
 		}
 		if (ts.isForOfStatement(node)) {
@@ -251,12 +365,13 @@ function collectTests(path: string, text: string, declarations: Map<string, stri
 						)
 							scope.set(element.name.text, item[index])
 					})
-				visit(node.statement, scope, active)
+				visit(node.statement, scope, active, tags, currentTest)
 			}
 			return
 		}
 		if (ts.isCallExpression(node)) {
 			const callee = node.expression.getText(source)
+			const here = `${path}:${source.getLineAndCharacterOfPosition(node.pos).line + 1}`
 			// Pruned branches never run, so nothing inside them is executable
 			// evidence — including nested step aliases from skipped parents.
 			if (
@@ -272,56 +387,97 @@ function collectTests(path: string, text: string, declarations: Map<string, stri
 			// step only counts with enabled executable test ancestry: a step
 			// in an uncalled helper or outside any test never runs. A step
 			// that is itself skipped or lives in a skipped suite cannot
-			// cover a component, exactly like a skipped test.
+			// cover a component, exactly like a skipped test. Tag details in
+			// the second argument never change an ID; steps inherit their
+			// test's tags through the describe/test/step stack, recorded in
+			// a separate selections map so declaration counts are unchanged.
 			if (callee === "test.describe") {
-				visitCallback(node, env, false)
+				visitCallback(
+					node,
+					env,
+					false,
+					[...new Set([...tags, ...detailsTags(node.arguments[1], env, here)])],
+					currentTest,
+				)
 				return
 			}
 			if (callee === "test.step") {
 				if (!active || disabled(node)) return
-				if (node.arguments[0]) record(node, env)
-				visitCallback(node, env, true)
+				const effective = [
+					...new Set([...tags, ...detailsTags(node.arguments[1], env, here)]),
+				]
+				if (node.arguments[0]) record(node, env, currentTest, effective, false)
+				visitCallback(node, env, true, effective, currentTest)
 				return
 			}
 			if (callee === "test" && node.arguments[0]) {
 				if (disabled(node)) return
-				record(node, env)
-				visitCallback(node, env, true)
+				const title = titleOf(node, env)
+				const effective = [
+					...new Set([...tags, ...detailsTags(node.arguments[1], env, here)]),
+				]
+				const motion = node.arguments.some(
+					argument =>
+						(ts.isArrowFunction(argument) || ts.isFunctionExpression(argument)) &&
+						mentionsMotion(argument),
+				)
+				record(node, env, title ?? currentTest, effective, motion)
+				visitCallback(node, env, true, effective, title ?? currentTest)
 				return
 			}
 		}
-		ts.forEachChild(node, child => visit(child, env, active))
+		ts.forEachChild(node, child => visit(child, env, active, tags, currentTest))
 	}
-	function visitCallback(node: ts.CallExpression, env: Map<string, Value>, active: boolean) {
+	function visitCallback(
+		node: ts.CallExpression,
+		env: Map<string, Value>,
+		active: boolean,
+		tags: string[],
+		currentTest: string | null,
+	) {
 		for (const argument of node.arguments) {
 			if (ts.isArrowFunction(argument) || ts.isFunctionExpression(argument))
-				visit(argument.body, env, active)
+				visit(argument.body, env, active, tags, currentTest)
 		}
 	}
-	function record(node: ts.CallExpression, env: Map<string, Value>) {
+	function titleOf(node: ts.CallExpression, env: Map<string, Value>): string | undefined {
 		const title = node.arguments[0] ? value(node.arguments[0], env) : undefined
-		if (typeof title === "string") {
-			const id = title.match(/^\[([^\]]+)\]/)?.[1] ?? title
-			const references = declarations.get(id) ?? []
-			references.push(`${path}:${source.getLineAndCharacterOfPosition(node.pos).line + 1}`)
-			declarations.set(id, references)
-		}
+		return typeof title === "string" ? title : undefined
 	}
-	visit(source, new Map(), false)
+	function record(
+		node: ts.CallExpression,
+		env: Map<string, Value>,
+		test: string | null,
+		tags: string[],
+		motion: boolean,
+	) {
+		const title = titleOf(node, env)
+		if (title === undefined) return
+		const id = title.match(/^\[([^\]]+)\]/)?.[1] ?? title
+		const references = declarations.get(id) ?? []
+		references.push(`${path}:${source.getLineAndCharacterOfPosition(node.pos).line + 1}`)
+		declarations.set(id, references)
+		const entries = selections.get(id) ?? []
+		entries.push({ path, test: test ?? title, tags, motion })
+		selections.set(id, entries)
+	}
+	visit(source, new Map(), false, [], null)
 }
 
 function declaredTests() {
 	const declarations = new Map<string, string[]>()
+	const selections = new Map<string, TestSelection[]>()
 	for (const path of files("tests/web").filter(
 		path => path.endsWith(".e2e.ts") && !path.endsWith("/coverage.e2e.ts"),
 	)) {
-		collectTests(path, readFileSync(join(root, path), "utf8"), declarations)
+		collectTests(path, readFileSync(join(root, path), "utf8"), declarations, selections)
 	}
-	return declarations
+	return { declarations, selections }
 }
 
 test("[UI-INVENTORY-PARSER] static generated titles resolve but skipped cases cannot cover a component", () => {
 	const declarations = new Map<string, string[]>()
+	const selections = new Map<string, TestSelection[]>()
 	collectTests(
 		"parser-fixture.ts",
 		`
@@ -338,6 +494,20 @@ test("[UI-INVENTORY-PARSER] static generated titles resolve but skipped cases ca
 		for (const name of ["alpha", "beta"] as const) test("looped group", async () => {
 			await test.step(\`looped \${name} step\`, async () => {})
 		})
+		test("tag mirror", { tag: "@motion" }, async () => {
+			await test.step("tag mirror step", async () => {})
+		})
+		test.describe("tagged suite", { tag: ["@tall"] }, () => {
+			test("suite child", async () => {
+				await test.step("suite child step", async () => {})
+			})
+		})
+		for (const [group, tags] of [["core", ["@tall", "@motion"]]] as const)
+			test(\`looped \${group}\`, { tag: tags }, async () => {
+				await test.step(\`looped \${group} step\`, async () => {})
+			})
+		test("conditional tags", { tag: true ? ["@light"] : ["@motion"] }, async () => {})
+		test.skip("skipped with tags", { tag: "@motion" }, () => {})
 		test("skipped group", async () => {
 			await test.step.skip("skipped step", async () => {})
 		})
@@ -362,6 +532,7 @@ test("[UI-INVENTORY-PARSER] static generated titles resolve but skipped cases ca
 		for (const value of externalValues) test(\`unresolved \${value}\`, () => {})
 	`,
 		declarations,
+		selections,
 	)
 	expect([...declarations.keys()]).toEqual([
 		"case first",
@@ -373,7 +544,68 @@ test("[UI-INVENTORY-PARSER] static generated titles resolve but skipped cases ca
 		"looped group",
 		"looped alpha step",
 		"looped beta step",
+		"tag mirror",
+		"tag mirror step",
+		"suite child",
+		"suite child step",
+		"looped core",
+		"looped core step",
+		"conditional tags",
 	])
+	expect(selections.get("tag mirror")).toEqual([
+		{ path: "parser-fixture.ts", test: "tag mirror", tags: ["@motion"], motion: false },
+	])
+	expect(selections.get("tag mirror step")).toEqual([
+		{ path: "parser-fixture.ts", test: "tag mirror", tags: ["@motion"], motion: false },
+	])
+	expect(selections.get("suite child")).toEqual([
+		{ path: "parser-fixture.ts", test: "suite child", tags: ["@tall"], motion: false },
+	])
+	expect(selections.get("suite child step")).toEqual([
+		{ path: "parser-fixture.ts", test: "suite child", tags: ["@tall"], motion: false },
+	])
+	expect(selections.get("looped core")).toEqual([
+		{
+			path: "parser-fixture.ts",
+			test: "looped core",
+			tags: ["@tall", "@motion"],
+			motion: false,
+		},
+	])
+	expect(selections.get("looped core step")).toEqual([
+		{
+			path: "parser-fixture.ts",
+			test: "looped core",
+			tags: ["@tall", "@motion"],
+			motion: false,
+		},
+	])
+	expect(selections.get("conditional tags")).toEqual([
+		{
+			path: "parser-fixture.ts",
+			test: "conditional tags",
+			tags: ["@light", "@motion"],
+			motion: false,
+		},
+	])
+	expect(selections.has("skipped with tags"), "skipped tests stay unrecorded").toBe(false)
+	expect(selections.get("grouped")).toEqual([
+		{ path: "parser-fixture.ts", test: "grouped", tags: [], motion: false },
+	])
+})
+
+test("[UI-INVENTORY-PARSER-TAGS] unresolved tag expressions throw instead of vanishing", () => {
+	for (const text of [
+		`test("unbound tag", { tag }, async () => {})`,
+		`test("numeric tag", { tag: 42 }, async () => {})`,
+		`test("half conditional", { tag: known ? ["@motion"] : other }, async () => {})`,
+	]) {
+		const declarations = new Map<string, string[]>()
+		const selections = new Map<string, TestSelection[]>()
+		expect(() => collectTests("parser-fixture.ts", text, declarations, selections)).toThrow(
+			/unresolved test tag/,
+		)
+	}
 })
 
 test("[UI-INVENTORY-FILES] every component and app file has an explicit owner and classification", () => {
@@ -420,7 +652,7 @@ test("[UI-INVENTORY-EXPORTS] every runtime export is visible, dormant, or a non-
 
 test("[UI-INVENTORY-COVERAGE] reviewed behaviour mappings reference executable test IDs and report gaps", async () => {
 	const testInfo = test.info()
-	const declarations = declaredTests()
+	const { declarations } = declaredTests()
 	const scenarios = [...componentInventory, ...routeInventory].flatMap(entry =>
 		entry.scenarios.flatMap(family =>
 			Object.entries(scenarioFamilies[family] ?? {}).map(([key, description]) => ({
@@ -537,4 +769,225 @@ test("[UI-INVENTORY-COVERAGE] reviewed behaviour mappings reference executable t
 			"Mapped scenarios still admit open facets; add evidence or a source-backed applicability reason before claiming completion",
 		).toEqual([])
 	}
+})
+
+const projectTagVocabulary = ["@desktop-only", "@mobile-only", "@tall", "@light", "@motion"]
+
+type SelectionProject = {
+	name: string
+	testIgnore?: string | RegExp | (string | RegExp)[]
+	grep?: RegExp | RegExp[]
+	grepInvert?: RegExp | RegExp[]
+}
+
+function projectIgnores(project: SelectionProject): (string | RegExp)[] {
+	if (!project.testIgnore) return []
+	return Array.isArray(project.testIgnore) ? project.testIgnore : [project.testIgnore]
+}
+
+function projectPatterns(patterns: RegExp | RegExp[] | undefined): RegExp[] {
+	if (!patterns) return []
+	return Array.isArray(patterns) ? patterns : [patterns]
+}
+
+// Playwright matches project grep/grepInvert against "<title> <tags…>"; every
+// testIgnore pattern in this repo is "**/<file>".
+function selectedBy(project: SelectionProject, file: string, fullTitle: string): boolean {
+	for (const pattern of projectIgnores(project)) {
+		if (typeof pattern === "string") {
+			expect(
+				pattern.startsWith("**/"),
+				`project selection only supports **/<file> ignores, found ${pattern}`,
+			).toBe(true)
+			if (file === pattern.slice("**/".length)) return false
+		} else if (pattern instanceof RegExp) {
+			if (pattern.test(`tests/web/${file}`)) return false
+		} else {
+			throw new Error(`unsupported testIgnore pattern in project ${project.name}`)
+		}
+	}
+	const grep = projectPatterns(project.grep)
+	if (grep.length > 0 && !grep.some(expression => expression.test(fullTitle))) return false
+	if (projectPatterns(project.grepInvert).some(expression => expression.test(fullTitle)))
+		return false
+	return true
+}
+
+// Effective description exactly as [UI-INVENTORY-COVERAGE] resolves it:
+// a scenarioDescriptions refinement, else the family case, else the synthetic
+// export/dormant consumer wording.
+function ledgerDescription(id: string): string {
+	const override = scenarioDescriptions[id]
+	if (override) return override
+	const hash = id.lastIndexOf("#")
+	const path = id.slice(0, hash)
+	const rest = id.slice(hash + 1)
+	const dot = rest.indexOf(".")
+	const family = rest.slice(0, dot)
+	const key = rest.slice(dot + 1)
+	if (family === "export" || family === "dormant") {
+		const entry = componentInventory.find(candidate => candidate.path === path)
+		const name = rest.split(".")[1] ?? rest
+		if (entry?.dormantExports.includes(name))
+			return `Dormant ${name}: standalone harness at port 5174; assert rendered output, meaningful pointer/keyboard interaction, selected/disabled states and long content where supported; a mount alone is insufficient`
+		return `${name}: reviewed substantive output/interaction assertions through a real route or composed harness consumer`
+	}
+	return scenarioFamilies[family]?.[key] ?? id
+}
+
+test("[UI-INVENTORY-PROJECTS] project selection executes every ledger configuration claim", async () => {
+	delete process.env.PLAYWRIGHT_FULL_MATRIX
+	delete process.env.PLAYWRIGHT_BROWSERS
+	const config = (await import("../../playwright.config")).default as unknown as {
+		projects: SelectionProject[]
+	}
+	const projects = new Map(config.projects.map(project => [project.name, project]))
+	for (const name of ["chromium", "mobile", "tall-desktop", "light", "reduced-motion"]) {
+		expect(
+			projects.has(name),
+			`playwright.config.ts must define a ${name} project for tag-filtered selection`,
+		).toBe(true)
+	}
+	const desktop = projects.get("chromium")
+	const mobile = projects.get("mobile")
+	const reducedMotion = projects.get("reduced-motion")
+	if (!desktop || !mobile || !reducedMotion)
+		throw new Error("tag-filtered desktop, mobile and reduced-motion projects are required")
+	const { selections } = declaredTests()
+
+	// Every used tag is one of the vocabulary tags; no test opts out of
+	// both desktop and mobile viewports at once.
+	const usedTags = new Set<string>()
+	for (const entries of selections.values())
+		for (const entry of entries) for (const tag of entry.tags) usedTags.add(tag)
+	for (const tag of usedTags)
+		expect(
+			projectTagVocabulary,
+			`unknown project tag ${tag}; extend the ledger vocabulary deliberately`,
+		).toContain(tag)
+	for (const [id, entries] of selections)
+		for (const entry of entries)
+			expect(
+				entry.tags.includes("@desktop-only") && entry.tags.includes("@mobile-only"),
+				`${id} carries both @desktop-only and @mobile-only`,
+			).toBe(false)
+
+	// Every enabled top-level test is selected by at least one project, so no
+	// test is orphaned. The tall-only file runs solely in tall-desktop by
+	// design, so desktop-or-mobile alone would falsely orphan it.
+	const selectors: SelectionProject[] = []
+	for (const project of projects.values()) selectors.push(project)
+	const topLevel = new Map<string, { file: string; title: string; tags: string[] }>()
+	for (const entries of selections.values())
+		for (const entry of entries) {
+			const key = `${entry.path} ${entry.test}`
+			const group = topLevel.get(key) ?? {
+				file: entry.path.split("/").pop() ?? entry.path,
+				title: entry.test,
+				tags: [],
+			}
+			group.tags = [...new Set([...group.tags, ...entry.tags])]
+			topLevel.set(key, group)
+		}
+	for (const group of topLevel.values()) {
+		const full = `${group.title} ${group.tags.join(" ")}`.trim()
+		expect(
+			selectors.some(project => selectedBy(project, group.file, full)),
+			`enabled test "${group.title}" in ${group.file} is selected by no project`,
+		).toBe(true)
+	}
+
+	// Every scenarioProjects claim is executed by the claimed projects for
+	// every mapped test ID, unless that ID is exempted with a reason. Both
+	// desktop and mobile must select the test when the claim includes mobile.
+	for (const scenario of Object.keys(scenarioProjects))
+		expect(
+			Object.hasOwn(behaviourCoverage, scenario),
+			`unknown scenarioProjects scenario`,
+		).toBe(true)
+	for (const [scenario, exemptions] of Object.entries(scenarioProjectExemptions)) {
+		expect(
+			Object.hasOwn(behaviourCoverage, scenario),
+			"unknown scenarioProjectExemptions",
+		).toBe(true)
+		for (const [testId, reason] of Object.entries(exemptions)) {
+			expect(
+				behaviourCoverage[scenario],
+				`${scenario}: exempted test ID is not mapped`,
+			).toContain(testId)
+			expect(
+				reason,
+				`${scenario}: a project exemption requires a source-backed reason`,
+			).toMatch(/(?:src|app)\/[\w/.[\]()-]+/)
+		}
+	}
+	for (const [scenario, claimed] of Object.entries(scenarioProjects)) {
+		for (const projectName of claimed) {
+			const project = projects.get(projectName)
+			if (!project) throw new Error(`unknown claimed project ${projectName} for ${scenario}`)
+			for (const testId of behaviourCoverage[scenario] ?? []) {
+				if (scenarioProjectExemptions[scenario]?.[testId]) continue
+				const entries = selections.get(testId)
+				expect(
+					entries?.length,
+					`${scenario}: mapped test ID ${testId} resolves to exactly one selection`,
+				).toBe(1)
+				for (const entry of entries ?? []) {
+					const file = entry.path.split("/").pop() ?? entry.path
+					const full = `${entry.test} ${entry.tags.join(" ")}`.trim()
+					expect(
+						selectedBy(project, file, full),
+						`${scenario} claims ${projectName} but "${testId}" (${entry.test} in ${file}) is not selected`,
+					).toBe(true)
+					if (projectName === "mobile")
+						expect(
+							selectedBy(desktop, file, full),
+							`${scenario} claims mobile but "${testId}" is not selected by chromium`,
+						).toBe(true)
+				}
+			}
+		}
+	}
+
+	// Prose that claims a configuration without a scenarioProjects entry (or
+	// an explicit exemption) fails, so later re-tagging cannot silently
+	// falsify a description.
+	const claimLexicon =
+		/\b(?:tall|reduced[- ]motion|mobile|dark|light|normal\/|five projects|every viewport|each viewport)\b/i
+	for (const scenario of Object.keys(behaviourCoverage)) {
+		if (!claimLexicon.test(ledgerDescription(scenario))) continue
+		if (scenarioProjects[scenario]) continue
+		expect(
+			scenarioProjectLexiconExemptions[scenario],
+			`${scenario} description claims a configuration but has no scenarioProjects entry`,
+		).toMatch(/\S/)
+	}
+	for (const scenario of Object.keys(scenarioProjectLexiconExemptions))
+		expect(
+			Object.hasOwn(behaviourCoverage, scenario),
+			"unknown scenarioProjectLexiconExemptions scenario",
+		).toBe(true)
+
+	// A test whose callback, or any transitively referenced file-local
+	// function, exercises reduced-motion behaviour must be selected by
+	// reduced-motion. Files the reduced-motion project ignores in the config
+	// (helper probes forcing no-preference) are exempt through that list only.
+	const reducedIgnores = new Set(
+		projectIgnores(reducedMotion).map(pattern => {
+			if (typeof pattern !== "string" || !pattern.startsWith("**/"))
+				throw new Error("reduced-motion ignores must be **/<file> strings")
+			return pattern.slice("**/".length)
+		}),
+	)
+	for (const [id, entries] of selections)
+		for (const entry of entries) {
+			if (!entry.motion) continue
+			const file = entry.path.split("/").pop() ?? entry.path
+			if (reducedIgnores.has(file)) continue
+			const full = `${entry.test} ${entry.tags.join(" ")}`.trim()
+			expect(
+				selectedBy(reducedMotion, file, full),
+				`"${id}" (${entry.test}) exercises reduced-motion behaviour but is not selected by reduced-motion`,
+			).toBe(true)
+		}
 })

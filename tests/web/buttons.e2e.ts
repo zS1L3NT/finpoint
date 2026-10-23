@@ -5,7 +5,11 @@ import { expect, test } from "./support/fixtures"
 // route-contracts.e2e.ts (one navigation serves both the layout and the audit).
 // This file keeps the chrome-level keyboard flows, which share one populated
 // seed and touch different routes without persisting anything.
-test("chrome keyboard flows share one seed", async ({ page, workspace, isMobile }) => {
+test("chrome keyboard flows share one seed", { tag: ["@motion"] }, async ({
+	page,
+	workspace,
+	isMobile,
+}) => {
 	void workspace
 	await test.step("month navigation and create button perform keyboard actions", async () => {
 		await page.goto("/?month=October&year=2026")
@@ -81,7 +85,10 @@ test("chrome keyboard flows share one seed", async ({ page, workspace, isMobile 
 	})
 })
 
-test("sidebar rail responds to Enter and Space", async ({ page, isMobile }) => {
+test("sidebar rail responds to Enter and Space", { tag: ["@desktop-only"] }, async ({
+	page,
+	isMobile,
+}) => {
 	test.skip(isMobile, "Sidebar rail is desktop only; mobile has a separate trigger")
 	await page.goto("/records")
 	const rail = page.locator('[data-slot="sidebar-rail"]')

@@ -5,7 +5,9 @@ import {
 } from "./support/assertions"
 import { expect, seedWorkspace, test } from "./support/fixtures"
 
-test("table refilter entrances share one dense seed", async ({ page }) => {
+test("table refilter entrances share one dense seed", {
+	tag: ["@tall", "@light", "@motion"],
+}, async ({ page }) => {
 	await seedWorkspace(page, "dense")
 	for (const route of ["/records", "/statements"] as const) {
 		await test.step(`table.refilter ${route} settled results reveal a different nonempty set`, async () => {
@@ -38,7 +40,9 @@ test("table refilter entrances share one dense seed", async ({ page }) => {
 	}
 })
 
-test("table paging-motion entrances share one dense seed", async ({ page }) => {
+test("table paging-motion entrances share one dense seed", {
+	tag: ["@tall", "@light", "@motion"],
+}, async ({ page }) => {
 	await seedWorkspace(page, "dense")
 	for (const route of ["/records", "/statements"] as const) {
 		await test.step(`table.paging-motion ${route} new page fades without restarting the rise`, async () => {
@@ -79,10 +83,9 @@ test("table paging-motion entrances share one dense seed", async ({ page }) => {
 	}
 })
 
-test("table.groups visible day headers enter with their grouped Records", async ({
-	page,
-	isMobile,
-}) => {
+test("table.groups visible day headers enter with their grouped Records", {
+	tag: ["@tall", "@motion"],
+}, async ({ page, isMobile }) => {
 	await seedWorkspace(page, "dense")
 	await page.goto("/accounts")
 	if (isMobile) await page.locator('header [data-slot="sidebar-trigger"]').click()

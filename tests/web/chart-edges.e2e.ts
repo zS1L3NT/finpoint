@@ -40,7 +40,9 @@ function tailStable(values: string[], count = 3) {
 	return values.length >= count && new Set(values.slice(-count)).size === 1
 }
 
-test("chart-edges dense journeys share one dense seed", async ({ page }) => {
+test("chart-edges dense journeys share one dense seed", { tag: ["@tall", "@motion"] }, async ({
+	page,
+}) => {
 	test.setTimeout(150_000)
 	await seedWorkspace(page, "dense")
 	await test.step("chart-edges containment: every dense card renders values and fits", async () => {
@@ -213,7 +215,9 @@ test("chart-edges dense journeys share one dense seed", async ({ page }) => {
 	})
 })
 
-test("chart-edges populated journeys share one seed", async ({ page }) => {
+test("chart-edges populated journeys share one seed", {
+	tag: ["@tall", "@light", "@motion"],
+}, async ({ page }) => {
 	test.setTimeout(150_000)
 	await seedWorkspace(page)
 	await test.step("chart-edges tooltips stay numeric and inside every viewport", async () => {

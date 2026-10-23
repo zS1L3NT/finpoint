@@ -703,7 +703,9 @@ test("settings validate, persist, and reload", async ({ page, workspace }) => {
 	await expect(page.locator("#default_filter_start_date")).toContainText("No default start date")
 })
 
-test("signed-out sync stays local with no external Google calls", async ({ page, workspace }) => {
+test("signed-out sync stays local with no external Google calls", {
+	tag: ["@desktop-only"],
+}, async ({ page, workspace }) => {
 	expect(workspace).toBe("populated")
 	const google = await blockGoogle(page)
 
@@ -716,7 +718,10 @@ test("signed-out sync stays local with no external Google calls", async ({ page,
 	expect(google.length).toBe(0)
 })
 
-test("backup round-trip restores the workspace", async ({ page, workspace }) => {
+test("backup round-trip restores the workspace", { tag: ["@desktop-only"] }, async ({
+	page,
+	workspace,
+}) => {
 	expect(workspace).toBe("populated")
 	await blockGoogle(page)
 

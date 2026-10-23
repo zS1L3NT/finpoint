@@ -776,7 +776,9 @@ test("widget group sidebar primitives shares one harness page", async ({ page, i
 	})
 })
 
-test("widget group chart sonner theme and layout shares one harness page", async ({ page }) => {
+test("widget group chart sonner theme and layout shares one harness page", {
+	tag: ["@light"],
+}, async ({ page }) => {
 	await test.step("chart container renders axes and legend entries", async () => {
 		await gotoPrimitives(page)
 		const section = page.getByTestId("primitive-chart")
@@ -859,10 +861,9 @@ test("widget group select long list shares one harness page", async ({ page }) =
 	})
 })
 
-test("long list selects a far item by tap opening and keyboard jump on touch", async ({
-	page,
-	hasTouch,
-}) => {
+test("long list selects a far item by tap opening and keyboard jump on touch", {
+	tag: ["@mobile-only"],
+}, async ({ page, hasTouch }) => {
 	test.skip(!hasTouch, "touch-only behaviour: hover arrows stay suppressed")
 	await gotoPrimitives(page)
 	await page.locator("#harness-select-long").tap()

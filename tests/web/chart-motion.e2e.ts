@@ -104,7 +104,10 @@ async function chartFrames(page: Page, titles: string[], open: () => Promise<voi
 	}
 }
 
-test("charts intro journeys share one seed", async ({ page, isMobile }) => {
+test("charts intro journeys share one seed", { tag: ["@tall", "@light", "@motion"] }, async ({
+	page,
+	isMobile,
+}) => {
 	test.setTimeout(150_000)
 	await seedWorkspace(page)
 	for (const destination of ["overview", "budget"] as const) {
@@ -288,9 +291,9 @@ test("charts.progress budget usage tooltip reconciles actual and projected spend
 	for (const path of paths) expect(path).not.toMatch(/NaN|Infinity/)
 })
 
-test("charts.containment every dense chart fits the viewport with usable graph surfaces", async ({
-	page,
-}) => {
+test("charts.containment every dense chart fits the viewport with usable graph surfaces", {
+	tag: ["@tall"],
+}, async ({ page }) => {
 	await seedWorkspace(page, "dense")
 	await page.goto("/?month=October&year=2026")
 	for (const title of [

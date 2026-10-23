@@ -10,7 +10,7 @@ import { expect, test } from "./support/fixtures"
 // App modal surfaces share one populated seed. None of them persists: dialogs
 // are escaped, reviews are cancelled, and sheets only reopen. Every step
 // navigates fresh.
-test("app modal surfaces share one seed", async ({ page, workspace }) => {
+test("app modal surfaces share one seed", { tag: ["@motion"] }, async ({ page, workspace }) => {
 	void workspace
 	await test.step("editor popup fades and moves through intermediate rendered frames", async () => {
 		await page.goto("/categories", { waitUntil: "domcontentloaded" })
@@ -187,220 +187,230 @@ test("harness modal focus containment shares one page", async ({ page }) => {
 })
 
 for (const action of ["Cancel", "Fix"] as const) {
-	test(`duplicate review exit fades popup and backdrop through intermediate alpha then removal${action === "Fix" ? " after Fix" : ""}`, async ({
-		page,
-		workspace,
-	}, testInfo) => {
-		void workspace
-		const tables = getScenario("populated").tables
-		const keptDescription =
-			tables.statements.find(s => s.id === IDS.statements.duplicatePair[0])?.description ?? ""
-		const deletedDescription =
-			tables.statements.find(s => s.id === IDS.statements.duplicatePair[1])?.description ?? ""
-		// Second pair, seeded raw below with primitive literals only: distinct IDs
-		// and reworded-but-matching descriptions, same account/day/amount.
-		const secondKeepId = "t1-s-dupexit-a"
-		const secondDeleteId = "t1-s-dupexit-b"
-		const secondKeepDescription = "QUICKEXIT PROBE 5511 SECONDARY"
-		const secondDeleteDescription = "SECONDARY 5511 QUICKEXIT PROBE"
-		await page.evaluate(
-			async ({ keepId, deleteId, keepDescription, deleteDescription }) => {
-				const database = await new Promise<IDBDatabase>((resolve, reject) => {
-					const open = indexedDB.open("finpoint")
-					open.onsuccess = () => resolve(open.result)
-					open.onerror = () => reject(open.error)
-				})
-				try {
-					await new Promise<void>((resolve, reject) => {
-						const transaction = database.transaction("statements", "readwrite")
-						transaction.oncomplete = () => resolve()
-						transaction.onabort = () => reject(transaction.error)
-						const table = transaction.objectStore("statements")
-						table.add({
-							id: keepId,
-							account_id: "t1-acc-revolut",
-							datetime: "2026-10-06 09:14",
-							description: keepDescription,
-							amount: -28.9,
-							index: 3,
-							is_pending: 0,
-						})
-						table.add({
-							id: deleteId,
-							account_id: "t1-acc-revolut",
-							datetime: "2026-10-06 09:14",
-							description: deleteDescription,
-							amount: -28.9,
-							index: 4,
-							is_pending: 0,
-						})
+	test(
+		`duplicate review exit fades popup and backdrop through intermediate alpha then removal${action === "Fix" ? " after Fix" : ""}`,
+		{ tag: "@motion" },
+		async ({ page, workspace }, testInfo) => {
+			void workspace
+			const tables = getScenario("populated").tables
+			const keptDescription =
+				tables.statements.find(s => s.id === IDS.statements.duplicatePair[0])
+					?.description ?? ""
+			const deletedDescription =
+				tables.statements.find(s => s.id === IDS.statements.duplicatePair[1])
+					?.description ?? ""
+			// Second pair, seeded raw below with primitive literals only: distinct IDs
+			// and reworded-but-matching descriptions, same account/day/amount.
+			const secondKeepId = "t1-s-dupexit-a"
+			const secondDeleteId = "t1-s-dupexit-b"
+			const secondKeepDescription = "QUICKEXIT PROBE 5511 SECONDARY"
+			const secondDeleteDescription = "SECONDARY 5511 QUICKEXIT PROBE"
+			await page.evaluate(
+				async ({ keepId, deleteId, keepDescription, deleteDescription }) => {
+					const database = await new Promise<IDBDatabase>((resolve, reject) => {
+						const open = indexedDB.open("finpoint")
+						open.onsuccess = () => resolve(open.result)
+						open.onerror = () => reject(open.error)
 					})
-				} finally {
-					database.close()
-				}
-			},
-			{
-				keepId: secondKeepId,
-				deleteId: secondDeleteId,
-				keepDescription: secondKeepDescription,
-				deleteDescription: secondDeleteDescription,
-			},
-		)
-		await page.goto("/allocator/duplicates")
-		await page.getByRole("radio", { name: `Keep ${keptDescription}`, exact: true }).click()
-		await page.getByRole("radio", { name: `Delete ${deletedDescription}`, exact: true }).click()
-		const trigger = page.getByRole("button", { name: "Review deletion", exact: true }).first()
-		await expectPopupEntrance(page, () => trigger.click())
-		const dialog = page.getByRole("dialog", {
-			name: "Delete duplicate Statements",
-			exact: true,
-		})
-		await expect(dialog).toBeVisible()
-		await expectVisibleBackdrop(page)
-		const reduced = testInfo.project.use.reducedMotion === "reduce"
-		// Record real rendered opacity through the close; the page clears the
-		// review input synchronously, so only a latched popup/backdrop can fade.
-		const recorder = await page.evaluateHandle(() => {
-			const frames: {
-				time: number
-				popupOpacity: number | null
-				popupPose: string | null
-				backdropOpacity: number | null
-				dialogs: number
-				backdrops: number
-			}[] = []
-			let stopped = false
-			let closedAt = 0
-			let readyResolve: () => void = () => {
-				throw new Error("recorder ready executor did not run")
-			}
-			const ready = new Promise<void>(resolve => {
-				readyResolve = resolve
-			})
-			const done = new Promise<typeof frames>(resolve => {
-				let first = true
-				const sample = (now: number) => {
-					if (first) {
-						first = false
-						readyResolve()
+					try {
+						await new Promise<void>((resolve, reject) => {
+							const transaction = database.transaction("statements", "readwrite")
+							transaction.oncomplete = () => resolve()
+							transaction.onabort = () => reject(transaction.error)
+							const table = transaction.objectStore("statements")
+							table.add({
+								id: keepId,
+								account_id: "t1-acc-revolut",
+								datetime: "2026-10-06 09:14",
+								description: keepDescription,
+								amount: -28.9,
+								index: 3,
+								is_pending: 0,
+							})
+							table.add({
+								id: deleteId,
+								account_id: "t1-acc-revolut",
+								datetime: "2026-10-06 09:14",
+								description: deleteDescription,
+								amount: -28.9,
+								index: 4,
+								is_pending: 0,
+							})
+						})
+					} finally {
+						database.close()
 					}
-					if (stopped) {
-						resolve(frames)
-						return
-					}
-					const popup = document.querySelector('[data-slot="dialog-content"]')
-					const backdrop = document.querySelector('[data-slot="dialog-overlay"]')
-					const popupStyle = popup ? getComputedStyle(popup) : null
-					frames.push({
-						time: now,
-						popupOpacity: popupStyle ? Number(popupStyle.opacity) : null,
-						popupPose: popupStyle
-							? `${popupStyle.transform}|${popupStyle.translate}|${popupStyle.scale}|${popupStyle.rotate}`
-							: null,
-						backdropOpacity: backdrop
-							? Number(getComputedStyle(backdrop).opacity)
-							: null,
-						dialogs: document.querySelectorAll('[role="dialog"]').length,
-						backdrops: document.querySelectorAll('[data-slot="dialog-overlay"]').length,
-					})
-					if (closedAt > 0 && now - closedAt > 800) resolve(frames)
-					else requestAnimationFrame(sample)
-				}
-				requestAnimationFrame(sample)
-			})
-			void done.catch(() => undefined)
-			return {
-				done,
-				ready,
-				markClosed: () => {
-					closedAt = performance.now()
 				},
-				stop: () => {
-					stopped = true
+				{
+					keepId: secondKeepId,
+					deleteId: secondDeleteId,
+					keepDescription: secondKeepDescription,
+					deleteDescription: secondDeleteDescription,
 				},
-			}
-		})
-		try {
-			// Wait for the first native rAF sample while the popup is still open,
-			// so the first-frame dialogs/opacity assertions are deterministic.
-			await recorder.evaluate(state => state.ready)
-			await dialog
-				.getByRole("button", {
-					name: action === "Fix" ? /^Delete \d+ Statements?$/ : "Cancel",
-				})
-				.click()
-			await expect(page.getByRole("dialog")).toHaveCount(0)
-			await expect(page.locator('[data-slot="dialog-overlay"]')).toHaveCount(0)
-			await recorder.evaluate(state => state.markClosed())
-			const frames = await recorder.evaluate(state => state.done)
-			await testInfo.attach("duplicate-exit-frames", {
-				body: JSON.stringify(frames),
-				contentType: "application/json",
-			})
-			expect(frames.length).toBeGreaterThanOrEqual(3)
-			expect(frames[0]?.dialogs).toBeGreaterThan(0)
-			expect(frames.at(-1)?.dialogs).toBe(0)
-			expect(frames.at(-1)?.backdrops).toBe(0)
-			if (reduced) {
-				const poses = frames
-					.map(frame => frame.popupPose)
-					.filter((pose): pose is string => pose !== null)
-				expect(poses.length).toBeGreaterThanOrEqual(1)
-				// Reduced motion disables transitions, so the close is a single
-				// instant snap to the ending pose followed by removal: at most two
-				// poses (same <= 2 snap contract as expectReducedRowMovement) and
-				// no interpolated alpha between fully visible and gone.
-				expect(new Set(poses).size).toBeLessThanOrEqual(2)
-				expect(
-					frames.every(
-						frame =>
-							frame.popupOpacity === null ||
-							frame.popupOpacity === 0 ||
-							frame.popupOpacity === 1,
-					),
-				).toBe(true)
-			} else {
-				expect(frames[0]?.popupOpacity).toBeGreaterThan(0.99)
-				expect(
-					frames.filter(
-						frame =>
-							frame.popupOpacity !== null &&
-							frame.popupOpacity > 0 &&
-							frame.popupOpacity < 1,
-					).length,
-				).toBeGreaterThan(1)
-				expect(
-					frames.filter(
-						frame =>
-							frame.backdropOpacity !== null &&
-							frame.backdropOpacity > 0 &&
-							frame.backdropOpacity < 1,
-					).length,
-				).toBeGreaterThan(1)
-			}
-			// Reopen with the OTHER seeded pair: the dialog must gate on the new
-			// input and show only its rows, proving the latched close content did
-			// not leak a stale row. (Reopening the same pair could not distinguish
-			// fresh content from a stale latch, so it proves nothing here.)
-			const secondCard = page.locator("section", { hasText: secondKeepDescription })
-			await secondCard
-				.getByRole("radio", { name: `Keep ${secondKeepDescription}`, exact: true })
-				.click()
-			await secondCard
-				.getByRole("radio", { name: `Delete ${secondDeleteDescription}`, exact: true })
-				.click()
-			await expectPopupEntrance(page, () =>
-				secondCard.getByRole("button", { name: "Review deletion", exact: true }).click(),
 			)
-			await expect(dialog).toContainText(secondKeepDescription)
-			await expect(dialog).toContainText(secondDeleteDescription)
-			await expect(dialog.getByText(keptDescription, { exact: true })).toHaveCount(0)
-			await expect(dialog.getByText(deletedDescription, { exact: true })).toHaveCount(0)
-			await page.keyboard.press("Escape")
-			await expect(page.getByRole("dialog")).toHaveCount(0)
-		} finally {
-			await recorder.evaluate(state => state.stop())
-			await recorder.dispose()
-		}
-	})
+			await page.goto("/allocator/duplicates")
+			await page.getByRole("radio", { name: `Keep ${keptDescription}`, exact: true }).click()
+			await page
+				.getByRole("radio", { name: `Delete ${deletedDescription}`, exact: true })
+				.click()
+			const trigger = page
+				.getByRole("button", { name: "Review deletion", exact: true })
+				.first()
+			await expectPopupEntrance(page, () => trigger.click())
+			const dialog = page.getByRole("dialog", {
+				name: "Delete duplicate Statements",
+				exact: true,
+			})
+			await expect(dialog).toBeVisible()
+			await expectVisibleBackdrop(page)
+			const reduced = testInfo.project.use.reducedMotion === "reduce"
+			// Record real rendered opacity through the close; the page clears the
+			// review input synchronously, so only a latched popup/backdrop can fade.
+			const recorder = await page.evaluateHandle(() => {
+				const frames: {
+					time: number
+					popupOpacity: number | null
+					popupPose: string | null
+					backdropOpacity: number | null
+					dialogs: number
+					backdrops: number
+				}[] = []
+				let stopped = false
+				let closedAt = 0
+				let readyResolve: () => void = () => {
+					throw new Error("recorder ready executor did not run")
+				}
+				const ready = new Promise<void>(resolve => {
+					readyResolve = resolve
+				})
+				const done = new Promise<typeof frames>(resolve => {
+					let first = true
+					const sample = (now: number) => {
+						if (first) {
+							first = false
+							readyResolve()
+						}
+						if (stopped) {
+							resolve(frames)
+							return
+						}
+						const popup = document.querySelector('[data-slot="dialog-content"]')
+						const backdrop = document.querySelector('[data-slot="dialog-overlay"]')
+						const popupStyle = popup ? getComputedStyle(popup) : null
+						frames.push({
+							time: now,
+							popupOpacity: popupStyle ? Number(popupStyle.opacity) : null,
+							popupPose: popupStyle
+								? `${popupStyle.transform}|${popupStyle.translate}|${popupStyle.scale}|${popupStyle.rotate}`
+								: null,
+							backdropOpacity: backdrop
+								? Number(getComputedStyle(backdrop).opacity)
+								: null,
+							dialogs: document.querySelectorAll('[role="dialog"]').length,
+							backdrops: document.querySelectorAll('[data-slot="dialog-overlay"]')
+								.length,
+						})
+						if (closedAt > 0 && now - closedAt > 800) resolve(frames)
+						else requestAnimationFrame(sample)
+					}
+					requestAnimationFrame(sample)
+				})
+				void done.catch(() => undefined)
+				return {
+					done,
+					ready,
+					markClosed: () => {
+						closedAt = performance.now()
+					},
+					stop: () => {
+						stopped = true
+					},
+				}
+			})
+			try {
+				// Wait for the first native rAF sample while the popup is still open,
+				// so the first-frame dialogs/opacity assertions are deterministic.
+				await recorder.evaluate(state => state.ready)
+				await dialog
+					.getByRole("button", {
+						name: action === "Fix" ? /^Delete \d+ Statements?$/ : "Cancel",
+					})
+					.click()
+				await expect(page.getByRole("dialog")).toHaveCount(0)
+				await expect(page.locator('[data-slot="dialog-overlay"]')).toHaveCount(0)
+				await recorder.evaluate(state => state.markClosed())
+				const frames = await recorder.evaluate(state => state.done)
+				await testInfo.attach("duplicate-exit-frames", {
+					body: JSON.stringify(frames),
+					contentType: "application/json",
+				})
+				expect(frames.length).toBeGreaterThanOrEqual(3)
+				expect(frames[0]?.dialogs).toBeGreaterThan(0)
+				expect(frames.at(-1)?.dialogs).toBe(0)
+				expect(frames.at(-1)?.backdrops).toBe(0)
+				if (reduced) {
+					const poses = frames
+						.map(frame => frame.popupPose)
+						.filter((pose): pose is string => pose !== null)
+					expect(poses.length).toBeGreaterThanOrEqual(1)
+					// Reduced motion disables transitions, so the close is a single
+					// instant snap to the ending pose followed by removal: at most two
+					// poses (same <= 2 snap contract as expectReducedRowMovement) and
+					// no interpolated alpha between fully visible and gone.
+					expect(new Set(poses).size).toBeLessThanOrEqual(2)
+					expect(
+						frames.every(
+							frame =>
+								frame.popupOpacity === null ||
+								frame.popupOpacity === 0 ||
+								frame.popupOpacity === 1,
+						),
+					).toBe(true)
+				} else {
+					expect(frames[0]?.popupOpacity).toBeGreaterThan(0.99)
+					expect(
+						frames.filter(
+							frame =>
+								frame.popupOpacity !== null &&
+								frame.popupOpacity > 0 &&
+								frame.popupOpacity < 1,
+						).length,
+					).toBeGreaterThan(1)
+					expect(
+						frames.filter(
+							frame =>
+								frame.backdropOpacity !== null &&
+								frame.backdropOpacity > 0 &&
+								frame.backdropOpacity < 1,
+						).length,
+					).toBeGreaterThan(1)
+				}
+				// Reopen with the OTHER seeded pair: the dialog must gate on the new
+				// input and show only its rows, proving the latched close content did
+				// not leak a stale row. (Reopening the same pair could not distinguish
+				// fresh content from a stale latch, so it proves nothing here.)
+				const secondCard = page.locator("section", { hasText: secondKeepDescription })
+				await secondCard
+					.getByRole("radio", { name: `Keep ${secondKeepDescription}`, exact: true })
+					.click()
+				await secondCard
+					.getByRole("radio", { name: `Delete ${secondDeleteDescription}`, exact: true })
+					.click()
+				await expectPopupEntrance(page, () =>
+					secondCard
+						.getByRole("button", { name: "Review deletion", exact: true })
+						.click(),
+				)
+				await expect(dialog).toContainText(secondKeepDescription)
+				await expect(dialog).toContainText(secondDeleteDescription)
+				await expect(dialog.getByText(keptDescription, { exact: true })).toHaveCount(0)
+				await expect(dialog.getByText(deletedDescription, { exact: true })).toHaveCount(0)
+				await page.keyboard.press("Escape")
+				await expect(page.getByRole("dialog")).toHaveCount(0)
+			} finally {
+				await recorder.evaluate(state => state.stop())
+				await recorder.dispose()
+			}
+		},
+	)
 }

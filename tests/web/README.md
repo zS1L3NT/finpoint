@@ -7,9 +7,10 @@ Run `bun run test:web` for the local matrix, or `bun run test:web --project=chro
 Use `bun run test:web:headed --project=chromium` to watch a run and `bun run test:web:report` to open its report.
 ## What to run
 
-Run the tests that cover what you changed, not the whole matrix. The listed matrix is 811 cases
-(measured with `bunx playwright test --list`; 2,186 before the test consolidation), every file in
-5 projects on one worker. Compatible cases that share a fixture and journey now run as `test.step`
+Run the tests that cover what you changed, not the whole matrix. The listed matrix is 362 cases
+(measured with `bunx playwright test --list`; 811 before project selection, 2,186 before the test
+consolidation), selected by project from every file on one worker. Compatible cases that share
+a fixture and journey now run as `test.step`
 groups inside one test with a single seed, saving the per-case browser context, seeding, and
 navigation. A scoped run is usually a few minutes. Full-matrix wall time is not re-measured here;
 do not quote a new total duration without running it.
@@ -24,7 +25,11 @@ do not quote a new total duration without running it.
 - Changed layout: add `--project=mobile` and `--project=tall-desktop`.
 - Changed a test helper in `support/`: every file importing it, in `chromium` at least.
 
-Default to `--project=chromium --project=mobile`. Add `dark` only for colour changes.
+Default to `--project=chromium --project=mobile`. Add `--project=light`
+for colour changes (tag the test `@light` if it asserts painted colour). Use
+`--project=chromium --project=reduced-motion` for motion changes: any test asserting a
+reduced-motion branch or using `expectPopupEntrance`/`expectReducedRowMovement` carries
+`@motion`, and the `[UI-INVENTORY-PROJECTS]` gate enforces it.
 Run the full matrix only when asked, or before a release.
 Only one browser run at a time in a shared checkout: concurrent runs starve animation frames.
 The default is one worker: native animation checks need enough browser frames during short fades.
@@ -63,8 +68,16 @@ For a verification run against frozen production bundles, run `bun run build` an
 `PLAYWRIGHT_EXTERNAL_SERVERS=1 bun run test:web`. Stop those two servers after the run.
 This avoids development reloads changing source while animation frames are sampled.
 
-The default projects are `chromium` (1440×900), `tall-desktop` (1920×1440), `mobile` (390×844 with touch),
-`dark`, and `reduced-motion`. Normal projects retain all application animations. Reduced motion uses the
+The default projects are `chromium` (1440×900, dark), `mobile` (390×844 with touch,
+dark), `tall-desktop` (1920×1440, dark), `light` (1440×900, light) and `reduced-motion`
+(1440×900, dark, `reduce`). Chromium and mobile run every case except a short reviewed
+list; tall-desktop, light and reduced-motion run only cases tagged `@tall`, `@light` or
+`@motion`. `PLAYWRIGHT_FULL_MATRIX=1` drops those tag filters for a 749-case release run
+(measured with `bunx playwright test --list`). Every test declares its complete literal tag
+list; the `[UI-INVENTORY-PROJECTS]` gate fails if a ledger configuration claim is not
+executed by the selected projects, so tag a test `@light` if it asserts painted colour
+and `@motion` if it asserts a reduced-motion branch. Normal projects retain all application
+animations. Reduced motion uses the
 browser preference and tests the application's response; it does not inject CSS to suppress animation.
 For additional engines, install `bunx playwright install --with-deps firefox webkit`, then run
 `PLAYWRIGHT_BROWSERS=all bun run test:web --project=firefox --project=webkit`.

@@ -25,7 +25,10 @@ test.beforeEach(async ({ page }) => {
 // Six populated overview journeys share one seed. Every step navigates back to
 // the overview first, so scope params or record-list drills from an earlier
 // step never leak into the next one.
-test("charts populated overview journeys share one seed", async ({ page, isMobile }) => {
+test("charts populated overview journeys share one seed", { tag: ["@motion"] }, async ({
+	page,
+	isMobile,
+}) => {
 	test.setTimeout(120_000)
 	await seedWorkspace(page)
 	await test.step("charts.summary income, refunds and exclusions reconcile across metrics and category mix", async () => {

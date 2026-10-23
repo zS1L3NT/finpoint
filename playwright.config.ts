@@ -1,5 +1,17 @@
 import { defineConfig } from "@playwright/test"
 
+// Chromium and mobile run every case; tall-desktop, light and reduced-motion run only
+// cases tagged for them. PLAYWRIGHT_FULL_MATRIX=1 drops those tag filters for a release run.
+const full = process.env.PLAYWRIGHT_FULL_MATRIX === "1"
+const tallOnly = "**/tall-budget-motion.e2e.ts"
+// Static ledger gate and viewport/theme-independent helper probes.
+const desktopOnly = ["**/coverage.e2e.ts", "**/assertion-probes.e2e.ts", "**/date-only.e2e.ts"]
+const piggyback = (tag: RegExp) => ({
+	testIgnore: [tallOnly, ...desktopOnly],
+	grepInvert: /@mobile-only/,
+	...(full ? {} : { grep: tag }),
+})
+
 export default defineConfig({
 	testDir: "./tests/web",
 	testMatch: "**/*.e2e.ts",
@@ -15,7 +27,7 @@ export default defineConfig({
 		baseURL: "http://localhost:5173",
 		browserName: "chromium",
 		viewport: { width: 1440, height: 900 },
-		colorScheme: "light",
+		colorScheme: "dark",
 		reducedMotion: "no-preference",
 		locale: "en-GB",
 		timezoneId: "Asia/Singapore",
@@ -23,29 +35,33 @@ export default defineConfig({
 		screenshot: "only-on-failure",
 	},
 	projects: [
-		{ name: "chromium", testIgnore: "**/tall-budget-motion.e2e.ts" },
-		{ name: "tall-desktop", use: { viewport: { width: 1920, height: 1440 } } },
+		{ name: "chromium", testIgnore: tallOnly, grepInvert: /@mobile-only/ },
 		{
 			name: "mobile",
-			testIgnore: "**/tall-budget-motion.e2e.ts",
+			testIgnore: [tallOnly, ...desktopOnly],
+			grepInvert: /@desktop-only/,
 			use: { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true },
 		},
-		{ name: "dark", testIgnore: "**/tall-budget-motion.e2e.ts", use: { colorScheme: "dark" } },
 		{
-			name: "reduced-motion",
-			testIgnore: "**/tall-budget-motion.e2e.ts",
-			use: { reducedMotion: "reduce" },
+			name: "tall-desktop",
+			...piggyback(/@tall\b/),
+			testIgnore: desktopOnly,
+			use: { viewport: { width: 1920, height: 1440 } },
 		},
+		{ name: "light", ...piggyback(/@light\b/), use: { colorScheme: "light" } },
+		{ name: "reduced-motion", ...piggyback(/@motion\b/), use: { reducedMotion: "reduce" } },
 		...(process.env.PLAYWRIGHT_BROWSERS === "all"
 			? ([
 					{
 						name: "firefox",
-						testIgnore: "**/tall-budget-motion.e2e.ts",
+						testIgnore: tallOnly,
+						grepInvert: /@mobile-only/,
 						use: { browserName: "firefox" },
 					},
 					{
 						name: "webkit",
-						testIgnore: "**/tall-budget-motion.e2e.ts",
+						testIgnore: tallOnly,
+						grepInvert: /@mobile-only/,
 						use: { browserName: "webkit" },
 					},
 				] as const)

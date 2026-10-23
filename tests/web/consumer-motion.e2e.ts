@@ -160,7 +160,9 @@ const populatedConsumers: MotionConsumer[] = [
 	},
 ] as const
 
-test("motion dense consumers share one dense seed", async ({ page, isMobile }) => {
+test("motion dense consumers share one dense seed", {
+	tag: ["@tall", "@light", "@motion"],
+}, async ({ page, isMobile }) => {
 	test.setTimeout(180000)
 	await seedWorkspace(page, "dense")
 	for (const consumer of denseConsumers) {
@@ -286,7 +288,10 @@ test("motion dense consumers share one dense seed", async ({ page, isMobile }) =
 	}
 })
 
-test("motion populated consumers share one populated seed", async ({ page, isMobile }) => {
+test("motion populated consumers share one populated seed", { tag: ["@tall", "@motion"] }, async ({
+	page,
+	isMobile,
+}) => {
 	test.setTimeout(150000)
 	await seedWorkspace(page, "populated")
 	for (const consumer of populatedConsumers) {

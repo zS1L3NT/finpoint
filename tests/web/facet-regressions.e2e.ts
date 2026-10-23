@@ -242,7 +242,7 @@ test("[UI-FACET-WEEKDAY-NULL] no comparison history renders zero current spendin
 
 test.describe("harness facets", () => {
 	test.use({ baseURL: "http://127.0.0.1:5174" })
-	test("harness facet primitives share one page", async ({ page }) => {
+	test("harness facet primitives share one page", { tag: ["@light"] }, async ({ page }) => {
 		await test.step("[UI-FACET-INPUT-GROUP] grouped notes accept long unicode text and keyboard edits", async () => {
 			await page.goto("/?section=primitives")
 			const notes = page.getByRole("textbox", { name: "Grouped notes", exact: true })

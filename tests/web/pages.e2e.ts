@@ -53,7 +53,9 @@ test("pages directory searches share one seed", async ({ page }) => {
 	}
 })
 
-test("table pagination journeys share one dense seed", async ({ page }) => {
+test("table pagination journeys share one dense seed", {
+	tag: ["@tall", "@light", "@motion"],
+}, async ({ page }) => {
 	test.setTimeout(90_000)
 	await seedWorkspace(page, "dense")
 	for (const [route, noun, search] of [

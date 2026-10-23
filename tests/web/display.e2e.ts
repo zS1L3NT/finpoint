@@ -8,7 +8,7 @@ test.beforeEach(async ({ page }) => {
 })
 
 // Read-only primitive checks share one page load: no step mutates the page.
-test("display static primitives share one page", async ({ page }) => {
+test("display static primitives share one page", { tag: ["@light"] }, async ({ page }) => {
 	await test.step("display.allocation zero negative full excess and opposite signs remain finite and bounded", async () => {
 		for (const [title, percent, amount] of [
 			["Zero", 0, "$0.00 / $0.00"],
@@ -152,7 +152,9 @@ test("display static primitives share one page", async ({ page }) => {
 // Motion steps each reveal content, so the page reloads between them: the
 // polyline sampler must observe the pre-mount state, which a revealed trend
 // from the entrance step would destroy.
-test("display motion primitives share one page with reloads", async ({ page }) => {
+test("display motion primitives share one page with reloads", { tag: ["@motion"] }, async ({
+	page,
+}) => {
 	await test.step("display.sparkline entrance respects reduced motion and draws the final data endpoint", async () => {
 		const button = page.getByRole("button", { name: "Show trend" })
 		await button.scrollIntoViewIfNeeded()

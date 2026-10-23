@@ -2152,19 +2152,19 @@ export const scenarioDescriptions: Record<string, string> = {
 	"src/components/charts/sparkline.tsx#chart.motion":
 		"Endpoint marker entrance respects reduced motion with final data endpoint; polyline draws progressively then settles",
 	"src/components/charts/cashflow-chart.tsx#chart.motion":
-		"All five projects: Surplus / Shortfall graph marks grow through intermediate geometry once and settle with no replay on hover/resize; reduced-motion immediate-final covered in reduced34",
+		"All five projects: Surplus / Shortfall graph marks grow through intermediate geometry once and settle with no replay on hover/resize; reduced-motion immediate-final covered in the reduced-motion project",
 	"src/components/charts/total-spending-chart.tsx#chart.motion":
-		"All five projects: Spending forecast graph marks grow through intermediate geometry once and settle with no replay on hover/resize; reduced-motion immediate-final covered in reduced34",
+		"All five projects: Spending forecast graph marks grow through intermediate geometry once and settle with no replay on hover/resize; reduced-motion immediate-final covered in the reduced-motion project",
 	"src/components/charts/daily-spending-chart.tsx#chart.motion":
-		"All five projects: Spending by day graph marks grow through intermediate geometry once and settle; reduced-motion immediate-final covered in reduced34",
+		"All five projects: Spending by day graph marks grow through intermediate geometry once and settle; reduced-motion immediate-final covered in the reduced-motion project",
 	"src/components/charts/weekday-bars.tsx#chart.motion":
-		"All five projects: Spending by weekday graph marks grow through intermediate geometry once and settle; reduced-motion immediate-final covered in reduced34",
+		"All five projects: Spending by weekday graph marks grow through intermediate geometry once and settle; reduced-motion immediate-final covered in the reduced-motion project",
 	"src/components/charts/category-history-chart.tsx#chart.motion":
-		"All five projects: Category trend graph marks grow through intermediate geometry once and settle; reduced-motion immediate-final covered in reduced34",
+		"All five projects: Category trend graph marks grow through intermediate geometry once and settle; reduced-motion immediate-final covered in the reduced-motion project",
 	"src/components/charts/budget-progress-chart.tsx#chart.motion":
-		"All five projects: Spending over time graph marks grow through intermediate geometry once and settle with no replay on hover/resize; reduced-motion immediate-final covered in reduced34",
+		"All five projects: Spending over time graph marks grow through intermediate geometry once and settle with no replay on hover/resize; reduced-motion immediate-final covered in the reduced-motion project",
 	"src/components/charts/chart-intro.ts#indirect.consumer":
-		"All five projects: overview and budget graph marks grow through intermediate geometry once and settle with no replay on hover/resize; reduced-motion immediate-final covered in reduced34",
+		"All five projects: overview and budget graph marks grow through intermediate geometry once and settle with no replay on hover/resize; reduced-motion immediate-final covered in the reduced-motion project",
 	"src/components/table/statement-columns.tsx#table.interaction":
 		"Statement pagination keeps search in the URL and changes row identity; search resets page and survives reload",
 	"src/components/table/statement-columns.tsx#table.rows":
@@ -2200,15 +2200,15 @@ export const scenarioDescriptions: Record<string, string> = {
 	"src/components/selection-bar.tsx#selection.state":
 		"Keyboard one-selection with dialog/cancel retention and clear, honestly disabled two-selection replace, small-viewport keyboard clear, and post-clear identity; no select-all header control exists by design",
 	"src/components/table/data-table.tsx#table.motion":
-		"Records/Statements consumers cascade with settled refilter, paging fade, detach no-replay and clear-identity across normal/tall/mobile/dark plus reduced34; Allocate tall beyond-12 excluded",
+		"Records/Statements consumers cascade with settled refilter, paging fade, detach no-replay and clear-identity across light/tall/mobile/dark plus the reduced-motion project; Allocate tall beyond-12 excluded",
 	"src/components/table/paginated-data-table.tsx#table.motion":
-		"Page changes keep identity with paging fade and Records/Statements cascades across normal/tall/mobile/dark plus reduced34",
+		"Page changes keep identity with paging fade and Records/Statements cascades across light/tall/mobile/dark plus the reduced-motion project",
 	"src/components/table/record-columns.tsx#table.motion":
-		"Records/Monthly consumers cascade with settled refilter and detach no-replay across normal/tall/mobile/dark plus reduced34; tall Budget Records covered by the tall-only file",
+		"Records/Monthly consumers cascade with settled refilter and detach no-replay across light/tall/mobile/dark plus the reduced-motion project; tall Budget Records covered by the tall-only file",
 	"src/components/table/row-groups.tsx#table.motion":
-		"Records/Monthly grouped consumers cascade with settled refilter across normal/tall/mobile/dark plus reduced34",
+		"Records/Monthly grouped consumers cascade with settled refilter across light/tall/mobile/dark plus the reduced-motion project",
 	"src/components/table/statement-columns.tsx#table.motion":
-		"Statements/Allocate consumers cascade with settled refilter and paging fade across normal/tall/mobile/dark plus reduced34; Allocate tall beyond-12 excluded",
+		"Statements/Allocate consumers cascade with settled refilter and paging fade across light/tall/mobile/dark plus the reduced-motion project; Allocate tall beyond-12 excluded",
 	"src/components/table/data-table.tsx#table.interaction":
 		"Budget detach preserves sibling identity without replay; record/statement pagination and category filtering act through real parent controls",
 	"src/components/table/record-columns.tsx#table.interaction":
@@ -4164,4 +4164,196 @@ export const facetNotApplicable: Record<string, Record<string, string>> = {
 		"text contrast on user colour":
 			"src/components/monthly-budget-badge.tsx paints only an isolated dot with user colour; text stays text-muted-foreground on bg-background, never on the user colour. Tests assert the painted dot, hollow fallback and full long-label title.",
 	},
+}
+
+/** Configuration claims in ledger prose, keyed by scenario.
+ * Desktop runs every enabled case and every project except light starts dark,
+ * so only the non-implicit projects are listed: mobile, tall-desktop, light and
+ * reduced-motion. Exactly the scenarios whose effective description names a
+ * configuration appear here; prose that merely mentions viewports without
+ * claiming them (editor tall scrolling, tall-only file wording) is covered by
+ * scenarioProjectLexiconExemptions instead. */
+export const scenarioProjects: Record<
+	string,
+	("mobile" | "tall-desktop" | "light" | "reduced-motion")[]
+> = {
+	"src/components/charts/cashflow-chart.tsx#chart.motion": [
+		"mobile",
+		"tall-desktop",
+		"light",
+		"reduced-motion",
+	],
+	"src/components/charts/total-spending-chart.tsx#chart.motion": [
+		"mobile",
+		"tall-desktop",
+		"light",
+		"reduced-motion",
+	],
+	"src/components/charts/daily-spending-chart.tsx#chart.motion": [
+		"mobile",
+		"tall-desktop",
+		"light",
+		"reduced-motion",
+	],
+	"src/components/charts/weekday-bars.tsx#chart.motion": [
+		"mobile",
+		"tall-desktop",
+		"light",
+		"reduced-motion",
+	],
+	"src/components/charts/category-history-chart.tsx#chart.motion": [
+		"mobile",
+		"tall-desktop",
+		"light",
+		"reduced-motion",
+	],
+	"src/components/charts/budget-progress-chart.tsx#chart.motion": [
+		"mobile",
+		"tall-desktop",
+		"light",
+		"reduced-motion",
+	],
+	"src/components/charts/chart-intro.ts#indirect.consumer": [
+		"mobile",
+		"tall-desktop",
+		"light",
+		"reduced-motion",
+	],
+	"src/components/table/data-table.tsx#table.motion": [
+		"mobile",
+		"tall-desktop",
+		"light",
+		"reduced-motion",
+	],
+	"src/components/table/paginated-data-table.tsx#table.motion": [
+		"mobile",
+		"tall-desktop",
+		"light",
+		"reduced-motion",
+	],
+	"src/components/table/record-columns.tsx#table.motion": [
+		"mobile",
+		"tall-desktop",
+		"light",
+		"reduced-motion",
+	],
+	"src/components/table/row-groups.tsx#table.motion": [
+		"mobile",
+		"tall-desktop",
+		"light",
+		"reduced-motion",
+	],
+	"src/components/table/statement-columns.tsx#table.motion": [
+		"mobile",
+		"tall-desktop",
+		"light",
+		"reduced-motion",
+	],
+	"app/statements/[id]/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
+	"app/statements/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
+	"app/budgets/[id]/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
+	"app/budgets/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
+	"app/accounts/[id]/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
+	"app/accounts/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
+	"app/allocator/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
+	"app/allocator/pending/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
+	"app/allocator/duplicates/page.tsx#route.viewport": [
+		"mobile",
+		"tall-desktop",
+		"reduced-motion",
+	],
+	"app/records/[id]/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
+	"app/records/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
+	"app/categories/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
+	"app/(month)/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
+	"app/(month)/records/monthly/page.tsx#route.viewport": [
+		"mobile",
+		"tall-desktop",
+		"reduced-motion",
+	],
+	"app/settings/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
+	"app/sync/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
+	"app/importer/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
+	"app/terms/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
+	"app/privacy/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
+	"src/components/charts/cashflow-chart.tsx#chart.responsive": ["mobile", "tall-desktop"],
+	"src/components/charts/category-history-chart.tsx#chart.responsive": ["mobile", "tall-desktop"],
+	"src/components/charts/daily-spending-chart.tsx#chart.responsive": ["mobile", "tall-desktop"],
+	"src/components/charts/total-spending-chart.tsx#chart.responsive": ["mobile", "tall-desktop"],
+	"src/components/charts/weekday-bars.tsx#chart.responsive": ["mobile", "tall-desktop"],
+	"src/components/charts/category-movers.tsx#chart.motion": ["reduced-motion"],
+	"src/components/charts/monthly-budget-usage.tsx#chart.motion": ["reduced-motion"],
+	"src/components/charts/spending-calendar.tsx#chart.motion": ["reduced-motion"],
+	"src/components/charts/sparkline.tsx#chart.motion": ["reduced-motion"],
+	"src/components/value-swap.tsx#display.values": ["reduced-motion"],
+	"src/components/table/row-groups.tsx#table.rows": ["mobile"],
+	"src/components/ui/sidebar.tsx#primitive.consumer": ["mobile"],
+	"src/components/layout/app-sidebar.tsx#export.default.behaviour": ["mobile"],
+	"src/components/layout/app-sidebar.tsx#display.interaction": ["mobile"],
+	"src/components/layout/app-sidebar.tsx#display.values": ["mobile"],
+	"src/components/layout/app-header.tsx#display.interaction": ["reduced-motion"],
+	"src/components/layout/shell-header.tsx#display.interaction": ["reduced-motion"],
+	"src/components/dialogs/account.tsx#editor.long": ["mobile"],
+	"src/components/dialogs/budget-editor.tsx#editor.long": ["mobile"],
+	"src/components/dialogs/record-creator.tsx#editor.long": ["mobile"],
+	"src/components/dialogs/record-editor.tsx#editor.long": ["mobile"],
+	"src/components/ui/alert.tsx#primitive.responsive": ["mobile"],
+	"src/components/ui/badge.tsx#primitive.responsive": ["mobile"],
+	"src/components/ui/button.tsx#primitive.responsive": ["mobile"],
+	"src/components/ui/button-group.tsx#primitive.responsive": ["mobile"],
+	"src/components/ui/card.tsx#primitive.responsive": ["mobile"],
+	"src/components/ui/chart.tsx#primitive.responsive": ["mobile"],
+	"src/components/ui/checkbox.tsx#primitive.responsive": ["mobile"],
+	"src/components/ui/empty.tsx#primitive.responsive": ["mobile"],
+	"src/components/ui/field.tsx#primitive.responsive": ["mobile"],
+	"src/components/ui/input.tsx#primitive.responsive": ["mobile"],
+	"src/components/ui/input-group.tsx#primitive.responsive": ["mobile"],
+	"src/components/ui/label.tsx#primitive.responsive": ["mobile"],
+	"src/components/ui/monthpicker.tsx#primitive.responsive": ["mobile"],
+	"src/components/ui/pagination.tsx#primitive.responsive": ["mobile"],
+	"src/components/ui/progress.tsx#primitive.responsive": ["mobile"],
+	"src/components/ui/scroll-area.tsx#primitive.responsive": ["mobile"],
+	"src/components/ui/separator.tsx#primitive.responsive": ["mobile"],
+	"src/components/ui/sidebar.tsx#primitive.responsive": ["mobile"],
+	"src/components/ui/sonner.tsx#primitive.responsive": ["mobile"],
+	"src/components/ui/table.tsx#primitive.responsive": ["mobile"],
+	"src/components/ui/textarea.tsx#primitive.responsive": ["mobile"],
+	"src/components/ui/toggle-group.tsx#primitive.responsive": ["mobile"],
+}
+
+/** Described exceptions within otherwise claimed scenarios. These exempt the
+ * listed test IDs from the claimed project selection; the remaining mappings
+ * still prove the claim. */
+export const scenarioProjectExemptions: Record<string, Record<string, string>> = {
+	"src/components/table/record-columns.tsx#table.motion": {
+		"motion.consumer Budget Records animates its initially visible related rows":
+			"Tall Budget Records run only in the tall-only file, as the description states; src/components/table/record-columns.tsx",
+	},
+}
+
+/** Behaviour-mapping IDs whose description matches the configuration-claim
+ * lexicon but names no executable project: the editor "mobile tall content may
+ * scroll" wording describes tall popup content scrolling on small viewports,
+ * not execution in the tall-desktop project. */
+export const scenarioProjectLexiconExemptions: Record<string, string> = {
+	"src/components/dialogs/account.tsx#editor.open":
+		"Tall content scrolling inside a mobile popup is about in-popup overflow, not the tall-desktop project; the mapped popup test runs on desktop and mobile",
+	"src/components/dialogs/budget-creator.tsx#editor.open":
+		"Tall content scrolling inside a mobile popup is about in-popup overflow, not the tall-desktop project; the mapped popup test runs on desktop and mobile",
+	"src/components/dialogs/budget-editor.tsx#editor.open":
+		"Tall content scrolling inside a mobile popup is about in-popup overflow, not the tall-desktop project; the mapped popup test runs on desktop and mobile",
+	"src/components/dialogs/category.tsx#editor.open":
+		"Tall content scrolling inside a mobile popup is about in-popup overflow, not the tall-desktop project; the mapped popup test runs on desktop and mobile",
+	"src/components/dialogs/monthly-budget.tsx#editor.open":
+		"Tall content scrolling inside a mobile popup is about in-popup overflow, not the tall-desktop project; the mapped popup test runs on desktop and mobile",
+	"src/components/dialogs/pending-statement.tsx#editor.open":
+		"Tall content scrolling inside a mobile popup is about in-popup overflow, not the tall-desktop project; the mapped popup test runs on desktop and mobile",
+	"src/components/dialogs/record-creator.tsx#editor.open":
+		"Tall content scrolling inside a mobile popup is about in-popup overflow, not the tall-desktop project; the mapped popup test runs on desktop and mobile",
+	"src/components/dialogs/record-editor.tsx#editor.open":
+		"Tall content scrolling inside a mobile popup is about in-popup overflow, not the tall-desktop project; the mapped popup test runs on desktop and mobile",
+	"src/components/dialogs/duplicate-review.tsx#editor.open":
+		"Tall content scrolling inside a mobile popup is about in-popup overflow, not the tall-desktop project; the mapped popup test runs on desktop and mobile",
+	"src/components/dialogs/statement-replacement-review.tsx#editor.open":
+		"Tall content scrolling inside a mobile popup is about in-popup overflow, not the tall-desktop project; the mapped popup test runs on desktop and mobile",
 }

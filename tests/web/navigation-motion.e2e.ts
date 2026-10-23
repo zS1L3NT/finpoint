@@ -15,7 +15,9 @@ async function resetHistory(page: Page, url: string) {
 	await expect.poll(() => page.evaluate(() => localStorage.getItem("history"))).not.toBeNull()
 }
 
-test("entrance motion shares one dense seed", async ({ page }) => {
+test("entrance motion shares one dense seed", { tag: ["@desktop-only", "@motion"] }, async ({
+	page,
+}) => {
 	await seedWorkspace(page, "dense")
 	await test.step("page fades during client navigation", async () => {
 		await page.goto("/privacy")
@@ -197,10 +199,9 @@ test("history clearing journeys share one seed with history resets", async ({
 	})
 })
 
-test("detaching a budget Record preserves the remaining row without replaying its entrance", async ({
-	page,
-	workspace,
-}) => {
+test("detaching a budget Record preserves the remaining row without replaying its entrance", {
+	tag: ["@tall", "@light", "@motion"],
+}, async ({ page, workspace }) => {
 	void workspace
 	await page.setViewportSize({ width: 1920, height: 1440 })
 	await page.goto("/budgets/t1-b-manual")

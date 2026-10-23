@@ -64,7 +64,7 @@ async function expectRouteLayout(page: Page, route: string, title: string) {
 		).toBeVisible()
 	await expect(page).toHaveTitle(/ · Finpoint$/)
 	await expect(page.locator("html")).toHaveClass(
-		test.info().project.name === "dark" ? /dark/ : /^(?!.*\bdark\b)/,
+		test.info().project.use.colorScheme === "light" ? /^(?!.*\bdark\b)/ : /dark/,
 	)
 	const main = page.locator("main")
 	expect(
@@ -134,8 +134,12 @@ async function expectRouteButtons(page: Page, route: string) {
 // One populated seed per sweep. Each route navigates once; the layout step
 // owns the navigation and the button-audit step reuses the same page, so the
 // audit sees exactly the layout-verified DOM. Trial clicks never navigate.
-for (const [group, routes] of [
-	["core", ["/", "/records", "/statements", "/accounts", "/budgets", "/categories"]],
+for (const [group, routes, tags] of [
+	[
+		"core",
+		["/", "/records", "/statements", "/accounts", "/budgets", "/categories"],
+		["@tall", "@motion", "@light"],
+	],
 	[
 		"workflows",
 		[
@@ -146,6 +150,7 @@ for (const [group, routes] of [
 			"/settings",
 			"/sync",
 		],
+		["@tall", "@motion"],
 	],
 	[
 		"details",
@@ -158,9 +163,10 @@ for (const [group, routes] of [
 			"/privacy",
 			"/terms",
 		],
+		["@tall", "@motion"],
 	],
-] as const) {
-	test(`route sweep ${group} shares one seed`, async ({ page, workspace }) => {
+] as [string, string[], string[]][]) {
+	test(`route sweep ${group} shares one seed`, { tag: tags }, async ({ page, workspace }) => {
 		test.setTimeout(120_000)
 		void workspace
 		for (const route of routes) {
@@ -251,7 +257,9 @@ test("route long names share one seed across stores", async ({ page }) => {
 	}
 })
 
-test("route refilter entrances share one dense seed", async ({ page }) => {
+test("route refilter entrances share one dense seed", { tag: ["@tall", "@motion"] }, async ({
+	page,
+}) => {
 	await seedWorkspace(page, "dense")
 	for (const route of ["/records", "/statements"] as const) {
 		await test.step(`route.refilter ${route} reveals every visible result with an entrance`, async () => {
@@ -285,10 +293,9 @@ test("route refilter entrances share one dense seed", async ({ page }) => {
 	}
 })
 
-test("route.selection multiple selections retain values after cancelling keyboard creation", async ({
-	page,
-	workspace,
-}) => {
+test("route.selection multiple selections retain values after cancelling keyboard creation", {
+	tag: ["@tall", "@light", "@motion"],
+}, async ({ page, workspace }) => {
 	void workspace
 	await page.goto("/allocator")
 	await expect(

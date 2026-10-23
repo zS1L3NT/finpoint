@@ -118,7 +118,7 @@ const editors = [
 	},
 ]
 
-test("editor popup entrances share one seed", async ({ page, workspace }) => {
+test("editor popup entrances share one seed", { tag: ["@motion"] }, async ({ page, workspace }) => {
 	test.setTimeout(150_000)
 	void workspace
 	for (const editor of editors) {
@@ -393,7 +393,10 @@ test("category editor journeys share one seed", async ({ page, workspace }) => {
 	})
 })
 
-test("monthly budget editor journeys share one seed", async ({ page, workspace }) => {
+test("monthly budget editor journeys share one seed", { tag: ["@motion"] }, async ({
+	page,
+	workspace,
+}) => {
 	void workspace
 	await test.step("monthly budget creator: blank errors, zero amount and null are distinct persisted values", async () => {
 		void workspace
@@ -546,7 +549,10 @@ test("pending statement editor journeys share one seed", async ({ page, workspac
 	})
 })
 
-test("record creator journeys share one seed", async ({ page, workspace }) => {
+test("record creator journeys share one seed", { tag: ["@motion"] }, async ({
+	page,
+	workspace,
+}) => {
 	test.setTimeout(90_000)
 	void workspace
 	for (const amount of ["-12.34", "0"]) {
@@ -781,7 +787,10 @@ async function openReplacementSheet(page: Page) {
 	return page.getByRole("dialog", { name: "Replace a pending Statement", exact: true })
 }
 
-test("replacement and duplicate review sheets share one seed", async ({ page, workspace }) => {
+test("replacement and duplicate review sheets share one seed", { tag: ["@motion"] }, async ({
+	page,
+	workspace,
+}) => {
 	void workspace
 	await test.step("pending confirmation sheet and replacement review: selected descriptions, cancel restores sheet", async () => {
 		void workspace
