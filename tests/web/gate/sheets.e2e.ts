@@ -762,8 +762,21 @@ test.describe("dense workspace", () => {
 			const search = candidate.getByPlaceholder("Search descriptions...")
 			await expect(search).toBeVisible()
 			// Record when the query was typed and when the next Statement was chosen, to prove the
-			// selection changed while the 300ms search callback was still pending.
+			// selection changed while the search callback was still pending. This document's
+			// 300ms debounces are stretched to 1500ms, so the selection always lands inside
+			// the window however slow the host is; the behaviour under test is unchanged.
 			await page.evaluate(() => {
+				const original = window.setTimeout
+				window.setTimeout = ((
+					handler: TimerHandler,
+					timeout?: number,
+					...rest: unknown[]
+				) =>
+					original(
+						handler,
+						timeout === 300 ? 1500 : timeout,
+						...rest,
+					)) as typeof window.setTimeout
 				document.addEventListener(
 					"click",
 					event => {
@@ -787,22 +800,19 @@ test.describe("dense workspace", () => {
 				)
 			})
 			await search.fill("never matches another Statement")
-			// Both clicks are forced: the <300ms race below must measure dispatch speed, not
-			// actionability polling (stability checks on an animating list eat the
-			// budget). The URL + visibility + no-stale-query assertions keep full
-			// strength — a genuinely failed click still fails loudly there.
+			// The stretched debounce leaves room for ordinary, actionability-checked clicks.
 			if (isMobile)
 				await page
 					.getByRole("button", { name: "Back to pending Statements", exact: true })
-					.click({ force: true })
-			await page.getByRole("button", { name: /^Dense pending 26\b/ }).click({ force: true })
+					.click()
+			await page.getByRole("button", { name: /^Dense pending 26\b/ }).click()
 			const gap = await page.evaluate(
 				() =>
 					Number(Reflect.get(window, "__selectedAt")) -
 					Number(Reflect.get(window, "__filledAt")),
 			)
 			expect(gap, "the selection changed before the search callback could fire").toBeLessThan(
-				300,
+				1500,
 			)
 			await expect(page).toHaveURL(new RegExp(`pending_statement_id=${next.id}`))
 			await expect(
@@ -811,8 +821,8 @@ test.describe("dense workspace", () => {
 			// The outgoing panel remains mounted briefly during its exit transition.
 			await expect(search).toHaveCount(1)
 			await expect(search).toHaveValue("")
-			// Outlast both 300ms search callbacks to reject a stale query appearing later.
-			await page.waitForTimeout(650)
+			// Outlast both stretched search callbacks to reject a stale query appearing later.
+			await page.waitForTimeout(3200)
 			await expect(search).toHaveValue("")
 			await expect(page).not.toHaveURL(/candidate_query=/)
 		})
@@ -899,5 +909,49 @@ test.describe("dense workspace", () => {
 			await expect(page).toHaveURL(/query=Dense\+pending\+26/)
 			await expect(page).not.toHaveURL(/account_id=/)
 		})
+	})
+})
+
+test.describe("dense workspace", () => {
+	test.use({ workspaceScenario: "dense" })
+
+	test("Pending queue search: typing on while an earlier query commits keeps every character", async ({
+		page,
+		workspace,
+	}) => {
+		void workspace
+		// When the 300ms debounce fires for "D" and starts its commit, type the rest in
+		// that same task, so the commit always lands after newer keystrokes. Mirroring it
+		// back into the input used to drop them ("Dnding 26" on a fast host).
+		await page.addInitScript(() => {
+			const original = window.setTimeout
+			window.setTimeout = ((handler: TimerHandler, timeout?: number, ...rest: unknown[]) =>
+				original(() => {
+					if (typeof handler === "function") handler(...rest)
+					const input = document.querySelector<HTMLInputElement>(
+						'section[aria-labelledby="pending-queue-title"] input[placeholder="Search descriptions..."]',
+					)
+					if (timeout !== 300 || input?.value !== "D" || Reflect.has(window, "__typedOn"))
+						return
+					Reflect.set(window, "__typedOn", true)
+					const setValue = Object.getOwnPropertyDescriptor(
+						HTMLInputElement.prototype,
+						"value",
+					)?.set
+					for (const character of "ense pending 26") {
+						setValue?.call(input, input.value + character)
+						input.dispatchEvent(new Event("input", { bubbles: true }))
+					}
+				}, timeout)) as typeof window.setTimeout
+		})
+		await page.goto("/allocator/pending")
+		const search = page
+			.locator('section[aria-labelledby="pending-queue-title"]')
+			.getByPlaceholder("Search descriptions...")
+		await expect(search).toBeVisible()
+		await search.pressSequentially("D")
+		await expect.poll(() => page.evaluate(() => Reflect.has(window, "__typedOn"))).toBe(true)
+		await expect(page).toHaveURL(/query=Dense\+pending\+26/)
+		await expect(search).toHaveValue("Dense pending 26")
 	})
 })

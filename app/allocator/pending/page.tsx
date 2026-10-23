@@ -116,8 +116,21 @@ export default function AllocatorPendingPage() {
 		pushParams(next)
 	}
 
-	useEffect(() => setQueueQuery(queueQueryParam), [queueQueryParam])
-	useEffect(() => setCandidateQuery(candidateQueryParam), [candidateQueryParam])
+	// Mirror committed queries into the inputs, except the echo of a query this page
+	// pushed itself: by the time that commit lands the user may have typed on, and
+	// copying the older value back would drop those keystrokes.
+	const pushedQueueQuery = useRef<string | null>(null)
+	const pushedCandidateQuery = useRef<string | null>(null)
+	useEffect(() => {
+		const echo = pushedQueueQuery.current === queueQueryParam
+		pushedQueueQuery.current = null
+		if (!echo) setQueueQuery(queueQueryParam)
+	}, [queueQueryParam])
+	useEffect(() => {
+		const echo = pushedCandidateQuery.current === candidateQueryParam
+		pushedCandidateQuery.current = null
+		if (!echo) setCandidateQuery(candidateQueryParam)
+	}, [candidateQueryParam])
 
 	// Invalidate the intent mirror once its commit lands; treat any other
 	// committed change (footer Links, Back/Forward) as authoritative.
@@ -147,6 +160,7 @@ export default function AllocatorPendingPage() {
 			// search, so clear those params in the same commit instead of
 			// pushing per keystroke (a push storm lets a slow response
 			// overwrite the query commit out of order).
+			pushedQueueQuery.current = queueQuery
 			updateParams(
 				{
 					query: queueQuery || null,
@@ -167,6 +181,7 @@ export default function AllocatorPendingPage() {
 	useEffect(() => {
 		if (candidateQuery === candidateQueryParam) return
 		const timer = window.setTimeout(() => {
+			pushedCandidateQuery.current = candidateQuery
 			updateParams(
 				{ candidate_query: candidateQuery || null, candidate_page: null },
 				false,
