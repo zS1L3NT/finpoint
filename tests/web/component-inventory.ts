@@ -2200,11 +2200,11 @@ export const scenarioDescriptions: Record<string, string> = {
 	"src/components/selection-bar.tsx#selection.state":
 		"Keyboard one-selection with dialog/cancel retention and clear, honestly disabled two-selection replace, small-viewport keyboard clear, and post-clear identity; no select-all header control exists by design",
 	"src/components/table/data-table.tsx#table.motion":
-		"Records/Statements consumers cascade with settled refilter, paging fade, detach no-replay and clear-identity across light/tall/mobile/dark plus the reduced-motion project; Allocate tall beyond-12 excluded",
+		"Records/Statements consumers cascade with settled refilter and paging fade across light/tall/mobile/dark plus the reduced-motion project; detach no-replay and clear-identity do not vary by configuration (default chromium/mobile selection, detach also reduced-motion); Allocate tall beyond-12 excluded",
 	"src/components/table/paginated-data-table.tsx#table.motion":
-		"Page changes keep identity with paging fade and Records/Statements cascades across light/tall/mobile/dark plus the reduced-motion project",
+		"Paging fade and Records/Statements cascades run across light/tall/mobile/dark plus the reduced-motion project; page-change identity does not vary by configuration (default chromium/mobile selection)",
 	"src/components/table/record-columns.tsx#table.motion":
-		"Records/Monthly consumers cascade with settled refilter and detach no-replay across light/tall/mobile/dark plus the reduced-motion project; tall Budget Records covered by the tall-only file",
+		"Records/Monthly consumers cascade with settled refilter across light/tall/mobile/dark plus the reduced-motion project; detach no-replay does not vary by configuration (default projects plus reduced-motion); tall Budget Records covered by the tall-only file",
 	"src/components/table/row-groups.tsx#table.motion":
 		"Records/Monthly grouped consumers cascade with settled refilter across light/tall/mobile/dark plus the reduced-motion project",
 	"src/components/table/statement-columns.tsx#table.motion":
@@ -4325,7 +4325,21 @@ export const scenarioProjects: Record<
  * listed test IDs from the claimed project selection; the remaining mappings
  * still prove the claim. */
 export const scenarioProjectExemptions: Record<string, Record<string, string>> = {
+	"src/components/table/data-table.tsx#table.motion": {
+		"detaching a budget Record preserves the remaining row without replaying its entrance":
+			"Detach no-replay does not vary by configuration; the test forces its own 1920×1440 viewport; src/components/table/data-table.tsx",
+		"route.selection multiple selections retain values after cancelling keyboard creation":
+			"Keyboard selection retention does not vary by configuration; src/components/selection-bar.tsx",
+	},
+	"src/components/table/paginated-data-table.tsx#table.motion": {
+		"table.pagination record keeps search in the URL and moves between pages":
+			"Page-change identity and URL state do not vary by configuration; src/components/table/paginated-data-table.tsx",
+		"table.pagination statement keeps search in the URL and moves between pages":
+			"Page-change identity and URL state do not vary by configuration; src/components/table/paginated-data-table.tsx",
+	},
 	"src/components/table/record-columns.tsx#table.motion": {
+		"detaching a budget Record preserves the remaining row without replaying its entrance":
+			"Detach no-replay does not vary by configuration; the test forces its own 1920×1440 viewport; src/components/table/record-columns.tsx",
 		"motion.consumer Budget Records animates its initially visible related rows":
 			"Tall Budget Records run only in the tall-only file, as the description states; src/components/table/record-columns.tsx",
 	},

@@ -200,7 +200,7 @@ test("history clearing journeys share one seed with history resets", async ({
 })
 
 test("detaching a budget Record preserves the remaining row without replaying its entrance", {
-	tag: ["@tall", "@light", "@motion"],
+	tag: ["@motion"],
 }, async ({ page, workspace }) => {
 	void workspace
 	await page.setViewportSize({ width: 1920, height: 1440 })

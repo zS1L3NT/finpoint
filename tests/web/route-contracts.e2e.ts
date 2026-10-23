@@ -293,9 +293,10 @@ test("route refilter entrances share one dense seed", { tag: ["@tall", "@motion"
 	}
 })
 
-test("route.selection multiple selections retain values after cancelling keyboard creation", {
-	tag: ["@tall", "@light", "@motion"],
-}, async ({ page, workspace }) => {
+test("route.selection multiple selections retain values after cancelling keyboard creation", async ({
+	page,
+	workspace,
+}) => {
 	void workspace
 	await page.goto("/allocator")
 	await expect(

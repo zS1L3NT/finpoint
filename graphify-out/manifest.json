@@ -1020,9 +1020,9 @@
     "semantic_hash": "29e62fa2eb28314189815e72b34a9950"
   },
   "AGENTS.md": {
-    "mtime": 1792711115.9132795,
-    "seen": 1792752203.401634,
-    "ast_hash": "c5b6f173ddb97b129dacba1c8a8b8f1d",
+    "mtime": 1792753444.6170337,
+    "seen": 1792753475.8835804,
+    "ast_hash": "1ec099aec48adec7b92168d9674b8a68",
     "semantic_hash": ""
   },
   "CONTEXT.md": {
@@ -1254,9 +1254,9 @@
     "semantic_hash": ""
   },
   "tests/web/component-inventory.ts": {
-    "mtime": 1792710719.4681375,
-    "seen": 1792752203.4015918,
-    "ast_hash": "ce00eab5bb553674e81c21c9205ecba1",
+    "mtime": 1792753804.8454413,
+    "seen": 1792753930.0347621,
+    "ast_hash": "8249df6e42bb44ebd3c27baa8343760f",
     "semantic_hash": ""
   },
   "tests/web/consumer-motion.e2e.ts": {
@@ -1380,15 +1380,15 @@
     "semantic_hash": ""
   },
   "tests/web/navigation-motion.e2e.ts": {
-    "mtime": 1792710015.8169403,
-    "seen": 1792752203.401616,
-    "ast_hash": "2f53812bdcacc9ec2069169e776166bd",
+    "mtime": 1792753419.369,
+    "seen": 1792753475.8835435,
+    "ast_hash": "225cc652918eab1cd50f6284ddecc92c",
     "semantic_hash": ""
   },
   "tests/web/pages.e2e.ts": {
-    "mtime": 1792709976.741006,
-    "seen": 1792752203.4016178,
-    "ast_hash": "9d588ce499ead5fd1fbb075a8013d022",
+    "mtime": 1792753419.369,
+    "seen": 1792753475.883546,
+    "ast_hash": "d4301132f00aeefa1f6894b48b74df65",
     "semantic_hash": ""
   },
   "tests/web/pending-search.e2e.ts": {
@@ -1398,9 +1398,9 @@
     "semantic_hash": ""
   },
   "tests/web/route-contracts.e2e.ts": {
-    "mtime": 1792710015.8209403,
-    "seen": 1792752203.40162,
-    "ast_hash": "7b3accaa8c566c45746d1c1e5dbb3505",
+    "mtime": 1792753459.0570526,
+    "seen": 1792753475.883551,
+    "ast_hash": "986d5f488a4749fec06b4539bbd5827b",
     "semantic_hash": ""
   },
   "tests/web/scroll-contracts.e2e.ts": {
@@ -1470,9 +1470,9 @@
     "semantic_hash": ""
   },
   "tests/web/README.md": {
-    "mtime": 1792753287.6768095,
-    "seen": 1792753316.2210028,
-    "ast_hash": "4a34efa9d4b5009f4833311e1950ee46",
+    "mtime": 1792753444.6170337,
+    "seen": 1792753475.8836057,
+    "ast_hash": "1e891f44c65644630f327abe34123fbe",
     "semantic_hash": ""
   },
   "tests/web/harness/display.html": {

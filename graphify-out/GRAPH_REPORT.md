@@ -1,7 +1,7 @@
 # Graph Report - t3-9755e75b  (2026-10-23)
 
 ## Corpus Check
-- 238 files · ~198,066 words
+- 238 files · ~198,200 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 9 file(s) not represented in the graph (top: (none) 5, .example 1, .lock 1)
 
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `91826dd4`
+- Built from commit: `edc67d09`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -526,7 +526,7 @@ Nodes (7): compact(), INK, LEVELS, quantile(), rampCap(), SpendingCalendar(), WE
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `@playwright/test` connect `@playwright/test` to `widgets.e2e.ts`, `coverage.e2e.ts`, `playwright.config.ts`, `sheet-loading.e2e.ts`, `fixtures.ts`, `package.json`, `editors.e2e.ts`, `workflows.e2e.ts`, `assertions.ts`?**
-  _High betweenness centrality (0.099) - this node is a cross-community bridge._
+  _High betweenness centrality (0.101) - this node is a cross-community bridge._
 - **What connects `@fontsource-variable/inter`, `shadcn`, `tailwindcss` to the rest of the system?**
   _76 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Button` be split into smaller, more focused modules?**
@@ -536,6 +536,6 @@ _Questions this graph is uniquely positioned to answer:_
 - **Should `total-spending-chart.tsx` be split into smaller, more focused modules?**
   _Cohesion score 0.10087082728592163 - nodes in this community are weakly interconnected._
 - **Why does `react` connect `utils.ts` to `Button`, `sync/page.tsx`, `total-spending-chart.tsx`, `pending/page.tsx`, `sidebar.tsx`, `record-columns.tsx`, `budgets/[id]/page.tsx`, `primitives.tsx`, `package.json`, `category-filter.tsx`, `budgets/page.tsx`, `duplicates/page.tsx`, `auto-sync.ts`, `(month)/page.tsx`, `use-appearance.tsx`, `app-sidebar.tsx`, `input-group.tsx`, `icon.tsx`, `accounts/page.tsx`, `allocator/page.tsx`, `cn`, `pagination.tsx`, `next`, `Separator`, `history.tsx`, `monthly-budget-usage.tsx`?**
-  _High betweenness centrality (0.071) - this node is a cross-community bridge._
+  _High betweenness centrality (0.069) - this node is a cross-community bridge._
 - **Should `sidebar.tsx` be split into smaller, more focused modules?**
   _Cohesion score 0.07665505226480836 - nodes in this community are weakly interconnected._
