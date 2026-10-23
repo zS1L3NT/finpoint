@@ -39,6 +39,8 @@ export default defineConfig({
 				outputFolder: process.env.PLAYWRIGHT_HTML_REPORT ?? "playwright-report/adhoc",
 			},
 		],
+		// The runner reads this to summarise failures on the pull request.
+		...(process.env.PLAYWRIGHT_JSON_OUTPUT_FILE ? [["json"] as ["json"]] : []),
 	],
 	use: {
 		baseURL: APP_URL,

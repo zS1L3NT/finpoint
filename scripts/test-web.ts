@@ -3,7 +3,9 @@
 // phase and (for `full`) the motion phase under PLAYWRIGHT_SERVER=production.
 // Ad-hoc runs stay on `bun run test:web` / `bun run test:web:motion`.
 import { spawn, spawnSync, type ChildProcess } from "node:child_process"
+import { rmSync } from "node:fs"
 import { releaseLock, takeLock } from "./suite-lock"
+import { describe, markdown, type PhaseSummary, summarise } from "./test-summary"
 
 type Mode = "gate" | "full"
 
@@ -204,17 +206,73 @@ function cleanTreeUnchanged(head: string): boolean {
 	return true
 }
 
-// Posts one commit status per context on the commit recorded before the run.
-// A pass becomes a green sign-off only when the tree is still clean at that
-// commit; a failure is posted red (`gh signoff fail`) so a required check never
-// sits pending after a failed run.
-async function report(head: string, results: [string, boolean][]): Promise<number> {
+// Upserts one pull-request comment (found by its marker) with the run summary and
+// returns its URL, or undefined when the branch has no open pull request.
+function postSummary(body: string): string | undefined {
+	const view = spawnSync("gh", ["pr", "view", "--json", "number"], { encoding: "utf8" })
+	if (view.status !== 0) return undefined
+	const number = (JSON.parse(view.stdout) as { number: number }).number
+	const comments = spawnSync(
+		"gh",
+		[
+			"api",
+			"--paginate",
+			`repos/{owner}/{repo}/issues/${number}/comments`,
+			"--jq",
+			'.[] | select(.body | startswith("<!-- test-web-signoff -->")) | .id',
+		],
+		{ encoding: "utf8" },
+	)
+	const existing = comments.stdout.trim().split("\n").filter(Boolean).at(-1)
+	const write = spawnSync(
+		"gh",
+		existing
+			? [
+					"api",
+					"-X",
+					"PATCH",
+					`repos/{owner}/{repo}/issues/comments/${existing}`,
+					"-F",
+					"body=@-",
+					"--jq",
+					".html_url",
+				]
+			: [
+					"api",
+					`repos/{owner}/{repo}/issues/${number}/comments`,
+					"-F",
+					"body=@-",
+					"--jq",
+					".html_url",
+				],
+		{ encoding: "utf8", input: body },
+	)
+	if (write.status !== 0) {
+		console.error(`could not post the test summary: ${write.stderr.trim()}`)
+		return undefined
+	}
+	return write.stdout.trim() || undefined
+}
+
+// Posts one commit status per context on the commit recorded before the run,
+// linking to the pull-request summary. A pass becomes a green sign-off only when
+// the tree is still clean at that commit; a failure is posted red
+// (`gh signoff fail`) so a required check never sits pending after a failed run.
+async function report(
+	head: string,
+	mode: Mode,
+	phases: PhaseSummary[],
+	results: [string, boolean][],
+): Promise<number> {
+	const url = postSummary(markdown(head, mode, phases))
+	const link = url ? ["--url", url] : []
+	const description = phases.map(describe).join("; ").slice(0, 140)
 	const clean = results.some(([, passed]) => passed) ? cleanTreeUnchanged(head) : true
 	for (const [context, passed] of results) {
 		if (signaled) return 130
 		const args = passed
-			? ["signoff", "--commit", head, context]
-			: ["signoff", "fail", "--commit", head, "--description", `${context} tests failed`, context]
+			? ["signoff", "--commit", head, ...link, context]
+			: ["signoff", "fail", "--commit", head, ...link, "--description", description, context]
 		if (passed && !clean) continue
 		const code = await runAsync("gh", args, process.env)
 		if (code !== 0) return code
@@ -262,7 +320,10 @@ async function main(): Promise<number> {
 		console.error("use only one of --signoff and --signoff-dry-run")
 		process.exit(2)
 	}
-	if ((signoff || dryRun) && (filterArgs.length > 0 || userProjects.length > 0 || workersOverridden)) {
+	if (
+		(signoff || dryRun) &&
+		(filterArgs.length > 0 || userProjects.length > 0 || workersOverridden)
+	) {
 		console.error("sign-off runs only complete runs: no pass-through arguments allowed")
 		process.exit(2)
 	}
@@ -297,13 +358,20 @@ async function main(): Promise<number> {
 		const motionEnv: NodeJS.ProcessEnv = { ...baseEnv, PLAYWRIGHT_MOTION: "1" }
 
 		const gateProjects =
-			userProjects.length > 0 ? userProjects : typed === "full" ? PROJECTS : ["desktop", "mobile"]
+			userProjects.length > 0
+				? userProjects
+				: typed === "full"
+					? PROJECTS
+					: ["desktop", "mobile"]
 		const output = typed === "gate" ? "test-results/gate" : "test-results/full-gate"
 		const gate: string[] = ["playwright", "test", "tests/web/gate"]
 		for (const project of gateProjects) gate.push(`--project=${project}`)
 		gate.push(`--workers=${workers}`, `--output=${output}`, ...filterArgs)
+		const gateJson = `${output}-results.json`
+		rmSync(gateJson, { force: true })
 		const gateCode = await runAsync("bunx", gate, {
 			...gateEnv,
+			PLAYWRIGHT_JSON_OUTPUT_FILE: gateJson,
 			PLAYWRIGHT_HTML_REPORT:
 				typed === "gate" ? "playwright-report/gate" : "playwright-report/full-gate",
 		})
@@ -311,7 +379,12 @@ async function main(): Promise<number> {
 
 		if (typed === "gate") {
 			if (signoff) {
-				const posted = await report(head, [["gate", gateCode === 0]])
+				const posted = await report(
+					head,
+					typed,
+					[summarise("gate", gateJson)],
+					[["gate", gateCode === 0]],
+				)
 				if (posted !== 0) return posted
 			}
 			return gateCode
@@ -327,17 +400,25 @@ async function main(): Promise<number> {
 		const motionProjects = userProjects.length > 0 ? userProjects : PROJECTS
 		for (const project of motionProjects) motion.push(`--project=${project}`)
 		motion.push(...filterArgs)
+		const motionJson = "test-results/full-motion-results.json"
+		rmSync(motionJson, { force: true })
 		const motionCode = await runAsync("bunx", motion, {
 			...motionEnv,
+			PLAYWRIGHT_JSON_OUTPUT_FILE: motionJson,
 			PLAYWRIGHT_HTML_REPORT: "playwright-report/full-motion",
 		})
 		if (signaled) return 130
 		if (signoff) {
 			// Full's gate phase covers every gate project, so it also decides signoff/gate.
-			const posted = await report(head, [
-				["gate", gateCode === 0],
-				["full", gateCode === 0 && motionCode === 0],
-			])
+			const posted = await report(
+				head,
+				typed,
+				[summarise("gate", gateJson), summarise("motion", motionJson)],
+				[
+					["gate", gateCode === 0],
+					["full", gateCode === 0 && motionCode === 0],
+				],
+			)
 			if (posted !== 0) return posted
 		}
 		return gateCode !== 0 || motionCode !== 0 ? 1 : 0

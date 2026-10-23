@@ -81,6 +81,10 @@ tree is clean (Next's generated `next-env.d.ts` is ignored). It records `HEAD` a
 status on that commit. A passing context is signed green (`gh signoff --commit <HEAD> gate`)
 only if the tree is still clean at the same commit. A failing context is posted red
 (`gh signoff fail`), so a required check shows the failure instead of waiting forever.
+Each run also writes one pull-request comment (updated in place on later runs) listing every
+phase's pass count and duration and, for each failure, its project, file and line, and the
+start of its error. Each status's **Details** link opens that comment, and a failed status's
+description holds the counts. The full HTML reports stay local under `playwright-report/`.
 `gate` mode posts `signoff/gate`. `full` mode posts `signoff/gate` from its gate phase (which
 covers every gate project) and `signoff/full` from both phases. With `--signoff`, no
 pass-through argument is allowed: only complete runs are reported. gh-signoff also requires

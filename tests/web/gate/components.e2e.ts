@@ -492,7 +492,7 @@ test.describe("harness widgets section", () => {
 								a.effect?.getComputedTiming().iterations !==
 								Number.POSITIVE_INFINITY,
 						)
-						.map(a => a.finished),
+						.map(a => a.finished.catch(() => undefined)),
 				),
 			)
 			await page.locator("#harness-payee").type("zzz")
@@ -1182,7 +1182,7 @@ test.describe("harness widgets section", () => {
 								a.effect?.getComputedTiming().iterations !==
 								Number.POSITIVE_INFINITY,
 						)
-						.map(a => a.finished),
+						.map(a => a.finished.catch(() => undefined)),
 				),
 			)
 			// The opened long popup itself must fit the viewport, not just the closed page.
@@ -1879,7 +1879,7 @@ test.describe("harness facets section", () => {
 								a.effect?.getComputedTiming().iterations !==
 								Number.POSITIVE_INFINITY,
 						)
-						.map(a => a.finished),
+						.map(a => a.finished.catch(() => undefined)),
 				),
 			)
 			const separators = menu.locator('[data-slot="dropdown-menu-separator"]')
@@ -1906,19 +1906,23 @@ test.describe("harness facets section", () => {
 			const destructive = badges.getByText("Over budget", { exact: true })
 			await expect(warning).toBeVisible()
 			await expect(destructive).toBeVisible()
-			// Badges transition their colour for 150ms; read the settled value, not a mid-fade one.
-			await page.evaluate(() =>
-				Promise.all(
-					document
-						.getAnimations()
-						.filter(
-							animation =>
-								animation.effect?.getComputedTiming().iterations !==
-								Number.POSITIVE_INFINITY,
-						)
-						.map(animation => animation.finished),
-				),
-			)
+			// Badges transition their colour for 150ms; read the settled value, not a mid-fade
+			// one. A transition can be cancelled and replaced, so poll until none is running.
+			await expect
+				.poll(() =>
+					page.evaluate(
+						() =>
+							document
+								.getAnimations()
+								.filter(
+									animation =>
+										animation.playState === "running" &&
+										animation.effect?.getComputedTiming().iterations !==
+											Number.POSITIVE_INFINITY,
+								).length,
+					),
+				)
+				.toBe(0)
 			const warningColour = await warning.evaluate(element => getComputedStyle(element).color)
 			const destructiveColour = await destructive.evaluate(
 				element => getComputedStyle(element).color,
