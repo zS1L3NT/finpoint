@@ -1763,7 +1763,11 @@ test.describe("harness widgets section", () => {
 			const content = page.locator('[data-slot="select-content"]').filter({ visible: true })
 			await expect(content).toHaveCount(1)
 			await expectPopupInViewport(page, content)
-			await content.getByRole("option", { name: /Sabbatical/ }).click()
+			// Base UI Select ignores a mouse click on an option that is not highlighted, and
+			// after the touch swipe above the highlight can lag on a fast host; phones tap.
+			const sabbatical = content.getByRole("option", { name: /Sabbatical/ })
+			if (isMobile) await sabbatical.tap()
+			else await sabbatical.click()
 			await expect(page.getByTestId("choice-value")).toHaveText("Choice value: long")
 			await expect(page.locator("#harness-choice")).toContainText("Sabbatical")
 		})
