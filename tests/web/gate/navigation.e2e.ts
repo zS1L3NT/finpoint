@@ -647,6 +647,11 @@ test("navigation history: category drill, fallbacks and static links preserve hi
 		if (!back || !heading) throw new Error("Back button and heading must have layout boxes")
 		expect(back.y + back.height).toBeLessThan(heading.y)
 		await page.getByRole("link", { name: "Open FairPrice Run", exact: true }).click()
+		// Let the drill commit first: a Back pressed while it is still finishing can be
+		// overridden by it (.scratch/ui-regression/issues/12-back-during-pending-drill.md).
+		await expect(
+			page.getByRole("heading", { name: "FairPrice Run", level: 2, exact: true }),
+		).toBeVisible()
 		await page.getByRole("button", { name: "Back to Records", exact: true }).click()
 		await expect(page).toHaveURL(origin)
 		await page.getByRole("button", { name: "Back to Categories", exact: true }).click()

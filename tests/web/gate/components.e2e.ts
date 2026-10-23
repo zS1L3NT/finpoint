@@ -1931,7 +1931,12 @@ test.describe("harness facets section", () => {
 					}
 				}, token)
 				expect(colours.expected[3]).toBeGreaterThan(0)
-				expect(colours.actual).toEqual(colours.expected)
+				// The token is outside sRGB, and macOS maps the computed oklab and the
+				// declared oklch through slightly different gamut paths (up to 3 per channel).
+				for (const [index, channel] of colours.actual.entries())
+					expect(
+						Math.abs(channel - (colours.expected[index] ?? -255)),
+					).toBeLessThanOrEqual(4)
 				const style = await badge.evaluate(element => {
 					const style = getComputedStyle(element)
 					return { color: style.color, background: style.backgroundColor }

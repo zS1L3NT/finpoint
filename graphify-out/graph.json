@@ -20228,7 +20228,7 @@
       "source_location": "L9"
     },
     {
-      "id": "tests_web_gate_navigation_e2e_rationale_677",
+      "id": "tests_web_gate_navigation_e2e_rationale_682",
       "label": "TODO: the hang mechanism is inferred from a completion-less trace, not",
       "_origin": "ast",
       "community": 70,
@@ -20236,7 +20236,7 @@
       "file_type": "rationale",
       "norm_label": "todo: the hang mechanism is inferred from a completion-less trace, not",
       "source_file": "tests/web/gate/navigation.e2e.ts",
-      "source_location": "L677"
+      "source_location": "L682"
     },
     {
       "id": "biome_rules_style",
@@ -22901,24 +22901,24 @@
       "type": "external"
     },
     {
-      "id": "next_dev_types_root_params_d",
-      "label": "next_dev_types_root_params_d",
+      "id": "next_types_root_params_d",
+      "label": "next_types_root_params_d",
       "community": 79,
       "community_name": "next-env.d.ts",
       "external": true,
       "file_type": "concept",
-      "norm_label": "next_dev_types_root_params_d",
+      "norm_label": "next_types_root_params_d",
       "source_file": "",
       "type": "external"
     },
     {
-      "id": "next_dev_types_routes_d",
-      "label": "next_dev_types_routes_d",
+      "id": "next_types_routes_d",
+      "label": "next_types_routes_d",
       "community": 79,
       "community_name": "next-env.d.ts",
       "external": true,
       "file_type": "concept",
-      "norm_label": "next_dev_types_routes_d",
+      "norm_label": "next_types_routes_d",
       "source_file": "",
       "type": "external"
     },
@@ -79225,7 +79225,7 @@
     },
     {
       "source": "next_env_d",
-      "target": "next_dev_types_routes_d",
+      "target": "next_types_routes_d",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -79237,7 +79237,7 @@
     },
     {
       "source": "next_env_d",
-      "target": "next_dev_types_root_params_d",
+      "target": "next_types_root_params_d",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -105273,14 +105273,14 @@
       "weight": 1.0
     },
     {
-      "source": "tests_web_gate_navigation_e2e_rationale_677",
+      "source": "tests_web_gate_navigation_e2e_rationale_682",
       "target": "tests_web_gate_navigation_e2e",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tests/web/gate/navigation.e2e.ts",
-      "source_location": "L677",
+      "source_location": "L682",
       "weight": 1.0
     },
     {
@@ -109019,5 +109019,5 @@
       "source_file": "tests/web/README.md"
     }
   ],
-  "built_at_commit": "1383f7e85383b8a3d4d660fe25c280036bda5bfe"
+  "built_at_commit": "1f0e619abfe16c4424b38886b94b2a087642a1d1"
 }

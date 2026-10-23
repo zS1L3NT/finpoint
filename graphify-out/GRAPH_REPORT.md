@@ -1,7 +1,7 @@
-# Graph Report - t3-9755e75b  (2026-10-23)
+# Graph Report - t3-9755e75b  (2026-10-24)
 
 ## Corpus Check
-- 238 files · ~207,422 words
+- 238 files · ~207,495 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 9 file(s) not represented in the graph (top: (none) 5, .example 1, .lock 1)
 
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `1383f7e8`
+- Built from commit: `1f0e619a`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -534,17 +534,17 @@ Nodes (6): arc(), centerCurrency(), MonthlyBudgetUsage(), MonthlyBudgetUsageItem
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `@playwright/test` connect `@playwright/test` to `motion/tables.e2e.ts`, `gate/components.e2e.ts`, `ledger.e2e.ts`, `tests_web_support_fixtures_expect`, `gate/sheets.e2e.ts`, `gate/routes.e2e.ts`, `package.json`, `fixtures.ts`?**
-  _High betweenness centrality (0.081) - this node is a cross-community bridge._
+- **Why does `cn()` connect `cn` to `budgets/[id]/page.tsx`, `record-editor.tsx`, `providers.tsx`, `budgets/page.tsx`, `primitives.tsx`, `lucide-react`, `utils.ts`, `(month)/page.tsx`, `Separator`, `sync/page.tsx`, `duplicates/page.tsx`, `daily-spending-chart.tsx`, `allocator/page.tsx`, `PaginationFooter`, `icon.tsx`, `sidebar.tsx`, `total-spending-chart.tsx`, `spending-calendar.tsx`, `record-columns.tsx`, `Button`, `routes.ts`, `next`, `monthly-budget-usage.tsx`?**
+  _High betweenness centrality (0.082) - this node is a cross-community bridge._
 - **What connects `@fontsource-variable/inter`, `shadcn`, `tailwindcss` to the rest of the system?**
   _80 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `record-editor.tsx` be split into smaller, more focused modules?**
   _Cohesion score 0.06308724832214765 - nodes in this community are weakly interconnected._
-- **Why does `cn()` connect `cn` to `budgets/[id]/page.tsx`, `record-editor.tsx`, `providers.tsx`, `budgets/page.tsx`, `primitives.tsx`, `lucide-react`, `utils.ts`, `(month)/page.tsx`, `Separator`, `sync/page.tsx`, `duplicates/page.tsx`, `daily-spending-chart.tsx`, `allocator/page.tsx`, `PaginationFooter`, `icon.tsx`, `sidebar.tsx`, `total-spending-chart.tsx`, `spending-calendar.tsx`, `record-columns.tsx`, `Button`, `routes.ts`, `next`, `monthly-budget-usage.tsx`?**
-  _High betweenness centrality (0.080) - this node is a cross-community bridge._
+- **Why does `@playwright/test` connect `@playwright/test` to `motion/tables.e2e.ts`, `gate/components.e2e.ts`, `ledger.e2e.ts`, `tests_web_support_fixtures_expect`, `gate/sheets.e2e.ts`, `gate/routes.e2e.ts`, `package.json`, `fixtures.ts`?**
+  _High betweenness centrality (0.081) - this node is a cross-community bridge._
 - **Should `providers.tsx` be split into smaller, more focused modules?**
   _Cohesion score 0.14285714285714285 - nodes in this community are weakly interconnected._
 - **Why does `react` connect `record-editor.tsx` to `budgets/[id]/page.tsx`, `providers.tsx`, `budgets/page.tsx`, `primitives.tsx`, `lucide-react`, `utils.ts`, `cn`, `(month)/page.tsx`, `package.json`, `Separator`, `auto-sync.ts`, `sync/page.tsx`, `duplicates/page.tsx`, `daily-spending-chart.tsx`, `allocator/page.tsx`, `PaginationFooter`, `icon.tsx`, `sidebar.tsx`, `total-spending-chart.tsx`, `history.tsx`, `record-columns.tsx`, `Button`, `routes.ts`, `next`, `monthly-budget-usage.tsx`?**
-  _High betweenness centrality (0.074) - this node is a cross-community bridge._
+  _High betweenness centrality (0.073) - this node is a cross-community bridge._
 - **Should `budgets/page.tsx` be split into smaller, more focused modules?**
   _Cohesion score 0.12979591836734694 - nodes in this community are weakly interconnected._
