@@ -170,6 +170,9 @@ function collectTests(
 	type Value = string | number | boolean | null | Value[] | { [key: string]: Value }
 	function value(node: ts.Expression, env: Map<string, Value>, depth = 0): Value | undefined {
 		if (depth > 20) return undefined
+		if (node.kind === ts.SyntaxKind.TrueKeyword) return true
+		if (node.kind === ts.SyntaxKind.FalseKeyword) return false
+		if (node.kind === ts.SyntaxKind.NullKeyword) return null
 		if (ts.isStringLiteralLike(node)) return node.text
 		if (ts.isNumericLiteral(node)) return Number(node.text)
 		if (
@@ -236,9 +239,44 @@ function collectTests(
 	}
 	// Tag details are a static object literal in the second argument:
 	// test(title, { tag: "@motion" }, …), test(title, { tag: ["@tall"] }, …),
-	// test(title, { tag: group === "core" ? ["@tall"] : [] }, …) or
-	// test(title, { tag: tags }, …) with tags bound through a static for…of.
+	// test(title, { tag: tags }, …) with tags bound through a static for…of, or
+	// a conditional whose condition resolves statically (loop bindings included).
 	// Anything else in the second argument is the callback, not details.
+	// A conditional records exactly the taken branch: unioning both branches
+	// would certify tags the runner never selects.
+	function conditionBranch(
+		node: ts.ConditionalExpression,
+		scope: Map<string, Value>,
+		here: string,
+	): ts.Expression {
+		const direct = value(node.condition, scope)
+		if (typeof direct === "boolean") return direct ? node.whenTrue : node.whenFalse
+		const test = unwrap(node.condition)
+		if (
+			ts.isBinaryExpression(test) &&
+			(test.operatorToken.kind === ts.SyntaxKind.EqualsEqualsEqualsToken ||
+				test.operatorToken.kind === ts.SyntaxKind.ExclamationEqualsEqualsToken)
+		) {
+			const left = value(test.left, scope)
+			const right = value(test.right, scope)
+			const primitive = (item: Value | undefined) =>
+				typeof item === "string" || typeof item === "number" || typeof item === "boolean"
+					? item
+					: undefined
+			const a = primitive(left)
+			const b = primitive(right)
+			if (a !== undefined && b !== undefined) {
+				const take =
+					test.operatorToken.kind === ts.SyntaxKind.EqualsEqualsEqualsToken
+						? a === b
+						: a !== b
+				return take ? node.whenTrue : node.whenFalse
+			}
+		}
+		throw new Error(
+			`${here}: unresolved test tag condition; tags must be static string literals`,
+		)
+	}
 	function detailsTags(
 		argument: ts.Expression | undefined,
 		scope: Map<string, Value>,
@@ -247,12 +285,7 @@ function collectTests(
 		if (!argument) return []
 		const unwrapped = unwrap(argument)
 		if (ts.isConditionalExpression(unwrapped))
-			return [
-				...new Set([
-					...detailsTags(unwrapped.whenTrue, scope, here),
-					...detailsTags(unwrapped.whenFalse, scope, here),
-				]),
-			]
+			return detailsTags(conditionBranch(unwrapped, scope, here), scope, here)
 		if (!ts.isObjectLiteralExpression(unwrapped)) return []
 		const tag = unwrapped.properties.find(
 			(property): property is ts.PropertyAssignment | ts.ShorthandPropertyAssignment =>
@@ -271,12 +304,7 @@ function collectTests(
 	function tagValues(node: ts.Expression, scope: Map<string, Value>, here: string): string[] {
 		const unwrapped = unwrap(node)
 		if (ts.isConditionalExpression(unwrapped))
-			return [
-				...new Set([
-					...tagValues(unwrapped.whenTrue, scope, here),
-					...tagValues(unwrapped.whenFalse, scope, here),
-				]),
-			]
+			return tagValues(conditionBranch(unwrapped, scope, here), scope, here)
 		const resolved = value(unwrapped, scope)
 		if (typeof resolved === "string") return [resolved]
 		if (Array.isArray(resolved) && resolved.every(item => typeof item === "string"))
@@ -507,6 +535,9 @@ test("[UI-INVENTORY-PARSER] static generated titles resolve but skipped cases ca
 				await test.step(\`looped \${group} step\`, async () => {})
 			})
 		test("conditional tags", { tag: true ? ["@light"] : ["@motion"] }, async () => {})
+		test("conditional tags false", { tag: false ? ["@motion"] : [] }, async () => {})
+		for (const kind of ["tall", "plain"] as const)
+			test(\`conditional \${kind}\`, { tag: kind === "tall" ? ["@tall"] : [] }, async () => {})
 		test.skip("skipped with tags", { tag: "@motion" }, () => {})
 		test("skipped group", async () => {
 			await test.step.skip("skipped step", async () => {})
@@ -551,6 +582,9 @@ test("[UI-INVENTORY-PARSER] static generated titles resolve but skipped cases ca
 		"looped core",
 		"looped core step",
 		"conditional tags",
+		"conditional tags false",
+		"conditional tall",
+		"conditional plain",
 	])
 	expect(selections.get("tag mirror")).toEqual([
 		{ path: "parser-fixture.ts", test: "tag mirror", tags: ["@motion"], motion: false },
@@ -584,7 +618,31 @@ test("[UI-INVENTORY-PARSER] static generated titles resolve but skipped cases ca
 		{
 			path: "parser-fixture.ts",
 			test: "conditional tags",
-			tags: ["@light", "@motion"],
+			tags: ["@light"],
+			motion: false,
+		},
+	])
+	expect(selections.get("conditional tags false")).toEqual([
+		{
+			path: "parser-fixture.ts",
+			test: "conditional tags false",
+			tags: [],
+			motion: false,
+		},
+	])
+	expect(selections.get("conditional tall")).toEqual([
+		{
+			path: "parser-fixture.ts",
+			test: "conditional tall",
+			tags: ["@tall"],
+			motion: false,
+		},
+	])
+	expect(selections.get("conditional plain")).toEqual([
+		{
+			path: "parser-fixture.ts",
+			test: "conditional plain",
+			tags: [],
 			motion: false,
 		},
 	])

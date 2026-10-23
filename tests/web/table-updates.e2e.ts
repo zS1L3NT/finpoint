@@ -6,13 +6,19 @@ import {
 } from "./support/assertions"
 import { expect, seedWorkspace, test } from "./support/fixtures"
 
-// The sidebar reads its mobile detection in a mount effect: a trigger tap
-// before hydration toggles the invisible desktop state instead of opening the
-// sheet, and a tap swallowed under load does the same visibly-nothing thing.
-// History hydration commits in the same mount pass (its provider wraps the
-// sidebar's), so wait for its localStorage marker first, then retry the tap
-// boundedly. The subsequent link wait remains the strict proof.
+// Mobile sidebar taps race hydration: useIsMobile() starts false and flips in
+// a mount effect, so a tap before that commit toggles the invisible desktop
+// state and nothing opens. localStorage.history survives reloads and gotos,
+// so a pre-existing marker proves nothing about the current mount — clear it
+// and reload first; the rewritten marker then proves THIS document hydrated
+// (the history provider wraps the sidebar's, so both mount effects commit in
+// the same pass). Retry the tap boundedly for swallowed taps under load. A
+// permanently absent sheet still fails the dialog check below, and the
+// subsequent visible-link wait keeps its own strict proof.
 async function openMobileSidebar(page: Page) {
+	await page.evaluate(() => localStorage.removeItem("history"))
+	await page.reload()
+	await expect.poll(() => page.evaluate(() => localStorage.getItem("history"))).not.toBeNull()
 	await expect.poll(() => page.evaluate(() => localStorage.getItem("history"))).not.toBeNull()
 	const trigger = page.locator('header [data-slot="sidebar-trigger"]')
 	for (let attempt = 0; attempt < 3; attempt++) {
@@ -20,6 +26,7 @@ async function openMobileSidebar(page: Page) {
 		await page.waitForTimeout(500)
 		if ((await page.getByRole("dialog").count()) > 0) break
 	}
+	await expect(page.getByRole("dialog")).toBeVisible()
 }
 
 test("table refilter entrances share one dense seed", {

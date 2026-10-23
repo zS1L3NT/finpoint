@@ -73,10 +73,13 @@ dark), `tall-desktop` (1920×1440, dark), `light` (1440×900, light) and `reduce
 (1440×900, dark, `reduce`). Chromium and mobile run every case except a short reviewed
 list; tall-desktop, light and reduced-motion run only cases tagged `@tall`, `@light` or
 `@motion`. `PLAYWRIGHT_FULL_MATRIX=1` drops those tag filters for a 749-case release run
-(measured with `bunx playwright test --list`). Every test declares its complete literal tag
-list; the `[UI-INVENTORY-PROJECTS]` gate fails if a ledger configuration claim is not
+(measured with `bunx playwright test --list`). Tests declare their tags literally
+(untagged tests intentionally use the implicit chromium/mobile default); the
+`[UI-INVENTORY-PROJECTS]` gate fails if a ledger configuration claim is not
 executed by the selected projects, so tag a test `@light` if it asserts painted colour
-and `@motion` if it asserts a reduced-motion branch. Normal projects retain all application
+and `@motion` if it asserts a reduced-motion branch. A CLI `--grep` combines with (not
+instead of) each project's tag filter, so running an untagged case on light or
+reduced-motion needs `PLAYWRIGHT_FULL_MATRIX=1`. Normal projects retain all application
 animations. Reduced motion uses the
 browser preference and tests the application's response; it does not inject CSS to suppress animation.
 For additional engines, install `bunx playwright install --with-deps firefox webkit`, then run
