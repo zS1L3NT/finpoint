@@ -752,3 +752,32 @@ test("history clearing: cancelled links, sidebar, tabs and chart drills clear or
 		await expect(page).toHaveURL(origin)
 	})
 })
+
+test("Back button: pressed the moment a drilled Record appears, returns to its origin", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	await gotoReady(page, "/records?category_ids=t1-cat-groceries")
+	const origin = page.url()
+	await expect(page.getByRole("link", { name: "Open FairPrice Run", exact: true })).toBeVisible()
+	// Click Back from inside the page on the first frame it exists, before the drill's URL
+	// commits: the drill must not override the back navigation.
+	await page.evaluate(() => {
+		const link = document.querySelector('a[aria-label="Open FairPrice Run"]')
+		if (!(link instanceof HTMLElement)) throw new Error("Expected the FairPrice Run link")
+		link.click()
+		const pressBack = () => {
+			const back = [...document.querySelectorAll("button")].find(button =>
+				button.textContent?.trim().startsWith("Back to Records"),
+			)
+			if (back) back.click()
+			else requestAnimationFrame(pressBack)
+		}
+		requestAnimationFrame(pressBack)
+	})
+	await expect(page).toHaveURL(origin)
+	await page.waitForTimeout(1000)
+	await expect(page).toHaveURL(origin)
+	await expect(page.getByRole("link", { name: "Open FairPrice Run", exact: true })).toBeVisible()
+})

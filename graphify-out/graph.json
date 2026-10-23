@@ -4721,7 +4721,7 @@
       "file_type": "code",
       "norm_label": "usehistory()",
       "source_file": "src/history.tsx",
-      "source_location": "L233"
+      "source_location": "L256"
     },
     {
       "id": "src_hooks_use_staged_mount_usestagedmount",
@@ -42711,7 +42711,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/history.tsx",
-      "source_location": "L154",
+      "source_location": "L157",
       "weight": 1.0
     },
     {
@@ -42723,7 +42723,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/history.tsx",
-      "source_location": "L89",
+      "source_location": "L92",
       "weight": 1.0
     },
     {
@@ -42735,7 +42735,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/history.tsx",
-      "source_location": "L89",
+      "source_location": "L92",
       "weight": 1.0
     },
     {
@@ -42747,7 +42747,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/history.tsx",
-      "source_location": "L89",
+      "source_location": "L92",
       "weight": 1.0
     },
     {
@@ -100015,17 +100015,6 @@
     },
     {
       "source": "src_history",
-      "target": "src_history_usehistory",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/history.tsx",
-      "source_location": "L233",
-      "weight": 1.0
-    },
-    {
-      "source": "src_history",
       "target": "src_history_getvalidhistory",
       "relation": "contains",
       "_origin": "ast",
@@ -100033,6 +100022,17 @@
       "confidence_score": 1.0,
       "source_file": "src/history.tsx",
       "source_location": "L25",
+      "weight": 1.0
+    },
+    {
+      "source": "src_history",
+      "target": "src_history_usehistory",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/history.tsx",
+      "source_location": "L256",
       "weight": 1.0
     },
     {
@@ -109526,5 +109526,5 @@
       "source_file": "tests/web/README.md"
     }
   ],
-  "built_at_commit": "a6bc518c442d633593292b4c37eccc6e0e705d3b"
+  "built_at_commit": "8cfa423a22ef1b6d3ea73303af8e29e7adb9eec4"
 }
