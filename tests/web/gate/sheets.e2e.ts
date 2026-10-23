@@ -724,7 +724,7 @@ test.describe("dense workspace", () => {
 				.filter({ hasText: "Pending Statement unavailable" })
 			await expect(alert).toBeVisible()
 			const search = page
-				.locator('section[aria-labelledby="pending-queue-title"]')
+				.locator('section[aria-label="Pending statements"]')
 				.getByPlaceholder("Search descriptions...")
 			await search.pressSequentially("Dense pending 26", { delay: 10 })
 			await expect(alert).toHaveCount(0)
@@ -742,7 +742,7 @@ test.describe("dense workspace", () => {
 		await test.step("pending queue: typing clears an orphan candidate query without discarding the queue buffer", async () => {
 			await page.goto("/allocator/pending?candidate_query=stale&candidate_page=2")
 			const search = page
-				.locator('section[aria-labelledby="pending-queue-title"]')
+				.locator('section[aria-label="Pending statements"]')
 				.getByPlaceholder("Search descriptions...")
 			await expect(search).toBeVisible()
 			const historyLength = await page.evaluate(() => history.length)
@@ -844,7 +844,7 @@ test.describe("dense workspace", () => {
 				await page.waitForTimeout(500)
 			}
 			const search = page
-				.locator('section[aria-labelledby="pending-queue-title"]')
+				.locator('section[aria-label="Pending statements"]')
 				.getByPlaceholder("Search descriptions...")
 			const historyLength = await page.evaluate(() => history.length)
 			await search.pressSequentially("Dense pending 26", { delay: 10 })
@@ -903,7 +903,7 @@ test.describe("dense workspace", () => {
 			await page.goBack()
 			await expect(page).not.toHaveURL(/account_id=/)
 			const search = page
-				.locator('section[aria-labelledby="pending-queue-title"]')
+				.locator('section[aria-label="Pending statements"]')
 				.getByPlaceholder("Search descriptions...")
 			await search.pressSequentially("Dense pending 26", { delay: 10 })
 			await expect(page).toHaveURL(/query=Dense\+pending\+26/)
@@ -929,7 +929,7 @@ test.describe("dense workspace", () => {
 				original(() => {
 					if (typeof handler === "function") handler(...rest)
 					const input = document.querySelector<HTMLInputElement>(
-						'section[aria-labelledby="pending-queue-title"] input[placeholder="Search descriptions..."]',
+						'section[aria-label="Pending statements"] input[placeholder="Search descriptions..."]',
 					)
 					if (timeout !== 300 || input?.value !== "D" || Reflect.has(window, "__typedOn"))
 						return
@@ -946,7 +946,7 @@ test.describe("dense workspace", () => {
 		})
 		await page.goto("/allocator/pending")
 		const search = page
-			.locator('section[aria-labelledby="pending-queue-title"]')
+			.locator('section[aria-label="Pending statements"]')
 			.getByPlaceholder("Search descriptions...")
 		await expect(search).toBeVisible()
 		await search.pressSequentially("D")

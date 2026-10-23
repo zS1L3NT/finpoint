@@ -12,7 +12,7 @@
 
 import Dexie, { type Table } from "dexie"
 import { hashLegacySnapshot, hashSnapshot } from "@/data/snapshot-hash"
-import type { AnalyticsTreatment } from "@/types"
+import type { AnalyticsTreatment, StatementRule } from "@/types"
 
 export type AccountRow = {
 	id: string
@@ -127,9 +127,10 @@ export type SettingsRow = {
 }
 
 export const DB_NAME = "finpoint"
-export const DB_VERSION = 5
+export const DB_VERSION = 6
 
 class FinpointDB extends Dexie {
+	statement_rules!: Table<StatementRule, string>
 	accounts!: Table<AccountRow, string>
 	statements!: Table<StatementRow, string>
 	duplicate_dismissals!: Table<DuplicateDismissalRow, [string, string]>
@@ -295,6 +296,42 @@ class FinpointDB extends Dexie {
 				// Adding an empty table must not turn a clean Drive baseline into unsynced edits.
 				if (lastHash?.value === (await Dexie.waitFor(hashSnapshot({ settings, tables })))) {
 					tables.duplicate_dismissals = []
+					await transaction.table("meta").put({
+						key: "drive_last_hash",
+						value: await Dexie.waitFor(hashSnapshot({ settings, tables })),
+					})
+				}
+			})
+		this.version(6)
+			.stores({ statement_rules: "id" })
+			.upgrade(async transaction => {
+				const tables: Record<string, unknown[]> = {}
+				for (const name of [
+					"accounts",
+					"statements",
+					"duplicate_dismissals",
+					"categories",
+					"records",
+					"allocations",
+					"budgets",
+					"budget_records",
+					"monthly_budgets",
+					"monthly_budget_defaults",
+					"monthly_budget_amounts",
+					"analytics_months",
+				])
+					tables[name] = await transaction.table(name).toArray()
+				const settings = {
+					default_filter_start_date:
+						(await transaction.table("settings").get("default_filter_start_date"))
+							?.value ?? null,
+					default_filter_end_date_today:
+						(await transaction.table("settings").get("default_filter_end_date_today"))
+							?.value === "true",
+				}
+				const lastHash = await transaction.table("meta").get("drive_last_hash")
+				if (lastHash?.value === (await Dexie.waitFor(hashSnapshot({ settings, tables })))) {
+					tables.statement_rules = []
 					await transaction.table("meta").put({
 						key: "drive_last_hash",
 						value: await Dexie.waitFor(hashSnapshot({ settings, tables })),

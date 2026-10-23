@@ -200,7 +200,7 @@ test("pending queue: keyboard replace and confirm replace the Pending Statement"
 }) => {
 	expect(workspace).toBe("populated")
 	await page.goto("/allocator/pending")
-	const queue = page.locator("section[aria-labelledby='pending-queue-title']")
+	const queue = page.locator("section[aria-label='Pending statements']")
 	await queue.getByPlaceholder("Search descriptions...").fill("Pasar malam")
 	const pick = page.getByRole("button", { name: /Pasar malam/ })
 	await expect(pick).toBeVisible()

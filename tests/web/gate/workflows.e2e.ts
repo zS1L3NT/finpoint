@@ -531,7 +531,7 @@ test("pending queue: replacing a Pending Statement preserves Allocations on the 
 	await blockGoogle(page)
 
 	await page.goto("/allocator/pending")
-	const queue = page.locator("section[aria-labelledby='pending-queue-title']")
+	const queue = page.locator("section[aria-label='Pending statements']")
 	await queue.getByPlaceholder("Search descriptions...").fill("Pasar malam")
 	await page.getByRole("button", { name: /Pasar malam/ }).click()
 	await expect(page).toHaveURL(/pending_statement_id=t1-s-pending/)
@@ -671,7 +671,7 @@ test("importer: a Revolut pending import surfaces in the pending queue", async (
 	expect(await countStore(page, "statements")).toBe(before + 1)
 
 	await page.goto("/allocator/pending")
-	const queue = page.locator("section[aria-labelledby='pending-queue-title']")
+	const queue = page.locator("section[aria-label='Pending statements']")
 	await queue.getByPlaceholder("Search descriptions...").fill("Workflow pending import")
 	await expect(page.getByRole("button", { name: /Workflow pending import/ })).toBeVisible()
 })

@@ -26,6 +26,7 @@ export type Statement = {
 	allocation_count: number
 	is_pending: boolean
 	is_unallocated: boolean
+	is_duplicate: boolean
 	account: Account
 }
 
@@ -150,4 +151,29 @@ export type AnalyticsSummary = {
 		monthly_budget_spending: { [monthlyBudgetId: string]: number }
 	}>
 	monthlyBudgets: Array<MonthlyBudget & { spending: number; records: number }>
+}
+
+/** Rules only read the Statement description; text comparisons ignore case. */
+export type RuleCondition = {
+	operator: "contains" | "equals" | "regex"
+	value: string
+}
+export type RuleMode = "suggest" | "autofill"
+export type RuleActions = {
+	title?: { mode: RuleMode; value: string }
+	people?: { mode: RuleMode; value: string }
+	location?: { mode: RuleMode; value: string }
+	category_id?: { mode: RuleMode; value: string }
+	analytics_treatment?: { mode: RuleMode; value: AnalyticsTreatment }
+	monthly_budget_id?: { mode: RuleMode; value: string | null }
+}
+export type RuleField = keyof RuleActions
+export type StatementRule = {
+	id: string
+	name: string
+	enabled: boolean
+	conditions: { mode: "all" | "any"; items: RuleCondition[] }
+	actions: RuleActions
+	created_at: string
+	updated_at: string
 }

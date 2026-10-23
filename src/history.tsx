@@ -1,7 +1,7 @@
 "use client"
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { createContext, useContext, useEffect, useRef, useState } from "react"
+import { createContext, startTransition, useContext, useEffect, useRef, useState } from "react"
 
 export type HistoryItem = { name: string; url: string }
 
@@ -79,9 +79,6 @@ export const HistoryProvider = ({ children }: { children: React.ReactNode }) => 
 	// otherwise the second navigation targets an already-popped entry and goes nowhere.
 	const historyRef = useRef<HistoryItem[]>([])
 	const navigatingBackRef = useRef(false)
-	// The last rendered URL the arrival effect has processed, and a Back waiting for it.
-	const arrivedUrlRef = useRef<string | null>(null)
-	const deferredBackRef = useRef(false)
 	const setHistorySync = (next: HistoryItem[] | ((current: HistoryItem[]) => HistoryItem[])) => {
 		const value = typeof next === "function" ? next(historyRef.current) : next
 		historyRef.current = value
@@ -167,7 +164,6 @@ export const HistoryProvider = ({ children }: { children: React.ReactNode }) => 
 		navigatingBackRef.current = false
 		setIsNavigatingBack(false)
 		// A filter can settle on the origin while the clicked destination is loading.
-		arrivedUrlRef.current = url
 		if (
 			pending &&
 			pending.destination !== url &&
@@ -205,10 +201,14 @@ export const HistoryProvider = ({ children }: { children: React.ReactNode }) => 
 				isNavigatingBack,
 				handlePush: name => () => {
 					const url = pathname + window.location.search
-					setHistorySync(history => [
-						...(history.at(-1)?.url === url ? history.slice(0, -1) : history),
-						{ name, url },
-					])
+					// Commit the Back entry with the route transition, so the outgoing
+					// page does not reveal its own Back button while the destination loads.
+					startTransition(() => {
+						setHistorySync(history => [
+							...(history.at(-1)?.url === url ? history.slice(0, -1) : history),
+							{ name, url },
+						])
+					})
 				},
 				handlePop: () => {
 					setHistorySync(history => history.slice(0, -1))
@@ -217,34 +217,15 @@ export const HistoryProvider = ({ children }: { children: React.ReactNode }) => 
 					setHistorySync([])
 				},
 				navigateBack: fallback => {
-					if (navigatingBackRef.current || deferredBackRef.current) return
-					let frames = 0
-					const goBack = () => {
-						// A drilled page renders, Back included, before its URL commits and
-						// before this provider sees the new route. Going back then reads the
-						// outgoing page as "here" and the drill's late commit wins, so wait
-						// (at most ~2s) for the drill to land and read "here" afterwards.
-						const arrived = arrivedUrlRef.current
-						const settled =
-							pendingLink.current === null &&
-							arrived !== null &&
-							normaliseUrl(window.location.href) === arrived
-						if (!settled && frames++ < 120) {
-							deferredBackRef.current = true
-							requestAnimationFrame(goBack)
-							return
-						}
-						deferredBackRef.current = false
-						const here = normaliseUrl(window.location.href)
-						const current = historyRef.current
-						const target = current[current.length - 1] ?? fallback
-						setHistorySync(current.length ? current.slice(0, -1) : current)
-						if (normaliseUrl(target.url) === here) return
-						navigatingBackRef.current = true
-						setIsNavigatingBack(true)
-						router.push(target.url)
-					}
-					goBack()
+					if (navigatingBackRef.current) return
+					const current = historyRef.current
+					const target = current[current.length - 1] ?? fallback
+					setHistorySync(current.length ? current.slice(0, -1) : current)
+					const here = pathname + (searchParams.size ? `?${searchParams}` : "")
+					if (normaliseUrl(target.url) === here) return
+					navigatingBackRef.current = true
+					setIsNavigatingBack(true)
+					router.push(target.url)
 				},
 			}}
 		>

@@ -33,17 +33,6 @@ export default function WorkflowTabs({
 			<Link
 				className={cn(
 					"shrink-0 border-b-2 px-4 py-2 text-sm transition-colors duration-150 ease-out",
-					active === "replace"
-						? "border-foreground font-medium"
-						: "border-transparent text-muted-foreground hover:text-foreground",
-				)}
-				href={pathAllocatorPending()}
-			>
-				Replace Pending
-			</Link>
-			<Link
-				className={cn(
-					"shrink-0 border-b-2 px-4 py-2 text-sm transition-colors duration-150 ease-out",
 					active === "duplicates"
 						? "border-foreground font-medium"
 						: "border-transparent text-muted-foreground hover:text-foreground",
@@ -51,6 +40,17 @@ export default function WorkflowTabs({
 				href={pathAllocatorDuplicates()}
 			>
 				Fix Duplicates
+			</Link>
+			<Link
+				className={cn(
+					"shrink-0 border-b-2 px-4 py-2 text-sm transition-colors duration-150 ease-out",
+					active === "replace"
+						? "border-foreground font-medium"
+						: "border-transparent text-muted-foreground hover:text-foreground",
+				)}
+				href={pathAllocatorPending()}
+			>
+				Replace Pending
 			</Link>
 		</nav>
 	)

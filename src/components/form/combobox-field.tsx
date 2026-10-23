@@ -1,6 +1,6 @@
 import { Combobox as ComboboxPrimitive } from "@base-ui/react"
 import { useState } from "react"
-import { FormField, type FormFieldProps } from "@/components/form/field"
+import { AUTOPOPULATED_BORDER, FormField, type FormFieldProps } from "@/components/form/field"
 import {
 	Combobox,
 	ComboboxContent,
@@ -26,6 +26,7 @@ export default function ComboboxField<T>({
 	id,
 	label,
 	description,
+	autopopulated,
 	errors,
 	disabled,
 	className,
@@ -40,6 +41,7 @@ export default function ComboboxField<T>({
 	onChange,
 }: Props<T>) {
 	const invalid = !!errors?.length
+	const hinted = !!autopopulated && !invalid
 	// Filter here instead of in Base UI: Base UI 1.4 freezes the typed query while the
 	// popup exits after a pick, but only unfreezes it once the popup unmounts, so
 	// reopening during that exit kept filtering by the old query whatever was typed.
@@ -59,6 +61,7 @@ export default function ComboboxField<T>({
 			id={id}
 			label={label}
 			description={description}
+			autopopulated={autopopulated}
 			errors={errors}
 			disabled={disabled}
 			className={className}
@@ -86,6 +89,8 @@ export default function ComboboxField<T>({
 					placeholder={placeholder}
 					disabled={disabled}
 					aria-invalid={invalid}
+					aria-describedby={hinted ? `${id}-autopopulated` : undefined}
+					className={hinted ? AUTOPOPULATED_BORDER : undefined}
 					showClear
 				/>
 				<ComboboxContent>

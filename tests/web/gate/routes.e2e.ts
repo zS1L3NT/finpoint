@@ -141,7 +141,7 @@ test("workflow tabs and sparkline: tabs navigate by keyboard, Allocate keeps its
 		await page.keyboard.press("Enter")
 		await expect(page).toHaveURL(/\/allocator\/pending$/)
 		await expect(
-			page.getByRole("heading", { name: "Pending Statements", exact: true }),
+			page.getByRole("region", { name: "Pending statements", exact: true }),
 		).toBeVisible()
 		await page
 			.getByRole("navigation", { name: "Workflow views" })

@@ -76,7 +76,7 @@ export default function BudgetsPage() {
 								<h3 className="text-sm font-semibold text-muted-foreground">
 									{state.label} · {items.length}
 								</h3>
-								<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+								<div className="grid gap-4 @2xl/page:grid-cols-2 @5xl/page:grid-cols-3">
 									{items.map((budget, index) => (
 										<motion.div
 											key={budget.id}

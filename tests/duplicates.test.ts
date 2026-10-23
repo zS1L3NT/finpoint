@@ -8,6 +8,7 @@ const { db } = await import("../src/data/db")
 const { duplicateGroups, dismissDuplicatePair, restoreDuplicatePair, fixDuplicates } = await import(
 	"../src/logic/duplicates"
 )
+const { listStatements, getStatement } = await import("../src/logic/statements")
 
 const statement = (
 	id: string,
@@ -27,6 +28,26 @@ beforeEach(async () => {
 	for (const table of db.tables) await table.clear()
 	await db.accounts.add({ id: "a", name: "FRANK", balance: 0, bank: "OCBC" })
 })
+test("duplicate warnings survive filtering and clear when separated or fixed", async () => {
+	await db.statements.bulkAdd([
+		statement("a", "DEBIT PURCHASE xx-7962 SHENG SIONG SUPERMARKET -S 03/10/26"),
+		statement("b", "DEBIT PURCHASE xx-7962 SHENG SIONG SUPERMARKET -S03/10/26"),
+		statement("pending", undefined, { is_pending: 1 }),
+		statement("unrelated", "COFFEE GARDEN"),
+	])
+	const filtered = await listStatements({ query: "-S 03", is_pending: "false" })
+	expect(filtered.map(s => [s.id, s.is_duplicate])).toEqual([["a", true]])
+	expect((await getStatement("b")).is_duplicate).toBe(true)
+	expect((await getStatement("pending")).is_duplicate).toBe(false)
+	expect((await getStatement("unrelated")).is_duplicate).toBe(false)
+	await dismissDuplicatePair("a", "b")
+	expect((await listStatements()).every(s => !s.is_duplicate)).toBe(true)
+	await restoreDuplicatePair("a", "b")
+	expect((await getStatement("a")).is_duplicate).toBe(true)
+	await fixDuplicates({ keep_id: "a", delete_ids: ["b"] })
+	expect((await getStatement("a")).is_duplicate).toBe(false)
+})
+
 test("spacing changes form groups and dismissals affect only one pair", async () => {
 	await db.statements.bulkAdd([
 		statement("a"),
@@ -178,7 +199,7 @@ test("backup restore, earlier backups and reset include the dismissal table", as
 test("schema version four upgrades with financial data intact", async () => {
 	const schemas = Object.fromEntries(
 		db.tables
-			.filter(t => t.name !== "duplicate_dismissals")
+			.filter(t => !["duplicate_dismissals", "statement_rules"].includes(t.name))
 			.map(t => [t.name, [t.schema.primKey.src, ...t.schema.indexes.map(i => i.src)].join(",")]),
 	)
 	await db.delete()
@@ -187,7 +208,7 @@ test("schema version four upgrades with financial data intact", async () => {
 	await legacy.table("statements").put(statement("a"))
 	legacy.close()
 	await db.open()
-	expect(db.verno).toBe(5)
+	expect(db.verno).toBe(6)
 	expect(await db.statements.get("a")).toEqual(statement("a"))
 	expect(await db.duplicate_dismissals.count()).toBe(0)
 })
@@ -200,12 +221,13 @@ test("dismissal migration preserves clean and dirty Drive baselines", async () =
 		const backup = await exportData()
 		const tables: Record<string, unknown[]> = { ...backup.tables }
 		delete tables.duplicate_dismissals
+		delete tables.statement_rules
 		const baseline = clean
 			? await hashSnapshot({ settings: backup.settings, tables })
 			: "unsynced-baseline"
 		const schemas = Object.fromEntries(
 			db.tables
-				.filter(t => t.name !== "duplicate_dismissals")
+				.filter(t => !["duplicate_dismissals", "statement_rules"].includes(t.name))
 				.map(t => [t.name, [t.schema.primKey.src, ...t.schema.indexes.map(i => i.src)].join(",")]),
 		)
 		await db.delete()

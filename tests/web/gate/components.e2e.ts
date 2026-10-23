@@ -2068,7 +2068,11 @@ test.describe("harness display section", () => {
 				["Opposite sign", 0, "$10.00 / -$25.00"],
 			] as const) {
 				const bar = page.getByTestId(`allocation-${title}`)
-				await expect(bar).toContainText(amount)
+				// The value, slash and total wrap as separate items, spaced by gap rather than text.
+				const [value, total] = amount
+					.split(" / ")
+					.map(part => part.replace(/[$.]/g, "\\$&"))
+				await expect(bar).toContainText(new RegExp(`${value}\\s*/\\s*${total}`))
 				await expect(bar.getByRole("progressbar")).toHaveAttribute(
 					"aria-valuenow",
 					String(percent),

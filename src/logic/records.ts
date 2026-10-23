@@ -4,6 +4,7 @@
 import { db } from "@/data/db"
 import { canUseMonthlyBudget } from "@/lib/analytics"
 import { contribution } from "@/logic/analytics"
+import { duplicateStatementIds } from "@/logic/duplicates"
 import { isPendingRecord, pendingStatementIds, tallyAllocations } from "@/logic/pending"
 import { inputToStored, newId, round2, TREATMENT_VALUES } from "@/logic/shared"
 import { ValidationError, Validator } from "@/logic/validate"
@@ -224,6 +225,7 @@ export async function getRecord(id: string): Promise<RecordDetail> {
 		totalsByStatement.set(allocation.statement_id, total)
 	}
 	const accounts = new Map(accountRows.map(a => [a.id, a]))
+	const duplicates = await duplicateStatementIds()
 
 	return {
 		...enriched,
@@ -236,6 +238,7 @@ export async function getRecord(id: string): Promise<RecordDetail> {
 					allocation_count: total.count,
 					is_pending: statement.is_pending === 1,
 					is_unallocated: total.count === 0,
+					is_duplicate: duplicates.has(statement.id),
 					pivot: { amount: amountByStatement.get(statement.id) ?? 0 },
 					account: accounts.get(statement.account_id) ?? {
 						id: statement.account_id,

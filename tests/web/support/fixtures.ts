@@ -14,7 +14,7 @@
 // args — they must stay self-contained with no module-closure references.
 
 import { test as base, expect, type Page } from "@playwright/test"
-import { getScenario, type ScenarioName, type WorkspaceDataset } from "./data"
+import { getScenario, type ScenarioName, type WorkspaceDataset, type WorkspaceTables } from "./data"
 import { setDateOnly } from "./date-only"
 
 export type { ScenarioName, WorkspaceDataset }
@@ -45,7 +45,7 @@ export const test = base.extend<WorkspaceFixtures>({
 
 const BOOT_TIMEOUT_MS = 30_000
 const DB_NAME = "finpoint"
-// Mirror of the existing stores in `src/data/db.ts` (v5). Passed into the
+// Mirror of the existing stores in `src/data/db.ts` (v6). Passed into the
 // browser as an evaluate arg; schema changes go through Dexie versioned
 // migrations in the app — never from test support.
 const STORE_NAMES = [
@@ -61,6 +61,7 @@ const STORE_NAMES = [
 	"monthly_budget_defaults",
 	"monthly_budget_amounts",
 	"analytics_months",
+	"statement_rules",
 	"settings",
 	"meta",
 ]
@@ -68,8 +69,11 @@ const STORE_NAMES = [
 export async function seedWorkspace(
 	page: Page,
 	scenario: ScenarioName = "populated",
+	/** Replaces whole tables, e.g. `{ statement_rules: statementRules() }`. */
+	tables: Partial<WorkspaceTables> = {},
 ): Promise<void> {
 	const dataset = getScenario(scenario)
+	Object.assign(dataset.tables, tables)
 	await page.goto("/")
 	await waitForBoot(page)
 	await page.evaluate(seedInBrowser, { dbName: DB_NAME, stores: STORE_NAMES, dataset })

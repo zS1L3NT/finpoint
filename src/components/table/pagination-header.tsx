@@ -1,5 +1,6 @@
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import { Input } from "@/components/ui/input"
+import { cn } from "@/lib/utils"
 
 export default function PaginationHeader({
 	query,
@@ -9,6 +10,7 @@ export default function PaginationHeader({
 	searchPlaceholder,
 	filters,
 	actions,
+	className,
 }: {
 	query: string
 	onQueryChange: (value: string) => void
@@ -17,9 +19,10 @@ export default function PaginationHeader({
 	searchPlaceholder: string
 	filters?: React.ReactNode
 	actions?: React.ReactNode
+	className?: string
 }) {
 	return (
-		<div className="flex flex-col gap-4">
+		<div className={cn("flex flex-col gap-4", className)}>
 			<div className="flex min-w-0 flex-col gap-2 md:flex-row md:items-center md:justify-between">
 				<div className="relative w-full md:w-sm">
 					<IconifyIcon

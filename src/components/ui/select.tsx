@@ -84,7 +84,7 @@ function SelectContent({
         className={cn(
           "relative z-50 max-h-(--available-height) max-w-(--available-width) min-w-32 origin-(--transform-origin) overflow-x-hidden rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 ease-out data-[open]:duration-150 data-[closed]:duration-100 data-[align-trigger=true]:animate-none data-[side=bottom]:slide-in-from-top-1 data-[side=left]:slide-in-from-right-1 data-[side=right]:slide-in-from-left-1 data-[side=top]:slide-in-from-bottom-1 data-[open]:animate-in data-[open]:fade-in-0 data-[open]:zoom-in-96 data-[closed]:animate-out data-[closed]:fade-out-0 data-[closed]:zoom-out-96 motion-reduce:animate-none",
           position === "popper" &&
-            "min-w-[min(var(--anchor-width),var(--available-width))] data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
+            "min-w-[min(var(--anchor-width),var(--available-width))]",
           variant === "filter" &&
             "min-w-(--anchor-width) rounded-xl border border-border p-1 shadow-lg ring-0 [&_[data-slot=select-group]]:p-1 [&_[data-slot=select-item]]:px-2.5 [&_[data-slot=select-item]]:py-1.5 [&_[data-slot=select-item][data-state=checked]]:bg-accent [&_[data-slot=select-item][data-state=checked]]:text-accent-foreground",
           className
@@ -133,7 +133,7 @@ function SelectItem({
       label={props.textValue}
       render={(attributes, state) => <div {...attributes} data-state={state.selected ? "checked" : "unchecked"} />}
       className={cn(
-        "relative flex min-h-7 w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1 text-xs/relaxed outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-3.5 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
+        "relative flex min-h-7 w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1 text-xs/relaxed outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-3.5",
         className
       )}
       {...props}
@@ -143,7 +143,7 @@ function SelectItem({
           <CheckIcon className="pointer-events-none" />
         </SelectPrimitive.ItemIndicator>
       </span>
-      <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
+      <SelectPrimitive.ItemText className="flex items-center gap-2">{children}</SelectPrimitive.ItemText>
     </SelectPrimitive.Item>
   )
 }

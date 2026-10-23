@@ -20,6 +20,7 @@ import type {
 	RecordRow,
 	StatementRow,
 } from "@/data/db"
+import type { StatementRule } from "@/types"
 
 export type ScenarioName = "empty" | "populated" | "dense"
 export const SCENARIO_NAMES: ScenarioName[] = ["empty", "populated", "dense"]
@@ -42,6 +43,7 @@ export type WorkspaceTables = {
 	monthly_budget_defaults: MonthlyBudgetDefaultRow[]
 	monthly_budget_amounts: MonthlyBudgetAmountRow[]
 	analytics_months: AnalyticsMonthRow[]
+	statement_rules: StatementRule[]
 }
 
 export type WorkspaceDataset = {
@@ -67,6 +69,7 @@ function emptyTables(): WorkspaceTables {
 		monthly_budget_defaults: [],
 		monthly_budget_amounts: [],
 		analytics_months: [],
+		statement_rules: [],
 	}
 }
 
@@ -1038,6 +1041,92 @@ export const IDS = {
 	},
 	budgets: { manual: "t1-b-manual", automatic: "t1-b-auto" },
 } as const
+
+/**
+ * Statement rules for the populated workspace, seeded only by the tests that need them so
+ * every other Record creator keeps its blank defaults. Creation order decides autofill
+ * conflicts: "Starbucks coffee" is older than "Raffles coffee".
+ */
+export function statementRules(): StatementRule[] {
+	const rule = (
+		id: string,
+		name: string,
+		minute: number,
+		conditions: StatementRule["conditions"],
+		actions: StatementRule["actions"],
+		enabled = true,
+	): StatementRule => ({
+		id,
+		name,
+		enabled,
+		conditions,
+		actions,
+		created_at: `2026-10-01T00:${pad2(minute)}:00.000Z`,
+		updated_at: `2026-10-01T00:${pad2(minute)}:00.000Z`,
+	})
+	return [
+		rule(
+			"t1-rule-starbucks",
+			"Starbucks coffee",
+			1,
+			{ mode: "all", items: [{ operator: "contains", value: "starbucks" }] },
+			{
+				title: { mode: "autofill", value: "Morning coffee" },
+				category_id: { mode: "autofill", value: "t1-cat-dining" },
+				people: { mode: "suggest", value: "Alex" },
+				location: { mode: "suggest", value: "Raffles Place" },
+			},
+		),
+		rule(
+			"t1-rule-raffles",
+			"Raffles coffee",
+			2,
+			{ mode: "any", items: [{ operator: "regex", value: "4455$" }] },
+			{
+				title: { mode: "suggest", value: "Coffee with team" },
+				category_id: { mode: "autofill", value: "t1-cat-groceries" },
+				location: { mode: "suggest", value: "Raffles Place" },
+				monthly_budget_id: { mode: "suggest", value: "t1-mb-recurring" },
+			},
+		),
+		rule(
+			"t1-rule-groceries",
+			"Groceries",
+			3,
+			{
+				mode: "any",
+				items: [
+					{ operator: "contains", value: "sheng siong" },
+					{ operator: "contains", value: "fairprice" },
+				],
+			},
+			{
+				title: { mode: "autofill", value: "Groceries" },
+				category_id: { mode: "autofill", value: "t1-cat-groceries" },
+				analytics_treatment: { mode: "suggest", value: "neutral" },
+				monthly_budget_id: { mode: "autofill", value: "t1-mb-recurring" },
+			},
+		),
+		rule(
+			"t1-rule-grab",
+			"Grab rides",
+			4,
+			{ mode: "all", items: [{ operator: "equals", value: "grab ride 7712" }] },
+			{ title: { mode: "autofill", value: "Taxi" } },
+			false,
+		),
+		rule(
+			"t1-rule-archived",
+			"Archived travel",
+			5,
+			{ mode: "all", items: [{ operator: "contains", value: "sheng" }] },
+			{
+				monthly_budget_id: { mode: "autofill", value: "t1-mb-travel" },
+				people: { mode: "autofill", value: "Sam" },
+			},
+		),
+	]
+}
 
 export function getScenario(name: ScenarioName): WorkspaceDataset {
 	const dataset =

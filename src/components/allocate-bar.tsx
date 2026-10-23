@@ -12,14 +12,19 @@ export default function AllocateBar({
 	const percent = total === 0 ? 0 : (value / total) * 100
 	return (
 		<div className="flex flex-col gap-2 tabular-nums">
-			<div className="flex justify-between">
+			<div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
 				<span>{title}</span>
-				<div>
-					<span className={cn("text-muted-foreground", classForCurrency(value))}>
+				<div className="flex flex-wrap gap-x-1">
+					<span
+						className={cn(
+							"text-muted-foreground whitespace-nowrap",
+							classForCurrency(value),
+						)}
+					>
 						{formatCurrency(value)}
 					</span>
-					{" / "}
-					<span className={cn("font-bold", classForCurrency(total))}>
+					<span>/</span>
+					<span className={cn("font-bold whitespace-nowrap", classForCurrency(total))}>
 						{formatCurrency(total)}
 					</span>
 				</div>

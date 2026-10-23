@@ -143,6 +143,10 @@ export async function dismissedDuplicatePairs() {
 	})
 }
 
+export async function duplicateStatementIds() {
+	return new Set((await duplicateGroups()).flatMap(group => group.statements.map(s => s.id)))
+}
+
 export async function dismissDuplicatePair(first: string, second: string) {
 	const v = new Validator()
 	const a = v.text(first, "statement_id")

@@ -158,6 +158,7 @@ export default function FixDuplicatesPage() {
 			<div className="flex flex-col gap-2">
 				<Input
 					aria-label="Search statement descriptions"
+					className="w-full md:w-sm"
 					placeholder="Search descriptions..."
 					value={query}
 					onChange={event => updateParams({ query: event.target.value })}

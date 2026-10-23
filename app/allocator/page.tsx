@@ -263,6 +263,7 @@ export default function AllocatorPage() {
 								/>
 							</FilterBar>
 						),
+						className: "gap-2",
 					}}
 					footer={{
 						summary: `${selectedStatements.length} selected. Showing ${paginated.data.length} of ${pluralize(paginated.total, "statement")}.`,
