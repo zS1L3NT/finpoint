@@ -472,6 +472,9 @@ test.describe("harness widgets section", () => {
 
 			await page.locator('[data-slot="combobox-clear"]').click()
 			await expect(page.getByTestId("payee-value")).toHaveText("Payee value: none")
+			// Clearing resets Base UI's input text after the value change; on a fast host,
+			// typing before that reset lands left the list filtered by the old label.
+			await expect(page.locator("#harness-payee")).toHaveValue("")
 
 			await page.locator("#harness-payee").click()
 			// The reopen click opens the combobox popup (Base UI openOnInputClick), so wait
@@ -1903,6 +1906,19 @@ test.describe("harness facets section", () => {
 			const destructive = badges.getByText("Over budget", { exact: true })
 			await expect(warning).toBeVisible()
 			await expect(destructive).toBeVisible()
+			// Badges transition their colour for 150ms; read the settled value, not a mid-fade one.
+			await page.evaluate(() =>
+				Promise.all(
+					document
+						.getAnimations()
+						.filter(
+							animation =>
+								animation.effect?.getComputedTiming().iterations !==
+								Number.POSITIVE_INFINITY,
+						)
+						.map(animation => animation.finished),
+				),
+			)
 			const warningColour = await warning.evaluate(element => getComputedStyle(element).color)
 			const destructiveColour = await destructive.evaluate(
 				element => getComputedStyle(element).color,
@@ -1931,8 +1947,8 @@ test.describe("harness facets section", () => {
 					}
 				}, token)
 				expect(colours.expected[3]).toBeGreaterThan(0)
-				// The token is outside sRGB, and macOS maps the computed oklab and the
-				// declared oklch through slightly different gamut paths (up to 3 per channel).
+				// The token is outside sRGB; allow small gamut-mapping rounding between the
+				// computed oklab and the declared oklch.
 				for (const [index, channel] of colours.actual.entries())
 					expect(
 						Math.abs(channel - (colours.expected[index] ?? -255)),
