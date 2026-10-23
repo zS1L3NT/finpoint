@@ -1302,9 +1302,9 @@
     "semantic_hash": "c272b33bce291bd857cfdec675909be8"
   },
   "tests/web/README.md": {
-    "mtime": 1792769573.8850853,
-    "seen": 1792769578.5320354,
-    "ast_hash": "b2512efbefcdc34b338b83b381ead18e",
+    "mtime": 1792775253.9019723,
+    "seen": 1792775266.3772113,
+    "ast_hash": "e041a910ef736f304096649a2cd15649",
     "semantic_hash": ""
   },
   "tests/web/harness/display.html": {
@@ -1344,9 +1344,9 @@
     "semantic_hash": "255c3c672fa1bcc0fa39874326dd8453"
   },
   "scripts/test-web.ts": {
-    "mtime": 1792769568.653088,
-    "seen": 1792769578.5317955,
-    "ast_hash": "38c81e69e25dec0f5afb0d877d36f8d1",
+    "mtime": 1792775253.9019723,
+    "seen": 1792775266.3769891,
+    "ast_hash": "ba0a0a07d7ed4ce3f99948ce544a4de8",
     "semantic_hash": ""
   },
   "tests/web/gate/charts.e2e.ts": {
@@ -1404,10 +1404,10 @@
     "semantic_hash": "427ec9dd049371217b39996cf4e0847d"
   },
   "tests/web/gate/sheets.e2e.ts": {
-    "mtime": 1792757170.0193777,
-    "seen": 1792769521.9519627,
-    "ast_hash": "13e9450b7b66c8d95d2f43def2cf1bd6",
-    "semantic_hash": "13e9450b7b66c8d95d2f43def2cf1bd6"
+    "mtime": 1792775167.3741121,
+    "seen": 1792775266.3771658,
+    "ast_hash": "8f7d374bf2afca68cb731369ed25f2a2",
+    "semantic_hash": ""
   },
   "tests/web/gate/tables.e2e.ts": {
     "mtime": 1792757393.0481548,

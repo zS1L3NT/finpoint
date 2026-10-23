@@ -177,8 +177,9 @@ function dryRunPreflight(mode: Mode): number {
 			: "[dry-run] git tree: could not inspect it",
 	)
 	console.log(`[dry-run] HEAD: ${head || "unknown"}`)
-	console.log("[dry-run] would run: gh signoff gate")
-	if (mode === "full") console.log("[dry-run] would run: gh signoff full")
+	console.log("[dry-run] on pass: gh signoff --commit <HEAD> gate")
+	if (mode === "full") console.log("[dry-run] on pass: gh signoff --commit <HEAD> full")
+	console.log("[dry-run] on failure: gh signoff fail --commit <HEAD> <context> (red status)")
 	return 0
 }
 
@@ -201,6 +202,24 @@ function cleanTreeUnchanged(head: string): boolean {
 		return false
 	}
 	return true
+}
+
+// Posts one commit status per context on the commit recorded before the run.
+// A pass becomes a green sign-off only when the tree is still clean at that
+// commit; a failure is posted red (`gh signoff fail`) so a required check never
+// sits pending after a failed run.
+async function report(head: string, results: [string, boolean][]): Promise<number> {
+	const clean = results.some(([, passed]) => passed) ? cleanTreeUnchanged(head) : true
+	for (const [context, passed] of results) {
+		if (signaled) return 130
+		const args = passed
+			? ["signoff", "--commit", head, context]
+			: ["signoff", "fail", "--commit", head, "--description", `${context} tests failed`, context]
+		if (passed && !clean) continue
+		const code = await runAsync("gh", args, process.env)
+		if (code !== 0) return code
+	}
+	return clean ? 0 : 1
 }
 
 async function main(): Promise<number> {
@@ -291,13 +310,11 @@ async function main(): Promise<number> {
 		if (signaled) return 130
 
 		if (typed === "gate") {
-			if (gateCode !== 0) return gateCode
 			if (signoff) {
-				if (!cleanTreeUnchanged(head)) return 1
-				const first = await runAsync("gh", ["signoff", "gate"], process.env)
-				return first
+				const posted = await report(head, [["gate", gateCode === 0]])
+				if (posted !== 0) return posted
 			}
-			return 0
+			return gateCode
 		}
 
 		const motion: string[] = [
@@ -315,14 +332,15 @@ async function main(): Promise<number> {
 			PLAYWRIGHT_HTML_REPORT: "playwright-report/full-motion",
 		})
 		if (signaled) return 130
-		if (gateCode !== 0 || motionCode !== 0) return 1
 		if (signoff) {
-			if (!cleanTreeUnchanged(head)) return 1
-			const first = await runAsync("gh", ["signoff", "gate"], process.env)
-			if (first !== 0 || signaled) return signaled ? 130 : first
-			return runAsync("gh", ["signoff", "full"], process.env)
+			// Full's gate phase covers every gate project, so it also decides signoff/gate.
+			const posted = await report(head, [
+				["gate", gateCode === 0],
+				["full", gateCode === 0 && motionCode === 0],
+			])
+			if (posted !== 0) return posted
 		}
-		return 0
+		return gateCode !== 0 || motionCode !== 0 ? 1 : 0
 	} finally {
 		releaseLock()
 	}

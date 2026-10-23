@@ -787,14 +787,14 @@ test.describe("dense workspace", () => {
 				)
 			})
 			await search.fill("never matches another Statement")
-			if (isMobile)
-				await page
-					.getByRole("button", { name: "Back to pending Statements", exact: true })
-					.click()
-			// Forced: the <300ms race below must measure dispatch speed, not
+			// Both clicks are forced: the <300ms race below must measure dispatch speed, not
 			// actionability polling (stability checks on an animating list eat the
 			// budget). The URL + visibility + no-stale-query assertions keep full
 			// strength — a genuinely failed click still fails loudly there.
+			if (isMobile)
+				await page
+					.getByRole("button", { name: "Back to pending Statements", exact: true })
+					.click({ force: true })
 			await page.getByRole("button", { name: /^Dense pending 26\b/ }).click({ force: true })
 			const gap = await page.evaluate(
 				() =>

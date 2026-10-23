@@ -76,15 +76,17 @@ output, but running both at once slows animation sampling.
 
 ## Sign-off
 
-`--signoff` refuses to start unless the `basecamp/gh-signoff` extension is installed
-and the tree is clean (Next's generated `next-env.d.ts` is ignored). After a passing run it checks the tree is still clean at the
-same commit, then runs `gh signoff gate` (gate mode) or `gh signoff gate` followed by
-`gh signoff full` (full mode). It never signs off on a failure. With `--signoff`,
-no pass-through argument is allowed: only complete runs are signed.
-gh-signoff also requires the commit to be pushed, so commit and push before a signed run.
-`--signoff-dry-run` prints the extension, tree, HEAD, and sign-off commands without
-running anything. We do not run `gh signoff install`; installing would make the gate
-a required check.
+`--signoff` refuses to start unless the `basecamp/gh-signoff` extension is installed and the
+tree is clean (Next's generated `next-env.d.ts` is ignored). It records `HEAD` and posts every
+status on that commit. A passing context is signed green (`gh signoff --commit <HEAD> gate`)
+only if the tree is still clean at the same commit. A failing context is posted red
+(`gh signoff fail`), so a required check shows the failure instead of waiting forever.
+`gate` mode posts `signoff/gate`. `full` mode posts `signoff/gate` from its gate phase (which
+covers every gate project) and `signoff/full` from both phases. With `--signoff`, no
+pass-through argument is allowed: only complete runs are reported. gh-signoff also requires
+the commit to be pushed, so commit and push before a signed run. `--signoff-dry-run` prints
+the extension, tree, HEAD and sign-off commands without running anything.
+`gh signoff install gate` makes `signoff/gate` a required check for merging.
 
 ## Projects and tags
 
