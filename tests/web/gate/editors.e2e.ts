@@ -1,28 +1,17 @@
 import type { Locator, Page } from "@playwright/test"
+import { expectPointerCursor, expectVisibleBackdrop } from "../support/assertions"
+import { IDS } from "../support/data"
 import {
-	expectPointerCursor,
-	expectPopupEntrance,
-	expectVisibleBackdrop,
-	sampleVisibleRowAnimations,
-} from "./support/assertions"
-import { getScenario, IDS } from "./support/data"
-import { expect, seedWorkspace, test } from "./support/fixtures"
-
-const data = getScenario("populated").tables
-function fixtureRow<T extends { id: string }>(rows: T[], id: string): T {
-	const row = rows.find(row => row.id === id)
-	if (!row) throw new Error(`Missing editor fixture ${id}`)
-	return row
-}
-
-const account = fixtureRow(data.accounts, IDS.accounts.dbs)
-const budget = fixtureRow(data.budgets, IDS.budgets.manual)
-const record = fixtureRow(data.records, IDS.records.nulls)
-const pending = fixtureRow(data.statements, IDS.statements.pending)
-const kept = fixtureRow(data.statements, IDS.statements.duplicatePair[0])
-const deleted = fixtureRow(data.statements, IDS.statements.duplicatePair[1])
-const imported = fixtureRow(data.statements, "t1-s-free-2")
-const longText = "Editor café 日本語 — ".repeat(12)
+	account,
+	budget,
+	chooseCategory,
+	longText,
+	openEditor,
+	pending,
+	record,
+	select,
+} from "../support/editors"
+import { expect, seedWorkspace, test } from "../support/fixtures"
 
 // Each opening is its own step in the shared entrance test below: a motion
 // failure aborts later openings fail-fast, so entrance regressions surface
@@ -118,27 +107,59 @@ const editors = [
 	},
 ]
 
-test("editor popup entrances share one seed", { tag: ["@motion"] }, async ({ page, workspace }) => {
+async function chooseRange(page: Page, dialog: Locator) {
+	await dialog.getByLabel("Date range", { exact: true }).click()
+	const calendar = page.locator('[data-slot="popover-content"]')
+	await expect(calendar).toBeVisible()
+	await calendar
+		.locator("button[data-day]")
+		.filter({ hasNot: page.locator("[disabled]") })
+		.first()
+		.click()
+	await calendar.getByRole("button", { name: "Apply", exact: true }).click()
+}
+
+const longName = "café 日本語 — Long description ".repeat(8).trim()
+
+async function containedFooter(dialog: Locator) {
+	await expect(dialog).toBeVisible()
+	expect(
+		await dialog.evaluate(element => element.scrollWidth - element.clientWidth),
+	).toBeLessThanOrEqual(1)
+	for (const action of await dialog.locator('[data-slot="dialog-footer"] button:visible').all()) {
+		await action.scrollIntoViewIfNeeded()
+		await expect(action).toBeInViewport()
+		if (await action.isEnabled()) {
+			await expectPointerCursor(action)
+			await action.click({ trial: true })
+		}
+	}
+	const cancel = dialog.getByRole("button", { name: "Cancel", exact: true })
+	await cancel.scrollIntoViewIfNeeded()
+	await expectPointerCursor(cancel)
+	await expect(cancel).toBeInViewport()
+	await cancel.click({ trial: true })
+	await cancel.focus()
+	await cancel.press("Enter")
+	await expect(dialog).not.toBeVisible()
+}
+
+test("editor popups: values, cursors, fit and keyboard reopen work", async ({
+	page,
+	workspace,
+}) => {
 	test.setTimeout(150_000)
 	void workspace
 	for (const editor of editors) {
-		await test.step(`${editor.name}: popup entrance, backdrop and keyboard reopen`, async () => {
+		await test.step(`${editor.name}: backdrop, values, cursors, fit and keyboard reopen work`, async () => {
 			void workspace
 			await page.goto(editor.route)
 			const trigger = page.getByRole("button", { name: editor.trigger, exact: true })
 			await expectPointerCursor(trigger)
-			const children = await sampleVisibleRowAnimations(
-				page,
-				'[data-slot="dialog-content"] [data-slot="field"], [data-slot="dialog-content"] div.overflow-hidden',
-				() => expectPopupEntrance(page, () => trigger.click()),
-			)
-			for (const child of children) {
-				expect(
-					Math.min(...child.frames.map(frame => frame.opacity)),
-					`${child.text}: initial fields must not separately fade`,
-				).toBeGreaterThan(0.99)
-			}
+			await trigger.click()
 			const dialog = page.getByRole("dialog", { name: editor.title, exact: true })
+			await expect(dialog).toBeVisible()
+			await expectVisibleBackdrop(page)
 			await expect(dialog.getByLabel(editor.field, { exact: true })).toHaveValue(editor.value)
 			// Every enabled popup button must look and stay interactive.
 			for (const button of await dialog.getByRole("button").all()) {
@@ -163,80 +184,7 @@ test("editor popup entrances share one seed", { tag: ["@motion"] }, async ({ pag
 	}
 })
 
-async function sampleWarningCollapse(page: Page, dialog: Locator) {
-	await expect(
-		dialog.locator("div.overflow-hidden").filter({ hasText: "Amount does not match" }).first(),
-	).toHaveCSS("opacity", "1")
-	const recorder = await page.evaluateHandle(() => ({
-		done: new Promise<{ opacity: number; height: number }[]>(resolve => {
-			const frames: { opacity: number; height: number }[] = []
-			let count = 0
-			const tick = () => {
-				const target = [
-					...document.querySelectorAll(
-						'[data-slot="dialog-content"] div.overflow-hidden',
-					),
-				].find(element => element.textContent?.includes("Amount does not match"))
-				frames.push(
-					target
-						? {
-								opacity: Number(getComputedStyle(target).opacity),
-								height: target.getBoundingClientRect().height,
-							}
-						: { opacity: 0, height: 0 },
-				)
-				if (++count < 24) requestAnimationFrame(tick)
-				else resolve(frames)
-			}
-			tick()
-		}),
-	}))
-	await dialog.getByLabel("Amount", { exact: true }).fill("0")
-	try {
-		return await recorder.evaluate(state => state.done)
-	} finally {
-		await recorder.dispose()
-	}
-}
-
-async function openEditor(page: Page, route: string, trigger: string, title: string) {
-	await page.goto(route)
-	await page.getByRole("button", { name: trigger, exact: true }).click()
-	const dialog = page.getByRole("dialog", { name: title, exact: true })
-	await expect(dialog).toBeVisible()
-	await expectVisibleBackdrop(page)
-	return dialog
-}
-
-async function select(page: Page, dialog: Locator, label: string, option: string) {
-	// Centre the trigger: edge-aligned auto-scrolls fight sticky dialog chrome.
-	// No Escape here: with no popup open it would close the dialog under test.
-	const trigger = dialog.getByLabel(label, { exact: true })
-	await trigger.evaluate(element => element.scrollIntoView({ block: "center" }))
-	await trigger.click()
-	const choice = page.getByRole("option", { name: option, exact: true })
-	await expect(choice).toBeVisible()
-	await choice.click()
-}
-
-async function chooseCategory(page: Page, dialog: Locator, name = "Groceries") {
-	await dialog.getByLabel("Category", { exact: true }).fill(name)
-	await page.getByRole("option", { name, exact: true }).click()
-}
-
-async function chooseRange(page: Page, dialog: Locator) {
-	await dialog.getByLabel("Date range", { exact: true }).click()
-	const calendar = page.locator('[data-slot="popover-content"]')
-	await expect(calendar).toBeVisible()
-	await calendar
-		.locator("button[data-day]")
-		.filter({ hasNot: page.locator("[disabled]") })
-		.first()
-		.click()
-	await calendar.getByRole("button", { name: "Apply", exact: true }).click()
-}
-
-test("account: required name, unicode rename persists after reload", async ({
+test("Account editor: required name and unicode rename persist after reload", async ({
 	page,
 	workspace,
 }) => {
@@ -261,9 +209,9 @@ test("account: required name, unicode rename persists after reload", async ({
 	)
 })
 
-test("budget editor journeys share one seed", async ({ page, workspace }) => {
+test("Budget editors: creator validation and editor persistence", async ({ page, workspace }) => {
 	void workspace
-	await test.step("budget creator: blank name/range errors, negative rejected, zero and single-day range persist", async () => {
+	await test.step("Budget creator: blank name and range errors, negative rejected, zero and single-day range persist", async () => {
 		void workspace
 		const dialog = await openEditor(page, "/budgets", "New Budget", "Create Budget")
 		await dialog.getByRole("button", { name: "Create budget", exact: true }).click()
@@ -286,7 +234,7 @@ test("budget editor journeys share one seed", async ({ page, workspace }) => {
 		await expect(update.getByLabel("Amount", { exact: true })).toHaveValue("0")
 		await expect(update.getByLabel("Date range", { exact: true })).not.toContainText("Any date")
 	})
-	await test.step("budget editor: prepopulated period and amount, clearing range fails, long name and zero persist", async () => {
+	await test.step("Budget editor: prepopulated period and amount, clearing range fails, long name and zero persist", async () => {
 		void workspace
 		const route = `/budgets/${budget.id}`
 		const dialog = await openEditor(page, route, "Edit Budget", "Edit Budget")
@@ -320,9 +268,12 @@ test("budget editor journeys share one seed", async ({ page, workspace }) => {
 	})
 })
 
-test("category editor journeys share one seed", async ({ page, workspace }) => {
+test("Category editors: treatment defaults, archived options and persistence", async ({
+	page,
+	workspace,
+}) => {
 	void workspace
-	await test.step("category: spending default budget, archived options absent, income clears budget, blank validation", async () => {
+	await test.step("Category editor: Spending default Monthly Budget, archived options absent, Income clears budget and blank validation", async () => {
 		void workspace
 		const dialog = await openEditor(page, "/categories", "Edit Groceries", "Edit Category")
 		await expect(dialog.getByLabel("Treatment", { exact: true })).toContainText("Spending")
@@ -358,7 +309,7 @@ test("category editor journeys share one seed", async ({ page, workspace }) => {
 			page.getByRole("dialog").getByLabel("Monthly budget", { exact: true }),
 		).toBeDisabled()
 	})
-	await test.step("category creator: required identity and valid colour/defaults persist", async () => {
+	await test.step("Category creator: required identity, icon, colour and defaults persist", async () => {
 		void workspace
 		const dialog = await openEditor(page, "/categories", "Create Category", "Create Category")
 		await dialog.getByRole("button", { name: "Create category", exact: true }).click()
@@ -393,12 +344,12 @@ test("category editor journeys share one seed", async ({ page, workspace }) => {
 	})
 })
 
-test("monthly budget editor journeys share one seed", { tag: ["@motion"] }, async ({
+test("Monthly Budget editors: creator validation and override persistence", async ({
 	page,
 	workspace,
 }) => {
 	void workspace
-	await test.step("monthly budget creator: blank errors, zero amount and null are distinct persisted values", async () => {
+	await test.step("Monthly Budget creator: blank errors, zero amount and null are distinct persisted values", async () => {
 		void workspace
 		const dialog = await openEditor(
 			page,
@@ -430,7 +381,7 @@ test("monthly budget editor journeys share one seed", { tag: ["@motion"] }, asyn
 				.getByRole("checkbox", { name: "No monthly amount", exact: true }),
 		).toBeChecked()
 	})
-	await test.step("monthly budget editor: inherited amount reveals smoothly only after override action", async () => {
+	await test.step("Monthly Budget editor: zero override persists after reload", async () => {
 		void workspace
 		const dialog = await openEditor(
 			page,
@@ -442,25 +393,8 @@ test("monthly budget editor journeys share one seed", { tag: ["@motion"] }, asyn
 		await expect(dialog.getByText("Amount for October 2026", { exact: true })).toBeVisible()
 		await select(page, dialog, "Amount rule", "Default")
 		await expect(dialog.getByLabel("Monthly amount", { exact: true })).toHaveCount(0)
-		const samples = await sampleVisibleRowAnimations(
-			page,
-			'[data-slot="dialog-content"] div.overflow-hidden:has(#monthly-budget-amount)',
-			() => select(page, dialog, "Amount rule", "Override one month"),
-		)
+		await select(page, dialog, "Amount rule", "Override one month")
 		await expect(dialog.getByLabel("Monthly amount", { exact: true })).toBeVisible()
-		expect(samples.length).toBe(1)
-		const frames = samples[0]?.frames ?? []
-		expect(
-			frames.length,
-			"Conditional amount wrapper is sampled over multiple frames",
-		).toBeGreaterThan(2)
-		if (!(await page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches))) {
-			expect(
-				Math.min(...frames.map(frame => frame.opacity)),
-				"Newly revealed amount fades in after action",
-			).toBeLessThan(0.95)
-			expect(frames.at(-1)?.opacity).toBeGreaterThan(0.99)
-		}
 		// Daily starts with a null October amount, so the revealed input is disabled.
 		await dialog.getByRole("checkbox", { name: "No monthly amount", exact: true }).uncheck()
 		await dialog.getByLabel("Monthly amount", { exact: true }).fill("0")
@@ -477,9 +411,12 @@ test("monthly budget editor journeys share one seed", { tag: ["@motion"] }, asyn
 	})
 })
 
-test("pending statement editor journeys share one seed", async ({ page, workspace }) => {
+test("Pending Statement editors: creator validation and editor persistence", async ({
+	page,
+	workspace,
+}) => {
 	void workspace
-	await test.step("pending statement creator: required account/description and negative amount persist", async () => {
+	await test.step("Pending Statement creator: required Account, description and negative amount persist", async () => {
 		void workspace
 		const dialog = await openEditor(
 			page,
@@ -511,7 +448,7 @@ test("pending statement editor journeys share one seed", async ({ page, workspac
 			.fill(longText.trim())
 		await expect(page.getByRole("main")).toContainText(longText.trim())
 	})
-	await test.step("pending statement editor: original description, allocations protect delete, zero fails and negative persists", async () => {
+	await test.step("Pending Statement editor: original description, Allocation protection, zero fails and negative persists", async () => {
 		void workspace
 		const route = `/statements/${pending.id}`
 		const dialog = await openEditor(
@@ -549,14 +486,14 @@ test("pending statement editor journeys share one seed", async ({ page, workspac
 	})
 })
 
-test("record creator journeys share one seed", { tag: ["@motion"] }, async ({
+test("Record creator: required fields, category defaults and persistence", async ({
 	page,
 	workspace,
 }) => {
 	test.setTimeout(90_000)
 	void workspace
 	for (const amount of ["-12.34", "0"]) {
-		await test.step(`record creator: required fields, category defaults, amount ${amount} and long text persist`, async () => {
+		await test.step(`Record creator: required fields, category defaults, amount ${amount} and long text persist`, async () => {
 			void workspace
 			const text = `${longText}(${amount})`
 			const dialog = await openEditor(
@@ -588,64 +525,18 @@ test("record creator journeys share one seed", { tag: ["@motion"] }, async ({
 			)
 			// The pending warning tracks the amount/allocation mismatch, not just mount state.
 			const mismatch = dialog.getByText("Amount does not match the sum of Allocation Amounts")
-			const expectWarningReveal = async (value: string) => {
-				const samples = await sampleVisibleRowAnimations(
-					page,
-					'[data-slot="dialog-content"] div.overflow-hidden',
-					() => dialog.getByLabel("Amount", { exact: true }).fill(value),
-				)
-				const warning = samples.find(sample =>
-					sample.text.includes("Amount does not match"),
-				)
-				expect(warning, "Conditional warning wrapper is sampled").toBeDefined()
-				const frames = warning?.frames ?? []
-				expect(
-					frames.length,
-					"Conditional warning is sampled over multiple frames",
-				).toBeGreaterThan(2)
-				if (
-					!(await page.evaluate(
-						() => matchMedia("(prefers-reduced-motion: reduce)").matches,
-					))
-				) {
-					expect(
-						Math.min(...frames.map(frame => frame.opacity)),
-						"Newly revealed warning fades in after action",
-					).toBeLessThan(0.95)
-					expect(frames.at(-1)?.opacity).toBeGreaterThan(0.99)
-				}
-			}
-			const expectWarningHide = async () => {
-				const frames = await sampleWarningCollapse(page, dialog)
-				await expect(mismatch).toHaveCount(0)
-				if (
-					!(await page.evaluate(
-						() => matchMedia("(prefers-reduced-motion: reduce)").matches,
-					))
-				) {
-					expect(
-						frames.length,
-						"Collapse is sampled over multiple frames",
-					).toBeGreaterThan(2)
-					const first = frames[0]
-					const last = frames.at(-1)
-					expect(first?.opacity ?? Number.NaN).toBeGreaterThan(0.5)
-					expect(
-						(last?.opacity ?? 1) < (first?.opacity ?? 0) ||
-							(last?.height ?? 0) < (first?.height ?? 0),
-						"Collapsing warning shrinks instead of replaying an entrance",
-					).toBe(true)
-				}
-			}
 			if (amount === "0") {
 				await expect(mismatch).toHaveCount(0)
-				await expectWarningReveal("-12.34")
+				await dialog.getByLabel("Amount", { exact: true }).fill("-12.34")
 				await expect(mismatch).toBeVisible()
-				await expectWarningHide()
+				await dialog.getByLabel("Amount", { exact: true }).fill("0")
+				await expect(mismatch).toHaveCount(0)
 			} else {
 				await expect(mismatch).toBeVisible()
-				await expectWarningHide()
-				await expectWarningReveal(amount)
+				await dialog.getByLabel("Amount", { exact: true }).fill("0")
+				await expect(mismatch).toHaveCount(0)
+				await dialog.getByLabel("Amount", { exact: true }).fill(amount)
+				await expect(mismatch).toBeVisible()
 			}
 			await dialog.getByRole("button", { name: "Create Record", exact: true }).click()
 			await expect(dialog).not.toBeVisible()
@@ -659,7 +550,7 @@ test("record creator journeys share one seed", { tag: ["@motion"] }, async ({
 			)
 		})
 	}
-	await test.step("record creator: clearing the selected date shows date validation and archived budgets stay unavailable", async () => {
+	await test.step("Record creator: clearing the selected date shows date validation and archived Monthly Budgets stay unavailable", async () => {
 		void workspace
 		const dialog = await openEditor(
 			page,
@@ -699,176 +590,234 @@ test("record creator journeys share one seed", { tag: ["@motion"] }, async ({
 	})
 })
 
-test("record editor and search sheets share one seed", async ({ page, workspace }) => {
-	void workspace
-	await test.step("statement search sheet: filter, allocate, Done returns to editor, unsaved allocation cancelled", async () => {
-		void workspace
-		const dialog = await openEditor(page, `/records/${record.id}`, "Edit Record", "Edit Record")
-		await dialog.getByRole("button", { name: "Allocate statement", exact: true }).click()
-		const sheet = page.getByRole("dialog", {
-			name: "Allocate statements to record",
-			exact: true,
-		})
-		await expectVisibleBackdrop(page)
-		await sheet.getByRole("searchbox", { name: "Search statements" }).fill(imported.description)
-		await sheet.getByRole("button").filter({ hasText: imported.description }).click()
-		await sheet.getByRole("button", { name: "Done", exact: true }).click()
-		await expect(sheet).not.toBeVisible()
-		await expect(dialog).toContainText(imported.description)
-		await dialog.getByRole("button", { name: "Cancel", exact: true }).click()
-		await expect(page.getByRole("dialog")).toHaveCount(0)
-		// The cancelled allocation was never saved to the Record.
-		await expect(page.locator("main")).not.toContainText(imported.description)
-		await page.getByRole("button", { name: "Edit Record", exact: true }).click()
-		const reopened = page.getByRole("dialog", { name: "Edit Record" })
-		await expect(reopened).toBeVisible()
-		await expect(
-			reopened.getByRole("button", { name: "Allocate statement", exact: true }),
-		).toBeVisible()
-		await expect(reopened).not.toContainText(imported.description)
-	})
-	await test.step("record search sheet: query miss and hit, attach persists, Escape/reopen", async () => {
-		void workspace
-		await page.goto(`/budgets/${budget.id}`)
-		const trigger = page.getByRole("button", { name: "Attach Record", exact: true })
-		await trigger.click()
-		const sheet = page.getByRole("dialog", { name: "Attach record to budget", exact: true })
-		await expectVisibleBackdrop(page)
-		await sheet.getByRole("searchbox", { name: "Search records" }).fill("no-such-record-999")
-		await expect(sheet).toContainText("No matching Records.")
-		await sheet.getByRole("searchbox", { name: "Search records" }).fill(record.title)
-		await sheet.getByRole("button").filter({ hasText: record.title }).click()
-		await expect(sheet).not.toBeVisible()
-		await page.reload()
-		await expect(page.getByRole("main")).toContainText(record.title)
-		await trigger.click()
-		await page.keyboard.press("Escape")
-		await expect(sheet).not.toBeVisible()
-		await trigger.click()
-		await expect(sheet).toBeVisible()
-	})
-	await test.step("record editor: null optional fields, long title, sign and penny keyboard steps persist", async () => {
-		void workspace
-		const dialog = await openEditor(page, `/records/${record.id}`, "Edit Record", "Edit Record")
-		await expect(dialog.getByLabel("Title", { exact: true })).toHaveValue(record.title)
-		await expect(dialog.getByLabel("People", { exact: true })).toHaveValue(record.people ?? "")
-		await expect(dialog.getByLabel("Location", { exact: true })).toHaveValue(
-			record.location ?? "",
-		)
-		await dialog.getByLabel("Title", { exact: true }).fill(longText)
-		const amount = dialog.getByLabel("Amount", { exact: true }).first()
-		await amount.fill("0")
-		await amount.press("ArrowDown")
-		await expect(amount).toHaveValue("-0.01")
-		await dialog
-			.getByRole("button", { name: "Make amount positive", exact: true })
-			.first()
-			.click()
-		await expect(amount).toHaveValue("0.01")
-		await dialog.getByRole("button", { name: "Save changes" }).click()
-		await expect(dialog).not.toBeVisible()
-		await page.reload()
-		await page.getByRole("button", { name: "Edit Record", exact: true }).click()
-		await expect(page.getByRole("dialog").getByLabel("Title", { exact: true })).toHaveValue(
-			longText.trim(),
-		)
-		await expect(
-			page.getByRole("dialog").getByLabel("Amount", { exact: true }).first(),
-		).toHaveValue("0.01")
-	})
-})
-
-async function openReplacementSheet(page: Page) {
-	await page.goto("/allocator")
-	await page
-		.getByRole("checkbox", { name: `Select statement ${imported.id}`, exact: true })
-		.check()
-	await page.getByRole("button", { name: "Replace Pending", exact: true }).click()
-	return page.getByRole("dialog", { name: "Replace a pending Statement", exact: true })
-}
-
-test("replacement and duplicate review sheets share one seed", { tag: ["@motion"] }, async ({
+test("Record editor: null optional fields, long title, sign and penny keyboard steps persist", async ({
 	page,
 	workspace,
 }) => {
 	void workspace
-	await test.step("pending confirmation sheet and replacement review: selected descriptions, cancel restores sheet", async () => {
-		void workspace
-		const sheet = await openReplacementSheet(page)
-		await expectVisibleBackdrop(page)
-		await expect(sheet).toContainText(imported.description)
-		await sheet
-			.getByRole("searchbox", { name: "Search pending Statements" })
-			.fill(pending.description)
-		const choice = sheet.getByRole("button").filter({ hasText: pending.description })
-		// Sample only the newly opened review; the confirmation sheet is already visible.
-		const entrance = await sampleVisibleRowAnimations(
-			page,
-			'[data-slot="dialog-content"]',
-			() => choice.click(),
-		)
-		expect(entrance.length).toBe(1)
-		if (!(await page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches))) {
-			expect(
-				entrance[0]?.frames.some(frame => frame.opacity > 0.01 && frame.opacity < 0.99),
-				"Replacement review must animate through intermediate opacity",
-			).toBe(true)
-		}
-		await expectVisibleBackdrop(page)
-		const review = page.getByRole("dialog", {
-			name: "Review Statement replacement",
-			exact: true,
-		})
-		await expect(review).toContainText(pending.description)
-		await expect(review).toContainText(imported.description)
-		await expect(
-			review.getByRole("button", { name: "Replace pending Statement", exact: true }),
-		).toBeEnabled()
-		await review.getByRole("button", { name: "Cancel", exact: true }).click()
-		await expect(sheet).toBeVisible()
-		await page.keyboard.press("Escape")
-		await expect(sheet).not.toBeVisible()
-	})
-	await test.step("duplicate review: explicit keep/delete, backdrop, cancel and reopen retain choices", async () => {
-		void workspace
-		await page.goto("/allocator/duplicates")
-		// Review stays disabled until both a kept and a deleted Statement are chosen.
-		await expect(
-			page.getByRole("button", { name: "Review deletion", exact: true }).first(),
-		).toBeDisabled()
-		await page.getByRole("radio", { name: `Keep ${kept.description}`, exact: true }).click()
-		await page
-			.getByRole("radio", { name: `Delete ${deleted.description}`, exact: true })
-			.click()
-		const trigger = page.getByRole("button", { name: "Review deletion", exact: true }).first()
-		await expectPopupEntrance(page, () => trigger.click())
-		const dialog = page.getByRole("dialog", {
-			name: "Delete duplicate Statements",
-			exact: true,
-		})
-		await expect(dialog).toContainText(kept.description)
-		await expect(dialog).toContainText(deleted.description)
-		await expect(
-			dialog.getByRole("button", { name: "Delete 1 Statement", exact: true }),
-		).toBeEnabled()
-		await dialog.getByRole("button", { name: "Cancel", exact: true }).click()
+	const dialog = await openEditor(page, `/records/${record.id}`, "Edit Record", "Edit Record")
+	await expect(dialog.getByLabel("Title", { exact: true })).toHaveValue(record.title)
+	await expect(dialog.getByLabel("People", { exact: true })).toHaveValue(record.people ?? "")
+	await expect(dialog.getByLabel("Location", { exact: true })).toHaveValue(record.location ?? "")
+	await dialog.getByLabel("Title", { exact: true }).fill(longText)
+	const amount = dialog.getByLabel("Amount", { exact: true }).first()
+	await amount.fill("0")
+	await amount.press("ArrowDown")
+	await expect(amount).toHaveValue("-0.01")
+	await dialog.getByRole("button", { name: "Make amount positive", exact: true }).first().click()
+	await expect(amount).toHaveValue("0.01")
+	await dialog.getByRole("button", { name: "Save changes" }).click()
+	await expect(dialog).not.toBeVisible()
+	await page.reload()
+	await page.getByRole("button", { name: "Edit Record", exact: true }).click()
+	await expect(page.getByRole("dialog").getByLabel("Title", { exact: true })).toHaveValue(
+		longText.trim(),
+	)
+	await expect(
+		page.getByRole("dialog").getByLabel("Amount", { exact: true }).first(),
+	).toHaveValue("0.01")
+})
+
+test("archived Monthly Budgets: archival persistence and historical assignment", async ({
+	page,
+}) => {
+	await seedWorkspace(page)
+	await test.step("Monthly Budget editor: archival persists without erasing historical assignment", async () => {
+		await page.goto("/?month=October&year=2026")
+		await page.getByRole("button", { name: "Edit Daily", exact: true }).click()
+		const dialog = page.getByRole("dialog", { name: "Edit Daily", exact: true })
+		await dialog.getByRole("checkbox", { name: "Archive monthly budget", exact: true }).check()
+		await dialog.getByRole("button", { name: "Save changes", exact: true }).click()
 		await expect(dialog).not.toBeVisible()
-		await trigger.click()
+		await page.reload()
+		const archived = await page.evaluate(async () => {
+			const database = await new Promise<IDBDatabase>(resolve => {
+				const open = indexedDB.open("finpoint")
+				open.onsuccess = () => resolve(open.result)
+			})
+			return await new Promise<boolean>(resolve => {
+				const request = database
+					.transaction("monthly_budgets", "readonly")
+					.objectStore("monthly_budgets")
+					.get("t1-mb-daily")
+				request.onsuccess = () => {
+					database.close()
+					resolve(request.result.archived)
+				}
+			})
+		})
+		expect(archived).toBe(true)
+		await page.goto(`/records/${IDS.records.unicode}`)
+		await expect(page.getByText(/Monthly budget ·/)).toContainText("Daily")
+	})
+	await test.step("archived Monthly Budget assignment: badge, total and disabled editor option are retained", async () => {
+		await page.evaluate(async () => {
+			const database = await new Promise<IDBDatabase>((resolve, reject) => {
+				const open = indexedDB.open("finpoint")
+				open.onsuccess = () => resolve(open.result)
+				open.onerror = () => reject(open.error)
+			})
+			await new Promise<void>((resolve, reject) => {
+				const transaction = database.transaction("records", "readwrite")
+				transaction.oncomplete = () => {
+					database.close()
+					resolve()
+				}
+				transaction.onabort = () => reject(transaction.error)
+				const store = transaction.objectStore("records")
+				const request = store.get("t1-r-unicode")
+				request.onsuccess = () =>
+					store.put({
+						...request.result,
+						monthly_budget_id: "t1-mb-travel",
+						monthly_budget_source: "manual",
+					})
+			})
+		})
+		await page.goto(`/records/${IDS.records.unicode}`)
+		await expect(page.getByText(/Monthly budget ·/)).toContainText("Travel")
+		await page.getByRole("button", { name: "Edit Record", exact: true }).click()
+		const dialog = page.getByRole("dialog", { name: "Edit Record", exact: true })
+		const budget = dialog.getByRole("combobox").filter({ hasText: "Travel" })
+		await expect(budget).toBeVisible()
+		await budget.click()
+		await expect(page.getByRole("option", { name: "Travel", exact: true })).toBeDisabled()
+		await page.keyboard.press("Escape")
 		await expect(dialog).toBeVisible()
 		await page.keyboard.press("Escape")
-		await expect(dialog).not.toBeVisible()
+		await page.goto("/records/monthly?month=October&year=2026&monthly_budget_id=t1-mb-travel")
+		await expect(
+			page.getByRole("link", { name: /^Open Kōpi/ }).filter({ visible: true }),
+		).toBeVisible()
+		await expect(page.locator("main")).toContainText("-$33.33")
 	})
 })
 
-test("empty workspace: category creation remains available and record category shows no options", async ({
-	page,
-}) => {
-	await seedWorkspace(page, "empty")
-	const dialog = await openEditor(page, "/records", "Create Pending Record", "Create New Record")
-	await dialog.getByLabel("Category", { exact: true }).click()
-	await expect(page.getByText("No categories found.", { exact: true })).toBeVisible()
-	await page.keyboard.press("Escape")
-	await dialog.getByRole("button", { name: "Cancel", exact: true }).click()
-	await page.goto("/categories")
-	await expect(page.getByRole("button", { name: "Create Category", exact: true })).toBeEnabled()
+test.describe("long content", () => {
+	test.beforeEach(async ({ workspace }) => {
+		void workspace
+	})
+
+	// Creator long-content checks share one seed: every step cancels through the
+	// footer, so no step persists anything for the next one.
+	test("long editor content: Unicode creator content keeps keyboard cancellation reachable", async ({
+		page,
+	}) => {
+		for (const [route, trigger, title, label] of [
+			["/budgets", "New Budget", "Create Budget", "Name"],
+			["/categories", "Create Category", "Create Category", "Name"],
+			["/?month=October&year=2026", "New", "Create monthly budget", "Name"],
+			["/statements", "Create Pending Statement", "Create Pending Statement", "Description"],
+		] as const) {
+			await test.step(`long ${title} editor: Unicode content and keyboard cancellation reachable`, async () => {
+				await page.goto(route)
+				await page.getByRole("button", { name: trigger, exact: true }).click()
+				const dialog = page.getByRole("dialog", { name: title, exact: true })
+				await dialog.getByLabel(label, { exact: true }).fill(longName)
+				await expect(dialog.getByLabel(label, { exact: true })).toHaveValue(longName)
+				await expectVisibleBackdrop(page)
+				await containedFooter(dialog)
+			})
+		}
+	})
+
+	// Review long-content checks share one seed: both steps rewrite the same four
+	// descriptions to the same absolute values, so the second rewrite is
+	// idempotent and the dialogs under test differ per step.
+	test("long review content: duplicate and replacement reviews keep footer usable", async ({
+		page,
+	}) => {
+		for (const kind of ["duplicate", "replacement"] as const) {
+			await test.step(`long ${kind} review: long imported descriptions and usable footer`, async () => {
+				await page.evaluate(async description => {
+					const database = await new Promise<IDBDatabase>((resolve, reject) => {
+						const open = indexedDB.open("finpoint")
+						open.onsuccess = () => resolve(open.result)
+						open.onerror = () => reject(open.error)
+					})
+					await new Promise<void>((resolve, reject) => {
+						const transaction = database.transaction("statements", "readwrite")
+						transaction.oncomplete = () => {
+							database.close()
+							resolve()
+						}
+						transaction.onabort = () => reject(transaction.error)
+						const store = transaction.objectStore("statements")
+						for (const id of [
+							"t1-s-dup-a",
+							"t1-s-dup-b",
+							"t1-s-pending",
+							"t1-s-free-2",
+						]) {
+							const request = store.get(id)
+							request.onsuccess = () =>
+								store.put({
+									...request.result,
+									description: `${description} ${id}`,
+								})
+						}
+					})
+				}, longName)
+				if (kind === "duplicate") {
+					await page.goto("/allocator/duplicates?view=all")
+					await page
+						.getByRole("radio", { name: `Keep ${longName} t1-s-dup-a`, exact: true })
+						.click()
+					await page
+						.getByRole("radio", { name: `Delete ${longName} t1-s-dup-b`, exact: true })
+						.click()
+					await page
+						.getByRole("button", { name: "Review deletion", exact: true })
+						.and(page.locator("button:not(:disabled)"))
+						.click()
+				} else {
+					await page.goto("/allocator")
+					await page
+						.getByRole("checkbox", {
+							name: `Select statement ${IDS.statements.unallocated[3]}`,
+							exact: true,
+						})
+						.check()
+					await page.getByRole("button", { name: "Replace Pending", exact: true }).click()
+					await page
+						.getByRole("dialog", { name: "Replace a pending Statement", exact: true })
+						.getByRole("button")
+						.filter({ hasText: `${longName} t1-s-pending` })
+						.click()
+				}
+				const dialog = page.getByRole("dialog", {
+					name:
+						kind === "duplicate"
+							? "Delete duplicate Statements"
+							: "Review Statement replacement",
+					exact: true,
+				})
+				await expect(dialog).toContainText(longName)
+				await expectVisibleBackdrop(page)
+				await containedFooter(dialog)
+			})
+		}
+	})
+})
+
+test.describe("empty workspace", () => {
+	test("empty workspace: Category creation remains available and Record Category shows no options", async ({
+		page,
+	}) => {
+		await seedWorkspace(page, "empty")
+		const dialog = await openEditor(
+			page,
+			"/records",
+			"Create Pending Record",
+			"Create New Record",
+		)
+		await dialog.getByLabel("Category", { exact: true }).click()
+		await expect(page.getByText("No categories found.", { exact: true })).toBeVisible()
+		await page.keyboard.press("Escape")
+		await dialog.getByRole("button", { name: "Cancel", exact: true }).click()
+		await page.goto("/categories")
+		await expect(
+			page.getByRole("button", { name: "Create Category", exact: true }),
+		).toBeEnabled()
+	})
 })

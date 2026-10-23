@@ -15,9 +15,9 @@ import {
 	scenarioProjectExemptions,
 	scenarioProjectLexiconExemptions,
 	scenarioProjects,
-} from "./component-inventory"
+} from "../component-inventory"
 
-const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..")
+const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..")
 
 // Financial Pending states are valid evidence. Only admissions of unfinished
 // coverage count here; an executable mapping cannot close an admitted facet.
@@ -39,7 +39,7 @@ function collectOpenFacets(
 	})
 }
 
-test("[UI-INVENTORY-FACETS] a mapped scenario stays incomplete while any facet is admitted open", () => {
+test("ledger facets: mapped scenarios stay incomplete while any facet is admitted open", () => {
 	const scenarios = [
 		{ id: "mapped", description: "Long option facets remain gaps" },
 		{ id: "keyboard", description: "Keyboard behaviour remains pending" },
@@ -59,6 +59,7 @@ test("[UI-INVENTORY-FACETS] a mapped scenario stays incomplete while any facet i
 
 function files(directory: string): string[] {
 	return readdirSync(join(root, directory), { withFileTypes: true })
+		.filter(entry => !entry.name.startsWith("."))
 		.flatMap(entry =>
 			entry.isDirectory()
 				? files(`${directory}/${entry.name}`)
@@ -142,6 +143,24 @@ function collectTests(
 ) {
 	const source = ts.createSourceFile(path, text, ts.ScriptTarget.Latest, true)
 	const constants = new Map<string, ts.Expression>()
+	// D39: the fixtures `test` may be imported under a local alias (for
+	// example `import { test as workspaceTest } from "../support/fixtures"`).
+	// Every `test`/`test.step`/`test.describe`/skip/only match below resolves
+	// through these local binding names, never the literal `test` alone.
+	const testHeads = new Set<string>(["test"])
+	for (const statement of source.statements) {
+		if (!ts.isImportDeclaration(statement)) continue
+		const bindings = statement.importClause?.namedBindings
+		if (!bindings || !ts.isNamedImports(bindings)) continue
+		for (const element of bindings.elements)
+			if ((element.propertyName?.text ?? element.name.text) === "test")
+				testHeads.add(element.name.text)
+	}
+	function splitTestCallee(callee: string): string | null {
+		const dot = callee.indexOf(".")
+		if (dot < 0) return testHeads.has(callee) ? "" : null
+		return testHeads.has(callee.slice(0, dot)) ? callee.slice(dot) : null
+	}
 	for (const statement of source.statements) {
 		if (ts.isVariableStatement(statement))
 			for (const declaration of statement.declarationList.declarations) {
@@ -238,7 +257,7 @@ function collectTests(
 		return node
 	}
 	// Tag details are a static object literal in the second argument:
-	// test(title, { tag: "@motion" }, …), test(title, { tag: ["@tall"] }, …),
+	// test(title, { tag: "@reduced-motion" }, …), test(title, { tag: ["@tall"] }, …),
 	// test(title, { tag: tags }, …) with tags bound through a static for…of, or
 	// a conditional whose condition resolves statically (loop bindings included).
 	// Anything else in the second argument is the callback, not details.
@@ -352,13 +371,17 @@ function collectTests(
 		return motionPattern.test(combined)
 	}
 	function disabled(node: ts.Node): boolean {
-		if (
-			ts.isCallExpression(node) &&
-			/^(?:test(?:\.info\(\))?\.(?:skip|fixme)|test\.step\.(?:skip|fixme)|testInfo\.(?:skip|fixme))$/.test(
-				node.expression.getText(source),
+		if (ts.isCallExpression(node)) {
+			const callee = node.expression.getText(source)
+			const rest = splitTestCallee(callee)
+			if (
+				rest !== null &&
+				(/^\.step\.(?:skip|fixme)$/.test(rest) ||
+					/^(?:\.info\(\))?\.(?:skip|fixme)$/.test(rest))
 			)
-		)
-			return true
+				return true
+			if (/^testInfo\.(?:skip|fixme)$/.test(callee)) return true
+		}
 		return node.getChildren(source).some(disabled)
 	}
 	function visit(
@@ -399,13 +422,19 @@ function collectTests(
 		}
 		if (ts.isCallExpression(node)) {
 			const callee = node.expression.getText(source)
+			const rest = splitTestCallee(callee)
 			const here = `${path}:${source.getLineAndCharacterOfPosition(node.pos).line + 1}`
 			// Pruned branches never run, so nothing inside them is executable
 			// evidence — including nested step aliases from skipped parents.
 			if (
-				/^test\.describe\.(?:skip|fixme|only)$/.test(callee) ||
-				/^test\.(?:skip|fixme|only)$/.test(callee) ||
-				/^test\.step\.(?:skip|fixme)$/.test(callee)
+				rest === ".describe.skip" ||
+				rest === ".describe.fixme" ||
+				rest === ".describe.only" ||
+				rest === ".skip" ||
+				rest === ".fixme" ||
+				rest === ".only" ||
+				rest === ".step.skip" ||
+				rest === ".step.fixme"
 			)
 				return
 			// Grouped tests keep the legacy case title as a static test.step
@@ -419,7 +448,7 @@ function collectTests(
 			// the second argument never change an ID; steps inherit their
 			// test's tags through the describe/test/step stack, recorded in
 			// a separate selections map so declaration counts are unchanged.
-			if (callee === "test.describe") {
+			if (rest === ".describe") {
 				visitCallback(
 					node,
 					env,
@@ -429,7 +458,7 @@ function collectTests(
 				)
 				return
 			}
-			if (callee === "test.step") {
+			if (rest === ".step") {
 				if (!active || disabled(node)) return
 				const effective = [
 					...new Set([...tags, ...detailsTags(node.arguments[1], env, here)]),
@@ -438,7 +467,7 @@ function collectTests(
 				visitCallback(node, env, true, effective, currentTest)
 				return
 			}
-			if (callee === "test" && node.arguments[0]) {
+			if (rest === "" && node.arguments[0]) {
 				if (disabled(node)) return
 				const title = titleOf(node, env)
 				const effective = [
@@ -495,15 +524,23 @@ function collectTests(
 function declaredTests() {
 	const declarations = new Map<string, string[]>()
 	const selections = new Map<string, TestSelection[]>()
-	for (const path of files("tests/web").filter(
-		path => path.endsWith(".e2e.ts") && !path.endsWith("/coverage.e2e.ts"),
-	)) {
-		collectTests(path, readFileSync(join(root, path), "utf8"), declarations, selections)
+	for (const directory of ["tests/web/gate", "tests/web/motion"]) {
+		let entries: string[]
+		try {
+			entries = files(directory)
+		} catch {
+			continue // a tier directory lands with its first migrated test
+		}
+		for (const path of entries.filter(
+			path => path.endsWith(".e2e.ts") && !path.endsWith("/ledger.e2e.ts"),
+		)) {
+			collectTests(path, readFileSync(join(root, path), "utf8"), declarations, selections)
+		}
 	}
 	return { declarations, selections }
 }
 
-test("[UI-INVENTORY-PARSER] static generated titles resolve but skipped cases cannot cover a component", () => {
+test("ledger parser: static generated titles resolve but skipped cases cannot cover a component", () => {
 	const declarations = new Map<string, string[]>()
 	const selections = new Map<string, TestSelection[]>()
 	collectTests(
@@ -538,6 +575,16 @@ test("[UI-INVENTORY-PARSER] static generated titles resolve but skipped cases ca
 		test("conditional tags false", { tag: false ? ["@motion"] : [] }, async () => {})
 		for (const kind of ["tall", "plain"] as const)
 			test(\`conditional \${kind}\`, { tag: kind === "tall" ? ["@tall"] : [] }, async () => {})
+		import { test as workspaceTest } from "./support/fixtures"
+		workspaceTest("alias title", async () => {
+			await workspaceTest.step("alias step", async () => {})
+		})
+		for (const [group, routes] of [["core", ["/", "/records"]]] as [string, string[]][]) {
+			workspaceTest(\`nested sweep \${group} shares one seed\`, async () => {
+				for (const route of routes)
+					await workspaceTest.step(\`nested \${route} stays inside\`, async () => {})
+			})
+		}
 		test.skip("skipped with tags", { tag: "@motion" }, () => {})
 		test("skipped group", async () => {
 			await test.step.skip("skipped step", async () => {})
@@ -585,6 +632,11 @@ test("[UI-INVENTORY-PARSER] static generated titles resolve but skipped cases ca
 		"conditional tags false",
 		"conditional tall",
 		"conditional plain",
+		"alias title",
+		"alias step",
+		"nested sweep core shares one seed",
+		"nested / stays inside",
+		"nested /records stays inside",
 	])
 	expect(selections.get("tag mirror")).toEqual([
 		{ path: "parser-fixture.ts", test: "tag mirror", tags: ["@motion"], motion: false },
@@ -646,13 +698,24 @@ test("[UI-INVENTORY-PARSER] static generated titles resolve but skipped cases ca
 			motion: false,
 		},
 	])
+	expect(selections.get("alias step")).toEqual([
+		{ path: "parser-fixture.ts", test: "alias title", tags: [], motion: false },
+	])
+	expect(selections.get("nested /records stays inside")).toEqual([
+		{
+			path: "parser-fixture.ts",
+			test: "nested sweep core shares one seed",
+			tags: [],
+			motion: false,
+		},
+	])
 	expect(selections.has("skipped with tags"), "skipped tests stay unrecorded").toBe(false)
 	expect(selections.get("grouped")).toEqual([
 		{ path: "parser-fixture.ts", test: "grouped", tags: [], motion: false },
 	])
 })
 
-test("[UI-INVENTORY-PARSER-TAGS] unresolved tag expressions throw instead of vanishing", () => {
+test("ledger parser tags: unresolved tag expressions throw instead of vanishing", () => {
 	for (const text of [
 		`test("unbound tag", { tag }, async () => {})`,
 		`test("numeric tag", { tag: 42 }, async () => {})`,
@@ -666,7 +729,7 @@ test("[UI-INVENTORY-PARSER-TAGS] unresolved tag expressions throw instead of van
 	}
 })
 
-test("[UI-INVENTORY-FILES] every component and app file has an explicit owner and classification", () => {
+test("ledger files: every component and app file has an explicit owner and classification", () => {
 	expect(componentInventory.map(entry => entry.path).sort()).toEqual(files("src/components"))
 	expect(routeInventory.map(entry => entry.path).sort()).toEqual(files("app"))
 	const paths = [...componentInventory, ...routeInventory].map(entry => entry.path)
@@ -696,7 +759,7 @@ test("[UI-INVENTORY-FILES] every component and app file has an explicit owner an
 	}
 })
 
-test("[UI-INVENTORY-EXPORTS] every runtime export is visible, dormant, or a non-rendering helper", () => {
+test("ledger exports: every runtime export is visible, dormant, or a non-rendering helper", () => {
 	for (const entry of componentInventory) {
 		const names = [...entry.visibleExports, ...entry.dormantExports, ...entry.helperExports]
 		expect(new Set(names).size, `${entry.path}: duplicate export classification`).toBe(
@@ -708,7 +771,7 @@ test("[UI-INVENTORY-EXPORTS] every runtime export is visible, dormant, or a non-
 	}
 })
 
-test("[UI-INVENTORY-COVERAGE] reviewed behaviour mappings reference executable test IDs and report gaps", async () => {
+test("ledger coverage: reviewed behaviour mappings reference executable test IDs and report gaps", async () => {
 	const testInfo = test.info()
 	const { declarations } = declaredTests()
 	const scenarios = [...componentInventory, ...routeInventory].flatMap(entry =>
@@ -829,7 +892,14 @@ test("[UI-INVENTORY-COVERAGE] reviewed behaviour mappings reference executable t
 	}
 })
 
-const projectTagVocabulary = ["@desktop-only", "@mobile-only", "@tall", "@light", "@motion"]
+const projectTagVocabulary = [
+	"@desktop-only",
+	"@mobile-only",
+	"@tall",
+	"@tall-only",
+	"@light",
+	"@reduced-motion",
+]
 
 type SelectionProject = {
 	name: string
@@ -849,7 +919,7 @@ function projectPatterns(patterns: RegExp | RegExp[] | undefined): RegExp[] {
 }
 
 // Playwright matches project grep/grepInvert against "<title> <tags…>"; every
-// testIgnore pattern in this repo is "**/<file>".
+// testIgnore pattern in this repo is "**/<file>", matched against repo-relative paths.
 function selectedBy(project: SelectionProject, file: string, fullTitle: string): boolean {
 	for (const pattern of projectIgnores(project)) {
 		if (typeof pattern === "string") {
@@ -857,9 +927,10 @@ function selectedBy(project: SelectionProject, file: string, fullTitle: string):
 				pattern.startsWith("**/"),
 				`project selection only supports **/<file> ignores, found ${pattern}`,
 			).toBe(true)
-			if (file === pattern.slice("**/".length)) return false
+			const suffix = pattern.slice("**/".length)
+			if (file === suffix || file.endsWith(`/${suffix}`)) return false
 		} else if (pattern instanceof RegExp) {
-			if (pattern.test(`tests/web/${file}`)) return false
+			if (pattern.test(file)) return false
 		} else {
 			throw new Error(`unsupported testIgnore pattern in project ${project.name}`)
 		}
@@ -871,7 +942,7 @@ function selectedBy(project: SelectionProject, file: string, fullTitle: string):
 	return true
 }
 
-// Effective description exactly as [UI-INVENTORY-COVERAGE] resolves it:
+// Effective description exactly as the ledger coverage test resolves it:
 // a scenarioDescriptions refinement, else the family case, else the synthetic
 // export/dormant consumer wording.
 function ledgerDescription(id: string): string {
@@ -893,20 +964,20 @@ function ledgerDescription(id: string): string {
 	return scenarioFamilies[family]?.[key] ?? id
 }
 
-test("[UI-INVENTORY-PROJECTS] project selection executes every ledger configuration claim", async () => {
+test("ledger projects: project selection executes every ledger configuration claim", async () => {
 	delete process.env.PLAYWRIGHT_FULL_MATRIX
 	delete process.env.PLAYWRIGHT_BROWSERS
-	const config = (await import("../../playwright.config")).default as unknown as {
+	const config = (await import("../../../playwright.config")).default as unknown as {
 		projects: SelectionProject[]
 	}
 	const projects = new Map(config.projects.map(project => [project.name, project]))
-	for (const name of ["chromium", "mobile", "tall-desktop", "light", "reduced-motion"]) {
+	for (const name of ["desktop", "mobile", "tall-desktop", "light", "reduced-motion"]) {
 		expect(
 			projects.has(name),
 			`playwright.config.ts must define a ${name} project for tag-filtered selection`,
 		).toBe(true)
 	}
-	const desktop = projects.get("chromium")
+	const desktop = projects.get("desktop")
 	const mobile = projects.get("mobile")
 	const reducedMotion = projects.get("reduced-motion")
 	if (!desktop || !mobile || !reducedMotion)
@@ -947,7 +1018,7 @@ test("[UI-INVENTORY-PROJECTS] project selection executes every ledger configurat
 		for (const entry of entries) {
 			const key = `${entry.path} ${entry.test}`
 			const group = topLevel.get(key) ?? {
-				file: entry.path.split("/").pop() ?? entry.path,
+				file: entry.path,
 				title: entry.test,
 				tags: [],
 			}
@@ -998,7 +1069,7 @@ test("[UI-INVENTORY-PROJECTS] project selection executes every ledger configurat
 					`${scenario}: mapped test ID ${testId} resolves to exactly one selection`,
 				).toBe(1)
 				for (const entry of entries ?? []) {
-					const file = entry.path.split("/").pop() ?? entry.path
+					const file = entry.path
 					const full = `${entry.test} ${entry.tags.join(" ")}`.trim()
 					expect(
 						selectedBy(project, file, full),
@@ -1007,7 +1078,7 @@ test("[UI-INVENTORY-PROJECTS] project selection executes every ledger configurat
 					if (projectName === "mobile")
 						expect(
 							selectedBy(desktop, file, full),
-							`${scenario} claims mobile but "${testId}" is not selected by chromium`,
+							`${scenario} claims mobile but "${testId}" is not selected by desktop`,
 						).toBe(true)
 				}
 			}
@@ -1037,18 +1108,17 @@ test("[UI-INVENTORY-PROJECTS] project selection executes every ledger configurat
 	// function, exercises reduced-motion behaviour must be selected by
 	// reduced-motion. Files the reduced-motion project ignores in the config
 	// (helper probes forcing no-preference) are exempt through that list only.
-	const reducedIgnores = new Set(
-		projectIgnores(reducedMotion).map(pattern => {
-			if (typeof pattern !== "string" || !pattern.startsWith("**/"))
-				throw new Error("reduced-motion ignores must be **/<file> strings")
-			return pattern.slice("**/".length)
-		}),
-	)
+	const reducedIgnores = projectIgnores(reducedMotion).map(pattern => {
+		if (typeof pattern !== "string" || !pattern.startsWith("**/"))
+			throw new Error("reduced-motion ignores must be **/<file> strings")
+		return pattern.slice("**/".length)
+	})
 	for (const [id, entries] of selections)
 		for (const entry of entries) {
 			if (!entry.motion) continue
-			const file = entry.path.split("/").pop() ?? entry.path
-			if (reducedIgnores.has(file)) continue
+			const file = entry.path
+			if (reducedIgnores.some(suffix => file === suffix || file.endsWith(`/${suffix}`)))
+				continue
 			const full = `${entry.test} ${entry.tags.join(" ")}`.trim()
 			expect(
 				selectedBy(reducedMotion, file, full),
@@ -1056,3 +1126,48 @@ test("[UI-INVENTORY-PROJECTS] project selection executes every ledger configurat
 			).toBe(true)
 		}
 })
+
+test("ledger tiers: gate files never import the motion sampler module", () => {
+	const gateFiles = files("tests/web/gate").filter(path => path.endsWith(".e2e.ts"))
+	expect(gateFiles.length).toBeGreaterThan(0)
+	for (const path of gateFiles) {
+		const text = readFileSync(join(root, path), "utf8")
+		expect(
+			importsMotionModule(path, text),
+			`${path}: gate files must not import support/motion`,
+		).toBe(false)
+	}
+})
+
+// D10 import-only tier guard, read from syntax so comments can never match:
+// every static import (including side-effect imports and `.ts`-suffixed
+// specifiers) and every dynamic import()/require() of support/motion counts.
+function importsMotionModule(path: string, text: string): boolean {
+	const source = ts.createSourceFile(path, text, ts.ScriptTarget.Latest, true)
+	function targetsMotion(specifier: string): boolean {
+		return /(?:^|\/)support\/motion$/.test(specifier.replace(/\.ts$/, ""))
+	}
+	let found = false
+	function visit(node: ts.Node): void {
+		if (found) return
+		if (ts.isImportDeclaration(node)) {
+			const specifier = node.moduleSpecifier
+			if (ts.isStringLiteralLike(specifier) && targetsMotion(specifier.text)) found = true
+			return
+		}
+		if (ts.isCallExpression(node)) {
+			const callee = node.expression.getText(source)
+			const argument = node.arguments.length === 1 ? node.arguments[0] : undefined
+			if (
+				(callee === "import" || callee === "require") &&
+				argument &&
+				ts.isStringLiteralLike(argument) &&
+				targetsMotion(argument.text)
+			)
+				found = true
+		}
+		ts.forEachChild(node, visit)
+	}
+	visit(source)
+	return found
+}

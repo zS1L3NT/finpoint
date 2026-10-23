@@ -1,35 +1,102 @@
 import type { Page } from "@playwright/test"
-import { IDS } from "./support/data"
-import { setDateOnly } from "./support/date-only"
-import { expect, seedWorkspace, test } from "./support/fixtures"
+import { card, overview, overviewCharts } from "../support/charts"
+import { setDateOnly } from "../support/date-only"
+import { expect, seedWorkspace, test } from "../support/fixtures"
 
-// Chart edge coverage: responsive containment and readability per card,
-// keyboard drills, and the three real DOM CSS transitions (movers scale,
-// donut dim, calendar heat). Category mix bars have no transition, so no
-// motion test exists for them.
+const marks =
+	".recharts-area-curve, .recharts-line-curve, .recharts-rectangle, clipPath[id^=animationClipPath] rect"
 
-const overview = "/?month=October&year=2026"
-
-// Every rendered Overview card.
-const cardTitles = [
-	"Spending forecast",
-	"Surplus / Shortfall",
-	"Spending by day",
-	"Spending by weekday",
-	"Category trend",
-	"Categories this month",
-	"Monthly budgets",
-	"Spending calendar",
-	"Biggest changes",
-]
-
-const overflow = (chart: ReturnType<typeof card>) =>
-	chart.evaluate(element => element.scrollWidth - element.clientWidth)
-
-function card(page: Page, title: string) {
-	return page
-		.locator('[data-slot="card"]')
-		.filter({ has: page.locator('[data-slot="card-title"]').filter({ hasText: title }) })
+async function chartFrames(page: Page, titles: string[], open: () => Promise<void>) {
+	const sampler = await page.evaluateHandle(
+		({ selector, titles }) => {
+			const frames: Record<string, { time: number; geometry: string }[]> = {}
+			const first: Record<string, number> = {}
+			let completed = 0
+			const done = new Promise<typeof frames>((resolve, reject) => {
+				const sample = (now: number) => {
+					for (const card of document.querySelectorAll('[data-slot="card"]')) {
+						const titleNode = card.querySelector('[data-slot="card-title"]')
+						const title = titleNode
+							? [...titleNode.childNodes]
+									.filter(node => node.nodeType === Node.TEXT_NODE)
+									.map(node => node.textContent)
+									.join("")
+									.trim()
+							: ""
+						const svg = card.querySelector("svg.recharts-surface")
+						if (
+							!title ||
+							!svg?.querySelector(
+								".recharts-area-curve, .recharts-line-curve, .recharts-rectangle",
+							)
+						)
+							continue
+						const geometry = JSON.stringify(
+							[...svg.querySelectorAll(selector)].map(mark => {
+								const style = getComputedStyle(mark)
+								return [
+									mark.tagName,
+									...["d", "x", "y", "width", "height"].map(name =>
+										mark.getAttribute(name),
+									),
+									style.strokeDasharray,
+									style.strokeDashoffset,
+								]
+							}),
+						)
+						if (first[title] === undefined) first[title] = now
+						frames[title] ??= []
+						frames[title].push({ time: now, geometry })
+					}
+					// Every requested chart gets its own full intro window: late mounts
+					// must also show intermediates and reach a stable tail before the
+					// sampler ends, instead of cutting off 1200ms after the first chart.
+					const settled = (title: string) => {
+						const samples = frames[title] ?? []
+						if (samples.length < 4) return false
+						if (now - (first[title] ?? now) < 700) return false
+						const recent = samples.filter(frame => frame.time > now - 200)
+						return (
+							recent.length > 0 &&
+							new Set(recent.map(frame => frame.geometry)).size === 1
+						)
+					}
+					if (completed && titles.every(settled)) resolve(frames)
+					else if (
+						completed &&
+						now - completed > 5000 &&
+						titles.every(title => !(frames[title] ?? []).length)
+					)
+						reject(new Error("No chart geometry appeared"))
+					else if (completed && now - completed > 15000)
+						reject(
+							new Error(
+								`Charts never settled: ${titles.filter(title => !settled(title)).join(", ")}`,
+							),
+						)
+					else requestAnimationFrame(sample)
+				}
+				requestAnimationFrame(sample)
+			})
+			return {
+				done,
+				complete: () => {
+					completed = performance.now()
+				},
+			}
+		},
+		{ selector: marks, titles },
+	)
+	await open()
+	await page.mouse.move(0, 0)
+	try {
+		return await sampler.evaluate(state => {
+			state.complete()
+			return state.done
+		})
+	} finally {
+		await sampler.dispose()
+	}
 }
 
 function distinct(values: string[]) {
@@ -40,86 +107,135 @@ function tailStable(values: string[], count = 3) {
 	return values.length >= count && new Set(values.slice(-count)).size === 1
 }
 
-test("chart-edges dense journeys share one dense seed", { tag: ["@tall", "@motion"] }, async ({
-	page,
-}) => {
+test("chart intro: overview and budget charts grow once and hover or resize never replays the grow-in", {
+	tag: ["@tall", "@light", "@reduced-motion"],
+}, async ({ page, isMobile }) => {
+	test.setTimeout(150_000)
+	await seedWorkspace(page)
+	for (const destination of ["overview", "budget"] as const) {
+		await test.step(`chart intro: ${destination} charts grow real graph marks once and respect reduced motion`, async () => {
+			await page.goto(destination === "overview" ? "/records" : "/budgets")
+			// Before hydration the trigger does nothing, so retry until the sheet is open.
+			if (destination === "overview" && isMobile)
+				await expect(async () => {
+					await page.locator('header [data-slot="sidebar-trigger"]').click()
+					await expect(
+						page.getByRole("dialog", { name: "Sidebar", exact: true }),
+					).toBeVisible({
+						timeout: 2000,
+					})
+				}).toPass()
+			const titles = destination === "overview" ? overviewCharts : ["Spending over time"]
+			const frames = await chartFrames(page, titles, async () => {
+				if (destination === "overview")
+					await page
+						.getByRole("link", { name: "Dashboard", exact: true })
+						.filter({ visible: true })
+						.click()
+				else
+					await page.getByRole("heading", { name: "October Buffer", exact: true }).click()
+			})
+			await test.info().attach("graph-frame-counts", {
+				body: JSON.stringify(
+					Object.fromEntries(
+						Object.entries(frames).map(([title, samples]) => [
+							title,
+							{
+								frames: samples.length,
+								distinct: new Set(samples.map(frame => frame.geometry)).size,
+							},
+						]),
+					),
+				),
+				contentType: "application/json",
+			})
+			const reduced = await page.evaluate(
+				() => matchMedia("(prefers-reduced-motion: reduce)").matches,
+			)
+			for (const title of titles) {
+				const samples = frames[title] ?? []
+				expect(samples.length, `${title}: actual plotted frames`).toBeGreaterThan(3)
+				expect(
+					samples.every(frame => !/NaN|Infinity/.test(frame.geometry)),
+					title,
+				).toBe(true)
+				const unique = new Set(samples.map(frame => frame.geometry))
+				if (reduced)
+					expect(unique.size, `${title}: reduced motion avoids graph growth`).toBe(1)
+				else
+					expect(
+						unique.size,
+						`${title}: intermediate graph geometry before settling`,
+					).toBeGreaterThan(2)
+				const settled = samples.filter(
+					frame => frame.time > (samples.at(-1)?.time ?? 0) - 200,
+				)
+				expect(
+					new Set(settled.map(frame => frame.geometry)).size,
+					`${title}: graph settles`,
+				).toBe(1)
+			}
+			// Hover and sidebar resize may update geometry; they must not restart the grow-in clip.
+			const chart = page
+				.locator('[data-slot="card"]')
+				.filter({
+					has: page.locator('[data-slot="card-title"]').filter({ hasText: titles[0] }),
+				})
+				.getByRole("application")
+			// Observe from before the interaction, so a replay that finishes quickly is still caught.
+			const watcher = await page.evaluateHandle(() => {
+				const state = { replayed: false, stop: () => undefined as void }
+				const check = () => {
+					if (document.querySelector('clipPath[id^="animationClipPath"]'))
+						state.replayed = true
+				}
+				const observer = new MutationObserver(check)
+				observer.observe(document.body, {
+					subtree: true,
+					childList: true,
+					attributes: true,
+				})
+				state.stop = () => observer.disconnect()
+				return state
+			})
+			await chart.hover()
+			// Intro animations start within a frame; 600ms covers a delayed restart.
+			await page.waitForTimeout(600)
+			if (!isMobile) {
+				const viewport = page.viewportSize()
+				// Wide viewports cap content width (container mx-auto), which absorbs
+				// the sidebar toggle before it reaches the chart. Narrow below the
+				// cap first so the toggle genuinely resizes the chart; restoring
+				// afterwards is a second observed resize, not silent cleanup.
+				const narrowed = viewport !== null && viewport.width > 1600
+				if (narrowed && viewport)
+					await page.setViewportSize({ width: 1500, height: viewport.height })
+				const width = await chart.evaluate(element => element.getBoundingClientRect().width)
+				await page.locator('header [data-slot="sidebar-trigger"]').click()
+				await expect
+					.poll(() => chart.evaluate(element => element.getBoundingClientRect().width))
+					.not.toBe(width)
+				await page.waitForTimeout(600)
+				if (narrowed && viewport)
+					await page.setViewportSize({ width: viewport.width, height: viewport.height })
+				await page.waitForTimeout(600)
+			}
+			const replayed = await watcher.evaluate(state => {
+				state.stop()
+				return state.replayed
+			})
+			await watcher.dispose()
+			expect(replayed, "hover and resize never restart the grow-in").toBe(false)
+		})
+	}
+})
+
+test("Budget donut: focus dims sibling segments in a smooth transition", {
+	tag: ["@tall", "@reduced-motion"],
+}, async ({ page }) => {
 	test.setTimeout(150_000)
 	await seedWorkspace(page, "dense")
-	await test.step("chart-edges containment: every dense card renders values and fits", async () => {
-		await page.goto(overview)
-		for (const title of cardTitles) {
-			const chart = card(page, title)
-			await expect(chart, title).toBeVisible()
-			// Wait for rendered numbers before the negative checks, so they cannot pass on an empty card.
-			await expect(chart, `${title}: renders values`).toContainText(/\d/)
-			await expect
-				.poll(() => overflow(chart), `${title}: no horizontal overflow`)
-				.toBeLessThanOrEqual(1)
-			await expect(chart, `${title}: finite values`).not.toContainText(/NaN|Infinity/)
-		}
-		await page.goto("/budgets/t1-d-b-01")
-		const progress = card(page, "Spending over time")
-		await expect(progress).toBeVisible()
-		expect(
-			await progress.evaluate(element => element.scrollWidth - element.clientWidth),
-			"Spending over time (budget-progress-chart.tsx): no horizontal overflow",
-		).toBeLessThanOrEqual(1)
-		await expect(progress).not.toContainText(/NaN|Infinity/)
-	})
-	await test.step("chart-edges dense long category name stays truncated and readable", async () => {
-		const name = `Dense ${"早餐 café ☕ ".repeat(12).trim()}`
-		await page.evaluate(
-			async ({ categoryId, name }) => {
-				const database = await new Promise<IDBDatabase>((resolve, reject) => {
-					const open = indexedDB.open("finpoint")
-					open.onsuccess = () => resolve(open.result)
-					open.onerror = () => reject(open.error)
-				})
-				try {
-					await new Promise<void>((resolve, reject) => {
-						const transaction = database.transaction("categories", "readwrite")
-						transaction.oncomplete = () => resolve()
-						transaction.onabort = () => reject(transaction.error)
-						const request = transaction.objectStore("categories").get(categoryId)
-						request.onsuccess = () =>
-							transaction.objectStore("categories").put({ ...request.result, name })
-					})
-				} finally {
-					database.close()
-				}
-			},
-			{ categoryId: "t1-d-cat-01", name },
-		)
-		await page.goto(overview)
-		const mix = card(page, "Categories this month")
-		const row = mix.getByRole("link", { name: /^Dense 早餐/ })
-		await expect(row).toBeVisible()
-		const label = row.locator("span.truncate")
-		await expect(label).toHaveCSS("text-overflow", "ellipsis")
-		expect(
-			await label.evaluate(element => element.scrollWidth > element.clientWidth),
-			"long category name is cut off with an ellipsis",
-		).toBe(true)
-		expect(
-			await row.evaluate(element => element.scrollWidth - element.clientWidth),
-			"the row itself does not overflow",
-		).toBeLessThanOrEqual(1)
-		// The amount column stays fully visible beside the truncated name.
-		const amount = row.locator("span.shrink-0")
-		await expect(amount).toBeVisible()
-		expect(await amount.evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(
-			true,
-		)
-		for (const title of ["Biggest changes", "Spending calendar", "Monthly budgets"]) {
-			const chart = card(page, title)
-			await expect(chart).toBeVisible()
-			expect(
-				await chart.evaluate(element => element.scrollWidth - element.clientWidth),
-				`${title}: fits with dense long-name data`,
-			).toBeLessThanOrEqual(1)
-		}
-	})
-	await test.step("chart-edges monthly budget donut dims siblings smoothly on focus", async () => {
+	await test.step("Monthly Budget donut: sibling segments dim smoothly on focus", async () => {
 		const reduced = test.info().project.name === "reduced-motion"
 		await page.goto(overview)
 		const budgets = card(page, "Monthly budgets")
@@ -215,73 +331,12 @@ test("chart-edges dense journeys share one dense seed", { tag: ["@tall", "@motio
 	})
 })
 
-test("chart-edges populated journeys share one seed", {
-	tag: ["@tall", "@light", "@motion"],
+test("populated charts: calendar heat and mover bars transition in place", {
+	tag: ["@tall", "@light", "@reduced-motion"],
 }, async ({ page }) => {
 	test.setTimeout(150_000)
 	await seedWorkspace(page)
-	await test.step("chart-edges tooltips stay numeric and inside every viewport", async () => {
-		await page.goto(overview)
-		const viewport = page.viewportSize()
-		for (const title of [
-			"Spending forecast",
-			"Surplus / Shortfall",
-			"Spending by day",
-			"Spending by weekday",
-			"Category trend",
-		]) {
-			const chart = card(page, title)
-			const surface = chart.getByRole("application").first()
-			await surface.scrollIntoViewIfNeeded()
-			await surface.focus()
-			for (let index = 0; index < 4; index++) {
-				await surface.press("ArrowRight")
-				await page.evaluate(() => new Promise(requestAnimationFrame))
-			}
-			const tooltip = chart.locator(".recharts-tooltip-wrapper")
-			await expect(tooltip, `${title}: tooltip opens by keyboard`).toBeVisible()
-			await expect(tooltip, `${title}: tooltip carries a value`).toContainText(/\$/)
-			const box = await tooltip.boundingBox()
-			expect(box, `${title}: tooltip is laid out`).not.toBeNull()
-			if (box && viewport) {
-				expect(box.x, `${title}: tooltip inside the left edge`).toBeGreaterThanOrEqual(-8)
-				expect(
-					box.x + box.width,
-					`${title}: tooltip inside the right edge`,
-				).toBeLessThanOrEqual(viewport.width + 8)
-			}
-		}
-		await page.goto(`/budgets/${IDS.budgets.manual}`)
-		const progress = card(page, "Spending over time")
-		const surface = progress.getByRole("application")
-		await surface.scrollIntoViewIfNeeded()
-		await surface.focus()
-		for (let index = 0; index < 4; index++) {
-			await surface.press("ArrowRight")
-			await page.evaluate(() => new Promise(requestAnimationFrame))
-		}
-		const tooltip = progress.locator(".recharts-tooltip-wrapper")
-		await expect(tooltip).toBeVisible()
-		await expect(tooltip).toContainText("5 Oct")
-		await expect(tooltip).toContainText("$84.20")
-	})
-	await test.step("chart-edges calendar and movers drills work by keyboard", async () => {
-		await page.goto(overview)
-		const calendar = card(page, "Spending calendar")
-		const day = calendar.getByRole("button", { name: /^5 October:/ })
-		await day.scrollIntoViewIfNeeded()
-		await day.focus()
-		await page.keyboard.press("Enter")
-		await expect(page).toHaveURL(/start_date=2026-10-05/)
-		await expect(page).toHaveURL(/end_date=2026-10-05/)
-		await page.goto(overview)
-		const mover = card(page, "Biggest changes").getByRole("link", { name: /Housing/ })
-		await mover.scrollIntoViewIfNeeded()
-		await mover.focus()
-		await page.keyboard.press("Enter")
-		await expect(page).toHaveURL(new RegExp(`category_ids=${IDS.categories.rent}`))
-	})
-	await test.step("chart-edges calendar heat fades in place on month change", async () => {
+	await test.step("spending calendar: day heat fades in place on month change", async () => {
 		const reduced = test.info().project.name === "reduced-motion"
 		await page.goto(overview)
 		const calendar = card(page, "Spending calendar")
@@ -346,7 +401,7 @@ test("chart-edges populated journeys share one seed", {
 			expect(distinct(values), "reduced motion recolors immediately").toBeLessThanOrEqual(2)
 		else expect(distinct(values), "day heat transitions in place").toBeGreaterThan(2)
 	})
-	await test.step("chart-edges movers liveRecordamount bar transitions on record update", async () => {
+	await test.step("biggest changes: the mover bar scale transitions on record update", async () => {
 		const reduced = test.info().project.name === "reduced-motion"
 		// Baseline comparators: September spending for daily-budget categories so the
 		// Groceries mover row exists with a comparison before the live update (same
@@ -406,9 +461,6 @@ test("chart-edges populated journeys share one seed", {
 		const movers = card(page, "Biggest changes")
 		const row = movers.getByRole("link", { name: /^Groceries/ })
 		await expect(row).toBeVisible()
-		const href = await row.getAttribute("href")
-		const rowHandle = await row.elementHandle()
-		if (!rowHandle) throw new Error("Groceries mover row missing")
 		const frames = await page.evaluateHandle(() => {
 			const root = [...document.querySelectorAll('[data-slot="card"]')].find(card =>
 				card
@@ -496,12 +548,5 @@ test("chart-edges populated journeys share one seed", {
 			expect(distinct(series), "Groceries bar scale transitions").toBeGreaterThan(2)
 			expect(series[0], "bar scale actually changes").not.toBe(series.at(-1))
 		}
-		await expect(row).toHaveAttribute("title", /176\.08/)
-		expect(await row.getAttribute("href"), "drill link identity retained").toBe(href)
-		expect(
-			await rowHandle.evaluate(element => element.isConnected),
-			"row node persists (keys kept)",
-		).toBe(true)
-		await rowHandle.dispose()
 	})
 })

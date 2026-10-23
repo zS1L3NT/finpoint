@@ -4,16 +4,18 @@ import {
 	expectReducedRowMovement,
 	expectVisibleRowCascade,
 	sampleVisibleRowAnimations,
-} from "./support/assertions"
+} from "../support/motion"
 
 test.use({ reducedMotion: "no-preference" })
 
 // Fault injection verifies the assertions themselves; product suites use real components.
 // Probes sharing a helper run as steps of one test: every step rebuilds its own
 // document with setContent, so no probe state leaks into the next one.
-test("assertion.reduced positional probes share one document lifecycle", async ({ page }) => {
+test("reduced-motion assertion: positional probes accept immediate changes and reject animated movement", async ({
+	page,
+}) => {
 	for (const moving of [false, true]) {
-		await test.step(`assertion.reduced ${moving ? "rejects animated" : "accepts immediate"} positional changes while retaining fades`, async () => {
+		await test.step(`reduced-motion assertion: ${moving ? "rejects animated" : "accepts immediate"} positional changes while retaining fades`, async () => {
 			await page.setContent("<button>Show</button>")
 			await page.evaluate(moving => {
 				document.querySelector("button")?.addEventListener("click", () => {
@@ -60,11 +62,11 @@ for (const faults of [
 		"behind page",
 	] as const,
 ]) {
-	test(`assertion.popup fault probes (${faults[0]}…${faults[faults.length - 1]})`, async ({
+	test(`popup entrance assertion: accepts or rejects each fault probe (${faults[0]}…${faults[faults.length - 1]})`, async ({
 		page,
 	}) => {
 		for (const fault of faults) {
-			await test.step(`assertion.popup ${fault === "none" || fault === "full viewport" ? "accepts" : "rejects"} ${fault}`, async () => {
+			await test.step(`popup entrance assertion: ${fault === "none" || fault === "full viewport" ? "accepts" : "rejects"} ${fault}`, async () => {
 				await page.setContent(`<style>
 @keyframes enter { from { opacity: 0 } to { opacity: 1 } }
 @keyframes rotate { from { rotate: 20deg } to { rotate: 0deg } }
@@ -137,9 +139,11 @@ for (const faults of [
 	})
 }
 
-test("assertion.cascade fault probes share one viewport", async ({ page }) => {
+test("cascade assertion: fault probes accept an intact cascade and reject cutoff, late batch, reverse and flash faults", async ({
+	page,
+}) => {
 	for (const fault of ["none", "cutoff", "late batch", "reverse", "flash"] as const) {
-		await test.step(`assertion.cascade rejects ${fault}`, async () => {
+		await test.step(`cascade assertion: ${fault === "none" ? "accepts" : "rejects"} ${fault}`, async () => {
 			await page.setViewportSize({ width: 1920, height: 1440 })
 			await page.setContent("<main></main>")
 			const samples = await sampleVisibleRowAnimations(page, "main > div", () =>
@@ -177,7 +181,7 @@ test("assertion.cascade fault probes share one viewport", async ({ page }) => {
 				)
 		})
 	}
-	await test.step("assertion.cascade rejects sub-millisecond native delay masquerading as a visible stagger", async () => {
+	await test.step("cascade assertion: rejects a sub-millisecond native delay masquerading as a visible stagger", async () => {
 		await page.setContent("<main></main>")
 		const samples = await sampleVisibleRowAnimations(page, "main > div", () =>
 			page.evaluate(() => {
@@ -196,7 +200,7 @@ test("assertion.cascade fault probes share one viewport", async ({ page }) => {
 		)
 		expect(() => expectVisibleRowCascade(samples, 2)).toThrow(/visible item order/)
 	})
-	await test.step("assertion.cascade rejects a whole scheduled list compressed into ten milliseconds", async () => {
+	await test.step("cascade assertion: rejects a whole scheduled list compressed into ten milliseconds", async () => {
 		await page.setViewportSize({ width: 1920, height: 1440 })
 		await page.setContent("<main></main>")
 		const samples = await sampleVisibleRowAnimations(page, "main > div", () =>
@@ -218,9 +222,11 @@ test("assertion.cascade fault probes share one viewport", async ({ page }) => {
 	})
 })
 
-test("assertion.stacked popup probes share one document", async ({ page }) => {
+test("stacked popup assertion: probes accept its own backdrop and reject only the previous backdrop", async ({
+	page,
+}) => {
 	for (const ownsBackdrop of [false, true]) {
-		await test.step(`assertion.popup ${ownsBackdrop ? "accepts" : "rejects"} a stacked popup with ${ownsBackdrop ? "its own" : "only the previous"} backdrop`, async () => {
+		await test.step(`stacked popup assertion: ${ownsBackdrop ? "accepts" : "rejects"} a stacked popup with ${ownsBackdrop ? "its own" : "only the previous"} backdrop`, async () => {
 			await page.setContent(`<style>
 @keyframes enter { from { opacity: 0 } to { opacity: 1 } }
 [role=dialog] { position:fixed; top:100px; left:20px; width:300px; height:200px; background:white; animation:enter 250ms linear; overflow:auto; }
@@ -249,9 +255,11 @@ test("assertion.stacked popup probes share one document", async ({ page }) => {
 	}
 })
 
-test("assertion.cascade count probes share one viewport", async ({ page }) => {
+test("cascade assertion: count probes at 13 and 15 items reject simultaneous tails and accept bounded and frame-tied staggers", async ({
+	page,
+}) => {
 	for (const count of [13, 15] as const) {
-		await test.step(`assertion.cascade rejects simultaneous tail with ${count} items`, async () => {
+		await test.step(`cascade assertion: rejects a simultaneous tail with ${count} items`, async () => {
 			await page.setViewportSize({ width: 1920, height: 1440 })
 			await page.setContent("<main></main>")
 			const samples = await sampleVisibleRowAnimations(page, "main > div", () =>
@@ -276,7 +284,7 @@ test("assertion.cascade count probes share one viewport", async ({ page }) => {
 			)
 		})
 
-		await test.step(`assertion.cascade accepts bounded compressed stagger with ${count} items`, async () => {
+		await test.step(`cascade assertion: accepts a bounded compressed stagger with ${count} items`, async () => {
 			await page.setViewportSize({ width: 1920, height: 1440 })
 			await page.setContent("<main></main>")
 			const samples = await sampleVisibleRowAnimations(page, "main > div", () =>
@@ -299,7 +307,7 @@ test("assertion.cascade count probes share one viewport", async ({ page }) => {
 			expectVisibleRowCascade(samples, count)
 		})
 
-		await test.step(`assertion.cascade accepts frame-tied fallback with ${count} items`, async () => {
+		await test.step(`cascade assertion: accepts a frame-tied fallback with ${count} items`, async () => {
 			await page.setViewportSize({ width: 1920, height: 1440 })
 			await page.setContent("<main></main>")
 			const samples = await sampleVisibleRowAnimations(page, "main > div", () =>
@@ -334,7 +342,7 @@ test("assertion.cascade count probes share one viewport", async ({ page }) => {
 	}
 
 	for (const count of [13, 15] as const) {
-		await test.step(`assertion.cascade fallback rejects a simultaneous ${count}-item tail`, async () => {
+		await test.step(`cascade assertion: fallback rejects a simultaneous ${count}-item tail`, async () => {
 			await page.setContent("<main></main>")
 			await page.setViewportSize({ width: 1920, height: 1440 })
 			const samples = await sampleVisibleRowAnimations(page, "main > div", () =>

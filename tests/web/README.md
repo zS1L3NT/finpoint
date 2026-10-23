@@ -3,96 +3,133 @@
 Install dependencies with `bun install`, then install Chromium with `bunx playwright install chromium`.
 On a Linux machine missing browser libraries, use `bunx playwright install --with-deps chromium`.
 
-Run `bun run test:web` for the local matrix, or `bun run test:web --project=chromium` for a desktop pass.
-Use `bun run test:web:headed --project=chromium` to watch a run and `bun run test:web:report` to open its report.
+## Two tiers: gate and motion
+
+The folder names the tier. `tests/web/gate/` holds mandatory tests: what renders,
+what persists, and what navigation, keyboard, validation, and workflow flows do.
+`tests/web/motion/` holds animation tests: anything that asserts how something
+animates (entrances, cascades, fades, frame-by-frame opacity or geometry, reduced-motion
+branches). Motion tests run only in the full suite, one at a time. Gate tests run in
+every suite run, in parallel.
+
+A test that checks animation behaviour with a frame sampler belongs in motion. Waiting
+for animations to finish before reading a value, or polling a functional condition
+with `requestAnimationFrame`, belongs in gate.
+
+## Areas
+
+Each tier has one file per area. A file exists only if it has tests.
+
+| Area | Covers | Server |
+| --- | --- | --- |
+| `routes` | Page and route rendering, empty, invalid, static, and detail pages, layout sweeps, loading reveal, card grids and page fades (motion) | app |
+| `tables` | Record, Statement, and Allocate tables: filters, pagination, selection, grouping, row entrances (motion) | app |
+| `editors` | Create and update dialogs and their fields, long content, archiving edits | app |
+| `sheets` | Search and confirmation sheets, held-IndexedDB loading, pending queue search | app |
+| `modals` | App modal surfaces, backdrops, dropdown and select scroll behaviour, exit fades (motion) | app |
+| `navigation` | Back button, history, browser traversal, workflow tabs | app |
+| `keyboard` | Keyboard-only flows, sidebar rail, chrome buttons | app |
+| `workflows` | Allocation, duplicates, importer, settings, sync, backup and reset | app |
+| `charts` | Chart values, tooltips, drills, containment, chart transitions (motion) | app |
+| `components` | Everything served by the Vite component harness | harness |
+| `helpers` | Self-tests of test helpers (`date-only` in gate, `assertion-probes` in motion) | both |
+| `ledger` | The behaviour-ledger gate (`ledger.e2e.ts`), gate only | none |
+
+Harness tests and app tests never share a file. Every harness-based test goes in
+`components` (or `helpers`).
+
 ## What to run
 
-Run the tests that cover what you changed, not the whole matrix. The listed matrix is 354 cases
-(measured with `bunx playwright test --list`; 811 before project selection, 2,186 before the test
-consolidation), selected by project from every file on one worker. Compatible cases that share
-a fixture and journey now run as `test.step`
-groups inside one test with a single seed, saving the per-case browser context, seeding, and
-navigation. A scoped run is usually a few minutes. Full-matrix wall time is not re-measured here;
-do not quote a new total duration without running it.
+Ad-hoc runs use the dev servers (app on 5173, harness on 5174, reused when already
+running). Runner commands build frozen production bundles first and serve them on
+dedicated ports (app on 5273, harness on 5274), so a running dev server is never reused.
 
-- Changed a shared UI primitive (`src/components/ui/*`): `widgets.e2e.ts`, plus the e2e files that grep
-  finds using its `data-slot` or role. Add `editors.e2e.ts` and `modal-regressions.e2e.ts` for dialogs,
-  sheets and popups.
-- Changed a route or page: `pages.e2e.ts`, `route-contracts.e2e.ts`, and the files that `goto` that route.
-- Changed history or navigation: `history-regressions.e2e.ts`, `keyboard-navigation.e2e.ts`, `navigation-motion.e2e.ts`.
-- Changed charts: `charts.e2e.ts`, `chart-edges.e2e.ts`, `chart-motion.e2e.ts`.
-- Changed motion: the relevant files above with `--project=chromium --project=reduced-motion`.
-- Changed layout: add `--project=mobile` and `--project=tall-desktop` (tagged `@tall` only; use `PLAYWRIGHT_FULL_MATRIX=1` for the rest).
-- Changed a test helper in `support/`: every file importing it, in `chromium` at least.
+- `bun run test:web` — ad-hoc gate run: dev servers, gate tests only, 1 worker.
+  All Playwright arguments pass through: file paths, `--grep`, `--project`, `--workers`.
+- `bun run test:web:motion` — ad-hoc motion run: `tests/web/motion` only, serial
+  (`--workers=1` is forced, even if appended). Greps and projects pass through. A path
+  must be inside `tests/web/motion` and replaces the folder (Playwright would otherwise
+  run every motion file); any other path is refused.
+- `bun run test:web:gate` — runner gate phase: production build, gate tests on
+  `desktop` and `mobile`, parallel at 50% of cores unless `--workers=N` is given.
+  Report in `playwright-report/gate`, output in `test-results/gate`.
+- `bun run test:web:full` — runner full run: phase 1 is the gate on all five projects
+  in parallel; phase 2 is motion on all five projects with 1 worker. Phase 2 runs even
+  if phase 1 fails, and the exit code is non-zero if either fails. Reports in
+  `playwright-report/full-gate` and `playwright-report/full-motion`.
 
-Default to `--project=chromium --project=mobile`. Add `--project=light`
-for colour changes (tag the test `@light` if it asserts painted colour). Use
-`--project=chromium --project=reduced-motion` for motion changes: any test asserting a
-reduced-motion branch or using `expectPopupEntrance`/`expectReducedRowMovement` carries
-`@motion`, and the `[UI-INVENTORY-PROJECTS]` gate enforces it.
-Run the full matrix only when asked, or before a release.
-Only one browser run at a time in a shared checkout: concurrent runs starve animation frames.
-The default is one worker: native animation checks need enough browser frames during short fades.
-Concurrent runs have missed intermediate frames on this host; the assertions and zero-retry policy stay the same.
-Filter a case with `--grep "case name"`, or pass a path such as `tests/web/modal-regressions.e2e.ts`.
-Select a combined test by its outer test title with `--grep`, or run its file. Playwright does
-not match nested `test.step` names when filtering tests. Find a legacy case title in the source
-to locate its containing test; `bunx playwright test --list` lists the selectable titles.
-The UI behaviour ledger (`component-inventory.ts`) maps the retained step IDs: the
-coverage gate parses static `test` and `test.step` titles, including ones generated by static
-`for…of` loops, and still requires each mapped ID to resolve to exactly one executable case.
+The runner accepts only `--grep`, `--grep-invert`, `--workers` (gate phase only),
+and `--project`. `--project` replaces the phase defaults and applies to both phases
+of `full`. Anything else (positional paths, `--config`, `--shard`) is refused; run
+single files ad-hoc with `bun run test:web -- <path>` instead.
 
-Grouped tests trade per-case isolation for wall-clock time. Each group keeps one seed and one
-browser context; steps re-navigate only where state would leak (documented per group), and
-history-dependent groups reset `localStorage` between steps. Destructive paths, held-IDB races,
-and differing history/fixture contracts stay standalone (`workflows.e2e.ts`, `sheet-loading.e2e.ts`,
-`history-regressions.e2e.ts`). A step failure aborts its group's later steps, so a red group
-may hide additional failures behind the first; re-run the containing test after fixing the
-first failure. Per-group timeouts are bounded sums of the steps' legitimate waits;
-the global timeout, single worker, and zero-retry policy are unchanged.
+Measured on 23 October 2026, 12-core Linux host without a GPU: the gate is 307 runs and took
+12 min 12 s including the production build (6 workers). The full run (327 gate runs in
+parallel, then 89 motion runs on 1 worker) took 27 min 22 s; every run passed. The
+pre-reorganisation suite (354 runs, 1 worker) took 36 min on the developer's Mac.
 
-Playwright starts the Next.js app with `npm run dev` on port 5173 when needed.
-It also starts the Vite component harness with `npm run test:web:harness` on port 5174.
-Vite serves the real shared components outside application routes. Both servers stop after testing when Playwright starts them.
-Playwright reuses existing servers without stopping them. In a shared checkout, the coordinating agent owns the
-long-running server; do not launch another instance. Browser contexts have isolated storage.
-No CI workflow is configured. Retries are disabled so regressions remain visible.
+Only one runner at a time: it takes a lock at `test-results/.suite-lock/pid` and refuses
+to start while that file exists. A lock left by a crashed run is never cleared
+automatically; the refusal says whether its holder is still alive and how to remove it.
+Ad-hoc runs take no lock and write to `test-results/adhoc`, so they cannot delete runner
+output, but running both at once slows animation sampling.
 
-The shared Select adapter discovers labels from literal `SelectItem` descendants, including groups
-and arrays. Custom components wrapping items and Radix-only content properties are not supported;
-current application consumers use plain items and the adapter's supported placement properties.
+## Sign-off
 
-For a verification run against frozen production bundles, run `bun run build` and
-`bun run test:web:harness:build`, then start `bun run start --port 5173` and
-`bun run test:web:harness:preview` in separate terminals. Run the matrix with
-`PLAYWRIGHT_EXTERNAL_SERVERS=1 bun run test:web`. Stop those two servers after the run.
-This avoids development reloads changing source while animation frames are sampled.
+`--signoff` refuses to start unless the `basecamp/gh-signoff` extension is installed
+and the tree is clean (Next's generated `next-env.d.ts` is ignored). After a passing run it checks the tree is still clean at the
+same commit, then runs `gh signoff gate` (gate mode) or `gh signoff gate` followed by
+`gh signoff full` (full mode). It never signs off on a failure. With `--signoff`,
+no pass-through argument is allowed: only complete runs are signed.
+gh-signoff also requires the commit to be pushed, so commit and push before a signed run.
+`--signoff-dry-run` prints the extension, tree, HEAD, and sign-off commands without
+running anything. We do not run `gh signoff install`; installing would make the gate
+a required check.
 
-The default projects are `chromium` (1440×900, dark), `mobile` (390×844 with touch,
-dark), `tall-desktop` (1920×1440, dark), `light` (1440×900, light) and `reduced-motion`
-(1440×900, dark, `reduce`). Chromium and mobile run every case except a short reviewed
-list; tall-desktop, light and reduced-motion run only cases tagged `@tall`, `@light` or
-`@motion`. `PLAYWRIGHT_FULL_MATRIX=1` drops those tag filters for a 749-case release run
-(measured with `bunx playwright test --list`). Tests declare their tags literally
-(untagged tests intentionally use the implicit chromium/mobile default); the
-`[UI-INVENTORY-PROJECTS]` gate fails if a ledger configuration claim is not
-executed by the selected projects, so tag a test `@light` if it asserts painted colour
-and `@motion` if it asserts a reduced-motion branch. A CLI `--grep` combines with (not
-instead of) each project's tag filter, so running an untagged case on light or
-reduced-motion needs `PLAYWRIGHT_FULL_MATRIX=1`. Normal projects retain all application
-animations. Reduced motion uses the
-browser preference and tests the application's response; it does not inject CSS to suppress animation.
-For additional engines, install `bunx playwright install --with-deps firefox webkit`, then run
-`PLAYWRIGHT_BROWSERS=all bun run test:web --project=firefox --project=webkit`.
+## Projects and tags
 
-Keep cases under `tests/web/` with the `.e2e.ts` suffix. Bun's unit test discovery must not collect them.
-Playwright records failure screenshots and retains failure traces in `test-results/`; the HTML report is
-in `playwright-report/`. Both directories are ignored. Open a trace with
-`bunx playwright show-trace test-results/<case>/trace.zip`.
+The projects are `desktop` (1440×900, dark), `mobile` (390×844 with touch, dark),
+`tall-desktop` (1920×1440, dark), `light` (1440×900, light), and `reduced-motion`
+(1440×900, dark, reduce). Desktop and mobile run every case except the ones tagged
+away from them. Tall-desktop, light, and reduced-motion run only cases tagged for
+them. `helpers` and `ledger` files run in desktop only. `PLAYWRIGHT_FULL_MATRIX=1`
+drops the tag filters for a release run. `PLAYWRIGHT_BROWSERS=all` adds `firefox`
+and `webkit` (install them first with `bunx playwright install --with-deps firefox webkit`).
+
+Tags, and nothing else: `@tall`, `@tall-only`, `@light`, `@reduced-motion`,
+`@mobile-only`, `@desktop-only`. Tag a test `@light` if it asserts painted colour
+and `@reduced-motion` if it asserts a reduced-motion branch. The ledger coverage gate
+fails if a test carries an unknown tag or if a test opts out of both desktop and
+mobile at once. A CLI `--grep` combines with (not instead of) each project's tag
+filter, so running an untagged case on light or reduced-motion needs
+`PLAYWRIGHT_FULL_MATRIX=1`.
+
+OAuth on port 5273 is not supported and not needed: the suite runs signed out, and
+financial data never touches the auth broker.
+
+## Titles and tags
+
+Test and step titles read `<subject>: <behaviour>`. The subject is a short lowercase
+noun phrase naming the component, page, or flow under test, using CONTEXT.md domain
+terms (`Record`, `Statement`, `Budget`, `Monthly Budget`, `Account`, `Category`,
+`Pending Statement`, `Allocation`) with their capitals everywhere else lowercase.
+Quoted labels keep their on-screen spelling. The behaviour is a present-tense
+lowercase sentence saying what is proven. Grouped tests (several steps, one seed)
+use `<subject>: <comma-separated summary of the steps>`. Titles carry no bracketed
+codes, no dotted prefixes, and no implementation phrasing. Loop-generated titles keep
+their template variables and stay unique across the suite. There are no
+`test.describe` wrappers except to scope `test.use` (for example a harness section);
+the folder already names the tier and the file names the area.
+
+The behaviour ledger is `tests/web/component-inventory.ts` plus the gate in
+`tests/web/gate/ledger.e2e.ts`. It parses static `test` and `test.step` titles,
+including ones generated by static `for…of` loops, and requires every mapped test ID
+to resolve to exactly one executable test. The tier guard fails if a `gate/` file
+imports `support/motion`.
 
 ## Fixtures
 
-Import `test`, `expect`, and `seedWorkspace` from `./support/fixtures`. Request the `workspace` fixture
+Import `test`, `expect`, and `seedWorkspace` from `../support/fixtures`. Request the `workspace` fixture
 for automatic seeding, with `test.use({ workspaceScenario: "dense" })` when needed. Alternatively call
 `await seedWorkspace(page, "empty")` explicitly. Scenarios are `empty`, `populated`, and `dense`;
 `support/data.ts` exports stable `IDS`. Seeding replaces real IndexedDB data in the test context after
@@ -105,23 +142,27 @@ Motion assertions need native frames to measure the rendered entrance.
 
 ## Rendered assertions
 
-`support/assertions.ts` exports these focused helpers:
+Functional helpers live in `support/assertions.ts`:
 
 - `expectVisibleBackdrop(page)` checks viewport coverage and the rendered background's alpha and opacity.
 - `expectPointerCursor(button)` checks that a visible, enabled control computes to `cursor: pointer`.
   Test keyboard activation and the resulting behaviour separately.
-- `expectPopupEntrance(page, open)` installs frame sampling before `open()`. It checks the whole popup's
-  entrance, stable initial child transforms/opacity, and transient overflow against settled overflow.
-  Tall mobile content may remain scrollable. Use it for opening an editor before revealing conditional fields.
 - `expectDropdownPreservesScroll(page, open, scrollContainer?)` checks existing overflow styles, layout
   width and real pointer scrolling after opening the menu. Desktop uses wheel input; mobile uses a
   trusted touch swipe. The fixture must have enough content to scroll.
   Pass the app's existing scroll container when it owns scrolling instead of the document.
+
+Frame samplers live in `support/motion.ts` and must never be imported from `gate/`:
+
 - `sampleVisibleRowAnimations(page, selector, reveal)` collects every matching element occupying the
   viewport during requestAnimationFrame samples, including initially transparent rows. It returns text
   labels, opacity, transforms, overflow and animation start times for diagnostics.
 - `expectVisibleRowCascade(samples, minimumRows)` requires every sampled row to enter and settle, with
   staggered progress. Pass at least `13` for the tall-desktop regression. Never slice the rows to twelve.
+- `expectReducedRowMovement(samples, minimumRows)` is for reduced-motion rows. It requires real laid-out content, settled opacity, no native positional animation, and no interpolated or replayed movement. Motion may snap the initial positional pose to its final pose while retaining an opacity fade.
+- `expectPopupEntrance(page, open)` installs frame sampling before `open()`. It checks the whole popup's
+  entrance, stable initial child transforms/opacity, and transient overflow against settled overflow.
+  Tall mobile content may remain scrollable. Use it for opening an editor before revealing conditional fields.
 
 Sampling callbacks must act in the current document: click a client-side navigation link, open a popup,
 or reveal data. A full `page.goto` or reload destroys the sampler and fails the test. Choose a selector
@@ -132,9 +173,12 @@ Wait for hydration and relevant live data before calling a helper. The helper wa
 Frame sampling starts before the action. Missing, disappearing, and undersampled elements fail the assertion.
 The sampler records CSS `transform`, `translate`, `scale`, and `rotate` separately and normalises identity transforms.
 It excludes elements hidden by CSS clipping, including Base UI native selects. It keeps opacity-zero entrances observable and leaves application animations enabled.
-Use `expectReducedRowMovement(samples, minimumRows)` for reduced-motion rows. It requires real laid-out content, settled opacity, no native positional animation, and no interpolated or replayed movement. Motion may snap the initial positional pose to its final pose while retaining an opacity fade.
 The popup helper checks that reduced motion suppresses movement and leaves the popup fully visible.
 Attach returned samples with `test.info().attach` when diagnosing a failure.
+
+Area helpers shared by one area's files live in `tests/web/support/<area>.ts`
+(`charts`, `editors`, `sheets`, `tables`). Helpers used by a single destination file
+stay local to that file.
 
 Sheet loading tests hold real IndexedDB transactions and observe the application's pending native
 read requests. Dexie can answer a warm query from memory, so these tests invalidate its table cache
@@ -149,4 +193,31 @@ Configuration follows the [Playwright configuration guide](https://playwright.de
 and [web server lifecycle guide](https://playwright.dev/docs/test-webserver), plus the installed Next.js
 Playwright guide under `node_modules/next/dist/docs/01-app/02-guides/testing/playwright.md`.
 
-`tests/web/tall-budget-motion.e2e.ts` runs only in the tall desktop project: the Budget detail chart places its related table below the initial fold on the other configured viewports. General consumer motion cases have no conditional skips.
+Keep cases under `tests/web/gate/` and `tests/web/motion/` with the `.e2e.ts` suffix. Bun's unit test discovery must not collect them.
+Playwright records failure screenshots and retains failure traces under `test-results/`:
+`test-results/adhoc` for ad-hoc runs, and `test-results/gate`, `test-results/full-gate` and
+`test-results/full-motion` for the runner. HTML reports live in the matching folders under
+`playwright-report/`. Both directories are ignored. `bun run test:web:report` opens the ad-hoc
+report; open a runner report with `bunx playwright show-report playwright-report/gate` (or
+`full-gate`, `full-motion`). Open a trace with
+`bunx playwright show-trace test-results/<folder>/<case>/trace.zip`.
+
+Grouped tests trade per-case isolation for wall-clock time. Each group keeps one seed and one
+browser context; steps re-navigate only where state would leak (documented per group), and
+history-dependent groups reset `localStorage` between steps. Destructive paths, held-IDB races,
+and differing history/fixture contracts stay standalone. A step failure aborts its group's later steps, so a red group
+may hide additional failures behind the first; re-run the containing test after fixing the
+first failure. Per-group timeouts are bounded sums of the steps' legitimate waits;
+the global timeout, single ad-hoc worker, and zero-retry policy are unchanged.
+
+The shared Select adapter discovers labels from literal `SelectItem` descendants, including groups
+and arrays. Custom components wrapping items and Radix-only content properties are not supported;
+current application consumers use plain items and the adapter's supported placement properties.
+
+For a verification run against frozen production bundles without the runner, run `bun run build` and
+`bun run test:web:harness:build`, then start `bun run start --port 5273` and
+`bun run test:web:harness:preview --port 5274 --strictPort` in separate terminals. Run the matrix with
+`PLAYWRIGHT_SERVER=production PLAYWRIGHT_EXTERNAL_SERVERS=1 bun run test:web` for gate tests, or
+the same variables with `bun run test:web:motion` for motion tests. Stop those two servers after
+the run.
+This avoids development reloads changing source while animation frames are sampled.

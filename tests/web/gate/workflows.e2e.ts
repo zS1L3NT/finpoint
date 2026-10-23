@@ -1,17 +1,7 @@
-// Team 3 (Muse) — end-to-end allocation, duplicate, pending, importer,
-// settings, and sync workflow coverage.
-//
-// Real workspace + real UI only: every test seeds IndexedDB through the
-// shared fixture, clicks visible controls, then verifies the change on a
-// subsequent page and after a reload. Editor open-animation and motion
-// assertions belong to Team 2 (editors.e2e); here motion is incidental.
-// Next `useSearchParams` semantics (client hook, Suspense-covered routes)
-// were read from the installed Next docs before touching route URLs.
-
 import { readFile } from "node:fs/promises"
 import type { Page } from "@playwright/test"
-import { IDS } from "./support/data"
-import { expect, seedWorkspace, test } from "./support/fixtures"
+import { IDS } from "../support/data"
+import { expect, seedWorkspace, test } from "../support/fixtures"
 
 const GOOGLE_RE = /google|gstatic|googleapis/i
 
@@ -112,7 +102,7 @@ async function ensureAllocatorDatetime(dialog: ReturnType<Page["getByRole"]>) {
 	await expect(time).not.toHaveValue("")
 }
 
-test("allocate exact statements to a new record and persist across reload", async ({
+test("allocator: exact Statements allocate to a new Record and persist across reload", async ({
 	page,
 	workspace,
 }) => {
@@ -166,7 +156,10 @@ test("allocate exact statements to a new record and persist across reload", asyn
 	expect(google.length).toBe(0)
 })
 
-test("under-allocation warns pending and the record stays pending", async ({ page, workspace }) => {
+test("Record creator: under-allocation warns that the Record stays Pending", async ({
+	page,
+	workspace,
+}) => {
 	expect(workspace).toBe("populated")
 	await blockGoogle(page)
 
@@ -198,7 +191,7 @@ test("under-allocation warns pending and the record stays pending", async ({ pag
 	await expect(page.locator("main").getByText("Pending", { exact: true }).first()).toBeVisible()
 })
 
-test("over-allocation is blocked with a useful message and no mutation", async ({
+test("Record creator: over-allocation is blocked with a useful message and no mutation", async ({
 	page,
 	workspace,
 }) => {
@@ -233,7 +226,7 @@ test("over-allocation is blocked with a useful message and no mutation", async (
 	expect(await countStore(page, "records")).toBe(before)
 })
 
-test("allocate-bar shows not, partial, and fully allocated states finitely", async ({
+test("allocate bar: not, partial and fully allocated states show finite values", async ({
 	page,
 	workspace,
 }) => {
@@ -275,7 +268,10 @@ test("allocate-bar shows not, partial, and fully allocated states finitely", asy
 	expect(await full.getAttribute("aria-valuenow")).toBe("100")
 })
 
-test("zero and negative amounts render with correct accounting", async ({ page, workspace }) => {
+test("amount display: zero and negative amounts render with correct accounting", async ({
+	page,
+	workspace,
+}) => {
 	expect(workspace).toBe("populated")
 	await blockGoogle(page)
 
@@ -312,7 +308,7 @@ test("zero and negative amounts render with correct accounting", async ({ page, 
 	expect(now).toBe(100)
 })
 
-test("record-search sheet allocates selected statements to a pending record", async ({
+test("Record search sheet: selected Statements allocate to a Pending Record", async ({
 	page,
 	workspace,
 }) => {
@@ -356,7 +352,7 @@ test("record-search sheet allocates selected statements to a pending record", as
 	).toBeVisible()
 })
 
-test("statement-search sheet appends an allocable statement in the editor", async ({
+test("Statement search sheet: an allocable Statement is appended in the Record editor", async ({
 	page,
 	workspace,
 }) => {
@@ -396,7 +392,7 @@ test("statement-search sheet appends an allocable statement in the editor", asyn
 	).toBeVisible()
 })
 
-test("removing an allocation row keeps sibling identity and persists", async ({
+test("Record editor: removing an Allocation keeps its sibling identity and persists", async ({
 	page,
 	workspace,
 }) => {
@@ -455,7 +451,7 @@ test("removing an allocation row keeps sibling identity and persists", async ({
 	).toBeVisible()
 })
 
-test("duplicate keep moves allocations and the deleted statement is gone", async ({
+test("duplicates: keep moves Allocations and the deleted Statement is gone", async ({
 	page,
 	workspace,
 }) => {
@@ -508,7 +504,10 @@ test("duplicate keep moves allocations and the deleted statement is gone", async
 	).toBeVisible()
 })
 
-test("separate pair restoration re-suggests the statements", async ({ page, workspace }) => {
+test("duplicates: restoring a Separate pair re-suggests its Statements", async ({
+	page,
+	workspace,
+}) => {
 	expect(workspace).toBe("populated")
 	await blockGoogle(page)
 
@@ -524,7 +523,7 @@ test("separate pair restoration re-suggests the statements", async ({ page, work
 	await expect(page.getByText("GRAB RIDE 7712")).toBeVisible()
 })
 
-test("replacing pending preserves allocations on the imported statement", async ({
+test("pending queue: replacing a Pending Statement preserves Allocations on the imported Statement", async ({
 	page,
 	workspace,
 }) => {
@@ -576,7 +575,7 @@ const DBS_VALID = [
 	"14 Oct 2026,Settled,WORKFLOW E2E IMPORT,,,-9.99,",
 ].join("\n")
 
-test("importer rejects invalid files without mutation and skips duplicates", async ({
+test("importer: invalid files are rejected without mutation and duplicates are skipped", async ({
 	page,
 	workspace,
 }) => {
@@ -642,7 +641,7 @@ test("importer rejects invalid files without mutation and skips duplicates", asy
 	expect(await countStore(page, "statements")).toBe(before + 1)
 })
 
-test("importer revolut pending import surfaces in the pending queue", async ({
+test("importer: a Revolut pending import surfaces in the pending queue", async ({
 	page,
 	workspace,
 }) => {
@@ -677,7 +676,7 @@ test("importer revolut pending import surfaces in the pending queue", async ({
 	await expect(page.getByRole("button", { name: /Workflow pending import/ })).toBeVisible()
 })
 
-test("settings validate, persist, and reload", async ({ page, workspace }) => {
+test("settings: default filters validate, persist and reload", async ({ page, workspace }) => {
 	expect(workspace).toBe("populated")
 	await blockGoogle(page)
 
@@ -703,7 +702,7 @@ test("settings validate, persist, and reload", async ({ page, workspace }) => {
 	await expect(page.locator("#default_filter_start_date")).toContainText("No default start date")
 })
 
-test("signed-out sync stays local with no external Google calls", {
+test("sync: signed-out data stays local with no external Google calls", {
 	tag: ["@desktop-only"],
 }, async ({ page, workspace }) => {
 	expect(workspace).toBe("populated")
@@ -718,10 +717,9 @@ test("signed-out sync stays local with no external Google calls", {
 	expect(google.length).toBe(0)
 })
 
-test("backup round-trip restores the workspace", { tag: ["@desktop-only"] }, async ({
-	page,
-	workspace,
-}) => {
+test("backup: a downloaded backup round-trips and restores the workspace", {
+	tag: ["@desktop-only"],
+}, async ({ page, workspace }) => {
 	expect(workspace).toBe("populated")
 	await blockGoogle(page)
 
@@ -765,7 +763,7 @@ test("backup round-trip restores the workspace", { tag: ["@desktop-only"] }, asy
 	expect(id).toBe(IDS.records.salaryIncome)
 })
 
-test("cancelled reset preserves workspace data", async ({ page, workspace }) => {
+test("reset: a cancelled reset preserves workspace data", async ({ page, workspace }) => {
 	expect(workspace).toBe("populated")
 	await blockGoogle(page)
 

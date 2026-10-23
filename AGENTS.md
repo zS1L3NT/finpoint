@@ -42,7 +42,7 @@
 
 ## Verification
 - Run `bun test` for the domain and importer tests, which use Dexie with in-memory IndexedDB.
-- Browser tests (`tests/web/`, Playwright) are scoped to what you change: run the files and projects that exercise the components, routes, or helpers you touched, and make them pass. Do not run the full matrix by default; it is 354 cases across 5 projects on one worker (measured with `bunx playwright test --list`; `PLAYWRIGHT_FULL_MATRIX=1` reproduces the 749-case all-configurations release run). See `tests/web/README.md` for how to pick cases.
+- Browser tests (`tests/web/`, Playwright) are scoped to what you change: run the files and projects that exercise the components, routes, or helpers you touched, and make them pass. Gate tests (`tests/web/gate/`) run in parallel; motion tests (`tests/web/motion/`) run alone, one at a time, in the full suite only. Ad-hoc runs use the dev servers: `bun run test:web -- <files> --project=desktop --project=mobile` for gate, `bun run test:web:motion -- <files>` for motion. The release path is the runner (`bun run test:web:gate`, `bun run test:web:full`), which builds frozen production bundles; do not run it by default. Measured on a 12-core Linux host: the gate is 307 runs in about 12 minutes; the full run (327 gate + 89 motion runs) about 27 minutes. See `tests/web/README.md` for the area layout and how to pick cases.
 - When asked to verify with `npm run dev`, run it directly, smoke-test the relevant local route, and stop the dev server afterwards.
 
 ## Agent skills

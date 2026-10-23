@@ -1,135 +1,116 @@
-// Keyboard navigation + representative keyboard actions for the 11 pending
-// route.navigation gaps (notes/muse-41-gaps.json). No independent review:
-// this file is Muse-written and unreviewed; counts below are Chromium-only
-// evidence unless the full matrix run is quoted.
-//
-// Honest applicability:
-// - Categories has no detail route: the drill is categories list -> filtered
-//   Records (keyboard) -> Record detail (keyboard) -> Back x2 (keyboard).
-// - Account cards are keyboard-operable from app13 (tabIndex + Enter parity
-//   with BudgetCard); the accounts case drives fully by keyboard.
-// - The allocator has no select-all header control; that facet is not claimed.
+import { expectPointerCursor } from "../support/assertions"
+import { IDS } from "../support/data"
+import { expect, test } from "../support/fixtures"
 
-import type { Page } from "@playwright/test"
-import { IDS } from "./support/data"
-import { expect, test } from "./support/fixtures"
+test("chrome buttons: keyboard month navigation and create button, sidebar trigger toggle, Account card Enter opens detail", {
+	tag: ["@reduced-motion"],
+}, async ({ page, workspace, isMobile }) => {
+	void workspace
+	await test.step("month navigation: keyboard previous-month and create Record actions work", async () => {
+		await page.goto("/?month=October&year=2026")
+		await page.getByRole("button", { name: "Previous month", exact: true }).focus()
+		await page.keyboard.press("Enter")
+		await expect(page.getByRole("heading", { name: "September 2026", level: 2 })).toBeVisible()
+		await page.goto("/records")
+		const create = page.getByRole("button", { name: /create pending record/i }).first()
+		await expectPointerCursor(create)
+		await create.focus()
+		await page.keyboard.press("Space")
+		await expect(page.getByRole("dialog")).toBeVisible()
+		// Leave the dialog closed so later steps start from a clean page.
+		await page.keyboard.press("Escape")
+		await expect(page.getByRole("dialog")).toHaveCount(0)
+	})
+	await test.step("sidebar trigger: keyboard toggle opens and closes the sidebar", async () => {
+		await page.goto("/privacy")
+		const toggle = page.locator('header [data-slot="sidebar-trigger"]')
+		await expectPointerCursor(toggle)
+		await toggle.focus()
+		await page.keyboard.press("Enter")
+		if (isMobile) {
+			await expect(page.getByRole("dialog")).toBeVisible()
+			await expect(
+				page.getByRole("dialog").getByText("Finpoint", { exact: true }),
+			).toBeVisible()
+			await expect(
+				page.getByRole("dialog").getByText("Local-first finance", { exact: true }),
+			).toBeVisible()
+			await page.keyboard.press("Escape")
+			await expect(page.getByRole("dialog")).toHaveCount(0)
+			await expect(toggle).toBeFocused()
+		} else {
+			await expect(page.locator('[data-slot="sidebar"]').first()).toHaveAttribute(
+				"data-state",
+				"collapsed",
+			)
+			await toggle.focus()
+			await page.keyboard.press("Space")
+			await expect(page.locator('[data-slot="sidebar"]').first()).toHaveAttribute(
+				"data-state",
+				"expanded",
+			)
+			await expect(
+				page.locator('[data-slot="sidebar"]').getByText("Finpoint", { exact: true }),
+			).toBeVisible()
+			await expect(
+				page
+					.locator('[data-slot="sidebar"]')
+					.getByText("Local-first finance", { exact: true }),
+			).toBeVisible()
+		}
+	})
+	await test.step("Account card: Enter opens detail while nested Rename Enter stays in its editor", async () => {
+		await page.goto("/accounts?query=One+Card")
+		const card = page.locator("article", { hasText: "One Card" })
+		await expect(card).toBeVisible()
+		const rename = card.getByRole("button", { name: "Rename One Card", exact: true })
+		await rename.focus()
+		await page.keyboard.press("Enter")
+		await expect(page.getByRole("dialog", { name: "Edit Account", exact: true })).toBeVisible()
+		await expect(page).toHaveURL(/\/accounts\?query=One\+Card$/)
+		await page.keyboard.press("Escape")
+		await expect(page.getByRole("dialog")).toHaveCount(0)
+		await card.focus()
+		await page.keyboard.press("Enter")
+		await expect(page).toHaveURL(/\/accounts\/t1-acc-uob$/)
+		const back = page.getByRole("button", { name: "Back to Accounts", exact: true })
+		await back.focus()
+		await page.keyboard.press("Enter")
+		await expect(page).toHaveURL(/\/accounts\?query=One\+Card$/)
+	})
+})
 
-async function expectBackAboveHeading(page: Page, name: string) {
-	const back = page.getByRole("button", { name, exact: true })
-	await expect(back).toBeVisible()
-	const backBox = await back.boundingBox()
-	const headingBox = await page.locator("main h2").first().boundingBox()
-	if (!backBox || !headingBox) throw new Error("Back and heading need layout boxes")
-	expect(backBox.y + backBox.height).toBeLessThan(headingBox.y)
-}
-
-async function keyboardBack(page: Page, name: string, url: RegExp | string) {
-	const back = page.getByRole("button", { name, exact: true })
-	await expectBackAboveHeading(page, name)
-	await back.focus()
+test("sidebar rail: Enter collapses and Space expands the sidebar", {
+	tag: ["@desktop-only"],
+}, async ({ page, isMobile }) => {
+	test.skip(isMobile, "Sidebar rail is desktop only; mobile has a separate trigger")
+	await page.goto("/records")
+	const rail = page.locator('[data-slot="sidebar-rail"]')
+	await expectPointerCursor(rail)
+	await rail.focus()
 	await page.keyboard.press("Enter")
-	await expect(page).toHaveURL(url)
-}
-
-// Origin drills share one seed but reset the history provider between steps:
-// each drill asserts an exact origin that a previous drill's entries would
-// otherwise pollute. Clearing localStorage then navigating starts each drill
-// with the same empty history a fresh context would have.
-test("keyboard origin drills share one seed with history resets", async ({ page, workspace }) => {
-	expect(workspace).toBe("populated")
-	const reset = async (origin: string) => {
-		await page.evaluate(() => localStorage.clear())
-		await page.goto(origin)
-	}
-	await test.step("records keyboard filtered list to detail to Back keeps exact origin", async () => {
-		const origin =
-			"/records?query=FairPrice+Run&page=1&per_page=5&start_date=2026-10-01&end_date=2026-10-31&min_amount=-100&max_amount=0"
-		await reset(origin)
-		const open = page
-			.getByRole("link", { name: "Open FairPrice Run", exact: true })
-			.filter({ visible: true })
-			.first()
-		await expect(open).toBeVisible()
-		await open.focus()
-		await page.keyboard.press("Enter")
-		await expect(page).toHaveURL(/\/records\/t1-r-groceries/)
-		await keyboardBack(page, "Back to Records", origin)
-	})
-	await test.step("statements keyboard filtered list to detail to Back keeps exact origin", async () => {
-		const origin =
-			"/statements?query=STARBUCKS&page=1&per_page=5&start_date=2026-10-01&end_date=2026-10-31&min_amount=-10&max_amount=0"
-		await reset(origin)
-		// The description renders in both the mobile list and the desktop table;
-		// exactly one is visible per viewport.
-		await expect(
-			page.locator("main").getByText("STARBUCKS 4455").filter({ visible: true }).first(),
-		).toBeVisible()
-		const open = page
-			.getByRole("link", { name: "Open statement", exact: true })
-			.filter({ visible: true })
-			.first()
-		await expect(open).toBeVisible()
-		await open.focus()
-		await page.keyboard.press("Enter")
-		await expect(page).toHaveURL(/\/statements\/t1-s-free-1/)
-		await keyboardBack(page, "Back to Statements", origin)
-	})
-	await test.step("accounts keyboard card to detail to Back keeps exact origin", async () => {
-		const origin = "/accounts?query=One+Card"
-		await reset(origin)
-		const card = page
-			.locator("article", { has: page.getByRole("heading", { name: "One Card" }) })
-			.first()
-		await expect(card).toBeVisible()
-		await card.focus()
-		await page.keyboard.press("Enter")
-		await expect(page).toHaveURL(/\/accounts\/t1-acc-uob/)
-		await keyboardBack(page, "Back to Accounts", origin)
-	})
-	await test.step("budgets keyboard card Enter to detail to Back keeps exact origin", async () => {
-		const origin = "/budgets?query=October+Buffer"
-		await reset(origin)
-		const card = page.locator("article", { hasText: "October Buffer" }).first()
-		await expect(card).toBeVisible()
-		await card.focus()
-		await page.keyboard.press("Enter")
-		await expect(page).toHaveURL(/\/budgets\/t1-b-manual/)
-		await keyboardBack(page, "Back to Budgets", origin)
-	})
-	await test.step("categories nested keyboard drill returns through exact origins", async () => {
-		// No /categories/[id] route exists: drill into filtered Records instead.
-		await reset("/categories?query=Groceries")
-		await expect(
-			page.getByRole("button", { name: "Edit Groceries", exact: true }),
-		).toBeVisible()
-		const drill = page.getByRole("link", { name: "Open Records for Groceries", exact: true })
-		await drill.focus()
-		await page.keyboard.press("Enter")
-		const recordsOrigin = new RegExp("/records\\?category_ids=t1-cat-groceries")
-		await expect(page).toHaveURL(recordsOrigin)
-		const recordsUrl = page.url()
-		await expect(
-			page.getByRole("button", { name: "Back to Categories", exact: true }),
-		).toBeVisible()
-		const open = page
-			.getByRole("link", { name: "Open FairPrice Run", exact: true })
-			.filter({ visible: true })
-			.first()
-		await open.focus()
-		await page.keyboard.press("Enter")
-		await expect(page).toHaveURL(/\/records\/t1-r-groceries/)
-		await keyboardBack(page, "Back to Records", recordsUrl)
-		await keyboardBack(page, "Back to Categories", /\/categories(\?|$)/)
-	})
+	await expect(page.locator('[data-slot="sidebar"]').first()).toHaveAttribute(
+		"data-state",
+		"collapsed",
+	)
+	await rail.focus()
+	await page.keyboard.press("Space")
+	await expect(page.locator('[data-slot="sidebar"]').first()).toHaveAttribute(
+		"data-state",
+		"expanded",
+	)
 })
 
 // Allocator keyboard flows share one seed: none of them persist (dialogs and
 // reviews are cancelled, selections are cleared), so step order is free. The
 // small-viewport step runs last because it resizes the viewport for the rest
 // of the test.
-test("allocator keyboard flows share one seed", async ({ page, workspace }) => {
+test("allocator keyboard flows: selection and dialog, duplicate review, disabled replace action and small-viewport clear", async ({
+	page,
+	workspace,
+}) => {
 	expect(workspace).toBe("populated")
-	await test.step("allocator keyboard selection, dialog, and clear", async () => {
+	await test.step("allocator: keyboard selection opens Create Record and Clear removes the selection", async () => {
 		await page.goto("/allocator")
 		const box = page.getByRole("checkbox", {
 			name: `Select statement ${IDS.statements.unallocated[2]}`,
@@ -153,7 +134,7 @@ test("allocator keyboard flows share one seed", async ({ page, workspace }) => {
 		await expect(box).not.toBeChecked()
 		await expect(page.locator("aside")).toHaveCount(0)
 	})
-	await test.step("duplicates keyboard keep, delete, review, and cancel", async () => {
+	await test.step("duplicates: keyboard keep, delete, review and cancel work", async () => {
 		await page.goto("/allocator/duplicates")
 		const keep = page.getByRole("radio", {
 			name: `Keep ${"DON DON DONKI 8821 PURCHASE"}`,
@@ -178,7 +159,7 @@ test("allocator keyboard flows share one seed", async ({ page, workspace }) => {
 		await page.keyboard.press("Escape")
 		await expect(review).toHaveCount(0)
 	})
-	await test.step("selection bar disabled replace action is honestly disabled", async () => {
+	await test.step("selection bar: replace action stays disabled for two selections", async () => {
 		await page.goto("/allocator")
 		// Two selections cannot map to one pending replacement: the action stays
 		// disabled through the real UI rather than a class assertion.
@@ -193,7 +174,7 @@ test("allocator keyboard flows share one seed", async ({ page, workspace }) => {
 		const create = page.getByRole("button", { name: "Create Record", exact: true })
 		await expect(create).toBeEnabled()
 	})
-	await test.step("selection bar on small viewport keeps clear reachable by keyboard", async () => {
+	await test.step("selection bar: Clear stays reachable by keyboard on a small viewport", async () => {
 		await page.setViewportSize({ width: 390, height: 844 })
 		await page.goto("/allocator")
 		const box = page.getByRole("checkbox", {
@@ -213,7 +194,10 @@ test("allocator keyboard flows share one seed", async ({ page, workspace }) => {
 	})
 })
 
-test("pending keyboard queue, replace, and confirm", async ({ page, workspace }) => {
+test("pending queue: keyboard replace and confirm replace the Pending Statement", async ({
+	page,
+	workspace,
+}) => {
 	expect(workspace).toBe("populated")
 	await page.goto("/allocator/pending")
 	const queue = page.locator("section[aria-labelledby='pending-queue-title']")
@@ -247,7 +231,10 @@ test("pending keyboard queue, replace, and confirm", async ({ page, workspace })
 	).toBeVisible()
 })
 
-test("settings keyboard save persists across reload", async ({ page, workspace }) => {
+test("settings: keyboard save of default filters persists across reload", async ({
+	page,
+	workspace,
+}) => {
 	expect(workspace).toBe("populated")
 	await page.goto("/settings")
 	const save = page.getByRole("button", { name: "Save default filters" })
@@ -270,9 +257,12 @@ test("settings keyboard save persists across reload", async ({ page, workspace }
 // Sync cancel and importer rejection share one seed: neither mutates the
 // workspace (the clear is cancelled, the bad file is rejected), and they
 // touch different routes, so one navigation each keeps them independent.
-test("sync cancel and importer rejection share one seed", async ({ page, workspace }) => {
+test("sync and importer: cancelled clear keeps data, keyboard bank select and invalid file rejection work", async ({
+	page,
+	workspace,
+}) => {
 	expect(workspace).toBe("populated")
-	await test.step("sync keyboard clear cancelled preserves data", async () => {
+	await test.step("sync: keyboard cancel of clear all data preserves the workspace", async () => {
 		await page.goto("/sync")
 		const clear = page.getByRole("button", { name: "Clear all data" })
 		await clear.focus()
@@ -294,7 +284,7 @@ test("sync cancel and importer rejection share one seed", async ({ page, workspa
 				.filter({ visible: true }),
 		).toBeVisible()
 	})
-	await test.step("importer keyboard bank select and invalid rejection", async () => {
+	await test.step("importer: keyboard bank select and invalid file rejection work", async () => {
 		await page.goto("/importer")
 		const dbs = page.getByRole("radio", { name: /DBS/ })
 		await dbs.focus()

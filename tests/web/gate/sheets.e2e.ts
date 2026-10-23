@@ -1,12 +1,166 @@
-// Sheet loading readiness (director D2): held actual reads after a
-// mounted-closed period and across reopening prove no false empty or old
-// selection, then resolve correct data. Silent while unresolved: no loading
-// copy and no skeleton. Sheets render null until the live query for the
-// CURRENT opening resolves; within one opening, prior rows stay mounted and
-// dimmed while a new query or filter read resolves (no blank, no remount).
 import type { Locator, Page } from "@playwright/test"
-import { IDS } from "./support/data"
-import { expect, test } from "./support/fixtures"
+import { expectVisibleBackdrop } from "../support/assertions"
+import { getScenario, IDS } from "../support/data"
+import { budget, deleted, imported, kept, openEditor, pending, record } from "../support/editors"
+import { expect, test } from "../support/fixtures"
+import { openReplacementSheet } from "../support/sheets"
+
+test("search sheets: filter, allocate, attach and reopen", async ({ page, workspace }) => {
+	void workspace
+	await test.step("Statement search sheet: filter, allocate, Done returns to editor and unsaved allocation is cancelled", async () => {
+		void workspace
+		const dialog = await openEditor(page, `/records/${record.id}`, "Edit Record", "Edit Record")
+		await dialog.getByRole("button", { name: "Allocate statement", exact: true }).click()
+		const sheet = page.getByRole("dialog", {
+			name: "Allocate statements to record",
+			exact: true,
+		})
+		await expectVisibleBackdrop(page)
+		await sheet.getByRole("searchbox", { name: "Search statements" }).fill(imported.description)
+		await sheet.getByRole("button").filter({ hasText: imported.description }).click()
+		await sheet.getByRole("button", { name: "Done", exact: true }).click()
+		await expect(sheet).not.toBeVisible()
+		await expect(dialog).toContainText(imported.description)
+		await dialog.getByRole("button", { name: "Cancel", exact: true }).click()
+		await expect(page.getByRole("dialog")).toHaveCount(0)
+		// The cancelled allocation was never saved to the Record.
+		await expect(page.locator("main")).not.toContainText(imported.description)
+		await page.getByRole("button", { name: "Edit Record", exact: true }).click()
+		const reopened = page.getByRole("dialog", { name: "Edit Record" })
+		await expect(reopened).toBeVisible()
+		await expect(
+			reopened.getByRole("button", { name: "Allocate statement", exact: true }),
+		).toBeVisible()
+		await expect(reopened).not.toContainText(imported.description)
+	})
+	await test.step("Record search sheet: query miss and hit, attach persists, Escape closes and click reopens", async () => {
+		void workspace
+		await page.goto(`/budgets/${budget.id}`)
+		const trigger = page.getByRole("button", { name: "Attach Record", exact: true })
+		await trigger.click()
+		const sheet = page.getByRole("dialog", { name: "Attach record to budget", exact: true })
+		await expectVisibleBackdrop(page)
+		await sheet.getByRole("searchbox", { name: "Search records" }).fill("no-such-record-999")
+		await expect(sheet).toContainText("No matching Records.")
+		await sheet.getByRole("searchbox", { name: "Search records" }).fill(record.title)
+		await sheet.getByRole("button").filter({ hasText: record.title }).click()
+		await expect(sheet).not.toBeVisible()
+		await page.reload()
+		await expect(page.getByRole("main")).toContainText(record.title)
+		await trigger.click()
+		await page.keyboard.press("Escape")
+		await expect(sheet).not.toBeVisible()
+		await trigger.click()
+		await expect(sheet).toBeVisible()
+	})
+})
+
+test("review sheets: selected descriptions, cancel restores and choices retain", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	await test.step("replacement review: selected descriptions and cancel restores sheet", async () => {
+		void workspace
+		const sheet = await openReplacementSheet(page)
+		await expectVisibleBackdrop(page)
+		await expect(sheet).toContainText(imported.description)
+		await sheet
+			.getByRole("searchbox", { name: "Search pending Statements" })
+			.fill(pending.description)
+		const choice = sheet.getByRole("button").filter({ hasText: pending.description })
+		await choice.click()
+		const review = page.getByRole("dialog", {
+			name: "Review Statement replacement",
+			exact: true,
+		})
+		await expect(review).toBeVisible()
+		await expectVisibleBackdrop(page)
+		await expect(review).toContainText(pending.description)
+		await expect(review).toContainText(imported.description)
+		await expect(
+			review.getByRole("button", { name: "Replace pending Statement", exact: true }),
+		).toBeEnabled()
+		await review.getByRole("button", { name: "Cancel", exact: true }).click()
+		await expect(sheet).toBeVisible()
+		await page.keyboard.press("Escape")
+		await expect(sheet).not.toBeVisible()
+	})
+	await test.step("duplicate review: explicit keep and delete, cancel and reopen retain choices", async () => {
+		void workspace
+		await page.goto("/allocator/duplicates")
+		// Review stays disabled until both a kept and a deleted Statement are chosen.
+		await expect(
+			page.getByRole("button", { name: "Review deletion", exact: true }).first(),
+		).toBeDisabled()
+		await page.getByRole("radio", { name: `Keep ${kept.description}`, exact: true }).click()
+		await page
+			.getByRole("radio", { name: `Delete ${deleted.description}`, exact: true })
+			.click()
+		const trigger = page.getByRole("button", { name: "Review deletion", exact: true }).first()
+		await trigger.click()
+		const dialog = page.getByRole("dialog", {
+			name: "Delete duplicate Statements",
+			exact: true,
+		})
+		await expect(dialog).toBeVisible()
+		await expect(dialog).toContainText(kept.description)
+		await expect(dialog).toContainText(deleted.description)
+		await expect(
+			dialog.getByRole("button", { name: "Delete 1 Statement", exact: true }),
+		).toBeEnabled()
+		await dialog.getByRole("button", { name: "Cancel", exact: true }).click()
+		await expect(dialog).not.toBeVisible()
+		await trigger.click()
+		await expect(dialog).toBeVisible()
+		await page.keyboard.press("Escape")
+		await expect(dialog).not.toBeVisible()
+	})
+})
+
+test("Statement search sheet: opens with backdrop and reopens after Escape", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	await page.goto(`/records/${IDS.records.partialPending}`)
+	await page.getByRole("button", { name: "Edit Record", exact: true }).click()
+	const editor = page.getByRole("dialog", { name: "Edit Record", exact: true })
+	await expect(editor).toBeVisible()
+	await editor.getByRole("button", { name: "Allocate statement", exact: true }).click()
+	const sheet = page.getByRole("dialog", {
+		name: "Allocate statements to record",
+		exact: true,
+	})
+	await expect(sheet).toBeVisible()
+	await expectVisibleBackdrop(page)
+	await page.keyboard.press("Escape")
+	await expect(sheet).not.toBeVisible()
+	await expect(editor).toBeVisible()
+	await editor.getByRole("button", { name: "Allocate statement", exact: true }).click()
+	await expect(sheet).toBeVisible()
+	await page.keyboard.press("Escape")
+	await expect(sheet).not.toBeVisible()
+})
+
+test("Record search sheet: opens with backdrop and reopens after Escape", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	await page.goto(`/budgets/${IDS.budgets.manual}`)
+	const trigger = page.getByRole("button", { name: "Attach Record", exact: true })
+	await trigger.click()
+	const sheet = page.getByRole("dialog", { name: "Attach record to budget", exact: true })
+	await expect(sheet).toBeVisible()
+	await expectVisibleBackdrop(page)
+	await page.keyboard.press("Escape")
+	await expect(sheet).not.toBeVisible()
+	await trigger.click()
+	await expect(sheet).toBeVisible()
+	await page.keyboard.press("Escape")
+	await expect(sheet).not.toBeVisible()
+})
 
 async function installReadHold(page: Page) {
 	// Scheduler-level hold: while holding, an open readwrite keeper transaction
@@ -175,7 +329,7 @@ async function expectSilentSheet(
 	await expect(sheet.locator('[data-slot="skeleton"]')).toHaveCount(0)
 }
 
-test("pending confirmation sheet stays silent while held after closed time, then resolves", async ({
+test("Pending confirmation sheet: stays silent while held after closed time, then resolves", async ({
 	page,
 	workspace,
 }) => {
@@ -219,7 +373,7 @@ test("pending confirmation sheet stays silent while held after closed time, then
 	await expect(sheet.getByText("Pasar malam snacks")).toBeVisible()
 })
 
-test("statement search sheet stays silent while held after closed time, then resolves", async ({
+test("Statement search sheet: stays silent while held after closed time, then resolves", async ({
 	page,
 	workspace,
 }) => {
@@ -256,7 +410,7 @@ test("statement search sheet stays silent while held after closed time, then res
 	await expect(sheet.getByText("SHENG SIONG 9902")).toBeVisible()
 })
 
-test("record search sheet stays silent while held after closed time, then resolves", async ({
+test("Record search sheet: stays silent while held after closed time, then resolves", async ({
 	page,
 	workspace,
 }) => {
@@ -355,7 +509,7 @@ async function seedPendingSearch(page: Page) {
 	})
 }
 
-test("pending confirmation sheet keeps prior rows while a held query change resolves", async ({
+test("Pending confirmation sheet: keeps prior rows while a held query change resolves", async ({
 	page,
 	workspace,
 }) => {
@@ -384,7 +538,7 @@ test("pending confirmation sheet keeps prior rows while a held query change reso
 	await expect(sheet.getByText("Card lunch placeholder")).toHaveCount(0)
 })
 
-test("pending confirmation sheet clears prior rows when reopened for another Statement", async ({
+test("Pending confirmation sheet: clears prior rows when reopened for another Statement", async ({
 	page,
 	workspace,
 }) => {
@@ -417,7 +571,7 @@ test("pending confirmation sheet clears prior rows when reopened for another Sta
 	await expect(sheet.locator("div.flex-1.overflow-y-auto")).toHaveCSS("opacity", "1")
 })
 
-test("statement search sheet keeps prior rows while a held query change resolves", async ({
+test("Statement search sheet: keeps prior rows while a held query change resolves", async ({
 	page,
 	workspace,
 }) => {
@@ -453,7 +607,7 @@ test("statement search sheet keeps prior rows while a held query change resolves
 	await expect(sheet.getByText(/No allocable Statements\./)).toHaveCount(0)
 })
 
-test("record search sheet keeps prior rows while a held query change resolves", async ({
+test("Record search sheet: keeps prior rows while a held query change resolves", async ({
 	page,
 	workspace,
 }) => {
@@ -486,7 +640,7 @@ test("record search sheet keeps prior rows while a held query change resolves", 
 	await expect(sheet.getByText(/No matching Records\./)).toHaveCount(0)
 })
 
-test("statement search sheet keeps prior rows while a held filter change resolves", async ({
+test("Statement search sheet: keeps prior rows while a held filter change resolves", async ({
 	page,
 	workspace,
 }) => {
@@ -544,4 +698,206 @@ test("statement search sheet keeps prior rows while a held filter change resolve
 	await expect(sheet.getByText("Older allocable Statement")).toBeVisible()
 	await expect(sheet.getByText("STARBUCKS 4455")).toBeVisible()
 	await expect(sheet.locator("div.flex-1.overflow-y-auto")).toHaveCSS("opacity", "1")
+})
+
+test.describe("dense workspace", () => {
+	test.use({ workspaceScenario: "dense" })
+	const pending = getScenario("dense").tables.statements.filter(statement => statement.is_pending)
+	const first = pending.find(statement => statement.description === "Dense pending 13")
+	const next = pending.find(statement => statement.description === "Dense pending 26")
+	if (!first || !next) throw new Error("Two distinct Pending Statements are required")
+
+	// One dense seed for the whole queue/candidate journey: every step navigates
+	// fresh, so URL, alert and history assertions keep their original meaning.
+	test("Pending queue and candidate search: typing, selection, pagination and Back behaviour", async ({
+		page,
+		workspace,
+		isMobile,
+	}) => {
+		void workspace
+		await test.step("Pending queue: typing clears a missing selection and dismisses its availability alert", async () => {
+			await page.goto(
+				"/allocator/pending?pending_statement_id=deleted-pending-statement&candidate_query=stale&candidate_page=2",
+			)
+			const alert = page
+				.getByRole("alert")
+				.filter({ hasText: "Pending Statement unavailable" })
+			await expect(alert).toBeVisible()
+			const search = page
+				.locator('section[aria-labelledby="pending-queue-title"]')
+				.getByPlaceholder("Search descriptions...")
+			await search.pressSequentially("Dense pending 26", { delay: 10 })
+			await expect(alert).toHaveCount(0)
+			await expect(page).not.toHaveURL(/pending_statement_id=/)
+			await expect(page).toHaveURL(/query=Dense\+pending\+26/)
+			await page.waitForTimeout(650)
+			await expect(search).toHaveValue("Dense pending 26")
+			await expect(alert).toHaveCount(0)
+			await expect(page).not.toHaveURL(
+				/pending_statement_id=|candidate_query=|candidate_page=/,
+			)
+			await expect(page).toHaveURL(/query=Dense\+pending\+26/)
+			await expect(page.getByRole("button", { name: /^Dense pending 26\b/ })).toBeVisible()
+		})
+		await test.step("Pending queue: typing clears an orphan candidate query without discarding the queue buffer", async () => {
+			await page.goto("/allocator/pending?candidate_query=stale&candidate_page=2")
+			const search = page
+				.locator('section[aria-labelledby="pending-queue-title"]')
+				.getByPlaceholder("Search descriptions...")
+			await expect(search).toBeVisible()
+			const historyLength = await page.evaluate(() => history.length)
+			await search.pressSequentially("Dense pending 26", { delay: 10 })
+			await expect(page).toHaveURL(/query=Dense\+pending\+26/)
+			await page.waitForTimeout(650)
+			await expect(search).toHaveValue("Dense pending 26")
+			await expect(page).not.toHaveURL(/candidate_query=|candidate_page=/)
+			await expect(page.getByRole("button", { name: /^Dense pending 26\b/ })).toBeVisible()
+			expect((await page.evaluate(() => history.length)) - historyLength).toBeLessThanOrEqual(
+				2,
+			)
+		})
+		await test.step("Pending selection: resets an unsettled candidate search without replaying it on the next Statement", async () => {
+			await page.goto(`/allocator/pending?pending_statement_id=${first.id}`)
+			const candidate = page.locator('section[aria-labelledby="candidate-title"]')
+			const search = candidate.getByPlaceholder("Search descriptions...")
+			await expect(search).toBeVisible()
+			// Record when the query was typed and when the next Statement was chosen, to prove the
+			// selection changed while the 300ms search callback was still pending.
+			await page.evaluate(() => {
+				document.addEventListener(
+					"click",
+					event => {
+						const target =
+							event.target instanceof Element ? event.target.closest("button") : null
+						// On mobile, leaving the candidate panel is the first selection change.
+						const text = target?.textContent?.trim() ?? ""
+						if (
+							!Reflect.has(window, "__selectedAt") &&
+							(text.startsWith("Dense pending 26") ||
+								text === "Back to pending Statements")
+						)
+							Reflect.set(window, "__selectedAt", performance.now())
+					},
+					{ capture: true },
+				)
+				document.addEventListener(
+					"input",
+					() => Reflect.set(window, "__filledAt", performance.now()),
+					{ capture: true },
+				)
+			})
+			await search.fill("never matches another Statement")
+			if (isMobile)
+				await page
+					.getByRole("button", { name: "Back to pending Statements", exact: true })
+					.click()
+			// Forced: the <300ms race below must measure dispatch speed, not
+			// actionability polling (stability checks on an animating list eat the
+			// budget). The URL + visibility + no-stale-query assertions keep full
+			// strength — a genuinely failed click still fails loudly there.
+			await page.getByRole("button", { name: /^Dense pending 26\b/ }).click({ force: true })
+			const gap = await page.evaluate(
+				() =>
+					Number(Reflect.get(window, "__selectedAt")) -
+					Number(Reflect.get(window, "__filledAt")),
+			)
+			expect(gap, "the selection changed before the search callback could fire").toBeLessThan(
+				300,
+			)
+			await expect(page).toHaveURL(new RegExp(`pending_statement_id=${next.id}`))
+			await expect(
+				candidate.getByText("Dense pending 26", { exact: true }).first(),
+			).toBeVisible()
+			// The outgoing panel remains mounted briefly during its exit transition.
+			await expect(search).toHaveCount(1)
+			await expect(search).toHaveValue("")
+			// Outlast both 300ms search callbacks to reject a stale query appearing later.
+			await page.waitForTimeout(650)
+			await expect(search).toHaveValue("")
+			await expect(page).not.toHaveURL(/candidate_query=/)
+		})
+		await test.step("Pending queue: typing retains every character while clearing the old selection", async () => {
+			await page.goto(`/allocator/pending?pending_statement_id=${first.id}`)
+			await expect(page.locator('section[aria-labelledby="candidate-title"]')).toBeVisible()
+			if (isMobile) {
+				await page
+					.getByRole("button", { name: "Back to pending Statements", exact: true })
+					.click()
+				// Let the Back commit land and the candidate panel finish exiting
+				// before typing: keystrokes during the transition race the commit.
+				// Mobile-only: other projects show both panels, so typing there also
+				// exercises clearing the live selection (asserted below); the mobile
+				// run only proves character retention and history bounds.
+				// The 30s budget covers cold-commit latency on dev servers; the
+				// committed-URL assertions that follow stay strict.
+				await expect(page).not.toHaveURL(/pending_statement_id=/, { timeout: 30000 })
+				await page.waitForTimeout(500)
+			}
+			const search = page
+				.locator('section[aria-labelledby="pending-queue-title"]')
+				.getByPlaceholder("Search descriptions...")
+			const historyLength = await page.evaluate(() => history.length)
+			await search.pressSequentially("Dense pending 26", { delay: 10 })
+			await expect(search).toHaveValue("Dense pending 26")
+			await expect(page).toHaveURL(/query=Dense\+pending\+26/)
+			await expect(page).not.toHaveURL(/pending_statement_id=/)
+			await page.waitForTimeout(650)
+			await expect(search).toHaveValue("Dense pending 26")
+			await expect(page.getByRole("button", { name: /^Dense pending 26\b/ })).toBeVisible()
+			// One selection-clear navigation and one debounced query navigation are
+			// sufficient; repeated clear intents must not add an entry per character.
+			expect((await page.evaluate(() => history.length)) - historyLength).toBeLessThanOrEqual(
+				2,
+			)
+		})
+		await test.step("queue pagination: survives a candidate search commit", async () => {
+			// Regression: timer-built URLs must not drop params from navigation that
+			// bypasses the intent mirror (footer Links, Back/Forward). Paginate AFTER
+			// the last pushParams push (selection): without invalidation the mirror
+			// still holds the pre-pagination params and the timer commit drops
+			// page=2. Each action waits for its commit.
+			await page.goto("/allocator/pending?per_page=2")
+			await page
+				.getByRole("button", { name: /^Dense pending \d+/ })
+				.first()
+				.click()
+			await expect(page).toHaveURL(/pending_statement_id=/)
+			const selected = new URL(page.url()).searchParams.get("pending_statement_id")
+			if (isMobile) {
+				// The queue (and its footer) hides behind the selection on mobile,
+				// so paginate by navigating with the selection preserved.
+				await page.goto(
+					`/allocator/pending?per_page=2&page=2&pending_statement_id=${selected}`,
+				)
+			} else {
+				await page.getByRole("link", { name: "Go to next page", exact: true }).click()
+			}
+			await expect(page).toHaveURL(/[?&]page=2(&|$)/)
+			const candidate = page
+				.locator('section[aria-labelledby="candidate-title"]')
+				.getByPlaceholder("Search descriptions...")
+			await expect(candidate).toBeVisible()
+			await candidate.fill("Dense Record")
+			await expect(page).toHaveURL(/candidate_query=Dense\+Record/)
+			await expect(page).toHaveURL(/[?&]page=2(&|$)/)
+			await expect(page).toHaveURL(/pending_statement_id=/)
+		})
+		await test.step("Browser Back: queue typing does not restore the account filter", async () => {
+			// Same stale-mirror hazard via popstate instead of Links.
+			await page.goto("/allocator/pending")
+			// Single combobox on this route (probed): the account filter trigger.
+			// Display names are not zero-padded ("Dense Account 1", id t1-d-acc-01).
+			await page.getByRole("combobox").first().click()
+			await page.getByRole("option", { name: "Dense Account 1", exact: true }).click()
+			await expect(page).toHaveURL(/account_id=t1-d-acc-01/)
+			await page.goBack()
+			await expect(page).not.toHaveURL(/account_id=/)
+			const search = page
+				.locator('section[aria-labelledby="pending-queue-title"]')
+				.getByPlaceholder("Search descriptions...")
+			await search.pressSequentially("Dense pending 26", { delay: 10 })
+			await expect(page).toHaveURL(/query=Dense\+pending\+26/)
+			await expect(page).not.toHaveURL(/account_id=/)
+		})
+	})
 })

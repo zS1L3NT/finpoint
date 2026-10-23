@@ -1,18 +1,15 @@
-import {
-	expectDropdownPreservesScroll,
-	expectPopupEntrance,
-	expectVisibleBackdrop,
-	sampleVisibleRowAnimations,
-} from "./support/assertions"
-import { getScenario, IDS } from "./support/data"
-import { expect, test } from "./support/fixtures"
+import { getScenario, IDS } from "../support/data"
+import { expect, test } from "../support/fixtures"
+import { expectPopupEntrance, sampleVisibleRowAnimations } from "../support/motion"
 
 // App modal surfaces share one populated seed. None of them persists: dialogs
 // are escaped, reviews are cancelled, and sheets only reopen. Every step
 // navigates fresh.
-test("app modal surfaces share one seed", { tag: ["@motion"] }, async ({ page, workspace }) => {
+test("app modal surfaces: popup entrances and fades", {
+	tag: ["@reduced-motion"],
+}, async ({ page, workspace }) => {
 	void workspace
-	await test.step("editor popup fades and moves through intermediate rendered frames", async () => {
+	await test.step("editor popup: fades and moves through intermediate rendered frames", async () => {
 		await page.goto("/categories", { waitUntil: "domcontentloaded" })
 		const trigger = page.getByRole("button", { name: "Create Category", exact: true })
 		await expect(trigger).toBeVisible()
@@ -41,33 +38,14 @@ test("app modal surfaces share one seed", { tag: ["@motion"] }, async ({ page, w
 		expect(Math.max(...frames.map(frame => frame.yOverflow))).toBeLessThanOrEqual(
 			last.yOverflow + 1,
 		)
-		await expectVisibleBackdrop(page)
-		await page.keyboard.press("Escape")
-		await expect(page.getByRole("dialog")).toHaveCount(0)
-		await expect(trigger).toBeFocused()
-		for (let cycle = 0; cycle < 3; cycle++) {
-			await trigger.click()
-			await expect(page.getByRole("dialog")).toBeVisible()
-			await page.keyboard.press("Escape")
-			await trigger.click()
-			await expect(page.getByRole("dialog")).toHaveCount(1)
-			await expectVisibleBackdrop(page)
-			await page.keyboard.press("Escape")
-			await expect(page.getByRole("dialog")).toHaveCount(0)
-		}
 	})
-	await test.step("pending Record editor opens with initial content already laid out", async () => {
+	await test.step("Record editor: opens with initial content already laid out", async () => {
 		await page.goto(`/records/${IDS.records.partialPending}`, { waitUntil: "domcontentloaded" })
 		const trigger = page.getByRole("button", { name: "Edit Record", exact: true })
 		await expect(trigger).toBeVisible()
 		await expectPopupEntrance(page, () => trigger.click())
-		await expect(page.getByRole("dialog").getByRole("alert")).toContainText(
-			"Amount does not match the sum of Allocation Amounts",
-		)
-		await page.keyboard.press("Escape")
-		await expect(page.getByRole("dialog")).toHaveCount(0)
 	})
-	await test.step("replacement review popup fades with stable initial content", async () => {
+	await test.step("Statement replacement review: popup fades with stable initial content", async () => {
 		await page.goto("/allocator")
 		await page
 			.getByRole("checkbox", {
@@ -83,113 +61,13 @@ test("app modal surfaces share one seed", { tag: ["@motion"] }, async ({ page, w
 			.fill("Pasar malam")
 		const choice = sheet.getByRole("button").filter({ hasText: "Pasar malam" })
 		await expectPopupEntrance(page, () => choice.click())
-		const review = page.getByRole("dialog", {
-			name: "Review Statement replacement",
-			exact: true,
-		})
-		await expect(review).toContainText("Pasar malam")
-		await expectVisibleBackdrop(page)
-		await review.getByRole("button", { name: "Cancel", exact: true }).click()
-		await expect(sheet).toBeVisible()
-		await page.keyboard.press("Escape")
-		await expect(sheet).not.toBeVisible()
 	})
-	await test.step("statement search sheet opens with backdrop and reopens after Escape", async () => {
-		await page.goto(`/records/${IDS.records.partialPending}`)
-		await page.getByRole("button", { name: "Edit Record", exact: true }).click()
-		const editor = page.getByRole("dialog", { name: "Edit Record", exact: true })
-		await expect(editor).toBeVisible()
-		await editor.getByRole("button", { name: "Allocate statement", exact: true }).click()
-		const sheet = page.getByRole("dialog", {
-			name: "Allocate statements to record",
-			exact: true,
-		})
-		await expect(sheet).toBeVisible()
-		await expectVisibleBackdrop(page)
-		await page.keyboard.press("Escape")
-		await expect(sheet).not.toBeVisible()
-		await expect(editor).toBeVisible()
-		await editor.getByRole("button", { name: "Allocate statement", exact: true }).click()
-		await expect(sheet).toBeVisible()
-		await page.keyboard.press("Escape")
-		await expect(sheet).not.toBeVisible()
-	})
-	await test.step("record search sheet opens with backdrop and reopens after Escape", async () => {
-		await page.goto(`/budgets/${IDS.budgets.manual}`)
-		const trigger = page.getByRole("button", { name: "Attach Record", exact: true })
-		await trigger.click()
-		const sheet = page.getByRole("dialog", { name: "Attach record to budget", exact: true })
-		await expect(sheet).toBeVisible()
-		await expectVisibleBackdrop(page)
-		await page.keyboard.press("Escape")
-		await expect(sheet).not.toBeVisible()
-		await trigger.click()
-		await expect(sheet).toBeVisible()
-		await page.keyboard.press("Escape")
-		await expect(sheet).not.toBeVisible()
-	})
-})
-
-test("dropdown keeps the page scrollable and supports keyboard selection after reopening", async ({
-	page,
-}) => {
-	await page.goto("http://127.0.0.1:5174/?section=primitives", { waitUntil: "domcontentloaded" })
-	const trigger = page.getByRole("button", { name: "Open menu", exact: true })
-	await trigger.scrollIntoViewIfNeeded()
-	await expectDropdownPreservesScroll(page, () => trigger.click())
-	await page.keyboard.press("Escape")
-	await expect(page.getByRole("menu")).toHaveCount(0)
-	await expect(trigger).toBeFocused()
-	await trigger.press("Enter")
-	await expect(page.getByRole("menuitem", { name: "Edit item", exact: true })).toBeFocused()
-	await page.keyboard.press("Enter")
-	await expect(page.getByTestId("dropdown-value")).toContainText("Menu: edit")
-	await expect(page.getByRole("menu")).toHaveCount(0)
-})
-
-test("harness modal focus containment shares one page", async ({ page }) => {
-	for (const modal of [
-		{ trigger: "Open dialog", role: "dialog", title: "Harness dialog", close: "Close dialog" },
-		{ trigger: "Open sheet", role: "dialog", title: "Harness sheet", close: "Close sheet" },
-		{
-			trigger: "Delete workspace",
-			role: "alertdialog",
-			title: "Delete workspace?",
-			close: "Cancel",
-		},
-	] as const) {
-		await test.step(`${modal.title}: backdrop, keyboard focus containment and restoration`, async () => {
-			await page.goto("http://127.0.0.1:5174/?section=primitives", {
-				waitUntil: "domcontentloaded",
-			})
-			const trigger = page.getByRole("button", { name: modal.trigger, exact: true })
-			await trigger.focus()
-			await trigger.press("Enter")
-			const popup = page.getByRole(modal.role, { name: modal.title, exact: true })
-			await expect(popup).toBeVisible()
-			await expectVisibleBackdrop(page)
-			for (let step = 0; step < 5; step++) {
-				await page.keyboard.press("Tab")
-				expect(
-					await popup.evaluate(element => element.contains(document.activeElement)),
-				).toBe(true)
-			}
-			await popup.getByRole("button", { name: modal.close, exact: true }).click()
-			await expect(popup).not.toBeVisible()
-			await expect(trigger).toBeFocused()
-			await trigger.press("Enter")
-			await expect(popup).toBeVisible()
-			await page.keyboard.press("Escape")
-			await expect(popup).not.toBeVisible()
-			await expect(trigger).toBeFocused()
-		})
-	}
 })
 
 for (const action of ["Cancel", "Fix"] as const) {
 	test(
-		`duplicate review exit fades popup and backdrop through intermediate alpha then removal${action === "Fix" ? " after Fix" : ""}`,
-		{ tag: "@motion" },
+		`Duplicate Statement review: exit fades popup and backdrop through intermediate alpha then removal${action === "Fix" ? " after Fix" : ""}`,
+		{ tag: "@reduced-motion" },
 		async ({ page, workspace }, testInfo) => {
 			void workspace
 			const tables = getScenario("populated").tables
@@ -262,7 +140,6 @@ for (const action of ["Cancel", "Fix"] as const) {
 				exact: true,
 			})
 			await expect(dialog).toBeVisible()
-			await expectVisibleBackdrop(page)
 			const reduced = testInfo.project.use.reducedMotion === "reduce"
 			// Record real rendered opacity through the close; the page clears the
 			// review input synchronously, so only a latched popup/backdrop can fade.
@@ -401,12 +278,6 @@ for (const action of ["Cancel", "Fix"] as const) {
 						.getByRole("button", { name: "Review deletion", exact: true })
 						.click(),
 				)
-				await expect(dialog).toContainText(secondKeepDescription)
-				await expect(dialog).toContainText(secondDeleteDescription)
-				await expect(dialog.getByText(keptDescription, { exact: true })).toHaveCount(0)
-				await expect(dialog.getByText(deletedDescription, { exact: true })).toHaveCount(0)
-				await page.keyboard.press("Escape")
-				await expect(page.getByRole("dialog")).toHaveCount(0)
 			} finally {
 				await recorder.evaluate(state => state.stop())
 				await recorder.dispose()

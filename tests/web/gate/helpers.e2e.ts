@@ -1,11 +1,13 @@
 import { expect, test } from "@playwright/test"
-import { installDateOnly, setDateOnly } from "./support/date-only"
-import { test as workspaceTest } from "./support/fixtures"
+import { installDateOnly, setDateOnly } from "../support/date-only"
+import { test as workspaceTest } from "../support/fixtures"
 
 const october = new Date("2026-10-15T12:00:00+08:00").getTime()
 const september = new Date("2026-09-15T12:00:00+08:00").getTime()
 
-test("date-only preserves Date semantics and native animation/timer clocks", async ({ page }) => {
+test("date-only clock: keeps Date semantics and native animation and timer clocks", async ({
+	page,
+}) => {
 	const native = await page.evaluateHandle(() => ({
 		Date,
 		performance,
@@ -112,7 +114,7 @@ test("date-only preserves Date semantics and native animation/timer clocks", asy
 })
 
 workspaceTest(
-	"date-only default and September override survive navigation and reload",
+	"date-only clock: default and September override survive navigation and reload",
 	async ({ page }) => {
 		expect(await page.evaluate(() => Date.now())).toBe(october)
 		await page.goto("/privacy")
@@ -144,7 +146,7 @@ workspaceTest(
 	},
 )
 
-test("date-only init script replay keeps the newest override in every order", async ({
+test("date-only clock: init script replay keeps the newest override in every order", async ({
 	context,
 }) => {
 	for (const order of [
