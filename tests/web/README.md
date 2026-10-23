@@ -22,7 +22,7 @@ do not quote a new total duration without running it.
 - Changed history or navigation: `history-regressions.e2e.ts`, `keyboard-navigation.e2e.ts`, `navigation-motion.e2e.ts`.
 - Changed charts: `charts.e2e.ts`, `chart-edges.e2e.ts`, `chart-motion.e2e.ts`.
 - Changed motion: the relevant files above with `--project=chromium --project=reduced-motion`.
-- Changed layout: add `--project=mobile` and `--project=tall-desktop`.
+- Changed layout: add `--project=mobile` and `--project=tall-desktop` (tagged `@tall` only; use `PLAYWRIGHT_FULL_MATRIX=1` for the rest).
 - Changed a test helper in `support/`: every file importing it, in `chromium` at least.
 
 Default to `--project=chromium --project=mobile`. Add `--project=light`

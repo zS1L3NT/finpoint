@@ -911,6 +911,13 @@ test("[UI-INVENTORY-PROJECTS] project selection executes every ledger configurat
 	const reducedMotion = projects.get("reduced-motion")
 	if (!desktop || !mobile || !reducedMotion)
 		throw new Error("tag-filtered desktop, mobile and reduced-motion projects are required")
+	for (const name of ["tall-desktop", "light", "reduced-motion"]) {
+		const selected = projects.get(name)
+		expect(
+			selected?.grep,
+			`${name} project must carry a tag grep; run the gate without PLAYWRIGHT_FULL_MATRIX=1`,
+		).toBeDefined()
+	}
 	const { selections } = declaredTests()
 
 	// Every used tag is one of the vocabulary tags; no test opts out of
