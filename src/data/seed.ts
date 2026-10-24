@@ -3,12 +3,24 @@
 
 import { db } from "@/data/db"
 import { DEFAULT_CATEGORIES, DEFAULT_MONTHLY_BUDGETS } from "@/data/defaults"
+import { exportData, tableCounts } from "@/data/export-import"
+import { hashSnapshot } from "@/data/snapshot-hash"
 import { slugify } from "@/logic/shared"
 
+// Hash of the starter rows as first seeded into an empty workspace. Drive sync
+// treats a workspace still matching it as untouched, so it never overrides a
+// Drive copy. Migrations that rewrite starter rows leave it stale, which only
+// falls back to counting the workspace as changed.
+export const SEED_HASH_KEY = "seed_hash"
+
 export async function seedIfEmpty(): Promise<void> {
+	const fresh =
+		!(await db.meta.get("seeded_v2")) &&
+		Object.values(await tableCounts()).every(count => count === 0)
+
 	// The marker makes repair one-time, so users can later remove all starter
 	// categories or monthlyBudgets without having them recreated on every visit.
-	return db.transaction("rw", [db.meta, db.monthly_budgets, db.categories], async () => {
+	await db.transaction("rw", [db.meta, db.monthly_budgets, db.categories], async () => {
 		if (await db.meta.get("seeded_v2")) return
 
 		const existingMonthlyBudgets = await db.monthly_budgets.toArray()
@@ -52,4 +64,8 @@ export async function seedIfEmpty(): Promise<void> {
 
 		await db.meta.put({ key: "seeded_v2", value: "1" })
 	})
+
+	if (fresh) {
+		await db.meta.put({ key: SEED_HASH_KEY, value: await hashSnapshot(await exportData()) })
+	}
 }
