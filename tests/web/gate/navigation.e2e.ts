@@ -868,3 +868,28 @@ test("Back button: a history restore while a drill link loads keeps its restored
 	release()
 	await page.unrouteAll({ behavior: "wait" })
 })
+
+test("mobile sidebar: a tap before the mobile layout settles opens the mobile menu", async ({
+	page,
+	isMobile,
+}) => {
+	test.skip(!isMobile, "Only phones switch to the mobile menu.")
+	// Report a desktop width until released, so the app boots believing it is on a desktop,
+	// as it does for the moment before its mobile check runs.
+	await page.addInitScript(() => {
+		const width = Object.getOwnPropertyDescriptor(window, "innerWidth")?.get
+		Object.defineProperty(window, "innerWidth", {
+			configurable: true,
+			get: () => (Reflect.get(window, "__released") ? width?.call(window) : 1440),
+		})
+	})
+	await page.goto("/")
+	const trigger = page.locator('header [data-slot="sidebar-trigger"]')
+	await expect(trigger).toBeVisible()
+	await page.evaluate(() => Reflect.set(window, "__released", true))
+	await trigger.click()
+	// Let the mobile check catch up with the real width.
+	await page.setViewportSize({ width: 800, height: 844 })
+	await page.setViewportSize({ width: 390, height: 844 })
+	await expect(page.locator('[data-sidebar="sidebar"][data-mobile="true"]')).toBeVisible()
+})
