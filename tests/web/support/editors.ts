@@ -34,11 +34,26 @@ export async function select(page: Page, dialog: Locator, label: string, option:
 	await trigger.evaluate(element => element.scrollIntoView({ block: "center" }))
 	await trigger.click()
 	const choice = page.getByRole("option", { name: option, exact: true })
-	await expect(choice).toBeVisible()
-	// Base UI Select can ignore a mouse click on an option it has not highlighted yet; phones tap.
-	if (await page.evaluate(() => matchMedia("(pointer: coarse)").matches)) await choice.tap()
-	else await choice.click()
+	await pickOption(choice)
 	await expect(choice).toHaveCount(0)
+}
+
+// Base UI Select commits a mouse click only on the option it has highlighted, and the
+// highlight follows the pointer one render later: a fast click can land first and be
+// ignored. A move that lands while the popup opens, or no move at all because the
+// pointer already rests there, highlights nothing, so hover at shifting points until
+// the option is highlighted, then click.
+export async function pickOption(option: Locator) {
+	await expect(option).toBeVisible()
+	if ((await option.getAttribute("data-slot")) === "select-item") {
+		let attempt = 0
+		await expect(async () => {
+			attempt++
+			await option.hover({ position: { x: 8 + (attempt % 2) * 8, y: 8 } })
+			await expect(option).toHaveAttribute("data-highlighted", "", { timeout: 250 })
+		}).toPass()
+	}
+	await option.click()
 }
 
 export async function chooseCategory(page: Page, dialog: Locator, name = "Groceries") {

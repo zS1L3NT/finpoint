@@ -1,6 +1,7 @@
 import { expectPointerCursor } from "../support/assertions"
 import { getScenario, IDS } from "../support/data"
 import { setDateOnly } from "../support/date-only"
+import { pickOption } from "../support/editors"
 import { expect, seedWorkspace, test } from "../support/fixtures"
 import { fits, patchRows, statementRow } from "../support/tables"
 
@@ -228,7 +229,7 @@ test.describe("pinned 15 October 2026 date", () => {
 		await page.goto("/records")
 		await page.getByRole("button", { name: "Any category", exact: true }).click()
 		await page.getByPlaceholder("Search categories...").fill("Groceries")
-		await page.getByRole("option", { name: "Groceries", exact: true }).click()
+		await pickOption(page.getByRole("option", { name: "Groceries", exact: true }))
 		await page.keyboard.press("Escape")
 		await expect(page).toHaveURL(new RegExp(`category_ids=${IDS.categories.groceries}`))
 		await expect(

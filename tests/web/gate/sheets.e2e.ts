@@ -1,7 +1,16 @@
 import type { Locator, Page } from "@playwright/test"
 import { expectVisibleBackdrop } from "../support/assertions"
 import { getScenario, IDS } from "../support/data"
-import { budget, deleted, imported, kept, openEditor, pending, record } from "../support/editors"
+import {
+	budget,
+	deleted,
+	imported,
+	kept,
+	openEditor,
+	pending,
+	pickOption,
+	record,
+} from "../support/editors"
 import { expect, test } from "../support/fixtures"
 import { openReplacementSheet } from "../support/sheets"
 
@@ -898,7 +907,7 @@ test.describe("dense workspace", () => {
 			// Single combobox on this route (probed): the account filter trigger.
 			// Display names are not zero-padded ("Dense Account 1", id t1-d-acc-01).
 			await page.getByRole("combobox").first().click()
-			await page.getByRole("option", { name: "Dense Account 1", exact: true }).click()
+			await pickOption(page.getByRole("option", { name: "Dense Account 1", exact: true }))
 			await expect(page).toHaveURL(/account_id=t1-d-acc-01/)
 			await page.goBack()
 			await expect(page).not.toHaveURL(/account_id=/)

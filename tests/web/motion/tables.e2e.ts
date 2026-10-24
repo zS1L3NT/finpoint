@@ -1,5 +1,6 @@
 import type { Page } from "@playwright/test"
 import { setDateOnly } from "../support/date-only"
+import { pickOption } from "../support/editors"
 import { expect, seedWorkspace, test } from "../support/fixtures"
 import {
 	expectReducedRowMovement,
@@ -204,11 +205,13 @@ async function expectConsumerEntrance(page: Page, consumer: MotionConsumer, isMo
 				.click()
 		else if (consumer.action === "view") {
 			await page.getByRole("combobox", { name: "Duplicate view" }).click()
-			await page.getByRole("option", { name: consumer.target, exact: true }).click()
+			await pickOption(page.getByRole("option", { name: consumer.target, exact: true }))
 		} else if (consumer.action === "pending") {
 			await page.getByRole("button", { name: new RegExp(`^${consumer.target}`) }).click()
 			await page.getByRole("combobox").filter({ hasText: "Suggested replacements" }).click()
-			await page.getByRole("option", { name: "All unallocated imports", exact: true }).click()
+			await pickOption(
+				page.getByRole("option", { name: "All unallocated imports", exact: true }),
+			)
 		} else await page.getByRole("link", { name: consumer.target, exact: true }).click()
 	})
 	const visibleCount = await page.locator(consumer.selector).evaluateAll(
