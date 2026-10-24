@@ -963,4 +963,86 @@ test.describe("dense workspace", () => {
 		await expect(page).toHaveURL(/query=Dense\+pending\+26/)
 		await expect(search).toHaveValue("Dense pending 26")
 	})
+
+	test("pending queue: a page link that supersedes an Account filter keeps that filter from coming back", async ({
+		page,
+		workspace,
+	}) => {
+		void workspace
+		await page.goto("/allocator/pending")
+		const queue = page.locator('section[aria-label="Pending statements"]')
+		await expect(queue.getByRole("link", { name: "Next" })).toBeVisible()
+		await queue.locator('[data-slot="select-trigger"]').first().click()
+		const option = page.getByRole("option", { name: "Dense Account 1", exact: true })
+		await expect(async () => {
+			await option.hover({ position: { x: 8, y: 8 } })
+			await expect(option).toHaveAttribute("data-highlighted", "", { timeout: 250 })
+		}).toPass({ timeout: 5000 })
+		// Pick the Account and click Next in one task, so the Link supersedes the
+		// filter push before it commits.
+		await page.evaluate(() => {
+			document.querySelector<HTMLElement>('[role="option"][data-highlighted]')?.click()
+			const next = [
+				...document.querySelectorAll<HTMLAnchorElement>(
+					'section[aria-label="Pending statements"] a',
+				),
+			].find(link => link.textContent?.trim() === "Next")
+			next?.click()
+		})
+		await expect(page.getByRole("listbox")).toHaveCount(0)
+		await expect(page).not.toHaveURL(/account_id=/)
+		await queue
+			.getByPlaceholder("Search descriptions...")
+			.pressSequentially("Dense", { delay: 20 })
+		await expect(page).toHaveURL(/query=Dense/)
+		await expect(page).not.toHaveURL(/account_id=/)
+	})
+
+	test("pending queue: Back during a search commit restores the URL's search into the box", async ({
+		page,
+		workspace,
+	}) => {
+		void workspace
+		// When the debounce for "Dense pending 1" fires, type one more character and press
+		// Back in that same task, before the search commit lands.
+		await page.addInitScript(() => {
+			const original = window.setTimeout
+			window.setTimeout = ((handler: TimerHandler, timeout?: number, ...rest: unknown[]) =>
+				original(() => {
+					if (typeof handler === "function") handler(...rest)
+					const input = document.querySelector<HTMLInputElement>(
+						'section[aria-label="Pending statements"] input[placeholder="Search descriptions..."]',
+					)
+					if (
+						timeout !== 300 ||
+						input?.value !== "Dense pending 1" ||
+						Reflect.has(window, "__backed")
+					)
+						return
+					Reflect.set(window, "__backed", true)
+					const setValue = Object.getOwnPropertyDescriptor(
+						HTMLInputElement.prototype,
+						"value",
+					)?.set
+					setValue?.call(input, `${input.value}2`)
+					input.dispatchEvent(new Event("input", { bubbles: true }))
+					history.back()
+				}, timeout)) as typeof window.setTimeout
+		})
+		await page.goto("/allocator/pending?query=Dense+pending+1")
+		const search = page
+			.locator('section[aria-label="Pending statements"]')
+			.getByPlaceholder("Search descriptions...")
+		await expect(search).toHaveValue("Dense pending 1")
+		await search.fill("Dense pending 3")
+		await expect(page).toHaveURL(/query=Dense\+pending\+3/)
+		await search.fill("Dense pending 1")
+		await expect.poll(() => page.evaluate(() => Reflect.has(window, "__backed"))).toBe(true)
+		await expect(page).toHaveURL(/query=Dense\+pending\+1$/)
+		await expect(search).toHaveValue("Dense pending 1")
+		// The abandoned "Dense pending 12" search must not commit later.
+		await page.waitForTimeout(650)
+		await expect(page).toHaveURL(/query=Dense\+pending\+1$/)
+		await expect(search).toHaveValue("Dense pending 1")
+	})
 })

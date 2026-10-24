@@ -143,14 +143,36 @@ export default function AllocatorPendingPage() {
 		}
 	}, [searchParams])
 
-	// Back/Forward is authoritative even mid-flight: drop any pending intent.
+	// Back/Forward and Links (pagination, footer) are authoritative even mid-flight: they
+	// supersede a pending push, so drop its intent rather than rebuild later pushes on it.
+	// Back/Forward also abandons pending searches and echo markers, so the restored URL
+	// is mirrored into the inputs instead of being overwritten by older typing.
 	useEffect(() => {
-		const onPopState = () => {
+		const dropIntent = () => {
 			latestParams.current = null
 			navigationPending.current = false
 		}
+		const onPopState = () => {
+			dropIntent()
+			pushedQueueQuery.current = null
+			pushedCandidateQuery.current = null
+			window.clearTimeout(queueTimer.current)
+			window.clearTimeout(candidateTimer.current)
+			// The restored URL can equal the last committed one, which leaves the
+			// mirror effects idle: copy its queries into the inputs here.
+			const restored = new URLSearchParams(window.location.search)
+			setQueueQuery(restored.get("query") ?? "")
+			setCandidateQuery(restored.get("candidate_query") ?? "")
+		}
+		const onLinkClick = (event: MouseEvent) => {
+			if (event.target instanceof Element && event.target.closest("a[href]")) dropIntent()
+		}
 		window.addEventListener("popstate", onPopState)
-		return () => window.removeEventListener("popstate", onPopState)
+		document.addEventListener("click", onLinkClick, true)
+		return () => {
+			window.removeEventListener("popstate", onPopState)
+			document.removeEventListener("click", onLinkClick, true)
+		}
 	}, [])
 
 	useEffect(() => {
