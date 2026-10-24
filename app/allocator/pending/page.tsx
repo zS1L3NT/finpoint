@@ -55,7 +55,24 @@ export default function AllocatorPendingPage() {
 	const searchParams = useSearchParams()
 	const router = useRouter()
 	const pathname = usePathname()
+	// Latest pushed params. Debounce timers close over render-scope searchParams;
+	// when a rapid selectPending push has not committed yet, a firing timer would
+	// rebuild from the stale base and resurrect just-cleared params.
+	const latestParams = useRef<URLSearchParams | null>(null)
+	// True while a pushParams navigation has not committed yet. Timers prefer the
+	// ref base only in that window; otherwise the committed params are truth, so
+	// navigation that bypasses pushParams (footer Links, Back/Forward) can never
+	// be overwritten by a stale-forward mirror.
+	const navigationPending = useRef(false)
 	const pushParams = (next: URLSearchParams) => {
+		// Dedupe against the last intent, not the committed URL: during a slow
+		// commit a fast revert (e.g. Account X, then All) must still push.
+		const previous = (
+			navigationPending.current && latestParams.current ? latestParams.current : searchParams
+		).toString()
+		latestParams.current = next
+		if (next.toString() === previous) return
+		navigationPending.current = true
 		const suffix = next.toString()
 		router.push(suffix ? `${pathname}?${suffix}` : pathname, { scroll: false })
 	}
@@ -85,8 +102,9 @@ export default function AllocatorPendingPage() {
 	const updateParams = (
 		changes: globalThis.Record<string, string | number | null>,
 		clearCandidate = false,
+		base: URLSearchParams | null = null,
 	) => {
-		const next = new URLSearchParams(searchParams.toString())
+		const next = new URLSearchParams((base ?? searchParams).toString())
 		for (const [key, value] of Object.entries(changes)) {
 			if (value === null || value === "") next.delete(key)
 			else next.set(key, String(value))
@@ -98,13 +116,85 @@ export default function AllocatorPendingPage() {
 		pushParams(next)
 	}
 
-	useEffect(() => setQueueQuery(queueQueryParam), [queueQueryParam])
-	useEffect(() => setCandidateQuery(candidateQueryParam), [candidateQueryParam])
+	// Mirror committed queries into the inputs, except the echo of a query this page
+	// pushed itself: by the time that commit lands the user may have typed on, and
+	// copying the older value back would drop those keystrokes.
+	const pushedQueueQuery = useRef<string | null>(null)
+	const pushedCandidateQuery = useRef<string | null>(null)
+	useEffect(() => {
+		const echo = pushedQueueQuery.current === queueQueryParam
+		pushedQueueQuery.current = null
+		if (!echo) setQueueQuery(queueQueryParam)
+	}, [queueQueryParam])
+	useEffect(() => {
+		const echo = pushedCandidateQuery.current === candidateQueryParam
+		pushedCandidateQuery.current = null
+		if (!echo) setCandidateQuery(candidateQueryParam)
+	}, [candidateQueryParam])
+
+	// Invalidate the intent mirror once its commit lands; treat any other
+	// committed change (footer Links, Back/Forward) as authoritative.
+	useEffect(() => {
+		if (latestParams.current?.toString() === searchParams.toString()) {
+			latestParams.current = null
+			navigationPending.current = false
+		} else if (!navigationPending.current) {
+			latestParams.current = null
+		}
+	}, [searchParams])
+
+	// Back/Forward and Links (pagination, footer) are authoritative even mid-flight: they
+	// supersede a pending push, so drop its intent rather than rebuild later pushes on it.
+	// Back/Forward also abandons pending searches and echo markers, so the restored URL
+	// is mirrored into the inputs instead of being overwritten by older typing.
+	useEffect(() => {
+		const dropIntent = () => {
+			latestParams.current = null
+			navigationPending.current = false
+		}
+		const onPopState = () => {
+			dropIntent()
+			pushedQueueQuery.current = null
+			pushedCandidateQuery.current = null
+			window.clearTimeout(queueTimer.current)
+			window.clearTimeout(candidateTimer.current)
+			// The restored URL can equal the last committed one, which leaves the
+			// mirror effects idle: copy its queries into the inputs here.
+			const restored = new URLSearchParams(window.location.search)
+			setQueueQuery(restored.get("query") ?? "")
+			setCandidateQuery(restored.get("candidate_query") ?? "")
+		}
+		const onLinkClick = (event: MouseEvent) => {
+			if (event.target instanceof Element && event.target.closest("a[href]")) dropIntent()
+		}
+		window.addEventListener("popstate", onPopState)
+		document.addEventListener("click", onLinkClick, true)
+		return () => {
+			window.removeEventListener("popstate", onPopState)
+			document.removeEventListener("click", onLinkClick, true)
+		}
+	}, [])
 
 	useEffect(() => {
 		if (queueQuery === queueQueryParam) return
 		const timer = window.setTimeout(() => {
-			updateParams({ query: queueQuery || null, page: null })
+			// Typing a new queue query abandons any selection and candidate
+			// search, so clear those params in the same commit instead of
+			// pushing per keystroke (a push storm lets a slow response
+			// overwrite the query commit out of order).
+			pushedQueueQuery.current = queueQuery
+			updateParams(
+				{
+					query: queueQuery || null,
+					page: null,
+					pending_statement_id: null,
+					candidate_page: null,
+					candidate_query: null,
+				},
+				false,
+				navigationPending.current ? latestParams.current : null,
+			)
+			setCandidateQuery("")
 		}, 300)
 		queueTimer.current = timer
 		return () => window.clearTimeout(timer)
@@ -113,7 +203,12 @@ export default function AllocatorPendingPage() {
 	useEffect(() => {
 		if (candidateQuery === candidateQueryParam) return
 		const timer = window.setTimeout(() => {
-			updateParams({ candidate_query: candidateQuery || null, candidate_page: null })
+			pushedCandidateQuery.current = candidateQuery
+			updateParams(
+				{ candidate_query: candidateQuery || null, candidate_page: null },
+				false,
+				navigationPending.current ? latestParams.current : null,
+			)
 		}, 300)
 		candidateTimer.current = timer
 		return () => window.clearTimeout(timer)

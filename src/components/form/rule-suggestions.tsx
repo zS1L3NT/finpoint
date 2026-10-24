@@ -1,5 +1,7 @@
+import { motion } from "framer-motion"
 import { UiIcon } from "@/components/icon"
 import { treatmentLabel } from "@/lib/analytics"
+import { TRANSITION } from "@/lib/motion"
 import type { listMonthlyBudgets } from "@/logic/monthly-budgets"
 import type { RuleRecommendation } from "@/logic/statement-rules"
 import type { AnalyticsTreatment, CategoryWithChildren, RuleField } from "@/types"
@@ -48,9 +50,13 @@ export default function RuleSuggestions({
 	if (!suggestions.length) return null
 	return (
 		<div className="-mt-1 flex flex-wrap gap-1.5" aria-label="Suggestions from statement rules">
-			{suggestions.map(item => (
-				<button
+			{/* Recommendations resolve after the creator opens, so the chips rise in one by one. */}
+			{suggestions.map((item, index) => (
+				<motion.button
 					key={item.rule_id}
+					initial={{ opacity: 0, y: 4 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ ...TRANSITION.fast, delay: index * 0.03 }}
 					type="button"
 					title={`Suggested by “${item.rule_name}”`}
 					disabled={disabled}
@@ -59,7 +65,7 @@ export default function RuleSuggestions({
 				>
 					<UiIcon icon="lucide:sparkles" className="size-3 shrink-0" />
 					<span className="truncate">{label(item.value)}</span>
-				</button>
+				</motion.button>
 			))}
 		</div>
 	)

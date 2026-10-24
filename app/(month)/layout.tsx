@@ -4,6 +4,7 @@ import { motion } from "framer-motion"
 import { DateTime } from "luxon"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useEffect, useState } from "react"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import { Button } from "@/components/ui/button"
@@ -28,6 +29,10 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 	const { latest, isNavigatingBack, navigateBack, handleClear } = useHistory()
 	const back = latest
 	const isMonthly = pathname.startsWith(`${pathRecords()}/`)
+	const [hydrated, setHydrated] = useState(false)
+
+	// Calendar labels and links use the browser date, which can differ from SSR.
+	useEffect(() => setHydrated(true), [])
 
 	const today = DateTime.now().startOf("day")
 	const isCurrent = date.hasSame(today, "month")
@@ -69,114 +74,120 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 	return (
 		<>
 			<PageContent className={isMonthly ? "gap-5 md:gap-7" : "gap-7 md:gap-9"}>
-				<header className="grid gap-5">
-					{back ? (
-						<Button
-							type="button"
-							variant="outline"
-							size="sm"
-							className="w-fit max-w-full self-start"
-							disabled={isNavigatingBack}
-							aria-busy={isNavigatingBack}
-							onClick={() => navigateBack(back)}
-						>
-							<IconifyIcon
-								icon={
-									isNavigatingBack ? "lucide:loader-circle" : "lucide:arrow-left"
-								}
-								className={isNavigatingBack ? "animate-spin" : undefined}
-							/>
-							<span className="truncate">Back to {back.name}</span>
-						</Button>
-					) : null}
-					<div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-						<div>
-							<p className="text-xs font-medium text-muted-foreground">
-								{isMonthly ? "Monthly Records" : "Monthly overview"}
-							</p>
-							<h2 className="mt-1 text-xl font-semibold tracking-tight md:text-2xl">
-								{month} {year}
-							</h2>
-							<p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>
-						</div>
-						<ButtonGroup className="w-full sm:w-fit">
+				{hydrated && (
+					<header className="grid gap-5">
+						{back ? (
 							<Button
+								type="button"
 								variant="outline"
-								aria-label="Previous month"
-								onClick={() => changeMonth(date.minus({ month: 1 }))}
+								size="sm"
+								className="w-fit max-w-full self-start"
+								disabled={isNavigatingBack}
+								aria-busy={isNavigatingBack}
+								onClick={() => navigateBack(back)}
 							>
-								<IconifyIcon icon="lucide:arrow-left" />
+								<IconifyIcon
+									icon={
+										isNavigatingBack
+											? "lucide:loader-circle"
+											: "lucide:arrow-left"
+									}
+									className={isNavigatingBack ? "animate-spin" : undefined}
+								/>
+								<span className="truncate">Back to {back.name}</span>
 							</Button>
-							<Popover>
-								<PopoverTrigger
-									render={<Button variant="outline" className="flex-1 sm:w-32" />}
+						) : null}
+						<div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+							<div>
+								<p className="text-xs font-medium text-muted-foreground">
+									{isMonthly ? "Monthly Records" : "Monthly overview"}
+								</p>
+								<h2 className="mt-1 text-xl font-semibold tracking-tight md:text-2xl">
+									{month} {year}
+								</h2>
+								<p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>
+							</div>
+							<ButtonGroup className="w-full sm:w-fit">
+								<Button
+									variant="outline"
+									aria-label="Previous month"
+									onClick={() => changeMonth(date.minus({ month: 1 }))}
 								>
-									<IconifyIcon icon="lucide:calendar" />{" "}
-									{date.toFormat("MMM yyyy")}
-								</PopoverTrigger>
-								<PopoverContent className="w-auto p-0">
-									<MonthPicker
-										selectedMonth={date.toJSDate()}
-										onMonthSelect={value =>
-											changeMonth(DateTime.fromJSDate(value))
+									<IconifyIcon icon="lucide:arrow-left" />
+								</Button>
+								<Popover>
+									<PopoverTrigger
+										render={
+											<Button variant="outline" className="flex-1 sm:w-32" />
 										}
-									/>
-								</PopoverContent>
-							</Popover>
-							<Button
-								variant="outline"
-								aria-label="Next month"
-								onClick={() => changeMonth(date.plus({ month: 1 }))}
-							>
-								<IconifyIcon icon="lucide:arrow-right" />
-							</Button>
-						</ButtonGroup>
-					</div>
-
-					<div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-						<nav
-							className="flex min-w-0 border-b sm:flex-1"
-							aria-label="Monthly finance views"
-						>
-							{(
-								[
-									[
-										"Overview",
-										false,
-										pathDashboard({ month, year: String(year) }),
-									],
-									[
-										"Monthly Records",
-										true,
-										pathMonthlyRecords({ month, year: String(year) }),
-									],
-								] as const
-							).map(([label, monthly, href]) => {
-								const active = monthly === isMonthly
-								return (
-									<Link
-										key={label}
-										className={cn(
-											"relative px-4 py-2 text-sm transition-colors duration-150 ease-out hover:text-foreground",
-											active ? "font-medium" : "text-muted-foreground",
-										)}
-										href={href}
-										onClick={handleClear}
 									>
-										{label}
-										{active ? (
-											<motion.span
-												layoutId="month-tab-indicator"
-												transition={SPRING.snappy}
-												className="absolute inset-x-0 bottom-0 h-0.5 bg-foreground"
-											/>
-										) : null}
-									</Link>
-								)
-							})}
-						</nav>
-					</div>
-				</header>
+										<IconifyIcon icon="lucide:calendar" />{" "}
+										{date.toFormat("MMM yyyy")}
+									</PopoverTrigger>
+									<PopoverContent className="w-auto p-0">
+										<MonthPicker
+											selectedMonth={date.toJSDate()}
+											onMonthSelect={value =>
+												changeMonth(DateTime.fromJSDate(value))
+											}
+										/>
+									</PopoverContent>
+								</Popover>
+								<Button
+									variant="outline"
+									aria-label="Next month"
+									onClick={() => changeMonth(date.plus({ month: 1 }))}
+								>
+									<IconifyIcon icon="lucide:arrow-right" />
+								</Button>
+							</ButtonGroup>
+						</div>
+
+						<div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+							<nav
+								className="flex min-w-0 border-b sm:flex-1"
+								aria-label="Monthly finance views"
+							>
+								{(
+									[
+										[
+											"Overview",
+											false,
+											pathDashboard({ month, year: String(year) }),
+										],
+										[
+											"Monthly Records",
+											true,
+											pathMonthlyRecords({ month, year: String(year) }),
+										],
+									] as const
+								).map(([label, monthly, href]) => {
+									const active = monthly === isMonthly
+									return (
+										<Link
+											key={label}
+											className={cn(
+												"relative px-4 py-2 text-sm transition-colors duration-150 ease-out hover:text-foreground",
+												active ? "font-medium" : "text-muted-foreground",
+											)}
+											href={href}
+											onClick={handleClear}
+										>
+											{label}
+											{active ? (
+												<motion.span
+													layoutId="month-tab-indicator"
+													transition={SPRING.snappy}
+													className="absolute inset-x-0 bottom-0 h-0.5 bg-foreground"
+												/>
+											) : null}
+										</Link>
+									)
+								})}
+							</nav>
+						</div>
+					</header>
+				)}
 
 				{children}
 			</PageContent>
