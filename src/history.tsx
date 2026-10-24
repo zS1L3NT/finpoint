@@ -79,6 +79,8 @@ export const HistoryProvider = ({ children }: { children: React.ReactNode }) => 
 	// otherwise the second navigation targets an already-popped entry and goes nowhere.
 	const historyRef = useRef<HistoryItem[]>([])
 	const navigatingBackRef = useRef(false)
+	// The origin URL whose Back entry a drill link pushed before its destination committed.
+	const pendingPushRef = useRef<string | null>(null)
 	const setHistorySync = (next: HistoryItem[] | ((current: HistoryItem[]) => HistoryItem[])) => {
 		const value = typeof next === "function" ? next(historyRef.current) : next
 		historyRef.current = value
@@ -149,6 +151,7 @@ export const HistoryProvider = ({ children }: { children: React.ReactNode }) => 
 	useEffect(() => {
 		const restoreHistory = (event: PopStateEvent) => {
 			pendingLink.current = null
+			pendingPushRef.current = null
 			// Next can commit the route before this listener runs. Restore here,
 			// rather than waiting for a route-arrival effect that already ran.
 			setHistorySync(getValidHistory(event.state?.finpointHistory))
@@ -160,7 +163,9 @@ export const HistoryProvider = ({ children }: { children: React.ReactNode }) => 
 	useEffect(() => {
 		const pending = pendingLink.current
 		const url = pathname + (searchParams.size ? `?${searchParams}` : "")
-		// A back navigation has landed; re-arm the back control.
+		// A navigation has landed: any pending drill entry now renders, and a back
+		// navigation re-arms the back control.
+		pendingPushRef.current = null
 		navigatingBackRef.current = false
 		setIsNavigatingBack(false)
 		// A filter can settle on the origin while the clicked destination is loading.
@@ -201,6 +206,7 @@ export const HistoryProvider = ({ children }: { children: React.ReactNode }) => 
 				isNavigatingBack,
 				handlePush: name => () => {
 					const url = pathname + window.location.search
+					pendingPushRef.current = normaliseUrl(url)
 					// Commit the Back entry with the route transition, so the outgoing
 					// page does not reveal its own Back button while the destination loads.
 					startTransition(() => {
@@ -218,10 +224,17 @@ export const HistoryProvider = ({ children }: { children: React.ReactNode }) => 
 				},
 				navigateBack: fallback => {
 					if (navigatingBackRef.current) return
-					const current = historyRef.current
+					const here = pathname + (searchParams.size ? `?${searchParams}` : "")
+					// A drill link leaving this page pushes this page's Back entry before the
+					// destination commits. Skip that unrendered entry, so Back still goes where
+					// its visible label says and supersedes the pending link.
+					let current = historyRef.current
+					const top = current[current.length - 1]
+					if (pendingPushRef.current === here && top && normaliseUrl(top.url) === here)
+						current = current.slice(0, -1)
+					pendingPushRef.current = null
 					const target = current[current.length - 1] ?? fallback
 					setHistorySync(current.length ? current.slice(0, -1) : current)
-					const here = pathname + (searchParams.size ? `?${searchParams}` : "")
 					if (normaliseUrl(target.url) === here) return
 					navigatingBackRef.current = true
 					setIsNavigatingBack(true)

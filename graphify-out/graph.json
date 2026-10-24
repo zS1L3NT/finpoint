@@ -7875,7 +7875,7 @@
       "file_type": "code",
       "norm_label": "usehistory()",
       "source_file": "src/history.tsx",
-      "source_location": "L237"
+      "source_location": "L250"
     },
     {
       "id": "src_hooks_use_staged_mount_usestagedmount",
@@ -18435,7 +18435,7 @@
       "node_kind": "heading",
       "norm_label": "fixtures",
       "source_file": "tests/web/README.md",
-      "source_location": "L141"
+      "source_location": "L142"
     },
     {
       "id": "tests_web_readme_projects_and_tags",
@@ -18447,7 +18447,7 @@
       "node_kind": "heading",
       "norm_label": "projects and tags",
       "source_file": "tests/web/README.md",
-      "source_location": "L97"
+      "source_location": "L98"
     },
     {
       "id": "tests_web_readme_rendered_assertions",
@@ -18459,7 +18459,7 @@
       "node_kind": "heading",
       "norm_label": "rendered assertions",
       "source_file": "tests/web/README.md",
-      "source_location": "L154"
+      "source_location": "L155"
     },
     {
       "id": "tests_web_readme_sign_off",
@@ -18471,7 +18471,7 @@
       "node_kind": "heading",
       "norm_label": "sign-off",
       "source_file": "tests/web/README.md",
-      "source_location": "L79"
+      "source_location": "L80"
     },
     {
       "id": "tests_web_readme_titles_and_tags",
@@ -18483,7 +18483,7 @@
       "node_kind": "heading",
       "norm_label": "titles and tags",
       "source_file": "tests/web/README.md",
-      "source_location": "L118"
+      "source_location": "L119"
     },
     {
       "id": "tests_web_readme_two_tiers_gate_and_motion",
@@ -20902,7 +20902,7 @@
       "source_location": "L687"
     },
     {
-      "id": "tests_web_gate_navigation_e2e_rationale_682",
+      "id": "tests_web_gate_navigation_e2e_rationale_684",
       "label": "TODO: the hang mechanism is inferred from a completion-less trace, not",
       "_origin": "ast",
       "community": 67,
@@ -20910,7 +20910,7 @@
       "file_type": "rationale",
       "norm_label": "todo: the hang mechanism is inferred from a completion-less trace, not",
       "source_file": "tests/web/gate/navigation.e2e.ts",
-      "source_location": "L682"
+      "source_location": "L684"
     },
     {
       "id": "biome_rules_style",
@@ -43549,7 +43549,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/history.tsx",
-      "source_location": "L154",
+      "source_location": "L157",
       "weight": 1.0
     },
     {
@@ -43561,7 +43561,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/history.tsx",
-      "source_location": "L89",
+      "source_location": "L91",
       "weight": 1.0
     },
     {
@@ -43573,7 +43573,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/history.tsx",
-      "source_location": "L89",
+      "source_location": "L91",
       "weight": 1.0
     },
     {
@@ -43585,7 +43585,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/history.tsx",
-      "source_location": "L89",
+      "source_location": "L91",
       "weight": 1.0
     },
     {
@@ -103616,17 +103616,6 @@
     },
     {
       "source": "src_history",
-      "target": "src_history_usehistory",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/history.tsx",
-      "source_location": "L237",
-      "weight": 1.0
-    },
-    {
-      "source": "src_history",
       "target": "src_history_getvalidhistory",
       "relation": "contains",
       "_origin": "ast",
@@ -103634,6 +103623,17 @@
       "confidence_score": 1.0,
       "source_file": "src/history.tsx",
       "source_location": "L25",
+      "weight": 1.0
+    },
+    {
+      "source": "src_history",
+      "target": "src_history_usehistory",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/history.tsx",
+      "source_location": "L250",
       "weight": 1.0
     },
     {
@@ -108253,7 +108253,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tests/web/README.md",
-      "source_location": "L118",
+      "source_location": "L119",
       "weight": 1.0
     },
     {
@@ -108264,7 +108264,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tests/web/README.md",
-      "source_location": "L141",
+      "source_location": "L142",
       "weight": 1.0
     },
     {
@@ -108275,7 +108275,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tests/web/README.md",
-      "source_location": "L154",
+      "source_location": "L155",
       "weight": 1.0
     },
     {
@@ -108319,7 +108319,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tests/web/README.md",
-      "source_location": "L79",
+      "source_location": "L80",
       "weight": 1.0
     },
     {
@@ -108330,7 +108330,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tests/web/README.md",
-      "source_location": "L97",
+      "source_location": "L98",
       "weight": 1.0
     },
     {
@@ -109785,14 +109785,14 @@
       "weight": 1.0
     },
     {
-      "source": "tests_web_gate_navigation_e2e_rationale_682",
+      "source": "tests_web_gate_navigation_e2e_rationale_684",
       "target": "tests_web_gate_navigation_e2e",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tests/web/gate/navigation.e2e.ts",
-      "source_location": "L682",
+      "source_location": "L684",
       "weight": 1.0
     },
     {
@@ -111948,7 +111948,7 @@
       "confidence_score": 0.95,
       "context": "Account",
       "source_file": "tests/web/README.md",
-      "source_location": "L122",
+      "source_location": "L123",
       "weight": 1.0
     },
     {
@@ -111960,7 +111960,7 @@
       "confidence_score": 0.95,
       "context": "Allocation",
       "source_file": "tests/web/README.md",
-      "source_location": "L123",
+      "source_location": "L124",
       "weight": 1.0
     },
     {
@@ -111972,7 +111972,7 @@
       "confidence_score": 0.95,
       "context": "Budget",
       "source_file": "tests/web/README.md",
-      "source_location": "L122",
+      "source_location": "L123",
       "weight": 1.0
     },
     {
@@ -111984,7 +111984,7 @@
       "confidence_score": 0.95,
       "context": "Category",
       "source_file": "tests/web/README.md",
-      "source_location": "L122",
+      "source_location": "L123",
       "weight": 1.0
     },
     {
@@ -112032,7 +112032,7 @@
       "confidence_score": 0.95,
       "context": "Record",
       "source_file": "tests/web/README.md",
-      "source_location": "L122",
+      "source_location": "L123",
       "weight": 1.0
     },
     {
@@ -112044,7 +112044,7 @@
       "confidence_score": 0.95,
       "context": "SelectItem",
       "source_file": "tests/web/README.md",
-      "source_location": "L224",
+      "source_location": "L225",
       "weight": 1.0
     },
     {
@@ -112056,7 +112056,7 @@
       "confidence_score": 0.95,
       "context": "Statement",
       "source_file": "tests/web/README.md",
-      "source_location": "L122",
+      "source_location": "L123",
       "weight": 1.0
     },
     {
@@ -112176,7 +112176,7 @@
       "confidence_score": 0.95,
       "context": "seedWorkspace",
       "source_file": "tests/web/README.md",
-      "source_location": "L143",
+      "source_location": "L144",
       "weight": 1.0
     },
     {
@@ -113047,5 +113047,5 @@
       "source_file": "AGENTS.md"
     }
   ],
-  "built_at_commit": "1c591fb1a82b2098cf2996b4162de6f0f3cca900"
+  "built_at_commit": "550b520fc6b8835d59ccfdb106ae699d8e3f4b73"
 }

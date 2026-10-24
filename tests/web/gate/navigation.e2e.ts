@@ -674,7 +674,9 @@ test("navigation history: Category drill, fallbacks and static links preserve hi
 		await page.getByRole("link", { name: "Privacy Policy", exact: true }).click()
 		await expect(page.getByRole("button", { name: /^Back to / })).toBeVisible()
 		await page.getByRole("link", { name: "Terms of Service", exact: true }).click()
-		await page.getByRole("button", { name: /^Back to / }).click()
+		// Privacy's own Back matches /^Back to / until Terms commits: wait for Terms.
+		await expect(page).toHaveURL(/\/terms$/)
+		await page.getByRole("button", { name: "Back to Privacy Policy", exact: true }).click()
 		await expect(page).toHaveURL(/\/privacy$/)
 		// A successful Back unmounts its own button mid-tap on touch
 		// viewports while the navigation still commits, hanging the tap on
@@ -722,6 +724,8 @@ test("history clearing: cancelled links, sidebar, tabs and chart drills clear or
 			.getByRole("link", { name: "Dashboard", exact: true })
 			.filter({ visible: true })
 			.click()
+		// The sidebar clears history at once, so Terms can lose its Back before Dashboard commits.
+		await expect(page).toHaveURL(/\/(\?|$)/)
 		await expect(page.getByRole("button", { name: /^Back to / })).toHaveCount(0)
 		await page
 			.getByRole("navigation", { name: "Monthly finance views" })
@@ -746,7 +750,9 @@ test("history clearing: cancelled links, sidebar, tabs and chart drills clear or
 		expect(backBox.y + backBox.height).toBeLessThan(headingBox.y)
 		const monthly = page.url()
 		await page.getByRole("link", { name: "Open FairPrice Run", exact: true }).click()
-		await page.getByRole("button", { name: /^Back to / }).click()
+		// The monthly page's own Back matches /^Back to / until the Record commits.
+		await expect(page).toHaveURL(/\/records\/t1-r-groceries$/)
+		await page.getByRole("button", { name: "Back to Monthly Records", exact: true }).click()
 		await expect(page).toHaveURL(monthly)
 		await back.click()
 		await expect(page).toHaveURL(origin)
@@ -771,13 +777,91 @@ test("Back button: returns to its origin when pressed as soon as a drilled Recor
 			const back = [...document.querySelectorAll("button")].find(button =>
 				button.textContent?.trim().startsWith("Back to Records"),
 			)
-			if (back) back.click()
-			else requestAnimationFrame(pressBack)
+			if (!back) return requestAnimationFrame(pressBack)
+			back.click()
+			Reflect.set(window, "__pressedBack", true)
 		}
 		requestAnimationFrame(pressBack)
 	})
+	// The origin URL holds before the drill commits too: prove Back was pressed first.
+	await expect.poll(() => page.evaluate(() => Reflect.get(window, "__pressedBack"))).toBe(true)
 	await expect(page).toHaveURL(origin)
 	await page.waitForTimeout(1000)
 	await expect(page).toHaveURL(origin)
 	await expect(page.getByRole("link", { name: "Open FairPrice Run", exact: true })).toBeVisible()
+})
+
+test("Back button: the outgoing page's Back cancels a drill link that is still loading", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	const origin = "/?month=October&year=2026&scope=all"
+	await resetHistory(page, origin)
+	await page.getByRole("button", { name: /^5 October: \$84.20 spent/ }).click()
+	await expect(page).toHaveURL(/start_date=2026-10-05/)
+	const back = page.getByRole("button", { name: "Back to overview", exact: true })
+	await expect(back).toBeEnabled()
+	// Hold the Record route so the drill is still loading when Back is pressed.
+	const { promise: held, resolve: release } = Promise.withResolvers<void>()
+	let requested = false
+	await page.route(/\/records\/t1-r-groceries/, async route => {
+		requested = true
+		await held
+		await route.continue()
+	})
+	await page
+		.getByRole("link", { name: "Open FairPrice Run", exact: true })
+		.click({ noWaitAfter: true })
+	await expect.poll(() => requested).toBe(true)
+	await back.click()
+	release()
+	await expect(page).toHaveURL(origin)
+	await expect(page.getByRole("heading", { name: "October 2026", level: 2 })).toBeVisible()
+	await page.unrouteAll({ behavior: "wait" })
+	await expect(page).toHaveURL(origin)
+	await expect(page.getByRole("heading", { name: "FairPrice Run" })).toHaveCount(0)
+})
+
+test("Back button: a history restore while a drill link loads keeps its restored entries", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	await resetHistory(page, "/?month=October&year=2026&scope=all")
+	await page.getByRole("button", { name: /^5 October: \$84.20 spent/ }).click()
+	await expect(page).toHaveURL(/start_date=2026-10-05/)
+	const monthly = new URL(page.url())
+	const { promise: held, resolve: release } = Promise.withResolvers<void>()
+	let requested = false
+	await page.route(/\/records\/t1-r-groceries/, async route => {
+		requested = true
+		await held
+		await route.continue()
+	})
+	await page
+		.getByRole("link", { name: "Open FairPrice Run", exact: true })
+		.click({ noWaitAfter: true })
+	await expect.poll(() => requested).toBe(true)
+	// A same-URL restore lands while the drill is pending: its equivalent-URL entry is
+	// visible and must consume exactly one Back click, like any restored entry.
+	await page.evaluate(self => {
+		window.dispatchEvent(
+			new PopStateEvent("popstate", {
+				state: {
+					...history.state,
+					finpointHistory: [
+						{ name: "Privacy Policy", url: "/privacy" },
+						{ name: "Monthly Records", url: self },
+					],
+				},
+			}),
+		)
+	}, monthly.pathname + monthly.search)
+	await page.getByRole("button", { name: "Back to Monthly Records", exact: true }).click()
+	await expect(
+		page.getByRole("button", { name: "Back to Privacy Policy", exact: true }),
+	).toBeVisible()
+	release()
+	await page.unrouteAll({ behavior: "wait" })
 })

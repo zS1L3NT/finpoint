@@ -768,9 +768,9 @@
     "semantic_hash": ""
   },
   "src/history.tsx": {
-    "mtime": 1792789612.866935,
-    "seen": 1792826523.4101253,
-    "ast_hash": "535163205117cc1fee5851867414d316",
+    "mtime": 1792836338.3324177,
+    "seen": 1792837056.3356838,
+    "ast_hash": "27a9461e8ca1058dd388b98f670b9699",
     "semantic_hash": ""
   },
   "src/hooks/use-api-form-errors.ts": {
@@ -1020,9 +1020,9 @@
     "semantic_hash": "29e62fa2eb28314189815e72b34a9950"
   },
   "AGENTS.md": {
-    "mtime": 1792826517.8895257,
-    "seen": 1792826523.4102106,
-    "ast_hash": "9016085db80518b7c6cda0d32533bafd",
+    "mtime": 1792834578.6227012,
+    "seen": 1792837056.3357925,
+    "ast_hash": "31f22190be366e09379e42908bfce8a2",
     "semantic_hash": ""
   },
   "CONTEXT.md": {
@@ -1344,9 +1344,9 @@
     "semantic_hash": ""
   },
   "tests/web/gate/navigation.e2e.ts": {
-    "mtime": 1792788615.4054053,
-    "seen": 1792826523.4101832,
-    "ast_hash": "c1bf168e1ca753305667232d83f30b96",
+    "mtime": 1792834714.2629366,
+    "seen": 1792837056.335755,
+    "ast_hash": "61c8c12205b3e07d9be151395a5a572a",
     "semantic_hash": ""
   },
   "tests/web/gate/routes.e2e.ts": {
@@ -1542,9 +1542,9 @@
     "semantic_hash": ""
   },
   "tests/web/README.md": {
-    "mtime": 1792826517.8895257,
-    "seen": 1792826523.4102218,
-    "ast_hash": "e2d21a7810a52e960f95d7a20a8f0d40",
+    "mtime": 1792834578.6187012,
+    "seen": 1792837056.3358064,
+    "ast_hash": "0d80084d13bde7b68d640b0f2d939c51",
     "semantic_hash": ""
   },
   "tests/web/harness/display.html": {
