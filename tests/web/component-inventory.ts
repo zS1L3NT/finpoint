@@ -2476,6 +2476,7 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"Record creator: popup enters as a whole",
 	],
 	"src/components/dialogs/record-creator.tsx#export.default.behaviour": [
+		"Record creator: rule autofill of Treatment and Monthly Budget follows the analytics rules",
 		"Record creator: backdrop, values, cursors, fit and keyboard reopen work",
 		"Record creator: popup enters as a whole",
 		"Record creator: validates required fields, applies Category defaults, and persists amount -12.34 and long text",
@@ -2643,6 +2644,7 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"Record rules: suggestion chips and late autofill notes rise in after the creator opens",
 	],
 	"src/components/form/record-analytics-fields.tsx#export.default.behaviour": [
+		"Record creator: rule autofill of Treatment and Monthly Budget follows the analytics rules",
 		"Record analytics: Treatment gates the Monthly Budget control",
 		"Category editor: offers a Spending default Monthly Budget, excludes archived options, clears the Budget for Income and validates a blank name",
 		"Record editor: long Monthly Budget option can be picked, cleared and disabled by Treatment",

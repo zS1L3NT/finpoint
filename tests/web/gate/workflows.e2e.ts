@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises"
 import type { Page } from "@playwright/test"
+import type { StatementRule } from "@/types"
 import { IDS, statementRules } from "../support/data"
 import { pickOption } from "../support/editors"
 import { expect, seedWorkspace, test } from "../support/fixtures"
@@ -270,6 +271,69 @@ test("Record creator: rule autofill fills fields, notes the rule and drops the n
 	await expect(
 		page.locator("main").getByText("Dining Out", { exact: true }).first(),
 	).toBeVisible()
+})
+
+test("Record creator: rule autofill of Treatment and Monthly Budget follows the analytics rules", async ({
+	page,
+}) => {
+	const starbucks = (actions: StatementRule["actions"]): StatementRule[] => [
+		{
+			id: "t1-rule-analytics",
+			name: "Coffee analytics",
+			enabled: true,
+			conditions: { mode: "all", items: [{ operator: "contains", value: "starbucks" }] },
+			actions,
+			created_at: "2026-10-01T00:01:00.000Z",
+			updated_at: "2026-10-01T00:01:00.000Z",
+		},
+	]
+	const open = async (rules: StatementRule[]) => {
+		await seedWorkspace(page, "populated", { statement_rules: rules })
+		await selectAllocatorStatements(page, [IDS.statements.unallocated[2]])
+		await page.getByRole("button", { name: "Create Record" }).click()
+		const dialog = page.getByRole("dialog", { name: "Create New Record" })
+		await expect(dialog).toBeVisible()
+		return dialog
+	}
+	const treatment = page.locator("#analytics_treatment")
+	const budget = page.locator("#monthly_budget_id")
+
+	await test.step("autofilled Category: brings its default Monthly Budget without a budget note", async () => {
+		const dialog = await open(
+			starbucks({ category_id: { mode: "autofill", value: "t1-cat-dining" } }),
+		)
+		await expect(dialog.locator("#category_id-autopopulated")).toBeVisible()
+		await expect(budget).toContainText("Category default · Daily")
+		await expect(dialog.locator("#monthly_budget_id-autopopulated")).toHaveCount(0)
+	})
+
+	await test.step("autofilled Income Treatment: keeps an autofilled Monthly Budget out", async () => {
+		const dialog = await open(
+			starbucks({
+				analytics_treatment: { mode: "autofill", value: "income" },
+				monthly_budget_id: { mode: "autofill", value: "t1-mb-recurring" },
+			}),
+		)
+		await expect(treatment).toContainText("Income")
+		await expect(dialog.locator("#analytics_treatment-autopopulated")).toHaveText(
+			"Autofilled by the “Coffee analytics” rule.",
+		)
+		await expect(budget).toBeDisabled()
+		await expect(budget).not.toContainText("Recurring")
+		await expect(dialog.locator("#monthly_budget_id-autopopulated")).toHaveCount(0)
+	})
+
+	await test.step("autofilled Monthly Budget: stays when the Category changes", async () => {
+		const dialog = await open(
+			starbucks({ monthly_budget_id: { mode: "autofill", value: "t1-mb-recurring" } }),
+		)
+		await expect(budget).toContainText("Recurring")
+		await expect(dialog.locator("#monthly_budget_id-autopopulated")).toHaveText(
+			"Autofilled by the “Coffee analytics” rule.",
+		)
+		await pickCategory(page, "Groceries")
+		await expect(budget).toContainText("Recurring")
+	})
 })
 
 test("Record creator: rule suggestions deduplicate, apply on click and skip paused or archived rules", async ({
