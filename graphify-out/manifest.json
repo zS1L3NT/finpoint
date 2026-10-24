@@ -1529,18 +1529,6 @@
     "ast_hash": "c272b33bce291bd857cfdec675909be8",
     "semantic_hash": ""
   },
-  "reviews/opus-pending-race-oct23.md": {
-    "mtime": 1792706811.2520983,
-    "seen": 1792826523.4102201,
-    "ast_hash": "e77173b7e4d06d5f820b06db8c3a5ed4",
-    "semantic_hash": ""
-  },
-  "reviews/opus-restructure-oct23.md": {
-    "mtime": 1792752629.2433527,
-    "seen": 1792826523.410221,
-    "ast_hash": "2f2c9686f6325677ef822b194b6dc590",
-    "semantic_hash": ""
-  },
   "tests/web/README.md": {
     "mtime": 1792854095.3713949,
     "seen": 1792854110.7010062,
