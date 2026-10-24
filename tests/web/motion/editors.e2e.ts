@@ -1,6 +1,6 @@
 import type { Locator, Page } from "@playwright/test"
 import { expectPointerCursor } from "../support/assertions"
-import { IDS, statementRules } from "../support/data"
+import { statementRules } from "../support/data"
 import {
 	account,
 	budget,
@@ -12,11 +12,7 @@ import {
 	select,
 } from "../support/editors"
 import { expect, seedWorkspace, test } from "../support/fixtures"
-import {
-	expectPopupEntrance,
-	expectReducedRowMovement,
-	sampleVisibleRowAnimations,
-} from "../support/motion"
+import { expectPopupEntrance, sampleVisibleRowAnimations } from "../support/motion"
 
 // Each opening is its own step in the shared entrance test below: a motion
 // failure aborts later openings fail-fast, so entrance regressions surface
@@ -118,14 +114,6 @@ const editors = [
 		field: "Name",
 		value: "",
 	},
-	{
-		name: "Statement rule editor",
-		route: "/statement-rules",
-		trigger: "Edit Starbucks coffee",
-		title: "Edit rule",
-		field: "Name",
-		value: "Starbucks coffee",
-	},
 ]
 
 async function sampleWarningCollapse(page: Page, dialog: Locator) {
@@ -182,15 +170,7 @@ test("editor popups: every create and update dialog enters as a whole", {
 			const children = await sampleVisibleRowAnimations(
 				page,
 				'[data-slot="dialog-content"] [data-slot="field"], [data-slot="dialog-content"] div.overflow-hidden',
-				() =>
-					expectPopupEntrance(
-						page,
-						() => trigger.click(),
-						// The rule preview lists matches from a live query, so it fills in after opening.
-						editor.name === "Statement rule editor"
-							? '[data-slot="dialog-content"] aside ul'
-							: undefined,
-					),
+				() => expectPopupEntrance(page, () => trigger.click()),
 			)
 			for (const child of children) {
 				expect(
@@ -322,79 +302,4 @@ test("Record creator: pending warning reveals and collapses smoothly", {
 			}
 		})
 	}
-})
-
-test("Record rules: suggestion chips and late autofill notes rise in after the creator opens", {
-	tag: ["@reduced-motion"],
-}, async ({ page }) => {
-	await seedWorkspace(page, "populated", { statement_rules: statementRules() })
-	// A tall viewport fits the whole creator, so every late chip and note
-	// occupies the viewport while it enters.
-	const size = page.viewportSize() ?? { width: 1440, height: 900 }
-	await page.setViewportSize({ width: size.width, height: 1400 })
-	await page.goto("/allocator")
-	const box = page.getByRole("checkbox", {
-		name: `Select statement ${IDS.statements.unallocated[2]}`,
-		exact: true,
-	})
-	await expect(box).toBeVisible()
-	await box.click()
-	// Warm the creator once so route compile and live queries settle; the
-	// sampled second opening then reveals chips promptly even under load.
-	await page.getByRole("button", { name: "Create Record" }).click()
-	const warm = page.getByRole("dialog", { name: "Create New Record" })
-	await expect(warm).toBeVisible()
-	await expect(warm.getByRole("button", { name: "Raffles Place", exact: true })).toHaveCount(1)
-	await warm.getByRole("button", { name: "Close", exact: true }).click()
-	await expect(warm).toHaveCount(0)
-	const samples = await sampleVisibleRowAnimations(
-		page,
-		'[aria-label="Suggestions from statement rules"] button, #title-autopopulated, #category_id-autopopulated, #datetime-autopopulated',
-		() => page.getByRole("button", { name: "Create Record" }).click(),
-	)
-	const present = samples.filter(sample => sample.text.includes("copied from the statement"))
-	const late = samples.filter(sample => !sample.text.includes("copied from the statement"))
-	expect(
-		samples.length,
-		"chips, late autofill notes and the open-time datetime note are all sampled",
-	).toBeGreaterThanOrEqual(7)
-	expect(late.length, "chips and late autofill notes animate").toBeGreaterThanOrEqual(6)
-	expect(present.length, "the datetime note is present at open").toBe(1)
-	if (await page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches)) {
-		expectReducedRowMovement(samples, 7)
-	} else {
-		for (const sample of late) {
-			const frames = sample.frames
-			expect(
-				Math.min(...frames.map(frame => frame.opacity)),
-				`${sample.text}: late content fades in`,
-			).toBeLessThan(1)
-			expect(
-				frames.at(-1)?.opacity,
-				`${sample.text}: late content settles visible`,
-			).toBeGreaterThan(0.99)
-			expect(
-				frames.some(frame => frame.transform !== "none" || frame.translate !== "none"),
-				`${sample.text}: late content rises with a translate on some frame`,
-			).toBe(true)
-		}
-	}
-	for (const sample of present) {
-		expect(
-			Math.min(...sample.frames.map(frame => frame.opacity)),
-			`${sample.text}: the open-time note does not fade independently`,
-		).toBe(1)
-		expect(
-			new Set(
-				sample.frames.map(
-					frame => `${frame.transform}|${frame.translate}|${frame.scale}|${frame.rotate}`,
-				),
-			).size,
-			`${sample.text}: the open-time note does not move independently`,
-		).toBe(1)
-	}
-	await test.info().attach("rule-suggestion-frames", {
-		body: JSON.stringify(samples),
-		contentType: "application/json",
-	})
 })

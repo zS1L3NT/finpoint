@@ -91,17 +91,10 @@ export default function StatementRuleDialog({
 		actions,
 	}
 	const ready = conditions.some(c => c.value.trim())
-	// Key the preview by its conditions: a live query keeps its previous result while the next
-	// one loads, and showing that stale result would flash "No Statements match" on open.
-	const previewKey = `${isOpen}:${JSON.stringify(input.conditions)}`
-	const preview = useLiveQuery(
-		async () => ({
-			key: previewKey,
-			items: isOpen && ready ? await previewStatementRule(input) : [],
-		}),
-		[previewKey],
+	const matches = useLiveQuery(
+		() => (isOpen && ready ? previewStatementRule(input) : []),
+		[isOpen, JSON.stringify(input.conditions)],
 	)
-	const matches = preview?.key === previewKey ? preview.items : undefined
 	const patterns = conditions.flatMap(c => conditionPattern(c) ?? [])
 
 	const setCondition = (key: string, patch: Partial<RuleCondition>) => {

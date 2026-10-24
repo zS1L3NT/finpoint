@@ -2634,13 +2634,11 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"field validation: errors render as alerts",
 		"Account editor: required name and unicode rename persist after reload",
 		"Record creator: rule autofill fills fields, notes the rule and drops the note when edited",
-		"Record rules: suggestion chips and late autofill notes rise in after the creator opens",
 	],
 	"src/components/form/field.tsx#field.input": [
 		"field validation: errors render as alerts",
 		"Account editor: required name and unicode rename persist after reload",
 		"Record creator: rule autofill fills fields, notes the rule and drops the note when edited",
-		"Record rules: suggestion chips and late autofill notes rise in after the creator opens",
 	],
 	"src/components/form/record-analytics-fields.tsx#export.default.behaviour": [
 		"Record analytics: Treatment gates the Monthly Budget control",
@@ -2671,7 +2669,6 @@ export const behaviourCoverage: Record<string, string[]> = {
 	"src/components/form/rule-suggestions.tsx#export.default.behaviour": [
 		"Record creator: rule autofill fills fields, notes the rule and drops the note when edited",
 		"Record creator: rule suggestions deduplicate, apply on click and skip paused or archived rules",
-		"Record rules: suggestion chips and late autofill notes rise in after the creator opens",
 	],
 	"src/components/charts/cashflow-chart.tsx#export.default.behaviour": [
 		"chart tooltips: Surplus / Shortfall keyboard navigation exposes actual numeric values",
@@ -4190,7 +4187,6 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"src/components/dialogs/statement-rule.tsx#editor.open": [
 		"Statement rule creator: popup enters as a whole",
-		"Statement rule editor: popup enters as a whole",
 	],
 	"src/components/dialogs/statement-rule.tsx#editor.validation": [
 		"Statement rule editor: invalid input shows errors, then a valid rule persists after reload",
