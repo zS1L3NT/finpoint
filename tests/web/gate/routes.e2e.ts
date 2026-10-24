@@ -2,7 +2,7 @@ import type { Page } from "@playwright/test"
 import { expectPointerCursor } from "../support/assertions"
 import { getScenario, IDS, statementRules } from "../support/data"
 import { setDateOnly } from "../support/date-only"
-import { openEditor } from "../support/editors"
+import { openEditor, pickOption } from "../support/editors"
 import { expect, seedWorkspace, test } from "../support/fixtures"
 import { fits, patchRows, statementRow } from "../support/tables"
 
@@ -849,13 +849,13 @@ test("Record facets: long Monthly Budget option picks and clears, Category histo
 		await expect(budget).toContainText(name)
 		await fits(page, budget)
 		await budget.click()
-		await page.getByRole("option", { name: "Unbudgeted", exact: true }).click()
+		await pickOption(page.getByRole("option", { name: "Unbudgeted", exact: true }))
 		await expect(budget).toContainText("Unbudgeted")
 		await dialog.locator("#analytics_treatment").click()
-		await page.getByRole("option", { name: "Income", exact: true }).click()
+		await pickOption(page.getByRole("option", { name: "Income", exact: true }))
 		await expect(budget).toBeDisabled()
 		await dialog.locator("#analytics_treatment").click()
-		await page.getByRole("option", { name: "Spending", exact: true }).click()
+		await pickOption(page.getByRole("option", { name: "Spending", exact: true }))
 		await expect(budget).toBeEnabled()
 		await expect(budget).toContainText("Unbudgeted")
 	})

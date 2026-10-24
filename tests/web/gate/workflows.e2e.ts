@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises"
 import type { Page } from "@playwright/test"
 import { IDS, statementRules } from "../support/data"
+import { pickOption } from "../support/editors"
 import { expect, seedWorkspace, test } from "../support/fixtures"
 
 const GOOGLE_RE = /google|gstatic|googleapis/i
@@ -658,7 +659,7 @@ test("pending queue: replacing a Pending Statement preserves Allocations on the 
 		.getByRole("combobox")
 		.filter({ hasText: "Suggested replacements", visible: true })
 		.click()
-	await page.getByRole("option", { name: "All unallocated imports" }).click()
+	await pickOption(page.getByRole("option", { name: "All unallocated imports" }))
 	const candidateSection = page.locator("section[aria-labelledby='candidate-title']")
 	await candidateSection.getByPlaceholder("Search descriptions...").fill("SHENG SIONG")
 	await page.getByRole("button", { name: "Replace", exact: true }).click()
@@ -768,7 +769,7 @@ test("importer: a Revolut pending import surfaces in the pending queue", async (
 
 	await page.getByRole("radio", { name: /Revolut/ }).click()
 	await page.locator("#account_select").click()
-	await page.getByRole("option", { name: "Vault" }).click()
+	await pickOption(page.getByRole("option", { name: "Vault" }))
 	const [chooser] = await Promise.all([
 		page.waitForEvent("filechooser"),
 		page.getByRole("button", { name: /Drop.*here/ }).click(),
@@ -802,7 +803,7 @@ test("settings: default filters validate, persist and reload", async ({ page, wo
 	await expect(save).toBeDisabled()
 
 	await page.locator("#default_filter_end_date").click()
-	await page.getByRole("option", { name: "Today" }).click()
+	await pickOption(page.getByRole("option", { name: "Today" }))
 	await expect(save).toBeEnabled()
 	await save.click()
 	await expect(page.getByText("Default filters saved.")).toBeVisible()

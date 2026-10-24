@@ -1,5 +1,6 @@
 import { statementRules } from "../support/data"
 import { setDateOnly } from "../support/date-only"
+import { pickOption } from "../support/editors"
 import { expect, seedWorkspace, test } from "../support/fixtures"
 import {
 	expectReducedRowMovement,
@@ -101,7 +102,9 @@ test("card grids: Accounts, Budgets and Categories enter as a cascade in the vie
 						.click()
 				else if (consumer.action === "view") {
 					await page.getByRole("combobox", { name: "Duplicate view" }).click()
-					await page.getByRole("option", { name: consumer.target, exact: true }).click()
+					await pickOption(
+						page.getByRole("option", { name: consumer.target, exact: true }),
+					)
 				} else if (consumer.action === "pending") {
 					await page
 						.getByRole("button", { name: new RegExp(`^${consumer.target}`) })
