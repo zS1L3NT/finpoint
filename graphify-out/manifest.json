@@ -36,9 +36,9 @@
     "semantic_hash": ""
   },
   "app/allocator/pending/page.tsx": {
-    "mtime": 1792849282.9077828,
-    "seen": 1792849309.6718578,
-    "ast_hash": "0295a690c0584d8abdf4a3702cbe9b42",
+    "mtime": 1792853341.319158,
+    "seen": 1792854110.7007217,
+    "ast_hash": "27fa705b889aae50669c8b24f5c5bafd",
     "semantic_hash": ""
   },
   "app/api/auth/exchange/route.ts": {
@@ -168,8 +168,8 @@
     "semantic_hash": "7d8a33d5aa042f85737cd2f3334ae040"
   },
   "next-env.d.ts": {
-    "mtime": 1792824907.6321497,
-    "seen": 1792826523.4099982,
+    "mtime": 1792852883.5110073,
+    "seen": 1792854110.7007496,
     "ast_hash": "8195d2c60ce847a459ae9d308d6a5724",
     "semantic_hash": ""
   },
@@ -678,8 +678,8 @@
     "semantic_hash": ""
   },
   "src/components/ui/sidebar.tsx": {
-    "mtime": 1792849282.8957827,
-    "seen": 1792849309.6719978,
+    "mtime": 1792853539.047221,
+    "seen": 1792854110.7008727,
     "ast_hash": "70c88f45943dc7c3fea95067638ca951",
     "semantic_hash": ""
   },
@@ -1020,9 +1020,9 @@
     "semantic_hash": "29e62fa2eb28314189815e72b34a9950"
   },
   "AGENTS.md": {
-    "mtime": 1792849282.8877826,
-    "seen": 1792849309.6721137,
-    "ast_hash": "6f7f580757d8d0b7f47031719734c631",
+    "mtime": 1792854095.3713949,
+    "seen": 1792854110.7009938,
+    "ast_hash": "e98c3c62e5dd4534a45c23c65663e442",
     "semantic_hash": ""
   },
   "CONTEXT.md": {
@@ -1296,9 +1296,9 @@
     "semantic_hash": ""
   },
   "tests/web/component-inventory.ts": {
-    "mtime": 1792849282.8997827,
-    "seen": 1792849309.6720731,
-    "ast_hash": "ebc5ed9df8645da24a1fafdac111469d",
+    "mtime": 1792852998.1110458,
+    "seen": 1792854110.7009504,
+    "ast_hash": "d99f887682053671d83453c6f972178d",
     "semantic_hash": ""
   },
   "tests/web/gate/charts.e2e.ts": {
@@ -1308,9 +1308,9 @@
     "semantic_hash": ""
   },
   "tests/web/gate/components.e2e.ts": {
-    "mtime": 1792849282.979783,
-    "seen": 1792849309.672075,
-    "ast_hash": "b4983556e62f4b2106c5e794e89878c2",
+    "mtime": 1792853020.8190534,
+    "seen": 1792854110.7009523,
+    "ast_hash": "75f3df996c85a2b7a5ee5b066552d45e",
     "semantic_hash": ""
   },
   "tests/web/gate/editors.e2e.ts": {
@@ -1344,21 +1344,21 @@
     "semantic_hash": ""
   },
   "tests/web/gate/navigation.e2e.ts": {
-    "mtime": 1792849283.0717833,
-    "seen": 1792849309.6720812,
-    "ast_hash": "3cf701d349df7e2e48fcfb32abedf781",
+    "mtime": 1792853472.8392,
+    "seen": 1792854110.7009587,
+    "ast_hash": "330c2d7a232cb882cdb6a319523336c3",
     "semantic_hash": ""
   },
   "tests/web/gate/routes.e2e.ts": {
-    "mtime": 1792849282.979783,
-    "seen": 1792849309.6720822,
-    "ast_hash": "94464e5370468a92db9b209330dc323b",
+    "mtime": 1792853019.551053,
+    "seen": 1792854110.7009597,
+    "ast_hash": "ee6093f318bf8c6d86623b339ba90ea5",
     "semantic_hash": ""
   },
   "tests/web/gate/sheets.e2e.ts": {
-    "mtime": 1792849282.979783,
-    "seen": 1792849309.672083,
-    "ast_hash": "4423897791471e612011b6c6bf49fbf5",
+    "mtime": 1792853243.7351267,
+    "seen": 1792854110.7009609,
+    "ast_hash": "9bafb14067c9f6539240cc4b9f8bdadf",
     "semantic_hash": ""
   },
   "tests/web/gate/tables.e2e.ts": {
@@ -1368,9 +1368,9 @@
     "semantic_hash": ""
   },
   "tests/web/gate/workflows.e2e.ts": {
-    "mtime": 1792849282.979783,
-    "seen": 1792849309.672085,
-    "ast_hash": "144c0484a0bb851b73cbe4b114d22ed0",
+    "mtime": 1792852945.063028,
+    "seen": 1792854110.7009633,
+    "ast_hash": "05a15cb91a722d5fa6d9e9eb02f8d7eb",
     "semantic_hash": ""
   },
   "tests/web/harness/app.tsx": {
@@ -1488,9 +1488,9 @@
     "semantic_hash": ""
   },
   "tests/web/support/editors.ts": {
-    "mtime": 1792849282.979783,
-    "seen": 1792849309.6721053,
-    "ast_hash": "a55192af738b78fba152fb56c1221eb3",
+    "mtime": 1792853019.551053,
+    "seen": 1792854110.7009852,
+    "ast_hash": "3f65effd28a62ef3f6717cf5b4ca22a1",
     "semantic_hash": ""
   },
   "tests/web/support/fixtures.ts": {
@@ -1542,9 +1542,9 @@
     "semantic_hash": ""
   },
   "tests/web/README.md": {
-    "mtime": 1792849283.0717833,
-    "seen": 1792849309.672126,
-    "ast_hash": "433115ad97ae1df99ed4518cad7f5ac8",
+    "mtime": 1792854095.3713949,
+    "seen": 1792854110.7010062,
+    "ast_hash": "125102b3edb406a34d3b2bbb51643f3d",
     "semantic_hash": ""
   },
   "tests/web/harness/display.html": {
