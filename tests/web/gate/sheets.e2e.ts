@@ -914,4 +914,44 @@ test.describe("dense workspace", () => {
 
 test.describe("dense workspace", () => {
 	test.use({ workspaceScenario: "dense" })
+
+	test("pending queue search: typing on while an earlier query commits keeps every character", async ({
+		page,
+		workspace,
+	}) => {
+		void workspace
+		// When the 300ms debounce fires for "D" and starts its commit, type the rest in
+		// that same task, so the commit always lands after newer keystrokes. Mirroring it
+		// back into the input used to drop them ("Dnding 26" on a fast host).
+		await page.addInitScript(() => {
+			const original = window.setTimeout
+			window.setTimeout = ((handler: TimerHandler, timeout?: number, ...rest: unknown[]) =>
+				original(() => {
+					if (typeof handler === "function") handler(...rest)
+					const input = document.querySelector<HTMLInputElement>(
+						'section[aria-label="Pending statements"] input[placeholder="Search descriptions..."]',
+					)
+					if (timeout !== 300 || input?.value !== "D" || Reflect.has(window, "__typedOn"))
+						return
+					Reflect.set(window, "__typedOn", true)
+					const setValue = Object.getOwnPropertyDescriptor(
+						HTMLInputElement.prototype,
+						"value",
+					)?.set
+					for (const character of "ense pending 26") {
+						setValue?.call(input, input.value + character)
+						input.dispatchEvent(new Event("input", { bubbles: true }))
+					}
+				}, timeout)) as typeof window.setTimeout
+		})
+		await page.goto("/allocator/pending")
+		const search = page
+			.locator('section[aria-label="Pending statements"]')
+			.getByPlaceholder("Search descriptions...")
+		await expect(search).toBeVisible()
+		await search.pressSequentially("D")
+		await expect.poll(() => page.evaluate(() => Reflect.has(window, "__typedOn"))).toBe(true)
+		await expect(page).toHaveURL(/query=Dense\+pending\+26/)
+		await expect(search).toHaveValue("Dense pending 26")
+	})
 })
