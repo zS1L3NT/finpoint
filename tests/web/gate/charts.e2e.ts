@@ -1,6 +1,6 @@
 import type { Page } from "@playwright/test"
 import { card, overview, overviewCharts } from "../support/charts"
-import { IDS } from "../support/data"
+import { getScenario, IDS } from "../support/data"
 import { setDateOnly } from "../support/date-only"
 import { expect, seedWorkspace, test } from "../support/fixtures"
 
@@ -489,6 +489,81 @@ test.describe("pinned overview date", () => {
 			await expect(metric(page, "Total surplus rate")).toContainText("—")
 			await page.getByRole("button", { name: "Next month", exact: true }).click()
 			await expect(metric(page, "Total spending")).toContainText("$286.63")
+		})
+	})
+
+	test("Monthly Budget cards: hover does not select or change the donut, and a click does", {
+		tag: ["@light"],
+	}, async ({ page, isMobile }) => {
+		test.setTimeout(120_000)
+		await seedWorkspace(page)
+		const budgets = getScenario("populated").tables.monthly_budgets.filter(
+			budget => !budget.archived,
+		)
+		const toRgb = (hex: string) => {
+			const parsed = hex.replace("#", "")
+			const full =
+				parsed.length === 3
+					? parsed
+							.split("")
+							.map(part => part + part)
+							.join("")
+					: parsed
+			const value = Number.parseInt(full, 16)
+			return `rgb(${(value >> 16) & 255}, ${(value >> 8) & 255}, ${value & 255})`
+		}
+		await test.step("Monthly Budget card: hover leaves selection and donut centre unchanged", async () => {
+			await page.goto(overview)
+			const cards = card(page, "Monthly budgets")
+			for (const budget of budgets) {
+				const scope = cards.getByRole("button", { name: budget.name, exact: true })
+				await expect(scope).toBeVisible()
+				const dot = scope.locator("span.size-2")
+				await expect(dot).toBeVisible()
+				const box = await dot.boundingBox()
+				if (!box) throw new Error(`Expected a colour dot for ${budget.name}`)
+				expect(box.width, `${budget.name} dot width`).toBeGreaterThan(0)
+				expect(box.height, `${budget.name} dot height`).toBeGreaterThan(0)
+				expect(
+					Math.abs(box.width - box.height),
+					`${budget.name} dot stays square`,
+				).toBeLessThanOrEqual(1)
+				await expect(dot).toHaveCSS("background-color", toRgb(budget.color))
+			}
+			const daily = cards.getByRole("button", { name: "Daily", exact: true })
+			const centre = cards.locator('[aria-live="polite"]')
+			const settled = await centre.textContent()
+			expect(settled).toContain("Monthly plan")
+			await expect(daily).toHaveAttribute("aria-pressed", "false")
+			await expect(page).not.toHaveURL(/scope=/)
+			if (!isMobile) {
+				await daily.hover()
+				await expect(daily).toHaveAttribute("aria-pressed", "false")
+				await expect(page).not.toHaveURL(/scope=/)
+				await expect(centre).toHaveText(settled ?? "")
+			}
+		})
+		await test.step("Monthly Budget card: click selects, clears and edit leaves selection alone", async () => {
+			await page.goto(overview)
+			const budgets = card(page, "Monthly budgets")
+			await expect(budgets.getByRole("button", { name: "Daily", exact: true })).toBeVisible()
+			await expect(budgets).toContainText("$192.03")
+			const daily = budgets.getByRole("button", { name: "Daily", exact: true })
+			await daily.click()
+			await expect(daily).toHaveAttribute("aria-pressed", "true")
+			await expect(page).toHaveURL(new RegExp(`scope=${IDS.monthlyBudgets.daily}`))
+			await expect(budgets.locator('[aria-live="polite"]')).toContainText("Daily")
+			await daily.click()
+			await expect(daily).toHaveAttribute("aria-pressed", "false")
+			await expect(page).not.toHaveURL(/scope=/)
+			await budgets.getByRole("button", { name: "Edit Daily", exact: true }).click()
+			await expect(page.getByRole("dialog", { name: "Edit Daily" })).toBeVisible()
+			// The open dialog inerts the page behind it, so the card's
+			// selection is asserted once the dialog closes.
+			await page.keyboard.press("Escape")
+			await expect(page.getByRole("dialog")).toHaveCount(0)
+			await expect(daily).toHaveAttribute("aria-pressed", "false")
+			await expect(page).not.toHaveURL(/scope=/)
 		})
 	})
 

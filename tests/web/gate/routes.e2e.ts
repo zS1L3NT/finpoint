@@ -1,7 +1,8 @@
 import type { Page } from "@playwright/test"
 import { expectPointerCursor } from "../support/assertions"
-import { getScenario, IDS } from "../support/data"
+import { getScenario, IDS, statementRules } from "../support/data"
 import { setDateOnly } from "../support/date-only"
+import { openEditor } from "../support/editors"
 import { expect, seedWorkspace, test } from "../support/fixtures"
 import { fits, patchRows, statementRow } from "../support/tables"
 
@@ -188,6 +189,88 @@ test("workflow tabs and sparkline: tabs navigate by keyboard, Allocate keeps its
 		).toBeVisible()
 		await expect(spark.locator("polyline")).not.toHaveAttribute("points", points ?? "")
 	})
+})
+
+test("Statement rules page: empty, populated and paused rules show conditions, actions and match counts", async ({
+	page,
+}) => {
+	await seedWorkspace(page, "empty")
+	await page.goto("/statement-rules")
+	await expect(page.getByText("No rules yet", { exact: true })).toBeVisible()
+	await page.getByRole("button", { name: "Create a rule", exact: true }).click()
+	await expect(page.getByRole("dialog", { name: "New rule", exact: true })).toBeVisible()
+	await page.keyboard.press("Escape")
+
+	await seedWorkspace(page, "populated", { statement_rules: statementRules() })
+	await page.goto("/statement-rules")
+	const cards = page.locator("main article")
+	await expect(cards).toHaveCount(5)
+	const names = [
+		"Starbucks coffee",
+		"Raffles coffee",
+		"Groceries",
+		"Grab rides",
+		"Archived travel",
+	]
+	for (const [index, name] of names.entries())
+		await expect(
+			cards.nth(index).getByRole("button", { name: `Edit ${name}`, exact: true }),
+		).toBeVisible()
+
+	const starbucks = cards.nth(0)
+	await expect(starbucks.getByText("contains", { exact: true })).toBeVisible()
+	await expect(starbucks.getByText("starbucks", { exact: true })).toBeVisible()
+	await expect(starbucks.getByText("1 matching Statement", { exact: true })).toBeVisible()
+	await expect(starbucks.getByText("Autofill", { exact: true })).toHaveCount(2)
+	await expect(starbucks.getByText("Suggest", { exact: true })).toHaveCount(2)
+
+	await expect(cards.nth(1).getByText("1 matching Statement", { exact: true })).toBeVisible()
+	await expect(cards.nth(2).getByText("or", { exact: true })).toBeVisible()
+	await expect(cards.nth(2).getByText("2 matching Statements", { exact: true })).toBeVisible()
+
+	const grab = cards.nth(3)
+	await expect(grab.getByText("Paused", { exact: true })).toBeVisible()
+	await expect(grab.getByRole("button", { name: "Resume Grab rides", exact: true })).toBeVisible()
+	await expect(grab.getByText("matching Statement")).toHaveCount(0)
+
+	const archived = cards.nth(4)
+	await expect(archived.getByText("Monthly budget", { exact: true })).toBeVisible()
+	await expect(archived.getByText("Travel", { exact: true })).toBeVisible()
+	await expect(archived.getByText("1 matching Statement", { exact: true })).toBeVisible()
+
+	for (let index = 0; index < 5; index++) await fits(page, cards.nth(index))
+})
+
+test("Statement rules page: the Plan Rules link opens it and pause, resume and delete persist after reload", async ({
+	page,
+	isMobile,
+}) => {
+	await seedWorkspace(page, "populated", { statement_rules: statementRules() })
+	await page.goto("/records")
+	// Tap at once: the mobile flag settles in a mount effect, and a tap before it
+	// must still open the mobile sheet rather than collapse the desktop sidebar.
+	if (isMobile) await page.locator('header [data-slot="sidebar-trigger"]').click()
+	await page.getByRole("link", { name: "Rules", exact: true }).filter({ visible: true }).click()
+	await expect(page).toHaveURL(/\/statement-rules$/)
+	await expect(page.locator("header h1")).toHaveText("Statement rules")
+
+	const starbucks = page.locator("main article").filter({ hasText: "Starbucks coffee" })
+	await page.getByRole("button", { name: "Pause Starbucks coffee", exact: true }).click()
+	await expect(starbucks.getByText("Paused", { exact: true })).toBeVisible()
+	await page.reload()
+	await expect(starbucks.getByText("Paused", { exact: true })).toBeVisible()
+	await page.getByRole("button", { name: "Resume Starbucks coffee", exact: true }).click()
+	await expect(starbucks.getByText("1 matching Statement", { exact: true })).toBeVisible()
+	await page.reload()
+	await expect(starbucks.getByText("1 matching Statement", { exact: true })).toBeVisible()
+
+	await page.getByRole("button", { name: "Edit Groceries", exact: true }).click()
+	const dialog = page.getByRole("dialog", { name: "Edit rule", exact: true })
+	await dialog.getByRole("button", { name: "Delete", exact: true }).click()
+	await expect(dialog).not.toBeVisible()
+	await page.reload()
+	await expect(page.getByRole("button", { name: "Edit Groceries", exact: true })).toHaveCount(0)
+	await expect(page.locator("main article")).toHaveCount(4)
 })
 
 // One populated seed per sweep. Each route navigates once; the layout step
@@ -838,4 +921,50 @@ test("Spending by weekday: no comparison history renders zero spending without a
 	await expect(tooltip).toContainText("$0.00")
 	await expect(tooltip).not.toContainText("Previous")
 	await expect(chart).not.toContainText(/NaN|Infinity/)
+})
+
+test("narrow desktop: pages stack by available width and popups keep side margins", {
+	tag: ["@desktop-only"],
+}, async ({ page }) => {
+	await page.setViewportSize({ width: 900, height: 800 })
+	await seedWorkspace(page, "populated", { statement_rules: statementRules() })
+	await test.step("pending queue: shows only the queue until a Pending Statement is selected", async () => {
+		await page.goto("/allocator/pending")
+		const queue = page.getByRole("region", { name: "Pending statements", exact: true })
+		const candidate = page.locator('section[aria-labelledby="candidate-title"]')
+		await expect(queue).toBeVisible()
+		await expect(candidate).toBeHidden()
+		await page.getByRole("button", { name: /^Pasar malam snacks/ }).click()
+		await expect(queue).toBeHidden()
+		await expect(candidate).toBeVisible()
+		await expect(
+			page.getByRole("button", { name: "Back to pending Statements", exact: true }),
+		).toBeVisible()
+	})
+	await test.step("Account, Budget, Category and rule pages: content does not overflow horizontally", async () => {
+		for (const route of ["/accounts", "/budgets", "/categories", "/statement-rules"]) {
+			await page.goto(route)
+			await expect(page.locator("main article").first()).toBeVisible()
+			expect(
+				await page.evaluate(
+					() =>
+						document.documentElement.scrollWidth - document.documentElement.clientWidth,
+				),
+				route,
+			).toBeLessThanOrEqual(1)
+		}
+	})
+	await test.step("Record creator: keeps at least 8px of side margin at 800px wide", async () => {
+		await page.setViewportSize({ width: 800, height: 800 })
+		const dialog = await openEditor(
+			page,
+			"/records",
+			"Create Pending Record",
+			"Create New Record",
+		)
+		const box = await dialog.boundingBox()
+		if (!box) throw new Error("Expected the Record creator to have layout")
+		expect(box.x).toBeGreaterThanOrEqual(8)
+		expect(box.x + box.width).toBeLessThanOrEqual(800 - 8)
+	})
 })

@@ -35,7 +35,10 @@ export async function select(page: Page, dialog: Locator, label: string, option:
 	await trigger.click()
 	const choice = page.getByRole("option", { name: option, exact: true })
 	await expect(choice).toBeVisible()
-	await choice.click()
+	// Base UI Select can ignore a mouse click on an option it has not highlighted yet; phones tap.
+	if (await page.evaluate(() => matchMedia("(pointer: coarse)").matches)) await choice.tap()
+	else await choice.click()
+	await expect(choice).toHaveCount(0)
 }
 
 export async function chooseCategory(page: Page, dialog: Locator, name = "Groceries") {

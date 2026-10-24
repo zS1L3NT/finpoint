@@ -59,6 +59,26 @@ export async function expectVisibleBackdrop(page: Page) {
 		.toBe(true)
 }
 
+export async function settledOverlayAlpha(page: Page, slot: string): Promise<number> {
+	const overlay = page.locator(`[data-slot="${slot}"]:visible`).last()
+	await expect(overlay).toBeVisible()
+	await expect
+		.poll(() => overlay.evaluate(element => Number(getComputedStyle(element).opacity)), {
+			message: `${slot} settles fully opaque`,
+		})
+		.toBe(1)
+	return overlay.evaluate(element => {
+		const canvas = document.createElement("canvas")
+		canvas.width = canvas.height = 1
+		const context = canvas.getContext("2d")
+		if (!context) throw new Error("Canvas is required to measure backdrop alpha")
+		context.fillStyle = "rgba(0,0,0,0)"
+		context.fillStyle = getComputedStyle(element).backgroundColor
+		context.fillRect(0, 0, 1, 1)
+		return (context.getImageData(0, 0, 1, 1).data[3] ?? 0) / 255
+	})
+}
+
 export async function expectPointerCursor(button: Locator) {
 	await expect(button).toBeVisible()
 	await expect(button).toBeEnabled()

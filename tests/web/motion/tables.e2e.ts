@@ -4,6 +4,7 @@ import { expect, seedWorkspace, test } from "../support/fixtures"
 import {
 	expectReducedRowMovement,
 	expectVisibleRowCascade,
+	poseIsIdentity,
 	sampleVisibleRowAnimations,
 } from "../support/motion"
 import { type MotionConsumer, openMobileSidebarFromConsumerMotion } from "../support/tables"
@@ -281,6 +282,286 @@ test("table refilter: changed results enter with the row entrance", {
 			expect(samples.length).toBeGreaterThan(1)
 			if (test.info().project.name === "reduced-motion") expectReducedRowMovement(samples, 2)
 			else expectVisibleRowCascade(samples, 2)
+		})
+	}
+})
+
+test("table refilter: rows interrupted mid-rise settle back in line", {
+	tag: ["@tall", "@light", "@reduced-motion"],
+}, async ({ page }) => {
+	await seedWorkspace(page, "dense")
+	for (const route of ["/records", "/statements"] as const) {
+		await test.step(`table refilter ${route}: interrupted rows settle back in line`, async () => {
+			const reduced = test.info().project.name === "reduced-motion"
+			const searchName =
+				route === "/records"
+					? "Search title, people, location, description..."
+					: "Search descriptions..."
+			const emptyCopy = route === "/records" ? "No records found." : "No statements found."
+			// A strict subset of the dense seed: contains-matched on both
+			// routes, so narrowing to it is a pure removal that keeps the
+			// discovered rows' DOM nodes alive.
+			const narrow = "Dense Record 1"
+			const allRows = `tbody tr:has(a[href^="${route}/"]), div.grid-cols-subgrid:has(a[href^="${route}/"])`
+			const rowParts = (href: string) =>
+				`tbody tr:has(a[href="${href}"]), div.grid-cols-subgrid:has(a[href="${href}"])`
+			// Discover retained rows on the settled narrowed list, so they
+			// are guaranteed members of the match set the refilter below
+			// commits to.
+			await page.goto(`${route}?query=${encodeURIComponent(narrow)}&per_page=100`)
+			const fullRows = page.locator(allRows)
+			await expect(fullRows.filter({ visible: true }).first()).toBeVisible()
+			const hrefs = (
+				await fullRows.filter({ visible: true }).evaluateAll(
+					(elements, origin) =>
+						elements
+							.filter(element => /Dense/.test(element.textContent ?? ""))
+							.slice(0, 4)
+							.map(
+								element =>
+									element
+										.querySelector(`a[href^="${origin}/"]`)
+										?.getAttribute("href") ?? "",
+							),
+					route,
+				)
+			).filter((href): href is string => href.length > 0)
+			expect(hrefs.length, "settled list exposes retained dense rows").toBeGreaterThanOrEqual(
+				2,
+			)
+			const selector = hrefs.map(rowParts).join(", ")
+			// Remount the full list from an empty result, then narrow back
+			// to the match set while the retained rows are still rising.
+			await page.goto(
+				`${route}?query=${encodeURIComponent("missing-ui-result")}&per_page=100`,
+			)
+			await expect(
+				page.getByText(emptyCopy, { exact: true }).filter({ visible: true }),
+			).toBeVisible()
+			const search = page.getByPlaceholder(searchName)
+			const samples = await sampleVisibleRowAnimations(page, selector, async () => {
+				await search.fill("")
+				// Catch a retained row mid-rise and narrow in the same task:
+				// the cascade settles in under a second, so any round trip
+				// between the catch and the narrow risks missing the window.
+				// Under reduced motion the rows snap to rest, so their
+				// mounting alone establishes the retained nodes.
+				const commit = await page.evaluate(
+					({
+						hrefSelector,
+						allSelector,
+						inputName,
+						narrowQuery,
+						reducedMotion,
+						retained,
+					}: {
+						hrefSelector: string
+						allSelector: string
+						inputName: string
+						narrowQuery: string
+						reducedMotion: boolean
+						retained: number
+					}) => {
+						const yOf = (row: Element) => {
+							const style = getComputedStyle(row)
+							let y = 0
+							if (style.transform !== "none")
+								y += new DOMMatrixReadOnly(style.transform).m42
+							const parts =
+								style.translate === "none"
+									? []
+									: style.translate.trim().split(/\s+/)
+							if (parts.length > 1) y += Number(parts[1])
+							return y
+						}
+						return new Promise<{
+							probeY: number
+							before: number
+							after: number
+							marked: number
+							connected: number
+							y: number
+						}>((resolve, reject) => {
+							const deadline = performance.now() + 8000
+							const waitCommit = (probeY: number, before: number) => {
+								const tick = () => {
+									const after = document.querySelectorAll(allSelector).length
+									if (after < before) {
+										const marked = [
+											...document.querySelectorAll('[data-probe="1"]'),
+										]
+										const kept = marked.filter(node => node.isConnected)
+										resolve({
+											probeY,
+											before,
+											after,
+											marked: marked.length,
+											connected: kept.length,
+											y: kept.length
+												? Math.max(...kept.map(node => Math.abs(yOf(node))))
+												: 0,
+										})
+										return
+									}
+									if (performance.now() > deadline)
+										reject(
+											new Error(
+												`refilter never committed a removal (rows stayed at ${after})`,
+											),
+										)
+									else requestAnimationFrame(tick)
+								}
+								tick()
+							}
+							const waitRise = () => {
+								const rows = [...document.querySelectorAll(hrefSelector)]
+								if (rows.length >= retained) {
+									// Catch the rise early (y well above rest) so the
+									// removal below still lands mid-flight.
+									const rising = reducedMotion
+										? rows
+										: rows.filter(row => Math.abs(yOf(row)) > 2)
+									if (rising.length > 0) {
+										for (const row of rising)
+											row.setAttribute("data-probe", "1")
+										const probeY = Math.max(
+											...rising.map(row => Math.abs(yOf(row))),
+										)
+										const before = document.querySelectorAll(allSelector).length
+										const input = document.querySelector(
+											`input[placeholder="${CSS.escape(inputName)}"]`,
+										)
+										if (!(input instanceof HTMLInputElement)) {
+											reject(
+												new Error("search input not found for narrowing"),
+											)
+											return
+										}
+										const setter = Object.getOwnPropertyDescriptor(
+											window.HTMLInputElement.prototype,
+											"value",
+										)?.set
+										if (!setter) {
+											reject(new Error("native value setter unavailable"))
+											return
+										}
+										setter.call(input, narrowQuery)
+										input.dispatchEvent(new Event("input", { bubbles: true }))
+										waitCommit(probeY, before)
+										return
+									}
+								}
+								if (performance.now() > deadline)
+									reject(
+										new Error(
+											reducedMotion
+												? "retained rows never mounted"
+												: "retained rows never displaced mid-rise",
+										),
+									)
+								else requestAnimationFrame(waitRise)
+							}
+							waitRise()
+						})
+					},
+					{
+						hrefSelector: selector,
+						allSelector: allRows,
+						inputName: searchName,
+						narrowQuery: narrow,
+						reducedMotion: reduced,
+						retained: hrefs.length,
+					},
+				)
+				if (!reduced)
+					expect(
+						commit.probeY,
+						"interruption catches a retained row mid-rise",
+					).toBeGreaterThan(2)
+				expect(commit.after, "at least one nonmatching row disappears").toBeLessThan(
+					commit.before,
+				)
+				expect(commit.marked, "interruption marks a retained node").toBeGreaterThan(0)
+				expect(commit.connected, "the retained node is the same connected node").toBe(
+					commit.marked,
+				)
+				if (!reduced)
+					expect(
+						commit.y,
+						"retained node still displaced at the removal boundary; the interruption window was missed",
+					).toBeGreaterThan(0.5)
+			})
+			expect(samples.length).toBeGreaterThanOrEqual(2)
+			if (reduced) {
+				expectReducedRowMovement(samples, 2)
+			} else {
+				expectVisibleRowCascade(samples, 2)
+				for (const sample of samples) {
+					expect(
+						sample.frames.some(frame => !poseIsIdentity(frame)),
+						`${sample.text}: interrupted rise leaves a displaced frame`,
+					).toBe(true)
+					const last = sample.frames.at(-1)
+					expect(last?.opacity, `${sample.text}: settled opacity`).toBeGreaterThan(0.99)
+					expect(
+						last ? poseIsIdentity(last) : false,
+						`${sample.text}: settles back to an identity transform`,
+					).toBe(true)
+				}
+			}
+			// The marked nodes survive the pure-removal refilter: the same
+			// connected nodes, settled back to identity.
+			const probed = await page.locator('[data-probe="1"]').evaluateAll(elements =>
+				elements.map(element => {
+					const style = getComputedStyle(element)
+					return {
+						connected: element.isConnected,
+						transform: style.transform,
+						translate: style.translate,
+						scale: style.scale,
+						rotate: style.rotate,
+					}
+				}),
+			)
+			expect(probed.length, "interruption keeps a marked retained node").toBeGreaterThan(0)
+			for (const node of probed) {
+				expect(node.connected, "the retained node is the same connected node").toBe(true)
+				expect(
+					poseIsIdentity(node),
+					`retained node settles back to identity (${node.transform} ${node.translate} ${node.scale} ${node.rotate})`,
+				).toBe(true)
+			}
+			// Sweep every final visible data row, not just the marked subset.
+			const final = await page.locator(allRows).evaluateAll(elements =>
+				elements
+					.filter(element => {
+						const rect = element.getBoundingClientRect()
+						const style = getComputedStyle(element)
+						return (
+							rect.width > 0 &&
+							rect.height > 0 &&
+							rect.bottom > 0 &&
+							rect.top < innerHeight &&
+							style.visibility !== "hidden" &&
+							style.display !== "none"
+						)
+					})
+					.map(element => {
+						const style = getComputedStyle(element)
+						return {
+							transform: style.transform,
+							translate: style.translate,
+							scale: style.scale,
+							rotate: style.rotate,
+						}
+					}),
+			)
+			expect(final.length, "every final visible data row is swept").toBeGreaterThanOrEqual(2)
+			for (const pose of final)
+				expect(
+					poseIsIdentity(pose),
+					`visible row settles back to an identity transform (${pose.transform} ${pose.translate} ${pose.scale} ${pose.rotate})`,
+				).toBe(true)
 		})
 	}
 })

@@ -23,9 +23,62 @@ export type RowAnimationSample = {
 	frames: MotionFrame[]
 }
 
+export type MotionPose = {
+	transform: string
+	translate: string
+	scale: string
+	rotate: string
+}
+
+const TRANSLATE_IDENTITY = /^(none|0px(?: 0px){0,2})$/
+const SCALE_IDENTITY = /^(none|1(?: 1){0,2})$/
+const ROTATE_IDENTITY = /^(none|0deg)$/
+
+function matrixIsIdentity(values: number[], identity: readonly number[]): boolean {
+	if (values.length !== identity.length) return false
+	return values.every((value, index) => {
+		const target = identity[index]
+		return (
+			typeof value === "number" &&
+			typeof target === "number" &&
+			Number.isFinite(value) &&
+			Math.abs(value - target) < 0.001
+		)
+	})
+}
+
+function transformIsIdentity(transform: string): boolean {
+	if (transform === "none") return true
+	const match = /^matrix(3d)?\(([^)]+)\)$/.exec(transform.trim())
+	if (!match) return false
+	const values = match[2]?.split(",").map(Number) ?? []
+	return matrixIsIdentity(
+		values,
+		match[1] ? [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1] : [1, 0, 0, 1, 0, 0],
+	)
+}
+
+// Numeric identity check mirroring the sampler's inline normalisation above:
+// individual translations such as `0px` or `0px 0px` count as identity, and a
+// computed matrix counts only when every entry matches the identity matrix.
+export function poseIsIdentity(pose: MotionPose): boolean {
+	return (
+		transformIsIdentity(pose.transform) &&
+		TRANSLATE_IDENTITY.test(pose.translate) &&
+		SCALE_IDENTITY.test(pose.scale) &&
+		ROTATE_IDENTITY.test(pose.rotate)
+	)
+}
+
 // Sampling begins before the action, including opacity-zero elements that occupy the viewport.
 // Keep the action in the current document (client navigation, click, or data reveal).
-async function startSampling(page: Page, selector: string, descendants = false) {
+async function startSampling(
+	page: Page,
+	selector: string,
+	descendants = false,
+	/** Descendants that legitimately arrive after the popup opens. */
+	late = '[data-slot="scroll-area-scrollbar"]',
+) {
 	await page.evaluate(async () => {
 		await document.fonts.ready
 		await Promise.all(
@@ -40,7 +93,7 @@ async function startSampling(page: Page, selector: string, descendants = false) 
 		)
 	})
 	return page.evaluateHandle(
-		({ selector, descendants }) => {
+		({ selector, descendants, late }) => {
 			const records = new Map<Element, { text: string; frames: MotionFrame[] }>()
 			let firstSeen = 0
 			let frameId = 0
@@ -147,8 +200,12 @@ async function startSampling(page: Page, selector: string, descendants = false) 
 					let animating = false
 					const current: unknown[] = []
 					for (const root of roots) {
+						// A scroll area's scrollbar is chrome Radix mounts and sizes only after
+						// measuring the content, so it is not popup content that should enter.
 						const elements = descendants
-							? [root, ...root.querySelectorAll("*")]
+							? [root, ...root.querySelectorAll("*")].filter(
+									element => !element.closest(late),
+								)
 							: [root]
 						for (const element of elements.filter(element =>
 							visible(element, descendants),
@@ -289,7 +346,7 @@ async function startSampling(page: Page, selector: string, descendants = false) 
 				},
 			}
 		},
-		{ selector, descendants },
+		{ selector, descendants, late },
 	)
 }
 
@@ -453,7 +510,12 @@ export function expectVisibleRowCascade(samples: RowAnimationSample[], minimumRo
 	}
 }
 
-export async function expectPopupEntrance(page: Page, open: () => Promise<void>) {
+export async function expectPopupEntrance(
+	page: Page,
+	open: () => Promise<void>,
+	/** Popup regions fed by a live query, which render nothing until their data arrives. */
+	liveRegions?: string,
+) {
 	const previousBackdrops = await page.evaluateHandle(
 		() =>
 			new Set(
@@ -465,7 +527,12 @@ export async function expectPopupEntrance(page: Page, open: () => Promise<void>)
 			),
 	)
 	let introducedBackdrop = false
-	const sampler = await startSampling(page, '[role="dialog"], [role="alertdialog"]', true)
+	const sampler = await startSampling(
+		page,
+		'[role="dialog"], [role="alertdialog"]',
+		true,
+		['[data-slot="scroll-area-scrollbar"]', liveRegions].filter(Boolean).join(", "),
+	)
 	let samples: RowAnimationSample[]
 	try {
 		await open()

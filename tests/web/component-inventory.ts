@@ -317,6 +317,15 @@ export const componentInventory: InventoryEntry[] = [
 		scenarios: ["editor"],
 	},
 	{
+		path: "src/components/dialogs/statement-rule.tsx",
+		owner: "team2",
+		routes: ["/statement-rules"],
+		visibleExports: ["default"],
+		dormantExports: [],
+		helperExports: [],
+		scenarios: ["editor"],
+	},
+	{
 		path: "src/components/form/amount-field.tsx",
 		owner: "team2",
 		routes: [
@@ -337,6 +346,23 @@ export const componentInventory: InventoryEntry[] = [
 		scenarios: ["field"],
 	},
 	{
+		path: "src/components/form/category-field.tsx",
+		owner: "team2",
+		routes: [
+			"/statements/[id]",
+			"/budgets/[id]",
+			"/allocator",
+			"/records/[id]",
+			"/records",
+			"/records/monthly",
+			"/statement-rules",
+		],
+		visibleExports: ["default"],
+		dormantExports: [],
+		helperExports: [],
+		scenarios: ["field"],
+	},
+	{
 		path: "src/components/form/combobox-field.tsx",
 		owner: "team2",
 		routes: [
@@ -347,6 +373,7 @@ export const componentInventory: InventoryEntry[] = [
 			"/records",
 			"/categories",
 			"/records/monthly",
+			"/statement-rules",
 		],
 		visibleExports: ["default"],
 		dormantExports: [],
@@ -414,10 +441,11 @@ export const componentInventory: InventoryEntry[] = [
 			"/records/monthly",
 			"/settings",
 			"/importer",
+			"/statement-rules",
 		],
 		visibleExports: ["FormField"],
 		dormantExports: [],
-		helperExports: [],
+		helperExports: ["AUTOPOPULATED_BORDER"],
 		scenarios: ["field"],
 	},
 	{
@@ -437,6 +465,15 @@ export const componentInventory: InventoryEntry[] = [
 		scenarios: ["field", "monthly-budget"],
 	},
 	{
+		path: "src/components/form/rule-suggestions.tsx",
+		owner: "team2",
+		routes: ["/allocator", "/records"],
+		visibleExports: ["default"],
+		dormantExports: [],
+		helperExports: ["ruleValueLabel"],
+		scenarios: ["display", "indirect"],
+	},
+	{
 		path: "src/components/form/select-field.tsx",
 		owner: "team2",
 		routes: [
@@ -451,6 +488,7 @@ export const componentInventory: InventoryEntry[] = [
 			"/",
 			"/records/monthly",
 			"/importer",
+			"/statement-rules",
 		],
 		visibleExports: ["default"],
 		dormantExports: [],
@@ -473,6 +511,7 @@ export const componentInventory: InventoryEntry[] = [
 			"/",
 			"/records/monthly",
 			"/importer",
+			"/statement-rules",
 		],
 		visibleExports: ["default"],
 		dormantExports: [],
@@ -966,6 +1005,7 @@ export const componentInventory: InventoryEntry[] = [
 			"/",
 			"/records/monthly",
 			"/sync",
+			"/statement-rules",
 		],
 		visibleExports: ["Badge"],
 		dormantExports: [],
@@ -1004,6 +1044,7 @@ export const componentInventory: InventoryEntry[] = [
 			"/sync",
 			"/importer",
 			"/privacy",
+			"/statement-rules",
 		],
 		visibleExports: ["Button"],
 		dormantExports: [],
@@ -1097,6 +1138,7 @@ export const componentInventory: InventoryEntry[] = [
 			"/",
 			"/records/monthly",
 			"/importer",
+			"/statement-rules",
 		],
 		visibleExports: [
 			"Combobox",
@@ -1154,9 +1196,11 @@ export const componentInventory: InventoryEntry[] = [
 			"/categories",
 			"/",
 			"/records/monthly",
+			"/statement-rules",
 		],
 		visibleExports: [
 			"Dialog",
+			"DialogBody",
 			"DialogClose",
 			"DialogContent",
 			"DialogDescription",
@@ -1691,6 +1735,7 @@ export const componentInventory: InventoryEntry[] = [
 			"/allocator/duplicates",
 			"/records",
 			"/records/monthly",
+			"/statement-rules",
 		],
 		visibleExports: ["ToggleGroup", "ToggleGroupItem"],
 		dormantExports: [],
@@ -1831,6 +1876,13 @@ export const routeInventory: RouteEntry[] = [
 		owner: "team3",
 		scenarios: ["route"],
 	},
+	{
+		path: "app/statement-rules/page.tsx",
+		url: "/statement-rules",
+		kind: "page",
+		owner: "team3",
+		scenarios: ["route"],
+	},
 	{ path: "app/(month)/page.tsx", url: "/", kind: "page", owner: "team3", scenarios: ["route"] },
 	{
 		path: "app/(month)/records/monthly/page.tsx",
@@ -1964,6 +2016,14 @@ export const scenarioDescriptions: Record<string, string> = {
 		"Label activation with valid time/date edits, keyboard open and disabled value retention; empty has no clear affordance and error alerts render through the shared FormField wrapper",
 	"src/components/form/record-analytics-fields.tsx#field.options":
 		"Treatment gating and scroll/Escape dismissal for both selects; long Monthly Budget label is selected intact, fits the popup/trigger, clears to Unbudgeted and remains cleared through Income/Spending changes",
+	"src/components/form/rule-suggestions.tsx#display.values":
+		"Suggestion chips deduplicate equal text values across rules and carry provenance titles",
+	"src/components/form/rule-suggestions.tsx#display.interaction":
+		"Chip activation by click and keyboard fills the field it suggests",
+	"src/components/form/rule-suggestions.tsx#indirect.consumer":
+		"The Record creator consumes rule suggestions for its fields",
+	"src/components/form/rule-suggestions.tsx#export.default.behaviour":
+		"Suggestions deduplicate equal values across rules, apply on activation, and skip paused or archived rules",
 	"src/components/form/select-field.tsx#field.options":
 		"Selected and disabled options with keyboard open/close, a long empty-optional select with while-open scroll, and disabled value retention",
 	"src/components/ui/select.tsx#primitive.responsive":
@@ -2168,7 +2228,7 @@ export const scenarioDescriptions: Record<string, string> = {
 	"src/components/table/statement-columns.tsx#table.interaction":
 		"Statement pagination keeps search in the URL and changes row identity; search resets page and survives reload",
 	"src/components/table/statement-columns.tsx#table.rows":
-		"Populated/empty rows retain pending badge, zero/signed amounts and allocable remainder; oversized description stays accessible and same-day signed subtotal reconciles; unsupported archive/null states have source reasons in facetNotApplicable",
+		"Populated/empty rows retain pending and duplicate badges, zero/signed amounts and allocable remainder; oversized description stays accessible and same-day signed subtotal reconciles; unsupported archive/null states have source reasons in facetNotApplicable",
 	"src/components/layout/app-header.tsx#display.values":
 		"Header h1 copy is asserted across all 19 layout routes and theme branches; reachable titles are fixed by ShellHeader.TITLES, so arbitrary entity-name h1 is inapplicable (facetNotApplicable)",
 	"src/components/layout/shell-header.tsx#display.values":
@@ -2247,6 +2307,8 @@ export const scenarioDescriptions: Record<string, string> = {
 		"Unicode long name entry keeps a contained footer with pointer cursor, in-viewport Cancel and Enter cancellation",
 	"src/components/dialogs/pending-statement.tsx#editor.long":
 		"Unicode long description entry keeps a contained footer with pointer cursor, in-viewport Cancel and Enter cancellation",
+	"src/components/dialogs/statement-rule.tsx#editor.long":
+		"Unicode long name entry keeps a contained footer with pointer cursor, in-viewport Cancel and Enter cancellation",
 	"src/components/dialogs/duplicate-review.tsx#editor.long":
 		"Long imported descriptions render with a contained footer, pointer cursor, in-viewport Cancel and Enter cancellation",
 	"src/components/dialogs/statement-replacement-review.tsx#editor.long":
@@ -2517,6 +2579,18 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"disabled form fields: stay disabled and keep their values",
 		"form labels: activate their controls and invalid input links its error",
 	],
+	"src/components/form/category-field.tsx#export.default.behaviour": [
+		"Record creator: validates required fields, applies Category defaults, and persists amount -12.34 and long text",
+		"Record creator: validates required fields, applies Category defaults, and persists amount 0 and long text",
+	],
+	"src/components/form/category-field.tsx#field.options": [
+		"Record creator: validates required fields, applies Category defaults, and persists amount -12.34 and long text",
+		"Record creator: validates required fields, applies Category defaults, and persists amount 0 and long text",
+	],
+	"src/components/form/category-field.tsx#field.input": [
+		"Record creator: validates required fields, applies Category defaults, and persists amount -12.34 and long text",
+		"Record creator: validates required fields, applies Category defaults, and persists amount 0 and long text",
+	],
 	"src/components/form/date-field.tsx#export.default.behaviour": [
 		"date field: picks a day from the calendar and clears",
 		"settings: default filters validate, persist and reload",
@@ -2559,10 +2633,14 @@ export const behaviourCoverage: Record<string, string[]> = {
 	"src/components/form/field.tsx#export.FormField.behaviour": [
 		"field validation: errors render as alerts",
 		"Account editor: required name and unicode rename persist after reload",
+		"Record creator: rule autofill fills fields, notes the rule and drops the note when edited",
+		"Record rules: suggestion chips and late autofill notes rise in after the creator opens",
 	],
 	"src/components/form/field.tsx#field.input": [
 		"field validation: errors render as alerts",
 		"Account editor: required name and unicode rename persist after reload",
+		"Record creator: rule autofill fills fields, notes the rule and drops the note when edited",
+		"Record rules: suggestion chips and late autofill notes rise in after the creator opens",
 	],
 	"src/components/form/record-analytics-fields.tsx#export.default.behaviour": [
 		"Record analytics: Treatment gates the Monthly Budget control",
@@ -2580,6 +2658,20 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"Record analytics: Treatment gates the Monthly Budget control",
 		"Record analytics: selects preserve page scroll while open and dismiss with Escape",
 		"Record editor: long Monthly Budget option can be picked, cleared and disabled by Treatment",
+	],
+	"src/components/form/rule-suggestions.tsx#display.values": [
+		"Record creator: rule suggestions deduplicate, apply on click and skip paused or archived rules",
+	],
+	"src/components/form/rule-suggestions.tsx#display.interaction": [
+		"Record creator: rule suggestions deduplicate, apply on click and skip paused or archived rules",
+	],
+	"src/components/form/rule-suggestions.tsx#indirect.consumer": [
+		"Record creator: rule suggestions deduplicate, apply on click and skip paused or archived rules",
+	],
+	"src/components/form/rule-suggestions.tsx#export.default.behaviour": [
+		"Record creator: rule autofill fills fields, notes the rule and drops the note when edited",
+		"Record creator: rule suggestions deduplicate, apply on click and skip paused or archived rules",
+		"Record rules: suggestion chips and late autofill notes rise in after the creator opens",
 	],
 	"src/components/charts/cashflow-chart.tsx#export.default.behaviour": [
 		"chart tooltips: Surplus / Shortfall keyboard navigation exposes actual numeric values",
@@ -2630,10 +2722,12 @@ export const behaviourCoverage: Record<string, string[]> = {
 	"src/components/charts/monthly-budget-usage.tsx#export.default.behaviour": [
 		"Monthly Budget card: null amount and zero plan remain distinct when scope changes",
 		"Monthly Budget rows: zero and null plans never display invalid percentages",
+		"Monthly Budget cards: hover does not select or change the donut, and a click does",
 	],
 	"src/components/charts/monthly-budget-usage.tsx#chart.values": [
 		"Monthly Budget card: null amount and zero plan remain distinct when scope changes",
 		"Monthly Budget rows: zero and null plans never display invalid percentages",
+		"Monthly Budget cards: hover does not select or change the donut, and a click does",
 	],
 	"src/components/charts/spending-calendar.tsx#export.default.behaviour": [
 		"spending calendar: daily amount, zero and refund days drill into exact Records",
@@ -2858,6 +2952,7 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"table refilter /records: settled results reveal a different nonempty set",
 		"Budget detail: detaching a Record keeps the remaining row node and persists the detachment",
 		"Budget detail: remaining row does not replay its entrance after detaching",
+		"table refilter: rows interrupted mid-rise settle back in line",
 	],
 	"src/components/ui/button.tsx#export.Button.behaviour": [
 		"button: enabled button counts clicks, works from the keyboard and shows a pointer cursor",
@@ -3090,6 +3185,9 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"modal primitives: dialog header, description and footer stay readable and close restores the trigger",
 		"modal focus: Harness dialog shows a backdrop, contains Tab focus and restores the trigger",
 	],
+	"src/components/ui/dialog.tsx#export.DialogBody.behaviour": [
+		"Record creator: a tall form scrolls its body between a pinned header and footer",
+	],
 	"src/components/ui/dialog.tsx#export.DialogTrigger.behaviour": [
 		"modal primitives: dialog header, description and footer stay readable and close restores the trigger",
 		"modal focus: Harness dialog shows a backdrop, contains Tab focus and restores the trigger",
@@ -3125,6 +3223,7 @@ export const behaviourCoverage: Record<string, string[]> = {
 	"src/components/ui/dialog.tsx#export.DialogOverlay.behaviour": [
 		"modal focus: Harness dialog shows a backdrop, contains Tab focus and restores the trigger",
 		"dialog: opens with a backdrop and closes on Escape with scroll restored",
+		"app modal surfaces: backdrops darken the page at half opacity",
 	],
 	"src/components/ui/dialog.tsx#primitive.consumer": [
 		"modal primitives: dialog header, description and footer stay readable and close restores the trigger",
@@ -3209,6 +3308,7 @@ export const behaviourCoverage: Record<string, string[]> = {
 	"src/components/ui/alert-dialog.tsx#export.AlertDialogOverlay.behaviour": [
 		"modal focus: Delete workspace? shows a backdrop, contains Tab focus and restores the trigger",
 		"alert dialog: confirms and cancels with a visible backdrop",
+		"alert dialog: overlay settles at half opacity",
 	],
 	"src/components/ui/alert-dialog.tsx#primitive.consumer": [
 		"modal primitives: alert header, description and footer stay readable and close restores the trigger",
@@ -3625,6 +3725,9 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"/categories page: search finds populated data and clears no-match copy",
 		"/categories page: stays silent while the database opens, then reveals its data",
 	],
+	"app/statement-rules/page.tsx#route.data": [
+		"Statement rules page: empty, populated and paused rules show conditions, actions and match counts",
+	],
 	"app/(month)/page.tsx#route.data": [
 		"overview summary: income, refunds and exclusions reconcile across metrics and Category mix",
 		"empty overview: no history gives zero metrics and useful chart explanations",
@@ -3677,6 +3780,9 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"app/categories/page.tsx#route.navigation": [
 		"Categories drill: nested keyboard drill returns through exact origins",
+	],
+	"app/statement-rules/page.tsx#route.navigation": [
+		"Statement rules page: the Plan Rules link opens it and pause, resume and delete persist after reload",
 	],
 	"app/settings/page.tsx#route.navigation": [
 		"settings: keyboard save of default filters persists across reload",
@@ -4008,12 +4114,16 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"src/components/table/statement-columns.tsx#table.interaction": [
 		"Statements table: keeps search in the URL and moves between pages",
+		"Duplicate badge: marks possible duplicate Statements and links to the account's duplicate review",
+		"Duplicate badge: disappears once the pair is resolved",
 	],
 	"src/components/table/statement-columns.tsx#table.rows": [
 		"Statement cells: retain pending, Allocation, zero and signed amount meaning",
 		"/statements page: resolves to its useful empty state",
 		"Statement detail: long pending description stays readable on list and detail with confirmation state",
 		"Statements table: signed same-day Statements show their exact grouped subtotal",
+		"Duplicate badge: marks possible duplicate Statements and links to the account's duplicate review",
+		"Duplicate badge: disappears once the pair is resolved",
 	],
 	"src/components/table/statement-columns.tsx#table.motion": [
 		"Statements: every visible item animates in the actual viewport",
@@ -4022,6 +4132,7 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"table refilter /statements: settled results reveal a different nonempty set",
 		"table paging /statements: first page shows five rows and next page moves the URL to page 2",
 		"table paging /statements: new page fades without restarting the rise",
+		"table refilter: rows interrupted mid-rise settle back in line",
 	],
 	"src/components/table/paginated-data-table.tsx#table.rows": [
 		"Records table: keeps search in the URL and moves between pages",
@@ -4041,6 +4152,9 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"src/components/dialogs/pending-statement.tsx#editor.long": [
 		"long Create Pending Statement editor: keeps Unicode content and keyboard cancellation reachable",
+	],
+	"src/components/dialogs/statement-rule.tsx#editor.long": [
+		"long New rule editor: keeps Unicode content and keyboard cancellation reachable",
 	],
 	"src/components/dialogs/duplicate-review.tsx#editor.long": [
 		"long duplicate review: keeps long imported descriptions readable and its footer usable",
@@ -4073,6 +4187,24 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"Record editor: null optional fields, long title, sign and penny keyboard steps persist",
 		"Record editor: pending warning content and Escape close work",
 		"Record editor: opens with initial content already laid out",
+	],
+	"src/components/dialogs/statement-rule.tsx#editor.open": [
+		"Statement rule creator: popup enters as a whole",
+		"Statement rule editor: popup enters as a whole",
+	],
+	"src/components/dialogs/statement-rule.tsx#editor.validation": [
+		"Statement rule editor: invalid input shows errors, then a valid rule persists after reload",
+	],
+	"src/components/dialogs/statement-rule.tsx#editor.conditional": [
+		"Statement rule editor: the preview lists matching Statements and combines conditions by all or any",
+		"Statement rule editor: actions toggle Suggest and Autofill, Unbudgeted differs from Not set, archived Monthly Budgets are hidden",
+		"Statement rule editor: Title, People and Location offer existing Record values",
+	],
+	"src/components/dialogs/statement-rule.tsx#export.default.behaviour": [
+		"Statement rule editor: invalid input shows errors, then a valid rule persists after reload",
+		"Statement rule editor: the preview lists matching Statements and combines conditions by all or any",
+		"Statement rule editor: actions toggle Suggest and Autofill, Unbudgeted differs from Not set, archived Monthly Budgets are hidden",
+		"Statement rule editor: Title, People and Location offer existing Record values",
 	],
 	"src/components/dialogs/category.tsx#editor.conditional": [
 		"Category editor: offers a Spending default Monthly Budget, excludes archived options, clears the Budget for Income and validates a blank name",
@@ -4135,6 +4267,9 @@ export const behaviourCoverage: Record<string, string[]> = {
 	"src/components/ui/dialog.tsx#primitive.responsive": [
 		"layout: sections fit the viewport width",
 		"dialog: opens with a backdrop and closes on Escape with scroll restored",
+		"Record creator: a tall form scrolls its body between a pinned header and footer",
+		"app modal surfaces: backdrops darken the page at half opacity",
+		"Record creator: keeps at least 8px of side margin at 800px wide",
 	],
 	"src/components/ui/empty.tsx#primitive.responsive": [
 		"layout: sections fit the viewport width",
@@ -4188,6 +4323,7 @@ export const behaviourCoverage: Record<string, string[]> = {
 	"src/components/ui/sheet.tsx#primitive.responsive": [
 		"layout: sections fit the viewport width",
 		"sheet: opens with a backdrop and closes from its close button",
+		"app modal surfaces: backdrops darken the page at half opacity",
 	],
 	"src/components/ui/sidebar.tsx#primitive.responsive": [
 		"layout: sections fit the viewport width",
@@ -4291,6 +4427,9 @@ export const behaviourCoverage: Record<string, string[]> = {
 	"app/privacy/page.tsx#route.viewport": [
 		"/privacy page: populated content and enabled controls stay inside the viewport",
 	],
+	"app/statement-rules/page.tsx#route.viewport": [
+		"Statement rules: cards enter as a cascade in the viewport",
+	],
 }
 
 /** Applicable facets without evidence stay here even when their parent scenario is mapped.
@@ -4310,7 +4449,7 @@ export const facetNotApplicable: Record<string, Record<string, string>> = {
 	},
 	"src/components/table/statement-columns.tsx#table.rows": {
 		"archived Statement":
-			"src/types.d.ts Statement and src/data/db.ts StatementRow have no archived field; StatementBadges renders Pending and Unallocated only.",
+			"src/types.d.ts Statement and src/data/db.ts StatementRow have no archived field; StatementBadges in src/components/table/statement-columns.tsx renders Pending, Unallocated and Duplicate? (the last derived from duplicate groups in src/logic/duplicates.ts, not a persisted flag).",
 		"null required fields":
 			"src/types.d.ts Statement requires description, amount, datetime and Account. src/logic/statements.ts enriches account with a fallback; null description/amount is not a supported imported or manual Statement shape.",
 	},
@@ -4448,6 +4587,7 @@ export const scenarioProjects: Record<
 	"app/importer/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
 	"app/terms/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
 	"app/privacy/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
+	"app/statement-rules/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
 	"src/components/charts/cashflow-chart.tsx#chart.responsive": ["mobile", "tall-desktop"],
 	"src/components/charts/category-history-chart.tsx#chart.responsive": ["mobile", "tall-desktop"],
 	"src/components/charts/daily-spending-chart.tsx#chart.responsive": ["mobile", "tall-desktop"],
@@ -4584,4 +4724,6 @@ export const scenarioProjectLexiconExemptions: Record<string, string> = {
 		"Tall content scrolling inside a mobile popup is about in-popup overflow, not the tall-desktop project; the mapped popup test runs on desktop and mobile",
 	"src/components/dialogs/statement-replacement-review.tsx#editor.open":
 		"Tall content scrolling inside a mobile popup is about in-popup overflow, not the tall-desktop project; the mapped popup test runs on desktop and mobile",
+	"src/components/dialogs/statement-rule.tsx#editor.open":
+		"Tall content scrolling inside a mobile popup is about in-popup overflow, not the tall-desktop project; the mapped popup steps run on desktop, mobile and reduced-motion",
 }

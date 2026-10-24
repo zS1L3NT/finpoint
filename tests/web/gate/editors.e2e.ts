@@ -1,6 +1,6 @@
 import type { Locator, Page } from "@playwright/test"
 import { expectPointerCursor, expectVisibleBackdrop } from "../support/assertions"
-import { IDS } from "../support/data"
+import { IDS, statementRules } from "../support/data"
 import {
 	account,
 	budget,
@@ -486,6 +486,183 @@ test("Pending Statement editors: validate creation and persist edits", async ({
 	})
 })
 
+test("Statement rule editor: invalid input shows errors, then a valid rule persists after reload", async ({
+	page,
+}) => {
+	await seedWorkspace(page, "populated", { statement_rules: statementRules() })
+	const dialog = await openEditor(page, "/statement-rules", "New rule", "New rule")
+	await dialog.getByRole("button", { name: "Create rule", exact: true }).click()
+	await expect(dialog.getByText("Name this rule.", { exact: true })).toBeVisible()
+	await expect(dialog.getByText("Enter text to look for.", { exact: true })).toBeVisible()
+	await expect(
+		dialog.getByText("Fill in at least one record field.", { exact: true }),
+	).toBeVisible()
+	await dialog.locator('button[id^="rule-operator-"]').click()
+	await page.getByRole("option", { name: "matches regex", exact: true }).click()
+	const text = dialog.getByLabel("Text to look for", { exact: true })
+	await text.fill("(")
+	await expect(text).toHaveAttribute("aria-invalid", "true")
+	await dialog.getByLabel("Name", { exact: true }).fill("Coffee rule")
+	await dialog.getByRole("button", { name: "Create rule", exact: true }).click()
+	await expect(
+		dialog.getByText("Enter a valid regular expression.", { exact: true }),
+	).toBeVisible()
+	await text.fill("starbucks|raffles")
+	await dialog.getByLabel("Title", { exact: true }).fill("Coffee")
+	// The open Title suggestions hide the mode toggles from the role tree.
+	await page.keyboard.press("Escape")
+	await dialog
+		.getByRole("group", { name: "How to use the title", exact: true })
+		.getByRole("radio", { name: "Autofill", exact: true })
+		.click()
+	await dialog.getByRole("button", { name: "Create rule", exact: true }).click()
+	await expect(dialog).not.toBeVisible()
+	await page.reload()
+	const card = page.locator("main article").filter({ hasText: "Coffee rule" })
+	await expect(card).toContainText("starbucks|raffles")
+	await expect(card.getByText("Coffee", { exact: true })).toBeVisible()
+	await expect(card.getByText("Autofill", { exact: true })).toBeVisible()
+
+	await page.getByRole("button", { name: "Edit Coffee rule", exact: true }).click()
+	const editor = page.getByRole("dialog", { name: "Edit rule", exact: true })
+	await expect(editor).toBeVisible()
+	await editor.getByLabel("Name", { exact: true }).fill("Coffee rules")
+	await editor.getByRole("button", { name: "Save changes", exact: true }).click()
+	await expect(editor).not.toBeVisible()
+	await page.reload()
+	await expect(page.getByRole("button", { name: "Edit Coffee rules", exact: true })).toBeVisible()
+
+	await page.getByRole("button", { name: "Edit Coffee rules", exact: true }).click()
+	const discarded = page.getByRole("dialog", { name: "Edit rule", exact: true })
+	await discarded.getByLabel("Name", { exact: true }).fill("Discarded name")
+	await discarded.getByRole("button", { name: "Cancel", exact: true }).click()
+	await expect(discarded).not.toBeVisible()
+	await page.reload()
+	await expect(page.getByRole("button", { name: "Edit Coffee rules", exact: true })).toBeVisible()
+	await expect(
+		page.getByRole("button", { name: "Edit Discarded name", exact: true }),
+	).toHaveCount(0)
+})
+
+test("Statement rule editor: the preview lists matching Statements and combines conditions by all or any", async ({
+	page,
+}) => {
+	await seedWorkspace(page, "populated", { statement_rules: statementRules() })
+	const dialog = await openEditor(page, "/statement-rules", "New rule", "New rule")
+	await expect(
+		dialog.getByText("Type some text to look for and matching Statements appear here.", {
+			exact: true,
+		}),
+	).toBeVisible()
+	const text = dialog.getByLabel("Text to look for", { exact: true })
+	await text.fill("grab")
+	await expect(
+		dialog.getByRole("heading", { name: "2 matching Statements", exact: true }),
+	).toBeVisible()
+	await expect(dialog.locator("mark")).toHaveCount(2)
+	await expect(dialog.locator("mark").first()).toHaveText("GRAB")
+
+	await dialog.getByRole("button", { name: "Add condition", exact: true }).click()
+	await dialog.getByLabel("Text to look for", { exact: true }).nth(1).fill("7712")
+	await expect(
+		dialog.getByRole("heading", { name: "1 matching Statement", exact: true }),
+	).toBeVisible()
+	await expect(dialog.locator("form").getByText("and", { exact: true })).toBeVisible()
+	await dialog.getByRole("radio", { name: "Matches any", exact: true }).click()
+	await expect(
+		dialog.getByRole("heading", { name: "2 matching Statements", exact: true }),
+	).toBeVisible()
+	await expect(dialog.locator("form").getByText("or", { exact: true })).toBeVisible()
+	await dialog.getByRole("radio", { name: "Matches all", exact: true }).click()
+	await expect(
+		dialog.getByRole("heading", { name: "1 matching Statement", exact: true }),
+	).toBeVisible()
+	await expect(dialog.locator("form").getByText("and", { exact: true })).toBeVisible()
+
+	await dialog.getByRole("button", { name: "Remove condition", exact: true }).nth(1).click()
+	await expect(
+		dialog.getByRole("heading", { name: "2 matching Statements", exact: true }),
+	).toBeVisible()
+	await expect(dialog.locator("form").getByText("and", { exact: true })).toHaveCount(0)
+
+	await text.fill("zzzz")
+	await expect(
+		dialog.getByText("No Statements match these conditions.", { exact: true }),
+	).toBeVisible()
+})
+
+test("Statement rule editor: actions toggle Suggest and Autofill, Unbudgeted differs from Not set, archived Monthly Budgets are hidden", async ({
+	page,
+}) => {
+	await seedWorkspace(page, "populated", { statement_rules: statementRules() })
+	const dialog = await openEditor(page, "/statement-rules", "New rule", "New rule")
+	const modeToggle = dialog.getByRole("group", {
+		name: "How to use the monthly budget",
+		exact: true,
+	})
+	await expect(modeToggle.getByRole("radio", { name: "Suggest", exact: true })).toBeDisabled()
+	await expect(modeToggle.getByRole("radio", { name: "Autofill", exact: true })).toBeDisabled()
+
+	await dialog.getByLabel("Monthly budget", { exact: true }).click()
+	await expect(page.getByRole("option", { name: "Not set", exact: true })).toBeVisible()
+	await expect(page.getByRole("option", { name: "Unbudgeted", exact: true })).toBeVisible()
+	await expect(page.getByRole("option", { name: "Daily", exact: true })).toBeVisible()
+	await expect(page.getByRole("option", { name: "Recurring", exact: true })).toBeVisible()
+	await expect(page.getByRole("option", { name: "Travel", exact: true })).toHaveCount(0)
+	await page.keyboard.press("Escape")
+	await expect(page.getByRole("option", { name: "Daily", exact: true })).toHaveCount(0)
+	await expect(dialog).toBeVisible()
+
+	await dialog.getByLabel("Name", { exact: true }).fill("Unbudgeted rule")
+	await dialog.getByLabel("Text to look for", { exact: true }).fill("grab")
+	await dialog.getByLabel("Title", { exact: true }).fill("Grab expense")
+	// The open Title suggestions hide the mode toggles from the role tree.
+	await page.keyboard.press("Escape")
+	await select(page, dialog, "Monthly budget", "Unbudgeted")
+	await expect(modeToggle.getByRole("radio", { name: "Suggest", exact: true })).toBeEnabled()
+	await modeToggle.getByRole("radio", { name: "Suggest", exact: true }).click()
+	await expect(modeToggle.getByRole("radio", { name: "Suggest", exact: true })).toBeChecked()
+	await modeToggle.getByRole("radio", { name: "Autofill", exact: true }).click()
+	await expect(modeToggle.getByRole("radio", { name: "Autofill", exact: true })).toBeChecked()
+	await expect(modeToggle.getByRole("radio", { name: "Suggest", exact: true })).not.toBeChecked()
+	await dialog.getByRole("button", { name: "Create rule", exact: true }).click()
+	await expect(dialog).not.toBeVisible()
+	await page.reload()
+	const card = page.locator("main article").filter({ hasText: "Unbudgeted rule" })
+	await expect(card.getByText("Monthly budget", { exact: true })).toBeVisible()
+	await expect(card.getByText("Unbudgeted", { exact: true })).toBeVisible()
+	await expect(card.getByText("Grab expense", { exact: true })).toBeVisible()
+	await expect(card.getByText("Autofill", { exact: true })).toHaveCount(1)
+
+	await page.getByRole("button", { name: "Edit Unbudgeted rule", exact: true }).click()
+	const editor = page.getByRole("dialog", { name: "Edit rule", exact: true })
+	await select(page, editor, "Monthly budget", "Not set")
+	await editor.getByRole("button", { name: "Save changes", exact: true }).click()
+	await expect(editor).not.toBeVisible()
+	await page.reload()
+	const updated = page.locator("main article").filter({ hasText: "Unbudgeted rule" })
+	await expect(updated.getByText("Grab expense", { exact: true })).toBeVisible()
+	await expect(updated.getByText("Monthly budget", { exact: true })).toHaveCount(0)
+	await expect(updated.getByText("Unbudgeted", { exact: true })).toHaveCount(0)
+})
+
+test("Statement rule editor: Title, People and Location offer existing Record values", async ({
+	page,
+}) => {
+	await seedWorkspace(page, "populated", { statement_rules: statementRules() })
+	const dialog = await openEditor(page, "/statement-rules", "New rule", "New rule")
+	for (const [label, typed, option] of [
+		["Title", "Hawker", "Hawker Dinner"],
+		["People", "Jia", "Jia Le"],
+		["Location", "Tampines", "Tampines Mall"],
+	] as const) {
+		await dialog.getByLabel(label, { exact: true }).fill(typed)
+		await expect(page.getByRole("option", { name: option, exact: true })).toBeVisible()
+		await page.getByRole("option", { name: option, exact: true }).click()
+		await expect(dialog.getByLabel(label, { exact: true })).toHaveValue(option)
+	}
+})
+
 test("Record creator: validates required fields, applies Category defaults and persists values", async ({
 	page,
 	workspace,
@@ -708,6 +885,7 @@ test.describe("long content", () => {
 			["/categories", "Create Category", "Create Category", "Name"],
 			["/?month=October&year=2026", "New", "Create monthly budget", "Name"],
 			["/statements", "Create Pending Statement", "Create Pending Statement", "Description"],
+			["/statement-rules", "New rule", "New rule", "Name"],
 		] as const) {
 			await test.step(`long ${title} editor: keeps Unicode content and keyboard cancellation reachable`, async () => {
 				await page.goto(route)

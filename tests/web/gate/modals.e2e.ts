@@ -1,4 +1,8 @@
-import { expectDropdownPreservesScroll, expectVisibleBackdrop } from "../support/assertions"
+import {
+	expectDropdownPreservesScroll,
+	expectVisibleBackdrop,
+	settledOverlayAlpha,
+} from "../support/assertions"
 import { getScenario, IDS } from "../support/data"
 import { expect, test } from "../support/fixtures"
 
@@ -195,5 +199,102 @@ test.describe("dense workspace", () => {
 				await expect(filter).toBeFocused()
 			})
 		}
+	})
+})
+
+test("Record creator: a tall form scrolls its body between a pinned header and footer", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	await page.setViewportSize({ width: 390, height: 600 })
+	await page.goto("/allocator")
+	await page
+		.getByRole("checkbox", {
+			name: `Select statement ${IDS.statements.unallocated[2]}`,
+			exact: true,
+		})
+		.click()
+	await page
+		.getByRole("checkbox", {
+			name: `Select statement ${IDS.statements.unallocated[3]}`,
+			exact: true,
+		})
+		.click()
+	await page.getByRole("button", { name: "Create Record", exact: true }).click()
+	const dialog = page.getByRole("dialog", { name: "Create New Record" })
+	await expect(dialog).toBeVisible()
+	// Let the popup's finite entrance settle before measuring, so the
+	// header/footer comparison below captures scrolling rather than entrance motion.
+	await expect
+		.poll(() => page.evaluate(() => document.getAnimations().length), {
+			message: "popup entrance animations settle",
+		})
+		.toBe(0)
+	const viewport = dialog.locator('[data-slot="dialog-body"] > [data-radix-scroll-area-viewport]')
+	await expect
+		.poll(() => viewport.evaluate(element => element.scrollHeight - element.clientHeight), {
+			message: "tall creator body overflows its viewport",
+		})
+		.toBeGreaterThan(0)
+	const header = dialog.locator('[data-slot="dialog-header"]')
+	const footer = dialog.locator('[data-slot="dialog-footer"]')
+	const chrome = () =>
+		dialog.evaluate(dialogElement => {
+			const rect = (slot: string) => {
+				const node = dialogElement.querySelector(`[data-slot="${slot}"]`)
+				return node?.getBoundingClientRect().toJSON() ?? null
+			}
+			return { header: rect("dialog-header"), footer: rect("dialog-footer") }
+		})
+	const before = await chrome()
+	await viewport.evaluate(element => {
+		element.scrollTop = element.scrollHeight
+	})
+	await expect
+		.poll(() => viewport.evaluate(element => element.scrollTop), {
+			message: "scrolling the body changes scrollTop",
+		})
+		.toBeGreaterThan(0)
+	expect(await chrome()).toEqual(before)
+	const save = footer.getByRole("button", { name: "Create Record", exact: true })
+	const cancel = footer.getByRole("button", { name: "Cancel", exact: true })
+	await expect(save).toBeVisible()
+	await expect(save).toBeInViewport()
+	await expect(cancel).toBeVisible()
+	await expect(cancel).toBeInViewport()
+	await expect(header).toBeInViewport()
+})
+
+test("app modal surfaces: backdrops darken the page at half opacity", {
+	tag: ["@light"],
+}, async ({ page, workspace }) => {
+	void workspace
+	await test.step("dialog overlay: settled colour alpha reads half", async () => {
+		await page.goto("/categories", { waitUntil: "domcontentloaded" })
+		await page.getByRole("button", { name: "Create Category", exact: true }).click()
+		await expect(page.getByRole("dialog")).toBeVisible()
+		const alpha = await settledOverlayAlpha(page, "dialog-overlay")
+		expect(alpha).toBeGreaterThan(0.48)
+		expect(alpha).toBeLessThan(0.52)
+		await page.keyboard.press("Escape")
+		await expect(page.getByRole("dialog")).toHaveCount(0)
+	})
+	await test.step("sheet overlay: settled colour alpha reads half", async () => {
+		await page.goto("/allocator")
+		await page
+			.getByRole("checkbox", {
+				name: `Select statement ${IDS.statements.unallocated[3]}`,
+				exact: true,
+			})
+			.check()
+		await page.getByRole("button", { name: "Replace Pending", exact: true }).click()
+		const sheet = page.getByRole("dialog", { name: "Replace a pending Statement", exact: true })
+		await expect(sheet).toBeVisible()
+		const alpha = await settledOverlayAlpha(page, "sheet-overlay")
+		expect(alpha).toBeGreaterThan(0.48)
+		expect(alpha).toBeLessThan(0.52)
+		await page.keyboard.press("Escape")
+		await expect(sheet).not.toBeVisible()
 	})
 })

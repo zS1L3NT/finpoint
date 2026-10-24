@@ -4,6 +4,7 @@ import {
 	expectPointerCursor,
 	expectVisibleBackdrop,
 	scrollWithInput,
+	settledOverlayAlpha,
 } from "../support/assertions"
 import { setDateOnly } from "../support/date-only"
 import { expect, test } from "../support/fixtures"
@@ -907,6 +908,23 @@ test.describe("harness widgets section", () => {
 			await expect(section.getByText("Something needs attention")).toBeVisible()
 			await section.getByRole("button", { name: "Review" }).click()
 		})
+	})
+
+	test("alert dialog: overlay settles at half opacity", {
+		tag: ["@light"],
+	}, async ({ page }) => {
+		await gotoPrimitives(page)
+		await page.getByRole("button", { name: "Delete workspace", exact: true }).click()
+		const popup = page.getByRole("alertdialog", {
+			name: "Delete workspace?",
+			exact: true,
+		})
+		await expect(popup).toBeVisible()
+		const alpha = await settledOverlayAlpha(page, "alert-dialog-overlay")
+		expect(alpha).toBeGreaterThan(0.48)
+		expect(alpha).toBeLessThan(0.52)
+		await popup.getByRole("button", { name: "Cancel", exact: true }).click()
+		await expect(popup).toHaveCount(0)
 	})
 
 	test("display primitives: badge, card, empty, progress, scroll area, separators, table, pagination, input group, item, label and field render their content", async ({

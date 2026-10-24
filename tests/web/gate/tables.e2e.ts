@@ -508,3 +508,69 @@ test("Statement cells: retain pending, Allocation, zero and signed amount meanin
 	}
 	expect(partlyAllocated, "the partly allocated case was checked").toBe(1)
 })
+
+test("Duplicate badge: marks possible duplicate Statements and links to the account's duplicate review", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	await page.goto("/statements?per_page=100")
+	for (const id of IDS.statements.duplicatePair) {
+		const badge = statementRow(page, id).getByRole("link", { name: "Duplicate?" })
+		await expect(badge).toBeVisible()
+		await expect(badge).toHaveAttribute(
+			"title",
+			"Possible duplicate statement. Review and fix duplicates.",
+		)
+		await expect(badge).toHaveAttribute(
+			"href",
+			"/allocator/duplicates?account_id=t1-acc-revolut",
+		)
+	}
+	await expect(
+		statementRow(page, IDS.statements.duplicatePair[0]).getByText("Unallocated", {
+			exact: true,
+		}),
+	).toBeVisible()
+	for (const id of IDS.statements.separatePair) {
+		await expect(statementRow(page, id).getByText("Duplicate?", { exact: true })).toHaveCount(0)
+	}
+	await expect(
+		statementRow(page, "t1-s-groceries").getByText("Duplicate?", { exact: true }),
+	).toHaveCount(0)
+	await statementRow(page, IDS.statements.duplicatePair[0])
+		.getByRole("link", { name: "Duplicate?" })
+		.click()
+	await expect(page).toHaveURL("/allocator/duplicates?account_id=t1-acc-revolut")
+})
+
+test("Duplicate badge: disappears once the pair is resolved", async ({ page, workspace }) => {
+	void workspace
+	const data = getScenario("populated").tables
+	const keptDescription =
+		data.statements.find(row => row.id === IDS.statements.duplicatePair[1])?.description ?? ""
+	const deletedDescription =
+		data.statements.find(row => row.id === IDS.statements.duplicatePair[0])?.description ?? ""
+	await page.goto("/statements?per_page=100")
+	await expect(
+		statementRow(page, IDS.statements.duplicatePair[0]).getByRole("link", {
+			name: "Duplicate?",
+		}),
+	).toBeVisible()
+	await page.goto("/allocator/duplicates")
+	await page.getByRole("radio", { name: `Keep ${keptDescription}`, exact: true }).click()
+	await page.getByRole("radio", { name: `Delete ${deletedDescription}`, exact: true }).click()
+	await page.getByRole("button", { name: "Review deletion" }).click()
+	const review = page.getByRole("dialog", { name: "Delete duplicate Statements" })
+	await expect(review).toBeVisible()
+	await review.getByRole("button", { name: "Delete 1 Statement" }).click()
+	await expect(review).toHaveCount(0)
+	await page.goto("/statements?per_page=100")
+	// Prove the loaded post-resolution rows first: the kept row renders without
+	// the badge and the deleted row is gone, before asserting the global count.
+	const kept = statementRow(page, IDS.statements.duplicatePair[1])
+	await expect(kept).toBeVisible()
+	await expect(statementRow(page, IDS.statements.duplicatePair[0])).toHaveCount(0)
+	await expect(kept.getByRole("link", { name: "Duplicate?" })).toHaveCount(0)
+	await expect(page.getByText("Duplicate?", { exact: true })).toHaveCount(0)
+})

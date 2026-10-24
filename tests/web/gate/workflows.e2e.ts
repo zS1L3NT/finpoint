@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises"
 import type { Page } from "@playwright/test"
-import { IDS } from "../support/data"
+import { IDS, statementRules } from "../support/data"
 import { expect, seedWorkspace, test } from "../support/fixtures"
 
 const GOOGLE_RE = /google|gstatic|googleapis/i
@@ -224,6 +224,122 @@ test("Record creator: an excessive Allocation is blocked with a useful message a
 	await expect(await findRecordId(page, "Workflow greedy supper")).toBeNull()
 	await page.reload()
 	expect(await countStore(page, "records")).toBe(before)
+})
+
+test("Record creator: rule autofill fills fields, notes the rule and drops the note when edited", async ({
+	page,
+}) => {
+	await seedWorkspace(page, "populated", { statement_rules: statementRules() })
+	await selectAllocatorStatements(page, [IDS.statements.unallocated[2]])
+	await page.getByRole("button", { name: "Create Record" }).click()
+	const dialog = page.getByRole("dialog", { name: "Create New Record" })
+	await expect(dialog).toBeVisible()
+	const title = dialog.getByLabel("Title", { exact: true })
+	await expect(title).toHaveValue("Morning coffee")
+	await expect(title).toHaveAttribute("aria-describedby", "title-autopopulated")
+	await expect(dialog.locator("#title-autopopulated")).toHaveText(
+		"Autofilled by the “Starbucks coffee” rule.",
+	)
+	const category = dialog.getByLabel("Category", { exact: true })
+	await expect(category).toHaveValue("Dining Out")
+	await expect(category).toHaveAttribute("aria-describedby", "category_id-autopopulated")
+	await expect(dialog.locator("#category_id-autopopulated")).toHaveText(
+		"Autofilled by the “Starbucks coffee” rule.",
+	)
+	await expect(dialog.locator("#datetime-autopopulated")).toHaveText(
+		"Date copied from the statement date.",
+	)
+
+	await title.fill("Morning coffee, edited")
+	await title.press("Escape")
+	await expect(page.getByRole("listbox")).toHaveCount(0)
+	await expect(dialog.locator("#title-autopopulated")).toHaveCount(0)
+	await expect(title).not.toHaveAttribute("aria-describedby", /.+/)
+	await expect(dialog.locator("#category_id-autopopulated")).toBeVisible()
+	await expect(dialog.locator("#datetime-autopopulated")).toHaveText(
+		"Date copied from the statement date.",
+	)
+
+	await dialog.getByRole("button", { name: "Create Record", exact: true }).click()
+	await expect(dialog).toHaveCount(0)
+	const id = await findRecordId(page, "Morning coffee, edited")
+	expect(id).not.toBeNull()
+	await page.goto(`/records/${id}`)
+	await expect(page.getByText("Morning coffee, edited", { exact: true }).first()).toBeVisible()
+	await expect(
+		page.locator("main").getByText("Dining Out", { exact: true }).first(),
+	).toBeVisible()
+})
+
+test("Record creator: rule suggestions deduplicate, apply on click and skip paused or archived rules", async ({
+	page,
+}) => {
+	await seedWorkspace(page, "populated", { statement_rules: statementRules() })
+	await selectAllocatorStatements(page, [IDS.statements.unallocated[2]])
+	await page.getByRole("button", { name: "Create Record" }).click()
+	const dialog = page.getByRole("dialog", { name: "Create New Record" })
+	await expect(dialog).toBeVisible()
+	await expect(dialog.getByRole("button", { name: "Raffles Place", exact: true })).toHaveCount(1)
+	const alex = dialog.getByRole("button", { name: "Alex", exact: true })
+	await expect(alex).toHaveAttribute("title", "Suggested by “Starbucks coffee”")
+	const coffee = dialog.getByRole("button", { name: "Coffee with team", exact: true })
+	await expect(coffee).toHaveAttribute("title", "Suggested by “Raffles coffee”")
+
+	const title = dialog.getByLabel("Title", { exact: true })
+	await title.focus()
+	await page.keyboard.press("Tab")
+	await expect(coffee).toBeFocused()
+	await page.keyboard.press("Enter")
+	await expect(title).toHaveValue("Coffee with team")
+
+	await alex.click()
+	await expect(dialog.getByLabel("People", { exact: true })).toHaveValue("Alex")
+
+	await dialog.getByRole("button", { name: "Close", exact: true }).click()
+	await expect(dialog).toHaveCount(0)
+
+	const withSentinel = statementRules()
+	withSentinel.push({
+		id: "t1-rule-sentinel",
+		name: "Sentinel",
+		enabled: true,
+		conditions: { mode: "all", items: [{ operator: "contains", value: "7712" }] },
+		actions: { location: { mode: "autofill", value: "Sentinel Vale" } },
+		created_at: "2026-10-01T00:06:00.000Z",
+		updated_at: "2026-10-01T00:06:00.000Z",
+	})
+	await seedWorkspace(page, "populated", { statement_rules: withSentinel })
+	await selectAllocatorStatements(page, [IDS.statements.separatePair[0]])
+	await page.getByRole("button", { name: "Create Record" }).click()
+	await expect(dialog).toBeVisible()
+	await expect(dialog.getByLabel("Location", { exact: true })).toHaveValue("Sentinel Vale")
+	await expect(dialog).not.toContainText("Taxi")
+	await expect(dialog.getByLabel("Title", { exact: true })).toHaveValue("")
+	await dialog.getByRole("button", { name: "Close", exact: true }).click()
+	await expect(dialog).toHaveCount(0)
+
+	await selectAllocatorStatements(page, [IDS.statements.unallocated[3]])
+	await page.getByRole("button", { name: "Create Record" }).click()
+	await expect(dialog).toBeVisible()
+	await expect(dialog.getByLabel("Title", { exact: true })).toHaveValue("Groceries")
+	await expect(dialog.getByLabel("People", { exact: true })).toHaveValue("Sam")
+	const budget = dialog.getByLabel("Monthly budget", { exact: true })
+	await expect(budget).toContainText("Recurring")
+	await expect(budget).not.toContainText("Travel")
+	await dialog.getByRole("button", { name: "Close", exact: true }).click()
+	await expect(dialog).toHaveCount(0)
+
+	const withoutGroceries = statementRules().map(rule =>
+		rule.id === "t1-rule-groceries" ? { ...rule, enabled: false } : rule,
+	)
+	await seedWorkspace(page, "populated", { statement_rules: withoutGroceries })
+	await selectAllocatorStatements(page, [IDS.statements.unallocated[3]])
+	await page.getByRole("button", { name: "Create Record" }).click()
+	await expect(dialog).toBeVisible()
+	await expect(dialog.getByLabel("People", { exact: true })).toHaveValue("Sam")
+	const isolatedBudget = dialog.getByLabel("Monthly budget", { exact: true })
+	await expect(isolatedBudget).toContainText("Unbudgeted")
+	await expect(isolatedBudget).not.toContainText("Travel")
 })
 
 test("Allocation bar: not, partial and fully allocated states show finite values", async ({

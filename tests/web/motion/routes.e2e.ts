@@ -1,3 +1,4 @@
+import { statementRules } from "../support/data"
 import { setDateOnly } from "../support/date-only"
 import { expect, seedWorkspace, test } from "../support/fixtures"
 import {
@@ -198,5 +199,47 @@ test("route entrances: page fades during client navigation and visible cards cas
 			body: JSON.stringify(samples),
 			contentType: "application/json",
 		})
+	})
+})
+
+test("Statement rules: cards enter as a cascade in the viewport", {
+	tag: ["@tall", "@light", "@reduced-motion"],
+}, async ({ page, isMobile }) => {
+	await seedWorkspace(page, "populated", { statement_rules: statementRules() })
+	await page.goto("/records")
+	await expect(page.locator("main h2").first()).toBeVisible()
+	if (isMobile) {
+		await openMobileSidebarFromConsumerMotion(page)
+	}
+	const selector = "main div:has(> article)"
+	const samples = await sampleVisibleRowAnimations(page, selector, async () => {
+		await page
+			.getByRole("link", { name: "Rules", exact: true })
+			.filter({ visible: true })
+			.click()
+	})
+	const visibleCount = await page.locator(selector).evaluateAll(
+		elements =>
+			elements.filter(element => {
+				const rect = element.getBoundingClientRect()
+				const style = getComputedStyle(element)
+				return (
+					rect.width > 0 &&
+					rect.height > 0 &&
+					rect.bottom > 0 &&
+					rect.top < innerHeight &&
+					style.visibility !== "hidden" &&
+					style.display !== "none"
+				)
+			}).length,
+	)
+	expect(samples.length, "Every rendered viewport card must be sampled").toBe(visibleCount)
+	expect(visibleCount, "Seeded rule cards render").toBeGreaterThanOrEqual(2)
+	if (await page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches))
+		expectReducedRowMovement(samples, visibleCount)
+	else expectVisibleRowCascade(samples, visibleCount)
+	await test.info().attach("rule-cards", {
+		body: JSON.stringify(samples),
+		contentType: "application/json",
 	})
 })
