@@ -1854,7 +1854,12 @@ test("modal focus: containment and restoration hold for dialog, sheet and alert"
 
 test("combobox field: reopening while the list fades out filters by the new search", async ({
 	page,
+	browserName,
 }) => {
+	test.skip(
+		browserName !== "chromium",
+		"Slowing animations needs the Chromium DevTools protocol.",
+	)
 	await page.goto(`${HARNESS_URL}/?section=forms`)
 	// Slow animations 20x so the 100ms exit lasts long enough to reopen inside it on any
 	// host; Base UI 1.4 otherwise kept filtering by the previous search until unmount.

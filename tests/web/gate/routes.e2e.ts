@@ -845,7 +845,7 @@ test("Record facets: long Monthly Budget option picks and clears, Category histo
 		const option = page.getByRole("option", { name, exact: true })
 		await expect(option).toHaveText(name)
 		await fits(page, page.getByRole("listbox"))
-		await option.click()
+		await pickOption(option)
 		await expect(budget).toContainText(name)
 		await fits(page, budget)
 		await budget.click()

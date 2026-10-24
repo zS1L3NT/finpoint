@@ -51,7 +51,7 @@ export async function pickOption(option: Locator) {
 			attempt++
 			await option.hover({ position: { x: 8 + (attempt % 2) * 8, y: 8 } })
 			await expect(option).toHaveAttribute("data-highlighted", "", { timeout: 250 })
-		}).toPass()
+		}).toPass({ timeout: 5000 })
 	}
 	await option.click()
 }
