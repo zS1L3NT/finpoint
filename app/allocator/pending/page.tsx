@@ -326,11 +326,8 @@ export default function AllocatorPendingPage() {
 								value={queueQuery}
 								onChange={event => {
 									setQueueQuery(event.target.value)
-									// Cancel a pending candidate commit rather than resetting
-									// its buffer: the queue commit below resets the buffer
-									// itself, so this avoids one extra navigation mid-typing
-									// without leaving stale candidate text unsearched.
-									window.clearTimeout(candidateTimer.current)
+									if (pendingStatementId || candidateQueryParam)
+										selectPending(null, queueQueryParam)
 								}}
 							/>
 							<FilterBar>
