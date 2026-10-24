@@ -2319,7 +2319,7 @@ export const scenarioDescriptions: Record<string, string> = {
 
 /** Explicitly non-applicable cases with documented reasons. These are neither
  * mapped nor pending: removing them from scenarios would hide the decision, and
- * mapping them would fabricate coverage. The gate reports them separately. */
+ * mapping them would fabricate coverage. The ledger reports them separately. */
 export const notApplicable: Record<string, string> = {
 	"src/components/dialogs/account.tsx#editor.conditional":
 		"No conditional sections in the account editor; reopen/keyboard semantics are covered via editor.open, not conditional motion",
@@ -4435,7 +4435,7 @@ export const behaviourCoverage: Record<string, string[]> = {
 }
 
 /** Applicable facets without evidence stay here even when their parent scenario is mapped.
- * The default gate fails these, as well as admissions in prose. */
+ * The ledger fails these, as well as admissions in prose. */
 export const openFacets: Record<string, string[]> = {}
 
 /** Source-backed exceptions within otherwise applicable scenarios. These do not
@@ -4641,35 +4641,35 @@ export const scenarioProjects: Record<
 export const scenarioProjectExemptions: Record<string, Record<string, string>> = {
 	"src/components/value-swap.tsx#display.values": {
 		"detail summary: long and missing values fit each viewport and a changed value keeps its final text":
-			"Functional gate half of a split test; its motion assertions run in the reduced-motion project from the motion half; src/components/value-swap.tsx",
+			"Functional core half of a split test; its motion assertions run in the reduced-motion project from the extra half; src/components/value-swap.tsx",
 	},
 	"src/components/charts/sparkline.tsx#chart.motion": {
 		"sparkline endpoint: stays on the final data value after Show trend":
-			"Functional gate half of a split test; its motion assertions run in the reduced-motion project from the motion half; src/components/charts/sparkline.tsx",
+			"Functional core half of a split test; its motion assertions run in the reduced-motion project from the extra half; src/components/charts/sparkline.tsx",
 		"sparkline entrance: reveals the final data endpoint":
-			"Functional gate half of a split test; its motion assertions run in the reduced-motion project from the motion half; src/components/charts/sparkline.tsx",
+			"Functional core half of a split test; its motion assertions run in the reduced-motion project from the extra half; src/components/charts/sparkline.tsx",
 	},
 	"src/components/charts/category-movers.tsx#chart.motion": {
 		"biggest changes: a saved Record amount updates the mover row and keeps its drill link and row node":
-			"Functional gate half of a split test; its motion assertions run in the reduced-motion project from the motion half; src/components/charts/category-movers.tsx",
+			"Functional core half of a split test; its motion assertions run in the reduced-motion project from the extra half; src/components/charts/category-movers.tsx",
 	},
 	"src/components/table/statement-columns.tsx#table.motion": {
 		"table paging /statements: first page shows five rows and next page moves the URL to page 2":
-			"Functional gate half of a split test; its motion assertions run in the reduced-motion project from the motion half; src/components/table/statement-columns.tsx",
+			"Functional core half of a split test; its motion assertions run in the reduced-motion project from the extra half; src/components/table/statement-columns.tsx",
 		"table refilter /statements: settled search keeps the query in the URL":
-			"Functional gate half of a split test; its motion assertions run in the reduced-motion project from the motion half; src/components/table/statement-columns.tsx",
+			"Functional core half of a split test; its motion assertions run in the reduced-motion project from the extra half; src/components/table/statement-columns.tsx",
 	},
 	"src/components/table/row-groups.tsx#table.motion": {
 		"table refilter /records: settled search keeps the query in the URL":
-			"Functional gate half of a split test; its motion assertions run in the reduced-motion project from the motion half; src/components/table/row-groups.tsx",
+			"Functional core half of a split test; its motion assertions run in the reduced-motion project from the extra half; src/components/table/row-groups.tsx",
 	},
 	"src/components/table/data-table.tsx#table.motion": {
 		"table paging /statements: first page shows five rows and next page moves the URL to page 2":
-			"Functional gate half of a split test; its motion assertions run in the reduced-motion project from the motion half; src/components/table/data-table.tsx",
+			"Functional core half of a split test; its motion assertions run in the reduced-motion project from the extra half; src/components/table/data-table.tsx",
 		"table paging /records: first page shows five rows and next page moves the URL to page 2":
-			"Functional gate half of a split test; its motion assertions run in the reduced-motion project from the motion half; src/components/table/data-table.tsx",
+			"Functional core half of a split test; its motion assertions run in the reduced-motion project from the extra half; src/components/table/data-table.tsx",
 		"table refilter /statements: settled search keeps the query in the URL":
-			"Functional gate half of a split test; its motion assertions run in the reduced-motion project from the motion half; src/components/table/data-table.tsx",
+			"Functional core half of a split test; its motion assertions run in the reduced-motion project from the extra half; src/components/table/data-table.tsx",
 		"table refilter /records: settled search keeps the query in the URL":
 			"URL query retention after refilter does not vary by configuration; the refilter entrance stays in the reduced-motion project as a motion test; src/components/table/data-table.tsx",
 		"Budget detail: detaching a Record keeps the remaining row node and persists the detachment":
@@ -4681,9 +4681,9 @@ export const scenarioProjectExemptions: Record<string, Record<string, string>> =
 	},
 	"src/components/table/paginated-data-table.tsx#table.motion": {
 		"table paging /statements: first page shows five rows and next page moves the URL to page 2":
-			"Functional gate half of a split test; its motion assertions run in the reduced-motion project from the motion half; src/components/table/paginated-data-table.tsx",
+			"Functional core half of a split test; its motion assertions run in the reduced-motion project from the extra half; src/components/table/paginated-data-table.tsx",
 		"table paging /records: first page shows five rows and next page moves the URL to page 2":
-			"Functional gate half of a split test; its motion assertions run in the reduced-motion project from the motion half; src/components/table/paginated-data-table.tsx",
+			"Functional core half of a split test; its motion assertions run in the reduced-motion project from the extra half; src/components/table/paginated-data-table.tsx",
 		"Records table: keeps search in the URL and moves between pages":
 			"Page-change identity and URL state do not vary by configuration; src/components/table/paginated-data-table.tsx",
 		"Statements table: keeps search in the URL and moves between pages":
@@ -4691,7 +4691,7 @@ export const scenarioProjectExemptions: Record<string, Record<string, string>> =
 	},
 	"src/components/table/record-columns.tsx#table.motion": {
 		"table refilter /records: settled search keeps the query in the URL":
-			"Functional gate half of a split test; its motion assertions run in the reduced-motion project from the motion half; src/components/table/record-columns.tsx",
+			"Functional core half of a split test; its motion assertions run in the reduced-motion project from the extra half; src/components/table/record-columns.tsx",
 		"Budget detail: detaching a Record keeps the remaining row node and persists the detachment":
 			"Detach no-replay does not vary by configuration; the test forces its own 1920×1440 viewport; src/components/table/record-columns.tsx",
 		"Budget detail: remaining row does not replay its entrance after detaching":

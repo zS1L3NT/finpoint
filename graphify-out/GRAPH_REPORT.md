@@ -1,63 +1,63 @@
 # Graph Report - t3-9755e75b  (2026-10-24)
 
 ## Corpus Check
-- 245 files · ~217,182 words
+- 249 files · ~217,149 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 9 file(s) not represented in the graph (top: (none) 5, .example 1, .lock 1)
 
 ## Summary
-- 1907 nodes · 7590 edges · 97 communities (87 shown, 10 thin omitted)
+- 1909 nodes · 7615 edges · 94 communities (85 shown, 9 thin omitted)
 - Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 119 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `9ae0fef1`
+- Built from commit: `0cc4aa7d`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
-- react
-- budgets/[id]/page.tsx
-- total-spending-chart.tsx
+- record-editor.tsx
+- @playwright/test
+- category-history-chart.tsx
 - statements.ts
-- sidebar.tsx
 - cn
+- combobox.tsx
 - sync/page.tsx
-- utils.ts
+- collectTests
 - Validator
 - dashboard.ts
-- importer/page.tsx
+- ValidationError
 - compilerOptions
 - accounts/page.tsx
 - package.json
 - dependencies
-- Project Shape
-- routes.ts
-- lib/motion.ts
+- src/data/* (persistence, migrations, seeding, backup serialization, Drive storage)
+- app-sidebar.tsx
+- paginated-data-table.tsx
 - suspicious
 - primitives.tsx
-- pending/page.tsx
+- Button
 - correctness
 - export-import.ts
 - drive-sync.ts
-- duplicates/page.tsx
+- duplicates.ts
 - records.ts
 - components.json
 - Commands
-- test-web.ts
-- use-appearance.tsx
-- shared.ts
-- date-range.tsx
+- runner.ts
+- chart.tsx
+- test-data.ts
+- (month)/layout.tsx
 - PaginationFooter
 - statement-rules.ts
 - auto-sync.ts
-- accounts/[id]/page.tsx
-- Validation rule (ValidationError + Validator)
+- cashflow-chart.tsx
+- STYLE.md
 - (month)/page.tsx
 - Monthly Budget
 - auth-vault.ts
-- providers.tsx
-- src/data/* (persistence, migrations, seeding, backup serialization, Drive storage)
+- total-spending-chart.tsx
+- tests_web_support_fixtures_expect
 - AGENTS.md
 - category-filter.tsx
 - types.d.ts
@@ -66,29 +66,28 @@
 - formatter
 - db.ts
 - ledger.e2e.ts
-- motion/editors.e2e.ts
+- support/motion.ts
 - biome.json
 - rules
-- icon.tsx
+- lucide-react
 - devDependencies
 - manifest.json
-- gate/components.e2e.ts
+- core/components.e2e.ts
 - Next.js agent rules block ("This is NOT the Next.js you know")
-- Button
+- monthly-budget-usage.tsx
 - Project Graph
-- item.tsx
+- vite.config.ts
 - formatter
 - Commit Guide
 - Records
 - snapshot-hash.ts
 - optionalDependencies
 - scripts
-- workflows.e2e.ts
 - style
 - Finpoint icon concept
 - Finpoint icon with charcoal shadow
-- gate/routes.e2e.ts
-- radix-ui
+- core/routes.e2e.ts
+- ui/field.tsx
 - Finpoint
 - Local Markdown Issue Tracker
 - Google Drive sync
@@ -106,8 +105,6 @@
 - Progressive Web Application
 - Issue tracker: Local Markdown
 - Domain docs
-- workflow-tabs.tsx
-- navigation.e2e.ts
 - spending-calendar.tsx
 - tsconfig.web.json
 
@@ -126,14 +123,14 @@
 ## Surprising Connections (you probably didn't know these)
 - `Rendered assertions` --references--> `SelectItem()`  [INFERRED]
   tests/web/README.md → src/components/ui/select.tsx
+- `Titles and tags` --references--> `describe()`  [INFERRED]
+  tests/web/README.md → scripts/test/lib/summary.ts
+- `Finpoint Style Additions` --references--> `useApiFormErrors()`  [INFERRED]
+  STYLE.md → src/hooks/use-api-form-errors.ts
 - `Copy` --references--> `pluralize()`  [INFERRED]
   STYLE.md → src/lib/utils.ts
-- `Titles and tags` --references--> `Account`  [INFERRED]
-  tests/web/README.md → src/types.d.ts
-- `Titles and tags` --references--> `Statement`  [INFERRED]
-  tests/web/README.md → src/types.d.ts
-- `Titles and tags` --references--> `Record`  [INFERRED]
-  tests/web/README.md → src/types.d.ts
+- `Finpoint Style Additions` --references--> `ValidationError`  [INFERRED]
+  STYLE.md → src/logic/validate.ts
 
 ## Import Cycles
 - None detected.
@@ -143,51 +140,51 @@
 - **UI / logic / data layer segregation** — agents_ui_layer, agents_logic_layer, agents_data_layer, agents_data_import_boundary [EXTRACTED 1.00]
 - **Laravel-shaped validation pipeline** — agents_validation_rule, agents_validation_error, agents_validator, src_logic_validate, agents_laravel_shaped_error_maps [EXTRACTED 1.00]
 
-## Communities (97 total, 10 thin omitted)
+## Communities (94 total, 9 thin omitted)
 
-### Community 0 - "react"
-Cohesion: 0.06
-Nodes (124): CandidateResults(), @base-ui/react, class-variance-authority, react, react-dom, sonner, @tanstack/react-form, AccountDialog() (+116 more)
+### Community 0 - "record-editor.tsx"
+Cohesion: 0.08
+Nodes (112): CandidateResults(), SECTIONS, ImporterPage(), Step(), EmptyRecords(), metadata, PrivacyPage(), SECTIONS (+104 more)
 
-### Community 1 - "budgets/[id]/page.tsx"
-Cohesion: 0.18
-Nodes (35): BudgetPage(), getBudgetAnalytics(), getCategoryData(), Legend(), DashboardPage(), ScopedCardTitle(), ScopeLabel(), WeekdayCard() (+27 more)
+### Community 1 - "@playwright/test"
+Cohesion: 0.17
+Nodes (12): @playwright/test, cardTitles, Child, october, september, card(), overview, overviewCharts (+4 more)
 
-### Community 2 - "total-spending-chart.tsx"
-Cohesion: 0.07
-Nodes (62): luxon, recharts, BudgetActiveDot(), BudgetProgressChart(), BudgetProgressPoint, buildSeries(), colorChange(), CashflowChart() (+54 more)
+### Community 2 - "category-history-chart.tsx"
+Cohesion: 0.14
+Nodes (27): recharts, BudgetActiveDot(), BudgetProgressChart(), BudgetProgressPoint, buildSeries(), colorChange(), aggregateSeries(), CategoryHistoryChart() (+19 more)
 
 ### Community 3 - "statements.ts"
-Cohesion: 0.21
-Nodes (19): countSuggestions(), dayDifference(), ensureCanReplace(), maskDescription(), ReplacementAllocation, replacementComparison(), replacementReason(), ReplacementStatement (+11 more)
+Cohesion: 0.14
+Nodes (27): countSuggestions(), duplicateStatementIds(), removeStatementDismissals(), dayDifference(), ensureCanReplace(), maskDescription(), ReplacementAllocation, replacementComparison() (+19 more)
 
-### Community 4 - "sidebar.tsx"
-Cohesion: 0.15
-Nodes (26): lucide-react, ICONS, AppearanceOption, APPEARANCES, AppearanceSwitch(), AppSidebar(), SyncDot(), SYSTEM_APPEARANCE (+18 more)
+### Community 4 - "cn"
+Cohesion: 0.12
+Nodes (33): AppearanceSwitch(), Sidebar(), SidebarContent(), SidebarContext, SidebarContextProps, SidebarFooter(), SidebarGroup(), SidebarGroupAction() (+25 more)
 
-### Community 5 - "cn"
-Cohesion: 0.18
-Nodes (23): ComboboxChip(), ComboboxChips(), ComboboxChipsInput(), ComboboxClear(), ComboboxContent(), ComboboxEmpty(), ComboboxGroup(), ComboboxInput() (+15 more)
+### Community 5 - "combobox.tsx"
+Cohesion: 0.11
+Nodes (23): ComboboxChip(), ComboboxChips(), ComboboxChipsInput(), ComboboxClear(), ComboboxCollection(), ComboboxContent(), ComboboxEmpty(), ComboboxGroup() (+15 more)
 
 ### Community 6 - "sync/page.tsx"
 Cohesion: 0.16
-Nodes (22): COUNT_ROWS, DataSettingsPage(), StateRow(), STATUS_TONES, StatusTone, WorkspaceRow(), clearAllData(), downloadExport() (+14 more)
+Nodes (24): COUNT_ROWS, DataSettingsPage(), StateRow(), STATUS_TONES, StatusTone, WorkspaceRow(), AlertDialog(), AlertDialogAction() (+16 more)
 
-### Community 7 - "utils.ts"
-Cohesion: 0.19
-Nodes (32): PendingCard(), AllocateBar(), Amount(), PendingStatementConfirmationSheet(), RecordOption(), RecordSearchSheet(), StatementOption(), StatementSearchSheet() (+24 more)
+### Community 7 - "collectTests"
+Cohesion: 0.28
+Nodes (16): collectTests(), conditionBranch(), detailsTags(), disabled(), mentionsMotion(), record(), splitTestCallee(), tagValues() (+8 more)
 
 ### Community 8 - "Validator"
-Cohesion: 0.18
-Nodes (24): updateAccount(), BudgetDetail, BudgetFilters, createBudget(), updateBudget(), validateBudget(), cleanInput(), importFiles() (+16 more)
+Cohesion: 0.23
+Nodes (20): updateAccount(), validateBudget(), cleanInput(), dismissDuplicatePair(), eligible(), fixDuplicates(), restoreDuplicatePair(), createMonthlyBudget() (+12 more)
 
 ### Community 9 - "dashboard.ts"
-Cohesion: 0.14
-Nodes (35): AnalyticsRecord, AnalyticsSummary, contribution(), summarize(), avg(), buildCashflowHistory(), buildCategories(), buildComparison() (+27 more)
+Cohesion: 0.10
+Nodes (44): db, AnalyticsRecord, AnalyticsSummary, contribution(), summarize(), avg(), BREAKDOWN_MONTHS, buildCashflowHistory() (+36 more)
 
-### Community 10 - "importer/page.tsx"
-Cohesion: 0.19
-Nodes (22): ACCEPT, BANKS_REQUIRING_ADDITIONAL_INFO, ImporterPage(), Step(), AccountActivity, ensureAccount(), NO_ACTIVITY, combine() (+14 more)
+### Community 10 - "ValidationError"
+Cohesion: 0.26
+Nodes (20): ensureAccount(), combine(), dbsDescriptionKey(), debitCreditAmount(), descriptionKey(), importDbs(), importFiles(), importOcbc() (+12 more)
 
 ### Community 11 - "compilerOptions"
 Cohesion: 0.06
@@ -199,55 +196,55 @@ Nodes (7): getStoredHistory(), getValidHistory(), HistoryContext, HistoryItem, H
 
 ### Community 13 - "package.json"
 Cohesion: 0.07
-Nodes (27): private, $schema, type, babel-plugin-react-compiler, @biomejs/biome, clsx, cmdk, @fontsource-variable/inter (+19 more)
+Nodes (26): private, $schema, type, babel-plugin-react-compiler, @biomejs/biome, clsx, cmdk, @fontsource-variable/inter (+18 more)
 
 ### Community 14 - "dependencies"
 Cohesion: 0.07
 Nodes (30): dependencies, @base-ui/react, class-variance-authority, clsx, cmdk, dexie, dexie-react-hooks, @fontsource-variable/inter (+22 more)
 
-### Community 15 - "Project Shape"
-Cohesion: 0.16
-Nodes (10): app/**/page.tsx, IndexedDB (Dexie), Interactive routes are "use client" (search params via next/navigation), Pages take no props, Project Shape, React Compiler (enabled), Root Suspense (keeps routes static), String primary keys (not auto-increment) (+2 more)
+### Community 15 - "src/data/* (persistence, migrations, seeding, backup serialization, Drive storage)"
+Cohesion: 0.14
+Nodes (18): app/**/page.tsx, Background Drive sync, src/data/* (persistence, migrations, seeding, backup serialization, Drive storage), IndexedDB (Dexie), Interactive routes are "use client" (search params via next/navigation), src/logic/* (domain reads and operations), (month) route-group shell (Overview + Monthly Records), Pages take no props (+10 more)
 
-### Community 16 - "routes.ts"
-Cohesion: 0.17
-Nodes (23): MonthLayout(), NotFound(), Template(), ShellHeader(), TITLES, SearchInit, useMonthParams(), armMonthTransition() (+15 more)
+### Community 16 - "app-sidebar.tsx"
+Cohesion: 0.08
+Nodes (55): metadata, RootLayout(), viewport, NotFound(), Boot(), Providers(), Template(), nextConfig (+47 more)
 
-### Community 17 - "lib/motion.ts"
-Cohesion: 0.22
-Nodes (25): @tanstack/react-table, DataTable(), PaginatedDataTable(), GroupHeaderRow(), groupStarts(), GroupTotal(), isInteractiveTarget(), MOBILE_LIST_CLASS (+17 more)
+### Community 17 - "paginated-data-table.tsx"
+Cohesion: 0.25
+Nodes (23): @tanstack/react-table, DataTable(), PaginatedDataTable(), GroupHeaderRow(), groupStarts(), GroupTotal(), isInteractiveTarget(), MOBILE_LIST_CLASS (+15 more)
 
 ### Community 18 - "suspicious"
 Cohesion: 0.07
 Nodes (28): suspicious, noAssignInExpressions, noAsyncPromiseExecutor, noCatchAssign, noClassAssign, noCompareNegZero, noControlCharactersInRegex, noDebugger (+20 more)
 
 ### Community 19 - "primitives.tsx"
-Cohesion: 0.08
-Nodes (54): AlertAction(), AlertDialog(), AlertDialogAction(), AlertDialogCancel(), AlertDialogContent(), AlertDialogDescription(), AlertDialogFooter(), AlertDialogHeader() (+46 more)
+Cohesion: 0.10
+Nodes (41): AlertAction(), AlertDialogTrigger(), DropdownMenu(), DropdownMenuCheckboxItem(), DropdownMenuContent(), DropdownMenuGroup(), DropdownMenuItem(), DropdownMenuLabel() (+33 more)
 
-### Community 20 - "pending/page.tsx"
-Cohesion: 0.18
-Nodes (39): AllocatorPage(), AllocatorPendingPage(), CandidatePage, ScopeSelect(), byRecordDay, FILTER_KEYS, Filters, MonthlyRecordFilters() (+31 more)
+### Community 20 - "Button"
+Cohesion: 0.05
+Nodes (164): AccountPage(), AccountCard(), AccountRow, AccountsPage(), CARD_MOTION, DuplicateGroupCard(), FixDuplicatesPage(), GroupHeader() (+156 more)
 
 ### Community 21 - "correctness"
 Cohesion: 0.08
 Nodes (26): noConstantCondition, noConstAssign, noEmptyCharacterClassInRegex, noEmptyPattern, noGlobalObjectCalls, noInvalidBuiltinInstantiation, noInvalidConstructorSuper, noNonoctalDecimalEscape (+18 more)
 
 ### Community 22 - "export-import.ts"
-Cohesion: 0.26
-Nodes (10): EXPORT_VERSION, FinpointExport, SYNC_TABLES, TableName, TABLES, DEFAULT_SETTINGS, FinpointSettings, readSettings() (+2 more)
+Cohesion: 0.19
+Nodes (17): clearAllData(), downloadExport(), importData(), parseImportFile(), SYNC_TABLES, tableCounts(), TableName, TABLES (+9 more)
 
 ### Community 23 - "drive-sync.ts"
-Cohesion: 0.35
-Nodes (18): exportData(), downloadBackupFile(), driveFetch(), findBackupFile(), getClockSkewMs(), getFileMeta(), isDriveConfigured(), uploadBackupFile() (+10 more)
+Cohesion: 0.27
+Nodes (22): exportData(), downloadBackupFile(), driveFetch(), findBackupFile(), getClockSkewMs(), getFileMeta(), isDriveConfigured(), uploadBackupFile() (+14 more)
 
-### Community 24 - "duplicates/page.tsx"
-Cohesion: 0.17
-Nodes (25): CARD_MOTION, DuplicateGroupCard(), FixDuplicatesPage(), GroupHeader(), highlightDifferences(), VIEWS, descriptionAnchors(), descriptionIdentity() (+17 more)
+### Community 24 - "duplicates.ts"
+Cohesion: 0.27
+Nodes (11): descriptionAnchors(), descriptionIdentity(), DuplicateGroup, duplicateGroups(), DuplicateStatement, FixDuplicatesInput, GENERIC, pairIds() (+3 more)
 
 ### Community 25 - "records.ts"
-Cohesion: 0.15
-Nodes (16): getMonthlyRecords(), MonthlyFilters, expandCategoryIdsForMonthly(), AllocationTally, pendingStatementIds(), tallyAllocations(), budgetCovers(), enrichRecords() (+8 more)
+Cohesion: 0.13
+Nodes (22): round2(), BudgetDetail, BudgetFilters, createBudget(), getBudget(), listBudgets(), AllocationTally, tallyAllocations() (+14 more)
 
 ### Community 26 - "components.json"
 Cohesion: 0.09
@@ -257,21 +254,21 @@ Nodes (21): aliases, components, hooks, lib, ui, utils, iconLibrary, menuAccent 
 Cohesion: 0.38
 Nodes (7): Biome (biome check --write), bun install, bun lint (write-mode), bun lint:check, bun run build, bun types:check, Commands
 
-### Community 28 - "test-web.ts"
+### Community 28 - "runner.ts"
 Cohesion: 0.09
-Nodes (35): describeHolder(), LOCK_DIR, readHolder(), refuse(), releaseLock(), takeLock(), flags, paths (+27 more)
+Nodes (38): describeHolder(), LOCK_DIR, readHolder(), refuse(), releaseLock(), takeLock(), awaitGroupExit(), groupAlive() (+30 more)
 
-### Community 29 - "use-appearance.tsx"
+### Community 29 - "chart.tsx"
 Cohesion: 0.23
-Nodes (15): Toaster(), Appearance, applyAppearance(), getStoredAppearance(), handleSystemThemeChange(), initializeAppearance(), isDarkMode(), listeners (+7 more)
+Nodes (11): ChartConfig, ChartContext, ChartContextProps, ChartLegendContent(), ChartStyle(), ChartTooltipContent(), getPayloadConfigFromPayload(), INITIAL_DIMENSION (+3 more)
 
-### Community 30 - "shared.ts"
-Cohesion: 0.17
-Nodes (16): db, DEFAULT_CATEGORIES, DEFAULT_MONTHLY_BUDGETS, BANK_BLURB, between(), CATEGORIES, DAILY, generateTestData() (+8 more)
+### Community 30 - "test-data.ts"
+Cohesion: 0.15
+Nodes (18): DEFAULT_CATEGORIES, DEFAULT_MONTHLY_BUDGETS, EXPORT_VERSION, FinpointExport, seedIfEmpty(), BANK_BLURB, between(), CATEGORIES (+10 more)
 
-### Community 31 - "date-range.tsx"
-Cohesion: 0.12
-Nodes (22): react-day-picker, DateField(), Props, DateRangeValue, formatRange(), Props, rangeFromValue(), buttonVariants (+14 more)
+### Community 31 - "(month)/layout.tsx"
+Cohesion: 0.08
+Nodes (43): BudgetState, MonthLayout(), @base-ui/react, luxon, react-day-picker, react-dom, Props, ComboboxField() (+35 more)
 
 ### Community 32 - "PaginationFooter"
 Cohesion: 0.38
@@ -279,59 +276,55 @@ Nodes (11): pageHref(), pageWindow(), PaginationFooter(), Pagination(), Paginati
 
 ### Community 33 - "statement-rules.ts"
 Cohesion: 0.10
-Nodes (17): dexie, fake-indexeddb, xlsx, inferRecordDatetime(), TREATMENT_VALUES, byCreation(), conditionPattern(), deleteStatementRule() (+9 more)
+Nodes (18): dexie, fake-indexeddb, xlsx, StatementRow, inferRecordDatetime(), byCreation(), conditionPattern(), deleteStatementRule() (+10 more)
 
 ### Community 34 - "auto-sync.ts"
+Cohesion: 0.15
+Nodes (18): useSyncStatus(), emit(), eventListeners, finishCycle(), getSyncSnapshot(), refreshTimes(), sameSnapshot(), set() (+10 more)
+
+### Community 35 - "cashflow-chart.tsx"
+Cohesion: 0.31
+Nodes (9): CashflowChart(), CashflowPoint, colorChange(), currencyOrDash(), LegendItem(), mobileAmount, seriesLabel(), StatefulActiveDot() (+1 more)
+
+### Community 36 - "STYLE.md"
 Cohesion: 0.13
-Nodes (22): useSyncStatus(), emit(), eventListeners, finishCycle(), flushOnHide(), getSyncSnapshot(), markDirty(), refreshSyncDisplay() (+14 more)
-
-### Community 35 - "accounts/[id]/page.tsx"
-Cohesion: 0.23
-Nodes (15): AccountPage(), MetricGrid(), amountTone(), formatRowTime(), StatementActions(), StatementActionsCell(), StatementAmount(), StatementBadges() (+7 more)
-
-### Community 36 - "Validation rule (ValidationError + Validator)"
-Cohesion: 0.50
-Nodes (4): Old Laravel Api/*Controller mapping, Laravel-shaped { field: string[] } error maps, ValidationError, Validator
+Nodes (17): Old Laravel Api/*Controller mapping, Laravel-shaped { field: string[] } error maps, ValidationError, Validator, APIs, Arguments, And Props, Code Style, Consistency, Copy (+9 more)
 
 ### Community 37 - "(month)/page.tsx"
-Cohesion: 0.08
-Nodes (33): Comparison, comparisonRateText(), comparisonText(), ComparisonValue, DashboardData, DashboardMonthlyBudget, DashboardView, deltaOf() (+25 more)
+Cohesion: 0.15
+Nodes (27): Comparison, comparisonRateText(), comparisonText(), ComparisonValue, DashboardData, DashboardMonthlyBudget, DashboardPage(), DashboardView (+19 more)
 
 ### Community 38 - "Monthly Budget"
-Cohesion: 0.09
-Nodes (28): CONTEXT.md (domain vocabulary), Account, Allocation, Budget, Category, Duplicate Statement, Finpoint Domain Glossary, Monthly Budget (+20 more)
+Cohesion: 0.18
+Nodes (16): CONTEXT.md (domain vocabulary), Account, Allocation, Budget, Category, Duplicate Statement, Finpoint Domain Glossary, Monthly Budget (+8 more)
 
 ### Community 39 - "auth-vault.ts"
 Cohesion: 0.29
 Nodes (14): POST(), POST(), POST(), jose, AUTH_COOKIE_NAME, authCookie(), authCookieConfig(), clientIp() (+6 more)
 
-### Community 40 - "providers.tsx"
-Cohesion: 0.23
-Nodes (12): metadata, RootLayout(), viewport, Boot(), Providers(), normalize(), preloadCategoryIcons(), SidebarProvider() (+4 more)
-
-### Community 41 - "src/data/* (persistence, migrations, seeding, backup serialization, Drive storage)"
-Cohesion: 0.38
-Nodes (8): Background Drive sync, src/data/* (persistence, migrations, seeding, backup serialization, Drive storage), src/logic/* (domain reads and operations), (month) route-group shell (Overview + Monthly Records), src/routes.ts (centralized route paths), Static content pages (privacy, terms) are server components, UI layer (app pages + components), Workspace backup/reset operations
+### Community 40 - "total-spending-chart.tsx"
+Cohesion: 0.36
+Nodes (8): LegendItem(), niceStep(), roundTick(), surplusAxis(), SurplusPoint, surplusZeroOffset(), TotalSpendingChart(), CashflowHistoryMonth
 
 ### Community 42 - "AGENTS.md"
 Cohesion: 0.19
 Nodes (11): Agent Behavior, Agent skills, CONTEXT.md, Conventions, Domain docs (single-context layout), Domain Language, Generated / Ignored Files, Issue tracker (local specs and tickets) (+3 more)
 
 ### Community 43 - "category-filter.tsx"
-Cohesion: 0.36
-Nodes (10): CategoryFilter(), CategoryFilterItem(), Command(), CommandEmpty(), CommandGroup(), CommandInput(), CommandItem(), CommandList() (+2 more)
+Cohesion: 0.33
+Nodes (11): CategoryFilter(), CategoryFilterItem(), Command(), CommandEmpty(), CommandGroup(), CommandInput(), CommandItem(), CommandList() (+3 more)
 
 ### Community 44 - "types.d.ts"
 Cohesion: 0.08
 Nodes (28): Account, Allocation, AnalyticsSummary, AnalyticsTreatment, Appearance, Budget, Category, CategoryWithChildren (+20 more)
 
 ### Community 45 - "fixtures.ts"
-Cohesion: 0.11
-Nodes (25): @playwright/test, cardTitles, Child, october, september, denseRowConsumers, populatedConsumers, card() (+17 more)
+Cohesion: 0.12
+Nodes (12): DBS_VALID, ScenarioName, WorkspaceDataset, WorkspaceTables, assertSeeded(), checkSeededMarker(), countStore(), seedInBrowser() (+4 more)
 
 ### Community 46 - "editors.ts"
-Cohesion: 0.12
-Nodes (20): containedFooter(), editors, longName, expectHeldRead(), expectRetainedRows(), expectSilentSheet(), expectPointerCursor(), account (+12 more)
+Cohesion: 0.13
+Nodes (20): editors, longName, expectHeldRead(), expectRetainedRows(), expectSilentSheet(), editors, expectVisibleBackdrop(), account (+12 more)
 
 ### Community 47 - "formatter"
 Cohesion: 0.15
@@ -339,15 +332,15 @@ Nodes (13): arrowParentheses, bracketSameLine, bracketSpacing, jsxQuoteStyle, qu
 
 ### Community 48 - "db.ts"
 Cohesion: 0.11
-Nodes (29): AccountRow, AllocationRow, AnalyticsMonthRow, asPending(), BudgetRecordRow, BudgetRow, CategoryRow, DB_NAME (+21 more)
+Nodes (28): AccountRow, AllocationRow, AnalyticsMonthRow, asPending(), BudgetRecordRow, BudgetRow, CategoryRow, DB_NAME (+20 more)
 
 ### Community 49 - "ledger.e2e.ts"
-Cohesion: 0.07
-Nodes (45): typescript, vite, @vitejs/plugin-react, behaviourCoverage, componentInventory, facetNotApplicable, InventoryEntry, notApplicable (+37 more)
+Cohesion: 0.11
+Nodes (24): behaviourCoverage, componentInventory, facetNotApplicable, InventoryEntry, notApplicable, openFacets, RouteEntry, routeInventory (+16 more)
 
-### Community 50 - "motion/editors.e2e.ts"
+### Community 50 - "support/motion.ts"
 Cohesion: 0.17
-Nodes (17): editors, denseCardConsumers, expectConsumerEntrance(), attachSamplingFailure(), expectPopupEntrance(), expectReducedRowMovement(), expectVisibleRowCascade(), matrixIsIdentity() (+9 more)
+Nodes (18): denseCardConsumers, denseRowConsumers, expectConsumerEntrance(), populatedConsumers, attachSamplingFailure(), expectPopupEntrance(), expectReducedRowMovement(), expectVisibleRowCascade() (+10 more)
 
 ### Community 51 - "biome.json"
 Cohesion: 0.18
@@ -357,9 +350,9 @@ Nodes (10): source, assist, actions, files, includes, linter, enabled, overrides
 Cohesion: 0.18
 Nodes (11): noAdjacentSpacesInRegex, noBannedTypes, noExtraBooleanCast, noUselessCatch, noUselessThisAlias, noUselessTypeConstraint, rules, noFloatingPromises (+3 more)
 
-### Community 53 - "icon.tsx"
-Cohesion: 0.18
-Nodes (15): BUDGET_STATES, BudgetCard(), BudgetsPage(), BudgetState, formatBudgetDateWindow(), DynamicUiIcon(), ICON_NAMES, iconNameSet (+7 more)
+### Community 53 - "lucide-react"
+Cohesion: 0.29
+Nodes (7): lucide-react, ButtonVariant, Month, MonthCal(), MonthCalProps, MonthPicker(), MONTHS
 
 ### Community 54 - "devDependencies"
 Cohesion: 0.15
@@ -369,25 +362,25 @@ Nodes (13): devDependencies, babel-plugin-react-compiler, @biomejs/biome, fake-i
 Cohesion: 0.20
 Nodes (9): background_color, description, display, icons, name, scope, short_name, start_url (+1 more)
 
-### Community 56 - "gate/components.e2e.ts"
-Cohesion: 0.14
-Nodes (10): desktopOnly, bounds(), contained(), expectWheelScrollsPageWhileOpen(), expectDropdownPreservesScroll(), expectVisibleBackdrop(), scrollWithInput(), settledOverlayAlpha() (+2 more)
+### Community 56 - "core/components.e2e.ts"
+Cohesion: 0.15
+Nodes (9): desktopOnly, bounds(), contained(), expectWheelScrollsPageWhileOpen(), expectDropdownPreservesScroll(), scrollWithInput(), settledOverlayAlpha(), APP_URL (+1 more)
 
 ### Community 57 - "Next.js agent rules block ("This is NOT the Next.js you know")"
 Cohesion: 0.18
 Nodes (9): app/api/auth/* Route Handlers, bun test, node_modules/next/dist/server/lib/generate-agent-files.js, Google OAuth broker (exchange/token/logout), Domain and importer tests (Dexie with in-memory IndexedDB), Next.js App Router app (mostly client-side), node_modules/next/dist/docs/, npm run dev (port 5173) (+1 more)
 
-### Community 58 - "Button"
-Cohesion: 0.13
-Nodes (34): AccountCard(), AccountRow, AccountsPage(), CategoriesPage(), CategoryDialogState, CategoryTile(), SECTIONS, InvestmentRow() (+26 more)
+### Community 58 - "monthly-budget-usage.tsx"
+Cohesion: 0.39
+Nodes (6): arc(), centerCurrency(), MonthlyBudgetUsage(), MonthlyBudgetUsageItem, compactAmount, formatChartCurrency()
 
 ### Community 59 - "Project Graph"
 Cohesion: 0.39
 Nodes (6): Committed graph artifacts (graph.json, GRAPH_REPORT.md, manifest.json, .graphify_labels.json), Graph health warnings and refresh failure reporting, graphify-out/graph.json, graphify skill (--update), graphify update ., Project Graph
 
-### Community 60 - "item.tsx"
-Cohesion: 0.20
-Nodes (11): Item(), ItemActions(), ItemContent(), ItemDescription(), ItemFooter(), ItemGroup(), ItemHeader(), ItemMedia() (+3 more)
+### Community 60 - "vite.config.ts"
+Cohesion: 0.29
+Nodes (4): vite, @vitejs/plugin-react, harnessDir, repoRoot
 
 ### Community 61 - "formatter"
 Cohesion: 0.25
@@ -410,8 +403,8 @@ Cohesion: 0.29
 Nodes (7): optionalDependencies, lightningcss-linux-x64-gnu, lightningcss-win32-x64-msvc, @rollup/rollup-linux-x64-gnu, @rollup/rollup-win32-x64-msvc, @tailwindcss/oxide-linux-x64-gnu, @tailwindcss/oxide-win32-x64-msvc
 
 ### Community 66 - "scripts"
-Cohesion: 0.12
-Nodes (17): scripts, build, dev, lint, lint:check, start, test:web, test:web:full (+9 more)
+Cohesion: 0.17
+Nodes (12): scripts, build, dev, lint, lint:check, start, test:web, test:web:core (+4 more)
 
 ### Community 68 - "style"
 Cohesion: 0.33
@@ -425,13 +418,13 @@ Nodes (5): Finpoint icon concept, Charcoal shadow halo, Circular point, Rounded 
 Cohesion: 0.40
 Nodes (5): Finpoint icon with charcoal shadow, Charcoal shadow halo, Circular point, Rounded F monogram, Off-white icon fill
 
-### Community 72 - "gate/routes.e2e.ts"
-Cohesion: 0.27
-Nodes (7): PREMATURE, routeReady, titles, IDS, fits(), patchRows(), statementRow()
+### Community 72 - "core/routes.e2e.ts"
+Cohesion: 0.22
+Nodes (9): containedFooter(), PREMATURE, routeReady, titles, expectPointerCursor(), IDS, fits(), patchRows() (+1 more)
 
-### Community 73 - "radix-ui"
-Cohesion: 0.18
-Nodes (12): radix-ui, AppHeader(), ButtonGroup(), ButtonGroupSeparator(), ButtonGroupText(), buttonGroupVariants, FieldSeparator(), ItemSeparator() (+4 more)
+### Community 73 - "ui/field.tsx"
+Cohesion: 0.13
+Nodes (17): class-variance-authority, radix-ui, AppHeader(), ButtonGroup(), ButtonGroupSeparator(), ButtonGroupText(), buttonGroupVariants, FieldContent() (+9 more)
 
 ### Community 74 - "Finpoint"
 Cohesion: 0.50
@@ -481,10 +474,6 @@ Nodes (4): Files, Issue tracker: Local Markdown, Skill operations, Status and de
 Cohesion: 0.50
 Nodes (3): Before exploration, Domain docs, Writing
 
-### Community 93 - "workflow-tabs.tsx"
-Cohesion: 0.40
-Nodes (8): ReviewLinks(), WorkflowTabs(), useDefaultFilterEndDateToday(), useDefaultFilterStartDate(), useSettings(), pathAllocator(), pathAllocatorDuplicates(), pathAllocatorPending()
-
 ### Community 96 - "spending-calendar.tsx"
 Cohesion: 0.36
 Nodes (7): compact(), INK, LEVELS, quantile(), rampCap(), SpendingCalendar(), WEEKDAYS
@@ -495,23 +484,23 @@ Nodes (6): ./tsconfig.json, compilerOptions, incremental, exclude, extends, incl
 
 ## Knowledge Gaps
 - **72 isolated node(s):** `@fontsource-variable/inter`, `shadcn`, `tailwindcss`, `tw-animate-css`, `@biomejs/biome` (+67 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 590 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **10 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 584 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **9 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `cn()` connect `cn` to `react`, `budgets/[id]/page.tsx`, `total-spending-chart.tsx`, `sidebar.tsx`, `sync/page.tsx`, `utils.ts`, `importer/page.tsx`, `routes.ts`, `lib/motion.ts`, `primitives.tsx`, `pending/page.tsx`, `duplicates/page.tsx`, `date-range.tsx`, `PaginationFooter`, `accounts/[id]/page.tsx`, `(month)/page.tsx`, `providers.tsx`, `category-filter.tsx`, `icon.tsx`, `Button`, `item.tsx`, `radix-ui`, `workflow-tabs.tsx`, `spending-calendar.tsx`?**
+- **Why does `cn()` connect `cn` to `record-editor.tsx`, `spending-calendar.tsx`, `category-history-chart.tsx`, `PaginationFooter`, `(month)/page.tsx`, `sync/page.tsx`, `combobox.tsx`, `total-spending-chart.tsx`, `ui/field.tsx`, `category-filter.tsx`, `app-sidebar.tsx`, `paginated-data-table.tsx`, `primitives.tsx`, `Button`, `lucide-react`, `monthly-budget-usage.tsx`, `chart.tsx`, `(month)/layout.tsx`?**
   _High betweenness centrality (0.092) - this node is a cross-community bridge._
 - **What connects `@fontsource-variable/inter`, `shadcn`, `tailwindcss` to the rest of the system?**
   _72 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `react` be split into smaller, more focused modules?**
-  _Cohesion score 0.06149932664970822 - nodes in this community are weakly interconnected._
-- **Why does `@playwright/test` connect `fixtures.ts` to `workflows.e2e.ts`, `gate/routes.e2e.ts`, `package.json`, `editors.ts`, `ledger.e2e.ts`, `motion/editors.e2e.ts`, `gate/components.e2e.ts`, `navigation.e2e.ts`?**
-  _High betweenness centrality (0.068) - this node is a cross-community bridge._
-- **Should `total-spending-chart.tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.06882882882882883 - nodes in this community are weakly interconnected._
-- **Why does `react` connect `react` to `budgets/[id]/page.tsx`, `total-spending-chart.tsx`, `sidebar.tsx`, `cn`, `sync/page.tsx`, `utils.ts`, `importer/page.tsx`, `accounts/page.tsx`, `package.json`, `routes.ts`, `lib/motion.ts`, `primitives.tsx`, `pending/page.tsx`, `duplicates/page.tsx`, `use-appearance.tsx`, `date-range.tsx`, `PaginationFooter`, `auto-sync.ts`, `accounts/[id]/page.tsx`, `(month)/page.tsx`, `providers.tsx`, `category-filter.tsx`, `icon.tsx`, `Button`, `item.tsx`, `radix-ui`?**
-  _High betweenness centrality (0.058) - this node is a cross-community bridge._
-- **Should `dashboard.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.13655761024182078 - nodes in this community are weakly interconnected._
+- **Should `record-editor.tsx` be split into smaller, more focused modules?**
+  _Cohesion score 0.07553157727705491 - nodes in this community are weakly interconnected._
+- **Why does `@playwright/test` connect `@playwright/test` to `core/routes.e2e.ts`, `tests_web_support_fixtures_expect`, `package.json`, `editors.ts`, `fixtures.ts`, `ledger.e2e.ts`, `support/motion.ts`, `core/components.e2e.ts`?**
+  _High betweenness centrality (0.064) - this node is a cross-community bridge._
+- **Should `category-history-chart.tsx` be split into smaller, more focused modules?**
+  _Cohesion score 0.1361344537815126 - nodes in this community are weakly interconnected._
+- **Why does `react` connect `Button` to `record-editor.tsx`, `category-history-chart.tsx`, `cn`, `combobox.tsx`, `sync/page.tsx`, `accounts/page.tsx`, `package.json`, `app-sidebar.tsx`, `paginated-data-table.tsx`, `primitives.tsx`, `chart.tsx`, `(month)/layout.tsx`, `PaginationFooter`, `auto-sync.ts`, `(month)/page.tsx`, `total-spending-chart.tsx`, `category-filter.tsx`, `lucide-react`, `monthly-budget-usage.tsx`, `ui/field.tsx`?**
+  _High betweenness centrality (0.059) - this node is a cross-community bridge._
+- **Should `statements.ts` be split into smaller, more focused modules?**
+  _Cohesion score 0.14482758620689656 - nodes in this community are weakly interconnected._

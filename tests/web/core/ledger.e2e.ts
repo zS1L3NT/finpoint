@@ -524,7 +524,7 @@ function collectTests(
 function declaredTests() {
 	const declarations = new Map<string, string[]>()
 	const selections = new Map<string, TestSelection[]>()
-	for (const directory of ["tests/web/gate", "tests/web/motion"]) {
+	for (const directory of ["tests/web/core", "tests/web/extra"]) {
 		let entries: string[]
 		try {
 			entries = files(directory)
@@ -986,7 +986,7 @@ test("ledger projects: project selection executes every ledger configuration cla
 		const selected = projects.get(name)
 		expect(
 			selected?.grep,
-			`${name} project must carry a tag grep; run the gate without PLAYWRIGHT_FULL_MATRIX=1`,
+			`${name} project must carry a tag grep; run the core tier without PLAYWRIGHT_FULL_MATRIX=1`,
 		).toBeDefined()
 	}
 	const { selections } = declaredTests()
@@ -1127,14 +1127,14 @@ test("ledger projects: project selection executes every ledger configuration cla
 		}
 })
 
-test("ledger tiers: gate files never import the motion sampler module", () => {
-	const gateFiles = files("tests/web/gate").filter(path => path.endsWith(".e2e.ts"))
-	expect(gateFiles.length).toBeGreaterThan(0)
-	for (const path of gateFiles) {
+test("ledger tiers: core files never import the motion sampler module", () => {
+	const coreFiles = files("tests/web/core").filter(path => path.endsWith(".e2e.ts"))
+	expect(coreFiles.length).toBeGreaterThan(0)
+	for (const path of coreFiles) {
 		const text = readFileSync(join(root, path), "utf8")
 		expect(
 			importsMotionModule(path, text),
-			`${path}: gate files must not import support/motion`,
+			`${path}: core files must not import support/motion`,
 		).toBe(false)
 	}
 })

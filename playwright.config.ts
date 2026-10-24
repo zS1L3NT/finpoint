@@ -4,23 +4,23 @@ import { APP_URL } from "./tests/web/support/urls"
 // Desktop and mobile run every case; tall-desktop, light and reduced-motion run only
 // cases tagged for them. PLAYWRIGHT_FULL_MATRIX=1 drops those tag filters for a release run.
 const full = process.env.PLAYWRIGHT_FULL_MATRIX === "1"
-// Motion tests are collected only with PLAYWRIGHT_MOTION=1, so ad-hoc runs stay gate-only.
-const motion = process.env.PLAYWRIGHT_MOTION === "1"
+// Extra (animation) tests are collected only with PLAYWRIGHT_EXTRA=1, so ad-hoc runs stay core-only.
+const extra = process.env.PLAYWRIGHT_EXTRA === "1"
 // Helper self-tests and the behaviour ledger run only in desktop.
 const desktopOnly = ["**/helpers.e2e.ts", "**/ledger.e2e.ts"]
 // Project testIgnore replaces the top-level value instead of merging, so the
-// motion exclusion must be repeated in every project's own ignores.
-const motionIgnores = motion ? [] : ["**/motion/**"]
+// extra exclusion must be repeated in every project's own ignores.
+const extraIgnores = extra ? [] : ["**/extra/**"]
 const piggyback = (tag: RegExp, invert: RegExp[] = [/@mobile-only/, /@tall-only/]) => ({
-	testIgnore: [...motionIgnores, ...desktopOnly],
+	testIgnore: [...extraIgnores, ...desktopOnly],
 	grepInvert: invert,
 	...(full ? {} : { grep: tag }),
 })
 
 export default defineConfig({
 	testDir: "./tests/web",
-	testMatch: "{gate,motion}/**/*.e2e.ts",
-	testIgnore: motion ? undefined : "**/motion/**",
+	testMatch: "{core,extra}/**/*.e2e.ts",
+	testIgnore: extra ? undefined : "**/extra/**",
 	fullyParallel: true,
 	forbidOnly: true,
 	workers: process.env.PLAYWRIGHT_WORKERS ?? 1,
@@ -56,12 +56,12 @@ export default defineConfig({
 	projects: [
 		{
 			name: "desktop",
-			testIgnore: motionIgnores,
+			testIgnore: extraIgnores,
 			grepInvert: [/@mobile-only/, /@tall-only/],
 		},
 		{
 			name: "mobile",
-			testIgnore: [...motionIgnores, ...desktopOnly],
+			testIgnore: [...extraIgnores, ...desktopOnly],
 			grepInvert: [/@desktop-only/, /@tall-only/],
 			use: { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true },
 		},
@@ -80,13 +80,13 @@ export default defineConfig({
 			? [
 					{
 						name: "firefox",
-						testIgnore: [...motionIgnores, ...desktopOnly],
+						testIgnore: [...extraIgnores, ...desktopOnly],
 						grepInvert: [/@mobile-only/, /@tall-only/],
 						use: { browserName: "firefox" as const },
 					},
 					{
 						name: "webkit",
-						testIgnore: [...motionIgnores, ...desktopOnly],
+						testIgnore: [...extraIgnores, ...desktopOnly],
 						grepInvert: [/@mobile-only/, /@tall-only/],
 						use: { browserName: "webkit" as const },
 					},
@@ -105,7 +105,8 @@ export default defineConfig({
 							timeout: 300_000,
 						},
 						{
-							command: "bun run test:web:harness:preview --port 5274 --strictPort",
+							command:
+								"bunx vite preview --config tests/web/harness/vite.config.ts --host 127.0.0.1 --port 5274 --strictPort",
 							url: "http://127.0.0.1:5274",
 							reuseExistingServer: false,
 							timeout: 300_000,
@@ -119,7 +120,8 @@ export default defineConfig({
 							timeout: 120_000,
 						},
 						{
-							command: "npm run test:web:harness",
+							command:
+								"bunx vite --config tests/web/harness/vite.config.ts --host 127.0.0.1",
 							url: "http://127.0.0.1:5174",
 							reuseExistingServer: true,
 							timeout: 120_000,

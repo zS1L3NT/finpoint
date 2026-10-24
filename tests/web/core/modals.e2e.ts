@@ -185,7 +185,7 @@ test.describe("dense workspace", () => {
 
 	// One dense seed for all scroll contracts. Every step navigates fresh, so
 	// open popups never leak between filters. The harness SelectField case
-	// lives in gate/components.
+	// lives in core/components.
 	test("Records filters: preserve the page scrollbar while open", async ({ page }) => {
 		for (const label of ["Any monthly budget", "Any treatment", "Any status"] as const) {
 			await test.step(`Records filter ${label}: preserves the page scrollbar while open`, async () => {

@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// Portable suite lock for scripts/test-web.ts. No side effects on import so the
+// Portable suite lock for the test runners. No side effects on import so the
 // logic can be exercised without running browsers.
 import { closeSync, mkdirSync, openSync, readFileSync, rmSync, writeSync } from "node:fs"
 

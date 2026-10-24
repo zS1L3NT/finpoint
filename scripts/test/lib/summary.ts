@@ -75,12 +75,19 @@ export function describe(summary: PhaseSummary): string {
 	return `${summary.phase}: ${summary.passed}/${total} passed${summary.failed ? `, ${summary.failed} failed` : ""} in ${summary.minutes} min`
 }
 
-export function markdown(head: string, mode: string, phases: PhaseSummary[]): string {
+// `pending` lists tiers still to run, so a comment posted between tiers says so.
+export function markdown(
+	head: string,
+	mode: string,
+	phases: PhaseSummary[],
+	pending: string[] = [],
+): string {
 	const lines = [
 		"<!-- test-web-signoff -->",
 		`### Browser tests: \`${mode}\` on \`${head.slice(0, 7)}\``,
 		"",
 		...phases.map(phase => `- ${phase.failed || !phase.ran ? "❌" : "✅"} ${describe(phase)}`),
+		...pending.map(phase => `- ⏳ ${phase}: running`),
 	]
 	for (const phase of phases)
 		for (const failure of phase.failures)

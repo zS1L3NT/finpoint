@@ -10,15 +10,10 @@
 		"lint:check": "biome check",
 		"types:check": "tsc --noEmit",
 		"types:web": "tsc --project tsconfig.web.json --noEmit",
-		"test:web:harness": "vite --config tests/web/harness/vite.config.ts --host 127.0.0.1",
 		"test:web": "playwright test",
-		"test:web:gate": "bun scripts/test-web.ts gate",
-		"test:web:full": "bun scripts/test-web.ts full",
-		"test:web:motion": "bun scripts/test-motion.ts",
-		"test:web:headed": "playwright test --headed",
-		"test:web:report": "playwright show-report playwright-report/adhoc",
-		"test:web:harness:build": "vite build --config tests/web/harness/vite.config.ts",
-		"test:web:harness:preview": "vite preview --config tests/web/harness/vite.config.ts --host 127.0.0.1"
+		"test:web:core": "bun scripts/test/core.ts",
+		"test:web:extra": "bun scripts/test/extra.ts",
+		"test:web:full": "bun scripts/test/full.ts"
 	},
 	"dependencies": {
 		"@base-ui/react": "^1.4.0",

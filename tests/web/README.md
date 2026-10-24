@@ -3,18 +3,17 @@
 Install dependencies with `bun install`, then install Chromium with `bunx playwright install chromium`.
 On a Linux machine missing browser libraries, use `bunx playwright install --with-deps chromium`.
 
-## Two tiers: gate and motion
+## Two tiers: core and extra
 
-The folder names the tier. `tests/web/gate/` holds mandatory tests: what renders,
+The folder names the tier. `tests/web/core/` holds mandatory tests: what renders,
 what persists, and what navigation, keyboard, validation, and workflow flows do.
-`tests/web/motion/` holds animation tests: anything that asserts how something
+`tests/web/extra/` holds animation tests: anything that asserts how something
 animates (entrances, cascades, fades, frame-by-frame opacity or geometry, reduced-motion
-branches). Motion tests run only in the full suite, one at a time. Gate tests run in
-every suite run, in parallel.
+branches). Extra tests run one at a time. Core tests run in parallel.
 
-A test that checks animation behaviour with a frame sampler belongs in motion. Waiting
+A test that checks animation behaviour with a frame sampler belongs in extra. Waiting
 for animations to finish before reading a value, or polling a functional condition
-with `requestAnimationFrame`, belongs in gate.
+with `requestAnimationFrame`, belongs in core.
 
 ## Areas
 
@@ -22,18 +21,18 @@ Each tier has one file per area. A file exists only if it has tests.
 
 | Area | Covers | Server |
 | --- | --- | --- |
-| `routes` | Page and route rendering, empty, invalid, static, and detail pages, layout sweeps, loading reveal, card grids and page fades (motion) | app |
-| `tables` | Record, Statement, and Allocate tables: filters, pagination, selection, grouping, row entrances (motion) | app |
+| `routes` | Page and route rendering, empty, invalid, static, and detail pages, layout sweeps, loading reveal, card grids and page fades (extra) | app |
+| `tables` | Record, Statement, and Allocate tables: filters, pagination, selection, grouping, row entrances (extra) | app |
 | `editors` | Create and update dialogs and their fields, long content, archiving edits | app |
 | `sheets` | Search and confirmation sheets, held-IndexedDB loading, pending queue search | app |
-| `modals` | App modal surfaces, backdrops, dropdown and select scroll behaviour, exit fades (motion) | app |
+| `modals` | App modal surfaces, backdrops, dropdown and select scroll behaviour, exit fades (extra) | app |
 | `navigation` | Back button, history, browser traversal, workflow tabs | app |
 | `keyboard` | Keyboard-only flows, sidebar rail, chrome buttons | app |
 | `workflows` | Allocation, duplicates, importer, settings, sync, backup and reset | app |
-| `charts` | Chart values, tooltips, drills, containment, chart transitions (motion) | app |
+| `charts` | Chart values, tooltips, drills, containment, chart transitions (extra) | app |
 | `components` | Everything served by the Vite component harness | harness |
-| `helpers` | Self-tests of test helpers (`date-only` in gate, `assertion-probes` in motion) | both |
-| `ledger` | The behaviour-ledger gate (`ledger.e2e.ts`), gate only | none |
+| `helpers` | Self-tests of test helpers (`date-only` in core, `assertion-probes` in extra) | both |
+| `ledger` | The behaviour ledger (`ledger.e2e.ts`), core only | none |
 
 Harness tests and app tests never share a file. Every harness-based test goes in
 `components` (or `helpers`).
@@ -44,32 +43,31 @@ Ad-hoc runs use the dev servers (app on 5173, harness on 5174, reused when alrea
 running). Runner commands build frozen production bundles first and serve them on
 dedicated ports (app on 5273, harness on 5274), so a running dev server is never reused.
 
-- `bun run test:web` — ad-hoc gate run: dev servers, gate tests only, 1 worker.
-  All Playwright arguments pass through: file paths, `--grep`, `--project`, `--workers`.
-- `bun run test:web:motion` — ad-hoc motion run: `tests/web/motion` only, serial
-  (`--workers=1` is forced, even if appended). Greps and projects pass through. A path
-  must be inside `tests/web/motion` and replaces the folder (Playwright would otherwise
-  run every motion file); any other path is refused.
-- `bun run test:web:gate` — runner gate phase: production build, gate tests on
-  `desktop` and `mobile`, parallel at 50% of cores unless `--workers=N` is given.
-  Report in `playwright-report/gate`, output in `test-results/gate`.
-- `bun run test:web:full` — runner full run: phase 1 is the gate on all five projects
-  in parallel; phase 2 is motion on all five projects with 1 worker. Phase 2 runs even
-  if phase 1 fails, and the exit code is non-zero if either fails. Reports in
-  `playwright-report/full-gate` and `playwright-report/full-motion`.
+- `bun run test:web` — ad-hoc core run: dev servers, core tests only, 1 worker.
+  All Playwright arguments pass through: file paths, `--grep`, `--project`, `--workers`,
+  `--headed`. For an ad-hoc extra run, set `PLAYWRIGHT_EXTRA=1` and keep one worker:
+  `PLAYWRIGHT_EXTRA=1 bun run test:web -- tests/web/extra/<file> --workers=1`.
+- `bun run test:web:core` — runner: production build, core tests on `desktop` and
+  `mobile`, parallel at 50% of cores unless `--workers=N` is given.
+- `bun run test:web:extra` — runner: production build, extra tests on all five
+  projects, always 1 worker.
+- `bun run test:web:full` — runner: production build, then core on all five projects in
+  parallel, then extra on all five projects with 1 worker. Extra runs even if core
+  fails, and the exit code is non-zero if either fails.
 
-The runner accepts only `--grep`, `--grep-invert`, `--workers` (gate phase only),
-and `--project`. `--project` replaces the phase defaults and applies to both phases
-of `full`. Anything else (positional paths, `--config`, `--shard`) is refused; run
-single files ad-hoc with `bun run test:web -- <path>` instead.
+Runner reports go to `playwright-report/core` and `playwright-report/extra`, output to
+`test-results/core` and `test-results/extra`. The runners accept only `--grep`,
+`--grep-invert`, `--workers` (core only), and `--project`. `--project` replaces the
+defaults and applies to both tiers of `full`. Anything else (positional paths, `--config`,
+`--shard`) is refused; run single files ad-hoc with `bun run test:web -- <path>` instead.
+The runners live in `scripts/test/` (`core.ts`, `extra.ts`, `full.ts`, sharing `lib/`).
 
-The gate is 354 runs (desktop and mobile); a full run is 377 gate runs on all five projects,
-then 102 motion runs (`bunx playwright test --list`, 24 October 2026). On a 12-core Linux host
-without a GPU a full run took about 27 min (13 min gate phase on 6 workers, 13 min motion
-phase); the 313-run gate before the merge took about 11 min including the production build.
-After the merge, a full run (365 + 102) on the developer's Mac took about 16 min (7 min gate
-phase, 9 min motion phase). The
-pre-reorganisation suite (354 runs, 1 worker) took 36 min on that Mac.
+Core is 354 runs (desktop and mobile); a full run is 377 core runs on all five projects,
+then 102 extra runs (`bunx playwright test --list`, 24 October 2026). On a 12-core Linux host
+without a GPU a full run took about 27 min (13 min core on 6 workers, 13 min extra);
+the 313-run core tier before the main merge took about 11 min including the production build.
+After the merge, a full run (365 + 102) on the developer's Mac took about 16 min (7 min core,
+9 min extra). The pre-reorganisation suite (354 runs, 1 worker) took 36 min on that Mac.
 
 Only one runner at a time: it takes a lock at `test-results/.suite-lock/pid` and refuses
 to start while that file exists. A lock left by a crashed run is never cleared
@@ -80,20 +78,20 @@ output, but running both at once slows animation sampling.
 ## Sign-off
 
 `--signoff` refuses to start unless the `basecamp/gh-signoff` extension is installed and the
-tree is clean (Next's generated `next-env.d.ts` is ignored). It records `HEAD` and posts every
-status on that commit. A passing context is signed green (`gh signoff --commit <HEAD> gate`)
-only if the tree is still clean at the same commit. A failing context is posted red
-(`gh signoff fail`), so a required check shows the failure instead of waiting forever.
-Each run also writes one pull-request comment (updated in place on later runs) listing every
-phase's pass count and duration and, for each failure, its project, file and line, and the
-start of its error. Each status's **Details** link opens that comment, and a failed status's
-description holds the counts. The full HTML reports stay local under `playwright-report/`.
-`gate` mode posts `signoff/gate`. `full` mode posts `signoff/gate` from its gate phase (which
-covers every gate project) and `signoff/full` from both phases. With `--signoff`, no
-pass-through argument is allowed: only complete runs are reported. gh-signoff also requires
-the commit to be pushed, so commit and push before a signed run. `--signoff-dry-run` prints
-the extension, tree, HEAD and sign-off commands without running anything.
-`gh signoff install gate` makes `signoff/gate` a required check for merging.
+tree is clean (Next's generated `next-env.d.ts` is ignored). It records `HEAD` and signs each
+tier on that commit as soon as the tier finishes: `test:web:full` posts `signoff/core`
+before extra starts, then `signoff/extra`. A passing tier is signed green
+(`gh signoff --commit <HEAD> core`) only if the tree is still clean at the same commit. A
+failing tier is posted red (`gh signoff fail`), so a required check shows the failure
+instead of waiting forever. Each sign-off also updates one pull-request comment listing
+every finished tier's pass count and duration, any tier still running, and, for each
+failure, its project, file and line, and the start of its error. Each status's **Details**
+link opens that comment, and a failed status's description holds the counts. The HTML
+reports stay local under `playwright-report/`. With `--signoff`, no pass-through argument is
+allowed: only complete runs are reported. gh-signoff also requires the commit to be pushed,
+so commit and push before a signed run. `--signoff-dry-run` prints the extension, tree, HEAD
+and sign-off commands without running anything. `gh signoff install core` makes
+`signoff/core` a required check for merging.
 
 ## Projects and tags
 
@@ -107,7 +105,7 @@ and `webkit` (install them first with `bunx playwright install --with-deps firef
 
 Tags, and nothing else: `@tall`, `@tall-only`, `@light`, `@reduced-motion`,
 `@mobile-only`, `@desktop-only`. Tag a test `@light` if it asserts painted colour
-and `@reduced-motion` if it asserts a reduced-motion branch. The ledger coverage gate
+and `@reduced-motion` if it asserts a reduced-motion branch. The ledger coverage check
 fails if a test carries an unknown tag or if a test opts out of both desktop and
 mobile at once. A CLI `--grep` combines with (not instead of) each project's tag
 filter, so running an untagged case on light or reduced-motion needs
@@ -129,14 +127,14 @@ codes, no dotted prefixes, and no implementation phrasing. Loop-generated titles
 their template variables and stay unique across the suite; a loop value that becomes the
 subject follows the same rules (`Account editor`, `Records table`), with a separate display
 field when assertions need a different spelling. Renaming a title means renaming its ID in
-`component-inventory.ts` too; the ledger gate fails otherwise. There are no
+`component-inventory.ts` too; the ledger fails otherwise. There are no
 `test.describe` wrappers except to scope `test.use` (for example a harness section);
 the folder already names the tier and the file names the area.
 
-The behaviour ledger is `tests/web/component-inventory.ts` plus the gate in
-`tests/web/gate/ledger.e2e.ts`. It parses static `test` and `test.step` titles,
+The behaviour ledger is `tests/web/component-inventory.ts` plus the checks in
+`tests/web/core/ledger.e2e.ts`. It parses static `test` and `test.step` titles,
 including ones generated by static `for…of` loops, and requires every mapped test ID
-to resolve to exactly one executable test. The tier guard fails if a `gate/` file
+to resolve to exactly one executable test. The tier guard fails if a `core/` file
 imports `support/motion`.
 
 ## Fixtures
@@ -164,7 +162,7 @@ Functional helpers live in `support/assertions.ts`:
   trusted touch swipe. The fixture must have enough content to scroll.
   Pass the app's existing scroll container when it owns scrolling instead of the document.
 
-Frame samplers live in `support/motion.ts` and must never be imported from `gate/`:
+Frame samplers live in `support/motion.ts` and must never be imported from `core/`:
 
 - `sampleVisibleRowAnimations(page, selector, reveal)` collects every matching element occupying the
   viewport during requestAnimationFrame samples, including initially transparent rows. It returns text
@@ -205,13 +203,12 @@ Configuration follows the [Playwright configuration guide](https://playwright.de
 and [web server lifecycle guide](https://playwright.dev/docs/test-webserver), plus the installed Next.js
 Playwright guide under `node_modules/next/dist/docs/01-app/02-guides/testing/playwright.md`.
 
-Keep cases under `tests/web/gate/` and `tests/web/motion/` with the `.e2e.ts` suffix. Bun's unit test discovery must not collect them.
+Keep cases under `tests/web/core/` and `tests/web/extra/` with the `.e2e.ts` suffix. Bun's unit test discovery must not collect them.
 Playwright records failure screenshots and retains failure traces under `test-results/`:
-`test-results/adhoc` for ad-hoc runs, and `test-results/gate`, `test-results/full-gate` and
-`test-results/full-motion` for the runner. HTML reports live in the matching folders under
-`playwright-report/`. Both directories are ignored. `bun run test:web:report` opens the ad-hoc
-report; open a runner report with `bunx playwright show-report playwright-report/gate` (or
-`full-gate`, `full-motion`). Open a trace with
+`test-results/adhoc` for ad-hoc runs, and `test-results/core` and `test-results/extra` for the
+runners. HTML reports live in the matching folders under `playwright-report/`. Both directories
+are ignored. Open a report with `bunx playwright show-report playwright-report/adhoc` (or `core`,
+`extra`). Open a trace with
 `bunx playwright show-trace test-results/<folder>/<case>/trace.zip`.
 
 Grouped tests trade per-case isolation for wall-clock time. Each group keeps one seed and one
@@ -227,9 +224,10 @@ and arrays. Custom components wrapping items and Radix-only content properties a
 current application consumers use plain items and the adapter's supported placement properties.
 
 For a verification run against frozen production bundles without the runner, run `bun run build` and
-`bun run test:web:harness:build`, then start `bun run start --port 5273` and
-`bun run test:web:harness:preview --port 5274 --strictPort` in separate terminals. Run the matrix with
-`PLAYWRIGHT_SERVER=production PLAYWRIGHT_EXTERNAL_SERVERS=1 bun run test:web` for gate tests, or
-the same variables with `bun run test:web:motion` for motion tests. Stop those two servers after
+`bunx vite build --config tests/web/harness/vite.config.ts`, then start `bun run start --port 5273` and
+`bunx vite preview --config tests/web/harness/vite.config.ts --host 127.0.0.1 --port 5274 --strictPort`
+in separate terminals. Run the matrix with
+`PLAYWRIGHT_SERVER=production PLAYWRIGHT_EXTERNAL_SERVERS=1 bun run test:web` for core tests, adding
+`PLAYWRIGHT_EXTRA=1` and `--workers=1` for extra tests. Stop those two servers after
 the run.
 This avoids development reloads changing source while animation frames are sampled.
