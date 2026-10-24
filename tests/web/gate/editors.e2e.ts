@@ -8,6 +8,7 @@ import {
 	longText,
 	openEditor,
 	pending,
+	pickOption,
 	record,
 	select,
 } from "../support/editors"
@@ -327,7 +328,7 @@ test("Category editors: persist Treatment defaults and exclude archived options"
 		)
 		await dialog.getByLabel("Name", { exact: true }).fill(longText)
 		await dialog.getByLabel("Icon", { exact: true }).fill("apple")
-		await page.getByRole("option", { name: "apple", exact: true }).click()
+		await pickOption(page.getByRole("option", { name: "apple", exact: true }))
 		await dialog.getByLabel("Colour", { exact: true }).fill("#123456")
 		await select(page, dialog, "Treatment", "Spending")
 		await select(page, dialog, "Monthly budget", "Daily")
@@ -498,7 +499,7 @@ test("Statement rule editor: invalid input shows errors, then a valid rule persi
 		dialog.getByText("Fill in at least one record field.", { exact: true }),
 	).toBeVisible()
 	await dialog.locator('button[id^="rule-operator-"]').click()
-	await page.getByRole("option", { name: "matches regex", exact: true }).click()
+	await pickOption(page.getByRole("option", { name: "matches regex", exact: true }))
 	const text = dialog.getByLabel("Text to look for", { exact: true })
 	await text.fill("(")
 	await expect(text).toHaveAttribute("aria-invalid", "true")
@@ -658,7 +659,7 @@ test("Statement rule editor: Title, People and Location offer existing Record va
 	] as const) {
 		await dialog.getByLabel(label, { exact: true }).fill(typed)
 		await expect(page.getByRole("option", { name: option, exact: true })).toBeVisible()
-		await page.getByRole("option", { name: option, exact: true }).click()
+		await pickOption(page.getByRole("option", { name: option, exact: true }))
 		await expect(dialog.getByLabel(label, { exact: true })).toHaveValue(option)
 	}
 })
@@ -744,7 +745,7 @@ test("Record creator: validates required fields, applies Category defaults and p
 		// selection: while it is open the dialog underneath is aria-hidden, so the
 		// trigger cannot be re-clicked, and Escape dismisses the dialog too
 		// (product bug, root-owned ui/select scope).
-		await page.getByRole("option", { name: "Daily", exact: true }).click()
+		await pickOption(page.getByRole("option", { name: "Daily", exact: true }))
 		await expect(page.getByRole("option", { name: "Daily", exact: true })).toHaveCount(0)
 		await expect(dialog).toBeVisible()
 		// A fresh creator starts dateless; stamp today first so clearing is meaningful.

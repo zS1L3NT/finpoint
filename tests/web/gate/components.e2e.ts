@@ -7,6 +7,7 @@ import {
 	settledOverlayAlpha,
 } from "../support/assertions"
 import { setDateOnly } from "../support/date-only"
+import { pickOption } from "../support/editors"
 import { expect, test } from "../support/fixtures"
 import { HARNESS_URL } from "../support/urls"
 
@@ -439,7 +440,7 @@ test.describe("harness widgets section", () => {
 		await test.step("select field: picks an option and leaves a disabled option unselected", async () => {
 			await gotoForms(page)
 			await page.locator("#harness-direction").click()
-			await page.getByRole("option", { name: "Income" }).click()
+			await pickOption(page.getByRole("option", { name: "Income" }))
 			await expect(page.getByTestId("direction-value")).toHaveText("Direction value: income")
 
 			await page.locator("#harness-direction").click()
@@ -553,12 +554,12 @@ test.describe("harness widgets section", () => {
 		await test.step("Record analytics: Treatment gates the Monthly Budget control", async () => {
 			await gotoForms(page)
 			await page.locator("#analytics_treatment").click()
-			await page.getByRole("option", { name: "Income", exact: true }).click()
+			await pickOption(page.getByRole("option", { name: "Income", exact: true }))
 			await expect(page.getByTestId("analytics-value")).toContainText("Treatment: income")
 			await expect(page.locator("#monthly_budget_id")).toBeDisabled()
 
 			await page.locator("#analytics_treatment").click()
-			await page.getByRole("option", { name: "Spending", exact: true }).click()
+			await pickOption(page.getByRole("option", { name: "Spending", exact: true }))
 			await expect(page.getByTestId("analytics-value")).toContainText("Treatment: spending")
 			await expect(page.locator("#monthly_budget_id")).toBeEnabled()
 		})
@@ -666,7 +667,7 @@ test.describe("harness widgets section", () => {
 			const search = page.getByRole("combobox", { name: "Search fruit" })
 			await search.fill("Dur")
 			await expect(page.getByRole("option", { name: "Apple" })).toBeHidden()
-			await page.getByRole("option", { name: /Durian/ }).click()
+			await pickOption(page.getByRole("option", { name: /Durian/ }))
 			await expect(page.getByTestId("command-value")).toHaveText("Command choice: Durian")
 
 			await search.fill("zzz")
@@ -691,7 +692,7 @@ test.describe("harness widgets section", () => {
 			await page.getByRole("button", { name: "Open command dialog" }).click()
 			await expect(page.getByRole("dialog")).toBeVisible()
 			await expectPopupInViewport(page, page.getByRole("dialog"))
-			await page.getByRole("option", { name: "Close dialog" }).click()
+			await pickOption(page.getByRole("option", { name: "Close dialog" }))
 			await expect(page.getByRole("dialog")).toBeHidden()
 		})
 	})
@@ -733,7 +734,7 @@ test.describe("harness widgets section", () => {
 			// Scope to the open popup: the always-mounted command list also exposes
 			// role=option items with overlapping names.
 			const content = page.locator('[data-slot="select-content"]')
-			await content.getByRole("option", { name: "Banana", exact: true }).click()
+			await pickOption(content.getByRole("option", { name: "Banana", exact: true }))
 			await expect(page.getByTestId("select-value")).toHaveText("Select value: banana")
 
 			await page.locator("#harness-select").click()
@@ -755,7 +756,7 @@ test.describe("harness widgets section", () => {
 			const input = page.getByLabel("Fruit combobox", { exact: true })
 			await input.click()
 			await input.type("Ban")
-			await page.getByRole("option", { name: "Banana" }).click()
+			await pickOption(page.getByRole("option", { name: "Banana" }))
 			await expect(page.getByTestId("combobox-value")).toHaveText("Combobox value: Banana")
 		})
 
@@ -765,7 +766,7 @@ test.describe("harness widgets section", () => {
 			await page.getByLabel("Collection fruit combobox").type("Cher")
 			const results = page.locator('[aria-label="Collection fruit results"]')
 			await expect(results.getByRole("option", { name: "Cherry" })).toBeVisible()
-			await results.getByRole("option", { name: "Cherry" }).click()
+			await pickOption(results.getByRole("option", { name: "Cherry" }))
 			await expect(page.getByTestId("combobox-collection-value")).toHaveText(
 				"Collection value: Cherry",
 			)
@@ -776,7 +777,7 @@ test.describe("harness widgets section", () => {
 			await expect(page.getByTestId("combobox-multi-value")).toHaveText("Multi value: Apple")
 			await page.getByLabel("Add fruit").click()
 			await page.getByLabel("Add fruit").type("Ban")
-			await page.getByRole("option", { name: "Banana" }).click()
+			await pickOption(page.getByRole("option", { name: "Banana" }))
 			await expect(page.getByTestId("combobox-multi-value")).toHaveText(
 				"Multi value: Apple, Banana",
 			)
@@ -1217,7 +1218,7 @@ test.describe("harness widgets section", () => {
 			await expect(content.locator('[data-slot="select-scroll-up-button"]')).toBeVisible()
 			const scrolled = await list.evaluate(element => element.scrollTop)
 			expect(scrolled).toBeGreaterThan(0)
-			await content.getByRole("option", { name: "Long item 40", exact: true }).click()
+			await pickOption(content.getByRole("option", { name: "Long item 40", exact: true }))
 			await expect(page.getByTestId("select-long-value")).toHaveText(
 				"Long select value: long-40",
 			)
@@ -1265,7 +1266,7 @@ test.describe("harness widgets section", () => {
 			await page.keyboard.press("Escape")
 			await input.click()
 			await input.type("Ban")
-			await page.getByRole("option", { name: "Banana" }).click()
+			await pickOption(page.getByRole("option", { name: "Banana" }))
 			await expect(page.getByTestId("combobox-value")).toHaveText("Combobox value: Banana")
 			await input.focus()
 			await page.keyboard.press("Tab")
@@ -1287,7 +1288,7 @@ test.describe("harness widgets section", () => {
 			await gotoPrimitives(page)
 			await page.getByLabel("Add fruit").click()
 			await page.getByLabel("Add fruit").type("Ban")
-			await page.getByRole("option", { name: "Banana" }).click()
+			await pickOption(page.getByRole("option", { name: "Banana" }))
 			await expect(page.getByTestId("combobox-multi-value")).toHaveText(
 				"Multi value: Apple, Banana",
 			)
@@ -1861,7 +1862,7 @@ test("select field: preserves the page scrollbar while open", async ({ page }) =
 	await expect(page.getByRole("listbox")).toHaveCount(0)
 	await expect(trigger).toBeFocused()
 	await trigger.press("Enter")
-	await page.getByRole("option", { name: "Income", exact: true }).click()
+	await pickOption(page.getByRole("option", { name: "Income", exact: true }))
 	await expect(page.getByTestId("direction-value")).toHaveText("Direction value: income")
 })
 
