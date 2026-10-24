@@ -667,9 +667,7 @@ export default function DataSettingsPage() {
 									onClick={() => void handleExport()}
 								>
 									<IconifyIcon icon="lucide:download" />
-									{busy === "export"
-										? "Downloading…"
-										: `Download backup · ${total.toLocaleString()} items`}
+									{busy === "export" ? "Downloading…" : "Download backup"}
 								</Button>
 								<Input
 									ref={fileInputRef}
