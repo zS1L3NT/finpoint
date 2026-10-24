@@ -64,7 +64,7 @@ of `full`. Anything else (positional paths, `--config`, `--shard`) is refused; r
 single files ad-hoc with `bun run test:web -- <path>` instead.
 
 The gate is 346 runs (desktop and mobile); a full run is 369 gate runs on all five projects,
-then 102 motion runs (`bunx playwright test --list`, 25 October 2026). On a 12-core Linux host
+then 102 motion runs (`bunx playwright test --list`, 24 October 2026). On a 12-core Linux host
 without a GPU a full run took about 27 min (13 min gate phase on 6 workers, 13 min motion
 phase); the 313-run gate before the merge took about 11 min including the production build.
 After the merge, a full run (365 + 102) on the developer's Mac took about 16 min (7 min gate

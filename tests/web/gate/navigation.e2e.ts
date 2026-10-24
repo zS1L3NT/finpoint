@@ -777,7 +777,10 @@ test("Back button: returns to its origin when pressed as soon as a drilled Recor
 			const back = [...document.querySelectorAll("button")].find(button =>
 				button.textContent?.trim().startsWith("Back to Records"),
 			)
-			if (!back) return requestAnimationFrame(pressBack)
+			if (!back) {
+				requestAnimationFrame(pressBack)
+				return
+			}
 			back.click()
 			Reflect.set(window, "__pressedBack", true)
 		}
