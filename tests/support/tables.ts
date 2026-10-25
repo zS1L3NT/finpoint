@@ -10,11 +10,27 @@ import { expect, type Locator, type Page } from "@playwright/test"
 // visible dialog below stays the strict proof: a genuinely broken sheet still
 // fails there, and single-tap reliability stays covered by the header-trigger
 // keyboard test.
+/** Phones open the sidebar from the tab bar's Menu; the header trigger is desktop-only. */
+export const mobileMenu = (page: Page) =>
+	page
+		.getByRole("navigation", { name: "Primary" })
+		.getByRole("button", { name: "Menu", exact: true })
+
+/** Phones fold table filters behind one Filters button and sheet; wider screens show them inline. */
+export async function openTableFilters(page: Page, isMobile: boolean) {
+	if (isMobile) await page.getByRole("button", { name: /^Filters/ }).click()
+}
+
+/** The open sheet is modal: close it before asserting on or clicking the list behind it. */
+export async function closeTableFilters(page: Page, isMobile: boolean) {
+	if (isMobile) await page.getByRole("button", { name: "Done", exact: true }).click()
+}
+
 export async function openMobileSidebarFromConsumerMotion(page: Page) {
 	await page.evaluate(() => localStorage.removeItem("history"))
 	await page.reload()
 	await expect.poll(() => page.evaluate(() => localStorage.getItem("history"))).not.toBeNull()
-	const trigger = page.locator('header [data-slot="sidebar-trigger"]')
+	const trigger = mobileMenu(page)
 	for (let attempt = 0; attempt < 3; attempt++) {
 		await trigger.click()
 		await page.waitForTimeout(500)

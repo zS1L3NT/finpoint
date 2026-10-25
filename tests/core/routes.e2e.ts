@@ -4,7 +4,14 @@ import { getScenario, IDS, statementRules } from "../support/data"
 import { setDateOnly } from "../support/date-only"
 import { openEditor, pickOption } from "../support/editors"
 import { expect, seedWorkspace, test } from "../support/fixtures"
-import { fits, patchRows, statementRow } from "../support/tables"
+import {
+	closeTableFilters,
+	fits,
+	mobileMenu,
+	openTableFilters,
+	patchRows,
+	statementRow,
+} from "../support/tables"
 
 const month = "month=October&year=2026"
 
@@ -249,7 +256,7 @@ test("Statement rules page: the Plan Rules link opens it and pause, resume and d
 	await page.goto("/records")
 	// Tap at once: the mobile flag settles in a mount effect, and a tap before it
 	// must still open the mobile sheet rather than collapse the desktop sidebar.
-	if (isMobile) await page.locator('header [data-slot="sidebar-trigger"]').click()
+	if (isMobile) await mobileMenu(page).click()
 	await page.getByRole("link", { name: "Rules", exact: true }).filter({ visible: true }).click()
 	await expect(page).toHaveURL(/\/statement-rules$/)
 	await expect(page.locator("header h1")).toHaveText("Statement rules")
@@ -716,9 +723,11 @@ test.describe("pinned 15 October 2026 date", () => {
 		).toBeVisible()
 		// Compact record rows omit the desktop budget column; the filter exposes
 		// the same Monthly budgets at every viewport size.
+		await openTableFilters(page, isMobile)
 		await page.getByRole("combobox").filter({ hasText: "Any monthly budget" }).click()
 		await expect(page.getByRole("option", { name: "Daily", exact: true })).toBeVisible()
 		await page.keyboard.press("Escape")
+		await closeTableFilters(page, isMobile)
 		if (!isMobile)
 			await expect(
 				page.getByText("Daily", { exact: true }).filter({ visible: true }).first(),

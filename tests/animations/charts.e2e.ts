@@ -2,6 +2,7 @@ import type { Page } from "@playwright/test"
 import { card, overview, overviewCharts } from "../support/charts"
 import { setDateOnly } from "../support/date-only"
 import { expect, seedWorkspace, test } from "../support/fixtures"
+import { mobileMenu } from "../support/tables"
 
 const marks =
 	".recharts-area-curve, .recharts-line-curve, .recharts-rectangle, clipPath[id^=animationClipPath] rect"
@@ -118,7 +119,7 @@ test("chart intro: overview and Budget charts grow once and hover or resize neve
 			// Before hydration the trigger does nothing, so retry until the sheet is open.
 			if (destination === "overview" && isMobile)
 				await expect(async () => {
-					await page.locator('header [data-slot="sidebar-trigger"]').click()
+					await mobileMenu(page).click()
 					await expect(
 						page.getByRole("dialog", { name: "Sidebar", exact: true }),
 					).toBeVisible({
@@ -323,7 +324,12 @@ test("Monthly Budget donut: focus dims sibling segments in a smooth transition",
 		// SVGElement here, which instanceof HTMLElement excludes, so an HTML-only
 		// blur predicate would leave the path focused and dimmed.
 		await page.mouse.move(0, 0)
-		await page.locator('header [data-slot="sidebar-trigger"]').focus()
+		// Phones swap the header trigger for the tab bar's Menu; either is a focusable outside the card.
+		await page
+			.locator('header [data-slot="sidebar-trigger"], nav[aria-label="Primary"] button')
+			.filter({ visible: true })
+			.first()
+			.focus()
 		await expect
 			.poll(() => groupElement.evaluate(element => getComputedStyle(element).opacity))
 			.toBe("1")

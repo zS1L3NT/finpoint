@@ -1,6 +1,7 @@
 import { expectPointerCursor } from "../support/assertions"
 import { IDS } from "../support/data"
 import { expect, test } from "../support/fixtures"
+import { mobileMenu } from "../support/tables"
 
 test("chrome buttons: navigate months and create Records by keyboard, toggle the sidebar and open Account details with Enter", {
 	tag: ["@reduced-motion"],
@@ -23,7 +24,9 @@ test("chrome buttons: navigate months and create Records by keyboard, toggle the
 	})
 	await test.step("sidebar trigger: keyboard toggle opens and closes the sidebar", async () => {
 		await page.goto("/privacy")
-		const toggle = page.locator('header [data-slot="sidebar-trigger"]')
+		const toggle = isMobile
+			? mobileMenu(page)
+			: page.locator('header [data-slot="sidebar-trigger"]')
 		await expectPointerCursor(toggle)
 		await toggle.focus()
 		await page.keyboard.press("Enter")

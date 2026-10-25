@@ -8,7 +8,11 @@ import {
 	poseIsIdentity,
 	sampleVisibleRowAnimations,
 } from "../support/motion"
-import { type MotionConsumer, openMobileSidebarFromConsumerMotion } from "../support/tables"
+import {
+	type MotionConsumer,
+	mobileMenu,
+	openMobileSidebarFromConsumerMotion,
+} from "../support/tables"
 
 // Mobile sidebar taps race hydration: useIsMobile() starts false and flips in
 // a mount effect, so a tap before that commit toggles the invisible desktop
@@ -24,7 +28,7 @@ async function openMobileSidebarFromTableUpdates(page: Page) {
 	await page.reload()
 	await expect.poll(() => page.evaluate(() => localStorage.getItem("history"))).not.toBeNull()
 	await expect.poll(() => page.evaluate(() => localStorage.getItem("history"))).not.toBeNull()
-	const trigger = page.locator('header [data-slot="sidebar-trigger"]')
+	const trigger = mobileMenu(page)
 	for (let attempt = 0; attempt < 3; attempt++) {
 		await trigger.click()
 		await page.waitForTimeout(500)

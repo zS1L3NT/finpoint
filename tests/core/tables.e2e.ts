@@ -3,7 +3,13 @@ import { getScenario, IDS } from "../support/data"
 import { setDateOnly } from "../support/date-only"
 import { pickOption } from "../support/editors"
 import { expect, seedWorkspace, test } from "../support/fixtures"
-import { fits, patchRows, statementRow } from "../support/tables"
+import {
+	closeTableFilters,
+	fits,
+	openTableFilters,
+	patchRows,
+	statementRow,
+} from "../support/tables"
 
 test("Records table: rendered Records keep zero, negative amounts and pending reasons", async ({
 	page,
@@ -224,13 +230,16 @@ test.describe("pinned 15 October 2026 date", () => {
 	})
 	test("Records table: Category selection narrows Records and survives reload", async ({
 		page,
+		isMobile,
 	}) => {
 		await seedWorkspace(page)
 		await page.goto("/records")
+		await openTableFilters(page, isMobile)
 		await page.getByRole("button", { name: "Any category", exact: true }).click()
 		await page.getByPlaceholder("Search categories...").fill("Groceries")
 		await pickOption(page.getByRole("option", { name: "Groceries", exact: true }))
 		await page.keyboard.press("Escape")
+		await closeTableFilters(page, isMobile)
 		await expect(page).toHaveURL(new RegExp(`category_ids=${IDS.categories.groceries}`))
 		await expect(
 			page.getByRole("link", { name: "Open FairPrice Run", exact: true }),
@@ -239,8 +248,10 @@ test.describe("pinned 15 October 2026 date", () => {
 			page.getByRole("link", { name: "Open Monthly Salary", exact: true }),
 		).toHaveCount(0)
 		await page.reload()
+		await openTableFilters(page, isMobile)
 		await expect(page.getByRole("button", { name: "1 category", exact: true })).toBeVisible()
 		await page.getByRole("button", { name: /^Clear/ }).click()
+		await closeTableFilters(page, isMobile)
 		await expect(page).not.toHaveURL(/category_ids=/)
 		await expect(
 			page.getByRole("link", { name: "Open Monthly Salary", exact: true }),
@@ -248,6 +259,7 @@ test.describe("pinned 15 October 2026 date", () => {
 	})
 	test("Records table: zero and signed amount filters apply, same-day subtotal and paid zero work", async ({
 		page,
+		isMobile,
 	}) => {
 		await seedWorkspace(page)
 		await test.step("Records table: zero is a real amount filter and paid and received ranges retain sign", async () => {
@@ -290,11 +302,13 @@ test.describe("pinned 15 October 2026 date", () => {
 		})
 		await test.step("amount control: paid zero is applied through the UI", async () => {
 			await page.goto("/records")
+			await openTableFilters(page, isMobile)
 			await page.getByRole("button", { name: "Any amount", exact: true }).click()
 			await page.getByRole("radio", { name: "Paid", exact: true }).click()
 			await page.getByRole("radio", { name: "Exactly", exact: true }).click()
 			await page.getByLabel("Value", { exact: true }).fill("0")
 			await page.getByRole("button", { name: "Apply", exact: true }).click()
+			await closeTableFilters(page, isMobile)
 			await expect(page).toHaveURL(/min_amount=0/)
 			await expect(page).toHaveURL(/max_amount=0/)
 			await expect(page.getByText("Showing 1 of 1 record.", { exact: true })).toBeVisible()

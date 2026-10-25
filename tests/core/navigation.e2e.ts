@@ -1,5 +1,6 @@
 import type { Page } from "@playwright/test"
 import { expect, test } from "../support/fixtures"
+import { mobileMenu } from "../support/tables"
 
 async function expectBackAboveHeadingFromHistoryRegressions(page: Page, backName: string) {
 	const back = page.getByRole("button", { name: backName, exact: true })
@@ -718,7 +719,7 @@ test("history clearing: cancelled links, sidebar, tabs and chart drills clear or
 		await resetHistory(page, "/privacy")
 		await page.getByRole("link", { name: "Terms of Service", exact: true }).click()
 		await expect(page.getByRole("button", { name: /^Back to / })).toBeVisible()
-		if (isMobile) await page.locator('header [data-slot="sidebar-trigger"]').click()
+		if (isMobile) await mobileMenu(page).click()
 		// Desktop and mobile sidebars both render a Dashboard link; only one is visible.
 		await page
 			.getByRole("link", { name: "Dashboard", exact: true })
@@ -884,7 +885,7 @@ test("mobile sidebar: a tap before the mobile layout settles opens the mobile me
 		})
 	})
 	await page.goto("/")
-	const trigger = page.locator('header [data-slot="sidebar-trigger"]')
+	const trigger = mobileMenu(page)
 	await expect(trigger).toBeVisible()
 	await page.evaluate(() => Reflect.set(window, "__released", true))
 	await trigger.click()
@@ -892,4 +893,34 @@ test("mobile sidebar: a tap before the mobile layout settles opens the mobile me
 	await page.setViewportSize({ width: 800, height: 844 })
 	await page.setViewportSize({ width: 390, height: 844 })
 	await expect(page.locator('[data-sidebar="sidebar"][data-mobile="true"]')).toBeVisible()
+})
+
+test("mobile drawer: a header drag tracks the finger, settles open, and a drawer drag closes it", async ({
+	page,
+	isMobile,
+}) => {
+	test.skip(!isMobile, "Only phones drag the sidebar drawer.")
+	await page.goto("/privacy")
+	// The history marker is written on mount, so the drag handlers are live once it exists.
+	await expect.poll(() => page.evaluate(() => localStorage.getItem("history"))).not.toBeNull()
+	const drawer = page.locator('[data-sidebar="sidebar"][data-mobile="true"]')
+	const right = () => drawer.evaluate(element => element.getBoundingClientRect().right)
+
+	await page.mouse.move(100, 24)
+	await page.mouse.down()
+	await page.mouse.move(180, 24, { steps: 8 })
+	// 1:1 tracking: an 80px drag shows 80px of drawer, with no transition lagging behind.
+	await expect.poll(right).toBeGreaterThan(76)
+	await expect.poll(right).toBeLessThan(84)
+	await page.mouse.move(340, 24, { steps: 8 })
+	await page.mouse.up()
+	await expect
+		.poll(() => drawer.evaluate(element => element.getBoundingClientRect().left))
+		.toBe(0)
+
+	await page.mouse.move(150, 400)
+	await page.mouse.down()
+	await page.mouse.move(0, 400, { steps: 8 })
+	await page.mouse.up()
+	await expect(drawer).toHaveCount(0)
 })
