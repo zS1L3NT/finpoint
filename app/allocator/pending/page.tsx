@@ -352,7 +352,7 @@ export default function AllocatorPendingPage() {
 										selectPending(null, queueQueryParam)
 								}}
 							/>
-							<FilterBar>
+							<FilterBar count={activeFilterCount}>
 								<Select
 									value={accountId}
 									onValueChange={value =>

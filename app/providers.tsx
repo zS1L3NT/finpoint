@@ -6,6 +6,7 @@ import { MotionConfig } from "framer-motion"
 import { useEffect, useState } from "react"
 import { preloadCategoryIcons } from "@/components/icon"
 import AppSidebar from "@/components/layout/app-sidebar"
+import MobileTabBar from "@/components/layout/mobile-tab-bar"
 import ShellHeader from "@/components/layout/shell-header"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { Toaster } from "@/components/ui/sonner"
@@ -75,10 +76,12 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 						<Analytics />
 						<SpeedInsights />
 						<AppSidebar />
-						<SidebarInset className="min-h-full">
+						{/* Phones reserve room for the fixed tab bar so the last rows stay reachable. */}
+						<SidebarInset className="min-h-full max-md:pb-[calc(3.75rem+env(safe-area-inset-bottom))]">
 							<ShellHeader />
 							{children}
 						</SidebarInset>
+						<MobileTabBar />
 					</SidebarProvider>
 				</TooltipProvider>
 			</HistoryProvider>

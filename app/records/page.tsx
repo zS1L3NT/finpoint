@@ -307,7 +307,7 @@ function RecordFilters({
 	}
 
 	return (
-		<FilterBar className="sm:flex sm:flex-wrap">
+		<FilterBar count={activeFilterCount} className="sm:flex sm:flex-wrap">
 			<CategoryFilter
 				categories={categories}
 				selectedIds={categoryIds}

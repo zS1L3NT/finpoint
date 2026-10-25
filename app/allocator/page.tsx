@@ -188,7 +188,7 @@ export default function AllocatorPage() {
 						onPageSizeChange: handlePageSizeChange,
 						searchPlaceholder: "Search descriptions...",
 						filters: (
-							<FilterBar>
+							<FilterBar count={activeFilterCount}>
 								<Select
 									value={accountId}
 									onValueChange={value =>

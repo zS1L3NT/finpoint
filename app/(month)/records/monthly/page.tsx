@@ -353,12 +353,13 @@ function MonthlyRecordFilters({
 		onChange(changes)
 	}
 
+	// Phones drop the card and put search beside the Filters button.
 	return (
 		<section
-			className="flex flex-col gap-3 rounded-lg border bg-muted/20 p-3"
+			className="flex items-center gap-2 sm:flex-col sm:items-stretch sm:gap-3 sm:rounded-lg sm:border sm:bg-muted/20 sm:p-3"
 			aria-labelledby="monthly-record-filters"
 		>
-			<div>
+			<div className="max-sm:sr-only">
 				<h3 id="monthly-record-filters" className="text-sm font-semibold">
 					Filter this month
 				</h3>
@@ -366,7 +367,7 @@ function MonthlyRecordFilters({
 					Search and narrow down this month's Records.
 				</p>
 			</div>
-			<div className="relative w-full md:w-sm">
+			<div className="relative w-full min-w-0 md:w-sm">
 				<IconifyIcon
 					icon="lucide:search"
 					className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground"
@@ -385,7 +386,7 @@ function MonthlyRecordFilters({
 					}}
 				/>
 			</div>
-			<FilterBar className="sm:flex sm:flex-wrap">
+			<FilterBar count={activeFilterCount} className="sm:flex sm:flex-wrap">
 				<CategoryFilter
 					categories={categories}
 					selectedIds={categoryIds}

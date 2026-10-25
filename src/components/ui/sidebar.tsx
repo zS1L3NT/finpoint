@@ -39,6 +39,9 @@ type SidebarContextProps = {
   setOpenMobile: (open: boolean) => void
   isMobile: boolean
   toggleSidebar: () => void
+  drawerDragged: boolean
+  drawerRef: React.RefObject<HTMLDivElement | null>
+  dragDrawer: (event: React.PointerEvent) => void
 }
 
 const SidebarContext = React.createContext<SidebarContextProps | null>(null)
@@ -66,7 +69,21 @@ function SidebarProvider({
   onOpenChange?: (open: boolean) => void
 }) {
   const isMobile = useIsMobile()
-  const [openMobile, setOpenMobile] = React.useState(false)
+  const [openMobile, setOpenMobileState] = React.useState(false)
+  // While a finger owns the mobile drawer, `--drawer-progress` (0 closed → 1 open) positions it
+  // instead of the sheet's enter/exit animations. Any regular open or close hands control back.
+  const [drawerDragged, setDrawerDragged] = React.useState(false)
+  const drawerRef = React.useRef<HTMLDivElement>(null)
+  const dragging = React.useRef(false)
+  const closeTimer = React.useRef<ReturnType<typeof setTimeout>>(undefined)
+  const setOpenMobile = React.useCallback(
+    (value: boolean | ((value: boolean) => boolean)) => {
+      clearTimeout(closeTimer.current)
+      setDrawerDragged(false)
+      setOpenMobileState(value)
+    },
+    []
+  )
 
   // This is the internal state of the sidebar.
   // We use openProp and setOpenProp for control from outside the component.
@@ -95,6 +112,86 @@ function SidebarProvider({
       ? setOpenMobile((open) => !open)
       : setOpen((open) => !open)
   }, [setOpen, setOpenMobile])
+
+  // Tracks a horizontal drag 1:1 (half the drawer width dragged = half open), then settles by
+  // position and release velocity. Vertical intent bails out early so scrolling stays native.
+  // One pointer owns the drawer at a time; a second finger, or the edge strip's pointerdown
+  // bubbling into the header, is ignored.
+  const dragDrawer = React.useCallback((event: React.PointerEvent) => {
+    if (window.innerWidth >= MOBILE_BREAKPOINT || event.button !== 0 || dragging.current) return
+    dragging.current = true
+    const { pointerId, clientX: startX, clientY: startY } = event
+    const target = event.currentTarget
+    let from = 0
+    let progress = 0
+    let velocity = 0
+    let last = { x: startX, t: event.timeStamp }
+    let active = false
+
+    const paint = (value: number, transition = "none") => {
+      const drawer = drawerRef.current
+      for (const el of [drawer, drawer?.previousElementSibling]) {
+        if (!(el instanceof HTMLElement)) continue
+        el.style.setProperty("--drawer-progress", String(value))
+        el.style.transition = transition
+      }
+    }
+    const stop = () => {
+      dragging.current = false
+      window.removeEventListener("pointermove", move)
+      window.removeEventListener("pointerup", release)
+      window.removeEventListener("pointercancel", release)
+    }
+    const move = (e: PointerEvent) => {
+      if (e.pointerId !== pointerId) return
+      const dx = e.clientX - startX
+      const dy = e.clientY - startY
+      if (!active) {
+        if (Math.abs(dy) > 10 && Math.abs(dy) > Math.abs(dx)) return stop()
+        // Start from where the drawer actually is, so catching it mid-settle doesn't jump.
+        const rect = drawerRef.current?.getBoundingClientRect()
+        from = rect ? Math.min(1, Math.max(0, rect.right / rect.width)) : 0
+        if (Math.abs(dx) < 8 || (from >= 1 && dx > 0) || (from <= 0 && dx < 0)) return
+        active = true
+        clearTimeout(closeTimer.current)
+        target.setPointerCapture(pointerId)
+        setDrawerDragged(true)
+        setOpenMobileState(true)
+      }
+      const width = drawerRef.current?.offsetWidth ?? 192
+      progress = Math.min(1, Math.max(0, from + dx / width))
+      velocity = (e.clientX - last.x) / Math.max(1, e.timeStamp - last.t) / width
+      last = { x: e.clientX, t: e.timeStamp }
+      paint(progress)
+    }
+    const release = (e: PointerEvent) => {
+      if (e.pointerId !== pointerId) return
+      stop()
+      if (!active) return
+      const cancelled = e.type === "pointercancel"
+      // A drag that ends over a link or button must not also activate it. Cancelled pointers fire no click.
+      if (!cancelled) {
+        const swallow = (click: MouseEvent) => {
+          click.preventDefault()
+          click.stopPropagation()
+        }
+        window.addEventListener("click", swallow, { capture: true, once: true })
+        setTimeout(() => window.removeEventListener("click", swallow, true), 100)
+      }
+
+      // A finger that stopped before lifting carries no fling.
+      if (e.timeStamp - last.t > 80) velocity = 0
+      const open = cancelled ? from >= 0.5 : progress + velocity * 150 > 0.5
+      const instant = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      paint(open ? 1 : 0, instant ? "none" : "translate 300ms cubic-bezier(0.32, 0.72, 0, 1), opacity 300ms ease-out")
+      // Closing stays under drag control so the already-hidden drawer unmounts without replaying an exit.
+      if (!open) closeTimer.current = setTimeout(() => setOpenMobileState(false), instant ? 0 : 300)
+    }
+
+    window.addEventListener("pointermove", move)
+    window.addEventListener("pointerup", release)
+    window.addEventListener("pointercancel", release)
+  }, [])
 
   // Adds a keyboard shortcut to toggle the sidebar.
   React.useEffect(() => {
@@ -125,8 +222,11 @@ function SidebarProvider({
       openMobile,
       setOpenMobile,
       toggleSidebar,
+      drawerDragged,
+      drawerRef,
+      dragDrawer,
     }),
-    [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar]
+    [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar, drawerDragged, dragDrawer]
   )
 
   return (
@@ -165,7 +265,7 @@ function Sidebar({
   variant?: "sidebar" | "floating" | "inset"
   collapsible?: "offcanvas" | "icon" | "none"
 }) {
-  const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+  const { isMobile, state, openMobile, setOpenMobile, drawerDragged, drawerRef, dragDrawer } = useSidebar()
   const mobileOpener = React.useRef<HTMLElement | null>(null)
 
   if (collapsible === "none") {
@@ -187,11 +287,19 @@ function Sidebar({
     return (
       <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
         <SheetContent
+          ref={drawerRef}
           dir={dir}
           data-sidebar="sidebar"
           data-slot="sidebar"
           data-mobile="true"
-          className="w-(--sidebar-width) max-w-[60vw] bg-sidebar p-0 text-sidebar-foreground"
+          className={cn(
+            "w-(--sidebar-width) max-w-[60vw] touch-pan-y touch-pinch-zoom bg-sidebar p-0 text-sidebar-foreground",
+            drawerDragged && "animate-none! translate-x-[calc((var(--drawer-progress,0)-1)*100%)]"
+          )}
+          overlayClassName={drawerDragged ? "animate-none! opacity-[var(--drawer-progress,0)]" : undefined}
+          onPointerDown={dragDrawer}
+          // A mouse drag over a link would start native drag-and-drop and cancel the drawer gesture.
+          onDragStart={event => event.preventDefault()}
           style={
             {
               "--sidebar-width": SIDEBAR_WIDTH_MOBILE,

@@ -123,7 +123,7 @@ export default function StatementsPage() {
 						onPageSizeChange: handlePageSizeChange,
 						searchPlaceholder: "Search descriptions...",
 						filters: (
-							<FilterBar>
+							<FilterBar count={activeFilterCount}>
 								<Select
 									value={accountId}
 									onValueChange={value =>

@@ -288,6 +288,8 @@
     html {
         @apply font-sans;
         scrollbar-gutter: stable;
+        /* Controls give their own press feedback; the grey WebKit tap flash reads as a web page. */
+        -webkit-tap-highlight-color: transparent;
     }
 
 	/*

@@ -164,7 +164,7 @@ export default function FixDuplicatesPage() {
 					onChange={event => updateParams({ query: event.target.value })}
 				/>
 				<div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:gap-4">
-					<FilterBar className="lg:w-auto">
+					<FilterBar count={filterCount} className="lg:w-auto">
 						<Select
 							value={view}
 							onValueChange={value =>

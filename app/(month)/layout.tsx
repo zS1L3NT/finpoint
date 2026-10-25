@@ -97,9 +97,10 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 								<span className="truncate">Back to {back.name}</span>
 							</Button>
 						) : null}
-						<div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-							<div>
-								<p className="text-xs font-medium text-muted-foreground">
+						{/* Phones keep the title and month control on one row; the tabs already name the view. */}
+						<div className="flex items-end justify-between gap-4">
+							<div className="min-w-0">
+								<p className="text-xs font-medium text-muted-foreground max-sm:hidden">
 									{isMonthly ? "Monthly Records" : "Monthly overview"}
 								</p>
 								<h2 className="mt-1 text-xl font-semibold tracking-tight md:text-2xl">
@@ -107,7 +108,7 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 								</h2>
 								<p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>
 							</div>
-							<ButtonGroup className="w-full sm:w-fit">
+							<ButtonGroup className="w-fit">
 								<Button
 									variant="outline"
 									aria-label="Previous month"
@@ -118,11 +119,17 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 								<Popover>
 									<PopoverTrigger
 										render={
-											<Button variant="outline" className="flex-1 sm:w-32" />
+											<Button
+												variant="outline"
+												aria-label={`Choose month, ${date.toFormat("MMMM yyyy")}`}
+												className="sm:w-32"
+											/>
 										}
 									>
-										<IconifyIcon icon="lucide:calendar" />{" "}
-										{date.toFormat("MMM yyyy")}
+										<IconifyIcon icon="lucide:calendar" />
+										<span className="max-sm:hidden">
+											{date.toFormat("MMM yyyy")}
+										</span>
 									</PopoverTrigger>
 									<PopoverContent className="w-auto p-0">
 										<MonthPicker
