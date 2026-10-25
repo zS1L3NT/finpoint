@@ -4,7 +4,8 @@ import { useLiveQuery } from "dexie-react-hooks"
 import { DateTime } from "luxon"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useRef } from "react"
+import { useRef, useState } from "react"
+import { toast } from "sonner"
 import CashflowChart from "@/components/charts/cashflow-chart"
 import CategoryHistoryChart from "@/components/charts/category-history-chart"
 import CategoryMovers from "@/components/charts/category-movers"
@@ -37,7 +38,14 @@ import { STALE_MONTH_CLASS, useMonthTransition } from "@/hooks/use-month-transit
 import { useStagedMount } from "@/hooks/use-staged-mount"
 import { cn, formatCurrency, pluralize } from "@/lib/utils"
 import { getDashboardView, type TrendMonth } from "@/logic/dashboard"
-import { pathAllocator, pathDashboard, pathMonthlyRecords, pathStatements } from "@/routes"
+import { hasWorkspaceActivity, loadDemoWorkspace } from "@/logic/workspace"
+import {
+	pathAllocator,
+	pathDashboard,
+	pathImporter,
+	pathMonthlyRecords,
+	pathStatements,
+} from "@/routes"
 import type { AnalyticsSummary } from "@/types"
 
 type DashboardView = Awaited<ReturnType<typeof getDashboardView>>
@@ -56,6 +64,7 @@ export default function DashboardPage() {
 	const router = useRouter()
 	const searchParams = useSearchParams()
 	const storedScope = searchParams.get("scope") ?? "all"
+	const active = useLiveQuery(() => hasWorkspaceActivity(), [])
 	// One live query, one table load: the three separate queries this replaced
 	// each re-scanned every table whenever anything changed.
 	const view = useLiveQuery(
@@ -129,6 +138,7 @@ export default function DashboardPage() {
 			aria-busy={stale}
 			className={cn("reveal grid gap-5 md:gap-6", stale && STALE_MONTH_CLASS)}
 		>
+			{active === false ? <DemoOffer /> : null}
 			{period.is_future ? (
 				<div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border bg-muted/20 p-4">
 					<div>
@@ -405,6 +415,46 @@ export default function DashboardPage() {
 					) : null}
 				</>
 			) : null}
+		</div>
+	)
+}
+
+function DemoOffer() {
+	const [loading, setLoading] = useState(false)
+
+	const handleDemo = async () => {
+		setLoading(true)
+		try {
+			await loadDemoWorkspace()
+			toast.success("Demo workspace loaded.")
+		} catch {
+			toast.error("Could not load demo data.")
+		} finally {
+			setLoading(false)
+		}
+	}
+
+	return (
+		<div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border bg-muted/20 p-4">
+			<div>
+				<p className="text-sm font-semibold">New to Finpoint?</p>
+				<p className="mt-1 text-xs text-muted-foreground">
+					Explore with demo data: 3 accounts and 5 months of Records. Reset it any time
+					from Data.
+				</p>
+			</div>
+			<div className="flex flex-wrap gap-2">
+				<Button variant="outline" size="sm" asChild>
+					<Link href={pathImporter()}>
+						<IconifyIcon icon="lucide:upload" />
+						Import statements
+					</Link>
+				</Button>
+				<Button size="sm" disabled={loading} onClick={() => void handleDemo()}>
+					<IconifyIcon icon="lucide:sparkles" />
+					{loading ? "Loading…" : "Try demo data"}
+				</Button>
+			</div>
 		</div>
 	)
 }

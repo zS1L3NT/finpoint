@@ -18,6 +18,16 @@ export async function countWorkspaceRows() {
 	return tableCounts()
 }
 
+/** False until the user has accounts, Statements, or Records: the Overview then offers demo data. */
+export async function hasWorkspaceActivity() {
+	const counts = await Promise.all([
+		db.accounts.count(),
+		db.statements.count(),
+		db.records.count(),
+	])
+	return counts.some(Boolean)
+}
+
 export async function exportWorkspace() {
 	downloadExport(await exportData())
 }

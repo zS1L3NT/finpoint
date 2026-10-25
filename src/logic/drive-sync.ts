@@ -13,6 +13,7 @@ import {
 	isDriveConfigured,
 	uploadBackupFile,
 } from "@/data/google-drive"
+import { SEED_HASH_KEY } from "@/data/seed"
 import { hashSnapshot } from "@/data/snapshot-hash"
 import { isRemoteNewer } from "@/logic/shared"
 
@@ -58,17 +59,22 @@ export async function markDriveChecked(): Promise<void> {
 	await db.meta.put({ key: LAST_CHECK_KEY, value: new Date().toISOString() })
 }
 
+/** The hash local changes are measured from: the last sync, else the untouched starter rows. */
+async function baselineHash(): Promise<string | null> {
+	return (await metaGet(LAST_HASH_KEY)) ?? (await metaGet(SEED_HASH_KEY))
+}
+
 export async function driveLocalDirty(): Promise<boolean> {
 	const snapshot = await exportData()
-	const lastHash = await metaGet(LAST_HASH_KEY)
-	if (!lastHash) {
+	const baseline = await baselineHash()
+	if (!baseline) {
 		return (
 			snapshot.settings.default_filter_start_date != null ||
 			snapshot.settings.default_filter_end_date_today ||
 			Object.values(snapshot.tables).some(rows => Array.isArray(rows) && rows.length > 0)
 		)
 	}
-	return (await hashSnapshot(snapshot)) !== lastHash
+	return (await hashSnapshot(snapshot)) !== baseline
 }
 
 export async function syncDrive(): Promise<DriveSyncResult> {
@@ -78,10 +84,10 @@ export async function syncDrive(): Promise<DriveSyncResult> {
 	const snapshot = await exportData()
 	const localHash = await hashSnapshot(snapshot)
 
-	const [storedFileId, lastSyncAt, lastHash] = await Promise.all([
+	const [storedFileId, lastSyncAt, baseline] = await Promise.all([
 		metaGet(FILE_ID_KEY),
 		metaGet(LAST_SYNC_KEY),
-		metaGet(LAST_HASH_KEY),
+		baselineHash(),
 	])
 
 	let fileId = storedFileId
@@ -112,7 +118,7 @@ export async function syncDrive(): Promise<DriveSyncResult> {
 		return { outcome: "pushed" }
 	}
 
-	const localDirty = lastHash ? localHash !== lastHash : true
+	const localDirty = baseline ? localHash !== baseline : true
 	const remoteDirty = isRemoteNewer(remoteMeta.modifiedTime, lastSyncAt, getClockSkewMs())
 	await db.meta.put({ key: REMOTE_TIME_KEY, value: remoteMeta.modifiedTime })
 	if (!localDirty && !remoteDirty) return { outcome: "up-to-date" }

@@ -62,8 +62,8 @@ defaults and applies to both tiers of `full`. Anything else (positional paths, `
 `--shard`) is refused; run single files ad-hoc with `bun run test:web -- <path>` instead.
 The runners live in `scripts/test/` (`core.ts`, `extra.ts`, `full.ts`, sharing `lib/`).
 
-Core is 354 runs (desktop and mobile); a full run is 377 core runs on all five projects,
-then 102 extra runs (`bunx playwright test --list`, 24 October 2026). On a 12-core Linux host
+Core is 356 runs (desktop and mobile); a full run is 379 core runs on all five projects,
+then 102 extra runs (`bunx playwright test --list`, 25 October 2026). On a 12-core Linux host
 without a GPU a full run took about 27 min (13 min core on 6 workers, 13 min extra);
 the 313-run core tier before the main merge took about 11 min including the production build.
 After the merge, a full run (365 + 102) on the developer's Mac took about 16 min (7 min core,
