@@ -27,12 +27,12 @@ env:
 
 jobs:
   changes:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       code: ${{ steps.scope.outputs.code }}
       e2e: ${{ steps.scope.outputs.e2e }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - id: scope
@@ -64,9 +64,9 @@ jobs:
   checks:
     needs: changes
     if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.code == 'true') }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
       - name: Lint
@@ -79,9 +79,9 @@ jobs:
   domain:
     needs: changes
     if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.code == 'true') }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
       - name: Domain tests
@@ -91,7 +91,7 @@ jobs:
     name: core (${{ matrix.group }})
     needs: changes
     if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.e2e == 'true') }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 40
     strategy:
       fail-fast: false
@@ -108,7 +108,7 @@ jobs:
           - group: components
             files: tests/core/components.e2e.ts tests/core/sheets.e2e.ts tests/core/helpers.e2e.ts tests/core/ledger.e2e.ts
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
       - name: Playwright core (${{ matrix.group }})
         run: >-
@@ -116,7 +116,7 @@ jobs:
           --workers=2 --reporter=list,blob
         env:
           PLAYWRIGHT_BLOB_OUTPUT_FILE: blob-report/core-${{ matrix.group }}.zip
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: blob-core-${{ matrix.group }}
@@ -127,7 +127,7 @@ jobs:
     name: animations (${{ matrix.group }})
     needs: changes
     if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.e2e == 'true') }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 40
     strategy:
       fail-fast: false
@@ -140,7 +140,7 @@ jobs:
           - group: display
             files: tests/animations/charts.e2e.ts tests/animations/routes.e2e.ts tests/animations/components.e2e.ts tests/animations/helpers.e2e.ts
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
       - name: Playwright animations (${{ matrix.group }})
         run: >-
@@ -149,7 +149,7 @@ jobs:
         env:
           PLAYWRIGHT_ANIMATIONS: "1"
           PLAYWRIGHT_BLOB_OUTPUT_FILE: blob-report/animations-${{ matrix.group }}.zip
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: blob-animations-${{ matrix.group }}
@@ -159,17 +159,17 @@ jobs:
   core:
     needs: [changes, core-group]
     if: ${{ !cancelled() }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       RAN: ${{ needs.changes.result != 'success' || needs.changes.outputs.e2e == 'true' }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         if: ${{ env.RAN == 'true' }}
       - uses: oven-sh/setup-bun@v2
         if: ${{ env.RAN == 'true' }}
       - run: bun install --frozen-lockfile
         if: ${{ env.RAN == 'true' }}
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         if: ${{ env.RAN == 'true' }}
         with:
           pattern: blob-core-*
@@ -178,7 +178,7 @@ jobs:
       - name: Merge reports
         if: ${{ env.RAN == 'true' }}
         run: bunx playwright merge-reports --reporter=html,github ./blob-report
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: ${{ env.RAN == 'true' }}
         with:
           name: playwright-report-core
@@ -196,17 +196,17 @@ jobs:
   animations:
     needs: [changes, animations-group]
     if: ${{ !cancelled() }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       RAN: ${{ needs.changes.result != 'success' || needs.changes.outputs.e2e == 'true' }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         if: ${{ env.RAN == 'true' }}
       - uses: oven-sh/setup-bun@v2
         if: ${{ env.RAN == 'true' }}
       - run: bun install --frozen-lockfile
         if: ${{ env.RAN == 'true' }}
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         if: ${{ env.RAN == 'true' }}
         with:
           pattern: blob-animations-*
@@ -215,7 +215,7 @@ jobs:
       - name: Merge reports
         if: ${{ env.RAN == 'true' }}
         run: bunx playwright merge-reports --reporter=html,github ./blob-report
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: ${{ env.RAN == 'true' }}
         with:
           name: playwright-report-animations

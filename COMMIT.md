@@ -49,3 +49,7 @@ Common gitmojis (full list at [gitmoji.dev](https://gitmoji.dev)):
 - **Approval** belongs to humans. Leave reviews as comments; never approve a pull request.
 
 <!-- setup-conventions:generated-end -->
+
+## Finpoint Additions
+
+- **Assignee:** assign every pull request to its owner, `zS1L3NT`, when opening it (`gh pr create --assignee zS1L3NT`).
