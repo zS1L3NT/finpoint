@@ -22,5 +22,5 @@ runs:
       run: bun run build
       shell: bash
     - name: Build harness
-      run: bunx vite build --config tests/web/harness/vite.config.ts
+      run: bunx vite build --config tests/harness/vite.config.ts
       shell: bash

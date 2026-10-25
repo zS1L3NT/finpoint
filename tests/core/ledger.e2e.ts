@@ -17,7 +17,7 @@ import {
 	scenarioProjects,
 } from "../component-inventory"
 
-const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..")
+const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..")
 
 // Financial Pending states are valid evidence. Only admissions of unfinished
 // coverage count here; an executable mapping cannot close an admitted facet.
@@ -171,7 +171,7 @@ function collectTests(
 	// IDS is reviewed deterministic fixture data, not a dynamic executable import.
 	const data = ts.createSourceFile(
 		"data.ts",
-		readFileSync(join(root, "tests/web/support/data.ts"), "utf8"),
+		readFileSync(join(root, "tests/support/data.ts"), "utf8"),
 		ts.ScriptTarget.Latest,
 		true,
 	)
@@ -524,7 +524,7 @@ function collectTests(
 function declaredTests() {
 	const declarations = new Map<string, string[]>()
 	const selections = new Map<string, TestSelection[]>()
-	for (const directory of ["tests/web/core", "tests/web/extra"]) {
+	for (const directory of ["tests/core", "tests/animations"]) {
 		let entries: string[]
 		try {
 			entries = files(directory)
@@ -794,7 +794,7 @@ test("ledger coverage: reviewed behaviour mappings reference executable test IDs
 				id: `${entry.path}#export.${name}.behaviour`,
 				owner: entry.owner,
 				description: entry.dormantExports.includes(name)
-					? `Dormant ${name}: substantive standalone tests/web/harness consumer at port 5174; verify supported output and interactions, not just mounting`
+					? `Dormant ${name}: substantive standalone tests/harness consumer at port 5174; verify supported output and interactions, not just mounting`
 					: `${name}: reviewed substantive output/interaction assertions through a real route or composed harness consumer`,
 				exempt: false,
 			})
@@ -967,7 +967,7 @@ function ledgerDescription(id: string): string {
 test("ledger projects: project selection executes every ledger configuration claim", async () => {
 	delete process.env.PLAYWRIGHT_FULL_MATRIX
 	delete process.env.PLAYWRIGHT_BROWSERS
-	const config = (await import("../../../playwright.config")).default as unknown as {
+	const config = (await import("../../playwright.config")).default as unknown as {
 		projects: SelectionProject[]
 	}
 	const projects = new Map(config.projects.map(project => [project.name, project]))
@@ -1128,7 +1128,7 @@ test("ledger projects: project selection executes every ledger configuration cla
 })
 
 test("ledger tiers: core files never import the motion sampler module", () => {
-	const coreFiles = files("tests/web/core").filter(path => path.endsWith(".e2e.ts"))
+	const coreFiles = files("tests/core").filter(path => path.endsWith(".e2e.ts"))
 	expect(coreFiles.length).toBeGreaterThan(0)
 	for (const path of coreFiles) {
 		const text = readFileSync(join(root, path), "utf8")
@@ -1137,6 +1137,22 @@ test("ledger tiers: core files never import the motion sampler module", () => {
 			`${path}: core files must not import support/motion`,
 		).toBe(false)
 	}
+})
+
+// CI runs each tier as named groups of files, so a file missing from the workflow
+// would never run in CI and a file listed twice would run twice.
+test("ledger CI groups: every browser test file belongs to exactly one CI group", () => {
+	const workflow = readFileSync(join(root, ".github/workflows/ci.yml"), "utf8")
+	const listed = workflow.match(/tests\/(?:core|animations)\/[\w-]+\.e2e\.ts/g) ?? []
+	for (const path of [...files("tests/core"), ...files("tests/animations")].filter(path =>
+		path.endsWith(".e2e.ts"),
+	))
+		expect(
+			listed.filter(entry => entry === path).length,
+			`${path}: list it in exactly one group in .github/workflows/ci.yml`,
+		).toBe(1)
+	for (const entry of listed)
+		expect(files(dirname(entry)), `${entry}: listed in CI but missing`).toContain(entry)
 })
 
 // D10 import-only tier guard, read from syntax so comments can never match:

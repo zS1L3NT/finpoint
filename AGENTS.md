@@ -41,8 +41,8 @@
 - Before changing the shape of a shared helper API in a meaningful way, such as converting a plain column factory into a hook, consult the user first unless they explicitly asked for that refactor.
 
 ## Verification
-- Run `bun test` for the domain and importer tests, which use Dexie with in-memory IndexedDB.
-- Browser tests (`tests/web/`, Playwright) are scoped to what you change: run the files and projects that exercise the components, routes, or helpers you touched, and make them pass. Core tests (`tests/web/core/`) run in parallel; extra tests (`tests/web/extra/`, animation) run alone, one at a time. Ad-hoc runs use the dev servers: `bun run test:web -- <files> --project=desktop --project=mobile` for core, `PLAYWRIGHT_EXTRA=1 bun run test:web -- <files> --workers=1` for extra. The release path is the runners (`bun run test:web:core`, `bun run test:web:extra`, `bun run test:web:full`), which build frozen production bundles; do not run them by default. Core is 356 runs; a full run is 379 core + 102 extra runs (about 27 minutes on a 12-core Linux host). See `tests/web/README.md` for the area layout and how to pick cases.
+- Run `bun test` for the domain and importer tests (`tests/domain/`), which use Dexie with in-memory IndexedDB.
+- Browser tests (`tests/core/`, `tests/animations/`, Playwright) are scoped to what you change: run the files and projects that exercise the components, routes, or helpers you touched, and make them pass. Core tests run in parallel; animation tests run alone, one at a time. Local runs use the dev servers: `bun run test:e2e -- <files> --project=desktop --project=mobile` for core, `PLAYWRIGHT_ANIMATIONS=1 bun run test:e2e -- <files> --workers=1` for animations. CI (`.github/workflows/ci.yml`) runs the whole suite on every pull request in named, time-balanced groups; a new browser test file must join exactly one group there. See `tests/README.md` for the area layout, the CI groups, and how to pick cases.
 - When asked to verify with `npm run dev`, run it directly, smoke-test the relevant local route, and stop the dev server afterwards.
 
 ## Agent skills

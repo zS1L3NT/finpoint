@@ -3,11 +3,6 @@
 	"compilerOptions": {
 		"incremental": false
 	},
-	"include": [
-		"tests/web/**/*.ts",
-		"tests/web/**/*.tsx",
-		"scripts/**/*.ts",
-		"playwright.config.ts"
-	],
-	"exclude": ["node_modules"]
+	"include": ["tests/**/*.ts", "tests/**/*.tsx", "playwright.config.ts"],
+	"exclude": ["node_modules", "tests/domain"]
 }

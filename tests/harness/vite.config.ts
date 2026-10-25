@@ -4,7 +4,7 @@ import react from "@vitejs/plugin-react"
 import { defineConfig } from "vite"
 
 const harnessDir = fileURLToPath(new URL(".", import.meta.url))
-const repoRoot = path.resolve(harnessDir, "..", "..", "..")
+const repoRoot = path.resolve(harnessDir, "..", "..")
 
 export default defineConfig(({ command }) => ({
 	root: harnessDir,

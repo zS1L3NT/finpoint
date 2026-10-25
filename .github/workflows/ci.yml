@@ -1,9 +1,11 @@
-# Browser tests on GitHub-hosted runners (free for this public repository). Core is
-# split into shards across all five projects; extra runs one job per project with a
-# single worker, since it samples animation frames. The `core` and `extra` jobs gate
-# their shards, merge the blob reports into one HTML report artifact, and are the
-# checks a ruleset would require.
-name: web
+# Continuous integration on GitHub-hosted runners (free for this public repository).
+# Browser tests run as named groups of files, balanced by measured run time, so a red
+# job names the area that broke. Core groups run every project in parallel; animation
+# groups run one test at a time, since they sample animation frames. The `core` and
+# `animations` jobs gate their groups and merge the blob reports into one HTML report
+# artifact; with `checks` and `domain` they are the checks the ruleset requires.
+# The ledger fails if a browser test file is missing from these groups or listed twice.
+name: ci
 
 on:
   pull_request:
@@ -12,65 +14,102 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: web-${{ github.ref }}
+  group: ci-${{ github.ref }}
   cancel-in-progress: true
 
 env:
   PLAYWRIGHT_SERVER: production
 
 jobs:
-  core-shard:
-    name: core (${{ matrix.shard }}/4)
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - name: Lint
+        run: bun lint:check
+      - name: Types
+        run: bun types:check
+      - name: Browser test types
+        run: bun run types:e2e
+
+  domain:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - name: Domain tests
+        run: bun test
+
+  core-group:
+    name: core (${{ matrix.group }})
     runs-on: ubuntu-latest
     timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3, 4]
+        include:
+          - group: pages
+            files: tests/core/routes.e2e.ts
+          - group: flows
+            files: tests/core/navigation.e2e.ts tests/core/workflows.e2e.ts
+          - group: editing
+            files: tests/core/editors.e2e.ts tests/core/modals.e2e.ts tests/core/keyboard.e2e.ts
+          - group: data
+            files: tests/core/charts.e2e.ts tests/core/tables.e2e.ts
+          - group: components
+            files: tests/core/components.e2e.ts tests/core/sheets.e2e.ts tests/core/helpers.e2e.ts tests/core/ledger.e2e.ts
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup
-      - name: Playwright core
+      - name: Playwright core (${{ matrix.group }})
         run: >-
-          bunx playwright test tests/web/core
-          --project=desktop --project=mobile --project=tall-desktop --project=light --project=reduced-motion
-          --workers=2 --shard=${{ matrix.shard }}/4 --reporter=list,blob
+          bunx playwright test ${{ matrix.files }}
+          --workers=2 --reporter=list,blob
         env:
-          PLAYWRIGHT_BLOB_OUTPUT_FILE: blob-report/core-${{ matrix.shard }}.zip
+          PLAYWRIGHT_BLOB_OUTPUT_FILE: blob-report/core-${{ matrix.group }}.zip
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
-          name: blob-core-${{ matrix.shard }}
+          name: blob-core-${{ matrix.group }}
           path: blob-report
           retention-days: 7
 
-  extra-project:
-    name: extra (${{ matrix.project }})
+  animations-group:
+    name: animations (${{ matrix.group }})
     runs-on: ubuntu-latest
     timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:
-        project: [desktop, mobile, tall-desktop, light, reduced-motion]
+        include:
+          - group: tables
+            files: tests/animations/tables.e2e.ts
+          - group: editing
+            files: tests/animations/editors.e2e.ts tests/animations/modals.e2e.ts tests/animations/sheets.e2e.ts
+          - group: display
+            files: tests/animations/charts.e2e.ts tests/animations/routes.e2e.ts tests/animations/components.e2e.ts tests/animations/helpers.e2e.ts
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup
-      - name: Playwright extra
+      - name: Playwright animations (${{ matrix.group }})
         run: >-
-          bunx playwright test tests/web/extra --project=${{ matrix.project }}
+          bunx playwright test ${{ matrix.files }}
           --workers=1 --reporter=list,blob
         env:
-          PLAYWRIGHT_EXTRA: "1"
-          PLAYWRIGHT_BLOB_OUTPUT_FILE: blob-report/extra-${{ matrix.project }}.zip
+          PLAYWRIGHT_ANIMATIONS: "1"
+          PLAYWRIGHT_BLOB_OUTPUT_FILE: blob-report/animations-${{ matrix.group }}.zip
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
-          name: blob-extra-${{ matrix.project }}
+          name: blob-animations-${{ matrix.group }}
           path: blob-report
           retention-days: 7
 
   core:
-    needs: core-shard
+    needs: core-group
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     steps:
@@ -90,13 +129,13 @@ jobs:
           path: playwright-report
           retention-days: 14
       - name: Gate
-        if: ${{ needs.core-shard.result != 'success' }}
+        if: ${{ needs.core-group.result != 'success' }}
         run: |
-          echo "::error::core shards: ${{ needs.core-shard.result }}"
+          echo "::error::core groups: ${{ needs.core-group.result }}"
           exit 1
 
-  extra:
-    needs: extra-project
+  animations:
+    needs: animations-group
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     steps:
@@ -105,18 +144,18 @@ jobs:
       - run: bun install --frozen-lockfile
       - uses: actions/download-artifact@v4
         with:
-          pattern: blob-extra-*
+          pattern: blob-animations-*
           path: blob-report
           merge-multiple: true
       - name: Merge reports
         run: bunx playwright merge-reports --reporter=html,github ./blob-report
       - uses: actions/upload-artifact@v4
         with:
-          name: playwright-report-extra
+          name: playwright-report-animations
           path: playwright-report
           retention-days: 14
       - name: Gate
-        if: ${{ needs.extra-project.result != 'success' }}
+        if: ${{ needs.animations-group.result != 'success' }}
         run: |
-          echo "::error::extra projects: ${{ needs.extra-project.result }}"
+          echo "::error::animations groups: ${{ needs.animations-group.result }}"
           exit 1
