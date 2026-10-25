@@ -112,10 +112,10 @@ export default function DashboardPage() {
 		...budget,
 		dashed: budget.id === "unbudgeted",
 	}))
-	const categoryRecordHref = (id: string) =>
+	const categoryRecordHref = (id: string, at?: DateTime) =>
 		pathMonthlyRecords({
-			month,
-			year: String(year),
+			month: at?.toFormat("MMMM") ?? month,
+			year: String(at?.year ?? year),
 			category_ids: id,
 			effective_spending: "true",
 			...scopeFilters,
@@ -315,6 +315,7 @@ export default function DashboardPage() {
 								months={data.comparison_history}
 								through={period.through}
 								monthlyBudgetIds={scope === "all" ? null : scopedBudgetIds}
+								recordHref={categoryRecordHref}
 								badge={
 									<ScopeLabel
 										scope={scope === "all" ? "Total" : scopeLabel}

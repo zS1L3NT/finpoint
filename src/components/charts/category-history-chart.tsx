@@ -1,8 +1,11 @@
 "use client"
 
+import { DateTime } from "luxon"
+import Link from "next/link"
 import { useState } from "react"
 import BarChart from "@/components/charts/bar-chart"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useHistory } from "@/history"
 import { formatCurrency } from "@/lib/utils"
 import { BREAKDOWN_MONTHS, type SpendingHistoryMonth } from "@/logic/dashboard"
 
@@ -20,11 +23,13 @@ export default function CategoryHistoryChart({
 	months,
 	through,
 	monthlyBudgetIds,
+	recordHref,
 	badge,
 }: {
 	months: SpendingHistoryMonth[]
 	through: string | null
 	monthlyBudgetIds: string[] | null
+	recordHref: (ids: string, at: DateTime) => string
 	badge: React.ReactNode
 }) {
 	const [active, setActive] = useState<number | null>(null)
@@ -125,7 +130,7 @@ export default function CategoryHistoryChart({
 				)}
 
 				{shown && totalSpending > 0 ? (
-					<MonthBreakdown month={shown} config={config} />
+					<MonthBreakdown month={shown} config={config} recordHref={recordHref} />
 				) : null}
 				{allSeries.length > visibleSeriesLimit && (
 					<details className="text-xs text-muted-foreground">
@@ -248,13 +253,17 @@ function monthTotal(month: ChartMonth) {
 	return Object.values(month.seriesValues).reduce((sum, value) => sum + value, 0)
 }
 
+// Like Revolut's Analytics breakdown, each row opens that month's Records for its Categories.
 function MonthBreakdown({
 	month,
 	config,
+	recordHref,
 }: {
 	month: ChartMonth
 	config: Record<string, { label: string; color: string }>
+	recordHref: (ids: string, at: DateTime) => string
 }) {
+	const { handlePush } = useHistory()
 	const total = monthTotal(month)
 	const entries = Object.entries(month.seriesValues)
 		.filter(([, value]) => value > 0)
@@ -280,7 +289,15 @@ function MonthBreakdown({
 				entries.map(([key, value]) => {
 					const details = month.seriesDetails[key] ?? []
 					return (
-						<div key={key} className="grid gap-1 rounded-lg bg-muted/40 px-3 py-2">
+						<Link
+							key={key}
+							href={recordHref(
+								details.map(item => item.id).join(","),
+								DateTime.fromFormat(month.month, "MMM yyyy"),
+							)}
+							onClick={handlePush("overview")}
+							className="grid gap-1 rounded-lg bg-muted/40 px-3 py-2 transition-colors duration-150 ease-out hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+						>
 							<div className="grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-x-3">
 								<span
 									className="size-2.5 rounded-full"
@@ -313,7 +330,7 @@ function MonthBreakdown({
 										</span>
 									</div>
 								))}
-						</div>
+						</Link>
 					)
 				})
 			)}

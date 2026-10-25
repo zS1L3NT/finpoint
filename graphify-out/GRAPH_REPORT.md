@@ -1,17 +1,17 @@
 # Graph Report - ai-revolut-style-charts  (2026-10-26)
 
 ## Corpus Check
-- 243 files · ~215,479 words
+- 243 files · ~215,557 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 9 file(s) not represented in the graph (top: (none) 5, .example 1, .lock 1)
 
 ## Summary
-- 1878 nodes · 7501 edges · 87 communities (76 shown, 11 thin omitted)
+- 1878 nodes · 7506 edges · 88 communities (77 shown, 11 thin omitted)
 - Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 127 edges (avg confidence: 0.84)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `8507e50d`
+- Built from commit: `4e39ce12`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -25,6 +25,7 @@
 - lib/motion.ts
 - providers.tsx
 - fixtures.ts
+- category-history-chart.tsx
 - paginated-data-table.tsx
 - compilerOptions
 - editors.ts
@@ -111,7 +112,7 @@
 7. `UiIcon()` - 56 edges
 8. `RecordCreatorDialog()` - 52 edges
 9. `round2()` - 44 edges
-10. `PageContent()` - 42 edges
+10. `next` - 42 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `Finpoint Style Additions` --references--> `useApiFormErrors()`  [INFERRED]
@@ -137,7 +138,7 @@
 - **Test group to gate to merged report flow** — github_workflows_ci_core_group, github_workflows_ci_animations_group, github_workflows_ci_core, github_workflows_ci_animations, github_workflows_ci_blob_report_merge [EXTRACTED 1.00]
 - **Every browser test file joins exactly one CI group, enforced by the ledger** — tests_readme_behaviour_ledger, tests_readme_ci_groups, github_workflows_ci_core_group, github_workflows_ci_animations_group, agents_verification_rules [INFERRED 0.95]
 
-## Communities (87 total, 11 thin omitted)
+## Communities (88 total, 11 thin omitted)
 
 ### Community 0 - "pending/page.tsx"
 Cohesion: 0.06
@@ -174,6 +175,10 @@ Nodes (28): metadata, RootLayout(), viewport, Boot(), Providers(), lucide-react,
 ### Community 8 - "fixtures.ts"
 Cohesion: 0.13
 Nodes (21): @playwright/test, cardTitles, Child, october, september, card(), chartTooltip, overview (+13 more)
+
+### Community 9 - "category-history-chart.tsx"
+Cohesion: 0.24
+Nodes (12): aggregateSeries(), CategoryHistoryChart(), ChartMonth, ChartSeries, MonthBreakdown(), MonthTick(), monthTotal(), prepareMonths() (+4 more)
 
 ### Community 10 - "paginated-data-table.tsx"
 Cohesion: 0.23
@@ -304,8 +309,8 @@ Cohesion: 0.36
 Nodes (7): MonthLayout(), luxon, ButtonGroup(), buttonGroupVariants, SearchInit, useMonthParams(), armMonthTransition()
 
 ### Community 45 - "formatCurrency"
-Cohesion: 0.11
-Nodes (31): bar(), BarChart(), BarSeries, PAD, aggregateSeries(), CategoryHistoryChart(), ChartMonth, ChartSeries (+23 more)
+Cohesion: 0.17
+Nodes (19): bar(), BarChart(), BarSeries, PAD, ChartSize, ReadoutRows(), arc(), centerCurrency() (+11 more)
 
 ### Community 47 - "formatter"
 Cohesion: 0.15
@@ -451,13 +456,13 @@ Nodes (5): Agent Behavior, Generated / Ignored Files, src/components/*, src/comp
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `react` connect `Button` to `pending/page.tsx`, `cn`, `next`, `lib/motion.ts`, `providers.tsx`, `(month)/layout.tsx`, `paginated-data-table.tsx`, `formatCurrency`, `utils.ts`, `(month)/page.tsx`, `pagination.tsx`, `date-range.tsx`, `package.json`, `sync/page.tsx`, `category-filter.tsx`, `app-sidebar.tsx`?**
-  _High betweenness centrality (0.085) - this node is a cross-community bridge._
+- **Why does `cn()` connect `cn` to `pending/page.tsx`, `Button`, `next`, `lib/motion.ts`, `providers.tsx`, `(month)/layout.tsx`, `paginated-data-table.tsx`, `formatCurrency`, `utils.ts`, `(month)/page.tsx`, `pagination.tsx`, `date-range.tsx`, `sync/page.tsx`, `spending-calendar.tsx`, `category-filter.tsx`, `app-sidebar.tsx`?**
+  _High betweenness centrality (0.083) - this node is a cross-community bridge._
 - **What connects `@fontsource-variable/inter`, `shadcn`, `tailwindcss` to the rest of the system?**
   _83 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `pending/page.tsx` be split into smaller, more focused modules?**
   _Cohesion score 0.06463923673225999 - nodes in this community are weakly interconnected._
-- **Why does `cn()` connect `cn` to `pending/page.tsx`, `Button`, `next`, `lib/motion.ts`, `providers.tsx`, `(month)/layout.tsx`, `paginated-data-table.tsx`, `formatCurrency`, `utils.ts`, `(month)/page.tsx`, `pagination.tsx`, `date-range.tsx`, `sync/page.tsx`, `spending-calendar.tsx`, `category-filter.tsx`, `app-sidebar.tsx`?**
+- **Why does `react` connect `Button` to `pending/page.tsx`, `cn`, `next`, `lib/motion.ts`, `providers.tsx`, `category-history-chart.tsx`, `(month)/layout.tsx`, `paginated-data-table.tsx`, `formatCurrency`, `utils.ts`, `(month)/page.tsx`, `pagination.tsx`, `date-range.tsx`, `package.json`, `sync/page.tsx`, `category-filter.tsx`, `app-sidebar.tsx`?**
   _High betweenness centrality (0.083) - this node is a cross-community bridge._
 - **Should `Button` be split into smaller, more focused modules?**
   _Cohesion score 0.05070092514038702 - nodes in this community are weakly interconnected._

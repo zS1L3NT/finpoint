@@ -8,6 +8,7 @@
   "6": "lib/motion.ts",
   "7": "providers.tsx",
   "8": "fixtures.ts",
+  "9": "category-history-chart.tsx",
   "10": "paginated-data-table.tsx",
   "11": "compilerOptions",
   "12": "editors.ts",
