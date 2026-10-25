@@ -34,15 +34,20 @@ I've also hosted Finpoint on my personal subdomain at https://finpoint.zectan.co
 
 - Dashboard
   - Monthly income, spending and surplus or shortfall
+  - Spending forecast with a projected month-end and recommended daily pace
   - Daily spending pace and previous-month comparisons
-  - Spending by day and weekday
+  - Spending by day and weekday, plus a spending calendar that opens each day's Records
   - Category and Monthly Budget breakdowns
+  - Biggest category changes against your usual spending
+  - Page-wide Monthly Budget scope that stays across chart links and month changes
   - Reusable Monthly Budgets with monthly amount overrides
   - Pending Record and Statement summaries
+  - Demo data offered on an empty overview
 - Records
   - Create, update and delete Records
   - Assign Categories, Monthly Budgets and accounting treatments
   - Attach one or more Statements through Allocations
+  - Suggested and autofilled details from Statement Rules
   - Search, filter and paginate Records
   - Monthly Records view with month navigation
 - Statements
@@ -54,13 +59,20 @@ I've also hosted Finpoint on my personal subdomain at https://finpoint.zectan.co
   - CSV, XLS and XLSX support
   - Automatically create missing Accounts during import
   - Skip duplicate Statements and preserve same-day ordering
+  - Flag possible Duplicate Statements with a badge
   - Create handwritten Pending Statements
   - Search and filter by Account, status and date
-- Allocator
+- Statement Rules
+  - Recognise recurring Statements by description (contains, is exactly or regex match)
+  - Suggest or autofill Record title, people, location, Category, treatment and Monthly Budget
+  - Live preview of the Statements a rule matches
+- Workflows
   - Allocate Statements to existing or new Records
   - Split amounts across multiple Records
   - Review incomplete Allocations
   - Replace a Pending Statement with imported activity while preserving its Allocations
+  - Fix Duplicate Statements by keeping one and moving its Allocations to it
+  - Mark same-day pairs as separate so they are no longer suggested
 - Planning
   - Categories
     - Nested subcategories
@@ -69,7 +81,7 @@ I've also hosted Finpoint on my personal subdomain at https://finpoint.zectan.co
   - Monthly Budgets
     - Core, outlier and custom groups
     - Daily, recurring or unpaced spending
-    - Default Monthly Budget amounts and month-specific overrides
+    - Default, one-month and from-this-month-onward amount rules
   - Budgets
     - Custom date periods and amounts
     - Automatic or manual Record membership
@@ -78,8 +90,9 @@ I've also hosted Finpoint on my personal subdomain at https://finpoint.zectan.co
   - Local IndexedDB storage with no account required
   - Optional automatic sync through your own Google Drive
   - Manual JSON backup and restore
-  - Conflict handling when both the browser and Drive copy change
+  - Conflict handling when both the browser and Drive copy change, without flagging untouched starter workspaces
   - Generated demo data
+  - Default filter date ranges
   - Light, dark and system themes
   - Progressive Web Application support
 
@@ -106,7 +119,14 @@ The interface is built with [shadcn/ui](https://ui.shadcn.com/) and [Base UI](ht
 
 ## Tests
 
-Finpoint does not currently have an automated test suite. The codebase can be checked with the following commands.
+Domain and importer tests run on Bun with an in-memory IndexedDB. Browser tests run on Playwright against the dev servers; see [tests/README.md](tests/README.md) for the layout and how to pick cases.
+
+```sh
+$ bun test
+$ bun run test:e2e
+```
+
+The codebase can also be checked with the following commands.
 
 ```sh
 $ bun lint:check
