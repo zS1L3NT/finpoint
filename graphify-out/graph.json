@@ -30945,18 +30945,6 @@
     },
     {
       "source": "src_components_charts_category_movers_categorymovers",
-      "target": "src_lib_utils_formatcurrency",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/charts/category-movers.tsx",
-      "source_location": "L64",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_charts_category_movers_categorymovers",
       "target": "src_components_icon_uiicon",
       "relation": "calls",
       "_origin": "ast",
@@ -30964,7 +30952,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/category-movers.tsx",
-      "source_location": "L71",
+      "source_location": "L62",
       "weight": 1.0
     },
     {
@@ -30976,7 +30964,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/category-movers.tsx",
-      "source_location": "L73",
+      "source_location": "L64",
       "weight": 1.0
     },
     {
@@ -30988,7 +30976,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/category-movers.tsx",
-      "source_location": "L73",
+      "source_location": "L64",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_charts_category_movers_categorymovers",
+      "target": "src_lib_utils_formatcurrency",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/charts/category-movers.tsx",
+      "source_location": "L70",
       "weight": 1.0
     },
     {
@@ -111431,5 +111431,5 @@
       "source_file": "tests/README.md"
     }
   ],
-  "built_at_commit": "a3978e57526213e1da91aca8bf49ccc29c90b22d"
+  "built_at_commit": "71b1448cd06834bb861dce133c30ca9dec5d4780"
 }

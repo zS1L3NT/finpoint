@@ -222,10 +222,10 @@
     "semantic_hash": ""
   },
   "src/components/charts/category-movers.tsx": {
-    "mtime": 1792955558.298935,
-    "seen": 1792956738.293817,
-    "ast_hash": "e044ed98af608688ec1c3b0b26c654f0",
-    "semantic_hash": "e044ed98af608688ec1c3b0b26c654f0"
+    "mtime": 1792962078.259423,
+    "seen": 1792962168.553624,
+    "ast_hash": "84acba8c367415b44311a86d987aeaaf",
+    "semantic_hash": ""
   },
   "src/components/charts/daily-spending-chart.tsx": {
     "mtime": 1792957450.7257297,
