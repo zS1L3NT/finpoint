@@ -45,7 +45,7 @@ Common gitmojis (full list at [gitmoji.dev](https://gitmoji.dev)):
 - **Ask first.** Pull request numbers are permanent, so a PR is irreversible. Open one only after the user approves that specific PR in the conversation.
 - Open it from the `ai/` branch.
 - **Title:** a plain sentence with the first letter capitalized and no emoji, for example `Add CSV export to reports page`.
-- **Body:** write it with the `/pr` skill (mattpocock's).
+- **Body:** write it with the `/pr` skill's template: a Summary diagram, before/after Evidence, and Merge Danger (door and blast radius). Take domain terms from `CONTEXT.md` where the skill says `GLOSSARY.md`.
 - **Approval** belongs to humans. Leave reviews as comments; never approve a pull request.
 
 <!-- setup-conventions:generated-end -->
