@@ -1542,9 +1542,9 @@
     "semantic_hash": ""
   },
   "src/components/charts/chart-frame.tsx": {
-    "mtime": 1792959316.5069265,
-    "seen": 1792959403.9442976,
-    "ast_hash": "f65670e9ce1d40e362382fcd659cfc43",
+    "mtime": 1792964613.0142972,
+    "seen": 1792964887.9868941,
+    "ast_hash": "36c93156449cdb8e9bf3483e76cd56de",
     "semantic_hash": ""
   }
 }
