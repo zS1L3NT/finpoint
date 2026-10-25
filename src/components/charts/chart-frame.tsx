@@ -121,7 +121,7 @@ export default function ChartFrame({
 					width={size.width}
 					height={size.height}
 					className={cn(
-						"block touch-pan-y [-webkit-touch-callout:none] focus-visible:outline-2 focus-visible:outline-ring",
+						"block touch-pan-y [-webkit-touch-callout:none] focus:outline-hidden focus-visible:outline-2 focus-visible:outline-ring",
 						onSelect && "cursor-pointer",
 					)}
 					onPointerDown={event => {
@@ -161,8 +161,10 @@ export default function ChartFrame({
 					onPointerLeave={event => {
 						if (event.pointerType === "mouse") setActive(null)
 					}}
-					onFocus={() => {
-						if (!press.current) setActive(value => value ?? 0)
+					// Only keyboard focus opens a reading: touch focuses the chart after the finger lifts.
+					onFocus={event => {
+						if (event.currentTarget.matches(":focus-visible"))
+							setActive(value => value ?? 0)
 					}}
 					onBlur={() => setActive(null)}
 					onKeyDown={onKeyDown}
