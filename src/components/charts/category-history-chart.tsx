@@ -1,10 +1,7 @@
 "use client"
 
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
-import { useChartIntro } from "@/components/charts/chart-intro"
+import BarChart from "@/components/charts/bar-chart"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ChartContainer, ChartTooltip } from "@/components/ui/chart"
-import { useIsMobile } from "@/hooks/use-mobile"
 import { formatCurrency } from "@/lib/utils"
 import { BREAKDOWN_MONTHS, type SpendingHistoryMonth } from "@/logic/dashboard"
 
@@ -29,8 +26,6 @@ export default function CategoryHistoryChart({
 	monthlyBudgetIds: string[] | null
 	badge: React.ReactNode
 }) {
-	const intro = useChartIntro(months.find(month => month.current)?.month)
-	const isMobile = useIsMobile()
 	const scopedMonths = months.map(month => ({
 		...month,
 		categories: month.categories
@@ -79,58 +74,28 @@ export default function CategoryHistoryChart({
 			<CardContent className="flex min-h-0 flex-1 flex-col gap-3">
 				{totalSpending > 0 ? (
 					<>
-						<div className="relative min-h-60 w-full flex-1 overflow-x-auto overflow-y-hidden sm:min-h-72">
-							<ChartContainer
-								config={config}
-								className="absolute inset-0 h-full w-full aspect-auto [&_.recharts-surface:focus-visible]:outline-2 [&_.recharts-surface:focus-visible]:outline-ring"
-								style={{
-									minWidth: Math.max(320, months.length * (isMobile ? 54 : 64)),
-								}}
-							>
-								<BarChart
-									data={chartData}
-									margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
-									accessibilityLayer
-									stackOffset="expand"
-								>
-									<CartesianGrid vertical={false} />
-									<XAxis
-										dataKey="month"
-										interval={0}
-										height={54}
-										tickLine={false}
-										axisLine={false}
-										tick={<MonthTick data={chartData} />}
-									/>
-									<YAxis
-										type="number"
-										domain={[0, 1]}
-										width={isMobile ? 36 : 44}
-										tickLine={false}
-										axisLine={false}
-										tickFormatter={value =>
-											`${Math.round(Number(value) * 100)}%`
-										}
-									/>
-									<ChartTooltip
-										cursor={{ fill: "var(--muted)", fillOpacity: 0.35 }}
-										content={<HistoryTooltip config={config} />}
-									/>
-									{series.map(item => (
-										<Bar
-											key={item.key}
-											dataKey={`seriesValues.${item.key}`}
-											stackId="spending"
-											name={item.name}
-											fill={item.color}
-											fillOpacity={0.88}
-											maxBarSize={64}
-											{...intro}
-										/>
-									))}
-								</BarChart>
-							</ChartContainer>
-						</div>
+						<BarChart
+							label="Category trend"
+							className="min-h-60 w-full flex-1 sm:min-h-72"
+							labels={chartData.map(month => month.month)}
+							layout="share"
+							series={series.map(item => ({
+								key: item.key,
+								label: item.name,
+								color: item.color,
+								opacity: 0.88,
+								values: chartData.map(month => month.seriesValues[item.key] ?? 0),
+							}))}
+							bottom={54}
+							tick={index => <MonthTick month={chartData[index]} />}
+							readout={index => {
+								const month = chartData[index]
+								return month ? (
+									<HistoryReadout month={month} config={config} />
+								) : null
+							}}
+							introKey={months.find(month => month.current)?.month}
+						/>
 					</>
 				) : (
 					<p className="py-10 text-center text-xs text-muted-foreground">
@@ -250,62 +215,43 @@ function prepareMonths(months: SpendingHistoryMonth[], series: ChartSeries[]): C
 	})
 }
 
-function MonthTick({
-	x = 0,
-	y = 0,
-	payload,
-	data,
-}: {
-	x?: number
-	y?: number
-	payload?: { value: string }
-	data: ChartMonth[]
-}) {
-	const month = data.find(item => item.month === payload?.value)
+function MonthTick({ month }: { month?: ChartMonth }) {
+	if (!month) return null
 	return (
-		<g transform={`translate(${x},${y})`}>
-			<text textAnchor="middle" className="fill-foreground text-[0.6875rem]">
-				<tspan x={0} dy="1em">
-					{month?.month ?? payload?.value}
+		<text textAnchor="middle" className="fill-foreground">
+			<tspan x={0} dy="1em">
+				{month.month}
+			</tspan>
+			{month.current && (
+				<tspan x={0} dy="1.2em" className="fill-primary">
+					Selected
 				</tspan>
-				{month?.current && (
-					<tspan x={0} dy="1.2em" className="fill-primary">
-						Selected
-					</tspan>
-				)}
-				{month?.included &&
-					Object.values(month.seriesValues).every(value => value === 0) && (
-						<tspan x={0} dy="1.2em" className="fill-muted-foreground">
-							No spending
-						</tspan>
-					)}
-				{month && !month.included && (
-					<tspan x={0} dy="1.2em" className="fill-muted-foreground">
-						Unavailable
-					</tspan>
-				)}
-			</text>
-		</g>
+			)}
+			{month.included && Object.values(month.seriesValues).every(value => value === 0) && (
+				<tspan x={0} dy="1.2em" className="fill-muted-foreground">
+					No spending
+				</tspan>
+			)}
+			{!month.included && (
+				<tspan x={0} dy="1.2em" className="fill-muted-foreground">
+					Unavailable
+				</tspan>
+			)}
+		</text>
 	)
 }
 
-function HistoryTooltip({
-	active,
-	payload,
-	label,
+function HistoryReadout({
+	month,
 	config,
 }: {
-	active?: boolean
-	payload?: { payload?: ChartMonth }[]
-	label?: string
+	month: ChartMonth
 	config: Record<string, { label: string; color: string }>
 }) {
-	if (!active || !payload?.length) return null
-	const month = payload[0]?.payload
-	if (!month) return null
+	const label = month.month
 	if (!month.included) {
 		return (
-			<div className="rounded-lg border bg-background px-3 py-2 text-xs shadow-xl">
+			<div>
 				<p className="font-medium">{label}</p>
 				<p className="text-muted-foreground">Unavailable: {month.reason}</p>
 			</div>
@@ -314,7 +260,7 @@ function HistoryTooltip({
 	const entries = Object.entries(month.seriesValues).filter(([, value]) => value > 0)
 	const total = entries.reduce((sum, [, value]) => sum + value, 0)
 	return (
-		<div className="max-h-72 min-w-48 overflow-y-auto rounded-lg border bg-background px-3 py-2 text-xs shadow-xl">
+		<div className="max-h-72 min-w-48 overflow-y-auto">
 			<p className="mb-2 font-medium">
 				{label}
 				{month.current ? " · selected month" : ""}

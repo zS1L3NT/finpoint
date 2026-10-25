@@ -3,7 +3,6 @@ import { useRouter } from "next/navigation"
 import TrendChart from "@/components/charts/trend-chart"
 import { useHistory } from "@/history"
 import { dayTicks } from "@/lib/chart-days"
-import { cn } from "@/lib/utils"
 import type { CashflowHistoryMonth } from "@/logic/dashboard"
 import { pathMonthlyRecords } from "@/routes"
 
@@ -22,13 +21,9 @@ export default function TotalSpendingChart({
 }) {
 	const router = useRouter()
 	const { handlePush } = useHistory()
-	const historyLines = history.map(item => ({
-		...item,
-		key: `previous_${item.offset}`,
-		opacity: item.offset === 1 ? 0.6 : 0.3,
-		dash: item.offset === 1 ? "4 4" : "1 5",
-	}))
-	const length = Math.max(data.length, ...history.map(item => item.surplus.length))
+	// Last month only, as a faint dashed comparison line.
+	const previous = history.find(item => item.offset === 1)
+	const length = Math.max(data.length, previous?.surplus.length ?? 0)
 	const openDay = (index: number) => {
 		if (index >= data.length) return
 		const selected = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
@@ -54,14 +49,21 @@ export default function TotalSpendingChart({
 				ticks={dayTicks(length).map(day => ({ index: day - 1, label: String(day) }))}
 				split={0}
 				series={[
-					...historyLines.map(item => ({
-						key: item.key,
-						label: item.month,
-						values: Array.from({ length }, (_, index) => item.surplus[index] ?? null),
-						color: "var(--foreground)",
-						dash: item.dash,
-						opacity: item.opacity,
-					})),
+					...(previous
+						? [
+								{
+									key: "previous",
+									label: previous.month,
+									values: Array.from(
+										{ length },
+										(_, index) => previous.surplus[index] ?? null,
+									),
+									color: "var(--foreground)",
+									dash: "4 4",
+									opacity: 0.6,
+								},
+							]
+						: []),
 					{
 						key: "surplus",
 						label: "Surplus / Shortfall",
@@ -74,37 +76,6 @@ export default function TotalSpendingChart({
 				introKey={`${month}-${year}`}
 				onSelect={openDay}
 			/>
-			<div className="flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
-				{historyLines.map(item => (
-					<span key={item.key} className="flex items-center gap-1.5">
-						<svg width="20" height="4" aria-hidden="true">
-							<line
-								x1="1"
-								y1="2"
-								x2="19"
-								y2="2"
-								stroke="var(--foreground)"
-								strokeOpacity={item.opacity}
-								strokeWidth={2}
-								strokeDasharray={item.dash}
-								strokeLinecap="round"
-							/>
-						</svg>
-						{item.month}
-					</span>
-				))}
-				<LegendItem color="bg-emerald-500" label="Surplus above $0" />
-				<LegendItem color="bg-rose-500" label="Shortfall below $0" />
-			</div>
 		</div>
-	)
-}
-
-function LegendItem({ color, label }: { color: "bg-emerald-500" | "bg-rose-500"; label: string }) {
-	return (
-		<span className="flex items-center gap-1.5">
-			<span className={cn("size-2 rounded-sm", color)} />
-			{label}
-		</span>
 	)
 }

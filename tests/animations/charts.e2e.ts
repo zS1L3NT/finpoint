@@ -3,12 +3,10 @@ import { card, overview, overviewCharts } from "../support/charts"
 import { setDateOnly } from "../support/date-only"
 import { expect, seedWorkspace, test } from "../support/fixtures"
 
-// Recharts marks plus the custom trend chart's marks and intro clip.
-const marks =
-	".recharts-area-curve, .recharts-line-curve, .recharts-rectangle, clipPath[id^=animationClipPath] rect, [data-slot=chart-mark], [data-chart-intro] rect"
-const surfaces = 'svg.recharts-surface, svg[data-slot="chart-surface"]'
-const plotted =
-	".recharts-area-curve, .recharts-line-curve, .recharts-rectangle, [data-slot=chart-mark]"
+// Plotted marks plus the intro clip that reveals them.
+const marks = "[data-slot=chart-mark], [data-chart-intro] rect"
+const surfaces = 'svg[data-slot="chart-surface"]'
+const plotted = "[data-slot=chart-mark]"
 
 async function chartFrames(page: Page, titles: string[], open: () => Promise<void>) {
 	const sampler = await page.evaluateHandle(
@@ -184,12 +182,7 @@ test("chart intro: overview and Budget charts grow once and hover or resize neve
 			const watcher = await page.evaluateHandle(() => {
 				const state = { replayed: false, stop: () => undefined as void }
 				const check = () => {
-					if (
-						document.querySelector(
-							'clipPath[id^="animationClipPath"], [data-chart-intro]',
-						)
-					)
-						state.replayed = true
+					if (document.querySelector("[data-chart-intro]")) state.replayed = true
 				}
 				const observer = new MutationObserver(check)
 				observer.observe(document.body, {
