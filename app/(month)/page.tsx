@@ -396,7 +396,8 @@ export default function DashboardPage() {
 								<ScopedCardTitle scope="Total">Spending by day</ScopedCardTitle>
 								<CardDescription>
 									Net daily spending across all monthly budgets, including
-									refunds. Select a day to open its Records.
+									refunds. Hold or hover over a day to read it, and click it to
+									open its Records.
 								</CardDescription>
 							</CardHeader>
 							<CardContent>

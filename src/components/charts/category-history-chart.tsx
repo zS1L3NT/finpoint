@@ -78,6 +78,7 @@ export default function CategoryHistoryChart({
 					Share of gross spending vs previous {BREAKDOWN_MONTHS} months · refunds excluded
 					{through &&
 						` · selected days 1–${Number(through.slice(-2))}; prior months in full`}
+					. Hold or hover over a month to list its Categories below.
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="flex min-h-0 flex-1 flex-col gap-3">

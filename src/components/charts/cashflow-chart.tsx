@@ -119,10 +119,14 @@ export default function CashflowChart({
 			</div>
 
 			<p className="text-xs text-muted-foreground">
+				Green shows recorded spending
+				{amount === null ? "" : `, turning red past the ${amountLabel ?? "monthly"} amount`}
+				.
 				{showProjection
-					? "The dashed line extends the current gross spending pace and includes later-dated Records already entered. Select a day to open its Records."
-					: "The solid line shows recorded spending. Select a day to open its Records."}
-				{previous ? " The faint dashed line shows last month by day of month." : ""}
+					? " The dashed amber line extends the current gross spending pace and includes later-dated Records already entered."
+					: ""}
+				{previous ? " The faint dashed line shows last month by day of month." : ""} Hold or
+				hover over a day to read it, and click it to open its Records.
 			</p>
 		</div>
 	)
