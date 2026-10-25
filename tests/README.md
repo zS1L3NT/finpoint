@@ -66,27 +66,25 @@ Each job is a GitHub check:
   `playwright-report-animations` artifact, and annotate failures on their lines.
 
 Groups are named by area so a red job says what broke, and balanced by run time so no
-job holds up the rest. Core groups ran about 5 to 7 minutes each and animation groups about
-4 to 6 minutes, including about 1.5 minutes of setup (dependencies, Chromium, builds); a
-whole run took about 8 minutes (25 October 2026):
+job holds up the rest. Each job spends about 1.5 minutes on setup (dependencies, Chromium,
+builds) before its tests. A whole run took 6.5 minutes (25 October 2026):
 
-| Tier | Group | Files |
-| --- | --- | --- |
-| core | `pages` | routes |
-| core | `flows` | navigation, workflows |
-| core | `editing` | editors, modals, keyboard |
-| core | `data` | charts, tables |
-| core | `components` | components, sheets, helpers, ledger |
-| animations | `tables` | tables |
-| animations | `editing` | editors, modals, sheets |
-| animations | `display` | charts, routes, components, helpers |
+| Tier | Group | Files | Runs | Tests |
+| --- | --- | --- | --- | --- |
+| core | `pages` | routes | 74 | 4.4 min |
+| core | `flows` | navigation, workflows | 90 | 4.7 min |
+| core | `editing` | editors, modals, keyboard | 57 | 3.0 min |
+| core | `data` | charts, tables | 60 | 3.3 min |
+| core | `components` | components, sheets, helpers, ledger | 99 | 4.2 min |
+| animations | `tables` | tables | 40 | 4.5 min |
+| animations | `editing` | editors, modals, sheets | 24 | 3.9 min |
+| animations | `display` | charts, routes, components, helpers | 38 | 4.4 min |
 
 A new browser test file must join exactly one group in `ci.yml`; the ledger fails
 otherwise. Rebalance when a group's job runs clearly longer than the others: the
 per-file run times are in each job's log.
 
-Core is 379 runs on all five projects and animations 102 (`bunx playwright test --list`,
-25 October 2026).
+Core is 380 runs on all five projects and animations 102 (25 October 2026).
 
 ## Projects and tags
 
