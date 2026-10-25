@@ -672,6 +672,20 @@ test.describe("pinned overview date", () => {
 		await expect(card(page, "Spending calendar")).toContainText("0 spending days · $0.00")
 	})
 
+	test("empty overview: the demo offer loads demo data and then goes away", async ({ page }) => {
+		await seedWorkspace(page, "empty")
+		await page.goto(overview)
+		await expect(page.getByText("New to Finpoint?")).toBeVisible()
+		await expect(page.getByRole("link", { name: "Import statements" })).toHaveAttribute(
+			"href",
+			"/importer",
+		)
+
+		await page.getByRole("button", { name: "Try demo data" }).click()
+		await expect(page.getByText("Demo workspace loaded.")).toBeVisible()
+		await expect(page.getByText("New to Finpoint?")).toBeHidden()
+	})
+
 	test("net refund: long Category name and excluded Treatment retain numeric meaning", async ({
 		page,
 	}) => {
