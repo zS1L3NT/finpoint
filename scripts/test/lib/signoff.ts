@@ -1,8 +1,8 @@
-// Sign-off for the test runners: preflight checks, the pull-request summary
-// comment, and one gh-signoff commit status per tier (signoff/core, signoff/extra).
-import { spawnSync } from "node:child_process"
-import { runAsync, runSync, wasSignaled } from "./process"
-import { describe, markdown, type PhaseSummary } from "./summary"
+// Sign-off for the test runners: preflight checks, then one GitHub check run per
+// tier, named after the tier, posted by the local-ci GitHub App (see checks.ts).
+import { type Check, type Checks, configProblems, connect } from "./checks"
+import { runSync } from "./process"
+import { outcome, type PhaseSummary } from "./summary"
 
 // Next rewrites next-env.d.ts when switching between `next dev` and `next build`
 // (the production build restores the committed form), so it never counts as dirty.
@@ -13,176 +13,108 @@ function gitStatus(): string {
 		.join("\n")
 }
 
-/** Real sign-off preflight: non-fatal, returns the recorded HEAD or null. */
-export function preflightSignoff(): string | null {
-	let extensions: string
-	try {
-		extensions = runSync("gh", ["extension", "list"])
-	} catch {
-		console.error("sign-off needs the gh CLI with the gh-signoff extension installed")
-		return null
-	}
-	if (!extensions.includes("basecamp/gh-signoff")) {
-		console.error("sign-off needs the gh-signoff extension (basecamp/gh-signoff)")
-		return null
-	}
-	let status: string
-	try {
-		status = gitStatus()
-	} catch {
-		console.error("sign-off needs a git tree it can inspect")
-		return null
-	}
-	if (status.trim() !== "") {
-		console.error("sign-off refuses a dirty tree: commit or stash first")
-		return null
-	}
-	try {
-		return runSync("git", ["rev-parse", "HEAD"]).trim()
-	} catch {
-		console.error("sign-off needs a git HEAD it can record")
-		return null
-	}
+export type Signoff = {
+	head: string
+	checks: Checks
+	tiers: Map<string, Check>
 }
 
-/** Dry-run preflight: never refuses, so it works without gh-signoff installed.
- * Prints each check result plus the commands a real run would execute. */
-export function dryRunPreflight(tiers: string[]): number {
-	let extensions = ""
-	try {
-		extensions = runSync("gh", ["extension", "list"])
-	} catch {
-		// gh absent: reported below, not fatal
-	}
-	const hasExtension = extensions.includes("basecamp/gh-signoff")
-	let status = ""
-	let statusOk = false
-	try {
-		status = gitStatus()
-		statusOk = true
-	} catch {
-		// reported below
-	}
+/** Checks the app config and a clean tree, records HEAD, and creates every tier's
+ * check run on it: the first in progress, the rest queued. Creating them doubles as
+ * the remaining preflight, since GitHub refuses an unpushed commit or a missing
+ * installation. Returns null after printing why it refused. */
+export async function startSignoff(tiers: string[], dryRun = false): Promise<Signoff | null> {
+	const problems = configProblems()
+	let status: string | undefined
 	let head = ""
 	try {
+		status = gitStatus()
 		head = runSync("git", ["rev-parse", "HEAD"]).trim()
 	} catch {
-		// reported below
+		problems.push("sign-off needs a git tree and HEAD it can inspect")
 	}
-	console.log(
-		`[dry-run] gh-signoff extension (basecamp/gh-signoff): ${hasExtension ? "present" : "MISSING — sign-off would refuse to start without it"}`,
-	)
-	console.log(
-		statusOk
-			? `[dry-run] git tree: ${status.trim() === "" ? "clean" : "DIRTY — sign-off would refuse; commit or stash first"}`
-			: "[dry-run] git tree: could not inspect it",
-	)
-	console.log(`[dry-run] HEAD: ${head || "unknown"}`)
-	for (const tier of tiers) {
-		console.log(`[dry-run] after ${tier}, on pass: gh signoff --commit <HEAD> ${tier}`)
-		console.log(`[dry-run] after ${tier}, on failure: gh signoff fail --commit <HEAD> ${tier}`)
+	if (status) problems.push("sign-off refuses a dirty tree: commit or stash first")
+	if (dryRun) {
+		console.log(`[dry-run] HEAD: ${head || "unknown"}`)
+		for (const problem of problems) console.log(`[dry-run] a real run would refuse: ${problem}`)
+	} else if (problems.length > 0) {
+		for (const problem of problems) console.error(problem)
+		return null
+	}
+
+	try {
+		const checks = await connect(dryRun)
+		const started = new Map<string, Check>()
+		for (const [index, tier] of tiers.entries())
+			started.set(tier, await checks.start(tier, head || "<HEAD>", index > 0))
+		return { head, checks, tiers: started }
+	} catch (error) {
+		console.error(
+			`could not create the check runs: ${error instanceof Error ? error.message : error}`,
+		)
+		console.error("is HEAD pushed, and is the app installed on this repository?")
+		return null
+	}
+}
+
+function cleanTreeUnchanged(head: string): string | undefined {
+	try {
+		if (gitStatus() !== "") return "The tree changed during the run."
+		if (runSync("git", ["rev-parse", "HEAD"]).trim() !== head)
+			return "HEAD changed during the run."
+	} catch {
+		return "Could not verify a clean tree after the run."
+	}
+}
+
+/** Completes one tier's check. A pass concludes success only when the tree is still
+ * clean at the recorded commit; otherwise failure, never neutral, because a required
+ * check accepts neutral as passing. */
+export async function finishTier(
+	signoff: Signoff,
+	tier: string,
+	mode: string,
+	summary: PhaseSummary,
+	passed: boolean,
+): Promise<void> {
+	const check = signoff.tiers.get(tier)
+	if (!check) return
+	const result = outcome(summary, signoff.head, mode)
+	const changed = passed ? cleanTreeUnchanged(signoff.head) : undefined
+	if (changed) console.error(`${changed} The ${tier} check is marked failed.`)
+	await check.finish({
+		...result,
+		conclusion: passed && !changed ? "success" : "failure",
+		...(changed
+			? { title: `Not signed: ${changed}`, summary: `${changed}\n\n${result.summary}` }
+			: {}),
+	})
+}
+
+/** Fails every check still open, for a run that stopped before its tests (a failed build). */
+export async function failOpen(signoff: Signoff, reason: string): Promise<void> {
+	for (const check of signoff.tiers.values())
+		await check.finish({
+			conclusion: "failure",
+			title: reason,
+			summary: `${reason}: no tests ran.`,
+		})
+}
+
+/** Dry run: never refuses and sends nothing; prints the preflight results and the
+ * check-run calls a real run would make for these tiers. */
+export async function dryRunSignoff(tiers: string[]): Promise<number> {
+	const signoff = await startSignoff(tiers, true)
+	if (!signoff) return 1
+	for (const [index, [tier, check]] of [...signoff.tiers].entries()) {
+		console.log(`[dry-run] when ${tier} starts:`)
+		if (index > 0) await check.begin()
+		console.log(`[dry-run] when ${tier} finishes (success or failure):`)
+		await check.finish({
+			conclusion: "success",
+			title: `<${tier} counts>`,
+			summary: "<per-project table>",
+		})
 	}
 	return 0
-}
-
-function cleanTreeUnchanged(head: string): boolean {
-	let status: string
-	let current: string
-	try {
-		status = gitStatus()
-		current = runSync("git", ["rev-parse", "HEAD"]).trim()
-	} catch {
-		console.error("could not verify a clean tree: not signing")
-		return false
-	}
-	if (status.trim() !== "") {
-		console.error("tree changed during the run: not signing")
-		return false
-	}
-	if (current !== head) {
-		console.error("HEAD changed during the run: not signing")
-		return false
-	}
-	return true
-}
-
-// Upserts one pull-request comment (found by its marker) with the run summary and
-// returns its URL, or undefined when the branch has no open pull request.
-function postSummary(body: string): string | undefined {
-	const view = spawnSync("gh", ["pr", "view", "--json", "number"], { encoding: "utf8" })
-	if (view.status !== 0) return undefined
-	const number = (JSON.parse(view.stdout) as { number: number }).number
-	const comments = spawnSync(
-		"gh",
-		[
-			"api",
-			"--paginate",
-			`repos/{owner}/{repo}/issues/${number}/comments`,
-			"--jq",
-			'.[] | select(.body | startswith("<!-- test-web-signoff -->")) | .id',
-		],
-		{ encoding: "utf8" },
-	)
-	const existing = comments.stdout.trim().split("\n").filter(Boolean).at(-1)
-	const write = spawnSync(
-		"gh",
-		existing
-			? [
-					"api",
-					"-X",
-					"PATCH",
-					`repos/{owner}/{repo}/issues/comments/${existing}`,
-					"-F",
-					"body=@-",
-					"--jq",
-					".html_url",
-				]
-			: [
-					"api",
-					`repos/{owner}/{repo}/issues/${number}/comments`,
-					"-F",
-					"body=@-",
-					"--jq",
-					".html_url",
-				],
-		{ encoding: "utf8", input: body },
-	)
-	if (write.status !== 0) {
-		console.error(`could not post the test summary: ${write.stderr.trim()}`)
-		return undefined
-	}
-	return write.stdout.trim() || undefined
-}
-
-/** Signs one finished tier on the commit recorded before the run, linking to the
- * pull-request summary of every tier so far. A pass becomes a green sign-off only
- * when the tree is still clean at that commit; a failure is posted red
- * (`gh signoff fail`) so a required check never sits pending after a failed run. */
-export async function signTier(
-	head: string,
-	mode: string,
-	phases: PhaseSummary[],
-	pending: string[],
-	tier: string,
-	passed: boolean,
-): Promise<number> {
-	const url = postSummary(markdown(head, mode, phases, pending))
-	const link = url ? ["--url", url] : []
-	if (wasSignaled()) return 130
-	if (passed) {
-		if (!cleanTreeUnchanged(head)) return 1
-		return runAsync("gh", ["signoff", "--commit", head, ...link, tier])
-	}
-	const summary = phases.find(phase => phase.phase === tier)
-	const description = (summary ? describe(summary) : `${tier}: failed`).slice(0, 140)
-	return runAsync("gh", [
-		"signoff",
-		"fail",
-		"--commit",
-		head,
-		...link,
-		"--description",
-		description,
-		tier,
-	])
 }

@@ -1,6 +1,7 @@
-// Summarises Playwright JSON reports for the pull request: counts, duration and
-// every failure with its location and the start of its error.
+// Summarises Playwright JSON reports for the check runs: counts per project,
+// duration and every failure with its location and the start of its error.
 import { existsSync, readFileSync } from "node:fs"
+import type { Annotation, Outcome } from "./checks"
 
 type Result = { status: string; duration: number; errors: { message?: string }[] }
 type Spec = {
@@ -28,7 +29,8 @@ export type PhaseSummary = {
 	failed: number
 	flaky: number
 	minutes: number
-	failures: { project: string; location: string; title: string; error: string }[]
+	projects: Record<string, { passed: number; failed: number; flaky: number; skipped: number }>
+	failures: { project: string; file: string; line: number; title: string; error: string }[]
 }
 
 const ANSI = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, "g")
@@ -41,18 +43,35 @@ function specs(suite: Suite, path: string[]): { spec: Spec; path: string[] }[] {
 
 export function summarise(phase: string, file: string): PhaseSummary {
 	if (!existsSync(file))
-		return { phase, ran: false, passed: 0, failed: 0, flaky: 0, minutes: 0, failures: [] }
+		return {
+			phase,
+			ran: false,
+			passed: 0,
+			failed: 0,
+			flaky: 0,
+			minutes: 0,
+			projects: {},
+			failures: [],
+		}
 	const report = JSON.parse(readFileSync(file, "utf8")) as Report
+	const projects: PhaseSummary["projects"] = {}
 	const failures: PhaseSummary["failures"] = []
 	for (const suite of report.suites)
 		for (const { spec, path } of specs(suite, [])) {
 			for (const test of spec.tests) {
+				projects[test.projectName] ??= { passed: 0, failed: 0, flaky: 0, skipped: 0 }
+				const counts = projects[test.projectName]
+				if (test.status === "expected") counts.passed++
+				else if (test.status === "unexpected") counts.failed++
+				else if (test.status === "flaky") counts.flaky++
+				else counts.skipped++
 				if (test.status !== "unexpected") continue
 				const result = test.results.at(-1)
 				const message = (result?.errors[0]?.message ?? "no error message").replace(ANSI, "")
 				failures.push({
 					project: test.projectName,
-					location: `tests/web/${spec.file}:${spec.line}`,
+					file: `tests/web/${spec.file}`,
+					line: spec.line,
 					title: [...path.filter(Boolean), spec.title].join(" › "),
 					error: message.split("\n").slice(0, 12).join("\n"),
 				})
@@ -65,42 +84,61 @@ export function summarise(phase: string, file: string): PhaseSummary {
 		failed: report.stats.unexpected,
 		flaky: report.stats.flaky,
 		minutes: Math.round(report.stats.duration / 6000) / 10,
+		projects,
 		failures,
 	}
 }
 
 export function describe(summary: PhaseSummary): string {
-	if (!summary.ran) return `${summary.phase}: did not run`
-	const total = summary.passed + summary.failed + summary.flaky
-	return `${summary.phase}: ${summary.passed}/${total} passed${summary.failed ? `, ${summary.failed} failed` : ""} in ${summary.minutes} min`
+	if (!summary.ran) return "did not run"
+	return `${summary.failed ? `${summary.failed} failed, ` : ""}${summary.passed} passed${summary.flaky ? `, ${summary.flaky} flaky` : ""} in ${summary.minutes} min`
 }
 
-// `pending` lists tiers still to run, so a comment posted between tiers says so.
-export function markdown(
+/** The check-run output for one tier: counts per project, then every failure,
+ * and one annotation per failing spec line (listing each project it failed on). */
+export function outcome(
+	summary: PhaseSummary,
 	head: string,
 	mode: string,
-	phases: PhaseSummary[],
-	pending: string[] = [],
-): string {
-	const lines = [
-		"<!-- test-web-signoff -->",
-		`### Browser tests: \`${mode}\` on \`${head.slice(0, 7)}\``,
-		"",
-		...phases.map(phase => `- ${phase.failed || !phase.ran ? "❌" : "✅"} ${describe(phase)}`),
-		...pending.map(phase => `- ⏳ ${phase}: running`),
-	]
-	for (const phase of phases)
-		for (const failure of phase.failures)
-			lines.push(
-				"",
-				`<details><summary>❌ [${failure.project}] ${failure.title}</summary>`,
-				"",
-				`\`${failure.location}\` (${phase.phase})`,
-				"",
-				"```",
-				failure.error,
-				"```",
-				"</details>",
+): Omit<Outcome, "conclusion"> {
+	const rows = Object.entries(summary.projects).map(
+		([project, c]) => `| ${project} | ${c.passed} | ${c.failed} | ${c.flaky} | ${c.skipped} |`,
+	)
+	const annotations = new Map<string, Annotation>()
+	for (const failure of summary.failures) {
+		const key = `${failure.file}:${failure.line}`
+		const existing = annotations.get(key)
+		if (existing) existing.title = existing.title.replace("]", `, ${failure.project}]`)
+		else
+			annotations.set(key, {
+				path: failure.file,
+				line: failure.line,
+				title: `[${failure.project}] ${failure.title}`,
+				message: failure.error,
+			})
+	}
+	return {
+		title: describe(summary),
+		summary: [
+			`\`${mode}\` run on \`${head.slice(0, 7)}\`, ${summary.minutes} min.`,
+			"",
+			"| Project | Passed | Failed | Flaky | Skipped |",
+			"| --- | --- | --- | --- | --- |",
+			...rows,
+		].join("\n"),
+		text: summary.failures
+			.map(failure =>
+				[
+					`### ❌ [${failure.project}] ${failure.title}`,
+					"",
+					`\`${failure.file}:${failure.line}\``,
+					"",
+					"```",
+					failure.error,
+					"```",
+				].join("\n"),
 			)
-	return lines.join("\n")
+			.join("\n\n"),
+		annotations: [...annotations.values()],
+	}
 }

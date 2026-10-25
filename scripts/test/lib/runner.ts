@@ -1,14 +1,11 @@
 // Shared runner for test:web:core, test:web:extra and test:web:full: builds frozen
 // bundles once, then runs each tier under PLAYWRIGHT_SERVER=production and, with
-// --signoff, signs each tier as soon as it finishes.
+// --signoff, reports each tier as its own GitHub check run, named after the tier.
 import { rmSync } from "node:fs"
 import { releaseLock, takeLock } from "./lock"
 import { runAsync, wasSignaled } from "./process"
-import { dryRunPreflight, preflightSignoff, signTier } from "./signoff"
-import { type PhaseSummary, summarise } from "./summary"
-
-export type TierName = "core" | "extra"
-export type Mode = TierName | "full"
+import { dryRunSignoff, failOpen, finishTier, type Signoff, startSignoff } from "./signoff"
+import { summarise } from "./summary"
 
 const ALL_PROJECTS = ["desktop", "mobile", "tall-desktop", "light", "reduced-motion"]
 
@@ -21,7 +18,10 @@ type Tier = {
 	env: NodeJS.ProcessEnv
 }
 
-const TIERS: Record<TierName, Tier> = {
+// Every tier is one check run, `full` runs them all in this order, and
+// `bun run test:web:ruleset` requires each of them for merging. Adding a tier here
+// (plus a scripts/test/<tier>.ts entry point to run it alone) is all a new suite needs.
+const TIERS = {
 	core: {
 		folder: "tests/web/core",
 		projects: mode => (mode === "full" ? ALL_PROJECTS : ["desktop", "mobile"]),
@@ -34,7 +34,11 @@ const TIERS: Record<TierName, Tier> = {
 		parallel: false,
 		env: { PLAYWRIGHT_EXTRA: "1" },
 	},
-}
+} satisfies Record<string, Tier>
+
+export type TierName = keyof typeof TIERS
+export type Mode = TierName | "full"
+export const TIER_NAMES = Object.keys(TIERS) as TierName[]
 
 type Options = {
 	workers: string
@@ -109,7 +113,7 @@ async function build(): Promise<number> {
 }
 
 async function runTier(name: TierName, mode: Mode, options: Options): Promise<number> {
-	const tier = TIERS[name]
+	const tier: Tier = TIERS[name]
 	const env: NodeJS.ProcessEnv = { ...process.env, PLAYWRIGHT_SERVER: "production" }
 	delete env.PLAYWRIGHT_EXTERNAL_SERVERS
 	delete env.PLAYWRIGHT_FULL_MATRIX
@@ -139,45 +143,40 @@ async function runTier(name: TierName, mode: Mode, options: Options): Promise<nu
 }
 
 /** Runs the given tiers in order and returns the process exit code. A failed tier
- * does not stop later ones; each is signed as soon as it finishes. */
+ * does not stop later ones; each check completes as soon as its tier finishes, and
+ * an interrupted run completes every open check as cancelled. */
 export async function run(mode: Mode, tiers: TierName[]): Promise<number> {
 	const options = parse(mode, process.argv.slice(2))
-	if (options.dryRun) return dryRunPreflight(tiers)
+	if (options.dryRun) return dryRunSignoff(tiers)
 
-	let head = ""
+	let signoff: Signoff | undefined
 	if (options.signoff) {
-		const recorded = preflightSignoff()
-		if (!recorded) return 1
-		head = recorded
+		const started = await startSignoff(tiers)
+		if (!started) return 1
+		signoff = started
 	}
 
 	takeLock()
 	try {
 		const built = await build()
-		if (built !== 0) return built
+		if (wasSignaled()) return 130
+		if (built !== 0) {
+			if (signoff) await failOpen(signoff, "Build failed")
+			return built
+		}
 
-		const phases: PhaseSummary[] = []
 		let failed = false
-		for (const [index, name] of tiers.entries()) {
+		for (const name of tiers) {
+			await signoff?.tiers.get(name)?.begin()
 			const code = await runTier(name, mode, options)
 			if (wasSignaled()) return 130
 			failed ||= code !== 0
-			phases.push(summarise(name, `test-results/${name}-results.json`))
-			if (options.signoff) {
-				const signed = await signTier(
-					head,
-					mode,
-					phases,
-					tiers.slice(index + 1),
-					name,
-					code === 0,
-				)
-				if (wasSignaled()) return 130
-				if (signed !== 0) return signed
-			}
+			const summary = summarise(name, `test-results/${name}-results.json`)
+			if (signoff) await finishTier(signoff, name, mode, summary, code === 0)
 		}
 		return failed ? 1 : 0
 	} finally {
+		await signoff?.checks.cancelOpen()
 		releaseLock()
 	}
 }

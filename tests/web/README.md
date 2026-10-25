@@ -60,7 +60,7 @@ Runner reports go to `playwright-report/core` and `playwright-report/extra`, out
 `--grep-invert`, `--workers` (core only), and `--project`. `--project` replaces the
 defaults and applies to both tiers of `full`. Anything else (positional paths, `--config`,
 `--shard`) is refused; run single files ad-hoc with `bun run test:web -- <path>` instead.
-The runners live in `scripts/test/` (`core.ts`, `extra.ts`, `full.ts`, sharing `lib/`).
+The runners live in `scripts/test/` (`core.ts`, `extra.ts`, `full.ts`, `ruleset.ts`, sharing `lib/`).
 
 Core is 354 runs (desktop and mobile); a full run is 377 core runs on all five projects,
 then 102 extra runs (`bunx playwright test --list`, 24 October 2026). On a 12-core Linux host
@@ -77,21 +77,43 @@ output, but running both at once slows animation sampling.
 
 ## Sign-off
 
-`--signoff` refuses to start unless the `basecamp/gh-signoff` extension is installed and the
-tree is clean (Next's generated `next-env.d.ts` is ignored). It records `HEAD` and signs each
-tier on that commit as soon as the tier finishes: `test:web:full` posts `signoff/core`
-before extra starts, then `signoff/extra`. A passing tier is signed green
-(`gh signoff --commit <HEAD> core`) only if the tree is still clean at the same commit. A
-failing tier is posted red (`gh signoff fail`), so a required check shows the failure
-instead of waiting forever. Each sign-off also updates one pull-request comment listing
-every finished tier's pass count and duration, any tier still running, and, for each
-failure, its project, file and line, and the start of its error. Each status's **Details**
-link opens that comment, and a failed status's description holds the counts. The HTML
-reports stay local under `playwright-report/`. With `--signoff`, no pass-through argument is
-allowed: only complete runs are reported. gh-signoff also requires the commit to be pushed,
-so commit and push before a signed run. `--signoff-dry-run` prints the extension, tree, HEAD
-and sign-off commands without running anything. `gh signoff install core` makes
-`signoff/core` a required check for merging.
+`--signoff` reports each tier as a GitHub check run named after the tier (`core`,
+`extra`), posted by a GitHub App with Checks write access only. Only the holder of the
+app's private key can post these checks, so the `main` ruleset requires them from that app
+and nothing else can satisfy them.
+
+Setup, once per machine: create a GitHub App with Checks set to read and write and no
+webhook, install it on the repository (or on every repository of the account), and save its
+private key outside the repository with mode `600`. Then write
+`~/.config/local-ci/config.json` as `{ "appId": <app ID>, "keyPath": "~/.config/local-ci/app.pem" }`.
+The runner finds the installation from the origin remote, so no per-repository setting is
+needed.
+
+A signed run refuses to start unless the config and key are in place and the tree is clean
+(Next's generated `next-env.d.ts` is ignored). It records `HEAD` and creates every tier's
+check on it before the build: the first in progress, the rest queued. GitHub refuses a
+commit it does not have, so commit and push first. Each check completes as soon as its
+tier finishes:
+
+- `success` only if the tier passed and the tree is still clean at the same commit;
+- `failure` if the tier failed, the build failed, or the tree or `HEAD` changed (never
+  `neutral`, which a required check would accept);
+- `cancelled` when the run is interrupted (Ctrl+C or SIGTERM).
+
+A check page shows the pass, fail, flaky and skip counts per project and the duration, then
+every failure's project, title, location and the start of its error. Each failing spec line
+also gets an annotation, which shows inline under **Files changed** when the pull request
+touches that test file. The HTML reports stay local under `playwright-report/`. A run killed
+outright (SIGKILL, a crash) leaves its checks in progress; a new signed run on the same
+commit supersedes them. With `--signoff`, no pass-through argument is allowed: only complete
+runs are reported. `--signoff-dry-run` prints the preflight results and every check-run
+call without network access or the key.
+
+The tiers come from one list (`TIERS` in `scripts/test/lib/runner.ts`). `test:web:full`
+runs them all in order, and `bun run test:web:ruleset` makes the default branch's ruleset
+require every tier's check from the app (`--dry-run` prints the change). After adding a
+tier, add its `scripts/test/<tier>.ts` entry point and run `test:web:ruleset` again once
+its check has passed on a pull request.
 
 ## Projects and tags
 

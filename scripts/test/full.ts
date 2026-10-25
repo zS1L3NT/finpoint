@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// test:web:full — core on every project, signed as soon as it finishes, then extra.
-import { run } from "./lib/runner"
+// test:web:full — every tier in order, each reported as soon as it finishes.
+import { run, TIER_NAMES } from "./lib/runner"
 
-process.exit(await run("full", ["core", "extra"]))
+process.exit(await run("full", TIER_NAMES))

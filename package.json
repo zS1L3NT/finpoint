@@ -13,7 +13,8 @@
 		"test:web": "playwright test",
 		"test:web:core": "bun scripts/test/core.ts",
 		"test:web:extra": "bun scripts/test/extra.ts",
-		"test:web:full": "bun scripts/test/full.ts"
+		"test:web:full": "bun scripts/test/full.ts",
+		"test:web:ruleset": "bun scripts/test/ruleset.ts"
 	},
 	"dependencies": {
 		"@base-ui/react": "^1.4.0",
