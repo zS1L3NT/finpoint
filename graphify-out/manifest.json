@@ -1530,9 +1530,9 @@
     "semantic_hash": "b194223f1f3b81550d206761165adf60"
   },
   "src/components/charts/trend-chart.tsx": {
-    "mtime": 1792957719.6370428,
-    "seen": 1792957746.230057,
-    "ast_hash": "f07e6ae8b3b02bfb3d8f0aeb85147e47",
+    "mtime": 1792958081.9162838,
+    "seen": 1792958128.7466319,
+    "ast_hash": "6198a0a288df0093a9386ac73c8d0dc9",
     "semantic_hash": ""
   },
   "src/components/charts/bar-chart.tsx": {

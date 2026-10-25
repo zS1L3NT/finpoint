@@ -20,9 +20,8 @@ export type TrendSeries = {
 // The right gutter holds the value pills that replace a Y axis.
 const PAD = { top: 12, right: 48, bottom: 24 }
 const PILL_GAP = 18
-const CORNER = 3
 
-/** Cumulative values as rounded steps: each day holds, then rises or falls on the next. */
+/** Daily values as one smooth line, with a fill fading towards $0. */
 export default function TrendChart({
 	label,
 	series,
@@ -333,23 +332,32 @@ function path(
 ) {
 	return runs(values)
 		.map(run => {
-			const trace = run
-				.map((p, i) => {
-					const previous = run[i - 1]
-					if (!previous) return `M${x(p.index)},${y(p.value)}`
-					const [x0, y0, x1, y1] = [
-						x(previous.index),
-						y(previous.value),
-						x(p.index),
-						y(p.value),
-					]
-					// The closing corner needs room on the next step, so the last step turns square.
-					const r = run[i + 1]
-						? Math.min(CORNER, Math.abs(y1 - y0) / 2, (x1 - x0) / 2)
-						: 0
-					if (!r) return `L${x1},${y0}L${x1},${y1}`
-					const turn = Math.sign(y1 - y0) * r
-					return `L${x1 - r},${y0}Q${x1},${y0} ${x1},${y0 + turn}L${x1},${y1 - turn}Q${x1},${y1} ${x1 + r},${y1}`
+			const points = run.map(p => [x(p.index), y(p.value)] as const)
+			const slopes = points.slice(1).map(([x1, y1], i) => {
+				const [x0, y0] = points[i] ?? [x1, y1]
+				return x1 === x0 ? 0 : (y1 - y0) / (x1 - x0)
+			})
+			// Monotone tangents: a flat stretch stays flat and the curve never overshoots a value.
+			const tangents = points.map((_, i) => {
+				const before = slopes[i - 1]
+				const after = slopes[i]
+				if (before === undefined || after === undefined) return before ?? after ?? 0
+				return Math.sign(before) === Math.sign(after)
+					? Math.sign(before) *
+							Math.min(
+								Math.abs(before),
+								Math.abs(after),
+								Math.abs(before + after) / 2,
+							)
+					: 0
+			})
+			const trace = points
+				.map(([x1, y1], i) => {
+					const previous = points[i - 1]
+					if (!previous) return `M${x1},${y1}`
+					const [x0, y0] = previous
+					const third = (x1 - x0) / 3
+					return `C${x0 + third},${y0 + (tangents[i - 1] ?? 0) * third} ${x1 - third},${y1 - (tangents[i] ?? 0) * third} ${x1},${y1}`
 				})
 				.join("")
 			const first = run[0]
