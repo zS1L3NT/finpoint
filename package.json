@@ -9,11 +9,8 @@
 		"lint": "biome check --write",
 		"lint:check": "biome check",
 		"types:check": "tsc --noEmit",
-		"types:web": "tsc --project tsconfig.web.json --noEmit",
-		"test:web": "playwright test",
-		"test:web:core": "bun scripts/test/core.ts",
-		"test:web:extra": "bun scripts/test/extra.ts",
-		"test:web:full": "bun scripts/test/full.ts"
+		"types:e2e": "tsc --project tsconfig.e2e.json --noEmit",
+		"test:e2e": "playwright test"
 	},
 	"dependencies": {
 		"@base-ui/react": "^1.4.0",

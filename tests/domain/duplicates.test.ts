@@ -3,12 +3,12 @@ import Dexie from "dexie"
 Dexie.dependencies.indexedDB = indexedDB
 Dexie.dependencies.IDBKeyRange = IDBKeyRange
 import { beforeEach, expect, test } from "bun:test"
-import type { StatementRow } from "../src/data/db"
-const { db } = await import("../src/data/db")
+import type { StatementRow } from "../../src/data/db"
+const { db } = await import("../../src/data/db")
 const { duplicateGroups, dismissDuplicatePair, restoreDuplicatePair, fixDuplicates } = await import(
-	"../src/logic/duplicates"
+	"../../src/logic/duplicates"
 )
-const { listStatements, getStatement } = await import("../src/logic/statements")
+const { listStatements, getStatement } = await import("../../src/logic/statements")
 
 const statement = (
 	id: string,
@@ -168,7 +168,7 @@ test("generic wording alone cannot create a strong match", async () => {
 })
 test("backup restore, earlier backups and reset include the dismissal table", async () => {
 	const { exportData, importData, parseImportFile, clearAllData, SYNC_TABLES } = await import(
-		"../src/data/export-import"
+		"../../src/data/export-import"
 	)
 	await db.statements.bulkAdd([statement("a"), statement("b")])
 	await dismissDuplicatePair("a", "b")
@@ -214,8 +214,8 @@ test("schema version four upgrades with financial data intact", async () => {
 })
 
 test("dismissal migration preserves clean and dirty Drive baselines", async () => {
-	const { exportData } = await import("../src/data/export-import")
-	const { hashSnapshot } = await import("../src/data/snapshot-hash")
+	const { exportData } = await import("../../src/data/export-import")
+	const { hashSnapshot } = await import("../../src/data/snapshot-hash")
 	for (const clean of [true, false]) {
 		await db.statements.put(statement("a"))
 		const backup = await exportData()
@@ -307,7 +307,7 @@ test("short mixed references cannot be rearranged internally", async () => {
 	expect(await duplicateGroups()).toEqual([])
 })
 test("record allocation deficits use the existing pending rule", async () => {
-	const { getRecord } = await import("../src/logic/records")
+	const { getRecord } = await import("../../src/logic/records")
 	await db.statements.bulkAdd([statement("a"), statement("b")])
 	await db.records.add({
 		id: "r",
@@ -334,7 +334,7 @@ test("record allocation deficits use the existing pending rule", async () => {
 })
 test("replacement and pending deletion clean dismissal references", async () => {
 	const { replacePendingStatement, deletePendingStatement } = await import(
-		"../src/logic/statements"
+		"../../src/logic/statements"
 	)
 	await db.statements.bulkAdd([
 		statement("a"),
@@ -351,14 +351,14 @@ test("replacement and pending deletion clean dismissal references", async () => 
 	expect(await db.duplicate_dismissals.count()).toBe(0)
 })
 test("version four backups require dismissal data", async () => {
-	const { exportData, parseImportFile } = await import("../src/data/export-import")
+	const { exportData, parseImportFile } = await import("../../src/data/export-import")
 	const backup = JSON.parse(JSON.stringify(await exportData()))
 	delete backup.tables.duplicate_dismissals
 	expect(() => parseImportFile(JSON.stringify(backup))).toThrow("incomplete")
 })
 
 test("backups restore dismissal pairs in order and drop orphaned pairs", async () => {
-	const { exportData, parseImportFile } = await import("../src/data/export-import")
+	const { exportData, parseImportFile } = await import("../../src/data/export-import")
 	await db.statements.bulkAdd([statement("a"), statement("b")])
 	const backup = JSON.parse(JSON.stringify(await exportData()))
 	backup.tables.duplicate_dismissals = [

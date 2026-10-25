@@ -3,9 +3,9 @@ import Dexie from "dexie"
 Dexie.dependencies.indexedDB = indexedDB
 Dexie.dependencies.IDBKeyRange = IDBKeyRange
 import { beforeEach, expect, test } from "bun:test"
-const { db } = await import("../src/data/db")
-const { seedIfEmpty } = await import("../src/data/seed")
-const { driveLocalDirty } = await import("../src/logic/drive-sync")
+const { db } = await import("../../src/data/db")
+const { seedIfEmpty } = await import("../../src/data/seed")
+const { driveLocalDirty } = await import("../../src/logic/drive-sync")
 
 beforeEach(async () => {
 	for (const table of db.tables) await table.clear()

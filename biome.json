@@ -4,8 +4,8 @@
 		"includes": [
 			"src/**/*.{js,jsx,ts,tsx}",
 			"app/**/*.{js,jsx,ts,tsx}",
-			"tests/web/**/*.{ts,tsx}",
-			"scripts/**/*.ts",
+			"tests/**/*.{ts,tsx}",
+			"!tests/domain/**",
 			"playwright.config.ts",
 			"!src/components/ui/**/*.*",
 			"next.config.ts",

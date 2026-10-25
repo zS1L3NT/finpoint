@@ -3,9 +3,9 @@ import Dexie from "dexie"
 Dexie.dependencies.indexedDB = indexedDB
 Dexie.dependencies.IDBKeyRange = IDBKeyRange
 import { beforeEach, expect, test } from "bun:test"
-import type { StatementRow } from "../src/data/db"
-import type { RuleInput } from "../src/logic/statement-rules"
-const { db } = await import("../src/data/db")
+import type { StatementRow } from "../../src/data/db"
+import type { RuleInput } from "../../src/logic/statement-rules"
+const { db } = await import("../../src/data/db")
 const {
 	saveStatementRule,
 	previewStatementRule,
@@ -15,9 +15,9 @@ const {
 	setStatementRuleEnabled,
 	deleteStatementRule,
 	matchesStatement,
-} = await import("../src/logic/statement-rules")
+} = await import("../../src/logic/statement-rules")
 const { exportData, importData, parseImportFile, clearAllData, SYNC_TABLES } = await import(
-	"../src/data/export-import"
+	"../../src/data/export-import"
 )
 const statement = (id: string, overrides: Partial<StatementRow> = {}): StatementRow => ({
 	id,
@@ -174,7 +174,7 @@ test("backups, Drive tables, legacy restore and reset include rules", async () =
 	expect(await db.statement_rules.count()).toBe(0)
 })
 test("version five upgrade preserves financial rows and clean or dirty Drive baseline", async () => {
-	const { hashSnapshot } = await import("../src/data/snapshot-hash")
+	const { hashSnapshot } = await import("../../src/data/snapshot-hash")
 	for (const clean of [true, false]) {
 		await db.statements.put(statement("s"))
 		const backup = await exportData()

@@ -4641,35 +4641,35 @@ export const scenarioProjects: Record<
 export const scenarioProjectExemptions: Record<string, Record<string, string>> = {
 	"src/components/value-swap.tsx#display.values": {
 		"detail summary: long and missing values fit each viewport and a changed value keeps its final text":
-			"Functional core half of a split test; its motion assertions run in the reduced-motion project from the extra half; src/components/value-swap.tsx",
+			"Functional core half of a split test; its motion assertions run in the reduced-motion project from the animations half; src/components/value-swap.tsx",
 	},
 	"src/components/charts/sparkline.tsx#chart.motion": {
 		"sparkline endpoint: stays on the final data value after Show trend":
-			"Functional core half of a split test; its motion assertions run in the reduced-motion project from the extra half; src/components/charts/sparkline.tsx",
+			"Functional core half of a split test; its motion assertions run in the reduced-motion project from the animations half; src/components/charts/sparkline.tsx",
 		"sparkline entrance: reveals the final data endpoint":
-			"Functional core half of a split test; its motion assertions run in the reduced-motion project from the extra half; src/components/charts/sparkline.tsx",
+			"Functional core half of a split test; its motion assertions run in the reduced-motion project from the animations half; src/components/charts/sparkline.tsx",
 	},
 	"src/components/charts/category-movers.tsx#chart.motion": {
 		"biggest changes: a saved Record amount updates the mover row and keeps its drill link and row node":
-			"Functional core half of a split test; its motion assertions run in the reduced-motion project from the extra half; src/components/charts/category-movers.tsx",
+			"Functional core half of a split test; its motion assertions run in the reduced-motion project from the animations half; src/components/charts/category-movers.tsx",
 	},
 	"src/components/table/statement-columns.tsx#table.motion": {
 		"table paging /statements: first page shows five rows and next page moves the URL to page 2":
-			"Functional core half of a split test; its motion assertions run in the reduced-motion project from the extra half; src/components/table/statement-columns.tsx",
+			"Functional core half of a split test; its motion assertions run in the reduced-motion project from the animations half; src/components/table/statement-columns.tsx",
 		"table refilter /statements: settled search keeps the query in the URL":
-			"Functional core half of a split test; its motion assertions run in the reduced-motion project from the extra half; src/components/table/statement-columns.tsx",
+			"Functional core half of a split test; its motion assertions run in the reduced-motion project from the animations half; src/components/table/statement-columns.tsx",
 	},
 	"src/components/table/row-groups.tsx#table.motion": {
 		"table refilter /records: settled search keeps the query in the URL":
-			"Functional core half of a split test; its motion assertions run in the reduced-motion project from the extra half; src/components/table/row-groups.tsx",
+			"Functional core half of a split test; its motion assertions run in the reduced-motion project from the animations half; src/components/table/row-groups.tsx",
 	},
 	"src/components/table/data-table.tsx#table.motion": {
 		"table paging /statements: first page shows five rows and next page moves the URL to page 2":
-			"Functional core half of a split test; its motion assertions run in the reduced-motion project from the extra half; src/components/table/data-table.tsx",
+			"Functional core half of a split test; its motion assertions run in the reduced-motion project from the animations half; src/components/table/data-table.tsx",
 		"table paging /records: first page shows five rows and next page moves the URL to page 2":
-			"Functional core half of a split test; its motion assertions run in the reduced-motion project from the extra half; src/components/table/data-table.tsx",
+			"Functional core half of a split test; its motion assertions run in the reduced-motion project from the animations half; src/components/table/data-table.tsx",
 		"table refilter /statements: settled search keeps the query in the URL":
-			"Functional core half of a split test; its motion assertions run in the reduced-motion project from the extra half; src/components/table/data-table.tsx",
+			"Functional core half of a split test; its motion assertions run in the reduced-motion project from the animations half; src/components/table/data-table.tsx",
 		"table refilter /records: settled search keeps the query in the URL":
 			"URL query retention after refilter does not vary by configuration; the refilter entrance stays in the reduced-motion project as a motion test; src/components/table/data-table.tsx",
 		"Budget detail: detaching a Record keeps the remaining row node and persists the detachment":
@@ -4681,9 +4681,9 @@ export const scenarioProjectExemptions: Record<string, Record<string, string>> =
 	},
 	"src/components/table/paginated-data-table.tsx#table.motion": {
 		"table paging /statements: first page shows five rows and next page moves the URL to page 2":
-			"Functional core half of a split test; its motion assertions run in the reduced-motion project from the extra half; src/components/table/paginated-data-table.tsx",
+			"Functional core half of a split test; its motion assertions run in the reduced-motion project from the animations half; src/components/table/paginated-data-table.tsx",
 		"table paging /records: first page shows five rows and next page moves the URL to page 2":
-			"Functional core half of a split test; its motion assertions run in the reduced-motion project from the extra half; src/components/table/paginated-data-table.tsx",
+			"Functional core half of a split test; its motion assertions run in the reduced-motion project from the animations half; src/components/table/paginated-data-table.tsx",
 		"Records table: keeps search in the URL and moves between pages":
 			"Page-change identity and URL state do not vary by configuration; src/components/table/paginated-data-table.tsx",
 		"Statements table: keeps search in the URL and moves between pages":
@@ -4691,7 +4691,7 @@ export const scenarioProjectExemptions: Record<string, Record<string, string>> =
 	},
 	"src/components/table/record-columns.tsx#table.motion": {
 		"table refilter /records: settled search keeps the query in the URL":
-			"Functional core half of a split test; its motion assertions run in the reduced-motion project from the extra half; src/components/table/record-columns.tsx",
+			"Functional core half of a split test; its motion assertions run in the reduced-motion project from the animations half; src/components/table/record-columns.tsx",
 		"Budget detail: detaching a Record keeps the remaining row node and persists the detachment":
 			"Detach no-replay does not vary by configuration; the test forces its own 1920×1440 viewport; src/components/table/record-columns.tsx",
 		"Budget detail: remaining row does not replay its entrance after detaching":

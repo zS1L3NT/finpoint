@@ -1,17 +1,20 @@
-# Browser regression tests
+# Tests
 
 Install dependencies with `bun install`, then install Chromium with `bunx playwright install chromium`.
 On a Linux machine missing browser libraries, use `bunx playwright install --with-deps chromium`.
 
-## Two tiers: core and extra
+Domain and importer tests live in `tests/domain/` and run with `bun test` (Dexie with
+in-memory IndexedDB). Everything else here is the Playwright browser suite.
 
-The folder names the tier. `tests/web/core/` holds mandatory tests: what renders,
+## Two tiers: core and animations
+
+The folder names the tier. `tests/core/` holds mandatory tests: what renders,
 what persists, and what navigation, keyboard, validation, and workflow flows do.
-`tests/web/extra/` holds animation tests: anything that asserts how something
+`tests/animations/` holds animation tests: anything that asserts how something
 animates (entrances, cascades, fades, frame-by-frame opacity or geometry, reduced-motion
-branches). Extra tests run one at a time. Core tests run in parallel.
+branches). Animation tests run one at a time. Core tests run in parallel.
 
-A test that checks animation behaviour with a frame sampler belongs in extra. Waiting
+A test that checks animation behaviour with a frame sampler belongs in animations. Waiting
 for animations to finish before reading a value, or polling a functional condition
 with `requestAnimationFrame`, belongs in core.
 
@@ -21,17 +24,17 @@ Each tier has one file per area. A file exists only if it has tests.
 
 | Area | Covers | Server |
 | --- | --- | --- |
-| `routes` | Page and route rendering, empty, invalid, static, and detail pages, layout sweeps, loading reveal, card grids and page fades (extra) | app |
-| `tables` | Record, Statement, and Allocate tables: filters, pagination, selection, grouping, row entrances (extra) | app |
+| `routes` | Page and route rendering, empty, invalid, static, and detail pages, layout sweeps, loading reveal, card grids and page fades (animations) | app |
+| `tables` | Record, Statement, and Allocate tables: filters, pagination, selection, grouping, row entrances (animations) | app |
 | `editors` | Create and update dialogs and their fields, long content, archiving edits | app |
 | `sheets` | Search and confirmation sheets, held-IndexedDB loading, pending queue search | app |
-| `modals` | App modal surfaces, backdrops, dropdown and select scroll behaviour, exit fades (extra) | app |
+| `modals` | App modal surfaces, backdrops, dropdown and select scroll behaviour, exit fades (animations) | app |
 | `navigation` | Back button, history, browser traversal, workflow tabs | app |
 | `keyboard` | Keyboard-only flows, sidebar rail, chrome buttons | app |
 | `workflows` | Allocation, duplicates, importer, settings, sync, backup and reset | app |
-| `charts` | Chart values, tooltips, drills, containment, chart transitions (extra) | app |
+| `charts` | Chart values, tooltips, drills, containment, chart transitions (animations) | app |
 | `components` | Everything served by the Vite component harness | harness |
-| `helpers` | Self-tests of test helpers (`date-only` in core, `assertion-probes` in extra) | both |
+| `helpers` | Self-tests of test helpers (`date-only` in core, `assertion-probes` in animations) | both |
 | `ledger` | The behaviour ledger (`ledger.e2e.ts`), core only | none |
 
 Harness tests and app tests never share a file. Every harness-based test goes in
@@ -39,59 +42,53 @@ Harness tests and app tests never share a file. Every harness-based test goes in
 
 ## What to run
 
-Ad-hoc runs use the dev servers (app on 5173, harness on 5174, reused when already
-running). Runner commands build frozen production bundles first and serve them on
-dedicated ports (app on 5273, harness on 5274), so a running dev server is never reused.
+Local runs use the dev servers (app on 5173, harness on 5174, reused when already running):
 
-- `bun run test:web` — ad-hoc core run: dev servers, core tests only, 1 worker.
-  All Playwright arguments pass through: file paths, `--grep`, `--project`, `--workers`,
-  `--headed`. For an ad-hoc extra run, set `PLAYWRIGHT_EXTRA=1` and keep one worker:
-  `PLAYWRIGHT_EXTRA=1 bun run test:web -- tests/web/extra/<file> --workers=1`.
-- `bun run test:web:core` — runner: production build, core tests on `desktop` and
-  `mobile`, parallel at 50% of cores unless `--workers=N` is given.
-- `bun run test:web:extra` — runner: production build, extra tests on all five
-  projects, always 1 worker.
-- `bun run test:web:full` — runner: production build, then core on all five projects in
-  parallel, then extra on all five projects with 1 worker. Extra runs even if core
-  fails, and the exit code is non-zero if either fails.
+- `bun run test:e2e` — core tests, 1 worker. All Playwright arguments pass through: file
+  paths, `--grep`, `--project`, `--workers`, `--headed`.
+- `PLAYWRIGHT_ANIMATIONS=1 bun run test:e2e -- tests/animations/<file> --workers=1` —
+  animation tests, always one worker.
 
-Runner reports go to `playwright-report/core` and `playwright-report/extra`, output to
-`test-results/core` and `test-results/extra`. The runners accept only `--grep`,
-`--grep-invert`, `--workers` (core only), and `--project`. `--project` replaces the
-defaults and applies to both tiers of `full`. Anything else (positional paths, `--config`,
-`--shard`) is refused; run single files ad-hoc with `bun run test:web -- <path>` instead.
-The runners live in `scripts/test/` (`core.ts`, `extra.ts`, `full.ts`, sharing `lib/`).
+Run the files and projects that exercise what you changed. The whole suite runs in CI.
 
-Core is 356 runs (desktop and mobile); a full run is 379 core runs on all five projects,
-then 102 extra runs (`bunx playwright test --list`, 25 October 2026). On a 12-core Linux host
-without a GPU a full run took about 27 min (13 min core on 6 workers, 13 min extra);
-the 313-run core tier before the main merge took about 11 min including the production build.
-After the merge, a full run (365 + 102) on the developer's Mac took about 16 min (7 min core,
-9 min extra). The pre-reorganisation suite (354 runs, 1 worker) took 36 min on that Mac.
+## CI
 
-Only one runner at a time: it takes a lock at `test-results/.suite-lock/pid` and refuses
-to start while that file exists. A lock left by a crashed run is never cleared
-automatically; the refusal says whether its holder is still alive and how to remove it.
-Ad-hoc runs take no lock and write to `test-results/adhoc`, so they cannot delete runner
-output, but running both at once slows animation sampling.
+`.github/workflows/ci.yml` runs on every pull request, on pushes to `main`, and on demand.
+Its first job, `changes`, lists the changed files and skips what they cannot affect:
+Markdown, `graphify-out/`, `docs/` and `.scratch/` changes run nothing, and
+`tests/domain/` changes skip the browser tests. A skipped job still reports as passing, so
+required checks never wait. When the changed files cannot be worked out (a manual run, or
+a push whose previous commit is unknown), everything runs. Each job is a GitHub check:
 
-## Sign-off
+- `checks`: `bun lint:check`, `bun types:check`, `bun run types:e2e`.
+- `domain`: `bun test`.
+- `core (<group>)`: one job per group of core files, on all five projects with two
+  workers, against frozen production bundles (app on 5273, harness on 5274).
+- `animations (<group>)`: the same for animation files, with one worker.
+- `core` and `animations`: pass only if every group of their tier passed. They merge the
+  groups' blob reports into one HTML report, uploaded as the `playwright-report-core` or
+  `playwright-report-animations` artifact, and annotate failures on their lines.
 
-`--signoff` refuses to start unless the `basecamp/gh-signoff` extension is installed and the
-tree is clean (Next's generated `next-env.d.ts` is ignored). It records `HEAD` and signs each
-tier on that commit as soon as the tier finishes: `test:web:full` posts `signoff/core`
-before extra starts, then `signoff/extra`. A passing tier is signed green
-(`gh signoff --commit <HEAD> core`) only if the tree is still clean at the same commit. A
-failing tier is posted red (`gh signoff fail`), so a required check shows the failure
-instead of waiting forever. Each sign-off also updates one pull-request comment listing
-every finished tier's pass count and duration, any tier still running, and, for each
-failure, its project, file and line, and the start of its error. Each status's **Details**
-link opens that comment, and a failed status's description holds the counts. The HTML
-reports stay local under `playwright-report/`. With `--signoff`, no pass-through argument is
-allowed: only complete runs are reported. gh-signoff also requires the commit to be pushed,
-so commit and push before a signed run. `--signoff-dry-run` prints the extension, tree, HEAD
-and sign-off commands without running anything. `gh signoff install core` makes
-`signoff/core` a required check for merging.
+Groups are named by area so a red job says what broke, and balanced by run time so no
+job holds up the rest. Each job spends about 1.5 minutes on setup (dependencies, Chromium,
+builds) before its tests. A whole run took 6.5 minutes (25 October 2026):
+
+| Tier | Group | Files | Runs | Tests |
+| --- | --- | --- | --- | --- |
+| core | `pages` | routes | 74 | 4.4 min |
+| core | `flows` | navigation, workflows | 90 | 4.7 min |
+| core | `editing` | editors, modals, keyboard | 57 | 3.0 min |
+| core | `data` | charts, tables | 60 | 3.3 min |
+| core | `components` | components, sheets, helpers, ledger | 99 | 4.2 min |
+| animations | `tables` | tables | 40 | 4.5 min |
+| animations | `editing` | editors, modals, sheets | 24 | 3.9 min |
+| animations | `display` | charts, routes, components, helpers | 38 | 4.4 min |
+
+A new browser test file must join exactly one group in `ci.yml`; the ledger fails
+otherwise. Rebalance when a group's job runs clearly longer than the others: the
+per-file run times are in each job's log.
+
+Core is 380 runs on all five projects and animations 102 (25 October 2026).
 
 ## Projects and tags
 
@@ -131,8 +128,8 @@ field when assertions need a different spelling. Renaming a title means renaming
 `test.describe` wrappers except to scope `test.use` (for example a harness section);
 the folder already names the tier and the file names the area.
 
-The behaviour ledger is `tests/web/component-inventory.ts` plus the checks in
-`tests/web/core/ledger.e2e.ts`. It parses static `test` and `test.step` titles,
+The behaviour ledger is `tests/component-inventory.ts` plus the checks in
+`tests/core/ledger.e2e.ts`. It parses static `test` and `test.step` titles,
 including ones generated by static `for…of` loops, and requires every mapped test ID
 to resolve to exactly one executable test. The tier guard fails if a `core/` file
 imports `support/motion`.
@@ -186,7 +183,7 @@ It excludes elements hidden by CSS clipping, including Base UI native selects. I
 The popup helper checks that reduced motion suppresses movement and leaves the popup fully visible.
 Attach returned samples with `test.info().attach` when diagnosing a failure.
 
-Area helpers shared by one area's files live in `tests/web/support/<area>.ts`
+Area helpers shared by one area's files live in `tests/support/<area>.ts`
 (`charts`, `editors`, `sheets`, `tables`). Helpers used by a single destination file
 stay local to that file.
 
@@ -195,7 +192,7 @@ read requests. Dexie can answer a warm query from memory, so these tests invalid
 through the installed storage-mutation protocol before requiring a delayed read. The fixture changes
 no stored values or rendered results. A blocked independent probe alone does not prove the UI is waiting.
 
-Run `bun run types:web` to check browser tests, shared assertions, the Vite harness, and Playwright configuration.
+Run `bun run types:e2e` to check browser tests, shared assertions, the Vite harness, and Playwright configuration.
 Run `bun lint:check` for a read-only Biome check, including browser tests.
 The application type check remains `bun types:check`.
 
@@ -203,13 +200,12 @@ Configuration follows the [Playwright configuration guide](https://playwright.de
 and [web server lifecycle guide](https://playwright.dev/docs/test-webserver), plus the installed Next.js
 Playwright guide under `node_modules/next/dist/docs/01-app/02-guides/testing/playwright.md`.
 
-Keep cases under `tests/web/core/` and `tests/web/extra/` with the `.e2e.ts` suffix. Bun's unit test discovery must not collect them.
-Playwright records failure screenshots and retains failure traces under `test-results/`:
-`test-results/adhoc` for ad-hoc runs, and `test-results/core` and `test-results/extra` for the
-runners. HTML reports live in the matching folders under `playwright-report/`. Both directories
-are ignored. Open a report with `bunx playwright show-report playwright-report/adhoc` (or `core`,
-`extra`). Open a trace with
-`bunx playwright show-trace test-results/<folder>/<case>/trace.zip`.
+Keep cases under `tests/core/` and `tests/animations/` with the `.e2e.ts` suffix. Bun's unit test discovery must not collect them.
+Playwright records failure screenshots and retains failure traces under `test-results/adhoc`,
+and writes the HTML report to `playwright-report/adhoc`; both directories are ignored. Open the
+report with `bunx playwright show-report playwright-report/adhoc`, or download a CI report
+artifact and open its folder the same way. Open a trace with
+`bunx playwright show-trace test-results/adhoc/<case>/trace.zip`.
 
 Grouped tests trade per-case isolation for wall-clock time. Each group keeps one seed and one
 browser context; steps re-navigate only where state would leak (documented per group), and
@@ -223,11 +219,11 @@ The shared Select adapter discovers labels from literal `SelectItem` descendants
 and arrays. Custom components wrapping items and Radix-only content properties are not supported;
 current application consumers use plain items and the adapter's supported placement properties.
 
-For a verification run against frozen production bundles without the runner, run `bun run build` and
-`bunx vite build --config tests/web/harness/vite.config.ts`, then start `bun run start --port 5273` and
-`bunx vite preview --config tests/web/harness/vite.config.ts --host 127.0.0.1 --port 5274 --strictPort`
+For a local run against frozen production bundles, as CI does, run `bun run build` and
+`bunx vite build --config tests/harness/vite.config.ts`, then start `bun run start --port 5273` and
+`bunx vite preview --config tests/harness/vite.config.ts --host 127.0.0.1 --port 5274 --strictPort`
 in separate terminals. Run the matrix with
-`PLAYWRIGHT_SERVER=production PLAYWRIGHT_EXTERNAL_SERVERS=1 bun run test:web` for core tests, adding
-`PLAYWRIGHT_EXTRA=1` and `--workers=1` for extra tests. Stop those two servers after
+`PLAYWRIGHT_SERVER=production PLAYWRIGHT_EXTERNAL_SERVERS=1 bun run test:e2e` for core tests, adding
+`PLAYWRIGHT_ANIMATIONS=1` and `--workers=1` for animation tests. Stop those two servers after
 the run.
 This avoids development reloads changing source while animation frames are sampled.

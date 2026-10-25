@@ -371,7 +371,7 @@ test.describe("harness primitives section", () => {
 test.describe("harness widgets section", () => {
 	test.use({ baseURL: HARNESS_URL })
 	// Mirror the domain suites' fixedClock: pin wall time so calendar/today
-	// rendering is deterministic. Same instant as tests/web/support/fixtures.ts.
+	// rendering is deterministic. Same instant as tests/support/fixtures.ts.
 	test.beforeEach(async ({ page }) => {
 		await setDateOnly(page, new Date("2026-10-15T12:00:00+08:00"))
 	})

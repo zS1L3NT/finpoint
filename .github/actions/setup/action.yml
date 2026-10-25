@@ -1,0 +1,26 @@
+# Shared test-job setup: Bun, dependencies, Chromium with its system libraries, and
+# the frozen production bundles (Next app and component harness) the tests serve.
+name: setup
+description: Install dependencies and Chromium, then build the app and the harness
+runs:
+  using: composite
+  steps:
+    - uses: oven-sh/setup-bun@v2
+    - uses: actions/setup-node@v7
+      with:
+        node-version: lts/*
+    - run: bun install --frozen-lockfile
+      shell: bash
+    - uses: actions/cache@v6
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+    - name: Install Chromium
+      run: bunx playwright install --with-deps chromium
+      shell: bash
+    - name: Build app
+      run: bun run build
+      shell: bash
+    - name: Build harness
+      run: bunx vite build --config tests/harness/vite.config.ts
+      shell: bash
