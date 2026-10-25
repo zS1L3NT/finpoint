@@ -54,7 +54,11 @@ Run the files and projects that exercise what you changed. The whole suite runs 
 ## CI
 
 `.github/workflows/ci.yml` runs on every pull request, on pushes to `main`, and on demand.
-Each job is a GitHub check:
+Its first job, `changes`, lists the changed files and skips what they cannot affect:
+Markdown, `graphify-out/`, `docs/` and `.scratch/` changes run nothing, and
+`tests/domain/` changes skip the browser tests. A skipped job still reports as passing, so
+required checks never wait. When the changed files cannot be worked out (a manual run, or
+a push whose previous commit is unknown), everything runs. Each job is a GitHub check:
 
 - `checks`: `bun lint:check`, `bun types:check`, `bun run types:e2e`.
 - `domain`: `bun test`.
