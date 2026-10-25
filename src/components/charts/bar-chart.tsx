@@ -27,6 +27,7 @@ export default function BarChart({
 	ticks,
 	bottom = 24,
 	readout,
+	onActive,
 	introKey,
 	onSelect,
 	className,
@@ -40,6 +41,7 @@ export default function BarChart({
 	ticks?: number[]
 	bottom?: number
 	readout?: (index: number) => React.ReactNode
+	onActive?: (index: number | null) => void
 	introKey?: string
 	onSelect?: (index: number) => void
 	className?: string
@@ -85,6 +87,7 @@ export default function BarChart({
 			introKey={introKey}
 			className={className}
 			onSelect={onSelect}
+			onActive={onActive}
 			indexAt={(position, size) => {
 				const { band } = scales(size)
 				return band ? Math.floor(position / band) : 0
@@ -177,9 +180,7 @@ export default function BarChart({
 								const start = value > 0 ? up : down
 								if (value > 0) up += value
 								else down += value
-								const outer =
-									position === (value > 0 ? outerUp : outerDown) &&
-									layout !== "share"
+								const outer = position === (value > 0 ? outerUp : outerDown)
 								return (
 									<path
 										key={s.key}

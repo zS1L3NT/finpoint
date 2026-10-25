@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import BarChart from "@/components/charts/bar-chart"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatCurrency } from "@/lib/utils"
@@ -26,6 +27,7 @@ export default function CategoryHistoryChart({
 	monthlyBudgetIds: string[] | null
 	badge: React.ReactNode
 }) {
+	const [active, setActive] = useState<number | null>(null)
 	const scopedMonths = months.map(month => ({
 		...month,
 		categories: month.categories
@@ -55,6 +57,8 @@ export default function CategoryHistoryChart({
 	)
 	const unavailable = chartData.filter(month => !month.included)
 	const selected = chartData.find(month => month.current)
+	// The list follows the month being read, and rests on the selected month.
+	const shown = (active === null ? undefined : chartData[active]) ?? selected
 	const selectedEmpty =
 		selected && Object.values(selected.seriesValues).every(value => value === 0)
 
@@ -90,10 +94,19 @@ export default function CategoryHistoryChart({
 							tick={index => <MonthTick month={chartData[index]} />}
 							readout={index => {
 								const month = chartData[index]
-								return month ? (
-									<HistoryReadout month={month} config={config} />
-								) : null
+								if (!month) return null
+								return (
+									<>
+										<span className="font-medium">{month.month}</span>
+										<span className="text-muted-foreground tabular-nums">
+											{month.included
+												? `Total ${formatCurrency(monthTotal(month))}`
+												: "Unavailable"}
+										</span>
+									</>
+								)
 							}}
+							onActive={setActive}
 							introKey={months.find(month => month.current)?.month}
 						/>
 					</>
@@ -111,19 +124,9 @@ export default function CategoryHistoryChart({
 					</p>
 				)}
 
-				{series.length > 0 && (
-					<div className="flex flex-wrap gap-x-3 gap-y-2 text-xs text-muted-foreground">
-						{series.map(item => (
-							<span key={item.key} className="flex items-center gap-1.5">
-								<span
-									className="size-2 rounded-sm"
-									style={{ backgroundColor: item.color }}
-								/>
-								{item.name}
-							</span>
-						))}
-					</div>
-				)}
+				{shown && totalSpending > 0 ? (
+					<MonthBreakdown month={shown} config={config} />
+				) : null}
 				{allSeries.length > visibleSeriesLimit && (
 					<details className="text-xs text-muted-foreground">
 						<summary className="cursor-pointer select-none">
@@ -241,73 +244,79 @@ function MonthTick({ month }: { month?: ChartMonth }) {
 	)
 }
 
-function HistoryReadout({
+function monthTotal(month: ChartMonth) {
+	return Object.values(month.seriesValues).reduce((sum, value) => sum + value, 0)
+}
+
+function MonthBreakdown({
 	month,
 	config,
 }: {
 	month: ChartMonth
 	config: Record<string, { label: string; color: string }>
 }) {
-	const label = month.month
-	if (!month.included) {
-		return (
-			<div>
-				<p className="font-medium">{label}</p>
-				<p className="text-muted-foreground">Unavailable: {month.reason}</p>
-			</div>
-		)
-	}
-	const entries = Object.entries(month.seriesValues).filter(([, value]) => value > 0)
-	const total = entries.reduce((sum, [, value]) => sum + value, 0)
+	const total = monthTotal(month)
+	const entries = Object.entries(month.seriesValues)
+		.filter(([, value]) => value > 0)
+		.sort(([, a], [, b]) => b - a)
+	const share = (value: number) => (total ? `${((value / total) * 100).toFixed(1)}%` : "0%")
+
 	return (
-		<div className="max-h-72 min-w-48 overflow-y-auto">
-			<p className="mb-2 font-medium">
-				{label}
-				{month.current ? " · selected month" : ""}
+		<div className="grid gap-1 text-xs" aria-live="polite">
+			<p className="flex justify-between gap-4 pb-1 font-medium">
+				<span>
+					{month.month}
+					{month.current ? " · selected month" : ""}
+				</span>
+				{month.included ? (
+					<span className="tabular-nums">{formatCurrency(total)}</span>
+				) : null}
 			</p>
-			{entries.length === 0 && (
+			{!month.included ? (
+				<p className="text-muted-foreground">Unavailable: {month.reason}</p>
+			) : entries.length === 0 ? (
 				<p className="text-muted-foreground">No spending recorded in this period.</p>
-			)}
-			{entries.map(([key, value]) => {
-				const details = month.seriesDetails[key] ?? []
-				return (
-					<div key={key} className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 py-0.5">
-						<span className="flex min-w-0 items-center gap-2 text-muted-foreground">
-							<span
-								className="size-2 shrink-0 rounded-full"
-								style={{ backgroundColor: config[key]?.color }}
-							/>
-							<span className="truncate">{config[key]?.label ?? key}</span>
-						</span>
-						<span className="font-medium tabular-nums">
-							{formatCurrency(value)} ·{" "}
-							{total ? `${((value / total) * 100).toFixed(1)}%` : "0%"}
-						</span>
-						{details.length > 1 && (
-							<div className="col-span-2 ml-2 mt-1 grid gap-0.5 border-l pl-2">
-								{details.map(item => (
-									<p key={item.id} className="flex justify-between gap-3">
-										<span className="flex min-w-0 items-center gap-2 text-muted-foreground">
-											<span
-												className="size-2 shrink-0 rounded-full"
-												style={{ backgroundColor: item.color }}
-											/>
-											<span className="truncate">{item.name}</span>
-										</span>
-										<span className="tabular-nums">
-											{formatCurrency(item.spending)} ·{" "}
-											{total
-												? `${((item.spending / total) * 100).toFixed(1)}%`
-												: "0%"}
-										</span>
-									</p>
-								))}
+			) : (
+				entries.map(([key, value]) => {
+					const details = month.seriesDetails[key] ?? []
+					return (
+						<div key={key} className="grid gap-1 rounded-lg bg-muted/40 px-3 py-2">
+							<div className="grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-x-3">
+								<span
+									className="size-2.5 rounded-full"
+									style={{ backgroundColor: config[key]?.color }}
+								/>
+								<span className="truncate">{config[key]?.label ?? key}</span>
+								<span className="font-medium tabular-nums">
+									{formatCurrency(value)}
+								</span>
+								<span className="w-12 text-right text-muted-foreground tabular-nums">
+									{share(value)}
+								</span>
 							</div>
-						)}
-					</div>
-				)
-			})}
-			<p className="mt-2 border-t pt-1 font-medium">Total {formatCurrency(total)}</p>
+							{details.length > 1 &&
+								details.map(item => (
+									<div
+										key={item.id}
+										className="grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-x-3 pl-5 text-muted-foreground"
+									>
+										<span
+											className="size-2 rounded-full"
+											style={{ backgroundColor: item.color }}
+										/>
+										<span className="truncate">{item.name}</span>
+										<span className="tabular-nums">
+											{formatCurrency(item.spending)}
+										</span>
+										<span className="w-12 text-right tabular-nums">
+											{share(item.spending)}
+										</span>
+									</div>
+								))}
+						</div>
+					)
+				})
+			)}
 		</div>
 	)
 }

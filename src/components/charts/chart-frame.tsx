@@ -27,6 +27,7 @@ export default function ChartFrame({
 	marks,
 	overlay,
 	readout,
+	onActive,
 	children,
 }: {
 	label: string
@@ -41,6 +42,7 @@ export default function ChartFrame({
 	marks: (size: ChartSize, active: number | null) => React.ReactNode
 	overlay?: (size: ChartSize, active: number | null) => React.ReactNode
 	readout: (index: number) => React.ReactNode
+	onActive?: (index: number | null) => void
 	children?: (size: ChartSize) => React.ReactNode
 }) {
 	const id = useId().replace(/:/g, "")
@@ -60,6 +62,8 @@ export default function ChartFrame({
 		observer.observe(element)
 		return () => observer.disconnect()
 	}, [])
+
+	useEffect(() => onActive?.(active), [active, onActive])
 
 	const intro = !reduceMotion && played !== introKey
 	const pointed = (event: React.PointerEvent<SVGSVGElement>) =>
