@@ -1,17 +1,17 @@
 # Graph Report - ai-revolut-style-charts  (2026-10-26)
 
 ## Corpus Check
-- 243 files · ~215,806 words
+- 243 files · ~215,977 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 9 file(s) not represented in the graph (top: (none) 5, .example 1, .lock 1)
 
 ## Summary
-- 1878 nodes · 7506 edges · 88 communities (77 shown, 11 thin omitted)
+- 1878 nodes · 7510 edges · 88 communities (77 shown, 11 thin omitted)
 - Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 127 edges (avg confidence: 0.84)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `33ee5d23`
+- Built from commit: `a3978e57`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -105,8 +105,8 @@
 ## God Nodes (most connected - your core abstractions)
 1. `cn()` - 318 edges
 2. `PrimitivesSection()` - 180 edges
-3. `Button()` - 125 edges
-4. `react` - 96 edges
+3. `Button()` - 127 edges
+4. `react` - 97 edges
 5. `formatCurrency()` - 77 edges
 6. `RecordEditorDialog()` - 63 edges
 7. `UiIcon()` - 56 edges
@@ -456,13 +456,13 @@ Nodes (5): Agent Behavior, Generated / Ignored Files, src/components/*, src/comp
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `cn()` connect `cn` to `pending/page.tsx`, `Button`, `next`, `lib/motion.ts`, `providers.tsx`, `(month)/layout.tsx`, `paginated-data-table.tsx`, `formatCurrency`, `utils.ts`, `(month)/page.tsx`, `pagination.tsx`, `date-range.tsx`, `sync/page.tsx`, `spending-calendar.tsx`, `category-filter.tsx`, `app-sidebar.tsx`?**
+- **Why does `react` connect `Button` to `pending/page.tsx`, `cn`, `next`, `lib/motion.ts`, `providers.tsx`, `category-history-chart.tsx`, `(month)/layout.tsx`, `paginated-data-table.tsx`, `formatCurrency`, `utils.ts`, `(month)/page.tsx`, `pagination.tsx`, `date-range.tsx`, `package.json`, `sync/page.tsx`, `spending-calendar.tsx`, `category-filter.tsx`, `app-sidebar.tsx`?**
   _High betweenness centrality (0.083) - this node is a cross-community bridge._
 - **What connects `@fontsource-variable/inter`, `shadcn`, `tailwindcss` to the rest of the system?**
   _83 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `pending/page.tsx` be split into smaller, more focused modules?**
   _Cohesion score 0.06463923673225999 - nodes in this community are weakly interconnected._
-- **Why does `react` connect `Button` to `pending/page.tsx`, `cn`, `next`, `lib/motion.ts`, `providers.tsx`, `category-history-chart.tsx`, `(month)/layout.tsx`, `paginated-data-table.tsx`, `formatCurrency`, `utils.ts`, `(month)/page.tsx`, `pagination.tsx`, `date-range.tsx`, `package.json`, `sync/page.tsx`, `category-filter.tsx`, `app-sidebar.tsx`?**
+- **Why does `cn()` connect `cn` to `pending/page.tsx`, `Button`, `next`, `lib/motion.ts`, `providers.tsx`, `(month)/layout.tsx`, `paginated-data-table.tsx`, `formatCurrency`, `utils.ts`, `(month)/page.tsx`, `pagination.tsx`, `date-range.tsx`, `sync/page.tsx`, `spending-calendar.tsx`, `category-filter.tsx`, `app-sidebar.tsx`?**
   _High betweenness centrality (0.083) - this node is a cross-community bridge._
 - **Should `Button` be split into smaller, more focused modules?**
   _Cohesion score 0.05070092514038702 - nodes in this community are weakly interconnected._

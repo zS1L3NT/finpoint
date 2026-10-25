@@ -336,8 +336,8 @@ export default function DashboardPage() {
 										Spending calendar
 									</ScopedCardTitle>
 									<CardDescription>
-										Stronger colour means more spending. Select a day to open
-										its Records.
+										Stronger colour means more spending. Select a day to see its
+										total and open its Records.
 									</CardDescription>
 								</CardHeader>
 								<CardContent>

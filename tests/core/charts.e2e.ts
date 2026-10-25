@@ -256,6 +256,9 @@ test("populated charts: tooltips stay numeric, drills work by keyboard and a Rec
 		await day.scrollIntoViewIfNeeded()
 		await day.focus()
 		await page.keyboard.press("Enter")
+		await expect(calendar).toContainText("Mon 5 Oct · $84.20 · 2 Records")
+		await calendar.getByRole("button", { name: "View Records", exact: true }).focus()
+		await page.keyboard.press("Enter")
 		await expect(page).toHaveURL(/start_date=2026-10-05/)
 		await expect(page).toHaveURL(/end_date=2026-10-05/)
 		await page.goto(overview)
@@ -415,6 +418,7 @@ test.describe("pinned overview date", () => {
 				calendar.getByRole("button", { name: "16 October: upcoming", exact: true }),
 			).toBeDisabled()
 			await calendar.getByRole("button", { name: /^5 October:/ }).click()
+			await calendar.getByRole("button", { name: "View Records", exact: true }).click()
 			await expect(page).toHaveURL(/start_date=2026-10-05/)
 			await expect(page).toHaveURL(/end_date=2026-10-05/)
 			await expect(
@@ -589,6 +593,7 @@ test.describe("pinned overview date", () => {
 				await calendar
 					.getByRole("button", { name: new RegExp(`^${days} ${month}:`) })
 					.click()
+				await calendar.getByRole("button", { name: "View Records", exact: true }).click()
 				const date = `${year}-${month === "February" ? "02" : month === "April" ? "04" : "09"}-${days}`
 				await expect(page).toHaveURL(new RegExp(`start_date=${date}`))
 				await expect(page.getByText("No matching Records", { exact: true })).toBeVisible()
