@@ -23,6 +23,9 @@ export type ChartConfig = Record<
 
 type ChartContextProps = {
   config: ChartConfig
+  // Touch only: Recharts never clears its tooltip when a finger lifts, so the
+  // tooltip shows while a finger is down and has moved, and hides on release.
+  touch: "idle" | "pressed" | "scrubbing" | null
 }
 
 const ChartContext = React.createContext<ChartContextProps | null>(null)
@@ -56,12 +59,26 @@ function ChartContainer({
 }) {
   const uniqueId = React.useId()
   const chartId = `chart-${id ?? uniqueId.replace(/:/g, "")}`
+  const [touch, setTouch] = React.useState<ChartContextProps["touch"]>(null)
 
   return (
-    <ChartContext.Provider value={{ config }}>
+    <ChartContext.Provider value={{ config, touch }}>
       <div
         data-slot="chart"
         data-chart={chartId}
+        onPointerDown={(event) =>
+          setTouch(event.pointerType === "mouse" ? null : "pressed")
+        }
+        // Recharts moves its tooltip on touchmove, so a press reads only once it scrubs.
+        onPointerMove={(event) => {
+          if (event.pointerType === "mouse") setTouch(null)
+          else if (touch === "pressed") setTouch("scrubbing")
+        }}
+        onPointerUp={(event) => {
+          if (event.pointerType !== "mouse") setTouch("idle")
+        }}
+        onPointerCancel={() => setTouch((value) => (value ? "idle" : null))}
+        onKeyDown={() => setTouch(null)}
         className={cn(
           "flex aspect-video justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-hidden [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector]:outline-hidden [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-surface]:outline-hidden",
           className
@@ -116,7 +133,15 @@ ${colorConfig
 // Recharts glides the tooltip box after the cursor over 400ms by default, which reads as
 // lag on every hover; a tooltip that follows the pointer should track it directly.
 function ChartTooltip(props: React.ComponentProps<typeof RechartsPrimitive.Tooltip>) {
-  return <RechartsPrimitive.Tooltip isAnimationActive={false} {...props} />
+  const { touch } = useChart()
+
+  return (
+    <RechartsPrimitive.Tooltip
+      isAnimationActive={false}
+      active={touch && touch !== "scrubbing" ? false : undefined}
+      {...props}
+    />
+  )
 }
 
 function ChartTooltipContent({

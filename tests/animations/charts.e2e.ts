@@ -3,12 +3,16 @@ import { card, overview, overviewCharts } from "../support/charts"
 import { setDateOnly } from "../support/date-only"
 import { expect, seedWorkspace, test } from "../support/fixtures"
 
+// Recharts marks plus the custom trend chart's marks and intro clip.
 const marks =
-	".recharts-area-curve, .recharts-line-curve, .recharts-rectangle, clipPath[id^=animationClipPath] rect"
+	".recharts-area-curve, .recharts-line-curve, .recharts-rectangle, clipPath[id^=animationClipPath] rect, [data-slot=chart-mark], [data-chart-intro] rect"
+const surfaces = 'svg.recharts-surface, svg[data-slot="chart-surface"]'
+const plotted =
+	".recharts-area-curve, .recharts-line-curve, .recharts-rectangle, [data-slot=chart-mark]"
 
 async function chartFrames(page: Page, titles: string[], open: () => Promise<void>) {
 	const sampler = await page.evaluateHandle(
-		({ selector, titles }) => {
+		({ selector, surfaces, plotted, titles }) => {
 			const frames: Record<string, { time: number; geometry: string }[]> = {}
 			const first: Record<string, number> = {}
 			let completed = 0
@@ -23,14 +27,8 @@ async function chartFrames(page: Page, titles: string[], open: () => Promise<voi
 									.join("")
 									.trim()
 							: ""
-						const svg = card.querySelector("svg.recharts-surface")
-						if (
-							!title ||
-							!svg?.querySelector(
-								".recharts-area-curve, .recharts-line-curve, .recharts-rectangle",
-							)
-						)
-							continue
+						const svg = card.querySelector(surfaces)
+						if (!title || !svg?.querySelector(plotted)) continue
 						const geometry = JSON.stringify(
 							[...svg.querySelectorAll(selector)].map(mark => {
 								const style = getComputedStyle(mark)
@@ -85,7 +83,7 @@ async function chartFrames(page: Page, titles: string[], open: () => Promise<voi
 				},
 			}
 		},
-		{ selector: marks, titles },
+		{ selector: marks, surfaces, plotted, titles },
 	)
 	await open()
 	await page.mouse.move(0, 0)
@@ -186,7 +184,11 @@ test("chart intro: overview and Budget charts grow once and hover or resize neve
 			const watcher = await page.evaluateHandle(() => {
 				const state = { replayed: false, stop: () => undefined as void }
 				const check = () => {
-					if (document.querySelector('clipPath[id^="animationClipPath"]'))
+					if (
+						document.querySelector(
+							'clipPath[id^="animationClipPath"], [data-chart-intro]',
+						)
+					)
 						state.replayed = true
 				}
 				const observer = new MutationObserver(check)

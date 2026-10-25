@@ -202,6 +202,15 @@ export const componentInventory: InventoryEntry[] = [
 		scenarios: ["chart"],
 	},
 	{
+		path: "src/components/charts/trend-chart.tsx",
+		owner: "team3",
+		routes: ["/budgets/[id]", "/"],
+		visibleExports: [],
+		dormantExports: [],
+		helperExports: ["default"],
+		scenarios: ["indirect"],
+	},
+	{
 		path: "src/components/charts/weekday-bars.tsx",
 		owner: "team3",
 		routes: ["/"],
@@ -2223,6 +2232,8 @@ export const scenarioDescriptions: Record<string, string> = {
 		"All five projects: Category trend graph marks grow through intermediate geometry once and settle; reduced-motion immediate-final covered in the reduced-motion project",
 	"src/components/charts/budget-progress-chart.tsx#chart.motion":
 		"All five projects: Spending over time graph marks grow through intermediate geometry once and settle with no replay on hover/resize; reduced-motion immediate-final covered in the reduced-motion project",
+	"src/components/charts/trend-chart.tsx#indirect.consumer":
+		"All five projects: Spending forecast, Surplus / Shortfall and Spending over time marks grow through intermediate geometry once and settle with no replay on hover/resize; reduced-motion immediate-final covered in the reduced-motion project",
 	"src/components/charts/chart-intro.ts#indirect.consumer":
 		"All five projects: overview and budget graph marks grow through intermediate geometry once and settle with no replay on hover/resize; reduced-motion immediate-final covered in the reduced-motion project",
 	"src/components/table/statement-columns.tsx#table.interaction":
@@ -4001,6 +4012,10 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"sparkline endpoint: stays on the final data value after Show trend",
 		"sparkline polyline: draws progressively then settles",
 	],
+	"src/components/charts/trend-chart.tsx#indirect.consumer": [
+		"chart intro: overview charts grow real graph marks once and respect reduced motion",
+		"chart intro: budget charts grow real graph marks once and respect reduced motion",
+	],
 	"src/components/charts/chart-intro.ts#indirect.consumer": [
 		"chart intro: overview charts grow real graph marks once and respect reduced motion",
 		"chart intro: budget charts grow real graph marks once and respect reduced motion",
@@ -4521,6 +4536,12 @@ export const scenarioProjects: Record<
 		"reduced-motion",
 	],
 	"src/components/charts/budget-progress-chart.tsx#chart.motion": [
+		"mobile",
+		"tall-desktop",
+		"light",
+		"reduced-motion",
+	],
+	"src/components/charts/trend-chart.tsx#indirect.consumer": [
 		"mobile",
 		"tall-desktop",
 		"light",

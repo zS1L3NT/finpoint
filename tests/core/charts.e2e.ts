@@ -1,5 +1,5 @@
 import type { Page } from "@playwright/test"
-import { card, overview, overviewCharts } from "../support/charts"
+import { card, chartTooltip, overview, overviewCharts } from "../support/charts"
 import { getScenario, IDS } from "../support/data"
 import { setDateOnly } from "../support/date-only"
 import { expect, seedWorkspace, test } from "../support/fixtures"
@@ -37,7 +37,7 @@ test("Budget detail: usage tooltip reconciles actual and projected spending even
 	const application = chart.getByRole("application")
 	await application.focus()
 	for (let index = 0; index < 4; index++) await page.keyboard.press("ArrowRight")
-	const tooltip = chart.locator(".recharts-tooltip-wrapper")
+	const tooltip = chart.locator(chartTooltip)
 	await expect(tooltip).toContainText("5 Oct")
 	await expect(tooltip).toContainText("$84.20")
 	for (let index = 0; index < 5; index++) await page.keyboard.press("ArrowRight")
@@ -113,7 +113,7 @@ test("overview charts: every dense chart fits the viewport with usable graph sur
 		if (overviewCharts.includes(title)) {
 			await card.getByRole("application").focus()
 			await page.keyboard.press("ArrowRight")
-			await expect(card.locator(".recharts-tooltip-wrapper")).toBeVisible()
+			await expect(card.locator(chartTooltip)).toBeVisible()
 		}
 	}
 })
@@ -222,7 +222,7 @@ test("populated charts: tooltips stay numeric, drills work by keyboard and a Rec
 				await surface.press("ArrowRight")
 				await page.evaluate(() => new Promise(requestAnimationFrame))
 			}
-			const tooltip = chart.locator(".recharts-tooltip-wrapper")
+			const tooltip = chart.locator(chartTooltip)
 			await expect(tooltip, `${title}: tooltip opens by keyboard`).toBeVisible()
 			await expect(tooltip, `${title}: tooltip carries a value`).toContainText(/\$/)
 			const box = await tooltip.boundingBox()
@@ -244,7 +244,7 @@ test("populated charts: tooltips stay numeric, drills work by keyboard and a Rec
 			await surface.press("ArrowRight")
 			await page.evaluate(() => new Promise(requestAnimationFrame))
 		}
-		const tooltip = progress.locator(".recharts-tooltip-wrapper")
+		const tooltip = progress.locator(chartTooltip)
 		await expect(tooltip).toBeVisible()
 		await expect(tooltip).toContainText("5 Oct")
 		await expect(tooltip).toContainText("$84.20")
@@ -615,7 +615,7 @@ test.describe("pinned overview date", () => {
 				const surface = chart.getByRole("application").first()
 				await surface.scrollIntoViewIfNeeded()
 				await surface.focus()
-				const tooltip = chart.locator(".recharts-tooltip-wrapper")
+				const tooltip = chart.locator(chartTooltip)
 				if (title === "Category trend") {
 					for (let index = 0; index < 12; index++) {
 						await surface.press("ArrowRight")

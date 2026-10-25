@@ -15,3 +15,6 @@ export function card(page: Page, title: string) {
 		.locator('[data-slot="card"]')
 		.filter({ has: page.locator('[data-slot="card-title"]').filter({ hasText: title }) })
 }
+
+// Recharts charts and the custom trend chart expose their readouts differently.
+export const chartTooltip = '.recharts-tooltip-wrapper, [data-slot="chart-tooltip"]'
