@@ -32,7 +32,8 @@ export default function CategoryHistoryChart({
 	recordHref: (ids: string, at: DateTime) => string
 	badge: React.ReactNode
 }) {
-	const [active, setActive] = useState<number | null>(null)
+	// The breakdown keeps the last month read, so its links stay reachable after the pointer leaves.
+	const [picked, setPicked] = useState<number | null>(null)
 	const scopedMonths = months.map(month => ({
 		...month,
 		categories: month.categories
@@ -62,8 +63,7 @@ export default function CategoryHistoryChart({
 	)
 	const unavailable = chartData.filter(month => !month.included)
 	const selected = chartData.find(month => month.current)
-	// The list follows the month being read, and rests on the selected month.
-	const shown = (active === null ? undefined : chartData[active]) ?? selected
+	const shown = (picked === null ? undefined : chartData[picked]) ?? selected
 	const selectedEmpty =
 		selected && Object.values(selected.seriesValues).every(value => value === 0)
 
@@ -112,7 +112,9 @@ export default function CategoryHistoryChart({
 									</>
 								)
 							}}
-							onActive={setActive}
+							onActive={index => {
+								if (index !== null) setPicked(index)
+							}}
 							introKey={months.find(month => month.current)?.month}
 						/>
 					</>
@@ -297,7 +299,7 @@ function MonthBreakdown({
 								DateTime.fromFormat(month.month, "MMM yyyy"),
 							)}
 							onClick={handlePush("overview")}
-							className="grid gap-1 rounded-lg bg-muted/40 px-3 py-2 transition-colors duration-150 ease-out hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+							className="grid gap-1 rounded-lg bg-muted/40 px-3 py-2 transition-colors duration-150 ease-out hover:bg-muted active:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 						>
 							<div className="grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-x-3">
 								<span

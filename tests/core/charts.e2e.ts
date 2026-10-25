@@ -621,9 +621,10 @@ test.describe("pinned overview date", () => {
 						await surface.press("ArrowRight")
 						await page.evaluate(() => new Promise(requestAnimationFrame))
 					}
-					await expect(tooltip).toContainText("selected month")
-					await expect(tooltip).toContainText("$100.00")
-					await expect(tooltip).toContainText("$117.53")
+					// Category amounts live in the breakdown list under the bars.
+					await expect(chart).toContainText("selected month")
+					await expect(chart).toContainText("$100.00")
+					await expect(chart).toContainText("$117.53")
 				} else if (title === "Spending by weekday") {
 					await expect(tooltip).toContainText("Average per Monday")
 					await expect(tooltip).toContainText("$92.10")

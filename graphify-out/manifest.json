@@ -216,9 +216,9 @@
     "semantic_hash": ""
   },
   "src/components/charts/category-history-chart.tsx": {
-    "mtime": 1792958895.207297,
-    "seen": 1792958917.766918,
-    "ast_hash": "4e9c20ac922259e0c5dea95a4c1e546b",
+    "mtime": 1792959313.650929,
+    "seen": 1792959403.944293,
+    "ast_hash": "eae189ff8d39496838038e9512cabb94",
     "semantic_hash": ""
   },
   "src/components/charts/category-movers.tsx": {
@@ -1290,9 +1290,9 @@
     "semantic_hash": ""
   },
   "tests/core/charts.e2e.ts": {
-    "mtime": 1792955976.666507,
-    "seen": 1792956738.293972,
-    "ast_hash": "46703af57ff24c4fad26a5d232f5abb3",
+    "mtime": 1792959348.1389003,
+    "seen": 1792959403.944469,
+    "ast_hash": "6304034f651c89d7066ddb6aaf9da317",
     "semantic_hash": ""
   },
   "tests/core/components.e2e.ts": {
@@ -1530,9 +1530,9 @@
     "semantic_hash": "b194223f1f3b81550d206761165adf60"
   },
   "src/components/charts/trend-chart.tsx": {
-    "mtime": 1792958081.9162838,
-    "seen": 1792958128.7466319,
-    "ast_hash": "6198a0a288df0093a9386ac73c8d0dc9",
+    "mtime": 1792959313.650929,
+    "seen": 1792959403.9443047,
+    "ast_hash": "a539683a5b3675c3a57c83cd528fd5cf",
     "semantic_hash": ""
   },
   "src/components/charts/bar-chart.tsx": {
@@ -1542,9 +1542,9 @@
     "semantic_hash": ""
   },
   "src/components/charts/chart-frame.tsx": {
-    "mtime": 1792958297.21196,
-    "seen": 1792958345.7736723,
-    "ast_hash": "f1ce40339790a0781b400284c70e8bfb",
+    "mtime": 1792959316.5069265,
+    "seen": 1792959403.9442976,
+    "ast_hash": "f65670e9ce1d40e362382fcd659cfc43",
     "semantic_hash": ""
   }
 }

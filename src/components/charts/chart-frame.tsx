@@ -47,7 +47,12 @@ export default function ChartFrame({
 }) {
 	const id = useId().replace(/:/g, "")
 	const box = useRef<HTMLDivElement>(null)
-	const press = useRef<{ index: number; timer: number; reading: boolean } | null>(null)
+	const press = useRef<{
+		pointer: number
+		index: number
+		timer: number
+		reading: boolean
+	} | null>(null)
 	const reduceMotion = useReducedMotion()
 	const [size, setSize] = useState<ChartSize>({ width: 0, height: 0 })
 	const [active, setActive] = useState<number | null>(null)
@@ -63,10 +68,19 @@ export default function ChartFrame({
 		return () => observer.disconnect()
 	}, [])
 
-	useEffect(() => onActive?.(active), [active, onActive])
+	useEffect(
+		() => () => {
+			if (press.current) window.clearTimeout(press.current.timer)
+		},
+		[],
+	)
+
+	// A shorter dataset (e.g. a 28-day month after a 31-day one) drops an index past its end.
+	const current = active !== null && active < count ? active : null
+	useEffect(() => onActive?.(current), [current, onActive])
 
 	const intro = !reduceMotion && played !== introKey
-	const pointed = (event: React.PointerEvent<SVGSVGElement>) =>
+	const pointed = (event: React.MouseEvent<SVGSVGElement>) =>
 		Math.min(
 			Math.max(
 				indexAt(event.clientX - event.currentTarget.getBoundingClientRect().left, size),
@@ -81,9 +95,9 @@ export default function ChartFrame({
 	const onKeyDown = (event: React.KeyboardEvent<SVGSVGElement>) => {
 		const next =
 			event.key === "ArrowRight"
-				? Math.min((active ?? -1) + 1, count - 1)
+				? Math.min((current ?? -1) + 1, count - 1)
 				: event.key === "ArrowLeft"
-					? Math.max((active ?? 1) - 1, 0)
+					? Math.max((current ?? 1) - 1, 0)
 					: event.key === "Home"
 						? 0
 						: event.key === "End"
@@ -92,7 +106,7 @@ export default function ChartFrame({
 		if (next !== null) {
 			event.preventDefault()
 			setActive(next)
-		} else if (event.key === "Enter" && active !== null) onSelect?.(active)
+		} else if (event.key === "Enter" && current !== null) onSelect?.(current)
 		else if (event.key === "Escape") setActive(null)
 	}
 
@@ -111,39 +125,44 @@ export default function ChartFrame({
 						onSelect && "cursor-pointer",
 					)}
 					onPointerDown={event => {
-						if (event.pointerType === "mouse") return
+						// The first finger owns the reading; later fingers are ignored.
+						if (event.pointerType === "mouse" || press.current) return
 						const index = pointed(event)
 						const timer = window.setTimeout(() => {
 							if (!press.current) return
 							press.current.reading = true
 							setActive(press.current.index)
 						}, HOLD_MS)
-						press.current = { index, timer, reading: false }
+						press.current = { pointer: event.pointerId, index, timer, reading: false }
 					}}
 					onPointerMove={event => {
 						if (event.pointerType === "mouse") setActive(pointed(event))
-						else if (press.current) {
+						else if (press.current?.pointer === event.pointerId) {
 							press.current.index = pointed(event)
 							if (press.current.reading) setActive(press.current.index)
 						}
 					}}
-					// Touch never selects: lifting a finger only ends the reading.
+					// Touch never selects: lifting the finger only ends the reading.
 					onPointerUp={event => {
-						if (event.pointerType === "mouse") onSelect?.(pointed(event))
-						else {
-							release()
-							setActive(null)
-						}
-					}}
-					onPointerCancel={() => {
+						if (press.current?.pointer !== event.pointerId) return
 						release()
 						setActive(null)
+					}}
+					onPointerCancel={event => {
+						if (press.current?.pointer !== event.pointerId) return
+						release()
+						setActive(null)
+					}}
+					// Click fires for the primary button only, pressed and released on the chart.
+					onClick={event => {
+						if ((event.nativeEvent as PointerEvent).pointerType !== "touch")
+							onSelect?.(pointed(event))
 					}}
 					onPointerLeave={event => {
 						if (event.pointerType === "mouse") setActive(null)
 					}}
 					onFocus={() => {
-						if (!press.current) setActive(0)
+						if (!press.current) setActive(value => value ?? 0)
 					}}
 					onBlur={() => setActive(null)}
 					onKeyDown={onKeyDown}
@@ -163,23 +182,30 @@ export default function ChartFrame({
 						</defs>
 					) : null}
 					{background?.(size)}
-					<g clipPath={intro ? `url(#${id}-intro)` : undefined}>{marks(size, active)}</g>
-					{overlay?.(size, active)}
+					<g clipPath={intro ? `url(#${id}-intro)` : undefined}>{marks(size, current)}</g>
+					{overlay?.(size, current)}
 				</svg>
 			) : null}
 			{size.width ? children?.(size) : null}
 			<div aria-live="polite">
-				{active !== null && size.width ? (
+				{current !== null && size.width ? (
 					<div
 						data-slot="chart-tooltip"
-						className="pointer-events-none absolute top-3 z-10 grid min-w-40 gap-1 rounded-xl bg-popover/95 px-3 py-2 text-xs shadow-lg ring-1 ring-foreground/10 backdrop-blur-sm"
+						className="pointer-events-none absolute top-3 z-10 grid gap-1 rounded-xl bg-popover/95 px-3 py-2 text-xs shadow-lg ring-1 ring-foreground/10 backdrop-blur-sm"
 						style={
-							anchor(active, size) > size.width / 2
-								? { right: size.width - anchor(active, size) + 12 }
-								: { left: anchor(active, size) + 12 }
+							// The card takes the wider side of the anchor and wraps to fit it.
+							anchor(current, size) > size.width / 2
+								? {
+										right: size.width - anchor(current, size) + 12,
+										maxWidth: anchor(current, size) - 20,
+									}
+								: {
+										left: anchor(current, size) + 12,
+										maxWidth: size.width - anchor(current, size) - 20,
+									}
 						}
 					>
-						{readout(active)}
+						{readout(current)}
 					</div>
 				) : null}
 			</div>
@@ -206,7 +232,7 @@ export function ReadoutRows({
 			<span className="font-medium">{title}</span>
 			{rows.map(row => (
 				<span key={row.key} className="flex items-center justify-between gap-4">
-					<span className="flex items-center gap-1.5 whitespace-nowrap text-muted-foreground">
+					<span className="flex items-center gap-1.5 text-muted-foreground">
 						<span
 							className="size-2 shrink-0 rounded-full"
 							style={{ backgroundColor: row.color, opacity: row.opacity }}

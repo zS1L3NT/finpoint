@@ -10595,7 +10595,7 @@
       "file_type": "code",
       "norm_label": "readoutrows()",
       "source_file": "src/components/charts/chart-frame.tsx",
-      "source_location": "L191"
+      "source_location": "L217"
     },
     {
       "id": "src_components_charts_monthly_budget_usage_arc",
@@ -11975,7 +11975,7 @@
       "file_type": "code",
       "norm_label": "aggregateseries()",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L177"
+      "source_location": "L179"
     },
     {
       "id": "src_components_charts_category_history_chart_categoryhistorychart",
@@ -11999,7 +11999,7 @@
       "file_type": "code",
       "norm_label": "monthbreakdown()",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L258"
+      "source_location": "L260"
     },
     {
       "id": "src_components_charts_category_history_chart_monthtick",
@@ -12011,7 +12011,7 @@
       "file_type": "code",
       "norm_label": "monthtick()",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L227"
+      "source_location": "L229"
     },
     {
       "id": "src_components_charts_category_history_chart_monthtotal",
@@ -12023,7 +12023,7 @@
       "file_type": "code",
       "norm_label": "monthtotal()",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L253"
+      "source_location": "L255"
     },
     {
       "id": "src_components_charts_category_history_chart_preparemonths",
@@ -12035,7 +12035,7 @@
       "file_type": "code",
       "norm_label": "preparemonths()",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L211"
+      "source_location": "L213"
     },
     {
       "id": "src_components_charts_category_history_chart_prepareseries",
@@ -12047,7 +12047,7 @@
       "file_type": "code",
       "norm_label": "prepareseries()",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L188"
+      "source_location": "L190"
     },
     {
       "id": "agents_graphify_out_graph_json",
@@ -30784,7 +30784,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L134",
+      "source_location": "L136",
       "weight": 1.0
     },
     {
@@ -30796,7 +30796,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L51",
+      "source_location": "L52",
       "weight": 1.0
     },
     {
@@ -30808,7 +30808,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L52",
+      "source_location": "L53",
       "weight": 1.0
     },
     {
@@ -30820,7 +30820,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L53",
+      "source_location": "L54",
       "weight": 1.0
     },
     {
@@ -30904,7 +30904,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L267",
+      "source_location": "L269",
       "weight": 1.0
     },
     {
@@ -30916,7 +30916,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L268",
+      "source_location": "L270",
       "weight": 1.0
     },
     {
@@ -30928,7 +30928,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L282",
+      "source_location": "L284",
       "weight": 1.0
     },
     {
@@ -31024,7 +31024,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/chart-frame.tsx",
-      "source_location": "L100",
+      "source_location": "L114",
       "weight": 1.0
     },
     {
@@ -96258,7 +96258,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L177",
+      "source_location": "L179",
       "weight": 1.0
     },
     {
@@ -96269,7 +96269,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L188",
+      "source_location": "L190",
       "weight": 1.0
     },
     {
@@ -96280,7 +96280,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L211",
+      "source_location": "L213",
       "weight": 1.0
     },
     {
@@ -96302,7 +96302,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L227",
+      "source_location": "L229",
       "weight": 1.0
     },
     {
@@ -96313,7 +96313,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L253",
+      "source_location": "L255",
       "weight": 1.0
     },
     {
@@ -96324,7 +96324,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L258",
+      "source_location": "L260",
       "weight": 1.0
     },
     {
@@ -96379,7 +96379,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/chart-frame.tsx",
-      "source_location": "L191",
+      "source_location": "L217",
       "weight": 1.0
     },
     {
@@ -111383,5 +111383,5 @@
       "source_file": "tests/README.md"
     }
   ],
-  "built_at_commit": "46df63830b9572b3cee0b80ed2e0f4919bd57db3"
+  "built_at_commit": "33ee5d23fb0a92f0fd24dac64a84a423f3d9090d"
 }

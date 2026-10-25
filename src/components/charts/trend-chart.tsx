@@ -362,6 +362,8 @@ function path(
 				.join("")
 			const first = run[0]
 			const last = run.at(-1)
+			// A lone point draws as a dot: a zero-length segment with a round cap.
+			if (!area && run.length === 1) return `${trace}h0`
 			return area && first && last
 				? `${trace}L${x(last.index)},${y(0)}L${x(first.index)},${y(0)}Z`
 				: trace
