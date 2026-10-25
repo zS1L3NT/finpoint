@@ -1,0 +1,122 @@
+# Browser tests on GitHub-hosted runners (free for this public repository). Core is
+# split into shards across all five projects; extra runs one job per project with a
+# single worker, since it samples animation frames. The `core` and `extra` jobs gate
+# their shards, merge the blob reports into one HTML report artifact, and are the
+# checks a ruleset would require.
+name: web
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: web-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PLAYWRIGHT_SERVER: production
+
+jobs:
+  core-shard:
+    name: core (${{ matrix.shard }}/4)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup
+      - name: Playwright core
+        run: >-
+          bunx playwright test tests/web/core
+          --project=desktop --project=mobile --project=tall-desktop --project=light --project=reduced-motion
+          --workers=2 --shard=${{ matrix.shard }}/4 --reporter=list,blob
+        env:
+          PLAYWRIGHT_BLOB_OUTPUT_FILE: blob-report/core-${{ matrix.shard }}.zip
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: blob-core-${{ matrix.shard }}
+          path: blob-report
+          retention-days: 7
+
+  extra-project:
+    name: extra (${{ matrix.project }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [desktop, mobile, tall-desktop, light, reduced-motion]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup
+      - name: Playwright extra
+        run: >-
+          bunx playwright test tests/web/extra --project=${{ matrix.project }}
+          --workers=1 --reporter=list,blob
+        env:
+          PLAYWRIGHT_EXTRA: "1"
+          PLAYWRIGHT_BLOB_OUTPUT_FILE: blob-report/extra-${{ matrix.project }}.zip
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: blob-extra-${{ matrix.project }}
+          path: blob-report
+          retention-days: 7
+
+  core:
+    needs: core-shard
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: blob-core-*
+          path: blob-report
+          merge-multiple: true
+      - name: Merge reports
+        run: bunx playwright merge-reports --reporter=html,github ./blob-report
+      - uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-core
+          path: playwright-report
+          retention-days: 14
+      - name: Gate
+        if: ${{ needs.core-shard.result != 'success' }}
+        run: |
+          echo "::error::core shards: ${{ needs.core-shard.result }}"
+          exit 1
+
+  extra:
+    needs: extra-project
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: blob-extra-*
+          path: blob-report
+          merge-multiple: true
+      - name: Merge reports
+        run: bunx playwright merge-reports --reporter=html,github ./blob-report
+      - uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-extra
+          path: playwright-report
+          retention-days: 14
+      - name: Gate
+        if: ${{ needs.extra-project.result != 'success' }}
+        run: |
+          echo "::error::extra projects: ${{ needs.extra-project.result }}"
+          exit 1
