@@ -2,7 +2,7 @@ import { defineConfig } from "@playwright/test"
 import { APP_URL } from "./tests/support/urls"
 
 // Desktop and mobile run every case; tall-desktop, light and reduced-motion run only
-// cases tagged for them. PLAYWRIGHT_FULL_MATRIX=1 drops those tag filters for a release run.
+// cases tagged for them. PLAYWRIGHT_FULL_MATRIX=1 drops those tag filters to run every case on every project.
 const full = process.env.PLAYWRIGHT_FULL_MATRIX === "1"
 // Animation tests are collected only with PLAYWRIGHT_ANIMATIONS=1, so ad-hoc runs stay core-only.
 const animations = process.env.PLAYWRIGHT_ANIMATIONS === "1"
