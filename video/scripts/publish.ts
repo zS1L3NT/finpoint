@@ -1,7 +1,9 @@
 // Publishes the rendered film to `public/guide`: a web-sized MP4, its chapter marks, a poster and
 // one still per beat for the Help articles (taken where the beat's picture is complete).
 //   bun video/scripts/publish.ts
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs"
+import { spawnSync } from "node:child_process"
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs"
+import { tmpdir } from "node:os"
 import { resolve } from "node:path"
 import { root, runFfmpeg } from "./tools"
 
@@ -42,14 +44,41 @@ writeFileSync(
 		.join("\n\n")}\n`,
 )
 
-const still = (seconds: number, file: string) =>
-	run(["-ss", seconds.toFixed(3), "-i", source, "-frames:v", "1", "-vf", "scale=1280:-2", "-q:v", "4", file])
-still(1.2, resolve(out, "poster.jpg"))
-let count = 0
+// Stills come from the composition, not the render, so the Help articles show the picture without
+// the film's burned-in captions: a copy of the project without its caption tracks is snapshotted.
+const shots: { seconds: number; file: string }[] = [{ seconds: 1.2, file: resolve(out, "poster.jpg") }]
 for (const chapter of timeline.chapters)
 	for (const segment of chapter.segments) {
 		const end = (chapter.startFrame + segment.from + segment.durationInFrames) / fps
-		still(Math.max(0, end - 0.6), resolve(out, "stills", `${chapter.id}-${segment.id}.jpg`))
-		count++
+		shots.push({ seconds: Math.max(0, end - 0.6), file: resolve(out, "stills", `${chapter.id}-${segment.id}.jpg`) })
 	}
-console.log(`Published the film, its chapters and ${count} stills to public/guide.`)
+const video = resolve(root, "video")
+const project = mkdtempSync(resolve(tmpdir(), "finpoint-stills-"))
+try {
+	for (const entry of ["assets", "compositions", "look.css", "hyperframes.json", "package.json", "node_modules"])
+		symlinkSync(resolve(video, entry), resolve(project, entry))
+	const index = readFileSync(resolve(video, "index.html"), "utf8")
+	writeFileSync(
+		resolve(project, "index.html"),
+		index.split("\n").filter(line => !line.includes('data-track-kind="captions"')).join("\n"),
+	)
+	const frames = resolve(project, "frames")
+	const at = shots.map(shot => shot.seconds.toFixed(3)).join(",")
+	const snapshot = spawnSync(
+		"npx",
+		["--yes", "hyperframes@0.8.203", "snapshot", project, "--at", at, "--no-end", "-o", frames],
+		{ cwd: video, stdio: "inherit" },
+	)
+	if (snapshot.status !== 0) throw new Error("hyperframes snapshot failed")
+	// Named frame-NN-at-…, in the order of `--at`.
+	const pngs = readdirSync(frames)
+		.filter(name => name.startsWith("frame-") && name.endsWith(".png"))
+		.sort((a, b) => Number(a.split("-")[1]) - Number(b.split("-")[1]))
+	if (pngs.length !== shots.length) throw new Error(`Expected ${shots.length} stills, got ${pngs.length}`)
+	shots.forEach((shot, index) =>
+		run(["-i", resolve(frames, pngs[index] as string), "-vf", "scale=1280:-2", "-q:v", "4", shot.file]),
+	)
+} finally {
+	rmSync(project, { recursive: true, force: true })
+}
+console.log(`Published the film, its chapters and ${shots.length - 1} stills to public/guide.`)
