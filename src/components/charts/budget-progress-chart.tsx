@@ -5,7 +5,10 @@ import { parseDatetime, round2 } from "@/lib/utils"
 import type { Record } from "@/types"
 
 type BudgetProgressPoint = {
+	/** Short axis label. */
 	date: string
+	/** Readout label with the year, since a Budget can cross into a new year. */
+	day: string
 	usage: number | null
 	projection: number | null
 }
@@ -32,7 +35,7 @@ export default function BudgetProgressChart({
 			<TrendChart
 				label="Cumulative budget spending by day"
 				className="h-72 w-full sm:h-80"
-				labels={data.map(point => point.date)}
+				labels={data.map(point => point.day)}
 				ticks={[...new Set([0, Math.round(last / 3), Math.round((last * 2) / 3), last])]
 					.filter(index => index >= 0)
 					.map(index => ({ index, label: data[index]?.date ?? "" }))}
@@ -97,6 +100,7 @@ function buildSeries(records: Record[], start: DateTime, end: DateTime, asOf: Da
 			elapsedDayCount > 0 && index >= elapsedDayCount - 1 && elapsedDayCount < dayCount
 		return {
 			date: start.plus({ days: index }).toFormat("d MMM"),
+			day: start.plus({ days: index }).toFormat("d MMM yyyy"),
 			usage: actual[index] ?? null,
 			projection: showProjection
 				? round2(cumulative + dailyPace * (index + 1 - elapsedDayCount))
