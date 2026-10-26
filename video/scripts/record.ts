@@ -75,6 +75,7 @@ try {
 			if (info) takes[script.name] = info
 		} catch (error) {
 			console.warn(`  ! ${script.name} failed: ${(error as Error).message.split("\n")[0]}`)
+			await take.abort()
 			await page.keyboard.press("Escape").catch(() => {})
 		}
 	}

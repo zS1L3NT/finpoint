@@ -99,9 +99,14 @@ export class Take {
 		return (segment.from + (times[index] ?? 0)) / fps - this.start
 	}
 
-	/** Waits for the narration to reach `word` in `beat`. Warns when the picture runs late. */
-	async at(beat: string, word?: string, nth = 0) {
-		const target = this.cue(beat, word, nth)
+	/**
+	 * Waits for the narration to reach `word` in `beat`, less `early` seconds so the action that
+	 * follows lands on the word. Warns when the picture runs late. Takes that are only played
+	 * through to reach a later one don't wait at all.
+	 */
+	async at(beat: string, word?: string, { nth = 0, early = 0.25 } = {}) {
+		if (!this.recording) return
+		const target = this.cue(beat, word, nth) - early
 		const wait = target - this.now()
 		if (wait > 0) await this.page.waitForTimeout(wait * 1000)
 		else if (wait < -0.4 && this.recording)
@@ -130,10 +135,17 @@ export class Take {
 		this.t0 = this.frames[0]?.t ?? this.t0
 	}
 
+	/** Stops a take that failed part-way, so the next one starts clean. */
+	async abort() {
+		await this.cdp?.send("Page.stopScreencast").catch(() => {})
+		await this.cdp?.detach().catch(() => {})
+		this.cdp = null
+	}
+
 	/** Holds until the last beat's narration has finished, then encodes the take. */
 	async finish(): Promise<TakeInfo | null> {
 		const duration = this.end - this.start
-		const wait = duration - this.now()
+		const wait = this.recording ? duration - this.now() : 0
 		if (this.recording && wait < -0.4)
 			console.warn(`  ! ${this.name}: the story overran its narration by ${(-wait).toFixed(1)}s`)
 		if (wait > 0) await this.page.waitForTimeout(wait * 1000)

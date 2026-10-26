@@ -66,6 +66,10 @@ type Run =
 	| { kind: "take"; id: string; beats: string[]; start: number; end: number }
 	| { kind: "scene"; id: string; scene: string; beats: string[]; start: number; end: number; values: Record<string, unknown> }
 
+type Owner =
+	| { kind: "take"; id: string; key: string }
+	| { kind: "scene"; id: string; scene: string; values: Record<string, unknown>; key: string }
+
 let missing = 0
 const clips: string[] = []
 const audio: string[] = []
@@ -85,7 +89,7 @@ guideChapters.forEach((source, chapterIndex) => {
 
 	// Who shows each beat: a take, a scene, or (until one exists) the placeholder card.
 	const uses = scenes[chapter.id] ?? []
-	const owner = (beat: string): Omit<Run, "start" | "end" | "beats"> & { key: string } => {
+	const owner = (beat: string): Owner => {
 		const take = Object.entries(takes).find(([, info]) => info.chapter === chapter.id && info.beats.includes(beat))
 		if (take) return { kind: "take", id: take[0], key: `take:${take[0]}` }
 		const index = uses.findIndex(use => use.beats.includes(beat))

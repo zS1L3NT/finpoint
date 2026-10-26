@@ -7,8 +7,8 @@
 // being authored against the current build.
 
 export const STAGE = { width: 1920, height: 1080 }
-/** The app's own viewport inside the stage: 16:9, shown at 1.2× when the camera is wide. */
-export const APP = { width: 1600, height: 900 }
+/** The app's own viewport inside the stage: 16:9, shown at 1.33× when the camera is wide. */
+export const APP = { width: 1440, height: 810 }
 
 export const stagePath = "/__guide-stage"
 
