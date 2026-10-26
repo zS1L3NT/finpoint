@@ -10019,7 +10019,7 @@
       "file_type": "code",
       "norm_label": "readoutrows()",
       "source_file": "src/components/charts/chart-frame.tsx",
-      "source_location": "L222"
+      "source_location": "L224"
     },
     {
       "id": "src_components_charts_trend_chart_path",
@@ -31223,7 +31223,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/chart-frame.tsx",
-      "source_location": "L115",
+      "source_location": "L117",
       "weight": 1.0
     },
     {
@@ -97093,7 +97093,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/chart-frame.tsx",
-      "source_location": "L222",
+      "source_location": "L224",
       "weight": 1.0
     },
     {
@@ -112141,5 +112141,5 @@
       "source_file": "tests/README.md"
     }
   ],
-  "built_at_commit": "b7308931754a64281dd300b5b7cb1d5b7774a270"
+  "built_at_commit": "0dd819158380c34e5a3dc2fa5a041438968a3dd7"
 }

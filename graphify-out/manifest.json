@@ -240,9 +240,9 @@
     "semantic_hash": "de1517ab6229ddfffc27fe026b44cf70"
   },
   "src/components/charts/spending-calendar.tsx": {
-    "mtime": 1792994289.7786093,
-    "seen": 1792994754.2502866,
-    "ast_hash": "acb59f8106075028aef5e3e252ac6762",
+    "mtime": 1792997448.47374,
+    "seen": 1793001869.124834,
+    "ast_hash": "ec697d7db6b95e650ef6f65ceec11673",
     "semantic_hash": ""
   },
   "src/components/charts/total-spending-chart.tsx": {
@@ -1236,8 +1236,8 @@
     "semantic_hash": "ef374ca2640a1aac7d1ac700ed785a0d"
   },
   "tests/animations/charts.e2e.ts": {
-    "mtime": 1792992268.510396,
-    "seen": 1792992563.3582356,
+    "mtime": 1792999252.481822,
+    "seen": 1793001869.1253152,
     "ast_hash": "3712a486da049751c2fcba27282280d6",
     "semantic_hash": ""
   },
@@ -1542,9 +1542,9 @@
     "semantic_hash": ""
   },
   "src/components/charts/chart-frame.tsx": {
-    "mtime": 1792994283.1225972,
-    "seen": 1792994754.2502818,
-    "ast_hash": "56cf252af5a205806c79aaca3c18e4e9",
+    "mtime": 1792999230.7297626,
+    "seen": 1793001869.12482,
+    "ast_hash": "fbbffc4faab23d7b8bb3776c66729938",
     "semantic_hash": ""
   },
   "src/lib/palette.ts": {
