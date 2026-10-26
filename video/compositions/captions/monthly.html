@@ -10,28 +10,32 @@
 		}
 	</style>
 	<div id="root" data-composition-id="captions" data-width="1920" data-height="1080">
-		<div id="cap-monthly-days-0" class="cap"><span>Next to the Dashboard’s Overview is Monthly</span></div>
-		<div id="cap-monthly-days-7" class="cap"><span>Records:</span></div>
-		<div id="cap-monthly-days-8" class="cap"><span>every Record in the month,</span></div>
-		<div id="cap-monthly-days-13" class="cap"><span>grouped by day, with each day’s total.</span></div>
+		<div id="cap-monthly-days-0" class="cap"><span>When a number on the Overview surprises</span></div>
+		<div id="cap-monthly-days-7" class="cap"><span>you, Monthly Records shows what’s behind it.</span></div>
+		<div id="cap-monthly-days-14" class="cap"><span>It sits next to the Overview:</span></div>
+		<div id="cap-monthly-days-20" class="cap"><span>every Record in the month,</span></div>
+		<div id="cap-monthly-days-25" class="cap"><span>grouped by day, with each day’s total.</span></div>
 		<div id="cap-monthly-drill-0" class="cap"><span>Click any part of a chart on</span></div>
 		<div id="cap-monthly-drill-7" class="cap"><span>the Overview,</span></div>
 		<div id="cap-monthly-drill-9" class="cap"><span>and Monthly Records opens on just those</span></div>
 		<div id="cap-monthly-drill-16" class="cap"><span>Records.</span></div>
-		<div id="cap-monthly-review-0" class="cap"><span>At the bottom of the Overview,</span></div>
-		<div id="cap-monthly-review-6" class="cap"><span>Review this month links to anything that</span></div>
-		<div id="cap-monthly-review-13" class="cap"><span>needs you:</span></div>
-		<div id="cap-monthly-review-15" class="cap"><span>Pending Records, Pending Statements,</span></div>
-		<div id="cap-monthly-review-19" class="cap"><span>and spending without a Monthly Budget.</span></div>
+		<div id="cap-monthly-review-0" class="cap"><span>And at the bottom of the Overview,</span></div>
+		<div id="cap-monthly-review-7" class="cap"><span>Review this month links to anything that</span></div>
+		<div id="cap-monthly-review-14" class="cap"><span>needs you:</span></div>
+		<div id="cap-monthly-review-16" class="cap"><span>Pending Records,</span></div>
+		<div id="cap-monthly-review-18" class="cap"><span>Pending Statements,</span></div>
+		<div id="cap-monthly-review-20" class="cap"><span>and spending that isn’t in any Monthly</span></div>
+		<div id="cap-monthly-review-27" class="cap"><span>Budget,</span></div>
+		<div id="cap-monthly-review-28" class="cap"><span>so no plan is tracking it.</span></div>
 	</div>
 	<script>
 		const tl = gsap.timeline({ paused: true })
-		const groups = [["cap-monthly-days-0",2.083,4.183],["cap-monthly-days-7",4.183,5.25],["cap-monthly-days-8",5.25,6.983],["cap-monthly-days-13",6.983,9.533],["cap-monthly-drill-0",9.983,11.65],["cap-monthly-drill-7",11.65,12.717],["cap-monthly-drill-9",12.717,15.017],["cap-monthly-drill-16",15.017,16.067],["cap-monthly-review-0",16.517,18.283],["cap-monthly-review-6",18.283,20.05],["cap-monthly-review-13",20.05,21.117],["cap-monthly-review-15",21.117,23.417],["cap-monthly-review-19",23.417,26.833]]
+		const groups = [["cap-monthly-days-0",2.083,4.483],["cap-monthly-days-7",4.483,7.283],["cap-monthly-days-14",7.283,9.117],["cap-monthly-days-20",9.117,10.917],["cap-monthly-days-25",10.917,13.533],["cap-monthly-drill-0",13.983,15.65],["cap-monthly-drill-7",15.65,16.717],["cap-monthly-drill-9",16.717,19.017],["cap-monthly-drill-16",19.017,20.067],["cap-monthly-review-0",20.517,22.45],["cap-monthly-review-7",22.45,24.183],["cap-monthly-review-14",24.183,25.283],["cap-monthly-review-16",25.283,26.35],["cap-monthly-review-18",26.35,27.583],["cap-monthly-review-20",27.583,29.683],["cap-monthly-review-27",29.683,30.317],["cap-monthly-review-28",30.317,33.167]]
 		for (const [id, start, end] of groups) {
 			tl.set("#" + id, { opacity: 1, visibility: "visible" }, start)
 			tl.set("#" + id, { opacity: 0, visibility: "hidden" }, end)
 		}
-		tl.set({}, {}, 27.133)
+		tl.set({}, {}, 33.467)
 		window.__timelines["captions"] = tl
 	</script>
 </template>

@@ -61,7 +61,8 @@ export default function GuideVideoPage() {
 							{learning && (
 								<VideoPlayer
 									seekVersion={seekVersion}
-									startFrame={startFrame}
+									initialFrame={startFrame}
+									chapterFrame={requested?.startFrame ?? null}
 									onChapterChange={setActiveId}
 								/>
 							)}
@@ -159,7 +160,10 @@ export default function GuideVideoPage() {
 								<li key={chapter.id}>
 									<Link
 										href={pathHelpVideo(chapter.id)}
-										onClick={() => setSeekVersion(value => value + 1)}
+										onClick={() =>
+											chapter.id === requested?.id &&
+											setSeekVersion(value => value + 1)
+										}
 										scroll={false}
 										aria-current={current ? "true" : undefined}
 										className={cn(

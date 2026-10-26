@@ -208,7 +208,7 @@ test("schema version four upgrades with financial data intact", async () => {
 	await legacy.table("statements").put(statement("a"))
 	legacy.close()
 	await db.open()
-	expect(db.verno).toBe(6)
+	expect(db.verno).toBe(7)
 	expect(await db.statements.get("a")).toEqual(statement("a"))
 	expect(await db.duplicate_dismissals.count()).toBe(0)
 })

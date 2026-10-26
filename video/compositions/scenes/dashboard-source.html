@@ -75,7 +75,7 @@
 		<div class="fp-card-title">Groceries</div>
 		<div class="fp-card-row"><div class="fp-card-meta"></div><span class="fp-amount">−$50</span></div>
 	</div>
-	<div id="dashboard" class="fp-dashboard" style="left:1168px;top:330px"><h2>Dashboard · Spending</h2><span id="dashboard-value" class="fp-value">$0</span><div class="fp-meter" style="--tone:var(--spending)"><div id="dashboard-meter" class="fp-meter-fill"></div></div><p style="margin-top:24px">−$30 dinner + −$50 groceries</p></div>
+	<div id="dashboard" class="fp-dashboard" style="left:1168px;top:330px"><h2>Dashboard · Spending</h2><span id="dashboard-value" class="fp-value">$0</span><div class="fp-meter" style="--tone:var(--spending)"><div id="dashboard-meter" class="fp-meter-fill"></div></div><p style="margin-top:24px">$30 dinner + $50 groceries</p></div>
 	<div id="dinner-flow" class="fp-flow" data-layout-allow-overlap style="--tone:var(--record)">
 		<svg viewBox="0 0 1920 1080" aria-hidden="true"><path class="fp-path" d="M752,392 C960,392 960,450 1168,450"/>
 		<circle class="fp-pulse" r="6" fill="var(--ink)"/><circle class="fp-port" cx="752" cy="392" r="7"/><path class="fp-arrow" d="m1156,441 12,9 -12,9"/></svg>
@@ -154,7 +154,7 @@ enter("#grocery", T("recs", 0.3) + 0.2, -32);
 enter("#dashboard", T("dash", 3));
 flow("#dinner-flow", T("calc", 4));
 flow("#grocery-flow", T("calc", 4) + 0.2);
-count("#dashboard-value", -80, T("calc", 4) + 0.65);
+count("#dashboard-value", 80, T("calc", 4) + 0.65);
 meter("#dashboard-meter", 1, T("calc", 4) + 0.65);
 leave("#grocery", T("imp", 9) - 0.35);
 leave("#grocery-flow", T("imp", 9) - 0.35);

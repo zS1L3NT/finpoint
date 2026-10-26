@@ -66,7 +66,7 @@ export const scenes: Record<string, SceneUse[]> = {
 				comb: ["combine", "combined"],
 				dinner: ["combine", "Dinner"],
 				share: ["combine", "share"],
-				simp: ["simple", "simply"],
+				simp: ["simple", "one to one"],
 				lunch: ["simple", "lunch"],
 			},
 		},

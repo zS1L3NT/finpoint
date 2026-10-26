@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import { getVideoChapter } from "@/lib/guide-video"
 import timeline from "@/lib/guide-video-timeline.json"
@@ -8,21 +8,29 @@ import { saveVideoPosition } from "@/logic/learning"
 
 /** The rendered guide film (`bun run video:build`), with its captions and chapter marks. */
 export default function GuideVideoPlayer({
-	startFrame,
+	initialFrame,
+	chapterFrame,
 	seekVersion,
 	onChapterChange,
 }: {
-	startFrame: number
+	initialFrame: number
+	chapterFrame: number | null
 	seekVersion: number
 	onChapterChange: (id: string) => void
 }) {
 	const video = useRef<HTMLVideoElement>(null)
+	const [resumeFrame] = useState(initialFrame)
 	useEffect(() => {
 		const element = video.current
-		if (!element || seekVersion < 0) return
-		element.pause()
-		element.currentTime = startFrame / timeline.fps
-	}, [startFrame, seekVersion])
+		if (!element) return
+		const seek = () => {
+			if (chapterFrame !== null) element.pause()
+			element.currentTime = (chapterFrame ?? resumeFrame) / timeline.fps
+		}
+		if (element.readyState >= 1) seek()
+		else element.addEventListener("loadedmetadata", seek, { once: true })
+		return () => element.removeEventListener("loadedmetadata", seek)
+	}, [resumeFrame, chapterFrame, seekVersion])
 	useEffect(() => {
 		const element = video.current
 		if (!element) return
@@ -58,7 +66,7 @@ export default function GuideVideoPlayer({
 		<video
 			ref={video}
 			className="size-full"
-			src={`/guide/finpoint-guide.mp4#t=${(startFrame / timeline.fps).toFixed(2)}`}
+			src="/guide/finpoint-guide.mp4"
 			poster="/guide/poster.jpg"
 			controls
 			preload="metadata"

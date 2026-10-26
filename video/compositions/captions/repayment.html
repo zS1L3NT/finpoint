@@ -14,14 +14,15 @@
 		<div id="cap-repayment-select-4" class="cap"><span>Select both Statements:</span></div>
 		<div id="cap-repayment-select-7" class="cap"><span>the $90</span></div>
 		<div id="cap-repayment-select-9" class="cap"><span>you paid, and the $60</span></div>
-		<div id="cap-repayment-select-14" class="cap"><span>your friend sent back.</span></div>
-		<div id="cap-repayment-select-18" class="cap"><span>The bar shows their total:</span></div>
-		<div id="cap-repayment-select-23" class="cap"><span>$30.</span></div>
-		<div id="cap-repayment-create-0" class="cap"><span>Choose Create Record, and call it Dinner</span></div>
-		<div id="cap-repayment-create-7" class="cap"><span>with Sam.</span></div>
-		<div id="cap-repayment-create-9" class="cap"><span>Both Statements are allocated,</span></div>
-		<div id="cap-repayment-create-13" class="cap"><span>and the Record comes to $30,</span></div>
-		<div id="cap-repayment-create-19" class="cap"><span>your real share.</span></div>
+		<div id="cap-repayment-select-14" class="cap"><span>your friend Sam sent back.</span></div>
+		<div id="cap-repayment-select-19" class="cap"><span>The bar nets them out:</span></div>
+		<div id="cap-repayment-select-24" class="cap"><span>$90</span></div>
+		<div id="cap-repayment-select-25" class="cap"><span>out, $60</span></div>
+		<div id="cap-repayment-select-27" class="cap"><span>back, so $30.</span></div>
+		<div id="cap-repayment-create-0" class="cap"><span>Choose Create Record, and call it Dinner.</span></div>
+		<div id="cap-repayment-create-7" class="cap"><span>Both Statements are allocated,</span></div>
+		<div id="cap-repayment-create-11" class="cap"><span>and the Record comes to $30,</span></div>
+		<div id="cap-repayment-create-17" class="cap"><span>your real share.</span></div>
 		<div id="cap-repayment-done-0" class="cap"><span>Save, and two Statements are explained by</span></div>
 		<div id="cap-repayment-done-7" class="cap"><span>a single Record.</span></div>
 		<div id="cap-repayment-done-10" class="cap"><span>Your spending shows the $30</span></div>
@@ -29,12 +30,12 @@
 	</div>
 	<script>
 		const tl = gsap.timeline({ paused: true })
-		const groups = [["cap-repayment-select-0",3.05,4.783],["cap-repayment-select-4",4.783,6.45],["cap-repayment-select-7",6.45,7.617],["cap-repayment-select-9",7.617,9.35],["cap-repayment-select-14",9.35,10.717],["cap-repayment-select-18",10.717,12.35],["cap-repayment-select-23",12.35,13.667],["cap-repayment-create-0",14.117,16.517],["cap-repayment-create-7",16.517,17.517],["cap-repayment-create-9",17.517,19.45],["cap-repayment-create-13",19.45,21.55],["cap-repayment-create-19",21.55,22.867],["cap-repayment-done-0",23.317,25.75],["cap-repayment-done-7",25.75,27.217],["cap-repayment-done-10",27.217,29.183],["cap-repayment-done-15",29.183,32.933]]
+		const groups = [["cap-repayment-select-0",3.05,4.75],["cap-repayment-select-4",4.75,6.45],["cap-repayment-select-7",6.45,7.683],["cap-repayment-select-9",7.683,9.517],["cap-repayment-select-14",9.517,11.083],["cap-repayment-select-19",11.083,12.65],["cap-repayment-select-24",12.65,13.617],["cap-repayment-select-25",13.617,14.817],["cap-repayment-select-27",14.817,16.7],["cap-repayment-create-0",17.15,20.05],["cap-repayment-create-7",20.05,21.95],["cap-repayment-create-11",21.95,24.05],["cap-repayment-create-17",24.05,25.367],["cap-repayment-done-0",25.817,28.25],["cap-repayment-done-7",28.25,29.717],["cap-repayment-done-10",29.717,31.683],["cap-repayment-done-15",31.683,35.433]]
 		for (const [id, start, end] of groups) {
 			tl.set("#" + id, { opacity: 1, visibility: "visible" }, start)
 			tl.set("#" + id, { opacity: 0, visibility: "hidden" }, end)
 		}
-		tl.set({}, {}, 33.233)
+		tl.set({}, {}, 35.733)
 		window.__timelines["captions"] = tl
 	</script>
 </template>

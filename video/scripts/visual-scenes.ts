@@ -92,7 +92,7 @@ tl.set({}, {}, T("conf", 8) + 1.5);
 const source = `
 	${card("dinner", "record", "Dinner", -30, 192, 300, "Your share")}
 	${card("grocery", "record", "Groceries", -50, 192, 540)}
-	${dashboard("dashboard", 1168, 330, "Dashboard · Spending", "−$30 dinner + −$50 groceries")}
+	${dashboard("dashboard", 1168, 330, "Dashboard · Spending", "$30 dinner + $50 groceries")}
 	${connector("dinner-flow", [752, 392], [1168, 450], -30, "record")}
 	${connector("grocery-flow", [752, 632], [1168, 520], -50, "record")}
 	<div id="unexplained" class="fp-stage">
@@ -108,7 +108,7 @@ enter("#grocery", T("recs", 0.3) + 0.2, -32);
 enter("#dashboard", T("dash", 3));
 flow("#dinner-flow", T("calc", 4));
 flow("#grocery-flow", T("calc", 4) + 0.2);
-count("#dashboard-value", -80, T("calc", 4) + 0.65);
+count("#dashboard-value", 80, T("calc", 4) + 0.65);
 meter("#dashboard-meter", 1, T("calc", 4) + 0.65);
 leave("#grocery", T("imp", 9) - 0.35);
 leave("#grocery-flow", T("imp", 9) - 0.35);

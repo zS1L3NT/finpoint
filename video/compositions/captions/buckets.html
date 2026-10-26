@@ -10,12 +10,18 @@
 		}
 	</style>
 	<div id="root" data-composition-id="captions" data-width="1920" data-height="1080">
-		<div id="cap-buckets-what-0" class="cap"><span>A Monthly Budget groups your spending for</span></div>
-		<div id="cap-buckets-what-7" class="cap"><span>planning month by month.</span></div>
-		<div id="cap-buckets-what-11" class="cap"><span>Finpoint starts you with four:</span></div>
-		<div id="cap-buckets-what-16" class="cap"><span>Daily, Recurring,</span></div>
-		<div id="cap-buckets-what-18" class="cap"><span>Irregular</span></div>
-		<div id="cap-buckets-what-19" class="cap"><span>and Travel.</span></div>
+		<div id="cap-buckets-what-0" class="cap"><span>The second default is a Monthly Budget.</span></div>
+		<div id="cap-buckets-what-7" class="cap"><span>It answers a different question:</span></div>
+		<div id="cap-buckets-what-12" class="cap"><span>am I on track?</span></div>
+		<div id="cap-buckets-what-16" class="cap"><span>A Monthly Budget is a group of</span></div>
+		<div id="cap-buckets-what-23" class="cap"><span>spending you plan for.</span></div>
+		<div id="cap-buckets-what-27" class="cap"><span>Finpoint starts you with four:</span></div>
+		<div id="cap-buckets-what-32" class="cap"><span>Daily for everyday</span></div>
+		<div id="cap-buckets-what-35" class="cap"><span>spending, Recurring for bills like rent and</span></div>
+		<div id="cap-buckets-what-42" class="cap"><span>your phone, Irregular</span></div>
+		<div id="cap-buckets-what-45" class="cap"><span>for one-off costs, and Travel.</span></div>
+		<div id="cap-buckets-what-50" class="cap"><span>Each gets its own amount every</span></div>
+		<div id="cap-buckets-what-56" class="cap"><span>month.</span></div>
 		<div id="cap-buckets-daily-0" class="cap"><span>Daily is the one to watch.</span></div>
 		<div id="cap-buckets-daily-6" class="cap"><span>It holds everyday</span></div>
 		<div id="cap-buckets-daily-9" class="cap"><span>spending, like food and transport,</span></div>
@@ -25,26 +31,27 @@
 		<div id="cap-buckets-amount-5" class="cap"><span>choose Edit beside it on the Dashboard,</span></div>
 		<div id="cap-buckets-amount-12" class="cap"><span>and set a Monthly amount,</span></div>
 		<div id="cap-buckets-amount-17" class="cap"><span>say $500.</span></div>
-		<div id="cap-buckets-rule-0" class="cap"><span>The Amount rule says how far it</span></div>
-		<div id="cap-buckets-rule-7" class="cap"><span>reaches.</span></div>
-		<div id="cap-buckets-rule-8" class="cap"><span>Override</span></div>
-		<div id="cap-buckets-rule-9" class="cap"><span>one month changes this month only.</span></div>
-		<div id="cap-buckets-rule-15" class="cap"><span>Override</span></div>
-		<div id="cap-buckets-rule-16" class="cap"><span>default applies from this month onward.</span></div>
+		<div id="cap-buckets-rule-0" class="cap"><span>The Amount rule decides which months that</span></div>
+		<div id="cap-buckets-rule-7" class="cap"><span>amount covers.</span></div>
+		<div id="cap-buckets-rule-9" class="cap"><span>Override</span></div>
+		<div id="cap-buckets-rule-10" class="cap"><span>one month changes this month only.</span></div>
+		<div id="cap-buckets-rule-16" class="cap"><span>Override</span></div>
+		<div id="cap-buckets-rule-17" class="cap"><span>default applies from this month onward.</span></div>
 		<div id="cap-buckets-compare-0" class="cap"><span>The Dashboard then shows how the month</span></div>
 		<div id="cap-buckets-compare-7" class="cap"><span>is going against the plan.</span></div>
-		<div id="cap-buckets-compare-12" class="cap"><span>A Monthly Budget doesn’t move or hold</span></div>
-		<div id="cap-buckets-compare-19" class="cap"><span>any money.</span></div>
-		<div id="cap-buckets-compare-21" class="cap"><span>It’s simply a comparison.</span></div>
+		<div id="cap-buckets-compare-12" class="cap"><span>A Monthly Budget doesn’t move or set</span></div>
+		<div id="cap-buckets-compare-19" class="cap"><span>aside any money.</span></div>
+		<div id="cap-buckets-compare-22" class="cap"><span>It’s a comparison,</span></div>
+		<div id="cap-buckets-compare-25" class="cap"><span>nothing more.</span></div>
 	</div>
 	<script>
 		const tl = gsap.timeline({ paused: true })
-		const groups = [["cap-buckets-what-0",2.083,4.15],["cap-buckets-what-7",4.15,5.717],["cap-buckets-what-11",5.717,7.617],["cap-buckets-what-16",7.617,8.983],["cap-buckets-what-18",8.983,9.75],["cap-buckets-what-19",9.75,10.967],["cap-buckets-daily-0",11.417,13.583],["cap-buckets-daily-6",13.583,14.717],["cap-buckets-daily-9",14.717,16.617],["cap-buckets-daily-14",16.617,18.85],["cap-buckets-daily-21",18.85,20.6],["cap-buckets-amount-0",21.05,22.683],["cap-buckets-amount-5",22.683,25.05],["cap-buckets-amount-12",25.05,26.517],["cap-buckets-amount-17",26.517,28.233],["cap-buckets-rule-0",28.683,30.517],["cap-buckets-rule-7",30.517,31.483],["cap-buckets-rule-8",31.483,32.25],["cap-buckets-rule-9",32.25,34.517],["cap-buckets-rule-15",34.517,35.35],["cap-buckets-rule-16",35.35,37.8],["cap-buckets-compare-0",38.25,40.117],["cap-buckets-compare-7",40.117,42.05],["cap-buckets-compare-12",42.05,43.983],["cap-buckets-compare-19",43.983,45.283],["cap-buckets-compare-21",45.283,48]]
+		const groups = [["cap-buckets-what-0",2.083,4.617],["cap-buckets-what-7",4.617,6.417],["cap-buckets-what-12",6.417,7.817],["cap-buckets-what-16",7.817,9.483],["cap-buckets-what-23",9.483,10.883],["cap-buckets-what-27",10.883,12.85],["cap-buckets-what-32",12.85,14.15],["cap-buckets-what-35",14.15,16.383],["cap-buckets-what-42",16.383,17.883],["cap-buckets-what-45",17.883,20.217],["cap-buckets-what-50",20.217,22.05],["cap-buckets-what-56",22.05,22.867],["cap-buckets-daily-0",23.317,25.483],["cap-buckets-daily-6",25.483,26.617],["cap-buckets-daily-9",26.617,28.517],["cap-buckets-daily-14",28.517,30.75],["cap-buckets-daily-21",30.75,32.5],["cap-buckets-amount-0",32.95,34.583],["cap-buckets-amount-5",34.583,36.95],["cap-buckets-amount-12",36.95,38.417],["cap-buckets-amount-17",38.417,40.133],["cap-buckets-rule-0",40.583,42.817],["cap-buckets-rule-7",42.817,44.15],["cap-buckets-rule-9",44.15,44.95],["cap-buckets-rule-10",44.95,47.283],["cap-buckets-rule-16",47.283,48.117],["cap-buckets-rule-17",48.117,50.633],["cap-buckets-compare-0",51.083,52.983],["cap-buckets-compare-7",52.983,54.95],["cap-buckets-compare-12",54.95,56.617],["cap-buckets-compare-19",56.617,58.317],["cap-buckets-compare-22",58.317,59.583],["cap-buckets-compare-25",59.583,61.633]]
 		for (const [id, start, end] of groups) {
 			tl.set("#" + id, { opacity: 1, visibility: "visible" }, start)
 			tl.set("#" + id, { opacity: 0, visibility: "hidden" }, end)
 		}
-		tl.set({}, {}, 48.3)
+		tl.set({}, {}, 61.933)
 		window.__timelines["captions"] = tl
 	</script>
 </template>

@@ -10,11 +10,14 @@
 		}
 	</style>
 	<div id="root" data-composition-id="captions" data-width="1920" data-height="1080">
-		<div id="cap-find-records-0" class="cap"><span>To find something later,</span></div>
-		<div id="cap-find-records-4" class="cap"><span>open Records.</span></div>
-		<div id="cap-find-records-6" class="cap"><span>Search by title, or filter by date,</span></div>
-		<div id="cap-find-records-13" class="cap"><span>Category</span></div>
-		<div id="cap-find-records-14" class="cap"><span>or amount.</span></div>
+		<div id="cap-find-records-0" class="cap"><span>Sooner or later you’ll want to look</span></div>
+		<div id="cap-find-records-7" class="cap"><span>something up, like what that $90</span></div>
+		<div id="cap-find-records-13" class="cap"><span>dinner was.</span></div>
+		<div id="cap-find-records-15" class="cap"><span>Open Records.</span></div>
+		<div id="cap-find-records-17" class="cap"><span>Search by title,</span></div>
+		<div id="cap-find-records-20" class="cap"><span>or filter by date,</span></div>
+		<div id="cap-find-records-24" class="cap"><span>Category</span></div>
+		<div id="cap-find-records-25" class="cap"><span>or amount.</span></div>
 		<div id="cap-find-edit-0" class="cap"><span>Open a Record to see its Statements,</span></div>
 		<div id="cap-find-edit-7" class="cap"><span>then choose Edit Record to change any</span></div>
 		<div id="cap-find-edit-14" class="cap"><span>field, or the Allocations</span></div>
@@ -23,18 +26,18 @@
 		<div id="cap-find-statements-7" class="cap"><span>bank activity,</span></div>
 		<div id="cap-find-statements-9" class="cap"><span>and each Account has a page of</span></div>
 		<div id="cap-find-statements-16" class="cap"><span>its own.</span></div>
-		<div id="cap-find-settings-0" class="cap"><span>If you always look at the same</span></div>
-		<div id="cap-find-settings-7" class="cap"><span>period, set default filters in Settings,</span></div>
-		<div id="cap-find-settings-13" class="cap"><span>and every list opens on that range.</span></div>
+		<div id="cap-find-settings-0" class="cap"><span>And if you always look at the</span></div>
+		<div id="cap-find-settings-7" class="cap"><span>same period, set default filters in Settings,</span></div>
+		<div id="cap-find-settings-14" class="cap"><span>so every list opens on that range.</span></div>
 	</div>
 	<script>
 		const tl = gsap.timeline({ paused: true })
-		const groups = [["cap-find-records-0",2.483,3.85],["cap-find-records-4",3.85,5.017],["cap-find-records-6",5.017,7.35],["cap-find-records-13",7.35,8.117],["cap-find-records-14",8.117,9.3],["cap-find-edit-0",9.75,12.083],["cap-find-edit-7",12.083,14.417],["cap-find-edit-14",14.417,15.95],["cap-find-edit-18",15.95,17.167],["cap-find-statements-0",17.617,19.583],["cap-find-statements-7",19.583,20.75],["cap-find-statements-9",20.75,22.517],["cap-find-statements-16",22.517,23.533],["cap-find-settings-0",23.983,25.783],["cap-find-settings-7",25.783,28.183],["cap-find-settings-13",28.183,31.733]]
+		const groups = [["cap-find-records-0",2.483,3.95],["cap-find-records-7",3.95,6.25],["cap-find-records-13",6.25,7.317],["cap-find-records-15",7.317,8.717],["cap-find-records-17",8.717,9.75],["cap-find-records-20",9.75,11.183],["cap-find-records-24",11.183,11.983],["cap-find-records-25",11.983,13.233],["cap-find-edit-0",13.683,16.017],["cap-find-edit-7",16.017,18.35],["cap-find-edit-14",18.35,19.883],["cap-find-edit-18",19.883,21.1],["cap-find-statements-0",21.55,23.517],["cap-find-statements-7",23.517,24.683],["cap-find-statements-9",24.683,26.45],["cap-find-statements-16",26.45,27.467],["cap-find-settings-0",27.917,29.483],["cap-find-settings-7",29.483,32.25],["cap-find-settings-14",32.25,35.8]]
 		for (const [id, start, end] of groups) {
 			tl.set("#" + id, { opacity: 1, visibility: "visible" }, start)
 			tl.set("#" + id, { opacity: 0, visibility: "hidden" }, end)
 		}
-		tl.set({}, {}, 32.033)
+		tl.set({}, {}, 36.1)
 		window.__timelines["captions"] = tl
 	</script>
 </template>

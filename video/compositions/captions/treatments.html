@@ -10,30 +10,32 @@
 		}
 	</style>
 	<div id="root" data-composition-id="captions" data-width="1920" data-height="1080">
-		<div id="cap-treatments-what-0" class="cap"><span>Treatment decides how the Dashboard counts a</span></div>
-		<div id="cap-treatments-what-7" class="cap"><span>Record:</span></div>
-		<div id="cap-treatments-what-8" class="cap"><span>as income,</span></div>
-		<div id="cap-treatments-what-10" class="cap"><span>as spending,</span></div>
-		<div id="cap-treatments-what-12" class="cap"><span>as saving,</span></div>
-		<div id="cap-treatments-what-14" class="cap"><span>or not at all.</span></div>
+		<div id="cap-treatments-what-0" class="cap"><span>Now, those two defaults.</span></div>
+		<div id="cap-treatments-what-4" class="cap"><span>The first is Treatment.</span></div>
+		<div id="cap-treatments-what-8" class="cap"><span>It decides how the Dashboard counts a</span></div>
+		<div id="cap-treatments-what-15" class="cap"><span>Record:</span></div>
+		<div id="cap-treatments-what-16" class="cap"><span>as income,</span></div>
+		<div id="cap-treatments-what-18" class="cap"><span>as spending, as saving,</span></div>
+		<div id="cap-treatments-what-22" class="cap"><span>or not at all.</span></div>
 		<div id="cap-treatments-examples-0" class="cap"><span>Your salary is Income.</span></div>
 		<div id="cap-treatments-examples-4" class="cap"><span>Lunch and groceries</span></div>
-		<div id="cap-treatments-examples-7" class="cap"><span>are Spending,</span></div>
-		<div id="cap-treatments-examples-9" class="cap"><span>and so is a refund,</span></div>
-		<div id="cap-treatments-examples-14" class="cap"><span>which lowers what you spent.</span></div>
-		<div id="cap-treatments-examples-19" class="cap"><span>Putting $500</span></div>
-		<div id="cap-treatments-examples-21" class="cap"><span>into an investment account is Saving /</span></div>
-		<div id="cap-treatments-examples-28" class="cap"><span>investment.</span></div>
-		<div id="cap-treatments-examples-29" class="cap"><span>And moving money between two accounts you</span></div>
-		<div id="cap-treatments-examples-36" class="cap"><span>track is a Transfer,</span></div>
-		<div id="cap-treatments-examples-40" class="cap"><span>which isn’t counted at all.</span></div>
-		<div id="cap-treatments-dashboard-0" class="cap"><span>On the Dashboard, Income</span></div>
+		<div id="cap-treatments-examples-7" class="cap"><span>are Spending.</span></div>
+		<div id="cap-treatments-examples-9" class="cap"><span>A refund is Spending too,</span></div>
+		<div id="cap-treatments-examples-14" class="cap"><span>because it lowers what you spent.</span></div>
+		<div id="cap-treatments-examples-20" class="cap"><span>Putting $500</span></div>
+		<div id="cap-treatments-examples-22" class="cap"><span>into an investment account is Saving /</span></div>
+		<div id="cap-treatments-examples-29" class="cap"><span>investment.</span></div>
+		<div id="cap-treatments-examples-30" class="cap"><span>And moving money between two accounts you</span></div>
+		<div id="cap-treatments-examples-37" class="cap"><span>track is a Transfer,</span></div>
+		<div id="cap-treatments-examples-41" class="cap"><span>which isn’t counted at all.</span></div>
+		<div id="cap-treatments-dashboard-0" class="cap"><span>On the Dashboard,</span></div>
+		<div id="cap-treatments-dashboard-3" class="cap"><span>Income</span></div>
 		<div id="cap-treatments-dashboard-4" class="cap"><span>and Spending make up your totals and</span></div>
 		<div id="cap-treatments-dashboard-11" class="cap"><span>charts.</span></div>
-		<div id="cap-treatments-dashboard-12" class="cap"><span>Saving and investment</span></div>
-		<div id="cap-treatments-dashboard-15" class="cap"><span>is kept out of them,</span></div>
-		<div id="cap-treatments-dashboard-20" class="cap"><span>in its own section further down.</span></div>
-		<div id="cap-treatments-dashboard-26" class="cap"><span>And Transfers don’t appear at all.</span></div>
+		<div id="cap-treatments-dashboard-12" class="cap"><span>Saving and investment are kept out of</span></div>
+		<div id="cap-treatments-dashboard-19" class="cap"><span>them, in their own section further down,</span></div>
+		<div id="cap-treatments-dashboard-26" class="cap"><span>so saving never looks like spending.</span></div>
+		<div id="cap-treatments-dashboard-32" class="cap"><span>And Transfers don’t appear at all.</span></div>
 		<div id="cap-treatments-override-0" class="cap"><span>Your Category</span></div>
 		<div id="cap-treatments-override-2" class="cap"><span>sets the treatment for you.</span></div>
 		<div id="cap-treatments-override-7" class="cap"><span>Change it on a single Record only</span></div>
@@ -41,12 +43,12 @@
 	</div>
 	<script>
 		const tl = gsap.timeline({ paused: true })
-		const groups = [["cap-treatments-what-0",1.617,3.55],["cap-treatments-what-7",3.55,4.617],["cap-treatments-what-8",4.617,5.683],["cap-treatments-what-10",5.683,6.55],["cap-treatments-what-12",6.55,7.417],["cap-treatments-what-14",7.417,8.867],["cap-treatments-examples-0",9.317,11.25],["cap-treatments-examples-4",11.25,12.383],["cap-treatments-examples-7",12.383,13.517],["cap-treatments-examples-9",13.517,15.083],["cap-treatments-examples-14",15.083,17.083],["cap-treatments-examples-19",17.083,18.683],["cap-treatments-examples-21",18.683,21.083],["cap-treatments-examples-28",21.083,22.15],["cap-treatments-examples-29",22.15,24.417],["cap-treatments-examples-36",24.417,25.65],["cap-treatments-examples-40",25.65,27.5],["cap-treatments-dashboard-0",27.95,29.583],["cap-treatments-dashboard-4",29.583,31.617],["cap-treatments-dashboard-11",31.617,32.35],["cap-treatments-dashboard-12",32.35,33.65],["cap-treatments-dashboard-15",33.65,34.95],["cap-treatments-dashboard-20",34.95,37.217],["cap-treatments-dashboard-26",37.217,39.533],["cap-treatments-override-0",39.983,40.883],["cap-treatments-override-2",40.883,42.483],["cap-treatments-override-7",42.483,44.517],["cap-treatments-override-14",44.517,47.533]]
+		const groups = [["cap-treatments-what-0",1.617,3.417],["cap-treatments-what-4",3.417,4.983],["cap-treatments-what-8",4.983,6.683],["cap-treatments-what-15",6.683,7.617],["cap-treatments-what-16",7.617,8.617],["cap-treatments-what-18",8.617,10.25],["cap-treatments-what-22",10.25,11.667],["cap-treatments-examples-0",12.117,13.983],["cap-treatments-examples-4",13.983,15.083],["cap-treatments-examples-7",15.083,16.55],["cap-treatments-examples-9",16.55,18.183],["cap-treatments-examples-14",18.183,20.517],["cap-treatments-examples-20",20.517,22.15],["cap-treatments-examples-22",22.15,24.55],["cap-treatments-examples-29",24.55,25.65],["cap-treatments-examples-30",25.65,27.917],["cap-treatments-examples-37",27.917,29.15],["cap-treatments-examples-41",29.15,30.967],["cap-treatments-dashboard-0",31.417,32.45],["cap-treatments-dashboard-3",32.45,33.083],["cap-treatments-dashboard-4",33.083,35.15],["cap-treatments-dashboard-11",35.15,35.917],["cap-treatments-dashboard-12",35.917,38.183],["cap-treatments-dashboard-19",38.183,40.417],["cap-treatments-dashboard-26",40.417,43.05],["cap-treatments-dashboard-32",43.05,45.333],["cap-treatments-override-0",45.783,46.683],["cap-treatments-override-2",46.683,48.283],["cap-treatments-override-7",48.283,50.317],["cap-treatments-override-14",50.317,53.333]]
 		for (const [id, start, end] of groups) {
 			tl.set("#" + id, { opacity: 1, visibility: "visible" }, start)
 			tl.set("#" + id, { opacity: 0, visibility: "hidden" }, end)
 		}
-		tl.set({}, {}, 47.833)
+		tl.set({}, {}, 53.633)
 		window.__timelines["captions"] = tl
 	</script>
 </template>

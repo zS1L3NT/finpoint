@@ -10,14 +10,16 @@
 		}
 	</style>
 	<div id="root" data-composition-id="captions" data-width="1920" data-height="1080">
-		<div id="cap-duplicates-why-0" class="cap"><span>Sometimes</span></div>
-		<div id="cap-duplicates-why-1" class="cap"><span>a bank changes a payment’s description between</span></div>
-		<div id="cap-duplicates-why-8" class="cap"><span>exports.</span></div>
-		<div id="cap-duplicates-why-9" class="cap"><span>Import both files,</span></div>
-		<div id="cap-duplicates-why-12" class="cap"><span>and the same payment arrives</span></div>
-		<div id="cap-duplicates-why-17" class="cap"><span>twice.</span></div>
+		<div id="cap-duplicates-why-0" class="cap"><span>Imports can go wrong in one more</span></div>
+		<div id="cap-duplicates-why-7" class="cap"><span>way.</span></div>
+		<div id="cap-duplicates-why-8" class="cap"><span>Sometimes</span></div>
+		<div id="cap-duplicates-why-9" class="cap"><span>a bank changes a payment’s description between</span></div>
+		<div id="cap-duplicates-why-16" class="cap"><span>exports.</span></div>
+		<div id="cap-duplicates-why-17" class="cap"><span>Import both files, and the same payment</span></div>
+		<div id="cap-duplicates-why-24" class="cap"><span>arrives</span></div>
+		<div id="cap-duplicates-why-25" class="cap"><span>twice, so you might explain it twice.</span></div>
 		<div id="cap-duplicates-badge-0" class="cap"><span>Finpoint spots Statements</span></div>
-		<div id="cap-duplicates-badge-3" class="cap"><span>on the same account,</span></div>
+		<div id="cap-duplicates-badge-3" class="cap"><span>with the same account,</span></div>
 		<div id="cap-duplicates-badge-7" class="cap"><span>day and amount,</span></div>
 		<div id="cap-duplicates-badge-10" class="cap"><span>and marks them as possible</span></div>
 		<div id="cap-duplicates-badge-15" class="cap"><span>duplicates.</span></div>
@@ -36,12 +38,12 @@
 	</div>
 	<script>
 		const tl = gsap.timeline({ paused: true })
-		const groups = [["cap-duplicates-why-0",2.517,3.317],["cap-duplicates-why-1",3.317,5.683],["cap-duplicates-why-8",5.683,6.617],["cap-duplicates-why-9",6.617,7.917],["cap-duplicates-why-12",7.917,9.85],["cap-duplicates-why-17",9.85,10.867],["cap-duplicates-badge-0",11.317,12.617],["cap-duplicates-badge-3",12.617,14.15],["cap-duplicates-badge-7",14.15,15.217],["cap-duplicates-badge-10",15.217,16.75],["cap-duplicates-badge-15",16.75,18.25],["cap-duplicates-badge-16",18.25,19.683],["cap-duplicates-badge-19",19.683,21.733],["cap-duplicates-choose-0",22.183,23.917],["cap-duplicates-choose-6",23.917,25.75],["cap-duplicates-choose-9",25.75,26.617],["cap-duplicates-choose-10",26.617,28.183],["cap-duplicates-choose-15",28.183,29.7],["cap-duplicates-review-0",30.15,32.45],["cap-duplicates-review-7",32.45,33.783],["cap-duplicates-review-9",33.783,34.583],["cap-duplicates-review-10",34.583,36.383],["cap-duplicates-review-15",36.383,39.333]]
+		const groups = [["cap-duplicates-why-0",2.517,4.45],["cap-duplicates-why-7",4.45,5.183],["cap-duplicates-why-8",5.183,5.983],["cap-duplicates-why-9",5.983,8.483],["cap-duplicates-why-16",8.483,9.45],["cap-duplicates-why-17",9.45,11.917],["cap-duplicates-why-24",11.917,12.55],["cap-duplicates-why-25",12.55,15.433],["cap-duplicates-badge-0",15.883,17.217],["cap-duplicates-badge-3",17.217,18.75],["cap-duplicates-badge-7",18.75,19.85],["cap-duplicates-badge-10",19.85,21.383],["cap-duplicates-badge-15",21.383,22.883],["cap-duplicates-badge-16",22.883,24.317],["cap-duplicates-badge-19",24.317,26.367],["cap-duplicates-choose-0",26.817,28.55],["cap-duplicates-choose-6",28.55,30.383],["cap-duplicates-choose-9",30.383,31.25],["cap-duplicates-choose-10",31.25,32.817],["cap-duplicates-choose-15",32.817,34.333],["cap-duplicates-review-0",34.783,37.083],["cap-duplicates-review-7",37.083,38.417],["cap-duplicates-review-9",38.417,39.217],["cap-duplicates-review-10",39.217,41.017],["cap-duplicates-review-15",41.017,43.967]]
 		for (const [id, start, end] of groups) {
 			tl.set("#" + id, { opacity: 1, visibility: "visible" }, start)
 			tl.set("#" + id, { opacity: 0, visibility: "hidden" }, end)
 		}
-		tl.set({}, {}, 39.633)
+		tl.set({}, {}, 44.267)
 		window.__timelines["captions"] = tl
 	</script>
 </template>

@@ -10,10 +10,13 @@
 		}
 	</style>
 	<div id="root" data-composition-id="captions" data-width="1920" data-height="1080">
-		<div id="cap-pending-when-0" class="cap"><span>Sometimes</span></div>
-		<div id="cap-pending-when-1" class="cap"><span>you know about spending before your bank</span></div>
-		<div id="cap-pending-when-8" class="cap"><span>shows all of it.</span></div>
-		<div id="cap-pending-when-12" class="cap"><span>Finpoint lets you record it anyway.</span></div>
+		<div id="cap-pending-when-0" class="cap"><span>Your Dashboard is only as current as</span></div>
+		<div id="cap-pending-when-7" class="cap"><span>your explanations.</span></div>
+		<div id="cap-pending-when-9" class="cap"><span>But sometimes</span></div>
+		<div id="cap-pending-when-11" class="cap"><span>you know about spending before your bank</span></div>
+		<div id="cap-pending-when-18" class="cap"><span>shows all of it,</span></div>
+		<div id="cap-pending-when-22" class="cap"><span>and you’d rather record it now than</span></div>
+		<div id="cap-pending-when-29" class="cap"><span>try to remember it later.</span></div>
 		<div id="cap-pending-concert-0" class="cap"><span>Say you paid $200</span></div>
 		<div id="cap-pending-concert-4" class="cap"><span>for two concert tickets,</span></div>
 		<div id="cap-pending-concert-8" class="cap"><span>and your friend Jo will pay you</span></div>
@@ -23,19 +26,21 @@
 		<div id="cap-pending-concert-26" class="cap"><span>your $100</span></div>
 		<div id="cap-pending-concert-28" class="cap"><span>share, from the $200</span></div>
 		<div id="cap-pending-concert-32" class="cap"><span>payment.</span></div>
-		<div id="cap-pending-flag-0" class="cap"><span>The amounts don’t match yet,</span></div>
+		<div id="cap-pending-flag-0" class="cap"><span>The amounts don’t match yet:</span></div>
 		<div id="cap-pending-flag-5" class="cap"><span>$100</span></div>
 		<div id="cap-pending-flag-6" class="cap"><span>against $200.</span></div>
 		<div id="cap-pending-flag-8" class="cap"><span>Finpoint warns you, and saves the Record</span></div>
-		<div id="cap-pending-flag-15" class="cap"><span>as Pending.</span></div>
+		<div id="cap-pending-flag-15" class="cap"><span>as Pending,</span></div>
+		<div id="cap-pending-flag-17" class="cap"><span>which means it isn’t settled yet.</span></div>
+		<div id="cap-pending-flag-23" class="cap"><span>Your $100</span></div>
+		<div id="cap-pending-flag-25" class="cap"><span>share already counts.</span></div>
 		<div id="cap-pending-list-0" class="cap"><span>Pending Records are marked in your Records</span></div>
 		<div id="cap-pending-list-7" class="cap"><span>list, so nothing gets forgotten.</span></div>
 		<div id="cap-pending-attach-0" class="cap"><span>When Jo’s $100</span></div>
 		<div id="cap-pending-attach-3" class="cap"><span>arrives,</span></div>
 		<div id="cap-pending-attach-4" class="cap"><span>select it and choose Allocate</span></div>
 		<div id="cap-pending-attach-9" class="cap"><span>to record.</span></div>
-		<div id="cap-pending-attach-11" class="cap"><span>Finpoint suggests the Pending Record it matches</span></div>
-		<div id="cap-pending-attach-18" class="cap"><span>exactly.</span></div>
+		<div id="cap-pending-attach-11" class="cap"><span>Finpoint suggests the Pending Record it completes.</span></div>
 		<div id="cap-pending-complete-0" class="cap"><span>The Record now combines both payments.</span></div>
 		<div id="cap-pending-complete-6" class="cap"><span>Save, and because the amounts tally,</span></div>
 		<div id="cap-pending-complete-12" class="cap"><span>it’s no longer Pending.</span></div>
@@ -51,12 +56,12 @@
 	</div>
 	<script>
 		const tl = gsap.timeline({ paused: true })
-		const groups = [["cap-pending-when-0",1.983,2.617],["cap-pending-when-1",2.617,4.383],["cap-pending-when-8",4.383,5.517],["cap-pending-when-12",5.517,8],["cap-pending-concert-0",8.45,10.217],["cap-pending-concert-4",10.217,11.75],["cap-pending-concert-8",11.75,13.283],["cap-pending-concert-15",13.283,14.817],["cap-pending-concert-17",14.817,15.85],["cap-pending-concert-19",15.85,17.75],["cap-pending-concert-26",17.75,18.983],["cap-pending-concert-28",18.983,20.717],["cap-pending-concert-32",20.717,21.667],["cap-pending-flag-0",22.117,23.517],["cap-pending-flag-5",23.517,24.683],["cap-pending-flag-6",24.683,26.617],["cap-pending-flag-8",26.617,29.083],["cap-pending-flag-15",29.083,30.367],["cap-pending-list-0",30.817,33.117],["cap-pending-list-7",33.117,35.467],["cap-pending-attach-0",35.917,37.483],["cap-pending-attach-3",37.483,38.283],["cap-pending-attach-4",38.283,40.25],["cap-pending-attach-9",40.25,41.517],["cap-pending-attach-11",41.517,44.183],["cap-pending-attach-18",44.183,45.433],["cap-pending-complete-0",45.883,48.45],["cap-pending-complete-6",48.45,50.75],["cap-pending-complete-12",50.75,52.467],["cap-pending-meaning-0",52.917,54.75],["cap-pending-meaning-7",54.75,55.95],["cap-pending-meaning-10",55.95,57.55],["cap-pending-meaning-15",57.55,59.05],["cap-pending-meaning-18",59.05,60.75],["cap-pending-meaning-25",60.75,62.183],["cap-pending-meaning-29",62.183,64.55],["cap-pending-meaning-36",64.55,65.65],["cap-pending-meaning-38",65.65,67.233]]
+		const groups = [["cap-pending-when-0",1.983,4.183],["cap-pending-when-7",4.183,5.85],["cap-pending-when-9",5.85,6.85],["cap-pending-when-11",6.85,9.017],["cap-pending-when-18",9.017,10.017],["cap-pending-when-22",10.017,11.783],["cap-pending-when-29",11.783,14],["cap-pending-concert-0",14.45,16.217],["cap-pending-concert-4",16.217,17.75],["cap-pending-concert-8",17.75,19.283],["cap-pending-concert-15",19.283,20.817],["cap-pending-concert-17",20.817,21.85],["cap-pending-concert-19",21.85,23.75],["cap-pending-concert-26",23.75,24.983],["cap-pending-concert-28",24.983,26.717],["cap-pending-concert-32",26.717,27.667],["cap-pending-flag-0",28.117,29.85],["cap-pending-flag-5",29.85,30.983],["cap-pending-flag-6",30.983,32.85],["cap-pending-flag-8",32.85,35.45],["cap-pending-flag-15",35.45,36.383],["cap-pending-flag-17",36.383,38.583],["cap-pending-flag-23",38.583,39.85],["cap-pending-flag-25",39.85,41.567],["cap-pending-list-0",42.017,44.317],["cap-pending-list-7",44.317,46.667],["cap-pending-attach-0",47.117,48.683],["cap-pending-attach-3",48.683,49.45],["cap-pending-attach-4",49.45,51.383],["cap-pending-attach-9",51.383,52.617],["cap-pending-attach-11",52.617,55.967],["cap-pending-complete-0",56.417,58.983],["cap-pending-complete-6",58.983,61.283],["cap-pending-complete-12",61.283,63],["cap-pending-meaning-0",63.45,65.283],["cap-pending-meaning-7",65.283,66.483],["cap-pending-meaning-10",66.483,68.083],["cap-pending-meaning-15",68.083,69.583],["cap-pending-meaning-18",69.583,71.283],["cap-pending-meaning-25",71.283,72.717],["cap-pending-meaning-29",72.717,75.083],["cap-pending-meaning-36",75.083,76.183],["cap-pending-meaning-38",76.183,77.767]]
 		for (const [id, start, end] of groups) {
 			tl.set("#" + id, { opacity: 1, visibility: "visible" }, start)
 			tl.set("#" + id, { opacity: 0, visibility: "hidden" }, end)
 		}
-		tl.set({}, {}, 67.533)
+		tl.set({}, {}, 78.067)
 		window.__timelines["captions"] = tl
 	</script>
 </template>

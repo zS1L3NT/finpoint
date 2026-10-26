@@ -10,7 +10,7 @@ import { tmpdir } from "node:os"
 import { resolve } from "node:path"
 import { chromium } from "@playwright/test"
 import { setTempo, Take, type TakeInfo, takesDir, takesFile } from "./director"
-import { installCursor, STAGE, stageHtml, stagePath } from "./stage"
+import { installCursor, type RingAudit, STAGE, stageHtml, stagePath } from "./stage"
 import { story } from "./story"
 import { chromiumPath, serveApp } from "./tools"
 
@@ -57,6 +57,16 @@ await context.addInitScript(target => {
 	globalThis.Date = GuideDate as DateConstructor
 }, now.getTime())
 await context.addInitScript(installCursor)
+const offenderShots: Promise<unknown>[] = []
+await context.exposeBinding("guideRingFailure", ({ page }, audit: RingAudit) => {
+	mkdirSync(failures, { recursive: true })
+	const file = `${audit.take}-${audit.key}-${audit.occurrence}`.replace(/[^a-zA-Z0-9_-]/g, "_")
+	const shot = page.screenshot({ path: resolve(failures, `${file}.png`) }).catch(error => {
+		console.warn(`  ! Could not capture ring ${audit.take}/${audit.key}: ${error.message}`)
+	})
+	offenderShots.push(shot)
+	return shot
+})
 const page = await context.newPage()
 page.setDefaultTimeout(15000)
 await page.goto(`${server.base}${stagePath}?app=${encodeURIComponent("/")}`)
@@ -75,6 +85,8 @@ try {
 			await take.begin()
 			await script.play(take)
 			const info = await take.finish()
+			if (take.recording && take.ringAudits.some(audit => audit.mode === "control" && audit.minVisibility < 0.999))
+				throw new Error("Unresolved control-ring visibility failures (see ring report)")
 			if (info) takes[script.name] = info
 		} catch (error) {
 			const message = (error as Error).message.split("\n").filter(Boolean)
@@ -92,6 +104,7 @@ try {
 	}
 	writeFileSync(takesFile, `${JSON.stringify(takes, null, "\t")}\n`)
 } finally {
+	await Promise.all(offenderShots)
 	await browser.close()
 	server.stop()
 	rmSync(work, { recursive: true, force: true })

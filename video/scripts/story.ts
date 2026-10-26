@@ -108,7 +108,7 @@ const sidebar = (frame: Frame, label: string) =>
 	frame.locator("[data-sidebar=menu-button]").filter({ hasText: label }).first()
 const card = (frame: Frame, title: string | RegExp) =>
 	frame.getByText(title, { exact: typeof title === "string" }).first().locator("xpath=ancestor::*[@data-slot='card'][1]")
-const row = (frame: Frame, text: string) =>
+const row = (frame: Frame, text: string | RegExp) =>
 	frame.locator("tr, [data-slot=mobile-row]").filter({ hasText: text }).first()
 const table = (frame: Frame) => frame.locator("table").first()
 const dialog = (frame: Frame) => frame.getByRole("dialog").last()
@@ -165,6 +165,18 @@ async function fillRecord(t: Take, title: string, query: string, category: strin
 	await pick(t.page, t.app, creator(t.app).category, query, category)
 }
 
+/** Fills People and Location without a word from the narration, so viewers spot them themselves. */
+async function details(t: Take, people: string, location?: string) {
+	const form = creator(t.app).dialog
+	await press(t.page, form.locator("#people"))
+	await type(t.page, people)
+	await t.page.keyboard.press("Tab")
+	if (!location) return
+	await press(t.page, form.locator("#location"))
+	await type(t.page, location)
+	await t.page.keyboard.press("Tab")
+}
+
 // ─── The story ────────────────────────────────────────────────────────────────────────────
 
 export const story: TakeScript[] = [
@@ -178,7 +190,7 @@ export const story: TakeScript[] = [
 			const app = t.app
 			const offer = app.getByText("New to Finpoint?").locator("xpath=ancestor::*[contains(@class,'rounded-xl')][1]")
 			await t.at("demo", "demo data")
-			await t.focus(offer, { zoom: 1.6 })
+			await t.focus(offer, { zoom: 1.6, reveal: false })
 			await t.ring("offer", button(app, /Try demo data/))
 			await glide(t.page, button(app, /Try demo data/))
 			await t.at("demo", "three accounts")
@@ -317,7 +329,7 @@ export const story: TakeScript[] = [
 			await creator(app).title.waitFor()
 			await t.focus(creator(app).dialog, { zoom: 1.5 })
 			await t.at("create", "already allocated")
-			await t.ring("allocations", creator(app).allocations)
+			await t.ring("allocations", creator(app).allocations, { mode: "region" })
 			await t.at("create", "amount and date")
 			await t.unring()
 			await t.ring("amount", creator(app).amount)
@@ -328,8 +340,8 @@ export const story: TakeScript[] = [
 			await t.at("fill", "pick")
 			await pick(t.page, app, creator(app).category, "Dining", "Dining Out")
 			await t.at("ignore", "Analytics")
+			await t.reveal(creator(app).analytics, { zoom: 1.5 })
 			await t.ring("analytics", creator(app).analytics)
-			await scrollTo(app, creator(app).analytics)
 			await t.at("save", "Create Record")
 			await t.unring()
 			await press(t.page, creator(app).submit)
@@ -396,6 +408,7 @@ export const story: TakeScript[] = [
 		name: "repayment",
 		chapter: "repayment",
 		beats: ["select", "create", "done"],
+		tempo: 0.7,
 		setup: t => go(t, "/allocator"),
 		async play(t) {
 			const app = t.app
@@ -410,11 +423,12 @@ export const story: TakeScript[] = [
 			await press(t.page, button(app, "Create Record"))
 			await creator(app).title.waitFor()
 			await t.focus(creator(app).dialog, { zoom: 1.5 })
-			await t.at("create", "Dinner with Sam")
+			await t.at("create", "call it Dinner")
 			await press(t.page, creator(app).title)
-			await type(t.page, "Dinner with Sam")
+			await type(t.page, "Dinner")
+			await details(t, "Sam")
 			await t.at("create", "Both Statements")
-			await t.ring("allocations", creator(app).allocations)
+			await t.ring("allocations", creator(app).allocations, { mode: "region" })
 			await t.at("create", "comes to $30")
 			await t.unring()
 			await t.ring("amount", creator(app).amount)
@@ -426,7 +440,7 @@ export const story: TakeScript[] = [
 			await t.wide()
 			await via(t, "Records")
 			await t.at("done", "single Record")
-			await t.ring("dinner", row(app, "Dinner with Sam"))
+			await t.ring("dinner", row(app, /Dinner/))
 		},
 	},
 	{
@@ -466,6 +480,7 @@ export const story: TakeScript[] = [
 		name: "pending",
 		chapter: "pending",
 		beats: ["concert", "flag", "list"],
+		tempo: 0.7,
 		async setup(t) {
 			await importOcbc(t, "ocbc-concert.csv", [concert])
 			await go(t, "/allocator")
@@ -477,14 +492,15 @@ export const story: TakeScript[] = [
 			await press(t.page, button(app, "Create Record"))
 			await creator(app).title.waitFor()
 			await t.focus(creator(app).dialog, { zoom: 1.5 })
-			await fillRecord(t, "Concert with Jo", "Enter", "Entertainment")
+			await fillRecord(t, "Concert", "Enter", "Entertainment")
+			await details(t, "Jo", "National Stadium")
 			await t.at("flag", "$100 against")
 			await t.ring("amount", creator(app).amount)
 			await retype(t.page, creator(app).amount, "-100")
 			await t.at("flag", "warns you")
 			await t.unring()
 			const warning = creator(app).dialog.getByRole("alert").first()
-			await t.ring("warning", warning)
+			await t.ring("warning", warning, { mode: "region" })
 			await t.at("flag", "saves the Record")
 			await t.unring()
 			await press(t.page, creator(app).submit)
@@ -492,7 +508,8 @@ export const story: TakeScript[] = [
 			await t.wide()
 			await via(t, "Records")
 			await t.at("list", "marked")
-			await t.ring("badge", row(app, "Concert with Jo").getByText("Pending").first())
+			await t.reveal(row(app, /Concert/), { zoom: 1.2 })
+			await t.ring("badge", row(app, /Concert/).getByText("Pending").first())
 		},
 	},
 	{
@@ -513,16 +530,16 @@ export const story: TakeScript[] = [
 			await press(t.page, allocate)
 			await t.unring()
 			const sheet = dialog(app)
-			await sheet.getByText("Concert with Jo").first().waitFor()
+			await sheet.getByText(/Concert/).first().waitFor()
 			await t.at("attach", "suggests")
-			await t.ring("suggestion", sheet.getByText("Concert with Jo").first())
+			await t.ring("suggestion", sheet.getByText(/Concert/).first())
 			await t.at("complete")
 			await t.unring()
-			await press(t.page, sheet.getByText("Concert with Jo").first())
+			await press(t.page, sheet.getByText(/Concert/).first())
 			await app.getByText("Edit Record").first().waitFor()
 			await t.focus(creator(app).dialog, { zoom: 1.5 })
 			await t.at("complete", "both payments")
-			await t.ring("allocations", creator(app).allocations)
+			await t.ring("allocations", creator(app).allocations, { mode: "region" })
 			await t.at("complete", "Save")
 			await t.unring()
 			await press(t.page, creator(app).submit)
@@ -530,7 +547,8 @@ export const story: TakeScript[] = [
 			await t.wide()
 			await via(t, "Records")
 			await t.at("complete", "no longer Pending")
-			await t.ring("concert", row(app, "Concert with Jo"))
+			await t.reveal(row(app, /Concert/), { zoom: 1.2 })
+			await t.ring("concert", row(app, /Concert/))
 		},
 	},
 	{
@@ -568,6 +586,7 @@ export const story: TakeScript[] = [
 			await t.focus(creator(app).dialog, { zoom: 1.5 })
 			await t.at("explain", "Burger with Mia")
 			await fillRecord(t, "Burger", "Din", "Dining Out")
+			await details(t, "Mia")
 			await press(t.page, creator(app).submit)
 			await closed(t)
 			await t.wide()
@@ -673,7 +692,7 @@ export const story: TakeScript[] = [
 			await t.page.keyboard.press("ControlOrMeta+a")
 			await t.page.keyboard.press("Backspace")
 			await t.at("edit", "Open a Record")
-			await press(t.page, row(app, "Dinner with Sam").getByRole("link").first())
+			await press(t.page, row(app, /Dinner/).getByRole("link").first())
 			await app.getByText("Edit Record").first().waitFor()
 			await t.at("edit", "its Statements")
 			await t.ring("statements", card(app, /^Statements allocated/))
@@ -685,7 +704,7 @@ export const story: TakeScript[] = [
 			await t.unring()
 			await t.focus(creator(app).dialog, { zoom: 1.4 })
 			await t.at("edit", "Allocations")
-			await t.ring("allocations", creator(app).allocations)
+			await t.ring("allocations", creator(app).allocations, { mode: "region" })
 			await t.at("statements")
 			await t.unring()
 			await t.page.keyboard.press("Escape")
@@ -767,11 +786,17 @@ export const story: TakeScript[] = [
 			await type(t.page, "Phone bill")
 			await t.at("fill", "Category")
 			await pick(t.page, app, form.getByLabel(/^Category$/).first(), "Bills", "Bills & Utilities")
+			// The title fills itself in; the Category is offered as a one-click suggestion.
+			const titleMode = form.getByRole("group", { name: "How to use the title" })
+			const categoryMode = form.getByRole("group", { name: "How to use the category" })
 			await t.at("fill", "Autofill")
-			await t.ring("autofill", form.getByText("Autofill", { exact: true }).first())
+			const autofill = titleMode.getByText("Autofill", { exact: true })
+			await t.ring("autofill", autofill)
+			await press(t.page, autofill)
 			await t.at("fill", "Suggest")
 			await t.unring()
-			await t.ring("suggest", form.getByText("Suggest", { exact: true }).first())
+			await t.ring("suggest", categoryMode.getByText("Suggest", { exact: true }))
+			await t.page.waitForTimeout(900)
 			await t.unring()
 			await press(t.page, form.getByRole("button", { name: /Create|Save/ }).last())
 			await closed(t)
@@ -784,6 +809,14 @@ export const story: TakeScript[] = [
 			await t.focus(creator(app).dialog, { zoom: 1.4 })
 			await t.at("use", "ready")
 			await t.ring("title", creator(app).title)
+			await t.at("use", "one click")
+			await t.unring()
+			const chip = creator(app)
+				.dialog.getByLabel("Suggestions from statement rules")
+				.getByRole("button", { name: /Bills & Utilities/ })
+			await t.reveal(chip, { zoom: 1.4 })
+			await t.ring("chip", chip)
+			await press(t.page, chip)
 			await t.at("use", "change any")
 			await t.unring()
 			await t.page.keyboard.press("Escape")
@@ -800,7 +833,7 @@ export const story: TakeScript[] = [
 			const app = t.app
 			await t.at("dashboard", "Income and Spending")
 			await t.ring("income", app.getByText(/income/i).first().locator("xpath=ancestor::*[@data-slot='card'][1]"))
-			await t.at("dashboard", "its own section")
+			await t.at("dashboard", "their own section")
 			await t.unring()
 			const saving = app.locator("#investment-title").locator("xpath=ancestor::section[1]")
 			await scrollTo(app, saving, { middle: 0.45 })
@@ -839,6 +872,10 @@ export const story: TakeScript[] = [
 			await t.at("rule", "this month onward")
 			const amount = form.locator("#monthly-budget-amount")
 			await amount.waitFor()
+			await app.getByRole("listbox").waitFor({ state: "detached" }).catch(() => {})
+			// Overriding starts with no amount; untick that so the field takes one.
+			const none = form.getByRole("checkbox", { name: "No monthly amount" })
+			if (await none.isChecked().catch(() => false)) await press(t.page, none)
 			await t.ring("amount", amount)
 			await retype(t.page, amount, "500")
 			await t.unring()
@@ -862,14 +899,18 @@ export const story: TakeScript[] = [
 			await press(t.page, tab)
 			await t.unring()
 			await t.at("days", "grouped by day")
-			await t.ring("list", app.locator("main").first())
+			await t.ring("list", app.locator("main").first(), { mode: "region" })
 			await t.at("drill")
 			await t.unring()
 			await press(t.page, app.getByRole("link", { name: "Overview" }).first())
 			await t.at("drill", "Click any part")
 			const chart = card(app, /^Categories this month/)
 			await scrollTo(app, chart, { middle: 0.45 })
-			await glide(t.page, chart.getByText("Groceries").first())
+			await press(t.page, chart.getByText("Groceries").first())
+			await t.ring("drilled", app.locator("main").first(), { mode: "region" })
+			await t.page.waitForTimeout(1500)
+			await t.unring()
+			await press(t.page, app.getByRole("link", { name: "Overview" }).first())
 			await t.at("review", "Review this month")
 			const review = app.getByLabel("Review this month")
 			await scrollTo(app, review, { middle: 0.6 })
@@ -890,12 +931,13 @@ export const story: TakeScript[] = [
 			await t.at("scope", "Choose a Monthly Budget")
 			await t.unring()
 			await t.wide()
+			await t.page.waitForTimeout(900)
 			const scope = app.getByLabel("Spending scope")
 			await t.ring("scope", scope)
 			await glide(t.page, scope)
 			await t.at("scope", "Total")
 			await t.unring()
-			await t.at("forecast", "spending chart")
+			await t.at("forecast", "Spending forecast")
 			const forecast = app.locator("[data-slot=card]").filter({ has: app.locator("svg") }).first()
 			await scrollTo(app, forecast, { middle: 0.45 })
 			await t.ring("forecast", forecast)
