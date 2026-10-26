@@ -1,8 +1,5 @@
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
-import { useChartIntro } from "@/components/charts/chart-intro"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { useIsMobile } from "@/hooks/use-mobile"
-import { formatChartCurrency } from "@/lib/chart-currency"
+import BarChart from "@/components/charts/bar-chart"
+import { ReadoutRows } from "@/components/charts/chart-frame"
 import { formatCurrency } from "@/lib/utils"
 
 const WEEKDAYS: Record<string, string> = {
@@ -28,8 +25,6 @@ export default function WeekdayBars({
 	}[]
 	comparisonCount: number
 }) {
-	const intro = useChartIntro("mount")
-	const isMobile = useIsMobile()
 	const baselineLabel = `Previous ${comparisonCount} ${comparisonCount === 1 ? "month" : "months"}`
 
 	return (
@@ -44,75 +39,64 @@ export default function WeekdayBars({
 					{baselineLabel}
 				</span>
 			</div>
-			<ChartContainer
-				className="h-48 w-full min-w-0 aspect-auto [&_.recharts-surface:focus-visible]:outline-2 [&_.recharts-surface:focus-visible]:outline-ring sm:h-64"
-				config={{
-					spending: { label: "This month", color: "var(--color-emerald-500)" },
-					baseline: { label: baselineLabel, color: "var(--color-muted-foreground)" },
+			<BarChart
+				label="Spending by weekday"
+				className="h-48 w-full min-w-0 sm:h-64"
+				labels={stats.map(stat => `Average per ${WEEKDAYS[stat.day]}`)}
+				layout="group"
+				series={[
+					{
+						key: "spending",
+						label: "This month",
+						color: "var(--color-emerald-500)",
+						values: stats.map(stat => stat.spending ?? 0),
+					},
+					{
+						key: "baseline",
+						label: baselineLabel,
+						color: "var(--color-muted-foreground)",
+						opacity: 0.35,
+						values: stats.map(stat => stat.baseline ?? 0),
+					},
+				]}
+				tick={index => (
+					<text textAnchor="middle" dy="1em">
+						{stats[index]?.day}
+					</text>
+				)}
+				readout={index => {
+					const stat = stats[index]
+					if (!stat) return null
+					return (
+						<ReadoutRows
+							title={`Average per ${WEEKDAYS[stat.day]}`}
+							rows={[
+								...(stat.spending === null
+									? []
+									: [
+											{
+												key: "spending",
+												label: `This month · ${stat.days} ${WEEKDAYS[stat.day]}s`,
+												color: "var(--color-emerald-500)",
+												value: formatCurrency(stat.spending),
+											},
+										]),
+								...(stat.baseline === null
+									? []
+									: [
+											{
+												key: "baseline",
+												label: `${baselineLabel} · ${stat.baseline_days} ${WEEKDAYS[stat.day]}s`,
+												color: "var(--color-muted-foreground)",
+												opacity: 0.35,
+												value: formatCurrency(stat.baseline),
+											},
+										]),
+							]}
+						/>
+					)
 				}}
-			>
-				<BarChart
-					data={stats}
-					margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
-					accessibilityLayer
-					barCategoryGap="28%"
-				>
-					<CartesianGrid vertical={false} />
-					<XAxis
-						height={24}
-						dataKey="day"
-						tickMargin={isMobile ? 4 : 8}
-						tickLine={false}
-						axisLine={false}
-					/>
-					<YAxis width={isMobile ? 40 : 48} tickFormatter={formatChartCurrency} />
-					<ChartTooltip
-						content={
-							<ChartTooltipContent
-								labelFormatter={label => `Average per ${WEEKDAYS[String(label)]}`}
-								formatter={(value, name, item) => (
-									<div className="grid w-full min-w-52 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2">
-										<span
-											className="size-2 rounded-full"
-											style={{
-												backgroundColor: item.color,
-												opacity: item.dataKey === "baseline" ? 0.35 : 1,
-											}}
-										/>
-										<div className="text-muted-foreground">
-											{String(name)}
-											<p className="text-[0.6875rem]">
-												{item.dataKey === "spending"
-													? item.payload.days
-													: item.payload.baseline_days}{" "}
-												{WEEKDAYS[item.payload.day]}s
-											</p>
-										</div>
-										<span className="text-right font-medium tabular-nums">
-											{formatCurrency(Number(value))}
-										</span>
-									</div>
-								)}
-							/>
-						}
-					/>
-					<Bar
-						dataKey="spending"
-						name="This month"
-						fill="var(--color-emerald-500)"
-						radius={[4, 4, 0, 0]}
-						{...intro}
-					/>
-					<Bar
-						dataKey="baseline"
-						name={baselineLabel}
-						fill="var(--color-muted-foreground)"
-						fillOpacity={0.35}
-						radius={[4, 4, 0, 0]}
-						{...intro}
-					/>
-				</BarChart>
-			</ChartContainer>
+			/>
 		</div>
 	)
 }

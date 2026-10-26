@@ -148,7 +148,6 @@ $ bun run build
   - Data
     - [![Dexie](https://img.shields.io/badge/dexie-%5E4.4.6-red?style=flat-square)](https://www.npmjs.com/package/dexie/v/4.4.6)
     - [![TanStack Table](https://img.shields.io/badge/%40tanstack%2Freact--table-%5E8.21.3-red?style=flat-square)](https://www.npmjs.com/package/@tanstack/react-table/v/8.21.3)
-    - [![Recharts](https://img.shields.io/badge/recharts-3.8.0-red?style=flat-square)](https://www.npmjs.com/package/recharts/v/3.8.0)
     - [![Papa Parse](https://img.shields.io/badge/papaparse-%5E5.7.0-red?style=flat-square)](https://www.npmjs.com/package/papaparse/v/5.7.0)
     - [![SheetJS](https://img.shields.io/badge/xlsx-%5E0.18.5-red?style=flat-square)](https://www.npmjs.com/package/xlsx/v/0.18.5)
     - [![Luxon](https://img.shields.io/badge/luxon-%5E3.7.2-red?style=flat-square)](https://www.npmjs.com/package/luxon/v/3.7.2)

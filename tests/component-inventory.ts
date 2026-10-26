@@ -148,12 +148,12 @@ export const componentInventory: InventoryEntry[] = [
 		scenarios: ["chart"],
 	},
 	{
-		path: "src/components/charts/chart-intro.ts",
+		path: "src/components/charts/chart-frame.tsx",
 		owner: "team3",
 		routes: ["/budgets/[id]", "/"],
 		visibleExports: [],
 		dormantExports: [],
-		helperExports: ["CHART_INTRO_MS", "useChartIntro"],
+		helperExports: ["ReadoutRows", "default"],
 		scenarios: ["indirect"],
 	},
 	{
@@ -200,6 +200,24 @@ export const componentInventory: InventoryEntry[] = [
 		dormantExports: [],
 		helperExports: [],
 		scenarios: ["chart"],
+	},
+	{
+		path: "src/components/charts/bar-chart.tsx",
+		owner: "team3",
+		routes: ["/budgets/[id]", "/"],
+		visibleExports: [],
+		dormantExports: [],
+		helperExports: ["default"],
+		scenarios: ["indirect"],
+	},
+	{
+		path: "src/components/charts/trend-chart.tsx",
+		owner: "team3",
+		routes: ["/budgets/[id]", "/"],
+		visibleExports: [],
+		dormantExports: [],
+		helperExports: ["default"],
+		scenarios: ["indirect"],
 	},
 	{
 		path: "src/components/charts/weekday-bars.tsx",
@@ -1101,15 +1119,6 @@ export const componentInventory: InventoryEntry[] = [
 			"CardTitle",
 		],
 		dormantExports: [],
-		helperExports: [],
-		scenarios: ["primitive"],
-	},
-	{
-		path: "src/components/ui/chart.tsx",
-		owner: "team2",
-		routes: ["/budgets/[id]", "/"],
-		visibleExports: ["ChartContainer", "ChartStyle", "ChartTooltip", "ChartTooltipContent"],
-		dormantExports: ["ChartLegend", "ChartLegendContent"],
 		helperExports: [],
 		scenarios: ["primitive"],
 	},
@@ -2137,8 +2146,6 @@ export const scenarioDescriptions: Record<string, string> = {
 		"Viewport actually scrolls; scrolling exposes visible vertical scrollbar and thumb with positive bounded geometry",
 	"src/components/ui/pagination.tsx#primitive.consumer":
 		"Current page exposes aria-current and previous/next accessible labels; actual app pagination is asserted separately",
-	"src/components/ui/chart.tsx#primitive.consumer":
-		"Composed legend exposes both named series, generated CSS colour variables differ, keyboard tooltip shows 120/200 then 180/160",
 	"src/components/ui/sonner.tsx#primitive.consumer":
 		"Real success/error buttons produce the expected notification texts",
 	"src/components/ui/sidebar.tsx#primitive.consumer":
@@ -2223,7 +2230,11 @@ export const scenarioDescriptions: Record<string, string> = {
 		"All five projects: Category trend graph marks grow through intermediate geometry once and settle; reduced-motion immediate-final covered in the reduced-motion project",
 	"src/components/charts/budget-progress-chart.tsx#chart.motion":
 		"All five projects: Spending over time graph marks grow through intermediate geometry once and settle with no replay on hover/resize; reduced-motion immediate-final covered in the reduced-motion project",
-	"src/components/charts/chart-intro.ts#indirect.consumer":
+	"src/components/charts/bar-chart.tsx#indirect.consumer":
+		"All five projects: Spending by day, Spending by weekday and Category trend marks grow through intermediate geometry once and settle with no replay on hover/resize; reduced-motion immediate-final covered in the reduced-motion project",
+	"src/components/charts/trend-chart.tsx#indirect.consumer":
+		"All five projects: Spending forecast, Surplus / Shortfall and Spending over time marks grow through intermediate geometry once and settle with no replay on hover/resize; reduced-motion immediate-final covered in the reduced-motion project",
+	"src/components/charts/chart-frame.tsx#indirect.consumer":
 		"All five projects: overview and budget graph marks grow through intermediate geometry once and settle with no replay on hover/resize; reduced-motion immediate-final covered in the reduced-motion project",
 	"src/components/table/statement-columns.tsx#table.interaction":
 		"Statement pagination keeps search in the URL and changes row identity; search resets page and survives reload",
@@ -3538,27 +3549,6 @@ export const behaviourCoverage: Record<string, string[]> = {
 	"src/components/ui/pagination.tsx#export.PaginationItem.behaviour": [
 		"Records table: keeps search in the URL and moves between pages",
 	],
-	"src/components/ui/chart.tsx#export.ChartContainer.behaviour": [
-		"chart: legend and keyboard tooltip keep series values and configured colours",
-	],
-	"src/components/ui/chart.tsx#export.ChartStyle.behaviour": [
-		"chart: legend and keyboard tooltip keep series values and configured colours",
-	],
-	"src/components/ui/chart.tsx#export.ChartLegend.behaviour": [
-		"chart: legend and keyboard tooltip keep series values and configured colours",
-	],
-	"src/components/ui/chart.tsx#export.ChartLegendContent.behaviour": [
-		"chart: legend and keyboard tooltip keep series values and configured colours",
-	],
-	"src/components/ui/chart.tsx#export.ChartTooltip.behaviour": [
-		"chart: legend and keyboard tooltip keep series values and configured colours",
-	],
-	"src/components/ui/chart.tsx#export.ChartTooltipContent.behaviour": [
-		"chart: legend and keyboard tooltip keep series values and configured colours",
-	],
-	"src/components/ui/chart.tsx#primitive.consumer": [
-		"chart: legend and keyboard tooltip keep series values and configured colours",
-	],
 	"src/components/ui/sonner.tsx#export.Toaster.behaviour": [
 		"toast: shows success and error toasts",
 	],
@@ -4001,7 +3991,15 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"sparkline endpoint: stays on the final data value after Show trend",
 		"sparkline polyline: draws progressively then settles",
 	],
-	"src/components/charts/chart-intro.ts#indirect.consumer": [
+	"src/components/charts/bar-chart.tsx#indirect.consumer": [
+		"chart intro: overview charts grow real graph marks once and respect reduced motion",
+		"chart intro: budget charts grow real graph marks once and respect reduced motion",
+	],
+	"src/components/charts/trend-chart.tsx#indirect.consumer": [
+		"chart intro: overview charts grow real graph marks once and respect reduced motion",
+		"chart intro: budget charts grow real graph marks once and respect reduced motion",
+	],
+	"src/components/charts/chart-frame.tsx#indirect.consumer": [
 		"chart intro: overview charts grow real graph marks once and respect reduced motion",
 		"chart intro: budget charts grow real graph marks once and respect reduced motion",
 	],
@@ -4056,7 +4054,6 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"src/components/charts/category-movers.tsx#chart.motion": [
 		"biggest changes: a saved Record amount updates the mover row and keeps its drill link and row node",
-		"biggest changes: the mover bar scale transitions on Record update",
 	],
 	"src/components/charts/monthly-budget-usage.tsx#chart.responsive": [
 		"dense overview cards: every card renders values and fits the viewport",
@@ -4247,10 +4244,6 @@ export const behaviourCoverage: Record<string, string[]> = {
 	"src/components/ui/card.tsx#primitive.responsive": [
 		"layout: sections fit the viewport width",
 		"badge, card and empty: render their content",
-	],
-	"src/components/ui/chart.tsx#primitive.responsive": [
-		"layout: sections fit the viewport width",
-		"chart container: renders axes and legend entries",
 	],
 	"src/components/ui/checkbox.tsx#primitive.responsive": [
 		"layout: sections fit the viewport width",
@@ -4526,7 +4519,19 @@ export const scenarioProjects: Record<
 		"light",
 		"reduced-motion",
 	],
-	"src/components/charts/chart-intro.ts#indirect.consumer": [
+	"src/components/charts/bar-chart.tsx#indirect.consumer": [
+		"mobile",
+		"tall-desktop",
+		"light",
+		"reduced-motion",
+	],
+	"src/components/charts/trend-chart.tsx#indirect.consumer": [
+		"mobile",
+		"tall-desktop",
+		"light",
+		"reduced-motion",
+	],
+	"src/components/charts/chart-frame.tsx#indirect.consumer": [
 		"mobile",
 		"tall-desktop",
 		"light",
@@ -4616,7 +4621,6 @@ export const scenarioProjects: Record<
 	"src/components/ui/button.tsx#primitive.responsive": ["mobile"],
 	"src/components/ui/button-group.tsx#primitive.responsive": ["mobile"],
 	"src/components/ui/card.tsx#primitive.responsive": ["mobile"],
-	"src/components/ui/chart.tsx#primitive.responsive": ["mobile"],
 	"src/components/ui/checkbox.tsx#primitive.responsive": ["mobile"],
 	"src/components/ui/empty.tsx#primitive.responsive": ["mobile"],
 	"src/components/ui/field.tsx#primitive.responsive": ["mobile"],

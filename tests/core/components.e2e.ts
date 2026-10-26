@@ -6,6 +6,7 @@ import {
 	scrollWithInput,
 	settledOverlayAlpha,
 } from "../support/assertions"
+import { themedRgb } from "../support/charts"
 import { setDateOnly } from "../support/date-only"
 import { pickOption } from "../support/editors"
 import { expect, test } from "../support/fixtures"
@@ -240,34 +241,6 @@ test.describe("harness primitives section", () => {
 				section,
 				section.locator('[data-slot="field-group"], [data-slot="field-content"]'),
 			)
-		})
-		await test.step("chart: legend and keyboard tooltip keep series values and configured colours", async () => {
-			await page.goto("/?section=primitives", { waitUntil: "commit" })
-			await expect(page.getByTestId("harness-primitives")).toBeVisible()
-			const section = page.getByTestId("primitive-chart")
-			const chart = section.locator('[data-slot="chart"]')
-			await expect(section.getByText("Spending", { exact: true })).toBeVisible()
-			await expect(section.getByText("Income", { exact: true })).toBeVisible()
-			const style = await chart.evaluate(element => ({
-				spend: getComputedStyle(element).getPropertyValue("--color-spend").trim(),
-				income: getComputedStyle(element).getPropertyValue("--color-income").trim(),
-			}))
-			expect(style.spend).not.toBe("")
-			expect(style.income).not.toBe("")
-			expect(style.spend).not.toBe(style.income)
-			const surface = chart.getByRole("application")
-			await surface.scrollIntoViewIfNeeded()
-			await surface.focus()
-			const tooltip = chart.locator(".recharts-tooltip-wrapper")
-			await expect(tooltip).toContainText("Spending")
-			await expect(tooltip).toContainText("Income")
-			await expect(tooltip).toContainText("Aug")
-			await expect(tooltip).toContainText("120")
-			await expect(tooltip).toContainText("200")
-			await surface.press("ArrowRight")
-			await expect(tooltip).toContainText("Sep")
-			await expect(tooltip).toContainText("180")
-			await expect(tooltip).toContainText("160")
 		})
 		await test.step("skeleton: standalone and menu skeletons reserve visible bounded geometry", async () => {
 			await page.goto("/?section=primitives", { waitUntil: "commit" })
@@ -1127,14 +1100,6 @@ test.describe("harness widgets section", () => {
 	test("chart, toast, theme and layout: axes and legend, success and error toasts, dark theme and viewport fit hold", {
 		tag: ["@light"],
 	}, async ({ page }) => {
-		await test.step("chart container: renders axes and legend entries", async () => {
-			await gotoPrimitives(page)
-			const section = page.getByTestId("primitive-chart")
-			await expect(section.locator('[data-slot="chart"] svg')).toBeVisible()
-			await expect(section.getByText("Aug")).toBeVisible()
-			await expect(section.getByText("Spending")).toBeVisible()
-		})
-
 		await test.step("toast: shows success and error toasts", async () => {
 			await gotoPrimitives(page)
 			await page.getByRole("button", { name: "Show success toast" }).click()
@@ -2154,7 +2119,7 @@ test.describe("harness display section", () => {
 			const colour = badges.locator("span[title]")
 			await expect(colour.locator(":scope > span").first()).toHaveCSS(
 				"background-color",
-				"rgb(56, 189, 248)",
+				await themedRgb(page, "#38bdf8"),
 			)
 			await expect(colour).toHaveAttribute("title", /早餐/)
 			const overflow = await badges.evaluate(
@@ -2171,7 +2136,7 @@ test.describe("harness display section", () => {
 			)
 			const coloured = page.getByTestId("colour-icon").locator("div")
 			await expect(coloured).toHaveCSS("width", "32px")
-			await expect(coloured).toHaveCSS("background-color", "rgb(239, 108, 0)")
+			await expect(coloured).toHaveCSS("background-color", await themedRgb(page, "#ef6c00"))
 			await expect(coloured.locator("svg")).toHaveAttribute("width", "16")
 		})
 		await test.step("sparkline fixtures: fit narrow viewports with visible strokes", async () => {

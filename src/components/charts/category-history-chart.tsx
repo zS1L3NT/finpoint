@@ -1,10 +1,12 @@
 "use client"
 
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
-import { useChartIntro } from "@/components/charts/chart-intro"
+import { DateTime } from "luxon"
+import Link from "next/link"
+import { useState } from "react"
+import BarChart from "@/components/charts/bar-chart"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ChartContainer, ChartTooltip } from "@/components/ui/chart"
-import { useIsMobile } from "@/hooks/use-mobile"
+import { useHistory } from "@/history"
+import { themeColor } from "@/lib/palette"
 import { formatCurrency } from "@/lib/utils"
 import { BREAKDOWN_MONTHS, type SpendingHistoryMonth } from "@/logic/dashboard"
 
@@ -22,15 +24,18 @@ export default function CategoryHistoryChart({
 	months,
 	through,
 	monthlyBudgetIds,
+	recordHref,
 	badge,
 }: {
 	months: SpendingHistoryMonth[]
 	through: string | null
 	monthlyBudgetIds: string[] | null
+	recordHref: (ids: string, at: DateTime) => string
 	badge: React.ReactNode
 }) {
-	const intro = useChartIntro(months.find(month => month.current)?.month)
-	const isMobile = useIsMobile()
+	// The breakdown keeps the last month read, so its links stay reachable after the pointer leaves.
+	// Kept by month, not position: the months shift when the displayed month changes.
+	const [picked, setPicked] = useState<string | null>(null)
 	const scopedMonths = months.map(month => ({
 		...month,
 		categories: month.categories
@@ -56,10 +61,11 @@ export default function CategoryHistoryChart({
 		0,
 	)
 	const config = Object.fromEntries(
-		series.map(item => [item.key, { label: item.name, color: item.color }]),
+		series.map(item => [item.key, { label: item.name, color: themeColor(item.color) }]),
 	)
 	const unavailable = chartData.filter(month => !month.included)
 	const selected = chartData.find(month => month.current)
+	const shown = chartData.find(month => month.month === picked) ?? selected
 	const selectedEmpty =
 		selected && Object.values(selected.seriesValues).every(value => value === 0)
 
@@ -74,63 +80,45 @@ export default function CategoryHistoryChart({
 					Share of gross spending vs previous {BREAKDOWN_MONTHS} months · refunds excluded
 					{through &&
 						` · selected days 1–${Number(through.slice(-2))}; prior months in full`}
+					. Hold or hover over a month to list its Categories below.
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="flex min-h-0 flex-1 flex-col gap-3">
 				{totalSpending > 0 ? (
 					<>
-						<div className="relative min-h-60 w-full flex-1 overflow-x-auto overflow-y-hidden sm:min-h-72">
-							<ChartContainer
-								config={config}
-								className="absolute inset-0 h-full w-full aspect-auto [&_.recharts-surface:focus-visible]:outline-2 [&_.recharts-surface:focus-visible]:outline-ring"
-								style={{
-									minWidth: Math.max(320, months.length * (isMobile ? 54 : 64)),
-								}}
-							>
-								<BarChart
-									data={chartData}
-									margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
-									accessibilityLayer
-									stackOffset="expand"
-								>
-									<CartesianGrid vertical={false} />
-									<XAxis
-										dataKey="month"
-										interval={0}
-										height={54}
-										tickLine={false}
-										axisLine={false}
-										tick={<MonthTick data={chartData} />}
-									/>
-									<YAxis
-										type="number"
-										domain={[0, 1]}
-										width={isMobile ? 36 : 44}
-										tickLine={false}
-										axisLine={false}
-										tickFormatter={value =>
-											`${Math.round(Number(value) * 100)}%`
-										}
-									/>
-									<ChartTooltip
-										cursor={{ fill: "var(--muted)", fillOpacity: 0.35 }}
-										content={<HistoryTooltip config={config} />}
-									/>
-									{series.map(item => (
-										<Bar
-											key={item.key}
-											dataKey={`seriesValues.${item.key}`}
-											stackId="spending"
-											name={item.name}
-											fill={item.color}
-											fillOpacity={0.88}
-											maxBarSize={64}
-											{...intro}
-										/>
-									))}
-								</BarChart>
-							</ChartContainer>
-						</div>
+						<BarChart
+							label="Category trend"
+							className="min-h-60 w-full flex-1 sm:min-h-72"
+							labels={chartData.map(month => month.month)}
+							layout="share"
+							series={series.map(item => ({
+								key: item.key,
+								label: item.name,
+								color: themeColor(item.color),
+								opacity: 0.88,
+								values: chartData.map(month => month.seriesValues[item.key] ?? 0),
+							}))}
+							bottom={54}
+							tick={index => <MonthTick month={chartData[index]} />}
+							readout={index => {
+								const month = chartData[index]
+								if (!month) return null
+								return (
+									<>
+										<span className="font-medium">{month.month}</span>
+										<span className="text-muted-foreground tabular-nums">
+											{month.included
+												? `Total ${formatCurrency(monthTotal(month))}`
+												: "Unavailable"}
+										</span>
+									</>
+								)
+							}}
+							onActive={index => {
+								if (index !== null) setPicked(chartData[index]?.month ?? null)
+							}}
+							introKey={months.find(month => month.current)?.month}
+						/>
 					</>
 				) : (
 					<p className="py-10 text-center text-xs text-muted-foreground">
@@ -146,19 +134,9 @@ export default function CategoryHistoryChart({
 					</p>
 				)}
 
-				{series.length > 0 && (
-					<div className="flex flex-wrap gap-x-3 gap-y-2 text-xs text-muted-foreground">
-						{series.map(item => (
-							<span key={item.key} className="flex items-center gap-1.5">
-								<span
-									className="size-2 rounded-sm"
-									style={{ backgroundColor: item.color }}
-								/>
-								{item.name}
-							</span>
-						))}
-					</div>
-				)}
+				{shown && totalSpending > 0 ? (
+					<MonthBreakdown month={shown} config={config} recordHref={recordHref} />
+				) : null}
 				{allSeries.length > visibleSeriesLimit && (
 					<details className="text-xs text-muted-foreground">
 						<summary className="cursor-pointer select-none">
@@ -169,7 +147,7 @@ export default function CategoryHistoryChart({
 								<span key={item.id} className="flex items-center gap-1.5">
 									<span
 										className="size-2 rounded-sm"
-										style={{ backgroundColor: item.color }}
+										style={{ backgroundColor: themeColor(item.color) }}
 									/>
 									{item.name}
 								</span>
@@ -250,118 +228,122 @@ function prepareMonths(months: SpendingHistoryMonth[], series: ChartSeries[]): C
 	})
 }
 
-function MonthTick({
-	x = 0,
-	y = 0,
-	payload,
-	data,
-}: {
-	x?: number
-	y?: number
-	payload?: { value: string }
-	data: ChartMonth[]
-}) {
-	const month = data.find(item => item.month === payload?.value)
+function MonthTick({ month }: { month?: ChartMonth }) {
+	if (!month) return null
 	return (
-		<g transform={`translate(${x},${y})`}>
-			<text textAnchor="middle" className="fill-foreground text-[0.6875rem]">
-				<tspan x={0} dy="1em">
-					{month?.month ?? payload?.value}
+		<text textAnchor="middle" className="fill-foreground">
+			<tspan x={0} dy="1em">
+				{month.month}
+			</tspan>
+			{month.current && (
+				<tspan x={0} dy="1.2em" className="fill-primary">
+					Selected
 				</tspan>
-				{month?.current && (
-					<tspan x={0} dy="1.2em" className="fill-primary">
-						Selected
-					</tspan>
-				)}
-				{month?.included &&
-					Object.values(month.seriesValues).every(value => value === 0) && (
-						<tspan x={0} dy="1.2em" className="fill-muted-foreground">
-							No spending
-						</tspan>
-					)}
-				{month && !month.included && (
-					<tspan x={0} dy="1.2em" className="fill-muted-foreground">
-						Unavailable
-					</tspan>
-				)}
-			</text>
-		</g>
+			)}
+			{month.included && Object.values(month.seriesValues).every(value => value === 0) && (
+				<tspan x={0} dy="1.2em" className="fill-muted-foreground">
+					No spending
+				</tspan>
+			)}
+			{!month.included && (
+				<tspan x={0} dy="1.2em" className="fill-muted-foreground">
+					Unavailable
+				</tspan>
+			)}
+		</text>
 	)
 }
 
-function HistoryTooltip({
-	active,
-	payload,
-	label,
+function monthTotal(month: ChartMonth) {
+	return Object.values(month.seriesValues).reduce((sum, value) => sum + value, 0)
+}
+
+// Like Revolut's Analytics breakdown, each row opens that month's Records for its Categories.
+function MonthBreakdown({
+	month,
 	config,
+	recordHref,
 }: {
-	active?: boolean
-	payload?: { payload?: ChartMonth }[]
-	label?: string
+	month: ChartMonth
 	config: Record<string, { label: string; color: string }>
+	recordHref: (ids: string, at: DateTime) => string
 }) {
-	if (!active || !payload?.length) return null
-	const month = payload[0]?.payload
-	if (!month) return null
-	if (!month.included) {
-		return (
-			<div className="rounded-lg border bg-background px-3 py-2 text-xs shadow-xl">
-				<p className="font-medium">{label}</p>
-				<p className="text-muted-foreground">Unavailable: {month.reason}</p>
-			</div>
-		)
-	}
-	const entries = Object.entries(month.seriesValues).filter(([, value]) => value > 0)
-	const total = entries.reduce((sum, [, value]) => sum + value, 0)
+	const { handlePush } = useHistory()
+	const total = monthTotal(month)
+	const entries = Object.entries(month.seriesValues)
+		.filter(([, value]) => value > 0)
+		.sort(([, a], [, b]) => b - a)
+	const share = (value: number) => (total ? `${((value / total) * 100).toFixed(1)}%` : "0%")
+
 	return (
-		<div className="max-h-72 min-w-48 overflow-y-auto rounded-lg border bg-background px-3 py-2 text-xs shadow-xl">
-			<p className="mb-2 font-medium">
-				{label}
-				{month.current ? " · selected month" : ""}
+		<div
+			role="group"
+			aria-label={`Categories in ${month.month}`}
+			className="grid gap-1 text-xs"
+			aria-live="polite"
+		>
+			<p className="flex justify-between gap-4 pb-1 font-medium">
+				<span>
+					{month.month}
+					{month.current ? " · selected month" : ""}
+				</span>
+				{month.included ? (
+					<span className="tabular-nums">{formatCurrency(total)}</span>
+				) : null}
 			</p>
-			{entries.length === 0 && (
+			{!month.included ? (
+				<p className="text-muted-foreground">Unavailable: {month.reason}</p>
+			) : entries.length === 0 ? (
 				<p className="text-muted-foreground">No spending recorded in this period.</p>
-			)}
-			{entries.map(([key, value]) => {
-				const details = month.seriesDetails[key] ?? []
-				return (
-					<div key={key} className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 py-0.5">
-						<span className="flex min-w-0 items-center gap-2 text-muted-foreground">
-							<span
-								className="size-2 shrink-0 rounded-full"
-								style={{ backgroundColor: config[key]?.color }}
-							/>
-							<span className="truncate">{config[key]?.label ?? key}</span>
-						</span>
-						<span className="font-medium tabular-nums">
-							{formatCurrency(value)} ·{" "}
-							{total ? `${((value / total) * 100).toFixed(1)}%` : "0%"}
-						</span>
-						{details.length > 1 && (
-							<div className="col-span-2 ml-2 mt-1 grid gap-0.5 border-l pl-2">
-								{details.map(item => (
-									<p key={item.id} className="flex justify-between gap-3">
-										<span className="flex min-w-0 items-center gap-2 text-muted-foreground">
-											<span
-												className="size-2 shrink-0 rounded-full"
-												style={{ backgroundColor: item.color }}
-											/>
-											<span className="truncate">{item.name}</span>
-										</span>
-										<span className="tabular-nums">
-											{formatCurrency(item.spending)} ·{" "}
-											{total
-												? `${((item.spending / total) * 100).toFixed(1)}%`
-												: "0%"}
-										</span>
-									</p>
-								))}
+			) : (
+				entries.map(([key, value]) => {
+					const details = month.seriesDetails[key] ?? []
+					return (
+						<Link
+							key={key}
+							href={recordHref(
+								details.map(item => item.id).join(","),
+								DateTime.fromFormat(month.month, "MMM yyyy"),
+							)}
+							onClick={handlePush("overview")}
+							className="grid gap-1 rounded-lg bg-muted/40 px-3 py-2 transition-colors duration-150 ease-out hover:bg-muted active:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+						>
+							<div className="grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-x-3">
+								<span
+									className="size-2.5 rounded-full"
+									style={{ backgroundColor: config[key]?.color }}
+								/>
+								<span className="truncate">{config[key]?.label ?? key}</span>
+								<span className="font-medium tabular-nums">
+									{formatCurrency(value)}
+								</span>
+								<span className="w-12 text-right text-muted-foreground tabular-nums">
+									{share(value)}
+								</span>
 							</div>
-						)}
-					</div>
-				)
-			})}
-			<p className="mt-2 border-t pt-1 font-medium">Total {formatCurrency(total)}</p>
+							{details.length > 1 &&
+								details.map(item => (
+									<div
+										key={item.id}
+										className="grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-x-3 pl-5 text-muted-foreground"
+									>
+										<span
+											className="size-2 rounded-full"
+											style={{ backgroundColor: themeColor(item.color) }}
+										/>
+										<span className="truncate">{item.name}</span>
+										<span className="tabular-nums">
+											{formatCurrency(item.spending)}
+										</span>
+										<span className="w-12 text-right tabular-nums">
+											{share(item.spending)}
+										</span>
+									</div>
+								))}
+						</Link>
+					)
+				})
+			)}
 		</div>
 	)
 }

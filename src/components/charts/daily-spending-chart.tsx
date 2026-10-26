@@ -1,13 +1,10 @@
 import { DateTime } from "luxon"
 import { useRouter } from "next/navigation"
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
-import { useChartIntro } from "@/components/charts/chart-intro"
+import BarChart from "@/components/charts/bar-chart"
 import MonthlyBudgetBadge from "@/components/monthly-budget-badge"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { useHistory } from "@/history"
-import { useIsMobile } from "@/hooks/use-mobile"
-import { formatChartCurrency } from "@/lib/chart-currency"
-import { formatCurrency } from "@/lib/utils"
+import { dayTicks } from "@/lib/chart-days"
+import { themeColor } from "@/lib/palette"
 import { pathMonthlyRecords } from "@/routes"
 
 export type MonthlyBudgetLine = {
@@ -29,15 +26,11 @@ export default function DailySpendingChart({
 	month: string
 	year: number
 }) {
-	const intro = useChartIntro(`${month}-${year}`)
-	const isMobile = useIsMobile()
 	const router = useRouter()
 	const { handlePush } = useHistory()
-	const interval = isMobile ? Math.max(Math.floor(rows.length / 4), 0) : "preserveStartEnd"
-	const openDay = (state: { activeLabel?: number | string } | null) => {
-		if (!state?.activeLabel) return
+	const openDay = (index: number) => {
 		const selected = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
-			.set({ day: Number(state.activeLabel) })
+			.set({ day: Number(rows[index]?.day ?? index + 1) })
 			.toFormat("yyyy-MM-dd")
 		handlePush("overview")()
 		void router.push(
@@ -61,80 +54,28 @@ export default function DailySpendingChart({
 					/>
 				))}
 			</div>
-			<ChartContainer
-				className="h-48 w-full min-w-0 aspect-auto [&_.recharts-surface:focus-visible]:outline-2 [&_.recharts-surface:focus-visible]:outline-ring cursor-pointer sm:h-64"
-				config={Object.fromEntries(
-					monthlyBudgets.map(monthlyBudget => [
-						monthlyBudget.id,
-						{ label: monthlyBudget.name, color: monthlyBudget.color },
-					]),
+			<BarChart
+				label="Spending by day"
+				className="h-48 w-full min-w-0 sm:h-64"
+				labels={rows.map(row => `${month} ${row.day}`)}
+				layout="stack"
+				// Stacked so a day's bar height is its total outflow.
+				series={monthlyBudgets.map(monthlyBudget => ({
+					key: monthlyBudget.id,
+					label: monthlyBudget.name,
+					color: themeColor(monthlyBudget.color),
+					opacity: monthlyBudget.dashed ? 0.55 : 1,
+					values: rows.map(row => row[monthlyBudget.id] ?? 0),
+				}))}
+				ticks={dayTicks(rows.length).map(day => day - 1)}
+				tick={index => (
+					<text textAnchor="middle" dy="1em">
+						{rows[index]?.day}
+					</text>
 				)}
-			>
-				<BarChart
-					data={rows}
-					margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
-					barCategoryGap={isMobile ? 1 : 3}
-					onClick={openDay}
-					style={{ cursor: "pointer" }}
-					accessibilityLayer
-				>
-					<CartesianGrid vertical={false} />
-					<XAxis
-						dataKey="day"
-						interval={interval}
-						height={24}
-						tickMargin={isMobile ? 4 : 8}
-						tickLine={false}
-						axisLine={false}
-					/>
-					<YAxis
-						tickLine={false}
-						axisLine={false}
-						width={isMobile ? 40 : 48}
-						tickFormatter={formatChartCurrency}
-					/>
-					<ChartTooltip
-						cursor={{ fill: "var(--muted)", fillOpacity: 0.6 }}
-						content={
-							<ChartTooltipContent
-								labelFormatter={(label, payload) =>
-									`${month} ${payload[0]?.payload.day ?? label}`
-								}
-								formatter={(value, name, item) => (
-									<div className="flex min-w-40 items-center justify-between gap-4">
-										<span className="flex items-center gap-2 text-muted-foreground">
-											<span
-												className="size-2 shrink-0 rounded-full"
-												style={{ backgroundColor: item.color }}
-											/>
-											{String(name)}
-										</span>
-										<span className="font-medium tabular-nums">
-											{formatCurrency(Number(value))}
-										</span>
-									</div>
-								)}
-							/>
-						}
-					/>
-					{monthlyBudgets.map((monthlyBudget, index) => (
-						// Stacked so a day's bar height is its total outflow; the
-						// 1px card-coloured stroke keeps adjacent segments apart.
-						<Bar
-							key={monthlyBudget.id}
-							dataKey={monthlyBudget.id}
-							name={monthlyBudget.name}
-							stackId="day"
-							fill={monthlyBudget.color}
-							fillOpacity={monthlyBudget.dashed ? 0.55 : 1}
-							stroke="var(--card)"
-							strokeWidth={1}
-							radius={index === monthlyBudgets.length - 1 ? [3, 3, 0, 0] : 0}
-							{...intro}
-						/>
-					))}
-				</BarChart>
-			</ChartContainer>
+				introKey={`${month}-${year}`}
+				onSelect={openDay}
+			/>
 		</div>
 	)
 }

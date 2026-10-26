@@ -1,5 +1,4 @@
 import { useState } from "react"
-import { Bar, BarChart, XAxis, YAxis } from "recharts"
 import { toast } from "sonner"
 import { Alert, AlertAction, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
@@ -26,13 +25,6 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card"
-import {
-	ChartContainer,
-	ChartLegend,
-	ChartLegendContent,
-	ChartTooltip,
-	ChartTooltipContent,
-} from "@/components/ui/chart"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
 	Combobox,
@@ -1047,30 +1039,6 @@ export function PrimitivesSection() {
 						</Field>
 					</FieldSet>
 				</FieldGroup>
-			</div>
-
-			<div data-testid="primitive-chart" className="flex flex-col gap-2">
-				<h3 className="text-xs font-semibold">Chart container</h3>
-				<ChartContainer
-					config={{
-						spend: { label: "Spending", color: "var(--chart-2)" },
-						income: { label: "Income", color: "var(--chart-1)" },
-					}}
-				>
-					<BarChart
-						data={[
-							{ m: "Aug", spend: 120, income: 200 },
-							{ m: "Sep", spend: 180, income: 160 },
-						]}
-					>
-						<XAxis dataKey="m" />
-						<YAxis />
-						<ChartTooltip content={<ChartTooltipContent />} />
-						<ChartLegend content={<ChartLegendContent />} />
-						<Bar dataKey="spend" fill="var(--color-spend)" />
-						<Bar dataKey="income" fill="var(--color-income)" />
-					</BarChart>
-				</ChartContainer>
 			</div>
 
 			<div data-testid="primitive-sonner" className="flex flex-col gap-2">

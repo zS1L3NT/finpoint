@@ -36,6 +36,7 @@ import { useHistory } from "@/history"
 import { useMonthParams } from "@/hooks/use-month-params"
 import { STALE_MONTH_CLASS, useMonthTransition } from "@/hooks/use-month-transition"
 import { useStagedMount } from "@/hooks/use-staged-mount"
+import { themeColor } from "@/lib/palette"
 import { cn, formatCurrency, pluralize } from "@/lib/utils"
 import { getDashboardView, type TrendMonth } from "@/logic/dashboard"
 import { hasWorkspaceActivity, loadDemoWorkspace } from "@/logic/workspace"
@@ -102,6 +103,10 @@ export default function DashboardPage() {
 		dailyMonthlyBudget: dailyBudget,
 	} = view
 	const { period, summary, series, weekday, future_records_count } = data
+	// Everything below shows the loaded data, so it takes the data's own month: while the next
+	// month loads, labels and links stay with the numbers on screen.
+	const dataMonth = data.month ?? month
+	const dataYear = data.year
 	const comparison = data.comparison
 	const paceSeries = paceData.series
 	const paceProjection = paceData.projection
@@ -112,10 +117,10 @@ export default function DashboardPage() {
 		...budget,
 		dashed: budget.id === "unbudgeted",
 	}))
-	const categoryRecordHref = (id: string) =>
+	const categoryRecordHref = (id: string, at?: DateTime) =>
 		pathMonthlyRecords({
-			month,
-			year: String(year),
+			month: at?.toFormat("MMMM") ?? dataMonth,
+			year: String(at?.year ?? dataYear),
 			category_ids: id,
 			effective_spending: "true",
 			...scopeFilters,
@@ -124,8 +129,8 @@ export default function DashboardPage() {
 		handlePush("overview")()
 		router.push(
 			pathMonthlyRecords({
-				month,
-				year: String(year),
+				month: dataMonth,
+				year: String(dataYear),
 				start_date: date,
 				end_date: date,
 				...scopeFilters,
@@ -143,16 +148,16 @@ export default function DashboardPage() {
 				<div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border bg-muted/20 p-4">
 					<div>
 						<p className="text-sm font-semibold">
-							Plan for {month} {year}
+							Plan for {dataMonth} {dataYear}
 						</p>
 						<p className="mt-1 text-xs text-muted-foreground">
-							Set your monthly amounts below. Spending results begin on 1 {month}.
+							Set your monthly amounts below. Spending results begin on 1 {dataMonth}.
 						</p>
 					</div>
 					<Button variant="outline" size="sm" asChild>
 						<Link
 							onClick={handlePush("overview")}
-							href={pathMonthlyRecords({ month, year: String(year) })}
+							href={pathMonthlyRecords({ month: dataMonth, year: String(dataYear) })}
 						>
 							{future_records_count
 								? `Review ${pluralize(future_records_count, "future-dated Record")}`
@@ -172,7 +177,7 @@ export default function DashboardPage() {
 			<div className="flex flex-wrap items-center justify-between gap-2">
 				<div className="min-w-0 flex-1 basis-full sm:basis-auto">
 					{!period.is_future ? (
-						<ReviewLinks data={data} month={month} year={year} />
+						<ReviewLinks data={data} month={dataMonth} year={dataYear} />
 					) : null}
 				</div>
 				<ScopeSelect value={scope} budgets={budgets} onChange={setScope} />
@@ -204,8 +209,8 @@ export default function DashboardPage() {
 							<CashflowChart
 								data={paceSeries}
 								history={paceData.history}
-								month={month}
-								year={year}
+								month={dataMonth}
+								year={dataYear}
 								amount={paceAmount?.amount ?? null}
 								amountLabel={paceAmount?.name ?? null}
 								showProjection={paceProjection.available}
@@ -232,8 +237,8 @@ export default function DashboardPage() {
 								</CardDescription>
 							</div>
 							<MonthlyBudgetDialog
-								month={month}
-								year={year}
+								month={dataMonth}
+								year={dataYear}
 								trigger={
 									<Button variant="outline" size="sm">
 										<IconifyIcon icon="lucide:plus" /> New
@@ -255,8 +260,8 @@ export default function DashboardPage() {
 							edit={budget => (
 								<MonthlyBudgetDialog
 									monthlyBudget={budgets.find(item => item.id === budget.id)}
-									month={month}
-									year={year}
+									month={dataMonth}
+									year={dataYear}
 									trigger={
 										<Button
 											variant="ghost"
@@ -315,6 +320,7 @@ export default function DashboardPage() {
 								months={data.comparison_history}
 								through={period.through}
 								monthlyBudgetIds={scope === "all" ? null : scopedBudgetIds}
+								recordHref={categoryRecordHref}
 								badge={
 									<ScopeLabel
 										scope={scope === "all" ? "Total" : scopeLabel}
@@ -335,14 +341,14 @@ export default function DashboardPage() {
 										Spending calendar
 									</ScopedCardTitle>
 									<CardDescription>
-										Stronger colour means more spending. Select a day to open
-										its Records.
+										Stronger colour means more spending. Select a day to see its
+										total and open its Records.
 									</CardDescription>
 								</CardHeader>
 								<CardContent>
 									<SpendingCalendar
-										month={month}
-										year={year}
+										month={dataMonth}
+										year={dataYear}
 										daily={scopedDaily}
 										through={period.through}
 										onSelect={openDay}
@@ -383,8 +389,8 @@ export default function DashboardPage() {
 								<TotalSpendingChart
 									data={series}
 									history={data.history}
-									month={month}
-									year={year}
+									month={dataMonth}
+									year={dataYear}
 								/>
 							</CardContent>
 						</Card>
@@ -395,15 +401,16 @@ export default function DashboardPage() {
 								<ScopedCardTitle scope="Total">Spending by day</ScopedCardTitle>
 								<CardDescription>
 									Net daily spending across all monthly budgets, including
-									refunds. Select a day to open its Records.
+									refunds. Hold or hover over a day to read it, and click it to
+									open its Records.
 								</CardDescription>
 							</CardHeader>
 							<CardContent>
 								<DailySpendingChart
 									rows={monthlyBudgetDailyData.rows}
 									monthlyBudgets={dailyLines}
-									month={month}
-									year={year}
+									month={dataMonth}
+									year={dataYear}
 								/>
 							</CardContent>
 						</Card>
@@ -411,7 +418,7 @@ export default function DashboardPage() {
 
 					{stage > 4 ? <WeekdayCard weekday={weekday} /> : null}
 					{stage > 5 ? (
-						<InvestmentRow summary={summary} month={month} year={year} />
+						<InvestmentRow summary={summary} month={dataMonth} year={dataYear} />
 					) : null}
 				</>
 			) : null}
@@ -496,7 +503,7 @@ function ScopeSelect({
 							<SelectItem key={budget.id} value={budget.id}>
 								<span
 									className="size-2 rounded-full"
-									style={{ backgroundColor: budget.color }}
+									style={{ backgroundColor: themeColor(budget.color) }}
 								/>
 								{budget.name}
 							</SelectItem>

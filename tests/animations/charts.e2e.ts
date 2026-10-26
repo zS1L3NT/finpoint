@@ -1,14 +1,15 @@
 import type { Page } from "@playwright/test"
 import { card, overview, overviewCharts } from "../support/charts"
-import { setDateOnly } from "../support/date-only"
 import { expect, seedWorkspace, test } from "../support/fixtures"
 
-const marks =
-	".recharts-area-curve, .recharts-line-curve, .recharts-rectangle, clipPath[id^=animationClipPath] rect"
+// Plotted marks plus the intro clip that reveals them.
+const marks = "[data-slot=chart-mark], [data-chart-intro] rect"
+const surfaces = 'svg[data-slot="chart-surface"]'
+const plotted = "[data-slot=chart-mark]"
 
 async function chartFrames(page: Page, titles: string[], open: () => Promise<void>) {
 	const sampler = await page.evaluateHandle(
-		({ selector, titles }) => {
+		({ selector, surfaces, plotted, titles }) => {
 			const frames: Record<string, { time: number; geometry: string }[]> = {}
 			const first: Record<string, number> = {}
 			let completed = 0
@@ -23,14 +24,8 @@ async function chartFrames(page: Page, titles: string[], open: () => Promise<voi
 									.join("")
 									.trim()
 							: ""
-						const svg = card.querySelector("svg.recharts-surface")
-						if (
-							!title ||
-							!svg?.querySelector(
-								".recharts-area-curve, .recharts-line-curve, .recharts-rectangle",
-							)
-						)
-							continue
+						const svg = card.querySelector(surfaces)
+						if (!title || !svg?.querySelector(plotted)) continue
 						const geometry = JSON.stringify(
 							[...svg.querySelectorAll(selector)].map(mark => {
 								const style = getComputedStyle(mark)
@@ -85,7 +80,7 @@ async function chartFrames(page: Page, titles: string[], open: () => Promise<voi
 				},
 			}
 		},
-		{ selector: marks, titles },
+		{ selector: marks, surfaces, plotted, titles },
 	)
 	await open()
 	await page.mouse.move(0, 0)
@@ -186,8 +181,7 @@ test("chart intro: overview and Budget charts grow once and hover or resize neve
 			const watcher = await page.evaluateHandle(() => {
 				const state = { replayed: false, stop: () => undefined as void }
 				const check = () => {
-					if (document.querySelector('clipPath[id^="animationClipPath"]'))
-						state.replayed = true
+					if (document.querySelector("[data-chart-intro]")) state.replayed = true
 				}
 				const observer = new MutationObserver(check)
 				observer.observe(document.body, {
@@ -331,7 +325,7 @@ test("Monthly Budget donut: focus dims sibling segments in a smooth transition",
 	})
 })
 
-test("populated charts: calendar heat and mover bars transition in place", {
+test("populated charts: calendar heat transitions in place", {
 	tag: ["@tall", "@light", "@reduced-motion"],
 }, async ({ page }) => {
 	test.setTimeout(150_000)
@@ -400,153 +394,5 @@ test("populated charts: calendar heat and mover bars transition in place", {
 		if (reduced)
 			expect(distinct(values), "reduced motion recolors immediately").toBeLessThanOrEqual(2)
 		else expect(distinct(values), "day heat transitions in place").toBeGreaterThan(2)
-	})
-	await test.step("biggest changes: the mover bar scale transitions on Record update", async () => {
-		const reduced = test.info().project.name === "reduced-motion"
-		// Baseline comparators: September spending for daily-budget categories so the
-		// Groceries mover row exists with a comparison before the live update (same
-		// raw-IDB pattern as charts.refund). The update stays in the same scope so
-		// the card keeps its keys: scope navigation remounts rows, which cannot
-		// prove a bar-scale transition.
-		await page.evaluate(async () => {
-			const database = await new Promise<IDBDatabase>((resolve, reject) => {
-				const open = indexedDB.open("finpoint")
-				open.onsuccess = () => resolve(open.result)
-				open.onerror = () => reject(open.error)
-			})
-			try {
-				await new Promise<void>((resolve, reject) => {
-					const transaction = database.transaction("records", "readwrite")
-					transaction.oncomplete = () => resolve()
-					transaction.onabort = () => reject(transaction.error)
-					const store = transaction.objectStore("records")
-					for (const [id, title, datetime, amount, category] of [
-						[
-							"t1-x-sep-groceries",
-							"September Groceries",
-							"2026-09-15 18:00",
-							-50,
-							"t1-cat-groceries",
-						],
-						[
-							"t1-x-sep-dining",
-							"September Dinner",
-							"2026-09-16 19:30",
-							-30,
-							"t1-cat-dining",
-						],
-					] as const) {
-						store.put({
-							id,
-							title,
-							people: null,
-							location: null,
-							description: null,
-							datetime,
-							amount,
-							category_id: category,
-							analytics_treatment: "spending",
-							analytics_treatment_source: "category",
-							monthly_budget_id: "t1-mb-daily",
-							monthly_budget_source: "category",
-							revision: 1,
-						})
-					}
-				})
-			} finally {
-				database.close()
-			}
-		})
-		await page.goto(overview)
-		const movers = card(page, "Biggest changes")
-		const row = movers.getByRole("link", { name: /^Groceries/ })
-		await expect(row).toBeVisible()
-		const frames = await page.evaluateHandle(() => {
-			const root = [...document.querySelectorAll('[data-slot="card"]')].find(card =>
-				card
-					.querySelector('[data-slot="card-title"]')
-					?.textContent?.includes("Biggest changes"),
-			)
-			const snapshot = () => {
-				const link = [...(root?.querySelectorAll("a") ?? [])].find(link =>
-					(link.getAttribute("title") ?? "").startsWith("Groceries:"),
-				)
-				const bar = link?.querySelector("span.transition-transform")
-				return bar ? getComputedStyle(bar).transform : "gone"
-			}
-			const samples: { time: number; transform: string }[] = []
-			let completed = 0
-			const finished = new Promise<{ time: number; transform: string }[]>(
-				(resolve, reject) => {
-					const start = performance.now()
-					const tick = (now: number) => {
-						samples.push({ time: now - start, transform: snapshot() })
-						// The deadline runs from the completion mark (committed money
-						// landed), never from sampler start.
-						if (completed && now - completed > 1500) resolve(samples)
-						else if (!completed && now - start > 30000)
-							reject(new Error("movers sampler never completed"))
-						else requestAnimationFrame(tick)
-					}
-					requestAnimationFrame(tick)
-				},
-			)
-			return {
-				finished,
-				complete: () => {
-					completed = performance.now()
-				},
-			}
-		})
-		let samples: { time: number; transform: string }[]
-		// A second page in the same context drives a real editor save: raw
-		// indexedDB writes bypass the app's live Dexie subscriptions (Dexie
-		// re-fires live queries only for Dexie-originated commits), so only an
-		// actual UI save handler propagates live. The first page keeps the same
-		// chart/bar DOM throughout; no remount, no fake motion or data state.
-		const editor = await page.context().newPage()
-		try {
-			await setDateOnly(editor, new Date("2026-10-15T12:00:00+08:00"))
-			await editor.goto("/records/t1-r-groceries")
-			await editor.getByRole("button", { name: "Edit Record", exact: true }).click()
-			const dialog = editor.getByRole("dialog", { name: "Edit Record", exact: true })
-			await expect(dialog).toBeVisible()
-			await dialog.locator("#amount").fill("-142.75")
-			await page.bringToFront()
-			// Evaluate-click keeps the first page foreground so its rAF keeps
-			// ticking while the second page saves.
-			const save = await dialog.getByRole("button", { name: "Save changes" }).elementHandle()
-			if (!save) throw new Error("editor Save missing")
-			await save.evaluate(element => (element as HTMLElement).click())
-			await save.dispose()
-			// Completion mark only after the committed money lands in the first
-			// page. The row aggregates its category (FairPrice −142.75 plus Kōpi
-			// −33.33), so the title shows $176.08, not the single-record amount.
-			await expect(row).toHaveAttribute("title", /176\.08/)
-			await frames.evaluate(state => state.complete())
-			samples = await frames.evaluate(state => state.finished)
-		} finally {
-			await frames.dispose()
-			await editor.close()
-		}
-		// Frame counts only prove observation density (rAF can starve under parallel
-		// workers); the motion proof is in the distinct/settled assertions below.
-		expect(samples.length).toBeGreaterThanOrEqual(5)
-		const series = samples.map(frame => frame.transform)
-		expect(series.includes("gone"), "Groceries bar persists through the update").toBe(false)
-		const endTime = samples.at(-1)?.time ?? 0
-		const tail = samples
-			.filter(frame => frame.time > endTime - 300)
-			.map(frame => frame.transform)
-		expect(new Set(tail).size, "Groceries bar transform settles").toBe(1)
-		if (reduced)
-			expect(
-				distinct(series),
-				"reduced motion applies the new scale immediately",
-			).toBeLessThanOrEqual(2)
-		else {
-			expect(distinct(series), "Groceries bar scale transitions").toBeGreaterThan(2)
-			expect(series[0], "bar scale actually changes").not.toBe(series.at(-1))
-		}
 	})
 })

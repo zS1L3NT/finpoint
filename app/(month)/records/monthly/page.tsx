@@ -30,6 +30,7 @@ import {
 import { STALE_MONTH_CLASS, useMonthTransition } from "@/hooks/use-month-transition"
 import { useRecordEditor } from "@/hooks/use-record-editor"
 import { TREATMENTS } from "@/lib/analytics"
+import { themeColor } from "@/lib/palette"
 import { cn } from "@/lib/utils"
 import { listCategories } from "@/logic/categories"
 import { getMonthlyRecords } from "@/logic/monthly"
@@ -420,7 +421,9 @@ function MonthlyRecordFilters({
 									>
 										<span
 											className="size-2 rounded-full"
-											style={{ backgroundColor: monthlyBudget.color }}
+											style={{
+												backgroundColor: themeColor(monthlyBudget.color),
+											}}
 										/>
 										{monthlyBudget.name}
 									</SelectItem>

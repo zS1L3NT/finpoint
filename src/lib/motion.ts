@@ -19,6 +19,9 @@ export const DURATION = {
 	slow: 0.3,
 } as const
 
+/** Chart data intro, in milliseconds: the marks reveal once per data context. */
+export const CHART_INTRO_MS = 450
+
 export const TRANSITION = {
 	fast: { duration: DURATION.fast, ease: EASE_OUT },
 	base: { duration: DURATION.base, ease: EASE_OUT },

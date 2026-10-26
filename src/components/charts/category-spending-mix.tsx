@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { useHistory } from "@/history"
+import { themeColor } from "@/lib/palette"
 import { formatCurrency } from "@/lib/utils"
 
 export default function CategorySpendingMix({
@@ -48,7 +49,10 @@ export default function CategorySpendingMix({
 						<div className="h-1.5 overflow-hidden rounded-full bg-muted">
 							<div
 								className="h-full rounded-full"
-								style={{ width: `${share}%`, backgroundColor: category.color }}
+								style={{
+									width: `${share}%`,
+									backgroundColor: themeColor(category.color),
+								}}
 							/>
 						</div>
 						{category.refunds > 0 ? (

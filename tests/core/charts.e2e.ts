@@ -1,5 +1,5 @@
 import type { Page } from "@playwright/test"
-import { card, overview, overviewCharts } from "../support/charts"
+import { card, chartTooltip, overview, overviewCharts, themedRgb } from "../support/charts"
 import { getScenario, IDS } from "../support/data"
 import { setDateOnly } from "../support/date-only"
 import { expect, seedWorkspace, test } from "../support/fixtures"
@@ -37,7 +37,7 @@ test("Budget detail: usage tooltip reconciles actual and projected spending even
 	const application = chart.getByRole("application")
 	await application.focus()
 	for (let index = 0; index < 4; index++) await page.keyboard.press("ArrowRight")
-	const tooltip = chart.locator(".recharts-tooltip-wrapper")
+	const tooltip = chart.locator(chartTooltip)
 	await expect(tooltip).toContainText("5 Oct")
 	await expect(tooltip).toContainText("$84.20")
 	for (let index = 0; index < 5; index++) await page.keyboard.press("ArrowRight")
@@ -113,7 +113,7 @@ test("overview charts: every dense chart fits the viewport with usable graph sur
 		if (overviewCharts.includes(title)) {
 			await card.getByRole("application").focus()
 			await page.keyboard.press("ArrowRight")
-			await expect(card.locator(".recharts-tooltip-wrapper")).toBeVisible()
+			await expect(card.locator(chartTooltip)).toBeVisible()
 		}
 	}
 })
@@ -199,6 +199,61 @@ test("dense overview: cards render values and fit, and a long Category name stay
 	})
 })
 
+test("touch charts: a hold reads and follows the finger, and lifting or cancelling clears it without navigating", async ({
+	page,
+	isMobile,
+	browserName,
+}) => {
+	// Raw touch input goes through the Chrome DevTools Protocol, so only Chromium phones run it.
+	test.skip(!isMobile || browserName !== "chromium", "needs Chromium touch input")
+	await seedWorkspace(page)
+	await page.goto(overview)
+	const chart = card(page, "Spending forecast")
+	const surface = chart.getByRole("application")
+	await surface.scrollIntoViewIfNeeded()
+	const box = await surface.boundingBox()
+	if (!box) throw new Error("Spending forecast surface missing")
+	const at = { x: box.x + box.width * 0.4, y: box.y + box.height / 2 }
+	const tooltip = chart.locator(chartTooltip)
+	const touch = await page.context().newCDPSession(page)
+	const send = (
+		type: "touchStart" | "touchMove" | "touchEnd" | "touchCancel",
+		points: { x: number; y: number }[],
+	) => touch.send("Input.dispatchTouchEvent", { type, touchPoints: points })
+	const url = page.url()
+	await test.step("touch chart: a quick tap neither reads nor opens Records", async () => {
+		await send("touchStart", [at])
+		await send("touchEnd", [])
+		await page.waitForTimeout(400)
+		await expect(tooltip).toHaveCount(0)
+		expect(page.url()).toBe(url)
+	})
+	await test.step("touch chart: a hold reads and the reading follows the finger", async () => {
+		await send("touchStart", [at])
+		// Past the 120ms hold.
+		await page.waitForTimeout(300)
+		await expect(tooltip).toBeVisible()
+		const first = await tooltip.textContent()
+		await send("touchMove", [{ x: at.x + box.width * 0.3, y: at.y }])
+		await expect(tooltip).not.toHaveText(first ?? "")
+	})
+	await test.step("touch chart: lifting the finger clears the reading and stays on the page", async () => {
+		await send("touchEnd", [])
+		await expect(tooltip).toHaveCount(0)
+		await page.waitForTimeout(400)
+		expect(page.url()).toBe(url)
+		await expect(tooltip).toHaveCount(0)
+	})
+	await test.step("touch chart: a cancelled hold clears the reading", async () => {
+		await send("touchStart", [at])
+		await page.waitForTimeout(300)
+		await expect(tooltip).toBeVisible()
+		await send("touchCancel", [])
+		await expect(tooltip).toHaveCount(0)
+		expect(page.url()).toBe(url)
+	})
+})
+
 test("populated charts: tooltips stay numeric, drills work by keyboard and a Record save updates the mover amount", {
 	tag: ["@tall", "@light"],
 }, async ({ page }) => {
@@ -222,7 +277,7 @@ test("populated charts: tooltips stay numeric, drills work by keyboard and a Rec
 				await surface.press("ArrowRight")
 				await page.evaluate(() => new Promise(requestAnimationFrame))
 			}
-			const tooltip = chart.locator(".recharts-tooltip-wrapper")
+			const tooltip = chart.locator(chartTooltip)
 			await expect(tooltip, `${title}: tooltip opens by keyboard`).toBeVisible()
 			await expect(tooltip, `${title}: tooltip carries a value`).toContainText(/\$/)
 			const box = await tooltip.boundingBox()
@@ -244,7 +299,7 @@ test("populated charts: tooltips stay numeric, drills work by keyboard and a Rec
 			await surface.press("ArrowRight")
 			await page.evaluate(() => new Promise(requestAnimationFrame))
 		}
-		const tooltip = progress.locator(".recharts-tooltip-wrapper")
+		const tooltip = progress.locator(chartTooltip)
 		await expect(tooltip).toBeVisible()
 		await expect(tooltip).toContainText("5 Oct")
 		await expect(tooltip).toContainText("$84.20")
@@ -255,6 +310,9 @@ test("populated charts: tooltips stay numeric, drills work by keyboard and a Rec
 		const day = calendar.getByRole("button", { name: /^5 October:/ })
 		await day.scrollIntoViewIfNeeded()
 		await day.focus()
+		await page.keyboard.press("Enter")
+		await expect(calendar).toContainText("Mon 5 Oct · $84.20 · 2 Records")
+		await calendar.getByRole("button", { name: "View Records", exact: true }).focus()
 		await page.keyboard.press("Enter")
 		await expect(page).toHaveURL(/start_date=2026-10-05/)
 		await expect(page).toHaveURL(/end_date=2026-10-05/)
@@ -349,12 +407,12 @@ test("populated charts: tooltips stay numeric, drills work by keyboard and a Rec
 			await save.dispose()
 			// Completion mark only after the committed money lands in the first
 			// page. The row aggregates its category (FairPrice −142.75 plus Kōpi
-			// −33.33), so the title shows $176.08, not the single-record amount.
-			await expect(row).toHaveAttribute("title", /176\.08/)
+			// −33.33), so the row shows $176.08, not the single-record amount.
+			await expect(row).toContainText("$176.08")
 		} finally {
 			await editor.close()
 		}
-		await expect(row).toHaveAttribute("title", /176\.08/)
+		await expect(row).toContainText("$176.08")
 		expect(await row.getAttribute("href"), "drill link identity retained").toBe(href)
 		expect(
 			await rowHandle.evaluate(element => element.isConnected),
@@ -415,6 +473,7 @@ test.describe("pinned overview date", () => {
 				calendar.getByRole("button", { name: "16 October: upcoming", exact: true }),
 			).toBeDisabled()
 			await calendar.getByRole("button", { name: /^5 October:/ }).click()
+			await calendar.getByRole("button", { name: "View Records", exact: true }).click()
 			await expect(page).toHaveURL(/start_date=2026-10-05/)
 			await expect(page).toHaveURL(/end_date=2026-10-05/)
 			await expect(
@@ -467,8 +526,9 @@ test.describe("pinned overview date", () => {
 		await test.step("biggest changes: Category change title and drilldown reconcile with the previous month", async () => {
 			await page.goto(overview)
 			const housing = card(page, "Biggest changes").getByRole("link", { name: /Housing/ })
-			await expect(housing).toHaveAttribute("title", "Housing: $0.00 vs $1,400.00 average")
-			await expect(housing).toContainText("−$1,400.00")
+			await expect(housing).toContainText("$0.00")
+			await expect(housing).toContainText("vs $1,400.00 average")
+			await expect(housing).toContainText("▼ $1,400.00")
 			await housing.click()
 			await expect(page).toHaveURL(new RegExp(`category_ids=${IDS.categories.rent}`))
 			await expect(page.getByText("No matching Records", { exact: true })).toBeVisible()
@@ -500,18 +560,6 @@ test.describe("pinned overview date", () => {
 		const budgets = getScenario("populated").tables.monthly_budgets.filter(
 			budget => !budget.archived,
 		)
-		const toRgb = (hex: string) => {
-			const parsed = hex.replace("#", "")
-			const full =
-				parsed.length === 3
-					? parsed
-							.split("")
-							.map(part => part + part)
-							.join("")
-					: parsed
-			const value = Number.parseInt(full, 16)
-			return `rgb(${(value >> 16) & 255}, ${(value >> 8) & 255}, ${value & 255})`
-		}
 		await test.step("Monthly Budget card: hover leaves selection and donut centre unchanged", async () => {
 			await page.goto(overview)
 			const cards = card(page, "Monthly budgets")
@@ -528,7 +576,7 @@ test.describe("pinned overview date", () => {
 					Math.abs(box.width - box.height),
 					`${budget.name} dot stays square`,
 				).toBeLessThanOrEqual(1)
-				await expect(dot).toHaveCSS("background-color", toRgb(budget.color))
+				await expect(dot).toHaveCSS("background-color", await themedRgb(page, budget.color))
 			}
 			const daily = cards.getByRole("button", { name: "Daily", exact: true })
 			const centre = cards.locator('[aria-live="polite"]')
@@ -589,6 +637,7 @@ test.describe("pinned overview date", () => {
 				await calendar
 					.getByRole("button", { name: new RegExp(`^${days} ${month}:`) })
 					.click()
+				await calendar.getByRole("button", { name: "View Records", exact: true }).click()
 				const date = `${year}-${month === "February" ? "02" : month === "April" ? "04" : "09"}-${days}`
 				await expect(page).toHaveURL(new RegExp(`start_date=${date}`))
 				await expect(page.getByText("No matching Records", { exact: true })).toBeVisible()
@@ -615,15 +664,22 @@ test.describe("pinned overview date", () => {
 				const surface = chart.getByRole("application").first()
 				await surface.scrollIntoViewIfNeeded()
 				await surface.focus()
-				const tooltip = chart.locator(".recharts-tooltip-wrapper")
+				const tooltip = chart.locator(chartTooltip)
 				if (title === "Category trend") {
-					for (let index = 0; index < 12; index++) {
-						await surface.press("ArrowRight")
-						await page.evaluate(() => new Promise(requestAnimationFrame))
-					}
-					await expect(tooltip).toContainText("selected month")
-					await expect(tooltip).toContainText("$100.00")
-					await expect(tooltip).toContainText("$117.53")
+					// Reading a month swaps the breakdown list under the bars to that month.
+					const breakdown = chart.getByRole("group", { name: /^Categories in / })
+					await surface.press("Home")
+					await expect(tooltip).toBeVisible()
+					const first = (await tooltip.locator("span").first().textContent()) ?? ""
+					expect(first, "readout names the first month").toMatch(/^[A-Z][a-z]{2} \d{4}$/)
+					await expect(breakdown, "list follows the read month").toHaveAccessibleName(
+						`Categories in ${first}`,
+					)
+					await surface.press("End")
+					await expect(tooltip).toContainText("Total $")
+					await expect(breakdown).toContainText("selected month")
+					await expect(breakdown).toContainText("$100.00")
+					await expect(breakdown).toContainText("$117.53")
 				} else if (title === "Spending by weekday") {
 					await expect(tooltip).toContainText("Average per Monday")
 					await expect(tooltip).toContainText("$92.10")

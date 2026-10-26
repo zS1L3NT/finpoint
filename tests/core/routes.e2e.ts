@@ -1,5 +1,6 @@
 import type { Page } from "@playwright/test"
 import { expectPointerCursor } from "../support/assertions"
+import { chartTooltip } from "../support/charts"
 import { getScenario, IDS, statementRules } from "../support/data"
 import { setDateOnly } from "../support/date-only"
 import { openEditor, pickOption } from "../support/editors"
@@ -916,7 +917,7 @@ test("Spending by weekday: no comparison history renders zero spending without a
 	})
 	await expect(chart).toContainText("No comparison history available.")
 	await chart.getByRole("application").focus()
-	const tooltip = chart.locator(".recharts-tooltip-wrapper")
+	const tooltip = chart.locator(chartTooltip)
 	await expect(tooltip).toContainText("Average per Monday")
 	await expect(tooltip).toContainText("$0.00")
 	await expect(tooltip).not.toContainText("Previous")

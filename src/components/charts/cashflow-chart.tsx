@@ -1,29 +1,10 @@
 import { DateTime } from "luxon"
 import { useRouter } from "next/navigation"
-import {
-	type ActiveDotProps,
-	Area,
-	CartesianGrid,
-	ComposedChart,
-	Line,
-	ReferenceLine,
-	XAxis,
-	YAxis,
-} from "recharts"
-import { useChartIntro } from "@/components/charts/chart-intro"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import TrendChart from "@/components/charts/trend-chart"
 import { useHistory } from "@/history"
-import { useIsMobile } from "@/hooks/use-mobile"
-import { formatChartCurrency } from "@/lib/chart-currency"
 import { dayTicks } from "@/lib/chart-days"
-import { formatCurrency } from "@/lib/utils"
 import type { CashflowHistoryMonth } from "@/logic/dashboard"
 import { pathMonthlyRecords } from "@/routes"
-
-const mobileAmount = new Intl.NumberFormat("en-SG", {
-	notation: "compact",
-	maximumFractionDigits: 0,
-})
 
 export type CashflowPoint = {
 	day: number
@@ -53,35 +34,16 @@ export default function CashflowChart({
 	amountLabel: string | null
 	showProjection: boolean
 }) {
-	const isMobile = useIsMobile()
-	// Animate the intro once per month. Left on, Recharts replays the path
-	// animation on every resize (e.g. each sidebar toggle).
-	const intro = useChartIntro(`${month}-${year}`)
 	const router = useRouter()
 	const { handlePush } = useHistory()
-	const historyLines = history.map(item => ({
-		...item,
-		key: `previous_${item.offset}`,
-		opacity: item.offset === 1 ? 0.6 : 0.3,
-		dash: item.offset === 1 ? "4 4" : "1 5",
-	}))
-	const chartData = Array.from(
-		{ length: Math.max(data.length, ...history.map(item => item.spending.length)) },
-		(_, index) => ({
-			...data[index],
-			day: index + 1,
-			...Object.fromEntries(
-				historyLines.map(item => [item.key, item.spending[index] ?? null]),
-			),
-		}),
-	)
-	const ticks = dayTicks(data.length)
-	const actualChange = colorChange(data, "spending", amount)
-	const projectionChange = colorChange(data, "projected_spending", amount)
-	const openDay = (state: { activeLabel?: number | string } | null) => {
-		if (!state?.activeLabel || Number(state.activeLabel) > data.length) return
+	// Last month only, as a faint dashed comparison line.
+	const previous = history.find(item => item.offset === 1)
+	// Last month's extra days are dropped: the chart has no dates past this month's end.
+	const length = data.length
+	const openDay = (index: number) => {
+		if (index >= data.length) return
 		const selected = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
-			.set({ day: Number(state.activeLabel) })
+			.set({ day: index + 1 })
 			.toFormat("yyyy-MM-dd")
 		handlePush("overview")()
 		void router.push(
@@ -94,20 +56,8 @@ export default function CashflowChart({
 			}),
 		)
 	}
-
-	const tooltip = (
-		<ChartTooltipContent
-			labelFormatter={(_, payload) => `${month} ${payload[0]?.payload.day}`}
-			formatter={(value, name) => (
-				<div className="flex min-w-40 items-center justify-between gap-4">
-					<span className="text-muted-foreground">{seriesLabel(name)}</span>
-					<span className="font-medium tabular-nums">
-						{formatCurrency(Number(value))}
-					</span>
-				</div>
-			)}
-		/>
-	)
+	const values = (field: "spending" | "projected_spending") =>
+		Array.from({ length }, (_, index) => data[index]?.[field] ?? null)
 
 	return (
 		<div className="grid gap-4" aria-label="Cumulative income, spending, and surplus">
@@ -115,327 +65,70 @@ export default function CashflowChart({
 				<p className="mb-2 text-xs font-medium text-muted-foreground">
 					Cumulative spending · SGD
 				</p>
-				<ChartContainer
-					className="h-52 w-full min-w-0 aspect-auto [&_.recharts-surface:focus-visible]:outline-2 [&_.recharts-surface:focus-visible]:outline-ring cursor-pointer sm:h-64"
-					config={{
-						spending: { label: "Usage", color: "var(--color-emerald-500)" },
-						projected_spending: {
-							label: "Usage (projection)",
-							color: "var(--color-amber-400)",
+				<TrendChart
+					label="Cumulative spending by day"
+					className="h-52 w-full min-w-0 sm:h-64"
+					labels={Array.from({ length }, (_, index) => `${month} ${index + 1}`)}
+					ticks={dayTicks(length).map(day => ({ index: day - 1, label: String(day) }))}
+					split={amount ?? undefined}
+					reference={
+						amount === null
+							? null
+							: { value: amount, label: `${amountLabel ?? "Monthly"} amount` }
+					}
+					series={[
+						...(previous
+							? [
+									{
+										key: "previous",
+										label: previous.month,
+										values: Array.from(
+											{ length },
+											(_, index) => previous.spending[index] ?? null,
+										),
+										color: "var(--foreground)",
+										dash: "4 4",
+										opacity: 0.6,
+									},
+								]
+							: []),
+						...(showProjection
+							? [
+									{
+										key: "projected_spending",
+										label: "Usage (projection)",
+										values: values("projected_spending"),
+										color: "var(--color-amber-400)",
+										over: "var(--color-orange-500)",
+										dash: "7 5",
+										fill: 0.12,
+									},
+								]
+							: []),
+						{
+							key: "spending",
+							label: "Usage",
+							values: values("spending"),
+							color: "var(--color-emerald-500)",
+							over: "var(--color-rose-500)",
+							fill: 0.3,
 						},
-					}}
-				>
-					<ComposedChart
-						data={chartData}
-						margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
-						onClick={openDay}
-						style={{ cursor: "pointer" }}
-						accessibilityLayer
-					>
-						<defs>
-							<linearGradient id="actual-line" x1="0" y1="0" x2="1" y2="0">
-								<stop
-									offset={`${actualChange}%`}
-									stopColor="var(--color-emerald-500)"
-								/>
-								<stop
-									offset={`${actualChange}%`}
-									stopColor="var(--color-rose-500)"
-								/>
-							</linearGradient>
-							<linearGradient id="actual-fill" x1="0" y1="0" x2="1" y2="0">
-								<stop
-									offset={`${actualChange}%`}
-									stopColor="var(--color-emerald-500)"
-									stopOpacity={0.18}
-								/>
-								<stop
-									offset={`${actualChange}%`}
-									stopColor="var(--color-rose-500)"
-									stopOpacity={0.18}
-								/>
-							</linearGradient>
-							<linearGradient id="projection-line" x1="0" y1="0" x2="1" y2="0">
-								<stop
-									offset={`${projectionChange}%`}
-									stopColor="var(--color-amber-400)"
-								/>
-								<stop
-									offset={`${projectionChange}%`}
-									stopColor="var(--color-orange-500)"
-								/>
-							</linearGradient>
-							<linearGradient id="projection-fill" x1="0" y1="0" x2="1" y2="0">
-								<stop
-									offset={`${projectionChange}%`}
-									stopColor="var(--color-amber-400)"
-									stopOpacity={0.1}
-								/>
-								<stop
-									offset={`${projectionChange}%`}
-									stopColor="var(--color-orange-500)"
-									stopOpacity={0.12}
-								/>
-							</linearGradient>
-						</defs>
-						<CartesianGrid strokeDasharray="3 3" vertical={false} />
-						<XAxis
-							dataKey="day"
-							ticks={ticks}
-							interval={0}
-							height={24}
-							tickMargin={isMobile ? 4 : 8}
-						/>
-						<YAxis
-							width={isMobile ? 32 : 48}
-							tick={{ fontSize: isMobile ? 10 : 12 }}
-							tickMargin={isMobile ? 2 : 8}
-							tickLine={false}
-							axisLine={false}
-							tickFormatter={
-								isMobile
-									? value =>
-											`${value < 0 ? "−" : ""}${mobileAmount.format(Math.abs(value)).toLowerCase()}`
-									: formatChartCurrency
-							}
-						/>
-						<ReferenceLine y={0} stroke="var(--border)" />
-						{amount !== null ? (
-							<ReferenceLine
-								y={amount}
-								stroke="var(--muted-foreground)"
-								strokeDasharray="4 4"
-								label={{
-									value: `${amountLabel ?? "Monthly"} amount`,
-									position: "insideTopRight",
-									fill: "var(--muted-foreground)",
-									fontSize: 11,
-								}}
-							/>
-						) : null}
-						<ChartTooltip content={tooltip} />
-						{historyLines.map(item => (
-							<Line
-								key={item.key}
-								dataKey={item.key}
-								name={item.month}
-								stroke="var(--foreground)"
-								strokeOpacity={item.opacity}
-								strokeWidth={2}
-								strokeDasharray={item.dash}
-								strokeLinecap="round"
-								dot={false}
-								activeDot={{
-									r: 4,
-									fill: "var(--foreground)",
-									fillOpacity: item.opacity,
-								}}
-								isAnimationActive={false}
-							/>
-						))}
-						<Area
-							key={`actual-${month}-${year}`}
-							{...intro}
-							onAnimationEnd={showProjection ? undefined : intro.onAnimationEnd}
-							dataKey="spending"
-							name="Usage"
-							stroke="url(#actual-line)"
-							fill="url(#actual-fill)"
-							strokeWidth={2.5}
-							dot={false}
-							activeDot={props => (
-								<StatefulActiveDot
-									{...props}
-									field="spending"
-									threshold={amount}
-									within="var(--color-emerald-500)"
-									exceeded="var(--color-rose-500)"
-								/>
-							)}
-						/>
-						{showProjection ? (
-							<Area
-								key={`projection-${month}-${year}`}
-								{...intro}
-								animationBegin={100}
-								dataKey="projected_spending"
-								name="Usage (projection)"
-								stroke="url(#projection-line)"
-								fill="url(#projection-fill)"
-								strokeWidth={2.5}
-								strokeDasharray="7 5"
-								dot={false}
-								connectNulls
-								activeDot={props =>
-									props.payload.spending === null ? (
-										<StatefulActiveDot
-											{...props}
-											field="projected_spending"
-											threshold={amount}
-											within="var(--color-amber-400)"
-											exceeded="var(--color-orange-500)"
-										/>
-									) : null
-								}
-							/>
-						) : null}
-					</ComposedChart>
-				</ChartContainer>
-				<div className="mt-2 flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
-					{historyLines.map(item => (
-						<span key={item.key} className="flex items-center gap-1.5">
-							<svg width="20" height="4" aria-hidden="true">
-								<line
-									x1="1"
-									y1="2"
-									x2="19"
-									y2="2"
-									stroke="var(--foreground)"
-									strokeOpacity={item.opacity}
-									strokeWidth={2}
-									strokeDasharray={item.dash}
-									strokeLinecap="round"
-								/>
-							</svg>
-							{item.month}
-						</span>
-					))}
-					<LegendItem color="bg-emerald-500" label="Usage" />
-					<LegendItem color="bg-rose-500" label="Exceed" />
-					{showProjection ? (
-						<>
-							<LegendItem color="bg-amber-400" label="Usage (projection)" />
-							<LegendItem color="bg-orange-500" label="Exceed (projection)" />
-						</>
-					) : null}
-				</div>
+					]}
+					introKey={`${month}-${year}`}
+					onSelect={openDay}
+				/>
 			</div>
 
-			<details className="rounded-md border px-3 py-2 text-xs">
-				<summary className="cursor-pointer font-medium">Daily chart data</summary>
-				<div className="mt-2 overflow-x-auto">
-					<table className="w-full min-w-120 border-collapse text-right tabular-nums">
-						<thead className="text-muted-foreground">
-							<tr>
-								<th className="border-b py-1 text-left font-medium">Day</th>
-								<th className="border-b py-1 font-medium">Income</th>
-								<th className="border-b py-1 font-medium">Spending</th>
-								{showProjection ? (
-									<th className="border-b py-1 font-medium">Projected</th>
-								) : null}
-								<th className="border-b py-1 font-medium">Surplus</th>
-								<th className="border-b py-1 font-medium">Average spending</th>
-							</tr>
-						</thead>
-						<tbody>
-							{data.map(point => (
-								<tr key={point.day}>
-									<th className="border-b py-1 text-left font-normal">
-										{point.day}
-									</th>
-									<td className="border-b py-1">
-										{currencyOrDash(point.income)}
-									</td>
-									<td className="border-b py-1">
-										{currencyOrDash(point.spending)}
-									</td>
-									{showProjection ? (
-										<td className="border-b py-1">
-											{currencyOrDash(point.projected_spending)}
-										</td>
-									) : null}
-									<td className="border-b py-1">
-										{currencyOrDash(point.surplus)}
-									</td>
-									<td className="border-b py-1">
-										{point.average_spending === null
-											? "—"
-											: formatCurrency(point.average_spending)}
-									</td>
-								</tr>
-							))}
-						</tbody>
-					</table>
-				</div>
-			</details>
 			<p className="text-xs text-muted-foreground">
+				Green shows recorded spending
+				{amount === null ? "" : `, turning red past the ${amountLabel ?? "monthly"} amount`}
+				.
 				{showProjection
-					? "The dashed line extends the current gross spending pace and includes later-dated Records already entered. Select a day to open its Records."
-					: "The solid line shows recorded spending. Select a day to open its Records."}
-				{history.length
-					? " Faint dashed and dotted lines show the previous two months by day of month."
+					? " The dashed amber line extends the current gross spending pace and includes later-dated Records already entered."
 					: ""}
+				{previous ? " The faint dashed line shows last month by day of month." : ""} Hold or
+				hover over a day to read it, and click it to open its Records.
 			</p>
 		</div>
 	)
-}
-
-function StatefulActiveDot({
-	cx,
-	cy,
-	payload,
-	field,
-	threshold,
-	within,
-	exceeded,
-}: ActiveDotProps & {
-	field: "spending" | "projected_spending"
-	threshold: number | null
-	within: string
-	exceeded: string
-}) {
-	if (cx === undefined || cy === undefined) return null
-	const value = Number(payload[field])
-	const color = threshold !== null && value > threshold ? exceeded : within
-
-	return <circle cx={cx} cy={cy} r={5} fill={color} stroke="var(--background)" strokeWidth={2} />
-}
-
-function LegendItem({ color, label }: { color: string; label: string }) {
-	return (
-		<span className="flex items-center gap-1.5">
-			<span className={`size-2 rounded-sm ${color}`} />
-			{label}
-		</span>
-	)
-}
-
-function colorChange(
-	data: CashflowPoint[],
-	field: "spending" | "projected_spending",
-	amount: number | null,
-) {
-	if (amount === null) return 100
-	const points = data.flatMap((point, index) => {
-		const value = point[field]
-		return value === null ? [] : [{ index, value }]
-	})
-	const first = points[0]
-	if (!first) return 100
-	if (first.value > amount) return 0
-
-	for (let index = 1; index < points.length; index += 1) {
-		const previous = points[index - 1]
-		const current = points[index]
-		if (!previous || !current || current.value <= amount) continue
-
-		const change = current.value - previous.value
-		const progress = change > 0 ? (amount - previous.value) / change : 1
-		const crossing = previous.index + (current.index - previous.index) * progress
-		const last = points[points.length - 1]
-		const visibleSpan = last ? last.index - first.index : 0
-
-		return visibleSpan > 0 ? ((crossing - first.index) / visibleSpan) * 100 : 0
-	}
-
-	return 100
-}
-
-function seriesLabel(name: number | string | undefined) {
-	const label = String(name ?? "Value").replaceAll("_", " ")
-	return label.charAt(0).toUpperCase() + label.slice(1)
-}
-
-function currencyOrDash(value: number | null) {
-	return value === null ? "—" : formatCurrency(value)
 }

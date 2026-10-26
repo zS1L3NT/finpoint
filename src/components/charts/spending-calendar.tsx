@@ -1,21 +1,28 @@
 "use client"
 
 import { DateTime } from "luxon"
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
 import { cn, formatCurrency } from "@/lib/utils"
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 const STEPS = 5
 const LEVELS = Array.from({ length: STEPS + 1 }, (_, level) => level)
-// Ink per heat step: steps 3+ are dark fills in both themes; dark mode's
-// step 1 is a light fill, so it needs dark ink.
+// One green whose strength grows with spending: only the cell's fill fades, so the
+// day and amount stay fully opaque. Ink turns dark once the green is strong.
+const STRENGTH = [0, 0.2, 0.38, 0.56, 0.78, 1]
 const INK = [
 	"text-muted-foreground",
-	"text-foreground dark:text-zinc-950",
-	"text-foreground dark:text-white",
-	"text-white",
-	"text-white",
-	"text-white",
+	"text-foreground",
+	"text-foreground",
+	"text-foreground",
+	"text-zinc-950",
+	"text-zinc-950",
 ]
+const heat = (level: number) =>
+	level
+		? `color-mix(in oklab, var(--creative) ${(STRENGTH[level] ?? 1) * 100}%, transparent)`
+		: "var(--muted)"
 
 function compact(value: number) {
 	if (value >= 1000) return `$${(value / 1000).toFixed(1)}k`
@@ -74,6 +81,14 @@ export default function SpendingCalendar({
 	const cap = rampCap(sorted)
 	const step = (value: number) =>
 		value <= 0 ? 0 : Math.min(STEPS, Math.max(1, Math.ceil((value / cap) * STEPS)))
+	// Tapping a day reads it in the strip below; a mouse previews by hovering.
+	const [selected, setSelected] = useState<string | null>(null)
+	const [preview, setPreview] = useState<string | null>(null)
+	// The calendar stays mounted across months, so a day kept from another month is ignored.
+	const inMonth = (key: string | null) =>
+		key?.startsWith(start.toFormat("yyyy-MM-")) ? key : null
+	const shown = inMonth(preview) ?? inMonth(selected)
+	const shownEntry = shown ? byDate.get(shown) : undefined
 	const spendDays = daily.filter(day => day.spending > 0).length
 	const total = daily.reduce((sum, day) => sum + Math.max(day.spending, 0), 0)
 
@@ -106,13 +121,19 @@ export default function SpendingCalendar({
 							title={label}
 							aria-label={label}
 							disabled={future}
-							onClick={() => onSelect(key)}
+							aria-pressed={key === selected}
+							onClick={() => setSelected(key)}
+							onPointerEnter={event => {
+								if (event.pointerType === "mouse" && !future) setPreview(key)
+							}}
+							onPointerLeave={() => setPreview(null)}
 							className={cn(
-								"group relative flex aspect-square min-h-9 cursor-pointer flex-col justify-between rounded-md p-1 text-left transition-[background-color,box-shadow,transform] duration-150 ease-out hover:z-10 hover:scale-[1.04] hover:shadow-md active:scale-[0.97] motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:active:scale-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-default disabled:opacity-40 disabled:hover:scale-100 disabled:hover:shadow-none disabled:active:scale-100 sm:p-1.5",
+								"group relative flex aspect-square min-h-9 cursor-pointer flex-col justify-between rounded-md p-1 text-left ring-offset-2 ring-offset-card transition-[background-color,box-shadow] duration-150 ease-out motion-reduce:transition-none hover:ring-2 hover:ring-foreground/30 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-default disabled:opacity-40 disabled:hover:ring-0 sm:p-1.5",
+								key === selected && "ring-2 ring-foreground hover:ring-foreground",
 								INK[level],
 								future && "border border-dashed bg-transparent",
 							)}
-							style={future ? undefined : { backgroundColor: `var(--heat-${level})` }}
+							style={future ? undefined : { backgroundColor: heat(level) }}
 						>
 							<span className="text-[0.6875rem] leading-none font-medium tabular-nums opacity-80">
 								{index + 1}
@@ -127,16 +148,34 @@ export default function SpendingCalendar({
 				})}
 			</div>
 			<div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
-				<span>
-					{spendDays} spending day{spendDays === 1 ? "" : "s"} · {formatCurrency(total)}
-				</span>
+				{shown ? (
+					<span className="flex min-h-8 items-center gap-3" aria-live="polite">
+						<span className="text-foreground">
+							{DateTime.fromISO(shown).toFormat("ccc d LLL")} ·{" "}
+							<span className="font-medium tabular-nums">
+								{formatCurrency(Math.max(shownEntry?.spending ?? 0, 0))}
+							</span>
+							{shownEntry?.records
+								? ` · ${shownEntry.records} Record${shownEntry.records === 1 ? "" : "s"}`
+								: ""}
+						</span>
+						<Button variant="outline" size="sm" onClick={() => onSelect(shown)}>
+							View Records
+						</Button>
+					</span>
+				) : (
+					<span className="flex min-h-8 items-center">
+						{spendDays} spending day{spendDays === 1 ? "" : "s"} ·{" "}
+						{formatCurrency(total)}
+					</span>
+				)}
 				<span className="flex items-center gap-1.5">
 					$0
 					{LEVELS.map(level => (
 						<span
 							key={level}
 							className="size-3 rounded-sm"
-							style={{ backgroundColor: `var(--heat-${level})` }}
+							style={{ backgroundColor: heat(level) }}
 						/>
 					))}
 					{max > 0 ? `${compact(cap)}${max > cap ? "+" : ""}` : "—"}
