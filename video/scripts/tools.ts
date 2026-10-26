@@ -1,6 +1,5 @@
-// Shared helpers for the video scripts, so a rebuild needs nothing beyond `bun install`: FFmpeg
-// falls back to the copy Remotion ships, Chromium to a system browser, and the app is served from
-// the latest production build when no URL is given.
+// Shared helpers for the video scripts: FFmpeg from PATH, Chromium from Playwright or a system
+// browser, and the app served from the latest production build when no URL is given.
 import { type ChildProcess, spawn, spawnSync } from "node:child_process"
 import { existsSync } from "node:fs"
 import { dirname, resolve } from "node:path"
@@ -8,13 +7,11 @@ import { fileURLToPath } from "node:url"
 
 export const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..")
 
-/** The FFmpeg command line prefix: `ffmpeg` on PATH, else `remotion ffmpeg` from this project. */
+/** The FFmpeg command: `FFMPEG`, else `ffmpeg` on PATH (HyperFrames needs it there too). */
 export function ffmpeg(): string[] {
 	if (process.env.FFMPEG) return [process.env.FFMPEG]
 	if (spawnSync("ffmpeg", ["-version"]).status === 0) return ["ffmpeg"]
-	const remotion = resolve(root, "video/node_modules/.bin/remotion")
-	if (existsSync(remotion)) return [remotion, "ffmpeg"]
-	throw new Error("FFmpeg not found. Run `bun install` in video/, or set FFMPEG.")
+	throw new Error("FFmpeg not found. Install it on PATH, or set FFMPEG.")
 }
 
 export function runFfmpeg(args: string[]) {
@@ -32,12 +29,6 @@ export function chromiumPath(bundled: string): string | undefined {
 	if (process.env.CHROMIUM) return process.env.CHROMIUM
 	if (existsSync(bundled)) return undefined
 	return systemChromium()
-}
-
-/** Remotion's browser flag: `CHROMIUM` or a system install, else Remotion downloads its own. */
-export function remotionBrowser(): string[] {
-	const path = process.env.CHROMIUM ?? systemChromium()
-	return path ? [`--browser-executable=${path}`] : []
 }
 
 /**

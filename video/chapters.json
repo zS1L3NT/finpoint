@@ -1,0 +1,82 @@
+[
+	{
+		"id": "start",
+		"title": "Why Finpoint?",
+		"start": 0
+	},
+	{
+		"id": "model",
+		"title": "Statements, Records and Allocations",
+		"start": 68.96666666666667
+	},
+	{
+		"id": "import",
+		"title": "Importing your bank statements",
+		"start": 142.8
+	},
+	{
+		"id": "allocator",
+		"title": "Meet the Allocator",
+		"start": 209.56666666666666
+	},
+	{
+		"id": "lunch",
+		"title": "Explaining your first purchase",
+		"start": 243
+	},
+	{
+		"id": "split",
+		"title": "Splitting one payment",
+		"start": 282.06666666666666
+	},
+	{
+		"id": "repayment",
+		"title": "Combining payments into one Record",
+		"start": 330.3
+	},
+	{
+		"id": "dashboard",
+		"title": "Where your numbers come from",
+		"start": 364.2
+	},
+	{
+		"id": "pending",
+		"title": "Pending Records",
+		"start": 400.56666666666666
+	},
+	{
+		"id": "pending-statements",
+		"title": "Pending Statements",
+		"start": 471.8666666666667
+	},
+	{
+		"id": "categories",
+		"title": "Categories",
+		"start": 522.6666666666666
+	},
+	{
+		"id": "treatments",
+		"title": "Treatments",
+		"start": 558.5666666666667
+	},
+	{
+		"id": "buckets",
+		"title": "Spending buckets and monthly targets",
+		"start": 605.3666666666667
+	},
+	{
+		"id": "budgets",
+		"title": "Budgets for trips and events",
+		"start": 646.3666666666667
+	},
+	{
+		"id": "sync",
+		"title": "Backups and Google Drive",
+		"start": 679.2333333333333
+	},
+	{
+		"id": "routine",
+		"title": "Your routine",
+		"start": 720.7
+	}
+]

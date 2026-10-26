@@ -1,0 +1,30 @@
+<html data-composition-variables='[{"id":"number","type":"string","label":"Number","default":"01"},{"id":"title","type":"string","label":"Title","default":"Chapter"},{"id":"level","type":"string","label":"Level","default":"The basics"}]'>
+<template>
+	<style>
+		#root { position: absolute; inset: 0; background: var(--night, #08080a); font-family: Inter, sans-serif; color: #fafafa; }
+		#title-wrap { position: absolute; left: 180px; right: 180px; top: 380px; }
+		#title-level { font: 600 30px/1 Inter, sans-serif; letter-spacing: 0.08em; text-transform: uppercase; color: #a594ff; }
+		#title-number { font: 500 30px/1 Inter, sans-serif; color: #71717a; margin-left: 18px; }
+		#title-text { margin-top: 30px; font: 700 112px/1.05 Inter, sans-serif; letter-spacing: -0.035em; }
+		#title-rule { margin-top: 44px; height: 4px; width: 160px; border-radius: 4px; background: #a594ff; transform-origin: 0 50%; }
+	</style>
+	<div id="root" data-composition-id="title" data-width="1920" data-height="1080">
+		<div id="title-wrap">
+			<div><span id="title-level" data-var-text="level">The basics</span><span id="title-number" data-var-text="number">01</span></div>
+			<h1 id="title-text" data-var-text="title">Chapter</h1>
+			<div id="title-rule"></div>
+		</div>
+	</div>
+	<script>
+		const vars = window.__hyperframes.getVariables()
+		document.querySelector("#title-level").textContent = vars.level
+		document.querySelector("#title-number").textContent = vars.number
+		document.querySelector("#title-text").textContent = vars.title
+		const tl = gsap.timeline({ paused: true })
+		tl.fromTo("#title-level, #title-number", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 0.1)
+		tl.fromTo("#title-text", { opacity: 0, y: 28, filter: "blur(10px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.7, ease: "power3.out" }, 0.2)
+		tl.fromTo("#title-rule", { scaleX: 0 }, { scaleX: 1, duration: 0.8, ease: "power3.inOut" }, 0.45)
+		window.__timelines["title"] = tl
+	</script>
+</template>
+</html>

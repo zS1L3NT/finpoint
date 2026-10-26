@@ -1,9 +1,9 @@
 "use client"
 
 import { Play } from "lucide-react"
-import dynamic from "next/dynamic"
 import Link from "next/link"
 import { GuideCheckActions } from "@/components/help/guide-check-actions"
+import GuideFigure from "@/components/help/guide-figure"
 import { Button } from "@/components/ui/button"
 import { type GuideBeat, type GuideChapter, practiceFor, stepOf } from "@/lib/guide"
 import { cn } from "@/lib/utils"
@@ -32,9 +32,6 @@ const destinations = {
 	dashboard: { href: pathDashboard(), label: "Open Dashboard" },
 }
 
-// Pictures render in the browser from the video's own scenes; nothing to show before then.
-const Figure = dynamic(() => import("@/components/help/guide-figure"), { ssr: false })
-
 function Beat({
 	chapter,
 	beat,
@@ -46,7 +43,7 @@ function Beat({
 }) {
 	return (
 		<div className="flex flex-col gap-2.5">
-			<Figure topic={chapter.id} beat={beat.id} />
+			<GuideFigure topic={chapter.id} beat={beat.id} />
 			<p className={cn(compact ? "text-sm leading-6" : "text-[0.9375rem] leading-7")}>
 				{beat.say}
 			</p>

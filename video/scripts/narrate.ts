@@ -11,7 +11,7 @@ import { guideChapters, stepOf } from "../../src/lib/guide"
 import { ffmpeg, root } from "./tools"
 
 const fps = 30
-const audioDir = resolve(root, "public/guide-audio")
+const audioDir = resolve(root, "video/assets/narration")
 const cacheFile = resolve(root, "video/narration.json")
 
 /** Voice and pacing. Changing any of these regenerates every clip. */
@@ -212,7 +212,7 @@ const chapters = guideChapters.map(chapter => {
 			if (!clip) throw new Error(`Missing narration for ${item.file}`)
 			const durationInFrames = Math.ceil(clip.duration * fps)
 			const sentenceParts = clip.parts.slice(item.titleParts)
-			const audio = `guide-audio/${item.file}`
+			const audio = `narration/${item.file}`
 			cues[audio] = item.body.flatMap((tokens, index) => {
 				const part = sentenceParts[index]
 				if (!part) return []
@@ -234,9 +234,12 @@ const chapters = guideChapters.map(chapter => {
 				captions += `${timestamp(segmentStart + part.start)} --> ${timestamp(segmentStart + part.end + 0.2)}\n${text}\n\n`
 			})
 			const step = stepOf(chapter, item.beat.id)
+			const title = item.titleParts ? clip.parts[0] : undefined
 			const segment = {
 				id: item.beat.id,
 				text: item.beat.say,
+				// Where the spoken chapter title ends in this clip, in seconds.
+				...(title ? { titleEnd: title.end } : {}),
 				...(step ? { step: step.number, steps: step.total } : {}),
 				from: cursor - startFrame,
 				durationInFrames,
@@ -266,9 +269,9 @@ writeFileSync(
 		.map(([audio, frames]) => `\t${JSON.stringify(audio)}: ${JSON.stringify(frames)}`)
 		.join(",\n")}\n}\n`,
 )
-writeFileSync(resolve(root, "public/finpoint-guide.vtt"), `${captions.trimEnd()}\n`)
+writeFileSync(resolve(root, "public/guide/finpoint-guide.vtt"), `${captions.trimEnd()}\n`)
 writeFileSync(
-	resolve(root, "public/finpoint-guide-transcript.txt"),
+	resolve(root, "public/guide/transcript.txt"),
 	chapters
 		.map(
 			chapter =>

@@ -6,10 +6,10 @@ import dynamic from "next/dynamic"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { useState } from "react"
-import { accentFor, color } from "@/components/help/film/theme"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import { Button } from "@/components/ui/button"
+import { accentFor, color } from "@/lib/guide-theme"
 import { getVideoChapter } from "@/lib/guide-video"
 import timeline from "@/lib/guide-video-timeline.json"
 import { cn } from "@/lib/utils"
@@ -107,12 +107,12 @@ export default function GuideVideoPage() {
 							</p>
 							<div className="flex gap-2">
 								<Button asChild variant="ghost" size="sm">
-									<a href="/finpoint-guide-transcript.txt" download>
+									<a href="/guide/transcript.txt" download>
 										<FileText /> Full transcript
 									</a>
 								</Button>
 								<Button asChild variant="ghost" size="sm">
-									<a href="/finpoint-guide.vtt" download>
+									<a href="/guide/finpoint-guide.vtt" download>
 										<Captions /> Captions
 									</a>
 								</Button>

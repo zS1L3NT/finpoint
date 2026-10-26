@@ -1,13 +1,12 @@
 "use client"
 
-import { Player, type PlayerRef, Thumbnail } from "@remotion/player"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef } from "react"
 import { toast } from "sonner"
-import { GuideFilm } from "@/components/help/guide-film"
 import { getVideoChapter } from "@/lib/guide-video"
 import timeline from "@/lib/guide-video-timeline.json"
 import { saveVideoPosition } from "@/logic/learning"
 
+/** The rendered guide film (`bun run video:build`), with its captions and chapter marks. */
 export default function GuideVideoPlayer({
 	startFrame,
 	seekVersion,
@@ -17,27 +16,19 @@ export default function GuideVideoPlayer({
 	seekVersion: number
 	onChapterChange: (id: string) => void
 }) {
-	const player = useRef<PlayerRef>(null)
-	const [reducedMotion, setReducedMotion] = useState(false)
+	const video = useRef<HTMLVideoElement>(null)
 	useEffect(() => {
-		const media = window.matchMedia("(prefers-reduced-motion: reduce)")
-		const update = () => setReducedMotion(media.matches)
-		update()
-		media.addEventListener("change", update)
-		return () => media.removeEventListener("change", update)
-	}, [])
-	useEffect(() => {
-		if (seekVersion >= 0) {
-			player.current?.pause()
-			player.current?.seekTo(startFrame)
-		}
+		const element = video.current
+		if (!element || seekVersion < 0) return
+		element.pause()
+		element.currentTime = startFrame / timeline.fps
 	}, [startFrame, seekVersion])
 	useEffect(() => {
-		const instance = player.current
-		if (!instance) return
+		const element = video.current
+		if (!element) return
 		let previous = ""
 		const update = () => {
-			const frame = instance.getCurrentFrame()
+			const frame = element.currentTime * timeline.fps
 			const chapter =
 				timeline.chapters.find(
 					item =>
@@ -49,53 +40,38 @@ export default function GuideVideoPlayer({
 			}
 		}
 		const remember = () => {
-			void saveVideoPosition(instance.getCurrentFrame()).catch(() =>
+			void saveVideoPosition(Math.round(element.currentTime * timeline.fps)).catch(() =>
 				toast.error(
 					"Could not remember the video position. You can still choose a chapter.",
 				),
 			)
 		}
-		instance.addEventListener("frameupdate", update)
-		instance.addEventListener("pause", remember)
+		element.addEventListener("timeupdate", update)
+		element.addEventListener("pause", remember)
 		update()
 		return () => {
-			instance.removeEventListener("frameupdate", update)
-			instance.removeEventListener("pause", remember)
+			element.removeEventListener("timeupdate", update)
+			element.removeEventListener("pause", remember)
 		}
 	}, [onChapterChange])
 	return (
-		<Player
-			ref={player}
-			component={GuideFilm}
-			inputProps={{ reducedMotion }}
-			durationInFrames={timeline.durationInFrames}
-			fps={timeline.fps}
-			compositionWidth={timeline.width}
-			compositionHeight={timeline.height}
-			initialFrame={startFrame}
+		<video
+			ref={video}
+			className="size-full"
+			src={`/guide/finpoint-guide.mp4#t=${(startFrame / timeline.fps).toFixed(2)}`}
+			poster="/guide/poster.jpg"
 			controls
-			showVolumeControls
-			showPosterWhenUnplayed
-			renderPoster={() => (
-				// Before the first play, hold on the chapter's finished title card instead of its
-				// empty opening frame.
-				<Thumbnail
-					component={GuideFilm}
-					inputProps={{ reducedMotion: true }}
-					frameToDisplay={
-						timeline.chapters.some(chapter => chapter.startFrame === startFrame)
-							? startFrame + 60
-							: startFrame
-					}
-					durationInFrames={timeline.durationInFrames}
-					fps={timeline.fps}
-					compositionWidth={timeline.width}
-					compositionHeight={timeline.height}
-					style={{ width: "100%", height: "100%", pointerEvents: "none" }}
-				/>
-			)}
-			style={{ width: "100%", height: "100%" }}
-			acknowledgeRemotionLicense
-		/>
+			preload="metadata"
+			playsInline
+		>
+			<track kind="captions" src="/guide/finpoint-guide.vtt" srcLang="en" label="English" />
+			<track
+				kind="chapters"
+				src="/guide/chapters.vtt"
+				srcLang="en"
+				label="Chapters"
+				default
+			/>
+		</video>
 	)
 }
