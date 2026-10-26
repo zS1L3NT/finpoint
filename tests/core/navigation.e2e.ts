@@ -738,6 +738,7 @@ test("history clearing: cancelled links, sidebar, tabs and chart drills clear or
 		const origin = "/?month=October&year=2026&scope=all"
 		await resetHistory(page, origin)
 		await page.getByRole("button", { name: /^5 October: \$84.20 spent/ }).click()
+		await page.getByRole("button", { name: "View Records", exact: true }).click()
 		await expect(page).toHaveURL(/start_date=2026-10-05/)
 		const back = page.getByRole("button", { name: /^Back to overview$/i })
 		await expect(back).toBeVisible()
@@ -802,6 +803,7 @@ test("Back button: the outgoing page's Back cancels a drill link that is still l
 	const origin = "/?month=October&year=2026&scope=all"
 	await resetHistory(page, origin)
 	await page.getByRole("button", { name: /^5 October: \$84.20 spent/ }).click()
+	await page.getByRole("button", { name: "View Records", exact: true }).click()
 	await expect(page).toHaveURL(/start_date=2026-10-05/)
 	const back = page.getByRole("button", { name: "Back to overview", exact: true })
 	await expect(back).toBeEnabled()
@@ -833,6 +835,7 @@ test("Back button: a history restore while a drill link loads keeps its restored
 	void workspace
 	await resetHistory(page, "/?month=October&year=2026&scope=all")
 	await page.getByRole("button", { name: /^5 October: \$84.20 spent/ }).click()
+	await page.getByRole("button", { name: "View Records", exact: true }).click()
 	await expect(page).toHaveURL(/start_date=2026-10-05/)
 	const monthly = new URL(page.url())
 	const { promise: held, resolve: release } = Promise.withResolvers<void>()

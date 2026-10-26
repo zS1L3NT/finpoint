@@ -4054,7 +4054,6 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"src/components/charts/category-movers.tsx#chart.motion": [
 		"biggest changes: a saved Record amount updates the mover row and keeps its drill link and row node",
-		"biggest changes: the mover bar scale transitions on Record update",
 	],
 	"src/components/charts/monthly-budget-usage.tsx#chart.responsive": [
 		"dense overview cards: every card renders values and fits the viewport",

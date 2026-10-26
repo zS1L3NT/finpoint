@@ -1,5 +1,5 @@
 import type { Page } from "@playwright/test"
-import { card, chartTooltip, overview, overviewCharts } from "../support/charts"
+import { card, chartTooltip, overview, overviewCharts, themedRgb } from "../support/charts"
 import { getScenario, IDS } from "../support/data"
 import { setDateOnly } from "../support/date-only"
 import { expect, seedWorkspace, test } from "../support/fixtures"
@@ -352,12 +352,12 @@ test("populated charts: tooltips stay numeric, drills work by keyboard and a Rec
 			await save.dispose()
 			// Completion mark only after the committed money lands in the first
 			// page. The row aggregates its category (FairPrice −142.75 plus Kōpi
-			// −33.33), so the title shows $176.08, not the single-record amount.
-			await expect(row).toHaveAttribute("title", /176\.08/)
+			// −33.33), so the row shows $176.08, not the single-record amount.
+			await expect(row).toContainText("$176.08")
 		} finally {
 			await editor.close()
 		}
-		await expect(row).toHaveAttribute("title", /176\.08/)
+		await expect(row).toContainText("$176.08")
 		expect(await row.getAttribute("href"), "drill link identity retained").toBe(href)
 		expect(
 			await rowHandle.evaluate(element => element.isConnected),
@@ -471,8 +471,9 @@ test.describe("pinned overview date", () => {
 		await test.step("biggest changes: Category change title and drilldown reconcile with the previous month", async () => {
 			await page.goto(overview)
 			const housing = card(page, "Biggest changes").getByRole("link", { name: /Housing/ })
-			await expect(housing).toHaveAttribute("title", "Housing: $0.00 vs $1,400.00 average")
-			await expect(housing).toContainText("−$1,400.00")
+			await expect(housing).toContainText("$0.00")
+			await expect(housing).toContainText("vs $1,400.00 average")
+			await expect(housing).toContainText("▼ $1,400.00")
 			await housing.click()
 			await expect(page).toHaveURL(new RegExp(`category_ids=${IDS.categories.rent}`))
 			await expect(page.getByText("No matching Records", { exact: true })).toBeVisible()
@@ -504,18 +505,6 @@ test.describe("pinned overview date", () => {
 		const budgets = getScenario("populated").tables.monthly_budgets.filter(
 			budget => !budget.archived,
 		)
-		const toRgb = (hex: string) => {
-			const parsed = hex.replace("#", "")
-			const full =
-				parsed.length === 3
-					? parsed
-							.split("")
-							.map(part => part + part)
-							.join("")
-					: parsed
-			const value = Number.parseInt(full, 16)
-			return `rgb(${(value >> 16) & 255}, ${(value >> 8) & 255}, ${value & 255})`
-		}
 		await test.step("Monthly Budget card: hover leaves selection and donut centre unchanged", async () => {
 			await page.goto(overview)
 			const cards = card(page, "Monthly budgets")
@@ -532,7 +521,7 @@ test.describe("pinned overview date", () => {
 					Math.abs(box.width - box.height),
 					`${budget.name} dot stays square`,
 				).toBeLessThanOrEqual(1)
-				await expect(dot).toHaveCSS("background-color", toRgb(budget.color))
+				await expect(dot).toHaveCSS("background-color", await themedRgb(page, budget.color))
 			}
 			const daily = cards.getByRole("button", { name: "Daily", exact: true })
 			const centre = cards.locator('[aria-live="polite"]')
