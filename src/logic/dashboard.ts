@@ -4,14 +4,16 @@
 import { DateTime } from "luxon"
 import {
 	type AnalyticsMonthRow,
-	type BucketDefaultRow,
-	type BucketRow,
-	type BucketTargetRow,
 	type CategoryRow,
 	db,
+	type MonthlyBudgetAmountRow,
+	type MonthlyBudgetDefaultRow,
+	type MonthlyBudgetRow,
 	type RecordRow,
+	type StatementRow,
 } from "@/data/db"
 import { type AnalyticsRecord, contribution, summarize } from "@/logic/analytics"
+import { defaultAmountFor, isMonthlyBudgetGroup } from "@/logic/monthly-budgets"
 import { expandCategoryIdsForMonthly } from "@/logic/monthly-shared"
 import {
 	type AllocationTally,
@@ -20,7 +22,17 @@ import {
 	tallyAllocations,
 } from "@/logic/pending"
 
-export type DashboardInput = { month: string; year: number; comparison_months?: number }
+export const COMPARISON_MONTHS = 2
+export const BREAKDOWN_MONTHS = 4
+
+export type DashboardInput = { month: string; year: number }
+
+export type CashflowHistoryMonth = {
+	month: string
+	offset: number
+	spending: number[]
+	surplus: number[]
+}
 
 export type SpendingHistoryMonth = {
 	month: string
@@ -32,12 +44,8 @@ export type SpendingHistoryMonth = {
 		name: string
 		color: string
 		spending: number
-		bucket_spending: Record<string, number>
+		monthly_budget_spending: Record<string, number>
 	}[]
-}
-
-function normalizeComparisonMonths(value = 3): number {
-	return Math.min(24, Math.max(1, Math.trunc(Number.isFinite(value) ? value : 3)))
 }
 
 export function monthStart(month: string, year: number): DateTime {
@@ -54,12 +62,12 @@ function toAnalyticsRecords(
 		amount: number
 		datetime: string
 		analytics_treatment: string
-		bucket_id: string | null
+		monthly_budget_id: string | null
 		category_id: string
 	}[],
 	allocatedByRecord: Map<string, AllocationTally>,
 	categories: Map<string, CategoryRow>,
-	buckets: Map<string, BucketRow>,
+	monthlyBudgets: Map<string, MonthlyBudgetRow>,
 ): AnalyticsRecord[] {
 	const items: (AnalyticsRecord | null)[] = rows.map(row => {
 		const entry = allocatedByRecord.get(row.id)
@@ -68,13 +76,15 @@ function toAnalyticsRecords(
 		const parent = category.parent_category_id
 			? (categories.get(category.parent_category_id) ?? null)
 			: null
-		const bucket = row.bucket_id ? (buckets.get(row.bucket_id) ?? null) : null
+		const monthly_budget = row.monthly_budget_id
+			? (monthlyBudgets.get(row.monthly_budget_id) ?? null)
+			: null
 		return {
 			id: row.id,
 			amount: row.amount,
 			datetime: row.datetime,
 			analytics_treatment: row.analytics_treatment,
-			bucket_id: row.bucket_id,
+			monthly_budget_id: row.monthly_budget_id,
 			is_pending: isPendingRecord(row.amount, entry),
 			category: {
 				id: category.id,
@@ -85,15 +95,15 @@ function toAnalyticsRecords(
 			category_parent: parent
 				? { id: parent.id, name: parent.name, icon: parent.icon, color: parent.color }
 				: null,
-			bucket: bucket
+			monthly_budget: monthly_budget
 				? {
-						id: bucket.id,
-						name: bucket.name,
-						color: bucket.color,
-						group: bucket.group,
-						pace_kind: bucket.pace_kind,
-						display_order: bucket.display_order,
-						archived: bucket.archived,
+						id: monthly_budget.id,
+						name: monthly_budget.name,
+						color: monthly_budget.color,
+						group: monthly_budget.group,
+						pace_kind: monthly_budget.pace_kind,
+						display_order: monthly_budget.display_order,
+						archived: monthly_budget.archived,
 					}
 				: null,
 		} satisfies AnalyticsRecord
@@ -111,51 +121,68 @@ const ISO_DAY = "yyyy-MM-dd"
 
 type LoadedTables = {
 	records: RecordRow[]
+	statements: StatementRow[]
+	allocatedStatementIds: Set<string>
 	allocated: Map<string, AllocationTally>
 	categories: Map<string, CategoryRow>
-	buckets: Map<string, BucketRow>
-	bucketRows: BucketRow[]
-	targets: BucketTargetRow[]
-	defaults: BucketDefaultRow[]
+	monthlyBudgets: Map<string, MonthlyBudgetRow>
+	monthlyBudgetRows: MonthlyBudgetRow[]
+	amounts: MonthlyBudgetAmountRow[]
+	defaults: MonthlyBudgetDefaultRow[]
 	coverages: Map<string, AnalyticsMonthRow>
 }
 
 async function loadDashboardTables(): Promise<LoadedTables> {
-	const [allRecords, allocations, coverages, categories, buckets, targets, defaults, pending] =
-		await Promise.all([
-			db.records.toArray(),
-			db.allocations.toArray(),
-			db.analytics_months.toArray(),
-			db.categories.toArray(),
-			db.buckets.toArray(),
-			db.bucket_targets.toArray(),
-			db.bucket_defaults.toArray(),
-			pendingStatementIds(),
-		])
+	const [
+		allRecords,
+		allocations,
+		coverages,
+		categories,
+		monthlyBudgets,
+		amounts,
+		defaults,
+		pending,
+		statements,
+	] = await Promise.all([
+		db.records.toArray(),
+		db.allocations.toArray(),
+		db.analytics_months.toArray(),
+		db.categories.toArray(),
+		db.monthly_budgets.toArray(),
+		db.monthly_budget_amounts.toArray(),
+		db.monthly_budget_defaults.toArray(),
+		pendingStatementIds(),
+		db.statements.toArray(),
+	])
 
 	return {
 		records: allRecords,
+		statements,
+		allocatedStatementIds: new Set(allocations.map(a => a.statement_id)),
 		allocated: tallyAllocations(allocations, pending),
 		categories: new Map(categories.map(c => [c.id, c])),
-		buckets: new Map(buckets.map(b => [b.id, b])),
-		bucketRows: buckets,
-		targets,
+		monthlyBudgets: new Map(monthlyBudgets.map(b => [b.id, b])),
+		monthlyBudgetRows: monthlyBudgets,
+		amounts,
 		defaults,
 		coverages: new Map(coverages.map(c => [c.month, c])),
 	}
 }
 
-/** Bucket ids for a pace/breakdown scope, or null for everything. */
-export function scopeBucketIds(scope: string, buckets: BucketRow[]): string[] | null {
+/** MonthlyBudget ids for a pace/breakdown scope, or null for everything. */
+export function scopeMonthlyBudgetIds(
+	scope: string,
+	monthlyBudgets: MonthlyBudgetRow[],
+): string[] | null {
 	if (scope === "all") return null
-	if (scope === "core" || scope === "outlier" || scope === "other") {
-		return buckets.filter(b => b.group === scope).map(b => b.id)
+	if (isMonthlyBudgetGroup(scope)) {
+		return monthlyBudgets.filter(b => b.group === scope).map(b => b.id)
 	}
 	return [scope]
 }
 
-function inScope(bucketId: string | null, scopeIds: string[] | null): boolean {
-	return scopeIds === null || (bucketId !== null && scopeIds.includes(bucketId))
+function inScope(monthlyBudgetId: string | null, scopeIds: string[] | null): boolean {
+	return scopeIds === null || (monthlyBudgetId !== null && scopeIds.includes(monthlyBudgetId))
 }
 
 function comparisonSummaries(
@@ -164,10 +191,10 @@ function comparisonSummaries(
 	isCurrent: boolean,
 	tables: LoadedTables,
 	scopeIds: string[] | null,
-	comparisonMonths: number,
+	months = COMPARISON_MONTHS,
 ) {
 	const out = []
-	for (let offset = 1; offset <= comparisonMonths; offset++) {
+	for (let offset = 1; offset <= months; offset++) {
 		const month = date.minus({ months: offset }).startOf("month")
 		const coverage = tables.coverages.get(month.toFormat("yyyy-MM-dd"))
 		const endDay = isCurrent
@@ -177,9 +204,14 @@ function comparisonSummaries(
 		const startKey = month.toFormat(ISO_DAY)
 		const endKey = end.toFormat(ISO_DAY)
 		const rows = tables.records.filter(
-			r => inRange(r.datetime, startKey, endKey) && inScope(r.bucket_id, scopeIds),
+			r => inRange(r.datetime, startKey, endKey) && inScope(r.monthly_budget_id, scopeIds),
 		)
-		const items = toAnalyticsRecords(rows, tables.allocated, tables.categories, tables.buckets)
+		const items = toAnalyticsRecords(
+			rows,
+			tables.allocated,
+			tables.categories,
+			tables.monthlyBudgets,
+		)
 		const excluded =
 			(coverage?.excluded_from_comparisons ?? false) ||
 			(coverage?.coverage ?? null) === "incomplete" ||
@@ -204,6 +236,44 @@ function comparisonSummaries(
 	return out
 }
 
+function buildCashflowHistory(
+	date: DateTime,
+	today: DateTime,
+	tables: LoadedTables,
+	scopeIds: string[] | null,
+): CashflowHistoryMonth[] {
+	// Full calendar months, ordered oldest first, independent of the comparison-average window.
+	return comparisonSummaries(date, today, false, tables, scopeIds)
+		.flatMap((month, index) => {
+			if (!month.included) return []
+			let spending = 0
+			let income = 0
+			const cumulative = Array.from(
+				{ length: DateTime.fromISO(month.start).daysInMonth ?? 30 },
+				(_, day) => {
+					const entry = month.summary.daily.find(
+						item => Number(item.date.slice(-2)) === day + 1,
+					)
+					spending += entry?.spending ?? 0
+					income += entry?.income ?? 0
+					return {
+						spending: Math.round(spending * 100) / 100,
+						surplus: Math.round((income - spending) * 100) / 100,
+					}
+				},
+			)
+			return [
+				{
+					month: month.month,
+					offset: index + 1,
+					spending: cumulative.map(point => point.spending),
+					surplus: cumulative.map(point => point.surplus),
+				},
+			]
+		})
+		.reverse()
+}
+
 function buildSpendingHistory(
 	date: DateTime,
 	currentItems: AnalyticsRecord[],
@@ -212,7 +282,7 @@ function buildSpendingHistory(
 	const buildBreakdown = (items: AnalyticsRecord[]) => {
 		const totals = new Map<
 			string,
-			{ name: string; color: string; cents: number; buckets: Record<string, number> }
+			{ name: string; color: string; cents: number; monthlyBudgets: Record<string, number> }
 		>()
 		for (const item of items) {
 			const category = item.category_parent ?? item.category
@@ -222,11 +292,12 @@ function buildSpendingHistory(
 				name: category.name,
 				color: category.color,
 				cents: 0,
-				buckets: {},
+				monthlyBudgets: {},
 			}
 			value.cents += cents
-			const bucket = item.bucket_id ?? "unbucketed"
-			value.buckets[bucket] = (value.buckets[bucket] ?? 0) + cents
+			const monthly_budget = item.monthly_budget_id ?? "unbudgeted"
+			value.monthlyBudgets[monthly_budget] =
+				(value.monthlyBudgets[monthly_budget] ?? 0) + cents
 			totals.set(category.id, value)
 		}
 		return {
@@ -235,8 +306,8 @@ function buildSpendingHistory(
 				name: value.name,
 				color: value.color,
 				spending: value.cents / 100,
-				bucket_spending: Object.fromEntries(
-					Object.entries(value.buckets).map(([id, cents]) => [id, cents / 100]),
+				monthly_budget_spending: Object.fromEntries(
+					Object.entries(value.monthlyBudgets).map(([id, cents]) => [id, cents / 100]),
 				),
 			})),
 		}
@@ -263,8 +334,10 @@ function buildSpendingHistory(
 	]
 }
 
-export async function getDashboard(input: DashboardInput, preloaded?: LoadedTables) {
-	const comparisonMonthCount = normalizeComparisonMonths(input.comparison_months)
+export async function getDashboard(
+	input: DashboardInput & { scope?: string },
+	preloaded?: LoadedTables,
+) {
 	const date = monthStart(input.month, input.year)
 	const today = DateTime.now().startOf("day")
 	const isCurrent = date.hasSame(today, "month")
@@ -283,7 +356,7 @@ export async function getDashboard(input: DashboardInput, preloaded?: LoadedTabl
 		monthRecords,
 		tables.allocated,
 		tables.categories,
-		tables.buckets,
+		tables.monthlyBudgets,
 	)
 
 	const actualRecords = isFuture
@@ -295,30 +368,24 @@ export async function getDashboard(input: DashboardInput, preloaded?: LoadedTabl
 	const summary = summarize(actualRecords)
 	const futureSummary = summarize(futureRecords)
 
-	const comparisonMonths = comparisonSummaries(
-		date,
-		today,
-		isCurrent,
-		tables,
-		null,
-		comparisonMonthCount,
-	)
+	const comparisonMonths = comparisonSummaries(date, today, isCurrent, tables, null)
 
 	const included = comparisonMonths.filter(m => m.included)
 	const comparison = buildComparison(summary, included)
-	const bucketsWithSpending = buildBuckets(
+	const monthlyBudgetsWithSpending = buildMonthlyBudgets(
 		date,
 		summary,
 		included,
-		tables.bucketRows,
-		tables.targets,
+		tables.monthlyBudgetRows,
+		tables.amounts,
 		tables.defaults,
+		input.scope,
 	)
 	const projection = buildProjection(
 		date,
 		summary,
 		futureSummary,
-		bucketsWithSpending,
+		monthlyBudgetsWithSpending,
 		isCurrent,
 		isFuture,
 		actualEnd.day ?? 1,
@@ -328,16 +395,36 @@ export async function getDashboard(input: DashboardInput, preloaded?: LoadedTabl
 		futureSummary,
 		included,
 		date.daysInMonth ?? 30,
-		actualEnd.day,
+		isFuture ? 0 : actualEnd.day,
 		projection.daily_spending,
 	)
 	const categories = buildCategories(summary, included)
 	const historyMonths = isCurrent
-		? comparisonSummaries(date, today, false, tables, null, comparisonMonthCount)
+		? comparisonSummaries(date, today, false, tables, null)
 		: comparisonMonths
-	const comparisonHistory = buildSpendingHistory(date, actualRecords, historyMonths)
+	const comparisonHistory = buildSpendingHistory(
+		date,
+		actualRecords,
+		comparisonSummaries(date, today, false, tables, null, BREAKDOWN_MONTHS),
+	)
+
+	const review = {
+		pending_records: monthRecords.filter(r =>
+			isPendingRecord(r.amount, tables.allocated.get(r.id)),
+		).length,
+		pending_statements: tables.statements.filter(
+			s => s.is_pending === 1 && inRange(s.datetime, monthStartKey, monthEndKey),
+		).length,
+		unallocated_statements: tables.statements.filter(
+			s =>
+				s.is_pending === 0 &&
+				inRange(s.datetime, monthStartKey, monthEndKey) &&
+				!tables.allocatedStatementIds.has(s.id),
+		).length,
+	}
 
 	return {
+		review,
 		month: date.monthLong,
 		year: date.year,
 		period: {
@@ -352,17 +439,19 @@ export async function getDashboard(input: DashboardInput, preloaded?: LoadedTabl
 		},
 		summary,
 		comparison,
-		comparison_months: comparisonMonthCount,
 		comparison_history: comparisonHistory,
+		history: buildCashflowHistory(date, today, tables, null),
 		series,
 		projection,
-		buckets: bucketsWithSpending,
+		monthlyBudgets: monthlyBudgetsWithSpending,
 		categories,
 		weekday: buildWeekday(
 			date,
-			isFuture ? 0 : (date.daysInMonth ?? 30),
+			isFuture ? 0 : isCurrent ? today.day : (date.daysInMonth ?? 30),
 			summary,
 			historyMonths.filter(m => m.included),
+			actualRecords.filter(r => contribution(r.analytics_treatment, r.amount).spending > 0)
+				.length,
 		),
 		future_records_count: futureRecords.length,
 	}
@@ -372,10 +461,8 @@ export async function getPaceView(
 	month: string,
 	year: number,
 	scope: string,
-	comparisonMonths = 3,
 	preloaded?: LoadedTables,
 ) {
-	comparisonMonths = normalizeComparisonMonths(comparisonMonths)
 	const date = monthStart(month, year)
 	const today = DateTime.now().startOf("day")
 	const isCurrent = date.hasSame(today, "month")
@@ -383,19 +470,21 @@ export async function getPaceView(
 	const actualEnd = isCurrent ? today.endOf("day") : date.endOf("month")
 
 	const tables = preloaded ?? (await loadDashboardTables())
-	const scopeIds = scopeBucketIds(scope, tables.bucketRows)
+	const scopeIds = scopeMonthlyBudgetIds(scope, tables.monthlyBudgetRows)
 	const monthStartKey = date.startOf("month").toFormat(ISO_DAY)
 	const monthEndKey = date.endOf("month").toFormat(ISO_DAY)
 	const actualEndKey = actualEnd.toFormat(ISO_DAY)
 
 	const monthRecords = tables.records.filter(
-		r => inRange(r.datetime, monthStartKey, monthEndKey) && inScope(r.bucket_id, scopeIds),
+		r =>
+			inRange(r.datetime, monthStartKey, monthEndKey) &&
+			inScope(r.monthly_budget_id, scopeIds),
 	)
 	const analyticsAll = toAnalyticsRecords(
 		monthRecords,
 		tables.allocated,
 		tables.categories,
-		tables.buckets,
+		tables.monthlyBudgets,
 	)
 
 	const actualRecords = isFuture
@@ -406,33 +495,52 @@ export async function getPaceView(
 
 	const summary = summarize(actualRecords)
 	const futureSummary = summarize(futureRecords)
-	const comparisonSummariesForPace = comparisonSummaries(
-		date,
-		today,
-		isCurrent,
-		tables,
-		scopeIds,
-		comparisonMonths,
-	)
+	const comparisonSummariesForPace = comparisonSummaries(date, today, isCurrent, tables, scopeIds)
 	const included = comparisonSummariesForPace.filter(m => m.included)
 
-	const scopedBucketRows = scopeIds
-		? tables.bucketRows.filter(b => scopeIds.includes(b.id))
-		: tables.bucketRows
-	const bucketsBuilt = buildBuckets(
+	const scopedMonthlyBudgetRows = scopeIds
+		? tables.monthlyBudgetRows.filter(b => scopeIds.includes(b.id))
+		: tables.monthlyBudgetRows
+	const monthlyBudgetsBuilt = buildMonthlyBudgets(
 		date,
 		summary,
 		included,
-		scopedBucketRows,
-		tables.targets,
+		scopedMonthlyBudgetRows,
+		tables.amounts,
 		tables.defaults,
+		scope,
 	)
+	const groupScope = isMonthlyBudgetGroup(scope)
+	const amounts = monthlyBudgetsBuilt.filter(b => b.amount !== null)
+	const pace = groupScope
+		? {
+				id: scope,
+				name: scope.charAt(0).toUpperCase() + scope.slice(1),
+				amount: amounts.length
+					? amounts.reduce((sum, b) => sum + (b.amount ?? 0), 0)
+					: null,
+				spending: summary.spending,
+				pace_kind:
+					monthlyBudgetsBuilt.length &&
+					monthlyBudgetsBuilt.every(b => b.pace_kind === "daily")
+						? "daily"
+						: "none",
+			}
+		: scope === "all"
+			? monthlyBudgetsBuilt.find(
+					b => b.pace_kind === "daily" && b.amount !== null && b.amount >= 0,
+				)
+			: monthlyBudgetsBuilt[0]
 	const projection = buildProjection(
 		date,
 		summary,
 		futureSummary,
-		bucketsBuilt,
-		isCurrent,
+		scope === "all"
+			? monthlyBudgetsBuilt
+			: pace
+				? [{ ...pace, scheduled_spending: futureSummary.spending }]
+				: [],
+		isCurrent && (scope === "all" || pace?.pace_kind === "daily"),
 		isFuture,
 		actualEnd.day ?? 1,
 	)
@@ -441,12 +549,10 @@ export async function getPaceView(
 		futureSummary,
 		included,
 		date.daysInMonth ?? 30,
-		actualEnd.day,
+		isFuture ? 0 : actualEnd.day,
 		projection.daily_spending,
 	)
-	const pace = bucketsBuilt.find(
-		b => b.pace_kind === "daily" && b.target !== null && b.target > 0,
-	)
+	const history = buildCashflowHistory(date, today, tables, scopeIds)
 	const highestSpendingDay = summary.daily.reduce<(typeof summary.daily)[number] | null>(
 		(highest, day) =>
 			day.spending > 0 && (!highest || day.spending > highest.spending) ? day : highest,
@@ -455,19 +561,23 @@ export async function getPaceView(
 
 	return {
 		series,
+		history,
 		projection,
-		paceBucket: pace ? { id: pace.id, name: pace.name, target: pace.target } : null,
+		paceMonthlyBudget: pace ? { id: pace.id, name: pace.name, amount: pace.amount } : null,
+		spending: Math.round(summary.spending * 100) / 100,
+		remaining:
+			pace?.amount == null ? null : Math.round((pace.amount - summary.spending) * 100) / 100,
 		completedMonth:
 			!isCurrent && !isFuture
 				? {
 						spending: Math.round(summary.spending * 100) / 100,
 						spending_per_day:
 							Math.round((summary.spending / (date.daysInMonth ?? 30)) * 100) / 100,
-						target: pace?.target ?? null,
-						target_difference:
-							pace?.target === null || pace?.target === undefined
+						amount: pace?.amount ?? null,
+						amount_difference:
+							pace?.amount === null || pace?.amount === undefined
 								? null
-								: Math.round((pace.target - pace.spending) * 100) / 100,
+								: Math.round((pace.amount - pace.spending) * 100) / 100,
 					}
 				: null,
 		highestSpendingDay: highestSpendingDay
@@ -476,13 +586,13 @@ export async function getPaceView(
 	}
 }
 
-export async function getBucketDaily(
+export async function getMonthlyBudgetDaily(
 	month: string,
 	year: number,
 	preloaded?: LoadedTables,
 ): Promise<{
 	rows: Record<string, number | null>[]
-	buckets: { id: string; name: string; color: string }[]
+	monthlyBudgets: { id: string; name: string; color: string }[]
 }> {
 	const date = monthStart(month, year)
 	const today = DateTime.now().startOf("day")
@@ -493,51 +603,50 @@ export async function getBucketDaily(
 
 	const tables = preloaded ?? (await loadDashboardTables())
 	const monthKey = date.toFormat("yyyy-MM")
-	const active = tables.bucketRows.filter(b => !b.archived)
+	const active = tables.monthlyBudgetRows
 	const spent = new Map<string, number>()
-	const unbucketed = new Map<number, number>()
+	const unbudgeted = new Map<number, number>()
 	for (const record of tables.records) {
 		const day = Number(record.datetime.slice(8, 10))
 		if (record.datetime.slice(0, 7) !== monthKey || day > elapsed) continue
-		const outflow =
-			record.analytics_treatment === "spending" ||
-			(record.analytics_treatment === "automatic" && record.amount < 0)
-				? Math.max(-record.amount, 0)
-				: 0
-		if (outflow <= 0) continue
-		if (record.bucket_id) {
-			spent.set(record.bucket_id, (spent.get(record.bucket_id) ?? 0) + outflow)
-			const key = `${record.bucket_id}|${day}`
+		const outflow = contribution(record.analytics_treatment, record.amount).spending / 100
+		if (outflow === 0) continue
+		if (record.monthly_budget_id) {
+			spent.set(
+				record.monthly_budget_id,
+				(spent.get(record.monthly_budget_id) ?? 0) + outflow,
+			)
+			const key = `${record.monthly_budget_id}|${day}`
 			spent.set(key, (spent.get(key) ?? 0) + outflow)
 		} else {
-			unbucketed.set(day, (unbucketed.get(day) ?? 0) + outflow)
+			unbudgeted.set(day, (unbudgeted.get(day) ?? 0) + outflow)
 		}
 	}
 
-	const buckets = active
-		.filter(b => (spent.get(b.id) ?? 0) > 0)
+	const monthlyBudgets = active
+		.filter(b => spent.has(b.id))
 		.map(b => ({ id: b.id, name: b.name, color: b.color }))
-	if ([...unbucketed.values()].some(v => v > 0)) {
-		buckets.push({ id: "unbucketed", name: "No bucket", color: "#94a3b8" })
+	if (unbudgeted.size > 0) {
+		monthlyBudgets.push({ id: "unbudgeted", name: "Unbudgeted", color: "#94a3b8" })
 	}
 
 	const rows = Array.from({ length: Math.max(daysInMonth, 1) }, (_, i) => {
 		const day = i + 1
 		const point: Record<string, number | null> = { day }
-		for (const bucket of buckets) {
-			point[bucket.id] =
+		for (const monthly_budget of monthlyBudgets) {
+			point[monthly_budget.id] =
 				day > elapsed
 					? null
 					: Math.round(
-							(bucket.id === "unbucketed"
-								? (unbucketed.get(day) ?? 0)
-								: (spent.get(`${bucket.id}|${day}`) ?? 0)) * 100,
+							(monthly_budget.id === "unbudgeted"
+								? (unbudgeted.get(day) ?? 0)
+								: (spent.get(`${monthly_budget.id}|${day}`) ?? 0)) * 100,
 						) / 100
 		}
 		return point
 	})
 
-	return { rows, buckets }
+	return { rows, monthlyBudgets }
 }
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const
@@ -553,6 +662,7 @@ function buildWeekday(
 	daysInMonth: number,
 	summary: ReturnType<typeof summarize>,
 	included: ReturnType<typeof comparisonSummaries>,
+	spendingRecords: number,
 ) {
 	function occurrences(start: DateTime, days: number, weekday: number) {
 		const first = ((weekday - start.weekday + 7) % 7) + 1
@@ -585,7 +695,33 @@ function buildWeekday(
 		}
 	})
 
-	return { stats, comparison_count: included.length }
+	// Only reported with enough observations and a meaningful (>= 15%) gap.
+	const observed = Array.from({ length: daysInMonth }, (_, i) => {
+		const day = date.plus({ days: i })
+		return {
+			weekend: day.weekday >= 6,
+			spending: summary.daily.find(d => d.date === day.toFormat(ISO_DAY))?.spending ?? 0,
+		}
+	})
+	const weekends = observed.filter(d => d.weekend)
+	const weekdays = observed.filter(d => !d.weekend)
+	const average = (days: typeof observed) =>
+		days.reduce((sum, d) => sum + d.spending, 0) / days.length
+	let weekend: { weekend_average: number; weekday_average: number } | null = null
+	if (weekends.length >= 4 && weekdays.length >= 10 && spendingRecords >= 8) {
+		const weekendAverage = average(weekends)
+		const weekdayAverage = average(weekdays)
+		if (
+			Math.abs(weekendAverage - weekdayAverage) >=
+			0.15 * Math.max(weekendAverage, weekdayAverage)
+		)
+			weekend = {
+				weekend_average: Math.round(weekendAverage * 100) / 100,
+				weekday_average: Math.round(weekdayAverage * 100) / 100,
+			}
+	}
+
+	return { stats, comparison_count: included.length, weekend }
 }
 
 function avg(values: (number | null)[]): number | null {
@@ -598,7 +734,10 @@ function buildComparison(
 	summary: ReturnType<typeof summarize>,
 	included: { summary: ReturnType<typeof summarize> }[],
 ) {
-	const result: Record<string, unknown> = { count: included.length }
+	const result = { count: included.length } as { count: number } & Record<
+		"income" | "spending" | "surplus" | "surplus_rate",
+		{ average: number | null; difference: number | null }
+	>
 	for (const field of ["income", "spending", "surplus", "surplus_rate"] as const) {
 		const average = avg(included.map(m => m.summary[field] as number | null))
 		result[field] = {
@@ -676,12 +815,13 @@ function buildProjection(
 	date: DateTime,
 	summary: ReturnType<typeof summarize>,
 	futureSummary: ReturnType<typeof summarize>,
-	buckets: {
+	monthlyBudgets: {
 		pace_kind: string
-		target: number | null
+		amount: number | null
 		spending: number
 		id: string
 		name: string
+		scheduled_spending?: number
 	}[],
 	isCurrent: boolean,
 	isFuture: boolean,
@@ -694,18 +834,19 @@ function buildProjection(
 			projected_spending: null,
 			scheduled_spending: 0,
 			remaining_days: 0,
-			bucket: null,
+			monthly_budget: null,
 		}
 	}
 	const remainingDays = Math.max((date.daysInMonth ?? 30) - elapsedDays, 0)
 	const dailySpending = summary.gross_spending / elapsedDays
-	const paceBucket = buckets.find(
-		b => b.pace_kind === "daily" && b.target !== null && b.target > 0,
+	const paceMonthlyBudget = monthlyBudgets.find(
+		b => b.pace_kind === "daily" && b.amount !== null && b.amount >= 0,
 	)
-	const paceTarget = paceBucket?.target ?? null
-	const futureBuckets = new Map(futureSummary.buckets.map(b => [b.id, b]))
-	const scheduledBucketSpending = paceBucket
-		? Number(futureBuckets.get(paceBucket.id)?.spending ?? 0)
+	const paceAmount = paceMonthlyBudget?.amount ?? null
+	const futureMonthlyBudgets = new Map(futureSummary.monthlyBudgets.map(b => [b.id, b]))
+	const scheduledMonthlyBudgetSpending = paceMonthlyBudget
+		? (paceMonthlyBudget.scheduled_spending ??
+			Number(futureMonthlyBudgets.get(paceMonthlyBudget.id)?.spending ?? 0))
 		: 0
 	return {
 		available: true,
@@ -716,28 +857,34 @@ function buildProjection(
 			) / 100,
 		scheduled_spending: Math.round(futureSummary.spending * 100) / 100,
 		remaining_days: remainingDays,
-		bucket:
-			paceBucket && paceTarget !== null
+		monthly_budget:
+			paceMonthlyBudget && paceAmount !== null
 				? {
-						name: paceBucket.name,
-						spent: paceBucket.spending,
-						target: paceTarget,
+						id: paceMonthlyBudget.id,
+						name: paceMonthlyBudget.name,
+						remaining:
+							paceAmount -
+							paceMonthlyBudget.spending -
+							scheduledMonthlyBudgetSpending,
+						spent: paceMonthlyBudget.spending,
+						amount: paceAmount,
 						projected:
 							Math.round(
-								(paceBucket.spending +
-									scheduledBucketSpending +
-									(paceBucket.spending / elapsedDays) * remainingDays) *
+								(paceMonthlyBudget.spending +
+									scheduledMonthlyBudgetSpending +
+									(paceMonthlyBudget.spending / elapsedDays) * remainingDays) *
 									100,
 							) / 100,
-						usage_pace: Math.round((paceBucket.spending / elapsedDays) * 100) / 100,
-						target_pace:
-							Math.round((paceTarget / (date.daysInMonth ?? 30)) * 100) / 100,
+						usage_pace:
+							Math.round((paceMonthlyBudget.spending / elapsedDays) * 100) / 100,
+						amount_pace:
+							Math.round((paceAmount / (date.daysInMonth ?? 30)) * 100) / 100,
 						recommended_pace: remainingDays
 							? Math.round(
 									Math.max(
-										(paceTarget -
-											paceBucket.spending -
-											scheduledBucketSpending) /
+										(paceAmount -
+											paceMonthlyBudget.spending -
+											scheduledMonthlyBudgetSpending) /
 											remainingDays,
 										0,
 									) * 100,
@@ -748,45 +895,48 @@ function buildProjection(
 	}
 }
 
-function buildBuckets(
+function buildMonthlyBudgets(
 	date: DateTime,
 	summary: ReturnType<typeof summarize>,
 	included: { summary: ReturnType<typeof summarize> }[],
-	bucketRows: BucketRow[],
-	targets: BucketTargetRow[],
-	defaults: BucketDefaultRow[],
+	monthlyBudgetRows: MonthlyBudgetRow[],
+	amounts: MonthlyBudgetAmountRow[],
+	defaults: MonthlyBudgetDefaultRow[],
+	selectedId?: string,
 ) {
-	const current = new Map(summary.buckets.map(b => [b.id, b]))
+	const current = new Map(summary.monthlyBudgets.map(b => [b.id, b]))
 	const baseline = new Map<string, number>()
 	for (const month of included) {
-		for (const bucket of month.summary.buckets) {
-			baseline.set(bucket.id, (baseline.get(bucket.id) ?? 0) + bucket.spending)
+		for (const monthly_budget of month.summary.monthlyBudgets) {
+			baseline.set(
+				monthly_budget.id,
+				(baseline.get(monthly_budget.id) ?? 0) + monthly_budget.spending,
+			)
 		}
 	}
 	for (const [id, total] of baseline) baseline.set(id, total / Math.max(included.length, 1))
 
 	const monthKey = date.toFormat("yyyy-MM-dd")
-	const buckets = bucketRows
-		.filter(b => !b.archived)
+	const monthlyBudgets = monthlyBudgetRows
+		.filter(b => !b.archived || current.has(b.id) || b.id === selectedId)
 		.sort((a, b) => a.display_order - b.display_order)
 	const out = []
-	for (const bucket of buckets) {
-		const override = targets.find(t => t.bucket_id === bucket.id && t.month === monthKey)
-		let target = override ? override.amount : null
-		if (target === undefined) target = null
-		if (override === undefined) {
-			const eligible = defaults
-				.filter(d => d.bucket_id === bucket.id && d.effective_month <= monthKey)
-				.sort((a, b) => (a.effective_month < b.effective_month ? 1 : -1))
-			target = eligible[0]?.amount ?? null
-		}
-		const spending = Number(current.get(bucket.id)?.spending ?? 0)
+	for (const monthly_budget of monthlyBudgets) {
+		const override = amounts.find(
+			t => t.monthly_budget_id === monthly_budget.id && t.month === monthKey,
+		)
+		const amount = override
+			? override.amount
+			: defaultAmountFor(defaults, monthly_budget.id, monthKey)
+		const spending = Number(current.get(monthly_budget.id)?.spending ?? 0)
 		out.push({
-			...bucket,
+			...monthly_budget,
 			spending,
-			target: target === null || target === undefined ? null : Number(target),
-			remaining: target === null || target === undefined ? null : Number(target) - spending,
-			comparison: baseline.has(bucket.id) ? spending - (baseline.get(bucket.id) ?? 0) : null,
+			amount: amount === null || amount === undefined ? null : Number(amount),
+			remaining: amount === null || amount === undefined ? null : Number(amount) - spending,
+			comparison: baseline.has(monthly_budget.id)
+				? spending - (baseline.get(monthly_budget.id) ?? 0)
+				: null,
 		})
 	}
 	return out
@@ -803,7 +953,7 @@ function buildCategories(
 				color: string
 				spending: number
 				records: number
-				bucket_spending: Record<string, number>
+				monthly_budget_spending: Record<string, number>
 			}[]
 		}
 	}[],
@@ -818,17 +968,17 @@ function buildCategories(
 		}
 	}
 	const baseline = new Map<string, number>()
-	const baselineBuckets = new Map<string, Record<string, number>>()
+	const baselineMonthlyBudgets = new Map<string, Record<string, number>>()
 	for (const [id, items] of baselineGroups) {
 		baseline.set(id, items.reduce((s, i) => s + i.spending, 0) / Math.max(included.length, 1))
-		const bucketIds = new Set(items.flatMap(i => Object.keys(i.bucket_spending)))
-		const perBucket: Record<string, number> = {}
-		for (const bucketId of bucketIds) {
-			perBucket[bucketId] =
-				items.reduce((s, i) => s + (i.bucket_spending[bucketId] ?? 0), 0) /
+		const monthlyBudgetIds = new Set(items.flatMap(i => Object.keys(i.monthly_budget_spending)))
+		const perMonthlyBudget: Record<string, number> = {}
+		for (const monthlyBudgetId of monthlyBudgetIds) {
+			perMonthlyBudget[monthlyBudgetId] =
+				items.reduce((s, i) => s + (i.monthly_budget_spending[monthlyBudgetId] ?? 0), 0) /
 				Math.max(included.length, 1)
 		}
-		baselineBuckets.set(id, perBucket)
+		baselineMonthlyBudgets.set(id, perMonthlyBudget)
 	}
 	const ids = new Set([...current.keys(), ...baselineGroups.keys()])
 	return [...ids].map(id => {
@@ -839,17 +989,22 @@ function buildCategories(
 			icon: fallback?.icon ?? "circle-question-mark",
 			color: fallback?.color ?? "#9E9E9E",
 			spending: 0,
+			outflow: 0,
+			refunds: 0,
 			records: 0,
-			bucket_spending: {},
+			monthly_budget_spending: {},
+			monthly_budget_outflow: {},
+			monthly_budget_refunds: {},
+			monthly_budget_records: {},
 		}
 		return {
 			...category,
 			share:
-				summary.spending > 0 && category.spending >= 0
-					? (category.spending / summary.spending) * 100
+				summary.gross_spending > 0
+					? (category.outflow / summary.gross_spending) * 100
 					: null,
 			comparison: baseline.has(id) ? category.spending - (baseline.get(id) ?? 0) : null,
-			baseline_bucket_spending: baselineBuckets.get(id) ?? {},
+			baseline_monthly_budget_spending: baselineMonthlyBudgets.get(id) ?? {},
 		}
 	})
 }
@@ -866,8 +1021,13 @@ export type TrendMonth = {
 	partial: boolean
 }
 
-/** Income vs spending for the trailing `count` months ending at the selected month. */
-function buildTrend(date: DateTime, today: DateTime, tables: LoadedTables, count = 12) {
+/**
+ * Income vs spending for the selected month and the two months before it (the same
+ * window the comparison text averages over). While the
+ * selected month is still running, every month is cut at the same day of the month, so the
+ * sparkline compares like with like (as the comparison text does) instead of ending in a cliff.
+ */
+function buildTrend(date: DateTime, today: DateTime, tables: LoadedTables) {
 	const byMonth = new Map<string, RecordRow[]>()
 	for (const record of tables.records) {
 		const key = record.datetime.slice(0, 7)
@@ -876,17 +1036,23 @@ function buildTrend(date: DateTime, today: DateTime, tables: LoadedTables, count
 		else byMonth.set(key, [record])
 	}
 	const todayKey = today.toFormat(ISO_DAY)
+	const toDate = date.hasSame(today, "month")
 	const months: TrendMonth[] = []
-	for (let offset = count - 1; offset >= 0; offset--) {
+	for (let offset = COMPARISON_MONTHS; offset >= 0; offset--) {
 		const month = date.minus({ months: offset }).startOf("month")
 		if (month > today) continue
 		const key = month.toFormat("yyyy-MM")
 		const partial = month.hasSame(today, "month")
+		const cutoff = toDate
+			? month.set({ day: Math.min(today.day, month.daysInMonth ?? 28) }).toFormat(ISO_DAY)
+			: partial
+				? todayKey
+				: null
 		const rows = (byMonth.get(key) ?? []).filter(
-			r => !partial || r.datetime.slice(0, 10) <= todayKey,
+			r => cutoff === null || r.datetime.slice(0, 10) <= cutoff,
 		)
 		const summary = summarize(
-			toAnalyticsRecords(rows, tables.allocated, tables.categories, tables.buckets),
+			toAnalyticsRecords(rows, tables.allocated, tables.categories, tables.monthlyBudgets),
 		)
 		months.push({
 			key,
@@ -907,24 +1073,68 @@ function buildTrend(date: DateTime, today: DateTime, tables: LoadedTables, count
  * Everything the Overview tab renders, read from one table load. The page used
  * to run three live queries that each scanned every table on every change.
  */
-export async function getDashboardView(input: DashboardInput) {
+export async function getDashboardView(input: DashboardInput & { scope?: string }) {
 	const tables = await loadDashboardTables()
 	const dashboard = await getDashboard(input, tables)
-	const dailyBucket =
-		dashboard.buckets.find(bucket => bucket.pace_kind === "daily") ??
-		dashboard.buckets.find(bucket => bucket.name.toLowerCase() === "daily") ??
+	const dailyMonthlyBudget =
+		dashboard.monthlyBudgets.find(monthly_budget => monthly_budget.pace_kind === "daily") ??
+		dashboard.monthlyBudgets.find(
+			monthly_budget => monthly_budget.name.toLowerCase() === "daily",
+		) ??
 		null
-	const [pace, bucketDaily] = await Promise.all([
+	const scope =
+		input.scope && (isMonthlyBudgetGroup(input.scope) || tables.monthlyBudgets.has(input.scope))
+			? input.scope
+			: "all"
+	const selectedBudget = tables.monthlyBudgets.get(scope)
+	const scopedBudgetIds = scopeMonthlyBudgetIds(scope, tables.monthlyBudgetRows)
+	const scopeLabel =
+		scope === "all"
+			? "All spending"
+			: isMonthlyBudgetGroup(scope)
+				? scope.charAt(0).toUpperCase() + scope.slice(1)
+				: (selectedBudget?.name ?? "Monthly budget")
+	const scopeFilters = {
+		monthly_budget_id: selectedBudget?.id,
+		monthly_budget_group: isMonthlyBudgetGroup(scope) ? scope : undefined,
+	}
+	const scoped =
+		scope === "all"
+			? dashboard
+			: await getDashboard(input, {
+					...tables,
+					records: tables.records.filter(r =>
+						inScope(r.monthly_budget_id, scopedBudgetIds),
+					),
+				})
+
+	const [pace, monthlyBudgetDaily] = await Promise.all([
 		getPaceView(
 			input.month,
 			input.year,
-			dailyBucket?.id ?? "all",
-			dashboard.comparison_months,
+			scope === "all" ? (dailyMonthlyBudget?.id ?? "all") : scope,
 			tables,
 		),
-		getBucketDaily(input.month, input.year, tables),
+		getMonthlyBudgetDaily(input.month, input.year, tables),
 	])
+
 	const date = monthStart(input.month, input.year)
 	const trend = buildTrend(date, DateTime.now().startOf("day"), tables)
-	return { dashboard, pace, bucketDaily, dailyBucketId: dailyBucket?.id ?? null, trend }
+
+	return {
+		dashboard,
+		pace,
+		monthlyBudgetDaily,
+		trend,
+		scope,
+		scopedBudgetIds,
+		scopedCategories: scoped.categories,
+		scopedComparisonCount: scoped.comparison.count,
+		scopedDaily: scoped.summary.daily,
+		scopeLabel,
+		scopeColor: selectedBudget?.color,
+		scopeFilters,
+		paceFilters: scope === "all" ? { monthly_budget_id: dailyMonthlyBudget?.id } : scopeFilters,
+		dailyMonthlyBudget,
+	}
 }

@@ -11,9 +11,6 @@ export const EASE_OUT = [0.23, 1, 0.32, 1] as const
 /** Strong ease-in-out: things already on screen moving to a new place. */
 export const EASE_IN_OUT = [0.77, 0, 0.175, 1] as const
 
-/** iOS-like drawer curve for edge sheets. */
-export const EASE_DRAWER = [0.32, 0.72, 0, 1] as const
-
 /** Durations in seconds. UI motion stays under 300ms; frequent actions sit at the low end. */
 export const DURATION = {
 	instant: 0.12,
@@ -21,6 +18,9 @@ export const DURATION = {
 	base: 0.22,
 	slow: 0.3,
 } as const
+
+/** Chart data intro, in milliseconds: the marks reveal once per data context. */
+export const CHART_INTRO_MS = 450
 
 export const TRANSITION = {
 	fast: { duration: DURATION.fast, ease: EASE_OUT },
@@ -37,18 +37,6 @@ export const SPRING = {
 } satisfies Record<string, Transition>
 
 /** The shortest row any table renders (a compact row, ~37px), used to count rows on screen. */
-const SHORTEST_ROW = 34
-
-/**
- * How many rows cascade in on arrival: every row that can fit on this screen, plus a couple of
- * spare. Anything past that is below the fold, so it appears with the page: capping only the
- * delay would make every remaining row start fading in at once.
- */
-export const rowCascadeLimit = () =>
-	typeof window === "undefined" ? 24 : Math.ceil(window.innerHeight / SHORTEST_ROW) + 2
-
-/** The whole cascade lands within this window however tall the screen, so big screens stay quick. */
-const CASCADE_SPAN = { cascade: 0.5, refilter: 0.3 }
 
 /**
  * How a table's rows enter:
@@ -59,25 +47,51 @@ const CASCADE_SPAN = { cascade: 0.5, refilter: 0.3 }
  */
 export type RowEntrance = "cascade" | "refilter" | "fade"
 
-/** Motion props for a table row (or its group header); rows past the fold do not animate. */
+/** Per-row timings of the table entrance, in seconds. */
+const ROW_FADE_DURATION = 0.18
+const ROW_REFILTER_DURATION = 0.24
+const ROW_CASCADE_DURATION = 0.28
+/** Compress the stagger smoothly so every item enters, even in very long lists. */
+const cascadeDelay = (index: number) => (0.45 * index) / (index + 15)
+const ROW_REFILTER_RISE = 6
+const ROW_CASCADE_RISE = 10
+
+/** Motion props for every table row (or its group header), with a bounded stagger. */
 export const rowEnter = (index: number, entrance: RowEntrance) => {
-	const limit = rowCascadeLimit()
-	if (index >= limit) return { initial: false as const }
 	if (entrance === "fade") {
 		return {
 			initial: { opacity: 0 },
-			animate: { opacity: 1 },
-			transition: { duration: 0.18, ease: EASE_OUT },
+			animate: { opacity: 1, y: 0 },
+			transition: { duration: ROW_FADE_DURATION, ease: EASE_OUT },
 		}
 	}
 	const refilter = entrance === "refilter"
 	return {
-		initial: { opacity: 0, y: refilter ? 6 : 10 },
+		initial: { opacity: 0, y: refilter ? ROW_REFILTER_RISE : ROW_CASCADE_RISE },
 		animate: { opacity: 1, y: 0 },
 		transition: {
-			duration: refilter ? 0.24 : 0.34,
+			duration: refilter ? ROW_REFILTER_DURATION : ROW_CASCADE_DURATION,
 			ease: EASE_OUT,
-			delay: index * Math.min(refilter ? 0.02 : 0.03, CASCADE_SPAN[entrance] / limit),
+			delay: cascadeDelay(index) * (refilter ? 2 / 3 : 1),
 		},
 	}
 }
+
+/** Motion props for a card in a grid: a short rise with the same bounded cascade as rows. */
+export const cardEnter = (index: number) => ({
+	initial: { opacity: 0, y: 6 },
+	animate: { opacity: 1, y: 0 },
+	transition: { ...TRANSITION.base, delay: cascadeDelay(index) },
+})
+
+/** Motion props for a block that collapses to nothing: height and margin close together. */
+export const COLLAPSE_MOTION = {
+	initial: { opacity: 0, height: 0, marginTop: -16 },
+	animate: { opacity: 1, height: "auto", marginTop: 0 },
+	exit: { opacity: 0, height: 0, marginTop: -16, transition: TRANSITION.fast },
+	transition: {
+		height: SPRING.smooth,
+		marginTop: SPRING.smooth,
+		opacity: TRANSITION.base,
+	},
+} as const

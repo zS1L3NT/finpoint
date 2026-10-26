@@ -4,16 +4,18 @@ import { useLiveQuery } from "dexie-react-hooks"
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { useState } from "react"
-import BucketBadge from "@/components/bucket-badge"
 import CategoryDialog from "@/components/dialogs/category"
 import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
+import MonthlyBudgetBadge from "@/components/monthly-budget-badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useHistory } from "@/history"
-import { canUseDefaultBucket, treatmentLabel } from "@/lib/analytics"
-import { SPRING } from "@/lib/motion"
+import { canUseDefaultMonthlyBudget, treatmentLabel } from "@/lib/analytics"
+import { cardEnter } from "@/lib/motion"
+import { themeColor } from "@/lib/palette"
+import { pluralize } from "@/lib/utils"
 import { listCategories } from "@/logic/categories"
 import { pathRecords } from "@/routes"
 import type { AnalyticsTreatment, Category, CategoryWithChildren } from "@/types"
@@ -43,7 +45,7 @@ export default function CategoriesPage() {
 			<PageContent>
 				<PageHeader
 					title="Categories"
-					subtitle="Categories give Records meaning and supply their default treatment and spending bucket."
+					subtitle="Categories give Records meaning and supply their default treatment and monthly budget."
 					description="Category map"
 					icon="lucide:tag"
 					actions={
@@ -73,15 +75,22 @@ export default function CategoriesPage() {
 				</div>
 
 				{categoriesQuery === undefined ? null : visible.length === 0 ? (
-					<p className="rounded-xl border border-dashed p-10 text-center text-sm text-muted-foreground">
+					<p className="rounded-xl border border-dashed p-10 text-center text-xs text-muted-foreground">
 						{query ? "No categories match your search." : "No categories yet."}
 					</p>
 				) : (
-					SECTIONS.map(section => {
+					SECTIONS.map((section, sectionIndex) => {
 						const items = visible.filter(
 							category =>
 								(category.analytics_treatment ?? "automatic") === section.value,
 						)
+						const offset = visible.filter(category =>
+							SECTIONS.slice(0, sectionIndex).some(
+								previous =>
+									(category.analytics_treatment ?? "automatic") ===
+									previous.value,
+							),
+						).length
 						if (!items.length) return null
 						const records = items.reduce(
 							(sum, category) =>
@@ -95,7 +104,7 @@ export default function CategoriesPage() {
 						)
 						return (
 							<section key={section.value} className="grid gap-3">
-								<h3 className="flex items-baseline gap-2 text-sm font-medium">
+								<h3 className="flex items-baseline gap-2 text-sm font-semibold">
 									{section.label}
 									<span className="text-xs font-normal text-muted-foreground">
 										{items.length}{" "}
@@ -103,17 +112,12 @@ export default function CategoriesPage() {
 										{records.toLocaleString()} Records
 									</span>
 								</h3>
-								<div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+								<div className="grid gap-3 @2xl/page:grid-cols-2 @5xl/page:grid-cols-3">
 									{items.map((category, index) => (
 										<motion.div
 											key={category.id}
-											className="grid"
-											initial={{ opacity: 0, y: 6 }}
-											animate={{ opacity: 1, y: 0 }}
-											transition={{
-												...SPRING.smooth,
-												delay: Math.min(index, 7) * 0.03,
-											}}
+											className="grid min-w-0 grid-cols-1"
+											{...cardEnter(offset + index)}
 										>
 											<CategoryTile
 												category={category}
@@ -132,11 +136,11 @@ export default function CategoriesPage() {
 			</PageContent>
 
 			<CategoryDialog
-				open={dialogState !== null}
+				isOpen={dialogState !== null}
 				mode={dialogState?.mode ?? "create"}
 				category={dialogState?.mode === "edit" ? dialogState.category : null}
 				categories={categories}
-				onOpenChange={open => {
+				setIsOpen={open => {
 					if (!open) {
 						setDialogState(null)
 					}
@@ -146,13 +150,9 @@ export default function CategoriesPage() {
 	)
 }
 
-const SECTIONS: { value: AnalyticsTreatment; label: string }[] = [
-	{ value: "spending", label: "Spending" },
-	{ value: "income", label: "Income" },
-	{ value: "saving_investment", label: "Saving & investment" },
-	{ value: "neutral", label: "Transfers & neutral" },
-	{ value: "automatic", label: "Automatic by direction" },
-]
+const SECTIONS = (
+	["spending", "income", "saving_investment", "neutral", "automatic"] as AnalyticsTreatment[]
+).map(value => ({ value, label: treatmentLabel(value) }))
 
 function CategoryTile({
 	category,
@@ -163,12 +163,12 @@ function CategoryTile({
 	onEdit: (category: Category | CategoryWithChildren) => void
 	onFindRecords: () => void
 }) {
-	const bucket = canUseDefaultBucket(category.analytics_treatment)
-		? category.default_bucket
+	const monthlyBudget = canUseDefaultMonthlyBudget(category.analytics_treatment)
+		? category.default_monthly_budget
 		: null
 	const childRecords = category.children.reduce((sum, child) => sum + child.records_count, 0)
 	return (
-		<article className="group grid content-start gap-3 rounded-xl border bg-card p-4 transition-[box-shadow,transform] duration-150 ease-out hover:shadow-md">
+		<article className="group grid min-w-0 grid-cols-1 content-start gap-3 rounded-xl border bg-card p-4 transition-shadow duration-150 ease-out hover:shadow-md">
 			<div className="flex items-start gap-3">
 				<button
 					type="button"
@@ -202,11 +202,11 @@ function CategoryTile({
 				</Button>
 			</div>
 
-			{bucket ? (
-				<BucketBadge
-					name={bucket.name}
-					color={bucket.color}
-					title="Default spending bucket"
+			{monthlyBudget ? (
+				<MonthlyBudgetBadge
+					name={monthlyBudget.name}
+					color={monthlyBudget.color}
+					title="Default monthly budget"
 				/>
 			) : category.analytics_treatment === null ? (
 				<p className="text-xs text-muted-foreground">
@@ -221,14 +221,14 @@ function CategoryTile({
 							key={child.id}
 							type="button"
 							onClick={() => onEdit(child)}
-							title={`${child.records_count} Records · edit`}
-							className="flex cursor-pointer items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs hover:bg-muted"
+							title={`${pluralize(child.records_count, "Record")} · edit`}
+							className="flex min-w-0 max-w-full cursor-pointer items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs hover:bg-muted"
 						>
 							<span
-								className="size-2 rounded-full"
-								style={{ backgroundColor: child.color }}
+								className="size-2 shrink-0 rounded-full"
+								style={{ backgroundColor: themeColor(child.color) }}
 							/>
-							{child.name}
+							<span className="truncate">{child.name}</span>
 							<span className="text-muted-foreground tabular-nums">
 								{child.records_count}
 							</span>

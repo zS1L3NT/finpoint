@@ -13,32 +13,36 @@ import {
 	replaceSettings,
 } from "@/data/settings"
 
-export const EXPORT_VERSION = 2
+export const EXPORT_VERSION = 5
 
 type TableName =
+	| "statement_rules"
 	| "accounts"
 	| "statements"
+	| "duplicate_dismissals"
 	| "categories"
 	| "records"
 	| "allocations"
 	| "budgets"
 	| "budget_records"
-	| "buckets"
-	| "bucket_defaults"
-	| "bucket_targets"
+	| "monthly_budgets"
+	| "monthly_budget_defaults"
+	| "monthly_budget_amounts"
 	| "analytics_months"
 
 export const TABLES: TableName[] = [
+	"statement_rules",
 	"accounts",
 	"statements",
+	"duplicate_dismissals",
 	"categories",
 	"records",
 	"allocations",
 	"budgets",
 	"budget_records",
-	"buckets",
-	"bucket_defaults",
-	"bucket_targets",
+	"monthly_budgets",
+	"monthly_budget_defaults",
+	"monthly_budget_amounts",
 	"analytics_months",
 ]
 
@@ -80,12 +84,52 @@ export function downloadExport(data: FinpointExport): void {
 
 export function parseImportFile(text: string): FinpointExport {
 	const parsed = JSON.parse(text) as Partial<FinpointExport>
+	const originalVersion = parsed?.version
+	if (parsed && [1, 2, 3].includes(parsed.version ?? 0) && parsed.tables) {
+		parsed.tables.duplicate_dismissals ??= []
+		if (parsed.version === 3) parsed.version = EXPORT_VERSION
+	}
+	if (parsed && (parsed.version === 1 || parsed.version === 2) && parsed.tables) {
+		const legacy = parsed.tables as Record<string, unknown[]>
+		for (const [old, current] of [
+			["buckets", "monthly_budgets"],
+			["bucket_defaults", "monthly_budget_defaults"],
+			["bucket_targets", "monthly_budget_amounts"],
+		] as const) {
+			if (!Array.isArray(legacy[old])) throw new Error("This backup file looks incomplete.")
+			legacy[current] = legacy[old].map(value => {
+				const { bucket_id, ...row } = value as Record<string, unknown>
+				return old === "buckets" ? row : { ...row, monthly_budget_id: bucket_id }
+			})
+			delete legacy[old]
+		}
+		if (Array.isArray(legacy.records))
+			legacy.records = legacy.records.map(value => {
+				const { bucket_id, bucket_source, ...row } = value as Record<string, unknown>
+				return {
+					...row,
+					monthly_budget_id: bucket_id ?? null,
+					monthly_budget_source: bucket_source ?? null,
+				}
+			})
+		if (Array.isArray(legacy.categories))
+			legacy.categories = legacy.categories.map(value => {
+				const { default_bucket_id, ...row } = value as Record<string, unknown>
+				return { ...row, default_monthly_budget_id: default_bucket_id ?? null }
+			})
+		parsed.version = EXPORT_VERSION
+	}
+	if (parsed && parsed.tables && [1, 2, 3, 4].includes(originalVersion ?? 0)) {
+		parsed.tables.statement_rules = []
+		if (parsed.version === 4) parsed.version = EXPORT_VERSION
+	}
 	if (parsed?.app !== "finpoint" || typeof parsed !== "object" || !parsed.tables) {
 		throw new Error("This file is not a Finpoint backup.")
 	}
 	if ((parsed.version ?? 0) > EXPORT_VERSION) {
 		throw new Error("This backup was made by a newer Finpoint version.")
 	}
+	if (parsed.version !== EXPORT_VERSION) throw new Error("Unsupported backup version.")
 	for (const table of TABLES) {
 		if (!Array.isArray(parsed.tables?.[table])) {
 			throw new Error("This backup file looks incomplete.")
@@ -99,20 +143,32 @@ export function parseImportFile(text: string): FinpointExport {
 	if (endDateToday != null && typeof endDateToday !== "boolean") {
 		throw new Error("This backup contains an invalid default end-date setting.")
 	}
-	const comparisonMonths = parsed.settings?.dashboard_comparison_months
-	if (
-		comparisonMonths !== undefined &&
-		(!Number.isInteger(comparisonMonths) || comparisonMonths < 1 || comparisonMonths > 24)
-	) {
-		throw new Error("This backup contains an invalid dashboard comparison period.")
+	const statementIds = new Set((parsed.tables.statements as { id?: unknown }[]).map(s => s.id))
+	const dismissals = new Map<string, { statement_id: string; other_statement_id: string }>()
+	for (const row of parsed.tables.duplicate_dismissals as Record<string, unknown>[]) {
+		const { statement_id: a, other_statement_id: b } = row
+		if (typeof a !== "string" || typeof b !== "string" || a === b) continue
+		if (!statementIds.has(a) || !statementIds.has(b)) continue
+		// Dismissals are keyed by the ordered pair, so restore that order for hand-edited backups.
+		const [statement_id, other_statement_id] = a < b ? [a, b] : [b, a]
+		dismissals.set(JSON.stringify([statement_id, other_statement_id]), {
+			statement_id,
+			other_statement_id,
+		})
 	}
 	return {
 		...(parsed as Omit<FinpointExport, "settings">),
-		settings: { ...DEFAULT_SETTINGS, ...parsed.settings },
+		tables: { ...parsed.tables, duplicate_dismissals: [...dismissals.values()] },
+		settings: {
+			default_filter_start_date: startDate ?? DEFAULT_SETTINGS.default_filter_start_date,
+			default_filter_end_date_today:
+				endDateToday ?? DEFAULT_SETTINGS.default_filter_end_date_today,
+		},
 	}
 }
 
 export async function importData(data: FinpointExport): Promise<void> {
+	data = parseImportFile(JSON.stringify(data))
 	await db.transaction(
 		"rw",
 		[...TABLES.map(table => db.table(table)), db.settings, db.meta],

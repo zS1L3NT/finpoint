@@ -1,16 +1,17 @@
 import { useForm, useStore } from "@tanstack/react-form"
+import { useLiveQuery } from "dexie-react-hooks"
 import { AnimatePresence, motion } from "framer-motion"
 import { DateTime } from "luxon"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import AmountField from "@/components/form/amount-field"
-import ComboboxField from "@/components/form/combobox-field"
+import CategoryField from "@/components/form/category-field"
 import DatetimeField from "@/components/form/datetime-field"
 import RecordAnalyticsFields from "@/components/form/record-analytics-fields"
 import TextField from "@/components/form/text-field"
 import TextareaField from "@/components/form/textarea-field"
 import { ContextHelp } from "@/components/help/context-help"
-import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
+import { UiIcon as IconifyIcon } from "@/components/icon"
 import StatementSearchSheet from "@/components/sheets/statement-search"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -24,6 +25,7 @@ import {
 } from "@/components/ui/card"
 import {
 	Dialog,
+	DialogBody,
 	DialogClose,
 	DialogContent,
 	DialogDescription,
@@ -46,15 +48,15 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { useHistory } from "@/history"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { useDialogCloseAnimation } from "@/hooks/use-dialog-close-animation"
-import { useFetch } from "@/hooks/use-fetch"
 import { useDefaultFilterEndDateToday, useDefaultFilterStartDate } from "@/hooks/use-settings"
-import { SPRING, TRANSITION } from "@/lib/motion"
-import { cn, formatCurrency, formatDatetime, round2dp } from "@/lib/utils"
+import { COLLAPSE_MOTION, SPRING, TRANSITION } from "@/lib/motion"
+import { cn, formatCurrency, formatDatetime, round2 } from "@/lib/utils"
 import { trackRecordSaved } from "@/logic/learning"
+import { listMonthlyBudgets } from "@/logic/monthly-budgets"
 import { ConflictError, deleteRecord, recordCompletions, updateRecord } from "@/logic/records"
 import { ValidationError } from "@/logic/validate"
-import { pathRecords } from "@/routes"
-import { Allocation, CategoryWithChildren, Record, Statement } from "@/types"
+import { pathRecord, pathRecords } from "@/routes"
+import type { Allocation, CategoryWithChildren, Record, Statement } from "@/types"
 
 export default function RecordEditorDialog({
 	record,
@@ -79,13 +81,16 @@ export default function RecordEditorDialog({
 		? DateTime.now().toFormat("yyyy-MM-dd")
 		: undefined
 
-	const completions = useFetch(() => recordCompletions(), {
+	const completions = useLiveQuery(() => recordCompletions(), []) ?? {
 		titles: [],
 		locations: [],
 		peoples: [],
-	})
+	}
+	// Resolve the Monthly Budget lookup before the popup mounts so the
+	// Analytics select keeps its laid-out label from the first frame.
+	const monthlyBudgets = useLiveQuery(() => listMonthlyBudgets(), [])
 
-	const [statementCache, setStatementCache] = useState<(Statement & { pivot?: Allocation })[]>([])
+	const [statementCache, setStatementCache] = useState(statements)
 	const [isAttachingStatement, setIsAttachingStatement] = useState(false)
 	const [submitError, setSubmitError] = useState("")
 
@@ -107,8 +112,9 @@ export default function RecordEditorDialog({
 			category_id: record.category.id,
 			analytics_treatment:
 				record.analytics_treatment_source === "manual" ? record.analytics_treatment : "",
-			bucket_id: record.bucket_id ?? "",
-			bucket_source: record.bucket_source ?? ("category" as "category" | "manual"),
+			monthly_budget_id: record.monthly_budget_id ?? "",
+			monthly_budget_source:
+				record.monthly_budget_source ?? ("category" as "category" | "manual"),
 			description: record.description ?? "",
 			statements: statements.map(statement => ({
 				id: statement.id,
@@ -127,8 +133,8 @@ export default function RecordEditorDialog({
 					amount: value.amount,
 					category_id: value.category_id,
 					analytics_treatment: value.analytics_treatment || null,
-					bucket_id: value.bucket_id || null,
-					bucket_source: value.bucket_source,
+					monthly_budget_id: value.monthly_budget_id || null,
+					monthly_budget_source: value.monthly_budget_source,
 					revision: record.revision,
 					statements: value.statements,
 				})
@@ -157,7 +163,7 @@ export default function RecordEditorDialog({
 			await deleteRecord(record.id)
 			setIsOpen(false)
 
-			if (location.pathname === `/records/${record.id}`) {
+			if (location.pathname === pathRecord(record.id)) {
 				navigateBack({
 					name: "Records",
 					url: pathRecords(
@@ -178,22 +184,22 @@ export default function RecordEditorDialog({
 	const isPendingAmount = useStore(
 		form.store,
 		state =>
-			round2dp(state.values.statements.reduce((acc, el) => acc + el.amount, 0)) !==
-			round2dp(state.values.amount),
+			round2(state.values.statements.reduce((acc, el) => acc + el.amount, 0)) !==
+			round2(state.values.amount),
 	)
 	const analytics = useStore(form.store, state => ({
 		treatment: state.values.analytics_treatment,
 		categoryId: state.values.category_id,
 		amount: state.values.amount,
-		bucketId: state.values.bucket_id,
-		bucketSource: state.values.bucket_source,
+		monthlyBudgetId: state.values.monthly_budget_id,
+		monthlyBudgetSource: state.values.monthly_budget_source,
 	}))
 	const analyticsCategory = categoriesFlat.find(category => category.id === analytics.categoryId)
 	const formStatements = useStore(form.store, state => state.values.statements)
 	const attachStatementsSheet = (
 		<StatementSearchSheet
-			title="Attach statements to record"
-			placeholder="Search unattached statements..."
+			title="Allocate statements to record"
+			placeholder="Search statements with amounts available to allocate..."
 			target={
 				Math.round(
 					(Number(analytics.amount) -
@@ -225,7 +231,7 @@ export default function RecordEditorDialog({
 			trigger={
 				<Button variant="outline" className="w-fit">
 					<IconifyIcon icon="lucide:link-2" />
-					Attach Statement
+					Allocate statement
 				</Button>
 			}
 		/>
@@ -244,224 +250,347 @@ export default function RecordEditorDialog({
 			}}
 		>
 			{trigger && <DialogTrigger render={trigger} />}
-			<DialogContent className="md:max-w-4xl">
-				<DialogHeader>
-					<DialogTitle>Edit Record</DialogTitle>
-					<DialogDescription>
-						Update the record details and its statement allocations.
-					</DialogDescription>
-				</DialogHeader>
+			{monthlyBudgets === undefined ? null : (
+				<DialogContent className="md:max-w-4xl">
+					<DialogHeader>
+						<DialogTitle>Edit Record</DialogTitle>
+						<DialogDescription>
+							Update the record details and its statement allocations.
+						</DialogDescription>
+					</DialogHeader>
 
-				<form
-					id="record-editor-form"
-					className="grid gap-8 lg:grid-cols-2"
-					onSubmit={event => {
-						event.preventDefault()
-						void form.handleSubmit()
-					}}
-				>
-					<div className="flex flex-col gap-4">
-						<p className="text-sm font-semibold">Record Information</p>
-
-						<FieldGroup>
-							<form.Field name="title">
-								{field => (
-									<TextField
-										id={field.name}
-										label="Title"
-										value={field.state.value}
-										suggestions={completions?.titles ?? []}
-										errors={mergeErrors(field.state.meta.errors, field.name)}
-										onChange={value => {
-											field.handleChange(value)
-											clearApiError(field.name)
-										}}
-									/>
-								)}
-							</form.Field>
-							<form.Field name="people">
-								{field => (
-									<TextField
-										id={field.name}
-										label="People"
-										value={field.state.value}
-										suggestions={completions?.peoples ?? []}
-										errors={mergeErrors(field.state.meta.errors, field.name)}
-										onChange={value => {
-											field.handleChange(value)
-											clearApiError(field.name)
-										}}
-									/>
-								)}
-							</form.Field>
-							<form.Field name="location">
-								{field => (
-									<TextField
-										id={field.name}
-										label="Location"
-										value={field.state.value}
-										suggestions={completions?.locations ?? []}
-										errors={mergeErrors(field.state.meta.errors, field.name)}
-										onChange={value => {
-											field.handleChange(value)
-											clearApiError(field.name)
-										}}
-									/>
-								)}
-							</form.Field>
-							<form.Field name="datetime">
-								{field => (
-									<DatetimeField
-										id={field.name}
-										label="Date & Time"
-										value={field.state.value}
-										errors={mergeErrors(field.state.meta.errors, field.name)}
-										onChange={value => {
-											field.handleChange(value)
-											clearApiError(field.name)
-										}}
-									/>
-								)}
-							</form.Field>
-							<form.Field name="amount">
-								{field => (
-									<AmountField
-										id={field.name}
-										label="Amount"
-										value={field.state.value}
-										errors={mergeErrors(field.state.meta.errors, field.name)}
-										onChange={value => {
-											field.handleChange(value)
-											clearApiError(field.name)
-										}}
-									/>
-								)}
-							</form.Field>
-							<AnimatePresence>
-								{isPendingAmount && (
-									<motion.div
-										className="overflow-hidden"
-										initial={{ opacity: 0, height: 0, marginTop: -16 }}
-										animate={{ opacity: 1, height: "auto", marginTop: 0 }}
-										exit={{
-											opacity: 0,
-											height: 0,
-											marginTop: -16,
-											transition: TRANSITION.fast,
-										}}
-										transition={{
-											height: SPRING.smooth,
-											marginTop: SPRING.smooth,
-											opacity: TRANSITION.base,
-										}}
-									>
-										<Alert className="mt-4 max-w-md border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-50">
-											<IconifyIcon icon="lucide:triangle-alert" />
-											<AlertTitle>
-												Amount does not match the sum of Allocation Amounts
-											</AlertTitle>
-											<AlertDescription>
-												This record will be marked as pending until the
-												record amount matches the sum of allocated statement
-												amounts.
-											</AlertDescription>
-										</Alert>
-									</motion.div>
-								)}
-							</AnimatePresence>
-							<form.Field name="category_id">
-								{field => (
-									<ComboboxField
-										id={field.name}
-										label="Category"
-										value={
-											categoriesFlat.find(
-												category => category.id === field.state.value,
-											) ?? null
-										}
-										errors={mergeErrors(field.state.meta.errors, field.name)}
-										placeholder="Select category"
-										emptyText="No categories found."
-										items={categoriesFlat}
-										getItemId={category => category.id}
-										getItemString={category => category.name}
-										renderItem={category => (
-											<div
-												className={cn(
-													"flex items-center gap-1",
-													category.parent_category_id ? "pl-2" : null,
-												)}
-											>
-												<Icon {...category} size={10} />
-												{category.name}
-											</div>
-										)}
-										onChange={value => {
-											field.handleChange(value?.id ?? "")
-											if (value?.default_bucket_id) {
-												form.setFieldValue(
-													"bucket_id",
-													value.default_bucket_id,
-												)
-												form.setFieldValue("bucket_source", "category")
-											} else if (
-												form.getFieldValue("bucket_source") === "category"
-											) {
-												form.setFieldValue("bucket_id", "")
-											}
-											clearApiError(field.name)
-										}}
-									/>
-								)}
-							</form.Field>
-							<form.Field name="description">
-								{field => (
-									<TextareaField
-										id={field.name}
-										label="Description"
-										value={field.state.value}
-										errors={mergeErrors(field.state.meta.errors, field.name)}
-										onChange={value => {
-											field.handleChange(value)
-											clearApiError(field.name)
-										}}
-									/>
-								)}
-							</form.Field>
-						</FieldGroup>
-						<RecordAnalyticsFields
-							treatment={analytics.treatment}
-							categoryTreatment={analyticsCategory?.analytics_treatment}
-							amount={analytics.amount}
-							bucketId={analytics.bucketId}
-							bucketSource={analytics.bucketSource}
-							categoryBucketId={analyticsCategory?.default_bucket_id}
-							onTreatmentChange={value =>
-								form.setFieldValue("analytics_treatment", value)
-							}
-							onBucketChange={(value, source) => {
-								form.setFieldValue("bucket_id", value)
-								form.setFieldValue("bucket_source", source)
+					<DialogBody>
+						<form
+							id="record-editor-form"
+							className="grid gap-8 lg:grid-cols-2"
+							onSubmit={event => {
+								event.preventDefault()
+								void form.handleSubmit()
 							}}
-						/>
-					</div>
+						>
+							<div className="flex flex-col gap-4">
+								<p className="text-sm font-semibold">Record Information</p>
 
-					<div className="flex flex-col gap-4">
-						<div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-							<p className="text-sm font-semibold">Statements Attached</p>
-
-							{!!formStatements.length && attachStatementsSheet}
-						</div>
-
-						<div className="flex flex-col gap-2">
-							<ScrollArea className="h-fit max-h-200">
-								<div className="relative flex flex-col gap-2">
-									<AnimatePresence initial={false} mode="popLayout">
-										{formStatements.map(({ id }, index) => (
+								<FieldGroup>
+									<form.Field name="title">
+										{field => (
+											<TextField
+												id={field.name}
+												label="Title"
+												value={field.state.value}
+												suggestions={completions?.titles ?? []}
+												errors={mergeErrors(
+													field.state.meta.errors,
+													field.name,
+												)}
+												onChange={value => {
+													field.handleChange(value)
+													clearApiError(field.name)
+												}}
+											/>
+										)}
+									</form.Field>
+									<form.Field name="people">
+										{field => (
+											<TextField
+												id={field.name}
+												label="People"
+												value={field.state.value}
+												suggestions={completions?.peoples ?? []}
+												errors={mergeErrors(
+													field.state.meta.errors,
+													field.name,
+												)}
+												onChange={value => {
+													field.handleChange(value)
+													clearApiError(field.name)
+												}}
+											/>
+										)}
+									</form.Field>
+									<form.Field name="location">
+										{field => (
+											<TextField
+												id={field.name}
+												label="Location"
+												value={field.state.value}
+												suggestions={completions?.locations ?? []}
+												errors={mergeErrors(
+													field.state.meta.errors,
+													field.name,
+												)}
+												onChange={value => {
+													field.handleChange(value)
+													clearApiError(field.name)
+												}}
+											/>
+										)}
+									</form.Field>
+									<form.Field name="datetime">
+										{field => (
+											<DatetimeField
+												id={field.name}
+												label="Date and time"
+												value={field.state.value}
+												errors={mergeErrors(
+													field.state.meta.errors,
+													field.name,
+												)}
+												onChange={value => {
+													field.handleChange(value)
+													clearApiError(field.name)
+												}}
+											/>
+										)}
+									</form.Field>
+									<form.Field name="amount">
+										{field => (
+											<AmountField
+												id={field.name}
+												label="Amount"
+												value={field.state.value}
+												errors={mergeErrors(
+													field.state.meta.errors,
+													field.name,
+												)}
+												onChange={value => {
+													field.handleChange(value)
+													clearApiError(field.name)
+												}}
+											/>
+										)}
+									</form.Field>
+									<AnimatePresence initial={false}>
+										{isPendingAmount && (
 											<motion.div
-												key={id}
-												className="p-0.5"
-												layout
+												className="overflow-hidden"
+												{...COLLAPSE_MOTION}
+											>
+												<Alert className="mt-4 max-w-md border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-50">
+													<IconifyIcon icon="lucide:triangle-alert" />
+													<AlertTitle>
+														Amount does not match the sum of Allocation
+														Amounts
+													</AlertTitle>
+													<AlertDescription>
+														This record will be marked as pending until
+														the record amount matches the sum of
+														allocated statement amounts.
+													</AlertDescription>
+												</Alert>
+											</motion.div>
+										)}
+									</AnimatePresence>
+									<form.Field name="category_id">
+										{field => (
+											<CategoryField
+												id={field.name}
+												label="Category"
+												value={field.state.value}
+												categories={categories}
+												errors={mergeErrors(
+													field.state.meta.errors,
+													field.name,
+												)}
+												onChange={value => {
+													field.handleChange(value?.id ?? "")
+													if (
+														form.getFieldValue(
+															"monthly_budget_source",
+														) === "category"
+													) {
+														form.setFieldValue(
+															"monthly_budget_id",
+															value?.default_monthly_budget_id ?? "",
+														)
+													}
+													clearApiError(field.name)
+												}}
+											/>
+										)}
+									</form.Field>
+									<form.Field name="description">
+										{field => (
+											<TextareaField
+												id={field.name}
+												label="Description"
+												value={field.state.value}
+												errors={mergeErrors(
+													field.state.meta.errors,
+													field.name,
+												)}
+												onChange={value => {
+													field.handleChange(value)
+													clearApiError(field.name)
+												}}
+											/>
+										)}
+									</form.Field>
+								</FieldGroup>
+								<RecordAnalyticsFields
+									treatment={analytics.treatment}
+									categoryTreatment={analyticsCategory?.analytics_treatment}
+									amount={analytics.amount}
+									monthlyBudgetId={analytics.monthlyBudgetId}
+									monthlyBudgetSource={analytics.monthlyBudgetSource}
+									categoryMonthlyBudgetId={
+										analyticsCategory?.default_monthly_budget_id
+									}
+									monthlyBudgets={monthlyBudgets}
+									onTreatmentChange={value =>
+										form.setFieldValue("analytics_treatment", value)
+									}
+									onMonthlyBudgetChange={(value, source) => {
+										form.setFieldValue("monthly_budget_id", value)
+										form.setFieldValue("monthly_budget_source", source)
+									}}
+								/>
+							</div>
+
+							<div className="flex flex-col gap-4">
+								<div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+									<p className="text-sm font-semibold">Statement allocations</p>
+
+									{!!formStatements.length && attachStatementsSheet}
+								</div>
+
+								<div className="flex flex-col gap-2">
+									<ScrollArea className="h-fit max-h-200">
+										<div className="relative flex flex-col gap-2">
+											<AnimatePresence initial={false} mode="popLayout">
+												{formStatements.map(({ id }, index) => (
+													<motion.div
+														key={id}
+														className="p-0.5"
+														layout
+														initial={{ opacity: 0, y: 6 }}
+														animate={{
+															opacity: 1,
+															y: 0,
+															transition: TRANSITION.base,
+														}}
+														exit={{
+															opacity: 0,
+															scale: 0.98,
+															transition: TRANSITION.fast,
+														}}
+														transition={{ layout: SPRING.snappy }}
+													>
+														<form.Field
+															name={
+																`statements[${index}].amount` as const
+															}
+														>
+															{field => {
+																const statement =
+																	// biome-ignore lint/style/noNonNullAssertion: All full statement objects must be cached
+																	statementCache.find(
+																		s => s.id === id,
+																	)!
+
+																const errors = mergeErrors(
+																	field.state.meta.errors,
+																	field.name,
+																)
+																const allocable = round2(
+																	statement.allocable_amount +
+																		(statement.pivot?.amount ??
+																			0),
+																)
+
+																const percent =
+																	allocable === 0
+																		? 0
+																		: (field.state.value /
+																				allocable) *
+																			100
+
+																return (
+																	<Card
+																		className={cn(
+																			errors.length
+																				? "border-destructive/50"
+																				: null,
+																		)}
+																	>
+																		<CardHeader>
+																			<CardTitle className="text-sm leading-5">
+																				{
+																					statement.description
+																				}
+																			</CardTitle>
+																			<CardDescription>
+																				{formatDatetime(
+																					statement.datetime,
+																				)}
+																			</CardDescription>
+																			<CardAction className="text-sm font-semibold">
+																				<Button
+																					type="button"
+																					variant="destructive"
+																					aria-label={`Remove ${statement.description}`}
+																					onClick={() => {
+																						form.setFieldValue(
+																							"statements",
+																							form
+																								.getFieldValue(
+																									"statements",
+																								)
+																								.filter(
+																									s =>
+																										s.id !==
+																										id,
+																								),
+																						)
+																					}}
+																				>
+																					<IconifyIcon icon="lucide:trash" />
+																				</Button>
+																			</CardAction>
+																		</CardHeader>
+																		<CardContent className="flex flex-col gap-4">
+																			<AmountField
+																				id={field.name}
+																				label="Amount"
+																				value={
+																					field.state
+																						.value
+																				}
+																				errors={errors}
+																				suffix={`of ${formatCurrency(allocable)}`}
+																				onChange={value => {
+																					field.handleChange(
+																						value,
+																					)
+																					clearApiError(
+																						field.name,
+																					)
+																				}}
+																			/>
+																			<Progress
+																				value={percent}
+																				className={cn(
+																					"transition-colors",
+																					percent > 100
+																						? "text-red-400"
+																						: null,
+																				)}
+																			/>
+																		</CardContent>
+																	</Card>
+																)
+															}}
+														</form.Field>
+													</motion.div>
+												))}
+											</AnimatePresence>
+										</div>
+									</ScrollArea>
+
+									<AnimatePresence initial={false}>
+										{!formStatements.length && (
+											<motion.div
+												key="empty"
 												initial={{ opacity: 0, y: 6 }}
 												animate={{
 													opacity: 1,
@@ -473,166 +602,57 @@ export default function RecordEditorDialog({
 													scale: 0.98,
 													transition: TRANSITION.fast,
 												}}
-												transition={{ layout: SPRING.snappy }}
 											>
-												<form.Field
-													name={`statements[${index}].amount` as const}
-												>
-													{field => {
-														// biome-ignore lint/style/noNonNullAssertion: All full statement objects must be cached
-														const statement = statementCache.find(
-															s => s.id === id,
-														)!
-
-														const errors = mergeErrors(
-															field.state.meta.errors,
-															field.name,
-														)
-														const allocable = round2dp(
-															statement.allocable_amount +
-																(statement.pivot?.amount ?? 0),
-														)
-
-														const percent =
-															allocable === 0
-																? 0
-																: (field.state.value / allocable) *
-																	100
-
-														return (
-															<Card
-																className={cn(
-																	errors.length
-																		? "border-destructive/50"
-																		: null,
-																)}
-															>
-																<CardHeader>
-																	<CardTitle className="text-sm leading-5">
-																		{statement.description}
-																	</CardTitle>
-																	<CardDescription>
-																		{formatDatetime(
-																			statement.datetime,
-																		)}
-																	</CardDescription>
-																	<CardAction className="text-sm font-semibold">
-																		<Button
-																			type="button"
-																			variant="destructive"
-																			onClick={() => {
-																				form.setFieldValue(
-																					"statements",
-																					form
-																						.getFieldValue(
-																							"statements",
-																						)
-																						.filter(
-																							s =>
-																								s.id !==
-																								id,
-																						),
-																				)
-																			}}
-																		>
-																			<IconifyIcon icon="lucide:trash" />
-																		</Button>
-																	</CardAction>
-																</CardHeader>
-																<CardContent className="flex flex-col gap-4">
-																	<AmountField
-																		id={field.name}
-																		label="Amount"
-																		value={field.state.value}
-																		errors={errors}
-																		suffix={`of ${formatCurrency(allocable)}`}
-																		onChange={value => {
-																			field.handleChange(
-																				value,
-																			)
-																			clearApiError(
-																				field.name,
-																			)
-																		}}
-																	/>
-																	<Progress
-																		value={percent}
-																		className={cn(
-																			"transition-colors",
-																			percent > 100
-																				? "text-red-400"
-																				: null,
-																		)}
-																	/>
-																</CardContent>
-															</Card>
-														)
-													}}
-												</form.Field>
+												<Empty className="border border-dashed">
+													<EmptyHeader>
+														<EmptyMedia variant="icon">
+															<IconifyIcon icon="lucide:credit-card" />
+														</EmptyMedia>
+														<EmptyTitle>No Statements</EmptyTitle>
+														<EmptyDescription>
+															No statements selected for allocation.
+														</EmptyDescription>
+													</EmptyHeader>
+													<EmptyContent>
+														{attachStatementsSheet}
+													</EmptyContent>
+												</Empty>
 											</motion.div>
-										))}
+										)}
 									</AnimatePresence>
 								</div>
-							</ScrollArea>
+							</div>
+						</form>
+					</DialogBody>
 
-							<AnimatePresence initial={false}>
-								{!formStatements.length && (
-									<motion.div
-										key="empty"
-										initial={{ opacity: 0, y: 6 }}
-										animate={{ opacity: 1, y: 0, transition: TRANSITION.base }}
-										exit={{
-											opacity: 0,
-											scale: 0.98,
-											transition: TRANSITION.fast,
-										}}
-									>
-										<Empty className="border border-dashed">
-											<EmptyHeader>
-												<EmptyMedia variant="icon">
-													<IconifyIcon icon="lucide:credit-card" />
-												</EmptyMedia>
-												<EmptyTitle>No Statements</EmptyTitle>
-												<EmptyDescription>
-													No statements selected for allocation.
-												</EmptyDescription>
-											</EmptyHeader>
-											<EmptyContent>{attachStatementsSheet}</EmptyContent>
-										</Empty>
-									</motion.div>
-								)}
-							</AnimatePresence>
-						</div>
-					</div>
-				</form>
-
-				<DialogFooter>
-					<div className="flex min-w-0 flex-col gap-2 sm:mr-auto sm:flex-row sm:items-center">
-						<Button type="button" variant="destructive" onClick={handleDelete}>
-							<IconifyIcon icon="lucide:trash-2" /> Delete
-						</Button>
-						{submitError ? (
-							<p
-								className="fade-in animate-in text-xs text-destructive duration-150 ease-out"
-								aria-live="polite"
-							>
-								{submitError}
-							</p>
-						) : null}
-					</div>
-					<DialogClose
-						render={
-							<Button type="button" variant="outline">
-								Cancel
+					<DialogFooter>
+						<div className="flex min-w-0 flex-col gap-2 sm:mr-auto sm:flex-row sm:items-center">
+							<Button type="button" variant="destructive" onClick={handleDelete}>
+								<IconifyIcon icon="lucide:trash-2" /> Delete
 							</Button>
-						}
-					/>
-					<Button type="button" onClick={() => void form.handleSubmit()}>
-						Save changes
-					</Button>
-				</DialogFooter>
-				<ContextHelp topic="pending" label="How this form works" variant="form" />
-			</DialogContent>
+							{submitError ? (
+								<p
+									className="fade-in animate-in text-xs text-destructive duration-150 ease-out"
+									aria-live="polite"
+								>
+									{submitError}
+								</p>
+							) : null}
+						</div>
+						<DialogClose
+							render={
+								<Button type="button" variant="outline">
+									Cancel
+								</Button>
+							}
+						/>
+						<Button type="button" onClick={() => void form.handleSubmit()}>
+							Save changes
+						</Button>
+					</DialogFooter>
+					<ContextHelp topic="pending" label="How this form works" variant="form" />
+				</DialogContent>
+			)}
 		</Dialog>
 	)
 }

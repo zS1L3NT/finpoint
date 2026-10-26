@@ -28,17 +28,6 @@ import {
 	CardTitle,
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { db } from "@/data/db"
-import {
-	clearAllData,
-	downloadExport,
-	exportData,
-	importData,
-	parseImportFile,
-	tableCounts,
-} from "@/data/export-import"
-import { seedIfEmpty } from "@/data/seed"
-import { generateTestData } from "@/data/test-data"
 import { useSyncStatus } from "@/hooks/use-sync-status"
 import { cn } from "@/lib/utils"
 import { ingestManualResult, resetSyncDisplay } from "@/logic/auto-sync"
@@ -51,6 +40,13 @@ import {
 } from "@/logic/drive-sync"
 import { trackBackupRequested } from "@/logic/learning"
 import { formatRelativeTime } from "@/logic/shared"
+import {
+	clearWorkspace,
+	countWorkspaceRows,
+	exportWorkspace,
+	importWorkspace,
+	loadDemoWorkspace,
+} from "@/logic/workspace"
 import { pathPrivacy, pathTerms } from "@/routes"
 
 const COUNT_ROWS = [
@@ -59,7 +55,7 @@ const COUNT_ROWS = [
 	["records", "Records", "lucide:receipt-text"],
 	["categories", "Categories", "lucide:tag"],
 	["budgets", "Budgets", "lucide:piggy-bank"],
-	["buckets", "Buckets", "lucide:wallet-cards"],
+	["monthly_budgets", "Monthly budgets", "lucide:wallet-cards"],
 ] as const
 
 type StatusTone = {
@@ -156,7 +152,7 @@ function WorkspaceRow({
 					<IconifyIcon icon={icon} className="size-4" />
 				</span>
 				<div className="min-w-0">
-					<p className={cn("text-sm font-medium", destructive && "text-destructive")}>
+					<p className={cn("text-sm font-semibold", destructive && "text-destructive")}>
 						{title}
 					</p>
 					<p className="mt-0.5 max-w-xl text-xs text-muted-foreground">{description}</p>
@@ -178,12 +174,7 @@ export default function DataSettingsPage() {
 	const [dragging, setDragging] = useState(false)
 	const sync = useSyncStatus()
 	const fileInputRef = useRef<HTMLInputElement>(null)
-	const counts =
-		useLiveQuery(async () => {
-			// Re-run whenever any table changes by depending on a cheap aggregate.
-			await db.statements.toCollection().count()
-			return tableCounts()
-		}, []) ?? null
+	const counts = useLiveQuery(() => countWorkspaceRows(), []) ?? null
 
 	const total = counts ? Object.values(counts).reduce((sum, count) => sum + count, 0) : 0
 
@@ -195,7 +186,7 @@ export default function DataSettingsPage() {
 	const handleExport = async () => {
 		setBusy("export")
 		try {
-			downloadExport(await exportData())
+			await exportWorkspace()
 			void trackBackupRequested().catch(() => undefined)
 			toast.success("Backup file downloaded.")
 		} catch {
@@ -212,8 +203,7 @@ export default function DataSettingsPage() {
 		}
 		setBusy("import")
 		try {
-			const text = await importFile.text()
-			await importData(parseImportFile(text))
+			await importWorkspace(await importFile.text())
 			toast.success("Backup file restored.")
 			setImportFile(null)
 			if (fileInputRef.current) fileInputRef.current.value = ""
@@ -231,8 +221,7 @@ export default function DataSettingsPage() {
 		}
 		setBusy("clear")
 		try {
-			await clearAllData()
-			await seedIfEmpty()
+			await clearWorkspace()
 			toast.success("Workspace cleared.")
 			setConfirmingClear(false)
 		} catch {
@@ -249,7 +238,7 @@ export default function DataSettingsPage() {
 		}
 		setBusy("demo")
 		try {
-			await importData(generateTestData())
+			await loadDemoWorkspace()
 			toast.success("Demo workspace loaded.")
 			setConfirmingDemo(false)
 		} catch {
@@ -477,10 +466,8 @@ export default function DataSettingsPage() {
 								key={status.title}
 								className="min-w-0 animate-in duration-200 ease-out fade-in-0 slide-in-from-bottom-1"
 							>
-								<h3 className="text-lg font-semibold tracking-tight md:text-xl">
-									{status.title}
-								</h3>
-								<p className="mt-0.5 text-sm text-muted-foreground">
+								<h3 className="text-sm font-semibold">{status.title}</h3>
+								<p className="mt-0.5 text-xs text-muted-foreground">
 									{status.detail}
 								</p>
 							</div>
@@ -543,11 +530,13 @@ export default function DataSettingsPage() {
 									{label}
 								</span>
 								{counts ? (
-									<span className="text-xl font-semibold tabular-nums">
+									<span className="text-lg font-semibold tracking-tight tabular-nums">
 										{(counts[key] ?? 0).toLocaleString()}
 									</span>
 								) : (
-									<span className="invisible text-xl font-semibold">0</span>
+									<span className="invisible text-lg font-semibold tracking-tight">
+										0
+									</span>
 								)}
 							</div>
 						))}
@@ -558,7 +547,7 @@ export default function DataSettingsPage() {
 							<MethodHeader
 								icon="lucide:cloud"
 								title="Google Drive"
-								description="Automatic. Stored in a hidden app folder in your own Drive. Finpoint never sees it."
+								description="Automatic. Stored in a hidden app folder in your own Drive. Your financial data never passes through Finpoint's server."
 								badge={
 									driveUnconfigured
 										? "Not available"
@@ -568,7 +557,7 @@ export default function DataSettingsPage() {
 								}
 								active={!driveUnconfigured && !driveTeaser}
 							/>
-							<CardContent className="grid flex-1 content-start gap-3 py-4 text-sm">
+							<CardContent className="grid flex-1 content-start gap-3 py-4 text-xs">
 								{driveUnconfigured ? (
 									process.env.NODE_ENV === "development" ? (
 										<ol className="grid list-decimal gap-2 pl-5 text-muted-foreground">
@@ -601,7 +590,11 @@ export default function DataSettingsPage() {
 												sync.localDirty ? "bg-amber-500" : "bg-emerald-500"
 											}
 											label="This browser"
-											value={sync.localDirty ? "Unsaved changes" : "Saved"}
+											value={
+												sync.localDirty
+													? "Changes waiting to sync"
+													: "Saved locally"
+											}
 										/>
 										<StateRow
 											tone={driveState.tone}
@@ -676,9 +669,7 @@ export default function DataSettingsPage() {
 									onClick={() => void handleExport()}
 								>
 									<IconifyIcon icon="lucide:download" />
-									{busy === "export"
-										? "Downloading…"
-										: `Download backup · ${total.toLocaleString()} items`}
+									{busy === "export" ? "Downloading…" : "Download backup"}
 								</Button>
 								<Input
 									ref={fileInputRef}
@@ -706,7 +697,7 @@ export default function DataSettingsPage() {
 										if (file) setImportFile(file)
 									}}
 									className={cn(
-										"grid cursor-pointer place-items-center gap-1.5 rounded-lg border border-dashed px-4 py-6 text-center text-sm transition-[background-color,border-color,transform] duration-150 ease-out hover:bg-muted/50 active:scale-[0.99] disabled:active:scale-100",
+										"grid cursor-pointer place-items-center gap-1.5 rounded-lg border border-dashed px-4 py-6 text-center text-sm transition-[background-color,border-color,transform] duration-150 ease-out hover:bg-muted/50 active:scale-[0.99] motion-reduce:transition-none motion-reduce:scale-100 motion-reduce:active:scale-100 disabled:active:scale-100",
 										dragging && "scale-[1.01] border-foreground bg-muted/60",
 									)}
 								>
@@ -776,7 +767,7 @@ export default function DataSettingsPage() {
 						<WorkspaceRow
 							icon="lucide:sparkles"
 							title="Try demo data"
-							description="3 accounts, 5 months of Records, 470+ Statements (40+ waiting to be matched), 2 budgets and buckets. Replaces everything in this browser."
+							description="3 accounts, 5 months of Records, 470+ Statements (40+ waiting to be allocated), 2 budgets and monthly budgets. Replaces everything in this browser."
 						>
 							{confirmingDemo && busy !== "demo" ? (
 								<Button
@@ -807,7 +798,7 @@ export default function DataSettingsPage() {
 						<WorkspaceRow
 							icon="lucide:trash-2"
 							title="Clear all data"
-							description="Delete everything in this browser, then restore the default categories and buckets."
+							description="Delete everything in this browser, then restore the default categories and monthly budgets."
 							destructive
 						>
 							{confirmingClear && busy !== "clear" ? (

@@ -4,8 +4,7 @@ import { useLiveQuery } from "dexie-react-hooks"
 import { AnimatePresence, motion } from "framer-motion"
 import Link from "next/link"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useEffect, useMemo, useState } from "react"
-import AllocatorTabs from "@/components/allocator-tabs"
+import { useEffect, useMemo, useRef, useState } from "react"
 import StatementReplacementReviewDialog, {
 	dateDifferenceLabel,
 } from "@/components/dialogs/statement-replacement-review"
@@ -27,9 +26,17 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select"
+import WorkflowTabs from "@/components/workflow-tabs"
 import { useHistory } from "@/history"
-import { SPRING, TRANSITION } from "@/lib/motion"
-import { classForCurrency, cn, formatCurrency, formatDatetime, round2dp } from "@/lib/utils"
+import { cardEnter, SPRING, TRANSITION } from "@/lib/motion"
+import {
+	classForCurrency,
+	cn,
+	formatCurrency,
+	formatDatetime,
+	pluralize,
+	round2,
+} from "@/lib/utils"
 import { listAccounts } from "@/logic/accounts"
 import { paginateItems, parsePage, parsePageSize } from "@/logic/pagination"
 import { replacementComparison, replacementReason, sameDirection } from "@/logic/replacements"
@@ -48,7 +55,24 @@ export default function AllocatorPendingPage() {
 	const searchParams = useSearchParams()
 	const router = useRouter()
 	const pathname = usePathname()
+	// Latest pushed params. Debounce timers close over render-scope searchParams;
+	// when a rapid selectPending push has not committed yet, a firing timer would
+	// rebuild from the stale base and resurrect just-cleared params.
+	const latestParams = useRef<URLSearchParams | null>(null)
+	// True while a pushParams navigation has not committed yet. Timers prefer the
+	// ref base only in that window; otherwise the committed params are truth, so
+	// navigation that bypasses pushParams (footer Links, Back/Forward) can never
+	// be overwritten by a stale-forward mirror.
+	const navigationPending = useRef(false)
 	const pushParams = (next: URLSearchParams) => {
+		// Dedupe against the last intent, not the committed URL: during a slow
+		// commit a fast revert (e.g. Account X, then All) must still push.
+		const previous = (
+			navigationPending.current && latestParams.current ? latestParams.current : searchParams
+		).toString()
+		latestParams.current = next
+		if (next.toString() === previous) return
+		navigationPending.current = true
 		const suffix = next.toString()
 		router.push(suffix ? `${pathname}?${suffix}` : pathname, { scroll: false })
 	}
@@ -72,12 +96,15 @@ export default function AllocatorPendingPage() {
 	const [queueQuery, setQueueQuery] = useState(queueQueryParam)
 	const [candidateQuery, setCandidateQuery] = useState(candidateQueryParam)
 	const [reviewStatement, setReviewStatement] = useState<Statement | null>(null)
+	const queueTimer = useRef<number | undefined>(undefined)
+	const candidateTimer = useRef<number | undefined>(undefined)
 
 	const updateParams = (
 		changes: globalThis.Record<string, string | number | null>,
 		clearCandidate = false,
+		base: URLSearchParams | null = null,
 	) => {
-		const next = new URLSearchParams(searchParams.toString())
+		const next = new URLSearchParams((base ?? searchParams).toString())
 		for (const [key, value] of Object.entries(changes)) {
 			if (value === null || value === "") next.delete(key)
 			else next.set(key, String(value))
@@ -89,27 +116,103 @@ export default function AllocatorPendingPage() {
 		pushParams(next)
 	}
 
-	useEffect(() => setQueueQuery(queueQueryParam), [queueQueryParam])
-	useEffect(() => setCandidateQuery(candidateQueryParam), [candidateQueryParam])
+	// Mirror committed queries into the inputs, except the echo of a query this page
+	// pushed itself: by the time that commit lands the user may have typed on, and
+	// copying the older value back would drop those keystrokes.
+	const pushedQueueQuery = useRef<string | null>(null)
+	const pushedCandidateQuery = useRef<string | null>(null)
+	useEffect(() => {
+		const echo = pushedQueueQuery.current === queueQueryParam
+		pushedQueueQuery.current = null
+		if (!echo) setQueueQuery(queueQueryParam)
+	}, [queueQueryParam])
+	useEffect(() => {
+		const echo = pushedCandidateQuery.current === candidateQueryParam
+		pushedCandidateQuery.current = null
+		if (!echo) setCandidateQuery(candidateQueryParam)
+	}, [candidateQueryParam])
+
+	// Invalidate the intent mirror once its commit lands; treat any other
+	// committed change (footer Links, Back/Forward) as authoritative.
+	useEffect(() => {
+		if (latestParams.current?.toString() === searchParams.toString()) {
+			latestParams.current = null
+			navigationPending.current = false
+		} else if (!navigationPending.current) {
+			latestParams.current = null
+		}
+	}, [searchParams])
+
+	// Back/Forward and Links (pagination, footer) are authoritative even mid-flight: they
+	// supersede a pending push, so drop its intent rather than rebuild later pushes on it.
+	// Back/Forward also abandons pending searches and echo markers, so the restored URL
+	// is mirrored into the inputs instead of being overwritten by older typing.
+	useEffect(() => {
+		const dropIntent = () => {
+			latestParams.current = null
+			navigationPending.current = false
+		}
+		const onPopState = () => {
+			dropIntent()
+			pushedQueueQuery.current = null
+			pushedCandidateQuery.current = null
+			window.clearTimeout(queueTimer.current)
+			window.clearTimeout(candidateTimer.current)
+			// The restored URL can equal the last committed one, which leaves the
+			// mirror effects idle: copy its queries into the inputs here.
+			const restored = new URLSearchParams(window.location.search)
+			setQueueQuery(restored.get("query") ?? "")
+			setCandidateQuery(restored.get("candidate_query") ?? "")
+		}
+		const onLinkClick = (event: MouseEvent) => {
+			if (event.target instanceof Element && event.target.closest("a[href]")) dropIntent()
+		}
+		window.addEventListener("popstate", onPopState)
+		document.addEventListener("click", onLinkClick, true)
+		return () => {
+			window.removeEventListener("popstate", onPopState)
+			document.removeEventListener("click", onLinkClick, true)
+		}
+	}, [])
 
 	useEffect(() => {
 		if (queueQuery === queueQueryParam) return
 		const timer = window.setTimeout(() => {
+			// Typing a new queue query abandons any selection and candidate
+			// search, so clear those params in the same commit instead of
+			// pushing per keystroke (a push storm lets a slow response
+			// overwrite the query commit out of order).
+			pushedQueueQuery.current = queueQuery
 			updateParams(
-				{ query: queueQuery || null, page: null, pending_statement_id: null },
-				true,
+				{
+					query: queueQuery || null,
+					page: null,
+					pending_statement_id: null,
+					candidate_page: null,
+					candidate_query: null,
+				},
+				false,
+				navigationPending.current ? latestParams.current : null,
 			)
+			setCandidateQuery("")
 		}, 300)
+		queueTimer.current = timer
 		return () => window.clearTimeout(timer)
-	}, [queueQuery, queueQueryParam])
+	}, [queueQuery, queueQueryParam, searchParams])
 
 	useEffect(() => {
 		if (candidateQuery === candidateQueryParam) return
 		const timer = window.setTimeout(() => {
-			updateParams({ candidate_query: candidateQuery || null, candidate_page: null })
+			pushedCandidateQuery.current = candidateQuery
+			updateParams(
+				{ candidate_query: candidateQuery || null, candidate_page: null },
+				false,
+				navigationPending.current ? latestParams.current : null,
+			)
 		}, 300)
+		candidateTimer.current = timer
 		return () => window.clearTimeout(timer)
-	}, [candidateQuery, candidateQueryParam])
+	}, [candidateQuery, candidateQueryParam, searchParams])
 
 	const accounts = useLiveQuery(() => listAccounts(), []) ?? []
 	const pendingQuery = useLiveQuery(
@@ -172,9 +275,14 @@ export default function AllocatorPendingPage() {
 		[selectedPendingStatement?.id, candidateQueryParam, candidateScope, candidatePage],
 	)
 
-	const selectPending = (statement: PendingReplacementStatement | null) => {
+	const selectPending = (statement: PendingReplacementStatement | null, query = queueQuery) => {
+		window.clearTimeout(queueTimer.current)
+		window.clearTimeout(candidateTimer.current)
 		setReviewStatement(null)
+		setCandidateQuery("")
 		updateParams({
+			query: query || null,
+			page: null,
 			pending_statement_id: statement?.id ?? null,
 			candidate_page: null,
 			candidate_query: null,
@@ -208,12 +316,12 @@ export default function AllocatorPendingPage() {
 		<>
 			<PageContent>
 				<PageHeader
-					title="Allocator"
-					subtitle="Compare pending Statements with imported activity, then move Allocations to the correct Statement."
-					description="Allocation workspace"
-					icon="lucide:link"
+					title="Workflows"
+					subtitle="Replace pending statements with imported activity."
+					description="Statement replacement"
+					icon="lucide:replace"
 				/>
-				<AllocatorTabs active="replace" />
+				<WorkflowTabs active="replace" />
 
 				{selectionMissing ? (
 					<Alert>
@@ -226,30 +334,23 @@ export default function AllocatorPendingPage() {
 					</Alert>
 				) : null}
 
-				<div className="grid min-w-0 gap-4 md:grid-cols-[minmax(18rem,2fr)_minmax(0,3fr)]">
+				<div className="grid min-w-0 gap-4 @4xl/page:grid-cols-[minmax(18rem,2fr)_minmax(0,3fr)]">
 					<section
 						className={cn(
 							"relative min-w-0 flex-col gap-4",
-							selectedPendingStatement ? "hidden md:flex" : "flex",
+							selectedPendingStatement ? "hidden @4xl/page:flex" : "flex",
 						)}
-						aria-labelledby="pending-queue-title"
+						aria-label="Pending statements"
 					>
 						<div className="flex flex-col gap-2">
-							<div>
-								<h3
-									id="pending-queue-title"
-									className="font-heading text-base font-medium"
-								>
-									Pending Statements
-								</h3>
-								<p className="text-xs/relaxed text-muted-foreground">
-									Oldest first · all Allocation states
-								</p>
-							</div>
 							<Input
 								placeholder="Search descriptions..."
 								value={queueQuery}
-								onChange={event => setQueueQuery(event.target.value)}
+								onChange={event => {
+									setQueueQuery(event.target.value)
+									if (pendingStatementId || candidateQueryParam)
+										selectPending(null, queueQueryParam)
+								}}
 							/>
 							<FilterBar>
 								<Select
@@ -292,20 +393,20 @@ export default function AllocatorPendingPage() {
 
 						{pendingStatements.data.length ? (
 							<div className="flex flex-col gap-2">
-								<AnimatePresence initial={false} mode="popLayout">
-									{pendingStatements.data.map(statement => (
+								<AnimatePresence mode="popLayout">
+									{pendingStatements.data.map((statement, index) => (
 										<motion.div
 											layout="position"
 											key={statement.id}
-											initial={{ opacity: 0, y: 6 }}
-											animate={{ opacity: 1, y: 0 }}
+											{...cardEnter(index)}
+											data-slot="pending-queue-item"
 											exit={{
 												opacity: 0,
 												scale: 0.97,
 												transition: TRANSITION.fast,
 											}}
 											transition={{
-												...TRANSITION.base,
+												...cardEnter(index).transition,
 												layout: SPRING.snappy,
 											}}
 										>
@@ -336,17 +437,19 @@ export default function AllocatorPendingPage() {
 							</Empty>
 						)}
 
-						<PaginationFooter
-							summary={`Showing ${pendingStatements.data.length} of ${pendingStatements.total} pending Statements.`}
-							page={pendingStatements.current_page}
-							lastPage={pendingStatements.last_page ?? 1}
-						/>
+						{pendingQuery !== undefined && (
+							<PaginationFooter
+								summary={`Showing ${pendingStatements.data.length} of ${pluralize(pendingStatements.total, "pending Statement")}.`}
+								page={pendingStatements.current_page}
+								lastPage={pendingStatements.last_page ?? 1}
+							/>
+						)}
 					</section>
 
 					<section
 						className={cn(
 							"min-w-0 flex-col gap-4",
-							selectedPendingStatement ? "flex" : "hidden md:flex",
+							selectedPendingStatement ? "flex" : "hidden @4xl/page:flex",
 						)}
 						aria-labelledby="candidate-title"
 					>
@@ -363,7 +466,7 @@ export default function AllocatorPendingPage() {
 								>
 									<Button
 										variant="outline"
-										className="w-fit md:hidden"
+										className="w-fit @4xl/page:hidden"
 										onClick={() => selectPending(null)}
 									>
 										<IconifyIcon
@@ -383,7 +486,7 @@ export default function AllocatorPendingPage() {
 											</p>
 											<div className="flex items-start justify-between gap-3">
 												<div className="min-w-0">
-													<p className="truncate font-semibold">
+													<p className="truncate text-sm font-semibold">
 														{selectedPendingStatement.description}
 													</p>
 													<p className="text-xs text-muted-foreground">
@@ -403,7 +506,7 @@ export default function AllocatorPendingPage() {
 												</div>
 												<span
 													className={cn(
-														"shrink-0 text-lg font-semibold tabular-nums",
+														"shrink-0 text-lg font-semibold tracking-tight tabular-nums",
 														classForCurrency(
 															selectedPendingStatement.amount,
 														),
@@ -417,7 +520,7 @@ export default function AllocatorPendingPage() {
 										</div>
 										<h3
 											id="candidate-title"
-											className="font-heading text-base font-medium"
+											className="font-heading text-sm font-semibold"
 										>
 											Imported Statements it could become
 										</h3>
@@ -470,9 +573,6 @@ export default function AllocatorPendingPage() {
 									<CandidateResults
 										data={candidates ?? null}
 										error={null}
-										showLoading={
-											candidates === undefined && !!selectedPendingStatement
-										}
 										scope={candidateScope}
 										onReview={setReviewStatement}
 										onPage={page =>
@@ -512,8 +612,8 @@ export default function AllocatorPendingPage() {
 			<StatementReplacementReviewDialog
 				statement={reviewStatement}
 				pendingStatement={selectedPendingStatement}
-				open={!!reviewStatement}
-				onOpenChange={open => {
+				isOpen={!!reviewStatement}
+				setIsOpen={open => {
 					if (!open) setReviewStatement(null)
 				}}
 				onConfirmed={afterReplacement}
@@ -559,7 +659,7 @@ function PendingCard({
 	selected: boolean
 	onSelect: () => void
 }) {
-	const allocated = round2dp(statement.amount - statement.allocable_amount)
+	const allocated = round2(statement.amount - statement.allocable_amount)
 	return (
 		<button
 			type="button"
@@ -619,14 +719,12 @@ function PendingCard({
 function CandidateResults({
 	data,
 	error,
-	showLoading,
 	scope,
 	onReview,
 	onPage,
 }: {
 	data: CandidatePage | null
 	error: string | null
-	showLoading: boolean
 	scope: string
 	onReview: (statement: Statement) => void
 	onPage: (page: number) => void
@@ -644,18 +742,7 @@ function CandidateResults({
 				</Alert>
 			</motion.div>
 		)
-	if (!data)
-		return showLoading ? (
-			<motion.div
-				initial={{ opacity: 0 }}
-				animate={{ opacity: 1 }}
-				transition={transition}
-				className="flex items-center gap-2 py-4 text-xs text-muted-foreground"
-			>
-				<IconifyIcon icon="lucide:loader-circle" className="animate-spin" />
-				Finding imported Statements…
-			</motion.div>
-		) : null
+	if (!data) return null
 	if (!data.data.length)
 		return (
 			<motion.div initial={initial} animate={{ opacity: 1, y: 0 }} transition={transition}>
@@ -688,11 +775,13 @@ function CandidateResults({
 			className="flex flex-col gap-3"
 		>
 			<div className="flex flex-col gap-2">
-				{data.data.map(statement => (
+				{data.data.map((statement, index) => (
 					<motion.div
 						key={statement.id}
+						data-slot="pending-candidate-item"
 						layout="position"
-						transition={{ layout: SPRING.snappy }}
+						{...cardEnter(index)}
+						transition={{ ...cardEnter(index).transition, layout: SPRING.snappy }}
 					>
 						<div
 							className={cn(
@@ -777,7 +866,7 @@ function CandidateResults({
 			</div>
 			<div className="flex flex-col gap-2 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
 				<span>
-					Showing {data.data.length} of {data.total} imported Statements.
+					Showing {data.data.length} of {pluralize(data.total, "imported Statement")}.
 				</span>
 				<div className="flex gap-1.5">
 					<Button

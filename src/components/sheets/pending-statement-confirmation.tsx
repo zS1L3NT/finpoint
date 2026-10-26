@@ -12,8 +12,7 @@ import {
 	SheetTitle,
 	SheetTrigger,
 } from "@/components/ui/sheet"
-import { classForCurrency, cn, formatCurrency, formatDatetime } from "@/lib/utils"
-import { round2 } from "@/logic/shared"
+import { classForCurrency, cn, formatCurrency, formatDatetime, round2 } from "@/lib/utils"
 import { listStatements } from "@/logic/statements"
 import type { Statement } from "@/types"
 
@@ -32,21 +31,36 @@ export default function PendingStatementConfirmationSheet({
 }) {
 	const [query, setQuery] = useState("")
 	const [pendingStatement, setPendingStatement] = useState<Statement | null>(null)
-	const statements =
-		useLiveQuery(() => {
-			if (!isOpen || !statement) return []
-			return listStatements({
-				query: query || null,
-				account_id: statement.account.id,
-				is_pending: "true",
-			})
-		}, [isOpen, query, statement?.id]) ?? []
-
+	const [epoch, setEpoch] = useState(0)
 	useEffect(() => {
 		if (!isOpen) {
+			setEpoch(value => value + 1)
 			setQuery("")
 		}
 	}, [isOpen])
+	const accountId = statement?.account.id
+	const statementId = statement?.id
+	const data = useLiveQuery(async () => {
+		if (!isOpen || !accountId || !statementId) return null
+		const rows = await listStatements({
+			query: query || null,
+			account_id: accountId,
+			is_pending: "true",
+		})
+		return { epoch, statementId, accountId, query, rows }
+	}, [isOpen, epoch, statementId, accountId, query])
+	// Keep rows through query changes, but never carry them across openings
+	// or onto a different Statement or Account.
+	const current =
+		isOpen &&
+		data != null &&
+		data.epoch === epoch &&
+		data.statementId === statementId &&
+		data.accountId === accountId
+			? data
+			: undefined
+	const statements = current?.rows
+	const stale = current !== undefined && current.query !== query
 
 	const review = (pending: Statement) => {
 		setPendingStatement(pending)
@@ -97,8 +111,13 @@ export default function PendingStatementConfirmationSheet({
 						</div>
 					</div>
 
-					<div className="flex-1 overflow-y-auto overscroll-contain">
-						{statements.length === 0 ? (
+					<div
+						className={cn(
+							"flex-1 overflow-y-auto overscroll-contain transition-opacity duration-150 ease-out",
+							stale && "opacity-70",
+						)}
+					>
+						{statements === undefined ? null : statements.length === 0 ? (
 							<p className="px-6 py-16 text-center text-sm text-muted-foreground">
 								No pending Statements for this Account.
 							</p>
@@ -157,8 +176,8 @@ export default function PendingStatementConfirmationSheet({
 			<StatementReplacementReviewDialog
 				statement={statement}
 				pendingStatement={pendingStatement}
-				open={!!pendingStatement && !isOpen}
-				onOpenChange={open => {
+				isOpen={!!pendingStatement && !isOpen}
+				setIsOpen={open => {
 					if (!open) {
 						setPendingStatement(null)
 						setIsOpen(true)

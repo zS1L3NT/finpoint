@@ -1,5 +1,5 @@
 import { DateTime } from "luxon"
-import { FormField, type FormFieldProps } from "@/components/form/field"
+import { AUTOPOPULATED_BORDER, FormField, type FormFieldProps } from "@/components/form/field"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils"
 type Props = FormFieldProps & {
 	value: string
 	placeholder?: string
+	autopopulatedTime?: boolean
 	onChange: (value: string) => void
 }
 
@@ -28,11 +29,13 @@ export default function DatetimeField({
 	id,
 	label,
 	description,
+	autopopulated,
 	errors,
 	disabled,
 	className,
 	value,
-	placeholder = "Select date & time",
+	placeholder = "Select date and time",
+	autopopulatedTime = false,
 	onChange,
 }: Props) {
 	const selected = parseValue(value)
@@ -75,6 +78,7 @@ export default function DatetimeField({
 			id={id}
 			label={label}
 			description={description}
+			autopopulated={autopopulated}
 			errors={errors}
 			disabled={disabled}
 			className={className}
@@ -88,10 +92,17 @@ export default function DatetimeField({
 								variant="outline"
 								disabled={disabled}
 								aria-invalid={invalid}
+								aria-describedby={
+									autopopulated && !invalid ? `${id}-autopopulated` : undefined
+								}
 								className={cn(
 									"min-w-0 max-w-full justify-start text-left text-sm font-normal md:text-xs/relaxed border-input",
 									!selected && "text-muted-foreground",
-									invalid ? "border-destructive" : null,
+									invalid
+										? "border-destructive"
+										: autopopulated
+											? AUTOPOPULATED_BORDER
+											: null,
 								)}
 							>
 								<IconifyIcon icon="lucide:calendar" />
@@ -120,9 +131,18 @@ export default function DatetimeField({
 					disabled={disabled}
 					onChange={event => updateTime(event.target.value)}
 					aria-invalid={invalid}
+					aria-describedby={
+						autopopulated && autopopulatedTime && !invalid
+							? `${id}-autopopulated`
+							: undefined
+					}
 					className={cn(
 						"min-w-0 max-w-full appearance-none [max-inline-size:100%] [min-inline-size:0]",
-						invalid ? "border-destructive" : null,
+						invalid
+							? "border-destructive"
+							: autopopulated && autopopulatedTime
+								? AUTOPOPULATED_BORDER
+								: null,
 					)}
 				/>
 			</div>

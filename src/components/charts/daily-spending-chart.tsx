@@ -1,16 +1,13 @@
 import { DateTime } from "luxon"
 import { useRouter } from "next/navigation"
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
-import BucketBadge from "@/components/bucket-badge"
-import { useChartIntro } from "@/components/charts/chart-intro"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import BarChart from "@/components/charts/bar-chart"
+import MonthlyBudgetBadge from "@/components/monthly-budget-badge"
 import { useHistory } from "@/history"
-import { useIsMobile } from "@/hooks/use-mobile"
-import { armTabTransition } from "@/hooks/use-tab-transition"
-import { formatCurrency } from "@/lib/utils"
+import { dayTicks } from "@/lib/chart-days"
+import { themeColor } from "@/lib/palette"
 import { pathMonthlyRecords } from "@/routes"
 
-export type BucketLine = {
+export type MonthlyBudgetLine = {
 	id: string
 	name: string
 	color: string
@@ -20,26 +17,21 @@ export type BucketLine = {
 
 export default function DailySpendingChart({
 	rows,
-	buckets,
+	monthlyBudgets,
 	month,
 	year,
 }: {
 	rows: Record<string, number | null>[]
-	buckets: BucketLine[]
+	monthlyBudgets: MonthlyBudgetLine[]
 	month: string
 	year: number
 }) {
-	const intro = useChartIntro()
-	const isMobile = useIsMobile()
 	const router = useRouter()
 	const { handlePush } = useHistory()
-	const interval = isMobile ? Math.max(Math.floor(rows.length / 4), 0) : "preserveStartEnd"
-	const openDay = (state: { activeLabel?: number | string } | null) => {
-		if (!state?.activeLabel) return
+	const openDay = (index: number) => {
 		const selected = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
-			.set({ day: Number(state.activeLabel) })
+			.set({ day: Number(rows[index]?.day ?? index + 1) })
 			.toFormat("yyyy-MM-dd")
-		armTabTransition()
 		handlePush("overview")()
 		void router.push(
 			pathMonthlyRecords({
@@ -54,79 +46,36 @@ export default function DailySpendingChart({
 	return (
 		<div className="grid gap-3">
 			<div className="flex flex-wrap gap-1.5">
-				{buckets.map(bucket => (
-					<BucketBadge key={bucket.id} name={bucket.name} color={bucket.color} />
+				{monthlyBudgets.map(monthlyBudget => (
+					<MonthlyBudgetBadge
+						key={monthlyBudget.id}
+						name={monthlyBudget.name}
+						color={monthlyBudget.color}
+					/>
 				))}
 			</div>
-			<ChartContainer
-				className="h-64 w-full aspect-auto cursor-pointer sm:h-72"
-				config={Object.fromEntries(
-					buckets.map(bucket => [bucket.id, { label: bucket.name, color: bucket.color }]),
+			<BarChart
+				label="Spending by day"
+				className="h-48 w-full min-w-0 sm:h-64"
+				labels={rows.map(row => `${month} ${row.day}`)}
+				layout="stack"
+				// Stacked so a day's bar height is its total outflow.
+				series={monthlyBudgets.map(monthlyBudget => ({
+					key: monthlyBudget.id,
+					label: monthlyBudget.name,
+					color: themeColor(monthlyBudget.color),
+					opacity: monthlyBudget.dashed ? 0.55 : 1,
+					values: rows.map(row => row[monthlyBudget.id] ?? 0),
+				}))}
+				ticks={dayTicks(rows.length).map(day => day - 1)}
+				tick={index => (
+					<text textAnchor="middle" dy="1em">
+						{rows[index]?.day}
+					</text>
 				)}
-			>
-				<BarChart
-					data={rows}
-					barCategoryGap={isMobile ? 1 : 3}
-					onClick={openDay}
-					style={{ cursor: "pointer" }}
-					accessibilityLayer
-				>
-					<CartesianGrid vertical={false} />
-					<XAxis
-						dataKey="day"
-						interval={interval}
-						tickMargin={8}
-						tickLine={false}
-						axisLine={false}
-					/>
-					<YAxis
-						tickLine={false}
-						axisLine={false}
-						width={isMobile ? 44 : 64}
-						tickFormatter={value => formatCurrency(Number(value)).replace(/\.00$/, "")}
-					/>
-					<ChartTooltip
-						cursor={{ fill: "var(--muted)", fillOpacity: 0.6 }}
-						content={
-							<ChartTooltipContent
-								labelFormatter={(label, payload) =>
-									`${month} ${payload[0]?.payload.day ?? label}`
-								}
-								formatter={(value, name, item) => (
-									<div className="flex min-w-40 items-center justify-between gap-4">
-										<span className="flex items-center gap-2 text-muted-foreground">
-											<span
-												className="size-2 shrink-0 rounded-full"
-												style={{ backgroundColor: item.color }}
-											/>
-											{String(name)}
-										</span>
-										<span className="font-medium tabular-nums">
-											{formatCurrency(Number(value))}
-										</span>
-									</div>
-								)}
-							/>
-						}
-					/>
-					{buckets.map((bucket, index) => (
-						// Stacked so a day's bar height is its total outflow; the
-						// 1px card-coloured stroke keeps adjacent segments apart.
-						<Bar
-							key={bucket.id}
-							dataKey={bucket.id}
-							name={bucket.name}
-							stackId="day"
-							fill={bucket.color}
-							fillOpacity={bucket.dashed ? 0.55 : 1}
-							stroke="var(--card)"
-							strokeWidth={1}
-							radius={index === buckets.length - 1 ? [3, 3, 0, 0] : 0}
-							{...intro}
-						/>
-					))}
-				</BarChart>
-			</ChartContainer>
+				introKey={`${month}-${year}`}
+				onSelect={openDay}
+			/>
 		</div>
 	)
 }

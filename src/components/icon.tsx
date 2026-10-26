@@ -3,6 +3,7 @@ import type { IconName } from "lucide-react/dynamic"
 import dynamicIconImports from "lucide-react/dynamicIconImports"
 import { useEffect, useState } from "react"
 import { ICONS } from "@/components/icons"
+import { themeColor } from "@/lib/palette"
 import { cn } from "@/lib/utils"
 
 export const ICON_NAMES = Object.keys(dynamicIconImports) as IconName[]
@@ -107,7 +108,7 @@ export default function Icon({
 	return (
 		<div
 			className="flex justify-center items-center rounded"
-			style={{ width: size * 2, height: size * 2, backgroundColor: color ?? undefined }}
+			style={{ width: size * 2, height: size * 2, backgroundColor: themeColor(color) }}
 		>
 			<UiIcon
 				icon={icon ?? "circle-question-mark"}

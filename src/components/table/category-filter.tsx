@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
-import { CategoryWithChildren } from "@/types"
+import type { CategoryWithChildren } from "@/types"
 
 export default function CategoryFilter({
 	categories,

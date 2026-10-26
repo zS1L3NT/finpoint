@@ -1,25 +1,53 @@
 "use client"
 
 import { DateTime } from "luxon"
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
 import { cn, formatCurrency } from "@/lib/utils"
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 const STEPS = 5
 const LEVELS = Array.from({ length: STEPS + 1 }, (_, level) => level)
-// Ink per heat step: light steps 3+ are dark fills; in dark mode the ramp
-// inverts, so only the brightest step needs dark ink.
+// One green whose strength grows with spending: only the cell's fill fades, so the
+// day and amount stay fully opaque. Ink turns dark once the green is strong.
+const STRENGTH = [0, 0.2, 0.38, 0.56, 0.78, 1]
 const INK = [
 	"text-muted-foreground",
 	"text-foreground",
-	"text-foreground dark:text-white",
-	"text-white",
-	"text-white",
-	"text-white dark:text-zinc-950",
+	"text-foreground",
+	"text-foreground",
+	"text-zinc-950",
+	"text-zinc-950",
 ]
+const heat = (level: number) =>
+	level
+		? `color-mix(in oklab, var(--creative) ${(STRENGTH[level] ?? 1) * 100}%, transparent)`
+		: "var(--muted)"
 
 function compact(value: number) {
 	if (value >= 1000) return `$${(value / 1000).toFixed(1)}k`
 	return `$${Math.round(value)}`
+}
+
+/** Linear-interpolated quantile of an ascending list. */
+function quantile(sorted: number[], q: number) {
+	const position = (sorted.length - 1) * q
+	const lower = sorted[Math.floor(position)] ?? 0
+	const upper = sorted[Math.ceil(position)] ?? lower
+	return lower + (upper - lower) * (position - Math.floor(position))
+}
+
+/**
+ * Top of the colour ramp: the month's largest day, unless it is an outlier past the
+ * Tukey fence (Q3 + 1.5 IQR), in which case the fence. One big purchase then shares the
+ * top shade instead of flattening every ordinary day into the lightest one.
+ */
+function rampCap(sorted: number[]) {
+	const max = sorted.at(-1) ?? 0
+	if (sorted.length < 4) return max
+	const q1 = quantile(sorted, 0.25)
+	const q3 = quantile(sorted, 0.75)
+	return Math.min(max, q3 + 1.5 * (q3 - q1))
 }
 
 /**
@@ -44,17 +72,23 @@ export default function SpendingCalendar({
 	const byDate = new Map(daily.map(day => [day.date, day]))
 	const max = Math.max(...daily.map(day => day.spending), 0)
 	const leading = start.weekday - 1
-	// Quantile steps over the month's spending days, so one large purchase
-	// does not flatten every other day into the lowest shade.
+	// Shade is proportional to the amount (so near-equal days always match), up to a cap
+	// that ignores outliers; anything past the cap takes the top shade.
 	const sorted = daily
 		.map(day => day.spending)
 		.filter(value => value > 0)
 		.sort((a, b) => a - b)
-	const thresholds = LEVELS.slice(1, STEPS).map(
-		level => sorted[Math.floor((level / STEPS) * sorted.length)] ?? 0,
-	)
+	const cap = rampCap(sorted)
 	const step = (value: number) =>
-		value <= 0 ? 0 : 1 + thresholds.filter(threshold => value >= threshold).length
+		value <= 0 ? 0 : Math.min(STEPS, Math.max(1, Math.ceil((value / cap) * STEPS)))
+	// Tapping a day reads it in the strip below; a mouse previews by hovering.
+	const [selected, setSelected] = useState<string | null>(null)
+	const [preview, setPreview] = useState<string | null>(null)
+	// The calendar stays mounted across months, so a day kept from another month is ignored.
+	const inMonth = (key: string | null) =>
+		key?.startsWith(start.toFormat("yyyy-MM-")) ? key : null
+	const shown = inMonth(preview) ?? inMonth(selected)
+	const shownEntry = shown ? byDate.get(shown) : undefined
 	const spendDays = daily.filter(day => day.spending > 0).length
 	const total = daily.reduce((sum, day) => sum + Math.max(day.spending, 0), 0)
 
@@ -87,19 +121,25 @@ export default function SpendingCalendar({
 							title={label}
 							aria-label={label}
 							disabled={future}
-							onClick={() => onSelect(key)}
+							aria-pressed={key === selected}
+							onClick={() => setSelected(key)}
+							onPointerEnter={event => {
+								if (event.pointerType === "mouse" && !future) setPreview(key)
+							}}
+							onPointerLeave={() => setPreview(null)}
 							className={cn(
-								"group relative flex aspect-square min-h-9 cursor-pointer flex-col justify-between rounded-md p-1 text-left transition-[background-color,box-shadow,transform] duration-150 ease-out hover:z-10 hover:scale-[1.04] hover:shadow-md active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-default disabled:opacity-40 disabled:hover:scale-100 disabled:hover:shadow-none disabled:active:scale-100 sm:p-1.5",
+								"group relative flex aspect-square min-h-9 cursor-pointer flex-col justify-between rounded-md p-1 text-left ring-offset-2 ring-offset-card transition-[background-color,box-shadow] duration-150 ease-out motion-reduce:transition-none hover:ring-2 hover:ring-foreground/30 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-default disabled:opacity-40 disabled:hover:ring-0 sm:p-1.5",
+								key === selected && "ring-2 ring-foreground hover:ring-foreground",
 								INK[level],
 								future && "border border-dashed bg-transparent",
 							)}
-							style={future ? undefined : { backgroundColor: `var(--heat-${level})` }}
+							style={future ? undefined : { backgroundColor: heat(level) }}
 						>
-							<span className="text-[0.625rem] leading-none font-medium tabular-nums opacity-80 sm:text-[0.6875rem]">
+							<span className="text-[0.6875rem] leading-none font-medium tabular-nums opacity-80">
 								{index + 1}
 							</span>
 							{level > 0 ? (
-								<span className="hidden text-[0.625rem] leading-none font-semibold tabular-nums sm:block">
+								<span className="hidden text-[0.6875rem] leading-none font-semibold tabular-nums sm:block">
 									{compact(spending)}
 								</span>
 							) : null}
@@ -108,19 +148,37 @@ export default function SpendingCalendar({
 				})}
 			</div>
 			<div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
-				<span>
-					{spendDays} spending day{spendDays === 1 ? "" : "s"} · {formatCurrency(total)}
-				</span>
+				{shown ? (
+					<span className="flex min-h-8 items-center gap-3" aria-live="polite">
+						<span className="text-foreground">
+							{DateTime.fromISO(shown).toFormat("ccc d LLL")} ·{" "}
+							<span className="font-medium tabular-nums">
+								{formatCurrency(Math.max(shownEntry?.spending ?? 0, 0))}
+							</span>
+							{shownEntry?.records
+								? ` · ${shownEntry.records} Record${shownEntry.records === 1 ? "" : "s"}`
+								: ""}
+						</span>
+						<Button variant="outline" size="sm" onClick={() => onSelect(shown)}>
+							View Records
+						</Button>
+					</span>
+				) : (
+					<span className="flex min-h-8 items-center">
+						{spendDays} spending day{spendDays === 1 ? "" : "s"} ·{" "}
+						{formatCurrency(total)}
+					</span>
+				)}
 				<span className="flex items-center gap-1.5">
 					$0
 					{LEVELS.map(level => (
 						<span
 							key={level}
 							className="size-3 rounded-sm"
-							style={{ backgroundColor: `var(--heat-${level})` }}
+							style={{ backgroundColor: heat(level) }}
 						/>
 					))}
-					{max > 0 ? compact(max) : "—"}
+					{max > 0 ? `${compact(cap)}${max > cap ? "+" : ""}` : "—"}
 				</span>
 			</div>
 		</div>

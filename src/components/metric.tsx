@@ -34,6 +34,7 @@ export function Metric({
 	delta,
 	spark,
 	sparkColor,
+	sparkPeriod,
 }: {
 	icon: string
 	label: string
@@ -43,18 +44,21 @@ export function Metric({
 	delta?: Delta
 	spark?: number[]
 	sparkColor?: string
+	/** What each sparkline point covers, when not the whole month (e.g. "days 1–8"). */
+	sparkPeriod?: string
 }) {
 	return (
 		<div
 			className={cn(
-				"relative grid min-h-28 min-w-0 content-between bg-card p-3 sm:p-4",
+				"relative grid min-h-24 min-w-0 content-start bg-card p-3 sm:p-4",
 				tone !== "neutral" &&
 					"before:absolute before:inset-x-0 before:top-0 before:h-0.5 before:content-['']",
-				tone === "positive" && "before:bg-emerald-500",
+				tone === "positive" && "before:bg-creative",
 				tone === "negative" && "before:bg-red-500",
 			)}
 		>
-			<div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-medium text-muted-foreground">
+			{/* min-h matches the delta chip, so tiles with and without one keep values level. */}
+			<div className="flex min-h-5 flex-wrap items-center gap-x-2 gap-y-1 text-xs font-medium text-muted-foreground">
 				<span className="hidden size-7 place-items-center rounded-lg border bg-background text-foreground shadow-xs sm:grid">
 					<IconifyIcon icon={icon} className="size-3.5" />
 				</span>
@@ -65,7 +69,7 @@ export function Metric({
 						className={cn(
 							"ml-auto rounded-full px-1.5 py-0.5 text-[0.6875rem] font-semibold whitespace-nowrap tabular-nums",
 							delta.good
-								? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+								? "bg-creative/10 text-creative"
 								: "bg-red-500/10 text-red-700 dark:text-red-400",
 						)}
 					>
@@ -73,12 +77,12 @@ export function Metric({
 					</span>
 				) : null}
 			</div>
-			<div className="mt-4 flex items-end justify-between gap-3">
+			<div className="mt-3 flex items-end justify-between gap-3">
 				<div className="min-w-0">
 					<p
 						className={cn(
-							"text-xl font-semibold tracking-tight tabular-nums sm:text-2xl",
-							tone === "positive" && "text-emerald-700 dark:text-emerald-400",
+							"text-lg font-semibold tracking-tight tabular-nums sm:text-xl",
+							tone === "positive" && "text-creative",
 							tone === "negative" && "text-red-700 dark:text-red-400",
 						)}
 					>
@@ -90,7 +94,7 @@ export function Metric({
 					<Sparkline
 						values={spark}
 						color={sparkColor}
-						label={`${label}, last ${spark.length} months`}
+						label={`${label}, ${sparkPeriod ? `${sparkPeriod} of each of ` : ""}the last ${spark.length} months`}
 						className="mb-1 hidden shrink-0 text-muted-foreground xl:block"
 					/>
 				) : null}

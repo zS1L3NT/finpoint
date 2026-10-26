@@ -1,0 +1,231 @@
+# Continuous integration on GitHub-hosted runners (free for this public repository).
+# Browser tests run as named groups of files, balanced by measured run time, so a red
+# job names the area that broke. Core groups run every project in parallel; animation
+# groups run one test at a time, since they sample animation frames. The `core` and
+# `animations` jobs gate their groups and merge the blob reports into one HTML report
+# artifact; with `checks` and `domain` they are the checks the ruleset requires.
+# The ledger fails if a browser test file is missing from these groups or listed twice.
+#
+# The workflow runs on every change so required checks always report; `changes` skips
+# the jobs a change cannot affect, and GitHub counts a job skipped by `if` as passing.
+# Docs and the project graph affect nothing; domain tests do not affect the browser
+# suite. If change detection fails, everything runs.
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PLAYWRIGHT_SERVER: production
+
+jobs:
+  changes:
+    runs-on: ubuntu-24.04
+    outputs:
+      code: ${{ steps.scope.outputs.code }}
+      e2e: ${{ steps.scope.outputs.e2e }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - id: scope
+        name: Scope the run to what changed
+        run: |
+          case "${{ github.event_name }}" in
+            pull_request) base="${{ github.event.pull_request.base.sha }}" ;;
+            push) base="${{ github.event.before }}" ;;
+            *) base="" ;;
+          esac
+          if [ -n "$base" ] && git cat-file -e "$base^{commit}" 2>/dev/null; then
+            files=$(git diff --name-only "$base" HEAD)
+          else
+            files="(unknown base: run everything)"
+          fi
+          code=$(grep -Ev '\.md$|^graphify-out/|^docs/|^\.scratch/|^LICENSE' <<< "$files" || true)
+          e2e=$(grep -Ev '^tests/domain/' <<< "$code" || true)
+          echo "code=$([ -n "$code" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          echo "e2e=$([ -n "$e2e" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          {
+            echo "### Changed files"
+            echo '```'
+            echo "$files"
+            echo '```'
+            echo "Checks and domain tests: $([ -n "$code" ] && echo run || echo skipped)."
+            echo "Browser tests: $([ -n "$e2e" ] && echo run || echo skipped)."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  checks:
+    needs: changes
+    if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.code == 'true') }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - name: Lint
+        run: bun lint:check
+      - name: Types
+        run: bun types:check
+      - name: Browser test types
+        run: bun run types:e2e
+
+  domain:
+    needs: changes
+    if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.code == 'true') }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - name: Domain tests
+        run: bun test
+
+  core-group:
+    name: core (${{ matrix.group }})
+    needs: changes
+    if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.e2e == 'true') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - group: pages
+            files: tests/core/routes.e2e.ts
+          - group: flows
+            files: tests/core/navigation.e2e.ts tests/core/workflows.e2e.ts
+          - group: editing
+            files: tests/core/editors.e2e.ts tests/core/modals.e2e.ts tests/core/keyboard.e2e.ts
+          - group: data
+            files: tests/core/charts.e2e.ts tests/core/tables.e2e.ts
+          - group: components
+            files: tests/core/components.e2e.ts tests/core/sheets.e2e.ts tests/core/helpers.e2e.ts tests/core/ledger.e2e.ts
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - name: Playwright core (${{ matrix.group }})
+        run: >-
+          bunx playwright test ${{ matrix.files }}
+          --workers=2 --reporter=list,blob
+        env:
+          PLAYWRIGHT_BLOB_OUTPUT_FILE: blob-report/core-${{ matrix.group }}.zip
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: blob-core-${{ matrix.group }}
+          path: blob-report
+          retention-days: 7
+
+  animations-group:
+    name: animations (${{ matrix.group }})
+    needs: changes
+    if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.e2e == 'true') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - group: tables
+            files: tests/animations/tables.e2e.ts
+          - group: editing
+            files: tests/animations/editors.e2e.ts tests/animations/modals.e2e.ts tests/animations/sheets.e2e.ts
+          - group: display
+            files: tests/animations/charts.e2e.ts tests/animations/routes.e2e.ts tests/animations/components.e2e.ts tests/animations/helpers.e2e.ts
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - name: Playwright animations (${{ matrix.group }})
+        run: >-
+          bunx playwright test ${{ matrix.files }}
+          --workers=1 --reporter=list,blob
+        env:
+          PLAYWRIGHT_ANIMATIONS: "1"
+          PLAYWRIGHT_BLOB_OUTPUT_FILE: blob-report/animations-${{ matrix.group }}.zip
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: blob-animations-${{ matrix.group }}
+          path: blob-report
+          retention-days: 7
+
+  core:
+    needs: [changes, core-group]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-24.04
+    env:
+      RAN: ${{ needs.changes.result != 'success' || needs.changes.outputs.e2e == 'true' }}
+    steps:
+      - uses: actions/checkout@v7
+        if: ${{ env.RAN == 'true' }}
+      - uses: oven-sh/setup-bun@v2
+        if: ${{ env.RAN == 'true' }}
+      - run: bun install --frozen-lockfile
+        if: ${{ env.RAN == 'true' }}
+      - uses: actions/download-artifact@v8
+        if: ${{ env.RAN == 'true' }}
+        with:
+          pattern: blob-core-*
+          path: blob-report
+          merge-multiple: true
+      - name: Merge reports
+        if: ${{ env.RAN == 'true' }}
+        run: bunx playwright merge-reports --reporter=html,github ./blob-report
+      - uses: actions/upload-artifact@v7
+        if: ${{ env.RAN == 'true' }}
+        with:
+          name: playwright-report-core
+          path: playwright-report
+          retention-days: 14
+      - name: Gate
+        if: ${{ always() }}
+        run: |
+          if [ "$RAN" != true ]; then echo "No browser-affecting changes: core skipped."; exit 0; fi
+          if [ "${{ needs.core-group.result }}" != success ]; then
+            echo "::error::core groups: ${{ needs.core-group.result }}"
+            exit 1
+          fi
+
+  animations:
+    needs: [changes, animations-group]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-24.04
+    env:
+      RAN: ${{ needs.changes.result != 'success' || needs.changes.outputs.e2e == 'true' }}
+    steps:
+      - uses: actions/checkout@v7
+        if: ${{ env.RAN == 'true' }}
+      - uses: oven-sh/setup-bun@v2
+        if: ${{ env.RAN == 'true' }}
+      - run: bun install --frozen-lockfile
+        if: ${{ env.RAN == 'true' }}
+      - uses: actions/download-artifact@v8
+        if: ${{ env.RAN == 'true' }}
+        with:
+          pattern: blob-animations-*
+          path: blob-report
+          merge-multiple: true
+      - name: Merge reports
+        if: ${{ env.RAN == 'true' }}
+        run: bunx playwright merge-reports --reporter=html,github ./blob-report
+      - uses: actions/upload-artifact@v7
+        if: ${{ env.RAN == 'true' }}
+        with:
+          name: playwright-report-animations
+          path: playwright-report
+          retention-days: 14
+      - name: Gate
+        if: ${{ always() }}
+        run: |
+          if [ "$RAN" != true ]; then echo "No browser-affecting changes: animations skipped."; exit 0; fi
+          if [ "${{ needs.animations-group.result }}" != success ]; then
+            echo "::error::animations groups: ${{ needs.animations-group.result }}"
+            exit 1
+          fi

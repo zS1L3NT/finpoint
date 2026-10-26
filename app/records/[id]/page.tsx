@@ -2,7 +2,6 @@
 
 import { useLiveQuery } from "dexie-react-hooks"
 import { use, useState } from "react"
-import BucketBadge from "@/components/bucket-badge"
 import { DetailSummary, DetailSummaryItem } from "@/components/detail-summary"
 import PendingStatementDialog from "@/components/dialogs/pending-statement"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
@@ -10,13 +9,13 @@ import { PendingHelp } from "@/components/help/pending-help"
 import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
+import MonthlyBudgetBadge from "@/components/monthly-budget-badge"
 import RecordAmount from "@/components/record-amount"
 import DataTable from "@/components/table/data-table"
 import { useStatementColumns, useStatementMobileRow } from "@/components/table/statement-columns"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { useFetch } from "@/hooks/use-fetch"
 import { treatmentLabel } from "@/lib/analytics"
 import { formatDatetime } from "@/lib/utils"
 import { listAccounts } from "@/logic/accounts"
@@ -28,8 +27,8 @@ import type { Allocation, Statement } from "@/types"
 export default function RecordPage({ params }: { params: Promise<{ id: string }> }) {
 	const { id } = use(params)
 	const data = useLiveQuery(() => (id ? getRecord(id).catch(() => null) : null), [id])
-	const accounts = useLiveQuery(() => listAccounts(), []) ?? []
-	const categories = useFetch(() => listCategories(), [])
+	const accounts = useLiveQuery(() => listAccounts(), [])
+	const categories = useLiveQuery(() => listCategories(), []) ?? []
 
 	const [isEditingRecord, setIsEditingRecord] = useState(false)
 	const [editingStatement, setEditingStatement] = useState<Statement | null>(null)
@@ -45,20 +44,19 @@ export default function RecordPage({ params }: { params: Promise<{ id: string }>
 	})
 
 	// undefined means the live query is still resolving; only null is genuinely missing.
-	if (data === undefined) return null
+	if (data === undefined || accounts === undefined) return null
 
 	if (!data) {
 		return (
 			<>
 				<PageContent>
-					<p className="text-sm text-muted-foreground">Record not found.</p>
+					<p className="text-xs text-muted-foreground">Record not found.</p>
 				</PageContent>
 			</>
 		)
 	}
 
 	const { statements, ...record } = data
-	const typedStatements = statements as unknown as (Statement & { pivot: Allocation })[]
 
 	return (
 		<>
@@ -71,7 +69,7 @@ export default function RecordPage({ params }: { params: Promise<{ id: string }>
 								<PendingHelp
 									amount={record.amount}
 									allocated={record.allocated_amount}
-									count={typedStatements.length}
+									count={statements.length}
 									pendingCount={record.pending_statement_count ?? 0}
 								/>
 							)}
@@ -95,7 +93,7 @@ export default function RecordPage({ params }: { params: Promise<{ id: string }>
 					actions={
 						<RecordEditorDialog
 							record={record}
-							statements={typedStatements}
+							statements={statements}
 							categories={categories}
 							isOpen={isEditingRecord}
 							setIsOpen={setIsEditingRecord}
@@ -117,10 +115,10 @@ export default function RecordPage({ params }: { params: Promise<{ id: string }>
 						<div className="flex flex-wrap items-center gap-x-5 gap-y-1">
 							<span>Treatment · {treatmentLabel(record.analytics_treatment)}</span>
 							<span className="flex items-center gap-1.5">
-								Spending bucket ·{" "}
-								<BucketBadge
-									name={record.bucket?.name ?? "No bucket"}
-									color={record.bucket?.color}
+								Monthly budget ·{" "}
+								<MonthlyBudgetBadge
+									name={record.monthly_budget?.name ?? "Unbudgeted"}
+									color={record.monthly_budget?.color}
 								/>
 							</span>
 						</div>
@@ -143,7 +141,7 @@ export default function RecordPage({ params }: { params: Promise<{ id: string }>
 					/>
 					<DetailSummaryItem
 						icon="lucide:calendar-clock"
-						label="Date & Time"
+						label="Date and time"
 						value={formatDatetime(record.datetime)}
 					/>
 				</DetailSummary>
@@ -151,13 +149,11 @@ export default function RecordPage({ params }: { params: Promise<{ id: string }>
 				<Card>
 					<CardHeader>
 						<CardTitle>Statements</CardTitle>
-						<CardDescription>
-							Allocated statements attached to this record.
-						</CardDescription>
+						<CardDescription>Statements allocated to this record.</CardDescription>
 					</CardHeader>
 					<CardContent>
 						<DataTable
-							data={typedStatements}
+							data={statements}
 							columns={columns}
 							mobileRow={mobileRow}
 							emptyMessage="No statements found."

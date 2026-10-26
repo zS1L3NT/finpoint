@@ -1,19 +1,7 @@
 export type Appearance = "light" | "dark" | "system"
 
-export type SharedPageProps = {
-	appearance: Appearance
-	sidebarOpen: boolean
-}
-
-export type PaginatedLink = {
-	active: boolean
-	label: string
-	url: string | null
-}
-
 export type Paginated<T> = {
 	data: T[]
-	links: PaginatedLink[]
 	total: number
 	per_page: number
 	current_page: number
@@ -38,6 +26,7 @@ export type Statement = {
 	allocation_count: number
 	is_pending: boolean
 	is_unallocated: boolean
+	is_duplicate: boolean
 	account: Account
 }
 
@@ -46,19 +35,6 @@ export type PendingReplacementStatement = Statement & {
 }
 
 export type StatementReplacementCandidate = Statement & {
-	amount_difference: number
-	day_difference: number
-	is_exact_amount: boolean
-	allocated_amount: number
-	remaining_allocable_amount: number
-	can_replace: boolean
-	disabled_reason: string | null
-}
-
-export type StatementReplacementReview = {
-	pending_statement: Statement
-	statement: Statement
-	allocations: Array<Record & { allocation_amount: number }>
 	amount_difference: number
 	day_difference: number
 	is_exact_amount: boolean
@@ -85,9 +61,9 @@ export type Record = {
 	analytics_treatment: AnalyticsTreatment
 	analytics_treatment_source: "category" | "manual"
 	revision: number
-	bucket_id: string | null
-	bucket_source: "category" | "manual" | null
-	bucket?: Bucket | null
+	monthly_budget_id: string | null
+	monthly_budget_source: "category" | "manual" | null
+	monthly_budget?: MonthlyBudget | null
 }
 
 export type AnalyticsTreatment =
@@ -96,12 +72,6 @@ export type AnalyticsTreatment =
 	| "saving_investment"
 	| "neutral"
 	| "automatic"
-
-export type RecordCompletions = {
-	titles: string[]
-	locations: string[]
-	peoples: string[]
-}
 
 export type Category = {
 	id: string
@@ -112,8 +82,8 @@ export type Category = {
 	can_delete: boolean
 	records_count: number
 	analytics_treatment: AnalyticsTreatment | null
-	default_bucket_id: string | null
-	default_bucket?: Bucket | null
+	default_monthly_budget_id: string | null
+	default_monthly_budget?: MonthlyBudget | null
 }
 
 export type CategoryWithChildren = Category & {
@@ -134,7 +104,7 @@ export type Budget = {
 	automatic: boolean
 }
 
-export type Bucket = {
+export type MonthlyBudget = {
 	id: string
 	name: string
 	color: string
@@ -142,6 +112,7 @@ export type Bucket = {
 	pace_kind: "daily" | "recurring" | "none"
 	display_order: number
 	archived: boolean
+	amount?: number | null
 }
 
 export type AnalyticsSummary = {
@@ -158,7 +129,7 @@ export type AnalyticsSummary = {
 	pending_gross_spending: number
 	pending_refunds: number
 	pending_count: number
-	unbucketed_count: number
+	unbudgeted_count: number
 	daily: Array<{
 		date: string
 		income: number
@@ -174,8 +145,35 @@ export type AnalyticsSummary = {
 		icon: string
 		color: string
 		spending: number
+		outflow: number
+		refunds: number
 		records: number
-		bucket_spending: { [bucketId: string]: number }
+		monthly_budget_spending: { [monthlyBudgetId: string]: number }
 	}>
-	buckets: Array<Bucket & { spending: number; records: number }>
+	monthlyBudgets: Array<MonthlyBudget & { spending: number; records: number }>
+}
+
+/** Rules only read the Statement description; text comparisons ignore case. */
+export type RuleCondition = {
+	operator: "contains" | "equals" | "regex"
+	value: string
+}
+export type RuleMode = "suggest" | "autofill"
+export type RuleActions = {
+	title?: { mode: RuleMode; value: string }
+	people?: { mode: RuleMode; value: string }
+	location?: { mode: RuleMode; value: string }
+	category_id?: { mode: RuleMode; value: string }
+	analytics_treatment?: { mode: RuleMode; value: AnalyticsTreatment }
+	monthly_budget_id?: { mode: RuleMode; value: string | null }
+}
+export type RuleField = keyof RuleActions
+export type StatementRule = {
+	id: string
+	name: string
+	enabled: boolean
+	conditions: { mode: "all" | "any"; items: RuleCondition[] }
+	actions: RuleActions
+	created_at: string
+	updated_at: string
 }

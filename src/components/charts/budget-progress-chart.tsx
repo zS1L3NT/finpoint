@@ -1,22 +1,14 @@
 import { DateTime } from "luxon"
 import { useMemo } from "react"
-import {
-	type ActiveDotProps,
-	Area,
-	AreaChart,
-	CartesianGrid,
-	ReferenceLine,
-	XAxis,
-	YAxis,
-} from "recharts"
-import { useChartIntro } from "@/components/charts/chart-intro"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { useIsMobile } from "@/hooks/use-mobile"
-import { formatCurrency, parseDatetime, round2dp } from "@/lib/utils"
+import TrendChart from "@/components/charts/trend-chart"
+import { parseDatetime, round2 } from "@/lib/utils"
 import type { Record } from "@/types"
 
 type BudgetProgressPoint = {
+	/** Short axis label. */
 	date: string
+	/** Readout label with the year, since a Budget can cross into a new year. */
+	day: string
 	usage: number | null
 	projection: number | null
 }
@@ -34,163 +26,43 @@ export default function BudgetProgressChart({
 	limit: number
 	asOf: DateTime
 }) {
-	const intro = useChartIntro()
-	const isMobile = useIsMobile()
 	const data = useMemo(() => buildSeries(records, start, end, asOf), [records, start, end, asOf])
-	const interval = isMobile ? Math.max(Math.floor(data.length / 3), 0) : "preserveStartEnd"
-	const usageChange = colorChange(data, "usage", limit)
-	const projectionChange = colorChange(data, "projection", limit)
+	const last = data.length - 1
 
 	return (
 		<div className="grid gap-2">
 			<p className="text-xs font-medium text-muted-foreground">Cumulative spending · SGD</p>
-			<ChartContainer
-				className="h-72 w-full aspect-auto cursor-crosshair sm:h-80"
-				config={{
-					usage: { label: "Usage", color: "var(--color-emerald-500)" },
-					projection: { label: "Usage (projection)", color: "var(--color-amber-400)" },
-				}}
-			>
-				<AreaChart data={data} accessibilityLayer>
-					<defs>
-						<linearGradient id="budget-usage-line" x1="0" y1="0" x2="1" y2="0">
-							<stop offset={`${usageChange}%`} stopColor="var(--color-emerald-500)" />
-							<stop offset={`${usageChange}%`} stopColor="var(--color-rose-500)" />
-						</linearGradient>
-						<linearGradient id="budget-usage-fill" x1="0" y1="0" x2="1" y2="0">
-							<stop
-								offset={`${usageChange}%`}
-								stopColor="var(--color-emerald-500)"
-								stopOpacity={0.18}
-							/>
-							<stop
-								offset={`${usageChange}%`}
-								stopColor="var(--color-rose-500)"
-								stopOpacity={0.18}
-							/>
-						</linearGradient>
-						<linearGradient id="budget-projection-line" x1="0" y1="0" x2="1" y2="0">
-							<stop
-								offset={`${projectionChange}%`}
-								stopColor="var(--color-amber-400)"
-							/>
-							<stop
-								offset={`${projectionChange}%`}
-								stopColor="var(--color-orange-500)"
-							/>
-						</linearGradient>
-						<linearGradient id="budget-projection-fill" x1="0" y1="0" x2="1" y2="0">
-							<stop
-								offset={`${projectionChange}%`}
-								stopColor="var(--color-amber-400)"
-								stopOpacity={0.1}
-							/>
-							<stop
-								offset={`${projectionChange}%`}
-								stopColor="var(--color-orange-500)"
-								stopOpacity={0.12}
-							/>
-						</linearGradient>
-					</defs>
-
-					<CartesianGrid strokeDasharray="3 3" vertical />
-					<XAxis dataKey="date" interval={interval} tickMargin={8} />
-					<YAxis
-						width={isMobile ? 44 : 64}
-						domain={[0, (dataMax: number) => Math.max(dataMax, limit) * 1.05]}
-						tickFormatter={compactCurrency}
-					/>
-					<ReferenceLine
-						y={limit}
-						stroke="var(--muted-foreground)"
-						strokeDasharray="4 4"
-						label={{
-							value: "Budget limit",
-							position: "insideTopRight",
-							fill: "var(--muted-foreground)",
-							fontSize: 11,
-						}}
-					/>
-					<ChartTooltip
-						content={
-							<ChartTooltipContent
-								formatter={(value, name) => (
-									<div className="flex min-w-40 items-center justify-between gap-4">
-										<span className="text-muted-foreground">
-											{String(name)}
-										</span>
-										<span className="font-medium tabular-nums">
-											{formatCurrency(Number(value))}
-										</span>
-									</div>
-								)}
-							/>
-						}
-					/>
-					<Area
-						{...intro}
-						dataKey="usage"
-						name="Usage"
-						stroke="url(#budget-usage-line)"
-						fill="url(#budget-usage-fill)"
-						strokeWidth={2.5}
-						dot={false}
-						activeDot={props => (
-							<BudgetActiveDot
-								{...props}
-								field="usage"
-								limit={limit}
-								within="var(--color-emerald-500)"
-								exceeded="var(--color-rose-500)"
-							/>
-						)}
-					/>
-					<Area
-						{...intro}
-						dataKey="projection"
-						name="Usage (projection)"
-						stroke="url(#budget-projection-line)"
-						fill="url(#budget-projection-fill)"
-						strokeWidth={2.5}
-						strokeDasharray="7 5"
-						dot={false}
-						connectNulls
-						activeDot={props =>
-							props.payload.usage === null ? (
-								<BudgetActiveDot
-									{...props}
-									field="projection"
-									limit={limit}
-									within="var(--color-amber-400)"
-									exceeded="var(--color-orange-500)"
-								/>
-							) : null
-						}
-					/>
-				</AreaChart>
-			</ChartContainer>
+			<TrendChart
+				label="Cumulative budget spending by day"
+				className="h-72 w-full sm:h-80"
+				labels={data.map(point => point.day)}
+				ticks={[...new Set([0, Math.round(last / 3), Math.round((last * 2) / 3), last])]
+					.filter(index => index >= 0)
+					.map(index => ({ index, label: data[index]?.date ?? "" }))}
+				split={limit}
+				reference={{ value: limit, label: "Budget limit" }}
+				series={[
+					{
+						key: "projection",
+						label: "Usage (projection)",
+						values: data.map(point => point.projection),
+						color: "var(--color-amber-400)",
+						over: "var(--color-orange-500)",
+						dash: "7 5",
+						fill: 0.12,
+					},
+					{
+						key: "usage",
+						label: "Usage",
+						values: data.map(point => point.usage),
+						color: "var(--color-emerald-500)",
+						over: "var(--color-rose-500)",
+						fill: 0.3,
+					},
+				]}
+			/>
 		</div>
 	)
-}
-
-function BudgetActiveDot({
-	cx,
-	cy,
-	payload,
-	field,
-	limit,
-	within,
-	exceeded,
-}: ActiveDotProps & {
-	field: "usage" | "projection"
-	limit: number
-	within: string
-	exceeded: string
-}) {
-	if (cx === undefined || cy === undefined) return null
-	const color = Number(payload[field]) > limit ? exceeded : within
-
-	return <circle cx={cx} cy={cy} r={5} fill={color} stroke="var(--background)" strokeWidth={2} />
 }
 
 function buildSeries(records: Record[], start: DateTime, end: DateTime, asOf: DateTime) {
@@ -207,7 +79,7 @@ function buildSeries(records: Record[], start: DateTime, end: DateTime, asOf: Da
 		if (record.amount >= 0 || date < start.startOf("day") || date > end.endOf("day")) continue
 		const key = date.toISODate()
 		if (!key) continue
-		spendingByDay.set(key, round2dp((spendingByDay.get(key) ?? 0) - record.amount))
+		spendingByDay.set(key, round2((spendingByDay.get(key) ?? 0) - record.amount))
 	}
 
 	let cumulative = 0
@@ -215,7 +87,7 @@ function buildSeries(records: Record[], start: DateTime, end: DateTime, asOf: Da
 	for (let index = 0; index < dayCount; index += 1) {
 		const date = start.plus({ days: index })
 		if (index < elapsedDayCount) {
-			cumulative = round2dp(cumulative + (spendingByDay.get(date.toISODate() ?? "") ?? 0))
+			cumulative = round2(cumulative + (spendingByDay.get(date.toISODate() ?? "") ?? 0))
 			actual.push(cumulative)
 		} else {
 			actual.push(null)
@@ -228,40 +100,11 @@ function buildSeries(records: Record[], start: DateTime, end: DateTime, asOf: Da
 			elapsedDayCount > 0 && index >= elapsedDayCount - 1 && elapsedDayCount < dayCount
 		return {
 			date: start.plus({ days: index }).toFormat("d MMM"),
+			day: start.plus({ days: index }).toFormat("d MMM yyyy"),
 			usage: actual[index] ?? null,
 			projection: showProjection
-				? round2dp(cumulative + dailyPace * (index + 1 - elapsedDayCount))
+				? round2(cumulative + dailyPace * (index + 1 - elapsedDayCount))
 				: null,
 		}
 	})
-}
-
-function colorChange(data: BudgetProgressPoint[], field: "usage" | "projection", limit: number) {
-	const points = data.flatMap((point, index) => {
-		const value = point[field]
-		return value === null ? [] : [{ index, value }]
-	})
-	if (!points.length) return 100
-	const first = points[0]
-	if (!first || first.value > limit) return 0
-
-	for (let index = 1; index < points.length; index += 1) {
-		const previous = points[index - 1]
-		const current = points[index]
-		if (!previous || !current || current.value <= limit) continue
-
-		const change = current.value - previous.value
-		const crossing =
-			previous.index + (current.index - previous.index) * ((limit - previous.value) / change)
-		const last = points[points.length - 1]
-		const span = last ? last.index - first.index : 0
-		return span > 0 ? ((crossing - first.index) / span) * 100 : 0
-	}
-
-	return 100
-}
-
-function compactCurrency(value: number) {
-	if (Math.abs(value) >= 1000) return `$${(value / 1000).toFixed(1)}k`
-	return `$${value}`
 }

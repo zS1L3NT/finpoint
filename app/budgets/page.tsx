@@ -16,11 +16,11 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useHistory } from "@/history"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
-import { SPRING } from "@/lib/motion"
+import { cardEnter } from "@/lib/motion"
 import { cn, formatCurrency, parseDate } from "@/lib/utils"
 import { listBudgets } from "@/logic/budgets"
 import { pathBudget } from "@/routes"
-import { Budget } from "@/types"
+import type { Budget } from "@/types"
 
 export default function BudgetsPage() {
 	const [isCreatingBudget, setIsCreatingBudget] = useState(false)
@@ -60,28 +60,28 @@ export default function BudgetsPage() {
 				/>
 
 				{budgets === undefined ? null : budgets.length === 0 ? (
-					<p className="rounded-xl border border-dashed p-10 text-center text-sm text-muted-foreground">
+					<p className="rounded-xl border border-dashed p-10 text-center text-xs text-muted-foreground">
 						{query ? "No budgets match your search." : "No budgets yet."}
 					</p>
 				) : (
-					BUDGET_STATES.map(state => {
+					BUDGET_STATES.map((state, stateIndex) => {
 						const items = budgets.filter(budget => budgetState(budget) === state.value)
+						const offset = budgets.filter(budget =>
+							BUDGET_STATES.slice(0, stateIndex).some(
+								previous => budgetState(budget) === previous.value,
+							),
+						).length
 						return items.length ? (
 							<section key={state.value} className="grid gap-3">
-								<h3 className="text-sm font-medium text-muted-foreground">
+								<h3 className="text-sm font-semibold text-muted-foreground">
 									{state.label} · {items.length}
 								</h3>
-								<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+								<div className="grid gap-4 @2xl/page:grid-cols-2 @5xl/page:grid-cols-3">
 									{items.map((budget, index) => (
 										<motion.div
 											key={budget.id}
-											className="grid"
-											initial={{ opacity: 0, y: 6 }}
-											animate={{ opacity: 1, y: 0 }}
-											transition={{
-												...SPRING.smooth,
-												delay: Math.min(index, 7) * 0.03,
-											}}
+											className="grid min-w-0 grid-cols-1"
+											{...cardEnter(offset + index)}
 										>
 											<BudgetCard
 												budget={budget}
@@ -158,7 +158,7 @@ function BudgetCard({ budget, onEdit }: { budget: Budget; onEdit: () => void }) 
 
 	return (
 		<article
-			className="group relative grid cursor-pointer gap-4 rounded-xl border bg-card p-4 transition-[box-shadow,transform] duration-150 ease-out hover:shadow-md active:scale-[0.99]"
+			className="group relative grid min-w-0 grid-cols-1 cursor-pointer gap-4 rounded-xl border bg-card p-4 transition-[box-shadow,transform] duration-150 ease-out hover:shadow-md active:scale-[0.99] motion-reduce:transition-none motion-reduce:active:scale-100"
 			onClick={event => {
 				if (!isInteractiveTarget(event.target)) open()
 			}}
@@ -169,7 +169,7 @@ function BudgetCard({ budget, onEdit }: { budget: Budget; onEdit: () => void }) 
 		>
 			<header className="flex items-start justify-between gap-3">
 				<div className="min-w-0">
-					<h4 className="truncate font-semibold">{budget.name}</h4>
+					<h4 className="truncate text-sm font-semibold">{budget.name}</h4>
 					<p className="mt-0.5 text-xs text-muted-foreground">
 						{formatBudgetDateWindow(budget)}
 					</p>
@@ -188,7 +188,7 @@ function BudgetCard({ budget, onEdit }: { budget: Budget; onEdit: () => void }) 
 
 			<div className="grid gap-2">
 				<div className="flex items-end justify-between gap-3">
-					<p className="text-2xl font-semibold tracking-tight tabular-nums">
+					<p className="text-xl font-semibold tracking-tight tabular-nums">
 						{formatCurrency(spent)}
 						<span className="text-sm font-normal text-muted-foreground">
 							{" "}
@@ -207,7 +207,7 @@ function BudgetCard({ budget, onEdit }: { budget: Budget; onEdit: () => void }) 
 				<div className="relative h-2 w-full rounded-full bg-muted">
 					<div
 						className={cn(
-							"h-full origin-left rounded-full transition-transform duration-300 ease-out",
+							"h-full origin-left rounded-full transition-transform duration-300 ease-out motion-reduce:transition-none",
 							over
 								? "bg-destructive"
 								: pace !== null && usage / 100 > pace + 0.05

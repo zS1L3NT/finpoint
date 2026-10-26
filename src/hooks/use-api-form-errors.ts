@@ -1,6 +1,5 @@
 import { useCallback, useState } from "react"
-
-type ErrorItem = { message?: string }
+import type { FieldErrorItem } from "@/components/form/field"
 
 const toDotPath = (path: string) => path.replace(/\[(\d+)\]/g, ".$1")
 
@@ -8,14 +7,14 @@ export function useApiFormErrors() {
 	const [apiErrors, setApiErrors] = useState<Record<string, string[]>>({})
 
 	const getApiFieldErrors = useCallback(
-		(path: string): ErrorItem[] =>
+		(path: string): FieldErrorItem[] =>
 			(apiErrors[toDotPath(path)] ?? []).map(message => ({ message })),
 		[apiErrors],
 	)
 
 	const mergeErrors = useCallback(
-		(errors: unknown[] | undefined, path: string): ErrorItem[] => [
-			...((errors ?? []) as ErrorItem[]),
+		(errors: unknown[] | undefined, path: string): FieldErrorItem[] => [
+			...((errors ?? []) as FieldErrorItem[]),
 			...getApiFieldErrors(path),
 		],
 		[getApiFieldErrors],

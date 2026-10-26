@@ -39,14 +39,14 @@ type ReplacementReview = Omit<Awaited<ReturnType<typeof replacementReview>>, "al
 export default function StatementReplacementReviewDialog({
 	statement,
 	pendingStatement,
-	open,
-	onOpenChange,
+	isOpen,
+	setIsOpen,
 	onConfirmed,
 }: {
 	statement: Statement | null
 	pendingStatement: Statement | null
-	open: boolean
-	onOpenChange: (open: boolean) => void
+	isOpen: boolean
+	setIsOpen: (isOpen: boolean) => void
 	onConfirmed: () => void
 }) {
 	const [review, setReview] = useState<ReplacementReview | null>(null)
@@ -55,7 +55,7 @@ export default function StatementReplacementReviewDialog({
 
 	useEffect(() => {
 		// While closing, keep the last review on screen; it's cleared once the exit completes.
-		if (!open) return
+		if (!isOpen) return
 		if (!statement || !pendingStatement) {
 			setReview(null)
 			setError(null)
@@ -104,7 +104,7 @@ export default function StatementReplacementReviewDialog({
 		return () => {
 			cancelled = true
 		}
-	}, [open, statement, pendingStatement])
+	}, [isOpen, statement, pendingStatement])
 
 	const handleReplace = async () => {
 		if (!review?.can_replace || isSubmitting) return
@@ -116,7 +116,7 @@ export default function StatementReplacementReviewDialog({
 				description: "Its Allocations now belong to the imported Statement.",
 			})
 			setIsSubmitting(false)
-			onOpenChange(false)
+			setIsOpen(false)
 			onConfirmed()
 		} catch (cause) {
 			const message =
@@ -133,161 +133,165 @@ export default function StatementReplacementReviewDialog({
 
 	return (
 		<Dialog
-			open={open}
-			onOpenChange={onOpenChange}
-			onOpenChangeComplete={isOpen => {
-				if (!isOpen) {
+			open={isOpen}
+			onOpenChange={setIsOpen}
+			onOpenChangeComplete={opened => {
+				if (!opened) {
 					setReview(null)
 					setError(null)
 				}
 			}}
 		>
-			<DialogContent className="md:max-w-3xl">
-				<DialogHeader className="gap-1">
-					<DialogTitle>Review Statement replacement</DialogTitle>
-					<DialogDescription>
-						Confirm which imported Statement will inherit the pending Statement’s
-						Allocations.
-					</DialogDescription>
-				</DialogHeader>
+			{review !== null || error !== null ? (
+				<DialogContent className="md:max-w-3xl">
+					<DialogHeader className="gap-1">
+						<DialogTitle>Review Statement replacement</DialogTitle>
+						<DialogDescription>
+							Confirm which imported Statement will inherit the pending Statement’s
+							Allocations.
+						</DialogDescription>
+					</DialogHeader>
 
-				{error ? (
-					<Alert variant="destructive">
-						<IconifyIcon icon="lucide:circle-alert" />
-						<AlertTitle>Review unavailable</AlertTitle>
-						<AlertDescription>{error}</AlertDescription>
-					</Alert>
-				) : review ? (
-					<div className="flex flex-col gap-4">
-						<div className="grid items-stretch gap-3 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
-							<StatementCard
-								label="Pending Statement"
-								description="Deleted after replacement"
-								badge="Source"
-								statement={review.pending_statement}
-								secondaryLabel="Moving unchanged"
-								secondaryAmount={review.allocated_amount}
-							/>
-							<div className="flex items-center justify-center text-muted-foreground">
-								<IconifyIcon icon="lucide:arrow-down" className="sm:hidden" />
-								<IconifyIcon
-									icon="lucide:arrow-right"
-									className="hidden sm:block"
+					{error ? (
+						<Alert variant="destructive">
+							<IconifyIcon icon="lucide:circle-alert" />
+							<AlertTitle>Review unavailable</AlertTitle>
+							<AlertDescription>{error}</AlertDescription>
+						</Alert>
+					) : review ? (
+						<div className="flex flex-col gap-4">
+							<div className="grid items-stretch gap-3 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
+								<StatementCard
+									label="Pending Statement"
+									description="Deleted after replacement"
+									badge="Source"
+									statement={review.pending_statement}
+									secondaryLabel="Moving unchanged"
+									secondaryAmount={review.allocated_amount}
+								/>
+								<div className="flex items-center justify-center text-muted-foreground">
+									<IconifyIcon icon="lucide:arrow-down" className="sm:hidden" />
+									<IconifyIcon
+										icon="lucide:arrow-right"
+										className="hidden sm:block"
+									/>
+								</div>
+								<StatementCard
+									label="Imported Statement"
+									description="Kept exactly as imported"
+									badge="Destination"
+									statement={review.statement}
+									secondaryLabel="Allocable afterward"
+									secondaryAmount={review.remaining_allocable_amount}
 								/>
 							</div>
-							<StatementCard
-								label="Imported Statement"
-								description="Kept exactly as imported"
-								badge="Destination"
-								statement={review.statement}
-								secondaryLabel="Allocable afterward"
-								secondaryAmount={review.remaining_allocable_amount}
-							/>
-						</div>
 
-						<div className="flex flex-wrap gap-1.5">
-							<Badge variant={review.is_exact_amount ? "secondary" : "warning"}>
-								{review.is_exact_amount
-									? "Same amount"
-									: `${formatCurrency(review.amount_difference)} amount difference`}
-							</Badge>
-							<Badge
-								variant={
-									Math.abs(review.day_difference) <= 7 ? "outline" : "warning"
-								}
-							>
-								{dateDifferenceLabel(review.day_difference)}
-							</Badge>
-						</div>
+							<div className="flex flex-wrap gap-1.5">
+								<Badge variant={review.is_exact_amount ? "secondary" : "warning"}>
+									{review.is_exact_amount
+										? "Same amount"
+										: `${formatCurrency(review.amount_difference)} amount difference`}
+								</Badge>
+								<Badge
+									variant={
+										Math.abs(review.day_difference) <= 7 ? "outline" : "warning"
+									}
+								>
+									{dateDifferenceLabel(review.day_difference)}
+								</Badge>
+							</div>
 
-						{review.allocations.length ? (
-							<Card size="sm">
-								<CardHeader>
-									<CardTitle>Affected Records</CardTitle>
-									<CardDescription>
-										These Allocation amounts and Record associations will remain
-										unchanged.
-									</CardDescription>
-									<CardAction>
-										<Badge variant="outline">{review.allocations.length}</Badge>
-									</CardAction>
-								</CardHeader>
-								<CardContent className="flex flex-col gap-2">
-									{review.allocations.map(record => (
-										<div
-											key={record.id}
-											className="flex items-start justify-between gap-3"
-										>
-											<div className="min-w-0">
-												<p className="truncate font-medium">
-													{record.title}
-												</p>
-												<p className="truncate text-muted-foreground">
-													{record.category.name} ·{" "}
-													{formatDatetime(record.datetime)}
-												</p>
-											</div>
-											<span
-												className={cn(
-													"shrink-0 font-medium",
-													classForCurrency(record.allocation_amount),
-												)}
+							{review.allocations.length ? (
+								<Card size="sm">
+									<CardHeader>
+										<CardTitle>Affected Records</CardTitle>
+										<CardDescription>
+											These Allocation amounts and Record associations will
+											remain unchanged.
+										</CardDescription>
+										<CardAction>
+											<Badge variant="outline">
+												{review.allocations.length}
+											</Badge>
+										</CardAction>
+									</CardHeader>
+									<CardContent className="flex flex-col gap-2">
+										{review.allocations.map(record => (
+											<div
+												key={record.id}
+												className="flex items-start justify-between gap-3"
 											>
-												{formatCurrency(record.allocation_amount)}
-											</span>
-										</div>
-									))}
-								</CardContent>
-							</Card>
-						) : null}
+												<div className="min-w-0">
+													<p className="truncate font-medium">
+														{record.title}
+													</p>
+													<p className="truncate text-muted-foreground">
+														{record.category.name} ·{" "}
+														{formatDatetime(record.datetime)}
+													</p>
+												</div>
+												<span
+													className={cn(
+														"shrink-0 font-medium tabular-nums",
+														classForCurrency(record.allocation_amount),
+													)}
+												>
+													{formatCurrency(record.allocation_amount)}
+												</span>
+											</div>
+										))}
+									</CardContent>
+								</Card>
+							) : null}
 
-						<Alert variant={review.can_replace ? "default" : "destructive"}>
-							<IconifyIcon
-								icon={
-									review.can_replace
-										? "lucide:circle-check"
-										: "lucide:circle-alert"
-								}
-							/>
-							<AlertTitle>
-								{review.can_replace
-									? review.allocations.length
-										? `${review.allocations.length} Allocation${review.allocations.length === 1 ? "" : "s"} ready to move`
-										: "No Allocations to transfer"
-									: "This pair cannot be replaced"}
-							</AlertTitle>
-							<AlertDescription>
-								{review.can_replace
-									? review.allocations.length
-										? `${formatCurrency(review.allocated_amount)} will move unchanged. The pending placeholder will then be deleted.`
-										: "Replacing will delete the pending placeholder. The imported Statement will remain unallocated."
-									: review.disabled_reason}
-							</AlertDescription>
-						</Alert>
-					</div>
-				) : null}
+							<Alert variant={review.can_replace ? "default" : "destructive"}>
+								<IconifyIcon
+									icon={
+										review.can_replace
+											? "lucide:circle-check"
+											: "lucide:circle-alert"
+									}
+								/>
+								<AlertTitle>
+									{review.can_replace
+										? review.allocations.length
+											? `${review.allocations.length} Allocation${review.allocations.length === 1 ? "" : "s"} ready to move`
+											: "No Allocations to transfer"
+										: "This pair cannot be replaced"}
+								</AlertTitle>
+								<AlertDescription>
+									{review.can_replace
+										? review.allocations.length
+											? `${formatCurrency(review.allocated_amount)} will move unchanged. The pending placeholder will then be deleted.`
+											: "Replacing will delete the pending placeholder. The imported Statement will remain unallocated."
+										: review.disabled_reason}
+								</AlertDescription>
+							</Alert>
+						</div>
+					) : null}
 
-				<DialogFooter>
-					<DialogClose
-						render={
-							<Button type="button" variant="outline">
-								Cancel
-							</Button>
-						}
-					/>
-					<Button
-						disabled={!review?.can_replace || isSubmitting}
-						onClick={() => void handleReplace()}
-					>
-						<IconifyIcon
-							icon={isSubmitting ? "lucide:loader-circle" : "lucide:replace"}
-							className={isSubmitting ? "animate-spin" : undefined}
-							data-icon="inline-start"
+					<DialogFooter>
+						<DialogClose
+							render={
+								<Button type="button" variant="outline">
+									Cancel
+								</Button>
+							}
 						/>
-						Replace pending Statement
-					</Button>
-				</DialogFooter>
-			</DialogContent>
+						<Button
+							disabled={!review?.can_replace || isSubmitting}
+							onClick={() => void handleReplace()}
+						>
+							<IconifyIcon
+								icon={isSubmitting ? "lucide:loader-circle" : "lucide:replace"}
+								className={isSubmitting ? "animate-spin" : undefined}
+								data-icon="inline-start"
+							/>
+							Replace pending Statement
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			) : null}
 		</Dialog>
 	)
 }
@@ -344,7 +348,7 @@ function Amount({ label, amount }: { label: string; amount: number }) {
 	return (
 		<div className="flex flex-col gap-0.5">
 			<span className="text-muted-foreground">{label}</span>
-			<span className={cn("font-semibold", classForCurrency(amount))}>
+			<span className={cn("font-semibold tabular-nums", classForCurrency(amount))}>
 				{formatCurrency(amount)}
 			</span>
 		</div>

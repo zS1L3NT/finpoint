@@ -4,7 +4,7 @@ import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { Slot } from "radix-ui"
 
-import { useIsMobile } from "@/hooks/use-mobile"
+import { MOBILE_BREAKPOINT, useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -88,9 +88,13 @@ function SidebarProvider({
   )
 
   // Helper to toggle the sidebar.
+  // Read the width at tap time: `isMobile` stays false until its effect runs, so a tap
+  // right after load would otherwise collapse the desktop sidebar instead of opening the sheet.
   const toggleSidebar = React.useCallback(() => {
-    return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open)
-  }, [isMobile, setOpen, setOpenMobile])
+    return window.innerWidth < MOBILE_BREAKPOINT
+      ? setOpenMobile((open) => !open)
+      : setOpen((open) => !open)
+  }, [setOpen, setOpenMobile])
 
   // Adds a keyboard shortcut to toggle the sidebar.
   React.useEffect(() => {
@@ -137,7 +141,7 @@ function SidebarProvider({
           } as React.CSSProperties
         }
         className={cn(
-          "group/sidebar-wrapper flex min-h-svh w-full has-data-[variant=inset]:bg-sidebar",
+          "group/sidebar-wrapper flex min-h-svh w-full overflow-x-clip has-data-[variant=inset]:bg-sidebar",
           className
         )}
         {...props}
@@ -162,6 +166,7 @@ function Sidebar({
   collapsible?: "offcanvas" | "icon" | "none"
 }) {
   const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+  const mobileOpener = React.useRef<HTMLElement | null>(null)
 
   if (collapsible === "none") {
     return (
@@ -194,6 +199,16 @@ function Sidebar({
           }
           side={side}
           showCloseButton={false}
+          onOpenAutoFocus={() => {
+            mobileOpener.current = document.activeElement instanceof HTMLElement
+              ? document.activeElement
+              : null
+          }}
+          onCloseAutoFocus={event => {
+            if (!mobileOpener.current?.isConnected) return
+            event.preventDefault()
+            mobileOpener.current.focus()
+          }}
         >
           <SheetHeader className="sr-only">
             <SheetTitle>Sidebar</SheetTitle>
@@ -219,8 +234,9 @@ function Sidebar({
         data-slot="sidebar-gap"
         className={cn(
           // No width transition: animating the gap reflows the whole page (and
-          // every responsive chart) on each frame. The gap snaps; the panel
-          // below slides on the compositor via transform.
+          // every responsive chart) on each frame. The gap snaps once and
+          // SidebarInset slides from its old position to the new one on the
+          // compositor, in step with the panel.
           "relative w-(--sidebar-width) bg-transparent",
           "group-data-[collapsible=offcanvas]:w-0",
           "group-data-[side=right]:rotate-180",
@@ -288,13 +304,11 @@ function SidebarRail({ className, ...props }: React.ComponentProps<"button">) {
       data-sidebar="rail"
       data-slot="sidebar-rail"
       aria-label="Toggle Sidebar"
-      tabIndex={-1}
       onClick={toggleSidebar}
       title="Toggle Sidebar"
       className={cn(
         "absolute inset-y-0 z-20 hidden w-4 after:transition-colors after:duration-150 after:ease-out group-data-[side=left]:-right-4 group-data-[side=right]:left-0 after:absolute after:inset-y-0 after:start-1/2 after:w-[2px] hover:after:bg-sidebar-border sm:flex ltr:-translate-x-1/2 rtl:-translate-x-1/2",
-        "in-data-[side=left]:cursor-w-resize in-data-[side=right]:cursor-e-resize",
-        "[[data-side=left][data-state=collapsed]_&]:cursor-e-resize [[data-side=right][data-state=collapsed]_&]:cursor-w-resize",
+        "cursor-pointer focus-visible:outline-2 focus-visible:outline-ring",
         "group-data-[collapsible=offcanvas]:translate-x-0 group-data-[collapsible=offcanvas]:after:left-full hover:group-data-[collapsible=offcanvas]:bg-sidebar",
         "[[data-side=left][data-collapsible=offcanvas]_&]:-right-2",
         "[[data-side=right][data-collapsible=offcanvas]_&]:-left-2",
@@ -306,11 +320,37 @@ function SidebarRail({ className, ...props }: React.ComponentProps<"button">) {
 }
 
 function SidebarInset({ className, ...props }: React.ComponentProps<"main">) {
+  const { state } = useSidebar()
+  const ref = React.useRef<HTMLElement>(null)
+  const left = React.useRef<number | null>(null)
+
+  // FLIP: the gap has already snapped to its new width, so start the content
+  // where it was and slide it into place alongside the panel's width transition.
+  React.useLayoutEffect(() => {
+    const element = ref.current
+    if (!element) return
+    const previous = left.current
+    const next = element.getBoundingClientRect().left
+    left.current = next
+    if (
+      previous === null ||
+      previous === next ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      return
+    }
+    element.animate(
+      [{ transform: `translateX(${previous - next}px)` }, { transform: "none" }],
+      { duration: 250, easing: "cubic-bezier(0.32, 0.72, 0, 1)" }
+    )
+  }, [state])
+
   return (
     <main
+      ref={ref}
       data-slot="sidebar-inset"
       className={cn(
-        "relative flex w-full flex-1 flex-col bg-background md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow-sm md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2",
+        "relative flex min-w-0 w-full flex-1 flex-col bg-background md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow-sm md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2",
         className
       )}
       {...props}

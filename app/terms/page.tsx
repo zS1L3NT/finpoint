@@ -9,7 +9,7 @@ const SECTIONS: { heading: string; body: string[] }[] = [
 	{
 		heading: "The service",
 		body: [
-			"Finpoint is a free, local-first personal finance tracker: it records imported account activity (statements) and the entries that explain it (records), plus budgets, categories, and spending buckets. It is provided as-is, for personal, non-commercial use.",
+			"Finpoint is a free, local-first personal finance tracker: it records imported account activity (statements) and the entries that explain it (records), plus budgets, categories, and monthly budgets. It is provided as-is, for personal, non-commercial use.",
 			"By using Finpoint you agree to these terms. If you do not agree, do not use it.",
 		],
 	},

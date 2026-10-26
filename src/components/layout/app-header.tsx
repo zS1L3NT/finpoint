@@ -11,7 +11,7 @@ export default function AppHeader({ title }: { title: string }) {
 			<div className="flex min-w-0 w-full items-center gap-1 px-3 md:px-4 lg:gap-2 lg:px-6">
 				<SidebarTrigger className="-ml-1" size="icon-lg" />
 				<Separator orientation="vertical" className="mx-1 md:mx-2" />
-				<h1 className="truncate text-base font-medium">{title}</h1>
+				<h1 className="truncate text-sm font-medium">{title}</h1>
 				<div className="ml-auto">
 					<ContextHelp />
 				</div>

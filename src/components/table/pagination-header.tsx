@@ -1,4 +1,6 @@
+import { UiIcon as IconifyIcon } from "@/components/icon"
 import { Input } from "@/components/ui/input"
+import { cn } from "@/lib/utils"
 
 export default function PaginationHeader({
 	query,
@@ -8,6 +10,7 @@ export default function PaginationHeader({
 	searchPlaceholder,
 	filters,
 	actions,
+	className,
 }: {
 	query: string
 	onQueryChange: (value: string) => void
@@ -16,16 +19,25 @@ export default function PaginationHeader({
 	searchPlaceholder: string
 	filters?: React.ReactNode
 	actions?: React.ReactNode
+	className?: string
 }) {
 	return (
-		<div className="flex flex-col gap-4">
+		<div className={cn("flex flex-col gap-4", className)}>
 			<div className="flex min-w-0 flex-col gap-2 md:flex-row md:items-center md:justify-between">
-				<Input
-					className="w-full border-border bg-input/20 dark:bg-input/30 md:w-sm"
-					placeholder={searchPlaceholder}
-					value={query}
-					onChange={e => onQueryChange(e.target.value)}
-				/>
+				<div className="relative w-full md:w-sm">
+					<IconifyIcon
+						icon="lucide:search"
+						className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground"
+					/>
+					<Input
+						type="search"
+						aria-label={searchPlaceholder.replace(/\.+$/, "")}
+						className="border-border bg-input/20 pl-8 dark:bg-input/30"
+						placeholder={searchPlaceholder}
+						value={query}
+						onChange={e => onQueryChange(e.target.value)}
+					/>
+				</div>
 
 				{actions ? (
 					<div className="flex flex-col gap-2 sm:flex-row md:items-center md:justify-end">

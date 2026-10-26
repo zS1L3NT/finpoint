@@ -19,12 +19,12 @@ import {
 } from "@/components/ui/dialog"
 import { FieldGroup } from "@/components/ui/field"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
-import { canUseDefaultBucket, treatmentLabel } from "@/lib/analytics"
+import { canUseDefaultMonthlyBudget, TREATMENTS, treatmentLabel } from "@/lib/analytics"
 import { cn } from "@/lib/utils"
-import { listBuckets } from "@/logic/buckets"
 import { createCategory, deleteCategory, updateCategory } from "@/logic/categories"
+import { listMonthlyBudgets } from "@/logic/monthly-budgets"
 import { ValidationError } from "@/logic/validate"
-import { AnalyticsTreatment, Category, CategoryWithChildren } from "@/types"
+import type { AnalyticsTreatment, Category, CategoryWithChildren } from "@/types"
 
 type CategoryFormValues = {
 	name: string
@@ -32,7 +32,7 @@ type CategoryFormValues = {
 	color: string
 	parent_category_id: string
 	analytics_treatment: AnalyticsTreatment | ""
-	default_bucket_id: string
+	default_monthly_budget_id: string
 }
 
 const NO_DEFAULT = "no_default"
@@ -52,31 +52,31 @@ const EMPTY_FORM_VALUES: CategoryFormValues = {
 	color: "",
 	parent_category_id: "",
 	analytics_treatment: "",
-	default_bucket_id: "",
+	default_monthly_budget_id: "",
 }
 
 export default function CategoryDialog({
-	open,
+	isOpen,
 	mode: modeProp,
 	category: categoryProp,
 	categories,
-	onOpenChange,
+	setIsOpen,
 }: {
-	open: boolean
+	isOpen: boolean
 	mode: "create" | "edit"
 	category: Category | CategoryWithChildren | null
 	categories: (Category | CategoryWithChildren)[]
-	onOpenChange: (open: boolean) => void
+	setIsOpen: (isOpen: boolean) => void
 }) {
 	// Parents clear mode/category the moment the dialog closes; keep the last open content
 	// so the title and fields don't flip while the exit animation plays.
 	const [snapshot, setSnapshot] = useState({ mode: modeProp, category: categoryProp })
-	if (open && (snapshot.mode !== modeProp || snapshot.category !== categoryProp)) {
+	if (isOpen && (snapshot.mode !== modeProp || snapshot.category !== categoryProp)) {
 		setSnapshot({ mode: modeProp, category: categoryProp })
 	}
-	const { mode, category } = open ? { mode: modeProp, category: categoryProp } : snapshot
+	const { mode, category } = isOpen ? { mode: modeProp, category: categoryProp } : snapshot
 	const isEditing = mode === "edit" && category !== null
-	const buckets = useLiveQuery(() => listBuckets(), []) ?? []
+	const monthlyBudgets = useLiveQuery(() => listMonthlyBudgets(), [])
 	const canEditParentCategory = !isEditing || isChildCategory(category)
 	const [values, setValues] = useState<CategoryFormValues>(EMPTY_FORM_VALUES)
 	const { getApiFieldErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
@@ -85,15 +85,17 @@ export default function CategoryDialog({
 		values.icon && !ICON_NAMES.includes(values.icon as (typeof ICON_NAMES)[number])
 			? [values.icon, ...ICON_NAMES]
 			: ICON_NAMES
-	const bucketEligible = canUseDefaultBucket(values.analytics_treatment || null)
-	const defaultBucketName = values.default_bucket_id
-		? (buckets.find(bucket => bucket.id === values.default_bucket_id)?.name ??
-			category?.default_bucket?.name ??
-			"Default bucket")
-		: "No default bucket"
+	const monthlyBudgetEligible = canUseDefaultMonthlyBudget(values.analytics_treatment || null)
+	const defaultMonthlyBudgetName = values.default_monthly_budget_id
+		? (monthlyBudgets?.find(
+				monthlyBudget => monthlyBudget.id === values.default_monthly_budget_id,
+			)?.name ??
+			category?.default_monthly_budget?.name ??
+			"Default monthly budget")
+		: "Unbudgeted"
 
 	useEffect(() => {
-		if (!open) {
+		if (!isOpen) {
 			return
 		}
 
@@ -105,12 +107,12 @@ export default function CategoryDialog({
 						color: category.color,
 						parent_category_id: category.parent_category_id ?? "",
 						analytics_treatment: category.analytics_treatment ?? "",
-						default_bucket_id: category.default_bucket_id ?? "",
+						default_monthly_budget_id: category.default_monthly_budget_id ?? "",
 					}
 				: EMPTY_FORM_VALUES,
 		)
 		resetApiErrors()
-	}, [open, category, resetApiErrors])
+	}, [isOpen, category, resetApiErrors])
 
 	const setValue = <TKey extends keyof CategoryFormValues>(
 		field: TKey,
@@ -128,7 +130,7 @@ export default function CategoryDialog({
 			color: values.color,
 			parent_category_id: values.parent_category_id || null,
 			analytics_treatment: values.analytics_treatment || null,
-			default_bucket_id: values.default_bucket_id || null,
+			default_monthly_budget_id: values.default_monthly_budget_id || null,
 		}
 		try {
 			if (isEditing && category) {
@@ -136,7 +138,7 @@ export default function CategoryDialog({
 			} else {
 				await createCategory(input)
 			}
-			onOpenChange(false)
+			setIsOpen(false)
 		} catch (cause) {
 			if (cause instanceof ValidationError) {
 				setApiErrors(cause.errors)
@@ -152,14 +154,16 @@ export default function CategoryDialog({
 		}
 		try {
 			await deleteCategory(category.id)
-			onOpenChange(false)
+			setIsOpen(false)
 		} catch {
 			toast.error("Unable to delete this category.")
 		}
 	}
 
+	if (monthlyBudgets === undefined) return null
+
 	return (
-		<Dialog open={open} onOpenChange={onOpenChange}>
+		<Dialog open={isOpen} onOpenChange={setIsOpen}>
 			<DialogContent className="md:max-w-lg">
 				<DialogHeader>
 					<DialogTitle>{isEditing ? "Edit Category" : "Create Category"}</DialogTitle>
@@ -182,7 +186,7 @@ export default function CategoryDialog({
 						{canEditParentCategory ? (
 							<ComboboxField
 								id="parent_category_id"
-								label="Parent Category"
+								label="Parent category"
 								value={
 									parentOptions.find(
 										option => option.id === values.parent_category_id,
@@ -224,7 +228,7 @@ export default function CategoryDialog({
 						/>
 						<TextField
 							id="color"
-							label="Color"
+							label="Colour"
 							value={values.color}
 							errors={getApiFieldErrors("color")}
 							onChange={value => setValue("color", value)}
@@ -246,7 +250,7 @@ export default function CategoryDialog({
 								<p className="flex items-center gap-1.5 text-xs text-muted-foreground">
 									<IconifyIcon icon="lucide:tag" className="size-3.5" />
 									<span className="truncate">
-										{`${values.analytics_treatment ? treatmentLabel(values.analytics_treatment) : "No default treatment"}${bucketEligible ? ` · ${defaultBucketName}` : ""}`}
+										{`${values.analytics_treatment ? treatmentLabel(values.analytics_treatment) : "No default treatment"}${monthlyBudgetEligible ? ` · ${defaultMonthlyBudgetName}` : ""}`}
 									</span>
 								</p>
 							</div>
@@ -261,36 +265,38 @@ export default function CategoryDialog({
 							value={values.analytics_treatment || NO_DEFAULT}
 							items={[
 								{ value: NO_DEFAULT, label: "No default treatment" },
-								{ value: "income", label: "Income" },
-								{ value: "spending", label: "Spending" },
-								{ value: "saving_investment", label: "Saving/investment" },
-								{ value: "neutral", label: "Transfer/neutral" },
-								{ value: "automatic", label: "Automatic by direction" },
+								...TREATMENTS,
 							]}
 							errors={getApiFieldErrors("analytics_treatment")}
 							onChange={value => {
 								const treatment =
 									value === NO_DEFAULT ? "" : (value as AnalyticsTreatment)
 								setValue("analytics_treatment", treatment)
-								if (!canUseDefaultBucket(treatment || null)) {
-									setValue("default_bucket_id", "")
+								if (!canUseDefaultMonthlyBudget(treatment || null)) {
+									setValue("default_monthly_budget_id", "")
 								}
 							}}
 						/>
 						<SelectField
-							id="default_bucket_id"
-							label="Spending bucket"
-							disabled={!bucketEligible}
-							value={values.default_bucket_id || NO_DEFAULT}
+							id="default_monthly_budget_id"
+							label="Monthly budget"
+							disabled={!monthlyBudgetEligible}
+							value={values.default_monthly_budget_id || NO_DEFAULT}
 							items={[
-								{ value: NO_DEFAULT, label: "No default bucket" },
-								...buckets
-									.filter(bucket => !bucket.archived)
-									.map(bucket => ({ value: bucket.id, label: bucket.name })),
+								{ value: NO_DEFAULT, label: "Unbudgeted" },
+								...monthlyBudgets
+									.filter(monthlyBudget => !monthlyBudget.archived)
+									.map(monthlyBudget => ({
+										value: monthlyBudget.id,
+										label: monthlyBudget.name,
+									})),
 							]}
-							errors={getApiFieldErrors("default_bucket_id")}
+							errors={getApiFieldErrors("default_monthly_budget_id")}
 							onChange={value =>
-								setValue("default_bucket_id", value === NO_DEFAULT ? "" : value)
+								setValue(
+									"default_monthly_budget_id",
+									value === NO_DEFAULT ? "" : value,
+								)
 							}
 						/>
 					</div>

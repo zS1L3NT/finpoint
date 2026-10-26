@@ -77,11 +77,13 @@ import {
 	MonitorSmartphone as MonitorSmartphoneIcon,
 	Navigation as NavigationIcon,
 	PartyPopper as PartyPopperIcon,
+	Pause as PauseIcon,
 	Pencil as PencilIcon,
 	Percent as PercentIcon,
 	PiggyBank as PiggyBankIcon,
 	Pill as PillIcon,
 	Plane as PlaneIcon,
+	Play as PlayIcon,
 	Plus as PlusIcon,
 	ReceiptCent as ReceiptCentIcon,
 	ReceiptEuro as ReceiptEuroIcon,
@@ -119,13 +121,12 @@ import {
 	Upload as UploadIcon,
 	Utensils as UtensilsIcon,
 	WalletCards as WalletCardsIcon,
+	WandSparkles as WandSparklesIcon,
 	Warehouse as WarehouseIcon,
 	Wine as WineIcon,
 	Wrench as WrenchIcon,
 	X as XIcon,
 } from "lucide-react"
-
-export const FALLBACK_ICON_NAME = "circle-question-mark"
 
 export const ICONS: Record<string, LucideIcon> = {
 	apple: AppleIcon,
@@ -207,6 +208,8 @@ export const ICONS: Record<string, LucideIcon> = {
 	"piggy-bank": PiggyBankIcon,
 	pill: PillIcon,
 	plane: PlaneIcon,
+	pause: PauseIcon,
+	play: PlayIcon,
 	plus: PlusIcon,
 	receipt: ReceiptIcon,
 	"receipt-cent": ReceiptCentIcon,
@@ -244,6 +247,7 @@ export const ICONS: Record<string, LucideIcon> = {
 	upload: UploadIcon,
 	utensils: UtensilsIcon,
 	"wallet-cards": WalletCardsIcon,
+	"wand-sparkles": WandSparklesIcon,
 	warehouse: WarehouseIcon,
 	wine: WineIcon,
 	wrench: WrenchIcon,

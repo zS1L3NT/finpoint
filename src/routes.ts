@@ -1,4 +1,4 @@
-// Client-side route paths (replaces the generated `@/wayfinder/routes`).
+// Client-side route paths.
 // Keep all route strings in one place so pages/components never hardcode URLs.
 
 export const pathDashboard = (query?: Record<string, string | undefined>) => withQuery("/", query)
@@ -7,6 +7,8 @@ export const pathAllocator = (query?: Record<string, string | undefined>) =>
 	withQuery("/allocator", query)
 export const pathAllocatorPending = (query?: Record<string, string | undefined>) =>
 	withQuery("/allocator/pending", query)
+export const pathAllocatorDuplicates = (query?: Record<string, string | undefined>) =>
+	withQuery("/allocator/duplicates", query)
 export const pathStatements = (query?: Record<string, string | undefined>) =>
 	withQuery("/statements", query)
 export const pathStatement = (id: string) => `/statements/${id}`
@@ -21,6 +23,8 @@ export const pathRecord = (id: string) => `/records/${id}`
 export const pathBudgets = (query?: Record<string, string | undefined>) =>
 	withQuery("/budgets", query)
 export const pathBudget = (id: string) => `/budgets/${id}`
+export const pathStatementRules = (query?: Record<string, string | undefined>) =>
+	withQuery("/statement-rules", query)
 export const pathCategories = () => "/categories"
 export const pathDataSettings = () => "/sync"
 export const pathSettings = () => "/settings"

@@ -46,23 +46,30 @@ export default function PaginationFooter({
 }) {
 	const searchParams = useSearchParams()
 	const current = Math.min(Math.max(1, page), Math.max(1, lastPage))
+	const atStart = current <= 1
+	const atEnd = current >= lastPage
+	// Disabled ends stay in place for layout, but leave the tab order and never point past the range.
+	const edge = (disabled: boolean) =>
+		disabled
+			? { className: "pointer-events-none opacity-50", "aria-disabled": true, tabIndex: -1 }
+			: {}
 
 	return (
-		<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+		<div className="flex flex-wrap items-center justify-between gap-3">
 			<div className="text-xs text-muted-foreground">{summary}</div>
 
-			<Pagination className="mx-0 w-full justify-start sm:w-auto sm:justify-end">
+			<Pagination className="mx-0 w-auto max-w-full shrink-0 justify-start">
 				<PaginationContent className="flex-wrap">
 					<PaginationItem>
 						<PaginationPrevious
-							href={pageHref(searchParams, current - 1)}
-							className={current <= 1 ? "pointer-events-none opacity-50" : undefined}
-							aria-disabled={current <= 1}
+							href={pageHref(searchParams, atStart ? current : current - 1)}
+							{...edge(atStart)}
 						/>
 					</PaginationItem>
-					{pageWindow(current, Math.max(1, lastPage)).map(item =>
+					{pageWindow(current, Math.max(1, lastPage)).map((item, index) =>
 						item === "…" ? (
-							<PaginationItem key={`ellipsis-${current}`}>
+							// Up to two gaps can show at once, so key them by position.
+							<PaginationItem key={`ellipsis-${index}`}>
 								<PaginationEllipsis />
 							</PaginationItem>
 						) : (
@@ -78,11 +85,8 @@ export default function PaginationFooter({
 					)}
 					<PaginationItem>
 						<PaginationNext
-							href={pageHref(searchParams, current + 1)}
-							className={
-								current >= lastPage ? "pointer-events-none opacity-50" : undefined
-							}
-							aria-disabled={current >= lastPage}
+							href={pageHref(searchParams, atEnd ? current : current + 1)}
+							{...edge(atEnd)}
 						/>
 					</PaginationItem>
 				</PaginationContent>

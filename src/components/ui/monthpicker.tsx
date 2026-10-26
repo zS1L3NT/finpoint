@@ -110,7 +110,7 @@ function MonthCal({ selectedMonth, onMonthSelect, callbacks, variant, minDate, m
                         }}
                         className={cn(buttonVariants({ variant: variant?.chevrons ?? "outline" }), "inline-flex items-center justify-center h-7 w-7 p-0 absolute left-1")}
                     >
-                        <ChevronLeft className="opacity-50 h-4 w-4" />
+                        <ChevronLeft className="opacity-50 size-4" />
                     </button>
                     <button
                         onClick={() => {
@@ -119,7 +119,7 @@ function MonthCal({ selectedMonth, onMonthSelect, callbacks, variant, minDate, m
                         }}
                         className={cn(buttonVariants({ variant: variant?.chevrons ?? "outline" }), "inline-flex items-center justify-center h-7 w-7 p-0 absolute right-1")}
                     >
-                        <ChevronRight className="opacity-50 h-4 w-4" />
+                        <ChevronRight className="opacity-50 size-4" />
                     </button>
                 </div>
             </div>

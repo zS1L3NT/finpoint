@@ -13,13 +13,16 @@ export function DetailSummary({
 	columns?: 2 | 3 | 4
 }) {
 	return (
-		<Card className="gap-0 py-0">
+		<Card className="@container/summary gap-0 py-0">
 			<div
 				className={cn(
-					"grid divide-y sm:divide-x sm:divide-y-0",
-					columns === 2 && "sm:grid-cols-2",
-					columns === 3 && "sm:grid-cols-3",
-					columns === 4 && "sm:grid-cols-2 lg:grid-cols-4",
+					"grid divide-y",
+					columns === 2 &&
+						"@xl/summary:grid-cols-2 @xl/summary:divide-x @xl/summary:divide-y-0",
+					columns === 3 &&
+						"@3xl/summary:grid-cols-3 @3xl/summary:divide-x @3xl/summary:divide-y-0",
+					columns === 4 &&
+						"@xl/summary:grid-cols-2 @xl/summary:divide-x @xl/summary:divide-y-0 @5xl/summary:grid-cols-4",
 				)}
 			>
 				{children}
@@ -46,7 +49,7 @@ export function DetailSummaryItem({
 }) {
 	return (
 		<div className="min-w-0 p-4 sm:p-5">
-			<p className="flex items-center gap-2 text-[10px] font-medium tracking-[0.14em] text-muted-foreground uppercase">
+			<p className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
 				<IconifyIcon icon={icon} className="size-3.5" />
 				{label}
 			</p>

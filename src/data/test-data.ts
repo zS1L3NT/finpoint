@@ -1,12 +1,12 @@
 // Abundant deterministic demo workspace for new users.
 // Generates ~4-5 months of accounts, statements, records, allocations,
-// budgets, buckets, and targets, then loads via importData (replaces all).
+// budgets, Monthly Budgets, and amounts, then loads via importData (replaces all).
 // Dates are relative to today so dashboards and comparisons look alive;
 // the RNG is seeded so every load produces the same workspace.
 
 import { DateTime } from "luxon"
-import { DEFAULT_BUCKETS, DEFAULT_CATEGORIES } from "@/data/defaults"
-import type { FinpointExport } from "@/data/export-import"
+import { DEFAULT_CATEGORIES, DEFAULT_MONTHLY_BUDGETS } from "@/data/defaults"
+import { EXPORT_VERSION, type FinpointExport } from "@/data/export-import"
 import { slugify } from "@/logic/shared"
 import type { AnalyticsTreatment } from "@/types"
 
@@ -44,12 +44,14 @@ function stamp(day: DateTime, hour: number, minute: number): string {
 const CATEGORIES = DEFAULT_CATEGORIES.map(category => ({
 	id: slugify(category.name),
 	...category,
-	bucket_id: category.bucket ? `demo-${category.bucket.toLowerCase()}` : null,
+	monthly_budget_id: category.monthly_budget
+		? `demo-${category.monthly_budget.toLowerCase()}`
+		: null,
 }))
 
-const BUCKETS = DEFAULT_BUCKETS.map(bucket => ({
-	id: `demo-${bucket.name.toLowerCase()}`,
-	...bucket,
+const MONTHLY_BUDGETS = DEFAULT_MONTHLY_BUDGETS.map(monthly_budget => ({
+	id: `demo-${monthly_budget.name.toLowerCase()}`,
+	...monthly_budget,
 }))
 
 type Meal = {
@@ -58,7 +60,7 @@ type Meal = {
 	amount: [number, number]
 	people: string[]
 	locations: string[]
-	bucket: string
+	monthly_budget: string
 	account: string
 }
 
@@ -76,7 +78,7 @@ const DAILY: Meal[] = [
 		amount: [6, 42],
 		people: ["Rong Xin", "Jia Le", "Wei Ming", ""],
 		locations: ["Bugis", "Tampines Mall", "Maxwell Food Centre", "Orchard", ""],
-		bucket: "demo-daily",
+		monthly_budget: "demo-daily",
 		account: "demo-uob-card",
 	},
 	{
@@ -85,7 +87,7 @@ const DAILY: Meal[] = [
 		amount: [2.5, 8.5],
 		people: ["", "Jia Le"],
 		locations: ["Raffles Place", "Guoco Tower", ""],
-		bucket: "demo-daily",
+		monthly_budget: "demo-daily",
 		account: "demo-uob-card",
 	},
 	{
@@ -94,7 +96,7 @@ const DAILY: Meal[] = [
 		amount: [12, 95],
 		people: ["", "Rong Xin"],
 		locations: ["Bedok", "Paya Lebar", ""],
-		bucket: "demo-daily",
+		monthly_budget: "demo-daily",
 		account: "demo-dbs-savings",
 	},
 	{
@@ -103,7 +105,7 @@ const DAILY: Meal[] = [
 		amount: [1.1, 10],
 		people: [""],
 		locations: [""],
-		bucket: "demo-daily",
+		monthly_budget: "demo-daily",
 		account: "demo-dbs-savings",
 	},
 	{
@@ -112,7 +114,7 @@ const DAILY: Meal[] = [
 		amount: [8, 32],
 		people: ["Rong Xin", ""],
 		locations: ["Changi", "CBD", "Jurong", ""],
-		bucket: "demo-daily",
+		monthly_budget: "demo-daily",
 		account: "demo-uob-card",
 	},
 ]
@@ -124,7 +126,7 @@ const RECURRING: Meal[] = [
 		amount: [4.9, 58],
 		people: [""],
 		locations: [""],
-		bucket: "demo-recurring",
+		monthly_budget: "demo-recurring",
 		account: "demo-uob-card",
 	},
 	{
@@ -133,7 +135,7 @@ const RECURRING: Meal[] = [
 		amount: [6, 45],
 		people: [""],
 		locations: [""],
-		bucket: "demo-recurring",
+		monthly_budget: "demo-recurring",
 		account: "demo-revolut",
 	},
 	{
@@ -142,7 +144,7 @@ const RECURRING: Meal[] = [
 		amount: [15, 120],
 		people: [""],
 		locations: ["Bedok Polyclinic", "Guardian", ""],
-		bucket: "demo-irregular",
+		monthly_budget: "demo-irregular",
 		account: "demo-dbs-savings",
 	},
 	{
@@ -151,7 +153,7 @@ const RECURRING: Meal[] = [
 		amount: [19, 150],
 		people: ["", "Jia Le"],
 		locations: ["Orchard", "Online", ""],
-		bucket: "demo-irregular",
+		monthly_budget: "demo-irregular",
 		account: "demo-uob-card",
 	},
 	{
@@ -160,7 +162,7 @@ const RECURRING: Meal[] = [
 		amount: [11, 32],
 		people: ["Rong Xin", "Wei Ming", ""],
 		locations: ["Bugis+", "Suntec", ""],
-		bucket: "demo-irregular",
+		monthly_budget: "demo-irregular",
 		account: "demo-uob-card",
 	},
 ]
@@ -174,6 +176,8 @@ const BANK_BLURB: Record<string, string[]> = {
 export function generateTestData(): FinpointExport {
 	const today = DateTime.now().startOf("day")
 	const tables = {
+		statement_rules: [],
+		duplicate_dismissals: [],
 		accounts: [
 			{ id: "demo-dbs-savings", name: "Everyday Savings", balance: 12480.55, bank: "DBS" },
 			{ id: "demo-uob-card", name: "One Card", balance: -842.2, bank: "UOB" },
@@ -195,7 +199,7 @@ export function generateTestData(): FinpointExport {
 			color: c.color,
 			parent_category_id: null,
 			analytics_treatment: c.treatment,
-			default_bucket_id: c.bucket_id,
+			default_monthly_budget_id: c.monthly_budget_id,
 		})),
 		records: [] as {
 			id: string
@@ -208,8 +212,8 @@ export function generateTestData(): FinpointExport {
 			category_id: string
 			analytics_treatment: AnalyticsTreatment
 			analytics_treatment_source: "category" | "manual"
-			bucket_id: string | null
-			bucket_source: "category" | "manual" | null
+			monthly_budget_id: string | null
+			monthly_budget_source: "category" | "manual" | null
 			revision: number
 		}[],
 		allocations: [] as { statement_id: string; record_id: string; amount: number }[],
@@ -222,13 +226,17 @@ export function generateTestData(): FinpointExport {
 			automatic: boolean
 		}[],
 		budget_records: [] as { budget_id: string; record_id: string }[],
-		buckets: BUCKETS.map(b => ({ ...b, archived: false })),
-		bucket_defaults: [] as {
-			bucket_id: string
+		monthly_budgets: MONTHLY_BUDGETS.map(b => ({ ...b, archived: false })),
+		monthly_budget_defaults: [] as {
+			monthly_budget_id: string
 			effective_month: string
 			amount: number | null
 		}[],
-		bucket_targets: [] as { bucket_id: string; month: string; amount: number | null }[],
+		monthly_budget_amounts: [] as {
+			monthly_budget_id: string
+			month: string
+			amount: number | null
+		}[],
 		analytics_months: [] as {
 			month: string
 			coverage: string
@@ -280,7 +288,7 @@ export function generateTestData(): FinpointExport {
 		day: DateTime
 		amount: number
 		category: string
-		bucket: string | null
+		monthly_budget: string | null
 		allocate: "full" | "partial" | "none"
 		account: string
 	}) => {
@@ -298,9 +306,9 @@ export function generateTestData(): FinpointExport {
 			category_id: input.category,
 			analytics_treatment: category.treatment,
 			analytics_treatment_source: "category",
-			bucket_id: input.bucket,
-			bucket_source: input.bucket
-				? input.bucket === category.bucket_id
+			monthly_budget_id: input.monthly_budget,
+			monthly_budget_source: input.monthly_budget
+				? input.monthly_budget === category.monthly_budget_id
 					? "category"
 					: "manual"
 				: null,
@@ -341,7 +349,7 @@ export function generateTestData(): FinpointExport {
 			day,
 			amount: -between(meal.amount[0], meal.amount[1]),
 			category: meal.category,
-			bucket: meal.bucket,
+			monthly_budget: meal.monthly_budget,
 			allocate: rand() < 0.88 ? "full" : rand() < 0.5 ? "partial" : "none",
 			account: meal.account,
 		})
@@ -363,7 +371,7 @@ export function generateTestData(): FinpointExport {
 				day,
 				amount: -1400,
 				category: "housing",
-				bucket: "demo-recurring",
+				monthly_budget: "demo-recurring",
 				allocate: "full",
 				account: "demo-dbs-savings",
 			})
@@ -377,7 +385,7 @@ export function generateTestData(): FinpointExport {
 				day,
 				amount: -between(95, 145),
 				category: "bills-utilities",
-				bucket: "demo-recurring",
+				monthly_budget: "demo-recurring",
 				allocate: "full",
 				account: "demo-dbs-savings",
 			})
@@ -391,7 +399,7 @@ export function generateTestData(): FinpointExport {
 				day,
 				amount: -65,
 				category: "insurance",
-				bucket: "demo-recurring",
+				monthly_budget: "demo-recurring",
 				allocate: "full",
 				account: "demo-dbs-savings",
 			})
@@ -405,7 +413,7 @@ export function generateTestData(): FinpointExport {
 				day,
 				amount: -between(30, 80),
 				category: "gifts-donations",
-				bucket: "demo-irregular",
+				monthly_budget: "demo-irregular",
 				allocate: "full",
 				account: "demo-uob-card",
 			})
@@ -419,7 +427,7 @@ export function generateTestData(): FinpointExport {
 				day,
 				amount: -2.5,
 				category: "other",
-				bucket: null,
+				monthly_budget: null,
 				allocate: "full",
 				account: "demo-dbs-savings",
 			})
@@ -433,7 +441,7 @@ export function generateTestData(): FinpointExport {
 				day,
 				amount: -250,
 				category: "transfer",
-				bucket: null,
+				monthly_budget: null,
 				allocate: "full",
 				account: "demo-dbs-savings",
 			})
@@ -445,7 +453,7 @@ export function generateTestData(): FinpointExport {
 				day,
 				amount: 250,
 				category: "transfer",
-				bucket: null,
+				monthly_budget: null,
 				allocate: "full",
 				account: "demo-revolut",
 			})
@@ -460,7 +468,7 @@ export function generateTestData(): FinpointExport {
 				day,
 				amount: between(4200, 5200),
 				category: "income",
-				bucket: null,
+				monthly_budget: null,
 				allocate: "full",
 				account: "demo-dbs-savings",
 			})
@@ -474,7 +482,7 @@ export function generateTestData(): FinpointExport {
 				day,
 				amount: -500,
 				category: "savings-investments",
-				bucket: null,
+				monthly_budget: null,
 				allocate: "full",
 				account: "demo-dbs-savings",
 			})
@@ -499,7 +507,7 @@ export function generateTestData(): FinpointExport {
 			day: trip.plus({ days: i }),
 			amount: -between(range[0], range[1]),
 			category,
-			bucket: "demo-travel",
+			monthly_budget: "demo-travel",
 			allocate: "full",
 			account,
 		})
@@ -534,7 +542,7 @@ export function generateTestData(): FinpointExport {
 		day: pendingDay,
 		amount: -14.5,
 		category: "dining-out",
-		bucket: "demo-daily",
+		monthly_budget: "demo-daily",
 		allocate: "none",
 		account: "demo-dbs-savings",
 	})
@@ -556,7 +564,9 @@ export function generateTestData(): FinpointExport {
 		end_date: trip.plus({ days: 6 }).toFormat("yyyy-MM-dd"),
 		automatic: false,
 	})
-	for (const record of tables.records.filter(r => r.bucket_id === "demo-travel").slice(0, 5)) {
+	for (const record of tables.records
+		.filter(r => r.monthly_budget_id === "demo-travel")
+		.slice(0, 5)) {
 		tables.budget_records.push({ budget_id: "demo-budget-trip", record_id: record.id })
 	}
 	const autoMonth = today.minus({ months: 1 }).startOf("month")
@@ -570,37 +580,37 @@ export function generateTestData(): FinpointExport {
 	})
 	for (const record of tables.records.filter(
 		r =>
-			r.bucket_id === "demo-daily" &&
+			r.monthly_budget_id === "demo-daily" &&
 			r.datetime.slice(0, 10) >= autoMonth.toFormat("yyyy-MM-dd") &&
 			r.datetime.slice(0, 10) <= autoMonth.endOf("month").toFormat("yyyy-MM-dd"),
 	)) {
 		tables.budget_records.push({ budget_id: "demo-budget-daily", record_id: record.id })
 	}
 
-	// Bucket targets for recent months + defaults
+	// MonthlyBudget amounts for recent months + defaults
 	const monthKeys: string[] = []
 	for (let back = 4; back >= 0; back--) {
 		monthKeys.push(today.minus({ months: back }).startOf("month").toFormat("yyyy-MM-dd"))
 	}
-	const monthlyTarget: Record<string, number> = {
+	const monthlyAmounts: Record<string, number> = {
 		"demo-daily": 950,
 		"demo-recurring": 1800,
 		"demo-irregular": 400,
 		"demo-travel": 0,
 	}
 	for (const key of monthKeys) {
-		for (const bucket of BUCKETS) {
-			tables.bucket_targets.push({
-				bucket_id: bucket.id,
+		for (const monthly_budget of MONTHLY_BUDGETS) {
+			tables.monthly_budget_amounts.push({
+				monthly_budget_id: monthly_budget.id,
 				month: key,
-				amount: monthlyTarget[bucket.id] ?? null,
+				amount: monthlyAmounts[monthly_budget.id] ?? null,
 			})
 		}
 	}
 	const firstMonth = monthKeys[0]
 	if (firstMonth) {
-		tables.bucket_defaults.push({
-			bucket_id: "demo-daily",
+		tables.monthly_budget_defaults.push({
+			monthly_budget_id: "demo-daily",
 			effective_month: firstMonth,
 			amount: 950,
 		})
@@ -621,12 +631,11 @@ export function generateTestData(): FinpointExport {
 
 	return {
 		app: "finpoint",
-		version: 2,
+		version: EXPORT_VERSION,
 		exported_at: new Date().toISOString(),
 		settings: {
 			default_filter_start_date: null,
 			default_filter_end_date_today: false,
-			dashboard_comparison_months: 3,
 		},
 		tables,
 	}

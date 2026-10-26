@@ -26,6 +26,7 @@ function ComboboxTrigger({
 }: ComboboxPrimitive.Trigger.Props) {
   return (
     <ComboboxPrimitive.Trigger
+      tabIndex={0}
       data-slot="combobox-trigger"
       className={cn("cursor-pointer [&_svg:not([class*='size-'])]:size-3.5", className)}
       {...props}
@@ -39,6 +40,7 @@ function ComboboxTrigger({
 function ComboboxClear({ className, ...props }: ComboboxPrimitive.Clear.Props) {
   return (
     <ComboboxPrimitive.Clear
+      tabIndex={0}
       data-slot="combobox-clear"
       render={<InputGroupButton variant="ghost" size="icon-xs" />}
       className={cn(className)}
@@ -55,6 +57,7 @@ function ComboboxInput({
   disabled = false,
   showTrigger = true,
   showClear = false,
+  onKeyDown,
   ...props
 }: ComboboxPrimitive.Input.Props & {
   showTrigger?: boolean
@@ -64,6 +67,15 @@ function ComboboxInput({
     <InputGroup className={cn("w-auto", className)}>
       <ComboboxPrimitive.Input
         render={<InputGroupInput disabled={disabled} />}
+        onKeyDown={event => {
+          onKeyDown?.(event)
+          // With the popup closed, Base UI's Escape wipes the value and stops the
+          // event, so a surrounding dialog never closes. Let Escape bubble instead;
+          // clearing stays on the clear button.
+          if (event.key === "Escape" && event.currentTarget.getAttribute("aria-expanded") !== "true") {
+            event.preventBaseUIHandler()
+          }
+        }}
         {...props}
       />
       <InputGroupAddon align="inline-end">

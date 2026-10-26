@@ -261,7 +261,7 @@ async function finishCycle(outcome: DriveSyncResult, announced: boolean): Promis
 			emit({
 				key: `conflict-${outcome.remoteModifiedTime}`,
 				title: "Both sides changed — choose which to keep.",
-				detail: "Open Sync to pick a winner.",
+				detail: "Open Data and choose which copy to keep.",
 			})
 		}
 	} else {

@@ -6,7 +6,7 @@ export const cn = (...inputs: ClassValue[]) => {
 	return twMerge(clsx(inputs))
 }
 
-export const round2dp = (number: number) => {
+export const round2 = (number: number) => {
 	return Math.round(number * 100) / 100
 }
 
@@ -35,11 +35,9 @@ export const formatCurrency = (amount: number) => {
 	return currencyFormat.format(amount)
 }
 
+export const pluralize = (count: number, noun: string) =>
+	`${count} ${noun}${count === 1 ? "" : "s"}`
+
 export const classForCurrency = (amount: number) => {
 	return amount < 0 ? "text-destructive" : amount > 0 ? "text-creative" : "text-foreground"
-}
-
-export const withMethod = (formData: FormData, method: "PUT" | "PATCH" | "DELETE") => {
-	formData.set("_method", method)
-	return formData
 }

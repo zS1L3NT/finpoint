@@ -24,7 +24,8 @@ import {
 	CardTitle,
 } from "@/components/ui/card"
 import { useRecordEditor } from "@/hooks/use-record-editor"
-import { formatCurrency, parseDate, parseDatetime, round2dp } from "@/lib/utils"
+import { themeColor } from "@/lib/palette"
+import { formatCurrency, parseDate, parseDatetime, round2 } from "@/lib/utils"
 import { attachBudgetRecord, detachBudgetRecord, getBudget } from "@/logic/budgets"
 import { listCategories } from "@/logic/categories"
 import { pathBudgets } from "@/routes"
@@ -36,13 +37,12 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 		() => (id ? getBudget(id).catch(() => null) : Promise.resolve(null)),
 		[id],
 	)
-	const categories =
-		useLiveQuery(() => listCategories() as unknown as Promise<CategoryWithChildren[]>, []) ?? []
+	const categories = useLiveQuery(() => listCategories(), []) ?? []
 	const [isEditingBudget, setIsEditingBudget] = useState(false)
 	const [isAttachingRecord, setIsAttachingRecord] = useState(false)
 	const { editingRecord, handleEdit, setEditingRecord } = useRecordEditor()
 	const budget = (data ?? null) as Budget | null
-	const records = useMemo(() => (data?.records ?? []) as unknown as Record[], [data])
+	const records = useMemo(() => data?.records ?? [], [data])
 	const budgetStart = parseDate(budget?.start_date ?? "2000-01-01")
 	const budgetEnd = parseDate(budget?.end_date ?? "2000-01-01")
 	const now = DateTime.now()
@@ -117,7 +117,7 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 		return (
 			<>
 				<PageContent>
-					<p className="text-sm text-muted-foreground">Budget not found.</p>
+					<p className="text-xs text-muted-foreground">Budget not found.</p>
 				</PageContent>
 			</>
 		)
@@ -206,7 +206,7 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 				<div className="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)]">
 					<Card>
 						<CardHeader className="border-b">
-							<CardTitle className="text-base">Spending over time</CardTitle>
+							<CardTitle>Spending over time</CardTitle>
 							<CardDescription>
 								Cumulative usage against the budget limit, including the current
 								pace projection.
@@ -231,7 +231,7 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 
 					<Card>
 						<CardHeader className="border-b">
-							<CardTitle className="text-base">Spending by category</CardTitle>
+							<CardTitle>Spending by category</CardTitle>
 							<CardDescription>
 								Where this budget’s outgoing Records went.
 							</CardDescription>
@@ -262,10 +262,10 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 											</div>
 											<div className="ml-10 h-1.5 overflow-hidden rounded-full bg-muted">
 												<div
-													className="h-full origin-left rounded-full transition-transform duration-300 ease-out"
+													className="h-full origin-left rounded-full transition-transform duration-300 ease-out motion-reduce:transition-none"
 													style={{
 														transform: `scaleX(${category.share / 100})`,
-														backgroundColor: category.color,
+														backgroundColor: themeColor(category.color),
 													}}
 												/>
 											</div>
@@ -273,7 +273,7 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 									))}
 								</div>
 							) : (
-								<p className="py-10 text-center text-sm text-muted-foreground">
+								<p className="py-10 text-center text-xs text-muted-foreground">
 									No outgoing Records in this budget.
 								</p>
 							)}
@@ -283,7 +283,7 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 
 				<Card>
 					<CardHeader>
-						<CardTitle className="text-base">
+						<CardTitle>
 							Attached Records
 							<span className="ml-2 text-sm font-normal text-muted-foreground">
 								{records.length}
@@ -357,7 +357,7 @@ function getBudgetAnalytics(
 		Math.max(Math.floor(asOf.startOf("day").diff(start.startOf("day"), "days").days) + 1, 0),
 		dayCount,
 	)
-	const spent = round2dp(
+	const spent = round2(
 		records
 			.filter(record => {
 				const date = parseDatetime(record.datetime)
@@ -366,18 +366,18 @@ function getBudgetAnalytics(
 			.reduce((total, record) => total - record.amount, 0),
 	)
 	const remainingDays = dayCount - elapsedDays
-	const currentPace = elapsedDays ? round2dp(spent / elapsedDays) : 0
-	const projectedSpending = round2dp(spent + currentPace * remainingDays)
+	const currentPace = elapsedDays ? round2(spent / elapsedDays) : 0
+	const projectedSpending = round2(spent + currentPace * remainingDays)
 	const recommendedPace = remainingDays
-		? round2dp(Math.max(limit - spent, 0) / remainingDays)
+		? round2(Math.max(limit - spent, 0) / remainingDays)
 		: null
 
 	return {
 		spent,
-		elapsedPercent: limit ? round2dp((spent / limit) * 100) : 0,
+		elapsedPercent: limit ? round2((spent / limit) * 100) : 0,
 		projectedSpending,
 		currentPace,
-		targetPace: dayCount ? round2dp(limit / dayCount) : 0,
+		targetPace: dayCount ? round2(limit / dayCount) : 0,
 		recommendedPace,
 		remainingDays,
 	}
@@ -404,7 +404,7 @@ function getCategoryData(
 			return {
 				...category,
 				records: matching.length,
-				amount: round2dp(matching.reduce((total, record) => total - record.amount, 0)),
+				amount: round2(matching.reduce((total, record) => total - record.amount, 0)),
 			}
 		})
 		.filter(category => category.records > 0)

@@ -14,7 +14,7 @@ A user-managed financial entry that represents the meaningful expense, income, t
 _Avoid_: Transaction, entry, ledger item
 
 **Allocation**:
-The assignment of part or all of a statement amount to a record. Allocations are what connect imported account activity to the records that explain it.
+The assignment of part or all of a Statement amount to a Record. Use allocate/allocation for this connection; attach/detach describes Budget membership. “Match” describes an amount comparison, not an allocation.
 _Avoid_: Link, match, reconciliation
 
 **Account**:
@@ -22,31 +22,39 @@ An external financial account whose activity is imported into Finpoint. Accounts
 _Avoid_: User account, login account
 
 **Pending Record**:
-A record whose allocated statement amounts do not tally with the record amount, or that is allocated to any Pending Statement (its imported bank row has not arrived yet). Pending records are useful when the real-world activity is known before the bank statements are fully confirmed.
+A record whose allocated statement amounts do not tally with the record amount, or that is allocated to any Pending Statement (its account activity is not confirmed yet). Pending records are useful when the real-world activity is known before the bank statements are fully confirmed.
 _Avoid_: Draft record, unconfirmed record
 
 **Pending Statement**:
-A handwritten placeholder for account activity that has not appeared in an imported bank feed yet. A pending statement may be allocated like any statement. When the imported statement arrives, it replaces one pending statement and inherits its allocations unchanged.
+A Statement whose account activity is not confirmed yet, whether entered manually or imported with a pending bank status. Pending describes confirmation state, not provenance. A Pending Statement may be allocated like any Statement; replacing it with a confirmed Statement preserves its allocations.
 _Avoid_: Draft statement, estimated record
+
+**Duplicate Statement**:
+An imported statement that repeats another imported statement on the same account, day, and amount, usually because the bank changed its description between exports. Fixing duplicates keeps one statement and deletes the others; Allocations follow the kept statement.
+_Avoid_: Survivor, double import, match
+
+**Separate pair**:
+Two same-day statements the user marked as not duplicates, so they are no longer suggested together. Marking is per pair and can be restored.
+_Avoid_: Ignored match, false positive
 
 **Budget**:
 A spending plan with a custom date period and amount. Budget membership can be manual, or automatic when records fall within the budget period; records may still be attached or detached outside the period.
 _Avoid_: Spending bucket, monthly target
 
-**Spending bucket**:
-A persistent, optional planning group for personal spending, such as Daily, Recurring, Irregular, or Travel. A bucket can have a default monthly target and a target override for a specific month. Only Records whose effective treatment is Spending contribute to bucket totals.
-_Avoid_: Budget, category, treatment
+**Monthly Budget**:
+A reusable spending plan for calendar months, such as Daily, Recurring, Irregular, or Travel. Each month takes its amount from one of three amount rules (see Monthly Budget amount). An explicit null means no comparison amount; zero is a valid amount. Only Records whose effective treatment is Spending contribute to its totals. Archived Monthly Budgets retain historical assignments.
+_Avoid_: Bucket, spending bucket, monthly target, custom-period budget
 
-**Monthly target**:
-An optional comparison amount for a spending bucket in a calendar month. It does not reserve cash, carry a balance, or change a Record's accounting treatment.
-_Avoid_: Budget, limit, allowance
+**Monthly Budget amount**:
+The comparison amount for a Monthly Budget in a selected calendar month. Each month has exactly one of three amount rules. **Default**: the month has no amount of its own and looks back to the latest Override default in an earlier month; unavailable when no earlier Override default exists. **Override one month**: an amount for that month only; months looking back skip it. **Override default**: a default amount that applies from its month onward; months looking back stop at the latest one they reach. Changing a month's rule replaces its previous rule for that month only; changing a month away from Override default makes later months look further back. It does not reserve cash, carry a balance, or change a Record's accounting treatment.
+_Avoid_: Target, limit, allowance
 
 **Treatment**:
-The accounting role of a Record: Income, Spending, Saving/investment, Transfer/neutral, or Automatic by amount direction. A Category supplies the normal default and a Record may override it for an exception.
+The accounting role of a Record: Income, Spending, Saving / investment, Transfer / excluded (counted in no total), or Automatic by direction (income or spending by amount sign). A Category supplies the normal default and a Record may override it for an exception.
 _Avoid_: Bucket, category type
 
 **Category**:
-A category gives a Record user-facing meaning and supplies its usual treatment and optional default spending bucket. The defaults reduce repeated input; the Category, treatment, and bucket remain separate concepts.
+A category gives a Record user-facing meaning and supplies its usual treatment and optional default Monthly Budget. The defaults reduce repeated input; the Category, treatment, and Monthly Budget remain separate concepts.
 _Avoid_: Budget category, bucket, treatment
 
 **Subcategory**:
@@ -61,8 +69,8 @@ Domain expert: "Call it a statement. A statement is the imported account activit
 Developer: "Why is this record still pending?"
 Domain expert: "Its allocated statements do not tally with the record amount yet."
 
-Developer: "Should dining go under a budget or spending bucket?"
-Domain expert: "Use a spending bucket for persistent monthly planning. Use a budget when the plan has its own custom period."
+Developer: "Should dining go under a Budget or Monthly Budget?"
+Domain expert: "Use a Monthly Budget for reusable calendar-month planning. Use a budget when the plan has its own custom period."
 
-Developer: "Why do Category, treatment, and bucket all exist?"
-Domain expert: "The Category describes the Record, its treatment controls totals, and its optional bucket groups personal spending. Category defaults normally fill the other two."
+Developer: "Why do Category, treatment, and Monthly Budget all exist?"
+Domain expert: "The Category describes the Record, its treatment controls totals, and its optional Monthly Budget groups personal spending. Category defaults normally fill the other two."

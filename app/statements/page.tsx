@@ -22,19 +22,22 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select"
+import { useHistory } from "@/history"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
-import { cn } from "@/lib/utils"
+import { cn, pluralize } from "@/lib/utils"
 import { listAccounts } from "@/logic/accounts"
 import { paginateItems, parsePage, parsePageSize } from "@/logic/pagination"
 import { listStatements } from "@/logic/statements"
 import type { Statement } from "@/types"
 
 export default function StatementsPage() {
+	const { latest } = useHistory()
 	const [isCreatingStatement, setIsCreatingStatement] = useState(false)
 	const [editingStatement, setEditingStatement] = useState<Statement | null>(null)
 	const searchParams = useSearchParams()
 	const accountId = searchParams.get("account_id") ?? "all"
 	const isPending = searchParams.get("is_pending")
+	const isUnallocated = searchParams.get("is_unallocated")
 	const startDate = searchParams.get("start_date")
 	const endDate = searchParams.get("end_date")
 	const minAmount = searchParams.get("min_amount")
@@ -49,6 +52,7 @@ export default function StatementsPage() {
 		searchParams.get("query"),
 		accountId === "all" ? "" : accountId,
 		isPending,
+		isUnallocated,
 		startDate ?? endDate,
 		minAmount ?? maxAmount,
 	].filter(Boolean).length
@@ -57,6 +61,7 @@ export default function StatementsPage() {
 			query: null,
 			account_id: null,
 			is_pending: null,
+			is_unallocated: null,
 			start_date: null,
 			end_date: null,
 			min_amount: null,
@@ -64,19 +69,20 @@ export default function StatementsPage() {
 			page: null,
 		})
 
-	const accounts = useLiveQuery(() => listAccounts(), []) ?? []
+	const accounts = useLiveQuery(() => listAccounts(), [])
 	const statementsQuery = useLiveQuery(
 		() =>
 			listStatements({
 				query: query || null,
 				account_id: accountId === "all" ? null : accountId,
 				is_pending: isPending,
+				is_unallocated: isUnallocated,
 				start_date: startDate,
 				end_date: endDate,
 				min_amount: minAmount,
 				max_amount: maxAmount,
 			}),
-		[query, accountId, isPending, startDate, endDate, minAmount, maxAmount],
+		[query, accountId, isPending, isUnallocated, startDate, endDate, minAmount, maxAmount],
 	)
 	const statements = statementsQuery ?? []
 	const paginated = useMemo(
@@ -94,14 +100,17 @@ export default function StatementsPage() {
 		grouped: true,
 	})
 
+	if (accounts === undefined || statementsQuery === undefined) return null
+
 	return (
 		<>
 			<PageContent>
 				<PageHeader
 					title="Statements"
-					subtitle="Review imported and handwritten pending statements with their allocated records."
+					subtitle="Review imported and pending statements with their allocated records."
 					description="Account activity"
 					icon="lucide:credit-card"
+					back={latest ?? undefined}
 				/>
 
 				<PaginatedDataTable
@@ -162,6 +171,28 @@ export default function StatementsPage() {
 										</SelectGroup>
 									</SelectContent>
 								</Select>
+								<Select
+									value={isUnallocated ?? "all"}
+									onValueChange={value =>
+										updateFilters({
+											is_unallocated: value === "all" ? null : value,
+										})
+									}
+								>
+									<SelectTrigger
+										className={cn("w-full sm:w-40", FILTER_CONTROL_CLASS)}
+									>
+										<IconifyIcon icon="lucide:circle-check-big" />
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent align="start" variant="filter">
+										<SelectGroup>
+											<SelectItem value="all">Any allocation</SelectItem>
+											<SelectItem value="true">Unallocated</SelectItem>
+											<SelectItem value="false">Allocated</SelectItem>
+										</SelectGroup>
+									</SelectContent>
+								</Select>
 								<DateRange
 									id="statements_date_range"
 									value={{ start: startDate, end: endDate }}
@@ -203,7 +234,7 @@ export default function StatementsPage() {
 						),
 					}}
 					footer={{
-						summary: `Showing ${paginated.data.length} of ${paginated.total} statements.`,
+						summary: `Showing ${paginated.data.length} of ${pluralize(paginated.total, "statement")}.`,
 					}}
 					mobileRow={mobileRow}
 					groupBy={byDay<Statement>("Statement")}

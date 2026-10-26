@@ -20,10 +20,10 @@ export default function PageHeader({
 	back?: HistoryItem
 }) {
 	const { latest, isNavigatingBack, navigateBack } = useHistory()
-	const backTarget = back ? (latest ?? back) : null
+	const backTarget = latest ?? back ?? null
 
 	return (
-		<div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+		<div className="flex flex-col gap-4 @2xl/page:flex-row @2xl/page:items-end @2xl/page:justify-between">
 			<div className="flex min-w-0 flex-col gap-4">
 				{backTarget ? (
 					<Button
@@ -39,20 +39,20 @@ export default function PageHeader({
 							icon={isNavigatingBack ? "lucide:loader-circle" : "lucide:arrow-left"}
 							className={isNavigatingBack ? "animate-spin" : undefined}
 						/>
-						Back to {backTarget.name}
+						<span className="truncate">Back to {backTarget.name}</span>
 					</Button>
 				) : null}
 
 				<div className="flex min-w-0 flex-col gap-1">
-					<div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground md:tracking-[0.22em]">
-						<IconifyIcon icon={Icon} className="size-3" />
+					<div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+						<IconifyIcon icon={Icon} className="size-3.5" />
 						{description}
 					</div>
-					<h2 className="text-2xl font-semibold tracking-tight break-words md:text-3xl">
+					<h2 className="text-xl font-semibold tracking-tight break-words md:text-2xl">
 						{title}
 					</h2>
 					{subtitle ? (
-						<div className="max-w-2xl text-sm text-muted-foreground whitespace-pre-line break-words">
+						<div className="max-w-prose text-xs text-muted-foreground whitespace-pre-line break-words">
 							{subtitle}
 						</div>
 					) : null}
@@ -60,7 +60,7 @@ export default function PageHeader({
 			</div>
 
 			{actions ? (
-				<div className="flex w-full shrink-0 flex-col gap-2 sm:flex-row sm:flex-wrap md:w-auto md:justify-end">
+				<div className="flex w-full shrink-0 flex-col gap-2 sm:flex-row sm:flex-wrap @2xl/page:w-auto @2xl/page:justify-end">
 					{actions}
 				</div>
 			) : null}

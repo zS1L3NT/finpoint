@@ -6,8 +6,8 @@ import { amountTone, formatRowTime } from "@/components/table/record-columns"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useHistory } from "@/history"
-import { cn, formatCurrency, round2dp } from "@/lib/utils"
-import { pathStatement } from "@/routes"
+import { cn, formatCurrency, round2 } from "@/lib/utils"
+import { pathAllocatorDuplicates, pathStatement } from "@/routes"
 import type { Allocation, Statement } from "@/types"
 
 type StatementRow = Statement & { pivot?: Allocation }
@@ -30,11 +30,21 @@ function StatementBadges({
 }) {
 	return (
 		<>
+			{statement.is_duplicate ? (
+				<Badge variant="destructive" asChild>
+					<Link
+						href={pathAllocatorDuplicates({ account_id: statement.account.id })}
+						title="Possible duplicate statement. Review and fix duplicates."
+					>
+						Duplicate?
+					</Link>
+				</Badge>
+			) : null}
 			{statement.is_pending ? (
 				<Badge
 					variant="warning"
 					className="shrink-0"
-					title="Handwritten placeholder until the bank row is imported"
+					title="Account activity awaiting confirmation"
 				>
 					Pending
 				</Badge>
@@ -55,7 +65,7 @@ function StatementAmount({
 	statement: StatementRow
 	amount: StatementTableOptions<StatementRow>["amount"]
 }) {
-	const allocable = round2dp(statement.allocable_amount)
+	const allocable = round2(statement.allocable_amount)
 	return (
 		<span className="grid justify-items-end gap-0.5 text-right">
 			<span className={cn("font-medium tabular-nums", amountTone(statement.amount))}>

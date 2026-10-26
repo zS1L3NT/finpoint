@@ -14,8 +14,9 @@ import { Input } from "@/components/ui/input"
 import { useHistory } from "@/history"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { bankMeta } from "@/lib/banks"
-import { SPRING } from "@/lib/motion"
-import { cn, formatCurrency } from "@/lib/utils"
+import { cardEnter } from "@/lib/motion"
+import { themeColor } from "@/lib/palette"
+import { cn, formatCurrency, pluralize } from "@/lib/utils"
 import { type AccountActivity, listAccounts } from "@/logic/accounts"
 import { pathAccount, pathAllocator } from "@/routes"
 import type { Account } from "@/types"
@@ -53,20 +54,18 @@ export default function AccountsPage() {
 				</div>
 
 				{accounts === undefined ? null : accounts.length === 0 ? (
-					<p className="rounded-xl border border-dashed p-10 text-center text-sm text-muted-foreground">
+					<p className="rounded-xl border border-dashed p-10 text-center text-xs text-muted-foreground">
 						{query
 							? "No accounts match your search."
 							: "No accounts yet. Import a bank export to create one."}
 					</p>
 				) : (
-					<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+					<div className="grid gap-4 @2xl/page:grid-cols-2 @5xl/page:grid-cols-3">
 						{accounts.map((account, index) => (
 							<motion.div
 								key={account.id}
-								className="grid"
-								initial={{ opacity: 0, y: 6 }}
-								animate={{ opacity: 1, y: 0 }}
-								transition={{ ...SPRING.smooth, delay: Math.min(index, 7) * 0.03 }}
+								className="grid min-w-0 grid-cols-1"
+								{...cardEnter(index)}
 							>
 								<AccountCard
 									account={account}
@@ -103,20 +102,24 @@ function AccountCard({ account, onEdit }: { account: AccountRow; onEdit: () => v
 
 	return (
 		<article
-			className="group grid cursor-pointer content-start gap-4 rounded-xl border bg-card p-4 transition-[box-shadow,transform] duration-150 ease-out hover:shadow-md active:scale-[0.99]"
+			className="group grid min-w-0 grid-cols-1 cursor-pointer content-start gap-4 rounded-xl border bg-card p-4 transition-[box-shadow,transform] duration-150 ease-out hover:shadow-md active:scale-[0.99] motion-reduce:transition-none motion-reduce:active:scale-100"
 			onClick={event => {
 				if (!isInteractiveTarget(event.target)) open()
 			}}
+			onKeyDown={event => {
+				if (event.key === "Enter" && event.target === event.currentTarget) open()
+			}}
+			tabIndex={0}
 		>
 			<header className="flex items-start gap-3">
 				<span
 					className="grid size-10 shrink-0 place-items-center rounded-lg text-xs font-bold text-white"
-					style={{ backgroundColor: bank.color }}
+					style={{ backgroundColor: themeColor(bank.color) }}
 				>
 					{bank.short}
 				</span>
 				<div className="min-w-0 flex-1">
-					<h3 className="truncate font-semibold">{account.name}</h3>
+					<h3 className="truncate text-sm font-semibold">{account.name}</h3>
 					<p className="truncate text-xs text-muted-foreground">
 						{bank.label}
 						{account.last_activity
@@ -139,13 +142,13 @@ function AccountCard({ account, onEdit }: { account: AccountRow; onEdit: () => v
 			<div className="grid grid-cols-2 gap-3 rounded-lg bg-muted/40 p-3 text-xs">
 				<div>
 					<p className="text-muted-foreground">In · 30 days</p>
-					<p className="mt-0.5 text-sm font-semibold text-creative tabular-nums">
+					<p className="mt-0.5 text-sm font-semibold text-creative tabular-nums whitespace-nowrap">
 						{formatCurrency(account.inflow_30d)}
 					</p>
 				</div>
 				<div>
 					<p className="text-muted-foreground">Out · 30 days</p>
-					<p className="mt-0.5 text-sm font-semibold text-destructive tabular-nums">
+					<p className="mt-0.5 text-sm font-semibold text-destructive tabular-nums whitespace-nowrap">
 						{formatCurrency(-account.outflow_30d)}
 					</p>
 				</div>
@@ -163,7 +166,12 @@ function AccountCard({ account, onEdit }: { account: AccountRow; onEdit: () => v
 			</div>
 
 			<footer className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-				<span>{account.statements_count.toLocaleString()} Statements</span>
+				<span>
+					{pluralize(account.statements_count, "Statement").replace(
+						String(account.statements_count),
+						account.statements_count.toLocaleString(),
+					)}
+				</span>
 				{account.unallocated_count ? (
 					<a
 						href={pathAllocator({ account_id: account.id })}

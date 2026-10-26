@@ -8,11 +8,11 @@ export type AnalyticsRecord = {
 	amount: number
 	datetime: string
 	analytics_treatment: string
-	bucket_id: string | null
+	monthly_budget_id: string | null
 	is_pending: boolean
 	category: { id: string; name: string; icon: string; color: string } | null
 	category_parent: { id: string; name: string; icon: string; color: string } | null
-	bucket: {
+	monthly_budget: {
 		id: string
 		name: string
 		color: string
@@ -63,7 +63,7 @@ export type AnalyticsSummary = {
 	surplus: number
 	surplus_rate: number | null
 	pending_count: number
-	unbucketed_count: number
+	unbudgeted_count: number
 	daily: {
 		date: string
 		income: number
@@ -79,10 +79,15 @@ export type AnalyticsSummary = {
 		icon: string
 		color: string
 		spending: number
+		outflow: number
+		refunds: number
 		records: number
-		bucket_spending: Record<string, number>
+		monthly_budget_spending: Record<string, number>
+		monthly_budget_outflow: Record<string, number>
+		monthly_budget_refunds: Record<string, number>
+		monthly_budget_records: Record<string, number>
 	}[]
-	buckets: {
+	monthlyBudgets: {
 		id: string
 		name: string
 		color: string
@@ -108,7 +113,7 @@ export function summarize(records: AnalyticsRecord[]): AnalyticsSummary {
 		pending_gross_spending: 0,
 		pending_refunds: 0,
 		pending_count: 0,
-		unbucketed_count: 0,
+		unbudgeted_count: 0,
 		daily: {} as Record<
 			string,
 			{
@@ -128,11 +133,16 @@ export function summarize(records: AnalyticsRecord[]): AnalyticsSummary {
 				icon: string
 				color: string
 				spending: number
+				outflow: number
+				refunds: number
 				records: number
-				bucket_spending: Record<string, number>
+				monthly_budget_spending: Record<string, number>
+				monthly_budget_outflow: Record<string, number>
+				monthly_budget_refunds: Record<string, number>
+				monthly_budget_records: Record<string, number>
 			}
 		>,
-		buckets: {} as Record<
+		monthlyBudgets: {} as Record<
 			string,
 			{
 				id: string
@@ -169,7 +179,7 @@ export function summarize(records: AnalyticsRecord[]): AnalyticsSummary {
 			summary.pending_refunds += Math.max(-value.spending, 0)
 		}
 
-		if (value.spending !== 0 && record.bucket_id === null) summary.unbucketed_count++
+		if (value.spending !== 0 && record.monthly_budget_id === null) summary.unbudgeted_count++
 
 		let day = summary.daily[date]
 		if (!day) {
@@ -191,24 +201,38 @@ export function summarize(records: AnalyticsRecord[]): AnalyticsSummary {
 					icon: category.icon,
 					color: category.color,
 					spending: 0,
+					outflow: 0,
+					refunds: 0,
 					records: 0,
-					bucket_spending: {},
+					monthly_budget_spending: {},
+					monthly_budget_outflow: {},
+					monthly_budget_refunds: {},
+					monthly_budget_records: {},
 				}
 				summary.categories[category.id] = cat
 			}
 			cat.spending += value.spending
+			cat.outflow += Math.max(value.spending, 0)
+			cat.refunds += Math.max(-value.spending, 0)
 			cat.records++
-			const bucketKey = record.bucket_id ?? "unbucketed"
-			cat.bucket_spending[bucketKey] = (cat.bucket_spending[bucketKey] ?? 0) + value.spending
+			const monthlyBudgetKey = record.monthly_budget_id ?? "unbudgeted"
+			cat.monthly_budget_spending[monthlyBudgetKey] =
+				(cat.monthly_budget_spending[monthlyBudgetKey] ?? 0) + value.spending
+			cat.monthly_budget_outflow[monthlyBudgetKey] =
+				(cat.monthly_budget_outflow[monthlyBudgetKey] ?? 0) + Math.max(value.spending, 0)
+			cat.monthly_budget_refunds[monthlyBudgetKey] =
+				(cat.monthly_budget_refunds[monthlyBudgetKey] ?? 0) + Math.max(-value.spending, 0)
+			cat.monthly_budget_records[monthlyBudgetKey] =
+				(cat.monthly_budget_records[monthlyBudgetKey] ?? 0) + 1
 
-			if (record.bucket) {
-				let bucket = summary.buckets[record.bucket.id]
-				if (!bucket) {
-					bucket = { ...record.bucket, spending: 0, records: 0 }
-					summary.buckets[record.bucket.id] = bucket
+			if (record.monthly_budget) {
+				let monthly_budget = summary.monthlyBudgets[record.monthly_budget.id]
+				if (!monthly_budget) {
+					monthly_budget = { ...record.monthly_budget, spending: 0, records: 0 }
+					summary.monthlyBudgets[record.monthly_budget.id] = monthly_budget
 				}
-				bucket.spending += value.spending
-				bucket.records++
+				monthly_budget.spending += value.spending
+				monthly_budget.records++
 			}
 		}
 	}
@@ -232,15 +256,23 @@ export function summarize(records: AnalyticsRecord[]): AnalyticsSummary {
 		.map(cat => ({
 			...cat,
 			spending: fromCents(cat.spending),
-			bucket_spending: Object.fromEntries(
-				Object.entries(cat.bucket_spending).map(([k, v]) => [k, fromCents(v)]),
+			monthly_budget_outflow: Object.fromEntries(
+				Object.entries(cat.monthly_budget_outflow).map(([k, v]) => [k, fromCents(v)]),
+			),
+			monthly_budget_refunds: Object.fromEntries(
+				Object.entries(cat.monthly_budget_refunds).map(([k, v]) => [k, fromCents(v)]),
+			),
+			outflow: fromCents(cat.outflow),
+			refunds: fromCents(cat.refunds),
+			monthly_budget_spending: Object.fromEntries(
+				Object.entries(cat.monthly_budget_spending).map(([k, v]) => [k, fromCents(v)]),
 			),
 		}))
 		.sort((a, b) => b.spending - a.spending)
 
-	const buckets = Object.values(summary.buckets).map(bucket => ({
-		...bucket,
-		spending: fromCents(bucket.spending),
+	const monthlyBudgets = Object.values(summary.monthlyBudgets).map(monthly_budget => ({
+		...monthly_budget,
+		spending: fromCents(monthly_budget.spending),
 	}))
 
 	const surplus = income - spending
@@ -259,9 +291,9 @@ export function summarize(records: AnalyticsRecord[]): AnalyticsSummary {
 		surplus,
 		surplus_rate: income > 0 ? (surplus / income) * 100 : null,
 		pending_count: summary.pending_count,
-		unbucketed_count: summary.unbucketed_count,
+		unbudgeted_count: summary.unbudgeted_count,
 		daily,
 		categories,
-		buckets,
+		monthlyBudgets,
 	}
 }

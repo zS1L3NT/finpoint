@@ -27,22 +27,24 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select"
-import { useFetch } from "@/hooks/use-fetch"
+import { STALE_MONTH_CLASS, useMonthTransition } from "@/hooks/use-month-transition"
 import { useRecordEditor } from "@/hooks/use-record-editor"
-import { useMonthTransition } from "@/hooks/use-tab-transition"
+import { TREATMENTS } from "@/lib/analytics"
+import { themeColor } from "@/lib/palette"
 import { cn } from "@/lib/utils"
 import { listCategories } from "@/logic/categories"
 import { getMonthlyRecords } from "@/logic/monthly"
 import { pathImporter, pathRecords } from "@/routes"
-import { Bucket, CategoryWithChildren, Record } from "@/types"
+import type { CategoryWithChildren, MonthlyBudget, Record } from "@/types"
 
 type Filters = {
 	query?: string
 	category_ids?: string
 	is_allocated?: string
-	bucket_id?: string
-	bucket_group?: string
-	show_unbucketed?: string | boolean
+	monthly_budget_id?: string
+	monthly_budget_group?: string
+	show_unbudgeted?: string | boolean
+	effective_spending?: string
 	treatment?: string
 	start_date?: string
 	end_date?: string
@@ -54,9 +56,10 @@ const FILTER_KEYS = [
 	"query",
 	"category_ids",
 	"is_allocated",
-	"bucket_id",
-	"bucket_group",
-	"show_unbucketed",
+	"monthly_budget_id",
+	"monthly_budget_group",
+	"show_unbudgeted",
+	"effective_spending",
 	"treatment",
 	"start_date",
 	"end_date",
@@ -70,13 +73,18 @@ export default function MonthlyRecordsPage() {
 	const searchParams = useSearchParams()
 	const router = useRouter()
 	const pathname = usePathname()
-	const pushParams = (next: URLSearchParams) => {
+	const pushParams = (next: URLSearchParams, replace = false) => {
 		const suffix = next.toString()
-		router.push(suffix ? pathname + "?" + suffix : pathname, { scroll: false })
+		const href = suffix ? pathname + "?" + suffix : pathname
+		if (replace) router.replace(href, { scroll: false })
+		else router.push(href, { scroll: false })
 	}
-	const setSearchParams = (init: URLSearchParams | globalThis.Record<string, string>) => {
+	const setSearchParams = (
+		init: URLSearchParams | globalThis.Record<string, string>,
+		replace = false,
+	) => {
 		if (init instanceof URLSearchParams) {
-			pushParams(init)
+			pushParams(init, replace)
 			return
 		}
 		const next = new URLSearchParams()
@@ -94,10 +102,11 @@ export default function MonthlyRecordsPage() {
 	const query = searchParams.get("query")
 	const categoryIdsParam = searchParams.get("category_ids")
 	const isAllocated = searchParams.get("is_allocated")
-	const bucketId = searchParams.get("bucket_id")
-	const bucketGroup = searchParams.get("bucket_group")
-	const showUnbucketedParam = searchParams.get("show_unbucketed")
-	const showUnbucketed = showUnbucketedParam === "1" || showUnbucketedParam === "true"
+	const monthlyBudgetId = searchParams.get("monthly_budget_id")
+	const monthlyBudgetGroup = searchParams.get("monthly_budget_group")
+	const showUnbudgetedParam = searchParams.get("show_unbudgeted")
+	const showUnbudgeted = showUnbudgetedParam === "1" || showUnbudgetedParam === "true"
+	const effectiveSpending = searchParams.get("effective_spending")
 	const treatment = searchParams.get("treatment")
 	const legacyDay = Number(searchParams.get("day"))
 	const legacyDate =
@@ -109,15 +118,15 @@ export default function MonthlyRecordsPage() {
 	const minAmount = searchParams.get("min_amount")
 	const maxAmount = searchParams.get("max_amount")
 	const contentRef = useRef<HTMLDivElement>(null)
-	useMonthTransition(contentRef, `${month}-${year}`)
 
 	const filterKey = JSON.stringify([
 		query,
 		categoryIdsParam,
 		isAllocated,
-		bucketId,
-		bucketGroup,
-		showUnbucketedParam,
+		monthlyBudgetId,
+		monthlyBudgetGroup,
+		showUnbudgetedParam,
+		effectiveSpending,
 		treatment,
 		startDate,
 		endDate,
@@ -130,9 +139,10 @@ export default function MonthlyRecordsPage() {
 				query,
 				category_ids: categoryIdsParam,
 				is_allocated: isAllocated,
-				bucket_id: bucketId,
-				bucket_group: bucketGroup,
-				show_unbucketed: showUnbucketed,
+				monthly_budget_id: monthlyBudgetId,
+				monthly_budget_group: monthlyBudgetGroup,
+				show_unbudgeted: showUnbudgeted,
+				effective_spending: ["1", "true"].includes(effectiveSpending ?? ""),
 				treatment,
 				start_date: startDate,
 				end_date: endDate,
@@ -141,19 +151,23 @@ export default function MonthlyRecordsPage() {
 			}).catch(() => null),
 		[month, year, filterKey],
 	)
-	const categories = useFetch(() => listCategories(), [])
+	const categories = useLiveQuery(() => listCategories(), []) ?? []
 	const { editingRecord, handleEdit, setEditingRecord } = useRecordEditor()
 	const columns = useRecordColumns<Record>({
 		pageName: "Monthly Records",
 		onEdit: handleEdit,
 		grouped: true,
-		showBucket: true,
+		showMonthlyBudget: true,
 	})
 	const mobileRow = useRecordMobileRow<Record>({
 		pageName: "Monthly Records",
 		onEdit: handleEdit,
 		grouped: true,
 	})
+	// Until the new month's query lands, the live query keeps the previous month's data.
+	const dataKey = data ? `${data.month}-${data.year}` : null
+	const stale = dataKey !== null && dataKey !== `${month}-${year}`
+	useMonthTransition(contentRef, dataKey)
 	const records = data?.records ?? []
 	const futureRecords = data?.future_records ?? []
 
@@ -161,30 +175,32 @@ export default function MonthlyRecordsPage() {
 	if (query) filters.query = query
 	if (categoryIdsParam) filters.category_ids = categoryIdsParam
 	if (isAllocated) filters.is_allocated = isAllocated
-	if (bucketId) filters.bucket_id = bucketId
-	if (bucketGroup) filters.bucket_group = bucketGroup
-	if (showUnbucketedParam) filters.show_unbucketed = showUnbucketedParam
+	if (monthlyBudgetId) filters.monthly_budget_id = monthlyBudgetId
+	if (monthlyBudgetGroup) filters.monthly_budget_group = monthlyBudgetGroup
+	if (showUnbudgetedParam) filters.show_unbudgeted = showUnbudgetedParam
+	if (["1", "true"].includes(effectiveSpending ?? "")) filters.effective_spending = "true"
 	if (treatment) filters.treatment = treatment
 	if (startDate) filters.start_date = startDate
 	if (endDate) filters.end_date = endDate
 	if (minAmount) filters.min_amount = minAmount
 	if (maxAmount) filters.max_amount = maxAmount
 
-	const visit = (changes: Partial<Filters> = {}, nextDate = date) => {
+	/** `replace` edits the current history entry, for refinements like typing in search. */
+	const visit = (changes: Partial<Filters> = {}, replace = false) => {
 		const merged: Partial<Filters> = { ...filters, ...changes }
 		const next = new URLSearchParams(searchParams.toString())
 		next.delete("day")
-		next.set("month", nextDate.toFormat("MMMM"))
-		next.set("year", String(nextDate.year))
+		next.set("month", date.toFormat("MMMM"))
+		next.set("year", String(date.year))
 		for (const key of FILTER_KEYS) {
 			const value = merged[key]
 			if (value === "" || value === false || value === undefined || value === null) {
 				next.delete(key)
 			} else {
-				next.set(key, key === "show_unbucketed" && value === true ? "1" : String(value))
+				next.set(key, key === "show_unbudgeted" && value === true ? "1" : String(value))
 			}
 		}
-		setSearchParams(next)
+		setSearchParams(next, replace)
 	}
 
 	const clearFilters = () => setSearchParams({ month, year: String(year) })
@@ -192,20 +208,24 @@ export default function MonthlyRecordsPage() {
 	if (data === undefined) return null
 
 	if (data === null) {
-		return <p className="text-sm text-muted-foreground">Monthly records not found.</p>
+		return <p className="text-xs text-muted-foreground">Monthly records not found.</p>
 	}
 
-	const { buckets, period } = data
+	const { monthlyBudgets, period } = data
 
 	return (
 		<>
-			<div ref={contentRef} className={cn("reveal grid gap-5 md:gap-7")}>
+			<div
+				ref={contentRef}
+				aria-busy={stale}
+				className={cn("reveal grid gap-5 md:gap-7", stale && STALE_MONTH_CLASS)}
+			>
 				<MonthlyRecordFilters
 					date={date}
 					categories={categories}
-					buckets={buckets}
+					monthlyBudgets={monthlyBudgets}
 					filters={filters}
-					onChange={changes => visit(changes)}
+					onChange={visit}
 					onClear={clearFilters}
 				/>
 
@@ -213,12 +233,12 @@ export default function MonthlyRecordsPage() {
 					<section className="grid gap-4" aria-labelledby="actual-records">
 						<div className="flex flex-wrap items-center justify-between gap-3">
 							<div>
-								<h3 id="actual-records" className="text-lg font-semibold">
+								<h3 id="actual-records" className="text-sm font-semibold">
 									{period.is_future
 										? "Future-dated Records"
 										: "Recorded activity"}
 								</h3>
-								<p className="text-sm text-muted-foreground">
+								<p className="text-xs text-muted-foreground">
 									{records.length} Record
 									{records.length === 1 ? "" : "s"}
 								</p>
@@ -241,18 +261,19 @@ export default function MonthlyRecordsPage() {
 							groupBy={byRecordDay}
 						/>
 					</section>
-				) : !period.is_future ? (
+				) : futureRecords.length ? null : (
 					<EmptyRecords
 						filtered={Object.keys(filters).length > 0}
+						future={period.is_future}
 						onClear={clearFilters}
 					/>
-				) : null}
+				)}
 
 				{futureRecords.length ? (
 					<section className="grid gap-4">
 						<div>
-							<h3 className="text-lg font-semibold">Later this month</h3>
-							<p className="text-sm text-muted-foreground">
+							<h3 className="text-sm font-semibold">Later this month</h3>
+							<p className="text-xs text-muted-foreground">
 								Excluded from actual totals.
 							</p>
 						</div>
@@ -285,47 +306,51 @@ export default function MonthlyRecordsPage() {
 function MonthlyRecordFilters({
 	date,
 	categories,
-	buckets,
+	monthlyBudgets,
 	filters,
 	onChange,
 	onClear,
 }: {
 	date: DateTime
 	categories: CategoryWithChildren[]
-	buckets: Bucket[]
+	monthlyBudgets: MonthlyBudget[]
 	filters: Filters
-	onChange: (changes: Partial<Filters>) => void
+	onChange: (changes: Partial<Filters>, replace?: boolean) => void
 	onClear: () => void
 }) {
 	const categoryIds = filters.category_ids?.split(",").filter(Boolean) ?? []
-	const bucketScope = filters.show_unbucketed
-		? "unbucketed"
-		: filters.bucket_id
-			? `bucket:${filters.bucket_id}`
-			: filters.bucket_group
-				? `group:${filters.bucket_group}`
-				: "all"
+	const monthlyBudgetScope =
+		filters.show_unbudgeted === true ||
+		filters.show_unbudgeted === "1" ||
+		filters.show_unbudgeted === "true"
+			? "unbudgeted"
+			: filters.monthly_budget_id
+				? `monthlyBudget:${filters.monthly_budget_id}`
+				: filters.monthly_budget_group
+					? `group:${filters.monthly_budget_group}`
+					: "all"
 	const [query, setQuery] = useState(filters.query ?? "")
 	useEffect(() => setQuery(filters.query ?? ""), [filters.query])
 	const activeFilterCount = [
 		filters.query,
 		categoryIds.length ? "category" : null,
 		filters.is_allocated,
-		bucketScope === "all" ? null : bucketScope,
-		filters.treatment,
+		monthlyBudgetScope === "all" ? null : monthlyBudgetScope,
+		filters.effective_spending ?? filters.treatment,
 		filters.start_date ?? filters.end_date,
 		filters.min_amount ?? filters.max_amount,
 	].filter(Boolean).length
 
-	const changeBucketScope = (scope: string) => {
+	const changeMonthlyBudgetScope = (scope: string) => {
 		const changes: Partial<Filters> = {
-			bucket_id: undefined,
-			bucket_group: undefined,
-			show_unbucketed: undefined,
+			monthly_budget_id: undefined,
+			monthly_budget_group: undefined,
+			show_unbudgeted: undefined,
 		}
-		if (scope === "unbucketed") changes.show_unbucketed = true
-		else if (scope.startsWith("bucket:")) changes.bucket_id = scope.slice(7)
-		else if (scope.startsWith("group:")) changes.bucket_group = scope.slice(6)
+		if (scope === "unbudgeted") changes.show_unbudgeted = true
+		else if (scope.startsWith("monthlyBudget:"))
+			changes.monthly_budget_id = scope.slice("monthlyBudget:".length)
+		else if (scope.startsWith("group:")) changes.monthly_budget_group = scope.slice(6)
 		onChange(changes)
 	}
 
@@ -335,7 +360,7 @@ function MonthlyRecordFilters({
 			aria-labelledby="monthly-record-filters"
 		>
 			<div>
-				<h3 id="monthly-record-filters" className="text-sm font-medium">
+				<h3 id="monthly-record-filters" className="text-sm font-semibold">
 					Filter this month
 				</h3>
 				<p className="text-xs text-muted-foreground">
@@ -355,7 +380,9 @@ function MonthlyRecordFilters({
 					value={query}
 					onChange={event => {
 						setQuery(event.target.value)
-						onChange({ query: event.target.value || undefined })
+						// The first keystroke starts a search (one Back undoes it);
+						// refining it edits that entry instead of piling up history.
+						onChange({ query: event.target.value || undefined }, !!filters.query)
 					}}
 				/>
 			</div>
@@ -366,34 +393,39 @@ function MonthlyRecordFilters({
 					onChange={ids => onChange({ category_ids: ids.join(",") || undefined })}
 				/>
 
-				<Select value={bucketScope} onValueChange={changeBucketScope}>
+				<Select value={monthlyBudgetScope} onValueChange={changeMonthlyBudgetScope}>
 					<SelectTrigger className={cn("w-full sm:w-40", FILTER_CONTROL_CLASS)}>
 						<IconifyIcon icon="lucide:wallet-cards" />
 						<SelectValue />
 					</SelectTrigger>
 					<SelectContent align="start" variant="filter">
 						<SelectGroup>
-							<SelectItem value="all">Any bucket</SelectItem>
-							<SelectItem value="unbucketed">No bucket</SelectItem>
+							<SelectItem value="all">Any monthly budget</SelectItem>
+							<SelectItem value="unbudgeted">Unbudgeted</SelectItem>
 						</SelectGroup>
 						<SelectSeparator />
 						<SelectGroup>
-							<SelectLabel>Bucket groups</SelectLabel>
+							<SelectLabel>Monthly budget groups</SelectLabel>
 							<SelectItem value="group:core">Core</SelectItem>
 							<SelectItem value="group:outlier">Outlier</SelectItem>
 							<SelectItem value="group:other">Other</SelectItem>
 						</SelectGroup>
-						{buckets.length ? <SelectSeparator /> : null}
-						{buckets.length ? (
+						{monthlyBudgets.length ? <SelectSeparator /> : null}
+						{monthlyBudgets.length ? (
 							<SelectGroup>
-								<SelectLabel>Specific bucket</SelectLabel>
-								{buckets.map(bucket => (
-									<SelectItem key={bucket.id} value={`bucket:${bucket.id}`}>
+								<SelectLabel>Specific monthly budget</SelectLabel>
+								{monthlyBudgets.map(monthlyBudget => (
+									<SelectItem
+										key={monthlyBudget.id}
+										value={`monthlyBudget:${monthlyBudget.id}`}
+									>
 										<span
 											className="size-2 rounded-full"
-											style={{ backgroundColor: bucket.color }}
+											style={{
+												backgroundColor: themeColor(monthlyBudget.color),
+											}}
 										/>
-										{bucket.name}
+										{monthlyBudget.name}
 									</SelectItem>
 								))}
 							</SelectGroup>
@@ -402,9 +434,19 @@ function MonthlyRecordFilters({
 				</Select>
 
 				<Select
-					value={filters.treatment ?? "all"}
+					value={
+						filters.effective_spending
+							? "effective_spending"
+							: (filters.treatment ?? "all")
+					}
 					onValueChange={value =>
-						onChange({ treatment: value === "all" ? undefined : value })
+						onChange({
+							treatment:
+								value === "all" || value === "effective_spending"
+									? undefined
+									: value,
+							effective_spending: value === "effective_spending" ? "true" : undefined,
+						})
 					}
 				>
 					<SelectTrigger className={cn("w-full sm:w-40", FILTER_CONTROL_CLASS)}>
@@ -414,12 +456,17 @@ function MonthlyRecordFilters({
 					<SelectContent align="start" variant="filter">
 						<SelectGroup>
 							<SelectItem value="all">Any treatment</SelectItem>
-							<SelectItem value="income">Income</SelectItem>
-							<SelectItem value="spending">Spending</SelectItem>
-							<SelectItem value="saving_investment">Saving / investment</SelectItem>
-							<SelectItem value="neutral">Excluded</SelectItem>
-							<SelectItem value="automatic">Automatic</SelectItem>
+							{TREATMENTS.map(item => (
+								<SelectItem key={item.value} value={item.value}>
+									{item.label}
+								</SelectItem>
+							))}
 						</SelectGroup>
+						{/* Only set by the Overview's links, so the list matches the total clicked. */}
+						<SelectSeparator />
+						<SelectItem value="effective_spending" disabled>
+							Counted as spending
+						</SelectItem>
 					</SelectContent>
 				</Select>
 
@@ -474,7 +521,15 @@ function MonthlyRecordFilters({
 	)
 }
 
-function EmptyRecords({ filtered, onClear }: { filtered: boolean; onClear: () => void }) {
+function EmptyRecords({
+	filtered,
+	future,
+	onClear,
+}: {
+	filtered: boolean
+	future: boolean
+	onClear: () => void
+}) {
 	if (filtered) {
 		return (
 			<Card>
@@ -487,6 +542,21 @@ function EmptyRecords({ filtered, onClear }: { filtered: boolean; onClear: () =>
 						Clear filters
 					</Button>
 				</CardContent>
+			</Card>
+		)
+	}
+
+	if (future) {
+		// Same framing as the Overview tab for a month that has not started.
+		return (
+			<Card>
+				<CardHeader>
+					<CardTitle>Future-dated Records</CardTitle>
+					<CardDescription>
+						No Records have been entered for this month. Actual results and comparisons
+						begin when the month starts.
+					</CardDescription>
+				</CardHeader>
 			</Card>
 		)
 	}

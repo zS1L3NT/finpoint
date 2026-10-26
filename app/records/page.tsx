@@ -27,15 +27,16 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select"
-import { useFetch } from "@/hooks/use-fetch"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { useRecordEditor } from "@/hooks/use-record-editor"
-import { cn } from "@/lib/utils"
-import { listBuckets } from "@/logic/buckets"
+import { TREATMENTS } from "@/lib/analytics"
+import { themeColor } from "@/lib/palette"
+import { cn, pluralize } from "@/lib/utils"
 import { listCategories } from "@/logic/categories"
+import { listMonthlyBudgets } from "@/logic/monthly-budgets"
 import { paginateItems, parsePage, parsePageSize } from "@/logic/pagination"
 import { listRecords } from "@/logic/records"
-import { Bucket, CategoryWithChildren, Record } from "@/types"
+import type { CategoryWithChildren, MonthlyBudget, Record } from "@/types"
 
 export default function RecordsPage() {
 	const searchParams = useSearchParams()
@@ -44,9 +45,9 @@ export default function RecordsPage() {
 	const minAmount = searchParams.get("min_amount")
 	const maxAmount = searchParams.get("max_amount")
 	const isAllocated = searchParams.get("is_allocated")
-	const bucketId = searchParams.get("bucket_id")
-	const bucketGroup = searchParams.get("bucket_group")
-	const showUnbucketed = searchParams.get("show_unbucketed") === "1"
+	const monthlyBudgetId = searchParams.get("monthly_budget_id")
+	const monthlyBudgetGroup = searchParams.get("monthly_budget_group")
+	const showUnbudgeted = ["1", "true"].includes(searchParams.get("show_unbudgeted") ?? "")
 	const treatment = searchParams.get("treatment")
 	const categoryIdsParam = searchParams.get("category_ids") ?? ""
 	const categoryIds = useMemo(
@@ -54,8 +55,8 @@ export default function RecordsPage() {
 		[categoryIdsParam],
 	)
 
-	const categories = useFetch(() => listCategories(), [])
-	const buckets = useFetch(() => listBuckets(), [])
+	const categories = useLiveQuery(() => listCategories(), []) ?? []
+	const monthlyBudgets = useLiveQuery(() => listMonthlyBudgets(), []) ?? []
 	const { editingRecord, handleEdit, setEditingRecord } = useRecordEditor()
 	const { query, page, pageSize, handleQueryChange, handlePageSizeChange, setParams } =
 		usePaginatedTableState()
@@ -75,9 +76,9 @@ export default function RecordsPage() {
 				max_amount: null,
 				is_allocated: null,
 				category_ids: null,
-				bucket_id: null,
-				bucket_group: null,
-				show_unbucketed: null,
+				monthly_budget_id: null,
+				monthly_budget_group: null,
+				show_unbudgeted: null,
 				treatment: null,
 				page: null,
 			}),
@@ -89,7 +90,7 @@ export default function RecordsPage() {
 		minAmount ?? maxAmount,
 		isAllocated,
 		categoryIds.length ? "categories" : null,
-		bucketId ?? bucketGroup ?? (showUnbucketed ? "unbucketed" : null),
+		monthlyBudgetId ?? monthlyBudgetGroup ?? (showUnbudgeted ? "unbudgeted" : null),
 		treatment,
 	].filter(Boolean).length
 
@@ -103,9 +104,9 @@ export default function RecordsPage() {
 				max_amount: maxAmount,
 				is_allocated: isAllocated,
 				category_ids: categoryIds.length ? categoryIds : null,
-				bucket_id: bucketId,
-				bucket_group: bucketGroup,
-				show_unbucketed: showUnbucketed,
+				monthly_budget_id: monthlyBudgetId,
+				monthly_budget_group: monthlyBudgetGroup,
+				show_unbudgeted: showUnbudgeted,
 				treatment,
 			}),
 		[
@@ -116,9 +117,9 @@ export default function RecordsPage() {
 			maxAmount,
 			isAllocated,
 			categoryIdsParam,
-			bucketId,
-			bucketGroup,
-			showUnbucketed,
+			monthlyBudgetId,
+			monthlyBudgetGroup,
+			showUnbudgeted,
 			treatment,
 		],
 	)
@@ -148,15 +149,15 @@ export default function RecordsPage() {
 				<RecordFilters
 					categories={categories}
 					categoryIds={categoryIds}
-					buckets={buckets}
+					monthlyBudgets={monthlyBudgets}
 					startDate={startDate}
 					endDate={endDate}
 					minAmount={minAmount}
 					maxAmount={maxAmount}
 					isAllocated={isAllocated}
-					bucketId={bucketId}
-					bucketGroup={bucketGroup}
-					showUnbucketed={showUnbucketed}
+					monthlyBudgetId={monthlyBudgetId}
+					monthlyBudgetGroup={monthlyBudgetGroup}
+					showUnbudgeted={showUnbudgeted}
 					treatment={treatment}
 					activeFilterCount={activeFilterCount}
 					onChange={updateFilters}
@@ -172,15 +173,15 @@ export default function RecordsPage() {
 			handlePageSizeChange,
 			categories,
 			categoryIds,
-			buckets,
+			monthlyBudgets,
 			startDate,
 			endDate,
 			minAmount,
 			maxAmount,
 			isAllocated,
-			bucketId,
-			bucketGroup,
-			showUnbucketed,
+			monthlyBudgetId,
+			monthlyBudgetGroup,
+			showUnbudgeted,
 			treatment,
 			activeFilterCount,
 			updateFilters,
@@ -189,10 +190,12 @@ export default function RecordsPage() {
 	)
 	const tableFooter = useMemo(
 		() => ({
-			summary: `Showing ${paginated.data.length} of ${paginated.total} records.`,
+			summary: `Showing ${paginated.data.length} of ${pluralize(paginated.total, "record")}.`,
 		}),
 		[paginated],
 	)
+
+	if (recordsQuery === undefined) return null
 
 	return (
 		<>
@@ -254,15 +257,15 @@ function RecordCreatorHost({ categories }: { categories: CategoryWithChildren[] 
 function RecordFilters({
 	categories,
 	categoryIds,
-	buckets,
+	monthlyBudgets,
 	startDate,
 	endDate,
 	minAmount,
 	maxAmount,
 	isAllocated,
-	bucketId,
-	bucketGroup,
-	showUnbucketed,
+	monthlyBudgetId,
+	monthlyBudgetGroup,
+	showUnbudgeted,
 	treatment,
 	activeFilterCount,
 	onChange,
@@ -270,39 +273,40 @@ function RecordFilters({
 }: {
 	categories: CategoryWithChildren[]
 	categoryIds: string[]
-	buckets: Bucket[]
+	monthlyBudgets: MonthlyBudget[]
 	startDate: string | null
 	endDate: string | null
 	minAmount: string | null
 	maxAmount: string | null
 	isAllocated: string | null
-	bucketId: string | null
-	bucketGroup: string | null
-	showUnbucketed: boolean
+	monthlyBudgetId: string | null
+	monthlyBudgetGroup: string | null
+	showUnbudgeted: boolean
 	treatment: string | null
 	activeFilterCount: number
 	onChange: (changes: { [key: string]: string | null }) => void
 	onClear: () => void
 }) {
-	const bucketScope = showUnbucketed
-		? "unbucketed"
-		: bucketId
-			? `bucket:${bucketId}`
-			: bucketGroup
-				? `group:${bucketGroup}`
+	const monthlyBudgetScope = showUnbudgeted
+		? "unbudgeted"
+		: monthlyBudgetId
+			? `monthlyBudget:${monthlyBudgetId}`
+			: monthlyBudgetGroup
+				? `group:${monthlyBudgetGroup}`
 				: "all"
-	const activeBuckets = buckets.filter(bucket => !bucket.archived)
+	const activeMonthlyBudgets = monthlyBudgets.filter(monthlyBudget => !monthlyBudget.archived)
 
-	const changeBucketScope = (scope: string) => {
+	const changeMonthlyBudgetScope = (scope: string) => {
 		const changes: { [key: string]: string | null } = {
-			bucket_id: null,
-			bucket_group: null,
-			show_unbucketed: null,
+			monthly_budget_id: null,
+			monthly_budget_group: null,
+			show_unbudgeted: null,
 		}
 
-		if (scope === "unbucketed") changes.show_unbucketed = "1"
-		else if (scope.startsWith("bucket:")) changes.bucket_id = scope.slice(7)
-		else if (scope.startsWith("group:")) changes.bucket_group = scope.slice(6)
+		if (scope === "unbudgeted") changes.show_unbudgeted = "1"
+		else if (scope.startsWith("monthlyBudget:"))
+			changes.monthly_budget_id = scope.slice("monthlyBudget:".length)
+		else if (scope.startsWith("group:")) changes.monthly_budget_group = scope.slice(6)
 
 		onChange(changes)
 	}
@@ -315,34 +319,37 @@ function RecordFilters({
 				onChange={ids => onChange({ category_ids: ids.join(",") || null })}
 			/>
 
-			<Select value={bucketScope} onValueChange={changeBucketScope}>
+			<Select value={monthlyBudgetScope} onValueChange={changeMonthlyBudgetScope}>
 				<SelectTrigger className={cn("w-full sm:w-40", FILTER_CONTROL_CLASS)}>
 					<IconifyIcon icon="lucide:wallet-cards" />
 					<SelectValue />
 				</SelectTrigger>
 				<SelectContent align="start" variant="filter">
 					<SelectGroup>
-						<SelectItem value="all">Any bucket</SelectItem>
-						<SelectItem value="unbucketed">No bucket</SelectItem>
+						<SelectItem value="all">Any monthly budget</SelectItem>
+						<SelectItem value="unbudgeted">Unbudgeted</SelectItem>
 					</SelectGroup>
 					<SelectSeparator />
 					<SelectGroup>
-						<SelectLabel>Bucket groups</SelectLabel>
+						<SelectLabel>Monthly budget groups</SelectLabel>
 						<SelectItem value="group:core">Core</SelectItem>
 						<SelectItem value="group:outlier">Outlier</SelectItem>
 						<SelectItem value="group:other">Other</SelectItem>
 					</SelectGroup>
-					{activeBuckets.length ? <SelectSeparator /> : null}
-					{activeBuckets.length ? (
+					{activeMonthlyBudgets.length ? <SelectSeparator /> : null}
+					{activeMonthlyBudgets.length ? (
 						<SelectGroup>
-							<SelectLabel>Specific bucket</SelectLabel>
-							{activeBuckets.map(bucket => (
-								<SelectItem key={bucket.id} value={`bucket:${bucket.id}`}>
+							<SelectLabel>Specific monthly budget</SelectLabel>
+							{activeMonthlyBudgets.map(monthlyBudget => (
+								<SelectItem
+									key={monthlyBudget.id}
+									value={`monthlyBudget:${monthlyBudget.id}`}
+								>
 									<span
 										className="size-2 rounded-full"
-										style={{ backgroundColor: bucket.color }}
+										style={{ backgroundColor: themeColor(monthlyBudget.color) }}
 									/>
-									{bucket.name}
+									{monthlyBudget.name}
 								</SelectItem>
 							))}
 						</SelectGroup>
@@ -361,11 +368,11 @@ function RecordFilters({
 				<SelectContent align="start" variant="filter">
 					<SelectGroup>
 						<SelectItem value="all">Any treatment</SelectItem>
-						<SelectItem value="income">Income</SelectItem>
-						<SelectItem value="spending">Spending</SelectItem>
-						<SelectItem value="saving_investment">Saving / investment</SelectItem>
-						<SelectItem value="neutral">Excluded</SelectItem>
-						<SelectItem value="automatic">Automatic</SelectItem>
+						{TREATMENTS.map(item => (
+							<SelectItem key={item.value} value={item.value}>
+								{item.label}
+							</SelectItem>
+						))}
 					</SelectGroup>
 				</SelectContent>
 			</Select>

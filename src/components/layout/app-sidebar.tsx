@@ -36,6 +36,7 @@ import {
 	pathImporter,
 	pathRecords,
 	pathSettings,
+	pathStatementRules,
 	pathStatements,
 } from "@/routes"
 
@@ -71,7 +72,7 @@ function useSyncIndicator() {
 							: sync.kind === "offline"
 								? "Offline"
 								: sync.kind === "local-changes"
-									? "Unsaved changes"
+									? "Changes waiting to sync"
 									: sync.kind === "never-synced"
 										? "Not connected yet"
 										: sync.kind === "error"
@@ -179,7 +180,8 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 					to: pathDashboard(),
 					icon: "lucide:chart-area",
 					label: "Dashboard",
-					active: pathname === "/",
+					// Monthly Records is the Dashboard's second tab, not part of Records.
+					active: pathname === "/" || pathname.startsWith("/records/monthly"),
 				},
 			],
 		},
@@ -192,7 +194,7 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 						end_date: defaultFilterEndDate,
 					}),
 					icon: "lucide:link",
-					label: "Allocator",
+					label: "Workflows",
 					active: pathname.startsWith("/allocator"),
 				},
 				{
@@ -206,7 +208,8 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 					),
 					icon: "lucide:receipt-text",
 					label: "Records",
-					active: pathname.startsWith("/records"),
+					active:
+						pathname.startsWith("/records") && !pathname.startsWith("/records/monthly"),
 				},
 				{
 					to: pathStatements(),
@@ -236,6 +239,12 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 					icon: "lucide:tag",
 					label: "Categories",
 					active: pathname.startsWith("/categories"),
+				},
+				{
+					to: pathStatementRules(),
+					icon: "lucide:wand-sparkles",
+					label: "Rules",
+					active: pathname.startsWith("/statement-rules"),
 				},
 			],
 		},
