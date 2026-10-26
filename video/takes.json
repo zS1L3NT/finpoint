@@ -1,0 +1,230 @@
+{
+	"workspace": {
+		"chapter": "workspace",
+		"beats": [
+			"demo",
+			"practice",
+			"own"
+		],
+		"start": 0,
+		"duration": 27.033333333333335
+	},
+	"revolut": {
+		"chapter": "import",
+		"beats": [
+			"revolut"
+		],
+		"start": 36.9,
+		"duration": 9.966666666666669
+	},
+	"import": {
+		"chapter": "import",
+		"beats": [
+			"choose",
+			"result",
+			"next"
+		],
+		"start": 52.53333333333333,
+		"duration": 16.933333333333337
+	},
+	"allocator": {
+		"chapter": "allocator",
+		"beats": [
+			"list",
+			"left",
+			"tabs",
+			"pages"
+		],
+		"start": 0,
+		"duration": 47.199999999999996
+	},
+	"lunch": {
+		"chapter": "lunch",
+		"beats": [
+			"select",
+			"create",
+			"fill",
+			"ignore",
+			"save"
+		],
+		"start": 0,
+		"duration": 42.3
+	},
+	"split": {
+		"chapter": "split",
+		"beats": [
+			"select",
+			"amount",
+			"left",
+			"gift",
+			"save"
+		],
+		"start": 0,
+		"duration": 39.33333333333333
+	},
+	"repayment": {
+		"chapter": "repayment",
+		"beats": [
+			"select",
+			"create",
+			"done"
+		],
+		"start": 0,
+		"duration": 34.03333333333333
+	},
+	"dashboard": {
+		"chapter": "dashboard",
+		"beats": [
+			"real",
+			"categories"
+		],
+		"start": 17.966666666666665,
+		"duration": 20.333333333333332
+	},
+	"pending": {
+		"chapter": "pending",
+		"beats": [
+			"concert",
+			"flag",
+			"list"
+		],
+		"start": 7.700000000000001,
+		"duration": 28.86666666666666
+	},
+	"attach": {
+		"chapter": "pending",
+		"beats": [
+			"attach",
+			"complete"
+		],
+		"start": 35.166666666666664,
+		"duration": 18.4
+	},
+	"placeholder": {
+		"chapter": "pending-statements",
+		"beats": [
+			"create",
+			"explain"
+		],
+		"start": 15,
+		"duration": 22.96666666666666
+	},
+	"replace": {
+		"chapter": "pending-statements",
+		"beats": [
+			"replace",
+			"review"
+		],
+		"start": 36.56666666666666,
+		"duration": 23.200000000000003
+	},
+	"duplicates": {
+		"chapter": "duplicates",
+		"beats": [
+			"badge",
+			"choose",
+			"review"
+		],
+		"start": 10.566666666666666,
+		"duration": 29.866666666666664
+	},
+	"find": {
+		"chapter": "find",
+		"beats": [
+			"records",
+			"edit",
+			"statements",
+			"settings"
+		],
+		"start": 0,
+		"duration": 32.83333333333333
+	},
+	"categories": {
+		"chapter": "categories",
+		"beats": [
+			"most",
+			"examples",
+			"defaults"
+		],
+		"start": 0,
+		"duration": 38.46666666666666
+	},
+	"rules": {
+		"chapter": "rules",
+		"beats": [
+			"match",
+			"fill",
+			"use"
+		],
+		"start": 9.6,
+		"duration": 29.766666666666666
+	},
+	"treatments": {
+		"chapter": "treatments",
+		"beats": [
+			"dashboard"
+		],
+		"start": 27.2,
+		"duration": 13.433333333333334
+	},
+	"monthly-budget": {
+		"chapter": "buckets",
+		"beats": [
+			"daily",
+			"amount",
+			"rule",
+			"compare"
+		],
+		"start": 10.666666666666668,
+		"duration": 38.43333333333332
+	},
+	"monthly": {
+		"chapter": "monthly",
+		"beats": [
+			"days",
+			"drill",
+			"review"
+		],
+		"start": 0,
+		"duration": 27.933333333333334
+	},
+	"insights": {
+		"chapter": "insights",
+		"beats": [
+			"metrics",
+			"scope",
+			"forecast",
+			"category",
+			"calendar"
+		],
+		"start": 0,
+		"duration": 45.266666666666666
+	},
+	"budgets": {
+		"chapter": "budgets",
+		"beats": [
+			"create",
+			"attach",
+			"own"
+		],
+		"start": 7.933333333333334,
+		"duration": 28.333333333333332
+	},
+	"data": {
+		"chapter": "sync",
+		"beats": [
+			"file",
+			"drive"
+		],
+		"start": 12.166666666666668,
+		"duration": 25.099999999999998
+	},
+	"help": {
+		"chapter": "routine",
+		"beats": [
+			"help"
+		],
+		"start": 21.266666666666666,
+		"duration": 8.966666666666669
+	}
+}

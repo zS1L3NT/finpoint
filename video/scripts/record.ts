@@ -9,7 +9,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { tmpdir } from "node:os"
 import { resolve } from "node:path"
 import { chromium } from "@playwright/test"
-import { Take, type TakeInfo, takesFile } from "./director"
+import { setTempo, Take, type TakeInfo, takesDir, takesFile } from "./director"
 import { installCursor, STAGE, stageHtml, stagePath } from "./stage"
 import { story } from "./story"
 import { chromiumPath, serveApp } from "./tools"
@@ -25,6 +25,7 @@ if (unknown.length) throw new Error(`No take named ${unknown.join(", ")}`)
 
 const takes: Record<string, TakeInfo> = existsSync(takesFile) && only.length ? JSON.parse(readFileSync(takesFile, "utf8")) : {}
 const failures = resolve(tmpdir(), "finpoint-record-failures")
+const failed: string[] = []
 const work = mkdtempSync(resolve(tmpdir(), "finpoint-record-"))
 const server = await serveApp()
 const browser = await chromium.launch({ executablePath: chromiumPath(chromium.executablePath()), headless: !headed })
@@ -66,6 +67,7 @@ try {
 		const recording = !only.length || only.includes(script.name)
 		const take = new Take(page, script.name, script.chapter, script.beats, work, recording)
 		console.log(`${recording ? "●" : "○"} ${script.name}`)
+		setTempo(script.tempo ?? 1)
 		try {
 			await script.setup?.(take)
 			await take.wide(1)
@@ -77,7 +79,11 @@ try {
 		} catch (error) {
 			const message = (error as Error).message.split("\n").filter(Boolean)
 			console.warn(`  ! ${script.name} failed: ${message.slice(0, 3).join(" | ")}`)
+			failed.push(script.name)
 			await take.abort()
+			// Never let compose reuse footage from an earlier run of a take that failed now.
+			delete takes[script.name]
+			rmSync(resolve(takesDir, `${script.name}.mp4`), { force: true })
 			// What the stage showed when it failed, to fix the story without re-running it headed.
 			mkdirSync(failures, { recursive: true })
 			await page.screenshot({ path: resolve(failures, `${script.name}.png`) }).catch(() => {})
@@ -91,3 +97,8 @@ try {
 	rmSync(work, { recursive: true, force: true })
 }
 console.log(`Recorded ${Object.keys(takes).length} takes into video/assets/takes.`)
+// Fail the build before compose turns missing takes into placeholder cards.
+if (failed.length) {
+	console.error(`Failed takes: ${failed.join(", ")}. Screenshots are in ${failures}.`)
+	process.exit(1)
+}

@@ -256,19 +256,36 @@ async function nudge(page: Page) {
 	await page.mouse.move(...mouse)
 }
 
+/**
+ * How long the hand takes, as a fraction of a relaxed pace. Takes whose narration moves fast set
+ * it lower (`TakeScript.tempo`), so the picture keeps up without cutting.
+ */
+let tempo = 1
+export const setTempo = (value: number) => {
+	tempo = value
+}
+
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2)
 
-/** Glides the pointer to `target` on an ease, like a person would, hovering along the way. */
-export async function glide(page: Page, target: Locator, { ms = 480, dx = 0.5, dy = 0.5 } = {}) {
-	await target.first().waitFor({ state: "visible" })
+/** Where on the stage `target` sits right now, at the fraction `dx`, `dy` of its box. */
+async function spot(target: Locator, dx: number, dy: number): Promise<[number, number]> {
 	const box = await target.first().boundingBox()
 	if (!box) throw new Error("glide: target not visible")
-	const to: [number, number] = [box.x + box.width * dx, box.y + box.height * dy]
+	return [box.x + box.width * dx, box.y + box.height * dy]
+}
+
+/**
+ * Glides the pointer to `target` on an ease, like a person would, hovering along the way. The
+ * target is re-measured every step, so the hand follows it while the camera is still moving.
+ */
+export async function glide(page: Page, target: Locator, { ms = 480 * tempo, dx = 0.5, dy = 0.5 } = {}) {
+	await target.first().waitFor({ state: "visible" })
 	const from = mouse
 	const steps = Math.max(8, Math.round(ms / 16))
 	const started = Date.now()
 	for (let i = 1; i <= steps; i++) {
 		const k = ease(i / steps)
+		const to = await spot(target, dx, dy)
 		mouse = [from[0] + (to[0] - from[0]) * k, from[1] + (to[1] - from[1]) * k]
 		await page.mouse.move(...mouse)
 		const due = started + (ms * i) / steps - Date.now()
@@ -279,16 +296,19 @@ export async function glide(page: Page, target: Locator, { ms = 480, dx = 0.5, d
 export async function press(page: Page, target: Locator, options?: { ms?: number; dx?: number; dy?: number }) {
 	await target.first().scrollIntoViewIfNeeded()
 	await glide(page, target, options)
-	await page.waitForTimeout(80)
+	await page.waitForTimeout(80 * tempo)
+	// The camera may still be easing: land on where the target is now, not where it was.
+	mouse = await spot(target, options?.dx ?? 0.5, options?.dy ?? 0.5)
+	await page.mouse.move(...mouse)
 	await page.mouse.down()
 	await page.waitForTimeout(70)
 	await page.mouse.up()
-	await page.waitForTimeout(220)
+	await page.waitForTimeout(220 * tempo)
 }
 
-export async function type(page: Page, text: string, delay = 45) {
+export async function type(page: Page, text: string, delay = 45 * tempo) {
 	await page.keyboard.type(text, { delay })
-	await page.waitForTimeout(150)
+	await page.waitForTimeout(150 * tempo)
 }
 
 /** Clears a field and types a new value into it, the way a person would. */

@@ -15,6 +15,8 @@ export type TakeScript = {
 	name: string
 	chapter: string
 	beats: string[]
+	/** Pace of the hand, below 1 for narration that moves faster than a relaxed hand. */
+	tempo?: number
 	setup?: (t: Take) => Promise<void>
 	play: (t: Take) => Promise<void>
 }
@@ -535,6 +537,7 @@ export const story: TakeScript[] = [
 		name: "placeholder",
 		chapter: "pending-statements",
 		beats: ["create", "explain"],
+		tempo: 0.6,
 		setup: t => go(t, "/statements"),
 		async play(t) {
 			const app = t.app
@@ -564,7 +567,7 @@ export const story: TakeScript[] = [
 			await creator(app).title.waitFor()
 			await t.focus(creator(app).dialog, { zoom: 1.5 })
 			await t.at("explain", "Burger with Mia")
-			await fillRecord(t, "Burger", "Dining", "Dining Out")
+			await fillRecord(t, "Burger", "Din", "Dining Out")
 			await press(t.page, creator(app).submit)
 			await closed(t)
 			await t.wide()
@@ -920,6 +923,7 @@ export const story: TakeScript[] = [
 		name: "budgets",
 		chapter: "budgets",
 		beats: ["create", "attach", "own"],
+		tempo: 0.6,
 		setup: t => go(t, "/budgets"),
 		async play(t) {
 			const app = t.app
@@ -940,8 +944,9 @@ export const story: TakeScript[] = [
 				await press(t.page, app.getByRole("button", { name: /next month/i }).first())
 			await press(t.page, app.getByRole("button", { name: /November 4(th)?, 2026/ }).first())
 			await press(t.page, app.getByRole("button", { name: "Apply", exact: true }))
+			// Picking two days takes longer than "its dates" does to say, so the ring follows the
+			// calendar straight away and stays on while the narration explains the switch.
 			const automatic = form.getByText("Automatic attach").first().locator("xpath=ancestor::*[@data-slot='field'][1]")
-			await t.at("attach", "Automatic attach")
 			await t.ring("automatic", automatic)
 			await t.at("attach", "turn it off")
 			await press(t.page, automatic.getByRole("checkbox").first())

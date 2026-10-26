@@ -20,7 +20,7 @@ bun run video:build                          # app, narrate, record, compose, re
 bun run video:build --skip=app,narrate       # skip any of those steps
 ```
 
-Needs FFmpeg on `PATH` (HyperFrames uses it too; `FFMPEG=` overrides the scripts' copy), Chromium (Playwright's, a system install, or `CHROMIUM=`), `bun install` here and in the root, and the Kokoro setup below. Record serves the production build on port 5174 (`FINPOINT_URL=` to film a running app).
+Needs a system font with the ⌘ glyph (DejaVu Sans or Noto Sans Symbols 2; check with `fc-list ':charset=2318'`), or the sidebar's shortcut hint films as a box. Also needs FFmpeg on `PATH` (HyperFrames uses it too; `FFMPEG=` overrides the scripts' copy), Chromium (Playwright's, a system install, or `CHROMIUM=`), `bun install` here and in the root, and the Kokoro setup below. Record serves the production build on port 5174 (`FINPOINT_URL=` to film a running app).
 
 ## Author a take
 

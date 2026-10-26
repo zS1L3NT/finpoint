@@ -57,56 +57,56 @@
 	{
 		"id": "duplicates",
 		"title": "Fixing duplicate Statements",
-		"start": 566.2666666666667
+		"start": 569.6666666666666
 	},
 	{
 		"id": "find",
 		"title": "Finding and fixing Records",
-		"start": 606.1333333333333
+		"start": 609.3
 	},
 	{
 		"id": "categories",
 		"title": "Categories",
-		"start": 638.1666666666666
+		"start": 641.3333333333334
 	},
 	{
 		"id": "rules",
 		"title": "Statement rules",
-		"start": 675.8333333333334
+		"start": 679
 	},
 	{
 		"id": "treatments",
 		"title": "Treatments",
-		"start": 714.4
+		"start": 717.5666666666667
 	},
 	{
 		"id": "buckets",
 		"title": "Monthly Budgets",
-		"start": 762.2333333333333
+		"start": 765.4
 	},
 	{
 		"id": "monthly",
 		"title": "Monthly Records",
-		"start": 810.5333333333333
+		"start": 813.7
 	},
 	{
 		"id": "insights",
 		"title": "Reading the Overview",
-		"start": 837.6666666666666
+		"start": 840.8333333333334
 	},
 	{
 		"id": "budgets",
 		"title": "Budgets for trips and events",
-		"start": 882.1333333333333
+		"start": 885.3
 	},
 	{
 		"id": "sync",
 		"title": "Backups and Google Drive",
-		"start": 917.6
+		"start": 920.7666666666667
 	},
 	{
 		"id": "routine",
 		"title": "Your routine",
-		"start": 968.0666666666667
+		"start": 971.2333333333333
 	}
 ]
