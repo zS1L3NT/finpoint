@@ -6,6 +6,7 @@ import { useState } from "react"
 import BarChart from "@/components/charts/bar-chart"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useHistory } from "@/history"
+import { themeColor } from "@/lib/palette"
 import { formatCurrency } from "@/lib/utils"
 import { BREAKDOWN_MONTHS, type SpendingHistoryMonth } from "@/logic/dashboard"
 
@@ -59,7 +60,7 @@ export default function CategoryHistoryChart({
 		0,
 	)
 	const config = Object.fromEntries(
-		series.map(item => [item.key, { label: item.name, color: item.color }]),
+		series.map(item => [item.key, { label: item.name, color: themeColor(item.color) }]),
 	)
 	const unavailable = chartData.filter(month => !month.included)
 	const selected = chartData.find(month => month.current)
@@ -92,7 +93,7 @@ export default function CategoryHistoryChart({
 							series={series.map(item => ({
 								key: item.key,
 								label: item.name,
-								color: item.color,
+								color: themeColor(item.color),
 								opacity: 0.88,
 								values: chartData.map(month => month.seriesValues[item.key] ?? 0),
 							}))}
@@ -145,7 +146,7 @@ export default function CategoryHistoryChart({
 								<span key={item.id} className="flex items-center gap-1.5">
 									<span
 										className="size-2 rounded-sm"
-										style={{ backgroundColor: item.color }}
+										style={{ backgroundColor: themeColor(item.color) }}
 									/>
 									{item.name}
 								</span>
@@ -322,7 +323,7 @@ function MonthBreakdown({
 									>
 										<span
 											className="size-2 rounded-full"
-											style={{ backgroundColor: item.color }}
+											style={{ backgroundColor: themeColor(item.color) }}
 										/>
 										<span className="truncate">{item.name}</span>
 										<span className="tabular-nums">

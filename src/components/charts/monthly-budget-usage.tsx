@@ -2,6 +2,7 @@
 
 import { useId, useState } from "react"
 import { formatChartCurrency } from "@/lib/chart-currency"
+import { themeColor } from "@/lib/palette"
 import { cn, formatCurrency } from "@/lib/utils"
 
 export type MonthlyBudgetUsageItem = {
@@ -80,9 +81,9 @@ export default function MonthlyBudgetUsage({
 								>
 									<stop
 										offset="0%"
-										stopColor={`color-mix(in oklab, ${budget.color} 75%, white)`}
+										stopColor={`color-mix(in oklab, ${themeColor(budget.color)} 75%, white)`}
 									/>
-									<stop offset="100%" stopColor={budget.color} />
+									<stop offset="100%" stopColor={themeColor(budget.color)} />
 								</linearGradient>
 							))}
 						</defs>
@@ -112,7 +113,7 @@ export default function MonthlyBudgetUsage({
 									<path
 										d={arc(start, end, 91)}
 										fill="none"
-										stroke={budget.color}
+										stroke={themeColor(budget.color)}
 										strokeOpacity="0.13"
 										strokeWidth="25"
 									/>
@@ -199,8 +200,8 @@ export default function MonthlyBudgetUsage({
 							style={
 								selected === budget.id
 									? {
-											borderColor: budget.color,
-											boxShadow: `0 0 0 1px ${budget.color}`,
+											borderColor: themeColor(budget.color),
+											boxShadow: `0 0 0 1px ${themeColor(budget.color)}`,
 										}
 									: undefined
 							}
@@ -214,7 +215,7 @@ export default function MonthlyBudgetUsage({
 								>
 									<span
 										className="size-2 shrink-0 rounded-full"
-										style={{ backgroundColor: budget.color }}
+										style={{ backgroundColor: themeColor(budget.color) }}
 									/>
 									<span className="truncate">{budget.name}</span>
 								</button>

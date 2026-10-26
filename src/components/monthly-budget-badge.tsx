@@ -1,3 +1,4 @@
+import { themeColor } from "@/lib/palette"
 import { cn } from "@/lib/utils"
 
 /**
@@ -26,7 +27,7 @@ export default function MonthlyBudgetBadge({
 		>
 			<span
 				className={cn("size-2 shrink-0 rounded-full", !color && "border border-current/40")}
-				style={color ? { backgroundColor: color } : undefined}
+				style={color ? { backgroundColor: themeColor(color) } : undefined}
 			/>
 			{name}
 		</span>

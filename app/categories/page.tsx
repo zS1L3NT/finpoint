@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input"
 import { useHistory } from "@/history"
 import { canUseDefaultMonthlyBudget, treatmentLabel } from "@/lib/analytics"
 import { cardEnter } from "@/lib/motion"
+import { themeColor } from "@/lib/palette"
 import { pluralize } from "@/lib/utils"
 import { listCategories } from "@/logic/categories"
 import { pathRecords } from "@/routes"
@@ -225,7 +226,7 @@ function CategoryTile({
 						>
 							<span
 								className="size-2 shrink-0 rounded-full"
-								style={{ backgroundColor: child.color }}
+								style={{ backgroundColor: themeColor(child.color) }}
 							/>
 							<span className="truncate">{child.name}</span>
 							<span className="text-muted-foreground tabular-nums">

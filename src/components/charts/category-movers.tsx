@@ -3,7 +3,8 @@
 import Link from "next/link"
 import { UiIcon } from "@/components/icon"
 import { useHistory } from "@/history"
-import { cn, formatCurrency, inkOn } from "@/lib/utils"
+import { themeColor } from "@/lib/palette"
+import { cn, formatCurrency } from "@/lib/utils"
 
 type Mover = {
 	id: string
@@ -57,12 +58,9 @@ export default function CategoryMovers({
 					>
 						<span
 							className="grid size-9 shrink-0 place-items-center rounded-full"
-							style={{ backgroundColor: category.color }}
+							style={{ backgroundColor: themeColor(category.color) }}
 						>
-							<UiIcon
-								icon={category.icon}
-								className={cn("size-4", inkOn(category.color))}
-							/>
+							<UiIcon icon={category.icon} className="size-4 text-white" />
 						</span>
 						<span className="grid min-w-0">
 							<span className="truncate text-sm font-medium">{category.name}</span>

@@ -29,6 +29,7 @@ import {
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { useRecordEditor } from "@/hooks/use-record-editor"
 import { TREATMENTS } from "@/lib/analytics"
+import { themeColor } from "@/lib/palette"
 import { cn, pluralize } from "@/lib/utils"
 import { listCategories } from "@/logic/categories"
 import { listMonthlyBudgets } from "@/logic/monthly-budgets"
@@ -342,7 +343,7 @@ function RecordFilters({
 								>
 									<span
 										className="size-2 rounded-full"
-										style={{ backgroundColor: monthlyBudget.color }}
+										style={{ backgroundColor: themeColor(monthlyBudget.color) }}
 									/>
 									{monthlyBudget.name}
 								</SelectItem>

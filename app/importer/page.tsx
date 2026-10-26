@@ -25,6 +25,7 @@ import { Input } from "@/components/ui/input"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { BANKS } from "@/lib/banks"
 import { SPRING, TRANSITION } from "@/lib/motion"
+import { themeColor } from "@/lib/palette"
 import { cn, pluralize } from "@/lib/utils"
 import { listAccounts } from "@/logic/accounts"
 import { importDbs, importOcbc, importRevolut, importUob } from "@/logic/importer"
@@ -236,7 +237,11 @@ export default function ImporterPage() {
 													>
 														<span
 															className="grid size-7 shrink-0 place-items-center rounded-md text-[0.625rem] font-bold text-white"
-															style={{ backgroundColor: item.color }}
+															style={{
+																backgroundColor: themeColor(
+																	item.color,
+																),
+															}}
 														>
 															{item.short}
 														</span>

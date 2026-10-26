@@ -15,6 +15,7 @@ import { useHistory } from "@/history"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { bankMeta } from "@/lib/banks"
 import { cardEnter } from "@/lib/motion"
+import { themeColor } from "@/lib/palette"
 import { cn, formatCurrency, pluralize } from "@/lib/utils"
 import { type AccountActivity, listAccounts } from "@/logic/accounts"
 import { pathAccount, pathAllocator } from "@/routes"
@@ -113,7 +114,7 @@ function AccountCard({ account, onEdit }: { account: AccountRow; onEdit: () => v
 			<header className="flex items-start gap-3">
 				<span
 					className="grid size-10 shrink-0 place-items-center rounded-lg text-xs font-bold text-white"
-					style={{ backgroundColor: bank.color }}
+					style={{ backgroundColor: themeColor(bank.color) }}
 				>
 					{bank.short}
 				</span>

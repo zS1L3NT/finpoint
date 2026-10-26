@@ -24,6 +24,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card"
 import { useRecordEditor } from "@/hooks/use-record-editor"
+import { themeColor } from "@/lib/palette"
 import { formatCurrency, parseDate, parseDatetime, round2 } from "@/lib/utils"
 import { attachBudgetRecord, detachBudgetRecord, getBudget } from "@/logic/budgets"
 import { listCategories } from "@/logic/categories"
@@ -264,7 +265,7 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 													className="h-full origin-left rounded-full transition-transform duration-300 ease-out motion-reduce:transition-none"
 													style={{
 														transform: `scaleX(${category.share / 100})`,
-														backgroundColor: category.color,
+														backgroundColor: themeColor(category.color),
 													}}
 												/>
 											</div>

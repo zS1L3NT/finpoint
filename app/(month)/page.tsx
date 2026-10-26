@@ -36,6 +36,7 @@ import { useHistory } from "@/history"
 import { useMonthParams } from "@/hooks/use-month-params"
 import { STALE_MONTH_CLASS, useMonthTransition } from "@/hooks/use-month-transition"
 import { useStagedMount } from "@/hooks/use-staged-mount"
+import { themeColor } from "@/lib/palette"
 import { cn, formatCurrency, pluralize } from "@/lib/utils"
 import { getDashboardView, type TrendMonth } from "@/logic/dashboard"
 import { hasWorkspaceActivity, loadDemoWorkspace } from "@/logic/workspace"
@@ -498,7 +499,7 @@ function ScopeSelect({
 							<SelectItem key={budget.id} value={budget.id}>
 								<span
 									className="size-2 rounded-full"
-									style={{ backgroundColor: budget.color }}
+									style={{ backgroundColor: themeColor(budget.color) }}
 								/>
 								{budget.name}
 							</SelectItem>

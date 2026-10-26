@@ -4,6 +4,7 @@ import BarChart from "@/components/charts/bar-chart"
 import MonthlyBudgetBadge from "@/components/monthly-budget-badge"
 import { useHistory } from "@/history"
 import { dayTicks } from "@/lib/chart-days"
+import { themeColor } from "@/lib/palette"
 import { pathMonthlyRecords } from "@/routes"
 
 export type MonthlyBudgetLine = {
@@ -62,7 +63,7 @@ export default function DailySpendingChart({
 				series={monthlyBudgets.map(monthlyBudget => ({
 					key: monthlyBudget.id,
 					label: monthlyBudget.name,
-					color: monthlyBudget.color,
+					color: themeColor(monthlyBudget.color),
 					opacity: monthlyBudget.dashed ? 0.55 : 1,
 					values: rows.map(row => row[monthlyBudget.id] ?? 0),
 				}))}
