@@ -1,0 +1,58 @@
+<html data-composition-variables='[{"id":"cues","type":"string","label":"Cues","default":"{}"}]'>
+<template>
+	<style>
+		#root { position: absolute; inset: 0; background: #08080a; font-family: Inter, sans-serif; color: #fafafa; overflow: hidden; }
+		#rl-kick { position: absolute; left: 160px; top: 120px; font: 600 26px/1 Inter, sans-serif; letter-spacing: 0.1em; text-transform: uppercase; color: #34d399; }
+		#rl-title { position: absolute; left: 160px; top: 160px; font: 700 54px/1.1 Inter, sans-serif; letter-spacing: -0.02em; }
+		.step { position: absolute; top: 320px; width: 250px; background: #141417; border: 1px solid rgb(255 255 255 / 0.12); border-radius: 18px; padding: 22px 18px; text-align: center; }
+		#rl-s1 { left: 96px; } #rl-s2 { left: 370px; } #rl-s3 { left: 644px; }
+		#rl-s4 { left: 918px; } #rl-s5 { left: 1192px; } #rl-s6 { left: 1466px; border-color: #34d399; }
+		.step .n { font: 700 26px/1 Inter, sans-serif; color: #71717a; }
+		.step .t { font: 700 30px/1.2 Inter, sans-serif; margin-top: 10px; }
+		.step .s { font: 500 21px/1.35 Inter, sans-serif; color: #a1a1aa; margin-top: 8px; }
+		.rarr { position: absolute; top: 392px; font: 700 34px/1 Inter, sans-serif; color: #34d399; }
+		#rl-a1 { left: 352px; } #rl-a2 { left: 626px; } #rl-a3 { left: 900px; } #rl-a4 { left: 1174px; } #rl-a5 { left: 1448px; }
+		#rl-loop { position: absolute; left: 96px; top: 560px; width: 1620px; text-align: center; font: 500 30px/1.5 Inter, sans-serif; color: #a1a1aa; }
+		#rl-loop b { color: #34d399; }
+		#rl-auto { display: inline-block; margin-top: 16px; background: rgb(52 211 153 / 0.1); border: 1px solid #34d399; border-radius: 16px; padding: 18px 36px; font: 700 32px/1.3 Inter, sans-serif; }
+	</style>
+	<div id="root" data-composition-id="routine-loop" data-width="1920" data-height="1080">
+		<div id="rl-kick">Your routine</div>
+		<div id="rl-title">A few minutes each time.</div>
+		<div class="step" id="rl-s1"><div class="n">1</div><div class="t">Import</div><div class="s">latest statements</div></div>
+		<div class="rarr" id="rl-a1">→</div>
+		<div class="step" id="rl-s2"><div class="n">2</div><div class="t">Fix duplicates</div><div class="s">keep one</div></div>
+		<div class="rarr" id="rl-a2">→</div>
+		<div class="step" id="rl-s3"><div class="n">3</div><div class="t">Explain</div><div class="s">what's new</div></div>
+		<div class="rarr" id="rl-a3">→</div>
+		<div class="step" id="rl-s4"><div class="n">4</div><div class="t">Check Pending</div><div class="s">nothing forgotten</div></div>
+		<div class="rarr" id="rl-a4">→</div>
+		<div class="step" id="rl-s5"><div class="n">5</div><div class="t">Dashboard</div><div class="s">glance over</div></div>
+		<div class="rarr" id="rl-a5">→</div>
+		<div class="step" id="rl-s6"><div class="n">6</div><div class="t">Backup</div><div class="s">keep a copy</div></div>
+		<div id="rl-loop">…and back to <b>Import</b> next time.<br><span id="rl-auto">☁ Drive connected → backup is automatic</span></div>
+	</div>
+	<script>
+		const vars = window.__hyperframes.getVariables(); const cues = JSON.parse(vars.cues || "{}");
+		const T = (n, fb) => cues[n] ?? fb;
+		const tl = gsap.timeline({ paused: true });
+		tl.fromTo("#rl-kick", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T("routine", 0.3));
+		tl.fromTo("#rl-title", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("routine", 0.3) + 0.15);
+		tl.fromTo("#rl-s1", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, T("import", 1.5));
+		tl.fromTo("#rl-a1", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power3.out" }, T("import", 1.5) + 0.4);
+		tl.fromTo("#rl-s2", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, T("dups", 3));
+		tl.fromTo("#rl-a2", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power3.out" }, T("dups", 3) + 0.4);
+		tl.fromTo("#rl-s3", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, T("expl", 4.5));
+		tl.fromTo("#rl-a3", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power3.out" }, T("expl", 4.5) + 0.4);
+		tl.fromTo("#rl-s4", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, T("pend", 6));
+		tl.fromTo("#rl-a4", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power3.out" }, T("pend", 6) + 0.4);
+		tl.fromTo("#rl-s5", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, T("dash", 7.5));
+		tl.fromTo("#rl-a5", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power3.out" }, T("dash", 7.5) + 0.4);
+		tl.fromTo("#rl-s6", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, T("backup", 9));
+		tl.fromTo("#rl-loop", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T("backup", 9) + 0.4);
+		tl.fromTo("#rl-auto", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T("drive", 12));
+		tl.set({}, {}, T("drive", 12) + 2.2);
+		window.__timelines["routine-loop"] = tl;
+	</script>
+</template>
+</html>

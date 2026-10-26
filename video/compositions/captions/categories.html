@@ -20,14 +20,15 @@
 		<div id="cap-categories-examples-7" class="cap"><span>Out.</span></div>
 		<div id="cap-categories-examples-8" class="cap"><span>The supermarket</span></div>
 		<div id="cap-categories-examples-10" class="cap"><span>run is Groceries.</span></div>
-		<div id="cap-categories-examples-13" class="cap"><span>The birthday gift goes under Gifts and</span></div>
+		<div id="cap-categories-examples-13" class="cap"><span>The birthday gift goes under Gifts &amp;</span></div>
 		<div id="cap-categories-examples-20" class="cap"><span>Donations.</span></div>
-		<div id="cap-categories-examples-21" class="cap"><span>Finpoint starts you with a sensible</span></div>
-		<div id="cap-categories-examples-27" class="cap"><span>set, and you can rename</span></div>
-		<div id="cap-categories-examples-32" class="cap"><span>them or add your own.</span></div>
+		<div id="cap-categories-examples-21" class="cap"><span>Finpoint starts you with a sensible set,</span></div>
+		<div id="cap-categories-examples-28" class="cap"><span>and you can rename them,</span></div>
+		<div id="cap-categories-examples-33" class="cap"><span>add your own, or nest one under</span></div>
+		<div id="cap-categories-examples-40" class="cap"><span>another.</span></div>
 		<div id="cap-categories-defaults-0" class="cap"><span>Each Category</span></div>
 		<div id="cap-categories-defaults-2" class="cap"><span>also carries two defaults:</span></div>
-		<div id="cap-categories-defaults-6" class="cap"><span>a treatment, and a spending bucket.</span></div>
+		<div id="cap-categories-defaults-6" class="cap"><span>a treatment, and a Monthly Budget.</span></div>
 		<div id="cap-categories-defaults-12" class="cap"><span>That’s why you could ignore those fields</span></div>
 		<div id="cap-categories-defaults-19" class="cap"><span>earlier.</span></div>
 		<div id="cap-categories-defaults-20" class="cap"><span>The Category</span></div>
@@ -35,12 +36,12 @@
 	</div>
 	<script>
 		const tl = gsap.timeline({ paused: true })
-		const groups = [["cap-categories-most-0",1.683,2.317],["cap-categories-most-1",2.317,4.183],["cap-categories-most-8",4.183,5.417],["cap-categories-most-11",5.417,6.883],["cap-categories-most-17",6.883,8.783],["cap-categories-most-24",8.783,9.833],["cap-categories-examples-0",10.283,12.45],["cap-categories-examples-7",12.45,13.117],["cap-categories-examples-8",13.117,14.15],["cap-categories-examples-10",14.15,15.65],["cap-categories-examples-13",15.65,17.783],["cap-categories-examples-20",17.783,19.117],["cap-categories-examples-21",19.117,21.017],["cap-categories-examples-27",21.017,22.683],["cap-categories-examples-32",22.683,24.367],["cap-categories-defaults-0",24.817,25.783],["cap-categories-defaults-2",25.783,27.65],["cap-categories-defaults-6",27.65,30.083],["cap-categories-defaults-12",30.083,32.05],["cap-categories-defaults-19",32.05,32.883],["cap-categories-defaults-20",32.883,33.717],["cap-categories-defaults-22",33.717,35.6]]
+		const groups = [["cap-categories-most-0",1.683,2.317],["cap-categories-most-1",2.317,4.183],["cap-categories-most-8",4.183,5.417],["cap-categories-most-11",5.417,6.883],["cap-categories-most-17",6.883,8.783],["cap-categories-most-24",8.783,9.833],["cap-categories-examples-0",10.283,12.45],["cap-categories-examples-7",12.45,13.183],["cap-categories-examples-8",13.183,14.217],["cap-categories-examples-10",14.217,15.717],["cap-categories-examples-13",15.717,17.883],["cap-categories-examples-20",17.883,19.183],["cap-categories-examples-21",19.183,21.317],["cap-categories-examples-28",21.317,22.883],["cap-categories-examples-33",22.883,24.85],["cap-categories-examples-40",24.85,26.067],["cap-categories-defaults-0",26.517,27.483],["cap-categories-defaults-2",27.483,29.35],["cap-categories-defaults-6",29.35,31.783],["cap-categories-defaults-12",31.783,33.717],["cap-categories-defaults-19",33.717,34.583],["cap-categories-defaults-20",34.583,35.45],["cap-categories-defaults-22",35.45,37.367]]
 		for (const [id, start, end] of groups) {
 			tl.set("#" + id, { opacity: 1, visibility: "visible" }, start)
 			tl.set("#" + id, { opacity: 0, visibility: "hidden" }, end)
 		}
-		tl.set({}, {}, 35.9)
+		tl.set({}, {}, 37.667)
 		window.__timelines["captions"] = tl
 	</script>
 </template>

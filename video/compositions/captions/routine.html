@@ -12,27 +12,29 @@
 	<div id="root" data-composition-id="captions" data-width="1920" data-height="1080">
 		<div id="cap-routine-loop-0" class="cap"><span>Here’s a routine that works.</span></div>
 		<div id="cap-routine-loop-5" class="cap"><span>Import your latest statements.</span></div>
-		<div id="cap-routine-loop-9" class="cap"><span>Explain what’s new in Allocator.</span></div>
-		<div id="cap-routine-loop-14" class="cap"><span>Check anything Pending.</span></div>
-		<div id="cap-routine-loop-17" class="cap"><span>Glance at your Dashboard.</span></div>
-		<div id="cap-routine-loop-21" class="cap"><span>And keep a backup.</span></div>
+		<div id="cap-routine-loop-9" class="cap"><span>Fix any duplicates,</span></div>
+		<div id="cap-routine-loop-12" class="cap"><span>and explain what’s new in Workflows.</span></div>
+		<div id="cap-routine-loop-18" class="cap"><span>Check anything Pending.</span></div>
+		<div id="cap-routine-loop-21" class="cap"><span>Glance at your Dashboard.</span></div>
+		<div id="cap-routine-loop-25" class="cap"><span>And keep a backup.</span></div>
 		<div id="cap-routine-backup-0" class="cap"><span>With Google Drive connected,</span></div>
 		<div id="cap-routine-backup-4" class="cap"><span>that happens automatically.</span></div>
 		<div id="cap-routine-backup-7" class="cap"><span>If not, download a backup file every</span></div>
 		<div id="cap-routine-backup-14" class="cap"><span>so often.</span></div>
 		<div id="cap-routine-help-0" class="cap"><span>And whenever you’re unsure,</span></div>
-		<div id="cap-routine-help-4" class="cap"><span>open Help from any page or form.</span></div>
-		<div id="cap-routine-help-11" class="cap"><span>Every chapter of this guide is there,</span></div>
-		<div id="cap-routine-help-18" class="cap"><span>with pictures.</span></div>
+		<div id="cap-routine-help-4" class="cap"><span>choose Help at the top of any</span></div>
+		<div id="cap-routine-help-11" class="cap"><span>page.</span></div>
+		<div id="cap-routine-help-12" class="cap"><span>Every chapter of this guide is there,</span></div>
+		<div id="cap-routine-help-19" class="cap"><span>with pictures.</span></div>
 	</div>
 	<script>
 		const tl = gsap.timeline({ paused: true })
-		const groups = [["cap-routine-loop-0",1.783,3.617],["cap-routine-loop-5",3.617,5.517],["cap-routine-loop-9",5.517,7.75],["cap-routine-loop-14",7.75,9.283],["cap-routine-loop-17",9.283,10.75],["cap-routine-loop-21",10.75,12.267],["cap-routine-backup-0",12.717,14.317],["cap-routine-backup-4",14.317,16.483],["cap-routine-backup-7",16.483,18.85],["cap-routine-backup-14",18.85,20],["cap-routine-help-0",20.45,22.183],["cap-routine-help-4",22.183,24.55],["cap-routine-help-11",24.55,26.717],["cap-routine-help-18",26.717,28.033]]
+		const groups = [["cap-routine-loop-0",1.783,3.65],["cap-routine-loop-5",3.65,5.683],["cap-routine-loop-9",5.683,7.217],["cap-routine-loop-12",7.217,9.183],["cap-routine-loop-18",9.183,10.783],["cap-routine-loop-21",10.783,12.283],["cap-routine-loop-25",12.283,13.833],["cap-routine-backup-0",14.283,15.883],["cap-routine-backup-4",15.883,18.05],["cap-routine-backup-7",18.05,20.417],["cap-routine-backup-14",20.417,21.567],["cap-routine-help-0",22.017,23.517],["cap-routine-help-4",23.517,24.883],["cap-routine-help-11",24.883,25.75],["cap-routine-help-12",25.75,27.85],["cap-routine-help-19",27.85,29.133]]
 		for (const [id, start, end] of groups) {
 			tl.set("#" + id, { opacity: 1, visibility: "visible" }, start)
 			tl.set("#" + id, { opacity: 0, visibility: "hidden" }, end)
 		}
-		tl.set({}, {}, 28.333)
+		tl.set({}, {}, 29.433)
 		window.__timelines["captions"] = tl
 	</script>
 </template>

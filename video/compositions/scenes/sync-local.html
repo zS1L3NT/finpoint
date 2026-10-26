@@ -1,0 +1,42 @@
+<html data-composition-variables='[{"id":"cues","type":"string","label":"Cues","default":"{}"}]'>
+<template>
+	<style>
+		#root { position: absolute; inset: 0; background: #08080a; font-family: Inter, sans-serif; color: #fafafa; overflow: hidden; }
+		#sl-kick { position: absolute; left: 160px; top: 130px; font: 600 26px/1 Inter, sans-serif; letter-spacing: 0.1em; text-transform: uppercase; color: #34d399; }
+		#sl-title { position: absolute; left: 160px; top: 170px; font: 700 56px/1.1 Inter, sans-serif; letter-spacing: -0.02em; }
+		.dev { position: absolute; top: 310px; width: 700px; border-radius: 24px; padding: 40px; text-align: center; }
+		#sl-here { left: 160px; background: rgb(52 211 153 / 0.07); border: 2px solid #34d399; }
+		#sl-gone { left: 1060px; background: #101013; border: 1px solid rgb(255 255 255 / 0.12); }
+		.dev .ic { font-size: 72px; }
+		.dev .t { font: 700 44px/1.15 Inter, sans-serif; margin-top: 18px; }
+		.dev .s { font: 500 26px/1.45 Inter, sans-serif; color: #a1a1aa; margin-top: 12px; }
+		.dev .s b { color: #fafafa; }
+		#sl-no { position: absolute; left: 1060px; top: 310px; width: 700px; height: 368px; pointer-events: none; }
+		#sl-no::before, #sl-no::after { content: ""; position: absolute; left: 60px; right: 60px; top: 50%; height: 8px; border-radius: 4px; background: #ff7a7a; }
+		#sl-no::before { transform: rotate(12deg); } #sl-no::after { transform: rotate(-12deg); }
+		#sl-cap { position: absolute; left: 160px; top: 720px; width: 1600px; text-align: center; font: 500 32px/1.45 Inter, sans-serif; color: #a1a1aa; }
+		#sl-cap b { color: #fafafa; }
+	</style>
+	<div id="root" data-composition-id="sync-local" data-width="1920" data-height="1080">
+		<div id="sl-kick">Backups and Google Drive</div>
+		<div id="sl-title">Your data lives here — nowhere else.</div>
+		<div class="dev" id="sl-here"><div class="ic">💻</div><div class="t">This browser, this device</div><div class="s">Finpoint keeps your data <b>in this browser</b>. That's the whole database.</div></div>
+		<div class="dev" id="sl-gone"><div class="ic">🗄</div><div class="t" style="color:#71717a">Finpoint's servers</div><div class="s">your finances never pass through them — we never see them</div></div>
+		<div id="sl-no"></div>
+		<div id="sl-cap">No Finpoint database. <b>Your data never passes through our servers.</b></div>
+	</div>
+	<script>
+		const vars = window.__hyperframes.getVariables(); const cues = JSON.parse(vars.cues || "{}");
+		const T = (n, fb) => cues[n] ?? fb;
+		const tl = gsap.timeline({ paused: true });
+		tl.fromTo("#sl-kick", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T("browser", 0.3));
+		tl.fromTo("#sl-title", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("browser", 0.3) + 0.15);
+		tl.fromTo("#sl-here", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("browser", 0.3) + 0.3);
+		tl.fromTo("#sl-gone", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("device", 2));
+		tl.fromTo("#sl-no", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power3.out" }, T("servers", 4));
+		tl.fromTo("#sl-cap", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T("servers", 4) + 0.4);
+		tl.set({}, {}, T("servers", 4) + 2.2);
+		window.__timelines["sync-local"] = tl;
+	</script>
+</template>
+</html>

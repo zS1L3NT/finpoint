@@ -13,8 +13,7 @@
 		<div id="cap-split-select-0" class="cap"><span>Back to the $80</span></div>
 		<div id="cap-split-select-4" class="cap"><span>supermarket</span></div>
 		<div id="cap-split-select-5" class="cap"><span>trip.</span></div>
-		<div id="cap-split-select-6" class="cap"><span>Select it in Allocator,</span></div>
-		<div id="cap-split-select-10" class="cap"><span>and choose Create Record.</span></div>
+		<div id="cap-split-select-6" class="cap"><span>Select it, and choose Create Record.</span></div>
 		<div id="cap-split-amount-0" class="cap"><span>Call it Groceries,</span></div>
 		<div id="cap-split-amount-3" class="cap"><span>and change both the Record’s amount and</span></div>
 		<div id="cap-split-amount-10" class="cap"><span>the Statement’s Allocation</span></div>
@@ -23,16 +22,16 @@
 		<div id="cap-split-amount-18" class="cap"><span>stays unexplained</span></div>
 		<div id="cap-split-amount-20" class="cap"><span>for now.</span></div>
 		<div id="cap-split-left-0" class="cap"><span>Save, and the supermarket</span></div>
-		<div id="cap-split-left-4" class="cap"><span>Statement stays in Allocator,</span></div>
-		<div id="cap-split-left-8" class="cap"><span>with $30</span></div>
-		<div id="cap-split-left-10" class="cap"><span>left.</span></div>
+		<div id="cap-split-left-4" class="cap"><span>Statement stays in the list,</span></div>
+		<div id="cap-split-left-9" class="cap"><span>with $30</span></div>
+		<div id="cap-split-left-11" class="cap"><span>left.</span></div>
 		<div id="cap-split-gift-0" class="cap"><span>Select it again, and create a second</span></div>
 		<div id="cap-split-gift-7" class="cap"><span>Record, Birthday gift, for the $30</span></div>
 		<div id="cap-split-gift-13" class="cap"><span>left to allocate.</span></div>
 		<div id="cap-split-gift-16" class="cap"><span>Finpoint fills that amount in for you.</span></div>
 		<div id="cap-split-save-0" class="cap"><span>Save, and the supermarket</span></div>
-		<div id="cap-split-save-4" class="cap"><span>Statement leaves Allocator,</span></div>
-		<div id="cap-split-save-7" class="cap"><span>because it’s now fully explained.</span></div>
+		<div id="cap-split-save-4" class="cap"><span>Statement leaves the list,</span></div>
+		<div id="cap-split-save-8" class="cap"><span>because it’s now fully explained.</span></div>
 		<div id="cap-split-done-0" class="cap"><span>Now one Statement is explained by two</span></div>
 		<div id="cap-split-done-7" class="cap"><span>Records:</span></div>
 		<div id="cap-split-done-8" class="cap"><span>$50</span></div>
@@ -42,12 +41,12 @@
 	</div>
 	<script>
 		const tl = gsap.timeline({ paused: true })
-		const groups = [["cap-split-select-0",2.15,3.417],["cap-split-select-4",3.417,4.117],["cap-split-select-5",4.117,4.75],["cap-split-select-6",4.75,6.417],["cap-split-select-10",6.417,8.2],["cap-split-amount-0",8.65,9.917],["cap-split-amount-3",9.917,11.983],["cap-split-amount-10",11.983,13.65],["cap-split-amount-13",13.65,15.283],["cap-split-amount-15",15.283,16.75],["cap-split-amount-18",16.75,17.783],["cap-split-amount-20",17.783,18.667],["cap-split-left-0",19.117,20.85],["cap-split-left-4",20.85,22.783],["cap-split-left-8",22.783,23.75],["cap-split-left-10",23.75,24.4],["cap-split-gift-0",24.85,26.983],["cap-split-gift-7",26.983,29.317],["cap-split-gift-13",29.317,30.95],["cap-split-gift-16",30.95,33.433],["cap-split-save-0",33.883,35.45],["cap-split-save-4",35.45,37.183],["cap-split-save-7",37.183,39.533],["cap-split-done-0",39.983,42.217],["cap-split-done-7",42.217,43.25],["cap-split-done-8",43.25,44.083],["cap-split-done-9",44.083,45.117],["cap-split-done-11",45.117,46.35],["cap-split-done-14",46.35,47.933]]
+		const groups = [["cap-split-select-0",2.15,3.417],["cap-split-select-4",3.417,4.15],["cap-split-select-5",4.15,4.75],["cap-split-select-6",4.75,7.3],["cap-split-amount-0",7.75,9.017],["cap-split-amount-3",9.017,11.083],["cap-split-amount-10",11.083,12.75],["cap-split-amount-13",12.75,14.383],["cap-split-amount-15",14.383,15.85],["cap-split-amount-18",15.85,16.883],["cap-split-amount-20",16.883,17.767],["cap-split-left-0",18.217,20.017],["cap-split-left-4",20.017,21.583],["cap-split-left-9",21.583,22.583],["cap-split-left-11",22.583,23.233],["cap-split-gift-0",23.683,25.817],["cap-split-gift-7",25.817,28.15],["cap-split-gift-13",28.15,29.783],["cap-split-gift-16",29.783,32.267],["cap-split-save-0",32.717,34.35],["cap-split-save-4",34.35,35.783],["cap-split-save-8",35.783,38.233],["cap-split-done-0",38.683,40.917],["cap-split-done-7",40.917,41.95],["cap-split-done-8",41.95,42.783],["cap-split-done-9",42.783,43.817],["cap-split-done-11",43.817,45.05],["cap-split-done-14",45.05,46.633]]
 		for (const [id, start, end] of groups) {
 			tl.set("#" + id, { opacity: 1, visibility: "visible" }, start)
 			tl.set("#" + id, { opacity: 0, visibility: "hidden" }, end)
 		}
-		tl.set({}, {}, 48.233)
+		tl.set({}, {}, 46.933)
 		window.__timelines["captions"] = tl
 	</script>
 </template>

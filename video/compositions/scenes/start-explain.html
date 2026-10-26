@@ -1,0 +1,57 @@
+<html data-composition-variables='[{"id":"cues","type":"string","label":"Cues","default":"{}"}]'>
+<template>
+	<style>
+		#root { position: absolute; inset: 0; background: #08080a; font-family: Inter, sans-serif; color: #fafafa; overflow: hidden; }
+		#se-kick { position: absolute; left: 160px; top: 128px; font: 600 26px/1 Inter, sans-serif; letter-spacing: 0.1em; text-transform: uppercase; color: #34d399; }
+		#se-title { position: absolute; left: 160px; top: 168px; font: 700 54px/1.1 Inter, sans-serif; letter-spacing: -0.02em; }
+		.erow { position: absolute; left: 160px; width: 1600px; display: flex; align-items: center; gap: 24px; }
+		#se-e1 { top: 280px; } #se-e2 { top: 420px; } #se-e3 { top: 560px; }
+		.stmt { width: 560px; background: #141417; border: 1px solid rgb(255 255 255 / 0.09); border-left: 8px solid #4c9bff; border-radius: 16px; padding: 18px 26px; display: flex; align-items: center; justify-content: space-between; }
+		.stmt .t { font: 700 30px/1.1 Inter, sans-serif; } .stmt .a { font: 700 38px/1 Inter, sans-serif; font-feature-settings: "tnum"; }
+		.arr { font: 700 34px/1 Inter, sans-serif; color: #34d399; }
+		.expl { background: rgb(52 211 153 / 0.12); border: 1px solid rgb(52 211 153 / 0.5); border-radius: 999px; padding: 14px 28px; font: 600 30px/1 Inter, sans-serif; }
+		.expl b { color: #34d399; font-feature-settings: "tnum"; }
+		.step { position: absolute; top: 716px; width: 480px; background: #141417; border: 1px solid rgb(255 255 255 / 0.12); border-radius: 20px; padding: 24px 30px; text-align: center; }
+		#se-s1 { left: 160px; border-top: 6px solid #4c9bff; } #se-s2 { left: 720px; border-top: 6px solid #34d399; } #se-s3 { left: 1280px; border-top: 6px solid #a594ff; }
+		.step .n { font: 600 24px/1 Inter, sans-serif; color: #71717a; }
+		.step .t { font: 700 38px/1.15 Inter, sans-serif; margin-top: 10px; }
+	</style>
+	<div id="root" data-composition-id="start-explain" data-width="1920" data-height="1080">
+		<div id="se-kick">Finpoint closes that gap</div>
+		<div id="se-title">Your words, beside your bank's.</div>
+		<div class="erow" id="se-e1">
+			<div class="stmt"><div class="t">NTUC −$80</div><div class="a">−$80</div></div>
+			<div class="arr">→</div><div class="expl" id="se-x1">groceries <b>−$50</b></div>
+		</div>
+		<div class="erow" id="se-e2">
+			<div class="stmt"><div class="t">NTUC −$80</div><div class="a">−$80</div></div>
+			<div class="arr">→</div><div class="expl" id="se-x2">a gift <b>−$30</b></div>
+		</div>
+		<div class="erow" id="se-e3">
+			<div class="stmt"><div class="t">SAKURA −$90 · SAM +$60</div><div class="a">−$30</div></div>
+			<div class="arr">→</div><div class="expl" id="se-x3">your share of dinner <b>−$30</b></div>
+		</div>
+		<div class="step" id="se-s1"><div class="n">1</div><div class="t">Bring in bank activity</div></div>
+		<div class="step" id="se-s2"><div class="n">2</div><div class="t">Explain it</div></div>
+		<div class="step" id="se-s3"><div class="n">3</div><div class="t">See where it went</div></div>
+	</div>
+	<script>
+		const vars = window.__hyperframes.getVariables(); const cues = JSON.parse(vars.cues || "{}");
+		const T = (n, fb) => cues[n] ?? fb;
+		const tl = gsap.timeline({ paused: true });
+		tl.fromTo("#se-kick", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T("closed", 0.3));
+		tl.fromTo("#se-title", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("closed", 0.3) + 0.15);
+		tl.fromTo("#se-e1", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("exact", 2));
+		tl.fromTo("#se-x1", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T("groceries", 5));
+		tl.fromTo("#se-e2", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("groceries", 5) + 0.4);
+		tl.fromTo("#se-x2", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T("gift", 7));
+		tl.fromTo("#se-e3", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("gift", 7) + 0.4);
+		tl.fromTo("#se-x3", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T("dinner", 9));
+		tl.fromTo("#se-s1", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("bring", 14));
+		tl.fromTo("#se-s2", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("explain2", 16));
+		tl.fromTo("#se-s3", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("see", 18));
+		tl.set({}, {}, T("see", 18) + 1.6);
+		window.__timelines["start-explain"] = tl;
+	</script>
+</template>
+</html>

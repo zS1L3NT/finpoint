@@ -32,32 +32,31 @@
 		<div id="cap-pending-list-7" class="cap"><span>list, so nothing gets forgotten.</span></div>
 		<div id="cap-pending-attach-0" class="cap"><span>When Jo’s $100</span></div>
 		<div id="cap-pending-attach-3" class="cap"><span>arrives,</span></div>
-		<div id="cap-pending-attach-4" class="cap"><span>select it in Allocator</span></div>
-		<div id="cap-pending-attach-8" class="cap"><span>and choose Attach to Record.</span></div>
-		<div id="cap-pending-attach-13" class="cap"><span>Finpoint suggests the Pending Record it matches</span></div>
-		<div id="cap-pending-attach-20" class="cap"><span>exactly.</span></div>
+		<div id="cap-pending-attach-4" class="cap"><span>select it and choose Allocate</span></div>
+		<div id="cap-pending-attach-9" class="cap"><span>to record.</span></div>
+		<div id="cap-pending-attach-11" class="cap"><span>Finpoint suggests the Pending Record it matches</span></div>
+		<div id="cap-pending-attach-18" class="cap"><span>exactly.</span></div>
 		<div id="cap-pending-complete-0" class="cap"><span>The Record now combines both payments.</span></div>
-		<div id="cap-pending-complete-6" class="cap"><span>Save, and because the amounts match,</span></div>
+		<div id="cap-pending-complete-6" class="cap"><span>Save, and because the amounts tally,</span></div>
 		<div id="cap-pending-complete-12" class="cap"><span>it’s no longer Pending.</span></div>
 		<div id="cap-pending-meaning-0" class="cap"><span>So a Record is Pending for one</span></div>
 		<div id="cap-pending-meaning-7" class="cap"><span>of two reasons.</span></div>
-		<div id="cap-pending-meaning-10" class="cap"><span>Its amounts don’t match yet,</span></div>
+		<div id="cap-pending-meaning-10" class="cap"><span>Its amounts don’t tally yet,</span></div>
 		<div id="cap-pending-meaning-15" class="cap"><span>like the concert.</span></div>
-		<div id="cap-pending-meaning-18" class="cap"><span>Or it relies on bank activity</span></div>
-		<div id="cap-pending-meaning-24" class="cap"><span>you’re still expecting,</span></div>
-		<div id="cap-pending-meaning-27" class="cap"><span>like a sofa balance due on delivery.</span></div>
-		<div id="cap-pending-meaning-34" class="cap"><span>Either way, Pending means the Record isn’t</span></div>
-		<div id="cap-pending-meaning-41" class="cap"><span>fully confirmed</span></div>
-		<div id="cap-pending-meaning-43" class="cap"><span>yet.</span></div>
+		<div id="cap-pending-meaning-18" class="cap"><span>Or one of its Statements is still</span></div>
+		<div id="cap-pending-meaning-25" class="cap"><span>Pending at the bank.</span></div>
+		<div id="cap-pending-meaning-29" class="cap"><span>Either way, Pending means the Record isn’t</span></div>
+		<div id="cap-pending-meaning-36" class="cap"><span>fully confirmed</span></div>
+		<div id="cap-pending-meaning-38" class="cap"><span>yet.</span></div>
 	</div>
 	<script>
 		const tl = gsap.timeline({ paused: true })
-		const groups = [["cap-pending-when-0",1.983,2.617],["cap-pending-when-1",2.617,4.383],["cap-pending-when-8",4.383,5.517],["cap-pending-when-12",5.517,8],["cap-pending-concert-0",8.45,10.217],["cap-pending-concert-4",10.217,11.75],["cap-pending-concert-8",11.75,13.283],["cap-pending-concert-15",13.283,14.817],["cap-pending-concert-17",14.817,15.85],["cap-pending-concert-19",15.85,17.75],["cap-pending-concert-26",17.75,18.983],["cap-pending-concert-28",18.983,20.717],["cap-pending-concert-32",20.717,21.667],["cap-pending-flag-0",22.117,23.517],["cap-pending-flag-5",23.517,24.683],["cap-pending-flag-6",24.683,26.617],["cap-pending-flag-8",26.617,29.083],["cap-pending-flag-15",29.083,30.367],["cap-pending-list-0",30.817,33.117],["cap-pending-list-7",33.117,35.467],["cap-pending-attach-0",35.917,37.583],["cap-pending-attach-3",37.583,38.383],["cap-pending-attach-4",38.383,40.05],["cap-pending-attach-8",40.05,42.417],["cap-pending-attach-13",42.417,45.117],["cap-pending-attach-20",45.117,46.4],["cap-pending-complete-0",46.85,49.417],["cap-pending-complete-6",49.417,51.65],["cap-pending-complete-12",51.65,53.4],["cap-pending-meaning-0",53.85,55.65],["cap-pending-meaning-7",55.65,56.85],["cap-pending-meaning-10",56.85,58.317],["cap-pending-meaning-15",58.317,59.917],["cap-pending-meaning-18",59.917,61.617],["cap-pending-meaning-24",61.617,62.85],["cap-pending-meaning-27",62.85,65.983],["cap-pending-meaning-34",65.983,68.35],["cap-pending-meaning-41",68.35,69.417],["cap-pending-meaning-43",69.417,71]]
+		const groups = [["cap-pending-when-0",1.983,2.617],["cap-pending-when-1",2.617,4.383],["cap-pending-when-8",4.383,5.517],["cap-pending-when-12",5.517,8],["cap-pending-concert-0",8.45,10.217],["cap-pending-concert-4",10.217,11.75],["cap-pending-concert-8",11.75,13.283],["cap-pending-concert-15",13.283,14.817],["cap-pending-concert-17",14.817,15.85],["cap-pending-concert-19",15.85,17.75],["cap-pending-concert-26",17.75,18.983],["cap-pending-concert-28",18.983,20.717],["cap-pending-concert-32",20.717,21.667],["cap-pending-flag-0",22.117,23.517],["cap-pending-flag-5",23.517,24.683],["cap-pending-flag-6",24.683,26.617],["cap-pending-flag-8",26.617,29.083],["cap-pending-flag-15",29.083,30.367],["cap-pending-list-0",30.817,33.117],["cap-pending-list-7",33.117,35.467],["cap-pending-attach-0",35.917,37.483],["cap-pending-attach-3",37.483,38.283],["cap-pending-attach-4",38.283,40.25],["cap-pending-attach-9",40.25,41.517],["cap-pending-attach-11",41.517,44.183],["cap-pending-attach-18",44.183,45.433],["cap-pending-complete-0",45.883,48.45],["cap-pending-complete-6",48.45,50.75],["cap-pending-complete-12",50.75,52.467],["cap-pending-meaning-0",52.917,54.75],["cap-pending-meaning-7",54.75,55.95],["cap-pending-meaning-10",55.95,57.55],["cap-pending-meaning-15",57.55,59.05],["cap-pending-meaning-18",59.05,60.75],["cap-pending-meaning-25",60.75,62.183],["cap-pending-meaning-29",62.183,64.55],["cap-pending-meaning-36",64.55,65.65],["cap-pending-meaning-38",65.65,67.233]]
 		for (const [id, start, end] of groups) {
 			tl.set("#" + id, { opacity: 1, visibility: "visible" }, start)
 			tl.set("#" + id, { opacity: 0, visibility: "hidden" }, end)
 		}
-		tl.set({}, {}, 71.3)
+		tl.set({}, {}, 67.533)
 		window.__timelines["captions"] = tl
 	</script>
 </template>

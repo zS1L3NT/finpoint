@@ -26,17 +26,22 @@
 		<div id="cap-sync-drive-12" class="cap"><span>copy in a hidden folder in your</span></div>
 		<div id="cap-sync-drive-19" class="cap"><span>own Drive, automatically,</span></div>
 		<div id="cap-sync-drive-22" class="cap"><span>so your devices stay in step.</span></div>
+		<div id="cap-sync-conflict-0" class="cap"><span>If the same data changed on two</span></div>
+		<div id="cap-sync-conflict-7" class="cap"><span>devices,</span></div>
+		<div id="cap-sync-conflict-8" class="cap"><span>Finpoint asks which copy to keep.</span></div>
+		<div id="cap-sync-conflict-14" class="cap"><span>It keeps one whole copy,</span></div>
+		<div id="cap-sync-conflict-19" class="cap"><span>never a mix of both.</span></div>
 		<div id="cap-sync-yours-0" class="cap"><span>Either way, your data only goes to</span></div>
 		<div id="cap-sync-yours-7" class="cap"><span>places you control.</span></div>
 	</div>
 	<script>
 		const tl = gsap.timeline({ paused: true })
-		const groups = [["cap-sync-local-0",2.35,4.55],["cap-sync-local-7",4.55,6.15],["cap-sync-local-10",6.15,8.117],["cap-sync-local-14",8.117,10.083],["cap-sync-local-21",10.083,12.467],["cap-sync-file-0",12.917,14.55],["cap-sync-file-7",14.55,16.95],["cap-sync-file-14",16.95,18.883],["cap-sync-file-20",18.883,20.95],["cap-sync-file-27",20.95,23.017],["cap-sync-file-33",23.017,25.367],["cap-sync-drive-0",25.817,27.983],["cap-sync-drive-5",27.983,30.05],["cap-sync-drive-12",30.05,31.95],["cap-sync-drive-19",31.95,34.05],["cap-sync-drive-22",34.05,36.167],["cap-sync-yours-0",36.617,38.817],["cap-sync-yours-7",38.817,41.167]]
+		const groups = [["cap-sync-local-0",2.35,4.55],["cap-sync-local-7",4.55,6.15],["cap-sync-local-10",6.15,8.117],["cap-sync-local-14",8.117,10.083],["cap-sync-local-21",10.083,12.467],["cap-sync-file-0",12.917,14.55],["cap-sync-file-7",14.55,16.95],["cap-sync-file-14",16.95,18.883],["cap-sync-file-20",18.883,20.95],["cap-sync-file-27",20.95,23.017],["cap-sync-file-33",23.017,25.367],["cap-sync-drive-0",25.817,27.983],["cap-sync-drive-5",27.983,30.05],["cap-sync-drive-12",30.05,31.95],["cap-sync-drive-19",31.95,34.05],["cap-sync-drive-22",34.05,36.167],["cap-sync-conflict-0",36.617,38.75],["cap-sync-conflict-7",38.75,39.617],["cap-sync-conflict-8",39.617,41.883],["cap-sync-conflict-14",41.883,43.483],["cap-sync-conflict-19",43.483,45.167],["cap-sync-yours-0",45.617,47.817],["cap-sync-yours-7",47.817,50.167]]
 		for (const [id, start, end] of groups) {
 			tl.set("#" + id, { opacity: 1, visibility: "visible" }, start)
 			tl.set("#" + id, { opacity: 0, visibility: "hidden" }, end)
 		}
-		tl.set({}, {}, 41.467)
+		tl.set({}, {}, 50.467)
 		window.__timelines["captions"] = tl
 	</script>
 </template>

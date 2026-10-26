@@ -10,35 +10,42 @@
 		}
 	</style>
 	<div id="root" data-composition-id="captions" data-width="1920" data-height="1080">
-		<div id="cap-allocator-list-0" class="cap"><span>Allocator</span></div>
-		<div id="cap-allocator-list-1" class="cap"><span>is where you’ll spend most of your</span></div>
-		<div id="cap-allocator-list-8" class="cap"><span>time in Finpoint.</span></div>
-		<div id="cap-allocator-list-11" class="cap"><span>It lists every Statement</span></div>
-		<div id="cap-allocator-list-15" class="cap"><span>that still has money left to explain,</span></div>
-		<div id="cap-allocator-list-22" class="cap"><span>newest first.</span></div>
+		<div id="cap-allocator-list-0" class="cap"><span>Workflows is where you’ll spend most of</span></div>
+		<div id="cap-allocator-list-7" class="cap"><span>your time.</span></div>
+		<div id="cap-allocator-list-9" class="cap"><span>Its first tab, Allocate</span></div>
+		<div id="cap-allocator-list-13" class="cap"><span>to Records,</span></div>
+		<div id="cap-allocator-list-15" class="cap"><span>lists every</span></div>
+		<div id="cap-allocator-list-17" class="cap"><span>Statement</span></div>
+		<div id="cap-allocator-list-18" class="cap"><span>that still has money left to explain,</span></div>
+		<div id="cap-allocator-list-25" class="cap"><span>newest first.</span></div>
 		<div id="cap-allocator-left-0" class="cap"><span>When only part of a Statement has</span></div>
 		<div id="cap-allocator-left-7" class="cap"><span>been explained,</span></div>
-		<div id="cap-allocator-left-9" class="cap"><span>Allocator</span></div>
-		<div id="cap-allocator-left-10" class="cap"><span>shows how much is left.</span></div>
+		<div id="cap-allocator-left-9" class="cap"><span>it shows how much is left.</span></div>
 		<div id="cap-allocator-left-15" class="cap"><span>Once a Statement is fully explained,</span></div>
 		<div id="cap-allocator-left-21" class="cap"><span>it leaves the list.</span></div>
+		<div id="cap-allocator-tabs-0" class="cap"><span>The other two tabs tidy up your</span></div>
+		<div id="cap-allocator-tabs-7" class="cap"><span>imports.</span></div>
+		<div id="cap-allocator-tabs-8" class="cap"><span>Fix Duplicates</span></div>
+		<div id="cap-allocator-tabs-10" class="cap"><span>catches activity</span></div>
+		<div id="cap-allocator-tabs-12" class="cap"><span>your bank exported twice,</span></div>
+		<div id="cap-allocator-tabs-16" class="cap"><span>and Replace Pending swaps a placeholder</span></div>
+		<div id="cap-allocator-tabs-22" class="cap"><span>for the real thing.</span></div>
+		<div id="cap-allocator-tabs-26" class="cap"><span>We’ll get to both.</span></div>
 		<div id="cap-allocator-pages-0" class="cap"><span>Two other pages help you look things</span></div>
 		<div id="cap-allocator-pages-7" class="cap"><span>up.</span></div>
 		<div id="cap-allocator-pages-8" class="cap"><span>Statements lists all your bank activity,</span></div>
-		<div id="cap-allocator-pages-14" class="cap"><span>explained</span></div>
-		<div id="cap-allocator-pages-15" class="cap"><span>or not.</span></div>
+		<div id="cap-allocator-pages-14" class="cap"><span>explained or not.</span></div>
 		<div id="cap-allocator-pages-17" class="cap"><span>Records lists your explanations.</span></div>
-		<div id="cap-allocator-pages-21" class="cap"><span>Allocator</span></div>
-		<div id="cap-allocator-pages-22" class="cap"><span>only shows what’s still waiting.</span></div>
+		<div id="cap-allocator-pages-21" class="cap"><span>Workflows only shows what still needs you.</span></div>
 	</div>
 	<script>
 		const tl = gsap.timeline({ paused: true })
-		const groups = [["cap-allocator-list-0",2.017,2.75],["cap-allocator-list-1",2.75,4.183],["cap-allocator-list-8",4.183,5.65],["cap-allocator-list-11",5.65,7.317],["cap-allocator-list-15",7.317,9.383],["cap-allocator-list-22",9.383,10.633],["cap-allocator-left-0",11.083,13.017],["cap-allocator-left-7",13.017,13.95],["cap-allocator-left-9",13.95,14.717],["cap-allocator-left-10",14.717,16.283],["cap-allocator-left-15",16.283,18.617],["cap-allocator-left-21",18.617,20.133],["cap-allocator-pages-0",20.583,22.417],["cap-allocator-pages-7",22.417,23.083],["cap-allocator-pages-8",23.083,25.55],["cap-allocator-pages-14",25.55,26.183],["cap-allocator-pages-15",26.183,27.05],["cap-allocator-pages-17",27.05,29.45],["cap-allocator-pages-21",29.45,30.283],["cap-allocator-pages-22",30.283,33.133]]
+		const groups = [["cap-allocator-list-0",1.75,3.417],["cap-allocator-list-7",3.417,4.583],["cap-allocator-list-9",4.583,6.283],["cap-allocator-list-13",6.283,7.117],["cap-allocator-list-15",7.117,7.95],["cap-allocator-list-17",7.95,8.583],["cap-allocator-list-18",8.583,10.717],["cap-allocator-list-25",10.717,11.967],["cap-allocator-left-0",12.417,14.45],["cap-allocator-left-7",14.45,15.483],["cap-allocator-left-9",15.483,17.25],["cap-allocator-left-15",17.25,19.583],["cap-allocator-left-21",19.583,21.1],["cap-allocator-tabs-0",21.55,23.517],["cap-allocator-tabs-7",23.517,24.517],["cap-allocator-tabs-8",24.517,25.483],["cap-allocator-tabs-10",25.483,26.65],["cap-allocator-tabs-12",26.65,28.217],["cap-allocator-tabs-16",28.217,30.583],["cap-allocator-tabs-22",30.583,31.883],["cap-allocator-tabs-26",31.883,33.3],["cap-allocator-pages-0",33.75,35.55],["cap-allocator-pages-7",35.55,36.217],["cap-allocator-pages-8",36.217,38.65],["cap-allocator-pages-14",38.65,40.117],["cap-allocator-pages-17",40.117,42.417],["cap-allocator-pages-21",42.417,46.1]]
 		for (const [id, start, end] of groups) {
 			tl.set("#" + id, { opacity: 1, visibility: "visible" }, start)
 			tl.set("#" + id, { opacity: 0, visibility: "hidden" }, end)
 		}
-		tl.set({}, {}, 33.433)
+		tl.set({}, {}, 46.4)
 		window.__timelines["captions"] = tl
 	</script>
 </template>

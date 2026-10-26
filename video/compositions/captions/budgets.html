@@ -16,11 +16,12 @@
 		<div id="cap-budgets-what-16" class="cap"><span>or a wedding.</span></div>
 		<div id="cap-budgets-create-0" class="cap"><span>Create one with a name,</span></div>
 		<div id="cap-budgets-create-5" class="cap"><span>an amount and its dates.</span></div>
-		<div id="cap-budgets-create-10" class="cap"><span>Leave Automatic</span></div>
-		<div id="cap-budgets-create-12" class="cap"><span>attach on, and Records dated inside the</span></div>
-		<div id="cap-budgets-create-19" class="cap"><span>period are attached for you:</span></div>
-		<div id="cap-budgets-create-24" class="cap"><span>the ones you already have,</span></div>
-		<div id="cap-budgets-create-29" class="cap"><span>and new ones as you add them.</span></div>
+		<div id="cap-budgets-attach-0" class="cap"><span>Automatic</span></div>
+		<div id="cap-budgets-attach-1" class="cap"><span>attach adds every Record dated inside the</span></div>
+		<div id="cap-budgets-attach-8" class="cap"><span>period, including income and transfers.</span></div>
+		<div id="cap-budgets-attach-13" class="cap"><span>To choose the Records yourself,</span></div>
+		<div id="cap-budgets-attach-18" class="cap"><span>turn it off, and attach them from</span></div>
+		<div id="cap-budgets-attach-25" class="cap"><span>the Budget’s page.</span></div>
 		<div id="cap-budgets-own-0" class="cap"><span>A Budget is its own small dashboard</span></div>
 		<div id="cap-budgets-own-7" class="cap"><span>for that period:</span></div>
 		<div id="cap-budgets-own-10" class="cap"><span>what you’ve spent, what’s left,</span></div>
@@ -31,12 +32,12 @@
 	</div>
 	<script>
 		const tl = gsap.timeline({ paused: true })
-		const groups = [["cap-budgets-what-0",2.517,4.317],["cap-budgets-what-7",4.317,5.283],["cap-budgets-what-11",5.283,6.85],["cap-budgets-what-16",6.85,8.233],["cap-budgets-create-0",8.683,10.317],["cap-budgets-create-5",10.317,12.217],["cap-budgets-create-10",12.217,13.283],["cap-budgets-create-12",13.283,15.55],["cap-budgets-create-19",15.55,17.817],["cap-budgets-create-24",17.817,19.45],["cap-budgets-create-29",19.45,21.367],["cap-budgets-own-0",21.817,23.75],["cap-budgets-own-7",23.75,25.283],["cap-budgets-own-10",25.283,26.85],["cap-budgets-own-15",26.85,28.217],["cap-budgets-own-18",28.217,29.117],["cap-budgets-own-20",29.117,30.35],["cap-budgets-own-24",30.35,32.567]]
+		const groups = [["cap-budgets-what-0",2.517,4.317],["cap-budgets-what-7",4.317,5.283],["cap-budgets-what-11",5.283,6.85],["cap-budgets-what-16",6.85,8.233],["cap-budgets-create-0",8.683,10.183],["cap-budgets-create-5",10.183,11.833],["cap-budgets-attach-0",12.283,13.083],["cap-budgets-attach-1",13.083,15.85],["cap-budgets-attach-8",15.85,18.817],["cap-budgets-attach-13",18.817,20.583],["cap-budgets-attach-18",20.583,22.383],["cap-budgets-attach-25",22.383,23.967],["cap-budgets-own-0",24.417,26.35],["cap-budgets-own-7",26.35,27.883],["cap-budgets-own-10",27.883,29.45],["cap-budgets-own-15",29.45,30.817],["cap-budgets-own-18",30.817,31.717],["cap-budgets-own-20",31.717,32.95],["cap-budgets-own-24",32.95,35.167]]
 		for (const [id, start, end] of groups) {
 			tl.set("#" + id, { opacity: 1, visibility: "visible" }, start)
 			tl.set("#" + id, { opacity: 0, visibility: "hidden" }, end)
 		}
-		tl.set({}, {}, 32.867)
+		tl.set({}, {}, 35.467)
 		window.__timelines["captions"] = tl
 	</script>
 </template>

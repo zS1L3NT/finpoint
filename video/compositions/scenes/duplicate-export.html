@@ -1,0 +1,43 @@
+<html data-composition-variables='[{"id":"cues","type":"string","label":"Cues","default":"{}"}]'>
+<template>
+	<style>
+		#root { position: absolute; inset: 0; background: #08080a; font-family: Inter, sans-serif; color: #fafafa; overflow: hidden; }
+		#de-kick { position: absolute; left: 160px; top: 130px; font: 600 26px/1 Inter, sans-serif; letter-spacing: 0.1em; text-transform: uppercase; color: #71717a; }
+		#de-title { position: absolute; left: 160px; top: 170px; font: 700 54px/1.1 Inter, sans-serif; letter-spacing: -0.02em; }
+		.dup { position: absolute; top: 310px; width: 640px; background: #141417; border: 1px solid rgb(255 255 255 / 0.09); border-left: 8px solid #4c9bff; border-radius: 18px; padding: 26px 30px; }
+		#de-d1 { left: 160px; } #de-d2 { left: 1120px; }
+		.dup .f { font: 600 24px/1 Inter, sans-serif; color: #71717a; }
+		.dup .t { font: 700 38px/1.15 Inter, sans-serif; margin-top: 12px; }
+		.dup .m { font: 500 24px/1.4 Inter, sans-serif; color: #a1a1aa; margin-top: 10px; font-feature-settings: "tnum"; }
+		.dup .a { font: 700 48px/1 Inter, sans-serif; font-feature-settings: "tnum"; margin-top: 12px; }
+		.hl { background: rgb(251 179 60 / 0.25); border-radius: 8px; padding: 2px 10px; }
+		#de-vs { position: absolute; left: 860px; top: 400px; width: 200px; text-align: center; font: 700 30px/1.4 Inter, sans-serif; color: #fbb33c; }
+		#de-flag { position: absolute; left: 660px; top: 590px; width: 600px; text-align: center; background: rgb(251 179 60 / 0.12); border: 1px solid #fbb33c; border-radius: 16px; padding: 20px 30px; font: 700 32px/1.35 Inter, sans-serif; }
+		#de-cap { position: absolute; left: 160px; top: 720px; width: 1600px; text-align: center; font: 500 32px/1.45 Inter, sans-serif; color: #a1a1aa; }
+		#de-cap b { color: #fafafa; }
+	</style>
+	<div id="root" data-composition-id="duplicate-export" data-width="1920" data-height="1080">
+		<div id="de-kick">Fixing duplicates</div>
+		<div id="de-title">The same payment, twice.</div>
+		<div class="dup" id="de-d1"><div class="f">Export one</div><div class="t"><span class="hl">GRAB*RIDE</span></div><div class="m">OCBC · 3 Oct</div><div class="a">−$18</div></div>
+		<div id="de-vs">same<br>day + amount</div>
+		<div class="dup" id="de-d2"><div class="f">Export two</div><div class="t"><span class="hl">GRAB RIDE SG</span></div><div class="m">OCBC · 3 Oct</div><div class="a">−$18</div></div>
+		<div id="de-flag">⚠ Possible duplicates — keep one</div>
+		<div id="de-cap">Your bank <b>changed the description</b> between exports.</div>
+	</div>
+	<script>
+		const vars = window.__hyperframes.getVariables(); const cues = JSON.parse(vars.cues || "{}");
+		const T = (n, fb) => cues[n] ?? fb;
+		const tl = gsap.timeline({ paused: true });
+		tl.fromTo("#de-kick", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T("chg", 0.3));
+		tl.fromTo("#de-title", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("chg", 0.3) + 0.15);
+		tl.fromTo("#de-d1", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("desc", 1.5));
+		tl.fromTo("#de-d2", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("exps", 3));
+		tl.fromTo("#de-vs", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power3.out" }, T("exps", 3) + 0.4);
+		tl.fromTo("#de-flag", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T("twice", 5));
+		tl.fromTo("#de-cap", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T("twice", 5) + 0.4);
+		tl.set({}, {}, T("twice", 5) + 2.0);
+		window.__timelines["duplicate-export"] = tl;
+	</script>
+</template>
+</html>

@@ -1,0 +1,51 @@
+<html data-composition-variables='[{"id":"cues","type":"string","label":"Cues","default":"{}"}]'>
+<template>
+	<style>
+		#root { position: absolute; inset: 0; background: #08080a; font-family: Inter, sans-serif; color: #fafafa; overflow: hidden; }
+		#tm-kick { position: absolute; left: 160px; top: 96px; font: 600 26px/1 Inter, sans-serif; letter-spacing: 0.1em; text-transform: uppercase; color: #71717a; }
+		#tm-title { position: absolute; left: 160px; top: 136px; font: 700 50px/1.1 Inter, sans-serif; letter-spacing: -0.02em; }
+		.lane { position: absolute; top: 240px; width: 312px; border-radius: 18px; padding: 22px 22px 26px; background: #101013; border: 1px solid rgb(255 255 255 / 0.1); }
+		#tm-l1 { left: 96px; border-top: 6px solid #4c9bff; } #tm-l2 { left: 432px; border-top: 6px solid #ff8a4c; }
+		#tm-l3 { left: 768px; border-top: 6px solid #c084fc; } #tm-l4 { left: 1104px; border-top: 6px solid #94a3b8; }
+		#tm-l5 { left: 1440px; border-top: 6px solid #71717a; }
+		.lane .h { font: 700 30px/1.15 Inter, sans-serif; }
+		.lane .s { font: 500 21px/1.4 Inter, sans-serif; color: #a1a1aa; margin-top: 8px; min-height: 88px; }
+		.pill { background: #1b1b1f; border: 1px solid rgb(255 255 255 / 0.12); border-radius: 14px; padding: 14px 16px; margin-top: 12px; font: 600 24px/1.3 Inter, sans-serif; }
+		.pill b { font-feature-settings: "tnum"; }
+		.pill .sub { font: 500 20px/1.3 Inter, sans-serif; color: #a1a1aa; }
+		#tm-cap { position: absolute; left: 160px; top: 760px; width: 1600px; text-align: center; font: 500 30px/1.45 Inter, sans-serif; color: #a1a1aa; }
+		#tm-cap b { color: #fafafa; }
+	</style>
+	<div id="root" data-composition-id="treatments" data-width="1920" data-height="1080">
+		<div id="tm-kick">Treatments</div>
+		<div id="tm-title">How the Dashboard counts a Record.</div>
+		<div class="lane" id="tm-l1"><div class="h" style="color:#4c9bff">Income</div><div class="s">money in that counts</div><div class="pill" id="tm-p1">Salary <b>+$3,000</b></div></div>
+		<div class="lane" id="tm-l2"><div class="h" style="color:#ff8a4c">Spending</div><div class="s">money out — refunds lower it</div><div class="pill" id="tm-p2">Lunch <b>−$12</b></div><div class="pill" id="tm-p3">Groceries <b>−$84</b></div><div class="pill" id="tm-p4">Refund <b>+$20</b><div class="sub">lowers spending</div></div></div>
+		<div class="lane" id="tm-l3"><div class="h" style="color:#c084fc">Saving / investment</div><div class="s">kept out, in its own section</div><div class="pill" id="tm-p5">Investment <b>−$500</b></div></div>
+		<div class="lane" id="tm-l4"><div class="h" style="color:#94a3b8">Transfer / excluded</div><div class="s">between tracked accounts — counted nowhere</div><div class="pill" id="tm-p6">OCBC → UOB <b>−$400</b></div></div>
+		<div class="lane" id="tm-l5"><div class="h" style="color:#71717a">Automatic</div><div class="s">by direction: in = income, out = spending</div><div class="pill" id="tm-p7">Money in → <b>income</b><br>Money out → <b>spending</b></div></div>
+		<div id="tm-cap">Salary in as <b>Income</b>. Lunch out as <b>Spending</b>. Between your own accounts: <b>nowhere</b>.</div>
+	</div>
+	<script>
+		const vars = window.__hyperframes.getVariables(); const cues = JSON.parse(vars.cues || "{}");
+		const T = (n, fb) => cues[n] ?? fb;
+		const tl = gsap.timeline({ paused: true });
+		tl.fromTo("#tm-kick", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T("treat", 0.3));
+		tl.fromTo("#tm-title", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("treat", 0.3) + 0.15);
+		tl.fromTo("#tm-l1", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("income", 1.5));
+		tl.fromTo("#tm-p1", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T("salary", 3));
+		tl.fromTo("#tm-l2", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("spend", 5));
+		tl.fromTo("#tm-p2", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T("lunch", 6.5));
+		tl.fromTo("#tm-p3", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T("lunch", 6.5) + 0.3);
+		tl.fromTo("#tm-p4", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T("refund", 8));
+		tl.fromTo("#tm-l3", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("inv", 10));
+		tl.fromTo("#tm-p5", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T("inv", 10) + 0.3);
+		tl.fromTo("#tm-l4", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("trans", 12));
+		tl.fromTo("#tm-p6", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T("trans", 12) + 0.3);
+		tl.fromTo("#tm-l5", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("trans", 12) + 0.6);
+		tl.fromTo("#tm-cap", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T("trans", 12) + 0.9);
+		tl.set({}, {}, T("trans", 12) + 2.4);
+		window.__timelines["treatments"] = tl;
+	</script>
+</template>
+</html>

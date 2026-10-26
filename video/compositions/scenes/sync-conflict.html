@@ -1,0 +1,49 @@
+<html data-composition-variables='[{"id":"cues","type":"string","label":"Cues","default":"{}"}]'>
+<template>
+	<style>
+		#root { position: absolute; inset: 0; background: #08080a; font-family: Inter, sans-serif; color: #fafafa; overflow: hidden; }
+		#sc-kick { position: absolute; left: 160px; top: 110px; font: 600 26px/1 Inter, sans-serif; letter-spacing: 0.1em; text-transform: uppercase; color: #a594ff; }
+		#sc-title { position: absolute; left: 160px; top: 150px; font: 700 52px/1.1 Inter, sans-serif; letter-spacing: -0.02em; }
+		.copy { position: absolute; top: 270px; width: 560px; background: #141417; border: 1px solid rgb(255 255 255 / 0.12); border-radius: 20px; padding: 28px 32px; text-align: center; }
+		#sc-a { left: 200px; } #sc-b { left: 1160px; }
+		.copy .d { font: 700 40px/1 Inter, sans-serif; }
+		.copy .t { font: 700 34px/1.2 Inter, sans-serif; margin-top: 12px; }
+		.copy .s { font: 500 24px/1.4 Inter, sans-serif; color: #a1a1aa; margin-top: 8px; font-feature-settings: "tnum"; }
+		.copy .verdict { display: inline-block; border-radius: 999px; padding: 10px 26px; font: 700 26px/1 Inter, sans-serif; margin-top: 16px; }
+		.keep { background: rgb(52 211 153 / 0.14); border: 1px solid #34d399; color: #34d399; }
+		.drop { background: rgb(255 255 255 / 0.05); border: 1px solid rgb(255 255 255 / 0.15); color: #71717a; }
+		#sc-whole { position: absolute; left: 460px; top: 590px; width: 1000px; text-align: center; font: 700 34px/1.4 Inter, sans-serif; }
+		#sc-whole b { color: #a594ff; }
+		.ctl { position: absolute; top: 680px; width: 400px; background: rgb(52 211 153 / 0.07); border: 1px solid rgb(52 211 153 / 0.4); border-radius: 16px; padding: 20px; text-align: center; font: 600 28px/1.3 Inter, sans-serif; }
+		#sc-c1 { left: 240px; } #sc-c2 { left: 760px; } #sc-c3 { left: 1280px; }
+		.ctl .s { font: 500 22px/1.3 Inter, sans-serif; color: #a1a1aa; }
+	</style>
+	<div id="root" data-composition-id="sync-conflict" data-width="1920" data-height="1080">
+		<div id="sc-kick">When copies disagree</div>
+		<div id="sc-title">Keep one whole copy — never a mix.</div>
+		<div class="copy" id="sc-a"><div class="d">📱 Phone</div><div class="t">Copy A</div><div class="s">42 Records · edited today</div><div class="verdict keep" id="sc-ka">✓ keep</div></div>
+		<div class="copy" id="sc-b"><div class="d">💻 Laptop</div><div class="t">Copy B</div><div class="s">41 Records · edited yesterday</div><div class="verdict drop" id="sc-kb">set aside</div></div>
+		<div id="sc-whole">One <b>whole</b> copy wins. Never a mix of both.</div>
+		<div class="ctl" id="sc-c1">🌐 This browser<div class="s">you control</div></div>
+		<div class="ctl" id="sc-c2">📁 Your file<div class="s">you control</div></div>
+		<div class="ctl" id="sc-c3">☁ Your Drive<div class="s">you control</div></div>
+	</div>
+	<script>
+		const vars = window.__hyperframes.getVariables(); const cues = JSON.parse(vars.cues || "{}");
+		const T = (n, fb) => cues[n] ?? fb;
+		const tl = gsap.timeline({ paused: true });
+		tl.fromTo("#sc-kick", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T("two", 0.3));
+		tl.fromTo("#sc-title", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("two", 0.3) + 0.15);
+		tl.fromTo("#sc-a", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("devices", 1.5));
+		tl.fromTo("#sc-b", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("devices", 1.5) + 0.3);
+		tl.fromTo("#sc-ka", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T("keep", 4));
+		tl.fromTo("#sc-kb", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T("keep", 4) + 0.2);
+		tl.fromTo("#sc-whole", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T("whole", 6));
+		tl.fromTo("#sc-c1", { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, T("ctrl", 9));
+		tl.fromTo("#sc-c2", { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, T("ctrl", 9) + 0.25);
+		tl.fromTo("#sc-c3", { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, T("ctrl", 9) + 0.5);
+		tl.set({}, {}, T("ctrl", 9) + 2.2);
+		window.__timelines["sync-conflict"] = tl;
+	</script>
+</template>
+</html>

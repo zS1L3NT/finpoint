@@ -1,0 +1,45 @@
+<html data-composition-variables='[{"id":"cues","type":"string","label":"Cues","default":"{}"}]'>
+<template>
+	<style>
+		#root { position: absolute; inset: 0; background: #08080a; font-family: Inter, sans-serif; color: #fafafa; overflow: hidden; }
+		#pr-kick { position: absolute; left: 160px; top: 120px; font: 600 26px/1 Inter, sans-serif; letter-spacing: 0.1em; text-transform: uppercase; color: #fbb33c; }
+		#pr-title { position: absolute; left: 160px; top: 160px; font: 700 54px/1.1 Inter, sans-serif; letter-spacing: -0.02em; }
+		.reason { position: absolute; top: 290px; width: 760px; background: #141417; border: 1px solid rgb(251 179 60 / 0.45); border-radius: 20px; padding: 30px 36px; }
+		#pr-r1 { left: 160px; } #pr-r2 { left: 1000px; }
+		.reason .n { display: inline-block; background: #fbb33c; color: #08080a; border-radius: 999px; font: 700 26px/1 Inter, sans-serif; padding: 8px 20px; }
+		.reason .t { font: 700 38px/1.2 Inter, sans-serif; margin-top: 16px; }
+		.reason .s { font: 500 26px/1.45 Inter, sans-serif; color: #a1a1aa; margin-top: 12px; font-feature-settings: "tnum"; }
+		.reason .s b { color: #fafafa; }
+		.badge { display: inline-block; background: rgb(251 179 60 / 0.16); border: 1px solid #fbb33c; color: #fbb33c; border-radius: 999px; padding: 10px 24px; font: 700 26px/1 Inter, sans-serif; margin-top: 16px; }
+		#pr-sum { position: absolute; left: 160px; top: 680px; width: 1600px; text-align: center; font: 500 34px/1.45 Inter, sans-serif; color: #a1a1aa; }
+		#pr-sum b { color: #fbb33c; }
+	</style>
+	<div id="root" data-composition-id="pending-reasons" data-width="1920" data-height="1080">
+		<div id="pr-kick">Why Pending?</div>
+		<div id="pr-title">Two reasons a Record is Pending.</div>
+		<div class="reason" id="pr-r1">
+			<div class="n">1</div><div class="t">Amounts don't tally yet</div>
+			<div class="s"><b>−$100</b> explained of <b>−$200</b> paid — like the concert</div>
+			<div class="badge">Pending · mismatch</div>
+		</div>
+		<div class="reason" id="pr-r2">
+			<div class="n">2</div><div class="t">A Statement still Pending</div>
+			<div class="s">the bank hasn't confirmed it yet</div>
+			<div class="badge">Pending · at the bank</div>
+		</div>
+		<div id="pr-sum">Either way, Pending means the Record <b>isn't fully confirmed yet</b>.</div>
+	</div>
+	<script>
+		const vars = window.__hyperframes.getVariables(); const cues = JSON.parse(vars.cues || "{}");
+		const T = (n, fb) => cues[n] ?? fb;
+		const tl = gsap.timeline({ paused: true });
+		tl.fromTo("#pr-kick", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T("two", 0.3));
+		tl.fromTo("#pr-title", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("two", 0.3) + 0.15);
+		tl.fromTo("#pr-r1", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("tally", 2));
+		tl.fromTo("#pr-r2", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("stmts", 5));
+		tl.fromTo("#pr-sum", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T("conf", 8));
+		tl.set({}, {}, T("conf", 8) + 2.0);
+		window.__timelines["pending-reasons"] = tl;
+	</script>
+</template>
+</html>

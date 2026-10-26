@@ -17,10 +17,10 @@ Follow Alex through a fictional month. Use this order:
 3. Open Finpoint, explain local storage, import a supported file, create Lunch, verify completion, download a backup.
 4. Split an $80 payment into $60 Groceries and $20 Shopping.
 5. Combine a $90 dinner payment and $60 repayment into a $30 personal-cost Record.
-6. Distinguish Income, Spending, Saving/investment, Transfer/neutral, and Automatic by direction.
+6. Distinguish Income, Spending, Saving / investment, Transfer / excluded, and Automatic by direction.
 7. Distinguish Pending Record from Pending Statement; replace a placeholder with imported activity while retaining its Allocations.
 8. Find/edit Records; use Statements, Accounts, Monthly Records, and filters.
-9. Explain Category versus treatment versus bucket; then monthly targets versus custom-period Budgets.
+9. Explain Category versus treatment versus Monthly Budget; then Monthly amounts versus custom-period Budgets.
 10. Read the Dashboard by question and scope; drill down to supporting Records.
 11. Back up, restore, optionally sync with Drive, understand conflicts, and finish with a repeatable routine.
 
@@ -35,18 +35,18 @@ Follow Alex through a fictional month. Use this order:
 - Income/spending analytics are based on Records. Importing Statements alone does not explain them.
 - Pending Records can already contribute to totals. Future-dated activity has separate actual/projection handling.
 - A positive Spending refund reduces spending. Automatic by direction would treat a positive amount as income.
-- Transfer/neutral does not contribute to income or spending.
-- Saving/investment contributions and withdrawals are separate; Net contributions = withdrawals − contributions. A negative value is not an investment loss.
-- Categories, treatments, buckets, monthly targets, and Budgets are different concepts.
-- Bucket defaults begin at the selected month; month-specific overrides take precedence. Targets do not hold or reserve cash.
+- Transfer / excluded does not contribute to income or spending.
+- Saving / investment contributions and withdrawals are separate; Net withdrawals = withdrawals − contributions. A negative value is not an investment loss.
+- Categories, treatments, Monthly Budgets, Monthly amounts, and Budgets are different concepts.
+- A month's Amount rule replaces its previous rule for that month only: Default looks back to the latest Override default in an earlier month, Override one month changes one month, and Override default applies from its month onward. Monthly amounts do not hold or reserve cash.
 - Budget membership is separate, and current Budget analytics use signed attached Record amounts rather than the Dashboard treatment rules. Demonstrate a manual Budget; Automatic attach defaults on and must be deliberately disabled for it.
 - Restoring a file or Drive copy replaces browser data. Conflict resolution chooses a whole copy, not a merge. Demo loading replaces current data too.
 
 ## Exact example totals
 
-The full plan supplies the fixture. Completed baseline: 11 imported Statements, 10 Records, 12 Allocations; no remaining placeholder or incomplete Allocations. Income $3,000; gross spending $147; refunds $20; net spending $127; surplus $2,873. Contributions $300; withdrawals $50; net contributions −$250. These are proposed fixture expectations, not a supplied or tested backup file.
+The full plan supplies the fixture. Completed baseline: 11 imported Statements, 10 Records, 12 Allocations; no remaining placeholder or incomplete Allocations. Income $3,000; gross spending $147; refunds $20; net spending $127; surplus $2,873. Contributions $300; withdrawals $50; net withdrawals −$250. These are proposed fixture expectations, not a supplied or tested backup file.
 
-Use a separate labelled dataset for rich historical charts. Reset optional holiday-bucket examples before returning to baseline totals.
+Use a separate labelled dataset for rich historical charts. Reset optional holiday Monthly Budget examples before returning to baseline totals.
 
 ## Creative freedom
 

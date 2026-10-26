@@ -1,0 +1,50 @@
+<html data-composition-variables='[{"id":"cues","type":"string","label":"Cues","default":"{}"}]'>
+<template>
+	<style>
+		#root { position: absolute; inset: 0; background: #08080a; font-family: Inter, sans-serif; color: #fafafa; overflow: hidden; }
+		#sd-kick { position: absolute; left: 160px; top: 140px; font: 600 26px/1 Inter, sans-serif; letter-spacing: 0.1em; text-transform: uppercase; color: #34d399; }
+		#sd-title { position: absolute; left: 160px; top: 180px; font: 700 58px/1.1 Inter, sans-serif; letter-spacing: -0.02em; }
+		#sd-stmt { position: absolute; left: 160px; top: 300px; width: 620px; background: #141417; border: 1px solid rgb(255 255 255 / 0.09); border-left: 8px solid #4c9bff; border-radius: 18px; padding: 26px 30px; }
+		#sd-stmt .t { font: 700 38px/1.1 Inter, sans-serif; } #sd-stmt .m { font: 500 24px/1 Inter, sans-serif; color: #a1a1aa; margin-top: 10px; }
+		#sd-stmt .a { font: 700 52px/1 Inter, sans-serif; font-feature-settings: "tnum"; margin-top: 14px; }
+		#sd-left { display: inline-block; margin-top: 16px; background: rgb(52 211 153 / 0.12); border-radius: 12px; padding: 10px 20px; font: 600 26px/1 Inter, sans-serif; color: #34d399; }
+		.srec { position: absolute; left: 1140px; width: 620px; background: #141417; border: 1px solid rgb(255 255 255 / 0.09); border-left: 8px solid #34d399; border-radius: 18px; padding: 24px 30px; display: flex; align-items: center; justify-content: space-between; }
+		#sd-r1 { top: 300px; } #sd-r2 { top: 480px; }
+		.srec .t { font: 700 36px/1.1 Inter, sans-serif; } .srec .a { font: 700 46px/1 Inter, sans-serif; color: #34d399; font-feature-settings: "tnum"; }
+		.slink { position: absolute; left: 810px; height: 6px; border-radius: 3px; background: #a594ff; width: 300px; transform-origin: 0 50%; }
+		#sd-l1 { top: 380px; } #sd-l2 { top: 560px; }
+		.samt { position: absolute; left: 900px; background: rgb(165 148 255 / 0.16); border: 1px solid #a594ff; border-radius: 999px; padding: 8px 20px; font: 700 28px/1 Inter, sans-serif; font-feature-settings: "tnum"; color: #d9d2ff; }
+		#sd-a1 { top: 350px; } #sd-a2 { top: 530px; }
+		#sd-done { position: absolute; left: 160px; top: 660px; width: 1600px; text-align: center; font: 600 34px/1.4 Inter, sans-serif; color: #a1a1aa; }
+		#sd-done b { color: #34d399; }
+	</style>
+	<div id="root" data-composition-id="split-done" data-width="1920" data-height="1080">
+		<div id="sd-kick">Fully explained</div>
+		<div id="sd-title">One Statement, two Records.</div>
+		<div id="sd-stmt"><div class="t">NTUC FAIRPRICE</div><div class="m">OCBC · 5 Oct</div><div class="a">−$80</div><div id="sd-left">$0 left to allocate ✓</div></div>
+		<div class="slink" id="sd-l1"></div><div class="samt" id="sd-a1">−$50</div>
+		<div class="slink" id="sd-l2"></div><div class="samt" id="sd-a2">−$30</div>
+		<div class="srec" id="sd-r1"><div class="t">Groceries</div><div class="a">−$50</div></div>
+		<div class="srec" id="sd-r2"><div class="t">Birthday gift</div><div class="a">−$30</div></div>
+		<div id="sd-done">$50 of groceries — and a <b>$30 gift</b>. Nothing left unexplained.</div>
+	</div>
+	<script>
+		const vars = window.__hyperframes.getVariables(); const cues = JSON.parse(vars.cues || "{}");
+		const T = (n, fb) => cues[n] ?? fb;
+		const tl = gsap.timeline({ paused: true });
+		tl.fromTo("#sd-kick", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T("stmt", 0.3));
+		tl.fromTo("#sd-title", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("stmt", 0.3) + 0.15);
+		tl.fromTo("#sd-stmt", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("stmt", 0.3) + 0.3);
+		tl.fromTo("#sd-r1", { opacity: 0, x: 30 }, { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" }, T("two", 2));
+		tl.fromTo("#sd-l1", { scaleX: 0, opacity: 0 }, { scaleX: 1, opacity: 1, duration: 0.55, ease: "power3.out" }, T("fifty", 3));
+		tl.fromTo("#sd-a1", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power3.out" }, T("fifty", 3) + 0.3);
+		tl.fromTo("#sd-r2", { opacity: 0, x: 30 }, { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" }, T("gift", 4.5));
+		tl.fromTo("#sd-l2", { scaleX: 0, opacity: 0 }, { scaleX: 1, opacity: 1, duration: 0.55, ease: "power3.out" }, T("gift", 4.5) + 0.2);
+		tl.fromTo("#sd-a2", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power3.out" }, T("gift", 4.5) + 0.45);
+		tl.fromTo("#sd-left", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power3.out" }, T("gift", 4.5) + 0.7);
+		tl.fromTo("#sd-done", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T("gift", 4.5) + 0.9);
+		tl.set({}, {}, T("gift", 4.5) + 2.4);
+		window.__timelines["split-done"] = tl;
+	</script>
+</template>
+</html>

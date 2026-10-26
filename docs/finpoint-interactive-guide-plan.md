@@ -18,7 +18,7 @@ These serve different moments. Put them behind one consistent Help entry so user
 
 A newcomer can import supported activity, explain a purchase with a Record and Allocation, understand why something remains Pending, and retain a backup. They can stop the tutorial without losing their place and find the relevant explanation later.
 
-They do not need to configure Categories, targets, Budgets, and Google Drive before using Finpoint. Starter Categories and buckets already exist and should support the first task.
+They do not need to configure Categories, Monthly amounts, Budgets, and Google Drive before using Finpoint. Starter Categories and Monthly Budgets already exist and should support the first task.
 
 ## 1. First visit: one useful choice
 
@@ -44,7 +44,7 @@ First-use detection must distinguish these states:
 | State | Appropriate behavior |
 |---|---|
 | Workspace still loading | Wait for readiness before deciding whether to show welcome; keep normal placeholders. |
-| Only seeded Categories/buckets exist | Offer the welcome card. Seeded defaults alone do not indicate an experienced user. |
+| Only seeded Categories/Monthly Budgets exist | Offer the welcome card. Seeded defaults alone do not indicate an experienced user. |
 | Imported Statements but no Records | Suggest explaining a Statement; do not send the user back through import. |
 | Existing or restored workspace | Offer Help unobtrusively; do not require a first-run tour. |
 | Lesson paused | Offer Resume from Help or the small setup card. |
@@ -110,9 +110,9 @@ After practice, offer a small checklist rather than a mandatory sequence of moda
 | Milestone | Action | What the guide checks |
 |---|---|---|
 | Bring in activity | Open Importer | An import succeeds and relevant Statements are available. An import with skipped duplicates may still be useful; inspect the outcome rather than demand a positive inserted count. |
-| Explain one purchase | Open Allocator | The user deliberately selects an eligible Statement and saves a valid complete Record. |
+| Explain one purchase | Open Workflows → Allocate to Records | The user deliberately selects an eligible Statement and saves a valid complete Record. |
 | Check the result | Open that Record or Monthly Records | The saved explanation and Allocations are visible. Merely opening a route is not proof that the user understands it. |
-| Understand backup | Open Sync | Show manual backup and optional Drive choices, with accurate status. |
+| Understand backup | Open Data | Show manual backup and optional Drive choices, with accurate status. |
 
 Progress labels should reflect available evidence: **Imported**, **Record complete**, **Reviewed**, **Backup download requested**, or **Drive up to date** as appropriate. A browser-triggered file download is not proof that a recoverable file reached a safe location; ask the user to check their downloads without claiming “Your data is safe.”
 
@@ -139,16 +139,16 @@ Provide help next to the confusing concept, using the user's current numbers whe
 | Record Pending badge | “Why Pending?” | Show Record amount, allocated sum, difference, and Pending Statement count. Explain missing Allocations, amount mismatch, or awaiting a real Statement, including for a zero-amount Record. Open its editor for review. |
 | Pending Statement badge | “What happens next?” | Explain imported replacement. Allocated Records stay Pending until the placeholder is replaced, even when their amounts tally. |
 | Allocation field | “What am I assigning?” | Show Statement amount, already allocated amount, and remaining capacity. Explain paid/received direction. |
-| Category/treatment/bucket fields | “How are these different?” | “Category: what it was for. Treatment: how it affects totals. Bucket: which spending group.” Show the dinner example. |
+| Category/treatment/Monthly Budget fields | “How are these different?” | “Category: what it was for. Treatment: how it affects totals. Monthly Budget: which spending group.” Show the dinner example. |
 | Treatment selector | “Help me choose” | Ask the user about purpose and show examples; never automatically relabel the Record. |
-| Bucket unavailable | “Why can't I choose a bucket?” | Explain whether the effective treatment is not spending-eligible or the chosen bucket is archived. |
-| Monthly target scope | “This month or onward?” | A small calendar example showing default timing and month-specific precedence. |
-| Import result | “What do these counts mean?” | Explain inserted, skipped unchanged, and ordering updates; link to Allocator. |
-| Empty Allocator | State-sensitive help | No imported activity → Import; filters hide activity → inspect filters; no remaining allocable amounts → this queue is clear, but Pending Records or pending replacements may still exist. |
+| Monthly Budget unavailable | “Why can't I choose a Monthly Budget?” | Explain whether the effective treatment is not spending-eligible or the chosen Monthly Budget is archived. |
+| Monthly amount rule | “This month or onward?” | A small calendar example showing Default, Override one month, and Override default with month-specific precedence. |
+| Import result | “What do these counts mean?” | Explain inserted, skipped unchanged, and ordering updates; link to Workflows → Allocate to Records. |
+| Empty Allocate to Records | State-sensitive help | No imported activity → Import; filters hide activity → inspect filters; no remaining allocable amounts → this queue is clear, but Pending Records or pending replacements may still exist. |
 | Empty Records | State-sensitive help | Explain whether activity is absent or filtered. Do not tell a user with imported Statements that they must import again. |
 | Dashboard pending amounts | “Are these included?” | Explain that applicable Pending Records already contribute to displayed totals. |
 | Dashboard scope | “What does Daily include?” | Identify the actual scope of that card; clarify it does not necessarily change other cards. |
-| Net contributions | “Why is this negative?” | Show withdrawals minus contributions. Clarify this is cash direction, not investment performance. |
+| Net withdrawals | “Why is this negative?” | Show withdrawals minus contributions. Clarify this is cash direction, not investment performance. |
 | Automatic attach on a Budget | “Which Records are included?” | Explain date-based membership and that it is not restricted to Spending treatment. Recommend checking the attached list. |
 | Sync conflict | “Which copy should I keep?” | Explain each direction and what it replaces. Offer local backup and review, not a preselected destructive choice. |
 
@@ -163,9 +163,9 @@ Proposed sidebar item: **Help & guides**. Also expose a small **Help** action in
 Organize by user intent:
 
 - **Get started:** how Finpoint works; first Record; supported imports; restore an existing backup.
-- **Explain activity:** split a purchase; combine Statements; repayments; refunds; transfers; saving/investment; the two Pending states.
+- **Explain activity:** split a purchase; combine Statements; repayments; refunds; transfers; Saving / investment; the two Pending states.
 - **Understand your totals:** income/spending; pending inclusion; actual versus future; chart scope; comparisons.
-- **Plan spending:** Category defaults; buckets and monthly targets; custom-period Budgets.
+- **Plan spending:** Category defaults; Monthly Budgets and Monthly amounts; custom-period Budgets.
 - **Find and fix:** missing activity; incomplete Allocations; wrong Category/treatment; replacement unavailable; surprising Budget total.
 - **Keep your data:** local storage; backup; restore; Drive; conflicts; demo/reset.
 
@@ -198,7 +198,7 @@ After the first lesson, show a few short, independent lessons. Do not put a “f
 | Understand Pending | Compare a missing Allocation with an allocated Pending Statement | User can identify which item needs what action | S10 |
 | Replace a placeholder | Imported −$25 replaces Pending −$25 | Same Record and Allocation; no duplicated expense | S10 |
 | Choose a treatment | Refund, transfer, salary, saving | Correct effects on income/spending/saving totals | S09 |
-| Set a monthly target | $600 onward; $700 one month | Prior and later months retain correct targets | S13 |
+| Set a Monthly amount | $600 as Override default; $700 Override one month | Prior and later months retain correct Monthly amounts | S13 |
 | Trace a surprising total | Drill from Dashboard to Records | Identify scope and the contributing Records | S15 |
 
 Allow **Show me an example**, **Try it myself**, and **Read the steps** where all three actually exist. Never ship disabled choices advertising unfinished lessons.
@@ -223,9 +223,9 @@ Do not autoplay the full video on first visit. For a user asking about Pending, 
 - Persistent Help & guides entry plus page-specific help links.
 - Welcome choices and a resumable first-use checklist.
 - One isolated lunch practice exercise, including the Pending mistake/recovery path.
-- Six strong help topics: core model, import, Pending Record, Pending Statement, Category/treatment/bucket, and backup/restore.
+- Six strong help topics: core model, import, Pending Record, Pending Statement, Category/treatment/Monthly Budget, and backup/restore.
 - Dynamic “Why Pending?” explanation from saved amounts.
-- Context-aware empty states on Records and Allocator.
+- Context-aware empty states on Records and Allocate to Records.
 
 If time is constrained, release the articles, contextual help, and checklist first, followed by the isolated lunch exercise. Do not substitute the destructive demo loader to rush practice into the first release.
 
@@ -234,7 +234,7 @@ If time is constrained, release the articles, contextual help, and checklist fir
 - Split, repayment, and replacement lessons.
 - Search aliases and focused troubleshooting guides.
 - Short video clips attached to matching topics when produced.
-- Treatment decision examples and bucket target explanations.
+- Treatment decision examples and Monthly Budget amount explanations.
 
 ### Later, only if justified
 

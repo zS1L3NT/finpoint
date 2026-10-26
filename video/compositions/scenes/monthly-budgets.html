@@ -1,0 +1,42 @@
+<html data-composition-variables='[{"id":"cues","type":"string","label":"Cues","default":"{}"}]'>
+<template>
+	<style>
+		#root { position: absolute; inset: 0; background: #08080a; font-family: Inter, sans-serif; color: #fafafa; overflow: hidden; }
+		#mb-kick { position: absolute; left: 160px; top: 100px; font: 600 26px/1 Inter, sans-serif; letter-spacing: 0.1em; text-transform: uppercase; color: #a594ff; }
+		#mb-title { position: absolute; left: 160px; top: 140px; font: 700 52px/1.1 Inter, sans-serif; letter-spacing: -0.02em; }
+		.brow { position: absolute; left: 160px; width: 1600px; display: flex; align-items: center; gap: 28px; }
+		#mb-b1 { top: 260px; } #mb-b2 { top: 400px; } #mb-b3 { top: 540px; } #mb-b4 { top: 680px; }
+		.bname { width: 300px; font: 700 38px/1.1 Inter, sans-serif; }
+		.bname .s { font: 500 22px/1.3 Inter, sans-serif; color: #a1a1aa; }
+		.mcell { width: 180px; background: rgb(165 148 255 / 0.08); border: 1px solid rgb(165 148 255 / 0.4); border-radius: 14px; padding: 14px 10px; text-align: center; font: 600 26px/1.2 Inter, sans-serif; }
+		.mcell .m { font: 500 20px/1 Inter, sans-serif; color: #a1a1aa; }
+		.mlab { position: absolute; top: 218px; width: 180px; text-align: center; font: 600 22px/1 Inter, sans-serif; color: #71717a; }
+		#mb-cap { position: absolute; left: 160px; top: 800px; width: 1600px; text-align: center; font: 500 30px/1.45 Inter, sans-serif; color: #a1a1aa; }
+		#mb-cap b { color: #fafafa; }
+	</style>
+	<div id="root" data-composition-id="monthly-budgets" data-width="1920" data-height="1080">
+		<div id="mb-kick">Monthly Budgets</div>
+		<div id="mb-title">A plan that repeats, month by month.</div>
+		<div class="mlab" style="left:488px">Jan</div><div class="mlab" style="left:696px">Feb</div><div class="mlab" style="left:904px">Mar</div>
+		<div class="brow" id="mb-b1"><div class="bname" style="color:#ff8a4c">Daily<div class="s">food &amp; transport</div></div><div class="mcell"><div class="m">Jan</div>$500</div><div class="mcell"><div class="m">Feb</div>$500</div><div class="mcell"><div class="m">Mar</div>$500</div><div style="font:500 24px/1.4 Inter;color:#a1a1aa">← Records join through their Category</div></div>
+		<div class="brow" id="mb-b2"><div class="bname">Recurring</div><div class="mcell"><div class="m">Jan</div>plan</div><div class="mcell"><div class="m">Feb</div>plan</div><div class="mcell"><div class="m">Mar</div>plan</div></div>
+		<div class="brow" id="mb-b3"><div class="bname">Irregular</div><div class="mcell"><div class="m">Jan</div>plan</div><div class="mcell"><div class="m">Feb</div>plan</div><div class="mcell"><div class="m">Mar</div>plan</div></div>
+		<div class="brow" id="mb-b4"><div class="bname">Travel</div><div class="mcell"><div class="m">Jan</div>plan</div><div class="mcell"><div class="m">Feb</div>plan</div><div class="mcell"><div class="m">Mar</div>plan</div></div>
+		<div id="mb-cap">Four Monthly Budgets — <b>Daily, Recurring, Irregular, Travel</b> — planning every month.</div>
+	</div>
+	<script>
+		const vars = window.__hyperframes.getVariables(); const cues = JSON.parse(vars.cues || "{}");
+		const T = (n, fb) => cues[n] ?? fb;
+		const tl = gsap.timeline({ paused: true });
+		tl.fromTo("#mb-kick", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T("mb", 0.3));
+		tl.fromTo("#mb-title", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("mb", 0.3) + 0.15);
+		tl.fromTo("#mb-b1", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("daily", 3));
+		tl.fromTo("#mb-b2", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("rec", 5));
+		tl.fromTo("#mb-b3", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("irr", 6));
+		tl.fromTo("#mb-b4", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("trav", 7));
+		tl.fromTo("#mb-cap", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T("month", 9));
+		tl.set({}, {}, T("month", 9) + 2.0);
+		window.__timelines["monthly-budgets"] = tl;
+	</script>
+</template>
+</html>

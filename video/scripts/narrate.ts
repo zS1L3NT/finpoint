@@ -152,7 +152,11 @@ const plan = guideChapters.flatMap((chapter, chapterIndex) =>
 )
 
 // Forget clips that are no longer part of the guide.
-for (const file of Object.keys(cache)) if (!plan.some(item => item.file === file)) delete cache[file]
+for (const file of Object.keys(cache))
+	if (!plan.some(item => item.file === file)) {
+		delete cache[file]
+		rmSync(resolve(audioDir, file), { force: true })
+	}
 
 // 2. Speak whatever changed.
 const stale = plan.filter(

@@ -12,11 +12,10 @@
 	<div id="root" data-composition-id="captions" data-width="1920" data-height="1080">
 		<div id="cap-dashboard-records-0" class="cap"><span>With a few Records saved,</span></div>
 		<div id="cap-dashboard-records-5" class="cap"><span>your Dashboard starts to fill in.</span></div>
-		<div id="cap-dashboard-records-11" class="cap"><span>Everything</span></div>
-		<div id="cap-dashboard-records-12" class="cap"><span>on it is calculated</span></div>
-		<div id="cap-dashboard-records-16" class="cap"><span>from Records, never directly from Statements.</span></div>
-		<div id="cap-dashboard-empty-0" class="cap"><span>That’s why importing alone leaves the Dashboard</span></div>
-		<div id="cap-dashboard-empty-7" class="cap"><span>empty.</span></div>
+		<div id="cap-dashboard-records-11" class="cap"><span>Every total on it is calculated</span></div>
+		<div id="cap-dashboard-records-17" class="cap"><span>from Records, never directly from Statements.</span></div>
+		<div id="cap-dashboard-empty-0" class="cap"><span>That’s why importing alone</span></div>
+		<div id="cap-dashboard-empty-4" class="cap"><span>doesn’t change your spending.</span></div>
 		<div id="cap-dashboard-empty-8" class="cap"><span>A Statement only counts once you’ve explained</span></div>
 		<div id="cap-dashboard-empty-15" class="cap"><span>it.</span></div>
 		<div id="cap-dashboard-real-0" class="cap"><span>And because it uses your explanations,</span></div>
@@ -24,19 +23,21 @@
 		<div id="cap-dashboard-real-13" class="cap"><span>$30</span></div>
 		<div id="cap-dashboard-real-14" class="cap"><span>on dinner, not $90,</span></div>
 		<div id="cap-dashboard-real-18" class="cap"><span>and groceries apart from the gift.</span></div>
-		<div id="cap-dashboard-categories-0" class="cap"><span>Your spending is broken down by Category,</span></div>
-		<div id="cap-dashboard-categories-7" class="cap"><span>so the Categories</span></div>
-		<div id="cap-dashboard-categories-10" class="cap"><span>you choose shape everything</span></div>
-		<div id="cap-dashboard-categories-14" class="cap"><span>you see here.</span></div>
+		<div id="cap-dashboard-categories-0" class="cap"><span>Categories</span></div>
+		<div id="cap-dashboard-categories-1" class="cap"><span>this month breaks your spending down by</span></div>
+		<div id="cap-dashboard-categories-8" class="cap"><span>Category,</span></div>
+		<div id="cap-dashboard-categories-9" class="cap"><span>so the Categories</span></div>
+		<div id="cap-dashboard-categories-12" class="cap"><span>you choose shape everything</span></div>
+		<div id="cap-dashboard-categories-16" class="cap"><span>you see here.</span></div>
 	</div>
 	<script>
 		const tl = gsap.timeline({ paused: true })
-		const groups = [["cap-dashboard-records-0",2.117,3.85],["cap-dashboard-records-5",3.85,5.983],["cap-dashboard-records-11",5.983,6.717],["cap-dashboard-records-12",6.717,7.95],["cap-dashboard-records-16",7.95,10.9],["cap-dashboard-empty-0",11.35,13.883],["cap-dashboard-empty-7",13.883,14.85],["cap-dashboard-empty-8",14.85,17.25],["cap-dashboard-empty-15",17.25,18.033],["cap-dashboard-real-0",18.483,21.017],["cap-dashboard-real-6",21.017,23.55],["cap-dashboard-real-13",23.55,24.283],["cap-dashboard-real-14",24.283,26.383],["cap-dashboard-real-18",26.383,28.7],["cap-dashboard-categories-0",29.15,31.417],["cap-dashboard-categories-7",31.417,32.45],["cap-dashboard-categories-10",32.45,34.017],["cap-dashboard-categories-14",34.017,36.067]]
+		const groups = [["cap-dashboard-records-0",2.117,3.883],["cap-dashboard-records-5",3.883,6.05],["cap-dashboard-records-11",6.05,8.217],["cap-dashboard-records-17",8.217,11.233],["cap-dashboard-empty-0",11.683,13.317],["cap-dashboard-empty-4",13.317,15.05],["cap-dashboard-empty-8",15.05,17.483],["cap-dashboard-empty-15",17.483,18.267],["cap-dashboard-real-0",18.717,21.25],["cap-dashboard-real-6",21.25,23.783],["cap-dashboard-real-13",23.783,24.517],["cap-dashboard-real-14",24.517,26.617],["cap-dashboard-real-18",26.617,28.933],["cap-dashboard-categories-0",29.383,30.083],["cap-dashboard-categories-1",30.083,31.517],["cap-dashboard-categories-8",31.517,32.417],["cap-dashboard-categories-9",32.417,33.517],["cap-dashboard-categories-12",33.517,35.117],["cap-dashboard-categories-16",35.117,37.2]]
 		for (const [id, start, end] of groups) {
 			tl.set("#" + id, { opacity: 1, visibility: "visible" }, start)
 			tl.set("#" + id, { opacity: 0, visibility: "hidden" }, end)
 		}
-		tl.set({}, {}, 36.367)
+		tl.set({}, {}, 37.5)
 		window.__timelines["captions"] = tl
 	</script>
 </template>

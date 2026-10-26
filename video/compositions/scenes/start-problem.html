@@ -1,0 +1,59 @@
+<html data-composition-variables='[{"id":"cues","type":"string","label":"Cues","default":"{}"}]'>
+<template>
+	<style>
+		#root { position: absolute; inset: 0; background: #08080a; font-family: Inter, sans-serif; color: #fafafa; overflow: hidden; }
+		#sp-kick { position: absolute; left: 160px; top: 128px; font: 600 26px/1 Inter, sans-serif; letter-spacing: 0.1em; text-transform: uppercase; color: #71717a; }
+		#sp-title { position: absolute; left: 160px; top: 168px; font: 700 54px/1.1 Inter, sans-serif; letter-spacing: -0.02em; }
+		.srow { position: absolute; left: 160px; width: 720px; background: #141417; border: 1px solid rgb(255 255 255 / 0.09); border-left: 8px solid #4c9bff; border-radius: 18px; padding: 22px 28px; display: flex; align-items: center; justify-content: space-between; }
+		.srow .t { font: 700 34px/1.1 Inter, sans-serif; }
+		.srow .m { font: 500 24px/1 Inter, sans-serif; color: #a1a1aa; margin-top: 10px; }
+		.srow .a { font: 700 44px/1 Inter, sans-serif; font-feature-settings: "tnum"; }
+		#sp-r1 { top: 268px; } #sp-r2 { top: 438px; } #sp-r3 { top: 608px; }
+		#sp-split { position: absolute; left: 1000px; top: 268px; width: 760px; background: rgb(52 211 153 / 0.07); border: 1px solid rgb(52 211 153 / 0.35); border-radius: 18px; padding: 26px 32px; }
+		#sp-split .h { font: 600 26px/1 Inter, sans-serif; color: #a1a1aa; }
+		#sp-split .big { font: 700 40px/1.2 Inter, sans-serif; margin-top: 8px; }
+		.gchip { display: inline-flex; align-items: center; gap: 12px; background: rgb(52 211 153 / 0.14); border: 1px solid rgb(52 211 153 / 0.5); color: #fafafa; border-radius: 999px; padding: 12px 24px; font: 700 30px/1 Inter, sans-serif; margin: 14px 14px 0 0; }
+		.gchip b { color: #34d399; font-feature-settings: "tnum"; }
+		#sp-dinner { position: absolute; left: 1000px; top: 608px; width: 760px; background: #141417; border: 1px solid rgb(255 255 255 / 0.09); border-radius: 18px; padding: 26px 32px; }
+		#sp-dinner .h { font: 600 26px/1 Inter, sans-serif; color: #a1a1aa; }
+		#sp-net { display: inline-block; margin-top: 12px; background: rgb(52 211 153 / 0.16); border: 1px solid #34d399; border-radius: 14px; padding: 14px 26px; font: 700 38px/1 Inter, sans-serif; }
+		#sp-net b { color: #34d399; font-feature-settings: "tnum"; }
+		.calc { font: 500 32px/1.5 Inter, sans-serif; color: #a1a1aa; font-feature-settings: "tnum"; }
+		.calc b { color: #fafafa; }
+	</style>
+	<div id="root" data-composition-id="start-problem" data-width="1920" data-height="1080">
+		<div id="sp-kick">Your bank shows payments</div>
+		<div id="sp-title">…not what they were for.</div>
+		<div class="srow" id="sp-r1"><div><div class="t">NTUC FAIRPRICE</div><div class="m">OCBC · 5 Oct</div></div><div class="a">−$80</div></div>
+		<div class="srow" id="sp-r2"><div><div class="t">SAKURA DINING</div><div class="m">OCBC · 10 Oct</div></div><div class="a">−$90</div></div>
+		<div class="srow" id="sp-r3"><div><div class="t">PAYNOW FROM SAM</div><div class="m">OCBC · 17 Oct</div></div><div class="a" style="color:#4c9bff">+$60</div></div>
+		<div id="sp-split">
+			<div class="h">One $80 payment, two meanings</div>
+			<div class="big">−$80 means…</div>
+			<div id="sp-groc"><span class="gchip">Groceries <b>−$50</b></span><span class="gchip" id="sp-gift">Birthday gift <b>−$30</b></span></div>
+		</div>
+		<div id="sp-dinner">
+			<div class="h">A week apart: money out, money in</div>
+			<div class="calc" style="margin-top:10px"><b>−$90</b> dinner &nbsp;+&nbsp; <b>+$60</b> back</div>
+			<div id="sp-net">your share <b>−$30</b></div>
+		</div>
+	</div>
+	<script>
+		const vars = window.__hyperframes.getVariables(); const cues = JSON.parse(vars.cues || "{}");
+		const T = (n, fb) => cues[n] ?? fb;
+		const tl = gsap.timeline({ paused: true });
+		tl.fromTo("#sp-kick", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T("feed", 0.3));
+		tl.fromTo("#sp-title", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("feed", 0.3) + 0.15);
+		tl.fromTo("#sp-r1", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("feed", 0.3) + 0.3);
+		tl.fromTo("#sp-r2", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("feed", 0.3) + 0.65);
+		tl.fromTo("#sp-r3", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("feed", 0.3) + 1.0);
+		tl.fromTo("#sp-split", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("spent", 6));
+		tl.fromTo("#sp-groc", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T("groceries", 8));
+		tl.fromTo("#sp-gift", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T("gift", 10));
+		tl.fromTo("#sp-dinner", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("dinner", 14));
+		tl.fromTo("#sp-net", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T("share", 18));
+		tl.set({}, {}, T("share", 18) + 1.6);
+		window.__timelines["start-problem"] = tl;
+	</script>
+</template>
+</html>

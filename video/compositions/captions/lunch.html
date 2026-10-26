@@ -12,34 +12,36 @@
 	<div id="root" data-composition-id="captions" data-width="1920" data-height="1080">
 		<div id="cap-lunch-select-0" class="cap"><span>Let’s explain a $12</span></div>
 		<div id="cap-lunch-select-4" class="cap"><span>lunch.</span></div>
-		<div id="cap-lunch-select-5" class="cap"><span>In Allocator,</span></div>
-		<div id="cap-lunch-select-7" class="cap"><span>click the lunch Statement to select it.</span></div>
-		<div id="cap-lunch-select-14" class="cap"><span>A bar appears with what you can</span></div>
-		<div id="cap-lunch-select-21" class="cap"><span>do next.</span></div>
+		<div id="cap-lunch-select-5" class="cap"><span>In Allocate</span></div>
+		<div id="cap-lunch-select-7" class="cap"><span>to Records, click the lunch Statement to</span></div>
+		<div id="cap-lunch-select-14" class="cap"><span>select it.</span></div>
+		<div id="cap-lunch-select-16" class="cap"><span>A bar appears with what you can</span></div>
+		<div id="cap-lunch-select-23" class="cap"><span>do next.</span></div>
 		<div id="cap-lunch-create-0" class="cap"><span>Choose Create Record.</span></div>
 		<div id="cap-lunch-create-3" class="cap"><span>A new Record opens with the Statement</span></div>
-		<div id="cap-lunch-create-10" class="cap"><span>already attached,</span></div>
-		<div id="cap-lunch-create-12" class="cap"><span>and its amount filled in.</span></div>
+		<div id="cap-lunch-create-10" class="cap"><span>already allocated,</span></div>
+		<div id="cap-lunch-create-12" class="cap"><span>and its amount and date filled in.</span></div>
 		<div id="cap-lunch-fill-0" class="cap"><span>Give it a title,</span></div>
 		<div id="cap-lunch-fill-4" class="cap"><span>like Lunch, and pick a Category,</span></div>
 		<div id="cap-lunch-fill-10" class="cap"><span>like Dining Out.</span></div>
-		<div id="cap-lunch-ignore-0" class="cap"><span>You’ll also see Treatment and Spending bucket.</span></div>
-		<div id="cap-lunch-ignore-7" class="cap"><span>Leave those alone for now:</span></div>
-		<div id="cap-lunch-ignore-12" class="cap"><span>your Category</span></div>
-		<div id="cap-lunch-ignore-14" class="cap"><span>fills them in, and we’ll come back</span></div>
-		<div id="cap-lunch-ignore-21" class="cap"><span>to them later.</span></div>
+		<div id="cap-lunch-ignore-0" class="cap"><span>Under Analytics</span></div>
+		<div id="cap-lunch-ignore-2" class="cap"><span>you’ll also see Treatment and Monthly Budget.</span></div>
+		<div id="cap-lunch-ignore-9" class="cap"><span>Leave those alone for now:</span></div>
+		<div id="cap-lunch-ignore-14" class="cap"><span>your Category</span></div>
+		<div id="cap-lunch-ignore-16" class="cap"><span>fills them in, and we’ll come back</span></div>
+		<div id="cap-lunch-ignore-23" class="cap"><span>to them later.</span></div>
 		<div id="cap-lunch-save-0" class="cap"><span>Choose Create Record to save.</span></div>
-		<div id="cap-lunch-save-5" class="cap"><span>The lunch Statement leaves Allocator,</span></div>
-		<div id="cap-lunch-save-10" class="cap"><span>because it’s fully explained.</span></div>
+		<div id="cap-lunch-save-5" class="cap"><span>The lunch Statement leaves the list,</span></div>
+		<div id="cap-lunch-save-11" class="cap"><span>because it’s fully explained.</span></div>
 	</div>
 	<script>
 		const tl = gsap.timeline({ paused: true })
-		const groups = [["cap-lunch-select-0",2.517,4.283],["cap-lunch-select-4",4.283,4.95],["cap-lunch-select-5",4.95,5.983],["cap-lunch-select-7",5.983,8.25],["cap-lunch-select-14",8.25,9.983],["cap-lunch-select-21",9.983,10.867],["cap-lunch-create-0",11.317,12.983],["cap-lunch-create-3",12.983,14.95],["cap-lunch-create-10",14.95,16.183],["cap-lunch-create-12",16.183,17.867],["cap-lunch-fill-0",18.317,19.317],["cap-lunch-fill-4",19.317,21.05],["cap-lunch-fill-10",21.05,22.4],["cap-lunch-ignore-0",22.85,25.783],["cap-lunch-ignore-7",25.783,27.583],["cap-lunch-ignore-12",27.583,28.45],["cap-lunch-ignore-14",28.45,30.017],["cap-lunch-ignore-21",30.017,31.333],["cap-lunch-save-0",31.783,33.95],["cap-lunch-save-5",33.95,35.917],["cap-lunch-save-10",35.917,38.767]]
+		const groups = [["cap-lunch-select-0",2.517,4.317],["cap-lunch-select-4",4.317,4.983],["cap-lunch-select-5",4.983,5.817],["cap-lunch-select-7",5.817,7.717],["cap-lunch-select-14",7.717,8.75],["cap-lunch-select-16",8.75,10.517],["cap-lunch-select-23",10.517,11.4],["cap-lunch-create-0",11.85,13.55],["cap-lunch-create-3",13.55,15.517],["cap-lunch-create-10",15.517,16.917],["cap-lunch-create-12",16.917,19.133],["cap-lunch-fill-0",19.583,20.583],["cap-lunch-fill-4",20.583,22.317],["cap-lunch-fill-10",22.317,23.667],["cap-lunch-ignore-0",24.117,25.383],["cap-lunch-ignore-2",25.383,28.283],["cap-lunch-ignore-9",28.283,30.117],["cap-lunch-ignore-14",30.117,30.983],["cap-lunch-ignore-16",30.983,32.583],["cap-lunch-ignore-23",32.583,33.9],["cap-lunch-save-0",34.35,36.483],["cap-lunch-save-5",36.483,38.25],["cap-lunch-save-11",38.25,41.2]]
 		for (const [id, start, end] of groups) {
 			tl.set("#" + id, { opacity: 1, visibility: "visible" }, start)
 			tl.set("#" + id, { opacity: 0, visibility: "hidden" }, end)
 		}
-		tl.set({}, {}, 39.067)
+		tl.set({}, {}, 41.5)
 		window.__timelines["captions"] = tl
 	</script>
 </template>

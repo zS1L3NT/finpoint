@@ -1,0 +1,61 @@
+<html data-composition-variables='[{"id":"cues","type":"string","label":"Cues","default":"{}"}]'>
+<template>
+	<style>
+		#root { position: absolute; inset: 0; background: #08080a; font-family: Inter, sans-serif; color: #fafafa; overflow: hidden; }
+		#ib-kick { position: absolute; left: 160px; top: 120px; font: 600 26px/1 Inter, sans-serif; letter-spacing: 0.1em; text-transform: uppercase; color: #71717a; }
+		#ib-title { position: absolute; left: 160px; top: 160px; font: 700 54px/1.1 Inter, sans-serif; letter-spacing: -0.02em; }
+		.node { position: absolute; top: 280px; width: 440px; background: #141417; border: 1px solid rgb(255 255 255 / 0.12); border-radius: 20px; padding: 28px 32px; text-align: center; }
+		#ib-bank { left: 160px; } #ib-file { left: 740px; } #ib-app { left: 1320px; border-color: #34d399; }
+		.node .ic { font: 700 44px/1 Inter, sans-serif; }
+		.node .t { font: 700 36px/1.15 Inter, sans-serif; margin-top: 14px; }
+		.node .s { font: 500 24px/1.3 Inter, sans-serif; color: #a1a1aa; margin-top: 10px; }
+		.farr { position: absolute; top: 372px; font: 700 54px/1 Inter, sans-serif; color: #4c9bff; }
+		#ib-a1 { left: 636px; } #ib-a2 { left: 1216px; }
+		.bank { position: absolute; top: 560px; width: 250px; background: #141417; border: 1px solid rgb(255 255 255 / 0.12); border-radius: 16px; padding: 18px 20px; text-align: center; }
+		#ib-b1 { left: 160px; } #ib-b2 { left: 500px; } #ib-b3 { left: 840px; } #ib-b4 { left: 1180px; }
+		.bank .t { font: 700 34px/1 Inter, sans-serif; } .bank .s { font: 600 22px/1 Inter, sans-serif; color: #a1a1aa; margin-top: 10px; }
+		.acct { position: absolute; top: 560px; width: 270px; background: rgb(76 155 255 / 0.07); border: 1px solid rgb(76 155 255 / 0.45); border-radius: 16px; padding: 18px 22px; }
+		#ib-ac1 { left: 1490px; } #ib-ac2 { left: 1490px; top: 706px; }
+		.acct .t { font: 700 30px/1.15 Inter, sans-serif; } .acct .s { font: 500 22px/1.3 Inter, sans-serif; color: #a1a1aa; margin-top: 8px; }
+		#ib-cap { position: absolute; left: 160px; top: 770px; font: 500 30px/1.4 Inter, sans-serif; color: #a1a1aa; }
+		#ib-cap b { color: #fafafa; }
+	</style>
+	<div id="root" data-composition-id="import-banks" data-width="1920" data-height="1080">
+		<div id="ib-kick">Importing your bank statements</div>
+		<div id="ib-title">From your bank, into Finpoint.</div>
+		<div class="node" id="ib-bank"><div class="ic">🏦</div><div class="t">Your bank</div><div class="s">DBS · OCBC · UOB · Revolut</div></div>
+		<div class="farr" id="ib-a1">→</div>
+		<div class="node" id="ib-file"><div class="ic">📄</div><div class="t">CSV / Excel</div><div class="s">downloaded export</div></div>
+		<div class="farr" id="ib-a2">→</div>
+		<div class="node" id="ib-app"><div class="ic">✓</div><div class="t">Finpoint</div><div class="s">Statements, per account</div></div>
+		<div class="bank" id="ib-b1"><div class="t">DBS</div><div class="s">CSV</div></div>
+		<div class="bank" id="ib-b2"><div class="t">OCBC</div><div class="s">CSV</div></div>
+		<div class="bank" id="ib-b3"><div class="t">UOB</div><div class="s">Excel</div></div>
+		<div class="bank" id="ib-b4"><div class="t">Revolut</div><div class="s">CSV / Excel</div></div>
+		<div class="acct" id="ib-ac1"><div class="t">OCBC 360 Account</div><div class="s">its own Statements</div></div>
+		<div class="acct" id="ib-ac2"><div class="t">UOB savings</div><div class="s">kept apart</div></div>
+		<div id="ib-cap">Each <b>Account</b> mirrors one of your bank accounts.</div>
+	</div>
+	<script>
+		const vars = window.__hyperframes.getVariables(); const cues = JSON.parse(vars.cues || "{}");
+		const T = (n, fb) => cues[n] ?? fb;
+		const tl = gsap.timeline({ paused: true });
+		tl.fromTo("#ib-kick", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T("bank", 0.3));
+		tl.fromTo("#ib-title", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("bank", 0.3) + 0.15);
+		tl.fromTo("#ib-bank", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("bank", 0.3) + 0.3);
+		tl.fromTo("#ib-a1", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power3.out" }, T("download", 2.5));
+		tl.fromTo("#ib-file", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("download", 2.5) + 0.15);
+		tl.fromTo("#ib-a2", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power3.out" }, T("bring", 4.5));
+		tl.fromTo("#ib-app", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("bring", 4.5) + 0.15);
+		tl.fromTo("#ib-b1", { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, T("dbs", 9));
+		tl.fromTo("#ib-b2", { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, T("ocbc", 10));
+		tl.fromTo("#ib-b3", { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, T("uob", 11));
+		tl.fromTo("#ib-b4", { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, T("rev", 12));
+		tl.fromTo("#ib-ac1", { opacity: 0, x: 30 }, { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" }, T("acct", 16));
+		tl.fromTo("#ib-ac2", { opacity: 0, x: 30 }, { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" }, T("apart", 20) - 0.4);
+		tl.fromTo("#ib-cap", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T("apart", 20));
+		tl.set({}, {}, T("apart", 20) + 1.8);
+		window.__timelines["import-banks"] = tl;
+	</script>
+</template>
+</html>

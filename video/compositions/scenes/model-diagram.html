@@ -1,0 +1,83 @@
+<html data-composition-variables='[{"id":"cues","type":"string","label":"Cues","default":"{}"}]'>
+<template>
+	<style>
+		#root { position: absolute; inset: 0; background: #08080a; font-family: Inter, sans-serif; color: #fafafa; overflow: hidden; }
+		#md-kick { position: absolute; left: 160px; top: 92px; font: 600 26px/1 Inter, sans-serif; letter-spacing: 0.1em; text-transform: uppercase; color: #71717a; }
+		.wchip { position: absolute; top: 132px; border-radius: 16px; padding: 18px 34px; font: 700 44px/1 Inter, sans-serif; letter-spacing: -0.01em; }
+		#md-ws { left: 160px; background: rgb(76 155 255 / 0.12); border: 1px solid #4c9bff; color: #4c9bff; }
+		#md-wr { left: 700px; background: rgb(52 211 153 / 0.12); border: 1px solid #34d399; color: #34d399; }
+		#md-wa { left: 1180px; background: rgb(165 148 255 / 0.12); border: 1px solid #a594ff; color: #a594ff; }
+		.card { position: absolute; background: #141417; border: 1px solid rgb(255 255 255 / 0.09); border-radius: 16px; padding: 18px 24px; }
+		.card .t { font: 700 30px/1.1 Inter, sans-serif; } .card .m { font: 500 22px/1 Inter, sans-serif; color: #a1a1aa; margin-top: 8px; }
+		.card .a { font: 700 36px/1 Inter, sans-serif; font-feature-settings: "tnum"; }
+		.scard { border-left: 8px solid #4c9bff; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+		.rcard { border-left: 8px solid #34d399; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+		#md-stmt { left: 160px; top: 268px; width: 560px; }
+		#md-rec1 { left: 1180px; top: 250px; width: 580px; }
+		#md-rec2 { left: 1180px; top: 410px; width: 580px; }
+		.link { position: absolute; height: 6px; border-radius: 3px; background: #a594ff; transform-origin: 0 50%; }
+		#md-l1 { left: 740px; top: 322px; width: 420px; }
+		#md-l2 { left: 740px; top: 474px; width: 420px; }
+		.amt { position: absolute; background: rgb(165 148 255 / 0.16); border: 1px solid #a594ff; color: #d9d2ff; border-radius: 999px; padding: 8px 20px; font: 700 28px/1 Inter, sans-serif; font-feature-settings: "tnum"; }
+		#md-a1 { left: 890px; top: 292px; } #md-a2 { left: 890px; top: 444px; }
+		.pat { position: absolute; font: 600 28px/1 Inter, sans-serif; color: #a594ff; background: rgb(165 148 255 / 0.1); border-radius: 12px; padding: 12px 22px; }
+		#md-pat { left: 160px; top: 470px; }
+		#md-c1 { left: 160px; top: 600px; width: 330px; } #md-c2 { left: 510px; top: 600px; width: 330px; }
+		#md-cd { left: 160px; top: 732px; width: 680px; border-left: 8px solid #34d399; display: flex; align-items: center; justify-content: space-between; }
+		#md-pat2 { left: 880px; top: 636px; }
+		#md-kopi { left: 1240px; top: 600px; width: 280px; } #md-lunch { left: 1560px; top: 732px; width: 280px; }
+		#md-pat3 { left: 1240px; top: 742px; }
+		.conn { position: absolute; font: 700 30px/1 Inter, sans-serif; color: #a594ff; }
+		#md-conn2 { left: 856px; top: 636px; } #md-conn3 { left: 1500px; top: 636px; }
+	</style>
+	<div id="root" data-composition-id="model-diagram" data-width="1920" data-height="1080">
+		<div id="md-kick">Three words</div>
+		<div class="wchip" id="md-ws">Statements</div>
+		<div class="wchip" id="md-wr">Records</div>
+		<div class="wchip" id="md-wa">Allocations</div>
+		<div class="card scard" id="md-stmt"><div><div class="t">NTUC FAIRPRICE</div><div class="m">OCBC · 5 Oct</div></div><div class="a">−$80</div></div>
+		<div class="link" id="md-l1"></div><div class="amt" id="md-a1">−$50</div>
+		<div class="link" id="md-l2"></div><div class="amt" id="md-a2">−$30</div>
+		<div class="card rcard" id="md-rec1"><div><div class="t">Groceries</div><div class="m">Record</div></div><div class="a">−$50</div></div>
+		<div class="card rcard" id="md-rec2"><div><div class="t">Birthday gift</div><div class="m">Record</div></div><div class="a">−$30</div></div>
+		<div class="pat" id="md-pat">one → many</div>
+		<div class="card scard" id="md-c1"><div><div class="t">SAKURA</div><div class="m">dinner −$90</div></div><div class="a">−$90</div></div>
+		<div class="card scard" id="md-c2"><div><div class="t">PAYNOW</div><div class="m">from Sam +$60</div></div><div class="a" style="color:#4c9bff">+$60</div></div>
+		<div class="conn" id="md-conn2">→</div>
+		<div class="card" id="md-cd"><div><div class="t">Dinner with Sam</div><div class="m">Record · your share</div></div><div class="a">−$30</div></div>
+		<div class="pat" id="md-pat2">many → one</div>
+		<div class="card scard" id="md-kopi"><div><div class="t">KOPI &amp; CO</div><div class="m">−$12</div></div><div class="a">−$12</div></div>
+		<div class="conn" id="md-conn3">→</div>
+		<div class="card rcard" id="md-lunch"><div><div class="t">Lunch</div><div class="m">Record</div></div><div class="a">−$12</div></div>
+		<div class="pat" id="md-pat3">one → one</div>
+	</div>
+	<script>
+		const vars = window.__hyperframes.getVariables(); const cues = JSON.parse(vars.cues || "{}");
+		const T = (n, fb) => cues[n] ?? fb;
+		const tl = gsap.timeline({ paused: true });
+		tl.fromTo("#md-kick", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T("three", 0.3));
+		tl.fromTo("#md-ws", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, T("wS", 1));
+		tl.fromTo("#md-wr", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, T("wR", 2));
+		tl.fromTo("#md-wa", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, T("wA", 3));
+		tl.fromTo("#md-stmt", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("stmt", 8));
+		tl.fromTo("#md-rec1", { opacity: 0, x: 30 }, { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" }, T("rec", 12));
+		tl.fromTo("#md-rec2", { opacity: 0, x: 30 }, { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" }, T("rec2", 14));
+		tl.fromTo("#md-l1", { scaleX: 0, opacity: 0 }, { scaleX: 1, opacity: 1, duration: 0.6, ease: "power3.out" }, T("alloc", 18));
+		tl.fromTo("#md-a1", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T("alloc", 18) + 0.3);
+		tl.fromTo("#md-l2", { scaleX: 0, opacity: 0 }, { scaleX: 1, opacity: 1, duration: 0.6, ease: "power3.out" }, T("alloc2", 20));
+		tl.fromTo("#md-a2", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T("alloc2", 20) + 0.3);
+		tl.fromTo("#md-pat", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T("pat", 24));
+		tl.fromTo("#md-c1", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("comb", 28));
+		tl.fromTo("#md-c2", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("comb", 28) + 0.35);
+		tl.fromTo("#md-conn2", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power3.out" }, T("dinner", 32) + 0.2);
+		tl.fromTo("#md-cd", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("dinner", 32));
+		tl.fromTo("#md-pat2", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T("share", 36));
+		tl.fromTo("#md-kopi", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("simp", 40) + 0.2);
+		tl.fromTo("#md-conn3", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power3.out" }, T("lunch", 42));
+		tl.fromTo("#md-lunch", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, T("lunch", 42) + 0.2);
+		tl.fromTo("#md-pat3", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T("lunch", 42) + 0.5);
+		tl.set({}, {}, T("lunch", 42) + 2.0);
+		window.__timelines["model-diagram"] = tl;
+	</script>
+</template>
+</html>
