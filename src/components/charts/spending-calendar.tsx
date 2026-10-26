@@ -8,16 +8,21 @@ import { cn, formatCurrency } from "@/lib/utils"
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 const STEPS = 5
 const LEVELS = Array.from({ length: STEPS + 1 }, (_, level) => level)
-// Ink per heat step: steps 3+ are dark fills in both themes; dark mode's
-// step 1 is a light fill, so it needs dark ink.
+// One green whose strength grows with spending: only the cell's fill fades, so the
+// day and amount stay fully opaque. Ink turns dark once the green is strong.
+const STRENGTH = [0, 0.2, 0.38, 0.56, 0.78, 1]
 const INK = [
 	"text-muted-foreground",
-	"text-foreground dark:text-zinc-950",
-	"text-foreground dark:text-white",
-	"text-white",
-	"text-white",
-	"text-white",
+	"text-foreground",
+	"text-foreground",
+	"text-foreground",
+	"text-zinc-950",
+	"text-zinc-950",
 ]
+const heat = (level: number) =>
+	level
+		? `color-mix(in oklab, var(--creative) ${(STRENGTH[level] ?? 1) * 100}%, transparent)`
+		: "var(--muted)"
 
 function compact(value: number) {
 	if (value >= 1000) return `$${(value / 1000).toFixed(1)}k`
@@ -120,12 +125,12 @@ export default function SpendingCalendar({
 							}}
 							onPointerLeave={() => setPreview(null)}
 							className={cn(
-								"group relative flex aspect-square min-h-9 cursor-pointer flex-col justify-between rounded-md p-1 text-left ring-offset-2 ring-offset-card transition-[background-color,box-shadow] duration-150 ease-out hover:ring-2 hover:ring-foreground/30 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-default disabled:opacity-40 disabled:hover:ring-0 sm:p-1.5",
+								"group relative flex aspect-square min-h-9 cursor-pointer flex-col justify-between rounded-md p-1 text-left ring-offset-2 ring-offset-card transition-[background-color,box-shadow] duration-150 ease-out motion-reduce:transition-none hover:ring-2 hover:ring-foreground/30 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-default disabled:opacity-40 disabled:hover:ring-0 sm:p-1.5",
 								key === selected && "ring-2 ring-foreground hover:ring-foreground",
 								INK[level],
 								future && "border border-dashed bg-transparent",
 							)}
-							style={future ? undefined : { backgroundColor: `var(--heat-${level})` }}
+							style={future ? undefined : { backgroundColor: heat(level) }}
 						>
 							<span className="text-[0.6875rem] leading-none font-medium tabular-nums opacity-80">
 								{index + 1}
@@ -167,7 +172,7 @@ export default function SpendingCalendar({
 						<span
 							key={level}
 							className="size-3 rounded-sm"
-							style={{ backgroundColor: `var(--heat-${level})` }}
+							style={{ backgroundColor: heat(level) }}
 						/>
 					))}
 					{max > 0 ? `${compact(cap)}${max > cap ? "+" : ""}` : "—"}

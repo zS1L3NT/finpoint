@@ -133,13 +133,6 @@
     --chart-6: #008300;
     --chart-7: #4a3aa7;
     --chart-8: #e34948;
-    /* Sequential one-hue ramp for magnitude (heatmaps), near-zero -> max. */
-    --heat-0: oklch(0.967 0.001 286.375);
-    --heat-1: #cde2fb;
-    --heat-2: #9ec5f4;
-    --heat-3: #5598e7;
-    --heat-4: #256abf;
-    --heat-5: #104281;
     --income: var(--chart-1);
     --spending: var(--chart-2);
     --radius:
@@ -218,12 +211,6 @@
     --chart-7: #9085e9;
     --chart-8: #e66767;
     /* Same direction as light mode: darker means more spending. */
-    --heat-0: oklch(0.274 0.006 286.033);
-    --heat-1: #86b6ef;
-    --heat-2: #3987e5;
-    --heat-3: #256abf;
-    --heat-4: #184f95;
-    --heat-5: #104281;
     --sidebar:
         oklch(0.21 0.006 285.885);
     --sidebar-foreground:
