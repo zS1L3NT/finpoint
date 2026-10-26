@@ -33,9 +33,9 @@ export function EmptyGuide({
 				{noImports
 					? "Import a supported bank CSV to bring in activity, or try a sample lesson first."
 					: queueClear
-						? "Fully allocated Statements leave Allocator. You can still find them in Statements. Review Pending Records separately."
+						? "Fully allocated Statements leave Allocate to Records. You can still find them in Statements. Review Pending Records separately."
 						: noRecords
-							? "Importing Statements does not create finished Records. Use Allocator to connect a bank amount to an explanation."
+							? "Importing Statements does not create finished Records. Use Workflows to allocate a bank amount to an explanation."
 							: "Search, dates, Account, amount, Category, or Pending filters can narrow a list to zero. Check them before assuming the data is missing."}
 			</p>
 			<div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">

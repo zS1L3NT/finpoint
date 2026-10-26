@@ -1,6 +1,7 @@
 import { useLiveQuery } from "dexie-react-hooks"
 import Link from "next/link"
 import { useState } from "react"
+import { ContextHelp } from "@/components/help/context-help"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
@@ -305,6 +306,7 @@ export default function DuplicateReviewDialog({
 							Delete {pluralize(displayInput?.delete_ids.length ?? 0, "Statement")}
 						</Button>
 					</DialogFooter>
+					<ContextHelp topic="duplicates" label="How this form works" variant="form" />
 				</DialogContent>
 			) : null}
 		</Dialog>

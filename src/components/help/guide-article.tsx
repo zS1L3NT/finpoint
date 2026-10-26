@@ -5,10 +5,19 @@ import Link from "next/link"
 import { GuideCheckActions } from "@/components/help/guide-check-actions"
 import GuideFigure from "@/components/help/guide-figure"
 import { Button } from "@/components/ui/button"
-import { type GuideBeat, type GuideChapter, practiceFor, stepOf } from "@/lib/guide"
+import {
+	type GuideBeat,
+	type GuideChapter,
+	type GuideDestination,
+	practiceFor,
+	stepOf,
+} from "@/lib/guide"
 import { cn } from "@/lib/utils"
 import {
+	pathAccounts,
 	pathAllocator,
+	pathAllocatorDuplicates,
+	pathAllocatorPending,
 	pathBudgets,
 	pathCategories,
 	pathDashboard,
@@ -17,18 +26,27 @@ import {
 	pathHelpPractice,
 	pathHelpVideo,
 	pathImporter,
+	pathMonthlyRecords,
 	pathRecords,
+	pathSettings,
+	pathStatementRules,
 	pathStatements,
 } from "@/routes"
 
-const destinations = {
+const destinations: Record<GuideDestination, { href: string; label: string }> = {
 	importer: { href: pathImporter(), label: "Open Importer" },
-	allocator: { href: pathAllocator(), label: "Open Allocator" },
+	allocator: { href: pathAllocator(), label: "Open Workflows" },
+	duplicates: { href: pathAllocatorDuplicates(), label: "Open Fix Duplicates" },
+	replace: { href: pathAllocatorPending(), label: "Open Replace Pending" },
 	records: { href: pathRecords(), label: "Open Records" },
+	monthly: { href: pathMonthlyRecords(), label: "Open Monthly Records" },
 	statements: { href: pathStatements(), label: "Open Statements" },
+	accounts: { href: pathAccounts(), label: "Open Accounts" },
 	categories: { href: pathCategories(), label: "Open Categories" },
+	rules: { href: pathStatementRules(), label: "Open Rules" },
 	budgets: { href: pathBudgets(), label: "Open Budgets" },
 	sync: { href: pathDataSettings(), label: "Open Data" },
+	settings: { href: pathSettings(), label: "Open Settings" },
 	dashboard: { href: pathDashboard(), label: "Open Dashboard" },
 }
 

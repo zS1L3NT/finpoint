@@ -650,7 +650,7 @@ export default function RecordEditorDialog({
 							Save changes
 						</Button>
 					</DialogFooter>
-					<ContextHelp topic="pending" label="How this form works" variant="form" />
+					<ContextHelp topic="find" label="How this form works" variant="form" />
 				</DialogContent>
 			)}
 		</Dialog>

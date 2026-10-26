@@ -58,10 +58,10 @@ export function PendingHelp({
 						? "This Record has no Allocations. Even a $0 Record needs at least one Allocation to be complete."
 						: round2(amount - allocated) !== 0
 							? "The saved Allocation total does not match the Record amount. Correct the Record or its Allocations according to what actually happened, then save again."
-							: "The amounts tally, but this Record uses a Pending Statement. It stays Pending until the real imported activity replaces the placeholder."}
+							: "The amounts tally, but this Record uses a Pending Statement. It stays Pending until that activity is confirmed, by replacing it with the confirmed imported Statement."}
 					{pendingCount > 0 &&
 						round2(amount - allocated) !== 0 &&
-						" It also uses a Pending Statement, which still needs replacement with the real imported activity."}
+						" It also uses a Pending Statement, which is not confirmed yet."}
 				</p>
 				<GuideArticle chapter={getGuideChapter("pending")} compact />
 			</DialogContent>
