@@ -23,7 +23,8 @@ export default function TotalSpendingChart({
 	const { handlePush } = useHistory()
 	// Last month only, as a faint dashed comparison line.
 	const previous = history.find(item => item.offset === 1)
-	const length = Math.max(data.length, previous?.surplus.length ?? 0)
+	// Last month's extra days are dropped: the chart has no dates past this month's end.
+	const length = data.length
 	const openDay = (index: number) => {
 		if (index >= data.length) return
 		const selected = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
