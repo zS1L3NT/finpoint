@@ -6455,7 +6455,7 @@
       "file_type": "code",
       "norm_label": "budgetprogresschart()",
       "source_file": "src/components/charts/budget-progress-chart.tsx",
-      "source_location": "L13"
+      "source_location": "L16"
     },
     {
       "id": "src_components_charts_budget_progress_chart_buildseries",
@@ -6467,7 +6467,7 @@
       "file_type": "code",
       "norm_label": "buildseries()",
       "source_file": "src/components/charts/budget-progress-chart.tsx",
-      "source_location": "L65"
+      "source_location": "L68"
     },
     {
       "id": "src_components_icon_icon",
@@ -30815,7 +30815,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/budget-progress-chart.tsx",
-      "source_location": "L26",
+      "source_location": "L29",
       "weight": 1.0
     },
     {
@@ -30827,7 +30827,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/budget-progress-chart.tsx",
-      "source_location": "L32",
+      "source_location": "L35",
       "weight": 1.0
     },
     {
@@ -30839,7 +30839,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/budget-progress-chart.tsx",
-      "source_location": "L75",
+      "source_location": "L78",
       "weight": 1.0
     },
     {
@@ -30851,7 +30851,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/budget-progress-chart.tsx",
-      "source_location": "L79",
+      "source_location": "L82",
       "weight": 1.0
     },
     {
@@ -96884,7 +96884,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/budget-progress-chart.tsx",
-      "source_location": "L13",
+      "source_location": "L16",
       "weight": 1.0
     },
     {
@@ -96895,7 +96895,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/budget-progress-chart.tsx",
-      "source_location": "L65",
+      "source_location": "L68",
       "weight": 1.0
     },
     {
@@ -112141,5 +112141,5 @@
       "source_file": "tests/README.md"
     }
   ],
-  "built_at_commit": "54ec6d7c6d62d2018be7a1b1ce0fb52cca7bda4d"
+  "built_at_commit": "e338426557c772949a2c46c1ae430fbcdd32ce84"
 }

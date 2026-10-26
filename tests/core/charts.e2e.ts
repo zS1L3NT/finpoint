@@ -199,6 +199,61 @@ test("dense overview: cards render values and fit, and a long Category name stay
 	})
 })
 
+test("touch charts: a hold reads and follows the finger, and lifting or cancelling clears it without navigating", async ({
+	page,
+	isMobile,
+	browserName,
+}) => {
+	// Raw touch input goes through the Chrome DevTools Protocol, so only Chromium phones run it.
+	test.skip(!isMobile || browserName !== "chromium", "needs Chromium touch input")
+	await seedWorkspace(page)
+	await page.goto(overview)
+	const chart = card(page, "Spending forecast")
+	const surface = chart.getByRole("application")
+	await surface.scrollIntoViewIfNeeded()
+	const box = await surface.boundingBox()
+	if (!box) throw new Error("Spending forecast surface missing")
+	const at = { x: box.x + box.width * 0.4, y: box.y + box.height / 2 }
+	const tooltip = chart.locator(chartTooltip)
+	const touch = await page.context().newCDPSession(page)
+	const send = (
+		type: "touchStart" | "touchMove" | "touchEnd" | "touchCancel",
+		points: { x: number; y: number }[],
+	) => touch.send("Input.dispatchTouchEvent", { type, touchPoints: points })
+	const url = page.url()
+	await test.step("touch chart: a quick tap neither reads nor opens Records", async () => {
+		await send("touchStart", [at])
+		await send("touchEnd", [])
+		await page.waitForTimeout(400)
+		await expect(tooltip).toHaveCount(0)
+		expect(page.url()).toBe(url)
+	})
+	await test.step("touch chart: a hold reads and the reading follows the finger", async () => {
+		await send("touchStart", [at])
+		// Past the 120ms hold.
+		await page.waitForTimeout(300)
+		await expect(tooltip).toBeVisible()
+		const first = await tooltip.textContent()
+		await send("touchMove", [{ x: at.x + box.width * 0.3, y: at.y }])
+		await expect(tooltip).not.toHaveText(first ?? "")
+	})
+	await test.step("touch chart: lifting the finger clears the reading and stays on the page", async () => {
+		await send("touchEnd", [])
+		await expect(tooltip).toHaveCount(0)
+		await page.waitForTimeout(400)
+		expect(page.url()).toBe(url)
+		await expect(tooltip).toHaveCount(0)
+	})
+	await test.step("touch chart: a cancelled hold clears the reading", async () => {
+		await send("touchStart", [at])
+		await page.waitForTimeout(300)
+		await expect(tooltip).toBeVisible()
+		await send("touchCancel", [])
+		await expect(tooltip).toHaveCount(0)
+		expect(page.url()).toBe(url)
+	})
+})
+
 test("populated charts: tooltips stay numeric, drills work by keyboard and a Record save updates the mover amount", {
 	tag: ["@tall", "@light"],
 }, async ({ page }) => {
@@ -611,11 +666,16 @@ test.describe("pinned overview date", () => {
 				await surface.focus()
 				const tooltip = chart.locator(chartTooltip)
 				if (title === "Category trend") {
-					for (let index = 0; index < 12; index++) {
-						await surface.press("ArrowRight")
-						await page.evaluate(() => new Promise(requestAnimationFrame))
-					}
-					// Category amounts live in the breakdown list under the bars.
+					// Reading a month swaps the breakdown list under the bars to that month.
+					await surface.press("Home")
+					await expect(tooltip).toBeVisible()
+					const first = (await tooltip.locator("span").first().textContent()) ?? ""
+					expect(first, "readout names the first month").toMatch(/^[A-Z][a-z]{2} \d{4}$/)
+					await expect(chart, "list follows the read month").not.toContainText(
+						"selected month",
+					)
+					await surface.press("End")
+					await expect(tooltip).toContainText("Total $")
 					await expect(chart).toContainText("selected month")
 					await expect(chart).toContainText("$100.00")
 					await expect(chart).toContainText("$117.53")

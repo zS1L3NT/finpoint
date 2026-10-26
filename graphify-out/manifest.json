@@ -204,9 +204,9 @@
     "semantic_hash": "29ed0ddc08c69f41a283990993ab57a1"
   },
   "src/components/charts/budget-progress-chart.tsx": {
-    "mtime": 1792955925.3105493,
-    "seen": 1792956738.293801,
-    "ast_hash": "3350ee881dfbf6f0d6c36ec66baf291b",
+    "mtime": 1793007479.8814814,
+    "seen": 1793010489.152004,
+    "ast_hash": "005b3f8528a96491ef8f5f7bbc932d7b",
     "semantic_hash": ""
   },
   "src/components/charts/cashflow-chart.tsx": {
@@ -216,8 +216,8 @@
     "semantic_hash": ""
   },
   "src/components/charts/category-history-chart.tsx": {
-    "mtime": 1792994260.5665565,
-    "seen": 1792994754.250278,
+    "mtime": 1793008808.2056231,
+    "seen": 1793010489.1520066,
     "ast_hash": "53c12bb3b58dab109721b2d748e32225",
     "semantic_hash": ""
   },
@@ -1284,15 +1284,15 @@
     "semantic_hash": "6a5979fb15cfd23d60809845df51a7f8"
   },
   "tests/component-inventory.ts": {
-    "mtime": 1792992268.506396,
-    "seen": 1792992563.3582442,
+    "mtime": 1793007666.625457,
+    "seen": 1793010489.1521814,
     "ast_hash": "6de075efc8319adf7e78006b823c6aad",
     "semantic_hash": ""
   },
   "tests/core/charts.e2e.ts": {
-    "mtime": 1792990917.1125731,
-    "seen": 1792992563.358245,
-    "ast_hash": "161cbc57f755dfb3091bcb3b1b097bb3",
+    "mtime": 1793008694.9695616,
+    "seen": 1793010489.1521828,
+    "ast_hash": "c1b94b0b3e1b783a8fb222b725a5e1a6",
     "semantic_hash": ""
   },
   "tests/core/components.e2e.ts": {
@@ -1542,8 +1542,8 @@
     "semantic_hash": ""
   },
   "src/components/charts/chart-frame.tsx": {
-    "mtime": 1792999230.7297626,
-    "seen": 1793001869.12482,
+    "mtime": 1793008899.7256732,
+    "seen": 1793010489.1520102,
     "ast_hash": "fbbffc4faab23d7b8bb3776c66729938",
     "semantic_hash": ""
   },
