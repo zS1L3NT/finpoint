@@ -2,7 +2,7 @@
 	"fps": 30,
 	"width": 1920,
 	"height": 1080,
-	"durationInFrames": 29925,
+	"durationInFrames": 30020,
 	"chapters": [
 		{
 			"id": "start",
@@ -503,7 +503,7 @@
 			"title": "Pending Statements",
 			"group": "Going further",
 			"startFrame": 15321,
-			"durationInFrames": 1667,
+			"durationInFrames": 1769,
 			"segments": [
 				{
 					"id": "why",
@@ -524,11 +524,11 @@
 				},
 				{
 					"id": "explain",
-					"text": "It appears in Workflows, marked Pending. Explain it like any other Statement. The Record counts straight away, but stays Pending while its Statement does.",
+					"text": "It appears in Workflows, marked Pending. Explain it like any other Statement: here, Burger with Mia, under Dining Out. Save, and the Record counts straight away, but stays Pending while its Statement does.",
 					"step": 2,
 					"steps": 4,
 					"from": 706,
-					"durationInFrames": 307,
+					"durationInFrames": 409,
 					"audio": "narration/pending-statements-explain.mp3"
 				},
 				{
@@ -536,7 +536,7 @@
 					"text": "When the confirmed Statement is imported, open Replace Pending. Pick the Pending Statement, and Finpoint suggests the imported Statements it could become.",
 					"step": 3,
 					"steps": 4,
-					"from": 1013,
+					"from": 1115,
 					"durationInFrames": 306,
 					"audio": "narration/pending-statements-replace.mp3"
 				},
@@ -545,7 +545,7 @@
 					"text": "Review the swap, and choose Replace pending Statement. The Allocations move to the confirmed Statement, the Pending one disappears, and nothing is counted twice.",
 					"step": 4,
 					"steps": 4,
-					"from": 1319,
+					"from": 1421,
 					"durationInFrames": 348,
 					"audio": "narration/pending-statements-review.mp3"
 				}
@@ -555,8 +555,8 @@
 			"id": "duplicates",
 			"title": "Fixing duplicate Statements",
 			"group": "Going further",
-			"startFrame": 16988,
-			"durationInFrames": 1196,
+			"startFrame": 17090,
+			"durationInFrames": 1189,
 			"segments": [
 				{
 					"id": "why",
@@ -575,11 +575,11 @@
 				},
 				{
 					"id": "choose",
-					"text": "Choose the Statement to keep, then Keep 1, delete 1. If they really are two payments, choose Not duplicates instead.",
+					"text": "If they really are two payments, choose Not duplicates. Otherwise, choose the Statement to keep, then Review deletion.",
 					"step": 1,
 					"steps": 2,
 					"from": 661,
-					"durationInFrames": 246,
+					"durationInFrames": 239,
 					"audio": "narration/duplicates-choose.mp3"
 				},
 				{
@@ -587,7 +587,7 @@
 					"text": "Finpoint shows what will happen before anything is deleted. Allocations follow the Statement you keep, so your Records stay explained.",
 					"step": 2,
 					"steps": 2,
-					"from": 907,
+					"from": 900,
 					"durationInFrames": 289,
 					"audio": "narration/duplicates-review.mp3"
 				}
@@ -597,7 +597,7 @@
 			"id": "find",
 			"title": "Finding and fixing Records",
 			"group": "Going further",
-			"startFrame": 18184,
+			"startFrame": 18279,
 			"durationInFrames": 961,
 			"segments": [
 				{
@@ -637,7 +637,7 @@
 			"id": "categories",
 			"title": "Categories",
 			"group": "Going further",
-			"startFrame": 19145,
+			"startFrame": 19240,
 			"durationInFrames": 1130,
 			"segments": [
 				{
@@ -668,7 +668,7 @@
 			"id": "rules",
 			"title": "Statement rules",
 			"group": "Going further",
-			"startFrame": 20275,
+			"startFrame": 20370,
 			"durationInFrames": 1157,
 			"segments": [
 				{
@@ -710,7 +710,7 @@
 			"id": "treatments",
 			"title": "Treatments",
 			"group": "Advanced",
-			"startFrame": 21432,
+			"startFrame": 21527,
 			"durationInFrames": 1435,
 			"segments": [
 				{
@@ -748,7 +748,7 @@
 			"id": "buckets",
 			"title": "Monthly Budgets",
 			"group": "Advanced",
-			"startFrame": 22867,
+			"startFrame": 22962,
 			"durationInFrames": 1449,
 			"segments": [
 				{
@@ -797,7 +797,7 @@
 			"id": "monthly",
 			"title": "Monthly Records",
 			"group": "Advanced",
-			"startFrame": 24316,
+			"startFrame": 24411,
 			"durationInFrames": 814,
 			"segments": [
 				{
@@ -828,7 +828,7 @@
 			"id": "insights",
 			"title": "Reading the Overview",
 			"group": "Advanced",
-			"startFrame": 25130,
+			"startFrame": 25225,
 			"durationInFrames": 1334,
 			"segments": [
 				{
@@ -873,7 +873,7 @@
 			"id": "budgets",
 			"title": "Budgets for trips and events",
 			"group": "Advanced",
-			"startFrame": 26464,
+			"startFrame": 26559,
 			"durationInFrames": 1064,
 			"segments": [
 				{
@@ -915,7 +915,7 @@
 			"id": "sync",
 			"title": "Backups and Google Drive",
 			"group": "Your data",
-			"startFrame": 27528,
+			"startFrame": 27623,
 			"durationInFrames": 1514,
 			"segments": [
 				{
@@ -960,7 +960,7 @@
 			"id": "routine",
 			"title": "Your routine",
 			"group": "Your data",
-			"startFrame": 29042,
+			"startFrame": 29137,
 			"durationInFrames": 883,
 			"segments": [
 				{

@@ -148,7 +148,7 @@ A Pending Statement is bank activity that isn’t confirmed yet. Some imports, l
 
 1. On the Statements page, choose Create Pending Statement. Pick the account, then enter the amount and a short description.
 
-2. It appears in Workflows, marked Pending. Explain it like any other Statement. The Record counts straight away, but stays Pending while its Statement does.
+2. It appears in Workflows, marked Pending. Explain it like any other Statement: here, Burger with Mia, under Dining Out. Save, and the Record counts straight away, but stays Pending while its Statement does.
 
 3. When the confirmed Statement is imported, open Replace Pending. Pick the Pending Statement, and Finpoint suggests the imported Statements it could become.
 
@@ -162,7 +162,7 @@ Sometimes a bank changes a payment’s description between exports. Import both 
 
 Finpoint spots Statements on the same account, day and amount, and marks them as possible duplicates. Open Fix Duplicates in Workflows to review them.
 
-1. Choose the Statement to keep, then Keep 1, delete 1. If they really are two payments, choose Not duplicates instead.
+1. If they really are two payments, choose Not duplicates. Otherwise, choose the Statement to keep, then Review deletion.
 
 2. Finpoint shows what will happen before anything is deleted. Allocations follow the Statement you keep, so your Records stay explained.
 

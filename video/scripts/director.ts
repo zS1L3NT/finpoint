@@ -104,10 +104,12 @@ export class Take {
 	 * follows lands on the word. Warns when the picture runs late. Takes that are only played
 	 * through to reach a later one don't wait at all.
 	 */
-	async at(beat: string, word?: string, { nth = 0, early = 0.25 } = {}) {
+	async at(beat: string, word?: string, { nth = 0, early = 0.4 } = {}) {
 		if (!this.recording) return
 		const target = this.cue(beat, word, nth) - early
 		const wait = target - this.now()
+		if (process.env.TAKE_LOG)
+			console.log(`    ${this.now().toFixed(1)}s → "${word ?? beat}" at ${target.toFixed(1)}s`)
 		if (wait > 0) await this.page.waitForTimeout(wait * 1000)
 		else if (wait < -0.4 && this.recording)
 			console.warn(`  ! ${this.name}: ${(-wait).toFixed(1)}s late for "${word ?? beat}"`)
@@ -209,13 +211,15 @@ export class Take {
 				return { x: r.left, y: r.top, w: r.width, h: r.height }
 			})
 		}
+		// The camera eases on its own while the hand carries on, as an editor's camera would.
 		await this.page.evaluate(
-			([box, zoom, ms]) =>
-				(window as unknown as { guideStage: { frameBox: (...a: unknown[]) => Promise<void> } }).guideStage.frameBox(
+			([box, zoom, ms]) => {
+				void (window as unknown as { guideStage: { frameBox: (...a: unknown[]) => Promise<void> } }).guideStage.frameBox(
 					box,
 					zoom,
 					ms,
-				),
+				)
+			},
 			[box, zoom, ms] as const,
 		)
 	}
@@ -255,7 +259,7 @@ async function nudge(page: Page) {
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2)
 
 /** Glides the pointer to `target` on an ease, like a person would, hovering along the way. */
-export async function glide(page: Page, target: Locator, { ms = 650, dx = 0.5, dy = 0.5 } = {}) {
+export async function glide(page: Page, target: Locator, { ms = 480, dx = 0.5, dy = 0.5 } = {}) {
 	await target.first().waitFor({ state: "visible" })
 	const box = await target.first().boundingBox()
 	if (!box) throw new Error("glide: target not visible")
@@ -275,16 +279,16 @@ export async function glide(page: Page, target: Locator, { ms = 650, dx = 0.5, d
 export async function press(page: Page, target: Locator, options?: { ms?: number; dx?: number; dy?: number }) {
 	await target.first().scrollIntoViewIfNeeded()
 	await glide(page, target, options)
-	await page.waitForTimeout(120)
+	await page.waitForTimeout(80)
 	await page.mouse.down()
-	await page.waitForTimeout(90)
+	await page.waitForTimeout(70)
 	await page.mouse.up()
-	await page.waitForTimeout(300)
+	await page.waitForTimeout(220)
 }
 
-export async function type(page: Page, text: string, delay = 75) {
+export async function type(page: Page, text: string, delay = 45) {
 	await page.keyboard.type(text, { delay })
-	await page.waitForTimeout(200)
+	await page.waitForTimeout(150)
 }
 
 /** Clears a field and types a new value into it, the way a person would. */

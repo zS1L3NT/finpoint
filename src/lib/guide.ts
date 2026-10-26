@@ -411,7 +411,7 @@ export const guideChapters: GuideChapter[] = [
 			{
 				id: "explain",
 				step: true,
-				say: "It appears in Workflows, marked Pending. Explain it like any other Statement. The Record counts straight away, but stays Pending while its Statement does.",
+				say: "It appears in Workflows, marked Pending. Explain it like any other Statement: here, Burger with Mia, under Dining Out. Save, and the Record counts straight away, but stays Pending while its Statement does.",
 			},
 			{
 				id: "replace",
@@ -444,7 +444,7 @@ export const guideChapters: GuideChapter[] = [
 			{
 				id: "choose",
 				step: true,
-				say: "Choose the Statement to keep, then Keep 1, delete 1. If they really are two payments, choose Not duplicates instead.",
+				say: "If they really are two payments, choose Not duplicates. Otherwise, choose the Statement to keep, then Review deletion.",
 			},
 			{
 				id: "review",

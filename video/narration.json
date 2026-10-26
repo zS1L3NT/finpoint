@@ -786,20 +786,24 @@
 		]
 	},
 	"pending-statements-explain.mp3": {
-		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"It appears in Workflows, marked Pending. Explain it like any other Statement. The Record counts straight away, but stays Pending while its Statement does.\",\"weights\":[11,12,19],\"pauseAfter\":0.7}],\"leadIn\":0.2}",
-		"duration": 10.201708333333332,
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"It appears in Workflows, marked Pending. Explain it like any other Statement: here, Burger with Mia, under Dining Out. Save, and the Record counts straight away, but stays Pending while its Statement does.\",\"weights\":[11,13,13,23],\"pauseAfter\":0.7}],\"leadIn\":0.2}",
+		"duration": 13.603333333333333,
 		"parts": [
 			{
 				"start": 0.2,
-				"end": 2.6100000000000003
+				"end": 2.56
 			},
 			{
 				"start": 3.16,
-				"end": 5.0200000000000005
+				"end": 4.87
 			},
 			{
-				"start": 5.57,
-				"end": 9.501708333333333
+				"start": 5.2,
+				"end": 7.71
+			},
+			{
+				"start": 8.309999999999999,
+				"end": 12.903333333333332
 			}
 		]
 	},
@@ -1290,16 +1294,16 @@
 		]
 	},
 	"duplicates-choose.mp3": {
-		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Choose the Statement to keep, then Keep 1, delete 1. If they really are two payments, choose Not duplicates instead.\",\"weights\":[17,19],\"pauseAfter\":0.7}],\"leadIn\":0.2}",
-		"duration": 8.183958333333333,
+		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"If they really are two payments, choose Not duplicates. Otherwise, choose the Statement to keep, then Review deletion.\",\"weights\":[17,20],\"pauseAfter\":0.7}],\"leadIn\":0.2}",
+		"duration": 7.944833333333333,
 		"parts": [
 			{
 				"start": 0.2,
-				"end": 3.4400000000000004
+				"end": 3.1700000000000004
 			},
 			{
-				"start": 3.98,
-				"end": 7.483958333333334
+				"start": 3.75,
+				"end": 7.244833333333333
 			}
 		]
 	},

@@ -5,7 +5,7 @@
 //   bun video/scripts/record.ts lunch split      only these takes (the story still plays through)
 //   bun video/scripts/record.ts --headed lunch   watch it happen, to author a take
 // Serves the build on port 5174 (FINPOINT_URL to use a running app); CHROMIUM picks a browser.
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { resolve } from "node:path"
 import { chromium } from "@playwright/test"
@@ -24,6 +24,7 @@ const unknown = only.filter(name => !story.some(take => take.name === name))
 if (unknown.length) throw new Error(`No take named ${unknown.join(", ")}`)
 
 const takes: Record<string, TakeInfo> = existsSync(takesFile) && only.length ? JSON.parse(readFileSync(takesFile, "utf8")) : {}
+const failures = resolve(tmpdir(), "finpoint-record-failures")
 const work = mkdtempSync(resolve(tmpdir(), "finpoint-record-"))
 const server = await serveApp()
 const browser = await chromium.launch({ executablePath: chromiumPath(chromium.executablePath()), headless: !headed })
@@ -74,8 +75,12 @@ try {
 			const info = await take.finish()
 			if (info) takes[script.name] = info
 		} catch (error) {
-			console.warn(`  ! ${script.name} failed: ${(error as Error).message.split("\n")[0]}`)
+			const message = (error as Error).message.split("\n").filter(Boolean)
+			console.warn(`  ! ${script.name} failed: ${message.slice(0, 3).join(" | ")}`)
 			await take.abort()
+			// What the stage showed when it failed, to fix the story without re-running it headed.
+			mkdirSync(failures, { recursive: true })
+			await page.screenshot({ path: resolve(failures, `${script.name}.png`) }).catch(() => {})
 			await page.keyboard.press("Escape").catch(() => {})
 		}
 	}
