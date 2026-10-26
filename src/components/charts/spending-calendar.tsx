@@ -124,7 +124,7 @@ export default function SpendingCalendar({
 							aria-pressed={key === selected}
 							onClick={() => setSelected(key)}
 							onPointerEnter={event => {
-								if (event.pointerType === "mouse") setPreview(key)
+								if (event.pointerType === "mouse" && !future) setPreview(key)
 							}}
 							onPointerLeave={() => setPreview(null)}
 							className={cn(
