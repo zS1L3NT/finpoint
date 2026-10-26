@@ -1548,9 +1548,9 @@
     "semantic_hash": ""
   },
   "src/lib/palette.ts": {
-    "mtime": 1792990025.5210435,
-    "seen": 1792992563.3582048,
-    "ast_hash": "1171ac1813669c9277e39cc768b70bcf",
+    "mtime": 1792996064.869633,
+    "seen": 1792996318.5866826,
+    "ast_hash": "3eb5f61d95aee39253e94ee379a8c8a6",
     "semantic_hash": ""
   }
 }

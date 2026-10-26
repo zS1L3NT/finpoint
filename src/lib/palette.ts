@@ -1,8 +1,8 @@
 import { argbFromHex, Hct, hexFromArgb } from "@material/material-color-utilities"
 
-// Tones (HCT lightness, 0 black to 100 white) every picked colour is moved to, so
-// white icons and text read on all of them: 5.4:1 in light mode, 3.2:1 in dark.
-const LIGHT_TONE = 45
+// Tones (HCT lightness, 0 black to 100 white) every picked colour is moved to: bright
+// enough to stay vivid, dark enough that white icons read (3.8:1 light, 3.2:1 dark).
+const LIGHT_TONE = 55
 const DARK_TONE = 60
 const HEX = /^#(?:[0-9a-f]{3}){1,2}$/i
 const cache = new Map<string, string>()
