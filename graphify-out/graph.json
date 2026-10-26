@@ -10019,7 +10019,7 @@
       "file_type": "code",
       "norm_label": "readoutrows()",
       "source_file": "src/components/charts/chart-frame.tsx",
-      "source_location": "L219"
+      "source_location": "L222"
     },
     {
       "id": "src_components_charts_trend_chart_path",
@@ -11831,7 +11831,7 @@
       "file_type": "code",
       "norm_label": "aggregateseries()",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L180"
+      "source_location": "L181"
     },
     {
       "id": "src_components_charts_category_history_chart_categoryhistorychart",
@@ -11855,7 +11855,7 @@
       "file_type": "code",
       "norm_label": "monthbreakdown()",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L261"
+      "source_location": "L262"
     },
     {
       "id": "src_components_charts_category_history_chart_monthtick",
@@ -11867,7 +11867,7 @@
       "file_type": "code",
       "norm_label": "monthtick()",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L230"
+      "source_location": "L231"
     },
     {
       "id": "src_components_charts_category_history_chart_monthtotal",
@@ -11879,7 +11879,7 @@
       "file_type": "code",
       "norm_label": "monthtotal()",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L256"
+      "source_location": "L257"
     },
     {
       "id": "src_components_charts_category_history_chart_preparemonths",
@@ -11891,7 +11891,7 @@
       "file_type": "code",
       "norm_label": "preparemonths()",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L214"
+      "source_location": "L215"
     },
     {
       "id": "src_components_charts_category_history_chart_prepareseries",
@@ -11903,7 +11903,7 @@
       "file_type": "code",
       "norm_label": "prepareseries()",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L191"
+      "source_location": "L192"
     },
     {
       "id": "src_components_charts_cashflow_chart_cashflowchart",
@@ -30911,7 +30911,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L101",
+      "source_location": "L102",
       "weight": 1.0
     },
     {
@@ -30923,7 +30923,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L110",
+      "source_location": "L111",
       "weight": 1.0
     },
     {
@@ -30935,7 +30935,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L110",
+      "source_location": "L111",
       "weight": 1.0
     },
     {
@@ -30947,7 +30947,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L137",
+      "source_location": "L138",
       "weight": 1.0
     },
     {
@@ -30959,7 +30959,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L53",
+      "source_location": "L54",
       "weight": 1.0
     },
     {
@@ -30971,7 +30971,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L54",
+      "source_location": "L55",
       "weight": 1.0
     },
     {
@@ -30983,7 +30983,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L55",
+      "source_location": "L56",
       "weight": 1.0
     },
     {
@@ -30995,7 +30995,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L63",
+      "source_location": "L64",
       "weight": 1.0
     },
     {
@@ -31007,7 +31007,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L72",
+      "source_location": "L73",
       "weight": 1.0
     },
     {
@@ -31019,7 +31019,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L73",
+      "source_location": "L74",
       "weight": 1.0
     },
     {
@@ -31031,7 +31031,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L74",
+      "source_location": "L75",
       "weight": 1.0
     },
     {
@@ -31043,7 +31043,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L78",
+      "source_location": "L79",
       "weight": 1.0
     },
     {
@@ -31055,7 +31055,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L85",
+      "source_location": "L86",
       "weight": 1.0
     },
     {
@@ -31067,7 +31067,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L88",
+      "source_location": "L89",
       "weight": 1.0
     },
     {
@@ -31079,7 +31079,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L270",
+      "source_location": "L271",
       "weight": 1.0
     },
     {
@@ -31091,7 +31091,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L271",
+      "source_location": "L272",
       "weight": 1.0
     },
     {
@@ -31103,7 +31103,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L285",
+      "source_location": "L286",
       "weight": 1.0
     },
     {
@@ -31115,7 +31115,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L326",
+      "source_location": "L327",
       "weight": 1.0
     },
     {
@@ -31223,7 +31223,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/chart-frame.tsx",
-      "source_location": "L114",
+      "source_location": "L115",
       "weight": 1.0
     },
     {
@@ -31403,7 +31403,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/spending-calendar.tsx",
-      "source_location": "L112",
+      "source_location": "L115",
       "weight": 1.0
     },
     {
@@ -31415,7 +31415,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/spending-calendar.tsx",
-      "source_location": "L127",
+      "source_location": "L130",
       "weight": 1.0
     },
     {
@@ -31427,7 +31427,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/spending-calendar.tsx",
-      "source_location": "L133",
+      "source_location": "L136",
       "weight": 1.0
     },
     {
@@ -31439,7 +31439,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/spending-calendar.tsx",
-      "source_location": "L140",
+      "source_location": "L143",
       "weight": 1.0
     },
     {
@@ -31451,7 +31451,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/spending-calendar.tsx",
-      "source_location": "L159",
+      "source_location": "L162",
       "weight": 1.0
     },
     {
@@ -96972,7 +96972,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L180",
+      "source_location": "L181",
       "weight": 1.0
     },
     {
@@ -96983,7 +96983,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L191",
+      "source_location": "L192",
       "weight": 1.0
     },
     {
@@ -96994,7 +96994,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L214",
+      "source_location": "L215",
       "weight": 1.0
     },
     {
@@ -97016,7 +97016,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L230",
+      "source_location": "L231",
       "weight": 1.0
     },
     {
@@ -97027,7 +97027,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L256",
+      "source_location": "L257",
       "weight": 1.0
     },
     {
@@ -97038,7 +97038,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L261",
+      "source_location": "L262",
       "weight": 1.0
     },
     {
@@ -97093,7 +97093,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/chart-frame.tsx",
-      "source_location": "L219",
+      "source_location": "L222",
       "weight": 1.0
     },
     {
@@ -112141,5 +112141,5 @@
       "source_file": "tests/README.md"
     }
   ],
-  "built_at_commit": "de08eca007e54e2b6f8fc810cb9cfb03cc4384ef"
+  "built_at_commit": "b7308931754a64281dd300b5b7cb1d5b7774a270"
 }

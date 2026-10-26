@@ -34,7 +34,8 @@ export default function CategoryHistoryChart({
 	badge: React.ReactNode
 }) {
 	// The breakdown keeps the last month read, so its links stay reachable after the pointer leaves.
-	const [picked, setPicked] = useState<number | null>(null)
+	// Kept by month, not position: the months shift when the displayed month changes.
+	const [picked, setPicked] = useState<string | null>(null)
 	const scopedMonths = months.map(month => ({
 		...month,
 		categories: month.categories
@@ -64,7 +65,7 @@ export default function CategoryHistoryChart({
 	)
 	const unavailable = chartData.filter(month => !month.included)
 	const selected = chartData.find(month => month.current)
-	const shown = (picked === null ? undefined : chartData[picked]) ?? selected
+	const shown = chartData.find(month => month.month === picked) ?? selected
 	const selectedEmpty =
 		selected && Object.values(selected.seriesValues).every(value => value === 0)
 
@@ -114,7 +115,7 @@ export default function CategoryHistoryChart({
 								)
 							}}
 							onActive={index => {
-								if (index !== null) setPicked(index)
+								if (index !== null) setPicked(chartData[index]?.month ?? null)
 							}}
 							introKey={months.find(month => month.current)?.month}
 						/>

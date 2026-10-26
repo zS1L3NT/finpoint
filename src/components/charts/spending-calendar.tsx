@@ -84,7 +84,10 @@ export default function SpendingCalendar({
 	// Tapping a day reads it in the strip below; a mouse previews by hovering.
 	const [selected, setSelected] = useState<string | null>(null)
 	const [preview, setPreview] = useState<string | null>(null)
-	const shown = preview ?? selected
+	// The calendar stays mounted across months, so a day kept from another month is ignored.
+	const inMonth = (key: string | null) =>
+		key?.startsWith(start.toFormat("yyyy-MM-")) ? key : null
+	const shown = inMonth(preview) ?? inMonth(selected)
 	const shownEntry = shown ? byDate.get(shown) : undefined
 	const spendDays = daily.filter(day => day.spending > 0).length
 	const total = daily.reduce((sum, day) => sum + Math.max(day.spending, 0), 0)

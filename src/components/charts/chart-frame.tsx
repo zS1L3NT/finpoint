@@ -53,6 +53,7 @@ export default function ChartFrame({
 		timer: number
 		reading: boolean
 	} | null>(null)
+	const pointerType = useRef<string | null>(null)
 	const reduceMotion = useReducedMotion()
 	const [size, setSize] = useState<ChartSize>({ width: 0, height: 0 })
 	const [active, setActive] = useState<number | null>(null)
@@ -125,6 +126,7 @@ export default function ChartFrame({
 						onSelect && "cursor-pointer",
 					)}
 					onPointerDown={event => {
+						pointerType.current = event.pointerType
 						// The first finger owns the reading; later fingers are ignored.
 						if (event.pointerType === "mouse" || press.current) return
 						const index = pointed(event)
@@ -153,10 +155,11 @@ export default function ChartFrame({
 						release()
 						setActive(null)
 					}}
-					// Click fires for the primary button only, pressed and released on the chart.
+					// Only a mouse selects, judged at pointerdown because iOS Safari's click can
+					// misreport its pointer type; touch and pen holds only read. Click fires for
+					// the primary button only, pressed and released on the chart.
 					onClick={event => {
-						if ((event.nativeEvent as PointerEvent).pointerType !== "touch")
-							onSelect?.(pointed(event))
+						if (pointerType.current === "mouse") onSelect?.(pointed(event))
 					}}
 					onPointerLeave={event => {
 						if (event.pointerType === "mouse") setActive(null)
