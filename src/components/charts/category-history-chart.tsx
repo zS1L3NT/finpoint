@@ -276,7 +276,12 @@ function MonthBreakdown({
 	const share = (value: number) => (total ? `${((value / total) * 100).toFixed(1)}%` : "0%")
 
 	return (
-		<div className="grid gap-1 text-xs" aria-live="polite">
+		<div
+			role="group"
+			aria-label={`Categories in ${month.month}`}
+			className="grid gap-1 text-xs"
+			aria-live="polite"
+		>
 			<p className="flex justify-between gap-4 pb-1 font-medium">
 				<span>
 					{month.month}

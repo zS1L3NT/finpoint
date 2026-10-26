@@ -31103,7 +31103,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L286",
+      "source_location": "L291",
       "weight": 1.0
     },
     {
@@ -31115,7 +31115,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L327",
+      "source_location": "L332",
       "weight": 1.0
     },
     {
@@ -112141,5 +112141,5 @@
       "source_file": "tests/README.md"
     }
   ],
-  "built_at_commit": "e338426557c772949a2c46c1ae430fbcdd32ce84"
+  "built_at_commit": "e245ddbb0cb1bd6339ff2b74ff45b124570a7bc8"
 }

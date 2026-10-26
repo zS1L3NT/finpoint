@@ -667,18 +667,19 @@ test.describe("pinned overview date", () => {
 				const tooltip = chart.locator(chartTooltip)
 				if (title === "Category trend") {
 					// Reading a month swaps the breakdown list under the bars to that month.
+					const breakdown = chart.getByRole("group", { name: /^Categories in / })
 					await surface.press("Home")
 					await expect(tooltip).toBeVisible()
 					const first = (await tooltip.locator("span").first().textContent()) ?? ""
 					expect(first, "readout names the first month").toMatch(/^[A-Z][a-z]{2} \d{4}$/)
-					await expect(chart, "list follows the read month").not.toContainText(
-						"selected month",
+					await expect(breakdown, "list follows the read month").toHaveAccessibleName(
+						`Categories in ${first}`,
 					)
 					await surface.press("End")
 					await expect(tooltip).toContainText("Total $")
-					await expect(chart).toContainText("selected month")
-					await expect(chart).toContainText("$100.00")
-					await expect(chart).toContainText("$117.53")
+					await expect(breakdown).toContainText("selected month")
+					await expect(breakdown).toContainText("$100.00")
+					await expect(breakdown).toContainText("$117.53")
 				} else if (title === "Spending by weekday") {
 					await expect(tooltip).toContainText("Average per Monday")
 					await expect(tooltip).toContainText("$92.10")
