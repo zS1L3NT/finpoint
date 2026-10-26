@@ -1,0 +1,41 @@
+#root { position: absolute; inset: 0; overflow: hidden; background: var(--night); color: var(--ink); font-family: Inter, sans-serif; font-feature-settings: "tnum"; }
+* { box-sizing: border-box; margin: 0; }
+.fp-heading { position: absolute; left: 192px; top: 112px; right: 192px; }
+.fp-kicker { color: var(--dim); font-size: 28px; font-weight: 600; margin-bottom: 18px; }
+.fp-heading h1 { font-size: 64px; line-height: 1.1; letter-spacing: -0.025em; }
+.fp-stage { position: absolute; inset: 0; }
+.fp-card { position: absolute; width: 560px; min-height: 184px; padding: 28px 32px; border: 2px solid color-mix(in srgb, var(--tone) 50%, var(--raised)); border-radius: 24px; background: linear-gradient(145deg, color-mix(in srgb, var(--tone) 9%, var(--raised)), var(--raised)); box-shadow: 0 16px 36px #0004, inset 0 1px 0 #ffffff12; }
+.fp-card[data-kind="statement"] { --tone: var(--statement); }
+.fp-card[data-kind="record"] { --tone: var(--record); }
+.fp-card[data-kind="budget"] { --tone: var(--allocation); }
+.fp-card-label { display: flex; gap: 12px; align-items: center; color: var(--tone); font-size: 28px; line-height: 1.2; margin-bottom: 12px; }
+.fp-icon { width: 30px; height: 30px; flex: none; stroke: currentColor; stroke-width: 1.8; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.fp-card-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 20px; align-items: center; margin-top: 12px; }
+.fp-card-title { font-size: 44px; line-height: 1.15; white-space: normal; overflow-wrap: anywhere; font-weight: 650; text-wrap: balance; }
+.fp-card-meta { font-size: 28px; line-height: 1.25; color: var(--dim); }
+.fp-amount { display: inline-block; flex: none; white-space: nowrap; font-size: 48px; font-weight: 700; letter-spacing: -0.025em; font-variant-numeric: tabular-nums; }
+.fp-chip { padding: 10px 20px; border: 2px solid var(--tone, var(--allocation)); border-radius: 100px; background: var(--raised); color: var(--ink); font-size: 36px; }
+.fp-badge { display: inline-flex; align-items: center; gap: 12px; padding: 10px 20px; border: 1px solid currentColor; border-radius: 100px; color: var(--tone, var(--pending)); background: var(--raised); font-size: 28px; font-weight: 600; white-space: nowrap; }
+.fp-card .fp-badge { margin-top: 18px; }
+.fp-flow { position: absolute; inset: 0; pointer-events: none; --tone: var(--allocation); }
+.fp-flow svg { position: absolute; inset: 0; width: 1920px; height: 1080px; overflow: visible; }
+.fp-path { fill: none; stroke: var(--tone); stroke-width: 5px; stroke-linecap: round; }
+.fp-port { fill: var(--night); stroke: var(--tone); stroke-width: 3px; }
+.fp-arrow { fill: none; stroke: var(--tone); stroke-width: 4px; stroke-linecap: round; stroke-linejoin: round; }
+.fp-packet { position: absolute; left: 0; top: 0; }
+.fp-flow-label { position: absolute; color: var(--tone); font-size: 28px; font-weight: 600; }
+.fp-callout { position: absolute; left: 192px; top: 800px; width: 1536px; padding: 22px 28px; border-left: 4px solid var(--tone, var(--allocation)); background: var(--raised); color: var(--ink); font-size: 36px; line-height: 1.3; }
+.fp-meter { height: 20px; background: #ffffff12; border-radius: 8px; overflow: hidden; }
+.fp-meter-fill { height: 100%; background: var(--tone, var(--record)); transform-origin: left center; }
+.fp-dashboard { position: absolute; padding: 36px; width: 560px; border: 2px solid var(--line); border-radius: 28px; background: var(--raised); --tone: var(--spending); }
+.fp-dashboard h2 { font-size: 32px; color: var(--spending); font-weight: 600; }
+.fp-dashboard .fp-value { display: block; margin: 18px 0 24px; font-size: 100px; line-height: 1; font-weight: 700; letter-spacing: -0.04em; }
+.fp-dashboard p { font-size: 28px; line-height: 1.4; color: var(--dim); }
+.fp-steps { position: absolute; left: 192px; top: 282px; display: flex; gap: 44px; }
+.fp-step { display: flex; align-items: center; gap: 14px; color: var(--dim); font-size: 28px; }
+.fp-step b { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 50%; border: 2px solid currentColor; font-size: 28px; }
+.fp-reason { position: absolute; top: 300px; width: 720px; }
+.fp-reason h2 { font-size: 38px; line-height: 1.2; margin-bottom: 30px; }
+.fp-reason .fp-card { position: relative; width: 100%; }
+.fp-comparison { display: flex; justify-content: space-between; margin: 24px 0 16px; font-size: 30px; color: var(--dim); }
+.fp-comparison b { color: var(--ink); }

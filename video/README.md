@@ -35,6 +35,8 @@ Only the named takes are recorded; earlier takes still play through, without wai
 
 Scenes follow the HyperFrames contract (read `.agents/skills/hyperframes/SKILL.md`). A scene declares a `cues` variable, reads it with `window.__hyperframes.getVariables()` (per-mount values don't reach `data-var-text`), and places each reveal at its cue. Its file name, root `data-composition-id` and timeline key match. Check with `npx hyperframes lint`, `check --json` and `snapshot` from this folder.
 
+The visual system, component APIs and remaining scene treatments are in [VISUALS.md](VISUALS.md). The three proof scenes (`model-diagram`, `pending-reasons`, `dashboard-source`) are authored in `scripts/visual-scenes.ts` with components from `compositions/components/`; run `bun video/scripts/visual-scenes.ts` from the repository root to regenerate their HTML. `bun video/scripts/visual-proof.ts` prepares isolated check/snapshot projects with the composed narration cues. See [REVIEW.md](REVIEW.md) for the verified frames and known limits.
+
 ## Narration setup
 
 One-time setup into `video/.kokoro` (ignored by Git):
