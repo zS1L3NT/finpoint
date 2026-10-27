@@ -10,18 +10,14 @@ import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { getVideoChapter } from "@/lib/guide-video"
+import { lookFor } from "@/lib/guide-theme"
+import { clock, getVideoChapter } from "@/lib/guide-video"
 import timeline from "@/lib/guide-video-timeline.json"
 import { cn } from "@/lib/utils"
 import { getLearning } from "@/logic/learning"
 import { pathHelp, pathHelpVideo } from "@/routes"
 
 const VideoPlayer = dynamic(() => import("@/components/help/guide-video-player"), { ssr: false })
-
-function clock(frame: number) {
-	const seconds = Math.floor(frame / timeline.fps)
-	return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`
-}
 
 export default function GuideVideoPage() {
 	const params = useSearchParams()
@@ -31,6 +27,7 @@ export default function GuideVideoPage() {
 	const [activeId, setActiveId] = useState(requested?.id ?? "start")
 	const active = getVideoChapter(activeId)
 	const activeNumber = timeline.chapters.indexOf(active) + 1
+	const look = lookFor(active.group)
 	const startFrame =
 		requested?.startFrame ?? Math.min(learning?.videoFrame ?? 0, timeline.durationInFrames - 1)
 	return (
@@ -50,7 +47,11 @@ export default function GuideVideoPage() {
 			/>
 			<div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
 				<div className="flex min-w-0 flex-col gap-6">
-					<div className="aspect-video w-full overflow-hidden rounded-xl border bg-black">
+					{/* The frame takes the playing chapter's level colour, so the film's chapters read as levels. */}
+					<div
+						className="aspect-video w-full overflow-hidden rounded-xl border border-(--level)/60 bg-black ring-4 ring-(--level)/15 transition-[border-color,box-shadow] duration-300 ease-out"
+						style={look.style}
+					>
 						{learning && (
 							<VideoPlayer
 								seekVersion={seekVersion}
@@ -60,9 +61,12 @@ export default function GuideVideoPage() {
 							/>
 						)}
 					</div>
-					<Card className="gap-0 py-0">
-						<CardHeader className="flex flex-row items-start justify-between gap-3 border-b py-4">
-							<div className="grid min-w-0 gap-1">
+					<Card className="gap-0 py-0" style={look.style}>
+						<CardHeader className="flex flex-row items-start gap-3 border-b py-4">
+							<span className="grid size-9 shrink-0 place-items-center rounded-lg bg-(--level) text-white transition-colors duration-300 ease-out">
+								<IconifyIcon icon={look.icon} className="size-4" />
+							</span>
+							<div className="grid min-w-0 flex-1 gap-1">
 								<CardTitle>{active.title}</CardTitle>
 								<CardDescription>
 									Chapter {activeNumber} · {active.group} · starts at{" "}
@@ -80,7 +84,7 @@ export default function GuideVideoPage() {
 								{active.segments.map(segment => (
 									<li key={segment.audio} className="flex gap-3">
 										{segment.step ? (
-											<span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full border text-xs font-medium tabular-nums">
+											<span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-(--level)/15 text-xs font-semibold text-(--level) tabular-nums">
 												{segment.step}
 											</span>
 										) : null}
@@ -115,42 +119,76 @@ export default function GuideVideoPage() {
 							{timeline.chapters.length} chapters · {clock(timeline.durationInFrames)}
 						</CardDescription>
 					</CardHeader>
-					<nav aria-label="Video chapters">
-						<ol>
-							{timeline.chapters.map((chapter, index) => {
-								const current = chapter.id === activeId
-								return (
-									<li key={chapter.id} className="border-b last:border-b-0">
-										<Link
-											href={pathHelpVideo(chapter.id)}
-											onClick={() =>
-												chapter.id === requested?.id &&
-												setSeekVersion(value => value + 1)
-											}
-											scroll={false}
-											aria-current={current ? "true" : undefined}
-											className={cn(
-												"flex items-start gap-3 px-4 py-2.5 text-sm transition-colors duration-150 hover:bg-muted/50",
-												current && "bg-muted font-medium",
-											)}
-										>
-											<span className="w-5 shrink-0 text-xs leading-5 text-muted-foreground tabular-nums">
-												{String(index + 1).padStart(2, "0")}
-											</span>
-											<span className="grid min-w-0 flex-1 gap-0.5">
-												<span>{chapter.title}</span>
-												<span className="text-xs font-normal text-muted-foreground">
-													{chapter.group}
-												</span>
-											</span>
-											<span className="shrink-0 text-xs leading-5 text-muted-foreground tabular-nums">
-												{clock(chapter.durationInFrames)}
-											</span>
-										</Link>
-									</li>
+					<nav
+						aria-label="Video chapters"
+						className="[&>div:last-child_li:last-child]:border-b-0"
+					>
+						{[...new Set(timeline.chapters.map(chapter => chapter.group))].map(
+							group => {
+								const chapters = timeline.chapters.filter(
+									item => item.group === group,
 								)
-							})}
-						</ol>
+								const level = lookFor(group)
+								return (
+									<div key={group} style={level.style}>
+										<p className="flex items-center gap-2 border-b bg-muted/40 px-4 py-2 text-xs font-medium">
+											<span className="grid size-5 shrink-0 place-items-center rounded-md bg-(--level) text-white">
+												<IconifyIcon icon={level.icon} className="size-3" />
+											</span>
+											{group}
+											<span className="ml-auto font-normal text-muted-foreground tabular-nums">
+												{clock(
+													chapters.reduce(
+														(total, item) =>
+															total + item.durationInFrames,
+														0,
+													),
+												)}
+											</span>
+										</p>
+										<ol>
+											{chapters.map(chapter => {
+												const current = chapter.id === activeId
+												return (
+													<li key={chapter.id} className="border-b">
+														<Link
+															href={pathHelpVideo(chapter.id)}
+															onClick={() =>
+																chapter.id === requested?.id &&
+																setSeekVersion(value => value + 1)
+															}
+															scroll={false}
+															aria-current={
+																current ? "true" : undefined
+															}
+															className={cn(
+																"relative flex items-start gap-3 px-4 py-2.5 text-sm transition-colors duration-150 hover:bg-muted/50",
+																current &&
+																	"bg-(--level)/10 font-medium before:absolute before:inset-y-1.5 before:left-0 before:w-1 before:rounded-r-full before:bg-(--level) before:content-[''] hover:bg-(--level)/15",
+															)}
+														>
+															<span className="w-5 shrink-0 text-xs leading-5 font-medium text-(--level) tabular-nums">
+																{String(
+																	timeline.chapters.indexOf(
+																		chapter,
+																	) + 1,
+																).padStart(2, "0")}
+															</span>
+															<span className="min-w-0 flex-1">
+																{chapter.title}
+															</span>
+															<span className="shrink-0 text-xs leading-5 font-normal text-muted-foreground tabular-nums">
+																{clock(chapter.durationInFrames)}
+															</span>
+														</Link>
+													</li>
+												)
+											})}
+										</ol>
+									</div>
+								)
+							},
+						)}
 					</nav>
 				</Card>
 			</div>

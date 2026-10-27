@@ -2292,15 +2292,15 @@
     "semantic_hash": ""
   },
   "app/help/page.tsx": {
-    "mtime": 1793070514.8438396,
-    "seen": 1793070792.792004,
-    "ast_hash": "c413f7e1e1846f218a5f6efbbfe07310",
+    "mtime": 1793091977.317168,
+    "seen": 1793091995.4662871,
+    "ast_hash": "10a6f6802ab57ec337398d5b807ed30b",
     "semantic_hash": ""
   },
   "app/help/video/page.tsx": {
-    "mtime": 1793070613.5719414,
-    "seen": 1793070792.7920055,
-    "ast_hash": "2d5fdfeacd7d88af482d4ae871003253",
+    "mtime": 1793091977.317168,
+    "seen": 1793091995.466289,
+    "ast_hash": "562067d94f221217553df4f2e64c9bf1",
     "semantic_hash": ""
   },
   "skills-lock.json": {
@@ -2358,9 +2358,9 @@
     "semantic_hash": ""
   },
   "src/lib/guide-theme.ts": {
-    "mtime": 1793028920.1382558,
-    "seen": 1793050425.0460296,
-    "ast_hash": "914ead06234d46c4c7faa2a78074dfbf",
+    "mtime": 1793091977.333168,
+    "seen": 1793091995.4665077,
+    "ast_hash": "110adb11f3b76a1787cbd37ab2a65129",
     "semantic_hash": ""
   },
   "src/lib/guide-video-cues.json": {
@@ -2376,9 +2376,9 @@
     "semantic_hash": ""
   },
   "src/lib/guide-video.ts": {
-    "mtime": 1793028920.1422558,
-    "seen": 1793050425.0460403,
-    "ast_hash": "2f804cdbc69d48a0ecb4e2c70451f4f7",
+    "mtime": 1793091977.333168,
+    "seen": 1793091995.4665122,
+    "ast_hash": "fe3467189babdbd17b5ac8e3cb00c81e",
     "semantic_hash": ""
   },
   "src/lib/guide.ts": {
