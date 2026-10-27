@@ -180,11 +180,11 @@ async function details(t: Take, people: string, location?: string) {
 // ─── The story ────────────────────────────────────────────────────────────────────────────
 
 export const story: TakeScript[] = [
-	// A brand-new browser: the Dashboard offers demo data, and Help offers practice.
+	// A brand-new browser: the Dashboard offers demo data.
 	{
 		name: "workspace",
 		chapter: "workspace",
-		beats: ["demo", "practice", "own"],
+		beats: ["demo", "own"],
 		setup: t => go(t, "/"),
 		async play(t) {
 			const app = t.app
@@ -198,13 +198,7 @@ export const story: TakeScript[] = [
 			await t.at("demo", "lived-in")
 			await t.unring()
 			await t.wide()
-			await via(t, "Help")
-			await t.at("practice", "practice lessons")
-			const practice = app.getByRole("link", { name: /practi/i }).first()
-			await t.ring("practice", practice)
-			await glide(t.page, practice)
-			await t.at("own")
-			await t.unring()
+			await t.at("own", "own bank activity")
 			await via(t, "Importer")
 		},
 	},

@@ -168,9 +168,9 @@
     "semantic_hash": "7d8a33d5aa042f85737cd2f3334ae040"
   },
   "next-env.d.ts": {
-    "mtime": 1793066733.5564532,
-    "seen": 1793066786.8104527,
-    "ast_hash": "aa94238a90e7d04b7a47ecc3145ba6a0",
+    "mtime": 1793066790.3883848,
+    "seen": 1793070263.8989174,
+    "ast_hash": "8195d2c60ce847a459ae9d308d6a5724",
     "semantic_hash": ""
   },
   "next.config.ts": {
@@ -984,9 +984,9 @@
     "semantic_hash": "1943f2b645390c908cfb784ddc37a94d"
   },
   "src/routes.ts": {
-    "mtime": 1793028920.1462557,
-    "seen": 1793050425.0461469,
-    "ast_hash": "159d78b1223127d0f27c94c479ba7b21",
+    "mtime": 1793070178.1674001,
+    "seen": 1793070263.899112,
+    "ast_hash": "529d64a3a2a34eb043877af746606691",
     "semantic_hash": ""
   },
   "src/types.d.ts": {
@@ -2292,21 +2292,15 @@
     "semantic_hash": ""
   },
   "app/help/page.tsx": {
-    "mtime": 1793028920.1382558,
-    "seen": 1793050425.045279,
-    "ast_hash": "3a817f3b20ce9aa890a094baa09e347b",
-    "semantic_hash": ""
-  },
-  "app/help/practice/page.tsx": {
-    "mtime": 1793028920.1382558,
-    "seen": 1793050425.0452826,
-    "ast_hash": "5a391bd906f281734962f42fbaedad37",
+    "mtime": 1793070204.3794408,
+    "seen": 1793070263.8988945,
+    "ast_hash": "91feb7dca3c366fefc1d7ee8788a841f",
     "semantic_hash": ""
   },
   "app/help/video/page.tsx": {
-    "mtime": 1793043631.2031298,
-    "seen": 1793050425.0452855,
-    "ast_hash": "fedc621f4b1341fe0aea688ac8268868",
+    "mtime": 1793070196.4474287,
+    "seen": 1793070263.8988965,
+    "ast_hash": "517bfadf56eb7daa76d4f28ba0ee83b1",
     "semantic_hash": ""
   },
   "skills-lock.json": {
@@ -2328,9 +2322,9 @@
     "semantic_hash": ""
   },
   "src/components/help/guide-article.tsx": {
-    "mtime": 1793028920.1582558,
-    "seen": 1793050425.0455172,
-    "ast_hash": "bc4023cd4f80c1f230c3d84e199db230",
+    "mtime": 1793070228.5594773,
+    "seen": 1793070263.8989732,
+    "ast_hash": "07a0c613376dead8d992761b24cac4fb",
     "semantic_hash": ""
   },
   "src/components/help/guide-check-actions.tsx": {
@@ -2358,9 +2352,9 @@
     "semantic_hash": ""
   },
   "src/components/help/welcome-guide.tsx": {
-    "mtime": 1793028920.1582558,
-    "seen": 1793050425.0455346,
-    "ast_hash": "18c1d6fa2f601ba6336ce9ff00890cf3",
+    "mtime": 1793070253.0355132,
+    "seen": 1793070263.8989785,
+    "ast_hash": "e4a6fd4430ef2c25ba40358f3767bcef",
     "semantic_hash": ""
   },
   "src/data/learning.ts": {
@@ -2394,21 +2388,15 @@
     "semantic_hash": ""
   },
   "src/lib/guide.ts": {
-    "mtime": 1793046918.3210895,
-    "seen": 1793050425.046044,
-    "ast_hash": "ce1ba1a4775823b96471119e5afcc37c",
+    "mtime": 1793070204.6314414,
+    "seen": 1793070263.8990805,
+    "ast_hash": "f005f37862619d1b6a023e95d16846e9",
     "semantic_hash": ""
   },
   "src/logic/learning.ts": {
-    "mtime": 1793028920.1422558,
-    "seen": 1793050425.0460927,
-    "ast_hash": "4620d45b615957b4abe4e95f9e2026e3",
-    "semantic_hash": ""
-  },
-  "src/logic/practice.ts": {
-    "mtime": 1793028920.1462557,
-    "seen": 1793050425.0461133,
-    "ast_hash": "db9dfb95c01bbc580b816d3e7f0d2460",
+    "mtime": 1793070191.5994213,
+    "seen": 1793070263.899096,
+    "ast_hash": "21e60c24a575cacf812a98ce069631e9",
     "semantic_hash": ""
   },
   "video/chapters.json": {
@@ -2484,9 +2472,9 @@
     "semantic_hash": ""
   },
   "video/scripts/story.ts": {
-    "mtime": 1793050017.371619,
-    "seen": 1793050425.0463629,
-    "ast_hash": "5ad0ac657638d3d06fdb5386d4fb0225",
+    "mtime": 1793070178.1674001,
+    "seen": 1793070263.8991833,
+    "ast_hash": "e9af2982877f4d06ee3b7f1ac09983e9",
     "semantic_hash": ""
   },
   "video/scripts/tools.ts": {

@@ -1,18 +1,7 @@
 "use client"
 
 import { useLiveQuery } from "dexie-react-hooks"
-import {
-	ArrowLeft,
-	ArrowRight,
-	Check,
-	Gift,
-	type LucideIcon,
-	Play,
-	Search,
-	TriangleAlert,
-	Users,
-	Utensils,
-} from "lucide-react"
+import { ArrowLeft, ArrowRight, Check, Play, Search } from "lucide-react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { useState } from "react"
@@ -27,24 +16,15 @@ import { accentFor, color } from "@/lib/guide-theme"
 import timeline from "@/lib/guide-video-timeline.json"
 import { cn } from "@/lib/utils"
 import { getLearningOverview, markGuideReviewed } from "@/logic/learning"
-import { practiceLessons } from "@/logic/practice"
-import { pathHelp, pathHelpPractice, pathHelpVideo } from "@/routes"
+import { pathHelp, pathHelpVideo } from "@/routes"
 
 type Overview = Awaited<ReturnType<typeof getLearningOverview>>
 
-const lessonIcons: Record<string, LucideIcon> = {
-	lunch: Utensils,
-	pending: TriangleAlert,
-	split: Gift,
-	repayment: Users,
-}
-
 const minutes = Math.round(timeline.durationInFrames / timeline.fps / 60)
 
-/** The five things a new workspace needs, read from saved data and the user's own confirmations. */
+/** The four things a new workspace needs, read from saved data and the user's own confirmations. */
 function milestones(overview: Overview) {
 	const { learning } = overview
-	const nextLesson = practiceLessons.find(lesson => !learning.completed.includes(lesson.id))
 	return [
 		{
 			label: "Bring in bank activity",
@@ -75,12 +55,6 @@ function milestones(overview: Overview) {
 				? `${learning.reviewedMonth} reviewed (confirmed by you)`
 				: "Check Dashboard and Monthly Records",
 			href: pathHelp("dashboard"),
-		},
-		{
-			label: "Practice the core workflow",
-			done: learning.completed.length >= practiceLessons.length,
-			value: `${learning.completed.length} of ${practiceLessons.length} sample lessons`,
-			href: pathHelpPractice(nextLesson?.id ?? "lunch"),
 		},
 		{
 			label: "Protect your data",
@@ -142,7 +116,7 @@ function Progress({ overview }: { overview: Overview }) {
 					{done} of {items.length} done
 				</span>
 			</div>
-			<ol className="grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
+			<ol className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
 				{items.map((item, index) => (
 					<li key={item.label}>
 						<Link
@@ -174,56 +148,6 @@ function Progress({ overview }: { overview: Overview }) {
 				Saved data and your own confirmations are tracked separately. Existing data doesn’t
 				tick these off on its own.
 			</p>
-		</section>
-	)
-}
-
-function PracticeLessons({ overview }: { overview: Overview }) {
-	const next = practiceLessons.find(lesson => !overview.learning.completed.includes(lesson.id))
-	return (
-		<section className="flex flex-col gap-3">
-			<div>
-				<h3 className="text-base font-semibold">Practice with sample data</h3>
-				<p className="text-sm text-muted-foreground">
-					Lessons use sample values only. Your financial data stays untouched.
-				</p>
-			</div>
-			<div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
-				{practiceLessons.map(lesson => {
-					const Icon = lessonIcons[lesson.id] ?? Utensils
-					const completed = overview.learning.completed.includes(lesson.id)
-					const upNext = lesson.id === next?.id
-					return (
-						<Link
-							key={lesson.id}
-							href={pathHelpPractice(lesson.id)}
-							className={cn(
-								"group flex items-center gap-4 rounded-xl border bg-card p-4 transition-colors duration-150 hover:bg-muted/50",
-								upNext && "ring-2 ring-foreground/10",
-							)}
-						>
-							<span className="grid size-10 shrink-0 place-items-center rounded-lg bg-muted">
-								<Icon className="size-5" />
-							</span>
-							<span className="flex min-w-0 flex-1 flex-col">
-								<span className="text-sm font-medium">{lesson.title}</span>
-								<span className="text-xs text-muted-foreground">
-									{completed
-										? "Completed · replay any time"
-										: upNext
-											? "Up next"
-											: "Not started"}
-								</span>
-							</span>
-							{completed ? (
-								<Check className="size-4 shrink-0 text-creative" />
-							) : (
-								<ArrowRight className="size-4 shrink-0 text-muted-foreground transition-transform duration-150 ease-out group-hover:translate-x-0.5" />
-							)}
-						</Link>
-					)
-				})}
-			</div>
 		</section>
 	)
 }
@@ -388,10 +312,7 @@ export default function HelpPage() {
 			) : (
 				<>
 					{overview && <Progress overview={overview} />}
-					<div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_minmax(0,28rem)]">
-						<Questions overview={overview} query="" />
-						{overview && <PracticeLessons overview={overview} />}
-					</div>
+					<Questions overview={overview} query="" />
 					<p className="text-xs text-muted-foreground">
 						Learning progress stays in this browser. It isn’t included in financial
 						backups or Google Drive sync.

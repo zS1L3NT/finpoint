@@ -5,13 +5,7 @@ import Link from "next/link"
 import { GuideCheckActions } from "@/components/help/guide-check-actions"
 import GuideFigure from "@/components/help/guide-figure"
 import { Button } from "@/components/ui/button"
-import {
-	type GuideBeat,
-	type GuideChapter,
-	type GuideDestination,
-	practiceFor,
-	stepOf,
-} from "@/lib/guide"
+import { type GuideBeat, type GuideChapter, type GuideDestination, stepOf } from "@/lib/guide"
 import { cn } from "@/lib/utils"
 import {
 	pathAccounts,
@@ -22,8 +16,6 @@ import {
 	pathCategories,
 	pathDashboard,
 	pathDataSettings,
-	pathHelp,
-	pathHelpPractice,
 	pathHelpVideo,
 	pathImporter,
 	pathMonthlyRecords,
@@ -95,7 +87,6 @@ export function GuideArticle({
 	compact?: boolean
 }) {
 	const destination = chapter.destination ? destinations[chapter.destination] : null
-	const practice = practiceFor[chapter.id]
 	return (
 		<div className={cn("flex max-w-3xl flex-col", compact ? "gap-6" : "gap-9")}>
 			{sections(chapter.beats).map(section =>
@@ -130,13 +121,6 @@ export function GuideArticle({
 							<Play /> Watch this chapter
 						</Link>
 					</Button>
-					{practice && (
-						<Button asChild variant="outline" size="lg" className="min-h-11">
-							<Link href={pathHelpPractice(practice, pathHelp(chapter.id))}>
-								Try with sample data
-							</Link>
-						</Button>
-					)}
 				</div>
 			)}
 			<GuideCheckActions topic={chapter.id} />

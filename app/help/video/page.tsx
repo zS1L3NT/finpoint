@@ -1,7 +1,7 @@
 "use client"
 
 import { useLiveQuery } from "dexie-react-hooks"
-import { ArrowRight, Captions, FileText, GraduationCap } from "lucide-react"
+import { ArrowRight, Captions, FileText } from "lucide-react"
 import dynamic from "next/dynamic"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
@@ -14,11 +14,9 @@ import { getVideoChapter } from "@/lib/guide-video"
 import timeline from "@/lib/guide-video-timeline.json"
 import { cn } from "@/lib/utils"
 import { getLearning } from "@/logic/learning"
-import { pathHelp, pathHelpPractice, pathHelpVideo } from "@/routes"
+import { pathHelp, pathHelpVideo } from "@/routes"
 
 const VideoPlayer = dynamic(() => import("@/components/help/guide-video-player"), { ssr: false })
-
-const practiced = ["lunch", "pending", "split", "repayment"]
 
 function clock(frame: number) {
 	const seconds = Math.floor(frame / timeline.fps)
@@ -81,16 +79,6 @@ export default function GuideVideoPage() {
 							</h3>
 						</div>
 						<div className="flex shrink-0 flex-wrap gap-2">
-							<Button asChild size="lg" className="min-h-11">
-								<Link
-									href={pathHelpPractice(
-										practiced.includes(activeId) ? activeId : "lunch",
-										pathHelpVideo(activeId),
-									)}
-								>
-									<GraduationCap /> Practice
-								</Link>
-							</Button>
 							<Button asChild variant="outline" size="lg" className="min-h-11">
 								<Link href={pathHelp(activeId)}>
 									Article <ArrowRight />

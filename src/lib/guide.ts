@@ -122,18 +122,14 @@ export const guideChapters: GuideChapter[] = [
 		id: "workspace",
 		title: "Trying Finpoint first",
 		level: "The basics",
-		summary: "Look around with demo data or a practice lesson before you bring in your own.",
-		keywords: "demo data try practice sample explore first visit empty start",
+		summary: "Look around with demo data before you bring in your own.",
+		keywords: "demo data try sample explore first visit empty start",
 		destination: "dashboard",
 		beats: [
 			{
 				id: "demo",
 				say: "Before you bring in your own bank, you can look around. On your first visit, the Dashboard, Finpoint’s home page, offers demo data: three accounts and five months of Records, so you can see what a lived-in Finpoint looks like.",
 				detail: "Demo data replaces whatever is in this browser. Reset it from the Data page when you’re ready to start for real.",
-			},
-			{
-				id: "practice",
-				say: "Help, at the top of every page, also has practice lessons. They use their own sample Statements, so you can try explaining and splitting a payment without touching your data.",
 			},
 			{
 				id: "own",
@@ -750,12 +746,4 @@ export function stepOf(chapter: GuideChapter, beatId: string) {
 	const steps = chapter.beats.filter(beat => beat.step)
 	const index = steps.findIndex(beat => beat.id === beatId)
 	return index === -1 ? null : { number: index + 1, total: steps.length }
-}
-
-/** Practice lessons that rehearse a chapter with sample data. */
-export const practiceFor: Record<string, string> = {
-	lunch: "lunch",
-	split: "split",
-	repayment: "repayment",
-	pending: "pending",
 }
