@@ -18,8 +18,7 @@ export function GuideCheckActions({ topic }: { topic: string }) {
 					your review. This is your confirmation, not an automated check of every amount.
 				</p>
 				<Button
-					size="lg"
-					className="min-h-11"
+					size="sm"
 					disabled={!learning || learning.reviewedMonth === monthKey}
 					onClick={() =>
 						void confirmMonthReviewed(monthKey).catch(() =>
@@ -42,8 +41,7 @@ export function GuideCheckActions({ topic }: { topic: string }) {
 				your Downloads folder and keep it somewhere safe before confirming here.
 			</p>
 			<Button
-				size="lg"
-				className="min-h-11"
+				size="sm"
 				disabled={!!learning.backupLocatedAt}
 				onClick={() =>
 					void confirmBackupLocated().catch(() =>

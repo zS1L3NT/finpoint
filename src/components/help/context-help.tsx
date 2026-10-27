@@ -99,7 +99,7 @@ export function ContextHelp({
 			)}
 			<DialogContent className="gap-5 md:top-3 md:right-3 md:bottom-3 md:left-auto md:max-h-none md:max-w-md md:translate-x-0 md:translate-y-0 md:p-6 data-open:md:slide-in-from-right-6 data-open:md:zoom-in-100">
 				<DialogHeader className="gap-1 pr-8">
-					<p className="flex items-center gap-1.5 text-xs font-medium tracking-[0.14em] text-muted-foreground uppercase">
+					<p className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
 						<CircleHelp className="size-3.5" />
 						{topic.level}
 					</p>

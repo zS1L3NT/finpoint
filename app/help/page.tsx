@@ -1,18 +1,19 @@
 "use client"
 
 import { useLiveQuery } from "dexie-react-hooks"
-import { ArrowLeft, ArrowRight, Check, Play, Search } from "lucide-react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { useState } from "react"
 import { toast } from "sonner"
 import { GuideArticle } from "@/components/help/guide-article"
+import { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { getGuideChapter, guideChapters, guideLevels } from "@/lib/guide"
-import { accentFor, color } from "@/lib/guide-theme"
 import timeline from "@/lib/guide-video-timeline.json"
 import { cn } from "@/lib/utils"
 import { getLearningOverview, markGuideReviewed } from "@/logic/learning"
@@ -71,37 +72,38 @@ function milestones(overview: Overview) {
 
 function VideoCard() {
 	return (
-		<Link
-			href={pathHelpVideo()}
-			className="group relative flex min-h-56 flex-col justify-end overflow-hidden rounded-2xl p-6 text-white ring-1 ring-border transition-shadow duration-200 ease-out hover:shadow-xl"
-			style={{
-				background: `radial-gradient(90% 110% at 0% 0%, ${accentFor("Start here")}66, transparent 60%), radial-gradient(80% 100% at 100% 100%, ${color.allocation}55, transparent 60%), ${color.night}`,
-			}}
-		>
-			<span
-				aria-hidden
-				className="absolute inset-0 opacity-40"
-				style={{
-					backgroundImage:
-						"radial-gradient(rgba(255,255,255,0.18) 1px, transparent 1.2px)",
-					backgroundSize: "22px 22px",
-					maskImage: "radial-gradient(70% 70% at 70% 30%, black, transparent)",
-				}}
-			/>
-			<span className="absolute top-6 right-6 grid size-14 place-items-center rounded-full bg-white text-black shadow-lg transition-transform duration-200 ease-out group-hover:scale-105">
-				<Play className="size-6 translate-x-0.5 fill-current" />
-			</span>
-			<span className="relative text-xs font-semibold tracking-[0.16em] text-white/70 uppercase">
-				Video guide · {timeline.chapters.length} chapters · {minutes} min
-			</span>
-			<span className="relative mt-1.5 text-2xl font-semibold tracking-tight">
-				Finpoint, from the beginning
-			</span>
-			<span className="relative mt-1 max-w-md text-sm text-white/70">
-				Real Finpoint screens, step by step: import your bank, explain a purchase, split a
-				payment and keep your data safe.
-			</span>
-		</Link>
+		<Card className="gap-0 py-0">
+			<div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center">
+				<Link
+					href={pathHelpVideo()}
+					className="relative block aspect-video w-full shrink-0 overflow-hidden rounded-lg border sm:w-56"
+				>
+					<img src="/guide/poster.jpg" alt="" className="size-full object-cover" />
+					<span className="absolute inset-0 grid place-items-center bg-black/30">
+						<span className="grid size-10 place-items-center rounded-full bg-background/90 text-foreground">
+							<IconifyIcon icon="lucide:play" className="size-4 translate-x-px" />
+						</span>
+					</span>
+				</Link>
+				<div className="flex min-w-0 flex-1 flex-col gap-1">
+					<p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+						<IconifyIcon icon="lucide:video" className="size-3.5" />
+						Video guide · {timeline.chapters.length} chapters · {minutes} min
+					</p>
+					<h3 className="text-sm font-semibold">Finpoint, from the beginning</h3>
+					<p className="max-w-xl text-xs text-muted-foreground">
+						Real Finpoint screens, step by step: import your bank, explain a purchase,
+						split a payment and keep your data safe.
+					</p>
+				</div>
+				<Button size="sm" asChild className="self-start sm:self-center">
+					<Link href={pathHelpVideo()}>
+						<IconifyIcon icon="lucide:circle-play" />
+						Watch
+					</Link>
+				</Button>
+			</div>
+		</Card>
 	)
 }
 
@@ -109,46 +111,46 @@ function Progress({ overview }: { overview: Overview }) {
 	const items = milestones(overview)
 	const done = items.filter(item => item.done).length
 	return (
-		<section className="flex flex-col gap-3">
-			<div className="flex items-baseline justify-between gap-4">
-				<h3 className="text-base font-semibold">Your first steps</h3>
-				<span className="text-sm text-muted-foreground tabular-nums">
+		<Card className="gap-0 py-0">
+			<CardHeader className="flex flex-row items-start justify-between gap-3 border-b py-4">
+				<div className="grid gap-1">
+					<CardTitle>Your first steps</CardTitle>
+					<CardDescription>
+						Saved data and your own confirmations are tracked separately.
+					</CardDescription>
+				</div>
+				<Badge variant="secondary" className="tabular-nums">
 					{done} of {items.length} done
-				</span>
-			</div>
-			<ol className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+				</Badge>
+			</CardHeader>
+			<ol className="grid gap-px bg-border sm:grid-cols-2 xl:grid-cols-4">
 				{items.map((item, index) => (
-					<li key={item.label}>
+					<li key={item.label} className="bg-card">
 						<Link
 							href={item.href}
-							className={cn(
-								"flex h-full flex-col gap-3 rounded-xl border bg-card p-4 transition-colors duration-150 hover:bg-muted/50",
-								item.done && "border-transparent bg-muted/40",
-							)}
+							className="flex h-full items-start gap-3 px-4 py-3 transition-colors duration-150 hover:bg-muted/50"
 						>
 							<span
 								className={cn(
-									"grid size-7 place-items-center rounded-full border text-xs font-semibold tabular-nums",
-									item.done && "border-transparent bg-creative text-white",
+									"grid size-6 shrink-0 place-items-center rounded-full border text-xs font-medium tabular-nums",
+									item.done && "border-transparent bg-foreground text-background",
 								)}
 							>
-								{item.done ? <Check className="size-4" /> : index + 1}
+								{item.done ? (
+									<IconifyIcon icon="lucide:check" className="size-3.5" />
+								) : (
+									index + 1
+								)}
 							</span>
-							<span className="flex flex-col gap-1">
+							<span className="grid min-w-0 gap-0.5">
 								<span className="text-sm font-medium">{item.label}</span>
-								<span className="text-xs leading-5 text-muted-foreground">
-									{item.value}
-								</span>
+								<span className="text-xs text-muted-foreground">{item.value}</span>
 							</span>
 						</Link>
 					</li>
 				))}
 			</ol>
-			<p className="text-xs text-muted-foreground">
-				Saved data and your own confirmations are tracked separately. Existing data doesn’t
-				tick these off on its own.
-			</p>
-		</section>
+		</Card>
 	)
 }
 
@@ -165,57 +167,59 @@ function Questions({ overview, query }: { overview?: Overview; query: string }) 
 			</p>
 		)
 	return (
-		<section className="flex flex-col gap-3" aria-live="polite">
-			{!query && <h3 className="text-base font-semibold">The guide, chapter by chapter</h3>}
-			<div className="grid gap-x-8 gap-y-6 md:grid-cols-2">
-				{guideLevels
-					.filter(level => matches.some(item => item.level === level))
-					.map(group => (
-						<div key={group} className="min-w-0">
-							<h4 className="mb-1 flex items-center gap-2 text-xs font-semibold tracking-[0.14em] text-muted-foreground uppercase">
-								<span
-									className="size-1.5 rounded-full"
-									style={{ background: accentFor(group) }}
-								/>
-								{group}
-							</h4>
-							<ul className="divide-y">
-								{matches
-									.filter(item => item.level === group)
-									.map(item => (
-										<li key={item.id}>
-											<Link
-												href={pathHelp(item.id)}
-												className="group flex min-h-12 items-start justify-between gap-3 py-3 text-sm"
-											>
-												<span className="w-6 shrink-0 text-muted-foreground tabular-nums">
-													{String(
-														guideChapters.indexOf(item) + 1,
-													).padStart(2, "0")}
-												</span>
-												<span className="flex min-w-0 flex-1 flex-col gap-0.5">
-													<span className="font-medium group-hover:underline group-hover:underline-offset-4">
-														{item.title}
-													</span>
-													<span className="text-xs leading-5 text-muted-foreground">
-														{item.summary}
-													</span>
-												</span>
-												{overview?.learning.reviewed.includes(item.id) ? (
-													<Check
-														className="size-4 shrink-0 text-creative"
-														aria-label="Reviewed"
-													/>
-												) : (
-													<ArrowRight className="size-4 shrink-0 text-muted-foreground transition-transform duration-150 ease-out group-hover:translate-x-0.5" />
+		<section
+			className="grid items-start gap-6 lg:grid-cols-2"
+			aria-label="Guide chapters"
+			aria-live="polite"
+		>
+			{guideLevels
+				.filter(level => matches.some(item => item.level === level))
+				.map(group => (
+					<Card key={group} className="gap-0 py-0">
+						<CardHeader className="border-b py-4">
+							<CardTitle>{group}</CardTitle>
+						</CardHeader>
+						<ul>
+							{matches
+								.filter(item => item.level === group)
+								.map(item => (
+									<li key={item.id} className="border-b last:border-b-0">
+										<Link
+											href={pathHelp(item.id)}
+											className="group flex items-start gap-3 px-4 py-3 transition-colors duration-150 hover:bg-muted/50"
+										>
+											<span className="w-5 shrink-0 text-xs leading-5 text-muted-foreground tabular-nums">
+												{String(guideChapters.indexOf(item) + 1).padStart(
+													2,
+													"0",
 												)}
-											</Link>
-										</li>
-									))}
-							</ul>
-						</div>
-					))}
-			</div>
+											</span>
+											<span className="grid min-w-0 flex-1 gap-0.5">
+												<span className="text-sm font-medium">
+													{item.title}
+												</span>
+												<span className="text-xs text-muted-foreground">
+													{item.summary}
+												</span>
+											</span>
+											{overview?.learning.reviewed.includes(item.id) ? (
+												<IconifyIcon
+													icon="lucide:check"
+													className="size-4 shrink-0 text-muted-foreground"
+													aria-label="Reviewed"
+												/>
+											) : (
+												<IconifyIcon
+													icon="lucide:chevron-right"
+													className="size-4 shrink-0 text-muted-foreground"
+												/>
+											)}
+										</Link>
+									</li>
+								))}
+						</ul>
+					</Card>
+				))}
 		</section>
 	)
 }
@@ -231,26 +235,24 @@ export default function HelpPage() {
 	if (topic)
 		return (
 			<PageContent>
-				<Button
-					asChild
-					variant="ghost"
-					size="sm"
-					className="-mb-2 w-fit text-muted-foreground"
-				>
-					<Link href={pathHelp()}>
-						<ArrowLeft /> All chapters
-					</Link>
-				</Button>
 				<PageHeader
 					title={topic.title}
 					description={topic.level}
 					icon="lucide:circle-help"
 					subtitle={topic.summary}
+					actions={
+						<Button variant="outline" size="sm" asChild>
+							<Link href={pathHelp()}>
+								<IconifyIcon icon="lucide:list" /> All chapters
+							</Link>
+						</Button>
+					}
 				/>
 				<div className="flex max-w-3xl flex-col gap-6">
 					<GuideArticle chapter={topic} />
 					<div className="flex flex-col items-start gap-2 border-t pt-5">
 						<Button
+							size="sm"
 							variant={
 								overview?.learning.reviewed.includes(topic.id)
 									? "outline"
@@ -265,7 +267,7 @@ export default function HelpPage() {
 						>
 							{overview?.learning.reviewed.includes(topic.id) ? (
 								<>
-									<Check /> Reviewed
+									<IconifyIcon icon="lucide:check" /> Reviewed
 								</>
 							) : (
 								"Mark as reviewed"
@@ -282,35 +284,31 @@ export default function HelpPage() {
 
 	return (
 		<PageContent>
-			<div className="grid items-stretch gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,28rem)]">
-				<div className="flex flex-col justify-center gap-6">
-					<PageHeader
-						title="How can we help?"
-						description="Help & guides"
-						icon="lucide:circle-help"
-						subtitle="Start with one purchase. Learn at your own pace, and come back whenever something looks off."
-					/>
-					<div className="relative max-w-xl">
-						<label htmlFor="guide-search" className="sr-only">
-							Search the guides
-						</label>
-						<Search className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-muted-foreground" />
-						<Input
-							id="guide-search"
-							type="search"
-							value={search}
-							onChange={event => setSearch(event.target.value)}
-							placeholder="Search: Pending, import, refund, backup…"
-							className="h-12 rounded-xl pl-11 text-base md:text-sm"
-						/>
-					</div>
-				</div>
-				{!query && <VideoCard />}
+			<PageHeader
+				title="How can we help?"
+				description="Help & guides"
+				icon="lucide:circle-help"
+				subtitle="Learn at your own pace, and come back whenever something looks off."
+			/>
+			<div className="relative max-w-sm">
+				<IconifyIcon
+					icon="lucide:search"
+					className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground"
+				/>
+				<Input
+					type="search"
+					aria-label="Search the guides"
+					placeholder="Search: Pending, import, refund, backup..."
+					className="pl-8"
+					value={search}
+					onChange={event => setSearch(event.target.value)}
+				/>
 			</div>
 			{query ? (
 				<Questions overview={overview} query={query} />
 			) : (
 				<>
+					<VideoCard />
 					{overview && <Progress overview={overview} />}
 					<Questions overview={overview} query="" />
 					<p className="text-xs text-muted-foreground">

@@ -29,7 +29,7 @@ export function PendingHelp({
 		<Dialog>
 			<DialogTrigger
 				render={
-					<Button variant="outline" size="lg" className="min-h-11">
+					<Button variant="outline" size="sm">
 						Why Pending?
 					</Button>
 				}

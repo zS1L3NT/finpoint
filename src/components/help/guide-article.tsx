@@ -112,11 +112,11 @@ export function GuideArticle({
 			{!compact && (
 				<div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
 					{destination && (
-						<Button asChild size="lg" className="min-h-11">
+						<Button asChild size="sm">
 							<Link href={destination.href}>{destination.label}</Link>
 						</Button>
 					)}
-					<Button asChild variant="outline" size="lg" className="min-h-11">
+					<Button asChild variant="outline" size="sm">
 						<Link href={pathHelpVideo(chapter.id)}>
 							<Play /> Watch this chapter
 						</Link>

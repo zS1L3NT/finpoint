@@ -39,7 +39,7 @@ export function EmptyGuide({
 							: "Search, dates, Account, amount, Category, or Pending filters can narrow a list to zero. Check them before assuming the data is missing."}
 			</p>
 			<div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-				<Button asChild variant="outline" size="lg" className="min-h-11">
+				<Button asChild variant="outline" size="sm">
 					<Link
 						href={
 							noImports
@@ -59,11 +59,11 @@ export function EmptyGuide({
 					</Link>
 				</Button>
 				{!noImports && !queueClear && (
-					<Button variant="outline" size="lg" className="min-h-11" onClick={onClear}>
+					<Button variant="outline" size="sm" onClick={onClear}>
 						Clear filters
 					</Button>
 				)}
-				<Button asChild variant="ghost" size="lg" className="min-h-11">
+				<Button asChild variant="ghost" size="sm">
 					<Link href={pathHelp()}>Help & guides</Link>
 				</Button>
 			</div>
