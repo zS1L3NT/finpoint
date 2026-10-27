@@ -1,7 +1,6 @@
 "use client"
 
 import { ContextHelp } from "@/components/help/context-help"
-import { LearningObserver } from "@/components/help/welcome-guide"
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 
@@ -15,7 +14,6 @@ export default function AppHeader({ title }: { title: string }) {
 				<div className="ml-auto">
 					<ContextHelp />
 				</div>
-				<LearningObserver />
 			</div>
 		</header>
 	)

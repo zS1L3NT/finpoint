@@ -16,7 +16,6 @@ import SpendingCalendar from "@/components/charts/spending-calendar"
 import TotalSpendingChart from "@/components/charts/total-spending-chart"
 import WeekdayBars from "@/components/charts/weekday-bars"
 import MonthlyBudgetDialog from "@/components/dialogs/monthly-budget"
-import { WelcomeGuide } from "@/components/help/welcome-guide"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import { Metric as DashboardMetric, type Delta, MetricGrid } from "@/components/metric"
 import MonthlyBudgetBadge from "@/components/monthly-budget-badge"
@@ -44,6 +43,8 @@ import { hasWorkspaceActivity, loadDemoWorkspace } from "@/logic/workspace"
 import {
 	pathAllocator,
 	pathDashboard,
+	pathDataSettings,
+	pathHelpVideo,
 	pathImporter,
 	pathMonthlyRecords,
 	pathStatements,
@@ -144,7 +145,6 @@ export default function DashboardPage() {
 			aria-busy={stale}
 			className={cn("reveal grid gap-5 md:gap-6", stale && STALE_MONTH_CLASS)}
 		>
-			<WelcomeGuide />
 			{active === false ? <DemoOffer /> : null}
 			{period.is_future ? (
 				<div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border bg-muted/20 p-4">
@@ -453,6 +453,18 @@ function DemoOffer() {
 				</p>
 			</div>
 			<div className="flex flex-wrap gap-2">
+				<Button variant="ghost" size="sm" asChild>
+					<Link href={pathHelpVideo()}>
+						<IconifyIcon icon="lucide:circle-play" />
+						Watch the guide
+					</Link>
+				</Button>
+				<Button variant="outline" size="sm" asChild>
+					<Link href={pathDataSettings()}>
+						<IconifyIcon icon="lucide:archive-restore" />
+						Restore a backup
+					</Link>
+				</Button>
 				<Button variant="outline" size="sm" asChild>
 					<Link href={pathImporter()}>
 						<IconifyIcon icon="lucide:upload" />

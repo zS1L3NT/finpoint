@@ -4,8 +4,6 @@ import { isPendingRecord, tallyAllocations } from "@/logic/pending"
 import { listStatements } from "@/logic/statements"
 
 type LearningState = {
-	dismissed: boolean
-	workspaceUsed: boolean
 	reviewed: string[]
 	videoFrame: number
 	lastImportAt: string | null
@@ -16,8 +14,6 @@ type LearningState = {
 }
 
 const emptyState = (): LearningState => ({
-	dismissed: false,
-	workspaceUsed: false,
 	reviewed: [],
 	videoFrame: 0,
 	lastImportAt: null,
@@ -32,8 +28,6 @@ function parseState(value: string | undefined): LearningState {
 	try {
 		const raw = JSON.parse(value)
 		const state = emptyState()
-		state.dismissed = raw.dismissed === true
-		state.workspaceUsed = raw.workspaceUsed === true
 		state.videoFrame =
 			Number.isSafeInteger(raw.videoFrame) && raw.videoFrame >= 0 ? raw.videoFrame : 0
 		for (const key of [
@@ -77,20 +71,9 @@ export async function getLearningOverview() {
 					? "pending"
 					: "complete",
 		learning,
-		eligible:
-			workspace.ready &&
-			!learning.dismissed &&
-			!learning.workspaceUsed &&
-			workspace.accounts + workspace.statements + workspace.records + workspace.budgets === 0,
 	}
 }
 
-export async function dismissWelcome() {
-	await updateLearning(state => ({ ...state, dismissed: true }))
-}
-export async function markWorkspaceUsed() {
-	await updateLearning(state => ({ ...state, workspaceUsed: true }))
-}
 export async function markGuideReviewed(id: string) {
 	if (!guideChapters.some(topic => topic.id === id)) return
 	await updateLearning(state => ({ ...state, reviewed: [...new Set([...state.reviewed, id])] }))
@@ -104,11 +87,10 @@ export async function trackImport(count: number) {
 		await updateLearning(state => ({
 			...state,
 			lastImportAt: new Date().toISOString(),
-			workspaceUsed: true,
 		}))
 }
 export async function trackRecordSaved(id: string) {
-	await updateLearning(state => ({ ...state, lastRecordId: id, workspaceUsed: true }))
+	await updateLearning(state => ({ ...state, lastRecordId: id }))
 }
 export async function confirmMonthReviewed(month: string) {
 	if (/^\d{4}-\d{2}$/.test(month))
