@@ -34,8 +34,6 @@ Trying Finpoint first
 
 Before you bring in your own bank, you can look around. On your first visit, the Dashboard, Finpoint’s home page, offers demo data: three accounts and five months of Records, so you can see what a lived-in Finpoint looks like.
 
-Help, at the top of every page, also has practice lessons. They use their own sample Statements, so you can try explaining and splitting a payment without touching your data.
-
 When you’re ready for your own money, reset the demo data from the Data page, and start with your own bank activity. That’s next.
 
 ————————

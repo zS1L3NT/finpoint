@@ -18,11 +18,6 @@
 		<div id="cap-workspace-demo-23" class="cap"><span>three accounts and five months of Records,</span></div>
 		<div id="cap-workspace-demo-30" class="cap"><span>so you can see what a lived-in</span></div>
 		<div id="cap-workspace-demo-37" class="cap"><span>Finpoint looks like.</span></div>
-		<div id="cap-workspace-practice-0" class="cap"><span>Help, at the top of every page,</span></div>
-		<div id="cap-workspace-practice-7" class="cap"><span>also has practice lessons.</span></div>
-		<div id="cap-workspace-practice-11" class="cap"><span>They use their own sample Statements,</span></div>
-		<div id="cap-workspace-practice-17" class="cap"><span>so you can try explaining and splitting</span></div>
-		<div id="cap-workspace-practice-24" class="cap"><span>a payment without touching your data.</span></div>
 		<div id="cap-workspace-own-0" class="cap"><span>When you’re ready for your own money,</span></div>
 		<div id="cap-workspace-own-7" class="cap"><span>reset the demo data from the Data</span></div>
 		<div id="cap-workspace-own-14" class="cap"><span>page, and start with your own bank</span></div>
@@ -31,12 +26,12 @@
 	</div>
 	<script>
 		const tl = gsap.timeline({ paused: true })
-		const groups = [["cap-workspace-demo-0",2.283,3.917],["cap-workspace-demo-7",3.917,5.417],["cap-workspace-demo-11",5.417,6.617],["cap-workspace-demo-15",6.617,8.817],["cap-workspace-demo-20",8.817,10.65],["cap-workspace-demo-23",10.65,12.783],["cap-workspace-demo-30",12.783,14.55],["cap-workspace-demo-37",14.55,16.133],["cap-workspace-practice-0",16.583,18.783],["cap-workspace-practice-7",18.783,20.817],["cap-workspace-practice-11",20.817,22.95],["cap-workspace-practice-17",22.95,24.917],["cap-workspace-practice-24",24.917,27.467],["cap-workspace-own-0",27.917,29.883],["cap-workspace-own-7",29.883,31.817],["cap-workspace-own-14",31.817,33.45],["cap-workspace-own-21",33.45,34.817],["cap-workspace-own-22",34.817,36.933]]
+		const groups = [["cap-workspace-demo-0",2.283,3.917],["cap-workspace-demo-7",3.917,5.417],["cap-workspace-demo-11",5.417,6.617],["cap-workspace-demo-15",6.617,8.817],["cap-workspace-demo-20",8.817,10.65],["cap-workspace-demo-23",10.65,12.783],["cap-workspace-demo-30",12.783,14.55],["cap-workspace-demo-37",14.55,16.133],["cap-workspace-own-0",16.583,18.55],["cap-workspace-own-7",18.55,20.483],["cap-workspace-own-14",20.483,22.117],["cap-workspace-own-21",22.117,23.483],["cap-workspace-own-22",23.483,25.6]]
 		for (const [id, start, end] of groups) {
 			tl.set("#" + id, { opacity: 1, visibility: "visible" }, start)
 			tl.set("#" + id, { opacity: 0, visibility: "hidden" }, end)
 		}
-		tl.set({}, {}, 37.233)
+		tl.set({}, {}, 25.9)
 		window.__timelines["captions"] = tl
 	</script>
 </template>

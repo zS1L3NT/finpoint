@@ -17,96 +17,96 @@
 	{
 		"id": "import",
 		"title": "Importing your bank activity",
-		"start": 178.96666666666667
+		"start": 167.63333333333333
 	},
 	{
 		"id": "allocator",
 		"title": "Workflows",
-		"start": 252.93333333333334
+		"start": 241.6
 	},
 	{
 		"id": "lunch",
 		"title": "Explaining your first purchase",
-		"start": 303.8333333333333
+		"start": 292.5
 	},
 	{
 		"id": "split",
 		"title": "Splitting one payment",
-		"start": 351.93333333333334
+		"start": 340.6
 	},
 	{
 		"id": "repayment",
 		"title": "Combining payments into one Record",
-		"start": 405.1
+		"start": 393.76666666666665
 	},
 	{
 		"id": "dashboard",
 		"title": "Where your numbers come from",
-		"start": 440.8333333333333
+		"start": 429.5
 	},
 	{
 		"id": "pending",
 		"title": "Pending Records",
-		"start": 481.23333333333335
+		"start": 469.9
 	},
 	{
 		"id": "pending-statements",
 		"title": "Pending Statements",
-		"start": 559.3
+		"start": 547.9666666666667
 	},
 	{
 		"id": "duplicates",
 		"title": "Fixing duplicate Statements",
-		"start": 623.5666666666667
+		"start": 612.2333333333333
 	},
 	{
 		"id": "find",
 		"title": "Finding and fixing Records",
-		"start": 667.8333333333334
+		"start": 656.5
 	},
 	{
 		"id": "categories",
 		"title": "Categories",
-		"start": 703.9333333333333
+		"start": 692.6
 	},
 	{
 		"id": "rules",
 		"title": "Statement rules",
-		"start": 749.1666666666666
+		"start": 737.8333333333334
 	},
 	{
 		"id": "treatments",
 		"title": "Treatments",
-		"start": 801.1
+		"start": 789.7666666666667
 	},
 	{
 		"id": "buckets",
 		"title": "Monthly Budgets",
-		"start": 854.7333333333333
+		"start": 843.4
 	},
 	{
 		"id": "insights",
 		"title": "Reading the Overview",
-		"start": 916.6666666666666
+		"start": 905.3333333333334
 	},
 	{
 		"id": "monthly",
 		"title": "Monthly Records",
-		"start": 969.9333333333333
+		"start": 958.6
 	},
 	{
 		"id": "budgets",
 		"title": "Budgets for trips and events",
-		"start": 1003.4
+		"start": 992.0666666666667
 	},
 	{
 		"id": "sync",
 		"title": "Backups and Google Drive",
-		"start": 1048.1
+		"start": 1036.7666666666667
 	},
 	{
 		"id": "routine",
 		"title": "Your routine",
-		"start": 1109.8333333333333
+		"start": 1098.5
 	}
 ]

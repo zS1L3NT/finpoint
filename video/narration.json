@@ -1299,20 +1299,6 @@
 			}
 		]
 	},
-	"workspace-practice.mp3": {
-		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"Help, at the top of every page, also has practice lessons. They use their own sample Statements, so you can try explaining and splitting a payment without touching your data.\",\"weights\":[20,31],\"pauseAfter\":0.85}],\"leadIn\":0.2}",
-		"duration": 11.327416666666666,
-		"parts": [
-			{
-				"start": 0.2,
-				"end": 3.87
-			},
-			{
-				"start": 4.430000000000001,
-				"end": 10.477416666666667
-			}
-		]
-	},
 	"workspace-own.mp3": {
 		"key": "{\"voice\":{\"voice\":\"af_heart\",\"lang\":\"en-us\",\"speed\":0.95},\"pause\":{\"leadIn\":0.2,\"afterTitle\":0.8,\"betweenBeats\":0.85,\"betweenSteps\":0.7,\"betweenChapters\":1.6},\"parts\":[{\"text\":\"When you’re ready for your own money, reset the demo data from the Data page, and start with your own bank activity. That’s next.\",\"weights\":[35,2],\"pauseAfter\":1.6}],\"leadIn\":0.2}",
 		"duration": 9.450166666666666,

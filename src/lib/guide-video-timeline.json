@@ -2,7 +2,7 @@
 	"fps": 30,
 	"width": 1920,
 	"height": 1080,
-	"durationInFrames": 34191,
+	"durationInFrames": 33851,
 	"chapters": [
 		{
 			"id": "start",
@@ -113,7 +113,7 @@
 			"title": "Trying Finpoint first",
 			"group": "The basics",
 			"startFrame": 4252,
-			"durationInFrames": 1117,
+			"durationInFrames": 777,
 			"segments": [
 				{
 					"id": "demo",
@@ -124,16 +124,9 @@
 					"audio": "narration/workspace-demo.mp3"
 				},
 				{
-					"id": "practice",
-					"text": "Help, at the top of every page, also has practice lessons. They use their own sample Statements, so you can try explaining and splitting a payment without touching your data.",
-					"from": 493,
-					"durationInFrames": 340,
-					"audio": "narration/workspace-practice.mp3"
-				},
-				{
 					"id": "own",
 					"text": "When you’re ready for your own money, reset the demo data from the Data page, and start with your own bank activity. That’s next.",
-					"from": 833,
+					"from": 493,
 					"durationInFrames": 284,
 					"audio": "narration/workspace-own.mp3"
 				}
@@ -143,7 +136,7 @@
 			"id": "import",
 			"title": "Importing your bank activity",
 			"group": "The basics",
-			"startFrame": 5369,
+			"startFrame": 5029,
 			"durationInFrames": 2219,
 			"segments": [
 				{
@@ -217,7 +210,7 @@
 			"id": "allocator",
 			"title": "Workflows",
 			"group": "The basics",
-			"startFrame": 7588,
+			"startFrame": 7248,
 			"durationInFrames": 1527,
 			"segments": [
 				{
@@ -255,7 +248,7 @@
 			"id": "lunch",
 			"title": "Explaining your first purchase",
 			"group": "The basics",
-			"startFrame": 9115,
+			"startFrame": 8775,
 			"durationInFrames": 1443,
 			"segments": [
 				{
@@ -308,7 +301,7 @@
 			"id": "split",
 			"title": "Splitting one payment",
 			"group": "The basics",
-			"startFrame": 10558,
+			"startFrame": 10218,
 			"durationInFrames": 1595,
 			"segments": [
 				{
@@ -370,7 +363,7 @@
 			"id": "repayment",
 			"title": "Combining payments into one Record",
 			"group": "The basics",
-			"startFrame": 12153,
+			"startFrame": 11813,
 			"durationInFrames": 1072,
 			"segments": [
 				{
@@ -405,7 +398,7 @@
 			"id": "dashboard",
 			"title": "Where your numbers come from",
 			"group": "The basics",
-			"startFrame": 13225,
+			"startFrame": 12885,
 			"durationInFrames": 1212,
 			"segments": [
 				{
@@ -443,7 +436,7 @@
 			"id": "pending",
 			"title": "Pending Records",
 			"group": "Going further",
-			"startFrame": 14437,
+			"startFrame": 14097,
 			"durationInFrames": 2342,
 			"segments": [
 				{
@@ -502,7 +495,7 @@
 			"id": "pending-statements",
 			"title": "Pending Statements",
 			"group": "Going further",
-			"startFrame": 16779,
+			"startFrame": 16439,
 			"durationInFrames": 1928,
 			"segments": [
 				{
@@ -555,7 +548,7 @@
 			"id": "duplicates",
 			"title": "Fixing duplicate Statements",
 			"group": "Going further",
-			"startFrame": 18707,
+			"startFrame": 18367,
 			"durationInFrames": 1328,
 			"segments": [
 				{
@@ -597,7 +590,7 @@
 			"id": "find",
 			"title": "Finding and fixing Records",
 			"group": "Going further",
-			"startFrame": 20035,
+			"startFrame": 19695,
 			"durationInFrames": 1083,
 			"segments": [
 				{
@@ -637,7 +630,7 @@
 			"id": "categories",
 			"title": "Categories",
 			"group": "Going further",
-			"startFrame": 21118,
+			"startFrame": 20778,
 			"durationInFrames": 1357,
 			"segments": [
 				{
@@ -668,7 +661,7 @@
 			"id": "rules",
 			"title": "Statement rules",
 			"group": "Going further",
-			"startFrame": 22475,
+			"startFrame": 22135,
 			"durationInFrames": 1558,
 			"segments": [
 				{
@@ -710,7 +703,7 @@
 			"id": "treatments",
 			"title": "Treatments",
 			"group": "Advanced",
-			"startFrame": 24033,
+			"startFrame": 23693,
 			"durationInFrames": 1609,
 			"segments": [
 				{
@@ -748,7 +741,7 @@
 			"id": "buckets",
 			"title": "Monthly Budgets",
 			"group": "Advanced",
-			"startFrame": 25642,
+			"startFrame": 25302,
 			"durationInFrames": 1858,
 			"segments": [
 				{
@@ -797,7 +790,7 @@
 			"id": "insights",
 			"title": "Reading the Overview",
 			"group": "Advanced",
-			"startFrame": 27500,
+			"startFrame": 27160,
 			"durationInFrames": 1598,
 			"segments": [
 				{
@@ -842,7 +835,7 @@
 			"id": "monthly",
 			"title": "Monthly Records",
 			"group": "Advanced",
-			"startFrame": 29098,
+			"startFrame": 28758,
 			"durationInFrames": 1004,
 			"segments": [
 				{
@@ -873,7 +866,7 @@
 			"id": "budgets",
 			"title": "Budgets for trips and events",
 			"group": "Advanced",
-			"startFrame": 30102,
+			"startFrame": 29762,
 			"durationInFrames": 1341,
 			"segments": [
 				{
@@ -915,7 +908,7 @@
 			"id": "sync",
 			"title": "Backups and Google Drive",
 			"group": "Your data",
-			"startFrame": 31443,
+			"startFrame": 31103,
 			"durationInFrames": 1852,
 			"segments": [
 				{
@@ -960,7 +953,7 @@
 			"id": "routine",
 			"title": "Your routine",
 			"group": "Your data",
-			"startFrame": 33295,
+			"startFrame": 32955,
 			"durationInFrames": 896,
 			"segments": [
 				{

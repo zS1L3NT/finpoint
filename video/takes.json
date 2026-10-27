@@ -1,4 +1,13 @@
 {
+	"workspace": {
+		"chapter": "workspace",
+		"beats": [
+			"demo",
+			"own"
+		],
+		"start": 0,
+		"duration": 26.7
+	},
 	"revolut": {
 		"chapter": "import",
 		"beats": [
@@ -216,15 +225,5 @@
 		],
 		"start": 21.599999999999998,
 		"duration": 9.06666666666667
-	},
-	"workspace": {
-		"chapter": "workspace",
-		"beats": [
-			"demo",
-			"practice",
-			"own"
-		],
-		"start": 0,
-		"duration": 38.03333333333333
 	}
 }
