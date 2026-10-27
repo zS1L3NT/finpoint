@@ -98,7 +98,7 @@ jobs:
       matrix:
         include:
           - group: pages
-            files: tests/core/routes.e2e.ts tests/core/guide-video.e2e.ts
+            files: tests/core/routes.e2e.ts tests/core/guide-video.e2e.ts tests/core/help.e2e.ts
           - group: flows
             files: tests/core/navigation.e2e.ts tests/core/workflows.e2e.ts
           - group: editing

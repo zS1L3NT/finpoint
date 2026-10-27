@@ -2469,6 +2469,56 @@ export const scenarioDescriptions: Record<string, string> = {
 		"Long imported descriptions render with a contained footer, pointer cursor, in-viewport Cancel and Enter cancellation",
 	"src/components/form/date-range.tsx#field.options":
 		"Fixed-format range applies a day and clears back to null; the popover preserves page overflow while open with content inside the viewport and Escape dismissal",
+	"src/components/help/context-help.tsx#display.values":
+		"Header menu lists the section guides with their titles; side panel shows the level, title, related guide choice and article",
+	"src/components/help/context-help.tsx#display.interaction":
+		"Menu opens by pointer and keyboard, guide choice opens the panel, related choice swaps the article, Full guide navigates and Back closes; form tooltip button opens the same panel",
+	"src/components/help/context-help.tsx#export.ContextHelp.behaviour":
+		"ContextHelp header menu, side panel, related choice, Full guide and form tooltip button work through real routes",
+	"src/components/help/empty-guide.tsx#display.values":
+		"Empty allocator and records copy explains import, full allocation, first purchase and hidden-by-filters states with their links",
+	"src/components/help/empty-guide.tsx#display.interaction":
+		"Open Importer, View Statements, Learn purchase and Help links navigate; Clear filters restores rows and has pointer affordance",
+	"src/components/help/empty-guide.tsx#export.EmptyGuide.behaviour":
+		"EmptyGuide import, full allocation, first purchase and hidden-by-filters states with working links and clear",
+	"src/components/help/guide-article.tsx#display.values":
+		"Article shows chapter beats with numbered tutorial steps, destination label, Watch link and still images with their narration",
+	"src/components/help/guide-article.tsx#display.interaction":
+		"Destination and Watch controls navigate by pointer and keyboard with pointer affordance; figures link to the video chapter",
+	"src/components/help/guide-article.tsx#export.GuideArticle.behaviour":
+		"GuideArticle beats, numbered steps, destination, Watch and figure links work through real help routes",
+	"src/components/help/guide-check-actions.tsx#display.values":
+		"Dashboard month review copy with month name and backup found-file copy with request date show enabled and confirmed states",
+	"src/components/help/guide-check-actions.tsx#display.interaction":
+		"Review and backup confirmations activate by pointer and keyboard, persist across reload and disable once confirmed",
+	"src/components/help/guide-check-actions.tsx#export.GuideCheckActions.behaviour":
+		"GuideCheckActions month review and backup confirmations persist through real help articles",
+	"src/components/help/guide-figure.tsx#display.values":
+		"Figure shows the chapter still image with its Watch affordance and caption where provided",
+	"src/components/help/guide-figure.tsx#display.interaction":
+		"Figure link opens the video chapter by pointer and keyboard with pointer affordance",
+	"src/components/help/guide-figure.tsx#export.default.behaviour":
+		"GuideFigure still image links to its video chapter through real help routes",
+	"src/components/help/guide-video-player.tsx#display.values":
+		"Film shows its source, poster, captions and chapter marks with the active chapter title and transcript links",
+	"src/components/help/guide-video-player.tsx#display.interaction":
+		"Pause remembers position, resume restores it, chapter choice seeks explicitly and seeks survive reload",
+	"src/components/help/guide-video-player.tsx#export.default.behaviour":
+		"GuideVideoPlayer pause, resume and chapter seeks work through the real video route",
+	"src/components/help/pending-help.tsx#display.values":
+		"Dialog lists Record amount, Allocation total, Difference, counts and the tally reason with the pending guide",
+	"src/components/help/pending-help.tsx#display.interaction":
+		"Why Pending opens by pointer and keyboard, shows the guide and closes with pointer affordance",
+	"src/components/help/pending-help.tsx#export.PendingHelp.behaviour":
+		"PendingHelp amounts, reasons and guide open from the real record detail",
+	"app/help/page.tsx#route.data":
+		"Hub shows progress, video resume, chapter search and article with reviewed state; empty workspace shows import-first milestones with silent reveal",
+	"app/help/page.tsx#route.navigation":
+		"Search, chapter cards, video Watch and Resume, milestone links and Mark as reviewed work by pointer and keyboard; All chapters returns",
+	"app/help/video/page.tsx#route.data":
+		"Video page shows resume position, chapter deep link, chapter list and Read article copy with silent reveal",
+	"app/help/video/page.tsx#route.navigation":
+		"Chapter links seek the film, Read article and All help topics navigate, keyboard chapter choice works",
 }
 
 /** Explicitly non-applicable cases with documented reasons. These are neither
@@ -4568,6 +4618,121 @@ export const behaviourCoverage: Record<string, string[]> = {
 	"app/statement-rules/page.tsx#route.viewport": [
 		"Statement rules: cards enter as a cascade in the viewport",
 	],
+	"src/components/help/context-help.tsx#display.values": [
+		"help menu: lists the section's guides and opens one in the side panel",
+		"help panel: related guides, full guide and back controls work",
+		"help form: tooltip button opens the section guide beside the dialog",
+	],
+	"src/components/help/context-help.tsx#display.interaction": [
+		"help menu: lists the section's guides and opens one in the side panel",
+		"help panel: related guides, full guide and back controls work",
+		"help form: tooltip button opens the section guide beside the dialog",
+	],
+	"src/components/help/context-help.tsx#export.ContextHelp.behaviour": [
+		"help menu: lists the section's guides and opens one in the side panel",
+		"help panel: related guides, full guide and back controls work",
+		"help form: tooltip button opens the section guide beside the dialog",
+	],
+	"src/components/help/empty-guide.tsx#display.values": [
+		"empty guide: empty allocator and records explain import with working links",
+		"empty guide: filtered lists explain hiding with a working clear",
+		"empty guide: full allocation and first-purchase states link onward",
+	],
+	"src/components/help/empty-guide.tsx#display.interaction": [
+		"empty guide: empty allocator and records explain import with working links",
+		"empty guide: filtered lists explain hiding with a working clear",
+		"empty guide: full allocation and first-purchase states link onward",
+	],
+	"src/components/help/empty-guide.tsx#export.EmptyGuide.behaviour": [
+		"empty guide: empty allocator and records explain import with working links",
+		"empty guide: filtered lists explain hiding with a working clear",
+		"empty guide: full allocation and first-purchase states link onward",
+	],
+	"src/components/help/guide-article.tsx#display.values": [
+		"help hub: search filters chapters and chapter cards link to articles",
+		"help article: destination, video and figure links open their targets",
+	],
+	"src/components/help/guide-article.tsx#display.interaction": [
+		"help article: destination, video and figure links open their targets",
+	],
+	"src/components/help/guide-article.tsx#export.GuideArticle.behaviour": [
+		"help hub: search filters chapters and chapter cards link to articles",
+		"help article: destination, video and figure links open their targets",
+	],
+	"src/components/help/guide-check-actions.tsx#display.values": [
+		"help review: month confirmation persists across reload",
+		"help backup: found-file confirmation persists after a requested download",
+	],
+	"src/components/help/guide-check-actions.tsx#display.interaction": [
+		"help review: month confirmation persists across reload",
+		"help backup: found-file confirmation persists after a requested download",
+	],
+	"src/components/help/guide-check-actions.tsx#export.GuideCheckActions.behaviour": [
+		"help review: month confirmation persists across reload",
+		"help backup: found-file confirmation persists after a requested download",
+	],
+	"src/components/help/guide-figure.tsx#display.values": [
+		"help article: destination, video and figure links open their targets",
+	],
+	"src/components/help/guide-figure.tsx#display.interaction": [
+		"help article: destination, video and figure links open their targets",
+	],
+	"src/components/help/guide-figure.tsx#export.default.behaviour": [
+		"help article: destination, video and figure links open their targets",
+	],
+	"src/components/help/guide-video-player.tsx#display.values": [
+		"guide video resume: pause preserves playback and chapters seek explicitly",
+		"guide video chapter: pause preserves playback and chapters seek explicitly",
+		"help video page: resume, chapter list and read-article links work",
+	],
+	"src/components/help/guide-video-player.tsx#display.interaction": [
+		"guide video resume: pause preserves playback and chapters seek explicitly",
+		"guide video chapter: pause preserves playback and chapters seek explicitly",
+		"help video page: resume, chapter list and read-article links work",
+	],
+	"src/components/help/guide-video-player.tsx#export.default.behaviour": [
+		"guide video resume: pause preserves playback and chapters seek explicitly",
+		"guide video chapter: pause preserves playback and chapters seek explicitly",
+		"help video page: resume, chapter list and read-article links work",
+	],
+	"src/components/help/pending-help.tsx#display.values": [
+		"pending help: record amounts, reasons and guide open from the dialog",
+	],
+	"src/components/help/pending-help.tsx#display.interaction": [
+		"pending help: record amounts, reasons and guide open from the dialog",
+	],
+	"src/components/help/pending-help.tsx#export.PendingHelp.behaviour": [
+		"pending help: record amounts, reasons and guide open from the dialog",
+	],
+	"app/help/page.tsx#route.data": [
+		"help hub: search filters chapters and chapter cards link to articles",
+		"help progress: milestones and video card reflect saved learning",
+		"help article: destination, video and figure links open their targets",
+		"help review: month confirmation persists across reload",
+		"help backup: found-file confirmation persists after a requested download",
+	],
+	"app/help/page.tsx#route.navigation": [
+		"help hub: search filters chapters and chapter cards link to articles",
+		"help article: destination, video and figure links open their targets",
+		"help review: month confirmation persists across reload",
+		"help progress: milestones and video card reflect saved learning",
+	],
+	"app/help/page.tsx#route.viewport": [
+		"/help page: populated content and enabled controls stay inside the viewport",
+	],
+	"app/help/video/page.tsx#route.data": [
+		"help video page: resume, chapter list and read-article links work",
+		"guide video resume: pause preserves playback and chapters seek explicitly",
+		"guide video chapter: pause preserves playback and chapters seek explicitly",
+	],
+	"app/help/video/page.tsx#route.navigation": [
+		"help video page: resume, chapter list and read-article links work",
+		"guide video resume: pause preserves playback and chapters seek explicitly",
+		"guide video chapter: pause preserves playback and chapters seek explicitly",
+	],
+	"app/help/video/page.tsx#route.viewport": [
+		"/help/video page: populated content and enabled controls stay inside the viewport",
+	],
 }
 
 /** Applicable facets without evidence stay here even when their parent scenario is mapped.
@@ -4738,6 +4903,8 @@ export const scenarioProjects: Record<
 	"app/terms/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
 	"app/privacy/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
 	"app/statement-rules/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
+	"app/help/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
+	"app/help/video/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
 	"src/components/charts/cashflow-chart.tsx#chart.responsive": ["mobile", "tall-desktop"],
 	"src/components/charts/category-history-chart.tsx#chart.responsive": ["mobile", "tall-desktop"],
 	"src/components/charts/daily-spending-chart.tsx#chart.responsive": ["mobile", "tall-desktop"],
