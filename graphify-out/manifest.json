@@ -168,8 +168,8 @@
     "semantic_hash": "7d8a33d5aa042f85737cd2f3334ae040"
   },
   "next-env.d.ts": {
-    "mtime": 1793070659.1639855,
-    "seen": 1793070792.7920394,
+    "mtime": 1793082055.4446564,
+    "seen": 1793082069.8010547,
     "ast_hash": "8195d2c60ce847a459ae9d308d6a5724",
     "semantic_hash": ""
   },
@@ -2310,15 +2310,15 @@
     "semantic_hash": ""
   },
   "src/components/help/context-help.tsx": {
-    "mtime": 1793070561.687889,
-    "seen": 1793070792.7921255,
-    "ast_hash": "f9c3b7e968763a923469e1ee1e00c933",
+    "mtime": 1793082055.4406562,
+    "seen": 1793082069.801109,
+    "ast_hash": "cfc419f325902fa4f8e29b02c02e4532",
     "semantic_hash": ""
   },
   "src/components/help/empty-guide.tsx": {
-    "mtime": 1793070561.6838892,
-    "seen": 1793070792.7921271,
-    "ast_hash": "3a971e5fefe8608df85db05f3e5dd7f4",
+    "mtime": 1793082055.4366562,
+    "seen": 1793082069.80111,
+    "ast_hash": "1beac6fe8c8cd9475dc085ad6ad193a6",
     "semantic_hash": ""
   },
   "src/components/help/guide-article.tsx": {
@@ -2364,15 +2364,15 @@
     "semantic_hash": ""
   },
   "src/lib/guide-video-cues.json": {
-    "mtime": 1793046945.1771698,
-    "seen": 1793050425.046033,
-    "ast_hash": "635efbc6482241b9e96585a9b1ed484e",
+    "mtime": 1793070795.7841084,
+    "seen": 1793082069.8012147,
+    "ast_hash": "9c6d4e7d65f4201f2c475ac27ecbf50f",
     "semantic_hash": ""
   },
   "src/lib/guide-video-timeline.json": {
-    "mtime": 1793046945.1771698,
-    "seen": 1793050425.0460367,
-    "ast_hash": "a913dcbebb45075c5c14dd22b6db8154",
+    "mtime": 1793070795.7841084,
+    "seen": 1793082069.8012156,
+    "ast_hash": "3eabaaa527a336e44faf077e41ce88e4",
     "semantic_hash": ""
   },
   "src/lib/guide-video.ts": {
@@ -2382,9 +2382,9 @@
     "semantic_hash": ""
   },
   "src/lib/guide.ts": {
-    "mtime": 1793070204.6314414,
-    "seen": 1793070263.8990805,
-    "ast_hash": "f005f37862619d1b6a023e95d16846e9",
+    "mtime": 1793081927.4848137,
+    "seen": 1793082069.801218,
+    "ast_hash": "16955b5fa06798554d192d61fe86c4a6",
     "semantic_hash": ""
   },
   "src/logic/learning.ts": {
@@ -2394,9 +2394,9 @@
     "semantic_hash": ""
   },
   "video/chapters.json": {
-    "mtime": 1793050324.6165178,
-    "seen": 1793050425.0463142,
-    "ast_hash": "9d9448e482a26b84bc5c1d9b1d2ca493",
+    "mtime": 1793071747.252759,
+    "seen": 1793082069.8013039,
+    "ast_hash": "deb6453e942bc3d4a641c0a661eed55a",
     "semantic_hash": ""
   },
   "video/hyperframes.json": {
@@ -2406,9 +2406,9 @@
     "semantic_hash": ""
   },
   "video/narration.json": {
-    "mtime": 1793046945.1731699,
-    "seen": 1793050425.0463295,
-    "ast_hash": "c111d1efd2fb071a0099e86f70d8d563",
+    "mtime": 1793070795.7761085,
+    "seen": 1793082069.8013093,
+    "ast_hash": "e5a46df397e6758eb939922b49ff6f37",
     "semantic_hash": ""
   },
   "video/package.json": {
@@ -2466,9 +2466,9 @@
     "semantic_hash": ""
   },
   "video/scripts/story.ts": {
-    "mtime": 1793070178.1674001,
-    "seen": 1793070263.8991833,
-    "ast_hash": "e9af2982877f4d06ee3b7f1ac09983e9",
+    "mtime": 1793081927.4888136,
+    "seen": 1793082069.8013206,
+    "ast_hash": "99949f25c8cef4c37a412a1f051c1019",
     "semantic_hash": ""
   },
   "video/scripts/tools.ts": {
@@ -2484,9 +2484,9 @@
     "semantic_hash": ""
   },
   "video/takes.json": {
-    "mtime": 1793050286.657219,
-    "seen": 1793050425.0463793,
-    "ast_hash": "13c2b3c3d05ff45a2e213f23fd8505e7",
+    "mtime": 1793071747.1687589,
+    "seen": 1793082069.801326,
+    "ast_hash": "031724e77f014fc80a70f67032d216c9",
     "semantic_hash": ""
   },
   ".agents/skills/hyperframes-cli/SKILL.md": {
@@ -3366,9 +3366,9 @@
     "semantic_hash": ""
   },
   "public/guide/transcript.txt": {
-    "mtime": 1793046945.1811697,
-    "seen": 1793050425.0469322,
-    "ast_hash": "3c573242b949781853f6d4b25746317a",
+    "mtime": 1793070795.7881086,
+    "seen": 1793082069.8015168,
+    "ast_hash": "0b4a577e76e8d78bf2b5a4504cd35d7d",
     "semantic_hash": ""
   },
   "video/README.md": {
@@ -3378,135 +3378,135 @@
     "semantic_hash": ""
   },
   "video/compositions/captions/allocator.html": {
-    "mtime": 1793050324.6125178,
-    "seen": 1793050425.0469606,
+    "mtime": 1793071747.248759,
+    "seen": 1793082069.8015265,
     "ast_hash": "64f19d3f707906e01cc30fac0e9eb9fe",
     "semantic_hash": ""
   },
   "video/compositions/captions/buckets.html": {
-    "mtime": 1793050324.6125178,
-    "seen": 1793050425.0469642,
+    "mtime": 1793071747.252759,
+    "seen": 1793082069.8015275,
     "ast_hash": "430c9735a297ba91dbca3e33c956f01e",
     "semantic_hash": ""
   },
   "video/compositions/captions/budgets.html": {
-    "mtime": 1793050324.6125178,
-    "seen": 1793050425.0469673,
+    "mtime": 1793071747.252759,
+    "seen": 1793082069.8015287,
     "ast_hash": "0bfa2efe248f07ab74ee9d207c3fcabc",
     "semantic_hash": ""
   },
   "video/compositions/captions/categories.html": {
-    "mtime": 1793050324.6125178,
-    "seen": 1793050425.0469708,
+    "mtime": 1793071747.248759,
+    "seen": 1793082069.8015296,
     "ast_hash": "94ca51c3761c5a008f45e3a8587ba86d",
     "semantic_hash": ""
   },
   "video/compositions/captions/dashboard.html": {
-    "mtime": 1793050324.6125178,
-    "seen": 1793050425.0469744,
+    "mtime": 1793071747.248759,
+    "seen": 1793082069.8015306,
     "ast_hash": "eeaf3df2aebf6a659ccc4b2be9c7fc4d",
     "semantic_hash": ""
   },
   "video/compositions/captions/duplicates.html": {
-    "mtime": 1793050324.6125178,
-    "seen": 1793050425.046978,
+    "mtime": 1793071747.248759,
+    "seen": 1793082069.8015316,
     "ast_hash": "cf10ee956acd709016cab2f90cfe817d",
     "semantic_hash": ""
   },
   "video/compositions/captions/find.html": {
-    "mtime": 1793050324.6125178,
-    "seen": 1793050425.0469813,
+    "mtime": 1793071747.248759,
+    "seen": 1793082069.8015327,
     "ast_hash": "226ea41fd49ff819eee6616a339bf9fe",
     "semantic_hash": ""
   },
   "video/compositions/captions/import.html": {
-    "mtime": 1793050324.6125178,
-    "seen": 1793050425.046985,
+    "mtime": 1793071747.248759,
+    "seen": 1793082069.801534,
     "ast_hash": "c711d5cd652e937ebda4ec9027234160",
     "semantic_hash": ""
   },
   "video/compositions/captions/insights.html": {
-    "mtime": 1793050324.6125178,
-    "seen": 1793050425.046988,
+    "mtime": 1793071747.252759,
+    "seen": 1793082069.8015347,
     "ast_hash": "d533d53b734270535d792c04adf7006a",
     "semantic_hash": ""
   },
   "video/compositions/captions/lunch.html": {
-    "mtime": 1793050324.6125178,
-    "seen": 1793050425.046991,
+    "mtime": 1793071747.248759,
+    "seen": 1793082069.8015358,
     "ast_hash": "710896f5f62726be8267653192de90f1",
     "semantic_hash": ""
   },
   "video/compositions/captions/model.html": {
-    "mtime": 1793050324.6125178,
-    "seen": 1793050425.0469947,
+    "mtime": 1793071747.248759,
+    "seen": 1793082069.8015368,
     "ast_hash": "cfb03d2b1e14cb29c4a18615be58a558",
     "semantic_hash": ""
   },
   "video/compositions/captions/monthly.html": {
-    "mtime": 1793050324.6125178,
-    "seen": 1793050425.0469978,
+    "mtime": 1793071747.252759,
+    "seen": 1793082069.8015378,
     "ast_hash": "f8a2dde0a2a5f8c848b41c9a223fcbd8",
     "semantic_hash": ""
   },
   "video/compositions/captions/pending-statements.html": {
-    "mtime": 1793050324.6125178,
-    "seen": 1793050425.0470014,
+    "mtime": 1793071747.248759,
+    "seen": 1793082069.8015387,
     "ast_hash": "7acdbd391c0fdc7038d8020ff19210de",
     "semantic_hash": ""
   },
   "video/compositions/captions/pending.html": {
-    "mtime": 1793050324.6125178,
-    "seen": 1793050425.0470052,
+    "mtime": 1793071747.248759,
+    "seen": 1793082069.80154,
     "ast_hash": "96aea201087e28d5148d8f727d4aa1a0",
     "semantic_hash": ""
   },
   "video/compositions/captions/repayment.html": {
-    "mtime": 1793050324.6125178,
-    "seen": 1793050425.0470088,
+    "mtime": 1793071747.248759,
+    "seen": 1793082069.8015409,
     "ast_hash": "2c008d766e71dd1c8adc219a4ec0dfba",
     "semantic_hash": ""
   },
   "video/compositions/captions/routine.html": {
-    "mtime": 1793050324.6125178,
-    "seen": 1793050425.0470123,
+    "mtime": 1793071747.252759,
+    "seen": 1793082069.8015418,
     "ast_hash": "a77c3a8779ef9e42ad34e644dd660e8f",
     "semantic_hash": ""
   },
   "video/compositions/captions/rules.html": {
-    "mtime": 1793050324.6125178,
-    "seen": 1793050425.047016,
+    "mtime": 1793071747.248759,
+    "seen": 1793082069.801543,
     "ast_hash": "11190a78f7bdb3ae50a3040f23d27f44",
     "semantic_hash": ""
   },
   "video/compositions/captions/split.html": {
-    "mtime": 1793050324.6125178,
-    "seen": 1793050425.0470197,
+    "mtime": 1793071747.248759,
+    "seen": 1793082069.8015442,
     "ast_hash": "c2b9e047944491fd94721cecc6ec1d35",
     "semantic_hash": ""
   },
   "video/compositions/captions/start.html": {
-    "mtime": 1793050324.6125178,
-    "seen": 1793050425.0470238,
+    "mtime": 1793071747.248759,
+    "seen": 1793082069.8015454,
     "ast_hash": "787e526195689bf11ec448deec70c5c0",
     "semantic_hash": ""
   },
   "video/compositions/captions/sync.html": {
-    "mtime": 1793050324.6125178,
-    "seen": 1793050425.0470273,
+    "mtime": 1793071747.252759,
+    "seen": 1793082069.8015466,
     "ast_hash": "47b40f49d73c1f9be7f14e6d1885e044",
     "semantic_hash": ""
   },
   "video/compositions/captions/treatments.html": {
-    "mtime": 1793050324.6125178,
-    "seen": 1793050425.0470314,
+    "mtime": 1793071747.248759,
+    "seen": 1793082069.8015475,
     "ast_hash": "26774d471fd3ba5ea2e32799205704b8",
     "semantic_hash": ""
   },
   "video/compositions/captions/workspace.html": {
-    "mtime": 1793050324.6125178,
-    "seen": 1793050425.0470347,
-    "ast_hash": "673f33e9f7059ea87a997615672e4326",
+    "mtime": 1793071747.248759,
+    "seen": 1793082069.8015485,
+    "ast_hash": "b464dd75c0227939a79956564de19b30",
     "semantic_hash": ""
   },
   "video/compositions/scenes/budget-period.html": {
@@ -3636,9 +3636,9 @@
     "semantic_hash": ""
   },
   "video/index.html": {
-    "mtime": 1793050324.6165178,
-    "seen": 1793050425.0471113,
-    "ast_hash": "d3f57a47de8c343fa37361ac6c35c2df",
+    "mtime": 1793071747.252759,
+    "seen": 1793082069.801572,
+    "ast_hash": "5e79acdcbdc2f39d696a535aa90caa1b",
     "semantic_hash": ""
   },
   ".agents/skills/media-use/audio/assets/sfx/chime.mp3": {
@@ -4355,628 +4355,616 @@
     "ast_hash": "d32c6a8dd2d4df8df7edeb4aa3c7c65a",
     "semantic_hash": ""
   },
-  "video/assets/narration/workspace-practice.mp3": {
-    "mtime": 1793046477.8917713,
-    "seen": 1793050425.05324,
-    "ast_hash": "ae9e50414a03ab806c2239b372fb9ae3",
-    "semantic_hash": ""
-  },
   "public/guide/poster.jpg": {
-    "mtime": 1793053570.9532697,
-    "seen": 1793066786.8109894,
+    "mtime": 1793077348.3467288,
+    "seen": 1793082069.8015816,
     "ast_hash": "f1c4c7aed6fbf97d5a278b8aae798bb7",
     "semantic_hash": ""
   },
   "public/guide/stills/allocator-left.jpg": {
-    "mtime": 1793053573.041265,
-    "seen": 1793066786.810991,
-    "ast_hash": "a0d2f6135aaa3826678df059a8512d12",
+    "mtime": 1793077350.3627272,
+    "seen": 1793082069.8015828,
+    "ast_hash": "3e1d7d0636fb5d710a2a1c5943e7ed86",
     "semantic_hash": ""
   },
   "public/guide/stills/allocator-list.jpg": {
-    "mtime": 1793053572.9532654,
-    "seen": 1793066786.8109922,
-    "ast_hash": "50609f7389661fa5fc6fcb81a6302fb0",
+    "mtime": 1793077350.2747273,
+    "seen": 1793082069.8015838,
+    "ast_hash": "2ef80d4b1622038cc83b8062e169b652",
     "semantic_hash": ""
   },
   "public/guide/stills/allocator-pages.jpg": {
-    "mtime": 1793053573.2212646,
-    "seen": 1793066786.810993,
-    "ast_hash": "4b8cafbbe879ee9cc1d907ef65801744",
+    "mtime": 1793077350.542727,
+    "seen": 1793082069.8015847,
+    "ast_hash": "3b5cacf842ca01ebc57f77c51d1536e7",
     "semantic_hash": ""
   },
   "public/guide/stills/allocator-tabs.jpg": {
-    "mtime": 1793053573.133265,
-    "seen": 1793066786.8109941,
-    "ast_hash": "18d5f45475499e7a4d6857168af0c8b6",
+    "mtime": 1793077350.4547272,
+    "seen": 1793082069.8015857,
+    "ast_hash": "e6856fdb0588b3d1da1428864ef73f7c",
     "semantic_hash": ""
   },
   "public/guide/stills/buckets-amount.jpg": {
-    "mtime": 1793053577.8252544,
-    "seen": 1793066786.8109949,
-    "ast_hash": "ce48a7b2290f07a9265847bf3b65d6e7",
+    "mtime": 1793077355.150723,
+    "seen": 1793082069.8015869,
+    "ast_hash": "360be341f2a67c9bd27ff946794e9d92",
     "semantic_hash": ""
   },
   "public/guide/stills/buckets-compare.jpg": {
-    "mtime": 1793053578.021254,
-    "seen": 1793066786.8109958,
-    "ast_hash": "824010acd07731795b59bb7589c8346a",
+    "mtime": 1793077355.342723,
+    "seen": 1793082069.8015878,
+    "ast_hash": "1c9da79a87b85741701a1551b56ce04a",
     "semantic_hash": ""
   },
   "public/guide/stills/buckets-daily.jpg": {
-    "mtime": 1793053577.7292547,
-    "seen": 1793066786.810997,
+    "mtime": 1793077355.0547233,
+    "seen": 1793082069.8015895,
     "ast_hash": "b9c2cd21ab14bf8f191c90fb25d83566",
     "semantic_hash": ""
   },
   "public/guide/stills/buckets-rule.jpg": {
-    "mtime": 1793053577.925254,
-    "seen": 1793066786.810998,
-    "ast_hash": "0ff770fa0647718e29b4e68e7e9efdcf",
+    "mtime": 1793077355.246723,
+    "seen": 1793082069.8015904,
+    "ast_hash": "932b96d9c4547a732ee368c758697f2c",
     "semantic_hash": ""
   },
   "public/guide/stills/buckets-what.jpg": {
-    "mtime": 1793053577.6252549,
-    "seen": 1793066786.8109992,
+    "mtime": 1793077354.9587233,
+    "seen": 1793082069.8015916,
     "ast_hash": "01ea6f2f18e71808bac807af14d41050",
     "semantic_hash": ""
   },
   "public/guide/stills/budgets-attach.jpg": {
-    "mtime": 1793053579.0132518,
-    "seen": 1793066786.811,
-    "ast_hash": "9086bbaf6a9ef336517d0ad5ecd01f7f",
+    "mtime": 1793077356.338722,
+    "seen": 1793082069.8015926,
+    "ast_hash": "b59dd01a59e4cb1d55c1990faa3ad31e",
     "semantic_hash": ""
   },
   "public/guide/stills/budgets-create.jpg": {
-    "mtime": 1793053578.925252,
-    "seen": 1793066786.811001,
-    "ast_hash": "6f728c58e075d94deeb77e9f459c1b21",
+    "mtime": 1793077356.254722,
+    "seen": 1793082069.8015938,
+    "ast_hash": "17b733ac91e5a575eee4003358c0d6c8",
     "semantic_hash": ""
   },
   "public/guide/stills/budgets-own.jpg": {
-    "mtime": 1793053579.1012516,
-    "seen": 1793066786.811002,
-    "ast_hash": "001c04fa8cdf6550ec273bb2b5696d7d",
+    "mtime": 1793077356.430722,
+    "seen": 1793082069.8015947,
+    "ast_hash": "9dfd6f54a716cb8f6dd44ef68fd6a690",
     "semantic_hash": ""
   },
   "public/guide/stills/budgets-what.jpg": {
-    "mtime": 1793053578.841252,
-    "seen": 1793066786.8110032,
+    "mtime": 1793077356.1667223,
+    "seen": 1793082069.801596,
     "ast_hash": "e94b83646ef4a4cb00257b9eb41deca8",
     "semantic_hash": ""
   },
   "public/guide/stills/categories-defaults.jpg": {
-    "mtime": 1793053576.8532565,
-    "seen": 1793066786.8110044,
-    "ast_hash": "ec05df0c2c3ffa9110b4aa371693f744",
+    "mtime": 1793077354.2107239,
+    "seen": 1793082069.8015969,
+    "ast_hash": "6383d733ec74c39d705a087913d7570c",
     "semantic_hash": ""
   },
   "public/guide/stills/categories-examples.jpg": {
-    "mtime": 1793053576.7572567,
-    "seen": 1793066786.8110054,
-    "ast_hash": "171cef2fa6b33c6e1e781328deb26494",
+    "mtime": 1793077354.1187239,
+    "seen": 1793082069.8015978,
+    "ast_hash": "f79b5ccf65703996d5de0db586d0303c",
     "semantic_hash": ""
   },
   "public/guide/stills/categories-most.jpg": {
-    "mtime": 1793053576.669257,
-    "seen": 1793066786.8110068,
-    "ast_hash": "2a7fc6121af9ba8f81c19aa416a43e47",
+    "mtime": 1793077354.026724,
+    "seen": 1793082069.801599,
+    "ast_hash": "749bc4ba128aa1e9ef3b74e7f73344ff",
     "semantic_hash": ""
   },
   "public/guide/stills/dashboard-categories.jpg": {
-    "mtime": 1793053574.8212612,
-    "seen": 1793066786.8110077,
-    "ast_hash": "c20c8215e505b86bf5ee1c08d6c432e8",
+    "mtime": 1793077352.1587257,
+    "seen": 1793082069.8016,
+    "ast_hash": "752e6c9797d832745a356b8a2b69e891",
     "semantic_hash": ""
   },
   "public/guide/stills/dashboard-empty.jpg": {
-    "mtime": 1793053574.6372616,
-    "seen": 1793066786.8110087,
+    "mtime": 1793077351.9707258,
+    "seen": 1793082069.801601,
     "ast_hash": "ecfe21770d489f8b0f6e0db9ff3ae349",
     "semantic_hash": ""
   },
   "public/guide/stills/dashboard-real.jpg": {
-    "mtime": 1793053574.7252614,
-    "seen": 1793066786.8110096,
-    "ast_hash": "c186e9742148af6e134d9da340bc0c4b",
+    "mtime": 1793077352.0627258,
+    "seen": 1793082069.8016021,
+    "ast_hash": "4cecff89c6977f83bddd9df0ec5839ee",
     "semantic_hash": ""
   },
   "public/guide/stills/dashboard-records.jpg": {
-    "mtime": 1793053574.5492618,
-    "seen": 1793066786.8110106,
+    "mtime": 1793077351.886726,
+    "seen": 1793082069.8016028,
     "ast_hash": "991e033103de8d24347dcb33cadf1cb5",
     "semantic_hash": ""
   },
   "public/guide/stills/duplicates-badge.jpg": {
-    "mtime": 1793053576.0372584,
-    "seen": 1793066786.8110116,
-    "ast_hash": "d12d7159537a3be60772e76d25cad32e",
+    "mtime": 1793077353.3827245,
+    "seen": 1793082069.8016038,
+    "ast_hash": "4cacde08d00917543adb0b1cfc751f2a",
     "semantic_hash": ""
   },
   "public/guide/stills/duplicates-choose.jpg": {
-    "mtime": 1793053576.1252582,
-    "seen": 1793066786.8110123,
-    "ast_hash": "5a1b699ce90868211722d1a1206bfe9c",
+    "mtime": 1793077353.4707246,
+    "seen": 1793082069.8016052,
+    "ast_hash": "8ff5a5da8d74806eaa98e423aa4d8a28",
     "semantic_hash": ""
   },
   "public/guide/stills/duplicates-review.jpg": {
-    "mtime": 1793053576.209258,
-    "seen": 1793066786.8110135,
-    "ast_hash": "b3a40abc74bda654a1d78a0fcdbfdc59",
+    "mtime": 1793077353.5627244,
+    "seen": 1793082069.8016062,
+    "ast_hash": "8617ab1481508d17afbef6b740817de3",
     "semantic_hash": ""
   },
   "public/guide/stills/duplicates-why.jpg": {
-    "mtime": 1793053575.9492586,
-    "seen": 1793066786.8110147,
+    "mtime": 1793077353.2987247,
+    "seen": 1793082069.8016074,
     "ast_hash": "de2f9091553d8de0f8dd8f5b442254a4",
     "semantic_hash": ""
   },
   "public/guide/stills/find-edit.jpg": {
-    "mtime": 1793053576.3932576,
-    "seen": 1793066786.8110158,
-    "ast_hash": "0c72d983e5ab36cf97ccf00b221867ae",
+    "mtime": 1793077353.7427242,
+    "seen": 1793082069.8016088,
+    "ast_hash": "e437d381a245eb59a5881ee0bc60c9ee",
     "semantic_hash": ""
   },
   "public/guide/stills/find-records.jpg": {
-    "mtime": 1793053576.3012578,
-    "seen": 1793066786.811017,
-    "ast_hash": "1883a05a8ce7d763df2d013cc47dbebb",
+    "mtime": 1793077353.6547244,
+    "seen": 1793082069.8016095,
+    "ast_hash": "298ac28c58367a39eee9300320889fbf",
     "semantic_hash": ""
   },
   "public/guide/stills/find-settings.jpg": {
-    "mtime": 1793053576.5772572,
-    "seen": 1793066786.8110178,
-    "ast_hash": "370121318b128434c94992ab90b79901",
+    "mtime": 1793077353.9307241,
+    "seen": 1793082069.8016105,
+    "ast_hash": "128f9fb021c1f6d48acb89a21dfa70fa",
     "semantic_hash": ""
   },
   "public/guide/stills/find-statements.jpg": {
-    "mtime": 1793053576.4852574,
-    "seen": 1793066786.8110185,
-    "ast_hash": "c39092214a7efc5305aa9f577d442ee5",
+    "mtime": 1793077353.8387241,
+    "seen": 1793082069.8016112,
+    "ast_hash": "094efc15b5c4f556709705f7c6c1d910",
     "semantic_hash": ""
   },
   "public/guide/stills/import-accounts.jpg": {
-    "mtime": 1793053572.4292665,
-    "seen": 1793066786.8110194,
+    "mtime": 1793077349.7587278,
+    "seen": 1793082069.8016124,
     "ast_hash": "74b4626a87df6ca75f4550e4f5f49256",
     "semantic_hash": ""
   },
   "public/guide/stills/import-banks.jpg": {
-    "mtime": 1793053572.3492668,
-    "seen": 1793066786.8110209,
+    "mtime": 1793077349.6787279,
+    "seen": 1793082069.8016136,
     "ast_hash": "4571eda9dc73a7b1d937b22853b7d790",
     "semantic_hash": ""
   },
   "public/guide/stills/import-choose.jpg": {
-    "mtime": 1793053572.685266,
-    "seen": 1793066786.8110218,
-    "ast_hash": "f0eac24c8dcd29f09d741d1bdc596139",
+    "mtime": 1793077350.0067275,
+    "seen": 1793082069.8016145,
+    "ast_hash": "0aeb888c6c44336b2b1a3b5e73755dfb",
     "semantic_hash": ""
   },
   "public/guide/stills/import-download.jpg": {
-    "mtime": 1793053572.5972662,
-    "seen": 1793066786.8110228,
+    "mtime": 1793077349.9187276,
+    "seen": 1793082069.8016155,
     "ast_hash": "d9064b31af2ba9c588c53d2c5834999c",
     "semantic_hash": ""
   },
   "public/guide/stills/import-intro.jpg": {
-    "mtime": 1793053572.2732668,
-    "seen": 1793066786.8110242,
+    "mtime": 1793077349.602728,
+    "seen": 1793082069.8016167,
     "ast_hash": "53685d4b14c10ad2cfe2e7f189cfcba5",
     "semantic_hash": ""
   },
   "public/guide/stills/import-next.jpg": {
-    "mtime": 1793053572.8652656,
-    "seen": 1793066786.811025,
-    "ast_hash": "6c2ae0c386ff55e5bbe7428bbe83b08f",
+    "mtime": 1793077350.1867273,
+    "seen": 1793082069.8016179,
+    "ast_hash": "303ddc5b1e4b4ee6f058bfa0ef3858d6",
     "semantic_hash": ""
   },
   "public/guide/stills/import-result.jpg": {
-    "mtime": 1793053572.7732658,
-    "seen": 1793066786.811026,
-    "ast_hash": "424feb1c1c2fbe9c4cd20be22cc4dc9a",
+    "mtime": 1793077350.0947275,
+    "seen": 1793082069.8016186,
+    "ast_hash": "3b73ab5c2e491cd81fb51e2b5c3e71a2",
     "semantic_hash": ""
   },
   "public/guide/stills/import-revolut.jpg": {
-    "mtime": 1793053572.5172663,
-    "seen": 1793066786.811027,
-    "ast_hash": "3e23d229a5ff0ed164b24d25a4b1e6e6",
+    "mtime": 1793077349.8427277,
+    "seen": 1793082069.8016198,
+    "ast_hash": "c9f81978ee5b490768990448c023ac25",
     "semantic_hash": ""
   },
   "public/guide/stills/insights-calendar.jpg": {
-    "mtime": 1793053578.493253,
-    "seen": 1793066786.8110282,
-    "ast_hash": "321a53baced994b18160969a5f327962",
+    "mtime": 1793077355.8187225,
+    "seen": 1793082069.801621,
+    "ast_hash": "2b6f5769bd611cd9c0fcc60b665a2dcc",
     "semantic_hash": ""
   },
   "public/guide/stills/insights-category.jpg": {
-    "mtime": 1793053578.397253,
-    "seen": 1793066786.8110292,
-    "ast_hash": "dd453592adb79a1e5a461fcae6239844",
+    "mtime": 1793077355.7227225,
+    "seen": 1793082069.801622,
+    "ast_hash": "4e6cb4b32d3184d7390f2a6b35bbdbf8",
     "semantic_hash": ""
   },
   "public/guide/stills/insights-forecast.jpg": {
-    "mtime": 1793053578.3052533,
-    "seen": 1793066786.8110306,
-    "ast_hash": "5703021ea7a76045e792584a94b2e7e1",
+    "mtime": 1793077355.6307228,
+    "seen": 1793082069.801623,
+    "ast_hash": "b5441a7755944f5db13303be5b066198",
     "semantic_hash": ""
   },
   "public/guide/stills/insights-metrics.jpg": {
-    "mtime": 1793053578.1172538,
-    "seen": 1793066786.8110316,
-    "ast_hash": "fb9dbc03ae34933398ba8119b62b57c4",
+    "mtime": 1793077355.4427228,
+    "seen": 1793082069.8016238,
+    "ast_hash": "225a769f1b7a73c95ca8e02c80ef0fdf",
     "semantic_hash": ""
   },
   "public/guide/stills/insights-scope.jpg": {
-    "mtime": 1793053578.2092535,
-    "seen": 1793066786.8110325,
-    "ast_hash": "5748dd63d1e7f10d0254d60bb3abbd47",
+    "mtime": 1793077355.5387228,
+    "seen": 1793082069.8016248,
+    "ast_hash": "a6e351e51ceee11dfc8fbfe5e5b9799e",
     "semantic_hash": ""
   },
   "public/guide/stills/lunch-create.jpg": {
-    "mtime": 1793053573.4052644,
-    "seen": 1793066786.8110335,
-    "ast_hash": "c6c9e09b752ecc806a26e881c52ab538",
+    "mtime": 1793077350.7267268,
+    "seen": 1793082069.8016262,
+    "ast_hash": "7273014d0897723f4571549713deca48",
     "semantic_hash": ""
   },
   "public/guide/stills/lunch-fill.jpg": {
-    "mtime": 1793053573.4972641,
-    "seen": 1793066786.811035,
-    "ast_hash": "582b34eff5cb457466c3193c2374d101",
+    "mtime": 1793077350.8187268,
+    "seen": 1793082069.8016272,
+    "ast_hash": "9db1cdd8a7de173a61af1cd1ed33e24a",
     "semantic_hash": ""
   },
   "public/guide/stills/lunch-ignore.jpg": {
-    "mtime": 1793053573.589264,
-    "seen": 1793066786.8110359,
-    "ast_hash": "8a4b03b06cf3cf84f457f8c25b2a77d9",
+    "mtime": 1793077350.9147267,
+    "seen": 1793082069.801628,
+    "ast_hash": "576242177efe5dfd126b0c12dce5799e",
     "semantic_hash": ""
   },
   "public/guide/stills/lunch-save.jpg": {
-    "mtime": 1793053573.6772637,
-    "seen": 1793066786.8110368,
-    "ast_hash": "a0ed9bfcfe7c34064d706ca0c8d0f9b9",
+    "mtime": 1793077351.0107267,
+    "seen": 1793082069.801629,
+    "ast_hash": "2bd884518a83f09ede8dda02859f7843",
     "semantic_hash": ""
   },
   "public/guide/stills/lunch-select.jpg": {
-    "mtime": 1793053573.3132646,
-    "seen": 1793066786.8110383,
-    "ast_hash": "10b6087199e65b252f2f6bdc7956ac5d",
+    "mtime": 1793077350.634727,
+    "seen": 1793082069.8016303,
+    "ast_hash": "2f53a459841e4ee20ce73e9632be73db",
     "semantic_hash": ""
   },
   "public/guide/stills/model-allocation.jpg": {
-    "mtime": 1793053571.6612682,
-    "seen": 1793066786.8110392,
+    "mtime": 1793077349.0987282,
+    "seen": 1793082069.8016312,
     "ast_hash": "8de9aad58ca61c4d018a735b78269849",
     "semantic_hash": ""
   },
   "public/guide/stills/model-combine.jpg": {
-    "mtime": 1793053571.833268,
-    "seen": 1793066786.8110402,
+    "mtime": 1793077349.270728,
+    "seen": 1793082069.8016322,
     "ast_hash": "703c46c4248391f3fa914eb0d3e37372",
     "semantic_hash": ""
   },
   "public/guide/stills/model-record.jpg": {
-    "mtime": 1793053571.5772684,
-    "seen": 1793066786.8110414,
+    "mtime": 1793077349.0107284,
+    "seen": 1793082069.8016331,
     "ast_hash": "7ce8c21b6d27b40489203b8c37578506",
     "semantic_hash": ""
   },
   "public/guide/stills/model-simple.jpg": {
-    "mtime": 1793053571.9172676,
-    "seen": 1793066786.811042,
+    "mtime": 1793077349.350728,
+    "seen": 1793082069.801634,
     "ast_hash": "2ad7bbfa08c6419a3a46b6344c2f9ea9",
     "semantic_hash": ""
   },
   "public/guide/stills/model-split.jpg": {
-    "mtime": 1793053571.749268,
-    "seen": 1793066786.811043,
+    "mtime": 1793077349.1827283,
+    "seen": 1793082069.801635,
     "ast_hash": "e7d4fdaa736d4523782f8de436675ef7",
     "semantic_hash": ""
   },
   "public/guide/stills/model-statement.jpg": {
-    "mtime": 1793053571.4932685,
-    "seen": 1793066786.8110437,
+    "mtime": 1793077348.9307284,
+    "seen": 1793082069.8016357,
     "ast_hash": "2f6f8290e691861ec711d13cb27a4407",
     "semantic_hash": ""
   },
   "public/guide/stills/model-three.jpg": {
-    "mtime": 1793053571.4172688,
-    "seen": 1793066786.8110452,
+    "mtime": 1793077348.8507285,
+    "seen": 1793082069.801637,
     "ast_hash": "40c652a851c0dfe7b270cfaee1426ad6",
     "semantic_hash": ""
   },
   "public/guide/stills/monthly-days.jpg": {
-    "mtime": 1793053578.5852528,
-    "seen": 1793066786.8110461,
-    "ast_hash": "68eb0b1585b87f890288ad0256b082eb",
+    "mtime": 1793077355.9067223,
+    "seen": 1793082069.801638,
+    "ast_hash": "fa2a0d169c156877a7fd42b2cc56a558",
     "semantic_hash": ""
   },
   "public/guide/stills/monthly-drill.jpg": {
-    "mtime": 1793053578.6732526,
-    "seen": 1793066786.811047,
-    "ast_hash": "7bb36a7397b6f7645d2a790b2610d6d3",
+    "mtime": 1793077355.9987223,
+    "seen": 1793082069.8016388,
+    "ast_hash": "a01893e2dbbec3315f7818116d7b8c5a",
     "semantic_hash": ""
   },
   "public/guide/stills/monthly-review.jpg": {
-    "mtime": 1793053578.7652524,
-    "seen": 1793066786.811048,
-    "ast_hash": "632d0012c44d9e2b7668bd48aaa79355",
+    "mtime": 1793077356.0907223,
+    "seen": 1793082069.80164,
+    "ast_hash": "a5ca09ddc052730691d193ed481fddaa",
     "semantic_hash": ""
   },
   "public/guide/stills/pending-attach.jpg": {
-    "mtime": 1793053575.26126,
-    "seen": 1793066786.811049,
-    "ast_hash": "afcfc870959ace0e601045f08f6d39a3",
+    "mtime": 1793077352.6027253,
+    "seen": 1793082069.8016407,
+    "ast_hash": "d7f243d1a3e7010959ad2f9ffe6cf27a",
     "semantic_hash": ""
   },
   "public/guide/stills/pending-complete.jpg": {
-    "mtime": 1793053575.35326,
-    "seen": 1793066786.81105,
-    "ast_hash": "8bbcbd10fef463796ed0582f0f52abab",
+    "mtime": 1793077352.6947253,
+    "seen": 1793082069.8016417,
+    "ast_hash": "d3509fdd418da6c6072223a1b483922c",
     "semantic_hash": ""
   },
   "public/guide/stills/pending-concert.jpg": {
-    "mtime": 1793053574.9892607,
-    "seen": 1793066786.811051,
-    "ast_hash": "747c099fdb20d56024e1ccb9e08cb657",
+    "mtime": 1793077352.3267255,
+    "seen": 1793082069.8016427,
+    "ast_hash": "a18de534aab26d9ac65bceee2f6e87f8",
     "semantic_hash": ""
   },
   "public/guide/stills/pending-flag.jpg": {
-    "mtime": 1793053575.0812604,
-    "seen": 1793066786.811052,
-    "ast_hash": "16e9f7ff93dc0ffc6311f23e111d57c0",
+    "mtime": 1793077352.4187255,
+    "seen": 1793082069.8016436,
+    "ast_hash": "0855cb29c3449a7eedb948717c4dd5db",
     "semantic_hash": ""
   },
   "public/guide/stills/pending-list.jpg": {
-    "mtime": 1793053575.1772604,
-    "seen": 1793066786.8110528,
-    "ast_hash": "49d035724debb1ee4febb2e3178beaaa",
+    "mtime": 1793077352.5147252,
+    "seen": 1793082069.8016446,
+    "ast_hash": "2599e13039c1a9c1b2f2f28d6d82d150",
     "semantic_hash": ""
   },
   "public/guide/stills/pending-meaning.jpg": {
-    "mtime": 1793053575.4372597,
-    "seen": 1793066786.811054,
+    "mtime": 1793077352.7747252,
+    "seen": 1793082069.8016458,
     "ast_hash": "09ae071fdb7a57f0d48e5f61483bffe6",
     "semantic_hash": ""
   },
   "public/guide/stills/pending-statements-create.jpg": {
-    "mtime": 1793053575.6052594,
-    "seen": 1793066786.8110554,
-    "ast_hash": "a1e0ca44375ee8b3c6bd27f2c33964f1",
+    "mtime": 1793077352.954725,
+    "seen": 1793082069.8016467,
+    "ast_hash": "7fa9441bf875d8770c67e8ad1c6cac7e",
     "semantic_hash": ""
   },
   "public/guide/stills/pending-statements-explain.jpg": {
-    "mtime": 1793053575.6972592,
-    "seen": 1793066786.8110561,
-    "ast_hash": "8d8117b00d9a88cb983818730bf6bd32",
+    "mtime": 1793077353.0467248,
+    "seen": 1793082069.8016477,
+    "ast_hash": "625defc36292aa87a550ea369105b991",
     "semantic_hash": ""
   },
   "public/guide/stills/pending-statements-replace.jpg": {
-    "mtime": 1793053575.789259,
-    "seen": 1793066786.811057,
+    "mtime": 1793077353.1347249,
+    "seen": 1793082069.8016489,
     "ast_hash": "0a63a2661b600c5bd503b79d9ff2b33b",
     "semantic_hash": ""
   },
   "public/guide/stills/pending-statements-review.jpg": {
-    "mtime": 1793053575.8732588,
-    "seen": 1793066786.8110578,
-    "ast_hash": "2b0063134f937e4538ecebe8506c5194",
+    "mtime": 1793077353.2227247,
+    "seen": 1793082069.8016496,
+    "ast_hash": "995c5d96dfcebc85e2b464a98e5a087f",
     "semantic_hash": ""
   },
   "public/guide/stills/pending-statements-why.jpg": {
-    "mtime": 1793053575.5132596,
-    "seen": 1793066786.811059,
+    "mtime": 1793077352.8547251,
+    "seen": 1793082069.801651,
     "ast_hash": "05f00b30b39a9af9fa969ef63687bfb0",
     "semantic_hash": ""
   },
   "public/guide/stills/pending-when.jpg": {
-    "mtime": 1793053574.897261,
-    "seen": 1793066786.8110602,
+    "mtime": 1793077352.2347255,
+    "seen": 1793082069.801652,
     "ast_hash": "8a15b562d9584d1a4c1e15754b394a71",
     "semantic_hash": ""
   },
   "public/guide/stills/repayment-create.jpg": {
-    "mtime": 1793053574.381262,
-    "seen": 1793066786.8110611,
-    "ast_hash": "ff662ca24d78cfaea2c21c459f56e88a",
+    "mtime": 1793077351.714726,
+    "seen": 1793082069.8016527,
+    "ast_hash": "a60d1dfc27b23dc1a5a842c1308e624a",
     "semantic_hash": ""
   },
   "public/guide/stills/repayment-done.jpg": {
-    "mtime": 1793053574.469262,
-    "seen": 1793066786.8110623,
-    "ast_hash": "dbc8f7b6852cfca1099323ce30bb23e3",
+    "mtime": 1793077351.802726,
+    "seen": 1793082069.8016539,
+    "ast_hash": "d764bbcf0d4cbf3ce7a8a4423054c8bc",
     "semantic_hash": ""
   },
   "public/guide/stills/repayment-select.jpg": {
-    "mtime": 1793053574.2892623,
-    "seen": 1793066786.811063,
-    "ast_hash": "a46d2205c61f23c0a52633a11d5eb71a",
+    "mtime": 1793077351.6227262,
+    "seen": 1793082069.8016548,
+    "ast_hash": "c58bdb7ea29ae16033156956006260ad",
     "semantic_hash": ""
   },
   "public/guide/stills/routine-backup.jpg": {
-    "mtime": 1793053579.6772501,
-    "seen": 1793066786.811064,
+    "mtime": 1793077356.9907215,
+    "seen": 1793082069.8016558,
     "ast_hash": "ab98cb920036686dc98f929bcb1c0906",
     "semantic_hash": ""
   },
   "public/guide/stills/routine-help.jpg": {
-    "mtime": 1793053579.77325,
-    "seen": 1793066786.8110652,
-    "ast_hash": "5b792daf09843312a7cb4db61fc0302a",
+    "mtime": 1793077357.0867214,
+    "seen": 1793082069.8016572,
+    "ast_hash": "0e181dcf0bbd8cde935ceeaf160066b8",
     "semantic_hash": ""
   },
   "public/guide/stills/routine-loop.jpg": {
-    "mtime": 1793053579.5972505,
-    "seen": 1793066786.811066,
+    "mtime": 1793077356.9187217,
+    "seen": 1793082069.8016582,
     "ast_hash": "ce4529892549d87c9af87598581e545c",
     "semantic_hash": ""
   },
   "public/guide/stills/rules-fill.jpg": {
-    "mtime": 1793053577.1012561,
-    "seen": 1793066786.8110669,
-    "ast_hash": "c6796669f2be6634893527c748fea1cb",
+    "mtime": 1793077354.4627237,
+    "seen": 1793082069.8016589,
+    "ast_hash": "36db814d4b195bb901696f8643e10ad5",
     "semantic_hash": ""
   },
   "public/guide/stills/rules-match.jpg": {
-    "mtime": 1793053577.0212562,
-    "seen": 1793066786.8110676,
-    "ast_hash": "3d581fe0d409adeb0c78356a9b8cde46",
+    "mtime": 1793077354.3827238,
+    "seen": 1793082069.8016596,
+    "ast_hash": "db4db59aef667fec99145d0106a03bc7",
     "semantic_hash": ""
   },
   "public/guide/stills/rules-use.jpg": {
-    "mtime": 1793053577.193256,
-    "seen": 1793066786.8110688,
-    "ast_hash": "bcc86b29e2f03da6e9e6662e73f796ae",
+    "mtime": 1793077354.5547235,
+    "seen": 1793082069.8016608,
+    "ast_hash": "2129eaf5b11f901fe19277016bd905b8",
     "semantic_hash": ""
   },
   "public/guide/stills/rules-why.jpg": {
-    "mtime": 1793053576.9332564,
-    "seen": 1793066786.8110697,
+    "mtime": 1793077354.2947237,
+    "seen": 1793082069.8016617,
     "ast_hash": "1097b3f5ba98241a25d05fdf8725916d",
     "semantic_hash": ""
   },
   "public/guide/stills/split-amount.jpg": {
-    "mtime": 1793053573.8572633,
-    "seen": 1793066786.8110707,
-    "ast_hash": "c1fd734fbea3f45d72960451cf826281",
+    "mtime": 1793077351.1947265,
+    "seen": 1793082069.8016627,
+    "ast_hash": "7c10a81461a08a346ca9152b30df26ef",
     "semantic_hash": ""
   },
   "public/guide/stills/split-done.jpg": {
-    "mtime": 1793053574.2012625,
-    "seen": 1793066786.8110716,
+    "mtime": 1793077351.538726,
+    "seen": 1793082069.8016636,
     "ast_hash": "370814bf012066f7b4327ff50bbad7cf",
     "semantic_hash": ""
   },
   "public/guide/stills/split-gift.jpg": {
-    "mtime": 1793053574.037263,
-    "seen": 1793066786.8110728,
-    "ast_hash": "d7b0e9cfe6b9d78bdb5aa02d684501ae",
+    "mtime": 1793077351.3747263,
+    "seen": 1793082069.8016648,
+    "ast_hash": "1910d1bb06e67c10452b3cd2df535d04",
     "semantic_hash": ""
   },
   "public/guide/stills/split-left.jpg": {
-    "mtime": 1793053573.9412632,
-    "seen": 1793066786.8110738,
-    "ast_hash": "e72dc78a8bf49e41f6baa412af9fbbce",
+    "mtime": 1793077351.2827263,
+    "seen": 1793082069.8016658,
+    "ast_hash": "8f66b963141da5afa952c17bce3603ba",
     "semantic_hash": ""
   },
   "public/guide/stills/split-save.jpg": {
-    "mtime": 1793053574.1252627,
-    "seen": 1793066786.8110745,
-    "ast_hash": "ac922c8d02a2b4d9f95d3548fa39bb45",
+    "mtime": 1793077351.462726,
+    "seen": 1793082069.8016667,
+    "ast_hash": "ccadff8252212b64a3f78b6418560215",
     "semantic_hash": ""
   },
   "public/guide/stills/split-select.jpg": {
-    "mtime": 1793053573.7652636,
-    "seen": 1793066786.8110757,
-    "ast_hash": "80cb8cd7c3800a4f00fed926efeeae12",
+    "mtime": 1793077351.1027265,
+    "seen": 1793082069.8016677,
+    "ast_hash": "e4b2673847f1c58c65bada6d579480de",
     "semantic_hash": ""
   },
   "public/guide/stills/start-bank.jpg": {
-    "mtime": 1793053571.0292697,
-    "seen": 1793066786.8110766,
+    "mtime": 1793077348.4387288,
+    "seen": 1793082069.8016686,
     "ast_hash": "0a8b66b76b8a3dc84692169948a300b4",
     "semantic_hash": ""
   },
   "public/guide/stills/start-built.jpg": {
-    "mtime": 1793053571.341269,
-    "seen": 1793066786.8110776,
+    "mtime": 1793077348.7707286,
+    "seen": 1793082069.8016696,
     "ast_hash": "283f1bc93ac8d953a1808ad92b5b160b",
     "semantic_hash": ""
   },
   "public/guide/stills/start-dinner.jpg": {
-    "mtime": 1793053571.1852694,
-    "seen": 1793066786.8110785,
+    "mtime": 1793077348.6147287,
+    "seen": 1793082069.8016706,
     "ast_hash": "c64cedf6d9d1184742be25543afd043c",
     "semantic_hash": ""
   },
   "public/guide/stills/start-explain.jpg": {
-    "mtime": 1793053571.261269,
-    "seen": 1793066786.8110797,
+    "mtime": 1793077348.6907287,
+    "seen": 1793082069.8016717,
     "ast_hash": "92b1d907b46760736ad01e0055b764f8",
     "semantic_hash": ""
   },
   "public/guide/stills/start-split.jpg": {
-    "mtime": 1793053571.1092694,
-    "seen": 1793066786.8110805,
+    "mtime": 1793077348.5307288,
+    "seen": 1793082069.8016727,
     "ast_hash": "2a68e91d2271a75dfc881cce5fff5f41",
     "semantic_hash": ""
   },
   "public/guide/stills/sync-conflict.jpg": {
-    "mtime": 1793053579.4452507,
-    "seen": 1793066786.8110814,
+    "mtime": 1793077356.7667217,
+    "seen": 1793082069.8016737,
     "ast_hash": "55c1ef64abc5649456684083bb5bea34",
     "semantic_hash": ""
   },
   "public/guide/stills/sync-drive.jpg": {
-    "mtime": 1793053579.3612509,
-    "seen": 1793066786.8110821,
-    "ast_hash": "f18f8817a146a518ffde0c9a4efedb67",
+    "mtime": 1793077356.6907218,
+    "seen": 1793082069.8016748,
+    "ast_hash": "675b5a5bef05ee26fafb9f06e9d98275",
     "semantic_hash": ""
   },
   "public/guide/stills/sync-file.jpg": {
-    "mtime": 1793053579.269251,
-    "seen": 1793066786.8110836,
-    "ast_hash": "3fbb1002c82ae7504402092bcb72e288",
+    "mtime": 1793077356.602722,
+    "seen": 1793082069.8016758,
+    "ast_hash": "cba6df93df4987ec3d66f820b505722d",
     "semantic_hash": ""
   },
   "public/guide/stills/sync-local.jpg": {
-    "mtime": 1793053579.1812513,
-    "seen": 1793066786.8110845,
+    "mtime": 1793077356.510722,
+    "seen": 1793082069.8016768,
     "ast_hash": "85e10dafc2a4a9bf1a93da763bb92160",
     "semantic_hash": ""
   },
   "public/guide/stills/sync-yours.jpg": {
-    "mtime": 1793053579.5212505,
-    "seen": 1793066786.8110855,
+    "mtime": 1793077356.8427217,
+    "seen": 1793082069.801678,
     "ast_hash": "cfea36323ee60799afe4b690b482ac47",
     "semantic_hash": ""
   },
   "public/guide/stills/treatments-dashboard.jpg": {
-    "mtime": 1793053577.4412553,
-    "seen": 1793066786.8110864,
-    "ast_hash": "993fea3d997b6e4c6f7e40f5f7660df0",
+    "mtime": 1793077354.8027234,
+    "seen": 1793082069.801679,
+    "ast_hash": "419df62439bdc125fdf252e161711b07",
     "semantic_hash": ""
   },
   "public/guide/stills/treatments-examples.jpg": {
-    "mtime": 1793053577.3412554,
-    "seen": 1793066786.8110874,
+    "mtime": 1793077354.7107234,
+    "seen": 1793082069.8016798,
     "ast_hash": "93df8346cd4c0053ea27428ecf9750ed",
     "semantic_hash": ""
   },
   "public/guide/stills/treatments-override.jpg": {
-    "mtime": 1793053577.533255,
-    "seen": 1793066786.8110883,
+    "mtime": 1793077354.8827233,
+    "seen": 1793082069.8016806,
     "ast_hash": "13a17a3712fe0ed8e49586147af53838",
     "semantic_hash": ""
   },
   "public/guide/stills/treatments-what.jpg": {
-    "mtime": 1793053577.2612557,
-    "seen": 1793066786.811089,
+    "mtime": 1793077354.6307235,
+    "seen": 1793082069.8016818,
     "ast_hash": "83b7eed200e36f56e5df252824bfac2a",
     "semantic_hash": ""
   },
   "public/guide/stills/workspace-demo.jpg": {
-    "mtime": 1793053572.0132675,
-    "seen": 1793066786.8110905,
-    "ast_hash": "b46f7dd332586bd3700d247efe2ec240",
+    "mtime": 1793077349.442728,
+    "seen": 1793082069.8016827,
+    "ast_hash": "a51673496ae97eb19d3f4158a33cd0c8",
     "semantic_hash": ""
   },
   "public/guide/stills/workspace-own.jpg": {
-    "mtime": 1793053572.193267,
-    "seen": 1793066786.8110914,
-    "ast_hash": "790c376ef1e2d10254825f3a049756e7",
-    "semantic_hash": ""
-  },
-  "public/guide/stills/workspace-practice.jpg": {
-    "mtime": 1793053572.1092672,
-    "seen": 1793066786.8110921,
-    "ast_hash": "f7a6e39e7c1eb29c75151db26add72be",
+    "mtime": 1793077349.526728,
+    "seen": 1793082069.8016837,
+    "ast_hash": "bc9108caa3baac87250d3bc34522695a",
     "semantic_hash": ""
   },
   "public/guide/finpoint-guide.mp4": {
-    "mtime": 1793053512.6173992,
-    "seen": 1793066786.8111167,
-    "ast_hash": "443e44e484201f5f8a0545b20c64c865",
+    "mtime": 1793077290.430782,
+    "seen": 1793082069.8017092,
+    "ast_hash": "8ed64dd2ec026ba674249b82efe94c85",
     "semantic_hash": ""
   },
   "video/compositions/components/kit.ts": {
@@ -5016,9 +5004,9 @@
     "semantic_hash": ""
   },
   "tests/core/guide-video.e2e.ts": {
-    "mtime": 1793070736.3240566,
-    "seen": 1793070792.792405,
-    "ast_hash": "107682bccae5bd83c6beea4362352546",
+    "mtime": 1793081940.280798,
+    "seen": 1793082069.8012657,
+    "ast_hash": "fa272cee60922568df933a5f824fae77",
     "semantic_hash": ""
   }
 }

@@ -207,3 +207,24 @@ test("guide rings: clipping and lifetime audits include hidden and detached targ
 		expect(audit.reason).toBe("finish")
 	}
 })
+
+test("help menu: lists the section's guides and opens one in the side panel", async ({ page }) => {
+	await page.goto("/allocator")
+	await page.getByRole("button", { name: "Help" }).first().click()
+	const menu = page.getByRole("menu")
+	await expect(menu.getByRole("menuitem")).toHaveText([
+		"Workflows",
+		"Explaining your first purchase",
+		"Splitting one payment",
+		"Combining payments into one Record",
+		"Pending Records",
+		"Watch this in the video guide",
+		"All help topics",
+	])
+	await menu.getByRole("menuitem", { name: "Splitting one payment" }).click()
+	const panel = page.getByRole("dialog")
+	await expect(panel.getByRole("heading", { name: "Splitting one payment" })).toBeVisible()
+	await expect(panel.getByRole("combobox", { name: "Related guides" })).toHaveText(
+		"Splitting one payment",
+	)
+})

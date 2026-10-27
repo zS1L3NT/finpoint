@@ -1030,7 +1030,12 @@ export const story: TakeScript[] = [
 			await t.ring("help", help)
 			await press(t.page, help)
 			await t.unring()
-			await t.at("help", "Every chapter")
+			await t.at("help", "guides")
+			const menu = app.getByRole("menu")
+			await t.ring("menu", menu)
+			await t.at("help", "step by step")
+			await press(t.page, menu.getByRole("menuitem").first())
+			await t.unring()
 			await t.ring("panel", dialog(app))
 		},
 	},

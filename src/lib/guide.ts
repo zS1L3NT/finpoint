@@ -729,7 +729,7 @@ export const guideChapters: GuideChapter[] = [
 			},
 			{
 				id: "help",
-				say: "And whenever you’re unsure, choose Help at the top of any page. Every chapter of this guide is there, step by step.",
+				say: "And whenever you’re unsure, choose Help at the top of any page. It lists the guides for that page, step by step.",
 			},
 		],
 	},
