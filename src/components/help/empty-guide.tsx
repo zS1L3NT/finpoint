@@ -31,7 +31,7 @@ export function EmptyGuide({
 			</p>
 			<p className="text-muted-foreground">
 				{noImports
-					? "Import a supported bank CSV to bring in activity, or try a sample lesson first."
+					? "Import a supported bank CSV to bring in activity, or try demo data from the Dashboard first."
 					: queueClear
 						? "Fully allocated Statements leave Allocate to Records. You can still find them in Statements. Review Pending Records separately."
 						: noRecords
