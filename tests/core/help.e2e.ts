@@ -463,14 +463,18 @@ test("help video page: resume, chapter list and read-article links work", async 
 	await expect(
 		page.getByRole("heading", { name: "Finpoint, from the beginning", exact: true }),
 	).toBeVisible()
-	const selected = timeline.chapters[1]
+	const selected = timeline.chapters[3]
 	if (!selected) throw new Error("Missing chapter fixture")
-	const link = page.getByRole("navigation", { name: "Video chapters" }).getByRole("link").nth(1)
+	const link = page.getByRole("navigation", { name: "Video chapters" }).getByRole("link").nth(3)
 	await expect(link).toContainText(selected.title)
 	await link.click()
 	await expect
 		.poll(() => page.locator("video").evaluate((el: HTMLVideoElement) => el.currentTime))
 		.toBeCloseTo(selected.startFrame / timeline.fps, 1)
 	await expect(page).toHaveURL(new RegExp(`/help/video\\?chapter=${selected.id}`))
+	await expect(page.getByRole("link", { name: "Read article" })).toHaveAttribute(
+		"href",
+		`/help?topic=${selected.id}`,
+	)
 	await fits(page, page.getByRole("heading", { name: "Finpoint, from the beginning" }))
 })

@@ -41,7 +41,8 @@ export default function GuideVideoPlayer({
 		if (!element) return
 		let previous = ""
 		const update = () => {
-			const frame = element.currentTime * timeline.fps
+			// Round, as a seek to a chapter's start can land a hair before its first frame.
+			const frame = Math.round(element.currentTime * timeline.fps)
 			const chapter =
 				timeline.chapters.find(
 					item =>
