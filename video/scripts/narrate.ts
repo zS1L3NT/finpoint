@@ -206,6 +206,8 @@ writeFileSync(cacheFile, `${JSON.stringify(cache, null, "\t")}\n`)
 // 3. Timeline, word cues, captions and transcript, all from the measured sentence positions.
 let cursor = 0
 let captions = "WEBVTT\n\n"
+/** WebVTT cue text must escape these; iPhone Safari refuses the whole video over a bare `&`. */
+const vttText = (text: string) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
 const cues: Record<string, number[]> = {}
 const chapters = guideChapters.map(chapter => {
 	const startFrame = cursor
@@ -235,7 +237,7 @@ const chapters = guideChapters.map(chapter => {
 					index < item.titleParts
 						? chapter.title
 						: (item.body[index - item.titleParts] ?? []).join(" ")
-				captions += `${timestamp(segmentStart + part.start)} --> ${timestamp(segmentStart + part.end + 0.2)}\n${text}\n\n`
+				captions += `${timestamp(segmentStart + part.start)} --> ${timestamp(segmentStart + part.end + 0.2)}\n${vttText(text)}\n\n`
 			})
 			const step = stepOf(chapter, item.beat.id)
 			const title = item.titleParts ? clip.parts[0] : undefined

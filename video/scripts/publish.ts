@@ -40,7 +40,7 @@ const timestamp = (seconds: number) => {
 writeFileSync(
 	resolve(out, "chapters.vtt"),
 	`WEBVTT\n\n${timeline.chapters
-		.map(chapter => `${timestamp(chapter.startFrame / fps)} --> ${timestamp((chapter.startFrame + chapter.durationInFrames) / fps)}\n${chapter.title}`)
+		.map(chapter => `${timestamp(chapter.startFrame / fps)} --> ${timestamp((chapter.startFrame + chapter.durationInFrames) / fps)}\n${chapter.title.replace(/&/g, "&amp;")}`)
 		.join("\n\n")}\n`,
 )
 

@@ -20,6 +20,11 @@ export default function GuideVideoPlayer({
 }) {
 	const video = useRef<HTMLVideoElement>(null)
 	const [resumeFrame] = useState(initialFrame)
+	// iPhone Safari rejects the whole video when it can't read a text track, so play without them.
+	const [tracks, setTracks] = useState(true)
+	useEffect(() => {
+		if (!tracks) video.current?.load()
+	}, [tracks])
 	useEffect(() => {
 		const element = video.current
 		if (!element) return
@@ -71,15 +76,25 @@ export default function GuideVideoPlayer({
 			controls
 			preload="metadata"
 			playsInline
+			onError={() => setTracks(false)}
 		>
-			<track kind="captions" src="/guide/finpoint-guide.vtt" srcLang="en" label="English" />
-			<track
-				kind="chapters"
-				src="/guide/chapters.vtt"
-				srcLang="en"
-				label="Chapters"
-				default
-			/>
+			{tracks && (
+				<>
+					<track
+						kind="captions"
+						src="/guide/finpoint-guide.vtt"
+						srcLang="en"
+						label="English"
+					/>
+					<track
+						kind="chapters"
+						src="/guide/chapters.vtt"
+						srcLang="en"
+						label="Chapters"
+						default
+					/>
+				</>
+			)}
 		</video>
 	)
 }
