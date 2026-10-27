@@ -159,6 +159,28 @@ test("guide rings: clipping and lifetime audits include hidden and detached targ
 				.evaluate(el => el.parentElement?.style.clipPath),
 		)
 		.toContain("path(")
+	// The target overflows #clip, so its ring is pulled inside #clip's padding box, whole.
+	const fit = await page.evaluate(() => {
+		const frame = document.querySelector("iframe") as HTMLIFrameElement
+		const outer = frame.getBoundingClientRect()
+		const scale = outer.width / frame.offsetWidth
+		const clip = frame.contentDocument?.querySelector("#clip") as HTMLElement
+		const box = clip.getBoundingClientRect()
+		const room = {
+			left: outer.left + (box.left + clip.clientLeft) * scale,
+			top: outer.top + (box.top + clip.clientTop) * scale,
+			right: outer.left + (box.left + clip.clientLeft + clip.clientWidth) * scale,
+			bottom: outer.top + (box.top + clip.clientTop + clip.clientHeight) * scale,
+		}
+		const ring = (document.querySelector(".ring") as HTMLElement).getBoundingClientRect()
+		return [
+			ring.left - room.left,
+			ring.top - room.top,
+			room.right - ring.right,
+			room.bottom - ring.bottom,
+		]
+	})
+	for (const gap of fit) expect(gap).toBeGreaterThanOrEqual(-0.5)
 	await page.waitForTimeout(80)
 	await app.locator("#target").evaluate(el => {
 		;(el as HTMLElement).style.display = "none"

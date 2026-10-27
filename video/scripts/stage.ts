@@ -189,8 +189,14 @@ export function stageHtml(appUrl: string) {
 		if (visible.length) {
 			const box = { left: Math.min(...visible.map(r => r.left)), top: Math.min(...visible.map(r => r.top)), right: Math.max(...visible.map(r => r.right)), bottom: Math.max(...visible.map(r => r.bottom)) }
 			const pad = 6 * view.s
-			Object.assign(item.ring.style, { left: (view.x + box.left * view.s - pad) + "px", top: (view.y + box.top * view.s - pad) + "px", width: ((box.right - box.left) * view.s + pad * 2) + "px", height: ((box.bottom - box.top) * view.s + pad * 2) + "px" })
-			// Clip the wrapper, so the border, padding AND shadow obey every boundary.
+			// Pull the ring inside the area that shows the target, so a target flush with a scroll
+			// area's edge (a tab, a card in a carousel, a page cut by the viewport) keeps its whole outline.
+			const room = geometry.regions.reduce((best, part) => (area(intersect(box, part)) > area(intersect(box, best)) ? part : best), geometry.regions[0])
+			const edge = { left: view.x + room.left * view.s, top: view.y + room.top * view.s, right: view.x + room.right * view.s, bottom: view.y + room.bottom * view.s }
+			const left = Math.max(edge.left, view.x + box.left * view.s - pad), top = Math.max(edge.top, view.y + box.top * view.s - pad)
+			const right = Math.min(edge.right, view.x + box.right * view.s + pad), bottom = Math.min(edge.bottom, view.y + box.bottom * view.s + pad)
+			Object.assign(item.ring.style, { left: left + "px", top: top + "px", width: (right - left) + "px", height: (bottom - top) + "px" })
+			// Clip the wrapper, so the ring's shadow obeys every boundary too.
 			item.wrapper.style.clipPath = 'path("' + geometry.regions.map(r => {
 				const l = view.x + r.left * view.s, t = view.y + r.top * view.s, right = view.x + r.right * view.s, bottom = view.y + r.bottom * view.s
 				return "M" + l + " " + t + "H" + right + "V" + bottom + "H" + l + "Z"
