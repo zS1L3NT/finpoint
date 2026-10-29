@@ -19,31 +19,31 @@
 		<div id="cap-allocator-list-24" class="cap"><span>Statement that still needs a label,</span></div>
 		<div id="cap-allocator-list-30" class="cap"><span>newest first.</span></div>
 		<div id="cap-allocator-left-0" class="cap"><span>Once a Statement is fully labelled,</span></div>
-		<div id="cap-allocator-left-6" class="cap"><span>it leaves this list.</span></div>
-		<div id="cap-allocator-left-10" class="cap"><span>So an empty list means you’re all</span></div>
-		<div id="cap-allocator-left-17" class="cap"><span>caught up, at least until your next</span></div>
-		<div id="cap-allocator-left-24" class="cap"><span>import.</span></div>
+		<div id="cap-allocator-left-6" class="cap"><span>the Statement leaves this list.</span></div>
+		<div id="cap-allocator-left-11" class="cap"><span>So an empty Allocate</span></div>
+		<div id="cap-allocator-left-15" class="cap"><span>to Records list means you’re all caught</span></div>
+		<div id="cap-allocator-left-22" class="cap"><span>up, at least until your next import.</span></div>
 		<div id="cap-allocator-tabs-0" class="cap"><span>The other two tabs help you tidy</span></div>
 		<div id="cap-allocator-tabs-7" class="cap"><span>up your imported Statements.</span></div>
-		<div id="cap-allocator-tabs-11" class="cap"><span>We’ll cover them later.</span></div>
+		<div id="cap-allocator-tabs-11" class="cap"><span>We’ll get to those tabs later.</span></div>
 		<div id="cap-allocator-pages-0" class="cap"><span>To look things up,</span></div>
-		<div id="cap-allocator-pages-4" class="cap"><span>use the Records and Statements</span></div>
-		<div id="cap-allocator-pages-9" class="cap"><span>pages.</span></div>
-		<div id="cap-allocator-pages-10" class="cap"><span>They list every Record and every Statement</span></div>
-		<div id="cap-allocator-pages-17" class="cap"><span>you have, with filters to help you</span></div>
-		<div id="cap-allocator-pages-24" class="cap"><span>find anything.</span></div>
-		<div id="cap-allocator-pages-26" class="cap"><span>Workflows is different:</span></div>
-		<div id="cap-allocator-pages-29" class="cap"><span>it only shows the Statements</span></div>
-		<div id="cap-allocator-pages-34" class="cap"><span>that still need you.</span></div>
+		<div id="cap-allocator-pages-4" class="cap"><span>use the Records page and the Statements</span></div>
+		<div id="cap-allocator-pages-11" class="cap"><span>page.</span></div>
+		<div id="cap-allocator-pages-12" class="cap"><span>The Records page lists every Record,</span></div>
+		<div id="cap-allocator-pages-18" class="cap"><span>and the Statements page lists every Statement,</span></div>
+		<div id="cap-allocator-pages-25" class="cap"><span>with filters to help you find anything.</span></div>
+		<div id="cap-allocator-pages-32" class="cap"><span>Workflows is different:</span></div>
+		<div id="cap-allocator-pages-35" class="cap"><span>Workflows only shows the Statements that still</span></div>
+		<div id="cap-allocator-pages-42" class="cap"><span>need a label.</span></div>
 	</div>
 	<script>
 		const tl = gsap.timeline({ paused: true })
-		const groups = [["cap-allocator-list-0",2.25,3.883],["cap-allocator-list-5",3.883,5.483],["cap-allocator-list-12",5.483,7.317],["cap-allocator-list-16",7.317,8.983],["cap-allocator-list-20",8.983,9.817],["cap-allocator-list-22",9.817,10.65],["cap-allocator-list-24",10.65,12.717],["cap-allocator-list-30",12.717,13.933],["cap-allocator-left-0",14.383,16.583],["cap-allocator-left-6",16.583,17.917],["cap-allocator-left-10",17.917,19.783],["cap-allocator-left-17",19.783,21.617],["cap-allocator-left-24",21.617,22.633],["cap-allocator-tabs-0",23.083,24.783],["cap-allocator-tabs-7",24.783,26.75],["cap-allocator-tabs-11",26.75,28.433],["cap-allocator-pages-0",28.883,29.917],["cap-allocator-pages-4",29.917,31.75],["cap-allocator-pages-9",31.75,32.617],["cap-allocator-pages-10",32.617,35.117],["cap-allocator-pages-17",35.117,36.917],["cap-allocator-pages-24",36.917,38.283],["cap-allocator-pages-26",38.283,39.883],["cap-allocator-pages-29",39.883,41.55],["cap-allocator-pages-34",41.55,43.733]]
+		const groups = [["cap-allocator-list-0",2.25,3.883],["cap-allocator-list-5",3.883,5.483],["cap-allocator-list-12",5.483,7.317],["cap-allocator-list-16",7.317,8.983],["cap-allocator-list-20",8.983,9.817],["cap-allocator-list-22",9.817,10.65],["cap-allocator-list-24",10.65,12.717],["cap-allocator-list-30",12.717,13.933],["cap-allocator-left-0",14.383,16.617],["cap-allocator-left-6",16.617,18.55],["cap-allocator-left-11",18.55,20.083],["cap-allocator-left-15",20.083,21.817],["cap-allocator-left-22",21.817,24.367],["cap-allocator-tabs-0",24.817,26.55],["cap-allocator-tabs-7",26.55,28.583],["cap-allocator-tabs-11",28.583,30.533],["cap-allocator-pages-0",30.983,31.917],["cap-allocator-pages-4",31.917,34.217],["cap-allocator-pages-11",34.217,35.15],["cap-allocator-pages-12",35.15,37.45],["cap-allocator-pages-18",37.45,40.35],["cap-allocator-pages-25",40.35,42.917],["cap-allocator-pages-32",42.917,44.617],["cap-allocator-pages-35",44.617,46.85],["cap-allocator-pages-42",46.85,49.033]]
 		for (const [id, start, end] of groups) {
 			tl.set("#" + id, { opacity: 1, visibility: "visible" }, start)
 			tl.set("#" + id, { opacity: 0, visibility: "hidden" }, end)
 		}
-		tl.set({}, {}, 44.033)
+		tl.set({}, {}, 49.333)
 		window.__timelines["captions"] = tl
 	</script>
 </template>

@@ -13,24 +13,25 @@
 		<div id="cap-workspace-demo-0" class="cap"><span>On your first visit,</span></div>
 		<div id="cap-workspace-demo-4" class="cap"><span>you’ll be greeted by an empty Dashboard.</span></div>
 		<div id="cap-workspace-demo-11" class="cap"><span>Since you don’t have any data yet,</span></div>
-		<div id="cap-workspace-demo-18" class="cap"><span>choose Try demo data.</span></div>
+		<div id="cap-workspace-demo-18" class="cap"><span>click Try demo data.</span></div>
 		<div id="cap-workspace-demo-22" class="cap"><span>It loads three bank accounts and five</span></div>
-		<div id="cap-workspace-demo-29" class="cap"><span>months of Records, so you can see</span></div>
-		<div id="cap-workspace-demo-36" class="cap"><span>what a lived-in Finpoint looks like.</span></div>
+		<div id="cap-workspace-demo-29" class="cap"><span>months of Records,</span></div>
+		<div id="cap-workspace-demo-32" class="cap"><span>so you can see what a lived-in</span></div>
+		<div id="cap-workspace-demo-39" class="cap"><span>Finpoint looks like.</span></div>
 		<div id="cap-workspace-own-0" class="cap"><span>When you’re done exploring,</span></div>
-		<div id="cap-workspace-own-4" class="cap"><span>clear the demo from the Data page,</span></div>
-		<div id="cap-workspace-own-11" class="cap"><span>with Clear all data.</span></div>
-		<div id="cap-workspace-own-15" class="cap"><span>Then you’re ready to import your own</span></div>
-		<div id="cap-workspace-own-22" class="cap"><span>bank activity.</span></div>
+		<div id="cap-workspace-own-4" class="cap"><span>clear the demo data from the Data</span></div>
+		<div id="cap-workspace-own-11" class="cap"><span>page, by clicking Clear all data.</span></div>
+		<div id="cap-workspace-own-17" class="cap"><span>Then you’re ready to import your own</span></div>
+		<div id="cap-workspace-own-24" class="cap"><span>bank activity.</span></div>
 	</div>
 	<script>
 		const tl = gsap.timeline({ paused: true })
-		const groups = [["cap-workspace-demo-0",2.783,3.917],["cap-workspace-demo-4",3.917,6.383],["cap-workspace-demo-11",6.383,8.35],["cap-workspace-demo-18",8.35,10.117],["cap-workspace-demo-22",10.117,11.95],["cap-workspace-demo-29",11.95,13.817],["cap-workspace-demo-36",13.817,16.467],["cap-workspace-own-0",16.917,18.583],["cap-workspace-own-4",18.583,20.65],["cap-workspace-own-11",20.65,22.183],["cap-workspace-own-15",22.183,23.75],["cap-workspace-own-22",23.75,25.933]]
+		const groups = [["cap-workspace-demo-0",2.783,3.917],["cap-workspace-demo-4",3.917,6.383],["cap-workspace-demo-11",6.383,8.45],["cap-workspace-demo-18",8.45,10.05],["cap-workspace-demo-22",10.05,11.917],["cap-workspace-demo-29",11.917,12.983],["cap-workspace-demo-32",12.983,14.85],["cap-workspace-demo-39",14.85,16.5],["cap-workspace-own-0",16.95,18.65],["cap-workspace-own-4",18.65,20.55],["cap-workspace-own-11",20.55,23.017],["cap-workspace-own-17",23.017,24.65],["cap-workspace-own-24",24.65,26.833]]
 		for (const [id, start, end] of groups) {
 			tl.set("#" + id, { opacity: 1, visibility: "visible" }, start)
 			tl.set("#" + id, { opacity: 0, visibility: "hidden" }, end)
 		}
-		tl.set({}, {}, 26.233)
+		tl.set({}, {}, 27.133)
 		window.__timelines["captions"] = tl
 	</script>
 </template>

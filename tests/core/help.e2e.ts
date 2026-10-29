@@ -159,9 +159,7 @@ test("help review: month confirmation persists across reload", async ({ page }) 
 	await seedWorkspace(page, "populated")
 	await clearLearning(page)
 	await page.goto("/help?topic=dashboard")
-	await expect(
-		page.getByRole("heading", { name: "Where your numbers come from", exact: true }),
-	).toBeVisible()
+	await expect(page.getByRole("heading", { name: "The Dashboard", exact: true })).toBeVisible()
 	await expect(page.getByText(/After checking October 2026/)).toBeVisible()
 	const confirm = page.getByRole("button", { name: "I reviewed October 2026" })
 	await expect(confirm).toBeVisible()
