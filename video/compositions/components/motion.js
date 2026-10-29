@@ -2,6 +2,8 @@
 const vars = window.__hyperframes.getVariables();
 const cues = JSON.parse(vars.cues || "{}");
 const T = (name, fallback) => cues[name] ?? fallback;
+// The chapter's level colour, for headings.
+document.querySelector("#root").style.setProperty("--level", vars.tone || "#4c9bff");
 const tl = gsap.timeline({ paused: true });
 const enter = (selector, at, x = 0) => tl.fromTo(selector,
 	{ opacity: 0, x, y: x ? 0 : 22 },
@@ -11,11 +13,11 @@ const emphasis = (selector, at) => tl.fromTo(selector,
 	{ scale: 1 }, { scale: 1.035, duration: 0.22, repeat: 1, yoyo: true, ease: "sine.inOut" }, at);
 const meter = (selector, value, at) => tl.fromTo(selector,
 	{ scaleX: 0 }, { scaleX: value, duration: 0.8, ease: "power2.out" }, at);
-const count = (selector, value, at) => {
-	const state = { value: 0 };
+const count = (selector, value, at, from = 0) => {
+	const state = { value: from };
 	const node = document.querySelector(selector);
-	tl.fromTo(state, { value: 0 }, { value, duration: 0.8, ease: "power2.out",
-		onUpdate: () => { node.textContent = `${state.value < -0.5 ? '−' : ''}$${Math.abs(Math.round(state.value))}`; }
+	tl.fromTo(state, { value: from }, { value, duration: 0.8, ease: "power2.out",
+		onUpdate: () => { node.textContent = `${state.value < -0.5 ? '−' : ''}$${Math.abs(Math.round(state.value)).toLocaleString('en-US')}`; }
 	}, at);
 };
 const flow = (id, at) => {
@@ -48,3 +50,16 @@ const steps = (selector, times) => {
 		if (index + 1 < times.length) tl.to(item, { color: "#a1a1aa", duration: 0.3 }, times[index + 1]);
 	});
 };
+// Draws an amount-free arrow along its path.
+const draw = (id, at) => {
+	const root = document.querySelector(id);
+	const path = root.querySelector(".fp-path");
+	const length = path.getTotalLength();
+	tl.fromTo(root, { opacity: 0 }, { opacity: 1, duration: 0.15 }, at);
+	tl.fromTo(path, { strokeDasharray: length, strokeDashoffset: length },
+		{ strokeDashoffset: 0, duration: 0.6, ease: "power2.inOut" }, at);
+	tl.fromTo(root.querySelector(".fp-arrow"), { opacity: 0 }, { opacity: 1, duration: 0.2 }, at + 0.45);
+};
+// Dims an object that stays on screen but stops being the subject.
+const dim = (selector, at) => tl.to(selector, { opacity: 0.3, duration: 0.35, ease: "power2.out" }, at);
+const undim = (selector, at) => tl.to(selector, { opacity: 1, duration: 0.35, ease: "power2.out" }, at);

@@ -108,7 +108,7 @@ bun video/scripts/visual-scenes.ts
 bun video/scripts/visual-proof.ts
 ```
 
-The first command writes only the three rebuilt scene files. The second copies those files and local GSAP into ignored `.hyperframes/visual-proof/<scene>/` projects with the exact cues and mount durations from the current `index.html`. It needs `bun install` in `video/`, but no takes or narration audio. Re-run it after composing a changed script. If narration exceeds the scene's declared envelope (90s for model, 24s for the other proofs), extend the duration passed to `scene()` before regeneration.
+The first command writes every scene file. The second (optionally given scene names) copies those files and local GSAP into ignored `.hyperframes/visual-proof/<scene>/` projects with the exact cues and mount durations from the current `index.html`. It needs `bun install` in `video/`, but no takes or narration audio. Re-run it after composing a changed script. If narration exceeds the scene's declared envelope (90s for model, 24s for the other proofs), extend the duration passed to `scene()` before regeneration.
 
 From `video/`:
 
@@ -120,25 +120,12 @@ npx --yes hyperframes@0.8.203 snapshot .hyperframes/visual-proof/model-diagram -
 
 Repeat for `pending-reasons` at 6,10,14 and `dashboard-source` at 5,7.3,9,17. Use `--review` for phone sheets and `--range 34.8,36.2 --frames 8 --no-end` for the Allocation motion. Snapshot times are scene-local in these fixtures. The full film adds its host start time.
 
-## Remaining scenes
+## Sizes and arrows
 
-| Scene | Suggested treatment |
-| --- | --- |
-| `start-problem` | Keep the imported payments fixed while two meanings unfold beside the supermarket purchase; net the dinner repayment last. |
-| `start-explain` | Reuse those objects and settle them into the bring → explain → see sequence. |
-| `import-banks` | Move one export file from bank to Finpoint, then separate Statements into labelled Account lanes. |
-| `import-download` | Zoom to the file extension; distinguish CSV/Excel from PDF with a clear accepted/rejected state. |
-| `split-done` | Reuse the split flow, then drain a clearly labelled “Left to allocate” meter to $0. |
-| `pending-when` | Place a Record on a date rail before the delayed Statement arrives. |
-| `pending-statement` | Swap the Pending card for the confirmed Statement while its Allocation stays visibly connected. |
-| `duplicate-export` | Keep account/day/amount aligned; change only the description, then reveal Duplicate? as a question. |
-| `rule-recurring` | Pass repeated phone Statements through one rule and show Suggest versus Autofill as distinct outcomes. |
-| `treatments` | Route a Record to the appropriate total; show a refund reducing Spending and Transfer contributing to none. |
-| `treatment-override` | Preserve the Category while a single Record's treatment badge changes, making the exception explicit. |
-| `monthly-budgets` | Advance a calendar-month selector over the same named plans; animate comparison amounts, not stored cash. |
-| `budget-period` | Draw a date range across October and November into a Budget card and its own small dashboard. |
-| `sync-local` | Put the data visibly inside the browser boundary; introduce backup destinations only when spoken. |
-| `sync-conflict` | Compare two complete copies and move one whole copy into the chosen state without blending rows. |
-| `routine-loop` | Use the step rail in two groups of three; finish with one return path to Import and Drive's backup badge. |
+Every scene is built from the kit in `scripts/visual-scenes.ts`; none is hand-written.
 
-`card.html` is the fallback placeholder, not one of the 19 illustrated scenes. Keep it visibly diagnostic; do not decorate it into a plausible missing scene.
+- **Relationship diagrams** (a Statement, its Allocations and their Records) always use full-size `card`s at the standard columns, so a Record is the same size in every scene that explains links.
+- **Lists and labels** use the compact `row` (a Statement or Record on one line, 104px tall) and `label` (a Record as a pill beside the payment it labels). A Record that is only being listed or pointed at never needs the full card.
+- **Things that aren't money** (banks, files, devices, plans, steps) are `tile`s.
+- **Every arrow is drawn**: `connector` when an amount moves (an Allocation), `arrow` for order, movement or cause. Never a → glyph in text; write "split across" or "combined into" instead.
+- **Headings** take the chapter's level colour (`tone`, passed by `compose.ts`), the same colour as the title card and the Help pages.

@@ -18,6 +18,9 @@ const groupLook: Record<string, { color: string; icon: string }> = {
 	"Your data": { color: color.pending, icon: "lucide:shield-check" },
 }
 
+/** A guide level's colour, as the film's title cards use it. */
+export const levelColor = (group: string) => groupLook[group]?.color ?? color.statement
+
 /** A colour at the app's per-theme tone (white icons read on it), exposed as `--level` for `bg-(--level)` classes. */
 export const levelStyle = (value: string) =>
 	({ "--level": themeColor(value) }) as React.CSSProperties

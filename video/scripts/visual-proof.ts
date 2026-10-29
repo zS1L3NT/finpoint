@@ -1,10 +1,12 @@
-// Isolate the three proof scenes with the exact per-mount cues from the composed film.
-// Run from any directory: bun video/scripts/visual-proof.ts. No narration or takes are required.
+// Isolate every illustrated scene (or the ones named) with the exact per-mount cues from the
+// composed film. Run from any directory: bun video/scripts/visual-proof.ts [scene...]. No narration
+// or takes are required.
 import { cpSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 
 const video = new URL("../", import.meta.url)
 const film = readFileSync(new URL("index.html", video), "utf8")
-for (const name of ["model-diagram", "pending-reasons", "dashboard-source"]) {
+const mounted = [...film.matchAll(/scenes\/([a-z-]+)\.html/g)].map(match => match[1]!).filter(name => name !== "card")
+for (const name of process.argv.length > 2 ? process.argv.slice(2) : [...new Set(mounted)]) {
 	const mount = film.match(new RegExp(`<div[^>]+scenes/${name}\\.html[^>]+>`))![0]
 	const duration = mount.match(/data-duration="([^"]+)"/)![1]
 	const values = mount.match(/data-variable-values='([^']+)'/)![1]

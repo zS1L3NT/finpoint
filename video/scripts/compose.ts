@@ -9,6 +9,7 @@
 import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { resolve } from "node:path"
 import { guideChapters } from "../../src/lib/guide"
+import { levelColor } from "../../src/lib/guide-theme"
 import { type CueRef, scenes } from "../scenes"
 import type { TakeInfo } from "./director"
 import { root } from "./tools"
@@ -84,7 +85,8 @@ guideChapters.forEach((source, chapterIndex) => {
 	const base = chapter.startFrame / fps
 	const end = base + chapter.durationInFrames / fps
 	const firstSegment = chapter.segments[0]
-	const titleEnd = base + (firstSegment?.titleEnd ?? 1.5) + 0.25
+	// The card holds a full second after its title is spoken, so it can be read before it fades.
+	const titleEnd = base + (firstSegment?.titleEnd ?? 1.5) + 1
 	chapterMarks.push({ id: chapter.id, title: chapter.title, start: base })
 
 	// Who shows each beat: a take, a scene, or (until one exists) the placeholder card.
@@ -127,7 +129,7 @@ guideChapters.forEach((source, chapterIndex) => {
 	// The title card, then each run on top of the last.
 	const titleId = `title-${chapter.id}`
 	clips.push(
-		`<div id="${titleId}" data-composition-id="${titleId}" data-composition-src="compositions/title.html" data-start="${round(base)}" data-duration="${round(titleEnd - base + FADE)}" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" data-variable-values='${attr({ number: String(chapterIndex + 1).padStart(2, "0"), title: chapter.title, level: chapter.group })}' style="z-index: 1"></div>`,
+		`<div id="${titleId}" data-composition-id="${titleId}" data-composition-src="compositions/title.html" data-start="${round(base)}" data-duration="${round(titleEnd - base + FADE)}" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" data-variable-values='${attr({ number: String(chapterIndex + 1).padStart(2, "0"), title: chapter.title, level: chapter.group, tone: levelColor(chapter.group) })}' style="z-index: 1"></div>`,
 	)
 	runs.forEach((run, index) => {
 		const id = `run-${chapter.id}-${index}`
@@ -145,7 +147,7 @@ guideChapters.forEach((source, chapterIndex) => {
 				cueTimes[name] = round(Math.max(0, wordTime(chapter, ref) - (run.start - base)))
 			const text = run.scene === "card" ? chapter.segments.find(item => item.id === run.beats[0])?.text ?? "" : undefined
 			clips.push(
-				`<div id="${id}" data-composition-id="${id}" data-composition-src="compositions/scenes/${run.scene}.html" data-start="${round(run.start)}" data-duration="${duration}" data-track-index="2" data-track-kind="graphics" data-width="1920" data-height="1080" data-variable-values='${attr({ ...run.values, cues: JSON.stringify(cueTimes), ...(text === undefined ? {} : { text }) })}' style="z-index: ${z}"></div>`,
+				`<div id="${id}" data-composition-id="${id}" data-composition-src="compositions/scenes/${run.scene}.html" data-start="${round(run.start)}" data-duration="${duration}" data-track-index="2" data-track-kind="graphics" data-width="1920" data-height="1080" data-variable-values='${attr({ ...run.values, tone: levelColor(chapter.group), cues: JSON.stringify(cueTimes), ...(text === undefined ? {} : { text }) })}' style="z-index: ${z}"></div>`,
 			)
 		}
 		fades.push(`tl.fromTo("#${id}", { opacity: 0 }, { opacity: 1, duration: ${FADE}, ease: "power1.inOut" }, ${round(run.start)})`)
