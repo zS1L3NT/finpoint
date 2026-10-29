@@ -1,0 +1,13 @@
+{
+	"name": "finpoint-guide-film",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "npx --yes hyperframes@0.8.203 preview",
+		"check": "npx --yes hyperframes@0.8.203 check",
+		"render": "npx --yes hyperframes@0.8.203 render"
+	},
+	"dependencies": {
+		"gsap": "3.14.2"
+	}
+}

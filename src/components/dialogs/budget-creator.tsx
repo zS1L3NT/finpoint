@@ -3,6 +3,7 @@ import { toast } from "sonner"
 import AmountField from "@/components/form/amount-field"
 import DateRange from "@/components/form/date-range"
 import TextField from "@/components/form/text-field"
+import { ContextHelp } from "@/components/help/context-help"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -187,6 +188,7 @@ export default function BudgetCreatorDialog({
 						Create budget
 					</Button>
 				</DialogFooter>
+				<ContextHelp topic="budgets" label="How this form works" variant="form" />
 			</DialogContent>
 		</Dialog>
 	)

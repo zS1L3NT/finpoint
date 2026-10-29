@@ -127,7 +127,7 @@ export type SettingsRow = {
 }
 
 export const DB_NAME = "finpoint"
-export const DB_VERSION = 6
+export const DB_VERSION = 7
 
 class FinpointDB extends Dexie {
 	statement_rules!: Table<StatementRule, string>
@@ -145,6 +145,8 @@ class FinpointDB extends Dexie {
 	analytics_months!: Table<AnalyticsMonthRow, string>
 	settings!: Table<SettingsRow, string>
 	meta!: Table<MetaRow, string>
+	/** Browser-only learning progress. Deliberately excluded from financial exports and sync. */
+	learning!: Table<MetaRow, string>
 
 	constructor() {
 		super(DB_NAME)
@@ -338,6 +340,8 @@ class FinpointDB extends Dexie {
 					})
 				}
 			})
+		// Learning progress is outside every snapshot, so a clean Drive baseline stays clean.
+		this.version(7).stores({ learning: "key" })
 	}
 }
 

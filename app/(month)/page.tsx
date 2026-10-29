@@ -43,6 +43,8 @@ import { hasWorkspaceActivity, loadDemoWorkspace } from "@/logic/workspace"
 import {
 	pathAllocator,
 	pathDashboard,
+	pathDataSettings,
+	pathHelpVideo,
 	pathImporter,
 	pathMonthlyRecords,
 	pathStatements,
@@ -451,6 +453,18 @@ function DemoOffer() {
 				</p>
 			</div>
 			<div className="flex flex-wrap gap-2">
+				<Button variant="ghost" size="sm" asChild>
+					<Link href={pathHelpVideo()}>
+						<IconifyIcon icon="lucide:circle-play" />
+						Watch the guide
+					</Link>
+				</Button>
+				<Button variant="outline" size="sm" asChild>
+					<Link href={pathDataSettings()}>
+						<IconifyIcon icon="lucide:archive-restore" />
+						Restore a backup
+					</Link>
+				</Button>
 				<Button variant="outline" size="sm" asChild>
 					<Link href={pathImporter()}>
 						<IconifyIcon icon="lucide:upload" />

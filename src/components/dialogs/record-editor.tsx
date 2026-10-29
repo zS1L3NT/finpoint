@@ -10,6 +10,7 @@ import DatetimeField from "@/components/form/datetime-field"
 import RecordAnalyticsFields from "@/components/form/record-analytics-fields"
 import TextField from "@/components/form/text-field"
 import TextareaField from "@/components/form/textarea-field"
+import { ContextHelp } from "@/components/help/context-help"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import StatementSearchSheet from "@/components/sheets/statement-search"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -50,6 +51,7 @@ import { useDialogCloseAnimation } from "@/hooks/use-dialog-close-animation"
 import { useDefaultFilterEndDateToday, useDefaultFilterStartDate } from "@/hooks/use-settings"
 import { COLLAPSE_MOTION, SPRING, TRANSITION } from "@/lib/motion"
 import { cn, formatCurrency, formatDatetime, round2 } from "@/lib/utils"
+import { trackRecordSaved } from "@/logic/learning"
 import { listMonthlyBudgets } from "@/logic/monthly-budgets"
 import { ConflictError, deleteRecord, recordCompletions, updateRecord } from "@/logic/records"
 import { ValidationError } from "@/logic/validate"
@@ -136,6 +138,7 @@ export default function RecordEditorDialog({
 					revision: record.revision,
 					statements: value.statements,
 				})
+				void trackRecordSaved(record.id).catch(() => undefined)
 				setIsOpen(false)
 			} catch (cause) {
 				if (cause instanceof ValidationError) {
@@ -647,6 +650,7 @@ export default function RecordEditorDialog({
 							Save changes
 						</Button>
 					</DialogFooter>
+					<ContextHelp topic="find" label="How this form works" variant="form" />
 				</DialogContent>
 			)}
 		</Dialog>

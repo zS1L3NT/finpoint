@@ -11,6 +11,7 @@ import {
 	pathCategories,
 	pathDashboard,
 	pathDataSettings,
+	pathHelp,
 	pathImporter,
 	pathMonthlyRecords,
 	pathPrivacy,
@@ -38,6 +39,7 @@ const TITLES: { match: (pathname: string) => boolean; title: string }[] = [
 	{ match: pathname => pathname.startsWith(pathAllocator()), title: "Workflows" },
 	{ match: pathname => pathname.startsWith(pathDataSettings()), title: "Data" },
 	{ match: pathname => pathname.startsWith(pathSettings()), title: "Settings" },
+	{ match: pathname => pathname.startsWith(pathHelp()), title: "Help & guides" },
 	{ match: pathname => pathname.startsWith(pathPrivacy()), title: "Privacy Policy" },
 	{ match: pathname => pathname.startsWith(pathTerms()), title: "Terms of Service" },
 ]

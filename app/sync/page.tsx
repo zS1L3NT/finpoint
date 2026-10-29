@@ -38,6 +38,7 @@ import {
 	syncDrive,
 	wasVaultProven,
 } from "@/logic/drive-sync"
+import { trackBackupRequested } from "@/logic/learning"
 import { formatRelativeTime } from "@/logic/shared"
 import {
 	clearWorkspace,
@@ -186,6 +187,7 @@ export default function DataSettingsPage() {
 		setBusy("export")
 		try {
 			await exportWorkspace()
+			void trackBackupRequested().catch(() => undefined)
 			toast.success("Backup file downloaded.")
 		} catch {
 			toast.error("Couldn't save backup file.")

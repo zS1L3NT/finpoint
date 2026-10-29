@@ -4,6 +4,7 @@ import { toast } from "sonner"
 import CategoryField from "@/components/form/category-field"
 import SelectField from "@/components/form/select-field"
 import TextField from "@/components/form/text-field"
+import { ContextHelp } from "@/components/help/context-help"
 import { UiIcon } from "@/components/icon"
 import { amountTone } from "@/components/table/record-columns"
 import { Button } from "@/components/ui/button"
@@ -464,6 +465,7 @@ export default function StatementRuleDialog({
 						{rule ? "Save changes" : "Create rule"}
 					</Button>
 				</DialogFooter>
+				<ContextHelp topic="rules" label="How this form works" variant="form" />
 			</DialogContent>
 		</Dialog>
 	)

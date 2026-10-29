@@ -1,0 +1,27 @@
+/* The film's look, shared by the root and readable by scenes. Colours match the app's dark theme
+   and give every domain object one colour for the whole film. */
+:root {
+	--night: #08080a;
+	--ink: #fafafa;
+	--dim: #a1a1aa;
+	--faint: #71717a;
+	--surface: rgb(255 255 255 / 0.045);
+	--raised: #16161a;
+	--line: rgb(255 255 255 / 0.09);
+	--statement: #4c9bff;
+	--allocation: #a594ff;
+	--record: #34d399;
+	--pending: #fbb33c;
+	--danger: #ff7a7a;
+	--income: #4c9bff;
+	--spending: #ff8a4c;
+	--saving: #c084fc;
+	--neutral: #94a3b8;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--night); }
+body { font-family: Inter, sans-serif; color: var(--ink); font-feature-settings: "tnum", "cv11"; }
+.ground {
+	position: absolute; inset: 0;
+	background: radial-gradient(1200px 700px at 78% 18%, rgb(76 155 255 / 0.10), transparent 60%), var(--night);
+}
