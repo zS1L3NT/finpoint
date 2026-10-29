@@ -7,106 +7,106 @@
 	{
 		"id": "model",
 		"title": "Statements, Records and Allocations",
-		"start": 122.46666666666667
+		"start": 151.4
 	},
 	{
 		"id": "workspace",
 		"title": "Trying Finpoint first",
-		"start": 230.7
+		"start": 273.6333333333333
 	},
 	{
 		"id": "import",
 		"title": "Importing your bank activity",
-		"start": 256.93333333333334
+		"start": 300.76666666666665
 	},
 	{
 		"id": "allocator",
 		"title": "Workflows",
-		"start": 366.03333333333336
+		"start": 411.1666666666667
 	},
 	{
 		"id": "lunch",
 		"title": "One to one: your first Record",
-		"start": 410.06666666666666
+		"start": 460.5
 	},
 	{
 		"id": "split",
 		"title": "One to many: splitting a payment",
-		"start": 467.06666666666666
+		"start": 529.1666666666666
 	},
 	{
 		"id": "repayment",
 		"title": "Many to one: combining payments",
-		"start": 523.9
+		"start": 599.4333333333333
 	},
 	{
 		"id": "dashboard",
-		"title": "Where your numbers come from",
-		"start": 564.5333333333333
+		"title": "The Dashboard",
+		"start": 642.3
 	},
 	{
 		"id": "pending",
 		"title": "Pending Records",
-		"start": 608
+		"start": 718.4
 	},
 	{
 		"id": "pending-statements",
 		"title": "Pending Statements",
-		"start": 687.2666666666667
+		"start": 802.6
 	},
 	{
 		"id": "duplicates",
 		"title": "Fixing duplicate Statements",
-		"start": 757.1333333333333
+		"start": 879.1333333333333
 	},
 	{
 		"id": "find",
 		"title": "Finding and fixing Records",
-		"start": 801.9333333333333
+		"start": 929.2666666666667
 	},
 	{
 		"id": "categories",
 		"title": "Categories",
-		"start": 840.8666666666667
+		"start": 968.6
 	},
 	{
 		"id": "rules",
 		"title": "Statement rules",
-		"start": 886.6666666666666
+		"start": 1014.4
 	},
 	{
 		"id": "treatments",
 		"title": "Treatments",
-		"start": 936.7
+		"start": 1067.2
 	},
 	{
 		"id": "buckets",
 		"title": "Monthly Budgets",
-		"start": 990.8333333333334
+		"start": 1121.3333333333333
 	},
 	{
 		"id": "insights",
 		"title": "Reading the Overview",
-		"start": 1053.2666666666667
+		"start": 1187.1
 	},
 	{
 		"id": "monthly",
 		"title": "Monthly Records",
-		"start": 1107.0333333333333
+		"start": 1240.8666666666666
 	},
 	{
 		"id": "budgets",
 		"title": "Budgets for trips and events",
-		"start": 1141
+		"start": 1274.8333333333333
 	},
 	{
 		"id": "sync",
 		"title": "Backups and Google Drive",
-		"start": 1186.2
+		"start": 1320.0333333333333
 	},
 	{
 		"id": "routine",
 		"title": "Your routine",
-		"start": 1248.3333333333333
+		"start": 1382.1666666666667
 	}
 ]

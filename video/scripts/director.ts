@@ -187,10 +187,10 @@ export class Take {
 			listFile,
 			"-t",
 			duration.toFixed(3),
-			"-r",
-			String(fps),
+			// Constant frame rate, padded with the last frame: ffmpeg otherwise drops the final hold,
+			// cutting the take short of its narration.
 			"-vf",
-			`scale=${STAGE.width}:${STAGE.height}:flags=lanczos`,
+			`fps=${fps},scale=${STAGE.width}:${STAGE.height}:flags=lanczos,tpad=stop_mode=clone:stop_duration=${duration.toFixed(3)}`,
 			"-pix_fmt",
 			"yuv420p",
 			"-c:v",

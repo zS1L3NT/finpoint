@@ -6,7 +6,7 @@
 			"own"
 		],
 		"start": 0,
-		"duration": 27.033333333333335
+		"duration": 27.933333333333334
 	},
 	"import": {
 		"chapter": "import",
@@ -14,8 +14,8 @@
 			"choose",
 			"result"
 		],
-		"start": 76.46666666666667,
-		"duration": 16.89999999999999
+		"start": 82.9,
+		"duration": 14.799999999999997
 	},
 	"revolut": {
 		"chapter": "import",
@@ -23,8 +23,8 @@
 			"pick",
 			"next"
 		],
-		"start": 91.96666666666667,
-		"duration": 17.933333333333323
+		"start": 96.30000000000001,
+		"duration": 14.899999999999991
 	},
 	"allocator": {
 		"chapter": "allocator",
@@ -35,7 +35,7 @@
 			"pages"
 		],
 		"start": 0,
-		"duration": 44.83333333333333
+		"duration": 50.13333333333333
 	},
 	"lunch": {
 		"chapter": "lunch",
@@ -44,22 +44,25 @@
 			"create",
 			"fill",
 			"ignore",
-			"save"
+			"save",
+			"found"
 		],
 		"start": 0,
-		"duration": 57.8
+		"duration": 69.46666666666667
 	},
 	"split": {
 		"chapter": "split",
 		"beats": [
 			"select",
 			"amount",
+			"submit",
 			"left",
 			"gift",
-			"save"
+			"save",
+			"found"
 		],
 		"start": 0,
-		"duration": 48.9
+		"duration": 60.666666666666664
 	},
 	"repayment": {
 		"chapter": "repayment",
@@ -69,7 +72,7 @@
 			"done"
 		],
 		"start": 0,
-		"duration": 41.43333333333333
+		"duration": 43.666666666666664
 	},
 	"dashboard": {
 		"chapter": "dashboard",
@@ -77,8 +80,8 @@
 			"real",
 			"explore"
 		],
-		"start": 23.766666666666666,
-		"duration": 20.5
+		"start": 24.266666666666666,
+		"duration": 52.633333333333326
 	},
 	"pending": {
 		"chapter": "pending",
@@ -87,8 +90,8 @@
 			"flag",
 			"list"
 		],
-		"start": 13.633333333333333,
-		"duration": 34.06666666666666
+		"start": 14.5,
+		"duration": 34.766666666666666
 	},
 	"attach": {
 		"chapter": "pending",
@@ -96,8 +99,8 @@
 			"attach",
 			"complete"
 		],
-		"start": 46.3,
-		"duration": 19.03333333333333
+		"start": 47.86666666666667,
+		"duration": 22.4
 	},
 	"placeholder": {
 		"chapter": "pending-statements",
@@ -105,8 +108,8 @@
 			"create",
 			"explain"
 		],
-		"start": 23.966666666666665,
-		"duration": 22.966666666666665
+		"start": 26.03333333333333,
+		"duration": 26.4
 	},
 	"replace": {
 		"chapter": "pending-statements",
@@ -114,8 +117,8 @@
 			"replace",
 			"review"
 		],
-		"start": 45.53333333333333,
-		"duration": 25.133333333333326
+		"start": 51.03333333333333,
+		"duration": 26.299999999999997
 	},
 	"duplicates": {
 		"chapter": "duplicates",
@@ -124,8 +127,8 @@
 			"choose",
 			"review"
 		],
-		"start": 15.566666666666668,
-		"duration": 30.033333333333324
+		"start": 18.2,
+		"duration": 32.733333333333334
 	},
 	"find": {
 		"chapter": "find",
@@ -136,7 +139,7 @@
 			"settings"
 		],
 		"start": 0,
-		"duration": 39.73333333333333
+		"duration": 40.13333333333333
 	},
 	"categories": {
 		"chapter": "categories",
@@ -155,8 +158,8 @@
 			"fill",
 			"use"
 		],
-		"start": 15.9,
-		"duration": 34.93333333333333
+		"start": 17.7,
+		"duration": 35.89999999999999
 	},
 	"treatments": {
 		"chapter": "treatments",
@@ -174,8 +177,8 @@
 			"rule",
 			"compare"
 		],
-		"start": 23.066666666666666,
-		"duration": 40.16666666666666
+		"start": 23.933333333333334,
+		"duration": 42.633333333333326
 	},
 	"monthly": {
 		"chapter": "monthly",
@@ -223,7 +226,7 @@
 		"beats": [
 			"help"
 		],
-		"start": 21.866666666666664,
-		"duration": 8.933333333333337
+		"start": 22.066666666666666,
+		"duration": 9.066666666666666
 	}
 }
