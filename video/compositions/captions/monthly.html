@@ -30,12 +30,12 @@
 	</div>
 	<script>
 		const tl = gsap.timeline({ paused: true })
-		const groups = [["cap-monthly-days-0",2.083,4.483],["cap-monthly-days-7",4.483,7.283],["cap-monthly-days-14",7.283,9.117],["cap-monthly-days-20",9.117,10.917],["cap-monthly-days-25",10.917,13.533],["cap-monthly-drill-0",13.983,15.65],["cap-monthly-drill-7",15.65,16.717],["cap-monthly-drill-9",16.717,19.017],["cap-monthly-drill-16",19.017,20.067],["cap-monthly-review-0",20.517,22.45],["cap-monthly-review-7",22.45,24.183],["cap-monthly-review-14",24.183,25.283],["cap-monthly-review-16",25.283,26.35],["cap-monthly-review-18",26.35,27.583],["cap-monthly-review-20",27.583,29.683],["cap-monthly-review-27",29.683,30.317],["cap-monthly-review-28",30.317,33.167]]
+		const groups = [["cap-monthly-days-0",2.583,4.983],["cap-monthly-days-7",4.983,7.783],["cap-monthly-days-14",7.783,9.617],["cap-monthly-days-20",9.617,11.417],["cap-monthly-days-25",11.417,14.033],["cap-monthly-drill-0",14.483,16.15],["cap-monthly-drill-7",16.15,17.217],["cap-monthly-drill-9",17.217,19.517],["cap-monthly-drill-16",19.517,20.567],["cap-monthly-review-0",21.017,22.95],["cap-monthly-review-7",22.95,24.683],["cap-monthly-review-14",24.683,25.783],["cap-monthly-review-16",25.783,26.85],["cap-monthly-review-18",26.85,28.083],["cap-monthly-review-20",28.083,30.183],["cap-monthly-review-27",30.183,30.817],["cap-monthly-review-28",30.817,33.667]]
 		for (const [id, start, end] of groups) {
 			tl.set("#" + id, { opacity: 1, visibility: "visible" }, start)
 			tl.set("#" + id, { opacity: 0, visibility: "hidden" }, end)
 		}
-		tl.set({}, {}, 33.467)
+		tl.set({}, {}, 33.967)
 		window.__timelines["captions"] = tl
 	</script>
 </template>

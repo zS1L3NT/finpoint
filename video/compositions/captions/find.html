@@ -10,34 +10,36 @@
 		}
 	</style>
 	<div id="root" data-composition-id="captions" data-width="1920" data-height="1080">
-		<div id="cap-find-records-0" class="cap"><span>Sooner or later you’ll want to look</span></div>
-		<div id="cap-find-records-7" class="cap"><span>something up, like what that $90</span></div>
-		<div id="cap-find-records-13" class="cap"><span>dinner was.</span></div>
-		<div id="cap-find-records-15" class="cap"><span>Open Records.</span></div>
-		<div id="cap-find-records-17" class="cap"><span>Search by title,</span></div>
-		<div id="cap-find-records-20" class="cap"><span>or filter by date,</span></div>
-		<div id="cap-find-records-24" class="cap"><span>Category</span></div>
-		<div id="cap-find-records-25" class="cap"><span>or amount.</span></div>
+		<div id="cap-find-records-0" class="cap"><span>Sooner or later, you’ll want to look</span></div>
+		<div id="cap-find-records-7" class="cap"><span>something up, like what that dinner with</span></div>
+		<div id="cap-find-records-14" class="cap"><span>Sam really cost.</span></div>
+		<div id="cap-find-records-17" class="cap"><span>Open Records,</span></div>
+		<div id="cap-find-records-19" class="cap"><span>then search by title,</span></div>
+		<div id="cap-find-records-23" class="cap"><span>or filter by date,</span></div>
+		<div id="cap-find-records-27" class="cap"><span>Category</span></div>
+		<div id="cap-find-records-28" class="cap"><span>or amount.</span></div>
 		<div id="cap-find-edit-0" class="cap"><span>Open a Record to see its Statements,</span></div>
 		<div id="cap-find-edit-7" class="cap"><span>then choose Edit Record to change any</span></div>
 		<div id="cap-find-edit-14" class="cap"><span>field, or the Allocations</span></div>
 		<div id="cap-find-edit-18" class="cap"><span>behind it.</span></div>
-		<div id="cap-find-statements-0" class="cap"><span>Statements works the same way for your</span></div>
-		<div id="cap-find-statements-7" class="cap"><span>bank activity,</span></div>
-		<div id="cap-find-statements-9" class="cap"><span>and each Account has a page of</span></div>
-		<div id="cap-find-statements-16" class="cap"><span>its own.</span></div>
+		<div id="cap-find-statements-0" class="cap"><span>The Statements page works the same way</span></div>
+		<div id="cap-find-statements-7" class="cap"><span>for your bank activity,</span></div>
+		<div id="cap-find-statements-11" class="cap"><span>and each Account has a page of</span></div>
+		<div id="cap-find-statements-18" class="cap"><span>its own.</span></div>
 		<div id="cap-find-settings-0" class="cap"><span>And if you always look at the</span></div>
-		<div id="cap-find-settings-7" class="cap"><span>same period, set default filters in Settings,</span></div>
-		<div id="cap-find-settings-14" class="cap"><span>so every list opens on that range.</span></div>
+		<div id="cap-find-settings-7" class="cap"><span>same period,</span></div>
+		<div id="cap-find-settings-9" class="cap"><span>set default filters in Settings,</span></div>
+		<div id="cap-find-settings-14" class="cap"><span>so Records and Allocate</span></div>
+		<div id="cap-find-settings-18" class="cap"><span>to Records open on that range.</span></div>
 	</div>
 	<script>
 		const tl = gsap.timeline({ paused: true })
-		const groups = [["cap-find-records-0",2.483,3.95],["cap-find-records-7",3.95,6.25],["cap-find-records-13",6.25,7.317],["cap-find-records-15",7.317,8.717],["cap-find-records-17",8.717,9.75],["cap-find-records-20",9.75,11.183],["cap-find-records-24",11.183,11.983],["cap-find-records-25",11.983,13.233],["cap-find-edit-0",13.683,16.017],["cap-find-edit-7",16.017,18.35],["cap-find-edit-14",18.35,19.883],["cap-find-edit-18",19.883,21.1],["cap-find-statements-0",21.55,23.517],["cap-find-statements-7",23.517,24.683],["cap-find-statements-9",24.683,26.45],["cap-find-statements-16",26.45,27.467],["cap-find-settings-0",27.917,29.483],["cap-find-settings-7",29.483,32.25],["cap-find-settings-14",32.25,35.8]]
+		const groups = [["cap-find-records-0",2.983,4.75],["cap-find-records-7",4.75,6.883],["cap-find-records-14",6.883,8.25],["cap-find-records-17",8.25,9.283],["cap-find-records-19",9.283,10.55],["cap-find-records-23",10.55,11.983],["cap-find-records-27",11.983,12.817],["cap-find-records-28",12.817,14.067],["cap-find-edit-0",14.517,16.85],["cap-find-edit-7",16.85,19.183],["cap-find-edit-14",19.183,20.717],["cap-find-edit-18",20.717,21.933],["cap-find-statements-0",22.383,24.55],["cap-find-statements-7",24.55,26.15],["cap-find-statements-11",26.15,27.95],["cap-find-statements-18",27.95,28.967],["cap-find-settings-0",29.417,31.017],["cap-find-settings-7",31.017,32.05],["cap-find-settings-9",32.05,33.85],["cap-find-settings-14",33.85,35.45],["cap-find-settings-18",35.45,38.633]]
 		for (const [id, start, end] of groups) {
 			tl.set("#" + id, { opacity: 1, visibility: "visible" }, start)
 			tl.set("#" + id, { opacity: 0, visibility: "hidden" }, end)
 		}
-		tl.set({}, {}, 36.1)
+		tl.set({}, {}, 38.933)
 		window.__timelines["captions"] = tl
 	</script>
 </template>

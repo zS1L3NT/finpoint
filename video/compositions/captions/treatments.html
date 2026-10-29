@@ -43,12 +43,12 @@
 	</div>
 	<script>
 		const tl = gsap.timeline({ paused: true })
-		const groups = [["cap-treatments-what-0",1.617,3.417],["cap-treatments-what-4",3.417,4.983],["cap-treatments-what-8",4.983,6.683],["cap-treatments-what-15",6.683,7.617],["cap-treatments-what-16",7.617,8.617],["cap-treatments-what-18",8.617,10.25],["cap-treatments-what-22",10.25,11.667],["cap-treatments-examples-0",12.117,13.983],["cap-treatments-examples-4",13.983,15.083],["cap-treatments-examples-7",15.083,16.55],["cap-treatments-examples-9",16.55,18.183],["cap-treatments-examples-14",18.183,20.517],["cap-treatments-examples-20",20.517,22.15],["cap-treatments-examples-22",22.15,24.55],["cap-treatments-examples-29",24.55,25.65],["cap-treatments-examples-30",25.65,27.917],["cap-treatments-examples-37",27.917,29.15],["cap-treatments-examples-41",29.15,30.967],["cap-treatments-dashboard-0",31.417,32.45],["cap-treatments-dashboard-3",32.45,33.083],["cap-treatments-dashboard-4",33.083,35.15],["cap-treatments-dashboard-11",35.15,35.917],["cap-treatments-dashboard-12",35.917,38.183],["cap-treatments-dashboard-19",38.183,40.417],["cap-treatments-dashboard-26",40.417,43.05],["cap-treatments-dashboard-32",43.05,45.333],["cap-treatments-override-0",45.783,46.683],["cap-treatments-override-2",46.683,48.283],["cap-treatments-override-7",48.283,50.317],["cap-treatments-override-14",50.317,53.333]]
+		const groups = [["cap-treatments-what-0",2.117,3.917],["cap-treatments-what-4",3.917,5.483],["cap-treatments-what-8",5.483,7.183],["cap-treatments-what-15",7.183,8.117],["cap-treatments-what-16",8.117,9.117],["cap-treatments-what-18",9.117,10.75],["cap-treatments-what-22",10.75,12.167],["cap-treatments-examples-0",12.617,14.483],["cap-treatments-examples-4",14.483,15.583],["cap-treatments-examples-7",15.583,17.05],["cap-treatments-examples-9",17.05,18.683],["cap-treatments-examples-14",18.683,21.017],["cap-treatments-examples-20",21.017,22.65],["cap-treatments-examples-22",22.65,25.05],["cap-treatments-examples-29",25.05,26.15],["cap-treatments-examples-30",26.15,28.417],["cap-treatments-examples-37",28.417,29.65],["cap-treatments-examples-41",29.65,31.467],["cap-treatments-dashboard-0",31.917,32.95],["cap-treatments-dashboard-3",32.95,33.583],["cap-treatments-dashboard-4",33.583,35.65],["cap-treatments-dashboard-11",35.65,36.417],["cap-treatments-dashboard-12",36.417,38.683],["cap-treatments-dashboard-19",38.683,40.917],["cap-treatments-dashboard-26",40.917,43.55],["cap-treatments-dashboard-32",43.55,45.833],["cap-treatments-override-0",46.283,47.183],["cap-treatments-override-2",47.183,48.783],["cap-treatments-override-7",48.783,50.817],["cap-treatments-override-14",50.817,53.833]]
 		for (const [id, start, end] of groups) {
 			tl.set("#" + id, { opacity: 1, visibility: "visible" }, start)
 			tl.set("#" + id, { opacity: 0, visibility: "hidden" }, end)
 		}
-		tl.set({}, {}, 53.633)
+		tl.set({}, {}, 54.133)
 		window.__timelines["captions"] = tl
 	</script>
 </template>

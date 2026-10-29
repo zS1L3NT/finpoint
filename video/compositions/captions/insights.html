@@ -41,12 +41,12 @@
 	</div>
 	<script>
 		const tl = gsap.timeline({ paused: true })
-		const groups = [["cap-insights-metrics-0",2.05,3.417],["cap-insights-metrics-5",3.417,4.383],["cap-insights-metrics-7",4.383,5.55],["cap-insights-metrics-11",5.55,7.683],["cap-insights-metrics-15",7.683,10.15],["cap-insights-metrics-21",10.15,11.717],["cap-insights-metrics-27",11.717,14.483],["cap-insights-metrics-34",14.483,16.45],["cap-insights-metrics-41",16.45,18.217],["cap-insights-metrics-48",18.217,19.233],["cap-insights-scope-0",19.683,21.883],["cap-insights-scope-7",21.883,24.283],["cap-insights-scope-14",24.283,26.65],["cap-insights-scope-21",26.65,29.633],["cap-insights-forecast-0",30.083,32.05],["cap-insights-forecast-7",32.05,33.817],["cap-insights-forecast-12",33.817,35.183],["cap-insights-forecast-16",35.183,36.95],["cap-insights-forecast-23",36.95,38.367],["cap-insights-category-0",38.817,40.683],["cap-insights-category-3",40.683,42.317],["cap-insights-category-10",42.317,43.017],["cap-insights-category-11",43.017,45.35],["cap-insights-category-18",45.35,46.433],["cap-insights-calendar-0",46.883,47.717],["cap-insights-calendar-2",47.717,49.383],["cap-insights-calendar-9",49.383,50.05],["cap-insights-calendar-10",50.05,52.967]]
+		const groups = [["cap-insights-metrics-0",2.55,3.917],["cap-insights-metrics-5",3.917,4.883],["cap-insights-metrics-7",4.883,6.05],["cap-insights-metrics-11",6.05,8.183],["cap-insights-metrics-15",8.183,10.65],["cap-insights-metrics-21",10.65,12.217],["cap-insights-metrics-27",12.217,14.983],["cap-insights-metrics-34",14.983,16.95],["cap-insights-metrics-41",16.95,18.717],["cap-insights-metrics-48",18.717,19.733],["cap-insights-scope-0",20.183,22.383],["cap-insights-scope-7",22.383,24.783],["cap-insights-scope-14",24.783,27.15],["cap-insights-scope-21",27.15,30.133],["cap-insights-forecast-0",30.583,32.55],["cap-insights-forecast-7",32.55,34.317],["cap-insights-forecast-12",34.317,35.683],["cap-insights-forecast-16",35.683,37.45],["cap-insights-forecast-23",37.45,38.867],["cap-insights-category-0",39.317,41.183],["cap-insights-category-3",41.183,42.817],["cap-insights-category-10",42.817,43.517],["cap-insights-category-11",43.517,45.85],["cap-insights-category-18",45.85,46.933],["cap-insights-calendar-0",47.383,48.217],["cap-insights-calendar-2",48.217,49.883],["cap-insights-calendar-9",49.883,50.55],["cap-insights-calendar-10",50.55,53.467]]
 		for (const [id, start, end] of groups) {
 			tl.set("#" + id, { opacity: 1, visibility: "visible" }, start)
 			tl.set("#" + id, { opacity: 0, visibility: "hidden" }, end)
 		}
-		tl.set({}, {}, 53.267)
+		tl.set({}, {}, 53.767)
 		window.__timelines["captions"] = tl
 	</script>
 </template>

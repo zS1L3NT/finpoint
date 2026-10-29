@@ -46,12 +46,12 @@
 	</div>
 	<script>
 		const tl = gsap.timeline({ paused: true })
-		const groups = [["cap-buckets-what-0",2.083,4.617],["cap-buckets-what-7",4.617,6.417],["cap-buckets-what-12",6.417,7.817],["cap-buckets-what-16",7.817,9.483],["cap-buckets-what-23",9.483,10.883],["cap-buckets-what-27",10.883,12.85],["cap-buckets-what-32",12.85,14.15],["cap-buckets-what-35",14.15,16.383],["cap-buckets-what-42",16.383,17.883],["cap-buckets-what-45",17.883,20.217],["cap-buckets-what-50",20.217,22.05],["cap-buckets-what-56",22.05,22.867],["cap-buckets-daily-0",23.317,25.483],["cap-buckets-daily-6",25.483,26.617],["cap-buckets-daily-9",26.617,28.517],["cap-buckets-daily-14",28.517,30.75],["cap-buckets-daily-21",30.75,32.5],["cap-buckets-amount-0",32.95,34.583],["cap-buckets-amount-5",34.583,36.95],["cap-buckets-amount-12",36.95,38.417],["cap-buckets-amount-17",38.417,40.133],["cap-buckets-rule-0",40.583,42.817],["cap-buckets-rule-7",42.817,44.15],["cap-buckets-rule-9",44.15,44.95],["cap-buckets-rule-10",44.95,47.283],["cap-buckets-rule-16",47.283,48.117],["cap-buckets-rule-17",48.117,50.633],["cap-buckets-compare-0",51.083,52.983],["cap-buckets-compare-7",52.983,54.95],["cap-buckets-compare-12",54.95,56.617],["cap-buckets-compare-19",56.617,58.317],["cap-buckets-compare-22",58.317,59.583],["cap-buckets-compare-25",59.583,61.633]]
+		const groups = [["cap-buckets-what-0",2.583,5.117],["cap-buckets-what-7",5.117,6.917],["cap-buckets-what-12",6.917,8.317],["cap-buckets-what-16",8.317,9.983],["cap-buckets-what-23",9.983,11.383],["cap-buckets-what-27",11.383,13.35],["cap-buckets-what-32",13.35,14.65],["cap-buckets-what-35",14.65,16.883],["cap-buckets-what-42",16.883,18.383],["cap-buckets-what-45",18.383,20.717],["cap-buckets-what-50",20.717,22.55],["cap-buckets-what-56",22.55,23.367],["cap-buckets-daily-0",23.817,25.983],["cap-buckets-daily-6",25.983,27.117],["cap-buckets-daily-9",27.117,29.017],["cap-buckets-daily-14",29.017,31.25],["cap-buckets-daily-21",31.25,33],["cap-buckets-amount-0",33.45,35.083],["cap-buckets-amount-5",35.083,37.45],["cap-buckets-amount-12",37.45,38.917],["cap-buckets-amount-17",38.917,40.633],["cap-buckets-rule-0",41.083,43.317],["cap-buckets-rule-7",43.317,44.65],["cap-buckets-rule-9",44.65,45.45],["cap-buckets-rule-10",45.45,47.783],["cap-buckets-rule-16",47.783,48.617],["cap-buckets-rule-17",48.617,51.133],["cap-buckets-compare-0",51.583,53.483],["cap-buckets-compare-7",53.483,55.45],["cap-buckets-compare-12",55.45,57.117],["cap-buckets-compare-19",57.117,58.817],["cap-buckets-compare-22",58.817,60.083],["cap-buckets-compare-25",60.083,62.133]]
 		for (const [id, start, end] of groups) {
 			tl.set("#" + id, { opacity: 1, visibility: "visible" }, start)
 			tl.set("#" + id, { opacity: 0, visibility: "hidden" }, end)
 		}
-		tl.set({}, {}, 61.933)
+		tl.set({}, {}, 62.433)
 		window.__timelines["captions"] = tl
 	</script>
 </template>

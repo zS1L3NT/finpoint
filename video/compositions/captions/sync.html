@@ -10,7 +10,7 @@
 		}
 	</style>
 	<div id="root" data-composition-id="captions" data-width="1920" data-height="1080">
-		<div id="cap-sync-local-0" class="cap"><span>You’ve put real work into explaining your</span></div>
+		<div id="cap-sync-local-0" class="cap"><span>You’ve put real work into labelling your</span></div>
 		<div id="cap-sync-local-7" class="cap"><span>money, so it’s worth knowing where it</span></div>
 		<div id="cap-sync-local-14" class="cap"><span>lives.</span></div>
 		<div id="cap-sync-local-15" class="cap"><span>Finpoint runs in your browser,</span></div>
@@ -43,12 +43,12 @@
 	</div>
 	<script>
 		const tl = gsap.timeline({ paused: true })
-		const groups = [["cap-sync-local-0",2.35,4.317],["cap-sync-local-7",4.317,6.283],["cap-sync-local-14",6.283,7.25],["cap-sync-local-15",7.25,8.95],["cap-sync-local-20",8.95,11.683],["cap-sync-local-27",11.683,13.65],["cap-sync-local-31",13.65,15.583],["cap-sync-local-38",15.583,17.967],["cap-sync-file-0",18.417,20.05],["cap-sync-file-7",20.05,22.45],["cap-sync-file-14",22.45,24.383],["cap-sync-file-20",24.383,26.483],["cap-sync-file-27",26.483,28.55],["cap-sync-file-33",28.55,30.917],["cap-sync-file-40",30.917,31.55],["cap-sync-file-41",31.55,32.183],["cap-sync-file-42",32.183,34.7],["cap-sync-drive-0",35.15,37.317],["cap-sync-drive-5",37.317,39.383],["cap-sync-drive-12",39.383,41.283],["cap-sync-drive-19",41.283,43.383],["cap-sync-drive-22",43.383,45.5],["cap-sync-conflict-0",45.95,48.083],["cap-sync-conflict-7",48.083,48.95],["cap-sync-conflict-8",48.95,50.883],["cap-sync-conflict-14",50.883,52.583],["cap-sync-conflict-19",52.583,54.083],["cap-sync-conflict-24",54.083,56.433],["cap-sync-yours-0",56.883,59.083],["cap-sync-yours-7",59.083,61.433]]
+		const groups = [["cap-sync-local-0",2.85,4.75],["cap-sync-local-7",4.75,6.65],["cap-sync-local-14",6.65,7.65],["cap-sync-local-15",7.65,9.35],["cap-sync-local-20",9.35,12.083],["cap-sync-local-27",12.083,14.05],["cap-sync-local-31",14.05,15.983],["cap-sync-local-38",15.983,18.367],["cap-sync-file-0",18.817,20.45],["cap-sync-file-7",20.45,22.85],["cap-sync-file-14",22.85,24.783],["cap-sync-file-20",24.783,26.883],["cap-sync-file-27",26.883,28.95],["cap-sync-file-33",28.95,31.317],["cap-sync-file-40",31.317,31.95],["cap-sync-file-41",31.95,32.583],["cap-sync-file-42",32.583,35.1],["cap-sync-drive-0",35.55,37.717],["cap-sync-drive-5",37.717,39.783],["cap-sync-drive-12",39.783,41.683],["cap-sync-drive-19",41.683,43.783],["cap-sync-drive-22",43.783,45.9],["cap-sync-conflict-0",46.35,48.483],["cap-sync-conflict-7",48.483,49.35],["cap-sync-conflict-8",49.35,51.283],["cap-sync-conflict-14",51.283,52.983],["cap-sync-conflict-19",52.983,54.483],["cap-sync-conflict-24",54.483,56.833],["cap-sync-yours-0",57.283,59.483],["cap-sync-yours-7",59.483,61.833]]
 		for (const [id, start, end] of groups) {
 			tl.set("#" + id, { opacity: 1, visibility: "visible" }, start)
 			tl.set("#" + id, { opacity: 0, visibility: "hidden" }, end)
 		}
-		tl.set({}, {}, 61.733)
+		tl.set({}, {}, 62.133)
 		window.__timelines["captions"] = tl
 	</script>
 </template>

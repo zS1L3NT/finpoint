@@ -10,22 +10,19 @@
 		}
 	</style>
 	<div id="root" data-composition-id="captions" data-width="1920" data-height="1080">
-		<div id="cap-rules-why-0" class="cap"><span>Your Categories</span></div>
-		<div id="cap-rules-why-2" class="cap"><span>already</span></div>
-		<div id="cap-rules-why-3" class="cap"><span>fill in two fields.</span></div>
-		<div id="cap-rules-why-7" class="cap"><span>Some payments come back every month,</span></div>
-		<div id="cap-rules-why-13" class="cap"><span>like your phone bill,</span></div>
-		<div id="cap-rules-why-17" class="cap"><span>and typing them out again gets old.</span></div>
-		<div id="cap-rules-why-24" class="cap"><span>A Statement rule recognises</span></div>
-		<div id="cap-rules-why-28" class="cap"><span>them, and fills in the Record for</span></div>
-		<div id="cap-rules-why-35" class="cap"><span>you when you create it.</span></div>
-		<div id="cap-rules-why-40" class="cap"><span>It never creates Records on its own.</span></div>
-		<div id="cap-rules-match-0" class="cap"><span>Open Rules and choose New rule.</span></div>
+		<div id="cap-rules-why-0" class="cap"><span>Some payments come back every month,</span></div>
+		<div id="cap-rules-why-6" class="cap"><span>like your phone bill,</span></div>
+		<div id="cap-rules-why-10" class="cap"><span>and labelling them again and again gets</span></div>
+		<div id="cap-rules-why-17" class="cap"><span>old.</span></div>
+		<div id="cap-rules-why-18" class="cap"><span>A Statement rule recognises</span></div>
+		<div id="cap-rules-why-22" class="cap"><span>them, and fills in the Record for</span></div>
+		<div id="cap-rules-why-29" class="cap"><span>you when you create it.</span></div>
+		<div id="cap-rules-why-34" class="cap"><span>It never creates Records on its own.</span></div>
+		<div id="cap-rules-match-0" class="cap"><span>Open Rules, and choose New rule.</span></div>
 		<div id="cap-rules-match-6" class="cap"><span>Give it a name,</span></div>
 		<div id="cap-rules-match-10" class="cap"><span>and the text to look for in</span></div>
 		<div id="cap-rules-match-17" class="cap"><span>the description.</span></div>
-		<div id="cap-rules-match-19" class="cap"><span>Finpoint shows the Statements</span></div>
-		<div id="cap-rules-match-23" class="cap"><span>it matches.</span></div>
+		<div id="cap-rules-match-19" class="cap"><span>Finpoint shows you the Statements it matches.</span></div>
 		<div id="cap-rules-fill-0" class="cap"><span>Then choose what it fills in:</span></div>
 		<div id="cap-rules-fill-6" class="cap"><span>a title, a Category,</span></div>
 		<div id="cap-rules-fill-10" class="cap"><span>even People or a Location.</span></div>
@@ -43,12 +40,12 @@
 	</div>
 	<script>
 		const tl = gsap.timeline({ paused: true })
-		const groups = [["cap-rules-why-0",1.917,2.95],["cap-rules-why-2",2.95,3.583],["cap-rules-why-3",3.583,4.85],["cap-rules-why-7",4.85,6.983],["cap-rules-why-13",6.983,8.217],["cap-rules-why-17",8.217,10.483],["cap-rules-why-24",10.483,12.35],["cap-rules-why-28",12.35,13.95],["cap-rules-why-35",13.95,15.583],["cap-rules-why-40",15.583,18.033],["cap-rules-match-0",18.483,20.85],["cap-rules-match-6",20.85,22.017],["cap-rules-match-10",22.017,23.183],["cap-rules-match-17",23.183,24.417],["cap-rules-match-19",24.417,26.017],["cap-rules-match-23",26.017,27.167],["cap-rules-fill-0",27.617,29.35],["cap-rules-fill-6",29.35,31.183],["cap-rules-fill-10",31.183,33.483],["cap-rules-fill-15",33.483,35.683],["cap-rules-fill-22",35.683,36.35],["cap-rules-fill-23",36.35,38.517],["cap-rules-fill-29",38.517,39.15],["cap-rules-fill-30",39.15,40.2],["cap-rules-use-0",40.65,42.517],["cap-rules-use-7",42.517,43.817],["cap-rules-use-10",43.817,44.75],["cap-rules-use-12",44.75,47.15],["cap-rules-use-19",47.15,48.717],["cap-rules-use-22",48.717,51.633]]
+		const groups = [["cap-rules-why-0",2.417,4.55],["cap-rules-why-6",4.55,5.817],["cap-rules-why-10",5.817,7.75],["cap-rules-why-17",7.75,8.617],["cap-rules-why-18",8.617,10.517],["cap-rules-why-22",10.517,12.117],["cap-rules-why-29",12.117,13.75],["cap-rules-why-34",13.75,16.2],["cap-rules-match-0",16.65,19.05],["cap-rules-match-6",19.05,20.217],["cap-rules-match-10",20.217,21.35],["cap-rules-match-17",21.35,22.583],["cap-rules-match-19",22.583,25.267],["cap-rules-fill-0",25.717,27.45],["cap-rules-fill-6",27.45,29.283],["cap-rules-fill-10",29.283,31.583],["cap-rules-fill-15",31.583,33.783],["cap-rules-fill-22",33.783,34.45],["cap-rules-fill-23",34.45,36.617],["cap-rules-fill-29",36.617,37.25],["cap-rules-fill-30",37.25,38.3],["cap-rules-use-0",38.75,40.617],["cap-rules-use-7",40.617,41.917],["cap-rules-use-10",41.917,42.85],["cap-rules-use-12",42.85,45.25],["cap-rules-use-19",45.25,46.817],["cap-rules-use-22",46.817,49.733]]
 		for (const [id, start, end] of groups) {
 			tl.set("#" + id, { opacity: 1, visibility: "visible" }, start)
 			tl.set("#" + id, { opacity: 0, visibility: "hidden" }, end)
 		}
-		tl.set({}, {}, 51.933)
+		tl.set({}, {}, 50.033)
 		window.__timelines["captions"] = tl
 	</script>
 </template>

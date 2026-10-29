@@ -13,7 +13,7 @@
 		<div id="cap-routine-loop-0" class="cap"><span>Here’s a routine that works.</span></div>
 		<div id="cap-routine-loop-5" class="cap"><span>Import your latest bank exports.</span></div>
 		<div id="cap-routine-loop-10" class="cap"><span>Fix any duplicates,</span></div>
-		<div id="cap-routine-loop-13" class="cap"><span>and explain what’s new in Workflows.</span></div>
+		<div id="cap-routine-loop-13" class="cap"><span>and label what’s new in Workflows.</span></div>
 		<div id="cap-routine-loop-19" class="cap"><span>Check anything Pending.</span></div>
 		<div id="cap-routine-loop-22" class="cap"><span>Glance at your Dashboard.</span></div>
 		<div id="cap-routine-loop-26" class="cap"><span>And keep a backup.</span></div>
@@ -24,17 +24,17 @@
 		<div id="cap-routine-help-0" class="cap"><span>And whenever you’re unsure,</span></div>
 		<div id="cap-routine-help-4" class="cap"><span>choose Help at the top of any</span></div>
 		<div id="cap-routine-help-11" class="cap"><span>page.</span></div>
-		<div id="cap-routine-help-12" class="cap"><span>Every chapter of this guide is there,</span></div>
+		<div id="cap-routine-help-12" class="cap"><span>It lists the guides for that page,</span></div>
 		<div id="cap-routine-help-19" class="cap"><span>step by step.</span></div>
 	</div>
 	<script>
 		const tl = gsap.timeline({ paused: true })
-		const groups = [["cap-routine-loop-0",1.783,3.65],["cap-routine-loop-5",3.65,6.017],["cap-routine-loop-10",6.017,7.517],["cap-routine-loop-13",7.517,9.517],["cap-routine-loop-19",9.517,11.117],["cap-routine-loop-22",11.117,12.617],["cap-routine-loop-26",12.617,14.167],["cap-routine-backup-0",14.617,16.217],["cap-routine-backup-4",16.217,18.383],["cap-routine-backup-7",18.383,20.75],["cap-routine-backup-14",20.75,21.9],["cap-routine-help-0",22.35,23.817],["cap-routine-help-4",23.817,25.15],["cap-routine-help-11",25.15,26.017],["cap-routine-help-12",26.017,28.417],["cap-routine-help-19",28.417,29.567]]
+		const groups = [["cap-routine-loop-0",2.283,4.15],["cap-routine-loop-5",4.15,6.483],["cap-routine-loop-10",6.483,7.883],["cap-routine-loop-13",7.883,9.717],["cap-routine-loop-19",9.717,11.35],["cap-routine-loop-22",11.35,12.883],["cap-routine-loop-26",12.883,14.433],["cap-routine-backup-0",14.883,16.483],["cap-routine-backup-4",16.483,18.65],["cap-routine-backup-7",18.65,21.017],["cap-routine-backup-14",21.017,22.167],["cap-routine-help-0",22.617,24.05],["cap-routine-help-4",24.05,25.383],["cap-routine-help-11",25.383,26.183],["cap-routine-help-12",26.183,28.417],["cap-routine-help-19",28.417,29.7]]
 		for (const [id, start, end] of groups) {
 			tl.set("#" + id, { opacity: 1, visibility: "visible" }, start)
 			tl.set("#" + id, { opacity: 0, visibility: "hidden" }, end)
 		}
-		tl.set({}, {}, 29.867)
+		tl.set({}, {}, 30)
 		window.__timelines["captions"] = tl
 	</script>
 </template>

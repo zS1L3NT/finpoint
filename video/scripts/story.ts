@@ -193,40 +193,24 @@ export const story: TakeScript[] = [
 			await t.focus(offer, { zoom: 1.6, reveal: false })
 			await t.ring("offer", button(app, /Try demo data/))
 			await glide(t.page, button(app, /Try demo data/))
-			await t.at("demo", "three accounts")
+			await t.at("demo", "three bank accounts")
 			await t.ring("text", app.getByText(/3 accounts and 5 months/))
 			await t.at("demo", "lived-in")
 			await t.unring()
 			await t.wide()
-			await t.at("own", "own bank activity")
-			await via(t, "Importer")
-		},
-	},
-	{
-		name: "revolut",
-		chapter: "import",
-		beats: ["revolut"],
-		setup: t => go(t, "/importer"),
-		async play(t) {
-			const app = t.app
-			await t.focus(card(app, "Upload statements"), { zoom: 1.5 })
-			const revolut = app.getByRole("radio", { name: /Revolut/ })
-			await t.at("revolut", "Revolut’s")
-			await t.ring("revolut", revolut)
-			await press(t.page, revolut)
-			await t.at("revolut", "pick or name")
-			await t.unring()
-			const account = app.getByText("Account", { exact: true }).first().locator("xpath=ancestor::*[@data-slot='field' or contains(@class,'space-y')][1]")
-			await t.ring("account", account)
-			await glide(t.page, account)
-			// Back to OCBC off the record, so the next take starts from a clean form.
-			await t.page.waitForTimeout(400)
+			await t.at("own", "Data page")
+			await via(t, "Data")
+			const clear = button(app, /Clear all data/)
+			await scrollTo(app, clear, { middle: 0.5 })
+			await t.at("own", "Clear all data")
+			await t.ring("clear", clear)
+			await glide(t.page, clear)
 		},
 	},
 	{
 		name: "import",
 		chapter: "import",
-		beats: ["choose", "result", "next"],
+		beats: ["choose", "result"],
 		setup: t => go(t, "/importer"),
 		async play(t) {
 			const app = t.app
@@ -252,15 +236,32 @@ export const story: TakeScript[] = [
 			await t.wide()
 			await t.at("result", "how many")
 			await t.ring("result", result.locator("xpath=ancestor::*[contains(@class,'rounded-xl')][1]"))
+		},
+	},
+	{
+		name: "revolut",
+		chapter: "import",
+		beats: ["pick", "next"],
+		async play(t) {
+			const app = t.app
+			await t.at("pick", "Revolut export")
+			await t.unring()
+			await t.focus(card(app, "Upload statements"), { zoom: 1.5 })
+			const revolut = app.getByRole("radio", { name: /Revolut/ })
+			await t.ring("revolut", revolut)
+			await press(t.page, revolut)
+			await t.at("pick", "pick its Account")
+			await t.unring()
+			const account = app.getByText("Account", { exact: true }).first().locator("xpath=ancestor::*[@data-slot='field' or contains(@class,'space-y')][1]")
+			await t.ring("account", account)
+			await glide(t.page, account)
+			// Workflows is only pointed at: the next chapter opens it.
+			// Pull back as the beat starts, so the sidebar is in frame by the time Workflows is said.
+			await t.at("next")
+			await t.unring()
+			await t.wide()
 			await t.at("next", "Workflows")
-			await t.unring("result")
 			await t.ring("workflows", sidebar(app, "Workflows"))
-			await t.at("next", "Allocate to Records")
-			await t.unring()
-			const allocate = app.getByRole("link", { name: /Allocate them/ })
-			await t.ring("allocate", allocate)
-			await press(t.page, allocate)
-			await t.unring()
 		},
 	},
 	{
@@ -278,28 +279,22 @@ export const story: TakeScript[] = [
 			await t.ring("list", table(app))
 			await glide(t.page, row(app, "PAYNOW FROM SAM"), { dx: 0.3, ms: 700 })
 			await glide(t.page, row(app, "KOPI & CO"), { dx: 0.3, ms: 1100 })
-			await t.at("left", "how much is left")
-			await t.unring()
-			const amountCell = row(app, "NTUC FAIRPRICE").locator("td").last()
-			await t.ring("left", amountCell)
-			await glide(t.page, amountCell)
+			// The list stays ringed while the narration says when Statements leave it.
 			await t.at("tabs")
 			await t.unring()
 			await t.ring("duplicates", app.getByRole("link", { name: "Fix Duplicates" }))
 			await glide(t.page, app.getByRole("link", { name: "Fix Duplicates" }))
-			await t.at("tabs", "Replace Pending")
-			await t.unring()
+			await t.at("tabs", "tidy up")
 			await t.ring("replace", app.getByRole("link", { name: "Replace Pending" }))
 			await glide(t.page, app.getByRole("link", { name: "Replace Pending" }))
-			await t.at("pages", "Statements")
-			await t.unring()
-			await t.ring("statements", sidebar(app, "Statements"))
-			await glide(t.page, sidebar(app, "Statements"))
-			await t.at("pages", "Records lists")
+			await t.at("pages", "Records")
 			await t.unring()
 			await t.ring("records", sidebar(app, "Records"))
 			await glide(t.page, sidebar(app, "Records"))
-			await t.at("pages", "Workflows only")
+			await t.at("pages", "Statements pages")
+			await t.ring("statements", sidebar(app, "Statements"))
+			await glide(t.page, sidebar(app, "Statements"))
+			await t.at("pages", "Workflows is different")
 			await t.unring()
 			await t.ring("workflows", sidebar(app, "Workflows"))
 		},
@@ -327,7 +322,7 @@ export const story: TakeScript[] = [
 			await t.at("create", "amount and date")
 			await t.unring()
 			await t.ring("amount", creator(app).amount)
-			await t.at("fill", "Give it")
+			await t.at("fill", "Give the Record")
 			await t.unring()
 			await press(t.page, creator(app).title)
 			await type(t.page, "Lunch")
@@ -370,7 +365,7 @@ export const story: TakeScript[] = [
 			await retype(t.page, creator(app).allocation, "-50")
 			await t.unring()
 			await pick(t.page, app, creator(app).category, "Groc", "Groceries")
-			await t.at("left", "Save")
+			await t.at("left", "Choose Create Record")
 			await press(t.page, creator(app).submit)
 			await closed(t)
 			await t.wide()
@@ -387,9 +382,9 @@ export const story: TakeScript[] = [
 			await press(t.page, creator(app).title)
 			await type(t.page, "Birthday gift")
 			await pick(t.page, app, creator(app).category, "Gift", "Gifts & Donations")
-			await t.at("gift", "fills that amount")
+			await t.at("gift", "fills in the $30")
 			await t.ring("amount", creator(app).amount)
-			await t.at("save", "Save")
+			await t.at("save", "Choose Create Record")
 			await t.unring()
 			await press(t.page, creator(app).submit)
 			await closed(t)
@@ -427,7 +422,7 @@ export const story: TakeScript[] = [
 			await t.unring()
 			await t.ring("amount", creator(app).amount)
 			await pick(t.page, app, creator(app).category, "Dining", "Dining Out")
-			await t.at("done", "Save")
+			await t.at("done", "Choose Create Record")
 			await t.unring()
 			await press(t.page, creator(app).submit)
 			await closed(t)
@@ -438,36 +433,22 @@ export const story: TakeScript[] = [
 		},
 	},
 	{
-		// The salary, an investment and last month are explained off camera, so the Overview has
-		// income, a saving and months to compare with.
 		name: "dashboard",
 		chapter: "dashboard",
-		beats: ["real", "categories"],
-		async setup(t) {
-			await importOcbc(t, "ocbc-history.csv", [
-				salary,
-				investment,
-				...[...september, ...lateOctober].map(([date, description, amount]) => [date, description, amount] as Row),
-			])
-			await go(t, "/allocator")
-			await explain(t, "TRANSFER TO SYFE", "Investing", "Savings & Investments")
-			for (const [, description, , title, category] of [...september, ...lateOctober])
-				await explain(t, description, title, category)
-			await explain(t, "SALARY ACME", "Salary", "Income")
-			await go(t, "/?month=October&year=2026")
-		},
+		beats: ["real", "explore"],
+		// Only the four Records the basics made are here, so the numbers match what was said.
+		setup: t => go(t, "/?month=October&year=2026"),
 		async play(t) {
 			const app = t.app
 			await t.at("real", "what you really spent")
 			const spending = app.getByText(/spending/i).first().locator("xpath=ancestor::*[@data-slot='card'][1]")
 			await t.ring("spending", spending)
 			await glide(t.page, spending)
-			await t.at("categories", "Categories this month")
+			await t.at("explore", "Scroll through")
 			await t.unring()
-			const categories = card(app, /^Categories this month/)
-			await scrollTo(app, categories, { middle: 0.45 })
-			await t.focus(categories, { zoom: 1.5 })
-			await glide(t.page, categories.getByText("Dining Out").first())
+			await scrollTo(app, card(app, /^Categories this month/), { middle: 0.45 })
+			await t.at("explore", "your own pace")
+			await scrollTo(app, card(app, /^Spending calendar/), { middle: 0.45 })
 		},
 	},
 	{
@@ -525,7 +506,7 @@ export const story: TakeScript[] = [
 			await t.unring()
 			const sheet = dialog(app)
 			await sheet.getByText(/Concert/).first().waitFor()
-			await t.at("attach", "suggests")
+			await t.at("attach", "suggest")
 			await t.ring("suggestion", sheet.getByText(/Concert/).first())
 			await t.at("complete")
 			await t.unring()
@@ -572,21 +553,21 @@ export const story: TakeScript[] = [
 			await t.at("explain", "Workflows")
 			await via(t, "Workflows")
 			await t.ring("pending", row(app, "Burger with Mia").getByText("Pending").first())
-			await t.at("explain", "Explain it")
+			await t.at("explain", "Label it")
 			await t.unring()
 			await press(t.page, row(app, "Burger with Mia"), { dx: 0.3 })
 			await press(t.page, button(app, "Create Record"))
 			await creator(app).title.waitFor()
 			await t.focus(creator(app).dialog, { zoom: 1.5 })
 			await t.at("explain", "Burger with Mia")
-			await fillRecord(t, "Burger", "Din", "Dining Out")
-			await details(t, "Mia")
+			await fillRecord(t, "Burger with Mia", "Din", "Dining Out")
+			await t.at("explain", "Save it")
 			await press(t.page, creator(app).submit)
 			await closed(t)
 			await t.wide()
 			await via(t, "Records")
 			await t.at("explain", "stays Pending")
-			await t.ring("burger", row(app, "Burger").getByText("Pending").first())
+			await t.ring("burger", row(app, "Burger with Mia").getByText("Pending").first())
 		},
 	},
 	{
@@ -606,7 +587,7 @@ export const story: TakeScript[] = [
 			await press(t.page, app.getByText("Burger with Mia").first())
 			const candidate = app.getByText("BURGER JOINT").first()
 			await candidate.waitFor()
-			await t.at("replace", "suggests")
+			await t.at("replace", "suggest")
 			await t.ring("candidate", candidate.locator("xpath=ancestor::*[@data-slot='card' or contains(@class,'rounded')][1]"))
 			await t.at("review", "Review")
 			await t.unring()
@@ -658,7 +639,7 @@ export const story: TakeScript[] = [
 			await press(t.page, fix)
 			await t.unring()
 			await dialog(app).waitFor()
-			await t.at("review", "shows what will happen")
+			await t.at("review", "what will happen")
 			await t.focus(dialog(app), { zoom: 1.4 })
 			await t.at("review", "Allocations follow")
 			const submit = dialog(app).getByRole("button", { name: /Delete/ }).last()
@@ -771,7 +752,7 @@ export const story: TakeScript[] = [
 			await t.at("match", "text to look for")
 			await press(t.page, form.getByLabel("Text to look for").first())
 			await type(t.page, "SINGTEL")
-			await t.at("match", "shows the Statements")
+			await t.at("match", "the Statements it matches")
 			await t.ring("matches", form.getByText(/matching Statement/).first().locator("xpath=.."))
 			await t.at("fill", "title")
 			await t.unring()
@@ -822,7 +803,21 @@ export const story: TakeScript[] = [
 		name: "treatments",
 		chapter: "treatments",
 		beats: ["dashboard"],
-		setup: t => go(t, "/?month=October&year=2026"),
+		// The salary, an investment and last month are labelled off camera, so the Dashboard has
+		// income, a saving and months to compare with.
+		async setup(t) {
+			await importOcbc(t, "ocbc-history.csv", [
+				salary,
+				investment,
+				...[...september, ...lateOctober].map(([date, description, amount]) => [date, description, amount] as Row),
+			])
+			await go(t, "/allocator")
+			await explain(t, "TRANSFER TO SYFE", "Investing", "Savings & Investments")
+			for (const [, description, , title, category] of [...september, ...lateOctober])
+				await explain(t, description, title, category)
+			await explain(t, "SALARY ACME", "Salary", "Income")
+			await go(t, "/?month=October&year=2026")
+		},
 		async play(t) {
 			const app = t.app
 			await t.at("dashboard", "Income and Spending")

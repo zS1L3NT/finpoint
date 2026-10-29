@@ -3,6 +3,7 @@
 // HyperFrames film, renders it and publishes it to `public/guide`.
 //   bun run video:build                       everything
 //   bun run video:build --skip=app,narrate    skip any of: app, narrate, record, compose, render, publish
+//   bun run video:build --gpu                 encode on the GPU (VideoToolbox on a Mac, NVENC etc.)
 import { spawnSync } from "node:child_process"
 import { resolve } from "node:path"
 import { root } from "./tools"
@@ -11,6 +12,7 @@ const skip = new Set(
 	process.argv.filter(arg => arg.startsWith("--skip=")).flatMap(arg => arg.slice("--skip=".length).split(",")),
 )
 const video = resolve(root, "video")
+const gpu = process.argv.includes("--gpu") ? ["--gpu"] : []
 
 // The app is built with a placeholder Drive client so the Data page shows Drive as a user sees
 // it; the film never connects.
@@ -19,7 +21,7 @@ const steps: [string, string, string[], string, Record<string, string>?][] = [
 	["narrate", "bun", [resolve(video, "scripts/narrate.ts")], root],
 	["record", "bun", [resolve(video, "scripts/record.ts")], root],
 	["compose", "bun", [resolve(video, "scripts/compose.ts")], root],
-	["render", "npx", ["--yes", "hyperframes@0.8.203", "render", "--quality", "delivery", "--output", "renders/finpoint-guide.mp4"], video],
+	["render", "npx", ["--yes", "hyperframes@0.8.203", "render", "--quality", "delivery", "--output", "renders/finpoint-guide.mp4", ...gpu], video],
 	["publish", "bun", [resolve(video, "scripts/publish.ts")], root],
 ]
 
