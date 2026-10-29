@@ -17,6 +17,15 @@
 		"start": 76.46666666666667,
 		"duration": 16.89999999999999
 	},
+	"revolut": {
+		"chapter": "import",
+		"beats": [
+			"pick",
+			"next"
+		],
+		"start": 91.96666666666667,
+		"duration": 17.933333333333323
+	},
 	"allocator": {
 		"chapter": "allocator",
 		"beats": [
@@ -105,8 +114,8 @@
 			"replace",
 			"review"
 		],
-		"start": 44.83333333333333,
-		"duration": 25.13333333333334
+		"start": 45.53333333333333,
+		"duration": 25.133333333333326
 	},
 	"duplicates": {
 		"chapter": "duplicates",
@@ -216,14 +225,5 @@
 		],
 		"start": 21.866666666666664,
 		"duration": 8.933333333333337
-	},
-	"revolut": {
-		"chapter": "import",
-		"beats": [
-			"pick",
-			"next"
-		],
-		"start": 91.96666666666667,
-		"duration": 17.933333333333323
 	}
 }
