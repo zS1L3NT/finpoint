@@ -84,7 +84,7 @@
 
 	<div id="path" class="fp-stage">
 		<div id="bank" class="fp-tile" style="left:192px;top:420px;width:400px;--tone:var(--statement)"><svg class="fp-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 9 9-6 9 6M3 21h18M5 10v8m5-8v8m4-8v8m5-8v8"/></svg><div><div class="fp-tile-title">Your bank</div><div class="fp-tile-meta">Website or app</div></div></div>
-		<div id="file" class="fp-tile" style="left:760px;top:420px;width:400px;--tone:var(--neutral)"><svg class="fp-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6v18h12V7l-4-4Zm0 0v4h4M9 13h6m-6 4h6"/></svg><div><div class="fp-tile-title">Export</div><div class="fp-tile-meta">ocbc-october.csv</div></div></div>
+		<div id="file" class="fp-tile" style="left:760px;top:420px;width:400px;--tone:var(--neutral)"><svg class="fp-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6v18h12V7l-4-4Zm0 0v4h4M9 13h6m-6 4h6"/></svg><div><div class="fp-tile-title">Bank export</div><div class="fp-tile-meta">ocbc-october.csv</div></div></div>
 		<div id="finpoint" class="fp-tile" style="left:1328px;top:420px;width:400px;--tone:var(--record)"><svg class="fp-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M7 6.5h.01M10 6.5h.01"/></svg><div><div class="fp-tile-title">Finpoint</div><div class="fp-tile-meta">Reads every line</div></div></div>
 		<div id="bank-file" class="fp-flow fp-arrow-only" data-layout-allow-overlap style="--tone:var(--neutral)">
 		<svg viewBox="0 0 1920 1080" aria-hidden="true"><path class="fp-path" d="M600,476 C676,476 676,476 752,476"/><path class="fp-arrow" transform="translate(752,476) rotate(0)" d="m-14,-10 14,10 -14,10"/></svg>
@@ -96,31 +96,30 @@
 		<div id="edited" style="position:absolute;left:760px;top:650px"><span class="fp-badge" style="--tone:var(--danger)">✕ Edited: might not import</span></div>
 	</div>
 	<div id="banks" class="fp-stage">
-		<div id="b-dbs" class="fp-tile" style="left:192px;top:400px;width:340px;--tone:var(--statement)"><svg class="fp-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 9 9-6 9 6M3 21h18M5 10v8m5-8v8m4-8v8m5-8v8"/></svg><div><div class="fp-tile-title">DBS</div><div class="fp-tile-meta">CSV or Excel</div></div></div>
-		<div id="b-ocbc" class="fp-tile" style="left:580px;top:400px;width:340px;--tone:var(--statement)"><svg class="fp-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 9 9-6 9 6M3 21h18M5 10v8m5-8v8m4-8v8m5-8v8"/></svg><div><div class="fp-tile-title">OCBC</div><div class="fp-tile-meta">CSV or Excel</div></div></div>
-		<div id="b-uob" class="fp-tile" style="left:968px;top:400px;width:340px;--tone:var(--statement)"><svg class="fp-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 9 9-6 9 6M3 21h18M5 10v8m5-8v8m4-8v8m5-8v8"/></svg><div><div class="fp-tile-title">UOB</div><div class="fp-tile-meta">CSV or Excel</div></div></div>
-		<div id="b-rev" class="fp-tile" style="left:1356px;top:400px;width:372px;--tone:var(--statement)"><svg class="fp-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 9 9-6 9 6M3 21h18M5 10v8m5-8v8m4-8v8m5-8v8"/></svg><div><div class="fp-tile-title">Revolut</div><div class="fp-tile-meta">CSV or Excel</div></div></div>
+		<div id="b-dbs" class="fp-tile" style="left:192px;top:400px;width:340px;--tone:var(--statement)"><svg class="fp-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 9 9-6 9 6M3 21h18M5 10v8m5-8v8m4-8v8m5-8v8"/></svg><div><div class="fp-tile-title">DBS</div><div class="fp-tile-meta">CSV file</div></div></div>
+		<div id="b-ocbc" class="fp-tile" style="left:580px;top:400px;width:340px;--tone:var(--statement)"><svg class="fp-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 9 9-6 9 6M3 21h18M5 10v8m5-8v8m4-8v8m5-8v8"/></svg><div><div class="fp-tile-title">OCBC</div><div class="fp-tile-meta">CSV file</div></div></div>
+		<div id="b-uob" class="fp-tile" style="left:968px;top:400px;width:340px;--tone:var(--statement)"><svg class="fp-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 9 9-6 9 6M3 21h18M5 10v8m5-8v8m4-8v8m5-8v8"/></svg><div><div class="fp-tile-title">UOB</div><div class="fp-tile-meta">Excel spreadsheet</div></div></div>
+		<div id="b-rev" class="fp-tile" style="left:1356px;top:400px;width:372px;--tone:var(--statement)"><svg class="fp-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 9 9-6 9 6M3 21h18M5 10v8m5-8v8m4-8v8m5-8v8"/></svg><div><div class="fp-tile-title">Revolut</div><div class="fp-tile-meta">CSV file</div></div></div>
 	</div>
 	<div id="accounts" class="fp-stage">
-		<div id="f-1" class="fp-tile" style="left:192px;top:330px;width:460px;--tone:var(--neutral)"><svg class="fp-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6v18h12V7l-4-4Zm0 0v4h4M9 13h6m-6 4h6"/></svg><div><div class="fp-tile-title">DBS export</div><div class="fp-tile-meta">Account …1234</div></div></div>
-		<div id="f-2" class="fp-tile" style="left:192px;top:560px;width:460px;--tone:var(--neutral)"><svg class="fp-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6v18h12V7l-4-4Zm0 0v4h4M9 13h6m-6 4h6"/></svg><div><div class="fp-tile-title">DBS export</div><div class="fp-tile-meta">Account …5678</div></div></div>
+		<div id="f-1" class="fp-tile" style="left:192px;top:330px;width:460px;--tone:var(--neutral)"><svg class="fp-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6v18h12V7l-4-4Zm0 0v4h4M9 13h6m-6 4h6"/></svg><div><div class="fp-tile-title">DBS bank export</div><div class="fp-tile-meta">Bank account …1234</div></div></div>
+		<div id="f-2" class="fp-tile" style="left:192px;top:560px;width:460px;--tone:var(--neutral)"><svg class="fp-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6v18h12V7l-4-4Zm0 0v4h4M9 13h6m-6 4h6"/></svg><div><div class="fp-tile-title">DBS bank export</div><div class="fp-tile-meta">Bank account …5678</div></div></div>
 		<div id="f-1-a" class="fp-flow fp-arrow-only" data-layout-allow-overlap style="--tone:var(--statement)">
 		<svg viewBox="0 0 1920 1080" aria-hidden="true"><path class="fp-path" d="M660,386 C910,386 910,386 1160,386"/><path class="fp-arrow" transform="translate(1160,386) rotate(0)" d="m-14,-10 14,10 -14,10"/></svg>
 	</div>
 		<div id="f-2-a" class="fp-flow fp-arrow-only" data-layout-allow-overlap style="--tone:var(--statement)">
 		<svg viewBox="0 0 1920 1080" aria-hidden="true"><path class="fp-path" d="M660,616 C910,616 910,616 1160,616"/><path class="fp-arrow" transform="translate(1160,616) rotate(0)" d="m-14,-10 14,10 -14,10"/></svg>
 	</div>
-		<div id="a-1" class="fp-tile" style="left:1168px;top:330px;width:560px;--tone:var(--statement)"><svg class="fp-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 9 9-6 9 6M3 21h18M5 10v8m5-8v8m4-8v8m5-8v8"/></svg><div><div class="fp-tile-title">DBS …1234</div><div class="fp-tile-meta">Its own Statements</div></div></div>
-		<div id="a-2" class="fp-tile" style="left:1168px;top:560px;width:560px;--tone:var(--statement)"><svg class="fp-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 9 9-6 9 6M3 21h18M5 10v8m5-8v8m4-8v8m5-8v8"/></svg><div><div class="fp-tile-title">DBS …5678</div><div class="fp-tile-meta">Its own Statements</div></div></div>
+		<div id="a-1" class="fp-tile" style="left:1168px;top:330px;width:560px;--tone:var(--statement)"><svg class="fp-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 9 9-6 9 6M3 21h18M5 10v8m5-8v8m4-8v8m5-8v8"/></svg><div><div class="fp-tile-title">From …1234</div><div class="fp-tile-meta">Its Statements, kept apart</div></div></div>
+		<div id="a-2" class="fp-tile" style="left:1168px;top:560px;width:560px;--tone:var(--statement)"><svg class="fp-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 9 9-6 9 6M3 21h18M5 10v8m5-8v8m4-8v8m5-8v8"/></svg><div><div class="fp-tile-title">From …5678</div><div class="fp-tile-meta">Its Statements, kept apart</div></div></div>
 	</div>
 	<div id="revolut" class="fp-stage">
-		<div id="r-file" class="fp-tile" style="left:192px;top:420px;width:460px;--tone:var(--neutral)"><svg class="fp-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6v18h12V7l-4-4Zm0 0v4h4M9 13h6m-6 4h6"/></svg><div><div class="fp-tile-title">Revolut export</div><div class="fp-tile-meta">No account inside</div></div></div>
-		<div id="r-q" style="position:absolute;left:192px;top:560px"><span class="fp-badge" style="--tone:var(--pending)">? Which account</span></div>
+		<div id="r-file" class="fp-tile" style="left:192px;top:420px;width:520px;--tone:var(--neutral)"><svg class="fp-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6v18h12V7l-4-4Zm0 0v4h4M9 13h6m-6 4h6"/></svg><div><div class="fp-tile-title">Revolut bank export</div><div class="fp-tile-meta">No bank account inside</div></div></div>
+		<div id="r-q" style="position:absolute;left:192px;top:560px"><span class="fp-badge" style="--tone:var(--pending)">? Which bank account</span></div>
 		<div id="r-ask" class="fp-flow fp-arrow-only" data-layout-allow-overlap style="--tone:var(--pending)">
-		<svg viewBox="0 0 1920 1080" aria-hidden="true"><path class="fp-path" d="M660,476 C910,476 910,476 1160,476"/><path class="fp-arrow" transform="translate(1160,476) rotate(0)" d="m-14,-10 14,10 -14,10"/></svg>
+		<svg viewBox="0 0 1920 1080" aria-hidden="true"><path class="fp-path" d="M720,476 C940,476 940,476 1160,476"/><path class="fp-arrow" transform="translate(1160,476) rotate(0)" d="m-14,-10 14,10 -14,10"/></svg>
 	</div>
-		<div id="r-pick" class="fp-tile" style="left:1168px;top:380px;width:560px;--tone:var(--statement)"><svg class="fp-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 9 9-6 9 6M3 21h18M5 10v8m5-8v8m4-8v8m5-8v8"/></svg><div><div class="fp-tile-title">Pick an Account</div><div class="fp-tile-meta">One you already have</div></div></div>
-		<div id="r-new" class="fp-tile" style="left:1168px;top:560px;width:560px;--tone:var(--statement)"><svg class="fp-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 9 9-6 9 6M3 21h18M5 10v8m5-8v8m4-8v8m5-8v8"/></svg><div><div class="fp-tile-title">Or create one</div><div class="fp-tile-meta">With an ID and a name</div></div></div>
+		<div id="r-pick" class="fp-tile" style="left:1168px;top:420px;width:560px;--tone:var(--statement)"><svg class="fp-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 9 9-6 9 6M3 21h18M5 10v8m5-8v8m4-8v8m5-8v8"/></svg><div><div class="fp-tile-title">Its bank account</div><div class="fp-tile-meta">You choose, before you import</div></div></div>
 	</div>
 	</div>
 </div>
@@ -191,7 +190,7 @@ const dim = (selector, at) => tl.to(selector, { opacity: 0.3, duration: 0.35, ea
 const undim = (selector, at) => tl.to(selector, { opacity: 1, duration: 0.35, ease: "power2.out" }, at);
 
 
-enter("#heading", T("export", 0.3));
+enter("#heading", 0.2);
 enter("#bank", T("export", 0.3), -32);
 draw("#bank-file", T("export", 0.3) + 0.5);
 enter("#file", T("export", 0.3) + 0.9);
@@ -221,8 +220,7 @@ enter("#r-file", T("rev2", 47), -32);
 enter("#r-q", T("dont", 49));
 draw("#r-ask", T("ask", 52));
 enter("#r-pick", T("ask", 52) + 0.4, 32);
-enter("#r-new", T("new", 55), 32);
-tl.set({}, {}, T("new", 55) + 1.6);
+tl.set({}, {}, T("ask", 52) + 1.6);
 
 window.__timelines["import-banks"] = tl;</script>
 </template>

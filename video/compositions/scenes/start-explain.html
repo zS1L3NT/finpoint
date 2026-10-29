@@ -180,7 +180,7 @@ const dim = (selector, at) => tl.to(selector, { opacity: 0.3, duration: 0.35, ea
 const undim = (selector, at) => tl.to(selector, { opacity: 1, duration: 0.35, ease: "power2.out" }, at);
 
 
-enter("#heading", T("gap", 0.3));
+enter("#heading", 0.2);
 enter("#fp-head", T("exact", 2));
 enter("#fp-ntuc", T("exact", 2) + 0.15);
 enter("#fp-sakura", T("exact", 2) + 0.3);

@@ -165,7 +165,7 @@ const dim = (selector, at) => tl.to(selector, { opacity: 0.3, duration: 0.35, ea
 const undim = (selector, at) => tl.to(selector, { opacity: 1, duration: 0.35, ease: "power2.out" }, at);
 
 
-enter("#heading", T("cat", 0.3));
+enter("#heading", 0.2);
 enter("#to-cat", T("cat", 0.3) + 0.2, -32);
 draw("#to-a1", T("cat", 0.3) + 0.6);
 enter("#to-r1", T("cat", 0.3) + 1, 24);

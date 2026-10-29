@@ -224,7 +224,7 @@ const dim = (selector, at) => tl.to(selector, { opacity: 0.3, duration: 0.35, ea
 const undim = (selector, at) => tl.to(selector, { opacity: 1, duration: 0.35, ease: "power2.out" }, at);
 
 
-enter("#heading", T("stmt", 0.3));
+enter("#heading", 0.2);
 enter("#supermarket", T("stmt", 0.3), -32);
 tl.fromTo("#untouched", { opacity: 0 }, { opacity: 1, duration: 0.4 }, T("trust", 6));
 enter("#groceries", T("rec", 14), 32);

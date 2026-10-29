@@ -80,7 +80,7 @@
 </style>
 <div id="root" data-composition-id="dashboard-source" data-width="1920" data-height="1080" data-duration="40">
 	<div id="dashboard-source-art" class="clip" data-start="0" data-duration="40" data-track-index="1" data-track-kind="graphics" data-hold>
-		<header id="heading" class="fp-heading"><div class="fp-kicker">Dashboard · where the numbers come from</div><h1>Records make the numbers.</h1></header>
+		<header id="heading" class="fp-heading"><div class="fp-kicker">The Dashboard</div><h1>Records make the numbers.</h1></header>
 
 	<div id="ds-lunch" class="fp-row" data-kind="record" style="left:192px;top:300px;width:640px">
 		<svg class="fp-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3Zm3 5h6m-6 4h6"/></svg><div class="fp-row-text"><div class="fp-row-title">Lunch</div><div class="fp-row-meta">Dining Out</div></div><span class="fp-amount">−$12</span>
@@ -182,7 +182,7 @@ const dim = (selector, at) => tl.to(selector, { opacity: 0.3, duration: 0.35, ea
 const undim = (selector, at) => tl.to(selector, { opacity: 1, duration: 0.35, ease: "power2.out" }, at);
 
 
-enter("#heading", T("recs", 0.3));
+enter("#heading", 0.2);
 enter("#ds-lunch", T("recs", 0.3) + 0.1, -32);
 enter("#ds-groceries", T("recs", 0.3) + 0.25, -32);
 enter("#ds-gift", T("recs", 0.3) + 0.4, -32);

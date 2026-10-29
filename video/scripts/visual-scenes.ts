@@ -16,10 +16,10 @@ const hold = (cue: string, fallback: number, seconds = 1.6) => `tl.set({}, {}, T
 
 write("start-welcome", 40, "Welcome", "Welcome to Finpoint.", `
 	<div id="balance" class="fp-dashboard" style="left:192px;top:330px;--tone:var(--statement)"><h2 style="color:var(--statement)">Your bank balance</h2><span id="balance-value" class="fp-value">$2,400</span>${meter("balance-meter", "statement")}<p style="margin-top:24px">Going faster than you expected</p></div>
-	${tile("many", "bank", "Several accounts", 1168, 330, "DBS, OCBC, UOB, Revolut", "statement", 560)}
-	${tile("few", "statement", "A few daily payments", 1168, 520, "From just one account", "statement", 560)}
-	${callout("missing", "Your banking app lists every payment. So what’s missing?", "statement")}`, `
-enter("#heading", T("welcome", 0.3));
+	${tile("many", "bank", "Several bank accounts", 1168, 330, "DBS, OCBC, UOB, Revolut", "statement", 560)}
+	${tile("few", "statement", "A few daily payments", 1168, 520, "From one bank account", "statement", 560)}
+	${callout("missing", "Banking apps already list every payment. So what’s missing?", "statement")}`, `
+enter("#heading", 0.2);
 enter("#balance", T("balance", 2), -32);
 count("#balance-value", 380, T("balance", 2) + 0.4, 2400);
 tl.fromTo("#balance-meter", { scaleX: 1 }, { scaleX: 0.16, duration: 0.8, ease: "power2.out" }, T("balance", 2) + 0.4);
@@ -47,7 +47,7 @@ write("start-problem", 60, "Your bank shows payments", "…but not what they wer
 	${label("dinner", "Dinner, your share", -30, 1168, 560)}
 	${arrow("from-sakura", [912, 482], [1160, 596], "record")}
 	${arrow("from-sam", [912, 662], [1160, 596], "record")}`, `
-enter("#heading", T("feed", 0.3));
+enter("#heading", 0.2);
 enter("#bank-head", T("feed", 0.3) + 0.2);
 enter("#bank-ntuc", T("feed", 0.3) + 0.35);
 enter("#bank-sakura", T("feed", 0.3) + 0.55);
@@ -86,7 +86,7 @@ write("start-explain", 50, "Finpoint closes that gap", "Your bank’s words, and
 	${arrow("fp-from-sakura", [912, 482], [1160, 556], "record")}
 	${arrow("fp-from-sam", [912, 602], [1160, 556], "record")}
 	${callout("idea", "Labels on your bank activity: one or many, simple or detailed.", "record")}`, `
-enter("#heading", T("gap", 0.3));
+enter("#heading", 0.2);
 enter("#fp-head", T("exact", 2));
 enter("#fp-ntuc", T("exact", 2) + 0.15);
 enter("#fp-sakura", T("exact", 2) + 0.3);
@@ -119,7 +119,7 @@ write("start-how", 40, "Using Finpoint", "Two things to do.", `
 		${card("idea-r", "record", "Your label for it", -80, 1168, 418, "In your own words")}
 		${connector("idea-a", [752, 510], [1168, 510], null)}
 	</div>`, `
-enter("#heading", T("two", 0.3));
+enter("#heading", 0.2);
 enter("#bring", T("bring", 3), -32);
 draw("#how-arrow", T("label", 5));
 enter("#labelit", T("label", 5) + 0.4, 32);
@@ -157,7 +157,7 @@ write("model-diagram", 110, "The basics · three ideas", "Bank activity, labelle
 		${connector("lunch-flow", [752, 510], [1168, 510], -12)}
 		${callout("lunch-note", "One Statement, one Record. Most of the time, it’s this simple.")}
 	</div>`, `
-enter("#heading", T("stmt", 0.3));
+enter("#heading", 0.2);
 enter("#supermarket", T("stmt", 0.3), -32);
 tl.fromTo("#untouched", { opacity: 0 }, { opacity: 1, duration: 0.4 }, T("trust", 6));
 enter("#groceries", T("rec", 14), 32);
@@ -194,7 +194,7 @@ write("model-complex", 50, "The basics · when it gets messier", "Many to many, 
 	${connector("ocbc-gift", [752, 650], [1168, 650], -40)}
 	${callout("three-note", "Two Statements and two Records, linked by three Allocations.")}
 	<style>#ocbc-groceries .fp-flow-label, #ocbc-gift .fp-flow-label { display: none; }</style>`, `
-enter("#heading", T("messier", 0.3));
+enter("#heading", 0.2);
 enter("#m-groceries", T("buy", 3), 32);
 enter("#m-gift", T("gift40", 5), 32);
 enter("#dbs", T("cards", 7), -32);
@@ -213,7 +213,7 @@ ${hold("itself", 21, 1.2)}
 write("import-banks", 110, "Importing your bank activity", "From your bank, as a file.", `
 	<div id="path" class="fp-stage">
 		${tile("bank", "bank", "Your bank", 192, 420, "Website or app", "statement", 400)}
-		${tile("file", "file", "Export", 760, 420, "ocbc-october.csv", "neutral", 400)}
+		${tile("file", "file", "Bank export", 760, 420, "ocbc-october.csv", "neutral", 400)}
 		${tile("finpoint", "browser", "Finpoint", 1328, 420, "Reads every line", "record", 400)}
 		${arrow("bank-file", [600, 476], [752, 476])}
 		${arrow("file-finpoint", [1168, 476], [1320, 476], "record")}
@@ -221,27 +221,26 @@ write("import-banks", 110, "Importing your bank activity", "From your bank, as a
 		<div id="edited" style="position:absolute;left:760px;top:650px">${badge("✕ Edited: might not import", "danger")}</div>
 	</div>
 	<div id="banks" class="fp-stage">
-		${tile("b-dbs", "bank", "DBS", 192, 400, "CSV or Excel", "statement", 340)}
-		${tile("b-ocbc", "bank", "OCBC", 580, 400, "CSV or Excel", "statement", 340)}
-		${tile("b-uob", "bank", "UOB", 968, 400, "CSV or Excel", "statement", 340)}
-		${tile("b-rev", "bank", "Revolut", 1356, 400, "CSV or Excel", "statement", 372)}
+		${tile("b-dbs", "bank", "DBS", 192, 400, "CSV file", "statement", 340)}
+		${tile("b-ocbc", "bank", "OCBC", 580, 400, "CSV file", "statement", 340)}
+		${tile("b-uob", "bank", "UOB", 968, 400, "Excel spreadsheet", "statement", 340)}
+		${tile("b-rev", "bank", "Revolut", 1356, 400, "CSV file", "statement", 372)}
 	</div>
 	<div id="accounts" class="fp-stage">
-		${tile("f-1", "file", "DBS export", 192, 330, "Account …1234", "neutral", 460)}
-		${tile("f-2", "file", "DBS export", 192, 560, "Account …5678", "neutral", 460)}
+		${tile("f-1", "file", "DBS bank export", 192, 330, "Bank account …1234", "neutral", 460)}
+		${tile("f-2", "file", "DBS bank export", 192, 560, "Bank account …5678", "neutral", 460)}
 		${arrow("f-1-a", [660, 386], [1160, 386], "statement")}
 		${arrow("f-2-a", [660, 616], [1160, 616], "statement")}
-		${tile("a-1", "bank", "DBS …1234", 1168, 330, "Its own Statements", "statement", 560)}
-		${tile("a-2", "bank", "DBS …5678", 1168, 560, "Its own Statements", "statement", 560)}
+		${tile("a-1", "statement", "From …1234", 1168, 330, "Its Statements, kept apart", "statement", 560)}
+		${tile("a-2", "statement", "From …5678", 1168, 560, "Its Statements, kept apart", "statement", 560)}
 	</div>
 	<div id="revolut" class="fp-stage">
-		${tile("r-file", "file", "Revolut export", 192, 420, "No account inside", "neutral", 460)}
-		<div id="r-q" style="position:absolute;left:192px;top:560px">${badge("? Which account", "pending")}</div>
-		${arrow("r-ask", [660, 476], [1160, 476], "pending")}
-		${tile("r-pick", "bank", "Pick an Account", 1168, 380, "One you already have", "statement", 560)}
-		${tile("r-new", "bank", "Or create one", 1168, 560, "With an ID and a name", "statement", 560)}
+		${tile("r-file", "file", "Revolut bank export", 192, 420, "No bank account inside", "neutral", 520)}
+		<div id="r-q" style="position:absolute;left:192px;top:560px">${badge("? Which bank account", "pending")}</div>
+		${arrow("r-ask", [720, 476], [1160, 476], "pending")}
+		${tile("r-pick", "bank", "Its bank account", 1168, 420, "You choose, before you import", "statement", 560)}
 	</div>`, `
-enter("#heading", T("export", 0.3));
+enter("#heading", 0.2);
 enter("#bank", T("export", 0.3), -32);
 draw("#bank-file", T("export", 0.3) + 0.5);
 enter("#file", T("export", 0.3) + 0.9);
@@ -271,18 +270,17 @@ enter("#r-file", T("rev2", 47), -32);
 enter("#r-q", T("dont", 49));
 draw("#r-ask", T("ask", 52));
 enter("#r-pick", T("ask", 52) + 0.4, 32);
-enter("#r-new", T("new", 55), 32);
-${hold("new", 55)}
+${hold("ask", 52)}
 `)
 
-write("import-download", 30, "Step one", "Download an export for each account.", `
+write("import-download", 30, "Step one", "Download a bank export for each bank account.", `
 	${tile("d-bank", "bank", "Your bank", 192, 440, "Website or app", "statement", 460)}
 	${arrow("d-1", [660, 496], [1160, 400])}
 	${arrow("d-2", [660, 496], [1160, 620])}
 	${tile("d-f1", "file", "OCBC 360 Account", 1168, 340, "ocbc-october.csv", "neutral", 560)}
 	${tile("d-f2", "file", "OCBC savings", 1168, 560, "ocbc-savings.xlsx", "neutral", 560)}
-	${callout("d-note", "A CSV or Excel file, once for each account you want to track.", "statement")}`, `
-enter("#heading", T("first", 0.3));
+	${callout("d-note", "A CSV or Excel bank export, once for each bank account you want to track.", "statement")}`, `
+enter("#heading", 0.2);
 enter("#d-bank", T("dl", 2), -32);
 draw("#d-1", T("csv", 4));
 enter("#d-f1", T("csv", 4) + 0.4, 32);
@@ -299,20 +297,21 @@ write("split-done", 24, "One to many", "Fully labelled.", `
 	${card("sd-groceries", "record", "Groceries", -50, 1168, 318)}
 	${card("sd-gift", "record", "Birthday gift", -30, 1168, 558)}
 	${split("sd-flow", [-50, -30])}`, `
-enter("#heading", 0);
+enter("#heading", 0.2);
 flow("#sd-flow-1", 0);
 enter("#sd-gift", T("two", 1), 32);
 flow("#sd-flow-2", T("two", 1));
-count("#sd-left", 0, T("gift", 3), -30);
-tl.fromTo("#sd-meter", { scaleX: 0.375 }, { scaleX: 0, duration: 0.8, ease: "power2.out" }, T("gift", 3));
+// The $30 left drains as the gift's Allocation arrives.
+count("#sd-left", 0, T("two", 1) + 0.5, -30);
+tl.fromTo("#sd-meter", { scaleX: 0.375 }, { scaleX: 0, duration: 0.8, ease: "power2.out" }, T("two", 1) + 0.5);
 emphasis("#sd-groceries", T("groc", 2));
 emphasis("#sd-gift", T("gift", 3) + 0.4);
 ${hold("gift", 3, 2)}
 `)
 
-// ─── 09 · Where your numbers come from ─────────────────────────────────────────────────────
+// ─── 09 · The Dashboard ─────────────────────────────────────────────────────────────────────
 
-write("dashboard-source", 40, "Dashboard · where the numbers come from", "Records make the numbers.", `
+write("dashboard-source", 40, "The Dashboard", "Records make the numbers.", `
 	${row("ds-lunch", "record", "Lunch", -12, 192, 300, "Dining Out", 640)}
 	${row("ds-groceries", "record", "Groceries", -50, 192, 420, "Groceries", 640)}
 	${row("ds-gift", "record", "Birthday gift", -30, 192, 540, "Gifts & Donations", 640)}
@@ -326,7 +325,7 @@ write("dashboard-source", 40, "Dashboard · where the numbers come from", "Recor
 		${row("ds-grab", "statement", "GRAB RIDE", -18, 192, 780, "Not labelled yet", 640)}
 		<div id="ds-not" style="position:absolute;left:880px;top:808px">${badge("✕ Not counted", "neutral")}</div>
 	</div>`, `
-enter("#heading", T("recs", 0.3));
+enter("#heading", 0.2);
 enter("#ds-lunch", T("recs", 0.3) + 0.1, -32);
 enter("#ds-groceries", T("recs", 0.3) + 0.25, -32);
 enter("#ds-gift", T("recs", 0.3) + 0.4, -32);
@@ -354,7 +353,7 @@ write("pending-when", 30, "Pending Records", "Label it now, before the bank catc
 	${row("pw-back", "statement", "PAYNOW FROM JO", 100, 1108, 320, "Not here yet", 620)}
 	${arrow("pw-down", [300, 428], [300, 500], "record", "v")}
 	${label("pw-label", "Concert, your share", -100, 192, 508)}`, `
-enter("#heading", T("date", 0.3));
+enter("#heading", 0.2);
 tl.fromTo("#pw-rail", { scaleX: 0, transformOrigin: "left center" }, { scaleX: 1, duration: 0.8, ease: "power2.out" }, T("date", 0.3));
 enter("#pw-today", T("date", 0.3) + 0.4);
 enter("#pw-week", T("date", 0.3) + 0.6);
@@ -379,7 +378,7 @@ write("pending-reasons", 30, "Pending · two different reasons", "What still nee
 		<div id="pending-status" style="margin-top:30px">${badge("Record stays Pending")}</div>
 	</section>
 	${callout("pending-note", "Either reason keeps the Record Pending.", "pending")}`, `
-enter("#heading", T("two", 0.3));
+enter("#heading", 0.2);
 enter("#mismatch", T("tally", 2));
 meter("#mismatch-meter", 0.5, T("tally", 2) + 0.3);
 emphasis("#concert .fp-badge", T("tally", 2) + 0.7);
@@ -399,7 +398,7 @@ write("pending-statement", 40, "Pending Statements", "Not confirmed by the bank 
 	${row("pst-3", "statement", "TAXI HOME", -24, 192, 570, "Added by you, the bank is slow", 760)}
 	<div id="pst-badge-3" style="position:absolute;left:992px;top:596px">${badge("Pending Statement")}</div>
 	<div id="pst-edit" style="position:absolute;left:192px;top:700px">${badge("You can edit it until the real one arrives", "statement")}</div>`, `
-enter("#heading", T("remember", 0.3));
+enter("#heading", 0.2);
 enter("#pst-1", T("remember", 0.3) + 0.2);
 emphasis("#pst-1", T("exception", 3));
 enter("#pst-2", T("pend", 5));
@@ -419,7 +418,7 @@ write("duplicate-export", 30, "Fixing duplicates", "The same payment, exported t
 	${row("de-r2", "statement", "GRAB RIDE SG", -18, 1168, 470, "OCBC · 12 Sep", 560)}
 	<div id="de-q" style="position:absolute;left:820px;top:496px">${badge("Duplicate?")}</div>
 	${callout("de-note", "Same account, same day, same amount. Only the description changed.", "pending")}`, `
-enter("#heading", T("exps", 0.3));
+enter("#heading", 0.2);
 enter("#de-f1", T("exps", 0.3), -32);
 enter("#de-r1", T("exps", 0.3) + 0.3, -32);
 enter("#de-f2", T("chg", 4), 32);
@@ -441,7 +440,7 @@ write("rule-recurring", 30, "Statement rules", "Recognise it once, fill it in ev
 	${arrow("rr-out", [1246, 472], [1320, 472], "record")}
 	${tile("rr-record", "record", "Phone bill", 1328, 416, "Bills & Utilities", "record", 400)}
 	${callout("rr-note", "It fills in the Record when you create one. It never creates Records on its own.", "allocation")}`, `
-enter("#heading", T("month", 0.3));
+enter("#heading", 0.2);
 enter("#rr-1", T("phone", 2));
 enter("#rr-2", T("phone", 2) + 0.25);
 enter("#rr-3", T("phone", 2) + 0.5);
@@ -472,7 +471,7 @@ write("treatments", 60, "Treatments", "How the Dashboard counts a Record.", `
 	${arrow("tm-a3", [820, 552], [1320, 477], "spending")}
 	${arrow("tm-a4", [820, 662], [1320, 607], "saving")}
 	${arrow("tm-a5", [820, 772], [1320, 747], "neutral")}`, `
-enter("#heading", T("treat", 0.3));
+enter("#heading", 0.2);
 enter("#tm-income", T("income", 4), 24);
 enter("#tm-spending", T("spend", 5), 24);
 enter("#tm-saving", T("saving", 6), 24);
@@ -497,7 +496,7 @@ write("treatment-override", 20, "Treatments · exceptions", "Your Category decid
 	${row("to-r1", "record", "Lunch", -12, 1168, 288, "Spending", 560)}
 	${row("to-r2", "record", "Team dinner", -80, 1168, 508, "Company pays you back", 560)}
 	<div id="to-badge" style="position:absolute;left:1168px;top:630px">${badge("Changed on this Record only", "allocation")}</div>`, `
-enter("#heading", T("cat", 0.3));
+enter("#heading", 0.2);
 enter("#to-cat", T("cat", 0.3) + 0.2, -32);
 draw("#to-a1", T("cat", 0.3) + 0.6);
 enter("#to-r1", T("cat", 0.3) + 1, 24);
@@ -518,7 +517,7 @@ write("monthly-budgets", 40, "Monthly Budgets", "Am I on track this month?", `
 	${plan("mb-irr", "Irregular", "One-off costs", 976)}
 	${plan("mb-trav", "Travel", "Trips", 1368)}
 	${callout("mb-note", "Each gets its own amount every month. A plan to compare with, not money set aside.", "neutral")}`, `
-enter("#heading", T("mb", 0.3));
+enter("#heading", 0.2);
 enter("#mb-month", T("month", 3));
 enter("#mb-daily", T("daily", 8));
 enter("#mb-rec", T("rec", 10));
@@ -536,7 +535,7 @@ write("budget-period", 30, "Budgets for trips and events", "Its own start and en
 	<div id="bp-range" style="position:absolute;left:760px;top:450px;width:400px;height:56px;border-radius:28px;background:color-mix(in srgb, var(--allocation) 25%, transparent);border:2px solid var(--allocation)"></div>
 	<div id="bp-label" class="fp-row-meta" style="position:absolute;left:780px;top:520px;font-size:28px;color:var(--ink)">28 Oct – 3 Nov</div>
 	${card("bp-budget", "budget", "A week in Bali", -1500, 680, 580, "Its own small dashboard")}`, `
-enter("#heading", T("bud", 0.3));
+enter("#heading", 0.2);
 enter("#bp-oct", T("bud", 0.3) + 0.2);
 enter("#bp-nov", T("bud", 0.3) + 0.4);
 tl.fromTo("#bp-range", { scaleX: 0, transformOrigin: "left center" }, { scaleX: 1, duration: 0.8, ease: "power2.inOut" }, T("start", 4));
@@ -555,7 +554,7 @@ write("sync-local", 30, "Your data", "It lives in your browser.", `
 	${row("sl-r3", "record", "Dinner", -30, 240, 620, "", 800)}
 	${tile("sl-server", "cloud", "Finpoint’s servers", 1250, 460, "Never see your data", "neutral", 478)}
 	<div id="sl-cross" style="position:absolute;left:1250px;top:580px">${badge("✕ Nothing stored here", "neutral")}</div>`, `
-enter("#heading", T("browser", 0.3));
+enter("#heading", 0.2);
 tl.fromTo("#sl-zone", { opacity: 0 }, { opacity: 1, duration: 0.5 }, T("browser", 0.3));
 enter("#sl-r1", T("device", 3));
 enter("#sl-r2", T("device", 3) + 0.2);
@@ -574,7 +573,7 @@ write("sync-conflict", 30, "When copies disagree", "Finpoint keeps one whole cop
 	<div id="sc-yours" class="fp-stage">
 		${callout("sc-note", "Your data only goes to places you control: this device, your backup file, your Google Drive.", "record")}
 	</div>`, `
-enter("#heading", T("two", 0.3));
+enter("#heading", 0.2);
 enter("#sc-a", T("devices", 2), -32);
 enter("#sc-b", T("devices", 2) + 0.3, -32);
 draw("#sc-keep", T("keep", 5));
@@ -602,7 +601,7 @@ write("routine-loop", 40, "Your routine", "A few minutes, every so often.", `
 	${arrow("rl-a4", [1252, 567], [1203, 567])}
 	${arrow("rl-a5", [719, 567], [670, 567])}
 	${callout("rl-note", "With Google Drive connected, backups happen on their own.", "record")}`, `
-enter("#heading", T("routine", 0.3));
+enter("#heading", 0.2);
 enter("#rl-1", T("import", 1.5));
 draw("#rl-a1", T("dups", 4));
 enter("#rl-2", T("dups", 4) + 0.3);

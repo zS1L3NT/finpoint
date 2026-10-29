@@ -164,7 +164,7 @@ const dim = (selector, at) => tl.to(selector, { opacity: 0.3, duration: 0.35, ea
 const undim = (selector, at) => tl.to(selector, { opacity: 1, duration: 0.35, ease: "power2.out" }, at);
 
 
-enter("#heading", T("date", 0.3));
+enter("#heading", 0.2);
 tl.fromTo("#pw-rail", { scaleX: 0, transformOrigin: "left center" }, { scaleX: 1, duration: 0.8, ease: "power2.out" }, T("date", 0.3));
 enter("#pw-today", T("date", 0.3) + 0.4);
 enter("#pw-week", T("date", 0.3) + 0.6);

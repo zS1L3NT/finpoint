@@ -169,7 +169,7 @@ const dim = (selector, at) => tl.to(selector, { opacity: 0.3, duration: 0.35, ea
 const undim = (selector, at) => tl.to(selector, { opacity: 1, duration: 0.35, ease: "power2.out" }, at);
 
 
-enter("#heading", T("month", 0.3));
+enter("#heading", 0.2);
 enter("#rr-1", T("phone", 2));
 enter("#rr-2", T("phone", 2) + 0.25);
 enter("#rr-3", T("phone", 2) + 0.5);

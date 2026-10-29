@@ -80,7 +80,7 @@
 </style>
 <div id="root" data-composition-id="import-download" data-width="1920" data-height="1080" data-duration="30">
 	<div id="import-download-art" class="clip" data-start="0" data-duration="30" data-track-index="1" data-track-kind="graphics" data-hold>
-		<header id="heading" class="fp-heading"><div class="fp-kicker">Step one</div><h1>Download an export for each account.</h1></header>
+		<header id="heading" class="fp-heading"><div class="fp-kicker">Step one</div><h1>Download a bank export for each bank account.</h1></header>
 
 	<div id="d-bank" class="fp-tile" style="left:192px;top:440px;width:460px;--tone:var(--statement)"><svg class="fp-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 9 9-6 9 6M3 21h18M5 10v8m5-8v8m4-8v8m5-8v8"/></svg><div><div class="fp-tile-title">Your bank</div><div class="fp-tile-meta">Website or app</div></div></div>
 	<div id="d-1" class="fp-flow fp-arrow-only" data-layout-allow-overlap style="--tone:var(--neutral)">
@@ -91,7 +91,7 @@
 	</div>
 	<div id="d-f1" class="fp-tile" style="left:1168px;top:340px;width:560px;--tone:var(--neutral)"><svg class="fp-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6v18h12V7l-4-4Zm0 0v4h4M9 13h6m-6 4h6"/></svg><div><div class="fp-tile-title">OCBC 360 Account</div><div class="fp-tile-meta">ocbc-october.csv</div></div></div>
 	<div id="d-f2" class="fp-tile" style="left:1168px;top:560px;width:560px;--tone:var(--neutral)"><svg class="fp-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6v18h12V7l-4-4Zm0 0v4h4M9 13h6m-6 4h6"/></svg><div><div class="fp-tile-title">OCBC savings</div><div class="fp-tile-meta">ocbc-savings.xlsx</div></div></div>
-	<div id="d-note" class="fp-callout" style="--tone:var(--statement)">A CSV or Excel file, once for each account you want to track.</div>
+	<div id="d-note" class="fp-callout" style="--tone:var(--statement)">A CSV or Excel bank export, once for each bank account you want to track.</div>
 	</div>
 </div>
 <script>// Embedded in each scene: selectors stay inside that composition's runtime scope.
@@ -161,7 +161,7 @@ const dim = (selector, at) => tl.to(selector, { opacity: 0.3, duration: 0.35, ea
 const undim = (selector, at) => tl.to(selector, { opacity: 1, duration: 0.35, ease: "power2.out" }, at);
 
 
-enter("#heading", T("first", 0.3));
+enter("#heading", 0.2);
 enter("#d-bank", T("dl", 2), -32);
 draw("#d-1", T("csv", 4));
 enter("#d-f1", T("csv", 4) + 0.4, 32);

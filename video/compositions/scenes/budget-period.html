@@ -160,7 +160,7 @@ const dim = (selector, at) => tl.to(selector, { opacity: 0.3, duration: 0.35, ea
 const undim = (selector, at) => tl.to(selector, { opacity: 1, duration: 0.35, ease: "power2.out" }, at);
 
 
-enter("#heading", T("bud", 0.3));
+enter("#heading", 0.2);
 enter("#bp-oct", T("bud", 0.3) + 0.2);
 enter("#bp-nov", T("bud", 0.3) + 0.4);
 tl.fromTo("#bp-range", { scaleX: 0, transformOrigin: "left center" }, { scaleX: 1, duration: 0.8, ease: "power2.inOut" }, T("start", 4));

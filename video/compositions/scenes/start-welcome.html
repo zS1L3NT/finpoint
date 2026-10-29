@@ -83,9 +83,9 @@
 		<header id="heading" class="fp-heading"><div class="fp-kicker">Welcome</div><h1>Welcome to Finpoint.</h1></header>
 
 	<div id="balance" class="fp-dashboard" style="left:192px;top:330px;--tone:var(--statement)"><h2 style="color:var(--statement)">Your bank balance</h2><span id="balance-value" class="fp-value">$2,400</span><div class="fp-meter" style="--tone:var(--statement)"><div id="balance-meter" class="fp-meter-fill"></div></div><p style="margin-top:24px">Going faster than you expected</p></div>
-	<div id="many" class="fp-tile" style="left:1168px;top:330px;width:560px;--tone:var(--statement)"><svg class="fp-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 9 9-6 9 6M3 21h18M5 10v8m5-8v8m4-8v8m5-8v8"/></svg><div><div class="fp-tile-title">Several accounts</div><div class="fp-tile-meta">DBS, OCBC, UOB, Revolut</div></div></div>
-	<div id="few" class="fp-tile" style="left:1168px;top:520px;width:560px;--tone:var(--statement)"><svg class="fp-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 9 9-6 9 6M3 21h18M5 10v8m5-8v8m4-8v8m5-8v8"/></svg><div><div class="fp-tile-title">A few daily payments</div><div class="fp-tile-meta">From just one account</div></div></div>
-	<div id="missing" class="fp-callout" style="--tone:var(--statement)">Your banking app lists every payment. So what’s missing?</div>
+	<div id="many" class="fp-tile" style="left:1168px;top:330px;width:560px;--tone:var(--statement)"><svg class="fp-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 9 9-6 9 6M3 21h18M5 10v8m5-8v8m4-8v8m5-8v8"/></svg><div><div class="fp-tile-title">Several bank accounts</div><div class="fp-tile-meta">DBS, OCBC, UOB, Revolut</div></div></div>
+	<div id="few" class="fp-tile" style="left:1168px;top:520px;width:560px;--tone:var(--statement)"><svg class="fp-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 9 9-6 9 6M3 21h18M5 10v8m5-8v8m4-8v8m5-8v8"/></svg><div><div class="fp-tile-title">A few daily payments</div><div class="fp-tile-meta">From one bank account</div></div></div>
+	<div id="missing" class="fp-callout" style="--tone:var(--statement)">Banking apps already list every payment. So what’s missing?</div>
 	</div>
 </div>
 <script>// Embedded in each scene: selectors stay inside that composition's runtime scope.
@@ -155,7 +155,7 @@ const dim = (selector, at) => tl.to(selector, { opacity: 0.3, duration: 0.35, ea
 const undim = (selector, at) => tl.to(selector, { opacity: 1, duration: 0.35, ease: "power2.out" }, at);
 
 
-enter("#heading", T("welcome", 0.3));
+enter("#heading", 0.2);
 enter("#balance", T("balance", 2), -32);
 count("#balance-value", 380, T("balance", 2) + 0.4, 2400);
 tl.fromTo("#balance-meter", { scaleX: 1 }, { scaleX: 0.16, duration: 0.8, ease: "power2.out" }, T("balance", 2) + 0.4);
