@@ -99,19 +99,21 @@ test("help hub: search filters chapters and chapter cards link to articles", asy
 	await expect(page.getByRole("heading", { name: "Finpoint, from the beginning" })).toBeVisible()
 	await expect(page.getByRole("link", { name: "Watch" })).toBeVisible()
 	await expect(search).toHaveValue("")
-	await search.fill("Splitting one payment")
-	await expect(page.getByRole("link", { name: /Splitting one payment/ }).first()).toBeVisible()
+	await search.fill("One to many: splitting a payment")
+	await expect(
+		page.getByRole("link", { name: /One to many: splitting a payment/ }).first(),
+	).toBeVisible()
 	await search.fill("no-such-guide-xyz")
 	await expect(page.getByText(/No matching chapter/)).toBeVisible()
 	await search.fill("")
-	const card = page.getByRole("link", { name: /Splitting one payment/ }).first()
+	const card = page.getByRole("link", { name: /One to many: splitting a payment/ }).first()
 	await expect(card).toBeVisible()
-	await expect(card).toContainText("Explain one Statement with several Records")
+	await expect(card).toContainText("Label one Statement with several Records")
 	await card.focus()
 	await page.keyboard.press("Enter")
 	await expect(page).toHaveURL(/\/help\?topic=split/)
 	await expect(
-		page.getByRole("heading", { name: "Splitting one payment", exact: true }),
+		page.getByRole("heading", { name: "One to many: splitting a payment", exact: true }),
 	).toBeVisible()
 	await expect(page.getByText(/supermarket trip/)).toBeVisible()
 })
@@ -121,9 +123,9 @@ test("help article: destination, video and figure links open their targets", asy
 	await clearLearning(page)
 	await page.goto("/help?topic=lunch")
 	await expect(
-		page.getByRole("heading", { name: "Explaining your first purchase", exact: true }),
+		page.getByRole("heading", { name: "One to one: your first Record", exact: true }),
 	).toBeVisible()
-	await expect(page.getByText(/\$12 lunch/)).toBeVisible()
+	await expect(page.getByText(/\$12 solo lunch/)).toBeVisible()
 	const steps = page.locator("ol li")
 	await expect(steps.first()).toBeVisible()
 	expect(await steps.count()).toBeGreaterThanOrEqual(4)
@@ -143,7 +145,7 @@ test("help article: destination, video and figure links open their targets", asy
 	await expect(watch).toHaveAttribute("href", "/help/video?chapter=lunch")
 	await watch.click()
 	await expect(page).toHaveURL(/\/help\/video\?chapter=lunch/)
-	await expect(page.getByText("Explaining your first purchase").first()).toBeVisible()
+	await expect(page.getByText("One to one: your first Record").first()).toBeVisible()
 	await page.goto("/help?topic=lunch")
 	const still = page.getByRole("link", { name: "Watch this in the video guide" }).first()
 	await expect(still).toBeVisible()
@@ -257,12 +259,16 @@ test("help panel: related guides, full guide and back controls work", async ({ p
 	await page.goto("/allocator")
 	await page.getByRole("button", { name: "Help" }).first().click()
 	const menu = page.getByRole("menu")
-	await expect(menu.getByRole("menuitem", { name: "Splitting one payment" })).toBeVisible()
-	await menu.getByRole("menuitem", { name: "Splitting one payment" }).click()
+	await expect(
+		menu.getByRole("menuitem", { name: "One to many: splitting a payment" }),
+	).toBeVisible()
+	await menu.getByRole("menuitem", { name: "One to many: splitting a payment" }).click()
 	const panel = page.getByRole("dialog")
-	await expect(panel.getByRole("heading", { name: "Splitting one payment" })).toBeVisible()
+	await expect(
+		panel.getByRole("heading", { name: "One to many: splitting a payment" }),
+	).toBeVisible()
 	const related = panel.getByRole("combobox", { name: "Related guides" })
-	await expect(related).toHaveText("Splitting one payment")
+	await expect(related).toHaveText("One to many: splitting a payment")
 	await related.click()
 	await page.getByRole("option", { name: "Workflows" }).click()
 	await expect(panel.getByRole("heading", { name: "Workflows" })).toBeVisible()
@@ -286,9 +292,9 @@ test("help form: tooltip button opens the section guide beside the dialog", asyn
 	await help.hover()
 	await expect(page.getByRole("tooltip", { name: "How this form works" })).toBeVisible()
 	await help.click()
-	const panel = page.getByRole("dialog", { name: "Explaining your first purchase" })
+	const panel = page.getByRole("dialog", { name: "One to one: your first Record" })
 	await expect(
-		panel.getByRole("heading", { name: "Explaining your first purchase" }),
+		panel.getByRole("heading", { name: "One to one: your first Record" }),
 	).toBeVisible()
 	await panel.getByRole("button", { name: "Back to what I was doing" }).click()
 	await expect(panel).toHaveCount(0)
@@ -358,7 +364,7 @@ test("empty guide: full allocation and first-purchase states link onward", async
 	await page.reload()
 	await page.goto("/allocator")
 	await expect(
-		page.getByText("No remaining Statement amounts to explain", { exact: true }),
+		page.getByText("No remaining Statement amounts to label", { exact: true }),
 	).toBeVisible()
 	const view = page.getByRole("link", { name: "View Statements" })
 	await expect(view).toHaveAttribute("href", "/statements")
@@ -372,7 +378,7 @@ test("empty guide: full allocation and first-purchase states link onward", async
 	await clearLearning(page)
 	await page.goto("/records")
 	await expect(
-		page.getByText("Bank activity is here. Now explain your first purchase.", {
+		page.getByText("Bank activity is here. Now label your first purchase.", {
 			exact: true,
 		}),
 	).toBeVisible()
@@ -414,11 +420,13 @@ test("pending help: record amounts, reasons and guide open from the dialog", asy
 })
 
 test("help video page: resume, chapter list and read-article links work", async ({ page }) => {
+	// A second into the second chapter, so resuming lands on its article.
+	const resumeFrame = (timeline.chapters[1]?.startFrame ?? 0) + timeline.fps
 	await seedWorkspace(page, "populated")
 	await clearLearning(page)
 	await setLearning(page, {
 		reviewed: [],
-		videoFrame: 3000,
+		videoFrame: resumeFrame,
 		lastImportAt: null,
 		lastRecordId: null,
 		reviewedMonth: null,
@@ -438,7 +446,7 @@ test("help video page: resume, chapter list and read-article links work", async 
 		.toBeGreaterThanOrEqual(2)
 	await expect
 		.poll(() => video.evaluate((el: HTMLVideoElement) => el.currentTime))
-		.toBeCloseTo(3000 / timeline.fps, 1)
+		.toBeCloseTo(resumeFrame / timeline.fps, 1)
 	const nav = page.getByRole("navigation", { name: "Video chapters" })
 	await expect(nav.getByRole("link")).toHaveCount(timeline.chapters.length)
 	await expect(page.getByText("Why Finpoint?").first()).toBeVisible()

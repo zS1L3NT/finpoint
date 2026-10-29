@@ -19,8 +19,11 @@ const voice = { voice: "af_heart", lang: "en-us", speed: 0.95 }
 /** Silence, in seconds, around and between spoken parts. */
 const pause = {
 	leadIn: 0.2,
-	afterTitle: 0.8,
+	// The title card holds a second after its title is spoken, then the voice carries on.
+	afterTitle: 1.3,
 	betweenBeats: 0.85,
+	/** After a beat whose thought the next beat finishes. */
+	flow: 0.25,
 	betweenSteps: 0.7,
 	betweenChapters: 1.6,
 }
@@ -78,6 +81,8 @@ function spoken(text: string) {
 		})
 		.replace(/(\d+)\.(\d)%/g, "$1 point $2 percent")
 		.replaceAll(" + ", " plus ")
+		// Said like "revolution", not "revolt".
+		.replaceAll("Revolut", "Revolute")
 		.replaceAll(" = ", " equals ")
 		.replaceAll(" → ", ", into ")
 		.replaceAll(" ← ", ", and from ")
@@ -139,9 +144,11 @@ const plan = guideChapters.flatMap((chapter, chapterIndex) =>
 				pauseAfter:
 					last && chapterIndex < guideChapters.length - 1
 						? pause.betweenChapters
-						: beat.step && next?.step
-							? pause.betweenSteps
-							: pause.betweenBeats,
+						: beat.flow
+							? pause.flow
+							: beat.step && next?.step
+								? pause.betweenSteps
+								: pause.betweenBeats,
 			},
 		]
 		const titleParts = beatIndex === 0 ? 1 : 0

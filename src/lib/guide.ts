@@ -17,6 +17,8 @@ export type GuideBeat = {
 	say: string
 	detail?: string
 	step?: boolean
+	/** The next beat finishes this beat's thought, so the film barely pauses between them. */
+	flow?: boolean
 }
 
 export type GuideDestination =
@@ -53,28 +55,40 @@ export const guideChapters: GuideChapter[] = [
 		id: "start",
 		title: "Why Finpoint?",
 		level: "The basics",
-		summary: "Your bank shows what moved, not what it was for. Finpoint lets you explain it.",
+		summary: "Your bank shows what moved, not what it was for. Finpoint lets you label it.",
 		keywords: "welcome introduction beginner problem purpose overview",
 		beats: [
+			{
+				id: "welcome",
+				say: "So you’ve decided to take charge of your spending, maybe after noticing your bank balance running dry faster than you expected. Welcome to Finpoint. This guide walks you through everything Finpoint can do, so you can use all of it, or just the parts you need. Track several accounts, or just a few daily payments from one. Finpoint works either way. But your banking app already lists every payment, so what’s missing?",
+			},
 			{
 				id: "bank",
 				say: "Your bank can tell you where every dollar went. What it can’t tell you is what each payment was really for.",
 			},
 			{
 				id: "split",
-				say: "Say you spent $80 at the supermarket. $50 of that was groceries, and $30 was a birthday gift for a friend. Your bank shows one $80 payment. But to you, those are two very different things.",
+				say: "Let’s say you spent $80 at the supermarket: $50 on groceries, and $30 on a birthday gift for a friend. Your banking app shows one $80 payment, and nothing more. But to you, those are two very different things, and you’d like to label them that way.",
 			},
 			{
 				id: "dinner",
-				say: "Or you paid $90 for dinner with a friend, and they sent their $60 share back a week later. Your bank shows two payments, a week apart: money out, and money in. What dinner really cost you was $30.",
+				say: "Or let’s say you paid $90 for dinner with a friend, and they sent their $60 share back a week later. Your banking app shows two payments, a week apart, so you’d have to scroll past everything in between to get the full picture. But to you, it’s really one $30 dinner, and you’d like to label it that way.",
 			},
 			{
 				id: "explain",
-				say: "Finpoint closes that gap. It keeps your bank activity exactly as your bank reports it, and lets you explain it in your own words: groceries, $50. A gift, $30. Your share of dinner, $30.",
+				say: "Finpoint was built to close that gap. It keeps your bank activity exactly as your bank reports it, and lets you label it in your own words: groceries, $50. A gift, $30. Your share of dinner, $30.",
 			},
 			{
 				id: "built",
-				say: "Once your spending is explained, your charts and budgets finally tell the truth. So using Finpoint comes down to three things: bring in your bank activity, explain it, and see where your money really went.",
+				say: "That’s the whole idea of Finpoint: adding labels to your bank activity, one or many, simple or detailed. Once your spending is labelled, it finally makes sense.",
+			},
+			{
+				id: "how",
+				say: "So how do you use Finpoint? It comes down to just two things: bring in your bank activity, and label it. Everything else falls into place from there.",
+			},
+			{
+				id: "concepts",
+				say: "To do that, you’ll need three ideas. Statements: your bank activity, exactly as your bank reports it. Records: your labels for that activity. And Allocations: the links between the two.",
 			},
 		],
 	},
@@ -83,38 +97,42 @@ export const guideChapters: GuideChapter[] = [
 		title: "Statements, Records and Allocations",
 		level: "The basics",
 		summary:
-			"The three words behind everything: bank activity, your explanations, and the amounts that connect them.",
+			"The three ideas behind everything: bank activity, your labels for it, and the amounts that link them.",
 		keywords: "statement record allocation terms concepts split combine transaction",
 		destination: "allocator",
 		beats: [
 			{
-				id: "three",
-				say: "To do that, Finpoint uses three words, and everything else builds on them: Statements, Records and Allocations.",
-			},
-			{
 				id: "statement",
-				say: "A Statement is one line of bank activity, exactly as your bank reports it. Like that $80 supermarket payment.",
+				say: "A Statement is one line of bank activity, exactly as your bank reports it, like that $80 supermarket payment. Finpoint never lets you edit the Statements your bank gives you, so you can trust them to match your bank. Well, almost always. We’ll get to that.",
 			},
 			{
 				id: "record",
-				say: "A Record is your explanation of what happened. Groceries for $50 is a Record. The gift for $30 is another.",
+				say: "A Record is your label for what happened, like the groceries for $50, and the gift for $30.",
 			},
 			{
 				id: "allocation",
-				say: "An Allocation connects a Statement to a Record, and says how much of the Statement belongs there. Here, $50 of the supermarket payment is allocated to Groceries, and the other $30 to the gift.",
+				say: "An Allocation links a Statement to a Record, and says how much of the Statement belongs to it. Here, $50 of the supermarket payment is allocated to Groceries, and the other $30 to the gift.",
 			},
 			{
 				id: "split",
-				say: "That’s the first pattern: one Statement, split into several Records. It’s how you untangle a mixed shopping trip.",
+				say: "So one Statement can be split across several Records. That’s how you untangle a mixed shopping trip, or a bill that covers two different things.",
 			},
 			{
 				id: "combine",
-				say: "The second pattern goes the other way: several Statements, combined into one Record. Your $90 dinner payment and your friend’s $60 transfer both belong to one Dinner Record, which comes to your real share: $30.",
+				say: "It works the other way too: several Statements can be combined into one Record. Your $90 dinner payment and your friend’s $60 transfer both belong to one Dinner Record. It shows what you really spent: $30.",
 			},
 			{
 				id: "simple",
-				say: "Most of the time, though, it’s one to one. A $12 lunch is one Statement, explained by one Lunch Record.",
-				detail: "You never change the bank’s amounts to make things fit. You explain them with Records, and Allocations show which part of each Statement went where.",
+				say: "Most of the time, though, it’s simpler: one Statement, labelled by one Record. A $12 lunch you had on your own is one Statement, and one Lunch Record. No need to overcomplicate things.",
+				detail: "You never change the bank’s amounts to make things fit. You label them with Records, and Allocations show which part of each Statement went where.",
+			},
+			{
+				id: "complex",
+				say: "And when things get messier, Finpoint keeps up. Say you bought $80 of groceries and a $40 gift in one checkout, but paid $60 on each of two cards. That’s two Statements and two Records, linked by three Allocations.",
+			},
+			{
+				id: "flexible",
+				say: "We won’t need anything that tangled in this guide. It’s just to show that Finpoint is as flexible as you need it to be. Enough examples. Let’s get you familiar with Finpoint itself.",
 			},
 		],
 	},
@@ -128,12 +146,12 @@ export const guideChapters: GuideChapter[] = [
 		beats: [
 			{
 				id: "demo",
-				say: "Before you bring in your own bank, you can look around. On your first visit, the Dashboard, Finpoint’s home page, offers demo data: three accounts and five months of Records, so you can see what a lived-in Finpoint looks like.",
-				detail: "Demo data replaces whatever is in this browser. Reset it from the Data page when you’re ready to start for real.",
+				say: "On your first visit, you’ll be greeted by an empty Dashboard. Since you don’t have any data yet, choose Try demo data. It loads three bank accounts and five months of Records, so you can see what a lived-in Finpoint looks like.",
+				detail: "Demo data replaces whatever is in this browser. Clear it from the Data page when you’re ready to start for real.",
 			},
 			{
 				id: "own",
-				say: "When you’re ready for your own money, reset the demo data from the Data page, and start with your own bank activity. That’s next.",
+				say: "When you’re done exploring, clear the demo from the Data page, with Clear all data. Then you’re ready to import your own bank activity.",
 			},
 		],
 	},
@@ -148,41 +166,50 @@ export const guideChapters: GuideChapter[] = [
 		beats: [
 			{
 				id: "intro",
-				say: "Banks let you download your activity as a file, called an export, from your bank’s website or app. You bring that file into Finpoint, and it reads every line.",
+				say: "Many banks let you download your activity as a file, called an export, from their website or app. Finpoint doesn’t connect to your bank directly, so this file is how your bank activity gets in.",
+			},
+			{
+				id: "untouched",
+				say: "Import the file exactly as your bank gave it to you. Finpoint reads each bank’s export as it is, so an edited file might not import correctly.",
 			},
 			{
 				id: "banks",
-				say: "Finpoint reads exports from DBS, OCBC, UOB and Revolut, as a CSV file or an Excel spreadsheet, depending on the bank.",
+				say: "For now, Finpoint reads exports from DBS, OCBC, UOB and Revolut, as a CSV file or an Excel spreadsheet, depending on the bank.",
 			},
 			{
 				id: "accounts",
-				say: "Each Statement belongs to an Account, one for each of your bank accounts. Import your OCBC 360 Account and your UOB savings account, and Finpoint keeps their Statements apart, using the account details inside each file.",
+				say: "You don’t need to sort your files by account. Each export says which bank account it came from, so Finpoint files its Statements under a matching Account for you. Import exports from two DBS accounts, and you’ll get two Accounts in Finpoint, each with its own Statements.",
 				detail: "Accounts are created for you the first time you import from them. You can rename them on the Accounts page.",
 			},
 			{
 				id: "revolut",
-				say: "Some exports, like Revolut’s, don’t say which account they came from. For those, Finpoint asks you to pick or name the account.",
+				say: "Revolut is the exception: its exports don’t say which account they came from. For those, Finpoint will ask you which Account the file belongs to, or to create a new one, with an ID and a name.",
 			},
 			{
 				id: "download",
+				say: "Let’s import your first file. Download a CSV or Excel export from your bank, once for each account you want to track.",
 				step: true,
-				say: "Download a CSV or Excel export from your bank, once for each account you want in Finpoint.",
 			},
 			{
 				id: "choose",
+				say: "Then open the Importer from the sidebar, choose your bank, and add your files. You can add several at once, except for Revolut, which takes one file at a time.",
 				step: true,
-				say: "Then open Importer from the sidebar, choose your bank, and add your files.",
 			},
 			{
 				id: "result",
-				step: true,
-				say: "Choose Import, and check how many new Statements came in.",
+				say: "Choose Import, and Finpoint will tell you how many new Statements came in.",
 				detail: "Importing an overlapping file again is safe: Statements Finpoint already has are skipped. If your bank changed a description between exports, the repeat shows up as a possible duplicate instead, which you can fix in Workflows.",
+				step: true,
+			},
+			{
+				id: "pick",
+				say: "And as we mentioned, a Revolut export needs one more choice before you import it: pick its Account, or create a new one with an ID and a name.",
+				step: true,
 			},
 			{
 				id: "next",
+				say: "Your new Statements now wait in Workflows for you to label, so that’s where we’re heading next.",
 				step: true,
-				say: "Your new Statements now wait in Workflows, under Allocate to Records, until you explain them. That’s where we’ll go next.",
 			},
 		],
 	},
@@ -190,128 +217,129 @@ export const guideChapters: GuideChapter[] = [
 		id: "allocator",
 		title: "Workflows",
 		level: "The basics",
-		summary: "Where bank amounts wait for an explanation, and where you tidy up imports.",
+		summary: "Where bank activity waits for a label, and where you tidy up imports.",
 		keywords:
 			"workflows allocate to records allocator unexplained remaining allocable fix duplicates replace pending",
 		destination: "allocator",
 		beats: [
 			{
 				id: "list",
-				say: "Workflows is your to-do list, and where you’ll spend most of your time. Its first tab, Allocate to Records, lists every Statement that still has money left to explain, newest first.",
+				say: "Workflows is your to-do list, and it’s where you’ll spend most of your time in Finpoint. Its first tab, Allocate to Records, lists every Statement that still needs a label, newest first.",
 			},
 			{
 				id: "left",
-				say: "When only part of a Statement has been explained, it shows how much is left. Once it’s fully explained, it leaves the list. An empty list means you’re done.",
+				say: "Once a Statement is fully labelled, it leaves this list. So an empty list means you’re all caught up, at least until your next import.",
 			},
 			{
 				id: "tabs",
-				say: "The other two tabs keep your imports clean. Fix Duplicates catches a payment your bank exported twice, and Replace Pending swaps a payment your bank hadn’t confirmed yet for the confirmed one. We’ll get to both.",
+				say: "The other two tabs help you tidy up your imported Statements. We’ll cover them later.",
 			},
 			{
 				id: "pages",
-				say: "Two other pages help you look things up. Statements lists all your bank activity, explained or not. Records lists your explanations. Workflows only shows what still needs you.",
+				say: "To look things up, use the Records and Statements pages. They list every Record and every Statement you have, with filters to help you find anything. Workflows is different: it only shows the Statements that still need you.",
 				detail: "If something seems to be missing, check the date range and filters first. A fully allocated Statement no longer appears in Allocate to Records, but it’s always in the Statements list.",
 			},
 		],
 	},
 	{
 		id: "lunch",
-		title: "Explaining your first purchase",
+		title: "One to one: your first Record",
 		level: "The basics",
-		summary: "Select a Statement in Workflows and create the Record that explains it.",
+		summary: "Select a Statement in Workflows and create the Record that labels it.",
 		keywords:
 			"first record create workflows allocate lunch purchase explain title category save",
 		destination: "allocator",
 		beats: [
 			{
 				id: "select",
+				say: "Let’s label that $12 solo lunch from earlier. In Workflows, click the lunch Statement to select it. A bar will appear at the top, with what you can do next.",
 				step: true,
-				say: "Let’s explain a $12 lunch. In Allocate to Records, click the lunch Statement to select it. A bar appears at the top, with what you can do next.",
 			},
 			{
 				id: "create",
+				say: "Choose Create Record. We’ll cover the other options later. The form opens with the Statement’s $12 already allocated, and the amount and date filled in for you.",
 				step: true,
-				say: "Choose Create Record. A new Record opens with the Statement already allocated, and its amount and date filled in.",
 			},
 			{
 				id: "fill",
-				step: true,
-				say: "Give it a title, like Lunch, and pick a Category, like Dining Out. A Category says what the money was for, and your spending charts are grouped by it.",
+				say: "Give the Record a title, like Lunch, and pick a Category, like Dining Out. A Category says what the money was for, and it will matter on your Dashboard later.",
 				detail: "People, Location and Description are optional. Add them when they’ll help you find the Record later.",
+				step: true,
 			},
 			{
 				id: "ignore",
-				say: "Under Analytics you’ll also see Treatment and Monthly Budget. Leave those for now: your Category fills them in, and we’ll come back to them later.",
+				say: "Under Analytics, you’ll also see Treatment and Monthly Budget. Leave them as they are for now: your Category fills them in. They’re more advanced, so we’ll cover them later.",
 			},
 			{
 				id: "save",
+				say: "Check that everything looks right, then choose Create Record at the bottom to save. The lunch Statement is now fully allocated, so it leaves the list.",
 				step: true,
-				say: "Choose Create Record again, at the bottom, to save. The lunch Statement leaves the list, because it’s fully explained.",
 			},
 		],
 	},
 	{
 		id: "split",
-		title: "Splitting one payment",
+		title: "One to many: splitting a payment",
 		level: "The basics",
-		summary: "Explain one Statement with several Records, like groceries and a gift.",
+		summary: "Label one Statement with several Records, like groceries and a gift.",
 		keywords:
 			"split divide partial allocate one statement two records groceries gift remaining",
 		destination: "allocator",
 		beats: [
 			{
 				id: "select",
+				say: "Now let’s split the $80 supermarket trip. Select it in Workflows, and choose Create Record.",
 				step: true,
-				say: "Now the $80 supermarket trip, which was really two things. Select it, and choose Create Record.",
 			},
 			{
 				id: "amount",
+				say: "Call it Groceries, and set both the Record’s amount and its Allocation to −$50. The Record is what you spent, and the Allocation is how much of this $80 payment it uses. The other $30 stays unlabelled, for the next Record.",
 				step: true,
-				say: "Call it Groceries, and set both the Record’s amount and its Allocation to $50. The Record is what you spent, and the Allocation is how much of this payment covers it. The other $30 stays unexplained for now.",
 			},
 			{
 				id: "left",
+				say: "Choose Create Record. Because only part of it is labelled, the supermarket Statement stays in the list, showing the $30 left.",
 				step: true,
-				say: "Save, and the supermarket Statement stays in the list, with $30 left.",
 			},
 			{
 				id: "gift",
+				say: "Select it again, and create a second Record, Birthday gift. Finpoint fills in the $30 that’s left for you.",
 				step: true,
-				say: "Select it again, and create a second Record, Birthday gift, for the $30 left to allocate. Finpoint fills that amount in for you.",
 			},
 			{
 				id: "save",
+				say: "Choose Create Record, and the supermarket Statement leaves the list.",
 				step: true,
-				say: "Save, and the supermarket Statement leaves the list, because it’s now fully explained.",
+				flow: true,
 			},
 			{
 				id: "done",
-				say: "Now one Statement is explained by two Records: $50 of groceries, and a $30 gift.",
+				say: "It’s now fully labelled by the two Records we just created: $50 of groceries, and a $30 gift.",
 			},
 		],
 	},
 	{
 		id: "repayment",
-		title: "Combining payments into one Record",
+		title: "Many to one: combining payments",
 		level: "The basics",
 		summary:
-			"Explain several Statements with one Record, like a dinner your friend paid you back for.",
+			"Label several Statements with one Record, like a dinner your friend paid you back for.",
 		keywords: "combine shared dinner repayment friend paid back several statements one record",
 		destination: "allocator",
 		beats: [
 			{
 				id: "select",
+				say: "Now let’s combine the two payments from that shared dinner. Select both Statements: the $90 you paid, and the $60 your friend Sam sent back. The bar adds them up: $90 out and $60 in, so $30 out.",
 				step: true,
-				say: "Now the shared dinner. Select both Statements: the $90 you paid, and the $60 your friend Sam sent back. The bar nets them out: $90 out, $60 back, so $30.",
 			},
 			{
 				id: "create",
+				say: "Choose Create Record, and call it Dinner. Both Statements are already allocated, and the Record comes to $30: what dinner really cost you.",
 				step: true,
-				say: "Choose Create Record, and call it Dinner. Both Statements are allocated, and the Record comes to $30, your real share.",
 			},
 			{
 				id: "done",
-				say: "Save, and two Statements are explained by a single Record. Your spending shows the $30 you really spent, not $90.",
+				say: "Choose Create Record, and both Statements are labelled by a single Record. Your spending now shows the $30 you really spent, not $90.",
 				detail: "The money your friend sent back isn’t income. It belongs to the dinner, so it simply reduces what the dinner cost you.",
 			},
 		],
@@ -320,25 +348,25 @@ export const guideChapters: GuideChapter[] = [
 		id: "dashboard",
 		title: "Where your numbers come from",
 		level: "The basics",
-		summary: "The Dashboard is built from your Records, so explained activity is what counts.",
+		summary: "The Dashboard is built from your Records, so labelled activity is what counts.",
 		keywords: "dashboard overview numbers totals empty spending records categories monthly",
 		destination: "dashboard",
 		beats: [
 			{
 				id: "records",
-				say: "Now let’s see what those explanations buy you. With a few Records saved, your Dashboard starts to fill in. Every total on it is calculated from Records, never directly from Statements.",
+				say: "We’ve spent some time creating Records. So how does that help you understand your money? With a few Records saved, your Dashboard starts to fill in, because everything on it is calculated from Records, never directly from Statements.",
 			},
 			{
 				id: "empty",
-				say: "That’s why importing alone doesn’t change your spending. A Statement only counts once you’ve explained it.",
+				say: "That’s why importing alone doesn’t change your Dashboard. A Statement only counts once a Record labels it.",
 			},
 			{
 				id: "real",
-				say: "And because it uses your explanations, the Dashboard shows what you really spent: $30 on dinner, not $90, and groceries apart from the gift.",
+				say: "And because it uses your labels, the Dashboard shows what you really spent: $30 on dinner, not $90, and groceries apart from the gift.",
 			},
 			{
-				id: "categories",
-				say: "Categories this month breaks your spending down by Category, so the Categories you choose shape everything you see here.",
+				id: "explore",
+				say: "There’s a lot more on the Dashboard. Scroll through and explore it at your own pace. We’ll come back to reading it in more depth later.",
 				detail: "Use the arrows beside the month to look back, and the Monthly Records tab to see every Record behind the month’s numbers. Pending Records already count in these totals.",
 			},
 		],
@@ -356,7 +384,7 @@ export const guideChapters: GuideChapter[] = [
 		beats: [
 			{
 				id: "when",
-				say: "Your Dashboard is only as current as your explanations. But sometimes you know about spending before your bank shows all of it, and you’d rather record it now than try to remember it later.",
+				say: "Your Dashboard is only as up to date as your labels. But sometimes you know about spending before your bank shows all of it, and you’d rather label it now than try to remember it later.",
 			},
 			{
 				id: "concert",
@@ -372,15 +400,15 @@ export const guideChapters: GuideChapter[] = [
 			},
 			{
 				id: "attach",
-				say: "When Jo’s $100 arrives, select it and choose Allocate to record. Finpoint suggests the Pending Record it completes.",
+				say: "When Jo’s $100 arrives, select it in Workflows and choose Allocate to record. Finpoint will suggest the Pending Record it completes.",
 			},
 			{
 				id: "complete",
-				say: "The Record now combines both payments. Save, and because the amounts tally, it’s no longer Pending.",
+				say: "The Record now combines both payments. Save it, and because the amounts add up, it’s no longer Pending.",
 			},
 			{
 				id: "meaning",
-				say: "So a Record is Pending for one of two reasons. Its amounts don’t tally yet, like the concert. Or one of its Statements is still Pending at the bank. Either way, Pending means the Record isn’t fully confirmed yet.",
+				say: "So a Record is Pending for one of two reasons. Its amounts don’t add up yet, like the concert. Or one of its Statements is still Pending at the bank. Either way, Pending means the Record isn’t fully confirmed yet.",
 				detail: "A Record with no Statements at all is Pending too. Open any Pending Record and choose Why Pending? to see exactly what doesn’t add up.",
 			},
 		],
@@ -397,27 +425,27 @@ export const guideChapters: GuideChapter[] = [
 		beats: [
 			{
 				id: "why",
-				say: "That second kind of Pending starts at the bank. A Pending Statement is bank activity that isn’t confirmed yet. Some imports, like Revolut’s, bring card payments in as Pending. And if your bank takes days to show a payment, you can add one yourself, so your month stays complete.",
+				say: "Remember how a Statement matches your bank, almost always? This is the exception. A Pending Statement is bank activity that isn’t confirmed yet. Some imports, like Revolut’s, bring card payments in as Pending. And if your bank takes days to show a payment, you can add one yourself, and edit it until the real one arrives, so your month stays complete.",
 			},
 			{
 				id: "create",
-				step: true,
 				say: "On the Statements page, choose Create Pending Statement. Pick the account, then enter the amount and a short description.",
+				step: true,
 			},
 			{
 				id: "explain",
+				say: "It appears in Workflows, marked Pending. Label it like any other Statement: here, a burger with Mia, under Dining Out. Save it, and the Record counts straight away, but stays Pending while its Statement does.",
 				step: true,
-				say: "It appears in Workflows, marked Pending. Explain it like any other Statement: here, a burger with Mia, under Dining Out. Save, and the Record counts straight away, but stays Pending while its Statement does.",
 			},
 			{
 				id: "replace",
+				say: "When the confirmed Statement arrives in a later import, open Replace Pending in Workflows. Pick the Pending Statement, and Finpoint will suggest the imported Statements it could become.",
 				step: true,
-				say: "When the confirmed Statement arrives in a later import, open Replace Pending. Pick the Pending Statement, and Finpoint suggests the imported Statements it could become.",
 			},
 			{
 				id: "review",
-				step: true,
 				say: "Review the swap, and choose Replace pending Statement. The Allocations move to the confirmed Statement, the Pending one disappears, and nothing is counted twice.",
+				step: true,
 			},
 		],
 	},
@@ -431,7 +459,7 @@ export const guideChapters: GuideChapter[] = [
 		beats: [
 			{
 				id: "why",
-				say: "Imports can go wrong in one more way. Sometimes a bank changes a payment’s description between exports. Import both files, and the same payment arrives twice, so you might explain it twice.",
+				say: "Imports can go wrong in one more way. Sometimes a bank changes a payment’s description between exports. Import both files, and the same payment arrives twice, so you might label it twice.",
 			},
 			{
 				id: "badge",
@@ -439,14 +467,14 @@ export const guideChapters: GuideChapter[] = [
 			},
 			{
 				id: "choose",
-				step: true,
 				say: "If they really are two payments, choose Not duplicates. Otherwise, choose the Statement to keep, then Review deletion.",
+				step: true,
 			},
 			{
 				id: "review",
-				step: true,
-				say: "Finpoint shows what will happen before anything is deleted. Allocations follow the Statement you keep, so your Records stay explained.",
+				say: "Finpoint shows you what will happen before anything is deleted. Allocations follow the Statement you keep, so your Records stay labelled.",
 				detail: "Pairs you mark as not duplicates are listed separately, and you can restore them. Finpoint doesn’t remember deleted descriptions, so importing the same old export again can bring them back.",
+				step: true,
 			},
 		],
 	},
@@ -460,20 +488,20 @@ export const guideChapters: GuideChapter[] = [
 		beats: [
 			{
 				id: "records",
-				say: "Sooner or later you’ll want to look something up, like what that $90 dinner was. Open Records. Search by title, or filter by date, Category or amount.",
+				say: "Sooner or later, you’ll want to look something up, like what that dinner with Sam really cost. Open Records, then search by title, or filter by date, Category or amount.",
 			},
 			{
 				id: "edit",
-				step: true,
 				say: "Open a Record to see its Statements, then choose Edit Record to change any field, or the Allocations behind it.",
+				step: true,
 			},
 			{
 				id: "statements",
-				say: "Statements works the same way for your bank activity, and each Account has a page of its own.",
+				say: "The Statements page works the same way for your bank activity, and each Account has a page of its own.",
 			},
 			{
 				id: "settings",
-				say: "And if you always look at the same period, set default filters in Settings, so every list opens on that range.",
+				say: "And if you always look at the same period, set default filters in Settings, so Records and Allocate to Records open on that range.",
 			},
 		],
 	},
@@ -487,7 +515,7 @@ export const guideChapters: GuideChapter[] = [
 		beats: [
 			{
 				id: "most",
-				say: "We’ve been picking Categories all along. They’re the most important choice you make on a Record: they say what it was for, and the Dashboard breaks your spending down by them.",
+				say: "We’ve been picking Categories all along. They’re the most important choice you make on a Record: they say what it was for, and your Dashboard breaks your spending down by them.",
 			},
 			{
 				id: "examples",
@@ -495,7 +523,7 @@ export const guideChapters: GuideChapter[] = [
 			},
 			{
 				id: "defaults",
-				say: "Each Category also carries two defaults: a Treatment, and a Monthly Budget. That’s why you could leave those fields alone earlier: the Category fills them in. We’ll look at both, right after one more time-saver.",
+				say: "Each Category also carries two defaults: a Treatment, and a Monthly Budget. That’s why you could leave those fields alone earlier: your Category fills them in. We’ll look at both, right after one more time-saver.",
 			},
 		],
 	},
@@ -509,17 +537,17 @@ export const guideChapters: GuideChapter[] = [
 		beats: [
 			{
 				id: "why",
-				say: "Your Categories already fill in two fields. Some payments come back every month, like your phone bill, and typing them out again gets old. A Statement rule recognises them, and fills in the Record for you when you create it. It never creates Records on its own.",
+				say: "Some payments come back every month, like your phone bill, and labelling them again and again gets old. A Statement rule recognises them, and fills in the Record for you when you create it. It never creates Records on its own.",
 			},
 			{
 				id: "match",
+				say: "Open Rules, and choose New rule. Give it a name, and the text to look for in the description. Finpoint shows you the Statements it matches.",
 				step: true,
-				say: "Open Rules and choose New rule. Give it a name, and the text to look for in the description. Finpoint shows the Statements it matches.",
 			},
 			{
 				id: "fill",
-				step: true,
 				say: "Then choose what it fills in: a title, a Category, even People or a Location. Autofill puts the value straight into the field. Suggest offers it as a one-click suggestion instead.",
+				step: true,
 			},
 			{
 				id: "use",
@@ -688,7 +716,7 @@ export const guideChapters: GuideChapter[] = [
 		beats: [
 			{
 				id: "local",
-				say: "You’ve put real work into explaining your money, so it’s worth knowing where it lives. Finpoint runs in your browser, and keeps your data on this device. There’s no Finpoint database, and your finances never pass through our servers, so we never see them.",
+				say: "You’ve put real work into labelling your money, so it’s worth knowing where it lives. Finpoint runs in your browser, and keeps your data on this device. There’s no Finpoint database, and your finances never pass through our servers, so we never see them.",
 			},
 			{
 				id: "file",
@@ -714,14 +742,13 @@ export const guideChapters: GuideChapter[] = [
 		id: "routine",
 		title: "Your routine",
 		level: "Your data",
-		summary:
-			"A few minutes each time: import, explain, check Pending, glance at the Dashboard.",
+		summary: "A few minutes each time: import, label, check Pending, glance at the Dashboard.",
 		keywords: "routine habit summary weekly checklist next steps",
 		destination: "importer",
 		beats: [
 			{
 				id: "loop",
-				say: "Here’s a routine that works. Import your latest bank exports. Fix any duplicates, and explain what’s new in Workflows. Check anything Pending. Glance at your Dashboard. And keep a backup.",
+				say: "Here’s a routine that works. Import your latest bank exports. Fix any duplicates, and label what’s new in Workflows. Check anything Pending. Glance at your Dashboard. And keep a backup.",
 			},
 			{
 				id: "backup",

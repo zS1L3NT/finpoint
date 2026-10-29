@@ -41,7 +41,7 @@ function milestones(overview: Overview) {
 			color: color.statement,
 		},
 		{
-			label: "Explain your activity",
+			label: "Label your activity",
 			done: overview.recordStatus === "complete",
 			value:
 				overview.recordStatus === "complete"
@@ -116,8 +116,8 @@ function VideoCard({ frame }: { frame?: number }) {
 						</p>
 						<h3 className="text-base font-semibold">Finpoint, from the beginning</h3>
 						<p className="max-w-xl text-xs text-muted-foreground">
-							Real Finpoint screens, step by step: import your bank, explain a
-							purchase, split a payment and keep your data safe.
+							Real Finpoint screens, step by step: import your bank, label a purchase,
+							split a payment and keep your data safe.
 						</p>
 					</div>
 					{/* The film's chapters to scale, coloured by level, with the paused point marked. */}

@@ -24,9 +24,9 @@ export function EmptyGuide({
 				{noImports
 					? "No bank Statements in this workspace yet"
 					: queueClear
-						? "No remaining Statement amounts to explain"
+						? "No remaining Statement amounts to label"
 						: noRecords
-							? "Bank activity is here. Now explain your first purchase."
+							? "Bank activity is here. Now label your first purchase."
 							: "Your filters may be hiding the item you want"}
 			</p>
 			<p className="text-muted-foreground">

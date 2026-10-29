@@ -214,17 +214,19 @@ test("help menu: lists the section's guides and opens one in the side panel", as
 	const menu = page.getByRole("menu")
 	await expect(menu.getByRole("menuitem")).toHaveText([
 		"Workflows",
-		"Explaining your first purchase",
-		"Splitting one payment",
-		"Combining payments into one Record",
+		"One to one: your first Record",
+		"One to many: splitting a payment",
+		"Many to one: combining payments",
 		"Pending Records",
 		"Watch this in the video guide",
 		"All help topics",
 	])
-	await menu.getByRole("menuitem", { name: "Splitting one payment" }).click()
+	await menu.getByRole("menuitem", { name: "One to many: splitting a payment" }).click()
 	const panel = page.getByRole("dialog")
-	await expect(panel.getByRole("heading", { name: "Splitting one payment" })).toBeVisible()
+	await expect(
+		panel.getByRole("heading", { name: "One to many: splitting a payment" }),
+	).toBeVisible()
 	await expect(panel.getByRole("combobox", { name: "Related guides" })).toHaveText(
-		"Splitting one payment",
+		"One to many: splitting a payment",
 	)
 })
