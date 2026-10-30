@@ -127,7 +127,7 @@ export type SettingsRow = {
 }
 
 export const DB_NAME = "finpoint"
-export const DB_VERSION = 6
+export const DB_VERSION = 7
 
 class FinpointDB extends Dexie {
 	statement_rules!: Table<StatementRule, string>
@@ -338,6 +338,52 @@ class FinpointDB extends Dexie {
 					})
 				}
 			})
+		this.version(7)
+			.stores({})
+			.upgrade(async transaction => {
+				const tables: Record<string, unknown[]> = {}
+				for (const name of [
+					"statement_rules",
+					"accounts",
+					"statements",
+					"duplicate_dismissals",
+					"categories",
+					"records",
+					"allocations",
+					"budgets",
+					"budget_records",
+					"monthly_budgets",
+					"monthly_budget_defaults",
+					"monthly_budget_amounts",
+					"analytics_months",
+				])
+					tables[name] = await transaction.table(name).toArray()
+				const settings = {
+					default_filter_start_date:
+						(await transaction.table("settings").get("default_filter_start_date"))
+							?.value ?? null,
+					default_filter_end_date_today:
+						(await transaction.table("settings").get("default_filter_end_date_today"))
+							?.value === "true",
+				}
+				const lastHash = await transaction.table("meta").get("drive_last_hash")
+				const clean =
+					lastHash?.value === (await Dexie.waitFor(hashSnapshot({ settings, tables })))
+				// Suggest-mode rule actions become autofill: learned suggestions now offer the chips.
+				await transaction
+					.table("statement_rules")
+					.toCollection()
+					.modify(rule => {
+						rule.actions = withoutActionModes(rule.actions)
+					})
+				if (clean) {
+					tables.statement_rules = await transaction.table("statement_rules").toArray()
+					await transaction.table("meta").put({
+						key: "drive_last_hash",
+						value: await Dexie.waitFor(hashSnapshot({ settings, tables })),
+					})
+				}
+			})
 	}
 }
 
@@ -345,4 +391,11 @@ export const db = new FinpointDB()
 
 export function asPending(value: boolean): number {
 	return value ? 1 : 0
+}
+
+/** Strips the retired suggest/autofill mode from stored or backed-up rule actions. */
+export function withoutActionModes(actions: Record<string, { value: unknown }>) {
+	return Object.fromEntries(
+		Object.entries(actions ?? {}).map(([field, action]) => [field, { value: action?.value }]),
+	)
 }

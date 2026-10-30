@@ -2026,13 +2026,13 @@ export const scenarioDescriptions: Record<string, string> = {
 	"src/components/form/record-analytics-fields.tsx#field.options":
 		"Treatment gating and scroll/Escape dismissal for both selects; long Monthly Budget label is selected intact, fits the popup/trigger, clears to Unbudgeted and remains cleared through Income/Spending changes",
 	"src/components/form/rule-suggestions.tsx#display.values":
-		"Suggestion chips deduplicate equal text values across rules and carry provenance titles",
+		"Chips learned from past Records carry the evidence behind them and hide the value the field already holds",
 	"src/components/form/rule-suggestions.tsx#display.interaction":
 		"Chip activation by click and keyboard fills the field it suggests",
 	"src/components/form/rule-suggestions.tsx#indirect.consumer":
-		"The Record creator consumes rule suggestions for its fields",
+		"The Record creator consumes learned suggestions for its fields",
 	"src/components/form/rule-suggestions.tsx#export.default.behaviour":
-		"Suggestions deduplicate equal values across rules, apply on activation, and skip paused or archived rules",
+		"Learned suggestions apply on activation and disappear once the field holds their value",
 	"src/components/form/select-field.tsx#field.options":
 		"Selected and disabled options with keyboard open/close, a long empty-optional select with while-open scroll, and disabled value retention",
 	"src/components/ui/select.tsx#primitive.responsive":
@@ -2646,13 +2646,13 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"field validation: errors render as alerts",
 		"Account editor: required name and unicode rename persist after reload",
 		"Record creator: rule autofill fills fields, notes the rule and drops the note when edited",
-		"Record rules: suggestion chips and late autofill notes rise in after the creator opens",
+		"Record creator: learned chips and late autofill notes rise in after the creator opens",
 	],
 	"src/components/form/field.tsx#field.input": [
 		"field validation: errors render as alerts",
 		"Account editor: required name and unicode rename persist after reload",
 		"Record creator: rule autofill fills fields, notes the rule and drops the note when edited",
-		"Record rules: suggestion chips and late autofill notes rise in after the creator opens",
+		"Record creator: learned chips and late autofill notes rise in after the creator opens",
 	],
 	"src/components/form/record-analytics-fields.tsx#export.default.behaviour": [
 		"Record creator: rule autofill of Treatment and Monthly Budget follows the analytics rules",
@@ -2673,18 +2673,18 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"Record editor: long Monthly Budget option can be picked, cleared and disabled by Treatment",
 	],
 	"src/components/form/rule-suggestions.tsx#display.values": [
-		"Record creator: rule suggestions deduplicate, apply on click and skip paused or archived rules",
+		"Record creator: learned suggestions apply on click and paused or archived rules stay out",
 	],
 	"src/components/form/rule-suggestions.tsx#display.interaction": [
-		"Record creator: rule suggestions deduplicate, apply on click and skip paused or archived rules",
+		"Record creator: learned suggestions apply on click and paused or archived rules stay out",
 	],
 	"src/components/form/rule-suggestions.tsx#indirect.consumer": [
-		"Record creator: rule suggestions deduplicate, apply on click and skip paused or archived rules",
+		"Record creator: learned suggestions apply on click and paused or archived rules stay out",
 	],
 	"src/components/form/rule-suggestions.tsx#export.default.behaviour": [
 		"Record creator: rule autofill fills fields, notes the rule and drops the note when edited",
-		"Record creator: rule suggestions deduplicate, apply on click and skip paused or archived rules",
-		"Record rules: suggestion chips and late autofill notes rise in after the creator opens",
+		"Record creator: learned suggestions apply on click and paused or archived rules stay out",
+		"Record creator: learned chips and late autofill notes rise in after the creator opens",
 	],
 	"src/components/charts/cashflow-chart.tsx#export.default.behaviour": [
 		"chart tooltips: Surplus / Shortfall keyboard navigation exposes actual numeric values",
@@ -4196,13 +4196,13 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"src/components/dialogs/statement-rule.tsx#editor.conditional": [
 		"Statement rule editor: the preview lists matching Statements and combines conditions by all or any",
-		"Statement rule editor: actions toggle Suggest and Autofill, Unbudgeted differs from Not set, archived Monthly Budgets are hidden",
+		"Statement rule editor: actions autofill, Unbudgeted differs from Not set, archived Monthly Budgets are hidden",
 		"Statement rule editor: Title, People and Location offer existing Record values",
 	],
 	"src/components/dialogs/statement-rule.tsx#export.default.behaviour": [
 		"Statement rule editor: invalid input shows errors, then a valid rule persists after reload",
 		"Statement rule editor: the preview lists matching Statements and combines conditions by all or any",
-		"Statement rule editor: actions toggle Suggest and Autofill, Unbudgeted differs from Not set, archived Monthly Budgets are hidden",
+		"Statement rule editor: actions autofill, Unbudgeted differs from Not set, archived Monthly Budgets are hidden",
 		"Statement rule editor: Title, People and Location offer existing Record values",
 	],
 	"src/components/dialogs/category.tsx#editor.conditional": [

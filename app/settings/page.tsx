@@ -25,13 +25,18 @@ import {
 	SelectValue,
 } from "@/components/ui/select"
 import { useSettings } from "@/hooks/use-settings"
+import { pluralize } from "@/lib/utils"
 import { updateSettings } from "@/logic/settings"
+import { RULE_FIELDS } from "@/logic/statement-rules"
+import { type SuggestionAccuracy, suggestionAccuracy } from "@/logic/suggestions"
 
 export default function SettingsPage() {
 	const settings = useSettings()
 	const [startDate, setStartDate] = useState("")
 	const [endDateToday, setEndDateToday] = useState(false)
 	const [saving, setSaving] = useState(false)
+	const [accuracy, setAccuracy] = useState<SuggestionAccuracy | null>(null)
+	const [measuring, setMeasuring] = useState(false)
 
 	useEffect(() => {
 		if (settings) {
@@ -57,6 +62,17 @@ export default function SettingsPage() {
 			toast.error(cause instanceof Error ? cause.message : "Could not save settings.")
 		} finally {
 			setSaving(false)
+		}
+	}
+
+	const handleMeasure = async () => {
+		setMeasuring(true)
+		try {
+			setAccuracy(await suggestionAccuracy())
+		} catch {
+			toast.error("Could not measure suggestions.")
+		} finally {
+			setMeasuring(false)
 		}
 	}
 
@@ -124,6 +140,46 @@ export default function SettingsPage() {
 						onClick={() => void handleSaveFilters()}
 					>
 						{saving ? "Saving…" : "Save default filters"}
+					</Button>
+				</CardFooter>
+			</Card>
+
+			<Card className="max-w-3xl overflow-hidden">
+				<CardHeader className="border-b">
+					<CardTitle>Suggestion accuracy</CardTitle>
+					<CardDescription>
+						Record suggestions are learned on this device from your past Records. To
+						measure them, Finpoint replays your history: each Record is predicted from
+						earlier Records only, then checked against what you chose.
+					</CardDescription>
+				</CardHeader>
+				<CardContent>
+					{accuracy ? (
+						<dl className="grid max-w-md grid-cols-[auto_auto_minmax(0,1fr)] items-baseline gap-x-4 gap-y-2 text-sm">
+							{accuracy.fields.map(({ field, hits, total }) => (
+								<div key={field} className="contents">
+									<dt className="text-muted-foreground">
+										{RULE_FIELDS.find(f => f.value === field)?.label}
+									</dt>
+									<dd className="font-medium tabular-nums">
+										{total ? `${Math.round((hits / total) * 100)}%` : "–"}
+									</dd>
+									<dd className="text-xs text-muted-foreground tabular-nums">
+										{hits} of {pluralize(total, "Record")}
+									</dd>
+								</div>
+							))}
+						</dl>
+					) : (
+						<p className="text-sm text-muted-foreground">
+							The first suggestion for each field is scored against Records with
+							allocated Statements.
+						</p>
+					)}
+				</CardContent>
+				<CardFooter className="justify-end border-t bg-muted/20">
+					<Button type="button" disabled={measuring} onClick={() => void handleMeasure()}>
+						{measuring ? "Measuring…" : accuracy ? "Measure again" : "Measure accuracy"}
 					</Button>
 				</CardFooter>
 			</Card>

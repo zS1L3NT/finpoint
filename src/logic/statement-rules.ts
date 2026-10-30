@@ -89,7 +89,6 @@ export async function saveStatementRule(input: RuleInput, id?: string) {
 			"actions",
 			RULE_FIELDS.map(f => f.value),
 		)
-		v.oneOf(action?.mode, `actions.${field}.mode`, ["suggest", "autofill"])
 		if (!(field === "monthly_budget_id" && action?.value === null))
 			v.text(action?.value, `actions.${field}.value`, "Enter a value.")
 		if (field === "analytics_treatment")
@@ -149,10 +148,9 @@ export type RuleRecommendation = {
 	rule_id: string
 	rule_name: string
 	field: RuleField
-	mode: "suggest" | "autofill"
 	value: string | null
 }
-/** Earlier rules win autofill conflicts; every suggestion stays available. */
+/** Earlier rules win autofill conflicts. */
 export async function statementRecommendations(
 	statementIds: string[],
 ): Promise<RuleRecommendation[]> {
@@ -180,7 +178,6 @@ export function recommendationAutofill(
 	recommendations: RuleRecommendation[],
 ): Partial<Record<RuleField, string | null>> {
 	const values: Partial<Record<RuleField, string | null>> = {}
-	for (const item of recommendations)
-		if (item.mode === "autofill" && !(item.field in values)) values[item.field] = item.value
+	for (const item of recommendations) if (!(item.field in values)) values[item.field] = item.value
 	return values
 }

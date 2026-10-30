@@ -5,7 +5,7 @@
 // Sessions persist automatically in IndexedDB — no manual save step.
 
 import { DateTime } from "luxon"
-import { db } from "@/data/db"
+import { db, withoutActionModes } from "@/data/db"
 import {
 	DEFAULT_SETTINGS,
 	type FinpointSettings,
@@ -13,7 +13,7 @@ import {
 	replaceSettings,
 } from "@/data/settings"
 
-export const EXPORT_VERSION = 5
+export const EXPORT_VERSION = 6
 
 type TableName =
 	| "statement_rules"
@@ -122,6 +122,13 @@ export function parseImportFile(text: string): FinpointExport {
 	if (parsed && parsed.tables && [1, 2, 3, 4].includes(originalVersion ?? 0)) {
 		parsed.tables.statement_rules = []
 		if (parsed.version === 4) parsed.version = EXPORT_VERSION
+	}
+	if (parsed?.version === 5 && Array.isArray(parsed.tables?.statement_rules)) {
+		parsed.tables.statement_rules = parsed.tables.statement_rules.map(value => {
+			const rule = value as { actions: Record<string, { value: unknown }> }
+			return { ...rule, actions: withoutActionModes(rule.actions) }
+		})
+		parsed.version = EXPORT_VERSION
 	}
 	if (parsed?.app !== "finpoint" || typeof parsed !== "object" || !parsed.tables) {
 		throw new Error("This file is not a Finpoint backup.")

@@ -1,6 +1,6 @@
 import type { Locator, Page } from "@playwright/test"
 import { expectPointerCursor } from "../support/assertions"
-import { IDS, statementRules } from "../support/data"
+import { IDS, learnedCoffee, statementRules } from "../support/data"
 import {
 	account,
 	budget,
@@ -324,10 +324,13 @@ test("Record creator: pending warning reveals and collapses smoothly", {
 	}
 })
 
-test("Record rules: suggestion chips and late autofill notes rise in after the creator opens", {
+test("Record creator: learned chips and late autofill notes rise in after the creator opens", {
 	tag: ["@reduced-motion"],
 }, async ({ page }) => {
-	await seedWorkspace(page, "populated", { statement_rules: statementRules() })
+	await seedWorkspace(page, "populated", {
+		...learnedCoffee(),
+		statement_rules: statementRules(),
+	})
 	// A tall viewport fits the whole creator, so every late chip and note
 	// occupies the viewport while it enters.
 	const size = page.viewportSize() ?? { width: 1440, height: 900 }
@@ -349,7 +352,7 @@ test("Record rules: suggestion chips and late autofill notes rise in after the c
 	await expect(warm).toHaveCount(0)
 	const samples = await sampleVisibleRowAnimations(
 		page,
-		'[aria-label="Suggestions from statement rules"] button, #title-autopopulated, #category_id-autopopulated, #datetime-autopopulated',
+		'[aria-label="Suggestions from past Records"] button, #title-autopopulated, #category_id-autopopulated, #datetime-autopopulated',
 		() => page.getByRole("button", { name: "Create Record" }).click(),
 	)
 	const present = samples.filter(sample => sample.text.includes("copied from the statement"))
@@ -357,11 +360,11 @@ test("Record rules: suggestion chips and late autofill notes rise in after the c
 	expect(
 		samples.length,
 		"chips, late autofill notes and the open-time datetime note are all sampled",
-	).toBeGreaterThanOrEqual(7)
-	expect(late.length, "chips and late autofill notes animate").toBeGreaterThanOrEqual(6)
+	).toBeGreaterThanOrEqual(6)
+	expect(late.length, "chips and late autofill notes animate").toBeGreaterThanOrEqual(5)
 	expect(present.length, "the datetime note is present at open").toBe(1)
 	if (await page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches)) {
-		expectReducedRowMovement(samples, 7)
+		expectReducedRowMovement(samples, 6)
 	} else {
 		for (const sample of late) {
 			const frames = sample.frames

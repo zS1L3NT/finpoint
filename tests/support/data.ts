@@ -1071,10 +1071,8 @@ export function statementRules(): StatementRule[] {
 			1,
 			{ mode: "all", items: [{ operator: "contains", value: "starbucks" }] },
 			{
-				title: { mode: "autofill", value: "Morning coffee" },
-				category_id: { mode: "autofill", value: "t1-cat-dining" },
-				people: { mode: "suggest", value: "Alex" },
-				location: { mode: "suggest", value: "Raffles Place" },
+				title: { value: "Morning coffee" },
+				category_id: { value: "t1-cat-dining" },
 			},
 		),
 		rule(
@@ -1083,10 +1081,7 @@ export function statementRules(): StatementRule[] {
 			2,
 			{ mode: "any", items: [{ operator: "regex", value: "4455$" }] },
 			{
-				title: { mode: "suggest", value: "Coffee with team" },
-				category_id: { mode: "autofill", value: "t1-cat-groceries" },
-				location: { mode: "suggest", value: "Raffles Place" },
-				monthly_budget_id: { mode: "suggest", value: "t1-mb-recurring" },
+				category_id: { value: "t1-cat-groceries" },
 			},
 		),
 		rule(
@@ -1101,10 +1096,9 @@ export function statementRules(): StatementRule[] {
 				],
 			},
 			{
-				title: { mode: "autofill", value: "Groceries" },
-				category_id: { mode: "autofill", value: "t1-cat-groceries" },
-				analytics_treatment: { mode: "suggest", value: "neutral" },
-				monthly_budget_id: { mode: "autofill", value: "t1-mb-recurring" },
+				title: { value: "Groceries" },
+				category_id: { value: "t1-cat-groceries" },
+				monthly_budget_id: { value: "t1-mb-recurring" },
 			},
 		),
 		rule(
@@ -1112,7 +1106,7 @@ export function statementRules(): StatementRule[] {
 			"Grab rides",
 			4,
 			{ mode: "all", items: [{ operator: "equals", value: "grab ride 7712" }] },
-			{ title: { mode: "autofill", value: "Taxi" } },
+			{ title: { value: "Taxi" } },
 			false,
 		),
 		rule(
@@ -1121,11 +1115,56 @@ export function statementRules(): StatementRule[] {
 			5,
 			{ mode: "all", items: [{ operator: "contains", value: "sheng" }] },
 			{
-				monthly_budget_id: { mode: "autofill", value: "t1-mb-travel" },
-				people: { mode: "autofill", value: "Sam" },
+				monthly_budget_id: { value: "t1-mb-travel" },
+				people: { value: "Sam" },
 			},
 		),
 	]
+}
+
+/**
+ * Two past Starbucks Records for the populated workspace, so the Record creator has decisions
+ * to learn from when "STARBUCKS 4455" is allocated: both went to "Coffee with team" with Alex
+ * at Raffles Place.
+ */
+export function learnedCoffee(): Pick<WorkspaceTables, "statements" | "records" | "allocations"> {
+	const { tables } = buildPopulated()
+	for (const day of ["01", "02"]) {
+		tables.statements.push({
+			id: `t1-s-coffee-${day}`,
+			account_id: "t1-acc-uob",
+			datetime: `2026-09-${day} 12:00`,
+			description: `STARBUCKS 30${day}`,
+			amount: -7.2,
+			index: 1,
+			is_pending: 0,
+		})
+		tables.records.push({
+			id: `t1-r-coffee-${day}`,
+			title: "Coffee with team",
+			people: "Alex",
+			location: "Raffles Place",
+			description: null,
+			datetime: `2026-09-${day} 12:00`,
+			amount: -7.2,
+			category_id: "t1-cat-dining",
+			analytics_treatment: "spending",
+			analytics_treatment_source: "category",
+			monthly_budget_id: "t1-mb-daily",
+			monthly_budget_source: "category",
+			revision: 1,
+		})
+		tables.allocations.push({
+			statement_id: `t1-s-coffee-${day}`,
+			record_id: `t1-r-coffee-${day}`,
+			amount: -7.2,
+		})
+	}
+	return {
+		statements: tables.statements,
+		records: tables.records,
+		allocations: tables.allocations,
+	}
 }
 
 export function getScenario(name: ScenarioName): WorkspaceDataset {

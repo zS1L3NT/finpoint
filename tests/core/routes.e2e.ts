@@ -222,8 +222,8 @@ test("Statement rules page: empty, populated and paused rules show conditions, a
 	await expect(starbucks.getByText("contains", { exact: true })).toBeVisible()
 	await expect(starbucks.getByText("starbucks", { exact: true })).toBeVisible()
 	await expect(starbucks.getByText("1 matching Statement", { exact: true })).toBeVisible()
-	await expect(starbucks.getByText("Autofill", { exact: true })).toHaveCount(2)
-	await expect(starbucks.getByText("Suggest", { exact: true })).toHaveCount(2)
+	await expect(starbucks.getByText("Morning coffee", { exact: true })).toBeVisible()
+	await expect(starbucks.getByText("Dining Out", { exact: true })).toBeVisible()
 
 	await expect(cards.nth(1).getByText("1 matching Statement", { exact: true })).toBeVisible()
 	await expect(cards.nth(2).getByText("or", { exact: true })).toBeVisible()

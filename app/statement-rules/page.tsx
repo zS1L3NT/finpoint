@@ -8,7 +8,6 @@ import { ruleValueLabel } from "@/components/form/rule-suggestions"
 import { UiIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { cardEnter } from "@/lib/motion"
 import { cn, pluralize } from "@/lib/utils"
@@ -18,16 +17,19 @@ import {
 	listStatementRules,
 	RULE_FIELDS,
 	RULE_OPERATORS,
+	type RuleInput,
 	setStatementRuleEnabled,
 } from "@/logic/statement-rules"
+import { type RuleSuggestion, suggestedStatementRules } from "@/logic/suggestions"
 import type { CategoryWithChildren } from "@/types"
 
 type Rule = Awaited<ReturnType<typeof listStatementRules>>[number]
 
 export default function StatementRulesPage() {
-	const [dialogRule, setDialogRule] = useState<Rule | "new" | null>(null)
+	const [dialogRule, setDialogRule] = useState<Rule | RuleInput | "new" | null>(null)
 
 	const rules = useLiveQuery(() => listStatementRules(), [])
+	const suggestions = useLiveQuery(() => suggestedStatementRules(), []) ?? []
 	const categories = useLiveQuery(() => listCategories(), []) ?? []
 	const monthlyBudgets = useLiveQuery(() => listMonthlyBudgets(), []) ?? []
 
@@ -59,8 +61,8 @@ export default function StatementRulesPage() {
 							<p className="text-sm font-medium">No rules yet</p>
 							<p className="max-w-sm text-xs text-muted-foreground">
 								For example, when the description contains{" "}
-								<span className="font-mono">SPOTIFY</span>, suggest the title
-								“Spotify” and autofill the Subscriptions category.
+								<span className="font-mono">SPOTIFY</span>, fill in the title
+								“Spotify” and the Subscriptions category.
 							</p>
 						</div>
 						<Button variant="outline" size="sm" onClick={() => setDialogRule("new")}>
@@ -84,6 +86,43 @@ export default function StatementRulesPage() {
 							</motion.div>
 						))}
 					</div>
+				)}
+
+				{rules === undefined || !suggestions.length ? null : (
+					<section className="grid gap-3" aria-labelledby="suggested-rules">
+						<header>
+							<h2 id="suggested-rules" className="text-sm font-medium">
+								Suggested rules
+							</h2>
+							<p className="text-xs text-muted-foreground">
+								You have made these choices again and again. Review one to fill them
+								in for you.
+							</p>
+						</header>
+						<div className="grid gap-3 @2xl/page:grid-cols-2 @5xl/page:grid-cols-3">
+							{suggestions.map((suggestion, index) => (
+								<motion.div
+									key={suggestion.key}
+									className="grid min-w-0 grid-cols-1"
+									{...cardEnter(index)}
+								>
+									<SuggestedRuleCard
+										suggestion={suggestion}
+										categories={categories}
+										monthlyBudgets={monthlyBudgets}
+										onReview={() =>
+											setDialogRule({
+												name: suggestion.name,
+												enabled: true,
+												conditions: suggestion.conditions,
+												actions: suggestion.actions,
+											})
+										}
+									/>
+								</motion.div>
+							))}
+						</div>
+					</section>
 				)}
 			</PageContent>
 
@@ -164,32 +203,93 @@ function RuleCard({
 				))}
 			</p>
 
-			<dl className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 border-t pt-3 text-xs">
-				{RULE_FIELDS.filter(f => rule.actions[f.value]).map(({ value: field, label }) => (
-					<div key={field} className="contents">
-						<dt className="text-muted-foreground">{label}</dt>
-						<dd className="truncate">
-							{ruleValueLabel(
-								field,
-								rule.actions[field]?.value ?? null,
-								categories,
-								monthlyBudgets,
-							)}
-						</dd>
-						<dd>
-							<Badge
-								variant={
-									rule.actions[field]?.mode === "autofill"
-										? "secondary"
-										: "outline"
-								}
-							>
-								{rule.actions[field]?.mode === "autofill" ? "Autofill" : "Suggest"}
-							</Badge>
-						</dd>
-					</div>
-				))}
-			</dl>
+			<RuleActionList
+				actions={rule.actions}
+				categories={categories}
+				monthlyBudgets={monthlyBudgets}
+			/>
 		</article>
+	)
+}
+
+function SuggestedRuleCard({
+	suggestion,
+	categories,
+	monthlyBudgets,
+	onReview,
+}: {
+	suggestion: RuleSuggestion
+	categories: CategoryWithChildren[]
+	monthlyBudgets: Awaited<ReturnType<typeof listMonthlyBudgets>>
+	onReview: () => void
+}) {
+	return (
+		<article className="grid min-w-0 grid-cols-1 content-start gap-3 rounded-xl border border-dashed bg-card p-4">
+			<header className="flex items-start gap-3">
+				<div className="min-w-0 flex-1">
+					<span className="flex items-center gap-1.5 font-medium">
+						<UiIcon
+							icon="lucide:sparkles"
+							className="size-3.5 shrink-0 text-muted-foreground"
+						/>
+						<span className="truncate">{suggestion.name}</span>
+					</span>
+					<span className="block text-xs text-muted-foreground tabular-nums">
+						{suggestion.agreeing} of{" "}
+						{pluralize(suggestion.matches, "matching Statement")} went to{" "}
+						{ruleValueLabel(
+							"category_id",
+							suggestion.actions.category_id?.value ?? null,
+							categories,
+							monthlyBudgets,
+						)}
+					</span>
+				</div>
+				<Button variant="outline" size="sm" onClick={onReview}>
+					Review
+				</Button>
+			</header>
+
+			<p className="flex flex-wrap items-baseline gap-x-1.5 gap-y-1 text-xs text-muted-foreground">
+				Description contains
+				<span className="max-w-full truncate rounded bg-muted px-1.5 py-0.5 font-mono text-foreground">
+					{suggestion.conditions.items[0]?.value}
+				</span>
+			</p>
+
+			<RuleActionList
+				actions={suggestion.actions}
+				categories={categories}
+				monthlyBudgets={monthlyBudgets}
+			/>
+		</article>
+	)
+}
+
+function RuleActionList({
+	actions,
+	categories,
+	monthlyBudgets,
+}: {
+	actions: Rule["actions"]
+	categories: CategoryWithChildren[]
+	monthlyBudgets: Awaited<ReturnType<typeof listMonthlyBudgets>>
+}) {
+	return (
+		<dl className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-1.5 border-t pt-3 text-xs">
+			{RULE_FIELDS.filter(f => actions[f.value]).map(({ value: field, label }) => (
+				<div key={field} className="contents">
+					<dt className="text-muted-foreground">{label}</dt>
+					<dd className="truncate">
+						{ruleValueLabel(
+							field,
+							actions[field]?.value ?? null,
+							categories,
+							monthlyBudgets,
+						)}
+					</dd>
+				</div>
+			))}
+		</dl>
 	)
 }
