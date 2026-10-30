@@ -38,7 +38,12 @@ import { listMonthlyBudgets } from "@/logic/monthly-budgets"
 import { inferRecordDatetime } from "@/logic/record-defaults"
 import { createMatchingRecords, createRecord, recordCompletions } from "@/logic/records"
 import { recommendationAutofill, statementRecommendations } from "@/logic/statement-rules"
-import { type RecordSuggestion, recordSuggestions, similarStatements } from "@/logic/suggestions"
+import {
+	prepareSuggestions,
+	type RecordSuggestion,
+	recordSuggestions,
+	similarStatements,
+} from "@/logic/suggestions"
 import { ValidationError } from "@/logic/validate"
 import type { AnalyticsTreatment, CategoryWithChildren, RuleField, Statement } from "@/types"
 
@@ -82,6 +87,12 @@ export default function RecordCreatorDialog({
 	)
 	const recommendations =
 		recommendationQuery?.key === recommendationKey ? recommendationQuery.items : undefined
+	// Learning this workspace's suggestion weights takes a moment, so it happens shortly after
+	// the page settles rather than when the creator opens (Safari lacks requestIdleCallback).
+	useEffect(() => {
+		const id = setTimeout(() => void prepareSuggestions(), 1000)
+		return () => clearTimeout(id)
+	}, [])
 	const statementKey = statements.map(s => s.id).join(",")
 	// Other allocable Statements of the same kind can take this Record's details in one go.
 	const similar = useLiveQuery(
@@ -185,16 +196,18 @@ export default function RecordCreatorDialog({
 	const analyticsCategory = categoriesFlat.find(category => category.id === analytics.categoryId)
 
 	const current = useStore(form.store, state => state.values)
-	// A typed title adds the Records that share it, so even a Record without Statements learns.
+	// A typed title and an entered time join the evidence; how much each counts is learned from
+	// this workspace.
 	const learned = useLiveQuery(
 		() =>
 			isOpen
 				? recordSuggestions({
 						statementIds: statementKey.split(",").filter(Boolean),
 						title: current.title,
+						datetime: current.datetime,
 					})
 				: undefined,
-		[isOpen, statementKey, current.title],
+		[isOpen, statementKey, current.title, current.datetime],
 	)
 	const applyRecommendation = (
 		item: Pick<RecordSuggestion, "field"> & { value: string | null },

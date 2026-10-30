@@ -28,7 +28,31 @@ import { useSettings } from "@/hooks/use-settings"
 import { pluralize } from "@/lib/utils"
 import { updateSettings } from "@/logic/settings"
 import { RULE_FIELDS } from "@/logic/statement-rules"
-import { type SuggestionAccuracy, suggestionAccuracy } from "@/logic/suggestions"
+import {
+	DEFAULT_WEIGHTS,
+	type SuggestionAccuracy,
+	suggestionAccuracy,
+	type Weights,
+} from "@/logic/suggestions"
+import type { RuleField } from "@/types"
+
+/** What the learned weights say about this workspace, in the user's words. */
+function learnedSignals(field: RuleField, w: Weights) {
+	const signals = [
+		w.price > DEFAULT_WEIGHTS.price && "exact amounts",
+		w.hour > DEFAULT_WEIGHTS.hour && "the time you enter",
+		field !== "title" && w.title > DEFAULT_WEIGHTS.title && "the Title more than the bank text",
+		field !== "title" && w.title < DEFAULT_WEIGHTS.title && "the bank text more than the Title",
+		w.halfLife < DEFAULT_WEIGHTS.halfLife && `mostly the last ${w.halfLife} days`,
+		w.halfLife > DEFAULT_WEIGHTS.halfLife && "your whole history",
+		w.threshold > DEFAULT_WEIGHTS.threshold && "only close merchant matches",
+		w.threshold < DEFAULT_WEIGHTS.threshold && "loose merchant matches",
+		w.shape > DEFAULT_WEIGHTS.shape && "similar kinds of payment when the merchant is new",
+	].filter(Boolean)
+	return signals.length
+		? `Learned to weigh ${signals.join(", ")}.`
+		: "Nothing beyond similar bank text and the Title yet."
+}
 
 export default function SettingsPage() {
 	const settings = useSettings()
@@ -148,15 +172,17 @@ export default function SettingsPage() {
 				<CardHeader className="border-b">
 					<CardTitle>Suggestion accuracy</CardTitle>
 					<CardDescription>
-						Record suggestions are learned on this device from your past Records. To
-						measure them, Finpoint replays your history: each Record is predicted from
-						earlier Records only, then checked against what you chose.
+						Record suggestions are learned on this device from your past Records,
+						including which signals matter for you. To measure them, Finpoint learns
+						only from your older Records, then predicts your newest third one by one
+						from what existed before each, as if you were creating it with its Title and
+						time filled in, and checks the first suggestion against what you chose.
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
 					{accuracy ? (
-						<dl className="grid max-w-md grid-cols-[auto_auto_minmax(0,1fr)] items-baseline gap-x-4 gap-y-2 text-sm">
-							{accuracy.fields.map(({ field, hits, total }) => (
+						<dl className="grid max-w-xl grid-cols-[auto_auto_minmax(0,1fr)] items-baseline gap-x-4 gap-y-1 text-sm">
+							{accuracy.fields.map(({ field, hits, total, unwanted, weights }) => (
 								<div key={field} className="contents">
 									<dt className="text-muted-foreground">
 										{RULE_FIELDS.find(f => f.value === field)?.label}
@@ -166,6 +192,12 @@ export default function SettingsPage() {
 									</dd>
 									<dd className="text-xs text-muted-foreground tabular-nums">
 										{hits} of {pluralize(total, "Record")}
+										{unwanted
+											? `; offered ${pluralize(unwanted, "time")} when you left it empty`
+											: ""}
+									</dd>
+									<dd className="col-span-3 mb-2 text-xs text-muted-foreground">
+										{learnedSignals(field, weights)}
 									</dd>
 								</div>
 							))}

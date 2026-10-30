@@ -2,7 +2,7 @@ import { indexedDB, IDBKeyRange } from "fake-indexeddb"
 import Dexie from "dexie"
 Dexie.dependencies.indexedDB = indexedDB
 Dexie.dependencies.IDBKeyRange = IDBKeyRange
-import { beforeEach, expect, test } from "bun:test"
+import { beforeEach, describe, expect, test } from "bun:test"
 import { DateTime } from "luxon"
 import type { RecordRow, StatementRow } from "../../src/data/db"
 const { db } = await import("../../src/data/db")
@@ -87,19 +87,41 @@ beforeEach(async () => {
 	})
 })
 
-test("descriptions reduce to words; reference codes and numbers drop out", () => {
-	expect(descriptionTokens("Grab* A-AWBP8DAGWKCFAV Singapore SGP")).toEqual([
+test("descriptions reduce to letter runs in any script; numbers drop out", () => {
+	expect(descriptionTokens("Grab* A-AWBP8DAGWKCFAV Singapore SGP 25JAN")).toEqual([
 		"grab",
 		"singapore",
 		"sgp",
+		"jan",
 	])
-	expect(descriptionTokens("7-ELEVEN-QUEENSTOWN MR Singapore SGP")).toEqual([
-		"eleven",
-		"queenstown",
-		"mr",
-		"singapore",
-		"sgp",
+	// A merchant written with digits keeps its letters.
+	expect(descriptionTokens("7ELEVEN 0412")).toEqual(["eleven"])
+	expect(descriptionTokens("Café Ñandú")).toEqual(["café", "ñandú"])
+	// Scripts without spaces compare by character pairs.
+	expect(descriptionTokens("麦当劳 中关村")).toEqual(["麦当", "当劳", "中关", "关村"])
+})
+
+test("a new merchant behind shared bank wording is not mistaken for a known one", async () => {
+	for (let day = 1; day <= 4; day++)
+		await decided(
+			`NETS QR PAYMENT 61${day}, TO: NOODLE HOUSE`,
+			{ title: "Noodles", category_id: "dining" },
+			`2026-10-0${day} 12:00`,
+		)
+	for (let day = 5; day <= 8; day++)
+		await decided(
+			`NETS QR PAYMENT 61${day}, TO: CORNER GROCER`,
+			{ title: "Groceries", category_id: "groceries" },
+			`2026-10-0${day} 12:00`,
+		)
+	const known = statement("NETS QR PAYMENT 699, TO: NOODLE HOUSE")
+	const fresh = statement("NETS QR PAYMENT 698, TO: BICYCLE WORKSHOP")
+	await db.statements.bulkAdd([known, fresh])
+
+	expect(chip((await recordSuggestions({ statementIds: [known.id] })).chips, "title")).toEqual([
+		"Noodles",
 	])
+	expect(chip((await recordSuggestions({ statementIds: [fresh.id] })).chips, "title")).toEqual([])
 })
 
 test("a new Statement gets the details past Records made from similar Statements", async () => {
@@ -126,22 +148,102 @@ test("a new Statement gets the details past Records made from similar Statements
 	expect(ranked.title).not.toContain("FairPrice Run")
 })
 
-test("amount and time of day separate the same merchant's different Records", async () => {
-	for (const day of ["05", "06", "07", "08"]) {
-		await decided("GRAB SINGAPORE", { title: "Grab to work", amount: -15 }, `2026-10-${day} 08:10`)
-		await decided("GRAB SINGAPORE", { title: "Grab home", amount: -32 }, `2026-10-${day} 23:30`)
+test("a chosen title leads the Category; the bank text still leads the place", async () => {
+	for (const day of ["01", "02", "03"]) {
+		await decided("CAMPUS CAFE", { title: "Coffee", category_id: "dining", location: "Campus" }, `2026-10-${day} 09:00`)
+		await decided("CAMPUS CAFE", { title: "Coffee", category_id: "dining", location: "Campus" }, `2026-10-${day} 10:00`)
+		await decided("CAMPUS CAFE", { title: "Drink", category_id: "groceries", location: "Campus" }, `2026-10-${day} 19:00`)
+		await decided("JUICE STALL", { title: "Drink", category_id: "groceries", location: "Library" }, `2026-10-${day} 15:00`)
 	}
-	await decided("GRAB SINGAPORE", { title: "Unrelated" }, "2026-10-09 12:00")
-	const morning = statement("GRAB SINGAPORE", { datetime: "2026-10-12 08:30", amount: -16 })
-	const night = statement("GRAB SINGAPORE", { datetime: "2026-10-12 23:10", amount: -30 })
-	await db.statements.bulkAdd([morning, night])
+	const query = statement("CAMPUS CAFE")
+	await db.statements.add(query)
 
-	expect(chip((await recordSuggestions({ statementIds: [morning.id] })).chips, "title")[0]).toBe(
-		"Grab to work",
+	const { chips } = await recordSuggestions({ statementIds: [query.id], title: "Drink" })
+
+	expect(chip(chips, "category_id")[0]).toBe("groceries")
+	expect(chip(chips, "location")).toEqual(["Campus"])
+	expect(chips.find(c => c.field === "category_id")?.reason).toBe(
+		"Learned from 6 past Records titled “Drink”",
 	)
-	expect(chip((await recordSuggestions({ statementIds: [night.id] })).chips, "title")[0]).toBe(
-		"Grab home",
+})
+
+test("people named in the bank text are suggested first", async () => {
+	await decided("HOTPOT HOUSE", { title: "Dinner", people: "Team" }, "2026-10-01 19:00")
+	await decided("KOPITIAM", { title: "Coffee", people: "Sam & Alex" }, "2026-10-02 10:00")
+	await decided("KOPITIAM", { title: "Coffee", people: "Alex" }, "2026-10-03 10:00")
+	const paid = statement("HOTPOT HOUSE", { amount: -30 })
+	const back = statement("ICT Incoming PayNow Ref 1000001, From: TAN ALEX, OTHR", {
+		amount: 10,
+	})
+	const also = statement("ICT Incoming PayNow Ref 1000002, From: LEE SAM, OTHR", { amount: 10 })
+	await db.statements.bulkAdd([paid, back, also])
+
+	const { chips } = await recordSuggestions({ statementIds: [paid.id, back.id, also.id] })
+
+	expect(chips.find(c => c.field === "people")).toEqual({
+		field: "people",
+		value: "Sam & Alex",
+		reason: "Named in the Statement",
+	})
+})
+
+test("names in bank text stop leading People once they have proved misleading", async () => {
+	for (const day of ["01", "02", "03", "04", "05"])
+		await decided("KOPITIAM", { title: "Coffee", people: "Alex" }, `2026-01-${day} 10:00`)
+	// A bakery that happens to carry the same name, never visited with Alex.
+	for (let i = 0; i < 30; i++)
+		await decided(
+			"ALEX BAKERY",
+			{ title: "Bread" },
+			DateTime.fromISO("2026-02-01").plus({ days: i }).toFormat("yyyy-MM-dd 09:00"),
+		)
+	const next = statement("ALEX BAKERY", { datetime: "2026-04-01 09:00" })
+	await db.statements.add(next)
+
+	const { chips } = await recordSuggestions({ statementIds: [next.id] })
+
+	expect(chips.some(c => c.reason === "Named in the Statement")).toBe(false)
+})
+
+test("weekly purchases of the same amount are not mistaken for a monthly charge", async () => {
+	const today = DateTime.now().startOf("day")
+	for (let week = 12; week >= 1; week--)
+		await decided(
+			"SWIM CLUB",
+			{ title: "Swim", category_id: "subscriptions", amount: -5 },
+			today.minus({ weeks: week }).toFormat("yyyy-MM-dd 07:00"),
+		)
+
+	expect(await recurringCharges()).toEqual([])
+})
+
+test("a Statement split across many Records counts less, and blank descriptions still match", async () => {
+	const wallet = statement("WALLET TOP-UP", { amount: -100 })
+	await db.statements.add(wallet)
+	// One top-up paid for four bottles of water; two other top-ups were just top-ups.
+	for (const i of [1, 2, 3, 4]) {
+		const r = record({ id: `wallet-${i}`, title: "Water", category_id: "dining" })
+		await db.records.add(r)
+		await db.allocations.add({ statement_id: wallet.id, record_id: r.id, amount: -25 })
+	}
+	for (const day of ["05", "06"])
+		await decided(
+			"WALLET TOP-UP",
+			{ title: "Travel wallet", category_id: "transport", amount: -100 },
+			`2026-10-${day} 12:00`,
+		)
+	for (const day of ["01", "02"])
+		await decided("", { title: "Interest", category_id: "groceries", amount: 0.3 }, `2026-10-${day} 00:00`)
+	const next = statement("WALLET TOP-UP", { amount: -100 })
+	const interest = statement("", { amount: 0.31 })
+	await db.statements.bulkAdd([next, interest])
+
+	expect(chip((await recordSuggestions({ statementIds: [next.id] })).chips, "title")[0]).toBe(
+		"Travel wallet",
 	)
+	expect(chip((await recordSuggestions({ statementIds: [interest.id] })).chips, "title")).toEqual([
+		"Interest",
+	])
 })
 
 test("a typed title brings its usual Category, people and place without any Statement", async () => {
@@ -283,7 +385,7 @@ test("replaying history scores each Record against earlier Records only", async 
 	expect(accuracy.records).toBe(3)
 	// The first Record has nothing earlier to learn from; the second follows the first; the
 	// third breaks the pattern.
-	expect(accuracy.fields.find(f => f.field === "category_id")).toEqual({
+	expect(accuracy.fields.find(f => f.field === "category_id")).toMatchObject({
 		field: "category_id",
 		hits: 1,
 		total: 3,
@@ -300,7 +402,154 @@ test("the demo workspace benchmark: the first chip is usually right", async () =
 		return (entry?.hits ?? 0) / (entry?.total || 1)
 	}
 
-	expect(records).toBeGreaterThan(300)
+	// The newest third is scored, with weights learned from the older two thirds.
+	expect(records).toBeGreaterThan(100)
 	expect(rate("category_id")).toBeGreaterThan(0.8)
 	expect(rate("title")).toBeGreaterThan(0.8)
 }, 30_000)
+
+/**
+ * Synthetic users with deliberately different habits. Each must get weights that fit their own
+ * history, not one person's: nothing in the learner may assume a particular user.
+ */
+describe("learned weights follow each user's own habits", () => {
+	const seeded = (seed: number) => () => {
+		seed = (seed * 1103515245 + 12345) % 2147483648
+		return seed / 2147483648
+	}
+	/** Adds a few hundred Records, one Statement each, as `persona` decides them. */
+	async function live(
+		persona: (i: number, random: () => number) => {
+			description: string
+			amount: number
+			title: string
+			category_id: string
+			hour?: number
+		},
+	) {
+		const random = seeded(7)
+		const start = DateTime.fromISO("2026-01-01")
+		for (let i = 0; i < 240; i++) {
+			const day = start.plus({ days: Math.floor(i * 1.2) })
+			const p = persona(i, random)
+			await decided(
+				`${p.description} ${Math.floor(random() * 90000) + 10000}`,
+				{ title: p.title, category_id: p.category_id, amount: p.amount },
+				day.set({ hour: p.hour ?? 0, minute: 0 }).toFormat("yyyy-MM-dd HH:mm"),
+			)
+		}
+		const { fields } = await suggestionAccuracy()
+		const field = (name: string) => {
+			const entry = fields.find(f => f.field === name)
+			return { ...entry, rate: (entry?.hits ?? 0) / (entry?.total || 1) }
+		}
+		return field
+	}
+
+	test("prices that tell items apart earn a price boost for titles", async () => {
+		const items = [
+			["Water", -1.0],
+			["Coffee", -1.4],
+			["Juice", -1.8],
+		] as const
+		const field = await live((_, random) => {
+			const [title, amount] = items[Math.floor(random() * items.length)] ?? items[0]
+			return { description: "SNACK MACHINE", amount, title, category_id: "dining" }
+		})
+		expect(field("title").weights?.price).toBeGreaterThan(1)
+		expect(field("title").rate).toBeGreaterThan(0.9)
+	})
+
+	test("titles that follow the time of day earn an hour boost", async () => {
+		const meals = [
+			["Breakfast", 8],
+			["Lunch", 12],
+			["Dinner", 19],
+		] as const
+		const field = await live((_, random) => {
+			const [title, hour] = meals[Math.floor(random() * meals.length)] ?? meals[0]
+			return { description: "FOOD HALL", amount: -6, title, category_id: "dining", hour }
+		})
+		expect(field("title").weights?.hour).toBeGreaterThan(1)
+		// The bank text has no time, so the entered time is what picks the meal.
+		const next = statement("FOOD HALL 55555", { amount: -6, datetime: "2026-12-01 00:00", index: 1 })
+		await db.statements.add(next)
+		for (const [title, hour] of meals)
+			expect(
+				chip(
+					(
+						await recordSuggestions({
+							statementIds: [next.id],
+							datetime: `2026-12-01T${String(hour).padStart(2, "0")}:20`,
+						})
+					).chips,
+					"title",
+				)[0],
+			).toBe(title)
+
+		for (const table of [db.statements, db.records, db.allocations]) await table.clear()
+		// The same meals at random hours: time says nothing, so it must not gain weight.
+		const random = await live((_, next) => {
+			const [title] = meals[Math.floor(next() * meals.length)] ?? meals[0]
+			return {
+				description: "FOOD HALL",
+				amount: -6,
+				title,
+				category_id: "dining",
+				hour: 7 + Math.floor(next() * 14),
+			}
+		})
+		expect(random("title").weights?.hour).toBe(1)
+	})
+
+	test("a user who changes habits gets a short memory; a steady user keeps a long one", async () => {
+		const changing = await live(i => ({
+			description: ["CORNER SHOP", "BOOK STORE", "CAFE ONE"][i % 3] ?? "CORNER SHOP",
+			amount: -10,
+			title: "Shopping",
+			// Each merchant's Category changes every two months.
+			category_id: Math.floor(i / 50) % 2 ? "groceries" : "dining",
+		}))
+		expect(changing("category_id").weights?.halfLife).toBeLessThanOrEqual(60)
+
+		for (const table of [db.statements, db.records, db.allocations]) await table.clear()
+		const steady = await live((i, random) => ({
+			description: ["CORNER SHOP", "BOOK STORE", "CAFE ONE"][i % 3] ?? "CORNER SHOP",
+			amount: -10,
+			title: "Shopping",
+			// The same merchant goes to its usual Category most of the time, at random.
+			category_id:
+				random() < 0.7 ? (["groceries", "dining", "transport"][i % 3] ?? "dining") : "subscriptions",
+		}))
+		expect(steady("category_id").weights?.halfLife).toBeGreaterThanOrEqual(120)
+	})
+
+	test("whether the title or the bank text decides the Category is learned, not assumed", async () => {
+		const reasons = [
+			["Rent", "groceries"],
+			["Lunch", "dining"],
+			["Bus fare", "transport"],
+		] as const
+		// Every transfer looks the same; only the title says what it was for.
+		const titleLed = await live((_, random) => {
+			const [title, category_id] = reasons[Math.floor(random() * reasons.length)] ?? reasons[0]
+			return { description: "FUNDS TRANSFER", amount: -20, title, category_id }
+		})
+		expect(titleLed("category_id").weights?.title).toBeGreaterThanOrEqual(1)
+		expect(titleLed("category_id").rate).toBeGreaterThan(0.9)
+
+		for (const table of [db.statements, db.records, db.allocations]) await table.clear()
+		const shops = [
+			["CORNER GROCER", "groceries"],
+			["NOODLE HOUSE", "dining"],
+			["TRAIN TICKETS", "transport"],
+		] as const
+		// The title is a vague note; the merchant says what it was.
+		const merchantLed = await live((_, random) => {
+			const [description, category_id] = shops[Math.floor(random() * shops.length)] ?? shops[0]
+			return { description, amount: -12, title: random() < 0.5 ? "Stuff" : "Misc", category_id }
+		})
+		expect(merchantLed("category_id").weights?.title).toBeLessThanOrEqual(1)
+		expect(merchantLed("category_id").rate).toBeGreaterThan(0.9)
+	})
+})
