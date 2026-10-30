@@ -393,6 +393,21 @@ test("replaying history scores each Record against earlier Records only", async 
 	expect(first.record.title).toBe("Grab Ride")
 })
 
+test("replaying history reports the mix-ups that keep coming back", async () => {
+	for (const day of ["01", "02", "03"])
+		await decided("GRAB SINGAPORE", {}, `2026-10-${day} 08:00`)
+	for (const day of ["04", "05", "06"])
+		await decided("GRAB SINGAPORE", { category_id: "dining" }, `2026-10-${day} 08:00`)
+
+	const category = (await suggestionAccuracy()).fields.find(f => f.field === "category_id")
+
+	// One wrong guess is noise; the same wrong guess twice is worth showing.
+	expect(category?.misses).toEqual([
+		{ offered: "transport", actual: "dining", count: expect.any(Number) },
+	])
+	expect(category?.misses[0]?.count).toBeGreaterThan(1)
+})
+
 test("the demo workspace benchmark: the first chip is usually right", async () => {
 	await importData(generateTestData())
 

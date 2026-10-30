@@ -1,7 +1,7 @@
 import type { Page } from "@playwright/test"
 import { expectPointerCursor } from "../support/assertions"
 import { chartTooltip } from "../support/charts"
-import { getScenario, IDS, statementRules } from "../support/data"
+import { getScenario, IDS, recurringStatements, statementRules } from "../support/data"
 import { setDateOnly } from "../support/date-only"
 import { openEditor, pickOption } from "../support/editors"
 import { expect, seedWorkspace, test } from "../support/fixtures"
@@ -21,6 +21,7 @@ const titles: Record<string, string> = {
 	"/allocator/duplicates": "Workflows",
 	"/importer": "Importer",
 	"/settings": "Settings",
+	"/recurring": "Recurring charges",
 	"/sync": "Data",
 	"/privacy": "Privacy Policy",
 	"/terms": "Terms of Service",
@@ -274,6 +275,72 @@ test("Statement rules page: the Plan Rules link opens it and pause, resume and d
 	await expect(page.locator("main article")).toHaveCount(4)
 })
 
+test("Statement rules page: search narrows rules by name, phrase or filled-in value", async ({
+	page,
+}) => {
+	await seedWorkspace(page, "populated", {
+		statement_rules: [
+			...statementRules(),
+			...statementRules().map(rule => ({
+				...rule,
+				id: `${rule.id}-copy`,
+				name: `${rule.name} copy`,
+			})),
+		],
+	})
+	await page.goto("/statement-rules")
+	const rows = page.locator("main section[aria-label='Your rules'] article")
+	await expect(rows).toHaveCount(10)
+
+	const search = page.getByRole("searchbox", { name: "Search rules", exact: true })
+	await search.fill("fairprice")
+	await expect(rows).toHaveCount(2)
+	await search.fill("morning coffee")
+	await expect(rows).toHaveCount(2)
+	await search.fill("no such rule")
+	await expect(page.getByText("No rules match your search.", { exact: true })).toBeVisible()
+	await search.fill("")
+	await expect(rows).toHaveCount(10)
+})
+
+test("Recurring charges page: monthly charges sort into late, coming up and charged this month", async ({
+	page,
+	isMobile,
+}) => {
+	await seedWorkspace(page, "populated", { statements: recurringStatements() })
+	await page.goto("/records")
+	if (isMobile) await page.locator('header [data-slot="sidebar-trigger"]').click()
+	await page
+		.getByRole("link", { name: "Recurring", exact: true })
+		.filter({ visible: true })
+		.click()
+	await expect(page).toHaveURL(/\/recurring$/)
+	await expect(page.locator("header h1")).toHaveText("Recurring charges")
+
+	const group = (name: string) => page.getByRole("region", { name })
+	await expect(group(/^Late/).getByText("ANYTIME FITNESS", { exact: true })).toBeVisible()
+	await expect(
+		group(/^Late/).getByText("Expected 5 Oct, 10 days late. Cancelled, or paid another way?", {
+			exact: true,
+		}),
+	).toBeVisible()
+	await expect(group(/^Coming up/).getByText("SPOTIFY STOCKHOLM", { exact: true })).toBeVisible()
+	await expect(group(/^Coming up/).getByText("In 5 days", { exact: true })).toBeVisible()
+	await expect(
+		group(/^Charged this month/).getByText("NETFLIX.COM", { exact: true }),
+	).toBeVisible()
+	await expect(group(/^Charged this month/).getByText("$15.98", { exact: true })).toBeVisible()
+	await expect(
+		group(/^Charged this month/).getByText("Next expected 3 Nov", { exact: true }),
+	).toBeVisible()
+	await fits(page, page.locator("main"))
+
+	await group(/^Coming up/)
+		.getByRole("link", { name: /SPOTIFY STOCKHOLM/ })
+		.click()
+	await expect(page).toHaveURL(/\/statements\?query=(spotify|stockholm)$/)
+})
+
 // One populated seed per sweep. Each route navigates once; the layout step
 // owns the navigation and the button-audit step reuses the same page, so the
 // audit sees exactly the layout-verified DOM. Trial clicks never navigate.
@@ -292,6 +359,7 @@ for (const [group, routes, tags] of [
 			"/importer",
 			"/settings",
 			"/sync",
+			"/recurring",
 		],
 		["@tall", "@reduced-motion"],
 	],

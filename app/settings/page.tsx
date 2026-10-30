@@ -1,12 +1,16 @@
 "use client"
 
+import { useLiveQuery } from "dexie-react-hooks"
+import Link from "next/link"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import DateField from "@/components/form/date-field"
 import { FormField } from "@/components/form/field"
+import { ruleValueLabel } from "@/components/form/rule-suggestions"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
 	Card,
@@ -25,7 +29,8 @@ import {
 	SelectValue,
 } from "@/components/ui/select"
 import { useSettings } from "@/hooks/use-settings"
-import { pluralize } from "@/lib/utils"
+import { cn, pluralize } from "@/lib/utils"
+import { listCategories } from "@/logic/categories"
 import { updateSettings } from "@/logic/settings"
 import { RULE_FIELDS } from "@/logic/statement-rules"
 import {
@@ -34,28 +39,27 @@ import {
 	suggestionAccuracy,
 	type Weights,
 } from "@/logic/suggestions"
+import { pathStatementRules } from "@/routes"
 import type { RuleField } from "@/types"
 
 /** What the learned weights say about this workspace, in the user's words. */
 function learnedSignals(field: RuleField, w: Weights) {
-	const signals = [
-		w.price > DEFAULT_WEIGHTS.price && "exact amounts",
-		w.hour > DEFAULT_WEIGHTS.hour && "the time you enter",
-		field !== "title" && w.title > DEFAULT_WEIGHTS.title && "the Title more than the bank text",
-		field !== "title" && w.title < DEFAULT_WEIGHTS.title && "the bank text more than the Title",
-		w.halfLife < DEFAULT_WEIGHTS.halfLife && `mostly the last ${w.halfLife} days`,
-		w.halfLife > DEFAULT_WEIGHTS.halfLife && "your whole history",
-		w.threshold > DEFAULT_WEIGHTS.threshold && "only close merchant matches",
-		w.threshold < DEFAULT_WEIGHTS.threshold && "loose merchant matches",
-		w.shape > DEFAULT_WEIGHTS.shape && "similar kinds of payment when the merchant is new",
-	].filter(Boolean)
-	return signals.length
-		? `Learned to weigh ${signals.join(", ")}.`
-		: "Nothing beyond similar bank text and the Title yet."
+	return [
+		w.price > DEFAULT_WEIGHTS.price && "Exact amounts",
+		w.hour > DEFAULT_WEIGHTS.hour && "Time of day",
+		field !== "title" && w.title > DEFAULT_WEIGHTS.title && "Title over bank text",
+		field !== "title" && w.title < DEFAULT_WEIGHTS.title && "Bank text over Title",
+		w.halfLife < DEFAULT_WEIGHTS.halfLife && `Last ${w.halfLife} days`,
+		w.halfLife > DEFAULT_WEIGHTS.halfLife && "Whole history",
+		w.threshold > DEFAULT_WEIGHTS.threshold && "Close merchant matches only",
+		w.threshold < DEFAULT_WEIGHTS.threshold && "Loose merchant matches",
+		w.shape > DEFAULT_WEIGHTS.shape && "Similar payments for new merchants",
+	].filter(signal => typeof signal === "string")
 }
 
 export default function SettingsPage() {
 	const settings = useSettings()
+	const categories = useLiveQuery(() => listCategories(), []) ?? []
 	const [startDate, setStartDate] = useState("")
 	const [endDateToday, setEndDateToday] = useState(false)
 	const [saving, setSaving] = useState(false)
@@ -172,40 +176,128 @@ export default function SettingsPage() {
 				<CardHeader className="border-b">
 					<CardTitle>Suggestion accuracy</CardTitle>
 					<CardDescription>
-						Record suggestions are learned on this device from your past Records,
-						including which signals matter for you. To measure them, Finpoint learns
-						only from your older Records, then predicts your newest third one by one
-						from what existed before each, as if you were creating it with its Title and
-						time filled in, and checks the first suggestion against what you chose.
+						How often the first suggestion in New Record matches what you chose, and
+						what Finpoint has learned about how you record. Everything is learned on
+						this device.
 					</CardDescription>
 				</CardHeader>
-				<CardContent>
+				<CardContent className="grid gap-5">
 					{accuracy ? (
-						<dl className="grid max-w-xl grid-cols-[auto_auto_minmax(0,1fr)] items-baseline gap-x-4 gap-y-1 text-sm">
-							{accuracy.fields.map(({ field, hits, total, unwanted, weights }) => (
-								<div key={field} className="contents">
-									<dt className="text-muted-foreground">
-										{RULE_FIELDS.find(f => f.value === field)?.label}
-									</dt>
-									<dd className="font-medium tabular-nums">
-										{total ? `${Math.round((hits / total) * 100)}%` : "–"}
-									</dd>
-									<dd className="text-xs text-muted-foreground tabular-nums">
-										{hits} of {pluralize(total, "Record")}
-										{unwanted
-											? `; offered ${pluralize(unwanted, "time")} when you left it empty`
-											: ""}
-									</dd>
-									<dd className="col-span-3 mb-2 text-xs text-muted-foreground">
-										{learnedSignals(field, weights)}
-									</dd>
-								</div>
-							))}
-						</dl>
+						<>
+							<p className="text-sm text-muted-foreground">
+								Replayed on your newest {pluralize(accuracy.records, "Record")}, the
+								first suggestion was right{" "}
+								<span className="font-medium text-foreground tabular-nums">
+									{pluralize(
+										accuracy.fields.reduce((sum, f) => sum + f.hits, 0),
+										"time",
+									)}
+								</span>
+								: that many fields you would not have typed.
+							</p>
+							<ul className="grid gap-5">
+								{accuracy.fields.map(
+									({ field, hits, total, unwanted, misses, weights }) => {
+										const label = RULE_FIELDS.find(
+											f => f.value === field,
+										)?.label
+										const tenths = total ? Math.round((hits / total) * 10) : 0
+										const value = (id: string) =>
+											ruleValueLabel(field, id, categories, undefined)
+										const signals = learnedSignals(field, weights)
+										return (
+											<li key={field} className="grid gap-2">
+												<div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+													<span className="w-20 text-sm font-medium">
+														{label}
+													</span>
+													<span
+														className="flex gap-0.5"
+														role="img"
+														aria-label={`About ${tenths} in 10 right`}
+													>
+														{Array.from({ length: 10 }, (_, i) => (
+															<span
+																key={i}
+																className={cn(
+																	"h-3 w-2 rounded-[2px]",
+																	i < tenths
+																		? "bg-foreground"
+																		: "bg-muted",
+																)}
+															/>
+														))}
+													</span>
+													<span className="text-sm font-medium tabular-nums">
+														{total
+															? `${Math.round((hits / total) * 100)}%`
+															: "–"}
+													</span>
+													<span className="text-xs text-muted-foreground tabular-nums">
+														{hits} of {pluralize(total, "Record")}
+													</span>
+												</div>
+												<div className="grid gap-1.5 text-xs text-muted-foreground @md/page:pl-23">
+													<p className="flex flex-wrap items-center gap-1">
+														{signals.length ? (
+															<>
+																Learned to weigh
+																{signals.map(signal => (
+																	<Badge
+																		key={signal}
+																		variant="secondary"
+																	>
+																		{signal}
+																	</Badge>
+																))}
+															</>
+														) : (
+															"Nothing beyond similar bank text and the Title yet."
+														)}
+													</p>
+													{misses.map(miss => (
+														<p key={`${miss.offered}:${miss.actual}`}>
+															Suggested{" "}
+															<span className="text-foreground">
+																{value(miss.offered)}
+															</span>{" "}
+															when you chose{" "}
+															<span className="text-foreground">
+																{value(miss.actual)}
+															</span>
+															, {pluralize(miss.count, "time")}.
+														</p>
+													))}
+													{unwanted ? (
+														<p>
+															Offered {pluralize(unwanted, "time")}{" "}
+															when you left it empty.
+														</p>
+													) : null}
+												</div>
+											</li>
+										)
+									},
+								)}
+							</ul>
+							{accuracy.fields.some(f => f.misses.length) ? (
+								<p className="text-xs text-muted-foreground">
+									Mix-ups that keep coming back are a good place for a{" "}
+									<Link
+										href={pathStatementRules()}
+										className="underline underline-offset-2"
+									>
+										Statement rule
+									</Link>
+									, which always fills in the same values.
+								</p>
+							) : null}
+						</>
 					) : (
 						<p className="text-sm text-muted-foreground">
-							The first suggestion for each field is scored against Records with
-							allocated Statements.
+							Finpoint learns only from your older Records, then replays your newest
+							third one by one from what existed before each, as if you were creating
+							it with its Title and time filled in.
 						</p>
 					)}
 				</CardContent>

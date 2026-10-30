@@ -61,7 +61,15 @@ export type RuleSuggestion = {
 
 export type SuggestionAccuracy = {
 	records: number
-	fields: { field: RuleField; hits: number; total: number; unwanted: number; weights: Weights }[]
+	fields: {
+		field: RuleField
+		hits: number
+		total: number
+		unwanted: number
+		/** The wrong first suggestions given most often, against what the user chose instead. */
+		misses: { offered: string; actual: string; count: number }[]
+		weights: Weights
+	}[]
 }
 
 const FIELD_VALUES: Record<RuleField, (record: RecordRow) => string | null> = {
@@ -979,6 +987,7 @@ export async function suggestionAccuracy(): Promise<SuggestionAccuracy> {
 		hits: 0,
 		total: 0,
 		unwanted: 0,
+		misses: [] as { offered: string; actual: string; count: number }[],
 		weights: weights.fields[field],
 	}))
 	const steps = 8
@@ -1008,8 +1017,20 @@ export async function suggestionAccuracy(): Promise<SuggestionAccuracy> {
 				}
 				entry.total++
 				if (offered === actual) entry.hits++
+				else if (offered) {
+					const miss = entry.misses.find(
+						m => m.offered === offered && m.actual === actual,
+					)
+					if (miss) miss.count++
+					else entry.misses.push({ offered, actual, count: 1 })
+				}
 			}
 		}
 	}
+	for (const entry of fields)
+		entry.misses = entry.misses
+			.filter(m => m.count > 1)
+			.sort((a, b) => b.count - a.count)
+			.slice(0, 2)
 	return { records: scored.length, fields }
 }

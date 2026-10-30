@@ -39,7 +39,6 @@ import { useStagedMount } from "@/hooks/use-staged-mount"
 import { themeColor } from "@/lib/palette"
 import { cn, formatCurrency, pluralize } from "@/lib/utils"
 import { getDashboardView, type TrendMonth } from "@/logic/dashboard"
-import { recurringCharges } from "@/logic/suggestions"
 import { hasWorkspaceActivity, loadDemoWorkspace } from "@/logic/workspace"
 import {
 	pathAllocator,
@@ -838,11 +837,6 @@ function ReviewLinks({ data, month, year }: { data: DashboardData; month: string
 	const date = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
 	const start = date.startOf("month").toISODate() ?? ""
 	const end = date.endOf("month").toISODate() ?? ""
-	const charges = useLiveQuery(() => recurringCharges(), [])
-	// Late monthly charges only matter while their month is the one under review.
-	const overdue = date.hasSame(DateTime.now(), "month")
-		? (charges ?? []).filter(charge => charge.overdue)
-		: []
 	// Keep the hit area steady: shrinking a pressed link loses clicks near its edges.
 	return (
 		<div className="flex flex-wrap items-center gap-2" aria-label="Review this month">
@@ -910,24 +904,6 @@ function ReviewLinks({ data, month, year }: { data: DashboardData; month: string
 					</Link>
 				</Button>
 			) : null}
-			{overdue.map(charge => (
-				<Button
-					key={charge.key}
-					variant="outline"
-					size="sm"
-					className="active:not-aria-[haspopup]:scale-100"
-					asChild
-				>
-					<Link
-						onClick={handlePush("overview")}
-						href={pathStatements({ query: charge.query })}
-						title={`Usually ${formatCurrency(charge.amount)} every month; expected by ${DateTime.fromISO(charge.expected).toFormat("d MMM")}.`}
-					>
-						<IconifyIcon icon="lucide:calendar-clock" />
-						{charge.label} not charged yet
-					</Link>
-				</Button>
-			))}
 			{data.summary.unbudgeted_count > 0 ? (
 				<Button
 					variant="outline"
