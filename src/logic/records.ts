@@ -6,6 +6,7 @@ import { canUseMonthlyBudget } from "@/lib/analytics"
 import { contribution } from "@/logic/analytics"
 import { duplicateStatementIds } from "@/logic/duplicates"
 import { isPendingRecord, pendingStatementIds, tallyAllocations } from "@/logic/pending"
+import { inferRecordDatetime } from "@/logic/record-defaults"
 import { inputToStored, newId, round2, TREATMENT_VALUES } from "@/logic/shared"
 import { ValidationError, Validator } from "@/logic/validate"
 import type { Allocation, AnalyticsTreatment, Record as AppRecord, Statement } from "@/types"
@@ -424,6 +425,43 @@ export async function createRecord(input: RecordInput) {
 			}
 
 			return stored
+		},
+	)
+}
+
+/**
+ * Creates one Record per Statement from shared details; each takes its own Statement's
+ * remaining amount and date. All or none are created.
+ */
+export async function createMatchingRecords(
+	input: Omit<RecordInput, "datetime" | "amount" | "statements">,
+	statementIds: string[],
+) {
+	return db.transaction(
+		"rw",
+		[db.records, db.allocations, db.budgets, db.budget_records, db.categories, db.statements],
+		async () => {
+			const allocations = await db.allocations.toArray()
+			const statements = (await db.statements.bulkGet(statementIds)).filter(
+				s => s !== undefined,
+			)
+			let created = 0
+			for (const statement of statements) {
+				const amount = round2(
+					allocations
+						.filter(a => a.statement_id === statement.id)
+						.reduce((left, a) => left - a.amount, statement.amount),
+				)
+				if (!amount) continue
+				await createRecord({
+					...input,
+					datetime: inferRecordDatetime([statement]).value,
+					amount,
+					statements: [{ id: statement.id, amount }],
+				})
+				created++
+			}
+			return created
 		},
 	)
 }

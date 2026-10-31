@@ -158,14 +158,14 @@ export type RuleCondition = {
 	operator: "contains" | "equals" | "regex"
 	value: string
 }
-export type RuleMode = "suggest" | "autofill"
+/** Every action autofills; learned Record suggestions offer the one-click chips. */
 export type RuleActions = {
-	title?: { mode: RuleMode; value: string }
-	people?: { mode: RuleMode; value: string }
-	location?: { mode: RuleMode; value: string }
-	category_id?: { mode: RuleMode; value: string }
-	analytics_treatment?: { mode: RuleMode; value: AnalyticsTreatment }
-	monthly_budget_id?: { mode: RuleMode; value: string | null }
+	title?: { value: string }
+	people?: { value: string }
+	location?: { value: string }
+	category_id?: { value: string }
+	analytics_treatment?: { value: AnalyticsTreatment }
+	monthly_budget_id?: { value: string | null }
 }
 export type RuleField = keyof RuleActions
 export type StatementRule = {

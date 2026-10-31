@@ -4,7 +4,7 @@ Dexie.dependencies.indexedDB = indexedDB
 Dexie.dependencies.IDBKeyRange = IDBKeyRange
 import { beforeEach, expect, test } from "bun:test"
 import type { StatementRow } from "../../src/data/db"
-const { db } = await import("../../src/data/db")
+const { db, DB_VERSION } = await import("../../src/data/db")
 const { duplicateGroups, dismissDuplicatePair, restoreDuplicatePair, fixDuplicates } = await import(
 	"../../src/logic/duplicates"
 )
@@ -208,7 +208,7 @@ test("schema version four upgrades with financial data intact", async () => {
 	await legacy.table("statements").put(statement("a"))
 	legacy.close()
 	await db.open()
-	expect(db.verno).toBe(6)
+	expect(db.verno).toBe(DB_VERSION)
 	expect(await db.statements.get("a")).toEqual(statement("a"))
 	expect(await db.duplicate_dismissals.count()).toBe(0)
 })

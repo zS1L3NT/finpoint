@@ -46,6 +46,7 @@ export function matchesStatement(
 	)
 }
 
+const NAME_ORDER = new Intl.Collator(undefined, { sensitivity: "base", numeric: true })
 const byCreation = (a: StatementRule, b: StatementRule) =>
 	a.created_at.localeCompare(b.created_at) || a.id.localeCompare(b.id)
 
@@ -54,10 +55,13 @@ export async function listStatementRules() {
 		db.statement_rules.toArray(),
 		db.statements.toArray(),
 	])
-	return rules.sort(byCreation).map(rule => ({
-		...rule,
-		matches: statements.filter(s => matchesStatement(rule, s)).length,
-	}))
+	// Listed by name so a long list reads like an index; matching still follows creation order.
+	return rules
+		.sort((a, b) => NAME_ORDER.compare(a.name, b.name) || byCreation(a, b))
+		.map(rule => ({
+			...rule,
+			matches: statements.filter(s => matchesStatement(rule, s)).length,
+		}))
 }
 
 export type RuleInput = Omit<StatementRule, "id" | "created_at" | "updated_at">
@@ -89,7 +93,6 @@ export async function saveStatementRule(input: RuleInput, id?: string) {
 			"actions",
 			RULE_FIELDS.map(f => f.value),
 		)
-		v.oneOf(action?.mode, `actions.${field}.mode`, ["suggest", "autofill"])
 		if (!(field === "monthly_budget_id" && action?.value === null))
 			v.text(action?.value, `actions.${field}.value`, "Enter a value.")
 		if (field === "analytics_treatment")
@@ -149,10 +152,9 @@ export type RuleRecommendation = {
 	rule_id: string
 	rule_name: string
 	field: RuleField
-	mode: "suggest" | "autofill"
 	value: string | null
 }
-/** Earlier rules win autofill conflicts; every suggestion stays available. */
+/** Earlier rules win autofill conflicts. */
 export async function statementRecommendations(
 	statementIds: string[],
 ): Promise<RuleRecommendation[]> {
@@ -180,7 +182,6 @@ export function recommendationAutofill(
 	recommendations: RuleRecommendation[],
 ): Partial<Record<RuleField, string | null>> {
 	const values: Partial<Record<RuleField, string | null>> = {}
-	for (const item of recommendations)
-		if (item.mode === "autofill" && !(item.field in values)) values[item.field] = item.value
+	for (const item of recommendations) if (!(item.field in values)) values[item.field] = item.value
 	return values
 }

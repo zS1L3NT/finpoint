@@ -28,16 +28,17 @@ import { recordCompletions } from "@/logic/records"
 import {
 	conditionPattern,
 	deleteStatementRule,
-	type listStatementRules,
 	previewStatementRule,
 	RULE_FIELDS,
 	RULE_OPERATORS,
+	type RuleInput,
 	saveStatementRule,
 } from "@/logic/statement-rules"
 import { ValidationError } from "@/logic/validate"
-import type { CategoryWithChildren, RuleActions, RuleCondition, RuleField, RuleMode } from "@/types"
+import type { CategoryWithChildren, RuleActions, RuleCondition, RuleField } from "@/types"
 
-type Rule = Awaited<ReturnType<typeof listStatementRules>>[number]
+/** A saved rule to edit, or a suggested draft (no id) to review before creating it. */
+type Rule = RuleInput & { id?: string }
 
 const UNSET = "unset"
 const UNBUDGETED = "unbudgeted"
@@ -108,12 +109,10 @@ export default function StatementRuleDialog({
 		setConditions(rows => rows.map(row => (row.key === key ? { ...row, ...patch } : row)))
 		clearApiError("conditions")
 	}
-	const setAction = (field: RuleField, value: string | null | undefined, mode?: RuleMode) => {
+	const setAction = (field: RuleField, value: string | null | undefined) => {
 		setActions(current => {
-			const { [field]: previous, ...rest } = current
-			return value === undefined
-				? rest
-				: { ...rest, [field]: { mode: mode ?? previous?.mode ?? "suggest", value } }
+			const { [field]: _, ...rest } = current
+			return value === undefined ? rest : { ...rest, [field]: { value } }
 		})
 		clearApiError(`actions.${field}.value`)
 		clearApiError("actions")
@@ -133,7 +132,7 @@ export default function StatementRuleDialog({
 		}
 	}
 	const handleDelete = async () => {
-		if (!rule) return
+		if (!rule?.id) return
 		try {
 			await deleteStatementRule(rule.id)
 			setIsOpen(false)
@@ -198,7 +197,7 @@ export default function StatementRuleDialog({
 		<Dialog open={isOpen} onOpenChange={setIsOpen}>
 			<DialogContent className="md:max-w-4xl">
 				<DialogHeader>
-					<DialogTitle>{rule ? "Edit rule" : "New rule"}</DialogTitle>
+					<DialogTitle>{rule?.id ? "Edit rule" : "New rule"}</DialogTitle>
 					<DialogDescription>
 						Recognise a Statement by its description, then prepare the Record you create
 						from it.
@@ -336,15 +335,15 @@ export default function StatementRuleDialog({
 								<header>
 									<h3 className="text-sm font-medium">Prepare the Record</h3>
 									<p className="text-xs text-muted-foreground">
-										Suggest offers a one-click chip under the field. Autofill
-										fills the field when the record creator opens.
+										These fields fill in when the Record creator opens. Past
+										Records still suggest the rest.
 									</p>
 								</header>
 								<div className="grid gap-3">
 									{RULE_FIELDS.map(({ value: field, label }) => (
 										<div
 											key={field}
-											className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 gap-y-1.5 sm:grid-cols-[7rem_minmax(0,1fr)_auto]"
+											className="grid grid-cols-1 items-start gap-x-3 gap-y-1.5 sm:grid-cols-[7rem_minmax(0,1fr)]"
 										>
 											<label
 												htmlFor={`rule-${field}`}
@@ -352,32 +351,7 @@ export default function StatementRuleDialog({
 											>
 												{label}
 											</label>
-											{/* Phones put the label beside its mode toggle, the value underneath. */}
-											<div className="order-last col-span-2 sm:order-none sm:col-span-1">
-												{valueInput(field)}
-											</div>
-											<ToggleGroup
-												type="single"
-												aria-label={`How to use the ${label.toLowerCase()}`}
-												className="p-0.5"
-												disabled={!actions[field]}
-												value={actions[field]?.mode ?? ""}
-												onValueChange={value => {
-													if (value)
-														setAction(
-															field,
-															actions[field]?.value,
-															value as RuleMode,
-														)
-												}}
-											>
-												<ToggleGroupItem value="suggest">
-													Suggest
-												</ToggleGroupItem>
-												<ToggleGroupItem value="autofill">
-													Autofill
-												</ToggleGroupItem>
-											</ToggleGroup>
+											{valueInput(field)}
 										</div>
 									))}
 								</div>
@@ -443,7 +417,7 @@ export default function StatementRuleDialog({
 				</DialogBody>
 
 				<DialogFooter>
-					{rule ? (
+					{rule?.id ? (
 						<Button
 							type="button"
 							variant="destructive"
@@ -461,7 +435,7 @@ export default function StatementRuleDialog({
 						}
 					/>
 					<Button type="submit" form="statement-rule-form">
-						{rule ? "Save changes" : "Create rule"}
+						{rule?.id ? "Save changes" : "Create rule"}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

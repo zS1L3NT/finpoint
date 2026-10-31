@@ -510,19 +510,14 @@ test("Statement rule editor: invalid input shows errors, then a valid rule persi
 	).toBeVisible()
 	await text.fill("starbucks|raffles")
 	await dialog.getByLabel("Title", { exact: true }).fill("Coffee")
-	// The open Title suggestions hide the mode toggles from the role tree.
+	// Close the open Title suggestions before submitting.
 	await page.keyboard.press("Escape")
-	await dialog
-		.getByRole("group", { name: "How to use the title", exact: true })
-		.getByRole("radio", { name: "Autofill", exact: true })
-		.click()
 	await dialog.getByRole("button", { name: "Create rule", exact: true }).click()
 	await expect(dialog).not.toBeVisible()
 	await page.reload()
 	const card = page.locator("main article").filter({ hasText: "Coffee rule" })
 	await expect(card).toContainText("starbucks|raffles")
 	await expect(card.getByText("Coffee", { exact: true })).toBeVisible()
-	await expect(card.getByText("Autofill", { exact: true })).toBeVisible()
 
 	await page.getByRole("button", { name: "Edit Coffee rule", exact: true }).click()
 	const editor = page.getByRole("dialog", { name: "Edit rule", exact: true })
@@ -592,17 +587,11 @@ test("Statement rule editor: the preview lists matching Statements and combines 
 	).toBeVisible()
 })
 
-test("Statement rule editor: actions toggle Suggest and Autofill, Unbudgeted differs from Not set, archived Monthly Budgets are hidden", async ({
+test("Statement rule editor: actions autofill, Unbudgeted differs from Not set, archived Monthly Budgets are hidden", async ({
 	page,
 }) => {
 	await seedWorkspace(page, "populated", { statement_rules: statementRules() })
 	const dialog = await openEditor(page, "/statement-rules", "New rule", "New rule")
-	const modeToggle = dialog.getByRole("group", {
-		name: "How to use the monthly budget",
-		exact: true,
-	})
-	await expect(modeToggle.getByRole("radio", { name: "Suggest", exact: true })).toBeDisabled()
-	await expect(modeToggle.getByRole("radio", { name: "Autofill", exact: true })).toBeDisabled()
 
 	await dialog.getByLabel("Monthly budget", { exact: true }).click()
 	await expect(page.getByRole("option", { name: "Not set", exact: true })).toBeVisible()
@@ -617,15 +606,9 @@ test("Statement rule editor: actions toggle Suggest and Autofill, Unbudgeted dif
 	await dialog.getByLabel("Name", { exact: true }).fill("Unbudgeted rule")
 	await dialog.getByLabel("Text to look for", { exact: true }).fill("grab")
 	await dialog.getByLabel("Title", { exact: true }).fill("Grab expense")
-	// The open Title suggestions hide the mode toggles from the role tree.
+	// The open Title suggestions cover the Monthly budget select.
 	await page.keyboard.press("Escape")
 	await select(page, dialog, "Monthly budget", "Unbudgeted")
-	await expect(modeToggle.getByRole("radio", { name: "Suggest", exact: true })).toBeEnabled()
-	await modeToggle.getByRole("radio", { name: "Suggest", exact: true }).click()
-	await expect(modeToggle.getByRole("radio", { name: "Suggest", exact: true })).toBeChecked()
-	await modeToggle.getByRole("radio", { name: "Autofill", exact: true }).click()
-	await expect(modeToggle.getByRole("radio", { name: "Autofill", exact: true })).toBeChecked()
-	await expect(modeToggle.getByRole("radio", { name: "Suggest", exact: true })).not.toBeChecked()
 	await dialog.getByRole("button", { name: "Create rule", exact: true }).click()
 	await expect(dialog).not.toBeVisible()
 	await page.reload()
@@ -633,7 +616,6 @@ test("Statement rule editor: actions toggle Suggest and Autofill, Unbudgeted dif
 	await expect(card.getByText("Monthly budget", { exact: true })).toBeVisible()
 	await expect(card.getByText("Unbudgeted", { exact: true })).toBeVisible()
 	await expect(card.getByText("Grab expense", { exact: true })).toBeVisible()
-	await expect(card.getByText("Autofill", { exact: true })).toHaveCount(1)
 
 	await page.getByRole("button", { name: "Edit Unbudgeted rule", exact: true }).click()
 	const editor = page.getByRole("dialog", { name: "Edit rule", exact: true })

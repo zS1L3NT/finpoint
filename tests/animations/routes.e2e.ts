@@ -205,7 +205,7 @@ test("route entrances: page fades during client navigation and visible cards cas
 	})
 })
 
-test("Statement rules: cards enter as a cascade in the viewport", {
+test("Statement rules: rows enter as a cascade in the viewport", {
 	tag: ["@tall", "@light", "@reduced-motion"],
 }, async ({ page, isMobile }) => {
 	await seedWorkspace(page, "populated", { statement_rules: statementRules() })
@@ -214,7 +214,7 @@ test("Statement rules: cards enter as a cascade in the viewport", {
 	if (isMobile) {
 		await openMobileSidebarFromConsumerMotion(page)
 	}
-	const selector = "main div:has(> article)"
+	const selector = "main section[aria-label='Your rules'] article"
 	const samples = await sampleVisibleRowAnimations(page, selector, async () => {
 		await page
 			.getByRole("link", { name: "Rules", exact: true })
@@ -236,8 +236,8 @@ test("Statement rules: cards enter as a cascade in the viewport", {
 				)
 			}).length,
 	)
-	expect(samples.length, "Every rendered viewport card must be sampled").toBe(visibleCount)
-	expect(visibleCount, "Seeded rule cards render").toBeGreaterThanOrEqual(2)
+	expect(samples.length, "Every rendered viewport row must be sampled").toBe(visibleCount)
+	expect(visibleCount, "Seeded rule rows render").toBeGreaterThanOrEqual(2)
 	if (await page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches))
 		expectReducedRowMovement(samples, visibleCount)
 	else expectVisibleRowCascade(samples, visibleCount)

@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises"
 import type { Page } from "@playwright/test"
 import type { StatementRule } from "@/types"
-import { IDS, statementRules } from "../support/data"
+import { IDS, learnedCoffee, statementRules } from "../support/data"
 import { pickOption } from "../support/editors"
 import { expect, seedWorkspace, test } from "../support/fixtures"
 
@@ -299,9 +299,7 @@ test("Record creator: rule autofill of Treatment and Monthly Budget follows the 
 	const budget = page.locator("#monthly_budget_id")
 
 	await test.step("autofilled Category: brings its default Monthly Budget without a budget note", async () => {
-		const dialog = await open(
-			starbucks({ category_id: { mode: "autofill", value: "t1-cat-dining" } }),
-		)
+		const dialog = await open(starbucks({ category_id: { value: "t1-cat-dining" } }))
 		await expect(dialog.locator("#category_id-autopopulated")).toBeVisible()
 		await expect(budget).toContainText("Category default · Daily")
 		await expect(dialog.locator("#monthly_budget_id-autopopulated")).toHaveCount(0)
@@ -310,8 +308,8 @@ test("Record creator: rule autofill of Treatment and Monthly Budget follows the 
 	await test.step("autofilled Income Treatment: keeps an autofilled Monthly Budget out", async () => {
 		const dialog = await open(
 			starbucks({
-				analytics_treatment: { mode: "autofill", value: "income" },
-				monthly_budget_id: { mode: "autofill", value: "t1-mb-recurring" },
+				analytics_treatment: { value: "income" },
+				monthly_budget_id: { value: "t1-mb-recurring" },
 			}),
 		)
 		await expect(treatment).toContainText("Income")
@@ -324,9 +322,7 @@ test("Record creator: rule autofill of Treatment and Monthly Budget follows the 
 	})
 
 	await test.step("autofilled Monthly Budget: stays when the Category changes", async () => {
-		const dialog = await open(
-			starbucks({ monthly_budget_id: { mode: "autofill", value: "t1-mb-recurring" } }),
-		)
+		const dialog = await open(starbucks({ monthly_budget_id: { value: "t1-mb-recurring" } }))
 		await expect(budget).toContainText("Recurring")
 		await expect(dialog.locator("#monthly_budget_id-autopopulated")).toHaveText(
 			"Autofilled by the “Coffee analytics” rule.",
@@ -336,29 +332,40 @@ test("Record creator: rule autofill of Treatment and Monthly Budget follows the 
 	})
 })
 
-test("Record creator: rule suggestions deduplicate, apply on click and skip paused or archived rules", async ({
+test("Record creator: learned suggestions apply on click and paused or archived rules stay out", async ({
 	page,
 }) => {
-	await seedWorkspace(page, "populated", { statement_rules: statementRules() })
+	await seedWorkspace(page, "populated", {
+		...learnedCoffee(),
+		statement_rules: statementRules(),
+	})
 	await selectAllocatorStatements(page, [IDS.statements.unallocated[2]])
 	await page.getByRole("button", { name: "Create Record" }).click()
 	const dialog = page.getByRole("dialog", { name: "Create New Record" })
 	await expect(dialog).toBeVisible()
-	await expect(dialog.getByRole("button", { name: "Raffles Place", exact: true })).toHaveCount(1)
-	const alex = dialog.getByRole("button", { name: "Alex", exact: true })
-	await expect(alex).toHaveAttribute("title", "Suggested by “Starbucks coffee”")
-	const coffee = dialog.getByRole("button", { name: "Coffee with team", exact: true })
-	await expect(coffee).toHaveAttribute("title", "Suggested by “Raffles coffee”")
-
 	const title = dialog.getByLabel("Title", { exact: true })
+	// The rule autofills the title; past Records offer theirs as a chip beside it.
+	await expect(title).toHaveValue("Morning coffee")
+	const coffee = dialog.getByRole("button", { name: "Coffee with team", exact: true })
+	await expect(coffee).toHaveAttribute(
+		"title",
+		"Learned from 2 past Records like “Coffee with team”",
+	)
+	const alex = dialog.getByRole("button", { name: "Alex", exact: true })
+	await expect(alex).toHaveCount(1)
+	await expect(dialog.getByRole("button", { name: "Raffles Place", exact: true })).toHaveCount(1)
+
 	await title.focus()
 	await page.keyboard.press("Tab")
 	await expect(coffee).toBeFocused()
 	await page.keyboard.press("Enter")
 	await expect(title).toHaveValue("Coffee with team")
+	// A chip that matches the field's value has nothing left to offer.
+	await expect(coffee).toHaveCount(0)
 
 	await alex.click()
 	await expect(dialog.getByLabel("People", { exact: true })).toHaveValue("Alex")
+	await expect(alex).toHaveCount(0)
 
 	await dialog.getByRole("button", { name: "Close", exact: true }).click()
 	await expect(dialog).toHaveCount(0)
@@ -369,7 +376,7 @@ test("Record creator: rule suggestions deduplicate, apply on click and skip paus
 		name: "Sentinel",
 		enabled: true,
 		conditions: { mode: "all", items: [{ operator: "contains", value: "7712" }] },
-		actions: { location: { mode: "autofill", value: "Sentinel Vale" } },
+		actions: { location: { value: "Sentinel Vale" } },
 		created_at: "2026-10-01T00:06:00.000Z",
 		updated_at: "2026-10-01T00:06:00.000Z",
 	})
@@ -405,6 +412,48 @@ test("Record creator: rule suggestions deduplicate, apply on click and skip paus
 	const isolatedBudget = dialog.getByLabel("Monthly budget", { exact: true })
 	await expect(isolatedBudget).toContainText("Unbudgeted")
 	await expect(isolatedBudget).not.toContainText("Travel")
+})
+
+test("Record creator: similar Statements each get a Record with the same details", async ({
+	page,
+}) => {
+	await seedWorkspace(page, "populated")
+	await selectAllocatorStatements(page, [IDS.statements.separatePair[0]])
+	await page.getByRole("button", { name: "Create Record" }).click()
+	const dialog = page.getByRole("dialog", { name: "Create New Record" })
+	await expect(dialog).toBeVisible()
+	await dialog.getByLabel("Also create a Record for 1 similar Statement").check()
+	await expect(dialog).toContainText("GRAB RIDE 7713")
+	await dialog.getByLabel("Title", { exact: true }).fill("Grab to work")
+	await dialog.getByLabel("Title", { exact: true }).press("Escape")
+	await pickCategory(page, "Groceries")
+	await dialog.getByRole("button", { name: "Create Record", exact: true }).click()
+	await expect(dialog).toHaveCount(0)
+	await expect(page.getByText("Created 2 Records.")).toBeVisible()
+
+	const records = await page.evaluate(async () => {
+		const request = indexedDB.open("finpoint")
+		const db = await new Promise<IDBDatabase>(resolve => {
+			request.onsuccess = () => resolve(request.result)
+		})
+		const read = <T>(store: string) =>
+			new Promise<T[]>(resolve => {
+				const all = db.transaction(store).objectStore(store).getAll()
+				all.onsuccess = () => resolve(all.result as T[])
+			})
+		const allocations = await read<{ statement_id: string; record_id: string }>("allocations")
+		const rows = await read<{ id: string; title: string; amount: number }>("records")
+		db.close()
+		return ["t1-s-sep-a", "t1-s-sep-b"].map(id => {
+			const recordId = allocations.find(a => a.statement_id === id)?.record_id
+			return rows.find(r => r.id === recordId)
+		})
+	})
+	expect(records.map(r => [r?.title, r?.amount])).toEqual([
+		["Grab to work", -18],
+		["Grab to work", -18],
+	])
+	expect(records[0]?.id).not.toBe(records[1]?.id)
 })
 
 test("Allocation bar: not, partial and fully allocated states show finite values", async ({
