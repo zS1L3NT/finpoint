@@ -39,14 +39,12 @@ import { useStagedMount } from "@/hooks/use-staged-mount"
 import { themeColor } from "@/lib/palette"
 import { cn, formatCurrency, pluralize } from "@/lib/utils"
 import { getDashboardView, type TrendMonth } from "@/logic/dashboard"
-import { type RecurringCharge, recurringCharges } from "@/logic/suggestions"
 import { hasWorkspaceActivity, loadDemoWorkspace } from "@/logic/workspace"
 import {
 	pathAllocator,
 	pathDashboard,
 	pathImporter,
 	pathMonthlyRecords,
-	pathRecords,
 	pathStatements,
 } from "@/routes"
 import type { AnalyticsSummary } from "@/types"
@@ -281,7 +279,6 @@ export default function DashboardPage() {
 					</CardContent>
 				</Card>
 			</div>
-			<RecurringCard month={dataMonth} year={dataYear} />
 			{!period.is_future ? (
 				<>
 					{stage > 0 ? (
@@ -426,153 +423,6 @@ export default function DashboardPage() {
 				</>
 			) : null}
 		</div>
-	)
-}
-
-const RECURRING_LANES: {
-	status: RecurringCharge["status"]
-	label: (current: boolean) => string
-	dot: string
-}[] = [
-	{
-		status: "late",
-		label: current => (current ? "Late" : "Not charged"),
-		dot: "border-destructive bg-destructive",
-	},
-	{ status: "due", label: () => "Coming up", dot: "border-foreground bg-background" },
-	{ status: "charged", label: () => "Charged", dot: "border-creative bg-creative" },
-]
-
-/**
- * Monthly charges found from history, drawn on one line for the month with each charge on the
- * day it lands, then sorted into lanes by whether it has arrived.
- */
-function RecurringCard({ month, year }: { month: string; year: number }) {
-	const { handlePush } = useHistory()
-	const start = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
-	const charges = useLiveQuery(() => recurringCharges(start.toISODate() ?? ""), [month, year])
-	if (!charges?.length) return null
-
-	const today = DateTime.now().startOf("day")
-	const current = start.hasSame(today, "month")
-	const days = start.daysInMonth ?? 30
-	const position = (date: DateTime) =>
-		`${((Math.min(date.hasSame(start, "month") ? date.day : 1, days) - 0.5) / days) * 100}%`
-	const note = (charge: RecurringCharge) => {
-		const date = DateTime.fromISO(charge.date)
-		const expected = DateTime.fromISO(charge.expected)
-		if (charge.status === "charged") return `Next expected ${expected.toFormat("d MMM")}`
-		if (charge.status === "late")
-			return current
-				? `Expected ${expected.toFormat("d MMM")}. Cancelled, or paid another way?`
-				: "No charge this month"
-		if (!current) return `Usually around ${date.toFormat("d MMM")}`
-		return expected < today
-			? `Expected ${expected.toFormat("d MMM")}, any day now`
-			: `In ${pluralize(Math.round(expected.diff(today, "days").days), "day")}`
-	}
-
-	return (
-		<Card className="min-w-0">
-			<CardHeader>
-				<CardTitle>Recurring charges</CardTitle>
-				<CardDescription className="tabular-nums">
-					{formatCurrency(-charges.reduce((sum, c) => sum + c.amount, 0))} a month across{" "}
-					{pluralize(charges.length, "charge")}, found from your history
-				</CardDescription>
-			</CardHeader>
-			<CardContent className="grid gap-4">
-				<div className="grid gap-1.5" aria-hidden>
-					<div className="relative h-6">
-						<div className="absolute inset-x-0 top-1/2 h-px bg-border" />
-						{current ? (
-							<div
-								className="absolute inset-y-0 w-px bg-foreground"
-								style={{ left: position(today) }}
-							/>
-						) : null}
-						{charges.map(charge => (
-							<span
-								key={charge.key}
-								title={`${charge.label}, ${formatCurrency(-charge.amount)}`}
-								className={cn(
-									"absolute top-1/2 size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2",
-									RECURRING_LANES.find(l => l.status === charge.status)?.dot,
-								)}
-								style={{ left: position(DateTime.fromISO(charge.date)) }}
-							/>
-						))}
-					</div>
-					<div className="flex justify-between text-[0.6875rem] text-muted-foreground tabular-nums">
-						<span>1 {start.toFormat("MMM")}</span>
-						<span>
-							{days} {start.toFormat("MMM")}
-						</span>
-					</div>
-				</div>
-				<div className="grid gap-4 @3xl/page:grid-cols-3">
-					{RECURRING_LANES.map(lane => {
-						const list = charges.filter(c => c.status === lane.status)
-						if (!list.length) return null
-						return (
-							<section
-								key={lane.status}
-								className="grid content-start gap-1"
-								aria-label={lane.label(current)}
-							>
-								<h3 className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-									<span
-										className={cn("size-2 rounded-full border-2", lane.dot)}
-									/>
-									{lane.label(current)}
-									<span className="tabular-nums">{list.length}</span>
-								</h3>
-								<ul className="grid">
-									{list.map(charge => {
-										const date = DateTime.fromISO(charge.date)
-										return (
-											<li key={charge.key}>
-												<Link
-													onClick={handlePush("overview")}
-													href={
-														charge.source === "records"
-															? pathRecords({ query: charge.query })
-															: pathStatements({
-																	query: charge.query,
-																})
-													}
-													className="-mx-2 grid grid-cols-[2rem_minmax(0,1fr)_auto] items-center gap-2 rounded-lg px-2 py-1.5 transition-colors duration-150 ease-out hover:bg-muted/50"
-												>
-													<span className="grid justify-items-center leading-none">
-														<span className="text-sm font-semibold tabular-nums">
-															{date.day}
-														</span>
-														<span className="text-[0.6875rem] text-muted-foreground uppercase">
-															{date.toFormat("MMM")}
-														</span>
-													</span>
-													<span className="min-w-0">
-														<span className="block truncate text-sm font-medium">
-															{charge.label}
-														</span>
-														<span className="block text-xs text-muted-foreground">
-															{note(charge)}
-														</span>
-													</span>
-													<span className="text-sm tabular-nums">
-														{formatCurrency(-charge.amount)}
-													</span>
-												</Link>
-											</li>
-										)
-									})}
-								</ul>
-							</section>
-						)
-					})}
-				</div>
-			</CardContent>
-		</Card>
 	)
 }
 

@@ -51,6 +51,8 @@ export type RecurringCharge = {
 	date: string
 	status: "charged" | "due" | "late"
 	expected: string
+	/** Every date it was charged, oldest first. */
+	history: string[]
 }
 
 export type RuleSuggestion = {
@@ -861,7 +863,7 @@ export async function recurringCharges(month?: string): Promise<RecurringCharge[
 		const title = record.title.trim().toLowerCase()
 		if (record.amount < 0 && title) titled.set(title, [...(titled.get(title) ?? []), record])
 	}
-	const charges: (Omit<RecurringCharge, "date" | "status" | "expected"> & {
+	const charges: (Omit<RecurringCharge, "date" | "status" | "expected" | "history"> & {
 		dates: DateTime[]
 	})[] = []
 	const covered = new Set<string>()
@@ -928,7 +930,11 @@ export async function recurringCharges(month?: string): Promise<RecurringCharge[
 			if (!first || !last) return []
 			const expected = last.plus({ months: 1 })
 			const charged = sorted.find(d => d.hasSame(start, "month"))
-			const base = { ...charge, expected: expected.toISODate() ?? "" }
+			const base = {
+				...charge,
+				expected: expected.toISODate() ?? "",
+				history: sorted.map(d => d.toISODate() ?? ""),
+			}
 			if (charged) return [{ ...base, date: charged.toISODate() ?? "", status: "charged" }]
 			// Months before the charge began, or after it stopped, have nothing to show.
 			if (start < first.startOf("month")) return []

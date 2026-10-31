@@ -16,10 +16,10 @@ import { useMonthParams } from "@/hooks/use-month-params"
 import { armMonthTransition } from "@/hooks/use-month-transition"
 import { SPRING } from "@/lib/motion"
 import { cn } from "@/lib/utils"
-import { pathDashboard, pathMonthlyRecords, pathRecords } from "@/routes"
+import { pathDashboard, pathMonthlyRecords, pathRecords, pathRecurring } from "@/routes"
 
 /**
- * Persistent shell for the Overview / Monthly Records tabs. The title, month
+ * Persistent shell for the Overview / Monthly Records / Recurring tabs. The title, month
  * navigation, and tabs mount once and never remount on tab switches, so the
  * month heading cannot flash. Pages below the Outlet render content only.
  */
@@ -29,6 +29,7 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 	const { latest, isNavigatingBack, navigateBack, handleClear } = useHistory()
 	const back = latest
 	const isMonthly = pathname.startsWith(`${pathRecords()}/`)
+	const isRecurring = pathname.startsWith(pathRecurring())
 	const [hydrated, setHydrated] = useState(false)
 
 	// Calendar labels and links use the browser date, which can differ from SSR.
@@ -38,13 +39,15 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 	const isCurrent = date.hasSame(today, "month")
 	const isFuture = date.startOf("month") > today.startOf("month")
 	const through = isCurrent ? today.toFormat("yyyy-MM-dd") : null
-	const subtitle = isMonthly
-		? isCurrent && through
-			? `Actuals through ${DateTime.fromISO(through).toFormat("d MMM")}`
-			: isFuture
-				? "Future-dated Records"
-				: "Full month"
-		: `${isCurrent ? `Through ${today.toFormat("d MMM")}` : isFuture ? "Future month" : "Full month"} · SGD · Based on Record dates`
+	const subtitle = isRecurring
+		? "Charges that arrive about once a month, found from your history"
+		: isMonthly
+			? isCurrent && through
+				? `Actuals through ${DateTime.fromISO(through).toFormat("d MMM")}`
+				: isFuture
+					? "Future-dated Records"
+					: "Full month"
+			: `${isCurrent ? `Through ${today.toFormat("d MMM")}` : isFuture ? "Future month" : "Full month"} · SGD · Based on Record dates`
 
 	const changeMonth = (next: DateTime) => {
 		if (next.hasSame(date, "month")) return
@@ -61,6 +64,8 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 				params.delete("end_date")
 				return params
 			})
+		} else if (isRecurring) {
+			setSearchParams({ month: monthName, year: yearValue })
 		} else {
 			// Keep the Overview's selected budget across months.
 			setSearchParams(previous => ({
@@ -100,7 +105,11 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 						<div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
 							<div>
 								<p className="text-xs font-medium text-muted-foreground">
-									{isMonthly ? "Monthly Records" : "Monthly overview"}
+									{isRecurring
+										? "Recurring charges"
+										: isMonthly
+											? "Monthly Records"
+											: "Monthly overview"}
 								</p>
 								<h2 className="mt-1 text-xl font-semibold tracking-tight md:text-2xl">
 									{month} {year}
@@ -152,17 +161,21 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 									[
 										[
 											"Overview",
-											false,
+											!isMonthly && !isRecurring,
 											pathDashboard({ month, year: String(year) }),
 										],
 										[
 											"Monthly Records",
-											true,
+											isMonthly,
 											pathMonthlyRecords({ month, year: String(year) }),
 										],
+										[
+											"Recurring",
+											isRecurring,
+											pathRecurring({ month, year: String(year) }),
+										],
 									] as const
-								).map(([label, monthly, href]) => {
-									const active = monthly === isMonthly
+								).map(([label, active, href]) => {
 									return (
 										<Link
 											key={label}
