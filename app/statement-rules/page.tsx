@@ -70,65 +70,6 @@ export default function StatementRulesPage() {
 					}
 				/>
 
-				{rules === undefined || !suggestions.length ? null : (
-					<section className="grid gap-2" aria-labelledby="suggested-rules">
-						<header>
-							<h2 id="suggested-rules" className="text-sm font-medium">
-								Suggested rules
-							</h2>
-							<p className="text-xs text-muted-foreground">
-								You have made these choices again and again. Review one to fill them
-								in for you.
-							</p>
-						</header>
-						<div className="grid divide-y overflow-hidden rounded-xl border border-dashed">
-							{suggestions.map((suggestion, index) => (
-								<motion.article
-									key={suggestion.key}
-									{...cardEnter(index)}
-									className={ROW_CLASS}
-								>
-									<div className="min-w-0">
-										<span className="flex items-center gap-1.5 text-sm font-medium">
-											<UiIcon
-												icon="lucide:sparkles"
-												className="size-3.5 shrink-0 text-muted-foreground"
-											/>
-											<span className="truncate">{suggestion.name}</span>
-										</span>
-										<span className="block text-xs text-muted-foreground tabular-nums">
-											{suggestion.agreeing} of{" "}
-											{pluralize(suggestion.matches, "matching Statement")}{" "}
-											agree
-										</span>
-									</div>
-									<RuleSentence
-										conditions={suggestion.conditions}
-										actions={suggestion.actions}
-										categories={categories}
-										monthlyBudgets={monthlyBudgets}
-									/>
-									<Button
-										variant="outline"
-										size="sm"
-										className={ACTION_CLASS}
-										onClick={() =>
-											setDialogRule({
-												name: suggestion.name,
-												enabled: true,
-												conditions: suggestion.conditions,
-												actions: suggestion.actions,
-											})
-										}
-									>
-										Review
-									</Button>
-								</motion.article>
-							))}
-						</div>
-					</section>
-				)}
-
 				{rules === undefined ? null : rules.length === 0 ? (
 					<motion.div
 						{...cardEnter(0)}
@@ -232,6 +173,64 @@ export default function StatementRulesPage() {
 								))}
 							</div>
 						)}
+					</section>
+				)}
+				{rules === undefined || !suggestions.length ? null : (
+					<section className="grid gap-2" aria-labelledby="suggested-rules">
+						<header>
+							<h2 id="suggested-rules" className="text-sm font-medium">
+								Suggested rules
+							</h2>
+							<p className="text-xs text-muted-foreground">
+								You have made these choices again and again. Review one to fill them
+								in for you.
+							</p>
+						</header>
+						<div className="grid divide-y overflow-hidden rounded-xl border border-dashed">
+							{suggestions.map((suggestion, index) => (
+								<motion.article
+									key={suggestion.key}
+									{...cardEnter(index)}
+									className={ROW_CLASS}
+								>
+									<div className="min-w-0">
+										<span className="flex items-center gap-1.5 text-sm font-medium">
+											<UiIcon
+												icon="lucide:sparkles"
+												className="size-3.5 shrink-0 text-muted-foreground"
+											/>
+											<span className="truncate">{suggestion.name}</span>
+										</span>
+										<span className="block text-xs text-muted-foreground tabular-nums">
+											{suggestion.agreeing} of{" "}
+											{pluralize(suggestion.matches, "matching Statement")}{" "}
+											agree
+										</span>
+									</div>
+									<RuleSentence
+										conditions={suggestion.conditions}
+										actions={suggestion.actions}
+										categories={categories}
+										monthlyBudgets={monthlyBudgets}
+									/>
+									<Button
+										variant="outline"
+										size="sm"
+										className={ACTION_CLASS}
+										onClick={() =>
+											setDialogRule({
+												name: suggestion.name,
+												enabled: true,
+												conditions: suggestion.conditions,
+												actions: suggestion.actions,
+											})
+										}
+									>
+										Review
+									</Button>
+								</motion.article>
+							))}
+						</div>
 					</section>
 				)}
 			</PageContent>

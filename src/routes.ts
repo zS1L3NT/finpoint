@@ -26,7 +26,6 @@ export const pathBudget = (id: string) => `/budgets/${id}`
 export const pathStatementRules = (query?: Record<string, string | undefined>) =>
 	withQuery("/statement-rules", query)
 export const pathCategories = () => "/categories"
-export const pathRecurring = () => "/recurring"
 export const pathDataSettings = () => "/sync"
 export const pathSettings = () => "/settings"
 export const pathPrivacy = () => "/privacy"

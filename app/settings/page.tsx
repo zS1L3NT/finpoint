@@ -256,22 +256,40 @@ export default function SettingsPage() {
 														)}
 													</p>
 													{misses.map(miss => (
-														<p key={`${miss.offered}:${miss.actual}`}>
-															Suggested{" "}
-															<span className="text-foreground">
-																{value(miss.offered)}
-															</span>{" "}
-															when you chose{" "}
-															<span className="text-foreground">
-																{value(miss.actual)}
+														<p
+															key={`${miss.offered}:${miss.actual}`}
+															className="flex items-start gap-1.5"
+														>
+															<IconifyIcon
+																icon="lucide:x"
+																className="mt-0.5 size-3 shrink-0 text-destructive"
+															/>
+															<span>
+																Wrong{" "}
+																{pluralize(miss.count, "time")}:
+																suggested{" "}
+																<span className="text-foreground line-through decoration-destructive">
+																	{value(miss.offered)}
+																</span>
+																, but you picked{" "}
+																<span className="font-medium text-foreground">
+																	{value(miss.actual)}
+																</span>
+																.
 															</span>
-															, {pluralize(miss.count, "time")}.
 														</p>
 													))}
 													{unwanted ? (
-														<p>
-															Offered {pluralize(unwanted, "time")}{" "}
-															when you left it empty.
+														<p className="flex items-start gap-1.5">
+															<IconifyIcon
+																icon="lucide:x"
+																className="mt-0.5 size-3 shrink-0 text-destructive"
+															/>
+															<span>
+																Wrong {pluralize(unwanted, "time")}:
+																suggested something when you left{" "}
+																{label} empty.
+															</span>
 														</p>
 													) : null}
 												</div>
@@ -282,7 +300,7 @@ export default function SettingsPage() {
 							</ul>
 							{accuracy.fields.some(f => f.misses.length) ? (
 								<p className="text-xs text-muted-foreground">
-									Mix-ups that keep coming back are a good place for a{" "}
+									The same wrong suggestion coming back is a good place for a{" "}
 									<Link
 										href={pathStatementRules()}
 										className="underline underline-offset-2"

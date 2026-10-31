@@ -21,7 +21,6 @@ const titles: Record<string, string> = {
 	"/allocator/duplicates": "Workflows",
 	"/importer": "Importer",
 	"/settings": "Settings",
-	"/recurring": "Recurring charges",
 	"/sync": "Data",
 	"/privacy": "Privacy Policy",
 	"/terms": "Terms of Service",
@@ -303,39 +302,30 @@ test("Statement rules page: search narrows rules by name, phrase or filled-in va
 	await expect(rows).toHaveCount(10)
 })
 
-test("Recurring charges page: monthly charges sort into late, coming up and charged this month", async ({
+test("Overview recurring charges: monthly charges sort into late, coming up and charged, and follow the read month", async ({
 	page,
-	isMobile,
 }) => {
 	await seedWorkspace(page, "populated", { statements: recurringStatements() })
-	await page.goto("/records")
-	if (isMobile) await page.locator('header [data-slot="sidebar-trigger"]').click()
-	await page
-		.getByRole("link", { name: "Recurring", exact: true })
-		.filter({ visible: true })
-		.click()
-	await expect(page).toHaveURL(/\/recurring$/)
-	await expect(page.locator("header h1")).toHaveText("Recurring charges")
+	await page.goto("/")
+	const card = page.locator('[data-slot="card"]').filter({ hasText: "Recurring charges" })
+	const lane = (name: string) => card.getByRole("region", { name, exact: true })
+	await expect(lane("Late").getByText("ANYTIME FITNESS", { exact: true })).toBeVisible()
+	await expect(
+		lane("Late").getByText("Expected 5 Oct. Cancelled, or paid another way?", { exact: true }),
+	).toBeVisible()
+	await expect(lane("Coming up").getByText("SPOTIFY STOCKHOLM", { exact: true })).toBeVisible()
+	await expect(lane("Coming up").getByText("In 5 days", { exact: true })).toBeVisible()
+	await expect(lane("Charged").getByText("NETFLIX.COM", { exact: true })).toBeVisible()
+	await expect(lane("Charged").getByText("$15.98", { exact: true })).toBeVisible()
+	await expect(lane("Charged").getByText("Next expected 3 Nov", { exact: true })).toBeVisible()
+	await fits(page, card)
 
-	const group = (name: string) => page.getByRole("region", { name })
-	await expect(group(/^Late/).getByText("ANYTIME FITNESS", { exact: true })).toBeVisible()
-	await expect(
-		group(/^Late/).getByText("Expected 5 Oct, 10 days late. Cancelled, or paid another way?", {
-			exact: true,
-		}),
-	).toBeVisible()
-	await expect(group(/^Coming up/).getByText("SPOTIFY STOCKHOLM", { exact: true })).toBeVisible()
-	await expect(group(/^Coming up/).getByText("In 5 days", { exact: true })).toBeVisible()
-	await expect(
-		group(/^Charged this month/).getByText("NETFLIX.COM", { exact: true }),
-	).toBeVisible()
-	await expect(group(/^Charged this month/).getByText("$15.98", { exact: true })).toBeVisible()
-	await expect(
-		group(/^Charged this month/).getByText("Next expected 3 Nov", { exact: true }),
-	).toBeVisible()
-	await fits(page, page.locator("main"))
+	await page.goto("/?month=September&year=2026")
+	await expect(lane("Charged").getByText("ANYTIME FITNESS", { exact: true })).toBeVisible()
+	await expect(lane("Charged").getByText("SPOTIFY STOCKHOLM", { exact: true })).toBeVisible()
 
-	await group(/^Coming up/)
+	await page.goto("/")
+	await lane("Coming up")
 		.getByRole("link", { name: /SPOTIFY STOCKHOLM/ })
 		.click()
 	await expect(page).toHaveURL(/\/statements\?query=(spotify|stockholm)$/)
@@ -359,7 +349,6 @@ for (const [group, routes, tags] of [
 			"/importer",
 			"/settings",
 			"/sync",
-			"/recurring",
 		],
 		["@tall", "@reduced-motion"],
 	],

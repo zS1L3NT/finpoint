@@ -357,9 +357,14 @@ test("a monthly charge that misses its usual date is overdue and suggests the re
 			today.minus({ months: back, days: 8 }).toFormat("yyyy-MM-dd 10:00"),
 		)
 
-	expect(await recurringCharges()).toMatchObject([
-		{ label: "Spotify", query: "spotify", amount: -11.98, overdue: true },
-	])
+	const [late] = await recurringCharges()
+	expect(late).toMatchObject({
+		label: "Spotify",
+		source: "records",
+		query: "Spotify",
+		amount: -11.98,
+		status: "late",
+	})
 
 	const next = statement("SPOTIFY P0123 STOCKHOLM", {
 		datetime: today.toFormat("yyyy-MM-dd 10:00"),
@@ -372,7 +377,55 @@ test("a monthly charge that misses its usual date is overdue and suggests the re
 		value: "recurring",
 		reason: "Charged every month",
 	})
-	expect((await recurringCharges())[0]?.overdue).toBe(false)
+	// The unrecorded Statement shares the Records' bank text, so the charge has arrived.
+	expect((await recurringCharges())[0]).toMatchObject({
+		label: "Spotify",
+		status: "charged",
+		date: today.toISODate(),
+	})
+})
+
+test("a yearly plan recorded as monthly Records is a monthly charge though one Statement paid it", async () => {
+	const today = DateTime.now().startOf("day")
+	const paid = statement("APPLE.COM/BILL ITUNES", {
+		datetime: today.minus({ months: 3 }).toFormat("yyyy-MM-dd 10:00"),
+		amount: -48,
+	})
+	await db.statements.add(paid)
+	for (const back of [3, 2, 1, 0]) {
+		const r = record({
+			title: "iCloud",
+			category_id: "subscriptions",
+			amount: -4,
+			datetime: today.minus({ months: back }).toFormat("yyyy-MM-dd 10:00"),
+		})
+		await db.records.add(r)
+		await db.allocations.add({ statement_id: paid.id, record_id: r.id, amount: -4 })
+	}
+
+	expect(await recurringCharges()).toMatchObject([
+		{ label: "iCloud", source: "records", amount: -4, status: "charged" },
+	])
+})
+
+test("a workspace without Records finds monthly charges from Statements alone", async () => {
+	const today = DateTime.now().startOf("day")
+	for (const back of [3, 2, 1])
+		await db.statements.add(
+			statement(`NETFLIX.COM ${back}8812`, {
+				datetime: today.minus({ months: back }).toFormat("yyyy-MM-dd 10:00"),
+				amount: -15.98,
+			}),
+		)
+
+	const [charge] = await recurringCharges()
+	expect(charge).toMatchObject({ source: "statements", query: "netflix", amount: -15.98 })
+	// Last month it was charged; next month it is expected again.
+	const month = (shift: number) => today.plus({ months: shift }).startOf("month").toISODate() ?? ""
+	expect((await recurringCharges(month(-1)))[0]?.status).toBe("charged")
+	expect((await recurringCharges(month(1)))[0]?.status).toBe("due")
+	// Before it began there is nothing to show.
+	expect(await recurringCharges(month(-6))).toEqual([])
 })
 
 test("replaying history scores each Record against earlier Records only", async () => {

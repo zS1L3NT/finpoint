@@ -43,11 +43,14 @@ export type RecordSuggestion = { field: RuleField; value: string; reason: string
 export type RecurringCharge = {
 	key: string
 	label: string
+	/** Where the charge's history lives: Records by their Title, or Statements by a word. */
+	source: "records" | "statements"
 	query: string
 	amount: number
-	last: string
+	/** Where the charge sits in the asked month: when it was charged, or when it is expected. */
+	date: string
+	status: "charged" | "due" | "late"
 	expected: string
-	overdue: boolean
 }
 
 export type RuleSuggestion = {
@@ -775,12 +778,30 @@ export async function similarStatements(statementIds: string[]) {
 		.slice(0, 20)
 }
 
+type Occurrence = { id: string; at: DateTime; amount: number }
+
 /**
- * Groups outgoing Statements by account and their two most telling words, then keeps groups
- * whose last few charges each came about a month apart for a steady amount. Every charge
- * counts, so a weekly habit never passes for a monthly one.
+ * A monthly pattern: the last few occurrences each came about a month apart for a steady
+ * amount, and the latest is recent. Every occurrence counts, so a weekly habit never passes for
+ * a monthly one, and gaps rather than calendar months absorb banks posting a few days late.
  */
-function recurringGroups(model: Model, statements: StatementRow[], today: DateTime) {
+function monthlyPattern(occurrences: Occurrence[], today: DateTime) {
+	const recent = occurrences.toSorted((a, b) => a.at.toMillis() - b.at.toMillis()).slice(-4)
+	if (recent.length < 3) return null
+	const monthly = recent.slice(1).every((o, i) => {
+		const gap = o.at.diff(recent[i]?.at ?? o.at, "days").days
+		return gap >= 20 && gap <= 40
+	})
+	const amounts = recent.map(o => Math.abs(o.amount)).sort((a, b) => a - b)
+	const median = amounts[Math.floor(amounts.length / 2)] ?? 0
+	const steady = amounts.every(amount => Math.abs(amount - median) <= median * 0.25)
+	const last = recent.at(-1)?.at
+	if (!monthly || !steady || !last || today.diff(last, "days").days > 70) return null
+	return { median, last }
+}
+
+/** Outgoing Statements grouped by account and their two most telling words. */
+function statementGroups(model: Model, statements: StatementRow[]) {
 	const groups = new Map<string, StatementRow[]>()
 	for (const statement of statements) {
 		if (statement.amount >= 0) continue
@@ -790,60 +811,155 @@ function recurringGroups(model: Model, statements: StatementRow[], today: DateTi
 			.join(" ")
 		if (!words) continue
 		const key = `${statement.account_id} ${words}`
-		const group = groups.get(key)
-		if (group) group.push(statement)
-		else groups.set(key, [statement])
+		groups.set(key, [...(groups.get(key) ?? []), statement])
 	}
-	return [...groups.entries()].flatMap(([key, rows]) => {
-		const recent = rows.sort((a, b) => a.datetime.localeCompare(b.datetime)).slice(-4)
-		if (recent.length < 3) return []
-		const dates = recent.map(s => parseDatetime(s.datetime))
-		const monthly = dates.slice(1).every((date, i) => {
-			const gap = date.diff(dates[i] ?? date, "days").days
-			return gap >= 20 && gap <= 40
-		})
-		const amounts = recent.map(s => Math.abs(s.amount)).sort((a, b) => a - b)
-		const median = amounts[Math.floor(amounts.length / 2)] ?? 0
-		const steady = amounts.every(amount => Math.abs(amount - median) <= median * 0.2)
-		const last = dates.at(-1)
-		if (!monthly || !steady || !last || today.diff(last, "days").days > 70) return []
-		return [
-			{
-				key: key.slice(key.indexOf(" ") + 1),
-				ids: new Set(rows.map(s => s.id)),
-				median,
-				last,
-				latest: recent.at(-1),
-			},
-		]
+	return groups
+}
+
+/** Statement groups with a monthly pattern, for the "Charged every month" suggestion. */
+function recurringGroups(model: Model, statements: StatementRow[], today: DateTime) {
+	return [...statementGroups(model, statements).entries()].flatMap(([key, rows]) => {
+		const pattern = monthlyPattern(
+			rows.map(s => ({ id: s.id, at: parseDatetime(s.datetime), amount: s.amount })),
+			today,
+		)
+		return pattern ? [{ key, ids: new Set(rows.map(s => s.id)), ...pattern }] : []
 	})
 }
 
-/** Monthly charges whose next Statement has not arrived within five days of its usual date. */
-export async function recurringCharges(): Promise<RecurringCharge[]> {
+/**
+ * Monthly charges and where each sits in `month` (the current month by default).
+ *
+ * Records come first: grouped by the user's own Title, they repeat even when the bank text
+ * changes each month or one prepaid Statement covers a year of monthly Records. A Statement
+ * that has arrived but is not yet recorded still counts for its Record group when it shares
+ * the group's account and telling words. Statements nobody recorded form their own groups, so
+ * a workspace without Records still finds its charges.
+ */
+export async function recurringCharges(month?: string): Promise<RecurringCharge[]> {
 	const tables = await loadTables()
 	const model = createModel(tables)
 	const today = DateTime.now().startOf("day")
-	const titles = new Map<string, string>()
-	for (const example of model.examples) titles.set(example.statement.id, example.record.title)
-	return recurringGroups(model, tables.statements, today)
-		.map(group => {
-			const expected = group.last.plus({ months: 1 })
-			const label =
-				[...group.ids].map(id => titles.get(id)).findLast(Boolean) ??
-				maskDescription(group.latest?.description ?? group.key)
-			return {
-				key: group.key,
-				label,
-				// The most telling word finds the group's Statements in the Statements search.
-				query: group.key.split(" ")[0] ?? group.key,
-				amount: -round2(group.median),
-				last: group.last.toISODate() ?? "",
-				expected: expected.toISODate() ?? "",
-				overdue: today > expected.plus({ days: 5 }),
-			}
+	const start = month ? DateTime.fromISO(month).startOf("month") : today.startOf("month")
+	const current = start.hasSame(today, "month")
+
+	const allocated = new Map<string, string[]>()
+	for (const a of tables.allocations)
+		allocated.set(a.statement_id, [...(allocated.get(a.statement_id) ?? []), a.record_id])
+	const statementKey = new Map<string, string>()
+	for (const [key, rows] of statementGroups(model, tables.statements))
+		for (const s of rows) statementKey.set(s.id, key)
+	const recordStatements = new Map<string, string[]>()
+	for (const a of tables.allocations)
+		recordStatements.set(a.record_id, [
+			...(recordStatements.get(a.record_id) ?? []),
+			a.statement_id,
+		])
+
+	const titled = new Map<string, RecordRow[]>()
+	for (const record of tables.records) {
+		const title = record.title.trim().toLowerCase()
+		if (record.amount < 0 && title) titled.set(title, [...(titled.get(title) ?? []), record])
+	}
+	const charges: (Omit<RecurringCharge, "date" | "status" | "expected"> & {
+		dates: DateTime[]
+	})[] = []
+	const covered = new Set<string>()
+	for (const records of titled.values()) {
+		const occurrences = records.map(r => ({
+			id: r.id,
+			at: parseDatetime(r.datetime),
+			amount: r.amount,
+		}))
+		const ids = records.flatMap(r => recordStatements.get(r.id) ?? [])
+		const keys = new Set(ids.flatMap(id => statementKey.get(id) ?? []))
+		const newest = Math.max(...occurrences.map(o => o.at.toMillis()))
+		const arrived = tables.statements
+			.filter(
+				s =>
+					!allocated.has(s.id) &&
+					keys.has(statementKey.get(s.id) ?? "") &&
+					parseDatetime(s.datetime).toMillis() > newest + 15 * 86_400_000,
+			)
+			.map(s => ({ id: s.id, at: parseDatetime(s.datetime), amount: s.amount }))
+		const pattern = monthlyPattern([...occurrences, ...arrived], today)
+		if (!pattern) continue
+		for (const id of [...ids, ...arrived.map(o => o.id)]) covered.add(id)
+		const latest = records.toSorted((a, b) => a.datetime.localeCompare(b.datetime)).at(-1)
+		charges.push({
+			key: `records ${latest?.title.trim().toLowerCase()}`,
+			label: latest?.title ?? "",
+			source: "records",
+			query: latest?.title ?? "",
+			amount: -round2(pattern.median),
+			dates: [...occurrences, ...arrived].map(o => o.at),
 		})
-		.sort((a, b) => a.expected.localeCompare(b.expected))
+	}
+	for (const [key, rows] of statementGroups(
+		model,
+		tables.statements.filter(s => !covered.has(s.id)),
+	)) {
+		const occurrences = rows.map(s => ({
+			id: s.id,
+			at: parseDatetime(s.datetime),
+			amount: s.amount,
+		}))
+		const pattern = monthlyPattern(occurrences, today)
+		// Recorded Statements belong to their Records' groups, even when those are not monthly.
+		if (rows.some(s => allocated.has(s.id)) || !pattern) continue
+		const words = key.slice(key.indexOf(" ") + 1)
+		const latest = rows.toSorted((a, b) => a.datetime.localeCompare(b.datetime)).at(-1)
+		charges.push({
+			key: `statements ${key}`,
+			label: maskDescription(latest?.description ?? words),
+			source: "statements",
+			// The most telling word finds the group's Statements in the Statements search.
+			query: words.split(" ")[0] ?? words,
+			amount: -round2(pattern.median),
+			dates: occurrences.map(o => o.at),
+		})
+	}
+
+	return charges
+		.flatMap(({ dates, ...charge }): RecurringCharge[] => {
+			const sorted = dates.toSorted((a, b) => a.toMillis() - b.toMillis())
+			const first = sorted[0]
+			const last = sorted.at(-1)
+			if (!first || !last) return []
+			const expected = last.plus({ months: 1 })
+			const charged = sorted.find(d => d.hasSame(start, "month"))
+			const base = { ...charge, expected: expected.toISODate() ?? "" }
+			if (charged) return [{ ...base, date: charged.toISODate() ?? "", status: "charged" }]
+			// Months before the charge began, or after it stopped, have nothing to show.
+			if (start < first.startOf("month")) return []
+			if (start < today.startOf("month")) {
+				if (start > last) return []
+				return [
+					{
+						...base,
+						date:
+							start
+								.set({ day: Math.min(last.day, start.daysInMonth ?? 28) })
+								.toISODate() ?? "",
+						status: "late",
+					},
+				]
+			}
+			const date = current
+				? expected
+				: start.set({ day: Math.min(last.day, start.daysInMonth ?? 28) })
+			return [
+				{
+					...base,
+					date: date.toISODate() ?? "",
+					status:
+						current && today > expected.plus({ days: 5 })
+							? ("late" as const)
+							: ("due" as const),
+				},
+			]
+		})
+		.sort((a, b) => a.date.localeCompare(b.date))
 }
 
 /**

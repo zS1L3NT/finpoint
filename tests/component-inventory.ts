@@ -1892,13 +1892,6 @@ export const routeInventory: RouteEntry[] = [
 		owner: "team3",
 		scenarios: ["route"],
 	},
-	{
-		path: "app/recurring/page.tsx",
-		url: "/recurring",
-		kind: "page",
-		owner: "team3",
-		scenarios: ["route"],
-	},
 	{ path: "app/(month)/page.tsx", url: "/", kind: "page", owner: "team3", scenarios: ["route"] },
 	{
 		path: "app/(month)/records/monthly/page.tsx",
@@ -3728,10 +3721,8 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"Statement rules page: empty, populated and paused rules show conditions, actions and match counts",
 		"Statement rules page: search narrows rules by name, phrase or filled-in value",
 	],
-	"app/recurring/page.tsx#route.data": [
-		"Recurring charges page: monthly charges sort into late, coming up and charged this month",
-	],
 	"app/(month)/page.tsx#route.data": [
+		"Overview recurring charges: monthly charges sort into late, coming up and charged, and follow the read month",
 		"overview summary: income, refunds and exclusions reconcile across metrics and Category mix",
 		"empty overview: no history gives zero metrics and useful chart explanations",
 		"Monthly Budget card: null amount and zero plan remain distinct when scope changes",
@@ -3783,9 +3774,6 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"app/categories/page.tsx#route.navigation": [
 		"Categories drill: nested keyboard drill returns through exact origins",
-	],
-	"app/recurring/page.tsx#route.navigation": [
-		"Recurring charges page: monthly charges sort into late, coming up and charged this month",
 	],
 	"app/statement-rules/page.tsx#route.navigation": [
 		"Statement rules page: the Plan Rules link opens it and pause, resume and delete persist after reload",
@@ -4439,9 +4427,6 @@ export const behaviourCoverage: Record<string, string[]> = {
 	"app/statement-rules/page.tsx#route.viewport": [
 		"Statement rules: rows enter as a cascade in the viewport",
 	],
-	"app/recurring/page.tsx#route.viewport": [
-		"/recurring page: populated content and enabled controls stay inside the viewport",
-	],
 }
 
 /** Applicable facets without evidence stay here even when their parent scenario is mapped.
@@ -4612,7 +4597,6 @@ export const scenarioProjects: Record<
 	"app/terms/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
 	"app/privacy/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
 	"app/statement-rules/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
-	"app/recurring/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
 	"src/components/charts/cashflow-chart.tsx#chart.responsive": ["mobile", "tall-desktop"],
 	"src/components/charts/category-history-chart.tsx#chart.responsive": ["mobile", "tall-desktop"],
 	"src/components/charts/daily-spending-chart.tsx#chart.responsive": ["mobile", "tall-desktop"],
