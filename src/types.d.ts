@@ -44,6 +44,13 @@ export type StatementReplacementCandidate = Statement & {
 	disabled_reason: string | null
 }
 
+export type TreatmentChoice = { kind: "category" } | { kind: "explicit"; value: AnalyticsTreatment }
+
+export type MonthlyBudgetChoice =
+	| { kind: "category" }
+	| { kind: "explicit"; id: string }
+	| { kind: "unbudgeted" }
+
 export type Record = {
 	id: string
 	datetime: string
@@ -59,6 +66,8 @@ export type Record = {
 	pending_statement_count?: number
 	category: Category
 	analytics_treatment: AnalyticsTreatment
+	treatment_choice: TreatmentChoice
+	monthly_budget_choice: MonthlyBudgetChoice
 	analytics_treatment_source: "category" | "manual"
 	revision: number
 	monthly_budget_id: string | null

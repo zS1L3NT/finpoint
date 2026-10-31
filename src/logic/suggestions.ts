@@ -10,10 +10,10 @@ import {
 	type CategoryRow,
 	db,
 	type MonthlyBudgetRow,
-	type RecordRow,
 	type StatementRow,
 } from "@/data/db"
 import { parseDatetime, pluralize } from "@/lib/utils"
+import { resolveRecordChoices } from "@/logic/record-choices"
 import { matchesStatement } from "@/logic/statement-rules"
 import { listStatements } from "@/logic/statements"
 import type { RuleActions, RuleField, StatementRule } from "@/types"
@@ -29,13 +29,17 @@ const RULE_PURITY = 0.9
 
 type Tables = {
 	statements: StatementRow[]
-	records: RecordRow[]
+	records: ReturnType<typeof resolveRecordChoices>[]
 	allocations: AllocationRow[]
 	categories: CategoryRow[]
 	monthlyBudgets: MonthlyBudgetRow[]
 }
 
-type Example = { statement: StatementRow; record: RecordRow; tokens: string[] }
+type Example = {
+	statement: StatementRow
+	record: ReturnType<typeof resolveRecordChoices>
+	tokens: string[]
+}
 
 export type RecordSuggestion = { field: RuleField; value: string; reason: string }
 
@@ -61,15 +65,23 @@ export type SuggestionAccuracy = {
 	}[]
 }
 
-const FIELD_VALUES: Record<RuleField, (record: RecordRow) => string | null> = {
+const FIELD_VALUES: Record<
+	RuleField,
+	(record: ReturnType<typeof resolveRecordChoices>) => string | null
+> = {
 	title: r => r.title,
 	people: r => r.people,
 	location: r => r.location,
 	category_id: r => r.category_id,
 	// Category defaults already supply these; only the user's own exceptions teach anything.
 	analytics_treatment: r =>
-		r.analytics_treatment_source === "manual" ? r.analytics_treatment : null,
-	monthly_budget_id: r => (r.monthly_budget_source === "manual" ? r.monthly_budget_id : null),
+		r.treatment_choice.kind === "explicit" ? r.treatment_choice.value : null,
+	monthly_budget_id: r =>
+		r.monthly_budget_choice.kind === "explicit"
+			? r.monthly_budget_choice.id
+			: r.monthly_budget_choice.kind === "unbudgeted"
+				? "unbudgeted"
+				: null,
 }
 /** Separates the people in a People value: "Sam & Alex", "Sam, Alex", "Sam and Alex". */
 const PEOPLE_SEPARATOR = /\s*(?:[&,+/]|\band\b)\s*/i
@@ -117,7 +129,18 @@ async function loadTables(): Promise<Tables> {
 		db.categories.toArray(),
 		db.monthly_budgets.toArray(),
 	])
-	return { statements, records, allocations, categories, monthlyBudgets }
+	return {
+		statements,
+		records: records.map(r =>
+			resolveRecordChoices(
+				r,
+				categories.find(c => c.id === r.category_id),
+			),
+		),
+		allocations,
+		categories,
+		monthlyBudgets,
+	}
 }
 
 /**
@@ -204,7 +227,7 @@ function createModel({ statements, records, allocations }: Tables) {
 	}
 
 	// Records by title, for what a typed title usually comes with.
-	const titled = new Map<string, RecordRow[]>()
+	const titled = new Map<string, ReturnType<typeof resolveRecordChoices>[]>()
 	for (const record of records) {
 		const key = record.title.toLowerCase()
 		const list = titled.get(key)
@@ -321,7 +344,7 @@ const LEARN_SAMPLE = 300
 
 /** A past Record that might inform a suggestion, with the raw signals its weight comes from. */
 type Clue = {
-	record: RecordRow
+	record: ReturnType<typeof resolveRecordChoices>
 	similarity: number
 	shape: number
 	days: number
@@ -329,7 +352,10 @@ type Clue = {
 	hours: number | null
 	shares: number
 }
-type Evidence = { statements: Clue[]; titled: { record: RecordRow; days: number }[] }
+type Evidence = {
+	statements: Clue[]
+	titled: { record: ReturnType<typeof resolveRecordChoices>; days: number }[]
+}
 
 /** Collects every past Record that could count, before any weights apply. */
 function gather(
@@ -348,10 +374,10 @@ function gather(
 				DateTime.now(),
 				...input.statements.map(s => parseDatetime(s.datetime)).filter(d => d.isValid),
 			)
-	const usable = (record: RecordRow) =>
+	const usable = (record: ReturnType<typeof resolveRecordChoices>) =>
 		record.id !== input.exclude && (!input.before || record.datetime < input.before)
 	const nowMs = now.toMillis()
-	const days = (record: RecordRow) =>
+	const days = (record: ReturnType<typeof resolveRecordChoices>) =>
 		Math.max(0, (nowMs - (model.times.get(record.id)?.ms ?? nowMs)) / 86_400_000)
 	// Midnight stands for an unknown time.
 	const at = input.datetime ? parseDatetime(input.datetime.replace("T", " ")) : null
@@ -418,10 +444,16 @@ function weigh(clue: Clue, w: Weights) {
 
 type Tally = {
 	total: number
-	values: Map<string, { weight: number; records: Set<string>; latest: RecordRow }>
+	values: Map<
+		string,
+		{ weight: number; records: Set<string>; latest: ReturnType<typeof resolveRecordChoices> }
+	>
 }
 
-function tally(field: RuleField, clues: { record: RecordRow; weight: number }[]): Tally {
+function tally(
+	field: RuleField,
+	clues: { record: ReturnType<typeof resolveRecordChoices>; weight: number }[],
+): Tally {
 	const result: Tally = { total: 0, values: new Map() }
 	for (const { record, weight } of clues) {
 		if (!weight) continue
@@ -489,7 +521,10 @@ function rank(evidence: Evidence, field: RuleField, w: Weights) {
  */
 function topValue(evidence: Evidence, field: RuleField, w: Weights) {
 	const scores = new Map<string, number>()
-	const add = (clues: { record: RecordRow; weight: number }[], share: number) => {
+	const add = (
+		clues: { record: ReturnType<typeof resolveRecordChoices>; weight: number }[],
+		share: number,
+	) => {
 		const total = clues.reduce((sum, clue) => sum + clue.weight, 0)
 		if (!total) return 0
 		for (const { record, weight } of clues) {
@@ -536,7 +571,7 @@ function allocatedStatements(tables: Tables) {
 	return allocated
 }
 
-const byDate = (records: RecordRow[]) =>
+const byDate = (records: ReturnType<typeof resolveRecordChoices>[]) =>
 	[...records].sort((a, b) => a.datetime.localeCompare(b.datetime))
 
 /** Records with allocated Statements, oldest first: the ones a replay can score. */
@@ -575,7 +610,7 @@ function namedPeople(model: Model, statements: StatementRow[], before?: string) 
  */
 function learnWeights(
 	model: Model,
-	sample: RecordRow[],
+	sample: ReturnType<typeof resolveRecordChoices>[],
 	allocated: Map<string, StatementRow[]>,
 ): LearnedWeights {
 	const cases = sample.map(record => {
@@ -684,7 +719,7 @@ function suggest(
 			field === "category_id"
 				? known.has(value)
 				: field === "monthly_budget_id"
-					? active.has(value)
+					? value === "unbudgeted" || active.has(value)
 					: true,
 		)
 		if (field === "title" || field === "people" || field === "location")
@@ -830,7 +865,7 @@ export async function suggestedStatementRules(): Promise<RuleSuggestion[]> {
 	const tables = await loadTables()
 	const model = createModel(tables)
 	const rules = await db.statement_rules.toArray()
-	const labelled = new Map<string, RecordRow>()
+	const labelled = new Map<string, ReturnType<typeof resolveRecordChoices>>()
 	for (const example of model.examples) labelled.set(example.statement.id, example.record)
 
 	// Bank boilerplate (card and payment-method prefixes) spreads across many Categories;
@@ -906,7 +941,11 @@ export async function suggestedStatementRules(): Promise<RuleSuggestion[]> {
 		const actions: RuleActions = { category_id: { value: candidate.category.value } }
 		for (const field of ["title", "people", "location", "monthly_budget_id"] as const) {
 			const agreed = candidate.consensus(field)
-			if (agreed) actions[field] = { value: agreed.value }
+			if (agreed) {
+				if (field === "monthly_budget_id")
+					actions[field] = { value: agreed.value === "unbudgeted" ? null : agreed.value }
+				else actions[field] = { value: agreed.value }
+			}
 		}
 		const sample = candidate.matched[0]?.description ?? candidate.phrase
 		const start = sample.toLowerCase().indexOf(candidate.phrase)

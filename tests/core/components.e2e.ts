@@ -535,12 +535,12 @@ test.describe("harness widgets section", () => {
 			await page.locator("#analytics_treatment").click()
 			await pickOption(page.getByRole("option", { name: "Income", exact: true }))
 			await expect(page.getByTestId("analytics-value")).toContainText("Treatment: income")
-			await expect(page.locator("#monthly_budget_id")).toBeDisabled()
+			await expect(page.locator("#monthly_budget_id")).toHaveCount(0)
 
 			await page.locator("#analytics_treatment").click()
 			await pickOption(page.getByRole("option", { name: "Spending", exact: true }))
 			await expect(page.getByTestId("analytics-value")).toContainText("Treatment: spending")
-			await expect(page.locator("#monthly_budget_id")).toBeEnabled()
+			await expect(page.locator("#monthly_budget_id")).toBeVisible()
 		})
 
 		await test.step("field validation: errors render as alerts", async () => {

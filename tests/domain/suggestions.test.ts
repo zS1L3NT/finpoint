@@ -38,10 +38,8 @@ const record = (overrides: Partial<RecordRow> = {}): RecordRow => ({
 	datetime: "2026-10-01 12:00",
 	amount: -15,
 	category_id: "transport",
-	analytics_treatment: "spending",
-	analytics_treatment_source: "category",
-	monthly_budget_id: null,
-	monthly_budget_source: null,
+	treatment_choice: { kind: "category" },
+	monthly_budget_choice: { kind: "category" },
 	revision: 1,
 	...overrides,
 })

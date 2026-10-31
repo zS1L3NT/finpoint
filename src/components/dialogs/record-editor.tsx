@@ -109,10 +109,15 @@ export default function RecordEditorDialog({
 			amount: record.amount,
 			category_id: record.category.id,
 			analytics_treatment:
-				record.analytics_treatment_source === "manual" ? record.analytics_treatment : "",
-			monthly_budget_id: record.monthly_budget_id ?? "",
+				record.treatment_choice.kind === "explicit" ? record.treatment_choice.value : "",
+			monthly_budget_id:
+				record.monthly_budget_choice.kind === "explicit"
+					? record.monthly_budget_choice.id
+					: "",
 			monthly_budget_source:
-				record.monthly_budget_source ?? ("category" as "category" | "manual"),
+				record.monthly_budget_choice.kind === "category"
+					? ("category" as const)
+					: ("manual" as const),
 			description: record.description ?? "",
 			statements: statements.map(statement => ({
 				id: statement.id,

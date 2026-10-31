@@ -288,10 +288,7 @@ test("Category editors: persist Treatment defaults and exclude archived options"
 		await expect(page.getByRole("option", { name: "Daily", exact: true })).toHaveCount(0)
 		await expect(dialog).toBeVisible()
 		await select(page, dialog, "Treatment", "Income")
-		await expect(dialog.getByLabel("Monthly budget", { exact: true })).toBeDisabled()
-		await expect(dialog.getByLabel("Monthly budget", { exact: true })).toContainText(
-			"Unbudgeted",
-		)
+		await expect(dialog.getByLabel("Monthly budget", { exact: true })).toHaveCount(0)
 		await dialog.getByLabel("Name", { exact: true }).fill("")
 		await dialog.getByRole("button", { name: "Save changes" }).click()
 		await expect(dialog.getByLabel("Name", { exact: true })).toHaveAttribute(
@@ -308,7 +305,7 @@ test("Category editors: persist Treatment defaults and exclude archived options"
 		).toContainText("Income")
 		await expect(
 			page.getByRole("dialog").getByLabel("Monthly budget", { exact: true }),
-		).toBeDisabled()
+		).toHaveCount(0)
 	})
 	await test.step("Category creator: required identity, icon, colour and defaults persist", async () => {
 		void workspace
@@ -837,8 +834,7 @@ test("archived Monthly Budgets: retain archival state and historical assignments
 				request.onsuccess = () =>
 					store.put({
 						...request.result,
-						monthly_budget_id: "t1-mb-travel",
-						monthly_budget_source: "manual",
+						monthly_budget_choice: { kind: "explicit", id: "t1-mb-travel" },
 					})
 			})
 		})

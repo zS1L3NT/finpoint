@@ -51,9 +51,7 @@ export default function RecordAnalyticsFields({
 	const treatmentValue =
 		treatment || (categoryTreatment !== undefined ? CATEGORY_DEFAULT : "automatic")
 	const monthlyBudgetValue =
-		monthlyBudgetSource === "category" &&
-		categoryMonthlyBudgetId &&
-		monthlyBudgetId === categoryMonthlyBudgetId
+		monthlyBudgetSource === "category" && categoryMonthlyBudgetId !== undefined
 			? CATEGORY_DEFAULT
 			: monthlyBudgetId || UNBUDGETED
 
@@ -80,60 +78,54 @@ export default function RecordAnalyticsFields({
 					onChange={value => {
 						const treatment = value === CATEGORY_DEFAULT ? "" : value
 						onTreatmentChange(treatment)
-						if (
-							!canUseMonthlyBudget(
-								(treatment ||
-									categoryTreatment ||
-									"automatic") as AnalyticsTreatment,
-								amount,
-							)
-						)
-							onMonthlyBudgetChange("", "manual")
 					}}
 				/>
 				{treatmentSuggestions}
-				<SelectField
-					id="monthly_budget_id"
-					label="Monthly budget"
-					autopopulated={monthlyBudgetAutopopulated}
-					disabled={!monthlyBudgetEligible}
-					value={monthlyBudgets === undefined ? "" : monthlyBudgetValue}
-					placeholder={monthlyBudgets === undefined ? "Monthly budget" : "Unbudgeted"}
-					items={[
-						{ value: UNBUDGETED, label: "Unbudgeted" },
-						...(categoryMonthlyBudgetId !== undefined
-							? [
-									{
-										value: CATEGORY_DEFAULT,
-										label: `Category default · ${categoryMonthlyBudget?.name ?? (categoryMonthlyBudgetId ? "Default monthly budget" : "Unbudgeted")}`,
-									},
-								]
-							: []),
-						...(monthlyBudgets ?? [])
-							.filter(
-								monthlyBudget =>
-									!monthlyBudget.archived || monthlyBudget.id === monthlyBudgetId,
-							)
-							.map(monthlyBudget => ({
-								value: monthlyBudget.id,
-								label: monthlyBudget.name,
-								disabled: monthlyBudget.archived,
-							})),
-					]}
-					onChange={value => {
-						if (!value) return
+				{monthlyBudgetEligible && (
+					<SelectField
+						id="monthly_budget_id"
+						label="Monthly budget"
+						autopopulated={monthlyBudgetAutopopulated}
+						disabled={!monthlyBudgetEligible}
+						value={monthlyBudgets === undefined ? "" : monthlyBudgetValue}
+						placeholder={monthlyBudgets === undefined ? "Monthly budget" : "Unbudgeted"}
+						items={[
+							{ value: UNBUDGETED, label: "Unbudgeted" },
+							...(categoryMonthlyBudgetId !== undefined
+								? [
+										{
+											value: CATEGORY_DEFAULT,
+											label: `Category default · ${categoryMonthlyBudget?.name ?? (categoryMonthlyBudgetId ? "Default monthly budget" : "Unbudgeted")}`,
+										},
+									]
+								: []),
+							...(monthlyBudgets ?? [])
+								.filter(
+									monthlyBudget =>
+										!monthlyBudget.archived ||
+										monthlyBudget.id === monthlyBudgetId,
+								)
+								.map(monthlyBudget => ({
+									value: monthlyBudget.id,
+									label: monthlyBudget.name,
+									disabled: monthlyBudget.archived,
+								})),
+						]}
+						onChange={value => {
+							if (!value) return
 
-						onMonthlyBudgetChange(
-							value === CATEGORY_DEFAULT
-								? (categoryMonthlyBudgetId ?? "")
-								: value === UNBUDGETED
-									? ""
-									: value,
-							value === CATEGORY_DEFAULT ? "category" : "manual",
-						)
-					}}
-				/>
-				{monthlyBudgetSuggestions}
+							onMonthlyBudgetChange(
+								value === CATEGORY_DEFAULT
+									? (categoryMonthlyBudgetId ?? "")
+									: value === UNBUDGETED
+										? ""
+										: value,
+								value === CATEGORY_DEFAULT ? "category" : "manual",
+							)
+						}}
+					/>
+				)}
+				{monthlyBudgetEligible && monthlyBudgetSuggestions}
 			</FieldGroup>
 		</div>
 	)

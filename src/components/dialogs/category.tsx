@@ -267,33 +267,32 @@ export default function CategoryDialog({
 							onChange={value => {
 								const treatment = value as AnalyticsTreatment
 								setValue("analytics_treatment", treatment)
-								if (!canUseDefaultMonthlyBudget(treatment)) {
-									setValue("default_monthly_budget_id", "")
-								}
 							}}
 						/>
-						<SelectField
-							id="default_monthly_budget_id"
-							label="Monthly budget"
-							disabled={!monthlyBudgetEligible}
-							value={values.default_monthly_budget_id || NO_DEFAULT}
-							items={[
-								{ value: NO_DEFAULT, label: "Unbudgeted" },
-								...monthlyBudgets
-									.filter(monthlyBudget => !monthlyBudget.archived)
-									.map(monthlyBudget => ({
-										value: monthlyBudget.id,
-										label: monthlyBudget.name,
-									})),
-							]}
-							errors={getApiFieldErrors("default_monthly_budget_id")}
-							onChange={value =>
-								setValue(
-									"default_monthly_budget_id",
-									value === NO_DEFAULT ? "" : value,
-								)
-							}
-						/>
+						{monthlyBudgetEligible && (
+							<SelectField
+								id="default_monthly_budget_id"
+								label="Monthly budget"
+								disabled={!monthlyBudgetEligible}
+								value={values.default_monthly_budget_id || NO_DEFAULT}
+								items={[
+									{ value: NO_DEFAULT, label: "Unbudgeted" },
+									...monthlyBudgets
+										.filter(monthlyBudget => !monthlyBudget.archived)
+										.map(monthlyBudget => ({
+											value: monthlyBudget.id,
+											label: monthlyBudget.name,
+										})),
+								]}
+								errors={getApiFieldErrors("default_monthly_budget_id")}
+								onChange={value =>
+									setValue(
+										"default_monthly_budget_id",
+										value === NO_DEFAULT ? "" : value,
+									)
+								}
+							/>
+						)}
 					</div>
 				</form>
 
