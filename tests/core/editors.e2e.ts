@@ -313,6 +313,13 @@ test("Category editors: persist Treatment defaults and exclude archived options"
 	await test.step("Category creator: required identity, icon, colour and defaults persist", async () => {
 		void workspace
 		const dialog = await openEditor(page, "/categories", "Create Category", "Create Category")
+		await expect(dialog.getByLabel("Treatment", { exact: true })).toContainText("Automatic")
+		await dialog.getByLabel("Treatment", { exact: true }).click()
+		await expect(
+			page.getByRole("option", { name: "No default treatment", exact: true }),
+		).toHaveCount(0)
+		await expect(page.getByRole("option", { name: "Automatic", exact: true })).toBeVisible()
+		await page.keyboard.press("Escape")
 		await dialog.getByRole("button", { name: "Create category", exact: true }).click()
 		await expect(dialog.getByLabel("Name", { exact: true })).toHaveAttribute(
 			"aria-invalid",
@@ -662,6 +669,7 @@ test("Record creator: validates required fields, applies Category defaults and p
 				"Create Pending Record",
 				"Create New Record",
 			)
+			await expect(dialog.getByLabel("Treatment", { exact: true })).toContainText("Automatic")
 			await dialog.getByRole("button", { name: "Create Record", exact: true }).click()
 			await expect(dialog.getByLabel("Title", { exact: true })).toHaveAttribute(
 				"aria-invalid",

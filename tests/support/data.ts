@@ -206,7 +206,7 @@ function buildPopulated(): WorkspaceDataset {
 			icon: "circle-question-mark",
 			color: "#9E9E9E",
 			parent_category_id: null,
-			analytics_treatment: null,
+			analytics_treatment: "automatic",
 			default_monthly_budget_id: null,
 		},
 	)
@@ -730,7 +730,7 @@ function buildDense(): WorkspaceDataset {
 			icon: "circle-question-mark",
 			color: "#9E9E9E",
 			parent_category_id: i % 8 === 0 ? "t1-d-cat-01" : null,
-			analytics_treatment: i % 13 === 0 ? null : cycle([...treatments], i - 1),
+			analytics_treatment: i % 13 === 0 ? "automatic" : cycle([...treatments], i - 1),
 			default_monthly_budget_id: i % 5 === 0 ? "t1-d-mb-daily" : null,
 		})
 	}

@@ -48,7 +48,8 @@ export default function RecordAnalyticsFields({
 	const categoryMonthlyBudget = monthlyBudgets?.find(
 		monthlyBudget => monthlyBudget.id === categoryMonthlyBudgetId,
 	)
-	const treatmentValue = treatment || (categoryTreatment ? CATEGORY_DEFAULT : "")
+	const treatmentValue =
+		treatment || (categoryTreatment !== undefined ? CATEGORY_DEFAULT : "automatic")
 	const monthlyBudgetValue =
 		monthlyBudgetSource === "category" &&
 		categoryMonthlyBudgetId &&
@@ -65,13 +66,12 @@ export default function RecordAnalyticsFields({
 					label="Treatment"
 					autopopulated={treatmentAutopopulated}
 					value={treatmentValue}
-					placeholder="No default treatment"
 					items={[
 						...(categoryTreatment !== undefined
 							? [
 									{
 										value: CATEGORY_DEFAULT,
-										label: `Category default · ${categoryTreatment ? treatmentLabel(categoryTreatment) : "No default treatment"}`,
+										label: `Category default · ${treatmentLabel(categoryTreatment)}`,
 									},
 								]
 							: []),

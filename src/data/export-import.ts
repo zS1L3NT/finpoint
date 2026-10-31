@@ -13,7 +13,7 @@ import {
 	replaceSettings,
 } from "@/data/settings"
 
-export const EXPORT_VERSION = 6
+export const EXPORT_VERSION = 7
 
 type TableName =
 	| "statement_rules"
@@ -130,6 +130,7 @@ export function parseImportFile(text: string): FinpointExport {
 		})
 		parsed.version = EXPORT_VERSION
 	}
+	if (parsed?.version === 6) parsed.version = EXPORT_VERSION
 	if (parsed?.app !== "finpoint" || typeof parsed !== "object" || !parsed.tables) {
 		throw new Error("This file is not a Finpoint backup.")
 	}
@@ -165,7 +166,14 @@ export function parseImportFile(text: string): FinpointExport {
 	}
 	return {
 		...(parsed as Omit<FinpointExport, "settings">),
-		tables: { ...parsed.tables, duplicate_dismissals: [...dismissals.values()] },
+		tables: {
+			...parsed.tables,
+			categories: (parsed.tables.categories as Record<string, unknown>[]).map(category => ({
+				...category,
+				analytics_treatment: category.analytics_treatment ?? "automatic",
+			})),
+			duplicate_dismissals: [...dismissals.values()],
+		},
 		settings: {
 			default_filter_start_date: startDate ?? DEFAULT_SETTINGS.default_filter_start_date,
 			default_filter_end_date_today:

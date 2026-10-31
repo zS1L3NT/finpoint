@@ -21,14 +21,13 @@ function cleanInput(input: CategoryInput) {
 		icon: v.text(input.icon, "icon"),
 		color: v.text(input.color, "color"),
 		parent_category_id: input.parent_category_id ?? null,
-		analytics_treatment: input.analytics_treatment
-			? v.oneOf(
-					input.analytics_treatment,
-					"analytics_treatment",
-					TREATMENT_VALUES,
-					"Invalid treatment.",
-				)
-			: null,
+		analytics_treatment:
+			v.oneOf(
+				input.analytics_treatment || "automatic",
+				"analytics_treatment",
+				TREATMENT_VALUES,
+				"Invalid treatment.",
+			) ?? "automatic",
 		default_monthly_budget_id: input.default_monthly_budget_id ?? null,
 	}
 	const id = v.slug(dto.name)

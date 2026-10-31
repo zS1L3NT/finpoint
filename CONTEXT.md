@@ -50,7 +50,7 @@ The comparison amount for a Monthly Budget in a selected calendar month. Each mo
 _Avoid_: Target, limit, allowance
 
 **Treatment**:
-The accounting role of a Record: Income, Spending, Saving / investment, Transfer / excluded (counted in no total), or Automatic by direction (income or spending by amount sign). A Category supplies the normal default and a Record may override it for an exception.
+The accounting role of a Record: Income, Spending, Saving / investment, Transfer / excluded (counted in no total), or Automatic (income or spending by amount sign). A Category always supplies a treatment, defaulting to Automatic, and a Record may override it for an exception.
 _Avoid_: Bucket, category type
 
 **Category**:

@@ -81,9 +81,6 @@ export async function enrichRecords(
 			category: category
 				? {
 						...category,
-						analytics_treatment: category.analytics_treatment as
-							| import("@/types").AnalyticsTreatment
-							| null,
 						can_delete: false,
 						records_count: 0,
 						default_monthly_budget: category.default_monthly_budget_id
@@ -96,7 +93,7 @@ export async function enrichRecords(
 						icon: "circle-question-mark",
 						color: "#9E9E9E",
 						parent_category_id: null,
-						analytics_treatment: null,
+						analytics_treatment: "automatic" as const,
 						default_monthly_budget_id: null,
 						can_delete: false,
 						records_count: 0,
@@ -297,7 +294,7 @@ async function analyticsValues(
 	input: RecordInput,
 	category: {
 		id: string
-		analytics_treatment: string | null
+		analytics_treatment: AnalyticsTreatment
 		default_monthly_budget_id: string | null
 	},
 	existingMonthlyBudgetId?: string | null,
@@ -308,9 +305,7 @@ async function analyticsValues(
 	monthly_budget_source: "category" | "manual" | null
 }> {
 	const explicitTreatment = input.analytics_treatment || null
-	const treatment = (explicitTreatment ??
-		category.analytics_treatment ??
-		"automatic") as AnalyticsTreatment
+	const treatment = (explicitTreatment ?? category.analytics_treatment) as AnalyticsTreatment
 	const eligible = canUseMonthlyBudget(treatment, Number(input.amount))
 	const requestedMonthlyBudget =
 		"monthly_budget_id" in input

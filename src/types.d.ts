@@ -81,7 +81,7 @@ export type Category = {
 	parent_category_id: string | null
 	can_delete: boolean
 	records_count: number
-	analytics_treatment: AnalyticsTreatment | null
+	analytics_treatment: AnalyticsTreatment
 	default_monthly_budget_id: string | null
 	default_monthly_budget?: MonthlyBudget | null
 }

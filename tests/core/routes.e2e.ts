@@ -653,7 +653,7 @@ test.describe("pinned 15 October 2026 date", () => {
 						spending: "Spending",
 						saving_investment: "Saving / investment",
 						neutral: "Transfer / excluded",
-						automatic: "Automatic by direction",
+						automatic: "Automatic",
 					}[record.analytics_treatment ?? "automatic"]
 					await expect(page.getByText(/Treatment ·/)).toHaveText(
 						`Treatment · ${treatment}`,

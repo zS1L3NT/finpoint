@@ -30,7 +30,7 @@ type CategoryFormValues = {
 	icon: string
 	color: string
 	parent_category_id: string
-	analytics_treatment: AnalyticsTreatment | ""
+	analytics_treatment: AnalyticsTreatment
 	default_monthly_budget_id: string
 }
 
@@ -50,7 +50,7 @@ const EMPTY_FORM_VALUES: CategoryFormValues = {
 	icon: "",
 	color: "",
 	parent_category_id: "",
-	analytics_treatment: "",
+	analytics_treatment: "automatic",
 	default_monthly_budget_id: "",
 }
 
@@ -84,7 +84,7 @@ export default function CategoryDialog({
 		values.icon && !ICON_NAMES.includes(values.icon as (typeof ICON_NAMES)[number])
 			? [values.icon, ...ICON_NAMES]
 			: ICON_NAMES
-	const monthlyBudgetEligible = canUseDefaultMonthlyBudget(values.analytics_treatment || null)
+	const monthlyBudgetEligible = canUseDefaultMonthlyBudget(values.analytics_treatment)
 	const defaultMonthlyBudgetName = values.default_monthly_budget_id
 		? (monthlyBudgets?.find(
 				monthlyBudget => monthlyBudget.id === values.default_monthly_budget_id,
@@ -105,7 +105,7 @@ export default function CategoryDialog({
 						icon: category.icon,
 						color: category.color,
 						parent_category_id: category.parent_category_id ?? "",
-						analytics_treatment: category.analytics_treatment ?? "",
+						analytics_treatment: category.analytics_treatment,
 						default_monthly_budget_id: category.default_monthly_budget_id ?? "",
 					}
 				: EMPTY_FORM_VALUES,
@@ -128,7 +128,7 @@ export default function CategoryDialog({
 			icon: values.icon,
 			color: values.color,
 			parent_category_id: values.parent_category_id || null,
-			analytics_treatment: values.analytics_treatment || null,
+			analytics_treatment: values.analytics_treatment,
 			default_monthly_budget_id: values.default_monthly_budget_id || null,
 		}
 		try {
@@ -249,7 +249,7 @@ export default function CategoryDialog({
 								<p className="flex items-center gap-1.5 text-xs text-muted-foreground">
 									<IconifyIcon icon="lucide:tag" className="size-3.5" />
 									<span className="truncate">
-										{`${values.analytics_treatment ? treatmentLabel(values.analytics_treatment) : "No default treatment"}${monthlyBudgetEligible ? ` · ${defaultMonthlyBudgetName}` : ""}`}
+										{`${treatmentLabel(values.analytics_treatment)}${monthlyBudgetEligible ? ` · ${defaultMonthlyBudgetName}` : ""}`}
 									</span>
 								</p>
 							</div>
@@ -261,17 +261,13 @@ export default function CategoryDialog({
 						<SelectField
 							id="analytics_treatment"
 							label="Treatment"
-							value={values.analytics_treatment || NO_DEFAULT}
-							items={[
-								{ value: NO_DEFAULT, label: "No default treatment" },
-								...TREATMENTS,
-							]}
+							value={values.analytics_treatment}
+							items={TREATMENTS}
 							errors={getApiFieldErrors("analytics_treatment")}
 							onChange={value => {
-								const treatment =
-									value === NO_DEFAULT ? "" : (value as AnalyticsTreatment)
+								const treatment = value as AnalyticsTreatment
 								setValue("analytics_treatment", treatment)
-								if (!canUseDefaultMonthlyBudget(treatment || null)) {
+								if (!canUseDefaultMonthlyBudget(treatment)) {
 									setValue("default_monthly_budget_id", "")
 								}
 							}}

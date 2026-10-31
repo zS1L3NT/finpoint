@@ -526,6 +526,12 @@ test.describe("harness widgets section", () => {
 
 		await test.step("Record analytics: Treatment gates the Monthly Budget control", async () => {
 			await gotoForms(page)
+			await expect(page.locator("#analytics_treatment")).toContainText(
+				"Category default · Spending",
+			)
+			await expect(page.getByTestId("analytics-value")).toContainText(
+				"Treatment: category-default",
+			)
 			await page.locator("#analytics_treatment").click()
 			await pickOption(page.getByRole("option", { name: "Income", exact: true }))
 			await expect(page.getByTestId("analytics-value")).toContainText("Treatment: income")

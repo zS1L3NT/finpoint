@@ -1,111 +1,105 @@
-# Graph Report - finpoint  (2026-10-31)
+# Graph Report - Finpoint  (2026-11-01)
 
 ## Corpus Check
-- cluster-only mode — file stats not available
+- 262 files · ~206,865 words
+- Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1933 nodes · 7738 edges · 95 communities (84 shown, 11 thin omitted)
+- 1934 nodes · 7745 edges · 93 communities (82 shown, 11 thin omitted)
 - Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 126 edges (avg confidence: 0.84)
-- Token cost: 29,857 input · 1,252 output
-
-## Graph Freshness
-- Built from commit: `335c0b45`
-- Run `git rev-parse HEAD` and compare to check if the graph is stale.
-- Run `graphify update .` after code changes (no API cost).
+- Token cost: unavailable (host agent semantic refresh; CLI structural refresh uses no model tokens)
 
 ## Community Hubs (Navigation)
-- Test Source Analysis Helpers
-- Record and Account Dialogs
-- Test Database and Snapshots
-- Project Graph Rules
-- Sidebar and Appearance
-- Dashboard Calculations
-- Dropdown Menu Primitives
-- Root Layout and Providers
-- Chart Browser Tests
-- Statement Importer
-- Data Table Components
-- TypeScript Compiler Config
-- Editor and Sheet Tests
-- App Sidebar and Header
-- Categories Page and Charts
-- Month Layout and Dashboard
-- Runtime Dependencies
-- Database Schema Rows
-- Monthly Budget Logic
-- Spending Calendar
-- Code Style Guide
-- Statement Replacements
-- Category History Chart
-- Biome Suspicious Rules
-- Package Manifest
-- Component Inventory Tests
-- Biome Correctness Rules
-- Statement Rules
-- Component and Modal Tests
-- Drive Sync Status
-- Animation Browser Tests
-- Route and Table Tests
-- Google Drive Auth
-- Layer Architecture Rules
-- Export and Import Data
-- shadcn Components Config
-- Defaults and Test Data
-- Vite Harness Config
-- Search and Filter Sheets
-- Domain Type Definitions
-- Domain Glossary
-- Auth Broker Routes
-- Accounts and Duplicates Pages
-- Duplicate Statement Detection
-- Category Filter and Command
-- Bar and Trend Charts
-- Navigation Browser Tests
-- Biome Formatter Style
-- Dev Dependencies
-- Pagination Components
-- Budgets and Records Logic
-- Commands and Agent Behavior
-- Verification and Next.js Rules
-- Analytics and Categories Logic
-- Navigation History Provider
-- Biome Configuration
-- Biome Complexity Rules
-- PWA Web Manifest
-- Playwright Config and URLs
-- NPM Scripts
-- Data Settings and Alerts
-- Biome Formatter Options
-- Dashboard and Budgets Features
-- Combobox Components
-- Domain and Tracker Docs
-- Optional Platform Dependencies
-- E2E TypeScript Config
-- Biome Style Rules
-- Finpoint Icon Concept
-- Finpoint Icon With Shadow
-- Local Issue Tracker
-- Finpoint Icon Elements
-- Domain Docs Guide
-- Local Tracker Operations
-- Drive Sync and Backup
-- F Monogram Icon
-- JPG Favicon Icon
-- PNG Favicon Icon
-- SVG Favicon Icon
-- F Monogram Icon Variant
-- F Monogram Icon Copy
-- App Icon Palette
-- Domain Docs Conflicts
+- react
+- lib/motion.ts
+- next
+- app-sidebar.tsx
+- categories/page.tsx
+- (month)/page.tsx
+- data.ts
+- Validator
+- db.ts
+- statements.ts
+- category-history-chart.tsx
+- ledger.e2e.ts
+- suggestions.ts
+- auto-sync.ts
+- support/motion.ts
+- core/routes.e2e.ts
+- fixtures.ts
+- export-import.ts
+- test-data.ts
+- amount-filter.tsx
+- types.d.ts
+- sidebar.tsx
+- Button
+- duplicates.ts
+- category-filter.tsx
+- trend-chart.tsx
+- pagination.tsx
+- dashboard.ts
+- records.ts
+- history.tsx
+- sync/page.tsx
+- providers.tsx
+- importer/page.tsx
+- lucide-react
+- collectTests
+- editors.ts
+- spending-calendar.tsx
+- core/components.e2e.ts
+- auth-vault.ts
+- tests_support_fixtures_expect
+- primitives.tsx
+- cn
+- @playwright/test
+- radix-ui
+- workflows.e2e.ts
+- Validation rule (ValidationError + Validator)
+- Tests README
+- src/data/* (persistence, migrations, seeding, backup serialization, Drive storage)
+- Commands
+- Next.js agent rules block ("This is NOT the Next.js you know")
+- Domain docs (single-context layout)
 - Conventions
-- Crawler Policy
-- Generated Demo Data
-- Progressive Web App
-- Button Group and Separators
-- Month Picker
-- Workflow Browser Tests
-- Charts and Next Templates
-- Validation Logic
+- compilerOptions
+- dependencies
+- STYLE.md
+- suspicious
+- package.json
+- correctness
+- components.json
+- vite.config.ts
+- formatter
+- devDependencies
+- biome.json
+- rules
+- manifest.json
+- scripts
+- formatter
+- optionalDependencies
+- tsconfig.e2e.json
+- style
+- Issue tracker: Local Markdown
+- Domain docs
+- Records
+- Finpoint icon concept
+- Finpoint icon with charcoal shadow
+- Finpoint
+- Google Drive sync
+- F monogram icon
+- JPG favicon icon
+- PNG favicon icon
+- SVG favicon icon
+- F monogram icon
+- F monogram icon
+- Finpoint app icon
+- Unrestricted crawler policy
+- Generated demo data
+- Progressive Web Application
+- Local Markdown Issue Tracker
+- Domain Documentation Conflicts
+- Monthly Budget
 
 ## God Nodes (most connected - your core abstractions)
 1. `cn()` - 321 edges
@@ -143,363 +137,355 @@
 - **Test group to gate to merged report flow** — github_workflows_ci_core_group, github_workflows_ci_animations_group, github_workflows_ci_core, github_workflows_ci_animations, github_workflows_ci_blob_report_merge [EXTRACTED 1.00]
 - **Every browser test file joins exactly one CI group, enforced by the ledger** — tests_readme_behaviour_ledger, tests_readme_ci_groups, github_workflows_ci_core_group, github_workflows_ci_animations_group, agents_verification_rules [INFERRED 0.95]
 
-## Communities (95 total, 11 thin omitted)
+## Communities (93 total, 11 thin omitted)
 
-### Community 0 - "Test Source Analysis Helpers"
-Cohesion: 0.28
-Nodes (16): collectTests(), conditionBranch(), detailsTags(), disabled(), mentionsMotion(), record(), splitTestCallee(), tagValues() (+8 more)
-
-### Community 1 - "Record and Account Dialogs"
+### Community 1 - "react"
 Cohesion: 0.07
-Nodes (108): react, react-day-picker, react-dom, sonner, @tanstack/react-form, AccountDialog(), BudgetCreatorDialog(), BudgetEditorDialog() (+100 more)
+Nodes (110): Rule, CategoryFormValues, PendingStatementValues, Rule, Props, Props, Props, FieldErrorItem (+102 more)
 
-### Community 2 - "Test Database and Snapshots"
-Cohesion: 0.12
-Nodes (12): dexie, fake-indexeddb, xlsx, FinpointDB, digestSnapshot(), hashLegacySnapshot(), hashSnapshot(), Snapshot (+4 more)
+### Community 10 - "lib/motion.ts"
+Cohesion: 0.10
+Nodes (41): Delta, RowGroup, State, RowEntrance, HarnessSection, Sparkline(), Metric(), DataTable() (+33 more)
 
-### Community 3 - "Project Graph Rules"
-Cohesion: 0.06
-Nodes (41): Build harness step (vite build tests/harness), Playwright browser cache keyed on bun.lock, blob report merge, Committed graph artifacts (graph.json, GRAPH_REPORT.md, manifest.json, .graphify_labels.json), Graph health warnings and refresh failure reporting, graphify-out/graph.json, graphify skill (--update), graphify update . (+33 more)
-
-### Community 4 - "Sidebar and Appearance"
-Cohesion: 0.13
-Nodes (31): AppearanceSwitch(), SidebarContent(), SidebarContext, SidebarContextProps, SidebarFooter(), SidebarGroup(), SidebarGroupAction(), SidebarGroupContent() (+23 more)
-
-### Community 5 - "Dashboard Calculations"
-Cohesion: 0.11
-Nodes (40): AllocationRow, db, contribution(), summarize(), avg(), buildCashflowHistory(), buildCategories(), buildComparison() (+32 more)
-
-### Community 6 - "Dropdown Menu Primitives"
-Cohesion: 0.09
-Nodes (46): AlertAction(), AlertDialogTrigger(), DropdownMenu(), DropdownMenuCheckboxItem(), DropdownMenuContent(), DropdownMenuGroup(), DropdownMenuItem(), DropdownMenuLabel() (+38 more)
-
-### Community 7 - "Root Layout and Providers"
-Cohesion: 0.14
-Nodes (24): metadata, RootLayout(), viewport, Boot(), Providers(), ShellHeader(), Toaster(), Appearance (+16 more)
-
-### Community 8 - "Chart Browser Tests"
-Cohesion: 0.23
-Nodes (7): @playwright/test, cardTitles, card(), chartTooltip, overview, overviewCharts, themedRgb()
-
-### Community 9 - "Statement Importer"
-Cohesion: 0.19
-Nodes (26): ACCEPT, BANKS_REQUIRING_ADDITIONAL_INFO, ImporterPage(), Step(), CardFooter(), BANKS, ensureAccount(), combine() (+18 more)
-
-### Community 10 - "Data Table Components"
-Cohesion: 0.16
-Nodes (30): framer-motion, @tanstack/react-table, DataTable(), PaginatedDataTable(), PaginationHeader(), GroupHeaderRow(), groupStarts(), GroupTotal() (+22 more)
-
-### Community 11 - "TypeScript Compiler Config"
-Cohesion: 0.06
-Nodes (33): compilerOptions, allowJs, allowSyntheticDefaultImports, allowUnusedLabels, esModuleInterop, forceConsistentCasingInFileNames, incremental, isolatedModules (+25 more)
-
-### Community 12 - "Editor and Sheet Tests"
-Cohesion: 0.12
-Nodes (22): editors, containedFooter(), editors, longName, expectHeldRead(), expectRetainedRows(), expectSilentSheet(), expectPointerCursor() (+14 more)
-
-### Community 13 - "App Sidebar and Header"
-Cohesion: 0.19
-Nodes (27): NotFound(), lucide-react, AppearanceOption, APPEARANCES, AppSidebar(), SyncDot(), SYSTEM_APPEARANCE, useSyncIndicator() (+19 more)
-
-### Community 14 - "Categories Page and Charts"
+### Community 100 - "next"
 Cohesion: 0.18
-Nodes (14): CategoriesPage(), CategoryDialogState, CategoryTile(), SECTIONS, CategoryMovers(), Mover, CategorySpendingMix(), arc() (+6 more)
+Nodes (20): CashflowPoint, MonthlyBudgetLine, SurplusPoint, SearchInit, CashflowHistoryMonth, MonthLayout(), InvestmentRow(), ReviewLinks() (+12 more)
 
-### Community 15 - "Month Layout and Dashboard"
-Cohesion: 0.11
-Nodes (29): MonthLayout(), Comparison, comparisonRateText(), comparisonText(), ComparisonValue, DashboardData, DashboardMonthlyBudget, DashboardPage() (+21 more)
-
-### Community 16 - "Runtime Dependencies"
-Cohesion: 0.07
-Nodes (30): dependencies, @base-ui/react, class-variance-authority, clsx, cmdk, dexie, dexie-react-hooks, @fontsource-variable/inter (+22 more)
-
-### Community 17 - "Database Schema Rows"
-Cohesion: 0.11
-Nodes (28): AccountRow, AnalyticsMonthRow, BudgetRecordRow, BudgetRow, CategoryRow, DB_NAME, DB_VERSION, DuplicateDismissalRow (+20 more)
-
-### Community 18 - "Monthly Budget Logic"
-Cohesion: 0.21
-Nodes (21): MonthlyBudgetDefaultRow, updateAccount(), validateBudget(), cleanInput(), dismissDuplicatePair(), restoreDuplicatePair(), amountFor(), createMonthlyBudget() (+13 more)
-
-### Community 19 - "Spending Calendar"
-Cohesion: 0.29
-Nodes (9): compact(), heat(), INK, LEVELS, quantile(), rampCap(), SpendingCalendar(), STRENGTH (+1 more)
-
-### Community 20 - "Code Style Guide"
-Cohesion: 0.17
-Nodes (13): APIs, Arguments, And Props, Code Style, Consistency, Copy, Core, Earning Its Place, Finpoint Style Additions, Grouping And Order (+5 more)
-
-### Community 21 - "Statement Replacements"
+### Community 13 - "app-sidebar.tsx"
 Cohesion: 0.18
-Nodes (21): asPending(), dayDifference(), ensureCanReplace(), maskDescription(), ReplacementAllocation, replacementComparison(), replacementReason(), ReplacementStatement (+13 more)
+Nodes (27): AppearanceOption, Template(), AppSidebar(), SyncDot(), useSyncIndicator(), ShellHeader(), WorkflowTabs(), useDefaultFilterEndDateToday() (+19 more)
 
-### Community 22 - "Category History Chart"
-Cohesion: 0.24
-Nodes (12): aggregateSeries(), CategoryHistoryChart(), ChartMonth, ChartSeries, MonthBreakdown(), MonthTick(), monthTotal(), prepareMonths() (+4 more)
+### Community 14 - "categories/page.tsx"
+Cohesion: 0.26
+Nodes (9): CategoryDialogState, Mover, CategoryTile(), CategoryMovers(), CategorySpendingMix(), MonthlyBudgetBadge(), themeColor(), SECTIONS (+1 more)
 
-### Community 23 - "Biome Suspicious Rules"
-Cohesion: 0.07
-Nodes (28): suspicious, noAssignInExpressions, noAsyncPromiseExecutor, noCatchAssign, noClassAssign, noCompareNegZero, noControlCharactersInRegex, noDebugger (+20 more)
-
-### Community 24 - "Package Manifest"
-Cohesion: 0.07
-Nodes (29): private, $schema, type, babel-plugin-react-compiler, @biomejs/biome, clsx, cmdk, @fontsource-variable/inter (+21 more)
-
-### Community 25 - "Component Inventory Tests"
-Cohesion: 0.11
-Nodes (24): behaviourCoverage, componentInventory, facetNotApplicable, InventoryEntry, notApplicable, openFacets, RouteEntry, routeInventory (+16 more)
-
-### Community 26 - "Biome Correctness Rules"
-Cohesion: 0.08
-Nodes (26): noConstantCondition, noConstAssign, noEmptyCharacterClassInRegex, noEmptyPattern, noGlobalObjectCalls, noInvalidBuiltinInstantiation, noInvalidConstructorSuper, noNonoctalDecimalEscape (+18 more)
-
-### Community 27 - "Statement Rules"
-Cohesion: 0.07
-Nodes (49): Rule, RuleSentence(), StatementRulesPage(), ruleValueLabel(), byCreation(), conditionPattern(), deleteStatementRule(), listStatementRules() (+41 more)
-
-### Community 28 - "Component and Modal Tests"
-Cohesion: 0.23
-Nodes (6): bounds(), contained(), expectWheelScrollsPageWhileOpen(), expectDropdownPreservesScroll(), scrollWithInput(), settledOverlayAlpha()
-
-### Community 29 - "Drive Sync Status"
+### Community 15 - "(month)/page.tsx"
 Cohesion: 0.13
-Nodes (39): downloadBackupFile(), driveFetch(), findBackupFile(), getClockSkewMs(), getFileMeta(), isDriveConfigured(), uploadBackupFile(), useSyncStatus() (+31 more)
+Nodes (23): Comparison, ComparisonValue, DashboardData, DashboardMonthlyBudget, DashboardView, PaceData, Projection, WeekdayBreakdown (+15 more)
 
-### Community 30 - "Animation Browser Tests"
-Cohesion: 0.17
-Nodes (19): denseCardConsumers, denseRowConsumers, expectConsumerEntrance(), populatedConsumers, pickOption(), attachSamplingFailure(), expectPopupEntrance(), expectReducedRowMovement() (+11 more)
+### Community 17 - "data.ts"
+Cohesion: 0.13
+Nodes (22): AccountRow, AnalyticsMonthRow, BudgetRecordRow, BudgetRow, CategoryRow, DuplicateDismissalRow, MonthlyBudgetAmountRow, MonthlyBudgetDefaultRow (+14 more)
 
-### Community 31 - "Route and Table Tests"
-Cohesion: 0.14
-Nodes (22): Child, october, september, PREMATURE, routeReady, titles, getScenario(), installDateOnly() (+14 more)
-
-### Community 32 - "Google Drive Auth"
+### Community 18 - "Validator"
 Cohesion: 0.24
-Nodes (12): AuthNeededError, cacheToken(), CodeResponse, disconnectDrive(), DriveFileMeta, ensureDriveToken(), ensureDriveTokenSilent(), googleClientId() (+4 more)
+Nodes (19): Validator, updateAccount(), validateBudget(), cleanInput(), dismissDuplicatePair(), eligible(), fixDuplicates(), restoreDuplicatePair() (+11 more)
 
-### Community 33 - "Layer Architecture Rules"
+### Community 2 - "db.ts"
+Cohesion: 0.10
+Nodes (18): FinpointDB, MetaRow, RecordRow, SettingsRow, Snapshot, digestSnapshot(), hashLegacySnapshot(), hashSnapshot() (+10 more)
+
+### Community 21 - "statements.ts"
+Cohesion: 0.17
+Nodes (22): ReplacementAllocation, ReplacementStatement, StatementDetail, StatementFilters, StatementInput, asPending(), duplicateStatementIds(), dayDifference() (+14 more)
+
+### Community 22 - "category-history-chart.tsx"
+Cohesion: 0.24
+Nodes (12): ChartMonth, ChartSeries, SpendingSeries, SpendingHistoryMonth, aggregateSeries(), CategoryHistoryChart(), MonthBreakdown(), MonthTick() (+4 more)
+
+### Community 25 - "ledger.e2e.ts"
+Cohesion: 0.11
+Nodes (24): InventoryEntry, RouteEntry, SelectionProject, TestSelection, admitsOpenFacets(), collectOpenFacets(), declaredTests(), files() (+16 more)
+
+### Community 27 - "suggestions.ts"
+Cohesion: 0.11
+Nodes (31): AllocationRow, Clue, Evidence, Example, LearnedWeights, Model, RuleSuggestion, suggestionAccuracy (+23 more)
+
+### Community 29 - "auto-sync.ts"
+Cohesion: 0.11
+Nodes (48): AuthNeededError, CodeResponse, DriveFileMeta, Window, SyncActivity, SyncEvent, SyncKind, driveStatus (+40 more)
+
+### Community 30 - "support/motion.ts"
+Cohesion: 0.17
+Nodes (18): MotionFrame, MotionPose, RowAnimationSample, MotionConsumer, expectConsumerEntrance(), attachSamplingFailure(), expectPopupEntrance(), expectReducedRowMovement() (+10 more)
+
+### Community 31 - "core/routes.e2e.ts"
 Cohesion: 0.15
-Nodes (17): app/**/page.tsx, Background Drive sync, src/data/* (persistence, migrations, seeding, backup serialization, Drive storage), IndexedDB (Dexie), Interactive routes are "use client" (search params via next/navigation), src/logic/* (domain reads and operations), (month) route-group shell (Overview + Monthly Records), Pages take no props (+9 more)
+Nodes (16): Child, containedFooter(), expectPointerCursor(), installDateOnly(), setDateOnly(), fits(), patchRows(), statementRow() (+8 more)
 
-### Community 34 - "Export and Import Data"
-Cohesion: 0.17
-Nodes (21): withoutActionModes(), clearAllData(), downloadExport(), exportData(), importData(), parseImportFile(), SYNC_TABLES, tableCounts() (+13 more)
+### Community 32 - "fixtures.ts"
+Cohesion: 0.24
+Nodes (11): ScenarioName, WorkspaceDataset, WorkspaceTables, WorkspaceFixtures, assertSeeded(), checkSeededMarker(), countStore(), seedInBrowser() (+3 more)
 
-### Community 35 - "shadcn Components Config"
-Cohesion: 0.09
-Nodes (21): aliases, components, hooks, lib, ui, utils, iconLibrary, menuAccent (+13 more)
-
-### Community 36 - "Defaults and Test Data"
+### Community 34 - "export-import.ts"
 Cohesion: 0.16
-Nodes (16): DEFAULT_CATEGORIES, DEFAULT_MONTHLY_BUDGETS, EXPORT_VERSION, FinpointExport, BANK_BLURB, between(), CATEGORIES, DAILY (+8 more)
+Nodes (22): TableName, FinpointSettings, withoutActionModes(), clearAllData(), downloadExport(), exportData(), importData(), parseImportFile() (+14 more)
 
-### Community 37 - "Vite Harness Config"
-Cohesion: 0.29
-Nodes (4): vite, @vitejs/plugin-react, harnessDir, repoRoot
+### Community 36 - "test-data.ts"
+Cohesion: 0.16
+Nodes (16): FinpointExport, Meal, between(), generateTestData(), pad(), pick(), stamp(), DEFAULT_CATEGORIES (+8 more)
 
-### Community 38 - "Search and Filter Sheets"
-Cohesion: 0.20
-Nodes (25): PendingStatementConfirmationSheet(), RecordSearchSheet(), StatementSearchSheet(), AmountFilter(), AmountRange, COMPARISONS, describe(), Draft (+17 more)
+### Community 38 - "amount-filter.tsx"
+Cohesion: 0.24
+Nodes (22): AmountRange, Draft, PendingStatementConfirmationSheet(), RecordSearchSheet(), StatementSearchSheet(), AmountFilter(), describe(), readRange() (+14 more)
 
-### Community 39 - "Domain Type Definitions"
+### Community 39 - "types.d.ts"
 Cohesion: 0.11
 Nodes (18): Account, Allocation, AnalyticsSummary, AnalyticsTreatment, Appearance, Budget, Category, CategoryWithChildren (+10 more)
 
-### Community 40 - "Domain Glossary"
-Cohesion: 0.18
-Nodes (16): CONTEXT.md (domain vocabulary), Account, Allocation, Budget, Category, Duplicate Statement, Finpoint Domain Glossary, Monthly Budget (+8 more)
+### Community 4 - "sidebar.tsx"
+Cohesion: 0.08
+Nodes (32): SidebarContextProps, AppearanceSwitch(), SidebarContent(), SidebarFooter(), SidebarGroup(), SidebarGroupAction(), SidebarGroupContent(), SidebarGroupLabel() (+24 more)
 
-### Community 41 - "Auth Broker Routes"
-Cohesion: 0.29
-Nodes (14): POST(), POST(), POST(), jose, AUTH_COOKIE_NAME, authCookie(), authCookieConfig(), clientIp() (+6 more)
-
-### Community 42 - "Accounts and Duplicates Pages"
+### Community 42 - "Button"
 Cohesion: 0.05
-Nodes (171): AccountPage(), AccountCard(), AccountRow, AccountsPage(), CARD_MOTION, DuplicateGroupCard(), FixDuplicatesPage(), GroupHeader() (+163 more)
+Nodes (174): AccountRow, CandidatePage, BudgetState, Filters, BudgetProgressPoint, ReplacementReview, ReviewAllocation, DateRangeValue (+166 more)
 
-### Community 43 - "Duplicate Statement Detection"
-Cohesion: 0.21
-Nodes (16): allocationOutcome(), descriptionAnchors(), descriptionIdentity(), DuplicateGroup, duplicateGroups(), DuplicateStatement, duplicateStatementIds(), eligible() (+8 more)
+### Community 43 - "duplicates.ts"
+Cohesion: 0.22
+Nodes (13): DuplicateGroup, DuplicateStatement, FixDuplicatesInput, allocationOutcome(), descriptionAnchors(), descriptionIdentity(), duplicateGroups(), pairIds() (+5 more)
 
-### Community 44 - "Category Filter and Command"
+### Community 44 - "category-filter.tsx"
+Cohesion: 0.20
+Nodes (18): Props, DateField(), CategoryFilter(), CategoryFilterItem(), Command(), CommandEmpty(), CommandGroup(), CommandInput() (+10 more)
+
+### Community 45 - "trend-chart.tsx"
+Cohesion: 0.15
+Nodes (20): BarSeries, ChartSize, MonthlyBudgetUsageItem, TrendSeries, bar(), BarChart(), ChartFrame(), ReadoutRows() (+12 more)
+
+### Community 49 - "pagination.tsx"
+Cohesion: 0.38
+Nodes (11): PaginationLinkProps, pageHref(), pageWindow(), PaginationFooter(), Pagination(), PaginationContent(), PaginationEllipsis(), PaginationItem() (+3 more)
+
+### Community 5 - "dashboard.ts"
+Cohesion: 0.11
+Nodes (41): AnalyticsRecord, AnalyticsSummary, DashboardInput, LoadedTables, TrendMonth, MonthlyFilters, contribution(), summarize() (+33 more)
+
+### Community 50 - "records.ts"
+Cohesion: 0.10
+Nodes (31): BudgetDetail, BudgetFilters, CategoryInput, AllocationTally, ConflictError, RecordDetail, RecordFilters, RecordInput (+23 more)
+
+### Community 54 - "history.tsx"
+Cohesion: 0.39
+Nodes (7): HistoryItem, getStoredHistory(), getValidHistory(), HistoryProvider(), normaliseUrl(), withoutTrailingSelf(), HistoryContext
+
+### Community 60 - "sync/page.tsx"
+Cohesion: 0.13
+Nodes (28): StatusTone, SyncSnapshot, DataSettingsPage(), StateRow(), WorkspaceRow(), AlertDialog(), AlertDialogAction(), AlertDialogCancel() (+20 more)
+
+### Community 7 - "providers.tsx"
+Cohesion: 0.14
+Nodes (23): Appearance, ResolvedAppearance, RootLayout(), Boot(), Providers(), Toaster(), applyAppearance(), getStoredAppearance() (+15 more)
+
+### Community 9 - "importer/page.tsx"
+Cohesion: 0.20
+Nodes (25): ImportResult, Parsed, Row, ValidationError, ImporterPage(), Step(), ensureAccount(), combine() (+17 more)
+
+### Community 98 - "lucide-react"
+Cohesion: 0.22
+Nodes (11): ButtonVariant, Month, MonthCalProps, Calendar(), CalendarDayButton(), MonthCal(), MonthPicker(), buttonVariants (+3 more)
+
+### Community 0 - "collectTests"
+Cohesion: 0.28
+Nodes (16): collectTests(), conditionBranch(), detailsTags(), disabled(), mentionsMotion(), record(), splitTestCallee(), tagValues() (+8 more)
+
+### Community 12 - "editors.ts"
+Cohesion: 0.13
+Nodes (20): expectHeldRead(), expectRetainedRows(), expectSilentSheet(), expectVisibleBackdrop(), chooseCategory(), openEditor(), pickOption(), select() (+12 more)
+
+### Community 19 - "spending-calendar.tsx"
+Cohesion: 0.29
+Nodes (9): compact(), heat(), quantile(), rampCap(), SpendingCalendar(), INK, LEVELS, STRENGTH (+1 more)
+
+### Community 28 - "core/components.e2e.ts"
+Cohesion: 0.15
+Nodes (9): bounds(), contained(), expectWheelScrollsPageWhileOpen(), expectDropdownPreservesScroll(), scrollWithInput(), settledOverlayAlpha(), desktopOnly, APP_URL (+1 more)
+
+### Community 41 - "auth-vault.ts"
+Cohesion: 0.29
+Nodes (14): POST(), POST(), POST(), authCookie(), authCookieConfig(), clientIp(), encryptionKey(), rateLimit() (+6 more)
+
+### Community 6 - "primitives.tsx"
+Cohesion: 0.10
+Nodes (45): AlertAction(), AlertDialogTrigger(), ComboboxCollection(), ComboboxValue(), DropdownMenu(), DropdownMenuCheckboxItem(), DropdownMenuContent(), DropdownMenuGroup() (+37 more)
+
+### Community 64 - "cn"
+Cohesion: 0.17
+Nodes (24): ComboboxChip(), ComboboxChips(), ComboboxChipsInput(), ComboboxClear(), ComboboxContent(), ComboboxEmpty(), ComboboxGroup(), ComboboxInput() (+16 more)
+
+### Community 8 - "@playwright/test"
+Cohesion: 0.23
+Nodes (7): card(), themedRgb(), cardTitles, chartTooltip, overview, overviewCharts, @playwright/test
+
+### Community 95 - "radix-ui"
+Cohesion: 0.24
+Nodes (10): AppHeader(), ButtonGroup(), ButtonGroupSeparator(), ButtonGroupText(), FieldSeparator(), Separator(), SidebarSeparator(), SidebarTrigger() (+2 more)
+
+### Community 102 - "Validation rule (ValidationError + Validator)"
+Cohesion: 0.50
+Nodes (4): ValidationError, Validator, Old Laravel Api/*Controller mapping, Laravel-shaped { field: string[] } error maps
+
+### Community 3 - "Tests README"
+Cohesion: 0.06
+Nodes (41): graphify-out/graph.json, graphify skill (--update), graphify update ., Build app step, Build harness step (tests/harness/vite.config.ts), Playwright browser cache (keyed on bun.lock), setup composite action, animations gate job (+33 more)
+
+### Community 33 - "src/data/* (persistence, migrations, seeding, backup serialization, Drive storage)"
+Cohesion: 0.15
+Nodes (17): app/**/page.tsx, src/data/* (persistence, migrations, seeding, backup serialization, Drive storage), IndexedDB (Dexie), src/logic/* (domain reads and operations), src/routes.ts (centralized route paths), useLiveQuery, Background Drive sync, Interactive routes are "use client" (search params via next/navigation) (+9 more)
+
+### Community 51 - "Commands"
+Cohesion: 0.20
+Nodes (11): Biome (biome check --write), bun install, bun lint (write-mode), bun lint:check, bun run build, bun types:check, src/components/*, src/components/ui/**/* (+3 more)
+
+### Community 52 - "Next.js agent rules block ("This is NOT the Next.js you know")"
+Cohesion: 0.18
+Nodes (9): app/api/auth/* Route Handlers, bun test, node_modules/next/dist/server/lib/generate-agent-files.js, npm run dev (port 5173), Google OAuth broker (exchange/token/logout), Domain and importer tests (Dexie with in-memory IndexedDB), Next.js App Router app (mostly client-side), Verification (+1 more)
+
+### Community 65 - "Domain docs (single-context layout)"
 Cohesion: 0.33
-Nodes (11): CategoryFilter(), CategoryFilterItem(), Command(), CommandEmpty(), CommandGroup(), CommandInput(), CommandItem(), CommandList() (+3 more)
+Nodes (7): Agent skills, Domain docs (single-context layout), Domain Language, Issue tracker (local specs and tickets), .scratch/ local work tracking, String primary keys (not auto-increment), CONTEXT.md
 
-### Community 45 - "Bar and Trend Charts"
-Cohesion: 0.19
-Nodes (17): bar(), BarChart(), BarSeries, PAD, ChartFrame(), ChartSize, ReadoutRows(), PAD (+9 more)
+### Community 11 - "compilerOptions"
+Cohesion: 0.06
+Nodes (33): compilerOptions, allowJs, allowSyntheticDefaultImports, allowUnusedLabels, esModuleInterop, forceConsistentCasingInFileNames, incremental, isolatedModules (+25 more)
 
-### Community 47 - "Biome Formatter Style"
+### Community 16 - "dependencies"
+Cohesion: 0.07
+Nodes (30): dependencies, @base-ui/react, class-variance-authority, clsx, cmdk, dexie, dexie-react-hooks, @fontsource-variable/inter (+22 more)
+
+### Community 20 - "STYLE.md"
+Cohesion: 0.17
+Nodes (13): APIs, Arguments, And Props, Code Style, Consistency, Copy, Core, Earning Its Place, Finpoint Style Additions, Grouping And Order (+5 more)
+
+### Community 23 - "suspicious"
+Cohesion: 0.07
+Nodes (28): suspicious, noAssignInExpressions, noAsyncPromiseExecutor, noCatchAssign, noClassAssign, noCompareNegZero, noControlCharactersInRegex, noDebugger (+20 more)
+
+### Community 24 - "package.json"
+Cohesion: 0.07
+Nodes (29): private, $schema, type, babel-plugin-react-compiler, @biomejs/biome, clsx, cmdk, @fontsource-variable/inter (+21 more)
+
+### Community 26 - "correctness"
+Cohesion: 0.08
+Nodes (26): noConstantCondition, noConstAssign, noEmptyCharacterClassInRegex, noEmptyPattern, noGlobalObjectCalls, noInvalidBuiltinInstantiation, noInvalidConstructorSuper, noNonoctalDecimalEscape (+18 more)
+
+### Community 35 - "components.json"
+Cohesion: 0.09
+Nodes (21): aliases, components, hooks, lib, ui, utils, iconLibrary, menuAccent (+13 more)
+
+### Community 37 - "vite.config.ts"
+Cohesion: 0.29
+Nodes (4): harnessDir, repoRoot, vite, @vitejs/plugin-react
+
+### Community 47 - "formatter"
 Cohesion: 0.15
 Nodes (13): arrowParentheses, bracketSameLine, bracketSpacing, jsxQuoteStyle, quoteProperties, quoteStyle, semicolons, trailingCommas (+5 more)
 
-### Community 48 - "Dev Dependencies"
+### Community 48 - "devDependencies"
 Cohesion: 0.15
 Nodes (13): devDependencies, babel-plugin-react-compiler, @biomejs/biome, fake-indexeddb, @playwright/test, @tailwindcss/postcss, @types/luxon, @types/node (+5 more)
 
-### Community 49 - "Pagination Components"
-Cohesion: 0.38
-Nodes (11): pageHref(), pageWindow(), PaginationFooter(), Pagination(), PaginationContent(), PaginationEllipsis(), PaginationItem(), PaginationLink() (+3 more)
-
-### Community 50 - "Budgets and Records Logic"
-Cohesion: 0.12
-Nodes (22): round2(), BudgetDetail, BudgetFilters, createBudget(), getBudget(), listBudgets(), updateBudget(), inferRecordDatetime() (+14 more)
-
-### Community 51 - "Commands and Agent Behavior"
-Cohesion: 0.20
-Nodes (11): Agent Behavior, Biome (biome check --write), bun install, bun lint (write-mode), bun lint:check, bun run build, bun types:check, Commands (+3 more)
-
-### Community 52 - "Verification and Next.js Rules"
-Cohesion: 0.18
-Nodes (9): app/api/auth/* Route Handlers, bun test, node_modules/next/dist/server/lib/generate-agent-files.js, Google OAuth broker (exchange/token/logout), Domain and importer tests (Dexie with in-memory IndexedDB), Next.js App Router app (mostly client-side), node_modules/next/dist/docs/, npm run dev (port 5173) (+1 more)
-
-### Community 53 - "Analytics and Categories Logic"
-Cohesion: 0.21
-Nodes (9): AnalyticsRecord, AnalyticsSummary, CategoryInput, createCategory(), updateCategory(), fromCents(), slugify(), TREATMENT_VALUES (+1 more)
-
-### Community 54 - "Navigation History Provider"
-Cohesion: 0.39
-Nodes (7): getStoredHistory(), getValidHistory(), HistoryContext, HistoryItem, HistoryProvider(), normaliseUrl(), withoutTrailingSelf()
-
-### Community 55 - "Biome Configuration"
+### Community 55 - "biome.json"
 Cohesion: 0.18
 Nodes (10): source, assist, actions, files, includes, linter, enabled, overrides (+2 more)
 
-### Community 56 - "Biome Complexity Rules"
+### Community 56 - "rules"
 Cohesion: 0.18
 Nodes (11): noAdjacentSpacesInRegex, noBannedTypes, noExtraBooleanCast, noUselessCatch, noUselessThisAlias, noUselessTypeConstraint, rules, noFloatingPromises (+3 more)
 
-### Community 57 - "PWA Web Manifest"
+### Community 57 - "manifest.json"
 Cohesion: 0.20
 Nodes (9): background_color, description, display, icons, name, scope, short_name, start_url (+1 more)
 
-### Community 58 - "Playwright Config and URLs"
-Cohesion: 0.38
-Nodes (3): desktopOnly, APP_URL, HARNESS_URL
-
-### Community 59 - "NPM Scripts"
+### Community 59 - "scripts"
 Cohesion: 0.22
 Nodes (9): scripts, build, dev, lint, lint:check, start, test:e2e, types:check (+1 more)
 
-### Community 60 - "Data Settings and Alerts"
-Cohesion: 0.16
-Nodes (24): COUNT_ROWS, DataSettingsPage(), StateRow(), STATUS_TONES, StatusTone, WorkspaceRow(), AlertDialog(), AlertDialogAction() (+16 more)
-
-### Community 62 - "Biome Formatter Options"
+### Community 62 - "formatter"
 Cohesion: 0.25
 Nodes (8): formatter, attributePosition, enabled, formatWithErrors, indentStyle, indentWidth, lineEnding, lineWidth
 
-### Community 63 - "Dashboard and Budgets Features"
-Cohesion: 0.32
-Nodes (8): Allocator, Budgets, Categories, Dashboard, Statement-allocation-record model, Monthly Budgets, Records, Statement importer
-
-### Community 64 - "Combobox Components"
-Cohesion: 0.11
-Nodes (24): @base-ui/react, Props, ComboboxChip(), ComboboxChips(), ComboboxChipsInput(), ComboboxClear(), ComboboxCollection(), ComboboxContent() (+16 more)
-
-### Community 65 - "Domain and Tracker Docs"
-Cohesion: 0.33
-Nodes (7): Agent skills, CONTEXT.md, Domain docs (single-context layout), Domain Language, Issue tracker (local specs and tickets), .scratch/ local work tracking, String primary keys (not auto-increment)
-
-### Community 66 - "Optional Platform Dependencies"
+### Community 66 - "optionalDependencies"
 Cohesion: 0.29
 Nodes (7): optionalDependencies, lightningcss-linux-x64-gnu, lightningcss-win32-x64-msvc, @rollup/rollup-linux-x64-gnu, @rollup/rollup-win32-x64-msvc, @tailwindcss/oxide-linux-x64-gnu, @tailwindcss/oxide-win32-x64-msvc
 
-### Community 68 - "E2E TypeScript Config"
+### Community 68 - "tsconfig.e2e.json"
 Cohesion: 0.29
-Nodes (6): ./tsconfig.json, compilerOptions, incremental, exclude, extends, include
+Nodes (6): compilerOptions, incremental, exclude, extends, include, ./tsconfig.json
 
-### Community 69 - "Biome Style Rules"
+### Community 69 - "style"
 Cohesion: 0.33
 Nodes (6): style, noNamespace, noNonNullAssertion, useArrayLiterals, useAsConstAssertion, useBlockStatements
 
-### Community 72 - "Finpoint Icon Concept"
-Cohesion: 0.40
-Nodes (5): Finpoint icon concept, Charcoal shadow halo, Circular point, Rounded F monogram, Off-white icon fill
-
-### Community 73 - "Finpoint Icon With Shadow"
-Cohesion: 0.40
-Nodes (5): Finpoint icon with charcoal shadow, Charcoal shadow halo, Circular point, Rounded F monogram, Off-white icon fill
-
-### Community 74 - "Local Issue Tracker"
+### Community 74 - "Issue tracker: Local Markdown"
 Cohesion: 0.40
 Nodes (4): Files, Issue tracker: Local Markdown, Skill operations, Status and dependencies
 
-### Community 75 - "Finpoint Icon Elements"
-Cohesion: 0.50
-Nodes (4): Finpoint, Circular point, Rounded F monogram, Off-white icon fill
-
-### Community 76 - "Domain Docs Guide"
+### Community 76 - "Domain docs"
 Cohesion: 0.50
 Nodes (3): Before exploration, Domain docs, Writing
 
-### Community 77 - "Local Tracker Operations"
-Cohesion: 0.50
-Nodes (4): Local Tracker Operations, Spec and Ticket Files, Ticket Lifecycle, Local Markdown Issue Tracker
+### Community 63 - "Records"
+Cohesion: 0.32
+Nodes (8): Allocator, Budgets, Categories, Dashboard, Statement-allocation-record model, Monthly Budgets, Records, Statement importer
 
-### Community 79 - "Drive Sync and Backup"
+### Community 72 - "Finpoint icon concept"
+Cohesion: 0.40
+Nodes (5): Charcoal shadow halo, Circular point, Rounded F monogram, Off-white icon fill, Finpoint icon concept
+
+### Community 73 - "Finpoint icon with charcoal shadow"
+Cohesion: 0.40
+Nodes (5): Charcoal shadow halo, Circular point, Rounded F monogram, Off-white icon fill, Finpoint icon with charcoal shadow
+
+### Community 75 - "Finpoint"
+Cohesion: 0.50
+Nodes (4): Circular point, Rounded F monogram, Off-white icon fill, Finpoint
+
+### Community 79 - "Google Drive sync"
 Cohesion: 0.50
 Nodes (4): Google Drive sync, JSON backup and restore, Local-first finance tracking, Sync conflict handling
 
-### Community 80 - "F Monogram Icon"
+### Community 80 - "F monogram icon"
 Cohesion: 0.67
 Nodes (3): Circular dot beside F, Rounded F letterform, F monogram icon
 
-### Community 81 - "JPG Favicon Icon"
+### Community 81 - "JPG favicon icon"
 Cohesion: 0.67
 Nodes (3): JPG favicon dot, JPG favicon F letterform, JPG favicon icon
 
-### Community 82 - "PNG Favicon Icon"
+### Community 82 - "PNG favicon icon"
 Cohesion: 0.67
 Nodes (3): PNG favicon dot, PNG favicon F letterform, PNG favicon icon
 
-### Community 83 - "SVG Favicon Icon"
+### Community 83 - "SVG favicon icon"
 Cohesion: 0.67
 Nodes (3): SVG favicon dot, SVG favicon F letterform, SVG favicon icon
 
-### Community 84 - "F Monogram Icon Variant"
+### Community 84 - "F monogram icon"
 Cohesion: 0.67
 Nodes (3): Circular dot beside F, Rounded F letterform, F monogram icon
 
-### Community 85 - "F Monogram Icon Copy"
+### Community 85 - "F monogram icon"
 Cohesion: 0.67
 Nodes (3): Circular dot beside F, Rounded F letterform, F monogram icon
 
-### Community 95 - "Button Group and Separators"
-Cohesion: 0.22
-Nodes (11): class-variance-authority, radix-ui, AppHeader(), ButtonGroup(), ButtonGroupSeparator(), ButtonGroupText(), buttonGroupVariants, FieldSeparator() (+3 more)
-
-### Community 98 - "Month Picker"
-Cohesion: 0.33
-Nodes (6): ButtonVariant, Month, MonthCal(), MonthCalProps, MonthPicker(), MONTHS
-
-### Community 100 - "Charts and Next Templates"
-Cohesion: 0.20
-Nodes (15): InvestmentRow(), ReviewLinks(), Template(), nextConfig, next, CashflowChart(), CashflowPoint, DailySpendingChart() (+7 more)
-
-### Community 102 - "Validation Logic"
+### Community 77 - "Local Markdown Issue Tracker"
 Cohesion: 0.50
-Nodes (4): Old Laravel Api/*Controller mapping, Laravel-shaped { field: string[] } error maps, ValidationError, Validator
+Nodes (4): Spec and Ticket Files, Local Tracker Operations, Ticket Lifecycle, Local Markdown Issue Tracker
+
+### Community 40 - "Monthly Budget"
+Cohesion: 0.18
+Nodes (16): Monthly Budget amount, Finpoint Domain Glossary, Account, Allocation, Budget, Category, Duplicate Statement, Monthly Budget (+8 more)
 
 ## Knowledge Gaps
 - **83 isolated node(s):** `Build app step`, `Build harness step (tests/harness/vite.config.ts)`, `Playwright browser cache (keyed on bun.lock)`, `Graph health warnings and refresh failure reporting`, `gitmoji.dev` (+78 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 588 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 589 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **11 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `cn()` connect `Sidebar and Appearance` to `Combobox Components`, `Record and Account Dialogs`, `Month Picker`, `Search and Filter Sheets`, `Dropdown Menu Primitives`, `Statement Importer`, `Accounts and Duplicates Pages`, `Data Table Components`, `Category Filter and Command`, `Bar and Trend Charts`, `Categories Page and Charts`, `Month Layout and Dashboard`, `App Sidebar and Header`, `Pagination Components`, `Spending Calendar`, `Statement Rules`, `Data Settings and Alerts`, `Button Group and Separators`?**
-  _High betweenness centrality (0.089) - this node is a cross-community bridge._
+- **Why does `cn()` connect `cn` to `react`, `lucide-react`, `next`, `sidebar.tsx`, `amount-filter.tsx`, `primitives.tsx`, `importer/page.tsx`, `Button`, `lib/motion.ts`, `category-filter.tsx`, `trend-chart.tsx`, `categories/page.tsx`, `(month)/page.tsx`, `app-sidebar.tsx`, `pagination.tsx`, `spending-calendar.tsx`, `sync/page.tsx`, `radix-ui`?**
+  _High betweenness centrality (0.094) - this node is a cross-community bridge._
 - **What connects `Build app step`, `Build harness step (tests/harness/vite.config.ts)`, `Playwright browser cache (keyed on bun.lock)` to the rest of the system?**
   _83 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `Record and Account Dialogs` be split into smaller, more focused modules?**
-  _Cohesion score 0.07278636856101645 - nodes in this community are weakly interconnected._
-- **Why does `react` connect `Record and Account Dialogs` to `Sidebar and Appearance`, `Dropdown Menu Primitives`, `Root Layout and Providers`, `Statement Importer`, `Data Table Components`, `App Sidebar and Header`, `Categories Page and Charts`, `Month Layout and Dashboard`, `Spending Calendar`, `Category History Chart`, `Package Manifest`, `Statement Rules`, `Drive Sync Status`, `Search and Filter Sheets`, `Accounts and Duplicates Pages`, `Category Filter and Command`, `Bar and Trend Charts`, `Pagination Components`, `Navigation History Provider`, `Data Settings and Alerts`, `Combobox Components`, `Button Group and Separators`, `Month Picker`?**
-  _High betweenness centrality (0.063) - this node is a cross-community bridge._
-- **Should `Test Database and Snapshots` be split into smaller, more focused modules?**
-  _Cohesion score 0.11692307692307692 - nodes in this community are weakly interconnected._
-- **Why does `src/data/* (persistence, migrations, seeding, backup serialization, Drive storage)` connect `Layer Architecture Rules` to `Root Layout and Providers`?**
-  _High betweenness centrality (0.044) - this node is a cross-community bridge._
-- **Should `Project Graph Rules` be split into smaller, more focused modules?**
-  _Cohesion score 0.05928614640048397 - nodes in this community are weakly interconnected._
+- **Should `react` be split into smaller, more focused modules?**
+  _Cohesion score 0.06800766283524905 - nodes in this community are weakly interconnected._
+- **Why does `react` connect `react` to `sidebar.tsx`, `primitives.tsx`, `providers.tsx`, `importer/page.tsx`, `lib/motion.ts`, `app-sidebar.tsx`, `categories/page.tsx`, `(month)/page.tsx`, `spending-calendar.tsx`, `category-history-chart.tsx`, `package.json`, `amount-filter.tsx`, `Button`, `category-filter.tsx`, `trend-chart.tsx`, `pagination.tsx`, `history.tsx`, `sync/page.tsx`, `cn`, `radix-ui`, `lucide-react`, `next`?**
+  _High betweenness centrality (0.062) - this node is a cross-community bridge._
+- **Should `lib/motion.ts` be split into smaller, more focused modules?**
+  _Cohesion score 0.10087719298245613 - nodes in this community are weakly interconnected._
+- **Why does `src/data/* (persistence, migrations, seeding, backup serialization, Drive storage)` connect `src/data/* (persistence, migrations, seeding, backup serialization, Drive storage)` to `providers.tsx`?**
+  _High betweenness centrality (0.055) - this node is a cross-community bridge._
+- **Should `(month)/page.tsx` be split into smaller, more focused modules?**
+  _Cohesion score 0.13230769230769232 - nodes in this community are weakly interconnected._
