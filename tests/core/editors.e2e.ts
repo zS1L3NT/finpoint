@@ -982,3 +982,24 @@ test.describe("empty workspace", () => {
 		).toBeEnabled()
 	})
 })
+
+test("Monthly Records editor: saved title appears immediately and survives reload", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	await page.goto("/records/monthly?month=October&year=2026")
+	await page.getByRole("button", { name: "Edit FairPrice Run", exact: true }).click()
+	const dialog = page.getByRole("dialog", { name: "Edit Record", exact: true })
+	await dialog.getByLabel("Title", { exact: true }).fill("Updated groceries")
+	await dialog.getByLabel("Title", { exact: true }).press("Escape")
+	await dialog.getByRole("button", { name: "Save changes", exact: true }).click()
+	await expect(dialog).not.toBeVisible()
+	await expect(
+		page.getByRole("button", { name: "Edit Updated groceries", exact: true }),
+	).toBeVisible()
+	await page.reload()
+	await expect(
+		page.getByRole("button", { name: "Edit Updated groceries", exact: true }),
+	).toBeVisible()
+})
