@@ -87,6 +87,16 @@ test("conditions compare the description as literal, case-insensitive text", () 
 	expect(matchesStatement(both("all"), s)).toBe(false)
 	expect(matchesStatement(both("any"), s)).toBe(true)
 })
+test("rules list by name, ignoring case and reading numbers whole", async () => {
+	for (const name of ["taxi", "Bus 10", "Bus 2", "Canteen"]) await saveStatementRule(input({ name }))
+
+	expect((await listStatementRules()).map(rule => rule.name)).toEqual([
+		"Bus 2",
+		"Bus 10",
+		"Canteen",
+		"taxi",
+	])
+})
 test("rules apply to every matching Statement whenever a Record is created", async () => {
 	await db.statements.add(statement("old"))
 	const rule = await saveStatementRule(input())

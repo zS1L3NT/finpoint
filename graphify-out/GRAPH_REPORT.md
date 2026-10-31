@@ -4,116 +4,108 @@
 - cluster-only mode — file stats not available
 
 ## Summary
-- 1943 nodes · 7809 edges · 103 communities (92 shown, 11 thin omitted)
-- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 127 edges (avg confidence: 0.84)
-- Token cost: 52,654 input · 1,347 output
+- 1944 nodes · 7810 edges · 95 communities (84 shown, 11 thin omitted)
+- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 126 edges (avg confidence: 0.84)
+- Token cost: 29,404 input · 1,225 output
 
 ## Graph Freshness
-- Built from commit: `f5ae5138`
+- Built from commit: `1a9267b3`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
-- Duplicate & Pending Views
-- Budget & Record Dialogs
-- Domain & Importer Tests
-- Graph Refresh Rules
-- Sidebar & Appearance Shell
-- Analytics Calculations
-- Dropdown & Alert Primitives
+- Test Source Analysis Helpers
+- Duplicates and Record Dialogs
+- Dexie Database Schema
+- Graph Artifact Rules
+- App Shell and Sidebar
+- Dashboard Analytics Builders
+- Filters and Combobox UI
 - Appearance Theme Hook
-- Chart Browser Tests
-- Statement File Importers
+- Chart E2E Tests
+- Statement Importer Logic
 - Data Table Components
-- TypeScript Compiler Config
-- Editor & Sheet Tests
-- App Sidebar & Header
-- Month Layout & Metrics
-- Dashboard View
+- TypeScript Config
+- Editor and Sheet Tests
+- Month Layout and Recurring
+- Logic and Data Layers
+- Month Overview Page
 - Runtime Dependencies
-- Database Schema Types
-- Monthly Budget Logic
+- Test Data Fixtures
+- Monthly Budgets and Duplicates Logic
 - Spending Calendar
-- Budget & Cashflow Charts
-- Duplicate Replacement Logic
+- UI Layer Conventions
+- Statement Replacements Logic
 - Category History Chart
 - Biome Suspicious Rules
 - Package Manifest
-- Component Inventory Tooling
+- Test Component Inventory
 - Biome Correctness Rules
-- Record Suggestions Engine
-- Component Browser Tests
-- Sync Status & Auto-sync
-- Animation Tests
-- Workspace Test Fixtures
-- Google Drive Integration
-- Layer Architecture Rules
-- Export & Import Data
-- shadcn Component Config
-- Seed & Test Data
-- Combobox Components
-- Search Sheets & Filters
-- Domain Type Definitions
+- Suggestion Scoring Logic
+- Playwright Component Tests
+- Drive Sync Engine
+- Animation Test Helpers
+- Route Animation and Fixtures
+- Google Drive Client
+- UI Architecture Rules
+- Export Import and Seeding
+- shadcn Components Config
+- Seed Defaults and Test Data
+- Vite Harness Config
+- Search Sheets and Filters
+- Shared Domain Types
 - Domain Glossary
-- Auth Broker Routes
-- Categories & Monthly Pages
+- Auth Route Handlers
+- Accounts and Allocator Pages
 - Duplicate Detection Logic
-- Database & Seeding
-- Bar & Trend Charts
-- Navigation Tests
+- Sync Toasts and Boot
+- Bar Chart Components
+- Navigation E2E Tests
 - Biome Formatter Options
 - Dev Dependencies
 - Pagination Components
-- Budgets & Pending Logic
-- Commands & Tooling Rules
-- Verification & Next.js Rules
-- Month Filters & Command
-- Route & Table Tests
+- Records and Analytics Logic
+- Project Commands
+- Next.js Auth Broker
+- Route and Table Tests
 - Biome Config
 - Biome Complexity Rules
 - Web App Manifest
-- Accounts & Importer Pages
+- Importer and Dashboard Pages
 - NPM Scripts
-- Data Settings & Alerts
-- Records & Statements Pages
+- Data Settings and Dialogs
 - Biome Formatter Settings
-- Core Domain Concepts
-- Budgets Page & Date Fields
-- Agent Skills & Docs
+- Product Feature Overview
+- Form Field Components
+- Domain and Tracker Docs
 - Optional Platform Dependencies
-- Record Table Columns
 - E2E TypeScript Config
 - Biome Style Rules
-- Root Layout & Harness
-- Code Style Guide
+- Icon Concept Shadow
 - Icon With Shadow
-- Icon With Shadow Variant
 - Issue Tracker Docs
 - Finpoint Icon
 - Domain Docs Guide
 - Local Tracker Operations
-- Drive Sync Overview
+- Local-first Sync Features
 - F Monogram Icon
 - JPG Favicon
 - PNG Favicon
 - SVG Favicon
-- F Monogram Icon Variant
-- F Monogram Icon Copy
+- F Monogram Dot
+- F Monogram Letterform
 - App Icon Palette
 - Domain Docs Conflicts
 - Conventions
 - Crawler Policy
-- Demo Data Generation
-- PWA Setup
-- Statement Rules Logic
-- UI Header & Button Group
-- Recurring Charge Suggestions
-- Recurring Page & Month Params
-- Month Picker & Toaster
+- Generated Demo Data
+- Progressive Web App
+- Header and Button UI
+- Month Picker
 - Workflow E2E Tests
-- History Navigation Context
-- Workflow Tabs & Settings
-- Validation Errors
+- Dashboard Chart Components
+- Settings Hook
+- Validation Error Handling
 
 ## God Nodes (most connected - your core abstractions)
 1. `cn()` - 323 edges
@@ -151,191 +143,191 @@
 - **Test group to gate to merged report flow** — github_workflows_ci_core_group, github_workflows_ci_animations_group, github_workflows_ci_core, github_workflows_ci_animations, github_workflows_ci_blob_report_merge [EXTRACTED 1.00]
 - **Every browser test file joins exactly one CI group, enforced by the ledger** — tests_readme_behaviour_ledger, tests_readme_ci_groups, github_workflows_ci_core_group, github_workflows_ci_animations_group, agents_verification_rules [INFERRED 0.95]
 
-## Communities (103 total, 11 thin omitted)
+## Communities (95 total, 11 thin omitted)
 
-### Community 0 - "Duplicate & Pending Views"
-Cohesion: 0.20
-Nodes (31): CARD_MOTION, DuplicateGroupCard(), FixDuplicatesPage(), GroupHeader(), highlightDifferences(), VIEWS, AllocatorPendingPage(), CandidatePage (+23 more)
+### Community 0 - "Test Source Analysis Helpers"
+Cohesion: 0.28
+Nodes (16): collectTests(), conditionBranch(), detailsTags(), disabled(), mentionsMotion(), record(), splitTestCallee(), tagValues() (+8 more)
 
-### Community 1 - "Budget & Record Dialogs"
+### Community 1 - "Duplicates and Record Dialogs"
 Cohesion: 0.07
-Nodes (130): CandidateResults(), BudgetPage(), getBudgetAnalytics(), getCategoryData(), Legend(), SECTIONS, ImporterPage(), Step() (+122 more)
+Nodes (115): CARD_MOTION, DuplicateGroupCard(), FixDuplicatesPage(), GroupHeader(), highlightDifferences(), VIEWS, AllocatorPendingPage(), CandidatePage (+107 more)
 
-### Community 2 - "Domain & Importer Tests"
-Cohesion: 0.14
-Nodes (7): dexie, fake-indexeddb, xlsx, decided(), live(), record(), statement()
+### Community 2 - "Dexie Database Schema"
+Cohesion: 0.08
+Nodes (21): dexie, fake-indexeddb, xlsx, AccountRow, AnalyticsMonthRow, DB_NAME, DB_VERSION, FinpointDB (+13 more)
 
-### Community 3 - "Graph Refresh Rules"
+### Community 3 - "Graph Artifact Rules"
 Cohesion: 0.06
 Nodes (41): Build harness step (vite build tests/harness), Playwright browser cache keyed on bun.lock, blob report merge, Committed graph artifacts (graph.json, GRAPH_REPORT.md, manifest.json, .graphify_labels.json), Graph health warnings and refresh failure reporting, graphify-out/graph.json, graphify skill (--update), graphify update . (+33 more)
 
-### Community 4 - "Sidebar & Appearance Shell"
-Cohesion: 0.12
-Nodes (33): Providers(), AppearanceSwitch(), SidebarContent(), SidebarContext, SidebarContextProps, SidebarFooter(), SidebarGroup(), SidebarGroupAction() (+25 more)
+### Community 4 - "App Shell and Sidebar"
+Cohesion: 0.09
+Nodes (42): metadata, RootLayout(), viewport, Providers(), AppearanceOption, APPEARANCES, AppearanceSwitch(), AppSidebar() (+34 more)
 
-### Community 5 - "Analytics Calculations"
-Cohesion: 0.11
-Nodes (42): AnalyticsRecord, AnalyticsSummary, contribution(), summarize(), avg(), buildCashflowHistory(), buildCategories(), buildComparison() (+34 more)
-
-### Community 6 - "Dropdown & Alert Primitives"
+### Community 5 - "Dashboard Analytics Builders"
 Cohesion: 0.10
-Nodes (42): AlertAction(), AlertDialogTrigger(), DropdownMenu(), DropdownMenuCheckboxItem(), DropdownMenuContent(), DropdownMenuGroup(), DropdownMenuItem(), DropdownMenuLabel() (+34 more)
+Nodes (42): AllocationRow, contribution(), summarize(), avg(), BREAKDOWN_MONTHS, buildCashflowHistory(), buildCategories(), buildComparison() (+34 more)
+
+### Community 6 - "Filters and Combobox UI"
+Cohesion: 0.09
+Nodes (54): CategoryFilter(), CategoryFilterItem(), AlertAction(), AlertDialogTrigger(), ComboboxChip(), ComboboxChips(), ComboboxChipsInput(), ComboboxClear() (+46 more)
 
 ### Community 7 - "Appearance Theme Hook"
 Cohesion: 0.26
 Nodes (14): Appearance, applyAppearance(), getStoredAppearance(), handleSystemThemeChange(), initializeAppearance(), isDarkMode(), listeners, mediaQuery() (+6 more)
 
-### Community 8 - "Chart Browser Tests"
+### Community 8 - "Chart E2E Tests"
 Cohesion: 0.23
 Nodes (7): @playwright/test, cardTitles, card(), chartTooltip, overview, overviewCharts, themedRgb()
 
-### Community 9 - "Statement File Importers"
+### Community 9 - "Statement Importer Logic"
 Cohesion: 0.26
 Nodes (20): ensureAccount(), combine(), dbsDescriptionKey(), debitCreditAmount(), descriptionKey(), importDbs(), importFiles(), importOcbc() (+12 more)
 
 ### Community 10 - "Data Table Components"
-Cohesion: 0.25
-Nodes (23): @tanstack/react-table, DataTable(), PaginatedDataTable(), GroupHeaderRow(), groupStarts(), GroupTotal(), isInteractiveTarget(), MOBILE_LIST_CLASS (+15 more)
+Cohesion: 0.17
+Nodes (30): framer-motion, @tanstack/react-table, DataTable(), PaginatedDataTable(), PaginationHeader(), GroupHeaderRow(), groupStarts(), GroupTotal() (+22 more)
 
-### Community 11 - "TypeScript Compiler Config"
+### Community 11 - "TypeScript Config"
 Cohesion: 0.06
 Nodes (33): compilerOptions, allowJs, allowSyntheticDefaultImports, allowUnusedLabels, esModuleInterop, forceConsistentCasingInFileNames, incremental, isolatedModules (+25 more)
 
-### Community 12 - "Editor & Sheet Tests"
+### Community 12 - "Editor and Sheet Tests"
+Cohesion: 0.13
+Nodes (20): editors, editors, longName, expectHeldRead(), expectRetainedRows(), expectSilentSheet(), expectVisibleBackdrop(), account (+12 more)
+
+### Community 13 - "Month Layout and Recurring"
+Cohesion: 0.13
+Nodes (34): MonthLayout(), ReviewLinks(), LANES, ordinal(), RecurringPage(), NotFound(), Template(), nextConfig (+26 more)
+
+### Community 14 - "Logic and Data Layers"
+Cohesion: 0.31
+Nodes (8): Background Drive sync, bun test, src/data/* (persistence, migrations, seeding, backup serialization, Drive storage), IndexedDB (Dexie), Domain and importer tests (Dexie with in-memory IndexedDB), src/logic/* (domain reads and operations), Verification, Workspace backup/reset operations
+
+### Community 15 - "Month Overview Page"
 Cohesion: 0.12
-Nodes (22): editors, containedFooter(), editors, longName, expectHeldRead(), expectRetainedRows(), expectSilentSheet(), expectPointerCursor() (+14 more)
-
-### Community 13 - "App Sidebar & Header"
-Cohesion: 0.20
-Nodes (25): ReviewLinks(), Template(), AppearanceOption, APPEARANCES, AppSidebar(), SyncDot(), SYSTEM_APPEARANCE, useSyncIndicator() (+17 more)
-
-### Community 14 - "Month Layout & Metrics"
-Cohesion: 0.18
-Nodes (17): framer-motion, AllocateBar(), Sparkline(), DetailSummary(), DetailSummaryItem(), Delta, Metric(), RecordAmount() (+9 more)
-
-### Community 15 - "Dashboard View"
-Cohesion: 0.12
-Nodes (35): Comparison, comparisonRateText(), comparisonText(), ComparisonValue, DashboardData, DashboardMonthlyBudget, DashboardPage(), DashboardView (+27 more)
+Nodes (25): Comparison, comparisonRateText(), comparisonText(), ComparisonValue, DashboardData, DashboardMonthlyBudget, DashboardView, deltaOf() (+17 more)
 
 ### Community 16 - "Runtime Dependencies"
 Cohesion: 0.07
 Nodes (30): dependencies, @base-ui/react, class-variance-authority, clsx, cmdk, dexie, dexie-react-hooks, @fontsource-variable/inter (+22 more)
 
-### Community 17 - "Database Schema Types"
-Cohesion: 0.11
-Nodes (30): AccountRow, AllocationRow, AnalyticsMonthRow, asPending(), BudgetRecordRow, BudgetRow, CategoryRow, DB_NAME (+22 more)
+### Community 17 - "Test Data Fixtures"
+Cohesion: 0.13
+Nodes (22): BudgetRecordRow, BudgetRow, CategoryRow, DuplicateDismissalRow, MonthlyBudgetDefaultRow, buildDense(), buildEmpty(), buildPopulated() (+14 more)
 
-### Community 18 - "Monthly Budget Logic"
-Cohesion: 0.27
-Nodes (16): updateAccount(), validateBudget(), cleanInput(), restoreDuplicatePair(), createMonthlyBudget(), MONTHLY_BUDGET_GROUPS, PACE_KINDS, setMonthlyBudgetAmount() (+8 more)
+### Community 18 - "Monthly Budgets and Duplicates Logic"
+Cohesion: 0.22
+Nodes (21): updateAccount(), validateBudget(), cleanInput(), dismissDuplicatePair(), fixDuplicates(), pairIds(), restoreDuplicatePair(), amountFor() (+13 more)
 
 ### Community 19 - "Spending Calendar"
 Cohesion: 0.29
 Nodes (9): compact(), heat(), INK, LEVELS, quantile(), rampCap(), SpendingCalendar(), STRENGTH (+1 more)
 
-### Community 20 - "Budget & Cashflow Charts"
-Cohesion: 0.26
-Nodes (11): BudgetProgressChart(), BudgetProgressPoint, buildSeries(), CashflowChart(), CashflowPoint, SurplusPoint, TotalSpendingChart(), TrendChart() (+3 more)
+### Community 20 - "UI Layer Conventions"
+Cohesion: 0.25
+Nodes (5): Agent Behavior, Generated / Ignored Files, src/components/*, src/components/ui/**/*, useLiveQuery
 
-### Community 21 - "Duplicate Replacement Logic"
+### Community 21 - "Statement Replacements Logic"
 Cohesion: 0.16
 Nodes (24): countSuggestions(), duplicateStatementIds(), removeStatementDismissals(), dayDifference(), ensureCanReplace(), maskDescription(), ReplacementAllocation, replacementComparison() (+16 more)
 
 ### Community 22 - "Category History Chart"
-Cohesion: 0.24
-Nodes (12): aggregateSeries(), CategoryHistoryChart(), ChartMonth, ChartSeries, MonthBreakdown(), MonthTick(), monthTotal(), prepareMonths() (+4 more)
+Cohesion: 0.31
+Nodes (10): aggregateSeries(), CategoryHistoryChart(), ChartMonth, ChartSeries, MonthBreakdown(), MonthTick(), monthTotal(), prepareMonths() (+2 more)
 
 ### Community 23 - "Biome Suspicious Rules"
 Cohesion: 0.07
 Nodes (28): suspicious, noAssignInExpressions, noAsyncPromiseExecutor, noCatchAssign, noClassAssign, noCompareNegZero, noControlCharactersInRegex, noDebugger (+20 more)
 
 ### Community 24 - "Package Manifest"
-Cohesion: 0.07
-Nodes (28): private, $schema, type, babel-plugin-react-compiler, @biomejs/biome, clsx, cmdk, @fontsource-variable/inter (+20 more)
+Cohesion: 0.06
+Nodes (31): private, $schema, type, babel-plugin-react-compiler, @base-ui/react, @biomejs/biome, clsx, cmdk (+23 more)
 
-### Community 25 - "Component Inventory Tooling"
-Cohesion: 0.07
-Nodes (45): typescript, vite, @vitejs/plugin-react, behaviourCoverage, componentInventory, facetNotApplicable, InventoryEntry, notApplicable (+37 more)
+### Community 25 - "Test Component Inventory"
+Cohesion: 0.11
+Nodes (24): behaviourCoverage, componentInventory, facetNotApplicable, InventoryEntry, notApplicable, openFacets, RouteEntry, routeInventory (+16 more)
 
 ### Community 26 - "Biome Correctness Rules"
 Cohesion: 0.08
 Nodes (26): noConstantCondition, noConstAssign, noEmptyCharacterClassInRegex, noEmptyPattern, noGlobalObjectCalls, noInvalidBuiltinInstantiation, noInvalidConstructorSuper, noNonoctalDecimalEscape (+18 more)
 
-### Community 27 - "Record Suggestions Engine"
+### Community 27 - "Suggestion Scoring Logic"
 Cohesion: 0.10
-Nodes (32): allocatedStatements(), asOf(), byDate(), CHIP_LIMIT, CHOICES, Clue, DEFAULT_WEIGHTS, descriptionTokens() (+24 more)
+Nodes (35): allocatedStatements(), asOf(), byDate(), CHIP_LIMIT, CHOICES, Clue, DEFAULT_WEIGHTS, descriptionTokens() (+27 more)
 
-### Community 28 - "Component Browser Tests"
+### Community 28 - "Playwright Component Tests"
 Cohesion: 0.15
 Nodes (9): desktopOnly, bounds(), contained(), expectWheelScrollsPageWhileOpen(), expectDropdownPreservesScroll(), scrollWithInput(), settledOverlayAlpha(), APP_URL (+1 more)
 
-### Community 29 - "Sync Status & Auto-sync"
-Cohesion: 0.11
-Nodes (26): Boot(), db, useSyncStatus(), useSyncToasts(), emit(), eventListeners, finishCycle(), getSyncSnapshot() (+18 more)
+### Community 29 - "Drive Sync Engine"
+Cohesion: 0.14
+Nodes (37): SYNC_TABLES, downloadBackupFile(), driveFetch(), findBackupFile(), getClockSkewMs(), getFileMeta(), isDriveConfigured(), uploadBackupFile() (+29 more)
 
-### Community 30 - "Animation Tests"
-Cohesion: 0.17
-Nodes (19): denseCardConsumers, denseRowConsumers, expectConsumerEntrance(), populatedConsumers, pickOption(), attachSamplingFailure(), expectPopupEntrance(), expectReducedRowMovement() (+11 more)
-
-### Community 31 - "Workspace Test Fixtures"
-Cohesion: 0.24
-Nodes (11): ScenarioName, WorkspaceDataset, WorkspaceTables, assertSeeded(), checkSeededMarker(), countStore(), seedInBrowser(), seedWorkspace() (+3 more)
-
-### Community 32 - "Google Drive Integration"
+### Community 30 - "Animation Test Helpers"
 Cohesion: 0.18
-Nodes (29): AuthNeededError, cacheToken(), CodeResponse, disconnectDrive(), downloadBackupFile(), driveFetch(), DriveFileMeta, ensureDriveToken() (+21 more)
+Nodes (17): denseRowConsumers, expectConsumerEntrance(), populatedConsumers, attachSamplingFailure(), expectPopupEntrance(), expectReducedRowMovement(), expectVisibleRowCascade(), matrixIsIdentity() (+9 more)
 
-### Community 33 - "Layer Architecture Rules"
-Cohesion: 0.15
-Nodes (17): app/**/page.tsx, Background Drive sync, src/data/* (persistence, migrations, seeding, backup serialization, Drive storage), IndexedDB (Dexie), Interactive routes are "use client" (search params via next/navigation), src/logic/* (domain reads and operations), (month) route-group shell (Overview + Monthly Records), Pages take no props (+9 more)
-
-### Community 34 - "Export & Import Data"
+### Community 31 - "Route Animation and Fixtures"
 Cohesion: 0.19
-Nodes (16): clearAllData(), downloadExport(), EXPORT_VERSION, FinpointExport, importData(), parseImportFile(), SYNC_TABLES, TableName (+8 more)
+Nodes (16): denseCardConsumers, Child, october, september, installDateOnly(), revisions, setDateOnly(), assertSeeded() (+8 more)
 
-### Community 35 - "shadcn Component Config"
+### Community 32 - "Google Drive Client"
+Cohesion: 0.24
+Nodes (12): AuthNeededError, cacheToken(), CodeResponse, disconnectDrive(), DriveFileMeta, ensureDriveToken(), ensureDriveTokenSilent(), googleClientId() (+4 more)
+
+### Community 33 - "UI Architecture Rules"
+Cohesion: 0.22
+Nodes (11): app/**/page.tsx, Interactive routes are "use client" (search params via next/navigation), (month) route-group shell (Overview + Monthly Records), Pages take no props, Project Shape, React Compiler (enabled), Root Suspense (keeps routes static), src/routes.ts (centralized route paths) (+3 more)
+
+### Community 34 - "Export Import and Seeding"
+Cohesion: 0.20
+Nodes (19): db, clearAllData(), downloadExport(), exportData(), importData(), parseImportFile(), tableCounts(), TableName (+11 more)
+
+### Community 35 - "shadcn Components Config"
 Cohesion: 0.09
 Nodes (21): aliases, components, hooks, lib, ui, utils, iconLibrary, menuAccent (+13 more)
 
-### Community 36 - "Seed & Test Data"
+### Community 36 - "Seed Defaults and Test Data"
+Cohesion: 0.15
+Nodes (18): DEFAULT_CATEGORIES, DEFAULT_MONTHLY_BUDGETS, EXPORT_VERSION, FinpointExport, SEED_HASH_KEY, BANK_BLURB, between(), CATEGORIES (+10 more)
+
+### Community 37 - "Vite Harness Config"
+Cohesion: 0.29
+Nodes (4): vite, @vitejs/plugin-react, harnessDir, repoRoot
+
+### Community 38 - "Search Sheets and Filters"
 Cohesion: 0.18
-Nodes (15): DEFAULT_CATEGORIES, DEFAULT_MONTHLY_BUDGETS, BANK_BLURB, between(), CATEGORIES, DAILY, generateTestData(), Meal (+7 more)
+Nodes (27): radix-ui, react, PendingStatementConfirmationSheet(), RecordSearchSheet(), StatementSearchSheet(), AmountFilter(), AmountRange, COMPARISONS (+19 more)
 
-### Community 37 - "Combobox Components"
-Cohesion: 0.11
-Nodes (24): Props, ComboboxChip(), ComboboxChips(), ComboboxChipsInput(), ComboboxClear(), ComboboxCollection(), ComboboxContent(), ComboboxEmpty() (+16 more)
-
-### Community 38 - "Search Sheets & Filters"
-Cohesion: 0.20
-Nodes (26): PendingStatementConfirmationSheet(), RecordOption(), RecordSearchSheet(), StatementOption(), StatementSearchSheet(), AmountFilter(), AmountRange, COMPARISONS (+18 more)
-
-### Community 39 - "Domain Type Definitions"
+### Community 39 - "Shared Domain Types"
 Cohesion: 0.11
 Nodes (18): Account, Allocation, AnalyticsSummary, AnalyticsTreatment, Appearance, Budget, Category, CategoryWithChildren (+10 more)
 
 ### Community 40 - "Domain Glossary"
-Cohesion: 0.18
-Nodes (16): CONTEXT.md (domain vocabulary), Account, Allocation, Budget, Category, Duplicate Statement, Finpoint Domain Glossary, Monthly Budget (+8 more)
+Cohesion: 0.09
+Nodes (29): CONTEXT.md (domain vocabulary), Account, Allocation, Budget, Category, Duplicate Statement, Finpoint Domain Glossary, Monthly Budget (+21 more)
 
-### Community 41 - "Auth Broker Routes"
+### Community 41 - "Auth Route Handlers"
 Cohesion: 0.29
 Nodes (14): POST(), POST(), POST(), jose, AUTH_COOKIE_NAME, authCookie(), authCookieConfig(), clientIp() (+6 more)
 
-### Community 42 - "Categories & Monthly Pages"
-Cohesion: 0.13
-Nodes (27): CategoriesPage(), CategoryDialogState, CategoryTile(), byRecordDay, FILTER_KEYS, Filters, MonthlyRecordsPage(), Rule (+19 more)
+### Community 42 - "Accounts and Allocator Pages"
+Cohesion: 0.05
+Nodes (141): AccountPage(), AccountCard(), AccountRow, AccountsPage(), AllocatorPage(), BudgetPage(), getBudgetAnalytics(), getCategoryData() (+133 more)
 
 ### Community 43 - "Duplicate Detection Logic"
-Cohesion: 0.23
-Nodes (15): allocationOutcome(), descriptionAnchors(), descriptionIdentity(), dismissDuplicatePair(), DuplicateGroup, duplicateGroups(), DuplicateStatement, eligible() (+7 more)
+Cohesion: 0.27
+Nodes (9): descriptionAnchors(), descriptionIdentity(), DuplicateGroup, DuplicateStatement, eligible(), FixDuplicatesInput, GENERIC, sameDayKey() (+1 more)
 
-### Community 44 - "Database & Seeding"
-Cohesion: 0.23
-Nodes (11): FinpointDB, withoutActionModes(), exportData(), tableCounts(), SEED_HASH_KEY, seedIfEmpty(), digestSnapshot(), hashLegacySnapshot() (+3 more)
+### Community 44 - "Sync Toasts and Boot"
+Cohesion: 0.50
+Nodes (4): Boot(), useSyncToasts(), subscribeSyncEvents(), listCategoryIconNames()
 
-### Community 45 - "Bar & Trend Charts"
-Cohesion: 0.19
-Nodes (16): bar(), BarChart(), BarSeries, PAD, ChartFrame(), ChartSize, ReadoutRows(), PAD (+8 more)
+### Community 45 - "Bar Chart Components"
+Cohesion: 0.17
+Nodes (18): bar(), BarChart(), BarSeries, PAD, ChartFrame(), ChartSize, ReadoutRows(), SurplusPoint (+10 more)
 
 ### Community 47 - "Biome Formatter Options"
 Cohesion: 0.15
@@ -349,25 +341,21 @@ Nodes (13): devDependencies, babel-plugin-react-compiler, @biomejs/biome, fake-i
 Cohesion: 0.38
 Nodes (11): pageHref(), pageWindow(), PaginationFooter(), Pagination(), PaginationContent(), PaginationEllipsis(), PaginationItem(), PaginationLink() (+3 more)
 
-### Community 50 - "Budgets & Pending Logic"
+### Community 50 - "Records and Analytics Logic"
 Cohesion: 0.13
-Nodes (26): PendingCard(), round2(), BudgetDetail, BudgetFilters, createBudget(), getBudget(), listBudgets(), pendingStatementIds() (+18 more)
+Nodes (21): asPending(), AnalyticsRecord, AnalyticsSummary, createBudget(), analyticsValues(), budgetCovers(), ConflictError, createRecord() (+13 more)
 
-### Community 51 - "Commands & Tooling Rules"
-Cohesion: 0.20
-Nodes (11): Agent Behavior, Biome (biome check --write), bun install, bun lint (write-mode), bun lint:check, bun run build, bun types:check, Commands (+3 more)
+### Community 51 - "Project Commands"
+Cohesion: 0.38
+Nodes (7): Biome (biome check --write), bun install, bun lint (write-mode), bun lint:check, bun run build, bun types:check, Commands
 
-### Community 52 - "Verification & Next.js Rules"
-Cohesion: 0.18
-Nodes (9): app/api/auth/* Route Handlers, bun test, node_modules/next/dist/server/lib/generate-agent-files.js, Google OAuth broker (exchange/token/logout), Domain and importer tests (Dexie with in-memory IndexedDB), Next.js App Router app (mostly client-side), node_modules/next/dist/docs/, npm run dev (port 5173) (+1 more)
+### Community 52 - "Next.js Auth Broker"
+Cohesion: 0.25
+Nodes (6): app/api/auth/* Route Handlers, node_modules/next/dist/server/lib/generate-agent-files.js, Google OAuth broker (exchange/token/logout), Next.js App Router app (mostly client-side), node_modules/next/dist/docs/, npm run dev (port 5173)
 
-### Community 53 - "Month Filters & Command"
-Cohesion: 0.17
-Nodes (21): MonthLayout(), @base-ui/react, DateField(), CategoryFilter(), CategoryFilterItem(), Command(), CommandEmpty(), CommandGroup() (+13 more)
-
-### Community 54 - "Route & Table Tests"
-Cohesion: 0.18
-Nodes (13): Child, october, september, PREMATURE, routeReady, titles, installDateOnly(), revisions (+5 more)
+### Community 54 - "Route and Table Tests"
+Cohesion: 0.22
+Nodes (9): containedFooter(), PREMATURE, routeReady, titles, expectPointerCursor(), IDS, fits(), patchRows() (+1 more)
 
 ### Community 55 - "Biome Config"
 Cohesion: 0.18
@@ -381,45 +369,37 @@ Nodes (11): noAdjacentSpacesInRegex, noBannedTypes, noExtraBooleanCast, noUseles
 Cohesion: 0.20
 Nodes (9): background_color, description, display, icons, name, scope, short_name, start_url (+1 more)
 
-### Community 58 - "Accounts & Importer Pages"
-Cohesion: 0.13
-Nodes (19): AccountCard(), AccountRow, AccountsPage(), ACCEPT, BANKS_REQUIRING_ADDITIONAL_INFO, NotFound(), metadata, SECTIONS (+11 more)
+### Community 58 - "Importer and Dashboard Pages"
+Cohesion: 0.21
+Nodes (24): ACCEPT, BANKS_REQUIRING_ADDITIONAL_INFO, ImporterPage(), Step(), DashboardPage(), ScopedCardTitle(), ScopeLabel(), WeekdayCard() (+16 more)
 
 ### Community 59 - "NPM Scripts"
 Cohesion: 0.22
 Nodes (9): scripts, build, dev, lint, lint:check, start, test:e2e, types:check (+1 more)
 
-### Community 60 - "Data Settings & Alerts"
-Cohesion: 0.15
-Nodes (26): COUNT_ROWS, DataSettingsPage(), StateRow(), STATUS_TONES, StatusTone, WorkspaceRow(), AlertDialog(), AlertDialogAction() (+18 more)
-
-### Community 61 - "Records & Statements Pages"
-Cohesion: 0.32
-Nodes (17): AccountPage(), AllocatorPage(), RecordsPage(), StatementsPage(), PageHeader(), SelectionBar(), byDay(), usePaginatedTableState() (+9 more)
+### Community 60 - "Data Settings and Dialogs"
+Cohesion: 0.13
+Nodes (28): COUNT_ROWS, DataSettingsPage(), StateRow(), STATUS_TONES, StatusTone, WorkspaceRow(), AlertDialog(), AlertDialogAction() (+20 more)
 
 ### Community 62 - "Biome Formatter Settings"
 Cohesion: 0.25
 Nodes (8): formatter, attributePosition, enabled, formatWithErrors, indentStyle, indentWidth, lineEnding, lineWidth
 
-### Community 63 - "Core Domain Concepts"
+### Community 63 - "Product Feature Overview"
 Cohesion: 0.32
 Nodes (8): Allocator, Budgets, Categories, Dashboard, Statement-allocation-record model, Monthly Budgets, Records, Statement importer
 
-### Community 64 - "Budgets Page & Date Fields"
-Cohesion: 0.19
-Nodes (18): BUDGET_STATES, BudgetCard(), BudgetsPage(), BudgetState, formatBudgetDateWindow(), RecordCreatorHost(), react-day-picker, Props (+10 more)
+### Community 64 - "Form Field Components"
+Cohesion: 0.08
+Nodes (47): BudgetState, react-dom, CategoryField(), ComboboxField(), Props, DateField(), Props, DateRange() (+39 more)
 
-### Community 65 - "Agent Skills & Docs"
+### Community 65 - "Domain and Tracker Docs"
 Cohesion: 0.33
 Nodes (7): Agent skills, CONTEXT.md, Domain docs (single-context layout), Domain Language, Issue tracker (local specs and tickets), .scratch/ local work tracking, String primary keys (not auto-increment)
 
 ### Community 66 - "Optional Platform Dependencies"
 Cohesion: 0.29
 Nodes (7): optionalDependencies, lightningcss-linux-x64-gnu, lightningcss-win32-x64-msvc, @rollup/rollup-linux-x64-gnu, @rollup/rollup-win32-x64-msvc, @tailwindcss/oxide-linux-x64-gnu, @tailwindcss/oxide-win32-x64-msvc
-
-### Community 67 - "Record Table Columns"
-Cohesion: 0.19
-Nodes (21): amountTone(), formatRowTime(), PendingBadge(), pendingReason(), RecordActions(), RecordActionsCell(), RecordAmountCell(), RecordEditButton() (+13 more)
 
 ### Community 68 - "E2E TypeScript Config"
 Cohesion: 0.29
@@ -429,19 +409,11 @@ Nodes (6): ./tsconfig.json, compilerOptions, incremental, exclude, extends, incl
 Cohesion: 0.33
 Nodes (6): style, noNamespace, noNonNullAssertion, useArrayLiterals, useAsConstAssertion, useBlockStatements
 
-### Community 70 - "Root Layout & Harness"
-Cohesion: 0.20
-Nodes (8): metadata, RootLayout(), viewport, react-dom, App(), HarnessSection, sectionFromLocation(), root
-
-### Community 71 - "Code Style Guide"
-Cohesion: 0.17
-Nodes (13): APIs, Arguments, And Props, Code Style, Consistency, Copy, Core, Earning Its Place, Finpoint Style Additions, Grouping And Order (+5 more)
-
-### Community 72 - "Icon With Shadow"
+### Community 72 - "Icon Concept Shadow"
 Cohesion: 0.40
 Nodes (5): Finpoint icon concept, Charcoal shadow halo, Circular point, Rounded F monogram, Off-white icon fill
 
-### Community 73 - "Icon With Shadow Variant"
+### Community 73 - "Icon With Shadow"
 Cohesion: 0.40
 Nodes (5): Finpoint icon with charcoal shadow, Charcoal shadow halo, Circular point, Rounded F monogram, Off-white icon fill
 
@@ -461,7 +433,7 @@ Nodes (3): Before exploration, Domain docs, Writing
 Cohesion: 0.50
 Nodes (4): Local Tracker Operations, Spec and Ticket Files, Ticket Lifecycle, Local Markdown Issue Tracker
 
-### Community 79 - "Drive Sync Overview"
+### Community 79 - "Local-first Sync Features"
 Cohesion: 0.50
 Nodes (4): Google Drive sync, JSON backup and restore, Local-first finance tracking, Sync conflict handling
 
@@ -481,65 +453,53 @@ Nodes (3): PNG favicon dot, PNG favicon F letterform, PNG favicon icon
 Cohesion: 0.67
 Nodes (3): SVG favicon dot, SVG favicon F letterform, SVG favicon icon
 
-### Community 84 - "F Monogram Icon Variant"
+### Community 84 - "F Monogram Dot"
 Cohesion: 0.67
 Nodes (3): Circular dot beside F, Rounded F letterform, F monogram icon
 
-### Community 85 - "F Monogram Icon Copy"
+### Community 85 - "F Monogram Letterform"
 Cohesion: 0.67
 Nodes (3): Circular dot beside F, Rounded F letterform, F monogram icon
 
-### Community 94 - "Statement Rules Logic"
-Cohesion: 0.21
-Nodes (14): StatementRow, TREATMENT_VALUES, byCreation(), conditionPattern(), deleteStatementRule(), listStatementRules(), matchesStatement(), previewStatementRule() (+6 more)
+### Community 95 - "Header and Button UI"
+Cohesion: 0.12
+Nodes (30): class-variance-authority, AppHeader(), ButtonGroup(), ButtonGroupSeparator(), ButtonGroupText(), buttonGroupVariants, FieldContent(), FieldLegend() (+22 more)
 
-### Community 95 - "UI Header & Button Group"
-Cohesion: 0.18
-Nodes (12): class-variance-authority, radix-ui, AppHeader(), ButtonGroup(), ButtonGroupSeparator(), ButtonGroupText(), buttonGroupVariants, FieldSeparator() (+4 more)
-
-### Community 96 - "Recurring Charge Suggestions"
-Cohesion: 0.26
-Nodes (12): parseDatetime(), inferRecordDatetime(), createModel(), loadTables(), monthlyPattern(), prepareSuggestions(), recordSuggestions(), recurringCharges() (+4 more)
-
-### Community 97 - "Recurring Page & Month Params"
+### Community 98 - "Month Picker"
 Cohesion: 0.29
-Nodes (9): LANES, ordinal(), RecurringPage(), luxon, SearchInit, useMonthParams(), STALE_MONTH_CLASS, takeMonthDirection() (+1 more)
+Nodes (7): lucide-react, ButtonVariant, Month, MonthCal(), MonthCalProps, MonthPicker(), MONTHS
 
-### Community 98 - "Month Picker & Toaster"
-Cohesion: 0.22
-Nodes (8): lucide-react, ButtonVariant, Month, MonthCal(), MonthCalProps, MonthPicker(), MONTHS, Toaster()
+### Community 100 - "Dashboard Chart Components"
+Cohesion: 0.15
+Nodes (20): CashflowChart(), CashflowPoint, CategoryMovers(), Mover, CategorySpendingMix(), DailySpendingChart(), MonthlyBudgetLine, MonthlyBudgetBadge() (+12 more)
 
-### Community 100 - "History Navigation Context"
-Cohesion: 0.36
-Nodes (7): getStoredHistory(), getValidHistory(), HistoryContext, HistoryItem, HistoryProvider(), normaliseUrl(), withoutTrailingSelf()
+### Community 101 - "Settings Hook"
+Cohesion: 0.83
+Nodes (3): useDefaultFilterEndDateToday(), useDefaultFilterStartDate(), useSettings()
 
-### Community 101 - "Workflow Tabs & Settings"
-Cohesion: 0.62
-Nodes (5): WorkflowTabs(), useDefaultFilterEndDateToday(), useDefaultFilterStartDate(), useSettings(), pathAllocatorDuplicates()
-
-### Community 102 - "Validation Errors"
+### Community 102 - "Validation Error Handling"
 Cohesion: 0.50
 Nodes (4): Old Laravel Api/*Controller mapping, Laravel-shaped { field: string[] } error maps, ValidationError, Validator
 
 ## Knowledge Gaps
-- **83 isolated node(s):** `Build app step`, `Build harness step (tests/harness/vite.config.ts)`, `Playwright browser cache (keyed on bun.lock)`, `Graph health warnings and refresh failure reporting`, `gitmoji.dev` (+78 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 589 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **83 isolated node(s):** `Agent Behavior`, `Generated / Ignored Files`, `Build app step`, `Build harness step (tests/harness/vite.config.ts)`, `Playwright browser cache (keyed on bun.lock)` (+78 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 590 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **11 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `cn()` connect `Sidebar & Appearance Shell` to `Duplicate & Pending Views`, `Budget & Record Dialogs`, `Dropdown & Alert Primitives`, `Data Table Components`, `Month Layout & Metrics`, `Dashboard View`, `Spending Calendar`, `Combobox Components`, `Search Sheets & Filters`, `Categories & Monthly Pages`, `Bar & Trend Charts`, `Pagination Components`, `Budgets & Pending Logic`, `Month Filters & Command`, `Accounts & Importer Pages`, `Data Settings & Alerts`, `Records & Statements Pages`, `Budgets Page & Date Fields`, `Record Table Columns`, `UI Header & Button Group`, `Recurring Page & Month Params`, `Month Picker & Toaster`, `Workflow Tabs & Settings`?**
+- **Why does `cn()` connect `Header and Button UI` to `Form Field Components`, `Duplicates and Record Dialogs`, `Month Picker`, `Dashboard Chart Components`, `App Shell and Sidebar`, `Search Sheets and Filters`, `Filters and Combobox UI`, `Accounts and Allocator Pages`, `Data Table Components`, `Month Layout and Recurring`, `Bar Chart Components`, `Month Overview Page`, `Pagination Components`, `Spending Calendar`, `Importer and Dashboard Pages`, `Data Settings and Dialogs`?**
   _High betweenness centrality (0.083) - this node is a cross-community bridge._
-- **What connects `Build app step`, `Build harness step (tests/harness/vite.config.ts)`, `Playwright browser cache (keyed on bun.lock)` to the rest of the system?**
+- **What connects `Agent Behavior`, `Generated / Ignored Files`, `Build app step` to the rest of the system?**
   _83 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `Budget & Record Dialogs` be split into smaller, more focused modules?**
-  _Cohesion score 0.06548577563070317 - nodes in this community are weakly interconnected._
-- **Why does `react` connect `Categories & Monthly Pages` to `Duplicate & Pending Views`, `Budget & Record Dialogs`, `Sidebar & Appearance Shell`, `Dropdown & Alert Primitives`, `Appearance Theme Hook`, `Data Table Components`, `App Sidebar & Header`, `Month Layout & Metrics`, `Dashboard View`, `Spending Calendar`, `Budget & Cashflow Charts`, `Category History Chart`, `Package Manifest`, `Sync Status & Auto-sync`, `Combobox Components`, `Search Sheets & Filters`, `Bar & Trend Charts`, `Pagination Components`, `Month Filters & Command`, `Accounts & Importer Pages`, `Data Settings & Alerts`, `Records & Statements Pages`, `Budgets Page & Date Fields`, `Record Table Columns`, `Root Layout & Harness`, `UI Header & Button Group`, `Recurring Page & Month Params`, `Month Picker & Toaster`, `History Navigation Context`?**
-  _High betweenness centrality (0.078) - this node is a cross-community bridge._
-- **Should `Domain & Importer Tests` be split into smaller, more focused modules?**
-  _Cohesion score 0.1380952380952381 - nodes in this community are weakly interconnected._
-- **Why does `src/data/* (persistence, migrations, seeding, backup serialization, Drive storage)` connect `Layer Architecture Rules` to `Sync Status & Auto-sync`?**
-  _High betweenness centrality (0.070) - this node is a cross-community bridge._
-- **Should `Graph Refresh Rules` be split into smaller, more focused modules?**
+- **Should `Duplicates and Record Dialogs` be split into smaller, more focused modules?**
+  _Cohesion score 0.06717325227963526 - nodes in this community are weakly interconnected._
+- **Why does `react` connect `Search Sheets and Filters` to `Duplicates and Record Dialogs`, `App Shell and Sidebar`, `Filters and Combobox UI`, `Appearance Theme Hook`, `Data Table Components`, `Month Layout and Recurring`, `Month Overview Page`, `Spending Calendar`, `Category History Chart`, `Package Manifest`, `Accounts and Allocator Pages`, `Sync Toasts and Boot`, `Bar Chart Components`, `Pagination Components`, `Importer and Dashboard Pages`, `Data Settings and Dialogs`, `Form Field Components`, `Header and Button UI`, `Month Picker`, `Dashboard Chart Components`?**
+  _High betweenness centrality (0.073) - this node is a cross-community bridge._
+- **Should `Dexie Database Schema` be split into smaller, more focused modules?**
+  _Cohesion score 0.07965860597439545 - nodes in this community are weakly interconnected._
+- **Why does `src/data/* (persistence, migrations, seeding, backup serialization, Drive storage)` connect `Logic and Data Layers` to `UI Architecture Rules`, `App Shell and Sidebar`?**
+  _High betweenness centrality (0.067) - this node is a cross-community bridge._
+- **Should `Graph Artifact Rules` be split into smaller, more focused modules?**
   _Cohesion score 0.05928614640048397 - nodes in this community are weakly interconnected._

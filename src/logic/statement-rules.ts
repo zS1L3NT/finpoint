@@ -46,6 +46,7 @@ export function matchesStatement(
 	)
 }
 
+const NAME_ORDER = new Intl.Collator(undefined, { sensitivity: "base", numeric: true })
 const byCreation = (a: StatementRule, b: StatementRule) =>
 	a.created_at.localeCompare(b.created_at) || a.id.localeCompare(b.id)
 
@@ -54,10 +55,13 @@ export async function listStatementRules() {
 		db.statement_rules.toArray(),
 		db.statements.toArray(),
 	])
-	return rules.sort(byCreation).map(rule => ({
-		...rule,
-		matches: statements.filter(s => matchesStatement(rule, s)).length,
-	}))
+	// Listed by name so a long list reads like an index; matching still follows creation order.
+	return rules
+		.sort((a, b) => NAME_ORDER.compare(a.name, b.name) || byCreation(a, b))
+		.map(rule => ({
+			...rule,
+			matches: statements.filter(s => matchesStatement(rule, s)).length,
+		}))
 }
 
 export type RuleInput = Omit<StatementRule, "id" | "created_at" | "updated_at">

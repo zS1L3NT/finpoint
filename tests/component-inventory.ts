@@ -3728,7 +3728,7 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"Recurring tab: monthly charges sort into late, coming up and charged, list their months and follow the read month",
 	],
 	"app/statement-rules/page.tsx#route.data": [
-		"Statement rules page: empty, populated and paused rules show conditions, actions and match counts",
+		"Statement rules page: empty, populated and paused rules show conditions, actions and match counts in name order",
 		"Statement rules page: search narrows rules by name, phrase or filled-in value",
 	],
 	"app/(month)/page.tsx#route.data": [

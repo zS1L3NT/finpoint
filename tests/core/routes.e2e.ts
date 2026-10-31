@@ -193,7 +193,7 @@ test("workflow tabs and sparkline: tabs navigate by keyboard, Allocate keeps its
 	})
 })
 
-test("Statement rules page: empty, populated and paused rules show conditions, actions and match counts", async ({
+test("Statement rules page: empty, populated and paused rules show conditions, actions and match counts in name order", async ({
 	page,
 }) => {
 	await seedWorkspace(page, "empty")
@@ -208,34 +208,34 @@ test("Statement rules page: empty, populated and paused rules show conditions, a
 	const cards = page.locator("main article")
 	await expect(cards).toHaveCount(5)
 	const names = [
-		"Starbucks coffee",
-		"Raffles coffee",
-		"Groceries",
-		"Grab rides",
 		"Archived travel",
+		"Grab rides",
+		"Groceries",
+		"Raffles coffee",
+		"Starbucks coffee",
 	]
 	for (const [index, name] of names.entries())
 		await expect(
 			cards.nth(index).getByRole("button", { name: `Edit ${name}`, exact: true }),
 		).toBeVisible()
 
-	const starbucks = cards.nth(0)
+	const starbucks = cards.nth(4)
 	await expect(starbucks.getByText("contains", { exact: true })).toBeVisible()
 	await expect(starbucks.getByText("starbucks", { exact: true })).toBeVisible()
 	await expect(starbucks.getByText("1 matching Statement", { exact: true })).toBeVisible()
 	await expect(starbucks.getByText("Morning coffee", { exact: true })).toBeVisible()
 	await expect(starbucks.getByText("Dining Out", { exact: true })).toBeVisible()
 
-	await expect(cards.nth(1).getByText("1 matching Statement", { exact: true })).toBeVisible()
+	await expect(cards.nth(3).getByText("1 matching Statement", { exact: true })).toBeVisible()
 	await expect(cards.nth(2).getByText("or", { exact: true })).toBeVisible()
 	await expect(cards.nth(2).getByText("2 matching Statements", { exact: true })).toBeVisible()
 
-	const grab = cards.nth(3)
+	const grab = cards.nth(1)
 	await expect(grab.getByText("Paused", { exact: true })).toBeVisible()
 	await expect(grab.getByRole("button", { name: "Resume Grab rides", exact: true })).toBeVisible()
 	await expect(grab.getByText("matching Statement")).toHaveCount(0)
 
-	const archived = cards.nth(4)
+	const archived = cards.nth(0)
 	await expect(archived.getByText("Monthly budget", { exact: true })).toBeVisible()
 	await expect(archived.getByText("Travel", { exact: true })).toBeVisible()
 	await expect(archived.getByText("1 matching Statement", { exact: true })).toBeVisible()
