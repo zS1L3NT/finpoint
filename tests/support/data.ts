@@ -1167,31 +1167,6 @@ export function learnedCoffee(): Pick<WorkspaceTables, "statements" | "records" 
 	}
 }
 
-/**
- * Monthly charges for the populated workspace, seen from the pinned 15 October 2026: the
- * Netflix charge has arrived this month, Spotify is due on the 20th, and the gym charge
- * expected on 5 October is late.
- */
-export function recurringStatements(): WorkspaceTables["statements"] {
-	const { tables } = buildPopulated()
-	for (const [name, description, amount, dates] of [
-		["netflix", "NETFLIX.COM", -15.98, ["07-03", "08-03", "09-03", "10-03"]],
-		["spotify", "SPOTIFY STOCKHOLM", -11.98, ["07-20", "08-20", "09-20"]],
-		["gym", "ANYTIME FITNESS", -80, ["06-05", "07-05", "08-05", "09-05"]],
-	] as const)
-		for (const date of dates)
-			tables.statements.push({
-				id: `t1-s-${name}-${date}`,
-				account_id: "t1-acc-uob",
-				datetime: `2026-${date} 09:00`,
-				description,
-				amount,
-				index: 1,
-				is_pending: 0,
-			})
-	return tables.statements
-}
-
 export function getScenario(name: ScenarioName): WorkspaceDataset {
 	const dataset =
 		name === "empty" ? buildEmpty() : name === "dense" ? buildDense() : buildPopulated()

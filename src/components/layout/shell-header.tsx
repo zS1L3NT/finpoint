@@ -15,7 +15,6 @@ import {
 	pathMonthlyRecords,
 	pathPrivacy,
 	pathRecords,
-	pathRecurring,
 	pathSettings,
 	pathStatementRules,
 	pathStatements,
@@ -25,7 +24,6 @@ import {
 const TITLES: { match: (pathname: string) => boolean; title: string }[] = [
 	{ match: pathname => pathname === pathDashboard(), title: "Dashboard" },
 	{ match: pathname => pathname.startsWith(pathMonthlyRecords()), title: "Monthly Records" },
-	{ match: pathname => pathname.startsWith(pathRecurring()), title: "Recurring charges" },
 	{ match: pathname => pathname.startsWith(`${pathRecords()}/`), title: "Record" },
 	{ match: pathname => pathname.startsWith(pathRecords()), title: "Records" },
 	{ match: pathname => pathname.startsWith(`${pathStatements()}/`), title: "Statement" },

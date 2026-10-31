@@ -1,7 +1,7 @@
 import type { Page } from "@playwright/test"
 import { expectPointerCursor } from "../support/assertions"
 import { chartTooltip } from "../support/charts"
-import { getScenario, IDS, recurringStatements, statementRules } from "../support/data"
+import { getScenario, IDS, statementRules } from "../support/data"
 import { setDateOnly } from "../support/date-only"
 import { openEditor, pickOption } from "../support/editors"
 import { expect, seedWorkspace, test } from "../support/fixtures"
@@ -21,7 +21,6 @@ const titles: Record<string, string> = {
 	"/allocator/duplicates": "Workflows",
 	"/importer": "Importer",
 	"/settings": "Settings",
-	"/recurring": "Recurring charges",
 	"/sync": "Data",
 	"/privacy": "Privacy Policy",
 	"/terms": "Terms of Service",
@@ -303,56 +302,6 @@ test("Statement rules page: search narrows rules by name, phrase or filled-in va
 	await expect(rows).toHaveCount(10)
 })
 
-test("Recurring tab: monthly charges sort into late, coming up and charged, list their months and follow the read month", async ({
-	page,
-}) => {
-	await seedWorkspace(page, "populated", { statements: recurringStatements() })
-	await page.goto("/")
-	await page
-		.getByRole("navigation", { name: "Monthly finance views" })
-		.getByRole("link", { name: "Recurring", exact: true })
-		.click()
-	await expect(page).toHaveURL(/\/recurring\?month=October&year=2026$/)
-	await expect(page.getByText("Recurring charges", { exact: true }).first()).toBeVisible()
-
-	const lane = (name: string) => page.getByRole("region", { name, exact: true })
-	await expect(lane("Late").getByText("ANYTIME FITNESS", { exact: true })).toBeVisible()
-	await expect(
-		lane("Late").getByText("Expected 5 Oct. Cancelled, or paid another way?", { exact: true }),
-	).toBeVisible()
-	await expect(lane("Coming up").getByText("SPOTIFY STOCKHOLM", { exact: true })).toBeVisible()
-	await expect(lane("Coming up").getByText("In 5 days", { exact: true })).toBeVisible()
-	await expect(lane("Charged").getByText("NETFLIX.COM", { exact: true })).toBeVisible()
-	await expect(lane("Charged").getByText("Next expected 3 Nov", { exact: true })).toBeVisible()
-
-	const every = page.getByRole("list", { name: "Every recurring charge" })
-	const netflix = every.getByRole("listitem").filter({ hasText: "NETFLIX.COM" })
-	await expect(netflix.getByText("$15.98", { exact: true })).toBeVisible()
-	await expect(
-		netflix.getByRole("img", { name: "Charged in 4 of the last 6 months" }),
-	).toBeVisible()
-	await expect(
-		every
-			.getByRole("listitem")
-			.filter({ hasText: "ANYTIME FITNESS" })
-			.getByRole("img", { name: "Charged in 4 of the last 6 months" }),
-	).toBeVisible()
-	await fits(page, page.locator("main"))
-
-	await page.getByRole("button", { name: "Previous month", exact: true }).click()
-	await expect(page).toHaveURL(/\/recurring\?month=September&year=2026$/)
-	await expect(lane("Charged").getByText("ANYTIME FITNESS", { exact: true })).toBeVisible()
-	await expect(lane("Charged").getByText("SPOTIFY STOCKHOLM", { exact: true })).toBeVisible()
-
-	await lane("Charged")
-		.getByRole("link", { name: /SPOTIFY STOCKHOLM/ })
-		.click()
-	await expect(page).toHaveURL(/\/statements\?query=(spotify|stockholm)$/)
-	await expect(
-		page.getByRole("button", { name: "Back to Recurring charges", exact: true }),
-	).toBeVisible()
-})
-
 // One populated seed per sweep. Each route navigates once; the layout step
 // owns the navigation and the button-audit step reuses the same page, so the
 // audit sees exactly the layout-verified DOM. Trial clicks never navigate.
@@ -371,7 +320,6 @@ for (const [group, routes, tags] of [
 			"/importer",
 			"/settings",
 			"/sync",
-			"/recurring",
 		],
 		["@tall", "@reduced-motion"],
 	],
