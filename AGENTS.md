@@ -44,6 +44,7 @@
 - Run `bun test` for the domain and importer tests (`tests/domain/`), which use Dexie with in-memory IndexedDB.
 - Browser tests (`tests/core/`, `tests/animations/`, Playwright) are scoped to what you change: run the files and projects that exercise the components, routes, or helpers you touched, and make them pass. Core tests run in parallel; animation tests run alone, one at a time. Local runs use the dev servers: `bun run test:e2e -- <files> --project=desktop --project=mobile` for core, `PLAYWRIGHT_ANIMATIONS=1 bun run test:e2e -- <files> --workers=1` for animations. CI (`.github/workflows/ci.yml`) runs the whole suite on every pull request in named, time-balanced groups; a new browser test file must join exactly one group there. See `tests/README.md` for the area layout, the CI groups, and how to pick cases.
 - When asked to verify with `npm run dev`, run it directly, smoke-test the relevant local route, and stop the dev server afterwards.
+- A failing test your change was not meant to affect is a regression: fix the code and keep the test exactly as it was. Edit a test only where its behaviour changed on purpose, and name each edited test in your report. A test you loosen must still go red when the feature is broken on purpose. Before calling a failure flaky, repeat it on the branch and on `main` and report both counts.
 
 ## Agent skills
 
