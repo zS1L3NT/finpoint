@@ -1554,15 +1554,15 @@
     "semantic_hash": ""
   },
   "src/logic/suggestions.ts": {
-    "mtime": 1793429769.0062757,
-    "seen": 1793430547.0280201,
-    "ast_hash": "ea7336d80067e67aa0957fd81eab7661",
+    "mtime": 1793431979.5455506,
+    "seen": 1793432036.3692017,
+    "ast_hash": "60338bbec1f7416cec73b3b6fe538672",
     "semantic_hash": ""
   },
   "tests/domain/suggestions.test.ts": {
-    "mtime": 1793428124.0895226,
-    "seen": 1793428942.4253423,
-    "ast_hash": "68dd0e20ff072a8b957f41ea38bfd087",
+    "mtime": 1793431979.4375505,
+    "seen": 1793432036.369235,
+    "ast_hash": "cfd104a1c9c0ecd55dff5723fa1c5817",
     "semantic_hash": ""
   },
   "app/(month)/recurring/page.tsx": {

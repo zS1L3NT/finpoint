@@ -187,6 +187,22 @@ test("people named in the bank text are suggested first", async () => {
 	})
 })
 
+test("a person named in the bank text is suggested alone though only recorded in a group", async () => {
+	await decided("KOPITIAM", { title: "Coffee", people: "Sam & Alex" }, "2026-10-02 10:00")
+	const back = statement("ICT Incoming PayNow Ref 1000001, From: TAN ALEX, OTHR", {
+		amount: 10,
+	})
+	await db.statements.add(back)
+
+	const { chips } = await recordSuggestions({ statementIds: [back.id] })
+
+	expect(chips.find(c => c.field === "people")).toEqual({
+		field: "people",
+		value: "Alex",
+		reason: "Named in the Statement",
+	})
+})
+
 test("names in bank text stop leading People once they have proved misleading", async () => {
 	for (const day of ["01", "02", "03", "04", "05"])
 		await decided("KOPITIAM", { title: "Coffee", people: "Alex" }, `2026-01-${day} 10:00`)
@@ -203,6 +219,32 @@ test("names in bank text stop leading People once they have proved misleading", 
 	const { chips } = await recordSuggestions({ statementIds: [next.id] })
 
 	expect(chips.some(c => c.reason === "Named in the Statement")).toBe(false)
+})
+
+test("Location leans on the bank text over the typed Title until history says otherwise", async () => {
+	// This food court's bank text usually means Canteen A; "Lunch" was mostly at Canteen B.
+	for (const [day, location] of [
+		["01", "Canteen A"],
+		["02", "Canteen A"],
+		["03", "Canteen A"],
+		["04", "Canteen A"],
+		["05", "Canteen B"],
+	])
+		await decided(
+			"FOODCOURT QR PAYMENT",
+			{ title: "Chicken rice", location },
+			`2026-10-${day} 12:00`,
+		)
+	for (const day of ["06", "07", "08"])
+		await db.records.add(
+			record({ title: "Lunch", location: "Canteen B", datetime: `2026-10-${day} 12:00` }),
+		)
+	const next = statement("FOODCOURT QR PAYMENT", { datetime: "2026-10-09 12:00" })
+	await db.statements.add(next)
+
+	const { chips } = await recordSuggestions({ statementIds: [next.id], title: "Lunch" })
+
+	expect(chips.find(c => c.field === "location")?.value).toBe("Canteen A")
 })
 
 test("weekly purchases of the same amount are not mistaken for a monthly charge", async () => {

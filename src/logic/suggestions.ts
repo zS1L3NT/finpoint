@@ -87,6 +87,9 @@ const FIELD_VALUES: Record<RuleField, (record: RecordRow) => string | null> = {
 		r.analytics_treatment_source === "manual" ? r.analytics_treatment : null,
 	monthly_budget_id: r => (r.monthly_budget_source === "manual" ? r.monthly_budget_id : null),
 }
+/** Separates the people in a People value: "Sam & Alex", "Sam, Alex", "Sam and Alex". */
+const PEOPLE_SEPARATOR = /\s*(?:[&,+/]|\band\b)\s*/i
+
 const CHIP_LIMIT: Record<RuleField, number> = {
 	title: 3,
 	people: 2,
@@ -225,14 +228,21 @@ function createModel({ statements, records, allocations }: Tables) {
 		else titled.set(key, [record])
 	}
 	// Every People value split into its names ("Sam & Alex" → sam, alex), to spot them in bank
-	// text.
+	// text. Each person of a group also stands alone, so bank text naming only Alex can still
+	// suggest Alex though Alex was only ever recorded with others.
 	const firstUse = new Map<string, string>()
-	for (const record of records)
-		if (record.people && !(record.datetime >= (firstUse.get(record.people) ?? "~")))
-			firstUse.set(record.people, record.datetime)
+	const use = (value: string, at: string) => {
+		if (!(at >= (firstUse.get(value) ?? "~"))) firstUse.set(value, at)
+	}
+	for (const record of records) {
+		if (!record.people) continue
+		use(record.people, record.datetime)
+		const names = record.people.split(PEOPLE_SEPARATOR).map(name => name.trim())
+		if (names.length > 1) for (const name of names) if (name) use(name, record.datetime)
+	}
 	const people = [...firstUse].map(([value, first]) => ({
 		people: value,
-		names: value.split(/\s*(?:[&,+/]|\band\b)\s*/i).map(descriptionTokens),
+		names: value.split(PEOPLE_SEPARATOR).map(descriptionTokens),
 		first,
 	}))
 
@@ -301,6 +311,17 @@ export const DEFAULT_WEIGHTS: Weights = {
 	threshold: 0.5,
 	shape: 0,
 }
+/**
+ * Where a field starts before its own history is replayed, when that differs from neutral. A
+ * place is named by the merchant in the bank text, while a typed Title says what was bought
+ * ("Lunch") at many places, so Location starts leaning on the bank text. The learner still moves
+ * away from this when a workspace's history shows the Title knows better.
+ */
+const FIELD_DEFAULTS: Partial<Record<RuleField, Partial<Weights>>> = { location: { title: 0.5 } }
+const startingWeights = (field: RuleField): Weights => ({
+	...DEFAULT_WEIGHTS,
+	...FIELD_DEFAULTS[field],
+})
 const CHOICES: { [K in keyof Weights]: number[] } = {
 	halfLife: [14, 30, 60, 120, 240, 480, 100_000],
 	price: [1, 2, 4, 8],
@@ -598,7 +619,7 @@ function learnWeights(
 			list.filter(({ actual, evidence }) => topValue(evidence, field, w) === actual).length
 		const train = relevant.slice(0, Math.floor(relevant.length * 0.75))
 		const check = relevant.slice(train.length)
-		let weights = { ...DEFAULT_WEIGHTS }
+		let weights = startingWeights(field)
 		if (train.length >= MIN_CASES) {
 			let best = hits(train, weights)
 			const margin = Math.max(2, train.length * 0.02)
@@ -612,8 +633,8 @@ function learnWeights(
 							weights = trial
 						}
 					}
-			if (hits(check, weights) < hits(check, DEFAULT_WEIGHTS))
-				weights = { ...DEFAULT_WEIGHTS }
+			if (hits(check, weights) < hits(check, startingWeights(field)))
+				weights = startingWeights(field)
 		}
 		fields[field] = weights
 	}
@@ -1104,7 +1125,7 @@ export async function suggestionAccuracy(): Promise<SuggestionAccuracy> {
 		allocatedStatements(history),
 	)
 	const scored = replayed.slice(split)
-	const fields = (["category_id", "title", "people", "location"] as const).map(field => ({
+	const fields = (["title", "people", "location", "category_id"] as const).map(field => ({
 		field,
 		hits: 0,
 		total: 0,
