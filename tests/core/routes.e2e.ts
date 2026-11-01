@@ -768,7 +768,10 @@ test.describe("pinned 15 October 2026 date", () => {
 		).toBeVisible()
 		// Compact record rows omit the desktop budget column; the filter exposes
 		// the same Monthly budgets at every viewport size.
-		await page.getByRole("combobox").filter({ hasText: "Any monthly budget" }).click()
+		await page
+			.getByRole("combobox")
+			.filter({ hasText: /^Total$/ })
+			.click()
 		await expect(page.getByRole("option", { name: "Daily", exact: true })).toBeVisible()
 		await page.keyboard.press("Escape")
 		if (!isMobile)

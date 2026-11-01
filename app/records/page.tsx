@@ -308,8 +308,10 @@ function RecordFilters({
 				</SelectTrigger>
 				<SelectContent align="start" variant="filter">
 					<SelectGroup>
-						<SelectItem value="all">Any monthly budget</SelectItem>
-						<SelectItem value="unbudgeted">Unbudgeted</SelectItem>
+						<SelectItem value="all">
+							<span className="size-2 rounded-full bg-foreground" />
+							Total
+						</SelectItem>
 						{activeMonthlyBudgets.map(monthlyBudget => (
 							<SelectItem
 								key={monthlyBudget.id}
@@ -322,6 +324,10 @@ function RecordFilters({
 								{monthlyBudget.name}
 							</SelectItem>
 						))}
+						<SelectItem value="unbudgeted">
+							<span className="size-2 rounded-full bg-muted-foreground" />
+							Unbudgeted
+						</SelectItem>
 					</SelectGroup>
 				</SelectContent>
 			</Select>

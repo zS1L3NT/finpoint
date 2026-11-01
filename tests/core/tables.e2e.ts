@@ -576,20 +576,23 @@ test("Duplicate badge: disappears once the pair is resolved", async ({ page, wor
 	await expect(page.getByText("Duplicate?", { exact: true })).toHaveCount(0)
 })
 
-test("Monthly budget filters: flat options keep Any and Unbudgeted before budgets", async ({
+test("Monthly budget filters: Total leads, budgets follow and Unbudgeted closes the list", async ({
 	page,
 	workspace,
 }) => {
 	void workspace
 	for (const route of ["/records", "/records/monthly?month=October&year=2026"]) {
 		await page.goto(route)
-		await page.getByRole("combobox").filter({ hasText: "Any monthly budget" }).click()
+		await page
+			.getByRole("combobox")
+			.filter({ hasText: /^Total$/ })
+			.click()
 		const options = page.getByRole("option")
 		expect((await options.allTextContents()).map(text => text.trim())).toEqual([
-			"Any monthly budget",
-			"Unbudgeted",
+			"Total",
 			"Daily",
 			"Recurring",
+			"Unbudgeted",
 		])
 		await expect(
 			page.locator('[data-slot="select-content"] [data-slot="select-separator"]'),

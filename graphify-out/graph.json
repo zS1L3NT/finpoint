@@ -5951,7 +5951,7 @@
       "file_type": "code",
       "norm_label": "emptyrecords()",
       "source_file": "app/(month)/records/monthly/page.tsx",
-      "source_location": "L500"
+      "source_location": "L506"
     },
     {
       "id": "app_privacy_page_privacypage",
@@ -28317,7 +28317,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/records/monthly/page.tsx",
-      "source_location": "L511",
+      "source_location": "L517",
       "weight": 1.0
     },
     {
@@ -28329,7 +28329,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/records/monthly/page.tsx",
-      "source_location": "L512",
+      "source_location": "L518",
       "weight": 1.0
     },
     {
@@ -28341,7 +28341,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/records/monthly/page.tsx",
-      "source_location": "L513",
+      "source_location": "L519",
       "weight": 1.0
     },
     {
@@ -28353,7 +28353,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/records/monthly/page.tsx",
-      "source_location": "L514",
+      "source_location": "L520",
       "weight": 1.0
     },
     {
@@ -28365,7 +28365,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/records/monthly/page.tsx",
-      "source_location": "L516",
+      "source_location": "L522",
       "weight": 1.0
     },
     {
@@ -28377,7 +28377,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/records/monthly/page.tsx",
-      "source_location": "L517",
+      "source_location": "L523",
       "weight": 1.0
     },
     {
@@ -28389,7 +28389,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/records/monthly/page.tsx",
-      "source_location": "L550",
+      "source_location": "L556",
       "weight": 1.0
     },
     {
@@ -28521,7 +28521,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/records/monthly/page.tsx",
-      "source_location": "L402",
+      "source_location": "L404",
       "weight": 1.0
     },
     {
@@ -28533,7 +28533,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/records/monthly/page.tsx",
-      "source_location": "L442",
+      "source_location": "L448",
       "weight": 1.0
     },
     {
@@ -28545,7 +28545,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/records/monthly/page.tsx",
-      "source_location": "L468",
+      "source_location": "L474",
       "weight": 1.0
     },
     {
@@ -28557,7 +28557,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/records/monthly/page.tsx",
-      "source_location": "L485",
+      "source_location": "L491",
       "weight": 1.0
     },
     {
@@ -28569,7 +28569,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/records/monthly/page.tsx",
-      "source_location": "L494",
+      "source_location": "L500",
       "weight": 1.0
     },
     {
@@ -29469,7 +29469,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/records/page.tsx",
-      "source_location": "L320",
+      "source_location": "L322",
       "weight": 1.0
     },
     {
@@ -29481,7 +29481,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/records/page.tsx",
-      "source_location": "L366",
+      "source_location": "L372",
       "weight": 1.0
     },
     {
@@ -29493,7 +29493,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/records/page.tsx",
-      "source_location": "L374",
+      "source_location": "L380",
       "weight": 1.0
     },
     {
@@ -29505,7 +29505,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/records/page.tsx",
-      "source_location": "L379",
+      "source_location": "L385",
       "weight": 1.0
     },
     {
@@ -96831,7 +96831,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/(month)/records/monthly/page.tsx",
-      "source_location": "L500",
+      "source_location": "L506",
       "weight": 1.0
     },
     {
@@ -115435,5 +115435,5 @@
       "source_file": "tests/README.md"
     }
   ],
-  "built_at_commit": "035b0792f63d3cb62ae60bd51a7acb9b9855b7b4"
+  "built_at_commit": "134ffbb0f30a36f06831c196214d70e500a907a5"
 }
