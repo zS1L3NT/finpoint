@@ -96,7 +96,6 @@ function toAnalyticsRecords(
 						name: monthly_budget.name,
 						color: monthly_budget.color,
 						group: monthly_budget.group,
-						pace_kind: monthly_budget.pace_kind,
 						display_order: monthly_budget.display_order,
 						archived: monthly_budget.archived,
 					}
@@ -512,38 +511,28 @@ export async function getPaceView(
 	)
 	const groupScope = isMonthlyBudgetGroup(scope)
 	const amounts = monthlyBudgetsBuilt.filter(b => b.amount !== null)
-	const pace = groupScope
-		? {
-				id: scope,
-				name: scope.charAt(0).toUpperCase() + scope.slice(1),
-				amount: amounts.length
-					? amounts.reduce((sum, b) => sum + (b.amount ?? 0), 0)
-					: null,
-				spending: summary.spending,
-				pace_kind:
-					monthlyBudgetsBuilt.length &&
-					monthlyBudgetsBuilt.every(b => b.pace_kind === "daily")
-						? "daily"
-						: "none",
-			}
-		: scope === "all"
-			? monthlyBudgetsBuilt.find(
-					b => b.pace_kind === "daily" && b.amount !== null && b.amount >= 0,
-				)
-			: monthlyBudgetsBuilt[0]
+	const pace =
+		groupScope || scope === "all"
+			? {
+					id: scope,
+					name:
+						scope === "all" ? "Total" : scope.charAt(0).toUpperCase() + scope.slice(1),
+					amount: amounts.length
+						? amounts.reduce((sum, b) => sum + (b.amount ?? 0), 0)
+						: null,
+					spending: summary.spending,
+				}
+			: monthlyBudgetsBuilt.find(b => b.amount !== null && b.amount >= 0)
 	const projection = buildProjection(
 		date,
 		summary,
 		futureSummary,
-		scope === "all"
-			? monthlyBudgetsBuilt
-			: pace
-				? [{ ...pace, scheduled_spending: futureSummary.spending }]
-				: [],
-		isCurrent && (scope === "all" || pace?.pace_kind === "daily"),
+		pace ? [{ ...pace, scheduled_spending: futureSummary.spending }] : [],
+		isCurrent,
 		isFuture,
 		actualEnd.day ?? 1,
 	)
+
 	const series = buildSeries(
 		summary,
 		futureSummary,
@@ -552,7 +541,96 @@ export async function getPaceView(
 		isFuture ? 0 : actualEnd.day,
 		projection.daily_spending,
 	)
-	const history = buildCashflowHistory(date, today, tables, scopeIds)
+	const daily = await getMonthlyBudgetDaily(month, year, tables)
+	const budgets = daily.monthlyBudgets.filter(b =>
+		inScope(b.id === "unbudgeted" ? null : b.id, scopeIds),
+	)
+	for (const budget of scopedMonthlyBudgetRows) {
+		if (
+			!budgets.some(b => b.id === budget.id) &&
+			(monthlyBudgetsBuilt.some(b => b.id === budget.id && b.amount !== null) ||
+				futureRecords.some(
+					r =>
+						r.monthly_budget_id === budget.id &&
+						contribution(r.analytics_treatment, r.amount).spending !== 0,
+				))
+		) {
+			budgets.push({ id: budget.id, name: budget.name, color: budget.color })
+		}
+	}
+	if (
+		scopeIds === null &&
+		!budgets.some(b => b.id === "unbudgeted") &&
+		futureRecords.some(
+			r =>
+				!r.monthly_budget_id &&
+				contribution(r.analytics_treatment, r.amount).spending !== 0,
+		)
+	) {
+		budgets.push({ id: "unbudgeted", name: "Unbudgeted", color: "#94a3b8" })
+	}
+	budgets.sort(
+		(a, b) =>
+			(tables.monthlyBudgets.get(a.id)?.display_order ?? Infinity) -
+			(tables.monthlyBudgets.get(b.id)?.display_order ?? Infinity),
+	)
+	const forecast = budgets.map(budget => {
+		const matches = (r: AnalyticsRecord) => (r.monthly_budget_id ?? "unbudgeted") === budget.id
+		const actual = summarize(actualRecords.filter(matches))
+		const future = summarize(futureRecords.filter(matches))
+		const projected = buildProjection(
+			date,
+			actual,
+			future,
+			[],
+			isCurrent,
+			isFuture,
+			actualEnd.day,
+		)
+		return {
+			...budget,
+			previous:
+				scope !== "all" && !groupScope
+					? buildCashflowHistory(date, today, tables, [budget.id]).find(
+							item => item.offset === 1,
+						)
+					: undefined,
+			points: buildSeries(
+				actual,
+				future,
+				[],
+				date.daysInMonth ?? 30,
+				isFuture ? 0 : actualEnd.day,
+				projected.daily_spending,
+			),
+		}
+	})
+
+	if (scope === "all" || groupScope) {
+		forecast.unshift({
+			id: "total",
+			name: "Total",
+			color: "var(--foreground)",
+			previous: buildCashflowHistory(date, today, tables, scopeIds).find(
+				item => item.offset === 1,
+			),
+			points: series.map((point, index) => ({
+				...point,
+				spending:
+					point.spending === null
+						? null
+						: forecast.reduce((sum, b) => sum + (b.points[index]?.spending ?? 0), 0),
+				projected_spending:
+					point.projected_spending === null
+						? null
+						: forecast.reduce(
+								(sum, b) => sum + (b.points[index]?.projected_spending ?? 0),
+								0,
+							),
+			})),
+		})
+	}
+
 	const highestSpendingDay = summary.daily.reduce<(typeof summary.daily)[number] | null>(
 		(highest, day) =>
 			day.spending > 0 && (!highest || day.spending > highest.spending) ? day : highest,
@@ -560,8 +638,9 @@ export async function getPaceView(
 	)
 
 	return {
+		forecast,
+		singleBudget: scope !== "all" && !groupScope,
 		series,
-		history,
 		projection,
 		paceMonthlyBudget: pace ? { id: pace.id, name: pace.name, amount: pace.amount } : null,
 		spending: Math.round(summary.spending * 100) / 100,
@@ -816,7 +895,6 @@ function buildProjection(
 	summary: ReturnType<typeof summarize>,
 	futureSummary: ReturnType<typeof summarize>,
 	monthlyBudgets: {
-		pace_kind: string
 		amount: number | null
 		spending: number
 		id: string
@@ -839,9 +917,7 @@ function buildProjection(
 	}
 	const remainingDays = Math.max((date.daysInMonth ?? 30) - elapsedDays, 0)
 	const dailySpending = summary.gross_spending / elapsedDays
-	const paceMonthlyBudget = monthlyBudgets.find(
-		b => b.pace_kind === "daily" && b.amount !== null && b.amount >= 0,
-	)
+	const paceMonthlyBudget = monthlyBudgets.find(b => b.amount !== null && b.amount >= 0)
 	const paceAmount = paceMonthlyBudget?.amount ?? null
 	const futureMonthlyBudgets = new Map(futureSummary.monthlyBudgets.map(b => [b.id, b]))
 	const scheduledMonthlyBudgetSpending = paceMonthlyBudget
@@ -1076,12 +1152,6 @@ function buildTrend(date: DateTime, today: DateTime, tables: LoadedTables) {
 export async function getDashboardView(input: DashboardInput & { scope?: string }) {
 	const tables = await loadDashboardTables()
 	const dashboard = await getDashboard(input, tables)
-	const dailyMonthlyBudget =
-		dashboard.monthlyBudgets.find(monthly_budget => monthly_budget.pace_kind === "daily") ??
-		dashboard.monthlyBudgets.find(
-			monthly_budget => monthly_budget.name.toLowerCase() === "daily",
-		) ??
-		null
 	const scope =
 		input.scope && (isMonthlyBudgetGroup(input.scope) || tables.monthlyBudgets.has(input.scope))
 			? input.scope
@@ -1090,7 +1160,7 @@ export async function getDashboardView(input: DashboardInput & { scope?: string 
 	const scopedBudgetIds = scopeMonthlyBudgetIds(scope, tables.monthlyBudgetRows)
 	const scopeLabel =
 		scope === "all"
-			? "All spending"
+			? "Total"
 			: isMonthlyBudgetGroup(scope)
 				? scope.charAt(0).toUpperCase() + scope.slice(1)
 				: (selectedBudget?.name ?? "Monthly budget")
@@ -1109,12 +1179,7 @@ export async function getDashboardView(input: DashboardInput & { scope?: string 
 				})
 
 	const [pace, monthlyBudgetDaily] = await Promise.all([
-		getPaceView(
-			input.month,
-			input.year,
-			scope === "all" ? (dailyMonthlyBudget?.id ?? "all") : scope,
-			tables,
-		),
+		getPaceView(input.month, input.year, scope, tables),
 		getMonthlyBudgetDaily(input.month, input.year, tables),
 	])
 
@@ -1134,7 +1199,6 @@ export async function getDashboardView(input: DashboardInput & { scope?: string 
 		scopeLabel,
 		scopeColor: selectedBudget?.color,
 		scopeFilters,
-		paceFilters: scope === "all" ? { monthly_budget_id: dailyMonthlyBudget?.id } : scopeFilters,
-		dailyMonthlyBudget,
+		paceFilters: scopeFilters,
 	}
 }

@@ -396,9 +396,15 @@ test("Monthly Budget editors: validate creation and persist overrides", async ({
 		)
 		// The amount section mounts after the amount-source live query resolves.
 		await expect(dialog.getByText("Amount for October 2026", { exact: true })).toBeVisible()
-		await select(page, dialog, "Amount rule", "Default")
+		await dialog
+			.getByRole("group", { name: "Amount rule", exact: true })
+			.getByRole("radio", { name: "Default", exact: true })
+			.check()
 		await expect(dialog.getByLabel("Monthly amount", { exact: true })).toHaveCount(0)
-		await select(page, dialog, "Amount rule", "Override one month")
+		await dialog
+			.getByRole("group", { name: "Amount rule", exact: true })
+			.getByRole("radio", { name: "Override one month", exact: true })
+			.check()
 		await expect(dialog.getByLabel("Monthly amount", { exact: true })).toBeVisible()
 		// Daily starts with a null October amount, so the revealed input is disabled.
 		await dialog.getByRole("checkbox", { name: "No monthly amount", exact: true }).uncheck()
@@ -408,8 +414,11 @@ test("Monthly Budget editors: validate creation and persist overrides", async ({
 		await page.reload()
 		await page.getByRole("button", { name: "Edit Daily", exact: true }).click()
 		await expect(
-			page.getByRole("dialog").getByLabel("Amount rule", { exact: true }),
-		).toContainText("Override one month")
+			page
+				.getByRole("dialog")
+				.getByRole("group", { name: "Amount rule", exact: true })
+				.getByRole("radio", { name: "Override one month", exact: true }),
+		).toBeChecked()
 		await expect(
 			page.getByRole("dialog").getByLabel("Monthly amount", { exact: true }),
 		).toHaveValue("0")
@@ -1049,4 +1058,38 @@ test("Record editor: inherited budget hides an ineligible Category default", asy
 	await expect(dialog.getByLabel("Monthly budget", { exact: true })).toContainText(
 		"Category default · Unbudgeted",
 	)
+})
+
+test("Monthly Budget editor: persists colour and Group choices and disables unavailable Default", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	const dialog = await openEditor(
+		page,
+		"/?month=October&year=2026",
+		"New",
+		"Create monthly budget",
+	)
+	await dialog.getByLabel("Name", { exact: true }).fill("Colour probe")
+	await dialog.getByRole("button", { name: "Teal", exact: true }).click()
+	await expect(dialog.getByRole("button", { name: "Teal", exact: true })).toHaveAttribute(
+		"aria-pressed",
+		"true",
+	)
+	await dialog.getByLabel("Custom colour", { exact: true }).fill("#123456")
+	await dialog.getByRole("radio", { name: "Outlier", exact: true }).click()
+	await expect(dialog).toContainText("Exceptional spending outside your usual pattern.")
+	await expect(dialog.getByText("Spending forecast", { exact: true })).toHaveCount(0)
+	await dialog.getByRole("button", { name: "Create monthly budget", exact: true }).click()
+	await expect(dialog).not.toBeVisible()
+	await page.reload()
+	await page.getByRole("button", { name: "Edit Colour probe", exact: true }).click()
+	const editor = page.getByRole("dialog", { name: "Edit Colour probe", exact: true })
+	await expect(editor.getByLabel("Custom colour", { exact: true })).toHaveValue("#123456")
+	await expect(editor.getByRole("radio", { name: "Outlier", exact: true })).toBeChecked()
+	await expect(editor).toContainText("Exceptional spending outside your usual pattern.")
+	await expect(editor.getByRole("radio", { name: "Default", exact: true })).toBeDisabled()
+	await expect(editor).toContainText("No earlier default")
+	await expect(editor.getByText("Spending forecast", { exact: true })).toHaveCount(0)
 })

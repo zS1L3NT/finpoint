@@ -14,7 +14,7 @@ import {
 	replaceSettings,
 } from "@/data/settings"
 
-export const EXPORT_VERSION = 7
+export const EXPORT_VERSION = 8
 
 type TableName =
 	| "statement_rules"
@@ -62,6 +62,9 @@ export async function exportData(): Promise<FinpointExport> {
 	for (const table of TABLES) {
 		tables[table] = await db.table(table).toArray()
 	}
+	tables.monthly_budgets = (tables.monthly_budgets as Record<string, unknown>[]).map(
+		monthlyBudgetFields,
+	)
 	return {
 		app: "finpoint",
 		version: EXPORT_VERSION,
@@ -88,7 +91,7 @@ export function parseImportFile(text: string): FinpointExport {
 	const originalVersion = parsed?.version
 	if (parsed && [1, 2, 3].includes(parsed.version ?? 0) && parsed.tables) {
 		parsed.tables.duplicate_dismissals ??= []
-		if (parsed.version === 3) parsed.version = EXPORT_VERSION
+		if (parsed.version === 3) parsed.version = 7
 	}
 	if (parsed && (parsed.version === 1 || parsed.version === 2) && parsed.tables) {
 		const legacy = parsed.tables as Record<string, unknown[]>
@@ -118,20 +121,21 @@ export function parseImportFile(text: string): FinpointExport {
 				const { default_bucket_id, ...row } = value as Record<string, unknown>
 				return { ...row, default_monthly_budget_id: default_bucket_id ?? null }
 			})
-		parsed.version = EXPORT_VERSION
+		parsed.version = 7
 	}
 	if (parsed && parsed.tables && [1, 2, 3, 4].includes(originalVersion ?? 0)) {
 		parsed.tables.statement_rules = []
-		if (parsed.version === 4) parsed.version = EXPORT_VERSION
+		if (parsed.version === 4) parsed.version = 7
 	}
 	if (parsed?.version === 5 && Array.isArray(parsed.tables?.statement_rules)) {
 		parsed.tables.statement_rules = parsed.tables.statement_rules.map(value => {
 			const rule = value as { actions: Record<string, { value: unknown }> }
 			return { ...rule, actions: withoutActionModes(rule.actions) }
 		})
-		parsed.version = EXPORT_VERSION
+		parsed.version = 7
 	}
-	if (parsed?.version === 6) parsed.version = EXPORT_VERSION
+	if (parsed?.version === 6) parsed.version = 7
+	if (parsed?.version === 7) parsed.version = EXPORT_VERSION
 	if (parsed?.app !== "finpoint" || typeof parsed !== "object" || !parsed.tables) {
 		throw new Error("This file is not a Finpoint backup.")
 	}
@@ -144,6 +148,10 @@ export function parseImportFile(text: string): FinpointExport {
 			throw new Error("This backup file looks incomplete.")
 		}
 	}
+	// Keep only current Monthly Budget fields from backups and hand-edited files.
+	parsed.tables.monthly_budgets = (
+		parsed.tables.monthly_budgets as Record<string, unknown>[]
+	).map(monthlyBudgetFields)
 	const categoryIds = new Set((parsed.tables.categories as { id: string }[]).map(c => c.id))
 	if ((originalVersion ?? 0) < 7)
 		parsed.tables.records = (parsed.tables.records as Record<string, unknown>[]).map(row =>
@@ -254,4 +262,15 @@ export async function tableCounts(): Promise<Record<TableName, number>> {
 		counts[table] = await db.table(table).count()
 	}
 	return counts
+}
+
+function monthlyBudgetFields({
+	id,
+	name,
+	color,
+	group,
+	display_order,
+	archived,
+}: Record<string, unknown>) {
+	return { id, name, color, group, display_order, archived }
 }

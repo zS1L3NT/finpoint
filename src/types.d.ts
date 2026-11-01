@@ -118,7 +118,6 @@ export type MonthlyBudget = {
 	name: string
 	color: string
 	group: "core" | "outlier" | "other"
-	pace_kind: "daily" | "recurring" | "none"
 	display_order: number
 	archived: boolean
 	amount?: number | null

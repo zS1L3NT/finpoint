@@ -89,7 +89,6 @@ export async function getMonthlyRecords(month: string, year: number, filters: Mo
 					name: r.monthly_budget.name,
 					color: r.monthly_budget.color,
 					group: r.monthly_budget.group,
-					pace_kind: r.monthly_budget.pace_kind,
 					display_order: r.monthly_budget.display_order,
 					archived: r.monthly_budget.archived,
 				}

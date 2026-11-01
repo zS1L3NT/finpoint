@@ -2,17 +2,7 @@ import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import {
-	Card,
-	CardAction,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card"
 import {
 	Dialog,
 	DialogClose,
@@ -22,8 +12,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog"
-import { Separator } from "@/components/ui/separator"
-import { classForCurrency, cn, formatCurrency, formatDatetime } from "@/lib/utils"
+import { classForCurrency, cn, formatCurrency, formatDatetime, pluralize } from "@/lib/utils"
 import { getRecord } from "@/logic/records"
 import { replacementReview, replacePendingStatement } from "@/logic/statements"
 import { ValidationError } from "@/logic/validate"
@@ -143,7 +132,7 @@ export default function StatementReplacementReviewDialog({
 			}}
 		>
 			{review !== null || error !== null ? (
-				<DialogContent className="md:max-w-3xl">
+				<DialogContent className="md:max-w-xl">
 					<DialogHeader className="gap-1">
 						<DialogTitle>Review Statement replacement</DialogTitle>
 						<DialogDescription>
@@ -159,114 +148,100 @@ export default function StatementReplacementReviewDialog({
 							<AlertDescription>{error}</AlertDescription>
 						</Alert>
 					) : review ? (
-						<div className="flex flex-col gap-4">
-							<div className="grid items-stretch gap-3 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
-								<StatementCard
-									label="Pending Statement"
-									description="Deleted after replacement"
-									badge="Source"
+						<div className="flex flex-col gap-5">
+							<div className="overflow-hidden rounded-xl border">
+								<StatementRow
 									statement={review.pending_statement}
-									secondaryLabel="Moving unchanged"
-									secondaryAmount={review.allocated_amount}
+									label="Pending · removed after replacing"
 								/>
-								<div className="flex items-center justify-center text-muted-foreground">
-									<IconifyIcon icon="lucide:arrow-down" className="sm:hidden" />
-									<IconifyIcon
-										icon="lucide:arrow-right"
-										className="hidden sm:block"
-									/>
+								<div className="flex items-center gap-3 px-4 text-muted-foreground">
+									<div className="h-px flex-1 bg-border" />
+									<IconifyIcon icon="lucide:arrow-down" className="size-4" />
+									<div className="h-px flex-1 bg-border" />
 								</div>
-								<StatementCard
-									label="Imported Statement"
-									description="Kept exactly as imported"
-									badge="Destination"
+								<StatementRow
 									statement={review.statement}
-									secondaryLabel="Allocable afterward"
-									secondaryAmount={review.remaining_allocable_amount}
+									label="Imported · kept as is"
 								/>
 							</div>
-
-							<div className="flex flex-wrap gap-1.5">
-								<Badge variant={review.is_exact_amount ? "secondary" : "warning"}>
-									{review.is_exact_amount
-										? "Same amount"
-										: `${formatCurrency(review.amount_difference)} amount difference`}
-								</Badge>
-								<Badge
-									variant={
-										Math.abs(review.day_difference) <= 7 ? "outline" : "warning"
-									}
-								>
-									{dateDifferenceLabel(review.day_difference)}
-								</Badge>
+							<div className="grid grid-cols-3 gap-3 border-b pb-5 text-xs">
+								<div>
+									<Amount label="Moving" amount={review.allocated_amount} />
+									<p className="mt-1 text-muted-foreground">
+										{pluralize(review.allocations.length, "Allocation")}
+									</p>
+								</div>
+								<div className="space-y-1">
+									<p className="text-muted-foreground">Difference</p>
+									<p
+										className={cn(
+											"font-semibold tabular-nums",
+											review.is_exact_amount
+												? "text-creative"
+												: "text-warning",
+										)}
+									>
+										{review.is_exact_amount
+											? "Same amount"
+											: formatCurrency(review.amount_difference)}
+									</p>
+									<p
+										className={
+											Math.abs(review.day_difference) > 7
+												? "text-warning"
+												: "text-muted-foreground"
+										}
+									>
+										{dateDifferenceLabel(review.day_difference)}
+									</p>
+								</div>
+								<Amount
+									label="Left to allocate afterward"
+									amount={review.remaining_allocable_amount}
+								/>
 							</div>
-
 							{review.allocations.length ? (
-								<Card size="sm">
-									<CardHeader>
-										<CardTitle>Affected Records</CardTitle>
-										<CardDescription>
-											These Allocation amounts and Record associations will
-											remain unchanged.
-										</CardDescription>
-										<CardAction>
-											<Badge variant="outline">
-												{review.allocations.length}
-											</Badge>
-										</CardAction>
-									</CardHeader>
-									<CardContent className="flex flex-col gap-2">
-										{review.allocations.map(record => (
-											<div
-												key={record.id}
-												className="flex items-start justify-between gap-3"
-											>
-												<div className="min-w-0">
-													<p className="truncate font-medium">
-														{record.title}
-													</p>
-													<p className="truncate text-muted-foreground">
-														{record.category.name} ·{" "}
-														{formatDatetime(record.datetime)}
-													</p>
-												</div>
-												<span
-													className={cn(
-														"shrink-0 font-medium tabular-nums",
-														classForCurrency(record.allocation_amount),
-													)}
-												>
-													{formatCurrency(record.allocation_amount)}
-												</span>
+								<section className="space-y-3">
+									<h3 className="text-sm font-medium">
+										{review.can_replace
+											? `${pluralize(review.allocations.length, "Allocation")} ready to move`
+											: "Affected Records"}
+									</h3>
+									{review.allocations.map(record => (
+										<div
+											key={record.id}
+											className="flex items-start justify-between gap-3 text-sm"
+										>
+											<div className="min-w-0">
+												<p className="font-medium">{record.title}</p>
+												<p className="text-xs text-muted-foreground">
+													{record.category.name} ·{" "}
+													{formatDatetime(record.datetime)}
+												</p>
 											</div>
-										))}
-									</CardContent>
-								</Card>
-							) : null}
-
-							<Alert variant={review.can_replace ? "default" : "destructive"}>
-								<IconifyIcon
-									icon={
-										review.can_replace
-											? "lucide:circle-check"
-											: "lucide:circle-alert"
-									}
-								/>
-								<AlertTitle>
-									{review.can_replace
-										? review.allocations.length
-											? `${review.allocations.length} Allocation${review.allocations.length === 1 ? "" : "s"} ready to move`
-											: "No Allocations to transfer"
-										: "This pair cannot be replaced"}
-								</AlertTitle>
-								<AlertDescription>
-									{review.can_replace
-										? review.allocations.length
-											? `${formatCurrency(review.allocated_amount)} will move unchanged. The pending placeholder will then be deleted.`
-											: "Replacing will delete the pending placeholder. The imported Statement will remain unallocated."
-										: review.disabled_reason}
-								</AlertDescription>
-							</Alert>
+											<span
+												className={cn(
+													"shrink-0 tabular-nums",
+													classForCurrency(record.allocation_amount),
+												)}
+											>
+												{formatCurrency(record.allocation_amount)}
+											</span>
+										</div>
+									))}
+								</section>
+							) : (
+								<p className="text-sm text-muted-foreground">
+									No Allocations to transfer.
+								</p>
+							)}
+							{!review.can_replace && (
+								<Alert variant="destructive">
+									<IconifyIcon icon="lucide:circle-alert" />
+									<AlertTitle>This pair cannot be replaced</AlertTitle>
+									<AlertDescription>{review.disabled_reason}</AlertDescription>
+								</Alert>
+							)}
 						</div>
 					) : null}
 
@@ -296,51 +271,25 @@ export default function StatementReplacementReviewDialog({
 	)
 }
 
-function StatementCard({
-	label,
-	description,
-	badge,
-	statement,
-	secondaryLabel,
-	secondaryAmount,
-}: {
-	label: string
-	description: string
-	badge: string
-	statement: Statement
-	secondaryLabel: string
-	secondaryAmount: number
-}) {
+function StatementRow({ statement, label }: { statement: Statement; label: string }) {
 	return (
-		<Card size="sm">
-			<CardHeader>
-				<CardTitle>{label}</CardTitle>
-				<CardDescription>{description}</CardDescription>
-				<CardAction>
-					<Badge variant={statement.is_pending ? "warning" : "secondary"}>{badge}</Badge>
-				</CardAction>
-			</CardHeader>
-			<CardContent className="flex flex-1 flex-col gap-3">
-				<div className="flex flex-1 flex-col gap-1">
-					<p className="whitespace-pre-line break-words font-medium">
-						{statement.description}
-					</p>
-					<p className="text-muted-foreground">{statement.account.name}</p>
-					<p className="text-muted-foreground">{formatDatetime(statement.datetime)}</p>
-				</div>
-				<Separator />
-				<div className="grid grid-cols-2 gap-3">
-					<Amount label="Statement amount" amount={statement.amount} />
-					<Amount label={secondaryLabel} amount={secondaryAmount} />
-				</div>
-			</CardContent>
-			<CardFooter>
-				<Badge variant="outline">
-					{statement.allocation_count} Allocation
-					{statement.allocation_count === 1 ? "" : "s"}
-				</Badge>
-			</CardFooter>
-		</Card>
+		<div className="flex items-center justify-between gap-4 p-4">
+			<div className="min-w-0 space-y-1">
+				<p className="text-xs text-muted-foreground">{label}</p>
+				<p className="break-words text-sm font-medium">{statement.description}</p>
+				<p className="text-xs text-muted-foreground">
+					{statement.account.name} · {formatDatetime(statement.datetime)}
+				</p>
+			</div>
+			<span
+				className={cn(
+					"shrink-0 font-semibold tabular-nums",
+					classForCurrency(statement.amount),
+				)}
+			>
+				{formatCurrency(statement.amount)}
+			</span>
+		</div>
 	)
 }
 

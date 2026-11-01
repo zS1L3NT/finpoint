@@ -693,6 +693,22 @@ test.describe("pinned overview date", () => {
 						await surface.press("ArrowRight")
 						await expect(tooltip).toContainText("October 5")
 						await expect(tooltip).toContainText("$84.20")
+					} else if (title === "Spending forecast") {
+						await surface.press("ArrowRight")
+						await expect(tooltip).toContainText("October 5")
+						await expect(
+							tooltip.getByText("Daily", { exact: true }).locator(".."),
+						).toContainText("$84.20")
+						await expect(
+							tooltip.getByText("Unbudgeted", { exact: true }).locator(".."),
+						).toContainText("-$17.90")
+						await expect(tooltip.getByText("Total", { exact: true })).toHaveCount(1)
+						await expect(
+							tooltip.getByText("Total", { exact: true }).locator(".."),
+						).toContainText("$66.30")
+						await expect(
+							card(page, title).getByRole("button", { name: "Daily", exact: true }),
+						).toHaveCount(0)
 					} else {
 						await surface.press("ArrowRight")
 						await expect(tooltip).toContainText(
@@ -813,4 +829,60 @@ test.describe("pinned overview date", () => {
 		await expect(card(page, "Categories this month")).not.toContainText(/NaN|Infinity/)
 		await expect(card(page, "Spending by day").getByRole("application")).toBeVisible()
 	})
+})
+
+test("Spending forecast: retains gradient backdrops and comparison lines", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	await page.goto(overview)
+	const chart = card(page, "Spending forecast")
+	await expect(chart.locator('[data-series="total"][fill="none"]')).toHaveAttribute("d", /.+/)
+	for (const path of await chart.locator("[data-series]").all()) {
+		await expect(path).toHaveAttribute("d", /.+/)
+		const fill = await path.getAttribute("fill")
+		const series = await path.getAttribute("data-series")
+		if (fill?.startsWith("url(#")) {
+			const id = fill.slice(5, -1)
+			await expect(chart.locator(`linearGradient[id="${id}"]`)).toHaveCount(1)
+			if (!series?.endsWith("-projection"))
+				await expect(path).toHaveAttribute(
+					"fill-opacity",
+					series === "total" ? "0.1" : "0.3",
+				)
+		}
+		if (series?.endsWith("-projection") && fill === "none")
+			await expect(path).toHaveAttribute("stroke-dasharray", "7 5")
+	}
+	await expect(chart.locator('[data-series="total-previous"]')).toHaveAttribute(
+		"stroke-dasharray",
+		"2 4",
+	)
+	await page.goto(`${overview}&scope=${IDS.monthlyBudgets.daily}`)
+	await expect(
+		card(page, "Spending forecast").locator('[data-series$="-previous"]'),
+	).toHaveAttribute("stroke-dasharray", "2 4")
+})
+
+test("Spending forecast: preserves scope and legend semantics", { tag: ["@light"] }, async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	await page.goto(overview)
+	const chart = card(page, "Spending forecast")
+	const legend = chart.locator('[data-slot="forecast-legend"]')
+	await expect(legend.locator(":scope > span").first()).toHaveText("Total")
+	await expect(legend.getByRole("button")).toHaveCount(0)
+	const dot = legend.locator(":scope > span").first().locator("span")
+	expect(await dot.evaluate(element => getComputedStyle(element).backgroundColor)).toBe(
+		await themedRgb(page, "var(--foreground)"),
+	)
+	await expect(chart.getByText("Total budget", { exact: true })).toBeVisible()
+	await page.getByRole("combobox", { name: "Spending scope", exact: true }).click()
+	await expect(page.getByRole("option", { name: "Total", exact: true })).toBeVisible()
+	await expect(page.getByRole("option", { name: "All spending", exact: true })).toHaveCount(0)
+	await page.getByRole("option", { name: "Recurring", exact: true }).click()
+	await expect(chart.getByText("Recurring budget", { exact: true })).toBeVisible()
 })

@@ -9,7 +9,6 @@ import {
 	openEditor,
 	pending,
 	record,
-	select,
 } from "../support/editors"
 import { expect, seedWorkspace, test } from "../support/fixtures"
 import {
@@ -209,12 +208,19 @@ test("Monthly Budget editor: inherited amount reveals smoothly after override ac
 	const dialog = await openEditor(page, "/?month=October&year=2026", "Edit Daily", "Edit Daily")
 	// The amount section mounts after the amount-source live query resolves.
 	await expect(dialog.getByText("Amount for October 2026", { exact: true })).toBeVisible()
-	await select(page, dialog, "Amount rule", "Default")
+	await dialog
+		.getByRole("group", { name: "Amount rule", exact: true })
+		.getByRole("radio", { name: "Default", exact: true })
+		.check()
 	await expect(dialog.getByLabel("Monthly amount", { exact: true })).toHaveCount(0)
 	const samples = await sampleVisibleRowAnimations(
 		page,
 		'[data-slot="dialog-content"] div.overflow-hidden:has(#monthly-budget-amount)',
-		() => select(page, dialog, "Amount rule", "Override one month"),
+		() =>
+			dialog
+				.getByRole("group", { name: "Amount rule", exact: true })
+				.getByRole("radio", { name: "Override one month", exact: true })
+				.check(),
 	)
 	await expect(dialog.getByLabel("Monthly amount", { exact: true })).toBeVisible()
 	expect(samples.length).toBe(1)

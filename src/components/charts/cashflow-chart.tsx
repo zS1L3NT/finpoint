@@ -1,9 +1,11 @@
 import { DateTime } from "luxon"
 import { useRouter } from "next/navigation"
 import TrendChart from "@/components/charts/trend-chart"
+import MonthlyBudgetBadge from "@/components/monthly-budget-badge"
 import { useHistory } from "@/history"
 import { dayTicks } from "@/lib/chart-days"
-import type { CashflowHistoryMonth } from "@/logic/dashboard"
+import { themeColor } from "@/lib/palette"
+import type { getPaceView } from "@/logic/dashboard"
 import { pathMonthlyRecords } from "@/routes"
 
 export type CashflowPoint = {
@@ -17,7 +19,7 @@ export type CashflowPoint = {
 
 export default function CashflowChart({
 	data,
-	history,
+	forecast,
 	month,
 	year,
 	amount,
@@ -26,7 +28,7 @@ export default function CashflowChart({
 	recordFilters,
 }: {
 	data: CashflowPoint[]
-	history: CashflowHistoryMonth[]
+	forecast: Awaited<ReturnType<typeof getPaceView>>["forecast"]
 	month: string
 	year: number
 	recordFilters?: Record<string, string | undefined>
@@ -36,9 +38,6 @@ export default function CashflowChart({
 }) {
 	const router = useRouter()
 	const { handlePush } = useHistory()
-	// Last month only, as a faint dashed comparison line.
-	const previous = history.find(item => item.offset === 1)
-	// Last month's extra days are dropped: the chart has no dates past this month's end.
 	const length = data.length
 	const openDay = (index: number) => {
 		if (index >= data.length) return
@@ -56,8 +55,6 @@ export default function CashflowChart({
 			}),
 		)
 	}
-	const values = (field: "spending" | "projected_spending") =>
-		Array.from({ length }, (_, index) => data[index]?.[field] ?? null)
 
 	return (
 		<div className="grid gap-4" aria-label="Cumulative income, spending, and surplus">
@@ -74,60 +71,72 @@ export default function CashflowChart({
 					reference={
 						amount === null
 							? null
-							: { value: amount, label: `${amountLabel ?? "Monthly"} amount` }
+							: {
+									value: amount,
+									label: `${amountLabel ?? "Monthly"} budget`,
+									color: forecast.some(b => b.id === "total")
+										? "var(--foreground)"
+										: undefined,
+								}
 					}
+					sortByValue
 					series={[
-						...(previous
+						...forecast.filter(b => b.id !== "total"),
+						...forecast.filter(b => b.id === "total"),
+					].flatMap(budget => [
+						...(budget.previous
 							? [
 									{
-										key: "previous",
-										label: previous.month,
+										key: `${budget.id}-previous`,
+										label: budget.name,
+										color: themeColor(budget.color),
+										dash: "2 4",
+										opacity: 0.6,
+										comparison: true,
 										values: Array.from(
 											{ length },
-											(_, index) => previous.spending[index] ?? null,
+											(_, index) => budget.previous?.spending[index] ?? null,
 										),
-										color: "var(--foreground)",
-										dash: "4 4",
-										opacity: 0.6,
-									},
-								]
-							: []),
-						...(showProjection
-							? [
-									{
-										key: "projected_spending",
-										label: "Usage (projection)",
-										values: values("projected_spending"),
-										color: "var(--color-amber-400)",
-										over: "var(--color-orange-500)",
-										dash: "7 5",
-										fill: 0.12,
 									},
 								]
 							: []),
 						{
-							key: "spending",
-							label: "Usage",
-							values: values("spending"),
-							color: "var(--color-emerald-500)",
-							over: "var(--color-rose-500)",
-							fill: 0.3,
+							key: `${budget.id}-projection`,
+							label: budget.name,
+							color: themeColor(budget.color),
+							dash: "7 5",
+							fill: 0.12,
+							values: budget.points.map(p => p.projected_spending),
+							readoutFallback: true,
+							readoutPriority: budget.id === "total" ? 1 : 0,
+							valuePill: budget.id === "total",
 						},
-					]}
+						{
+							key: budget.id,
+							fill: budget.id === "total" ? 0.1 : 0.3,
+							label: budget.name,
+							color: themeColor(budget.color),
+							values: budget.points.map(p => p.spending),
+							readoutPriority: budget.id === "total" ? 1 : 0,
+							valuePill: budget.id === "total",
+						},
+					])}
 					introKey={`${month}-${year}`}
 					onSelect={openDay}
 				/>
 			</div>
 
+			<div data-slot="forecast-legend" className="flex flex-wrap gap-1.5">
+				{forecast.map(b => (
+					<MonthlyBudgetBadge key={b.id} name={b.name} color={b.color} />
+				))}
+			</div>
 			<p className="text-xs text-muted-foreground">
-				Green shows recorded spending
-				{amount === null ? "" : `, turning red past the ${amountLabel ?? "monthly"} amount`}
-				.
+				Each colour shows a Monthly Budget's cumulative spending.
 				{showProjection
-					? " The dashed amber line extends the current gross spending pace and includes later-dated Records already entered."
+					? " Dashed lines extend each budget's gross spending pace and include scheduled Records."
 					: ""}
-				{previous ? " The faint dashed line shows last month by day of month." : ""} Hold or
-				hover over a day to read it, and click it to open its Records.
+				Hold or hover over a day to read it, and click it to open its Records.
 			</p>
 		</div>
 	)
