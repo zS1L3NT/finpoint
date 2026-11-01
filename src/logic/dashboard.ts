@@ -548,7 +548,7 @@ export async function getPaceView(
 	for (const budget of scopedMonthlyBudgetRows) {
 		if (
 			!budgets.some(b => b.id === budget.id) &&
-			(scopeIds !== null ||
+			(monthlyBudgetsBuilt.some(b => b.id === budget.id && b.amount !== null) ||
 				futureRecords.some(
 					r =>
 						r.monthly_budget_id === budget.id &&
@@ -611,17 +611,9 @@ export async function getPaceView(
 			id: "total",
 			name: "Total",
 			color: "var(--foreground)",
-			previous: buildCashflowHistory(
-				date,
-				today,
-				{
-					...tables,
-					records: tables.records.filter(r =>
-						budgets.some(b => b.id === (r.monthly_budget_id ?? "unbudgeted")),
-					),
-				},
-				null,
-			).find(item => item.offset === 1),
+			previous: buildCashflowHistory(date, today, tables, scopeIds).find(
+				item => item.offset === 1,
+			),
 			points: series.map((point, index) => ({
 				...point,
 				spending:
@@ -639,7 +631,6 @@ export async function getPaceView(
 		})
 	}
 
-	const history = buildCashflowHistory(date, today, tables, scopeIds)
 	const highestSpendingDay = summary.daily.reduce<(typeof summary.daily)[number] | null>(
 		(highest, day) =>
 			day.spending > 0 && (!highest || day.spending > highest.spending) ? day : highest,
@@ -650,7 +641,6 @@ export async function getPaceView(
 		forecast,
 		singleBudget: scope !== "all" && !groupScope,
 		series,
-		history,
 		projection,
 		paceMonthlyBudget: pace ? { id: pace.id, name: pace.name, amount: pace.amount } : null,
 		spending: Math.round(summary.spending * 100) / 100,

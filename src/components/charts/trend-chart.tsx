@@ -15,6 +15,9 @@ export type TrendSeries = {
 	opacity?: number
 	/** Strength of the fill fading from the line towards $0. */
 	fill?: number
+	readoutFallback?: boolean
+	readoutPriority?: number
+	valuePill?: boolean
 	comparison?: boolean
 }
 
@@ -30,7 +33,7 @@ export default function TrendChart({
 	ticks,
 	split,
 	reference,
-	showTotal = false,
+	sortByValue = false,
 	introKey,
 	onSelect,
 	className,
@@ -41,7 +44,7 @@ export default function TrendChart({
 	ticks: { index: number; label: string }[]
 	split?: number
 	reference?: { value: number; label: string; color?: string } | null
-	showTotal?: boolean
+	sortByValue?: boolean
 	introKey?: string
 	onSelect?: (index: number) => void
 	className?: string
@@ -222,6 +225,7 @@ export default function TrendChart({
 								<path
 									key={s.key}
 									data-slot="chart-mark"
+									data-series={s.key}
 									d={path(s.values, x, y, true)}
 									fill={`url(#${id}-${s.key})`}
 									fillOpacity={s.fill}
@@ -233,6 +237,7 @@ export default function TrendChart({
 							<path
 								key={s.key}
 								data-slot="chart-mark"
+								data-series={s.key}
 								d={path(s.values, x, y)}
 								fill="none"
 								stroke={`url(#${id}-${s.key})`}
@@ -282,20 +287,19 @@ export default function TrendChart({
 					s =>
 						!s.comparison &&
 						s.values[index] != null &&
-						(!showTotal ||
-							!s.dash ||
+						(!s.readoutFallback ||
 							!series.some(
 								other =>
 									other.label === s.label &&
-									!other.dash &&
+									!other.comparison &&
+									!other.readoutFallback &&
 									other.values[index] != null,
 							)),
 				)
 				const rows = visible
 					.toSorted((a, b) =>
-						showTotal
-							? Number(b.key === "total" || b.key === "total-projection") -
-									Number(a.key === "total" || a.key === "total-projection") ||
+						sortByValue
+							? (b.readoutPriority ?? 0) - (a.readoutPriority ?? 0) ||
 								(b.values[index] ?? 0) - (a.values[index] ?? 0)
 							: (b.fill ?? 0) - (a.fill ?? 0),
 					)
@@ -314,7 +318,7 @@ export default function TrendChart({
 				const { y } = scales(size)
 				const pills = [
 					...series
-						.filter(s => s.key === "total" || s.key === "total-projection")
+						.filter(s => s.valuePill)
 						.flatMap(s => s.values.filter(v => v !== null).slice(-1)),
 					...(reference ? [reference.value] : []),
 					dataMax,

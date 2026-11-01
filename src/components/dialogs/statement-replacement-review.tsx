@@ -151,8 +151,8 @@ export default function StatementReplacementReviewDialog({
 						<div className="flex flex-col gap-5">
 							<div className="overflow-hidden rounded-xl border">
 								<StatementRow
-									label="Pending · removed after replacing"
 									statement={review.pending_statement}
+									label="Pending · removed after replacing"
 								/>
 								<div className="flex items-center gap-3 px-4 text-muted-foreground">
 									<div className="h-px flex-1 bg-border" />
@@ -160,8 +160,8 @@ export default function StatementReplacementReviewDialog({
 									<div className="h-px flex-1 bg-border" />
 								</div>
 								<StatementRow
-									label="Imported · kept as is"
 									statement={review.statement}
+									label="Imported · kept as is"
 								/>
 							</div>
 							<div className="grid grid-cols-3 gap-3 border-b pb-5 text-xs">
@@ -271,7 +271,7 @@ export default function StatementReplacementReviewDialog({
 	)
 }
 
-function StatementRow({ label, statement }: { label: string; statement: Statement }) {
+function StatementRow({ statement, label }: { statement: Statement; label: string }) {
 	return (
 		<div className="flex items-center justify-between gap-4 p-4">
 			<div className="min-w-0 space-y-1">

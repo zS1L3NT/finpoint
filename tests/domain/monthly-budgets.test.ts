@@ -220,3 +220,28 @@ test("legacy Holiday starter detection works with current budget fields", async 
 	expect(await db.monthly_budgets.get(holiday.id)).toEqual({ ...holiday, name: "Travel" })
 	expect(await db.monthly_budgets.where("name").equals("Travel").count()).toBe(1)
 })
+
+test("Total previous month includes budgets without current spending and Unbudgeted", async () => {
+	const budget = await upsertMonthlyBudget({ ...input, amount: null })
+	await db.categories.add({ id: "c", name: "Food", icon: "", color: "", parent_category_id: null, analytics_treatment: "spending", default_monthly_budget_id: null })
+	await db.analytics_months.add({ month: today.minus({ months: 1 }).toFormat("yyyy-MM-01"), coverage: "complete", covered_through: null, excluded_from_comparisons: false })
+	for (const [id, choice] of [["budget", { kind: "explicit", id: budget.id }], ["unbudgeted", { kind: "unbudgeted" }]] as const) {
+		await db.records.add({ id, title: id, amount: -25, datetime: today.minus({ months: 1 }).toFormat("yyyy-MM-01 12:00"), category_id: "c", people: null, location: null, description: null, treatment_choice: { kind: "explicit", value: "spending" }, monthly_budget_choice: choice, revision: 1 })
+	}
+	for (const [scope, expected] of [["all", 50], ["outlier", 25]] as const) {
+		const { pace } = await getDashboardView({ month: today.toFormat("MMMM"), year: today.year, scope })
+		expect(pace.forecast[0].previous?.spending.at(-1)).toBe(expected)
+	}
+})
+
+test("forecast includes planned budgets at zero and hides budgets without amount or spending", async () => {
+	await upsertMonthlyBudget(input)
+	await upsertMonthlyBudget({ ...input, name: "Zero", amount: 0 })
+	await upsertMonthlyBudget({ ...input, name: "Hidden", amount: null })
+	for (const scope of ["all", "outlier"]) {
+		const { pace } = await getDashboardView({ month: today.toFormat("MMMM"), year: today.year, scope })
+		expect(pace.paceMonthlyBudget?.amount).toBe(100)
+		expect(pace.forecast.map(b => b.name)).toEqual(["Total", "Travel", "Zero"])
+		for (const budget of pace.forecast) expect(budget.points[0].spending).toBe(0)
+	}
+})

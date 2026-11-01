@@ -762,8 +762,8 @@ function suggest(
 		const usual = [...counts.entries()]
 			.filter(([id]) => active.has(id))
 			.sort(([, a], [, b]) => b - a)[0]?.[0]
-		const value = usual
-		if (value) chips.push({ field: "monthly_budget_id", value, reason: "Charged every month" })
+		if (usual)
+			chips.push({ field: "monthly_budget_id", value: usual, reason: "Charged every month" })
 	}
 
 	return { chips, ranked }

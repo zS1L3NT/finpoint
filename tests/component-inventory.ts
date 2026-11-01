@@ -2457,6 +2457,7 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"Monthly Budget editor: popup enters as a whole",
 	],
 	"src/components/dialogs/monthly-budget.tsx#export.default.behaviour": [
+		"Monthly Budget editor: persists colour and Group choices and disables unavailable Default",
 		"Monthly Budget editor: backdrop, values, cursors, fit and keyboard reopen work",
 		"Monthly Budget editor: popup enters as a whole",
 		"Monthly Budget creator: rejects blank input and persists distinct zero and null amounts",
@@ -2524,6 +2525,7 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"Duplicate Statement review: popup enters as a whole",
 	],
 	"src/components/dialogs/statement-replacement-review.tsx#export.default.behaviour": [
+		"Statement replacement: reconciles transfer summary and blocks invalid pairs",
 		"replacement review: shows selected descriptions and restores the sheet on cancel",
 		"replacement review: review enters through intermediate opacity",
 	],
@@ -2687,6 +2689,8 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"Record creator: learned chips and late autofill notes rise in after the creator opens",
 	],
 	"src/components/charts/cashflow-chart.tsx#export.default.behaviour": [
+		"Spending forecast: retains gradient backdrops and comparison lines",
+		"Spending forecast: preserves scope and legend semantics",
 		"chart tooltips: Surplus / Shortfall keyboard navigation exposes actual numeric values",
 	],
 	"src/components/charts/daily-spending-chart.tsx#export.default.behaviour": [

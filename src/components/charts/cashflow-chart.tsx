@@ -79,7 +79,7 @@ export default function CashflowChart({
 										: undefined,
 								}
 					}
-					showTotal
+					sortByValue
 					series={[
 						...forecast.filter(b => b.id !== "total"),
 						...forecast.filter(b => b.id === "total"),
@@ -107,6 +107,9 @@ export default function CashflowChart({
 							dash: "7 5",
 							fill: 0.12,
 							values: budget.points.map(p => p.projected_spending),
+							readoutFallback: true,
+							readoutPriority: budget.id === "total" ? 1 : 0,
+							valuePill: budget.id === "total",
 						},
 						{
 							key: budget.id,
@@ -114,6 +117,8 @@ export default function CashflowChart({
 							label: budget.name,
 							color: themeColor(budget.color),
 							values: budget.points.map(p => p.spending),
+							readoutPriority: budget.id === "total" ? 1 : 0,
+							valuePill: budget.id === "total",
 						},
 					])}
 					introKey={`${month}-${year}`}
@@ -121,7 +126,7 @@ export default function CashflowChart({
 				/>
 			</div>
 
-			<div className="flex flex-wrap gap-1.5">
+			<div data-slot="forecast-legend" className="flex flex-wrap gap-1.5">
 				{forecast.map(b => (
 					<MonthlyBudgetBadge key={b.id} name={b.name} color={b.color} />
 				))}

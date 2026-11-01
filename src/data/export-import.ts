@@ -63,14 +63,7 @@ export async function exportData(): Promise<FinpointExport> {
 		tables[table] = await db.table(table).toArray()
 	}
 	tables.monthly_budgets = (tables.monthly_budgets as Record<string, unknown>[]).map(
-		({ id, name, color, group, display_order, archived }) => ({
-			id,
-			name,
-			color,
-			group,
-			display_order,
-			archived,
-		}),
+		monthlyBudgetFields,
 	)
 	return {
 		app: "finpoint",
@@ -158,14 +151,7 @@ export function parseImportFile(text: string): FinpointExport {
 	// Keep only current Monthly Budget fields from backups and hand-edited files.
 	parsed.tables.monthly_budgets = (
 		parsed.tables.monthly_budgets as Record<string, unknown>[]
-	).map(({ id, name, color, group, display_order, archived }) => ({
-		id,
-		name,
-		color,
-		group,
-		display_order,
-		archived,
-	}))
+	).map(monthlyBudgetFields)
 	const categoryIds = new Set((parsed.tables.categories as { id: string }[]).map(c => c.id))
 	if ((originalVersion ?? 0) < 7)
 		parsed.tables.records = (parsed.tables.records as Record<string, unknown>[]).map(row =>
@@ -276,4 +262,15 @@ export async function tableCounts(): Promise<Record<TableName, number>> {
 		counts[table] = await db.table(table).count()
 	}
 	return counts
+}
+
+function monthlyBudgetFields({
+	id,
+	name,
+	color,
+	group,
+	display_order,
+	archived,
+}: Record<string, unknown>) {
+	return { id, name, color, group, display_order, archived }
 }

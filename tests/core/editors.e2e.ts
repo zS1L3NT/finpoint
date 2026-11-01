@@ -1059,3 +1059,37 @@ test("Record editor: inherited budget hides an ineligible Category default", asy
 		"Category default · Unbudgeted",
 	)
 })
+
+test("Monthly Budget editor: persists colour and Group choices and disables unavailable Default", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	const dialog = await openEditor(
+		page,
+		"/?month=October&year=2026",
+		"New",
+		"Create monthly budget",
+	)
+	await dialog.getByLabel("Name", { exact: true }).fill("Colour probe")
+	await dialog.getByRole("button", { name: "Teal", exact: true }).click()
+	await expect(dialog.getByRole("button", { name: "Teal", exact: true })).toHaveAttribute(
+		"aria-pressed",
+		"true",
+	)
+	await dialog.getByLabel("Custom colour", { exact: true }).fill("#123456")
+	await dialog.getByRole("radio", { name: "Outlier", exact: true }).click()
+	await expect(dialog).toContainText("Exceptional spending outside your usual pattern.")
+	await expect(dialog.getByText("Spending forecast", { exact: true })).toHaveCount(0)
+	await dialog.getByRole("button", { name: "Create monthly budget", exact: true }).click()
+	await expect(dialog).not.toBeVisible()
+	await page.reload()
+	await page.getByRole("button", { name: "Edit Colour probe", exact: true }).click()
+	const editor = page.getByRole("dialog", { name: "Edit Colour probe", exact: true })
+	await expect(editor.getByLabel("Custom colour", { exact: true })).toHaveValue("#123456")
+	await expect(editor.getByRole("radio", { name: "Outlier", exact: true })).toBeChecked()
+	await expect(editor).toContainText("Exceptional spending outside your usual pattern.")
+	await expect(editor.getByRole("radio", { name: "Default", exact: true })).toBeDisabled()
+	await expect(editor).toContainText("No earlier default")
+	await expect(editor.getByText("Spending forecast", { exact: true })).toHaveCount(0)
+})

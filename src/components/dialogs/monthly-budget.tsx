@@ -131,7 +131,7 @@ export default function MonthlyBudgetDialog({
 							{monthlyBudget ? `Edit ${monthlyBudget.name}` : "Create monthly budget"}
 						</DialogTitle>
 						<DialogDescription>
-							Name, group and forecast apply to every month. The amount can differ by
+							Name, colour and group apply to every month. The amount can differ by
 							month.
 						</DialogDescription>
 					</DialogHeader>
