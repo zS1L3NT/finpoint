@@ -30,18 +30,19 @@ test("new Monthly Budgets and edits store only current fields", async () => {
 	expect(await db.monthly_budgets.get(row.id)).toEqual({ ...expected, name: "Holiday" })
 })
 
-test("current-month forecasts compare the selected budget, group and All spending", async () => {
+test("current-month forecasts compare the selected budget, group and Total", async () => {
 	const row = await upsertMonthlyBudget(input)
 	await upsertMonthlyBudget({ ...input, name: "Food", group: "core", amount: 200 })
 	for (const [scope, name, amount] of [
 		[row.id, "Travel", 100],
 		["outlier", "Outlier", 100],
 		["core", "Core", 200],
-		["all", "All spending", 300],
+		["all", "Total", 300],
 	] as const) {
 		const view = await getDashboardView({ month: today.toFormat("MMMM"), year: today.year, scope })
 		expect(view.pace.projection.available).toBe(true)
 		expect(view.pace.projection.monthly_budget).toMatchObject({ name, amount })
+		expect(view.scopeLabel).toBe(name)
 		expect(view.paceFilters).toEqual(view.scopeFilters)
 	}
 })
@@ -52,6 +53,7 @@ test("forecasts remain available without a comparison amount and accept zero", a
 		const view = await getDashboardView({ month: today.toFormat("MMMM"), year: today.year, scope })
 		expect(view.pace.projection.available).toBe(true)
 		expect(view.pace.projection.monthly_budget).toBeNull()
+		expect(view.pace.paceMonthlyBudget?.amount ?? null).toBeNull()
 	}
 	await upsertMonthlyBudget({ ...input, id: row.id, amount: 0 })
 	const view = await getDashboardView({ month: today.toFormat("MMMM"), year: today.year, scope: row.id })
@@ -89,6 +91,8 @@ test("forecast lines reconcile budgets and Unbudgeted spending across scopes", a
 			monthly_budget_choice: budget ? { kind: "explicit", id: budget } : { kind: "unbudgeted" },
 			revision: 1,
 		})
+		const record = await db.records.get(id)
+		await db.records.add({ ...record!, id: `previous-${id}`, datetime: today.minus({ months: 1 }).toFormat("yyyy-MM-01 12:00"), amount: amount * 2 })
 	}
 	for (const [scope, names, total] of [
 		["all", ["Travel", "Food", "Unbudgeted"], 60],
@@ -104,6 +108,8 @@ test("forecast lines reconcile budgets and Unbudgeted spending across scopes", a
 		expect(budgets.map(b => b.name).sort()).toEqual([...names].sort())
 		expect(pace.forecast[0].id === "total").toBe(scope !== travel.id)
 		if (scope !== travel.id) {
+			expect(pace.forecast[0].previous?.spending).toEqual(Array(today.minus({ months: 1 }).daysInMonth).fill(total * 2))
+			expect(pace.paceMonthlyBudget?.amount).toBe(scope === "all" ? 200 : 100)
 			for (const [index, point] of pace.forecast[0].points.entries()) {
 				for (const key of ["spending", "projected_spending"] as const) {
 					expect(point[key]).toBe(budgets[0].points[index][key] === null ? null : budgets.reduce((sum, b) => sum + (b.points[index][key] ?? 0), 0))

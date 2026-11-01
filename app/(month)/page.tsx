@@ -205,8 +205,10 @@ export default function DashboardPage() {
 								forecast={paceData.forecast}
 								month={dataMonth}
 								year={dataYear}
-								amount={paceData.singleBudget ? (paceAmount?.amount ?? null) : null}
-								amountLabel={paceAmount?.name ?? null}
+								amount={paceAmount?.amount ?? null}
+								amountLabel={
+									paceData.singleBudget ? (paceAmount?.name ?? null) : "Total"
+								}
 								showProjection={paceProjection.available}
 								recordFilters={paceFilters}
 							/>
@@ -480,7 +482,10 @@ function ScopeSelect({
 			</SelectTrigger>
 			<SelectContent variant="filter">
 				<SelectGroup>
-					<SelectItem value="all">All spending</SelectItem>
+					<SelectItem value="all">
+						<span className="size-2 rounded-full bg-foreground" />
+						Total
+					</SelectItem>
 				</SelectGroup>
 				<SelectSeparator />
 				<SelectGroup>

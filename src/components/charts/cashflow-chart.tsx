@@ -71,7 +71,13 @@ export default function CashflowChart({
 					reference={
 						amount === null
 							? null
-							: { value: amount, label: `${amountLabel ?? "Monthly"} budget` }
+							: {
+									value: amount,
+									label: `${amountLabel ?? "Monthly"} budget`,
+									color: forecast.some(b => b.id === "total")
+										? "var(--foreground)"
+										: undefined,
+								}
 					}
 					showTotal
 					series={[

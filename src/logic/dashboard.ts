@@ -516,9 +516,7 @@ export async function getPaceView(
 			? {
 					id: scope,
 					name:
-						scope === "all"
-							? "All spending"
-							: scope.charAt(0).toUpperCase() + scope.slice(1),
+						scope === "all" ? "Total" : scope.charAt(0).toUpperCase() + scope.slice(1),
 					amount: amounts.length
 						? amounts.reduce((sum, b) => sum + (b.amount ?? 0), 0)
 						: null,
@@ -613,7 +611,17 @@ export async function getPaceView(
 			id: "total",
 			name: "Total",
 			color: "var(--foreground)",
-			previous: undefined,
+			previous: buildCashflowHistory(
+				date,
+				today,
+				{
+					...tables,
+					records: tables.records.filter(r =>
+						budgets.some(b => b.id === (r.monthly_budget_id ?? "unbudgeted")),
+					),
+				},
+				null,
+			).find(item => item.offset === 1),
 			points: series.map((point, index) => ({
 				...point,
 				spending:
@@ -1162,7 +1170,7 @@ export async function getDashboardView(input: DashboardInput & { scope?: string 
 	const scopedBudgetIds = scopeMonthlyBudgetIds(scope, tables.monthlyBudgetRows)
 	const scopeLabel =
 		scope === "all"
-			? "All spending"
+			? "Total"
 			: isMonthlyBudgetGroup(scope)
 				? scope.charAt(0).toUpperCase() + scope.slice(1)
 				: (selectedBudget?.name ?? "Monthly budget")

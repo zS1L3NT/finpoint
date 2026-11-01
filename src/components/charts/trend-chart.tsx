@@ -40,7 +40,7 @@ export default function TrendChart({
 	labels: string[]
 	ticks: { index: number; label: string }[]
 	split?: number
-	reference?: { value: number; label: string } | null
+	reference?: { value: number; label: string; color?: string } | null
 	showTotal?: boolean
 	introKey?: string
 	onSelect?: (index: number) => void
@@ -119,7 +119,15 @@ export default function TrendChart({
 							/>
 						) : null}
 						{reference ? (
-							<g className="fill-muted-foreground stroke-muted-foreground">
+							<g
+								className={
+									reference.color
+										? undefined
+										: "fill-muted-foreground stroke-muted-foreground"
+								}
+								fill={reference.color}
+								stroke={reference.color}
+							>
 								<line
 									x1={0}
 									x2={plotWidth}
