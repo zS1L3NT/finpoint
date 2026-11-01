@@ -15,12 +15,7 @@ export async function listMonthlyBudgets() {
 	return Promise.all(rows.map(async row => ({ ...row, amount: await amountFor(row.id, month) })))
 }
 
-async function createMonthlyBudget(input: {
-	name: string
-	color: string
-	group: string
-	compare_previous_month?: boolean
-}) {
+async function createMonthlyBudget(input: { name: string; color: string; group: string }) {
 	const v = new Validator()
 	const name = v.text(input.name, "name")
 	const color = v.text(input.color, "color")
@@ -41,7 +36,6 @@ async function createMonthlyBudget(input: {
 		color,
 		group: group ?? "other",
 		display_order: max + 10,
-		compare_previous_month: input.compare_previous_month ?? false,
 		archived: false,
 	}
 	await db.monthly_budgets.add(row)
@@ -51,13 +45,7 @@ async function createMonthlyBudget(input: {
 
 async function updateMonthlyBudget(
 	id: string,
-	input: {
-		name: string
-		color: string
-		group: string
-		compare_previous_month?: boolean
-		archived: boolean
-	},
+	input: { name: string; color: string; group: string; archived: boolean },
 ) {
 	const v = new Validator()
 	const name = v.text(input.name, "name")
@@ -79,7 +67,6 @@ async function updateMonthlyBudget(
 		name,
 		color,
 		group: savedGroup,
-		compare_previous_month: input.compare_previous_month ?? false,
 		archived: !!input.archived,
 	})
 	const saved = await db.monthly_budgets.get(id)
@@ -155,18 +142,12 @@ export async function upsertMonthlyBudget(input: {
 	name: string
 	color: string
 	group: string
-	compare_previous_month?: boolean
 	archived?: boolean
 	month: string
 	amount: unknown
 	scope: string
 }) {
 	const v = new Validator()
-	if (
-		input.compare_previous_month !== undefined &&
-		typeof input.compare_previous_month !== "boolean"
-	)
-		v.reject("compare_previous_month", "Choose whether to compare the previous month.")
 	v.text(input.name, "name")
 	v.text(input.color, "color")
 	v.oneOf(input.group, "group", MONTHLY_BUDGET_GROUPS)

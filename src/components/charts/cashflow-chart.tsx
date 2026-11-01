@@ -78,8 +78,7 @@ export default function CashflowChart({
 					}
 					showTotal
 					series={forecast.flatMap(budget => [
-						...(budget.previous &&
-						(budget.id === focused || budget.compare_previous_month)
+						...(budget.previous && budget.id === focused
 							? [
 									{
 										key: `${budget.id}-previous`,

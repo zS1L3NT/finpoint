@@ -119,7 +119,6 @@ export type MonthlyBudget = {
 	color: string
 	group: "core" | "outlier" | "other"
 	display_order: number
-	compare_previous_month?: boolean
 	archived: boolean
 	amount?: number | null
 }

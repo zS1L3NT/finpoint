@@ -591,9 +591,6 @@ export async function getPaceView(
 		)
 		return {
 			...budget,
-			compare_previous_month:
-				tables.monthlyBudgetRows.find(b => b.id === budget.id)?.compare_previous_month ??
-				false,
 			previous: buildCashflowHistory(
 				date,
 				today,
