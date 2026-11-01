@@ -202,10 +202,10 @@ export default function DashboardPage() {
 						<CardContent>
 							<CashflowChart
 								data={paceSeries}
-								history={paceData.history}
+								forecast={paceData.forecast}
 								month={dataMonth}
 								year={dataYear}
-								amount={paceAmount?.amount ?? null}
+								amount={paceData.singleBudget ? (paceAmount?.amount ?? null) : null}
 								amountLabel={paceAmount?.name ?? null}
 								showProjection={paceProjection.available}
 								recordFilters={paceFilters}

@@ -29,6 +29,7 @@ export default function TrendChart({
 	ticks,
 	split,
 	reference,
+	showTotal = false,
 	introKey,
 	onSelect,
 	className,
@@ -39,6 +40,7 @@ export default function TrendChart({
 	ticks: { index: number; label: string }[]
 	split?: number
 	reference?: { value: number; label: string } | null
+	showTotal?: boolean
 	introKey?: string
 	onSelect?: (index: number) => void
 	className?: string
@@ -266,25 +268,44 @@ export default function TrendChart({
 					</g>
 				)
 			}}
-			readout={index => (
-				<ReadoutRows
-					title={labels[index]}
-					// The filled (primary) series lead; comparison lines follow.
-					rows={series
-						.filter(s => s.values[index] != null)
-						.toSorted((a, b) => (b.fill ?? 0) - (a.fill ?? 0))
-						.map(s => {
-							const value = s.values[index] ?? 0
-							return {
-								key: s.key,
-								label: s.label,
-								color: tone(s, value),
-								opacity: s.opacity,
-								value: formatCurrency(value),
-							}
-						})}
-				/>
-			)}
+			readout={index => {
+				const visible = series.filter(
+					s =>
+						s.values[index] != null &&
+						(!showTotal ||
+							!s.dash ||
+							!series.some(
+								other =>
+									other.label === s.label &&
+									!other.dash &&
+									other.values[index] != null,
+							)),
+				)
+				const rows = visible
+					.toSorted((a, b) =>
+						showTotal
+							? (b.values[index] ?? 0) - (a.values[index] ?? 0)
+							: (b.fill ?? 0) - (a.fill ?? 0),
+					)
+					.map(s => ({
+						key: s.key,
+						label: s.label,
+						color: tone(s, s.values[index] ?? 0),
+						opacity: s.opacity,
+						value: formatCurrency(s.values[index] ?? 0),
+					}))
+				if (showTotal)
+					rows.push({
+						key: "total",
+						label: "Total",
+						color: "var(--foreground)",
+						opacity: 1,
+						value: formatCurrency(
+							visible.reduce((sum, s) => sum + (s.values[index] ?? 0), 0),
+						),
+					})
+				return <ReadoutRows title={labels[index]} rows={rows} />
+			}}
 		>
 			{size => {
 				const { y } = scales(size)

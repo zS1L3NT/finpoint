@@ -57,3 +57,107 @@ test("forecasts remain available without a comparison amount and accept zero", a
 	const view = await getDashboardView({ month: today.toFormat("MMMM"), year: today.year, scope: row.id })
 	expect(view.pace.projection.monthly_budget?.amount).toBe(0)
 })
+
+test("forecast lines reconcile budgets and Unbudgeted spending across scopes", async () => {
+	await db.categories.add({
+		id: "c",
+		name: "Food",
+		icon: "",
+		color: "",
+		parent_category_id: null,
+		analytics_treatment: "spending",
+		default_monthly_budget_id: null,
+	})
+	const travel = await upsertMonthlyBudget(input)
+	const food = await upsertMonthlyBudget({ ...input, name: "Food", group: "core" })
+	for (const [id, budget, amount] of [
+		["a", travel.id, -30],
+		["b", food.id, -20],
+		["c", null, -10],
+	] as const) {
+		await db.records.add({
+			id,
+			title: id,
+			amount,
+			datetime: today.toFormat("yyyy-MM-01 12:00"),
+			category_id: "c",
+			people: null,
+			location: null,
+			description: null,
+			analytics_treatment: "spending",
+			analytics_treatment_source: "manual",
+			monthly_budget_id: budget,
+			monthly_budget_source: "manual",
+			revision: 1,
+		})
+	}
+	for (const [scope, names, total] of [
+		["all", ["Travel", "Food", "Unbudgeted"], 60],
+		["core", ["Food"], 20],
+		[travel.id, ["Travel"], 30],
+	] as const) {
+		const { pace } = await getDashboardView({
+			month: today.toFormat("MMMM"),
+			year: today.year,
+			scope,
+		})
+		expect(pace.forecast.map(b => b.name).sort()).toEqual([...names].sort())
+		expect(pace.forecast.reduce((sum, b) => sum + (b.points[0].spending ?? 0), 0)).toBe(total)
+		expect(pace.forecast.find(b => b.name === "Travel")?.color ?? food.color).toBe("#123456")
+		for (const b of pace.forecast) {
+			expect(b.points[today.day - 1].projected_spending).toBe(
+				b.points[today.day - 1].spending,
+			)
+			expect(b.points.at(-1)?.projected_spending).toBeGreaterThanOrEqual(
+				b.points[0].spending ?? 0,
+			)
+		}
+	}
+})
+
+test("forecast projections retain gross pace after refunds and add scheduled spending", async () => {
+	const { Settings } = await import("luxon")
+	const previousNow = Settings.now
+	try {
+		// Use a fixed clock so scheduled Records remain in the future on every run.
+		Settings.now = () => 1791201600000
+		await db.categories.add({
+			id: "c",
+			name: "Food",
+			icon: "",
+			color: "",
+			parent_category_id: null,
+			analytics_treatment: "spending",
+			default_monthly_budget_id: null,
+		})
+		const budget = await upsertMonthlyBudget({ ...input, month: "2026-10-01" })
+		for (const [id, day, amount] of [
+			["spent", "01", -100],
+			["refund", "02", 20],
+			["scheduled", "10", -50],
+		] as const) {
+			await db.records.add({
+				id,
+				title: id,
+				amount,
+				datetime: `2026-10-${day} 12:00`,
+				category_id: "c",
+				people: null,
+				location: null,
+				description: null,
+				analytics_treatment: "spending",
+				analytics_treatment_source: "manual",
+				monthly_budget_id: budget.id,
+				monthly_budget_source: "manual",
+				revision: 1,
+			})
+		}
+		const { pace } = await getDashboardView({ month: "October", year: 2026, scope: budget.id })
+		expect(pace.forecast[0].points[4].spending).toBe(80)
+		expect(pace.forecast[0].points[4].projected_spending).toBe(80)
+		expect(pace.forecast[0].points[9].projected_spending).toBe(230)
+		expect(pace.forecast[0].points[30].projected_spending).toBe(650)
+	} finally {
+		Settings.now = previousNow
+	}
+})

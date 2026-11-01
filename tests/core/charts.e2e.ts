@@ -693,6 +693,17 @@ test.describe("pinned overview date", () => {
 						await surface.press("ArrowRight")
 						await expect(tooltip).toContainText("October 5")
 						await expect(tooltip).toContainText("$84.20")
+					} else if (title === "Spending forecast") {
+						await surface.press("ArrowRight")
+						await expect(tooltip).toContainText("October 5")
+						await expect(
+							tooltip.getByText("Daily", { exact: true }).locator(".."),
+						).toContainText("$84.20")
+						await expect(
+							tooltip.getByText("Unbudgeted", { exact: true }).locator(".."),
+						).toContainText("-$17.90")
+						await expect(tooltip).toContainText("Total")
+						await expect(tooltip).toContainText("$66.30")
 					} else {
 						await surface.press("ArrowRight")
 						await expect(tooltip).toContainText(

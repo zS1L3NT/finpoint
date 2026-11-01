@@ -543,6 +543,60 @@ export async function getPaceView(
 		isFuture ? 0 : actualEnd.day,
 		projection.daily_spending,
 	)
+	const daily = await getMonthlyBudgetDaily(month, year, tables)
+	const budgets = daily.monthlyBudgets.filter(b =>
+		inScope(b.id === "unbudgeted" ? null : b.id, scopeIds),
+	)
+	for (const budget of scopedMonthlyBudgetRows) {
+		if (
+			!budgets.some(b => b.id === budget.id) &&
+			(scopeIds !== null ||
+				futureRecords.some(
+					r =>
+						r.monthly_budget_id === budget.id &&
+						contribution(r.analytics_treatment, r.amount).spending !== 0,
+				))
+		) {
+			budgets.push({ id: budget.id, name: budget.name, color: budget.color })
+		}
+	}
+	if (
+		scopeIds === null &&
+		!budgets.some(b => b.id === "unbudgeted") &&
+		futureRecords.some(
+			r =>
+				!r.monthly_budget_id &&
+				contribution(r.analytics_treatment, r.amount).spending !== 0,
+		)
+	) {
+		budgets.push({ id: "unbudgeted", name: "Unbudgeted", color: "#94a3b8" })
+	}
+	const forecast = budgets.map(budget => {
+		const matches = (r: AnalyticsRecord) => (r.monthly_budget_id ?? "unbudgeted") === budget.id
+		const actual = summarize(actualRecords.filter(matches))
+		const future = summarize(futureRecords.filter(matches))
+		const projected = buildProjection(
+			date,
+			actual,
+			future,
+			[],
+			isCurrent,
+			isFuture,
+			actualEnd.day,
+		)
+		return {
+			...budget,
+			points: buildSeries(
+				actual,
+				future,
+				[],
+				date.daysInMonth ?? 30,
+				isFuture ? 0 : actualEnd.day,
+				projected.daily_spending,
+			),
+		}
+	})
+
 	const history = buildCashflowHistory(date, today, tables, scopeIds)
 	const highestSpendingDay = summary.daily.reduce<(typeof summary.daily)[number] | null>(
 		(highest, day) =>
@@ -551,6 +605,8 @@ export async function getPaceView(
 	)
 
 	return {
+		forecast,
+		singleBudget: scope !== "all" && !groupScope,
 		series,
 		history,
 		projection,
