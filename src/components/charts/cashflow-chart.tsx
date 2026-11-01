@@ -110,7 +110,7 @@ export default function CashflowChart({
 						},
 						{
 							key: budget.id,
-							fill: 0.3,
+							fill: budget.id === "total" ? 0.1 : 0.3,
 							label: budget.name,
 							color: themeColor(budget.color),
 							values: budget.points.map(p => p.spending),
