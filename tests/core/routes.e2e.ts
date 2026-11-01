@@ -648,22 +648,45 @@ test.describe("pinned 15 October 2026 date", () => {
 							"Missing category fixture",
 					)
 					// Independent expectation, not the product's own label lookup.
+					const category = data.categories.find(row => row.id === record.category_id)
+					const effectiveTreatment =
+						record.treatment_choice.kind === "explicit"
+							? record.treatment_choice.value
+							: (category?.analytics_treatment ?? "automatic")
 					const treatment = {
 						income: "Income",
 						spending: "Spending",
 						saving_investment: "Saving / investment",
 						neutral: "Transfer / excluded",
-						automatic: "Automatic by direction",
-					}[record.analytics_treatment ?? "automatic"]
+						automatic: "Automatic",
+					}[effectiveTreatment]
 					await expect(page.getByText(/Treatment ·/)).toHaveText(
 						`Treatment · ${treatment}`,
 					)
-					await expect(page.getByText(/Monthly budget ·/)).toContainText(
-						record.monthly_budget_id
-							? (data.monthly_budgets.find(row => row.id === record.monthly_budget_id)
-									?.name ?? "Missing monthly budget fixture")
-							: "Unbudgeted",
-					)
+					const canUseBudget =
+						effectiveTreatment === "spending" ||
+						(effectiveTreatment === "automatic" && record.amount < 0)
+					const canUseDefault =
+						category?.analytics_treatment === "spending" ||
+						category?.analytics_treatment === "automatic" ||
+						category?.analytics_treatment == null
+					const effectiveBudgetId = canUseBudget
+						? record.monthly_budget_choice.kind === "explicit"
+							? record.monthly_budget_choice.id
+							: record.monthly_budget_choice.kind === "category" && canUseDefault
+								? (category?.default_monthly_budget_id ?? null)
+								: null
+						: null
+					if (!canUseBudget) {
+						await expect(page.getByText(/Monthly budget ·/)).toHaveCount(0)
+					} else {
+						await expect(page.getByText(/Monthly budget ·/)).toContainText(
+							effectiveBudgetId
+								? (data.monthly_budgets.find(row => row.id === effectiveBudgetId)
+										?.name ?? "Missing monthly budget fixture")
+								: "Unbudgeted",
+						)
+					}
 					const allocations = data.allocations.filter(row => row.record_id === record.id)
 					if (!allocations.length)
 						await expect(
@@ -882,10 +905,10 @@ test("Record facets: long Monthly Budget option picks and clears, Category histo
 		await expect(budget).toContainText("Unbudgeted")
 		await dialog.locator("#analytics_treatment").click()
 		await pickOption(page.getByRole("option", { name: "Income", exact: true }))
-		await expect(budget).toBeDisabled()
+		await expect(budget).toHaveCount(0)
 		await dialog.locator("#analytics_treatment").click()
 		await pickOption(page.getByRole("option", { name: "Spending", exact: true }))
-		await expect(budget).toBeEnabled()
+		await expect(budget).toBeVisible()
 		await expect(budget).toContainText("Unbudgeted")
 	})
 	await test.step("Category trend chart: unavailable months are distinguished from recorded zero spending", async () => {

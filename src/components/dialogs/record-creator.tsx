@@ -212,7 +212,12 @@ export default function RecordCreatorDialog({
 	const applyRecommendation = (
 		item: Pick<RecordSuggestion, "field"> & { value: string | null },
 	) => {
-		form.setFieldValue(item.field, item.value ?? "")
+		form.setFieldValue(
+			item.field,
+			item.field === "monthly_budget_id" && item.value === "unbudgeted"
+				? ""
+				: (item.value ?? ""),
+		)
 		clearApiError(item.field)
 		if (
 			item.field === "category_id" &&
@@ -225,13 +230,6 @@ export default function RecordCreatorDialog({
 		}
 		if (item.field === "monthly_budget_id")
 			form.setFieldValue("monthly_budget_source", "manual")
-		if (
-			item.field === "analytics_treatment" &&
-			!canUseMonthlyBudget(item.value as AnalyticsTreatment, form.getFieldValue("amount"))
-		) {
-			form.setFieldValue("monthly_budget_id", "")
-			form.setFieldValue("monthly_budget_source", "manual")
-		}
 	}
 	useEffect(() => {
 		if (!isOpen) {

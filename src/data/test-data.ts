@@ -1,3 +1,4 @@
+import { migrateRecordChoices } from "@/data/record-choices"
 // Abundant deterministic demo workspace for new users.
 // Generates ~4-5 months of accounts, statements, records, allocations,
 // budgets, Monthly Budgets, and amounts, then loads via importData (replaces all).
@@ -637,6 +638,6 @@ export function generateTestData(): FinpointExport {
 			default_filter_start_date: null,
 			default_filter_end_date_today: false,
 		},
-		tables,
+		tables: { ...tables, records: tables.records.map(r => migrateRecordChoices(r, true)) },
 	}
 }

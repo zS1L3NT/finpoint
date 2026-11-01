@@ -15,7 +15,7 @@ import { useStatementColumns, useStatementMobileRow } from "@/components/table/s
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { treatmentLabel } from "@/lib/analytics"
+import { canUseMonthlyBudget, treatmentLabel } from "@/lib/analytics"
 import { formatDatetime } from "@/lib/utils"
 import { listAccounts } from "@/logic/accounts"
 import { listCategories } from "@/logic/categories"
@@ -105,13 +105,15 @@ export default function RecordPage({ params }: { params: Promise<{ id: string }>
 					footer={
 						<div className="flex flex-wrap items-center gap-x-5 gap-y-1">
 							<span>Treatment · {treatmentLabel(record.analytics_treatment)}</span>
-							<span className="flex items-center gap-1.5">
-								Monthly budget ·{" "}
-								<MonthlyBudgetBadge
-									name={record.monthly_budget?.name ?? "Unbudgeted"}
-									color={record.monthly_budget?.color}
-								/>
-							</span>
+							{canUseMonthlyBudget(record.analytics_treatment, record.amount) && (
+								<span className="flex items-center gap-1.5">
+									Monthly budget ·{" "}
+									<MonthlyBudgetBadge
+										name={record.monthly_budget?.name ?? "Unbudgeted"}
+										color={record.monthly_budget?.color}
+									/>
+								</span>
+							)}
 						</div>
 					}
 				>

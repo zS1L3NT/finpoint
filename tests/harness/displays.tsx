@@ -24,10 +24,12 @@ const record: Record = {
 	allocated_amount: -10,
 	is_pending: true,
 	analytics_treatment: "spending",
+	treatment_choice: { kind: "category" },
+	monthly_budget_choice: { kind: "category" },
 	analytics_treatment_source: "category",
 	revision: 1,
 	monthly_budget_id: null,
-	monthly_budget_source: null,
+	monthly_budget_source: "category",
 	category: {
 		id: "display-category",
 		name: "Groceries",

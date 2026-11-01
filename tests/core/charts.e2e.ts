@@ -366,10 +366,8 @@ test("populated charts: tooltips stay numeric, drills work by keyboard and a Rec
 							datetime,
 							amount,
 							category_id: category,
-							analytics_treatment: "spending",
-							analytics_treatment_source: "category",
-							monthly_budget_id: "t1-mb-daily",
-							monthly_budget_source: "category",
+							treatment_choice: { kind: "category" },
+							monthly_budget_choice: { kind: "category" },
 							revision: 1,
 						})
 					}

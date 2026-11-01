@@ -81,14 +81,11 @@ export default function CategoriesPage() {
 				) : (
 					SECTIONS.map((section, sectionIndex) => {
 						const items = visible.filter(
-							category =>
-								(category.analytics_treatment ?? "automatic") === section.value,
+							category => category.analytics_treatment === section.value,
 						)
 						const offset = visible.filter(category =>
 							SECTIONS.slice(0, sectionIndex).some(
-								previous =>
-									(category.analytics_treatment ?? "automatic") ===
-									previous.value,
+								previous => category.analytics_treatment === previous.value,
 							),
 						).length
 						if (!items.length) return null
@@ -208,7 +205,7 @@ function CategoryTile({
 					color={monthlyBudget.color}
 					title="Default monthly budget"
 				/>
-			) : category.analytics_treatment === null ? (
+			) : category.analytics_treatment === "automatic" ? (
 				<p className="text-xs text-muted-foreground">
 					{treatmentLabel(category.analytics_treatment)}
 				</p>

@@ -21,6 +21,7 @@ import {
 	pendingStatementIds,
 	tallyAllocations,
 } from "@/logic/pending"
+import { resolveRecordChoices } from "@/logic/record-choices"
 
 export const COMPARISON_MONTHS = 2
 export const BREAKDOWN_MONTHS = 4
@@ -57,19 +58,13 @@ export function monthStart(month: string, year: number): DateTime {
 }
 
 function toAnalyticsRecords(
-	rows: {
-		id: string
-		amount: number
-		datetime: string
-		analytics_treatment: string
-		monthly_budget_id: string | null
-		category_id: string
-	}[],
+	rows: RecordRow[],
 	allocatedByRecord: Map<string, AllocationTally>,
 	categories: Map<string, CategoryRow>,
 	monthlyBudgets: Map<string, MonthlyBudgetRow>,
 ): AnalyticsRecord[] {
-	const items: (AnalyticsRecord | null)[] = rows.map(row => {
+	const items: (AnalyticsRecord | null)[] = rows.map(stored => {
+		const row = resolveRecordChoices(stored, categories.get(stored.category_id))
 		const entry = allocatedByRecord.get(row.id)
 		const category = categories.get(row.category_id)
 		if (!category) return null
@@ -120,7 +115,7 @@ function inRange(datetime: string, start: string, end: string): boolean {
 const ISO_DAY = "yyyy-MM-dd"
 
 type LoadedTables = {
-	records: RecordRow[]
+	records: ReturnType<typeof resolveRecordChoices>[]
 	statements: StatementRow[]
 	allocatedStatementIds: Set<string>
 	allocated: Map<string, AllocationTally>
@@ -156,7 +151,12 @@ async function loadDashboardTables(): Promise<LoadedTables> {
 	])
 
 	return {
-		records: allRecords,
+		records: allRecords.map(r =>
+			resolveRecordChoices(
+				r,
+				categories.find(c => c.id === r.category_id),
+			),
+		),
 		statements,
 		allocatedStatementIds: new Set(allocations.map(a => a.statement_id)),
 		allocated: tallyAllocations(allocations, pending),
@@ -1028,7 +1028,7 @@ export type TrendMonth = {
  * sparkline compares like with like (as the comparison text does) instead of ending in a cliff.
  */
 function buildTrend(date: DateTime, today: DateTime, tables: LoadedTables) {
-	const byMonth = new Map<string, RecordRow[]>()
+	const byMonth = new Map<string, ReturnType<typeof resolveRecordChoices>[]>()
 	for (const record of tables.records) {
 		const key = record.datetime.slice(0, 7)
 		const list = byMonth.get(key)

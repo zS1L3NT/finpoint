@@ -6,6 +6,7 @@
 
 import { DateTime } from "luxon"
 import { db, withoutActionModes } from "@/data/db"
+import { migrateRecordChoices } from "@/data/record-choices"
 import {
 	DEFAULT_SETTINGS,
 	type FinpointSettings,
@@ -13,7 +14,7 @@ import {
 	replaceSettings,
 } from "@/data/settings"
 
-export const EXPORT_VERSION = 6
+export const EXPORT_VERSION = 7
 
 type TableName =
 	| "statement_rules"
@@ -130,6 +131,7 @@ export function parseImportFile(text: string): FinpointExport {
 		})
 		parsed.version = EXPORT_VERSION
 	}
+	if (parsed?.version === 6) parsed.version = EXPORT_VERSION
 	if (parsed?.app !== "finpoint" || typeof parsed !== "object" || !parsed.tables) {
 		throw new Error("This file is not a Finpoint backup.")
 	}
@@ -141,6 +143,43 @@ export function parseImportFile(text: string): FinpointExport {
 		if (!Array.isArray(parsed.tables?.[table])) {
 			throw new Error("This backup file looks incomplete.")
 		}
+	}
+	const categoryIds = new Set((parsed.tables.categories as { id: string }[]).map(c => c.id))
+	if ((originalVersion ?? 0) < 7)
+		parsed.tables.records = (parsed.tables.records as Record<string, unknown>[]).map(row =>
+			migrateRecordChoices(row, categoryIds.has(String(row.category_id))),
+		)
+	for (const row of parsed.tables.records as Record<string, unknown>[]) {
+		const treatment = row.treatment_choice as Record<string, unknown> | undefined
+		const budget = row.monthly_budget_choice as Record<string, unknown> | undefined
+		const validTreatment =
+			treatment &&
+			((treatment.kind === "category" && Object.keys(treatment).length === 1) ||
+				(treatment.kind === "explicit" &&
+					Object.keys(treatment).length === 2 &&
+					typeof treatment.value === "string" &&
+					["automatic", "income", "spending", "saving_investment", "neutral"].includes(
+						treatment.value,
+					)))
+		const validBudget =
+			budget &&
+			(((budget.kind === "category" || budget.kind === "unbudgeted") &&
+				Object.keys(budget).length === 1) ||
+				(budget.kind === "explicit" &&
+					Object.keys(budget).length === 2 &&
+					typeof budget.id === "string" &&
+					budget.id.length > 0))
+		if (
+			!validTreatment ||
+			!validBudget ||
+			[
+				"analytics_treatment",
+				"analytics_treatment_source",
+				"monthly_budget_id",
+				"monthly_budget_source",
+			].some(key => key in row)
+		)
+			throw new Error("This backup contains an invalid Record choice.")
 	}
 	const startDate = parsed.settings?.default_filter_start_date
 	if (startDate != null && !/^\d{4}-\d{2}-\d{2}$/.test(startDate)) {
@@ -165,7 +204,14 @@ export function parseImportFile(text: string): FinpointExport {
 	}
 	return {
 		...(parsed as Omit<FinpointExport, "settings">),
-		tables: { ...parsed.tables, duplicate_dismissals: [...dismissals.values()] },
+		tables: {
+			...parsed.tables,
+			categories: (parsed.tables.categories as Record<string, unknown>[]).map(category => ({
+				...category,
+				analytics_treatment: category.analytics_treatment ?? "automatic",
+			})),
+			duplicate_dismissals: [...dismissals.values()],
+		},
 		settings: {
 			default_filter_start_date: startDate ?? DEFAULT_SETTINGS.default_filter_start_date,
 			default_filter_end_date_today:

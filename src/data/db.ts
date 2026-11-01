@@ -11,8 +11,14 @@
 //  3. Keep old version blocks untouched so existing browsers upgrade cleanly.
 
 import Dexie, { type Table } from "dexie"
+import { migrateRecordChoices } from "@/data/record-choices"
 import { hashLegacySnapshot, hashSnapshot } from "@/data/snapshot-hash"
-import type { AnalyticsTreatment, StatementRule } from "@/types"
+import type {
+	AnalyticsTreatment,
+	MonthlyBudgetChoice,
+	StatementRule,
+	TreatmentChoice,
+} from "@/types"
 
 export type AccountRow = {
 	id: string
@@ -41,7 +47,7 @@ export type CategoryRow = {
 	icon: string
 	color: string
 	parent_category_id: string | null
-	analytics_treatment: AnalyticsTreatment | null
+	analytics_treatment: AnalyticsTreatment
 	default_monthly_budget_id: string | null
 }
 
@@ -55,10 +61,8 @@ export type RecordRow = {
 	datetime: string
 	amount: number
 	category_id: string
-	analytics_treatment: AnalyticsTreatment
-	analytics_treatment_source: "category" | "manual"
-	monthly_budget_id: string | null
-	monthly_budget_source: "category" | "manual" | null
+	treatment_choice: TreatmentChoice
+	monthly_budget_choice: MonthlyBudgetChoice
 	revision: number
 }
 
@@ -127,7 +131,7 @@ export type SettingsRow = {
 }
 
 export const DB_NAME = "finpoint"
-export const DB_VERSION = 7
+export const DB_VERSION = 8
 
 class FinpointDB extends Dexie {
 	statement_rules!: Table<StatementRule, string>
@@ -378,6 +382,62 @@ class FinpointDB extends Dexie {
 					})
 				if (clean) {
 					tables.statement_rules = await transaction.table("statement_rules").toArray()
+					await transaction.table("meta").put({
+						key: "drive_last_hash",
+						value: await Dexie.waitFor(hashSnapshot({ settings, tables })),
+					})
+				}
+			})
+		this.version(8)
+			.stores({ records: "id, datetime, category_id" })
+			.upgrade(async transaction => {
+				const tables: Record<string, unknown[]> = {}
+				for (const name of [
+					"statement_rules",
+					"accounts",
+					"statements",
+					"duplicate_dismissals",
+					"categories",
+					"records",
+					"allocations",
+					"budgets",
+					"budget_records",
+					"monthly_budgets",
+					"monthly_budget_defaults",
+					"monthly_budget_amounts",
+					"analytics_months",
+				])
+					tables[name] = await transaction.table(name).toArray()
+				const settings = {
+					default_filter_start_date:
+						(await transaction.table("settings").get("default_filter_start_date"))
+							?.value ?? null,
+					default_filter_end_date_today:
+						(await transaction.table("settings").get("default_filter_end_date_today"))
+							?.value === "true",
+				}
+				const lastHash = await transaction.table("meta").get("drive_last_hash")
+				const clean =
+					lastHash?.value === (await Dexie.waitFor(hashSnapshot({ settings, tables })))
+				// Normalize both Categories and Record choices in the same upgrade.
+				await transaction
+					.table("categories")
+					.toCollection()
+					.modify(category => {
+						category.analytics_treatment ??= "automatic"
+					})
+				const categories = new Set((tables.categories as CategoryRow[]).map(c => c.id))
+				await transaction
+					.table("records")
+					.toCollection()
+					.modify(row => {
+						const converted = migrateRecordChoices(row, categories.has(row.category_id))
+						for (const key of Object.keys(row)) delete row[key]
+						Object.assign(row, converted)
+					})
+				if (clean) {
+					tables.categories = await transaction.table("categories").toArray()
+					tables.records = await transaction.table("records").toArray()
 					await transaction.table("meta").put({
 						key: "drive_last_hash",
 						value: await Dexie.waitFor(hashSnapshot({ settings, tables })),

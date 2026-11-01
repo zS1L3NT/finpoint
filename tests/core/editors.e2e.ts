@@ -1,6 +1,6 @@
 import type { Locator, Page } from "@playwright/test"
 import { expectPointerCursor, expectVisibleBackdrop } from "../support/assertions"
-import { IDS, statementRules } from "../support/data"
+import { getScenario, IDS, statementRules } from "../support/data"
 import {
 	account,
 	budget,
@@ -288,10 +288,7 @@ test("Category editors: persist Treatment defaults and exclude archived options"
 		await expect(page.getByRole("option", { name: "Daily", exact: true })).toHaveCount(0)
 		await expect(dialog).toBeVisible()
 		await select(page, dialog, "Treatment", "Income")
-		await expect(dialog.getByLabel("Monthly budget", { exact: true })).toBeDisabled()
-		await expect(dialog.getByLabel("Monthly budget", { exact: true })).toContainText(
-			"Unbudgeted",
-		)
+		await expect(dialog.getByLabel("Monthly budget", { exact: true })).toHaveCount(0)
 		await dialog.getByLabel("Name", { exact: true }).fill("")
 		await dialog.getByRole("button", { name: "Save changes" }).click()
 		await expect(dialog.getByLabel("Name", { exact: true })).toHaveAttribute(
@@ -308,11 +305,18 @@ test("Category editors: persist Treatment defaults and exclude archived options"
 		).toContainText("Income")
 		await expect(
 			page.getByRole("dialog").getByLabel("Monthly budget", { exact: true }),
-		).toBeDisabled()
+		).toHaveCount(0)
 	})
 	await test.step("Category creator: required identity, icon, colour and defaults persist", async () => {
 		void workspace
 		const dialog = await openEditor(page, "/categories", "Create Category", "Create Category")
+		await expect(dialog.getByLabel("Treatment", { exact: true })).toContainText("Automatic")
+		await dialog.getByLabel("Treatment", { exact: true }).click()
+		await expect(
+			page.getByRole("option", { name: "No default treatment", exact: true }),
+		).toHaveCount(0)
+		await expect(page.getByRole("option", { name: "Automatic", exact: true })).toBeVisible()
+		await page.keyboard.press("Escape")
 		await dialog.getByRole("button", { name: "Create category", exact: true }).click()
 		await expect(dialog.getByLabel("Name", { exact: true })).toHaveAttribute(
 			"aria-invalid",
@@ -662,6 +666,7 @@ test("Record creator: validates required fields, applies Category defaults and p
 				"Create Pending Record",
 				"Create New Record",
 			)
+			await expect(dialog.getByLabel("Treatment", { exact: true })).toContainText("Automatic")
 			await dialog.getByRole("button", { name: "Create Record", exact: true }).click()
 			await expect(dialog.getByLabel("Title", { exact: true })).toHaveAttribute(
 				"aria-invalid",
@@ -829,8 +834,7 @@ test("archived Monthly Budgets: retain archival state and historical assignments
 				request.onsuccess = () =>
 					store.put({
 						...request.result,
-						monthly_budget_id: "t1-mb-travel",
-						monthly_budget_source: "manual",
+						monthly_budget_choice: { kind: "explicit", id: "t1-mb-travel" },
 					})
 			})
 		})
@@ -1002,4 +1006,47 @@ test("Monthly Records editor: saved title appears immediately and survives reloa
 	await expect(
 		page.getByRole("button", { name: "Edit Updated groceries", exact: true }),
 	).toBeVisible()
+})
+
+test("Record editor: inherited budget hides an ineligible Category default", async ({ page }) => {
+	const tables = getScenario("populated").tables
+	await seedWorkspace(page, "populated", {
+		categories: tables.categories.map(category =>
+			category.id === IDS.categories.groceries
+				? {
+						...category,
+						analytics_treatment: "neutral",
+						default_monthly_budget_id: IDS.monthlyBudgets.daily,
+					}
+				: category,
+		),
+		records: [
+			{
+				...record,
+				title: "Dormant budget regression",
+				category_id: IDS.categories.groceries,
+				treatment_choice: { kind: "explicit", value: "spending" },
+				monthly_budget_choice: { kind: "category" },
+			},
+		],
+	})
+	await page.goto(`/records/${record.id}`)
+	await page.getByRole("button", { name: "Edit Record", exact: true }).click()
+	const dialog = page.getByRole("dialog", { name: "Edit Record", exact: true })
+	await expect(dialog.getByLabel("Monthly budget", { exact: true })).toContainText(
+		"Category default · Unbudgeted",
+	)
+	await select(page, dialog, "Treatment", "Transfer / excluded")
+	await expect(dialog.getByLabel("Monthly budget", { exact: true })).toHaveCount(0)
+	await select(page, dialog, "Treatment", "Spending")
+	await expect(dialog.getByLabel("Monthly budget", { exact: true })).toContainText(
+		"Category default · Unbudgeted",
+	)
+	await dialog.getByRole("button", { name: "Save changes", exact: true }).click()
+	await expect(dialog).not.toBeVisible()
+	await page.reload()
+	await page.getByRole("button", { name: "Edit Record", exact: true }).click()
+	await expect(dialog.getByLabel("Monthly budget", { exact: true })).toContainText(
+		"Category default · Unbudgeted",
+	)
 })

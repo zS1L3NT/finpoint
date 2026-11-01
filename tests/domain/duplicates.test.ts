@@ -104,10 +104,8 @@ test("move allocations without changing kept fields or records, and clean dismis
 		people: null,
 		location: null,
 		description: null,
-		analytics_treatment: "spending",
-		analytics_treatment_source: "manual",
-		monthly_budget_id: null,
-		monthly_budget_source: null,
+		treatment_choice: { kind: "explicit", value: "spending" },
+		monthly_budget_choice: { kind: "unbudgeted" },
 		revision: 1,
 	})
 	const record = await db.records.get("r")
@@ -318,10 +316,8 @@ test("record allocation deficits use the existing pending rule", async () => {
 		people: null,
 		location: null,
 		description: null,
-		analytics_treatment: "spending",
-		analytics_treatment_source: "manual",
-		monthly_budget_id: null,
-		monthly_budget_source: null,
+		treatment_choice: { kind: "explicit", value: "spending" },
+		monthly_budget_choice: { kind: "unbudgeted" },
 		revision: 1,
 	})
 	await db.allocations.bulkAdd([

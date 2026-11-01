@@ -1,11 +1,12 @@
 // Mirrors `Api\RecordController`, `Api\RecordMonthlyBudgetController`,
 // `Api\CompletionsController`, and `Record::appQuery`.
 
-import { db } from "@/data/db"
+import { db, type RecordRow } from "@/data/db"
 import { canUseMonthlyBudget } from "@/lib/analytics"
 import { contribution } from "@/logic/analytics"
 import { duplicateStatementIds } from "@/logic/duplicates"
 import { isPendingRecord, pendingStatementIds, tallyAllocations } from "@/logic/pending"
+import { resolveRecordChoices } from "@/logic/record-choices"
 import { inferRecordDatetime } from "@/logic/record-defaults"
 import { inputToStored, newId, round2, TREATMENT_VALUES } from "@/logic/shared"
 import { ValidationError, Validator } from "@/logic/validate"
@@ -47,27 +48,12 @@ function subtitle(people: string | null, location: string | null): string | null
 	return out || null
 }
 
-export async function enrichRecords(
-	rows: {
-		id: string
-		title: string
-		people: string | null
-		location: string | null
-		description: string | null
-		datetime: string
-		amount: number
-		category_id: string
-		analytics_treatment: AnalyticsTreatment
-		analytics_treatment_source: "category" | "manual"
-		monthly_budget_id: string | null
-		monthly_budget_source: "category" | "manual" | null
-		revision: number
-	}[],
-) {
+export async function enrichRecords(rows: RecordRow[]) {
 	const categories = new Map((await db.categories.toArray()).map(c => [c.id, c]))
 	const monthlyBudgets = new Map((await db.monthly_budgets.toArray()).map(b => [b.id, b]))
 	const byRecord = tallyAllocations(await db.allocations.toArray(), await pendingStatementIds())
-	return rows.map(row => {
+	return rows.map(stored => {
+		const row = resolveRecordChoices(stored, categories.get(stored.category_id))
 		const entry = byRecord.get(row.id)
 		const allocated_amount = entry?.sum ?? 0
 		const category = categories.get(row.category_id)
@@ -81,9 +67,6 @@ export async function enrichRecords(
 			category: category
 				? {
 						...category,
-						analytics_treatment: category.analytics_treatment as
-							| import("@/types").AnalyticsTreatment
-							| null,
 						can_delete: false,
 						records_count: 0,
 						default_monthly_budget: category.default_monthly_budget_id
@@ -96,7 +79,7 @@ export async function enrichRecords(
 						icon: "circle-question-mark",
 						color: "#9E9E9E",
 						parent_category_id: null,
-						analytics_treatment: null,
+						analytics_treatment: "automatic" as const,
 						default_monthly_budget_id: null,
 						can_delete: false,
 						records_count: 0,
@@ -128,7 +111,10 @@ async function expandCategoryIds(ids: string[]): Promise<string[]> {
 }
 
 export async function listRecords(filters: RecordFilters = {}) {
-	let rows = await db.records.toArray()
+	const categories = new Map((await db.categories.toArray()).map(c => [c.id, c]))
+	let rows = (await db.records.toArray()).map(r =>
+		resolveRecordChoices(r, categories.get(r.category_id)),
+	)
 
 	const q = (filters.query ?? "").trim().toLowerCase()
 	if (q) {
@@ -165,7 +151,12 @@ export async function listRecords(filters: RecordFilters = {}) {
 				monthlyBudgets.get(r.monthly_budget_id)?.group === filters.monthly_budget_group,
 		)
 	}
-	if (filters.show_unbudgeted) rows = rows.filter(r => r.monthly_budget_id === null)
+	if (filters.show_unbudgeted)
+		rows = rows.filter(
+			r =>
+				canUseMonthlyBudget(r.analytics_treatment, r.amount) &&
+				r.monthly_budget_id === null,
+		)
 	if (filters.effective_spending)
 		rows = rows.filter(r => contribution(r.analytics_treatment, r.amount).spending !== 0)
 	if (filters.treatment) rows = rows.filter(r => r.analytics_treatment === filters.treatment)
@@ -289,47 +280,38 @@ function validateRecordInput(input: RecordInput) {
 			"Invalid treatment.",
 		)
 	}
+	if (input.monthly_budget_source != null)
+		v.oneOf(
+			input.monthly_budget_source,
+			"monthly_budget_source",
+			["category", "manual"] as const,
+			"Invalid Monthly Budget choice.",
+		)
+	if (input.monthly_budget_id != null && typeof input.monthly_budget_id !== "string")
+		v.reject("monthly_budget_id", "Invalid Monthly Budget.")
 	v.throwIfInvalid()
 	return { ...input, title, datetime, amount, category_id }
 }
 
-async function analyticsValues(
+function analyticsValues(
 	input: RecordInput,
-	category: {
-		id: string
-		analytics_treatment: string | null
-		default_monthly_budget_id: string | null
-	},
-	existingMonthlyBudgetId?: string | null,
-): Promise<{
-	analytics_treatment: AnalyticsTreatment
-	analytics_treatment_source: "category" | "manual"
-	monthly_budget_id: string | null
-	monthly_budget_source: "category" | "manual" | null
-}> {
-	const explicitTreatment = input.analytics_treatment || null
-	const treatment = (explicitTreatment ??
-		category.analytics_treatment ??
-		"automatic") as AnalyticsTreatment
-	const eligible = canUseMonthlyBudget(treatment, Number(input.amount))
-	const requestedMonthlyBudget =
-		"monthly_budget_id" in input
-			? input.monthly_budget_id || null
-			: existingMonthlyBudgetId === undefined
-				? category.default_monthly_budget_id
-				: existingMonthlyBudgetId
-	const monthlyBudgetId = eligible ? requestedMonthlyBudget : null
-	const requestedSource = input.monthly_budget_source ?? null
-	const monthlyBudgetSource = !monthlyBudgetId
-		? null
-		: requestedSource === "category" && monthlyBudgetId === category.default_monthly_budget_id
-			? "category"
-			: "manual"
+	existing?: RecordRow,
+): Pick<RecordRow, "treatment_choice" | "monthly_budget_choice"> {
 	return {
-		analytics_treatment: treatment,
-		analytics_treatment_source: explicitTreatment ? "manual" : "category",
-		monthly_budget_id: monthlyBudgetId,
-		monthly_budget_source: monthlyBudgetSource as "category" | "manual" | null,
+		treatment_choice:
+			"analytics_treatment" in input
+				? input.analytics_treatment
+					? { kind: "explicit", value: input.analytics_treatment as AnalyticsTreatment }
+					: { kind: "category" }
+				: (existing?.treatment_choice ?? { kind: "category" }),
+		monthly_budget_choice:
+			input.monthly_budget_source === "category"
+				? { kind: "category" }
+				: "monthly_budget_id" in input
+					? input.monthly_budget_id
+						? { kind: "explicit", id: input.monthly_budget_id }
+						: { kind: "unbudgeted" }
+					: (existing?.monthly_budget_choice ?? { kind: "category" }),
 	}
 }
 
@@ -394,7 +376,7 @@ export async function createRecord(input: RecordInput) {
 		"rw",
 		[db.records, db.allocations, db.budgets, db.budget_records],
 		async () => {
-			const analytics = await analyticsValues(dto, category)
+			const analytics = analyticsValues(dto)
 			const id = newId()
 			await db.records.add({
 				id,
@@ -424,7 +406,7 @@ export async function createRecord(input: RecordInput) {
 				await db.budget_records.put({ budget_id: budget.id, record_id: id })
 			}
 
-			return stored
+			return resolveRecordChoices(stored, category)
 		},
 	)
 }
@@ -482,7 +464,7 @@ export async function updateRecord(id: string, input: RecordInput & { revision?:
 	await validateAllocations(statements, prior)
 
 	return db.transaction("rw", [db.records, db.allocations], async () => {
-		const analytics = await analyticsValues(dto, category, existing.monthly_budget_id)
+		const analytics = analyticsValues(dto, existing)
 		await db.records.update(id, {
 			title: dto.title.trim(),
 			people: dto.people?.trim() || null,
@@ -505,7 +487,7 @@ export async function updateRecord(id: string, input: RecordInput & { revision?:
 		const updated = await db.records.get(id)
 		if (!updated) throw new Error("Record not found.")
 
-		return updated
+		return resolveRecordChoices(updated, category)
 	})
 }
 

@@ -316,8 +316,7 @@ test("Record creator: rule autofill of Treatment and Monthly Budget follows the 
 		await expect(dialog.locator("#analytics_treatment-autopopulated")).toHaveText(
 			"Autofilled by the “Coffee analytics” rule.",
 		)
-		await expect(budget).toBeDisabled()
-		await expect(budget).not.toContainText("Recurring")
+		await expect(budget).toHaveCount(0)
 		await expect(dialog.locator("#monthly_budget_id-autopopulated")).toHaveCount(0)
 	})
 
