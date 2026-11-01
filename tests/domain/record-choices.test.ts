@@ -18,8 +18,8 @@ beforeEach(async () => {
 
 async function setupBudgets() {
 	await db.monthly_budgets.bulkAdd([
-		{ id: "daily", name: "Daily", color: "#38bdf8", group: "core", pace_kind: "daily", display_order: 10, archived: false },
-		{ id: "recurring", name: "Recurring", color: "#a78bfa", group: "core", pace_kind: "recurring", display_order: 20, archived: false },
+		{ id: "daily", name: "Daily", color: "#38bdf8", group: "core", display_order: 10, archived: false },
+		{ id: "recurring", name: "Recurring", color: "#a78bfa", group: "core", display_order: 20, archived: false },
 	])
 }
 

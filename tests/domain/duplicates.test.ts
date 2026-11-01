@@ -268,7 +268,6 @@ test("version two database upgrades preserve legacy monthly budget data", async 
 			name: "Daily",
 			color: "#000000",
 			group: "core",
-			pace_kind: "daily",
 			display_order: 1,
 			archived: false,
 		})

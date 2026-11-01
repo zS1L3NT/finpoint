@@ -118,7 +118,6 @@ export type MonthlyBudget = {
 	name: string
 	color: string
 	group: "core" | "outlier" | "other"
-	pace_kind: "daily" | "recurring" | "none"
 	display_order: number
 	archived: boolean
 	amount?: number | null
@@ -159,7 +158,7 @@ export type AnalyticsSummary = {
 		records: number
 		monthly_budget_spending: { [monthlyBudgetId: string]: number }
 	}>
-	monthlyBudgets: Array<Omit<MonthlyBudget, "pace_kind"> & { spending: number; records: number }>
+	monthlyBudgets: Array<MonthlyBudget & { spending: number; records: number }>
 }
 
 /** Rules only read the Statement description; text comparisons ignore case. */

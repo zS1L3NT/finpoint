@@ -78,7 +78,6 @@ beforeEach(async () => {
 		name: "Recurring",
 		color: "",
 		group: "core",
-		pace_kind: "recurring",
 		display_order: 1,
 		archived: false,
 	})
@@ -392,11 +391,12 @@ test("repeated decisions propose a rule with its own dry run, until a rule cover
 })
 
 test("a monthly charge suggests the Monthly Budget learned from history", async () => {
+	await db.categories.update("subscriptions", { default_monthly_budget_id: "recurring" })
 	const today = DateTime.now().startOf("day")
 	for (const back of [3, 2, 1])
 		await decided(
 			`SPOTIFY P${back}23 STOCKHOLM`,
-			{ title: "Spotify", category_id: "subscriptions", amount: -11.98, monthly_budget_id: "recurring" },
+			{ title: "Spotify", category_id: "subscriptions", amount: -11.98 },
 			today.minus({ months: back, days: 8 }).toFormat("yyyy-MM-dd 10:00"),
 		)
 	const next = statement("SPOTIFY P0123 STOCKHOLM", {

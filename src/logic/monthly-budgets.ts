@@ -35,7 +35,6 @@ async function createMonthlyBudget(input: { name: string; color: string; group: 
 		name,
 		color,
 		group: group ?? "other",
-		pace_kind: "none" as const,
 		display_order: max + 10,
 		archived: false,
 	}

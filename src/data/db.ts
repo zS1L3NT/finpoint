@@ -93,7 +93,6 @@ export type MonthlyBudgetRow = {
 	name: string
 	color: string
 	group: "core" | "outlier" | "other"
-	pace_kind: "daily" | "recurring" | "none"
 	display_order: number
 	archived: boolean
 }
@@ -426,6 +425,12 @@ class FinpointDB extends Dexie {
 					.modify(category => {
 						category.analytics_treatment ??= "automatic"
 					})
+				await transaction
+					.table("monthly_budgets")
+					.toCollection()
+					.modify(row => {
+						delete row.pace_kind
+					})
 				const categories = new Set((tables.categories as CategoryRow[]).map(c => c.id))
 				await transaction
 					.table("records")
@@ -436,6 +441,7 @@ class FinpointDB extends Dexie {
 						Object.assign(row, converted)
 					})
 				if (clean) {
+					tables.monthly_budgets = await transaction.table("monthly_budgets").toArray()
 					tables.categories = await transaction.table("categories").toArray()
 					tables.records = await transaction.table("records").toArray()
 					await transaction.table("meta").put({

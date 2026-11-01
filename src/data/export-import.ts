@@ -144,6 +144,10 @@ export function parseImportFile(text: string): FinpointExport {
 			throw new Error("This backup file looks incomplete.")
 		}
 	}
+	// Strip retired Monthly Budget metadata, including backups from the unreleased v7 format.
+	parsed.tables.monthly_budgets = (
+		parsed.tables.monthly_budgets as Record<string, unknown>[]
+	).map(({ pace_kind, ...row }) => row)
 	const categoryIds = new Set((parsed.tables.categories as { id: string }[]).map(c => c.id))
 	if ((originalVersion ?? 0) < 7)
 		parsed.tables.records = (parsed.tables.records as Record<string, unknown>[]).map(row =>

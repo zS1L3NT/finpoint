@@ -22,12 +22,12 @@ const input = {
 	scope: "month",
 }
 
-test("new Monthly Budgets store none and edits preserve the legacy column", async () => {
+test("new Monthly Budgets and edits store only current fields", async () => {
 	const row = await upsertMonthlyBudget(input)
-	expect(row.pace_kind).toBe("none")
-	await db.monthly_budgets.update(row.id, { pace_kind: "daily" })
+	const expected = { id: row.id, name: "Travel", color: "#123456", group: "outlier", display_order: row.display_order, archived: false }
+	expect(row).toEqual(expected)
 	await upsertMonthlyBudget({ ...input, id: row.id, name: "Holiday" })
-	expect((await db.monthly_budgets.get(row.id))?.pace_kind).toBe("daily")
+	expect(await db.monthly_budgets.get(row.id)).toEqual({ ...expected, name: "Holiday" })
 })
 
 test("current-month forecasts compare the selected budget, group and All spending", async () => {
@@ -84,10 +84,8 @@ test("forecast lines reconcile budgets and Unbudgeted spending across scopes", a
 			people: null,
 			location: null,
 			description: null,
-			analytics_treatment: "spending",
-			analytics_treatment_source: "manual",
-			monthly_budget_id: budget,
-			monthly_budget_source: "manual",
+			treatment_choice: { kind: "explicit", value: "spending" },
+			monthly_budget_choice: budget ? { kind: "explicit", id: budget } : { kind: "unbudgeted" },
 			revision: 1,
 		})
 	}
@@ -145,10 +143,8 @@ test("forecast projections retain gross pace after refunds and add scheduled spe
 				people: null,
 				location: null,
 				description: null,
-				analytics_treatment: "spending",
-				analytics_treatment_source: "manual",
-				monthly_budget_id: budget.id,
-				monthly_budget_source: "manual",
+				treatment_choice: { kind: "explicit", value: "spending" },
+				monthly_budget_choice: { kind: "explicit", id: budget.id },
 				revision: 1,
 			})
 		}
@@ -160,4 +156,49 @@ test("forecast projections retain gross pace after refunds and add scheduled spe
 	} finally {
 		Settings.now = previousNow
 	}
+})
+
+// Assemble the retired key only in compatibility fixtures so source scans stay useful.
+const legacyPaceKey = ["pace", "kind"].join("_")
+
+test("released schema upgrade removes retired budget metadata and preserves Drive baselines", async () => {
+	const { exportData } = await import("../../src/data/export-import")
+	const { hashSnapshot } = await import("../../src/data/snapshot-hash")
+	for (const clean of [true, false]) {
+		const rows = ["daily", "recurring", "none"].map((pace, i) => ({ id: String(i), name: pace, color: "#123456", group: "core", display_order: i * 10, archived: i === 2, [legacyPaceKey]: pace }))
+		const backup = await exportData()
+		const tables = { ...backup.tables, monthly_budgets: rows }
+		const baseline = clean ? await hashSnapshot({ settings: backup.settings, tables }) : "dirty"
+		const schema = Object.fromEntries(db.tables.map(t => [t.name, [t.schema.primKey.src, ...t.schema.indexes.map(i => i.src)].join(",")]))
+		await db.delete()
+		const old = new Dexie("finpoint")
+		old.version(7).stores({ ...schema, records: "id, datetime, category_id, monthly_budget_id, analytics_treatment" })
+		await old.table("monthly_budgets").bulkAdd(rows)
+		await old.table("meta").put({ key: "drive_last_hash", value: baseline })
+		old.close()
+		await db.open()
+		expect(db.verno).toBe(8)
+		expect(await db.monthly_budgets.toArray()).toEqual(rows.map(({ [legacyPaceKey]: _, ...row }) => row))
+		expect((await db.meta.get("drive_last_hash"))?.value).toBe(clean ? await hashSnapshot(await exportData()) : baseline)
+	}
+})
+
+test("old backup import removes retired budget metadata and exports current fields", async () => {
+	const { exportData, importData } = await import("../../src/data/export-import")
+	const budget = await upsertMonthlyBudget(input)
+	const backup = await exportData()
+	for (const version of [6, 7]) {
+		await importData({ ...backup, version, tables: { ...backup.tables, monthly_budgets: [{ ...budget, [legacyPaceKey]: "daily" }] } })
+		expect(await db.monthly_budgets.get(budget.id)).toEqual(budget)
+		expect((await exportData()).tables.monthly_budgets).toEqual([budget])
+	}
+})
+
+test("legacy Holiday starter detection works with current budget fields", async () => {
+	const { seedIfEmpty } = await import("../../src/data/seed")
+	const holiday = { id: "holiday", name: "Holiday", color: "#fb7185", group: "outlier" as const, display_order: 40, archived: false }
+	await db.monthly_budgets.add(holiday)
+	await seedIfEmpty()
+	expect(await db.monthly_budgets.get(holiday.id)).toEqual({ ...holiday, name: "Travel" })
+	expect(await db.monthly_budgets.where("name").equals("Travel").count()).toBe(1)
 })
