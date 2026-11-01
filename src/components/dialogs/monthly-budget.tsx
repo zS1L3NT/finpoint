@@ -42,7 +42,6 @@ export default function MonthlyBudgetDialog({
 	const [name, setName] = useState(monthlyBudget?.name ?? "")
 	const [color, setColor] = useState(monthlyBudget?.color ?? "#64748b")
 	const [group, setGroup] = useState(monthlyBudget?.group ?? "core")
-	const [paceKind, setPaceKind] = useState(monthlyBudget?.pace_kind ?? "none")
 	const [amount, setAmount] = useState(monthlyBudget?.amount ?? 0)
 	const [noAmount, setNoAmount] = useState(monthlyBudget?.amount === null)
 	const [amountScope, setAmountScope] = useState<string | null>(null)
@@ -82,7 +81,6 @@ export default function MonthlyBudgetDialog({
 		setName(monthlyBudget?.name ?? "")
 		setColor(monthlyBudget?.color ?? "#64748b")
 		setGroup(monthlyBudget?.group ?? "core")
-		setPaceKind(monthlyBudget?.pace_kind ?? "none")
 		setAmount(monthlyBudget?.amount ?? 0)
 		setNoAmount(monthlyBudget?.amount === null)
 		setAmountScope(null)
@@ -99,7 +97,6 @@ export default function MonthlyBudgetDialog({
 				name,
 				color,
 				group,
-				pace_kind: group === "outlier" ? "none" : paceKind,
 				archived,
 				month: selectedMonth.toISODate() ?? "",
 				amount: noAmount ? null : amount,
@@ -217,61 +214,6 @@ export default function MonthlyBudgetDialog({
 												: "Other spending you want to track separately."}
 									</p>
 								</fieldset>
-								<fieldset className="space-y-2" disabled={group === "outlier"}>
-									<legend className="mb-2 text-sm font-medium">
-										Spending forecast
-									</legend>
-									{[
-										[
-											"none",
-											"Recorded amounts only",
-											"Show spending without a daily estimate.",
-										],
-										[
-											"daily",
-											"Estimate from daily spending",
-											"Project month-end spending from the daily average.",
-										],
-										[
-											"recurring",
-											"Recurring / scheduled spending",
-											"Include recorded and future-dated spending.",
-										],
-									].map(([value, label, description]) => (
-										<label
-											key={value}
-											className="flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 has-[:checked]:border-ring has-[:checked]:bg-muted/50 has-[:disabled]:opacity-50"
-										>
-											<input
-												type="radio"
-												name="monthly-budget-pace"
-												aria-label={label}
-												value={value}
-												checked={
-													(group === "outlier" ? "none" : paceKind) ===
-													value
-												}
-												onChange={() =>
-													setPaceKind(value as MonthlyBudget["pace_kind"])
-												}
-												className="accent-primary"
-											/>
-											<span>
-												<span className="block text-xs font-medium">
-													{label}
-												</span>
-												<span className="block text-xs text-muted-foreground">
-													{description}
-												</span>
-											</span>
-										</label>
-									))}
-								</fieldset>
-								{group === "outlier" && (
-									<p className="text-xs text-muted-foreground">
-										Outlier monthly budgets use recorded amounts only.
-									</p>
-								)}
 							</FieldGroup>
 							<FieldGroup className="gap-3 border-t pt-4">
 								<p className="text-sm font-medium">Amount for {monthLabel}</p>

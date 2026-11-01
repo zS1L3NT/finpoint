@@ -393,12 +393,12 @@ test("repeated decisions propose a rule with its own dry run, until a rule cover
 	expect((await suggestedStatementRules()).some(r => r.key === "grab")).toBe(false)
 })
 
-test("a monthly charge suggests the recurring Monthly Budget", async () => {
+test("a monthly charge suggests the Monthly Budget learned from history", async () => {
 	const today = DateTime.now().startOf("day")
 	for (const back of [3, 2, 1])
 		await decided(
 			`SPOTIFY P${back}23 STOCKHOLM`,
-			{ title: "Spotify", category_id: "subscriptions", amount: -11.98 },
+			{ title: "Spotify", category_id: "subscriptions", amount: -11.98, monthly_budget_id: "recurring" },
 			today.minus({ months: back, days: 8 }).toFormat("yyyy-MM-dd 10:00"),
 		)
 	const next = statement("SPOTIFY P0123 STOCKHOLM", {
@@ -414,6 +414,25 @@ test("a monthly charge suggests the recurring Monthly Budget", async () => {
 		value: "recurring",
 		reason: "Charged every month",
 	})
+})
+
+test("a monthly charge without budget history has no Monthly Budget chip", async () => {
+	const today = DateTime.now().startOf("day")
+	for (const back of [3, 2, 1])
+		await decided(
+			`SPOTIFY P${back}23 STOCKHOLM`,
+			{ title: "Spotify", category_id: "subscriptions", amount: -11.98 },
+			today.minus({ months: back, days: 8 }).toFormat("yyyy-MM-dd 10:00"),
+		)
+	const next = statement("SPOTIFY P0123 STOCKHOLM", {
+		datetime: today.toFormat("yyyy-MM-dd 10:00"),
+		amount: -11.98,
+	})
+	await db.statements.add(next)
+
+	const { chips } = await recordSuggestions({ statementIds: [next.id] })
+
+	expect(chips.some(c => c.reason === "Charged every month")).toBe(false)
 })
 
 test("replaying history scores each Record against earlier Records only", async () => {

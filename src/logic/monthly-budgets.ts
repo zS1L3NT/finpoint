@@ -6,7 +6,6 @@ import { newId } from "@/logic/shared"
 import { Validator } from "@/logic/validate"
 
 const MONTHLY_BUDGET_GROUPS = ["core", "outlier", "other"] as const
-const PACE_KINDS = ["daily", "recurring", "none"] as const
 
 export async function listMonthlyBudgets() {
 	const month = DateTime.now().toFormat("yyyy-MM-01")
@@ -16,17 +15,11 @@ export async function listMonthlyBudgets() {
 	return Promise.all(rows.map(async row => ({ ...row, amount: await amountFor(row.id, month) })))
 }
 
-async function createMonthlyBudget(input: {
-	name: string
-	color: string
-	group: string
-	pace_kind: string
-}) {
+async function createMonthlyBudget(input: { name: string; color: string; group: string }) {
 	const v = new Validator()
 	const name = v.text(input.name, "name")
 	const color = v.text(input.color, "color")
 	const group = v.oneOf(input.group, "group", MONTHLY_BUDGET_GROUPS, "Invalid group.")
-	const pace_kind = v.oneOf(input.pace_kind, "pace_kind", PACE_KINDS, "Invalid pace.")
 	v.throwIfInvalid()
 
 	if (await db.monthly_budgets.where("name").equals(name).first()) {
@@ -42,7 +35,7 @@ async function createMonthlyBudget(input: {
 		name,
 		color,
 		group: group ?? "other",
-		pace_kind: group === "outlier" ? "none" : (pace_kind ?? "none"),
+		pace_kind: "none" as const,
 		display_order: max + 10,
 		archived: false,
 	}
@@ -53,13 +46,12 @@ async function createMonthlyBudget(input: {
 
 async function updateMonthlyBudget(
 	id: string,
-	input: { name: string; color: string; group: string; pace_kind: string; archived: boolean },
+	input: { name: string; color: string; group: string; archived: boolean },
 ) {
 	const v = new Validator()
 	const name = v.text(input.name, "name")
 	const color = v.text(input.color, "color")
 	const group = v.oneOf(input.group, "group", MONTHLY_BUDGET_GROUPS)
-	const pace_kind = v.oneOf(input.pace_kind, "pace_kind", PACE_KINDS)
 	v.throwIfInvalid()
 
 	const existing = await db.monthly_budgets.get(id)
@@ -76,7 +68,6 @@ async function updateMonthlyBudget(
 		name,
 		color,
 		group: savedGroup,
-		pace_kind: savedGroup === "outlier" ? "none" : (pace_kind ?? existing.pace_kind),
 		archived: !!input.archived,
 	})
 	const saved = await db.monthly_budgets.get(id)
@@ -152,7 +143,6 @@ export async function upsertMonthlyBudget(input: {
 	name: string
 	color: string
 	group: string
-	pace_kind: string
 	archived?: boolean
 	month: string
 	amount: unknown
@@ -162,7 +152,6 @@ export async function upsertMonthlyBudget(input: {
 	v.text(input.name, "name")
 	v.text(input.color, "color")
 	v.oneOf(input.group, "group", MONTHLY_BUDGET_GROUPS)
-	v.oneOf(input.pace_kind, "pace_kind", PACE_KINDS)
 	const { month, amount } = validateAmount(input, v)
 
 	const saved = await db.transaction(

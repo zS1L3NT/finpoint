@@ -150,7 +150,7 @@ export type AnalyticsSummary = {
 		records: number
 		monthly_budget_spending: { [monthlyBudgetId: string]: number }
 	}>
-	monthlyBudgets: Array<MonthlyBudget & { spending: number; records: number }>
+	monthlyBudgets: Array<Omit<MonthlyBudget, "pace_kind"> & { spending: number; records: number }>
 }
 
 /** Rules only read the Statement description; text comparisons ignore case. */
