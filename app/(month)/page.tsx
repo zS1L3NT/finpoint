@@ -205,9 +205,7 @@ export default function DashboardPage() {
 								year={dataYear}
 								amount={paceAmount?.amount ?? null}
 								amountLabel={
-									paceData.singleBudget
-										? (paceAmount?.name ?? null)
-										: "All budgets"
+									paceData.singleBudget ? (paceAmount?.name ?? null) : "Total"
 								}
 								showProjection={paceProjection.available}
 								recordFilters={paceFilters}

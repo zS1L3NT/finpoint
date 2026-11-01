@@ -32,14 +32,14 @@ test("new Monthly Budgets and edits store only current fields", async () => {
 test("current-month forecasts compare the selected budget and Total", async () => {
 	const row = await upsertMonthlyBudget(input)
 	await upsertMonthlyBudget({ ...input, name: "Food", amount: 200 })
-	for (const [scope, name, amount] of [
-		[row.id, "Travel", 100],
-		["all", "All budgets", 300],
+	for (const [scope, name, label, amount] of [
+		[row.id, "Travel", "Travel", 100],
+		["all", "Total", "All budgets", 300],
 	] as const) {
 		const view = await getDashboardView({ month: today.toFormat("MMMM"), year: today.year, scope })
 		expect(view.pace.projection.available).toBe(true)
 		expect(view.pace.projection.monthly_budget).toMatchObject({ name, amount })
-		expect(view.scopeLabel).toBe(name)
+		expect(view.scopeLabel).toBe(label)
 		expect(view.paceFilters).toEqual(view.scopeFilters)
 	}
 })
