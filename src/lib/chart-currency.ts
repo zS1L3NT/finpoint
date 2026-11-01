@@ -1,6 +1,7 @@
 const compactAmount = new Intl.NumberFormat("en-SG", {
 	notation: "compact",
-	maximumFractionDigits: 1,
+	minimumFractionDigits: 2,
+	maximumFractionDigits: 2,
 })
 
 export function formatChartCurrency(value: number) {
