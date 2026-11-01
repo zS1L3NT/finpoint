@@ -738,7 +738,7 @@ function PaceSummary({
 						: "No monthly amount",
 					detail: budget
 						? `Projected ${formatCurrency(budget.projected)}`
-						: "Set a monthly amount for this scope",
+						: "Set an amount in Monthly budgets",
 				},
 				{
 					icon: "lucide:chart-no-axes-combined",
