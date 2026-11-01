@@ -100,7 +100,6 @@ export default function DashboardPage() {
 		scopeColor,
 		scopeFilters,
 		paceFilters,
-		dailyMonthlyBudget: dailyBudget,
 	} = view
 	const { period, summary, series, weekday, future_records_count } = data
 	// Everything below shows the loaded data, so it takes the data's own month: while the next
@@ -191,12 +190,7 @@ export default function DashboardPage() {
 				{!period.is_future ? (
 					<Card className="min-w-0">
 						<CardHeader className="border-b">
-							<ScopedCardTitle
-								scope={
-									scope === "all" ? (dailyBudget?.name ?? "Total") : scopeLabel
-								}
-								color={scope === "all" ? dailyBudget?.color : scopeColor}
-							>
+							<ScopedCardTitle scope={scopeLabel} color={scopeColor}>
 								Spending forecast
 							</ScopedCardTitle>
 							<CardDescription>
@@ -741,10 +735,10 @@ function PaceSummary({
 					label: budget ? `${budget.name} usage pace` : "Usage pace",
 					value: budget
 						? `${formatCurrency(budget.usage_pace)} / day`
-						: "No paced budget",
+						: "No monthly amount",
 					detail: budget
 						? `Projected ${formatCurrency(budget.projected)}`
-						: "Set a daily-paced monthly budget",
+						: "Set a monthly amount for this scope",
 				},
 				{
 					icon: "lucide:chart-no-axes-combined",
