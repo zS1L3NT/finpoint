@@ -768,7 +768,10 @@ test.describe("pinned 15 October 2026 date", () => {
 		).toBeVisible()
 		// Compact record rows omit the desktop budget column; the filter exposes
 		// the same Monthly budgets at every viewport size.
-		await page.getByRole("combobox").filter({ hasText: "Any monthly budget" }).click()
+		await page
+			.getByRole("combobox")
+			.filter({ hasText: /^All budgets$/ })
+			.click()
 		await expect(page.getByRole("option", { name: "Daily", exact: true })).toBeVisible()
 		await page.keyboard.press("Escape")
 		if (!isMobile)
@@ -928,7 +931,7 @@ test("Record facets: long Monthly Budget option picks and clears, Category histo
 		await expect(chart.getByText("No spending", { exact: true })).toBeVisible()
 		await chart.getByText(/months unavailable$/).click()
 		await expect(chart).toContainText("No recorded activity; coverage unknown")
-		await page.goto("/?month=October&year=2026&scope=other")
+		await page.goto("/?month=October&year=2026&scope=t1-mb-travel")
 		await expect(chart).toContainText("No spending in the available months.")
 	})
 })

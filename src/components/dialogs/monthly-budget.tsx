@@ -1,5 +1,6 @@
 import { useLiveQuery } from "dexie-react-hooks"
 import { AnimatePresence, motion } from "framer-motion"
+import { Check, Palette } from "lucide-react"
 import { DateTime } from "luxon"
 import { useState } from "react"
 import { toast } from "sonner"
@@ -18,10 +19,9 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { COLLAPSE_MOTION } from "@/lib/motion"
-import { cn, formatCurrency } from "@/lib/utils"
+import { formatCurrency } from "@/lib/utils"
 import { getMonthlyBudgetAmountSource, upsertMonthlyBudget } from "@/logic/monthly-budgets"
 import { ValidationError } from "@/logic/validate"
 import type { MonthlyBudget } from "@/types"
@@ -41,7 +41,6 @@ export default function MonthlyBudgetDialog({
 	const [open, setOpen] = useState(false)
 	const [name, setName] = useState(monthlyBudget?.name ?? "")
 	const [color, setColor] = useState(monthlyBudget?.color ?? "#64748b")
-	const [group, setGroup] = useState(monthlyBudget?.group ?? "core")
 	const [amount, setAmount] = useState(monthlyBudget?.amount ?? 0)
 	const [noAmount, setNoAmount] = useState(monthlyBudget?.amount === null)
 	const [amountScope, setAmountScope] = useState<string | null>(null)
@@ -80,7 +79,6 @@ export default function MonthlyBudgetDialog({
 	const reset = () => {
 		setName(monthlyBudget?.name ?? "")
 		setColor(monthlyBudget?.color ?? "#64748b")
-		setGroup(monthlyBudget?.group ?? "core")
 		setAmount(monthlyBudget?.amount ?? 0)
 		setNoAmount(monthlyBudget?.amount === null)
 		setAmountScope(null)
@@ -96,7 +94,6 @@ export default function MonthlyBudgetDialog({
 				id: monthlyBudget?.id,
 				name,
 				color,
-				group,
 				archived,
 				month: selectedMonth.toISODate() ?? "",
 				amount: noAmount ? null : amount,
@@ -131,8 +128,7 @@ export default function MonthlyBudgetDialog({
 							{monthlyBudget ? `Edit ${monthlyBudget.name}` : "Create monthly budget"}
 						</DialogTitle>
 						<DialogDescription>
-							Name, colour and group apply to every month. The amount can differ by
-							month.
+							Name and colour apply to every month. The amount can differ by month.
 						</DialogDescription>
 					</DialogHeader>
 					{!monthlyBudget || source ? (
@@ -153,7 +149,7 @@ export default function MonthlyBudgetDialog({
 								/>
 								<Field>
 									<FieldLabel htmlFor="monthly-budget-color">Colour</FieldLabel>
-									<div className="flex items-center gap-2">
+									<div className="flex flex-wrap items-center gap-2">
 										{COLOURS.map(([label, value]) => (
 											<button
 												key={value}
@@ -161,59 +157,38 @@ export default function MonthlyBudgetDialog({
 												aria-label={label}
 												aria-pressed={color === value}
 												onClick={() => setColor(value)}
-												className="size-6 shrink-0 cursor-pointer rounded-full border border-foreground/10 outline-offset-2 focus-visible:outline-2 aria-pressed:ring-2 aria-pressed:ring-ring aria-pressed:ring-offset-2 aria-pressed:ring-offset-background"
-												style={{ backgroundColor: value }}
-											/>
+												className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full border border-foreground/10 outline-offset-2 focus-visible:outline-2"
+												style={{
+													backgroundColor: value,
+													color:
+														value === "#64748b" ? "white" : "#0f172a",
+												}}
+											>
+												{color === value ? (
+													<Check className="size-4" strokeWidth={3} />
+												) : null}
+											</button>
 										))}
-										<input
-											id="monthly-budget-color"
-											aria-label="Custom colour"
-											type="color"
-											value={color}
-											onChange={event => setColor(event.target.value)}
-											className={cn(
-												"size-6 shrink-0 cursor-pointer appearance-none rounded-full border border-foreground/10 bg-[conic-gradient(#f43f5e,#f59e0b,#84cc16,#14b8a6,#38bdf8,#8b5cf6,#ec4899,#f43f5e)] p-0 outline-offset-2 focus-visible:outline-2 [&::-moz-color-swatch]:border-0 [&::-webkit-color-swatch-wrapper]:p-0 [&::-webkit-color-swatch]:rounded-full [&::-webkit-color-swatch]:border-0",
-												// The native swatch shows the colour only once it is custom; presets keep the rainbow.
-												COLOURS.some(([, value]) => value === color)
-													? "[&::-moz-color-swatch]:opacity-0 [&::-webkit-color-swatch]:opacity-0"
-													: "ring-2 ring-ring ring-offset-2 ring-offset-background",
+										<label className="relative flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full border bg-muted has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2">
+											{COLOURS.some(([, value]) => value === color) ? (
+												<Palette className="size-4" />
+											) : (
+												<span
+													className="size-4 rounded-full"
+													style={{ backgroundColor: color }}
+												/>
 											)}
-										/>
+											<input
+												id="monthly-budget-color"
+												aria-label="Custom colour"
+												type="color"
+												value={color}
+												onChange={event => setColor(event.target.value)}
+												className="absolute inset-0 size-full cursor-pointer opacity-0"
+											/>
+										</label>
 									</div>
 								</Field>
-								<fieldset className="space-y-2">
-									<legend className="mb-2 text-sm font-medium">Group</legend>
-									<ToggleGroup
-										type="single"
-										value={group}
-										onValueChange={value => {
-											if (value) setGroup(value as MonthlyBudget["group"])
-										}}
-										aria-label="Group"
-										className="w-full"
-									>
-										{(["core", "outlier", "other"] as const).map(value => (
-											<ToggleGroupItem
-												key={value}
-												value={value}
-												className="flex-1"
-											>
-												{value === "core"
-													? "Core"
-													: value === "outlier"
-														? "Outlier"
-														: "Other"}
-											</ToggleGroupItem>
-										))}
-									</ToggleGroup>
-									<p className="text-xs text-muted-foreground">
-										{group === "core"
-											? "Regular spending in your monthly plan."
-											: group === "outlier"
-												? "Exceptional spending outside your usual pattern."
-												: "Other spending you want to track separately."}
-									</p>
-								</fieldset>
 							</FieldGroup>
 							<FieldGroup className="gap-3 border-t pt-4">
 								<p className="text-sm font-medium">Amount for {monthLabel}</p>

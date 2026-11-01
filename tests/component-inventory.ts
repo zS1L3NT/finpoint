@@ -2457,7 +2457,7 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"Monthly Budget editor: popup enters as a whole",
 	],
 	"src/components/dialogs/monthly-budget.tsx#export.default.behaviour": [
-		"Monthly Budget editor: persists colour and Group choices and disables unavailable Default",
+		"Monthly Budget editor: persists colour choices and disables unavailable Default",
 		"Monthly Budget editor: backdrop, values, cursors, fit and keyboard reopen work",
 		"Monthly Budget editor: popup enters as a whole",
 		"Monthly Budget creator: rejects blank input and persists distinct zero and null amounts",
@@ -4469,7 +4469,7 @@ export const facetNotApplicable: Record<string, Record<string, string>> = {
 	},
 	"src/components/dialogs/monthly-budget.tsx#monthly-budget.archived": {
 		"editor treatment and Unbudgeted fields":
-			"src/components/dialogs/monthly-budget.tsx edits identity, group, amount and archived. Treatment and Unbudgeted choice live in record-analytics-fields.tsx and the badge; mapped consumer tests cover those there.",
+			"src/components/dialogs/monthly-budget.tsx edits identity, amount and archived. Treatment and Unbudgeted choice live in record-analytics-fields.tsx and the badge; mapped consumer tests cover those there.",
 	},
 	"src/components/monthly-budget-badge.tsx#display.values": {
 		"text contrast on user colour":

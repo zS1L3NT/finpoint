@@ -575,3 +575,29 @@ test("Duplicate badge: disappears once the pair is resolved", async ({ page, wor
 	await expect(kept.getByRole("link", { name: "Duplicate?" })).toHaveCount(0)
 	await expect(page.getByText("Duplicate?", { exact: true })).toHaveCount(0)
 })
+
+test("Monthly budget filters: All budgets leads, budgets follow and Unbudgeted closes the list", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	for (const route of ["/records", "/records/monthly?month=October&year=2026"]) {
+		await page.goto(route)
+		await page
+			.getByRole("combobox")
+			.filter({ hasText: /^All budgets$/ })
+			.click()
+		const options = page.getByRole("option")
+		expect((await options.allTextContents()).map(text => text.trim())).toEqual([
+			"All budgets",
+			"Daily",
+			"Recurring",
+			"Unbudgeted",
+		])
+		await expect(
+			page.locator('[data-slot="select-content"] [data-slot="select-separator"]'),
+		).toHaveCount(0)
+		await page.getByRole("option", { name: "Daily", exact: true }).click()
+		await expect(page).toHaveURL(/monthly_budget_id=t1-mb-daily/)
+	}
+})

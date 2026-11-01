@@ -5,8 +5,6 @@ import { db, type MonthlyBudgetDefaultRow } from "@/data/db"
 import { newId } from "@/logic/shared"
 import { Validator } from "@/logic/validate"
 
-const MONTHLY_BUDGET_GROUPS = ["core", "outlier", "other"] as const
-
 export async function listMonthlyBudgets() {
 	const month = DateTime.now().toFormat("yyyy-MM-01")
 	const rows = (await db.monthly_budgets.toArray()).sort(
@@ -15,11 +13,10 @@ export async function listMonthlyBudgets() {
 	return Promise.all(rows.map(async row => ({ ...row, amount: await amountFor(row.id, month) })))
 }
 
-async function createMonthlyBudget(input: { name: string; color: string; group: string }) {
+async function createMonthlyBudget(input: { name: string; color: string }) {
 	const v = new Validator()
 	const name = v.text(input.name, "name")
 	const color = v.text(input.color, "color")
-	const group = v.oneOf(input.group, "group", MONTHLY_BUDGET_GROUPS, "Invalid group.")
 	v.throwIfInvalid()
 
 	if (await db.monthly_budgets.where("name").equals(name).first()) {
@@ -34,7 +31,6 @@ async function createMonthlyBudget(input: { name: string; color: string; group: 
 		id: newId(),
 		name,
 		color,
-		group: group ?? "other",
 		display_order: max + 10,
 		archived: false,
 	}
@@ -45,12 +41,11 @@ async function createMonthlyBudget(input: { name: string; color: string; group: 
 
 async function updateMonthlyBudget(
 	id: string,
-	input: { name: string; color: string; group: string; archived: boolean },
+	input: { name: string; color: string; archived: boolean },
 ) {
 	const v = new Validator()
 	const name = v.text(input.name, "name")
 	const color = v.text(input.color, "color")
-	const group = v.oneOf(input.group, "group", MONTHLY_BUDGET_GROUPS)
 	v.throwIfInvalid()
 
 	const existing = await db.monthly_budgets.get(id)
@@ -62,11 +57,9 @@ async function updateMonthlyBudget(
 		v.throwIfInvalid()
 	}
 
-	const savedGroup = group ?? existing.group
 	await db.monthly_budgets.update(id, {
 		name,
 		color,
-		group: savedGroup,
 		archived: !!input.archived,
 	})
 	const saved = await db.monthly_budgets.get(id)
@@ -141,7 +134,6 @@ export async function upsertMonthlyBudget(input: {
 	id?: string
 	name: string
 	color: string
-	group: string
 	archived?: boolean
 	month: string
 	amount: unknown
@@ -150,7 +142,6 @@ export async function upsertMonthlyBudget(input: {
 	const v = new Validator()
 	v.text(input.name, "name")
 	v.text(input.color, "color")
-	v.oneOf(input.group, "group", MONTHLY_BUDGET_GROUPS)
 	const { month, amount } = validateAmount(input, v)
 
 	const saved = await db.transaction(
@@ -171,12 +162,6 @@ export async function upsertMonthlyBudget(input: {
 	)
 
 	return saved
-}
-
-export function isMonthlyBudgetGroup(
-	scope: string,
-): scope is (typeof MONTHLY_BUDGET_GROUPS)[number] {
-	return MONTHLY_BUDGET_GROUPS.some(group => group === scope)
 }
 
 export function defaultAmountFor(

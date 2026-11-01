@@ -18,8 +18,8 @@ beforeEach(async () => {
 
 async function setupBudgets() {
 	await db.monthly_budgets.bulkAdd([
-		{ id: "daily", name: "Daily", color: "#38bdf8", group: "core", display_order: 10, archived: false },
-		{ id: "recurring", name: "Recurring", color: "#a78bfa", group: "core", display_order: 20, archived: false },
+		{ id: "daily", name: "Daily", color: "#38bdf8", display_order: 10, archived: false },
+		{ id: "recurring", name: "Recurring", color: "#a78bfa", display_order: 20, archived: false },
 	])
 }
 
@@ -335,7 +335,7 @@ test("version seven upgrade normalizes categories and converts choices while pre
 		old.close()
 		await db.open()
 		// Both conversions run directly from the released schema.
-		expect(db.verno).toBe(9)
+		expect(db.verno).toBe(10)
 		expect((await db.categories.get("food"))?.analytics_treatment).toBe("automatic")
 		expect(db.records.schema.indexes.some(index => index.name === "monthly_budget_id")).toBe(false)
 		const taxi = await db.records.get("taxi-1")

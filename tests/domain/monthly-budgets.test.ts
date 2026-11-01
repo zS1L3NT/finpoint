@@ -16,7 +16,6 @@ const today = DateTime.now()
 const input = {
 	name: "Travel",
 	color: "#123456",
-	group: "outlier",
 	month: today.toFormat("yyyy-MM-01"),
 	amount: 100,
 	scope: "month",
@@ -24,32 +23,30 @@ const input = {
 
 test("new Monthly Budgets and edits store only current fields", async () => {
 	const row = await upsertMonthlyBudget(input)
-	const expected = { id: row.id, name: "Travel", color: "#123456", group: "outlier", display_order: row.display_order, archived: false }
+	const expected = { id: row.id, name: "Travel", color: "#123456", display_order: row.display_order, archived: false }
 	expect(row).toEqual(expected)
 	await upsertMonthlyBudget({ ...input, id: row.id, name: "Holiday" })
 	expect(await db.monthly_budgets.get(row.id)).toEqual({ ...expected, name: "Holiday" })
 })
 
-test("current-month forecasts compare the selected budget, group and Total", async () => {
+test("current-month forecasts compare the selected budget and Total", async () => {
 	const row = await upsertMonthlyBudget(input)
-	await upsertMonthlyBudget({ ...input, name: "Food", group: "core", amount: 200 })
-	for (const [scope, name, amount] of [
-		[row.id, "Travel", 100],
-		["outlier", "Outlier", 100],
-		["core", "Core", 200],
-		["all", "Total", 300],
+	await upsertMonthlyBudget({ ...input, name: "Food", amount: 200 })
+	for (const [scope, name, label, amount] of [
+		[row.id, "Travel", "Travel", 100],
+		["all", "Total", "All budgets", 300],
 	] as const) {
 		const view = await getDashboardView({ month: today.toFormat("MMMM"), year: today.year, scope })
 		expect(view.pace.projection.available).toBe(true)
 		expect(view.pace.projection.monthly_budget).toMatchObject({ name, amount })
-		expect(view.scopeLabel).toBe(name)
+		expect(view.scopeLabel).toBe(label)
 		expect(view.paceFilters).toEqual(view.scopeFilters)
 	}
 })
 
 test("forecasts remain available without a comparison amount and accept zero", async () => {
 	const row = await upsertMonthlyBudget({ ...input, amount: null })
-	for (const scope of [row.id, "outlier", "all"]) {
+	for (const scope of [row.id, "all"]) {
 		const view = await getDashboardView({ month: today.toFormat("MMMM"), year: today.year, scope })
 		expect(view.pace.projection.available).toBe(true)
 		expect(view.pace.projection.monthly_budget).toBeNull()
@@ -72,7 +69,7 @@ test("forecast lines reconcile budgets and Unbudgeted spending across scopes", a
 		default_monthly_budget_id: null,
 	})
 	const travel = await upsertMonthlyBudget(input)
-	const food = await upsertMonthlyBudget({ ...input, name: "Food", group: "core" })
+	const food = await upsertMonthlyBudget({ ...input, name: "Food" })
 	for (const [id, budget, amount] of [
 		["a", travel.id, -30],
 		["b", food.id, -20],
@@ -96,7 +93,7 @@ test("forecast lines reconcile budgets and Unbudgeted spending across scopes", a
 	}
 	for (const [scope, names, total] of [
 		["all", ["Travel", "Food", "Unbudgeted"], 60],
-		["core", ["Food"], 20],
+		[food.id, ["Food"], 20],
 		[travel.id, ["Travel"], 30],
 	] as const) {
 		const { pace } = await getDashboardView({
@@ -106,8 +103,8 @@ test("forecast lines reconcile budgets and Unbudgeted spending across scopes", a
 		})
 		const budgets = pace.forecast.filter(b => b.id !== "total")
 		expect(budgets.map(b => b.name).sort()).toEqual([...names].sort())
-		expect(pace.forecast[0].id === "total").toBe(scope !== travel.id)
-		if (scope !== travel.id) {
+		expect(pace.forecast[0].id === "total").toBe(scope === "all")
+		if (scope === "all") {
 			expect(pace.forecast[0].previous?.spending).toEqual(Array(today.minus({ months: 1 }).daysInMonth).fill(total * 2))
 			expect(pace.paceMonthlyBudget?.amount).toBe(scope === "all" ? 200 : 100)
 			for (const [index, point] of pace.forecast[0].points.entries()) {
@@ -116,7 +113,7 @@ test("forecast lines reconcile budgets and Unbudgeted spending across scopes", a
 				}
 			}
 		}
-		for (const b of budgets) expect(b.previous !== undefined).toBe(scope === travel.id)
+		for (const b of budgets) expect(b.previous !== undefined).toBe(scope !== "all")
 		expect(budgets.reduce((sum, b) => sum + (b.points[0].spending ?? 0), 0)).toBe(total)
 		expect(pace.forecast.find(b => b.name === "Travel")?.color ?? food.color).toBe("#123456")
 		for (const b of pace.forecast) {
@@ -178,7 +175,7 @@ test("forecast projections retain gross pace after refunds and add scheduled spe
 // Assemble the retired key only in compatibility fixtures so source scans stay useful.
 const legacyPaceKey = ["pace", "kind"].join("_")
 
-test("version nine upgrade removes retired budget metadata and preserves Drive baselines", async () => {
+test("upgrades remove retired budget metadata and preserve Drive baselines", async () => {
 	const { exportData } = await import("../../src/data/export-import")
 	const { hashSnapshot } = await import("../../src/data/snapshot-hash")
 	for (const clean of [true, false]) {
@@ -194,8 +191,8 @@ test("version nine upgrade removes retired budget metadata and preserves Drive b
 		await old.table("meta").put({ key: "drive_last_hash", value: baseline })
 		old.close()
 		await db.open()
-		expect(db.verno).toBe(9)
-		expect(await db.monthly_budgets.toArray()).toEqual(rows.map(({ [legacyPaceKey]: _, ...row }) => row))
+		expect(db.verno).toBe(10)
+		expect(await db.monthly_budgets.toArray()).toEqual(rows.map(({ [legacyPaceKey]: _, group: _group, ...row }) => row))
 		expect((await db.meta.get("drive_last_hash"))?.value).toBe(clean ? await hashSnapshot(await exportData()) : baseline)
 	}
 })
@@ -205,7 +202,7 @@ test("old backup import removes retired budget metadata and exports current fiel
 	const budget = await upsertMonthlyBudget(input)
 	const backup = await exportData()
 	for (const version of [6, 7, 8]) {
-		await importData({ ...backup, version, tables: { ...backup.tables, monthly_budgets: [{ ...budget, [legacyPaceKey]: "daily" }] } })
+		await importData({ ...backup, version, tables: { ...backup.tables, monthly_budgets: [{ ...budget, group: "core", [legacyPaceKey]: "daily" }] } })
 		expect(await db.monthly_budgets.get(budget.id)).toEqual(budget)
 		expect((await exportData()).version).toBe(8)
 		expect((await exportData()).tables.monthly_budgets).toEqual([budget])
@@ -214,7 +211,7 @@ test("old backup import removes retired budget metadata and exports current fiel
 
 test("legacy Holiday starter detection works with current budget fields", async () => {
 	const { seedIfEmpty } = await import("../../src/data/seed")
-	const holiday = { id: "holiday", name: "Holiday", color: "#fb7185", group: "outlier" as const, display_order: 40, archived: false }
+	const holiday = { id: "holiday", name: "Holiday", color: "#fb7185", display_order: 40, archived: false }
 	await db.monthly_budgets.add(holiday)
 	await seedIfEmpty()
 	expect(await db.monthly_budgets.get(holiday.id)).toEqual({ ...holiday, name: "Travel" })
@@ -228,20 +225,25 @@ test("Total previous month includes budgets without current spending and Unbudge
 	for (const [id, choice] of [["budget", { kind: "explicit", id: budget.id }], ["unbudgeted", { kind: "unbudgeted" }]] as const) {
 		await db.records.add({ id, title: id, amount: -25, datetime: today.minus({ months: 1 }).toFormat("yyyy-MM-01 12:00"), category_id: "c", people: null, location: null, description: null, treatment_choice: { kind: "explicit", value: "spending" }, monthly_budget_choice: choice, revision: 1 })
 	}
-	for (const [scope, expected] of [["all", 50], ["outlier", 25]] as const) {
-		const { pace } = await getDashboardView({ month: today.toFormat("MMMM"), year: today.year, scope })
-		expect(pace.forecast[0].previous?.spending.at(-1)).toBe(expected)
-	}
+	const { pace } = await getDashboardView({ month: today.toFormat("MMMM"), year: today.year, scope: "all" })
+	expect(pace.forecast[0].previous?.spending.at(-1)).toBe(50)
 })
 
 test("forecast includes planned budgets at zero and hides budgets without amount or spending", async () => {
 	await upsertMonthlyBudget(input)
 	await upsertMonthlyBudget({ ...input, name: "Zero", amount: 0 })
 	await upsertMonthlyBudget({ ...input, name: "Hidden", amount: null })
-	for (const scope of ["all", "outlier"]) {
-		const { pace } = await getDashboardView({ month: today.toFormat("MMMM"), year: today.year, scope })
-		expect(pace.paceMonthlyBudget?.amount).toBe(100)
-		expect(pace.forecast.map(b => b.name)).toEqual(["Total", "Travel", "Zero"])
-		for (const budget of pace.forecast) expect(budget.points[0].spending).toBe(0)
+	const { pace } = await getDashboardView({ month: today.toFormat("MMMM"), year: today.year, scope: "all" })
+	expect(pace.paceMonthlyBudget?.amount).toBe(100)
+	expect(pace.forecast.map(b => b.name)).toEqual(["Total", "Travel", "Zero"])
+	for (const budget of pace.forecast) expect(budget.points[0].spending).toBe(0)
+})
+
+test("retired group scopes fall back to Total", async () => {
+	await upsertMonthlyBudget(input)
+	for (const scope of ["core", "outlier", "other"]) {
+		const view = await getDashboardView({ month: today.toFormat("MMMM"), year: today.year, scope })
+		expect(view.scopeLabel).toBe("All budgets")
+		expect(view.scopeFilters).toEqual({ monthly_budget_id: undefined })
 	}
 })

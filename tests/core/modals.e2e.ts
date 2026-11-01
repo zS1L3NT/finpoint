@@ -187,12 +187,14 @@ test.describe("dense workspace", () => {
 	// open popups never leak between filters. The harness SelectField case
 	// lives in core/components.
 	test("Records filters: preserve the page scrollbar while open", async ({ page }) => {
-		for (const label of ["Any monthly budget", "Any treatment", "Any status"] as const) {
+		for (const label of ["All budgets", "Any treatment", "Any status"] as const) {
 			await test.step(`Records filter ${label}: preserves the page scrollbar while open`, async () => {
 				// Each app filter is a distinct combobox consumer on the dense records
 				// route; the shared harness case above covers the editor SelectField.
 				await page.goto("/records?per_page=100")
-				const filter = page.getByRole("combobox").filter({ hasText: label })
+				const filter = page
+					.getByRole("combobox")
+					.filter({ hasText: new RegExp(`^${label}$`) })
 				await expect(filter).toBeVisible()
 				await expectDropdownPreservesScroll(page, () => filter.click())
 				await page.keyboard.press("Escape")

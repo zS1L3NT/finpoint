@@ -31,7 +31,6 @@ export async function seedIfEmpty(): Promise<void> {
 			monthly_budget =>
 				monthly_budget.name === "Holiday" &&
 				monthly_budget.color === "#fb7185" &&
-				monthly_budget.group === "outlier" &&
 				monthly_budget.display_order === 40,
 		)
 		if (!monthlyBudgetsByName.has("Travel") && legacyHoliday) {

@@ -13,7 +13,7 @@ import {
 	type StatementRow,
 } from "@/data/db"
 import { type AnalyticsRecord, contribution, summarize } from "@/logic/analytics"
-import { defaultAmountFor, isMonthlyBudgetGroup } from "@/logic/monthly-budgets"
+import { defaultAmountFor } from "@/logic/monthly-budgets"
 import { expandCategoryIdsForMonthly } from "@/logic/monthly-shared"
 import {
 	type AllocationTally,
@@ -95,7 +95,6 @@ function toAnalyticsRecords(
 						id: monthly_budget.id,
 						name: monthly_budget.name,
 						color: monthly_budget.color,
-						group: monthly_budget.group,
 						display_order: monthly_budget.display_order,
 						archived: monthly_budget.archived,
 					}
@@ -169,14 +168,8 @@ async function loadDashboardTables(): Promise<LoadedTables> {
 }
 
 /** MonthlyBudget ids for a pace/breakdown scope, or null for everything. */
-export function scopeMonthlyBudgetIds(
-	scope: string,
-	monthlyBudgets: MonthlyBudgetRow[],
-): string[] | null {
+export function scopeMonthlyBudgetIds(scope: string): string[] | null {
 	if (scope === "all") return null
-	if (isMonthlyBudgetGroup(scope)) {
-		return monthlyBudgets.filter(b => b.group === scope).map(b => b.id)
-	}
 	return [scope]
 }
 
@@ -469,7 +462,7 @@ export async function getPaceView(
 	const actualEnd = isCurrent ? today.endOf("day") : date.endOf("month")
 
 	const tables = preloaded ?? (await loadDashboardTables())
-	const scopeIds = scopeMonthlyBudgetIds(scope, tables.monthlyBudgetRows)
+	const scopeIds = scopeMonthlyBudgetIds(scope)
 	const monthStartKey = date.startOf("month").toFormat(ISO_DAY)
 	const monthEndKey = date.endOf("month").toFormat(ISO_DAY)
 	const actualEndKey = actualEnd.toFormat(ISO_DAY)
@@ -509,14 +502,12 @@ export async function getPaceView(
 		tables.defaults,
 		scope,
 	)
-	const groupScope = isMonthlyBudgetGroup(scope)
 	const amounts = monthlyBudgetsBuilt.filter(b => b.amount !== null)
 	const pace =
-		groupScope || scope === "all"
+		scope === "all"
 			? {
 					id: scope,
-					name:
-						scope === "all" ? "Total" : scope.charAt(0).toUpperCase() + scope.slice(1),
+					name: "Total",
 					amount: amounts.length
 						? amounts.reduce((sum, b) => sum + (b.amount ?? 0), 0)
 						: null,
@@ -590,7 +581,7 @@ export async function getPaceView(
 		return {
 			...budget,
 			previous:
-				scope !== "all" && !groupScope
+				scope !== "all"
 					? buildCashflowHistory(date, today, tables, [budget.id]).find(
 							item => item.offset === 1,
 						)
@@ -606,7 +597,7 @@ export async function getPaceView(
 		}
 	})
 
-	if (scope === "all" || groupScope) {
+	if (scope === "all") {
 		forecast.unshift({
 			id: "total",
 			name: "Total",
@@ -639,7 +630,7 @@ export async function getPaceView(
 
 	return {
 		forecast,
-		singleBudget: scope !== "all" && !groupScope,
+		singleBudget: scope !== "all",
 		series,
 		projection,
 		paceMonthlyBudget: pace ? { id: pace.id, name: pace.name, amount: pace.amount } : null,
@@ -1152,21 +1143,12 @@ function buildTrend(date: DateTime, today: DateTime, tables: LoadedTables) {
 export async function getDashboardView(input: DashboardInput & { scope?: string }) {
 	const tables = await loadDashboardTables()
 	const dashboard = await getDashboard(input, tables)
-	const scope =
-		input.scope && (isMonthlyBudgetGroup(input.scope) || tables.monthlyBudgets.has(input.scope))
-			? input.scope
-			: "all"
+	const scope = input.scope && tables.monthlyBudgets.has(input.scope) ? input.scope : "all"
 	const selectedBudget = tables.monthlyBudgets.get(scope)
-	const scopedBudgetIds = scopeMonthlyBudgetIds(scope, tables.monthlyBudgetRows)
-	const scopeLabel =
-		scope === "all"
-			? "Total"
-			: isMonthlyBudgetGroup(scope)
-				? scope.charAt(0).toUpperCase() + scope.slice(1)
-				: (selectedBudget?.name ?? "Monthly budget")
+	const scopedBudgetIds = scopeMonthlyBudgetIds(scope)
+	const scopeLabel = scope === "all" ? "All budgets" : (selectedBudget?.name ?? "Monthly budget")
 	const scopeFilters = {
 		monthly_budget_id: selectedBudget?.id,
-		monthly_budget_group: isMonthlyBudgetGroup(scope) ? scope : undefined,
 	}
 	const scoped =
 		scope === "all"
