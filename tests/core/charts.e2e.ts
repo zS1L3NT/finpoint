@@ -702,8 +702,13 @@ test.describe("pinned overview date", () => {
 						await expect(
 							tooltip.getByText("Unbudgeted", { exact: true }).locator(".."),
 						).toContainText("-$17.90")
-						await expect(tooltip).toContainText("Total")
-						await expect(tooltip).toContainText("$66.30")
+						await expect(tooltip.getByText("Total", { exact: true })).toHaveCount(1)
+						await expect(
+							tooltip.getByText("Total", { exact: true }).locator(".."),
+						).toContainText("$66.30")
+						await expect(
+							card(page, title).getByRole("button", { name: "Daily", exact: true }),
+						).toHaveCount(0)
 					} else {
 						await surface.press("ArrowRight")
 						await expect(tooltip).toContainText(

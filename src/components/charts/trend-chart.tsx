@@ -286,7 +286,9 @@ export default function TrendChart({
 				const rows = visible
 					.toSorted((a, b) =>
 						showTotal
-							? (b.values[index] ?? 0) - (a.values[index] ?? 0)
+							? Number(b.key === "total" || b.key === "total-projection") -
+									Number(a.key === "total" || a.key === "total-projection") ||
+								(b.values[index] ?? 0) - (a.values[index] ?? 0)
 							: (b.fill ?? 0) - (a.fill ?? 0),
 					)
 					.map(s => ({
@@ -296,22 +298,16 @@ export default function TrendChart({
 						opacity: s.opacity,
 						value: formatCurrency(s.values[index] ?? 0),
 					}))
-				if (showTotal)
-					rows.push({
-						key: "total",
-						label: "Total",
-						color: "var(--foreground)",
-						opacity: 1,
-						value: formatCurrency(
-							visible.reduce((sum, s) => sum + (s.values[index] ?? 0), 0),
-						),
-					})
+
 				return <ReadoutRows title={labels[index]} rows={rows} />
 			}}
 		>
 			{size => {
 				const { y } = scales(size)
 				const pills = [
+					...series
+						.filter(s => s.key === "total" || s.key === "total-projection")
+						.flatMap(s => s.values.filter(v => v !== null).slice(-1)),
 					...(reference ? [reference.value] : []),
 					dataMax,
 					...(dataMin < 0 ? [0, dataMin] : []),

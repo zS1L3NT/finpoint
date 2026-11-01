@@ -210,9 +210,9 @@
     "semantic_hash": ""
   },
   "src/components/charts/cashflow-chart.tsx": {
-    "mtime": 1793525985.48875,
-    "seen": 1793526045.2229483,
-    "ast_hash": "640330e9ea4c1e2cab2dea7b0c0103e8",
+    "mtime": 1793526458.4248385,
+    "seen": 1793526511.2984242,
+    "ast_hash": "0e9d97b76381cd622350a145f86ed84f",
     "semantic_hash": ""
   },
   "src/components/charts/category-history-chart.tsx": {
@@ -906,9 +906,9 @@
     "semantic_hash": ""
   },
   "src/logic/dashboard.ts": {
-    "mtime": 1793525897.43674,
-    "seen": 1793525929.6840582,
-    "ast_hash": "13c15e564122677d48695ba67786a7e0",
+    "mtime": 1793526484.9488444,
+    "seen": 1793526511.298921,
+    "ast_hash": "a0911f2ab74ea758cb58f38c94e15bbf",
     "semantic_hash": ""
   },
   "src/logic/drive-sync.ts": {
@@ -1290,9 +1290,9 @@
     "semantic_hash": ""
   },
   "tests/core/charts.e2e.ts": {
-    "mtime": 1793525985.48875,
-    "seen": 1793526045.2231617,
-    "ast_hash": "2e0f046a89bd432480cf2e1b2cb15f72",
+    "mtime": 1793526458.4488385,
+    "seen": 1793526511.2990398,
+    "ast_hash": "9ba6fcf4cade37a8dc0d1cded477a983",
     "semantic_hash": ""
   },
   "tests/core/components.e2e.ts": {
@@ -1530,9 +1530,9 @@
     "semantic_hash": "b194223f1f3b81550d206761165adf60"
   },
   "src/components/charts/trend-chart.tsx": {
-    "mtime": 1793525985.48475,
-    "seen": 1793526045.2229621,
-    "ast_hash": "14a8828ec873068156590f95c80f2ec4",
+    "mtime": 1793526458.4368384,
+    "seen": 1793526511.2984622,
+    "ast_hash": "46ba39a8beb7f64a14ba1e7426c6992d",
     "semantic_hash": ""
   },
   "src/components/charts/bar-chart.tsx": {
@@ -1590,9 +1590,9 @@
     "semantic_hash": ""
   },
   "tests/domain/monthly-budgets.test.ts": {
-    "mtime": 1793525897.43674,
-    "seen": 1793525929.684128,
-    "ast_hash": "6e752ce1987d0e36f552033e97915456",
+    "mtime": 1793526497.8128476,
+    "seen": 1793526511.2990906,
+    "ast_hash": "24630a4ebb2a28bbe1fc973deff4c68f",
     "semantic_hash": ""
   }
 }

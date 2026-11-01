@@ -1,17 +1,17 @@
 # Graph Report - t3-0bdd2711  (2026-11-01)
 
 ## Corpus Check
-- 251 files · ~230,586 words
+- 251 files · ~230,690 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 9 file(s) not represented in the graph (top: (none) 5, .example 1, .lock 1)
 
 ## Summary
-- 1946 nodes · 7804 edges · 98 communities (89 shown, 9 thin omitted)
+- 1946 nodes · 7803 edges · 98 communities (89 shown, 9 thin omitted)
 - Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 127 edges (avg confidence: 0.84)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `50cab2be`
+- Built from commit: `3371a940`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -116,7 +116,7 @@
 1. `cn()` - 324 edges
 2. `PrimitivesSection()` - 180 edges
 3. `Button()` - 126 edges
-4. `react` - 98 edges
+4. `react` - 97 edges
 5. `formatCurrency()` - 78 edges
 6. `RecordEditorDialog()` - 63 edges
 7. `RecordCreatorDialog()` - 57 edges
@@ -520,7 +520,7 @@ _Questions this graph is uniquely positioned to answer:_
   _83 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `statements.ts` be split into smaller, more focused modules?**
   _Cohesion score 0.14532019704433496 - nodes in this community are weakly interconnected._
-- **Why does `react` connect `react` to `record-editor.tsx`, `sidebar.tsx`, `primitives.tsx`, `providers.tsx`, `lib/motion.ts`, `app-sidebar.tsx`, `pending/page.tsx`, `(month)/page.tsx`, `spending-calendar.tsx`, `category-history-chart.tsx`, `package.json`, `amount-filter.tsx`, `importer/page.tsx`, `statement-columns.tsx`, `budgets/[id]/page.tsx`, `trend-chart.tsx`, `pagination.tsx`, `records.ts`, `Button`, `next`, `sync/page.tsx`, `history.tsx`, `cn`, `app.tsx`, `duplicates/page.tsx`, `radix-ui`, `lucide-react`, `useHistory`?**
+- **Why does `react` connect `react` to `record-editor.tsx`, `sidebar.tsx`, `primitives.tsx`, `providers.tsx`, `lib/motion.ts`, `app-sidebar.tsx`, `pending/page.tsx`, `(month)/page.tsx`, `spending-calendar.tsx`, `category-history-chart.tsx`, `package.json`, `amount-filter.tsx`, `importer/page.tsx`, `statement-columns.tsx`, `budgets/[id]/page.tsx`, `trend-chart.tsx`, `pagination.tsx`, `records.ts`, `Button`, `next`, `sync/page.tsx`, `history.tsx`, `cn`, `app.tsx`, `duplicates/page.tsx`, `radix-ui`, `lucide-react`?**
   _High betweenness centrality (0.072) - this node is a cross-community bridge._
 - **Should `record-editor.tsx` be split into smaller, more focused modules?**
   _Cohesion score 0.07019527235354574 - nodes in this community are weakly interconnected._

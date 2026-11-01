@@ -591,17 +591,12 @@ export async function getPaceView(
 		)
 		return {
 			...budget,
-			previous: buildCashflowHistory(
-				date,
-				today,
-				budget.id === "unbudgeted"
-					? {
-							...tables,
-							records: tables.records.filter(r => r.monthly_budget_id === null),
-						}
-					: tables,
-				budget.id === "unbudgeted" ? null : [budget.id],
-			).find(item => item.offset === 1),
+			previous:
+				scope !== "all" && !groupScope
+					? buildCashflowHistory(date, today, tables, [budget.id]).find(
+							item => item.offset === 1,
+						)
+					: undefined,
 			points: buildSeries(
 				actual,
 				future,
@@ -612,6 +607,29 @@ export async function getPaceView(
 			),
 		}
 	})
+
+	if (scope === "all" || groupScope) {
+		forecast.unshift({
+			id: "total",
+			name: "Total",
+			color: "var(--foreground)",
+			previous: undefined,
+			points: series.map((point, index) => ({
+				...point,
+				spending:
+					point.spending === null
+						? null
+						: forecast.reduce((sum, b) => sum + (b.points[index]?.spending ?? 0), 0),
+				projected_spending:
+					point.projected_spending === null
+						? null
+						: forecast.reduce(
+								(sum, b) => sum + (b.points[index]?.projected_spending ?? 0),
+								0,
+							),
+			})),
+		})
+	}
 
 	const history = buildCashflowHistory(date, today, tables, scopeIds)
 	const highestSpendingDay = summary.daily.reduce<(typeof summary.daily)[number] | null>(

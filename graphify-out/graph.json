@@ -450,7 +450,7 @@
       "file_type": "code",
       "norm_label": "cashflowpoint",
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L12"
+      "source_location": "L11"
     },
     {
       "id": "src_components_charts_category_movers_mover",
@@ -1958,7 +1958,7 @@
       "file_type": "code",
       "norm_label": "trendmonth",
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L1074"
+      "source_location": "L1092"
     },
     {
       "id": "src_logic_monthly_monthlyfilters",
@@ -3779,7 +3779,7 @@
       "file_type": "code",
       "norm_label": "cashflowchart()",
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L21"
+      "source_location": "L20"
     },
     {
       "id": "src_components_charts_category_movers_categorymovers",
@@ -8795,7 +8795,7 @@
       "file_type": "code",
       "norm_label": "path()",
       "source_file": "src/components/charts/trend-chart.tsx",
-      "source_location": "L350"
+      "source_location": "L346"
     },
     {
       "id": "src_components_charts_trend_chart_runs",
@@ -8807,7 +8807,7 @@
       "file_type": "code",
       "norm_label": "runs()",
       "source_file": "src/components/charts/trend-chart.tsx",
-      "source_location": "L340"
+      "source_location": "L336"
     },
     {
       "id": "src_components_charts_trend_chart_trendchart",
@@ -9083,7 +9083,7 @@
       "file_type": "code",
       "norm_label": "avg()",
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L790"
+      "source_location": "L808"
     },
     {
       "id": "src_logic_dashboard_buildcashflowhistory",
@@ -9107,7 +9107,7 @@
       "file_type": "code",
       "norm_label": "buildcategories()",
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L1005"
+      "source_location": "L1023"
     },
     {
       "id": "src_logic_dashboard_buildcomparison",
@@ -9119,7 +9119,7 @@
       "file_type": "code",
       "norm_label": "buildcomparison()",
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L796"
+      "source_location": "L814"
     },
     {
       "id": "src_logic_dashboard_buildmonthlybudgets",
@@ -9131,7 +9131,7 @@
       "file_type": "code",
       "norm_label": "buildmonthlybudgets()",
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L958"
+      "source_location": "L976"
     },
     {
       "id": "src_logic_dashboard_buildprojection",
@@ -9143,7 +9143,7 @@
       "file_type": "code",
       "norm_label": "buildprojection()",
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L877"
+      "source_location": "L895"
     },
     {
       "id": "src_logic_dashboard_buildseries",
@@ -9155,7 +9155,7 @@
       "file_type": "code",
       "norm_label": "buildseries()",
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L827"
+      "source_location": "L845"
     },
     {
       "id": "src_logic_dashboard_buildspendinghistory",
@@ -9179,7 +9179,7 @@
       "file_type": "code",
       "norm_label": "buildtrend()",
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L1090"
+      "source_location": "L1108"
     },
     {
       "id": "src_logic_dashboard_buildweekday",
@@ -9191,7 +9191,7 @@
       "file_type": "code",
       "norm_label": "buildweekday()",
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L723"
+      "source_location": "L741"
     },
     {
       "id": "src_logic_dashboard_buildweekday_occurrences",
@@ -9203,7 +9203,7 @@
       "file_type": "code",
       "norm_label": "occurrences()",
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L730"
+      "source_location": "L748"
     },
     {
       "id": "src_logic_dashboard_comparisonsummaries",
@@ -9239,7 +9239,7 @@
       "file_type": "code",
       "norm_label": "getdashboardview()",
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L1136"
+      "source_location": "L1154"
     },
     {
       "id": "src_logic_dashboard_getmonthlybudgetdaily",
@@ -9251,7 +9251,7 @@
       "file_type": "code",
       "norm_label": "getmonthlybudgetdaily()",
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L652"
+      "source_location": "L670"
     },
     {
       "id": "src_logic_dashboard_getpaceview",
@@ -9347,7 +9347,7 @@
       "file_type": "code",
       "norm_label": "weekdayof()",
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L717"
+      "source_location": "L735"
     },
     {
       "id": "src_logic_monthly_budgets_amountfor",
@@ -16474,7 +16474,7 @@
       "file_type": "code",
       "norm_label": "legacypacekey",
       "source_file": "tests/domain/monthly-budgets.test.ts",
-      "source_location": "L162"
+      "source_location": "L173"
     },
     {
       "id": "tests_domain_monthly_budgets_test_today",
@@ -19775,7 +19775,7 @@
       "file_type": "code",
       "norm_label": "weekdays",
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L715"
+      "source_location": "L733"
     },
     {
       "id": "src_logic_monthly",
@@ -31725,7 +31725,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L129",
+      "source_location": "L120",
       "weight": 1.0
     },
     {
@@ -31737,7 +31737,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L41",
+      "source_location": "L40",
       "weight": 1.0
     },
     {
@@ -31749,7 +31749,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L52",
+      "source_location": "L49",
       "weight": 1.0
     },
     {
@@ -31761,7 +31761,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L68",
+      "source_location": "L65",
       "weight": 1.0
     },
     {
@@ -31773,7 +31773,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L72",
+      "source_location": "L69",
       "weight": 1.0
     },
     {
@@ -32409,7 +32409,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/trend-chart.tsx",
-      "source_location": "L356",
+      "source_location": "L352",
       "weight": 1.0
     },
     {
@@ -32433,7 +32433,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/trend-chart.tsx",
-      "source_location": "L297",
+      "source_location": "L299",
       "weight": 1.0
     },
     {
@@ -32445,7 +32445,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/trend-chart.tsx",
-      "source_location": "L309",
+      "source_location": "L302",
       "weight": 1.0
     },
     {
@@ -32457,7 +32457,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/trend-chart.tsx",
-      "source_location": "L331",
+      "source_location": "L327",
       "weight": 1.0
     },
     {
@@ -44613,7 +44613,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L805",
+      "source_location": "L823",
       "weight": 1.0
     },
     {
@@ -44625,7 +44625,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L990",
+      "source_location": "L1008",
       "weight": 1.0
     },
     {
@@ -44649,7 +44649,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L1114",
+      "source_location": "L1132",
       "weight": 1.0
     },
     {
@@ -44661,7 +44661,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L1115",
+      "source_location": "L1133",
       "weight": 1.0
     },
     {
@@ -44673,7 +44673,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L738",
+      "source_location": "L756",
       "weight": 1.0
     },
     {
@@ -44925,7 +44925,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L1137",
+      "source_location": "L1155",
       "weight": 1.0
     },
     {
@@ -44937,7 +44937,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L1138",
+      "source_location": "L1156",
       "weight": 1.0
     },
     {
@@ -44949,7 +44949,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L1140",
+      "source_location": "L1158",
       "weight": 1.0
     },
     {
@@ -44961,7 +44961,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L1144",
+      "source_location": "L1162",
       "weight": 1.0
     },
     {
@@ -44973,7 +44973,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L1161",
+      "source_location": "L1179",
       "weight": 1.0
     },
     {
@@ -44985,7 +44985,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L1166",
+      "source_location": "L1184",
       "weight": 1.0
     },
     {
@@ -44997,7 +44997,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L1167",
+      "source_location": "L1185",
       "weight": 1.0
     },
     {
@@ -45009,7 +45009,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L1170",
+      "source_location": "L1188",
       "weight": 1.0
     },
     {
@@ -45021,7 +45021,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L1171",
+      "source_location": "L1189",
       "weight": 1.0
     },
     {
@@ -45033,7 +45033,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L660",
+      "source_location": "L678",
       "weight": 1.0
     },
     {
@@ -45045,7 +45045,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L667",
+      "source_location": "L685",
       "weight": 1.0
     },
     {
@@ -45057,7 +45057,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L675",
+      "source_location": "L693",
       "weight": 1.0
     },
     {
@@ -45237,7 +45237,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L594",
+      "source_location": "L596",
       "weight": 1.0
     },
     {
@@ -49245,7 +49245,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/domain/monthly-budgets.test.ts",
-      "source_location": "L169",
+      "source_location": "L180",
       "weight": 1.0
     },
     {
@@ -49257,7 +49257,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/domain/monthly-budgets.test.ts",
-      "source_location": "L171",
+      "source_location": "L182",
       "weight": 1.0
     },
     {
@@ -49269,7 +49269,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/domain/monthly-budgets.test.ts",
-      "source_location": "L191",
+      "source_location": "L202",
       "weight": 1.0
     },
     {
@@ -49281,7 +49281,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/domain/monthly-budgets.test.ts",
-      "source_location": "L202",
+      "source_location": "L213",
       "weight": 1.0
     },
     {
@@ -52173,7 +52173,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L730",
+      "source_location": "L748",
       "weight": 1.0
     },
     {
@@ -52953,7 +52953,7 @@
       "confidence_score": 1.0,
       "context": "export",
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L1072",
+      "source_location": "L1090",
       "weight": 1.0
     },
     {
@@ -53091,7 +53091,7 @@
       "context": "import",
       "deferred": true,
       "source_file": "tests/domain/monthly-budgets.test.ts",
-      "source_location": "L117",
+      "source_location": "L128",
       "weight": 1.0
     },
     {
@@ -53104,7 +53104,7 @@
       "context": "import",
       "deferred": true,
       "source_file": "tests/domain/monthly-budgets.test.ts",
-      "source_location": "L165",
+      "source_location": "L176",
       "weight": 1.0
     },
     {
@@ -53117,7 +53117,7 @@
       "context": "import",
       "deferred": true,
       "source_file": "tests/domain/monthly-budgets.test.ts",
-      "source_location": "L166",
+      "source_location": "L177",
       "weight": 1.0
     },
     {
@@ -53130,7 +53130,7 @@
       "context": "import",
       "deferred": true,
       "source_file": "tests/domain/monthly-budgets.test.ts",
-      "source_location": "L199",
+      "source_location": "L210",
       "weight": 1.0
     },
     {
@@ -61236,18 +61236,6 @@
     },
     {
       "source": "src_components_charts_cashflow_chart",
-      "target": "src_routes_pathmonthlyrecords",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L10",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_charts_cashflow_chart",
       "target": "src_components_charts_trend_chart_trendchart",
       "relation": "imports",
       "_origin": "ast",
@@ -61255,7 +61243,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L4",
+      "source_location": "L3",
       "weight": 1.0
     },
     {
@@ -61267,7 +61255,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L5",
+      "source_location": "L4",
       "weight": 1.0
     },
     {
@@ -61279,7 +61267,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L6",
+      "source_location": "L5",
       "weight": 1.0
     },
     {
@@ -61291,7 +61279,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L7",
+      "source_location": "L6",
       "weight": 1.0
     },
     {
@@ -61303,12 +61291,24 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L8",
+      "source_location": "L7",
       "weight": 1.0
     },
     {
       "source": "src_components_charts_cashflow_chart",
       "target": "src_logic_dashboard_getpaceview",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/charts/cashflow-chart.tsx",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_charts_cashflow_chart",
+      "target": "src_routes_pathmonthlyrecords",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -84221,18 +84221,6 @@
     },
     {
       "source": "src_components_charts_cashflow_chart",
-      "target": "src_routes",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L10",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_charts_cashflow_chart",
       "target": "ref_next",
       "relation": "imports_from",
       "_origin": "ast",
@@ -84245,7 +84233,7 @@
     },
     {
       "source": "src_components_charts_cashflow_chart",
-      "target": "ref_react",
+      "target": "src_components_charts_trend_chart",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -84257,7 +84245,7 @@
     },
     {
       "source": "src_components_charts_cashflow_chart",
-      "target": "src_components_charts_trend_chart",
+      "target": "src_components_monthly_budget_badge",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -84269,7 +84257,7 @@
     },
     {
       "source": "src_components_charts_cashflow_chart",
-      "target": "src_components_monthly_budget_badge",
+      "target": "src_history",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -84281,7 +84269,7 @@
     },
     {
       "source": "src_components_charts_cashflow_chart",
-      "target": "src_history",
+      "target": "src_lib_chart_days",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -84293,7 +84281,7 @@
     },
     {
       "source": "src_components_charts_cashflow_chart",
-      "target": "src_lib_chart_days",
+      "target": "src_lib_palette",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -84305,18 +84293,6 @@
     },
     {
       "source": "src_components_charts_cashflow_chart",
-      "target": "src_lib_palette",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L8",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_charts_cashflow_chart",
       "target": "src_logic_dashboard",
       "relation": "imports_from",
       "_origin": "ast",
@@ -84324,8 +84300,20 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L9",
+      "source_location": "L8",
       "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_charts_cashflow_chart",
+      "target": "src_routes",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/charts/cashflow-chart.tsx",
+      "source_location": "L9",
       "weight": 1.0
     },
     {
@@ -99730,7 +99718,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L12",
+      "source_location": "L11",
       "weight": 1.0
     },
     {
@@ -99741,7 +99729,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L21",
+      "source_location": "L20",
       "weight": 1.0
     },
     {
@@ -100148,7 +100136,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/trend-chart.tsx",
-      "source_location": "L340",
+      "source_location": "L336",
       "weight": 1.0
     },
     {
@@ -100159,7 +100147,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/trend-chart.tsx",
-      "source_location": "L350",
+      "source_location": "L346",
       "weight": 1.0
     },
     {
@@ -106440,18 +106428,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L1005",
-      "weight": 1.0
-    },
-    {
-      "source": "src_logic_dashboard",
-      "target": "src_logic_dashboard_trendmonth",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/logic/dashboard.ts",
-      "source_location": "L1074",
+      "source_location": "L1023",
       "weight": 1.0
     },
     {
@@ -106467,13 +106444,24 @@
     },
     {
       "source": "src_logic_dashboard",
+      "target": "src_logic_dashboard_trendmonth",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/logic/dashboard.ts",
+      "source_location": "L1092",
+      "weight": 1.0
+    },
+    {
+      "source": "src_logic_dashboard",
       "target": "src_logic_dashboard_buildtrend",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L1090",
+      "source_location": "L1108",
       "weight": 1.0
     },
     {
@@ -106484,7 +106472,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L1136",
+      "source_location": "L1154",
       "weight": 1.0
     },
     {
@@ -106671,7 +106659,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L652",
+      "source_location": "L670",
       "weight": 1.0
     },
     {
@@ -106682,7 +106670,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L715",
+      "source_location": "L733",
       "weight": 1.0
     },
     {
@@ -106693,7 +106681,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L717",
+      "source_location": "L735",
       "weight": 1.0
     },
     {
@@ -106704,7 +106692,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L723",
+      "source_location": "L741",
       "weight": 1.0
     },
     {
@@ -106715,7 +106703,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L790",
+      "source_location": "L808",
       "weight": 1.0
     },
     {
@@ -106726,7 +106714,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L796",
+      "source_location": "L814",
       "weight": 1.0
     },
     {
@@ -106737,7 +106725,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L827",
+      "source_location": "L845",
       "weight": 1.0
     },
     {
@@ -106748,7 +106736,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L877",
+      "source_location": "L895",
       "weight": 1.0
     },
     {
@@ -106759,7 +106747,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L958",
+      "source_location": "L976",
       "weight": 1.0
     },
     {
@@ -109916,7 +109904,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tests/domain/monthly-budgets.test.ts",
-      "source_location": "L162",
+      "source_location": "L173",
       "weight": 1.0
     },
     {
@@ -115662,5 +115650,5 @@
       "source_file": "tests/README.md"
     }
   ],
-  "built_at_commit": "50cab2be9ba964d910593d3c3cb820ad0c51e75f"
+  "built_at_commit": "3371a940fd4e306c5aa853c72e75ada1afa3466f"
 }

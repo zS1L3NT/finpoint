@@ -59,6 +59,7 @@ test("forecasts remain available without a comparison amount and accept zero", a
 })
 
 test("forecast lines reconcile budgets and Unbudgeted spending across scopes", async () => {
+	await db.analytics_months.add({ month: today.minus({ months: 1 }).startOf("month").toFormat("yyyy-MM-dd"), coverage: "complete", covered_through: null, excluded_from_comparisons: false })
 	await db.categories.add({
 		id: "c",
 		name: "Food",
@@ -99,8 +100,18 @@ test("forecast lines reconcile budgets and Unbudgeted spending across scopes", a
 			year: today.year,
 			scope,
 		})
-		expect(pace.forecast.map(b => b.name).sort()).toEqual([...names].sort())
-		expect(pace.forecast.reduce((sum, b) => sum + (b.points[0].spending ?? 0), 0)).toBe(total)
+		const budgets = pace.forecast.filter(b => b.id !== "total")
+		expect(budgets.map(b => b.name).sort()).toEqual([...names].sort())
+		expect(pace.forecast[0].id === "total").toBe(scope !== travel.id)
+		if (scope !== travel.id) {
+			for (const [index, point] of pace.forecast[0].points.entries()) {
+				for (const key of ["spending", "projected_spending"] as const) {
+					expect(point[key]).toBe(budgets[0].points[index][key] === null ? null : budgets.reduce((sum, b) => sum + (b.points[index][key] ?? 0), 0))
+				}
+			}
+		}
+		for (const b of budgets) expect(b.previous !== undefined).toBe(scope === travel.id)
+		expect(budgets.reduce((sum, b) => sum + (b.points[0].spending ?? 0), 0)).toBe(total)
 		expect(pace.forecast.find(b => b.name === "Travel")?.color ?? food.color).toBe("#123456")
 		for (const b of pace.forecast) {
 			expect(b.points[today.day - 1].projected_spending).toBe(
