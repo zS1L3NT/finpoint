@@ -702,6 +702,7 @@ test.describe("pinned overview date", () => {
 						await expect(
 							tooltip.getByText("Unbudgeted", { exact: true }).locator(".."),
 						).toContainText("-$17.90")
+						await expect(tooltip).toContainText("Sep")
 						await expect(tooltip).toContainText("Total")
 						await expect(tooltip).toContainText("$66.30")
 					} else {

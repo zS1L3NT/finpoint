@@ -151,7 +151,10 @@ export function parseImportFile(text: string): FinpointExport {
 	// Strip retired Monthly Budget metadata from older backups and hand-edited files.
 	parsed.tables.monthly_budgets = (
 		parsed.tables.monthly_budgets as Record<string, unknown>[]
-	).map(({ pace_kind, ...row }) => row)
+	).map(({ pace_kind, ...row }) => ({
+		...row,
+		compare_previous_month: row.compare_previous_month === true,
+	}))
 	const categoryIds = new Set((parsed.tables.categories as { id: string }[]).map(c => c.id))
 	if ((originalVersion ?? 0) < 7)
 		parsed.tables.records = (parsed.tables.records as Record<string, unknown>[]).map(row =>

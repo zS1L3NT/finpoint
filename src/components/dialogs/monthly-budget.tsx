@@ -45,6 +45,9 @@ export default function MonthlyBudgetDialog({
 	const [amount, setAmount] = useState(monthlyBudget?.amount ?? 0)
 	const [noAmount, setNoAmount] = useState(monthlyBudget?.amount === null)
 	const [amountScope, setAmountScope] = useState<string | null>(null)
+	const [comparePreviousMonth, setComparePreviousMonth] = useState(
+		monthlyBudget?.compare_previous_month ?? false,
+	)
 	const [archived, setArchived] = useState(monthlyBudget?.archived ?? false)
 	const { apiErrors, getApiFieldErrors, resetApiErrors, setApiErrors } = useApiFormErrors()
 	const [submitting, setSubmitting] = useState(false)
@@ -84,6 +87,7 @@ export default function MonthlyBudgetDialog({
 		setAmount(monthlyBudget?.amount ?? 0)
 		setNoAmount(monthlyBudget?.amount === null)
 		setAmountScope(null)
+		setComparePreviousMonth(monthlyBudget?.compare_previous_month ?? false)
 		setArchived(monthlyBudget?.archived ?? false)
 		resetApiErrors()
 	}
@@ -98,6 +102,7 @@ export default function MonthlyBudgetDialog({
 				color,
 				group,
 				archived,
+				compare_previous_month: comparePreviousMonth,
 				month: selectedMonth.toISODate() ?? "",
 				amount: noAmount ? null : amount,
 				scope,
@@ -214,6 +219,20 @@ export default function MonthlyBudgetDialog({
 												: "Other spending you want to track separately."}
 									</p>
 								</fieldset>
+								<Field>
+									<FieldLabel>
+										<Checkbox
+											checked={comparePreviousMonth}
+											onCheckedChange={value =>
+												setComparePreviousMonth(value === true)
+											}
+										/>
+										Compare spending to previous month
+									</FieldLabel>
+									<p className="text-xs text-muted-foreground">
+										Always show last month’s line on the Spending forecast.
+									</p>
+								</Field>
 							</FieldGroup>
 							<FieldGroup className="gap-3 border-t pt-4">
 								<p className="text-sm font-medium">Amount for {monthLabel}</p>

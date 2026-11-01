@@ -571,6 +571,11 @@ export async function getPaceView(
 	) {
 		budgets.push({ id: "unbudgeted", name: "Unbudgeted", color: "#94a3b8" })
 	}
+	budgets.sort(
+		(a, b) =>
+			(tables.monthlyBudgets.get(a.id)?.display_order ?? Infinity) -
+			(tables.monthlyBudgets.get(b.id)?.display_order ?? Infinity),
+	)
 	const forecast = budgets.map(budget => {
 		const matches = (r: AnalyticsRecord) => (r.monthly_budget_id ?? "unbudgeted") === budget.id
 		const actual = summarize(actualRecords.filter(matches))
@@ -586,6 +591,20 @@ export async function getPaceView(
 		)
 		return {
 			...budget,
+			compare_previous_month:
+				tables.monthlyBudgetRows.find(b => b.id === budget.id)?.compare_previous_month ??
+				false,
+			previous: buildCashflowHistory(
+				date,
+				today,
+				budget.id === "unbudgeted"
+					? {
+							...tables,
+							records: tables.records.filter(r => r.monthly_budget_id === null),
+						}
+					: tables,
+				budget.id === "unbudgeted" ? null : [budget.id],
+			).find(item => item.offset === 1),
 			points: buildSeries(
 				actual,
 				future,

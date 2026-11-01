@@ -41,7 +41,12 @@ export async function seedIfEmpty(): Promise<void> {
 		for (const monthly_budget of DEFAULT_MONTHLY_BUDGETS) {
 			if (monthlyBudgetsByName.has(monthly_budget.name)) continue
 			const id = crypto.randomUUID()
-			await db.monthly_budgets.add({ id, ...monthly_budget, archived: false })
+			await db.monthly_budgets.add({
+				id,
+				...monthly_budget,
+				compare_previous_month: false,
+				archived: false,
+			})
 			monthlyBudgetsByName.set(monthly_budget.name, id)
 		}
 

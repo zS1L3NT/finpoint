@@ -24,7 +24,7 @@ const input = {
 
 test("new Monthly Budgets and edits store only current fields", async () => {
 	const row = await upsertMonthlyBudget(input)
-	const expected = { id: row.id, name: "Travel", color: "#123456", group: "outlier", display_order: row.display_order, archived: false }
+	const expected = { id: row.id, name: "Travel", color: "#123456", group: "outlier", display_order: row.display_order, compare_previous_month: false, archived: false }
 	expect(row).toEqual(expected)
 	await upsertMonthlyBudget({ ...input, id: row.id, name: "Holiday" })
 	expect(await db.monthly_budgets.get(row.id)).toEqual({ ...expected, name: "Holiday" })
@@ -202,4 +202,18 @@ test("legacy Holiday starter detection works with current budget fields", async 
 	await seedIfEmpty()
 	expect(await db.monthly_budgets.get(holiday.id)).toEqual({ ...holiday, name: "Travel" })
 	expect(await db.monthly_budgets.where("name").equals("Travel").count()).toBe(1)
+})
+
+test("Monthly Budget comparison preference persists through edits and backups", async () => {
+ const { exportData, importData } = await import("../../src/data/export-import")
+ const row = await upsertMonthlyBudget({ ...input, compare_previous_month: true })
+ expect(row.compare_previous_month).toBe(true)
+ const backup = await exportData()
+ await importData(backup)
+ expect((await db.monthly_budgets.get(row.id))?.compare_previous_month).toBe(true)
+ await upsertMonthlyBudget({ ...input, id: row.id, compare_previous_month: false })
+ expect((await db.monthly_budgets.get(row.id))?.compare_previous_month).toBe(false)
+ for (const budget of backup.tables.monthly_budgets as Record<string, unknown>[]) delete budget.compare_previous_month
+ await importData(backup)
+ expect((await db.monthly_budgets.get(row.id))?.compare_previous_month).toBe(false)
 })

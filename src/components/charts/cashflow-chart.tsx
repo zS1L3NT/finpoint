@@ -1,5 +1,6 @@
 import { DateTime } from "luxon"
 import { useRouter } from "next/navigation"
+import { useState } from "react"
 import TrendChart from "@/components/charts/trend-chart"
 import MonthlyBudgetBadge from "@/components/monthly-budget-badge"
 import { useHistory } from "@/history"
@@ -38,6 +39,8 @@ export default function CashflowChart({
 }) {
 	const router = useRouter()
 	const { handlePush } = useHistory()
+	const [focusedId, setFocusedId] = useState<string | null>(null)
+	const focused = forecast.find(b => b.id === focusedId)?.id ?? forecast[0]?.id
 	const length = data.length
 	const openDay = (index: number) => {
 		if (index >= data.length) return
@@ -75,15 +78,36 @@ export default function CashflowChart({
 					}
 					showTotal
 					series={forecast.flatMap(budget => [
+						...(budget.previous &&
+						(budget.id === focused || budget.compare_previous_month)
+							? [
+									{
+										key: `${budget.id}-previous`,
+										label: budget.name,
+										color: themeColor(budget.color),
+										dash: "2 4",
+										opacity: 0.6,
+										comparison: true,
+										values: Array.from(
+											{ length },
+											(_, index) => budget.previous?.spending[index] ?? null,
+										),
+									},
+								]
+							: []),
 						{
 							key: `${budget.id}-projection`,
 							label: budget.name,
 							color: themeColor(budget.color),
 							dash: "7 5",
+							fill: budget.id === focused ? 0.12 : 0.025,
+							previous: budget.previous,
 							values: budget.points.map(p => p.projected_spending),
 						},
 						{
 							key: budget.id,
+							fill: budget.id === focused ? 0.3 : 0.06,
+							previous: budget.previous,
 							label: budget.name,
 							color: themeColor(budget.color),
 							values: budget.points.map(p => p.spending),
@@ -96,7 +120,17 @@ export default function CashflowChart({
 
 			<div className="flex flex-wrap gap-1.5">
 				{forecast.map(b => (
-					<MonthlyBudgetBadge key={b.id} name={b.name} color={b.color} />
+					<button
+						key={b.id}
+						type="button"
+						aria-pressed={b.id === focused}
+						onMouseEnter={() => setFocusedId(b.id)}
+						onFocus={() => setFocusedId(b.id)}
+						onClick={() => setFocusedId(b.id)}
+						className="cursor-pointer rounded-full outline-offset-2 aria-pressed:ring-2 aria-pressed:ring-ring"
+					>
+						<MonthlyBudgetBadge name={b.name} color={b.color} />
+					</button>
 				))}
 			</div>
 			<p className="text-xs text-muted-foreground">
