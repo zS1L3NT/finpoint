@@ -8795,7 +8795,7 @@
       "file_type": "code",
       "norm_label": "path()",
       "source_file": "src/components/charts/trend-chart.tsx",
-      "source_location": "L355"
+      "source_location": "L350"
     },
     {
       "id": "src_components_charts_trend_chart_runs",
@@ -8807,7 +8807,7 @@
       "file_type": "code",
       "norm_label": "runs()",
       "source_file": "src/components/charts/trend-chart.tsx",
-      "source_location": "L345"
+      "source_location": "L340"
     },
     {
       "id": "src_components_charts_trend_chart_trendchart",
@@ -8819,7 +8819,7 @@
       "file_type": "code",
       "norm_label": "trendchart()",
       "source_file": "src/components/charts/trend-chart.tsx",
-      "source_location": "L27"
+      "source_location": "L26"
     },
     {
       "id": "src_components_charts_weekday_bars_weekdaybars",
@@ -8843,7 +8843,7 @@
       "file_type": "code",
       "norm_label": "formatchartcurrency()",
       "source_file": "src/lib/chart-currency.ts",
-      "source_location": "L6"
+      "source_location": "L7"
     },
     {
       "id": "playwright_config_piggyback",
@@ -19291,7 +19291,7 @@
       "file_type": "code",
       "norm_label": "pad",
       "source_file": "src/components/charts/trend-chart.tsx",
-      "source_location": "L23"
+      "source_location": "L22"
     },
     {
       "id": "src_components_charts_weekday_bars",
@@ -31725,7 +31725,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L131",
+      "source_location": "L129",
       "weight": 1.0
     },
     {
@@ -32409,7 +32409,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/trend-chart.tsx",
-      "source_location": "L361",
+      "source_location": "L356",
       "weight": 1.0
     },
     {
@@ -32421,7 +32421,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/trend-chart.tsx",
-      "source_location": "L218",
+      "source_location": "L217",
       "weight": 1.0
     },
     {
@@ -32433,7 +32433,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/trend-chart.tsx",
-      "source_location": "L299",
+      "source_location": "L297",
       "weight": 1.0
     },
     {
@@ -32445,7 +32445,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/trend-chart.tsx",
-      "source_location": "L314",
+      "source_location": "L309",
       "weight": 1.0
     },
     {
@@ -32457,7 +32457,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/trend-chart.tsx",
-      "source_location": "L336",
+      "source_location": "L331",
       "weight": 1.0
     },
     {
@@ -32469,7 +32469,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/trend-chart.tsx",
-      "source_location": "L78",
+      "source_location": "L77",
       "weight": 1.0
     },
     {
@@ -100126,7 +100126,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/trend-chart.tsx",
-      "source_location": "L23",
+      "source_location": "L22",
       "weight": 1.0
     },
     {
@@ -100137,7 +100137,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/trend-chart.tsx",
-      "source_location": "L27",
+      "source_location": "L26",
       "weight": 1.0
     },
     {
@@ -100148,7 +100148,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/trend-chart.tsx",
-      "source_location": "L345",
+      "source_location": "L340",
       "weight": 1.0
     },
     {
@@ -100159,7 +100159,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/trend-chart.tsx",
-      "source_location": "L355",
+      "source_location": "L350",
       "weight": 1.0
     },
     {
@@ -105615,7 +105615,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/chart-currency.ts",
-      "source_location": "L6",
+      "source_location": "L7",
       "weight": 1.0
     },
     {
@@ -115662,5 +115662,5 @@
       "source_file": "tests/README.md"
     }
   ],
-  "built_at_commit": "f3dff568105ca53fbeae085acdf41be7e1700aeb"
+  "built_at_commit": "50cab2be9ba964d910593d3c3cb820ad0c51e75f"
 }
