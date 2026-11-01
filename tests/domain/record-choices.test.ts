@@ -345,3 +345,18 @@ test("version seven upgrade normalizes categories and converts choices while pre
 		expect((await db.meta.get("drive_last_hash"))?.value).toBe(clean ? await hashSnapshot(await exportData()) : baseline)
 	}
 })
+
+test("backup choices reject coerced enum values without replacing workspace data", async () => {
+	await createCategory({ name: "Food", icon: "x", color: "#123" })
+	await createRecord({ title: "Lunch", amount: -10, datetime: "2026-10-01T12:00", category_id: "food" })
+	const backup = await exportData()
+	for (const choices of [
+		{ treatment_choice: { kind: "explicit", value: ["income"] } },
+		{ monthly_budget_choice: { kind: ["unbudgeted"] } },
+	]) {
+		const invalid = { ...backup, tables: { ...backup.tables, records: backup.tables.records.map(row => ({ ...row as object, ...choices })) } }
+		expect(() => parseImportFile(JSON.stringify(invalid))).toThrow("invalid Record choice")
+		await expect(importData(invalid)).rejects.toThrow("invalid Record choice")
+		expect((await exportData()).tables).toEqual(backup.tables)
+	}
+})

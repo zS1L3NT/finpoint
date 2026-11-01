@@ -115,6 +115,71 @@
   },
   "nodes": [
     {
+      "id": "src_logic_auto_sync_syncactivity",
+      "label": "SyncActivity",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "auto-sync.ts",
+      "file_type": "code",
+      "norm_label": "syncactivity",
+      "source_file": "src/logic/auto-sync.ts",
+      "source_location": "L26"
+    },
+    {
+      "id": "src_logic_auto_sync_syncevent",
+      "label": "SyncEvent",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "auto-sync.ts",
+      "file_type": "code",
+      "norm_label": "syncevent",
+      "source_file": "src/logic/auto-sync.ts",
+      "source_location": "L51"
+    },
+    {
+      "id": "src_logic_auto_sync_synckind",
+      "label": "SyncKind",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "auto-sync.ts",
+      "file_type": "code",
+      "norm_label": "synckind",
+      "source_file": "src/logic/auto-sync.ts",
+      "source_location": "L28"
+    },
+    {
+      "id": "src_logic_auto_sync_syncsnapshot",
+      "label": "SyncSnapshot",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "auto-sync.ts",
+      "file_type": "code",
+      "norm_label": "syncsnapshot",
+      "source_file": "src/logic/auto-sync.ts",
+      "source_location": "L38"
+    },
+    {
+      "id": "src_logic_drive_sync_drivesyncresult",
+      "label": "DriveSyncResult",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "auto-sync.ts",
+      "file_type": "code",
+      "norm_label": "drivesyncresult",
+      "source_file": "src/logic/drive-sync.ts",
+      "source_location": "L30"
+    },
+    {
       "id": "app_budgets_page_budgetstate",
       "label": "BudgetState",
       "_callable": true,
@@ -817,32 +882,6 @@
       "source_location": "L128"
     },
     {
-      "id": "tests_support_data_scenarioname",
-      "label": "ScenarioName",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "db.ts",
-      "file_type": "code",
-      "norm_label": "scenarioname",
-      "source_file": "tests/support/data.ts",
-      "source_location": "L25"
-    },
-    {
-      "id": "tests_support_data_workspacedataset",
-      "label": "WorkspaceDataset",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "db.ts",
-      "file_type": "code",
-      "norm_label": "workspacedataset",
-      "source_file": "tests/support/data.ts",
-      "source_location": "L49"
-    },
-    {
       "id": "tests_support_data_workspacesettings",
       "label": "WorkspaceSettings",
       "_callable": true,
@@ -854,19 +893,6 @@
       "norm_label": "workspacesettings",
       "source_file": "tests/support/data.ts",
       "source_location": "L28"
-    },
-    {
-      "id": "tests_support_data_workspacetables",
-      "label": "WorkspaceTables",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "db.ts",
-      "file_type": "code",
-      "norm_label": "workspacetables",
-      "source_file": "tests/support/data.ts",
-      "source_location": "L33"
     },
     {
       "id": "src_logic_validate_validator",
@@ -1213,7 +1239,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "auto-sync.ts",
+      "community_name": "drive-sync.ts",
       "file_type": "code",
       "norm_label": "authneedederror",
       "source_file": "src/data/google-drive.ts",
@@ -1226,7 +1252,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "auto-sync.ts",
+      "community_name": "drive-sync.ts",
       "file_type": "code",
       "norm_label": "coderesponse",
       "source_file": "src/data/google-drive.ts",
@@ -1239,7 +1265,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "auto-sync.ts",
+      "community_name": "drive-sync.ts",
       "file_type": "code",
       "norm_label": "drivefilemeta",
       "source_file": "src/data/google-drive.ts",
@@ -1252,50 +1278,11 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "auto-sync.ts",
+      "community_name": "drive-sync.ts",
       "file_type": "code",
       "norm_label": "window",
       "source_file": "src/data/google-drive.ts",
       "source_location": "L18"
-    },
-    {
-      "id": "src_logic_auto_sync_syncactivity",
-      "label": "SyncActivity",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "auto-sync.ts",
-      "file_type": "code",
-      "norm_label": "syncactivity",
-      "source_file": "src/logic/auto-sync.ts",
-      "source_location": "L26"
-    },
-    {
-      "id": "src_logic_auto_sync_syncevent",
-      "label": "SyncEvent",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "auto-sync.ts",
-      "file_type": "code",
-      "norm_label": "syncevent",
-      "source_file": "src/logic/auto-sync.ts",
-      "source_location": "L51"
-    },
-    {
-      "id": "src_logic_auto_sync_synckind",
-      "label": "SyncKind",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "auto-sync.ts",
-      "file_type": "code",
-      "norm_label": "synckind",
-      "source_file": "src/logic/auto-sync.ts",
-      "source_location": "L28"
     },
     {
       "id": "src_logic_drive_sync_drivestatus",
@@ -1304,7 +1291,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "auto-sync.ts",
+      "community_name": "drive-sync.ts",
       "file_type": "code",
       "norm_label": "drivestatus",
       "source_file": "src/logic/drive-sync.ts",
@@ -1317,24 +1304,11 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "auto-sync.ts",
+      "community_name": "drive-sync.ts",
       "file_type": "code",
       "norm_label": "drivesyncoutcome",
       "source_file": "src/logic/drive-sync.ts",
       "source_location": "L28"
-    },
-    {
-      "id": "src_logic_drive_sync_drivesyncresult",
-      "label": "DriveSyncResult",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "auto-sync.ts",
-      "file_type": "code",
-      "norm_label": "drivesyncresult",
-      "source_file": "src/logic/drive-sync.ts",
-      "source_location": "L30"
     },
     {
       "id": "tests_support_motion_motionframe",
@@ -1389,32 +1363,6 @@
       "source_location": "L26"
     },
     {
-      "id": "tests_core_helpers_e2e_child",
-      "label": "Child",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 31,
-      "community_name": "fixtures.ts",
-      "file_type": "code",
-      "norm_label": "child",
-      "source_file": "tests/core/helpers.e2e.ts",
-      "source_location": "L26"
-    },
-    {
-      "id": "tests_support_fixtures_workspacefixtures",
-      "label": "WorkspaceFixtures",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 31,
-      "community_name": "fixtures.ts",
-      "file_type": "code",
-      "norm_label": "workspacefixtures",
-      "source_file": "tests/support/fixtures.ts",
-      "source_location": "L23"
-    },
-    {
       "id": "app_allocator_pending_page_candidatepage",
       "label": "CandidatePage",
       "_callable": true,
@@ -1425,6 +1373,19 @@
       "file_type": "code",
       "norm_label": "candidatepage",
       "source_file": "app/allocator/pending/page.tsx",
+      "source_location": "L52"
+    },
+    {
+      "id": "src_data_export_import_finpointexport",
+      "label": "FinpointExport",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "export-import.ts",
+      "file_type": "code",
+      "norm_label": "finpointexport",
+      "source_file": "src/data/export-import.ts",
       "source_location": "L52"
     },
     {
@@ -1454,30 +1415,69 @@
       "source_location": "L3"
     },
     {
-      "id": "src_data_export_import_finpointexport",
-      "label": "FinpointExport",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "shared.ts",
-      "file_type": "code",
-      "norm_label": "finpointexport",
-      "source_file": "src/data/export-import.ts",
-      "source_location": "L52"
-    },
-    {
       "id": "src_data_test_data_meal",
       "label": "Meal",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 36,
-      "community_name": "shared.ts",
+      "community": 34,
+      "community_name": "export-import.ts",
       "file_type": "code",
       "norm_label": "meal",
       "source_file": "src/data/test-data.ts",
       "source_location": "L58"
+    },
+    {
+      "id": "tests_support_data_scenarioname",
+      "label": "ScenarioName",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 36,
+      "community_name": "fixtures.ts",
+      "file_type": "code",
+      "norm_label": "scenarioname",
+      "source_file": "tests/support/data.ts",
+      "source_location": "L25"
+    },
+    {
+      "id": "tests_support_data_workspacedataset",
+      "label": "WorkspaceDataset",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 36,
+      "community_name": "fixtures.ts",
+      "file_type": "code",
+      "norm_label": "workspacedataset",
+      "source_file": "tests/support/data.ts",
+      "source_location": "L49"
+    },
+    {
+      "id": "tests_support_data_workspacetables",
+      "label": "WorkspaceTables",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 36,
+      "community_name": "fixtures.ts",
+      "file_type": "code",
+      "norm_label": "workspacetables",
+      "source_file": "tests/support/data.ts",
+      "source_location": "L33"
+    },
+    {
+      "id": "tests_support_fixtures_workspacefixtures",
+      "label": "WorkspaceFixtures",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 36,
+      "community_name": "fixtures.ts",
+      "file_type": "code",
+      "norm_label": "workspacefixtures",
+      "source_file": "tests/support/fixtures.ts",
+      "source_location": "L23"
     },
     {
       "id": "src_components_table_amount_filter_amountrange",
@@ -2208,19 +2208,6 @@
       "source_location": "L60"
     },
     {
-      "id": "src_logic_auto_sync_syncsnapshot",
-      "label": "SyncSnapshot",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 60,
-      "community_name": "sync/page.tsx",
-      "file_type": "code",
-      "norm_label": "syncsnapshot",
-      "source_file": "src/logic/auto-sync.ts",
-      "source_location": "L38"
-    },
-    {
       "id": "src_logic_statement_rules_ruleinput",
       "label": "RuleInput",
       "_callable": true,
@@ -2284,6 +2271,19 @@
       "norm_label": "resolvedappearance",
       "source_file": "src/hooks/use-appearance.tsx",
       "source_location": "L3"
+    },
+    {
+      "id": "tests_core_helpers_e2e_child",
+      "label": "Child",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "@playwright/test",
+      "file_type": "code",
+      "norm_label": "child",
+      "source_file": "tests/core/helpers.e2e.ts",
+      "source_location": "L26"
     },
     {
       "id": "src_logic_importer_importresult",
@@ -2388,6 +2388,186 @@
       "norm_label": "monthcalprops",
       "source_file": "src/components/ui/monthpicker.tsx",
       "source_location": "L33"
+    },
+    {
+      "id": "src_hooks_use_sync_status_usesyncstatus",
+      "label": "useSyncStatus()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "auto-sync.ts",
+      "file_type": "code",
+      "norm_label": "usesyncstatus()",
+      "source_file": "src/hooks/use-sync-status.ts",
+      "source_location": "L4"
+    },
+    {
+      "id": "src_logic_auto_sync_emit",
+      "label": "emit()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "auto-sync.ts",
+      "file_type": "code",
+      "norm_label": "emit()",
+      "source_file": "src/logic/auto-sync.ts",
+      "source_location": "L103"
+    },
+    {
+      "id": "src_logic_auto_sync_finishcycle",
+      "label": "finishCycle()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "auto-sync.ts",
+      "file_type": "code",
+      "norm_label": "finishcycle()",
+      "source_file": "src/logic/auto-sync.ts",
+      "source_location": "L219"
+    },
+    {
+      "id": "src_logic_auto_sync_getsyncsnapshot",
+      "label": "getSyncSnapshot()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "auto-sync.ts",
+      "file_type": "code",
+      "norm_label": "getsyncsnapshot()",
+      "source_file": "src/logic/auto-sync.ts",
+      "source_location": "L114"
+    },
+    {
+      "id": "src_logic_auto_sync_ingestmanualresult",
+      "label": "ingestManualResult()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "auto-sync.ts",
+      "file_type": "code",
+      "norm_label": "ingestmanualresult()",
+      "source_file": "src/logic/auto-sync.ts",
+      "source_location": "L281"
+    },
+    {
+      "id": "src_logic_auto_sync_markdirty",
+      "label": "markDirty()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "auto-sync.ts",
+      "file_type": "code",
+      "norm_label": "markdirty()",
+      "source_file": "src/logic/auto-sync.ts",
+      "source_location": "L131"
+    },
+    {
+      "id": "src_logic_auto_sync_refreshsyncdisplay",
+      "label": "refreshSyncDisplay()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "auto-sync.ts",
+      "file_type": "code",
+      "norm_label": "refreshsyncdisplay()",
+      "source_file": "src/logic/auto-sync.ts",
+      "source_location": "L185"
+    },
+    {
+      "id": "src_logic_auto_sync_refreshtimes",
+      "label": "refreshTimes()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "auto-sync.ts",
+      "file_type": "code",
+      "norm_label": "refreshtimes()",
+      "source_file": "src/logic/auto-sync.ts",
+      "source_location": "L163"
+    },
+    {
+      "id": "src_logic_auto_sync_resetsyncdisplay",
+      "label": "resetSyncDisplay()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "auto-sync.ts",
+      "file_type": "code",
+      "norm_label": "resetsyncdisplay()",
+      "source_file": "src/logic/auto-sync.ts",
+      "source_location": "L287"
+    },
+    {
+      "id": "src_logic_auto_sync_samesnapshot",
+      "label": "sameSnapshot()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "auto-sync.ts",
+      "file_type": "code",
+      "norm_label": "samesnapshot()",
+      "source_file": "src/logic/auto-sync.ts",
+      "source_location": "L73"
+    },
+    {
+      "id": "src_logic_auto_sync_set",
+      "label": "set()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "auto-sync.ts",
+      "file_type": "code",
+      "norm_label": "set()",
+      "source_file": "src/logic/auto-sync.ts",
+      "source_location": "L88"
+    },
+    {
+      "id": "src_logic_auto_sync_startautosync",
+      "label": "startAutoSync()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "auto-sync.ts",
+      "file_type": "code",
+      "norm_label": "startautosync()",
+      "source_file": "src/logic/auto-sync.ts",
+      "source_location": "L394"
+    },
+    {
+      "id": "src_logic_auto_sync_subscribesync",
+      "label": "subscribeSync()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "auto-sync.ts",
+      "file_type": "code",
+      "norm_label": "subscribesync()",
+      "source_file": "src/logic/auto-sync.ts",
+      "source_location": "L107"
+    },
+    {
+      "id": "src_logic_auto_sync_withsynclock",
+      "label": "withSyncLock()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "auto-sync.ts",
+      "file_type": "code",
+      "norm_label": "withsynclock()",
+      "source_file": "src/logic/auto-sync.ts",
+      "source_location": "L143"
+    },
+    {
+      "id": "src_logic_drive_sync_markdrivechecked",
+      "label": "markDriveChecked()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "auto-sync.ts",
+      "file_type": "code",
+      "norm_label": "markdrivechecked()",
+      "source_file": "src/logic/drive-sync.ts",
+      "source_location": "L58"
     },
     {
       "id": "app_budgets_page_budgetcard",
@@ -3698,18 +3878,6 @@
       "source_location": "L111"
     },
     {
-      "id": "tests_core_editors_e2e_containedfooter",
-      "label": "containedFooter()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 12,
-      "community_name": "editors.ts",
-      "file_type": "code",
-      "norm_label": "containedfooter()",
-      "source_file": "tests/core/editors.e2e.ts",
-      "source_location": "L125"
-    },
-    {
       "id": "tests_core_sheets_e2e_expectheldread",
       "label": "expectHeldRead()",
       "_callable": true,
@@ -3806,28 +3974,16 @@
       "source_location": "L482"
     },
     {
-      "id": "tests_support_assertions_expectpointercursor",
-      "label": "expectPointerCursor()",
+      "id": "tests_support_data_statementrules",
+      "label": "statementRules()",
       "_callable": true,
       "_origin": "ast",
       "community": 12,
       "community_name": "editors.ts",
       "file_type": "code",
-      "norm_label": "expectpointercursor()",
-      "source_file": "tests/support/assertions.ts",
-      "source_location": "L82"
-    },
-    {
-      "id": "tests_support_assertions_expectvisiblebackdrop",
-      "label": "expectVisibleBackdrop()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 12,
-      "community_name": "editors.ts",
-      "file_type": "code",
-      "norm_label": "expectvisiblebackdrop()",
-      "source_file": "tests/support/assertions.ts",
-      "source_location": "L3"
+      "norm_label": "statementrules()",
+      "source_file": "tests/support/data.ts",
+      "source_location": "L1017"
     },
     {
       "id": "tests_support_editors_choosecategory",
@@ -3864,6 +4020,18 @@
       "norm_label": "openeditor()",
       "source_file": "tests/support/editors.ts",
       "source_location": "L21"
+    },
+    {
+      "id": "tests_support_editors_pickoption",
+      "label": "pickOption()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 12,
+      "community_name": "editors.ts",
+      "file_type": "code",
+      "norm_label": "pickoption()",
+      "source_file": "tests/support/editors.ts",
+      "source_location": "L46"
     },
     {
       "id": "tests_support_editors_select",
@@ -4766,6 +4934,18 @@
       "source_location": "L58"
     },
     {
+      "id": "tests_support_data_getscenario",
+      "label": "getScenario()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 17,
+      "community_name": "db.ts",
+      "file_type": "code",
+      "norm_label": "getscenario()",
+      "source_file": "tests/support/data.ts",
+      "source_location": "L1135"
+    },
+    {
       "id": "tests_support_data_learnedcoffee",
       "label": "learnedCoffee()",
       "_callable": true,
@@ -5172,6 +5352,18 @@
       "norm_label": "spendingcalendar()",
       "source_file": "src/components/charts/spending-calendar.tsx",
       "source_location": "L57"
+    },
+    {
+      "id": "src_data_export_import_clearalldata",
+      "label": "clearAllData()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "duplicates.test.ts",
+      "file_type": "code",
+      "norm_label": "clearalldata()",
+      "source_file": "src/data/export-import.ts",
+      "source_location": "L241"
     },
     {
       "id": "src_data_snapshot_hash_digestsnapshot",
@@ -6326,6 +6518,18 @@
       "source_location": "L102"
     },
     {
+      "id": "tests_core_editors_e2e_containedfooter",
+      "label": "containedFooter()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 28,
+      "community_name": "core/components.e2e.ts",
+      "file_type": "code",
+      "norm_label": "containedfooter()",
+      "source_file": "tests/core/editors.e2e.ts",
+      "source_location": "L125"
+    },
+    {
       "id": "tests_support_assertions_expectdropdownpreservesscroll",
       "label": "expectDropdownPreservesScroll()",
       "_callable": true,
@@ -6336,6 +6540,30 @@
       "norm_label": "expectdropdownpreservesscroll()",
       "source_file": "tests/support/assertions.ts",
       "source_location": "L188"
+    },
+    {
+      "id": "tests_support_assertions_expectpointercursor",
+      "label": "expectPointerCursor()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 28,
+      "community_name": "core/components.e2e.ts",
+      "file_type": "code",
+      "norm_label": "expectpointercursor()",
+      "source_file": "tests/support/assertions.ts",
+      "source_location": "L82"
+    },
+    {
+      "id": "tests_support_assertions_expectvisiblebackdrop",
+      "label": "expectVisibleBackdrop()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 28,
+      "community_name": "core/components.e2e.ts",
+      "file_type": "code",
+      "norm_label": "expectvisiblebackdrop()",
+      "source_file": "tests/support/assertions.ts",
+      "source_location": "L3"
     },
     {
       "id": "tests_support_assertions_scrollwithinput",
@@ -6367,7 +6595,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "auto-sync.ts",
+      "community_name": "drive-sync.ts",
       "file_type": "code",
       "norm_label": "exportdata()",
       "source_file": "src/data/export-import.ts",
@@ -6379,7 +6607,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "auto-sync.ts",
+      "community_name": "drive-sync.ts",
       "file_type": "code",
       "norm_label": ".constructor()",
       "source_file": "src/data/google-drive.ts",
@@ -6391,7 +6619,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "auto-sync.ts",
+      "community_name": "drive-sync.ts",
       "file_type": "code",
       "norm_label": "cachetoken()",
       "source_file": "src/data/google-drive.ts",
@@ -6403,7 +6631,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "auto-sync.ts",
+      "community_name": "drive-sync.ts",
       "file_type": "code",
       "norm_label": "disconnectdrive()",
       "source_file": "src/data/google-drive.ts",
@@ -6415,7 +6643,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "auto-sync.ts",
+      "community_name": "drive-sync.ts",
       "file_type": "code",
       "norm_label": "downloadbackupfile()",
       "source_file": "src/data/google-drive.ts",
@@ -6427,7 +6655,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "auto-sync.ts",
+      "community_name": "drive-sync.ts",
       "file_type": "code",
       "norm_label": "drivefetch()",
       "source_file": "src/data/google-drive.ts",
@@ -6439,7 +6667,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "auto-sync.ts",
+      "community_name": "drive-sync.ts",
       "file_type": "code",
       "norm_label": "ensuredrivetoken()",
       "source_file": "src/data/google-drive.ts",
@@ -6451,7 +6679,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "auto-sync.ts",
+      "community_name": "drive-sync.ts",
       "file_type": "code",
       "norm_label": "ensuredrivetokensilent()",
       "source_file": "src/data/google-drive.ts",
@@ -6463,7 +6691,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "auto-sync.ts",
+      "community_name": "drive-sync.ts",
       "file_type": "code",
       "norm_label": "findbackupfile()",
       "source_file": "src/data/google-drive.ts",
@@ -6475,7 +6703,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "auto-sync.ts",
+      "community_name": "drive-sync.ts",
       "file_type": "code",
       "norm_label": "getclockskewms()",
       "source_file": "src/data/google-drive.ts",
@@ -6487,7 +6715,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "auto-sync.ts",
+      "community_name": "drive-sync.ts",
       "file_type": "code",
       "norm_label": "getfilemeta()",
       "source_file": "src/data/google-drive.ts",
@@ -6499,7 +6727,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "auto-sync.ts",
+      "community_name": "drive-sync.ts",
       "file_type": "code",
       "norm_label": "googleclientid()",
       "source_file": "src/data/google-drive.ts",
@@ -6511,7 +6739,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "auto-sync.ts",
+      "community_name": "drive-sync.ts",
       "file_type": "code",
       "norm_label": "hasfreshdrivetoken()",
       "source_file": "src/data/google-drive.ts",
@@ -6523,7 +6751,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "auto-sync.ts",
+      "community_name": "drive-sync.ts",
       "file_type": "code",
       "norm_label": "isdriveconfigured()",
       "source_file": "src/data/google-drive.ts",
@@ -6535,7 +6763,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "auto-sync.ts",
+      "community_name": "drive-sync.ts",
       "file_type": "code",
       "norm_label": "loadgsi()",
       "source_file": "src/data/google-drive.ts",
@@ -6547,7 +6775,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "auto-sync.ts",
+      "community_name": "drive-sync.ts",
       "file_type": "code",
       "norm_label": "requestdrivecode()",
       "source_file": "src/data/google-drive.ts",
@@ -6559,7 +6787,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "auto-sync.ts",
+      "community_name": "drive-sync.ts",
       "file_type": "code",
       "norm_label": "uploadbackupfile()",
       "source_file": "src/data/google-drive.ts",
@@ -6571,7 +6799,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "auto-sync.ts",
+      "community_name": "drive-sync.ts",
       "file_type": "code",
       "norm_label": "hashsnapshot()",
       "source_file": "src/data/snapshot-hash.ts",
@@ -6583,35 +6811,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "auto-sync.ts",
+      "community_name": "drive-sync.ts",
       "file_type": "code",
       "norm_label": "cycle()",
       "source_file": "src/logic/auto-sync.ts",
       "source_location": "L293"
-    },
-    {
-      "id": "src_logic_auto_sync_emit",
-      "label": "emit()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "auto-sync.ts",
-      "file_type": "code",
-      "norm_label": "emit()",
-      "source_file": "src/logic/auto-sync.ts",
-      "source_location": "L103"
-    },
-    {
-      "id": "src_logic_auto_sync_finishcycle",
-      "label": "finishCycle()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "auto-sync.ts",
-      "file_type": "code",
-      "norm_label": "finishcycle()",
-      "source_file": "src/logic/auto-sync.ts",
-      "source_location": "L219"
     },
     {
       "id": "src_logic_auto_sync_flushonhide",
@@ -6619,107 +6823,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "auto-sync.ts",
+      "community_name": "drive-sync.ts",
       "file_type": "code",
       "norm_label": "flushonhide()",
       "source_file": "src/logic/auto-sync.ts",
       "source_location": "L385"
-    },
-    {
-      "id": "src_logic_auto_sync_ingestmanualresult",
-      "label": "ingestManualResult()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "auto-sync.ts",
-      "file_type": "code",
-      "norm_label": "ingestmanualresult()",
-      "source_file": "src/logic/auto-sync.ts",
-      "source_location": "L281"
-    },
-    {
-      "id": "src_logic_auto_sync_markdirty",
-      "label": "markDirty()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "auto-sync.ts",
-      "file_type": "code",
-      "norm_label": "markdirty()",
-      "source_file": "src/logic/auto-sync.ts",
-      "source_location": "L131"
-    },
-    {
-      "id": "src_logic_auto_sync_refreshsyncdisplay",
-      "label": "refreshSyncDisplay()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "auto-sync.ts",
-      "file_type": "code",
-      "norm_label": "refreshsyncdisplay()",
-      "source_file": "src/logic/auto-sync.ts",
-      "source_location": "L185"
-    },
-    {
-      "id": "src_logic_auto_sync_refreshtimes",
-      "label": "refreshTimes()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "auto-sync.ts",
-      "file_type": "code",
-      "norm_label": "refreshtimes()",
-      "source_file": "src/logic/auto-sync.ts",
-      "source_location": "L163"
-    },
-    {
-      "id": "src_logic_auto_sync_samesnapshot",
-      "label": "sameSnapshot()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "auto-sync.ts",
-      "file_type": "code",
-      "norm_label": "samesnapshot()",
-      "source_file": "src/logic/auto-sync.ts",
-      "source_location": "L73"
-    },
-    {
-      "id": "src_logic_auto_sync_set",
-      "label": "set()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "auto-sync.ts",
-      "file_type": "code",
-      "norm_label": "set()",
-      "source_file": "src/logic/auto-sync.ts",
-      "source_location": "L88"
-    },
-    {
-      "id": "src_logic_auto_sync_startautosync",
-      "label": "startAutoSync()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "auto-sync.ts",
-      "file_type": "code",
-      "norm_label": "startautosync()",
-      "source_file": "src/logic/auto-sync.ts",
-      "source_location": "L394"
-    },
-    {
-      "id": "src_logic_auto_sync_withsynclock",
-      "label": "withSyncLock()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "auto-sync.ts",
-      "file_type": "code",
-      "norm_label": "withsynclock()",
-      "source_file": "src/logic/auto-sync.ts",
-      "source_location": "L143"
     },
     {
       "id": "src_logic_drive_sync_baselinehash",
@@ -6727,7 +6835,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "auto-sync.ts",
+      "community_name": "drive-sync.ts",
       "file_type": "code",
       "norm_label": "baselinehash()",
       "source_file": "src/logic/drive-sync.ts",
@@ -6739,23 +6847,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "auto-sync.ts",
+      "community_name": "drive-sync.ts",
       "file_type": "code",
       "norm_label": "drivelocaldirty()",
       "source_file": "src/logic/drive-sync.ts",
       "source_location": "L67"
-    },
-    {
-      "id": "src_logic_drive_sync_markdrivechecked",
-      "label": "markDriveChecked()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "auto-sync.ts",
-      "file_type": "code",
-      "norm_label": "markdrivechecked()",
-      "source_file": "src/logic/drive-sync.ts",
-      "source_location": "L58"
     },
     {
       "id": "src_logic_drive_sync_metaget",
@@ -6763,7 +6859,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "auto-sync.ts",
+      "community_name": "drive-sync.ts",
       "file_type": "code",
       "norm_label": "metaget()",
       "source_file": "src/logic/drive-sync.ts",
@@ -6775,7 +6871,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "auto-sync.ts",
+      "community_name": "drive-sync.ts",
       "file_type": "code",
       "norm_label": "pulldrive()",
       "source_file": "src/logic/drive-sync.ts",
@@ -6787,7 +6883,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "auto-sync.ts",
+      "community_name": "drive-sync.ts",
       "file_type": "code",
       "norm_label": "pushdrive()",
       "source_file": "src/logic/drive-sync.ts",
@@ -6799,7 +6895,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "auto-sync.ts",
+      "community_name": "drive-sync.ts",
       "file_type": "code",
       "norm_label": "syncdrive()",
       "source_file": "src/logic/drive-sync.ts",
@@ -6811,7 +6907,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "auto-sync.ts",
+      "community_name": "drive-sync.ts",
       "file_type": "code",
       "norm_label": "isremotenewer()",
       "source_file": "src/logic/shared.ts",
@@ -6840,18 +6936,6 @@
       "norm_label": "openmobilesidebarfromtableupdates()",
       "source_file": "tests/animations/tables.e2e.ts",
       "source_location": "L22"
-    },
-    {
-      "id": "tests_support_editors_pickoption",
-      "label": "pickOption()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 30,
-      "community_name": "support/motion.ts",
-      "file_type": "code",
-      "norm_label": "pickoption()",
-      "source_file": "tests/support/editors.ts",
-      "source_location": "L46"
     },
     {
       "id": "tests_support_motion_attachsamplingfailure",
@@ -6979,7 +7063,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 31,
-      "community_name": "fixtures.ts",
+      "community_name": "core/routes.e2e.ts",
       "file_type": "code",
       "norm_label": "expectroutebuttons()",
       "source_file": "tests/core/routes.e2e.ts",
@@ -6991,119 +7075,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 31,
-      "community_name": "fixtures.ts",
+      "community_name": "core/routes.e2e.ts",
       "file_type": "code",
       "norm_label": "expectroutelayout()",
       "source_file": "tests/core/routes.e2e.ts",
       "source_location": "L49"
-    },
-    {
-      "id": "tests_support_data_getscenario",
-      "label": "getScenario()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 31,
-      "community_name": "fixtures.ts",
-      "file_type": "code",
-      "norm_label": "getscenario()",
-      "source_file": "tests/support/data.ts",
-      "source_location": "L1135"
-    },
-    {
-      "id": "tests_support_date_only_installdateonly",
-      "label": "installDateOnly()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 31,
-      "community_name": "fixtures.ts",
-      "file_type": "code",
-      "norm_label": "installdateonly()",
-      "source_file": "tests/support/date-only.ts",
-      "source_location": "L18"
-    },
-    {
-      "id": "tests_support_date_only_setdateonly",
-      "label": "setDateOnly()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 31,
-      "community_name": "fixtures.ts",
-      "file_type": "code",
-      "norm_label": "setdateonly()",
-      "source_file": "tests/support/date-only.ts",
-      "source_location": "L6"
-    },
-    {
-      "id": "tests_support_fixtures_assertseeded",
-      "label": "assertSeeded()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 31,
-      "community_name": "fixtures.ts",
-      "file_type": "code",
-      "norm_label": "assertseeded()",
-      "source_file": "tests/support/fixtures.ts",
-      "source_location": "L99"
-    },
-    {
-      "id": "tests_support_fixtures_checkseededmarker",
-      "label": "checkSeededMarker()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 31,
-      "community_name": "fixtures.ts",
-      "file_type": "code",
-      "norm_label": "checkseededmarker()",
-      "source_file": "tests/support/fixtures.ts",
-      "source_location": "L110"
-    },
-    {
-      "id": "tests_support_fixtures_countstore",
-      "label": "countStore()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 31,
-      "community_name": "fixtures.ts",
-      "file_type": "code",
-      "norm_label": "countstore()",
-      "source_file": "tests/support/fixtures.ts",
-      "source_location": "L212"
-    },
-    {
-      "id": "tests_support_fixtures_seedinbrowser",
-      "label": "seedInBrowser()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 31,
-      "community_name": "fixtures.ts",
-      "file_type": "code",
-      "norm_label": "seedinbrowser()",
-      "source_file": "tests/support/fixtures.ts",
-      "source_location": "L155"
-    },
-    {
-      "id": "tests_support_fixtures_seedworkspace",
-      "label": "seedWorkspace()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 31,
-      "community_name": "fixtures.ts",
-      "file_type": "code",
-      "norm_label": "seedworkspace()",
-      "source_file": "tests/support/fixtures.ts",
-      "source_location": "L69"
-    },
-    {
-      "id": "tests_support_fixtures_waitforboot",
-      "label": "waitForBoot()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 31,
-      "community_name": "fixtures.ts",
-      "file_type": "code",
-      "norm_label": "waitforboot()",
-      "source_file": "tests/support/fixtures.ts",
-      "source_location": "L85"
     },
     {
       "id": "tests_support_tables_fits",
@@ -7111,7 +7087,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 31,
-      "community_name": "fixtures.ts",
+      "community_name": "core/routes.e2e.ts",
       "file_type": "code",
       "norm_label": "fits()",
       "source_file": "tests/support/tables.ts",
@@ -7123,7 +7099,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 31,
-      "community_name": "fixtures.ts",
+      "community_name": "core/routes.e2e.ts",
       "file_type": "code",
       "norm_label": "patchrows()",
       "source_file": "tests/support/tables.ts",
@@ -7135,7 +7111,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 31,
-      "community_name": "fixtures.ts",
+      "community_name": "core/routes.e2e.ts",
       "file_type": "code",
       "norm_label": "statementrow()",
       "source_file": "tests/support/tables.ts",
@@ -7223,7 +7199,7 @@
       "file_type": "code",
       "norm_label": "recordanalyticsfields()",
       "source_file": "src/components/form/record-analytics-fields.tsx",
-      "source_location": "L11"
+      "source_location": "L16"
     },
     {
       "id": "src_components_ui_alert_alert",
@@ -7430,18 +7406,6 @@
       "source_location": "L457"
     },
     {
-      "id": "src_data_export_import_clearalldata",
-      "label": "clearAllData()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 34,
-      "community_name": "export-import.ts",
-      "file_type": "code",
-      "norm_label": "clearalldata()",
-      "source_file": "src/data/export-import.ts",
-      "source_location": "L240"
-    },
-    {
       "id": "src_data_export_import_downloadexport",
       "label": "downloadExport()",
       "_callable": true,
@@ -7463,7 +7427,7 @@
       "file_type": "code",
       "norm_label": "importdata()",
       "source_file": "src/data/export-import.ts",
-      "source_location": "L222"
+      "source_location": "L223"
     },
     {
       "id": "src_data_export_import_parseimportfile",
@@ -7487,7 +7451,7 @@
       "file_type": "code",
       "norm_label": "tablecounts()",
       "source_file": "src/data/export-import.ts",
-      "source_location": "L250"
+      "source_location": "L251"
     },
     {
       "id": "src_data_record_choices_migraterecordchoices",
@@ -7538,6 +7502,78 @@
       "source_location": "L27"
     },
     {
+      "id": "src_data_test_data_between",
+      "label": "between()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "export-import.ts",
+      "file_type": "code",
+      "norm_label": "between()",
+      "source_file": "src/data/test-data.ts",
+      "source_location": "L33"
+    },
+    {
+      "id": "src_data_test_data_generatetestdata",
+      "label": "generateTestData()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "export-import.ts",
+      "file_type": "code",
+      "norm_label": "generatetestdata()",
+      "source_file": "src/data/test-data.ts",
+      "source_location": "L177"
+    },
+    {
+      "id": "src_data_test_data_mulberry32",
+      "label": "mulberry32()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "export-import.ts",
+      "file_type": "code",
+      "norm_label": "mulberry32()",
+      "source_file": "src/data/test-data.ts",
+      "source_location": "L14"
+    },
+    {
+      "id": "src_data_test_data_pad",
+      "label": "pad()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "export-import.ts",
+      "file_type": "code",
+      "norm_label": "pad()",
+      "source_file": "src/data/test-data.ts",
+      "source_location": "L37"
+    },
+    {
+      "id": "src_data_test_data_pick",
+      "label": "pick()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "export-import.ts",
+      "file_type": "code",
+      "norm_label": "pick()",
+      "source_file": "src/data/test-data.ts",
+      "source_location": "L27"
+    },
+    {
+      "id": "src_data_test_data_stamp",
+      "label": "stamp()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "export-import.ts",
+      "file_type": "code",
+      "norm_label": "stamp()",
+      "source_file": "src/data/test-data.ts",
+      "source_location": "L41"
+    },
+    {
       "id": "src_logic_settings_getsettings",
       "label": "getSettings()",
       "_callable": true,
@@ -7550,28 +7586,16 @@
       "source_location": "L4"
     },
     {
-      "id": "src_logic_workspace_clearworkspace",
-      "label": "clearWorkspace()",
+      "id": "src_logic_shared_slugify",
+      "label": "slugify()",
       "_callable": true,
       "_origin": "ast",
       "community": 34,
       "community_name": "export-import.ts",
       "file_type": "code",
-      "norm_label": "clearworkspace()",
-      "source_file": "src/logic/workspace.ts",
-      "source_location": "L39"
-    },
-    {
-      "id": "src_logic_workspace_countworkspacerows",
-      "label": "countWorkspaceRows()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 34,
-      "community_name": "export-import.ts",
-      "file_type": "code",
-      "norm_label": "countworkspacerows()",
-      "source_file": "src/logic/workspace.ts",
-      "source_location": "L15"
+      "norm_label": "slugify()",
+      "source_file": "src/logic/shared.ts",
+      "source_location": "L8"
     },
     {
       "id": "src_logic_workspace_exportworkspace",
@@ -7598,88 +7622,88 @@
       "source_location": "L35"
     },
     {
-      "id": "src_data_test_data_between",
-      "label": "between()",
+      "id": "src_logic_workspace_loaddemoworkspace",
+      "label": "loadDemoWorkspace()",
       "_callable": true,
       "_origin": "ast",
-      "community": 36,
-      "community_name": "shared.ts",
+      "community": 34,
+      "community_name": "export-import.ts",
       "file_type": "code",
-      "norm_label": "between()",
-      "source_file": "src/data/test-data.ts",
-      "source_location": "L33"
+      "norm_label": "loaddemoworkspace()",
+      "source_file": "src/logic/workspace.ts",
+      "source_location": "L44"
     },
     {
-      "id": "src_data_test_data_generatetestdata",
-      "label": "generateTestData()",
+      "id": "tests_support_fixtures_assertseeded",
+      "label": "assertSeeded()",
       "_callable": true,
       "_origin": "ast",
       "community": 36,
-      "community_name": "shared.ts",
+      "community_name": "fixtures.ts",
       "file_type": "code",
-      "norm_label": "generatetestdata()",
-      "source_file": "src/data/test-data.ts",
-      "source_location": "L177"
+      "norm_label": "assertseeded()",
+      "source_file": "tests/support/fixtures.ts",
+      "source_location": "L99"
     },
     {
-      "id": "src_data_test_data_mulberry32",
-      "label": "mulberry32()",
+      "id": "tests_support_fixtures_checkseededmarker",
+      "label": "checkSeededMarker()",
       "_callable": true,
       "_origin": "ast",
       "community": 36,
-      "community_name": "shared.ts",
+      "community_name": "fixtures.ts",
       "file_type": "code",
-      "norm_label": "mulberry32()",
-      "source_file": "src/data/test-data.ts",
-      "source_location": "L14"
+      "norm_label": "checkseededmarker()",
+      "source_file": "tests/support/fixtures.ts",
+      "source_location": "L110"
     },
     {
-      "id": "src_data_test_data_pad",
-      "label": "pad()",
+      "id": "tests_support_fixtures_countstore",
+      "label": "countStore()",
       "_callable": true,
       "_origin": "ast",
       "community": 36,
-      "community_name": "shared.ts",
+      "community_name": "fixtures.ts",
       "file_type": "code",
-      "norm_label": "pad()",
-      "source_file": "src/data/test-data.ts",
-      "source_location": "L37"
+      "norm_label": "countstore()",
+      "source_file": "tests/support/fixtures.ts",
+      "source_location": "L212"
     },
     {
-      "id": "src_data_test_data_pick",
-      "label": "pick()",
+      "id": "tests_support_fixtures_seedinbrowser",
+      "label": "seedInBrowser()",
       "_callable": true,
       "_origin": "ast",
       "community": 36,
-      "community_name": "shared.ts",
+      "community_name": "fixtures.ts",
       "file_type": "code",
-      "norm_label": "pick()",
-      "source_file": "src/data/test-data.ts",
-      "source_location": "L27"
+      "norm_label": "seedinbrowser()",
+      "source_file": "tests/support/fixtures.ts",
+      "source_location": "L155"
     },
     {
-      "id": "src_data_test_data_stamp",
-      "label": "stamp()",
+      "id": "tests_support_fixtures_seedworkspace",
+      "label": "seedWorkspace()",
       "_callable": true,
       "_origin": "ast",
       "community": 36,
-      "community_name": "shared.ts",
+      "community_name": "fixtures.ts",
       "file_type": "code",
-      "norm_label": "stamp()",
-      "source_file": "src/data/test-data.ts",
-      "source_location": "L41"
+      "norm_label": "seedworkspace()",
+      "source_file": "tests/support/fixtures.ts",
+      "source_location": "L69"
     },
     {
-      "id": "src_logic_shared_slugify",
-      "label": "slugify()",
+      "id": "tests_support_fixtures_waitforboot",
+      "label": "waitForBoot()",
       "_callable": true,
       "_origin": "ast",
       "community": 36,
-      "community_name": "shared.ts",
+      "community_name": "fixtures.ts",
       "file_type": "code",
-      "norm_label": "slugify()",
-      "source_file": "src/logic/shared.ts",
-      "source_location": "L8"
+      "norm_label": "waitforboot()",
+      "source_file": "tests/support/fixtures.ts",
+      "source_location": "L85"
     },
     {
       "id": "src_components_sheets_pending_statement_confirmation_pendingstatementconfirmationsheet",
@@ -9355,7 +9379,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 46,
-      "community_name": "tests_support_fixtures_expect",
+      "community_name": "navigation.e2e.ts",
       "file_type": "code",
       "norm_label": "expectbackaboveheadingfromhistoryregressions()",
       "source_file": "tests/core/navigation.e2e.ts",
@@ -9367,7 +9391,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 46,
-      "community_name": "tests_support_fixtures_expect",
+      "community_name": "navigation.e2e.ts",
       "file_type": "code",
       "norm_label": "expectbackaboveheadingfromkeyboardnavigation()",
       "source_file": "tests/core/navigation.e2e.ts",
@@ -9379,7 +9403,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 46,
-      "community_name": "tests_support_fixtures_expect",
+      "community_name": "navigation.e2e.ts",
       "file_type": "code",
       "norm_label": "expectnoback()",
       "source_file": "tests/core/navigation.e2e.ts",
@@ -9391,7 +9415,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 46,
-      "community_name": "tests_support_fixtures_expect",
+      "community_name": "navigation.e2e.ts",
       "file_type": "code",
       "norm_label": "gotoready()",
       "source_file": "tests/core/navigation.e2e.ts",
@@ -9403,7 +9427,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 46,
-      "community_name": "tests_support_fixtures_expect",
+      "community_name": "navigation.e2e.ts",
       "file_type": "code",
       "norm_label": "keyboardback()",
       "source_file": "tests/core/navigation.e2e.ts",
@@ -9415,7 +9439,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 46,
-      "community_name": "tests_support_fixtures_expect",
+      "community_name": "navigation.e2e.ts",
       "file_type": "code",
       "norm_label": "resethistory()",
       "source_file": "tests/core/navigation.e2e.ts",
@@ -11174,54 +11198,6 @@
       "source_location": "L61"
     },
     {
-      "id": "src_hooks_use_sync_status_usesyncstatus",
-      "label": "useSyncStatus()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 60,
-      "community_name": "sync/page.tsx",
-      "file_type": "code",
-      "norm_label": "usesyncstatus()",
-      "source_file": "src/hooks/use-sync-status.ts",
-      "source_location": "L4"
-    },
-    {
-      "id": "src_logic_auto_sync_getsyncsnapshot",
-      "label": "getSyncSnapshot()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 60,
-      "community_name": "sync/page.tsx",
-      "file_type": "code",
-      "norm_label": "getsyncsnapshot()",
-      "source_file": "src/logic/auto-sync.ts",
-      "source_location": "L114"
-    },
-    {
-      "id": "src_logic_auto_sync_resetsyncdisplay",
-      "label": "resetSyncDisplay()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 60,
-      "community_name": "sync/page.tsx",
-      "file_type": "code",
-      "norm_label": "resetsyncdisplay()",
-      "source_file": "src/logic/auto-sync.ts",
-      "source_location": "L287"
-    },
-    {
-      "id": "src_logic_auto_sync_subscribesync",
-      "label": "subscribeSync()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 60,
-      "community_name": "sync/page.tsx",
-      "file_type": "code",
-      "norm_label": "subscribesync()",
-      "source_file": "src/logic/auto-sync.ts",
-      "source_location": "L107"
-    },
-    {
       "id": "src_logic_drive_sync_disconnectdrivesync",
       "label": "disconnectDriveSync()",
       "_callable": true,
@@ -11246,16 +11222,28 @@
       "source_location": "L63"
     },
     {
-      "id": "src_logic_workspace_loaddemoworkspace",
-      "label": "loadDemoWorkspace()",
+      "id": "src_logic_workspace_clearworkspace",
+      "label": "clearWorkspace()",
       "_callable": true,
       "_origin": "ast",
       "community": 60,
       "community_name": "sync/page.tsx",
       "file_type": "code",
-      "norm_label": "loaddemoworkspace()",
+      "norm_label": "clearworkspace()",
       "source_file": "src/logic/workspace.ts",
-      "source_location": "L44"
+      "source_location": "L39"
+    },
+    {
+      "id": "src_logic_workspace_countworkspacerows",
+      "label": "countWorkspaceRows()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 60,
+      "community_name": "sync/page.tsx",
+      "file_type": "code",
+      "norm_label": "countworkspacerows()",
+      "source_file": "src/logic/workspace.ts",
+      "source_location": "L15"
     },
     {
       "id": "src_logic_statement_rules_bycreation",
@@ -12110,6 +12098,30 @@
       "source_location": "L23"
     },
     {
+      "id": "tests_support_date_only_installdateonly",
+      "label": "installDateOnly()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "@playwright/test",
+      "file_type": "code",
+      "norm_label": "installdateonly()",
+      "source_file": "tests/support/date-only.ts",
+      "source_location": "L18"
+    },
+    {
+      "id": "tests_support_date_only_setdateonly",
+      "label": "setDateOnly()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "@playwright/test",
+      "file_type": "code",
+      "norm_label": "setdateonly()",
+      "source_file": "tests/support/date-only.ts",
+      "source_location": "L6"
+    },
+    {
       "id": "src_logic_accounts_ensureaccount",
       "label": "ensureAccount()",
       "_callable": true,
@@ -12612,18 +12624,6 @@
       "norm_label": "selectallocatorstatements()",
       "source_file": "tests/core/workflows.e2e.ts",
       "source_location": "L79"
-    },
-    {
-      "id": "tests_support_data_statementrules",
-      "label": "statementRules()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 99,
-      "community_name": "workflows.e2e.ts",
-      "file_type": "code",
-      "norm_label": "statementrules()",
-      "source_file": "tests/support/data.ts",
-      "source_location": "L1017"
     },
     {
       "id": "agents_validation_error",
@@ -14265,6 +14265,61 @@
       "source_url": null
     },
     {
+      "id": "src_hooks_use_sync_status",
+      "label": "use-sync-status.ts",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "auto-sync.ts",
+      "file_type": "code",
+      "norm_label": "use-sync-status.ts",
+      "source_file": "src/hooks/use-sync-status.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_logic_auto_sync",
+      "label": "auto-sync.ts",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "auto-sync.ts",
+      "file_type": "code",
+      "norm_label": "auto-sync.ts",
+      "source_file": "src/logic/auto-sync.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_logic_auto_sync_eventlisteners",
+      "label": "eventListeners",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "auto-sync.ts",
+      "file_type": "code",
+      "norm_label": "eventlisteners",
+      "source_file": "src/logic/auto-sync.ts",
+      "source_location": "L71"
+    },
+    {
+      "id": "src_logic_auto_sync_snapshot",
+      "label": "snapshot",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "auto-sync.ts",
+      "file_type": "code",
+      "norm_label": "snapshot",
+      "source_file": "src/logic/auto-sync.ts",
+      "source_location": "L57"
+    },
+    {
+      "id": "src_logic_auto_sync_snapshotlisteners",
+      "label": "snapshotListeners",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "auto-sync.ts",
+      "file_type": "code",
+      "norm_label": "snapshotlisteners",
+      "source_file": "src/logic/auto-sync.ts",
+      "source_location": "L70"
+    },
+    {
       "id": "app_budgets_page",
       "label": "budgets/page.tsx",
       "_origin": "ast",
@@ -15528,17 +15583,6 @@
       "norm_label": "longname",
       "source_file": "tests/core/editors.e2e.ts",
       "source_location": "L123"
-    },
-    {
-      "id": "tests_core_keyboard_e2e",
-      "label": "keyboard.e2e.ts",
-      "_origin": "ast",
-      "community": 12,
-      "community_name": "editors.ts",
-      "file_type": "code",
-      "norm_label": "keyboard.e2e.ts",
-      "source_file": "tests/core/keyboard.e2e.ts",
-      "source_location": "L1"
     },
     {
       "id": "tests_core_sheets_e2e",
@@ -18018,6 +18062,17 @@
       "source_location": "L1"
     },
     {
+      "id": "tests_core_keyboard_e2e",
+      "label": "keyboard.e2e.ts",
+      "_origin": "ast",
+      "community": 28,
+      "community_name": "core/components.e2e.ts",
+      "file_type": "code",
+      "norm_label": "keyboard.e2e.ts",
+      "source_file": "tests/core/keyboard.e2e.ts",
+      "source_location": "L1"
+    },
+    {
       "id": "tests_core_modals_e2e",
       "label": "core/modals.e2e.ts",
       "_origin": "ast",
@@ -18044,62 +18099,18 @@
       "label": "google-drive.ts",
       "_origin": "ast",
       "community": 29,
-      "community_name": "auto-sync.ts",
+      "community_name": "drive-sync.ts",
       "file_type": "code",
       "norm_label": "google-drive.ts",
       "source_file": "src/data/google-drive.ts",
       "source_location": "L1"
     },
     {
-      "id": "src_logic_auto_sync",
-      "label": "auto-sync.ts",
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "auto-sync.ts",
-      "file_type": "code",
-      "norm_label": "auto-sync.ts",
-      "source_file": "src/logic/auto-sync.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_logic_auto_sync_eventlisteners",
-      "label": "eventListeners",
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "auto-sync.ts",
-      "file_type": "code",
-      "norm_label": "eventlisteners",
-      "source_file": "src/logic/auto-sync.ts",
-      "source_location": "L71"
-    },
-    {
-      "id": "src_logic_auto_sync_snapshot",
-      "label": "snapshot",
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "auto-sync.ts",
-      "file_type": "code",
-      "norm_label": "snapshot",
-      "source_file": "src/logic/auto-sync.ts",
-      "source_location": "L57"
-    },
-    {
-      "id": "src_logic_auto_sync_snapshotlisteners",
-      "label": "snapshotListeners",
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "auto-sync.ts",
-      "file_type": "code",
-      "norm_label": "snapshotlisteners",
-      "source_file": "src/logic/auto-sync.ts",
-      "source_location": "L70"
-    },
-    {
       "id": "src_logic_drive_sync",
       "label": "drive-sync.ts",
       "_origin": "ast",
       "community": 29,
-      "community_name": "auto-sync.ts",
+      "community_name": "drive-sync.ts",
       "file_type": "code",
       "norm_label": "drive-sync.ts",
       "source_file": "src/logic/drive-sync.ts",
@@ -18114,6 +18125,17 @@
       "file_type": "code",
       "norm_label": "animations/helpers.e2e.ts",
       "source_file": "tests/animations/helpers.e2e.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "tests_animations_modals_e2e",
+      "label": "animations/modals.e2e.ts",
+      "_origin": "ast",
+      "community": 30,
+      "community_name": "support/motion.ts",
+      "file_type": "code",
+      "norm_label": "animations/modals.e2e.ts",
+      "source_file": "tests/animations/modals.e2e.ts",
       "source_location": "L1"
     },
     {
@@ -18183,55 +18205,11 @@
       "source_location": "L1"
     },
     {
-      "id": "tests_animations_modals_e2e",
-      "label": "animations/modals.e2e.ts",
-      "_origin": "ast",
-      "community": 31,
-      "community_name": "fixtures.ts",
-      "file_type": "code",
-      "norm_label": "animations/modals.e2e.ts",
-      "source_file": "tests/animations/modals.e2e.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "tests_core_helpers_e2e",
-      "label": "core/helpers.e2e.ts",
-      "_origin": "ast",
-      "community": 31,
-      "community_name": "fixtures.ts",
-      "file_type": "code",
-      "norm_label": "core/helpers.e2e.ts",
-      "source_file": "tests/core/helpers.e2e.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "tests_core_helpers_e2e_october",
-      "label": "october",
-      "_origin": "ast",
-      "community": 31,
-      "community_name": "fixtures.ts",
-      "file_type": "code",
-      "norm_label": "october",
-      "source_file": "tests/core/helpers.e2e.ts",
-      "source_location": "L5"
-    },
-    {
-      "id": "tests_core_helpers_e2e_september",
-      "label": "september",
-      "_origin": "ast",
-      "community": 31,
-      "community_name": "fixtures.ts",
-      "file_type": "code",
-      "norm_label": "september",
-      "source_file": "tests/core/helpers.e2e.ts",
-      "source_location": "L6"
-    },
-    {
       "id": "tests_core_routes_e2e",
       "label": "core/routes.e2e.ts",
       "_origin": "ast",
       "community": 31,
-      "community_name": "fixtures.ts",
+      "community_name": "core/routes.e2e.ts",
       "file_type": "code",
       "norm_label": "core/routes.e2e.ts",
       "source_file": "tests/core/routes.e2e.ts",
@@ -18242,7 +18220,7 @@
       "label": "PREMATURE",
       "_origin": "ast",
       "community": 31,
-      "community_name": "fixtures.ts",
+      "community_name": "core/routes.e2e.ts",
       "file_type": "code",
       "norm_label": "premature",
       "source_file": "tests/core/routes.e2e.ts",
@@ -18253,7 +18231,7 @@
       "label": "routeReady",
       "_origin": "ast",
       "community": 31,
-      "community_name": "fixtures.ts",
+      "community_name": "core/routes.e2e.ts",
       "file_type": "code",
       "norm_label": "routeready",
       "source_file": "tests/core/routes.e2e.ts",
@@ -18264,7 +18242,7 @@
       "label": "titles",
       "_origin": "ast",
       "community": 31,
-      "community_name": "fixtures.ts",
+      "community_name": "core/routes.e2e.ts",
       "file_type": "code",
       "norm_label": "titles",
       "source_file": "tests/core/routes.e2e.ts",
@@ -18275,73 +18253,18 @@
       "label": "core/tables.e2e.ts",
       "_origin": "ast",
       "community": 31,
-      "community_name": "fixtures.ts",
+      "community_name": "core/routes.e2e.ts",
       "file_type": "code",
       "norm_label": "core/tables.e2e.ts",
       "source_file": "tests/core/tables.e2e.ts",
       "source_location": "L1"
     },
     {
-      "id": "tests_support_date_only",
-      "label": "date-only.ts",
-      "_origin": "ast",
-      "community": 31,
-      "community_name": "fixtures.ts",
-      "file_type": "code",
-      "norm_label": "date-only.ts",
-      "source_file": "tests/support/date-only.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "tests_support_date_only_revisions",
-      "label": "revisions",
-      "_origin": "ast",
-      "community": 31,
-      "community_name": "fixtures.ts",
-      "file_type": "code",
-      "norm_label": "revisions",
-      "source_file": "tests/support/date-only.ts",
-      "source_location": "L3"
-    },
-    {
-      "id": "tests_support_fixtures",
-      "label": "fixtures.ts",
-      "_origin": "ast",
-      "community": 31,
-      "community_name": "fixtures.ts",
-      "file_type": "code",
-      "norm_label": "fixtures.ts",
-      "source_file": "tests/support/fixtures.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "tests_support_fixtures_store_names",
-      "label": "STORE_NAMES",
-      "_origin": "ast",
-      "community": 31,
-      "community_name": "fixtures.ts",
-      "file_type": "code",
-      "norm_label": "store_names",
-      "source_file": "tests/support/fixtures.ts",
-      "source_location": "L51"
-    },
-    {
-      "id": "tests_support_fixtures_test",
-      "label": "test",
-      "_origin": "ast",
-      "community": 31,
-      "community_name": "fixtures.ts",
-      "file_type": "code",
-      "norm_label": "test",
-      "source_file": "tests/support/fixtures.ts",
-      "source_location": "L31"
-    },
-    {
       "id": "tests_support_tables",
       "label": "tables.ts",
       "_origin": "ast",
       "community": 31,
-      "community_name": "fixtures.ts",
+      "community_name": "core/routes.e2e.ts",
       "file_type": "code",
       "norm_label": "tables.ts",
       "source_file": "tests/support/tables.ts",
@@ -18502,6 +18425,39 @@
       "source_location": "L450"
     },
     {
+      "id": "src_data_defaults",
+      "label": "defaults.ts",
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "export-import.ts",
+      "file_type": "code",
+      "norm_label": "defaults.ts",
+      "source_file": "src/data/defaults.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_data_defaults_default_categories",
+      "label": "DEFAULT_CATEGORIES",
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "export-import.ts",
+      "file_type": "code",
+      "norm_label": "default_categories",
+      "source_file": "src/data/defaults.ts",
+      "source_location": "L16"
+    },
+    {
+      "id": "src_data_defaults_default_monthly_budgets",
+      "label": "DEFAULT_MONTHLY_BUDGETS",
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "export-import.ts",
+      "file_type": "code",
+      "norm_label": "default_monthly_budgets",
+      "source_file": "src/data/defaults.ts",
+      "source_location": "L3"
+    },
+    {
       "id": "src_data_export_import",
       "label": "export-import.ts",
       "_origin": "ast",
@@ -18511,6 +18467,17 @@
       "norm_label": "export-import.ts",
       "source_file": "src/data/export-import.ts",
       "source_location": "L1"
+    },
+    {
+      "id": "src_data_export_import_export_version",
+      "label": "EXPORT_VERSION",
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "export-import.ts",
+      "file_type": "code",
+      "norm_label": "export_version",
+      "source_file": "src/data/export-import.ts",
+      "source_location": "L17"
     },
     {
       "id": "src_data_export_import_sync_tables",
@@ -18546,6 +18513,28 @@
       "source_location": "L1"
     },
     {
+      "id": "src_data_seed",
+      "label": "seed.ts",
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "export-import.ts",
+      "file_type": "code",
+      "norm_label": "seed.ts",
+      "source_file": "src/data/seed.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_data_seed_seed_hash_key",
+      "label": "SEED_HASH_KEY",
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "export-import.ts",
+      "file_type": "code",
+      "norm_label": "seed_hash_key",
+      "source_file": "src/data/seed.ts",
+      "source_location": "L14"
+    },
+    {
       "id": "src_data_settings",
       "label": "data/settings.ts",
       "_origin": "ast",
@@ -18566,6 +18555,83 @@
       "norm_label": "default_settings",
       "source_file": "src/data/settings.ts",
       "source_location": "L8"
+    },
+    {
+      "id": "src_data_test_data",
+      "label": "test-data.ts",
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "export-import.ts",
+      "file_type": "code",
+      "norm_label": "test-data.ts",
+      "source_file": "src/data/test-data.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_data_test_data_bank_blurb",
+      "label": "BANK_BLURB",
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "export-import.ts",
+      "file_type": "code",
+      "norm_label": "bank_blurb",
+      "source_file": "src/data/test-data.ts",
+      "source_location": "L171"
+    },
+    {
+      "id": "src_data_test_data_categories",
+      "label": "CATEGORIES",
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "export-import.ts",
+      "file_type": "code",
+      "norm_label": "categories",
+      "source_file": "src/data/test-data.ts",
+      "source_location": "L45"
+    },
+    {
+      "id": "src_data_test_data_daily",
+      "label": "DAILY",
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "export-import.ts",
+      "file_type": "code",
+      "norm_label": "daily",
+      "source_file": "src/data/test-data.ts",
+      "source_location": "L68"
+    },
+    {
+      "id": "src_data_test_data_monthly_budgets",
+      "label": "MONTHLY_BUDGETS",
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "export-import.ts",
+      "file_type": "code",
+      "norm_label": "monthly_budgets",
+      "source_file": "src/data/test-data.ts",
+      "source_location": "L53"
+    },
+    {
+      "id": "src_data_test_data_rand",
+      "label": "rand",
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "export-import.ts",
+      "file_type": "code",
+      "norm_label": "rand",
+      "source_file": "src/data/test-data.ts",
+      "source_location": "L25"
+    },
+    {
+      "id": "src_data_test_data_recurring",
+      "label": "RECURRING",
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "export-import.ts",
+      "file_type": "code",
+      "norm_label": "recurring",
+      "source_file": "src/data/test-data.ts",
+      "source_location": "L123"
     },
     {
       "id": "src_logic_settings",
@@ -18832,158 +18898,26 @@
       "source_location": "L5"
     },
     {
-      "id": "src_data_defaults",
-      "label": "defaults.ts",
+      "id": "tests_support_fixtures",
+      "label": "fixtures.ts",
       "_origin": "ast",
       "community": 36,
-      "community_name": "shared.ts",
+      "community_name": "fixtures.ts",
       "file_type": "code",
-      "norm_label": "defaults.ts",
-      "source_file": "src/data/defaults.ts",
+      "norm_label": "fixtures.ts",
+      "source_file": "tests/support/fixtures.ts",
       "source_location": "L1"
     },
     {
-      "id": "src_data_defaults_default_categories",
-      "label": "DEFAULT_CATEGORIES",
+      "id": "tests_support_fixtures_store_names",
+      "label": "STORE_NAMES",
       "_origin": "ast",
       "community": 36,
-      "community_name": "shared.ts",
+      "community_name": "fixtures.ts",
       "file_type": "code",
-      "norm_label": "default_categories",
-      "source_file": "src/data/defaults.ts",
-      "source_location": "L16"
-    },
-    {
-      "id": "src_data_defaults_default_monthly_budgets",
-      "label": "DEFAULT_MONTHLY_BUDGETS",
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "shared.ts",
-      "file_type": "code",
-      "norm_label": "default_monthly_budgets",
-      "source_file": "src/data/defaults.ts",
-      "source_location": "L3"
-    },
-    {
-      "id": "src_data_export_import_export_version",
-      "label": "EXPORT_VERSION",
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "shared.ts",
-      "file_type": "code",
-      "norm_label": "export_version",
-      "source_file": "src/data/export-import.ts",
-      "source_location": "L17"
-    },
-    {
-      "id": "src_data_seed",
-      "label": "seed.ts",
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "shared.ts",
-      "file_type": "code",
-      "norm_label": "seed.ts",
-      "source_file": "src/data/seed.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_data_seed_seed_hash_key",
-      "label": "SEED_HASH_KEY",
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "shared.ts",
-      "file_type": "code",
-      "norm_label": "seed_hash_key",
-      "source_file": "src/data/seed.ts",
-      "source_location": "L14"
-    },
-    {
-      "id": "src_data_test_data",
-      "label": "test-data.ts",
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "shared.ts",
-      "file_type": "code",
-      "norm_label": "test-data.ts",
-      "source_file": "src/data/test-data.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_data_test_data_bank_blurb",
-      "label": "BANK_BLURB",
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "shared.ts",
-      "file_type": "code",
-      "norm_label": "bank_blurb",
-      "source_file": "src/data/test-data.ts",
-      "source_location": "L171"
-    },
-    {
-      "id": "src_data_test_data_categories",
-      "label": "CATEGORIES",
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "shared.ts",
-      "file_type": "code",
-      "norm_label": "categories",
-      "source_file": "src/data/test-data.ts",
-      "source_location": "L45"
-    },
-    {
-      "id": "src_data_test_data_daily",
-      "label": "DAILY",
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "shared.ts",
-      "file_type": "code",
-      "norm_label": "daily",
-      "source_file": "src/data/test-data.ts",
-      "source_location": "L68"
-    },
-    {
-      "id": "src_data_test_data_monthly_budgets",
-      "label": "MONTHLY_BUDGETS",
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "shared.ts",
-      "file_type": "code",
-      "norm_label": "monthly_budgets",
-      "source_file": "src/data/test-data.ts",
-      "source_location": "L53"
-    },
-    {
-      "id": "src_data_test_data_rand",
-      "label": "rand",
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "shared.ts",
-      "file_type": "code",
-      "norm_label": "rand",
-      "source_file": "src/data/test-data.ts",
-      "source_location": "L25"
-    },
-    {
-      "id": "src_data_test_data_recurring",
-      "label": "RECURRING",
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "shared.ts",
-      "file_type": "code",
-      "norm_label": "recurring",
-      "source_file": "src/data/test-data.ts",
-      "source_location": "L123"
-    },
-    {
-      "id": "src_logic_shared",
-      "label": "shared.ts",
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "shared.ts",
-      "file_type": "code",
-      "norm_label": "shared.ts",
-      "source_file": "src/logic/shared.ts",
-      "source_location": "L1"
+      "norm_label": "store_names",
+      "source_file": "tests/support/fixtures.ts",
+      "source_location": "L51"
     },
     {
       "id": "src_components_sheets_pending_statement_confirmation",
@@ -19727,7 +19661,7 @@
       "label": "navigation.e2e.ts",
       "_origin": "ast",
       "community": 46,
-      "community_name": "tests_support_fixtures_expect",
+      "community_name": "navigation.e2e.ts",
       "file_type": "code",
       "norm_label": "navigation.e2e.ts",
       "source_file": "tests/core/navigation.e2e.ts",
@@ -19738,7 +19672,7 @@
       "label": "TODO: the hang mechanism is inferred from a completion-less trace, not",
       "_origin": "ast",
       "community": 46,
-      "community_name": "tests_support_fixtures_expect",
+      "community_name": "navigation.e2e.ts",
       "file_type": "rationale",
       "norm_label": "todo: the hang mechanism is inferred from a completion-less trace, not",
       "source_file": "tests/core/navigation.e2e.ts",
@@ -20966,14 +20900,14 @@
       "source_location": "L1"
     },
     {
-      "id": "src_hooks_use_sync_status",
-      "label": "use-sync-status.ts",
+      "id": "src_logic_shared",
+      "label": "shared.ts",
       "_origin": "ast",
-      "community": 60,
-      "community_name": "sync/page.tsx",
+      "community": 61,
+      "community_name": "statement-rules.ts",
       "file_type": "code",
-      "norm_label": "use-sync-status.ts",
-      "source_file": "src/hooks/use-sync-status.ts",
+      "norm_label": "shared.ts",
+      "source_file": "src/logic/shared.ts",
       "source_location": "L1"
     },
     {
@@ -21701,6 +21635,39 @@
       "source_location": "L7"
     },
     {
+      "id": "tests_core_helpers_e2e",
+      "label": "core/helpers.e2e.ts",
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "@playwright/test",
+      "file_type": "code",
+      "norm_label": "core/helpers.e2e.ts",
+      "source_file": "tests/core/helpers.e2e.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "tests_core_helpers_e2e_october",
+      "label": "october",
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "@playwright/test",
+      "file_type": "code",
+      "norm_label": "october",
+      "source_file": "tests/core/helpers.e2e.ts",
+      "source_location": "L5"
+    },
+    {
+      "id": "tests_core_helpers_e2e_september",
+      "label": "september",
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "@playwright/test",
+      "file_type": "code",
+      "norm_label": "september",
+      "source_file": "tests/core/helpers.e2e.ts",
+      "source_location": "L6"
+    },
+    {
       "id": "tests_support_charts",
       "label": "charts.ts",
       "_origin": "ast",
@@ -21743,6 +21710,39 @@
       "norm_label": "overviewcharts",
       "source_file": "tests/support/charts.ts",
       "source_location": "L6"
+    },
+    {
+      "id": "tests_support_date_only",
+      "label": "date-only.ts",
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "@playwright/test",
+      "file_type": "code",
+      "norm_label": "date-only.ts",
+      "source_file": "tests/support/date-only.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "tests_support_date_only_revisions",
+      "label": "revisions",
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "@playwright/test",
+      "file_type": "code",
+      "norm_label": "revisions",
+      "source_file": "tests/support/date-only.ts",
+      "source_location": "L3"
+    },
+    {
+      "id": "tests_support_fixtures_test",
+      "label": "test",
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "@playwright/test",
+      "file_type": "code",
+      "norm_label": "test",
+      "source_file": "tests/support/fixtures.ts",
+      "source_location": "L31"
     },
     {
       "id": "ref_playwright_test",
@@ -23378,6 +23378,17 @@
       "source_location": "L5"
     },
     {
+      "id": "tests_support_fixtures_expect",
+      "label": "tests_support_fixtures_expect",
+      "community": 12,
+      "community_name": "editors.ts",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "tests_support_fixtures_expect",
+      "source_file": "",
+      "type": "external"
+    },
+    {
       "id": "ref_bun_test",
       "label": "ref_bun_test",
       "community": 2,
@@ -23407,17 +23418,6 @@
       "external": true,
       "file_type": "concept",
       "norm_label": "ref_node_url",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "tests_support_fixtures_expect",
-      "label": "tests_support_fixtures_expect",
-      "community": 46,
-      "community_name": "tests_support_fixtures_expect",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "tests_support_fixtures_expect",
       "source_file": "",
       "type": "external"
     },
@@ -36913,7 +36913,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/form/record-analytics-fields.tsx",
-      "source_location": "L42",
+      "source_location": "L47",
       "weight": 1.0
     },
     {
@@ -36925,7 +36925,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/form/record-analytics-fields.tsx",
-      "source_location": "L47",
+      "source_location": "L52",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_form_record_analytics_fields_recordanalyticsfields",
+      "target": "src_lib_analytics_canusedefaultmonthlybudget",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/form/record-analytics-fields.tsx",
+      "source_location": "L53",
       "weight": 1.0
     },
     {
@@ -36937,7 +36949,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/form/record-analytics-fields.tsx",
-      "source_location": "L61",
+      "source_location": "L69",
       "weight": 1.0
     },
     {
@@ -36949,7 +36961,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/form/record-analytics-fields.tsx",
-      "source_location": "L62",
+      "source_location": "L70",
       "weight": 1.0
     },
     {
@@ -36961,7 +36973,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/form/record-analytics-fields.tsx",
-      "source_location": "L72",
+      "source_location": "L80",
       "weight": 1.0
     },
     {
@@ -43297,7 +43309,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/data/export-import.ts",
-      "source_location": "L223",
+      "source_location": "L224",
       "weight": 1.0
     },
     {
@@ -43309,7 +43321,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/data/export-import.ts",
-      "source_location": "L233",
+      "source_location": "L234",
       "weight": 1.0
     },
     {
@@ -66588,6 +66600,18 @@
     },
     {
       "source": "src_components_form_record_analytics_fields",
+      "target": "src_logic_monthly_budgets_listmonthlybudgets",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/form/record-analytics-fields.tsx",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_form_record_analytics_fields",
       "target": "src_components_form_select_field_selectfield",
       "relation": "imports",
       "_origin": "ast",
@@ -66608,6 +66632,18 @@
       "context": "import",
       "source_file": "src/components/form/record-analytics-fields.tsx",
       "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_form_record_analytics_fields",
+      "target": "src_lib_analytics_canusedefaultmonthlybudget",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/form/record-analytics-fields.tsx",
+      "source_location": "L4",
       "weight": 1.0
     },
     {
@@ -66644,18 +66680,6 @@
       "context": "import",
       "source_file": "src/components/form/record-analytics-fields.tsx",
       "source_location": "L4",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_form_record_analytics_fields",
-      "target": "src_logic_monthly_budgets_listmonthlybudgets",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/components/form/record-analytics-fields.tsx",
-      "source_location": "L5",
       "weight": 1.0
     },
     {
@@ -74408,6 +74432,18 @@
       "context": "import",
       "source_file": "tests/core/editors.e2e.ts",
       "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_core_editors_e2e",
+      "target": "tests_support_data_getscenario",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "tests/core/editors.e2e.ts",
+      "source_location": "L3",
       "weight": 1.0
     },
     {
@@ -87944,6 +87980,31 @@
     },
     {
       "source": "src_components_form_record_analytics_fields",
+      "target": "src_logic_monthly_budgets",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/form/record-analytics-fields.tsx",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_form_record_analytics_fields",
+      "target": "ref_types",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/form/record-analytics-fields.tsx",
+      "source_location": "L11",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_form_record_analytics_fields",
       "target": "src_components_form_select_field",
       "relation": "imports_from",
       "_origin": "ast",
@@ -87976,31 +88037,6 @@
       "context": "import",
       "source_file": "src/components/form/record-analytics-fields.tsx",
       "source_location": "L4",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_form_record_analytics_fields",
-      "target": "src_logic_monthly_budgets",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/components/form/record-analytics-fields.tsx",
-      "source_location": "L5",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_form_record_analytics_fields",
-      "target": "ref_types",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/components/form/record-analytics-fields.tsx",
-      "source_location": "L6",
-      "type_only": true,
       "weight": 1.0
     },
     {
@@ -100636,7 +100672,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/form/record-analytics-fields.tsx",
-      "source_location": "L11",
+      "source_location": "L16",
       "weight": 1.0
     },
     {
@@ -104266,7 +104302,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/data/export-import.ts",
-      "source_location": "L222",
+      "source_location": "L223",
       "weight": 1.0
     },
     {
@@ -104277,7 +104313,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/data/export-import.ts",
-      "source_location": "L240",
+      "source_location": "L241",
       "weight": 1.0
     },
     {
@@ -104288,7 +104324,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/data/export-import.ts",
-      "source_location": "L250",
+      "source_location": "L251",
       "weight": 1.0
     },
     {
@@ -115518,5 +115554,5 @@
       "source_file": "tests/README.md"
     }
   ],
-  "built_at_commit": "28f12ac4d67b79ba9313ffce320abd0a1ab3bf8e"
+  "built_at_commit": "5744845e18c15ed711ce0086eebff4bce53d207f"
 }

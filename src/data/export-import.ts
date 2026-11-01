@@ -157,12 +157,13 @@ export function parseImportFile(text: string): FinpointExport {
 			((treatment.kind === "category" && Object.keys(treatment).length === 1) ||
 				(treatment.kind === "explicit" &&
 					Object.keys(treatment).length === 2 &&
+					typeof treatment.value === "string" &&
 					["automatic", "income", "spending", "saving_investment", "neutral"].includes(
-						String(treatment.value),
+						treatment.value,
 					)))
 		const validBudget =
 			budget &&
-			((["category", "unbudgeted"].includes(String(budget.kind)) &&
+			(((budget.kind === "category" || budget.kind === "unbudgeted") &&
 				Object.keys(budget).length === 1) ||
 				(budget.kind === "explicit" &&
 					Object.keys(budget).length === 2 &&

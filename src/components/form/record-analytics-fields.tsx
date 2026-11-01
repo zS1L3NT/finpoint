@@ -1,7 +1,12 @@
 import { useLiveQuery } from "dexie-react-hooks"
 import SelectField from "@/components/form/select-field"
 import { FieldGroup } from "@/components/ui/field"
-import { canUseMonthlyBudget, TREATMENTS, treatmentLabel } from "@/lib/analytics"
+import {
+	canUseDefaultMonthlyBudget,
+	canUseMonthlyBudget,
+	TREATMENTS,
+	treatmentLabel,
+} from "@/lib/analytics"
 import { listMonthlyBudgets } from "@/logic/monthly-budgets"
 import type { AnalyticsTreatment } from "@/types"
 
@@ -45,8 +50,11 @@ export default function RecordAnalyticsFields({
 	const monthlyBudgets = monthlyBudgetsProp ?? queriedMonthlyBudgets
 	const effectiveTreatment = (treatment || categoryTreatment || "automatic") as AnalyticsTreatment
 	const monthlyBudgetEligible = canUseMonthlyBudget(effectiveTreatment, amount)
+	const categoryBudgetId = canUseDefaultMonthlyBudget(categoryTreatment)
+		? categoryMonthlyBudgetId
+		: null
 	const categoryMonthlyBudget = monthlyBudgets?.find(
-		monthlyBudget => monthlyBudget.id === categoryMonthlyBudgetId,
+		monthlyBudget => monthlyBudget.id === categoryBudgetId,
 	)
 	const treatmentValue =
 		treatment || (categoryTreatment !== undefined ? CATEGORY_DEFAULT : "automatic")
@@ -95,7 +103,7 @@ export default function RecordAnalyticsFields({
 								? [
 										{
 											value: CATEGORY_DEFAULT,
-											label: `Category default · ${categoryMonthlyBudget?.name ?? (categoryMonthlyBudgetId ? "Default monthly budget" : "Unbudgeted")}`,
+											label: `Category default · ${categoryMonthlyBudget?.name ?? (categoryBudgetId ? "Default monthly budget" : "Unbudgeted")}`,
 										},
 									]
 								: []),
@@ -116,7 +124,7 @@ export default function RecordAnalyticsFields({
 
 							onMonthlyBudgetChange(
 								value === CATEGORY_DEFAULT
-									? (categoryMonthlyBudgetId ?? "")
+									? (categoryBudgetId ?? "")
 									: value === UNBUDGETED
 										? ""
 										: value,

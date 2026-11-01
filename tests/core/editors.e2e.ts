@@ -1,6 +1,6 @@
 import type { Locator, Page } from "@playwright/test"
 import { expectPointerCursor, expectVisibleBackdrop } from "../support/assertions"
-import { IDS, statementRules } from "../support/data"
+import { getScenario, IDS, statementRules } from "../support/data"
 import {
 	account,
 	budget,
@@ -1006,4 +1006,47 @@ test("Monthly Records editor: saved title appears immediately and survives reloa
 	await expect(
 		page.getByRole("button", { name: "Edit Updated groceries", exact: true }),
 	).toBeVisible()
+})
+
+test("Record editor: inherited budget hides an ineligible Category default", async ({ page }) => {
+	const tables = getScenario("populated").tables
+	await seedWorkspace(page, "populated", {
+		categories: tables.categories.map(category =>
+			category.id === IDS.categories.groceries
+				? {
+						...category,
+						analytics_treatment: "neutral",
+						default_monthly_budget_id: IDS.monthlyBudgets.daily,
+					}
+				: category,
+		),
+		records: [
+			{
+				...record,
+				title: "Dormant budget regression",
+				category_id: IDS.categories.groceries,
+				treatment_choice: { kind: "explicit", value: "spending" },
+				monthly_budget_choice: { kind: "category" },
+			},
+		],
+	})
+	await page.goto(`/records/${record.id}`)
+	await page.getByRole("button", { name: "Edit Record", exact: true }).click()
+	const dialog = page.getByRole("dialog", { name: "Edit Record", exact: true })
+	await expect(dialog.getByLabel("Monthly budget", { exact: true })).toContainText(
+		"Category default · Unbudgeted",
+	)
+	await select(page, dialog, "Treatment", "Transfer / excluded")
+	await expect(dialog.getByLabel("Monthly budget", { exact: true })).toHaveCount(0)
+	await select(page, dialog, "Treatment", "Spending")
+	await expect(dialog.getByLabel("Monthly budget", { exact: true })).toContainText(
+		"Category default · Unbudgeted",
+	)
+	await dialog.getByRole("button", { name: "Save changes", exact: true }).click()
+	await expect(dialog).not.toBeVisible()
+	await page.reload()
+	await page.getByRole("button", { name: "Edit Record", exact: true }).click()
+	await expect(dialog.getByLabel("Monthly budget", { exact: true })).toContainText(
+		"Category default · Unbudgeted",
+	)
 })
