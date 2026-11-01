@@ -928,7 +928,7 @@ test("Record facets: long Monthly Budget option picks and clears, Category histo
 		await expect(chart.getByText("No spending", { exact: true })).toBeVisible()
 		await chart.getByText(/months unavailable$/).click()
 		await expect(chart).toContainText("No recorded activity; coverage unknown")
-		await page.goto("/?month=October&year=2026&scope=other")
+		await page.goto("/?month=October&year=2026&scope=t1-mb-travel")
 		await expect(chart).toContainText("No spending in the available months.")
 	})
 })

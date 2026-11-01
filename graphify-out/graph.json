@@ -23510,24 +23510,24 @@
       "type": "external"
     },
     {
-      "id": "next_dev_types_root_params_d",
-      "label": "next_dev_types_root_params_d",
+      "id": "next_types_root_params_d",
+      "label": "next_types_root_params_d",
       "community": 78,
       "community_name": "next-env.d.ts",
       "external": true,
       "file_type": "concept",
-      "norm_label": "next_dev_types_root_params_d",
+      "norm_label": "next_types_root_params_d",
       "source_file": "",
       "type": "external"
     },
     {
-      "id": "next_dev_types_routes_d",
-      "label": "next_dev_types_routes_d",
+      "id": "next_types_routes_d",
+      "label": "next_types_routes_d",
       "community": 78,
       "community_name": "next-env.d.ts",
       "external": true,
       "file_type": "concept",
-      "norm_label": "next_dev_types_routes_d",
+      "norm_label": "next_types_routes_d",
       "source_file": "",
       "type": "external"
     },
@@ -83836,7 +83836,7 @@
     },
     {
       "source": "next_env_d",
-      "target": "next_dev_types_routes_d",
+      "target": "next_types_routes_d",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -83848,7 +83848,7 @@
     },
     {
       "source": "next_env_d",
-      "target": "next_dev_types_root_params_d",
+      "target": "next_types_root_params_d",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -115435,5 +115435,5 @@
       "source_file": "tests/README.md"
     }
   ],
-  "built_at_commit": "7e3b45f50b6ab8628099af547c30aa9784d7d95e"
+  "built_at_commit": "035b0792f63d3cb62ae60bd51a7acb9b9855b7b4"
 }
