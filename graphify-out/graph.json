@@ -2390,210 +2390,6 @@
       "source_location": "L33"
     },
     {
-      "id": "tests_core_ledger_e2e_collecttests",
-      "label": "collectTests()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "collectTests",
-      "file_type": "code",
-      "norm_label": "collecttests()",
-      "source_file": "tests/core/ledger.e2e.ts",
-      "source_location": "L138"
-    },
-    {
-      "id": "tests_core_ledger_e2e_collecttests_conditionbranch",
-      "label": "conditionBranch()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "collectTests",
-      "file_type": "code",
-      "norm_label": "conditionbranch()",
-      "source_file": "tests/core/ledger.e2e.ts",
-      "source_location": "L266"
-    },
-    {
-      "id": "tests_core_ledger_e2e_collecttests_detailstags",
-      "label": "detailsTags()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "collectTests",
-      "file_type": "code",
-      "norm_label": "detailstags()",
-      "source_file": "tests/core/ledger.e2e.ts",
-      "source_location": "L299"
-    },
-    {
-      "id": "tests_core_ledger_e2e_collecttests_disabled",
-      "label": "disabled()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "collectTests",
-      "file_type": "code",
-      "norm_label": "disabled()",
-      "source_file": "tests/core/ledger.e2e.ts",
-      "source_location": "L373"
-    },
-    {
-      "id": "tests_core_ledger_e2e_collecttests_filefunctions",
-      "label": "fileFunctions()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "collectTests",
-      "file_type": "code",
-      "norm_label": "filefunctions()",
-      "source_file": "tests/core/ledger.e2e.ts",
-      "source_location": "L337"
-    },
-    {
-      "id": "tests_core_ledger_e2e_collecttests_mentionsmotion",
-      "label": "mentionsMotion()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "collectTests",
-      "file_type": "code",
-      "norm_label": "mentionsmotion()",
-      "source_file": "tests/core/ledger.e2e.ts",
-      "source_location": "L357"
-    },
-    {
-      "id": "tests_core_ledger_e2e_collecttests_record",
-      "label": "record()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "collectTests",
-      "file_type": "code",
-      "norm_label": "record()",
-      "source_file": "tests/core/ledger.e2e.ts",
-      "source_location": "L504"
-    },
-    {
-      "id": "tests_core_ledger_e2e_collecttests_splittestcallee",
-      "label": "splitTestCallee()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "collectTests",
-      "file_type": "code",
-      "norm_label": "splittestcallee()",
-      "source_file": "tests/core/ledger.e2e.ts",
-      "source_location": "L159"
-    },
-    {
-      "id": "tests_core_ledger_e2e_collecttests_tagvalues",
-      "label": "tagValues()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "collectTests",
-      "file_type": "code",
-      "norm_label": "tagvalues()",
-      "source_file": "tests/core/ledger.e2e.ts",
-      "source_location": "L323"
-    },
-    {
-      "id": "tests_core_ledger_e2e_collecttests_titleof",
-      "label": "titleOf()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "collectTests",
-      "file_type": "code",
-      "norm_label": "titleof()",
-      "source_file": "tests/core/ledger.e2e.ts",
-      "source_location": "L500"
-    },
-    {
-      "id": "tests_core_ledger_e2e_collecttests_unwrap",
-      "label": "unwrap()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "collectTests",
-      "file_type": "code",
-      "norm_label": "unwrap()",
-      "source_file": "tests/core/ledger.e2e.ts",
-      "source_location": "L250"
-    },
-    {
-      "id": "tests_core_ledger_e2e_collecttests_value",
-      "label": "value()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "collectTests",
-      "file_type": "code",
-      "norm_label": "value()",
-      "source_file": "tests/core/ledger.e2e.ts",
-      "source_location": "L190"
-    },
-    {
-      "id": "tests_core_ledger_e2e_collecttests_visit",
-      "label": "visit()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "collectTests",
-      "file_type": "code",
-      "norm_label": "visit()",
-      "source_file": "tests/core/ledger.e2e.ts",
-      "source_location": "L387"
-    },
-    {
-      "id": "tests_core_ledger_e2e_collecttests_visitcallback",
-      "label": "visitCallback()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "collectTests",
-      "file_type": "code",
-      "norm_label": "visitcallback()",
-      "source_file": "tests/core/ledger.e2e.ts",
-      "source_location": "L488"
-    },
-    {
-      "id": "tests_core_ledger_e2e_importsmotionmodule",
-      "label": "importsMotionModule()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "collectTests",
-      "file_type": "code",
-      "norm_label": "importsmotionmodule()",
-      "source_file": "tests/core/ledger.e2e.ts",
-      "source_location": "L1161"
-    },
-    {
-      "id": "tests_core_ledger_e2e_importsmotionmodule_targetsmotion",
-      "label": "targetsMotion()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "collectTests",
-      "file_type": "code",
-      "norm_label": "targetsmotion()",
-      "source_file": "tests/core/ledger.e2e.ts",
-      "source_location": "L1163"
-    },
-    {
-      "id": "tests_core_ledger_e2e_importsmotionmodule_visit",
-      "label": "visit()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "collectTests",
-      "file_type": "code",
-      "norm_label": "visit()",
-      "source_file": "tests/core/ledger.e2e.ts",
-      "source_location": "L1167"
-    },
-    {
       "id": "app_budgets_page_budgetcard",
       "label": "BudgetCard()",
       "_callable": true,
@@ -5906,6 +5702,174 @@
       "source_location": "L30"
     },
     {
+      "id": "tests_core_ledger_e2e_collecttests",
+      "label": "collectTests()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ledger.e2e.ts",
+      "file_type": "code",
+      "norm_label": "collecttests()",
+      "source_file": "tests/core/ledger.e2e.ts",
+      "source_location": "L138"
+    },
+    {
+      "id": "tests_core_ledger_e2e_collecttests_conditionbranch",
+      "label": "conditionBranch()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ledger.e2e.ts",
+      "file_type": "code",
+      "norm_label": "conditionbranch()",
+      "source_file": "tests/core/ledger.e2e.ts",
+      "source_location": "L266"
+    },
+    {
+      "id": "tests_core_ledger_e2e_collecttests_detailstags",
+      "label": "detailsTags()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ledger.e2e.ts",
+      "file_type": "code",
+      "norm_label": "detailstags()",
+      "source_file": "tests/core/ledger.e2e.ts",
+      "source_location": "L299"
+    },
+    {
+      "id": "tests_core_ledger_e2e_collecttests_disabled",
+      "label": "disabled()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ledger.e2e.ts",
+      "file_type": "code",
+      "norm_label": "disabled()",
+      "source_file": "tests/core/ledger.e2e.ts",
+      "source_location": "L373"
+    },
+    {
+      "id": "tests_core_ledger_e2e_collecttests_filefunctions",
+      "label": "fileFunctions()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ledger.e2e.ts",
+      "file_type": "code",
+      "norm_label": "filefunctions()",
+      "source_file": "tests/core/ledger.e2e.ts",
+      "source_location": "L337"
+    },
+    {
+      "id": "tests_core_ledger_e2e_collecttests_mentionsmotion",
+      "label": "mentionsMotion()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ledger.e2e.ts",
+      "file_type": "code",
+      "norm_label": "mentionsmotion()",
+      "source_file": "tests/core/ledger.e2e.ts",
+      "source_location": "L357"
+    },
+    {
+      "id": "tests_core_ledger_e2e_collecttests_record",
+      "label": "record()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ledger.e2e.ts",
+      "file_type": "code",
+      "norm_label": "record()",
+      "source_file": "tests/core/ledger.e2e.ts",
+      "source_location": "L504"
+    },
+    {
+      "id": "tests_core_ledger_e2e_collecttests_splittestcallee",
+      "label": "splitTestCallee()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ledger.e2e.ts",
+      "file_type": "code",
+      "norm_label": "splittestcallee()",
+      "source_file": "tests/core/ledger.e2e.ts",
+      "source_location": "L159"
+    },
+    {
+      "id": "tests_core_ledger_e2e_collecttests_tagvalues",
+      "label": "tagValues()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ledger.e2e.ts",
+      "file_type": "code",
+      "norm_label": "tagvalues()",
+      "source_file": "tests/core/ledger.e2e.ts",
+      "source_location": "L323"
+    },
+    {
+      "id": "tests_core_ledger_e2e_collecttests_titleof",
+      "label": "titleOf()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ledger.e2e.ts",
+      "file_type": "code",
+      "norm_label": "titleof()",
+      "source_file": "tests/core/ledger.e2e.ts",
+      "source_location": "L500"
+    },
+    {
+      "id": "tests_core_ledger_e2e_collecttests_unwrap",
+      "label": "unwrap()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ledger.e2e.ts",
+      "file_type": "code",
+      "norm_label": "unwrap()",
+      "source_file": "tests/core/ledger.e2e.ts",
+      "source_location": "L250"
+    },
+    {
+      "id": "tests_core_ledger_e2e_collecttests_value",
+      "label": "value()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ledger.e2e.ts",
+      "file_type": "code",
+      "norm_label": "value()",
+      "source_file": "tests/core/ledger.e2e.ts",
+      "source_location": "L190"
+    },
+    {
+      "id": "tests_core_ledger_e2e_collecttests_visit",
+      "label": "visit()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ledger.e2e.ts",
+      "file_type": "code",
+      "norm_label": "visit()",
+      "source_file": "tests/core/ledger.e2e.ts",
+      "source_location": "L387"
+    },
+    {
+      "id": "tests_core_ledger_e2e_collecttests_visitcallback",
+      "label": "visitCallback()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ledger.e2e.ts",
+      "file_type": "code",
+      "norm_label": "visitcallback()",
+      "source_file": "tests/core/ledger.e2e.ts",
+      "source_location": "L488"
+    },
+    {
       "id": "tests_core_ledger_e2e_declaredtests",
       "label": "declaredTests()",
       "_callable": true,
@@ -5928,6 +5892,42 @@
       "norm_label": "files()",
       "source_file": "tests/core/ledger.e2e.ts",
       "source_location": "L60"
+    },
+    {
+      "id": "tests_core_ledger_e2e_importsmotionmodule",
+      "label": "importsMotionModule()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ledger.e2e.ts",
+      "file_type": "code",
+      "norm_label": "importsmotionmodule()",
+      "source_file": "tests/core/ledger.e2e.ts",
+      "source_location": "L1161"
+    },
+    {
+      "id": "tests_core_ledger_e2e_importsmotionmodule_targetsmotion",
+      "label": "targetsMotion()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ledger.e2e.ts",
+      "file_type": "code",
+      "norm_label": "targetsmotion()",
+      "source_file": "tests/core/ledger.e2e.ts",
+      "source_location": "L1163"
+    },
+    {
+      "id": "tests_core_ledger_e2e_importsmotionmodule_visit",
+      "label": "visit()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ledger.e2e.ts",
+      "file_type": "code",
+      "norm_label": "visit()",
+      "source_file": "tests/core/ledger.e2e.ts",
+      "source_location": "L1167"
     },
     {
       "id": "tests_core_ledger_e2e_ledgerdescription",
@@ -17215,17 +17215,6 @@
       "source_location": "L17"
     },
     {
-      "id": "ref_jose",
-      "label": "jose",
-      "_origin": "ast",
-      "community": 24,
-      "community_name": "package.json",
-      "file_type": "concept",
-      "norm_label": "jose",
-      "source_file": "package.json",
-      "source_location": "L29"
-    },
-    {
       "id": "ref_lightningcss_linux_x64_gnu",
       "label": "lightningcss-linux-x64-gnu",
       "_origin": "ast",
@@ -17424,17 +17413,6 @@
       "source_location": "L54"
     },
     {
-      "id": "ref_typescript",
-      "label": "typescript",
-      "_origin": "ast",
-      "community": 24,
-      "community_name": "package.json",
-      "file_type": "concept",
-      "norm_label": "typescript",
-      "source_file": "package.json",
-      "source_location": "L43"
-    },
-    {
       "id": "tests_component_inventory",
       "label": "component-inventory.ts",
       "_origin": "ast",
@@ -17598,6 +17576,72 @@
       "norm_label": "root",
       "source_file": "tests/core/ledger.e2e.ts",
       "source_location": "L20"
+    },
+    {
+      "id": "tests_harness_vite_config",
+      "label": "vite.config.ts",
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ledger.e2e.ts",
+      "file_type": "code",
+      "norm_label": "vite.config.ts",
+      "source_file": "tests/harness/vite.config.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "tests_harness_vite_config_harnessdir",
+      "label": "harnessDir",
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ledger.e2e.ts",
+      "file_type": "code",
+      "norm_label": "harnessdir",
+      "source_file": "tests/harness/vite.config.ts",
+      "source_location": "L6"
+    },
+    {
+      "id": "tests_harness_vite_config_reporoot",
+      "label": "repoRoot",
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ledger.e2e.ts",
+      "file_type": "code",
+      "norm_label": "reporoot",
+      "source_file": "tests/harness/vite.config.ts",
+      "source_location": "L7"
+    },
+    {
+      "id": "ref_typescript",
+      "label": "typescript",
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ledger.e2e.ts",
+      "file_type": "concept",
+      "norm_label": "typescript",
+      "source_file": "package.json",
+      "source_location": "L43"
+    },
+    {
+      "id": "ref_vite",
+      "label": "vite",
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ledger.e2e.ts",
+      "file_type": "concept",
+      "norm_label": "vite",
+      "source_file": "package.json",
+      "source_location": "L58"
+    },
+    {
+      "id": "ref_vitejs_plugin_react",
+      "label": "@vitejs/plugin-react",
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ledger.e2e.ts",
+      "file_type": "concept",
+      "norm_label": "@vitejs/plugin-react",
+      "source_file": "package.json",
+      "source_location": "L55"
     },
     {
       "id": "biome_correctness_noconstantcondition",
@@ -18942,61 +18986,6 @@
       "source_location": "L1"
     },
     {
-      "id": "tests_harness_vite_config",
-      "label": "vite.config.ts",
-      "_origin": "ast",
-      "community": 37,
-      "community_name": "vite.config.ts",
-      "file_type": "code",
-      "norm_label": "vite.config.ts",
-      "source_file": "tests/harness/vite.config.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "tests_harness_vite_config_harnessdir",
-      "label": "harnessDir",
-      "_origin": "ast",
-      "community": 37,
-      "community_name": "vite.config.ts",
-      "file_type": "code",
-      "norm_label": "harnessdir",
-      "source_file": "tests/harness/vite.config.ts",
-      "source_location": "L6"
-    },
-    {
-      "id": "tests_harness_vite_config_reporoot",
-      "label": "repoRoot",
-      "_origin": "ast",
-      "community": 37,
-      "community_name": "vite.config.ts",
-      "file_type": "code",
-      "norm_label": "reporoot",
-      "source_file": "tests/harness/vite.config.ts",
-      "source_location": "L7"
-    },
-    {
-      "id": "ref_vite",
-      "label": "vite",
-      "_origin": "ast",
-      "community": 37,
-      "community_name": "vite.config.ts",
-      "file_type": "concept",
-      "norm_label": "vite",
-      "source_file": "package.json",
-      "source_location": "L58"
-    },
-    {
-      "id": "ref_vitejs_plugin_react",
-      "label": "@vitejs/plugin-react",
-      "_origin": "ast",
-      "community": 37,
-      "community_name": "vite.config.ts",
-      "file_type": "concept",
-      "norm_label": "@vitejs/plugin-react",
-      "source_file": "package.json",
-      "source_location": "L55"
-    },
-    {
       "id": "src_components_sheets_pending_statement_confirmation",
       "label": "pending-statement-confirmation.tsx",
       "_origin": "ast",
@@ -19248,6 +19237,17 @@
       "norm_label": "hits",
       "source_file": "src/lib/auth-vault.ts",
       "source_location": "L44"
+    },
+    {
+      "id": "ref_jose",
+      "label": "jose",
+      "_origin": "ast",
+      "community": 41,
+      "community_name": "auth-vault.ts",
+      "file_type": "concept",
+      "norm_label": "jose",
+      "source_file": "package.json",
+      "source_location": "L29"
     },
     {
       "id": "app_accounts_id_page",
@@ -22083,7 +22083,7 @@
       "file_type": "code",
       "norm_label": "dbs_valid",
       "source_file": "tests/core/workflows.e2e.ts",
-      "source_location": "L801"
+      "source_location": "L800"
     },
     {
       "id": "style_react_typescript",
@@ -23391,8 +23391,8 @@
     {
       "id": "ref_node_path",
       "label": "ref_node_path",
-      "community": 37,
-      "community_name": "vite.config.ts",
+      "community": 25,
+      "community_name": "ledger.e2e.ts",
       "external": true,
       "file_type": "concept",
       "norm_label": "ref_node_path",
@@ -23402,8 +23402,8 @@
     {
       "id": "ref_node_url",
       "label": "ref_node_url",
-      "community": 37,
-      "community_name": "vite.config.ts",
+      "community": 25,
+      "community_name": "ledger.e2e.ts",
       "external": true,
       "file_type": "concept",
       "norm_label": "ref_node_url",
@@ -23466,24 +23466,24 @@
       "type": "external"
     },
     {
-      "id": "next_dev_types_root_params_d",
-      "label": "next_dev_types_root_params_d",
+      "id": "ref_next_types_root_params_d_ts",
+      "label": "ref_next_types_root_params_d_ts",
       "community": 78,
       "community_name": "next-env.d.ts",
       "external": true,
       "file_type": "concept",
-      "norm_label": "next_dev_types_root_params_d",
+      "norm_label": "ref_next_types_root_params_d_ts",
       "source_file": "",
       "type": "external"
     },
     {
-      "id": "next_dev_types_routes_d",
-      "label": "next_dev_types_routes_d",
+      "id": "ref_next_types_routes_d_ts",
+      "label": "ref_next_types_routes_d_ts",
       "community": 78,
       "community_name": "next-env.d.ts",
       "external": true,
       "file_type": "concept",
-      "norm_label": "next_dev_types_routes_d",
+      "norm_label": "ref_next_types_routes_d_ts",
       "source_file": "",
       "type": "external"
     },
@@ -84004,7 +84004,7 @@
     },
     {
       "source": "next_env_d",
-      "target": "next_dev_types_routes_d",
+      "target": "ref_next_types_routes_d_ts",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -84016,7 +84016,7 @@
     },
     {
       "source": "next_env_d",
-      "target": "next_dev_types_root_params_d",
+      "target": "ref_next_types_root_params_d_ts",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -109799,7 +109799,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tests/core/workflows.e2e.ts",
-      "source_location": "L801",
+      "source_location": "L800",
       "weight": 1.0
     },
     {
@@ -115518,5 +115518,5 @@
       "source_file": "tests/README.md"
     }
   ],
-  "built_at_commit": "c740b0d380557f0c3cd26c23639c96ea4392a87a"
+  "built_at_commit": "f698a15cae0f8760ed270c615583a66334cbdb98"
 }

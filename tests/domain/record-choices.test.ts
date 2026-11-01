@@ -273,3 +273,69 @@ test("old backup import converts to choices and validates", async () => {
 		expect("analytics_treatment" in row).toBe(false)
 	}
 })
+
+test("version eight upgrade converts to choices and preserves clean and dirty Drive baselines", async () => {
+	await setupBudgets()
+	await createCategory({ name: "Food", icon: "x", color: "#123", analytics_treatment: "spending", default_monthly_budget_id: "daily" })
+	await createRecord({ title: "Lunch", amount: -10, datetime: "2026-10-01T12:00", category_id: "food" })
+	// Taxi-like: category-origin automatic that disagrees with current category
+	await db.categories.add({
+		id: "taxi",
+		name: "Taxi",
+		icon: "x",
+		color: "#123",
+		parent_category_id: null,
+		analytics_treatment: "saving_investment",
+		default_monthly_budget_id: null,
+	})
+	await db.records.add({
+		id: "taxi-1",
+		title: "Taxi",
+		people: null,
+		location: null,
+		description: null,
+		datetime: "2026-07-24 12:00",
+		amount: -20,
+		category_id: "taxi",
+		treatment_choice: { kind: "category" },
+		monthly_budget_choice: { kind: "category" },
+		revision: 1,
+	} as never)
+	for (const clean of [true, false]) {
+		const backup = await exportData()
+		// Simulate v8 shape: choices -> legacy resolved+source
+		const tables = {
+			...backup.tables,
+			records: (backup.tables.records as Record<string, unknown>[]).map(row => {
+				const { treatment_choice, monthly_budget_choice, ...rest } = row
+				const tc = treatment_choice as { kind: string; value?: string }
+				const bc = monthly_budget_choice as { kind: string; id?: string }
+				// Taxi row keeps old copied automatic even though category is saving/investment
+				const isTaxi = (row as { id: string }).id === "taxi-1"
+				return {
+					...rest,
+					analytics_treatment: isTaxi ? "automatic" : tc.kind === "explicit" ? tc.value : "spending",
+					analytics_treatment_source: tc.kind === "explicit" ? "manual" : "category",
+					monthly_budget_id: bc.kind === "explicit" ? bc.id : (row as { id: string }).id === "lunch" ? "daily" : null,
+					monthly_budget_source: bc.kind === "category" ? "category" : bc.kind === "explicit" ? "manual" : null,
+				}
+			}),
+		}
+		const baseline = clean ? await hashSnapshot({ settings: backup.settings, tables }) : "dirty"
+		const schema = Object.fromEntries(db.tables.map(t => [t.name, [t.schema.primKey.src, ...t.schema.indexes.map(i => i.src)].join(",")]))
+		await db.delete()
+		const old = new Dexie("finpoint")
+		old.version(8).stores(schema)
+		for (const [name, rows] of Object.entries(tables))
+			if ((rows as unknown[]).length) await old.table(name).bulkAdd(rows as never[])
+		await old.table("meta").put({ key: "drive_last_hash", value: baseline })
+		old.close()
+		await db.open()
+		// Converted rows use choices, Taxi follows current category
+		const taxi = await db.records.get("taxi-1")
+		expect(taxi?.treatment_choice).toEqual({ kind: "category" })
+		const resolved = resolveRecordChoices(taxi as never, await db.categories.get("taxi"))
+		expect(resolved.analytics_treatment).toBe("saving_investment")
+		expect((await db.meta.get("drive_last_hash"))?.value).toBe(clean ? await hashSnapshot(await exportData()) : baseline)
+	}
+})

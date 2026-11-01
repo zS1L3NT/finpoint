@@ -1,22 +1,21 @@
 # Graph Report - t3-812f2e1b  (2026-11-01)
 
 ## Corpus Check
-- 250 files · ~228,514 words
+- 250 files · ~228,853 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 9 file(s) not represented in the graph (top: (none) 5, .example 1, .lock 1)
 
 ## Summary
-- 1942 nodes · 7795 edges · 101 communities (90 shown, 11 thin omitted)
+- 1942 nodes · 7795 edges · 99 communities (88 shown, 11 thin omitted)
 - Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 127 edges (avg confidence: 0.84)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `c740b0d3`
+- Built from commit: `f698a15c`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
-- collectTests
 - Button
 - duplicates.test.ts
 - Tests README
@@ -53,7 +52,6 @@
 - export-import.ts
 - components.json
 - shared.ts
-- vite.config.ts
 - react
 - types.d.ts
 - Monthly Budget
@@ -151,11 +149,7 @@
 - **Test group to gate to merged report flow** — github_workflows_ci_core_group, github_workflows_ci_animations_group, github_workflows_ci_core, github_workflows_ci_animations, github_workflows_ci_blob_report_merge [EXTRACTED 1.00]
 - **Every browser test file joins exactly one CI group, enforced by the ledger** — tests_readme_behaviour_ledger, tests_readme_ci_groups, github_workflows_ci_core_group, github_workflows_ci_animations_group, agents_verification_rules [INFERRED 0.95]
 
-## Communities (101 total, 11 thin omitted)
-
-### Community 0 - "collectTests"
-Cohesion: 0.28
-Nodes (16): collectTests(), conditionBranch(), detailsTags(), disabled(), mentionsMotion(), record(), splitTestCallee(), tagValues() (+8 more)
+## Communities (99 total, 11 thin omitted)
 
 ### Community 1 - "Button"
 Cohesion: 0.07
@@ -251,11 +245,11 @@ Nodes (28): suspicious, noAssignInExpressions, noAsyncPromiseExecutor, noCatchAs
 
 ### Community 24 - "package.json"
 Cohesion: 0.07
-Nodes (28): private, $schema, type, babel-plugin-react-compiler, @biomejs/biome, clsx, cmdk, @fontsource-variable/inter (+20 more)
+Nodes (26): private, $schema, type, babel-plugin-react-compiler, @biomejs/biome, clsx, cmdk, @fontsource-variable/inter (+18 more)
 
 ### Community 25 - "ledger.e2e.ts"
-Cohesion: 0.11
-Nodes (24): behaviourCoverage, componentInventory, facetNotApplicable, InventoryEntry, notApplicable, openFacets, RouteEntry, routeInventory (+16 more)
+Cohesion: 0.07
+Nodes (45): typescript, vite, @vitejs/plugin-react, behaviourCoverage, componentInventory, facetNotApplicable, InventoryEntry, notApplicable (+37 more)
 
 ### Community 26 - "correctness"
 Cohesion: 0.08
@@ -301,10 +295,6 @@ Nodes (21): aliases, components, hooks, lib, ui, utils, iconLibrary, menuAccent 
 Cohesion: 0.15
 Nodes (18): DEFAULT_CATEGORIES, DEFAULT_MONTHLY_BUDGETS, EXPORT_VERSION, FinpointExport, SEED_HASH_KEY, BANK_BLURB, between(), CATEGORIES (+10 more)
 
-### Community 37 - "vite.config.ts"
-Cohesion: 0.29
-Nodes (4): vite, @vitejs/plugin-react, harnessDir, repoRoot
-
 ### Community 38 - "react"
 Cohesion: 0.20
 Nodes (26): react, PendingStatementConfirmationSheet(), RecordSearchSheet(), StatementSearchSheet(), AmountFilter(), AmountRange, COMPARISONS, describe() (+18 more)
@@ -318,8 +308,8 @@ Cohesion: 0.18
 Nodes (16): CONTEXT.md (domain vocabulary), Account, Allocation, Budget, Category, Duplicate Statement, Finpoint Domain Glossary, Monthly Budget (+8 more)
 
 ### Community 41 - "auth-vault.ts"
-Cohesion: 0.32
-Nodes (13): POST(), POST(), POST(), AUTH_COOKIE_NAME, authCookie(), authCookieConfig(), clientIp(), encryptionKey() (+5 more)
+Cohesion: 0.29
+Nodes (14): POST(), POST(), POST(), jose, AUTH_COOKIE_NAME, authCookie(), authCookieConfig(), clientIp() (+6 more)
 
 ### Community 42 - "utils.ts"
 Cohesion: 0.13
@@ -522,16 +512,16 @@ Nodes (23): CategoriesPage(), CategoryDialogState, CategoryTile(), SECTIONS, nex
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `cn()` connect `cn` to `Button`, `primitives.tsx`, `lib/motion.ts`, `app-sidebar.tsx`, `importer/page.tsx`, `(month)/page.tsx`, `spending-calendar.tsx`, `record-editor.tsx`, `react`, `utils.ts`, `formatCurrency`, `trend-chart.tsx`, `pagination.tsx`, `monthly/page.tsx`, `icon.tsx`, `sync/page.tsx`, `combobox.tsx`, `select.tsx`, `radix-ui`, `luxon`, `lucide-react`, `next`?**
-  _High betweenness centrality (0.100) - this node is a cross-community bridge._
+  _High betweenness centrality (0.099) - this node is a cross-community bridge._
 - **What connects `@fontsource-variable/inter`, `shadcn`, `tailwindcss` to the rest of the system?**
   _83 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Button` be split into smaller, more focused modules?**
   _Cohesion score 0.06545052515201769 - nodes in this community are weakly interconnected._
-- **Why does `src/data/* (persistence, migrations, seeding, backup serialization, Drive storage)` connect `src/data/* (persistence, migrations, seeding, backup serialization, Drive storage)` to `providers.tsx`?**
-  _High betweenness centrality (0.072) - this node is a cross-community bridge._
+- **Why does `react` connect `react` to `Button`, `cn`, `primitives.tsx`, `use-appearance.tsx`, `lib/motion.ts`, `app-sidebar.tsx`, `importer/page.tsx`, `(month)/page.tsx`, `spending-calendar.tsx`, `category-history-chart.tsx`, `package.json`, `record-editor.tsx`, `utils.ts`, `formatCurrency`, `trend-chart.tsx`, `pagination.tsx`, `monthly/page.tsx`, `history.tsx`, `icon.tsx`, `sync/page.tsx`, `combobox.tsx`, `providers.tsx`, `select.tsx`, `records/[id]/page.tsx`, `radix-ui`, `luxon`, `lucide-react`, `next`?**
+  _High betweenness centrality (0.075) - this node is a cross-community bridge._
 - **Should `duplicates.test.ts` be split into smaller, more focused modules?**
   _Cohesion score 0.1164021164021164 - nodes in this community are weakly interconnected._
 - **Why does `@playwright/test` connect `@playwright/test` to `animations/components.e2e.ts`, `workflows.e2e.ts`, `editors.ts`, `tests_support_fixtures_expect`, `package.json`, `ledger.e2e.ts`, `core/components.e2e.ts`, `support/motion.ts`, `fixtures.ts`?**
-  _High betweenness centrality (0.069) - this node is a cross-community bridge._
+  _High betweenness centrality (0.070) - this node is a cross-community bridge._
 - **Should `Tests README` be split into smaller, more focused modules?**
   _Cohesion score 0.05928614640048397 - nodes in this community are weakly interconnected._

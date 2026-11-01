@@ -1,5 +1,4 @@
 {
-  "0": "collectTests",
   "1": "Button",
   "2": "duplicates.test.ts",
   "3": "Tests README",
@@ -36,7 +35,6 @@
   "34": "export-import.ts",
   "35": "components.json",
   "36": "shared.ts",
-  "37": "vite.config.ts",
   "38": "react",
   "39": "types.d.ts",
   "40": "Monthly Budget",
