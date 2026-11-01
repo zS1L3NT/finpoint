@@ -32,7 +32,11 @@ export async function getMonthlyRecords(month: string, year: number, filters: Mo
 		: date.endOf("month").toFormat("yyyy-MM-dd")
 
 	const rawCategoryIds = (filters.category_ids ?? "").split(",").filter(Boolean)
-	const category_ids = await expandCategoryIdsForMonthly(rawCategoryIds)
+	// Avoid awaiting a non-Dexie promise before the first read: liveQuery must
+	// retain its observation context when no Category filter is selected.
+	const category_ids = rawCategoryIds.length
+		? await expandCategoryIdsForMonthly(rawCategoryIds)
+		: []
 	const startDate = filters.start_date ?? date.toFormat("yyyy-MM-dd")
 	const endDate = filters.end_date ?? date.endOf("month").toFormat("yyyy-MM-dd")
 	const rangeStart = DateTime.fromFormat(startDate, "yyyy-MM-dd")
