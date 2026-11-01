@@ -34,7 +34,7 @@ test("current-month forecasts compare the selected budget and Total", async () =
 	await upsertMonthlyBudget({ ...input, name: "Food", amount: 200 })
 	for (const [scope, name, amount] of [
 		[row.id, "Travel", 100],
-		["all", "Total", 300],
+		["all", "All budgets", 300],
 	] as const) {
 		const view = await getDashboardView({ month: today.toFormat("MMMM"), year: today.year, scope })
 		expect(view.pace.projection.available).toBe(true)
@@ -243,7 +243,7 @@ test("retired group scopes fall back to Total", async () => {
 	await upsertMonthlyBudget(input)
 	for (const scope of ["core", "outlier", "other"]) {
 		const view = await getDashboardView({ month: today.toFormat("MMMM"), year: today.year, scope })
-		expect(view.scopeLabel).toBe("Total")
+		expect(view.scopeLabel).toBe("All budgets")
 		expect(view.scopeFilters).toEqual({ monthly_budget_id: undefined })
 	}
 })

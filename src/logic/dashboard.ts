@@ -1146,7 +1146,7 @@ export async function getDashboardView(input: DashboardInput & { scope?: string 
 	const scope = input.scope && tables.monthlyBudgets.has(input.scope) ? input.scope : "all"
 	const selectedBudget = tables.monthlyBudgets.get(scope)
 	const scopedBudgetIds = scopeMonthlyBudgetIds(scope)
-	const scopeLabel = scope === "all" ? "Total" : (selectedBudget?.name ?? "Monthly budget")
+	const scopeLabel = scope === "all" ? "All budgets" : (selectedBudget?.name ?? "Monthly budget")
 	const scopeFilters = {
 		monthly_budget_id: selectedBudget?.id,
 	}

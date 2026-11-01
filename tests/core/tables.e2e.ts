@@ -576,7 +576,7 @@ test("Duplicate badge: disappears once the pair is resolved", async ({ page, wor
 	await expect(page.getByText("Duplicate?", { exact: true })).toHaveCount(0)
 })
 
-test("Monthly budget filters: Total leads, budgets follow and Unbudgeted closes the list", async ({
+test("Monthly budget filters: All budgets leads, budgets follow and Unbudgeted closes the list", async ({
 	page,
 	workspace,
 }) => {
@@ -585,11 +585,11 @@ test("Monthly budget filters: Total leads, budgets follow and Unbudgeted closes 
 		await page.goto(route)
 		await page
 			.getByRole("combobox")
-			.filter({ hasText: /^Total$/ })
+			.filter({ hasText: /^All budgets$/ })
 			.click()
 		const options = page.getByRole("option")
 		expect((await options.allTextContents()).map(text => text.trim())).toEqual([
-			"Total",
+			"All budgets",
 			"Daily",
 			"Recurring",
 			"Unbudgeted",

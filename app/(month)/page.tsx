@@ -205,7 +205,9 @@ export default function DashboardPage() {
 								year={dataYear}
 								amount={paceAmount?.amount ?? null}
 								amountLabel={
-									paceData.singleBudget ? (paceAmount?.name ?? null) : "Total"
+									paceData.singleBudget
+										? (paceAmount?.name ?? null)
+										: "All budgets"
 								}
 								showProjection={paceProjection.available}
 								recordFilters={paceFilters}
@@ -280,7 +282,7 @@ export default function DashboardPage() {
 							<Card className="min-w-0">
 								<CardHeader>
 									<ScopedCardTitle
-										scope={scope === "all" ? "Total" : scopeLabel}
+										scope={scope === "all" ? "All budgets" : scopeLabel}
 										color={scopeColor}
 									>
 										Categories this month
@@ -317,7 +319,7 @@ export default function DashboardPage() {
 								recordHref={categoryRecordHref}
 								badge={
 									<ScopeLabel
-										scope={scope === "all" ? "Total" : scopeLabel}
+										scope={scope === "all" ? "All budgets" : scopeLabel}
 										color={scopeColor}
 									/>
 								}
@@ -329,7 +331,7 @@ export default function DashboardPage() {
 							<Card className="min-w-0">
 								<CardHeader>
 									<ScopedCardTitle
-										scope={scope === "all" ? "Total" : scopeLabel}
+										scope={scope === "all" ? "All budgets" : scopeLabel}
 										color={scopeColor}
 									>
 										Spending calendar
@@ -352,7 +354,7 @@ export default function DashboardPage() {
 							<Card className="min-w-0">
 								<CardHeader>
 									<ScopedCardTitle
-										scope={scope === "all" ? "Total" : scopeLabel}
+										scope={scope === "all" ? "All budgets" : scopeLabel}
 										color={scopeColor}
 									>
 										Biggest changes
@@ -374,7 +376,9 @@ export default function DashboardPage() {
 					{stage > 2 ? (
 						<Card className="min-w-0">
 							<CardHeader>
-								<ScopedCardTitle scope="Total">Surplus / Shortfall</ScopedCardTitle>
+								<ScopedCardTitle scope="All budgets">
+									Surplus / Shortfall
+								</ScopedCardTitle>
 								<CardDescription>
 									Cumulative income minus all personal spending
 								</CardDescription>
@@ -392,7 +396,9 @@ export default function DashboardPage() {
 					{stage > 3 ? (
 						<Card>
 							<CardHeader className="border-b">
-								<ScopedCardTitle scope="Total">Spending by day</ScopedCardTitle>
+								<ScopedCardTitle scope="All budgets">
+									Spending by day
+								</ScopedCardTitle>
 								<CardDescription>
 									Net daily spending across all monthly budgets, including
 									refunds. Hold or hover over a day to read it, and click it to
@@ -482,7 +488,7 @@ function ScopeSelect({
 				<SelectGroup>
 					<SelectItem value="all">
 						<span className="size-2 rounded-full bg-foreground" />
-						Total
+						All budgets
 					</SelectItem>
 					{budgets.map(budget => (
 						<SelectItem key={budget.id} value={budget.id}>
@@ -503,7 +509,7 @@ function WeekdayCard({ weekday }: { weekday: WeekdayBreakdown }) {
 	return (
 		<Card>
 			<CardHeader>
-				<ScopedCardTitle scope="Total">Spending by weekday</ScopedCardTitle>
+				<ScopedCardTitle scope="All budgets">Spending by weekday</ScopedCardTitle>
 				<CardDescription>
 					Spending on each weekday ÷ its occurrences in the month, including zero-spend
 					days.
@@ -543,7 +549,8 @@ function ScopedCardTitle({
 }
 
 function ScopeLabel({ scope, color }: { scope: string; color?: string }) {
-	if (scope === "Total") return <MonthlyBudgetBadge name="Total" color="var(--foreground)" />
+	if (scope === "All budgets")
+		return <MonthlyBudgetBadge name="All budgets" color="var(--foreground)" />
 	return (
 		<MonthlyBudgetBadge
 			name={scope}

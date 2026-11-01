@@ -770,7 +770,7 @@ test.describe("pinned 15 October 2026 date", () => {
 		// the same Monthly budgets at every viewport size.
 		await page
 			.getByRole("combobox")
-			.filter({ hasText: /^Total$/ })
+			.filter({ hasText: /^All budgets$/ })
 			.click()
 		await expect(page.getByRole("option", { name: "Daily", exact: true })).toBeVisible()
 		await page.keyboard.press("Escape")

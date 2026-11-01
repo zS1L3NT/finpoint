@@ -310,7 +310,7 @@ function RecordFilters({
 					<SelectGroup>
 						<SelectItem value="all">
 							<span className="size-2 rounded-full bg-foreground" />
-							Total
+							All budgets
 						</SelectItem>
 						{activeMonthlyBudgets.map(monthlyBudget => (
 							<SelectItem
