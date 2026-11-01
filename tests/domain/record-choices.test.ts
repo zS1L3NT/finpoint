@@ -251,7 +251,7 @@ test("old backup import converts to choices and validates", async () => {
 	await createRecord({ title: "Lunch", amount: -10, datetime: "2026-10-01T12:00", category_id: "food" })
 	const backup = await exportData()
 	const old = JSON.parse(JSON.stringify(backup))
-	old.version = 7
+	old.version = 6
 	// Simulate old shape: replace choices with legacy fields
 	old.tables.records = old.tables.records.map((r: Record<string, unknown>) => {
 		const { treatment_choice, monthly_budget_choice, ...rest } = r
@@ -266,7 +266,7 @@ test("old backup import converts to choices and validates", async () => {
 		}
 	})
 	const parsed = parseImportFile(JSON.stringify(old))
-	expect(parsed.version).toBe(8)
+	expect(parsed.version).toBe(7)
 	for (const row of parsed.tables.records as Record<string, unknown>[]) {
 		expect(row.treatment_choice).toBeDefined()
 		expect(row.monthly_budget_choice).toBeDefined()
@@ -274,7 +274,7 @@ test("old backup import converts to choices and validates", async () => {
 	}
 })
 
-test("version eight upgrade converts to choices and preserves clean and dirty Drive baselines", async () => {
+test("version seven upgrade normalizes categories and converts choices while preserving Drive baselines", async () => {
 	await setupBudgets()
 	await createCategory({ name: "Food", icon: "x", color: "#123", analytics_treatment: "spending", default_monthly_budget_id: "daily" })
 	await createRecord({ title: "Lunch", amount: -10, datetime: "2026-10-01T12:00", category_id: "food" })
@@ -303,9 +303,12 @@ test("version eight upgrade converts to choices and preserves clean and dirty Dr
 	} as never)
 	for (const clean of [true, false]) {
 		const backup = await exportData()
-		// Simulate v8 shape: choices -> legacy resolved+source
+		// Simulate released v7 shape: choices -> legacy resolved+source
 		const tables = {
 			...backup.tables,
+			categories: (backup.tables.categories as Record<string, unknown>[]).map(category =>
+				category.id === "food" ? { ...category, analytics_treatment: null } : category,
+			),
 			records: (backup.tables.records as Record<string, unknown>[]).map(row => {
 				const { treatment_choice, monthly_budget_choice, ...rest } = row
 				const tc = treatment_choice as { kind: string; value?: string }
@@ -325,13 +328,16 @@ test("version eight upgrade converts to choices and preserves clean and dirty Dr
 		const schema = Object.fromEntries(db.tables.map(t => [t.name, [t.schema.primKey.src, ...t.schema.indexes.map(i => i.src)].join(",")]))
 		await db.delete()
 		const old = new Dexie("finpoint")
-		old.version(8).stores(schema)
+		old.version(7).stores({ ...schema, records: "id, datetime, category_id, monthly_budget_id, analytics_treatment" })
 		for (const [name, rows] of Object.entries(tables))
 			if ((rows as unknown[]).length) await old.table(name).bulkAdd(rows as never[])
 		await old.table("meta").put({ key: "drive_last_hash", value: baseline })
 		old.close()
 		await db.open()
-		// Converted rows use choices, Taxi follows current category
+		// Both conversions run directly from the released schema.
+		expect(db.verno).toBe(8)
+		expect((await db.categories.get("food"))?.analytics_treatment).toBe("automatic")
+		expect(db.records.schema.indexes.some(index => index.name === "monthly_budget_id")).toBe(false)
 		const taxi = await db.records.get("taxi-1")
 		expect(taxi?.treatment_choice).toEqual({ kind: "category" })
 		const resolved = resolveRecordChoices(taxi as never, await db.categories.get("taxi"))

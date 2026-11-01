@@ -14,7 +14,7 @@ import {
 	replaceSettings,
 } from "@/data/settings"
 
-export const EXPORT_VERSION = 8
+export const EXPORT_VERSION = 7
 
 type TableName =
 	| "statement_rules"
@@ -131,7 +131,7 @@ export function parseImportFile(text: string): FinpointExport {
 		})
 		parsed.version = EXPORT_VERSION
 	}
-	if (parsed?.version === 6 || parsed?.version === 7) parsed.version = EXPORT_VERSION
+	if (parsed?.version === 6) parsed.version = EXPORT_VERSION
 	if (parsed?.app !== "finpoint" || typeof parsed !== "object" || !parsed.tables) {
 		throw new Error("This file is not a Finpoint backup.")
 	}
@@ -145,7 +145,7 @@ export function parseImportFile(text: string): FinpointExport {
 		}
 	}
 	const categoryIds = new Set((parsed.tables.categories as { id: string }[]).map(c => c.id))
-	if ((originalVersion ?? 0) < 8)
+	if ((originalVersion ?? 0) < 7)
 		parsed.tables.records = (parsed.tables.records as Record<string, unknown>[]).map(row =>
 			migrateRecordChoices(row, categoryIds.has(String(row.category_id))),
 		)
