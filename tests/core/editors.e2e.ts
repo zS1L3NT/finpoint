@@ -396,9 +396,15 @@ test("Monthly Budget editors: validate creation and persist overrides", async ({
 		)
 		// The amount section mounts after the amount-source live query resolves.
 		await expect(dialog.getByText("Amount for October 2026", { exact: true })).toBeVisible()
-		await select(page, dialog, "Amount rule", "Default")
+		await dialog
+			.getByRole("group", { name: "Amount rule", exact: true })
+			.getByRole("radio", { name: "Default", exact: true })
+			.check()
 		await expect(dialog.getByLabel("Monthly amount", { exact: true })).toHaveCount(0)
-		await select(page, dialog, "Amount rule", "Override one month")
+		await dialog
+			.getByRole("group", { name: "Amount rule", exact: true })
+			.getByRole("radio", { name: "Override one month", exact: true })
+			.check()
 		await expect(dialog.getByLabel("Monthly amount", { exact: true })).toBeVisible()
 		// Daily starts with a null October amount, so the revealed input is disabled.
 		await dialog.getByRole("checkbox", { name: "No monthly amount", exact: true }).uncheck()
@@ -408,8 +414,11 @@ test("Monthly Budget editors: validate creation and persist overrides", async ({
 		await page.reload()
 		await page.getByRole("button", { name: "Edit Daily", exact: true }).click()
 		await expect(
-			page.getByRole("dialog").getByLabel("Amount rule", { exact: true }),
-		).toContainText("Override one month")
+			page
+				.getByRole("dialog")
+				.getByRole("group", { name: "Amount rule", exact: true })
+				.getByRole("radio", { name: "Override one month", exact: true }),
+		).toBeChecked()
 		await expect(
 			page.getByRole("dialog").getByLabel("Monthly amount", { exact: true }),
 		).toHaveValue("0")
