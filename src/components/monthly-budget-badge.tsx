@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils"
 /**
  * The one way a monthly budget is shown inline: a hairline pill with the
  * monthly budget's colour as a dot. `color` is null for "Unbudgeted" and for scopes
- * that are not a single monthly budget (groups), which get a hollow dot instead.
+ * such as Total, which get a hollow dot instead.
  */
 export default function MonthlyBudgetBadge({
 	name,

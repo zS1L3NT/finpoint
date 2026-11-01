@@ -26,7 +26,6 @@ export type RecordFilters = {
 	is_allocated?: string | null
 	category_ids?: string[] | null
 	monthly_budget_id?: string | null
-	monthly_budget_group?: string | null
 	show_unbudgeted?: boolean
 	effective_spending?: boolean
 	treatment?: string | null
@@ -143,14 +142,6 @@ export async function listRecords(filters: RecordFilters = {}) {
 	}
 	if (filters.monthly_budget_id)
 		rows = rows.filter(r => r.monthly_budget_id === filters.monthly_budget_id)
-	if (filters.monthly_budget_group) {
-		const monthlyBudgets = new Map((await db.monthly_budgets.toArray()).map(b => [b.id, b]))
-		rows = rows.filter(
-			r =>
-				r.monthly_budget_id &&
-				monthlyBudgets.get(r.monthly_budget_id)?.group === filters.monthly_budget_group,
-		)
-	}
 	if (filters.show_unbudgeted)
 		rows = rows.filter(
 			r =>

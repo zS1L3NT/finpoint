@@ -882,6 +882,9 @@ test("Spending forecast: preserves scope and legend semantics", { tag: ["@light"
 	await expect(chart.getByText("Total budget", { exact: true })).toBeVisible()
 	await page.getByRole("combobox", { name: "Spending scope", exact: true }).click()
 	await expect(page.getByRole("option", { name: "Total", exact: true })).toBeVisible()
+	await expect(page.getByRole("option")).toHaveText(["Total", "Daily", "Recurring"])
+	await expect(page.locator('[data-slot="select-separator"]')).toHaveCount(0)
+
 	await expect(page.getByRole("option", { name: "All spending", exact: true })).toHaveCount(0)
 	await page.getByRole("option", { name: "Recurring", exact: true }).click()
 	await expect(chart.getByText("Recurring budget", { exact: true })).toBeVisible()

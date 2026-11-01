@@ -77,7 +77,6 @@ beforeEach(async () => {
 		id: "recurring",
 		name: "Recurring",
 		color: "",
-		group: "core",
 		display_order: 1,
 		archived: false,
 	})

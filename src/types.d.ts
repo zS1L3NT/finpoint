@@ -117,7 +117,6 @@ export type MonthlyBudget = {
 	id: string
 	name: string
 	color: string
-	group: "core" | "outlier" | "other"
 	display_order: number
 	archived: boolean
 	amount?: number | null

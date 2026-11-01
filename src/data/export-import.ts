@@ -268,9 +268,8 @@ function monthlyBudgetFields({
 	id,
 	name,
 	color,
-	group,
 	display_order,
 	archived,
 }: Record<string, unknown>) {
-	return { id, name, color, group, display_order, archived }
+	return { id, name, color, display_order, archived }
 }

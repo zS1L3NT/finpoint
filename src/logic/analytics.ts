@@ -16,7 +16,6 @@ export type AnalyticsRecord = {
 		id: string
 		name: string
 		color: string
-		group: "core" | "outlier" | "other"
 		display_order: number
 		archived: boolean
 	} | null
@@ -90,7 +89,6 @@ export type AnalyticsSummary = {
 		id: string
 		name: string
 		color: string
-		group: "core" | "outlier" | "other"
 		display_order: number
 		archived: boolean
 		spending: number
@@ -146,7 +144,6 @@ export function summarize(records: AnalyticsRecord[]): AnalyticsSummary {
 				id: string
 				name: string
 				color: string
-				group: "core" | "outlier" | "other"
 				display_order: number
 				archived: boolean
 				spending: number

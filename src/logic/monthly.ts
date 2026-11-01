@@ -12,7 +12,6 @@ export type MonthlyFilters = {
 	category_ids?: string | null
 	is_allocated?: string | null
 	monthly_budget_id?: string | null
-	monthly_budget_group?: string | null
 	show_unbudgeted?: boolean
 	effective_spending?: boolean
 	treatment?: string | null
@@ -60,7 +59,6 @@ export async function getMonthlyRecords(month: string, year: number, filters: Mo
 		is_allocated: filters.is_allocated ?? null,
 		category_ids,
 		monthly_budget_id: filters.monthly_budget_id ?? null,
-		monthly_budget_group: filters.monthly_budget_group ?? null,
 		show_unbudgeted: !!filters.show_unbudgeted,
 		effective_spending: !!filters.effective_spending,
 		treatment: filters.treatment ?? null,
@@ -88,7 +86,6 @@ export async function getMonthlyRecords(month: string, year: number, filters: Mo
 					id: r.monthly_budget.id,
 					name: r.monthly_budget.name,
 					color: r.monthly_budget.color,
-					group: r.monthly_budget.group,
 					display_order: r.monthly_budget.display_order,
 					archived: r.monthly_budget.archived,
 				}
@@ -118,7 +115,6 @@ export async function getMonthlyRecords(month: string, year: number, filters: Mo
 			category_ids: filters.category_ids ?? null,
 			is_allocated: filters.is_allocated ?? null,
 			monthly_budget_id: filters.monthly_budget_id ?? null,
-			monthly_budget_group: filters.monthly_budget_group ?? null,
 			show_unbudgeted: !!filters.show_unbudgeted,
 			effective_spending: !!filters.effective_spending,
 			treatment: filters.treatment ?? null,

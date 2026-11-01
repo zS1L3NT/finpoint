@@ -27,8 +27,6 @@ import {
 	SelectContent,
 	SelectGroup,
 	SelectItem,
-	SelectLabel,
-	SelectSeparator,
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select"
@@ -486,29 +484,16 @@ function ScopeSelect({
 						<span className="size-2 rounded-full bg-foreground" />
 						Total
 					</SelectItem>
+					{budgets.map(budget => (
+						<SelectItem key={budget.id} value={budget.id}>
+							<span
+								className="size-2 rounded-full"
+								style={{ backgroundColor: themeColor(budget.color) }}
+							/>
+							{budget.name}
+						</SelectItem>
+					))}
 				</SelectGroup>
-				<SelectSeparator />
-				<SelectGroup>
-					<SelectLabel>Budget groups</SelectLabel>
-					<SelectItem value="core">Core</SelectItem>
-					<SelectItem value="outlier">Outlier</SelectItem>
-					<SelectItem value="other">Other</SelectItem>
-				</SelectGroup>
-				{budgets.length ? <SelectSeparator /> : null}
-				{budgets.length ? (
-					<SelectGroup>
-						<SelectLabel>Specific monthly budget</SelectLabel>
-						{budgets.map(budget => (
-							<SelectItem key={budget.id} value={budget.id}>
-								<span
-									className="size-2 rounded-full"
-									style={{ backgroundColor: themeColor(budget.color) }}
-								/>
-								{budget.name}
-							</SelectItem>
-						))}
-					</SelectGroup>
-				) : null}
 			</SelectContent>
 		</Select>
 	)
