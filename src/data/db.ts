@@ -130,7 +130,7 @@ export type SettingsRow = {
 }
 
 export const DB_NAME = "finpoint"
-export const DB_VERSION = 8
+export const DB_VERSION = 9
 
 class FinpointDB extends Dexie {
 	statement_rules!: Table<StatementRule, string>
@@ -425,12 +425,6 @@ class FinpointDB extends Dexie {
 					.modify(category => {
 						category.analytics_treatment ??= "automatic"
 					})
-				await transaction
-					.table("monthly_budgets")
-					.toCollection()
-					.modify(row => {
-						delete row.pace_kind
-					})
 				const categories = new Set((tables.categories as CategoryRow[]).map(c => c.id))
 				await transaction
 					.table("records")
@@ -441,9 +435,53 @@ class FinpointDB extends Dexie {
 						Object.assign(row, converted)
 					})
 				if (clean) {
-					tables.monthly_budgets = await transaction.table("monthly_budgets").toArray()
 					tables.categories = await transaction.table("categories").toArray()
 					tables.records = await transaction.table("records").toArray()
+					await transaction.table("meta").put({
+						key: "drive_last_hash",
+						value: await Dexie.waitFor(hashSnapshot({ settings, tables })),
+					})
+				}
+			})
+		this.version(9)
+			.stores({})
+			.upgrade(async transaction => {
+				const tables: Record<string, unknown[]> = {}
+				for (const name of [
+					"statement_rules",
+					"accounts",
+					"statements",
+					"duplicate_dismissals",
+					"categories",
+					"records",
+					"allocations",
+					"budgets",
+					"budget_records",
+					"monthly_budgets",
+					"monthly_budget_defaults",
+					"monthly_budget_amounts",
+					"analytics_months",
+				])
+					tables[name] = await transaction.table(name).toArray()
+				const settings = {
+					default_filter_start_date:
+						(await transaction.table("settings").get("default_filter_start_date"))
+							?.value ?? null,
+					default_filter_end_date_today:
+						(await transaction.table("settings").get("default_filter_end_date_today"))
+							?.value === "true",
+				}
+				const lastHash = await transaction.table("meta").get("drive_last_hash")
+				const clean =
+					lastHash?.value === (await Dexie.waitFor(hashSnapshot({ settings, tables })))
+				await transaction
+					.table("monthly_budgets")
+					.toCollection()
+					.modify(row => {
+						delete row.pace_kind
+					})
+				if (clean) {
+					tables.monthly_budgets = await transaction.table("monthly_budgets").toArray()
 					await transaction.table("meta").put({
 						key: "drive_last_hash",
 						value: await Dexie.waitFor(hashSnapshot({ settings, tables })),

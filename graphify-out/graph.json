@@ -4823,7 +4823,7 @@
       "file_type": "code",
       "norm_label": "aspending()",
       "source_file": "src/data/db.ts",
-      "source_location": "L458"
+      "source_location": "L496"
     },
     {
       "id": "tests_domain_suggestions_test_chip",
@@ -12179,7 +12179,7 @@
       "file_type": "code",
       "norm_label": "withoutactionmodes()",
       "source_file": "src/data/db.ts",
-      "source_location": "L463"
+      "source_location": "L501"
     },
     {
       "id": "src_data_export_import_clearalldata",
@@ -12191,7 +12191,7 @@
       "file_type": "code",
       "norm_label": "clearalldata()",
       "source_file": "src/data/export-import.ts",
-      "source_location": "L245"
+      "source_location": "L249"
     },
     {
       "id": "src_data_export_import_downloadexport",
@@ -12203,7 +12203,7 @@
       "file_type": "code",
       "norm_label": "downloadexport()",
       "source_file": "src/data/export-import.ts",
-      "source_location": "L74"
+      "source_location": "L77"
     },
     {
       "id": "src_data_export_import_exportdata",
@@ -12227,7 +12227,7 @@
       "file_type": "code",
       "norm_label": "importdata()",
       "source_file": "src/data/export-import.ts",
-      "source_location": "L227"
+      "source_location": "L231"
     },
     {
       "id": "src_data_export_import_parseimportfile",
@@ -12239,7 +12239,7 @@
       "file_type": "code",
       "norm_label": "parseimportfile()",
       "source_file": "src/data/export-import.ts",
-      "source_location": "L86"
+      "source_location": "L89"
     },
     {
       "id": "src_data_export_import_tablecounts",
@@ -12251,7 +12251,7 @@
       "file_type": "code",
       "norm_label": "tablecounts()",
       "source_file": "src/data/export-import.ts",
-      "source_location": "L255"
+      "source_location": "L259"
     },
     {
       "id": "src_data_record_choices_migraterecordchoices",
@@ -21381,7 +21381,7 @@
       "file_type": "code",
       "norm_label": "db",
       "source_file": "src/data/db.ts",
-      "source_location": "L456"
+      "source_location": "L494"
     },
     {
       "id": "src_hooks_use_appearance",
@@ -43233,7 +43233,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/data/db.ts",
-      "source_location": "L439",
+      "source_location": "L433",
       "weight": 1.0
     },
     {
@@ -43245,7 +43245,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/data/export-import.ts",
-      "source_location": "L69",
+      "source_location": "L72",
       "weight": 1.0
     },
     {
@@ -43257,7 +43257,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/data/export-import.ts",
-      "source_location": "L228",
+      "source_location": "L232",
       "weight": 1.0
     },
     {
@@ -43269,7 +43269,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/data/export-import.ts",
-      "source_location": "L238",
+      "source_location": "L242",
       "weight": 1.0
     },
     {
@@ -43281,7 +43281,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/data/export-import.ts",
-      "source_location": "L130",
+      "source_location": "L133",
       "weight": 1.0
     },
     {
@@ -43293,7 +43293,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/data/export-import.ts",
-      "source_location": "L154",
+      "source_location": "L158",
       "weight": 1.0
     },
     {
@@ -49281,7 +49281,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/domain/monthly-budgets.test.ts",
-      "source_location": "L201",
+      "source_location": "L202",
       "weight": 1.0
     },
     {
@@ -53130,7 +53130,7 @@
       "context": "import",
       "deferred": true,
       "source_file": "tests/domain/monthly-budgets.test.ts",
-      "source_location": "L198",
+      "source_location": "L199",
       "weight": 1.0
     },
     {
@@ -104217,7 +104217,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/data/db.ts",
-      "source_location": "L456",
+      "source_location": "L494",
       "weight": 1.0
     },
     {
@@ -104228,7 +104228,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/data/db.ts",
-      "source_location": "L458",
+      "source_location": "L496",
       "weight": 1.0
     },
     {
@@ -104239,7 +104239,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/data/db.ts",
-      "source_location": "L463",
+      "source_location": "L501",
       "weight": 1.0
     },
     {
@@ -104349,7 +104349,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/data/export-import.ts",
-      "source_location": "L227",
+      "source_location": "L231",
       "weight": 1.0
     },
     {
@@ -104360,7 +104360,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/data/export-import.ts",
-      "source_location": "L245",
+      "source_location": "L249",
       "weight": 1.0
     },
     {
@@ -104371,7 +104371,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/data/export-import.ts",
-      "source_location": "L255",
+      "source_location": "L259",
       "weight": 1.0
     },
     {
@@ -104426,7 +104426,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/data/export-import.ts",
-      "source_location": "L74",
+      "source_location": "L77",
       "weight": 1.0
     },
     {
@@ -104437,7 +104437,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/data/export-import.ts",
-      "source_location": "L86",
+      "source_location": "L89",
       "weight": 1.0
     },
     {
@@ -115650,5 +115650,5 @@
       "source_file": "tests/README.md"
     }
   ],
-  "built_at_commit": "48ad8314846e4c3f06ddd242c0b151122397b9ca"
+  "built_at_commit": "15bf1e93a36591961afdef600f3890ec00eefa00"
 }

@@ -266,7 +266,7 @@ test("old backup import converts to choices and validates", async () => {
 		}
 	})
 	const parsed = parseImportFile(JSON.stringify(old))
-	expect(parsed.version).toBe(7)
+	expect(parsed.version).toBe(8)
 	for (const row of parsed.tables.records as Record<string, unknown>[]) {
 		expect(row.treatment_choice).toBeDefined()
 		expect(row.monthly_budget_choice).toBeDefined()
@@ -335,7 +335,7 @@ test("version seven upgrade normalizes categories and converts choices while pre
 		old.close()
 		await db.open()
 		// Both conversions run directly from the released schema.
-		expect(db.verno).toBe(8)
+		expect(db.verno).toBe(9)
 		expect((await db.categories.get("food"))?.analytics_treatment).toBe("automatic")
 		expect(db.records.schema.indexes.some(index => index.name === "monthly_budget_id")).toBe(false)
 		const taxi = await db.records.get("taxi-1")

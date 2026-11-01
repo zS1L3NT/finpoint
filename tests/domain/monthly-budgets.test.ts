@@ -161,7 +161,7 @@ test("forecast projections retain gross pace after refunds and add scheduled spe
 // Assemble the retired key only in compatibility fixtures so source scans stay useful.
 const legacyPaceKey = ["pace", "kind"].join("_")
 
-test("released schema upgrade removes retired budget metadata and preserves Drive baselines", async () => {
+test("version nine upgrade removes retired budget metadata and preserves Drive baselines", async () => {
 	const { exportData } = await import("../../src/data/export-import")
 	const { hashSnapshot } = await import("../../src/data/snapshot-hash")
 	for (const clean of [true, false]) {
@@ -172,12 +172,12 @@ test("released schema upgrade removes retired budget metadata and preserves Driv
 		const schema = Object.fromEntries(db.tables.map(t => [t.name, [t.schema.primKey.src, ...t.schema.indexes.map(i => i.src)].join(",")]))
 		await db.delete()
 		const old = new Dexie("finpoint")
-		old.version(7).stores({ ...schema, records: "id, datetime, category_id, monthly_budget_id, analytics_treatment" })
+		old.version(8).stores(schema)
 		await old.table("monthly_budgets").bulkAdd(rows)
 		await old.table("meta").put({ key: "drive_last_hash", value: baseline })
 		old.close()
 		await db.open()
-		expect(db.verno).toBe(8)
+		expect(db.verno).toBe(9)
 		expect(await db.monthly_budgets.toArray()).toEqual(rows.map(({ [legacyPaceKey]: _, ...row }) => row))
 		expect((await db.meta.get("drive_last_hash"))?.value).toBe(clean ? await hashSnapshot(await exportData()) : baseline)
 	}
@@ -187,9 +187,10 @@ test("old backup import removes retired budget metadata and exports current fiel
 	const { exportData, importData } = await import("../../src/data/export-import")
 	const budget = await upsertMonthlyBudget(input)
 	const backup = await exportData()
-	for (const version of [6, 7]) {
+	for (const version of [6, 7, 8]) {
 		await importData({ ...backup, version, tables: { ...backup.tables, monthly_budgets: [{ ...budget, [legacyPaceKey]: "daily" }] } })
 		expect(await db.monthly_budgets.get(budget.id)).toEqual(budget)
+		expect((await exportData()).version).toBe(8)
 		expect((await exportData()).tables.monthly_budgets).toEqual([budget])
 	}
 })
