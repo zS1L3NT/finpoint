@@ -100,13 +100,11 @@ export default function CashflowChart({
 							color: themeColor(budget.color),
 							dash: "7 5",
 							fill: budget.id === focused ? 0.12 : 0.025,
-							previous: budget.previous,
 							values: budget.points.map(p => p.projected_spending),
 						},
 						{
 							key: budget.id,
 							fill: budget.id === focused ? 0.3 : 0.06,
-							previous: budget.previous,
 							label: budget.name,
 							color: themeColor(budget.color),
 							values: budget.points.map(p => p.spending),

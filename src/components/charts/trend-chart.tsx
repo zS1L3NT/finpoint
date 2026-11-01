@@ -16,7 +16,6 @@ export type TrendSeries = {
 	/** Strength of the fill fading from the line towards $0. */
 	fill?: number
 	comparison?: boolean
-	previous?: { month: string; spending: Array<number | null> }
 }
 
 // The right gutter holds the value pills that replace a Y axis.
@@ -295,11 +294,7 @@ export default function TrendChart({
 						label: s.label,
 						color: tone(s, s.values[index] ?? 0),
 						opacity: s.opacity,
-						value:
-							formatCurrency(s.values[index] ?? 0) +
-							(s.previous
-								? ` · ${s.previous.month.slice(0, 3)} ${s.previous.spending[index] == null ? "—" : formatCurrency(s.previous.spending[index] ?? 0)}`
-								: ""),
+						value: formatCurrency(s.values[index] ?? 0),
 					}))
 				if (showTotal)
 					rows.push({
