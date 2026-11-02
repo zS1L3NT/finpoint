@@ -1,17 +1,17 @@
 # Graph Report - t3-0e6a25a0  (2026-11-02)
 
 ## Corpus Check
-- 251 files · ~230,745 words
+- 251 files · ~230,860 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 9 file(s) not represented in the graph (top: (none) 5, .example 1, .lock 1)
 
 ## Summary
-- 1937 nodes · 7752 edges · 95 communities (83 shown, 12 thin omitted)
+- 1937 nodes · 7754 edges · 95 communities (83 shown, 12 thin omitted)
 - Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 126 edges (avg confidence: 0.84)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `01821d2b`
+- Built from commit: `07f8d15b`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -110,7 +110,7 @@
 - utils.ts
 
 ## God Nodes (most connected - your core abstractions)
-1. `cn()` - 322 edges
+1. `cn()` - 324 edges
 2. `PrimitivesSection()` - 180 edges
 3. `Button()` - 126 edges
 4. `react` - 97 edges
@@ -488,13 +488,13 @@ Nodes (44): CategoriesPage(), CategoryDialogState, CategoryTile(), luxon, bar(),
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `cn()` connect `cn` to `input-group.tsx`, `Button`, `(month)/page.tsx`, `utils.ts`, `ui/field.tsx`, `duplicates/page.tsx`, `Input`, `primitives.tsx`, `budgets/page.tsx`, `react`, `icon.tsx`, `pagination.tsx`, `sync/page.tsx`, `amount-filter.tsx`, `item.tsx`, `suggestions.ts`, `accounts/page.tsx`, `lucide-react`?**
-  _High betweenness centrality (0.088) - this node is a cross-community bridge._
+  _High betweenness centrality (0.090) - this node is a cross-community bridge._
 - **What connects `@fontsource-variable/inter`, `shadcn`, `tailwindcss` to the rest of the system?**
   _83 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `cn` be split into smaller, more focused modules?**
   _Cohesion score 0.112375533428165 - nodes in this community are weakly interconnected._
 - **Why does `react` connect `react` to `cn`, `Button`, `auto-sync.ts`, `primitives.tsx`, `budgets/page.tsx`, `icon.tsx`, `sync/page.tsx`, `item.tsx`, `package.json`, `suggestions.ts`, `input-group.tsx`, `ui/field.tsx`, `Input`, `main.tsx`, `use-appearance.tsx`, `pagination.tsx`, `amount-filter.tsx`, `providers.tsx`, `accounts/page.tsx`, `(month)/page.tsx`, `duplicates/page.tsx`, `lucide-react`, `utils.ts`?**
-  _High betweenness centrality (0.074) - this node is a cross-community bridge._
+  _High betweenness centrality (0.073) - this node is a cross-community bridge._
 - **Should `Button` be split into smaller, more focused modules?**
   _Cohesion score 0.0698314413484692 - nodes in this community are weakly interconnected._
 - **Why does `src/data/* (persistence, migrations, seeding, backup serialization, Drive storage)` connect `src/data/* (persistence, migrations, seeding, backup serialization, Drive storage)` to `UI layer (app pages + components)`, `providers.tsx`?**

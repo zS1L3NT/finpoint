@@ -990,3 +990,29 @@ test("category cards: cap five rows and keep equal XL heights when expanding", a
 		}
 	}
 })
+
+test("category cards: reading different months keeps the XL row and chart height stable", async ({
+	page,
+	isMobile,
+}) => {
+	test.skip(isMobile, "Cards share a row at XL widths")
+	await setDateOnly(page, new Date("2026-11-01T12:00:00+08:00"))
+	await seedWorkspace(page, "dense")
+	await page.setViewportSize({ width: 1920, height: 1080 })
+	await page.goto(overview)
+	const chart = card(page, "Category trend")
+	const surface = chart.getByRole("application")
+	await surface.focus()
+	await surface.press("End")
+	const height = await chart.evaluate(element => element.getBoundingClientRect().height)
+	const chartHeight = await surface.evaluate(element => element.getBoundingClientRect().height)
+	for (const key of ["Home", "ArrowRight", "ArrowRight", "ArrowRight", "End"]) {
+		await surface.press(key)
+		await expect
+			.poll(() => chart.evaluate(element => element.getBoundingClientRect().height))
+			.toBe(height)
+		await expect
+			.poll(() => surface.evaluate(element => element.getBoundingClientRect().height))
+			.toBe(chartHeight)
+	}
+})

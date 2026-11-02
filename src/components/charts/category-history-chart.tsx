@@ -8,7 +8,7 @@ import CategorySpendingMix from "@/components/charts/category-spending-mix"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useHistory } from "@/history"
 import { themeColor } from "@/lib/palette"
-import { formatCurrency } from "@/lib/utils"
+import { cn, formatCurrency } from "@/lib/utils"
 import { BREAKDOWN_MONTHS, type SpendingHistoryMonth } from "@/logic/dashboard"
 
 type SpendingSeries = SpendingHistoryMonth["categories"][number]
@@ -81,8 +81,13 @@ export default function CategoryHistoryChart({
 		selected && Object.values(selected.seriesValues).every(value => value === 0)
 
 	return (
-		<div className="grid items-start gap-5 xl:items-stretch xl:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
-			<Card className="order-2 min-w-0 xl:order-1">
+		<div
+			className={cn(
+				"grid items-start gap-5 xl:items-stretch xl:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]",
+				limit !== undefined && "xl:h-[26rem]",
+			)}
+		>
+			<Card className="order-2 min-h-0 min-w-0 xl:order-1">
 				<CardHeader>
 					<CardTitle className="flex flex-wrap items-center gap-2">
 						{shown?.current
@@ -97,7 +102,7 @@ export default function CategoryHistoryChart({
 							: "Gross spending · refunds excluded"}
 					</CardDescription>
 				</CardHeader>
-				<CardContent>
+				<CardContent className="min-h-0 overflow-y-auto">
 					{shown?.current ? (
 						<div
 							role="group"
@@ -139,7 +144,7 @@ export default function CategoryHistoryChart({
 					)}
 				</CardContent>
 			</Card>
-			<Card className="order-1 min-w-0 xl:order-2">
+			<Card className="order-1 min-h-0 min-w-0 xl:order-2">
 				<CardHeader>
 					<CardTitle className="flex flex-wrap items-center gap-2">
 						Category trend
