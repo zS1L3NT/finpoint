@@ -148,7 +148,7 @@ export default function BarChart({
 							key={index}
 							className={cn(
 								"transition-opacity duration-150 ease-out",
-								active !== null && active !== index && "opacity-35",
+								active !== null && active !== index && "opacity-65",
 							)}
 						>
 							{series.map((s, position) => {

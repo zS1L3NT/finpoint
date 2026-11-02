@@ -8,7 +8,6 @@ const cardTitles = [
 	"Spending forecast",
 	"Surplus / Shortfall",
 	"Spending by day",
-	"Spending by weekday",
 	"Category trend",
 	"Categories this month",
 	"Monthly budgets",
@@ -114,6 +113,7 @@ test("overview charts: every dense chart fits the viewport with usable graph sur
 			await card.getByRole("application").focus()
 			await page.keyboard.press("ArrowRight")
 			await expect(card.locator(chartTooltip)).toBeVisible()
+			if (title === "Category trend") await card.getByRole("application").press("End")
 		}
 	}
 })
@@ -266,7 +266,6 @@ test("populated charts: tooltips stay numeric, drills work by keyboard and a Rec
 			"Spending forecast",
 			"Surplus / Shortfall",
 			"Spending by day",
-			"Spending by weekday",
 			"Category trend",
 		]) {
 			const chart = card(page, title)
@@ -446,9 +445,6 @@ test.describe("pinned overview date", () => {
 				"$20.00 refunded · $80.00 net",
 			)
 			await expect(mix.getByRole("link", { name: /Transfer|Income|Savings/ })).toHaveCount(0)
-			await expect(card(page, "Spending by weekday")).toContainText(
-				"Compared with 1 previous full months",
-			)
 			await expect(card(page, "Biggest changes")).toContainText("Against the 1-month average")
 		})
 		await test.step("spending calendar: daily amount, zero and refund days drill into exact Records", async () => {
@@ -650,7 +646,6 @@ test.describe("pinned overview date", () => {
 			"Spending forecast",
 			"Surplus / Shortfall",
 			"Spending by day",
-			"Spending by weekday",
 			"Category trend",
 			"Spending over time",
 		]) {
@@ -664,8 +659,8 @@ test.describe("pinned overview date", () => {
 				await surface.focus()
 				const tooltip = chart.locator(chartTooltip)
 				if (title === "Category trend") {
-					// Reading a month swaps the breakdown list under the bars to that month.
-					const breakdown = chart.getByRole("group", { name: /^Categories in / })
+					// Reading a month updates the shared category list beside the chart.
+					const breakdown = page.getByRole("group", { name: /^Categories in / })
 					await surface.press("Home")
 					await expect(tooltip).toBeVisible()
 					const first = (await tooltip.locator("span").first().textContent()) ?? ""
@@ -678,9 +673,6 @@ test.describe("pinned overview date", () => {
 					await expect(breakdown).toContainText("selected month")
 					await expect(breakdown).toContainText("$100.00")
 					await expect(breakdown).toContainText("$117.53")
-				} else if (title === "Spending by weekday") {
-					await expect(tooltip).toContainText("Average per Monday")
-					await expect(tooltip).toContainText("$92.10")
 				} else {
 					for (let index = 0; index < 3; index++) {
 						await surface.press("ArrowRight")
@@ -735,9 +727,6 @@ test.describe("pinned overview date", () => {
 		)
 		await expect(card(page, "Biggest changes")).toContainText(
 			"Not enough history to compare categories yet.",
-		)
-		await expect(card(page, "Spending by weekday")).toContainText(
-			"No comparison history available.",
 		)
 		await expect(card(page, "Spending calendar")).toContainText("0 spending days · $0.00")
 	})
@@ -888,4 +877,142 @@ test("Spending forecast: preserves scope and legend semantics", { tag: ["@light"
 	await expect(page.getByRole("option", { name: "All spending", exact: true })).toHaveCount(0)
 	await page.getByRole("option", { name: "Recurring", exact: true }).click()
 	await expect(chart.getByText("Recurring budget", { exact: true })).toBeVisible()
+})
+
+test("overview: forecast fills XL card and category hover preserves bars", async ({
+	page,
+	isMobile,
+}) => {
+	await seedWorkspace(page)
+	await page.goto(overview)
+	const forecast = card(page, "Spending forecast")
+	if (!isMobile) {
+		for (const width of [1440, 1920, 2560]) {
+			await page.setViewportSize({ width, height: 1080 })
+			await expect
+				.poll(async () => {
+					const content = await forecast
+						.locator('[data-slot="card-content"]')
+						.boundingBox()
+					const summary = await forecast
+						.locator('[data-slot="card-content"]')
+						.locator(":scope > :last-child")
+						.boundingBox()
+					return content && summary
+						? content.y + content.height - summary.y - summary.height
+						: 999
+				})
+				.toBeLessThan(2)
+		}
+	}
+	const surface = card(page, "Category trend").getByRole("application")
+	await surface.scrollIntoViewIfNeeded()
+	const marks = surface.locator('[data-slot="chart-mark"]')
+	const paths = await marks.evaluateAll(elements =>
+		elements.map(element => element.getAttribute("d")),
+	)
+	await surface.focus()
+	await surface.press("End")
+	await expect(card(page, "Category trend").locator(chartTooltip)).toBeVisible()
+	await expect
+		.poll(() =>
+			marks.evaluateAll(elements => elements.map(element => element.getAttribute("d"))),
+		)
+		.toEqual(paths)
+	const dimmed = surface.locator("g.opacity-65").first()
+	await expect
+		.poll(() => dimmed.evaluate(element => Number(getComputedStyle(element).opacity)))
+		.toBeGreaterThanOrEqual(0.6)
+	await expect(page.getByText("Spending by weekday", { exact: true })).toHaveCount(0)
+})
+
+test("category trend: one shared list follows the read month and keeps its links reachable", async ({
+	page,
+	isMobile,
+}) => {
+	await seedWorkspace(page)
+	await page.goto(overview)
+	const chart = card(page, "Category trend")
+	const surface = chart.getByRole("application")
+	const list = page.getByRole("group", { name: /^Categories in / })
+	await expect(list).toHaveAccessibleName("Categories in Oct 2026")
+	await expect(list).toContainText("$20.00 refunded")
+	await expect(chart.getByRole("group", { name: /^Categories in / })).toHaveCount(0)
+	await surface.scrollIntoViewIfNeeded()
+	await surface.focus()
+	await surface.press("Home")
+	await expect(list).toHaveAccessibleName("Categories in Jun 2026")
+	await surface.press("ArrowRight")
+	await surface.press("ArrowRight")
+	await surface.press("ArrowRight")
+	await expect(list).toHaveAccessibleName("Categories in Sep 2026")
+	await expect(list.getByRole("link").first()).toHaveAttribute("href", /month=September/)
+	if (!isMobile) {
+		const box = await surface.boundingBox()
+		if (!box) throw new Error("Category trend surface missing")
+		await surface.hover({ position: { x: box.width * 0.7, y: 80 } })
+		await list.hover()
+		await expect(list).toHaveAccessibleName("Categories in Sep 2026")
+	}
+	await surface.focus()
+	await surface.press("End")
+	await expect(list).toHaveAccessibleName("Categories in Oct 2026")
+	await expect(card(page, "Categories this month")).toContainText("$20.00 refunded")
+})
+
+test("category cards: cap five rows and keep equal XL heights when expanding", async ({
+	page,
+	isMobile,
+}) => {
+	await setDateOnly(page, new Date("2026-11-01T12:00:00+08:00"))
+	await seedWorkspace(page, "dense")
+	await page.goto(overview)
+	if (!isMobile) await page.setViewportSize({ width: 1920, height: 1080 })
+	const categories = card(page, "Categories this month")
+	const chart = card(page, "Category trend")
+	const toggle = categories.getByRole("button", { name: /more categories/ })
+	await expect(categories.getByRole("link")).toHaveCount(5)
+	await expect(toggle).toHaveAttribute("aria-expanded", "false")
+	for (const expanded of [false, true, false]) {
+		if (expanded) await toggle.click()
+		else if (await categories.getByRole("button", { name: "Show fewer categories" }).count())
+			await categories.getByRole("button", { name: "Show fewer categories" }).click()
+		if (expanded) expect(await categories.getByRole("link").count()).toBeGreaterThan(5)
+		else await expect(categories.getByRole("link")).toHaveCount(5)
+		if (!isMobile) {
+			await expect
+				.poll(async () => {
+					const left = await categories.boundingBox()
+					const right = await chart.boundingBox()
+					return left && right ? Math.abs(left.height - right.height) : 999
+				})
+				.toBeLessThan(2)
+		}
+	}
+})
+
+test("category cards: reading different months keeps the XL row and chart height stable", async ({
+	page,
+	isMobile,
+}) => {
+	test.skip(isMobile, "Cards share a row at XL widths")
+	await setDateOnly(page, new Date("2026-11-01T12:00:00+08:00"))
+	await seedWorkspace(page, "dense")
+	await page.setViewportSize({ width: 1920, height: 1080 })
+	await page.goto(overview)
+	const chart = card(page, "Category trend")
+	const surface = chart.getByRole("application")
+	await surface.focus()
+	await surface.press("End")
+	const height = await chart.evaluate(element => element.getBoundingClientRect().height)
+	const chartHeight = await surface.evaluate(element => element.getBoundingClientRect().height)
+	for (const key of ["Home", "ArrowRight", "ArrowRight", "ArrowRight", "End"]) {
+		await surface.press(key)
+		await expect
+			.poll(() => chart.evaluate(element => element.getBoundingClientRect().height))
+			.toBe(height)
+		await expect
+			.poll(() => surface.evaluate(element => element.getBoundingClientRect().height))
+			.toBe(chartHeight)
+	}
 })

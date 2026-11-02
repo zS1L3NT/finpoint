@@ -7,7 +7,6 @@ export const overviewCharts = [
 	"Spending forecast",
 	"Surplus / Shortfall",
 	"Spending by day",
-	"Spending by weekday",
 	"Category trend",
 ]
 

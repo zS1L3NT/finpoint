@@ -1,6 +1,5 @@
 import type { Page } from "@playwright/test"
 import { expectPointerCursor } from "../support/assertions"
-import { chartTooltip } from "../support/charts"
 import { getScenario, IDS, statementRules } from "../support/data"
 import { setDateOnly } from "../support/date-only"
 import { openEditor, pickOption } from "../support/editors"
@@ -959,23 +958,6 @@ test("Statement detail: long pending description stays readable on list and deta
 	await expect(
 		page.getByRole("button", { name: "Edit Pending Statement", exact: true }),
 	).toHaveCount(0)
-})
-
-test("Spending by weekday: no comparison history renders zero spending without a fabricated baseline", async ({
-	page,
-}) => {
-	await seedWorkspace(page, "empty")
-	await page.goto("/?month=October&year=2026")
-	const chart = page.locator('[data-slot="card"]').filter({
-		has: page.locator('[data-slot="card-title"]').filter({ hasText: "Spending by weekday" }),
-	})
-	await expect(chart).toContainText("No comparison history available.")
-	await chart.getByRole("application").focus()
-	const tooltip = chart.locator(chartTooltip)
-	await expect(tooltip).toContainText("Average per Monday")
-	await expect(tooltip).toContainText("$0.00")
-	await expect(tooltip).not.toContainText("Previous")
-	await expect(chart).not.toContainText(/NaN|Infinity/)
 })
 
 test("narrow desktop: pages stack by available width and popups keep side margins", {
