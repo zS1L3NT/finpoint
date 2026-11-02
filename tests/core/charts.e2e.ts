@@ -113,6 +113,7 @@ test("overview charts: every dense chart fits the viewport with usable graph sur
 			await card.getByRole("application").focus()
 			await page.keyboard.press("ArrowRight")
 			await expect(card.locator(chartTooltip)).toBeVisible()
+			if (title === "Category trend") await card.getByRole("application").press("End")
 		}
 	}
 })
@@ -658,8 +659,8 @@ test.describe("pinned overview date", () => {
 				await surface.focus()
 				const tooltip = chart.locator(chartTooltip)
 				if (title === "Category trend") {
-					// Reading a month swaps the breakdown list under the bars to that month.
-					const breakdown = chart.getByRole("group", { name: /^Categories in / })
+					// Reading a month updates the shared category list beside the chart.
+					const breakdown = page.getByRole("group", { name: /^Categories in / })
 					await surface.press("Home")
 					await expect(tooltip).toBeVisible()
 					const first = (await tooltip.locator("span").first().textContent()) ?? ""
@@ -923,4 +924,69 @@ test("overview: forecast fills XL card and category hover preserves bars", async
 		.poll(() => dimmed.evaluate(element => Number(getComputedStyle(element).opacity)))
 		.toBeGreaterThanOrEqual(0.6)
 	await expect(page.getByText("Spending by weekday", { exact: true })).toHaveCount(0)
+})
+
+test("category trend: one shared list follows the read month and keeps its links reachable", async ({
+	page,
+	isMobile,
+}) => {
+	await seedWorkspace(page)
+	await page.goto(overview)
+	const chart = card(page, "Category trend")
+	const surface = chart.getByRole("application")
+	const list = page.getByRole("group", { name: /^Categories in / })
+	await expect(list).toHaveAccessibleName("Categories in Oct 2026")
+	await expect(list).toContainText("$20.00 refunded")
+	await expect(chart.getByRole("group", { name: /^Categories in / })).toHaveCount(0)
+	await surface.scrollIntoViewIfNeeded()
+	await surface.focus()
+	await surface.press("Home")
+	await expect(list).toHaveAccessibleName("Categories in Jun 2026")
+	await surface.press("ArrowRight")
+	await surface.press("ArrowRight")
+	await surface.press("ArrowRight")
+	await expect(list).toHaveAccessibleName("Categories in Sep 2026")
+	await expect(list.getByRole("link").first()).toHaveAttribute("href", /month=September/)
+	if (!isMobile) {
+		const box = await surface.boundingBox()
+		if (!box) throw new Error("Category trend surface missing")
+		await surface.hover({ position: { x: box.width * 0.7, y: 80 } })
+		await list.hover()
+		await expect(list).toHaveAccessibleName("Categories in Sep 2026")
+	}
+	await surface.focus()
+	await surface.press("End")
+	await expect(list).toHaveAccessibleName("Categories in Oct 2026")
+	await expect(card(page, "Categories this month")).toContainText("$20.00 refunded")
+})
+
+test("category cards: cap five rows and keep equal XL heights when expanding", async ({
+	page,
+	isMobile,
+}) => {
+	await setDateOnly(page, new Date("2026-11-01T12:00:00+08:00"))
+	await seedWorkspace(page, "dense")
+	await page.goto(overview)
+	if (!isMobile) await page.setViewportSize({ width: 1920, height: 1080 })
+	const categories = card(page, "Categories this month")
+	const chart = card(page, "Category trend")
+	const toggle = categories.getByRole("button", { name: /more categories/ })
+	await expect(categories.getByRole("link")).toHaveCount(5)
+	await expect(toggle).toHaveAttribute("aria-expanded", "false")
+	for (const expanded of [false, true, false]) {
+		if (expanded) await toggle.click()
+		else if (await categories.getByRole("button", { name: "Show fewer categories" }).count())
+			await categories.getByRole("button", { name: "Show fewer categories" }).click()
+		if (expanded) expect(await categories.getByRole("link").count()).toBeGreaterThan(5)
+		else await expect(categories.getByRole("link")).toHaveCount(5)
+		if (!isMobile) {
+			await expect
+				.poll(async () => {
+					const left = await categories.boundingBox()
+					const right = await chart.boundingBox()
+					return left && right ? Math.abs(left.height - right.height) : 999
+				})
+				.toBeLessThan(2)
+		}
+	}
 })

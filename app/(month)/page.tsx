@@ -9,7 +9,6 @@ import { toast } from "sonner"
 import CashflowChart from "@/components/charts/cashflow-chart"
 import CategoryHistoryChart from "@/components/charts/category-history-chart"
 import CategoryMovers from "@/components/charts/category-movers"
-import CategorySpendingMix from "@/components/charts/category-spending-mix"
 import DailySpendingChart from "@/components/charts/daily-spending-chart"
 import MonthlyBudgetUsage from "@/components/charts/monthly-budget-usage"
 import SpendingCalendar from "@/components/charts/spending-calendar"
@@ -274,53 +273,21 @@ export default function DashboardPage() {
 			{!period.is_future ? (
 				<>
 					{stage > 0 ? (
-						<div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
-							<Card className="min-w-0">
-								<CardHeader>
-									<ScopedCardTitle
-										scope={scope === "all" ? "All budgets" : scopeLabel}
-										color={scopeColor}
-									>
-										Categories this month
-									</ScopedCardTitle>
-									<CardDescription className="tabular-nums">
-										{scopeLabel} ·{" "}
-										{formatCurrency(
-											scopedCategories.reduce(
-												(sum, category) => sum + category.outflow,
-												0,
-											),
-										)}{" "}
-										expenses ·{" "}
-										{formatCurrency(
-											scopedCategories.reduce(
-												(sum, category) => sum + category.refunds,
-												0,
-											),
-										)}{" "}
-										refunds
-									</CardDescription>
-								</CardHeader>
-								<CardContent>
-									<CategorySpendingMix
-										categories={scopedCategories}
-										recordHref={categoryRecordHref}
-									/>
-								</CardContent>
-							</Card>
-							<CategoryHistoryChart
-								months={data.comparison_history}
-								through={period.through}
-								monthlyBudgetIds={scope === "all" ? null : scopedBudgetIds}
-								recordHref={categoryRecordHref}
-								badge={
-									<ScopeLabel
-										scope={scope === "all" ? "All budgets" : scopeLabel}
-										color={scopeColor}
-									/>
-								}
-							/>
-						</div>
+						<CategoryHistoryChart
+							key={`${dataMonth}-${dataYear}`}
+							categories={scopedCategories}
+							scopeLabel={scopeLabel}
+							months={data.comparison_history}
+							through={period.through}
+							monthlyBudgetIds={scope === "all" ? null : scopedBudgetIds}
+							recordHref={categoryRecordHref}
+							badge={
+								<ScopeLabel
+									scope={scope === "all" ? "All budgets" : scopeLabel}
+									color={scopeColor}
+								/>
+							}
+						/>
 					) : null}
 					{stage > 1 ? (
 						<div className="grid gap-5 lg:grid-cols-2">

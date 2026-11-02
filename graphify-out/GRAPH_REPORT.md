@@ -1,17 +1,17 @@
 # Graph Report - t3-0e6a25a0  (2026-11-02)
 
 ## Corpus Check
-- 251 files · ~230,355 words
+- 251 files · ~230,745 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 9 file(s) not represented in the graph (top: (none) 5, .example 1, .lock 1)
 
 ## Summary
-- 1937 nodes · 7753 edges · 96 communities (84 shown, 12 thin omitted)
+- 1937 nodes · 7752 edges · 95 communities (83 shown, 12 thin omitted)
 - Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 126 edges (avg confidence: 0.84)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `63a55b5d`
+- Built from commit: `01821d2b`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -38,7 +38,7 @@
 - google-drive.ts
 - Validation rule (ValidationError + Validator)
 - sync/page.tsx
-- category-history-chart.tsx
+- item.tsx
 - suspicious
 - package.json
 - ledger.e2e.ts
@@ -61,7 +61,6 @@
 - importer.ts
 - main.tsx
 - use-appearance.tsx
-- item.tsx
 - tests_support_fixtures_expect
 - formatter
 - devDependencies
@@ -115,7 +114,7 @@
 2. `PrimitivesSection()` - 180 edges
 3. `Button()` - 126 edges
 4. `react` - 97 edges
-5. `formatCurrency()` - 75 edges
+5. `formatCurrency()` - 74 edges
 6. `RecordEditorDialog()` - 63 edges
 7. `RecordCreatorDialog()` - 57 edges
 8. `UiIcon()` - 56 edges
@@ -146,7 +145,7 @@
 - **Test group to gate to merged report flow** — github_workflows_ci_core_group, github_workflows_ci_animations_group, github_workflows_ci_core, github_workflows_ci_animations, github_workflows_ci_blob_report_merge [EXTRACTED 1.00]
 - **Every browser test file joins exactly one CI group, enforced by the ledger** — tests_readme_behaviour_ledger, tests_readme_ci_groups, github_workflows_ci_core_group, github_workflows_ci_animations_group, agents_verification_rules [INFERRED 0.95]
 
-## Communities (96 total, 12 thin omitted)
+## Communities (95 total, 12 thin omitted)
 
 ### Community 0 - "cn"
 Cohesion: 0.11
@@ -236,9 +235,9 @@ Nodes (4): Old Laravel Api/*Controller mapping, Laravel-shaped { field: string[]
 Cohesion: 0.18
 Nodes (34): ACCEPT, BANKS_REQUIRING_ADDITIONAL_INFO, ImporterPage(), Step(), EmptyRecords(), metadata, PrivacyPage(), SECTIONS (+26 more)
 
-### Community 22 - "category-history-chart.tsx"
-Cohesion: 0.31
-Nodes (10): aggregateSeries(), CategoryHistoryChart(), ChartMonth, ChartSeries, MonthBreakdown(), MonthTick(), monthTotal(), prepareMonths() (+2 more)
+### Community 22 - "item.tsx"
+Cohesion: 0.20
+Nodes (11): Item(), ItemActions(), ItemContent(), ItemDescription(), ItemFooter(), ItemGroup(), ItemHeader(), ItemMedia() (+3 more)
 
 ### Community 23 - "suspicious"
 Cohesion: 0.07
@@ -324,10 +323,6 @@ Nodes (19): papaparse, ensureAccount(), combine(), dbsDescriptionKey(), debitCre
 Cohesion: 0.23
 Nodes (15): Toaster(), Appearance, applyAppearance(), getStoredAppearance(), handleSystemThemeChange(), initializeAppearance(), isDarkMode(), listeners (+7 more)
 
-### Community 45 - "item.tsx"
-Cohesion: 0.20
-Nodes (11): Item(), ItemActions(), ItemContent(), ItemDescription(), ItemFooter(), ItemGroup(), ItemHeader(), ItemMedia() (+3 more)
-
 ### Community 47 - "formatter"
 Cohesion: 0.15
 Nodes (13): arrowParentheses, bracketSameLine, bracketSpacing, jsxQuoteStyle, quoteProperties, quoteStyle, semicolons, trailingCommas (+5 more)
@@ -402,7 +397,7 @@ Nodes (7): optionalDependencies, lightningcss-linux-x64-gnu, lightningcss-win32-
 
 ### Community 67 - "(month)/page.tsx"
 Cohesion: 0.09
-Nodes (37): Comparison, comparisonRateText(), comparisonText(), ComparisonValue, DashboardData, DashboardMonthlyBudget, DashboardPage(), DashboardView (+29 more)
+Nodes (39): Comparison, comparisonRateText(), comparisonText(), ComparisonValue, DashboardData, DashboardMonthlyBudget, DashboardPage(), DashboardView (+31 more)
 
 ### Community 68 - "tsconfig.e2e.json"
 Cohesion: 0.29
@@ -481,8 +476,8 @@ Cohesion: 0.22
 Nodes (11): lucide-react, react-day-picker, buttonVariants, Calendar(), CalendarDayButton(), ButtonVariant, Month, MonthCal() (+3 more)
 
 ### Community 100 - "utils.ts"
-Cohesion: 0.10
-Nodes (36): CategoriesPage(), CategoryDialogState, CategoryTile(), luxon, bar(), BarChart(), BarSeries, PAD (+28 more)
+Cohesion: 0.09
+Nodes (44): CategoriesPage(), CategoryDialogState, CategoryTile(), luxon, bar(), BarChart(), BarSeries, PAD (+36 more)
 
 ## Knowledge Gaps
 - **83 isolated node(s):** `@fontsource-variable/inter`, `shadcn`, `tailwindcss`, `tw-animate-css`, `@biomejs/biome` (+78 more)
@@ -492,13 +487,13 @@ Nodes (36): CategoriesPage(), CategoryDialogState, CategoryTile(), luxon, bar(),
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `cn()` connect `cn` to `input-group.tsx`, `Button`, `(month)/page.tsx`, `utils.ts`, `ui/field.tsx`, `duplicates/page.tsx`, `Input`, `primitives.tsx`, `budgets/page.tsx`, `react`, `item.tsx`, `icon.tsx`, `pagination.tsx`, `sync/page.tsx`, `amount-filter.tsx`, `suggestions.ts`, `accounts/page.tsx`, `lucide-react`?**
+- **Why does `cn()` connect `cn` to `input-group.tsx`, `Button`, `(month)/page.tsx`, `utils.ts`, `ui/field.tsx`, `duplicates/page.tsx`, `Input`, `primitives.tsx`, `budgets/page.tsx`, `react`, `icon.tsx`, `pagination.tsx`, `sync/page.tsx`, `amount-filter.tsx`, `item.tsx`, `suggestions.ts`, `accounts/page.tsx`, `lucide-react`?**
   _High betweenness centrality (0.088) - this node is a cross-community bridge._
 - **What connects `@fontsource-variable/inter`, `shadcn`, `tailwindcss` to the rest of the system?**
   _83 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `cn` be split into smaller, more focused modules?**
   _Cohesion score 0.112375533428165 - nodes in this community are weakly interconnected._
-- **Why does `react` connect `react` to `cn`, `Button`, `auto-sync.ts`, `primitives.tsx`, `budgets/page.tsx`, `icon.tsx`, `sync/page.tsx`, `category-history-chart.tsx`, `package.json`, `suggestions.ts`, `input-group.tsx`, `ui/field.tsx`, `Input`, `main.tsx`, `use-appearance.tsx`, `item.tsx`, `pagination.tsx`, `amount-filter.tsx`, `providers.tsx`, `accounts/page.tsx`, `(month)/page.tsx`, `duplicates/page.tsx`, `lucide-react`, `utils.ts`?**
+- **Why does `react` connect `react` to `cn`, `Button`, `auto-sync.ts`, `primitives.tsx`, `budgets/page.tsx`, `icon.tsx`, `sync/page.tsx`, `item.tsx`, `package.json`, `suggestions.ts`, `input-group.tsx`, `ui/field.tsx`, `Input`, `main.tsx`, `use-appearance.tsx`, `pagination.tsx`, `amount-filter.tsx`, `providers.tsx`, `accounts/page.tsx`, `(month)/page.tsx`, `duplicates/page.tsx`, `lucide-react`, `utils.ts`?**
   _High betweenness centrality (0.074) - this node is a cross-community bridge._
 - **Should `Button` be split into smaller, more focused modules?**
   _Cohesion score 0.0698314413484692 - nodes in this community are weakly interconnected._

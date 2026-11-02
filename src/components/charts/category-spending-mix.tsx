@@ -6,6 +6,7 @@ import { formatCurrency } from "@/lib/utils"
 export default function CategorySpendingMix({
 	categories,
 	recordHref,
+	limit,
 }: {
 	categories: {
 		id: string
@@ -17,6 +18,7 @@ export default function CategorySpendingMix({
 		records: number
 	}[]
 	recordHref: (id: string) => string
+	limit?: number
 }) {
 	const { handlePush } = useHistory()
 	const total = categories.reduce((sum, category) => sum + category.outflow, 0)
@@ -25,7 +27,7 @@ export default function CategorySpendingMix({
 		.sort((a, b) => b.outflow - a.outflow)
 	return (
 		<div className="grid gap-4">
-			{rows.map(category => {
+			{rows.slice(0, limit).map(category => {
 				const value = category.outflow
 				const share = total > 0 ? (value / total) * 100 : 0
 				return (
