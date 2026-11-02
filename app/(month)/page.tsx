@@ -14,7 +14,6 @@ import DailySpendingChart from "@/components/charts/daily-spending-chart"
 import MonthlyBudgetUsage from "@/components/charts/monthly-budget-usage"
 import SpendingCalendar from "@/components/charts/spending-calendar"
 import TotalSpendingChart from "@/components/charts/total-spending-chart"
-import WeekdayBars from "@/components/charts/weekday-bars"
 import MonthlyBudgetDialog from "@/components/dialogs/monthly-budget"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import { Metric as DashboardMetric, type Delta, MetricGrid } from "@/components/metric"
@@ -54,7 +53,6 @@ type Comparison = DashboardData["comparison"]
 type ComparisonValue = Comparison["income"]
 type Projection = DashboardView["pace"]["projection"]
 type PaceData = DashboardView["pace"]
-type WeekdayBreakdown = DashboardData["weekday"]
 
 export default function DashboardPage() {
 	const { handlePush } = useHistory()
@@ -86,7 +84,7 @@ export default function DashboardPage() {
 	const monthlyBudgetDailyData = view?.monthlyBudgetDaily
 	// The summary and pace chart paint first; the sections below the fold then mount one per
 	// frame. Mounting every chart in one commit blocked arrival for ~300ms in production.
-	const stage = useStagedMount(6, !!data && !!paceData && !!monthlyBudgetDailyData)
+	const stage = useStagedMount(5, !!data && !!paceData && !!monthlyBudgetDailyData)
 	if (!view || !data || !paceData || !monthlyBudgetDailyData) return null
 	const {
 		scope,
@@ -99,7 +97,7 @@ export default function DashboardPage() {
 		scopeFilters,
 		paceFilters,
 	} = view
-	const { period, summary, series, weekday, future_records_count } = data
+	const { period, summary, series, future_records_count } = data
 	// Everything below shows the loaded data, so it takes the data's own month: while the next
 	// month loads, labels and links stay with the numbers on screen.
 	const dataMonth = data.month ?? month
@@ -197,7 +195,7 @@ export default function DashboardPage() {
 									: "Recorded spending against the monthly plan."}
 							</CardDescription>
 						</CardHeader>
-						<CardContent>
+						<CardContent className="flex min-h-0 flex-1 flex-col">
 							<CashflowChart
 								data={paceSeries}
 								forecast={paceData.forecast}
@@ -414,8 +412,7 @@ export default function DashboardPage() {
 						</Card>
 					) : null}
 
-					{stage > 4 ? <WeekdayCard weekday={weekday} /> : null}
-					{stage > 5 ? (
+					{stage > 4 ? (
 						<InvestmentRow summary={summary} month={dataMonth} year={dataYear} />
 					) : null}
 				</>
@@ -500,32 +497,6 @@ function ScopeSelect({
 				</SelectGroup>
 			</SelectContent>
 		</Select>
-	)
-}
-
-function WeekdayCard({ weekday }: { weekday: WeekdayBreakdown }) {
-	return (
-		<Card>
-			<CardHeader>
-				<ScopedCardTitle scope="All budgets">Spending by weekday</ScopedCardTitle>
-				<CardDescription>
-					Spending on each weekday ÷ its occurrences in the month, including zero-spend
-					days.
-					{weekday.comparison_count
-						? ` Compared with ${weekday.comparison_count} previous full months, using all occurrences of the same weekday.`
-						: " No comparison history available."}
-				</CardDescription>
-			</CardHeader>
-			<CardContent>
-				<WeekdayBars stats={weekday.stats} comparisonCount={weekday.comparison_count} />
-				{weekday.weekend ? (
-					<p className="mt-3 text-xs text-muted-foreground">
-						Weekend days average {formatCurrency(weekday.weekend.weekend_average)} vs{" "}
-						{formatCurrency(weekday.weekend.weekday_average)} on weekdays this month.
-					</p>
-				) : null}
-			</CardContent>
-		</Card>
 	)
 }
 

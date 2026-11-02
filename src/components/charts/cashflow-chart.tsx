@@ -57,14 +57,17 @@ export default function CashflowChart({
 	}
 
 	return (
-		<div className="grid gap-4" aria-label="Cumulative income, spending, and surplus">
-			<div>
+		<div
+			className="flex min-h-0 flex-1 flex-col gap-4"
+			aria-label="Cumulative income, spending, and surplus"
+		>
+			<div className="flex min-h-0 flex-1 flex-col">
 				<p className="mb-2 text-xs font-medium text-muted-foreground">
 					Cumulative spending · SGD
 				</p>
 				<TrendChart
 					label="Cumulative spending by day"
-					className="h-52 w-full min-w-0 sm:h-64"
+					className="h-52 w-full min-w-0 sm:h-64 xl:h-auto xl:min-h-64 xl:flex-1"
 					labels={Array.from({ length }, (_, index) => `${month} ${index + 1}`)}
 					ticks={dayTicks(length).map(day => ({ index: day - 1, label: String(day) }))}
 					split={amount ?? undefined}

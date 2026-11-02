@@ -8,7 +8,6 @@ const cardTitles = [
 	"Spending forecast",
 	"Surplus / Shortfall",
 	"Spending by day",
-	"Spending by weekday",
 	"Category trend",
 	"Categories this month",
 	"Monthly budgets",
@@ -266,7 +265,6 @@ test("populated charts: tooltips stay numeric, drills work by keyboard and a Rec
 			"Spending forecast",
 			"Surplus / Shortfall",
 			"Spending by day",
-			"Spending by weekday",
 			"Category trend",
 		]) {
 			const chart = card(page, title)
@@ -446,9 +444,6 @@ test.describe("pinned overview date", () => {
 				"$20.00 refunded · $80.00 net",
 			)
 			await expect(mix.getByRole("link", { name: /Transfer|Income|Savings/ })).toHaveCount(0)
-			await expect(card(page, "Spending by weekday")).toContainText(
-				"Compared with 1 previous full months",
-			)
 			await expect(card(page, "Biggest changes")).toContainText("Against the 1-month average")
 		})
 		await test.step("spending calendar: daily amount, zero and refund days drill into exact Records", async () => {
@@ -650,7 +645,6 @@ test.describe("pinned overview date", () => {
 			"Spending forecast",
 			"Surplus / Shortfall",
 			"Spending by day",
-			"Spending by weekday",
 			"Category trend",
 			"Spending over time",
 		]) {
@@ -678,9 +672,6 @@ test.describe("pinned overview date", () => {
 					await expect(breakdown).toContainText("selected month")
 					await expect(breakdown).toContainText("$100.00")
 					await expect(breakdown).toContainText("$117.53")
-				} else if (title === "Spending by weekday") {
-					await expect(tooltip).toContainText("Average per Monday")
-					await expect(tooltip).toContainText("$92.10")
 				} else {
 					for (let index = 0; index < 3; index++) {
 						await surface.press("ArrowRight")
@@ -735,9 +726,6 @@ test.describe("pinned overview date", () => {
 		)
 		await expect(card(page, "Biggest changes")).toContainText(
 			"Not enough history to compare categories yet.",
-		)
-		await expect(card(page, "Spending by weekday")).toContainText(
-			"No comparison history available.",
 		)
 		await expect(card(page, "Spending calendar")).toContainText("0 spending days · $0.00")
 	})
@@ -888,4 +876,51 @@ test("Spending forecast: preserves scope and legend semantics", { tag: ["@light"
 	await expect(page.getByRole("option", { name: "All spending", exact: true })).toHaveCount(0)
 	await page.getByRole("option", { name: "Recurring", exact: true }).click()
 	await expect(chart.getByText("Recurring budget", { exact: true })).toBeVisible()
+})
+
+test("overview: forecast fills XL card and category hover preserves bars", async ({
+	page,
+	isMobile,
+}) => {
+	await seedWorkspace(page)
+	await page.goto(overview)
+	const forecast = card(page, "Spending forecast")
+	if (!isMobile) {
+		for (const width of [1440, 1920, 2560]) {
+			await page.setViewportSize({ width, height: 1080 })
+			await expect
+				.poll(async () => {
+					const content = await forecast
+						.locator('[data-slot="card-content"]')
+						.boundingBox()
+					const summary = await forecast
+						.locator('[data-slot="card-content"]')
+						.locator(":scope > :last-child")
+						.boundingBox()
+					return content && summary
+						? content.y + content.height - summary.y - summary.height
+						: 999
+				})
+				.toBeLessThan(2)
+		}
+	}
+	const surface = card(page, "Category trend").getByRole("application")
+	await surface.scrollIntoViewIfNeeded()
+	const marks = surface.locator('[data-slot="chart-mark"]')
+	const paths = await marks.evaluateAll(elements =>
+		elements.map(element => element.getAttribute("d")),
+	)
+	await surface.focus()
+	await surface.press("End")
+	await expect(card(page, "Category trend").locator(chartTooltip)).toBeVisible()
+	await expect
+		.poll(() =>
+			marks.evaluateAll(elements => elements.map(element => element.getAttribute("d"))),
+		)
+		.toEqual(paths)
+	const dimmed = surface.locator("g.opacity-65").first()
+	await expect
+		.poll(() => dimmed.evaluate(element => Number(getComputedStyle(element).opacity)))
+		.toBeGreaterThanOrEqual(0.6)
+	await expect(page.getByText("Spending by weekday", { exact: true })).toHaveCount(0)
 })
