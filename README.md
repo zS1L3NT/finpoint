@@ -1,4 +1,4 @@
-![Finpoint Cover Image](https://res.cloudinary.com/zs1l3nt/image/upload/repositories/finpoint.png)
+![Finpoint Cover Image](https://res.cloudinary.com/zs1l3nt/image/upload/v1793559402/repositories/finpoint.png)
 
 # Finpoint
 
