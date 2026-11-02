@@ -1,14 +1,10 @@
 import type { AnalyticsTreatment } from "@/types"
 
 export const DEFAULT_MONTHLY_BUDGETS = [
-	{ name: "Daily", color: "#38bdf8", display_order: 10 },
-	{
-		name: "Recurring",
-		color: "#a78bfa",
-		display_order: 20,
-	},
-	{ name: "Irregular", color: "#fbbf24", display_order: 30 },
-	{ name: "Travel", color: "#fb7185", display_order: 40 },
+	{ name: "Daily", color: "#43a047", display_order: 10 },
+	{ name: "Recurring", color: "#0097a7", display_order: 20 },
+	{ name: "Irregular", color: "#ab47bc", display_order: 30 },
+	{ name: "Travel", color: "#ce9600", display_order: 40 },
 ] as const
 
 export const DEFAULT_CATEGORIES: {
