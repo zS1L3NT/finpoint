@@ -1,4 +1,5 @@
 import type { Page } from "@playwright/test"
+import { IDS } from "../support/data"
 import { setDateOnly } from "../support/date-only"
 import { pickOption } from "../support/editors"
 import { expect, seedWorkspace, test } from "../support/fixtures"
@@ -749,4 +750,31 @@ test("Budget detail: remaining row does not replay its entrance after detaching"
 			sample.frames.every(frame => frame.opacity === 1 && frame.transform === "none"),
 		).toBe(true)
 	}
+})
+
+test("selection toolbar: fades in without movement when reduced motion is requested", {
+	tag: ["@reduced-motion"],
+}, async ({ page, workspace }) => {
+	void workspace
+	await page.goto("/allocator")
+	const row = page.getByRole("checkbox", {
+		name: `Select statement ${IDS.statements.unallocated[2]}`,
+		exact: true,
+	})
+	await expect(row).toBeVisible()
+	const samples = await sampleVisibleRowAnimations(page, 'aside[aria-live="polite"]', () =>
+		row.click(),
+	)
+	expect(samples).toHaveLength(1)
+	const frames = samples[0]?.frames
+	if (!frames?.length) throw new Error("Selection toolbar has no rendered frames")
+	expect(frames.at(-1)?.opacity).toBe(1)
+	if (test.info().project.use.reducedMotion === "reduce") {
+		expect(frames.every(frame => poseIsIdentity(frame))).toBe(true)
+	} else {
+		expect(frames.some(frame => !poseIsIdentity(frame))).toBe(true)
+	}
+	await row.focus()
+	await page.keyboard.press("Space")
+	await expect(page.locator('aside[aria-live="polite"]')).toHaveCount(0)
 })

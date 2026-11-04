@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from "framer-motion"
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
 import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field"
 import { DURATION, EASE_OUT, TRANSITION } from "@/lib/motion"
 
@@ -29,6 +29,7 @@ export function FormField({
 	children,
 	...props
 }: FormFieldProps & { children: React.ReactNode }) {
+	const reduceMotion = useReducedMotion()
 	return (
 		<Field data-invalid={!!errors?.length} data-disabled={disabled || undefined} {...props}>
 			{label ? <FieldLabel htmlFor={id}>{label}</FieldLabel> : null}
@@ -42,7 +43,7 @@ export function FormField({
 						key="autopopulated"
 						id={`${id}-autopopulated`}
 						className="text-emerald-700 dark:text-emerald-400"
-						initial={{ opacity: 0, y: -3 }}
+						initial={{ opacity: 0, y: reduceMotion ? 0 : -3 }}
 						animate={{ opacity: 1, y: 0 }}
 						exit={{
 							opacity: 0,
