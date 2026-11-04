@@ -1,7 +1,7 @@
 # Graph Report - t3-001ff1de  (2026-11-04)
 
 ## Corpus Check
-- 251 files · ~231,843 words
+- 251 files · ~231,955 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 9 file(s) not represented in the graph (top: (none) 5, .example 1, .lock 1)
 
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `88ba7b1f`
+- Built from commit: `57ca3fbe`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -481,16 +481,16 @@ Nodes (18): bar(), BarChart(), BarSeries, PAD, BudgetProgressChart(), BudgetProg
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `cn()` connect `cn` to `record-editor.tsx`, `(month)/page.tsx`, `trend-chart.tsx`, `Button`, `next`, `categories/page.tsx`, `utils.ts`, `accounts/page.tsx`, `lib/motion.ts`, `round2`, `primitives.tsx`, `app-sidebar.tsx`, `pagination.tsx`, `button.tsx`, `spending-calendar.tsx`, `formatCurrency`, `budgets/[id]/page.tsx`?**
-  _High betweenness centrality (0.091) - this node is a cross-community bridge._
+  _High betweenness centrality (0.093) - this node is a cross-community bridge._
 - **What connects `@fontsource-variable/inter`, `shadcn`, `tailwindcss` to the rest of the system?**
   _83 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `cn` be split into smaller, more focused modules?**
   _Cohesion score 0.09805735430157261 - nodes in this community are weakly interconnected._
-- **Why does `react` connect `utils.ts` to `cn`, `record-editor.tsx`, `auto-sync.ts`, `primitives.tsx`, `categories/page.tsx`, `lib/motion.ts`, `app-sidebar.tsx`, `app.tsx`, `package.json`, `next`, `accounts/page.tsx`, `round2`, `pagination.tsx`, `button.tsx`, `spending-calendar.tsx`, `providers.tsx`, `formatCurrency`, `budgets/[id]/page.tsx`, `(month)/page.tsx`, `Button`, `trend-chart.tsx`?**
-  _High betweenness centrality (0.071) - this node is a cross-community bridge._
+- **Why does `src/data/* (persistence, migrations, seeding, backup serialization, Drive storage)` connect `src/data/* (persistence, migrations, seeding, backup serialization, Drive storage)` to `UI layer (app pages + components)`, `providers.tsx`?**
+  _High betweenness centrality (0.068) - this node is a cross-community bridge._
 - **Should `record-editor.tsx` be split into smaller, more focused modules?**
   _Cohesion score 0.06763796909492274 - nodes in this community are weakly interconnected._
-- **Why does `src/data/* (persistence, migrations, seeding, backup serialization, Drive storage)` connect `src/data/* (persistence, migrations, seeding, backup serialization, Drive storage)` to `UI layer (app pages + components)`, `providers.tsx`?**
-  _High betweenness centrality (0.069) - this node is a cross-community bridge._
+- **Why does `react` connect `utils.ts` to `cn`, `record-editor.tsx`, `auto-sync.ts`, `primitives.tsx`, `categories/page.tsx`, `lib/motion.ts`, `app-sidebar.tsx`, `app.tsx`, `package.json`, `next`, `accounts/page.tsx`, `round2`, `pagination.tsx`, `button.tsx`, `spending-calendar.tsx`, `providers.tsx`, `formatCurrency`, `budgets/[id]/page.tsx`, `(month)/page.tsx`, `Button`, `trend-chart.tsx`?**
+  _High betweenness centrality (0.067) - this node is a cross-community bridge._
 - **Should `db.ts` be split into smaller, more focused modules?**
   _Cohesion score 0.10416666666666667 - nodes in this community are weakly interconnected._

@@ -77,27 +77,33 @@ export default function RecordCreatorDialog({
 	// Analytics select keeps its laid-out label from the first frame.
 	const monthlyBudgets = useLiveQuery(() => listMonthlyBudgets(), [])
 
-	const recommendationKey = `${isOpen}:${statements.map(s => s.id).join(",")}`
+	// Rules, learned chips and similar Statements read the whole workspace, so they wait for the
+	// popup to finish entering: run during its fade, they block the frames it needs.
+	const [entered, setEntered] = useState(false)
+	const ready = isOpen && entered
+	const recommendationKey = `${ready}:${statements.map(s => s.id).join(",")}`
 	const recommendationQuery = useLiveQuery(
 		async () => ({
 			key: recommendationKey,
-			items: isOpen ? await statementRecommendations(statements.map(s => s.id)) : [],
+			items: ready ? await statementRecommendations(statements.map(s => s.id)) : undefined,
 		}),
 		[recommendationKey],
 	)
 	const recommendations =
 		recommendationQuery?.key === recommendationKey ? recommendationQuery.items : undefined
-	// Learning this workspace's suggestion weights takes a moment, so it happens shortly after
-	// the page settles rather than when the creator opens (Safari lacks requestIdleCallback).
+	// Learning this workspace's suggestion weights takes a moment, so it happens while the creator
+	// is closed and the page has settled, never during its entrance; reopening after a create
+	// relearns from the new Record (Safari lacks requestIdleCallback).
 	useEffect(() => {
+		if (isOpen) return
 		const id = setTimeout(() => void prepareSuggestions(), 1000)
 		return () => clearTimeout(id)
-	}, [])
+	}, [isOpen])
 	const statementKey = statements.map(s => s.id).join(",")
 	// Other allocable Statements of the same kind can take this Record's details in one go.
 	const similar = useLiveQuery(
-		() => (isOpen ? similarStatements(statementKey.split(",").filter(Boolean)) : []),
-		[isOpen, statementKey],
+		() => (ready ? similarStatements(statementKey.split(",").filter(Boolean)) : []),
+		[ready, statementKey],
 	)
 	const [includeSimilar, setIncludeSimilar] = useState(false)
 	const ruleSession = useRef("")
@@ -200,14 +206,14 @@ export default function RecordCreatorDialog({
 	// this workspace.
 	const learned = useLiveQuery(
 		() =>
-			isOpen
+			ready
 				? recordSuggestions({
 						statementIds: statementKey.split(",").filter(Boolean),
 						title: current.title,
 						datetime: current.datetime,
 					})
 				: undefined,
-		[isOpen, statementKey, current.title, current.datetime],
+		[ready, statementKey, current.title, current.datetime],
 	)
 	const applyRecommendation = (
 		item: Pick<RecordSuggestion, "field"> & { value: string | null },
@@ -314,6 +320,7 @@ export default function RecordCreatorDialog({
 	return (
 		<Dialog
 			open={isOpen}
+			onOpenChangeComplete={setEntered}
 			onOpenChange={isOpen => {
 				setIsOpen(isOpen)
 				if (isOpen) {
