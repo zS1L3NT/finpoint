@@ -39,8 +39,11 @@ import {
 } from "@/lib/utils"
 import { listAccounts } from "@/logic/accounts"
 import { paginateItems, parsePage, parsePageSize } from "@/logic/pagination"
-import { replacementComparison, replacementReason, sameDirection } from "@/logic/replacements"
-import { listStatements, replacementCandidates } from "@/logic/statements"
+import {
+	listStatements,
+	replacementCandidates,
+	suggestedReplacementCounts,
+} from "@/logic/statements"
 import { pathStatement } from "@/routes"
 import type {
 	Paginated,
@@ -226,17 +229,6 @@ export default function AllocatorPendingPage() {
 	)
 	const pending = pendingQuery ?? []
 	const allPending = useLiveQuery(() => listStatements({ is_pending: "true" }), []) ?? []
-	const imports =
-		useLiveQuery(
-			() =>
-				listStatements({
-					account_id: accountId === "all" ? null : accountId,
-					is_pending: "false",
-					is_unallocated: "true",
-				}),
-			[accountId],
-		) ?? []
-
 	const sortedPending = useMemo(
 		() =>
 			[...pending].sort(
@@ -246,16 +238,20 @@ export default function AllocatorPendingPage() {
 	)
 	const queuePage = parsePage(searchParams.get("page"))
 	const queuePageSize = parsePageSize(searchParams.get("per_page"), 25)
-	const pendingStatements = useMemo<Paginated<PendingReplacementStatement>>(() => {
-		const paginated = paginateItems(sortedPending, queuePage, queuePageSize)
-		return {
-			...paginated,
-			data: paginated.data.map(statement => ({
-				...statement,
-				suggestion_count: countSuggestions(statement, imports),
-			})),
-		}
-	}, [sortedPending, queuePage, queuePageSize, imports])
+	const pendingPage = useMemo(
+		() => paginateItems(sortedPending, queuePage, queuePageSize),
+		[sortedPending, queuePage, queuePageSize],
+	)
+	const pageIds = pendingPage.data.map(statement => statement.id)
+	const suggestionCounts =
+		useLiveQuery(() => suggestedReplacementCounts(pageIds), [pageIds.join(",")]) ?? {}
+	const pendingStatements: Paginated<PendingReplacementStatement> = {
+		...pendingPage,
+		data: pendingPage.data.map(statement => ({
+			...statement,
+			suggestion_count: suggestionCounts[statement.id] ?? 0,
+		})),
+	}
 
 	const selectedPendingStatement = pendingStatementId
 		? (allPending.find(statement => statement.id === pendingStatementId) ?? null)
@@ -621,34 +617,6 @@ export default function AllocatorPendingPage() {
 			/>
 		</>
 	)
-}
-
-function countSuggestions(statement: Statement, imports: Statement[]): number {
-	const pendingShape = {
-		id: statement.id,
-		account_id: statement.account.id,
-		amount: statement.amount,
-		datetime: statement.datetime,
-		is_pending: true,
-	}
-	let count = 0
-	for (const imported of imports) {
-		if (imported.account.id !== statement.account.id) continue
-		const candidate = {
-			id: imported.id,
-			account_id: imported.account.id,
-			amount: imported.amount,
-			datetime: imported.datetime,
-			is_pending: false,
-		}
-		if (!sameDirection(candidate, pendingShape)) continue
-		const comparison = replacementComparison(candidate, pendingShape, [])
-		if (Math.abs(comparison.day_difference) > 7) continue
-		if (comparison.amount_difference > 5) continue
-		if (replacementReason(candidate, pendingShape, [], []) !== null) continue
-		count += 1
-	}
-	return count
 }
 
 function PendingCard({
