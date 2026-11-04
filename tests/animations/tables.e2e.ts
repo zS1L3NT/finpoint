@@ -1,4 +1,5 @@
 import type { Page } from "@playwright/test"
+import { IDS } from "../support/data"
 import { setDateOnly } from "../support/date-only"
 import { pickOption } from "../support/editors"
 import { expect, seedWorkspace, test } from "../support/fixtures"
@@ -749,4 +750,63 @@ test("Budget detail: remaining row does not replay its entrance after detaching"
 			sample.frames.every(frame => frame.opacity === 1 && frame.transform === "none"),
 		).toBe(true)
 	}
+})
+
+test("allocator: an allocated Statement fades out and the rows below slide up", {
+	tag: ["@reduced-motion"],
+}, async ({ page, workspace }) => {
+	void workspace
+	await page.goto("/allocator")
+	const id = IDS.statements.unallocated[3]
+	const box = page.getByRole("checkbox", { name: `Select statement ${id}`, exact: true })
+	await expect(box).toBeVisible()
+	await box.click()
+	await page.getByRole("button", { name: "Allocate to record" }).click()
+	const sheet = page.getByRole("dialog", { name: "Allocate to pending record" })
+	await sheet.getByLabel("Search records").fill("StashAway")
+	await sheet.getByRole("button", { name: /StashAway Deposit/ }).click()
+	const editor = page.getByRole("dialog", { name: "Edit Record" })
+	await expect(editor).toBeVisible()
+	// Track the allocated row and the row just below it, by node, until both settle.
+	const recorder = await page.evaluateHandle(() => {
+		const rows = [...document.querySelectorAll("tbody tr, div.grid-cols-subgrid")].filter(
+			row => row.getBoundingClientRect().height > 0,
+		) as HTMLElement[]
+		const index = rows.findIndex(row => row.getAttribute("data-state") === "selected")
+		const leaving = rows[index]
+		const below = rows[index + 1]
+		const frames: { opacity: number | null; top: number }[] = []
+		const tick = () => {
+			if (!below) return
+			frames.push({
+				opacity: leaving?.isConnected ? Number(getComputedStyle(leaving).opacity) : null,
+				top: below.getBoundingClientRect().top,
+			})
+			if (frames.length < 240) requestAnimationFrame(tick)
+		}
+		requestAnimationFrame(tick)
+		return { frames, hasBelow: !!below }
+	})
+	expect(await recorder.evaluate(state => state.hasBelow), "a row sits below").toBe(true)
+	await editor.getByRole("button", { name: "Save changes" }).click()
+	await expect(editor).toHaveCount(0)
+	await expect(page.getByRole("checkbox", { name: `Select statement ${id}` })).toHaveCount(0)
+	await expect
+		.poll(() => recorder.evaluate(state => state.frames.length), { timeout: 10_000 })
+		.toBe(240)
+	const frames = await recorder.evaluate(state => state.frames)
+	await recorder.dispose()
+	const first = frames[0]?.top ?? 0
+	const last = frames.at(-1)?.top ?? 0
+	expect(last, "the rows below close the gap").toBeLessThan(first - 10)
+	const between = frames.filter(f => f.top < first - 1 && f.top > last + 1)
+	if (await page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches)) {
+		expect(between, "reduced motion closes the gap without sliding").toHaveLength(0)
+		return
+	}
+	// The fade shares its frames with the editor closing, so one in-between frame is the floor;
+	// without the exit the row goes straight from opaque to gone.
+	const fading = frames.filter(f => f.opacity !== null && f.opacity > 0.01 && f.opacity < 0.99)
+	expect(fading.length, "the allocated row fades through intermediate frames").toBeGreaterThan(0)
+	expect(between.length, "the rows below slide into the gap").toBeGreaterThan(1)
 })

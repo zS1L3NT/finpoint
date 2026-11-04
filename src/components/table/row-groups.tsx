@@ -1,4 +1,4 @@
-import { motion } from "framer-motion"
+import { AnimatePresence, LayoutGroup, motion } from "framer-motion"
 import { DateTime } from "luxon"
 import { TableCell, TableRow } from "@/components/ui/table"
 import { type RowEntrance, rowEnter } from "@/lib/motion"
@@ -91,6 +91,18 @@ export function GroupHeaderRow<TData>({
 	)
 }
 
+/**
+ * Lets rows with an `exit` fade out before they unmount; the group then re-measures the rows
+ * left behind, so their `layout` slides them into the gap.
+ */
+export function LeavingRows({ children }: { children: React.ReactNode }) {
+	return (
+		<LayoutGroup>
+			<AnimatePresence>{children}</AnimatePresence>
+		</LayoutGroup>
+	)
+}
+
 /** A mobile list row, animated like a desktop table row. */
 export function MobileRow({
 	index,
@@ -114,6 +126,7 @@ export function MobileGroupHeader<TData>({
 	rows,
 	index,
 	entrance,
+	leave,
 }: {
 	group: RowGroup<TData>
 	groupKey: string
@@ -121,10 +134,13 @@ export function MobileGroupHeader<TData>({
 	/** Position of the group's first row; headers enter together with it. */
 	index: number
 	entrance: RowEntrance
+	/** Exit props shared with the group's rows, so the header never lingers alone. */
+	leave?: Partial<React.ComponentProps<typeof motion.div>>
 }) {
 	return (
 		<motion.div
 			{...rowEnter(index, entrance)}
+			{...leave}
 			className={cn(MOBILE_ROW_CLASS, "bg-muted/50 px-3 py-1.5 text-sm")}
 		>
 			<div className="min-w-0">{group.label(groupKey, rows)}</div>

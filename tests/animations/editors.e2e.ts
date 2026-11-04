@@ -330,6 +330,50 @@ test("Record creator: pending warning reveals and collapses smoothly", {
 	}
 })
 
+test("Record creator: an allocation card grows for its error without squashing", {
+	tag: ["@reduced-motion"],
+}, async ({ page, workspace }) => {
+	void workspace
+	// A tall viewport keeps the allocation card on screen while it grows.
+	const size = page.viewportSize() ?? { width: 1440, height: 900 }
+	await page.setViewportSize({ width: size.width, height: 1400 })
+	await page.goto("/allocator")
+	const box = page.getByRole("checkbox", {
+		name: `Select statement ${IDS.statements.unallocated[2]}`,
+		exact: true,
+	})
+	await expect(box).toBeVisible()
+	await box.click()
+	await page.getByRole("button", { name: "Create Record", exact: true }).click()
+	const dialog = page.getByRole("dialog", { name: "Create New Record", exact: true })
+	await expect(dialog).toBeVisible()
+	// Valid details let submission reach the allocation amount's own rule.
+	await dialog.getByLabel("Title", { exact: true }).fill("Allocation error")
+	await chooseCategory(page, dialog)
+	await dialog.locator('[id="statements[0].amount"]').fill("0")
+	const samples = await sampleVisibleRowAnimations(
+		page,
+		'[data-slot="dialog-content"] div.p-0\\.5:has([id="statements[0].amount"])',
+		() => dialog.getByRole("button", { name: "Create Record", exact: true }).click(),
+	)
+	await expect(dialog.getByText(/^The amount must be (positive|negative)\.$/)).toBeVisible()
+	expect(samples).toHaveLength(1)
+	const frames = samples[0]?.frames ?? []
+	expect(
+		(frames.at(-1)?.layoutHeight ?? 0) - (frames[0]?.layoutHeight ?? 0),
+		"The error grows the card",
+	).toBeGreaterThan(4)
+	// Full layout animation would scale-correct the resize, squashing the card's text.
+	const scales = frames.map(frame => {
+		const values = /^matrix\(([^)]+)\)$/.exec(frame.transform)?.[1]?.split(",").map(Number)
+		return values ? [values[0], values[3]] : [1, 1]
+	})
+	expect(
+		scales.every(([x, y]) => Math.abs((x ?? 1) - 1) < 0.001 && Math.abs((y ?? 1) - 1) < 0.001),
+		"Allocation card never scales while it grows",
+	).toBe(true)
+})
+
 test("Record creator: learned chips and late autofill notes rise in after the creator opens", {
 	tag: ["@reduced-motion"],
 }, async ({ page }) => {
