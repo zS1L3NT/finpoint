@@ -17228,7 +17228,7 @@
       "file_type": "code",
       "norm_label": "facetnotapplicable",
       "source_file": "tests/component-inventory.ts",
-      "source_location": "L4411"
+      "source_location": "L4414"
     },
     {
       "id": "tests_component_inventory_notapplicable",
@@ -17250,7 +17250,7 @@
       "file_type": "code",
       "norm_label": "openfacets",
       "source_file": "tests/component-inventory.ts",
-      "source_location": "L4407"
+      "source_location": "L4410"
     },
     {
       "id": "tests_component_inventory_routeinventory",
@@ -17294,7 +17294,7 @@
       "file_type": "code",
       "norm_label": "scenarioprojectexemptions",
       "source_file": "tests/component-inventory.ts",
-      "source_location": "L4613"
+      "source_location": "L4616"
     },
     {
       "id": "tests_component_inventory_scenarioprojectlexiconexemptions",
@@ -17305,7 +17305,7 @@
       "file_type": "code",
       "norm_label": "scenarioprojectlexiconexemptions",
       "source_file": "tests/component-inventory.ts",
-      "source_location": "L4680"
+      "source_location": "L4683"
     },
     {
       "id": "tests_component_inventory_scenarioprojects",
@@ -17316,7 +17316,7 @@
       "file_type": "code",
       "norm_label": "scenarioprojects",
       "source_file": "tests/component-inventory.ts",
-      "source_location": "L4457"
+      "source_location": "L4460"
     },
     {
       "id": "tests_core_ledger_e2e",
@@ -108963,7 +108963,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tests/component-inventory.ts",
-      "source_location": "L4407",
+      "source_location": "L4410",
       "weight": 1.0
     },
     {
@@ -108974,7 +108974,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tests/component-inventory.ts",
-      "source_location": "L4411",
+      "source_location": "L4414",
       "weight": 1.0
     },
     {
@@ -108985,7 +108985,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tests/component-inventory.ts",
-      "source_location": "L4457",
+      "source_location": "L4460",
       "weight": 1.0
     },
     {
@@ -108996,7 +108996,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tests/component-inventory.ts",
-      "source_location": "L4613",
+      "source_location": "L4616",
       "weight": 1.0
     },
     {
@@ -109007,7 +109007,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tests/component-inventory.ts",
-      "source_location": "L4680",
+      "source_location": "L4683",
       "weight": 1.0
     },
     {
@@ -115104,5 +115104,5 @@
       "source_file": "tests/README.md"
     }
   ],
-  "built_at_commit": "57ca3fbe592f4b062ab3ca141452b71527798f46"
+  "built_at_commit": "baaa73ea4e7d6637ef74ba3c3acf337dc3f18e23"
 }

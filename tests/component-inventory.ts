@@ -938,7 +938,7 @@ export const componentInventory: InventoryEntry[] = [
 			"/records",
 			"/records/monthly",
 		],
-		visibleExports: ["GroupHeaderRow", "MobileGroupHeader", "MobileRow"],
+		visibleExports: ["GroupHeaderRow", "LeavingRows", "MobileGroupHeader", "MobileRow"],
 		dormantExports: [],
 		helperExports: [
 			"MOBILE_LIST_CLASS",
@@ -2909,6 +2909,9 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"src/components/table/row-groups.tsx#export.GroupHeaderRow.behaviour": [
 		"Records table: same-day subtotal includes positive and negative Records",
+	],
+	"src/components/table/row-groups.tsx#export.LeavingRows.behaviour": [
+		"allocator: an allocated Statement fades out and the rows below slide up",
 	],
 	"src/components/table/row-groups.tsx#export.MobileGroupHeader.behaviour": [
 		"Records table: same-day subtotal includes positive and negative Records",
