@@ -380,7 +380,7 @@ test("cascade assertion: count probes at 13 and 15 items reject simultaneous tai
 test("modal exit assertion: missing popup or backdrop motion fails even when both disappear", async ({
 	page,
 }) => {
-	for (const broken of ["none", "popup", "backdrop"] as const) {
+	for (const broken of ["none", "popup", "backdrop", "flash", "remount"] as const) {
 		await test.step(`modal exit assertion: ${broken} missing animation`, async () => {
 			await page.setContent(
 				'<div data-slot="dialog-overlay"></div><div data-slot="dialog-content">Modal</div><button>Close</button>',
@@ -396,11 +396,27 @@ test("modal exit assertion: missing popup or backdrop motion fails even when bot
 						if (broken === name) element.remove()
 						else
 							element
-								.animate([{ opacity: 1 }, { opacity: 0 }], {
-									duration: 180,
-									fill: "forwards",
+								.animate(
+									broken === "flash" && name === "popup"
+										? [{ opacity: 1 }, { opacity: 0 }, { opacity: 1 }]
+										: [{ opacity: 1 }, { opacity: 0 }],
+									{
+										duration: 180,
+										fill: "forwards",
+									},
+								)
+								.finished.then(() => {
+									element.remove()
+									if (broken === "remount" && name === "popup") {
+										setTimeout(() => {
+											const replacement = element.cloneNode(
+												true,
+											) as HTMLElement
+											document.body.append(replacement)
+											setTimeout(() => replacement.remove(), 80)
+										}, 80)
+									}
 								})
-								.finished.then(() => element.remove())
 					}
 				})
 			}, broken)
@@ -410,7 +426,11 @@ test("modal exit assertion: missing popup or backdrop motion fails even when bot
 			if (broken === "none") await result
 			else
 				await expect(result).rejects.toThrow(
-					broken === "popup" ? /Popup must animate/ : /Backdrop must fade/,
+					broken === "popup"
+						? /Popup must animate/
+						: broken === "backdrop"
+							? /Backdrop must fade/
+							: /must not reappear|must never flash back/,
 				)
 		})
 	}

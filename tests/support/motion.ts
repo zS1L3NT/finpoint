@@ -646,7 +646,7 @@ export async function expectModalExit(page: Page, selector: string, close: () =>
 				.map(animation => animation.finished.catch(() => undefined)),
 		)
 	})
-	const recorder = await popup.evaluateHandle(element => {
+	const recorder = await popup.evaluateHandle((element, selector) => {
 		const slot =
 			element.getAttribute("data-slot") === "sidebar"
 				? "sheet-overlay"
@@ -654,11 +654,20 @@ export async function expectModalExit(page: Page, selector: string, close: () =>
 		const overlays = [...document.querySelectorAll(`[data-slot="${slot}"]`)]
 		const overlay = overlays.at(-1)
 		if (!overlay) throw new Error("Modal backdrop missing before close")
-		const frames: { popup: number | null; backdrop: number | null; pose: string | null }[] = []
+		const frames: {
+			popup: number | null
+			backdrop: number | null
+			pose: string | null
+			visiblePopups: number
+		}[] = []
 		let stopped = false
 		const sample = () => {
 			const style = getComputedStyle(element)
 			frames.push({
+				visiblePopups: [...document.querySelectorAll(selector)].filter(node => {
+					const style = getComputedStyle(node)
+					return Number(style.opacity) > 0.01 && style.visibility !== "hidden"
+				}).length,
 				popup: element.isConnected ? Number(style.opacity) : null,
 				backdrop: overlay.isConnected ? Number(getComputedStyle(overlay).opacity) : null,
 				pose: element.isConnected
@@ -676,20 +685,46 @@ export async function expectModalExit(page: Page, selector: string, close: () =>
 				sample()
 			},
 		}
-	})
+	}, selector)
 	try {
 		await close()
 		await expect(popup).toHaveCount(0)
 		await expect.poll(() => recorder.evaluate(state => state.removed())).toBe(true)
+		// Observe beyond the 300ms motion budget: an exiting parent can remount a new portal.
+		await page.evaluate(
+			() =>
+				new Promise<void>(resolve => {
+					const start = performance.now()
+					const sample = () =>
+						performance.now() - start >= 400 ? resolve() : requestAnimationFrame(sample)
+					requestAnimationFrame(sample)
+				}),
+		)
 		await recorder.evaluate(state => state.stop())
 		const frames = await recorder.evaluate(state => state.frames)
 		await test.info().attach("modal-exit-frames", {
 			body: JSON.stringify(frames),
 			contentType: "application/json",
 		})
+		let disappeared = false
+		for (const frame of frames) {
+			if (frame.visiblePopups === 0) disappeared = true
+			if (disappeared)
+				expect(frame.visiblePopups, "Modal must not reappear after exit").toBe(0)
+		}
 		expect(frames[0]?.popup).toBe(1)
 		expect(frames.at(-1)?.popup).toBeNull()
 		expect(frames.at(-1)?.backdrop).toBeNull()
+		for (const surface of ["popup", "backdrop"] as const) {
+			let previous = 1
+			for (const frame of frames) {
+				const opacity = frame[surface] ?? 0
+				expect(opacity, `${surface} must never flash back during exit`).toBeLessThanOrEqual(
+					previous + 0.01,
+				)
+				previous = opacity
+			}
+		}
 		const reduced = await page.evaluate(
 			() => matchMedia("(prefers-reduced-motion: reduce)").matches,
 		)

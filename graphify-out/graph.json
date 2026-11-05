@@ -7066,7 +7066,7 @@
       "file_type": "code",
       "norm_label": "expectmodalentrance()",
       "source_file": "tests/support/motion.ts",
-      "source_location": "L726"
+      "source_location": "L761"
     },
     {
       "id": "tests_support_motion_expectmodalexit",
@@ -51812,7 +51812,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/support/motion.ts",
-      "source_location": "L731",
+      "source_location": "L766",
       "weight": 1.0
     },
     {
@@ -51824,7 +51824,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/support/motion.ts",
-      "source_location": "L749",
+      "source_location": "L784",
       "weight": 1.0
     },
     {
@@ -110646,17 +110646,6 @@
     },
     {
       "source": "tests_support_motion",
-      "target": "tests_support_motion_expectmodalentrance",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "tests/support/motion.ts",
-      "source_location": "L726",
-      "weight": 1.0
-    },
-    {
-      "source": "tests_support_motion",
       "target": "tests_support_motion_startsampling",
       "relation": "contains",
       "_origin": "ast",
@@ -110664,6 +110653,17 @@
       "confidence_score": 1.0,
       "source_file": "tests/support/motion.ts",
       "source_location": "L75",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_support_motion",
+      "target": "tests_support_motion_expectmodalentrance",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tests/support/motion.ts",
+      "source_location": "L761",
       "weight": 1.0
     },
     {
@@ -115506,5 +115506,5 @@
       "source_file": "tests/README.md"
     }
   ],
-  "built_at_commit": "02ae8c67ef68ef654eca5d0075be5312a04f5011"
+  "built_at_commit": "e97bff86b28dd94a4321904ae2ab1328a1ac468c"
 }

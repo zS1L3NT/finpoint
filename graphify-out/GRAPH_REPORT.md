@@ -1,7 +1,7 @@
 # Graph Report - t3-001ff1de  (2026-11-06)
 
 ## Corpus Check
-- 252 files · ~234,880 words
+- 252 files · ~235,110 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 9 file(s) not represented in the graph (top: (none) 5, .example 1, .lock 1)
 
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `02ae8c67`
+- Built from commit: `e97bff86`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -488,11 +488,11 @@ _Questions this graph is uniquely positioned to answer:_
   _83 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `sidebar.tsx` be split into smaller, more focused modules?**
   _Cohesion score 0.0873440285204991 - nodes in this community are weakly interconnected._
-- **Why does `src/data/* (persistence, migrations, seeding, backup serialization, Drive storage)` connect `src/data/* (persistence, migrations, seeding, backup serialization, Drive storage)` to `providers.tsx`?**
-  _High betweenness centrality (0.079) - this node is a cross-community bridge._
+- **Why does `react` connect `Button` to `sidebar.tsx`, `record-creator.tsx`, `use-sync-status.ts`, `primitives.tsx`, `cn`, `sync/page.tsx`, `paginated-data-table.tsx`, `app-sidebar.tsx`, `use-appearance.tsx`, `app.tsx`, `package.json`, `alert-dialog.tsx`, `category-filter.tsx`, `category-history-chart.tsx`, `history.tsx`, `pagination.tsx`, `records.ts`, `(month)/layout.tsx`, `spending-calendar.tsx`, `providers.tsx`, `(month)/page.tsx`, `PrimitivesSection`, `trend-chart.tsx`?**
+  _High betweenness centrality (0.076) - this node is a cross-community bridge._
 - **Should `record-creator.tsx` be split into smaller, more focused modules?**
   _Cohesion score 0.0718014379986211 - nodes in this community are weakly interconnected._
-- **Why does `react` connect `Button` to `sidebar.tsx`, `record-creator.tsx`, `use-sync-status.ts`, `primitives.tsx`, `cn`, `sync/page.tsx`, `paginated-data-table.tsx`, `app-sidebar.tsx`, `use-appearance.tsx`, `app.tsx`, `package.json`, `alert-dialog.tsx`, `category-filter.tsx`, `category-history-chart.tsx`, `history.tsx`, `pagination.tsx`, `records.ts`, `(month)/layout.tsx`, `spending-calendar.tsx`, `providers.tsx`, `(month)/page.tsx`, `PrimitivesSection`, `trend-chart.tsx`?**
-  _High betweenness centrality (0.073) - this node is a cross-community bridge._
+- **Why does `src/data/* (persistence, migrations, seeding, backup serialization, Drive storage)` connect `src/data/* (persistence, migrations, seeding, backup serialization, Drive storage)` to `providers.tsx`?**
+  _High betweenness centrality (0.076) - this node is a cross-community bridge._
 - **Should `monthly-budgets.test.ts` be split into smaller, more focused modules?**
   _Cohesion score 0.10080645161290322 - nodes in this community are weakly interconnected._
