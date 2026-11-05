@@ -7,6 +7,7 @@ import {
 	behaviourCoverage,
 	componentInventory,
 	facetNotApplicable,
+	modalAnimationCoverage,
 	notApplicable,
 	openFacets,
 	routeInventory,
@@ -333,7 +334,7 @@ function collectTests(
 		)
 	}
 	const motionPattern =
-		/expectPopupEntrance|expectReducedRowMovement|prefers-reduced-motion|"reduced-motion"|reducedMotion/
+		/expectPopupEntrance|expectModalEntrance|expectModalExit|expectReducedRowMovement|prefers-reduced-motion|"reduced-motion"|reducedMotion/
 	function fileFunctions(): Map<string, string> {
 		const bodies = new Map<string, string>()
 		for (const statement of source.statements) {
@@ -1187,3 +1188,33 @@ function importsMotionModule(path: string, text: string): boolean {
 	visit(source)
 	return found
 }
+
+test("ledger modal animations: every modal owner maps to executable entrance and exit coverage", () => {
+	const owners = [...files("src"), ...files("app")].filter(
+		path =>
+			/\.tsx$/.test(path) &&
+			/<(?:Dialog|Sheet|AlertDialog)\b/.test(readFileSync(join(root, path), "utf8")),
+	)
+	expect(Object.keys(modalAnimationCoverage).sort()).toEqual(owners.sort())
+	const { declarations, selections } = declaredTests()
+	for (const [owner, ids] of Object.entries(modalAnimationCoverage)) {
+		expect(ids.length, `${owner}: missing modal animation coverage`).toBeGreaterThan(0)
+		for (const id of ids) {
+			expect(declarations.has(id), `${owner}: missing executable animation test ${id}`).toBe(
+				true,
+			)
+			expect(
+				declarations.get(id)?.every(path => path.startsWith("tests/animations/")),
+				`${owner}: modal animations belong in the animation tier`,
+			).toBe(true)
+			expect(
+				selections.get(id)?.every(entry => entry.motion),
+				`${owner}: modal coverage must measure rendered animation`,
+			).toBe(true)
+			expect(
+				selections.get(id)?.every(entry => entry.tags.includes("@reduced-motion")),
+				`${owner}: modal coverage must run with reduced motion too`,
+			).toBe(true)
+		}
+	}
+})

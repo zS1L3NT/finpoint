@@ -31,6 +31,7 @@ import { FieldGroup } from "@/components/ui/field"
 import { Progress } from "@/components/ui/progress"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
+import { useDialogCloseAnimation } from "@/hooks/use-dialog-close-animation"
 import { canUseMonthlyBudget } from "@/lib/analytics"
 import { COLLAPSE_MOTION, SPRING, TRANSITION } from "@/lib/motion"
 import { cn, formatCurrency, formatDatetime, pluralize, round2 } from "@/lib/utils"
@@ -52,7 +53,7 @@ export default function RecordCreatorDialog({
 	categories,
 	clear,
 	isOpen,
-	setIsOpen,
+	setIsOpen: onOpenChange,
 	trigger,
 }: {
 	statements: Statement[]
@@ -62,7 +63,15 @@ export default function RecordCreatorDialog({
 	setIsOpen: (isOpen: boolean) => void
 	trigger?: React.ReactElement
 }) {
-	// Parents clear the selection right after a successful create; keep the last open list so
+	const created = useRef(false)
+	const { open, setIsOpen, onOpenChangeComplete } = useDialogCloseAnimation(isOpen, open => {
+		onOpenChange(open)
+		if (!open && created.current) {
+			created.current = false
+			clear?.()
+		}
+	})
+	// Keep the last open list if the parent changes its selection while closing, so
 	// the attached statements don't vanish while the dialog fades out.
 	const [openStatements, setOpenStatements] = useState(statementsProp)
 	if (isOpen && openStatements !== statementsProp) setOpenStatements(statementsProp)
@@ -174,8 +183,8 @@ export default function RecordCreatorDialog({
 						created => toast.success(`Created ${pluralize(created + 1, "Record")}.`),
 						() => toast.error("Created this Record, but not the similar ones."),
 					)
+				created.current = true
 				setIsOpen(false)
-				clear?.()
 			} catch (cause) {
 				if (cause instanceof ValidationError) {
 					setApiErrors(cause.errors)
@@ -319,8 +328,11 @@ export default function RecordCreatorDialog({
 
 	return (
 		<Dialog
-			open={isOpen}
-			onOpenChangeComplete={setEntered}
+			open={open}
+			onOpenChangeComplete={open => {
+				setEntered(open)
+				onOpenChangeComplete(open)
+			}}
 			onOpenChange={isOpen => {
 				setIsOpen(isOpen)
 				if (isOpen) {

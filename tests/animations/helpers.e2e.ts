@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test"
 import {
+	expectModalExit,
 	expectPopupEntrance,
 	expectReducedRowMovement,
 	expectVisibleRowCascade,
@@ -372,6 +373,45 @@ test("cascade assertion: count probes at 13 and 15 items reject simultaneous tai
 			expect(() => expectVisibleRowCascade(samples, count)).toThrow(
 				/separate rendered progress/,
 			)
+		})
+	}
+})
+
+test("modal exit assertion: missing popup or backdrop motion fails even when both disappear", async ({
+	page,
+}) => {
+	for (const broken of ["none", "popup", "backdrop"] as const) {
+		await test.step(`modal exit assertion: ${broken} missing animation`, async () => {
+			await page.setContent(
+				'<div data-slot="dialog-overlay"></div><div data-slot="dialog-content">Modal</div><button>Close</button>',
+			)
+			await page.evaluate(broken => {
+				document.querySelector("button")?.addEventListener("click", () => {
+					for (const [name, slot] of [
+						["popup", "dialog-content"],
+						["backdrop", "dialog-overlay"],
+					]) {
+						const element = document.querySelector(`[data-slot="${slot}"]`)
+						if (!element) throw new Error("Missing modal probe")
+						if (broken === name) element.remove()
+						else
+							element
+								.animate([{ opacity: 1 }, { opacity: 0 }], {
+									duration: 180,
+									fill: "forwards",
+								})
+								.finished.then(() => element.remove())
+					}
+				})
+			}, broken)
+			const result = expectModalExit(page, '[data-slot="dialog-content"]', () =>
+				page.getByRole("button", { name: "Close" }).click(),
+			)
+			if (broken === "none") await result
+			else
+				await expect(result).rejects.toThrow(
+					broken === "popup" ? /Popup must animate/ : /Backdrop must fade/,
+				)
 		})
 	}
 })

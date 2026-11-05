@@ -633,3 +633,118 @@ export async function expectPopupEntrance(
 	expect(introducedBackdrop, "The entering popup introduces its own backdrop").toBe(true)
 	await expectVisibleBackdrop(page)
 }
+
+/** Observe the actual portal nodes until removal; a successful close alone proves no animation. */
+export async function expectModalExit(page: Page, selector: string, close: () => Promise<unknown>) {
+	const popup = page.locator(selector)
+	await expect(popup).toHaveCount(1)
+	await popup.evaluate(async element => {
+		await Promise.all(
+			element
+				.getAnimations({ subtree: true })
+				.filter(animation => animation.effect?.getTiming().iterations !== Infinity)
+				.map(animation => animation.finished.catch(() => undefined)),
+		)
+	})
+	const recorder = await popup.evaluateHandle(element => {
+		const slot =
+			element.getAttribute("data-slot") === "sidebar"
+				? "sheet-overlay"
+				: element.getAttribute("data-slot")?.replace("content", "overlay")
+		const overlays = [...document.querySelectorAll(`[data-slot="${slot}"]`)]
+		const overlay = overlays.at(-1)
+		if (!overlay) throw new Error("Modal backdrop missing before close")
+		const frames: { popup: number | null; backdrop: number | null; pose: string | null }[] = []
+		let stopped = false
+		const sample = () => {
+			const style = getComputedStyle(element)
+			frames.push({
+				popup: element.isConnected ? Number(style.opacity) : null,
+				backdrop: overlay.isConnected ? Number(getComputedStyle(overlay).opacity) : null,
+				pose: element.isConnected
+					? `${style.transform}|${style.translate}|${style.scale}`
+					: null,
+			})
+			if (!stopped) requestAnimationFrame(sample)
+		}
+		sample()
+		return {
+			frames,
+			removed: () => !element.isConnected && !overlay.isConnected,
+			stop: () => {
+				stopped = true
+				sample()
+			},
+		}
+	})
+	try {
+		await close()
+		await expect(popup).toHaveCount(0)
+		await expect.poll(() => recorder.evaluate(state => state.removed())).toBe(true)
+		await recorder.evaluate(state => state.stop())
+		const frames = await recorder.evaluate(state => state.frames)
+		await test.info().attach("modal-exit-frames", {
+			body: JSON.stringify(frames),
+			contentType: "application/json",
+		})
+		expect(frames[0]?.popup).toBe(1)
+		expect(frames.at(-1)?.popup).toBeNull()
+		expect(frames.at(-1)?.backdrop).toBeNull()
+		const reduced = await page.evaluate(
+			() => matchMedia("(prefers-reduced-motion: reduce)").matches,
+		)
+		if (reduced) {
+			expect(
+				new Set(frames.map(frame => frame.pose).filter(pose => pose !== null)).size,
+			).toBeLessThanOrEqual(2)
+		} else {
+			const fading = frames.filter(
+				frame => frame.popup !== null && frame.popup > 0 && frame.popup < 1,
+			)
+			const moving = new Set(frames.map(frame => frame.pose).filter(pose => pose !== null))
+			expect(
+				fading.length > 1 ||
+					((selector.includes("sheet") || selector.includes("sidebar")) &&
+						moving.size > 2),
+				"Popup must animate before removal",
+			).toBe(true)
+			expect(
+				frames.filter(
+					frame => frame.backdrop !== null && frame.backdrop > 0 && frame.backdrop < 1,
+				).length,
+				"Backdrop must fade before removal",
+			).toBeGreaterThan(1)
+		}
+		return frames
+	} finally {
+		await recorder.evaluate(state => state.stop())
+		await recorder.dispose()
+	}
+}
+
+/** Sheets slide; dialogs fade. Both must pass through real frames and end fully visible. */
+export async function expectModalEntrance(
+	page: Page,
+	selector: string,
+	open: () => Promise<unknown>,
+) {
+	const samples = await sampleVisibleRowAnimations(page, selector, async () => {
+		await open()
+	})
+	expect(samples).toHaveLength(1)
+	const frames = samples[0]?.frames ?? []
+	expect(frames.at(-1)?.opacity).toBe(1)
+	const poses = new Set(
+		frames.map(frame => `${frame.transform}|${frame.translate}|${frame.scale}`),
+	)
+	if (await page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches)) {
+		expect(poses.size).toBeLessThanOrEqual(2)
+	} else {
+		expect(
+			frames.filter(frame => frame.opacity > 0 && frame.opacity < 1).length > 1 ||
+				poses.size > 2,
+			"Modal must enter through rendered frames",
+		).toBe(true)
+	}
+	await expectVisibleBackdrop(page)
+}

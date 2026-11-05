@@ -20,6 +20,10 @@ export type RouteEntry = {
 // Scenario keys become stable IDs: `${entry.path}#${family}.${case}`.
 // Map a case only after reviewing its real assertions; mounting/importing is insufficient.
 export const scenarioFamilies: Record<string, Record<string, string>> = {
+	modal: {
+		lifecycle:
+			"Popup and backdrop enter and exit before removal, cancellation and confirmation call the right action, and reduced motion suppresses movement",
+	},
 	editor: {
 		open: "Open create/update popup: visible backdrop, whole-popup motion, initially visible children stable with no transient overflow; mobile tall content may scroll",
 		validation:
@@ -227,6 +231,15 @@ export const componentInventory: InventoryEntry[] = [
 		dormantExports: [],
 		helperExports: [],
 		scenarios: ["display"],
+	},
+	{
+		path: "src/components/dialogs/drive-overwrite-confirmation.tsx",
+		owner: "team3",
+		routes: ["/sync"],
+		visibleExports: ["default"],
+		dormantExports: [],
+		helperExports: [],
+		scenarios: ["modal"],
 	},
 	{
 		path: "src/components/dialogs/account.tsx",
@@ -2387,6 +2400,15 @@ export const notApplicable: Record<string, string> = {
 
 /** Reviewed assertion mappings. Passing browser evidence is separate; unmapped cases fail by default. */
 export const behaviourCoverage: Record<string, string[]> = {
+	"src/components/dialogs/drive-overwrite-confirmation.tsx#export.default.behaviour": [
+		"Drive overwrite confirmation: Cancel animates popup and backdrop in and out",
+		"Drive overwrite confirmation: Replace Drive backup animates popup and backdrop in and out",
+	],
+	"src/components/dialogs/drive-overwrite-confirmation.tsx#modal.lifecycle": [
+		"Drive overwrite confirmation: Cancel animates popup and backdrop in and out",
+		"Drive overwrite confirmation: Replace Drive backup animates popup and backdrop in and out",
+	],
+
 	"src/components/dialogs/account.tsx#editor.open": [
 		"Account editor: backdrop, values, cursors, fit and keyboard reopen work",
 		"Account editor: popup enters as a whole",
@@ -4462,6 +4484,15 @@ export const scenarioProjects: Record<
 	string,
 	("mobile" | "tall-desktop" | "light" | "reduced-motion")[]
 > = {
+	"src/components/dialogs/drive-overwrite-confirmation.tsx#modal.lifecycle": [
+		"mobile",
+		"reduced-motion",
+	],
+	"src/components/dialogs/drive-overwrite-confirmation.tsx#export.default.behaviour": [
+		"mobile",
+		"reduced-motion",
+	],
+
 	"src/components/charts/cashflow-chart.tsx#chart.motion": [
 		"mobile",
 		"tall-desktop",
@@ -4704,4 +4735,79 @@ export const scenarioProjectLexiconExemptions: Record<string, string> = {
 		"Tall content scrolling inside a mobile popup is about in-popup overflow, not the tall-desktop project; the mapped popup test runs on desktop and mobile",
 	"src/components/dialogs/statement-rule.tsx#editor.open":
 		"Tall content scrolling inside a mobile popup is about in-popup overflow, not the tall-desktop project; the mapped popup steps run on desktop, mobile and reduced-motion",
+}
+
+/** Every modal owner needs executable entrance/exit coverage, including non-editor surfaces. */
+export const modalAnimationCoverage: Record<string, string[]> = {
+	"src/components/dialogs/account.tsx": [
+		"editor popups: saving every existing editor preserves its popup and backdrop exit",
+		"editor popups: every create and update dialog exits before removal and reopens",
+	],
+	"src/components/dialogs/budget-creator.tsx": [
+		"editor popups: successful creation preserves every creator exit",
+		"editor popups: every create and update dialog exits before removal and reopens",
+	],
+	"src/components/dialogs/budget-editor.tsx": [
+		"editor popups: saving every existing editor preserves its popup and backdrop exit",
+		"editor popups: every create and update dialog exits before removal and reopens",
+	],
+	"src/components/dialogs/category.tsx": [
+		"editor popups: saving every existing editor preserves its popup and backdrop exit",
+		"editor popups: successful creation preserves every creator exit",
+		"editor popups: every create and update dialog exits before removal and reopens",
+	],
+	"src/components/dialogs/monthly-budget.tsx": [
+		"editor popups: saving every existing editor preserves its popup and backdrop exit",
+		"editor popups: successful creation preserves every creator exit",
+		"editor popups: every create and update dialog exits before removal and reopens",
+	],
+	"src/components/dialogs/pending-statement.tsx": [
+		"editor popups: saving every existing editor preserves its popup and backdrop exit",
+		"editor popups: successful creation preserves every creator exit",
+		"editor popups: every create and update dialog exits before removal and reopens",
+	],
+	"src/components/dialogs/record-creator.tsx": [
+		"editor popups: successful creation preserves every creator exit",
+		"allocator Record creator: Cancel preserves the popup and backdrop through exit",
+		"allocator Record creator: Create Record preserves the popup and backdrop through exit",
+	],
+	"src/components/dialogs/record-editor.tsx": [
+		"editor popups: saving every existing editor preserves its popup and backdrop exit",
+		"editor popups: every create and update dialog exits before removal and reopens",
+	],
+	"src/components/dialogs/statement-rule.tsx": [
+		"editor popups: saving every existing editor preserves its popup and backdrop exit",
+		"editor popups: successful creation preserves every creator exit",
+		"editor popups: every create and update dialog exits before removal and reopens",
+	],
+	"src/components/dialogs/duplicate-review.tsx": [
+		"Duplicate Statement review: exit fades popup and backdrop through intermediate alpha then removal",
+		"Duplicate Statement review: exit fades popup and backdrop through intermediate alpha then removal after Fix",
+	],
+	"src/components/dialogs/statement-replacement-review.tsx": [
+		"Statement replacement review: Cancel animates the exit before removal",
+		"Statement replacement review: Replace pending Statement animates the exit before removal",
+	],
+	"src/components/sheets/record-search.tsx": [
+		"search sheets: every sheet animates in and out on dismissal and completion",
+	],
+	"src/components/sheets/statement-search.tsx": [
+		"search sheets: every sheet animates in and out on dismissal and completion",
+	],
+	"src/components/sheets/pending-statement-confirmation.tsx": [
+		"search sheets: every sheet animates in and out on dismissal and completion",
+	],
+	"src/components/table/amount-filter.tsx": [
+		"mobile modal sheets: sidebar and amount filter animate in and out",
+	],
+	"src/components/ui/sidebar.tsx": [
+		"mobile modal sheets: sidebar and amount filter animate in and out",
+	],
+	"src/components/ui/command.tsx": [
+		"modal primitives: dialog, sheet, command and alert animate in and out",
+	],
+	"src/components/dialogs/drive-overwrite-confirmation.tsx": [
+		"Drive overwrite confirmation: Cancel animates popup and backdrop in and out",
+		"Drive overwrite confirmation: Replace Drive backup animates popup and backdrop in and out",
+	],
 }

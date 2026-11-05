@@ -1,5 +1,5 @@
 import { expect, test } from "../support/fixtures"
-import { sampleVisibleRowAnimations } from "../support/motion"
+import { expectModalEntrance, expectModalExit, sampleVisibleRowAnimations } from "../support/motion"
 import { HARNESS_URL } from "../support/urls"
 
 test.describe("harness facets section", () => {
@@ -143,3 +143,53 @@ test.describe("harness display section", () => {
 		})
 	})
 })
+
+test("modal primitives: dialog, sheet, command and alert animate in and out", {
+	tag: ["@reduced-motion"],
+}, async ({ page }) => {
+	test.setTimeout(90_000)
+	for (const surface of [
+		{ trigger: "Open dialog", slot: "dialog-content", close: "Close dialog" },
+		{ trigger: "Open sheet", slot: "sheet-content", close: "Close sheet" },
+		{ trigger: "Open command dialog", slot: "dialog-content", close: "Close dialog" },
+		{ trigger: "Delete workspace", slot: "alert-dialog-content", close: "Cancel" },
+		{ trigger: "Delete workspace", slot: "alert-dialog-content", close: "Confirm delete" },
+	]) {
+		await test.step(`${surface.trigger}: ${surface.close} retains popup and backdrop during exit`, async () => {
+			await page.goto(`${HARNESS_URL}/?section=primitives`)
+			const trigger = page.getByRole("button", { name: surface.trigger, exact: true })
+			const selector = `[data-slot="${surface.slot}"]`
+			await expectModalEntrance(page, selector, () => trigger.click())
+			const popup = page.locator(selector)
+			await expectModalExit(page, selector, () =>
+				popup
+					.getByRole(surface.trigger === "Open command dialog" ? "option" : "button", {
+						name: surface.close,
+						exact: true,
+					})
+					.click(),
+			)
+		})
+	}
+})
+
+for (const action of ["Cancel", "Replace Drive backup"] as const) {
+	test(`Drive overwrite confirmation: ${action} animates popup and backdrop in and out`, {
+		tag: ["@reduced-motion"],
+	}, async ({ page }) => {
+		await page.goto(`${HARNESS_URL}/?section=primitives`)
+		const trigger = page.getByRole("button", { name: "Overwrite Drive", exact: true })
+		await expectModalEntrance(page, '[data-slot="alert-dialog-content"]', () => trigger.click())
+		const dialog = page.getByRole("alertdialog", {
+			name: "Replace the Google Drive backup?",
+			exact: true,
+		})
+		await expect(dialog).toContainText("Changes that exist only in Drive will be lost.")
+		await expectModalExit(page, '[data-slot="alert-dialog-content"]', () =>
+			dialog.getByRole("button", { name: action, exact: true }).click(),
+		)
+		await expect(page.getByTestId("drive-confirmed")).toHaveText(
+			action === "Cancel" ? "Drive replacement not confirmed" : "Drive replacement confirmed",
+		)
+	})
+}
