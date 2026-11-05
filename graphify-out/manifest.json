@@ -552,10 +552,10 @@
     "semantic_hash": "af2534ce3e73ad5decdc06ad5efc5de2"
   },
   "src/components/ui/combobox.tsx": {
-    "mtime": 1793763022.5535033,
-    "seen": 1793772746.9974055,
-    "ast_hash": "cca817b535ae0e18b29320b92d9ee56a",
-    "semantic_hash": "cca817b535ae0e18b29320b92d9ee56a"
+    "mtime": 1793886993.684901,
+    "seen": 1793887108.138189,
+    "ast_hash": "5b3343c6285529e6af75e226a99ba966",
+    "semantic_hash": ""
   },
   "src/components/ui/command.tsx": {
     "mtime": 1793763022.5535033,
@@ -1278,9 +1278,9 @@
     "semantic_hash": ""
   },
   "tests/component-inventory.ts": {
-    "mtime": 1793886350.3362138,
-    "seen": 1793886375.594331,
-    "ast_hash": "60e9be3c60069a1bd9a993c721509143",
+    "mtime": 1793887046.2929788,
+    "seen": 1793887108.1386433,
+    "ast_hash": "65ad109372a206e0025a835860767565",
     "semantic_hash": ""
   },
   "tests/core/charts.e2e.ts": {
@@ -1296,9 +1296,9 @@
     "semantic_hash": ""
   },
   "tests/core/editors.e2e.ts": {
-    "mtime": 1793763022.5575032,
-    "seen": 1793772746.997508,
-    "ast_hash": "574cb581941024ac164bfda5352c74b2",
+    "mtime": 1793887047.9249814,
+    "seen": 1793887108.1386552,
+    "ast_hash": "66c72a026c72b2fdf41fa9602bee122b",
     "semantic_hash": ""
   },
   "tests/core/helpers.e2e.ts": {

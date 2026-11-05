@@ -1091,3 +1091,21 @@ test("Monthly Budget editor: persists colour choices and disables unavailable De
 	await expect(editor).toContainText("No earlier default")
 	await expect(editor.getByText("Spending forecast", { exact: true })).toHaveCount(0)
 })
+
+test("Category popup: bringing an option into view preserves the modal page position", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	const dialog = await openEditor(page, "/records", "Create Pending Record", "Create New Record")
+	await dialog.getByLabel("Category", { exact: true }).fill("Groceries")
+	const option = page.getByRole("option", { name: "Groceries", exact: true })
+	await expect(option).toBeVisible()
+	const before = await page.evaluate(() => window.scrollY)
+	await option.evaluate(element => element.scrollIntoView({ block: "center" }))
+	expect(await page.evaluate(() => window.scrollY)).toBe(before)
+	await option.click()
+	await expect(dialog.getByLabel("Treatment", { exact: true })).toContainText(
+		"Category default · Spending",
+	)
+})

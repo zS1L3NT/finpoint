@@ -114,6 +114,7 @@ function ComboboxContent({
   return (
     <ComboboxPrimitive.Portal>
       <ComboboxPrimitive.Positioner
+        positionMethod="fixed"
         side={side}
         sideOffset={sideOffset}
         align={align}

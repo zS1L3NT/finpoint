@@ -9334,7 +9334,7 @@
       "file_type": "code",
       "norm_label": "comboboxchip()",
       "source_file": "src/components/ui/combobox.tsx",
-      "source_location": "L246"
+      "source_location": "L247"
     },
     {
       "id": "src_components_ui_combobox_comboboxchips",
@@ -9346,7 +9346,7 @@
       "file_type": "code",
       "norm_label": "comboboxchips()",
       "source_file": "src/components/ui/combobox.tsx",
-      "source_location": "L229"
+      "source_location": "L230"
     },
     {
       "id": "src_components_ui_combobox_comboboxchipsinput",
@@ -9358,7 +9358,7 @@
       "file_type": "code",
       "norm_label": "comboboxchipsinput()",
       "source_file": "src/components/ui/combobox.tsx",
-      "source_location": "L277"
+      "source_location": "L278"
     },
     {
       "id": "src_components_ui_combobox_comboboxcollection",
@@ -9370,7 +9370,7 @@
       "file_type": "code",
       "norm_label": "comboboxcollection()",
       "source_file": "src/components/ui/combobox.tsx",
-      "source_location": "L197"
+      "source_location": "L198"
     },
     {
       "id": "src_components_ui_combobox_comboboxempty",
@@ -9382,7 +9382,7 @@
       "file_type": "code",
       "norm_label": "comboboxempty()",
       "source_file": "src/components/ui/combobox.tsx",
-      "source_location": "L203"
+      "source_location": "L204"
     },
     {
       "id": "src_components_ui_combobox_comboboxgroup",
@@ -9394,7 +9394,7 @@
       "file_type": "code",
       "norm_label": "comboboxgroup()",
       "source_file": "src/components/ui/combobox.tsx",
-      "source_location": "L174"
+      "source_location": "L175"
     },
     {
       "id": "src_components_ui_combobox_comboboxitem",
@@ -9406,7 +9406,7 @@
       "file_type": "code",
       "norm_label": "comboboxitem()",
       "source_file": "src/components/ui/combobox.tsx",
-      "source_location": "L148"
+      "source_location": "L149"
     },
     {
       "id": "src_components_ui_combobox_comboboxlabel",
@@ -9418,7 +9418,7 @@
       "file_type": "code",
       "norm_label": "comboboxlabel()",
       "source_file": "src/components/ui/combobox.tsx",
-      "source_location": "L184"
+      "source_location": "L185"
     },
     {
       "id": "src_components_ui_combobox_comboboxlist",
@@ -9430,7 +9430,7 @@
       "file_type": "code",
       "norm_label": "comboboxlist()",
       "source_file": "src/components/ui/combobox.tsx",
-      "source_location": "L135"
+      "source_location": "L136"
     },
     {
       "id": "src_components_ui_combobox_comboboxseparator",
@@ -9442,7 +9442,7 @@
       "file_type": "code",
       "norm_label": "comboboxseparator()",
       "source_file": "src/components/ui/combobox.tsx",
-      "source_location": "L216"
+      "source_location": "L217"
     },
     {
       "id": "src_components_ui_combobox_comboboxvalue",
@@ -9466,7 +9466,7 @@
       "file_type": "code",
       "norm_label": "usecomboboxanchor()",
       "source_file": "src/components/ui/combobox.tsx",
-      "source_location": "L290"
+      "source_location": "L291"
     },
     {
       "id": "src_components_ui_dropdown_menu_dropdownmenu",
@@ -17228,7 +17228,7 @@
       "file_type": "code",
       "norm_label": "facetnotapplicable",
       "source_file": "tests/component-inventory.ts",
-      "source_location": "L4414"
+      "source_location": "L4415"
     },
     {
       "id": "tests_component_inventory_notapplicable",
@@ -17250,7 +17250,7 @@
       "file_type": "code",
       "norm_label": "openfacets",
       "source_file": "tests/component-inventory.ts",
-      "source_location": "L4410"
+      "source_location": "L4411"
     },
     {
       "id": "tests_component_inventory_routeinventory",
@@ -17294,7 +17294,7 @@
       "file_type": "code",
       "norm_label": "scenarioprojectexemptions",
       "source_file": "tests/component-inventory.ts",
-      "source_location": "L4616"
+      "source_location": "L4617"
     },
     {
       "id": "tests_component_inventory_scenarioprojectlexiconexemptions",
@@ -17305,7 +17305,7 @@
       "file_type": "code",
       "norm_label": "scenarioprojectlexiconexemptions",
       "source_file": "tests/component-inventory.ts",
-      "source_location": "L4683"
+      "source_location": "L4684"
     },
     {
       "id": "tests_component_inventory_scenarioprojects",
@@ -17316,7 +17316,7 @@
       "file_type": "code",
       "norm_label": "scenarioprojects",
       "source_file": "tests/component-inventory.ts",
-      "source_location": "L4460"
+      "source_location": "L4461"
     },
     {
       "id": "tests_core_ledger_e2e",
@@ -40390,7 +40390,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/ui/combobox.tsx",
-      "source_location": "L257",
+      "source_location": "L258",
       "weight": 1.0
     },
     {
@@ -40402,7 +40402,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/ui/combobox.tsx",
-      "source_location": "L266",
+      "source_location": "L267",
       "weight": 1.0
     },
     {
@@ -40414,7 +40414,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/ui/combobox.tsx",
-      "source_location": "L237",
+      "source_location": "L238",
       "weight": 1.0
     },
     {
@@ -40426,7 +40426,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/ui/combobox.tsx",
-      "source_location": "L284",
+      "source_location": "L285",
       "weight": 1.0
     },
     {
@@ -40462,7 +40462,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/ui/combobox.tsx",
-      "source_location": "L127",
+      "source_location": "L128",
       "weight": 1.0
     },
     {
@@ -40474,7 +40474,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/ui/combobox.tsx",
-      "source_location": "L207",
+      "source_location": "L208",
       "weight": 1.0
     },
     {
@@ -40486,7 +40486,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/ui/combobox.tsx",
-      "source_location": "L178",
+      "source_location": "L179",
       "weight": 1.0
     },
     {
@@ -40582,7 +40582,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/ui/combobox.tsx",
-      "source_location": "L156",
+      "source_location": "L157",
       "weight": 1.0
     },
     {
@@ -40594,7 +40594,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/ui/combobox.tsx",
-      "source_location": "L191",
+      "source_location": "L192",
       "weight": 1.0
     },
     {
@@ -40606,7 +40606,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/ui/combobox.tsx",
-      "source_location": "L139",
+      "source_location": "L140",
       "weight": 1.0
     },
     {
@@ -40618,7 +40618,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/ui/combobox.tsx",
-      "source_location": "L223",
+      "source_location": "L224",
       "weight": 1.0
     },
     {
@@ -101582,7 +101582,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/ui/combobox.tsx",
-      "source_location": "L135",
+      "source_location": "L136",
       "weight": 1.0
     },
     {
@@ -101593,7 +101593,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/ui/combobox.tsx",
-      "source_location": "L148",
+      "source_location": "L149",
       "weight": 1.0
     },
     {
@@ -101604,7 +101604,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/ui/combobox.tsx",
-      "source_location": "L174",
+      "source_location": "L175",
       "weight": 1.0
     },
     {
@@ -101626,7 +101626,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/ui/combobox.tsx",
-      "source_location": "L184",
+      "source_location": "L185",
       "weight": 1.0
     },
     {
@@ -101637,7 +101637,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/ui/combobox.tsx",
-      "source_location": "L197",
+      "source_location": "L198",
       "weight": 1.0
     },
     {
@@ -101648,7 +101648,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/ui/combobox.tsx",
-      "source_location": "L203",
+      "source_location": "L204",
       "weight": 1.0
     },
     {
@@ -101659,7 +101659,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/ui/combobox.tsx",
-      "source_location": "L216",
+      "source_location": "L217",
       "weight": 1.0
     },
     {
@@ -101681,7 +101681,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/ui/combobox.tsx",
-      "source_location": "L229",
+      "source_location": "L230",
       "weight": 1.0
     },
     {
@@ -101692,7 +101692,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/ui/combobox.tsx",
-      "source_location": "L246",
+      "source_location": "L247",
       "weight": 1.0
     },
     {
@@ -101703,7 +101703,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/ui/combobox.tsx",
-      "source_location": "L277",
+      "source_location": "L278",
       "weight": 1.0
     },
     {
@@ -101714,7 +101714,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/ui/combobox.tsx",
-      "source_location": "L290",
+      "source_location": "L291",
       "weight": 1.0
     },
     {
@@ -108963,7 +108963,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tests/component-inventory.ts",
-      "source_location": "L4410",
+      "source_location": "L4411",
       "weight": 1.0
     },
     {
@@ -108974,7 +108974,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tests/component-inventory.ts",
-      "source_location": "L4414",
+      "source_location": "L4415",
       "weight": 1.0
     },
     {
@@ -108985,7 +108985,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tests/component-inventory.ts",
-      "source_location": "L4460",
+      "source_location": "L4461",
       "weight": 1.0
     },
     {
@@ -108996,7 +108996,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tests/component-inventory.ts",
-      "source_location": "L4616",
+      "source_location": "L4617",
       "weight": 1.0
     },
     {
@@ -109007,7 +109007,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tests/component-inventory.ts",
-      "source_location": "L4683",
+      "source_location": "L4684",
       "weight": 1.0
     },
     {
@@ -115104,5 +115104,5 @@
       "source_file": "tests/README.md"
     }
   ],
-  "built_at_commit": "baaa73ea4e7d6637ef74ba3c3acf337dc3f18e23"
+  "built_at_commit": "1c90e3be138e5e0e951c476f8f3f14db3be449ea"
 }
