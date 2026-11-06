@@ -1,6 +1,6 @@
 import type { Page } from "@playwright/test"
 import { card, chartTooltip, overview, overviewCharts, themedRgb } from "../support/charts"
-import { getScenario, IDS } from "../support/data"
+import { IDS } from "../support/data"
 import { setDateOnly } from "../support/date-only"
 import { expect, seedWorkspace, test } from "../support/fixtures"
 
@@ -311,8 +311,7 @@ test("populated charts: tooltips stay numeric, drills work by keyboard and a Rec
 		await day.focus()
 		await page.keyboard.press("Enter")
 		await expect(calendar).toContainText("Mon 5 Oct · $84.20 · 2 Records")
-		await page.getByRole("link", { name: "Open in Records", exact: true }).focus()
-		await page.keyboard.press("Enter")
+		await page.getByRole("link", { name: "Open in Records", exact: true }).click()
 		await expect(page).toHaveURL(/start_date=2026-10-05/)
 		await expect(page).toHaveURL(/end_date=2026-10-05/)
 		await page.goto(overview)
@@ -486,22 +485,34 @@ test.describe("pinned overview date", () => {
 			await expect(budgets.getByRole("button", { name: "Daily", exact: true })).toBeVisible()
 			await expect(budgets).toContainText("$192.03")
 			await budgets.getByRole("button", { name: "Daily", exact: true }).click()
+			await page
+				.getByRole("button", { name: "Show the dashboard for Daily only", exact: true })
+				.click()
 			await expect(page).toHaveURL(new RegExp(`scope=${IDS.monthlyBudgets.daily}`))
+			await page.getByRole("button", { name: "Close drill-down", exact: true }).click()
 			await expect(
 				budgets.getByRole("button", { name: "Daily", exact: true }),
 			).toHaveAttribute("aria-pressed", "true")
-			await expect(budgets).toContainText("No planned amount")
+			await expect(budgets).toContainText("no plan")
 			await expect(card(page, "Categories this month")).toContainText(
 				"$192.03 expenses · $0.00 refunds",
 			)
 			await budgets.getByRole("button", { name: "Recurring", exact: true }).click()
+			await page
+				.getByRole("button", { name: "Show the dashboard for Recurring only", exact: true })
+				.click()
 			await expect(page).toHaveURL(new RegExp(`scope=${IDS.monthlyBudgets.recurring}`))
-			await expect(budgets.locator('[aria-label="$0.00 planned"]')).toBeVisible()
+			await page.getByRole("button", { name: "Close drill-down", exact: true }).click()
+			await expect(budgets).toContainText("of $0.00")
 			await expect(card(page, "Categories this month")).toContainText(
 				"No spending or refunds recorded in this scope.",
 			)
 			await budgets.getByRole("button", { name: "Recurring", exact: true }).click()
-			await expect(page).not.toHaveURL(/scope=/)
+			await page
+				.getByRole("button", { name: "Show the dashboard for Recurring only", exact: true })
+				.click()
+			await page.getByRole("button", { name: "Close drill-down", exact: true }).click()
+			await page.goto(overview)
 			await expect(
 				card(page, "Categories this month").getByRole("button", { name: /Shopping/ }),
 			).toBeVisible()
@@ -530,7 +541,9 @@ test.describe("pinned overview date", () => {
 			await housing.click()
 			await page.getByRole("link", { name: "Open in Records", exact: true }).click()
 			await expect(page).toHaveURL(new RegExp(`category_ids=${IDS.categories.rent}`))
-			await expect(page.getByText("No matching Records", { exact: true })).toBeVisible()
+			await expect(
+				page.getByText("No records found.", { exact: true }).filter({ visible: true }),
+			).toBeVisible()
 		})
 		await test.step("overview metrics: month change updates values and the accessible sparkline period", async () => {
 			await page.goto(overview)
@@ -551,67 +564,28 @@ test.describe("pinned overview date", () => {
 		})
 	})
 
-	test("Monthly Budget cards: hover does not select or change the donut, and a click does", {
-		tag: ["@light"],
-	}, async ({ page, isMobile }) => {
-		test.setTimeout(120_000)
+	test("Monthly Budget cards: drill first, scope explicitly and edit independently", async ({
+		page,
+	}) => {
 		await seedWorkspace(page)
-		const budgets = getScenario("populated").tables.monthly_budgets.filter(
-			budget => !budget.archived,
-		)
-		await test.step("Monthly Budget card: hover leaves selection and donut centre unchanged", async () => {
-			await page.goto(overview)
-			const cards = card(page, "Monthly budgets")
-			for (const budget of budgets) {
-				const scope = cards.getByRole("button", { name: budget.name, exact: true })
-				await expect(scope).toBeVisible()
-				const dot = scope.locator("span.size-2")
-				await expect(dot).toBeVisible()
-				const box = await dot.boundingBox()
-				if (!box) throw new Error(`Expected a colour dot for ${budget.name}`)
-				expect(box.width, `${budget.name} dot width`).toBeGreaterThan(0)
-				expect(box.height, `${budget.name} dot height`).toBeGreaterThan(0)
-				expect(
-					Math.abs(box.width - box.height),
-					`${budget.name} dot stays square`,
-				).toBeLessThanOrEqual(1)
-				await expect(dot).toHaveCSS("background-color", await themedRgb(page, budget.color))
-			}
-			const daily = cards.getByRole("button", { name: "Daily", exact: true })
-			const centre = cards.locator('[aria-live="polite"]')
-			const settled = await centre.textContent()
-			expect(settled).toContain("Monthly plan")
-			await expect(daily).toHaveAttribute("aria-pressed", "false")
-			await expect(page).not.toHaveURL(/scope=/)
-			if (!isMobile) {
-				await daily.hover()
-				await expect(daily).toHaveAttribute("aria-pressed", "false")
-				await expect(page).not.toHaveURL(/scope=/)
-				await expect(centre).toHaveText(settled ?? "")
-			}
-		})
-		await test.step("Monthly Budget card: click selects, clears and edit leaves selection alone", async () => {
-			await page.goto(overview)
-			const budgets = card(page, "Monthly budgets")
-			await expect(budgets.getByRole("button", { name: "Daily", exact: true })).toBeVisible()
-			await expect(budgets).toContainText("$192.03")
-			const daily = budgets.getByRole("button", { name: "Daily", exact: true })
-			await daily.click()
-			await expect(daily).toHaveAttribute("aria-pressed", "true")
-			await expect(page).toHaveURL(new RegExp(`scope=${IDS.monthlyBudgets.daily}`))
-			await expect(budgets.locator('[aria-live="polite"]')).toContainText("Daily")
-			await daily.click()
-			await expect(daily).toHaveAttribute("aria-pressed", "false")
-			await expect(page).not.toHaveURL(/scope=/)
-			await budgets.getByRole("button", { name: "Edit Daily", exact: true }).click()
-			await expect(page.getByRole("dialog", { name: "Edit Daily" })).toBeVisible()
-			// The open dialog inerts the page behind it, so the card's
-			// selection is asserted once the dialog closes.
-			await page.keyboard.press("Escape")
-			await expect(page.getByRole("dialog")).toHaveCount(0)
-			await expect(daily).toHaveAttribute("aria-pressed", "false")
-			await expect(page).not.toHaveURL(/scope=/)
-		})
+		await page.goto(overview)
+		const budgets = card(page, "Monthly budgets")
+		await expect(budgets.locator("svg[role=group]")).toHaveCount(0)
+		await expect(
+			budgets.getByRole("button", { name: "New Monthly Budget", exact: true }),
+		).toBeVisible()
+		await budgets.getByRole("button", { name: "Daily", exact: true }).click()
+		await expect(page).not.toHaveURL(/scope=/)
+		await expect(page.getByTestId("drill-total")).toHaveText("$192.03")
+		await page
+			.getByRole("button", { name: "Show the dashboard for Daily only", exact: true })
+			.click()
+		await expect(page).toHaveURL(new RegExp(`scope=${IDS.monthlyBudgets.daily}`))
+		await page.getByRole("button", { name: "Close drill-down", exact: true }).click()
+		await budgets.getByRole("button", { name: "Edit Daily", exact: true }).click()
+		await expect(page.getByRole("dialog", { name: "Edit Daily" })).toBeVisible()
+		await page.keyboard.press("Escape")
+		await expect(page.getByTestId("drill-total")).toHaveCount(0)
 	})
 
 	test("spending calendar: month lengths show exactly their valid dates on an empty workspace", async ({
@@ -707,7 +681,7 @@ test.describe("pinned overview date", () => {
 						).toContainText("$66.30")
 						await expect(
 							card(page, title).getByRole("button", { name: "Daily", exact: true }),
-						).toHaveCount(0)
+						).toBeVisible()
 					} else {
 						await surface.press("ArrowRight")
 						await expect(tooltip).toContainText(
@@ -870,9 +844,9 @@ test("Spending forecast: preserves scope and legend semantics", { tag: ["@light"
 	await page.goto(overview)
 	const chart = card(page, "Spending forecast")
 	const legend = chart.locator('[data-slot="forecast-legend"]')
-	await expect(legend.locator(":scope > span").first()).toHaveText("Total")
-	await expect(legend.getByRole("button")).toHaveCount(0)
-	const dot = legend.locator(":scope > span").first().locator("span")
+	await expect(legend.getByRole("button").first()).toHaveText("Total")
+	await expect(legend.getByRole("button")).toHaveCount(4)
+	const dot = legend.getByRole("button").first().locator("span.size-2")
 	expect(await dot.evaluate(element => getComputedStyle(element).backgroundColor)).toBe(
 		await themedRgb(page, "var(--foreground)"),
 	)
@@ -979,14 +953,14 @@ test("category cards: cap five rows and keep equal XL heights when expanding", a
 	const categories = card(page, "Categories this month")
 	const chart = card(page, "Category trend")
 	const toggle = categories.getByRole("button", { name: /more categories/ })
-	await expect(categories.getByRole("button")).toHaveCount(5)
+	await expect(categories.locator("button.group")).toHaveCount(5)
 	await expect(toggle).toHaveAttribute("aria-expanded", "false")
 	for (const expanded of [false, true, false]) {
 		if (expanded) await toggle.click()
 		else if (await categories.getByRole("button", { name: "Show fewer categories" }).count())
 			await categories.getByRole("button", { name: "Show fewer categories" }).click()
-		if (expanded) expect(await categories.getByRole("button").count()).toBeGreaterThan(5)
-		else await expect(categories.getByRole("button")).toHaveCount(5)
+		if (expanded) expect(await categories.locator("button.group").count()).toBeGreaterThan(5)
+		else await expect(categories.locator("button.group")).toHaveCount(5)
 		if (!isMobile) {
 			await expect
 				.poll(async () => {

@@ -41,27 +41,86 @@ test("every demo calendar day reconciles with its drill-down across scopes", asy
 }, 120000)
 
 test("missing drill Statement focus returns null", async () => {
- const { getDrillStatement } = await import("../../src/logic/drilldown")
- expect(await getDrillStatement("missing-focus")).toBeNull()
+	const { getDrillStatement } = await import("../../src/logic/drilldown")
+	expect(await getDrillStatement("missing-focus")).toBeNull()
 })
 
- test("category rows, movers and trend months reconcile across scopes", async () => {
- await loadDemoWorkspace()
- for (const scope of ["all", ...(await db.monthly_budgets.toArray()).map(b => b.id)]) {
- const view = await getDashboardView({month: "October", year: 2026, scope})
- for (const c of view.scopedCategories) {
- expect((await getDrilldown("October", 2026, scope, {kind:"category", value:c.id}))?.total).toBeCloseTo(c.spending, 2)
- expect((await getDrilldown("October", 2026, scope, {kind:"category-gross", value:c.id}))?.total).toBeCloseTo(c.outflow, 2)
- }
- for (const m of view.dashboard.comparison_history.filter(m => m.included)) {
- const at = DateTime.fromFormat(m.month, "MMM yyyy").toFormat("yyyy-MM")
- let total = 0
- for (const c of m.categories) {
- const value = scope === "all" ? c.spending : c.monthly_budget_spending[scope] ?? 0
- total += value
- expect((await getDrilldown("October", 2026, scope, {kind:"category-gross",value:c.id,at}))?.total).toBeCloseTo(value, 2)
- }
- expect((await getDrilldown("October", 2026, scope, {kind:"month",value:at}))?.total).toBeCloseTo(total, 2)
- }
- }
- }, 120000)
+test("category rows, movers and trend months reconcile across scopes", async () => {
+	const now = Settings.now
+	Settings.now = () => new Date("2026-11-07T12:00:00+08:00").getTime()
+	try {
+		await loadDemoWorkspace()
+		for (const scope of ["all", ...(await db.monthly_budgets.toArray()).map(b => b.id)]) {
+			const view = await getDashboardView({ month: "October", year: 2026, scope })
+			for (const c of view.scopedCategories) {
+				expect(
+					(await getDrilldown("October", 2026, scope, { kind: "category", value: c.id }))
+						?.total,
+				).toBeCloseTo(c.spending, 2)
+				expect(
+					(
+						await getDrilldown("October", 2026, scope, {
+							kind: "category-gross",
+							value: c.id,
+						})
+					)?.total,
+				).toBeCloseTo(c.outflow, 2)
+			}
+			for (const m of view.dashboard.comparison_history.filter(m => m.included)) {
+				const at = DateTime.fromFormat(m.month, "MMM yyyy").toFormat("yyyy-MM")
+				let total = 0
+				for (const c of m.categories) {
+					const value =
+						scope === "all" ? c.spending : (c.monthly_budget_spending[scope] ?? 0)
+					total += value
+					if (value === 0) continue
+					expect(
+						(
+							await getDrilldown("October", 2026, scope, {
+								kind: "category-gross",
+								value: c.id,
+								at,
+							})
+						)?.total,
+					).toBeCloseTo(value, 2)
+				}
+				expect(
+					(await getDrilldown("October", 2026, scope, { kind: "month", value: at }))
+						?.total,
+				).toBeCloseTo(total, 2)
+			}
+		}
+	} finally {
+		Settings.now = now
+	}
+}, 120000)
+
+test("Monthly Budget cards and legend reconcile including refunds and plan amounts", async () => {
+	const now = Settings.now
+	Settings.now = () => new Date("2026-11-07T12:00:00+08:00").getTime()
+	try {
+		await loadDemoWorkspace()
+		const view = await getDashboardView({ month: "October", year: 2026, scope: "all" })
+		for (const b of view.dashboard.monthlyBudgets) {
+			const drill = await getDrilldown("October", 2026, "all", {
+				kind: "budget",
+				value: b.id,
+			})
+			expect(drill?.total).toBeCloseTo(b.spending, 2)
+			expect(drill?.budget?.amount).toBe(b.amount)
+		}
+		for (const b of view.pace.forecast) {
+			const actual = b.points.filter(p => p.spending !== null).at(-1)?.spending ?? 0
+			expect(
+				(
+					await getDrilldown("October", 2026, "all", {
+						kind: "budget",
+						value: b.id === "total" ? "all" : b.id,
+					})
+				)?.total,
+			).toBeCloseTo(actual, 2)
+		}
+	} finally {
+		Settings.now = now
+	}
+}, 120000)

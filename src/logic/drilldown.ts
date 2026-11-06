@@ -30,6 +30,7 @@ export async function getDrilldown(
 		return null
 	if (
 		selection.kind === "budget" &&
+		!["all", "unbudgeted"].includes(selection.value) &&
 		!view.dashboard.monthlyBudgets.some(b => b.id === selection.value)
 	)
 		return null
@@ -47,8 +48,15 @@ export async function getDrilldown(
 		category_ids: selection.kind.startsWith("category")
 			? selection.value.split(",")
 			: undefined,
+		show_unbudgeted: selection.kind === "budget" && selection.value === "unbudgeted",
 		monthly_budget_id:
-			selection.kind === "budget" ? selection.value : scope === "all" ? undefined : scope,
+			selection.kind === "budget"
+				? ["all", "unbudgeted"].includes(selection.value)
+					? undefined
+					: selection.value
+				: scope === "all"
+					? undefined
+					: scope,
 	}
 	let records = await listRecords(filters)
 	if (selection.kind === "category-gross" || selection.kind === "month")
@@ -68,15 +76,20 @@ export async function getDrilldown(
 			: selection.kind.startsWith("category")
 				? `${view.scopedCategories.find(c => c.id === selection.value)?.name ?? "Categories"} in ${date.toFormat("MMMM")}`
 				: selection.kind === "budget"
-					? `${view.dashboard.monthlyBudgets.find(b => b.id === selection.value)?.name ?? "Monthly budget"} in ${date.toFormat("MMMM")}`
+					? `${view.dashboard.monthlyBudgets.find(b => b.id === selection.value)?.name ?? (selection.value === "unbudgeted" ? "Unbudgeted" : "All budgets")} in ${date.toFormat("MMMM")}`
 					: `Spending in ${date.toFormat("MMMM")}`
 	return {
+		budget:
+			selection.kind === "budget"
+				? view.dashboard.monthlyBudgets.find(b => b.id === selection.value)
+				: undefined,
 		title,
 		total,
 		records: details,
 		href: pathRecords({
 			...filters,
 			effective_spending: "true",
+			show_unbudgeted: filters.show_unbudgeted ? "true" : undefined,
 			category_ids: filters.category_ids?.join(","),
 		}),
 	}

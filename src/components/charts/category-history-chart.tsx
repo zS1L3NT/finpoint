@@ -368,48 +368,60 @@ function MonthBreakdown({
 				entries.slice(0, limit).map(([key, value]) => {
 					const details = month.seriesDetails[key] ?? []
 					return (
-						<button
-							type="button"
-							key={key}
-							onClick={() =>
-								onDrill({
-									kind: "category-gross",
-									value: details.map(item => item.id).join(","),
-									at: DateTime.fromFormat(month.month, "MMM yyyy").toFormat(
-										"yyyy-MM",
-									),
-								})
-							}
-							className="group grid min-w-0 gap-1.5 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-						>
-							<div className="grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-x-3">
-								<span
-									className="size-2.5 rounded-full"
-									style={{ backgroundColor: config[key]?.color }}
-								/>
-								<span className="truncate">{config[key]?.label ?? key}</span>
-								<span className="font-medium tabular-nums">
-									{formatCurrency(value)}
-								</span>
-								<span className="w-12 text-right text-muted-foreground tabular-nums">
-									{share(value)}
-								</span>
-							</div>
-							<div className="h-1.5 overflow-hidden rounded-full bg-muted">
-								<div
-									className="h-full rounded-full"
-									style={{
-										width: share(value),
-										backgroundColor: config[key]?.color,
-									}}
-								/>
-							</div>
+						<div key={key} className="grid gap-1.5">
+							<button
+								type="button"
+								onClick={() =>
+									onDrill({
+										kind: "category-gross",
+										value: details.map(item => item.id).join(","),
+										at: DateTime.fromFormat(month.month, "MMM yyyy").toFormat(
+											"yyyy-MM",
+										),
+									})
+								}
+								className="group grid min-w-0 gap-1.5 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+							>
+								<div className="grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-x-3">
+									<span
+										className="size-2.5 rounded-full"
+										style={{ backgroundColor: config[key]?.color }}
+									/>
+									<span className="truncate">{config[key]?.label ?? key}</span>
+									<span className="font-medium tabular-nums">
+										{formatCurrency(value)}
+									</span>
+									<span className="w-12 text-right text-muted-foreground tabular-nums">
+										{share(value)}
+									</span>
+								</div>
+								<div className="h-1.5 overflow-hidden rounded-full bg-muted">
+									<div
+										className="h-full rounded-full"
+										style={{
+											width: share(value),
+											backgroundColor: config[key]?.color,
+										}}
+									/>
+								</div>
+							</button>
 							{limit === undefined &&
 								details.length > 1 &&
 								details.map(item => (
-									<div
+									<button
+										type="button"
+										onClick={() =>
+											onDrill({
+												kind: "category-gross",
+												value: item.id,
+												at: DateTime.fromFormat(
+													month.month,
+													"MMM yyyy",
+												).toFormat("yyyy-MM"),
+											})
+										}
 										key={item.id}
-										className="grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-x-3 pl-5 text-muted-foreground"
+										className="group grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-x-3 rounded pl-5 text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 									>
 										<span
 											className="size-2 rounded-full"
@@ -422,9 +434,9 @@ function MonthBreakdown({
 										<span className="w-12 text-right tabular-nums">
 											{share(item.spending)}
 										</span>
-									</div>
+									</button>
 								))}
-						</button>
+						</div>
 					)
 				})
 			)}

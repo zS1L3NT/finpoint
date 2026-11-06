@@ -18,6 +18,7 @@ export function DrillPanel({
 	month,
 	year,
 	scope,
+	onScope,
 	close,
 }: {
 	focus: string | null
@@ -26,6 +27,7 @@ export function DrillPanel({
 	month: string
 	year: number
 	scope: string
+	onScope: (value: string) => void
 	close: () => void
 }) {
 	const key = JSON.stringify(selection)
@@ -82,6 +84,13 @@ export function DrillPanel({
 					>
 						{data.title}
 					</h2>
+					{data.budget ? (
+						<p className="text-xs text-muted-foreground">
+							{data.budget.amount === null
+								? "No planned amount"
+								: `${formatCurrency(data.total)} of ${formatCurrency(data.budget.amount)}`}
+						</p>
+					) : null}
 					{statement ? (
 						<nav
 							aria-label="Drill-down breadcrumb"
@@ -190,7 +199,20 @@ export function DrillPanel({
 					)}
 				</motion.div>
 			</AnimatePresence>
-			<div className="border-t p-5">
+			<div className="grid gap-2 border-t p-5">
+				<p className="flex justify-between text-sm tabular-nums">
+					<span>Total</span>
+					<span>{formatCurrency(data.total)}</span>
+				</p>
+				{data.budget ? (
+					<Button
+						variant="outline"
+						className="h-auto min-h-8 whitespace-normal"
+						onClick={() => onScope(selection.value)}
+					>
+						Show the dashboard for {data.budget.name} only
+					</Button>
+				) : null}
 				<Button asChild variant="outline" className="w-full">
 					<Link href={data.href}>Open in Records</Link>
 				</Button>

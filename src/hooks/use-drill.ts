@@ -39,7 +39,16 @@ export function useDrill() {
 		})
 	const open = (s: Selection) => {
 		trigger.current = document.activeElement as HTMLElement
-		router.push(href(s), { scroll: false })
+		router.push(
+			selection?.kind === s.kind && selection.value === s.value && selection.at === s.at
+				? pathDashboard({
+						...Object.fromEntries(params),
+						drill: undefined,
+						focus: undefined,
+					})
+				: href(s),
+			{ scroll: false },
+		)
 	}
 	const close = () => {
 		router.push(

@@ -1,12 +1,10 @@
 import { DateTime } from "luxon"
-import { useRouter } from "next/navigation"
 import TrendChart from "@/components/charts/trend-chart"
 import MonthlyBudgetBadge from "@/components/monthly-budget-badge"
-import { useHistory } from "@/history"
 import { dayTicks } from "@/lib/chart-days"
 import { themeColor } from "@/lib/palette"
 import type { getPaceView } from "@/logic/dashboard"
-import { pathMonthlyRecords } from "@/routes"
+import type { Selection } from "@/logic/drilldown"
 
 export type CashflowPoint = {
 	day: number
@@ -25,35 +23,24 @@ export default function CashflowChart({
 	amount,
 	amountLabel,
 	showProjection,
-	recordFilters,
+	onDrill,
 }: {
 	data: CashflowPoint[]
 	forecast: Awaited<ReturnType<typeof getPaceView>>["forecast"]
 	month: string
 	year: number
-	recordFilters?: Record<string, string | undefined>
 	amount: number | null
 	amountLabel: string | null
 	showProjection: boolean
+	onDrill: (selection: Selection) => void
 }) {
-	const router = useRouter()
-	const { handlePush } = useHistory()
 	const length = data.length
 	const openDay = (index: number) => {
 		if (index >= data.length) return
 		const selected = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
 			.set({ day: index + 1 })
 			.toFormat("yyyy-MM-dd")
-		handlePush("overview")()
-		void router.push(
-			pathMonthlyRecords({
-				month,
-				year: String(year),
-				start_date: selected,
-				end_date: selected,
-				...recordFilters,
-			}),
-		)
+		onDrill({ kind: "day", value: selected })
 	}
 
 	return (
@@ -131,13 +118,22 @@ export default function CashflowChart({
 
 			<div data-slot="forecast-legend" className="flex flex-wrap gap-1.5">
 				{forecast.map(b => (
-					<MonthlyBudgetBadge key={b.id} name={b.name} color={b.color} />
+					<button
+						key={b.id}
+						type="button"
+						onClick={() =>
+							onDrill({ kind: "budget", value: b.id === "total" ? "all" : b.id })
+						}
+						className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+					>
+						<MonthlyBudgetBadge name={b.name} color={b.color} />
+					</button>
 				))}
 			</div>
 			<p className="text-xs text-muted-foreground">
 				Each colour shows a Monthly Budget's cumulative spending.
 				{showProjection
-					? " Dashed lines extend each budget's gross spending pace and include scheduled Records."
+					? " Dashed lines extend each budget's gross spending pace and include scheduled Records. "
 					: ""}
 				Hold or hover over a day to read it, and click it to open its Records.
 			</p>

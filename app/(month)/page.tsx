@@ -105,7 +105,6 @@ export default function DashboardPage() {
 		scopedDaily,
 		scopeLabel,
 		scopeColor,
-		paceFilters,
 	} = view
 	const dailyLines = monthlyBudgetDailyData.monthlyBudgets.map(budget => ({
 		...budget,
@@ -214,7 +213,7 @@ export default function DashboardPage() {
 										paceData.singleBudget ? (paceAmount?.name ?? null) : "Total"
 									}
 									showProjection={paceProjection.available}
-									recordFilters={paceFilters}
+									onDrill={drill.open}
 								/>
 								<p className="mt-4 text-sm text-muted-foreground">
 									{paceProjection.available
@@ -226,7 +225,7 @@ export default function DashboardPage() {
 					) : null}
 					<Card className="min-w-0">
 						<CardHeader>
-							<div className="flex items-start justify-between gap-3">
+							<div className="flex flex-wrap items-start justify-between gap-3">
 								<div>
 									<CardTitle>Monthly budgets</CardTitle>
 									<CardDescription className="mt-1">
@@ -238,7 +237,7 @@ export default function DashboardPage() {
 									year={dataYear}
 									trigger={
 										<Button variant="outline" size="sm">
-											<IconifyIcon icon="lucide:plus" /> New
+											<IconifyIcon icon="lucide:plus" /> New Monthly Budget
 										</Button>
 									}
 								/>
@@ -255,7 +254,7 @@ export default function DashboardPage() {
 								selected={
 									budgets.some(budget => budget.id === scope) ? scope : null
 								}
-								onSelect={setScope}
+								onDrill={drill.open}
 								edit={budget => (
 									<MonthlyBudgetDialog
 										monthlyBudget={budgets.find(item => item.id === budget.id)}
@@ -399,6 +398,7 @@ export default function DashboardPage() {
 						month={dataMonth}
 						year={dataYear}
 						scope={scope}
+						onScope={setScope}
 						close={drill.close}
 					/>
 				) : null}

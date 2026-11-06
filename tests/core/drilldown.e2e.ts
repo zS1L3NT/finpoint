@@ -1,4 +1,4 @@
-import { card, overview } from "../support/charts"
+import { card, chartTooltip, overview } from "../support/charts"
 import { expect, seedWorkspace, test } from "../support/fixtures"
 
 test("day drill-down: totals, retarget, Back, close, focus and invalid URLs", async ({
@@ -64,4 +64,43 @@ test("drill pivot: URL expansion, Statement breadcrumb and browser Back survive 
 	await expect(page.getByText("Records allocated to this Statement")).toHaveCount(0)
 	await page.goto(`${overview}&drill=day:2026-10-05&focus=invalid`)
 	await expect(page.getByTestId("drill-total")).toHaveCount(0)
+})
+
+test("category, trend and budget selections retain the Dashboard and reconcile their visible amounts", async ({
+	page,
+}) => {
+	await seedWorkspace(page)
+	await page.goto(overview)
+	const mix = card(page, "Categories this month")
+	const groceries = mix.getByRole("button", { name: /^Groceries/ })
+	await groceries.click()
+	await expect(page).toHaveURL(/drill=category-gross/)
+	await expect(page.getByTestId("drill-total")).toHaveText("$117.53")
+	await page.getByRole("button", { name: "Close drill-down" }).click()
+	const trend = card(page, "Category trend").getByRole("application")
+	await trend.focus()
+	await trend.press("End")
+	await trend.press("Enter")
+	await expect(page).toHaveURL(/drill=month%3A2026-10/)
+	await expect(page.getByTestId("drill-total")).toHaveText("$306.63")
+	await page.getByRole("button", { name: "Close drill-down" }).click()
+	const legend = card(page, "Spending forecast").locator('[data-slot="forecast-legend"]')
+	await legend.getByRole("button", { name: "Daily", exact: true }).click()
+	await expect(page).toHaveURL(/drill=budget/)
+	await expect(page.getByTestId("drill-total")).toHaveText("$192.03")
+	await expect(page).not.toHaveURL(/scope=/)
+	await page.getByRole("button", { name: "Close drill-down" }).click()
+	const forecast = card(page, "Spending forecast").getByRole("application")
+	await forecast.focus()
+	await forecast.press("Home")
+	await expect(card(page, "Spending forecast").locator(chartTooltip)).toContainText("October 1")
+	for (let day = 1; day < 5; day++) {
+		await forecast.press("ArrowRight")
+		await expect(card(page, "Spending forecast").locator(chartTooltip)).toContainText(
+			`October ${day + 1}`,
+		)
+	}
+	await forecast.press("Enter")
+	await expect(page).toHaveURL(/drill=day%3A2026-10-05/)
+	await expect(page.getByTestId("drill-total")).toHaveText("$84.20")
 })
