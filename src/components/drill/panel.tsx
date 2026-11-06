@@ -102,7 +102,9 @@ export function DrillPanel({
 					</p>
 					<p className="mt-1 text-xs text-muted-foreground">
 						{pluralize(data.records.length, "Record")} ·{" "}
-						{selection.kind === "category" ? "before refunds" : "effective spending"}
+						{selection.kind === "category-gross" || selection.kind === "month"
+							? "Spending · refunds excluded · Pending Records counted"
+							: "Spending · refunds subtracted · Pending Records counted"}
 					</p>
 				</div>
 				<Button variant="ghost" size="sm" onClick={close} aria-label="Close drill-down">

@@ -16,7 +16,7 @@ export function useDrill() {
 		validFocus &&
 		value &&
 		extra === undefined &&
-		["day", "category", "month", "budget"].includes(kind ?? "") &&
+		["day", "category-gross", "category", "month", "budget"].includes(kind ?? "") &&
 		(at === undefined || (/^\d{4}-\d{2}$/.test(at) && DateTime.fromISO(`${at}-01`).isValid)) &&
 		(kind !== "month" ||
 			(/^\d{4}-\d{2}$/.test(value) && DateTime.fromISO(`${value}-01`).isValid)) &&

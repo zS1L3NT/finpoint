@@ -105,7 +105,6 @@ export default function DashboardPage() {
 		scopedDaily,
 		scopeLabel,
 		scopeColor,
-		scopeFilters,
 		paceFilters,
 	} = view
 	const dailyLines = monthlyBudgetDailyData.monthlyBudgets.map(budget => ({
@@ -121,14 +120,6 @@ export default function DashboardPage() {
 	const paceSeries = paceData.series
 	const paceProjection = paceData.projection
 	const paceAmount = paceData.paceMonthlyBudget
-	const categoryRecordHref = (id: string, at?: DateTime) =>
-		pathMonthlyRecords({
-			month: at?.toFormat("MMMM") ?? dataMonth,
-			year: String(at?.year ?? dataYear),
-			category_ids: id,
-			effective_spending: "true",
-			...scopeFilters,
-		})
 	const openDay = (date: string) => drill.open({ kind: "day", value: date })
 	return (
 		<motion.div
@@ -298,7 +289,7 @@ export default function DashboardPage() {
 								months={data.comparison_history}
 								through={period.through}
 								monthlyBudgetIds={scope === "all" ? null : scopedBudgetIds}
-								recordHref={categoryRecordHref}
+								onDrill={drill.open}
 								badge={
 									<ScopeLabel
 										scope={scope === "all" ? "All budgets" : scopeLabel}
@@ -348,7 +339,7 @@ export default function DashboardPage() {
 										<CategoryMovers
 											categories={scopedCategories}
 											comparisonCount={scopedComparisonCount}
-											recordHref={categoryRecordHref}
+											onDrill={drill.open}
 										/>
 									</CardContent>
 								</Card>

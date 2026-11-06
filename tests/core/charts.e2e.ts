@@ -170,7 +170,7 @@ test("dense overview: cards render values and fit, and a long Category name stay
 		)
 		await page.goto(overview)
 		const mix = card(page, "Categories this month")
-		const row = mix.getByRole("link", { name: /^Dense 早餐/ })
+		const row = mix.getByRole("button", { name: /^Dense 早餐/ })
 		await expect(row).toBeVisible()
 		const label = row.locator("span.truncate")
 		await expect(label).toHaveCSS("text-overflow", "ellipsis")
@@ -316,10 +316,11 @@ test("populated charts: tooltips stay numeric, drills work by keyboard and a Rec
 		await expect(page).toHaveURL(/start_date=2026-10-05/)
 		await expect(page).toHaveURL(/end_date=2026-10-05/)
 		await page.goto(overview)
-		const mover = card(page, "Biggest changes").getByRole("link", { name: /Housing/ })
+		const mover = card(page, "Biggest changes").getByRole("button", { name: /Housing/ })
 		await mover.scrollIntoViewIfNeeded()
 		await mover.focus()
 		await page.keyboard.press("Enter")
+		await page.getByRole("link", { name: "Open in Records", exact: true }).click()
 		await expect(page).toHaveURL(new RegExp(`category_ids=${IDS.categories.rent}`))
 	})
 	await test.step("biggest changes: a saved Record amount updates the mover row and keeps its drill link and row node", async () => {
@@ -377,9 +378,9 @@ test("populated charts: tooltips stay numeric, drills work by keyboard and a Rec
 		})
 		await page.goto(overview)
 		const movers = card(page, "Biggest changes")
-		const row = movers.getByRole("link", { name: /^Groceries/ })
+		const row = movers.getByRole("button", { name: /^Groceries/ })
 		await expect(row).toBeVisible()
-		const href = await row.getAttribute("href")
+		const name = await row.textContent()
 		const rowHandle = await row.elementHandle()
 		if (!rowHandle) throw new Error("Groceries mover row missing")
 		// A second page in the same context drives a real editor save: raw
@@ -410,7 +411,7 @@ test("populated charts: tooltips stay numeric, drills work by keyboard and a Rec
 			await editor.close()
 		}
 		await expect(row).toContainText("$176.08")
-		expect(await row.getAttribute("href"), "drill link identity retained").toBe(href)
+		expect(await row.textContent()).not.toBe(name)
 		expect(
 			await rowHandle.evaluate(element => element.isConnected),
 			"row node persists (keys kept)",
@@ -440,11 +441,13 @@ test.describe("pinned overview date", () => {
 			await expect(metric(page, "Total surplus rate")).toContainText("94.5%")
 			const mix = card(page, "Categories this month")
 			await expect(mix).toContainText("$306.63 expenses · $20.00 refunds")
-			await expect(mix.getByRole("link", { name: /Shopping/ })).toContainText("$100.00")
-			await expect(mix.getByRole("link", { name: /Shopping/ })).toContainText(
+			await expect(mix.getByRole("button", { name: /Shopping/ })).toContainText("$100.00")
+			await expect(mix.getByRole("button", { name: /Shopping/ })).toContainText(
 				"$20.00 refunded · $80.00 net",
 			)
-			await expect(mix.getByRole("link", { name: /Transfer|Income|Savings/ })).toHaveCount(0)
+			await expect(mix.getByRole("button", { name: /Transfer|Income|Savings/ })).toHaveCount(
+				0,
+			)
 			await expect(card(page, "Biggest changes")).toContainText("Against the 1-month average")
 		})
 		await test.step("spending calendar: daily amount, zero and refund days drill into exact Records", async () => {
@@ -500,14 +503,15 @@ test.describe("pinned overview date", () => {
 			await budgets.getByRole("button", { name: "Recurring", exact: true }).click()
 			await expect(page).not.toHaveURL(/scope=/)
 			await expect(
-				card(page, "Categories this month").getByRole("link", { name: /Shopping/ }),
+				card(page, "Categories this month").getByRole("button", { name: /Shopping/ }),
 			).toBeVisible()
 		})
 		await test.step("Category mix: drilldown carries Treatment and Category filters", async () => {
 			await page.goto(overview)
 			await card(page, "Categories this month")
-				.getByRole("link", { name: /Groceries/ })
+				.getByRole("button", { name: /Groceries/ })
 				.click()
+			await page.getByRole("link", { name: "Open in Records", exact: true }).click()
 			await expect(page).toHaveURL(new RegExp(`category_ids=${IDS.categories.groceries}`))
 			await expect(page).toHaveURL(/effective_spending=true/)
 			await expect(
@@ -519,11 +523,12 @@ test.describe("pinned overview date", () => {
 		})
 		await test.step("biggest changes: Category change title and drilldown reconcile with the previous month", async () => {
 			await page.goto(overview)
-			const housing = card(page, "Biggest changes").getByRole("link", { name: /Housing/ })
+			const housing = card(page, "Biggest changes").getByRole("button", { name: /Housing/ })
 			await expect(housing).toContainText("$0.00")
 			await expect(housing).toContainText("vs $1,400.00 average")
 			await expect(housing).toContainText("▼ $1,400.00")
 			await housing.click()
+			await page.getByRole("link", { name: "Open in Records", exact: true }).click()
 			await expect(page).toHaveURL(new RegExp(`category_ids=${IDS.categories.rent}`))
 			await expect(page.getByText("No matching Records", { exact: true })).toBeVisible()
 		})
@@ -786,10 +791,10 @@ test.describe("pinned overview date", () => {
 		await expect(metric(page, "Total net refund")).toContainText("$93.37")
 		await expect(metric(page, "Total surplus")).toContainText("$5,296.87")
 		const mix = card(page, "Categories this month")
-		await expect(mix.getByRole("link", { name: /Shopping/ })).toContainText(
+		await expect(mix.getByRole("button", { name: /Shopping/ })).toContainText(
 			"$400.00 refunded · -$300.00 net",
 		)
-		await expect(mix.getByRole("link", { name: new RegExp("^Groceries") })).toContainText(
+		await expect(mix.getByRole("button", { name: new RegExp("^Groceries") })).toContainText(
 			name.trim(),
 		)
 		const size = await mix.evaluate(element => ({
@@ -800,7 +805,8 @@ test.describe("pinned overview date", () => {
 		await expect(
 			card(page, "Spending calendar").getByRole("button", { name: /^4 October:/ }),
 		).toHaveAttribute("aria-label", /\$0\.00 spent/)
-		await mix.getByRole("link", { name: /^Groceries/ }).click()
+		await mix.getByRole("button", { name: /^Groceries/ }).click()
+		await page.getByRole("link", { name: "Open in Records", exact: true }).click()
 		await expect(page).toHaveURL(new RegExp(`category_ids=${IDS.categories.groceries}`))
 		await expect(
 			page.getByRole("link", { name: "Open FairPrice Run", exact: true }),
@@ -948,7 +954,7 @@ test("category trend: one shared list follows the read month and keeps its links
 	await surface.press("ArrowRight")
 	await surface.press("ArrowRight")
 	await expect(list).toHaveAccessibleName("Categories in Sep 2026")
-	await expect(list.getByRole("link").first()).toHaveAttribute("href", /month=September/)
+	await expect(list.getByRole("button").first()).toBeVisible()
 	if (!isMobile) {
 		const box = await surface.boundingBox()
 		if (!box) throw new Error("Category trend surface missing")
@@ -973,14 +979,14 @@ test("category cards: cap five rows and keep equal XL heights when expanding", a
 	const categories = card(page, "Categories this month")
 	const chart = card(page, "Category trend")
 	const toggle = categories.getByRole("button", { name: /more categories/ })
-	await expect(categories.getByRole("link")).toHaveCount(5)
+	await expect(categories.getByRole("button")).toHaveCount(5)
 	await expect(toggle).toHaveAttribute("aria-expanded", "false")
 	for (const expanded of [false, true, false]) {
 		if (expanded) await toggle.click()
 		else if (await categories.getByRole("button", { name: "Show fewer categories" }).count())
 			await categories.getByRole("button", { name: "Show fewer categories" }).click()
-		if (expanded) expect(await categories.getByRole("link").count()).toBeGreaterThan(5)
-		else await expect(categories.getByRole("link")).toHaveCount(5)
+		if (expanded) expect(await categories.getByRole("button").count()).toBeGreaterThan(5)
+		else await expect(categories.getByRole("button")).toHaveCount(5)
 		if (!isMobile) {
 			await expect
 				.poll(async () => {

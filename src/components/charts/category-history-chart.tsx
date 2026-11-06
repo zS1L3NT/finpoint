@@ -1,15 +1,14 @@
 "use client"
 
 import { DateTime } from "luxon"
-import Link from "next/link"
 import { type ComponentProps, useState } from "react"
 import BarChart from "@/components/charts/bar-chart"
 import CategorySpendingMix from "@/components/charts/category-spending-mix"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { useHistory } from "@/history"
 import { themeColor } from "@/lib/palette"
 import { cn, formatCurrency } from "@/lib/utils"
 import { BREAKDOWN_MONTHS, type SpendingHistoryMonth } from "@/logic/dashboard"
+import type { Selection } from "@/logic/drilldown"
 
 type SpendingSeries = SpendingHistoryMonth["categories"][number]
 type ChartSeries = SpendingSeries & { key: string; members: SpendingSeries[]; total: number }
@@ -28,9 +27,8 @@ export default function CategoryHistoryChart({
 	scopeLabel,
 	through,
 	monthlyBudgetIds,
-	recordHref,
+	onDrill,
 	badge,
-	onSelect,
 	compact = false,
 }: {
 	months: SpendingHistoryMonth[]
@@ -38,9 +36,8 @@ export default function CategoryHistoryChart({
 	scopeLabel: string
 	through: string | null
 	monthlyBudgetIds: string[] | null
-	recordHref: (ids: string, at: DateTime) => string
+	onDrill: (selection: Selection) => void
 	compact?: boolean
-	onSelect?: (at: DateTime) => void
 	badge: React.ReactNode
 }) {
 	// The breakdown keeps the last month read, so its links stay reachable after the pointer leaves.
@@ -120,16 +117,14 @@ export default function CategoryHistoryChart({
 							<CategorySpendingMix
 								categories={categories}
 								limit={limit}
-								recordHref={id =>
-									recordHref(id, DateTime.fromFormat(shown.month, "MMM yyyy"))
-								}
+								onDrill={onDrill}
 							/>
 						</div>
 					) : shown ? (
 						<MonthBreakdown
 							month={shown}
 							config={config}
-							recordHref={recordHref}
+							onDrill={onDrill}
 							limit={limit}
 						/>
 					) : null}
@@ -171,7 +166,13 @@ export default function CategoryHistoryChart({
 								onSelect={index => {
 									const m = chartData[index]
 									if (m?.included)
-										onSelect?.(DateTime.fromFormat(m.month, "MMM yyyy"))
+										onDrill({
+											kind: "month",
+											value: DateTime.fromFormat(
+												m.month,
+												"MMM yyyy",
+											).toFormat("yyyy-MM"),
+										})
 								}}
 								className="h-60 w-full sm:h-72 xl:h-auto xl:min-h-60 xl:flex-1"
 								labels={chartData.map(month => month.month)}
@@ -329,15 +330,14 @@ function monthTotal(month: ChartMonth) {
 function MonthBreakdown({
 	month,
 	config,
-	recordHref,
+	onDrill,
 	limit,
 }: {
 	month: ChartMonth
 	config: Record<string, { label: string; color: string }>
-	recordHref: (ids: string, at: DateTime) => string
+	onDrill: (selection: Selection) => void
 	limit?: number
 }) {
-	const { handlePush } = useHistory()
 	const total = monthTotal(month)
 	const entries = Object.entries(month.seriesValues)
 		.filter(([, value]) => value > 0)
@@ -368,13 +368,18 @@ function MonthBreakdown({
 				entries.slice(0, limit).map(([key, value]) => {
 					const details = month.seriesDetails[key] ?? []
 					return (
-						<Link
+						<button
+							type="button"
 							key={key}
-							href={recordHref(
-								details.map(item => item.id).join(","),
-								DateTime.fromFormat(month.month, "MMM yyyy"),
-							)}
-							onClick={handlePush("overview")}
+							onClick={() =>
+								onDrill({
+									kind: "category-gross",
+									value: details.map(item => item.id).join(","),
+									at: DateTime.fromFormat(month.month, "MMM yyyy").toFormat(
+										"yyyy-MM",
+									),
+								})
+							}
 							className="group grid min-w-0 gap-1.5 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 						>
 							<div className="grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-x-3">
@@ -419,7 +424,7 @@ function MonthBreakdown({
 										</span>
 									</div>
 								))}
-						</Link>
+						</button>
 					)
 				})
 			)}

@@ -1,10 +1,9 @@
 "use client"
 
-import Link from "next/link"
 import { UiIcon } from "@/components/icon"
-import { useHistory } from "@/history"
 import { themeColor } from "@/lib/palette"
 import { cn, formatCurrency } from "@/lib/utils"
+import type { Selection } from "@/logic/drilldown"
 
 type Mover = {
 	id: string
@@ -22,15 +21,14 @@ type Mover = {
 export default function CategoryMovers({
 	categories,
 	comparisonCount,
-	recordHref,
+	onDrill,
 	limit = 6,
 }: {
 	categories: Mover[]
 	comparisonCount: number
-	recordHref: (id: string) => string
+	onDrill: (selection: Selection) => void
 	limit?: number
 }) {
-	const { handlePush } = useHistory()
 	const movers = categories
 		.filter(category => category.comparison !== null && Math.abs(category.comparison) >= 0.5)
 		.sort((a, b) => Math.abs(b.comparison ?? 0) - Math.abs(a.comparison ?? 0))
@@ -50,10 +48,10 @@ export default function CategoryMovers({
 				const difference = category.comparison ?? 0
 				const up = difference > 0
 				return (
-					<Link
+					<button
+						type="button"
 						key={category.id}
-						href={recordHref(category.id)}
-						onClick={handlePush("overview")}
+						onClick={() => onDrill({ kind: "category", value: category.id })}
 						className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-lg px-2 py-2 transition-colors duration-150 ease-out hover:bg-muted/50 active:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 					>
 						<span
@@ -63,7 +61,7 @@ export default function CategoryMovers({
 							<UiIcon icon={category.icon} className="size-4 text-white" />
 						</span>
 						<span className="grid min-w-0">
-							<span className="truncate text-sm font-medium">{category.name}</span>
+							<span className="truncate text-sm font-medium">{category.name} ›</span>
 							<span className="truncate text-xs text-muted-foreground tabular-nums">
 								vs {formatCurrency(category.spending - difference)} average
 							</span>
@@ -81,7 +79,7 @@ export default function CategoryMovers({
 								{up ? "▲" : "▼"} {formatCurrency(Math.abs(difference))}
 							</span>
 						</span>
-					</Link>
+					</button>
 				)
 			})}
 			<p className="px-2 pt-1 text-xs text-muted-foreground">

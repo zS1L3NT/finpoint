@@ -44,3 +44,24 @@ test("missing drill Statement focus returns null", async () => {
  const { getDrillStatement } = await import("../../src/logic/drilldown")
  expect(await getDrillStatement("missing-focus")).toBeNull()
 })
+
+ test("category rows, movers and trend months reconcile across scopes", async () => {
+ await loadDemoWorkspace()
+ for (const scope of ["all", ...(await db.monthly_budgets.toArray()).map(b => b.id)]) {
+ const view = await getDashboardView({month: "October", year: 2026, scope})
+ for (const c of view.scopedCategories) {
+ expect((await getDrilldown("October", 2026, scope, {kind:"category", value:c.id}))?.total).toBeCloseTo(c.spending, 2)
+ expect((await getDrilldown("October", 2026, scope, {kind:"category-gross", value:c.id}))?.total).toBeCloseTo(c.outflow, 2)
+ }
+ for (const m of view.dashboard.comparison_history.filter(m => m.included)) {
+ const at = DateTime.fromFormat(m.month, "MMM yyyy").toFormat("yyyy-MM")
+ let total = 0
+ for (const c of m.categories) {
+ const value = scope === "all" ? c.spending : c.monthly_budget_spending[scope] ?? 0
+ total += value
+ expect((await getDrilldown("October", 2026, scope, {kind:"category-gross",value:c.id,at}))?.total).toBeCloseTo(value, 2)
+ }
+ expect((await getDrilldown("October", 2026, scope, {kind:"month",value:at}))?.total).toBeCloseTo(total, 2)
+ }
+ }
+ }, 120000)

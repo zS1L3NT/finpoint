@@ -163,3 +163,5 @@ Click a Spending calendar day to open its Drill-down: Records sorted by amount a
 Records and Statements expose read-only Allocations through an Allocations chevron. Each Allocation shows its share of the other amount, with any remainder below. Record allocation progress is visible on desktop and mobile; pending reasons explain confirmation or amount differences. Detail pages and Dashboard drill-downs use the same allocation rows.
 
 Expand a Record in the Dashboard Drill-down to see its Statements. Select a Statement to see its account and allocated Records. The breadcrumb and Back button return to the selection; browser Back restores the previous expansion. These views survive reloads and shared links through the `focus` URL parameter.
+
+Category rows, category trend month bars and their category lists open the Drill-down without leaving the Dashboard. Category rows and trend totals exclude refunds; Biggest changes opens the net spending Records, with refunds subtracted.

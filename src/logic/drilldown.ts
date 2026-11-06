@@ -7,7 +7,7 @@ import { getStatement } from "@/logic/statements"
 import { pathRecords } from "@/routes"
 
 export type Selection = {
-	kind: "day" | "category" | "month" | "budget"
+	kind: "day" | "category-gross" | "category" | "month" | "budget"
 	value: string
 	at?: string
 }
@@ -24,8 +24,8 @@ export async function getDrilldown(
 		: DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
 	const view = await getDashboardView({ month: date.toFormat("MMMM"), year: date.year, scope })
 	if (
-		selection.kind === "category" &&
-		!selection.value.split(",").every(id => view.scopedCategories.some(c => c.id === id))
+		(selection.kind === "category" || selection.kind === "category-gross") &&
+		(await db.categories.bulkGet(selection.value.split(","))).some(c => !c)
 	)
 		return null
 	if (
@@ -43,13 +43,15 @@ export async function getDrilldown(
 		end_date: end,
 		effective_spending: true,
 		max_amount:
-			selection.kind === "category" || selection.kind === "month" ? "-0.01" : undefined,
-		category_ids: selection.kind === "category" ? selection.value.split(",") : undefined,
+			selection.kind === "category-gross" || selection.kind === "month" ? "-0.01" : undefined,
+		category_ids: selection.kind.startsWith("category")
+			? selection.value.split(",")
+			: undefined,
 		monthly_budget_id:
 			selection.kind === "budget" ? selection.value : scope === "all" ? undefined : scope,
 	}
 	let records = await listRecords(filters)
-	if (selection.kind === "category" || selection.kind === "month")
+	if (selection.kind === "category-gross" || selection.kind === "month")
 		records = records.filter(r => contribution(r.analytics_treatment, r.amount).spending > 0)
 	records.sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount))
 	const details = await Promise.all(records.map(r => getRecord(r.id)))
@@ -63,7 +65,7 @@ export async function getDrilldown(
 	const title =
 		selection.kind === "day"
 			? `Spending on ${DateTime.fromISO(selection.value).toFormat("ccc d LLL")}`
-			: selection.kind === "category"
+			: selection.kind.startsWith("category")
 				? `${view.scopedCategories.find(c => c.id === selection.value)?.name ?? "Categories"} in ${date.toFormat("MMMM")}`
 				: selection.kind === "budget"
 					? `${view.dashboard.monthlyBudgets.find(b => b.id === selection.value)?.name ?? "Monthly budget"} in ${date.toFormat("MMMM")}`

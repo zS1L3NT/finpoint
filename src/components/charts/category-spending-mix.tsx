@@ -1,11 +1,10 @@
-import Link from "next/link"
-import { useHistory } from "@/history"
 import { themeColor } from "@/lib/palette"
 import { formatCurrency } from "@/lib/utils"
+import type { Selection } from "@/logic/drilldown"
 
 export default function CategorySpendingMix({
 	categories,
-	recordHref,
+	onDrill,
 	limit,
 }: {
 	categories: {
@@ -17,10 +16,9 @@ export default function CategorySpendingMix({
 		refunds: number
 		records: number
 	}[]
-	recordHref: (id: string) => string
+	onDrill: (selection: Selection) => void
 	limit?: number
 }) {
-	const { handlePush } = useHistory()
 	const total = categories.reduce((sum, category) => sum + category.outflow, 0)
 	const rows = categories
 		.filter(category => category.records > 0)
@@ -31,15 +29,15 @@ export default function CategorySpendingMix({
 				const value = category.outflow
 				const share = total > 0 ? (value / total) * 100 : 0
 				return (
-					<Link
+					<button
+						type="button"
 						key={category.id}
-						href={recordHref(category.id)}
-						onClick={handlePush("overview")}
+						onClick={() => onDrill({ kind: "category-gross", value: category.id })}
 						className="group grid min-w-0 gap-1.5 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 					>
 						<div className="flex min-w-0 items-center justify-between gap-3 text-xs">
 							<span className="min-w-0 truncate font-medium group-hover:underline">
-								{category.name}
+								{category.name} ›
 							</span>
 							<span className="shrink-0 tabular-nums">
 								{formatCurrency(value)}{" "}
@@ -63,7 +61,7 @@ export default function CategorySpendingMix({
 								{formatCurrency(category.spending)} net
 							</p>
 						) : null}
-					</Link>
+					</button>
 				)
 			})}
 			{!rows.length ? (
