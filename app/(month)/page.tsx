@@ -190,7 +190,9 @@ export default function DashboardPage() {
 							</ScopedCardTitle>
 							<CardDescription>
 								{paceProjection.available
-									? "If recorded daily spending continues, plus scheduled spending."
+									? paceProjection.history_remaining !== null
+										? `You usually spend ${formatCurrency(paceProjection.history_remaining)} more after ${DateTime.fromISO(period.through ?? "").toFormat("d MMMM")}, plus any scheduled Records.`
+										: "At your typical daily pace, plus scheduled Records."
 									: "Recorded spending against the monthly plan."}
 							</CardDescription>
 						</CardHeader>

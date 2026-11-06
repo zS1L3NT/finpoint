@@ -381,6 +381,8 @@ export async function getDashboard(
 		isCurrent,
 		isFuture,
 		actualEnd.day ?? 1,
+		comparisonSummaries(date, today, false, tables, null),
+		actualRecords,
 	)
 	const series = buildSeries(
 		summary,
@@ -503,6 +505,7 @@ export async function getPaceView(
 					spending: summary.spending,
 				}
 			: monthlyBudgetsBuilt.find(b => b.amount !== null && b.amount >= 0)
+	const forecastComparisons = comparisonSummaries(date, today, false, tables, scopeIds)
 	const projection = buildProjection(
 		date,
 		summary,
@@ -511,6 +514,8 @@ export async function getPaceView(
 		isCurrent,
 		isFuture,
 		actualEnd.day ?? 1,
+		forecastComparisons,
+		actualRecords,
 	)
 
 	const series = buildSeries(
@@ -566,6 +571,12 @@ export async function getPaceView(
 			isCurrent,
 			isFuture,
 			actualEnd.day,
+			forecastComparisons.map(month => ({
+				...month,
+				items: month.items.filter(matches),
+				summary: summarize(month.items.filter(matches)),
+			})),
+			actualRecords.filter(matches),
 		)
 		return {
 			...budget,
@@ -600,13 +611,7 @@ export async function getPaceView(
 					point.spending === null
 						? null
 						: forecast.reduce((sum, b) => sum + (b.points[index]?.spending ?? 0), 0),
-				projected_spending:
-					point.projected_spending === null
-						? null
-						: forecast.reduce(
-								(sum, b) => sum + (b.points[index]?.projected_spending ?? 0),
-								0,
-							),
+				projected_spending: point.projected_spending,
 			})),
 		})
 	}
@@ -809,10 +814,13 @@ function buildProjection(
 	isCurrent: boolean,
 	isFuture: boolean,
 	elapsedDays: number,
+	comparisons: ReturnType<typeof comparisonSummaries>,
+	actualItems: AnalyticsRecord[],
 ) {
 	if (!isCurrent || isFuture || elapsedDays < 1) {
 		return {
 			available: false,
+			history_remaining: null,
 			daily_spending: null,
 			projected_spending: null,
 			scheduled_spending: 0,
@@ -821,7 +829,38 @@ function buildProjection(
 		}
 	}
 	const remainingDays = Math.max((date.daysInMonth ?? 30) - elapsedDays, 0)
-	const dailySpending = summary.gross_spending / elapsedDays
+	const included = comparisons.filter(month => month.included)
+	const remainingSpending = (actual: ReturnType<typeof summarize>, budgetId?: string) => {
+		if (budgetId === "all") budgetId = undefined
+		if (included.length)
+			return (
+				included.reduce((sum, month) => {
+					const days = DateTime.fromISO(month.start).daysInMonth ?? 30
+					const cutoff = Math.min(elapsedDays, days)
+					const daily = budgetId
+						? summarize(month.items.filter(r => r.monthly_budget_id === budgetId)).daily
+						: month.summary.daily
+					const remaining = daily
+						.filter(day => Number(day.date.slice(-2)) > cutoff)
+						.reduce((total, day) => total + day.spending, 0)
+					return sum + (days > cutoff ? (remaining * remainingDays) / (days - cutoff) : 0)
+				}, 0) / included.length
+			)
+		const days = Array.from({ length: elapsedDays }, (_, day) =>
+			Math.max(
+				actual.daily.find(row => Number(row.date.slice(-2)) === day + 1)?.spending ?? 0,
+				0,
+			),
+		).sort((a, b) => a - b)
+		const middle = Math.floor(days.length / 2)
+		return (
+			(days.length % 2
+				? (days[middle] ?? 0)
+				: ((days[middle - 1] ?? 0) + (days[middle] ?? 0)) / 2) * remainingDays
+		)
+	}
+	const remaining = remainingSpending(summary)
+	const dailySpending = remainingDays ? remaining / remainingDays : 0
 	const paceMonthlyBudget = monthlyBudgets.find(b => b.amount !== null && b.amount >= 0)
 	const paceAmount = paceMonthlyBudget?.amount ?? null
 	const futureMonthlyBudgets = new Map(futureSummary.monthlyBudgets.map(b => [b.id, b]))
@@ -831,7 +870,8 @@ function buildProjection(
 		: 0
 	return {
 		available: true,
-		daily_spending: Math.round(dailySpending * 100) / 100,
+		history_remaining: included.length ? Math.round(remaining * 100) / 100 : null,
+		daily_spending: dailySpending,
 		projected_spending:
 			Math.round(
 				(summary.spending + futureSummary.spending + dailySpending * remainingDays) * 100,
@@ -853,7 +893,18 @@ function buildProjection(
 							Math.round(
 								(paceMonthlyBudget.spending +
 									scheduledMonthlyBudgetSpending +
-									(paceMonthlyBudget.spending / elapsedDays) * remainingDays) *
+									remainingSpending(
+										paceMonthlyBudget.id === "all"
+											? summary
+											: summarize(
+													actualItems.filter(
+														r =>
+															r.monthly_budget_id ===
+															paceMonthlyBudget.id,
+													),
+												),
+										paceMonthlyBudget.id,
+									)) *
 									100,
 							) / 100,
 						usage_pace:
