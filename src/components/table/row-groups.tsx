@@ -158,7 +158,7 @@ export function isInteractiveTarget(target: EventTarget | null) {
 	if (typeof window !== "undefined" && window.getSelection()?.toString()) return true
 	return (
 		target instanceof Element &&
-		!!target.closest("a, button, input, label, select, textarea, [role='checkbox']")
+		!!target.closest("a, button, summary, input, label, select, textarea, [role='checkbox']")
 	)
 }
 

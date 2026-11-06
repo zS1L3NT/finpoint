@@ -159,3 +159,5 @@ $ bun run build
     - [![Biome](https://img.shields.io/badge/%40biomejs%2Fbiome-%5E2.4.12-red?style=flat-square)](https://www.npmjs.com/package/@biomejs/biome/v/2.4.12)
 
 Click a Spending calendar day to open its Drill-down: Records sorted by amount and the day’s effective spending total. On desktop it docks beside the Dashboard; on smaller screens it opens as a bottom sheet. Select another day to change its contents, or close with Escape, the close button, or browser Back. “Open in Records” carries the selected day and budget scope into the Records page.
+
+Records and Statements expose read-only Allocations through an Allocations chevron. Each Allocation shows its share of the other amount, with any remainder below. Record allocation progress is visible on desktop and mobile; pending reasons explain confirmation or amount differences. Detail pages and Dashboard drill-downs use the same allocation rows.

@@ -690,14 +690,14 @@ test.describe("pinned 15 October 2026 date", () => {
 					if (!allocations.length)
 						await expect(
 							page
-								.getByText("No statements found.", { exact: true })
+								.getByText("No Statements allocated yet.", { exact: true })
 								.filter({ visible: true }),
 						).toBeVisible()
 					else
 						for (const allocation of allocations)
 							await expect(
 								page
-									.getByRole("link", { name: "Open statement" })
+									.getByRole("link")
 									.and(
 										page.locator(
 											`[href="/statements/${allocation.statement_id}"]`,
@@ -711,7 +711,7 @@ test.describe("pinned 15 October 2026 date", () => {
 								.first()
 								.locator("..")
 								.locator(".."),
-						).toContainText("[-$25.00]")
+						).toContainText("$25.00 of $60.00 allocated")
 				})
 			}
 		})

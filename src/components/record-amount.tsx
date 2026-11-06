@@ -1,3 +1,4 @@
+import { AllocationProgress } from "@/components/allocation-progress"
 import { classForCurrency, cn, formatCurrency } from "@/lib/utils"
 import type { Record } from "@/types"
 
@@ -21,9 +22,7 @@ export default function RecordAmount({
 		>
 			<span className={classForCurrency(amount)}>{formatCurrency(amount)}</span>
 			{showAccumulated ? (
-				<span className="text-muted-foreground">
-					[{formatCurrency(record.allocated_amount)}]
-				</span>
+				<AllocationProgress amount={record.amount} allocated={record.allocated_amount} />
 			) : null}
 		</span>
 	)

@@ -12,6 +12,17 @@ import { inputToStored, newId, round2, TREATMENT_VALUES } from "@/logic/shared"
 import { ValidationError, Validator } from "@/logic/validate"
 import type { Allocation, AnalyticsTreatment, Record as AppRecord, Statement } from "@/types"
 
+export function pendingReason(
+	record: Pick<AppRecord, "amount" | "allocated_amount" | "pending_statement_count">,
+): string {
+	if (record.pending_statement_count)
+		return "Allocated account activity is awaiting confirmation."
+	if (record.allocated_amount === 0 && record.amount !== 0) return "No Statements allocated yet."
+	if (round2(record.allocated_amount - record.amount) !== 0)
+		return "The allocated amount differs from the Record amount."
+	return "All Allocations are confirmed and tally with the Record amount."
+}
+
 export type RecordDetail = AppRecord & {
 	statements: Array<Statement & { pivot: Allocation }>
 }

@@ -4,6 +4,8 @@ import { motion, useReducedMotion } from "framer-motion"
 import { ChevronDown } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
+import { AllocationProgress } from "@/components/allocation-progress"
+import { AllocationRows } from "@/components/allocation-rows"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
 import { SPRING, TRANSITION } from "@/lib/motion"
@@ -107,15 +109,7 @@ export function DrillPanel({
 							<p className="mb-3 text-xs text-muted-foreground">
 								Records allocated to this Statement
 							</p>
-							{statement.records.map(r => (
-								<div key={r.id} className="border-b py-4">
-									<p>{r.title}</p>
-									<p className="text-xs text-muted-foreground">
-										{formatCurrency(Math.abs(r.pivot.amount))} of{" "}
-										{formatCurrency(Math.abs(r.amount))}
-									</p>
-								</div>
-							))}
+							<AllocationRows statement={statement} />
 						</>
 					) : null
 				) : (
@@ -139,6 +133,10 @@ export function DrillPanel({
 									<span className="text-sm tabular-nums">
 										{r.amount > 0 ? "Refund " : ""}
 										{formatCurrency(Math.abs(r.amount))}
+										<AllocationProgress
+											amount={r.amount}
+											allocated={r.allocated_amount}
+										/>
 									</span>
 									<ChevronDown aria-hidden className="size-4 shrink-0" />
 								</button>
@@ -149,34 +147,10 @@ export function DrillPanel({
 										transition={reduced ? TRANSITION.fast : SPRING.snappy}
 										className="mb-4 overflow-hidden rounded-lg bg-muted/40 p-3"
 									>
-										{r.is_pending ? (
-											<p className="mb-3 text-xs text-muted-foreground">
-												{r.pending_statement_count
-													? "Pending because an Allocation touches a Pending Statement."
-													: "Pending because the allocated sum differs from the Record amount."}
-											</p>
-										) : null}
-										{r.statements.map(s => (
-											<button
-												type="button"
-												key={s.id}
-												onClick={() => setPivot({ key, id: s.id })}
-												className="block w-full rounded p-2 text-left hover:bg-muted"
-											>
-												<span className="block text-xs font-medium">
-													{s.description} ›
-												</span>
-												<span className="text-xs text-muted-foreground">
-													{formatCurrency(Math.abs(s.pivot.amount))} of{" "}
-													{formatCurrency(Math.abs(s.amount))}
-												</span>
-											</button>
-										))}
-										{!r.statements.length ? (
-											<p className="text-xs text-muted-foreground">
-												No Statements allocated yet.
-											</p>
-										) : null}
+										<AllocationRows
+											record={r}
+											onStatement={id => setPivot({ key, id })}
+										/>
 									</motion.div>
 								) : null}
 							</div>

@@ -20,8 +20,11 @@ test("Records table: rendered Records keep zero, negative amounts and pending re
 	await expect(partial).toContainText("-$60.00")
 	await expect(partial.getByText("Pending", { exact: true })).toHaveAttribute(
 		"title",
-		"-$25.00 of -$60.00 allocated",
+		"The allocated amount differs from the Record amount.",
 	)
+	await expect(partial).toContainText("$25.00 of $60.00 allocated")
+	await partial.getByText("Allocations", { exact: true }).click()
+	await expect(partial.getByTestId("allocation-rows")).toBeVisible()
 	const groceries = page
 		.getByRole("link", { name: "Open FairPrice Run", exact: true })
 		.locator("xpath=ancestor::*[self::tr or contains(@class, 'grid-cols-subgrid')][1]")

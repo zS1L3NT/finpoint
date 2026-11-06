@@ -1,6 +1,7 @@
 import type { CellContext, ColumnDef, Row } from "@tanstack/react-table"
 import Link from "next/link"
 import { useMemo } from "react"
+import { AllocationExpansion } from "@/components/allocation-rows"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import { amountTone, formatRowTime } from "@/components/table/record-columns"
 import { Badge } from "@/components/ui/badge"
@@ -142,6 +143,8 @@ export function useStatementColumns<TStatement extends StatementRow>({
 				header: "Statement",
 				cell: ({ row }) => (
 					<div className="min-w-0">
+						<AllocationExpansion id={row.original.id} kind="statement" />
+
 						<p className="flex items-center gap-1.5">
 							<span className="min-w-0 truncate font-medium">
 								{row.original.description || "No description"}
@@ -207,6 +210,7 @@ export function useStatementMobileRow<TStatement extends StatementRow>({
 				<>
 					<div className="flex min-w-0 items-center gap-3">
 						{leading?.(statement)}
+
 						<div className="min-w-0 flex-1">
 							<p className="flex items-center gap-1.5">
 								<span className="min-w-0 truncate font-medium">
@@ -226,6 +230,11 @@ export function useStatementMobileRow<TStatement extends StatementRow>({
 					</div>
 					<StatementAmount statement={statement} amount={amount} />
 					<StatementActions statement={statement} options={{ pageName, onEdit }} />
+					{amount === "amount" ? (
+						<div className="col-span-full">
+							<AllocationExpansion id={statement.id} kind="statement" />
+						</div>
+					) : null}
 				</>
 			)
 		},

@@ -2,16 +2,14 @@
 
 import { useLiveQuery } from "dexie-react-hooks"
 import { use, useState } from "react"
+import { AllocationRows } from "@/components/allocation-rows"
 import { DetailSummary, DetailSummaryItem } from "@/components/detail-summary"
-import PendingStatementDialog from "@/components/dialogs/pending-statement"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
 import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import MonthlyBudgetBadge from "@/components/monthly-budget-badge"
 import RecordAmount from "@/components/record-amount"
-import DataTable from "@/components/table/data-table"
-import { useStatementColumns, useStatementMobileRow } from "@/components/table/statement-columns"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -21,7 +19,6 @@ import { listAccounts } from "@/logic/accounts"
 import { listCategories } from "@/logic/categories"
 import { getRecord } from "@/logic/records"
 import { pathRecords } from "@/routes"
-import type { Allocation, Statement } from "@/types"
 
 export default function RecordPage({ params }: { params: Promise<{ id: string }> }) {
 	const { id } = use(params)
@@ -30,18 +27,6 @@ export default function RecordPage({ params }: { params: Promise<{ id: string }>
 	const categories = useLiveQuery(() => listCategories(), []) ?? []
 
 	const [isEditingRecord, setIsEditingRecord] = useState(false)
-	const [editingStatement, setEditingStatement] = useState<Statement | null>(null)
-	const columns = useStatementColumns<Statement & { pivot: Allocation }>({
-		amount: "allocated",
-		pageName: `Record ${data?.id ?? ""}`,
-		onEdit: setEditingStatement,
-	})
-	const mobileRow = useStatementMobileRow<Statement & { pivot: Allocation }>({
-		amount: "allocated",
-		pageName: `Record ${data?.id ?? ""}`,
-		onEdit: setEditingStatement,
-	})
-
 	// undefined means the live query is still resolving; only null is genuinely missing.
 	if (data === undefined || accounts === undefined) return null
 
@@ -145,26 +130,10 @@ export default function RecordPage({ params }: { params: Promise<{ id: string }>
 						<CardDescription>Statements allocated to this record.</CardDescription>
 					</CardHeader>
 					<CardContent>
-						<DataTable
-							data={statements}
-							columns={columns}
-							mobileRow={mobileRow}
-							emptyMessage="No statements found."
-						/>
+						<AllocationRows record={data} />
 					</CardContent>
 				</Card>
 			</PageContent>
-
-			{editingStatement ? (
-				<PendingStatementDialog
-					statement={editingStatement}
-					accounts={accounts}
-					isOpen
-					setIsOpen={open => {
-						if (!open) setEditingStatement(null)
-					}}
-				/>
-			) : null}
 		</>
 	)
 }
