@@ -3120,6 +3120,8 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"combobox primitive: filters, selects and clears",
 	],
 	"src/components/ui/combobox.tsx#export.ComboboxContent.behaviour": [
+		"Category dropdown: opening and closing render intermediate frames",
+		"Category dropdown: opening and closing render intermediate frames with CPU throttling where supported",
 		"Category popup: bringing an option into view preserves the modal page position",
 		"combobox field: filters, picks, clears and shows empty text",
 		"combobox primitive: filters, selects and clears",

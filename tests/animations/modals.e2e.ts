@@ -361,3 +361,104 @@ for (const action of ["Cancel", "Save changes"] as const) {
 		await expect(page.locator('aside[aria-live="polite"]')).toHaveCount(0)
 	})
 }
+
+for (const [busy, suffix] of [
+	[false, ""],
+	[true, " with CPU throttling where supported"],
+] as const) {
+	test(`Category dropdown: opening and closing render intermediate frames${suffix}`, {
+		tag: "@reduced-motion",
+	}, async ({ page, workspace, browserName }) => {
+		void workspace
+		const reduced = test.info().project.use.reducedMotion === "reduce"
+
+		await page.goto("/allocator")
+		await page
+			.getByRole("checkbox", {
+				name: `Select statement ${IDS.statements.unallocated[2]}`,
+				exact: true,
+			})
+			.check()
+		await page.getByRole("button", { name: "Create Record", exact: true }).click()
+		const field = page.getByRole("dialog").getByLabel("Category", { exact: true })
+		await field.scrollIntoViewIfNeeded()
+		if (busy && browserName === "chromium") {
+			const cdp = await page.context().newCDPSession(page)
+			await cdp.send("Emulation.setCPUThrottlingRate", { rate: 6 })
+		}
+		const recorder = await page.evaluateHandle(() => {
+			const frames: { time: number; opacity: number | null; transform: string | null }[] = []
+			let stopped = false
+			const sample = (time: number) => {
+				const popup = document.querySelector('[data-slot="combobox-content"]')
+				frames.push({
+					time,
+					transform: popup ? getComputedStyle(popup).transform : null,
+					opacity: popup ? Number(getComputedStyle(popup).opacity) : null,
+				})
+				if (!stopped) requestAnimationFrame(sample)
+			}
+			requestAnimationFrame(sample)
+			return {
+				frames,
+				stop: () => {
+					stopped = true
+				},
+			}
+		})
+		try {
+			for (const close of ["Escape", "select"]) {
+				await recorder.evaluate(r => {
+					r.frames.length = 0
+				})
+				await field.click()
+				await expect(page.locator('[data-slot="combobox-content"]')).toHaveCSS(
+					"opacity",
+					"1",
+				)
+				const entrance = await recorder.evaluate(r => r.frames)
+				await test.info().attach(`category-${close}-entrance`, {
+					body: JSON.stringify(entrance),
+					contentType: "application/json",
+				})
+				if (reduced)
+					expect(
+						entrance
+							.filter(f => f.transform !== null)
+							.every(f => f.transform === "none"),
+					).toBe(true)
+				else
+					expect(
+						entrance.filter(
+							f => f.opacity !== null && f.opacity > 0.01 && f.opacity < 0.99,
+						).length,
+						"Category opening must render intermediate opacity",
+					).toBeGreaterThan(1)
+				await recorder.evaluate(r => {
+					r.frames.length = 0
+				})
+				if (close === "Escape") await page.keyboard.press("Escape")
+				else await page.getByRole("option", { name: "Groceries", exact: true }).click()
+				await expect(page.locator('[data-slot="combobox-content"]')).toHaveCount(0)
+				const exit = await recorder.evaluate(r => r.frames)
+				await test.info().attach(`category-${close}-exit`, {
+					body: JSON.stringify(exit),
+					contentType: "application/json",
+				})
+				if (reduced)
+					expect(
+						exit.filter(f => f.transform !== null).every(f => f.transform === "none"),
+					).toBe(true)
+				else
+					expect(
+						exit.filter(f => f.opacity !== null && f.opacity > 0.01 && f.opacity < 0.99)
+							.length,
+						"Category closing must render intermediate opacity",
+					).toBeGreaterThan(1)
+			}
+		} finally {
+			await recorder.evaluate(r => r.stop())
+			await recorder.dispose()
+		}
+	})
+}
