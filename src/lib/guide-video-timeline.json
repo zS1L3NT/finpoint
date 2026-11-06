@@ -1,0 +1,1065 @@
+{
+	"fps": 30,
+	"width": 1920,
+	"height": 1080,
+	"durationInFrames": 42375,
+	"chapters": [
+		{
+			"id": "start",
+			"title": "Why Finpoint?",
+			"group": "The basics",
+			"startFrame": 0,
+			"durationInFrames": 4542,
+			"segments": [
+				{
+					"id": "welcome",
+					"text": "So you’ve decided to take charge of your spending, maybe after noticing your bank balance running dry faster than you expected. Congratulations, and welcome to Finpoint. This guide walks you through everything Finpoint can do, so you can use all of it, or just the parts you need. Finpoint can help you track several bank accounts, or just a few daily payments from one bank account. Finpoint works either way.",
+					"titleEnd": 1.1003333333333334,
+					"from": 0,
+					"durationInFrames": 823,
+					"audio": "narration/start-welcome.mp3"
+				},
+				{
+					"id": "missing",
+					"text": "But modern banking apps can already list every payment from your bank account. So what’s missing? Isn’t that enough?",
+					"from": 823,
+					"durationInFrames": 224,
+					"audio": "narration/start-missing.mp3"
+				},
+				{
+					"id": "bank",
+					"text": "The thing is, your bank can tell you where every dollar went through your bank statements, but your bank can’t tell you what each payment was really for.",
+					"from": 1047,
+					"durationInFrames": 271,
+					"audio": "narration/start-bank.mp3"
+				},
+				{
+					"id": "split",
+					"text": "Let’s say you spent $80 at the supermarket in one Apple Pay payment: $50 of that $80 was on groceries, and $30 of that $80 was on a birthday gift for a friend. Your banking app shows one $80 payment, and nothing more. But to you, those are two very different purchases, and maybe you’d like to label them that way.",
+					"from": 1318,
+					"durationInFrames": 670,
+					"audio": "narration/start-split.mp3"
+				},
+				{
+					"id": "dinner",
+					"text": "Or let’s say you paid $90 for dinner with a friend, and they sent their $60 share back a week later. Your banking app shows two payments, a week apart, so you’d have to scroll past everything in between to get the full picture of both payments. But to you, those two payments are really just one dinner, and maybe you’d like to label them that way.",
+					"from": 1988,
+					"durationInFrames": 659,
+					"audio": "narration/start-dinner.mp3"
+				},
+				{
+					"id": "explain",
+					"text": "Finpoint was built to close that gap. Finpoint not only keeps your bank activity exactly as your bank reports it, but also lets you label your bank activity in your own words: groceries, $50. A gift, $30. Your share of dinner, $30.",
+					"from": 2647,
+					"durationInFrames": 538,
+					"audio": "narration/start-explain.mp3"
+				},
+				{
+					"id": "built",
+					"text": "That’s the whole idea of Finpoint: adding labels to your bank activity, whether it’s one label or many labels, and whether they’re simple or complex labels. Once your bank activity is labelled, your bank activity becomes much easier to understand.",
+					"from": 3185,
+					"durationInFrames": 495,
+					"audio": "narration/start-built.mp3"
+				},
+				{
+					"id": "how",
+					"text": "So how do you use Finpoint? It comes down to just two things: bring in your bank activity, and label your bank activity. Everything else falls into place from there.",
+					"from": 3680,
+					"durationInFrames": 319,
+					"audio": "narration/start-how.mp3"
+				},
+				{
+					"id": "concepts",
+					"text": "To do that, you’ll need to understand the three core ideas of Finpoint. Statements, which are your bank activity, exactly as your bank reports it. Records, which are your labels for your bank activity. And Allocations, which are the links between Statements and Records.",
+					"from": 3999,
+					"durationInFrames": 543,
+					"audio": "narration/start-concepts.mp3"
+				}
+			]
+		},
+		{
+			"id": "model",
+			"title": "Statements, Records and Allocations",
+			"group": "The basics",
+			"startFrame": 4542,
+			"durationInFrames": 3667,
+			"segments": [
+				{
+					"id": "statement",
+					"text": "A Statement is one line of bank activity, exactly as your bank reports it, like that $80 supermarket payment. Finpoint never lets you edit the Statements your bank gives you, so you can trust your Statements to match your bank. Well, almost always. We’ll get to that.",
+					"titleEnd": 2.3142500000000004,
+					"from": 0,
+					"durationInFrames": 635,
+					"audio": "narration/model-statement.mp3"
+				},
+				{
+					"id": "record",
+					"text": "A Record is your label for what happened, like a Groceries Record for $50, and a Gift Record for $30.",
+					"from": 635,
+					"durationInFrames": 244,
+					"audio": "narration/model-record.mp3"
+				},
+				{
+					"id": "allocation",
+					"text": "An Allocation links a Statement to a Record, and says how much of the Statement belongs to that Record. Here, $50 of the supermarket Statement is allocated to the Groceries Record, and the other $30 to the Gift Record.",
+					"from": 879,
+					"durationInFrames": 454,
+					"audio": "narration/model-allocation.mp3"
+				},
+				{
+					"id": "split",
+					"text": "So one Statement can be split across several Records. That’s how you untangle a mixed shopping trip, or a bill that covers two different things.",
+					"from": 1333,
+					"durationInFrames": 279,
+					"audio": "narration/model-split.mp3"
+				},
+				{
+					"id": "combine",
+					"text": "It works the other way too: several Statements can be combined into one Record. Your $90 dinner Statement and your friend’s $60 transfer Statement both belong to one Dinner Record, and that Record shows what you really spent: $30.",
+					"from": 1612,
+					"durationInFrames": 499,
+					"audio": "narration/model-combine.mp3"
+				},
+				{
+					"id": "simple",
+					"text": "Most of the time, though, it’s simpler: one Statement, labelled by one Record. A $12 lunch you had on your own is one Statement, labelled by one Lunch Record. Your Allocations don’t always have to be complex. Your Allocations can be as simple as this.",
+					"from": 2111,
+					"durationInFrames": 526,
+					"audio": "narration/model-simple.mp3"
+				},
+				{
+					"id": "complex",
+					"text": "And when things get messier, Finpoint keeps up. Say you bought $80 of groceries and a $40 gift in one checkout, but paid $60 on each of two cards. That’s two Statements and two Records, linked by three Allocations.",
+					"from": 2637,
+					"durationInFrames": 479,
+					"audio": "narration/model-complex.mp3"
+				},
+				{
+					"id": "flexible",
+					"text": "We won’t be covering anything quite this complex in this guide. This example is just to show that Finpoint can be as flexible as you need it to be, even in very complex situations.",
+					"from": 3116,
+					"durationInFrames": 364,
+					"audio": "narration/model-flexible.mp3"
+				},
+				{
+					"id": "enough",
+					"text": "Okay, that’s enough examples. Let’s get you familiar with Finpoint itself.",
+					"from": 3480,
+					"durationInFrames": 187,
+					"audio": "narration/model-enough.mp3"
+				}
+			]
+		},
+		{
+			"id": "workspace",
+			"title": "Trying Finpoint first",
+			"group": "The basics",
+			"startFrame": 8209,
+			"durationInFrames": 814,
+			"segments": [
+				{
+					"id": "demo",
+					"text": "On your first visit, you’ll be greeted by an empty Dashboard. Since you don’t have any data yet, click Try demo data. It loads three bank accounts and five months of Records, so you can see what a lived-in Finpoint looks like.",
+					"titleEnd": 1.519375,
+					"from": 0,
+					"durationInFrames": 504,
+					"audio": "narration/workspace-demo.mp3"
+				},
+				{
+					"id": "own",
+					"text": "When you’re done exploring, clear the demo data from the Data page, by clicking Clear all data. Then you’re ready to import your own bank activity.",
+					"from": 504,
+					"durationInFrames": 310,
+					"audio": "narration/workspace-own.mp3"
+				}
+			]
+		},
+		{
+			"id": "import",
+			"title": "Importing your bank activity",
+			"group": "The basics",
+			"startFrame": 9023,
+			"durationInFrames": 3312,
+			"segments": [
+				{
+					"id": "intro",
+					"text": "Many banks let you download your bank activity as a file, called a bank export, from their website or app. Finpoint doesn’t connect to your bank directly, so this bank export is how your bank activity gets into Finpoint.",
+					"titleEnd": 1.6950416666666666,
+					"from": 0,
+					"durationInFrames": 517,
+					"audio": "narration/import-intro.mp3"
+				},
+				{
+					"id": "untouched",
+					"text": "Import the bank export exactly as your bank gave it to you. Finpoint reads each bank export as it is, so an edited bank export might not import into Finpoint correctly.",
+					"from": 517,
+					"durationInFrames": 351,
+					"audio": "narration/import-untouched.mp3"
+				},
+				{
+					"id": "banks",
+					"text": "For now, Finpoint reads bank exports from DBS, OCBC, UOB and Revolut, as a CSV file or an Excel spreadsheet, depending on the bank.",
+					"from": 868,
+					"durationInFrames": 357,
+					"audio": "narration/import-banks.mp3"
+				},
+				{
+					"id": "accounts",
+					"text": "Don’t worry about importing bank exports from several bank accounts at once. Each bank export says which bank account it came from, so Finpoint sorts the new Statements for you. So if you import bank exports from two DBS bank accounts together, Finpoint keeps each bank account’s Statements apart.",
+					"from": 1225,
+					"durationInFrames": 567,
+					"audio": "narration/import-accounts.mp3"
+				},
+				{
+					"id": "revolut",
+					"text": "There’s one catch, though: some bank exports don’t say which bank account they came from. Revolut is one of them. For a Revolut bank export, Finpoint will ask you to choose which bank account the bank export belongs to.",
+					"from": 1792,
+					"durationInFrames": 421,
+					"audio": "narration/import-revolut.mp3"
+				},
+				{
+					"id": "download",
+					"text": "Let’s import your first bank export. Download a CSV or Excel bank export from your bank, once for each bank account you want to track.",
+					"step": 1,
+					"steps": 5,
+					"from": 2213,
+					"durationInFrames": 292,
+					"audio": "narration/import-download.mp3"
+				},
+				{
+					"id": "choose",
+					"text": "Then open the Importer from the sidebar, choose your bank, and add your bank exports. You can add several bank exports at once.",
+					"step": 2,
+					"steps": 5,
+					"from": 2505,
+					"durationInFrames": 255,
+					"audio": "narration/import-choose.mp3"
+				},
+				{
+					"id": "result",
+					"text": "Click Import, and Finpoint will tell you how many new Statements came in.",
+					"step": 3,
+					"steps": 5,
+					"from": 2760,
+					"durationInFrames": 147,
+					"audio": "narration/import-result.mp3"
+				},
+				{
+					"id": "pick",
+					"text": "And as we mentioned, for a Revolut bank export, you’ll need to choose its bank account before you import it.",
+					"step": 4,
+					"steps": 5,
+					"from": 2907,
+					"durationInFrames": 206,
+					"audio": "narration/import-pick.mp3"
+				},
+				{
+					"id": "next",
+					"text": "Your new Statements now wait in Workflows for you to label, so that’s where we’re heading next.",
+					"step": 5,
+					"steps": 5,
+					"from": 3113,
+					"durationInFrames": 199,
+					"audio": "narration/import-next.mp3"
+				}
+			]
+		},
+		{
+			"id": "allocator",
+			"title": "Workflows",
+			"group": "The basics",
+			"startFrame": 12335,
+			"durationInFrames": 1480,
+			"segments": [
+				{
+					"id": "list",
+					"text": "Workflows is your to-do list, and it’s where you’ll spend most of your time in Finpoint. Its first tab, Allocate to Records, lists every Statement that still needs a label, newest first.",
+					"titleEnd": 0.9918750000000001,
+					"from": 0,
+					"durationInFrames": 427,
+					"audio": "narration/allocator-list.mp3"
+				},
+				{
+					"id": "left",
+					"text": "Once a Statement is fully labelled, the Statement leaves this list. So an empty Allocate to Records list means you’re all caught up, at least until your next import.",
+					"from": 427,
+					"durationInFrames": 313,
+					"audio": "narration/allocator-left.mp3"
+				},
+				{
+					"id": "tabs",
+					"text": "The other two tabs help you tidy up your imported Statements. We’ll get to those tabs later.",
+					"from": 740,
+					"durationInFrames": 185,
+					"audio": "narration/allocator-tabs.mp3"
+				},
+				{
+					"id": "pages",
+					"text": "To look things up, use the Records page and the Statements page. The Records page lists every Record, and the Statements page lists every Statement, with filters to help you find anything. Workflows is different: Workflows only shows the Statements that still need a label.",
+					"from": 925,
+					"durationInFrames": 555,
+					"audio": "narration/allocator-pages.mp3"
+				}
+			]
+		},
+		{
+			"id": "lunch",
+			"title": "One to one: your first Record",
+			"group": "The basics",
+			"startFrame": 13815,
+			"durationInFrames": 2060,
+			"segments": [
+				{
+					"id": "select",
+					"text": "Let’s label that $12 solo lunch from earlier. In Workflows, click the lunch Statement to select it. A bar will appear at the top, with buttons for what you can do next.",
+					"titleEnd": 2.065375,
+					"step": 1,
+					"steps": 4,
+					"from": 0,
+					"durationInFrames": 443,
+					"audio": "narration/lunch-select.mp3"
+				},
+				{
+					"id": "create",
+					"text": "We’ll cover the other buttons later. For now, click Create Record. The Create Record form opens with the Statement’s $12 already allocated, and the Record’s amount and date filled in for you.",
+					"step": 2,
+					"steps": 4,
+					"from": 443,
+					"durationInFrames": 393,
+					"audio": "narration/lunch-create.mp3"
+				},
+				{
+					"id": "fill",
+					"text": "Give the Record a title, like Lunch, and choose a Category, like Dining Out. A Category says what the money was for, and your Category will matter on your Dashboard later.",
+					"step": 3,
+					"steps": 4,
+					"from": 836,
+					"durationInFrames": 324,
+					"audio": "narration/lunch-fill.mp3"
+				},
+				{
+					"id": "ignore",
+					"text": "Under Analytics, you’ll also see Treatment and Monthly Budget. Leave Treatment and Monthly Budget as they are for now: your Category fills them in. These features are more advanced, so we’ll cover them later.",
+					"from": 1160,
+					"durationInFrames": 409,
+					"audio": "narration/lunch-ignore.mp3"
+				},
+				{
+					"id": "save",
+					"text": "Check that everything looks right, then click Create Record at the bottom to save the Record. The lunch Statement is now fully allocated by this Record, so the Statement leaves the list.",
+					"step": 4,
+					"steps": 4,
+					"from": 1569,
+					"durationInFrames": 348,
+					"audio": "narration/lunch-save.mp3"
+				},
+				{
+					"id": "found",
+					"text": "And on the Records page, you’ll find your new Lunch Record.",
+					"from": 1917,
+					"durationInFrames": 143,
+					"audio": "narration/lunch-found.mp3"
+				}
+			]
+		},
+		{
+			"id": "split",
+			"title": "One to many: splitting a payment",
+			"group": "The basics",
+			"startFrame": 15875,
+			"durationInFrames": 2108,
+			"segments": [
+				{
+					"id": "select",
+					"text": "Now let’s split the $80 supermarket trip. Select the supermarket Statement in Workflows, and click Create Record.",
+					"titleEnd": 2.0527083333333334,
+					"step": 1,
+					"steps": 6,
+					"from": 0,
+					"durationInFrames": 346,
+					"audio": "narration/split-select.mp3"
+				},
+				{
+					"id": "amount",
+					"text": "Call the Record Groceries, and set both the Record’s amount and its Allocation to −$50. The Record is what you spent, and the Allocation is how much of this $80 Statement the Record uses. The other $30 stays unlabelled, for the next Record.",
+					"step": 2,
+					"steps": 6,
+					"from": 346,
+					"durationInFrames": 536,
+					"audio": "narration/split-amount.mp3"
+				},
+				{
+					"id": "submit",
+					"text": "Click Create Record.",
+					"step": 3,
+					"steps": 6,
+					"from": 882,
+					"durationInFrames": 47,
+					"audio": "narration/split-submit.mp3"
+				},
+				{
+					"id": "left",
+					"text": "Because only $50 of the Statement is allocated, the supermarket Statement stays in the list, showing the $30 left.",
+					"step": 4,
+					"steps": 6,
+					"from": 929,
+					"durationInFrames": 266,
+					"audio": "narration/split-left.mp3"
+				},
+				{
+					"id": "gift",
+					"text": "Select the supermarket Statement again, and create a second Record, Birthday gift. Finpoint fills in the $30 that’s left to allocate.",
+					"step": 5,
+					"steps": 6,
+					"from": 1195,
+					"durationInFrames": 280,
+					"audio": "narration/split-gift.mp3"
+				},
+				{
+					"id": "save",
+					"text": "Click Create Record, and the supermarket Statement leaves the list.",
+					"step": 6,
+					"steps": 6,
+					"from": 1475,
+					"durationInFrames": 143,
+					"audio": "narration/split-save.mp3"
+				},
+				{
+					"id": "found",
+					"text": "On the Records page, you’ll now find both new Records: Groceries, and Birthday gift.",
+					"from": 1618,
+					"durationInFrames": 178,
+					"audio": "narration/split-found.mp3"
+				},
+				{
+					"id": "done",
+					"text": "The supermarket Statement is now fully labelled by the two Records we just created: $50 of groceries, and a $30 gift.",
+					"from": 1796,
+					"durationInFrames": 312,
+					"audio": "narration/split-done.mp3"
+				}
+			]
+		},
+		{
+			"id": "repayment",
+			"title": "Many to one: combining payments",
+			"group": "The basics",
+			"startFrame": 17983,
+			"durationInFrames": 1286,
+			"segments": [
+				{
+					"id": "select",
+					"text": "Now let’s combine the two payments from the shared dinner we talked about earlier. Select both Statements: the $90 you paid, and the $60 your friend Sam sent back. The bar adds both Statements up: $90 out and $60 in, so $30 out.",
+					"titleEnd": 2.186166666666667,
+					"step": 1,
+					"steps": 2,
+					"from": 0,
+					"durationInFrames": 648,
+					"audio": "narration/repayment-select.mp3"
+				},
+				{
+					"id": "create",
+					"text": "Click Create Record, and call the Record Dinner. Both Statements are already allocated, and the Record comes to $30: what dinner really cost you.",
+					"step": 2,
+					"steps": 2,
+					"from": 648,
+					"durationInFrames": 304,
+					"audio": "narration/repayment-create.mp3"
+				},
+				{
+					"id": "done",
+					"text": "Click Create Record, and both Statements are labelled by a single Record. Your spending now shows the $30 you really spent, not $90.",
+					"from": 952,
+					"durationInFrames": 334,
+					"audio": "narration/repayment-done.mp3"
+				}
+			]
+		},
+		{
+			"id": "dashboard",
+			"title": "The Dashboard",
+			"group": "The basics",
+			"startFrame": 19269,
+			"durationInFrames": 2283,
+			"segments": [
+				{
+					"id": "records",
+					"text": "We’ve spent some time creating Records. So how do those Records help you understand your money? That’s what the Dashboard is for. Everything on the Dashboard is calculated from your Records, never directly from your Statements.",
+					"titleEnd": 0.9822916666666668,
+					"from": 0,
+					"durationInFrames": 472,
+					"audio": "narration/dashboard-records.mp3"
+				},
+				{
+					"id": "empty",
+					"text": "That’s why importing Statements alone doesn’t change your Dashboard. A Statement only counts on the Dashboard once a Record labels it.",
+					"from": 472,
+					"durationInFrames": 274,
+					"audio": "narration/dashboard-empty.mp3"
+				},
+				{
+					"id": "real",
+					"text": "Let’s open the Dashboard now. Total spending shows $122. That’s the four Records we just created: your $12 lunch, $50 of groceries, the $30 gift, and your $30 share of dinner. Your banking app would count the full $90 for that dinner, but the Dashboard counts the $30 you really spent, because the Dashboard uses your Records. The Spending forecast chart below shows the same four Records. The chart steps up on each Record’s date, and the dashed line shows where your spending is heading this month.",
+					"from": 746,
+					"durationInFrames": 1062,
+					"audio": "narration/dashboard-real.mp3"
+				},
+				{
+					"id": "explore",
+					"text": "There’s a lot more further down the Dashboard: your Monthly Budgets, your spending by Category, a spending calendar, and more. Scroll through and explore the Dashboard at your own pace. We’ll come back to reading the Dashboard in more depth later.",
+					"from": 1808,
+					"durationInFrames": 475,
+					"audio": "narration/dashboard-explore.mp3"
+				}
+			]
+		},
+		{
+			"id": "pending",
+			"title": "Pending Records",
+			"group": "Going further",
+			"startFrame": 21552,
+			"durationInFrames": 2526,
+			"segments": [
+				{
+					"id": "when",
+					"text": "Your Dashboard is only as up to date as your labels. But sometimes you know about spending before your bank shows all of it, and you’d rather label that spending now than try to remember it later.",
+					"titleEnd": 1.2478749999999998,
+					"from": 0,
+					"durationInFrames": 453,
+					"audio": "narration/pending-when.mp3"
+				},
+				{
+					"id": "concert",
+					"text": "Say you paid $200 for two concert tickets, and your friend Jo will pay you back $100 next week. You can already create the Record for your $100 share, from the $200 Statement.",
+					"from": 453,
+					"durationInFrames": 414,
+					"audio": "narration/pending-concert.mp3"
+				},
+				{
+					"id": "flag",
+					"text": "The amounts don’t match yet: $100 against $200. Finpoint warns you, and saves the Record as Pending, which means the Record isn’t settled yet. Your $100 share already counts.",
+					"from": 867,
+					"durationInFrames": 434,
+					"audio": "narration/pending-flag.mp3"
+				},
+				{
+					"id": "list",
+					"text": "Pending Records are marked in your Records list, so nothing gets forgotten.",
+					"from": 1301,
+					"durationInFrames": 153,
+					"audio": "narration/pending-list.mp3"
+				},
+				{
+					"id": "attach",
+					"text": "When Jo’s $100 Statement arrives, select that Statement in Workflows and click Allocate to record. Finpoint will suggest the Pending Record that the Statement completes.",
+					"from": 1454,
+					"durationInFrames": 379,
+					"audio": "narration/pending-attach.mp3"
+				},
+				{
+					"id": "complete",
+					"text": "The Record now combines both Statements. Save the Record, and because the amounts add up, the Record is no longer Pending.",
+					"from": 1833,
+					"durationInFrames": 251,
+					"audio": "narration/pending-complete.mp3"
+				},
+				{
+					"id": "meaning",
+					"text": "So a Record is Pending for one of two reasons. Its amounts don’t add up yet, like the concert. Or one of its Statements is still Pending at the bank. Either way, Pending means the Record isn’t fully confirmed yet.",
+					"from": 2084,
+					"durationInFrames": 442,
+					"audio": "narration/pending-meaning.mp3"
+				}
+			]
+		},
+		{
+			"id": "pending-statements",
+			"title": "Pending Statements",
+			"group": "Going further",
+			"startFrame": 24078,
+			"durationInFrames": 2296,
+			"segments": [
+				{
+					"id": "why",
+					"text": "Remember how a Statement matches your bank, almost always? This is the exception. A Pending Statement is bank activity that isn’t confirmed yet. Some bank exports, like Revolut’s, bring card payments in as Pending Statements. And if your bank takes days to show a payment, you can add a Pending Statement yourself, and edit it until the confirmed Statement arrives, so your month stays complete.",
+					"titleEnd": 1.240125,
+					"from": 0,
+					"durationInFrames": 799,
+					"audio": "narration/pending-statements-why.mp3"
+				},
+				{
+					"id": "create",
+					"text": "On the Statements page, click Create Pending Statement. Choose the Account, then enter the amount and a short description.",
+					"step": 1,
+					"steps": 4,
+					"from": 799,
+					"durationInFrames": 238,
+					"audio": "narration/pending-statements-create.mp3"
+				},
+				{
+					"id": "explain",
+					"text": "The Pending Statement appears in Workflows, marked Pending. Label the Pending Statement like any other Statement: here, with a Burger with Mia Record, under Dining Out. Save the Record, and the Record counts straight away, but stays Pending while its Statement does.",
+					"step": 2,
+					"steps": 4,
+					"from": 1037,
+					"durationInFrames": 512,
+					"audio": "narration/pending-statements-explain.mp3"
+				},
+				{
+					"id": "replace",
+					"text": "When the confirmed Statement arrives in a later import, open Replace Pending in Workflows. Choose the Pending Statement, and Finpoint will suggest the imported Statements the Pending Statement could become.",
+					"step": 3,
+					"steps": 4,
+					"from": 1549,
+					"durationInFrames": 394,
+					"audio": "narration/pending-statements-replace.mp3"
+				},
+				{
+					"id": "review",
+					"text": "Review the swap, and click Replace pending Statement. The Allocations move to the confirmed Statement, the Pending Statement disappears, and nothing is counted twice.",
+					"step": 4,
+					"steps": 4,
+					"from": 1943,
+					"durationInFrames": 353,
+					"audio": "narration/pending-statements-review.mp3"
+				}
+			]
+		},
+		{
+			"id": "duplicates",
+			"title": "Fixing duplicate Statements",
+			"group": "Going further",
+			"startFrame": 26374,
+			"durationInFrames": 1504,
+			"segments": [
+				{
+					"id": "why",
+					"text": "Imported Statements can go wrong in one more way. Sometimes a bank changes a payment’s description between bank exports. Import both bank exports, and the same payment arrives twice, as two Statements, so you might label it twice.",
+					"titleEnd": 1.7689166666666667,
+					"from": 0,
+					"durationInFrames": 564,
+					"audio": "narration/duplicates-why.mp3"
+				},
+				{
+					"id": "badge",
+					"text": "Finpoint spots Statements with the same account, day and amount, and marks those Statements as possible duplicates. Open Fix Duplicates in Workflows to review the duplicate Statements.",
+					"from": 564,
+					"durationInFrames": 384,
+					"audio": "narration/duplicates-badge.mp3"
+				},
+				{
+					"id": "choose",
+					"text": "If the Statements really are two payments, click Not duplicates. Otherwise, choose the Statement to keep, then click Review deletion.",
+					"step": 1,
+					"steps": 2,
+					"from": 948,
+					"durationInFrames": 264,
+					"audio": "narration/duplicates-choose.mp3"
+				},
+				{
+					"id": "review",
+					"text": "Finpoint shows you what will happen before anything is deleted. Allocations follow the Statement you keep, so your Records stay labelled.",
+					"step": 2,
+					"steps": 2,
+					"from": 1212,
+					"durationInFrames": 292,
+					"audio": "narration/duplicates-review.mp3"
+				}
+			]
+		},
+		{
+			"id": "find",
+			"title": "Finding and fixing Records",
+			"group": "Going further",
+			"startFrame": 27878,
+			"durationInFrames": 1180,
+			"segments": [
+				{
+					"id": "records",
+					"text": "Sooner or later, you’ll want to look something up, like what that dinner with Sam really cost. Open the Records page, then search by title, or filter by date, Category or amount.",
+					"titleEnd": 1.7215833333333332,
+					"from": 0,
+					"durationInFrames": 445,
+					"audio": "narration/find-records.mp3"
+				},
+				{
+					"id": "edit",
+					"text": "Open a Record to see its Statements, then click Edit Record to change any field, or the Allocations behind it.",
+					"step": 1,
+					"steps": 1,
+					"from": 445,
+					"durationInFrames": 234,
+					"audio": "narration/find-edit.mp3"
+				},
+				{
+					"id": "statements",
+					"text": "The Statements page works the same way for your bank activity, and each Account has a page of its own.",
+					"from": 679,
+					"durationInFrames": 211,
+					"audio": "narration/find-statements.mp3"
+				},
+				{
+					"id": "settings",
+					"text": "And if you always look at the same period, set default filters in Settings, so Records and Allocate to Records open on that range.",
+					"from": 890,
+					"durationInFrames": 290,
+					"audio": "narration/find-settings.mp3"
+				}
+			]
+		},
+		{
+			"id": "categories",
+			"title": "Categories",
+			"group": "Going further",
+			"startFrame": 29058,
+			"durationInFrames": 1374,
+			"segments": [
+				{
+					"id": "most",
+					"text": "We’ve been picking Categories all along. They’re the most important choice you make on a Record: they say what it was for, and your Dashboard breaks your spending down by them.",
+					"titleEnd": 0.9315416666666667,
+					"from": 0,
+					"durationInFrames": 378,
+					"audio": "narration/categories-most.mp3"
+				},
+				{
+					"id": "examples",
+					"text": "Lunch and dinner with friends are Dining Out. The supermarket run is Groceries. The birthday gift goes under Gifts & Donations. Finpoint starts you with a sensible set, and you can rename them, add your own, or nest one under another, like Coffee under Dining Out.",
+					"from": 378,
+					"durationInFrames": 543,
+					"audio": "narration/categories-examples.mp3"
+				},
+				{
+					"id": "defaults",
+					"text": "Each Category also carries two defaults: a Treatment, and a Monthly Budget. That’s why you could leave those fields alone earlier: your Category fills them in. We’ll look at both, right after one more time-saver.",
+					"from": 921,
+					"durationInFrames": 453,
+					"audio": "narration/categories-defaults.mp3"
+				}
+			]
+		},
+		{
+			"id": "rules",
+			"title": "Statement rules",
+			"group": "Going further",
+			"startFrame": 30432,
+			"durationInFrames": 1584,
+			"segments": [
+				{
+					"id": "why",
+					"text": "Some payments come back every month, like your phone bill, and labelling them again and again gets old. A Statement rule recognises those Statements, and fills in the Record for you when you create a Record from one. It never creates Records on its own.",
+					"titleEnd": 1.155,
+					"from": 0,
+					"durationInFrames": 549,
+					"audio": "narration/rules-why.mp3"
+				},
+				{
+					"id": "match",
+					"text": "Open Rules, and click New rule. Give it a name, and the text to look for in the description. Finpoint shows you the Statements the rule matches.",
+					"step": 1,
+					"steps": 2,
+					"from": 549,
+					"durationInFrames": 288,
+					"audio": "narration/rules-match.mp3"
+				},
+				{
+					"id": "fill",
+					"text": "Then choose what the rule fills in: a title, a Category, even People or a Location. Autofill puts the value straight into the field. Suggest offers it as a one-click suggestion instead.",
+					"step": 2,
+					"steps": 2,
+					"from": 837,
+					"durationInFrames": 404,
+					"audio": "narration/rules-fill.mp3"
+				},
+				{
+					"id": "use",
+					"text": "Next time you create a Record from a matching Statement, the autofilled fields are ready, and the suggestions are one click away. You can still change any of them.",
+					"from": 1241,
+					"durationInFrames": 343,
+					"audio": "narration/rules-use.mp3"
+				}
+			]
+		},
+		{
+			"id": "treatments",
+			"title": "Treatments",
+			"group": "Advanced",
+			"startFrame": 32016,
+			"durationInFrames": 1624,
+			"segments": [
+				{
+					"id": "what",
+					"text": "Now, those two defaults. The first is Treatment. It decides how the Dashboard counts a Record: as income, as spending, as saving, or not at all.",
+					"titleEnd": 0.8820833333333333,
+					"from": 0,
+					"durationInFrames": 374,
+					"audio": "narration/treatments-what.mp3"
+				},
+				{
+					"id": "examples",
+					"text": "Your salary is Income. Lunch and groceries are Spending. A refund is Spending too, because it lowers what you spent. Putting $500 into an investment account is Saving / investment. And moving money between two accounts you track is a Transfer, which isn’t counted at all.",
+					"from": 374,
+					"durationInFrames": 579,
+					"audio": "narration/treatments-examples.mp3"
+				},
+				{
+					"id": "dashboard",
+					"text": "On the Dashboard, Income and Spending make up your totals and charts. Saving and investment are kept out of them, in their own section further down, so saving never looks like spending. And Transfers don’t appear at all.",
+					"from": 953,
+					"durationInFrames": 431,
+					"audio": "narration/treatments-dashboard.mp3"
+				},
+				{
+					"id": "override",
+					"text": "Your Category sets the treatment for you. Change it on a single Record only when that Record is an exception.",
+					"from": 1384,
+					"durationInFrames": 240,
+					"audio": "narration/treatments-override.mp3"
+				}
+			]
+		},
+		{
+			"id": "buckets",
+			"title": "Monthly Budgets",
+			"group": "Advanced",
+			"startFrame": 33640,
+			"durationInFrames": 1973,
+			"segments": [
+				{
+					"id": "what",
+					"text": "The second default is a Monthly Budget. It answers a different question: am I on track? A Monthly Budget is a group of spending you plan for. Finpoint starts you with four: Daily for everyday spending, Recurring for bills like rent and your phone, Irregular for one-off costs, and Travel. Each Monthly Budget gets its own amount every month.",
+					"titleEnd": 1.3355416666666666,
+					"from": 0,
+					"durationInFrames": 736,
+					"audio": "narration/buckets-what.mp3"
+				},
+				{
+					"id": "daily",
+					"text": "Daily is the Monthly Budget to watch. Daily holds everyday spending, like food and transport, and the Dashboard forecasts where Daily is heading by the end of the month.",
+					"from": 736,
+					"durationInFrames": 333,
+					"audio": "narration/buckets-daily.mp3"
+				},
+				{
+					"id": "amount",
+					"text": "To give Daily an amount, click Edit beside Daily on the Dashboard, and set a Monthly amount, say $500.",
+					"step": 1,
+					"steps": 2,
+					"from": 1069,
+					"durationInFrames": 235,
+					"audio": "narration/buckets-amount.mp3"
+				},
+				{
+					"id": "rule",
+					"text": "The Amount rule decides which months that amount covers. Choose Override one month to change this month only. Choose Override default to apply it from this month onward.",
+					"step": 2,
+					"steps": 2,
+					"from": 1304,
+					"durationInFrames": 339,
+					"audio": "narration/buckets-rule.mp3"
+				},
+				{
+					"id": "compare",
+					"text": "The Dashboard then shows how the month is going against the plan. A Monthly Budget doesn’t move or set aside any money. It’s a comparison, nothing more.",
+					"from": 1643,
+					"durationInFrames": 330,
+					"audio": "narration/buckets-compare.mp3"
+				}
+			]
+		},
+		{
+			"id": "insights",
+			"title": "Reading the Overview",
+			"group": "Advanced",
+			"startFrame": 35613,
+			"durationInFrames": 1613,
+			"segments": [
+				{
+					"id": "metrics",
+					"text": "With a plan in place, the Overview, the Dashboard’s first tab, becomes your monthly check-in. Its top answers the big questions: what came in, what you spent, and your surplus, which is the difference. Each number is compared with the last two months, at the same point in the month.",
+					"titleEnd": 1.3150416666666667,
+					"from": 0,
+					"durationInFrames": 601,
+					"audio": "narration/insights-metrics.mp3"
+				},
+				{
+					"id": "scope",
+					"text": "Choose a Monthly Budget at the top, and the spending charts narrow to it. Cards whose names start with Total ignore that choice, and always show everything.",
+					"from": 601,
+					"durationInFrames": 312,
+					"audio": "narration/insights-scope.mp3"
+				},
+				{
+					"id": "forecast",
+					"text": "The Spending forecast chart shows this month so far, where it’s heading, and the months before, so you can see early if you’re running ahead.",
+					"from": 913,
+					"durationInFrames": 262,
+					"audio": "narration/insights-forecast.mp3"
+				},
+				{
+					"id": "category",
+					"text": "Further down, Categories this month and their trend show what changed, and Biggest changes calls out the largest moves.",
+					"from": 1175,
+					"durationInFrames": 242,
+					"audio": "narration/insights-category.mp3"
+				},
+				{
+					"id": "calendar",
+					"text": "The calendar colours each day by how much you spent. Pick a day to see its Records.",
+					"from": 1417,
+					"durationInFrames": 196,
+					"audio": "narration/insights-calendar.mp3"
+				}
+			]
+		},
+		{
+			"id": "monthly",
+			"title": "Monthly Records",
+			"group": "Advanced",
+			"startFrame": 37226,
+			"durationInFrames": 1019,
+			"segments": [
+				{
+					"id": "days",
+					"text": "When a number on the Overview surprises you, Monthly Records shows what’s behind it. It sits next to the Overview: every Record in the month, grouped by day, with each day’s total.",
+					"titleEnd": 1.3367083333333334,
+					"from": 0,
+					"durationInFrames": 430,
+					"audio": "narration/monthly-days.mp3"
+				},
+				{
+					"id": "drill",
+					"text": "Click any part of a chart on the Overview, and Monthly Records opens on just those Records.",
+					"from": 430,
+					"durationInFrames": 196,
+					"audio": "narration/monthly-drill.mp3"
+				},
+				{
+					"id": "review",
+					"text": "And at the bottom of the Overview, Review this month links to anything that needs you: Pending Records, Pending Statements, and spending that isn’t in any Monthly Budget, so no plan is tracking it.",
+					"from": 626,
+					"durationInFrames": 393,
+					"audio": "narration/monthly-review.mp3"
+				}
+			]
+		},
+		{
+			"id": "budgets",
+			"title": "Budgets for trips and events",
+			"group": "Advanced",
+			"startFrame": 38245,
+			"durationInFrames": 1356,
+			"segments": [
+				{
+					"id": "what",
+					"text": "Everything so far works month by month. A Budget, with no Monthly in front, is different: it has its own start and end, like a week in Bali, or a wedding. You see the whole trip in one place, even when it spans two months.",
+					"titleEnd": 1.7614166666666666,
+					"from": 0,
+					"durationInFrames": 542,
+					"audio": "narration/budgets-what.mp3"
+				},
+				{
+					"id": "create",
+					"text": "Create one with a name, an amount and its dates.",
+					"step": 1,
+					"steps": 2,
+					"from": 542,
+					"durationInFrames": 108,
+					"audio": "narration/budgets-create.mp3"
+				},
+				{
+					"id": "attach",
+					"text": "Automatic attach adds every Record dated inside the period, including income and transfers. To choose the Records yourself, turn it off, and attach them from the Budget’s page.",
+					"step": 2,
+					"steps": 2,
+					"from": 650,
+					"durationInFrames": 364,
+					"audio": "narration/budgets-attach.mp3"
+				},
+				{
+					"id": "own",
+					"text": "A Budget is its own small dashboard for that period: what you’ve spent, what’s left, and your pace. Its Records still count on your monthly Dashboard as usual.",
+					"from": 1014,
+					"durationInFrames": 342,
+					"audio": "narration/budgets-own.mp3"
+				}
+			]
+		},
+		{
+			"id": "sync",
+			"title": "Backups and Google Drive",
+			"group": "Your data",
+			"startFrame": 39601,
+			"durationInFrames": 1864,
+			"segments": [
+				{
+					"id": "local",
+					"text": "You’ve put real work into labelling your money, so it’s worth knowing where it lives. Finpoint runs in your browser, and keeps your data on this device. There’s no Finpoint database, and your finances never pass through our servers, so we never see them.",
+					"titleEnd": 1.5936249999999998,
+					"from": 0,
+					"durationInFrames": 560,
+					"audio": "narration/sync-local.mp3"
+				},
+				{
+					"id": "file",
+					"text": "That means keeping a copy is up to you, and there are two ways. The first is a backup file. Download it from the Data page whenever you like, and restore it later, on this device or a new one. Restoring replaces this browser’s data with the backup.",
+					"from": 560,
+					"durationInFrames": 502,
+					"audio": "narration/sync-file.mp3"
+				},
+				{
+					"id": "drive",
+					"text": "The second is Google Drive. Connect it once, and Finpoint keeps a copy in a hidden folder in your own Drive, automatically, so your devices stay in step.",
+					"from": 1062,
+					"durationInFrames": 324,
+					"audio": "narration/sync-drive.mp3"
+				},
+				{
+					"id": "conflict",
+					"text": "If the same data changed on two devices, Finpoint asks which copy to keep, and keeps that whole copy, never a mix of both, so your Records always add up.",
+					"from": 1386,
+					"durationInFrames": 328,
+					"audio": "narration/sync-conflict.mp3"
+				},
+				{
+					"id": "yours",
+					"text": "Either way, your data only goes to places you control.",
+					"from": 1714,
+					"durationInFrames": 150,
+					"audio": "narration/sync-yours.mp3"
+				}
+			]
+		},
+		{
+			"id": "routine",
+			"title": "Your routine",
+			"group": "Your data",
+			"startFrame": 41465,
+			"durationInFrames": 910,
+			"segments": [
+				{
+					"id": "loop",
+					"text": "Here’s a routine that works. Import your latest bank exports. Fix any duplicates, and label what’s new in Workflows. Check anything Pending. Glance at your Dashboard. And keep a backup.",
+					"titleEnd": 1.0223333333333333,
+					"from": 0,
+					"durationInFrames": 442,
+					"audio": "narration/routine-loop.mp3"
+				},
+				{
+					"id": "backup",
+					"text": "With Google Drive connected, backups happen automatically. If not, download a backup file every so often.",
+					"from": 442,
+					"durationInFrames": 238,
+					"audio": "narration/routine-backup.mp3"
+				},
+				{
+					"id": "help",
+					"text": "And whenever you’re unsure, click Help at the top of any page. Help lists the guides for that page, step by step.",
+					"from": 680,
+					"durationInFrames": 230,
+					"audio": "narration/routine-help.mp3"
+				}
+			]
+		}
+	]
+}

@@ -4,7 +4,7 @@ Dexie.dependencies.indexedDB = indexedDB
 Dexie.dependencies.IDBKeyRange = IDBKeyRange
 import { beforeEach, expect, test } from "bun:test"
 import { DateTime } from "luxon"
-const { db } = await import("../../src/data/db")
+const { db, DB_VERSION } = await import("../../src/data/db")
 const { upsertMonthlyBudget } = await import("../../src/logic/monthly-budgets")
 const { getDashboardView } = await import("../../src/logic/dashboard")
 
@@ -191,7 +191,7 @@ test("upgrades remove retired budget metadata and preserve Drive baselines", asy
 		await old.table("meta").put({ key: "drive_last_hash", value: baseline })
 		old.close()
 		await db.open()
-		expect(db.verno).toBe(10)
+		expect(db.verno).toBe(DB_VERSION)
 		expect(await db.monthly_budgets.toArray()).toEqual(rows.map(({ [legacyPaceKey]: _, group: _group, ...row }) => row))
 		expect((await db.meta.get("drive_last_hash"))?.value).toBe(clean ? await hashSnapshot(await exportData()) : baseline)
 	}

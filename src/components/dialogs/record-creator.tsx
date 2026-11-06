@@ -10,6 +10,7 @@ import RecordAnalyticsFields from "@/components/form/record-analytics-fields"
 import RuleSuggestions, { ruleValueLabel } from "@/components/form/rule-suggestions"
 import TextField from "@/components/form/text-field"
 import TextareaField from "@/components/form/textarea-field"
+import { ContextHelp } from "@/components/help/context-help"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -35,6 +36,7 @@ import { useDialogCloseAnimation } from "@/hooks/use-dialog-close-animation"
 import { canUseMonthlyBudget } from "@/lib/analytics"
 import { COLLAPSE_MOTION, SPRING, TRANSITION } from "@/lib/motion"
 import { cn, formatCurrency, formatDatetime, pluralize, round2 } from "@/lib/utils"
+import { trackRecordSaved } from "@/logic/learning"
 import { listMonthlyBudgets } from "@/logic/monthly-budgets"
 import { inferRecordDatetime } from "@/logic/record-defaults"
 import { createMatchingRecords, createRecord, recordCompletions } from "@/logic/records"
@@ -168,12 +170,13 @@ export default function RecordCreatorDialog({
 					monthly_budget_id: value.monthly_budget_id || null,
 					monthly_budget_source: value.monthly_budget_source,
 				}
-				await createRecord({
+				const record = await createRecord({
 					...details,
 					datetime: value.datetime,
 					amount: value.amount,
 					statements: value.statements,
 				})
+				void trackRecordSaved(record.id).catch(() => undefined)
 				// The selected Record already exists, so a failed batch must not invite a resubmit.
 				if (includeSimilar && similar?.length)
 					await createMatchingRecords(
@@ -781,6 +784,7 @@ export default function RecordCreatorDialog({
 							Create Record
 						</Button>
 					</DialogFooter>
+					<ContextHelp topic="lunch" label="How this form works" variant="form" />
 				</DialogContent>
 			)}
 		</Dialog>

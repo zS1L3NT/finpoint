@@ -133,7 +133,7 @@ export default function StatementPage({ params }: { params: Promise<{ id: string
 				<Card>
 					<CardHeader>
 						<CardTitle>Records</CardTitle>
-						<CardDescription>Records linked to this statement.</CardDescription>
+						<CardDescription>Records this Statement is allocated to.</CardDescription>
 					</CardHeader>
 					<CardContent>
 						<DataTable

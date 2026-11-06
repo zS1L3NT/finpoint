@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
+import { ContextHelp } from "@/components/help/context-help"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -265,6 +266,11 @@ export default function StatementReplacementReviewDialog({
 							Replace pending Statement
 						</Button>
 					</DialogFooter>
+					<ContextHelp
+						topic="pending-statements"
+						label="How this form works"
+						variant="form"
+					/>
 				</DialogContent>
 			) : null}
 		</Dialog>

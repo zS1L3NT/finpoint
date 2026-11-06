@@ -6,6 +6,7 @@ import AmountField from "@/components/form/amount-field"
 import DatetimeField from "@/components/form/datetime-field"
 import SelectField from "@/components/form/select-field"
 import TextareaField from "@/components/form/textarea-field"
+import { ContextHelp } from "@/components/help/context-help"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import { Button } from "@/components/ui/button"
 import {
@@ -230,6 +231,11 @@ export default function PendingStatementDialog({
 						</Button>
 					</div>
 				</DialogFooter>
+				<ContextHelp
+					topic="pending-statements"
+					label="How this form works"
+					variant="form"
+				/>
 			</DialogContent>
 		</Dialog>
 	)

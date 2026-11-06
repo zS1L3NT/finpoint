@@ -6,6 +6,7 @@ import { useState } from "react"
 import { toast } from "sonner"
 import AmountField from "@/components/form/amount-field"
 import TextField from "@/components/form/text-field"
+import { ContextHelp } from "@/components/help/context-help"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -338,6 +339,7 @@ export default function MonthlyBudgetDialog({
 							</DialogFooter>
 						</form>
 					) : null}
+					<ContextHelp topic="buckets" label="How this form works" variant="form" />
 				</DialogContent>
 			) : null}
 		</Dialog>

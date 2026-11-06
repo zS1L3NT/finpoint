@@ -30,6 +30,8 @@ export const pathDataSettings = () => "/sync"
 export const pathSettings = () => "/settings"
 export const pathPrivacy = () => "/privacy"
 export const pathTerms = () => "/terms"
+export const pathHelp = (topic?: string) => withQuery("/help", { topic })
+export const pathHelpVideo = (chapter?: string) => withQuery("/help/video", { chapter })
 
 function withQuery(path: string, query?: Record<string, string | undefined>): string {
 	if (!query) return path

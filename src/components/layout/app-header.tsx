@@ -1,5 +1,6 @@
 "use client"
 
+import { ContextHelp } from "@/components/help/context-help"
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 
@@ -10,6 +11,9 @@ export default function AppHeader({ title }: { title: string }) {
 				<SidebarTrigger className="-ml-1" size="icon-lg" />
 				<Separator orientation="vertical" className="mx-1 md:mx-2" />
 				<h1 className="truncate text-sm font-medium">{title}</h1>
+				<div className="ml-auto">
+					<ContextHelp />
+				</div>
 			</div>
 		</header>
 	)

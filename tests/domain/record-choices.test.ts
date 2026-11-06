@@ -3,7 +3,7 @@ import Dexie from "dexie"
 Dexie.dependencies.indexedDB = indexedDB
 Dexie.dependencies.IDBKeyRange = IDBKeyRange
 import { beforeEach, expect, test } from "bun:test"
-const { db } = await import("../../src/data/db")
+const { db, DB_VERSION } = await import("../../src/data/db")
 const { exportData, importData, parseImportFile } = await import("../../src/data/export-import")
 const { createCategory, updateCategory } = await import("../../src/logic/categories")
 const { createRecord, updateRecord, listRecords, getRecord } = await import("../../src/logic/records")
@@ -335,7 +335,7 @@ test("version seven upgrade normalizes categories and converts choices while pre
 		old.close()
 		await db.open()
 		// Both conversions run directly from the released schema.
-		expect(db.verno).toBe(10)
+		expect(db.verno).toBe(DB_VERSION)
 		expect((await db.categories.get("food"))?.analytics_treatment).toBe("automatic")
 		expect(db.records.schema.indexes.some(index => index.name === "monthly_budget_id")).toBe(false)
 		const taxi = await db.records.get("taxi-1")

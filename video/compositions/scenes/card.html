@@ -1,0 +1,20 @@
+<html data-composition-variables='[{"id":"text","type":"string","label":"Text","default":""},{"id":"cues","type":"string","label":"Cues","default":"{}"}]'>
+<template>
+	<!-- Placeholder for a beat that has no take or scene yet: the narration, set large. -->
+	<style>
+		#root { position: absolute; inset: 0; background: #08080a; font-family: Inter, sans-serif; }
+		#card-text { position: absolute; left: 200px; right: 200px; top: 300px; color: #fafafa; font: 600 56px/1.25 Inter, sans-serif; letter-spacing: -0.02em; }
+		#card-tag { position: absolute; left: 200px; top: 220px; color: #fbb33c; font: 600 24px/1 Inter, sans-serif; letter-spacing: 0.08em; text-transform: uppercase; }
+	</style>
+	<div id="root" data-composition-id="card" data-width="1920" data-height="1080">
+		<div id="card-tag">Scene to come</div>
+		<p id="card-text" data-var-text="text"></p>
+	</div>
+	<script>
+		document.querySelector("#card-text").textContent = window.__hyperframes.getVariables().text
+		const tl = gsap.timeline({ paused: true })
+		tl.fromTo("#card-text", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 0.1)
+		window.__timelines["card"] = tl
+	</script>
+</template>
+</html>

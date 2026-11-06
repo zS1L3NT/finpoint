@@ -36,6 +36,8 @@ export const SPRING = {
 	lively: { type: "spring", duration: 0.4, bounce: 0.15 },
 } satisfies Record<string, Transition>
 
+/** The shortest row any table renders (a compact row, ~37px), used to count rows on screen. */
+
 /**
  * How a table's rows enter:
  * - `cascade`: first arrival of the data; the rows on screen rise in one after another.

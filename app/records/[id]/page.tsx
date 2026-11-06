@@ -5,6 +5,7 @@ import { use, useState } from "react"
 import { DetailSummary, DetailSummaryItem } from "@/components/detail-summary"
 import PendingStatementDialog from "@/components/dialogs/pending-statement"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
+import { PendingHelp } from "@/components/help/pending-help"
 import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
@@ -64,6 +65,14 @@ export default function RecordPage({ params }: { params: Promise<{ id: string }>
 					title={
 						<div className="flex flex-wrap items-center gap-2">
 							{record.title}
+							{record.is_pending && (
+								<PendingHelp
+									amount={record.amount}
+									allocated={record.allocated_amount}
+									count={statements.length}
+									pendingCount={record.pending_statement_count ?? 0}
+								/>
+							)}
 							{record.is_pending && (
 								<Badge variant="warning" className="tracking-normal">
 									Pending

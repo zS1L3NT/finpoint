@@ -29,6 +29,7 @@ import { themeColor } from "@/lib/palette"
 import { cn, pluralize } from "@/lib/utils"
 import { listAccounts } from "@/logic/accounts"
 import { importDbs, importOcbc, importRevolut, importUob } from "@/logic/importer"
+import { trackImport } from "@/logic/learning"
 import { ValidationError } from "@/logic/validate"
 import { pathAllocator } from "@/routes"
 
@@ -115,6 +116,9 @@ export default function ImporterPage() {
 							: value.bank === "ocbc"
 								? await importOcbc(files)
 								: await importRevolut(files[0] ?? null, accountId, accountName)
+				void trackImport(data.imported + data.skipped + data.reindexed).catch(
+					() => undefined,
+				)
 				toast.success("Import complete.", {
 					description: (
 						<>

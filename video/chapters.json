@@ -1,0 +1,112 @@
+[
+	{
+		"id": "start",
+		"title": "Why Finpoint?",
+		"start": 0
+	},
+	{
+		"id": "model",
+		"title": "Statements, Records and Allocations",
+		"start": 151.4
+	},
+	{
+		"id": "workspace",
+		"title": "Trying Finpoint first",
+		"start": 273.6333333333333
+	},
+	{
+		"id": "import",
+		"title": "Importing your bank activity",
+		"start": 300.76666666666665
+	},
+	{
+		"id": "allocator",
+		"title": "Workflows",
+		"start": 411.1666666666667
+	},
+	{
+		"id": "lunch",
+		"title": "One to one: your first Record",
+		"start": 460.5
+	},
+	{
+		"id": "split",
+		"title": "One to many: splitting a payment",
+		"start": 529.1666666666666
+	},
+	{
+		"id": "repayment",
+		"title": "Many to one: combining payments",
+		"start": 599.4333333333333
+	},
+	{
+		"id": "dashboard",
+		"title": "The Dashboard",
+		"start": 642.3
+	},
+	{
+		"id": "pending",
+		"title": "Pending Records",
+		"start": 718.4
+	},
+	{
+		"id": "pending-statements",
+		"title": "Pending Statements",
+		"start": 802.6
+	},
+	{
+		"id": "duplicates",
+		"title": "Fixing duplicate Statements",
+		"start": 879.1333333333333
+	},
+	{
+		"id": "find",
+		"title": "Finding and fixing Records",
+		"start": 929.2666666666667
+	},
+	{
+		"id": "categories",
+		"title": "Categories",
+		"start": 968.6
+	},
+	{
+		"id": "rules",
+		"title": "Statement rules",
+		"start": 1014.4
+	},
+	{
+		"id": "treatments",
+		"title": "Treatments",
+		"start": 1067.2
+	},
+	{
+		"id": "buckets",
+		"title": "Monthly Budgets",
+		"start": 1121.3333333333333
+	},
+	{
+		"id": "insights",
+		"title": "Reading the Overview",
+		"start": 1187.1
+	},
+	{
+		"id": "monthly",
+		"title": "Monthly Records",
+		"start": 1240.8666666666666
+	},
+	{
+		"id": "budgets",
+		"title": "Budgets for trips and events",
+		"start": 1274.8333333333333
+	},
+	{
+		"id": "sync",
+		"title": "Backups and Google Drive",
+		"start": 1320.0333333333333
+	},
+	{
+		"id": "routine",
+		"title": "Your routine",
+		"start": 1382.1666666666667
+	}
+]
