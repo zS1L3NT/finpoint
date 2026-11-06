@@ -30,6 +30,8 @@ export default function CategoryHistoryChart({
 	monthlyBudgetIds,
 	recordHref,
 	badge,
+	onSelect,
+	compact = false,
 }: {
 	months: SpendingHistoryMonth[]
 	categories: ComponentProps<typeof CategorySpendingMix>["categories"]
@@ -37,6 +39,8 @@ export default function CategoryHistoryChart({
 	through: string | null
 	monthlyBudgetIds: string[] | null
 	recordHref: (ids: string, at: DateTime) => string
+	compact?: boolean
+	onSelect?: (at: DateTime) => void
 	badge: React.ReactNode
 }) {
 	// The breakdown keeps the last month read, so its links stay reachable after the pointer leaves.
@@ -83,8 +87,9 @@ export default function CategoryHistoryChart({
 	return (
 		<div
 			className={cn(
-				"grid items-start gap-5 xl:items-stretch xl:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]",
-				limit !== undefined && "xl:h-[26rem]",
+				"grid items-start gap-5",
+				!compact && "xl:items-stretch xl:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]",
+				!compact && limit !== undefined && "xl:h-[26rem]",
 			)}
 		>
 			<Card className="order-2 min-h-0 min-w-0 xl:order-1">
@@ -163,6 +168,11 @@ export default function CategoryHistoryChart({
 						<>
 							<BarChart
 								label="Category trend"
+								onSelect={index => {
+									const m = chartData[index]
+									if (m?.included)
+										onSelect?.(DateTime.fromFormat(m.month, "MMM yyyy"))
+								}}
 								className="h-60 w-full sm:h-72 xl:h-auto xl:min-h-60 xl:flex-1"
 								labels={chartData.map(month => month.month)}
 								layout="share"
