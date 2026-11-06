@@ -8,10 +8,12 @@ import {
 	longText,
 	openEditor,
 	pending,
+	pickOption,
 	record,
 } from "../support/editors"
 import { expect, seedWorkspace, test } from "../support/fixtures"
 import {
+	expectModalExit,
 	expectPopupEntrance,
 	expectReducedRowMovement,
 	sampleVisibleRowAnimations,
@@ -330,6 +332,50 @@ test("Record creator: pending warning reveals and collapses smoothly", {
 	}
 })
 
+test("Record creator: an allocation card grows for its error without squashing", {
+	tag: ["@reduced-motion"],
+}, async ({ page, workspace }) => {
+	void workspace
+	// A tall viewport keeps the allocation card on screen while it grows.
+	const size = page.viewportSize() ?? { width: 1440, height: 900 }
+	await page.setViewportSize({ width: size.width, height: 1400 })
+	await page.goto("/allocator")
+	const box = page.getByRole("checkbox", {
+		name: `Select statement ${IDS.statements.unallocated[2]}`,
+		exact: true,
+	})
+	await expect(box).toBeVisible()
+	await box.click()
+	await page.getByRole("button", { name: "Create Record", exact: true }).click()
+	const dialog = page.getByRole("dialog", { name: "Create New Record", exact: true })
+	await expect(dialog).toBeVisible()
+	// Valid details let submission reach the allocation amount's own rule.
+	await dialog.getByLabel("Title", { exact: true }).fill("Allocation error")
+	await chooseCategory(page, dialog)
+	await dialog.locator('[id="statements[0].amount"]').fill("0")
+	const samples = await sampleVisibleRowAnimations(
+		page,
+		'[data-slot="dialog-content"] div.p-0\\.5:has([id="statements[0].amount"])',
+		() => dialog.getByRole("button", { name: "Create Record", exact: true }).click(),
+	)
+	await expect(dialog.getByText(/^The amount must be (positive|negative)\.$/)).toBeVisible()
+	expect(samples).toHaveLength(1)
+	const frames = samples[0]?.frames ?? []
+	expect(
+		(frames.at(-1)?.layoutHeight ?? 0) - (frames[0]?.layoutHeight ?? 0),
+		"The error grows the card",
+	).toBeGreaterThan(4)
+	// Full layout animation would scale-correct the resize, squashing the card's text.
+	const scales = frames.map(frame => {
+		const values = /^matrix\(([^)]+)\)$/.exec(frame.transform)?.[1]?.split(",").map(Number)
+		return values ? [values[0], values[3]] : [1, 1]
+	})
+	expect(
+		scales.every(([x, y]) => Math.abs((x ?? 1) - 1) < 0.001 && Math.abs((y ?? 1) - 1) < 0.001),
+		"Allocation card never scales while it grows",
+	).toBe(true)
+})
+
 test("Record creator: learned chips and late autofill notes rise in after the creator opens", {
 	tag: ["@reduced-motion"],
 }, async ({ page }) => {
@@ -406,4 +452,105 @@ test("Record creator: learned chips and late autofill notes rise in after the cr
 		body: JSON.stringify(samples),
 		contentType: "application/json",
 	})
+})
+
+test("editor popups: every create and update dialog exits before removal and reopens", {
+	tag: ["@reduced-motion"],
+}, async ({ page, workspace }) => {
+	test.setTimeout(180_000)
+	void workspace
+	for (const editor of editors) {
+		if (editor.name === "Statement rule creator")
+			await seedWorkspace(page, "populated", { statement_rules: statementRules() })
+		await test.step(`${editor.name}: Cancel and Escape animate popup and backdrop exits`, async () => {
+			await page.goto(editor.route)
+			const trigger = page.getByRole("button", { name: editor.trigger, exact: true })
+			await trigger.click()
+			const dialog = page.getByRole("dialog", { name: editor.title, exact: true })
+			await expect(dialog).toBeVisible()
+			await expectModalExit(page, '[data-slot="dialog-content"]', () =>
+				dialog.getByRole("button", { name: "Cancel", exact: true }).click(),
+			)
+			await expectPopupEntrance(
+				page,
+				() => trigger.click(),
+				editor.name === "Statement rule editor"
+					? '[data-slot="dialog-content"] aside ul'
+					: undefined,
+			)
+			await expect(dialog.getByLabel(editor.field, { exact: true })).toHaveValue(editor.value)
+			await expectModalExit(page, '[data-slot="dialog-content"]', () =>
+				page.keyboard.press("Escape"),
+			)
+		})
+	}
+})
+
+test("editor popups: saving every existing editor preserves its popup and backdrop exit", {
+	tag: ["@reduced-motion"],
+}, async ({ page, workspace }) => {
+	test.setTimeout(120_000)
+	void workspace
+	for (const editor of editors.filter(editor => editor.name.endsWith("editor"))) {
+		if (editor.name === "Statement rule editor")
+			await seedWorkspace(page, "populated", { statement_rules: statementRules() })
+		await test.step(`${editor.name}: successful save animates before removal`, async () => {
+			await page.goto(editor.route)
+			await page.getByRole("button", { name: editor.trigger, exact: true }).click()
+			const dialog = page.getByRole("dialog", { name: editor.title, exact: true })
+			await expect(dialog).toBeVisible()
+			await expect(dialog.getByLabel(editor.field, { exact: true })).toHaveValue(editor.value)
+			await dialog.getByLabel(editor.field, { exact: true }).fill(`${editor.value} motion`)
+			await dialog.getByLabel(editor.field, { exact: true }).press("Tab")
+			await expectModalExit(page, '[data-slot="dialog-content"]', () =>
+				dialog.getByRole("button", { name: "Save changes", exact: true }).click(),
+			)
+		})
+	}
+})
+
+test("editor popups: successful creation preserves every creator exit", {
+	tag: ["@reduced-motion"],
+}, async ({ page, workspace }) => {
+	test.setTimeout(120_000)
+	void workspace
+	for (const editor of editors.filter(editor => editor.name.endsWith("creator"))) {
+		await test.step(`${editor.name}: successful creation animates before removal`, async () => {
+			await page.goto(editor.route)
+			await page.getByRole("button", { name: editor.trigger, exact: true }).click()
+			const dialog = page.getByRole("dialog", { name: editor.title, exact: true })
+			await expect(dialog.getByLabel(editor.field, { exact: true })).toHaveValue("")
+			await dialog.getByLabel(editor.field, { exact: true }).fill(`Motion ${editor.name}`)
+			await dialog.getByLabel(editor.field, { exact: true }).press("Tab")
+			if (editor.name === "Budget creator") {
+				await dialog.getByLabel("Date range", { exact: true }).click()
+				const calendar = page.locator('[data-slot="popover-content"]')
+				await calendar
+					.locator("button[data-day]")
+					.filter({ hasNot: page.locator("[disabled]") })
+					.first()
+					.click()
+				await calendar.getByRole("button", { name: "Apply", exact: true }).click()
+			}
+			if (editor.name === "Category creator") {
+				await dialog.getByLabel("Icon", { exact: true }).fill("apple")
+				await pickOption(page.getByRole("option", { name: "apple", exact: true }))
+				await dialog.getByLabel("Colour", { exact: true }).fill("#123456")
+			}
+			if (editor.name === "Pending Statement creator")
+				await dialog.getByLabel("Amount", { exact: true }).fill("-1")
+			if (editor.name === "Record creator") {
+				await chooseCategory(page, dialog)
+				await dialog.locator("#datetime-time").fill("12:00")
+			}
+			if (editor.name === "Statement rule creator") {
+				await dialog.getByLabel("Text to look for", { exact: true }).fill("motion")
+				await dialog.getByLabel("Title", { exact: true }).fill("Motion rule")
+				await dialog.getByLabel("Title", { exact: true }).press("Tab")
+			}
+			await expectModalExit(page, '[data-slot="dialog-content"]', () =>
+				dialog.locator('button[type="submit"]').click(),
+			)
+		})
+	}
 })

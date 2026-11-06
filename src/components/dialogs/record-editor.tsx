@@ -464,7 +464,7 @@ export default function RecordEditorDialog({
 													<motion.div
 														key={id}
 														className="p-0.5"
-														layout
+														layout="position"
 														initial={{ opacity: 0, y: 6 }}
 														animate={{
 															opacity: 1,
@@ -572,7 +572,7 @@ export default function RecordEditorDialog({
 																			<Progress
 																				value={percent}
 																				className={cn(
-																					"transition-colors",
+																					"transition-colors duration-150 ease-out",
 																					percent > 100
 																						? "text-red-400"
 																						: null,

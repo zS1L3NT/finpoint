@@ -1,6 +1,12 @@
 import { getScenario, IDS } from "../support/data"
+import { chooseCategory } from "../support/editors"
 import { expect, test } from "../support/fixtures"
-import { expectPopupEntrance, sampleVisibleRowAnimations } from "../support/motion"
+import {
+	expectModalEntrance,
+	expectModalExit,
+	expectPopupEntrance,
+	sampleVisibleRowAnimations,
+} from "../support/motion"
 
 // App modal surfaces share one populated seed. None of them persists: dialogs
 // are escaped, reviews are cancelled, and sheets only reopen. Every step
@@ -64,9 +70,12 @@ test("app modal surfaces: animate popup entrances and fades", {
 	})
 })
 
-for (const action of ["Cancel", "Fix"] as const) {
+for (const [action, suffix] of [
+	["Cancel", ""],
+	["Fix", " after Fix"],
+] as const) {
 	test(
-		`Duplicate Statement review: exit fades popup and backdrop through intermediate alpha then removal${action === "Fix" ? " after Fix" : ""}`,
+		`Duplicate Statement review: exit fades popup and backdrop through intermediate alpha then removal${suffix}`,
 		{ tag: "@reduced-motion" },
 		async ({ page, workspace }, testInfo) => {
 			void workspace
@@ -284,4 +293,71 @@ for (const action of ["Cancel", "Fix"] as const) {
 			}
 		},
 	)
+}
+
+for (const action of ["Cancel", "Create Record"] as const) {
+	test(`allocator Record creator: ${action} preserves the popup and backdrop through exit`, {
+		tag: ["@reduced-motion"],
+	}, async ({ page, workspace }) => {
+		void workspace
+		await page.goto("/allocator")
+		const row = page.getByRole("checkbox", {
+			name: `Select statement ${IDS.statements.unallocated[2]}`,
+			exact: true,
+		})
+		await row.check()
+		await expectPopupEntrance(page, () =>
+			page.getByRole("button", { name: "Create Record", exact: true }).click(),
+		)
+		const dialog = page.getByRole("dialog", { name: "Create New Record", exact: true })
+		if (action === "Create Record") {
+			await dialog.getByLabel("Title", { exact: true }).fill("Allocator exit regression")
+			await chooseCategory(page, dialog)
+		}
+		await expectModalExit(page, '[data-slot="dialog-content"]', () =>
+			dialog.getByRole("button", { name: action, exact: true }).click(),
+		)
+		if (action === "Create Record") {
+			await expect(page.locator('aside[aria-live="polite"]')).toHaveCount(0)
+			await page.goto("/records")
+			await expect(
+				page.getByRole("button", { name: "Edit Allocator exit regression", exact: true }),
+			).toBeVisible()
+		} else {
+			await expect(row).toBeChecked()
+			await expectPopupEntrance(page, () =>
+				page.getByRole("button", { name: "Create Record", exact: true }).click(),
+			)
+		}
+	})
+}
+
+for (const action of ["Cancel", "Save changes"] as const) {
+	test(`allocator Record editor: ${action} animates before the parent clears its selection`, {
+		tag: ["@reduced-motion"],
+	}, async ({ page, workspace }) => {
+		void workspace
+		await page.goto("/allocator")
+		await page
+			.getByRole("checkbox", {
+				name: `Select statement ${IDS.statements.unallocated[3]}`,
+				exact: true,
+			})
+			.check()
+		await expectModalEntrance(page, '[data-slot="sheet-content"]', () =>
+			page.getByRole("button", { name: "Allocate to record", exact: true }).click(),
+		)
+		const sheet = page.getByRole("dialog", { name: "Allocate to pending record", exact: true })
+		await sheet.getByLabel("Search records").fill("StashAway")
+		await expectModalEntrance(page, '[data-slot="dialog-content"]', () =>
+			expectModalExit(page, '[data-slot="sheet-content"]', () =>
+				sheet.getByRole("button", { name: /StashAway Deposit/ }).click(),
+			),
+		)
+		const editor = page.getByRole("dialog", { name: "Edit Record", exact: true })
+		await expectModalExit(page, '[data-slot="dialog-content"]', () =>
+			editor.getByRole("button", { name: action, exact: true }).click(),
+		)
+		await expect(page.locator('aside[aria-live="polite"]')).toHaveCount(0)
+	})
 }

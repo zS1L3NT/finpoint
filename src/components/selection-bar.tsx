@@ -25,7 +25,7 @@ export default function SelectionBar({
 		<AnimatePresence>
 			{open ? (
 				<motion.aside
-					layout
+					layout="position"
 					initial={{ opacity: 0, y: 20, scale: 0.98 }}
 					animate={{ opacity: 1, y: 0, scale: 1 }}
 					exit={{

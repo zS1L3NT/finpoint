@@ -1,4 +1,5 @@
 import { useLiveQuery } from "dexie-react-hooks"
+import { AnimatePresence, motion } from "framer-motion"
 import SelectField from "@/components/form/select-field"
 import { FieldGroup } from "@/components/ui/field"
 import {
@@ -7,6 +8,7 @@ import {
 	TREATMENTS,
 	treatmentLabel,
 } from "@/lib/analytics"
+import { COLLAPSE_MOTION } from "@/lib/motion"
 import { listMonthlyBudgets } from "@/logic/monthly-budgets"
 import type { AnalyticsTreatment } from "@/types"
 
@@ -89,51 +91,61 @@ export default function RecordAnalyticsFields({
 					}}
 				/>
 				{treatmentSuggestions}
-				{monthlyBudgetEligible && (
-					<SelectField
-						id="monthly_budget_id"
-						label="Monthly budget"
-						autopopulated={monthlyBudgetAutopopulated}
-						disabled={!monthlyBudgetEligible}
-						value={monthlyBudgets === undefined ? "" : monthlyBudgetValue}
-						placeholder={monthlyBudgets === undefined ? "Monthly budget" : "Unbudgeted"}
-						items={[
-							{ value: UNBUDGETED, label: "Unbudgeted" },
-							...(categoryMonthlyBudgetId !== undefined
-								? [
-										{
-											value: CATEGORY_DEFAULT,
-											label: `Category default · ${categoryMonthlyBudget?.name ?? (categoryBudgetId ? "Default monthly budget" : "Unbudgeted")}`,
-										},
-									]
-								: []),
-							...(monthlyBudgets ?? [])
-								.filter(
-									monthlyBudget =>
-										!monthlyBudget.archived ||
-										monthlyBudget.id === monthlyBudgetId,
-								)
-								.map(monthlyBudget => ({
-									value: monthlyBudget.id,
-									label: monthlyBudget.name,
-									disabled: monthlyBudget.archived,
-								})),
-						]}
-						onChange={value => {
-							if (!value) return
+				<AnimatePresence initial={false}>
+					{monthlyBudgetEligible ? (
+						<motion.div
+							key="monthly-budget"
+							className="grid gap-4"
+							{...COLLAPSE_MOTION}
+						>
+							<SelectField
+								id="monthly_budget_id"
+								label="Monthly budget"
+								autopopulated={monthlyBudgetAutopopulated}
+								disabled={!monthlyBudgetEligible}
+								value={monthlyBudgets === undefined ? "" : monthlyBudgetValue}
+								placeholder={
+									monthlyBudgets === undefined ? "Monthly budget" : "Unbudgeted"
+								}
+								items={[
+									{ value: UNBUDGETED, label: "Unbudgeted" },
+									...(categoryMonthlyBudgetId !== undefined
+										? [
+												{
+													value: CATEGORY_DEFAULT,
+													label: `Category default · ${categoryMonthlyBudget?.name ?? (categoryBudgetId ? "Default monthly budget" : "Unbudgeted")}`,
+												},
+											]
+										: []),
+									...(monthlyBudgets ?? [])
+										.filter(
+											monthlyBudget =>
+												!monthlyBudget.archived ||
+												monthlyBudget.id === monthlyBudgetId,
+										)
+										.map(monthlyBudget => ({
+											value: monthlyBudget.id,
+											label: monthlyBudget.name,
+											disabled: monthlyBudget.archived,
+										})),
+								]}
+								onChange={value => {
+									if (!value) return
 
-							onMonthlyBudgetChange(
-								value === CATEGORY_DEFAULT
-									? (categoryBudgetId ?? "")
-									: value === UNBUDGETED
-										? ""
-										: value,
-								value === CATEGORY_DEFAULT ? "category" : "manual",
-							)
-						}}
-					/>
-				)}
-				{monthlyBudgetEligible && monthlyBudgetSuggestions}
+									onMonthlyBudgetChange(
+										value === CATEGORY_DEFAULT
+											? (categoryBudgetId ?? "")
+											: value === UNBUDGETED
+												? ""
+												: value,
+										value === CATEGORY_DEFAULT ? "category" : "manual",
+									)
+								}}
+							/>
+							{monthlyBudgetSuggestions}
+						</motion.div>
+					) : null}
+				</AnimatePresence>
 			</FieldGroup>
 		</div>
 	)

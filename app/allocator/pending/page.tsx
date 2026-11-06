@@ -635,7 +635,7 @@ function PendingCard({
 			onClick={onSelect}
 			aria-pressed={selected}
 			className={cn(
-				"group grid w-full cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 rounded-lg border bg-card px-3 py-2.5 text-left transition-colors hover:bg-muted/50",
+				"group grid w-full cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 rounded-lg border bg-card px-3 py-2.5 text-left transition-colors duration-150 ease-out hover:bg-muted/50",
 				selected && "border-primary bg-muted ring-1 ring-primary/50",
 			)}
 		>

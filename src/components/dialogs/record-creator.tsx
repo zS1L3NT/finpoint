@@ -31,6 +31,7 @@ import { FieldGroup } from "@/components/ui/field"
 import { Progress } from "@/components/ui/progress"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
+import { useDialogCloseAnimation } from "@/hooks/use-dialog-close-animation"
 import { canUseMonthlyBudget } from "@/lib/analytics"
 import { COLLAPSE_MOTION, SPRING, TRANSITION } from "@/lib/motion"
 import { cn, formatCurrency, formatDatetime, pluralize, round2 } from "@/lib/utils"
@@ -52,7 +53,7 @@ export default function RecordCreatorDialog({
 	categories,
 	clear,
 	isOpen,
-	setIsOpen,
+	setIsOpen: onOpenChange,
 	trigger,
 }: {
 	statements: Statement[]
@@ -62,7 +63,15 @@ export default function RecordCreatorDialog({
 	setIsOpen: (isOpen: boolean) => void
 	trigger?: React.ReactElement
 }) {
-	// Parents clear the selection right after a successful create; keep the last open list so
+	const created = useRef(false)
+	const { open, setIsOpen, onOpenChangeComplete } = useDialogCloseAnimation(isOpen, open => {
+		onOpenChange(open)
+		if (!open && created.current) {
+			created.current = false
+			clear?.()
+		}
+	})
+	// Keep the last open list if the parent changes its selection while closing, so
 	// the attached statements don't vanish while the dialog fades out.
 	const [openStatements, setOpenStatements] = useState(statementsProp)
 	if (isOpen && openStatements !== statementsProp) setOpenStatements(statementsProp)
@@ -77,27 +86,33 @@ export default function RecordCreatorDialog({
 	// Analytics select keeps its laid-out label from the first frame.
 	const monthlyBudgets = useLiveQuery(() => listMonthlyBudgets(), [])
 
-	const recommendationKey = `${isOpen}:${statements.map(s => s.id).join(",")}`
+	// Rules, learned chips and similar Statements read the whole workspace, so they wait for the
+	// popup to finish entering: run during its fade, they block the frames it needs.
+	const [entered, setEntered] = useState(false)
+	const ready = isOpen && entered
+	const recommendationKey = `${ready}:${statements.map(s => s.id).join(",")}`
 	const recommendationQuery = useLiveQuery(
 		async () => ({
 			key: recommendationKey,
-			items: isOpen ? await statementRecommendations(statements.map(s => s.id)) : [],
+			items: ready ? await statementRecommendations(statements.map(s => s.id)) : undefined,
 		}),
 		[recommendationKey],
 	)
 	const recommendations =
 		recommendationQuery?.key === recommendationKey ? recommendationQuery.items : undefined
-	// Learning this workspace's suggestion weights takes a moment, so it happens shortly after
-	// the page settles rather than when the creator opens (Safari lacks requestIdleCallback).
+	// Learning this workspace's suggestion weights takes a moment, so it happens while the creator
+	// is closed and the page has settled, never during its entrance; reopening after a create
+	// relearns from the new Record (Safari lacks requestIdleCallback).
 	useEffect(() => {
+		if (isOpen) return
 		const id = setTimeout(() => void prepareSuggestions(), 1000)
 		return () => clearTimeout(id)
-	}, [])
+	}, [isOpen])
 	const statementKey = statements.map(s => s.id).join(",")
 	// Other allocable Statements of the same kind can take this Record's details in one go.
 	const similar = useLiveQuery(
-		() => (isOpen ? similarStatements(statementKey.split(",").filter(Boolean)) : []),
-		[isOpen, statementKey],
+		() => (ready ? similarStatements(statementKey.split(",").filter(Boolean)) : []),
+		[ready, statementKey],
 	)
 	const [includeSimilar, setIncludeSimilar] = useState(false)
 	const ruleSession = useRef("")
@@ -168,8 +183,8 @@ export default function RecordCreatorDialog({
 						created => toast.success(`Created ${pluralize(created + 1, "Record")}.`),
 						() => toast.error("Created this Record, but not the similar ones."),
 					)
+				created.current = true
 				setIsOpen(false)
-				clear?.()
 			} catch (cause) {
 				if (cause instanceof ValidationError) {
 					setApiErrors(cause.errors)
@@ -200,14 +215,14 @@ export default function RecordCreatorDialog({
 	// this workspace.
 	const learned = useLiveQuery(
 		() =>
-			isOpen
+			ready
 				? recordSuggestions({
 						statementIds: statementKey.split(",").filter(Boolean),
 						title: current.title,
 						datetime: current.datetime,
 					})
 				: undefined,
-		[isOpen, statementKey, current.title, current.datetime],
+		[ready, statementKey, current.title, current.datetime],
 	)
 	const applyRecommendation = (
 		item: Pick<RecordSuggestion, "field"> & { value: string | null },
@@ -313,7 +328,11 @@ export default function RecordCreatorDialog({
 
 	return (
 		<Dialog
-			open={isOpen}
+			open={open}
+			onOpenChangeComplete={open => {
+				setEntered(open)
+				onOpenChangeComplete(open)
+			}}
 			onOpenChange={isOpen => {
 				setIsOpen(isOpen)
 				if (isOpen) {
@@ -570,7 +589,7 @@ export default function RecordCreatorDialog({
 												<motion.div
 													key={statement.id}
 													className="p-0.5"
-													layout
+													layout="position"
 													initial={{ opacity: 0, y: 6 }}
 													animate={{
 														opacity: 1,
@@ -643,7 +662,7 @@ export default function RecordCreatorDialog({
 																		<Progress
 																			value={percent}
 																			className={cn(
-																				"transition-colors",
+																				"transition-colors duration-150 ease-out",
 																				percent > 100
 																					? "text-red-400"
 																					: null,
