@@ -10,7 +10,10 @@ export function useDrill() {
 	const trigger = useRef<HTMLElement | null>(null)
 	const wasOpen = useRef(false)
 	const [kind, value, at, extra] = (params.get("drill") ?? "").split(":")
+	const focus = params.get("focus")
+	const validFocus = focus === null || /^(record|statement):[^:]+$/.test(focus)
 	const selection: Selection | null =
+		validFocus &&
 		value &&
 		extra === undefined &&
 		["day", "category", "month", "budget"].includes(kind ?? "") &&
@@ -44,5 +47,10 @@ export function useDrill() {
 			{ scroll: false },
 		)
 	}
-	return { selection, open, close, href }
+	const pivot = (focus: string | null) => {
+		router.push(pathDashboard({ ...Object.fromEntries(params), focus: focus ?? undefined }), {
+			scroll: false,
+		})
+	}
+	return { selection, focus, pivot, open, close, href }
 }

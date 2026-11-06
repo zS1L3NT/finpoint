@@ -403,6 +403,8 @@ export default function DashboardPage() {
 				{drill.selection ? (
 					<DrillPanel
 						selection={drill.selection}
+						focus={drill.focus}
+						pivot={drill.pivot}
 						month={dataMonth}
 						year={dataYear}
 						scope={scope}

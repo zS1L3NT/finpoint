@@ -161,3 +161,5 @@ $ bun run build
 Click a Spending calendar day to open its Drill-down: Records sorted by amount and the day’s effective spending total. On desktop it docks beside the Dashboard; on smaller screens it opens as a bottom sheet. Select another day to change its contents, or close with Escape, the close button, or browser Back. “Open in Records” carries the selected day and budget scope into the Records page.
 
 Records and Statements expose read-only Allocations through an Allocations chevron. Each Allocation shows its share of the other amount, with any remainder below. Record allocation progress is visible on desktop and mobile; pending reasons explain confirmation or amount differences. Detail pages and Dashboard drill-downs use the same allocation rows.
+
+Expand a Record in the Dashboard Drill-down to see its Statements. Select a Statement to see its account and allocated Records. The breadcrumb and Back button return to the selection; browser Back restores the previous expansion. These views survive reloads and shared links through the `focus` URL parameter.

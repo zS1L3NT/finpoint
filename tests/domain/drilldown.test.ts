@@ -39,3 +39,8 @@ test("every demo calendar day reconciles with its drill-down across scopes", asy
 		Settings.now = now
 	}
 }, 120000)
+
+test("missing drill Statement focus returns null", async () => {
+ const { getDrillStatement } = await import("../../src/logic/drilldown")
+ expect(await getDrillStatement("missing-focus")).toBeNull()
+})

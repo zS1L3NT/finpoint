@@ -41,3 +41,27 @@ test("day drill-down: totals, retarget, Back, close, focus and invalid URLs", as
 	await expect(page).toHaveURL(/start_date=2026-10-05/)
 	await expect(page).toHaveURL(/end_date=2026-10-05/)
 })
+
+test("drill pivot: URL expansion, Statement breadcrumb and browser Back survive reload", async ({
+	page,
+}) => {
+	await seedWorkspace(page)
+	await page.goto(`${overview}&drill=day:2026-10-05`)
+	const row = page.getByTestId("drill-body").locator("button[aria-expanded]").first()
+	await row.click()
+	await expect(page).toHaveURL(/focus=record%3A/)
+	await page.getByTestId("allocation-rows").getByRole("button").first().click()
+	await expect(page).toHaveURL(/focus=statement%3A/)
+	await expect(page.getByRole("navigation", { name: "Drill-down breadcrumb" })).toBeVisible()
+	await expect(page.getByRole("button", { name: "← Back" })).toBeVisible()
+	await page.reload()
+	await expect(page.getByText("Records allocated to this Statement")).toBeVisible()
+	await page.goBack()
+	await expect(page).toHaveURL(/focus=record%3A/)
+	await expect(row).toHaveAttribute("aria-expanded", "true")
+	await page.goForward()
+	await page.getByRole("button", { name: "← Back" }).click()
+	await expect(page.getByText("Records allocated to this Statement")).toHaveCount(0)
+	await page.goto(`${overview}&drill=day:2026-10-05&focus=invalid`)
+	await expect(page.getByTestId("drill-total")).toHaveCount(0)
+})

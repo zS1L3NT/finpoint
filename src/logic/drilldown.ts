@@ -1,4 +1,5 @@
 import { DateTime } from "luxon"
+import { db } from "@/data/db"
 import { contribution } from "@/logic/analytics"
 import { getDashboardView } from "@/logic/dashboard"
 import { getRecord, listRecords } from "@/logic/records"
@@ -80,5 +81,5 @@ export async function getDrilldown(
 }
 
 export async function getDrillStatement(id: string) {
-	return getStatement(id)
+	return (await db.statements.get(id)) ? getStatement(id) : null
 }
