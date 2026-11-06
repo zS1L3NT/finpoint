@@ -61,6 +61,10 @@ _Avoid_: Budget category, bucket, treatment
 A category presented under another category for one layer of grouping. Use subcategory only when the parent-child presentation matters; otherwise it is still just a category.
 _Avoid_: Child category
 
+**Drill-down**:
+The panel that lists the Records behind a number on the Dashboard, and their Allocations.
+_Avoid_: Inspect panel, breakdown, details
+
 ## Example Dialogue
 
 Developer: "Should this imported row become a transaction?"

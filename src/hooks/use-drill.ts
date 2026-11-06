@@ -8,20 +8,26 @@ export function useDrill() {
 	const router = useRouter()
 	const params = useSearchParams()
 	const trigger = useRef<HTMLElement | null>(null)
+	const wasOpen = useRef(false)
 	const [kind, value, at, extra] = (params.get("drill") ?? "").split(":")
 	const selection: Selection | null =
 		value &&
-		!extra &&
+		extra === undefined &&
 		["day", "category", "month", "budget"].includes(kind ?? "") &&
-		(!at || (/^\d{4}-\d{2}$/.test(at) && DateTime.fromISO(`${at}-01`).isValid)) &&
+		(at === undefined || (/^\d{4}-\d{2}$/.test(at) && DateTime.fromISO(`${at}-01`).isValid)) &&
 		(kind !== "month" ||
 			(/^\d{4}-\d{2}$/.test(value) && DateTime.fromISO(`${value}-01`).isValid)) &&
-		(kind !== "day" || (/^\d{4}-\d{2}-\d{2}$/.test(value) && DateTime.fromISO(value).isValid))
+		(kind !== "day" ||
+			(at === undefined &&
+				/^\d{4}-\d{2}-\d{2}$/.test(value) &&
+				DateTime.fromISO(value).isValid))
 			? { kind: kind as Selection["kind"], value, at }
 			: null
 	useEffect(() => {
-		if (!selection) requestAnimationFrame(() => trigger.current?.focus())
-	}, [selection])
+		if (!selection && wasOpen.current)
+			requestAnimationFrame(() => trigger.current?.focus({ preventScroll: true }))
+		wasOpen.current = !!selection
+	}, [!!selection])
 	const href = (s: Selection) =>
 		pathDashboard({
 			...Object.fromEntries(params),
@@ -37,7 +43,6 @@ export function useDrill() {
 			pathDashboard({ ...Object.fromEntries(params), drill: undefined, focus: undefined }),
 			{ scroll: false },
 		)
-		requestAnimationFrame(() => trigger.current?.focus())
 	}
 	return { selection, open, close, href }
 }

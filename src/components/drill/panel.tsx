@@ -1,12 +1,13 @@
 "use client"
 import { useLiveQuery } from "dexie-react-hooks"
 import { motion, useReducedMotion } from "framer-motion"
+import { ChevronDown } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
 import { SPRING, TRANSITION } from "@/lib/motion"
-import { formatCurrency } from "@/lib/utils"
+import { formatCurrency, pluralize } from "@/lib/utils"
 import { getDrilldown, getDrillStatement, type Selection } from "@/logic/drilldown"
 export function DrillPanel({
 	selection,
@@ -63,15 +64,25 @@ export function DrillPanel({
 		<>
 			<div className="flex items-start justify-between gap-3 border-b p-5">
 				<div>
-					<p className="text-xs text-muted-foreground">Drill-down</p>
 					<h2
 						id="drill-title"
 						tabIndex={-1}
-						className="mt-2 text-lg font-semibold tracking-tight"
+						className="text-lg font-semibold tracking-tight"
 					>
 						{data.title}
 						{statement ? ` › ${statement.description}` : ""}
 					</h2>
+					<p
+						className="text-3xl font-semibold tracking-tight tabular-nums"
+						data-testid="drill-total"
+						aria-live="polite"
+					>
+						{formatCurrency(data.total)}
+					</p>
+					<p className="mt-1 text-xs text-muted-foreground">
+						{pluralize(data.records.length, "Record")} ·{" "}
+						{selection.kind === "category" ? "before refunds" : "effective spending"}
+					</p>
 				</div>
 				<Button variant="ghost" size="sm" onClick={close} aria-label="Close drill-down">
 					✕
@@ -109,19 +120,6 @@ export function DrillPanel({
 					) : null
 				) : (
 					<>
-						<p
-							className="text-3xl font-semibold tracking-tight tabular-nums"
-							data-testid="drill-total"
-							aria-live="polite"
-						>
-							{formatCurrency(data.total)}
-						</p>
-						<p className="mt-1 mb-6 text-xs text-muted-foreground">
-							{data.records.length} Records ·{" "}
-							{selection.kind === "category"
-								? "before refunds"
-								: "effective spending"}
-						</p>
 						{data.records.map(r => (
 							<div key={r.id} className="border-b">
 								<button
@@ -139,9 +137,10 @@ export function DrillPanel({
 										</span>
 									</span>
 									<span className="text-sm tabular-nums">
-										{formatCurrency(r.amount)}
+										{r.amount > 0 ? "Refund " : ""}
+										{formatCurrency(Math.abs(r.amount))}
 									</span>
-									<span>{expanded === r.id ? "⌄" : "›"}</span>
+									<ChevronDown aria-hidden className="size-4 shrink-0" />
 								</button>
 								{expanded === r.id ? (
 									<motion.div

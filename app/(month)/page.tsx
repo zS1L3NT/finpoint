@@ -1,17 +1,19 @@
 "use client"
 
 import { useLiveQuery } from "dexie-react-hooks"
-import { AnimatePresence } from "framer-motion"
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
 import { DateTime } from "luxon"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import CashflowChart from "@/components/charts/cashflow-chart"
 import CategoryHistoryChart from "@/components/charts/category-history-chart"
 import CategoryMovers from "@/components/charts/category-movers"
+import DailySpendingChart from "@/components/charts/daily-spending-chart"
 import MonthlyBudgetUsage from "@/components/charts/monthly-budget-usage"
 import SpendingCalendar from "@/components/charts/spending-calendar"
+import TotalSpendingChart from "@/components/charts/total-spending-chart"
 import MonthlyBudgetDialog from "@/components/dialogs/monthly-budget"
 import { DrillPanel } from "@/components/drill/panel"
 import { UiIcon as IconifyIcon } from "@/components/icon"
@@ -33,6 +35,7 @@ import { useDrill } from "@/hooks/use-drill"
 import { useMonthParams } from "@/hooks/use-month-params"
 import { STALE_MONTH_CLASS, useMonthTransition } from "@/hooks/use-month-transition"
 import { useStagedMount } from "@/hooks/use-staged-mount"
+import { SPRING, TRANSITION } from "@/lib/motion"
 import { themeColor } from "@/lib/palette"
 import { cn, formatCurrency, pluralize } from "@/lib/utils"
 import { getDashboardView, type TrendMonth } from "@/logic/dashboard"
@@ -54,6 +57,15 @@ type ComparisonValue = Comparison["income"]
 
 export default function DashboardPage() {
 	const drill = useDrill()
+	const reduced = useReducedMotion()
+	const [desktop, setDesktop] = useState(false)
+	useEffect(() => {
+		const media = matchMedia("(min-width: 1280px)")
+		const update = () => setDesktop(media.matches)
+		update()
+		media.addEventListener("change", update)
+		return () => media.removeEventListener("change", update)
+	}, [])
 	const { handlePush } = useHistory()
 	const { month, year } = useMonthParams()
 	const contentRef = useRef<HTMLDivElement>(null)
@@ -93,9 +105,14 @@ export default function DashboardPage() {
 		scopedDaily,
 		scopeLabel,
 		scopeColor,
+		scopeFilters,
 		paceFilters,
 	} = view
-	const { period, summary, future_records_count } = data
+	const dailyLines = monthlyBudgetDailyData.monthlyBudgets.map(budget => ({
+		...budget,
+		dashed: budget.id === "unbudgeted",
+	}))
+	const { period, summary, series, future_records_count } = data
 	// Everything below shows the loaded data, so it takes the data's own month: while the next
 	// month loads, labels and links stay with the numbers on screen.
 	const dataMonth = data.month ?? month
@@ -105,29 +122,27 @@ export default function DashboardPage() {
 	const paceProjection = paceData.projection
 	const paceAmount = paceData.paceMonthlyBudget
 	const categoryRecordHref = (id: string, at?: DateTime) =>
-		drill.href({ kind: "category", value: id, at: at?.toFormat("yyyy-MM") })
+		pathMonthlyRecords({
+			month: at?.toFormat("MMMM") ?? dataMonth,
+			year: String(at?.year ?? dataYear),
+			category_ids: id,
+			effective_spending: "true",
+			...scopeFilters,
+		})
 	const openDay = (date: string) => drill.open({ kind: "day", value: date })
 	return (
-		<div
-			className={cn(
-				"grid items-start gap-6",
-				drill.selection && "xl:grid-cols-[minmax(0,1fr)_420px]",
-			)}
+		<motion.div
+			className="grid items-start"
+			initial={false}
+			animate={{
+				gridTemplateColumns: desktop
+					? `minmax(0,1fr) ${drill.selection ? 420 : 0}px`
+					: "minmax(0,1fr)",
+				columnGap: desktop && drill.selection ? 24 : 0,
+			}}
+			transition={reduced ? TRANSITION.fast : SPRING.smooth}
 		>
 			<div
-				onClickCapture={event => {
-					const anchor = (event.target as HTMLElement).closest("a")
-					if (anchor?.href.includes("drill=")) {
-						const raw = new URL(anchor.href).searchParams.get("drill")
-						const [kind, value, at] = (raw ?? "").split(":")
-						if (kind === "category" && value) {
-							event.preventDefault()
-							event.stopPropagation()
-							anchor.focus()
-							drill.open({ kind, value, at })
-						}
-					}
-				}}
 				ref={contentRef}
 				aria-busy={stale}
 				className={cn("reveal grid gap-5 md:gap-6", stale && STALE_MONTH_CLASS)}
@@ -192,8 +207,8 @@ export default function DashboardPage() {
 								<CardDescription>
 									{paceProjection.available
 										? paceProjection.history_remaining !== null
-										? `You usually spend ${formatCurrency(paceProjection.history_remaining)} more after ${DateTime.fromISO(period.through ?? "").toFormat("d MMMM")}, plus any scheduled Records.`
-										: "At your typical daily pace, plus scheduled Records."
+											? `You usually spend ${formatCurrency(paceProjection.history_remaining)} more after ${DateTime.fromISO(period.through ?? "").toFormat("d MMMM")}, plus any scheduled Records.`
+											: "At your typical daily pace, plus scheduled Records."
 										: "Recorded spending against the monthly plan."}
 								</CardDescription>
 							</CardHeader>
@@ -249,7 +264,7 @@ export default function DashboardPage() {
 								selected={
 									budgets.some(budget => budget.id === scope) ? scope : null
 								}
-								onSelect={id => drill.open({ kind: "budget", value: id })}
+								onSelect={setScope}
 								edit={budget => (
 									<MonthlyBudgetDialog
 										monthlyBudget={budgets.find(item => item.id === budget.id)}
@@ -277,13 +292,6 @@ export default function DashboardPage() {
 						{stage > 0 ? (
 							<CategoryHistoryChart
 								compact={!!drill.selection}
-								onSelect={at =>
-									drill.open({
-										kind: "month",
-										value: at.toFormat("yyyy-MM"),
-										at: at.toFormat("yyyy-MM"),
-									})
-								}
 								key={`${dataMonth}-${dataYear}`}
 								categories={scopedCategories}
 								scopeLabel={scopeLabel}
@@ -346,6 +354,48 @@ export default function DashboardPage() {
 								</Card>
 							</div>
 						) : null}
+						{stage > 2 ? (
+							<Card className="min-w-0">
+								<CardHeader>
+									<ScopedCardTitle scope="All budgets">
+										Surplus / Shortfall
+									</ScopedCardTitle>
+									<CardDescription>
+										Cumulative income minus all personal spending
+									</CardDescription>
+								</CardHeader>
+								<CardContent>
+									<TotalSpendingChart
+										data={series}
+										history={data.history}
+										month={dataMonth}
+										year={dataYear}
+									/>
+								</CardContent>
+							</Card>
+						) : null}
+						{stage > 3 ? (
+							<Card>
+								<CardHeader className="border-b">
+									<ScopedCardTitle scope="All budgets">
+										Spending by day
+									</ScopedCardTitle>
+									<CardDescription>
+										Net daily spending across all monthly budgets, including
+										refunds. Hold or hover over a day to read it, and click it
+										to open its Records.
+									</CardDescription>
+								</CardHeader>
+								<CardContent>
+									<DailySpendingChart
+										rows={monthlyBudgetDailyData.rows}
+										monthlyBudgets={dailyLines}
+										month={dataMonth}
+										year={dataYear}
+									/>
+								</CardContent>
+							</Card>
+						) : null}
 					</>
 				) : null}
 			</div>
@@ -360,7 +410,7 @@ export default function DashboardPage() {
 					/>
 				) : null}
 			</AnimatePresence>
-		</div>
+		</motion.div>
 	)
 }
 
