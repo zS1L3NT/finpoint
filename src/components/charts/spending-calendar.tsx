@@ -2,7 +2,6 @@
 
 import { DateTime } from "luxon"
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
 import { cn, formatCurrency } from "@/lib/utils"
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
@@ -122,7 +121,10 @@ export default function SpendingCalendar({
 							aria-label={label}
 							disabled={future}
 							aria-pressed={key === selected}
-							onClick={() => setSelected(key)}
+							onClick={() => {
+								setSelected(key)
+								onSelect(key)
+							}}
 							onPointerEnter={event => {
 								if (event.pointerType === "mouse" && !future) setPreview(key)
 							}}
@@ -159,9 +161,6 @@ export default function SpendingCalendar({
 								? ` · ${shownEntry.records} Record${shownEntry.records === 1 ? "" : "s"}`
 								: ""}
 						</span>
-						<Button variant="outline" size="sm" onClick={() => onSelect(shown)}>
-							View Records
-						</Button>
 					</span>
 				) : (
 					<span className="flex min-h-8 items-center">

@@ -61,8 +61,8 @@ export default function MonthlyBudgetUsage({
 
 	return (
 		<div className="@container flex h-full flex-col gap-4">
-			<div className="grid gap-5 @[48rem]:grid-cols-[auto_minmax(0,30rem)] @[48rem]:items-center @[48rem]:justify-center @[48rem]:gap-12">
-				<div className="relative mx-auto size-52 shrink-0 @[28rem]:size-64 @[48rem]:size-72">
+			<div className="grid gap-5">
+				<div className="hidden">
 					<svg
 						viewBox="0 0 240 240"
 						className="size-full overflow-visible"
