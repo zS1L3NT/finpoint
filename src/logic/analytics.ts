@@ -16,8 +16,6 @@ export type AnalyticsRecord = {
 		id: string
 		name: string
 		color: string
-		group: "core" | "outlier" | "other"
-		pace_kind: "daily" | "recurring" | "none"
 		display_order: number
 		archived: boolean
 	} | null
@@ -91,8 +89,6 @@ export type AnalyticsSummary = {
 		id: string
 		name: string
 		color: string
-		group: "core" | "outlier" | "other"
-		pace_kind: "daily" | "recurring" | "none"
 		display_order: number
 		archived: boolean
 		spending: number
@@ -148,8 +144,6 @@ export function summarize(records: AnalyticsRecord[]): AnalyticsSummary {
 				id: string
 				name: string
 				color: string
-				group: "core" | "outlier" | "other"
-				pace_kind: "daily" | "recurring" | "none"
 				display_order: number
 				archived: boolean
 				spending: number

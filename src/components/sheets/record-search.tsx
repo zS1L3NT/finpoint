@@ -156,8 +156,8 @@ export default function RecordSearchSheet({
 
 				<div
 					className={cn(
-						"flex-1 overflow-y-auto overscroll-contain",
-						stale && "opacity-70 transition-opacity",
+						"flex-1 overflow-y-auto overscroll-contain transition-opacity duration-150 ease-out",
+						stale && "opacity-70",
 					)}
 				>
 					{sorted === undefined ? null : visible.length === 0 ? (

@@ -20,6 +20,10 @@ export type RouteEntry = {
 // Scenario keys become stable IDs: `${entry.path}#${family}.${case}`.
 // Map a case only after reviewing its real assertions; mounting/importing is insufficient.
 export const scenarioFamilies: Record<string, Record<string, string>> = {
+	modal: {
+		lifecycle:
+			"Popup and backdrop enter and exit before removal, cancellation and confirmation call the right action, and reduced motion suppresses movement",
+	},
 	editor: {
 		open: "Open create/update popup: visible backdrop, whole-popup motion, initially visible children stable with no transient overflow; mobile tall content may scroll",
 		validation:
@@ -220,15 +224,6 @@ export const componentInventory: InventoryEntry[] = [
 		scenarios: ["indirect"],
 	},
 	{
-		path: "src/components/charts/weekday-bars.tsx",
-		owner: "team3",
-		routes: ["/"],
-		visibleExports: ["default"],
-		dormantExports: [],
-		helperExports: [],
-		scenarios: ["chart"],
-	},
-	{
 		path: "src/components/detail-summary.tsx",
 		owner: "team3",
 		routes: ["/statements/[id]", "/records/[id]"],
@@ -236,6 +231,15 @@ export const componentInventory: InventoryEntry[] = [
 		dormantExports: [],
 		helperExports: [],
 		scenarios: ["display"],
+	},
+	{
+		path: "src/components/dialogs/drive-overwrite-confirmation.tsx",
+		owner: "team3",
+		routes: ["/sync"],
+		visibleExports: ["default"],
+		dormantExports: [],
+		helperExports: [],
+		scenarios: ["modal"],
 	},
 	{
 		path: "src/components/dialogs/account.tsx",
@@ -947,7 +951,7 @@ export const componentInventory: InventoryEntry[] = [
 			"/records",
 			"/records/monthly",
 		],
-		visibleExports: ["GroupHeaderRow", "MobileGroupHeader", "MobileRow"],
+		visibleExports: ["GroupHeaderRow", "LeavingRows", "MobileGroupHeader", "MobileRow"],
 		dormantExports: [],
 		helperExports: [
 			"MOBILE_LIST_CLASS",
@@ -2169,13 +2173,13 @@ export const scenarioDescriptions: Record<string, string> = {
 	"src/components/form/record-analytics-fields.tsx#field.options":
 		"Treatment gating and scroll/Escape dismissal for both selects; long Monthly Budget label is selected intact, fits the popup/trigger, clears to Unbudgeted and remains cleared through Income/Spending changes",
 	"src/components/form/rule-suggestions.tsx#display.values":
-		"Suggestion chips deduplicate equal text values across rules and carry provenance titles",
+		"Chips learned from past Records carry the evidence behind them and hide the value the field already holds",
 	"src/components/form/rule-suggestions.tsx#display.interaction":
 		"Chip activation by click and keyboard fills the field it suggests",
 	"src/components/form/rule-suggestions.tsx#indirect.consumer":
-		"The Record creator consumes rule suggestions for its fields",
+		"The Record creator consumes learned suggestions for its fields",
 	"src/components/form/rule-suggestions.tsx#export.default.behaviour":
-		"Suggestions deduplicate equal values across rules, apply on activation, and skip paused or archived rules",
+		"Learned suggestions apply on activation and disappear once the field holds their value",
 	"src/components/form/select-field.tsx#field.options":
 		"Selected and disabled options with keyboard open/close, a long empty-optional select with while-open scroll, and disabled value retention",
 	"src/components/ui/select.tsx#primitive.responsive":
@@ -2196,8 +2200,6 @@ export const scenarioDescriptions: Record<string, string> = {
 		"Closed pages fit the viewport; the hover/focus tooltip fits the viewport",
 	"src/components/ui/calendar.tsx#primitive.responsive":
 		"Closed pages fit the viewport; the date-picker calendar popup fits the viewport with while-open scroll preservation and Escape dismissal",
-	"src/components/charts/weekday-bars.tsx#chart.values":
-		"Keyboard tooltip exposes expected numeric values; empty history renders zero current spending without a fabricated comparison baseline",
 	"src/components/charts/category-history-chart.tsx#chart.values":
 		"Keyboard tooltip exposes selected-month values; empty scope explains no spending and history distinguishes unavailable coverage from a complete zero-spending month",
 	"src/components/charts/category-movers.tsx#chart.values":
@@ -2339,8 +2341,6 @@ export const scenarioDescriptions: Record<string, string> = {
 		"Dense card fits with finite values; keyboard tooltip stays numeric and inside every viewport",
 	"src/components/charts/daily-spending-chart.tsx#chart.responsive":
 		"Dense card fits with finite values; keyboard tooltip stays numeric and inside every viewport",
-	"src/components/charts/weekday-bars.tsx#chart.responsive":
-		"Dense card fits with finite values; keyboard tooltip stays numeric and inside every viewport",
 	"src/components/charts/total-spending-chart.tsx#chart.responsive":
 		"Dense card fits with finite values; keyboard tooltip stays numeric and inside every viewport",
 	"src/components/charts/category-movers.tsx#chart.responsive":
@@ -2367,14 +2367,12 @@ export const scenarioDescriptions: Record<string, string> = {
 		"All five projects: Spending forecast graph marks grow through intermediate geometry once and settle with no replay on hover/resize; reduced-motion immediate-final covered in the reduced-motion project",
 	"src/components/charts/daily-spending-chart.tsx#chart.motion":
 		"All five projects: Spending by day graph marks grow through intermediate geometry once and settle; reduced-motion immediate-final covered in the reduced-motion project",
-	"src/components/charts/weekday-bars.tsx#chart.motion":
-		"All five projects: Spending by weekday graph marks grow through intermediate geometry once and settle; reduced-motion immediate-final covered in the reduced-motion project",
 	"src/components/charts/category-history-chart.tsx#chart.motion":
 		"All five projects: Category trend graph marks grow through intermediate geometry once and settle; reduced-motion immediate-final covered in the reduced-motion project",
 	"src/components/charts/budget-progress-chart.tsx#chart.motion":
 		"All five projects: Spending over time graph marks grow through intermediate geometry once and settle with no replay on hover/resize; reduced-motion immediate-final covered in the reduced-motion project",
 	"src/components/charts/bar-chart.tsx#indirect.consumer":
-		"All five projects: Spending by day, Spending by weekday and Category trend marks grow through intermediate geometry once and settle with no replay on hover/resize; reduced-motion immediate-final covered in the reduced-motion project",
+		"All five projects: Spending by day and Category trend marks grow through intermediate geometry once and settle with no replay on hover/resize; reduced-motion immediate-final covered in the reduced-motion project",
 	"src/components/charts/trend-chart.tsx#indirect.consumer":
 		"All five projects: Spending forecast, Surplus / Shortfall and Spending over time marks grow through intermediate geometry once and settle with no replay on hover/resize; reduced-motion immediate-final covered in the reduced-motion project",
 	"src/components/charts/chart-frame.tsx#indirect.consumer":
@@ -2595,6 +2593,15 @@ export const notApplicable: Record<string, string> = {
 
 /** Reviewed assertion mappings. Passing browser evidence is separate; unmapped cases fail by default. */
 export const behaviourCoverage: Record<string, string[]> = {
+	"src/components/dialogs/drive-overwrite-confirmation.tsx#export.default.behaviour": [
+		"Drive overwrite confirmation: Cancel animates popup and backdrop in and out",
+		"Drive overwrite confirmation: Replace Drive backup animates popup and backdrop in and out",
+	],
+	"src/components/dialogs/drive-overwrite-confirmation.tsx#modal.lifecycle": [
+		"Drive overwrite confirmation: Cancel animates popup and backdrop in and out",
+		"Drive overwrite confirmation: Replace Drive backup animates popup and backdrop in and out",
+	],
+
 	"src/components/dialogs/account.tsx#editor.open": [
 		"Account editor: backdrop, values, cursors, fit and keyboard reopen work",
 		"Account editor: popup enters as a whole",
@@ -2650,6 +2657,7 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"Monthly Budget editor: popup enters as a whole",
 	],
 	"src/components/dialogs/monthly-budget.tsx#export.default.behaviour": [
+		"Monthly Budget editor: persists colour choices and disables unavailable Default",
 		"Monthly Budget editor: backdrop, values, cursors, fit and keyboard reopen work",
 		"Monthly Budget editor: popup enters as a whole",
 		"Monthly Budget creator: rejects blank input and persists distinct zero and null amounts",
@@ -2717,6 +2725,7 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"Duplicate Statement review: popup enters as a whole",
 	],
 	"src/components/dialogs/statement-replacement-review.tsx#export.default.behaviour": [
+		"Statement replacement: reconciles transfer summary and blocks invalid pairs",
 		"replacement review: shows selected descriptions and restores the sheet on cancel",
 		"replacement review: review enters through intermediate opacity",
 	],
@@ -2839,13 +2848,13 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"field validation: errors render as alerts",
 		"Account editor: required name and unicode rename persist after reload",
 		"Record creator: rule autofill fills fields, notes the rule and drops the note when edited",
-		"Record rules: suggestion chips and late autofill notes rise in after the creator opens",
+		"Record creator: learned chips and late autofill notes rise in after the creator opens",
 	],
 	"src/components/form/field.tsx#field.input": [
 		"field validation: errors render as alerts",
 		"Account editor: required name and unicode rename persist after reload",
 		"Record creator: rule autofill fills fields, notes the rule and drops the note when edited",
-		"Record rules: suggestion chips and late autofill notes rise in after the creator opens",
+		"Record creator: learned chips and late autofill notes rise in after the creator opens",
 	],
 	"src/components/form/record-analytics-fields.tsx#export.default.behaviour": [
 		"Record creator: rule autofill of Treatment and Monthly Budget follows the analytics rules",
@@ -2866,20 +2875,22 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"Record editor: long Monthly Budget option can be picked, cleared and disabled by Treatment",
 	],
 	"src/components/form/rule-suggestions.tsx#display.values": [
-		"Record creator: rule suggestions deduplicate, apply on click and skip paused or archived rules",
+		"Record creator: learned suggestions apply on click and paused or archived rules stay out",
 	],
 	"src/components/form/rule-suggestions.tsx#display.interaction": [
-		"Record creator: rule suggestions deduplicate, apply on click and skip paused or archived rules",
+		"Record creator: learned suggestions apply on click and paused or archived rules stay out",
 	],
 	"src/components/form/rule-suggestions.tsx#indirect.consumer": [
-		"Record creator: rule suggestions deduplicate, apply on click and skip paused or archived rules",
+		"Record creator: learned suggestions apply on click and paused or archived rules stay out",
 	],
 	"src/components/form/rule-suggestions.tsx#export.default.behaviour": [
 		"Record creator: rule autofill fills fields, notes the rule and drops the note when edited",
-		"Record creator: rule suggestions deduplicate, apply on click and skip paused or archived rules",
-		"Record rules: suggestion chips and late autofill notes rise in after the creator opens",
+		"Record creator: learned suggestions apply on click and paused or archived rules stay out",
+		"Record creator: learned chips and late autofill notes rise in after the creator opens",
 	],
 	"src/components/charts/cashflow-chart.tsx#export.default.behaviour": [
+		"Spending forecast: retains gradient backdrops and comparison lines",
+		"Spending forecast: preserves scope and legend semantics",
 		"chart tooltips: Surplus / Shortfall keyboard navigation exposes actual numeric values",
 	],
 	"src/components/charts/daily-spending-chart.tsx#export.default.behaviour": [
@@ -2887,14 +2898,6 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"src/components/charts/total-spending-chart.tsx#export.default.behaviour": [
 		"chart tooltips: Spending forecast keyboard navigation exposes actual numeric values",
-	],
-	"src/components/charts/weekday-bars.tsx#export.default.behaviour": [
-		"chart tooltips: Spending by weekday keyboard navigation exposes actual numeric values",
-	],
-	"src/components/charts/weekday-bars.tsx#chart.values": [
-		"chart tooltips: Spending by weekday keyboard navigation exposes actual numeric values",
-		"empty overview: no history gives zero metrics and useful chart explanations",
-		"Spending by weekday: no comparison history renders zero spending without a fabricated baseline",
 	],
 	"src/components/charts/category-history-chart.tsx#export.default.behaviour": [
 		"chart tooltips: Category trend keyboard navigation exposes actual numeric values",
@@ -3122,6 +3125,9 @@ export const behaviourCoverage: Record<string, string[]> = {
 	"src/components/table/row-groups.tsx#export.GroupHeaderRow.behaviour": [
 		"Records table: same-day subtotal includes positive and negative Records",
 	],
+	"src/components/table/row-groups.tsx#export.LeavingRows.behaviour": [
+		"allocator: an allocated Statement fades out and the rows below slide up",
+	],
 	"src/components/table/row-groups.tsx#export.MobileGroupHeader.behaviour": [
 		"Records table: same-day subtotal includes positive and negative Records",
 	],
@@ -3307,6 +3313,7 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"combobox primitive: filters, selects and clears",
 	],
 	"src/components/ui/combobox.tsx#export.ComboboxContent.behaviour": [
+		"Category popup: bringing an option into view preserves the modal page position",
 		"combobox field: filters, picks, clears and shows empty text",
 		"combobox primitive: filters, selects and clears",
 	],
@@ -3911,7 +3918,8 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"/categories page: stays silent while the database opens, then reveals its data",
 	],
 	"app/statement-rules/page.tsx#route.data": [
-		"Statement rules page: empty, populated and paused rules show conditions, actions and match counts",
+		"Statement rules page: empty, populated and paused rules show conditions, actions and match counts in name order",
+		"Statement rules page: search narrows rules by name, phrase or filled-in value",
 	],
 	"app/(month)/page.tsx#route.data": [
 		"overview summary: income, refunds and exclusions reconcile across metrics and Category mix",
@@ -4224,10 +4232,6 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"dense overview cards: every card renders values and fits the viewport",
 		"chart tooltips: stay numeric and inside every viewport",
 	],
-	"src/components/charts/weekday-bars.tsx#chart.responsive": [
-		"dense overview cards: every card renders values and fits the viewport",
-		"chart tooltips: stay numeric and inside every viewport",
-	],
 	"src/components/charts/category-history-chart.tsx#chart.responsive": [
 		"dense overview cards: every card renders values and fits the viewport",
 		"chart tooltips: stay numeric and inside every viewport",
@@ -4274,9 +4278,6 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"chart intro: overview charts grow real graph marks once and respect reduced motion",
 	],
 	"src/components/charts/daily-spending-chart.tsx#chart.motion": [
-		"chart intro: overview charts grow real graph marks once and respect reduced motion",
-	],
-	"src/components/charts/weekday-bars.tsx#chart.motion": [
 		"chart intro: overview charts grow real graph marks once and respect reduced motion",
 	],
 	"src/components/charts/category-history-chart.tsx#chart.motion": [
@@ -4389,13 +4390,13 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"src/components/dialogs/statement-rule.tsx#editor.conditional": [
 		"Statement rule editor: the preview lists matching Statements and combines conditions by all or any",
-		"Statement rule editor: actions toggle Suggest and Autofill, Unbudgeted differs from Not set, archived Monthly Budgets are hidden",
+		"Statement rule editor: actions autofill, Unbudgeted differs from Not set, archived Monthly Budgets are hidden",
 		"Statement rule editor: Title, People and Location offer existing Record values",
 	],
 	"src/components/dialogs/statement-rule.tsx#export.default.behaviour": [
 		"Statement rule editor: invalid input shows errors, then a valid rule persists after reload",
 		"Statement rule editor: the preview lists matching Statements and combines conditions by all or any",
-		"Statement rule editor: actions toggle Suggest and Autofill, Unbudgeted differs from Not set, archived Monthly Budgets are hidden",
+		"Statement rule editor: actions autofill, Unbudgeted differs from Not set, archived Monthly Budgets are hidden",
 		"Statement rule editor: Title, People and Location offer existing Record values",
 	],
 	"src/components/dialogs/category.tsx#editor.conditional": [
@@ -4616,7 +4617,7 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"/privacy page: populated content and enabled controls stay inside the viewport",
 	],
 	"app/statement-rules/page.tsx#route.viewport": [
-		"Statement rules: cards enter as a cascade in the viewport",
+		"Statement rules: rows enter as a cascade in the viewport",
 	],
 	"src/components/help/context-help.tsx#display.values": [
 		"help menu: lists the section's guides and opens one in the side panel",
@@ -4772,7 +4773,7 @@ export const facetNotApplicable: Record<string, Record<string, string>> = {
 	},
 	"src/components/dialogs/monthly-budget.tsx#monthly-budget.archived": {
 		"editor treatment and Unbudgeted fields":
-			"src/components/dialogs/monthly-budget.tsx edits identity, group, pace, amount and archived. Treatment and Unbudgeted choice live in record-analytics-fields.tsx and the badge; mapped consumer tests cover those there.",
+			"src/components/dialogs/monthly-budget.tsx edits identity, amount and archived. Treatment and Unbudgeted choice live in record-analytics-fields.tsx and the badge; mapped consumer tests cover those there.",
 	},
 	"src/components/monthly-budget-badge.tsx#display.values": {
 		"text contrast on user colour":
@@ -4791,6 +4792,15 @@ export const scenarioProjects: Record<
 	string,
 	("mobile" | "tall-desktop" | "light" | "reduced-motion")[]
 > = {
+	"src/components/dialogs/drive-overwrite-confirmation.tsx#modal.lifecycle": [
+		"mobile",
+		"reduced-motion",
+	],
+	"src/components/dialogs/drive-overwrite-confirmation.tsx#export.default.behaviour": [
+		"mobile",
+		"reduced-motion",
+	],
+
 	"src/components/charts/cashflow-chart.tsx#chart.motion": [
 		"mobile",
 		"tall-desktop",
@@ -4804,12 +4814,6 @@ export const scenarioProjects: Record<
 		"reduced-motion",
 	],
 	"src/components/charts/daily-spending-chart.tsx#chart.motion": [
-		"mobile",
-		"tall-desktop",
-		"light",
-		"reduced-motion",
-	],
-	"src/components/charts/weekday-bars.tsx#chart.motion": [
 		"mobile",
 		"tall-desktop",
 		"light",
@@ -4909,7 +4913,6 @@ export const scenarioProjects: Record<
 	"src/components/charts/category-history-chart.tsx#chart.responsive": ["mobile", "tall-desktop"],
 	"src/components/charts/daily-spending-chart.tsx#chart.responsive": ["mobile", "tall-desktop"],
 	"src/components/charts/total-spending-chart.tsx#chart.responsive": ["mobile", "tall-desktop"],
-	"src/components/charts/weekday-bars.tsx#chart.responsive": ["mobile", "tall-desktop"],
 	"src/components/charts/category-movers.tsx#chart.motion": ["reduced-motion"],
 	"src/components/charts/monthly-budget-usage.tsx#chart.motion": ["reduced-motion"],
 	"src/components/charts/spending-calendar.tsx#chart.motion": ["reduced-motion"],
@@ -5042,4 +5045,79 @@ export const scenarioProjectLexiconExemptions: Record<string, string> = {
 		"Tall content scrolling inside a mobile popup is about in-popup overflow, not the tall-desktop project; the mapped popup test runs on desktop and mobile",
 	"src/components/dialogs/statement-rule.tsx#editor.open":
 		"Tall content scrolling inside a mobile popup is about in-popup overflow, not the tall-desktop project; the mapped popup steps run on desktop, mobile and reduced-motion",
+}
+
+/** Every modal owner needs executable entrance/exit coverage, including non-editor surfaces. */
+export const modalAnimationCoverage: Record<string, string[]> = {
+	"src/components/dialogs/account.tsx": [
+		"editor popups: saving every existing editor preserves its popup and backdrop exit",
+		"editor popups: every create and update dialog exits before removal and reopens",
+	],
+	"src/components/dialogs/budget-creator.tsx": [
+		"editor popups: successful creation preserves every creator exit",
+		"editor popups: every create and update dialog exits before removal and reopens",
+	],
+	"src/components/dialogs/budget-editor.tsx": [
+		"editor popups: saving every existing editor preserves its popup and backdrop exit",
+		"editor popups: every create and update dialog exits before removal and reopens",
+	],
+	"src/components/dialogs/category.tsx": [
+		"editor popups: saving every existing editor preserves its popup and backdrop exit",
+		"editor popups: successful creation preserves every creator exit",
+		"editor popups: every create and update dialog exits before removal and reopens",
+	],
+	"src/components/dialogs/monthly-budget.tsx": [
+		"editor popups: saving every existing editor preserves its popup and backdrop exit",
+		"editor popups: successful creation preserves every creator exit",
+		"editor popups: every create and update dialog exits before removal and reopens",
+	],
+	"src/components/dialogs/pending-statement.tsx": [
+		"editor popups: saving every existing editor preserves its popup and backdrop exit",
+		"editor popups: successful creation preserves every creator exit",
+		"editor popups: every create and update dialog exits before removal and reopens",
+	],
+	"src/components/dialogs/record-creator.tsx": [
+		"editor popups: successful creation preserves every creator exit",
+		"allocator Record creator: Cancel preserves the popup and backdrop through exit",
+		"allocator Record creator: Create Record preserves the popup and backdrop through exit",
+	],
+	"src/components/dialogs/record-editor.tsx": [
+		"editor popups: saving every existing editor preserves its popup and backdrop exit",
+		"editor popups: every create and update dialog exits before removal and reopens",
+	],
+	"src/components/dialogs/statement-rule.tsx": [
+		"editor popups: saving every existing editor preserves its popup and backdrop exit",
+		"editor popups: successful creation preserves every creator exit",
+		"editor popups: every create and update dialog exits before removal and reopens",
+	],
+	"src/components/dialogs/duplicate-review.tsx": [
+		"Duplicate Statement review: exit fades popup and backdrop through intermediate alpha then removal",
+		"Duplicate Statement review: exit fades popup and backdrop through intermediate alpha then removal after Fix",
+	],
+	"src/components/dialogs/statement-replacement-review.tsx": [
+		"Statement replacement review: Cancel animates the exit before removal",
+		"Statement replacement review: Replace pending Statement animates the exit before removal",
+	],
+	"src/components/sheets/record-search.tsx": [
+		"search sheets: every sheet animates in and out on dismissal and completion",
+	],
+	"src/components/sheets/statement-search.tsx": [
+		"search sheets: every sheet animates in and out on dismissal and completion",
+	],
+	"src/components/sheets/pending-statement-confirmation.tsx": [
+		"search sheets: every sheet animates in and out on dismissal and completion",
+	],
+	"src/components/table/amount-filter.tsx": [
+		"mobile modal sheets: sidebar and amount filter animate in and out",
+	],
+	"src/components/ui/sidebar.tsx": [
+		"mobile modal sheets: sidebar and amount filter animate in and out",
+	],
+	"src/components/ui/command.tsx": [
+		"modal primitives: dialog, sheet, command and alert animate in and out",
+	],
+	"src/components/dialogs/drive-overwrite-confirmation.tsx": [
+		"Drive overwrite confirmation: Cancel animates popup and backdrop in and out",
+		"Drive overwrite confirmation: Replace Drive backup animates popup and backdrop in and out",
+	],
 }

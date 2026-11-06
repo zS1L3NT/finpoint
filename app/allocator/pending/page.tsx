@@ -39,8 +39,11 @@ import {
 } from "@/lib/utils"
 import { listAccounts } from "@/logic/accounts"
 import { paginateItems, parsePage, parsePageSize } from "@/logic/pagination"
-import { replacementComparison, replacementReason, sameDirection } from "@/logic/replacements"
-import { listStatements, replacementCandidates } from "@/logic/statements"
+import {
+	listStatements,
+	replacementCandidates,
+	suggestedReplacementCounts,
+} from "@/logic/statements"
 import { pathStatement } from "@/routes"
 import type {
 	Paginated,
@@ -226,17 +229,6 @@ export default function AllocatorPendingPage() {
 	)
 	const pending = pendingQuery ?? []
 	const allPending = useLiveQuery(() => listStatements({ is_pending: "true" }), []) ?? []
-	const imports =
-		useLiveQuery(
-			() =>
-				listStatements({
-					account_id: accountId === "all" ? null : accountId,
-					is_pending: "false",
-					is_unallocated: "true",
-				}),
-			[accountId],
-		) ?? []
-
 	const sortedPending = useMemo(
 		() =>
 			[...pending].sort(
@@ -246,16 +238,20 @@ export default function AllocatorPendingPage() {
 	)
 	const queuePage = parsePage(searchParams.get("page"))
 	const queuePageSize = parsePageSize(searchParams.get("per_page"), 25)
-	const pendingStatements = useMemo<Paginated<PendingReplacementStatement>>(() => {
-		const paginated = paginateItems(sortedPending, queuePage, queuePageSize)
-		return {
-			...paginated,
-			data: paginated.data.map(statement => ({
-				...statement,
-				suggestion_count: countSuggestions(statement, imports),
-			})),
-		}
-	}, [sortedPending, queuePage, queuePageSize, imports])
+	const pendingPage = useMemo(
+		() => paginateItems(sortedPending, queuePage, queuePageSize),
+		[sortedPending, queuePage, queuePageSize],
+	)
+	const pageIds = pendingPage.data.map(statement => statement.id)
+	const suggestionCounts =
+		useLiveQuery(() => suggestedReplacementCounts(pageIds), [pageIds.join(",")]) ?? {}
+	const pendingStatements: Paginated<PendingReplacementStatement> = {
+		...pendingPage,
+		data: pendingPage.data.map(statement => ({
+			...statement,
+			suggestion_count: suggestionCounts[statement.id] ?? 0,
+		})),
+	}
 
 	const selectedPendingStatement = pendingStatementId
 		? (allPending.find(statement => statement.id === pendingStatementId) ?? null)
@@ -476,13 +472,14 @@ export default function AllocatorPendingPage() {
 										Back to pending Statements
 									</Button>
 									<div className="flex flex-col gap-2">
-										<div className="grid gap-3 rounded-xl border border-dashed bg-amber-500/5 p-4">
-											<p className="flex items-center gap-1.5 text-xs font-medium text-amber-700 dark:text-amber-400">
+										<div className="grid gap-3 rounded-xl border bg-muted/20 p-3">
+											<p className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
 												<IconifyIcon
 													icon="lucide:circle-dashed"
 													className="size-3.5"
 												/>
-												Replacing pending Statement
+												<Badge variant="secondary">Pending</Badge>
+												<span>Replacing pending Statement</span>
 											</p>
 											<div className="flex items-start justify-between gap-3">
 												<div className="min-w-0">
@@ -590,7 +587,7 @@ export default function AllocatorPendingPage() {
 									exit={{ opacity: 0, y: -4, transition: TRANSITION.fast }}
 									transition={TRANSITION.base}
 								>
-									<Empty className="min-h-72 border">
+									<Empty className="items-start p-4 text-left">
 										<EmptyHeader>
 											<EmptyMedia variant="icon">
 												<IconifyIcon icon="lucide:replace" />
@@ -622,34 +619,6 @@ export default function AllocatorPendingPage() {
 	)
 }
 
-function countSuggestions(statement: Statement, imports: Statement[]): number {
-	const pendingShape = {
-		id: statement.id,
-		account_id: statement.account.id,
-		amount: statement.amount,
-		datetime: statement.datetime,
-		is_pending: true,
-	}
-	let count = 0
-	for (const imported of imports) {
-		if (imported.account.id !== statement.account.id) continue
-		const candidate = {
-			id: imported.id,
-			account_id: imported.account.id,
-			amount: imported.amount,
-			datetime: imported.datetime,
-			is_pending: false,
-		}
-		if (!sameDirection(candidate, pendingShape)) continue
-		const comparison = replacementComparison(candidate, pendingShape, [])
-		if (Math.abs(comparison.day_difference) > 7) continue
-		if (comparison.amount_difference > 5) continue
-		if (replacementReason(candidate, pendingShape, [], []) !== null) continue
-		count += 1
-	}
-	return count
-}
-
 function PendingCard({
 	statement,
 	selected,
@@ -666,8 +635,8 @@ function PendingCard({
 			onClick={onSelect}
 			aria-pressed={selected}
 			className={cn(
-				"group grid w-full cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 rounded-lg border bg-card px-3 py-2.5 text-left transition-colors hover:bg-muted/50",
-				selected && "border-foreground/40 bg-muted/60 ring-1 ring-foreground/20",
+				"group grid w-full cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 rounded-lg border bg-card px-3 py-2.5 text-left transition-colors duration-150 ease-out hover:bg-muted/50",
+				selected && "border-primary bg-muted ring-1 ring-primary/50",
 			)}
 		>
 			<span className="min-w-0">
@@ -704,7 +673,7 @@ function PendingCard({
 						"font-medium",
 						statement.suggestion_count
 							? "text-emerald-700 dark:text-emerald-400"
-							: "text-amber-700 dark:text-amber-400",
+							: "text-muted-foreground",
 					)}
 				>
 					{statement.suggestion_count
@@ -809,20 +778,16 @@ function CandidateResults({
 									<span className="text-muted-foreground">
 										{formatDatetime(statement.datetime)}
 									</span>
-									<Badge
-										variant="outline"
-										className={cn(
-											statement.is_exact_amount &&
-												"border-emerald-500/40 text-emerald-700 dark:text-emerald-400",
-										)}
+									<span
+										className={cn(statement.is_exact_amount && "text-creative")}
 									>
 										{statement.is_exact_amount
 											? "Same amount"
 											: `${formatCurrency(statement.amount_difference)} difference`}
-									</Badge>
-									<Badge variant="outline">
-										{dateDifferenceLabel(statement.day_difference)}
-									</Badge>
+									</span>
+									<span className="text-muted-foreground">
+										· {dateDifferenceLabel(statement.day_difference)}
+									</span>
 								</div>
 								<p
 									className={cn(
@@ -832,8 +797,7 @@ function CandidateResults({
 											: "text-muted-foreground",
 									)}
 								>
-									{statement.disabled_reason ??
-										`${formatCurrency(statement.remaining_allocable_amount)} stays allocable after replacing.`}
+									{statement.disabled_reason}
 								</p>
 							</div>
 							<div className="flex items-center justify-end gap-1">

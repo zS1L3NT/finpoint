@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
 import { MonthPicker } from "@/components/ui/monthpicker"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import ValueSwap from "@/components/value-swap"
 import { useHistory } from "@/history"
 import { useMonthParams } from "@/hooks/use-month-params"
 import { armMonthTransition } from "@/hooks/use-month-transition"
@@ -103,7 +104,7 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 									{isMonthly ? "Monthly Records" : "Monthly overview"}
 								</p>
 								<h2 className="mt-1 text-xl font-semibold tracking-tight md:text-2xl">
-									{month} {year}
+									<ValueSwap value={`${month} ${year}`} />
 								</h2>
 								<p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>
 							</div>

@@ -1,93 +1,93 @@
-# Graph Report - t3-bf8533fe  (2026-10-30)
+# Graph Report - t3-bf8533fe  (2026-11-06)
 
 ## Corpus Check
-- 516 files · ~741,048 words
+- 524 files · ~773,183 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 28 file(s) not represented in the graph (top: (none) 13, .woff2 6, .css 3)
 
 ## Summary
-- 4158 nodes · 11193 edges · 261 communities (232 shown, 29 thin omitted)
-- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 203 edges (avg confidence: 0.87)
+- 4219 nodes · 11421 edges · 268 communities (239 shown, 29 thin omitted)
+- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 201 edges (avg confidence: 0.87)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `e37daa80`
+- Built from commit: `8a8c1c24`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
-- importer/page.tsx
-- lucide-react
+- sidebar.tsx
+- Button
 - db.ts
 - Tests README
-- workflows.e2e.ts
-- dashboard.ts
-- tts.mjs
-- logic/learning.ts
-- @playwright/test
-- heygen.mjs
-- paginated-data-table.tsx
-- compilerOptions
-- editors.ts
-- narrate.ts
-- publish.ts
-- (month)/page.tsx
-- dependencies
-- sidebar.tsx
-- Validator
 - auto-sync.ts
 - amount-filter.tsx
+- primitives.tsx
+- ValidationError
+- fixtures.ts
+- importer/page.tsx
+- lib/motion.ts
+- compilerOptions
+- editors.ts
+- routes.ts
+- Validator
+- collectTests
+- dependencies
+- data.ts
 - statements.ts
-- cn
+- use-appearance.tsx
+- Validation rule (ValidationError + Validator)
+- manifest.mjs
+- STYLE.md
 - suspicious
 - package.json
 - ledger.e2e.ts
 - correctness
-- sync/page.tsx
+- dashboard.ts
 - core/components.e2e.ts
-- fixtures.ts
-- support/motion.ts
-- Story
 - drive-sync.ts
-- Finpoint illustrated scenes
-- utils.ts
+- @playwright/test
+- core/routes.e2e.ts
+- transcript-cut.mjs
+- src/data/* (persistence, migrations, seeding, backup serialization, Drive storage)
+- test-data.ts
 - components.json
-- lib/motion.ts
 - Lambda rendering on AWS
-- director.ts
+- heygen.mjs
+- useHistory
 - types.d.ts
-- STYLE.md
+- Monthly Budget
 - auth-vault.ts
-- guide.ts
-- record-editor.tsx
-- pending/page.tsx
-- ref_node_fs
-- collectTests
+- history.tsx
+- vite.config.ts
+- icon.tsx
+- tts.mjs
+- navigation.e2e.ts
 - formatter
 - devDependencies
-- spending-calendar.tsx
-- prefs-store.mjs
+- pagination.tsx
+- utils.ts
 - Commands
 - Next.js agent rules block ("This is NOT the Next.js you know")
-- sfx.mjs
-- core/routes.e2e.ts
+- (month)/layout.tsx
+- spending-calendar.tsx
 - biome.json
 - rules
-- public/manifest.json
-- cutlist.mjs
+- manifest.json
+- suggestions.ts
 - scripts
-- manifest.mjs
-- category-filter.tsx
+- bgm.mjs
+- Captions
 - formatter
 - Records
-- records.ts
+- sfx.mjs
 - Domain docs (single-context layout)
 - optionalDependencies
-- budgets/[id]/page.tsx
+- (month)/page.tsx
 - tsconfig.e2e.json
 - style
-- Captions
-- Validation rule (ValidationError + Validator)
+- duplicates/page.tsx
+- cn
 - Finpoint icon concept
 - Finpoint icon with charcoal shadow
 - Issue tracker: Local Markdown
@@ -107,14 +107,19 @@
 - Unrestricted crawler policy
 - Generated demo data
 - Progressive Web Application
+- statement-rules.ts
 - Media treatment recipes
 - audio.mjs
 - 6. Scene instructions and narration anchors
-- primitives.tsx
-- vite.config.ts
-- providers.tsx
+- visual-scenes.ts
+- ref_node_fs
+- trend-chart.tsx
 - Placeholder material
+- ui/field.tsx
 - story.ts
+- logic/learning.ts
+- records.ts
+- telemetry.mjs
 - compose.ts
 - Biennale Yellow — Frame (video / frame layer)
 - BlockFrame — Frame (video / frame layer)
@@ -122,7 +127,6 @@
 - Bold Poster — Frame (video / frame layer)
 - Broadside — Frame (video / frame layer)
 - Capsule — Frame (video / frame layer)
-- Cartesian — Frame (video / frame layer)
 - Cobalt Grid — Frame (video / frame layer)
 - Code editorial — Frame (video / frame layer)
 - Coral — Frame (video / frame layer)
@@ -130,86 +134,91 @@
 - Daisy Days — Frame (video / frame layer)
 - Editorial Forest — Frame (video / frame layer)
 - carve.mjs
-- telemetry.mjs
-- export-import.ts
-- Finpoint: interactive first-use and help plan
-- dither.mjs
-- duplicates.ts
-- lint_source.py
-- src/data/* (persistence, migrations, seeding, backup serialization, Drive storage)
 - record.ts
+- dither.mjs
+- prefs-store.mjs
+- Finpoint: interactive first-use and help plan
+- plugin-installation.md
+- lint_source.py
+- narrate.ts
+- publish.ts
+- locate.mjs
+- director.ts
+- export-import.ts
+- Take
+- Cartesian — Frame (video / frame layer)
 - Text To Speech
+- Resolve — command, flags, reuse, adopt, inventory
 - wait-bgm.mjs
 - Stargazed.tsx
-- bgm.mjs
-- HyperFrames CLI
-- app.tsx
-- Take
+- luxon
+- Finpoint illustrated scenes
 - Media operations: agent guidance
 - StatsScene.tsx
 - tier-3-data-driven/remotion-src/package.json
-- statement-rules.ts
-- src/components/*
-- pagination.tsx
 - tier-1-title-card/remotion-src/package.json
 - tier-2-multi-scene/remotion-src/package.json
-- hashSnapshot
+- google-drive.ts
 - Registry discovery
+- bake-basemap.mjs
 - extract-audio-data.py
 - eval.mjs
+- motion.js
 - Component quality bar
 - ref_remotion
 - compilerOptions
 - compilerOptions
 - compilerOptions
 - Remotion → HyperFrames API Map
-- Skill installation and freshness
+- Storyboard format — `STORYBOARD.md` + parsed manifest
+- gemini-auth_test.py
 - Patterns that work with caveats
+- DataSettingsPage
 - tts.py
 - info, upgrade, compositions, timeline, docs, benchmark, telemetry, asset preprocessing
+- Story
 - Blocks
-- locate.mjs
 - Background Removal
-- gemini-auth_test.py
 - lyria-recipe.py
+- transcribe.mjs
 - Sequencing translation: Sequence, Series, Composition root
 - video/package.json
+- metric.tsx
 - lint, check, snapshot
 - preview, play, render, publish
-- Resolve — command, flags, reuse, adopt, inventory
 - Eval: how to validate a translation end-to-end
 - Media translation: Audio, Video, Img, IFrame, staticFile
-- transcribe.mjs
-- details
+- budgets/page.tsx
 - The look
 - AuthenticationTests
+- details
 - Lottie translation: @remotion/lottie → HF lottie adapter
 - Parameter translation: Zod schemas, defaultProps, calculateMetadata
 - Timing translation: interpolate, spring, easing
 - Finpoint video: compact production handoff
+- monthly-budgets.test.ts
 - hyperframes.json
 - Films from a source: measured facts
 - Explainers, tutorials and "how it works"
 - Steps
 - Steps
-- Frame Treatments
 - media-use usage dashboard
 - MultiScene.tsx
 - 07-custom-hook.tsx
 - Font translation
+- Frame Treatments
 - Captions
 - Motion
 - Sound
 - The spec
+- monthly-budget-usage.tsx
 - Launch, promo and feature films
 - Wiring Blocks
 - Sound effects (SFX)
-- motion.js
 - Mixing in HyperFrames
 - run.sh
 - When to bow out: the runtime interop pattern
-- Button
-- bake-basemap.mjs
+- guide.ts
 - Compare and batch rendering
 - Review
 - Animation runtimes
@@ -219,11 +228,11 @@
 - The demo.html Convention
 - Install Locations
 - Wiring Components
+- HyperFrames registry
 - Ownership matrix, usage stats, telemetry, privacy
 - Setup and providers — install, auth, RAM ladders, forcing a provider
 - Tier 2 — title-image-outro
 - Transitions translation: @remotion/transitions → HF crossfades / shader-transitions
-- UI layer (app pages + components)
 - init, capture, skills
 - Cards over talking-head footage
 - Characters, mascots and story shorts
@@ -257,6 +266,7 @@
 - 08-mixed.tsx
 - clean.tsx
 - LUT library (authoring)
+- visit
 - beats.md
 - conventions.md
 - feedback.md
@@ -267,25 +277,20 @@
 - frame_strip.sh
 - render_diff.sh
 - smoke.sh
-- plugin-installation.md
-- visual-scenes.ts
-- test-data.ts
 
 ## God Nodes (most connected - your core abstractions)
-1. `cn()` - 329 edges
-2. `PrimitivesSection()` - 180 edges
-3. `Button()` - 142 edges
-4. `formatCurrency()` - 79 edges
+1. `cn()` - 335 edges
+2. `PrimitivesSection()` - 181 edges
+3. `Button()` - 141 edges
+4. `formatCurrency()` - 76 edges
 5. `RecordEditorDialog()` - 65 edges
-6. `UiIcon()` - 58 edges
-7. `RecordCreatorDialog()` - 54 edges
+6. `RecordCreatorDialog()` - 60 edges
+7. `UiIcon()` - 58 edges
 8. `ContextHelp()` - 51 edges
-9. `next` - 48 edges
-10. `Card()` - 47 edges
+9. `next` - 49 edges
+10. `round2()` - 47 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `References and decisions` --references--> `StatementCard()`  [INFERRED]
-  video/VISUALS.md → src/components/dialogs/statement-replacement-review.tsx
 - `1 · Cover (identity · move: serif + compass ring · left)` --references--> `label()`  [INFERRED]
   .agents/skills/hyperframes/assets/frame-presets/cartesian/FRAME.md → video/compositions/components/kit.ts
 - `2 · Agenda / Index (index · move: hairline list · left)` --references--> `label()`  [INFERRED]
@@ -294,6 +299,8 @@
   .agents/skills/media-use/references/mixing.md → video/compositions/components/kit.ts
 - `Bounded tuning` --references--> `details()`  [INFERRED]
   .agents/skills/media-use/references/media-treatment-recipes.md → video/scripts/story.ts
+- `10. Implementation boundaries for a later agent` --references--> `Boot()`  [INFERRED]
+  docs/finpoint-interactive-guide-plan.md → app/providers.tsx
 
 ## Import Cycles
 - None detected.
@@ -307,47 +314,51 @@
 - **Test group to gate to merged report flow** — github_workflows_ci_core_group, github_workflows_ci_animations_group, github_workflows_ci_core, github_workflows_ci_animations, github_workflows_ci_blob_report_merge [EXTRACTED 1.00]
 - **Every browser test file joins exactly one CI group, enforced by the ledger** — tests_readme_behaviour_ledger, tests_readme_ci_groups, github_workflows_ci_core_group, github_workflows_ci_animations_group, agents_verification_rules [INFERRED 0.95]
 
-## Communities (261 total, 29 thin omitted)
+## Communities (268 total, 29 thin omitted)
 
-### Community 0 - "importer/page.tsx"
-Cohesion: 0.12
-Nodes (53): HelpPage(), milestones(), minutes, Overview, Progress(), Questions(), VideoCard(), GuideVideoPage() (+45 more)
+### Community 0 - "sidebar.tsx"
+Cohesion: 0.09
+Nodes (42): metadata, RootLayout(), viewport, Providers(), AppearanceOption, APPEARANCES, AppearanceSwitch(), AppSidebar() (+34 more)
 
-### Community 1 - "lucide-react"
-Cohesion: 0.22
-Nodes (11): lucide-react, react-day-picker, buttonVariants, Calendar(), CalendarDayButton(), ButtonVariant, Month, MonthCal() (+3 more)
+### Community 1 - "Button"
+Cohesion: 0.14
+Nodes (65): RecordCreatorHost(), sonner, @tanstack/react-form, AccountDialog(), BudgetCreatorDialog(), BudgetEditorDialog(), CategoryDialog(), CategoryFormValues (+57 more)
 
 ### Community 2 - "db.ts"
-Cohesion: 0.10
-Nodes (29): AccountRow, AllocationRow, AnalyticsMonthRow, BudgetRecordRow, BudgetRow, CategoryRow, DB_NAME, DB_VERSION (+21 more)
+Cohesion: 0.07
+Nodes (24): dexie, fake-indexeddb, xlsx, AccountRow, AllocationRow, asPending(), BudgetRecordRow, BudgetRow (+16 more)
 
 ### Community 3 - "Tests README"
 Cohesion: 0.06
 Nodes (41): Build harness step (vite build tests/harness), Playwright browser cache keyed on bun.lock, blob report merge, Committed graph artifacts (graph.json, GRAPH_REPORT.md, manifest.json, .graphify_labels.json), Graph health warnings and refresh failure reporting, graphify-out/graph.json, graphify skill (--update), graphify update . (+33 more)
 
-### Community 5 - "dashboard.ts"
-Cohesion: 0.13
-Nodes (36): contribution(), summarize(), avg(), BREAKDOWN_MONTHS, buildCashflowHistory(), buildCategories(), buildComparison(), buildMonthlyBudgets() (+28 more)
+### Community 4 - "auto-sync.ts"
+Cohesion: 0.11
+Nodes (27): Boot(), 10. Implementation boundaries for a later agent, useSyncStatus(), useSyncToasts(), emit(), eventListeners, finishCycle(), getSyncSnapshot() (+19 more)
 
-### Community 6 - "tts.mjs"
+### Community 5 - "amount-filter.tsx"
+Cohesion: 0.19
+Nodes (20): AmountFilter(), AmountRange, COMPARISONS, describe(), Draft, readRange(), upperBound(), Sheet() (+12 more)
+
+### Community 6 - "primitives.tsx"
 Cohesion: 0.08
-Nodes (33): geminiAuth(), geminiConfigured(), GEMINI_TTS_MODEL, GEMINI_TTS_MODELS, pcmToWav(), synthesizeGemini(), heygenMessage(), defaultProbe() (+25 more)
+Nodes (64): class-variance-authority, radix-ui, DriveOverwriteConfirmation(), AppHeader(), AlertAction(), AlertDialog(), AlertDialogAction(), AlertDialogCancel() (+56 more)
 
-### Community 7 - "logic/learning.ts"
-Cohesion: 0.21
-Nodes (18): GuideCheckActions(), readLearningValue(), readLearningWorkspace(), updateLearningValue(), confirmBackupLocated(), confirmMonthReviewed(), emptyState(), getEmptyGuideContext() (+10 more)
+### Community 7 - "ValidationError"
+Cohesion: 0.26
+Nodes (20): ensureAccount(), combine(), dbsDescriptionKey(), debitCreditAmount(), descriptionKey(), importDbs(), importFiles(), importOcbc() (+12 more)
 
-### Community 8 - "@playwright/test"
-Cohesion: 0.15
-Nodes (13): @playwright/test, cardTitles, Child, october, september, card(), chartTooltip, overview (+5 more)
+### Community 8 - "fixtures.ts"
+Cohesion: 0.14
+Nodes (15): cardTitles, card(), chartTooltip, overview, overviewCharts, themedRgb(), assertSeeded(), checkSeededMarker() (+7 more)
 
-### Community 9 - "heygen.mjs"
-Cohesion: 0.08
-Nodes (30): Cloned voices — `scripts/heygen-voice.mjs`, argv, dur, output, positional, clone(), list(), main() (+22 more)
+### Community 9 - "importer/page.tsx"
+Cohesion: 0.12
+Nodes (55): HelpPage(), milestones(), minutes, Overview, Progress(), Questions(), VideoCard(), GuideVideoPage() (+47 more)
 
-### Community 10 - "paginated-data-table.tsx"
-Cohesion: 0.25
-Nodes (23): @tanstack/react-table, DataTable(), PaginatedDataTable(), GroupHeaderRow(), groupStarts(), GroupTotal(), isInteractiveTarget(), MOBILE_LIST_CLASS (+15 more)
+### Community 10 - "lib/motion.ts"
+Cohesion: 0.19
+Nodes (29): @tanstack/react-table, DataTable(), PaginatedDataTable(), PaginationHeader(), GroupHeaderRow(), groupStarts(), GroupTotal(), isInteractiveTarget() (+21 more)
 
 ### Community 11 - "compilerOptions"
 Cohesion: 0.06
@@ -355,47 +366,47 @@ Nodes (33): compilerOptions, allowJs, allowSyntheticDefaultImports, allowUnusedL
 
 ### Community 12 - "editors.ts"
 Cohesion: 0.13
-Nodes (21): editors, editors, longName, expectHeldRead(), expectRetainedRows(), expectSilentSheet(), expectVisibleBackdrop(), IDS (+13 more)
+Nodes (22): editors, editors, longName, expectHeldRead(), expectRetainedRows(), expectSilentSheet(), expectVisibleBackdrop(), IDS (+14 more)
 
-### Community 13 - "narrate.ts"
-Cohesion: 0.15
-Nodes (20): stepOf(), audioDir, Cached, cacheFile, chapters, cues, endsSentence(), ones (+12 more)
-
-### Community 14 - "publish.ts"
+### Community 13 - "routes.ts"
 Cohesion: 0.12
-Nodes (17): skip, steps, video, Chapter, out, project, run(), Segment (+9 more)
+Nodes (35): AccountCard(), AccountRow, AccountsPage(), NotFound(), nextConfig, next, EmptyGuide(), Beat() (+27 more)
 
-### Community 15 - "(month)/page.tsx"
-Cohesion: 0.06
-Nodes (68): CategoriesPage(), CategoryDialogState, CategoryTile(), Comparison, comparisonRateText(), comparisonText(), ComparisonValue, DashboardData (+60 more)
+### Community 14 - "Validator"
+Cohesion: 0.25
+Nodes (18): updateAccount(), createBudget(), validateBudget(), cleanInput(), dismissDuplicatePair(), restoreDuplicatePair(), createMonthlyBudget(), setMonthlyBudgetAmount() (+10 more)
+
+### Community 15 - "collectTests"
+Cohesion: 0.35
+Nodes (13): collectTests(), conditionBranch(), detailsTags(), disabled(), mentionsMotion(), record(), splitTestCallee(), tagValues() (+5 more)
 
 ### Community 16 - "dependencies"
 Cohesion: 0.07
 Nodes (30): dependencies, @base-ui/react, class-variance-authority, clsx, cmdk, dexie, dexie-react-hooks, @fontsource-variable/inter (+22 more)
 
-### Community 17 - "sidebar.tsx"
+### Community 17 - "data.ts"
+Cohesion: 0.12
+Nodes (17): DBS_VALID, buildDense(), buildEmpty(), buildPopulated(), cycle(), DEFAULT_SETTINGS, emptyTables(), getScenario() (+9 more)
+
+### Community 18 - "statements.ts"
 Cohesion: 0.11
-Nodes (33): AppearanceOption, APPEARANCES, AppearanceSwitch(), AppSidebar(), SyncDot(), SYSTEM_APPEARANCE, useSyncIndicator(), SidebarContent() (+25 more)
+Nodes (37): allocationOutcome(), descriptionAnchors(), descriptionIdentity(), DuplicateGroup, duplicateGroups(), DuplicateStatement, duplicateStatementIds(), eligible() (+29 more)
 
-### Community 18 - "Validator"
-Cohesion: 0.24
-Nodes (19): updateAccount(), validateBudget(), cleanInput(), dismissDuplicatePair(), restoreDuplicatePair(), createMonthlyBudget(), MONTHLY_BUDGET_GROUPS, PACE_KINDS (+11 more)
+### Community 19 - "use-appearance.tsx"
+Cohesion: 0.26
+Nodes (14): Appearance, applyAppearance(), getStoredAppearance(), handleSystemThemeChange(), initializeAppearance(), isDarkMode(), listeners, mediaQuery() (+6 more)
 
-### Community 19 - "auto-sync.ts"
-Cohesion: 0.10
-Nodes (27): Boot(), 10. Implementation boundaries for a later agent, AuthNeededError, useSyncStatus(), useSyncToasts(), emit(), eventListeners, finishCycle() (+19 more)
+### Community 20 - "Validation rule (ValidationError + Validator)"
+Cohesion: 0.50
+Nodes (4): Old Laravel Api/*Controller mapping, Laravel-shaped { field: string[] } error maps, ValidationError, Validator
 
-### Community 20 - "amount-filter.tsx"
+### Community 21 - "manifest.mjs"
+Cohesion: 0.08
+Nodes (54): recordInManifest(), SFX_SOURCES, noBgm, voicePaths(), writtenAssets(), formatDims(), formatDur(), generateIndexContent() (+46 more)
+
+### Community 22 - "STYLE.md"
 Cohesion: 0.17
-Nodes (23): StatementSearchSheet(), AmountFilter(), AmountRange, COMPARISONS, describe(), Draft, readRange(), upperBound() (+15 more)
-
-### Community 21 - "statements.ts"
-Cohesion: 0.14
-Nodes (26): countSuggestions(), asPending(), AnalyticsRecord, AnalyticsSummary, duplicateStatementIds(), dayDifference(), ensureCanReplace(), maskDescription() (+18 more)
-
-### Community 22 - "cn"
-Cohesion: 0.14
-Nodes (25): class-variance-authority, radix-ui, AppHeader(), ButtonGroup(), ButtonGroupSeparator(), ButtonGroupText(), buttonGroupVariants, FieldSeparator() (+17 more)
+Nodes (13): APIs, Arguments, And Props, Code Style, Consistency, Copy, Core, Earning Its Place, Finpoint Style Additions, Grouping And Order (+5 more)
 
 ### Community 23 - "suspicious"
 Cohesion: 0.07
@@ -407,91 +418,87 @@ Nodes (30): react, react-dom, private, $schema, type, babel-plugin-react-compile
 
 ### Community 25 - "ledger.e2e.ts"
 Cohesion: 0.11
-Nodes (24): project(), typescript, behaviourCoverage, componentInventory, facetNotApplicable, InventoryEntry, notApplicable, openFacets (+16 more)
+Nodes (25): project(), typescript, behaviourCoverage, componentInventory, facetNotApplicable, InventoryEntry, modalAnimationCoverage, notApplicable (+17 more)
 
 ### Community 26 - "correctness"
 Cohesion: 0.08
 Nodes (26): noConstantCondition, noConstAssign, noEmptyCharacterClassInRegex, noEmptyPattern, noGlobalObjectCalls, noInvalidBuiltinInstantiation, noInvalidConstructorSuper, noNonoctalDecimalEscape (+18 more)
 
-### Community 27 - "sync/page.tsx"
-Cohesion: 0.19
-Nodes (21): COUNT_ROWS, DataSettingsPage(), StateRow(), STATUS_TONES, StatusTone, WorkspaceRow(), AlertDialog(), AlertDialogAction() (+13 more)
+### Community 27 - "dashboard.ts"
+Cohesion: 0.12
+Nodes (37): AnalyticsMonthRow, db, AnalyticsRecord, AnalyticsSummary, contribution(), summarize(), avg(), buildCashflowHistory() (+29 more)
 
 ### Community 28 - "core/components.e2e.ts"
-Cohesion: 0.14
-Nodes (9): desktopOnly, bounds(), contained(), expectWheelScrollsPageWhileOpen(), expectDropdownPreservesScroll(), scrollWithInput(), settledOverlayAlpha(), APP_URL (+1 more)
+Cohesion: 0.23
+Nodes (6): bounds(), contained(), expectWheelScrollsPageWhileOpen(), expectDropdownPreservesScroll(), scrollWithInput(), settledOverlayAlpha()
 
-### Community 29 - "fixtures.ts"
-Cohesion: 0.15
-Nodes (12): expectBackAboveHeadingFromKeyboardNavigation(), keyboardBack(), getScenario(), assertSeeded(), checkSeededMarker(), countStore(), seedInBrowser(), seedWorkspace() (+4 more)
+### Community 29 - "drive-sync.ts"
+Cohesion: 0.29
+Nodes (20): exportData(), downloadBackupFile(), driveFetch(), findBackupFile(), getClockSkewMs(), getFileMeta(), isDriveConfigured(), uploadBackupFile() (+12 more)
 
-### Community 30 - "support/motion.ts"
-Cohesion: 0.17
-Nodes (19): denseCardConsumers, denseRowConsumers, expectConsumerEntrance(), populatedConsumers, pickOption(), attachSamplingFailure(), expectPopupEntrance(), expectReducedRowMovement() (+11 more)
-
-### Community 31 - "Story"
-Cohesion: 0.06
-Nodes (31): 1. The one thing, 2. Three storylines, then one, 3. The hook, 4. Beats, 5. Worlds, 6. Copy and voice, 7. The brand, 8. Tells of a generated film (+23 more)
-
-### Community 32 - "drive-sync.ts"
-Cohesion: 0.16
-Nodes (33): importData(), parseImportFile(), cacheToken(), CodeResponse, disconnectDrive(), downloadBackupFile(), driveFetch(), DriveFileMeta (+25 more)
-
-### Community 33 - "Finpoint illustrated scenes"
-Cohesion: 0.12
-Nodes (15): Author a scene, Author a take, Finpoint beginner video, How it fits together, Narration setup, Rebuild everything, Snapshot evidence, Verification and limits (+7 more)
-
-### Community 34 - "utils.ts"
+### Community 30 - "@playwright/test"
 Cohesion: 0.10
-Nodes (37): AccountCard(), AccountRow, AccountsPage(), BUDGET_STATES, BudgetCard(), BudgetsPage(), BudgetState, formatBudgetDateWindow() (+29 more)
+Nodes (29): desktopOnly, @playwright/test, denseCardConsumers, denseRowConsumers, expectConsumerEntrance(), populatedConsumers, Child, october (+21 more)
+
+### Community 31 - "core/routes.e2e.ts"
+Cohesion: 0.18
+Nodes (8): containedFooter(), PREMATURE, routeReady, titles, expectPointerCursor(), fits(), patchRows(), statementRow()
+
+### Community 32 - "transcript-cut.mjs"
+Cohesion: 0.09
+Nodes (41): escapeRegExp(), readTargetAttrs(), run(), { values: args }, bareToken(), clampRanges(), cleanRange(), compileCutList() (+33 more)
+
+### Community 33 - "src/data/* (persistence, migrations, seeding, backup serialization, Drive storage)"
+Cohesion: 0.15
+Nodes (17): app/**/page.tsx, Background Drive sync, src/data/* (persistence, migrations, seeding, backup serialization, Drive storage), IndexedDB (Dexie), Interactive routes are "use client" (search params via next/navigation), src/logic/* (domain reads and operations), (month) route-group shell (Overview + Monthly Records), Pages take no props (+9 more)
+
+### Community 34 - "test-data.ts"
+Cohesion: 0.15
+Nodes (19): DEFAULT_CATEGORIES, DEFAULT_MONTHLY_BUDGETS, EXPORT_VERSION, FinpointExport, SEED_HASH_KEY, BANK_BLURB, between(), CATEGORIES (+11 more)
 
 ### Community 35 - "components.json"
 Cohesion: 0.09
 Nodes (21): aliases, components, hooks, lib, ui, utils, iconLibrary, menuAccent (+13 more)
 
-### Community 36 - "lib/motion.ts"
-Cohesion: 0.14
-Nodes (21): framer-motion, AllocateBar(), Sparkline(), DetailSummaryItem(), Delta, Metric(), RecordAmount(), ValueSwap() (+13 more)
-
-### Community 37 - "Lambda rendering on AWS"
+### Community 36 - "Lambda rendering on AWS"
 Cohesion: 0.05
 Nodes (37): Archive size and `.hyperframesignore`, Authentication, cloud — HeyGen-hosted rendering (zero-infra), Fire-and-forget and webhooks, Managing renders, Render options, Safe retries, Templates and variables (+29 more)
 
-### Community 38 - "director.ts"
-Cohesion: 0.15
-Nodes (19): 5. Customize, Chapter, cues, ease(), fps, glide(), mouse, pick() (+11 more)
+### Community 37 - "heygen.mjs"
+Cohesion: 0.09
+Nodes (28): argv, dur, output, positional, clone(), list(), main(), MEDIA_TYPES (+20 more)
+
+### Community 38 - "useHistory"
+Cohesion: 0.19
+Nodes (18): aggregateSeries(), CategoryHistoryChart(), ChartMonth, ChartSeries, MonthBreakdown(), MonthTick(), monthTotal(), prepareMonths() (+10 more)
 
 ### Community 39 - "types.d.ts"
 Cohesion: 0.10
-Nodes (19): Account, Allocation, AnalyticsSummary, AnalyticsTreatment, Appearance, Budget, Category, CategoryWithChildren (+11 more)
+Nodes (20): Account, Allocation, AnalyticsSummary, AnalyticsTreatment, Appearance, Budget, Category, CategoryWithChildren (+12 more)
 
-### Community 40 - "STYLE.md"
-Cohesion: 0.09
-Nodes (28): CONTEXT.md (domain vocabulary), Account, Allocation, Budget, Category, Duplicate Statement, Finpoint Domain Glossary, Monthly Budget (+20 more)
+### Community 40 - "Monthly Budget"
+Cohesion: 0.18
+Nodes (16): CONTEXT.md (domain vocabulary), Account, Allocation, Budget, Category, Duplicate Statement, Finpoint Domain Glossary, Monthly Budget (+8 more)
 
 ### Community 41 - "auth-vault.ts"
 Cohesion: 0.29
 Nodes (14): POST(), POST(), POST(), jose, AUTH_COOKIE_NAME, authCookie(), authCookieConfig(), clientIp() (+6 more)
 
-### Community 42 - "guide.ts"
-Cohesion: 0.29
-Nodes (6): GuideBeat, GuideChapter, guideChapters, GuideDestination, GuideLevel, guideLevels
+### Community 42 - "history.tsx"
+Cohesion: 0.39
+Nodes (7): getStoredHistory(), getValidHistory(), HistoryContext, HistoryItem, HistoryProvider(), normaliseUrl(), withoutTrailingSelf()
 
-### Community 43 - "record-editor.tsx"
-Cohesion: 0.05
-Nodes (138): CandidateResults(), SECTIONS, sonner, @tanstack/react-form, AccountDialog(), BudgetCreatorDialog(), BudgetEditorDialog(), CategoryDialog() (+130 more)
+### Community 43 - "vite.config.ts"
+Cohesion: 0.40
+Nodes (4): vite, @vitejs/plugin-react, harnessDir, repoRoot
 
-### Community 44 - "pending/page.tsx"
-Cohesion: 0.12
-Nodes (60): AccountPage(), CARD_MOTION, DuplicateGroupCard(), FixDuplicatesPage(), GroupHeader(), highlightDifferences(), VIEWS, AllocatorPage() (+52 more)
+### Community 44 - "icon.tsx"
+Cohesion: 0.10
+Nodes (31): CategoriesPage(), CategoryDialogState, CategoryTile(), SECTIONS, Rule, RuleSentence(), StatementRulesPage(), framer-motion (+23 more)
 
-### Community 45 - "ref_node_fs"
-Cohesion: 0.05
-Nodes (33): browser, Configure FFmpeg without a package manager, doctor, doctor, browser, isMainModule(), CLI_MEDIA_USE, SKILLS, skillScripts() (+25 more)
-
-### Community 46 - "collectTests"
-Cohesion: 0.28
-Nodes (16): collectTests(), conditionBranch(), detailsTags(), disabled(), mentionsMotion(), record(), splitTestCallee(), tagValues() (+8 more)
+### Community 45 - "tts.mjs"
+Cohesion: 0.10
+Nodes (26): GEMINI_TTS_MODEL, GEMINI_TTS_MODELS, pcmToWav(), synthesizeGemini(), elevenlabsAvailable(), ffmpegDurationFallback(), ffprobeDuration(), heygenAvailable() (+18 more)
 
 ### Community 47 - "formatter"
 Cohesion: 0.15
@@ -501,29 +508,29 @@ Nodes (13): arrowParentheses, bracketSameLine, bracketSpacing, jsxQuoteStyle, qu
 Cohesion: 0.15
 Nodes (13): devDependencies, babel-plugin-react-compiler, @biomejs/biome, fake-indexeddb, @playwright/test, @tailwindcss/postcss, @types/luxon, @types/node (+5 more)
 
-### Community 49 - "spending-calendar.tsx"
-Cohesion: 0.29
-Nodes (9): compact(), heat(), INK, LEVELS, quantile(), rampCap(), SpendingCalendar(), STRENGTH (+1 more)
+### Community 49 - "pagination.tsx"
+Cohesion: 0.38
+Nodes (11): pageHref(), pageWindow(), PaginationFooter(), Pagination(), PaginationContent(), PaginationEllipsis(), PaginationItem(), PaginationLink() (+3 more)
 
-### Community 50 - "prefs-store.mjs"
-Cohesion: 0.19
-Nodes (18): globalMediaDir(), mediaHome(), dedupe(), emptyFile(), isRecord(), mergedPreferences(), PREFERENCE_KEYS, preferenceKeyFor() (+10 more)
+### Community 50 - "utils.ts"
+Cohesion: 0.10
+Nodes (46): BudgetPage(), getBudgetAnalytics(), getCategoryData(), Legend(), MonthlyRecordsPage(), AllocateBar(), BudgetProgressChart(), BudgetProgressPoint (+38 more)
 
 ### Community 51 - "Commands"
-Cohesion: 0.38
-Nodes (7): Biome (biome check --write), bun install, bun lint (write-mode), bun lint:check, bun run build, bun types:check, Commands
+Cohesion: 0.20
+Nodes (11): Agent Behavior, Biome (biome check --write), bun install, bun lint (write-mode), bun lint:check, bun run build, bun types:check, Commands (+3 more)
 
 ### Community 52 - "Next.js agent rules block ("This is NOT the Next.js you know")"
-Cohesion: 0.25
-Nodes (6): app/api/auth/* Route Handlers, node_modules/next/dist/server/lib/generate-agent-files.js, Google OAuth broker (exchange/token/logout), Next.js App Router app (mostly client-side), node_modules/next/dist/docs/, npm run dev (port 5173)
-
-### Community 53 - "sfx.mjs"
-Cohesion: 0.12
-Nodes (25): downloadTo(), agentWritePath(), httpsUrl(), oneLine(), OPENVERSE_SFX_LICENSES, OpenverseUnavailableError, penalty(), pickOpenverseSfx() (+17 more)
-
-### Community 54 - "core/routes.e2e.ts"
 Cohesion: 0.18
-Nodes (8): containedFooter(), PREMATURE, routeReady, titles, expectPointerCursor(), fits(), patchRows(), statementRow()
+Nodes (9): app/api/auth/* Route Handlers, bun test, node_modules/next/dist/server/lib/generate-agent-files.js, Google OAuth broker (exchange/token/logout), Domain and importer tests (Dexie with in-memory IndexedDB), Next.js App Router app (mostly client-side), node_modules/next/dist/docs/, npm run dev (port 5173) (+1 more)
+
+### Community 53 - "(month)/layout.tsx"
+Cohesion: 0.08
+Nodes (40): MonthLayout(), @base-ui/react, lucide-react, react-day-picker, DateField(), Props, DateRangeValue, formatRange() (+32 more)
+
+### Community 54 - "spending-calendar.tsx"
+Cohesion: 0.29
+Nodes (9): compact(), heat(), INK, LEVELS, quantile(), rampCap(), SpendingCalendar(), STRENGTH (+1 more)
 
 ### Community 55 - "biome.json"
 Cohesion: 0.18
@@ -533,25 +540,25 @@ Nodes (10): source, assist, actions, files, includes, linter, enabled, overrides
 Cohesion: 0.18
 Nodes (11): noAdjacentSpacesInRegex, noBannedTypes, noExtraBooleanCast, noUselessCatch, noUselessThisAlias, noUselessTypeConstraint, rules, noFloatingPromises (+3 more)
 
-### Community 57 - "public/manifest.json"
+### Community 57 - "manifest.json"
 Cohesion: 0.20
 Nodes (9): background_color, description, display, icons, name, scope, short_name, start_url (+1 more)
 
-### Community 58 - "cutlist.mjs"
-Cohesion: 0.14
-Nodes (28): escapeRegExp(), readTargetAttrs(), run(), { values: args }, bareToken(), clampRanges(), cleanRange(), compileCutList() (+20 more)
+### Community 58 - "suggestions.ts"
+Cohesion: 0.11
+Nodes (36): allocatedStatements(), asOf(), byDate(), CHIP_LIMIT, CHOICES, Clue, createModel(), DEFAULT_WEIGHTS (+28 more)
 
 ### Community 59 - "scripts"
 Cohesion: 0.17
 Nodes (12): scripts, build, dev, lint, lint:check, start, test:e2e, types:check (+4 more)
 
-### Community 60 - "manifest.mjs"
-Cohesion: 0.08
-Nodes (54): recordInManifest(), SFX_SOURCES, noBgm, voicePaths(), writtenAssets(), formatDims(), formatDur(), generateIndexContent() (+46 more)
+### Community 60 - "bgm.mjs"
+Cohesion: 0.10
+Nodes (25): Background music (BGM), Failure modes, HeyGen retrieval (default), Local generation (fallback) — Lyria → MusicGen, Lyria knobs (direct recipe use), Mood inference (the generate prompt), BGM_PY_DEPS, generateBgmDetached() (+17 more)
 
-### Community 61 - "category-filter.tsx"
-Cohesion: 0.19
-Nodes (19): DateField(), Props, CategoryFilter(), CategoryFilterItem(), Command(), CommandEmpty(), CommandGroup(), CommandInput() (+11 more)
+### Community 61 - "Captions"
+Cohesion: 0.06
+Nodes (30): Caption Exit Guarantee, Captions, Constraints, Further References, Per-Word Styling, Positioning, Pre-Built Caption Components, Script-to-Style Mapping (+22 more)
 
 ### Community 62 - "formatter"
 Cohesion: 0.25
@@ -561,9 +568,9 @@ Nodes (8): formatter, attributePosition, enabled, formatWithErrors, indentStyle,
 Cohesion: 0.32
 Nodes (8): Allocator, Budgets, Categories, Dashboard, Statement-allocation-record model, Monthly Budgets, Records, Statement importer
 
-### Community 64 - "records.ts"
-Cohesion: 0.15
-Nodes (17): db, getMonthlyRecords(), MonthlyFilters, expandCategoryIdsForMonthly(), analyticsValues(), budgetCovers(), ConflictError, createRecord() (+9 more)
+### Community 64 - "sfx.mjs"
+Cohesion: 0.12
+Nodes (25): downloadTo(), agentWritePath(), httpsUrl(), oneLine(), OPENVERSE_SFX_LICENSES, OpenverseUnavailableError, penalty(), pickOpenverseSfx() (+17 more)
 
 ### Community 65 - "Domain docs (single-context layout)"
 Cohesion: 0.33
@@ -573,9 +580,9 @@ Nodes (7): Agent skills, CONTEXT.md, Domain docs (single-context layout), Domain
 Cohesion: 0.29
 Nodes (7): optionalDependencies, lightningcss-linux-x64-gnu, lightningcss-win32-x64-msvc, @rollup/rollup-linux-x64-gnu, @rollup/rollup-win32-x64-msvc, @tailwindcss/oxide-linux-x64-gnu, @tailwindcss/oxide-win32-x64-msvc
 
-### Community 67 - "budgets/[id]/page.tsx"
-Cohesion: 0.11
-Nodes (37): BudgetPage(), getBudgetAnalytics(), getCategoryData(), Legend(), MonthlyRecordsPage(), BudgetProgressChart(), BudgetProgressPoint, buildSeries() (+29 more)
+### Community 67 - "(month)/page.tsx"
+Cohesion: 0.13
+Nodes (25): Comparison, comparisonRateText(), comparisonText(), ComparisonValue, DashboardData, DashboardMonthlyBudget, DashboardPage(), DashboardView (+17 more)
 
 ### Community 68 - "tsconfig.e2e.json"
 Cohesion: 0.29
@@ -585,13 +592,13 @@ Nodes (6): ./tsconfig.json, compilerOptions, incremental, exclude, extends, incl
 Cohesion: 0.33
 Nodes (6): style, noNamespace, noNonNullAssertion, useArrayLiterals, useAsConstAssertion, useBlockStatements
 
-### Community 70 - "Captions"
-Cohesion: 0.06
-Nodes (30): Caption Exit Guarantee, Captions, Constraints, Further References, Per-Word Styling, Positioning, Pre-Built Caption Components, Script-to-Style Mapping (+22 more)
+### Community 70 - "duplicates/page.tsx"
+Cohesion: 0.11
+Nodes (70): AccountPage(), CARD_MOTION, DuplicateGroupCard(), FixDuplicatesPage(), GroupHeader(), highlightDifferences(), VIEWS, AllocatorPage() (+62 more)
 
-### Community 71 - "Validation rule (ValidationError + Validator)"
-Cohesion: 0.50
-Nodes (4): Old Laravel Api/*Controller mapping, Laravel-shaped { field: string[] } error maps, ValidationError, Validator
+### Community 71 - "cn"
+Cohesion: 0.14
+Nodes (32): CategoryFilter(), CategoryFilterItem(), ComboboxChip(), ComboboxChips(), ComboboxChipsInput(), ComboboxClear(), ComboboxCollection(), ComboboxGroup() (+24 more)
 
 ### Community 72 - "Finpoint icon concept"
 Cohesion: 0.40
@@ -645,617 +652,645 @@ Nodes (3): Circular dot beside F, Rounded F letterform, F monogram icon
 Cohesion: 0.67
 Nodes (3): Circular dot beside F, Rounded F letterform, F monogram icon
 
-### Community 94 - "Media treatment recipes"
+### Community 94 - "statement-rules.ts"
+Cohesion: 0.24
+Nodes (12): byCreation(), conditionPattern(), deleteStatementRule(), listStatementRules(), matchesStatement(), NAME_ORDER, previewStatementRule(), recommendationAutofill() (+4 more)
+
+### Community 95 - "Media treatment recipes"
 Cohesion: 0.06
 Nodes (33): 8mm Home Movie, Base payload, Base payload, Bounded tuning, Bounded tuning, Cached Error Diffusion, Creator Camcorder, Crosshatched Sketch (+25 more)
 
-### Community 95 - "audio.mjs"
+### Community 96 - "audio.mjs"
 Cohesion: 0.07
 Nodes (24): anomalies, argv, audioMeta, bgmFields, bgmModeOverride, HERE, hyperframesDir, langOverride (+16 more)
 
-### Community 96 - "6. Scene instructions and narration anchors"
+### Community 97 - "6. Scene instructions and narration anchors"
 Cohesion: 0.06
 Nodes (31): 10. Visual and editing direction for the next model, 11. Efficient production workflow, 12. Source map and pre-recording verification, 1. The recommendation, 2. The problem, solution, and concrete fixes, 3. Teaching rules, 4. Vocabulary, introduced only when needed, 5. Master chapter flow (+23 more)
 
-### Community 97 - "primitives.tsx"
-Cohesion: 0.09
-Nodes (53): @base-ui/react, ComboboxField(), Props, AlertAction(), AlertDialogTrigger(), ComboboxChip(), ComboboxChips(), ComboboxChipsInput() (+45 more)
-
-### Community 98 - "vite.config.ts"
-Cohesion: 0.40
-Nodes (4): vite, @vitejs/plugin-react, harnessDir, repoRoot
-
-### Community 99 - "providers.tsx"
-Cohesion: 0.12
-Nodes (28): metadata, RootLayout(), viewport, Providers(), ShellHeader(), SidebarInset(), SidebarProvider(), Toaster() (+20 more)
-
-### Community 100 - "Placeholder material"
-Cohesion: 0.07
-Nodes (26): All types, Caption blocks, Contributing a Block or Component to the Registry, Quality Gate, Step 1: Clarify, Step 2: Scaffold, Step 3: Build, Step 4: Validate (+18 more)
-
-### Community 101 - "story.ts"
-Cohesion: 0.09
-Nodes (22): burger, closed(), concert, creator(), dialog(), explain(), exportFile(), files (+14 more)
-
-### Community 102 - "compose.ts"
-Cohesion: 0.09
-Nodes (21): levelColor(), CueRef, scenes, SceneUse, audio, bare(), captionGroups, captionHosts (+13 more)
-
-### Community 103 - "Biennale Yellow — Frame (video / frame layer)"
-Cohesion: 0.08
-Nodes (24): 1 · Cover (identity · move: display + sun bloom · left), 2 · Chapter Divider (section · move: jumbo numeral · vertical rail), 3 · Ledger (catalog · move: hairline tabular rows · the dense frame), 4 · Manifesto / Quote (quote · move: italic serif · centered bloom), 5 · Poster Panel (statement · move: yellow panel · split), 6 · Strand List (programme · move: numbered editorial rows · left), Approved Entities, Aspect-Ratio Behavior (+16 more)
-
-### Community 104 - "BlockFrame — Frame (video / frame layer)"
-Cohesion: 0.08
-Nodes (24): 1 · Cover (identity · move: decorations puncture · left), 2 · Feature Cards (catalog · move: 3-up bordered grid · blue ground), 3 · Stat Grid (data · move: tilted stat cards · green ground), 4 · Closing Plate (closer · move: inverted black · centered), 5 · Quote (quote · move: bordered quote frame · pink ground), 6 · Timeline (process · move: stepped bordered cards · offwhite), Approved Entities, Aspect-Ratio Behavior (+16 more)
-
-### Community 105 - "Blue Professional — Frame (video / frame layer)"
-Cohesion: 0.08
-Nodes (24): 1 · Cover (identity · move: diagonal accent · left), 2 · Dashboard (data · move: 3-up metric grid · the dense frame), 3 · Bar Ranking (data · move: cobalt bars · left), 4 · Pull Quote (quote · move: concentric rings · centered), 5 · Split + Highlight (content · move: asymmetric split · left), 6 · Closing / CTA (closer · move: centered rings + CTA), Approved Entities, Aspect-Ratio Behavior (+16 more)
-
-### Community 106 - "Bold Poster — Frame (video / frame layer)"
-Cohesion: 0.08
-Nodes (24): 1 · Hero Stack (identity · move: 3-line tilted stack · left), 2 · Hero Stat (statement · move: poster numeral · red panel · centered), 3 · Financial Grid (data · move: double-border matrix · the dense frame), 4 · Pull Quote (quote · move: tilted/stacked display · red panel · left), 5 · Editorial Cards (content · move: red leftbar cards · left), 6 · Closing Statement (closer · move: tilted close-big · centered/left), Approved Entities, Aspect-Ratio Behavior (+16 more)
-
-### Community 107 - "Broadside — Frame (video / frame layer)"
-Cohesion: 0.08
-Nodes (24): 1 · Cover (identity · move: massive type · ORANGE register · left), 2 · Statement (declarative · move: type IS composition · DARK register · left), 3 · Stat Grid (data · move: top-border cards · DARK · the dense frame), 4 · Fadelist (narrative · move: opacity stack · DARK), 5 · Pull Quote (quote · move: oversized mark · DARK · left), 6 · Compare (argument · move: split + orange payoff · DARK→ORANGE), Approved Entities, Aspect-Ratio Behavior (+16 more)
-
-### Community 108 - "Capsule — Frame (video / frame layer)"
-Cohesion: 0.08
-Nodes (24): 1 · Cover (identity · move: title pill + display · centered), 2 · Pillar Cards (catalog · move: 3-up grid · left — the dense frame), 3 · Stat Grid (data · move: stat pills · centered head), 4 · Pull Quote (quote · move: highlight pill · left), 5 · Orbit (concept · move: gravitational pills · centered), 6 · Closing Plate (closer · move: title pill + display · centered), Approved Entities, Aspect-Ratio Behavior (+16 more)
-
-### Community 109 - "Cartesian — Frame (video / frame layer)"
-Cohesion: 0.11
-Nodes (17): Approved Entities, Aspect-Ratio Behavior, Cartesian — Frame (video / frame layer), Colors, Components, Composition Rules, Depth & Surface, Do (+9 more)
-
-### Community 110 - "Cobalt Grid — Frame (video / frame layer)"
-Cohesion: 0.08
-Nodes (24): 1 · Hero Cover (identity · move: serif + glitch · left), 2 · Index Ledger (catalog · move: dense matrix · left — the dense frame), 3 · Chapter Opener (section · move: scale · sparse · left), 4 · Data Frame (chart · move: pixel-stack · left), 5 · Manifesto / Quote (quote · move: centered statement · sparse), 6 · Colophon (closer · move: right-aligned close · sparse), Approved Entities, Aspect-Ratio Behavior (+16 more)
-
-### Community 111 - "Code editorial — Frame (video / frame layer)"
-Cohesion: 0.08
-Nodes (24): 1 · Cover (identity · move: oversized EB Garamond · cream), 2 · Statement (statement · move: single EB Garamond line · cream or navy), 3 · Code Surface (code · move: warm-navy code window · the PR-critical frame), 4 · Number / Impact (data · move: oversized figure · cream), 5 · Pull-quote (quote · move: EB Garamond italic · cream), 6 · Closing / CTA (closer · move: coral voltage · cream or navy), Approved Real Entities, Aspect-Ratio Behavior (+16 more)
-
-### Community 112 - "Coral — Frame (video / frame layer)"
-Cohesion: 0.08
-Nodes (24): 1 · Region-Split Cover (identity · move: hard region edge · left), 2 · Feature Stat (anchor · move: scale · coral environment · left), 3 · Quote Layout (quote · move: panel split · giant mark), 4 · Closing Plate (closer · move: cream field + coral band · centered), 5 · Three-Column Catalog (catalog · move: density — the dense frame · centered head), 6 · Timeline (process · move: horizontal rail · left), Approved Entities, Aspect-Ratio Behavior (+16 more)
-
-### Community 113 - "Creative Mode — Frame (video / frame layer)"
-Cohesion: 0.08
-Nodes (24): 1 · Wordmark Cover (identity · move: full-frame lockup · centered), 2 · Big Claim (oversized statement · move: scale · left), 3 · Stat Grid (catalog · move: density — the one dense frame · centered), 4 · Closing Plate (closer · move: ground-swap · centered), 5 · Featured Marker (callout · move: hard-shadow focal · left/asymmetric), 6 · Comparison Ledger (data · move: matrix · left), Approved Entities, Aspect-Ratio Behavior (+16 more)
-
-### Community 114 - "Daisy Days — Frame (video / frame layer)"
-Cohesion: 0.08
-Nodes (24): 1 · Cover (identity · move: ornament wreath · saturated · centered), 2 · Info Cards (catalog · move: 3-up white cards · cream · the dense frame), 3 · Process Steps (sequence · move: rotating circle markers · peach · centered), 4 · Quote (quote · move: quote-mark anchor · soft-pink · centered), 5 · Framed Section (feature · move: cap+body card · cream), 6 · Closing (closer · move: ornament wreath · saturated · centered), Approved Real Entities, Aspect-Ratio Behavior (+16 more)
-
-### Community 115 - "Editorial Forest — Frame (video / frame layer)"
-Cohesion: 0.08
-Nodes (24): 1 · Cover (identity · move: oversized serif · green · left), 2 · Topic Tiles (catalog · move: rotating-fill grid · cream · the dense frame), 3 · KPI Stat (data · move: oversized figure · green), 4 · Statement (quote · move: display serif · cream · left), 5 · Step Framework (process · move: 8px step tiles · cream/green), 6 · Chart (data · move: bars + meta · green), Approved Real Entities, Aspect-Ratio Behavior (+16 more)
-
-### Community 116 - "carve.mjs"
-Cohesion: 0.21
-Nodes (16): attrOf(), carveSources(), decode(), DEFAULT_STRENGTH, detectTracks(), escapeAttr(), fail(), groupSourceRefusal() (+8 more)
-
-### Community 117 - "telemetry.mjs"
-Cohesion: 0.12
-Nodes (29): withFileLock(), anonymousId(), __anonymousIdForTest(), heygenAccountDistinctId(), identifyAccount(), isTestOrCiContext(), legacyMediaAnonId(), optedOut() (+21 more)
-
-### Community 118 - "export-import.ts"
-Cohesion: 0.18
-Nodes (18): clearAllData(), downloadExport(), EXPORT_VERSION, exportData(), FinpointExport, SYNC_TABLES, tableCounts(), TableName (+10 more)
-
-### Community 119 - "Finpoint: interactive first-use and help plan"
-Cohesion: 0.09
-Nodes (21): 11. Acceptance and evaluation, 12. What the clickable concept demonstrates, 1. First visit: one useful choice, 2. Practice lesson: one purchase, one clear result, 3. Guided use with real data, 4. Contextual help: the strongest everyday feature, 5. Help & guides: a permanent destination, 6. Optional practice library (+13 more)
-
-### Community 120 - "dither.mjs"
-Cohesion: 0.18
-Nodes (19): frameRateNumber(), IMAGE_EXTENSIONS, OUTPUT_IMAGE_EXTENSIONS, probe(), processImage(), processVideo(), run(), temporaryOutput() (+11 more)
-
-### Community 121 - "duplicates.ts"
-Cohesion: 0.24
-Nodes (14): allocationOutcome(), descriptionAnchors(), descriptionIdentity(), DuplicateGroup, duplicateGroups(), DuplicateStatement, eligible(), fixDuplicates() (+6 more)
-
-### Community 122 - "lint_source.py"
-Cohesion: 0.11
-Nodes (7): _find_matching_paren(), Finding, lint_file(), main(), _regex_matcher(), Rule, _use_effect_with_deps()
-
-### Community 123 - "src/data/* (persistence, migrations, seeding, backup serialization, Drive storage)"
-Cohesion: 0.31
-Nodes (8): Background Drive sync, bun test, src/data/* (persistence, migrations, seeding, backup serialization, Drive storage), IndexedDB (Dexie), Domain and importer tests (Dexie with in-memory IndexedDB), src/logic/* (domain reads and operations), Verification, Workspace backup/reset operations
-
-### Community 124 - "record.ts"
-Cohesion: 0.10
-Nodes (20): setTempo(), takesFile, args, failed, failures, GuideDate, headed, now (+12 more)
-
-### Community 125 - "Text To Speech"
-Cohesion: 0.12
-Nodes (15): Available routes, ffmpeg requirement, Gemini narration, HeyGen word-timestamp shape, Long scripts, Multilingual (Kokoro voice prefix → language), Narrating a HyperFrames docs video, Self-contained HeyGen (no CLI) — `scripts/heygen-tts.mjs` (+7 more)
-
-### Community 126 - "wait-bgm.mjs"
-Cohesion: 0.11
-Nodes (10): argv, audioMeta, audioMetaPath, base, hyperframesDir, intervalMs, outPath, started (+2 more)
-
-### Community 127 - "Stargazed.tsx"
-Cohesion: 0.18
-Nodes (12): Props, UnderlinedText(), defaultProps, RemotionRoot(), OutroScene(), Props, StatsScene(), Props (+4 more)
-
-### Community 128 - "bgm.mjs"
-Cohesion: 0.24
-Nodes (13): BGM_PY_DEPS, generateBgmDetached(), LYRIA_PY_DEPS, lyriaKey(), musicgenScript(), pipInstall(), pyOk(), r3() (+5 more)
-
-### Community 129 - "HyperFrames CLI"
-Cohesion: 0.22
-Nodes (9): Commands by job, Edit the timeline, HyperFrames CLI, Project history, References, Render where, The loop, When a command fails (+1 more)
-
-### Community 130 - "app.tsx"
-Cohesion: 0.32
-Nodes (4): App(), HarnessSection, sectionFromLocation(), root
-
-### Community 131 - "Take"
-Cohesion: 0.16
-Nodes (4): bare(), nudge(), Take, words()
-
-### Community 132 - "Media operations: agent guidance"
-Cohesion: 0.12
-Nodes (15): Cut / trim: keep a slice, Ducking (declare in-composition / bake for export), Exact error-diffusion dither, Generate: images (local first, cloud upsell), Generate: video (`resolve --type video`, HeyGen avatar first), HEVC / H.265 sources, Image-to-video (animate any still into a talking clip), Media operations: agent guidance (+7 more)
-
-### Community 133 - "StatsScene.tsx"
-Cohesion: 0.17
-Nodes (12): Composition shape, How to render and evaluate, The lossy parts (and why threshold = 0.90), Tier 3 — stargazed-data-driven, Translation walk-through (skill cheat sheet), What it tests, AnimatedNumber(), Props (+4 more)
-
-### Community 134 - "tier-3-data-driven/remotion-src/package.json"
-Cohesion: 0.12
-Nodes (15): dependencies, react, react-dom, remotion, @remotion/cli, zod, react, react-dom (+7 more)
-
-### Community 135 - "statement-rules.ts"
-Cohesion: 0.10
-Nodes (17): dexie, fake-indexeddb, xlsx, StatementRow, byCreation(), conditionPattern(), deleteStatementRule(), listStatementRules() (+9 more)
-
-### Community 136 - "src/components/*"
-Cohesion: 0.25
-Nodes (5): Agent Behavior, Generated / Ignored Files, src/components/*, src/components/ui/**/*, useLiveQuery
-
-### Community 137 - "pagination.tsx"
-Cohesion: 0.38
-Nodes (11): pageHref(), pageWindow(), PaginationFooter(), Pagination(), PaginationContent(), PaginationEllipsis(), PaginationItem(), PaginationLink() (+3 more)
-
-### Community 138 - "tier-1-title-card/remotion-src/package.json"
-Cohesion: 0.13
-Nodes (14): dependencies, react, react-dom, remotion, @remotion/cli, react, react-dom, remotion (+6 more)
-
-### Community 139 - "tier-2-multi-scene/remotion-src/package.json"
-Cohesion: 0.13
-Nodes (14): dependencies, react, react-dom, remotion, @remotion/cli, react, react-dom, remotion (+6 more)
-
-### Community 140 - "hashSnapshot"
-Cohesion: 0.43
-Nodes (5): FinpointDB, digestSnapshot(), hashLegacySnapshot(), hashSnapshot(), Snapshot
-
-### Community 141 - "Registry discovery"
-Cohesion: 0.14
-Nodes (12): Available items, Components, Item manifest fields, Read the registry manifest as a fallback, Reading an item's manifest, Registry discovery, Use the catalog command first, Report what the catalog does not have (+4 more)
-
-### Community 142 - "extract-audio-data.py"
-Cohesion: 0.26
-Nodes (5): compute_band_edges(), compute_fft_bands(), decode_audio(), extract(), main()
-
-### Community 143 - "eval.mjs"
-Cohesion: 0.18
-Nodes (13): countAssetFiles(), walk(), escapeHtml(), evalBlock(), generateReport(), outPath, REPO_ROOT, report (+5 more)
-
-### Community 144 - "Component quality bar"
-Cohesion: 0.15
-Nodes (12): Calibration, Checklist, Component quality bar, Duplicates, which one survives, Fatal, cut the item, Fixable, keep and repair, How an audit runs, Mechanical first pass (+4 more)
-
-### Community 145 - "ref_remotion"
-Cohesion: 0.21
-Nodes (3): RemotionRoot(), TitleCard(), handle
-
-### Community 146 - "compilerOptions"
-Cohesion: 0.15
-Nodes (12): compilerOptions, esModuleInterop, forceConsistentCasingInFileNames, isolatedModules, jsx, module, moduleResolution, resolveJsonModule (+4 more)
-
-### Community 147 - "compilerOptions"
-Cohesion: 0.15
-Nodes (12): compilerOptions, esModuleInterop, forceConsistentCasingInFileNames, isolatedModules, jsx, module, moduleResolution, resolveJsonModule (+4 more)
-
-### Community 148 - "compilerOptions"
-Cohesion: 0.15
-Nodes (12): compilerOptions, esModuleInterop, forceConsistentCasingInFileNames, isolatedModules, jsx, module, moduleResolution, resolveJsonModule (+4 more)
-
-### Community 149 - "Remotion → HyperFrames API Map"
-Cohesion: 0.15
-Nodes (13): Composition root, Distributed rendering, Fonts, Lottie, Media, Parameters, React patterns, Reading this table (+5 more)
-
-### Community 150 - "Skill installation and freshness"
-Cohesion: 0.33
-Nodes (5): Diagnose and update, Keep the project's CLI current, Skill installation and freshness, Stale-skills notice, What `init` does
-
-### Community 151 - "Patterns that work with caveats"
-Cohesion: 0.17
-Nodes (11): Code-split components (`React.lazy`), Custom `presentation` in `<TransitionSeries>`, `<Loop>` with stateful children, Patterns that always work, Patterns that work with caveats, React patterns the skill refuses, Remotion's `<Img>` with crossOrigin, Reporting gaps to the user (+3 more)
-
-### Community 152 - "tts.py"
-Cohesion: 0.21
-Nodes (3): gaps(), sentence_spans(), trim()
-
-### Community 153 - "info, upgrade, compositions, timeline, docs, benchmark, telemetry, asset preprocessing"
-Cohesion: 0.18
-Nodes (10): Asset Preprocessing, benchmark, compositions, docs, info, info, upgrade, compositions, timeline, docs, benchmark, telemetry, asset preprocessing, Query one-liners (jq, node fallback if jq is absent), Remaining harness usage, telemetry (+2 more)
-
-### Community 154 - "Blocks"
-Cohesion: 0.18
-Nodes (11): Blocks, Branding + 3D UI (2), Code Animations (9), Code snippets (24), Liquid Glass (7), Maps + data viz (8), Shader transitions (14), Showcases (6) (+3 more)
-
-### Community 155 - "locate.mjs"
-Cohesion: 0.20
-Nodes (5): [cmd, ...rest], font(), gridFilters(), opt, pos
-
-### Community 156 - "Background Removal"
-Cohesion: 0.18
-Nodes (10): Background Removal, Canonical 3-layer template (plate + content + cutout), Compositing patterns — pick the right one, Device (`--device`), Layer separation (`--background-output`), Output Format, Quality (`--quality`), Text-behind-subject pattern (two non-obvious rules) (+2 more)
-
-### Community 158 - "lyria-recipe.py"
-Cohesion: 0.33
-Nodes (3): generate_bgm(), main(), parse_args()
-
-### Community 159 - "Sequencing translation: Sequence, Series, Composition root"
-Cohesion: 0.18
-Nodes (11): `<AbsoluteFill>` → positioned div, `<Composition>` → root `#stage`, Crossfading scene boundaries, `<Freeze>`, `<Loop>`, Multiple parallel tracks, Nested `<Sequence>` flattens, `<Sequence>` → sub-composition host (+3 more)
-
-### Community 160 - "video/package.json"
-Cohesion: 0.18
-Nodes (10): gsap, dependencies, gsap, name, private, scripts, check, dev (+2 more)
-
-### Community 161 - "lint, check, snapshot"
-Cohesion: 0.20
-Nodes (9): check, Deprecated: validate, inspect, layout, Discipline (motion-heavy work), Keep verification clean and inspect the actual pixels, lint, lint, check, snapshot, Motion verification (`*.motion.json` sidecar), snapshot (+1 more)
-
-### Community 162 - "preview, play, render, publish"
-Cohesion: 0.20
-Nodes (9): Agent context from Studio selection, feedback (report after rendering), Launching with an external browser (preview + play), play (lightweight player), preview, preview, play, render, publish, publish, render (+1 more)
-
-### Community 164 - "Resolve — command, flags, reuse, adopt, inventory"
-Cohesion: 0.11
-Nodes (16): voice(), Adopt existing projects, Cross-project reuse, Examples, Flags, How it works, Reading the inventory, Resolve — command, flags, reuse, adopt, inventory (+8 more)
-
-### Community 165 - "Eval: how to validate a translation end-to-end"
-Cohesion: 0.20
-Nodes (10): CI integration, Critical: encoder config, Eval: how to validate a translation end-to-end, Per-fixture flow, Reading `diff/summary.json`, The three scripts, Threshold rule of thumb, Validated tier thresholds (+2 more)
-
-### Community 166 - "Media translation: Audio, Video, Img, IFrame, staticFile"
-Cohesion: 0.20
-Nodes (10): Asset paths, `<Audio>`, `delayRender()` / `continueRender()`, `<IFrame>`, `<Img>`, Media translation: Audio, Video, Img, IFrame, staticFile, Trim / playbackRate, `<Video>` and `<OffthreadVideo>` (+2 more)
-
-### Community 167 - "transcribe.mjs"
-Cohesion: 0.18
-Nodes (12): resolveNpxCliPath(), resolveNpxInvocation(), mergeTokensToWords(), dist, root, atomicWrite(), inputPath, outPath (+4 more)
-
-### Community 168 - "details"
-Cohesion: 0.22
-Nodes (8): Classify the request, Common workflow, Media treatments, Permission and scope, Seed or assemble, Translate vague feedback conservatively, count(), details()
-
-### Community 169 - "The look"
-Cohesion: 0.22
-Nodes (8): From a brand, From a reference, Make it re-brandable, Presets, The look, The LOOK line, The project's design spec, Video facts
-
-### Community 172 - "Lottie translation: @remotion/lottie → HF lottie adapter"
-Cohesion: 0.22
-Nodes (8): After Effects → Lottie limitations, Asset handling, Loop behavior, Lottie source isn't actually translation-blocking, Lottie translation: @remotion/lottie → HF lottie adapter, Multiple Lottie animations, Pattern, Performance note
-
-### Community 173 - "Parameter translation: Zod schemas, defaultProps, calculateMetadata"
-Cohesion: 0.22
-Nodes (9): Async calculateMetadata (NOT translatable), Boolean props, Default props, Nested object / array props, Numeric props that need typed parsing, Parameter translation: Zod schemas, defaultProps, calculateMetadata, Sync calculateMetadata (translatable), When the composition uses props for computed prop derivation (+1 more)
-
-### Community 174 - "Timing translation: interpolate, spring, easing"
-Cohesion: 0.22
-Nodes (9): Conversion: frames → seconds, Custom count-up / number tweens, interpolate driving non-numeric properties, interpolate — linear, interpolate — multi-segment, interpolate with custom easing, spring → GSAP back.out, Stagger via per-instance prop (+1 more)
-
-### Community 175 - "Finpoint video: compact production handoff"
-Cohesion: 0.22
-Nodes (8): Creative freedom, Efficient sequence, Exact example totals, Finpoint video: compact production handoff, Narrative, Non-negotiable meaning, Objective, Verification boundary
-
-### Community 176 - "hyperframes.json"
-Cohesion: 0.22
-Nodes (8): media, autoProxy, paths, assets, blocks, components, registry, $schema
-
-### Community 177 - "Films from a source: measured facts"
-Cohesion: 0.25
-Nodes (7): Films from a source: measured facts, From a pull request, From a website, Maps and real places, On music, Script and pacing, Short motion pieces
-
-### Community 178 - "Explainers, tutorials and "how it works""
-Cohesion: 0.25
-Nodes (7): Devices that explain, Explainers, tutorials and "how it works", Getting it right, Ground it first, Shapes of information, Tells for this type, Words
-
-### Community 179 - "Steps"
-Cohesion: 0.25
-Nodes (7): 1. Install the block, 2. Wire into index.html, 3. Lint and preview, 4. Customize (optional), Scenario, Steps, Worked Example: Adding a Block
-
-### Community 180 - "Steps"
-Cohesion: 0.25
-Nodes (7): 1. Install the component, 2. Read the snippet, 3. Wire into your composition, 4. Lint and preview, Scenario, Steps, Worked Example: Adding a Component
-
-### Community 181 - "Frame Treatments"
-Cohesion: 0.29
-Nodes (7): 1 · Cover (identity · move: serif + compass ring · left), 2 · Agenda / Index (index · move: hairline list · left), 3 · Pull Quote (quote · move: centered statement · compass ring), 4 · Closing Plate (closer · move: centered ring · centered), 5 · Two-Column Editorial (content · move: asymmetric split · left), 6 · Stats / Timeline (data · move: hairline rail · left), Frame Treatments
-
-### Community 182 - "media-use usage dashboard"
-Cohesion: 0.29
-Nodes (7): Dashboard tiles, Event catalog (verified present in-project), Identity (see `scripts/lib/telemetry.mjs`), media-use usage dashboard, Recreate in an analytics dashboard, sidebar(), via()
-
-### Community 183 - "MultiScene.tsx"
-Cohesion: 0.43
-Nodes (5): ImageScene(), MultiScene(), OutroScene(), TitleScene(), RemotionRoot()
-
-### Community 184 - "07-custom-hook.tsx"
-Cohesion: 0.29
-Nodes (6): CustomHookDriven(), useFadeIn(), Cases, Tier 4 — escape-hatch, Validation, What it tests
-
-### Community 185 - "Font translation"
-Cohesion: 0.25
-Nodes (8): Font loading and `delayRender`, Font subsetting, Font translation, Multi-weight loading, Pattern: local fonts via `@font-face`, Pattern: `@remotion/google-fonts/<Family>`, Pattern: system font fallback (no font load), When in doubt: use Inter
-
-### Community 186 - "Captions"
-Cohesion: 0.29
-Nodes (6): Captions, Fit and place, Groups, Structure, Text behind the speaker, Words and timings
-
-### Community 187 - "Motion"
-Cohesion: 0.29
-Nodes (6): Common faults, Motion, Motion craft, Seeing motion, The right mechanism, Transitions with a cause
-
-### Community 188 - "Sound"
-Cohesion: 0.29
-Nodes (6): 1. The default, 2. The clock, 3. Music, 4. Effects, 5. Levels, Sound
-
-### Community 189 - "The spec"
-Cohesion: 0.29
-Nodes (6): A look built from a medium, BANNED by default, Composition numbers, The spec, The template, Turning words into numbers
-
-### Community 190 - "Launch, promo and feature films"
-Cohesion: 0.29
-Nodes (6): Launch, promo and feature films, Real UI, never a mockup, Tells for this type, The end card, The product on screen, Worlds and transitions
-
-### Community 191 - "Wiring Blocks"
-Cohesion: 0.29
-Nodes (6): Basic wiring, Multiple blocks, Positioning blocks, Required attributes, Timeline coordination, Wiring Blocks
-
-### Community 192 - "Sound effects (SFX)"
-Cohesion: 0.29
-Nodes (6): Bundled library (fallback), Cues — request → meta, Licences, Openverse, Rules, Sound effects (SFX)
-
-### Community 193 - "motion.js"
-Cohesion: 0.15
-Nodes (5): cues, enter(), steps(), tl, vars
-
-### Community 194 - "Mixing in HyperFrames"
-Cohesion: 0.29
-Nodes (6): `data-automation`: envelopes, `data-fx-chain`: effects, Group buses, Level and fades, Mixing in HyperFrames, Music under a voice
-
-### Community 195 - "run.sh"
-Cohesion: 0.57
-Nodes (6): read_json_value(), require_render_tier_tools(), run_lint_tier(), run_render_tier(), run.sh script, write_result()
-
-### Community 197 - "When to bow out: the runtime interop pattern"
-Cohesion: 0.29
-Nodes (7): The lint output already includes recommendations, The recommendation message, What the interop pattern actually does, When NOT to bow out: warnings only, When the source has BOTH blockers AND warnings, When to bow out: the runtime interop pattern, When to recommend interop
-
-### Community 198 - "Button"
-Cohesion: 0.14
-Nodes (35): MonthLayout(), DemoOffer(), InvestmentRow(), ReviewLinks(), NotFound(), Template(), nextConfig, next (+27 more)
-
-### Community 199 - "bake-basemap.mjs"
-Cohesion: 0.20
-Nodes (5): CENTER, COUNTRIES, framesDir, MARGIN, N
-
-### Community 200 - "Compare and batch rendering"
-Cohesion: 0.33
-Nodes (5): Batch template renders, Compare and batch rendering, Compare color grades, Compare projects or variants, Contents
-
-### Community 201 - "Review"
-Cohesion: 0.33
-Nodes (5): 1. Measure, then look, 2. What to look for, 3. Notes and fixes, 4. The delivery note, Review
-
-### Community 202 - "Animation runtimes"
-Cohesion: 0.33
-Nodes (5): Animation runtimes, dotLottie browser setup, GSAP facts that bite, Other runtimes, The seek protocol
-
-### Community 204 - "3D, simulations and generative pieces"
-Cohesion: 0.33
-Nodes (5): 3D, simulations and generative pieces, Camera and story, Check it, Deterministic by construction, Light and materials
-
-### Community 205 - "Music videos and films cut to a track"
-Cohesion: 0.33
-Nodes (5): Music videos and films cut to a track, Pictures for the words, Song structure becomes edit structure, Tells for this type, The look
-
-### Community 206 - "Vertical and social clips (9:16)"
-Cohesion: 0.33
-Nodes (5): Layout, Pacing, The first second, The platform's own UI, Vertical and social clips (9:16)
-
-### Community 207 - "The demo.html Convention"
-Cohesion: 0.33
-Nodes (5): Blocks don't need demo.html, Demo structure, Demos are not installed, The demo.html Convention, Why components ship demo.html
-
-### Community 208 - "Install Locations"
-Cohesion: 0.33
-Nodes (5): Custom layouts, Default paths, How path remapping works, hyperframes.json, Install Locations
-
-### Community 209 - "Wiring Components"
-Cohesion: 0.33
-Nodes (5): Example: grain-overlay (CSS-only, no timeline integration), Example: shimmer-sweep (needs timeline integration), General process, Key principles, Wiring Components
-
-### Community 212 - "Ownership matrix, usage stats, telemetry, privacy"
-Cohesion: 0.33
-Nodes (5): Ownership matrix, usage stats, telemetry, privacy, Privacy, Telemetry, Usage stats, What it owns (the gaps HyperFrames leaves)
-
-### Community 213 - "Setup and providers — install, auth, RAM ladders, forcing a provider"
-Cohesion: 0.33
-Nodes (5): CLI tools used (what to run, and how to enable each), Host HeyGen access (no CLI sign-in), Providers, Setup and providers — install, auth, RAM ladders, forcing a provider, Setup — install heygen first (free-usage path)
-
-### Community 214 - "Tier 2 — title-image-outro"
-Cohesion: 0.33
-Nodes (5): How to render and evaluate, Tier 2 — title-image-outro, Translation walk-through, What it tests, Why threshold 0.95?
-
-### Community 215 - "Transitions translation: @remotion/transitions → HF crossfades / shader-transitions"
-Cohesion: 0.33
-Nodes (6): Pattern: `<TransitionSeries>` is `<Series>` with overlap, Presentation table, Timing translations, Transitions translation: @remotion/transitions → HF crossfades / shader-transitions, When the source uses a custom Presentation, When to use HF shader-transitions
-
-### Community 216 - "UI layer (app pages + components)"
-Cohesion: 0.22
-Nodes (11): app/**/page.tsx, Interactive routes are "use client" (search params via next/navigation), (month) route-group shell (Overview + Monthly Records), Pages take no props, Project Shape, React Compiler (enabled), Root Suspense (keeps routes static), src/routes.ts (centralized route paths) (+3 more)
-
-### Community 217 - "init, capture, skills"
-Cohesion: 0.40
-Nodes (4): capture, init, init, capture, skills, skills
-
-### Community 218 - "Cards over talking-head footage"
-Cohesion: 0.40
-Nodes (4): Cards over talking-head footage, Pitfalls, Timing, Where the video sits
-
-### Community 219 - "Characters, mascots and story shorts"
-Cohesion: 0.40
-Nodes (4): Acting, Build, Characters, mascots and story shorts, Reads
-
-### Community 220 - "Numbers, charts and data stories"
-Cohesion: 0.40
-Nodes (4): Charts as pictures, Numbers, charts and data stories, One number at a time, Tells for this type
-
-### Community 221 - "sfx/manifest.json"
-Cohesion: 0.40
-Nodes (4): chime, description, duration, file
-
-### Community 222 - "Local media commands"
-Cohesion: 0.40
-Nodes (4): Cutouts, Grade and style footage and images, Local media commands, Sound
-
-### Community 223 - "User memory — preferences and recipes"
-Cohesion: 0.40
-Nodes (4): Files, Preferences — remembered defaults, Recipes — frozen video bundles, User memory — preferences and recipes
-
-### Community 224 - "Tier 1 — title-card-fade"
-Cohesion: 0.40
-Nodes (4): How to render and evaluate, Tier 1 — title-card-fade, Translation walk-through, What it tests
-
-### Community 225 - "Implemented beginner guide — handoff"
-Cohesion: 0.40
-Nodes (4): Editable structure, Implemented beginner guide — handoff, Storage and workflow, Verification and review
-
-### Community 226 - "SFX Credits"
-Cohesion: 0.50
-Nodes (3): Files, License, SFX Credits
-
-### Community 227 - "click"
-Cohesion: 0.50
-Nodes (4): click, description, duration, file
-
-### Community 228 - "click-soft"
-Cohesion: 0.50
-Nodes (4): click-soft, description, duration, file
-
-### Community 229 - "error"
-Cohesion: 0.50
-Nodes (4): error, description, duration, file
-
-### Community 230 - "glitch-1"
-Cohesion: 0.50
-Nodes (4): glitch-1, description, duration, file
-
-### Community 231 - "glitch-2"
-Cohesion: 0.50
-Nodes (4): glitch-2, description, duration, file
-
-### Community 232 - "glitch-3"
-Cohesion: 0.50
-Nodes (4): glitch-3, description, duration, file
-
-### Community 233 - "impact-bass-1"
-Cohesion: 0.50
-Nodes (4): impact-bass-1, description, duration, file
-
-### Community 234 - "impact-bass-2"
-Cohesion: 0.50
-Nodes (4): impact-bass-2, description, duration, file
-
-### Community 235 - "key-press"
-Cohesion: 0.50
-Nodes (4): key-press, description, duration, file
-
-### Community 236 - "notification"
-Cohesion: 0.50
-Nodes (4): notification, description, duration, file
-
-### Community 237 - "ping"
-Cohesion: 0.50
-Nodes (4): ping, description, duration, file
-
-### Community 238 - "pop"
-Cohesion: 0.50
-Nodes (4): pop, description, duration, file
-
-### Community 239 - "riser"
-Cohesion: 0.50
-Nodes (4): riser, description, duration, file
-
-### Community 240 - "sparkle"
-Cohesion: 0.50
-Nodes (4): sparkle, description, duration, file
-
-### Community 241 - "typing"
-Cohesion: 0.50
-Nodes (4): typing, description, duration, file
-
-### Community 242 - "whoosh"
-Cohesion: 0.50
-Nodes (4): whoosh, description, duration, file
-
-### Community 243 - "whoosh-cinematic"
-Cohesion: 0.50
-Nodes (4): whoosh-cinematic, description, duration, file
-
-### Community 244 - "whoosh-short"
-Cohesion: 0.50
-Nodes (4): whoosh-short, description, duration, file
-
-### Community 245 - "Requirements & Caches"
-Cohesion: 0.50
-Nodes (3): Credential & key priority, Model caches & system dependencies, Requirements & Caches
-
-### Community 250 - "clean.tsx"
-Cohesion: 0.83
-Nodes (3): MyComposition(), pick(), TitleCard()
-
-### Community 265 - "plugin-installation.md"
-Cohesion: 0.10
-Nodes (16): Running from an installed plugin, Contributing, Find and install, HyperFrames registry, What's in it, Wiring, Contract, HyperFrames (+8 more)
-
-### Community 266 - "visual-scenes.ts"
+### Community 98 - "visual-scenes.ts"
 Cohesion: 0.16
 Nodes (27): amount(), arrow(), badge(), callout(), card(), connector(), dashboard(), escape() (+19 more)
 
-### Community 268 - "test-data.ts"
+### Community 99 - "ref_node_fs"
+Cohesion: 0.06
+Nodes (32): browser, Configure FFmpeg without a package manager, doctor, doctor, browser, isMainModule(), CLI_MEDIA_USE, SKILLS, skillScripts() (+24 more)
+
+### Community 100 - "trend-chart.tsx"
+Cohesion: 0.22
+Nodes (13): bar(), BarChart(), BarSeries, PAD, ChartFrame(), ChartSize, ReadoutRows(), PAD (+5 more)
+
+### Community 101 - "Placeholder material"
+Cohesion: 0.07
+Nodes (26): All types, Caption blocks, Contributing a Block or Component to the Registry, Quality Gate, Step 1: Clarify, Step 2: Scaffold, Step 3: Build, Step 4: Validate (+18 more)
+
+### Community 102 - "ui/field.tsx"
+Cohesion: 0.14
+Nodes (22): ComboboxField(), Props, AUTOPOPULATED_BORDER, FieldErrorItem, FormField(), MotionFieldDescription, Props, ComboboxContent() (+14 more)
+
+### Community 103 - "story.ts"
+Cohesion: 0.09
+Nodes (22): burger, closed(), concert, creator(), dialog(), explain(), exportFile(), files (+14 more)
+
+### Community 104 - "logic/learning.ts"
+Cohesion: 0.16
+Nodes (20): GuideCheckActions(), GuideVideoPlayer(), readLearningValue(), readLearningWorkspace(), updateLearningValue(), SearchInit, useMonthParams(), getVideoChapter() (+12 more)
+
+### Community 105 - "records.ts"
+Cohesion: 0.15
+Nodes (23): loadDashboardTables(), getLearningOverview(), isPendingRecord(), pendingStatementIds(), tallyAllocations(), resolveRecordChoices(), analyticsValues(), budgetCovers() (+15 more)
+
+### Community 106 - "telemetry.mjs"
+Cohesion: 0.15
+Nodes (20): withFileLock(), anonymousId(), __anonymousIdForTest(), heygenAccountDistinctId(), identifyAccount(), isTestOrCiContext(), legacyMediaAnonId(), optedOut() (+12 more)
+
+### Community 107 - "compose.ts"
+Cohesion: 0.09
+Nodes (21): levelColor(), CueRef, scenes, SceneUse, audio, bare(), captionGroups, captionHosts (+13 more)
+
+### Community 108 - "Biennale Yellow — Frame (video / frame layer)"
+Cohesion: 0.08
+Nodes (24): 1 · Cover (identity · move: display + sun bloom · left), 2 · Chapter Divider (section · move: jumbo numeral · vertical rail), 3 · Ledger (catalog · move: hairline tabular rows · the dense frame), 4 · Manifesto / Quote (quote · move: italic serif · centered bloom), 5 · Poster Panel (statement · move: yellow panel · split), 6 · Strand List (programme · move: numbered editorial rows · left), Approved Entities, Aspect-Ratio Behavior (+16 more)
+
+### Community 109 - "BlockFrame — Frame (video / frame layer)"
+Cohesion: 0.08
+Nodes (24): 1 · Cover (identity · move: decorations puncture · left), 2 · Feature Cards (catalog · move: 3-up bordered grid · blue ground), 3 · Stat Grid (data · move: tilted stat cards · green ground), 4 · Closing Plate (closer · move: inverted black · centered), 5 · Quote (quote · move: bordered quote frame · pink ground), 6 · Timeline (process · move: stepped bordered cards · offwhite), Approved Entities, Aspect-Ratio Behavior (+16 more)
+
+### Community 110 - "Blue Professional — Frame (video / frame layer)"
+Cohesion: 0.08
+Nodes (24): 1 · Cover (identity · move: diagonal accent · left), 2 · Dashboard (data · move: 3-up metric grid · the dense frame), 3 · Bar Ranking (data · move: cobalt bars · left), 4 · Pull Quote (quote · move: concentric rings · centered), 5 · Split + Highlight (content · move: asymmetric split · left), 6 · Closing / CTA (closer · move: centered rings + CTA), Approved Entities, Aspect-Ratio Behavior (+16 more)
+
+### Community 111 - "Bold Poster — Frame (video / frame layer)"
+Cohesion: 0.08
+Nodes (24): 1 · Hero Stack (identity · move: 3-line tilted stack · left), 2 · Hero Stat (statement · move: poster numeral · red panel · centered), 3 · Financial Grid (data · move: double-border matrix · the dense frame), 4 · Pull Quote (quote · move: tilted/stacked display · red panel · left), 5 · Editorial Cards (content · move: red leftbar cards · left), 6 · Closing Statement (closer · move: tilted close-big · centered/left), Approved Entities, Aspect-Ratio Behavior (+16 more)
+
+### Community 112 - "Broadside — Frame (video / frame layer)"
+Cohesion: 0.08
+Nodes (24): 1 · Cover (identity · move: massive type · ORANGE register · left), 2 · Statement (declarative · move: type IS composition · DARK register · left), 3 · Stat Grid (data · move: top-border cards · DARK · the dense frame), 4 · Fadelist (narrative · move: opacity stack · DARK), 5 · Pull Quote (quote · move: oversized mark · DARK · left), 6 · Compare (argument · move: split + orange payoff · DARK→ORANGE), Approved Entities, Aspect-Ratio Behavior (+16 more)
+
+### Community 113 - "Capsule — Frame (video / frame layer)"
+Cohesion: 0.08
+Nodes (24): 1 · Cover (identity · move: title pill + display · centered), 2 · Pillar Cards (catalog · move: 3-up grid · left — the dense frame), 3 · Stat Grid (data · move: stat pills · centered head), 4 · Pull Quote (quote · move: highlight pill · left), 5 · Orbit (concept · move: gravitational pills · centered), 6 · Closing Plate (closer · move: title pill + display · centered), Approved Entities, Aspect-Ratio Behavior (+16 more)
+
+### Community 114 - "Cobalt Grid — Frame (video / frame layer)"
+Cohesion: 0.08
+Nodes (24): 1 · Hero Cover (identity · move: serif + glitch · left), 2 · Index Ledger (catalog · move: dense matrix · left — the dense frame), 3 · Chapter Opener (section · move: scale · sparse · left), 4 · Data Frame (chart · move: pixel-stack · left), 5 · Manifesto / Quote (quote · move: centered statement · sparse), 6 · Colophon (closer · move: right-aligned close · sparse), Approved Entities, Aspect-Ratio Behavior (+16 more)
+
+### Community 115 - "Code editorial — Frame (video / frame layer)"
+Cohesion: 0.08
+Nodes (24): 1 · Cover (identity · move: oversized EB Garamond · cream), 2 · Statement (statement · move: single EB Garamond line · cream or navy), 3 · Code Surface (code · move: warm-navy code window · the PR-critical frame), 4 · Number / Impact (data · move: oversized figure · cream), 5 · Pull-quote (quote · move: EB Garamond italic · cream), 6 · Closing / CTA (closer · move: coral voltage · cream or navy), Approved Real Entities, Aspect-Ratio Behavior (+16 more)
+
+### Community 116 - "Coral — Frame (video / frame layer)"
+Cohesion: 0.08
+Nodes (24): 1 · Region-Split Cover (identity · move: hard region edge · left), 2 · Feature Stat (anchor · move: scale · coral environment · left), 3 · Quote Layout (quote · move: panel split · giant mark), 4 · Closing Plate (closer · move: cream field + coral band · centered), 5 · Three-Column Catalog (catalog · move: density — the dense frame · centered head), 6 · Timeline (process · move: horizontal rail · left), Approved Entities, Aspect-Ratio Behavior (+16 more)
+
+### Community 117 - "Creative Mode — Frame (video / frame layer)"
+Cohesion: 0.08
+Nodes (24): 1 · Wordmark Cover (identity · move: full-frame lockup · centered), 2 · Big Claim (oversized statement · move: scale · left), 3 · Stat Grid (catalog · move: density — the one dense frame · centered), 4 · Closing Plate (closer · move: ground-swap · centered), 5 · Featured Marker (callout · move: hard-shadow focal · left/asymmetric), 6 · Comparison Ledger (data · move: matrix · left), Approved Entities, Aspect-Ratio Behavior (+16 more)
+
+### Community 118 - "Daisy Days — Frame (video / frame layer)"
+Cohesion: 0.08
+Nodes (24): 1 · Cover (identity · move: ornament wreath · saturated · centered), 2 · Info Cards (catalog · move: 3-up white cards · cream · the dense frame), 3 · Process Steps (sequence · move: rotating circle markers · peach · centered), 4 · Quote (quote · move: quote-mark anchor · soft-pink · centered), 5 · Framed Section (feature · move: cap+body card · cream), 6 · Closing (closer · move: ornament wreath · saturated · centered), Approved Real Entities, Aspect-Ratio Behavior (+16 more)
+
+### Community 119 - "Editorial Forest — Frame (video / frame layer)"
+Cohesion: 0.08
+Nodes (24): 1 · Cover (identity · move: oversized serif · green · left), 2 · Topic Tiles (catalog · move: rotating-fill grid · cream · the dense frame), 3 · KPI Stat (data · move: oversized figure · green), 4 · Statement (quote · move: display serif · cream · left), 5 · Step Framework (process · move: 8px step tiles · cream/green), 6 · Chart (data · move: bars + meta · green), Approved Real Entities, Aspect-Ratio Behavior (+16 more)
+
+### Community 120 - "carve.mjs"
+Cohesion: 0.19
+Nodes (17): attrOf(), carveSources(), decode(), DEFAULT_STRENGTH, detectTracks(), escapeAttr(), fail(), groupSourceRefusal() (+9 more)
+
+### Community 121 - "record.ts"
+Cohesion: 0.10
+Nodes (20): setTempo(), takesFile, args, failed, failures, GuideDate, headed, now (+12 more)
+
+### Community 122 - "dither.mjs"
+Cohesion: 0.17
+Nodes (19): frameRateNumber(), IMAGE_EXTENSIONS, OUTPUT_IMAGE_EXTENSIONS, probe(), processImage(), processVideo(), run(), temporaryOutput() (+11 more)
+
+### Community 123 - "prefs-store.mjs"
+Cohesion: 0.19
+Nodes (18): globalMediaDir(), mediaHome(), dedupe(), emptyFile(), isRecord(), mergedPreferences(), PREFERENCE_KEYS, preferenceKeyFor() (+10 more)
+
+### Community 124 - "Finpoint: interactive first-use and help plan"
+Cohesion: 0.09
+Nodes (21): 11. Acceptance and evaluation, 12. What the clickable concept demonstrates, 1. First visit: one useful choice, 2. Practice lesson: one purchase, one clear result, 3. Guided use with real data, 4. Contextual help: the strongest everyday feature, 5. Help & guides: a permanent destination, 6. Optional practice library (+13 more)
+
+### Community 125 - "plugin-installation.md"
+Cohesion: 0.10
+Nodes (16): Running from an installed plugin, Diagnose and update, Keep the project's CLI current, Skill installation and freshness, Stale-skills notice, What `init` does, Contract, HyperFrames (+8 more)
+
+### Community 126 - "lint_source.py"
+Cohesion: 0.11
+Nodes (7): _find_matching_paren(), Finding, lint_file(), main(), _regex_matcher(), Rule, _use_effect_with_deps()
+
+### Community 127 - "narrate.ts"
+Cohesion: 0.15
+Nodes (20): stepOf(), audioDir, Cached, cacheFile, chapters, cues, endsSentence(), ones (+12 more)
+
+### Community 128 - "publish.ts"
+Cohesion: 0.12
+Nodes (17): skip, steps, video, Chapter, out, project, run(), Segment (+9 more)
+
+### Community 129 - "locate.mjs"
+Cohesion: 0.11
+Nodes (14): Commands by job, Edit the timeline, HyperFrames CLI, Project history, References, Render where, The loop, When a command fails (+6 more)
+
+### Community 130 - "director.ts"
+Cohesion: 0.15
+Nodes (19): 5. Customize, Chapter, cues, ease(), fps, glide(), mouse, pick() (+11 more)
+
+### Community 131 - "export-import.ts"
+Cohesion: 0.19
+Nodes (15): FinpointDB, withoutActionModes(), importData(), monthlyBudgetFields(), parseImportFile(), SYNC_TABLES, TableName, TABLES (+7 more)
+
+### Community 132 - "Take"
+Cohesion: 0.16
+Nodes (4): bare(), nudge(), Take, words()
+
+### Community 133 - "Cartesian — Frame (video / frame layer)"
+Cohesion: 0.11
+Nodes (17): Approved Entities, Aspect-Ratio Behavior, Cartesian — Frame (video / frame layer), Colors, Components, Composition Rules, Depth & Surface, Do (+9 more)
+
+### Community 134 - "Text To Speech"
+Cohesion: 0.11
+Nodes (16): Available routes, Cloned voices — `scripts/heygen-voice.mjs`, ffmpeg requirement, Gemini narration, HeyGen word-timestamp shape, Long scripts, Multilingual (Kokoro voice prefix → language), Narrating a HyperFrames docs video (+8 more)
+
+### Community 135 - "Resolve — command, flags, reuse, adopt, inventory"
+Cohesion: 0.11
+Nodes (16): voice(), Adopt existing projects, Cross-project reuse, Examples, Flags, How it works, Reading the inventory, Resolve — command, flags, reuse, adopt, inventory (+8 more)
+
+### Community 136 - "wait-bgm.mjs"
+Cohesion: 0.11
+Nodes (10): argv, audioMeta, audioMetaPath, base, hyperframesDir, intervalMs, outPath, started (+2 more)
+
+### Community 137 - "Stargazed.tsx"
 Cohesion: 0.18
-Nodes (16): DEFAULT_CATEGORIES, DEFAULT_MONTHLY_BUDGETS, SEED_HASH_KEY, BANK_BLURB, between(), CATEGORIES, DAILY, generateTestData() (+8 more)
+Nodes (12): Props, UnderlinedText(), defaultProps, RemotionRoot(), OutroScene(), Props, StatsScene(), Props (+4 more)
+
+### Community 138 - "luxon"
+Cohesion: 0.24
+Nodes (12): ReviewLinks(), Template(), luxon, CashflowChart(), CashflowPoint, DailySpendingChart(), MonthlyBudgetLine, SurplusPoint (+4 more)
+
+### Community 139 - "Finpoint illustrated scenes"
+Cohesion: 0.12
+Nodes (15): Author a scene, Author a take, Finpoint beginner video, How it fits together, Narration setup, Rebuild everything, Snapshot evidence, Verification and limits (+7 more)
+
+### Community 140 - "Media operations: agent guidance"
+Cohesion: 0.12
+Nodes (15): Cut / trim: keep a slice, Ducking (declare in-composition / bake for export), Exact error-diffusion dither, Generate: images (local first, cloud upsell), Generate: video (`resolve --type video`, HeyGen avatar first), HEVC / H.265 sources, Image-to-video (animate any still into a talking clip), Media operations: agent guidance (+7 more)
+
+### Community 141 - "StatsScene.tsx"
+Cohesion: 0.17
+Nodes (12): Composition shape, How to render and evaluate, The lossy parts (and why threshold = 0.90), Tier 3 — stargazed-data-driven, Translation walk-through (skill cheat sheet), What it tests, AnimatedNumber(), Props (+4 more)
+
+### Community 142 - "tier-3-data-driven/remotion-src/package.json"
+Cohesion: 0.12
+Nodes (15): dependencies, react, react-dom, remotion, @remotion/cli, zod, react, react-dom (+7 more)
+
+### Community 143 - "tier-1-title-card/remotion-src/package.json"
+Cohesion: 0.13
+Nodes (14): dependencies, react, react-dom, remotion, @remotion/cli, react, react-dom, remotion (+6 more)
+
+### Community 144 - "tier-2-multi-scene/remotion-src/package.json"
+Cohesion: 0.13
+Nodes (14): dependencies, react, react-dom, remotion, @remotion/cli, react, react-dom, remotion (+6 more)
+
+### Community 145 - "google-drive.ts"
+Cohesion: 0.22
+Nodes (13): AuthNeededError, cacheToken(), CodeResponse, disconnectDrive(), DriveFileMeta, ensureDriveToken(), ensureDriveTokenSilent(), googleClientId() (+5 more)
+
+### Community 146 - "Registry discovery"
+Cohesion: 0.14
+Nodes (12): Available items, Components, Item manifest fields, Read the registry manifest as a fallback, Reading an item's manifest, Registry discovery, Use the catalog command first, Report what the catalog does not have (+4 more)
+
+### Community 147 - "bake-basemap.mjs"
+Cohesion: 0.13
+Nodes (8): CENTER, COUNTRIES, framesDir, MARGIN, N, film, mounted, video
+
+### Community 148 - "extract-audio-data.py"
+Cohesion: 0.26
+Nodes (5): compute_band_edges(), compute_fft_bands(), decode_audio(), extract(), main()
+
+### Community 149 - "eval.mjs"
+Cohesion: 0.18
+Nodes (13): countAssetFiles(), walk(), escapeHtml(), evalBlock(), generateReport(), outPath, REPO_ROOT, report (+5 more)
+
+### Community 150 - "motion.js"
+Cohesion: 0.15
+Nodes (5): cues, enter(), steps(), tl, vars
+
+### Community 151 - "Component quality bar"
+Cohesion: 0.15
+Nodes (12): Calibration, Checklist, Component quality bar, Duplicates, which one survives, Fatal, cut the item, Fixable, keep and repair, How an audit runs, Mechanical first pass (+4 more)
+
+### Community 152 - "ref_remotion"
+Cohesion: 0.21
+Nodes (3): RemotionRoot(), TitleCard(), handle
+
+### Community 153 - "compilerOptions"
+Cohesion: 0.15
+Nodes (12): compilerOptions, esModuleInterop, forceConsistentCasingInFileNames, isolatedModules, jsx, module, moduleResolution, resolveJsonModule (+4 more)
+
+### Community 154 - "compilerOptions"
+Cohesion: 0.15
+Nodes (12): compilerOptions, esModuleInterop, forceConsistentCasingInFileNames, isolatedModules, jsx, module, moduleResolution, resolveJsonModule (+4 more)
+
+### Community 155 - "compilerOptions"
+Cohesion: 0.15
+Nodes (12): compilerOptions, esModuleInterop, forceConsistentCasingInFileNames, isolatedModules, jsx, module, moduleResolution, resolveJsonModule (+4 more)
+
+### Community 156 - "Remotion → HyperFrames API Map"
+Cohesion: 0.15
+Nodes (13): Composition root, Distributed rendering, Fonts, Lottie, Media, Parameters, React patterns, Reading this table (+5 more)
+
+### Community 157 - "Storyboard format — `STORYBOARD.md` + parsed manifest"
+Cohesion: 0.17
+Nodes (11): 1. The run, 2. The page, 3. The plan beside it, Example, Notes, Parsed manifest, Per-frame sections, `SCRIPT.md` (out of scope here) (+3 more)
+
+### Community 159 - "Patterns that work with caveats"
+Cohesion: 0.17
+Nodes (11): Code-split components (`React.lazy`), Custom `presentation` in `<TransitionSeries>`, `<Loop>` with stateful children, Patterns that always work, Patterns that work with caveats, React patterns the skill refuses, Remotion's `<Img>` with crossOrigin, Reporting gaps to the user (+3 more)
+
+### Community 160 - "DataSettingsPage"
+Cohesion: 0.27
+Nodes (11): DataSettingsPage(), StateRow(), WorkspaceRow(), clearAllData(), downloadExport(), tableCounts(), wasVaultProven(), seedIfEmpty() (+3 more)
+
+### Community 161 - "tts.py"
+Cohesion: 0.21
+Nodes (3): gaps(), sentence_spans(), trim()
+
+### Community 162 - "info, upgrade, compositions, timeline, docs, benchmark, telemetry, asset preprocessing"
+Cohesion: 0.18
+Nodes (10): Asset Preprocessing, benchmark, compositions, docs, info, info, upgrade, compositions, timeline, docs, benchmark, telemetry, asset preprocessing, Query one-liners (jq, node fallback if jq is absent), Remaining harness usage, telemetry (+2 more)
+
+### Community 163 - "Story"
+Cohesion: 0.18
+Nodes (9): 1. The one thing, 2. Three storylines, then one, 3. The hook, 4. Beats, 5. Worlds, 6. Copy and voice, 7. The brand, 8. Tells of a generated film (+1 more)
+
+### Community 164 - "Blocks"
+Cohesion: 0.18
+Nodes (11): Blocks, Branding + 3D UI (2), Code Animations (9), Code snippets (24), Liquid Glass (7), Maps + data viz (8), Shader transitions (14), Showcases (6) (+3 more)
+
+### Community 165 - "Background Removal"
+Cohesion: 0.18
+Nodes (10): Background Removal, Canonical 3-layer template (plate + content + cutout), Compositing patterns — pick the right one, Device (`--device`), Layer separation (`--background-output`), Output Format, Quality (`--quality`), Text-behind-subject pattern (two non-obvious rules) (+2 more)
+
+### Community 166 - "lyria-recipe.py"
+Cohesion: 0.33
+Nodes (3): generate_bgm(), main(), parse_args()
+
+### Community 167 - "transcribe.mjs"
+Cohesion: 0.27
+Nodes (8): mergeTokensToWords(), atomicWrite(), inputPath, outPath, report(), runCli(), runParakeet(), { values: args }
+
+### Community 168 - "Sequencing translation: Sequence, Series, Composition root"
+Cohesion: 0.18
+Nodes (11): `<AbsoluteFill>` → positioned div, `<Composition>` → root `#stage`, Crossfading scene boundaries, `<Freeze>`, `<Loop>`, Multiple parallel tracks, Nested `<Sequence>` flattens, `<Sequence>` → sub-composition host (+3 more)
+
+### Community 169 - "video/package.json"
+Cohesion: 0.18
+Nodes (10): gsap, dependencies, gsap, name, private, scripts, check, dev (+2 more)
+
+### Community 170 - "metric.tsx"
+Cohesion: 0.31
+Nodes (7): Sparkline(), Delta, Metric(), SelectionBar(), ValueSwap(), DURATION, EASE_OUT
+
+### Community 171 - "lint, check, snapshot"
+Cohesion: 0.20
+Nodes (9): check, Deprecated: validate, inspect, layout, Discipline (motion-heavy work), Keep verification clean and inspect the actual pixels, lint, lint, check, snapshot, Motion verification (`*.motion.json` sidecar), snapshot (+1 more)
+
+### Community 172 - "preview, play, render, publish"
+Cohesion: 0.20
+Nodes (9): Agent context from Studio selection, feedback (report after rendering), Launching with an external browser (preview + play), play (lightweight player), preview, preview, play, render, publish, publish, render (+1 more)
+
+### Community 173 - "Eval: how to validate a translation end-to-end"
+Cohesion: 0.20
+Nodes (10): CI integration, Critical: encoder config, Eval: how to validate a translation end-to-end, Per-fixture flow, Reading `diff/summary.json`, The three scripts, Threshold rule of thumb, Validated tier thresholds (+2 more)
+
+### Community 174 - "Media translation: Audio, Video, Img, IFrame, staticFile"
+Cohesion: 0.20
+Nodes (10): Asset paths, `<Audio>`, `delayRender()` / `continueRender()`, `<IFrame>`, `<Img>`, Media translation: Audio, Video, Img, IFrame, staticFile, Trim / playbackRate, `<Video>` and `<OffthreadVideo>` (+2 more)
+
+### Community 175 - "budgets/page.tsx"
+Cohesion: 0.36
+Nodes (9): BUDGET_STATES, BudgetCard(), BudgetsPage(), BudgetState, formatBudgetDateWindow(), rangeFromValue(), parseDate(), listBudgets() (+1 more)
+
+### Community 176 - "The look"
+Cohesion: 0.22
+Nodes (8): From a brand, From a reference, Make it re-brandable, Presets, The look, The LOOK line, The project's design spec, Video facts
+
+### Community 178 - "details"
+Cohesion: 0.22
+Nodes (8): Classify the request, Common workflow, Media treatments, Permission and scope, Seed or assemble, Translate vague feedback conservatively, count(), details()
+
+### Community 180 - "Lottie translation: @remotion/lottie → HF lottie adapter"
+Cohesion: 0.22
+Nodes (8): After Effects → Lottie limitations, Asset handling, Loop behavior, Lottie source isn't actually translation-blocking, Lottie translation: @remotion/lottie → HF lottie adapter, Multiple Lottie animations, Pattern, Performance note
+
+### Community 181 - "Parameter translation: Zod schemas, defaultProps, calculateMetadata"
+Cohesion: 0.22
+Nodes (9): Async calculateMetadata (NOT translatable), Boolean props, Default props, Nested object / array props, Numeric props that need typed parsing, Parameter translation: Zod schemas, defaultProps, calculateMetadata, Sync calculateMetadata (translatable), When the composition uses props for computed prop derivation (+1 more)
+
+### Community 182 - "Timing translation: interpolate, spring, easing"
+Cohesion: 0.22
+Nodes (9): Conversion: frames → seconds, Custom count-up / number tweens, interpolate driving non-numeric properties, interpolate — linear, interpolate — multi-segment, interpolate with custom easing, spring → GSAP back.out, Stagger via per-instance prop (+1 more)
+
+### Community 183 - "Finpoint video: compact production handoff"
+Cohesion: 0.22
+Nodes (8): Creative freedom, Efficient sequence, Exact example totals, Finpoint video: compact production handoff, Narrative, Non-negotiable meaning, Objective, Verification boundary
+
+### Community 184 - "monthly-budgets.test.ts"
+Cohesion: 0.31
+Nodes (7): digestSnapshot(), hashLegacySnapshot(), hashSnapshot(), Snapshot, input, legacyPaceKey, today
+
+### Community 185 - "hyperframes.json"
+Cohesion: 0.22
+Nodes (8): media, autoProxy, paths, assets, blocks, components, registry, $schema
+
+### Community 186 - "Films from a source: measured facts"
+Cohesion: 0.25
+Nodes (7): Films from a source: measured facts, From a pull request, From a website, Maps and real places, On music, Script and pacing, Short motion pieces
+
+### Community 187 - "Explainers, tutorials and "how it works""
+Cohesion: 0.25
+Nodes (7): Devices that explain, Explainers, tutorials and "how it works", Getting it right, Ground it first, Shapes of information, Tells for this type, Words
+
+### Community 188 - "Steps"
+Cohesion: 0.25
+Nodes (7): 1. Install the block, 2. Wire into index.html, 3. Lint and preview, 4. Customize (optional), Scenario, Steps, Worked Example: Adding a Block
+
+### Community 189 - "Steps"
+Cohesion: 0.25
+Nodes (7): 1. Install the component, 2. Read the snippet, 3. Wire into your composition, 4. Lint and preview, Scenario, Steps, Worked Example: Adding a Component
+
+### Community 190 - "media-use usage dashboard"
+Cohesion: 0.29
+Nodes (7): Dashboard tiles, Event catalog (verified present in-project), Identity (see `scripts/lib/telemetry.mjs`), media-use usage dashboard, Recreate in an analytics dashboard, sidebar(), via()
+
+### Community 191 - "MultiScene.tsx"
+Cohesion: 0.43
+Nodes (5): ImageScene(), MultiScene(), OutroScene(), TitleScene(), RemotionRoot()
+
+### Community 192 - "07-custom-hook.tsx"
+Cohesion: 0.29
+Nodes (6): CustomHookDriven(), useFadeIn(), Cases, Tier 4 — escape-hatch, Validation, What it tests
+
+### Community 193 - "Font translation"
+Cohesion: 0.25
+Nodes (8): Font loading and `delayRender`, Font subsetting, Font translation, Multi-weight loading, Pattern: local fonts via `@font-face`, Pattern: `@remotion/google-fonts/<Family>`, Pattern: system font fallback (no font load), When in doubt: use Inter
+
+### Community 194 - "Frame Treatments"
+Cohesion: 0.29
+Nodes (7): 1 · Cover (identity · move: serif + compass ring · left), 2 · Agenda / Index (index · move: hairline list · left), 3 · Pull Quote (quote · move: centered statement · compass ring), 4 · Closing Plate (closer · move: centered ring · centered), 5 · Two-Column Editorial (content · move: asymmetric split · left), 6 · Stats / Timeline (data · move: hairline rail · left), Frame Treatments
+
+### Community 195 - "Captions"
+Cohesion: 0.29
+Nodes (6): Captions, Fit and place, Groups, Structure, Text behind the speaker, Words and timings
+
+### Community 196 - "Motion"
+Cohesion: 0.29
+Nodes (6): Common faults, Motion, Motion craft, Seeing motion, The right mechanism, Transitions with a cause
+
+### Community 197 - "Sound"
+Cohesion: 0.29
+Nodes (6): 1. The default, 2. The clock, 3. Music, 4. Effects, 5. Levels, Sound
+
+### Community 198 - "The spec"
+Cohesion: 0.29
+Nodes (6): A look built from a medium, BANNED by default, Composition numbers, The spec, The template, Turning words into numbers
+
+### Community 199 - "monthly-budget-usage.tsx"
+Cohesion: 0.38
+Nodes (6): Frontmatter (global direction), Driving it from the request, arc(), centerCurrency(), MonthlyBudgetUsage(), MonthlyBudgetUsageItem
+
+### Community 200 - "Launch, promo and feature films"
+Cohesion: 0.29
+Nodes (6): Launch, promo and feature films, Real UI, never a mockup, Tells for this type, The end card, The product on screen, Worlds and transitions
+
+### Community 201 - "Wiring Blocks"
+Cohesion: 0.29
+Nodes (6): Basic wiring, Multiple blocks, Positioning blocks, Required attributes, Timeline coordination, Wiring Blocks
+
+### Community 202 - "Sound effects (SFX)"
+Cohesion: 0.29
+Nodes (6): Bundled library (fallback), Cues — request → meta, Licences, Openverse, Rules, Sound effects (SFX)
+
+### Community 203 - "Mixing in HyperFrames"
+Cohesion: 0.29
+Nodes (6): `data-automation`: envelopes, `data-fx-chain`: effects, Group buses, Level and fades, Mixing in HyperFrames, Music under a voice
+
+### Community 204 - "run.sh"
+Cohesion: 0.57
+Nodes (6): read_json_value(), require_render_tier_tools(), run_lint_tier(), run_render_tier(), run.sh script, write_result()
+
+### Community 206 - "When to bow out: the runtime interop pattern"
+Cohesion: 0.29
+Nodes (7): The lint output already includes recommendations, The recommendation message, What the interop pattern actually does, When NOT to bow out: warnings only, When the source has BOTH blockers AND warnings, When to bow out: the runtime interop pattern, When to recommend interop
+
+### Community 207 - "guide.ts"
+Cohesion: 0.29
+Nodes (6): GuideBeat, GuideChapter, guideChapters, GuideDestination, GuideLevel, guideLevels
+
+### Community 208 - "Compare and batch rendering"
+Cohesion: 0.33
+Nodes (5): Batch template renders, Compare and batch rendering, Compare color grades, Compare projects or variants, Contents
+
+### Community 209 - "Review"
+Cohesion: 0.33
+Nodes (5): 1. Measure, then look, 2. What to look for, 3. Notes and fixes, 4. The delivery note, Review
+
+### Community 210 - "Animation runtimes"
+Cohesion: 0.33
+Nodes (5): Animation runtimes, dotLottie browser setup, GSAP facts that bite, Other runtimes, The seek protocol
+
+### Community 211 - "3D, simulations and generative pieces"
+Cohesion: 0.33
+Nodes (5): 3D, simulations and generative pieces, Camera and story, Check it, Deterministic by construction, Light and materials
+
+### Community 212 - "Music videos and films cut to a track"
+Cohesion: 0.33
+Nodes (5): Music videos and films cut to a track, Pictures for the words, Song structure becomes edit structure, Tells for this type, The look
+
+### Community 213 - "Vertical and social clips (9:16)"
+Cohesion: 0.33
+Nodes (5): Layout, Pacing, The first second, The platform's own UI, Vertical and social clips (9:16)
+
+### Community 214 - "The demo.html Convention"
+Cohesion: 0.33
+Nodes (5): Blocks don't need demo.html, Demo structure, Demos are not installed, The demo.html Convention, Why components ship demo.html
+
+### Community 215 - "Install Locations"
+Cohesion: 0.33
+Nodes (5): Custom layouts, Default paths, How path remapping works, hyperframes.json, Install Locations
+
+### Community 216 - "Wiring Components"
+Cohesion: 0.33
+Nodes (5): Example: grain-overlay (CSS-only, no timeline integration), Example: shimmer-sweep (needs timeline integration), General process, Key principles, Wiring Components
+
+### Community 217 - "HyperFrames registry"
+Cohesion: 0.33
+Nodes (5): Contributing, Find and install, HyperFrames registry, What's in it, Wiring
+
+### Community 218 - "Ownership matrix, usage stats, telemetry, privacy"
+Cohesion: 0.33
+Nodes (5): Ownership matrix, usage stats, telemetry, privacy, Privacy, Telemetry, Usage stats, What it owns (the gaps HyperFrames leaves)
+
+### Community 219 - "Setup and providers — install, auth, RAM ladders, forcing a provider"
+Cohesion: 0.33
+Nodes (5): CLI tools used (what to run, and how to enable each), Host HeyGen access (no CLI sign-in), Providers, Setup and providers — install, auth, RAM ladders, forcing a provider, Setup — install heygen first (free-usage path)
+
+### Community 220 - "Tier 2 — title-image-outro"
+Cohesion: 0.33
+Nodes (5): How to render and evaluate, Tier 2 — title-image-outro, Translation walk-through, What it tests, Why threshold 0.95?
+
+### Community 221 - "Transitions translation: @remotion/transitions → HF crossfades / shader-transitions"
+Cohesion: 0.33
+Nodes (6): Pattern: `<TransitionSeries>` is `<Series>` with overlap, Presentation table, Timing translations, Transitions translation: @remotion/transitions → HF crossfades / shader-transitions, When the source uses a custom Presentation, When to use HF shader-transitions
+
+### Community 222 - "init, capture, skills"
+Cohesion: 0.40
+Nodes (4): capture, init, init, capture, skills, skills
+
+### Community 223 - "Cards over talking-head footage"
+Cohesion: 0.40
+Nodes (4): Cards over talking-head footage, Pitfalls, Timing, Where the video sits
+
+### Community 224 - "Characters, mascots and story shorts"
+Cohesion: 0.40
+Nodes (4): Acting, Build, Characters, mascots and story shorts, Reads
+
+### Community 225 - "Numbers, charts and data stories"
+Cohesion: 0.40
+Nodes (4): Charts as pictures, Numbers, charts and data stories, One number at a time, Tells for this type
+
+### Community 226 - "sfx/manifest.json"
+Cohesion: 0.40
+Nodes (4): chime, description, duration, file
+
+### Community 227 - "Local media commands"
+Cohesion: 0.40
+Nodes (4): Cutouts, Grade and style footage and images, Local media commands, Sound
+
+### Community 228 - "User memory — preferences and recipes"
+Cohesion: 0.40
+Nodes (4): Files, Preferences — remembered defaults, Recipes — frozen video bundles, User memory — preferences and recipes
+
+### Community 229 - "Tier 1 — title-card-fade"
+Cohesion: 0.40
+Nodes (4): How to render and evaluate, Tier 1 — title-card-fade, Translation walk-through, What it tests
+
+### Community 230 - "Implemented beginner guide — handoff"
+Cohesion: 0.40
+Nodes (4): Editable structure, Implemented beginner guide — handoff, Storage and workflow, Verification and review
+
+### Community 231 - "SFX Credits"
+Cohesion: 0.50
+Nodes (3): Files, License, SFX Credits
+
+### Community 232 - "click"
+Cohesion: 0.50
+Nodes (4): click, description, duration, file
+
+### Community 233 - "click-soft"
+Cohesion: 0.50
+Nodes (4): click-soft, description, duration, file
+
+### Community 234 - "error"
+Cohesion: 0.50
+Nodes (4): error, description, duration, file
+
+### Community 235 - "glitch-1"
+Cohesion: 0.50
+Nodes (4): glitch-1, description, duration, file
+
+### Community 236 - "glitch-2"
+Cohesion: 0.50
+Nodes (4): glitch-2, description, duration, file
+
+### Community 237 - "glitch-3"
+Cohesion: 0.50
+Nodes (4): glitch-3, description, duration, file
+
+### Community 238 - "impact-bass-1"
+Cohesion: 0.50
+Nodes (4): impact-bass-1, description, duration, file
+
+### Community 239 - "impact-bass-2"
+Cohesion: 0.50
+Nodes (4): impact-bass-2, description, duration, file
+
+### Community 240 - "key-press"
+Cohesion: 0.50
+Nodes (4): key-press, description, duration, file
+
+### Community 241 - "notification"
+Cohesion: 0.50
+Nodes (4): notification, description, duration, file
+
+### Community 242 - "ping"
+Cohesion: 0.50
+Nodes (4): ping, description, duration, file
+
+### Community 243 - "pop"
+Cohesion: 0.50
+Nodes (4): pop, description, duration, file
+
+### Community 244 - "riser"
+Cohesion: 0.50
+Nodes (4): riser, description, duration, file
+
+### Community 245 - "sparkle"
+Cohesion: 0.50
+Nodes (4): sparkle, description, duration, file
+
+### Community 246 - "typing"
+Cohesion: 0.50
+Nodes (4): typing, description, duration, file
+
+### Community 247 - "whoosh"
+Cohesion: 0.50
+Nodes (4): whoosh, description, duration, file
+
+### Community 248 - "whoosh-cinematic"
+Cohesion: 0.50
+Nodes (4): whoosh-cinematic, description, duration, file
+
+### Community 249 - "whoosh-short"
+Cohesion: 0.50
+Nodes (4): whoosh-short, description, duration, file
+
+### Community 250 - "Requirements & Caches"
+Cohesion: 0.50
+Nodes (3): Credential & key priority, Model caches & system dependencies, Requirements & Caches
+
+### Community 255 - "clean.tsx"
+Cohesion: 0.83
+Nodes (3): MyComposition(), pick(), TitleCard()
+
+### Community 257 - "visit"
+Cohesion: 1.00
+Nodes (3): importsMotionModule(), targetsMotion(), visit()
 
 ## Knowledge Gaps
 - **98 isolated node(s):** `@remotion/cli`, `react`, `react-dom`, `remotion`, `@remotion/cli` (+93 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1948 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1967 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **29 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `@playwright/test` connect `@playwright/test` to `workflows.e2e.ts`, `story.ts`, `director.ts`, `editors.ts`, `record.ts`, `core/routes.e2e.ts`, `package.json`, `ledger.e2e.ts`, `core/components.e2e.ts`, `fixtures.ts`, `support/motion.ts`?**
+- **Why does `@playwright/test` connect `@playwright/test` to `record.ts`, `director.ts`, `story.ts`, `fixtures.ts`, `editors.ts`, `navigation.e2e.ts`, `data.ts`, `package.json`, `ledger.e2e.ts`, `core/components.e2e.ts`, `core/routes.e2e.ts`?**
   _High betweenness centrality (0.041) - this node is a cross-community bridge._
 - **What connects `@remotion/cli`, `react`, `react-dom` to the rest of the system?**
   _98 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `importer/page.tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.12020460358056266 - nodes in this community are weakly interconnected._
-- **Why does `cn()` connect `cn` to `importer/page.tsx`, `lucide-react`, `pagination.tsx`, `paginated-data-table.tsx`, `(month)/page.tsx`, `sidebar.tsx`, `amount-filter.tsx`, `sync/page.tsx`, `Story`, `utils.ts`, `lib/motion.ts`, `record-editor.tsx`, `pending/page.tsx`, `spending-calendar.tsx`, `category-filter.tsx`, `budgets/[id]/page.tsx`, `Button`, `primitives.tsx`, `providers.tsx`?**
-  _High betweenness centrality (0.033) - this node is a cross-community bridge._
+- **Should `sidebar.tsx` be split into smaller, more focused modules?**
+  _Cohesion score 0.08673469387755102 - nodes in this community are weakly interconnected._
+- **Why does `cn()` connect `cn` to `sidebar.tsx`, `Button`, `amount-filter.tsx`, `primitives.tsx`, `importer/page.tsx`, `luxon`, `lib/motion.ts`, `routes.ts`, `DataSettingsPage`, `useHistory`, `metric.tsx`, `icon.tsx`, `budgets/page.tsx`, `pagination.tsx`, `utils.ts`, `(month)/layout.tsx`, `spending-calendar.tsx`, `(month)/page.tsx`, `duplicates/page.tsx`, `monthly-budget-usage.tsx`, `trend-chart.tsx`, `ui/field.tsx`?**
+  _High betweenness centrality (0.040) - this node is a cross-community bridge._
+- **Should `Button` be split into smaller, more focused modules?**
+  _Cohesion score 0.13845350052246605 - nodes in this community are weakly interconnected._
+- **Why does `Commands by job` connect `locate.mjs` to `tts.py`, `visual-scenes.ts`?**
+  _High betweenness centrality (0.029) - this node is a cross-community bridge._
 - **Should `db.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.09879032258064516 - nodes in this community are weakly interconnected._
-- **Why does `mulberry32()` connect `Placeholder material` to `test-data.ts`?**
-  _High betweenness centrality (0.026) - this node is a cross-community bridge._
-- **Should `Tests README` be split into smaller, more focused modules?**
-  _Cohesion score 0.05928614640048397 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.07293868921775898 - nodes in this community are weakly interconnected._

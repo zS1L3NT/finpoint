@@ -94,8 +94,6 @@ function buildPopulated(): WorkspaceDataset {
 			id: "t1-mb-daily",
 			name: "Daily",
 			color: "#38bdf8",
-			group: "core",
-			pace_kind: "daily",
 			display_order: 10,
 			archived: false,
 		},
@@ -103,8 +101,6 @@ function buildPopulated(): WorkspaceDataset {
 			id: "t1-mb-recurring",
 			name: "Recurring",
 			color: "#a78bfa",
-			group: "core",
-			pace_kind: "recurring",
 			display_order: 20,
 			archived: false,
 		},
@@ -112,8 +108,6 @@ function buildPopulated(): WorkspaceDataset {
 			id: "t1-mb-travel",
 			name: "Travel",
 			color: "#fb7185",
-			group: "outlier",
-			pace_kind: "none",
 			display_order: 40,
 			archived: true,
 		},
@@ -206,7 +200,7 @@ function buildPopulated(): WorkspaceDataset {
 			icon: "circle-question-mark",
 			color: "#9E9E9E",
 			parent_category_id: null,
-			analytics_treatment: null,
+			analytics_treatment: "automatic",
 			default_monthly_budget_id: null,
 		},
 	)
@@ -233,10 +227,8 @@ function buildPopulated(): WorkspaceDataset {
 			datetime: "2026-10-01 09:00",
 			amount: 5200,
 			category_id: "t1-cat-income",
-			analytics_treatment: "income",
-			analytics_treatment_source: "category",
-			monthly_budget_id: null,
-			monthly_budget_source: null,
+			treatment_choice: { kind: "category" },
+			monthly_budget_choice: { kind: "category" },
 			revision: 1,
 		},
 		{
@@ -248,10 +240,8 @@ function buildPopulated(): WorkspaceDataset {
 			datetime: "2026-09-01 09:05",
 			amount: -1400,
 			category_id: "t1-cat-rent",
-			analytics_treatment: "spending",
-			analytics_treatment_source: "category",
-			monthly_budget_id: "t1-mb-recurring",
-			monthly_budget_source: "category",
+			treatment_choice: { kind: "category" },
+			monthly_budget_choice: { kind: "category" },
 			revision: 1,
 		},
 		{
@@ -263,10 +253,8 @@ function buildPopulated(): WorkspaceDataset {
 			datetime: "2026-10-05 18:24",
 			amount: -84.2,
 			category_id: "t1-cat-groceries",
-			analytics_treatment: "spending",
-			analytics_treatment_source: "category",
-			monthly_budget_id: "t1-mb-daily",
-			monthly_budget_source: "category",
+			treatment_choice: { kind: "category" },
+			monthly_budget_choice: { kind: "category" },
 			revision: 1,
 		},
 		{
@@ -278,10 +266,8 @@ function buildPopulated(): WorkspaceDataset {
 			datetime: "2026-10-07 12:00",
 			amount: -250,
 			category_id: "t1-cat-transfer",
-			analytics_treatment: "neutral",
-			analytics_treatment_source: "category",
-			monthly_budget_id: null,
-			monthly_budget_source: null,
+			treatment_choice: { kind: "category" },
+			monthly_budget_choice: { kind: "category" },
 			revision: 1,
 		},
 		{
@@ -293,10 +279,8 @@ function buildPopulated(): WorkspaceDataset {
 			datetime: "2026-10-05 08:00",
 			amount: -500,
 			category_id: "t1-cat-saving",
-			analytics_treatment: "saving_investment",
-			analytics_treatment_source: "category",
-			monthly_budget_id: null,
-			monthly_budget_source: null,
+			treatment_choice: { kind: "category" },
+			monthly_budget_choice: { kind: "category" },
 			revision: 1,
 		},
 		{
@@ -308,10 +292,8 @@ function buildPopulated(): WorkspaceDataset {
 			datetime: "2026-10-09 19:40",
 			amount: -60,
 			category_id: "t1-cat-dining",
-			analytics_treatment: "spending",
-			analytics_treatment_source: "category",
-			monthly_budget_id: "t1-mb-daily",
-			monthly_budget_source: "category",
+			treatment_choice: { kind: "category" },
+			monthly_budget_choice: { kind: "category" },
 			revision: 1,
 		},
 		{
@@ -323,10 +305,8 @@ function buildPopulated(): WorkspaceDataset {
 			datetime: "2026-10-11 20:15",
 			amount: -14.5,
 			category_id: "t1-cat-dining",
-			analytics_treatment: "spending",
-			analytics_treatment_source: "category",
-			monthly_budget_id: "t1-mb-daily",
-			monthly_budget_source: "category",
+			treatment_choice: { kind: "category" },
+			monthly_budget_choice: { kind: "category" },
 			revision: 1,
 		},
 		{
@@ -338,10 +318,8 @@ function buildPopulated(): WorkspaceDataset {
 			datetime: "2026-10-06 10:00",
 			amount: 0,
 			category_id: "t1-cat-null",
-			analytics_treatment: "spending",
-			analytics_treatment_source: "manual",
-			monthly_budget_id: null,
-			monthly_budget_source: null,
+			treatment_choice: { kind: "explicit", value: "spending" },
+			monthly_budget_choice: { kind: "category" },
 			revision: 1,
 		},
 		{
@@ -353,10 +331,8 @@ function buildPopulated(): WorkspaceDataset {
 			datetime: "2026-10-08 08:30",
 			amount: -12.5,
 			category_id: "t1-cat-null",
-			analytics_treatment: "spending",
-			analytics_treatment_source: "manual",
-			monthly_budget_id: null,
-			monthly_budget_source: null,
+			treatment_choice: { kind: "explicit", value: "spending" },
+			monthly_budget_choice: { kind: "category" },
 			revision: 1,
 		},
 		{
@@ -368,10 +344,8 @@ function buildPopulated(): WorkspaceDataset {
 			datetime: "2026-10-10 13:20",
 			amount: -33.33,
 			category_id: "t1-cat-groceries",
-			analytics_treatment: "spending",
-			analytics_treatment_source: "category",
-			monthly_budget_id: "t1-mb-daily",
-			monthly_budget_source: "category",
+			treatment_choice: { kind: "category" },
+			monthly_budget_choice: { kind: "category" },
 			revision: 1,
 		},
 		{
@@ -383,10 +357,8 @@ function buildPopulated(): WorkspaceDataset {
 			datetime: "2026-10-12 15:05",
 			amount: -100,
 			category_id: "t1-cat-shopping",
-			analytics_treatment: "spending",
-			analytics_treatment_source: "category",
-			monthly_budget_id: null,
-			monthly_budget_source: null,
+			treatment_choice: { kind: "category" },
+			monthly_budget_choice: { kind: "category" },
 			revision: 1,
 		},
 		{
@@ -398,10 +370,8 @@ function buildPopulated(): WorkspaceDataset {
 			datetime: "2026-10-04 11:10",
 			amount: 20,
 			category_id: "t1-cat-shopping",
-			analytics_treatment: "spending",
-			analytics_treatment_source: "category",
-			monthly_budget_id: null,
-			monthly_budget_source: null,
+			treatment_choice: { kind: "category" },
+			monthly_budget_choice: { kind: "category" },
 			revision: 1,
 		},
 		{
@@ -413,10 +383,8 @@ function buildPopulated(): WorkspaceDataset {
 			datetime: "2026-08-15 09:33",
 			amount: -45,
 			category_id: "t1-cat-groceries",
-			analytics_treatment: "spending",
-			analytics_treatment_source: "category",
-			monthly_budget_id: "t1-mb-daily",
-			monthly_budget_source: "category",
+			treatment_choice: { kind: "category" },
+			monthly_budget_choice: { kind: "category" },
 			revision: 1,
 		},
 		{
@@ -428,10 +396,8 @@ function buildPopulated(): WorkspaceDataset {
 			datetime: "2026-10-03 08:12",
 			amount: -2.1,
 			category_id: "t1-cat-auto",
-			analytics_treatment: "automatic",
-			analytics_treatment_source: "category",
-			monthly_budget_id: null,
-			monthly_budget_source: null,
+			treatment_choice: { kind: "category" },
+			monthly_budget_choice: { kind: "category" },
 			revision: 1,
 		},
 		{
@@ -443,10 +409,8 @@ function buildPopulated(): WorkspaceDataset {
 			datetime: "2026-10-03 08:13",
 			amount: 3.5,
 			category_id: "t1-cat-auto",
-			analytics_treatment: "automatic",
-			analytics_treatment_source: "category",
-			monthly_budget_id: null,
-			monthly_budget_source: null,
+			treatment_choice: { kind: "category" },
+			monthly_budget_choice: { kind: "category" },
 			revision: 1,
 		},
 	)
@@ -730,7 +694,7 @@ function buildDense(): WorkspaceDataset {
 			icon: "circle-question-mark",
 			color: "#9E9E9E",
 			parent_category_id: i % 8 === 0 ? "t1-d-cat-01" : null,
-			analytics_treatment: i % 13 === 0 ? null : cycle([...treatments], i - 1),
+			analytics_treatment: i % 13 === 0 ? "automatic" : cycle([...treatments], i - 1),
 			default_monthly_budget_id: i % 5 === 0 ? "t1-d-mb-daily" : null,
 		})
 	}
@@ -739,8 +703,6 @@ function buildDense(): WorkspaceDataset {
 			id: "t1-d-mb-daily",
 			name: "Daily",
 			color: "#38bdf8",
-			group: "core",
-			pace_kind: "daily",
 			display_order: 10,
 			archived: false,
 		},
@@ -748,8 +710,6 @@ function buildDense(): WorkspaceDataset {
 			id: "t1-d-mb-recurring",
 			name: "Recurring",
 			color: "#a78bfa",
-			group: "core",
-			pace_kind: "recurring",
 			display_order: 20,
 			archived: false,
 		},
@@ -757,8 +717,6 @@ function buildDense(): WorkspaceDataset {
 			id: "t1-d-mb-irregular",
 			name: "Irregular",
 			color: "#fbbf24",
-			group: "outlier",
-			pace_kind: "none",
 			display_order: 30,
 			archived: false,
 		},
@@ -766,8 +724,6 @@ function buildDense(): WorkspaceDataset {
 			id: "t1-d-mb-travel",
 			name: "Travel",
 			color: "#fb7185",
-			group: "outlier",
-			pace_kind: "none",
 			display_order: 40,
 			archived: false,
 		},
@@ -775,8 +731,6 @@ function buildDense(): WorkspaceDataset {
 			id: "t1-d-mb-extra-1",
 			name: "Dense Extra 1",
 			color: "#64DD17",
-			group: "other",
-			pace_kind: "none",
 			display_order: 50,
 			archived: false,
 		},
@@ -784,8 +738,6 @@ function buildDense(): WorkspaceDataset {
 			id: "t1-d-mb-extra-2",
 			name: "Dense Extra 2",
 			color: "#4FC3F7",
-			group: "other",
-			pace_kind: "none",
 			display_order: 60,
 			archived: false,
 		},
@@ -793,8 +745,6 @@ function buildDense(): WorkspaceDataset {
 			id: "t1-d-mb-extra-3",
 			name: "Dense Extra 3",
 			color: "#AB47BD",
-			group: "other",
-			pace_kind: "none",
 			display_order: 70,
 			archived: false,
 		},
@@ -802,8 +752,6 @@ function buildDense(): WorkspaceDataset {
 			id: "t1-d-mb-extra-4",
 			name: "Dense Archived",
 			color: "#78909C",
-			group: "other",
-			pace_kind: "none",
 			display_order: 80,
 			archived: true,
 		},
@@ -859,7 +807,6 @@ function buildDense(): WorkspaceDataset {
 		const account = cycle(tables.accounts, i - 1)
 		const amount = i % 10 === 0 ? 0 : i % 9 === 0 ? round2(100 + i) : round2(-(10 + i * 1.5))
 		const recordId = `t1-d-r-${pad2(i)}`
-		const treatment = category.analytics_treatment ?? "spending"
 		tables.records.push({
 			id: recordId,
 			title:
@@ -872,10 +819,8 @@ function buildDense(): WorkspaceDataset {
 			datetime: `${day} 12:00`,
 			amount,
 			category_id: category.id,
-			analytics_treatment: treatment,
-			analytics_treatment_source: category.analytics_treatment ? "category" : "manual",
-			monthly_budget_id: category.default_monthly_budget_id,
-			monthly_budget_source: category.default_monthly_budget_id ? "category" : null,
+			treatment_choice: { kind: "category" },
+			monthly_budget_choice: { kind: "category" },
 			revision: 1,
 		})
 		if (i % 11 === 0) continue
@@ -1071,10 +1016,8 @@ export function statementRules(): StatementRule[] {
 			1,
 			{ mode: "all", items: [{ operator: "contains", value: "starbucks" }] },
 			{
-				title: { mode: "autofill", value: "Morning coffee" },
-				category_id: { mode: "autofill", value: "t1-cat-dining" },
-				people: { mode: "suggest", value: "Alex" },
-				location: { mode: "suggest", value: "Raffles Place" },
+				title: { value: "Morning coffee" },
+				category_id: { value: "t1-cat-dining" },
 			},
 		),
 		rule(
@@ -1083,10 +1026,7 @@ export function statementRules(): StatementRule[] {
 			2,
 			{ mode: "any", items: [{ operator: "regex", value: "4455$" }] },
 			{
-				title: { mode: "suggest", value: "Coffee with team" },
-				category_id: { mode: "autofill", value: "t1-cat-groceries" },
-				location: { mode: "suggest", value: "Raffles Place" },
-				monthly_budget_id: { mode: "suggest", value: "t1-mb-recurring" },
+				category_id: { value: "t1-cat-groceries" },
 			},
 		),
 		rule(
@@ -1101,10 +1041,9 @@ export function statementRules(): StatementRule[] {
 				],
 			},
 			{
-				title: { mode: "autofill", value: "Groceries" },
-				category_id: { mode: "autofill", value: "t1-cat-groceries" },
-				analytics_treatment: { mode: "suggest", value: "neutral" },
-				monthly_budget_id: { mode: "autofill", value: "t1-mb-recurring" },
+				title: { value: "Groceries" },
+				category_id: { value: "t1-cat-groceries" },
+				monthly_budget_id: { value: "t1-mb-recurring" },
 			},
 		),
 		rule(
@@ -1112,7 +1051,7 @@ export function statementRules(): StatementRule[] {
 			"Grab rides",
 			4,
 			{ mode: "all", items: [{ operator: "equals", value: "grab ride 7712" }] },
-			{ title: { mode: "autofill", value: "Taxi" } },
+			{ title: { value: "Taxi" } },
 			false,
 		),
 		rule(
@@ -1121,11 +1060,54 @@ export function statementRules(): StatementRule[] {
 			5,
 			{ mode: "all", items: [{ operator: "contains", value: "sheng" }] },
 			{
-				monthly_budget_id: { mode: "autofill", value: "t1-mb-travel" },
-				people: { mode: "autofill", value: "Sam" },
+				monthly_budget_id: { value: "t1-mb-travel" },
+				people: { value: "Sam" },
 			},
 		),
 	]
+}
+
+/**
+ * Two past Starbucks Records for the populated workspace, so the Record creator has decisions
+ * to learn from when "STARBUCKS 4455" is allocated: both went to "Coffee with team" with Alex
+ * at Raffles Place.
+ */
+export function learnedCoffee(): Pick<WorkspaceTables, "statements" | "records" | "allocations"> {
+	const { tables } = buildPopulated()
+	for (const day of ["01", "02"]) {
+		tables.statements.push({
+			id: `t1-s-coffee-${day}`,
+			account_id: "t1-acc-uob",
+			datetime: `2026-09-${day} 12:00`,
+			description: `STARBUCKS 30${day}`,
+			amount: -7.2,
+			index: 1,
+			is_pending: 0,
+		})
+		tables.records.push({
+			id: `t1-r-coffee-${day}`,
+			title: "Coffee with team",
+			people: "Alex",
+			location: "Raffles Place",
+			description: null,
+			datetime: `2026-09-${day} 12:00`,
+			amount: -7.2,
+			category_id: "t1-cat-dining",
+			treatment_choice: { kind: "category" },
+			monthly_budget_choice: { kind: "category" },
+			revision: 1,
+		})
+		tables.allocations.push({
+			statement_id: `t1-s-coffee-${day}`,
+			record_id: `t1-r-coffee-${day}`,
+			amount: -7.2,
+		})
+	}
+	return {
+		statements: tables.statements,
+		records: tables.records,
+		allocations: tables.allocations,
+	}
 }
 
 export function getScenario(name: ScenarioName): WorkspaceDataset {

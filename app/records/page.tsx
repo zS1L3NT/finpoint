@@ -22,8 +22,6 @@ import {
 	SelectContent,
 	SelectGroup,
 	SelectItem,
-	SelectLabel,
-	SelectSeparator,
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select"
@@ -46,7 +44,6 @@ export default function RecordsPage() {
 	const maxAmount = searchParams.get("max_amount")
 	const isAllocated = searchParams.get("is_allocated")
 	const monthlyBudgetId = searchParams.get("monthly_budget_id")
-	const monthlyBudgetGroup = searchParams.get("monthly_budget_group")
 	const showUnbudgeted = ["1", "true"].includes(searchParams.get("show_unbudgeted") ?? "")
 	const treatment = searchParams.get("treatment")
 	const categoryIdsParam = searchParams.get("category_ids") ?? ""
@@ -77,7 +74,6 @@ export default function RecordsPage() {
 				is_allocated: null,
 				category_ids: null,
 				monthly_budget_id: null,
-				monthly_budget_group: null,
 				show_unbudgeted: null,
 				treatment: null,
 				page: null,
@@ -90,7 +86,7 @@ export default function RecordsPage() {
 		minAmount ?? maxAmount,
 		isAllocated,
 		categoryIds.length ? "categories" : null,
-		monthlyBudgetId ?? monthlyBudgetGroup ?? (showUnbudgeted ? "unbudgeted" : null),
+		monthlyBudgetId ?? (showUnbudgeted ? "unbudgeted" : null),
 		treatment,
 	].filter(Boolean).length
 
@@ -105,7 +101,6 @@ export default function RecordsPage() {
 				is_allocated: isAllocated,
 				category_ids: categoryIds.length ? categoryIds : null,
 				monthly_budget_id: monthlyBudgetId,
-				monthly_budget_group: monthlyBudgetGroup,
 				show_unbudgeted: showUnbudgeted,
 				treatment,
 			}),
@@ -118,7 +113,6 @@ export default function RecordsPage() {
 			isAllocated,
 			categoryIdsParam,
 			monthlyBudgetId,
-			monthlyBudgetGroup,
 			showUnbudgeted,
 			treatment,
 		],
@@ -156,7 +150,6 @@ export default function RecordsPage() {
 					maxAmount={maxAmount}
 					isAllocated={isAllocated}
 					monthlyBudgetId={monthlyBudgetId}
-					monthlyBudgetGroup={monthlyBudgetGroup}
 					showUnbudgeted={showUnbudgeted}
 					treatment={treatment}
 					activeFilterCount={activeFilterCount}
@@ -180,7 +173,6 @@ export default function RecordsPage() {
 			maxAmount,
 			isAllocated,
 			monthlyBudgetId,
-			monthlyBudgetGroup,
 			showUnbudgeted,
 			treatment,
 			activeFilterCount,
@@ -264,7 +256,6 @@ function RecordFilters({
 	maxAmount,
 	isAllocated,
 	monthlyBudgetId,
-	monthlyBudgetGroup,
 	showUnbudgeted,
 	treatment,
 	activeFilterCount,
@@ -280,7 +271,6 @@ function RecordFilters({
 	maxAmount: string | null
 	isAllocated: string | null
 	monthlyBudgetId: string | null
-	monthlyBudgetGroup: string | null
 	showUnbudgeted: boolean
 	treatment: string | null
 	activeFilterCount: number
@@ -291,22 +281,18 @@ function RecordFilters({
 		? "unbudgeted"
 		: monthlyBudgetId
 			? `monthlyBudget:${monthlyBudgetId}`
-			: monthlyBudgetGroup
-				? `group:${monthlyBudgetGroup}`
-				: "all"
+			: "all"
 	const activeMonthlyBudgets = monthlyBudgets.filter(monthlyBudget => !monthlyBudget.archived)
 
 	const changeMonthlyBudgetScope = (scope: string) => {
 		const changes: { [key: string]: string | null } = {
 			monthly_budget_id: null,
-			monthly_budget_group: null,
 			show_unbudgeted: null,
 		}
 
 		if (scope === "unbudgeted") changes.show_unbudgeted = "1"
 		else if (scope.startsWith("monthlyBudget:"))
 			changes.monthly_budget_id = scope.slice("monthlyBudget:".length)
-		else if (scope.startsWith("group:")) changes.monthly_budget_group = scope.slice(6)
 
 		onChange(changes)
 	}
@@ -326,34 +312,27 @@ function RecordFilters({
 				</SelectTrigger>
 				<SelectContent align="start" variant="filter">
 					<SelectGroup>
-						<SelectItem value="all">Any monthly budget</SelectItem>
-						<SelectItem value="unbudgeted">Unbudgeted</SelectItem>
+						<SelectItem value="all">
+							<span className="size-2 rounded-full bg-foreground" />
+							All budgets
+						</SelectItem>
+						{activeMonthlyBudgets.map(monthlyBudget => (
+							<SelectItem
+								key={monthlyBudget.id}
+								value={`monthlyBudget:${monthlyBudget.id}`}
+							>
+								<span
+									className="size-2 rounded-full"
+									style={{ backgroundColor: themeColor(monthlyBudget.color) }}
+								/>
+								{monthlyBudget.name}
+							</SelectItem>
+						))}
+						<SelectItem value="unbudgeted">
+							<span className="size-2 rounded-full bg-muted-foreground" />
+							Unbudgeted
+						</SelectItem>
 					</SelectGroup>
-					<SelectSeparator />
-					<SelectGroup>
-						<SelectLabel>Monthly budget groups</SelectLabel>
-						<SelectItem value="group:core">Core</SelectItem>
-						<SelectItem value="group:outlier">Outlier</SelectItem>
-						<SelectItem value="group:other">Other</SelectItem>
-					</SelectGroup>
-					{activeMonthlyBudgets.length ? <SelectSeparator /> : null}
-					{activeMonthlyBudgets.length ? (
-						<SelectGroup>
-							<SelectLabel>Specific monthly budget</SelectLabel>
-							{activeMonthlyBudgets.map(monthlyBudget => (
-								<SelectItem
-									key={monthlyBudget.id}
-									value={`monthlyBudget:${monthlyBudget.id}`}
-								>
-									<span
-										className="size-2 rounded-full"
-										style={{ backgroundColor: themeColor(monthlyBudget.color) }}
-									/>
-									{monthlyBudget.name}
-								</SelectItem>
-							))}
-						</SelectGroup>
-					) : null}
 				</SelectContent>
 			</Select>
 

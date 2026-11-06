@@ -4,7 +4,7 @@ Dexie.dependencies.indexedDB = indexedDB
 Dexie.dependencies.IDBKeyRange = IDBKeyRange
 import { beforeEach, expect, test } from "bun:test"
 import type { StatementRow } from "../../src/data/db"
-const { db } = await import("../../src/data/db")
+const { db, DB_VERSION } = await import("../../src/data/db")
 const { duplicateGroups, dismissDuplicatePair, restoreDuplicatePair, fixDuplicates } = await import(
 	"../../src/logic/duplicates"
 )
@@ -104,10 +104,8 @@ test("move allocations without changing kept fields or records, and clean dismis
 		people: null,
 		location: null,
 		description: null,
-		analytics_treatment: "spending",
-		analytics_treatment_source: "manual",
-		monthly_budget_id: null,
-		monthly_budget_source: null,
+		treatment_choice: { kind: "explicit", value: "spending" },
+		monthly_budget_choice: { kind: "unbudgeted" },
 		revision: 1,
 	})
 	const record = await db.records.get("r")
@@ -208,7 +206,7 @@ test("schema version four upgrades with financial data intact", async () => {
 	await legacy.table("statements").put(statement("a"))
 	legacy.close()
 	await db.open()
-	expect(db.verno).toBe(7)
+	expect(db.verno).toBe(DB_VERSION)
 	expect(await db.statements.get("a")).toEqual(statement("a"))
 	expect(await db.duplicate_dismissals.count()).toBe(0)
 })
@@ -270,7 +268,6 @@ test("version two database upgrades preserve legacy monthly budget data", async 
 			name: "Daily",
 			color: "#000000",
 			group: "core",
-			pace_kind: "daily",
 			display_order: 1,
 			archived: false,
 		})
@@ -318,10 +315,8 @@ test("record allocation deficits use the existing pending rule", async () => {
 		people: null,
 		location: null,
 		description: null,
-		analytics_treatment: "spending",
-		analytics_treatment_source: "manual",
-		monthly_budget_id: null,
-		monthly_budget_source: null,
+		treatment_choice: { kind: "explicit", value: "spending" },
+		monthly_budget_choice: { kind: "unbudgeted" },
 		revision: 1,
 	})
 	await db.allocations.bulkAdd([

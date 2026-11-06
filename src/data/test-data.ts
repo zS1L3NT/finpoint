@@ -1,3 +1,4 @@
+import { migrateRecordChoices } from "@/data/record-choices"
 // Abundant deterministic demo workspace for new users.
 // Generates ~4-5 months of accounts, statements, records, allocations,
 // budgets, Monthly Budgets, and amounts, then loads via importData (replaces all).
@@ -119,25 +120,9 @@ const DAILY: Meal[] = [
 	},
 ]
 
-const RECURRING: Meal[] = [
-	{
-		category: "bills-utilities",
-		titles: ["Mobile Plan", "Spotify Family", "iCloud+ 200GB"],
-		amount: [4.9, 58],
-		people: [""],
-		locations: [""],
-		monthly_budget: "demo-recurring",
-		account: "demo-uob-card",
-	},
-	{
-		category: "bills-utilities",
-		titles: ["Netflix", "App Store Subscription", "Notion Plus"],
-		amount: [6, 45],
-		people: [""],
-		locations: [""],
-		monthly_budget: "demo-recurring",
-		account: "demo-revolut",
-	},
+// Occasional purchases on random days. Irregular spending is lumpy: a few
+// quiet months, then a bigger buy, so it never out-weighs Daily.
+const IRREGULAR: Meal[] = [
 	{
 		category: "healthcare",
 		titles: ["GP Visit", "Dental Scaling", "Pharmacy"],
@@ -164,6 +149,74 @@ const RECURRING: Meal[] = [
 		locations: ["Bugis+", "Suntec", ""],
 		monthly_budget: "demo-irregular",
 		account: "demo-uob-card",
+	},
+	{
+		category: "gifts-donations",
+		titles: ["Birthday Gift", "Wedding Ang Bao", "Charity Run"],
+		amount: [30, 120],
+		people: ["Wei Ming", "Jia Le", ""],
+		locations: [""],
+		monthly_budget: "demo-irregular",
+		account: "demo-uob-card",
+	},
+]
+
+// Fixed monthly charges: few and small, the way most people's are.
+const RECURRING: {
+	day: number
+	title: string
+	description: string
+	amount: [number, number]
+	category: string
+	account: string
+}[] = [
+	{
+		day: 3,
+		title: "Mobile Plan",
+		description: "",
+		amount: [30, 30],
+		category: "bills-utilities",
+		account: "demo-uob-card",
+	},
+	{
+		day: 8,
+		title: "Spotify Family",
+		description: "",
+		amount: [19.98, 19.98],
+		category: "bills-utilities",
+		account: "demo-uob-card",
+	},
+	{
+		day: 10,
+		title: "Utilities Bill",
+		description: "Electricity and water",
+		amount: [70, 115],
+		category: "bills-utilities",
+		account: "demo-dbs-savings",
+	},
+	{
+		day: 12,
+		title: "Netflix",
+		description: "",
+		amount: [17.98, 17.98],
+		category: "bills-utilities",
+		account: "demo-revolut",
+	},
+	{
+		day: 15,
+		title: "Health Insurance Premium",
+		description: "Monthly premium",
+		amount: [65, 65],
+		category: "insurance",
+		account: "demo-dbs-savings",
+	},
+	{
+		day: 20,
+		title: "iCloud+ 200GB",
+		description: "",
+		amount: [3.98, 3.98],
+		category: "bills-utilities",
+		account: "demo-revolut",
 	},
 ]
 
@@ -360,62 +413,21 @@ export function generateTestData(): FinpointExport {
 		const day = today.minus({ days: back })
 		const meals = 2 + (rand() < 0.35 ? 1 : 0)
 		for (let i = 0; i < meals; i++) addMeal(pick(DAILY), day)
-		if (rand() < 0.3) addMeal(pick(RECURRING), day)
+		if (rand() < 0.15) addMeal(pick(IRREGULAR), day)
 
-		if (day.day === 1) {
+		for (const charge of RECURRING) {
+			if (day.day !== charge.day) continue
 			addRecord({
-				title: "Monthly Rent",
+				title: charge.title,
 				people: "",
 				location: "",
-				description: "Housing payment",
+				description: charge.description,
 				day,
-				amount: -1400,
-				category: "housing",
+				amount: -between(charge.amount[0], charge.amount[1]),
+				category: charge.category,
 				monthly_budget: "demo-recurring",
 				allocate: "full",
-				account: "demo-dbs-savings",
-			})
-		}
-		if (day.day === 10) {
-			addRecord({
-				title: "Utilities Bill",
-				people: "",
-				location: "",
-				description: "Electricity and water",
-				day,
-				amount: -between(95, 145),
-				category: "bills-utilities",
-				monthly_budget: "demo-recurring",
-				allocate: "full",
-				account: "demo-dbs-savings",
-			})
-		}
-		if (day.day === 15) {
-			addRecord({
-				title: "Health Insurance Premium",
-				people: "",
-				location: "",
-				description: "Monthly premium",
-				day,
-				amount: -65,
-				category: "insurance",
-				monthly_budget: "demo-recurring",
-				allocate: "full",
-				account: "demo-dbs-savings",
-			})
-		}
-		if (day.day === 18) {
-			addRecord({
-				title: "Birthday Gift",
-				people: "",
-				location: "",
-				description: "",
-				day,
-				amount: -between(30, 80),
-				category: "gifts-donations",
-				monthly_budget: "demo-irregular",
-				allocate: "full",
-				account: "demo-uob-card",
+				account: charge.account,
 			})
 		}
 		if (day.day === 22) {
@@ -491,20 +503,24 @@ export function generateTestData(): FinpointExport {
 
 	// Travel trip cluster two months back
 	const trip = today.minus({ months: 2 }).set({ day: 12 })
-	const travel: [string, string, [number, number], string][] = [
-		["Scoot to Tokyo", "travel", [380, 460], "demo-uob-card"],
-		["Shibuya Hotel", "travel", [520, 640], "demo-uob-card"],
-		["Ichiran Ramen", "dining-out", [18, 35], "demo-revolut"],
-		["Don Quijote Haul", "shopping", [90, 210], "demo-revolut"],
-		["TeamLab Tickets", "entertainment", [45, 60], "demo-revolut"],
+	const travel: [string, string, [number, number], string, number][] = [
+		["Scoot to Tokyo", "travel", [380, 460], "demo-uob-card", 0],
+		["Shibuya Hotel", "travel", [820, 960], "demo-uob-card", 0],
+		["Suica Top-up", "transport", [40, 60], "demo-revolut", 0],
+		["Ichiran Ramen", "dining-out", [18, 35], "demo-revolut", 1],
+		["TeamLab Tickets", "entertainment", [45, 60], "demo-revolut", 1],
+		["Sushi Dinner", "dining-out", [60, 110], "demo-revolut", 2],
+		["Don Quijote Haul", "shopping", [90, 210], "demo-revolut", 3],
+		["Shinkansen to Kyoto", "transport", [110, 140], "demo-revolut", 4],
+		["Kyoto Ryokan", "travel", [180, 260], "demo-uob-card", 4],
 	]
-	travel.forEach(([title, category, range, account], i) => {
+	travel.forEach(([title, category, range, account, offset], i) => {
 		addRecord({
 			title,
 			people: i < 2 ? "Rong Xin" : "",
-			location: "Tokyo",
+			location: offset < 4 ? "Tokyo" : "Kyoto",
 			description: "Autumn trip",
-			day: trip.plus({ days: i }),
+			day: trip.plus({ days: offset }),
 			amount: -between(range[0], range[1]),
 			category,
 			monthly_budget: "demo-travel",
@@ -564,16 +580,14 @@ export function generateTestData(): FinpointExport {
 		end_date: trip.plus({ days: 6 }).toFormat("yyyy-MM-dd"),
 		automatic: false,
 	})
-	for (const record of tables.records
-		.filter(r => r.monthly_budget_id === "demo-travel")
-		.slice(0, 5)) {
+	for (const record of tables.records.filter(r => r.monthly_budget_id === "demo-travel")) {
 		tables.budget_records.push({ budget_id: "demo-budget-trip", record_id: record.id })
 	}
 	const autoMonth = today.minus({ months: 1 }).startOf("month")
 	tables.budgets.push({
 		id: "demo-budget-daily",
 		name: `${autoMonth.toFormat("MMMM")} Daily`,
-		amount: 900,
+		amount: 1800,
 		start_date: autoMonth.toFormat("yyyy-MM-dd"),
 		end_date: autoMonth.endOf("month").toFormat("yyyy-MM-dd"),
 		automatic: true,
@@ -593,17 +607,21 @@ export function generateTestData(): FinpointExport {
 		monthKeys.push(today.minus({ months: back }).startOf("month").toFormat("yyyy-MM-dd"))
 	}
 	const monthlyAmounts: Record<string, number> = {
-		"demo-daily": 950,
-		"demo-recurring": 1800,
+		"demo-daily": 1800,
+		"demo-recurring": 250,
 		"demo-irregular": 400,
 		"demo-travel": 0,
 	}
+	const tripMonth = trip.startOf("month").toFormat("yyyy-MM-dd")
 	for (const key of monthKeys) {
 		for (const monthly_budget of MONTHLY_BUDGETS) {
 			tables.monthly_budget_amounts.push({
 				monthly_budget_id: monthly_budget.id,
 				month: key,
-				amount: monthlyAmounts[monthly_budget.id] ?? null,
+				amount:
+					monthly_budget.id === "demo-travel" && key === tripMonth
+						? 2000
+						: (monthlyAmounts[monthly_budget.id] ?? null),
 			})
 		}
 	}
@@ -612,7 +630,7 @@ export function generateTestData(): FinpointExport {
 		tables.monthly_budget_defaults.push({
 			monthly_budget_id: "demo-daily",
 			effective_month: firstMonth,
-			amount: 950,
+			amount: 1800,
 		})
 	}
 
@@ -637,6 +655,6 @@ export function generateTestData(): FinpointExport {
 			default_filter_start_date: null,
 			default_filter_end_date_today: false,
 		},
-		tables,
+		tables: { ...tables, records: tables.records.map(r => migrateRecordChoices(r, true)) },
 	}
 }

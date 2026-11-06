@@ -526,15 +526,21 @@ test.describe("harness widgets section", () => {
 
 		await test.step("Record analytics: Treatment gates the Monthly Budget control", async () => {
 			await gotoForms(page)
+			await expect(page.locator("#analytics_treatment")).toContainText(
+				"Category default · Spending",
+			)
+			await expect(page.getByTestId("analytics-value")).toContainText(
+				"Treatment: category-default",
+			)
 			await page.locator("#analytics_treatment").click()
 			await pickOption(page.getByRole("option", { name: "Income", exact: true }))
 			await expect(page.getByTestId("analytics-value")).toContainText("Treatment: income")
-			await expect(page.locator("#monthly_budget_id")).toBeDisabled()
+			await expect(page.locator("#monthly_budget_id")).toHaveCount(0)
 
 			await page.locator("#analytics_treatment").click()
 			await pickOption(page.getByRole("option", { name: "Spending", exact: true }))
 			await expect(page.getByTestId("analytics-value")).toContainText("Treatment: spending")
-			await expect(page.locator("#monthly_budget_id")).toBeEnabled()
+			await expect(page.locator("#monthly_budget_id")).toBeVisible()
 		})
 
 		await test.step("field validation: errors render as alerts", async () => {

@@ -353,7 +353,7 @@ function StatementTile({
 			aria-pressed={selected}
 			onClick={onSelect}
 			className={cn(
-				"flex flex-col gap-1 rounded-lg border p-3 text-left transition-colors hover:bg-emerald-500/10",
+				"flex flex-col gap-1 rounded-lg border p-3 text-left transition-colors duration-150 ease-out hover:bg-emerald-500/10",
 				selected ? tint : "border-border",
 				selected && "ring-2 ring-emerald-500/40",
 			)}

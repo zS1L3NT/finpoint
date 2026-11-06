@@ -1,6 +1,6 @@
 import type { Locator, Page } from "@playwright/test"
 import { expectPointerCursor, expectVisibleBackdrop } from "../support/assertions"
-import { IDS, statementRules } from "../support/data"
+import { getScenario, IDS, statementRules } from "../support/data"
 import {
 	account,
 	budget,
@@ -288,10 +288,7 @@ test("Category editors: persist Treatment defaults and exclude archived options"
 		await expect(page.getByRole("option", { name: "Daily", exact: true })).toHaveCount(0)
 		await expect(dialog).toBeVisible()
 		await select(page, dialog, "Treatment", "Income")
-		await expect(dialog.getByLabel("Monthly budget", { exact: true })).toBeDisabled()
-		await expect(dialog.getByLabel("Monthly budget", { exact: true })).toContainText(
-			"Unbudgeted",
-		)
+		await expect(dialog.getByLabel("Monthly budget", { exact: true })).toHaveCount(0)
 		await dialog.getByLabel("Name", { exact: true }).fill("")
 		await dialog.getByRole("button", { name: "Save changes" }).click()
 		await expect(dialog.getByLabel("Name", { exact: true })).toHaveAttribute(
@@ -308,11 +305,18 @@ test("Category editors: persist Treatment defaults and exclude archived options"
 		).toContainText("Income")
 		await expect(
 			page.getByRole("dialog").getByLabel("Monthly budget", { exact: true }),
-		).toBeDisabled()
+		).toHaveCount(0)
 	})
 	await test.step("Category creator: required identity, icon, colour and defaults persist", async () => {
 		void workspace
 		const dialog = await openEditor(page, "/categories", "Create Category", "Create Category")
+		await expect(dialog.getByLabel("Treatment", { exact: true })).toContainText("Automatic")
+		await dialog.getByLabel("Treatment", { exact: true }).click()
+		await expect(
+			page.getByRole("option", { name: "No default treatment", exact: true }),
+		).toHaveCount(0)
+		await expect(page.getByRole("option", { name: "Automatic", exact: true })).toBeVisible()
+		await page.keyboard.press("Escape")
 		await dialog.getByRole("button", { name: "Create category", exact: true }).click()
 		await expect(dialog.getByLabel("Name", { exact: true })).toHaveAttribute(
 			"aria-invalid",
@@ -392,9 +396,15 @@ test("Monthly Budget editors: validate creation and persist overrides", async ({
 		)
 		// The amount section mounts after the amount-source live query resolves.
 		await expect(dialog.getByText("Amount for October 2026", { exact: true })).toBeVisible()
-		await select(page, dialog, "Amount rule", "Default")
+		await dialog
+			.getByRole("group", { name: "Amount rule", exact: true })
+			.getByRole("radio", { name: "Default", exact: true })
+			.check()
 		await expect(dialog.getByLabel("Monthly amount", { exact: true })).toHaveCount(0)
-		await select(page, dialog, "Amount rule", "Override one month")
+		await dialog
+			.getByRole("group", { name: "Amount rule", exact: true })
+			.getByRole("radio", { name: "Override one month", exact: true })
+			.check()
 		await expect(dialog.getByLabel("Monthly amount", { exact: true })).toBeVisible()
 		// Daily starts with a null October amount, so the revealed input is disabled.
 		await dialog.getByRole("checkbox", { name: "No monthly amount", exact: true }).uncheck()
@@ -404,8 +414,11 @@ test("Monthly Budget editors: validate creation and persist overrides", async ({
 		await page.reload()
 		await page.getByRole("button", { name: "Edit Daily", exact: true }).click()
 		await expect(
-			page.getByRole("dialog").getByLabel("Amount rule", { exact: true }),
-		).toContainText("Override one month")
+			page
+				.getByRole("dialog")
+				.getByRole("group", { name: "Amount rule", exact: true })
+				.getByRole("radio", { name: "Override one month", exact: true }),
+		).toBeChecked()
 		await expect(
 			page.getByRole("dialog").getByLabel("Monthly amount", { exact: true }),
 		).toHaveValue("0")
@@ -510,19 +523,14 @@ test("Statement rule editor: invalid input shows errors, then a valid rule persi
 	).toBeVisible()
 	await text.fill("starbucks|raffles")
 	await dialog.getByLabel("Title", { exact: true }).fill("Coffee")
-	// The open Title suggestions hide the mode toggles from the role tree.
+	// Close the open Title suggestions before submitting.
 	await page.keyboard.press("Escape")
-	await dialog
-		.getByRole("group", { name: "How to use the title", exact: true })
-		.getByRole("radio", { name: "Autofill", exact: true })
-		.click()
 	await dialog.getByRole("button", { name: "Create rule", exact: true }).click()
 	await expect(dialog).not.toBeVisible()
 	await page.reload()
 	const card = page.locator("main article").filter({ hasText: "Coffee rule" })
 	await expect(card).toContainText("starbucks|raffles")
 	await expect(card.getByText("Coffee", { exact: true })).toBeVisible()
-	await expect(card.getByText("Autofill", { exact: true })).toBeVisible()
 
 	await page.getByRole("button", { name: "Edit Coffee rule", exact: true }).click()
 	const editor = page.getByRole("dialog", { name: "Edit rule", exact: true })
@@ -592,17 +600,11 @@ test("Statement rule editor: the preview lists matching Statements and combines 
 	).toBeVisible()
 })
 
-test("Statement rule editor: actions toggle Suggest and Autofill, Unbudgeted differs from Not set, archived Monthly Budgets are hidden", async ({
+test("Statement rule editor: actions autofill, Unbudgeted differs from Not set, archived Monthly Budgets are hidden", async ({
 	page,
 }) => {
 	await seedWorkspace(page, "populated", { statement_rules: statementRules() })
 	const dialog = await openEditor(page, "/statement-rules", "New rule", "New rule")
-	const modeToggle = dialog.getByRole("group", {
-		name: "How to use the monthly budget",
-		exact: true,
-	})
-	await expect(modeToggle.getByRole("radio", { name: "Suggest", exact: true })).toBeDisabled()
-	await expect(modeToggle.getByRole("radio", { name: "Autofill", exact: true })).toBeDisabled()
 
 	await dialog.getByLabel("Monthly budget", { exact: true }).click()
 	await expect(page.getByRole("option", { name: "Not set", exact: true })).toBeVisible()
@@ -617,15 +619,9 @@ test("Statement rule editor: actions toggle Suggest and Autofill, Unbudgeted dif
 	await dialog.getByLabel("Name", { exact: true }).fill("Unbudgeted rule")
 	await dialog.getByLabel("Text to look for", { exact: true }).fill("grab")
 	await dialog.getByLabel("Title", { exact: true }).fill("Grab expense")
-	// The open Title suggestions hide the mode toggles from the role tree.
+	// The open Title suggestions cover the Monthly budget select.
 	await page.keyboard.press("Escape")
 	await select(page, dialog, "Monthly budget", "Unbudgeted")
-	await expect(modeToggle.getByRole("radio", { name: "Suggest", exact: true })).toBeEnabled()
-	await modeToggle.getByRole("radio", { name: "Suggest", exact: true }).click()
-	await expect(modeToggle.getByRole("radio", { name: "Suggest", exact: true })).toBeChecked()
-	await modeToggle.getByRole("radio", { name: "Autofill", exact: true }).click()
-	await expect(modeToggle.getByRole("radio", { name: "Autofill", exact: true })).toBeChecked()
-	await expect(modeToggle.getByRole("radio", { name: "Suggest", exact: true })).not.toBeChecked()
 	await dialog.getByRole("button", { name: "Create rule", exact: true }).click()
 	await expect(dialog).not.toBeVisible()
 	await page.reload()
@@ -633,7 +629,6 @@ test("Statement rule editor: actions toggle Suggest and Autofill, Unbudgeted dif
 	await expect(card.getByText("Monthly budget", { exact: true })).toBeVisible()
 	await expect(card.getByText("Unbudgeted", { exact: true })).toBeVisible()
 	await expect(card.getByText("Grab expense", { exact: true })).toBeVisible()
-	await expect(card.getByText("Autofill", { exact: true })).toHaveCount(1)
 
 	await page.getByRole("button", { name: "Edit Unbudgeted rule", exact: true }).click()
 	const editor = page.getByRole("dialog", { name: "Edit rule", exact: true })
@@ -680,6 +675,7 @@ test("Record creator: validates required fields, applies Category defaults and p
 				"Create Pending Record",
 				"Create New Record",
 			)
+			await expect(dialog.getByLabel("Treatment", { exact: true })).toContainText("Automatic")
 			await dialog.getByRole("button", { name: "Create Record", exact: true }).click()
 			await expect(dialog.getByLabel("Title", { exact: true })).toHaveAttribute(
 				"aria-invalid",
@@ -847,8 +843,7 @@ test("archived Monthly Budgets: retain archival state and historical assignments
 				request.onsuccess = () =>
 					store.put({
 						...request.result,
-						monthly_budget_id: "t1-mb-travel",
-						monthly_budget_source: "manual",
+						monthly_budget_choice: { kind: "explicit", id: "t1-mb-travel" },
 					})
 			})
 		})
@@ -999,4 +994,118 @@ test.describe("empty workspace", () => {
 			page.getByRole("button", { name: "Create Category", exact: true }),
 		).toBeEnabled()
 	})
+})
+
+test("Monthly Records editor: saved title appears immediately and survives reload", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	await page.goto("/records/monthly?month=October&year=2026")
+	await page.getByRole("button", { name: "Edit FairPrice Run", exact: true }).click()
+	const dialog = page.getByRole("dialog", { name: "Edit Record", exact: true })
+	await dialog.getByLabel("Title", { exact: true }).fill("Updated groceries")
+	await dialog.getByLabel("Title", { exact: true }).press("Escape")
+	await dialog.getByRole("button", { name: "Save changes", exact: true }).click()
+	await expect(dialog).not.toBeVisible()
+	await expect(
+		page.getByRole("button", { name: "Edit Updated groceries", exact: true }),
+	).toBeVisible()
+	await page.reload()
+	await expect(
+		page.getByRole("button", { name: "Edit Updated groceries", exact: true }),
+	).toBeVisible()
+})
+
+test("Record editor: inherited budget hides an ineligible Category default", async ({ page }) => {
+	const tables = getScenario("populated").tables
+	await seedWorkspace(page, "populated", {
+		categories: tables.categories.map(category =>
+			category.id === IDS.categories.groceries
+				? {
+						...category,
+						analytics_treatment: "neutral",
+						default_monthly_budget_id: IDS.monthlyBudgets.daily,
+					}
+				: category,
+		),
+		records: [
+			{
+				...record,
+				title: "Dormant budget regression",
+				category_id: IDS.categories.groceries,
+				treatment_choice: { kind: "explicit", value: "spending" },
+				monthly_budget_choice: { kind: "category" },
+			},
+		],
+	})
+	await page.goto(`/records/${record.id}`)
+	await page.getByRole("button", { name: "Edit Record", exact: true }).click()
+	const dialog = page.getByRole("dialog", { name: "Edit Record", exact: true })
+	await expect(dialog.getByLabel("Monthly budget", { exact: true })).toContainText(
+		"Category default · Unbudgeted",
+	)
+	await select(page, dialog, "Treatment", "Transfer / excluded")
+	await expect(dialog.getByLabel("Monthly budget", { exact: true })).toHaveCount(0)
+	await select(page, dialog, "Treatment", "Spending")
+	await expect(dialog.getByLabel("Monthly budget", { exact: true })).toContainText(
+		"Category default · Unbudgeted",
+	)
+	await dialog.getByRole("button", { name: "Save changes", exact: true }).click()
+	await expect(dialog).not.toBeVisible()
+	await page.reload()
+	await page.getByRole("button", { name: "Edit Record", exact: true }).click()
+	await expect(dialog.getByLabel("Monthly budget", { exact: true })).toContainText(
+		"Category default · Unbudgeted",
+	)
+})
+
+test("Monthly Budget editor: persists colour choices and disables unavailable Default", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	const dialog = await openEditor(
+		page,
+		"/?month=October&year=2026",
+		"New",
+		"Create monthly budget",
+	)
+	await dialog.getByLabel("Name", { exact: true }).fill("Colour probe")
+	await dialog.getByRole("button", { name: "Teal", exact: true }).click()
+	await expect(dialog.getByRole("button", { name: "Teal", exact: true })).toHaveAttribute(
+		"aria-pressed",
+		"true",
+	)
+	await dialog.getByLabel("Custom colour", { exact: true }).fill("#123456")
+	await expect(dialog.getByRole("group", { name: "Group", exact: true })).toHaveCount(0)
+	await expect(dialog.getByText("Spending forecast", { exact: true })).toHaveCount(0)
+	await dialog.getByRole("button", { name: "Create monthly budget", exact: true }).click()
+	await expect(dialog).not.toBeVisible()
+	await page.reload()
+	await page.getByRole("button", { name: "Edit Colour probe", exact: true }).click()
+	const editor = page.getByRole("dialog", { name: "Edit Colour probe", exact: true })
+	await expect(editor.getByLabel("Custom colour", { exact: true })).toHaveValue("#123456")
+	await expect(editor.getByText("Group", { exact: true })).toHaveCount(0)
+	await expect(editor.getByRole("radio", { name: "Default", exact: true })).toBeDisabled()
+	await expect(editor).toContainText("No earlier default")
+	await expect(editor.getByText("Spending forecast", { exact: true })).toHaveCount(0)
+})
+
+test("Category popup: bringing an option into view preserves the modal page position", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	const dialog = await openEditor(page, "/records", "Create Pending Record", "Create New Record")
+	await dialog.getByLabel("Category", { exact: true }).fill("Groceries")
+	const option = page.getByRole("option", { name: "Groceries", exact: true })
+	await expect(option).toBeVisible()
+	const before = await page.evaluate(() => window.scrollY)
+	await option.evaluate(element => element.scrollIntoView({ block: "center" }))
+	expect(await page.evaluate(() => window.scrollY)).toBe(before)
+	await option.click()
+	await expect(dialog.getByLabel("Treatment", { exact: true })).toContainText(
+		"Category default · Spending",
+	)
 })

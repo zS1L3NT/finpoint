@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { toast } from "sonner"
+import DriveOverwriteConfirmation from "@/components/dialogs/drive-overwrite-confirmation"
 import { Alert, AlertAction, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
 	AlertDialog,
@@ -239,6 +240,8 @@ export function PrimitivesSection() {
 	const [menuFlag, setMenuFlag] = useState(true)
 	const [menuAlign, setMenuAlign] = useState("left")
 	const [alertDecision, setAlertDecision] = useState("")
+	const [driveConfirmationOpen, setDriveConfirmationOpen] = useState(false)
+	const [driveConfirmed, setDriveConfirmed] = useState(false)
 	const [dialogOpen, setDialogOpen] = useState(false)
 	const [collectionValue, setCollectionValue] = useState<string | null>(null)
 	const [progress, setProgress] = useState(50)
@@ -616,6 +619,19 @@ export function PrimitivesSection() {
 				</Alert>
 			</div>
 
+			<div>
+				<Button onClick={() => setDriveConfirmationOpen(true)}>Overwrite Drive</Button>
+				<DriveOverwriteConfirmation
+					isOpen={driveConfirmationOpen}
+					setIsOpen={setDriveConfirmationOpen}
+					onConfirm={() => setDriveConfirmed(true)}
+				/>
+				<p data-testid="drive-confirmed">
+					{driveConfirmed
+						? "Drive replacement confirmed"
+						: "Drive replacement not confirmed"}
+				</p>
+			</div>
 			<div data-testid="primitive-alert-dialog" className="flex flex-col gap-2">
 				<h3 className="text-xs font-semibold">Alert dialog</h3>
 				<AlertDialog>

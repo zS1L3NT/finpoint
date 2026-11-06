@@ -44,6 +44,13 @@ export type StatementReplacementCandidate = Statement & {
 	disabled_reason: string | null
 }
 
+export type TreatmentChoice = { kind: "category" } | { kind: "explicit"; value: AnalyticsTreatment }
+
+export type MonthlyBudgetChoice =
+	| { kind: "category" }
+	| { kind: "explicit"; id: string }
+	| { kind: "unbudgeted" }
+
 export type Record = {
 	id: string
 	datetime: string
@@ -59,6 +66,8 @@ export type Record = {
 	pending_statement_count?: number
 	category: Category
 	analytics_treatment: AnalyticsTreatment
+	treatment_choice: TreatmentChoice
+	monthly_budget_choice: MonthlyBudgetChoice
 	analytics_treatment_source: "category" | "manual"
 	revision: number
 	monthly_budget_id: string | null
@@ -81,7 +90,7 @@ export type Category = {
 	parent_category_id: string | null
 	can_delete: boolean
 	records_count: number
-	analytics_treatment: AnalyticsTreatment | null
+	analytics_treatment: AnalyticsTreatment
 	default_monthly_budget_id: string | null
 	default_monthly_budget?: MonthlyBudget | null
 }
@@ -108,8 +117,6 @@ export type MonthlyBudget = {
 	id: string
 	name: string
 	color: string
-	group: "core" | "outlier" | "other"
-	pace_kind: "daily" | "recurring" | "none"
 	display_order: number
 	archived: boolean
 	amount?: number | null
@@ -158,14 +165,14 @@ export type RuleCondition = {
 	operator: "contains" | "equals" | "regex"
 	value: string
 }
-export type RuleMode = "suggest" | "autofill"
+/** Every action autofills; learned Record suggestions offer the one-click chips. */
 export type RuleActions = {
-	title?: { mode: RuleMode; value: string }
-	people?: { mode: RuleMode; value: string }
-	location?: { mode: RuleMode; value: string }
-	category_id?: { mode: RuleMode; value: string }
-	analytics_treatment?: { mode: RuleMode; value: AnalyticsTreatment }
-	monthly_budget_id?: { mode: RuleMode; value: string | null }
+	title?: { value: string }
+	people?: { value: string }
+	location?: { value: string }
+	category_id?: { value: string }
+	analytics_treatment?: { value: AnalyticsTreatment }
+	monthly_budget_id?: { value: string | null }
 }
 export type RuleField = keyof RuleActions
 export type StatementRule = {

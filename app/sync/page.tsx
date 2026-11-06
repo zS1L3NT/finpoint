@@ -4,19 +4,10 @@ import { useLiveQuery } from "dexie-react-hooks"
 import Link from "next/link"
 import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
+import DriveOverwriteConfirmation from "@/components/dialogs/drive-overwrite-confirmation"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
-import {
-	AlertDialog,
-	AlertDialogAction,
-	AlertDialogCancel,
-	AlertDialogContent,
-	AlertDialogDescription,
-	AlertDialogFooter,
-	AlertDialogHeader,
-	AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -841,26 +832,11 @@ export default function DataSettingsPage() {
 				</div>
 			</PageContent>
 
-			<AlertDialog open={confirmingPush} onOpenChange={setConfirmingPush}>
-				<AlertDialogContent>
-					<AlertDialogHeader>
-						<AlertDialogTitle>Replace the Google Drive backup?</AlertDialogTitle>
-						<AlertDialogDescription>
-							This replaces the Finpoint data in Google Drive with the data on this
-							browser. Changes that exist only in Drive will be lost.
-						</AlertDialogDescription>
-					</AlertDialogHeader>
-					<AlertDialogFooter>
-						<AlertDialogCancel>Cancel</AlertDialogCancel>
-						<AlertDialogAction
-							variant="destructive"
-							onClick={() => void resolveDrivePush()}
-						>
-							Replace Drive backup
-						</AlertDialogAction>
-					</AlertDialogFooter>
-				</AlertDialogContent>
-			</AlertDialog>
+			<DriveOverwriteConfirmation
+				isOpen={confirmingPush}
+				setIsOpen={setConfirmingPush}
+				onConfirm={() => void resolveDrivePush()}
+			/>
 		</>
 	)
 }

@@ -15,6 +15,7 @@ import { UiIcon as IconifyIcon } from "@/components/icon"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
 	Dialog,
 	DialogBody,
@@ -31,18 +32,21 @@ import { FieldGroup } from "@/components/ui/field"
 import { Progress } from "@/components/ui/progress"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
+import { useDialogCloseAnimation } from "@/hooks/use-dialog-close-animation"
 import { canUseMonthlyBudget } from "@/lib/analytics"
 import { COLLAPSE_MOTION, SPRING, TRANSITION } from "@/lib/motion"
 import { cn, formatCurrency, formatDatetime, pluralize, round2 } from "@/lib/utils"
 import { trackRecordSaved } from "@/logic/learning"
 import { listMonthlyBudgets } from "@/logic/monthly-budgets"
 import { inferRecordDatetime } from "@/logic/record-defaults"
-import { createRecord, recordCompletions } from "@/logic/records"
+import { createMatchingRecords, createRecord, recordCompletions } from "@/logic/records"
+import { recommendationAutofill, statementRecommendations } from "@/logic/statement-rules"
 import {
-	type RuleRecommendation,
-	recommendationAutofill,
-	statementRecommendations,
-} from "@/logic/statement-rules"
+	prepareSuggestions,
+	type RecordSuggestion,
+	recordSuggestions,
+	similarStatements,
+} from "@/logic/suggestions"
 import { ValidationError } from "@/logic/validate"
 import type { AnalyticsTreatment, CategoryWithChildren, RuleField, Statement } from "@/types"
 
@@ -51,7 +55,7 @@ export default function RecordCreatorDialog({
 	categories,
 	clear,
 	isOpen,
-	setIsOpen,
+	setIsOpen: onOpenChange,
 	trigger,
 }: {
 	statements: Statement[]
@@ -61,7 +65,15 @@ export default function RecordCreatorDialog({
 	setIsOpen: (isOpen: boolean) => void
 	trigger?: React.ReactElement
 }) {
-	// Parents clear the selection right after a successful create; keep the last open list so
+	const created = useRef(false)
+	const { open, setIsOpen, onOpenChangeComplete } = useDialogCloseAnimation(isOpen, open => {
+		onOpenChange(open)
+		if (!open && created.current) {
+			created.current = false
+			clear?.()
+		}
+	})
+	// Keep the last open list if the parent changes its selection while closing, so
 	// the attached statements don't vanish while the dialog fades out.
 	const [openStatements, setOpenStatements] = useState(statementsProp)
 	if (isOpen && openStatements !== statementsProp) setOpenStatements(statementsProp)
@@ -76,21 +88,43 @@ export default function RecordCreatorDialog({
 	// Analytics select keeps its laid-out label from the first frame.
 	const monthlyBudgets = useLiveQuery(() => listMonthlyBudgets(), [])
 
-	const recommendationKey = `${isOpen}:${statements.map(s => s.id).join(",")}`
+	// Rules, learned chips and similar Statements read the whole workspace, so they wait for the
+	// popup to finish entering: run during its fade, they block the frames it needs.
+	const [entered, setEntered] = useState(false)
+	const ready = isOpen && entered
+	const recommendationKey = `${ready}:${statements.map(s => s.id).join(",")}`
 	const recommendationQuery = useLiveQuery(
 		async () => ({
 			key: recommendationKey,
-			items: isOpen ? await statementRecommendations(statements.map(s => s.id)) : [],
+			items: ready ? await statementRecommendations(statements.map(s => s.id)) : undefined,
 		}),
 		[recommendationKey],
 	)
 	const recommendations =
 		recommendationQuery?.key === recommendationKey ? recommendationQuery.items : undefined
+	// Learning this workspace's suggestion weights takes a moment, so it happens while the creator
+	// is closed and the page has settled, never during its entrance; reopening after a create
+	// relearns from the new Record (Safari lacks requestIdleCallback).
+	useEffect(() => {
+		if (isOpen) return
+		const id = setTimeout(() => void prepareSuggestions(), 1000)
+		return () => clearTimeout(id)
+	}, [isOpen])
+	const statementKey = statements.map(s => s.id).join(",")
+	// Other allocable Statements of the same kind can take this Record's details in one go.
+	const similar = useLiveQuery(
+		() => (ready ? similarStatements(statementKey.split(",").filter(Boolean)) : []),
+		[ready, statementKey],
+	)
+	const [includeSimilar, setIncludeSimilar] = useState(false)
 	const ruleSession = useRef("")
 	const appliedAutofill = useRef(false)
 	const touchedFields = useRef(new Set<RuleField>())
 	// Rule name per autofilled field; editing the field drops its note.
 	const [autofilledBy, setAutofilledBy] = useState<Partial<Record<RuleField, string>>>({})
+	// Learned chips wait for rule autofill, so a chip for the value a rule is about to fill never
+	// flashes in and out.
+	const [autofillSettled, setAutofillSettled] = useState(false)
 
 	const { mergeErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
 
@@ -126,22 +160,34 @@ export default function RecordCreatorDialog({
 		},
 		onSubmit: async ({ value }) => {
 			try {
-				const created = await createRecord({
+				const details = {
 					title: value.title,
 					people: value.people,
 					location: value.location,
 					description: value.description,
-					datetime: value.datetime,
-					amount: value.amount,
 					category_id: value.category_id,
 					analytics_treatment: value.analytics_treatment || null,
 					monthly_budget_id: value.monthly_budget_id || null,
 					monthly_budget_source: value.monthly_budget_source,
+				}
+				const record = await createRecord({
+					...details,
+					datetime: value.datetime,
+					amount: value.amount,
 					statements: value.statements,
 				})
-				void trackRecordSaved(created.id).catch(() => undefined)
+				void trackRecordSaved(record.id).catch(() => undefined)
+				// The selected Record already exists, so a failed batch must not invite a resubmit.
+				if (includeSimilar && similar?.length)
+					await createMatchingRecords(
+						details,
+						similar.map(s => s.id),
+					).then(
+						created => toast.success(`Created ${pluralize(created + 1, "Record")}.`),
+						() => toast.error("Created this Record, but not the similar ones."),
+					)
+				created.current = true
 				setIsOpen(false)
-				clear?.()
 			} catch (cause) {
 				if (cause instanceof ValidationError) {
 					setApiErrors(cause.errors)
@@ -167,8 +213,29 @@ export default function RecordCreatorDialog({
 	}))
 	const analyticsCategory = categoriesFlat.find(category => category.id === analytics.categoryId)
 
-	const applyRecommendation = (item: Pick<RuleRecommendation, "field" | "value">) => {
-		form.setFieldValue(item.field, item.value ?? "")
+	const current = useStore(form.store, state => state.values)
+	// A typed title and an entered time join the evidence; how much each counts is learned from
+	// this workspace.
+	const learned = useLiveQuery(
+		() =>
+			ready
+				? recordSuggestions({
+						statementIds: statementKey.split(",").filter(Boolean),
+						title: current.title,
+						datetime: current.datetime,
+					})
+				: undefined,
+		[ready, statementKey, current.title, current.datetime],
+	)
+	const applyRecommendation = (
+		item: Pick<RecordSuggestion, "field"> & { value: string | null },
+	) => {
+		form.setFieldValue(
+			item.field,
+			item.field === "monthly_budget_id" && item.value === "unbudgeted"
+				? ""
+				: (item.value ?? ""),
+		)
 		clearApiError(item.field)
 		if (
 			item.field === "category_id" &&
@@ -181,13 +248,6 @@ export default function RecordCreatorDialog({
 		}
 		if (item.field === "monthly_budget_id")
 			form.setFieldValue("monthly_budget_source", "manual")
-		if (
-			item.field === "analytics_treatment" &&
-			!canUseMonthlyBudget(item.value as AnalyticsTreatment, form.getFieldValue("amount"))
-		) {
-			form.setFieldValue("monthly_budget_id", "")
-			form.setFieldValue("monthly_budget_source", "manual")
-		}
 	}
 	useEffect(() => {
 		if (!isOpen) {
@@ -200,6 +260,8 @@ export default function RecordCreatorDialog({
 			appliedAutofill.current = false
 			touchedFields.current.clear()
 			setAutofilledBy({})
+			setAutofillSettled(false)
+			setIncludeSimilar(false)
 			form.reset()
 		}
 		if (recommendations === undefined || appliedAutofill.current) return
@@ -230,11 +292,10 @@ export default function RecordCreatorDialog({
 					continue
 			}
 			applyRecommendation({ field, value: values[field] ?? null })
-			applied[field] = recommendations.find(
-				r => r.mode === "autofill" && r.field === field,
-			)?.rule_name
+			applied[field] = recommendations.find(r => r.field === field)?.rule_name
 		}
 		setAutofilledBy(applied)
+		setAutofillSettled(true)
 	}, [isOpen, statements, recommendations, form, categoriesFlat, applyRecommendation])
 	const touch = (field: RuleField) => {
 		touchedFields.current.add(field)
@@ -249,7 +310,8 @@ export default function RecordCreatorDialog({
 	const ruleSuggestions = (field: RuleField) => (
 		<RuleSuggestions
 			field={field}
-			recommendations={recommendations ?? []}
+			value={current[field]}
+			suggestions={autofillSettled ? (learned?.chips ?? []) : []}
 			label={value => ruleValueLabel(field, value, categories, monthlyBudgets)}
 			disabled={
 				field === "monthly_budget_id" &&
@@ -269,7 +331,11 @@ export default function RecordCreatorDialog({
 
 	return (
 		<Dialog
-			open={isOpen}
+			open={open}
+			onOpenChangeComplete={open => {
+				setEntered(open)
+				onOpenChangeComplete(open)
+			}}
 			onOpenChange={isOpen => {
 				setIsOpen(isOpen)
 				if (isOpen) {
@@ -308,7 +374,10 @@ export default function RecordCreatorDialog({
 												label="Title"
 												autopopulated={autofillNote("title")}
 												value={field.state.value}
-												suggestions={completions?.titles ?? []}
+												suggestions={[
+													...(learned?.ranked.title ?? []),
+													...(completions?.titles ?? []),
+												]}
 												errors={mergeErrors(
 													field.state.meta.errors,
 													field.name,
@@ -329,7 +398,10 @@ export default function RecordCreatorDialog({
 												label="People"
 												autopopulated={autofillNote("people")}
 												value={field.state.value}
-												suggestions={completions?.peoples ?? []}
+												suggestions={[
+													...(learned?.ranked.people ?? []),
+													...(completions?.peoples ?? []),
+												]}
 												errors={mergeErrors(
 													field.state.meta.errors,
 													field.name,
@@ -350,7 +422,10 @@ export default function RecordCreatorDialog({
 												label="Location"
 												autopopulated={autofillNote("location")}
 												value={field.state.value}
-												suggestions={completions?.locations ?? []}
+												suggestions={[
+													...(learned?.ranked.location ?? []),
+													...(completions?.locations ?? []),
+												]}
 												errors={mergeErrors(
 													field.state.meta.errors,
 													field.name,
@@ -517,7 +592,7 @@ export default function RecordCreatorDialog({
 												<motion.div
 													key={statement.id}
 													className="p-0.5"
-													layout
+													layout="position"
 													initial={{ opacity: 0, y: 6 }}
 													animate={{
 														opacity: 1,
@@ -590,7 +665,7 @@ export default function RecordCreatorDialog({
 																		<Progress
 																			value={percent}
 																			className={cn(
-																				"transition-colors",
+																				"transition-colors duration-150 ease-out",
 																				percent > 100
 																					? "text-red-400"
 																					: null,
@@ -637,6 +712,62 @@ export default function RecordCreatorDialog({
 										)}
 									</AnimatePresence>
 								</ScrollArea>
+
+								<AnimatePresence initial={false}>
+									{similar?.length ? (
+										<motion.div
+											className="overflow-hidden"
+											{...COLLAPSE_MOTION}
+										>
+											<div className="grid gap-3 rounded-lg border border-dashed p-3">
+												<label
+													htmlFor="include-similar"
+													className="flex cursor-pointer items-start gap-2.5 text-sm"
+												>
+													<Checkbox
+														id="include-similar"
+														className="mt-0.5"
+														checked={includeSimilar}
+														onCheckedChange={checked =>
+															setIncludeSimilar(checked === true)
+														}
+													/>
+													<span className="grid gap-0.5">
+														<span className="font-medium">
+															Also create a Record for{" "}
+															{similar.length === 1
+																? "1 similar Statement"
+																: `each of ${similar.length} similar Statements`}
+														</span>
+														<span className="text-xs text-muted-foreground">
+															Each takes these details with its own
+															amount and date.
+														</span>
+													</span>
+												</label>
+												<ul className="grid gap-1 text-xs">
+													{similar.map(statement => (
+														<li
+															key={statement.id}
+															className="flex items-baseline justify-between gap-3"
+														>
+															<span className="min-w-0 truncate">
+																{statement.description}
+															</span>
+															<span className="shrink-0 text-muted-foreground tabular-nums">
+																{formatDatetime(statement.datetime)}{" "}
+																·{" "}
+																{formatCurrency(
+																	statement.allocable_amount,
+																)}
+															</span>
+														</li>
+													))}
+												</ul>
+											</div>
+										</motion.div>
+									) : null}
+								</AnimatePresence>
 							</div>
 						</form>
 					</DialogBody>

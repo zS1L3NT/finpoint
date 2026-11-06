@@ -111,10 +111,15 @@ export default function RecordEditorDialog({
 			amount: record.amount,
 			category_id: record.category.id,
 			analytics_treatment:
-				record.analytics_treatment_source === "manual" ? record.analytics_treatment : "",
-			monthly_budget_id: record.monthly_budget_id ?? "",
+				record.treatment_choice.kind === "explicit" ? record.treatment_choice.value : "",
+			monthly_budget_id:
+				record.monthly_budget_choice.kind === "explicit"
+					? record.monthly_budget_choice.id
+					: "",
 			monthly_budget_source:
-				record.monthly_budget_source ?? ("category" as "category" | "manual"),
+				record.monthly_budget_choice.kind === "category"
+					? ("category" as const)
+					: ("manual" as const),
 			description: record.description ?? "",
 			statements: statements.map(statement => ({
 				id: statement.id,
@@ -462,7 +467,7 @@ export default function RecordEditorDialog({
 													<motion.div
 														key={id}
 														className="p-0.5"
-														layout
+														layout="position"
 														initial={{ opacity: 0, y: 6 }}
 														animate={{
 															opacity: 1,
@@ -570,7 +575,7 @@ export default function RecordEditorDialog({
 																			<Progress
 																				value={percent}
 																				className={cn(
-																					"transition-colors",
+																					"transition-colors duration-150 ease-out",
 																					percent > 100
 																						? "text-red-400"
 																						: null,

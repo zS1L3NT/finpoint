@@ -91,5 +91,7 @@ Project-specific code style rules preserved from the previous guide.
 - Keep motion values/presets reused across files in `src/lib/motion.ts`. Timed UI motion lasts at most 300ms per animation; chart data intro is 450ms. Springs use the shared presets.
 - Specify an explicit duration and `ease-out` with app-owned CSS `transition-*` classes; make transform transitions respect reduced motion.
 - Interactive list rows give colour press feedback without scaling. Removing rows on the same page preserves row identity and does not replay the entrance cascade.
+- In a selectable table, a selected row that leaves the list (an action consumed it) fades out and the rows below slide up into its place; unselected removals (search, filters) stay instant.
+- Framer `layout` on anything holding text whose size can change is `layout="position"`, so a resize never scale-squashes its contents.
 - Changing numbers use `tabular-nums`; use `tracking-tight` only at `text-lg` and larger, and write 11px micro text as `text-[0.6875rem]`.
 - Positive money uses the `creative` token. Icons over user-chosen colours choose a contrasting foreground.

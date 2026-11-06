@@ -9,12 +9,10 @@ import { toast } from "sonner"
 import CashflowChart from "@/components/charts/cashflow-chart"
 import CategoryHistoryChart from "@/components/charts/category-history-chart"
 import CategoryMovers from "@/components/charts/category-movers"
-import CategorySpendingMix from "@/components/charts/category-spending-mix"
 import DailySpendingChart from "@/components/charts/daily-spending-chart"
 import MonthlyBudgetUsage from "@/components/charts/monthly-budget-usage"
 import SpendingCalendar from "@/components/charts/spending-calendar"
 import TotalSpendingChart from "@/components/charts/total-spending-chart"
-import WeekdayBars from "@/components/charts/weekday-bars"
 import MonthlyBudgetDialog from "@/components/dialogs/monthly-budget"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import { Metric as DashboardMetric, type Delta, MetricGrid } from "@/components/metric"
@@ -27,8 +25,6 @@ import {
 	SelectContent,
 	SelectGroup,
 	SelectItem,
-	SelectLabel,
-	SelectSeparator,
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select"
@@ -58,7 +54,6 @@ type Comparison = DashboardData["comparison"]
 type ComparisonValue = Comparison["income"]
 type Projection = DashboardView["pace"]["projection"]
 type PaceData = DashboardView["pace"]
-type WeekdayBreakdown = DashboardData["weekday"]
 
 export default function DashboardPage() {
 	const { handlePush } = useHistory()
@@ -90,7 +85,7 @@ export default function DashboardPage() {
 	const monthlyBudgetDailyData = view?.monthlyBudgetDaily
 	// The summary and pace chart paint first; the sections below the fold then mount one per
 	// frame. Mounting every chart in one commit blocked arrival for ~300ms in production.
-	const stage = useStagedMount(6, !!data && !!paceData && !!monthlyBudgetDailyData)
+	const stage = useStagedMount(5, !!data && !!paceData && !!monthlyBudgetDailyData)
 	if (!view || !data || !paceData || !monthlyBudgetDailyData) return null
 	const {
 		scope,
@@ -102,9 +97,8 @@ export default function DashboardPage() {
 		scopeColor,
 		scopeFilters,
 		paceFilters,
-		dailyMonthlyBudget: dailyBudget,
 	} = view
-	const { period, summary, series, weekday, future_records_count } = data
+	const { period, summary, series, future_records_count } = data
 	// Everything below shows the loaded data, so it takes the data's own month: while the next
 	// month loads, labels and links stay with the numbers on screen.
 	const dataMonth = data.month ?? month
@@ -193,12 +187,7 @@ export default function DashboardPage() {
 				{!period.is_future ? (
 					<Card className="min-w-0">
 						<CardHeader className="border-b">
-							<ScopedCardTitle
-								scope={
-									scope === "all" ? (dailyBudget?.name ?? "Total") : scopeLabel
-								}
-								color={scope === "all" ? dailyBudget?.color : scopeColor}
-							>
+							<ScopedCardTitle scope={scopeLabel} color={scopeColor}>
 								Spending forecast
 							</ScopedCardTitle>
 							<CardDescription>
@@ -207,14 +196,16 @@ export default function DashboardPage() {
 									: "Recorded spending against the monthly plan."}
 							</CardDescription>
 						</CardHeader>
-						<CardContent>
+						<CardContent className="flex min-h-0 flex-1 flex-col">
 							<CashflowChart
 								data={paceSeries}
-								history={paceData.history}
+								forecast={paceData.forecast}
 								month={dataMonth}
 								year={dataYear}
 								amount={paceAmount?.amount ?? null}
-								amountLabel={paceAmount?.name ?? null}
+								amountLabel={
+									paceData.singleBudget ? (paceAmount?.name ?? null) : "Total"
+								}
 								showProjection={paceProjection.available}
 								recordFilters={paceFilters}
 							/>
@@ -284,60 +275,28 @@ export default function DashboardPage() {
 			{!period.is_future ? (
 				<>
 					{stage > 0 ? (
-						<div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
-							<Card className="min-w-0">
-								<CardHeader>
-									<ScopedCardTitle
-										scope={scope === "all" ? "Total" : scopeLabel}
-										color={scopeColor}
-									>
-										Categories this month
-									</ScopedCardTitle>
-									<CardDescription className="tabular-nums">
-										{scopeLabel} ·{" "}
-										{formatCurrency(
-											scopedCategories.reduce(
-												(sum, category) => sum + category.outflow,
-												0,
-											),
-										)}{" "}
-										expenses ·{" "}
-										{formatCurrency(
-											scopedCategories.reduce(
-												(sum, category) => sum + category.refunds,
-												0,
-											),
-										)}{" "}
-										refunds
-									</CardDescription>
-								</CardHeader>
-								<CardContent>
-									<CategorySpendingMix
-										categories={scopedCategories}
-										recordHref={categoryRecordHref}
-									/>
-								</CardContent>
-							</Card>
-							<CategoryHistoryChart
-								months={data.comparison_history}
-								through={period.through}
-								monthlyBudgetIds={scope === "all" ? null : scopedBudgetIds}
-								recordHref={categoryRecordHref}
-								badge={
-									<ScopeLabel
-										scope={scope === "all" ? "Total" : scopeLabel}
-										color={scopeColor}
-									/>
-								}
-							/>
-						</div>
+						<CategoryHistoryChart
+							key={`${dataMonth}-${dataYear}`}
+							categories={scopedCategories}
+							scopeLabel={scopeLabel}
+							months={data.comparison_history}
+							through={period.through}
+							monthlyBudgetIds={scope === "all" ? null : scopedBudgetIds}
+							recordHref={categoryRecordHref}
+							badge={
+								<ScopeLabel
+									scope={scope === "all" ? "All budgets" : scopeLabel}
+									color={scopeColor}
+								/>
+							}
+						/>
 					) : null}
 					{stage > 1 ? (
 						<div className="grid gap-5 lg:grid-cols-2">
 							<Card className="min-w-0">
 								<CardHeader>
 									<ScopedCardTitle
-										scope={scope === "all" ? "Total" : scopeLabel}
+										scope={scope === "all" ? "All budgets" : scopeLabel}
 										color={scopeColor}
 									>
 										Spending calendar
@@ -360,7 +319,7 @@ export default function DashboardPage() {
 							<Card className="min-w-0">
 								<CardHeader>
 									<ScopedCardTitle
-										scope={scope === "all" ? "Total" : scopeLabel}
+										scope={scope === "all" ? "All budgets" : scopeLabel}
 										color={scopeColor}
 									>
 										Biggest changes
@@ -382,7 +341,9 @@ export default function DashboardPage() {
 					{stage > 2 ? (
 						<Card className="min-w-0">
 							<CardHeader>
-								<ScopedCardTitle scope="Total">Surplus / Shortfall</ScopedCardTitle>
+								<ScopedCardTitle scope="All budgets">
+									Surplus / Shortfall
+								</ScopedCardTitle>
 								<CardDescription>
 									Cumulative income minus all personal spending
 								</CardDescription>
@@ -400,7 +361,9 @@ export default function DashboardPage() {
 					{stage > 3 ? (
 						<Card>
 							<CardHeader className="border-b">
-								<ScopedCardTitle scope="Total">Spending by day</ScopedCardTitle>
+								<ScopedCardTitle scope="All budgets">
+									Spending by day
+								</ScopedCardTitle>
 								<CardDescription>
 									Net daily spending across all monthly budgets, including
 									refunds. Hold or hover over a day to read it, and click it to
@@ -418,8 +381,7 @@ export default function DashboardPage() {
 						</Card>
 					) : null}
 
-					{stage > 4 ? <WeekdayCard weekday={weekday} /> : null}
-					{stage > 5 ? (
+					{stage > 4 ? (
 						<InvestmentRow summary={summary} month={dataMonth} year={dataYear} />
 					) : null}
 				</>
@@ -500,58 +462,22 @@ function ScopeSelect({
 			</SelectTrigger>
 			<SelectContent variant="filter">
 				<SelectGroup>
-					<SelectItem value="all">All spending</SelectItem>
+					<SelectItem value="all">
+						<span className="size-2 rounded-full bg-foreground" />
+						All budgets
+					</SelectItem>
+					{budgets.map(budget => (
+						<SelectItem key={budget.id} value={budget.id}>
+							<span
+								className="size-2 rounded-full"
+								style={{ backgroundColor: themeColor(budget.color) }}
+							/>
+							{budget.name}
+						</SelectItem>
+					))}
 				</SelectGroup>
-				<SelectSeparator />
-				<SelectGroup>
-					<SelectLabel>Budget groups</SelectLabel>
-					<SelectItem value="core">Core</SelectItem>
-					<SelectItem value="outlier">Outlier</SelectItem>
-					<SelectItem value="other">Other</SelectItem>
-				</SelectGroup>
-				{budgets.length ? <SelectSeparator /> : null}
-				{budgets.length ? (
-					<SelectGroup>
-						<SelectLabel>Specific monthly budget</SelectLabel>
-						{budgets.map(budget => (
-							<SelectItem key={budget.id} value={budget.id}>
-								<span
-									className="size-2 rounded-full"
-									style={{ backgroundColor: themeColor(budget.color) }}
-								/>
-								{budget.name}
-							</SelectItem>
-						))}
-					</SelectGroup>
-				) : null}
 			</SelectContent>
 		</Select>
-	)
-}
-
-function WeekdayCard({ weekday }: { weekday: WeekdayBreakdown }) {
-	return (
-		<Card>
-			<CardHeader>
-				<ScopedCardTitle scope="Total">Spending by weekday</ScopedCardTitle>
-				<CardDescription>
-					Spending on each weekday ÷ its occurrences in the month, including zero-spend
-					days.
-					{weekday.comparison_count
-						? ` Compared with ${weekday.comparison_count} previous full months, using all occurrences of the same weekday.`
-						: " No comparison history available."}
-				</CardDescription>
-			</CardHeader>
-			<CardContent>
-				<WeekdayBars stats={weekday.stats} comparisonCount={weekday.comparison_count} />
-				{weekday.weekend ? (
-					<p className="mt-3 text-xs text-muted-foreground">
-						Weekend days average {formatCurrency(weekday.weekend.weekend_average)} vs{" "}
-						{formatCurrency(weekday.weekend.weekday_average)} on weekdays this month.
-					</p>
-				) : null}
-			</CardContent>
-		</Card>
 	)
 }
 
@@ -573,7 +499,8 @@ function ScopedCardTitle({
 }
 
 function ScopeLabel({ scope, color }: { scope: string; color?: string }) {
-	if (scope === "Total") return <MonthlyBudgetBadge name="Total" color="var(--foreground)" />
+	if (scope === "All budgets")
+		return <MonthlyBudgetBadge name="All budgets" color="var(--foreground)" />
 	return (
 		<MonthlyBudgetBadge
 			name={scope}
@@ -755,10 +682,10 @@ function PaceSummary({
 					label: budget ? `${budget.name} usage pace` : "Usage pace",
 					value: budget
 						? `${formatCurrency(budget.usage_pace)} / day`
-						: "No paced budget",
+						: "No monthly amount",
 					detail: budget
 						? `Projected ${formatCurrency(budget.projected)}`
-						: "Set a daily-paced monthly budget",
+						: "Set an amount in Monthly budgets",
 				},
 				{
 					icon: "lucide:chart-no-axes-combined",
@@ -939,11 +866,6 @@ function ReviewLinks({ data, month, year }: { data: DashboardData; month: string
 						{data.summary.unbudgeted_count === 1 ? "" : "s"}
 					</Link>
 				</Button>
-			) : null}
-			{data.summary.pending_count > 0 ? (
-				<span className="basis-full text-[0.6875rem] text-muted-foreground">
-					Pending Record values count in totals.
-				</span>
 			) : null}
 		</div>
 	)

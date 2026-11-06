@@ -1,4 +1,4 @@
-![Finpoint Cover Image](https://res.cloudinary.com/zs1l3nt/image/upload/repositories/finpoint.png)
+![Finpoint Cover Image](https://res.cloudinary.com/zs1l3nt/image/upload/v1793559402/repositories/finpoint.png)
 
 # Finpoint
 
@@ -34,20 +34,21 @@ I've also hosted Finpoint on my personal subdomain at https://finpoint.zectan.co
 
 - Dashboard
   - Monthly income, spending and surplus or shortfall
-  - Spending forecast with a projected month-end and recommended daily pace
-  - Daily spending pace and previous-month comparisons
-  - Spending by day and weekday, plus a spending calendar that opens each day's Records
-  - Category and Monthly Budget breakdowns
+  - Spending forecast for all budgets or a single Monthly Budget, with a projected month-end and recommended pace
+  - Usage pace against each Monthly Budget's amount and previous-month comparisons
+  - Spending by day and weekday, plus a spending calendar that previews each day before opening its Records
+  - Category and Monthly Budget breakdowns, with category trends that open each month's Records
   - Biggest category changes against your usual spending
   - Page-wide Monthly Budget scope that stays across chart links and month changes
   - Reusable Monthly Budgets with monthly amount overrides
-  - Pending Record and Statement summaries
+  - Review links for Pending Records, Pending Statements, unallocated Statements and unbudgeted spending
   - Demo data offered on an empty overview
 - Records
   - Create, update and delete Records
   - Assign Categories, Monthly Budgets and accounting treatments
   - Attach one or more Statements through Allocations
-  - Suggested and autofilled details from Statement Rules
+  - Suggested details learned from your past Records
+  - Autofilled details from Statement Rules
   - Search, filter and paginate Records
   - Monthly Records view with month navigation
 - Statements
@@ -64,8 +65,9 @@ I've also hosted Finpoint on my personal subdomain at https://finpoint.zectan.co
   - Search and filter by Account, status and date
 - Statement Rules
   - Recognise recurring Statements by description (contains, is exactly or regex match)
-  - Suggest or autofill Record title, people, location, Category, treatment and Monthly Budget
+  - Autofill Record title, people, location, Category, treatment and Monthly Budget
   - Live preview of the Statements a rule matches
+  - Suggested rules drafted from Records you keep labelling the same way
 - Workflows
   - Allocate Statements to existing or new Records
   - Split amounts across multiple Records
@@ -79,9 +81,8 @@ I've also hosted Finpoint on my personal subdomain at https://finpoint.zectan.co
     - Default accounting treatments
     - Default Monthly Budgets
   - Monthly Budgets
-    - Core, outlier and custom groups
-    - Daily, recurring or unpaced spending
     - Default, one-month and from-this-month-onward amount rules
+    - A spending forecast for each Monthly Budget
   - Budgets
     - Custom date periods and amounts
     - Automatic or manual Record membership
@@ -93,7 +94,8 @@ I've also hosted Finpoint on my personal subdomain at https://finpoint.zectan.co
   - Conflict handling when both the browser and Drive copy change, without flagging untouched starter workspaces
   - Generated demo data
   - Default filter date ranges
-  - Light, dark and system themes
+  - Suggestion accuracy measured on your own Records
+  - Light, dark and system themes, with picked colours toned to match each theme
   - Progressive Web Application support
 
 ## Usage
@@ -144,7 +146,7 @@ $ bun run build
     - [![shadcn](https://img.shields.io/badge/shadcn-%5E4.3.0-red?style=flat-square)](https://www.npmjs.com/package/shadcn/v/4.3.0)
     - [![Tailwind CSS](https://img.shields.io/badge/tailwindcss-%5E4.0.0-red?style=flat-square)](https://www.npmjs.com/package/tailwindcss/v/4.0.0)
     - [![Framer Motion](https://img.shields.io/badge/framer--motion-%5E12.38.0-red?style=flat-square)](https://www.npmjs.com/package/framer-motion/v/12.38.0)
-    - [![Lucide React](https://img.shields.io/badge/lucide--react-%5E1.14.0-red?style=flat-square)](https://www.npmjs.com/package/lucide-react/v/1.14.0)
+    - [![Lucide React](https://img.shields.io/badge/lucide--react-%5E1.55.0-red?style=flat-square)](https://www.npmjs.com/package/lucide-react/v/1.55.0)
   - Data
     - [![Dexie](https://img.shields.io/badge/dexie-%5E4.4.6-red?style=flat-square)](https://www.npmjs.com/package/dexie/v/4.4.6)
     - [![TanStack Table](https://img.shields.io/badge/%40tanstack%2Freact--table-%5E8.21.3-red?style=flat-square)](https://www.npmjs.com/package/@tanstack/react-table/v/8.21.3)

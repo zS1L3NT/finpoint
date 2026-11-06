@@ -366,6 +366,18 @@ export async function replacementCandidates(
 	return paginate(candidates, page, perPage)
 }
 
+/** Suggested replacement count per pending Statement, using the same rules as `replacementCandidates`. */
+export async function suggestedReplacementCounts(pendingIds: string[]) {
+	const counts: Record<string, number> = {}
+	for (const id of pendingIds) {
+		// A pending Statement replaced mid-query is gone or no longer pending; skip it.
+		const pending = await db.statements.get(id)
+		if (pending?.is_pending !== 1) continue
+		counts[id] = (await replacementCandidates(id, { scope: "suggested", per_page: 1 })).total
+	}
+	return counts
+}
+
 export async function replacementReview(pendingId: string, statementId: string) {
 	const pending = await db.statements.get(pendingId)
 	const statement = await db.statements.get(statementId)

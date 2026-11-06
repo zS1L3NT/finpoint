@@ -12,7 +12,6 @@ export type MonthlyFilters = {
 	category_ids?: string | null
 	is_allocated?: string | null
 	monthly_budget_id?: string | null
-	monthly_budget_group?: string | null
 	show_unbudgeted?: boolean
 	effective_spending?: boolean
 	treatment?: string | null
@@ -32,7 +31,11 @@ export async function getMonthlyRecords(month: string, year: number, filters: Mo
 		: date.endOf("month").toFormat("yyyy-MM-dd")
 
 	const rawCategoryIds = (filters.category_ids ?? "").split(",").filter(Boolean)
-	const category_ids = await expandCategoryIdsForMonthly(rawCategoryIds)
+	// Avoid awaiting a non-Dexie promise before the first read: liveQuery must
+	// retain its observation context when no Category filter is selected.
+	const category_ids = rawCategoryIds.length
+		? await expandCategoryIdsForMonthly(rawCategoryIds)
+		: []
 	const startDate = filters.start_date ?? date.toFormat("yyyy-MM-dd")
 	const endDate = filters.end_date ?? date.endOf("month").toFormat("yyyy-MM-dd")
 	const rangeStart = DateTime.fromFormat(startDate, "yyyy-MM-dd")
@@ -56,7 +59,6 @@ export async function getMonthlyRecords(month: string, year: number, filters: Mo
 		is_allocated: filters.is_allocated ?? null,
 		category_ids,
 		monthly_budget_id: filters.monthly_budget_id ?? null,
-		monthly_budget_group: filters.monthly_budget_group ?? null,
 		show_unbudgeted: !!filters.show_unbudgeted,
 		effective_spending: !!filters.effective_spending,
 		treatment: filters.treatment ?? null,
@@ -84,8 +86,6 @@ export async function getMonthlyRecords(month: string, year: number, filters: Mo
 					id: r.monthly_budget.id,
 					name: r.monthly_budget.name,
 					color: r.monthly_budget.color,
-					group: r.monthly_budget.group,
-					pace_kind: r.monthly_budget.pace_kind,
 					display_order: r.monthly_budget.display_order,
 					archived: r.monthly_budget.archived,
 				}
@@ -115,7 +115,6 @@ export async function getMonthlyRecords(month: string, year: number, filters: Mo
 			category_ids: filters.category_ids ?? null,
 			is_allocated: filters.is_allocated ?? null,
 			monthly_budget_id: filters.monthly_budget_id ?? null,
-			monthly_budget_group: filters.monthly_budget_group ?? null,
 			show_unbudgeted: !!filters.show_unbudgeted,
 			effective_spending: !!filters.effective_spending,
 			treatment: filters.treatment ?? null,

@@ -4,7 +4,7 @@ import {
 	settledOverlayAlpha,
 } from "../support/assertions"
 import { getScenario, IDS } from "../support/data"
-import { expect, test } from "../support/fixtures"
+import { expect, seedWorkspace, test } from "../support/fixtures"
 
 // App modal surfaces share one populated seed. None of them persists: dialogs
 // are escaped, reviews are cancelled, and sheets only reopen. Every step
@@ -187,12 +187,14 @@ test.describe("dense workspace", () => {
 	// open popups never leak between filters. The harness SelectField case
 	// lives in core/components.
 	test("Records filters: preserve the page scrollbar while open", async ({ page }) => {
-		for (const label of ["Any monthly budget", "Any treatment", "Any status"] as const) {
+		for (const label of ["All budgets", "Any treatment", "Any status"] as const) {
 			await test.step(`Records filter ${label}: preserves the page scrollbar while open`, async () => {
 				// Each app filter is a distinct combobox consumer on the dense records
 				// route; the shared harness case above covers the editor SelectField.
 				await page.goto("/records?per_page=100")
-				const filter = page.getByRole("combobox").filter({ hasText: label })
+				const filter = page
+					.getByRole("combobox")
+					.filter({ hasText: new RegExp(`^${label}$`) })
 				await expect(filter).toBeVisible()
 				await expectDropdownPreservesScroll(page, () => filter.click())
 				await page.keyboard.press("Escape")
@@ -297,4 +299,63 @@ test("app modal surfaces: backdrops darken the page at half opacity", {
 		await page.keyboard.press("Escape")
 		await expect(sheet).not.toBeVisible()
 	})
+})
+
+test("Statement replacement: reconciles transfer summary and blocks invalid pairs", async ({
+	page,
+}) => {
+	test.setTimeout(120_000)
+	for (const [count, amount, moving, difference, remaining] of [
+		[1, -20, "-$14.50", "$5.50", "-$5.50"],
+		[2, -20, "-$15.50", "$5.50", "-$4.50"],
+		[2, -10, "-$15.50", "$4.50", "$5.50"],
+	] as const) {
+		const { tables } = getScenario("populated")
+		const incoming = IDS.statements.unallocated[3]
+		tables.statements = tables.statements.map(s => (s.id === incoming ? { ...s, amount } : s))
+		if (count === 2)
+			tables.allocations.push({
+				statement_id: IDS.statements.pending,
+				record_id: IDS.records.partialPending,
+				amount: -1,
+			})
+		await seedWorkspace(page, "populated", tables)
+		await page.goto("/allocator")
+		await page
+			.getByRole("checkbox", { name: `Select statement ${incoming}`, exact: true })
+			.check()
+		await page.getByRole("button", { name: "Replace Pending", exact: true }).click()
+		const sheet = page.getByRole("dialog", { name: "Replace a pending Statement", exact: true })
+		await sheet
+			.getByRole("searchbox", { name: "Search pending Statements" })
+			.fill("Pasar malam")
+		await sheet.getByRole("button").filter({ hasText: "Pasar malam" }).click()
+		const review = page.getByRole("dialog", {
+			name: "Review Statement replacement",
+			exact: true,
+		})
+		for (const [label, value] of [
+			["Moving", moving],
+			["Difference", difference],
+			["Left to allocate afterward", remaining],
+		] as const) {
+			await expect(review.getByText(label, { exact: true }).locator("..")).toContainText(
+				value,
+			)
+		}
+		await expect(
+			review.getByText(`${count} Allocation${count === 1 ? "" : "s"}`, { exact: true }),
+		).toBeVisible()
+		const confirm = review.getByRole("button", {
+			name: "Replace pending Statement",
+			exact: true,
+		})
+		if (amount === -10) {
+			await expect(review.getByRole("alert")).toContainText("This pair cannot be replaced")
+			await expect(confirm).toBeDisabled()
+		} else {
+			await expect(review.getByRole("alert")).toHaveCount(0)
+			await expect(confirm).toBeEnabled()
+		}
+	}
 })

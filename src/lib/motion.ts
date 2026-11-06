@@ -62,7 +62,7 @@ export const rowEnter = (index: number, entrance: RowEntrance) => {
 		return {
 			initial: { opacity: 0 },
 			animate: { opacity: 1, y: 0 },
-			transition: { duration: ROW_FADE_DURATION, ease: EASE_OUT },
+			transition: { duration: ROW_FADE_DURATION, ease: EASE_OUT, layout: SPRING.snappy },
 		}
 	}
 	const refilter = entrance === "refilter"
@@ -73,9 +73,22 @@ export const rowEnter = (index: number, entrance: RowEntrance) => {
 			duration: refilter ? ROW_REFILTER_DURATION : ROW_CASCADE_DURATION,
 			ease: EASE_OUT,
 			delay: cascadeDelay(index) * (refilter ? 2 / 3 : 1),
+			layout: SPRING.snappy,
 		},
 	}
 }
+
+/**
+ * Motion props for rows of a selectable table: a selected row that leaves the list (it was
+ * allocated, replaced or turned into a Record) fades out, then the rows below slide up into its
+ * place. Unselected rows leave instantly, so search and filtering stay quick. Layout stays on
+ * without a selection too: the selection clears as the leaving row goes, before the rest move.
+ */
+export const rowLeave = (selected: boolean) =>
+	({
+		layout: "position",
+		exit: selected ? { opacity: 0, transition: TRANSITION.fast } : undefined,
+	}) as const
 
 /** Motion props for a card in a grid: a short rise with the same bounded cascade as rows. */
 export const cardEnter = (index: number) => ({
@@ -84,11 +97,25 @@ export const cardEnter = (index: number) => ({
 	transition: { ...TRANSITION.base, delay: cascadeDelay(index) },
 })
 
-/** Motion props for a block that collapses to nothing: height and margin close together. */
+/**
+ * Motion props for a block that collapses to nothing: height and margin close together. It
+ * clips only while moving, so focus rings of the fields inside stay whole once it is open.
+ */
 export const COLLAPSE_MOTION = {
-	initial: { opacity: 0, height: 0, marginTop: -16 },
-	animate: { opacity: 1, height: "auto", marginTop: 0 },
-	exit: { opacity: 0, height: 0, marginTop: -16, transition: TRANSITION.fast },
+	initial: { opacity: 0, height: 0, marginTop: -16, overflow: "hidden" },
+	animate: {
+		opacity: 1,
+		height: "auto",
+		marginTop: 0,
+		transitionEnd: { overflow: "visible" },
+	},
+	exit: {
+		opacity: 0,
+		height: 0,
+		marginTop: -16,
+		overflow: "hidden",
+		transition: TRANSITION.fast,
+	},
 	transition: {
 		height: SPRING.smooth,
 		marginTop: SPRING.smooth,

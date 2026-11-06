@@ -5,7 +5,8 @@
 // Sessions persist automatically in IndexedDB — no manual save step.
 
 import { DateTime } from "luxon"
-import { db } from "@/data/db"
+import { db, withoutActionModes } from "@/data/db"
+import { migrateRecordChoices } from "@/data/record-choices"
 import {
 	DEFAULT_SETTINGS,
 	type FinpointSettings,
@@ -13,7 +14,7 @@ import {
 	replaceSettings,
 } from "@/data/settings"
 
-export const EXPORT_VERSION = 5
+export const EXPORT_VERSION = 8
 
 type TableName =
 	| "statement_rules"
@@ -61,6 +62,9 @@ export async function exportData(): Promise<FinpointExport> {
 	for (const table of TABLES) {
 		tables[table] = await db.table(table).toArray()
 	}
+	tables.monthly_budgets = (tables.monthly_budgets as Record<string, unknown>[]).map(
+		monthlyBudgetFields,
+	)
 	return {
 		app: "finpoint",
 		version: EXPORT_VERSION,
@@ -87,7 +91,7 @@ export function parseImportFile(text: string): FinpointExport {
 	const originalVersion = parsed?.version
 	if (parsed && [1, 2, 3].includes(parsed.version ?? 0) && parsed.tables) {
 		parsed.tables.duplicate_dismissals ??= []
-		if (parsed.version === 3) parsed.version = EXPORT_VERSION
+		if (parsed.version === 3) parsed.version = 7
 	}
 	if (parsed && (parsed.version === 1 || parsed.version === 2) && parsed.tables) {
 		const legacy = parsed.tables as Record<string, unknown[]>
@@ -117,12 +121,21 @@ export function parseImportFile(text: string): FinpointExport {
 				const { default_bucket_id, ...row } = value as Record<string, unknown>
 				return { ...row, default_monthly_budget_id: default_bucket_id ?? null }
 			})
-		parsed.version = EXPORT_VERSION
+		parsed.version = 7
 	}
 	if (parsed && parsed.tables && [1, 2, 3, 4].includes(originalVersion ?? 0)) {
 		parsed.tables.statement_rules = []
-		if (parsed.version === 4) parsed.version = EXPORT_VERSION
+		if (parsed.version === 4) parsed.version = 7
 	}
+	if (parsed?.version === 5 && Array.isArray(parsed.tables?.statement_rules)) {
+		parsed.tables.statement_rules = parsed.tables.statement_rules.map(value => {
+			const rule = value as { actions: Record<string, { value: unknown }> }
+			return { ...rule, actions: withoutActionModes(rule.actions) }
+		})
+		parsed.version = 7
+	}
+	if (parsed?.version === 6) parsed.version = 7
+	if (parsed?.version === 7) parsed.version = EXPORT_VERSION
 	if (parsed?.app !== "finpoint" || typeof parsed !== "object" || !parsed.tables) {
 		throw new Error("This file is not a Finpoint backup.")
 	}
@@ -134,6 +147,47 @@ export function parseImportFile(text: string): FinpointExport {
 		if (!Array.isArray(parsed.tables?.[table])) {
 			throw new Error("This backup file looks incomplete.")
 		}
+	}
+	// Keep only current Monthly Budget fields from backups and hand-edited files.
+	parsed.tables.monthly_budgets = (
+		parsed.tables.monthly_budgets as Record<string, unknown>[]
+	).map(monthlyBudgetFields)
+	const categoryIds = new Set((parsed.tables.categories as { id: string }[]).map(c => c.id))
+	if ((originalVersion ?? 0) < 7)
+		parsed.tables.records = (parsed.tables.records as Record<string, unknown>[]).map(row =>
+			migrateRecordChoices(row, categoryIds.has(String(row.category_id))),
+		)
+	for (const row of parsed.tables.records as Record<string, unknown>[]) {
+		const treatment = row.treatment_choice as Record<string, unknown> | undefined
+		const budget = row.monthly_budget_choice as Record<string, unknown> | undefined
+		const validTreatment =
+			treatment &&
+			((treatment.kind === "category" && Object.keys(treatment).length === 1) ||
+				(treatment.kind === "explicit" &&
+					Object.keys(treatment).length === 2 &&
+					typeof treatment.value === "string" &&
+					["automatic", "income", "spending", "saving_investment", "neutral"].includes(
+						treatment.value,
+					)))
+		const validBudget =
+			budget &&
+			(((budget.kind === "category" || budget.kind === "unbudgeted") &&
+				Object.keys(budget).length === 1) ||
+				(budget.kind === "explicit" &&
+					Object.keys(budget).length === 2 &&
+					typeof budget.id === "string" &&
+					budget.id.length > 0))
+		if (
+			!validTreatment ||
+			!validBudget ||
+			[
+				"analytics_treatment",
+				"analytics_treatment_source",
+				"monthly_budget_id",
+				"monthly_budget_source",
+			].some(key => key in row)
+		)
+			throw new Error("This backup contains an invalid Record choice.")
 	}
 	const startDate = parsed.settings?.default_filter_start_date
 	if (startDate != null && !/^\d{4}-\d{2}-\d{2}$/.test(startDate)) {
@@ -158,7 +212,14 @@ export function parseImportFile(text: string): FinpointExport {
 	}
 	return {
 		...(parsed as Omit<FinpointExport, "settings">),
-		tables: { ...parsed.tables, duplicate_dismissals: [...dismissals.values()] },
+		tables: {
+			...parsed.tables,
+			categories: (parsed.tables.categories as Record<string, unknown>[]).map(category => ({
+				...category,
+				analytics_treatment: category.analytics_treatment ?? "automatic",
+			})),
+			duplicate_dismissals: [...dismissals.values()],
+		},
 		settings: {
 			default_filter_start_date: startDate ?? DEFAULT_SETTINGS.default_filter_start_date,
 			default_filter_end_date_today:
@@ -201,4 +262,14 @@ export async function tableCounts(): Promise<Record<TableName, number>> {
 		counts[table] = await db.table(table).count()
 	}
 	return counts
+}
+
+function monthlyBudgetFields({
+	id,
+	name,
+	color,
+	display_order,
+	archived,
+}: Record<string, unknown>) {
+	return { id, name, color, display_order, archived }
 }

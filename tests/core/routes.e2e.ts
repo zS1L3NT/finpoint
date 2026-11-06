@@ -1,6 +1,5 @@
 import type { Page } from "@playwright/test"
 import { expectPointerCursor } from "../support/assertions"
-import { chartTooltip } from "../support/charts"
 import { getScenario, IDS, statementRules } from "../support/data"
 import { setDateOnly } from "../support/date-only"
 import { openEditor, pickOption } from "../support/editors"
@@ -194,7 +193,7 @@ test("workflow tabs and sparkline: tabs navigate by keyboard, Allocate keeps its
 	})
 })
 
-test("Statement rules page: empty, populated and paused rules show conditions, actions and match counts", async ({
+test("Statement rules page: empty, populated and paused rules show conditions, actions and match counts in name order", async ({
 	page,
 }) => {
 	await seedWorkspace(page, "empty")
@@ -209,34 +208,34 @@ test("Statement rules page: empty, populated and paused rules show conditions, a
 	const cards = page.locator("main article")
 	await expect(cards).toHaveCount(5)
 	const names = [
-		"Starbucks coffee",
-		"Raffles coffee",
-		"Groceries",
-		"Grab rides",
 		"Archived travel",
+		"Grab rides",
+		"Groceries",
+		"Raffles coffee",
+		"Starbucks coffee",
 	]
 	for (const [index, name] of names.entries())
 		await expect(
 			cards.nth(index).getByRole("button", { name: `Edit ${name}`, exact: true }),
 		).toBeVisible()
 
-	const starbucks = cards.nth(0)
+	const starbucks = cards.nth(4)
 	await expect(starbucks.getByText("contains", { exact: true })).toBeVisible()
 	await expect(starbucks.getByText("starbucks", { exact: true })).toBeVisible()
 	await expect(starbucks.getByText("1 matching Statement", { exact: true })).toBeVisible()
-	await expect(starbucks.getByText("Autofill", { exact: true })).toHaveCount(2)
-	await expect(starbucks.getByText("Suggest", { exact: true })).toHaveCount(2)
+	await expect(starbucks.getByText("Morning coffee", { exact: true })).toBeVisible()
+	await expect(starbucks.getByText("Dining Out", { exact: true })).toBeVisible()
 
-	await expect(cards.nth(1).getByText("1 matching Statement", { exact: true })).toBeVisible()
+	await expect(cards.nth(3).getByText("1 matching Statement", { exact: true })).toBeVisible()
 	await expect(cards.nth(2).getByText("or", { exact: true })).toBeVisible()
 	await expect(cards.nth(2).getByText("2 matching Statements", { exact: true })).toBeVisible()
 
-	const grab = cards.nth(3)
+	const grab = cards.nth(1)
 	await expect(grab.getByText("Paused", { exact: true })).toBeVisible()
 	await expect(grab.getByRole("button", { name: "Resume Grab rides", exact: true })).toBeVisible()
 	await expect(grab.getByText("matching Statement")).toHaveCount(0)
 
-	const archived = cards.nth(4)
+	const archived = cards.nth(0)
 	await expect(archived.getByText("Monthly budget", { exact: true })).toBeVisible()
 	await expect(archived.getByText("Travel", { exact: true })).toBeVisible()
 	await expect(archived.getByText("1 matching Statement", { exact: true })).toBeVisible()
@@ -274,6 +273,34 @@ test("Statement rules page: the Plan Rules link opens it and pause, resume and d
 	await page.reload()
 	await expect(page.getByRole("button", { name: "Edit Groceries", exact: true })).toHaveCount(0)
 	await expect(page.locator("main article")).toHaveCount(4)
+})
+
+test("Statement rules page: search narrows rules by name, phrase or filled-in value", async ({
+	page,
+}) => {
+	await seedWorkspace(page, "populated", {
+		statement_rules: [
+			...statementRules(),
+			...statementRules().map(rule => ({
+				...rule,
+				id: `${rule.id}-copy`,
+				name: `${rule.name} copy`,
+			})),
+		],
+	})
+	await page.goto("/statement-rules")
+	const rows = page.locator("main section[aria-label='Your rules'] article")
+	await expect(rows).toHaveCount(10)
+
+	const search = page.getByRole("searchbox", { name: "Search rules", exact: true })
+	await search.fill("fairprice")
+	await expect(rows).toHaveCount(2)
+	await search.fill("morning coffee")
+	await expect(rows).toHaveCount(2)
+	await search.fill("no such rule")
+	await expect(page.getByText("No rules match your search.", { exact: true })).toBeVisible()
+	await search.fill("")
+	await expect(rows).toHaveCount(10)
 })
 
 // One populated seed per sweep. Each route navigates once; the layout step
@@ -624,22 +651,45 @@ test.describe("pinned 15 October 2026 date", () => {
 							"Missing category fixture",
 					)
 					// Independent expectation, not the product's own label lookup.
+					const category = data.categories.find(row => row.id === record.category_id)
+					const effectiveTreatment =
+						record.treatment_choice.kind === "explicit"
+							? record.treatment_choice.value
+							: (category?.analytics_treatment ?? "automatic")
 					const treatment = {
 						income: "Income",
 						spending: "Spending",
 						saving_investment: "Saving / investment",
 						neutral: "Transfer / excluded",
-						automatic: "Automatic by direction",
-					}[record.analytics_treatment ?? "automatic"]
+						automatic: "Automatic",
+					}[effectiveTreatment]
 					await expect(page.getByText(/Treatment ·/)).toHaveText(
 						`Treatment · ${treatment}`,
 					)
-					await expect(page.getByText(/Monthly budget ·/)).toContainText(
-						record.monthly_budget_id
-							? (data.monthly_budgets.find(row => row.id === record.monthly_budget_id)
-									?.name ?? "Missing monthly budget fixture")
-							: "Unbudgeted",
-					)
+					const canUseBudget =
+						effectiveTreatment === "spending" ||
+						(effectiveTreatment === "automatic" && record.amount < 0)
+					const canUseDefault =
+						category?.analytics_treatment === "spending" ||
+						category?.analytics_treatment === "automatic" ||
+						category?.analytics_treatment == null
+					const effectiveBudgetId = canUseBudget
+						? record.monthly_budget_choice.kind === "explicit"
+							? record.monthly_budget_choice.id
+							: record.monthly_budget_choice.kind === "category" && canUseDefault
+								? (category?.default_monthly_budget_id ?? null)
+								: null
+						: null
+					if (!canUseBudget) {
+						await expect(page.getByText(/Monthly budget ·/)).toHaveCount(0)
+					} else {
+						await expect(page.getByText(/Monthly budget ·/)).toContainText(
+							effectiveBudgetId
+								? (data.monthly_budgets.find(row => row.id === effectiveBudgetId)
+										?.name ?? "Missing monthly budget fixture")
+								: "Unbudgeted",
+						)
+					}
 					const allocations = data.allocations.filter(row => row.record_id === record.id)
 					if (!allocations.length)
 						await expect(
@@ -721,7 +771,10 @@ test.describe("pinned 15 October 2026 date", () => {
 		).toBeVisible()
 		// Compact record rows omit the desktop budget column; the filter exposes
 		// the same Monthly budgets at every viewport size.
-		await page.getByRole("combobox").filter({ hasText: "Any monthly budget" }).click()
+		await page
+			.getByRole("combobox")
+			.filter({ hasText: /^All budgets$/ })
+			.click()
 		await expect(page.getByRole("option", { name: "Daily", exact: true })).toBeVisible()
 		await page.keyboard.press("Escape")
 		if (!isMobile)
@@ -858,10 +911,10 @@ test("Record facets: long Monthly Budget option picks and clears, Category histo
 		await expect(budget).toContainText("Unbudgeted")
 		await dialog.locator("#analytics_treatment").click()
 		await pickOption(page.getByRole("option", { name: "Income", exact: true }))
-		await expect(budget).toBeDisabled()
+		await expect(budget).toHaveCount(0)
 		await dialog.locator("#analytics_treatment").click()
 		await pickOption(page.getByRole("option", { name: "Spending", exact: true }))
-		await expect(budget).toBeEnabled()
+		await expect(budget).toBeVisible()
 		await expect(budget).toContainText("Unbudgeted")
 	})
 	await test.step("Category trend chart: unavailable months are distinguished from recorded zero spending", async () => {
@@ -881,7 +934,7 @@ test("Record facets: long Monthly Budget option picks and clears, Category histo
 		await expect(chart.getByText("No spending", { exact: true })).toBeVisible()
 		await chart.getByText(/months unavailable$/).click()
 		await expect(chart).toContainText("No recorded activity; coverage unknown")
-		await page.goto("/?month=October&year=2026&scope=other")
+		await page.goto("/?month=October&year=2026&scope=t1-mb-travel")
 		await expect(chart).toContainText("No spending in the available months.")
 	})
 })
@@ -909,23 +962,6 @@ test("Statement detail: long pending description stays readable on list and deta
 	await expect(
 		page.getByRole("button", { name: "Edit Pending Statement", exact: true }),
 	).toHaveCount(0)
-})
-
-test("Spending by weekday: no comparison history renders zero spending without a fabricated baseline", async ({
-	page,
-}) => {
-	await seedWorkspace(page, "empty")
-	await page.goto("/?month=October&year=2026")
-	const chart = page.locator('[data-slot="card"]').filter({
-		has: page.locator('[data-slot="card-title"]').filter({ hasText: "Spending by weekday" }),
-	})
-	await expect(chart).toContainText("No comparison history available.")
-	await chart.getByRole("application").focus()
-	const tooltip = chart.locator(chartTooltip)
-	await expect(tooltip).toContainText("Average per Monday")
-	await expect(tooltip).toContainText("$0.00")
-	await expect(tooltip).not.toContainText("Previous")
-	await expect(chart).not.toContainText(/NaN|Infinity/)
 })
 
 test("narrow desktop: pages stack by available width and popups keep side margins", {

@@ -12,6 +12,7 @@ import {
 	GroupHeaderRow,
 	groupStarts,
 	isInteractiveTarget,
+	LeavingRows,
 	MOBILE_LIST_CLASS,
 	MobileGroupHeader,
 	MobileRow,
@@ -26,7 +27,7 @@ import {
 	TableRow,
 } from "@/components/ui/table"
 import { useRowEntrance } from "@/hooks/use-row-cascade"
-import { rowEnter } from "@/lib/motion"
+import { rowEnter, rowLeave } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 import type { Paginated } from "@/types"
 
@@ -79,6 +80,10 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 	const clickRow = (row: TData) => (event: React.MouseEvent) => {
 		if (onRowClick && !isInteractiveTarget(event.target)) onRowClick(row)
 	}
+	// Only selectable tables animate rows leaving; elsewhere removals stay immediate.
+	const Leaving = selectedIds ? LeavingRows : Fragment
+	const leave = (ids: string[]) =>
+		selectedIds ? rowLeave(ids.every(id => selectedIds.includes(id))) : undefined
 
 	return (
 		<div className="@container/table flex min-w-0 flex-col gap-4">
@@ -92,43 +97,49 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 					)}
 				>
 					<Fragment key={rowsKey}>
-						{loading ? null : rows.length ? (
-							rows.flatMap((row, index) => {
-								const group = starts.get(index)
-								return [
-									group && groupBy ? (
-										<MobileGroupHeader
-											key={`group-${group.key}`}
-											group={groupBy}
-											groupKey={group.key}
-											rows={group.rows}
+						<Leaving>
+							{loading ? null : rows.length ? (
+								rows.flatMap((row, index) => {
+									const group = starts.get(index)
+									return [
+										group && groupBy ? (
+											<MobileGroupHeader
+												key={`group-${group.key}`}
+												group={groupBy}
+												groupKey={group.key}
+												rows={group.rows}
+												index={index}
+												entrance={entrance}
+												leave={leave(group.rows.map(r => r.id))}
+											/>
+										) : null,
+										<MobileRow
+											key={row.id}
 											index={index}
 											entrance={entrance}
-										/>
-									) : null,
-									<MobileRow
-										key={row.id}
-										index={index}
-										entrance={entrance}
-										data-state={selectedIds?.includes(row.id) && "selected"}
-										onClick={onRowClick ? clickRow(row.original) : undefined}
-										className={cn(
-											"px-3 py-2.5 text-sm transition-colors duration-150 ease-out data-[state=selected]:bg-muted",
-											onRowClick && "cursor-pointer active:bg-muted/60",
-										)}
-									>
-										{mobileRow(row)}
-									</MobileRow>,
-								]
-							})
-						) : (
-							<div
-								key="empty"
-								className="col-span-full p-8 text-center text-sm text-muted-foreground"
-							>
-								{emptyMessage}
-							</div>
-						)}
+											{...leave([row.id])}
+											data-state={selectedIds?.includes(row.id) && "selected"}
+											onClick={
+												onRowClick ? clickRow(row.original) : undefined
+											}
+											className={cn(
+												"px-3 py-2.5 text-sm transition-colors duration-150 ease-out data-[state=selected]:bg-muted",
+												onRowClick && "cursor-pointer active:bg-muted/60",
+											)}
+										>
+											{mobileRow(row)}
+										</MobileRow>,
+									]
+								})
+							) : (
+								<div
+									key="empty"
+									className="col-span-full p-8 text-center text-sm text-muted-foreground"
+								>
+									{emptyMessage}
+								</div>
+							)}
+						</Leaving>
 					</Fragment>
 				</div>
 			) : null}
@@ -166,60 +177,69 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 					</TableHeader>
 					<TableBody key={loading ? "loading" : "rows"}>
 						<Fragment key={rowsKey}>
-							{loading ? null : rows.length ? (
-								rows.flatMap((row, index) => {
-									const group = starts.get(index)
-									return [
-										group && groupBy ? (
-											<GroupHeaderRow
-												key={`group-${group.key}`}
-												group={groupBy}
-												groupKey={group.key}
-												rows={group.rows}
-												columns={columnInfo}
-												enter={rowEnter(index, entrance)}
-											/>
-										) : null,
-										<TableRow
-											key={row.id}
-											{...rowEnter(index, entrance)}
-											data-state={selectedIds?.includes(row.id) && "selected"}
-											onClick={
-												onRowClick ? clickRow(row.original) : undefined
-											}
-											className={cn(
-												onRowClick && "cursor-pointer active:bg-muted/60",
-											)}
+							<Leaving>
+								{loading ? null : rows.length ? (
+									rows.flatMap((row, index) => {
+										const group = starts.get(index)
+										return [
+											group && groupBy ? (
+												<GroupHeaderRow
+													key={`group-${group.key}`}
+													group={groupBy}
+													groupKey={group.key}
+													rows={group.rows}
+													columns={columnInfo}
+													enter={{
+														...rowEnter(index, entrance),
+														...leave(group.rows.map(r => r.id)),
+													}}
+												/>
+											) : null,
+											<TableRow
+												key={row.id}
+												{...rowEnter(index, entrance)}
+												{...leave([row.id])}
+												data-state={
+													selectedIds?.includes(row.id) && "selected"
+												}
+												onClick={
+													onRowClick ? clickRow(row.original) : undefined
+												}
+												className={cn(
+													onRowClick &&
+														"cursor-pointer active:bg-muted/60",
+												)}
+											>
+												{row.getVisibleCells().map(cell => (
+													<TableCell
+														key={cell.id}
+														className={
+															cell.column.columnDef.meta &&
+															"width" in cell.column.columnDef.meta
+																? `${cell.column.columnDef.meta?.width}`
+																: undefined
+														}
+													>
+														{flexRender(
+															cell.column.columnDef.cell,
+															cell.getContext(),
+														)}
+													</TableCell>
+												))}
+											</TableRow>,
+										]
+									})
+								) : (
+									<TableRow key="empty">
+										<TableCell
+											colSpan={columns.length}
+											className="h-24 text-center text-muted-foreground"
 										>
-											{row.getVisibleCells().map(cell => (
-												<TableCell
-													key={cell.id}
-													className={
-														cell.column.columnDef.meta &&
-														"width" in cell.column.columnDef.meta
-															? `${cell.column.columnDef.meta?.width}`
-															: undefined
-													}
-												>
-													{flexRender(
-														cell.column.columnDef.cell,
-														cell.getContext(),
-													)}
-												</TableCell>
-											))}
-										</TableRow>,
-									]
-								})
-							) : (
-								<TableRow key="empty">
-									<TableCell
-										colSpan={columns.length}
-										className="h-24 text-center text-muted-foreground"
-									>
-										{emptyMessage}
-									</TableCell>
-								</TableRow>
-							)}
+											{emptyMessage}
+										</TableCell>
+									</TableRow>
+								)}
+							</Leaving>
 						</Fragment>
 					</TableBody>
 				</Table>

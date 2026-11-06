@@ -14,7 +14,7 @@ export const TREATMENTS: { value: AnalyticsTreatment; label: string }[] = [
 	{ value: "spending", label: "Spending" },
 	{ value: "saving_investment", label: "Saving / investment" },
 	{ value: "neutral", label: "Transfer / excluded" },
-	{ value: "automatic", label: "Automatic by direction" },
+	{ value: "automatic", label: "Automatic" },
 ]
 
 export function treatmentLabel(treatment: AnalyticsTreatment | null | undefined) {
