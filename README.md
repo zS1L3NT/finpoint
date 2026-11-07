@@ -196,3 +196,5 @@ The Dashboard Monthly budgets footer shows total spending, including spending no
 On mobile, the Dashboard drill-down opens at half height with a clear backdrop and compact header. The grab handle expands it to full height with a dimmed backdrop; press it again to collapse. Pending allocation captions wrap beneath amounts to keep Record titles readable.
 
 The Spending forecast names its dotted previous-month comparison in the caption and prefixes that line’s endpoint value pill with the month abbreviation.
+
+Comparison Drill-downs sort both columns by amount, show the included months’ combined spending divided by their count, and state the difference from that average in the header.

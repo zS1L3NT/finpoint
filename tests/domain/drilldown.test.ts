@@ -160,6 +160,10 @@ test("compare drill uses the mover average and included same-period months", asy
    expect(drill!.total).toBeCloseTo(category.spending,2)
    expect(drill!.comparison!.average).toBeCloseTo(category.spending-category.comparison!,2)
    expect(drill!.comparison!.months).toHaveLength(view.scopedComparisonCount)
+   expect(drill!.comparison!.total/view.scopedComparisonCount).toBeCloseTo(drill!.comparison!.average!,2)
+   for (const rows of [drill!.records,drill!.comparison!.records]) {
+    expect(rows.map(r=>Math.abs(r.amount))).toEqual(rows.map(r=>Math.abs(r.amount)).sort((a,b)=>b-a))
+   }
  expect(-drill!.comparison!.records.reduce((sum,r)=>sum+r.amount,0)/view.scopedComparisonCount).toBeCloseTo(drill!.comparison!.average!,2)
    expect(drill!.comparison!.records.every(r=>r.datetime.slice(8,10) <= "15")).toBe(true)
   }

@@ -984,10 +984,10 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1794081332.4137323,
-    "seen": 1794081473.7837422,
-    "ast_hash": "6ec331411e0c18be54d76e88b1ce9b9f",
-    "semantic_hash": "6ec331411e0c18be54d76e88b1ce9b9f"
+    "mtime": 1794081658.5820534,
+    "seen": 1794081811.1690176,
+    "ast_hash": "fbddb0e667003609fa04166ad98048ae",
+    "semantic_hash": "fbddb0e667003609fa04166ad98048ae"
   },
   "assets/branding/finpoint-icon-prompt.txt": {
     "mtime": 1793935852.1723228,
@@ -1578,9 +1578,9 @@
     "semantic_hash": "22094bdb40cc65a0a6cb6a06360c02a9"
   },
   "src/components/drill/panel.tsx": {
-    "mtime": 1794080423.5023441,
-    "seen": 1794080495.4049053,
-    "ast_hash": "bf374986d0cbaf701504246789efcffc",
+    "mtime": 1794081659.9180431,
+    "seen": 1794081809.2751539,
+    "ast_hash": "f8980bbf482eda6fcd050320220b19eb",
     "semantic_hash": ""
   },
   "src/hooks/use-drill.ts": {
@@ -1590,9 +1590,9 @@
     "semantic_hash": ""
   },
   "src/logic/drilldown.ts": {
-    "mtime": 1794080423.6263456,
-    "seen": 1794080495.4051726,
-    "ast_hash": "8d3a2dadb787c5e4eea1e2f7ce2650d6",
+    "mtime": 1794081660.0220423,
+    "seen": 1794081809.275314,
+    "ast_hash": "2341876ae3ca13b9f2db2f6e9c0ccd7c",
     "semantic_hash": ""
   },
   "tests/animations/drilldown.e2e.ts": {
@@ -1602,15 +1602,15 @@
     "semantic_hash": ""
   },
   "tests/core/drilldown.e2e.ts": {
-    "mtime": 1794080433.438476,
-    "seen": 1794080495.4052622,
-    "ast_hash": "2c727f6f31c70a6c17c22683418d0200",
+    "mtime": 1794081660.1300416,
+    "seen": 1794081809.275362,
+    "ast_hash": "ecc14c7fc508747474a8504269f50bce",
     "semantic_hash": ""
   },
   "tests/domain/drilldown.test.ts": {
-    "mtime": 1794066929.35413,
-    "seen": 1794067133.1831968,
-    "ast_hash": "10830acfd04c62bb4579baa609d44e4a",
+    "mtime": 1794081641.6101878,
+    "seen": 1794081809.2753782,
+    "ast_hash": "81bf365903a8bd48ec33c1c2d80c6a06",
     "semantic_hash": ""
   },
   "docs/adr/0001-drill-down-url-state.md": {

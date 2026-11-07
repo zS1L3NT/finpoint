@@ -176,6 +176,10 @@ test("Biggest changes compares named periods and preserves the month through rel
 	await expect(page).toHaveURL(/drill=compare/)
 	const comparison = page.getByTestId("drill-comparison")
 	await expect(comparison).toContainText("$1,400.00")
+	await expect(comparison).toContainText("$1,400.00 ÷ 1 month")
+	await expect(page.locator("#drill-title").locator("..")).toContainText(
+		"$1,400.00 less than your 1-month average",
+	)
 	await expect(comparison).toContainText("Only in comparison")
 	await expect(comparison.locator("section")).toHaveCount(2)
 	await page.reload()

@@ -141,7 +141,15 @@ export async function getDrilldown(
 						period: view.dashboard.period.is_current
 							? `Days 1–${DateTime.now().day}`
 							: "Full months",
-						records: comparisonRecords,
+						total:
+							comparisonRecords.reduce(
+								(sum, r) =>
+									sum + summaryMeasure(r.analytics_treatment, r.amount, "spent"),
+								0,
+							) / 100,
+						records: comparisonRecords.sort(
+							(a, b) => Math.abs(b.amount) - Math.abs(a.amount),
+						),
 						uniqueCurrentIds: details
 							.filter(r => !comparisonRecords.some(p => p.title === r.title))
 							.map(r => r.id),

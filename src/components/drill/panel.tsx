@@ -141,6 +141,15 @@ export function DrillPanel({
 							{statement.account.name} statement
 						</nav>
 					) : null}
+					{!statementId &&
+					comparison?.average !== null &&
+					comparison?.average !== undefined ? (
+						<p className="mt-2 text-xs text-muted-foreground">
+							{formatCurrency(Math.abs(data.total - comparison.average))}{" "}
+							{data.total >= comparison.average ? "more" : "less"} than your{" "}
+							{`${comparison.months.length}-month`} average
+						</p>
+					) : null}
 					<p
 						className="mt-1 text-3xl font-semibold tracking-tight tabular-nums"
 						data-testid="drill-total"
@@ -258,6 +267,15 @@ export function DrillPanel({
 											<p className="mb-3 text-muted-foreground">
 												{comparison.period}
 												{index ? ` · ${comparison.months.join(", ")}` : ""}
+												{index && comparison.months.length ? (
+													<span className="block">
+														{formatCurrency(comparison.total)} ÷{" "}
+														{comparison.months.length}{" "}
+														{comparison.months.length === 1
+															? "month"
+															: "months"}
+													</span>
+												) : null}
 											</p>
 											{side.rows.map(r => (
 												<Link
