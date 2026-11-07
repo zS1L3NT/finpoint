@@ -155,6 +155,16 @@ test("workflow tabs and sparkline: tabs navigate by keyboard, Allocate keeps its
 			.getByRole("link", { name: "Statements", exact: true })
 			.click()
 		await expect(page).toHaveURL(/\/statements\?start_date=2026-10-01/)
+		if ((page.viewportSize()?.width ?? 1440) < 768)
+			await page
+				.locator("main")
+				.getByRole("button", { name: "Toggle Sidebar", exact: true })
+				.click()
+		await page
+			.getByRole("link", { name: "Allocate", exact: true })
+			.filter({ visible: true })
+			.click()
+		await expect(page).toHaveURL(/\/allocator\?start_date=2026-10-01/)
 		await expect(
 			page.getByRole("checkbox", { name: "Select statement t1-s-free-1", exact: true }),
 		).toBeVisible()

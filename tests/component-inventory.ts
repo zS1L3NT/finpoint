@@ -262,7 +262,7 @@ export const componentInventory: InventoryEntry[] = [
 	{
 		path: "src/components/dialogs/duplicate-review.tsx",
 		owner: "team2",
-		routes: ["/allocator/duplicates"],
+		routes: ["/statements/duplicates"],
 		visibleExports: ["default"],
 		dormantExports: [],
 		helperExports: [],
@@ -314,7 +314,7 @@ export const componentInventory: InventoryEntry[] = [
 	{
 		path: "src/components/dialogs/statement-replacement-review.tsx",
 		owner: "team2",
-		routes: ["/allocator", "/allocator/pending"],
+		routes: ["/allocator", "/statements/pending"],
 		visibleExports: ["default"],
 		dormantExports: [],
 		helperExports: ["dateDifferenceLabel"],
@@ -551,8 +551,8 @@ export const componentInventory: InventoryEntry[] = [
 			"/accounts/[id]",
 			"/accounts",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records/[id]",
 			"/records",
 			"/categories",
@@ -580,8 +580,8 @@ export const componentInventory: InventoryEntry[] = [
 			"/accounts/[id]",
 			"/accounts",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records/[id]",
 			"/records",
 			"/categories",
@@ -609,8 +609,8 @@ export const componentInventory: InventoryEntry[] = [
 			"/accounts/[id]",
 			"/accounts",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records/[id]",
 			"/records",
 			"/categories",
@@ -638,8 +638,8 @@ export const componentInventory: InventoryEntry[] = [
 			"/accounts/[id]",
 			"/accounts",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records/[id]",
 			"/records",
 			"/categories",
@@ -667,8 +667,8 @@ export const componentInventory: InventoryEntry[] = [
 			"/accounts/[id]",
 			"/accounts",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records/[id]",
 			"/records",
 			"/categories",
@@ -696,8 +696,8 @@ export const componentInventory: InventoryEntry[] = [
 			"/accounts/[id]",
 			"/accounts",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records/[id]",
 			"/records",
 			"/categories",
@@ -723,8 +723,8 @@ export const componentInventory: InventoryEntry[] = [
 			"/accounts/[id]",
 			"/accounts",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records/[id]",
 			"/records",
 			"/categories",
@@ -855,8 +855,8 @@ export const componentInventory: InventoryEntry[] = [
 		routes: [
 			"/statements",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records",
 			"/",
 			"/records/monthly",
@@ -882,8 +882,8 @@ export const componentInventory: InventoryEntry[] = [
 			"/statements",
 			"/accounts/[id]",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records",
 		],
 		visibleExports: ["default"],
@@ -981,8 +981,8 @@ export const componentInventory: InventoryEntry[] = [
 			"/statements/[id]",
 			"/budgets/[id]",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records/[id]",
 			"/records",
 			"/records/monthly",
@@ -1002,8 +1002,8 @@ export const componentInventory: InventoryEntry[] = [
 			"/budgets",
 			"/accounts/[id]",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records/[id]",
 			"/records",
 			"/",
@@ -1036,8 +1036,8 @@ export const componentInventory: InventoryEntry[] = [
 			"/accounts/[id]",
 			"/accounts",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records/[id]",
 			"/records",
 			"/categories",
@@ -1082,8 +1082,8 @@ export const componentInventory: InventoryEntry[] = [
 			"/statements/[id]",
 			"/budgets/[id]",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records/[id]",
 			"/records",
 			"/categories",
@@ -1184,8 +1184,8 @@ export const componentInventory: InventoryEntry[] = [
 			"/accounts/[id]",
 			"/accounts",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records/[id]",
 			"/records",
 			"/categories",
@@ -1242,8 +1242,8 @@ export const componentInventory: InventoryEntry[] = [
 			"/statements/[id]",
 			"/budgets/[id]",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records/[id]",
 			"/records",
 			"/records/monthly",
@@ -1318,8 +1318,8 @@ export const componentInventory: InventoryEntry[] = [
 			"/accounts/[id]",
 			"/accounts",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records/[id]",
 			"/records",
 			"/categories",
@@ -1396,8 +1396,8 @@ export const componentInventory: InventoryEntry[] = [
 			"/statements",
 			"/accounts/[id]",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records",
 		],
 		visibleExports: [
@@ -1475,8 +1475,8 @@ export const componentInventory: InventoryEntry[] = [
 			"/budgets/[id]",
 			"/accounts/[id]",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records/[id]",
 			"/records",
 			"/categories",
@@ -1512,8 +1512,8 @@ export const componentInventory: InventoryEntry[] = [
 			"/accounts/[id]",
 			"/accounts",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records/[id]",
 			"/records",
 			"/categories",
@@ -1541,8 +1541,8 @@ export const componentInventory: InventoryEntry[] = [
 			"/accounts/[id]",
 			"/accounts",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records/[id]",
 			"/records",
 			"/categories",
@@ -1577,8 +1577,8 @@ export const componentInventory: InventoryEntry[] = [
 			"/accounts/[id]",
 			"/accounts",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records/[id]",
 			"/records",
 			"/categories",
@@ -1631,8 +1631,8 @@ export const componentInventory: InventoryEntry[] = [
 			"/accounts/[id]",
 			"/accounts",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records/[id]",
 			"/records",
 			"/categories",
@@ -1660,8 +1660,8 @@ export const componentInventory: InventoryEntry[] = [
 			"/accounts/[id]",
 			"/accounts",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records/[id]",
 			"/records",
 			"/categories",
@@ -1727,7 +1727,7 @@ export const componentInventory: InventoryEntry[] = [
 		routes: [
 			"/statements",
 			"/allocator",
-			"/allocator/duplicates",
+			"/statements/duplicates",
 			"/records",
 			"/records/monthly",
 			"/statement-rules",
@@ -1748,8 +1748,8 @@ export const componentInventory: InventoryEntry[] = [
 			"/accounts/[id]",
 			"/accounts",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records/[id]",
 			"/records",
 			"/categories",
@@ -1776,9 +1776,9 @@ export const componentInventory: InventoryEntry[] = [
 		scenarios: ["display"],
 	},
 	{
-		path: "src/components/workflow-tabs.tsx",
+		path: "src/components/statement-tabs.tsx",
 		owner: "team3",
-		routes: ["/allocator", "/allocator/duplicates", "/allocator/pending"],
+		routes: ["/allocator", "/statements/duplicates", "/statements/pending"],
 		visibleExports: ["default"],
 		dormantExports: [],
 		helperExports: [],
@@ -1837,15 +1837,15 @@ export const routeInventory: RouteEntry[] = [
 		scenarios: ["route"],
 	},
 	{
-		path: "app/allocator/duplicates/page.tsx",
-		url: "/allocator/duplicates",
+		path: "app/statements/duplicates/page.tsx",
+		url: "/statements/duplicates",
 		kind: "page",
 		owner: "team3",
 		scenarios: ["route"],
 	},
 	{
-		path: "app/allocator/pending/page.tsx",
-		url: "/allocator/pending",
+		path: "app/statements/pending/page.tsx",
+		url: "/statements/pending",
 		kind: "page",
 		owner: "team3",
 		scenarios: ["route"],
@@ -2138,8 +2138,8 @@ export const scenarioDescriptions: Record<string, string> = {
 		"Standalone and menu placeholders have visible bounded geometry; non-positional pulse changes opacity without moving or resizing the standalone placeholder under every motion preference",
 	"src/components/layout/page-header.tsx#display.interaction":
 		"Back control is above destination heading and restores exact category/record origin URLs",
-	"src/components/workflow-tabs.tsx#display.interaction":
-		"Keyboard navigation changes Replace Pending, Fix Duplicates and Allocate destinations; returning to Allocate carries configured default start date",
+	"src/components/statement-tabs.tsx#display.interaction":
+		"Keyboard navigation changes Replace pending, Duplicates and Statements destinations; the sidebar Allocate link carries the configured default start date",
 	"src/components/layout/app-sidebar.tsx#display.interaction":
 		"Visible sidebar Dashboard link navigates and clears drill history; header sidebar trigger toggles via keyboard (dialog on mobile)",
 	"src/components/layout/app-sidebar.tsx#export.default.behaviour":
@@ -2150,9 +2150,9 @@ export const scenarioDescriptions: Record<string, string> = {
 		"Disabled unchanged Save enables for edits; date filter changes persist and clear restores absent default",
 	"app/sync/page.tsx#route.data":
 		"Backup exports real counts, empty workspace disables download, restore returns exact Records/Statements and a known Record ID",
-	"app/allocator/duplicates/page.tsx#route.data":
+	"app/statements/duplicates/page.tsx#route.data":
 		"Explicit keep/delete moves allocations, deletes selected duplicate and leaves kept statement fully allocated",
-	"app/allocator/pending/page.tsx#route.data":
+	"app/statements/pending/page.tsx#route.data":
 		"Queue/candidate search selects replacement; allocation follows imported statement and old pending ID is gone",
 	"app/accounts/[id]/page.tsx#route.navigation":
 		'Direct account detail fallback is tested by "direct Accounts detail has a working fallback"; "accounts keyboard card to detail to Back keeps exact origin" verifies this route\'s filtered keyboard return and Back above heading',
@@ -2226,9 +2226,9 @@ export const scenarioDescriptions: Record<string, string> = {
 		"Keyboard card to detail (One Card account) with exact origin, Back above heading and keyboard return; pointer fallbacks covered separately",
 	"app/allocator/page.tsx#route.navigation":
 		"Keyboard checkbox selection, dialog open/cancel and clear with checked state retained",
-	"app/allocator/duplicates/page.tsx#route.navigation":
+	"app/statements/duplicates/page.tsx#route.navigation":
 		"Keyboard keep/delete radio choice with review open and Escape cancel",
-	"app/allocator/pending/page.tsx#route.navigation":
+	"app/statements/pending/page.tsx#route.navigation":
 		"Keyboard queue search, candidate scope, replace and confirm through to the record",
 	"app/records/page.tsx#route.navigation":
 		"Keyboard filtered list to detail with exact origin, Back above heading and keyboard return; pointer fallbacks covered separately",
@@ -3593,13 +3593,13 @@ export const behaviourCoverage: Record<string, string[]> = {
 	"src/components/layout/page-header.tsx#display.values": [
 		"Category drill: nested detail returns to exact filtered origins",
 	],
-	"src/components/workflow-tabs.tsx#export.default.behaviour": [
+	"src/components/statement-tabs.tsx#export.default.behaviour": [
 		"workflow tabs: navigate by keyboard and Allocate keeps the default date filter",
 	],
-	"src/components/workflow-tabs.tsx#display.values": [
+	"src/components/statement-tabs.tsx#display.values": [
 		"workflow tabs: navigate by keyboard and Allocate keeps the default date filter",
 	],
-	"src/components/workflow-tabs.tsx#display.interaction": [
+	"src/components/statement-tabs.tsx#display.interaction": [
 		"workflow tabs: navigate by keyboard and Allocate keeps the default date filter",
 	],
 	"src/components/layout/app-sidebar.tsx#export.default.behaviour": [
@@ -3624,13 +3624,13 @@ export const behaviourCoverage: Record<string, string[]> = {
 	"app/sync/page.tsx#route.data": [
 		"backup: a downloaded backup round-trips and restores the workspace",
 	],
-	"app/allocator/duplicates/page.tsx#route.data": [
+	"app/statements/duplicates/page.tsx#route.data": [
 		"duplicates: keep moves Allocations and the deleted Statement is gone",
-		"/allocator/duplicates page: empty state resolves without premature loading copy",
+		"/statements/duplicates page: empty state resolves without premature loading copy",
 	],
-	"app/allocator/pending/page.tsx#route.data": [
+	"app/statements/pending/page.tsx#route.data": [
 		"pending queue: replacing a Pending Statement preserves Allocations on the imported Statement",
-		"/allocator/pending page: empty state resolves without premature loading copy",
+		"/statements/pending page: empty state resolves without premature loading copy",
 	],
 	"app/statements/page.tsx#route.data": [
 		"/statements page: resolves to its useful empty state",
@@ -3737,10 +3737,10 @@ export const behaviourCoverage: Record<string, string[]> = {
 	"app/allocator/page.tsx#route.navigation": [
 		"allocator: keyboard selection opens Create Record and Clear removes the selection",
 	],
-	"app/allocator/duplicates/page.tsx#route.navigation": [
+	"app/statements/duplicates/page.tsx#route.navigation": [
 		"duplicates: keyboard keep, delete, review and cancel work",
 	],
-	"app/allocator/pending/page.tsx#route.navigation": [
+	"app/statements/pending/page.tsx#route.navigation": [
 		"pending queue: keyboard replace and confirm replace the Pending Statement",
 	],
 	"app/records/page.tsx#route.navigation": [
@@ -3790,8 +3790,8 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"/budgets page: populated content and enabled controls stay inside the viewport",
 		"/categories page: populated content and enabled controls stay inside the viewport",
 		"/allocator page: populated content and enabled controls stay inside the viewport",
-		"/allocator/pending page: populated content and enabled controls stay inside the viewport",
-		"/allocator/duplicates page: populated content and enabled controls stay inside the viewport",
+		"/statements/pending page: populated content and enabled controls stay inside the viewport",
+		"/statements/duplicates page: populated content and enabled controls stay inside the viewport",
 		"/importer page: populated content and enabled controls stay inside the viewport",
 		"/settings page: populated content and enabled controls stay inside the viewport",
 		"/sync page: populated content and enabled controls stay inside the viewport",
@@ -3824,8 +3824,8 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"/budgets page: populated content and enabled controls stay inside the viewport",
 		"/categories page: populated content and enabled controls stay inside the viewport",
 		"/allocator page: populated content and enabled controls stay inside the viewport",
-		"/allocator/pending page: populated content and enabled controls stay inside the viewport",
-		"/allocator/duplicates page: populated content and enabled controls stay inside the viewport",
+		"/statements/pending page: populated content and enabled controls stay inside the viewport",
+		"/statements/duplicates page: populated content and enabled controls stay inside the viewport",
 		"/importer page: populated content and enabled controls stay inside the viewport",
 		"/settings page: populated content and enabled controls stay inside the viewport",
 		"/sync page: populated content and enabled controls stay inside the viewport",
@@ -4333,11 +4333,11 @@ export const behaviourCoverage: Record<string, string[]> = {
 	"app/allocator/page.tsx#route.viewport": [
 		"/allocator page: populated content and enabled controls stay inside the viewport",
 	],
-	"app/allocator/pending/page.tsx#route.viewport": [
-		"/allocator/pending page: populated content and enabled controls stay inside the viewport",
+	"app/statements/pending/page.tsx#route.viewport": [
+		"/statements/pending page: populated content and enabled controls stay inside the viewport",
 	],
-	"app/allocator/duplicates/page.tsx#route.viewport": [
-		"/allocator/duplicates page: populated content and enabled controls stay inside the viewport",
+	"app/statements/duplicates/page.tsx#route.viewport": [
+		"/statements/duplicates page: populated content and enabled controls stay inside the viewport",
 	],
 	"app/records/page.tsx#route.viewport": [
 		"/records page: populated content and enabled controls stay inside the viewport",
@@ -4512,8 +4512,8 @@ export const scenarioProjects: Record<
 	"app/accounts/[id]/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
 	"app/accounts/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
 	"app/allocator/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
-	"app/allocator/pending/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
-	"app/allocator/duplicates/page.tsx#route.viewport": [
+	"app/statements/pending/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
+	"app/statements/duplicates/page.tsx#route.viewport": [
 		"mobile",
 		"tall-desktop",
 		"reduced-motion",
