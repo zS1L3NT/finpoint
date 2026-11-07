@@ -98,6 +98,42 @@ export const scenarioFamilies: Record<string, Record<string, string>> = {
 
 export const componentInventory: InventoryEntry[] = [
 	{
+		path: "src/components/allocation-progress.tsx",
+		owner: "team3",
+		routes: ["/", "/records", "/statements", "/records/[id]", "/statements/[id]"],
+		visibleExports: ["AllocationProgress"],
+		dormantExports: [],
+		helperExports: [],
+		scenarios: ["display"],
+	},
+	{
+		path: "src/components/allocation-rows.tsx",
+		owner: "team3",
+		routes: ["/", "/records", "/statements", "/records/[id]", "/statements/[id]"],
+		visibleExports: ["AllocationRows", "AllocationExpansion"],
+		dormantExports: [],
+		helperExports: [],
+		scenarios: ["display"],
+	},
+	{
+		path: "src/components/charts/largest-records.tsx",
+		owner: "team3",
+		routes: ["/"],
+		visibleExports: ["default"],
+		dormantExports: [],
+		helperExports: [],
+		scenarios: ["display"],
+	},
+	{
+		path: "src/components/drill/panel.tsx",
+		owner: "team3",
+		routes: ["/"],
+		visibleExports: ["DrillPanel"],
+		dormantExports: [],
+		helperExports: [],
+		scenarios: ["display"],
+	},
+	{
 		path: "src/components/allocate-bar.tsx",
 		owner: "team3",
 		routes: ["/statements/[id]"],
@@ -161,15 +197,6 @@ export const componentInventory: InventoryEntry[] = [
 		scenarios: ["indirect"],
 	},
 	{
-		path: "src/components/charts/daily-spending-chart.tsx",
-		owner: "team3",
-		routes: ["/"],
-		visibleExports: ["default"],
-		dormantExports: [],
-		helperExports: [],
-		scenarios: ["chart"],
-	},
-	{
 		path: "src/components/charts/monthly-budget-usage.tsx",
 		owner: "team3",
 		routes: ["/"],
@@ -189,15 +216,6 @@ export const componentInventory: InventoryEntry[] = [
 	},
 	{
 		path: "src/components/charts/spending-calendar.tsx",
-		owner: "team3",
-		routes: ["/"],
-		visibleExports: ["default"],
-		dormantExports: [],
-		helperExports: [],
-		scenarios: ["chart"],
-	},
-	{
-		path: "src/components/charts/total-spending-chart.tsx",
 		owner: "team3",
 		routes: ["/"],
 		visibleExports: ["default"],
@@ -280,7 +298,7 @@ export const componentInventory: InventoryEntry[] = [
 	{
 		path: "src/components/dialogs/duplicate-review.tsx",
 		owner: "team2",
-		routes: ["/allocator/duplicates"],
+		routes: ["/statements/duplicates"],
 		visibleExports: ["default"],
 		dormantExports: [],
 		helperExports: [],
@@ -316,14 +334,7 @@ export const componentInventory: InventoryEntry[] = [
 	{
 		path: "src/components/dialogs/record-editor.tsx",
 		owner: "team2",
-		routes: [
-			"/statements/[id]",
-			"/budgets/[id]",
-			"/allocator",
-			"/records/[id]",
-			"/records",
-			"/records/monthly",
-		],
+		routes: ["/statements/[id]", "/budgets/[id]", "/allocator", "/records/[id]", "/records"],
 		visibleExports: ["default"],
 		dormantExports: [],
 		helperExports: [],
@@ -332,7 +343,7 @@ export const componentInventory: InventoryEntry[] = [
 	{
 		path: "src/components/dialogs/statement-replacement-review.tsx",
 		owner: "team2",
-		routes: ["/allocator", "/allocator/pending"],
+		routes: ["/allocator", "/statements/pending"],
 		visibleExports: ["default"],
 		dormantExports: [],
 		helperExports: ["dateDifferenceLabel"],
@@ -360,7 +371,6 @@ export const componentInventory: InventoryEntry[] = [
 			"/records/[id]",
 			"/records",
 			"/",
-			"/records/monthly",
 		],
 		visibleExports: ["default"],
 		dormantExports: [],
@@ -376,7 +386,6 @@ export const componentInventory: InventoryEntry[] = [
 			"/allocator",
 			"/records/[id]",
 			"/records",
-			"/records/monthly",
 			"/statement-rules",
 		],
 		visibleExports: ["default"],
@@ -394,7 +403,6 @@ export const componentInventory: InventoryEntry[] = [
 			"/records/[id]",
 			"/records",
 			"/categories",
-			"/records/monthly",
 			"/statement-rules",
 		],
 		visibleExports: ["default"],
@@ -414,14 +422,7 @@ export const componentInventory: InventoryEntry[] = [
 	{
 		path: "src/components/form/date-range.tsx",
 		owner: "team2",
-		routes: [
-			"/statements",
-			"/budgets/[id]",
-			"/budgets",
-			"/allocator",
-			"/records",
-			"/records/monthly",
-		],
+		routes: ["/statements", "/budgets/[id]", "/budgets", "/allocator", "/records"],
 		visibleExports: ["default"],
 		dormantExports: [],
 		helperExports: [],
@@ -438,7 +439,6 @@ export const componentInventory: InventoryEntry[] = [
 			"/allocator",
 			"/records/[id]",
 			"/records",
-			"/records/monthly",
 		],
 		visibleExports: ["default"],
 		dormantExports: [],
@@ -460,7 +460,6 @@ export const componentInventory: InventoryEntry[] = [
 			"/records",
 			"/categories",
 			"/",
-			"/records/monthly",
 			"/settings",
 			"/importer",
 			"/statement-rules",
@@ -473,14 +472,7 @@ export const componentInventory: InventoryEntry[] = [
 	{
 		path: "src/components/form/record-analytics-fields.tsx",
 		owner: "team2",
-		routes: [
-			"/statements/[id]",
-			"/budgets/[id]",
-			"/allocator",
-			"/records/[id]",
-			"/records",
-			"/records/monthly",
-		],
+		routes: ["/statements/[id]", "/budgets/[id]", "/allocator", "/records/[id]", "/records"],
 		visibleExports: ["default"],
 		dormantExports: [],
 		helperExports: [],
@@ -508,7 +500,6 @@ export const componentInventory: InventoryEntry[] = [
 			"/records",
 			"/categories",
 			"/",
-			"/records/monthly",
 			"/importer",
 			"/statement-rules",
 		],
@@ -531,7 +522,6 @@ export const componentInventory: InventoryEntry[] = [
 			"/records",
 			"/categories",
 			"/",
-			"/records/monthly",
 			"/importer",
 			"/statement-rules",
 		],
@@ -551,7 +541,6 @@ export const componentInventory: InventoryEntry[] = [
 			"/allocator",
 			"/records/[id]",
 			"/records",
-			"/records/monthly",
 		],
 		visibleExports: ["default"],
 		dormantExports: [],
@@ -569,13 +558,12 @@ export const componentInventory: InventoryEntry[] = [
 			"/accounts/[id]",
 			"/accounts",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records/[id]",
 			"/records",
 			"/categories",
 			"/",
-			"/records/monthly",
 			"/terms",
 			"/settings",
 			"/sync",
@@ -598,13 +586,12 @@ export const componentInventory: InventoryEntry[] = [
 			"/accounts/[id]",
 			"/accounts",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records/[id]",
 			"/records",
 			"/categories",
 			"/",
-			"/records/monthly",
 			"/terms",
 			"/settings",
 			"/sync",
@@ -627,13 +614,12 @@ export const componentInventory: InventoryEntry[] = [
 			"/accounts/[id]",
 			"/accounts",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records/[id]",
 			"/records",
 			"/categories",
 			"/",
-			"/records/monthly",
 			"/terms",
 			"/settings",
 			"/sync",
@@ -656,13 +642,12 @@ export const componentInventory: InventoryEntry[] = [
 			"/accounts/[id]",
 			"/accounts",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records/[id]",
 			"/records",
 			"/categories",
 			"/",
-			"/records/monthly",
 			"/terms",
 			"/settings",
 			"/sync",
@@ -685,13 +670,12 @@ export const componentInventory: InventoryEntry[] = [
 			"/accounts/[id]",
 			"/accounts",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records/[id]",
 			"/records",
 			"/categories",
 			"/",
-			"/records/monthly",
 			"/terms",
 			"/settings",
 			"/sync",
@@ -714,8 +698,8 @@ export const componentInventory: InventoryEntry[] = [
 			"/accounts/[id]",
 			"/accounts",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records/[id]",
 			"/records",
 			"/categories",
@@ -741,13 +725,12 @@ export const componentInventory: InventoryEntry[] = [
 			"/accounts/[id]",
 			"/accounts",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records/[id]",
 			"/records",
 			"/categories",
 			"/",
-			"/records/monthly",
 			"/terms",
 			"/settings",
 			"/sync",
@@ -781,7 +764,6 @@ export const componentInventory: InventoryEntry[] = [
 			"/records",
 			"/categories",
 			"/",
-			"/records/monthly",
 		],
 		visibleExports: ["default"],
 		dormantExports: [],
@@ -827,14 +809,7 @@ export const componentInventory: InventoryEntry[] = [
 	{
 		path: "src/components/sheets/statement-search.tsx",
 		owner: "team3",
-		routes: [
-			"/statements/[id]",
-			"/budgets/[id]",
-			"/allocator",
-			"/records/[id]",
-			"/records",
-			"/records/monthly",
-		],
+		routes: ["/statements/[id]", "/budgets/[id]", "/allocator", "/records/[id]", "/records"],
 		visibleExports: ["default"],
 		dormantExports: [],
 		helperExports: [],
@@ -843,7 +818,7 @@ export const componentInventory: InventoryEntry[] = [
 	{
 		path: "src/components/table/amount-filter.tsx",
 		owner: "team3",
-		routes: ["/statements", "/allocator", "/records", "/records/monthly"],
+		routes: ["/statements", "/allocator", "/records"],
 		visibleExports: ["default"],
 		dormantExports: [],
 		helperExports: [],
@@ -852,7 +827,7 @@ export const componentInventory: InventoryEntry[] = [
 	{
 		path: "src/components/table/category-filter.tsx",
 		owner: "team3",
-		routes: ["/records", "/records/monthly"],
+		routes: ["/records"],
 		visibleExports: ["default"],
 		dormantExports: [],
 		helperExports: [],
@@ -861,7 +836,7 @@ export const componentInventory: InventoryEntry[] = [
 	{
 		path: "src/components/table/data-table.tsx",
 		owner: "team3",
-		routes: ["/statements/[id]", "/budgets/[id]", "/records/[id]", "/records/monthly"],
+		routes: ["/statements/[id]", "/budgets/[id]", "/records/[id]"],
 		visibleExports: ["default"],
 		dormantExports: [],
 		helperExports: [],
@@ -873,11 +848,10 @@ export const componentInventory: InventoryEntry[] = [
 		routes: [
 			"/statements",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records",
 			"/",
-			"/records/monthly",
 		],
 		visibleExports: ["ClearFiltersButton", "FilterBar"],
 		dormantExports: [],
@@ -900,8 +874,8 @@ export const componentInventory: InventoryEntry[] = [
 			"/statements",
 			"/accounts/[id]",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records",
 		],
 		visibleExports: ["default"],
@@ -929,7 +903,6 @@ export const componentInventory: InventoryEntry[] = [
 			"/allocator",
 			"/records/[id]",
 			"/records",
-			"/records/monthly",
 		],
 		visibleExports: ["PendingBadge", "RecordAmountCell"],
 		dormantExports: [],
@@ -949,7 +922,6 @@ export const componentInventory: InventoryEntry[] = [
 			"/allocator",
 			"/records/[id]",
 			"/records",
-			"/records/monthly",
 		],
 		visibleExports: ["GroupHeaderRow", "LeavingRows", "MobileGroupHeader", "MobileRow"],
 		dormantExports: [],
@@ -999,11 +971,10 @@ export const componentInventory: InventoryEntry[] = [
 			"/statements/[id]",
 			"/budgets/[id]",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records/[id]",
 			"/records",
-			"/records/monthly",
 		],
 		visibleExports: ["Alert", "AlertDescription", "AlertTitle"],
 		dormantExports: ["AlertAction"],
@@ -1020,12 +991,11 @@ export const componentInventory: InventoryEntry[] = [
 			"/budgets",
 			"/accounts/[id]",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records/[id]",
 			"/records",
 			"/",
-			"/records/monthly",
 			"/sync",
 			"/statement-rules",
 		],
@@ -1037,7 +1007,7 @@ export const componentInventory: InventoryEntry[] = [
 	{
 		path: "src/components/ui/button-group.tsx",
 		owner: "team2",
-		routes: ["/", "/records/monthly"],
+		routes: ["/"],
 		visibleExports: ["ButtonGroup"],
 		dormantExports: ["ButtonGroupSeparator", "ButtonGroupText"],
 		helperExports: ["buttonGroupVariants"],
@@ -1054,13 +1024,12 @@ export const componentInventory: InventoryEntry[] = [
 			"/accounts/[id]",
 			"/accounts",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records/[id]",
 			"/records",
 			"/categories",
 			"/",
-			"/records/monthly",
 			"/terms",
 			"/settings",
 			"/sync",
@@ -1085,7 +1054,6 @@ export const componentInventory: InventoryEntry[] = [
 			"/allocator",
 			"/records/[id]",
 			"/records",
-			"/records/monthly",
 			"/settings",
 		],
 		visibleExports: ["Calendar", "CalendarDayButton"],
@@ -1100,13 +1068,12 @@ export const componentInventory: InventoryEntry[] = [
 			"/statements/[id]",
 			"/budgets/[id]",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records/[id]",
 			"/records",
 			"/categories",
 			"/",
-			"/records/monthly",
 			"/terms",
 			"/settings",
 			"/sync",
@@ -1149,7 +1116,6 @@ export const componentInventory: InventoryEntry[] = [
 			"/records",
 			"/categories",
 			"/",
-			"/records/monthly",
 			"/importer",
 			"/statement-rules",
 		],
@@ -1178,7 +1144,7 @@ export const componentInventory: InventoryEntry[] = [
 	{
 		path: "src/components/ui/command.tsx",
 		owner: "team2",
-		routes: ["/records", "/records/monthly"],
+		routes: ["/records"],
 		visibleExports: [
 			"Command",
 			"CommandEmpty",
@@ -1202,13 +1168,12 @@ export const componentInventory: InventoryEntry[] = [
 			"/accounts/[id]",
 			"/accounts",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records/[id]",
 			"/records",
 			"/categories",
 			"/",
-			"/records/monthly",
 			"/statement-rules",
 		],
 		visibleExports: [
@@ -1260,11 +1225,10 @@ export const componentInventory: InventoryEntry[] = [
 			"/statements/[id]",
 			"/budgets/[id]",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records/[id]",
 			"/records",
-			"/records/monthly",
 		],
 		visibleExports: [
 			"Empty",
@@ -1293,7 +1257,6 @@ export const componentInventory: InventoryEntry[] = [
 			"/records",
 			"/categories",
 			"/",
-			"/records/monthly",
 			"/settings",
 			"/importer",
 		],
@@ -1317,7 +1280,6 @@ export const componentInventory: InventoryEntry[] = [
 			"/records",
 			"/categories",
 			"/",
-			"/records/monthly",
 			"/importer",
 		],
 		visibleExports: ["InputGroup", "InputGroupAddon", "InputGroupButton", "InputGroupInput"],
@@ -1336,13 +1298,12 @@ export const componentInventory: InventoryEntry[] = [
 			"/accounts/[id]",
 			"/accounts",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records/[id]",
 			"/records",
 			"/categories",
 			"/",
-			"/records/monthly",
 			"/terms",
 			"/settings",
 			"/sync",
@@ -1389,7 +1350,6 @@ export const componentInventory: InventoryEntry[] = [
 			"/records",
 			"/categories",
 			"/",
-			"/records/monthly",
 			"/settings",
 			"/importer",
 		],
@@ -1401,7 +1361,7 @@ export const componentInventory: InventoryEntry[] = [
 	{
 		path: "src/components/ui/monthpicker.tsx",
 		owner: "team2",
-		routes: ["/", "/records/monthly"],
+		routes: ["/"],
 		visibleExports: ["MonthPicker"],
 		dormantExports: [],
 		helperExports: [],
@@ -1414,8 +1374,8 @@ export const componentInventory: InventoryEntry[] = [
 			"/statements",
 			"/accounts/[id]",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records",
 		],
 		visibleExports: [
@@ -1444,7 +1404,6 @@ export const componentInventory: InventoryEntry[] = [
 			"/records/[id]",
 			"/records",
 			"/",
-			"/records/monthly",
 			"/settings",
 		],
 		visibleExports: ["Popover", "PopoverContent", "PopoverTrigger"],
@@ -1455,14 +1414,7 @@ export const componentInventory: InventoryEntry[] = [
 	{
 		path: "src/components/ui/progress.tsx",
 		owner: "team2",
-		routes: [
-			"/statements/[id]",
-			"/budgets/[id]",
-			"/allocator",
-			"/records/[id]",
-			"/records",
-			"/records/monthly",
-		],
+		routes: ["/statements/[id]", "/budgets/[id]", "/allocator", "/records/[id]", "/records"],
 		visibleExports: ["Progress"],
 		dormantExports: [],
 		helperExports: [],
@@ -1471,14 +1423,7 @@ export const componentInventory: InventoryEntry[] = [
 	{
 		path: "src/components/ui/scroll-area.tsx",
 		owner: "team2",
-		routes: [
-			"/statements/[id]",
-			"/budgets/[id]",
-			"/allocator",
-			"/records/[id]",
-			"/records",
-			"/records/monthly",
-		],
+		routes: ["/statements/[id]", "/budgets/[id]", "/allocator", "/records/[id]", "/records"],
 		visibleExports: ["ScrollArea", "ScrollBar"],
 		dormantExports: [],
 		helperExports: [],
@@ -1493,13 +1438,12 @@ export const componentInventory: InventoryEntry[] = [
 			"/budgets/[id]",
 			"/accounts/[id]",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records/[id]",
 			"/records",
 			"/categories",
 			"/",
-			"/records/monthly",
 			"/settings",
 			"/importer",
 		],
@@ -1530,13 +1474,12 @@ export const componentInventory: InventoryEntry[] = [
 			"/accounts/[id]",
 			"/accounts",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records/[id]",
 			"/records",
 			"/categories",
 			"/",
-			"/records/monthly",
 			"/terms",
 			"/settings",
 			"/sync",
@@ -1559,13 +1502,12 @@ export const componentInventory: InventoryEntry[] = [
 			"/accounts/[id]",
 			"/accounts",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records/[id]",
 			"/records",
 			"/categories",
 			"/",
-			"/records/monthly",
 			"/terms",
 			"/settings",
 			"/sync",
@@ -1595,13 +1537,12 @@ export const componentInventory: InventoryEntry[] = [
 			"/accounts/[id]",
 			"/accounts",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records/[id]",
 			"/records",
 			"/categories",
 			"/",
-			"/records/monthly",
 			"/terms",
 			"/settings",
 			"/sync",
@@ -1649,13 +1590,12 @@ export const componentInventory: InventoryEntry[] = [
 			"/accounts/[id]",
 			"/accounts",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records/[id]",
 			"/records",
 			"/categories",
 			"/",
-			"/records/monthly",
 			"/terms",
 			"/settings",
 			"/sync",
@@ -1678,13 +1618,12 @@ export const componentInventory: InventoryEntry[] = [
 			"/accounts/[id]",
 			"/accounts",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records/[id]",
 			"/records",
 			"/categories",
 			"/",
-			"/records/monthly",
 			"/terms",
 			"/settings",
 			"/sync",
@@ -1709,7 +1648,6 @@ export const componentInventory: InventoryEntry[] = [
 			"/allocator",
 			"/records/[id]",
 			"/records",
-			"/records/monthly",
 		],
 		visibleExports: ["Table", "TableBody", "TableCell", "TableHead", "TableHeader", "TableRow"],
 		dormantExports: ["TableCaption", "TableFooter"],
@@ -1731,7 +1669,6 @@ export const componentInventory: InventoryEntry[] = [
 			"/records",
 			"/categories",
 			"/",
-			"/records/monthly",
 			"/importer",
 		],
 		visibleExports: ["Textarea"],
@@ -1745,9 +1682,8 @@ export const componentInventory: InventoryEntry[] = [
 		routes: [
 			"/statements",
 			"/allocator",
-			"/allocator/duplicates",
+			"/statements/duplicates",
 			"/records",
-			"/records/monthly",
 			"/statement-rules",
 		],
 		visibleExports: ["ToggleGroup", "ToggleGroupItem"],
@@ -1766,13 +1702,12 @@ export const componentInventory: InventoryEntry[] = [
 			"/accounts/[id]",
 			"/accounts",
 			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
+			"/statements/duplicates",
+			"/statements/pending",
 			"/records/[id]",
 			"/records",
 			"/categories",
 			"/",
-			"/records/monthly",
 			"/terms",
 			"/settings",
 			"/sync",
@@ -1794,9 +1729,18 @@ export const componentInventory: InventoryEntry[] = [
 		scenarios: ["display"],
 	},
 	{
-		path: "src/components/workflow-tabs.tsx",
+		path: "src/components/statement-tabs.tsx",
 		owner: "team3",
-		routes: ["/allocator", "/allocator/duplicates", "/allocator/pending"],
+		routes: ["/allocator", "/statements/duplicates", "/statements/pending"],
+		visibleExports: ["default"],
+		dormantExports: [],
+		helperExports: [],
+		scenarios: ["display"],
+	},
+	{
+		path: "src/components/term.tsx",
+		owner: "team3",
+		routes: ["/"],
 		visibleExports: ["default"],
 		dormantExports: [],
 		helperExports: [],
@@ -1855,15 +1799,15 @@ export const routeInventory: RouteEntry[] = [
 		scenarios: ["route"],
 	},
 	{
-		path: "app/allocator/duplicates/page.tsx",
-		url: "/allocator/duplicates",
+		path: "app/statements/duplicates/page.tsx",
+		url: "/statements/duplicates",
 		kind: "page",
 		owner: "team3",
 		scenarios: ["route"],
 	},
 	{
-		path: "app/allocator/pending/page.tsx",
-		url: "/allocator/pending",
+		path: "app/statements/pending/page.tsx",
+		url: "/statements/pending",
 		kind: "page",
 		owner: "team3",
 		scenarios: ["route"],
@@ -1897,13 +1841,6 @@ export const routeInventory: RouteEntry[] = [
 		scenarios: ["route"],
 	},
 	{ path: "app/(month)/page.tsx", url: "/", kind: "page", owner: "team3", scenarios: ["route"] },
-	{
-		path: "app/(month)/records/monthly/page.tsx",
-		url: "/records/monthly",
-		kind: "page",
-		owner: "team3",
-		scenarios: ["route"],
-	},
 	{
 		path: "app/terms/page.tsx",
 		url: "/terms",
@@ -1987,6 +1924,10 @@ export const routeInventory: RouteEntry[] = [
 
 /** Specific refinements of generic family cases. These remain required, not exempt. */
 export const scenarioDescriptions: Record<string, string> = {
+	"src/components/term.tsx#display.values":
+		"Left over exposes its plain definition and numeric example",
+	"src/components/term.tsx#display.interaction":
+		"Keyboard and tap open the definition; Escape dismisses it",
 	"src/components/dialogs/account.tsx#editor.validation":
 		"Validate supported required fields and boundary amounts, correct input and verify persisted values after reload; disabled paths asserted where this editor exposes them",
 	"src/components/dialogs/account.tsx#editor.conditional":
@@ -2156,8 +2097,8 @@ export const scenarioDescriptions: Record<string, string> = {
 		"Standalone and menu placeholders have visible bounded geometry; non-positional pulse changes opacity without moving or resizing the standalone placeholder under every motion preference",
 	"src/components/layout/page-header.tsx#display.interaction":
 		"Back control is above destination heading and restores exact category/record origin URLs",
-	"src/components/workflow-tabs.tsx#display.interaction":
-		"Keyboard navigation changes Replace Pending, Fix Duplicates and Allocate destinations; returning to Allocate carries configured default start date",
+	"src/components/statement-tabs.tsx#display.interaction":
+		"Keyboard navigation changes Replace pending, Duplicates and Statements destinations; the sidebar Allocate link carries the configured default start date",
 	"src/components/layout/app-sidebar.tsx#display.interaction":
 		"Visible sidebar Dashboard link navigates and clears drill history; header sidebar trigger toggles via keyboard (dialog on mobile)",
 	"src/components/layout/app-sidebar.tsx#export.default.behaviour":
@@ -2168,9 +2109,9 @@ export const scenarioDescriptions: Record<string, string> = {
 		"Disabled unchanged Save enables for edits; date filter changes persist and clear restores absent default",
 	"app/sync/page.tsx#route.data":
 		"Backup exports real counts, empty workspace disables download, restore returns exact Records/Statements and a known Record ID",
-	"app/allocator/duplicates/page.tsx#route.data":
+	"app/statements/duplicates/page.tsx#route.data":
 		"Explicit keep/delete moves allocations, deletes selected duplicate and leaves kept statement fully allocated",
-	"app/allocator/pending/page.tsx#route.data":
+	"app/statements/pending/page.tsx#route.data":
 		"Queue/candidate search selects replacement; allocation follows imported statement and old pending ID is gone",
 	"app/accounts/[id]/page.tsx#route.navigation":
 		'Direct account detail fallback is tested by "direct Accounts detail has a working fallback"; "accounts keyboard card to detail to Back keeps exact origin" verifies this route\'s filtered keyboard return and Back above heading',
@@ -2196,10 +2137,6 @@ export const scenarioDescriptions: Record<string, string> = {
 		"Dense card fits with finite values; keyboard tooltip stays numeric and inside every viewport",
 	"src/components/charts/category-history-chart.tsx#chart.responsive":
 		"Dense card fits with finite values; keyboard tooltip stays numeric and inside every viewport",
-	"src/components/charts/daily-spending-chart.tsx#chart.responsive":
-		"Dense card fits with finite values; keyboard tooltip stays numeric and inside every viewport",
-	"src/components/charts/total-spending-chart.tsx#chart.responsive":
-		"Dense card fits with finite values; keyboard tooltip stays numeric and inside every viewport",
 	"src/components/charts/category-movers.tsx#chart.responsive":
 		"Dense card fits with finite values and long names; Housing drill works by keyboard",
 	"src/components/charts/category-movers.tsx#chart.motion":
@@ -2220,10 +2157,6 @@ export const scenarioDescriptions: Record<string, string> = {
 		"Endpoint marker entrance respects reduced motion with final data endpoint; polyline draws progressively then settles",
 	"src/components/charts/cashflow-chart.tsx#chart.motion":
 		"All five projects: Surplus / Shortfall graph marks grow through intermediate geometry once and settle with no replay on hover/resize; reduced-motion immediate-final covered in the reduced-motion project",
-	"src/components/charts/total-spending-chart.tsx#chart.motion":
-		"All five projects: Spending forecast graph marks grow through intermediate geometry once and settle with no replay on hover/resize; reduced-motion immediate-final covered in the reduced-motion project",
-	"src/components/charts/daily-spending-chart.tsx#chart.motion":
-		"All five projects: Spending by day graph marks grow through intermediate geometry once and settle; reduced-motion immediate-final covered in the reduced-motion project",
 	"src/components/charts/category-history-chart.tsx#chart.motion":
 		"All five projects: Category trend graph marks grow through intermediate geometry once and settle; reduced-motion immediate-final covered in the reduced-motion project",
 	"src/components/charts/budget-progress-chart.tsx#chart.motion":
@@ -2252,9 +2185,9 @@ export const scenarioDescriptions: Record<string, string> = {
 		"Keyboard card to detail (One Card account) with exact origin, Back above heading and keyboard return; pointer fallbacks covered separately",
 	"app/allocator/page.tsx#route.navigation":
 		"Keyboard checkbox selection, dialog open/cancel and clear with checked state retained",
-	"app/allocator/duplicates/page.tsx#route.navigation":
+	"app/statements/duplicates/page.tsx#route.navigation":
 		"Keyboard keep/delete radio choice with review open and Escape cancel",
-	"app/allocator/pending/page.tsx#route.navigation":
+	"app/statements/pending/page.tsx#route.navigation":
 		"Keyboard queue search, candidate scope, replace and confirm through to the record",
 	"app/records/page.tsx#route.navigation":
 		"Keyboard filtered list to detail with exact origin, Back above heading and keyboard return; pointer fallbacks covered separately",
@@ -2306,8 +2239,6 @@ export const scenarioDescriptions: Record<string, string> = {
 		"Populated/empty/searchable directory with silent reveal; long-name overflow is covered via route.long",
 	"app/(month)/page.tsx#route.data":
 		"Income/refund/exclusion reconciliation with empty, null/zero-plan, dense, calendar-drill and movers values; per-chart motion stays separate",
-	"app/(month)/records/monthly/page.tsx#route.data":
-		"Empty and archived-assignment filtered totals; later current-month rows show excluded-from-actuals copy and money, and future-month rows retain amount plus keyboard drill",
 	"src/components/dialogs/budget-creator.tsx#editor.long":
 		"Unicode long name entry keeps a contained footer with pointer cursor, in-viewport Cancel and Enter cancellation",
 	"src/components/dialogs/category.tsx#editor.long":
@@ -2330,6 +2261,8 @@ export const scenarioDescriptions: Record<string, string> = {
  * mapped nor pending: removing them from scenarios would hide the decision, and
  * mapping them would fabricate coverage. The ledger reports them separately. */
 export const notApplicable: Record<string, string> = {
+	"src/components/charts/monthly-budget-usage.tsx#chart.motion":
+		"src/components/charts/monthly-budget-usage.tsx renders static progress rows; the donut and its segment animation were deliberately removed.",
 	"src/components/dialogs/account.tsx#editor.conditional":
 		"No conditional sections in the account editor; reopen/keyboard semantics are covered via editor.open, not conditional motion",
 	"src/components/dialogs/budget-creator.tsx#editor.conditional":
@@ -2400,6 +2333,50 @@ export const notApplicable: Record<string, string> = {
 
 /** Reviewed assertion mappings. Passing browser evidence is separate; unmapped cases fail by default. */
 export const behaviourCoverage: Record<string, string[]> = {
+	"src/components/drill/panel.tsx#export.DrillPanel.behaviour": [
+		"day drill-down: totals, retarget, Back, close, focus and invalid URLs",
+	],
+	"src/components/drill/panel.tsx#display.interaction": [
+		"day drill-down: totals, retarget, Back, close, focus and invalid URLs",
+	],
+	"src/components/drill/panel.tsx#display.values": [
+		"day drill-down: totals, retarget, Back, close, focus and invalid URLs",
+	],
+	"src/components/charts/largest-records.tsx#export.default.behaviour": [
+		"Largest Records opens a sorted drill and preserves sort into Records",
+	],
+	"src/components/charts/largest-records.tsx#display.interaction": [
+		"Largest Records opens a sorted drill and preserves sort into Records",
+	],
+	"src/components/charts/largest-records.tsx#display.values": [
+		"Largest Records opens a sorted drill and preserves sort into Records",
+	],
+	"src/components/allocation-rows.tsx#export.AllocationExpansion.behaviour": [
+		"Records table: rendered Records keep zero, negative amounts and pending reasons",
+	],
+	"src/components/allocation-rows.tsx#export.AllocationRows.behaviour": [
+		"drill pivot: URL expansion, Statement breadcrumb and browser Back survive reload",
+	],
+	"src/components/allocation-rows.tsx#display.interaction": [
+		"drill pivot: URL expansion, Statement breadcrumb and browser Back survive reload",
+	],
+	"src/components/allocation-rows.tsx#display.values": [
+		"drill pivot: URL expansion, Statement breadcrumb and browser Back survive reload",
+	],
+	"src/components/allocation-progress.tsx#export.AllocationProgress.behaviour": [
+		"Records table: rendered Records keep zero, negative amounts and pending reasons",
+	],
+	"src/components/allocation-progress.tsx#display.interaction": [
+		"Records table: rendered Records keep zero, negative amounts and pending reasons",
+	],
+	"src/components/allocation-progress.tsx#display.values": [
+		"Records table: rendered Records keep zero, negative amounts and pending reasons",
+	],
+	"src/components/term.tsx#export.default.behaviour": [
+		"term definitions open by keyboard and tap",
+	],
+	"src/components/term.tsx#display.values": ["term definitions open by keyboard and tap"],
+	"src/components/term.tsx#display.interaction": ["term definitions open by keyboard and tap"],
 	"src/components/dialogs/drive-overwrite-confirmation.tsx#export.default.behaviour": [
 		"Drive overwrite confirmation: Cancel animates popup and backdrop in and out",
 		"Drive overwrite confirmation: Replace Drive backup animates popup and backdrop in and out",
@@ -2698,12 +2675,6 @@ export const behaviourCoverage: Record<string, string[]> = {
 	"src/components/charts/cashflow-chart.tsx#export.default.behaviour": [
 		"Spending forecast: retains gradient backdrops and comparison lines",
 		"Spending forecast: preserves scope and legend semantics",
-		"chart tooltips: Surplus / Shortfall keyboard navigation exposes actual numeric values",
-	],
-	"src/components/charts/daily-spending-chart.tsx#export.default.behaviour": [
-		"chart tooltips: Spending by day keyboard navigation exposes actual numeric values",
-	],
-	"src/components/charts/total-spending-chart.tsx#export.default.behaviour": [
 		"chart tooltips: Spending forecast keyboard navigation exposes actual numeric values",
 	],
 	"src/components/charts/category-history-chart.tsx#export.default.behaviour": [
@@ -2711,7 +2682,6 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"src/components/charts/category-history-chart.tsx#chart.values": [
 		"chart tooltips: Category trend keyboard navigation exposes actual numeric values",
-		"empty overview: no history gives zero metrics and useful chart explanations",
 		"Category trend chart: unavailable months are distinguished from recorded zero spending",
 	],
 	"src/components/charts/budget-progress-chart.tsx#export.default.behaviour": [
@@ -2729,21 +2699,19 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"src/components/charts/category-movers.tsx#export.default.behaviour": [
 		"biggest changes: Category change title and drilldown reconcile with the previous month",
-		"empty overview: no history gives zero metrics and useful chart explanations",
 	],
 	"src/components/charts/category-movers.tsx#chart.values": [
 		"biggest changes: Category change title and drilldown reconcile with the previous month",
-		"empty overview: no history gives zero metrics and useful chart explanations",
 	],
 	"src/components/charts/monthly-budget-usage.tsx#export.default.behaviour": [
 		"Monthly Budget card: null amount and zero plan remain distinct when scope changes",
 		"Monthly Budget rows: zero and null plans never display invalid percentages",
-		"Monthly Budget cards: hover does not select or change the donut, and a click does",
+		"Monthly Budget cards: drill first, scope explicitly and edit independently",
 	],
 	"src/components/charts/monthly-budget-usage.tsx#chart.values": [
 		"Monthly Budget card: null amount and zero plan remain distinct when scope changes",
 		"Monthly Budget rows: zero and null plans never display invalid percentages",
-		"Monthly Budget cards: hover does not select or change the donut, and a click does",
+		"Monthly Budget cards: drill first, scope explicitly and edit independently",
 	],
 	"src/components/charts/spending-calendar.tsx#export.default.behaviour": [
 		"spending calendar: daily amount, zero and refund days drill into exact Records",
@@ -2760,15 +2728,12 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"src/components/metric.tsx#export.Metric.behaviour": [
 		"overview summary: income, refunds and exclusions reconcile across metrics and Category mix",
-		"empty overview: no history gives zero metrics and useful chart explanations",
 	],
 	"src/components/metric.tsx#export.MetricGrid.behaviour": [
 		"overview summary: income, refunds and exclusions reconcile across metrics and Category mix",
-		"empty overview: no history gives zero metrics and useful chart explanations",
 	],
 	"src/components/metric.tsx#display.values": [
 		"overview summary: income, refunds and exclusions reconcile across metrics and Category mix",
-		"empty overview: no history gives zero metrics and useful chart explanations",
 	],
 	"src/components/value-swap.tsx#export.default.behaviour": [
 		"overview metrics: month change updates values and the accessible sparkline period",
@@ -2946,7 +2911,6 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"src/components/table/row-groups.tsx#table.motion": [
 		"Records: every visible item animates in the actual viewport",
-		"Monthly Records: every visible item animates in the actual viewport",
 		"table refilter /records: settled search keeps the query in the URL",
 		"table refilter /records: settled results reveal a different nonempty set",
 	],
@@ -2965,7 +2929,6 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"src/components/table/record-columns.tsx#table.motion": [
 		"Records: every visible item animates in the actual viewport",
-		"Monthly Records: every visible item animates in the actual viewport",
 		"Budget detail: initially visible related Records rows animate as a cascade",
 		"table refilter /records: settled search keeps the query in the URL",
 		"table refilter /records: settled results reveal a different nonempty set",
@@ -3625,25 +3588,25 @@ export const behaviourCoverage: Record<string, string[]> = {
 	"src/components/layout/page-header.tsx#display.values": [
 		"Category drill: nested detail returns to exact filtered origins",
 	],
-	"src/components/workflow-tabs.tsx#export.default.behaviour": [
+	"src/components/statement-tabs.tsx#export.default.behaviour": [
 		"workflow tabs: navigate by keyboard and Allocate keeps the default date filter",
 	],
-	"src/components/workflow-tabs.tsx#display.values": [
+	"src/components/statement-tabs.tsx#display.values": [
 		"workflow tabs: navigate by keyboard and Allocate keeps the default date filter",
 	],
-	"src/components/workflow-tabs.tsx#display.interaction": [
+	"src/components/statement-tabs.tsx#display.interaction": [
 		"workflow tabs: navigate by keyboard and Allocate keeps the default date filter",
 	],
 	"src/components/layout/app-sidebar.tsx#export.default.behaviour": [
-		"sidebar and month tabs: clear drill history",
+		"sidebar: clears drill history",
 		"sidebar trigger: keyboard toggle opens and closes the sidebar",
 	],
 	"src/components/layout/app-sidebar.tsx#display.interaction": [
-		"sidebar and month tabs: clear drill history",
+		"sidebar: clears drill history",
 		"sidebar trigger: keyboard toggle opens and closes the sidebar",
 	],
 	"app/(month)/layout.tsx#shell.consumer": [
-		"monthly shell: header and tabs keep DOM identity across tab switches",
+		"monthly shell: header keeps DOM identity across month changes without tabs",
 	],
 	"app/template.tsx#shell.consumer": ["page transition: fades in during client navigation"],
 	"app/not-found.tsx#shell.consumer": ["not-found page: offers a working Records destination"],
@@ -3656,11 +3619,11 @@ export const behaviourCoverage: Record<string, string[]> = {
 	"app/sync/page.tsx#route.data": [
 		"backup: a downloaded backup round-trips and restores the workspace",
 	],
-	"app/allocator/duplicates/page.tsx#route.data": [
+	"app/statements/duplicates/page.tsx#route.data": [
 		"duplicates: keep moves Allocations and the deleted Statement is gone",
 		"/allocator/duplicates page: empty state resolves without premature loading copy",
 	],
-	"app/allocator/pending/page.tsx#route.data": [
+	"app/statements/pending/page.tsx#route.data": [
 		"pending queue: replacing a Pending Statement preserves Allocations on the imported Statement",
 		"/allocator/pending page: empty state resolves without premature loading copy",
 	],
@@ -3703,6 +3666,7 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"Account rows: pending edits are distinguished from imported activity",
 	],
 	"app/records/page.tsx#route.data": [
+		"Records by month: later and future Records keep amounts and working drills",
 		"/records page: resolves to its useful empty state",
 		"Records table: keeps search in the URL and moves between pages",
 		"Records table: Category selection narrows Records and survives reload",
@@ -3730,16 +3694,12 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"app/(month)/page.tsx#route.data": [
 		"overview summary: income, refunds and exclusions reconcile across metrics and Category mix",
-		"empty overview: no history gives zero metrics and useful chart explanations",
+		"empty workspace: the start state offers import and demo data, and demo data loads the workspace",
+		"empty month: the notice offers the latest recorded month and moves there",
 		"Monthly Budget card: null amount and zero plan remain distinct when scope changes",
 		"Monthly Budget rows: zero and null plans never display invalid percentages",
 		"spending calendar: daily amount, zero and refund days drill into exact Records",
 		"biggest changes: Category change title and drilldown reconcile with the previous month",
-	],
-	"app/(month)/records/monthly/page.tsx#route.data": [
-		"/records/monthly?month=October&year=2026 page: resolves to its useful empty state",
-		"archived Monthly Budget assignment: badge, total and disabled editor option are retained",
-		"Monthly Records: later and future Records keep amounts and working drills",
 	],
 	"app/accounts/[id]/page.tsx#route.navigation": [
 		"direct Accounts detail: has a working fallback",
@@ -3769,13 +3729,14 @@ export const behaviourCoverage: Record<string, string[]> = {
 	"app/allocator/page.tsx#route.navigation": [
 		"allocator: keyboard selection opens Create Record and Clear removes the selection",
 	],
-	"app/allocator/duplicates/page.tsx#route.navigation": [
+	"app/statements/duplicates/page.tsx#route.navigation": [
 		"duplicates: keyboard keep, delete, review and cancel work",
 	],
-	"app/allocator/pending/page.tsx#route.navigation": [
+	"app/statements/pending/page.tsx#route.navigation": [
 		"pending queue: keyboard replace and confirm replace the Pending Statement",
 	],
 	"app/records/page.tsx#route.navigation": [
+		"Monthly Records redirect preserves every filter and Records month navigation",
 		"Records list: keyboard filtered list to detail to Back keeps exact origin",
 	],
 	"app/categories/page.tsx#route.navigation": [
@@ -4013,29 +3974,11 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"src/components/charts/budget-progress-chart.tsx#chart.values": [
 		"chart tooltips: Spending over time keyboard navigation exposes actual numeric values",
-		"empty overview: no history gives zero metrics and useful chart explanations",
 	],
 	"src/components/charts/cashflow-chart.tsx#chart.values": [
-		"chart tooltips: Surplus / Shortfall keyboard navigation exposes actual numeric values",
-		"empty overview: no history gives zero metrics and useful chart explanations",
-	],
-	"src/components/charts/daily-spending-chart.tsx#chart.values": [
-		"chart tooltips: Spending by day keyboard navigation exposes actual numeric values",
-		"empty overview: no history gives zero metrics and useful chart explanations",
-	],
-	"src/components/charts/total-spending-chart.tsx#chart.values": [
 		"chart tooltips: Spending forecast keyboard navigation exposes actual numeric values",
-		"empty overview: no history gives zero metrics and useful chart explanations",
-	],
-	"src/components/charts/total-spending-chart.tsx#chart.responsive": [
-		"dense overview cards: every card renders values and fits the viewport",
-		"chart tooltips: stay numeric and inside every viewport",
 	],
 	"src/components/charts/cashflow-chart.tsx#chart.responsive": [
-		"dense overview cards: every card renders values and fits the viewport",
-		"chart tooltips: stay numeric and inside every viewport",
-	],
-	"src/components/charts/daily-spending-chart.tsx#chart.responsive": [
 		"dense overview cards: every card renders values and fits the viewport",
 		"chart tooltips: stay numeric and inside every viewport",
 	],
@@ -4063,9 +4006,6 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"dense overview cards: every card renders values and fits the viewport",
 		"Category mix: a dense long Category name stays truncated and readable",
 	],
-	"src/components/charts/monthly-budget-usage.tsx#chart.motion": [
-		"Monthly Budget donut: sibling segments dim smoothly on focus",
-	],
 	"src/components/charts/spending-calendar.tsx#chart.responsive": [
 		"dense overview cards: every card renders values and fits the viewport",
 		"Category mix: a dense long Category name stays truncated and readable",
@@ -4079,12 +4019,6 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"sparkline: missing, flat, negative, mixed and dense values have correct finite endpoints",
 	],
 	"src/components/charts/cashflow-chart.tsx#chart.motion": [
-		"chart intro: overview charts grow real graph marks once and respect reduced motion",
-	],
-	"src/components/charts/total-spending-chart.tsx#chart.motion": [
-		"chart intro: overview charts grow real graph marks once and respect reduced motion",
-	],
-	"src/components/charts/daily-spending-chart.tsx#chart.motion": [
 		"chart intro: overview charts grow real graph marks once and respect reduced motion",
 	],
 	"src/components/charts/category-history-chart.tsx#chart.motion": [
@@ -4353,15 +4287,11 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"/allocator page: empty state resolves without premature loading copy",
 	],
 	"app/(month)/page.tsx#route.navigation": [
-		"monthly shell: header and tabs keep DOM identity across tab switches",
-		"sidebar and month tabs: clear drill history",
-	],
-	"app/(month)/records/monthly/page.tsx#route.navigation": [
-		"monthly shell: header and tabs keep DOM identity across tab switches",
-		"sidebar and month tabs: clear drill history",
+		"monthly shell: header keeps DOM identity across month changes without tabs",
+		"sidebar: clears drill history",
 	],
 	"app/layout.tsx#shell.consumer": [
-		"monthly shell: header and tabs keep DOM identity across tab switches",
+		"monthly shell: header keeps DOM identity across month changes without tabs",
 	],
 	"app/providers.tsx#shell.consumer": [
 		"/records page: stays silent while the database opens, then reveals its data",
@@ -4387,10 +4317,10 @@ export const behaviourCoverage: Record<string, string[]> = {
 	"app/allocator/page.tsx#route.viewport": [
 		"/allocator page: populated content and enabled controls stay inside the viewport",
 	],
-	"app/allocator/pending/page.tsx#route.viewport": [
+	"app/statements/pending/page.tsx#route.viewport": [
 		"/allocator/pending page: populated content and enabled controls stay inside the viewport",
 	],
-	"app/allocator/duplicates/page.tsx#route.viewport": [
+	"app/statements/duplicates/page.tsx#route.viewport": [
 		"/allocator/duplicates page: populated content and enabled controls stay inside the viewport",
 	],
 	"app/records/page.tsx#route.viewport": [
@@ -4404,9 +4334,6 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"app/(month)/page.tsx#route.viewport": [
 		"/ page: populated content and enabled controls stay inside the viewport",
-	],
-	"app/(month)/records/monthly/page.tsx#route.viewport": [
-		"/records/monthly?month=October&year=2026 page: populated content and enabled controls stay inside the viewport",
 	],
 	"app/settings/page.tsx#route.viewport": [
 		"/settings page: populated content and enabled controls stay inside the viewport",
@@ -4484,6 +4411,10 @@ export const scenarioProjects: Record<
 	string,
 	("mobile" | "tall-desktop" | "light" | "reduced-motion")[]
 > = {
+	"src/components/drill/panel.tsx#display.interaction": ["mobile"],
+	"src/components/charts/largest-records.tsx#display.interaction": ["mobile"],
+	"src/components/allocation-rows.tsx#display.interaction": ["mobile"],
+	"src/components/allocation-progress.tsx#display.interaction": ["mobile"],
 	"src/components/dialogs/drive-overwrite-confirmation.tsx#modal.lifecycle": [
 		"mobile",
 		"reduced-motion",
@@ -4494,18 +4425,6 @@ export const scenarioProjects: Record<
 	],
 
 	"src/components/charts/cashflow-chart.tsx#chart.motion": [
-		"mobile",
-		"tall-desktop",
-		"light",
-		"reduced-motion",
-	],
-	"src/components/charts/total-spending-chart.tsx#chart.motion": [
-		"mobile",
-		"tall-desktop",
-		"light",
-		"reduced-motion",
-	],
-	"src/components/charts/daily-spending-chart.tsx#chart.motion": [
 		"mobile",
 		"tall-desktop",
 		"light",
@@ -4578,8 +4497,8 @@ export const scenarioProjects: Record<
 	"app/accounts/[id]/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
 	"app/accounts/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
 	"app/allocator/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
-	"app/allocator/pending/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
-	"app/allocator/duplicates/page.tsx#route.viewport": [
+	"app/statements/pending/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
+	"app/statements/duplicates/page.tsx#route.viewport": [
 		"mobile",
 		"tall-desktop",
 		"reduced-motion",
@@ -4588,11 +4507,6 @@ export const scenarioProjects: Record<
 	"app/records/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
 	"app/categories/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
 	"app/(month)/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
-	"app/(month)/records/monthly/page.tsx#route.viewport": [
-		"mobile",
-		"tall-desktop",
-		"reduced-motion",
-	],
 	"app/settings/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
 	"app/sync/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
 	"app/importer/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
@@ -4601,10 +4515,7 @@ export const scenarioProjects: Record<
 	"app/statement-rules/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
 	"src/components/charts/cashflow-chart.tsx#chart.responsive": ["mobile", "tall-desktop"],
 	"src/components/charts/category-history-chart.tsx#chart.responsive": ["mobile", "tall-desktop"],
-	"src/components/charts/daily-spending-chart.tsx#chart.responsive": ["mobile", "tall-desktop"],
-	"src/components/charts/total-spending-chart.tsx#chart.responsive": ["mobile", "tall-desktop"],
 	"src/components/charts/category-movers.tsx#chart.motion": ["reduced-motion"],
-	"src/components/charts/monthly-budget-usage.tsx#chart.motion": ["reduced-motion"],
 	"src/components/charts/spending-calendar.tsx#chart.motion": ["reduced-motion"],
 	"src/components/charts/sparkline.tsx#chart.motion": ["reduced-motion"],
 	"src/components/value-swap.tsx#display.values": ["reduced-motion"],
@@ -4739,6 +4650,7 @@ export const scenarioProjectLexiconExemptions: Record<string, string> = {
 
 /** Every modal owner needs executable entrance/exit coverage, including non-editor surfaces. */
 export const modalAnimationCoverage: Record<string, string[]> = {
+	"src/components/drill/panel.tsx": ["drill sheet: entrance and exit retain popup motion"],
 	"src/components/dialogs/account.tsx": [
 		"editor popups: saving every existing editor preserves its popup and backdrop exit",
 		"editor popups: every create and update dialog exits before removal and reopens",

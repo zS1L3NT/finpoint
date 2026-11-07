@@ -57,29 +57,10 @@ const denseRowConsumers: MotionConsumer[] = [
 		dense: true,
 	},
 	{
-		name: "Monthly Records",
-		origin: "/?month=October&year=2026",
-		action: "month-tab",
-		target: "Monthly Records",
-		selector:
-			'main section[aria-labelledby="actual-records"] tbody tr:has(a[href^="/records/"]), main section[aria-labelledby="actual-records"] div.grid-cols-subgrid:has(a[href^="/records/"])',
-		dense: true,
-	},
-	{
-		name: "future Monthly Records",
-		origin: "/?month=October&year=2026",
-		action: "month-tab",
-		target: "Monthly Records",
-		selector:
-			'main section:not([aria-labelledby]) tbody tr:has(a[href^="/records/"]), main section:not([aria-labelledby]) div.grid-cols-subgrid:has(a[href^="/records/"])',
-		dense: true,
-		future: true,
-	},
-	{
 		name: "pending queue",
-		origin: "/allocator",
+		origin: "/statements",
 		action: "workflow",
-		target: "Replace Pending",
+		target: "Replace pending",
 		selector: 'main [data-slot="pending-queue-item"]',
 		dense: true,
 	},
@@ -89,7 +70,7 @@ const denseRowConsumers: MotionConsumer[] = [
 		name: "Allocate",
 		origin: "/accounts",
 		action: "sidebar",
-		target: "Workflows",
+		target: "Allocate",
 		selector: statementRows,
 		dense: true,
 	},
@@ -122,9 +103,9 @@ const populatedConsumers: MotionConsumer[] = [
 	},
 	{
 		name: "duplicate groups",
-		origin: "/allocator",
+		origin: "/statements",
 		action: "workflow",
-		target: "Fix Duplicates",
+		target: "Duplicates",
 		selector: 'main [data-slot="duplicate-group-item"]',
 		dense: false,
 	},
@@ -194,7 +175,7 @@ async function expectConsumerEntrance(page: Page, consumer: MotionConsumer, isMo
 				.click()
 		else if (consumer.action === "workflow")
 			await page
-				.getByRole("navigation", { name: "Workflow views" })
+				.getByRole("navigation", { name: "Statement views" })
 				.getByRole("link", { name: consumer.target, exact: true })
 				.click()
 		else if (consumer.action === "heading")
@@ -667,7 +648,7 @@ test("table refilter from no results: visible results enter with an entrance", {
 	}
 })
 
-test("table rows: Records, Statements, Monthly Records, future Monthly Records, pending queue and Allocate enter as a cascade in the viewport", {
+test("table rows: Records, Statements, pending queue and Allocate enter as a cascade in the viewport", {
 	tag: ["@tall", "@light", "@reduced-motion"],
 }, async ({ page, isMobile }) => {
 	test.setTimeout(180000)

@@ -2,7 +2,6 @@
 
 import { DateTime } from "luxon"
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
 import { cn, formatCurrency } from "@/lib/utils"
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
@@ -87,7 +86,7 @@ export default function SpendingCalendar({
 	// The calendar stays mounted across months, so a day kept from another month is ignored.
 	const inMonth = (key: string | null) =>
 		key?.startsWith(start.toFormat("yyyy-MM-")) ? key : null
-	const shown = inMonth(preview) ?? inMonth(selected)
+	const shown = inMonth(selected) ?? inMonth(preview)
 	const shownEntry = shown ? byDate.get(shown) : undefined
 	const spendDays = daily.filter(day => day.spending > 0).length
 	const total = daily.reduce((sum, day) => sum + Math.max(day.spending, 0), 0)
@@ -122,13 +121,16 @@ export default function SpendingCalendar({
 							aria-label={label}
 							disabled={future}
 							aria-pressed={key === selected}
-							onClick={() => setSelected(key)}
+							onClick={() => {
+								setSelected(key)
+								onSelect(key)
+							}}
 							onPointerEnter={event => {
 								if (event.pointerType === "mouse" && !future) setPreview(key)
 							}}
 							onPointerLeave={() => setPreview(null)}
 							className={cn(
-								"group relative flex aspect-square min-h-9 cursor-pointer flex-col justify-between rounded-md p-1 text-left ring-offset-2 ring-offset-card transition-[background-color,box-shadow] duration-150 ease-out motion-reduce:transition-none hover:ring-2 hover:ring-foreground/30 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-default disabled:opacity-40 disabled:hover:ring-0 sm:p-1.5",
+								"group relative flex aspect-square min-h-11 cursor-pointer flex-col justify-between rounded-md p-1 text-left ring-offset-2 ring-offset-card transition-[background-color,box-shadow] duration-150 ease-out motion-reduce:transition-none hover:ring-2 hover:ring-foreground/30 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-default disabled:opacity-40 disabled:hover:ring-0 sm:p-1.5",
 								key === selected && "ring-2 ring-foreground hover:ring-foreground",
 								INK[level],
 								future && "border border-dashed bg-transparent",
@@ -147,7 +149,7 @@ export default function SpendingCalendar({
 					)
 				})}
 			</div>
-			<div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+			<div className="grid gap-2 text-xs text-muted-foreground">
 				{shown ? (
 					<span className="flex min-h-8 items-center gap-3" aria-live="polite">
 						<span className="text-foreground">
@@ -159,9 +161,6 @@ export default function SpendingCalendar({
 								? ` · ${shownEntry.records} Record${shownEntry.records === 1 ? "" : "s"}`
 								: ""}
 						</span>
-						<Button variant="outline" size="sm" onClick={() => onSelect(shown)}>
-							View Records
-						</Button>
 					</span>
 				) : (
 					<span className="flex min-h-8 items-center">

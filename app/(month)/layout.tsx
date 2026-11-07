@@ -1,8 +1,6 @@
 "use client"
 
-import { motion } from "framer-motion"
 import { DateTime } from "luxon"
-import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
 import { UiIcon as IconifyIcon } from "@/components/icon"
@@ -15,66 +13,49 @@ import ValueSwap from "@/components/value-swap"
 import { useHistory } from "@/history"
 import { useMonthParams } from "@/hooks/use-month-params"
 import { armMonthTransition } from "@/hooks/use-month-transition"
-import { SPRING } from "@/lib/motion"
-import { cn } from "@/lib/utils"
-import { pathDashboard, pathMonthlyRecords, pathRecords } from "@/routes"
 
 /**
- * Persistent shell for the Overview / Monthly Records tabs. The title, month
- * navigation, and tabs mount once and never remount on tab switches, so the
- * month heading cannot flash. Pages below the Outlet render content only.
+ * Persistent Dashboard shell. The title and month navigation stay mounted
+ * while the selected month changes.
  */
 export default function MonthLayout({ children }: { children: React.ReactNode }) {
 	const { month, year, date, setSearchParams } = useMonthParams()
 	const pathname = usePathname()
-	const { latest, isNavigatingBack, navigateBack, handleClear } = useHistory()
-	const back = latest
-	const isMonthly = pathname.startsWith(`${pathRecords()}/`)
+
+	const { latest, isNavigatingBack, navigateBack } = useHistory()
 	const [hydrated, setHydrated] = useState(false)
 
 	// Calendar labels and links use the browser date, which can differ from SSR.
 	useEffect(() => setHydrated(true), [])
 
 	const today = DateTime.now().startOf("day")
+	const [backPath, backQuery] = latest?.url.split("?") ?? []
+	const backParams = new URLSearchParams(backQuery)
+	const back =
+		backPath === pathname &&
+		(backParams.get("month") ?? today.toFormat("MMMM")) === month &&
+		Number(backParams.get("year") ?? today.year) === year
+			? null
+			: latest
 	const isCurrent = date.hasSame(today, "month")
 	const isFuture = date.startOf("month") > today.startOf("month")
-	const through = isCurrent ? today.toFormat("yyyy-MM-dd") : null
-	const subtitle = isMonthly
-		? isCurrent && through
-			? `Actuals through ${DateTime.fromISO(through).toFormat("d MMM")}`
-			: isFuture
-				? "Future-dated Records"
-				: "Full month"
-		: `${isCurrent ? `Through ${today.toFormat("d MMM")}` : isFuture ? "Future month" : "Full month"} · SGD · Based on Record dates`
+	const subtitle = `${isCurrent ? `Through ${today.toFormat("d MMM")}` : isFuture ? "Future month" : "Full month"} · SGD · Based on Record dates`
 
 	const changeMonth = (next: DateTime) => {
 		if (next.hasSame(date, "month")) return
 		armMonthTransition(next > date ? 1 : -1)
 		const monthName = next.toFormat("MMMM")
 		const yearValue = String(next.year)
-		if (isMonthly) {
-			setSearchParams(previous => {
-				const params = new URLSearchParams(previous)
-				params.set("month", monthName)
-				params.set("year", yearValue)
-				params.delete("day")
-				params.delete("start_date")
-				params.delete("end_date")
-				return params
-			})
-		} else {
-			// Keep the Overview's selected budget across months.
-			setSearchParams(previous => ({
-				month: monthName,
-				year: yearValue,
-				scope: previous.get("scope") ?? undefined,
-			}))
-		}
+		setSearchParams(previous => ({
+			month: monthName,
+			year: yearValue,
+			scope: previous.get("scope") ?? undefined,
+		}))
 	}
 
 	return (
 		<>
-			<PageContent className={isMonthly ? "gap-5 md:gap-7" : "gap-7 md:gap-9"}>
+			<PageContent className="gap-7 md:gap-9">
 				{hydrated && (
 					<header className="grid gap-5">
 						{back ? (
@@ -101,7 +82,7 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 						<div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
 							<div>
 								<p className="text-xs font-medium text-muted-foreground">
-									{isMonthly ? "Monthly Records" : "Monthly overview"}
+									Dashboard
 								</p>
 								<h2 className="mt-1 text-xl font-semibold tracking-tight md:text-2xl">
 									<ValueSwap value={`${month} ${year}`} />
@@ -142,50 +123,6 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 									<IconifyIcon icon="lucide:arrow-right" />
 								</Button>
 							</ButtonGroup>
-						</div>
-
-						<div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-							<nav
-								className="flex min-w-0 border-b sm:flex-1"
-								aria-label="Monthly finance views"
-							>
-								{(
-									[
-										[
-											"Overview",
-											false,
-											pathDashboard({ month, year: String(year) }),
-										],
-										[
-											"Monthly Records",
-											true,
-											pathMonthlyRecords({ month, year: String(year) }),
-										],
-									] as const
-								).map(([label, monthly, href]) => {
-									const active = monthly === isMonthly
-									return (
-										<Link
-											key={label}
-											className={cn(
-												"relative px-4 py-2 text-sm transition-colors duration-150 ease-out hover:text-foreground",
-												active ? "font-medium" : "text-muted-foreground",
-											)}
-											href={href}
-											onClick={handleClear}
-										>
-											{label}
-											{active ? (
-												<motion.span
-													layoutId="month-tab-indicator"
-													transition={SPRING.snappy}
-													className="absolute inset-x-0 bottom-0 h-0.5 bg-foreground"
-												/>
-											) : null}
-										</Link>
-									)
-								})}
-							</nav>
 						</div>
 					</header>
 				)}

@@ -104,7 +104,7 @@ jobs:
           - group: editing
             files: tests/core/editors.e2e.ts tests/core/modals.e2e.ts tests/core/keyboard.e2e.ts
           - group: data
-            files: tests/core/charts.e2e.ts tests/core/tables.e2e.ts
+            files: tests/core/drilldown.e2e.ts tests/core/charts.e2e.ts tests/core/tables.e2e.ts
           - group: components
             files: tests/core/components.e2e.ts tests/core/sheets.e2e.ts tests/core/helpers.e2e.ts tests/core/ledger.e2e.ts
     steps:
@@ -138,7 +138,7 @@ jobs:
           - group: editing
             files: tests/animations/editors.e2e.ts tests/animations/modals.e2e.ts tests/animations/sheets.e2e.ts
           - group: display
-            files: tests/animations/charts.e2e.ts tests/animations/routes.e2e.ts tests/animations/components.e2e.ts tests/animations/helpers.e2e.ts
+            files: tests/animations/drilldown.e2e.ts tests/animations/charts.e2e.ts tests/animations/routes.e2e.ts tests/animations/components.e2e.ts tests/animations/helpers.e2e.ts
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/setup

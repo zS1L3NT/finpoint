@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useHistory } from "@/history"
 import { cn, formatCurrency, round2 } from "@/lib/utils"
-import { pathAllocatorDuplicates, pathStatement } from "@/routes"
+import { pathStatement, pathStatementsDuplicates } from "@/routes"
 import type { Allocation, Statement } from "@/types"
 
 type StatementRow = Statement & { pivot?: Allocation }
@@ -33,7 +33,7 @@ function StatementBadges({
 			{statement.is_duplicate ? (
 				<Badge variant="destructive" asChild>
 					<Link
-						href={pathAllocatorDuplicates({ account_id: statement.account.id })}
+						href={pathStatementsDuplicates({ account_id: statement.account.id })}
 						title="Possible duplicate statement. Review and fix duplicates."
 					>
 						Duplicate?
@@ -73,7 +73,8 @@ function StatementAmount({
 			</span>
 			{amount === "allocated" ? (
 				<span className="text-[0.6875rem] text-muted-foreground tabular-nums">
-					{formatCurrency(statement.pivot?.amount ?? 0)} here
+					{formatCurrency(statement.pivot?.amount ?? 0)} of{" "}
+					{formatCurrency(statement.amount)} allocated
 				</span>
 			) : allocable !== statement.amount && (amount === "allocable" || allocable !== 0) ? (
 				<span className="text-[0.6875rem] text-muted-foreground tabular-nums">
@@ -144,7 +145,9 @@ export function useStatementColumns<TStatement extends StatementRow>({
 					<div className="min-w-0">
 						<p className="flex items-center gap-1.5">
 							<span className="min-w-0 truncate font-medium">
-								{row.original.description || "No description"}
+								<Link href={pathStatement(row.original.id)}>
+									{row.original.description || "No description"}
+								</Link>
 							</span>
 							<StatementBadges
 								statement={row.original}
@@ -207,10 +210,13 @@ export function useStatementMobileRow<TStatement extends StatementRow>({
 				<>
 					<div className="flex min-w-0 items-center gap-3">
 						{leading?.(statement)}
+
 						<div className="min-w-0 flex-1">
 							<p className="flex items-center gap-1.5">
 								<span className="min-w-0 truncate font-medium">
-									{statement.description || "No description"}
+									<Link href={pathStatement(statement.id)}>
+										{statement.description || "No description"}
+									</Link>
 								</span>
 								<StatementBadges
 									statement={statement}

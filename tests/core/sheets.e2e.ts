@@ -345,7 +345,7 @@ test("pending confirmation sheet: stays silent while held after closed time, the
 	expect(workspace).toBe("populated")
 	await page.goto("/allocator")
 	await expect(
-		page.locator("main").getByRole("heading", { name: "Workflows", exact: true, level: 2 }),
+		page.locator("main").getByRole("heading", { name: "Allocate", exact: true, level: 2 }),
 	).toBeVisible()
 	await expect(
 		page.getByRole("checkbox", { name: "Select statement t1-s-free-2", exact: true }),

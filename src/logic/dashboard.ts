@@ -12,6 +12,7 @@ import {
 	type RecordRow,
 	type StatementRow,
 } from "@/data/db"
+import { formatCurrency, pluralize } from "@/lib/utils"
 import { type AnalyticsRecord, contribution, summarize } from "@/logic/analytics"
 import { defaultAmountFor } from "@/logic/monthly-budgets"
 import { expandCategoryIdsForMonthly } from "@/logic/monthly-shared"
@@ -22,6 +23,8 @@ import {
 	tallyAllocations,
 } from "@/logic/pending"
 import { resolveRecordChoices } from "@/logic/record-choices"
+
+import { pathAllocator, pathRecords, pathStatements } from "@/routes"
 
 export const COMPARISON_MONTHS = 2
 export const BREAKDOWN_MONTHS = 4
@@ -326,6 +329,26 @@ function buildSpendingHistory(
 	]
 }
 
+export type RecordMonth = { month: string; year: number }
+
+/**
+ * Most recent month before the given one holding at least one Record, or null
+ * when no earlier month has any. Powers the empty-month "Go to <month>" notice.
+ */
+export async function findLatestRecordMonth(input: DashboardInput): Promise<RecordMonth | null> {
+	const start = monthStart(input.month, input.year)
+
+	const latest = await db.records
+		.where("datetime")
+		.below(start.toFormat("yyyy-MM-dd HH:mm"))
+		.reverse()
+		.first()
+	if (!latest) return null
+
+	const date = DateTime.fromFormat(latest.datetime.slice(0, 7), "yyyy-MM")
+	return { month: date.monthLong ?? input.month, year: date.year }
+}
+
 export async function getDashboard(
 	input: DashboardInput & { scope?: string },
 	preloaded?: LoadedTables,
@@ -381,14 +404,8 @@ export async function getDashboard(
 		isCurrent,
 		isFuture,
 		actualEnd.day ?? 1,
-	)
-	const series = buildSeries(
-		summary,
-		futureSummary,
-		included,
-		date.daysInMonth ?? 30,
-		isFuture ? 0 : actualEnd.day,
-		projection.daily_spending,
+		comparisonSummaries(date, today, false, tables, null),
+		actualRecords,
 	)
 	const categories = buildCategories(summary, included)
 	const comparisonHistory = buildSpendingHistory(
@@ -429,12 +446,25 @@ export async function getDashboard(
 		summary,
 		comparison,
 		comparison_history: comparisonHistory,
-		history: buildCashflowHistory(date, today, tables, null),
-		series,
+		comparison_months: included.map(m => m.month),
 		projection,
+		spendingTotals: {
+			budgeted:
+				Math.round(
+					monthlyBudgetsWithSpending.reduce((sum, b) => sum + b.spending, 0) * 100,
+				) / 100,
+			unbudgeted:
+				Math.round(
+					summary.categories.reduce(
+						(sum, c) => sum + (c.monthly_budget_spending.unbudgeted ?? 0),
+						0,
+					) * 100,
+				) / 100,
+		},
 		monthlyBudgets: monthlyBudgetsWithSpending,
 		categories,
 		future_records_count: futureRecords.length,
+		record_count: monthRecords.length,
 	}
 }
 
@@ -503,6 +533,7 @@ export async function getPaceView(
 					spending: summary.spending,
 				}
 			: monthlyBudgetsBuilt.find(b => b.amount !== null && b.amount >= 0)
+	const forecastComparisons = comparisonSummaries(date, today, false, tables, scopeIds)
 	const projection = buildProjection(
 		date,
 		summary,
@@ -511,6 +542,8 @@ export async function getPaceView(
 		isCurrent,
 		isFuture,
 		actualEnd.day ?? 1,
+		forecastComparisons,
+		actualRecords,
 	)
 
 	const series = buildSeries(
@@ -566,6 +599,12 @@ export async function getPaceView(
 			isCurrent,
 			isFuture,
 			actualEnd.day,
+			forecastComparisons.map(month => ({
+				...month,
+				items: month.items.filter(matches),
+				summary: summarize(month.items.filter(matches)),
+			})),
+			actualRecords.filter(matches),
 		)
 		return {
 			...budget,
@@ -600,13 +639,7 @@ export async function getPaceView(
 					point.spending === null
 						? null
 						: forecast.reduce((sum, b) => sum + (b.points[index]?.spending ?? 0), 0),
-				projected_spending:
-					point.projected_spending === null
-						? null
-						: forecast.reduce(
-								(sum, b) => sum + (b.points[index]?.projected_spending ?? 0),
-								0,
-							),
+				projected_spending: point.projected_spending,
 			})),
 		})
 	}
@@ -809,10 +842,13 @@ function buildProjection(
 	isCurrent: boolean,
 	isFuture: boolean,
 	elapsedDays: number,
+	comparisons: ReturnType<typeof comparisonSummaries>,
+	actualItems: AnalyticsRecord[],
 ) {
 	if (!isCurrent || isFuture || elapsedDays < 1) {
 		return {
 			available: false,
+			history_remaining: null,
 			daily_spending: null,
 			projected_spending: null,
 			scheduled_spending: 0,
@@ -821,7 +857,38 @@ function buildProjection(
 		}
 	}
 	const remainingDays = Math.max((date.daysInMonth ?? 30) - elapsedDays, 0)
-	const dailySpending = summary.gross_spending / elapsedDays
+	const included = comparisons.filter(month => month.included)
+	const remainingSpending = (actual: ReturnType<typeof summarize>, budgetId?: string) => {
+		if (budgetId === "all") budgetId = undefined
+		if (included.length)
+			return (
+				included.reduce((sum, month) => {
+					const days = DateTime.fromISO(month.start).daysInMonth ?? 30
+					const cutoff = Math.min(elapsedDays, days)
+					const daily = budgetId
+						? summarize(month.items.filter(r => r.monthly_budget_id === budgetId)).daily
+						: month.summary.daily
+					const remaining = daily
+						.filter(day => Number(day.date.slice(-2)) > cutoff)
+						.reduce((total, day) => total + day.spending, 0)
+					return sum + (days > cutoff ? (remaining * remainingDays) / (days - cutoff) : 0)
+				}, 0) / included.length
+			)
+		const days = Array.from({ length: elapsedDays }, (_, day) =>
+			Math.max(
+				actual.daily.find(row => Number(row.date.slice(-2)) === day + 1)?.spending ?? 0,
+				0,
+			),
+		).sort((a, b) => a - b)
+		const middle = Math.floor(days.length / 2)
+		return (
+			(days.length % 2
+				? (days[middle] ?? 0)
+				: ((days[middle - 1] ?? 0) + (days[middle] ?? 0)) / 2) * remainingDays
+		)
+	}
+	const remaining = remainingSpending(summary)
+	const dailySpending = remainingDays ? remaining / remainingDays : 0
 	const paceMonthlyBudget = monthlyBudgets.find(b => b.amount !== null && b.amount >= 0)
 	const paceAmount = paceMonthlyBudget?.amount ?? null
 	const futureMonthlyBudgets = new Map(futureSummary.monthlyBudgets.map(b => [b.id, b]))
@@ -831,7 +898,8 @@ function buildProjection(
 		: 0
 	return {
 		available: true,
-		daily_spending: Math.round(dailySpending * 100) / 100,
+		history_remaining: included.length ? Math.round(remaining * 100) / 100 : null,
+		daily_spending: dailySpending,
 		projected_spending:
 			Math.round(
 				(summary.spending + futureSummary.spending + dailySpending * remainingDays) * 100,
@@ -853,7 +921,18 @@ function buildProjection(
 							Math.round(
 								(paceMonthlyBudget.spending +
 									scheduledMonthlyBudgetSpending +
-									(paceMonthlyBudget.spending / elapsedDays) * remainingDays) *
+									remainingSpending(
+										paceMonthlyBudget.id === "all"
+											? summary
+											: summarize(
+													actualItems.filter(
+														r =>
+															r.monthly_budget_id ===
+															paceMonthlyBudget.id,
+													),
+												),
+										paceMonthlyBudget.id,
+									)) *
 									100,
 							) / 100,
 						usage_pace:
@@ -1074,27 +1153,171 @@ export async function getDashboardView(input: DashboardInput & { scope?: string 
 					),
 				})
 
-	const [pace, monthlyBudgetDaily] = await Promise.all([
-		getPaceView(input.month, input.year, scope, tables),
-		getMonthlyBudgetDaily(input.month, input.year, tables),
-	])
+	const pace = await getPaceView(input.month, input.year, scope, tables)
 
 	const date = monthStart(input.month, input.year)
 	const trend = buildTrend(date, DateTime.now().startOf("day"), tables)
 
+	const incomeMonths = new Map<string, { amount: number; day: number }>()
+	for (const r of toAnalyticsRecords(
+		tables.records,
+		tables.allocated,
+		tables.categories,
+		tables.monthlyBudgets,
+	)) {
+		if (r.datetime.slice(0, 10) >= date.toFormat(ISO_DAY)) continue
+		const income = contribution(r.analytics_treatment, r.amount).income / 100
+		if (income <= 0) continue
+		const key = r.datetime.slice(0, 7)
+		const previous = incomeMonths.get(key)
+		incomeMonths.set(key, {
+			amount: (previous?.amount ?? 0) + income,
+			day: Math.max(previous?.day ?? 1, Number(r.datetime.slice(8, 10))),
+		})
+	}
+	const incomeHistory = incomeMonths.size
+		? {
+				amount:
+					[...incomeMonths.values()].reduce((sum, m) => sum + m.amount, 0) /
+					incomeMonths.size,
+				day: Math.round(
+					[...incomeMonths.values()].reduce((sum, m) => sum + m.day, 0) /
+						incomeMonths.size,
+				),
+			}
+		: null
 	return {
+		incomeHistory,
+		headline: buildHeadline(
+			pace.spending,
+			pace.paceMonthlyBudget?.amount ?? null,
+			scoped.categories,
+			input.month,
+			dashboard.period.is_current
+				? Math.max(0, (date.daysInMonth ?? 30) - DateTime.now().day)
+				: 0,
+			dashboard.period.is_future,
+			dashboard.record_count === 0 &&
+				!dashboard.period.is_current &&
+				!dashboard.period.is_future
+				? input.year
+				: undefined,
+		),
 		dashboard,
 		pace,
-		monthlyBudgetDaily,
 		trend,
 		scope,
 		scopedBudgetIds,
 		scopedCategories: scoped.categories,
 		scopedComparisonCount: scoped.comparison.count,
+		scopedComparisonMonths: scoped.comparison_months,
 		scopedDaily: scoped.summary.daily,
 		scopeLabel,
 		scopeColor: selectedBudget?.color,
 		scopeFilters,
 		paceFilters: scopeFilters,
 	}
+}
+
+export function buildHeadline(
+	spent: number,
+	plan: number | null,
+	categories: { name: string; share: number | null }[],
+	month: string,
+	days: number,
+	future: boolean,
+	emptyYear?: number,
+) {
+	if (emptyYear !== undefined) return `No Records in ${month} ${emptyYear}.`
+	if (future)
+		return plan === null
+			? `Set your ${month} plan below.`
+			: `Your ${month} plan is ${formatCurrency(plan)}.`
+	const majority = categories.find(c => (c.share ?? 0) >= 50)
+	return [
+		`You've spent ${formatCurrency(spent)}${plan === null ? "" : ` of your ${formatCurrency(plan)} plan`}.`,
+		majority && spent > 0 ? `${majority.name} is most of it.` : "",
+		days > 0
+			? `${days} ${days === 1 ? "day" : "days"} left.`
+			: plan === null
+				? `${month} is complete.`
+				: `${month} closed ${formatCurrency(Math.abs(plan - spent))} ${spent > plan ? "over" : "under"} plan.`,
+	]
+		.filter(Boolean)
+		.join(" ")
+}
+
+export function buildAttention(
+	data: Awaited<ReturnType<typeof getDashboard>>,
+	month: string,
+	year: number,
+) {
+	const date = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
+	const range = {
+		start_date: date.startOf("month").toISODate() ?? "",
+		end_date: date.endOf("month").toISODate() ?? "",
+	}
+	const rows = [
+		...data.monthlyBudgets
+			.filter(b => b.remaining !== null && b.remaining < 0)
+			.map(b => ({
+				label: `${b.name}: ${formatCurrency(-(b.remaining ?? 0))} over plan`,
+				detail: "Review the Records behind this Monthly Budget.",
+				icon: "lucide:triangle-alert",
+				selection: { kind: "budget", value: b.id } as const,
+				href: undefined as string | undefined,
+			})),
+		...(data.review.unallocated_statements
+			? [
+					{
+						label: pluralize(
+							data.review.unallocated_statements,
+							"unallocated Statement",
+						),
+						detail: "Totals may be low until these are allocated.",
+						icon: "lucide:inbox",
+						href: pathAllocator({ ...range, is_pending: "false" }),
+						selection: undefined,
+					},
+				]
+			: []),
+		...(data.review.pending_records
+			? [
+					{
+						label: pluralize(data.review.pending_records, "Pending Record"),
+						detail: "Not yet matched to a Statement.",
+						icon: "lucide:circle-dashed",
+						href: pathRecords({
+							month,
+							year: String(year),
+							is_allocated: "false",
+						}),
+						selection: undefined,
+					},
+				]
+			: []),
+		...(data.review.pending_statements
+			? [
+					{
+						label: pluralize(data.review.pending_statements, "Pending Statement"),
+						detail: "Bank activity waiting for confirmation.",
+						icon: "lucide:circle-dashed",
+						href: pathStatements({ ...range, is_pending: "true" }),
+						selection: undefined,
+					},
+				]
+			: []),
+		...(data.summary.unbudgeted_count
+			? [
+					{
+						label: `${formatCurrency(data.categories.reduce((sum, category) => sum + (category.monthly_budget_spending.unbudgeted ?? 0), 0))} without a Monthly Budget`,
+						detail: "Spending without a Monthly Budget.",
+						icon: "lucide:wallet",
+						selection: { kind: "budget", value: "unbudgeted" } as const,
+						href: undefined,
+					},
+				]
+			: []),
+	].slice(0, 3)
+	return rows
 }

@@ -61,7 +61,7 @@ const editors = [
 	{
 		name: "Monthly Budget creator",
 		route: "/?month=October&year=2026",
-		trigger: "New",
+		trigger: "New Monthly Budget",
 		title: "Create monthly budget",
 		field: "Name",
 		value: "",
@@ -359,7 +359,7 @@ test("Monthly Budget editors: validate creation and persist overrides", async ({
 		const dialog = await openEditor(
 			page,
 			"/?month=October&year=2026",
-			"New",
+			"New Monthly Budget",
 			"Create monthly budget",
 		)
 		await dialog.getByRole("button", { name: "Create monthly budget", exact: true }).click()
@@ -665,7 +665,7 @@ test("Record creator: validates required fields, applies Category defaults and p
 }) => {
 	test.setTimeout(90_000)
 	void workspace
-	for (const amount of ["-12.34", "0"]) {
+	for (const amount of ["12.34", "0"]) {
 		await test.step(`Record creator: validates required fields, applies Category defaults, and persists amount ${amount} and long text`, async () => {
 			void workspace
 			const text = `${longText}(${amount})`
@@ -701,7 +701,7 @@ test("Record creator: validates required fields, applies Category defaults and p
 			const mismatch = dialog.getByText("Amount does not match the sum of Allocation Amounts")
 			if (amount === "0") {
 				await expect(mismatch).toHaveCount(0)
-				await dialog.getByLabel("Amount", { exact: true }).fill("-12.34")
+				await dialog.getByLabel("Amount", { exact: true }).fill("12.34")
 				await expect(mismatch).toBeVisible()
 				await dialog.getByLabel("Amount", { exact: true }).fill("0")
 				await expect(mismatch).toHaveCount(0)
@@ -777,8 +777,9 @@ test("Record editor: null optional fields, long title, sign and penny keyboard s
 	const amount = dialog.getByLabel("Amount", { exact: true }).first()
 	await amount.fill("0")
 	await amount.press("ArrowDown")
-	await expect(amount).toHaveValue("-0.01")
-	await dialog.getByRole("button", { name: "Make amount positive", exact: true }).first().click()
+	await expect(amount).toHaveValue("0")
+	await amount.press("ArrowUp")
+	await dialog.getByRole("radio", { name: "Money in", exact: true }).click()
 	await expect(amount).toHaveValue("0.01")
 	await dialog.getByRole("button", { name: "Save changes" }).click()
 	await expect(dialog).not.toBeVisible()
@@ -879,7 +880,7 @@ test.describe("long content", () => {
 		for (const [route, trigger, title, label] of [
 			["/budgets", "New Budget", "Create Budget", "Name"],
 			["/categories", "Create Category", "Create Category", "Name"],
-			["/?month=October&year=2026", "New", "Create monthly budget", "Name"],
+			["/?month=October&year=2026", "New Monthly Budget", "Create monthly budget", "Name"],
 			["/statements", "Create Pending Statement", "Create Pending Statement", "Description"],
 			["/statement-rules", "New rule", "New rule", "Name"],
 		] as const) {
@@ -996,7 +997,7 @@ test.describe("empty workspace", () => {
 	})
 })
 
-test("Monthly Records editor: saved title appears immediately and survives reload", async ({
+test("Records month editor via legacy URL: saved title appears immediately and survives reload", async ({
 	page,
 	workspace,
 }) => {
@@ -1068,7 +1069,7 @@ test("Monthly Budget editor: persists colour choices and disables unavailable De
 	const dialog = await openEditor(
 		page,
 		"/?month=October&year=2026",
-		"New",
+		"New Monthly Budget",
 		"Create monthly budget",
 	)
 	await dialog.getByLabel("Name", { exact: true }).fill("Colour probe")

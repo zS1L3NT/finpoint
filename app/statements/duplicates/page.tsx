@@ -10,6 +10,7 @@ import DuplicateReviewDialog from "@/components/dialogs/duplicate-review"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
+import StatementTabs from "@/components/statement-tabs"
 import { ClearFiltersButton, FILTER_CONTROL_CLASS, FilterBar } from "@/components/table/filter-bar"
 import PaginationFooter from "@/components/table/pagination-footer"
 import { Badge } from "@/components/ui/badge"
@@ -24,7 +25,6 @@ import {
 	SelectValue,
 } from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import WorkflowTabs from "@/components/workflow-tabs"
 import { cardEnter, SPRING, TRANSITION } from "@/lib/motion"
 import {
 	classForCurrency,
@@ -149,20 +149,26 @@ export default function FixDuplicatesPage() {
 	return (
 		<PageContent>
 			<PageHeader
-				title="Workflows"
+				title="Statements"
 				subtitle="Review possible duplicate bank Statements and preserve the correct imported activity."
 				description="Statement cleanup"
 				icon="lucide:copy-check"
 			/>
-			<WorkflowTabs active="duplicates" />
+			<StatementTabs active="duplicates" />
 			<div className="flex flex-col gap-2">
-				<Input
-					aria-label="Search statement descriptions"
-					className="w-full md:w-sm"
-					placeholder="Search descriptions..."
-					value={query}
-					onChange={event => updateParams({ query: event.target.value })}
-				/>
+				<div className="relative w-full md:w-sm">
+					<IconifyIcon
+						icon="lucide:search"
+						className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+					/>
+					<Input
+						aria-label="Search statement descriptions"
+						className="pl-9"
+						placeholder="Search descriptions..."
+						value={query}
+						onChange={event => updateParams({ query: event.target.value })}
+					/>
+				</div>
 				<div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:gap-4">
 					<FilterBar className="lg:w-auto">
 						<Select

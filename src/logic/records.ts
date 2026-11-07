@@ -1,9 +1,11 @@
 // Mirrors `Api\RecordController`, `Api\RecordMonthlyBudgetController`,
 // `Api\CompletionsController`, and `Record::appQuery`.
 
+import { DateTime } from "luxon"
 import { db, type RecordRow } from "@/data/db"
 import { canUseMonthlyBudget } from "@/lib/analytics"
-import { contribution } from "@/logic/analytics"
+import { formatCurrency } from "@/lib/utils"
+import { contribution, summaryMeasure } from "@/logic/analytics"
 import { duplicateStatementIds } from "@/logic/duplicates"
 import { isPendingRecord, pendingStatementIds, tallyAllocations } from "@/logic/pending"
 import { resolveRecordChoices } from "@/logic/record-choices"
@@ -12,11 +14,26 @@ import { inputToStored, newId, round2, TREATMENT_VALUES } from "@/logic/shared"
 import { ValidationError, Validator } from "@/logic/validate"
 import type { Allocation, AnalyticsTreatment, Record as AppRecord, Statement } from "@/types"
 
+export function pendingReason(
+	record: Pick<AppRecord, "amount" | "allocated_amount" | "pending_statement_count">,
+): string {
+	if (record.pending_statement_count) return "Statement not confirmed yet"
+	if (record.allocated_amount === 0 && record.amount !== 0) return "No Statement yet"
+	if (record.amount * record.allocated_amount < 0) return "Amounts have opposite signs"
+	if (round2(record.allocated_amount - record.amount) !== 0)
+		return `${formatCurrency(Math.abs(round2(record.amount - record.allocated_amount)))} not allocated yet`
+	return "All Allocations are confirmed and tally with the Record amount."
+}
+
 export type RecordDetail = AppRecord & {
 	statements: Array<Statement & { pivot: Allocation }>
 }
 
 export type RecordFilters = {
+	day?: string | null
+	month?: string | null
+	year?: string | null
+	sort?: string | null
 	query?: string | null
 	exclude_budget_id?: string | null
 	start_date?: string | null
@@ -27,6 +44,7 @@ export type RecordFilters = {
 	category_ids?: string[] | null
 	monthly_budget_id?: string | null
 	show_unbudgeted?: boolean
+	measure?: string | null
 	effective_spending?: boolean
 	treatment?: string | null
 }
@@ -125,6 +143,22 @@ export async function listRecords(filters: RecordFilters = {}) {
 				(record.description ?? "").toLowerCase().includes(q),
 		)
 	}
+	const selectedMonth =
+		filters.month && filters.year
+			? DateTime.fromFormat(`${filters.month} ${filters.year}`, "MMMM yyyy")
+			: null
+	if (selectedMonth?.isValid)
+		rows = rows.filter(r => r.datetime.startsWith(selectedMonth.toFormat("yyyy-MM")))
+	const day = Number(filters.day)
+	if (
+		selectedMonth?.isValid &&
+		Number.isInteger(day) &&
+		day >= 1 &&
+		day <= (selectedMonth.daysInMonth ?? 0)
+	)
+		rows = rows.filter(r =>
+			r.datetime.startsWith(selectedMonth.set({ day }).toFormat("yyyy-MM-dd")),
+		)
 	const { start_date, end_date } = filters
 	if (start_date) rows = rows.filter(r => r.datetime.slice(0, 10) >= start_date)
 	if (end_date) rows = rows.filter(r => r.datetime.slice(0, 10) <= end_date)
@@ -147,6 +181,10 @@ export async function listRecords(filters: RecordFilters = {}) {
 			r =>
 				canUseMonthlyBudget(r.analytics_treatment, r.amount) &&
 				r.monthly_budget_id === null,
+		)
+	if (filters.measure)
+		rows = rows.filter(
+			r => summaryMeasure(r.analytics_treatment, r.amount, filters.measure ?? "") !== 0,
 		)
 	if (filters.effective_spending)
 		rows = rows.filter(r => contribution(r.analytics_treatment, r.amount).spending !== 0)
@@ -174,6 +212,11 @@ export async function listRecords(filters: RecordFilters = {}) {
 
 	enriched.sort(
 		(a, b) =>
+			(filters.sort === "amount_desc"
+				? Math.abs(b.amount) - Math.abs(a.amount)
+				: filters.sort === "amount_asc"
+					? Math.abs(a.amount) - Math.abs(b.amount)
+					: 0) ||
 			b.datetime.localeCompare(a.datetime) ||
 			a.amount - b.amount ||
 			a.title.localeCompare(b.title) ||

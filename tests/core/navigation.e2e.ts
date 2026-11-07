@@ -1,5 +1,5 @@
 import type { Page } from "@playwright/test"
-import { expect, test } from "../support/fixtures"
+import { expect, seedWorkspace, test } from "../support/fixtures"
 
 async function expectBackAboveHeadingFromHistoryRegressions(page: Page, backName: string) {
 	const back = page.getByRole("button", { name: backName, exact: true })
@@ -263,7 +263,6 @@ test("monthly shell: browser Back removes self-target and Forward restores its c
 }) => {
 	void workspace
 	await gotoReady(page, "/?month=October&year=2026")
-	const origin = page.url()
 	await page
 		.locator('[data-slot="card"]')
 		.filter({
@@ -271,18 +270,22 @@ test("monthly shell: browser Back removes self-target and Forward restores its c
 				.locator('[data-slot="card-title"]')
 				.filter({ hasText: "Categories this month" }),
 		})
-		.getByRole("link", { name: /Groceries/ })
+		.getByRole("button", { name: /^Groceries/ })
 		.click()
+	await expect(page).toHaveURL(/drill=category-gross/)
+	// The chart origin is the Dashboard with its drill-down open.
+	const origin = page.url()
+	await page.getByRole("link", { name: "Open in Records" }).click()
 	await expect(page).toHaveURL(/category_ids=t1-cat-groceries/)
 	const records = page.url()
-	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to overview")
+	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to October 2026")
 	await page.goBack()
 	await expect(page).toHaveURL(origin)
 	await expectNoBack(page)
 	await page.goForward()
 	await expect(page).toHaveURL(records)
-	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to overview")
-	await page.getByRole("button", { name: "Back to overview", exact: true }).click()
+	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to October 2026")
+	await page.getByRole("button", { name: "Back to October 2026", exact: true }).click()
 	await expect(page).toHaveURL(origin)
 	await expectNoBack(page)
 })
@@ -342,17 +345,17 @@ test("delayed navigation: ordinary navigation survives an intervening modified c
 })
 
 test("workflow tabs: do not capture history", async ({ page }) => {
-	await gotoReady(page, "/allocator")
+	await gotoReady(page, "/statements")
 	await expectNoBack(page)
-	const tabs = page.getByRole("navigation", { name: "Workflow views" })
-	await tabs.getByRole("link", { name: "Replace Pending", exact: true }).click()
-	await expect(page).toHaveURL(/\/allocator\/pending/)
+	const tabs = page.getByRole("navigation", { name: "Statement views" })
+	await tabs.getByRole("link", { name: "Replace pending", exact: true }).click()
+	await expect(page).toHaveURL(/\/statements\/pending/)
 	await expectNoBack(page)
-	await tabs.getByRole("link", { name: "Fix Duplicates", exact: true }).click()
-	await expect(page).toHaveURL(/\/allocator\/duplicates/)
+	await tabs.getByRole("link", { name: "Duplicates", exact: true }).click()
+	await expect(page).toHaveURL(/\/statements\/duplicates/)
 	await expectNoBack(page)
-	await tabs.getByRole("link", { name: "Allocate to Records", exact: true }).click()
-	await expect(page).toHaveURL(/\/allocator(\?|$)/)
+	await tabs.getByRole("link", { name: "Statements", exact: true }).click()
+	await expect(page).toHaveURL(/\/statements(\?|$)/)
 	await expectNoBack(page)
 })
 
@@ -362,15 +365,15 @@ test("workflow tabs: established ordinary origin clears across tabs", async ({ p
 	await expect(
 		page.getByRole("button", { name: "Back to Privacy Policy", exact: true }),
 	).toBeVisible()
-	await gotoReady(page, "/allocator")
+	await gotoReady(page, "/statements")
 	await expect(
 		page.getByRole("button", { name: "Back to Privacy Policy", exact: true }),
 	).toBeVisible()
 	await page
-		.getByRole("navigation", { name: "Workflow views" })
-		.getByRole("link", { name: "Replace Pending", exact: true })
+		.getByRole("navigation", { name: "Statement views" })
+		.getByRole("link", { name: "Replace pending", exact: true })
 		.click()
-	await expect(page).toHaveURL(/\/allocator\/pending/)
+	await expect(page).toHaveURL(/\/statements\/pending/)
 	await expectNoBack(page)
 })
 
@@ -714,7 +717,7 @@ test("history clearing: cancelled links, sidebar, tabs and chart drills clear or
 		await expect(page).toHaveURL(/\/privacy$/)
 		await expect(page.getByRole("button", { name: /^Back to / })).toHaveCount(0)
 	})
-	await test.step("sidebar and month tabs: clear drill history", async () => {
+	await test.step("sidebar: clears drill history", async () => {
 		await resetHistory(page, "/privacy")
 		await page.getByRole("link", { name: "Terms of Service", exact: true }).click()
 		await expect(page.getByRole("button", { name: /^Back to / })).toBeVisible()
@@ -727,36 +730,6 @@ test("history clearing: cancelled links, sidebar, tabs and chart drills clear or
 		// The sidebar clears history at once, so Terms can lose its Back before Dashboard commits.
 		await expect(page).toHaveURL(/\/(\?|$)/)
 		await expect(page.getByRole("button", { name: /^Back to / })).toHaveCount(0)
-		await page
-			.getByRole("navigation", { name: "Monthly finance views" })
-			.getByRole("link", { name: "Monthly Records", exact: true })
-			.click()
-		await expect(page).toHaveURL(/\/records\/monthly/)
-		await expect(page.getByRole("button", { name: /^Back to / })).toHaveCount(0)
-	})
-	await test.step("chart drill: nested Record returns through filtered overview", async () => {
-		const origin = "/?month=October&year=2026&scope=all"
-		await resetHistory(page, origin)
-		await page.getByRole("button", { name: /^5 October: \$84.20 spent/ }).click()
-		await page.getByRole("button", { name: "View Records", exact: true }).click()
-		await expect(page).toHaveURL(/start_date=2026-10-05/)
-		const back = page.getByRole("button", { name: /^Back to overview$/i })
-		await expect(back).toBeVisible()
-		const backBox = await back.boundingBox()
-		const headingBox = await page
-			.getByRole("heading", { name: "October 2026", level: 2 })
-			.boundingBox()
-		if (!backBox || !headingBox)
-			throw new Error("Back and month heading must have layout boxes")
-		expect(backBox.y + backBox.height).toBeLessThan(headingBox.y)
-		const monthly = page.url()
-		await page.getByRole("link", { name: "Open FairPrice Run", exact: true }).click()
-		// The monthly page's own Back matches /^Back to / until the Record commits.
-		await expect(page).toHaveURL(/\/records\/t1-r-groceries$/)
-		await page.getByRole("button", { name: "Back to Monthly Records", exact: true }).click()
-		await expect(page).toHaveURL(monthly)
-		await back.click()
-		await expect(page).toHaveURL(origin)
 	})
 })
 
@@ -795,83 +768,6 @@ test("Back button: returns to its origin when pressed as soon as a drilled Recor
 	await expect(page.getByRole("link", { name: "Open FairPrice Run", exact: true })).toBeVisible()
 })
 
-test("Back button: the outgoing page's Back cancels a drill link that is still loading", async ({
-	page,
-	workspace,
-}) => {
-	void workspace
-	const origin = "/?month=October&year=2026&scope=all"
-	await resetHistory(page, origin)
-	await page.getByRole("button", { name: /^5 October: \$84.20 spent/ }).click()
-	await page.getByRole("button", { name: "View Records", exact: true }).click()
-	await expect(page).toHaveURL(/start_date=2026-10-05/)
-	const back = page.getByRole("button", { name: "Back to overview", exact: true })
-	await expect(back).toBeEnabled()
-	// Hold the Record route so the drill is still loading when Back is pressed.
-	const { promise: held, resolve: release } = Promise.withResolvers<void>()
-	let requested = false
-	await page.route(/\/records\/t1-r-groceries/, async route => {
-		requested = true
-		await held
-		await route.continue()
-	})
-	await page
-		.getByRole("link", { name: "Open FairPrice Run", exact: true })
-		.click({ noWaitAfter: true })
-	await expect.poll(() => requested).toBe(true)
-	await back.click()
-	release()
-	await expect(page).toHaveURL(origin)
-	await expect(page.getByRole("heading", { name: "October 2026", level: 2 })).toBeVisible()
-	await page.unrouteAll({ behavior: "wait" })
-	await expect(page).toHaveURL(origin)
-	await expect(page.getByRole("heading", { name: "FairPrice Run" })).toHaveCount(0)
-})
-
-test("Back button: a history restore while a drill link loads keeps its restored entries", async ({
-	page,
-	workspace,
-}) => {
-	void workspace
-	await resetHistory(page, "/?month=October&year=2026&scope=all")
-	await page.getByRole("button", { name: /^5 October: \$84.20 spent/ }).click()
-	await page.getByRole("button", { name: "View Records", exact: true }).click()
-	await expect(page).toHaveURL(/start_date=2026-10-05/)
-	const monthly = new URL(page.url())
-	const { promise: held, resolve: release } = Promise.withResolvers<void>()
-	let requested = false
-	await page.route(/\/records\/t1-r-groceries/, async route => {
-		requested = true
-		await held
-		await route.continue()
-	})
-	await page
-		.getByRole("link", { name: "Open FairPrice Run", exact: true })
-		.click({ noWaitAfter: true })
-	await expect.poll(() => requested).toBe(true)
-	// A same-URL restore lands while the drill is pending: its equivalent-URL entry is
-	// visible and must consume exactly one Back click, like any restored entry.
-	await page.evaluate(self => {
-		window.dispatchEvent(
-			new PopStateEvent("popstate", {
-				state: {
-					...history.state,
-					finpointHistory: [
-						{ name: "Privacy Policy", url: "/privacy" },
-						{ name: "Monthly Records", url: self },
-					],
-				},
-			}),
-		)
-	}, monthly.pathname + monthly.search)
-	await page.getByRole("button", { name: "Back to Monthly Records", exact: true }).click()
-	await expect(
-		page.getByRole("button", { name: "Back to Privacy Policy", exact: true }),
-	).toBeVisible()
-	release()
-	await page.unrouteAll({ behavior: "wait" })
-})
-
 test("mobile sidebar: a tap before the mobile layout settles opens the mobile menu", async ({
 	page,
 	isMobile,
@@ -895,4 +791,49 @@ test("mobile sidebar: a tap before the mobile layout settles opens the mobile me
 	await page.setViewportSize({ width: 800, height: 844 })
 	await page.setViewportSize({ width: 390, height: 844 })
 	await expect(page.locator('[data-sidebar="sidebar"][data-mobile="true"]')).toBeVisible()
+})
+
+test("Statement cleanup redirects preserve filters", async ({ page }) => {
+	for (const tab of ["pending", "duplicates"]) {
+		await gotoReady(page, `/allocator/${tab}?account_id=t1-a-cash&query=coffee`)
+		await expect(page).toHaveURL(
+			new RegExp(`/statements/${tab}\\?account_id=t1-a-cash&query=coffee$`),
+		)
+		await expect(page.getByRole("navigation", { name: "Statement views" })).toBeVisible()
+	}
+})
+
+test("monthly shell: direct drill URL hides a stale same-month Dashboard origin", async ({
+	page,
+}) => {
+	await seedWorkspace(page)
+	await page.goto("/?month=October&year=2026")
+	await page
+		.getByLabel("Attention", { exact: true })
+		.getByRole("link", { name: /Pending Record/ })
+		.click()
+	await expect(page).toHaveURL(/is_allocated=false/)
+	await page.goto("/?month=October&year=2026&drill=day:2026-10-05")
+	await expect(page.getByTestId("drill-total")).toHaveText("$84.20")
+	await expect(
+		page.getByRole("button", {
+			name: "Back to October 2026",
+			exact: true,
+			includeHidden: true,
+		}),
+	).toHaveCount(0)
+	await page.evaluate(() =>
+		localStorage.setItem(
+			"history",
+			JSON.stringify([{ name: "September 2026", url: "/?month=September&year=2026" }]),
+		),
+	)
+	await page.reload()
+	await expect(page.getByTestId("drill-total")).toHaveText("$84.20")
+	await page.keyboard.press("Escape")
+	await expect(
+		page.getByRole("button", { name: "Back to September 2026", exact: true }),
+	).toBeVisible()
+	await page.getByRole("button", { name: "Back to September 2026", exact: true }).click()
+	await expect(page).toHaveURL(/month=September/)
 })

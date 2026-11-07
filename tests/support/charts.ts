@@ -3,12 +3,7 @@ import { themeColor } from "@/lib/palette"
 
 export const overview = "/?month=October&year=2026"
 
-export const overviewCharts = [
-	"Spending forecast",
-	"Surplus / Shortfall",
-	"Spending by day",
-	"Category trend",
-]
+export const overviewCharts = ["Spending forecast", "Category trend"]
 
 export function card(page: Page, title: string) {
 	return page

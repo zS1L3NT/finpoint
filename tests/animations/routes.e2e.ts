@@ -90,7 +90,7 @@ test("card grids: Accounts, Budgets and Categories enter as a cascade in the vie
 						.click()
 				else if (consumer.action === "workflow")
 					await page
-						.getByRole("navigation", { name: "Workflow views" })
+						.getByRole("navigation", { name: "Statement views" })
 						.getByRole("link", { name: consumer.target, exact: true })
 						.click()
 				else if (consumer.action === "heading")

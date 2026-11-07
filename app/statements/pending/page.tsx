@@ -11,6 +11,7 @@ import StatementReplacementReviewDialog, {
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
+import StatementTabs from "@/components/statement-tabs"
 import { ClearFiltersButton, FILTER_CONTROL_CLASS, FilterBar } from "@/components/table/filter-bar"
 import PaginationFooter from "@/components/table/pagination-footer"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -26,7 +27,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select"
-import WorkflowTabs from "@/components/workflow-tabs"
 import { useHistory } from "@/history"
 import { cardEnter, SPRING, TRANSITION } from "@/lib/motion"
 import {
@@ -312,12 +312,12 @@ export default function AllocatorPendingPage() {
 		<>
 			<PageContent>
 				<PageHeader
-					title="Workflows"
+					title="Statements"
 					subtitle="Replace pending statements with imported activity."
 					description="Statement replacement"
 					icon="lucide:replace"
 				/>
-				<WorkflowTabs active="replace" />
+				<StatementTabs active="replace" />
 
 				{selectionMissing ? (
 					<Alert>

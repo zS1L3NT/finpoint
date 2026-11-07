@@ -1,19 +1,20 @@
 "use client"
 
 import { useLiveQuery } from "dexie-react-hooks"
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
 import { DateTime } from "luxon"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import CashflowChart from "@/components/charts/cashflow-chart"
 import CategoryHistoryChart from "@/components/charts/category-history-chart"
 import CategoryMovers from "@/components/charts/category-movers"
-import DailySpendingChart from "@/components/charts/daily-spending-chart"
+import LargestRecords from "@/components/charts/largest-records"
 import MonthlyBudgetUsage from "@/components/charts/monthly-budget-usage"
 import SpendingCalendar from "@/components/charts/spending-calendar"
-import TotalSpendingChart from "@/components/charts/total-spending-chart"
 import MonthlyBudgetDialog from "@/components/dialogs/monthly-budget"
+import { DrillPanel } from "@/components/drill/panel"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import { Metric as DashboardMetric, type Delta, MetricGrid } from "@/components/metric"
 import MonthlyBudgetBadge from "@/components/monthly-budget-badge"
@@ -29,20 +30,21 @@ import {
 	SelectValue,
 } from "@/components/ui/select"
 import { useHistory } from "@/history"
+import { useDrill } from "@/hooks/use-drill"
 import { useMonthParams } from "@/hooks/use-month-params"
 import { STALE_MONTH_CLASS, useMonthTransition } from "@/hooks/use-month-transition"
 import { useStagedMount } from "@/hooks/use-staged-mount"
+import { SPRING, TRANSITION } from "@/lib/motion"
 import { themeColor } from "@/lib/palette"
 import { cn, formatCurrency, pluralize } from "@/lib/utils"
-import { getDashboardView, type TrendMonth } from "@/logic/dashboard"
-import { hasWorkspaceActivity, loadDemoWorkspace } from "@/logic/workspace"
 import {
-	pathAllocator,
-	pathDashboard,
-	pathImporter,
-	pathMonthlyRecords,
-	pathStatements,
-} from "@/routes"
+	buildAttention,
+	findLatestRecordMonth,
+	getDashboardView,
+	type TrendMonth,
+} from "@/logic/dashboard"
+import { hasWorkspaceActivity, loadDemoWorkspace } from "@/logic/workspace"
+import { pathBudgets, pathDashboard, pathImporter, pathRecords } from "@/routes"
 import type { AnalyticsSummary } from "@/types"
 
 type DashboardView = Awaited<ReturnType<typeof getDashboardView>>
@@ -50,10 +52,18 @@ type DashboardData = DashboardView["dashboard"]
 type DashboardMonthlyBudget = DashboardData["monthlyBudgets"][number]
 type Comparison = DashboardData["comparison"]
 type ComparisonValue = Comparison["income"]
-type Projection = DashboardView["pace"]["projection"]
-type PaceData = DashboardView["pace"]
 
 export default function DashboardPage() {
+	const drill = useDrill()
+	const reduced = useReducedMotion()
+	const [desktop, setDesktop] = useState(false)
+	useEffect(() => {
+		const media = matchMedia("(min-width: 1280px)")
+		const update = () => setDesktop(media.matches)
+		update()
+		media.addEventListener("change", update)
+		return () => media.removeEventListener("change", update)
+	}, [])
 	const { handlePush } = useHistory()
 	const { month, year } = useMonthParams()
 	const contentRef = useRef<HTMLDivElement>(null)
@@ -80,11 +90,11 @@ export default function DashboardPage() {
 		router.replace(pathDashboard(params), { scroll: false })
 	}
 	const paceData = view?.pace
-	const monthlyBudgetDailyData = view?.monthlyBudgetDaily
 	// The summary and pace chart paint first; the sections below the fold then mount one per
 	// frame. Mounting every chart in one commit blocked arrival for ~300ms in production.
-	const stage = useStagedMount(5, !!data && !!paceData && !!monthlyBudgetDailyData)
-	if (!view || !data || !paceData || !monthlyBudgetDailyData) return null
+	const stage = useStagedMount(2, !!data && !!paceData)
+	if (active === undefined || !view || !data || !paceData) return null
+	if (active === false) return <DemoOffer />
 	const {
 		scope,
 		scopedBudgetIds,
@@ -93,10 +103,8 @@ export default function DashboardPage() {
 		scopedDaily,
 		scopeLabel,
 		scopeColor,
-		scopeFilters,
-		paceFilters,
 	} = view
-	const { period, summary, series, future_records_count } = data
+	const { period, summary, future_records_count } = data
 	// Everything below shows the loaded data, so it takes the data's own month: while the next
 	// month loads, labels and links stay with the numbers on screen.
 	const dataMonth = data.month ?? month
@@ -105,286 +113,294 @@ export default function DashboardPage() {
 	const paceSeries = paceData.series
 	const paceProjection = paceData.projection
 	const paceAmount = paceData.paceMonthlyBudget
-	const completedMonth = paceData.completedMonth
-	const highestSpendingDay = paceData.highestSpendingDay
-	const dailyLines = monthlyBudgetDailyData.monthlyBudgets.map(budget => ({
-		...budget,
-		dashed: budget.id === "unbudgeted",
-	}))
-	const categoryRecordHref = (id: string, at?: DateTime) =>
-		pathMonthlyRecords({
-			month: at?.toFormat("MMMM") ?? dataMonth,
-			year: String(at?.year ?? dataYear),
-			category_ids: id,
-			effective_spending: "true",
-			...scopeFilters,
-		})
-	const openDay = (date: string) => {
-		handlePush("overview")()
-		router.push(
-			pathMonthlyRecords({
-				month: dataMonth,
-				year: String(dataYear),
-				start_date: date,
-				end_date: date,
-				...scopeFilters,
-			}),
-		)
-	}
-	return (
-		<div
-			ref={contentRef}
-			aria-busy={stale}
-			className={cn("reveal grid gap-5 md:gap-6", stale && STALE_MONTH_CLASS)}
-		>
-			{active === false ? <DemoOffer /> : null}
-			{period.is_future ? (
-				<div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border bg-muted/20 p-4">
-					<div>
-						<p className="text-sm font-semibold">
-							Plan for {dataMonth} {dataYear}
-						</p>
-						<p className="mt-1 text-xs text-muted-foreground">
-							Set your monthly amounts below. Spending results begin on 1 {dataMonth}.
-						</p>
-					</div>
-					<Button variant="outline" size="sm" asChild>
-						<Link
-							onClick={handlePush("overview")}
-							href={pathMonthlyRecords({ month: dataMonth, year: String(dataYear) })}
-						>
-							{future_records_count
-								? `Review ${pluralize(future_records_count, "future-dated Record")}`
-								: "Plan Records"}
-							<IconifyIcon icon="lucide:arrow-up-right" />
-						</Link>
-					</Button>
-				</div>
-			) : (
-				<SummaryBand
-					summary={summary}
-					comparison={comparison}
-					trend={view.trend}
-					through={period.through}
-				/>
-			)}
-			<div className="flex flex-wrap items-center justify-between gap-2">
-				<div className="min-w-0 flex-1 basis-full sm:basis-auto">
-					{!period.is_future ? (
-						<ReviewLinks data={data} month={dataMonth} year={dataYear} />
-					) : null}
-				</div>
-				<ScopeSelect value={scope} budgets={budgets} onChange={setScope} />
+	const openDay = (date: string) => drill.open({ kind: "day", value: date })
+	if (!period.is_current && !period.is_future && data.record_count === 0)
+		return (
+			<div className="reveal flex flex-col items-start gap-4 rounded-xl border bg-muted/20 p-5">
+				<p className="text-sm" aria-label="Month headline">
+					{view.headline}
+				</p>
+				<Button asChild>
+					<Link href={pathImporter()}>Import statements</Link>
+				</Button>
 			</div>
+		)
+	return (
+		<motion.div
+			className="grid items-start"
+			initial={false}
+			animate={{
+				gridTemplateColumns: desktop
+					? `minmax(0,1fr) ${drill.selection ? 420 : 0}px`
+					: "minmax(0,1fr)",
+				columnGap: desktop && drill.selection ? 24 : 0,
+			}}
+			transition={reduced ? TRANSITION.fast : SPRING.smooth}
+		>
 			<div
+				ref={contentRef}
+				aria-busy={stale}
 				className={cn(
-					"grid gap-5",
-					!period.is_future && "xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]",
+					"reveal @container/dashboard min-w-0 grid gap-5 md:gap-6",
+					stale && STALE_MONTH_CLASS,
 				)}
 			>
-				{!period.is_future ? (
-					<Card className="min-w-0">
-						<CardHeader className="border-b">
-							<ScopedCardTitle scope={scopeLabel} color={scopeColor}>
-								Spending forecast
-							</ScopedCardTitle>
-							<CardDescription>
-								{paceProjection.available
-									? "If recorded daily spending continues, plus scheduled spending."
-									: "Recorded spending against the monthly plan."}
-							</CardDescription>
-						</CardHeader>
-						<CardContent className="flex min-h-0 flex-1 flex-col">
-							<CashflowChart
-								data={paceSeries}
-								forecast={paceData.forecast}
-								month={dataMonth}
-								year={dataYear}
-								amount={paceAmount?.amount ?? null}
-								amountLabel={
-									paceData.singleBudget ? (paceAmount?.name ?? null) : "Total"
-								}
-								showProjection={paceProjection.available}
-								recordFilters={paceFilters}
-							/>
-							<PaceSummary
-								projection={paceProjection}
-								completedMonth={completedMonth}
-								highestSpendingDay={highestSpendingDay}
-								spending={paceData.spending}
-								amount={paceAmount?.amount ?? null}
-								remaining={paceData.remaining}
-							/>
-						</CardContent>
-					</Card>
+				{!period.is_future && data.record_count === 0 ? (
+					<EmptyMonthNotice month={dataMonth} year={dataYear} />
 				) : null}
-				<Card className="min-w-0">
-					<CardHeader>
-						<div className="flex items-start justify-between gap-3">
-							<div>
-								<CardTitle>Monthly budgets</CardTitle>
-								<CardDescription className="mt-1">
-									Segment size = planned share · Fill = amount used
-								</CardDescription>
-							</div>
-							<MonthlyBudgetDialog
-								month={dataMonth}
-								year={dataYear}
-								trigger={
-									<Button variant="outline" size="sm">
-										<IconifyIcon icon="lucide:plus" /> New
-									</Button>
-								}
-							/>
+				<p
+					className="text-base font-medium text-pretty leading-relaxed"
+					aria-label="Month headline"
+				>
+					{view.headline}
+				</p>
+				{!period.is_future ? (
+					<AttentionList
+						data={data}
+						month={dataMonth}
+						year={dataYear}
+						onDrill={drill.open}
+					/>
+				) : null}
+				{period.is_future ? (
+					<div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border bg-muted/20 p-4">
+						<div>
+							<p className="text-sm font-semibold">
+								Plan for {dataMonth} {dataYear}
+							</p>
+							<p className="mt-1 text-xs text-muted-foreground">
+								Set your monthly amounts below. Spending results begin on 1{" "}
+								{dataMonth}.
+							</p>
 						</div>
-					</CardHeader>
-					<CardContent className="flex flex-1 flex-col">
-						<MonthlyBudgetUsage
-							budgets={budgets}
-							unbudgeted={data.categories.reduce(
-								(sum, category) =>
-									sum + (category.monthly_budget_spending.unbudgeted ?? 0),
-								0,
-							)}
-							selected={budgets.some(budget => budget.id === scope) ? scope : null}
-							onSelect={setScope}
-							edit={budget => (
+						<Button variant="outline" size="sm" asChild>
+							<Link
+								onClick={handlePush("overview")}
+								href={pathRecords({
+									month: dataMonth,
+									year: String(dataYear),
+								})}
+							>
+								{future_records_count
+									? `Review ${pluralize(future_records_count, "future-dated Record")}`
+									: "Plan Records"}
+								<IconifyIcon icon="lucide:arrow-up-right" />
+							</Link>
+						</Button>
+					</div>
+				) : (
+					<SummaryBand
+						summary={summary}
+						incomeHistory={view.incomeHistory}
+						comparison={comparison}
+						trend={view.trend}
+						through={period.through}
+						onDrill={value => drill.open({ kind: "metric", value })}
+					/>
+				)}
+				<div className="flex flex-wrap items-center justify-between gap-2">
+					<ScopeSelect value={scope} budgets={budgets} onChange={setScope} />
+				</div>
+				<div
+					className={cn(
+						"grid gap-5",
+						!period.is_future &&
+							"items-start @min-[860px]/dashboard:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]",
+					)}
+				>
+					{!period.is_future ? (
+						<Card className="min-w-0">
+							<CardHeader className="border-b">
+								<ScopedCardTitle scope={scopeLabel} color={scopeColor}>
+									Spending forecast
+								</ScopedCardTitle>
+								<CardDescription>
+									{paceProjection.available
+										? paceProjection.history_remaining !== null
+											? `You usually spend ${formatCurrency(paceProjection.history_remaining)} more after ${DateTime.fromISO(period.through ?? "").toFormat("d MMMM")}, plus any scheduled Records.`
+											: "At your typical daily pace, plus scheduled Records."
+										: "Recorded spending against the monthly plan."}
+								</CardDescription>
+							</CardHeader>
+							<CardContent className="flex min-h-0 flex-1 flex-col">
+								<CashflowChart
+									data={paceSeries}
+									forecast={paceData.forecast}
+									month={dataMonth}
+									year={dataYear}
+									amount={paceAmount?.amount ?? null}
+									amountLabel={
+										paceData.singleBudget ? (paceAmount?.name ?? null) : "Total"
+									}
+									showProjection={paceProjection.available}
+									onDrill={drill.open}
+								/>
+								<p className="mt-4 text-sm text-muted-foreground">
+									{paceProjection.available
+										? `At this pace, spending may reach ${formatCurrency(paceProjection.projected_spending ?? 0)} this month.`
+										: `${formatCurrency(paceData.spending)} spent this month.`}
+								</p>
+							</CardContent>
+						</Card>
+					) : null}
+					<Card className="min-w-0">
+						<CardHeader>
+							<div className="flex flex-wrap items-start justify-between gap-3">
+								<div>
+									<CardTitle>Monthly budgets</CardTitle>
+									<CardDescription className="mt-1">
+										Spending against each monthly plan
+									</CardDescription>
+								</div>
 								<MonthlyBudgetDialog
-									monthlyBudget={budgets.find(item => item.id === budget.id)}
 									month={dataMonth}
 									year={dataYear}
 									trigger={
-										<Button
-											variant="ghost"
-											size="sm"
-											className="min-h-8"
-											onClick={event => event.stopPropagation()}
-											aria-label={`Edit ${budget.name}`}
-										>
-											Edit
+										<Button variant="outline" size="sm">
+											<IconifyIcon icon="lucide:plus" /> New Monthly Budget
 										</Button>
 									}
 								/>
-							)}
-						/>
-					</CardContent>
-				</Card>
-			</div>
-			{!period.is_future ? (
-				<>
-					{stage > 0 ? (
-						<CategoryHistoryChart
-							key={`${dataMonth}-${dataYear}`}
-							categories={scopedCategories}
-							scopeLabel={scopeLabel}
-							months={data.comparison_history}
-							through={period.through}
-							monthlyBudgetIds={scope === "all" ? null : scopedBudgetIds}
-							recordHref={categoryRecordHref}
-							badge={
-								<ScopeLabel
-									scope={scope === "all" ? "All budgets" : scopeLabel}
-									color={scopeColor}
-								/>
-							}
-						/>
-					) : null}
-					{stage > 1 ? (
-						<div className="grid gap-5 lg:grid-cols-2">
-							<Card className="min-w-0">
-								<CardHeader>
-									<ScopedCardTitle
-										scope={scope === "all" ? "All budgets" : scopeLabel}
-										color={scopeColor}
-									>
-										Spending calendar
-									</ScopedCardTitle>
-									<CardDescription>
-										Stronger colour means more spending. Select a day to see its
-										total and open its Records.
-									</CardDescription>
-								</CardHeader>
-								<CardContent>
-									<SpendingCalendar
+							</div>
+						</CardHeader>
+						<CardContent className="flex flex-1 flex-col">
+							<MonthlyBudgetUsage
+								budgets={budgets}
+								unbudgeted={data.spendingTotals.unbudgeted}
+								selected={
+									budgets.some(budget => budget.id === scope) ? scope : null
+								}
+								onDrill={drill.open}
+								edit={budget => (
+									<MonthlyBudgetDialog
+										monthlyBudget={budgets.find(item => item.id === budget.id)}
 										month={dataMonth}
 										year={dataYear}
-										daily={scopedDaily}
-										through={period.through}
-										onSelect={openDay}
+										trigger={
+											<Button
+												variant="ghost"
+												size="sm"
+												className="min-h-8"
+												onClick={event => event.stopPropagation()}
+												aria-label={`Edit ${budget.name}`}
+											>
+												Edit
+											</Button>
+										}
 									/>
-								</CardContent>
-							</Card>
-							<Card className="min-w-0">
-								<CardHeader>
-									<ScopedCardTitle
+								)}
+							/>
+							<Link
+								href={pathBudgets()}
+								className="mt-3 inline-flex min-h-11 items-center gap-2 text-xs text-muted-foreground underline underline-offset-4"
+							>
+								<IconifyIcon icon="lucide:calendar-range" /> Custom-period Budgets ·
+								View Budgets
+							</Link>
+						</CardContent>
+					</Card>
+				</div>
+				{!period.is_future ? (
+					<>
+						{stage > 0 ? (
+							<CategoryHistoryChart
+								compact={false}
+								key={`${dataMonth}-${dataYear}`}
+								categories={scopedCategories}
+								scopeLabel={scopeLabel}
+								months={data.comparison_history}
+								through={period.through}
+								monthlyBudgetIds={scope === "all" ? null : scopedBudgetIds}
+								onDrill={drill.open}
+								badge={
+									<ScopeLabel
 										scope={scope === "all" ? "All budgets" : scopeLabel}
 										color={scopeColor}
-									>
-										Biggest changes
-									</ScopedCardTitle>
-									<CardDescription>
-										Categories that moved most against your usual spending.
-									</CardDescription>
-								</CardHeader>
-								<CardContent>
-									<CategoryMovers
-										categories={scopedCategories}
-										comparisonCount={scopedComparisonCount}
-										recordHref={categoryRecordHref}
 									/>
-								</CardContent>
-							</Card>
-						</div>
-					) : null}
-					{stage > 2 ? (
-						<Card className="min-w-0">
-							<CardHeader>
-								<ScopedCardTitle scope="All budgets">
-									Surplus / Shortfall
-								</ScopedCardTitle>
-								<CardDescription>
-									Cumulative income minus all personal spending
-								</CardDescription>
-							</CardHeader>
-							<CardContent>
-								<TotalSpendingChart
-									data={series}
-									history={data.history}
+								}
+							/>
+						) : null}
+						{stage > 1 ? (
+							<div
+								className={
+									"grid items-start gap-5 @min-[860px]/dashboard:grid-cols-3"
+								}
+							>
+								<LargestRecords
 									month={dataMonth}
 									year={dataYear}
+									scope={scope}
+									onDrill={drill.open}
 								/>
-							</CardContent>
-						</Card>
-					) : null}
-					{stage > 3 ? (
-						<Card>
-							<CardHeader className="border-b">
-								<ScopedCardTitle scope="All budgets">
-									Spending by day
-								</ScopedCardTitle>
-								<CardDescription>
-									Net daily spending across all monthly budgets, including
-									refunds. Hold or hover over a day to read it, and click it to
-									open its Records.
-								</CardDescription>
-							</CardHeader>
-							<CardContent>
-								<DailySpendingChart
-									rows={monthlyBudgetDailyData.rows}
-									monthlyBudgets={dailyLines}
-									month={dataMonth}
-									year={dataYear}
-								/>
-							</CardContent>
-						</Card>
-					) : null}
-
-					{stage > 4 ? (
-						<InvestmentRow summary={summary} month={dataMonth} year={dataYear} />
-					) : null}
-				</>
-			) : null}
-		</div>
+								<Card className="min-w-0">
+									<CardHeader>
+										<ScopedCardTitle
+											scope={scope === "all" ? "All budgets" : scopeLabel}
+											color={scopeColor}
+										>
+											Spending calendar
+										</ScopedCardTitle>
+										<CardDescription>
+											Stronger colour means more spending. Select a day to see
+											its total and open its Records.
+										</CardDescription>
+									</CardHeader>
+									<CardContent>
+										<SpendingCalendar
+											month={dataMonth}
+											year={dataYear}
+											daily={scopedDaily}
+											through={period.through}
+											onSelect={openDay}
+										/>
+									</CardContent>
+								</Card>
+								<Card className="min-w-0">
+									<CardHeader>
+										<ScopedCardTitle
+											scope={scope === "all" ? "All budgets" : scopeLabel}
+											color={scopeColor}
+										>
+											Biggest changes
+										</ScopedCardTitle>
+										<CardDescription>
+											Categories that moved most against your usual spending.
+										</CardDescription>
+									</CardHeader>
+									<CardContent>
+										<CategoryMovers
+											categories={scopedCategories}
+											comparisonCount={scopedComparisonCount}
+											comparisonMonths={view.scopedComparisonMonths}
+											period={
+												data.period.is_current
+													? `Days 1–${data.period.through?.slice(-2)}`
+													: "Full months"
+											}
+											onDrill={drill.open}
+										/>
+									</CardContent>
+								</Card>
+							</div>
+						) : null}
+					</>
+				) : null}
+			</div>
+			<AnimatePresence>
+				{drill.selection ? (
+					<DrillPanel
+						selection={drill.selection}
+						focus={drill.focus}
+						pivot={drill.pivot}
+						month={dataMonth}
+						year={dataYear}
+						scope={scope}
+						onScope={setScope}
+						close={drill.close}
+					/>
+				) : null}
+			</AnimatePresence>
+		</motion.div>
 	)
 }
 
@@ -404,26 +420,55 @@ function DemoOffer() {
 	}
 
 	return (
-		<div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border bg-muted/20 p-4">
-			<div>
-				<p className="text-sm font-semibold">New to Finpoint?</p>
-				<p className="mt-1 text-xs text-muted-foreground">
-					Explore with demo data: 3 accounts and 5 months of Records. Reset it any time
-					from Data.
-				</p>
-			</div>
-			<div className="flex flex-wrap gap-2">
-				<Button variant="outline" size="sm" asChild>
+		<div className="reveal mx-auto flex max-w-md flex-col items-center gap-4 py-16 text-center">
+			<span className="flex size-12 items-center justify-center rounded-full bg-muted">
+				<IconifyIcon icon="lucide:wallet" className="size-6 text-muted-foreground" />
+			</span>
+			<h2 className="text-lg font-semibold">Start with your bank statements</h2>
+			<p className="text-sm text-muted-foreground">
+				Import a statement file and Finpoint builds your Records, budgets and charts from
+				it. Or explore first with demo data: 3 accounts and 5 months of Records. Reset it
+				any time from Data.
+			</p>
+			<div className="flex flex-wrap justify-center gap-2">
+				<Button asChild>
 					<Link href={pathImporter()}>
 						<IconifyIcon icon="lucide:upload" />
 						Import statements
 					</Link>
 				</Button>
-				<Button size="sm" disabled={loading} onClick={() => void handleDemo()}>
+				<Button variant="outline" disabled={loading} onClick={() => void handleDemo()}>
 					<IconifyIcon icon="lucide:sparkles" />
 					{loading ? "Loading…" : "Try demo data"}
 				</Button>
 			</div>
+		</div>
+	)
+}
+
+function EmptyMonthNotice({ month, year }: { month: string; year: number }) {
+	const { setSearchParams } = useMonthParams()
+	const latest = useLiveQuery(() => findLatestRecordMonth({ month, year }), [month, year])
+
+	return (
+		<div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border bg-muted/20 p-4">
+			<p className="text-sm">Nothing recorded in {month} yet.</p>
+			{latest ? (
+				<Button
+					variant="outline"
+					size="sm"
+					onClick={() =>
+						setSearchParams(previous => ({
+							month: latest.month,
+							year: String(latest.year),
+							scope: previous.get("scope") ?? undefined,
+						}))
+					}
+				>
+					Go to {latest.month}
+					<IconifyIcon icon="lucide:arrow-left" />
+				</Button>
+			) : null}
 		</div>
 	)
 }
@@ -497,374 +542,187 @@ function ScopeLabel({ scope, color }: { scope: string; color?: string }) {
 
 function SummaryBand({
 	summary,
+	incomeHistory,
 	comparison,
 	trend,
 	through,
+	onDrill,
 }: {
 	summary: AnalyticsSummary
+	incomeHistory: DashboardView["incomeHistory"]
 	comparison: Comparison
 	trend: TrendMonth[]
-	/** Last actual day while the month is running; trend points then cover days 1 to it. */
 	through: string | null
+	onDrill: (value: string) => void
 }) {
 	const sparkPeriod = through ? `days 1–${DateTime.fromISO(through).day}` : undefined
-	const surplusLabel =
-		summary.surplus > 0 ? "Surplus" : summary.surplus < 0 ? "Shortfall" : "Balance"
-	const tone = summary.surplus > 0 ? "positive" : summary.surplus < 0 ? "negative" : "neutral"
+	const waiting = through !== null && summary.income === 0
+
 	return (
-		<Card className="gap-0 overflow-hidden py-0">
-			<MetricGrid className="rounded-none border-0">
-				<DashboardMetric
-					icon="lucide:circle-dollar-sign"
-					label="Total income"
-					value={formatCurrency(summary.income)}
-					detail={comparisonText(comparison.income, comparison.count)}
-					delta={deltaOf(comparison.income, comparison.count, "up")}
-					spark={trend.map(month => month.income)}
-					sparkColor="var(--income)"
-					sparkPeriod={sparkPeriod}
-				/>
-				<DashboardMetric
-					icon="lucide:receipt-text"
-					label={summary.spending < 0 ? "Total net refund" : "Total spending"}
-					value={formatCurrency(Math.abs(summary.spending))}
-					detail={comparisonText(comparison.spending, comparison.count)}
-					delta={deltaOf(comparison.spending, comparison.count, "down")}
-					spark={trend.map(month => month.spending)}
-					sparkColor="var(--spending)"
-					sparkPeriod={sparkPeriod}
-				/>
-				<DashboardMetric
-					icon="lucide:scale"
-					label={`Total ${surplusLabel.toLowerCase()}`}
-					value={formatCurrency(Math.abs(summary.surplus))}
-					detail="Income less personal spending"
-					tone={tone}
-					delta={deltaOf(comparison.surplus, comparison.count, "up")}
-					spark={trend.map(month => month.surplus)}
-					sparkColor="var(--foreground)"
-					sparkPeriod={sparkPeriod}
-				/>
-				<DashboardMetric
-					icon="lucide:percent"
-					label="Total surplus rate"
-					value={
-						summary.surplus_rate === null ? "—" : `${summary.surplus_rate.toFixed(1)}%`
-					}
-					detail={
-						summary.surplus_rate === null
-							? "No positive net income"
-							: comparisonRateText(comparison.surplus_rate, comparison.count)
-					}
-					tone={tone}
-				/>
+		<Card className="@container gap-0 overflow-hidden py-0">
+			<MetricGrid className="grid-cols-1 rounded-none border-0 lg:grid-cols-1 @min-[600px]:grid-cols-3 @min-[600px]:lg:grid-cols-3">
+				{[
+					{
+						key: "spent",
+						label: "Spent",
+						icon: "lucide:receipt-text",
+						value: formatCurrency(summary.spending),
+						detail:
+							comparison.count && comparison.spending.difference !== null
+								? `${formatCurrency(Math.abs(comparison.spending.difference))} ${comparison.spending.difference >= 0 ? "more" : "less"} than usual${through ? " so far" : ""}`
+								: "No comparison history",
+						spark: trend.map(m => m.spending),
+					},
+					{
+						key: "income",
+						label: "Income",
+						icon: "lucide:circle-dollar-sign",
+						value:
+							summary.income === 0
+								? incomeHistory
+									? "None yet"
+									: "None recorded"
+								: formatCurrency(summary.income),
+						detail:
+							summary.income === 0
+								? incomeHistory
+									? `Usually ~${formatCurrency(incomeHistory.amount)} by day ${incomeHistory.day}`
+									: "Add income ›"
+								: comparisonText(comparison.income, comparison.count),
+						spark: trend.map(m => m.income),
+					},
+					{
+						key: "leftover",
+						label: "Left over",
+						icon: "lucide:scale",
+						value: waiting ? "—" : formatCurrency(summary.surplus),
+						detail: waiting
+							? "Waiting for income"
+							: summary.surplus_rate === null
+								? "Income less personal spending"
+								: `${summary.surplus_rate.toFixed(1)}% of income`,
+						spark: trend.map(m => m.surplus),
+					},
+				].map(m => (
+					<DashboardMetric
+						key={m.key}
+						icon={m.icon}
+						label={m.label}
+						value={m.value}
+						detail={m.detail}
+						spark={m.spark}
+						sparkPeriod={sparkPeriod}
+						delta={
+							through
+								? undefined
+								: deltaOf(
+										m.key === "income"
+											? comparison.income
+											: m.key === "spent"
+												? comparison.spending
+												: comparison.surplus,
+										comparison.count,
+										m.key === "spent" ? "down" : "up",
+									)
+						}
+						onSelect={() => onDrill(m.key)}
+						sparkColor={
+							m.key === "income"
+								? "var(--income)"
+								: m.key === "spent"
+									? "var(--spending)"
+									: "var(--foreground)"
+						}
+						tone={
+							m.key === "leftover" && !waiting
+								? summary.surplus > 0
+									? "positive"
+									: summary.surplus < 0
+										? "negative"
+										: "neutral"
+								: "neutral"
+						}
+					/>
+				))}
 			</MetricGrid>
+			<button
+				type="button"
+				onClick={() => onDrill("saved")}
+				className="transition-colors duration-150 ease-out hover:bg-muted/40 active:bg-muted/60 flex min-h-11 cursor-pointer items-center justify-between border-t px-4 py-3 text-sm focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
+			>
+				<span>Saved this month</span>
+				<span className="tabular-nums">
+					{formatCurrency(summary.contributions - summary.withdrawals)}{" "}
+					<IconifyIcon icon="lucide:chevron-right" className="inline size-4" />
+				</span>
+			</button>
 		</Card>
 	)
 }
 
-function InvestmentRow({
-	summary,
+function AttentionList({
+	data,
 	month,
 	year,
+	onDrill,
 }: {
-	summary: AnalyticsSummary
+	data: DashboardData
 	month: string
 	year: number
+	onDrill: (selection: import("@/logic/drilldown").Selection) => void
 }) {
-	const { handlePush } = useHistory()
-	const net = Math.round((summary.withdrawals - summary.contributions) * 100) / 100
-	const rate = summary.income > 0 ? (net / summary.income) * 100 : null
+	const rows = buildAttention(data, month, year)
+	if (!rows.length) return null
 	return (
-		<section className="grid gap-4" aria-labelledby="investment-title">
-			<div className="flex flex-wrap items-center justify-between gap-3">
-				<div>
-					<h3 id="investment-title" className="text-sm font-semibold">
-						Saving and investment movements
-					</h3>
-					<p className="text-xs text-muted-foreground">
-						Recorded contributions and withdrawals for this month
-					</p>
-				</div>
-				<Button variant="outline" size="sm" asChild>
-					<Link
-						onClick={handlePush("overview")}
-						href={pathMonthlyRecords({
-							month,
-							year: String(year),
-							treatment: "saving_investment",
-						})}
-					>
-						View Records
-					</Link>
-				</Button>
-			</div>
-			<MetricGrid>
-				<DashboardMetric
-					icon="lucide:arrow-up-right"
-					label="Contributions"
-					value={formatCurrency(summary.contributions)}
-					detail="Money put into savings and investments"
-				/>
-				<DashboardMetric
-					icon="lucide:arrow-down-left"
-					label="Withdrawals"
-					value={formatCurrency(summary.withdrawals)}
-					detail="Money taken out of savings and investments"
-				/>
-				<DashboardMetric
-					icon="lucide:scale"
-					label="Net withdrawals"
-					value={formatCurrency(net)}
-					detail="Withdrawals less contributions"
-					tone={net > 0 ? "positive" : net < 0 ? "negative" : "neutral"}
-				/>
-				<DashboardMetric
-					icon="lucide:percent"
-					label="Net withdrawals / income"
-					value={rate === null ? "—" : `${rate.toFixed(1)}%`}
-					detail={
-						rate === null
-							? "No positive net income"
-							: "Net withdrawals as a share of income"
-					}
-				/>
-			</MetricGrid>
-		</section>
+		<Card className="gap-0 overflow-hidden py-0" aria-label="Attention">
+			<ul className="divide-y">
+				{rows.map((row, index) => {
+					const content = (
+						<>
+							<IconifyIcon
+								icon={row.icon}
+								className={cn(
+									"size-4 shrink-0",
+									index === 0
+										? "text-amber-600 dark:text-amber-400"
+										: "text-muted-foreground",
+								)}
+							/>
+							<span className="min-w-0 flex-1">
+								<span className="block font-medium">{row.label}</span>
+								<span className="block text-xs text-muted-foreground">
+									{row.detail}
+								</span>
+							</span>
+							<IconifyIcon
+								icon="lucide:chevron-right"
+								className="size-4 shrink-0 text-muted-foreground"
+							/>
+						</>
+					)
+					const style =
+						"flex min-h-11 w-full items-center gap-3 px-4 py-2 text-left text-sm transition-colors duration-150 ease-out hover:bg-muted/40 active:bg-muted/60"
+					return (
+						<li key={row.label}>
+							{row.selection ? (
+								<button
+									type="button"
+									className={style}
+									onClick={() => row.selection && onDrill(row.selection)}
+								>
+									{content}
+								</button>
+							) : (
+								<Link className={style} href={row.href ?? ""}>
+									{content}
+								</Link>
+							)}
+						</li>
+					)
+				})}
+			</ul>
+		</Card>
 	)
-}
-
-function PaceSummary({
-	projection,
-	completedMonth,
-	highestSpendingDay,
-	spending,
-	amount,
-	remaining,
-}: {
-	projection: Projection
-	completedMonth: PaceData["completedMonth"]
-	highestSpendingDay: PaceData["highestSpendingDay"]
-	spending: number
-	amount: number | null
-	remaining: number | null
-}) {
-	const budget = projection.monthly_budget
-	const result = completedMonth?.amount_difference ?? null
-	const highest = {
-		icon: "lucide:flame",
-		label: "Highest-spend day",
-		value: highestSpendingDay ? formatCurrency(highestSpendingDay.spending) : "—",
-		detail: highestSpendingDay
-			? DateTime.fromISO(highestSpendingDay.date).toFormat("d MMMM")
-			: "No spending yet",
-	}
-	const daysLeft = `${projection.remaining_days} day${projection.remaining_days === 1 ? "" : "s"} left`
-	const stats = projection.available
-		? [
-				highest,
-				{
-					icon: "lucide:gauge",
-					label: budget ? `${budget.name} usage pace` : "Usage pace",
-					value: budget
-						? `${formatCurrency(budget.usage_pace)} / day`
-						: "No monthly amount",
-					detail: budget
-						? `Projected ${formatCurrency(budget.projected)}`
-						: "Set an amount in Monthly budgets",
-				},
-				{
-					icon: "lucide:chart-no-axes-combined",
-					label: "Projected month-end",
-					value: formatCurrency(projection.projected_spending ?? 0),
-					detail: `${formatCurrency(projection.daily_spending ?? 0)} daily pace${projection.scheduled_spending ? ` + ${formatCurrency(projection.scheduled_spending)} scheduled` : ""}`,
-				},
-				{
-					icon: "lucide:circle-gauge",
-					label: "Recommended pace",
-					value:
-						budget?.recommended_pace == null
-							? "—"
-							: `${formatCurrency(budget.recommended_pace)} / day`,
-					detail: !budget
-						? `${daysLeft} · No planned amount`
-						: budget.remaining < 0
-							? `${formatCurrency(-budget.remaining)} over after scheduled spending`
-							: budget.remaining === 0
-								? "Plan used up"
-								: `${daysLeft} · To finish within ${formatCurrency(budget.amount)}`,
-				},
-			]
-		: !completedMonth
-			? [
-					highest,
-					{
-						icon: "lucide:receipt-text",
-						label: "Spent so far",
-						value: formatCurrency(spending),
-						detail: "Recorded spending in this scope",
-					},
-					{
-						icon: "lucide:clipboard-list",
-						label: "Planned",
-						value: amount === null ? "Not set" : formatCurrency(amount),
-						detail: "Monthly budget amount",
-					},
-					{
-						icon: "lucide:wallet",
-						label: remaining !== null && remaining < 0 ? "Over plan" : "Remaining",
-						value: remaining === null ? "—" : formatCurrency(Math.abs(remaining)),
-						detail:
-							amount === null ? "No planned amount" : "Plan less recorded spending",
-					},
-				]
-			: [
-					highest,
-					{
-						icon: "lucide:receipt-text",
-						label: "Final month spending",
-						value: formatCurrency(completedMonth.spending),
-						detail: "Recorded for the whole month",
-					},
-					{
-						icon: "lucide:circle-check-big",
-						label: "Final plan result",
-						value:
-							result === null
-								? "No planned amount"
-								: Math.abs(result) < 0.005
-									? "On plan"
-									: `${formatCurrency(Math.abs(result))} ${result > 0 ? "under" : "over"}`,
-						detail:
-							completedMonth.amount == null
-								? "Set a monthly amount to compare"
-								: `Against ${formatCurrency(completedMonth.amount)} planned`,
-					},
-					{
-						icon: "lucide:calendar-days",
-						label: "Spending per day",
-						value: `${formatCurrency(completedMonth.spending_per_day)} / day`,
-						detail: "Full-month total ÷ calendar days",
-					},
-				]
-	// Four across only when the card is wide enough for the values; two by two otherwise.
-	return (
-		<div className="@container mt-3">
-			<MetricGrid className="lg:grid-cols-2 @[52rem]:grid-cols-4 lg:@[52rem]:grid-cols-4">
-				{stats.map(stat => (
-					<DashboardMetric key={stat.label} {...stat} />
-				))}
-			</MetricGrid>
-		</div>
-	)
-}
-
-function ReviewLinks({ data, month, year }: { data: DashboardData; month: string; year: number }) {
-	const { handlePush } = useHistory()
-	const date = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
-	const start = date.startOf("month").toISODate() ?? ""
-	const end = date.endOf("month").toISODate() ?? ""
-	// Keep the hit area steady: shrinking a pressed link loses clicks near its edges.
-	return (
-		<div className="flex flex-wrap items-center gap-2" aria-label="Review this month">
-			{data.review.pending_records > 0 ? (
-				<Button
-					variant="outline"
-					size="sm"
-					className="active:not-aria-[haspopup]:scale-100"
-					asChild
-				>
-					<Link
-						onClick={handlePush("overview")}
-						href={pathMonthlyRecords({
-							month,
-							year: String(year),
-							is_allocated: "false",
-						})}
-					>
-						<IconifyIcon icon="lucide:circle-dashed" />
-						{data.review.pending_records} Pending Record
-						{data.review.pending_records === 1 ? "" : "s"}
-					</Link>
-				</Button>
-			) : null}
-
-			{data.review.pending_statements > 0 ? (
-				<Button
-					variant="outline"
-					size="sm"
-					className="active:not-aria-[haspopup]:scale-100"
-					asChild
-				>
-					<Link
-						onClick={handlePush("overview")}
-						href={pathStatements({
-							start_date: start,
-							end_date: end,
-							is_pending: "true",
-						})}
-					>
-						<IconifyIcon icon="lucide:circle-dashed" />
-						{data.review.pending_statements} Pending Statement
-						{data.review.pending_statements === 1 ? "" : "s"}
-					</Link>
-				</Button>
-			) : null}
-			{data.review.unallocated_statements > 0 ? (
-				<Button
-					variant="outline"
-					size="sm"
-					className="active:not-aria-[haspopup]:scale-100"
-					asChild
-				>
-					<Link
-						onClick={handlePush("overview")}
-						href={pathAllocator({
-							start_date: start,
-							end_date: end,
-							is_pending: "false",
-						})}
-					>
-						<IconifyIcon icon="lucide:inbox" />
-						{data.review.unallocated_statements} unallocated Statement
-						{data.review.unallocated_statements === 1 ? "" : "s"}
-					</Link>
-				</Button>
-			) : null}
-			{data.summary.unbudgeted_count > 0 ? (
-				<Button
-					variant="outline"
-					size="sm"
-					className="active:not-aria-[haspopup]:scale-100"
-					asChild
-				>
-					<Link
-						onClick={handlePush("overview")}
-						href={pathMonthlyRecords({
-							month,
-							year: String(year),
-							show_unbudgeted: "true",
-							effective_spending: "true",
-						})}
-					>
-						<IconifyIcon icon="lucide:wallet" />
-						{data.summary.unbudgeted_count} unbudgeted spending Record
-						{data.summary.unbudgeted_count === 1 ? "" : "s"}
-					</Link>
-				</Button>
-			) : null}
-		</div>
-	)
-}
-
-/** Signed change vs the comparison average; `better` says which direction is good. */
-function deltaOf(value: ComparisonValue, count: number, better: "up" | "down"): Delta | undefined {
-	if (!count || value.difference === null || Math.abs(value.difference) < 0.005) return undefined
-	const up = value.difference > 0
-	return {
-		text: `${up ? "↑" : "↓"} ${formatCurrency(Math.abs(value.difference)).replace(/\.\d\d$/, "")}`,
-		good: up === (better === "up"),
-	}
 }
 
 function comparisonText(value: ComparisonValue, count: number) {
@@ -873,8 +731,11 @@ function comparisonText(value: ComparisonValue, count: number) {
 	return `${formatCurrency(Math.abs(value.difference))} ${value.difference > 0 ? "above" : "below"} ${count}-mo avg`
 }
 
-function comparisonRateText(value: ComparisonValue, count: number) {
-	if (!count || value.difference === null) return "No comparison history"
-	if (Math.abs(value.difference) < 0.05) return `Same as ${count}-month average`
-	return `${Math.abs(value.difference).toFixed(1)} points ${value.difference > 0 ? "above" : "below"} average`
+function deltaOf(value: ComparisonValue, count: number, better: "up" | "down"): Delta | undefined {
+	if (!count || value.difference === null || Math.abs(value.difference) < 0.005) return undefined
+	const up = value.difference > 0
+	return {
+		text: `${up ? "↑" : "↓"} ${formatCurrency(Math.abs(value.difference)).replace(/\.\d\d$/, "")}`,
+		good: up === (better === "up"),
+	}
 }

@@ -15,15 +15,15 @@ const titles: Record<string, string> = {
 	"/accounts": "Accounts",
 	"/budgets": "Budgets",
 	"/categories": "Categories",
-	"/allocator": "Workflows",
-	"/allocator/pending": "Workflows",
-	"/allocator/duplicates": "Workflows",
+	"/allocator": "Allocate",
+	"/allocator/pending": "Statements",
+	"/allocator/duplicates": "Statements",
 	"/importer": "Importer",
 	"/settings": "Settings",
 	"/sync": "Data",
 	"/privacy": "Privacy Policy",
 	"/terms": "Terms of Service",
-	"/records/monthly?month=October&year=2026": "Monthly Records",
+	"/records/monthly?month=October&year=2026": "Records",
 	"/accounts/t1-acc-dbs": "Account",
 	"/budgets/t1-b-manual": "Budget",
 	"/records/t1-r-partial": "Record",
@@ -60,7 +60,9 @@ async function expectRouteLayout(page: Page, route: string, title: string) {
 		await expect(page.locator("main article").first()).toBeVisible()
 	if (route === "/")
 		await expect(
-			page.locator("div.min-h-24.bg-card", { hasText: "Total spending" }),
+			page
+				.getByRole("button", { name: /^Spent / })
+				.filter({ has: page.locator(".tabular-nums") }),
 		).toBeVisible()
 	await expect(page).toHaveTitle(/ · Finpoint$/)
 	await expect(page.locator("html")).toHaveClass(
@@ -136,23 +138,33 @@ test("workflow tabs and sparkline: tabs navigate by keyboard, Allocate keeps its
 }) => {
 	await seedWorkspace(page)
 	await test.step("workflow tabs: navigate by keyboard and Allocate keeps the default date filter", async () => {
-		await page.goto("/allocator")
-		const tabs = page.getByRole("navigation", { name: "Workflow views" })
-		await tabs.getByRole("link", { name: "Replace Pending", exact: true }).focus()
+		await page.goto("/statements")
+		const tabs = page.getByRole("navigation", { name: "Statement views" })
+		await tabs.getByRole("link", { name: "Replace pending", exact: true }).focus()
 		await page.keyboard.press("Enter")
-		await expect(page).toHaveURL(/\/allocator\/pending$/)
+		await expect(page).toHaveURL(/\/statements\/pending$/)
 		await expect(
 			page.getByRole("region", { name: "Pending statements", exact: true }),
 		).toBeVisible()
 		await page
-			.getByRole("navigation", { name: "Workflow views" })
-			.getByRole("link", { name: "Fix Duplicates", exact: true })
+			.getByRole("navigation", { name: "Statement views" })
+			.getByRole("link", { name: "Duplicates", exact: true })
 			.focus()
 		await page.keyboard.press("Enter")
-		await expect(page).toHaveURL(/\/allocator\/duplicates$/)
+		await expect(page).toHaveURL(/\/statements\/duplicates$/)
 		await page
-			.getByRole("navigation", { name: "Workflow views" })
-			.getByRole("link", { name: "Allocate to Records", exact: true })
+			.getByRole("navigation", { name: "Statement views" })
+			.getByRole("link", { name: "Statements", exact: true })
+			.click()
+		await expect(page).toHaveURL(/\/statements\?start_date=2026-10-01/)
+		if ((page.viewportSize()?.width ?? 1440) < 768)
+			await page
+				.locator("main")
+				.getByRole("button", { name: "Toggle Sidebar", exact: true })
+				.click()
+		await page
+			.getByRole("link", { name: "Allocate", exact: true })
+			.filter({ visible: true })
 			.click()
 		await expect(page).toHaveURL(/\/allocator\?start_date=2026-10-01/)
 		await expect(
@@ -161,7 +173,7 @@ test("workflow tabs and sparkline: tabs navigate by keyboard, Allocate keeps its
 	})
 	await test.step("total spending sparkline: keeps finite data marks and its endpoint follows changed month values", async () => {
 		await page.goto("/?month=October&year=2026")
-		const spark = page.locator('svg[role="img"][aria-label^="Total spending,"]').first()
+		const spark = page.locator('svg[role="img"][aria-label^="Spent,"]').first()
 		await expect(spark).toBeAttached()
 		const points = await spark.locator("polyline").getAttribute("points")
 		expect(points).toBeTruthy()
@@ -360,9 +372,9 @@ test("allocator empty states: Statements, pending and duplicate lists resolve wi
 }) => {
 	await seedWorkspace(page, "empty")
 	for (const [route, empty] of [
-		["/allocator", "No statements found.", "Workflows"],
-		["/allocator/pending", "No pending Statements", "Workflows"],
-		["/allocator/duplicates", "No duplicates found", "Workflows"],
+		["/allocator", "No statements found.", "Allocate"],
+		["/allocator/pending", "No pending Statements", "Statements"],
+		["/allocator/duplicates", "No duplicates found", "Statements"],
 	] as const) {
 		await test.step(`${route} page: empty state resolves without premature loading copy`, async () => {
 			await page.goto(route)
@@ -556,7 +568,7 @@ test.describe("pinned 15 October 2026 date", () => {
 			["/accounts", "Accounts", "No accounts yet. Import a bank export to create one."],
 			["/categories", "Categories", "No categories yet."],
 			["/budgets", "Budgets", "No budgets yet."],
-			[`/records/monthly?${month}`, "October 2026", "No Records for this month"],
+			[`/records/monthly?${month}`, "Records", "No records found."],
 		] as const) {
 			await test.step(`${route} page: resolves to its useful empty state`, async () => {
 				await page.goto(route)
@@ -697,7 +709,7 @@ test.describe("pinned 15 October 2026 date", () => {
 						for (const allocation of allocations)
 							await expect(
 								page
-									.getByRole("link", { name: "Open statement" })
+									.getByRole("link")
 									.and(
 										page.locator(
 											`[href="/statements/${allocation.statement_id}"]`,
@@ -711,7 +723,7 @@ test.describe("pinned 15 October 2026 date", () => {
 								.first()
 								.locator("..")
 								.locator(".."),
-						).toContainText("[-$25.00]")
+						).toContainText("$25.00 of $60.00 allocated")
 				})
 			}
 		})
@@ -745,46 +757,40 @@ test.describe("pinned 15 October 2026 date", () => {
 			})
 		}
 	})
-	test("monthly shell: header and tabs keep DOM identity across tab switches", async ({
+	test("monthly shell: header keeps DOM identity across month changes without tabs", async ({
 		page,
-		isMobile,
 	}) => {
 		await seedWorkspace(page)
 		await page.goto(`/?${month}`)
 		const heading = await page
 			.getByRole("heading", { name: "October 2026", exact: true })
 			.elementHandle()
-		const tabs = await page
-			.getByRole("navigation", { name: "Monthly finance views" })
-			.elementHandle()
-		await page
-			.getByRole("navigation", { name: "Monthly finance views" })
-			.getByRole("link", { name: "Monthly Records", exact: true })
-			.click()
-		await expect(page.getByRole("heading", { name: "Recorded activity" })).toBeVisible()
+		await expect(page.getByRole("navigation", { name: "Monthly finance views" })).toHaveCount(0)
+		await page.getByRole("button", { name: "Next month", exact: true }).click()
 		await expect(
-			page.getByRole("link", { name: "Open FairPrice Run", exact: true }),
+			page.getByRole("heading", { name: "November 2026", exact: true }),
 		).toBeVisible()
-		// Compact record rows omit the desktop budget column; the filter exposes
-		// the same Monthly budgets at every viewport size.
-		await page
-			.getByRole("combobox")
-			.filter({ hasText: /^All budgets$/ })
-			.click()
-		await expect(page.getByRole("option", { name: "Daily", exact: true })).toBeVisible()
-		await page.keyboard.press("Escape")
-		if (!isMobile)
-			await expect(
-				page.getByText("Daily", { exact: true }).filter({ visible: true }).first(),
-			).toBeVisible()
 		await expect.poll(() => heading?.evaluate(node => node.isConnected)).toBe(true)
-		await expect.poll(() => tabs?.evaluate(node => node.isConnected)).toBe(true)
-		await page
-			.getByRole("navigation", { name: "Monthly finance views" })
-			.getByRole("link", { name: "Overview", exact: true })
-			.click()
-		await expect(page.getByText("Total income", { exact: false }).first()).toBeVisible()
-		await expect.poll(() => heading?.evaluate(node => node.isConnected)).toBe(true)
+	})
+	test("Monthly Records redirect preserves every filter and Records month navigation", async ({
+		page,
+	}) => {
+		await seedWorkspace(page)
+		const params =
+			"month=October&year=2026&query=FairPrice&category_ids=t1-cat-groceries&sort=amount_desc&per_page=50"
+		await page.goto(`/records/monthly?${params}`)
+		await expect(page).toHaveURL(`/records?${params}`)
+		await expect(
+			page.getByRole("button", { name: "Edit FairPrice Run", exact: true }),
+		).toBeVisible()
+		await page.getByRole("button", { name: "Next month", exact: true }).click()
+		await expect.poll(() => new URL(page.url()).searchParams.get("month")).toBe("November")
+		for (const [key, value] of new URLSearchParams(params))
+			if (key !== "month") expect(new URL(page.url()).searchParams.get(key)).toBe(value)
+		await page.getByRole("button", { name: "Previous month", exact: true }).click()
+		await expect(
+			page.getByRole("button", { name: "Edit FairPrice Run", exact: true }),
+		).toBeVisible()
 	})
 	test("static and not-found routes: static pages are readable and unmatched routes offer Records", async ({
 		page,
@@ -871,12 +877,18 @@ test("monthly headers: hydrate with a browser date different from the server", a
 	await setDateOnly(page, new Date("2001-01-15T12:00:00+08:00"))
 	for (const [route, heading, subtitle] of [
 		["/", "January 2001", "Through 15 Jan · SGD · Based on Record dates"],
-		["/records/monthly", "January 2001", "Actuals through 15 Jan"],
+		[
+			"/records/monthly",
+			"Records",
+			"Browse and manage your financial records. Choose a month to narrow the list.",
+		],
 		["/?month=December&year=2000", "December 2000", "Full month · SGD · Based on Record dates"],
 	] as const) {
 		await test.step(`${route} header: hydrates with the browser date and reports no hydration errors`, async () => {
 			await page.goto(route)
-			await expect(page.getByRole("heading", { name: heading, exact: true })).toBeVisible()
+			await expect(
+				page.getByRole("heading", { name: heading, level: 2, exact: true }),
+			).toBeVisible()
 			await expect(page.getByText(subtitle, { exact: true })).toBeVisible()
 			await expect(page.getByRole("button", { name: "Next month" })).toBeEnabled()
 			expect(errors.filter(error => /hydrat|server rendered/i.test(error))).toEqual([])
@@ -1004,4 +1016,20 @@ test("narrow desktop: pages stack by available width and popups keep side margin
 		expect(box.x).toBeGreaterThanOrEqual(8)
 		expect(box.x + box.width).toBeLessThanOrEqual(800 - 8)
 	})
+})
+
+test("term definitions open by keyboard and tap", async ({ page }) => {
+	await seedWorkspace(page)
+	await page.goto("/?month=October&year=2026")
+	await expect(page.getByRole("button", { name: "Define Left over", exact: true })).toHaveCount(0)
+	await page.goto("/?month=October&year=2026&drill=day:2026-10-05")
+	const term = page.getByRole("button", { name: "Define Pending", exact: true })
+	await term.focus()
+	await page.keyboard.press("Enter")
+	await expect(page.getByRole("tooltip")).toContainText("A Record is pending")
+	await page.keyboard.press("Escape")
+	await expect(page.getByRole("tooltip")).not.toBeVisible()
+	await page.goto("/?month=October&year=2026&drill=day:2026-10-05")
+	await term.click()
+	await expect(page.getByRole("tooltip")).toContainText("$20")
 })

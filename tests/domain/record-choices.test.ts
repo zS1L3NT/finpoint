@@ -360,3 +360,13 @@ test("backup choices reject coerced enum values without replacing workspace data
 		expect((await exportData()).tables).toEqual(backup.tables)
 	}
 })
+
+ test("Records month filter includes full month and intersects date filters", async () => {
+ for (const [id, datetime] of [["before", "2026-09-30 23:59"], ["first", "2026-10-01 00:00"], ["last", "2026-10-31 23:59"], ["after", "2026-11-01 00:00"]]) {
+ await db.records.add({id,title:id,datetime,amount:-10,category_id:"none",people:null,location:null,description:null,treatment_choice:{kind:"automatic"},monthly_budget_choice:{kind:"category"},revision:1} as never)
+ }
+ expect((await listRecords({month:"October",year:"2026"})).map(r=>r.title).sort()).toEqual(["first","last"])
+ expect((await listRecords({month:"October",year:"2026",start_date:"2026-10-15"})).map(r=>r.title)).toEqual(["last"])
+ expect((await listRecords({month:"October",year:"2026",day:"31"})).map(r=>r.title)).toEqual(["last"])
+ expect(await listRecords()).toHaveLength(4)
+ })

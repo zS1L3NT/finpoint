@@ -1,6 +1,7 @@
 import type { CellContext, ColumnDef, Row } from "@tanstack/react-table"
 import Link from "next/link"
 import { useMemo, useState } from "react"
+import { AllocationProgress } from "@/components/allocation-progress"
 import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
 import MonthlyBudgetBadge from "@/components/monthly-budget-badge"
 import { Badge } from "@/components/ui/badge"
@@ -8,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { useHistory } from "@/history"
 import { canUseMonthlyBudget, treatmentLabel } from "@/lib/analytics"
 import { classForCurrency, cn, formatCurrency, parseDatetime } from "@/lib/utils"
+import { pendingReason } from "@/logic/records"
 import { pathRecord } from "@/routes"
 import type { Allocation, Record } from "@/types"
 
@@ -37,14 +39,6 @@ export function formatRowTime(datetime: string, grouped: boolean) {
 	// Midnight means "no time recorded".
 	if (grouped) return time === "12:00 AM" ? "" : time
 	return time === "12:00 AM" ? date.toFormat("d MMM yyyy") : date.toFormat("d MMM, h:mm a")
-}
-
-function pendingReason(record: Record) {
-	if (record.allocated_amount === 0) return "No statements allocated yet"
-	if (record.allocated_amount !== record.amount)
-		return `${formatCurrency(record.allocated_amount)} of ${formatCurrency(record.amount)} allocated`
-	if (record.pending_statement_count) return "Awaiting the imported bank statement"
-	return "Pending"
 }
 
 export function PendingBadge({ record }: { record: Record }) {
@@ -87,11 +81,28 @@ export function RecordAmountCell({
 			<span className={cn("font-medium tabular-nums", amountTone(value))}>
 				{formatCurrency(value)}
 			</span>
-			{showAllocated && record.allocated_amount !== record.amount ? (
-				<span className="hidden text-[0.6875rem] text-muted-foreground tabular-nums sm:block">
-					{formatCurrency(record.allocated_amount)} allocated
-				</span>
-			) : null}
+			{showAllocated ? <RecordAllocationProgress record={record} value={value} /> : null}
+		</span>
+	)
+}
+
+function RecordAllocationProgress({ record, value }: { record: Record; value: number }) {
+	if (
+		value === record.amount &&
+		(!record.is_pending || record.allocated_amount === record.amount)
+	)
+		return null
+	return (
+		<span
+			className={cn(
+				"text-muted-foreground [&>span]:text-inherit",
+				Math.abs(record.allocated_amount) > Math.abs(record.amount) && "text-destructive",
+			)}
+		>
+			<AllocationProgress
+				amount={record.amount}
+				allocated={value !== record.amount ? value : record.allocated_amount}
+			/>
 		</span>
 	)
 }
@@ -177,7 +188,9 @@ export function useRecordColumns<TRecord extends RecordRow>({
 						<div className="min-w-0 flex-1">
 							<p className="flex items-center gap-1.5">
 								<span className="min-w-0 truncate font-medium">
-									{row.original.title}
+									<Link href={pathRecord(row.original.id)}>
+										{row.original.title}
+									</Link>
 								</span>
 								<PendingBadge record={row.original} />
 							</p>
@@ -232,7 +245,7 @@ export function useRecordColumns<TRecord extends RecordRow>({
 								? (row.original.pivot?.amount ?? 0)
 								: row.original.amount
 						}
-						showAllocated={amount === "amount" && row.original.is_pending}
+						showAllocated={true}
 					/>
 				),
 			},
@@ -270,10 +283,13 @@ export function useRecordMobileRow<TRecord extends RecordRow>({
 				<>
 					<div className="flex min-w-0 items-center gap-3">
 						{leading?.(record)}
+
 						<Icon {...record.category} size={14} />
 						<div className="min-w-0 flex-1">
 							<p className="flex items-center gap-1.5">
-								<span className="min-w-0 truncate font-medium">{record.title}</span>
+								<span className="min-w-0 truncate font-medium">
+									<Link href={pathRecord(record.id)}>{record.title}</Link>
+								</span>
 								<PendingBadge record={record} />
 							</p>
 							<p className="truncate text-xs text-muted-foreground">
@@ -281,13 +297,10 @@ export function useRecordMobileRow<TRecord extends RecordRow>({
 									.filter(Boolean)
 									.join(" · ")}
 							</p>
+							<RecordAllocationProgress record={record} value={value} />
 						</div>
 					</div>
-					<RecordAmountCell
-						record={record}
-						value={value}
-						showAllocated={amount === "amount" && record.is_pending}
-					/>
+					<RecordAmountCell record={record} value={value} showAllocated={false} />
 					<RecordActions record={record} options={{ pageName, extraActions, onEdit }} />
 				</>
 			)

@@ -20,8 +20,10 @@ test("Records table: rendered Records keep zero, negative amounts and pending re
 	await expect(partial).toContainText("-$60.00")
 	await expect(partial.getByText("Pending", { exact: true })).toHaveAttribute(
 		"title",
-		"-$25.00 of -$60.00 allocated",
+		"$35.00 not allocated yet",
 	)
+	await expect(partial).toContainText("$25.00 of $60.00 allocated")
+	await expect(partial.getByText("Allocations", { exact: true })).toHaveCount(0)
 	const groceries = page
 		.getByRole("link", { name: "Open FairPrice Run", exact: true })
 		.locator("xpath=ancestor::*[self::tr or contains(@class, 'grid-cols-subgrid')][1]")
@@ -309,26 +311,20 @@ test("Records lists: later and future Records keep amounts and drills, long Reco
 	page,
 }) => {
 	await seedWorkspace(page)
-	await test.step("Monthly Records: later and future Records keep amounts and working drills", async () => {
+	await test.step("Records by month: later and future Records keep amounts and working drills", async () => {
 		await patchRows(page, "records", [
 			{ id: IDS.records.unicode, datetime: "2026-11-10 13:20" },
 			{ id: "t1-r-refund", datetime: "2026-10-20 11:10" },
 		])
 		await page.goto("/records/monthly?month=October&year=2026")
-		const later = page
-			.locator("section")
-			.filter({ has: page.getByRole("heading", { name: "Later this month", exact: true }) })
-		await expect(later).toContainText("Excluded from actual totals.")
 		await expect(
-			later
+			page
 				.getByRole("link", { name: "Open Returned Kettle", exact: true })
 				.filter({ visible: true }),
 		).toBeVisible()
-		await expect(later).toContainText("$20.00")
+		await expect(page.locator("main")).toContainText("$20.00")
 		await page.goto("/records/monthly?month=November&year=2026")
-		await expect(
-			page.getByRole("heading", { name: "November 2026", exact: true }),
-		).toBeVisible()
+		await expect(page.getByText("Records for November 2026.", { exact: true })).toBeVisible()
 		const future = page.getByRole("link", { name: /^Open Kōpi/ }).filter({ visible: true })
 		await fits(page, future)
 		await expect(page.locator("main")).toContainText("-$33.33")
@@ -525,7 +521,7 @@ test("Duplicate badge: marks possible duplicate Statements and links to the acco
 		)
 		await expect(badge).toHaveAttribute(
 			"href",
-			"/allocator/duplicates?account_id=t1-acc-revolut",
+			"/statements/duplicates?account_id=t1-acc-revolut",
 		)
 	}
 	await expect(
@@ -542,7 +538,7 @@ test("Duplicate badge: marks possible duplicate Statements and links to the acco
 	await statementRow(page, IDS.statements.duplicatePair[0])
 		.getByRole("link", { name: "Duplicate?" })
 		.click()
-	await expect(page).toHaveURL("/allocator/duplicates?account_id=t1-acc-revolut")
+	await expect(page).toHaveURL("/statements/duplicates?account_id=t1-acc-revolut")
 })
 
 test("Duplicate badge: disappears once the pair is resolved", async ({ page, workspace }) => {
@@ -600,4 +596,26 @@ test("Monthly budget filters: All budgets leads, budgets follow and Unbudgeted c
 		await page.getByRole("option", { name: "Daily", exact: true }).click()
 		await expect(page).toHaveURL(/monthly_budget_id=t1-mb-daily/)
 	}
+})
+
+test("Statement title opens the funded Records detail", async ({ page }) => {
+	await seedWorkspace(page)
+	await page.goto("/statements?query=FairPrice")
+	await page.getByRole("link", { name: "FairPrice Run · SGD 4412", exact: true }).click()
+	await expect(page).toHaveURL(/statements\/t1-s-groceries/)
+	await expect(page.getByRole("link", { name: "FairPrice Run", exact: true })).toBeVisible()
+})
+
+test("Records month context is excluded from Clear filters and survives clearing status", async ({
+	page,
+}) => {
+	await seedWorkspace(page)
+	await page.goto("/records?month=October&year=2026")
+	await expect(page.getByRole("button", { name: /^Clear/ })).toBeDisabled()
+	await page.goto("/records?month=October&year=2026&is_allocated=false")
+	await expect(page.getByRole("button", { name: /^Clear/ })).toHaveAccessibleName("Clear 1")
+	await page.getByRole("button", { name: /^Clear/ }).click()
+	await expect(page).toHaveURL(/month=October/)
+	await expect(page).not.toHaveURL(/is_allocated=/)
+	await expect(page.getByRole("button", { name: /^Clear/ })).toBeDisabled()
 })

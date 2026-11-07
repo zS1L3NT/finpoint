@@ -120,3 +120,10 @@ export const COLLAPSE_MOTION = {
 		opacity: TRANSITION.base,
 	},
 } as const
+
+/** A Statement enters from the right; returning Records enter from the left. */
+export const DRILL_PIVOT = {
+	enter: (direction: number) => ({ opacity: 0, x: direction * 24 }),
+	visible: { opacity: 1, x: 0 },
+	exit: (direction: number) => ({ opacity: 0, x: direction * -24 }),
+}

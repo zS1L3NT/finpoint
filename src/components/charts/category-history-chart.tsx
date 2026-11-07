@@ -1,15 +1,14 @@
 "use client"
 
 import { DateTime } from "luxon"
-import Link from "next/link"
 import { type ComponentProps, useState } from "react"
 import BarChart from "@/components/charts/bar-chart"
 import CategorySpendingMix from "@/components/charts/category-spending-mix"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { useHistory } from "@/history"
 import { themeColor } from "@/lib/palette"
 import { cn, formatCurrency } from "@/lib/utils"
 import { BREAKDOWN_MONTHS, type SpendingHistoryMonth } from "@/logic/dashboard"
+import type { Selection } from "@/logic/drilldown"
 
 type SpendingSeries = SpendingHistoryMonth["categories"][number]
 type ChartSeries = SpendingSeries & { key: string; members: SpendingSeries[]; total: number }
@@ -28,15 +27,17 @@ export default function CategoryHistoryChart({
 	scopeLabel,
 	through,
 	monthlyBudgetIds,
-	recordHref,
+	onDrill,
 	badge,
+	compact = false,
 }: {
 	months: SpendingHistoryMonth[]
 	categories: ComponentProps<typeof CategorySpendingMix>["categories"]
 	scopeLabel: string
 	through: string | null
 	monthlyBudgetIds: string[] | null
-	recordHref: (ids: string, at: DateTime) => string
+	onDrill: (selection: Selection) => void
+	compact?: boolean
 	badge: React.ReactNode
 }) {
 	// The breakdown keeps the last month read, so its links stay reachable after the pointer leaves.
@@ -83,11 +84,11 @@ export default function CategoryHistoryChart({
 	return (
 		<div
 			className={cn(
-				"grid items-start gap-5 xl:items-stretch xl:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]",
-				limit !== undefined && "xl:h-[26rem]",
+				"grid items-start gap-5",
+				!compact && "@min-[860px]/dashboard:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]",
 			)}
 		>
-			<Card className="order-2 min-h-0 min-w-0 xl:order-1">
+			<Card className="order-2 min-h-0 min-w-0 @min-[600px]/dashboard:order-1">
 				<CardHeader>
 					<CardTitle className="flex flex-wrap items-center gap-2">
 						{shown?.current
@@ -98,7 +99,7 @@ export default function CategoryHistoryChart({
 					<CardDescription className="tabular-nums">
 						{scopeLabel} ·{" "}
 						{shown?.current
-							? `${formatCurrency(categories.reduce((sum, category) => sum + category.outflow, 0))} expenses · ${formatCurrency(categories.reduce((sum, category) => sum + category.refunds, 0))} refunds`
+							? `${formatCurrency(categories.reduce((sum, category) => sum + category.outflow, 0))} expenses · ${formatCurrency(categories.reduce((sum, category) => sum + category.refunds, 0))} refunds = ${formatCurrency(categories.reduce((sum, category) => sum + category.spending, 0))} spending`
 							: "Gross spending · refunds excluded"}
 					</CardDescription>
 				</CardHeader>
@@ -115,16 +116,14 @@ export default function CategoryHistoryChart({
 							<CategorySpendingMix
 								categories={categories}
 								limit={limit}
-								recordHref={id =>
-									recordHref(id, DateTime.fromFormat(shown.month, "MMM yyyy"))
-								}
+								onDrill={onDrill}
 							/>
 						</div>
 					) : shown ? (
 						<MonthBreakdown
 							month={shown}
 							config={config}
-							recordHref={recordHref}
+							onDrill={onDrill}
 							limit={limit}
 						/>
 					) : null}
@@ -135,7 +134,7 @@ export default function CategoryHistoryChart({
 							onClick={() =>
 								setExpanded(limit === undefined ? null : (shown?.month ?? null))
 							}
-							className="mt-3 text-xs text-muted-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+							className="cursor-pointer mt-3 text-xs text-muted-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 						>
 							{limit === undefined
 								? "Show fewer categories"
@@ -144,7 +143,7 @@ export default function CategoryHistoryChart({
 					)}
 				</CardContent>
 			</Card>
-			<Card className="order-1 min-h-0 min-w-0 xl:order-2">
+			<Card className="order-1 min-h-0 min-w-0 @min-[600px]/dashboard:order-2">
 				<CardHeader>
 					<CardTitle className="flex flex-wrap items-center gap-2">
 						Category trend
@@ -163,7 +162,18 @@ export default function CategoryHistoryChart({
 						<>
 							<BarChart
 								label="Category trend"
-								className="h-60 w-full sm:h-72 xl:h-auto xl:min-h-60 xl:flex-1"
+								onSelect={index => {
+									const m = chartData[index]
+									if (m?.included)
+										onDrill({
+											kind: "month",
+											value: DateTime.fromFormat(
+												m.month,
+												"MMM yyyy",
+											).toFormat("yyyy-MM"),
+										})
+								}}
+								className="h-60 w-full sm:h-72 @min-[600px]/dashboard:h-auto @min-[600px]/dashboard:min-h-60 @min-[600px]/dashboard:flex-1"
 								labels={chartData.map(month => month.month)}
 								layout="share"
 								series={series.map(item => ({
@@ -288,13 +298,13 @@ function prepareMonths(months: SpendingHistoryMonth[], series: ChartSeries[]): C
 function MonthTick({ month }: { month?: ChartMonth }) {
 	if (!month) return null
 	return (
-		<text textAnchor="middle" className="fill-foreground">
+		<text textAnchor="middle" className="overflow-visible fill-foreground">
 			<tspan x={0} dy="1em">
-				{month.month}
+				{month.month.split(" ")[0]}
 			</tspan>
 			{month.current && (
 				<tspan x={0} dy="1.2em" className="fill-primary">
-					Selected
+					{month.month.split(" ")[1]}
 				</tspan>
 			)}
 			{month.included && Object.values(month.seriesValues).every(value => value === 0) && (
@@ -319,15 +329,14 @@ function monthTotal(month: ChartMonth) {
 function MonthBreakdown({
 	month,
 	config,
-	recordHref,
+	onDrill,
 	limit,
 }: {
 	month: ChartMonth
 	config: Record<string, { label: string; color: string }>
-	recordHref: (ids: string, at: DateTime) => string
+	onDrill: (selection: Selection) => void
 	limit?: number
 }) {
-	const { handlePush } = useHistory()
 	const total = monthTotal(month)
 	const entries = Object.entries(month.seriesValues)
 		.filter(([, value]) => value > 0)
@@ -358,43 +367,60 @@ function MonthBreakdown({
 				entries.slice(0, limit).map(([key, value]) => {
 					const details = month.seriesDetails[key] ?? []
 					return (
-						<Link
-							key={key}
-							href={recordHref(
-								details.map(item => item.id).join(","),
-								DateTime.fromFormat(month.month, "MMM yyyy"),
-							)}
-							onClick={handlePush("overview")}
-							className="group grid min-w-0 gap-1.5 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-						>
-							<div className="grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-x-3">
-								<span
-									className="size-2.5 rounded-full"
-									style={{ backgroundColor: config[key]?.color }}
-								/>
-								<span className="truncate">{config[key]?.label ?? key}</span>
-								<span className="font-medium tabular-nums">
-									{formatCurrency(value)}
-								</span>
-								<span className="w-12 text-right text-muted-foreground tabular-nums">
-									{share(value)}
-								</span>
-							</div>
-							<div className="h-1.5 overflow-hidden rounded-full bg-muted">
-								<div
-									className="h-full rounded-full"
-									style={{
-										width: share(value),
-										backgroundColor: config[key]?.color,
-									}}
-								/>
-							</div>
+						<div key={key} className="grid gap-1.5">
+							<button
+								type="button"
+								onClick={() =>
+									onDrill({
+										kind: "category-gross",
+										value: details.map(item => item.id).join(","),
+										at: DateTime.fromFormat(month.month, "MMM yyyy").toFormat(
+											"yyyy-MM",
+										),
+									})
+								}
+								className="cursor-pointer group grid min-w-0 gap-1.5 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+							>
+								<div className="grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-x-3">
+									<span
+										className="size-2.5 rounded-full"
+										style={{ backgroundColor: config[key]?.color }}
+									/>
+									<span className="truncate">{config[key]?.label ?? key}</span>
+									<span className="font-medium tabular-nums">
+										{formatCurrency(value)}
+									</span>
+									<span className="w-12 text-right text-muted-foreground tabular-nums">
+										{share(value)}
+									</span>
+								</div>
+								<div className="h-1.5 overflow-hidden rounded-full bg-muted">
+									<div
+										className="h-full rounded-full"
+										style={{
+											width: share(value),
+											backgroundColor: config[key]?.color,
+										}}
+									/>
+								</div>
+							</button>
 							{limit === undefined &&
 								details.length > 1 &&
 								details.map(item => (
-									<div
+									<button
+										type="button"
+										onClick={() =>
+											onDrill({
+												kind: "category-gross",
+												value: item.id,
+												at: DateTime.fromFormat(
+													month.month,
+													"MMM yyyy",
+												).toFormat("yyyy-MM"),
+											})
+										}
 										key={item.id}
-										className="grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-x-3 pl-5 text-muted-foreground"
+										className="cursor-pointer group grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-x-3 rounded pl-5 text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 									>
 										<span
 											className="size-2 rounded-full"
@@ -407,9 +433,9 @@ function MonthBreakdown({
 										<span className="w-12 text-right tabular-nums">
 											{share(item.spending)}
 										</span>
-									</div>
+									</button>
 								))}
-						</Link>
+						</div>
 					)
 				})
 			)}

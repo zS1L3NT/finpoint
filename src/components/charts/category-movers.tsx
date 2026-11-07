@@ -1,10 +1,9 @@
 "use client"
 
-import Link from "next/link"
 import { UiIcon } from "@/components/icon"
-import { useHistory } from "@/history"
 import { themeColor } from "@/lib/palette"
 import { cn, formatCurrency } from "@/lib/utils"
+import type { Selection } from "@/logic/drilldown"
 
 type Mover = {
 	id: string
@@ -16,21 +15,23 @@ type Mover = {
 }
 
 /**
- * Categories that moved most against their average, as a Revolut-style list:
- * this month's amount with a coloured ▲/▼ change against the average.
+ * Categories with the largest spending changes against their same-period average.
  */
 export default function CategoryMovers({
 	categories,
 	comparisonCount,
-	recordHref,
+	comparisonMonths = [],
+	period = "Same period",
+	onDrill,
 	limit = 6,
 }: {
 	categories: Mover[]
 	comparisonCount: number
-	recordHref: (id: string) => string
+	comparisonMonths?: string[]
+	period?: string
+	onDrill: (selection: Selection) => void
 	limit?: number
 }) {
-	const { handlePush } = useHistory()
 	const movers = categories
 		.filter(category => category.comparison !== null && Math.abs(category.comparison) >= 0.5)
 		.sort((a, b) => Math.abs(b.comparison ?? 0) - Math.abs(a.comparison ?? 0))
@@ -50,11 +51,11 @@ export default function CategoryMovers({
 				const difference = category.comparison ?? 0
 				const up = difference > 0
 				return (
-					<Link
+					<button
+						type="button"
 						key={category.id}
-						href={recordHref(category.id)}
-						onClick={handlePush("overview")}
-						className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-lg px-2 py-2 transition-colors duration-150 ease-out hover:bg-muted/50 active:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+						onClick={() => onDrill({ kind: "compare", value: category.id })}
+						className="cursor-pointer text-left grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-lg px-2 py-2 transition-colors duration-150 ease-out hover:bg-muted/50 active:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 					>
 						<span
 							className="grid size-9 shrink-0 place-items-center rounded-full"
@@ -64,8 +65,12 @@ export default function CategoryMovers({
 						</span>
 						<span className="grid min-w-0">
 							<span className="truncate text-sm font-medium">{category.name}</span>
-							<span className="truncate text-xs text-muted-foreground tabular-nums">
-								vs {formatCurrency(category.spending - difference)} average
+							<span className="whitespace-normal text-xs text-muted-foreground tabular-nums">
+								{formatCurrency(Math.abs(difference))} {up ? "more" : "less"} than
+								your{" "}
+								<span className="whitespace-nowrap">
+									{comparisonCount}-month average
+								</span>
 							</span>
 						</span>
 						<span className="grid justify-items-end">
@@ -74,19 +79,23 @@ export default function CategoryMovers({
 							</span>
 							<span
 								className={cn(
-									"text-xs font-medium tabular-nums",
-									up ? "text-destructive" : "text-creative",
+									"text-xs tabular-nums",
+									period.startsWith("Days")
+										? "text-muted-foreground"
+										: up
+											? "text-destructive"
+											: "text-creative",
 								)}
 							>
 								{up ? "▲" : "▼"} {formatCurrency(Math.abs(difference))}
 							</span>
 						</span>
-					</Link>
+					</button>
 				)
 			})}
 			<p className="px-2 pt-1 text-xs text-muted-foreground">
-				Against the {comparisonCount}-month average over the same period. Red spent more;
-				green spent less.
+				Comparison window: {period} · {comparisonMonths.join(", ")}. Open a row to compare
+				Records.
 			</p>
 		</div>
 	)

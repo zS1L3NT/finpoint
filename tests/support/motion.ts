@@ -280,6 +280,7 @@ async function startSampling(
 								}),
 							}
 							record.frames.push(frame)
+							if (record.frames.length < 3) stableSince = now
 							current.push([
 								frame.opacity,
 								frame.transform,

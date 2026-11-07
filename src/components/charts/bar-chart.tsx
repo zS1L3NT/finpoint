@@ -46,6 +46,8 @@ export default function BarChart({
 	onSelect?: (index: number) => void
 	className?: string
 }) {
+	"use no memo"
+
 	const totals = labels.map((_, index) => series.map(s => s.values[index] ?? 0))
 	const dataMax = Math.max(
 		0,

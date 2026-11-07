@@ -8,6 +8,7 @@ import DateRange from "@/components/form/date-range"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
+import StatementTabs from "@/components/statement-tabs"
 import AmountFilter from "@/components/table/amount-filter"
 import { ClearFiltersButton, FILTER_CONTROL_CLASS, FilterBar } from "@/components/table/filter-bar"
 import PaginatedDataTable from "@/components/table/paginated-data-table"
@@ -104,7 +105,7 @@ export default function StatementsPage() {
 
 	return (
 		<>
-			<PageContent>
+			<PageContent className="gap-2 md:gap-6">
 				<PageHeader
 					title="Statements"
 					subtitle="Review imported and pending statements with their allocated records."
@@ -112,6 +113,8 @@ export default function StatementsPage() {
 					icon="lucide:credit-card"
 					back={latest ?? undefined}
 				/>
+
+				<StatementTabs active="statements" />
 
 				<PaginatedDataTable
 					paginated={paginated}
@@ -123,7 +126,7 @@ export default function StatementsPage() {
 						onPageSizeChange: handlePageSizeChange,
 						searchPlaceholder: "Search descriptions...",
 						filters: (
-							<FilterBar>
+							<FilterBar className="gap-y-1 sm:gap-y-2">
 								<Select
 									value={accountId}
 									onValueChange={value =>

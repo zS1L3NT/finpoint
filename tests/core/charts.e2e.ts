@@ -1,13 +1,11 @@
 import type { Page } from "@playwright/test"
 import { card, chartTooltip, overview, overviewCharts, themedRgb } from "../support/charts"
-import { getScenario, IDS } from "../support/data"
+import { IDS } from "../support/data"
 import { setDateOnly } from "../support/date-only"
 import { expect, seedWorkspace, test } from "../support/fixtures"
 
 const cardTitles = [
 	"Spending forecast",
-	"Surplus / Shortfall",
-	"Spending by day",
 	"Category trend",
 	"Categories this month",
 	"Monthly budgets",
@@ -19,10 +17,9 @@ const overflow = (chart: ReturnType<typeof card>) =>
 	chart.evaluate(element => element.scrollWidth - element.clientWidth)
 
 function metric(page: Page, label: string) {
-	// "Total surplus" is a prefix of "Total surplus rate"; exclude the rate tile.
-	if (label === "Total surplus")
-		return page.locator("div.min-h-24.bg-card", { hasText: /Total surplus(?! rate)/ })
-	return page.locator("div.min-h-24.bg-card", { hasText: label })
+	return page
+		.getByRole("button", { name: new RegExp(`^${label}(?: |$)`) })
+		.filter({ has: page.locator(".tabular-nums") })
 }
 
 test("Budget detail: usage tooltip reconciles actual and projected spending even with a zero plan", async ({
@@ -110,6 +107,21 @@ test("overview charts: every dense chart fits the viewport with usable graph sur
 		).toBeLessThanOrEqual(1)
 		await expect(card).not.toContainText(/NaN|Infinity/)
 		if (overviewCharts.includes(title)) {
+			const surface = card.getByRole("application")
+			await expect
+				.poll(() =>
+					surface.evaluate(element => {
+						const width = element.getBoundingClientRect().width
+						return (
+							Math.max(
+								...[...element.querySelectorAll("line")].map(line =>
+									Number(line.getAttribute("x2")),
+								),
+							) / width
+						)
+					}),
+				)
+				.toBeGreaterThan(0.95)
 			await card.getByRole("application").focus()
 			await page.keyboard.press("ArrowRight")
 			await expect(card.locator(chartTooltip)).toBeVisible()
@@ -170,7 +182,7 @@ test("dense overview: cards render values and fit, and a long Category name stay
 		)
 		await page.goto(overview)
 		const mix = card(page, "Categories this month")
-		const row = mix.getByRole("link", { name: /^Dense 早餐/ })
+		const row = mix.getByRole("button", { name: /^Dense 早餐/ })
 		await expect(row).toBeVisible()
 		const label = row.locator("span.truncate")
 		await expect(label).toHaveCSS("text-overflow", "ellipsis")
@@ -262,12 +274,7 @@ test("populated charts: tooltips stay numeric, drills work by keyboard and a Rec
 	await test.step("chart tooltips: stay numeric and inside every viewport", async () => {
 		await page.goto(overview)
 		const viewport = page.viewportSize()
-		for (const title of [
-			"Spending forecast",
-			"Surplus / Shortfall",
-			"Spending by day",
-			"Category trend",
-		]) {
+		for (const title of ["Spending forecast", "Category trend"]) {
 			const chart = card(page, title)
 			const surface = chart.getByRole("application").first()
 			await surface.scrollIntoViewIfNeeded()
@@ -311,15 +318,15 @@ test("populated charts: tooltips stay numeric, drills work by keyboard and a Rec
 		await day.focus()
 		await page.keyboard.press("Enter")
 		await expect(calendar).toContainText("Mon 5 Oct · $84.20 · 2 Records")
-		await calendar.getByRole("button", { name: "View Records", exact: true }).focus()
-		await page.keyboard.press("Enter")
+		await page.getByRole("link", { name: "Open in Records", exact: true }).click()
 		await expect(page).toHaveURL(/start_date=2026-10-05/)
 		await expect(page).toHaveURL(/end_date=2026-10-05/)
 		await page.goto(overview)
-		const mover = card(page, "Biggest changes").getByRole("link", { name: /Housing/ })
+		const mover = card(page, "Biggest changes").getByRole("button", { name: /Housing/ })
 		await mover.scrollIntoViewIfNeeded()
 		await mover.focus()
 		await page.keyboard.press("Enter")
+		await page.getByRole("link", { name: "Open in Records", exact: true }).click()
 		await expect(page).toHaveURL(new RegExp(`category_ids=${IDS.categories.rent}`))
 	})
 	await test.step("biggest changes: a saved Record amount updates the mover row and keeps its drill link and row node", async () => {
@@ -377,9 +384,9 @@ test("populated charts: tooltips stay numeric, drills work by keyboard and a Rec
 		})
 		await page.goto(overview)
 		const movers = card(page, "Biggest changes")
-		const row = movers.getByRole("link", { name: /^Groceries/ })
+		const row = movers.getByRole("button", { name: /^Groceries/ })
 		await expect(row).toBeVisible()
-		const href = await row.getAttribute("href")
+		const name = await row.textContent()
 		const rowHandle = await row.elementHandle()
 		if (!rowHandle) throw new Error("Groceries mover row missing")
 		// A second page in the same context drives a real editor save: raw
@@ -394,7 +401,7 @@ test("populated charts: tooltips stay numeric, drills work by keyboard and a Rec
 			await editor.getByRole("button", { name: "Edit Record", exact: true }).click()
 			const dialog = editor.getByRole("dialog", { name: "Edit Record", exact: true })
 			await expect(dialog).toBeVisible()
-			await dialog.locator("#amount").fill("-142.75")
+			await dialog.locator("#amount").fill("142.75")
 			await page.bringToFront()
 			// Evaluate-click keeps the first page foreground so its rAF keeps
 			// ticking while the second page saves.
@@ -402,6 +409,7 @@ test("populated charts: tooltips stay numeric, drills work by keyboard and a Rec
 			if (!save) throw new Error("editor Save missing")
 			await save.evaluate(element => (element as HTMLElement).click())
 			await save.dispose()
+			await expect(dialog).toHaveCount(0)
 			// Completion mark only after the committed money lands in the first
 			// page. The row aggregates its category (FairPrice −142.75 plus Kōpi
 			// −33.33), so the row shows $176.08, not the single-record amount.
@@ -410,7 +418,7 @@ test("populated charts: tooltips stay numeric, drills work by keyboard and a Rec
 			await editor.close()
 		}
 		await expect(row).toContainText("$176.08")
-		expect(await row.getAttribute("href"), "drill link identity retained").toBe(href)
+		expect(await row.textContent()).not.toBe(name)
 		expect(
 			await rowHandle.evaluate(element => element.isConnected),
 			"row node persists (keys kept)",
@@ -434,18 +442,32 @@ test.describe("pinned overview date", () => {
 		await seedWorkspace(page)
 		await test.step("overview summary: income, refunds and exclusions reconcile across metrics and Category mix", async () => {
 			await page.goto(overview)
-			await expect(metric(page, "Total income")).toContainText("$5,203.50")
-			await expect(metric(page, "Total spending")).toContainText("$286.63")
-			await expect(metric(page, "Total surplus")).toContainText("$4,916.87")
-			await expect(metric(page, "Total surplus rate")).toContainText("94.5%")
+			await expect(metric(page, "Income")).toContainText("$5,203.50")
+			await expect(metric(page, "Spent")).toContainText("$286.63")
+			await expect(metric(page, "Left over")).toContainText("$4,916.87")
+			await expect(metric(page, "Left over")).toContainText("94.5%")
+			for (const label of ["Spent", "Income", "Left over", "Saved this month"]) {
+				await page
+					.getByRole("button", { name: new RegExp(`^${label}`) })
+					.first()
+					.click()
+				await expect(
+					page.getByRole("link", { name: "Open in Records", exact: true }),
+				).toBeVisible()
+				await page.keyboard.press("Escape")
+			}
 			const mix = card(page, "Categories this month")
 			await expect(mix).toContainText("$306.63 expenses · $20.00 refunds")
-			await expect(mix.getByRole("link", { name: /Shopping/ })).toContainText("$100.00")
-			await expect(mix.getByRole("link", { name: /Shopping/ })).toContainText(
+			await expect(mix.getByRole("button", { name: /Shopping/ })).toContainText("$100.00")
+			await expect(mix.getByRole("button", { name: /Shopping/ })).toContainText(
 				"$20.00 refunded · $80.00 net",
 			)
-			await expect(mix.getByRole("link", { name: /Transfer|Income|Savings/ })).toHaveCount(0)
-			await expect(card(page, "Biggest changes")).toContainText("Against the 1-month average")
+			await expect(mix.getByRole("button", { name: /Transfer|Income|Savings/ })).toHaveCount(
+				0,
+			)
+			await expect(card(page, "Biggest changes")).toContainText(
+				"Comparison window: Days 1–15 · Sep 2026",
+			)
 		})
 		await test.step("spending calendar: daily amount, zero and refund days drill into exact Records", async () => {
 			await page.goto(overview)
@@ -467,7 +489,7 @@ test.describe("pinned overview date", () => {
 				calendar.getByRole("button", { name: "16 October: upcoming", exact: true }),
 			).toBeDisabled()
 			await calendar.getByRole("button", { name: /^5 October:/ }).click()
-			await calendar.getByRole("button", { name: "View Records", exact: true }).click()
+			await page.getByRole("link", { name: "Open in Records", exact: true }).click()
 			await expect(page).toHaveURL(/start_date=2026-10-05/)
 			await expect(page).toHaveURL(/end_date=2026-10-05/)
 			await expect(
@@ -483,31 +505,45 @@ test.describe("pinned overview date", () => {
 			await expect(budgets.getByRole("button", { name: "Daily", exact: true })).toBeVisible()
 			await expect(budgets).toContainText("$192.03")
 			await budgets.getByRole("button", { name: "Daily", exact: true }).click()
+			await page
+				.getByRole("button", { name: "Show the dashboard for Daily only", exact: true })
+				.click()
 			await expect(page).toHaveURL(new RegExp(`scope=${IDS.monthlyBudgets.daily}`))
+			await page.getByRole("button", { name: "Close drill-down", exact: true }).click()
 			await expect(
 				budgets.getByRole("button", { name: "Daily", exact: true }),
 			).toHaveAttribute("aria-pressed", "true")
-			await expect(budgets).toContainText("No planned amount")
+			await expect(budgets).toContainText("no plan")
 			await expect(card(page, "Categories this month")).toContainText(
 				"$192.03 expenses · $0.00 refunds",
 			)
 			await budgets.getByRole("button", { name: "Recurring", exact: true }).click()
+			await page
+				.getByRole("button", { name: "Show the dashboard for Recurring only", exact: true })
+				.click()
 			await expect(page).toHaveURL(new RegExp(`scope=${IDS.monthlyBudgets.recurring}`))
-			await expect(budgets.locator('[aria-label="$0.00 planned"]')).toBeVisible()
+			await page.getByRole("button", { name: "Close drill-down", exact: true }).click()
+			await expect(budgets).toContainText("no plan")
+			await expect(budgets).not.toContainText("of $0.00")
 			await expect(card(page, "Categories this month")).toContainText(
 				"No spending or refunds recorded in this scope.",
 			)
 			await budgets.getByRole("button", { name: "Recurring", exact: true }).click()
-			await expect(page).not.toHaveURL(/scope=/)
+			await page
+				.getByRole("button", { name: "Show the dashboard for Recurring only", exact: true })
+				.click()
+			await page.getByRole("button", { name: "Close drill-down", exact: true }).click()
+			await page.goto(overview)
 			await expect(
-				card(page, "Categories this month").getByRole("link", { name: /Shopping/ }),
+				card(page, "Categories this month").getByRole("button", { name: /Shopping/ }),
 			).toBeVisible()
 		})
 		await test.step("Category mix: drilldown carries Treatment and Category filters", async () => {
 			await page.goto(overview)
 			await card(page, "Categories this month")
-				.getByRole("link", { name: /Groceries/ })
+				.getByRole("button", { name: /Groceries/ })
 				.click()
+			await page.getByRole("link", { name: "Open in Records", exact: true }).click()
 			await expect(page).toHaveURL(new RegExp(`category_ids=${IDS.categories.groceries}`))
 			await expect(page).toHaveURL(/effective_spending=true/)
 			await expect(
@@ -519,100 +555,60 @@ test.describe("pinned overview date", () => {
 		})
 		await test.step("biggest changes: Category change title and drilldown reconcile with the previous month", async () => {
 			await page.goto(overview)
-			const housing = card(page, "Biggest changes").getByRole("link", { name: /Housing/ })
+			const housing = card(page, "Biggest changes").getByRole("button", { name: /Housing/ })
 			await expect(housing).toContainText("$0.00")
-			await expect(housing).toContainText("vs $1,400.00 average")
+			await expect(housing).toContainText("$1,400.00 less than your 1-month average")
 			await expect(housing).toContainText("▼ $1,400.00")
 			await housing.click()
+			await page.getByRole("link", { name: "Open in Records", exact: true }).click()
 			await expect(page).toHaveURL(new RegExp(`category_ids=${IDS.categories.rent}`))
-			await expect(page.getByText("No matching Records", { exact: true })).toBeVisible()
+			await expect(
+				page.getByText("No records found.", { exact: true }).filter({ visible: true }),
+			).toBeVisible()
 		})
 		await test.step("overview metrics: month change updates values and the accessible sparkline period", async () => {
 			await page.goto(overview)
-			await expect(metric(page, "Total spending")).toContainText("$286.63")
+			await expect(metric(page, "Spent")).toContainText("$286.63")
 			if (!isMobile)
-				await expect(
-					page.getByRole("img", { name: /^Total spending, .*last/ }),
-				).toBeVisible()
+				await expect(page.getByRole("img", { name: /^Spent, .*last/ })).toBeVisible()
 			await page.getByRole("button", { name: "Previous month", exact: true }).click()
 			await expect(
 				page.getByRole("heading", { name: "September 2026", exact: true }),
 			).toBeVisible()
-			await expect(metric(page, "Total spending")).toContainText("$1,400.00")
-			await expect(metric(page, "Total shortfall")).toContainText("$1,400.00")
-			await expect(metric(page, "Total surplus rate")).toContainText("—")
+			await expect(metric(page, "Spent")).toContainText("$1,400.00")
+			await expect(metric(page, "Left over")).toContainText("-$1,400.00")
+			await expect(metric(page, "Left over")).toContainText("Income less personal spending")
 			await page.getByRole("button", { name: "Next month", exact: true }).click()
-			await expect(metric(page, "Total spending")).toContainText("$286.63")
+			await expect(metric(page, "Spent")).toContainText("$286.63")
 		})
 	})
 
-	test("Monthly Budget cards: hover does not select or change the donut, and a click does", {
-		tag: ["@light"],
-	}, async ({ page, isMobile }) => {
-		test.setTimeout(120_000)
-		await seedWorkspace(page)
-		const budgets = getScenario("populated").tables.monthly_budgets.filter(
-			budget => !budget.archived,
-		)
-		await test.step("Monthly Budget card: hover leaves selection and donut centre unchanged", async () => {
-			await page.goto(overview)
-			const cards = card(page, "Monthly budgets")
-			for (const budget of budgets) {
-				const scope = cards.getByRole("button", { name: budget.name, exact: true })
-				await expect(scope).toBeVisible()
-				const dot = scope.locator("span.size-2")
-				await expect(dot).toBeVisible()
-				const box = await dot.boundingBox()
-				if (!box) throw new Error(`Expected a colour dot for ${budget.name}`)
-				expect(box.width, `${budget.name} dot width`).toBeGreaterThan(0)
-				expect(box.height, `${budget.name} dot height`).toBeGreaterThan(0)
-				expect(
-					Math.abs(box.width - box.height),
-					`${budget.name} dot stays square`,
-				).toBeLessThanOrEqual(1)
-				await expect(dot).toHaveCSS("background-color", await themedRgb(page, budget.color))
-			}
-			const daily = cards.getByRole("button", { name: "Daily", exact: true })
-			const centre = cards.locator('[aria-live="polite"]')
-			const settled = await centre.textContent()
-			expect(settled).toContain("Monthly plan")
-			await expect(daily).toHaveAttribute("aria-pressed", "false")
-			await expect(page).not.toHaveURL(/scope=/)
-			if (!isMobile) {
-				await daily.hover()
-				await expect(daily).toHaveAttribute("aria-pressed", "false")
-				await expect(page).not.toHaveURL(/scope=/)
-				await expect(centre).toHaveText(settled ?? "")
-			}
-		})
-		await test.step("Monthly Budget card: click selects, clears and edit leaves selection alone", async () => {
-			await page.goto(overview)
-			const budgets = card(page, "Monthly budgets")
-			await expect(budgets.getByRole("button", { name: "Daily", exact: true })).toBeVisible()
-			await expect(budgets).toContainText("$192.03")
-			const daily = budgets.getByRole("button", { name: "Daily", exact: true })
-			await daily.click()
-			await expect(daily).toHaveAttribute("aria-pressed", "true")
-			await expect(page).toHaveURL(new RegExp(`scope=${IDS.monthlyBudgets.daily}`))
-			await expect(budgets.locator('[aria-live="polite"]')).toContainText("Daily")
-			await daily.click()
-			await expect(daily).toHaveAttribute("aria-pressed", "false")
-			await expect(page).not.toHaveURL(/scope=/)
-			await budgets.getByRole("button", { name: "Edit Daily", exact: true }).click()
-			await expect(page.getByRole("dialog", { name: "Edit Daily" })).toBeVisible()
-			// The open dialog inerts the page behind it, so the card's
-			// selection is asserted once the dialog closes.
-			await page.keyboard.press("Escape")
-			await expect(page.getByRole("dialog")).toHaveCount(0)
-			await expect(daily).toHaveAttribute("aria-pressed", "false")
-			await expect(page).not.toHaveURL(/scope=/)
-		})
-	})
-
-	test("spending calendar: month lengths show exactly their valid dates on an empty workspace", async ({
+	test("Monthly Budget cards: drill first, scope explicitly and edit independently", async ({
 		page,
 	}) => {
-		await seedWorkspace(page, "empty")
+		await seedWorkspace(page)
+		await page.goto(overview)
+		const budgets = card(page, "Monthly budgets")
+		await expect(budgets.locator("svg[role=group]")).toHaveCount(0)
+		await expect(
+			budgets.getByRole("button", { name: "New Monthly Budget", exact: true }),
+		).toBeVisible()
+		await budgets.getByRole("button", { name: "Daily", exact: true }).click()
+		await expect(page).not.toHaveURL(/scope=/)
+		await expect(page.getByTestId("drill-total")).toHaveText("$192.03")
+		await page
+			.getByRole("button", { name: "Show the dashboard for Daily only", exact: true })
+			.click()
+		await expect(page).toHaveURL(new RegExp(`scope=${IDS.monthlyBudgets.daily}`))
+		await page.getByRole("button", { name: "Close drill-down", exact: true }).click()
+		await budgets.getByRole("button", { name: "Edit Daily", exact: true }).click()
+		await expect(page.getByRole("dialog", { name: "Edit Daily" })).toBeVisible()
+		await page.keyboard.press("Escape")
+		await expect(page.getByTestId("drill-total")).toHaveCount(0)
+	})
+
+	test("spending calendar: month lengths show exactly their valid dates", async ({ page }) => {
+		await seedWorkspace(page)
 		for (const [month, year, days] of [
 			["February", 2024, 29],
 			["February", 2025, 28],
@@ -631,10 +627,12 @@ test.describe("pinned overview date", () => {
 				await calendar
 					.getByRole("button", { name: new RegExp(`^${days} ${month}:`) })
 					.click()
-				await calendar.getByRole("button", { name: "View Records", exact: true }).click()
+				await page.getByRole("link", { name: "Open in Records", exact: true }).click()
 				const date = `${year}-${month === "February" ? "02" : month === "April" ? "04" : "09"}-${days}`
 				await expect(page).toHaveURL(new RegExp(`start_date=${date}`))
-				await expect(page.getByText("No matching Records", { exact: true })).toBeVisible()
+				await expect(
+					page.getByText("No records found.", { exact: true }).filter({ visible: true }),
+				).toBeVisible()
 			})
 		}
 	})
@@ -642,13 +640,7 @@ test.describe("pinned overview date", () => {
 	test("chart tooltips: keyboard sweeps expose actual numeric values", async ({ page }) => {
 		test.setTimeout(120_000)
 		await seedWorkspace(page)
-		for (const title of [
-			"Spending forecast",
-			"Surplus / Shortfall",
-			"Spending by day",
-			"Category trend",
-			"Spending over time",
-		]) {
+		for (const title of ["Spending forecast", "Category trend", "Spending over time"]) {
 			await test.step(`chart tooltips: ${title} keyboard navigation exposes actual numeric values`, async () => {
 				await page.goto(
 					title === "Spending over time" ? `/budgets/${IDS.budgets.manual}` : overview,
@@ -679,13 +671,7 @@ test.describe("pinned overview date", () => {
 						await page.evaluate(() => new Promise(requestAnimationFrame))
 					}
 					await expect(tooltip).toBeVisible()
-					if (title === "Spending by day") {
-						await expect(tooltip).toContainText("October 4")
-						await expect(tooltip).toContainText("-$20.00")
-						await surface.press("ArrowRight")
-						await expect(tooltip).toContainText("October 5")
-						await expect(tooltip).toContainText("$84.20")
-					} else if (title === "Spending forecast") {
+					if (title === "Spending forecast") {
 						await surface.press("ArrowRight")
 						await expect(tooltip).toContainText("October 5")
 						await expect(
@@ -700,49 +686,50 @@ test.describe("pinned overview date", () => {
 						).toContainText("$66.30")
 						await expect(
 							card(page, title).getByRole("button", { name: "Daily", exact: true }),
-						).toHaveCount(0)
+						).toBeVisible()
 					} else {
 						await surface.press("ArrowRight")
-						await expect(tooltip).toContainText(
-							title === "Surplus / Shortfall" ? "$5,137.20" : "$84.20",
-						)
+						await expect(tooltip).toContainText("$84.20")
 					}
 				}
 			})
 		}
 	})
 
-	test("empty overview: no history gives zero metrics and useful chart explanations", async ({
+	test("empty workspace: the start state offers import and demo data, and demo data loads the workspace", async ({
 		page,
 	}) => {
 		await seedWorkspace(page, "empty")
 		await page.goto(overview)
-		await expect(metric(page, "Total income")).toContainText("$0.00")
-		await expect(metric(page, "Total spending")).toContainText("$0.00")
-		await expect(metric(page, "Total balance")).toContainText("$0.00")
-		await expect(metric(page, "Total surplus rate")).toContainText("—")
-		await expect(metric(page, "Total surplus rate")).toContainText("No positive net income")
-		await expect(card(page, "Category trend")).toContainText(
-			"No spending in the available months.",
-		)
-		await expect(card(page, "Biggest changes")).toContainText(
-			"Not enough history to compare categories yet.",
-		)
-		await expect(card(page, "Spending calendar")).toContainText("0 spending days · $0.00")
-	})
-
-	test("empty overview: the demo offer loads demo data and then goes away", async ({ page }) => {
-		await seedWorkspace(page, "empty")
-		await page.goto(overview)
-		await expect(page.getByText("New to Finpoint?")).toBeVisible()
+		await expect(
+			page.getByRole("heading", { name: "Start with your bank statements", exact: true }),
+		).toBeVisible()
 		await expect(page.getByRole("link", { name: "Import statements" })).toHaveAttribute(
 			"href",
 			"/importer",
 		)
+		await expect(page.getByRole("button", { name: "Try demo data", exact: true })).toBeVisible()
 
-		await page.getByRole("button", { name: "Try demo data" }).click()
+		await page.getByRole("button", { name: "Try demo data", exact: true }).click()
 		await expect(page.getByText("Demo workspace loaded.")).toBeVisible()
-		await expect(page.getByText("New to Finpoint?")).toBeHidden()
+		await expect(
+			page.getByRole("heading", { name: "Start with your bank statements", exact: true }),
+		).toBeHidden()
+	})
+
+	test("empty month: the notice offers the latest recorded month and moves there", async ({
+		page,
+	}) => {
+		await setDateOnly(page, new Date("2026-12-15T12:00:00+08:00"))
+		await seedWorkspace(page)
+		await page.goto("/?month=November&year=2026")
+		await expect(
+			page.getByText("Nothing recorded in November yet.", { exact: true }),
+		).toBeVisible()
+		await page.getByRole("button", { name: "Go to October", exact: true }).click()
+		await expect(page).toHaveURL(/month=October&year=2026/)
+		await expect(page.getByRole("heading", { name: "October 2026", exact: true })).toBeVisible()
+		await expect(page.getByText("Nothing recorded in October yet.")).toHaveCount(0)
 	})
 
 	test("net refund: long Category name and excluded Treatment retain numeric meaning", async ({
@@ -781,13 +768,13 @@ test.describe("pinned overview date", () => {
 			{ categoryId: IDS.categories.groceries, name },
 		)
 		await page.goto(overview)
-		await expect(metric(page, "Total net refund")).toContainText("$93.37")
-		await expect(metric(page, "Total surplus")).toContainText("$5,296.87")
+		await expect(metric(page, "Spent")).toContainText("-$93.37")
+		await expect(metric(page, "Left over")).toContainText("$5,296.87")
 		const mix = card(page, "Categories this month")
-		await expect(mix.getByRole("link", { name: /Shopping/ })).toContainText(
+		await expect(mix.getByRole("button", { name: /Shopping/ })).toContainText(
 			"$400.00 refunded · -$300.00 net",
 		)
-		await expect(mix.getByRole("link", { name: new RegExp("^Groceries") })).toContainText(
+		await expect(mix.getByRole("button", { name: new RegExp("^Groceries") })).toContainText(
 			name.trim(),
 		)
 		const size = await mix.evaluate(element => ({
@@ -798,7 +785,8 @@ test.describe("pinned overview date", () => {
 		await expect(
 			card(page, "Spending calendar").getByRole("button", { name: /^4 October:/ }),
 		).toHaveAttribute("aria-label", /\$0\.00 spent/)
-		await mix.getByRole("link", { name: /^Groceries/ }).click()
+		await mix.getByRole("button", { name: /^Groceries/ }).click()
+		await page.getByRole("link", { name: "Open in Records", exact: true }).click()
 		await expect(page).toHaveURL(new RegExp(`category_ids=${IDS.categories.groceries}`))
 		await expect(
 			page.getByRole("link", { name: "Open FairPrice Run", exact: true }),
@@ -816,7 +804,6 @@ test.describe("pinned overview date", () => {
 		await expect(budgets.getByRole("button", { name: "Recurring", exact: true })).toBeVisible()
 		await expect(budgets).not.toContainText(/NaN|Infinity/)
 		await expect(card(page, "Categories this month")).not.toContainText(/NaN|Infinity/)
-		await expect(card(page, "Spending by day").getByRole("application")).toBeVisible()
 	})
 })
 
@@ -844,6 +831,8 @@ test("Spending forecast: retains gradient backdrops and comparison lines", async
 		if (series?.endsWith("-projection") && fill === "none")
 			await expect(path).toHaveAttribute("stroke-dasharray", "7 5")
 	}
+	await expect(chart).toContainText("Dotted line: September for comparison.")
+	await expect(chart.getByText(/^Sep \$/)).toBeVisible()
 	await expect(chart.locator('[data-series="total-previous"]')).toHaveAttribute(
 		"stroke-dasharray",
 		"2 4",
@@ -862,9 +851,9 @@ test("Spending forecast: preserves scope and legend semantics", { tag: ["@light"
 	await page.goto(overview)
 	const chart = card(page, "Spending forecast")
 	const legend = chart.locator('[data-slot="forecast-legend"]')
-	await expect(legend.locator(":scope > span").first()).toHaveText("Total")
-	await expect(legend.getByRole("button")).toHaveCount(0)
-	const dot = legend.locator(":scope > span").first().locator("span")
+	await expect(legend.getByRole("button").first()).toHaveText("Total")
+	await expect(legend.getByRole("button")).toHaveCount(4)
+	const dot = legend.getByRole("button").first().locator("span.size-2")
 	expect(await dot.evaluate(element => getComputedStyle(element).backgroundColor)).toBe(
 		await themedRgb(page, "var(--foreground)"),
 	)
@@ -923,7 +912,12 @@ test("overview: forecast fills XL card and category hover preserves bars", async
 	await expect
 		.poll(() => dimmed.evaluate(element => Number(getComputedStyle(element).opacity)))
 		.toBeGreaterThanOrEqual(0.6)
-	await expect(page.getByText("Spending by weekday", { exact: true })).toHaveCount(0)
+	for (const title of ["Spending by weekday", "Spending by day", "Surplus / Shortfall"]) {
+		await expect(page.getByText(title, { exact: true })).toHaveCount(0)
+	}
+	await expect(
+		card(page, "Spending calendar").getByRole("button", { name: "View Records", exact: true }),
+	).toHaveCount(0)
 })
 
 test("category trend: one shared list follows the read month and keeps its links reachable", async ({
@@ -946,7 +940,7 @@ test("category trend: one shared list follows the read month and keeps its links
 	await surface.press("ArrowRight")
 	await surface.press("ArrowRight")
 	await expect(list).toHaveAccessibleName("Categories in Sep 2026")
-	await expect(list.getByRole("link").first()).toHaveAttribute("href", /month=September/)
+	await expect(list.getByRole("button").first()).toBeVisible()
 	if (!isMobile) {
 		const box = await surface.boundingBox()
 		if (!box) throw new Error("Category trend surface missing")
@@ -960,7 +954,7 @@ test("category trend: one shared list follows the read month and keeps its links
 	await expect(card(page, "Categories this month")).toContainText("$20.00 refunded")
 })
 
-test("category cards: cap five rows and keep equal XL heights when expanding", async ({
+test("category cards: cap five rows and keep natural heights when expanding", async ({
 	page,
 	isMobile,
 }) => {
@@ -971,22 +965,29 @@ test("category cards: cap five rows and keep equal XL heights when expanding", a
 	const categories = card(page, "Categories this month")
 	const chart = card(page, "Category trend")
 	const toggle = categories.getByRole("button", { name: /more categories/ })
-	await expect(categories.getByRole("link")).toHaveCount(5)
+	await expect(categories.locator("button.group")).toHaveCount(5)
 	await expect(toggle).toHaveAttribute("aria-expanded", "false")
 	for (const expanded of [false, true, false]) {
 		if (expanded) await toggle.click()
 		else if (await categories.getByRole("button", { name: "Show fewer categories" }).count())
 			await categories.getByRole("button", { name: "Show fewer categories" }).click()
-		if (expanded) expect(await categories.getByRole("link").count()).toBeGreaterThan(5)
-		else await expect(categories.getByRole("link")).toHaveCount(5)
+		if (expanded) expect(await categories.locator("button.group").count()).toBeGreaterThan(5)
+		else await expect(categories.locator("button.group")).toHaveCount(5)
 		if (!isMobile) {
 			await expect
 				.poll(async () => {
-					const left = await categories.boundingBox()
-					const right = await chart.boundingBox()
-					return left && right ? Math.abs(left.height - right.height) : 999
+					const box = await categories.boundingBox()
+					const action = await categories
+						.getByRole("button", {
+							name: expanded ? "Show fewer categories" : /more categories/,
+						})
+						.boundingBox()
+					return box && action ? box.y + box.height - action.y - action.height : 999
 				})
-				.toBeLessThan(2)
+				.toBeLessThan(32)
+			const left = await categories.boundingBox()
+			const right = await chart.boundingBox()
+			expect(Math.abs((left?.y ?? 0) - (right?.y ?? 0))).toBeLessThan(2)
 		}
 	}
 })

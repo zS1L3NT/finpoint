@@ -127,7 +127,7 @@ test("forecast lines reconcile budgets and Unbudgeted spending across scopes", a
 	}
 })
 
-test("forecast projections retain gross pace after refunds and add scheduled spending", async () => {
+test("forecast projections use median pace after refunds and add scheduled spending", async () => {
 	const { Settings } = await import("luxon")
 	const previousNow = Settings.now
 	try {
@@ -165,8 +165,8 @@ test("forecast projections retain gross pace after refunds and add scheduled spe
 		const { pace } = await getDashboardView({ month: "October", year: 2026, scope: budget.id })
 		expect(pace.forecast[0].points[4].spending).toBe(80)
 		expect(pace.forecast[0].points[4].projected_spending).toBe(80)
-		expect(pace.forecast[0].points[9].projected_spending).toBe(230)
-		expect(pace.forecast[0].points[30].projected_spending).toBe(650)
+		expect(pace.forecast[0].points[9].projected_spending).toBe(130)
+		expect(pace.forecast[0].points[30].projected_spending).toBe(130)
 	} finally {
 		Settings.now = previousNow
 	}

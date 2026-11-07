@@ -44,6 +44,7 @@ import {
 import { FieldGroup } from "@/components/ui/field"
 import { Progress } from "@/components/ui/progress"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { useHistory } from "@/history"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { useDialogCloseAnimation } from "@/hooks/use-dialog-close-animation"
@@ -90,6 +91,7 @@ export default function RecordEditorDialog({
 
 	const [statementCache, setStatementCache] = useState(statements)
 	const [isAttachingStatement, setIsAttachingStatement] = useState(false)
+	const [moneyDirection, setMoneyDirection] = useState(record.amount < 0 ? "out" : "in")
 	const [submitError, setSubmitError] = useState("")
 
 	const { mergeErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
@@ -247,6 +249,7 @@ export default function RecordEditorDialog({
 				setIsOpen(isOpen)
 				if (isOpen) {
 					form.reset()
+					setMoneyDirection(record.amount < 0 ? "out" : "in")
 					resetApiErrors()
 				}
 			}}
@@ -345,18 +348,44 @@ export default function RecordEditorDialog({
 											/>
 										)}
 									</form.Field>
+									<ToggleGroup
+										type="single"
+										aria-label="Money direction"
+										value={moneyDirection}
+										onValueChange={value => {
+											if (!value) return
+											setMoneyDirection(value)
+											form.setFieldValue(
+												"amount",
+												Math.abs(form.getFieldValue("amount")) *
+													(value === "out" ? -1 : 1),
+											)
+											clearApiError("amount")
+										}}
+									>
+										<ToggleGroupItem value="out" className="min-h-11">
+											Money out
+										</ToggleGroupItem>
+										<ToggleGroupItem value="in" className="min-h-11">
+											Money in
+										</ToggleGroupItem>
+									</ToggleGroup>
 									<form.Field name="amount">
 										{field => (
 											<AmountField
 												id={field.name}
 												label="Amount"
-												value={field.state.value}
+												value={Math.abs(field.state.value)}
+												min={0}
 												errors={mergeErrors(
 													field.state.meta.errors,
 													field.name,
 												)}
 												onChange={value => {
-													field.handleChange(value)
+													field.handleChange(
+														Math.abs(value) *
+															(moneyDirection === "out" ? -1 : 1),
+													)
 													clearApiError(field.name)
 												}}
 											/>

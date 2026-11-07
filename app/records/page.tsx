@@ -1,6 +1,7 @@
 "use client"
 
 import { useLiveQuery } from "dexie-react-hooks"
+import { DateTime } from "luxon"
 import { useSearchParams } from "next/navigation"
 import { useCallback, useMemo, useState } from "react"
 import RecordCreatorDialog from "@/components/dialogs/record-creator"
@@ -16,6 +17,9 @@ import PaginatedDataTable from "@/components/table/paginated-data-table"
 import { useRecordColumns, useRecordMobileRow } from "@/components/table/record-columns"
 import { byDay } from "@/components/table/row-groups"
 import { Button } from "@/components/ui/button"
+import { ButtonGroup } from "@/components/ui/button-group"
+import { MonthPicker } from "@/components/ui/monthpicker"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import {
 	Select,
 	SelectContent,
@@ -24,6 +28,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select"
+import { useMonthParams } from "@/hooks/use-month-params"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { useRecordEditor } from "@/hooks/use-record-editor"
 import { TREATMENTS } from "@/lib/analytics"
@@ -37,6 +42,11 @@ import type { CategoryWithChildren, MonthlyBudget, Record } from "@/types"
 
 export default function RecordsPage() {
 	const searchParams = useSearchParams()
+	const { month, year, date } = useMonthParams()
+	const selectedDay = searchParams.get("day")
+	const selectedMonth = searchParams.get("month")
+	const selectedYear = searchParams.get("year")
+	const sort = searchParams.get("sort") ?? "date"
 	const startDate = searchParams.get("start_date")
 	const endDate = searchParams.get("end_date")
 	const minAmount = searchParams.get("min_amount")
@@ -45,6 +55,8 @@ export default function RecordsPage() {
 	const monthlyBudgetId = searchParams.get("monthly_budget_id")
 	const showUnbudgeted = ["1", "true"].includes(searchParams.get("show_unbudgeted") ?? "")
 	const treatment = searchParams.get("treatment")
+	const measure = searchParams.get("measure")
+	const effectiveSpending = searchParams.get("effective_spending") === "true"
 	const categoryIdsParam = searchParams.get("category_ids") ?? ""
 	const categoryIds = useMemo(
 		() => categoryIdsParam.split(",").filter(Boolean),
@@ -66,6 +78,7 @@ export default function RecordsPage() {
 		() =>
 			setParams({
 				query: null,
+				day: null,
 				start_date: null,
 				end_date: null,
 				min_amount: null,
@@ -75,6 +88,8 @@ export default function RecordsPage() {
 				monthly_budget_id: null,
 				show_unbudgeted: null,
 				treatment: null,
+				measure: null,
+				effective_spending: null,
 				page: null,
 			}),
 		[setParams],
@@ -87,12 +102,20 @@ export default function RecordsPage() {
 		categoryIds.length ? "categories" : null,
 		monthlyBudgetId ?? (showUnbudgeted ? "unbudgeted" : null),
 		treatment,
+		measure,
+		effectiveSpending || null,
 	].filter(Boolean).length
 
 	const recordsQuery = useLiveQuery(
 		() =>
 			listRecords({
+				day: selectedDay,
+				month: selectedMonth,
+				year: selectedYear,
+				sort,
 				query: query || null,
+				measure,
+				effective_spending: effectiveSpending,
 				start_date: startDate,
 				end_date: endDate,
 				min_amount: minAmount,
@@ -104,7 +127,13 @@ export default function RecordsPage() {
 				treatment,
 			}),
 		[
+			selectedDay,
+			selectedMonth,
+			selectedYear,
+			sort,
 			query,
+			measure,
+			effectiveSpending,
 			startDate,
 			endDate,
 			minAmount,
@@ -124,12 +153,12 @@ export default function RecordsPage() {
 	const columns = useRecordColumns<Record>({
 		pageName: "Records",
 		onEdit: handleEdit,
-		grouped: true,
+		grouped: sort === "date",
 	})
 	const mobileRow = useRecordMobileRow<Record>({
 		pageName: "Records",
 		onEdit: handleEdit,
-		grouped: true,
+		grouped: sort === "date",
 	})
 	const tableHeader = useMemo(
 		() => ({
@@ -140,6 +169,7 @@ export default function RecordsPage() {
 			searchPlaceholder: "Search title, people, location, description...",
 			filters: (
 				<RecordFilters
+					sort={sort}
 					categories={categories}
 					categoryIds={categoryIds}
 					monthlyBudgets={monthlyBudgets}
@@ -159,6 +189,7 @@ export default function RecordsPage() {
 			actions: <RecordCreatorHost categories={categories} />,
 		}),
 		[
+			sort,
 			query,
 			handleQueryChange,
 			pageSize,
@@ -186,6 +217,16 @@ export default function RecordsPage() {
 		[paginated],
 	)
 
+	const changeMonth = (next: DateTime) =>
+		setParams({
+			month: next.toFormat("MMMM"),
+			year: String(next.year),
+			day: null,
+			start_date: null,
+			end_date: null,
+			page: null,
+		})
+
 	if (recordsQuery === undefined) return null
 
 	return (
@@ -193,17 +234,56 @@ export default function RecordsPage() {
 			<PageContent>
 				<PageHeader
 					title="Records"
-					subtitle="Browse and manage your financial records."
+					subtitle={
+						selectedMonth
+							? `Records for ${month} ${year}.`
+							: "Browse and manage your financial records. Choose a month to narrow the list."
+					}
 					description="Ledger view"
 					icon="lucide:receipt-text"
+					actions={
+						<ButtonGroup className="w-full sm:w-fit">
+							<Button
+								variant="outline"
+								aria-label="Previous month"
+								onClick={() => changeMonth(date.minus({ month: 1 }))}
+							>
+								<IconifyIcon icon="lucide:arrow-left" />
+							</Button>
+							<Popover>
+								<PopoverTrigger
+									render={<Button variant="outline" className="flex-1 sm:w-32" />}
+								>
+									<IconifyIcon icon="lucide:calendar" />
+									{selectedMonth ? date.toFormat("MMM yyyy") : "All months"}
+								</PopoverTrigger>
+								<PopoverContent className="w-auto p-0">
+									<MonthPicker
+										selectedMonth={date.toJSDate()}
+										onMonthSelect={value =>
+											changeMonth(DateTime.fromJSDate(value))
+										}
+									/>
+								</PopoverContent>
+							</Popover>
+							<Button
+								variant="outline"
+								aria-label="Next month"
+								onClick={() => changeMonth(date.plus({ month: 1 }))}
+							>
+								<IconifyIcon icon="lucide:arrow-right" />
+							</Button>
+						</ButtonGroup>
+					}
 				/>
+
 				<PaginatedDataTable
 					paginated={paginated}
 					columns={columns}
 					header={tableHeader}
 					footer={tableFooter}
 					mobileRow={mobileRow}
-					groupBy={byDay<Record>("Record")}
+					groupBy={sort === "date" ? byDay<Record>("Record") : undefined}
 					emptyMessage="No records found."
 					loading={recordsQuery === undefined}
 				/>
@@ -243,6 +323,7 @@ function RecordCreatorHost({ categories }: { categories: CategoryWithChildren[] 
 }
 
 function RecordFilters({
+	sort,
 	categories,
 	categoryIds,
 	monthlyBudgets,
@@ -258,6 +339,7 @@ function RecordFilters({
 	onChange,
 	onClear,
 }: {
+	sort: string
 	categories: CategoryWithChildren[]
 	categoryIds: string[]
 	monthlyBudgets: MonthlyBudget[]
@@ -294,7 +376,24 @@ function RecordFilters({
 	}
 
 	return (
-		<FilterBar className="sm:flex sm:flex-wrap">
+		<FilterBar className="gap-y-1 sm:gap-y-2 sm:*:basis-24">
+			<Select
+				value={sort}
+				onValueChange={value => onChange({ sort: value === "date" ? null : value })}
+			>
+				<SelectTrigger
+					aria-label="Sort Records"
+					className={cn("w-full h-9 sm:w-auto", FILTER_CONTROL_CLASS)}
+				>
+					<IconifyIcon icon="lucide:arrow-up-down" />
+					<SelectValue />
+				</SelectTrigger>
+				<SelectContent>
+					<SelectItem value="date">Newest first</SelectItem>
+					<SelectItem value="amount_desc">Amount: largest first</SelectItem>
+					<SelectItem value="amount_asc">Amount: smallest first</SelectItem>
+				</SelectContent>
+			</Select>
 			<CategoryFilter
 				categories={categories}
 				selectedIds={categoryIds}

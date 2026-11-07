@@ -291,3 +291,16 @@ export function summarize(records: AnalyticsRecord[]): AnalyticsSummary {
 		monthlyBudgets,
 	}
 }
+
+/** Signed cents behind the Dashboard summary and its Records filters. */
+export function summaryMeasure(
+	treatment: Parameters<typeof contribution>[0],
+	amount: number,
+	measure: string,
+) {
+	const c = contribution(treatment, amount)
+	if (measure === "spent") return c.spending
+	if (measure === "income") return c.income
+	if (measure === "saved") return c.contributions - c.withdrawals
+	return c.income - c.spending
+}

@@ -10,6 +10,7 @@ Date-only statements may preserve a same-day timing order inferred from the bank
 _Avoid_: Transaction, bank row, feed row
 
 **Record**:
+Records is the single ledger, with optional calendar-month navigation. Legacy Monthly Records URLs redirect here with their filters intact.
 A user-managed financial entry that represents the meaningful expense, income, transfer, or adjustment behind account activity. A record may be linked to one or more statements.
 _Avoid_: Transaction, entry, ledger item
 
@@ -61,6 +62,39 @@ _Avoid_: Budget category, bucket, treatment
 A category presented under another category for one layer of grouping. Use subcategory only when the parent-child presentation matters; otherwise it is still just a category.
 _Avoid_: Child category
 
+**Drill-down**:
+The panel that lists the Records behind a number on the Dashboard, and their Allocations. On mobile it is a bottom sheet with two detents (half and full), switched with its grab handle button.
+_Avoid_: Inspect panel, breakdown, details
+
+**Effective spending**:
+Personal spending selected by the effective Record treatment (Record override, otherwise Category default, otherwise amount sign), net of refunds. Transfer / excluded and Saving / investment do not contribute.
+_Avoid_: Outflow, all money out
+
+**Left over**:
+Income minus personal spending, before Saving / investment contributions. It is a Record-based measure for the selected period and spending scope, not an account balance or available cash.
+_Avoid_: Total shortfall/surplus, disposable cash
+
+**Unbudgeted**:
+Spending Records with no Monthly Budget assigned. These still count as spending.
+_Avoid_: Uncategorised, unallocated
+
+**Pace**:
+A month-end spending estimate using prior-month spending patterns plus scheduled Records, with typical daily spending as a fallback when history is unavailable.
+_Avoid_: Guaranteed forecast
+
+**Irregular**:
+An example Monthly Budget name for spending that does not occur every month. Names do not determine treatment or forecast behaviour.
+_Avoid_: Special accounting type
+
+**Money out / Money in**:
+The Record editor's direction control: Money out stores a negative amount; Money in stores a positive amount. The amount field shows the magnitude. This direction is separate from treatment.
+_Avoid_: Debit / credit
+
+**Allocate**:
+The workspace for assigning available Statement amounts to Records. Statement cleanup is accessed through Statements tabs.
+_Avoid_: Workflows
+
+
 ## Example Dialogue
 
 Developer: "Should this imported row become a transaction?"
@@ -74,3 +108,16 @@ Domain expert: "Use a Monthly Budget for reusable calendar-month planning. Use a
 
 Developer: "Why do Category, treatment, and Monthly Budget all exist?"
 Domain expert: "The Category describes the Record, its treatment controls totals, and its optional Monthly Budget groups personal spending. Category defaults normally fill the other two."
+
+**Comparison window**:
+The included historical months used to calculate usual spending. Current months compare the same days so far; completed months compare full months. Months excluded or marked incomplete do not contribute. The window is shared by Biggest changes and its comparison Drill-down.
+_Avoid_: Normal spending, expected spending
+
+### Headline and Attention
+
+The Dashboard Headline is a fixed factual sentence: spending against the selected plan,
+a category contributing at least half of spending, and days left or the closed month's result.
+With no plan it reports spending alone. Attention replaces the review chips with at most
+three rows, prioritising over-plan Monthly Budgets, unallocated Statements, Pending Records,
+Pending Statements, then unbudgeted spending. Budget rows open their drill-down; Statement
+and Pending Record rows open their filtered work lists.

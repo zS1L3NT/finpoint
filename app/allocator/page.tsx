@@ -3,7 +3,7 @@
 import { useLiveQuery } from "dexie-react-hooks"
 import { DateTime } from "luxon"
 import { useSearchParams } from "next/navigation"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import RecordCreatorDialog from "@/components/dialogs/record-creator"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
 import DateRange from "@/components/form/date-range"
@@ -28,7 +28,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select"
-import WorkflowTabs from "@/components/workflow-tabs"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { useRecordEditor } from "@/hooks/use-record-editor"
 import { useDefaultFilterEndDateToday, useDefaultFilterStartDate } from "@/hooks/use-settings"
@@ -77,6 +76,13 @@ export default function AllocatorPage() {
 	)
 
 	const [selectedStatements, setSelectedStatements] = useState<Statement[]>([])
+	const prefill = searchParams.get("statement_ids") ?? ""
+	const appliedPrefill = useRef("")
+	useEffect(() => {
+		if (!statementsQuery || appliedPrefill.current === prefill) return
+		appliedPrefill.current = prefill
+		setSelectedStatements(statementsQuery.filter(s => prefill.split(",").includes(s.id)))
+	}, [statementsQuery, prefill])
 	const [isCreatingRecord, setIsCreatingRecord] = useState(false)
 	const [isAttachingRecord, setIsAttachingRecord] = useState(false)
 	const [isReplacingPendingStatement, setIsReplacingPendingStatement] = useState(false)
@@ -147,13 +153,11 @@ export default function AllocatorPage() {
 		<>
 			<PageContent>
 				<PageHeader
-					title="Workflows"
-					subtitle="Allocate statements to records and replace pending statements."
+					title="Allocate"
+					subtitle="Allocate statements to records."
 					description="Allocation workspace"
 					icon="lucide:link"
 				/>
-
-				<WorkflowTabs active="allocate" />
 
 				<PaginatedDataTable
 					paginated={paginated}
