@@ -6,11 +6,15 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 import { AllocationProgress } from "@/components/allocation-progress"
 import { AllocationRows } from "@/components/allocation-rows"
+import RecordEditorDialog from "@/components/dialogs/record-editor"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
+import { useRecordEditor } from "@/hooks/use-record-editor"
 import { DRILL_PIVOT, SPRING, TRANSITION } from "@/lib/motion"
 import { formatCurrency, pluralize } from "@/lib/utils"
+import { listCategories } from "@/logic/categories"
 import { getDrilldown, getDrillStatement, type Selection } from "@/logic/drilldown"
+import { pathAllocator } from "@/routes"
 export function DrillPanel({
 	selection,
 	focus,
@@ -30,6 +34,8 @@ export function DrillPanel({
 	onScope: (value: string) => void
 	close: () => void
 }) {
+	const { editingRecord, handleEdit, setEditingRecord } = useRecordEditor()
+	const categories = useLiveQuery(() => listCategories(), []) ?? []
 	const key = JSON.stringify(selection)
 	const data = useLiveQuery(
 		() => getDrilldown(month, year, scope, selection),
@@ -56,11 +62,11 @@ export function DrillPanel({
 	}, [])
 	useEffect(() => {
 		const handler = (e: KeyboardEvent) => {
-			if (e.key === "Escape") close()
+			if (e.key === "Escape" && !editingRecord) close()
 		}
 		document.addEventListener("keydown", handler)
 		return () => document.removeEventListener("keydown", handler)
-	}, [close])
+	}, [close, editingRecord])
 	useEffect(() => {
 		if (
 			data === null ||
@@ -75,6 +81,26 @@ export function DrillPanel({
 	}, [ready, desktop])
 	const content = data ? (
 		<>
+			{editingRecord ? (
+				<RecordEditorDialog
+					record={editingRecord}
+					statements={editingRecord.statements}
+					categories={categories}
+					isOpen
+					setIsOpen={open => {
+						if (!open) {
+							const id = editingRecord.id
+							setEditingRecord(null)
+							requestAnimationFrame(() =>
+								(
+									document.getElementById(`drill-edit-${id}`) ??
+									document.getElementById("drill-title")
+								)?.focus({ preventScroll: true }),
+							)
+						}
+					}}
+				/>
+			) : null}
 			<div className="flex items-start justify-between gap-3 border-b p-5">
 				<div>
 					<h2
@@ -145,6 +171,13 @@ export function DrillPanel({
 									Records allocated to this Statement
 								</p>
 								<AllocationRows statement={statement} />
+								{statement.allocable_amount !== 0 ? (
+									<Button asChild variant="outline">
+										<Link href={pathAllocator({ statement_ids: statement.id })}>
+											Allocate…
+										</Link>
+									</Button>
+								) : null}
 							</>
 						) : null
 					) : (
@@ -184,6 +217,14 @@ export function DrillPanel({
 											transition={reduced ? TRANSITION.fast : SPRING.snappy}
 											className="mb-4 overflow-hidden rounded-lg bg-muted/40 p-3"
 										>
+											<Button
+												id={`drill-edit-${r.id}`}
+												variant="outline"
+												size="sm"
+												onClick={() => handleEdit(r)}
+											>
+												Edit Record
+											</Button>
 											<AllocationRows
 												record={r}
 												onStatement={id => {
@@ -233,6 +274,7 @@ export function DrillPanel({
 		</motion.aside>
 	) : (
 		<Sheet
+			modal={!editingRecord}
 			open
 			onOpenChange={open => {
 				if (!open) close()

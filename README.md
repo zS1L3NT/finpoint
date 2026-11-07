@@ -171,3 +171,5 @@ Forecast days, Monthly Budget cards and forecast legend entries open their Recor
 The Dashboard summary shows Spent, Income and Left over. Select a metric to inspect its Records; Saved this month shows contributions less withdrawals. While income is still missing in the current month, Left over waits neutrally for income. Historical income comparisons cover the same days so far.
 
 The Dashboard uses the spending calendar and forecast for daily spending. Select a calendar day to open its Records directly. Redundant daily bars, surplus chart, weekday card and pace tiles have been removed.
+
+In the Dashboard drill-down, expand a Record and choose **Edit Record**. Saved changes update the total immediately. Close the editor to return to its action. An unallocated Statement in the Statement view offers **Allocate…**, opening the Allocator with that Statement selected.

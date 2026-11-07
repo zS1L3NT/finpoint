@@ -3,7 +3,7 @@
 import { useLiveQuery } from "dexie-react-hooks"
 import { DateTime } from "luxon"
 import { useSearchParams } from "next/navigation"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import RecordCreatorDialog from "@/components/dialogs/record-creator"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
 import DateRange from "@/components/form/date-range"
@@ -77,6 +77,13 @@ export default function AllocatorPage() {
 	)
 
 	const [selectedStatements, setSelectedStatements] = useState<Statement[]>([])
+	const prefill = searchParams.get("statement_ids") ?? ""
+	const appliedPrefill = useRef("")
+	useEffect(() => {
+		if (!statementsQuery || appliedPrefill.current === prefill) return
+		appliedPrefill.current = prefill
+		setSelectedStatements(statementsQuery.filter(s => prefill.split(",").includes(s.id)))
+	}, [statementsQuery, prefill])
 	const [isCreatingRecord, setIsCreatingRecord] = useState(false)
 	const [isAttachingRecord, setIsAttachingRecord] = useState(false)
 	const [isReplacingPendingStatement, setIsReplacingPendingStatement] = useState(false)
