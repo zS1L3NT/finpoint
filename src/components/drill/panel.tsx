@@ -80,7 +80,7 @@ export function DrillPanel({
 		)
 			close()
 	}, [data, statement, expanded, close])
-	const ready = !!data
+	const ready = !!data && (!statementId || !!statement)
 	useEffect(() => {
 		if (ready && desktop) document.getElementById("drill-title")?.focus({ preventScroll: true })
 	}, [ready, desktop])
@@ -120,9 +120,9 @@ export function DrillPanel({
 						tabIndex={-1}
 						className="text-lg font-semibold tracking-tight outline-none"
 					>
-						{data.title}
+						{statement ? statement.description : data.title}
 					</h2>
-					{data.budget ? (
+					{data.budget && !statementId ? (
 						<p className="text-xs text-muted-foreground">
 							{data.budget.amount === null
 								? "No planned amount"
@@ -134,10 +134,11 @@ export function DrillPanel({
 							aria-label="Drill-down breadcrumb"
 							className="mt-2 text-xs text-muted-foreground"
 						>
+							{data.title} ›{" "}
 							{data.records.find(r => r.id === origin?.id)?.title
 								? `${data.records.find(r => r.id === origin?.id)?.title} › `
 								: ""}
-							{statement.account.name} statement › {statement.description}
+							{statement.account.name} statement
 						</nav>
 					) : null}
 					<p
@@ -145,19 +146,31 @@ export function DrillPanel({
 						data-testid="drill-total"
 						aria-live="polite"
 					>
-						{formatCurrency(data.total)}
+						{formatCurrency(statement ? statement.amount : data.total)}
 					</p>
 					<p
 						className={cn(
 							"mt-1 text-xs text-muted-foreground",
-							!desktop && !full && "truncate",
+							!desktop && !full && !statementId && "truncate",
 						)}
 					>
-						{pluralize(data.records.length, "Record")} ·{" "}
-						{selection.kind === "category-gross" || selection.kind === "month"
-							? "Spending · refunds excluded"
-							: "Spending · refunds subtracted"}{" "}
-						· Includes <Term name="Pending" /> Records
+						{statement ? (
+							<>
+								Statement · {statement.account.name} ·{" "}
+								{parseDatetime(statement.datetime).toFormat("d MMM yyyy, HH:mm")}
+								<span className="block">
+									Funds {pluralize(statement.records.length, "Record")}
+								</span>
+							</>
+						) : (
+							<>
+								{pluralize(data.records.length, "Record")} ·{" "}
+								{selection.kind === "category-gross" || selection.kind === "month"
+									? "Spending · refunds excluded"
+									: "Spending · refunds subtracted"}{" "}
+								· Includes <Term name="Pending" /> Records
+							</>
+						)}
 					</p>
 				</div>
 				<Button
@@ -182,7 +195,7 @@ export function DrillPanel({
 					className={cn(
 						"min-h-0 flex-1 overflow-y-auto p-5",
 						!desktop && "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
-						!desktop && !full && "py-0",
+						!desktop && !full && (statementId ? "pt-3" : "py-0"),
 					)}
 				>
 					{statementId ? (
@@ -191,8 +204,11 @@ export function DrillPanel({
 								<Button variant="outline" size="sm" onClick={back}>
 									← Back
 								</Button>
-								<p className="my-5 text-3xl tabular-nums">
-									{formatCurrency(statement.amount)}
+								<p className="my-3 text-xs text-muted-foreground">
+									{statement.account.name} ·{" "}
+									{parseDatetime(statement.datetime).toFormat(
+										"d MMM yyyy, HH:mm",
+									)}
 								</p>
 								<p className="mb-3 text-xs text-muted-foreground">
 									Records allocated to this Statement
@@ -200,7 +216,11 @@ export function DrillPanel({
 								<AllocationRows statement={statement} />
 								{statement.allocable_amount !== 0 ? (
 									<Button asChild variant="outline">
-										<Link href={pathAllocator({ statement_ids: statement.id })}>
+										<Link
+											href={pathAllocator({
+												statement_ids: statement.id,
+											})}
+										>
 											Allocate…
 										</Link>
 									</Button>
@@ -332,7 +352,9 @@ export function DrillPanel({
 												) : null}
 											</span>
 											<motion.span
-												animate={{ rotate: expanded === r.id ? 180 : 0 }}
+												animate={{
+													rotate: expanded === r.id ? 180 : 0,
+												}}
 												transition={TRANSITION.fast}
 											>
 												<IconifyIcon
@@ -412,7 +434,7 @@ export function DrillPanel({
 			role="region"
 			className="sticky top-4 flex h-[calc(100vh-2rem)] flex-col overflow-hidden rounded-xl border bg-card shadow-sm"
 		>
-			{content}
+			{ready ? content : null}
 		</motion.aside>
 	) : (
 		<motion.div exit={{ opacity: 0 }} transition={TRANSITION.base}>
@@ -460,7 +482,7 @@ export function DrillPanel({
 						transition={reduced ? TRANSITION.fast : SPRING.snappy}
 						className="flex min-h-0 flex-col overflow-hidden"
 					>
-						{content}
+						{ready ? content : null}
 					</motion.div>
 				</SheetContent>
 			</Sheet>

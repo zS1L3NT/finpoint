@@ -163,7 +163,7 @@ Click a Spending calendar day to open its Drill-down: Records sorted by amount a
 
 Record and Statement detail pages retain their tables and editors, with allocated portions shown alongside amounts. Expand a Record in the Dashboard drill-down to inspect its Allocations. Pending Records show allocation progress; fully allocated list rows keep their compact layout.
 
-Expand a Record in the Dashboard Drill-down to see its Statements. Select a Statement to see its account and allocated Records. The breadcrumb and Back button return to the selection; browser Back restores the previous expansion. These views survive reloads and shared links through the `focus` URL parameter.
+Expand a Record in the Dashboard Drill-down to see its Statements. Select a Statement to see its amount, account, date and time, and the Records it funds. The header follows the focused Statement; Back restores the selection total. The breadcrumb and Back button return to the selection; browser Back restores the previous expansion. These views survive reloads and shared links through the `focus` URL parameter.
 
 Category rows, category trend month bars and their category lists open the Drill-down without leaving the Dashboard. Category rows and trend totals exclude refunds; Biggest changes describes each rise or fall in words and names the included comparison months. Open a row to compare this month with its same-period average, with refunds subtracted. The two columns list the Records behind each side; “Only this month” and “Only in comparison” identify titles absent from the other side. Current months compare the same days so far; completed months compare full months.
 
