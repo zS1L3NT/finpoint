@@ -65,6 +65,35 @@ _Avoid_: Child category
 The panel that lists the Records behind a number on the Dashboard, and their Allocations.
 _Avoid_: Inspect panel, breakdown, details
 
+**Effective spending**:
+Personal spending selected by the effective Record treatment (Record override, otherwise Category default, otherwise amount sign), net of refunds. Transfer / excluded and Saving / investment do not contribute.
+_Avoid_: Outflow, all money out
+
+**Left over**:
+Income minus personal spending, before Saving / investment contributions. It is a Record-based measure for the selected period and spending scope, not an account balance or available cash.
+_Avoid_: Total shortfall/surplus, disposable cash
+
+**Unbudgeted**:
+Spending Records with no Monthly Budget assigned. These still count as spending.
+_Avoid_: Uncategorised, unallocated
+
+**Pace**:
+A month-end spending estimate using prior-month spending patterns plus scheduled Records, with typical daily spending as a fallback when history is unavailable.
+_Avoid_: Guaranteed forecast
+
+**Irregular**:
+An example Monthly Budget name for spending that does not occur every month. Names do not determine treatment or forecast behaviour.
+_Avoid_: Special accounting type
+
+**Money out / Money in**:
+The Record editor's direction control: Money out stores a negative amount; Money in stores a positive amount. The amount field shows the magnitude. This direction is separate from treatment.
+_Avoid_: Debit / credit
+
+**Allocate**:
+The workspace for assigning available Statement amounts to Records. Statement cleanup is accessed through Statements tabs.
+_Avoid_: Workflows
+
+
 ## Example Dialogue
 
 Developer: "Should this imported row become a transaction?"

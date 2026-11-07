@@ -33,11 +33,11 @@ I've also hosted Finpoint on my personal subdomain at https://finpoint.zectan.co
 ## Features
 
 - Dashboard
-  - Monthly income, spending and surplus or shortfall
+  - Monthly income, spending and Left over
   - Spending forecast for all budgets or a single Monthly Budget, with a projected month-end and recommended pace
-  - Usage pace against each Monthly Budget's amount and previous-month comparisons
-  - Spending by day and weekday, plus a spending calendar that previews each day before opening its Records
-  - Category and Monthly Budget breakdowns, with category trends that open each month's Records
+  - Spending against each Monthly Budget's amount and previous-month comparisons
+  - A spending calendar that opens the Records behind each day
+  - Category and Monthly Budget totals, with category trends that open each month's Records
   - Biggest category changes against your usual spending
   - Page-wide Monthly Budget scope that stays across chart links and month changes
   - Reusable Monthly Budgets with monthly amount overrides
@@ -46,7 +46,7 @@ I've also hosted Finpoint on my personal subdomain at https://finpoint.zectan.co
 - Records
   - Create, update and delete Records
   - Assign Categories, Monthly Budgets and accounting treatments
-  - Attach one or more Statements through Allocations
+  - Allocate one or more Statements to a Record
   - Suggested details learned from your past Records
   - Autofilled details from Statement Rules
   - Search, filter and paginate Records
@@ -63,18 +63,18 @@ I've also hosted Finpoint on my personal subdomain at https://finpoint.zectan.co
   - Flag possible Duplicate Statements with a badge
   - Create handwritten Pending Statements
   - Search and filter by Account, status and date
+  - Replace a Pending Statement with imported activity while preserving its Allocations
+  - Fix Duplicate Statements by keeping one and moving its Allocations to it
+  - Mark same-day pairs as separate so they are no longer suggested
 - Statement Rules
   - Recognise recurring Statements by description (contains, is exactly or regex match)
   - Autofill Record title, people, location, Category, treatment and Monthly Budget
   - Live preview of the Statements a rule matches
   - Suggested rules drafted from Records you keep labelling the same way
-- Workflows
+- Allocate
   - Allocate Statements to existing or new Records
   - Split amounts across multiple Records
   - Review incomplete Allocations
-  - Replace a Pending Statement with imported activity while preserving its Allocations
-  - Fix Duplicate Statements by keeping one and moving its Allocations to it
-  - Mark same-day pairs as separate so they are no longer suggested
 - Planning
   - Categories
     - Nested subcategories
@@ -177,3 +177,5 @@ In the Dashboard drill-down, expand a Record and choose **Edit Record**. Saved c
 **Largest Records** shows the selected month and scope’s five largest Spending Records by absolute amount, including refunds. **See all** opens the sorted drill-down. On Records, **Sort Records** offers newest first or absolute amount in either direction; sorting applies before pagination and survives reloads in the URL.
 
 Allocate assigns Statements to Records. Statement cleanup lives in the Statements, Replace pending and Duplicates tabs; old cleanup URLs redirect with filters preserved. In the Record editor, choose Money out or Money in and enter a positive amount.
+
+The Dashboard’s Financial terms row offers dotted-underlined definitions with examples. Hover, focus, or tap a term; press Escape to close. Effective spending follows treatment rules and includes refunds. Left over means income minus personal spending, before saving and investment contributions.

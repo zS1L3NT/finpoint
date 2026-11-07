@@ -61,7 +61,7 @@ const editors = [
 	{
 		name: "Monthly Budget creator",
 		route: "/?month=October&year=2026",
-		trigger: "New",
+		trigger: "New Monthly Budget",
 		title: "Create monthly budget",
 		field: "Name",
 		value: "",
@@ -359,7 +359,7 @@ test("Monthly Budget editors: validate creation and persist overrides", async ({
 		const dialog = await openEditor(
 			page,
 			"/?month=October&year=2026",
-			"New",
+			"New Monthly Budget",
 			"Create monthly budget",
 		)
 		await dialog.getByRole("button", { name: "Create monthly budget", exact: true }).click()
@@ -880,7 +880,7 @@ test.describe("long content", () => {
 		for (const [route, trigger, title, label] of [
 			["/budgets", "New Budget", "Create Budget", "Name"],
 			["/categories", "Create Category", "Create Category", "Name"],
-			["/?month=October&year=2026", "New", "Create monthly budget", "Name"],
+			["/?month=October&year=2026", "New Monthly Budget", "Create monthly budget", "Name"],
 			["/statements", "Create Pending Statement", "Create Pending Statement", "Description"],
 			["/statement-rules", "New rule", "New rule", "Name"],
 		] as const) {
@@ -1069,7 +1069,7 @@ test("Monthly Budget editor: persists colour choices and disables unavailable De
 	const dialog = await openEditor(
 		page,
 		"/?month=October&year=2026",
-		"New",
+		"New Monthly Budget",
 		"Create monthly budget",
 	)
 	await dialog.getByLabel("Name", { exact: true }).fill("Colour probe")

@@ -19,6 +19,7 @@ import { UiIcon as IconifyIcon } from "@/components/icon"
 import { Metric as DashboardMetric, MetricGrid } from "@/components/metric"
 import MonthlyBudgetBadge from "@/components/monthly-budget-badge"
 import { FILTER_CONTROL_CLASS } from "@/components/table/filter-bar"
+import Term from "@/components/term"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -494,6 +495,16 @@ function SummaryBand({
 
 	return (
 		<Card className="gap-0 overflow-hidden py-0">
+			<div
+				className="flex flex-wrap gap-x-4 px-3 text-xs text-muted-foreground"
+				aria-label="Financial terms"
+			>
+				{(["Pending", "Allocation", "Effective spending", "Left over"] as const).map(
+					name => (
+						<Term key={name} name={name} />
+					),
+				)}
+			</div>
 			<MetricGrid className="grid-cols-1 rounded-none border-0 sm:grid-cols-3 lg:grid-cols-3">
 				{[
 					{

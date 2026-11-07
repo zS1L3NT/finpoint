@@ -135,7 +135,7 @@ export default function CashflowChart({
 				{showProjection
 					? " Dashed lines extend each budget's gross spending pace and include scheduled Records. "
 					: ""}
-				Hold or hover over a day to read it, and click it to open its Records.
+				Hover or focus a day to read its total. Select it to open its Records.
 			</p>
 		</div>
 	)

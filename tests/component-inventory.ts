@@ -1784,6 +1784,15 @@ export const componentInventory: InventoryEntry[] = [
 		helperExports: [],
 		scenarios: ["display"],
 	},
+	{
+		path: "src/components/term.tsx",
+		owner: "team3",
+		routes: ["/"],
+		visibleExports: ["default"],
+		dormantExports: [],
+		helperExports: [],
+		scenarios: ["display"],
+	},
 ]
 
 export const routeInventory: RouteEntry[] = [
@@ -1969,6 +1978,10 @@ export const routeInventory: RouteEntry[] = [
 
 /** Specific refinements of generic family cases. These remain required, not exempt. */
 export const scenarioDescriptions: Record<string, string> = {
+	"src/components/term.tsx#display.values":
+		"Left over exposes its plain definition and numeric example",
+	"src/components/term.tsx#display.interaction":
+		"Keyboard and tap open the definition; Escape dismisses it",
 	"src/components/dialogs/account.tsx#editor.validation":
 		"Validate supported required fields and boundary amounts, correct input and verify persisted values after reload; disabled paths asserted where this editor exposes them",
 	"src/components/dialogs/account.tsx#editor.conditional":
@@ -2374,6 +2387,11 @@ export const notApplicable: Record<string, string> = {
 
 /** Reviewed assertion mappings. Passing browser evidence is separate; unmapped cases fail by default. */
 export const behaviourCoverage: Record<string, string[]> = {
+	"src/components/term.tsx#export.default.behaviour": [
+		"term definitions open by keyboard and tap",
+	],
+	"src/components/term.tsx#display.values": ["term definitions open by keyboard and tap"],
+	"src/components/term.tsx#display.interaction": ["term definitions open by keyboard and tap"],
 	"src/components/dialogs/drive-overwrite-confirmation.tsx#export.default.behaviour": [
 		"Drive overwrite confirmation: Cancel animates popup and backdrop in and out",
 		"Drive overwrite confirmation: Replace Drive backup animates popup and backdrop in and out",

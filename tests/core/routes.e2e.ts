@@ -171,7 +171,7 @@ test("workflow tabs and sparkline: tabs navigate by keyboard, Allocate keeps its
 	})
 	await test.step("total spending sparkline: keeps finite data marks and its endpoint follows changed month values", async () => {
 		await page.goto("/?month=October&year=2026")
-		const spark = page.locator('svg[role="img"][aria-label^="Total spending,"]').first()
+		const spark = page.locator('svg[role="img"][aria-label^="Spent ›,"]').first()
 		await expect(spark).toBeAttached()
 		const points = await spark.locator("polyline").getAttribute("points")
 		expect(points).toBeTruthy()
@@ -1014,4 +1014,17 @@ test("narrow desktop: pages stack by available width and popups keep side margin
 		expect(box.x).toBeGreaterThanOrEqual(8)
 		expect(box.x + box.width).toBeLessThanOrEqual(800 - 8)
 	})
+})
+
+test("term definitions open by keyboard and tap", async ({ page }) => {
+	await seedWorkspace(page)
+	await page.goto("/?month=October&year=2026")
+	const term = page.getByRole("button", { name: "Define Left over", exact: true })
+	await term.focus()
+	await page.keyboard.press("Enter")
+	await expect(page.getByRole("tooltip")).toContainText("Income minus personal spending")
+	await page.keyboard.press("Escape")
+	await expect(page.getByRole("tooltip")).not.toBeVisible()
+	await term.click()
+	await expect(page.getByRole("tooltip")).toContainText("$3,000")
 })
