@@ -1,6 +1,7 @@
 // Mirrors `Api\RecordController`, `Api\RecordMonthlyBudgetController`,
 // `Api\CompletionsController`, and `Record::appQuery`.
 
+import { DateTime } from "luxon"
 import { db, type RecordRow } from "@/data/db"
 import { canUseMonthlyBudget } from "@/lib/analytics"
 import { contribution, summaryMeasure } from "@/logic/analytics"
@@ -28,6 +29,9 @@ export type RecordDetail = AppRecord & {
 }
 
 export type RecordFilters = {
+	day?: string | null
+	month?: string | null
+	year?: string | null
 	sort?: string | null
 	query?: string | null
 	exclude_budget_id?: string | null
@@ -138,6 +142,22 @@ export async function listRecords(filters: RecordFilters = {}) {
 				(record.description ?? "").toLowerCase().includes(q),
 		)
 	}
+	const selectedMonth =
+		filters.month && filters.year
+			? DateTime.fromFormat(`${filters.month} ${filters.year}`, "MMMM yyyy")
+			: null
+	if (selectedMonth?.isValid)
+		rows = rows.filter(r => r.datetime.startsWith(selectedMonth.toFormat("yyyy-MM")))
+	const day = Number(filters.day)
+	if (
+		selectedMonth?.isValid &&
+		Number.isInteger(day) &&
+		day >= 1 &&
+		day <= (selectedMonth.daysInMonth ?? 0)
+	)
+		rows = rows.filter(r =>
+			r.datetime.startsWith(selectedMonth.set({ day }).toFormat("yyyy-MM-dd")),
+		)
 	const { start_date, end_date } = filters
 	if (start_date) rows = rows.filter(r => r.datetime.slice(0, 10) >= start_date)
 	if (end_date) rows = rows.filter(r => r.datetime.slice(0, 10) <= end_date)

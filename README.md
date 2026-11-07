@@ -51,7 +51,7 @@ I've also hosted Finpoint on my personal subdomain at https://finpoint.zectan.co
   - Suggested details learned from your past Records
   - Autofilled details from Statement Rules
   - Search, filter and paginate Records
-  - Monthly Records view with month navigation
+  - Records month navigation, with old Monthly Records links redirecting to the same filtered Records view
 - Statements
   - Import Statements from
     - DBS

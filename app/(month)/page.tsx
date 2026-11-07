@@ -44,7 +44,7 @@ import {
 	type TrendMonth,
 } from "@/logic/dashboard"
 import { hasWorkspaceActivity, loadDemoWorkspace } from "@/logic/workspace"
-import { pathBudgets, pathDashboard, pathImporter, pathMonthlyRecords } from "@/routes"
+import { pathBudgets, pathDashboard, pathImporter, pathRecords } from "@/routes"
 import type { AnalyticsSummary } from "@/types"
 
 type DashboardView = Awaited<ReturnType<typeof getDashboardView>>
@@ -165,7 +165,7 @@ export default function DashboardPage() {
 						<Button variant="outline" size="sm" asChild>
 							<Link
 								onClick={handlePush("overview")}
-								href={pathMonthlyRecords({
+								href={pathRecords({
 									month: dataMonth,
 									year: String(dataYear),
 								})}

@@ -1,6 +1,7 @@
 "use client"
 
 import { useLiveQuery } from "dexie-react-hooks"
+import { DateTime } from "luxon"
 import { useSearchParams } from "next/navigation"
 import { useCallback, useMemo, useState } from "react"
 import RecordCreatorDialog from "@/components/dialogs/record-creator"
@@ -16,6 +17,9 @@ import PaginatedDataTable from "@/components/table/paginated-data-table"
 import { useRecordColumns, useRecordMobileRow } from "@/components/table/record-columns"
 import { byDay } from "@/components/table/row-groups"
 import { Button } from "@/components/ui/button"
+import { ButtonGroup } from "@/components/ui/button-group"
+import { MonthPicker } from "@/components/ui/monthpicker"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import {
 	Select,
 	SelectContent,
@@ -24,6 +28,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select"
+import { useMonthParams } from "@/hooks/use-month-params"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { useRecordEditor } from "@/hooks/use-record-editor"
 import { TREATMENTS } from "@/lib/analytics"
@@ -37,6 +42,10 @@ import type { CategoryWithChildren, MonthlyBudget, Record } from "@/types"
 
 export default function RecordsPage() {
 	const searchParams = useSearchParams()
+	const { month, year, date } = useMonthParams()
+	const selectedDay = searchParams.get("day")
+	const selectedMonth = searchParams.get("month")
+	const selectedYear = searchParams.get("year")
 	const sort = searchParams.get("sort") ?? "date"
 	const startDate = searchParams.get("start_date")
 	const endDate = searchParams.get("end_date")
@@ -69,6 +78,9 @@ export default function RecordsPage() {
 		() =>
 			setParams({
 				query: null,
+				day: null,
+				month: null,
+				year: null,
 				start_date: null,
 				end_date: null,
 				min_amount: null,
@@ -86,6 +98,7 @@ export default function RecordsPage() {
 	)
 	const activeFilterCount = [
 		searchParams.get("query"),
+		selectedMonth,
 		startDate ?? endDate,
 		minAmount ?? maxAmount,
 		isAllocated,
@@ -99,6 +112,9 @@ export default function RecordsPage() {
 	const recordsQuery = useLiveQuery(
 		() =>
 			listRecords({
+				day: selectedDay,
+				month: selectedMonth,
+				year: selectedYear,
 				sort,
 				query: query || null,
 				measure,
@@ -114,6 +130,9 @@ export default function RecordsPage() {
 				treatment,
 			}),
 		[
+			selectedDay,
+			selectedMonth,
+			selectedYear,
 			sort,
 			query,
 			measure,
@@ -201,6 +220,16 @@ export default function RecordsPage() {
 		[paginated],
 	)
 
+	const changeMonth = (next: DateTime) =>
+		setParams({
+			month: next.toFormat("MMMM"),
+			year: String(next.year),
+			day: null,
+			start_date: null,
+			end_date: null,
+			page: null,
+		})
+
 	if (recordsQuery === undefined) return null
 
 	return (
@@ -208,9 +237,47 @@ export default function RecordsPage() {
 			<PageContent>
 				<PageHeader
 					title="Records"
-					subtitle="Browse and manage your financial records."
+					subtitle={
+						selectedMonth
+							? `Records for ${month} ${year}.`
+							: "Browse and manage your financial records. Choose a month to narrow the list."
+					}
 					description="Ledger view"
 					icon="lucide:receipt-text"
+					actions={
+						<ButtonGroup className="w-full sm:w-fit">
+							<Button
+								variant="outline"
+								aria-label="Previous month"
+								onClick={() => changeMonth(date.minus({ month: 1 }))}
+							>
+								<IconifyIcon icon="lucide:arrow-left" />
+							</Button>
+							<Popover>
+								<PopoverTrigger
+									render={<Button variant="outline" className="flex-1 sm:w-32" />}
+								>
+									<IconifyIcon icon="lucide:calendar" />
+									{selectedMonth ? date.toFormat("MMM yyyy") : "All months"}
+								</PopoverTrigger>
+								<PopoverContent className="w-auto p-0">
+									<MonthPicker
+										selectedMonth={date.toJSDate()}
+										onMonthSelect={value =>
+											changeMonth(DateTime.fromJSDate(value))
+										}
+									/>
+								</PopoverContent>
+							</Popover>
+							<Button
+								variant="outline"
+								aria-label="Next month"
+								onClick={() => changeMonth(date.plus({ month: 1 }))}
+							>
+								<IconifyIcon icon="lucide:arrow-right" />
+							</Button>
+						</ButtonGroup>
+					}
 				/>
 
 				<PaginatedDataTable

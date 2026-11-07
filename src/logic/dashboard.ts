@@ -24,7 +24,7 @@ import {
 } from "@/logic/pending"
 import { resolveRecordChoices } from "@/logic/record-choices"
 
-import { pathAllocator, pathMonthlyRecords, pathStatements } from "@/routes"
+import { pathAllocator, pathRecords, pathStatements } from "@/routes"
 
 export const COMPARISON_MONTHS = 2
 export const BREAKDOWN_MONTHS = 4
@@ -1280,7 +1280,7 @@ export function buildAttention(
 						label: pluralize(data.review.pending_records, "Pending Record"),
 						detail: "Not yet matched to a Statement.",
 						icon: "lucide:circle-dashed",
-						href: pathMonthlyRecords({
+						href: pathRecords({
 							month,
 							year: String(year),
 							is_allocated: "false",

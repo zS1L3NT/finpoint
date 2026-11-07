@@ -10,6 +10,7 @@ Date-only statements may preserve a same-day timing order inferred from the bank
 _Avoid_: Transaction, bank row, feed row
 
 **Record**:
+Records is the single ledger, with optional calendar-month navigation. Legacy Monthly Records URLs redirect here with their filters intact.
 A user-managed financial entry that represents the meaningful expense, income, transfer, or adjustment behind account activity. A record may be linked to one or more statements.
 _Avoid_: Transaction, entry, ledger item
 

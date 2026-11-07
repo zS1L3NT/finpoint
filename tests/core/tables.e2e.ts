@@ -311,26 +311,20 @@ test("Records lists: later and future Records keep amounts and drills, long Reco
 	page,
 }) => {
 	await seedWorkspace(page)
-	await test.step("Monthly Records: later and future Records keep amounts and working drills", async () => {
+	await test.step("Records by month: later and future Records keep amounts and working drills", async () => {
 		await patchRows(page, "records", [
 			{ id: IDS.records.unicode, datetime: "2026-11-10 13:20" },
 			{ id: "t1-r-refund", datetime: "2026-10-20 11:10" },
 		])
 		await page.goto("/records/monthly?month=October&year=2026")
-		const later = page
-			.locator("section")
-			.filter({ has: page.getByRole("heading", { name: "Later this month", exact: true }) })
-		await expect(later).toContainText("Excluded from actual totals.")
 		await expect(
-			later
+			page
 				.getByRole("link", { name: "Open Returned Kettle", exact: true })
 				.filter({ visible: true }),
 		).toBeVisible()
-		await expect(later).toContainText("$20.00")
+		await expect(page.locator("main")).toContainText("$20.00")
 		await page.goto("/records/monthly?month=November&year=2026")
-		await expect(
-			page.getByRole("heading", { name: "November 2026", exact: true }),
-		).toBeVisible()
+		await expect(page.getByText("Records for November 2026.", { exact: true })).toBeVisible()
 		const future = page.getByRole("link", { name: /^Open Kōpi/ }).filter({ visible: true })
 		await fits(page, future)
 		await expect(page.locator("main")).toContainText("-$33.33")

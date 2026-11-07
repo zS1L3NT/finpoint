@@ -997,7 +997,7 @@ test.describe("empty workspace", () => {
 	})
 })
 
-test("Monthly Records editor: saved title appears immediately and survives reload", async ({
+test("Records month editor via legacy URL: saved title appears immediately and survives reload", async ({
 	page,
 	workspace,
 }) => {

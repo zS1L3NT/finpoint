@@ -57,25 +57,6 @@ const denseRowConsumers: MotionConsumer[] = [
 		dense: true,
 	},
 	{
-		name: "Monthly Records",
-		origin: "/?month=October&year=2026",
-		action: "month-tab",
-		target: "Monthly Records",
-		selector:
-			'main section[aria-labelledby="actual-records"] tbody tr:has(a[href^="/records/"]), main section[aria-labelledby="actual-records"] div.grid-cols-subgrid:has(a[href^="/records/"])',
-		dense: true,
-	},
-	{
-		name: "future Monthly Records",
-		origin: "/?month=October&year=2026",
-		action: "month-tab",
-		target: "Monthly Records",
-		selector:
-			'main section:not([aria-labelledby]) tbody tr:has(a[href^="/records/"]), main section:not([aria-labelledby]) div.grid-cols-subgrid:has(a[href^="/records/"])',
-		dense: true,
-		future: true,
-	},
-	{
 		name: "pending queue",
 		origin: "/statements",
 		action: "workflow",
@@ -667,7 +648,7 @@ test("table refilter from no results: visible results enter with an entrance", {
 	}
 })
 
-test("table rows: Records, Statements, Monthly Records, future Monthly Records, pending queue and Allocate enter as a cascade in the viewport", {
+test("table rows: Records, Statements, pending queue and Allocate enter as a cascade in the viewport", {
 	tag: ["@tall", "@light", "@reduced-motion"],
 }, async ({ page, isMobile }) => {
 	test.setTimeout(180000)

@@ -714,7 +714,7 @@ test("history clearing: cancelled links, sidebar, tabs and chart drills clear or
 		await expect(page).toHaveURL(/\/privacy$/)
 		await expect(page.getByRole("button", { name: /^Back to / })).toHaveCount(0)
 	})
-	await test.step("sidebar and month tabs: clear drill history", async () => {
+	await test.step("sidebar: clears drill history", async () => {
 		await resetHistory(page, "/privacy")
 		await page.getByRole("link", { name: "Terms of Service", exact: true }).click()
 		await expect(page.getByRole("button", { name: /^Back to / })).toBeVisible()
@@ -726,12 +726,6 @@ test("history clearing: cancelled links, sidebar, tabs and chart drills clear or
 			.click()
 		// The sidebar clears history at once, so Terms can lose its Back before Dashboard commits.
 		await expect(page).toHaveURL(/\/(\?|$)/)
-		await expect(page.getByRole("button", { name: /^Back to / })).toHaveCount(0)
-		await page
-			.getByRole("navigation", { name: "Monthly finance views" })
-			.getByRole("link", { name: "Monthly Records", exact: true })
-			.click()
-		await expect(page).toHaveURL(/\/records\/monthly/)
 		await expect(page.getByRole("button", { name: /^Back to / })).toHaveCount(0)
 	})
 })

@@ -1,6 +1,6 @@
 "use client"
 
-import { usePathname } from "next/navigation"
+import { usePathname, useSearchParams } from "next/navigation"
 import { useEffect } from "react"
 import AppHeader from "@/components/layout/app-header"
 import { useMonthParams } from "@/hooks/use-month-params"
@@ -12,7 +12,6 @@ import {
 	pathDashboard,
 	pathDataSettings,
 	pathImporter,
-	pathMonthlyRecords,
 	pathPrivacy,
 	pathRecords,
 	pathSettings,
@@ -25,7 +24,6 @@ import {
 
 const TITLES: { match: (pathname: string) => boolean; title: string }[] = [
 	{ match: pathname => pathname === pathDashboard(), title: "Dashboard" },
-	{ match: pathname => pathname.startsWith(pathMonthlyRecords()), title: "Monthly Records" },
 	{ match: pathname => pathname.startsWith(`${pathRecords()}/`), title: "Record" },
 	{ match: pathname => pathname.startsWith(pathRecords()), title: "Records" },
 	{
@@ -51,13 +49,14 @@ const TITLES: { match: (pathname: string) => boolean; title: string }[] = [
 /** Persistent top bar: lives above the per-route animation boundary. Also owns the tab title. */
 export default function ShellHeader() {
 	const pathname = usePathname()
+	const searchParams = useSearchParams()
 	const { date } = useMonthParams()
 	const title = TITLES.find(entry => entry.match(pathname))?.title ?? "Page not found"
 	// Month views lead with the month, so several open tabs stay tellable apart.
 	const monthView =
 		pathname === pathDashboard()
-			? "Overview"
-			: pathname.startsWith(pathMonthlyRecords())
+			? "Dashboard"
+			: pathname === pathRecords() && searchParams.has("month")
 				? "Records"
 				: null
 	const tabTitle = `${monthView ? `${date.toFormat("MMM yyyy")} ${monthView}` : title} · Finpoint`
