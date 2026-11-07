@@ -42,7 +42,8 @@ I've also hosted Finpoint on my personal subdomain at https://finpoint.zectan.co
   - Page-wide Monthly Budget scope that stays across chart links and month changes
   - Reusable Monthly Budgets with monthly amount overrides
   - Review links for Pending Records, Pending Statements, unallocated Statements and unbudgeted spending
-  - Demo data offered on an empty overview
+  - A start state on an empty workspace offering statement import or demo data
+  - A notice on an empty month offering the latest recorded month
 - Records
   - Create, update and delete Records
   - Assign Categories, Monthly Budgets and accounting treatments

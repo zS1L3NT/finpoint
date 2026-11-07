@@ -589,10 +589,8 @@ test.describe("pinned overview date", () => {
 		await expect(page.getByTestId("drill-total")).toHaveCount(0)
 	})
 
-	test("spending calendar: month lengths show exactly their valid dates on an empty workspace", async ({
-		page,
-	}) => {
-		await seedWorkspace(page, "empty")
+	test("spending calendar: month lengths show exactly their valid dates", async ({ page }) => {
+		await seedWorkspace(page)
 		for (const [month, year, days] of [
 			["February", 2024, 29],
 			["February", 2025, 28],
@@ -680,37 +678,40 @@ test.describe("pinned overview date", () => {
 		}
 	})
 
-	test("empty overview: no history gives zero metrics and useful chart explanations", async ({
+	test("empty workspace: the start state offers import and demo data, and demo data loads the workspace", async ({
 		page,
 	}) => {
 		await seedWorkspace(page, "empty")
 		await page.goto(overview)
-		await expect(metric(page, "Income")).toContainText("None recorded")
-		await expect(metric(page, "Spent")).toContainText("$0.00")
-		await expect(metric(page, "Left over")).toContainText("Waiting for income")
-		await expect(metric(page, "Left over")).toContainText("—")
-		await expect(page.getByRole("button", { name: /^Saved this month/ })).toContainText("$0.00")
-		await expect(card(page, "Category trend")).toContainText(
-			"No spending in the available months.",
-		)
-		await expect(card(page, "Biggest changes")).toContainText(
-			"Not enough history to compare categories yet.",
-		)
-		await expect(card(page, "Spending calendar")).toContainText("0 spending days · $0.00")
-	})
-
-	test("empty overview: the demo offer loads demo data and then goes away", async ({ page }) => {
-		await seedWorkspace(page, "empty")
-		await page.goto(overview)
-		await expect(page.getByText("New to Finpoint?")).toBeVisible()
+		await expect(
+			page.getByRole("heading", { name: "Start with your bank statements", exact: true }),
+		).toBeVisible()
 		await expect(page.getByRole("link", { name: "Import statements" })).toHaveAttribute(
 			"href",
 			"/importer",
 		)
+		await expect(page.getByRole("button", { name: "Try demo data", exact: true })).toBeVisible()
 
-		await page.getByRole("button", { name: "Try demo data" }).click()
+		await page.getByRole("button", { name: "Try demo data", exact: true }).click()
 		await expect(page.getByText("Demo workspace loaded.")).toBeVisible()
-		await expect(page.getByText("New to Finpoint?")).toBeHidden()
+		await expect(
+			page.getByRole("heading", { name: "Start with your bank statements", exact: true }),
+		).toBeHidden()
+	})
+
+	test("empty month: the notice offers the latest recorded month and moves there", async ({
+		page,
+	}) => {
+		await setDateOnly(page, new Date("2026-12-15T12:00:00+08:00"))
+		await seedWorkspace(page)
+		await page.goto("/?month=November&year=2026")
+		await expect(
+			page.getByText("Nothing recorded in November yet.", { exact: true }),
+		).toBeVisible()
+		await page.getByRole("button", { name: "Go to October", exact: true }).click()
+		await expect(page).toHaveURL(/month=October&year=2026/)
+		await expect(page.getByRole("heading", { name: "October 2026", exact: true })).toBeVisible()
+		await expect(page.getByText("Nothing recorded in October yet.")).toHaveCount(0)
 	})
 
 	test("net refund: long Category name and excluded Treatment retain numeric meaning", async ({

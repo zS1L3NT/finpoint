@@ -38,7 +38,7 @@ import { useStagedMount } from "@/hooks/use-staged-mount"
 import { SPRING, TRANSITION } from "@/lib/motion"
 import { themeColor } from "@/lib/palette"
 import { cn, formatCurrency, pluralize } from "@/lib/utils"
-import { getDashboardView, type TrendMonth } from "@/logic/dashboard"
+import { findLatestRecordMonth, getDashboardView, type TrendMonth } from "@/logic/dashboard"
 import { hasWorkspaceActivity, loadDemoWorkspace } from "@/logic/workspace"
 import {
 	pathAllocator,
@@ -95,7 +95,8 @@ export default function DashboardPage() {
 	// The summary and pace chart paint first; the sections below the fold then mount one per
 	// frame. Mounting every chart in one commit blocked arrival for ~300ms in production.
 	const stage = useStagedMount(2, !!data && !!paceData)
-	if (!view || !data || !paceData) return null
+	if (active === undefined || !view || !data || !paceData) return null
+	if (active === false) return <DemoOffer />
 	const {
 		scope,
 		scopedBudgetIds,
@@ -132,7 +133,9 @@ export default function DashboardPage() {
 				aria-busy={stale}
 				className={cn("reveal grid gap-5 md:gap-6", stale && STALE_MONTH_CLASS)}
 			>
-				{active === false ? <DemoOffer /> : null}
+				{!period.is_future && data.record_count === 0 ? (
+					<EmptyMonthNotice month={dataMonth} year={dataYear} />
+				) : null}
 				{period.is_future ? (
 					<div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border bg-muted/20 p-4">
 						<div>
@@ -390,26 +393,55 @@ function DemoOffer() {
 	}
 
 	return (
-		<div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border bg-muted/20 p-4">
-			<div>
-				<p className="text-sm font-semibold">New to Finpoint?</p>
-				<p className="mt-1 text-xs text-muted-foreground">
-					Explore with demo data: 3 accounts and 5 months of Records. Reset it any time
-					from Data.
-				</p>
-			</div>
-			<div className="flex flex-wrap gap-2">
-				<Button variant="outline" size="sm" asChild>
+		<div className="reveal mx-auto flex max-w-md flex-col items-center gap-4 py-16 text-center">
+			<span className="flex size-12 items-center justify-center rounded-full bg-muted">
+				<IconifyIcon icon="lucide:wallet" className="size-6 text-muted-foreground" />
+			</span>
+			<h2 className="text-lg font-semibold">Start with your bank statements</h2>
+			<p className="text-sm text-muted-foreground">
+				Import a statement file and Finpoint builds your Records, budgets and charts from
+				it. Or explore first with demo data: 3 accounts and 5 months of Records. Reset it
+				any time from Data.
+			</p>
+			<div className="flex flex-wrap justify-center gap-2">
+				<Button asChild>
 					<Link href={pathImporter()}>
 						<IconifyIcon icon="lucide:upload" />
 						Import statements
 					</Link>
 				</Button>
-				<Button size="sm" disabled={loading} onClick={() => void handleDemo()}>
+				<Button variant="outline" disabled={loading} onClick={() => void handleDemo()}>
 					<IconifyIcon icon="lucide:sparkles" />
 					{loading ? "Loading…" : "Try demo data"}
 				</Button>
 			</div>
+		</div>
+	)
+}
+
+function EmptyMonthNotice({ month, year }: { month: string; year: number }) {
+	const { setSearchParams } = useMonthParams()
+	const latest = useLiveQuery(() => findLatestRecordMonth({ month, year }), [month, year])
+
+	return (
+		<div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border bg-muted/20 p-4">
+			<p className="text-sm">Nothing recorded in {month} yet.</p>
+			{latest ? (
+				<Button
+					variant="outline"
+					size="sm"
+					onClick={() =>
+						setSearchParams(previous => ({
+							month: latest.month,
+							year: String(latest.year),
+							scope: previous.get("scope") ?? undefined,
+						}))
+					}
+				>
+					Go to {latest.month}
+					<IconifyIcon icon="lucide:arrow-left" />
+				</Button>
+			) : null}
 		</div>
 	)
 }

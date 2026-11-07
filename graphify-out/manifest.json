@@ -6,9 +6,9 @@
     "semantic_hash": ""
   },
   "app/(month)/page.tsx": {
-    "mtime": 1794028263.8797534,
-    "seen": 1794029325.533299,
-    "ast_hash": "425a2f514c61798c2d346d56bbb01e49",
+    "mtime": 1794029643.0874946,
+    "seen": 1794038435.85001,
+    "ast_hash": "24ebf1f55c32261ebed8f28bed217f00",
     "semantic_hash": ""
   },
   "app/(month)/records/monthly/page.tsx": {
@@ -162,9 +162,9 @@
     "semantic_hash": "7d8a33d5aa042f85737cd2f3334ae040"
   },
   "next-env.d.ts": {
-    "mtime": 1794029182.4039505,
-    "seen": 1794029325.5333428,
-    "ast_hash": "8195d2c60ce847a459ae9d308d6a5724",
+    "mtime": 1794029814.946197,
+    "seen": 1794038435.8502128,
+    "ast_hash": "aa94238a90e7d04b7a47ecc3145ba6a0",
     "semantic_hash": ""
   },
   "next.config.ts": {
@@ -882,9 +882,9 @@
     "semantic_hash": ""
   },
   "src/logic/dashboard.ts": {
-    "mtime": 1794028207.3076284,
-    "seen": 1794029325.5335274,
-    "ast_hash": "3b1e1b2c85946e78578774b1394de305",
+    "mtime": 1794029782.6904306,
+    "seen": 1794038435.851058,
+    "ast_hash": "1775fe79e557f002228513d3179a5213",
     "semantic_hash": ""
   },
   "src/logic/drive-sync.ts": {
@@ -990,10 +990,10 @@
     "semantic_hash": "c6d623463f145b3807f057a3f430ae23"
   },
   "README.md": {
-    "mtime": 1794028290.3438108,
-    "seen": 1794029327.4789414,
-    "ast_hash": "c457256a23071e28633ca0025d9dabe4",
-    "semantic_hash": "c457256a23071e28633ca0025d9dabe4"
+    "mtime": 1794029672.9712589,
+    "seen": 1794038435.8515399,
+    "ast_hash": "d52e195b6a4b776b484c742643ec4626",
+    "semantic_hash": ""
   },
   "assets/branding/finpoint-icon-prompt.txt": {
     "mtime": 1793935852.1723228,
@@ -1248,15 +1248,15 @@
     "semantic_hash": ""
   },
   "tests/component-inventory.ts": {
-    "mtime": 1794028026.539203,
-    "seen": 1794028176.8795657,
-    "ast_hash": "9d84d57e0ce572eed87336458404cac5",
+    "mtime": 1794029665.0193212,
+    "seen": 1794038435.8512633,
+    "ast_hash": "020833765d8471bbbbebb52d1055b89e",
     "semantic_hash": ""
   },
   "tests/core/charts.e2e.ts": {
-    "mtime": 1794028722.9233778,
-    "seen": 1794029325.5335677,
-    "ast_hash": "0710df027cd57635f829f354adad2393",
+    "mtime": 1794029782.78643,
+    "seen": 1794038435.851268,
+    "ast_hash": "844ed2f2ada1d484eef014eaf07b7160",
     "semantic_hash": ""
   },
   "tests/core/components.e2e.ts": {
@@ -1671,6 +1671,12 @@
     "mtime": 1794021652.3391225,
     "seen": 1794022177.1764278,
     "ast_hash": "bc8f95dfd4adc50be5cd302f5677df87",
+    "semantic_hash": ""
+  },
+  "tests/domain/empty-states.test.ts": {
+    "mtime": 1794029625.4996355,
+    "seen": 1794038435.8513677,
+    "ast_hash": "0c1921aac7fa3c7e9c77fe2552847400",
     "semantic_hash": ""
   }
 }

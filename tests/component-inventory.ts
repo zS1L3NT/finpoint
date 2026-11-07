@@ -2774,7 +2774,6 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"src/components/charts/category-history-chart.tsx#chart.values": [
 		"chart tooltips: Category trend keyboard navigation exposes actual numeric values",
-		"empty overview: no history gives zero metrics and useful chart explanations",
 		"Category trend chart: unavailable months are distinguished from recorded zero spending",
 	],
 	"src/components/charts/budget-progress-chart.tsx#export.default.behaviour": [
@@ -2792,11 +2791,9 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"src/components/charts/category-movers.tsx#export.default.behaviour": [
 		"biggest changes: Category change title and drilldown reconcile with the previous month",
-		"empty overview: no history gives zero metrics and useful chart explanations",
 	],
 	"src/components/charts/category-movers.tsx#chart.values": [
 		"biggest changes: Category change title and drilldown reconcile with the previous month",
-		"empty overview: no history gives zero metrics and useful chart explanations",
 	],
 	"src/components/charts/monthly-budget-usage.tsx#export.default.behaviour": [
 		"Monthly Budget card: null amount and zero plan remain distinct when scope changes",
@@ -2823,15 +2820,12 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"src/components/metric.tsx#export.Metric.behaviour": [
 		"overview summary: income, refunds and exclusions reconcile across metrics and Category mix",
-		"empty overview: no history gives zero metrics and useful chart explanations",
 	],
 	"src/components/metric.tsx#export.MetricGrid.behaviour": [
 		"overview summary: income, refunds and exclusions reconcile across metrics and Category mix",
-		"empty overview: no history gives zero metrics and useful chart explanations",
 	],
 	"src/components/metric.tsx#display.values": [
 		"overview summary: income, refunds and exclusions reconcile across metrics and Category mix",
-		"empty overview: no history gives zero metrics and useful chart explanations",
 	],
 	"src/components/value-swap.tsx#export.default.behaviour": [
 		"overview metrics: month change updates values and the accessible sparkline period",
@@ -3793,7 +3787,8 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"app/(month)/page.tsx#route.data": [
 		"overview summary: income, refunds and exclusions reconcile across metrics and Category mix",
-		"empty overview: no history gives zero metrics and useful chart explanations",
+		"empty workspace: the start state offers import and demo data, and demo data loads the workspace",
+		"empty month: the notice offers the latest recorded month and moves there",
 		"Monthly Budget card: null amount and zero plan remain distinct when scope changes",
 		"Monthly Budget rows: zero and null plans never display invalid percentages",
 		"spending calendar: daily amount, zero and refund days drill into exact Records",
@@ -4076,11 +4071,9 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"src/components/charts/budget-progress-chart.tsx#chart.values": [
 		"chart tooltips: Spending over time keyboard navigation exposes actual numeric values",
-		"empty overview: no history gives zero metrics and useful chart explanations",
 	],
 	"src/components/charts/cashflow-chart.tsx#chart.values": [
 		"chart tooltips: Spending forecast keyboard navigation exposes actual numeric values",
-		"empty overview: no history gives zero metrics and useful chart explanations",
 	],
 	"src/components/charts/cashflow-chart.tsx#chart.responsive": [
 		"dense overview cards: every card renders values and fits the viewport",

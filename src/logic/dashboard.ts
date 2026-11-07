@@ -326,6 +326,26 @@ function buildSpendingHistory(
 	]
 }
 
+export type RecordMonth = { month: string; year: number }
+
+/**
+ * Most recent month before the given one holding at least one Record, or null
+ * when no earlier month has any. Powers the empty-month "Go to <month>" notice.
+ */
+export async function findLatestRecordMonth(input: DashboardInput): Promise<RecordMonth | null> {
+	const start = monthStart(input.month, input.year)
+
+	const latest = await db.records
+		.where("datetime")
+		.below(start.toFormat("yyyy-MM-dd HH:mm"))
+		.reverse()
+		.first()
+	if (!latest) return null
+
+	const date = DateTime.fromFormat(latest.datetime.slice(0, 7), "yyyy-MM")
+	return { month: date.monthLong ?? input.month, year: date.year }
+}
+
 export async function getDashboard(
 	input: DashboardInput & { scope?: string },
 	preloaded?: LoadedTables,
@@ -428,6 +448,7 @@ export async function getDashboard(
 		monthlyBudgets: monthlyBudgetsWithSpending,
 		categories,
 		future_records_count: futureRecords.length,
+		record_count: monthRecords.length,
 	}
 }
 
