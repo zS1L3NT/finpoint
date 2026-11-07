@@ -605,3 +605,17 @@ test("Statement title opens the funded Records detail", async ({ page }) => {
 	await expect(page).toHaveURL(/statements\/t1-s-groceries/)
 	await expect(page.getByRole("link", { name: "FairPrice Run", exact: true })).toBeVisible()
 })
+
+test("Records month context is excluded from Clear filters and survives clearing status", async ({
+	page,
+}) => {
+	await seedWorkspace(page)
+	await page.goto("/records?month=October&year=2026")
+	await expect(page.getByRole("button", { name: /^Clear/ })).toBeDisabled()
+	await page.goto("/records?month=October&year=2026&is_allocated=false")
+	await expect(page.getByRole("button", { name: /^Clear/ })).toHaveAccessibleName("Clear 1")
+	await page.getByRole("button", { name: /^Clear/ }).click()
+	await expect(page).toHaveURL(/month=October/)
+	await expect(page).not.toHaveURL(/is_allocated=/)
+	await expect(page.getByRole("button", { name: /^Clear/ })).toBeDisabled()
+})

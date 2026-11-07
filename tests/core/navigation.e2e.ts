@@ -1,5 +1,5 @@
 import type { Page } from "@playwright/test"
-import { expect, test } from "../support/fixtures"
+import { expect, seedWorkspace, test } from "../support/fixtures"
 
 async function expectBackAboveHeadingFromHistoryRegressions(page: Page, backName: string) {
 	const back = page.getByRole("button", { name: backName, exact: true })
@@ -801,4 +801,39 @@ test("Statement cleanup redirects preserve filters", async ({ page }) => {
 		)
 		await expect(page.getByRole("navigation", { name: "Statement views" })).toBeVisible()
 	}
+})
+
+test("monthly shell: direct drill URL hides a stale same-month Dashboard origin", async ({
+	page,
+}) => {
+	await seedWorkspace(page)
+	await page.goto("/?month=October&year=2026")
+	await page
+		.getByLabel("Attention", { exact: true })
+		.getByRole("link", { name: /Pending Record/ })
+		.click()
+	await expect(page).toHaveURL(/is_allocated=false/)
+	await page.goto("/?month=October&year=2026&drill=day:2026-10-05")
+	await expect(page.getByTestId("drill-total")).toHaveText("$84.20")
+	await expect(
+		page.getByRole("button", {
+			name: "Back to October 2026",
+			exact: true,
+			includeHidden: true,
+		}),
+	).toHaveCount(0)
+	await page.evaluate(() =>
+		localStorage.setItem(
+			"history",
+			JSON.stringify([{ name: "September 2026", url: "/?month=September&year=2026" }]),
+		),
+	)
+	await page.reload()
+	await expect(page.getByTestId("drill-total")).toHaveText("$84.20")
+	await page.keyboard.press("Escape")
+	await expect(
+		page.getByRole("button", { name: "Back to September 2026", exact: true }),
+	).toBeVisible()
+	await page.getByRole("button", { name: "Back to September 2026", exact: true }).click()
+	await expect(page).toHaveURL(/month=September/)
 })

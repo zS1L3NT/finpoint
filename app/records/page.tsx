@@ -79,8 +79,6 @@ export default function RecordsPage() {
 			setParams({
 				query: null,
 				day: null,
-				month: null,
-				year: null,
 				start_date: null,
 				end_date: null,
 				min_amount: null,
@@ -98,7 +96,6 @@ export default function RecordsPage() {
 	)
 	const activeFilterCount = [
 		searchParams.get("query"),
-		selectedMonth,
 		startDate ?? endDate,
 		minAmount ?? maxAmount,
 		isAllocated,

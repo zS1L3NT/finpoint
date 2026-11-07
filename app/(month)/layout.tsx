@@ -1,6 +1,7 @@
 "use client"
 
 import { DateTime } from "luxon"
+import { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
@@ -19,15 +20,23 @@ import { armMonthTransition } from "@/hooks/use-month-transition"
  */
 export default function MonthLayout({ children }: { children: React.ReactNode }) {
 	const { month, year, date, setSearchParams } = useMonthParams()
+	const pathname = usePathname()
 
 	const { latest, isNavigatingBack, navigateBack } = useHistory()
-	const back = latest
 	const [hydrated, setHydrated] = useState(false)
 
 	// Calendar labels and links use the browser date, which can differ from SSR.
 	useEffect(() => setHydrated(true), [])
 
 	const today = DateTime.now().startOf("day")
+	const [backPath, backQuery] = latest?.url.split("?") ?? []
+	const backParams = new URLSearchParams(backQuery)
+	const back =
+		backPath === pathname &&
+		(backParams.get("month") ?? today.toFormat("MMMM")) === month &&
+		Number(backParams.get("year") ?? today.year) === year
+			? null
+			: latest
 	const isCurrent = date.hasSame(today, "month")
 	const isFuture = date.startOf("month") > today.startOf("month")
 	const subtitle = `${isCurrent ? `Through ${today.toFormat("d MMM")}` : isFuture ? "Future month" : "Full month"} · SGD · Based on Record dates`

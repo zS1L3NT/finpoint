@@ -202,3 +202,5 @@ Comparison Drill-downs sort both columns by amount, show the included months’ 
 Spending Drill-downs label refunds and show their positive amounts with a plus sign in green. When refunds are present, the header shows gross spending minus refunds so the total can be reconciled.
 
 Past months without Records show one dated empty-state message and an Import statements action. Empty charts and summary cards stay hidden for those months.
+
+The Dashboard hides a Back action pointing to its current month. Records treats the selected month as navigation context: Clear filters counts user filters and preserves that month.
