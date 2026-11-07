@@ -197,3 +197,30 @@ test("Monthly budgets explain unbudgeted spending and link to custom-period Budg
 	await budgets.getByRole("link", { name: /Custom-period Budgets/ }).click()
 	await expect(page).toHaveURL(/\/budgets$/)
 })
+
+test("mobile sheet toggles between two detents with the grab handle and closes with Escape", async ({
+	page,
+	isMobile,
+}) => {
+	test.skip(!isMobile, "bottom sheet is the mobile surface")
+	await seedWorkspace(page)
+	await page.goto(`${overview}&drill=day:2026-10-05`)
+	const sheet = page.getByRole("dialog")
+	const body = sheet.getByTestId("drill-sheet-body")
+	const grab = sheet.getByTestId("drill-grab")
+	await expect(body).toHaveAttribute("data-detent", "half")
+	await expect(grab).toHaveAccessibleName("Expand drill-down")
+	await expect(sheet.getByText("Total", { exact: true })).toHaveCount(0)
+	const height = async () => (await sheet.boundingBox())?.height ?? 0
+	await expect.poll(height).toBeGreaterThan(0)
+	const half = await height()
+	await grab.focus()
+	await grab.press("Enter")
+	await expect(body).toHaveAttribute("data-detent", "full")
+	await expect(grab).toHaveAccessibleName("Collapse drill-down")
+	await expect.poll(height).toBeGreaterThan(half + 100)
+	await grab.click()
+	await expect(body).toHaveAttribute("data-detent", "half")
+	await page.keyboard.press("Escape")
+	await expect(sheet).toHaveCount(0)
+})

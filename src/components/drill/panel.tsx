@@ -55,6 +55,7 @@ export function DrillPanel({
 	const [desktop, setDesktop] = useState(
 		() => typeof window !== "undefined" && matchMedia("(min-width:1280px)").matches,
 	)
+	const [full, setFull] = useState(false)
 	const reduced = useReducedMotion()
 	const present = useIsPresent()
 	useEffect(() => {
@@ -402,14 +403,38 @@ export function DrillPanel({
 					}}
 					side="bottom"
 					showCloseButton={false}
-					className="h-[85dvh]! rounded-t-2xl motion-reduce:data-[state=open]:animate-in motion-reduce:data-[state=open]:fade-in motion-reduce:data-[state=closed]:animate-out motion-reduce:data-[state=closed]:fade-out"
+					className="h-auto! rounded-t-2xl motion-reduce:data-[state=open]:animate-in motion-reduce:data-[state=open]:fade-in motion-reduce:data-[state=closed]:animate-out motion-reduce:data-[state=closed]:fade-out"
 				>
-					<div
-						aria-hidden="true"
-						className="mx-auto mt-2 h-1 w-10 shrink-0 rounded-full bg-muted-foreground/40"
-					/>
+					<button
+						type="button"
+						data-testid="drill-grab"
+						aria-label={full ? "Collapse drill-down" : "Expand drill-down"}
+						aria-expanded={full}
+						onClick={() => setFull(v => !v)}
+						className="mx-auto flex h-11 w-full shrink-0 cursor-pointer flex-col items-center justify-center gap-0.5 text-muted-foreground outline-none focus-visible:bg-muted/40"
+					>
+						<span
+							aria-hidden="true"
+							className="h-1 w-10 rounded-full bg-muted-foreground/40"
+						/>
+						<IconifyIcon
+							icon={full ? "lucide:chevron-down" : "lucide:chevron-up"}
+							className="size-4"
+						/>
+					</button>
 					<SheetTitle className="sr-only">Drill-down</SheetTitle>
-					{content}
+					<motion.div
+						data-testid="drill-sheet-body"
+						data-detent={full ? "full" : "half"}
+						initial={false}
+						animate={{
+							height: full ? "calc(92dvh - 2.75rem)" : "calc(55dvh - 2.75rem)",
+						}}
+						transition={reduced ? TRANSITION.fast : SPRING.snappy}
+						className="flex min-h-0 flex-col overflow-hidden"
+					>
+						{content}
+					</motion.div>
 				</SheetContent>
 			</Sheet>
 		</motion.div>

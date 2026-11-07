@@ -63,7 +63,7 @@ A category presented under another category for one layer of grouping. Use subca
 _Avoid_: Child category
 
 **Drill-down**:
-The panel that lists the Records behind a number on the Dashboard, and their Allocations.
+The panel that lists the Records behind a number on the Dashboard, and their Allocations. On mobile it is a bottom sheet with two detents (half and full), switched with its grab handle button.
 _Avoid_: Inspect panel, breakdown, details
 
 **Effective spending**:

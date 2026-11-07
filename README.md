@@ -169,6 +169,8 @@ Category rows, category trend month bars and their category lists open the Drill
 
 Forecast days, Monthly Budget cards and forecast legend entries open their Records in the Drill-down. Choose “Show the dashboard for … only” inside a budget panel to change the dashboard scope. Use “New Monthly Budget” to create a plan; Edit remains a separate action.
 
+On mobile the Drill-down is a bottom sheet. It opens half height so the Dashboard stays visible above it; tap the handle at its top (or press Enter on it) to expand it to full height and again to collapse. Close it with the X, Escape or Back. Dragging the sheet is not supported yet.
+
 The Dashboard summary shows Spent, Income and Left over. Select a metric to inspect its Records; Saved this month shows contributions less withdrawals. While income is still missing in the current month, Left over waits neutrally for income. Historical income comparisons cover the same days so far.
 
 The Dashboard uses the spending calendar and forecast for daily spending. Select a calendar day to open its Records directly. Redundant daily bars, surplus chart, weekday card and pace tiles have been removed.
