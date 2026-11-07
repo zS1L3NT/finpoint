@@ -1197,6 +1197,11 @@ export async function getDashboardView(input: DashboardInput & { scope?: string 
 				? Math.max(0, (date.daysInMonth ?? 30) - DateTime.now().day)
 				: 0,
 			dashboard.period.is_future,
+			dashboard.record_count === 0 &&
+				!dashboard.period.is_current &&
+				!dashboard.period.is_future
+				? input.year
+				: undefined,
 		),
 		dashboard,
 		pace,
@@ -1221,7 +1226,9 @@ export function buildHeadline(
 	month: string,
 	days: number,
 	future: boolean,
+	emptyYear?: number,
 ) {
+	if (emptyYear !== undefined) return `No Records in ${month} ${emptyYear}.`
 	if (future)
 		return plan === null
 			? `Set your ${month} plan below.`

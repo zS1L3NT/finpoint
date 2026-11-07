@@ -278,3 +278,13 @@ test("Spending drill labels and signs refunds and reconciles its caption", async
 		"$306.63 spent − $20.00 refunds",
 	)
 })
+
+test("past empty month shows one dated message and no empty charts", async ({ page }) => {
+	await seedWorkspace(page)
+	await page.goto("/?month=January&year=2025")
+	await expect(page.getByLabel("Month headline")).toHaveText("No Records in January 2025.")
+	await expect(page.getByText(/Nothing recorded/)).toHaveCount(0)
+	await expect(page.getByRole("application")).toHaveCount(0)
+	await expect(page.getByRole("link", { name: "Import statements", exact: true })).toBeVisible()
+	await expect(page.getByRole("button", { name: /Spent/ })).toHaveCount(0)
+})

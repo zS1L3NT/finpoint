@@ -114,6 +114,17 @@ export default function DashboardPage() {
 	const paceProjection = paceData.projection
 	const paceAmount = paceData.paceMonthlyBudget
 	const openDay = (date: string) => drill.open({ kind: "day", value: date })
+	if (!period.is_current && !period.is_future && data.record_count === 0)
+		return (
+			<div className="reveal flex flex-col items-start gap-4 rounded-xl border bg-muted/20 p-5">
+				<p className="text-sm" aria-label="Month headline">
+					{view.headline}
+				</p>
+				<Button asChild>
+					<Link href={pathImporter()}>Import statements</Link>
+				</Button>
+			</div>
+		)
 	return (
 		<motion.div
 			className="grid items-start"

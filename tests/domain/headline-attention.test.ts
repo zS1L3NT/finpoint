@@ -25,3 +25,7 @@ test("Attention ranks budgets first and caps the list at three", async () => {
  data.review = { unallocated_statements: 0, pending_records: 0, pending_statements: 1 }
  expect(buildAttention(data, "October", 2026).map(r => r.label)).toEqual(["1 Pending Statement", "$2.50 without a Monthly Budget"])
 })
+
+ test("past empty headline names the month and year once", () => {
+ expect(buildHeadline(0,null,[],"January",0,false,2025)).toBe("No Records in January 2025.")
+ })

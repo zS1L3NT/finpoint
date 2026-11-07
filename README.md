@@ -200,3 +200,5 @@ The Spending forecast names its dotted previous-month comparison in the caption 
 Comparison Drill-downs sort both columns by amount, show the included months’ combined spending divided by their count, and state the difference from that average in the header.
 
 Spending Drill-downs label refunds and show their positive amounts with a plus sign in green. When refunds are present, the header shows gross spending minus refunds so the total can be reconciled.
+
+Past months without Records show one dated empty-state message and an Import statements action. Empty charts and summary cards stay hidden for those months.
