@@ -10,6 +10,7 @@ import { toast } from "sonner"
 import CashflowChart from "@/components/charts/cashflow-chart"
 import CategoryHistoryChart from "@/components/charts/category-history-chart"
 import CategoryMovers from "@/components/charts/category-movers"
+import LargestRecords from "@/components/charts/largest-records"
 import MonthlyBudgetUsage from "@/components/charts/monthly-budget-usage"
 import SpendingCalendar from "@/components/charts/spending-calendar"
 import MonthlyBudgetDialog from "@/components/dialogs/monthly-budget"
@@ -294,6 +295,12 @@ export default function DashboardPage() {
 						) : null}
 						{stage > 1 ? (
 							<div className={cn("grid gap-5", !drill.selection && "lg:grid-cols-2")}>
+								<LargestRecords
+									month={dataMonth}
+									year={dataYear}
+									scope={scope}
+									onDrill={drill.open}
+								/>
 								<Card className="min-w-0">
 									<CardHeader>
 										<ScopedCardTitle

@@ -7,7 +7,7 @@ import { getStatement } from "@/logic/statements"
 import { pathRecords } from "@/routes"
 
 export type Selection = {
-	kind: "metric" | "day" | "category-gross" | "category" | "month" | "budget"
+	kind: "largest" | "metric" | "day" | "category-gross" | "category" | "month" | "budget"
 	value: string
 	at?: string
 }
@@ -40,6 +40,7 @@ export async function getDrilldown(
 			? selection.value
 			: (view.dashboard.period.through ?? date.endOf("month").toFormat("yyyy-MM-dd"))
 	const filters = {
+		sort: selection.kind === "largest" ? "amount_desc" : undefined,
 		start_date: start,
 		end_date: end,
 		effective_spending: selection.kind !== "metric",
@@ -75,15 +76,17 @@ export async function getDrilldown(
 		records.reduce((sum, r) => sum + measure(r), 0) / 100,
 	)
 	const title =
-		selection.kind === "metric"
-			? `${({ spent: "Spent", income: "Income", leftover: "Left over", saved: "Saved this month" } as Record<string, string>)[selection.value]} in ${date.toFormat("MMMM")}`
-			: selection.kind === "day"
-				? `Spending on ${DateTime.fromISO(selection.value).toFormat("ccc d LLL")}`
-				: selection.kind.startsWith("category")
-					? `${view.scopedCategories.find(c => c.id === selection.value)?.name ?? "Categories"} in ${date.toFormat("MMMM")}`
-					: selection.kind === "budget"
-						? `${view.dashboard.monthlyBudgets.find(b => b.id === selection.value)?.name ?? (selection.value === "unbudgeted" ? "Unbudgeted" : "All budgets")} in ${date.toFormat("MMMM")}`
-						: `Spending in ${date.toFormat("MMMM")}`
+		selection.kind === "largest"
+			? `Largest Records in ${date.toFormat("MMMM")}`
+			: selection.kind === "metric"
+				? `${({ spent: "Spent", income: "Income", leftover: "Left over", saved: "Saved this month" } as Record<string, string>)[selection.value]} in ${date.toFormat("MMMM")}`
+				: selection.kind === "day"
+					? `Spending on ${DateTime.fromISO(selection.value).toFormat("ccc d LLL")}`
+					: selection.kind.startsWith("category")
+						? `${view.scopedCategories.find(c => c.id === selection.value)?.name ?? "Categories"} in ${date.toFormat("MMMM")}`
+						: selection.kind === "budget"
+							? `${view.dashboard.monthlyBudgets.find(b => b.id === selection.value)?.name ?? (selection.value === "unbudgeted" ? "Unbudgeted" : "All budgets")} in ${date.toFormat("MMMM")}`
+							: `Spending in ${date.toFormat("MMMM")}`
 	return {
 		budget:
 			selection.kind === "budget"

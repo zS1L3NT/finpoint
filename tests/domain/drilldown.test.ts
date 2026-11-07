@@ -133,3 +133,15 @@ test("Monthly Budget cards and legend reconcile including refunds and plan amoun
  expect((await getDrilldown("October",2026,"unbudgeted",{kind:"metric",value}))?.total).toBeCloseTo(total,2)
  }
  }, 30000)
+
+ test("largest selection and Records amount sorting preserve month and scope", async () => {
+ await loadDemoWorkspace()
+ const {listRecords} = await import("../../src/logic/records")
+ for (const scope of ["all", ...(await db.monthly_budgets.toArray()).map(b => b.id)]) {
+ const drill = await getDrilldown("October", 2026, scope, {kind:"largest", value:""})
+ const records = await listRecords({start_date:"2026-10-01",end_date:"2026-10-31", effective_spending:true,monthly_budget_id:scope === "all" ? undefined : scope,sort:"amount_desc"})
+ expect(drill!.records.map(r=>r.id)).toEqual(records.map(r=>r.id))
+ expect(records.map(r=>Math.abs(r.amount))).toEqual(records.map(r=>Math.abs(r.amount)).sort((a,b)=>b-a))
+ expect(drill!.href).toContain("sort=amount_desc")
+ }
+ },120000)

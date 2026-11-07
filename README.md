@@ -173,3 +173,5 @@ The Dashboard summary shows Spent, Income and Left over. Select a metric to insp
 The Dashboard uses the spending calendar and forecast for daily spending. Select a calendar day to open its Records directly. Redundant daily bars, surplus chart, weekday card and pace tiles have been removed.
 
 In the Dashboard drill-down, expand a Record and choose **Edit Record**. Saved changes update the total immediately. Close the editor to return to its action. An unallocated Statement in the Statement view offers **Allocate…**, opening the Allocator with that Statement selected.
+
+**Largest Records** shows the selected month and scope’s five largest Spending Records by absolute amount, including refunds. **See all** opens the sorted drill-down. On Records, **Sort Records** offers newest first or absolute amount in either direction; sorting applies before pagination and survives reloads in the URL.

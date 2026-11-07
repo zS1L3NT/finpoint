@@ -9,15 +9,17 @@ export function useDrill() {
 	const params = useSearchParams()
 	const trigger = useRef<HTMLElement | null>(null)
 	const wasOpen = useRef(false)
-	const [kind, value, at, extra] = (params.get("drill") ?? "").split(":")
+	const [kind, value = "", at, extra] = (params.get("drill") ?? "").split(":")
 	const focus = params.get("focus")
 	const validFocus = focus === null || /^(record|statement):[^:]+$/.test(focus)
 	const selection: Selection | null =
 		validFocus &&
-		value &&
+		(value || kind === "largest") &&
 		(kind !== "metric" || ["spent", "income", "leftover", "saved"].includes(value)) &&
 		extra === undefined &&
-		["metric", "day", "category-gross", "category", "month", "budget"].includes(kind ?? "") &&
+		["largest", "metric", "day", "category-gross", "category", "month", "budget"].includes(
+			kind ?? "",
+		) &&
 		(at === undefined || (/^\d{4}-\d{2}$/.test(at) && DateTime.fromISO(`${at}-01`).isValid)) &&
 		(kind !== "month" ||
 			(/^\d{4}-\d{2}$/.test(value) && DateTime.fromISO(`${value}-01`).isValid)) &&
@@ -25,11 +27,19 @@ export function useDrill() {
 			(at === undefined &&
 				/^\d{4}-\d{2}-\d{2}$/.test(value) &&
 				DateTime.fromISO(value).isValid))
-			? { kind: kind as Selection["kind"], value, at }
+			? { kind: kind as Selection["kind"], value: value ?? "", at }
 			: null
 	useEffect(() => {
 		if (!selection && wasOpen.current)
-			requestAnimationFrame(() => trigger.current?.focus({ preventScroll: true }))
+			requestAnimationFrame(() => {
+				if (
+					document.activeElement === document.body ||
+					document.activeElement?.closest(
+						'[aria-labelledby="drill-title"], [data-slot="sheet-content"]',
+					)
+				)
+					trigger.current?.focus({ preventScroll: true })
+			})
 		wasOpen.current = !!selection
 	}, [!!selection])
 	const href = (s: Selection) =>

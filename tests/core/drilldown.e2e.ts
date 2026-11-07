@@ -123,3 +123,24 @@ test("edit from drill returns focus and updates the live total", async ({ page }
 	await expect(edit).toBeFocused()
 	await expect(page.getByTestId("drill-total")).toHaveText("$85.20")
 })
+
+test("Largest Records opens a sorted drill and preserves sort into Records", async ({ page }) => {
+	await seedWorkspace(page)
+	await page.goto(overview)
+	const largest = card(page, "Largest Records")
+	await expect(largest.locator("button")).toHaveCount(6)
+	await largest.getByRole("button", { name: "See all", exact: true }).click()
+	await expect(page).toHaveURL(/drill=largest/)
+	await expect(
+		page.getByTestId("drill-body").locator("button[aria-expanded]").first(),
+	).toContainText("Uniqlo Basics")
+	await page.getByRole("link", { name: "Open in Records" }).click()
+	await expect(page).toHaveURL(/sort=amount_desc/)
+	await expect(page.getByRole("combobox", { name: "Sort Records" })).toContainText(
+		"Amount: largest first",
+	)
+	await page.reload()
+	await expect(page.getByRole("combobox", { name: "Sort Records" })).toContainText(
+		"Amount: largest first",
+	)
+})

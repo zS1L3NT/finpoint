@@ -28,6 +28,7 @@ export type RecordDetail = AppRecord & {
 }
 
 export type RecordFilters = {
+	sort?: string | null
 	query?: string | null
 	exclude_budget_id?: string | null
 	start_date?: string | null
@@ -190,6 +191,11 @@ export async function listRecords(filters: RecordFilters = {}) {
 
 	enriched.sort(
 		(a, b) =>
+			(filters.sort === "amount_desc"
+				? Math.abs(b.amount) - Math.abs(a.amount)
+				: filters.sort === "amount_asc"
+					? Math.abs(a.amount) - Math.abs(b.amount)
+					: 0) ||
 			b.datetime.localeCompare(a.datetime) ||
 			a.amount - b.amount ||
 			a.title.localeCompare(b.title) ||

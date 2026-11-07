@@ -37,6 +37,7 @@ import type { CategoryWithChildren, MonthlyBudget, Record } from "@/types"
 
 export default function RecordsPage() {
 	const searchParams = useSearchParams()
+	const sort = searchParams.get("sort") ?? "date"
 	const startDate = searchParams.get("start_date")
 	const endDate = searchParams.get("end_date")
 	const minAmount = searchParams.get("min_amount")
@@ -98,6 +99,7 @@ export default function RecordsPage() {
 	const recordsQuery = useLiveQuery(
 		() =>
 			listRecords({
+				sort,
 				query: query || null,
 				measure,
 				effective_spending: effectiveSpending,
@@ -112,6 +114,7 @@ export default function RecordsPage() {
 				treatment,
 			}),
 		[
+			sort,
 			query,
 			measure,
 			effectiveSpending,
@@ -134,12 +137,12 @@ export default function RecordsPage() {
 	const columns = useRecordColumns<Record>({
 		pageName: "Records",
 		onEdit: handleEdit,
-		grouped: true,
+		grouped: sort === "date",
 	})
 	const mobileRow = useRecordMobileRow<Record>({
 		pageName: "Records",
 		onEdit: handleEdit,
-		grouped: true,
+		grouped: sort === "date",
 	})
 	const tableHeader = useMemo(
 		() => ({
@@ -207,13 +210,28 @@ export default function RecordsPage() {
 					description="Ledger view"
 					icon="lucide:receipt-text"
 				/>
+				<Select
+					value={sort}
+					onValueChange={value =>
+						updateFilters({ sort: value === "date" ? null : value })
+					}
+				>
+					<SelectTrigger aria-label="Sort Records" className="w-full sm:w-56">
+						<SelectValue />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="date">Newest first</SelectItem>
+						<SelectItem value="amount_desc">Amount: largest first</SelectItem>
+						<SelectItem value="amount_asc">Amount: smallest first</SelectItem>
+					</SelectContent>
+				</Select>
 				<PaginatedDataTable
 					paginated={paginated}
 					columns={columns}
 					header={tableHeader}
 					footer={tableFooter}
 					mobileRow={mobileRow}
-					groupBy={byDay<Record>("Record")}
+					groupBy={sort === "date" ? byDay<Record>("Record") : undefined}
 					emptyMessage="No records found."
 					loading={recordsQuery === undefined}
 				/>
