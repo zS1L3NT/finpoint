@@ -98,6 +98,42 @@ export const scenarioFamilies: Record<string, Record<string, string>> = {
 
 export const componentInventory: InventoryEntry[] = [
 	{
+		path: "src/components/allocation-progress.tsx",
+		owner: "team3",
+		routes: ["/", "/records", "/statements", "/records/[id]", "/statements/[id]"],
+		visibleExports: ["AllocationProgress"],
+		dormantExports: [],
+		helperExports: [],
+		scenarios: ["display"],
+	},
+	{
+		path: "src/components/allocation-rows.tsx",
+		owner: "team3",
+		routes: ["/", "/records", "/statements", "/records/[id]", "/statements/[id]"],
+		visibleExports: ["AllocationRows", "AllocationExpansion"],
+		dormantExports: [],
+		helperExports: [],
+		scenarios: ["display"],
+	},
+	{
+		path: "src/components/charts/largest-records.tsx",
+		owner: "team3",
+		routes: ["/"],
+		visibleExports: ["default"],
+		dormantExports: [],
+		helperExports: [],
+		scenarios: ["display"],
+	},
+	{
+		path: "src/components/drill/panel.tsx",
+		owner: "team3",
+		routes: ["/"],
+		visibleExports: ["DrillPanel"],
+		dormantExports: [],
+		helperExports: [],
+		scenarios: ["display"],
+	},
+	{
 		path: "src/components/allocate-bar.tsx",
 		owner: "team3",
 		routes: ["/statements/[id]"],
@@ -2317,6 +2353,8 @@ export const scenarioDescriptions: Record<string, string> = {
  * mapped nor pending: removing them from scenarios would hide the decision, and
  * mapping them would fabricate coverage. The ledger reports them separately. */
 export const notApplicable: Record<string, string> = {
+	"src/components/charts/monthly-budget-usage.tsx#chart.motion":
+		"src/components/charts/monthly-budget-usage.tsx renders static progress rows; the donut and its segment animation were deliberately removed.",
 	"src/components/dialogs/account.tsx#editor.conditional":
 		"No conditional sections in the account editor; reopen/keyboard semantics are covered via editor.open, not conditional motion",
 	"src/components/dialogs/budget-creator.tsx#editor.conditional":
@@ -2387,6 +2425,45 @@ export const notApplicable: Record<string, string> = {
 
 /** Reviewed assertion mappings. Passing browser evidence is separate; unmapped cases fail by default. */
 export const behaviourCoverage: Record<string, string[]> = {
+	"src/components/drill/panel.tsx#export.DrillPanel.behaviour": [
+		"day drill-down: totals, retarget, Back, close, focus and invalid URLs",
+	],
+	"src/components/drill/panel.tsx#display.interaction": [
+		"day drill-down: totals, retarget, Back, close, focus and invalid URLs",
+	],
+	"src/components/drill/panel.tsx#display.values": [
+		"day drill-down: totals, retarget, Back, close, focus and invalid URLs",
+	],
+	"src/components/charts/largest-records.tsx#export.default.behaviour": [
+		"Largest Records opens a sorted drill and preserves sort into Records",
+	],
+	"src/components/charts/largest-records.tsx#display.interaction": [
+		"Largest Records opens a sorted drill and preserves sort into Records",
+	],
+	"src/components/charts/largest-records.tsx#display.values": [
+		"Largest Records opens a sorted drill and preserves sort into Records",
+	],
+	"src/components/allocation-rows.tsx#export.AllocationExpansion.behaviour": [
+		"Records table: rendered Records keep zero, negative amounts and pending reasons",
+	],
+	"src/components/allocation-rows.tsx#export.AllocationRows.behaviour": [
+		"drill pivot: URL expansion, Statement breadcrumb and browser Back survive reload",
+	],
+	"src/components/allocation-rows.tsx#display.interaction": [
+		"drill pivot: URL expansion, Statement breadcrumb and browser Back survive reload",
+	],
+	"src/components/allocation-rows.tsx#display.values": [
+		"drill pivot: URL expansion, Statement breadcrumb and browser Back survive reload",
+	],
+	"src/components/allocation-progress.tsx#export.AllocationProgress.behaviour": [
+		"Records table: rendered Records keep zero, negative amounts and pending reasons",
+	],
+	"src/components/allocation-progress.tsx#display.interaction": [
+		"Records table: rendered Records keep zero, negative amounts and pending reasons",
+	],
+	"src/components/allocation-progress.tsx#display.values": [
+		"Records table: rendered Records keep zero, negative amounts and pending reasons",
+	],
 	"src/components/term.tsx#export.default.behaviour": [
 		"term definitions open by keyboard and tap",
 	],
@@ -2690,7 +2767,7 @@ export const behaviourCoverage: Record<string, string[]> = {
 	"src/components/charts/cashflow-chart.tsx#export.default.behaviour": [
 		"Spending forecast: retains gradient backdrops and comparison lines",
 		"Spending forecast: preserves scope and legend semantics",
-		"chart tooltips: Surplus / Shortfall keyboard navigation exposes actual numeric values",
+		"chart tooltips: Spending forecast keyboard navigation exposes actual numeric values",
 	],
 	"src/components/charts/category-history-chart.tsx#export.default.behaviour": [
 		"chart tooltips: Category trend keyboard navigation exposes actual numeric values",
@@ -2724,12 +2801,12 @@ export const behaviourCoverage: Record<string, string[]> = {
 	"src/components/charts/monthly-budget-usage.tsx#export.default.behaviour": [
 		"Monthly Budget card: null amount and zero plan remain distinct when scope changes",
 		"Monthly Budget rows: zero and null plans never display invalid percentages",
-		"Monthly Budget cards: hover does not select or change the donut, and a click does",
+		"Monthly Budget cards: drill first, scope explicitly and edit independently",
 	],
 	"src/components/charts/monthly-budget-usage.tsx#chart.values": [
 		"Monthly Budget card: null amount and zero plan remain distinct when scope changes",
 		"Monthly Budget rows: zero and null plans never display invalid percentages",
-		"Monthly Budget cards: hover does not select or change the donut, and a click does",
+		"Monthly Budget cards: drill first, scope explicitly and edit independently",
 	],
 	"src/components/charts/spending-calendar.tsx#export.default.behaviour": [
 		"spending calendar: daily amount, zero and refund days drill into exact Records",
@@ -3644,11 +3721,11 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"app/statements/duplicates/page.tsx#route.data": [
 		"duplicates: keep moves Allocations and the deleted Statement is gone",
-		"/statements/duplicates page: empty state resolves without premature loading copy",
+		"/allocator/duplicates page: empty state resolves without premature loading copy",
 	],
 	"app/statements/pending/page.tsx#route.data": [
 		"pending queue: replacing a Pending Statement preserves Allocations on the imported Statement",
-		"/statements/pending page: empty state resolves without premature loading copy",
+		"/allocator/pending page: empty state resolves without premature loading copy",
 	],
 	"app/statements/page.tsx#route.data": [
 		"/statements page: resolves to its useful empty state",
@@ -3808,8 +3885,8 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"/budgets page: populated content and enabled controls stay inside the viewport",
 		"/categories page: populated content and enabled controls stay inside the viewport",
 		"/allocator page: populated content and enabled controls stay inside the viewport",
-		"/statements/pending page: populated content and enabled controls stay inside the viewport",
-		"/statements/duplicates page: populated content and enabled controls stay inside the viewport",
+		"/allocator/pending page: populated content and enabled controls stay inside the viewport",
+		"/allocator/duplicates page: populated content and enabled controls stay inside the viewport",
 		"/importer page: populated content and enabled controls stay inside the viewport",
 		"/settings page: populated content and enabled controls stay inside the viewport",
 		"/sync page: populated content and enabled controls stay inside the viewport",
@@ -3842,8 +3919,8 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"/budgets page: populated content and enabled controls stay inside the viewport",
 		"/categories page: populated content and enabled controls stay inside the viewport",
 		"/allocator page: populated content and enabled controls stay inside the viewport",
-		"/statements/pending page: populated content and enabled controls stay inside the viewport",
-		"/statements/duplicates page: populated content and enabled controls stay inside the viewport",
+		"/allocator/pending page: populated content and enabled controls stay inside the viewport",
+		"/allocator/duplicates page: populated content and enabled controls stay inside the viewport",
 		"/importer page: populated content and enabled controls stay inside the viewport",
 		"/settings page: populated content and enabled controls stay inside the viewport",
 		"/sync page: populated content and enabled controls stay inside the viewport",
@@ -4002,7 +4079,7 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"empty overview: no history gives zero metrics and useful chart explanations",
 	],
 	"src/components/charts/cashflow-chart.tsx#chart.values": [
-		"chart tooltips: Surplus / Shortfall keyboard navigation exposes actual numeric values",
+		"chart tooltips: Spending forecast keyboard navigation exposes actual numeric values",
 		"empty overview: no history gives zero metrics and useful chart explanations",
 	],
 	"src/components/charts/cashflow-chart.tsx#chart.responsive": [
@@ -4032,9 +4109,6 @@ export const behaviourCoverage: Record<string, string[]> = {
 	"src/components/charts/monthly-budget-usage.tsx#chart.responsive": [
 		"dense overview cards: every card renders values and fits the viewport",
 		"Category mix: a dense long Category name stays truncated and readable",
-	],
-	"src/components/charts/monthly-budget-usage.tsx#chart.motion": [
-		"Monthly Budget donut: sibling segments dim smoothly on focus",
 	],
 	"src/components/charts/spending-calendar.tsx#chart.responsive": [
 		"dense overview cards: every card renders values and fits the viewport",
@@ -4352,10 +4426,10 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"/allocator page: populated content and enabled controls stay inside the viewport",
 	],
 	"app/statements/pending/page.tsx#route.viewport": [
-		"/statements/pending page: populated content and enabled controls stay inside the viewport",
+		"/allocator/pending page: populated content and enabled controls stay inside the viewport",
 	],
 	"app/statements/duplicates/page.tsx#route.viewport": [
-		"/statements/duplicates page: populated content and enabled controls stay inside the viewport",
+		"/allocator/duplicates page: populated content and enabled controls stay inside the viewport",
 	],
 	"app/records/page.tsx#route.viewport": [
 		"/records page: populated content and enabled controls stay inside the viewport",
@@ -4448,6 +4522,10 @@ export const scenarioProjects: Record<
 	string,
 	("mobile" | "tall-desktop" | "light" | "reduced-motion")[]
 > = {
+	"src/components/drill/panel.tsx#display.interaction": ["mobile"],
+	"src/components/charts/largest-records.tsx#display.interaction": ["mobile"],
+	"src/components/allocation-rows.tsx#display.interaction": ["mobile"],
+	"src/components/allocation-progress.tsx#display.interaction": ["mobile"],
 	"src/components/dialogs/drive-overwrite-confirmation.tsx#modal.lifecycle": [
 		"mobile",
 		"reduced-motion",
@@ -4554,7 +4632,6 @@ export const scenarioProjects: Record<
 	"src/components/charts/cashflow-chart.tsx#chart.responsive": ["mobile", "tall-desktop"],
 	"src/components/charts/category-history-chart.tsx#chart.responsive": ["mobile", "tall-desktop"],
 	"src/components/charts/category-movers.tsx#chart.motion": ["reduced-motion"],
-	"src/components/charts/monthly-budget-usage.tsx#chart.motion": ["reduced-motion"],
 	"src/components/charts/spending-calendar.tsx#chart.motion": ["reduced-motion"],
 	"src/components/charts/sparkline.tsx#chart.motion": ["reduced-motion"],
 	"src/components/value-swap.tsx#display.values": ["reduced-motion"],
@@ -4689,6 +4766,7 @@ export const scenarioProjectLexiconExemptions: Record<string, string> = {
 
 /** Every modal owner needs executable entrance/exit coverage, including non-editor surfaces. */
 export const modalAnimationCoverage: Record<string, string[]> = {
+	"src/components/drill/panel.tsx": ["drill sheet: entrance and exit retain popup motion"],
 	"src/components/dialogs/account.tsx": [
 		"editor popups: saving every existing editor preserves its popup and backdrop exit",
 		"editor popups: every create and update dialog exits before removal and reopens",

@@ -162,8 +162,8 @@
     "semantic_hash": "7d8a33d5aa042f85737cd2f3334ae040"
   },
   "next-env.d.ts": {
-    "mtime": 1794022106.3831282,
-    "seen": 1794022177.1763446,
+    "mtime": 1794028071.0633118,
+    "seen": 1794028176.879302,
     "ast_hash": "8195d2c60ce847a459ae9d308d6a5724",
     "semantic_hash": ""
   },
@@ -1242,15 +1242,15 @@
     "semantic_hash": ""
   },
   "tests/animations/tables.e2e.ts": {
-    "mtime": 1794020351.3477237,
-    "seen": 1794020390.1528363,
-    "ast_hash": "70aaed57b4cda6ee41485d3471b4097c",
+    "mtime": 1794027400.2731662,
+    "seen": 1794027597.284315,
+    "ast_hash": "3a9bfd8e2a92dbf0eae4b258f5ec0ef6",
     "semantic_hash": ""
   },
   "tests/component-inventory.ts": {
-    "mtime": 1794021994.5780706,
-    "seen": 1794022177.1765707,
-    "ast_hash": "67f55f05ff81dc98998ccf26a2185fbf",
+    "mtime": 1794028026.539203,
+    "seen": 1794028176.8795657,
+    "ast_hash": "9d84d57e0ce572eed87336458404cac5",
     "semantic_hash": ""
   },
   "tests/core/charts.e2e.ts": {
@@ -1284,8 +1284,8 @@
     "semantic_hash": "67d8bc8633242c332bf0df758012ba68"
   },
   "tests/core/ledger.e2e.ts": {
-    "mtime": 1793992522.3593879,
-    "seen": 1793992690.739597,
+    "mtime": 1794027907.8868966,
+    "seen": 1794028176.8795738,
     "ast_hash": "db062945bee9e5916b5c8a280700f505",
     "semantic_hash": ""
   },
@@ -1440,9 +1440,9 @@
     "semantic_hash": "c1ed69450eaa427a85d29b197b78a8ea"
   },
   "tests/support/motion.ts": {
-    "mtime": 1793992522.3593879,
-    "seen": 1793992690.7396328,
-    "ast_hash": "9390197b6f8e7300424bc24590a8114f",
+    "mtime": 1794027488.5255356,
+    "seen": 1794027597.2843635,
+    "ast_hash": "fa84c7076d74625643df9be1ebc446b8",
     "semantic_hash": ""
   },
   "tests/support/sheets.ts": {
@@ -1584,9 +1584,9 @@
     "semantic_hash": ""
   },
   "src/components/drill/panel.tsx": {
-    "mtime": 1794017236.8724508,
-    "seen": 1794017371.7318597,
-    "ast_hash": "c4123a645dcab6c36d7e7677077683d7",
+    "mtime": 1794027979.0670834,
+    "seen": 1794028176.879354,
+    "ast_hash": "7fa2f57b83e8fa26bf1e9f26043043db",
     "semantic_hash": ""
   },
   "src/hooks/use-drill.ts": {
@@ -1602,9 +1602,9 @@
     "semantic_hash": ""
   },
   "tests/animations/drilldown.e2e.ts": {
-    "mtime": 1794005850.5956273,
-    "seen": 1794005913.9649148,
-    "ast_hash": "c0f4a47b161653f244b4c5692f38d28b",
+    "mtime": 1794027979.2270837,
+    "seen": 1794028176.8795571,
+    "ast_hash": "9565c4a47b1f277d568ab3e034c86f69",
     "semantic_hash": ""
   },
   "tests/core/drilldown.e2e.ts": {
@@ -1614,9 +1614,9 @@
     "semantic_hash": ""
   },
   "tests/domain/drilldown.test.ts": {
-    "mtime": 1794016946.769383,
-    "seen": 1794017371.73243,
-    "ast_hash": "b74a92d829a5de989be8616712daa210",
+    "mtime": 1794027642.2260985,
+    "seen": 1794027817.236648,
+    "ast_hash": "7e83d07fb034a9202d92db4c6759d321",
     "semantic_hash": ""
   },
   "docs/adr/0001-drill-down-url-state.md": {

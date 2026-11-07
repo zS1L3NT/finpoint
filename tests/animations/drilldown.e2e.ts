@@ -1,5 +1,6 @@
 import { card, overview } from "../support/charts"
 import { expect, seedWorkspace, test } from "../support/fixtures"
+import { poseIsIdentity, sampleVisibleRowAnimations } from "../support/motion"
 
 test("day drill-down: docking animates the main column width", { tag: "@desktop-only" }, async ({
 	page,
@@ -69,4 +70,42 @@ test("drill pivot: Statement and Back travel in opposite directions", async ({ p
 	expect(Math.min(...back)).toBeLessThan(-2)
 	expect(Math.max(...back)).toBeGreaterThan(2)
 	expect(back.at(-1)).toBe(0)
+})
+
+test("drill sheet: entrance and exit retain popup motion", { tag: ["@reduced-motion"] }, async ({
+	page,
+}) => {
+	await page.setViewportSize({ width: 390, height: 844 })
+	await seedWorkspace(page)
+	await page.goto(overview)
+	const day = card(page, "Spending calendar").getByRole("button", { name: /^5 October:/ })
+	await day.scrollIntoViewIfNeeded()
+	const samples = await sampleVisibleRowAnimations(page, '[data-slot="sheet-content"]', () =>
+		day.click(),
+	)
+	expect(samples).toHaveLength(1)
+	const frames = samples[0]!.frames
+	expect(poseIsIdentity(frames.at(-1)!)).toBe(true)
+	const reduced = await page.evaluate(
+		() => matchMedia("(prefers-reduced-motion: reduce)").matches,
+	)
+	if (!reduced) expect(frames.filter(f => !poseIsIdentity(f)).length).toBeGreaterThan(1)
+	else expect(frames.every(poseIsIdentity)).toBe(true)
+	const recorder = await page.locator('[data-slot="sheet-content"]').evaluateHandle(element => {
+		const poses: string[] = []
+		const tick = () => {
+			if (element.isConnected) {
+				poses.push(getComputedStyle(element).transform)
+				requestAnimationFrame(tick)
+			}
+		}
+		tick()
+		return { poses, removed: () => !element.isConnected }
+	})
+	await page.getByRole("button", { name: "Close drill-down" }).click()
+	await expect.poll(() => recorder.evaluate(r => r.removed())).toBe(true)
+	const poses = await recorder.evaluate(r => r.poses)
+	if (!reduced) expect(new Set(poses).size).toBeGreaterThan(2)
+	await expect(page.locator('[data-slot="sheet-overlay"]')).toHaveCount(0)
+	await recorder.dispose()
 })

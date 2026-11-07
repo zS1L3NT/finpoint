@@ -1,6 +1,6 @@
 "use client"
 import { useLiveQuery } from "dexie-react-hooks"
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
+import { AnimatePresence, motion, useIsPresent, useReducedMotion } from "framer-motion"
 import { ChevronDown } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
@@ -53,6 +53,7 @@ export function DrillPanel({
 		() => typeof window !== "undefined" && matchMedia("(min-width:1280px)").matches,
 	)
 	const reduced = useReducedMotion()
+	const present = useIsPresent()
 	useEffect(() => {
 		const media = matchMedia("(min-width:1280px)")
 		const update = () => setDesktop(media.matches)
@@ -273,24 +274,26 @@ export function DrillPanel({
 			{content}
 		</motion.aside>
 	) : (
-		<Sheet
-			modal={!editingRecord}
-			open
-			onOpenChange={open => {
-				if (!open) close()
-			}}
-		>
-			<SheetContent
-				onCloseAutoFocus={event => {
-					event.preventDefault()
+		<motion.div exit={{ opacity: 0 }} transition={TRANSITION.base}>
+			<Sheet
+				modal={!editingRecord}
+				open={present}
+				onOpenChange={open => {
+					if (!open) close()
 				}}
-				side="bottom"
-				showCloseButton={false}
-				className="h-[85dvh]! rounded-t-2xl motion-reduce:data-[state=open]:animate-in motion-reduce:data-[state=open]:fade-in motion-reduce:data-[state=closed]:animate-out motion-reduce:data-[state=closed]:fade-out"
 			>
-				<SheetTitle className="sr-only">Drill-down</SheetTitle>
-				{content}
-			</SheetContent>
-		</Sheet>
+				<SheetContent
+					onCloseAutoFocus={event => {
+						event.preventDefault()
+					}}
+					side="bottom"
+					showCloseButton={false}
+					className="h-[85dvh]! rounded-t-2xl motion-reduce:data-[state=open]:animate-in motion-reduce:data-[state=open]:fade-in motion-reduce:data-[state=closed]:animate-out motion-reduce:data-[state=closed]:fade-out"
+				>
+					<SheetTitle className="sr-only">Drill-down</SheetTitle>
+					{content}
+				</SheetContent>
+			</Sheet>
+		</motion.div>
 	)
 }
