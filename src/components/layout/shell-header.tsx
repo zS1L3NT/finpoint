@@ -18,6 +18,8 @@ import {
 	pathSettings,
 	pathStatementRules,
 	pathStatements,
+	pathStatementsDuplicates,
+	pathStatementsPending,
 	pathTerms,
 } from "@/routes"
 
@@ -26,6 +28,10 @@ const TITLES: { match: (pathname: string) => boolean; title: string }[] = [
 	{ match: pathname => pathname.startsWith(pathMonthlyRecords()), title: "Monthly Records" },
 	{ match: pathname => pathname.startsWith(`${pathRecords()}/`), title: "Record" },
 	{ match: pathname => pathname.startsWith(pathRecords()), title: "Records" },
+	{
+		match: pathname => [pathStatementsPending(), pathStatementsDuplicates()].includes(pathname),
+		title: "Statements",
+	},
 	{ match: pathname => pathname.startsWith(`${pathStatements()}/`), title: "Statement" },
 	{ match: pathname => pathname.startsWith(pathStatements()), title: "Statements" },
 	{ match: pathname => pathname.startsWith(`${pathAccounts()}/`), title: "Account" },
@@ -35,7 +41,7 @@ const TITLES: { match: (pathname: string) => boolean; title: string }[] = [
 	{ match: pathname => pathname.startsWith(pathStatementRules()), title: "Statement rules" },
 	{ match: pathname => pathname.startsWith(pathCategories()), title: "Categories" },
 	{ match: pathname => pathname.startsWith(pathImporter()), title: "Importer" },
-	{ match: pathname => pathname.startsWith(pathAllocator()), title: "Workflows" },
+	{ match: pathname => pathname.startsWith(pathAllocator()), title: "Allocate" },
 	{ match: pathname => pathname.startsWith(pathDataSettings()), title: "Data" },
 	{ match: pathname => pathname.startsWith(pathSettings()), title: "Settings" },
 	{ match: pathname => pathname.startsWith(pathPrivacy()), title: "Privacy Policy" },

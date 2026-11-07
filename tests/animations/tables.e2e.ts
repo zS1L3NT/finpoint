@@ -77,9 +77,9 @@ const denseRowConsumers: MotionConsumer[] = [
 	},
 	{
 		name: "pending queue",
-		origin: "/allocator",
+		origin: "/statements",
 		action: "workflow",
-		target: "Replace Pending",
+		target: "Replace pending",
 		selector: 'main [data-slot="pending-queue-item"]',
 		dense: true,
 	},
@@ -89,7 +89,7 @@ const denseRowConsumers: MotionConsumer[] = [
 		name: "Allocate",
 		origin: "/accounts",
 		action: "sidebar",
-		target: "Workflows",
+		target: "Allocate",
 		selector: statementRows,
 		dense: true,
 	},
@@ -122,9 +122,9 @@ const populatedConsumers: MotionConsumer[] = [
 	},
 	{
 		name: "duplicate groups",
-		origin: "/allocator",
+		origin: "/statements",
 		action: "workflow",
-		target: "Fix Duplicates",
+		target: "Duplicates",
 		selector: 'main [data-slot="duplicate-group-item"]',
 		dense: false,
 	},
@@ -194,7 +194,7 @@ async function expectConsumerEntrance(page: Page, consumer: MotionConsumer, isMo
 				.click()
 		else if (consumer.action === "workflow")
 			await page
-				.getByRole("navigation", { name: "Workflow views" })
+				.getByRole("navigation", { name: "Statement views" })
 				.getByRole("link", { name: consumer.target, exact: true })
 				.click()
 		else if (consumer.action === "heading")

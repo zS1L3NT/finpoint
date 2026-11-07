@@ -8,6 +8,7 @@ import DateRange from "@/components/form/date-range"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
+import StatementTabs from "@/components/statement-tabs"
 import AmountFilter from "@/components/table/amount-filter"
 import { ClearFiltersButton, FILTER_CONTROL_CLASS, FilterBar } from "@/components/table/filter-bar"
 import PaginatedDataTable from "@/components/table/paginated-data-table"
@@ -112,6 +113,8 @@ export default function StatementsPage() {
 					icon="lucide:credit-card"
 					back={latest ?? undefined}
 				/>
+
+				<StatementTabs active="statements" />
 
 				<PaginatedDataTable
 					paginated={paginated}

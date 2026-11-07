@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useHistory } from "@/history"
 import { cn, formatCurrency, round2 } from "@/lib/utils"
-import { pathAllocatorDuplicates, pathStatement } from "@/routes"
+import { pathStatement, pathStatementsDuplicates } from "@/routes"
 import type { Allocation, Statement } from "@/types"
 
 type StatementRow = Statement & { pivot?: Allocation }
@@ -34,7 +34,7 @@ function StatementBadges({
 			{statement.is_duplicate ? (
 				<Badge variant="destructive" asChild>
 					<Link
-						href={pathAllocatorDuplicates({ account_id: statement.account.id })}
+						href={pathStatementsDuplicates({ account_id: statement.account.id })}
 						title="Possible duplicate statement. Review and fix duplicates."
 					>
 						Duplicate?

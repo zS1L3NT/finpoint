@@ -342,17 +342,17 @@ test("delayed navigation: ordinary navigation survives an intervening modified c
 })
 
 test("workflow tabs: do not capture history", async ({ page }) => {
-	await gotoReady(page, "/allocator")
+	await gotoReady(page, "/statements")
 	await expectNoBack(page)
-	const tabs = page.getByRole("navigation", { name: "Workflow views" })
-	await tabs.getByRole("link", { name: "Replace Pending", exact: true }).click()
-	await expect(page).toHaveURL(/\/allocator\/pending/)
+	const tabs = page.getByRole("navigation", { name: "Statement views" })
+	await tabs.getByRole("link", { name: "Replace pending", exact: true }).click()
+	await expect(page).toHaveURL(/\/statements\/pending/)
 	await expectNoBack(page)
-	await tabs.getByRole("link", { name: "Fix Duplicates", exact: true }).click()
-	await expect(page).toHaveURL(/\/allocator\/duplicates/)
+	await tabs.getByRole("link", { name: "Duplicates", exact: true }).click()
+	await expect(page).toHaveURL(/\/statements\/duplicates/)
 	await expectNoBack(page)
-	await tabs.getByRole("link", { name: "Allocate to Records", exact: true }).click()
-	await expect(page).toHaveURL(/\/allocator(\?|$)/)
+	await tabs.getByRole("link", { name: "Statements", exact: true }).click()
+	await expect(page).toHaveURL(/\/statements(\?|$)/)
 	await expectNoBack(page)
 })
 
@@ -362,15 +362,15 @@ test("workflow tabs: established ordinary origin clears across tabs", async ({ p
 	await expect(
 		page.getByRole("button", { name: "Back to Privacy Policy", exact: true }),
 	).toBeVisible()
-	await gotoReady(page, "/allocator")
+	await gotoReady(page, "/statements")
 	await expect(
 		page.getByRole("button", { name: "Back to Privacy Policy", exact: true }),
 	).toBeVisible()
 	await page
-		.getByRole("navigation", { name: "Workflow views" })
-		.getByRole("link", { name: "Replace Pending", exact: true })
+		.getByRole("navigation", { name: "Statement views" })
+		.getByRole("link", { name: "Replace pending", exact: true })
 		.click()
-	await expect(page).toHaveURL(/\/allocator\/pending/)
+	await expect(page).toHaveURL(/\/statements\/pending/)
 	await expectNoBack(page)
 })
 
@@ -794,4 +794,14 @@ test("mobile sidebar: a tap before the mobile layout settles opens the mobile me
 	await page.setViewportSize({ width: 800, height: 844 })
 	await page.setViewportSize({ width: 390, height: 844 })
 	await expect(page.locator('[data-sidebar="sidebar"][data-mobile="true"]')).toBeVisible()
+})
+
+test("Statement cleanup redirects preserve filters", async ({ page }) => {
+	for (const tab of ["pending", "duplicates"]) {
+		await gotoReady(page, `/allocator/${tab}?account_id=t1-a-cash&query=coffee`)
+		await expect(page).toHaveURL(
+			new RegExp(`/statements/${tab}\\?account_id=t1-a-cash&query=coffee$`),
+		)
+		await expect(page.getByRole("navigation", { name: "Statement views" })).toBeVisible()
+	}
 })

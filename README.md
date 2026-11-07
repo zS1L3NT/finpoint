@@ -175,3 +175,5 @@ The Dashboard uses the spending calendar and forecast for daily spending. Select
 In the Dashboard drill-down, expand a Record and choose **Edit Record**. Saved changes update the total immediately. Close the editor to return to its action. An unallocated Statement in the Statement view offers **Allocate…**, opening the Allocator with that Statement selected.
 
 **Largest Records** shows the selected month and scope’s five largest Spending Records by absolute amount, including refunds. **See all** opens the sorted drill-down. On Records, **Sort Records** offers newest first or absolute amount in either direction; sorting applies before pagination and survives reloads in the URL.
+
+Allocate assigns Statements to Records. Statement cleanup lives in the Statements, Replace pending and Duplicates tabs; old cleanup URLs redirect with filters preserved. In the Record editor, choose Money out or Money in and enter a positive amount.

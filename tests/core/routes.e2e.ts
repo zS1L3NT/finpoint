@@ -15,9 +15,9 @@ const titles: Record<string, string> = {
 	"/accounts": "Accounts",
 	"/budgets": "Budgets",
 	"/categories": "Categories",
-	"/allocator": "Workflows",
-	"/allocator/pending": "Workflows",
-	"/allocator/duplicates": "Workflows",
+	"/allocator": "Allocate",
+	"/allocator/pending": "Statements",
+	"/allocator/duplicates": "Statements",
 	"/importer": "Importer",
 	"/settings": "Settings",
 	"/sync": "Data",
@@ -136,25 +136,25 @@ test("workflow tabs and sparkline: tabs navigate by keyboard, Allocate keeps its
 }) => {
 	await seedWorkspace(page)
 	await test.step("workflow tabs: navigate by keyboard and Allocate keeps the default date filter", async () => {
-		await page.goto("/allocator")
-		const tabs = page.getByRole("navigation", { name: "Workflow views" })
-		await tabs.getByRole("link", { name: "Replace Pending", exact: true }).focus()
+		await page.goto("/statements")
+		const tabs = page.getByRole("navigation", { name: "Statement views" })
+		await tabs.getByRole("link", { name: "Replace pending", exact: true }).focus()
 		await page.keyboard.press("Enter")
-		await expect(page).toHaveURL(/\/allocator\/pending$/)
+		await expect(page).toHaveURL(/\/statements\/pending$/)
 		await expect(
 			page.getByRole("region", { name: "Pending statements", exact: true }),
 		).toBeVisible()
 		await page
-			.getByRole("navigation", { name: "Workflow views" })
-			.getByRole("link", { name: "Fix Duplicates", exact: true })
+			.getByRole("navigation", { name: "Statement views" })
+			.getByRole("link", { name: "Duplicates", exact: true })
 			.focus()
 		await page.keyboard.press("Enter")
-		await expect(page).toHaveURL(/\/allocator\/duplicates$/)
+		await expect(page).toHaveURL(/\/statements\/duplicates$/)
 		await page
-			.getByRole("navigation", { name: "Workflow views" })
-			.getByRole("link", { name: "Allocate to Records", exact: true })
+			.getByRole("navigation", { name: "Statement views" })
+			.getByRole("link", { name: "Statements", exact: true })
 			.click()
-		await expect(page).toHaveURL(/\/allocator\?start_date=2026-10-01/)
+		await expect(page).toHaveURL(/\/statements\?start_date=2026-10-01/)
 		await expect(
 			page.getByRole("checkbox", { name: "Select statement t1-s-free-1", exact: true }),
 		).toBeVisible()
@@ -360,9 +360,9 @@ test("allocator empty states: Statements, pending and duplicate lists resolve wi
 }) => {
 	await seedWorkspace(page, "empty")
 	for (const [route, empty] of [
-		["/allocator", "No statements found.", "Workflows"],
-		["/allocator/pending", "No pending Statements", "Workflows"],
-		["/allocator/duplicates", "No duplicates found", "Workflows"],
+		["/allocator", "No statements found.", "Allocate"],
+		["/allocator/pending", "No pending Statements", "Statements"],
+		["/allocator/duplicates", "No duplicates found", "Statements"],
 	] as const) {
 		await test.step(`${route} page: empty state resolves without premature loading copy`, async () => {
 			await page.goto(route)

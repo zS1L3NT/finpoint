@@ -5,10 +5,10 @@ export const pathDashboard = (query?: Record<string, string | undefined>) => wit
 export const pathImporter = () => "/importer"
 export const pathAllocator = (query?: Record<string, string | undefined>) =>
 	withQuery("/allocator", query)
-export const pathAllocatorPending = (query?: Record<string, string | undefined>) =>
-	withQuery("/allocator/pending", query)
-export const pathAllocatorDuplicates = (query?: Record<string, string | undefined>) =>
-	withQuery("/allocator/duplicates", query)
+export const pathStatementsPending = (query?: Record<string, string | undefined>) =>
+	withQuery("/statements/pending", query)
+export const pathStatementsDuplicates = (query?: Record<string, string | undefined>) =>
+	withQuery("/statements/duplicates", query)
 export const pathStatements = (query?: Record<string, string | undefined>) =>
 	withQuery("/statements", query)
 export const pathStatement = (id: string) => `/statements/${id}`

@@ -28,7 +28,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select"
-import WorkflowTabs from "@/components/workflow-tabs"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { useRecordEditor } from "@/hooks/use-record-editor"
 import { useDefaultFilterEndDateToday, useDefaultFilterStartDate } from "@/hooks/use-settings"
@@ -154,13 +153,11 @@ export default function AllocatorPage() {
 		<>
 			<PageContent>
 				<PageHeader
-					title="Workflows"
-					subtitle="Allocate statements to records and replace pending statements."
+					title="Allocate"
+					subtitle="Allocate statements to records."
 					description="Allocation workspace"
 					icon="lucide:link"
 				/>
-
-				<WorkflowTabs active="allocate" />
 
 				<PaginatedDataTable
 					paginated={paginated}

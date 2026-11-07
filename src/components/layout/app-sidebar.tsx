@@ -193,7 +193,7 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 						end_date: defaultFilterEndDate,
 					}),
 					icon: "lucide:link",
-					label: "Workflows",
+					label: "Allocate",
 					active: pathname.startsWith("/allocator"),
 				},
 				{
