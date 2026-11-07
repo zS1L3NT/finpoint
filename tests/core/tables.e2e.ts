@@ -597,3 +597,11 @@ test("Monthly budget filters: All budgets leads, budgets follow and Unbudgeted c
 		await expect(page).toHaveURL(/monthly_budget_id=t1-mb-daily/)
 	}
 })
+
+test("Statement title opens the funded Records detail", async ({ page }) => {
+	await seedWorkspace(page)
+	await page.goto("/statements?query=FairPrice")
+	await page.getByRole("link", { name: "FairPrice Run · SGD 4412", exact: true }).click()
+	await expect(page).toHaveURL(/statements\/t1-s-groceries/)
+	await expect(page.getByRole("link", { name: "FairPrice Run", exact: true })).toBeVisible()
+})

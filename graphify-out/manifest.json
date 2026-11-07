@@ -474,9 +474,9 @@
     "semantic_hash": ""
   },
   "src/components/table/statement-columns.tsx": {
-    "mtime": 1794040470.07642,
-    "seen": 1794040991.2888794,
-    "ast_hash": "2bc4c3f043793087cf46148942a1a031",
+    "mtime": 1794080981.4497771,
+    "seen": 1794081125.783661,
+    "ast_hash": "9a3597eba3b01658550e14dcf6e8c8db",
     "semantic_hash": ""
   },
   "src/components/ui/alert-dialog.tsx": {
@@ -984,10 +984,10 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1794080422.0263245,
-    "seen": 1794080511.6189487,
-    "ast_hash": "c1191ea16904619065e535549e78de3a",
-    "semantic_hash": "c1191ea16904619065e535549e78de3a"
+    "mtime": 1794080979.8418288,
+    "seen": 1794081128.2056296,
+    "ast_hash": "2314115dbe806b3bd7942e7e85d276b6",
+    "semantic_hash": "2314115dbe806b3bd7942e7e85d276b6"
   },
   "assets/branding/finpoint-icon-prompt.txt": {
     "mtime": 1793935852.1723228,
@@ -1308,9 +1308,9 @@
     "semantic_hash": ""
   },
   "tests/core/tables.e2e.ts": {
-    "mtime": 1794080432.4344628,
-    "seen": 1794080495.40528,
-    "ast_hash": "1950df9f7c81dd04090ed04db381fc51",
+    "mtime": 1794080981.7817664,
+    "seen": 1794081125.7838936,
+    "ast_hash": "8d531b4aebec76f5db87f4ed01d3baa3",
     "semantic_hash": ""
   },
   "tests/core/workflows.e2e.ts": {

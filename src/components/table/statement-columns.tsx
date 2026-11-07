@@ -145,7 +145,9 @@ export function useStatementColumns<TStatement extends StatementRow>({
 					<div className="min-w-0">
 						<p className="flex items-center gap-1.5">
 							<span className="min-w-0 truncate font-medium">
-								{row.original.description || "No description"}
+								<Link href={pathStatement(row.original.id)}>
+									{row.original.description || "No description"}
+								</Link>
 							</span>
 							<StatementBadges
 								statement={row.original}
@@ -212,7 +214,9 @@ export function useStatementMobileRow<TStatement extends StatementRow>({
 						<div className="min-w-0 flex-1">
 							<p className="flex items-center gap-1.5">
 								<span className="min-w-0 truncate font-medium">
-									{statement.description || "No description"}
+									<Link href={pathStatement(statement.id)}>
+										{statement.description || "No description"}
+									</Link>
 								</span>
 								<StatementBadges
 									statement={statement}
