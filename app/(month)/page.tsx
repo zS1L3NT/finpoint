@@ -16,7 +16,7 @@ import SpendingCalendar from "@/components/charts/spending-calendar"
 import MonthlyBudgetDialog from "@/components/dialogs/monthly-budget"
 import { DrillPanel } from "@/components/drill/panel"
 import { UiIcon as IconifyIcon } from "@/components/icon"
-import { Metric as DashboardMetric, MetricGrid } from "@/components/metric"
+import { Metric as DashboardMetric, type Delta, MetricGrid } from "@/components/metric"
 import MonthlyBudgetBadge from "@/components/monthly-budget-badge"
 import { FILTER_CONTROL_CLASS } from "@/components/table/filter-bar"
 import Term from "@/components/term"
@@ -184,8 +184,9 @@ export default function DashboardPage() {
 					className={cn(
 						"grid gap-5",
 						!period.is_future &&
-							!drill.selection &&
-							"xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]",
+							(drill.selection
+								? "2xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]"
+								: "xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]"),
 					)}
 				>
 					{!period.is_future ? (
@@ -298,7 +299,7 @@ export default function DashboardPage() {
 							/>
 						) : null}
 						{stage > 1 ? (
-							<div className={cn("grid gap-5", !drill.selection && "lg:grid-cols-2")}>
+							<div className={cn("grid gap-5", !drill.selection && "lg:grid-cols-3")}>
 								<LargestRecords
 									month={dataMonth}
 									year={dataYear}
@@ -532,18 +533,8 @@ function SummaryBand({
 	const waiting = through !== null && summary.income === 0
 
 	return (
-		<Card className="gap-0 overflow-hidden py-0">
-			<div
-				className="flex flex-wrap gap-x-4 px-3 text-xs text-muted-foreground"
-				aria-label="Financial terms"
-			>
-				{(["Pending", "Allocation", "Effective spending", "Left over"] as const).map(
-					name => (
-						<Term key={name} name={name} />
-					),
-				)}
-			</div>
-			<MetricGrid className="grid-cols-1 rounded-none border-0 sm:grid-cols-3 lg:grid-cols-3">
+		<Card className="@container gap-0 overflow-hidden py-0">
+			<MetricGrid className="grid-cols-1 rounded-none border-0 @min-[700px]:grid-cols-3 lg:grid-cols-1 @min-[700px]:lg:grid-cols-3">
 				{[
 					{
 						key: "spent",
@@ -587,31 +578,64 @@ function SummaryBand({
 						spark: trend.map(m => m.surplus),
 					},
 				].map(m => (
-					<button
+					<DashboardMetric
 						key={m.key}
-						type="button"
-						onClick={() => onDrill(m.key)}
-						className="cursor-pointer text-left focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
-					>
-						<DashboardMetric
-							icon={m.icon}
-							label={`${m.label} ›`}
-							value={m.value}
-							detail={m.detail}
-							spark={m.spark}
-							sparkPeriod={sparkPeriod}
-						/>
-					</button>
+						icon={m.icon}
+						label={
+							m.key === "spent" ? (
+								<Term name="Effective spending" label="Spent" />
+							) : m.key === "leftover" ? (
+								<Term name="Left over" />
+							) : (
+								m.label
+							)
+						}
+						value={m.value}
+						detail={m.detail}
+						spark={m.spark}
+						sparkPeriod={sparkPeriod}
+						delta={
+							through
+								? undefined
+								: deltaOf(
+										m.key === "income"
+											? comparison.income
+											: m.key === "spent"
+												? comparison.spending
+												: comparison.surplus,
+										comparison.count,
+										m.key === "spent" ? "down" : "up",
+									)
+						}
+						onSelect={() => onDrill(m.key)}
+						sparkColor={
+							m.key === "income"
+								? "var(--income)"
+								: m.key === "spent"
+									? "var(--spending)"
+									: "var(--foreground)"
+						}
+						tone={
+							m.key === "leftover" && !waiting
+								? summary.surplus > 0
+									? "positive"
+									: summary.surplus < 0
+										? "negative"
+										: "neutral"
+								: "neutral"
+						}
+					/>
 				))}
 			</MetricGrid>
 			<button
 				type="button"
 				onClick={() => onDrill("saved")}
-				className="flex min-h-11 cursor-pointer items-center justify-between border-t px-4 py-3 text-sm focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
+				className="transition-colors duration-150 ease-out hover:bg-muted/40 active:bg-muted/60 flex min-h-11 cursor-pointer items-center justify-between border-t px-4 py-3 text-sm focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
 			>
 				<span>Saved this month</span>
 				<span className="tabular-nums">
-					{formatCurrency(summary.contributions - summary.withdrawals)} ›
+					{formatCurrency(summary.contributions - summary.withdrawals)}{" "}
+					<IconifyIcon icon="lucide:chevron-right" className="inline size-4" />
 				</span>
 			</button>
 		</Card>
@@ -720,4 +744,13 @@ function comparisonText(value: ComparisonValue, count: number) {
 	if (!count || value.difference === null) return "No comparison history"
 	if (Math.abs(value.difference) < 0.005) return `Same as ${count}-month average`
 	return `${formatCurrency(Math.abs(value.difference))} ${value.difference > 0 ? "above" : "below"} ${count}-mo avg`
+}
+
+function deltaOf(value: ComparisonValue, count: number, better: "up" | "down"): Delta | undefined {
+	if (!count || value.difference === null || Math.abs(value.difference) < 0.005) return undefined
+	const up = value.difference > 0
+	return {
+		text: `${up ? "↑" : "↓"} ${formatCurrency(Math.abs(value.difference)).replace(/\.\d\d$/, "")}`,
+		good: up === (better === "up"),
+	}
 }

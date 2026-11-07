@@ -2,7 +2,7 @@
 
 import { UiIcon } from "@/components/icon"
 import { themeColor } from "@/lib/palette"
-import { formatCurrency } from "@/lib/utils"
+import { cn, formatCurrency } from "@/lib/utils"
 import type { Selection } from "@/logic/drilldown"
 
 type Mover = {
@@ -64,18 +64,27 @@ export default function CategoryMovers({
 							<UiIcon icon={category.icon} className="size-4 text-white" />
 						</span>
 						<span className="grid min-w-0">
-							<span className="text-sm font-medium">
-								{category.name} {up ? "up" : "down"}{" "}
-								{formatCurrency(Math.abs(difference))} vs your {comparisonCount}
-								-month average
-							</span>
+							<span className="truncate text-sm font-medium">{category.name}</span>
 							<span className="truncate text-xs text-muted-foreground tabular-nums">
-								Average {formatCurrency(category.spending - difference)}
+								{formatCurrency(Math.abs(difference))} {up ? "more" : "less"} than
+								your {comparisonCount}-month average
 							</span>
 						</span>
 						<span className="grid justify-items-end">
 							<span className="text-sm font-medium tabular-nums">
 								{formatCurrency(category.spending)}
+							</span>
+							<span
+								className={cn(
+									"text-xs tabular-nums",
+									period.startsWith("Days")
+										? "text-muted-foreground"
+										: up
+											? "text-destructive"
+											: "text-creative",
+								)}
+							>
+								{up ? "▲" : "▼"} {formatCurrency(Math.abs(difference))}
 							</span>
 						</span>
 					</button>

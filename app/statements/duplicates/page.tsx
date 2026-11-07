@@ -156,13 +156,19 @@ export default function FixDuplicatesPage() {
 			/>
 			<StatementTabs active="duplicates" />
 			<div className="flex flex-col gap-2">
-				<Input
-					aria-label="Search statement descriptions"
-					className="w-full md:w-sm"
-					placeholder="Search descriptions..."
-					value={query}
-					onChange={event => updateParams({ query: event.target.value })}
-				/>
+				<div className="relative w-full md:w-sm">
+					<IconifyIcon
+						icon="lucide:search"
+						className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+					/>
+					<Input
+						aria-label="Search statement descriptions"
+						className="pl-9"
+						placeholder="Search descriptions..."
+						value={query}
+						onChange={event => updateParams({ query: event.target.value })}
+					/>
+				</div>
 				<div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:gap-4">
 					<FilterBar className="lg:w-auto">
 						<Select

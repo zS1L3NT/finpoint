@@ -1,17 +1,19 @@
 "use client"
 import { useLiveQuery } from "dexie-react-hooks"
 import { AnimatePresence, motion, useIsPresent, useReducedMotion } from "framer-motion"
-import { ChevronDown } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { AllocationProgress } from "@/components/allocation-progress"
 import { AllocationRows } from "@/components/allocation-rows"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
+import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
+import MonthlyBudgetBadge from "@/components/monthly-budget-badge"
+import { amountTone, PendingBadge } from "@/components/table/record-columns"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
 import { useRecordEditor } from "@/hooks/use-record-editor"
 import { DRILL_PIVOT, SPRING, TRANSITION } from "@/lib/motion"
-import { formatCurrency, pluralize } from "@/lib/utils"
+import { cn, formatCurrency, parseDatetime, pluralize } from "@/lib/utils"
 import { listCategories } from "@/logic/categories"
 import { getDrilldown, getDrillStatement, type Selection } from "@/logic/drilldown"
 import { pathAllocator, pathRecord } from "@/routes"
@@ -108,7 +110,7 @@ export function DrillPanel({
 					<h2
 						id="drill-title"
 						tabIndex={-1}
-						className="text-lg font-semibold tracking-tight outline-none focus-visible:ring-2 focus-visible:ring-ring"
+						className="text-lg font-semibold tracking-tight outline-none"
 					>
 						{data.title}
 					</h2>
@@ -131,7 +133,7 @@ export function DrillPanel({
 						</nav>
 					) : null}
 					<p
-						className="text-3xl font-semibold tracking-tight tabular-nums"
+						className="mt-1 text-3xl font-semibold tracking-tight tabular-nums"
 						data-testid="drill-total"
 						aria-live="polite"
 					>
@@ -144,8 +146,13 @@ export function DrillPanel({
 							: "Spending · refunds subtracted · Pending Records counted"}
 					</p>
 				</div>
-				<Button variant="ghost" size="sm" onClick={close} aria-label="Close drill-down">
-					✕
+				<Button
+					variant="ghost"
+					size="icon-sm"
+					onClick={close}
+					aria-label="Close drill-down"
+				>
+					<IconifyIcon icon="lucide:x" />
 				</Button>
 			</div>
 			<AnimatePresence mode="wait" custom={statementId ? 1 : -1}>
@@ -224,11 +231,17 @@ export function DrillPanel({
 														{r.title}
 													</span>
 													<span className="block text-muted-foreground">
-														{r.datetime.slice(0, 10)}
+														{parseDatetime(r.datetime).toFormat(
+															"ccc d MMM",
+														)}
 													</span>
-													<span className="block tabular-nums">
-														{r.amount > 0 ? "Refund " : ""}
-														{formatCurrency(Math.abs(r.amount))}
+													<span
+														className={cn(
+															"block tabular-nums",
+															amountTone(r.amount),
+														)}
+													>
+														{formatCurrency(r.amount)}
 													</span>
 													{side.unique.includes(r.id) ? (
 														<span className="block text-muted-foreground">
@@ -260,23 +273,48 @@ export function DrillPanel({
 												pivot(expanded === r.id ? null : `record:${r.id}`)
 											}
 										>
+											<Icon {...r.category} size={14} />
 											<span className="min-w-0 flex-1">
 												<span className="block text-sm font-medium">
 													{r.title}
+													<PendingBadge record={r} />
 												</span>
 												<span className="text-xs text-muted-foreground">
-													{r.datetime.slice(0, 10)} · {r.category.name}
+													{parseDatetime(r.datetime).toFormat(
+														"ccc d MMM",
+													)}{" "}
+													· {r.category.name}
+													{r.monthly_budget ? (
+														<MonthlyBudgetBadge
+															name={r.monthly_budget.name}
+															color={r.monthly_budget.color}
+														/>
+													) : null}
 												</span>
 											</span>
-											<span className="text-sm tabular-nums">
-												{r.amount > 0 ? "Refund " : ""}
-												{formatCurrency(Math.abs(r.amount))}
-												<AllocationProgress
-													amount={r.amount}
-													allocated={r.allocated_amount}
-												/>
+											<span
+												className={cn(
+													"text-sm tabular-nums",
+													amountTone(r.amount),
+												)}
+											>
+												{formatCurrency(r.amount)}
+												{r.is_pending ? (
+													<AllocationProgress
+														amount={r.amount}
+														allocated={r.allocated_amount}
+													/>
+												) : null}
 											</span>
-											<ChevronDown aria-hidden className="size-4 shrink-0" />
+											<motion.span
+												animate={{ rotate: expanded === r.id ? 180 : 0 }}
+												transition={TRANSITION.fast}
+											>
+												<IconifyIcon
+													icon="lucide:chevron-down"
+													className="size-4 shrink-0"
+												/>
+											</motion.span>
 										</button>
 										{expanded === r.id ? (
 											<motion.div

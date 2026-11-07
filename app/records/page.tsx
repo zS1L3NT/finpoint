@@ -153,6 +153,7 @@ export default function RecordsPage() {
 			searchPlaceholder: "Search title, people, location, description...",
 			filters: (
 				<RecordFilters
+					sort={sort}
 					categories={categories}
 					categoryIds={categoryIds}
 					monthlyBudgets={monthlyBudgets}
@@ -172,6 +173,7 @@ export default function RecordsPage() {
 			actions: <RecordCreatorHost categories={categories} />,
 		}),
 		[
+			sort,
 			query,
 			handleQueryChange,
 			pageSize,
@@ -210,21 +212,7 @@ export default function RecordsPage() {
 					description="Ledger view"
 					icon="lucide:receipt-text"
 				/>
-				<Select
-					value={sort}
-					onValueChange={value =>
-						updateFilters({ sort: value === "date" ? null : value })
-					}
-				>
-					<SelectTrigger aria-label="Sort Records" className="w-full sm:w-56">
-						<SelectValue />
-					</SelectTrigger>
-					<SelectContent>
-						<SelectItem value="date">Newest first</SelectItem>
-						<SelectItem value="amount_desc">Amount: largest first</SelectItem>
-						<SelectItem value="amount_asc">Amount: smallest first</SelectItem>
-					</SelectContent>
-				</Select>
+
 				<PaginatedDataTable
 					paginated={paginated}
 					columns={columns}
@@ -271,6 +259,7 @@ function RecordCreatorHost({ categories }: { categories: CategoryWithChildren[] 
 }
 
 function RecordFilters({
+	sort,
 	categories,
 	categoryIds,
 	monthlyBudgets,
@@ -286,6 +275,7 @@ function RecordFilters({
 	onChange,
 	onClear,
 }: {
+	sort: string
 	categories: CategoryWithChildren[]
 	categoryIds: string[]
 	monthlyBudgets: MonthlyBudget[]
@@ -323,6 +313,20 @@ function RecordFilters({
 
 	return (
 		<FilterBar className="sm:flex sm:flex-wrap">
+			<Select
+				value={sort}
+				onValueChange={value => onChange({ sort: value === "date" ? null : value })}
+			>
+				<SelectTrigger aria-label="Sort Records" className={FILTER_CONTROL_CLASS}>
+					<IconifyIcon icon="lucide:arrow-up-down" />
+					<SelectValue />
+				</SelectTrigger>
+				<SelectContent>
+					<SelectItem value="date">Newest first</SelectItem>
+					<SelectItem value="amount_desc">Amount: largest first</SelectItem>
+					<SelectItem value="amount_asc">Amount: smallest first</SelectItem>
+				</SelectContent>
+			</Select>
 			<CategoryFilter
 				categories={categories}
 				selectedIds={categoryIds}

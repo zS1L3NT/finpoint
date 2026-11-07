@@ -35,9 +35,10 @@ export function Metric({
 	spark,
 	sparkColor,
 	sparkPeriod,
+	onSelect,
 }: {
 	icon: string
-	label: string
+	label: React.ReactNode
 	value: string
 	detail: string
 	tone?: "positive" | "negative" | "neutral"
@@ -46,10 +47,16 @@ export function Metric({
 	sparkColor?: string
 	/** What each sparkline point covers, when not the whole month (e.g. "days 1–8"). */
 	sparkPeriod?: string
+	onSelect?: () => void
 }) {
+	const Root = onSelect ? "button" : "div"
 	return (
-		<div
+		<Root
+			type={onSelect ? "button" : undefined}
+			onClick={onSelect}
 			className={cn(
+				onSelect &&
+					"group cursor-pointer text-left focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring transition-colors duration-150 ease-out hover:bg-muted/40 active:bg-muted/60",
 				"relative grid min-h-24 min-w-0 content-start bg-card p-3 sm:p-4",
 				tone !== "neutral" &&
 					"before:absolute before:inset-x-0 before:top-0 before:h-0.5 before:content-['']",
@@ -63,6 +70,12 @@ export function Metric({
 					<IconifyIcon icon={icon} className="size-3.5" />
 				</span>
 				{label}
+				{onSelect ? (
+					<IconifyIcon
+						icon="lucide:chevron-right"
+						className="ml-auto size-3 opacity-60 group-hover:opacity-100"
+					/>
+				) : null}
 				{delta ? (
 					<span
 						title={delta.good ? "Better than average" : "Worse than average"}
@@ -94,11 +107,11 @@ export function Metric({
 					<Sparkline
 						values={spark}
 						color={sparkColor}
-						label={`${label}, ${sparkPeriod ? `${sparkPeriod} of each of ` : ""}the last ${spark.length} months`}
+						label={`${typeof label === "string" ? label : ((label as React.ReactElement<{ label?: string; name: string }>).props.label ?? (label as React.ReactElement<{ name: string }>).props.name)}, ${sparkPeriod ? `${sparkPeriod} of each of ` : ""}the last ${spark.length} months`}
 						className="mb-1 hidden shrink-0 text-muted-foreground xl:block"
 					/>
 				) : null}
 			</div>
-		</div>
+		</Root>
 	)
 }

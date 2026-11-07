@@ -18,8 +18,8 @@ const overflow = (chart: ReturnType<typeof card>) =>
 
 function metric(page: Page, label: string) {
 	return page
-		.getByRole("button", { name: new RegExp(`^${label} ›`) })
-		.locator("div.min-h-24.bg-card")
+		.getByRole("button", { name: new RegExp(`^${label}(?: |$)`) })
+		.filter({ has: page.locator(".tabular-nums") })
 }
 
 test("Budget detail: usage tooltip reconciles actual and projected spending even with a zero plan", async ({
@@ -552,7 +552,7 @@ test.describe("pinned overview date", () => {
 			await page.goto(overview)
 			await expect(metric(page, "Spent")).toContainText("$286.63")
 			if (!isMobile)
-				await expect(page.getByRole("img", { name: /^Spent ›, .*last/ })).toBeVisible()
+				await expect(page.getByRole("img", { name: /^Spent, .*last/ })).toBeVisible()
 			await page.getByRole("button", { name: "Previous month", exact: true }).click()
 			await expect(
 				page.getByRole("heading", { name: "September 2026", exact: true }),

@@ -14,19 +14,30 @@ const DEFINITIONS = {
 		"Income minus personal spending, before money moved into savings or investments. For example, $3,000 income minus $2,000 spending leaves $1,000.",
 } as const
 
-export default function Term({ name }: { name: keyof typeof DEFINITIONS }) {
+export default function Term({ name, label }: { name: keyof typeof DEFINITIONS; label?: string }) {
 	const [open, setOpen] = useState(false)
 	return (
 		<Tooltip open={open} onOpenChange={setOpen}>
 			<TooltipTrigger asChild>
-				<button
-					type="button"
+				<span
+					role="button"
+					tabIndex={0}
 					aria-label={`Define ${name}`}
-					className="min-h-11 cursor-help underline decoration-dotted underline-offset-4 focus-visible:outline-2 focus-visible:outline-ring"
-					onClick={() => setOpen(true)}
+					className="inline cursor-help underline decoration-dotted underline-offset-4 focus-visible:outline-2 focus-visible:outline-ring"
+					onKeyDown={event => {
+						if (event.key === "Enter" || event.key === " ") {
+							event.preventDefault()
+							event.stopPropagation()
+							setOpen(true)
+						}
+					}}
+					onClick={event => {
+						event.stopPropagation()
+						setOpen(true)
+					}}
 				>
-					{name}
-				</button>
+					{label ?? name}
+				</span>
 			</TooltipTrigger>
 			<TooltipContent>{DEFINITIONS[name]}</TooltipContent>
 		</Tooltip>

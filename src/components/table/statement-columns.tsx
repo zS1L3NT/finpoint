@@ -1,7 +1,6 @@
 import type { CellContext, ColumnDef, Row } from "@tanstack/react-table"
 import Link from "next/link"
 import { useMemo } from "react"
-import { AllocationExpansion } from "@/components/allocation-rows"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import { amountTone, formatRowTime } from "@/components/table/record-columns"
 import { Badge } from "@/components/ui/badge"
@@ -74,7 +73,8 @@ function StatementAmount({
 			</span>
 			{amount === "allocated" ? (
 				<span className="text-[0.6875rem] text-muted-foreground tabular-nums">
-					{formatCurrency(statement.pivot?.amount ?? 0)} here
+					{formatCurrency(statement.pivot?.amount ?? 0)} of{" "}
+					{formatCurrency(statement.amount)} allocated
 				</span>
 			) : allocable !== statement.amount && (amount === "allocable" || allocable !== 0) ? (
 				<span className="text-[0.6875rem] text-muted-foreground tabular-nums">
@@ -143,8 +143,6 @@ export function useStatementColumns<TStatement extends StatementRow>({
 				header: "Statement",
 				cell: ({ row }) => (
 					<div className="min-w-0">
-						<AllocationExpansion id={row.original.id} kind="statement" />
-
 						<p className="flex items-center gap-1.5">
 							<span className="min-w-0 truncate font-medium">
 								{row.original.description || "No description"}
@@ -230,11 +228,6 @@ export function useStatementMobileRow<TStatement extends StatementRow>({
 					</div>
 					<StatementAmount statement={statement} amount={amount} />
 					<StatementActions statement={statement} options={{ pageName, onEdit }} />
-					{amount === "amount" ? (
-						<div className="col-span-full">
-							<AllocationExpansion id={statement.id} kind="statement" />
-						</div>
-					) : null}
 				</>
 			)
 		},

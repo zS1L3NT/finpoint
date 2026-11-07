@@ -2,7 +2,6 @@ import type { CellContext, ColumnDef, Row } from "@tanstack/react-table"
 import Link from "next/link"
 import { useMemo, useState } from "react"
 import { AllocationProgress } from "@/components/allocation-progress"
-import { AllocationExpansion } from "@/components/allocation-rows"
 import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
 import MonthlyBudgetBadge from "@/components/monthly-budget-badge"
 import { Badge } from "@/components/ui/badge"
@@ -82,8 +81,15 @@ export function RecordAmountCell({
 			<span className={cn("font-medium tabular-nums", amountTone(value))}>
 				{formatCurrency(value)}
 			</span>
-			{showAllocated ? (
-				<AllocationProgress amount={record.amount} allocated={record.allocated_amount} />
+			{showAllocated &&
+			(value !== record.amount ||
+				(record.is_pending && record.allocated_amount !== record.amount)) ? (
+				<span className="text-amber-700 dark:text-amber-400 [&>span]:text-inherit">
+					<AllocationProgress
+						amount={record.amount}
+						allocated={value !== record.amount ? value : record.allocated_amount}
+					/>
+				</span>
 			) : null}
 		</span>
 	)
@@ -180,7 +186,6 @@ export function useRecordColumns<TRecord extends RecordRow>({
 								{row.original.category.name}
 								{row.original.subtitle ? ` · ${row.original.subtitle}` : ""}
 							</p>
-							<AllocationExpansion id={row.original.id} kind="record" />
 						</div>
 					</div>
 				),
@@ -228,7 +233,7 @@ export function useRecordColumns<TRecord extends RecordRow>({
 								? (row.original.pivot?.amount ?? 0)
 								: row.original.amount
 						}
-						showAllocated={amount === "amount"}
+						showAllocated={true}
 					/>
 				),
 			},
@@ -282,17 +287,8 @@ export function useRecordMobileRow<TRecord extends RecordRow>({
 							</p>
 						</div>
 					</div>
-					<RecordAmountCell
-						record={record}
-						value={value}
-						showAllocated={amount === "amount"}
-					/>
+					<RecordAmountCell record={record} value={value} showAllocated={true} />
 					<RecordActions record={record} options={{ pageName, extraActions, onEdit }} />
-					{amount === "amount" ? (
-						<div className="col-span-full">
-							<AllocationExpansion id={record.id} kind="record" />
-						</div>
-					) : null}
 				</>
 			)
 		},
