@@ -161,15 +161,6 @@ export const componentInventory: InventoryEntry[] = [
 		scenarios: ["indirect"],
 	},
 	{
-		path: "src/components/charts/daily-spending-chart.tsx",
-		owner: "team3",
-		routes: ["/"],
-		visibleExports: ["default"],
-		dormantExports: [],
-		helperExports: [],
-		scenarios: ["chart"],
-	},
-	{
 		path: "src/components/charts/monthly-budget-usage.tsx",
 		owner: "team3",
 		routes: ["/"],
@@ -189,15 +180,6 @@ export const componentInventory: InventoryEntry[] = [
 	},
 	{
 		path: "src/components/charts/spending-calendar.tsx",
-		owner: "team3",
-		routes: ["/"],
-		visibleExports: ["default"],
-		dormantExports: [],
-		helperExports: [],
-		scenarios: ["chart"],
-	},
-	{
-		path: "src/components/charts/total-spending-chart.tsx",
 		owner: "team3",
 		routes: ["/"],
 		visibleExports: ["default"],
@@ -2196,10 +2178,6 @@ export const scenarioDescriptions: Record<string, string> = {
 		"Dense card fits with finite values; keyboard tooltip stays numeric and inside every viewport",
 	"src/components/charts/category-history-chart.tsx#chart.responsive":
 		"Dense card fits with finite values; keyboard tooltip stays numeric and inside every viewport",
-	"src/components/charts/daily-spending-chart.tsx#chart.responsive":
-		"Dense card fits with finite values; keyboard tooltip stays numeric and inside every viewport",
-	"src/components/charts/total-spending-chart.tsx#chart.responsive":
-		"Dense card fits with finite values; keyboard tooltip stays numeric and inside every viewport",
 	"src/components/charts/category-movers.tsx#chart.responsive":
 		"Dense card fits with finite values and long names; Housing drill works by keyboard",
 	"src/components/charts/category-movers.tsx#chart.motion":
@@ -2220,10 +2198,6 @@ export const scenarioDescriptions: Record<string, string> = {
 		"Endpoint marker entrance respects reduced motion with final data endpoint; polyline draws progressively then settles",
 	"src/components/charts/cashflow-chart.tsx#chart.motion":
 		"All five projects: Surplus / Shortfall graph marks grow through intermediate geometry once and settle with no replay on hover/resize; reduced-motion immediate-final covered in the reduced-motion project",
-	"src/components/charts/total-spending-chart.tsx#chart.motion":
-		"All five projects: Spending forecast graph marks grow through intermediate geometry once and settle with no replay on hover/resize; reduced-motion immediate-final covered in the reduced-motion project",
-	"src/components/charts/daily-spending-chart.tsx#chart.motion":
-		"All five projects: Spending by day graph marks grow through intermediate geometry once and settle; reduced-motion immediate-final covered in the reduced-motion project",
 	"src/components/charts/category-history-chart.tsx#chart.motion":
 		"All five projects: Category trend graph marks grow through intermediate geometry once and settle; reduced-motion immediate-final covered in the reduced-motion project",
 	"src/components/charts/budget-progress-chart.tsx#chart.motion":
@@ -2699,12 +2673,6 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"Spending forecast: retains gradient backdrops and comparison lines",
 		"Spending forecast: preserves scope and legend semantics",
 		"chart tooltips: Surplus / Shortfall keyboard navigation exposes actual numeric values",
-	],
-	"src/components/charts/daily-spending-chart.tsx#export.default.behaviour": [
-		"chart tooltips: Spending by day keyboard navigation exposes actual numeric values",
-	],
-	"src/components/charts/total-spending-chart.tsx#export.default.behaviour": [
-		"chart tooltips: Spending forecast keyboard navigation exposes actual numeric values",
 	],
 	"src/components/charts/category-history-chart.tsx#export.default.behaviour": [
 		"chart tooltips: Category trend keyboard navigation exposes actual numeric values",
@@ -4019,23 +3987,7 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"chart tooltips: Surplus / Shortfall keyboard navigation exposes actual numeric values",
 		"empty overview: no history gives zero metrics and useful chart explanations",
 	],
-	"src/components/charts/daily-spending-chart.tsx#chart.values": [
-		"chart tooltips: Spending by day keyboard navigation exposes actual numeric values",
-		"empty overview: no history gives zero metrics and useful chart explanations",
-	],
-	"src/components/charts/total-spending-chart.tsx#chart.values": [
-		"chart tooltips: Spending forecast keyboard navigation exposes actual numeric values",
-		"empty overview: no history gives zero metrics and useful chart explanations",
-	],
-	"src/components/charts/total-spending-chart.tsx#chart.responsive": [
-		"dense overview cards: every card renders values and fits the viewport",
-		"chart tooltips: stay numeric and inside every viewport",
-	],
 	"src/components/charts/cashflow-chart.tsx#chart.responsive": [
-		"dense overview cards: every card renders values and fits the viewport",
-		"chart tooltips: stay numeric and inside every viewport",
-	],
-	"src/components/charts/daily-spending-chart.tsx#chart.responsive": [
 		"dense overview cards: every card renders values and fits the viewport",
 		"chart tooltips: stay numeric and inside every viewport",
 	],
@@ -4079,12 +4031,6 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"sparkline: missing, flat, negative, mixed and dense values have correct finite endpoints",
 	],
 	"src/components/charts/cashflow-chart.tsx#chart.motion": [
-		"chart intro: overview charts grow real graph marks once and respect reduced motion",
-	],
-	"src/components/charts/total-spending-chart.tsx#chart.motion": [
-		"chart intro: overview charts grow real graph marks once and respect reduced motion",
-	],
-	"src/components/charts/daily-spending-chart.tsx#chart.motion": [
 		"chart intro: overview charts grow real graph marks once and respect reduced motion",
 	],
 	"src/components/charts/category-history-chart.tsx#chart.motion": [
@@ -4499,18 +4445,6 @@ export const scenarioProjects: Record<
 		"light",
 		"reduced-motion",
 	],
-	"src/components/charts/total-spending-chart.tsx#chart.motion": [
-		"mobile",
-		"tall-desktop",
-		"light",
-		"reduced-motion",
-	],
-	"src/components/charts/daily-spending-chart.tsx#chart.motion": [
-		"mobile",
-		"tall-desktop",
-		"light",
-		"reduced-motion",
-	],
 	"src/components/charts/category-history-chart.tsx#chart.motion": [
 		"mobile",
 		"tall-desktop",
@@ -4601,8 +4535,6 @@ export const scenarioProjects: Record<
 	"app/statement-rules/page.tsx#route.viewport": ["mobile", "tall-desktop", "reduced-motion"],
 	"src/components/charts/cashflow-chart.tsx#chart.responsive": ["mobile", "tall-desktop"],
 	"src/components/charts/category-history-chart.tsx#chart.responsive": ["mobile", "tall-desktop"],
-	"src/components/charts/daily-spending-chart.tsx#chart.responsive": ["mobile", "tall-desktop"],
-	"src/components/charts/total-spending-chart.tsx#chart.responsive": ["mobile", "tall-desktop"],
 	"src/components/charts/category-movers.tsx#chart.motion": ["reduced-motion"],
 	"src/components/charts/monthly-budget-usage.tsx#chart.motion": ["reduced-motion"],
 	"src/components/charts/spending-calendar.tsx#chart.motion": ["reduced-motion"],

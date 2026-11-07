@@ -6,8 +6,6 @@ import { expect, seedWorkspace, test } from "../support/fixtures"
 
 const cardTitles = [
 	"Spending forecast",
-	"Surplus / Shortfall",
-	"Spending by day",
 	"Category trend",
 	"Categories this month",
 	"Monthly budgets",
@@ -261,12 +259,7 @@ test("populated charts: tooltips stay numeric, drills work by keyboard and a Rec
 	await test.step("chart tooltips: stay numeric and inside every viewport", async () => {
 		await page.goto(overview)
 		const viewport = page.viewportSize()
-		for (const title of [
-			"Spending forecast",
-			"Surplus / Shortfall",
-			"Spending by day",
-			"Category trend",
-		]) {
+		for (const title of ["Spending forecast", "Category trend"]) {
 			const chart = card(page, title)
 			const surface = chart.getByRole("application").first()
 			await surface.scrollIntoViewIfNeeded()
@@ -630,13 +623,7 @@ test.describe("pinned overview date", () => {
 	test("chart tooltips: keyboard sweeps expose actual numeric values", async ({ page }) => {
 		test.setTimeout(120_000)
 		await seedWorkspace(page)
-		for (const title of [
-			"Spending forecast",
-			"Surplus / Shortfall",
-			"Spending by day",
-			"Category trend",
-			"Spending over time",
-		]) {
+		for (const title of ["Spending forecast", "Category trend", "Spending over time"]) {
 			await test.step(`chart tooltips: ${title} keyboard navigation exposes actual numeric values`, async () => {
 				await page.goto(
 					title === "Spending over time" ? `/budgets/${IDS.budgets.manual}` : overview,
@@ -667,13 +654,7 @@ test.describe("pinned overview date", () => {
 						await page.evaluate(() => new Promise(requestAnimationFrame))
 					}
 					await expect(tooltip).toBeVisible()
-					if (title === "Spending by day") {
-						await expect(tooltip).toContainText("October 4")
-						await expect(tooltip).toContainText("-$20.00")
-						await surface.press("ArrowRight")
-						await expect(tooltip).toContainText("October 5")
-						await expect(tooltip).toContainText("$84.20")
-					} else if (title === "Spending forecast") {
+					if (title === "Spending forecast") {
 						await surface.press("ArrowRight")
 						await expect(tooltip).toContainText("October 5")
 						await expect(
@@ -691,9 +672,7 @@ test.describe("pinned overview date", () => {
 						).toBeVisible()
 					} else {
 						await surface.press("ArrowRight")
-						await expect(tooltip).toContainText(
-							title === "Surplus / Shortfall" ? "$5,137.20" : "$84.20",
-						)
+						await expect(tooltip).toContainText("$84.20")
 					}
 				}
 			})
@@ -707,8 +686,8 @@ test.describe("pinned overview date", () => {
 		await page.goto(overview)
 		await expect(metric(page, "Income")).toContainText("None recorded")
 		await expect(metric(page, "Spent")).toContainText("$0.00")
-		await expect(metric(page, "Left over")).toContainText("Income less personal spending")
-		await expect(metric(page, "Left over")).toContainText("$0.00")
+		await expect(metric(page, "Left over")).toContainText("Waiting for income")
+		await expect(metric(page, "Left over")).toContainText("—")
 		await expect(page.getByRole("button", { name: /^Saved this month/ })).toContainText("$0.00")
 		await expect(card(page, "Category trend")).toContainText(
 			"No spending in the available months.",
@@ -769,7 +748,7 @@ test.describe("pinned overview date", () => {
 			{ categoryId: IDS.categories.groceries, name },
 		)
 		await page.goto(overview)
-		await expect(metric(page, "Total net refund")).toContainText("$93.37")
+		await expect(metric(page, "Spent")).toContainText("-$93.37")
 		await expect(metric(page, "Left over")).toContainText("$5,296.87")
 		const mix = card(page, "Categories this month")
 		await expect(mix.getByRole("button", { name: /Shopping/ })).toContainText(
@@ -805,7 +784,6 @@ test.describe("pinned overview date", () => {
 		await expect(budgets.getByRole("button", { name: "Recurring", exact: true })).toBeVisible()
 		await expect(budgets).not.toContainText(/NaN|Infinity/)
 		await expect(card(page, "Categories this month")).not.toContainText(/NaN|Infinity/)
-		await expect(card(page, "Spending by day").getByRole("application")).toBeVisible()
 	})
 })
 
@@ -912,7 +890,12 @@ test("overview: forecast fills XL card and category hover preserves bars", async
 	await expect
 		.poll(() => dimmed.evaluate(element => Number(getComputedStyle(element).opacity)))
 		.toBeGreaterThanOrEqual(0.6)
-	await expect(page.getByText("Spending by weekday", { exact: true })).toHaveCount(0)
+	for (const title of ["Spending by weekday", "Spending by day", "Surplus / Shortfall"]) {
+		await expect(page.getByText(title, { exact: true })).toHaveCount(0)
+	}
+	await expect(
+		card(page, "Spending calendar").getByRole("button", { name: "View Records", exact: true }),
+	).toHaveCount(0)
 })
 
 test("category trend: one shared list follows the read month and keeps its links reachable", async ({

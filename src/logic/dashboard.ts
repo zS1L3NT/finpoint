@@ -384,14 +384,6 @@ export async function getDashboard(
 		comparisonSummaries(date, today, false, tables, null),
 		actualRecords,
 	)
-	const series = buildSeries(
-		summary,
-		futureSummary,
-		included,
-		date.daysInMonth ?? 30,
-		isFuture ? 0 : actualEnd.day,
-		projection.daily_spending,
-	)
 	const categories = buildCategories(summary, included)
 	const comparisonHistory = buildSpendingHistory(
 		date,
@@ -431,8 +423,6 @@ export async function getDashboard(
 		summary,
 		comparison,
 		comparison_history: comparisonHistory,
-		history: buildCashflowHistory(date, today, tables, null),
-		series,
 		projection,
 		monthlyBudgets: monthlyBudgetsWithSpending,
 		categories,
@@ -1125,10 +1115,7 @@ export async function getDashboardView(input: DashboardInput & { scope?: string 
 					),
 				})
 
-	const [pace, monthlyBudgetDaily] = await Promise.all([
-		getPaceView(input.month, input.year, scope, tables),
-		getMonthlyBudgetDaily(input.month, input.year, tables),
-	])
+	const pace = await getPaceView(input.month, input.year, scope, tables)
 
 	const date = monthStart(input.month, input.year)
 	const trend = buildTrend(date, DateTime.now().startOf("day"), tables)
@@ -1165,7 +1152,6 @@ export async function getDashboardView(input: DashboardInput & { scope?: string 
 		incomeHistory,
 		dashboard,
 		pace,
-		monthlyBudgetDaily,
 		trend,
 		scope,
 		scopedBudgetIds,

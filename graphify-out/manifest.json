@@ -6,9 +6,9 @@
     "semantic_hash": ""
   },
   "app/(month)/page.tsx": {
-    "mtime": 1794013276.962806,
-    "seen": 1794013424.2768192,
-    "ast_hash": "913cdf516af144cfc2e42ceeafa0606b",
+    "mtime": 1794013624.7838988,
+    "seen": 1794013672.7209337,
+    "ast_hash": "00d7f13d731079c8b0b63a3194cff3eb",
     "semantic_hash": ""
   },
   "app/(month)/records/monthly/page.tsx": {
@@ -227,12 +227,6 @@
     "ast_hash": "004b706c8f8151d4052462809298d0f6",
     "semantic_hash": ""
   },
-  "src/components/charts/daily-spending-chart.tsx": {
-    "mtime": 1793935852.1683228,
-    "seen": 1793992690.7394192,
-    "ast_hash": "719929f9f4c8681c069c847c2127ebe4",
-    "semantic_hash": ""
-  },
   "src/components/charts/sparkline.tsx": {
     "mtime": 1793935852.1683228,
     "seen": 1793992690.7394218,
@@ -243,12 +237,6 @@
     "mtime": 1793999038.9296846,
     "seen": 1794002187.9887648,
     "ast_hash": "2ff0f3cc7cdd521dc0fe298826e1a0b5",
-    "semantic_hash": ""
-  },
-  "src/components/charts/total-spending-chart.tsx": {
-    "mtime": 1793935852.1683228,
-    "seen": 1793992690.739424,
-    "ast_hash": "e362e71c418795891902878e4facdbff",
     "semantic_hash": ""
   },
   "src/components/detail-summary.tsx": {
@@ -900,9 +888,9 @@
     "semantic_hash": ""
   },
   "src/logic/dashboard.ts": {
-    "mtime": 1793994338.3598208,
-    "seen": 1793995409.0728252,
-    "ast_hash": "95db4b60839a5c0bb47f0327d1438bb4",
+    "mtime": 1794013948.1049924,
+    "seen": 1794013972.798319,
+    "ast_hash": "e325bb9f31c698ffad4b5e9f4ac5225f",
     "semantic_hash": ""
   },
   "src/logic/drive-sync.ts": {
@@ -1008,9 +996,9 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1794013248.326722,
-    "seen": 1794013266.876431,
-    "ast_hash": "9060a8a1e421562340cd720c444ac6d4",
+    "mtime": 1794013623.319894,
+    "seen": 1794013828.1576116,
+    "ast_hash": "6407c712f7ad50f98125b374e4bf6d06",
     "semantic_hash": ""
   },
   "assets/branding/finpoint-icon-prompt.txt": {
@@ -1278,15 +1266,15 @@
     "semantic_hash": ""
   },
   "tests/component-inventory.ts": {
-    "mtime": 1793992522.355388,
-    "seen": 1793992690.7395906,
-    "ast_hash": "15946e8e7f31a80c1fe30571b62da547",
+    "mtime": 1794013623.319894,
+    "seen": 1794013672.7215867,
+    "ast_hash": "e25ea5160aa19f916c019afa717c3deb",
     "semantic_hash": ""
   },
   "tests/core/charts.e2e.ts": {
-    "mtime": 1794013533.9316027,
-    "seen": 1794013537.623538,
-    "ast_hash": "d6d5273ace503216223e6bd578de3db9",
+    "mtime": 1794013789.7964504,
+    "seen": 1794013828.1575334,
+    "ast_hash": "cf2ad35f8d738806640d91f42f984fa9",
     "semantic_hash": ""
   },
   "tests/core/components.e2e.ts": {
@@ -1326,9 +1314,9 @@
     "semantic_hash": ""
   },
   "tests/core/navigation.e2e.ts": {
-    "mtime": 1793935852.1723228,
-    "seen": 1793992690.7395995,
-    "ast_hash": "07a29f384bda2d348e8e24f838af2ae7",
+    "mtime": 1794013836.6766098,
+    "seen": 1794013853.9851425,
+    "ast_hash": "a1b91b049cf85ed239a592648cbc0ba6",
     "semantic_hash": ""
   },
   "tests/core/routes.e2e.ts": {
@@ -1440,9 +1428,9 @@
     "semantic_hash": "ca9bcc6743c1b543d19f007dfb54478a"
   },
   "tests/support/charts.ts": {
-    "mtime": 1793992522.3593879,
-    "seen": 1793992690.7396278,
-    "ast_hash": "b445e490c763da6088ec9c859377f22e",
+    "mtime": 1794013624.9958994,
+    "seen": 1794013672.7216568,
+    "ast_hash": "b98e5767cb89b5de353e4c6f124d109c",
     "semantic_hash": ""
   },
   "tests/support/data.ts": {

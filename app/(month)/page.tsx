@@ -10,10 +10,8 @@ import { toast } from "sonner"
 import CashflowChart from "@/components/charts/cashflow-chart"
 import CategoryHistoryChart from "@/components/charts/category-history-chart"
 import CategoryMovers from "@/components/charts/category-movers"
-import DailySpendingChart from "@/components/charts/daily-spending-chart"
 import MonthlyBudgetUsage from "@/components/charts/monthly-budget-usage"
 import SpendingCalendar from "@/components/charts/spending-calendar"
-import TotalSpendingChart from "@/components/charts/total-spending-chart"
 import MonthlyBudgetDialog from "@/components/dialogs/monthly-budget"
 import { DrillPanel } from "@/components/drill/panel"
 import { UiIcon as IconifyIcon } from "@/components/icon"
@@ -92,11 +90,10 @@ export default function DashboardPage() {
 		router.replace(pathDashboard(params), { scroll: false })
 	}
 	const paceData = view?.pace
-	const monthlyBudgetDailyData = view?.monthlyBudgetDaily
 	// The summary and pace chart paint first; the sections below the fold then mount one per
 	// frame. Mounting every chart in one commit blocked arrival for ~300ms in production.
-	const stage = useStagedMount(5, !!data && !!paceData && !!monthlyBudgetDailyData)
-	if (!view || !data || !paceData || !monthlyBudgetDailyData) return null
+	const stage = useStagedMount(2, !!data && !!paceData)
+	if (!view || !data || !paceData) return null
 	const {
 		scope,
 		scopedBudgetIds,
@@ -106,11 +103,7 @@ export default function DashboardPage() {
 		scopeLabel,
 		scopeColor,
 	} = view
-	const dailyLines = monthlyBudgetDailyData.monthlyBudgets.map(budget => ({
-		...budget,
-		dashed: budget.id === "unbudgeted",
-	}))
-	const { period, summary, series, future_records_count } = data
+	const { period, summary, future_records_count } = data
 	// Everything below shows the loaded data, so it takes the data's own month: while the next
 	// month loads, labels and links stay with the numbers on screen.
 	const dataMonth = data.month ?? month
@@ -345,48 +338,6 @@ export default function DashboardPage() {
 									</CardContent>
 								</Card>
 							</div>
-						) : null}
-						{stage > 2 ? (
-							<Card className="min-w-0">
-								<CardHeader>
-									<ScopedCardTitle scope="All budgets">
-										Surplus / Shortfall
-									</ScopedCardTitle>
-									<CardDescription>
-										Cumulative income minus all personal spending
-									</CardDescription>
-								</CardHeader>
-								<CardContent>
-									<TotalSpendingChart
-										data={series}
-										history={data.history}
-										month={dataMonth}
-										year={dataYear}
-									/>
-								</CardContent>
-							</Card>
-						) : null}
-						{stage > 3 ? (
-							<Card>
-								<CardHeader className="border-b">
-									<ScopedCardTitle scope="All budgets">
-										Spending by day
-									</ScopedCardTitle>
-									<CardDescription>
-										Net daily spending across all monthly budgets, including
-										refunds. Hold or hover over a day to read it, and click it
-										to open its Records.
-									</CardDescription>
-								</CardHeader>
-								<CardContent>
-									<DailySpendingChart
-										rows={monthlyBudgetDailyData.rows}
-										monthlyBudgets={dailyLines}
-										month={dataMonth}
-										year={dataYear}
-									/>
-								</CardContent>
-							</Card>
 						) : null}
 					</>
 				) : null}
