@@ -19,9 +19,9 @@ export default function MonthlyBudgetBadge({
 }) {
 	return (
 		<span
-			title={title}
+			title={title ?? (typeof name === "string" ? name : undefined)}
 			className={cn(
-				"inline-flex w-fit shrink-0 items-center gap-1.5 rounded-full border bg-background px-2 py-0.5 text-xs font-normal whitespace-nowrap text-muted-foreground",
+				"inline-flex w-fit max-w-full shrink-0 items-center gap-1.5 rounded-full border bg-background px-2 py-0.5 text-xs font-normal whitespace-nowrap text-muted-foreground",
 				className,
 			)}
 		>
@@ -29,7 +29,7 @@ export default function MonthlyBudgetBadge({
 				className={cn("size-2 shrink-0 rounded-full", !color && "border border-current/40")}
 				style={color ? { backgroundColor: themeColor(color) } : undefined}
 			/>
-			{name}
+			<span className="truncate">{name}</span>
 		</span>
 	)
 }

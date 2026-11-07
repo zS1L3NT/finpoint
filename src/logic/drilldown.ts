@@ -2,23 +2,22 @@ import { DateTime } from "luxon"
 import { db } from "@/data/db"
 import { contribution, summaryMeasure } from "@/logic/analytics"
 import { getDashboardView } from "@/logic/dashboard"
-import { getRecord, listRecords, pendingReason } from "@/logic/records"
+import { getRecords, listRecords, pendingReason } from "@/logic/records"
 import { getStatement } from "@/logic/statements"
 import { pathRecords } from "@/routes"
 
-export type Selection = {
-	kind:
-		| "compare"
-		| "largest"
-		| "metric"
-		| "day"
-		| "category-gross"
-		| "category"
-		| "month"
-		| "budget"
-	value: string
-	at?: string
-}
+export const SELECTION_KINDS = [
+	"compare",
+	"largest",
+	"metric",
+	"day",
+	"category-gross",
+	"category",
+	"month",
+	"budget",
+] as const
+
+export type Selection = { kind: (typeof SELECTION_KINDS)[number]; value: string; at?: string }
 
 export async function getDrilldown(
 	month: string,
@@ -91,7 +90,7 @@ export async function getDrilldown(
 					a.category.id.localeCompare(b.category.id)
 				: 0) || Math.abs(b.amount) - Math.abs(a.amount),
 	)
-	const details = await Promise.all(records.map(r => getRecord(r.id)))
+	const details = await getRecords(records.map(r => r.id))
 	const groups = new Map<
 		string,
 		{ category: (typeof records)[number]["category"]; total: number }

@@ -297,7 +297,7 @@ export function DrillPanel({
 												<Link
 													key={r.id}
 													href={pathRecord(r.id)}
-													className="block break-words border-t py-3 hover:bg-muted/30"
+													className="block break-words border-t py-3 transition-colors duration-150 ease-out hover:bg-muted/40 active:bg-muted/60"
 												>
 													<span className="block font-medium">
 														{r.title}
@@ -376,7 +376,7 @@ export function DrillPanel({
 											<button
 												type="button"
 												className={cn(
-													"cursor-pointer flex w-full items-center gap-3 py-4 text-left hover:bg-muted/30",
+													"cursor-pointer flex w-full flex-wrap items-center gap-3 py-4 text-left transition-colors duration-150 ease-out hover:bg-muted/40 active:bg-muted/60",
 													!desktop && !full && "py-2",
 												)}
 												aria-expanded={expanded === r.id}
@@ -387,8 +387,8 @@ export function DrillPanel({
 												}
 											>
 												<Icon {...r.category} size={14} />
-												<span className="min-w-0 flex-1">
-													<span className="block text-sm font-medium">
+												<span className="min-w-[9rem] flex-1">
+													<span className="block text-sm font-medium break-words">
 														{r.title}
 														<PendingBadge record={r} />
 														{r.analytics_treatment === "spending" &&
@@ -415,6 +415,12 @@ export function DrillPanel({
 															/>
 														) : null}
 													</span>
+													{r.is_pending ? (
+														<AllocationProgress
+															amount={r.amount}
+															allocated={r.allocated_amount}
+														/>
+													) : null}
 													{r.pendingReason ? (
 														<span className="block text-xs text-muted-foreground">
 															{r.pendingReason}
@@ -422,10 +428,9 @@ export function DrillPanel({
 													) : null}
 												</span>
 												<span
+													data-testid="drill-row-amount"
 													className={cn(
-														"text-sm tabular-nums",
-														!desktop &&
-															"w-24 shrink-0 text-right [&>span]:whitespace-normal",
+														"ml-auto shrink-0 whitespace-nowrap text-right text-sm tabular-nums",
 														amountTone(r.amount),
 													)}
 												>
@@ -434,12 +439,6 @@ export function DrillPanel({
 														? "+"
 														: ""}
 													{formatCurrency(r.amount)}
-													{r.is_pending ? (
-														<AllocationProgress
-															amount={r.amount}
-															allocated={r.allocated_amount}
-														/>
-													) : null}
 												</span>
 												<motion.span
 													animate={{
@@ -527,7 +526,7 @@ export function DrillPanel({
 			transition={reduced ? TRANSITION.fast : SPRING.snappy}
 			aria-labelledby="drill-title"
 			role="region"
-			className="sticky top-4 flex h-[calc(100vh-2rem)] flex-col overflow-hidden rounded-xl border bg-card shadow-sm"
+			className="sticky top-4 ml-6 flex h-[calc(100vh-2rem)] flex-col overflow-hidden rounded-xl border bg-card shadow-sm"
 		>
 			{content}
 		</motion.aside>

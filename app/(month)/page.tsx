@@ -115,25 +115,15 @@ export default function DashboardPage() {
 	const paceAmount = paceData.paceMonthlyBudget
 	const openDay = (date: string) => drill.open({ kind: "day", value: date })
 	if (!period.is_current && !period.is_future && data.record_count === 0)
-		return (
-			<div className="reveal flex flex-col items-start gap-4 rounded-xl border bg-muted/20 p-5">
-				<p className="text-sm" aria-label="Month headline">
-					{view.headline}
-				</p>
-				<Button asChild>
-					<Link href={pathImporter()}>Import statements</Link>
-				</Button>
-			</div>
-		)
+		return <EmptyMonthNotice month={month} year={year} message={view.headline} />
 	return (
 		<motion.div
 			className="grid items-start"
 			initial={false}
 			animate={{
-				gridTemplateColumns: desktop
-					? `minmax(0,1fr) ${drill.selection ? 420 : 0}px`
-					: "minmax(0,1fr)",
-				columnGap: desktop && drill.selection ? 24 : 0,
+				// Always two tracks, gap inside the panel track (the aside's margin): animating the
+				// track count or column-gap left a stale layout when crossing the dock breakpoint.
+				gridTemplateColumns: `minmax(0,1fr) ${desktop && drill.selection ? 444 : 0}px`,
 			}}
 			transition={reduced ? TRANSITION.fast : SPRING.smooth}
 		>
@@ -446,29 +436,52 @@ function DemoOffer() {
 	)
 }
 
-function EmptyMonthNotice({ month, year }: { month: string; year: number }) {
+/** `message` marks a past month with no Records: the whole Dashboard collapses to this notice. */
+function EmptyMonthNotice({
+	month,
+	year,
+	message,
+}: {
+	month: string
+	year: number
+	message?: string
+}) {
 	const { setSearchParams } = useMonthParams()
 	const latest = useLiveQuery(() => findLatestRecordMonth({ month, year }), [month, year])
 
 	return (
-		<div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border bg-muted/20 p-4">
-			<p className="text-sm">Nothing recorded in {month} yet.</p>
-			{latest ? (
-				<Button
-					variant="outline"
-					size="sm"
-					onClick={() =>
-						setSearchParams(previous => ({
-							month: latest.month,
-							year: String(latest.year),
-							scope: previous.get("scope") ?? undefined,
-						}))
-					}
-				>
-					Go to {latest.month}
-					<IconifyIcon icon="lucide:arrow-left" />
-				</Button>
-			) : null}
+		<div
+			className={cn(
+				"flex flex-wrap items-center justify-between gap-4 rounded-xl border bg-muted/20 p-4",
+				message && "reveal",
+			)}
+		>
+			<p className="text-sm" aria-label={message ? "Month headline" : undefined}>
+				{message ?? `Nothing recorded in ${month} yet.`}
+			</p>
+			<div className="flex flex-wrap gap-2">
+				{message ? (
+					<Button asChild variant="outline" size="sm">
+						<Link href={pathImporter()}>Import statements</Link>
+					</Button>
+				) : null}
+				{latest ? (
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={() =>
+							setSearchParams(previous => ({
+								month: latest.month,
+								year: String(latest.year),
+								scope: previous.get("scope") ?? undefined,
+							}))
+						}
+					>
+						Go to {latest.month}
+						<IconifyIcon icon="lucide:arrow-left" />
+					</Button>
+				) : null}
+			</div>
 		</div>
 	)
 }
@@ -600,7 +613,7 @@ function SummaryBand({
 							? "Waiting for income"
 							: summary.surplus_rate === null
 								? "Income less personal spending"
-								: `${summary.surplus_rate.toFixed(1)}% of income`,
+								: `${summary.surplus_rate.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}% of income`,
 						spark: trend.map(m => m.surplus),
 					},
 				].map(m => (

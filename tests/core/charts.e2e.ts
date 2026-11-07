@@ -3,6 +3,7 @@ import { card, chartTooltip, overview, overviewCharts, themedRgb } from "../supp
 import { IDS } from "../support/data"
 import { setDateOnly } from "../support/date-only"
 import { expect, seedWorkspace, test } from "../support/fixtures"
+import { patchRows } from "../support/tables"
 
 const cardTitles = [
 	"Spending forecast",
@@ -616,6 +617,12 @@ test.describe("pinned overview date", () => {
 			["September", 2026, 30],
 		] as const) {
 			await test.step(`spending calendar: ${month} ${year} has exactly ${days} valid dates`, async () => {
+				// A past month needs one Record to show the Dashboard (otherwise it collapses to
+				// the empty notice); the zero-amount Record on day 1 leaves every total at $0.00.
+				const mm = month === "February" ? "02" : month === "April" ? "04" : "09"
+				await patchRows(page, "records", [
+					{ id: IDS.records.zero, datetime: `${year}-${mm}-01 09:00` },
+				])
 				await page.goto(`/?month=${month}&year=${year}`)
 				const calendar = card(page, "Spending calendar")
 				await expect(calendar.getByRole("button")).toHaveCount(days)
@@ -723,13 +730,11 @@ test.describe("pinned overview date", () => {
 		await setDateOnly(page, new Date("2026-12-15T12:00:00+08:00"))
 		await seedWorkspace(page)
 		await page.goto("/?month=November&year=2026")
-		await expect(
-			page.getByText("Nothing recorded in November yet.", { exact: true }),
-		).toBeVisible()
+		await expect(page.getByText("No Records in November 2026.", { exact: true })).toBeVisible()
 		await page.getByRole("button", { name: "Go to October", exact: true }).click()
 		await expect(page).toHaveURL(/month=October&year=2026/)
 		await expect(page.getByRole("heading", { name: "October 2026", exact: true })).toBeVisible()
-		await expect(page.getByText("Nothing recorded in October yet.")).toHaveCount(0)
+		await expect(page.getByText("No Records in October 2026.")).toHaveCount(0)
 	})
 
 	test("net refund: long Category name and excluded Treatment retain numeric meaning", async ({

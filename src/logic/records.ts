@@ -229,20 +229,25 @@ export async function listRecords(filters: RecordFilters = {}) {
 }
 
 export async function getRecord(id: string): Promise<RecordDetail> {
-	const row = await db.records.get(id)
-	if (!row) throw new Error("Record not found.")
-	const enriched = (await enrichRecords([row]))[0]
-	if (!enriched) throw new Error("Record not found.")
-	const allocations = await db.allocations.where("record_id").equals(id).toArray()
-	const statementIds = allocations.map(a => a.statement_id)
-	const [statements, statementAllocations, accountRows] = await Promise.all([
+	const [record] = await getRecords([id])
+	if (!record) throw new Error("Record not found.")
+	return record
+}
+
+/** Batched getRecord: one duplicate scan and account read for the whole list, in `ids` order. */
+export async function getRecords(ids: string[]): Promise<RecordDetail[]> {
+	const rows = (await db.records.bulkGet(ids)).filter(r => r !== undefined)
+	const enriched = await enrichRecords(rows)
+	const allocations = await db.allocations.where("record_id").anyOf(ids).toArray()
+	const statementIds = [...new Set(allocations.map(a => a.statement_id))]
+	const [statements, statementAllocations, accountRows, duplicates] = await Promise.all([
 		statementIds.length ? db.statements.where("id").anyOf(statementIds).toArray() : [],
 		statementIds.length
 			? db.allocations.where("statement_id").anyOf(statementIds).toArray()
 			: [],
 		db.accounts.toArray(),
+		duplicateStatementIds(),
 	])
-	const amountByStatement = new Map(allocations.map(a => [a.statement_id, a.amount]))
 	const totalsByStatement = new Map<string, { sum: number; count: number }>()
 	for (const allocation of statementAllocations) {
 		const total = totalsByStatement.get(allocation.statement_id) ?? { sum: 0, count: 0 }
@@ -251,28 +256,37 @@ export async function getRecord(id: string): Promise<RecordDetail> {
 		totalsByStatement.set(allocation.statement_id, total)
 	}
 	const accounts = new Map(accountRows.map(a => [a.id, a]))
-	const duplicates = await duplicateStatementIds()
+	const statementsById = new Map(statements.map(s => [s.id, s]))
 
-	return {
-		...enriched,
-		statements: statements
-			.map(statement => {
+	return enriched.map(record => ({
+		...record,
+		// One entry per Statement (last allocation wins), as the single-Record read did.
+		statements: [
+			...new Map(
+				allocations.filter(a => a.record_id === record.id).map(a => [a.statement_id, a]),
+			).values(),
+		]
+			.flatMap(a => {
+				const statement = statementsById.get(a.statement_id)
+				if (!statement) return []
 				const total = totalsByStatement.get(statement.id) ?? { sum: 0, count: 0 }
-				return {
-					...statement,
-					allocable_amount: round2(statement.amount - total.sum),
-					allocation_count: total.count,
-					is_pending: statement.is_pending === 1,
-					is_unallocated: total.count === 0,
-					is_duplicate: duplicates.has(statement.id),
-					pivot: { amount: amountByStatement.get(statement.id) ?? 0 },
-					account: accounts.get(statement.account_id) ?? {
-						id: statement.account_id,
-						name: statement.account_id,
-						balance: 0,
-						bank: "",
+				return [
+					{
+						...statement,
+						allocable_amount: round2(statement.amount - total.sum),
+						allocation_count: total.count,
+						is_pending: statement.is_pending === 1,
+						is_unallocated: total.count === 0,
+						is_duplicate: duplicates.has(statement.id),
+						pivot: { amount: a.amount },
+						account: accounts.get(statement.account_id) ?? {
+							id: statement.account_id,
+							name: statement.account_id,
+							balance: 0,
+							bank: "",
+						},
 					},
-				}
+				]
 			})
 			.sort(
 				(a, b) =>
@@ -281,7 +295,7 @@ export async function getRecord(id: string): Promise<RecordDetail> {
 					a.amount - b.amount ||
 					a.description.localeCompare(b.description),
 			),
-	}
+	}))
 }
 
 export type RecordStatementInput = { id: string; amount: number }

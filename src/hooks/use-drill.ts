@@ -2,7 +2,7 @@
 import { DateTime } from "luxon"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useRef } from "react"
-import type { Selection } from "@/logic/drilldown"
+import { SELECTION_KINDS, type Selection } from "@/logic/drilldown"
 import { pathDashboard } from "@/routes"
 export function useDrill() {
 	const router = useRouter()
@@ -17,16 +17,7 @@ export function useDrill() {
 		(value || kind === "largest") &&
 		(kind !== "metric" || ["spent", "income", "leftover", "saved"].includes(value)) &&
 		extra === undefined &&
-		[
-			"compare",
-			"largest",
-			"metric",
-			"day",
-			"category-gross",
-			"category",
-			"month",
-			"budget",
-		].includes(kind ?? "") &&
+		(SELECTION_KINDS as readonly string[]).includes(kind ?? "") &&
 		(at === undefined || (/^\d{4}-\d{2}$/.test(at) && DateTime.fromISO(`${at}-01`).isValid)) &&
 		(kind !== "month" ||
 			(/^\d{4}-\d{2}$/.test(value) && DateTime.fromISO(`${value}-01`).isValid)) &&

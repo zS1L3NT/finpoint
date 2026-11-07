@@ -705,11 +705,12 @@ test.describe("pinned 15 October 2026 date", () => {
 								.getByText("No statements found.", { exact: true })
 								.filter({ visible: true }),
 						).toBeVisible()
+					// Title link and "Open statement" icon both lead to the Statement (ticket 26).
 					else
 						for (const allocation of allocations)
 							await expect(
 								page
-									.getByRole("link")
+									.getByRole("link", { name: "Open statement", exact: true })
 									.and(
 										page.locator(
 											`[href="/statements/${allocation.statement_id}"]`,
@@ -1023,6 +1024,10 @@ test("term definitions open by keyboard and tap", async ({ page }) => {
 	await page.goto("/?month=October&year=2026")
 	await expect(page.getByRole("button", { name: "Define Left over", exact: true })).toHaveCount(0)
 	await page.goto("/?month=October&year=2026&drill=day:2026-10-05")
+	// The half-height mobile sheet shortens its meta line; the definition lives at full height.
+	const expand = page.getByRole("button", { name: "Expand drill-down", exact: true })
+	const sheet = (page.viewportSize()?.width ?? 0) < 1280
+	if (sheet) await expand.click()
 	const term = page.getByRole("button", { name: "Define Pending", exact: true })
 	await term.focus()
 	await page.keyboard.press("Enter")
@@ -1030,6 +1035,7 @@ test("term definitions open by keyboard and tap", async ({ page }) => {
 	await page.keyboard.press("Escape")
 	await expect(page.getByRole("tooltip")).not.toBeVisible()
 	await page.goto("/?month=October&year=2026&drill=day:2026-10-05")
+	if (sheet) await expand.click()
 	await term.click()
 	await expect(page.getByRole("tooltip")).toContainText("$20")
 })

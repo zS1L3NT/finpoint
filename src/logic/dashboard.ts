@@ -1311,7 +1311,7 @@ export function buildAttention(
 			? [
 					{
 						label: `${formatCurrency(data.categories.reduce((sum, category) => sum + (category.monthly_budget_spending.unbudgeted ?? 0), 0))} without a Monthly Budget`,
-						detail: "Spending without a Monthly Budget.",
+						detail: "Give it a Monthly Budget so it counts toward a plan.",
 						icon: "lucide:wallet",
 						selection: { kind: "budget", value: "unbudgeted" } as const,
 						href: undefined,
