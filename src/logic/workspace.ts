@@ -11,6 +11,7 @@ import {
 } from "@/data/export-import"
 import { seedIfEmpty } from "@/data/seed"
 import { generateTestData } from "@/data/test-data"
+import { generateWorstCaseData } from "@/data/worst-case-data"
 
 export async function countWorkspaceRows() {
 	// Re-run whenever any table changes by depending on a cheap aggregate.
@@ -43,4 +44,9 @@ export async function clearWorkspace() {
 
 export async function loadDemoWorkspace() {
 	await importData(generateTestData())
+}
+
+/** Dev-only: the demo workspace with realistic worst-case values, for UI stress checks. */
+export async function loadWorstCaseWorkspace() {
+	await importData(generateWorstCaseData())
 }

@@ -137,6 +137,8 @@ $ bun types:check
 $ bun run build
 ```
 
+To stress-test the UI with realistic worst-case data (long and one-letter names, emoji, huge amounts), run the dev server, or build with `NEXT_PUBLIC_DEV_TOOLS=1`. The Dashboard then shows a "Demo data / Worst case / Empty" switch at the bottom. Each option replaces the whole local workspace.
+
 ## Built with
 
 - TypeScript

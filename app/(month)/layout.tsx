@@ -3,6 +3,7 @@
 import { DateTime } from "luxon"
 import { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
+import DevDataToggle from "@/components/dev-data-toggle"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import { Button } from "@/components/ui/button"
@@ -129,6 +130,7 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 
 				{children}
 			</PageContent>
+			<DevDataToggle />
 		</>
 	)
 }
