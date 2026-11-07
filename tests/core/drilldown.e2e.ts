@@ -185,3 +185,15 @@ test("headline and Attention replace review chips with ranked work links", async
 	await attention.getByRole("link", { name: /Pending Record/ }).click()
 	await expect(page).toHaveURL(/is_allocated=false/)
 })
+
+test("Monthly budgets explain unbudgeted spending and link to custom-period Budgets", async ({
+	page,
+}) => {
+	await seedWorkspace(page)
+	await page.goto(overview)
+	const budgets = card(page, "Monthly budgets")
+	await expect(budgets).toContainText("incl. $94.60 not in any Monthly Budget")
+	await expect(budgets).toContainText("Amounts are after refunds")
+	await budgets.getByRole("link", { name: /Custom-period Budgets/ }).click()
+	await expect(page).toHaveURL(/\/budgets$/)
+})

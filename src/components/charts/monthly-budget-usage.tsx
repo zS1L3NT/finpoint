@@ -116,6 +116,10 @@ export default function MonthlyBudgetUsage({
 					</p>
 				) : null}
 			</div>
+			<p className="text-xs text-muted-foreground tabular-nums">
+				Total spending {formatCurrency(spending + unbudgeted)} · incl.{" "}
+				{formatCurrency(unbudgeted)} not in any Monthly Budget. Amounts are after refunds.
+			</p>
 			<p className="mt-auto flex flex-wrap gap-x-3 gap-y-1 rounded-lg border bg-muted/20 px-3 py-2 text-xs text-muted-foreground">
 				<span>
 					Budgeted{" "}

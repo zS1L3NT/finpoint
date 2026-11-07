@@ -166,3 +166,12 @@ test("compare drill uses the mover average and included same-period months", asy
   expect(await getDrilldown("October",2026,"all",{kind:"compare",value:"missing"})).toBeNull()
  } finally {Settings.now=now}
 },30000)
+
+test("Dashboard spending includes the $2.50 outside Monthly Budgets", async () => {
+	await loadDemoWorkspace()
+	const { dashboard: d } = await getDashboardView({ month: "October", year: 2026, scope: "all" })
+	expect(d.spendingTotals.unbudgeted).toBe(2.5)
+	expect(d.spendingTotals.budgeted + d.spendingTotals.unbudgeted).toBeCloseTo(d.summary.spending, 2)
+	expect(d.summary.gross_spending - d.summary.refunds).toBeCloseTo(d.summary.spending, 2)
+	expect(d.categories.reduce((sum, c) => sum + c.spending, 0)).toBeCloseTo(d.summary.spending, 2)
+})

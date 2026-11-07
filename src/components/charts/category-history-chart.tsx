@@ -99,7 +99,7 @@ export default function CategoryHistoryChart({
 					<CardDescription className="tabular-nums">
 						{scopeLabel} ·{" "}
 						{shown?.current
-							? `${formatCurrency(categories.reduce((sum, category) => sum + category.outflow, 0))} expenses · ${formatCurrency(categories.reduce((sum, category) => sum + category.refunds, 0))} refunds`
+							? `${formatCurrency(categories.reduce((sum, category) => sum + category.outflow, 0))} expenses · ${formatCurrency(categories.reduce((sum, category) => sum + category.refunds, 0))} refunds = ${formatCurrency(categories.reduce((sum, category) => sum + category.spending, 0))} spending`
 							: "Gross spending · refunds excluded"}
 					</CardDescription>
 				</CardHeader>

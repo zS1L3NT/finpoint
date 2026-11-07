@@ -188,3 +188,5 @@ its Records in the drill-down; other rows take you to the filtered work list. Ch
 budget scope updates the headline while Attention continues to cover the whole month.
 
 Dashboard cards use natural heights and stack when the main column is narrow. Attention keeps small unbudgeted amounts visible below higher-priority work, shows the amount without a Monthly Budget, and highlights only the first row.
+
+The Dashboard Monthly budgets footer shows total spending, including spending not in any Monthly Budget, after refunds. Categories show expenses minus refunds so their total can be compared with spending. The footer links to Budgets for plans with a custom date period; these may overlap Monthly Budgets and are not added to their totals.

@@ -44,7 +44,7 @@ import {
 	type TrendMonth,
 } from "@/logic/dashboard"
 import { hasWorkspaceActivity, loadDemoWorkspace } from "@/logic/workspace"
-import { pathDashboard, pathImporter, pathMonthlyRecords } from "@/routes"
+import { pathBudgets, pathDashboard, pathImporter, pathMonthlyRecords } from "@/routes"
 import type { AnalyticsSummary } from "@/types"
 
 type DashboardView = Awaited<ReturnType<typeof getDashboardView>>
@@ -255,11 +255,7 @@ export default function DashboardPage() {
 						<CardContent className="flex flex-1 flex-col">
 							<MonthlyBudgetUsage
 								budgets={budgets}
-								unbudgeted={data.categories.reduce(
-									(sum, category) =>
-										sum + (category.monthly_budget_spending.unbudgeted ?? 0),
-									0,
-								)}
+								unbudgeted={data.spendingTotals.unbudgeted}
 								selected={
 									budgets.some(budget => budget.id === scope) ? scope : null
 								}
@@ -283,6 +279,13 @@ export default function DashboardPage() {
 									/>
 								)}
 							/>
+							<Link
+								href={pathBudgets()}
+								className="mt-3 inline-flex min-h-11 items-center gap-2 text-xs text-muted-foreground underline underline-offset-4"
+							>
+								<IconifyIcon icon="lucide:calendar-range" /> Custom-period Budgets ·
+								View Budgets
+							</Link>
 						</CardContent>
 					</Card>
 				</div>

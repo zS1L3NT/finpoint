@@ -448,6 +448,19 @@ export async function getDashboard(
 		comparison_history: comparisonHistory,
 		comparison_months: included.map(m => m.month),
 		projection,
+		spendingTotals: {
+			budgeted:
+				Math.round(
+					monthlyBudgetsWithSpending.reduce((sum, b) => sum + b.spending, 0) * 100,
+				) / 100,
+			unbudgeted:
+				Math.round(
+					summary.categories.reduce(
+						(sum, c) => sum + (c.monthly_budget_spending.unbudgeted ?? 0),
+						0,
+					) * 100,
+				) / 100,
+		},
 		monthlyBudgets: monthlyBudgetsWithSpending,
 		categories,
 		future_records_count: futureRecords.length,
