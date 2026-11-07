@@ -386,7 +386,7 @@ test("populated charts: tooltips stay numeric, drills work by keyboard and a Rec
 			await editor.getByRole("button", { name: "Edit Record", exact: true }).click()
 			const dialog = editor.getByRole("dialog", { name: "Edit Record", exact: true })
 			await expect(dialog).toBeVisible()
-			await dialog.locator("#amount").fill("-142.75")
+			await dialog.locator("#amount").fill("142.75")
 			await page.bringToFront()
 			// Evaluate-click keeps the first page foreground so its rAF keeps
 			// ticking while the second page saves.
@@ -394,6 +394,7 @@ test("populated charts: tooltips stay numeric, drills work by keyboard and a Rec
 			if (!save) throw new Error("editor Save missing")
 			await save.evaluate(element => (element as HTMLElement).click())
 			await save.dispose()
+			await expect(dialog).toHaveCount(0)
 			// Completion mark only after the committed money lands in the first
 			// page. The row aggregates its category (FairPrice −142.75 plus Kōpi
 			// −33.33), so the row shows $176.08, not the single-record amount.
@@ -538,8 +539,8 @@ test.describe("pinned overview date", () => {
 			await page.goto(overview)
 			const housing = card(page, "Biggest changes").getByRole("button", { name: /Housing/ })
 			await expect(housing).toContainText("$0.00")
-			await expect(housing).toContainText("vs $1,400.00 average")
-			await expect(housing).toContainText("▼ $1,400.00")
+			await expect(housing).toContainText("Average $1,400.00")
+			await expect(housing).toContainText("Housing down $1,400.00 vs your 1-month average")
 			await housing.click()
 			await page.getByRole("link", { name: "Open in Records", exact: true }).click()
 			await expect(page).toHaveURL(new RegExp(`category_ids=${IDS.categories.rent}`))

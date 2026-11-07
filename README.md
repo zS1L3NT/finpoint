@@ -164,7 +164,7 @@ Records and Statements expose read-only Allocations through an Allocations chevr
 
 Expand a Record in the Dashboard Drill-down to see its Statements. Select a Statement to see its account and allocated Records. The breadcrumb and Back button return to the selection; browser Back restores the previous expansion. These views survive reloads and shared links through the `focus` URL parameter.
 
-Category rows, category trend month bars and their category lists open the Drill-down without leaving the Dashboard. Category rows and trend totals exclude refunds; Biggest changes opens the net spending Records, with refunds subtracted.
+Category rows, category trend month bars and their category lists open the Drill-down without leaving the Dashboard. Category rows and trend totals exclude refunds; Biggest changes describes each rise or fall in words and names the included comparison months. Open a row to compare this month with its same-period average, with refunds subtracted. The two columns list the Records behind each side; “Only this month” and “Only in comparison” identify titles absent from the other side. Current months compare the same days so far; completed months compare full months.
 
 Forecast days, Monthly Budget cards and forecast legend entries open their Records in the Drill-down. Choose “Show the dashboard for … only” inside a budget panel to change the dashboard scope. Use “New Monthly Budget” to create a plan; Edit remains a separate action.
 

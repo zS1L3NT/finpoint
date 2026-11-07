@@ -107,3 +107,7 @@ Domain expert: "Use a Monthly Budget for reusable calendar-month planning. Use a
 
 Developer: "Why do Category, treatment, and Monthly Budget all exist?"
 Domain expert: "The Category describes the Record, its treatment controls totals, and its optional Monthly Budget groups personal spending. Category defaults normally fill the other two."
+
+**Comparison window**:
+The included historical months used to calculate usual spending. Current months compare the same days so far; completed months compare full months. Months excluded or marked incomplete do not contribute. The window is shared by Biggest changes and its comparison Drill-down.
+_Avoid_: Normal spending, expected spending

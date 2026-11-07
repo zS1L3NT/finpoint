@@ -7,7 +7,15 @@ import { getStatement } from "@/logic/statements"
 import { pathRecords } from "@/routes"
 
 export type Selection = {
-	kind: "largest" | "metric" | "day" | "category-gross" | "category" | "month" | "budget"
+	kind:
+		| "compare"
+		| "largest"
+		| "metric"
+		| "day"
+		| "category-gross"
+		| "category"
+		| "month"
+		| "budget"
 	value: string
 	at?: string
 }
@@ -24,7 +32,9 @@ export async function getDrilldown(
 		: DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
 	const view = await getDashboardView({ month: date.toFormat("MMMM"), year: date.year, scope })
 	if (
-		(selection.kind === "category" || selection.kind === "category-gross") &&
+		(selection.kind === "compare" ||
+			selection.kind === "category" ||
+			selection.kind === "category-gross") &&
 		(await db.categories.bulkGet(selection.value.split(","))).some(c => !c)
 	)
 		return null
@@ -47,9 +57,10 @@ export async function getDrilldown(
 		measure: selection.kind === "metric" ? selection.value : undefined,
 		max_amount:
 			selection.kind === "category-gross" || selection.kind === "month" ? "-0.01" : undefined,
-		category_ids: selection.kind.startsWith("category")
-			? selection.value.split(",")
-			: undefined,
+		category_ids:
+			selection.kind === "compare" || selection.kind.startsWith("category")
+				? selection.value.split(",")
+				: undefined,
 		show_unbudgeted: selection.kind === "budget" && selection.value === "unbudgeted",
 		monthly_budget_id:
 			selection.kind === "budget"
@@ -60,7 +71,10 @@ export async function getDrilldown(
 					? undefined
 					: scope,
 	}
-	let records = await listRecords(filters)
+	let records =
+		selection.kind === "compare" && view.dashboard.period.is_future
+			? []
+			: await listRecords(filters)
 	const measure = (r: (typeof records)[number]) =>
 		summaryMeasure(
 			r.analytics_treatment,
@@ -82,12 +96,60 @@ export async function getDrilldown(
 				? `${({ spent: "Spent", income: "Income", leftover: "Left over", saved: "Saved this month" } as Record<string, string>)[selection.value]} in ${date.toFormat("MMMM")}`
 				: selection.kind === "day"
 					? `Spending on ${DateTime.fromISO(selection.value).toFormat("ccc d LLL")}`
-					: selection.kind.startsWith("category")
-						? `${view.scopedCategories.find(c => c.id === selection.value)?.name ?? "Categories"} in ${date.toFormat("MMMM")}`
-						: selection.kind === "budget"
-							? `${view.dashboard.monthlyBudgets.find(b => b.id === selection.value)?.name ?? (selection.value === "unbudgeted" ? "Unbudgeted" : "All budgets")} in ${date.toFormat("MMMM")}`
-							: `Spending in ${date.toFormat("MMMM")}`
+					: selection.kind === "compare"
+						? `${view.scopedCategories.find(c => c.id === selection.value)?.name}: ${month} vs usual`
+						: selection.kind.startsWith("category")
+							? `${view.scopedCategories.find(c => c.id === selection.value)?.name ?? "Categories"} in ${date.toFormat("MMMM")}`
+							: selection.kind === "budget"
+								? `${view.dashboard.monthlyBudgets.find(b => b.id === selection.value)?.name ?? (selection.value === "unbudgeted" ? "Unbudgeted" : "All budgets")} in ${date.toFormat("MMMM")}`
+								: `Spending in ${date.toFormat("MMMM")}`
+
+	const category = view.scopedCategories.find(c => c.id === selection.value)
+	const comparisonRecords =
+		selection.kind === "compare"
+			? (
+					await Promise.all(
+						view.scopedComparisonMonths.map(async label => {
+							const previous = DateTime.fromFormat(label, "MMM yyyy")
+							return listRecords({
+								...filters,
+								start_date: previous.toFormat("yyyy-MM-dd"),
+								end_date: previous
+									.set({
+										day: view.dashboard.period.is_current
+											? Math.min(
+													DateTime.now().day,
+													previous.daysInMonth ?? 28,
+												)
+											: (previous.daysInMonth ?? 28),
+									})
+									.toFormat("yyyy-MM-dd"),
+							})
+						}),
+					)
+				).flat()
+			: []
 	return {
+		comparison:
+			selection.kind === "compare"
+				? {
+						average:
+							category?.comparison === null || category?.comparison === undefined
+								? null
+								: category.spending - category.comparison,
+						months: view.scopedComparisonMonths,
+						period: view.dashboard.period.is_current
+							? `Days 1–${DateTime.now().day}`
+							: "Full months",
+						records: comparisonRecords,
+						uniqueCurrentIds: details
+							.filter(r => !comparisonRecords.some(p => p.title === r.title))
+							.map(r => r.id),
+						uniquePreviousIds: comparisonRecords
+							.filter(r => !details.some(p => p.title === r.title))
+							.map(r => r.id),
+					}
+				: undefined,
 		budget:
 			selection.kind === "budget"
 				? view.dashboard.monthlyBudgets.find(b => b.id === selection.value)

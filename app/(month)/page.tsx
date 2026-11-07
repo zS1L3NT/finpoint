@@ -341,6 +341,12 @@ export default function DashboardPage() {
 										<CategoryMovers
 											categories={scopedCategories}
 											comparisonCount={scopedComparisonCount}
+											comparisonMonths={view.scopedComparisonMonths}
+											period={
+												data.period.is_current
+													? `Days 1–${data.period.through?.slice(-2)}`
+													: "Full months"
+											}
 											onDrill={drill.open}
 										/>
 									</CardContent>

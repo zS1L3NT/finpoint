@@ -14,7 +14,7 @@ import { DRILL_PIVOT, SPRING, TRANSITION } from "@/lib/motion"
 import { formatCurrency, pluralize } from "@/lib/utils"
 import { listCategories } from "@/logic/categories"
 import { getDrilldown, getDrillStatement, type Selection } from "@/logic/drilldown"
-import { pathAllocator } from "@/routes"
+import { pathAllocator, pathRecord } from "@/routes"
 export function DrillPanel({
 	selection,
 	focus,
@@ -80,6 +80,7 @@ export function DrillPanel({
 	useEffect(() => {
 		if (ready && desktop) document.getElementById("drill-title")?.focus({ preventScroll: true })
 	}, [ready, desktop])
+	const comparison = data?.comparison
 	const content = data ? (
 		<>
 			{editingRecord ? (
@@ -183,60 +184,132 @@ export function DrillPanel({
 						) : null
 					) : (
 						<>
-							{data.records.map(r => (
-								<div key={r.id} className="border-b">
-									<button
-										type="button"
-										className="flex w-full items-center gap-3 py-4 text-left hover:bg-muted/30"
-										aria-expanded={expanded === r.id}
-										onClick={() =>
-											pivot(expanded === r.id ? null : `record:${r.id}`)
-										}
-									>
-										<span className="min-w-0 flex-1">
-											<span className="block text-sm font-medium">
-												{r.title}
-											</span>
-											<span className="text-xs text-muted-foreground">
-												{r.datetime.slice(0, 10)} · {r.category.name}
-											</span>
-										</span>
-										<span className="text-sm tabular-nums">
-											{r.amount > 0 ? "Refund " : ""}
-											{formatCurrency(Math.abs(r.amount))}
-											<AllocationProgress
-												amount={r.amount}
-												allocated={r.allocated_amount}
-											/>
-										</span>
-										<ChevronDown aria-hidden className="size-4 shrink-0" />
-									</button>
-									{expanded === r.id ? (
-										<motion.div
-											initial={{ opacity: 0, height: reduced ? "auto" : 0 }}
-											animate={{ opacity: 1, height: "auto" }}
-											transition={reduced ? TRANSITION.fast : SPRING.snappy}
-											className="mb-4 overflow-hidden rounded-lg bg-muted/40 p-3"
-										>
-											<Button
-												id={`drill-edit-${r.id}`}
-												variant="outline"
-												size="sm"
-												onClick={() => handleEdit(r)}
-											>
-												Edit Record
-											</Button>
-											<AllocationRows
-												record={r}
-												onStatement={id => {
-													setOrigin({ key, id: r.id })
-													pivot(`statement:${id}`)
-												}}
-											/>
-										</motion.div>
-									) : null}
+							{comparison ? (
+								<div
+									data-testid="drill-comparison"
+									className="grid grid-cols-2 gap-3 text-xs"
+								>
+									{[
+										{
+											label: month,
+											amount: data.total,
+											rows: data.records,
+											unique: comparison.uniqueCurrentIds,
+										},
+										{
+											label: `${comparison.months.length}-month average`,
+											amount: comparison.average,
+											rows: comparison.records,
+											unique: comparison.uniquePreviousIds,
+										},
+									].map((side, index) => (
+										<section key={side.label} className="min-w-0">
+											<h3 className="font-medium">{side.label}</h3>
+											<p className="my-2 text-lg font-semibold tabular-nums">
+												{side.amount === null
+													? "No comparison"
+													: formatCurrency(side.amount)}
+											</p>
+											<p className="mb-3 text-muted-foreground">
+												{comparison.period}
+												{index ? ` · ${comparison.months.join(", ")}` : ""}
+											</p>
+											{side.rows.map(r => (
+												<Link
+													key={r.id}
+													href={pathRecord(r.id)}
+													className="block break-words border-t py-3 hover:bg-muted/30"
+												>
+													<span className="block font-medium">
+														{r.title}
+													</span>
+													<span className="block text-muted-foreground">
+														{r.datetime.slice(0, 10)}
+													</span>
+													<span className="block tabular-nums">
+														{r.amount > 0 ? "Refund " : ""}
+														{formatCurrency(Math.abs(r.amount))}
+													</span>
+													{side.unique.includes(r.id) ? (
+														<span className="block text-muted-foreground">
+															{index
+																? "Only in comparison"
+																: "Only this month"}
+														</span>
+													) : null}
+												</Link>
+											))}
+											{!side.rows.length ? (
+												<p>No Records in this period.</p>
+											) : null}
+										</section>
+									))}
+									<p className="col-span-2 text-muted-foreground">
+										Labels show Record titles found on only one side. The
+										average divides spending by the included months.
+									</p>
 								</div>
-							))}
+							) : (
+								data.records.map(r => (
+									<div key={r.id} className="border-b">
+										<button
+											type="button"
+											className="flex w-full items-center gap-3 py-4 text-left hover:bg-muted/30"
+											aria-expanded={expanded === r.id}
+											onClick={() =>
+												pivot(expanded === r.id ? null : `record:${r.id}`)
+											}
+										>
+											<span className="min-w-0 flex-1">
+												<span className="block text-sm font-medium">
+													{r.title}
+												</span>
+												<span className="text-xs text-muted-foreground">
+													{r.datetime.slice(0, 10)} · {r.category.name}
+												</span>
+											</span>
+											<span className="text-sm tabular-nums">
+												{r.amount > 0 ? "Refund " : ""}
+												{formatCurrency(Math.abs(r.amount))}
+												<AllocationProgress
+													amount={r.amount}
+													allocated={r.allocated_amount}
+												/>
+											</span>
+											<ChevronDown aria-hidden className="size-4 shrink-0" />
+										</button>
+										{expanded === r.id ? (
+											<motion.div
+												initial={{
+													opacity: 0,
+													height: reduced ? "auto" : 0,
+												}}
+												animate={{ opacity: 1, height: "auto" }}
+												transition={
+													reduced ? TRANSITION.fast : SPRING.snappy
+												}
+												className="mb-4 overflow-hidden rounded-lg bg-muted/40 p-3"
+											>
+												<Button
+													id={`drill-edit-${r.id}`}
+													variant="outline"
+													size="sm"
+													onClick={() => handleEdit(r)}
+												>
+													Edit Record
+												</Button>
+												<AllocationRows
+													record={r}
+													onStatement={id => {
+														setOrigin({ key, id: r.id })
+														pivot(`statement:${id}`)
+													}}
+												/>
+											</motion.div>
+										) : null}
+									</div>
+								))
+							)}
 						</>
 					)}
 				</motion.div>

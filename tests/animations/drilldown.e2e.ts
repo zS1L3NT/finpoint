@@ -84,8 +84,11 @@ test("drill sheet: entrance and exit retain popup motion", { tag: ["@reduced-mot
 		day.click(),
 	)
 	expect(samples).toHaveLength(1)
-	const frames = samples[0]!.frames
-	expect(poseIsIdentity(frames.at(-1)!)).toBe(true)
+	const frames = samples[0]?.frames
+	if (!frames?.length) throw new Error("Sheet frames missing")
+	const last = frames.at(-1)
+	if (!last) throw new Error("Sheet did not settle")
+	expect(poseIsIdentity(last)).toBe(true)
 	const reduced = await page.evaluate(
 		() => matchMedia("(prefers-reduced-motion: reduce)").matches,
 	)

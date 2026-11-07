@@ -118,7 +118,7 @@ test("edit from drill returns focus and updates the live total", async ({ page }
 	await edit.click()
 	const amount = dialog.locator("input#amount")
 	const original = Number(await amount.inputValue())
-	await amount.fill(String(original - 1))
+	await amount.fill(String(original + 1))
 	await dialog.getByRole("button", { name: "Save changes", exact: true }).click()
 	await expect(edit).toBeFocused()
 	await expect(page.getByTestId("drill-total")).toHaveText("$85.20")
@@ -143,4 +143,30 @@ test("Largest Records opens a sorted drill and preserves sort into Records", asy
 	await expect(page.getByRole("combobox", { name: "Sort Records" })).toContainText(
 		"Amount: largest first",
 	)
+})
+
+test("Biggest changes compares named periods and preserves the month through reload and Back", async ({
+	page,
+}) => {
+	await seedWorkspace(page)
+	await page.goto(overview)
+	const mover = card(page, "Biggest changes").getByRole("button", { name: /Housing down/ })
+	await expect(mover).toContainText("vs your 1-month average")
+	await expect(card(page, "Biggest changes")).toContainText("Sep 2026")
+	await mover.click()
+	await expect(page).toHaveURL(/drill=compare/)
+	const comparison = page.getByTestId("drill-comparison")
+	await expect(comparison).toContainText("$1,400.00")
+	await expect(comparison).toContainText("Only in comparison")
+	await expect(comparison.locator("section")).toHaveCount(2)
+	await page.reload()
+	await expect(comparison).toBeVisible()
+	await expect(page.getByTestId("drill-total")).toHaveText("$0.00")
+	await page.getByRole("button", { name: "Close drill-down" }).click()
+	await expect(page).not.toHaveURL(/drill=/)
+	await expect(comparison).toHaveCount(0)
+	await page.goBack()
+	await expect(comparison).toBeVisible()
+	await page.getByRole("link", { name: "Open in Records", exact: true }).click()
+	await expect(page).toHaveURL(/category_ids=t1-cat-rent/)
 })

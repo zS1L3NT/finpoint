@@ -145,3 +145,24 @@ test("Monthly Budget cards and legend reconcile including refunds and plan amoun
  expect(drill!.href).toContain("sort=amount_desc")
  }
  },120000)
+
+
+test("compare drill uses the mover average and included same-period months", async () => {
+ const now = Settings.now
+ Settings.now = () => new Date("2026-10-15T12:00:00+08:00").getTime()
+ try {
+  await loadDemoWorkspace()
+  for (const scope of ["all", (await db.monthly_budgets.toArray())[0]!.id]) {
+   const view = await getDashboardView({month:"October",year:2026,scope})
+   const category = view.scopedCategories.find(c => c.comparison !== null)
+   if (!category) throw new Error("Expected comparison history")
+   const drill = await getDrilldown("October",2026,scope,{kind:"compare",value:category.id})
+   expect(drill!.total).toBeCloseTo(category.spending,2)
+   expect(drill!.comparison!.average).toBeCloseTo(category.spending-category.comparison!,2)
+   expect(drill!.comparison!.months).toHaveLength(view.scopedComparisonCount)
+ expect(-drill!.comparison!.records.reduce((sum,r)=>sum+r.amount,0)/view.scopedComparisonCount).toBeCloseTo(drill!.comparison!.average!,2)
+   expect(drill!.comparison!.records.every(r=>r.datetime.slice(8,10) <= "15")).toBe(true)
+  }
+  expect(await getDrilldown("October",2026,"all",{kind:"compare",value:"missing"})).toBeNull()
+ } finally {Settings.now=now}
+},30000)

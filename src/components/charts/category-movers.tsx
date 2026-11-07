@@ -2,7 +2,7 @@
 
 import { UiIcon } from "@/components/icon"
 import { themeColor } from "@/lib/palette"
-import { cn, formatCurrency } from "@/lib/utils"
+import { formatCurrency } from "@/lib/utils"
 import type { Selection } from "@/logic/drilldown"
 
 type Mover = {
@@ -15,17 +15,20 @@ type Mover = {
 }
 
 /**
- * Categories that moved most against their average, as a Revolut-style list:
- * this month's amount with a coloured ▲/▼ change against the average.
+ * Categories with the largest spending changes against their same-period average.
  */
 export default function CategoryMovers({
 	categories,
 	comparisonCount,
+	comparisonMonths = [],
+	period = "Same period",
 	onDrill,
 	limit = 6,
 }: {
 	categories: Mover[]
 	comparisonCount: number
+	comparisonMonths?: string[]
+	period?: string
 	onDrill: (selection: Selection) => void
 	limit?: number
 }) {
@@ -51,7 +54,7 @@ export default function CategoryMovers({
 					<button
 						type="button"
 						key={category.id}
-						onClick={() => onDrill({ kind: "category", value: category.id })}
+						onClick={() => onDrill({ kind: "compare", value: category.id })}
 						className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-lg px-2 py-2 transition-colors duration-150 ease-out hover:bg-muted/50 active:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 					>
 						<span
@@ -61,30 +64,26 @@ export default function CategoryMovers({
 							<UiIcon icon={category.icon} className="size-4 text-white" />
 						</span>
 						<span className="grid min-w-0">
-							<span className="truncate text-sm font-medium">{category.name} ›</span>
+							<span className="text-sm font-medium">
+								{category.name} {up ? "up" : "down"}{" "}
+								{formatCurrency(Math.abs(difference))} vs your {comparisonCount}
+								-month average
+							</span>
 							<span className="truncate text-xs text-muted-foreground tabular-nums">
-								vs {formatCurrency(category.spending - difference)} average
+								Average {formatCurrency(category.spending - difference)}
 							</span>
 						</span>
 						<span className="grid justify-items-end">
 							<span className="text-sm font-medium tabular-nums">
 								{formatCurrency(category.spending)}
 							</span>
-							<span
-								className={cn(
-									"text-xs font-medium tabular-nums",
-									up ? "text-destructive" : "text-creative",
-								)}
-							>
-								{up ? "▲" : "▼"} {formatCurrency(Math.abs(difference))}
-							</span>
 						</span>
 					</button>
 				)
 			})}
 			<p className="px-2 pt-1 text-xs text-muted-foreground">
-				Against the {comparisonCount}-month average over the same period. Red spent more;
-				green spent less.
+				Against the {comparisonCount}-month average over the same period. Comparison window:{" "}
+				{period} · {comparisonMonths.join(", ")}. Open a row to compare Records.
 			</p>
 		</div>
 	)
