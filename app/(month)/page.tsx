@@ -19,7 +19,6 @@ import { UiIcon as IconifyIcon } from "@/components/icon"
 import { Metric as DashboardMetric, type Delta, MetricGrid } from "@/components/metric"
 import MonthlyBudgetBadge from "@/components/monthly-budget-badge"
 import { FILTER_CONTROL_CLASS } from "@/components/table/filter-bar"
-import Term from "@/components/term"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -131,7 +130,10 @@ export default function DashboardPage() {
 			<div
 				ref={contentRef}
 				aria-busy={stale}
-				className={cn("reveal grid gap-5 md:gap-6", stale && STALE_MONTH_CLASS)}
+				className={cn(
+					"reveal @container/dashboard min-w-0 grid gap-5 md:gap-6",
+					stale && STALE_MONTH_CLASS,
+				)}
 			>
 				{!period.is_future && data.record_count === 0 ? (
 					<EmptyMonthNotice month={dataMonth} year={dataYear} />
@@ -184,9 +186,7 @@ export default function DashboardPage() {
 					className={cn(
 						"grid gap-5",
 						!period.is_future &&
-							(drill.selection
-								? "2xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]"
-								: "xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]"),
+							"items-start @min-[600px]/dashboard:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]",
 					)}
 				>
 					{!period.is_future ? (
@@ -282,7 +282,7 @@ export default function DashboardPage() {
 					<>
 						{stage > 0 ? (
 							<CategoryHistoryChart
-								compact={!!drill.selection}
+								compact={false}
 								key={`${dataMonth}-${dataYear}`}
 								categories={scopedCategories}
 								scopeLabel={scopeLabel}
@@ -299,7 +299,11 @@ export default function DashboardPage() {
 							/>
 						) : null}
 						{stage > 1 ? (
-							<div className={cn("grid gap-5", !drill.selection && "lg:grid-cols-3")}>
+							<div
+								className={
+									"grid items-start gap-5 @min-[600px]/dashboard:grid-cols-2 @min-[860px]/dashboard:grid-cols-3"
+								}
+							>
 								<LargestRecords
 									month={dataMonth}
 									year={dataYear}
@@ -534,7 +538,7 @@ function SummaryBand({
 
 	return (
 		<Card className="@container gap-0 overflow-hidden py-0">
-			<MetricGrid className="grid-cols-1 rounded-none border-0 @min-[700px]:grid-cols-3 lg:grid-cols-1 @min-[700px]:lg:grid-cols-3">
+			<MetricGrid className="grid-cols-1 rounded-none border-0 lg:grid-cols-1 @min-[600px]:grid-cols-3 @min-[600px]:lg:grid-cols-3">
 				{[
 					{
 						key: "spent",
@@ -581,15 +585,7 @@ function SummaryBand({
 					<DashboardMetric
 						key={m.key}
 						icon={m.icon}
-						label={
-							m.key === "spent" ? (
-								<Term name="Effective spending" label="Spent" />
-							) : m.key === "leftover" ? (
-								<Term name="Left over" />
-							) : (
-								m.label
-							)
-						}
+						label={m.label}
 						value={m.value}
 						detail={m.detail}
 						spark={m.spark}

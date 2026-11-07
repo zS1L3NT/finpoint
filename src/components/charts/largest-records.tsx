@@ -29,7 +29,15 @@ export default function LargestRecords({
 	if (!data) return null
 	return (
 		<Card className="min-w-0">
-			<CardHeader>
+			<CardHeader className="relative pr-24">
+				<Button
+					variant="link"
+					size="sm"
+					className="absolute right-5 top-3"
+					onClick={() => onDrill({ kind: "largest", value: "" })}
+				>
+					See all
+				</Button>
 				<CardTitle>Largest Records</CardTitle>
 				<CardDescription>
 					Top five Spending Records by absolute amount · current scope, refunds included.
@@ -68,14 +76,6 @@ export default function LargestRecords({
 				{!data.records.length ? (
 					<p className="text-sm text-muted-foreground">No Spending Records this month.</p>
 				) : null}
-				<Button
-					variant="link"
-					size="sm"
-					className="justify-self-end"
-					onClick={() => onDrill({ kind: "largest", value: "" })}
-				>
-					See all
-				</Button>
 			</CardContent>
 		</Card>
 	)

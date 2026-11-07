@@ -54,7 +54,7 @@ export default function CashflowChart({
 				</p>
 				<TrendChart
 					label="Cumulative spending by day"
-					className="h-52 w-full min-w-0 sm:h-64 xl:h-auto xl:min-h-64 xl:flex-1"
+					className="w-full min-w-0 aspect-[2/1]"
 					labels={Array.from({ length }, (_, index) => `${month} ${index + 1}`)}
 					ticks={dayTicks(length).map(day => ({ index: day - 1, label: String(day) }))}
 					split={amount ?? undefined}

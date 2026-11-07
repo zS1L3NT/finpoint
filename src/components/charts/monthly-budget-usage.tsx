@@ -57,7 +57,7 @@ export default function MonthlyBudgetUsage({
 								: undefined
 						}
 					>
-						<div className="flex items-center justify-between gap-2">
+						<div className="flex items-baseline justify-between gap-2">
 							<button
 								type="button"
 								aria-pressed={selected === budget.id}

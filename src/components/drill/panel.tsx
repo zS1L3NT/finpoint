@@ -358,10 +358,6 @@ export function DrillPanel({
 				</motion.div>
 			</AnimatePresence>
 			<div className="grid gap-2 border-t p-5">
-				<p className="flex justify-between text-sm tabular-nums">
-					<span>Total</span>
-					<span>{formatCurrency(data.total)}</span>
-				</p>
 				{data.budget ? (
 					<Button
 						variant="outline"
@@ -406,6 +402,10 @@ export function DrillPanel({
 					showCloseButton={false}
 					className="h-[85dvh]! rounded-t-2xl motion-reduce:data-[state=open]:animate-in motion-reduce:data-[state=open]:fade-in motion-reduce:data-[state=closed]:animate-out motion-reduce:data-[state=closed]:fade-out"
 				>
+					<div
+						aria-hidden="true"
+						className="mx-auto mt-2 h-1 w-10 shrink-0 rounded-full bg-muted-foreground/40"
+					/>
 					<SheetTitle className="sr-only">Drill-down</SheetTitle>
 					{content}
 				</SheetContent>

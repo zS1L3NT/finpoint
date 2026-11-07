@@ -55,7 +55,7 @@ export default function CategoryMovers({
 						type="button"
 						key={category.id}
 						onClick={() => onDrill({ kind: "compare", value: category.id })}
-						className="cursor-pointer grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-lg px-2 py-2 transition-colors duration-150 ease-out hover:bg-muted/50 active:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+						className="cursor-pointer text-left grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-lg px-2 py-2 transition-colors duration-150 ease-out hover:bg-muted/50 active:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 					>
 						<span
 							className="grid size-9 shrink-0 place-items-center rounded-full"
@@ -65,7 +65,7 @@ export default function CategoryMovers({
 						</span>
 						<span className="grid min-w-0">
 							<span className="truncate text-sm font-medium">{category.name}</span>
-							<span className="truncate text-xs text-muted-foreground tabular-nums">
+							<span className="whitespace-normal text-xs text-muted-foreground tabular-nums">
 								{formatCurrency(Math.abs(difference))} {up ? "more" : "less"} than
 								your {comparisonCount}-month average
 							</span>
@@ -91,8 +91,8 @@ export default function CategoryMovers({
 				)
 			})}
 			<p className="px-2 pt-1 text-xs text-muted-foreground">
-				Against the {comparisonCount}-month average over the same period. Comparison window:{" "}
-				{period} · {comparisonMonths.join(", ")}. Open a row to compare Records.
+				Comparison window: {period} · {comparisonMonths.join(", ")}. Open a row to compare
+				Records.
 			</p>
 		</div>
 	)

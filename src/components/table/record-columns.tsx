@@ -93,7 +93,12 @@ function RecordAllocationProgress({ record, value }: { record: Record; value: nu
 	)
 		return null
 	return (
-		<span className="text-amber-700 dark:text-amber-400 [&>span]:text-inherit">
+		<span
+			className={cn(
+				"text-muted-foreground [&>span]:text-inherit",
+				Math.abs(record.allocated_amount) > Math.abs(record.amount) && "text-destructive",
+			)}
+		>
 			<AllocationProgress
 				amount={record.amount}
 				allocated={value !== record.amount ? value : record.allocated_amount}

@@ -16,7 +16,8 @@ test("day drill-down: totals, retarget, Back, close, focus and invalid URLs", as
 		? page.getByRole("dialog")
 		: page.getByRole("region", { name: /Spending on/ })
 	await expect(panel.getByTestId("drill-total")).toHaveText("$84.20")
-	await expect(panel).not.toContainText("-$")
+	await expect(panel.getByTestId("drill-total")).not.toContainText("-$")
+	await expect(panel.getByTestId("drill-body")).toContainText("-$84.20")
 	await page.goBack()
 	await expect(panel).toHaveCount(0)
 	await expect(day).toBeFocused()
@@ -150,8 +151,10 @@ test("Biggest changes compares named periods and preserves the month through rel
 }) => {
 	await seedWorkspace(page)
 	await page.goto(overview)
-	const mover = card(page, "Biggest changes").getByRole("button", { name: /Housing down/ })
-	await expect(mover).toContainText("vs your 1-month average")
+	const mover = card(page, "Biggest changes").getByRole("button", {
+		name: /Housing.*less than your/,
+	})
+	await expect(mover).toContainText("less than your 1-month average")
 	await expect(card(page, "Biggest changes")).toContainText("Sep 2026")
 	await mover.click()
 	await expect(page).toHaveURL(/drill=compare/)

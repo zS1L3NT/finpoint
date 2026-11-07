@@ -107,6 +107,21 @@ test("overview charts: every dense chart fits the viewport with usable graph sur
 		).toBeLessThanOrEqual(1)
 		await expect(card).not.toContainText(/NaN|Infinity/)
 		if (overviewCharts.includes(title)) {
+			const surface = card.getByRole("application")
+			await expect
+				.poll(() =>
+					surface.evaluate(element => {
+						const width = element.getBoundingClientRect().width
+						return (
+							Math.max(
+								...[...element.querySelectorAll("line")].map(line =>
+									Number(line.getAttribute("x2")),
+								),
+							) / width
+						)
+					}),
+				)
+				.toBeGreaterThan(0.95)
 			await card.getByRole("application").focus()
 			await page.keyboard.press("ArrowRight")
 			await expect(card.locator(chartTooltip)).toBeVisible()
@@ -450,7 +465,9 @@ test.describe("pinned overview date", () => {
 			await expect(mix.getByRole("button", { name: /Transfer|Income|Savings/ })).toHaveCount(
 				0,
 			)
-			await expect(card(page, "Biggest changes")).toContainText("Against the 1-month average")
+			await expect(card(page, "Biggest changes")).toContainText(
+				"Comparison window: Days 1–15 · Sep 2026",
+			)
 		})
 		await test.step("spending calendar: daily amount, zero and refund days drill into exact Records", async () => {
 			await page.goto(overview)

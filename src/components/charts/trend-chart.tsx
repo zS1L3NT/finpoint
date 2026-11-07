@@ -49,6 +49,8 @@ export default function TrendChart({
 	onSelect?: (index: number) => void
 	className?: string
 }) {
+	"use no memo"
+
 	const id = useId().replace(/:/g, "")
 	const values = series.flatMap(s => s.values.filter(value => value !== null))
 	const dataMax = Math.max(0, ...values)

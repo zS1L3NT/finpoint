@@ -312,12 +312,15 @@ function RecordFilters({
 	}
 
 	return (
-		<FilterBar className="gap-y-1 sm:gap-y-2 sm:flex sm:flex-wrap">
+		<FilterBar className="gap-y-1 sm:gap-y-2 sm:*:basis-24">
 			<Select
 				value={sort}
 				onValueChange={value => onChange({ sort: value === "date" ? null : value })}
 			>
-				<SelectTrigger aria-label="Sort Records" className={FILTER_CONTROL_CLASS}>
+				<SelectTrigger
+					aria-label="Sort Records"
+					className={cn("w-full h-9 sm:w-auto", FILTER_CONTROL_CLASS)}
+				>
 					<IconifyIcon icon="lucide:arrow-up-down" />
 					<SelectValue />
 				</SelectTrigger>

@@ -45,6 +45,8 @@ export default function ChartFrame({
 	onActive?: (index: number | null) => void
 	children?: (size: ChartSize) => React.ReactNode
 }) {
+	"use no memo"
+
 	const id = useId().replace(/:/g, "")
 	const box = useRef<HTMLDivElement>(null)
 	const press = useRef<{
@@ -62,9 +64,11 @@ export default function ChartFrame({
 	useEffect(() => {
 		const element = box.current
 		if (!element) return
-		const observer = new ResizeObserver(([entry]) => {
-			if (entry) setSize({ width: entry.contentRect.width, height: entry.contentRect.height })
-		})
+		const measure = () => {
+			setSize({ width: element.clientWidth, height: element.clientHeight })
+		}
+		const observer = new ResizeObserver(measure)
+		measure()
 		observer.observe(element)
 		return () => observer.disconnect()
 	}, [])
@@ -114,7 +118,11 @@ export default function ChartFrame({
 	return (
 		// The surface is out of flow, so the box sizes from its class alone and shrinks with
 		// the layout instead of being held open by the width it last measured.
-		<div ref={box} className={cn("relative select-none", className)} style={style}>
+		<div
+			ref={box}
+			className={cn("relative min-w-0 w-full select-none", className)}
+			style={style}
+		>
 			{size.width && count ? (
 				<svg
 					role="application"

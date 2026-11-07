@@ -63,7 +63,7 @@ export function Metric({
 			className={cn(
 				onSelect &&
 					"group cursor-pointer text-left focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring transition-colors duration-150 ease-out hover:bg-muted/40 active:bg-muted/60",
-				"relative grid min-h-24 min-w-0 content-start bg-card p-3 sm:p-4",
+				"@container/metric relative grid grid-cols-[minmax(0,1fr)] min-h-24 min-w-0 content-start bg-card p-3 sm:p-4",
 				tone !== "neutral" &&
 					"before:absolute before:inset-x-0 before:top-0 before:h-0.5 before:content-['']",
 				tone === "positive" && "before:bg-creative",
@@ -79,7 +79,7 @@ export function Metric({
 				{onSelect ? (
 					<IconifyIcon
 						icon="lucide:chevron-right"
-						className="ml-auto size-3 opacity-60 group-hover:opacity-100"
+						className="ml-1 size-3 opacity-60 group-hover:opacity-100"
 					/>
 				) : null}
 				{delta ? (
@@ -114,7 +114,7 @@ export function Metric({
 						values={spark}
 						color={sparkColor}
 						label={`${text}, ${sparkPeriod ? `${sparkPeriod} of each of ` : ""}the last ${spark.length} months`}
-						className="mb-1 hidden shrink-0 text-muted-foreground xl:block"
+						className="mb-1 hidden w-12 shrink-0 text-muted-foreground xl:block @min-[260px]/metric:w-24"
 					/>
 				) : null}
 			</div>

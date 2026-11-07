@@ -179,4 +179,4 @@ In the Dashboard drill-down, expand a Record and choose **Edit Record**. Saved c
 
 Allocate assigns Statements to Records. Statement cleanup lives in the Statements, Replace pending and Duplicates tabs; old cleanup URLs redirect with filters preserved. In the Record editor, choose Money out or Money in and enter a positive amount.
 
-Dashboard metric labels and drill-down copy offer inline dotted-underlined definitions with examples. Hover, focus, or tap a term; press Escape to close. Effective spending follows treatment rules and includes refunds. Left over means income minus personal spending, before saving and investment contributions.
+Dashboard metric labels open their Records directly. Dotted-underlined terms in drill-down copy offer definitions with examples. Hover, focus, or tap a term; press Escape to close. Effective spending follows treatment rules and includes refunds. Left over means income minus personal spending, before saving and investment contributions.

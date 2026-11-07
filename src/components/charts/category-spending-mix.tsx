@@ -1,3 +1,4 @@
+import { UiIcon } from "@/components/icon"
 import { themeColor } from "@/lib/palette"
 import { formatCurrency } from "@/lib/utils"
 import type { Selection } from "@/logic/drilldown"
@@ -37,7 +38,11 @@ export default function CategorySpendingMix({
 					>
 						<div className="flex min-w-0 items-center justify-between gap-3 text-xs">
 							<span className="min-w-0 truncate font-medium group-hover:underline">
-								{category.name} ›
+								{category.name}{" "}
+								<UiIcon
+									icon="lucide:chevron-right"
+									className="inline size-3 opacity-60"
+								/>
 							</span>
 							<span className="shrink-0 tabular-nums">
 								{formatCurrency(value)}{" "}

@@ -85,11 +85,12 @@ export default function CategoryHistoryChart({
 		<div
 			className={cn(
 				"grid items-start gap-5",
-				!compact && "xl:items-stretch xl:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]",
-				!compact && limit !== undefined && "xl:h-[26rem]",
+				!compact &&
+					"@min-[600px]/dashboard:items-stretch @min-[600px]/dashboard:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]",
+				!compact && limit !== undefined && "@min-[600px]/dashboard:h-[26rem]",
 			)}
 		>
-			<Card className="order-2 min-h-0 min-w-0 xl:order-1">
+			<Card className="order-2 min-h-0 min-w-0 @min-[600px]/dashboard:order-1">
 				<CardHeader>
 					<CardTitle className="flex flex-wrap items-center gap-2">
 						{shown?.current
@@ -144,7 +145,7 @@ export default function CategoryHistoryChart({
 					)}
 				</CardContent>
 			</Card>
-			<Card className="order-1 min-h-0 min-w-0 xl:order-2">
+			<Card className="order-1 min-h-0 min-w-0 @min-[600px]/dashboard:order-2">
 				<CardHeader>
 					<CardTitle className="flex flex-wrap items-center gap-2">
 						Category trend
@@ -174,7 +175,7 @@ export default function CategoryHistoryChart({
 											).toFormat("yyyy-MM"),
 										})
 								}}
-								className="h-60 w-full sm:h-72 xl:h-auto xl:min-h-60 xl:flex-1"
+								className="h-60 w-full sm:h-72 @min-[600px]/dashboard:h-auto @min-[600px]/dashboard:min-h-60 @min-[600px]/dashboard:flex-1"
 								labels={chartData.map(month => month.month)}
 								layout="share"
 								series={series.map(item => ({
@@ -299,13 +300,13 @@ function prepareMonths(months: SpendingHistoryMonth[], series: ChartSeries[]): C
 function MonthTick({ month }: { month?: ChartMonth }) {
 	if (!month) return null
 	return (
-		<text textAnchor="middle" className="fill-foreground">
+		<text textAnchor="middle" className="overflow-visible fill-foreground">
 			<tspan x={0} dy="1em">
-				{month.month}
+				{month.month.split(" ")[0]}
 			</tspan>
 			{month.current && (
 				<tspan x={0} dy="1.2em" className="fill-primary">
-					Selected
+					{month.month.split(" ")[1]}
 				</tspan>
 			)}
 			{month.included && Object.values(month.seriesValues).every(value => value === 0) && (
