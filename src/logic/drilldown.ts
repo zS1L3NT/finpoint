@@ -164,6 +164,18 @@ export async function getDrilldown(
 				: undefined,
 		title,
 		total,
+		gross_spending:
+			records.reduce(
+				(sum, r) =>
+					sum + Math.max(contribution(r.analytics_treatment, r.amount).spending, 0),
+				0,
+			) / 100,
+		refund_total:
+			records.reduce(
+				(sum, r) =>
+					sum + Math.max(-contribution(r.analytics_treatment, r.amount).spending, 0),
+				0,
+			) / 100,
 		records: details.map(r => ({
 			...r,
 			pendingReason: r.is_pending ? pendingReason(r) : null,

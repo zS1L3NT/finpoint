@@ -266,3 +266,15 @@ test("Pending drill rows explain their reason before expanding without duplicate
 	await expect(expansion).not.toContainText("allocated")
 	await expect(expansion).toContainText("$35.00 remaining to allocate")
 })
+
+test("Spending drill labels and signs refunds and reconciles its caption", async ({ page }) => {
+	await seedWorkspace(page)
+	await page.goto(`${overview}&drill=metric:spent`)
+	const refund = page.getByTestId("drill-body").getByRole("button", { name: /Returned Kettle/ })
+	await expect(refund).toContainText("Refund")
+	await expect(refund).toContainText("+$20.00")
+	await expect(refund.getByText("+$20.00", { exact: true })).toHaveClass(/text-creative/)
+	await expect(page.locator("#drill-title").locator("..")).toContainText(
+		"$306.63 spent − $20.00 refunds",
+	)
+})

@@ -10,6 +10,7 @@ import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
 import MonthlyBudgetBadge from "@/components/monthly-budget-badge"
 import { amountTone, PendingBadge } from "@/components/table/record-columns"
 import Term from "@/components/term"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
 import { useRecordEditor } from "@/hooks/use-record-editor"
@@ -178,6 +179,12 @@ export function DrillPanel({
 									? "Spending · refunds excluded"
 									: "Spending · refunds subtracted"}{" "}
 								· Includes <Term name="Pending" /> Records
+								{data.refund_total > 0 ? (
+									<span className="block">
+										{formatCurrency(data.gross_spending)} spent −{" "}
+										{formatCurrency(data.refund_total)} refunds
+									</span>
+								) : null}
 							</>
 						)}
 					</p>
@@ -285,6 +292,15 @@ export function DrillPanel({
 												>
 													<span className="block font-medium">
 														{r.title}
+														{r.analytics_treatment === "spending" &&
+														r.amount > 0 ? (
+															<Badge
+																variant="outline"
+																className="text-creative"
+															>
+																Refund
+															</Badge>
+														) : null}
 													</span>
 													<span className="block text-muted-foreground">
 														{parseDatetime(r.datetime).toFormat(
@@ -297,6 +313,10 @@ export function DrillPanel({
 															amountTone(r.amount),
 														)}
 													>
+														{r.analytics_treatment === "spending" &&
+														r.amount > 0
+															? "+"
+															: ""}
 														{formatCurrency(r.amount)}
 													</span>
 													{side.unique.includes(r.id) ? (
@@ -337,6 +357,15 @@ export function DrillPanel({
 												<span className="block text-sm font-medium">
 													{r.title}
 													<PendingBadge record={r} />
+													{r.analytics_treatment === "spending" &&
+													r.amount > 0 ? (
+														<Badge
+															variant="outline"
+															className="text-creative"
+														>
+															Refund
+														</Badge>
+													) : null}
 												</span>
 												<span className="flex flex-col items-start sm:flex-row sm:flex-wrap sm:items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
 													<span>
@@ -366,6 +395,10 @@ export function DrillPanel({
 													amountTone(r.amount),
 												)}
 											>
+												{r.analytics_treatment === "spending" &&
+												r.amount > 0
+													? "+"
+													: ""}
 												{formatCurrency(r.amount)}
 												{r.is_pending ? (
 													<AllocationProgress

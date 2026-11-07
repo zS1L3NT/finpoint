@@ -390,8 +390,8 @@
     "semantic_hash": ""
   },
   "src/components/record-amount.tsx": {
-    "mtime": 1794003533.7685575,
-    "seen": 1794003621.4897175,
+    "mtime": 1794082053.3400457,
+    "seen": 1794082288.1795356,
     "ast_hash": "3f8aecc9f5fe5d5edd726b82b861256f",
     "semantic_hash": ""
   },
@@ -984,10 +984,10 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1794081658.5820534,
-    "seen": 1794081811.1690176,
-    "ast_hash": "fbddb0e667003609fa04166ad98048ae",
-    "semantic_hash": "fbddb0e667003609fa04166ad98048ae"
+    "mtime": 1794081957.5363736,
+    "seen": 1794082291.4162138,
+    "ast_hash": "b7a6021054069878440d7a2bf595695e",
+    "semantic_hash": "b7a6021054069878440d7a2bf595695e"
   },
   "assets/branding/finpoint-icon-prompt.txt": {
     "mtime": 1793935852.1723228,
@@ -1578,9 +1578,9 @@
     "semantic_hash": "22094bdb40cc65a0a6cb6a06360c02a9"
   },
   "src/components/drill/panel.tsx": {
-    "mtime": 1794081659.9180431,
-    "seen": 1794081809.2751539,
-    "ast_hash": "f8980bbf482eda6fcd050320220b19eb",
+    "mtime": 1794081990.8602505,
+    "seen": 1794082288.1794991,
+    "ast_hash": "24bb2b5b8680a36792be2a7f77492c42",
     "semantic_hash": ""
   },
   "src/hooks/use-drill.ts": {
@@ -1590,9 +1590,9 @@
     "semantic_hash": ""
   },
   "src/logic/drilldown.ts": {
-    "mtime": 1794081660.0220423,
-    "seen": 1794081809.275314,
-    "ast_hash": "2341876ae3ca13b9f2db2f6e9c0ccd7c",
+    "mtime": 1794081958.9723682,
+    "seen": 1794082288.1796765,
+    "ast_hash": "37eccb7b6633871059826cf163105e13",
     "semantic_hash": ""
   },
   "tests/animations/drilldown.e2e.ts": {
@@ -1602,15 +1602,15 @@
     "semantic_hash": ""
   },
   "tests/core/drilldown.e2e.ts": {
-    "mtime": 1794081660.1300416,
-    "seen": 1794081809.275362,
-    "ast_hash": "ecc14c7fc508747474a8504269f50bce",
+    "mtime": 1794082085.3959532,
+    "seen": 1794082288.1797292,
+    "ast_hash": "539b1d3e2b4c205d5d0d1fc3abb030f1",
     "semantic_hash": ""
   },
   "tests/domain/drilldown.test.ts": {
-    "mtime": 1794081641.6101878,
-    "seen": 1794081809.2753782,
-    "ast_hash": "81bf365903a8bd48ec33c1c2d80c6a06",
+    "mtime": 1794082149.58379,
+    "seen": 1794082288.179748,
+    "ast_hash": "f53c70d11e6ea5e0c614220a0dbdac6e",
     "semantic_hash": ""
   },
   "docs/adr/0001-drill-down-url-state.md": {

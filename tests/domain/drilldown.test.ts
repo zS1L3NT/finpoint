@@ -179,3 +179,14 @@ test("Dashboard spending includes the $2.50 outside Monthly Budgets", async () =
 	expect(d.summary.gross_spending - d.summary.refunds).toBeCloseTo(d.summary.spending, 2)
 	expect(d.categories.reduce((sum, c) => sum + c.spending, 0)).toBeCloseTo(d.summary.spending, 2)
 })
+
+ test("spending drill reconciles gross spending and a cent-exact refund", async () => {
+ await loadDemoWorkspace()
+ const before=await getDrilldown("October",2026,"all",{kind:"metric",value:"spent"})
+ const record=before!.records.find(r=>r.amount<0)!
+ await db.records.update(record.id,{amount:34.72,treatment_choice:{kind:"explicit",value:"spending"}})
+ const drill=await getDrilldown("October",2026,"all",{kind:"metric",value:"spent"})
+ expect(drill!.refund_total).toBe(34.72)
+ expect(drill!.gross_spending-drill!.refund_total).toBeCloseTo(drill!.total,2)
+ expect(drill!.total).toBeCloseTo(before!.total+record.amount-34.72,2)
+ },30000)
