@@ -67,7 +67,10 @@ export default function CategoryMovers({
 							<span className="truncate text-sm font-medium">{category.name}</span>
 							<span className="whitespace-normal text-xs text-muted-foreground tabular-nums">
 								{formatCurrency(Math.abs(difference))} {up ? "more" : "less"} than
-								your {comparisonCount}-month average
+								your{" "}
+								<span className="whitespace-nowrap">
+									{comparisonCount}-month average
+								</span>
 							</span>
 						</span>
 						<span className="grid justify-items-end">

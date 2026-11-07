@@ -162,8 +162,8 @@
     "semantic_hash": "7d8a33d5aa042f85737cd2f3334ae040"
   },
   "next-env.d.ts": {
-    "mtime": 1794050310.0975296,
-    "seen": 1794050373.844737,
+    "mtime": 1794058466.4235759,
+    "seen": 1794058757.6496603,
     "ast_hash": "8195d2c60ce847a459ae9d308d6a5724",
     "semantic_hash": ""
   },
@@ -204,9 +204,9 @@
     "semantic_hash": ""
   },
   "src/components/charts/cashflow-chart.tsx": {
-    "mtime": 1794053503.7122495,
-    "seen": 1794053991.1814697,
-    "ast_hash": "c7b3301fcccf8b3c27d43b0e5efd6e2e",
+    "mtime": 1794058293.531474,
+    "seen": 1794058757.6496964,
+    "ast_hash": "73207ad55519444939d8c4bc2670bbf6",
     "semantic_hash": ""
   },
   "src/components/charts/category-history-chart.tsx": {
@@ -216,9 +216,9 @@
     "semantic_hash": ""
   },
   "src/components/charts/category-movers.tsx": {
-    "mtime": 1794053480.5685725,
-    "seen": 1794053991.1814742,
-    "ast_hash": "842e7ddae4aa57c1dee862c4eb011a84",
+    "mtime": 1794058313.9669256,
+    "seen": 1794058757.6497023,
+    "ast_hash": "a776754a22381e439bb5c98682a748fd",
     "semantic_hash": ""
   },
   "src/components/charts/sparkline.tsx": {
@@ -390,9 +390,9 @@
     "semantic_hash": ""
   },
   "src/components/metric.tsx": {
-    "mtime": 1794053854.8554058,
-    "seen": 1794053991.181631,
-    "ast_hash": "89d4be6f687ffc0e90861abba32d87b4",
+    "mtime": 1794058299.0273242,
+    "seen": 1794058757.6498337,
+    "ast_hash": "ca60361eb54978995cf4431fd7470473",
     "semantic_hash": ""
   },
   "src/components/record-amount.tsx": {
@@ -1584,9 +1584,9 @@
     "semantic_hash": "22094bdb40cc65a0a6cb6a06360c02a9"
   },
   "src/components/drill/panel.tsx": {
-    "mtime": 1794053907.754683,
-    "seen": 1794053991.1815453,
-    "ast_hash": "4cc3a92374e2973f1db10af5405ddf8b",
+    "mtime": 1794058293.531474,
+    "seen": 1794058757.6497703,
+    "ast_hash": "2e1659e29515f76a54d1e214c2f89382",
     "semantic_hash": ""
   },
   "src/hooks/use-drill.ts": {

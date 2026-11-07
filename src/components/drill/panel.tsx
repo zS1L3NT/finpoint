@@ -281,11 +281,11 @@ export function DrillPanel({
 													{r.title}
 													<PendingBadge record={r} />
 												</span>
-												<span className="text-xs text-muted-foreground">
+												<span className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
 													{parseDatetime(r.datetime).toFormat(
 														"ccc d MMM",
 													)}{" "}
-													· {r.category.name}
+													· {r.category.name}{" "}
 													{r.monthly_budget ? (
 														<MonthlyBudgetBadge
 															name={r.monthly_budget.name}

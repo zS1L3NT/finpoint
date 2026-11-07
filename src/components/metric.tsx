@@ -71,7 +71,7 @@ export function Metric({
 			)}
 		>
 			{/* min-h matches the delta chip, so tiles with and without one keep values level. */}
-			<div className="flex min-h-5 flex-wrap items-center gap-x-2 gap-y-1 text-xs font-medium text-muted-foreground">
+			<div className="flex min-h-5 min-w-0 items-center gap-x-2 text-xs font-medium text-muted-foreground">
 				<span className="hidden size-7 place-items-center rounded-lg border bg-background text-foreground shadow-xs sm:grid">
 					<IconifyIcon icon={icon} className="size-3.5" />
 				</span>
@@ -86,7 +86,7 @@ export function Metric({
 					<span
 						title={delta.good ? "Better than average" : "Worse than average"}
 						className={cn(
-							"ml-auto rounded-full px-1.5 py-0.5 text-[0.6875rem] font-semibold whitespace-nowrap tabular-nums",
+							"ml-auto shrink-0 rounded-full px-1.5 py-0.5 text-[0.6875rem] font-semibold whitespace-nowrap tabular-nums",
 							delta.good
 								? "bg-creative/10 text-creative"
 								: "bg-red-500/10 text-red-700 dark:text-red-400",
@@ -114,7 +114,7 @@ export function Metric({
 						values={spark}
 						color={sparkColor}
 						label={`${text}, ${sparkPeriod ? `${sparkPeriod} of each of ` : ""}the last ${spark.length} months`}
-						className="mb-1 hidden w-12 shrink-0 text-muted-foreground xl:block @min-[260px]/metric:w-24"
+						className="mb-1 hidden w-12 shrink-0 text-muted-foreground @min-[240px]/metric:block @min-[260px]/metric:w-24"
 					/>
 				) : null}
 			</div>
