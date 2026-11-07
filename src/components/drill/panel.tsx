@@ -107,8 +107,14 @@ export function DrillPanel({
 					}}
 				/>
 			) : null}
-			<div className="flex items-start justify-between gap-3 border-b p-5">
-				<div>
+			<div
+				className={cn(
+					"flex items-start justify-between gap-3 border-b p-5",
+					!desktop && "shrink-0",
+					!desktop && !full && "px-5 py-2",
+				)}
+			>
+				<div className={cn(!desktop && "min-w-0")}>
 					<h2
 						id="drill-title"
 						tabIndex={-1}
@@ -141,7 +147,12 @@ export function DrillPanel({
 					>
 						{formatCurrency(data.total)}
 					</p>
-					<p className="mt-1 text-xs text-muted-foreground">
+					<p
+						className={cn(
+							"mt-1 text-xs text-muted-foreground",
+							!desktop && !full && "truncate",
+						)}
+					>
 						{pluralize(data.records.length, "Record")} ·{" "}
 						{selection.kind === "category-gross" || selection.kind === "month"
 							? "Spending · refunds excluded"
@@ -168,7 +179,11 @@ export function DrillPanel({
 					animate="visible"
 					exit={reduced ? { opacity: 0 } : "exit"}
 					transition={reduced ? TRANSITION.fast : TRANSITION.base}
-					className="min-h-0 flex-1 overflow-y-auto p-5"
+					className={cn(
+						"min-h-0 flex-1 overflow-y-auto p-5",
+						!desktop && "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+						!desktop && !full && "py-0",
+					)}
 				>
 					{statementId ? (
 						statement ? (
@@ -270,7 +285,10 @@ export function DrillPanel({
 									<div key={r.id} className="border-b">
 										<button
 											type="button"
-											className="cursor-pointer flex w-full items-center gap-3 py-4 text-left hover:bg-muted/30"
+											className={cn(
+												"cursor-pointer flex w-full items-center gap-3 py-4 text-left hover:bg-muted/30",
+												!desktop && !full && "py-2",
+											)}
 											aria-expanded={expanded === r.id}
 											onClick={() =>
 												pivot(expanded === r.id ? null : `record:${r.id}`)
@@ -300,6 +318,8 @@ export function DrillPanel({
 											<span
 												className={cn(
 													"text-sm tabular-nums",
+													!desktop &&
+														"w-24 shrink-0 text-right [&>span]:whitespace-normal",
 													amountTone(r.amount),
 												)}
 											>
@@ -360,7 +380,13 @@ export function DrillPanel({
 					)}
 				</motion.div>
 			</AnimatePresence>
-			<div className="grid gap-2 border-t p-5">
+			<div
+				className={cn(
+					"grid gap-2 border-t p-5",
+					!desktop && "shrink-0",
+					!desktop && !full && "py-3",
+				)}
+			>
 				{data.budget ? (
 					<Button
 						variant="outline"
@@ -403,6 +429,7 @@ export function DrillPanel({
 					}}
 					side="bottom"
 					showCloseButton={false}
+					overlayClassName={full ? undefined : "bg-transparent"}
 					className="h-auto! rounded-t-2xl motion-reduce:data-[state=open]:animate-in motion-reduce:data-[state=open]:fade-in motion-reduce:data-[state=closed]:animate-out motion-reduce:data-[state=closed]:fade-out"
 				>
 					<button

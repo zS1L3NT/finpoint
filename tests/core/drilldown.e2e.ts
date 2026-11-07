@@ -213,6 +213,10 @@ test("mobile sheet toggles between two detents with the grab handle and closes w
 	const grab = sheet.getByTestId("drill-grab")
 	await expect(body).toHaveAttribute("data-detent", "half")
 	await expect(grab).toHaveAccessibleName("Expand drill-down")
+	await expect(page.locator('[data-slot="sheet-overlay"]')).toHaveCSS(
+		"background-color",
+		"rgba(0, 0, 0, 0)",
+	)
 	await expect(sheet.getByText("Total", { exact: true })).toHaveCount(0)
 	const height = async () => (await sheet.boundingBox())?.height ?? 0
 	await expect.poll(height).toBeGreaterThan(0)
@@ -221,6 +225,10 @@ test("mobile sheet toggles between two detents with the grab handle and closes w
 	await grab.press("Enter")
 	await expect(body).toHaveAttribute("data-detent", "full")
 	await expect(grab).toHaveAccessibleName("Collapse drill-down")
+	await expect(page.locator('[data-slot="sheet-overlay"]')).not.toHaveCSS(
+		"background-color",
+		"rgba(0, 0, 0, 0)",
+	)
 	await expect.poll(height).toBeGreaterThan(half + 100)
 	await grab.click()
 	await expect(body).toHaveAttribute("data-detent", "half")

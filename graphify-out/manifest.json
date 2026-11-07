@@ -630,9 +630,9 @@
     "semantic_hash": "1449ebdaae30a546b22655bd37adee9b"
   },
   "src/components/ui/sheet.tsx": {
-    "mtime": 1793992522.3513877,
-    "seen": 1793992690.7395072,
-    "ast_hash": "bad7f24c6fb042f75dc006e60c6b04cf",
+    "mtime": 1794075578.072901,
+    "seen": 1794075820.2939382,
+    "ast_hash": "78ee9fa0008e857b1700e16e462c5ab3",
     "semantic_hash": ""
   },
   "src/components/ui/sidebar.tsx": {
@@ -984,10 +984,10 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1794075109.402634,
-    "seen": 1794075458.5682447,
-    "ast_hash": "ca4a077756015ad60bff30973659ab99",
-    "semantic_hash": ""
+    "mtime": 1794075606.2224803,
+    "seen": 1794075905.67941,
+    "ast_hash": "ae174f170a513d880b8322bdb9e60f94",
+    "semantic_hash": "ae174f170a513d880b8322bdb9e60f94"
   },
   "assets/branding/finpoint-icon-prompt.txt": {
     "mtime": 1793935852.1723228,
@@ -1578,9 +1578,9 @@
     "semantic_hash": "22094bdb40cc65a0a6cb6a06360c02a9"
   },
   "src/components/drill/panel.tsx": {
-    "mtime": 1794074967.9119015,
-    "seen": 1794075458.5679014,
-    "ast_hash": "bdf84590afd49601a34ce012e8165cda",
+    "mtime": 1794075930.870437,
+    "seen": 1794076385.5446086,
+    "ast_hash": "3904b9425391003e335103dc014b6b6a",
     "semantic_hash": ""
   },
   "src/hooks/use-drill.ts": {
@@ -1602,9 +1602,9 @@
     "semantic_hash": ""
   },
   "tests/core/drilldown.e2e.ts": {
-    "mtime": 1794074556.4436886,
-    "seen": 1794075458.5681865,
-    "ast_hash": "e49dfd131b80d8fa380fd1e0a22ed386",
+    "mtime": 1794075695.9933343,
+    "seen": 1794075820.2941797,
+    "ast_hash": "978d878ae911feb32cd5fb5213dbb8f6",
     "semantic_hash": ""
   },
   "tests/domain/drilldown.test.ts": {
