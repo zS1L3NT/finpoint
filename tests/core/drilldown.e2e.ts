@@ -229,6 +229,7 @@ test("mobile sheet toggles between two detents with the grab handle and closes w
 	const body = sheet.getByTestId("drill-sheet-body")
 	const grab = sheet.getByTestId("drill-grab")
 	await expect(body).toHaveAttribute("data-detent", "half")
+	await expect(sheet.getByTestId("drill-total").locator("+ p")).toHaveText("1 Record · Spending")
 	await expect(grab).toHaveAccessibleName("Expand drill-down")
 	await expect(page.locator('[data-slot="sheet-overlay"]')).toHaveCSS(
 		"background-color",
@@ -287,4 +288,27 @@ test("past empty month shows one dated message and no empty charts", async ({ pa
 	await expect(page.getByRole("application")).toHaveCount(0)
 	await expect(page.getByRole("link", { name: "Import statements", exact: true })).toBeVisible()
 	await expect(page.getByRole("button", { name: /Spent/ })).toHaveCount(0)
+})
+
+test("Spent drill groups Records with net category subtotals", async ({ page }) => {
+	await seedWorkspace(page)
+	await page.goto(`${overview}&drill=metric:spent`)
+	const body = page.getByTestId("drill-body")
+	await expect(
+		body.getByRole("heading", { name: "Groceries $117.53", exact: true }),
+	).toBeVisible()
+	await expect(body.getByRole("heading", { name: "Shopping $80.00", exact: true })).toBeVisible()
+	await expect(page.getByTestId("drill-total")).toHaveText("$286.63")
+})
+
+test("comparison rows show Pending reasons without opening another page", async ({ page }) => {
+	await seedWorkspace(page)
+	await page.goto(`${overview}&drill=compare:t1-cat-dining`)
+	const record = page
+		.getByTestId("drill-comparison")
+		.locator("section")
+		.first()
+		.getByRole("link", { name: /Hawker Dinner/ })
+	await expect(record).toContainText("Pending")
+	await expect(record).toContainText("$35.00 not allocated yet")
 })

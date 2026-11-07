@@ -49,10 +49,11 @@ export function DrillPanel({
 	const [origin, setOrigin] = useState<{ key: string; id: string } | null>(null)
 	const statementId = focus?.startsWith("statement:") ? focus.slice(10) : null
 	const back = () => pivot(origin?.key === key ? `record:${origin.id}` : null)
-	const statement = useLiveQuery(
+	const statementQuery = useLiveQuery(
 		() => (statementId ? getDrillStatement(statementId) : undefined),
 		[statementId],
 	)
+	const statement = statementId ? statementQuery : undefined
 	const [desktop, setDesktop] = useState(
 		() => typeof window !== "undefined" && matchMedia("(min-width:1280px)").matches,
 	)
@@ -116,78 +117,86 @@ export function DrillPanel({
 				)}
 			>
 				<div className={cn(!desktop && "min-w-0")}>
-					<h2
-						id="drill-title"
-						tabIndex={-1}
-						className="text-lg font-semibold tracking-tight outline-none"
-					>
-						{statement ? statement.description : data.title}
-					</h2>
-					{data.budget && !statementId ? (
-						<p className="text-xs text-muted-foreground">
-							{data.budget.amount === null
-								? "No planned amount"
-								: `${formatCurrency(data.total)} of ${formatCurrency(data.budget.amount)}`}
-						</p>
+					{ready ? (
+						<>
+							<h2
+								id="drill-title"
+								tabIndex={-1}
+								className="text-lg font-semibold tracking-tight outline-none"
+							>
+								{statement ? statement.description : data.title}
+							</h2>
+							{data.budget && !statementId ? (
+								<p className="text-xs text-muted-foreground">
+									{data.budget.amount === null
+										? "No planned amount"
+										: `${formatCurrency(data.total)} of ${formatCurrency(data.budget.amount)}`}
+								</p>
+							) : null}
+							{statement ? (
+								<nav
+									aria-label="Drill-down breadcrumb"
+									className="mt-2 text-xs text-muted-foreground"
+								>
+									{data.title} ›{" "}
+									{data.records.find(r => r.id === origin?.id)?.title
+										? `${data.records.find(r => r.id === origin?.id)?.title} › `
+										: ""}
+									{statement.account.name} statement
+								</nav>
+							) : null}
+							{!statementId &&
+							comparison?.difference !== null &&
+							comparison?.difference !== undefined ? (
+								<p className="mt-2 text-xs text-muted-foreground">
+									{formatCurrency(Math.abs(comparison.difference))}{" "}
+									{comparison.difference >= 0 ? "more" : "less"} than your{" "}
+									{`${comparison.months.length}-month`} average
+								</p>
+							) : null}
+							<p
+								className="mt-1 text-3xl font-semibold tracking-tight tabular-nums"
+								data-testid="drill-total"
+								aria-live="polite"
+							>
+								{formatCurrency(statement ? statement.amount : data.total)}
+							</p>
+							<p className="mt-1 text-xs text-muted-foreground">
+								{statement ? (
+									<>
+										Statement · {statement.account.name} ·{" "}
+										{parseDatetime(statement.datetime).toFormat(
+											"d MMM yyyy, HH:mm",
+										)}
+										<span className="block">
+											Funds {pluralize(statement.records.length, "Record")}
+										</span>
+									</>
+								) : (
+									<>
+										{pluralize(data.records.length, "Record")} ·{" "}
+										{!desktop && !full ? (
+											"Spending"
+										) : (
+											<>
+												{selection.kind === "category-gross" ||
+												selection.kind === "month"
+													? "Spending · refunds excluded"
+													: "Spending · refunds subtracted"}{" "}
+												· Includes <Term name="Pending" /> Records
+											</>
+										)}
+										{data.refund_total > 0 ? (
+											<span className="block">
+												{formatCurrency(data.gross_spending)} spent −{" "}
+												{formatCurrency(data.refund_total)} refunds
+											</span>
+										) : null}
+									</>
+								)}
+							</p>
+						</>
 					) : null}
-					{statement ? (
-						<nav
-							aria-label="Drill-down breadcrumb"
-							className="mt-2 text-xs text-muted-foreground"
-						>
-							{data.title} ›{" "}
-							{data.records.find(r => r.id === origin?.id)?.title
-								? `${data.records.find(r => r.id === origin?.id)?.title} › `
-								: ""}
-							{statement.account.name} statement
-						</nav>
-					) : null}
-					{!statementId &&
-					comparison?.average !== null &&
-					comparison?.average !== undefined ? (
-						<p className="mt-2 text-xs text-muted-foreground">
-							{formatCurrency(Math.abs(data.total - comparison.average))}{" "}
-							{data.total >= comparison.average ? "more" : "less"} than your{" "}
-							{`${comparison.months.length}-month`} average
-						</p>
-					) : null}
-					<p
-						className="mt-1 text-3xl font-semibold tracking-tight tabular-nums"
-						data-testid="drill-total"
-						aria-live="polite"
-					>
-						{formatCurrency(statement ? statement.amount : data.total)}
-					</p>
-					<p
-						className={cn(
-							"mt-1 text-xs text-muted-foreground",
-							!desktop && !full && !statementId && "truncate",
-						)}
-					>
-						{statement ? (
-							<>
-								Statement · {statement.account.name} ·{" "}
-								{parseDatetime(statement.datetime).toFormat("d MMM yyyy, HH:mm")}
-								<span className="block">
-									Funds {pluralize(statement.records.length, "Record")}
-								</span>
-							</>
-						) : (
-							<>
-								{pluralize(data.records.length, "Record")} ·{" "}
-								{selection.kind === "category-gross" || selection.kind === "month"
-									? "Spending · refunds excluded"
-									: "Spending · refunds subtracted"}{" "}
-								· Includes <Term name="Pending" /> Records
-								{data.refund_total > 0 ? (
-									<span className="block">
-										{formatCurrency(data.gross_spending)} spent −{" "}
-										{formatCurrency(data.refund_total)} refunds
-									</span>
-								) : null}
-							</>
-						)}
-					</p>
 				</div>
 				<Button
 					variant="ghost"
@@ -292,6 +301,7 @@ export function DrillPanel({
 												>
 													<span className="block font-medium">
 														{r.title}
+														<PendingBadge record={r} />
 														{r.analytics_treatment === "spending" &&
 														r.amount > 0 ? (
 															<Badge
@@ -307,6 +317,11 @@ export function DrillPanel({
 															"ccc d MMM",
 														)}
 													</span>
+													{r.pendingReason ? (
+														<span className="block text-muted-foreground">
+															{r.pendingReason}
+														</span>
+													) : null}
 													<span
 														className={cn(
 															"block tabular-nums",
@@ -339,121 +354,144 @@ export function DrillPanel({
 									</p>
 								</div>
 							) : (
-								data.records.map(r => (
-									<div key={r.id} className="border-b">
-										<button
-											type="button"
-											className={cn(
-												"cursor-pointer flex w-full items-center gap-3 py-4 text-left hover:bg-muted/30",
-												!desktop && !full && "py-2",
-											)}
-											aria-expanded={expanded === r.id}
-											onClick={() =>
-												pivot(expanded === r.id ? null : `record:${r.id}`)
-											}
-										>
-											<Icon {...r.category} size={14} />
-											<span className="min-w-0 flex-1">
-												<span className="block text-sm font-medium">
-													{r.title}
-													<PendingBadge record={r} />
-													{r.analytics_treatment === "spending" &&
-													r.amount > 0 ? (
-														<Badge
-															variant="outline"
-															className="text-creative"
-														>
-															Refund
-														</Badge>
+								data.records.map((r, index) => {
+									const group =
+										index === 0 ||
+										data.records[index - 1]?.category.id !== r.category.id
+											? data.groups.find(g => g.category.id === r.category.id)
+											: undefined
+									return (
+										<div key={r.id} className="border-b">
+											{group ? (
+												<h3 className="flex items-center gap-2 pt-4 text-sm font-medium">
+													<Icon {...group.category} size={14} />
+													<span className="min-w-0 truncate">
+														{group.category.name}
+													</span>
+													<span className="ml-auto shrink-0 tabular-nums">
+														{formatCurrency(group.total)}
+													</span>
+												</h3>
+											) : null}
+											<button
+												type="button"
+												className={cn(
+													"cursor-pointer flex w-full items-center gap-3 py-4 text-left hover:bg-muted/30",
+													!desktop && !full && "py-2",
+												)}
+												aria-expanded={expanded === r.id}
+												onClick={() =>
+													pivot(
+														expanded === r.id ? null : `record:${r.id}`,
+													)
+												}
+											>
+												<Icon {...r.category} size={14} />
+												<span className="min-w-0 flex-1">
+													<span className="block text-sm font-medium">
+														{r.title}
+														<PendingBadge record={r} />
+														{r.analytics_treatment === "spending" &&
+														r.amount > 0 ? (
+															<Badge
+																variant="outline"
+																className="text-creative"
+															>
+																Refund
+															</Badge>
+														) : null}
+													</span>
+													<span className="flex flex-col items-start sm:flex-row sm:flex-wrap sm:items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+														<span>
+															{parseDatetime(r.datetime).toFormat(
+																"ccc d MMM",
+															)}{" "}
+															· {r.category.name}
+														</span>
+														{r.monthly_budget ? (
+															<MonthlyBudgetBadge
+																name={r.monthly_budget.name}
+																color={r.monthly_budget.color}
+															/>
+														) : null}
+													</span>
+													{r.pendingReason ? (
+														<span className="block text-xs text-muted-foreground">
+															{r.pendingReason}
+														</span>
 													) : null}
 												</span>
-												<span className="flex flex-col items-start sm:flex-row sm:flex-wrap sm:items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
-													<span>
-														{parseDatetime(r.datetime).toFormat(
-															"ccc d MMM",
-														)}{" "}
-														· {r.category.name}
-													</span>
-													{r.monthly_budget ? (
-														<MonthlyBudgetBadge
-															name={r.monthly_budget.name}
-															color={r.monthly_budget.color}
+												<span
+													className={cn(
+														"text-sm tabular-nums",
+														!desktop &&
+															"w-24 shrink-0 text-right [&>span]:whitespace-normal",
+														amountTone(r.amount),
+													)}
+												>
+													{r.analytics_treatment === "spending" &&
+													r.amount > 0
+														? "+"
+														: ""}
+													{formatCurrency(r.amount)}
+													{r.is_pending ? (
+														<AllocationProgress
+															amount={r.amount}
+															allocated={r.allocated_amount}
 														/>
 													) : null}
 												</span>
-												{r.pendingReason ? (
-													<span className="block text-xs text-muted-foreground">
-														{r.pendingReason}
-													</span>
-												) : null}
-											</span>
-											<span
-												className={cn(
-													"text-sm tabular-nums",
-													!desktop &&
-														"w-24 shrink-0 text-right [&>span]:whitespace-normal",
-													amountTone(r.amount),
-												)}
-											>
-												{r.analytics_treatment === "spending" &&
-												r.amount > 0
-													? "+"
-													: ""}
-												{formatCurrency(r.amount)}
-												{r.is_pending ? (
-													<AllocationProgress
-														amount={r.amount}
-														allocated={r.allocated_amount}
-													/>
-												) : null}
-											</span>
-											<motion.span
-												animate={{
-													rotate: expanded === r.id ? 180 : 0,
-												}}
-												transition={TRANSITION.fast}
-											>
-												<IconifyIcon
-													icon="lucide:chevron-down"
-													className="size-4 shrink-0"
-												/>
-											</motion.span>
-										</button>
-										{expanded === r.id ? (
-											<motion.div
-												initial={{
-													opacity: 0,
-													height: reduced ? "auto" : 0,
-												}}
-												animate={{ opacity: 1, height: "auto" }}
-												transition={
-													reduced ? TRANSITION.fast : SPRING.snappy
-												}
-												className="mb-4 overflow-hidden rounded-lg bg-muted/40 p-3"
-											>
-												<Button
-													id={`drill-edit-${r.id}`}
-													variant="outline"
-													size="sm"
-													onClick={() => handleEdit(r)}
-												>
-													Edit Record
-												</Button>
-												<p className="my-2 text-xs text-muted-foreground">
-													<Term name="Allocation" label="Allocations" />
-												</p>
-												<AllocationRows
-													record={r}
-													showSummary={false}
-													onStatement={id => {
-														setOrigin({ key, id: r.id })
-														pivot(`statement:${id}`)
+												<motion.span
+													animate={{
+														rotate: expanded === r.id ? 180 : 0,
 													}}
-												/>
-											</motion.div>
-										) : null}
-									</div>
-								))
+													transition={TRANSITION.fast}
+												>
+													<IconifyIcon
+														icon="lucide:chevron-down"
+														className="size-4 shrink-0"
+													/>
+												</motion.span>
+											</button>
+											{expanded === r.id ? (
+												<motion.div
+													initial={{
+														opacity: 0,
+														height: reduced ? "auto" : 0,
+													}}
+													animate={{ opacity: 1, height: "auto" }}
+													transition={
+														reduced ? TRANSITION.fast : SPRING.snappy
+													}
+													className="mb-4 overflow-hidden rounded-lg bg-muted/40 p-3"
+												>
+													<Button
+														id={`drill-edit-${r.id}`}
+														variant="outline"
+														size="sm"
+														onClick={() => handleEdit(r)}
+													>
+														Edit Record
+													</Button>
+													<p className="my-2 text-xs text-muted-foreground">
+														<Term
+															name="Allocation"
+															label="Allocations"
+														/>
+													</p>
+													<AllocationRows
+														record={r}
+														showSummary={false}
+														onStatement={id => {
+															setOrigin({ key, id: r.id })
+															pivot(`statement:${id}`)
+														}}
+													/>
+												</motion.div>
+											) : null}
+										</div>
+									)
+								})
 							)}
 						</>
 					)}
@@ -491,7 +529,7 @@ export function DrillPanel({
 			role="region"
 			className="sticky top-4 flex h-[calc(100vh-2rem)] flex-col overflow-hidden rounded-xl border bg-card shadow-sm"
 		>
-			{ready ? content : null}
+			{content}
 		</motion.aside>
 	) : (
 		<motion.div exit={{ opacity: 0 }} transition={TRANSITION.base}>
@@ -539,7 +577,7 @@ export function DrillPanel({
 						transition={reduced ? TRANSITION.fast : SPRING.snappy}
 						className="flex min-h-0 flex-col overflow-hidden"
 					>
-						{ready ? content : null}
+						{content}
 					</motion.div>
 				</SheetContent>
 			</Sheet>

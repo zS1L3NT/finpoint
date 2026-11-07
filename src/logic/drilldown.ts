@@ -83,8 +83,25 @@ export async function getDrilldown(
 		)
 	if (selection.kind === "category-gross" || selection.kind === "month")
 		records = records.filter(r => contribution(r.analytics_treatment, r.amount).spending > 0)
-	records.sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount))
+	const grouped = selection.kind === "metric" && selection.value === "spent"
+	records.sort(
+		(a, b) =>
+			(grouped
+				? a.category.name.localeCompare(b.category.name) ||
+					a.category.id.localeCompare(b.category.id)
+				: 0) || Math.abs(b.amount) - Math.abs(a.amount),
+	)
 	const details = await Promise.all(records.map(r => getRecord(r.id)))
+	const groups = new Map<
+		string,
+		{ category: (typeof records)[number]["category"]; total: number }
+	>()
+	if (grouped)
+		for (const r of records) {
+			const group = groups.get(r.category.id)
+			if (group) group.total += measure(r)
+			else groups.set(r.category.id, { category: r.category, total: measure(r) })
+		}
 	const total = Math.max(
 		selection.kind === "day" ? 0 : Number.NEGATIVE_INFINITY,
 		records.reduce((sum, r) => sum + measure(r), 0) / 100,
@@ -137,6 +154,7 @@ export async function getDrilldown(
 							category?.comparison === null || category?.comparison === undefined
 								? null
 								: category.spending - category.comparison,
+						difference: category?.comparison ?? null,
 						months: view.scopedComparisonMonths,
 						period: view.dashboard.period.is_current
 							? `Days 1–${DateTime.now().day}`
@@ -147,9 +165,12 @@ export async function getDrilldown(
 									sum + summaryMeasure(r.analytics_treatment, r.amount, "spent"),
 								0,
 							) / 100,
-						records: comparisonRecords.sort(
-							(a, b) => Math.abs(b.amount) - Math.abs(a.amount),
-						),
+						records: comparisonRecords
+							.sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount))
+							.map(r => ({
+								...r,
+								pendingReason: r.is_pending ? pendingReason(r) : null,
+							})),
 						uniqueCurrentIds: details
 							.filter(r => !comparisonRecords.some(p => p.title === r.title))
 							.map(r => r.id),
@@ -164,6 +185,7 @@ export async function getDrilldown(
 				: undefined,
 		title,
 		total,
+		groups: [...groups.values()].map(g => ({ ...g, total: g.total / 100 })),
 		gross_spending:
 			records.reduce(
 				(sum, r) =>

@@ -159,6 +159,7 @@ test("compare drill uses the mover average and included same-period months", asy
    const drill = await getDrilldown("October",2026,scope,{kind:"compare",value:category.id})
    expect(drill!.total).toBeCloseTo(category.spending,2)
    expect(drill!.comparison!.average).toBeCloseTo(category.spending-category.comparison!,2)
+   expect(drill!.comparison!.difference).toBeCloseTo(category.comparison!,2)
    expect(drill!.comparison!.months).toHaveLength(view.scopedComparisonCount)
    expect(drill!.comparison!.total/view.scopedComparisonCount).toBeCloseTo(drill!.comparison!.average!,2)
    for (const rows of [drill!.records,drill!.comparison!.records]) {
@@ -189,4 +190,19 @@ test("Dashboard spending includes the $2.50 outside Monthly Budgets", async () =
  expect(drill!.refund_total).toBe(34.72)
  expect(drill!.gross_spending-drill!.refund_total).toBeCloseTo(drill!.total,2)
  expect(drill!.total).toBeCloseTo(before!.total+record.amount-34.72,2)
+ },30000)
+
+ test("Spent category groups partition Records and reconcile including a refund", async () => {
+ await loadDemoWorkspace()
+ const record=(await db.records.toArray()).find(r=>r.datetime.startsWith("2026-10")&&r.amount<0)!
+ await db.records.update(record.id,{amount:34.72,treatment_choice:{kind:"explicit",value:"spending"}})
+ const drill=(await getDrilldown("October",2026,"all",{kind:"metric",value:"spent"}))!
+ expect(drill.groups.reduce((sum,g)=>sum+g.total,0)).toBeCloseTo(drill.total,2)
+ expect(new Set(drill.groups.map(g=>g.category.id))).toEqual(new Set(drill.records.map(r=>r.category.id)))
+ for(const group of drill.groups){
+  const indices=drill.records.flatMap((r,i)=>r.category.id===group.category.id?[i]:[])
+  expect(indices.at(-1)!-indices[0]!+1).toBe(indices.length)
+  const amounts=drill.records.filter(r=>r.category.id===group.category.id).map(r=>Math.abs(r.amount))
+  expect(amounts).toEqual([...amounts].sort((a,b)=>b-a))
+ }
  },30000)

@@ -984,10 +984,10 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1794082942.0400963,
-    "seen": 1794083130.4919772,
-    "ast_hash": "cf711ec72d2017fe80eff99cb1468fff",
-    "semantic_hash": "cf711ec72d2017fe80eff99cb1468fff"
+    "mtime": 1794083673.837332,
+    "seen": 1794083848.4648693,
+    "ast_hash": "bc0dfd9f92be88171f53f7a9244fae23",
+    "semantic_hash": "bc0dfd9f92be88171f53f7a9244fae23"
   },
   "assets/branding/finpoint-icon-prompt.txt": {
     "mtime": 1793935852.1723228,
@@ -1578,9 +1578,9 @@
     "semantic_hash": "22094bdb40cc65a0a6cb6a06360c02a9"
   },
   "src/components/drill/panel.tsx": {
-    "mtime": 1794081990.8602505,
-    "seen": 1794082288.1794991,
-    "ast_hash": "24bb2b5b8680a36792be2a7f77492c42",
+    "mtime": 1794085465.4680257,
+    "seen": 1794086110.1090853,
+    "ast_hash": "7332bf1e04f740afad20482f58e598ae",
     "semantic_hash": ""
   },
   "src/hooks/use-drill.ts": {
@@ -1590,9 +1590,9 @@
     "semantic_hash": ""
   },
   "src/logic/drilldown.ts": {
-    "mtime": 1794081958.9723682,
-    "seen": 1794082288.1796765,
-    "ast_hash": "37eccb7b6633871059826cf163105e13",
+    "mtime": 1794086104.550131,
+    "seen": 1794086110.1092262,
+    "ast_hash": "d1713e9f033e9bdf1054f2d8db6732d1",
     "semantic_hash": ""
   },
   "tests/animations/drilldown.e2e.ts": {
@@ -1602,15 +1602,15 @@
     "semantic_hash": ""
   },
   "tests/core/drilldown.e2e.ts": {
-    "mtime": 1794082588.6872602,
-    "seen": 1794082750.7415266,
-    "ast_hash": "d92894590cd304e63139b4745c159ccb",
+    "mtime": 1794084935.001207,
+    "seen": 1794085166.8580322,
+    "ast_hash": "aa29cabaef82577af1cac87bea1e9dcf",
     "semantic_hash": ""
   },
   "tests/domain/drilldown.test.ts": {
-    "mtime": 1794082149.58379,
-    "seen": 1794082288.179748,
-    "ast_hash": "f53c70d11e6ea5e0c614220a0dbdac6e",
+    "mtime": 1794083961.7297368,
+    "seen": 1794084217.8761005,
+    "ast_hash": "fe96b9596b7ba84b2a35748a3d0f1fdc",
     "semantic_hash": ""
   },
   "docs/adr/0001-drill-down-url-state.md": {

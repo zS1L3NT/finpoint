@@ -204,3 +204,5 @@ Spending Drill-downs label refunds and show their positive amounts with a plus s
 Past months without Records show one dated empty-state message and an Import statements action. Empty charts and summary cards stay hidden for those months.
 
 The Dashboard hides a Back action pointing to its current month. Records treats the selected month as navigation context: Clear filters counts user filters and preserves that month.
+
+The Spent Drill-down groups Records by Category, with net subtotals that add up to the header. At half height the mobile sheet keeps the Record count and Spending label compact; expand it to read the inclusion rules. Attention’s Pending and unallocated rows continue to open their filtered work lists.
