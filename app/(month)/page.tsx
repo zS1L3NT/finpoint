@@ -17,7 +17,7 @@ import TotalSpendingChart from "@/components/charts/total-spending-chart"
 import MonthlyBudgetDialog from "@/components/dialogs/monthly-budget"
 import { DrillPanel } from "@/components/drill/panel"
 import { UiIcon as IconifyIcon } from "@/components/icon"
-import { Metric as DashboardMetric, type Delta, MetricGrid } from "@/components/metric"
+import { Metric as DashboardMetric, MetricGrid } from "@/components/metric"
 import MonthlyBudgetBadge from "@/components/monthly-budget-badge"
 import { FILTER_CONTROL_CLASS } from "@/components/table/filter-bar"
 import { Button } from "@/components/ui/button"
@@ -167,9 +167,11 @@ export default function DashboardPage() {
 				) : (
 					<SummaryBand
 						summary={summary}
+						incomeHistory={view.incomeHistory}
 						comparison={comparison}
 						trend={view.trend}
 						through={period.through}
+						onDrill={value => drill.open({ kind: "metric", value })}
 					/>
 				)}
 				<div className="flex flex-wrap items-center justify-between gap-2">
@@ -516,68 +518,95 @@ function ScopeLabel({ scope, color }: { scope: string; color?: string }) {
 
 function SummaryBand({
 	summary,
+	incomeHistory,
 	comparison,
 	trend,
 	through,
+	onDrill,
 }: {
 	summary: AnalyticsSummary
+	incomeHistory: DashboardView["incomeHistory"]
 	comparison: Comparison
 	trend: TrendMonth[]
-	/** Last actual day while the month is running; trend points then cover days 1 to it. */
 	through: string | null
+	onDrill: (value: string) => void
 }) {
 	const sparkPeriod = through ? `days 1–${DateTime.fromISO(through).day}` : undefined
-	const surplusLabel =
-		summary.surplus > 0 ? "Surplus" : summary.surplus < 0 ? "Shortfall" : "Balance"
-	const tone = summary.surplus > 0 ? "positive" : summary.surplus < 0 ? "negative" : "neutral"
+	const waiting = through !== null && summary.income === 0
+
 	return (
 		<Card className="gap-0 overflow-hidden py-0">
-			<MetricGrid className="rounded-none border-0">
-				<DashboardMetric
-					icon="lucide:circle-dollar-sign"
-					label="Total income"
-					value={formatCurrency(summary.income)}
-					detail={comparisonText(comparison.income, comparison.count)}
-					delta={deltaOf(comparison.income, comparison.count, "up")}
-					spark={trend.map(month => month.income)}
-					sparkColor="var(--income)"
-					sparkPeriod={sparkPeriod}
-				/>
-				<DashboardMetric
-					icon="lucide:receipt-text"
-					label={summary.spending < 0 ? "Total net refund" : "Total spending"}
-					value={formatCurrency(Math.abs(summary.spending))}
-					detail={comparisonText(comparison.spending, comparison.count)}
-					delta={deltaOf(comparison.spending, comparison.count, "down")}
-					spark={trend.map(month => month.spending)}
-					sparkColor="var(--spending)"
-					sparkPeriod={sparkPeriod}
-				/>
-				<DashboardMetric
-					icon="lucide:scale"
-					label={`Total ${surplusLabel.toLowerCase()}`}
-					value={formatCurrency(Math.abs(summary.surplus))}
-					detail="Income less personal spending"
-					tone={tone}
-					delta={deltaOf(comparison.surplus, comparison.count, "up")}
-					spark={trend.map(month => month.surplus)}
-					sparkColor="var(--foreground)"
-					sparkPeriod={sparkPeriod}
-				/>
-				<DashboardMetric
-					icon="lucide:percent"
-					label="Total surplus rate"
-					value={
-						summary.surplus_rate === null ? "—" : `${summary.surplus_rate.toFixed(1)}%`
-					}
-					detail={
-						summary.surplus_rate === null
-							? "No positive net income"
-							: comparisonRateText(comparison.surplus_rate, comparison.count)
-					}
-					tone={tone}
-				/>
+			<MetricGrid className="grid-cols-1 rounded-none border-0 sm:grid-cols-3 lg:grid-cols-3">
+				{[
+					{
+						key: "spent",
+						label: "Spent",
+						icon: "lucide:receipt-text",
+						value: formatCurrency(summary.spending),
+						detail:
+							comparison.count && comparison.spending.difference !== null
+								? `${formatCurrency(Math.abs(comparison.spending.difference))} ${comparison.spending.difference >= 0 ? "more" : "less"} than usual${through ? " so far" : ""}`
+								: "No comparison history",
+						spark: trend.map(m => m.spending),
+					},
+					{
+						key: "income",
+						label: "Income",
+						icon: "lucide:circle-dollar-sign",
+						value:
+							summary.income === 0
+								? incomeHistory
+									? "None yet"
+									: "None recorded"
+								: formatCurrency(summary.income),
+						detail:
+							summary.income === 0
+								? incomeHistory
+									? `Usually ~${formatCurrency(incomeHistory.amount)} by day ${incomeHistory.day}`
+									: "Add income ›"
+								: comparisonText(comparison.income, comparison.count),
+						spark: trend.map(m => m.income),
+					},
+					{
+						key: "leftover",
+						label: "Left over",
+						icon: "lucide:scale",
+						value: waiting ? "—" : formatCurrency(summary.surplus),
+						detail: waiting
+							? "Waiting for income"
+							: summary.surplus_rate === null
+								? "Income less personal spending"
+								: `${summary.surplus_rate.toFixed(1)}% of income`,
+						spark: trend.map(m => m.surplus),
+					},
+				].map(m => (
+					<button
+						key={m.key}
+						type="button"
+						onClick={() => onDrill(m.key)}
+						className="cursor-pointer text-left focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
+					>
+						<DashboardMetric
+							icon={m.icon}
+							label={`${m.label} ›`}
+							value={m.value}
+							detail={m.detail}
+							spark={m.spark}
+							sparkPeriod={sparkPeriod}
+						/>
+					</button>
+				))}
 			</MetricGrid>
+			<button
+				type="button"
+				onClick={() => onDrill("saved")}
+				className="flex min-h-11 cursor-pointer items-center justify-between border-t px-4 py-3 text-sm focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
+			>
+				<span>Saved this month</span>
+				<span className="tabular-nums">
+					{formatCurrency(summary.contributions - summary.withdrawals)} ›
+				</span>
+			</button>
 		</Card>
 	)
 }
@@ -680,24 +709,8 @@ function ReviewLinks({ data, month, year }: { data: DashboardData; month: string
 	)
 }
 
-/** Signed change vs the comparison average; `better` says which direction is good. */
-function deltaOf(value: ComparisonValue, count: number, better: "up" | "down"): Delta | undefined {
-	if (!count || value.difference === null || Math.abs(value.difference) < 0.005) return undefined
-	const up = value.difference > 0
-	return {
-		text: `${up ? "↑" : "↓"} ${formatCurrency(Math.abs(value.difference)).replace(/\.\d\d$/, "")}`,
-		good: up === (better === "up"),
-	}
-}
-
 function comparisonText(value: ComparisonValue, count: number) {
 	if (!count || value.difference === null) return "No comparison history"
 	if (Math.abs(value.difference) < 0.005) return `Same as ${count}-month average`
 	return `${formatCurrency(Math.abs(value.difference))} ${value.difference > 0 ? "above" : "below"} ${count}-mo avg`
-}
-
-function comparisonRateText(value: ComparisonValue, count: number) {
-	if (!count || value.difference === null) return "No comparison history"
-	if (Math.abs(value.difference) < 0.05) return `Same as ${count}-month average`
-	return `${Math.abs(value.difference).toFixed(1)} points ${value.difference > 0 ? "above" : "below"} average`
 }

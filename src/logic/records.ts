@@ -3,7 +3,7 @@
 
 import { db, type RecordRow } from "@/data/db"
 import { canUseMonthlyBudget } from "@/lib/analytics"
-import { contribution } from "@/logic/analytics"
+import { contribution, summaryMeasure } from "@/logic/analytics"
 import { duplicateStatementIds } from "@/logic/duplicates"
 import { isPendingRecord, pendingStatementIds, tallyAllocations } from "@/logic/pending"
 import { resolveRecordChoices } from "@/logic/record-choices"
@@ -38,6 +38,7 @@ export type RecordFilters = {
 	category_ids?: string[] | null
 	monthly_budget_id?: string | null
 	show_unbudgeted?: boolean
+	measure?: string | null
 	effective_spending?: boolean
 	treatment?: string | null
 }
@@ -158,6 +159,10 @@ export async function listRecords(filters: RecordFilters = {}) {
 			r =>
 				canUseMonthlyBudget(r.analytics_treatment, r.amount) &&
 				r.monthly_budget_id === null,
+		)
+	if (filters.measure)
+		rows = rows.filter(
+			r => summaryMeasure(r.analytics_treatment, r.amount, filters.measure ?? "") !== 0,
 		)
 	if (filters.effective_spending)
 		rows = rows.filter(r => contribution(r.analytics_treatment, r.amount).spending !== 0)

@@ -1133,7 +1133,36 @@ export async function getDashboardView(input: DashboardInput & { scope?: string 
 	const date = monthStart(input.month, input.year)
 	const trend = buildTrend(date, DateTime.now().startOf("day"), tables)
 
+	const incomeMonths = new Map<string, { amount: number; day: number }>()
+	for (const r of toAnalyticsRecords(
+		tables.records,
+		tables.allocated,
+		tables.categories,
+		tables.monthlyBudgets,
+	)) {
+		if (r.datetime.slice(0, 10) >= date.toFormat(ISO_DAY)) continue
+		const income = contribution(r.analytics_treatment, r.amount).income / 100
+		if (income <= 0) continue
+		const key = r.datetime.slice(0, 7)
+		const previous = incomeMonths.get(key)
+		incomeMonths.set(key, {
+			amount: (previous?.amount ?? 0) + income,
+			day: Math.max(previous?.day ?? 1, Number(r.datetime.slice(8, 10))),
+		})
+	}
+	const incomeHistory = incomeMonths.size
+		? {
+				amount:
+					[...incomeMonths.values()].reduce((sum, m) => sum + m.amount, 0) /
+					incomeMonths.size,
+				day: Math.round(
+					[...incomeMonths.values()].reduce((sum, m) => sum + m.day, 0) /
+						incomeMonths.size,
+				),
+			}
+		: null
 	return {
+		incomeHistory,
 		dashboard,
 		pace,
 		monthlyBudgetDaily,

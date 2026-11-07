@@ -124,3 +124,12 @@ test("Monthly Budget cards and legend reconcile including refunds and plan amoun
 		Settings.now = now
 	}
 }, 120000)
+
+ test("summary measures reconcile independently of spending scope", async () => {
+ await loadDemoWorkspace()
+ const view = await getDashboardView({month: "October", year: 2026, scope: "all"})
+ const s = view.dashboard.summary
+ for (const [value, total] of Object.entries({spent:s.spending, income:s.income, leftover:s.surplus, saved:s.contributions-s.withdrawals})) {
+ expect((await getDrilldown("October",2026,"unbudgeted",{kind:"metric",value}))?.total).toBeCloseTo(total,2)
+ }
+ }, 30000)

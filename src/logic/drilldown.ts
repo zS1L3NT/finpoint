@@ -1,13 +1,13 @@
 import { DateTime } from "luxon"
 import { db } from "@/data/db"
-import { contribution } from "@/logic/analytics"
+import { contribution, summaryMeasure } from "@/logic/analytics"
 import { getDashboardView } from "@/logic/dashboard"
 import { getRecord, listRecords } from "@/logic/records"
 import { getStatement } from "@/logic/statements"
 import { pathRecords } from "@/routes"
 
 export type Selection = {
-	kind: "day" | "category-gross" | "category" | "month" | "budget"
+	kind: "metric" | "day" | "category-gross" | "category" | "month" | "budget"
 	value: string
 	at?: string
 }
@@ -42,7 +42,8 @@ export async function getDrilldown(
 	const filters = {
 		start_date: start,
 		end_date: end,
-		effective_spending: true,
+		effective_spending: selection.kind !== "metric",
+		measure: selection.kind === "metric" ? selection.value : undefined,
 		max_amount:
 			selection.kind === "category-gross" || selection.kind === "month" ? "-0.01" : undefined,
 		category_ids: selection.kind.startsWith("category")
@@ -54,30 +55,35 @@ export async function getDrilldown(
 				? ["all", "unbudgeted"].includes(selection.value)
 					? undefined
 					: selection.value
-				: scope === "all"
+				: selection.kind === "metric" || scope === "all"
 					? undefined
 					: scope,
 	}
 	let records = await listRecords(filters)
+	const measure = (r: (typeof records)[number]) =>
+		summaryMeasure(
+			r.analytics_treatment,
+			r.amount,
+			selection.kind === "metric" ? selection.value : "spent",
+		)
 	if (selection.kind === "category-gross" || selection.kind === "month")
 		records = records.filter(r => contribution(r.analytics_treatment, r.amount).spending > 0)
 	records.sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount))
 	const details = await Promise.all(records.map(r => getRecord(r.id)))
 	const total = Math.max(
 		selection.kind === "day" ? 0 : Number.NEGATIVE_INFINITY,
-		records.reduce(
-			(sum, r) => sum + contribution(r.analytics_treatment, r.amount).spending,
-			0,
-		) / 100,
+		records.reduce((sum, r) => sum + measure(r), 0) / 100,
 	)
 	const title =
-		selection.kind === "day"
-			? `Spending on ${DateTime.fromISO(selection.value).toFormat("ccc d LLL")}`
-			: selection.kind.startsWith("category")
-				? `${view.scopedCategories.find(c => c.id === selection.value)?.name ?? "Categories"} in ${date.toFormat("MMMM")}`
-				: selection.kind === "budget"
-					? `${view.dashboard.monthlyBudgets.find(b => b.id === selection.value)?.name ?? (selection.value === "unbudgeted" ? "Unbudgeted" : "All budgets")} in ${date.toFormat("MMMM")}`
-					: `Spending in ${date.toFormat("MMMM")}`
+		selection.kind === "metric"
+			? `${({ spent: "Spent", income: "Income", leftover: "Left over", saved: "Saved this month" } as Record<string, string>)[selection.value]} in ${date.toFormat("MMMM")}`
+			: selection.kind === "day"
+				? `Spending on ${DateTime.fromISO(selection.value).toFormat("ccc d LLL")}`
+				: selection.kind.startsWith("category")
+					? `${view.scopedCategories.find(c => c.id === selection.value)?.name ?? "Categories"} in ${date.toFormat("MMMM")}`
+					: selection.kind === "budget"
+						? `${view.dashboard.monthlyBudgets.find(b => b.id === selection.value)?.name ?? (selection.value === "unbudgeted" ? "Unbudgeted" : "All budgets")} in ${date.toFormat("MMMM")}`
+						: `Spending in ${date.toFormat("MMMM")}`
 	return {
 		budget:
 			selection.kind === "budget"
@@ -88,7 +94,7 @@ export async function getDrilldown(
 		records: details,
 		href: pathRecords({
 			...filters,
-			effective_spending: "true",
+			effective_spending: filters.effective_spending ? "true" : undefined,
 			show_unbudgeted: filters.show_unbudgeted ? "true" : undefined,
 			category_ids: filters.category_ids?.join(","),
 		}),

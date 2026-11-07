@@ -45,6 +45,8 @@ export default function RecordsPage() {
 	const monthlyBudgetId = searchParams.get("monthly_budget_id")
 	const showUnbudgeted = ["1", "true"].includes(searchParams.get("show_unbudgeted") ?? "")
 	const treatment = searchParams.get("treatment")
+	const measure = searchParams.get("measure")
+	const effectiveSpending = searchParams.get("effective_spending") === "true"
 	const categoryIdsParam = searchParams.get("category_ids") ?? ""
 	const categoryIds = useMemo(
 		() => categoryIdsParam.split(",").filter(Boolean),
@@ -75,6 +77,8 @@ export default function RecordsPage() {
 				monthly_budget_id: null,
 				show_unbudgeted: null,
 				treatment: null,
+				measure: null,
+				effective_spending: null,
 				page: null,
 			}),
 		[setParams],
@@ -87,12 +91,16 @@ export default function RecordsPage() {
 		categoryIds.length ? "categories" : null,
 		monthlyBudgetId ?? (showUnbudgeted ? "unbudgeted" : null),
 		treatment,
+		measure,
+		effectiveSpending || null,
 	].filter(Boolean).length
 
 	const recordsQuery = useLiveQuery(
 		() =>
 			listRecords({
 				query: query || null,
+				measure,
+				effective_spending: effectiveSpending,
 				start_date: startDate,
 				end_date: endDate,
 				min_amount: minAmount,
@@ -105,6 +113,8 @@ export default function RecordsPage() {
 			}),
 		[
 			query,
+			measure,
+			effectiveSpending,
 			startDate,
 			endDate,
 			minAmount,

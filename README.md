@@ -167,3 +167,5 @@ Expand a Record in the Dashboard Drill-down to see its Statements. Select a Stat
 Category rows, category trend month bars and their category lists open the Drill-down without leaving the Dashboard. Category rows and trend totals exclude refunds; Biggest changes opens the net spending Records, with refunds subtracted.
 
 Forecast days, Monthly Budget cards and forecast legend entries open their Records in the Drill-down. Choose “Show the dashboard for … only” inside a budget panel to change the dashboard scope. Use “New Monthly Budget” to create a plan; Edit remains a separate action.
+
+The Dashboard summary shows Spent, Income and Left over. Select a metric to inspect its Records; Saved this month shows contributions less withdrawals. While income is still missing in the current month, Left over waits neutrally for income. Historical income comparisons cover the same days so far.

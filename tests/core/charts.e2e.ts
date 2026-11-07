@@ -19,10 +19,9 @@ const overflow = (chart: ReturnType<typeof card>) =>
 	chart.evaluate(element => element.scrollWidth - element.clientWidth)
 
 function metric(page: Page, label: string) {
-	// "Total surplus" is a prefix of "Total surplus rate"; exclude the rate tile.
-	if (label === "Total surplus")
-		return page.locator("div.min-h-24.bg-card", { hasText: /Total surplus(?! rate)/ })
-	return page.locator("div.min-h-24.bg-card", { hasText: label })
+	return page
+		.getByRole("button", { name: new RegExp(`^${label} ›`) })
+		.locator("div.min-h-24.bg-card")
 }
 
 test("Budget detail: usage tooltip reconciles actual and projected spending even with a zero plan", async ({
@@ -434,10 +433,20 @@ test.describe("pinned overview date", () => {
 		await seedWorkspace(page)
 		await test.step("overview summary: income, refunds and exclusions reconcile across metrics and Category mix", async () => {
 			await page.goto(overview)
-			await expect(metric(page, "Total income")).toContainText("$5,203.50")
-			await expect(metric(page, "Total spending")).toContainText("$286.63")
-			await expect(metric(page, "Total surplus")).toContainText("$4,916.87")
-			await expect(metric(page, "Total surplus rate")).toContainText("94.5%")
+			await expect(metric(page, "Income")).toContainText("$5,203.50")
+			await expect(metric(page, "Spent")).toContainText("$286.63")
+			await expect(metric(page, "Left over")).toContainText("$4,916.87")
+			await expect(metric(page, "Left over")).toContainText("94.5%")
+			for (const label of ["Spent", "Income", "Left over", "Saved this month"]) {
+				await page
+					.getByRole("button", { name: new RegExp(`^${label}`) })
+					.first()
+					.click()
+				await expect(
+					page.getByRole("link", { name: "Open in Records", exact: true }),
+				).toBeVisible()
+				await page.keyboard.press("Escape")
+			}
 			const mix = card(page, "Categories this month")
 			await expect(mix).toContainText("$306.63 expenses · $20.00 refunds")
 			await expect(mix.getByRole("button", { name: /Shopping/ })).toContainText("$100.00")
@@ -547,20 +556,18 @@ test.describe("pinned overview date", () => {
 		})
 		await test.step("overview metrics: month change updates values and the accessible sparkline period", async () => {
 			await page.goto(overview)
-			await expect(metric(page, "Total spending")).toContainText("$286.63")
+			await expect(metric(page, "Spent")).toContainText("$286.63")
 			if (!isMobile)
-				await expect(
-					page.getByRole("img", { name: /^Total spending, .*last/ }),
-				).toBeVisible()
+				await expect(page.getByRole("img", { name: /^Spent ›, .*last/ })).toBeVisible()
 			await page.getByRole("button", { name: "Previous month", exact: true }).click()
 			await expect(
 				page.getByRole("heading", { name: "September 2026", exact: true }),
 			).toBeVisible()
-			await expect(metric(page, "Total spending")).toContainText("$1,400.00")
-			await expect(metric(page, "Total shortfall")).toContainText("$1,400.00")
-			await expect(metric(page, "Total surplus rate")).toContainText("—")
+			await expect(metric(page, "Spent")).toContainText("$1,400.00")
+			await expect(metric(page, "Left over")).toContainText("-$1,400.00")
+			await expect(metric(page, "Left over")).toContainText("Income less personal spending")
 			await page.getByRole("button", { name: "Next month", exact: true }).click()
-			await expect(metric(page, "Total spending")).toContainText("$286.63")
+			await expect(metric(page, "Spent")).toContainText("$286.63")
 		})
 	})
 
@@ -698,11 +705,11 @@ test.describe("pinned overview date", () => {
 	}) => {
 		await seedWorkspace(page, "empty")
 		await page.goto(overview)
-		await expect(metric(page, "Total income")).toContainText("$0.00")
-		await expect(metric(page, "Total spending")).toContainText("$0.00")
-		await expect(metric(page, "Total balance")).toContainText("$0.00")
-		await expect(metric(page, "Total surplus rate")).toContainText("—")
-		await expect(metric(page, "Total surplus rate")).toContainText("No positive net income")
+		await expect(metric(page, "Income")).toContainText("None recorded")
+		await expect(metric(page, "Spent")).toContainText("$0.00")
+		await expect(metric(page, "Left over")).toContainText("Income less personal spending")
+		await expect(metric(page, "Left over")).toContainText("$0.00")
+		await expect(page.getByRole("button", { name: /^Saved this month/ })).toContainText("$0.00")
 		await expect(card(page, "Category trend")).toContainText(
 			"No spending in the available months.",
 		)
@@ -763,7 +770,7 @@ test.describe("pinned overview date", () => {
 		)
 		await page.goto(overview)
 		await expect(metric(page, "Total net refund")).toContainText("$93.37")
-		await expect(metric(page, "Total surplus")).toContainText("$5,296.87")
+		await expect(metric(page, "Left over")).toContainText("$5,296.87")
 		const mix = card(page, "Categories this month")
 		await expect(mix.getByRole("button", { name: /Shopping/ })).toContainText(
 			"$400.00 refunded · -$300.00 net",
