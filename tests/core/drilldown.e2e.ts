@@ -248,3 +248,17 @@ test("mobile sheet toggles between two detents with the grab handle and closes w
 	await page.keyboard.press("Escape")
 	await expect(sheet).toHaveCount(0)
 })
+
+test("Pending drill rows explain their reason before expanding without duplicate captions", async ({
+	page,
+}) => {
+	await seedWorkspace(page)
+	await page.goto(`${overview}&drill=metric:spent`)
+	const body = page.getByTestId("drill-body")
+	const row = body.getByRole("button", { name: /Hawker Dinner/ })
+	await expect(row).toContainText("$35.00 not allocated yet")
+	await row.click()
+	const expansion = row.locator("..").getByTestId("allocation-rows")
+	await expect(expansion).not.toContainText("allocated")
+	await expect(expansion).toContainText("$35.00 remaining to allocate")
+})

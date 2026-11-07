@@ -334,6 +334,11 @@ export function DrillPanel({
 														/>
 													) : null}
 												</span>
+												{r.pendingReason ? (
+													<span className="block text-xs text-muted-foreground">
+														{r.pendingReason}
+													</span>
+												) : null}
 											</span>
 											<span
 												className={cn(
@@ -388,6 +393,7 @@ export function DrillPanel({
 												</p>
 												<AllocationRows
 													record={r}
+													showSummary={false}
 													onStatement={id => {
 														setOrigin({ key, id: r.id })
 														pivot(`statement:${id}`)

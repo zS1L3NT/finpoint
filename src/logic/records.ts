@@ -4,6 +4,7 @@
 import { DateTime } from "luxon"
 import { db, type RecordRow } from "@/data/db"
 import { canUseMonthlyBudget } from "@/lib/analytics"
+import { formatCurrency } from "@/lib/utils"
 import { contribution, summaryMeasure } from "@/logic/analytics"
 import { duplicateStatementIds } from "@/logic/duplicates"
 import { isPendingRecord, pendingStatementIds, tallyAllocations } from "@/logic/pending"
@@ -16,11 +17,11 @@ import type { Allocation, AnalyticsTreatment, Record as AppRecord, Statement } f
 export function pendingReason(
 	record: Pick<AppRecord, "amount" | "allocated_amount" | "pending_statement_count">,
 ): string {
-	if (record.pending_statement_count)
-		return "Allocated account activity is awaiting confirmation."
-	if (record.allocated_amount === 0 && record.amount !== 0) return "No Statements allocated yet."
+	if (record.pending_statement_count) return "Statement not confirmed yet"
+	if (record.allocated_amount === 0 && record.amount !== 0) return "No Statement yet"
+	if (record.amount * record.allocated_amount < 0) return "Amounts have opposite signs"
 	if (round2(record.allocated_amount - record.amount) !== 0)
-		return "The allocated amount differs from the Record amount."
+		return `${formatCurrency(Math.abs(round2(record.amount - record.allocated_amount)))} not allocated yet`
 	return "All Allocations are confirmed and tally with the Record amount."
 }
 

@@ -20,7 +20,7 @@ test("Records table: rendered Records keep zero, negative amounts and pending re
 	await expect(partial).toContainText("-$60.00")
 	await expect(partial.getByText("Pending", { exact: true })).toHaveAttribute(
 		"title",
-		"The allocated amount differs from the Record amount.",
+		"$35.00 not allocated yet",
 	)
 	await expect(partial).toContainText("$25.00 of $60.00 allocated")
 	await expect(partial.getByText("Allocations", { exact: true })).toHaveCount(0)

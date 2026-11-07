@@ -2,7 +2,7 @@ import { DateTime } from "luxon"
 import { db } from "@/data/db"
 import { contribution, summaryMeasure } from "@/logic/analytics"
 import { getDashboardView } from "@/logic/dashboard"
-import { getRecord, listRecords } from "@/logic/records"
+import { getRecord, listRecords, pendingReason } from "@/logic/records"
 import { getStatement } from "@/logic/statements"
 import { pathRecords } from "@/routes"
 
@@ -156,7 +156,10 @@ export async function getDrilldown(
 				: undefined,
 		title,
 		total,
-		records: details,
+		records: details.map(r => ({
+			...r,
+			pendingReason: r.is_pending ? pendingReason(r) : null,
+		})),
 		href: pathRecords({
 			...filters,
 			effective_spending: filters.effective_spending ? "true" : undefined,

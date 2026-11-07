@@ -20,7 +20,8 @@ export function AllocationRows({
 	record,
 	statement,
 	onStatement,
-}: AllocationSource & { onStatement?: (id: string) => void }) {
+	showSummary = true,
+}: AllocationSource & { onStatement?: (id: string) => void; showSummary?: boolean }) {
 	const source = record ?? statement
 	const rows = record ? record.statements : statement.records
 	const allocated = rows.reduce((sum, row) => sum + row.pivot.amount, 0)
@@ -33,8 +34,10 @@ export function AllocationRows({
 			className="grid gap-2 text-xs"
 			data-testid="allocation-rows"
 		>
-			<AllocationProgress amount={source.amount} allocated={allocated} />
-			{record?.is_pending ? (
+			{showSummary ? (
+				<AllocationProgress amount={source.amount} allocated={allocated} />
+			) : null}
+			{showSummary && record?.is_pending && rows.length ? (
 				<p className="text-muted-foreground">{pendingReason(record)}</p>
 			) : null}
 			{rows.map(row => {
