@@ -50,10 +50,16 @@ export function Metric({
 	onSelect?: () => void
 }) {
 	const Root = onSelect ? "button" : "div"
+	const text =
+		typeof label === "string"
+			? label
+			: ((label as React.ReactElement<{ label?: string; name: string }>).props.label ??
+				(label as React.ReactElement<{ name: string }>).props.name)
 	return (
 		<Root
 			type={onSelect ? "button" : undefined}
 			onClick={onSelect}
+			aria-label={onSelect ? `${text} ${value} ${detail}` : undefined}
 			className={cn(
 				onSelect &&
 					"group cursor-pointer text-left focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring transition-colors duration-150 ease-out hover:bg-muted/40 active:bg-muted/60",
@@ -107,7 +113,7 @@ export function Metric({
 					<Sparkline
 						values={spark}
 						color={sparkColor}
-						label={`${typeof label === "string" ? label : ((label as React.ReactElement<{ label?: string; name: string }>).props.label ?? (label as React.ReactElement<{ name: string }>).props.name)}, ${sparkPeriod ? `${sparkPeriod} of each of ` : ""}the last ${spark.length} months`}
+						label={`${text}, ${sparkPeriod ? `${sparkPeriod} of each of ` : ""}the last ${spark.length} months`}
 						className="mb-1 hidden shrink-0 text-muted-foreground xl:block"
 					/>
 				) : null}

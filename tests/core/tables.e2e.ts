@@ -23,8 +23,7 @@ test("Records table: rendered Records keep zero, negative amounts and pending re
 		"The allocated amount differs from the Record amount.",
 	)
 	await expect(partial).toContainText("$25.00 of $60.00 allocated")
-	await partial.getByText("Allocations", { exact: true }).click()
-	await expect(partial.getByTestId("allocation-rows")).toBeVisible()
+	await expect(partial.getByText("Allocations", { exact: true })).toHaveCount(0)
 	const groceries = page
 		.getByRole("link", { name: "Open FairPrice Run", exact: true })
 		.locator("xpath=ancestor::*[self::tr or contains(@class, 'grid-cols-subgrid')][1]")
@@ -528,7 +527,7 @@ test("Duplicate badge: marks possible duplicate Statements and links to the acco
 		)
 		await expect(badge).toHaveAttribute(
 			"href",
-			"/allocator/duplicates?account_id=t1-acc-revolut",
+			"/statements/duplicates?account_id=t1-acc-revolut",
 		)
 	}
 	await expect(
@@ -545,7 +544,7 @@ test("Duplicate badge: marks possible duplicate Statements and links to the acco
 	await statementRow(page, IDS.statements.duplicatePair[0])
 		.getByRole("link", { name: "Duplicate?" })
 		.click()
-	await expect(page).toHaveURL("/allocator/duplicates?account_id=t1-acc-revolut")
+	await expect(page).toHaveURL("/statements/duplicates?account_id=t1-acc-revolut")
 })
 
 test("Duplicate badge: disappears once the pair is resolved", async ({ page, workspace }) => {

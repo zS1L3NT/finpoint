@@ -506,7 +506,8 @@ test.describe("pinned overview date", () => {
 				.click()
 			await expect(page).toHaveURL(new RegExp(`scope=${IDS.monthlyBudgets.recurring}`))
 			await page.getByRole("button", { name: "Close drill-down", exact: true }).click()
-			await expect(budgets).toContainText("of $0.00")
+			await expect(budgets).toContainText("no plan")
+			await expect(budgets).not.toContainText("of $0.00")
 			await expect(card(page, "Categories this month")).toContainText(
 				"No spending or refunds recorded in this scope.",
 			)
@@ -539,8 +540,8 @@ test.describe("pinned overview date", () => {
 			await page.goto(overview)
 			const housing = card(page, "Biggest changes").getByRole("button", { name: /Housing/ })
 			await expect(housing).toContainText("$0.00")
-			await expect(housing).toContainText("Average $1,400.00")
-			await expect(housing).toContainText("Housing down $1,400.00 vs your 1-month average")
+			await expect(housing).toContainText("$1,400.00 less than your 1-month average")
+			await expect(housing).toContainText("▼ $1,400.00")
 			await housing.click()
 			await page.getByRole("link", { name: "Open in Records", exact: true }).click()
 			await expect(page).toHaveURL(new RegExp(`category_ids=${IDS.categories.rent}`))

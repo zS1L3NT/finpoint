@@ -124,7 +124,7 @@ export default function CashflowChart({
 						onClick={() =>
 							onDrill({ kind: "budget", value: b.id === "total" ? "all" : b.id })
 						}
-						className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+						className="cursor-pointer rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 					>
 						<MonthlyBudgetBadge name={b.name} color={b.color} />
 					</button>

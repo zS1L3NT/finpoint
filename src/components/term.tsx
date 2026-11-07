@@ -23,7 +23,7 @@ export default function Term({ name, label }: { name: keyof typeof DEFINITIONS; 
 					role="button"
 					tabIndex={0}
 					aria-label={`Define ${name}`}
-					className="inline cursor-help underline decoration-dotted underline-offset-4 focus-visible:outline-2 focus-visible:outline-ring"
+					className="inline cursor-pointer underline decoration-dotted underline-offset-4 focus-visible:outline-2 focus-visible:outline-ring"
 					onKeyDown={event => {
 						if (event.key === "Enter" || event.key === " ") {
 							event.preventDefault()

@@ -9,6 +9,7 @@ import RecordEditorDialog from "@/components/dialogs/record-editor"
 import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
 import MonthlyBudgetBadge from "@/components/monthly-budget-badge"
 import { amountTone, PendingBadge } from "@/components/table/record-columns"
+import Term from "@/components/term"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
 import { useRecordEditor } from "@/hooks/use-record-editor"
@@ -142,8 +143,9 @@ export function DrillPanel({
 					<p className="mt-1 text-xs text-muted-foreground">
 						{pluralize(data.records.length, "Record")} ·{" "}
 						{selection.kind === "category-gross" || selection.kind === "month"
-							? "Spending · refunds excluded · Pending Records counted"
-							: "Spending · refunds subtracted · Pending Records counted"}
+							? "Spending · refunds excluded"
+							: "Spending · refunds subtracted"}{" "}
+						· <Term name="Pending" /> Records counted
 					</p>
 				</div>
 				<Button
@@ -267,7 +269,7 @@ export function DrillPanel({
 									<div key={r.id} className="border-b">
 										<button
 											type="button"
-											className="flex w-full items-center gap-3 py-4 text-left hover:bg-muted/30"
+											className="cursor-pointer flex w-full items-center gap-3 py-4 text-left hover:bg-muted/30"
 											aria-expanded={expanded === r.id}
 											onClick={() =>
 												pivot(expanded === r.id ? null : `record:${r.id}`)
@@ -336,6 +338,9 @@ export function DrillPanel({
 												>
 													Edit Record
 												</Button>
+												<p className="my-2 text-xs text-muted-foreground">
+													<Term name="Allocation" label="Allocations" />
+												</p>
 												<AllocationRows
 													record={r}
 													onStatement={id => {

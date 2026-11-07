@@ -81,16 +81,23 @@ export function RecordAmountCell({
 			<span className={cn("font-medium tabular-nums", amountTone(value))}>
 				{formatCurrency(value)}
 			</span>
-			{showAllocated &&
-			(value !== record.amount ||
-				(record.is_pending && record.allocated_amount !== record.amount)) ? (
-				<span className="text-amber-700 dark:text-amber-400 [&>span]:text-inherit">
-					<AllocationProgress
-						amount={record.amount}
-						allocated={value !== record.amount ? value : record.allocated_amount}
-					/>
-				</span>
-			) : null}
+			{showAllocated ? <RecordAllocationProgress record={record} value={value} /> : null}
+		</span>
+	)
+}
+
+function RecordAllocationProgress({ record, value }: { record: Record; value: number }) {
+	if (
+		value === record.amount &&
+		(!record.is_pending || record.allocated_amount === record.amount)
+	)
+		return null
+	return (
+		<span className="text-amber-700 dark:text-amber-400 [&>span]:text-inherit">
+			<AllocationProgress
+				amount={record.amount}
+				allocated={value !== record.amount ? value : record.allocated_amount}
+			/>
 		</span>
 	)
 }
@@ -285,9 +292,10 @@ export function useRecordMobileRow<TRecord extends RecordRow>({
 									.filter(Boolean)
 									.join(" · ")}
 							</p>
+							<RecordAllocationProgress record={record} value={value} />
 						</div>
 					</div>
-					<RecordAmountCell record={record} value={value} showAllocated={true} />
+					<RecordAmountCell record={record} value={value} showAllocated={false} />
 					<RecordActions record={record} options={{ pageName, extraActions, onEdit }} />
 				</>
 			)

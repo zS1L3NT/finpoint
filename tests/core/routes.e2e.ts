@@ -60,7 +60,9 @@ async function expectRouteLayout(page: Page, route: string, title: string) {
 		await expect(page.locator("main article").first()).toBeVisible()
 	if (route === "/")
 		await expect(
-			page.locator("div.min-h-24.bg-card", { hasText: "Total spending" }),
+			page
+				.getByRole("button", { name: /^Spent / })
+				.filter({ has: page.locator(".tabular-nums") }),
 		).toBeVisible()
 	await expect(page).toHaveTitle(/ · Finpoint$/)
 	await expect(page.locator("html")).toHaveClass(
@@ -171,7 +173,7 @@ test("workflow tabs and sparkline: tabs navigate by keyboard, Allocate keeps its
 	})
 	await test.step("total spending sparkline: keeps finite data marks and its endpoint follows changed month values", async () => {
 		await page.goto("/?month=October&year=2026")
-		const spark = page.locator('svg[role="img"][aria-label^="Spent ›,"]').first()
+		const spark = page.locator('svg[role="img"][aria-label^="Spent,"]').first()
 		await expect(spark).toBeAttached()
 		const points = await spark.locator("polyline").getAttribute("points")
 		expect(points).toBeTruthy()
@@ -700,7 +702,7 @@ test.describe("pinned 15 October 2026 date", () => {
 					if (!allocations.length)
 						await expect(
 							page
-								.getByText("No Statements allocated yet.", { exact: true })
+								.getByText("No statements found.", { exact: true })
 								.filter({ visible: true }),
 						).toBeVisible()
 					else
@@ -793,7 +795,11 @@ test.describe("pinned 15 October 2026 date", () => {
 			.getByRole("navigation", { name: "Monthly finance views" })
 			.getByRole("link", { name: "Overview", exact: true })
 			.click()
-		await expect(page.getByText("Total income", { exact: false }).first()).toBeVisible()
+		await expect(
+			page
+				.getByRole("button", { name: /^Income / })
+				.filter({ has: page.locator(".tabular-nums") }),
+		).toBeVisible()
 		await expect.poll(() => heading?.evaluate(node => node.isConnected)).toBe(true)
 	})
 	test("static and not-found routes: static pages are readable and unmatched routes offer Records", async ({

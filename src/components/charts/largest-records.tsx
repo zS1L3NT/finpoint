@@ -35,7 +35,7 @@ export default function LargestRecords({
 					Top five Spending Records by absolute amount · current scope, refunds included.
 				</CardDescription>
 			</CardHeader>
-			<CardContent className="grid gap-2">
+			<CardContent className="grid min-w-0 grid-cols-1 gap-2">
 				{data.records.slice(0, 5).map(r => (
 					<button
 						type="button"
@@ -50,7 +50,7 @@ export default function LargestRecords({
 								{ scroll: false },
 							)
 						}
-						className="flex items-center justify-between gap-3 rounded p-2 text-left text-sm hover:bg-muted active:bg-muted"
+						className="cursor-pointer flex min-w-0 items-center justify-between gap-3 rounded p-2 text-left text-sm hover:bg-muted active:bg-muted"
 					>
 						<Icon {...r.category} size={14} />
 						<span className="min-w-0 flex-1 truncate">

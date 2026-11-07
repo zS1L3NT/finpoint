@@ -105,7 +105,7 @@ export default function StatementsPage() {
 
 	return (
 		<>
-			<PageContent>
+			<PageContent className="gap-2 md:gap-6">
 				<PageHeader
 					title="Statements"
 					subtitle="Review imported and pending statements with their allocated records."
@@ -126,7 +126,7 @@ export default function StatementsPage() {
 						onPageSizeChange: handlePageSizeChange,
 						searchPlaceholder: "Search descriptions...",
 						filters: (
-							<FilterBar>
+							<FilterBar className="gap-y-1 sm:gap-y-2">
 								<Select
 									value={accountId}
 									onValueChange={value =>

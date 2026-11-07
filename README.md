@@ -161,7 +161,7 @@ $ bun run build
 
 Click a Spending calendar day to open its Drill-down: Records sorted by amount and the day’s effective spending total. On desktop it docks beside the Dashboard; on smaller screens it opens as a bottom sheet. Select another day to change its contents, or close with Escape, the close button, or browser Back. “Open in Records” carries the selected day and budget scope into the Records page.
 
-Records and Statements expose read-only Allocations through an Allocations chevron. Each Allocation shows its share of the other amount, with any remainder below. Record allocation progress is visible on desktop and mobile; pending reasons explain confirmation or amount differences. Detail pages and Dashboard drill-downs use the same allocation rows.
+Record and Statement detail pages retain their tables and editors, with allocated portions shown alongside amounts. Expand a Record in the Dashboard drill-down to inspect its Allocations. Pending Records show allocation progress; fully allocated list rows keep their compact layout.
 
 Expand a Record in the Dashboard Drill-down to see its Statements. Select a Statement to see its account and allocated Records. The breadcrumb and Back button return to the selection; browser Back restores the previous expansion. These views survive reloads and shared links through the `focus` URL parameter.
 
@@ -179,4 +179,4 @@ In the Dashboard drill-down, expand a Record and choose **Edit Record**. Saved c
 
 Allocate assigns Statements to Records. Statement cleanup lives in the Statements, Replace pending and Duplicates tabs; old cleanup URLs redirect with filters preserved. In the Record editor, choose Money out or Money in and enter a positive amount.
 
-The Dashboard’s Financial terms row offers dotted-underlined definitions with examples. Hover, focus, or tap a term; press Escape to close. Effective spending follows treatment rules and includes refunds. Left over means income minus personal spending, before saving and investment contributions.
+Dashboard metric labels and drill-down copy offer inline dotted-underlined definitions with examples. Hover, focus, or tap a term; press Escape to close. Effective spending follows treatment rules and includes refunds. Left over means income minus personal spending, before saving and investment contributions.

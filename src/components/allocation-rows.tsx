@@ -61,7 +61,7 @@ export function AllocationRows({
 						type="button"
 						key={row.id}
 						onClick={() => onStatement(row.id)}
-						className="rounded p-2 text-left hover:bg-muted"
+						className="cursor-pointer rounded p-2 text-left hover:bg-muted"
 					>
 						{content}
 					</button>

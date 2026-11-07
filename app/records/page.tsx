@@ -312,7 +312,7 @@ function RecordFilters({
 	}
 
 	return (
-		<FilterBar className="sm:flex sm:flex-wrap">
+		<FilterBar className="gap-y-1 sm:gap-y-2 sm:flex sm:flex-wrap">
 			<Select
 				value={sort}
 				onValueChange={value => onChange({ sort: value === "date" ? null : value })}

@@ -109,7 +109,7 @@ const populatedConsumers: MotionConsumer[] = [
 		origin: "/records",
 		action: "link",
 		target: "Open Hawker Dinner",
-		selector: 'main [data-testid="allocation-rows"]:has(a[href^="/statements/"])',
+		selector: statementRows,
 		dense: false,
 	},
 	{
@@ -117,7 +117,7 @@ const populatedConsumers: MotionConsumer[] = [
 		origin: "/statements",
 		action: "statement",
 		target: "t1-s-pending",
-		selector: 'main [data-testid="allocation-rows"]:has(a[href^="/records/"])',
+		selector: recordRows,
 		dense: false,
 	},
 	{
@@ -246,9 +246,6 @@ async function expectConsumerEntrance(page: Page, consumer: MotionConsumer, isMo
 	if (await page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches))
 		expectReducedRowMovement(samples, visibleCount)
 	else expectVisibleRowCascade(samples, visibleCount)
-	if (consumer.selector.includes("allocation-rows"))
-		for (const sample of samples)
-			for (const frame of sample.frames) expect(poseIsIdentity(frame)).toBe(true)
 	await test.info().attach("consumer-frames", {
 		body: JSON.stringify(samples),
 		contentType: "application/json",

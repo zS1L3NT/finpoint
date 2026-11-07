@@ -90,13 +90,13 @@ export default function MonthlyBudgetUsage({
 								<span className="font-medium text-foreground">
 									{formatCurrency(budget.spending)}
 								</span>{" "}
-								{budget.amount === null
+								{budget.amount === null || budget.amount === 0
 									? "used · no plan"
 									: budget.spending < 0
 										? "net refund"
 										: `of ${formatCurrency(budget.amount)}`}
 							</p>
-							{budget.remaining !== null ? (
+							{budget.amount !== 0 && budget.remaining !== null ? (
 								<p
 									className={cn(
 										"shrink-0 tabular-nums text-muted-foreground",
