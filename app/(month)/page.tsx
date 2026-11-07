@@ -37,15 +37,14 @@ import { useStagedMount } from "@/hooks/use-staged-mount"
 import { SPRING, TRANSITION } from "@/lib/motion"
 import { themeColor } from "@/lib/palette"
 import { cn, formatCurrency, pluralize } from "@/lib/utils"
-import { findLatestRecordMonth, getDashboardView, type TrendMonth } from "@/logic/dashboard"
-import { hasWorkspaceActivity, loadDemoWorkspace } from "@/logic/workspace"
 import {
-	pathAllocator,
-	pathDashboard,
-	pathImporter,
-	pathMonthlyRecords,
-	pathStatements,
-} from "@/routes"
+	buildAttention,
+	findLatestRecordMonth,
+	getDashboardView,
+	type TrendMonth,
+} from "@/logic/dashboard"
+import { hasWorkspaceActivity, loadDemoWorkspace } from "@/logic/workspace"
+import { pathDashboard, pathImporter, pathMonthlyRecords } from "@/routes"
 import type { AnalyticsSummary } from "@/types"
 
 type DashboardView = Awaited<ReturnType<typeof getDashboardView>>
@@ -138,6 +137,17 @@ export default function DashboardPage() {
 				{!period.is_future && data.record_count === 0 ? (
 					<EmptyMonthNotice month={dataMonth} year={dataYear} />
 				) : null}
+				<p className="text-sm leading-relaxed" aria-label="Month headline">
+					{view.headline}
+				</p>
+				{!period.is_future ? (
+					<AttentionList
+						data={data}
+						month={dataMonth}
+						year={dataYear}
+						onDrill={drill.open}
+					/>
+				) : null}
 				{period.is_future ? (
 					<div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border bg-muted/20 p-4">
 						<div>
@@ -175,11 +185,6 @@ export default function DashboardPage() {
 					/>
 				)}
 				<div className="flex flex-wrap items-center justify-between gap-2">
-					<div className="min-w-0 flex-1 basis-full sm:basis-auto">
-						{!period.is_future ? (
-							<ReviewLinks data={data} month={dataMonth} year={dataYear} />
-						) : null}
-					</div>
 					<ScopeSelect value={scope} budgets={budgets} onChange={setScope} />
 				</div>
 				<div
@@ -638,101 +643,63 @@ function SummaryBand({
 	)
 }
 
-function ReviewLinks({ data, month, year }: { data: DashboardData; month: string; year: number }) {
-	const { handlePush } = useHistory()
-	const date = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
-	const start = date.startOf("month").toISODate() ?? ""
-	const end = date.endOf("month").toISODate() ?? ""
-	// Keep the hit area steady: shrinking a pressed link loses clicks near its edges.
+function AttentionList({
+	data,
+	month,
+	year,
+	onDrill,
+}: {
+	data: DashboardData
+	month: string
+	year: number
+	onDrill: (selection: import("@/logic/drilldown").Selection) => void
+}) {
+	const rows = buildAttention(data, month, year)
+	if (!rows.length) return null
 	return (
-		<div className="flex flex-wrap items-center gap-2" aria-label="Review this month">
-			{data.review.pending_records > 0 ? (
-				<Button
-					variant="outline"
-					size="sm"
-					className="active:not-aria-[haspopup]:scale-100"
-					asChild
-				>
-					<Link
-						onClick={handlePush("overview")}
-						href={pathMonthlyRecords({
-							month,
-							year: String(year),
-							is_allocated: "false",
-						})}
-					>
-						<IconifyIcon icon="lucide:circle-dashed" />
-						{data.review.pending_records} Pending Record
-						{data.review.pending_records === 1 ? "" : "s"}
-					</Link>
-				</Button>
-			) : null}
-
-			{data.review.pending_statements > 0 ? (
-				<Button
-					variant="outline"
-					size="sm"
-					className="active:not-aria-[haspopup]:scale-100"
-					asChild
-				>
-					<Link
-						onClick={handlePush("overview")}
-						href={pathStatements({
-							start_date: start,
-							end_date: end,
-							is_pending: "true",
-						})}
-					>
-						<IconifyIcon icon="lucide:circle-dashed" />
-						{data.review.pending_statements} Pending Statement
-						{data.review.pending_statements === 1 ? "" : "s"}
-					</Link>
-				</Button>
-			) : null}
-			{data.review.unallocated_statements > 0 ? (
-				<Button
-					variant="outline"
-					size="sm"
-					className="active:not-aria-[haspopup]:scale-100"
-					asChild
-				>
-					<Link
-						onClick={handlePush("overview")}
-						href={pathAllocator({
-							start_date: start,
-							end_date: end,
-							is_pending: "false",
-						})}
-					>
-						<IconifyIcon icon="lucide:inbox" />
-						{data.review.unallocated_statements} unallocated Statement
-						{data.review.unallocated_statements === 1 ? "" : "s"}
-					</Link>
-				</Button>
-			) : null}
-			{data.summary.unbudgeted_count > 0 ? (
-				<Button
-					variant="outline"
-					size="sm"
-					className="active:not-aria-[haspopup]:scale-100"
-					asChild
-				>
-					<Link
-						onClick={handlePush("overview")}
-						href={pathMonthlyRecords({
-							month,
-							year: String(year),
-							show_unbudgeted: "true",
-							effective_spending: "true",
-						})}
-					>
-						<IconifyIcon icon="lucide:wallet" />
-						{data.summary.unbudgeted_count} unbudgeted spending Record
-						{data.summary.unbudgeted_count === 1 ? "" : "s"}
-					</Link>
-				</Button>
-			) : null}
-		</div>
+		<Card className="gap-0 overflow-hidden py-0" aria-label="Attention">
+			<ul className="divide-y">
+				{rows.map(row => {
+					const content = (
+						<>
+							<IconifyIcon
+								icon={row.icon}
+								className="size-4 shrink-0 text-amber-600 dark:text-amber-400"
+							/>
+							<span className="min-w-0 flex-1">
+								<span className="block font-medium">{row.label}</span>
+								<span className="block text-xs text-muted-foreground">
+									{row.detail}
+								</span>
+							</span>
+							<IconifyIcon
+								icon="lucide:chevron-right"
+								className="size-4 shrink-0 text-muted-foreground"
+							/>
+						</>
+					)
+					const style =
+						"flex min-h-11 w-full items-center gap-3 px-4 py-3 text-left text-sm transition-colors duration-150 ease-out hover:bg-muted/40 active:bg-muted/60"
+					return (
+						<li key={row.label}>
+							{row.selection ? (
+								<button
+									type="button"
+									className={style}
+									onClick={() => row.selection && onDrill(row.selection)}
+								>
+									{content}
+								</button>
+							) : (
+								<Link className={style} href={row.href ?? ""}>
+									{content}
+								</Link>
+							)}
+						</li>
+					)
+				})}
+			</ul>
+		</Card>
 	)
 }
 

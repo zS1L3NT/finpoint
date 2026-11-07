@@ -180,3 +180,9 @@ In the Dashboard drill-down, expand a Record and choose **Edit Record**. Saved c
 Allocate assigns Statements to Records. Statement cleanup lives in the Statements, Replace pending and Duplicates tabs; old cleanup URLs redirect with filters preserved. In the Record editor, choose Money out or Money in and enter a positive amount.
 
 Dashboard metric labels open their Records directly. Dotted-underlined terms in drill-down copy offer definitions with examples. Hover, focus, or tap a term; press Escape to close. Effective spending follows treatment rules and includes refunds. Left over means income minus personal spending, before saving and investment contributions.
+
+The Dashboard starts with a factual month headline and an Attention list of up to three
+things to review. Over-plan Monthly Budgets come first, followed by unallocated Statements,
+Pending Records, Pending Statements and unbudgeted spending. Select a budget row to see
+its Records in the drill-down; other rows take you to the filtered work list. Changing the
+budget scope updates the headline while Attention continues to cover the whole month.

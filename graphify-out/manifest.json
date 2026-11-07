@@ -6,9 +6,9 @@
     "semantic_hash": ""
   },
   "app/(month)/page.tsx": {
-    "mtime": 1794057293.9871051,
-    "seen": 1794057966.0244768,
-    "ast_hash": "54e089d508dd9d67d0e0b45942234844",
+    "mtime": 1794061047.4104192,
+    "seen": 1794061146.6504676,
+    "ast_hash": "d7c979f87c6a0d6c55145f751c1bfe83",
     "semantic_hash": ""
   },
   "app/(month)/records/monthly/page.tsx": {
@@ -882,9 +882,9 @@
     "semantic_hash": ""
   },
   "src/logic/dashboard.ts": {
-    "mtime": 1794029782.6904306,
-    "seen": 1794038435.851058,
-    "ast_hash": "1775fe79e557f002228513d3179a5213",
+    "mtime": 1794061047.88642,
+    "seen": 1794061146.6514513,
+    "ast_hash": "135ceb43096693973593fd8894cbd084",
     "semantic_hash": ""
   },
   "src/logic/drive-sync.ts": {
@@ -984,16 +984,16 @@
     "semantic_hash": "4fb45b64bfbdca8e3830749cad265d06"
   },
   "CONTEXT.md": {
-    "mtime": 1794028290.3478107,
-    "seen": 1794029327.4789472,
-    "ast_hash": "c6d623463f145b3807f057a3f430ae23",
-    "semantic_hash": "c6d623463f145b3807f057a3f430ae23"
+    "mtime": 1794061011.2223718,
+    "seen": 1794061273.1140654,
+    "ast_hash": "",
+    "semantic_hash": "702eb731899070db6412390d4a374b82"
   },
   "README.md": {
-    "mtime": 1794056653.0757577,
-    "seen": 1794057091.1934428,
-    "ast_hash": "a9f16c101ba86ca20e837741330e38f1",
-    "semantic_hash": "a9f16c101ba86ca20e837741330e38f1"
+    "mtime": 1794061011.226372,
+    "seen": 1794061273.1140745,
+    "ast_hash": "",
+    "semantic_hash": "48a524de518a764ece4661475336a22b"
   },
   "assets/branding/finpoint-icon-prompt.txt": {
     "mtime": 1793935852.1723228,
@@ -1608,9 +1608,9 @@
     "semantic_hash": ""
   },
   "tests/core/drilldown.e2e.ts": {
-    "mtime": 1794055262.038591,
-    "seen": 1794056677.3064885,
-    "ast_hash": "88048c7f5b5d4cccb8908c55305cbd61",
+    "mtime": 1794061215.210689,
+    "seen": 1794061267.7540152,
+    "ast_hash": "ce2b46f01e8ca73208b4e8aab5087ac1",
     "semantic_hash": ""
   },
   "tests/domain/drilldown.test.ts": {
@@ -1677,6 +1677,12 @@
     "mtime": 1794029625.4996355,
     "seen": 1794038435.8513677,
     "ast_hash": "0c1921aac7fa3c7e9c77fe2552847400",
+    "semantic_hash": ""
+  },
+  "tests/domain/headline-attention.test.ts": {
+    "mtime": 1794061073.2544558,
+    "seen": 1794061146.6517415,
+    "ast_hash": "adad579b4ed4a47f2e042decbd591c05",
     "semantic_hash": ""
   }
 }

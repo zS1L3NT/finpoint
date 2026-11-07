@@ -173,3 +173,15 @@ test("Biggest changes compares named periods and preserves the month through rel
 	await page.getByRole("link", { name: "Open in Records", exact: true }).click()
 	await expect(page).toHaveURL(/category_ids=t1-cat-rent/)
 })
+
+test("headline and Attention replace review chips with ranked work links", async ({ page }) => {
+	await seedWorkspace(page)
+	await page.goto(overview)
+	await expect(page.getByLabel("Month headline")).toContainText("You've spent")
+	await expect(page.getByLabel("Month headline")).toContainText("16 days left.")
+	await expect(page.getByLabel("Review this month")).toHaveCount(0)
+	const attention = page.getByLabel("Attention", { exact: true })
+	await expect(attention.locator("li")).toHaveCount(3)
+	await attention.getByRole("link", { name: /Pending Record/ }).click()
+	await expect(page).toHaveURL(/is_allocated=false/)
+})

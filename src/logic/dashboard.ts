@@ -12,6 +12,7 @@ import {
 	type RecordRow,
 	type StatementRow,
 } from "@/data/db"
+import { formatCurrency, pluralize } from "@/lib/utils"
 import { type AnalyticsRecord, contribution, summarize } from "@/logic/analytics"
 import { defaultAmountFor } from "@/logic/monthly-budgets"
 import { expandCategoryIdsForMonthly } from "@/logic/monthly-shared"
@@ -22,6 +23,8 @@ import {
 	tallyAllocations,
 } from "@/logic/pending"
 import { resolveRecordChoices } from "@/logic/record-choices"
+
+import { pathAllocator, pathMonthlyRecords, pathStatements } from "@/routes"
 
 export const COMPARISON_MONTHS = 2
 export const BREAKDOWN_MONTHS = 4
@@ -1172,6 +1175,16 @@ export async function getDashboardView(input: DashboardInput & { scope?: string 
 		: null
 	return {
 		incomeHistory,
+		headline: buildHeadline(
+			pace.spending,
+			pace.paceMonthlyBudget?.amount ?? null,
+			scoped.categories,
+			input.month,
+			dashboard.period.is_current
+				? Math.max(0, (date.daysInMonth ?? 30) - DateTime.now().day)
+				: 0,
+			dashboard.period.is_future,
+		),
 		dashboard,
 		pace,
 		trend,
@@ -1186,4 +1199,108 @@ export async function getDashboardView(input: DashboardInput & { scope?: string 
 		scopeFilters,
 		paceFilters: scopeFilters,
 	}
+}
+
+export function buildHeadline(
+	spent: number,
+	plan: number | null,
+	categories: { name: string; share: number | null }[],
+	month: string,
+	days: number,
+	future: boolean,
+) {
+	if (future)
+		return plan === null
+			? `Set your ${month} plan below.`
+			: `Your ${month} plan is ${formatCurrency(plan)}.`
+	const majority = categories.find(c => (c.share ?? 0) >= 50)
+	return [
+		`You've spent ${formatCurrency(spent)}${plan === null ? "" : ` of your ${formatCurrency(plan)} plan`}.`,
+		majority && spent > 0 ? `${majority.name} is most of it.` : "",
+		days > 0
+			? `${days} ${days === 1 ? "day" : "days"} left.`
+			: plan === null
+				? `${month} is complete.`
+				: `${month} closed ${formatCurrency(Math.abs(plan - spent))} ${spent > plan ? "over" : "under"} plan.`,
+	]
+		.filter(Boolean)
+		.join(" ")
+}
+
+export function buildAttention(
+	data: Awaited<ReturnType<typeof getDashboard>>,
+	month: string,
+	year: number,
+) {
+	const date = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
+	const range = {
+		start_date: date.startOf("month").toISODate() ?? "",
+		end_date: date.endOf("month").toISODate() ?? "",
+	}
+	const rows = [
+		...data.monthlyBudgets
+			.filter(b => b.remaining !== null && b.remaining < 0)
+			.map(b => ({
+				label: `${b.name}: ${formatCurrency(-(b.remaining ?? 0))} over plan`,
+				detail: "Review the Records behind this Monthly Budget.",
+				icon: "lucide:triangle-alert",
+				selection: { kind: "budget", value: b.id } as const,
+				href: undefined as string | undefined,
+			})),
+		...(data.review.unallocated_statements
+			? [
+					{
+						label: pluralize(
+							data.review.unallocated_statements,
+							"unallocated Statement",
+						),
+						detail: "Totals may be low until these are allocated.",
+						icon: "lucide:inbox",
+						href: pathAllocator({ ...range, is_pending: "false" }),
+						selection: undefined,
+					},
+				]
+			: []),
+		...(data.review.pending_records
+			? [
+					{
+						label: pluralize(data.review.pending_records, "Pending Record"),
+						detail: "Not fully allocated or linked to a Pending Statement.",
+						icon: "lucide:circle-dashed",
+						href: pathMonthlyRecords({
+							month,
+							year: String(year),
+							is_allocated: "false",
+						}),
+						selection: undefined,
+					},
+				]
+			: []),
+		...(data.review.pending_statements
+			? [
+					{
+						label: pluralize(data.review.pending_statements, "Pending Statement"),
+						detail: "Bank activity waiting for confirmation.",
+						icon: "lucide:circle-dashed",
+						href: pathStatements({ ...range, is_pending: "true" }),
+						selection: undefined,
+					},
+				]
+			: []),
+		...(data.summary.unbudgeted_count
+			? [
+					{
+						label: pluralize(
+							data.summary.unbudgeted_count,
+							"unbudgeted spending Record",
+						),
+						detail: "Spending without a Monthly Budget.",
+						icon: "lucide:wallet",
+						selection: { kind: "budget", value: "unbudgeted" } as const,
+						href: undefined,
+					},
+				]
+			: []),
+	].slice(0, 3)
+	return rows
 }

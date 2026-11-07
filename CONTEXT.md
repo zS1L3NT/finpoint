@@ -111,3 +111,12 @@ Domain expert: "The Category describes the Record, its treatment controls totals
 **Comparison window**:
 The included historical months used to calculate usual spending. Current months compare the same days so far; completed months compare full months. Months excluded or marked incomplete do not contribute. The window is shared by Biggest changes and its comparison Drill-down.
 _Avoid_: Normal spending, expected spending
+
+### Headline and Attention
+
+The Dashboard Headline is a fixed factual sentence: spending against the selected plan,
+a category contributing at least half of spending, and days left or the closed month's result.
+With no plan it reports spending alone. Attention replaces the review chips with at most
+three rows, prioritising over-plan Monthly Budgets, unallocated Statements, Pending Records,
+Pending Statements, then unbudgeted spending. Budget rows open their drill-down; Statement
+and Pending Record rows open their filtered work lists.
