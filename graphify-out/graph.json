@@ -21349,7 +21349,7 @@
       "source_location": "L1"
     },
     {
-      "id": "tests_core_navigation_e2e_rationale_684",
+      "id": "tests_core_navigation_e2e_rationale_687",
       "label": "TODO: the hang mechanism is inferred from a completion-less trace, not",
       "_origin": "ast",
       "community": 66,
@@ -21357,7 +21357,7 @@
       "file_type": "rationale",
       "norm_label": "todo: the hang mechanism is inferred from a completion-less trace, not",
       "source_file": "tests/core/navigation.e2e.ts",
-      "source_location": "L684"
+      "source_location": "L687"
     },
     {
       "id": "package_optionaldependencies",
@@ -113736,14 +113736,14 @@
       "weight": 1.0
     },
     {
-      "source": "tests_core_navigation_e2e_rationale_684",
+      "source": "tests_core_navigation_e2e_rationale_687",
       "target": "tests_core_navigation_e2e",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tests/core/navigation.e2e.ts",
-      "source_location": "L684",
+      "source_location": "L687",
       "weight": 1.0
     },
     {
@@ -117689,5 +117689,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "c29d1fe992e0a3d9bd972f1d6a6f43c499f67005"
+  "built_at_commit": "93dfcb1804a7c333cab1744dc9cd82b53c62d98b"
 }

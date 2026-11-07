@@ -263,7 +263,6 @@ test("monthly shell: browser Back removes self-target and Forward restores its c
 }) => {
 	void workspace
 	await gotoReady(page, "/?month=October&year=2026")
-	const origin = page.url()
 	await page
 		.locator('[data-slot="card"]')
 		.filter({
@@ -271,18 +270,22 @@ test("monthly shell: browser Back removes self-target and Forward restores its c
 				.locator('[data-slot="card-title"]')
 				.filter({ hasText: "Categories this month" }),
 		})
-		.getByRole("link", { name: /Groceries/ })
+		.getByRole("button", { name: /^Groceries/ })
 		.click()
+	await expect(page).toHaveURL(/drill=category-gross/)
+	// The chart origin is the Dashboard with its drill-down open.
+	const origin = page.url()
+	await page.getByRole("link", { name: "Open in Records" }).click()
 	await expect(page).toHaveURL(/category_ids=t1-cat-groceries/)
 	const records = page.url()
-	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to overview")
+	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to October 2026")
 	await page.goBack()
 	await expect(page).toHaveURL(origin)
 	await expectNoBack(page)
 	await page.goForward()
 	await expect(page).toHaveURL(records)
-	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to overview")
-	await page.getByRole("button", { name: "Back to overview", exact: true }).click()
+	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to October 2026")
+	await page.getByRole("button", { name: "Back to October 2026", exact: true }).click()
 	await expect(page).toHaveURL(origin)
 	await expectNoBack(page)
 })

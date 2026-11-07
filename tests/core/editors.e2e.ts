@@ -665,7 +665,7 @@ test("Record creator: validates required fields, applies Category defaults and p
 }) => {
 	test.setTimeout(90_000)
 	void workspace
-	for (const amount of ["-12.34", "0"]) {
+	for (const amount of ["12.34", "0"]) {
 		await test.step(`Record creator: validates required fields, applies Category defaults, and persists amount ${amount} and long text`, async () => {
 			void workspace
 			const text = `${longText}(${amount})`
@@ -701,7 +701,7 @@ test("Record creator: validates required fields, applies Category defaults and p
 			const mismatch = dialog.getByText("Amount does not match the sum of Allocation Amounts")
 			if (amount === "0") {
 				await expect(mismatch).toHaveCount(0)
-				await dialog.getByLabel("Amount", { exact: true }).fill("-12.34")
+				await dialog.getByLabel("Amount", { exact: true }).fill("12.34")
 				await expect(mismatch).toBeVisible()
 				await dialog.getByLabel("Amount", { exact: true }).fill("0")
 				await expect(mismatch).toHaveCount(0)
