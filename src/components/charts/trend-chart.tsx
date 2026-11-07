@@ -18,6 +18,7 @@ export type TrendSeries = {
 	readoutFallback?: boolean
 	readoutPriority?: number
 	valuePill?: boolean
+	valuePillLabel?: string
 	comparison?: boolean
 }
 
@@ -63,7 +64,7 @@ export default function TrendChart({
 		split !== undefined && s.over && value > split ? s.over : s.color
 
 	const scales = ({ width, height }: ChartSize) => {
-		const plotWidth = Math.max(width - PAD.right, 0)
+		const plotWidth = Math.max(width - (series.some(s => s.valuePillLabel) ? 80 : PAD.right), 0)
 		const plotHeight = Math.max(height - PAD.top - PAD.bottom, 0)
 		const y = (value: number) => PAD.top + ((top - value) / (top - floor)) * plotHeight
 		return {
@@ -338,6 +339,13 @@ export default function TrendChart({
 						className="pointer-events-none absolute right-0 -translate-y-1/2 rounded-md bg-muted px-1.5 py-0.5 text-[0.6875rem] text-muted-foreground tabular-nums"
 						style={{ top: y(value) }}
 					>
+						{
+							series.find(
+								s =>
+									s.valuePillLabel &&
+									s.values.filter(v => v !== null).at(-1) === value,
+							)?.valuePillLabel
+						}{" "}
 						{formatChartCurrency(value)}
 					</span>
 				))

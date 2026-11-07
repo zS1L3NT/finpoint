@@ -831,6 +831,8 @@ test("Spending forecast: retains gradient backdrops and comparison lines", async
 		if (series?.endsWith("-projection") && fill === "none")
 			await expect(path).toHaveAttribute("stroke-dasharray", "7 5")
 	}
+	await expect(chart).toContainText("Dotted line: September for comparison.")
+	await expect(chart.getByText(/^Sep \$/)).toBeVisible()
 	await expect(chart.locator('[data-series="total-previous"]')).toHaveAttribute(
 		"stroke-dasharray",
 		"2 4",

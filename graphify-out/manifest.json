@@ -198,9 +198,9 @@
     "semantic_hash": ""
   },
   "src/components/charts/cashflow-chart.tsx": {
-    "mtime": 1794058293.531474,
-    "seen": 1794058757.6496964,
-    "ast_hash": "73207ad55519444939d8c4bc2670bbf6",
+    "mtime": 1794081333.7337117,
+    "seen": 1794081471.8346043,
+    "ast_hash": "482d096ea3f84fe749f1cd9d12d56969",
     "semantic_hash": ""
   },
   "src/components/charts/category-history-chart.tsx": {
@@ -984,10 +984,10 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1794080979.8418288,
-    "seen": 1794081128.2056296,
-    "ast_hash": "2314115dbe806b3bd7942e7e85d276b6",
-    "semantic_hash": "2314115dbe806b3bd7942e7e85d276b6"
+    "mtime": 1794081332.4137323,
+    "seen": 1794081473.7837422,
+    "ast_hash": "6ec331411e0c18be54d76e88b1ce9b9f",
+    "semantic_hash": "6ec331411e0c18be54d76e88b1ce9b9f"
   },
   "assets/branding/finpoint-icon-prompt.txt": {
     "mtime": 1793935852.1723228,
@@ -1248,9 +1248,9 @@
     "semantic_hash": ""
   },
   "tests/core/charts.e2e.ts": {
-    "mtime": 1794064013.4333138,
-    "seen": 1794064207.1166518,
-    "ast_hash": "e4b98aa14063312f711f3f88e360e5dc",
+    "mtime": 1794081332.4137323,
+    "seen": 1794081471.834949,
+    "ast_hash": "0bfa4d83d5747ec8241df20715cfbb51",
     "semantic_hash": ""
   },
   "tests/core/components.e2e.ts": {
@@ -1488,9 +1488,9 @@
     "semantic_hash": "b194223f1f3b81550d206761165adf60"
   },
   "src/components/charts/trend-chart.tsx": {
-    "mtime": 1794054149.8614683,
-    "seen": 1794056677.3062582,
-    "ast_hash": "b4f8f0a6eed951f09380e675a0d746e3",
+    "mtime": 1794081333.777711,
+    "seen": 1794081471.8346243,
+    "ast_hash": "d3544bd9f3f3151559f22504ba20af67",
     "semantic_hash": ""
   },
   "src/components/charts/bar-chart.tsx": {

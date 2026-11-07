@@ -34,6 +34,7 @@ export default function CashflowChart({
 	showProjection: boolean
 	onDrill: (selection: Selection) => void
 }) {
+	const previous = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy").minus({ months: 1 })
 	const length = data.length
 	const openDay = (index: number) => {
 		if (index >= data.length) return
@@ -78,6 +79,7 @@ export default function CashflowChart({
 							? [
 									{
 										key: `${budget.id}-previous`,
+										valuePillLabel: previous.toFormat("MMM"),
 										label: budget.name,
 										color: themeColor(budget.color),
 										dash: "2 4",
@@ -134,6 +136,9 @@ export default function CashflowChart({
 				Each colour shows a Monthly Budget's cumulative spending.{" "}
 				{showProjection
 					? "Dashed lines extend each budget's gross spending pace and include scheduled Records. "
+					: ""}
+				{forecast.some(b => b.previous)
+					? `Dotted line: ${previous.toFormat("MMMM")} for comparison. `
 					: ""}
 				Hover or focus a day to read its total. Select it to open its Records.
 			</p>

@@ -194,3 +194,5 @@ Dashboard cards use natural heights and stack when the main column is narrow. At
 The Dashboard Monthly budgets footer shows total spending, including spending not in any Monthly Budget, after refunds. Categories show expenses minus refunds so their total can be compared with spending. The footer links to Budgets for plans with a custom date period; these may overlap Monthly Budgets and are not added to their totals.
 
 On mobile, the Dashboard drill-down opens at half height with a clear backdrop and compact header. The grab handle expands it to full height with a dimmed backdrop; press it again to collapse. Pending allocation captions wrap beneath amounts to keep Record titles readable.
+
+The Spending forecast names its dotted previous-month comparison in the caption and prefixes that line’s endpoint value pill with the month abbreviation.
