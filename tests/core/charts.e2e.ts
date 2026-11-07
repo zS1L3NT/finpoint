@@ -952,7 +952,7 @@ test("category trend: one shared list follows the read month and keeps its links
 	await expect(card(page, "Categories this month")).toContainText("$20.00 refunded")
 })
 
-test("category cards: cap five rows and keep equal XL heights when expanding", async ({
+test("category cards: cap five rows and keep natural heights when expanding", async ({
 	page,
 	isMobile,
 }) => {
@@ -974,11 +974,18 @@ test("category cards: cap five rows and keep equal XL heights when expanding", a
 		if (!isMobile) {
 			await expect
 				.poll(async () => {
-					const left = await categories.boundingBox()
-					const right = await chart.boundingBox()
-					return left && right ? Math.abs(left.height - right.height) : 999
+					const box = await categories.boundingBox()
+					const action = await categories
+						.getByRole("button", {
+							name: expanded ? "Show fewer categories" : /more categories/,
+						})
+						.boundingBox()
+					return box && action ? box.y + box.height - action.y - action.height : 999
 				})
-				.toBeLessThan(2)
+				.toBeLessThan(32)
+			const left = await categories.boundingBox()
+			const right = await chart.boundingBox()
+			expect(Math.abs((left?.y ?? 0) - (right?.y ?? 0))).toBeLessThan(2)
 		}
 	}
 })

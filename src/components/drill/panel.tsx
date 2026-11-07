@@ -145,7 +145,7 @@ export function DrillPanel({
 						{selection.kind === "category-gross" || selection.kind === "month"
 							? "Spending · refunds excluded"
 							: "Spending · refunds subtracted"}{" "}
-						· <Term name="Pending" /> Records counted
+						· Includes <Term name="Pending" /> Records
 					</p>
 				</div>
 				<Button
@@ -281,11 +281,13 @@ export function DrillPanel({
 													{r.title}
 													<PendingBadge record={r} />
 												</span>
-												<span className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
-													{parseDatetime(r.datetime).toFormat(
-														"ccc d MMM",
-													)}{" "}
-													· {r.category.name}{" "}
+												<span className="flex flex-col items-start sm:flex-row sm:flex-wrap sm:items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+													<span>
+														{parseDatetime(r.datetime).toFormat(
+															"ccc d MMM",
+														)}{" "}
+														· {r.category.name}
+													</span>
 													{r.monthly_budget ? (
 														<MonthlyBudgetBadge
 															name={r.monthly_budget.name}

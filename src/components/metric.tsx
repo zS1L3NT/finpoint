@@ -63,7 +63,7 @@ export function Metric({
 			className={cn(
 				onSelect &&
 					"group cursor-pointer text-left focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring transition-colors duration-150 ease-out hover:bg-muted/40 active:bg-muted/60",
-				"@container/metric relative grid grid-cols-[minmax(0,1fr)] min-h-24 min-w-0 content-start bg-card p-3 sm:p-4",
+				"@container/metric relative grid grid-cols-[minmax(0,1fr)] min-h-24 min-w-0 content-start @max-[599px]/dashboard:min-h-0 @max-[599px]/dashboard:grid-cols-[1fr_auto] @max-[599px]/dashboard:items-center @max-[599px]/dashboard:gap-x-3 @max-[599px]/dashboard:py-2! bg-card p-3 sm:p-4",
 				tone !== "neutral" &&
 					"before:absolute before:inset-x-0 before:top-0 before:h-0.5 before:content-['']",
 				tone === "positive" && "before:bg-creative",
@@ -71,15 +71,15 @@ export function Metric({
 			)}
 		>
 			{/* min-h matches the delta chip, so tiles with and without one keep values level. */}
-			<div className="flex min-h-5 min-w-0 items-center gap-x-2 text-xs font-medium text-muted-foreground">
-				<span className="hidden size-7 place-items-center rounded-lg border bg-background text-foreground shadow-xs sm:grid">
+			<div className="flex min-h-5 min-w-0 whitespace-nowrap items-center gap-x-2 text-xs font-medium text-muted-foreground">
+				<span className="hidden shrink-0 size-7 place-items-center rounded-lg border bg-background text-foreground shadow-xs @min-[240px]/metric:grid @max-[599px]/dashboard:hidden!">
 					<IconifyIcon icon={icon} className="size-3.5" />
 				</span>
 				{label}
 				{onSelect ? (
 					<IconifyIcon
 						icon="lucide:chevron-right"
-						className="ml-1 size-3 opacity-60 group-hover:opacity-100"
+						className="hidden @min-[240px]/metric:block ml-1 size-3 shrink-0 opacity-60 group-hover:opacity-100"
 					/>
 				) : null}
 				{delta ? (
@@ -96,7 +96,7 @@ export function Metric({
 					</span>
 				) : null}
 			</div>
-			<div className="mt-3 flex items-end justify-between gap-3">
+			<div className="mt-3 @max-[599px]/dashboard:mt-0 @max-[599px]/dashboard:text-right flex items-end justify-between gap-3">
 				<div className="min-w-0">
 					<p
 						className={cn(
@@ -114,7 +114,7 @@ export function Metric({
 						values={spark}
 						color={sparkColor}
 						label={`${text}, ${sparkPeriod ? `${sparkPeriod} of each of ` : ""}the last ${spark.length} months`}
-						className="mb-1 hidden w-12 shrink-0 text-muted-foreground @min-[240px]/metric:block @min-[260px]/metric:w-24"
+						className="mb-1 hidden w-12 shrink-0 text-muted-foreground @min-[240px]/metric:block @min-[260px]/metric:w-24 @max-[599px]/dashboard:hidden!"
 					/>
 				) : null}
 			</div>

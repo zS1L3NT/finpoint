@@ -186,3 +186,5 @@ things to review. Over-plan Monthly Budgets come first, followed by unallocated 
 Pending Records, Pending Statements and unbudgeted spending. Select a budget row to see
 its Records in the drill-down; other rows take you to the filtered work list. Changing the
 budget scope updates the headline while Attention continues to cover the whole month.
+
+Dashboard cards use natural heights and stack when the main column is narrow. Attention keeps small unbudgeted amounts visible below higher-priority work, shows the amount without a Monthly Budget, and highlights only the first row.

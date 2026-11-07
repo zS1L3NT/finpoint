@@ -137,7 +137,10 @@ export default function DashboardPage() {
 				{!period.is_future && data.record_count === 0 ? (
 					<EmptyMonthNotice month={dataMonth} year={dataYear} />
 				) : null}
-				<p className="text-sm leading-relaxed" aria-label="Month headline">
+				<p
+					className="text-base font-medium text-pretty leading-relaxed"
+					aria-label="Month headline"
+				>
 					{view.headline}
 				</p>
 				{!period.is_future ? (
@@ -191,7 +194,7 @@ export default function DashboardPage() {
 					className={cn(
 						"grid gap-5",
 						!period.is_future &&
-							"items-start @min-[600px]/dashboard:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]",
+							"items-start @min-[860px]/dashboard:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]",
 					)}
 				>
 					{!period.is_future ? (
@@ -306,7 +309,7 @@ export default function DashboardPage() {
 						{stage > 1 ? (
 							<div
 								className={
-									"grid items-start gap-5 @min-[600px]/dashboard:grid-cols-2 @min-[860px]/dashboard:grid-cols-3"
+									"grid items-start gap-5 @min-[860px]/dashboard:grid-cols-3"
 								}
 							>
 								<LargestRecords
@@ -659,12 +662,17 @@ function AttentionList({
 	return (
 		<Card className="gap-0 overflow-hidden py-0" aria-label="Attention">
 			<ul className="divide-y">
-				{rows.map(row => {
+				{rows.map((row, index) => {
 					const content = (
 						<>
 							<IconifyIcon
 								icon={row.icon}
-								className="size-4 shrink-0 text-amber-600 dark:text-amber-400"
+								className={cn(
+									"size-4 shrink-0",
+									index === 0
+										? "text-amber-600 dark:text-amber-400"
+										: "text-muted-foreground",
+								)}
 							/>
 							<span className="min-w-0 flex-1">
 								<span className="block font-medium">{row.label}</span>
@@ -679,7 +687,7 @@ function AttentionList({
 						</>
 					)
 					const style =
-						"flex min-h-11 w-full items-center gap-3 px-4 py-3 text-left text-sm transition-colors duration-150 ease-out hover:bg-muted/40 active:bg-muted/60"
+						"flex min-h-11 w-full items-center gap-3 px-4 py-2 text-left text-sm transition-colors duration-150 ease-out hover:bg-muted/40 active:bg-muted/60"
 					return (
 						<li key={row.label}>
 							{row.selection ? (

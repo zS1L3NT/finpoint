@@ -1265,7 +1265,7 @@ export function buildAttention(
 			? [
 					{
 						label: pluralize(data.review.pending_records, "Pending Record"),
-						detail: "Not fully allocated or linked to a Pending Statement.",
+						detail: "Not yet matched to a Statement.",
 						icon: "lucide:circle-dashed",
 						href: pathMonthlyRecords({
 							month,
@@ -1290,10 +1290,7 @@ export function buildAttention(
 		...(data.summary.unbudgeted_count
 			? [
 					{
-						label: pluralize(
-							data.summary.unbudgeted_count,
-							"unbudgeted spending Record",
-						),
+						label: `${formatCurrency(data.categories.reduce((sum, category) => sum + (category.monthly_budget_spending.unbudgeted ?? 0), 0))} without a Monthly Budget`,
 						detail: "Spending without a Monthly Budget.",
 						icon: "lucide:wallet",
 						selection: { kind: "budget", value: "unbudgeted" } as const,

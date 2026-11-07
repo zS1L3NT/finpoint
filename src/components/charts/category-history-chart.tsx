@@ -85,9 +85,7 @@ export default function CategoryHistoryChart({
 		<div
 			className={cn(
 				"grid items-start gap-5",
-				!compact &&
-					"@min-[600px]/dashboard:items-stretch @min-[600px]/dashboard:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]",
-				!compact && limit !== undefined && "@min-[600px]/dashboard:h-[26rem]",
+				!compact && "@min-[860px]/dashboard:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]",
 			)}
 		>
 			<Card className="order-2 min-h-0 min-w-0 @min-[600px]/dashboard:order-1">

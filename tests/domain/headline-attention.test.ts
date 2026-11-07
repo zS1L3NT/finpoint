@@ -14,6 +14,7 @@ test("Attention ranks budgets first and caps the list at three", async () => {
  monthlyBudgets: [{ id: "rent", name: "Rent", remaining: -10 }],
  review: { unallocated_statements: 2, pending_records: 1, pending_statements: 1 },
  summary: { unbudgeted_count: 1 },
+ categories: [{ monthly_budget_spending: { unbudgeted: 2.5 } }],
  } as Parameters<typeof buildAttention>[0]
  const rows = buildAttention(data, "October", 2026)
  expect(rows).toHaveLength(3)
@@ -22,5 +23,5 @@ test("Attention ranks budgets first and caps the list at three", async () => {
  expect(rows[2].label).toContain("Pending Record")
  data.monthlyBudgets = []
  data.review = { unallocated_statements: 0, pending_records: 0, pending_statements: 1 }
- expect(buildAttention(data, "October", 2026).map(r => r.label)).toEqual(["1 Pending Statement", "1 unbudgeted spending Record"])
+ expect(buildAttention(data, "October", 2026).map(r => r.label)).toEqual(["1 Pending Statement", "$2.50 without a Monthly Budget"])
 })

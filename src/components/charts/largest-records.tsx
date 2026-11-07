@@ -29,18 +29,20 @@ export default function LargestRecords({
 	if (!data) return null
 	return (
 		<Card className="min-w-0">
-			<CardHeader className="relative pr-24">
-				<Button
-					variant="link"
-					size="sm"
-					className="absolute right-5 top-3"
-					onClick={() => onDrill({ kind: "largest", value: "" })}
-				>
-					See all
-				</Button>
-				<CardTitle>Largest Records</CardTitle>
-				<CardDescription>
-					Top five Spending Records by absolute amount · current scope, refunds included.
+			<CardHeader>
+				<div className="flex items-center justify-between gap-2">
+					<CardTitle>Largest Records</CardTitle>
+					<Button
+						variant="link"
+						size="sm"
+						className="shrink-0"
+						onClick={() => onDrill({ kind: "largest", value: "" })}
+					>
+						See all
+					</Button>
+				</div>
+				<CardDescription title="Current scope, refunds included; ranked by absolute amount.">
+					Top five Spending Records by amount
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="grid min-w-0 grid-cols-1 gap-2">
