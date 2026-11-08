@@ -41,10 +41,14 @@ export function formatRowTime(datetime: string, grouped: boolean) {
 	return time === "12:00 AM" ? date.toFormat("d MMM yyyy") : date.toFormat("d MMM, h:mm a")
 }
 
-export function PendingBadge({ record }: { record: Record }) {
+export function PendingBadge({ record, className }: { record: Record; className?: string }) {
 	if (!record.is_pending) return null
 	return (
-		<Badge variant="warning" className="shrink-0" title={pendingReason(record)}>
+		<Badge
+			variant="warning"
+			className={cn("shrink-0", className)}
+			title={pendingReason(record)}
+		>
 			Pending
 		</Badge>
 	)

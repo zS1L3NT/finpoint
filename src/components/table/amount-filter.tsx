@@ -159,7 +159,11 @@ export default function AmountFilter({
 			>
 				{selected ? describe(readRange(value)) : "Any amount"}
 			</span>
-			<IconifyIcon icon="lucide:chevron-down" className="justify-self-end" />
+			<IconifyIcon
+				icon="lucide:chevron-down"
+				data-filter-chevron
+				className="justify-self-end"
+			/>
 		</>
 	)
 	const form = (

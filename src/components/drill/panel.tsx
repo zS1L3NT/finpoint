@@ -265,7 +265,7 @@ export function DrillPanel({
 					exit={reduced ? { opacity: 0 } : "exit"}
 					transition={reduced ? TRANSITION.fast : TRANSITION.base}
 					className={cn(
-						"min-h-0 flex-1 overflow-y-auto p-5",
+						"min-h-0 flex-1 overflow-y-auto p-5 [scrollbar-width:thin]",
 						page && "overflow-y-visible",
 						sheet && "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
 						sheet && !full && (statementId ? "pt-3" : "py-0"),
@@ -349,12 +349,15 @@ export function DrillPanel({
 													>
 														<span className="block font-medium">
 															{r.title}
-															<PendingBadge record={r} />
+															<PendingBadge
+																record={r}
+																className="ms-1.5 align-[0.1em]"
+															/>
 															{r.analytics_treatment === "spending" &&
 															r.amount > 0 ? (
 																<Badge
 																	variant="outline"
-																	className="text-creative"
+																	className="ms-1.5 align-[0.1em] text-creative"
 																>
 																	Refund
 																</Badge>
@@ -439,12 +442,15 @@ export function DrillPanel({
 												<span className="min-w-[9rem] flex-1">
 													<span className="block text-sm font-medium break-words">
 														{r.title}
-														<PendingBadge record={r} />
+														<PendingBadge
+															record={r}
+															className="ms-1.5 align-[0.1em]"
+														/>
 														{r.analytics_treatment === "spending" &&
 														r.amount > 0 ? (
 															<Badge
 																variant="outline"
-																className="text-creative"
+																className="ms-1.5 align-[0.1em] text-creative"
 															>
 																Refund
 															</Badge>

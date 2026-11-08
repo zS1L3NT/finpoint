@@ -32,13 +32,17 @@ export function FilterField({
 	children: React.ReactNode
 }) {
 	return (
-		<div data-filter={name} data-active={active || undefined} className="relative">
+		<div
+			data-filter={name}
+			data-active={active || undefined}
+			className="relative data-active:[&_[data-filter-chevron]]:invisible"
+		>
 			{children}
 			{active ? (
 				<button
 					type="button"
 					aria-label={`Reset ${name} filter`}
-					className="absolute inset-y-0 right-8 my-auto grid size-5 cursor-pointer place-items-center rounded-full bg-background text-muted-foreground transition-colors duration-150 ease-out hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+					className="absolute inset-y-0 right-1.5 my-auto grid size-5 cursor-pointer place-items-center rounded-full text-muted-foreground transition-colors duration-150 ease-out hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 					onClick={onClear}
 				>
 					<IconifyIcon icon="lucide:x" className="size-3.5" />

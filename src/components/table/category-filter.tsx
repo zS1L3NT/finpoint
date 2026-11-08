@@ -52,7 +52,11 @@ export default function CategoryFilter({
 							? `${selectedIds.length} categor${selectedIds.length === 1 ? "y" : "ies"}`
 							: "Any category"}
 					</span>
-					<IconifyIcon icon="lucide:chevron-down" className="justify-self-end" />
+					<IconifyIcon
+						icon="lucide:chevron-down"
+						data-filter-chevron
+						className="justify-self-end"
+					/>
 				</PopoverTrigger>
 				<PopoverContent
 					align="start"

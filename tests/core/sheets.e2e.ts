@@ -1029,7 +1029,7 @@ test.describe("dense workspace", () => {
 					history.back()
 				}, timeout)) as typeof window.setTimeout
 		})
-		await page.goto("/allocator/pending?query=Dense+pending+1")
+		await page.goto("/statements/pending?query=Dense+pending+1")
 		const search = page
 			.locator('section[aria-label="Pending statements"]')
 			.getByPlaceholder("Search descriptions...")
