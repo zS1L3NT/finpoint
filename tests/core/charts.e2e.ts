@@ -1,4 +1,4 @@
-import type { Page } from "@playwright/test"
+import type { Locator, Page } from "@playwright/test"
 import { card, chartTooltip, overview, overviewCharts, themedRgb } from "../support/charts"
 import { IDS } from "../support/data"
 import { setDateOnly } from "../support/date-only"
@@ -957,6 +957,30 @@ test("category trend: one shared list follows the read month and keeps its links
 	await surface.press("End")
 	await expect(list).toHaveAccessibleName("Categories in Oct 2026")
 	await expect(card(page, "Categories this month")).toContainText("$20.00 refunded")
+})
+
+test("category rows: names sit left-aligned next to their dot", async ({ page }) => {
+	await seedWorkspace(page)
+	await page.goto(overview)
+	// The name text starts within 16px of the row's leading edge (the dot, when the row has one).
+	const gap = (button: Locator) =>
+		button.evaluate(el => {
+			const name = [...el.querySelectorAll("span")].find(s => s.textContent?.trim())
+			if (!name) throw new Error("Category name missing")
+			const range = document.createRange()
+			range.selectNodeContents(name)
+			const dot = name.previousElementSibling?.getBoundingClientRect()
+			const edge = dot ? dot.right : el.getBoundingClientRect().left
+			return range.getBoundingClientRect().left - edge
+		})
+	for (const list of [
+		page.getByRole("group", { name: /^Categories in / }),
+		card(page, "Categories this month"),
+	]) {
+		const row = list.getByRole("button").first()
+		await expect(row).toBeVisible()
+		expect(await gap(row)).toBeLessThan(16)
+	}
 })
 
 test("category cards: cap five rows and keep natural heights when expanding", async ({

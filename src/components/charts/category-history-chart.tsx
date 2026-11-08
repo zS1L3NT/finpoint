@@ -382,7 +382,7 @@ function MonthBreakdown({
 										),
 									})
 								}
-								className="cursor-pointer group grid min-w-0 gap-1.5 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+								className="cursor-pointer group grid min-w-0 gap-1.5 rounded text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 							>
 								<div className="grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-x-3">
 									<span
@@ -423,7 +423,7 @@ function MonthBreakdown({
 											})
 										}
 										key={item.id}
-										className="cursor-pointer group grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-x-3 rounded pl-5 text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+										className="cursor-pointer group grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-x-3 rounded pl-5 text-left text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 									>
 										<span
 											className="size-2 rounded-full"
