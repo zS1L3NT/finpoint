@@ -1,5 +1,32 @@
-import { type FinpointSettings, readSettings, replaceSettings } from "@/data/settings"
+import {
+	DRILL_MODES,
+	type DrillMode,
+	type FinpointSettings,
+	readDrillMode,
+	readSettings,
+	replaceSettings,
+	writeDrillMode,
+} from "@/data/settings"
 import { Validator } from "@/logic/validate"
+
+export type { DrillMode }
+
+export async function getDrillMode(): Promise<DrillMode> {
+	return readDrillMode()
+}
+
+export async function setDrillMode(mode: DrillMode): Promise<void> {
+	const v = new Validator()
+	const valid = v.oneOf(
+		mode,
+		"drill_mode",
+		DRILL_MODES,
+		"Choose side peek, center peek or full page.",
+	)
+	v.throwIfInvalid()
+
+	await writeDrillMode(valid as DrillMode)
+}
 
 export async function getSettings(): Promise<FinpointSettings> {
 	return readSettings()

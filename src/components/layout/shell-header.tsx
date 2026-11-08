@@ -11,6 +11,7 @@ import {
 	pathCategories,
 	pathDashboard,
 	pathDataSettings,
+	pathDrill,
 	pathImporter,
 	pathPrivacy,
 	pathRecords,
@@ -24,6 +25,7 @@ import {
 
 const TITLES: { match: (pathname: string) => boolean; title: string }[] = [
 	{ match: pathname => pathname === pathDashboard(), title: "Dashboard" },
+	{ match: pathname => pathname === pathDrill(), title: "Drill-down" },
 	{ match: pathname => pathname.startsWith(`${pathRecords()}/`), title: "Record" },
 	{ match: pathname => pathname.startsWith(pathRecords()), title: "Records" },
 	{

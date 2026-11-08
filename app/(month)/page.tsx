@@ -1,11 +1,11 @@
 "use client"
 
 import { useLiveQuery } from "dexie-react-hooks"
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
+import { AnimatePresence } from "framer-motion"
 import { DateTime } from "luxon"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import { toast } from "sonner"
 import CashflowChart from "@/components/charts/cashflow-chart"
 import CategoryHistoryChart from "@/components/charts/category-history-chart"
@@ -34,7 +34,6 @@ import { useDrill } from "@/hooks/use-drill"
 import { useMonthParams } from "@/hooks/use-month-params"
 import { STALE_MONTH_CLASS, useMonthTransition } from "@/hooks/use-month-transition"
 import { useStagedMount } from "@/hooks/use-staged-mount"
-import { SPRING, TRANSITION } from "@/lib/motion"
 import { themeColor } from "@/lib/palette"
 import { cn, formatCurrency, pluralize } from "@/lib/utils"
 import {
@@ -55,15 +54,6 @@ type ComparisonValue = Comparison["income"]
 
 export default function DashboardPage() {
 	const drill = useDrill()
-	const reduced = useReducedMotion()
-	const [desktop, setDesktop] = useState(false)
-	useEffect(() => {
-		const media = matchMedia("(min-width: 1280px)")
-		const update = () => setDesktop(media.matches)
-		update()
-		media.addEventListener("change", update)
-		return () => media.removeEventListener("change", update)
-	}, [])
 	const { handlePush } = useHistory()
 	const { month, year } = useMonthParams()
 	const contentRef = useRef<HTMLDivElement>(null)
@@ -117,16 +107,7 @@ export default function DashboardPage() {
 	if (!period.is_current && !period.is_future && data.record_count === 0)
 		return <EmptyMonthNotice month={month} year={year} message={view.headline} />
 	return (
-		<motion.div
-			className="grid items-start"
-			initial={false}
-			animate={{
-				// Always two tracks, gap inside the panel track (the aside's margin): animating the
-				// track count or column-gap left a stale layout when crossing the dock breakpoint.
-				gridTemplateColumns: `minmax(0,1fr) ${desktop && drill.selection ? 444 : 0}px`,
-			}}
-			transition={reduced ? TRANSITION.fast : SPRING.smooth}
-		>
+		<>
 			<div
 				ref={contentRef}
 				aria-busy={stale}
@@ -387,10 +368,11 @@ export default function DashboardPage() {
 						scope={scope}
 						onScope={setScope}
 						close={drill.close}
+						place={drill.place}
 					/>
 				) : null}
 			</AnimatePresence>
-		</motion.div>
+		</>
 	)
 }
 

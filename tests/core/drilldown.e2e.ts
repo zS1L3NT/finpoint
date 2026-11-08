@@ -1,10 +1,8 @@
+import type { Page } from "@playwright/test"
 import { card, chartTooltip, overview } from "../support/charts"
 import { expect, seedWorkspace, test } from "../support/fixtures"
 
-test("day drill-down: totals, retarget, Back, close, focus and invalid URLs", async ({
-	page,
-	isMobile,
-}) => {
+test("day drill-down: totals, Back, close, Escape, focus and invalid URLs", async ({ page }) => {
 	await seedWorkspace(page)
 	await page.goto(overview)
 	const calendar = card(page, "Spending calendar")
@@ -12,9 +10,7 @@ test("day drill-down: totals, retarget, Back, close, focus and invalid URLs", as
 	await day.focus()
 	await day.press("Enter")
 	await expect(page).toHaveURL(/drill=day%3A2026-10-05/)
-	const panel = isMobile
-		? page.getByRole("dialog")
-		: page.getByRole("region", { name: /Spending on/ })
+	const panel = page.getByRole("dialog", { name: /Spending on/ })
 	await expect(panel.getByTestId("drill-total")).toHaveText("$84.20")
 	await expect(panel.getByTestId("drill-total")).not.toContainText("-$")
 	await expect(panel.getByTestId("drill-body")).toContainText("-$84.20")
@@ -24,16 +20,10 @@ test("day drill-down: totals, retarget, Back, close, focus and invalid URLs", as
 	await day.press("Enter")
 	await panel.getByRole("button", { name: "Close drill-down" }).click()
 	await expect(day).toBeFocused()
-	if (!isMobile) {
-		await day.press("Enter")
-		await calendar.getByRole("button", { name: /^6 October:/ }).hover()
-		await expect(calendar).toContainText("Mon 5 Oct · $84.20 · 2 Records")
-		await calendar.getByRole("button", { name: /^6 October:/ }).click()
-		await expect(panel).toHaveCount(1)
-		await expect(panel).toContainText("Spending on Tue 6 Oct")
-		await page.keyboard.press("Escape")
-		await expect(calendar.getByRole("button", { name: /^6 October:/ })).toBeFocused()
-	}
+	await day.press("Enter")
+	await page.keyboard.press("Escape")
+	await expect(panel).toHaveCount(0)
+	await expect(day).toBeFocused()
 	await page.goto(`${overview}&drill=day:2026-02-30`)
 	await expect(page.getByTestId("drill-total")).toHaveCount(0)
 	await page.goto(`${overview}&drill=day:2026-10-05`)
@@ -311,4 +301,116 @@ test("comparison rows show Pending reasons without opening another page", async 
 		.getByRole("link", { name: /Hawker Dinner/ })
 	await expect(record).toContainText("Pending")
 	await expect(record).toContainText("$35.00 not allocated yet")
+})
+
+const dashboardCards = (page: Page) =>
+	page.locator('[data-slot="card"]').evaluateAll(cards =>
+		cards.map(card => {
+			const box = card.getBoundingClientRect()
+			return [box.x, box.y + window.scrollY, box.width, box.height].map(Math.round)
+		}),
+	)
+
+async function chooseMode(page: Page, label: string) {
+	await page.getByRole("button", { name: /^Open as:/ }).click()
+	await page.getByRole("menuitemradio", { name: label }).click()
+}
+
+test("opening and closing a drill moves no Dashboard card", async ({ page }) => {
+	await seedWorkspace(page)
+	await page.goto(overview)
+	const day = card(page, "Spending calendar").getByRole("button", { name: /^5 October:/ })
+	await day.scrollIntoViewIfNeeded()
+	await expect(page.locator('[data-slot="card"]').first()).toBeVisible()
+	await page.waitForTimeout(800)
+	const before = await dashboardCards(page)
+	await day.click()
+	await expect(page.getByTestId("drill-total")).toBeVisible()
+	await page.waitForTimeout(500)
+	expect(await dashboardCards(page)).toEqual(before)
+	await page.getByRole("button", { name: "Close drill-down" }).click()
+	await expect(page.getByTestId("drill-total")).toHaveCount(0)
+	await page.waitForTimeout(500)
+	expect(await dashboardCards(page)).toEqual(before)
+})
+
+test("drill opens as side peek, centre peek or full page, switches live and persists", async ({
+	page,
+	isMobile,
+}) => {
+	await seedWorkspace(page)
+	await page.goto(`${overview}&drill=day:2026-10-05`)
+	const dialog = page.getByRole("dialog", { name: /Spending on/ })
+	const box = async () => (await dialog.boundingBox()) ?? { x: 0, y: 0, width: 0, height: 0 }
+	const viewport = page.viewportSize()?.width ?? 0
+	await expect(dialog).toBeVisible()
+	await expect.poll(async () => (await box()).width).toBeGreaterThan(0)
+	if (isMobile) {
+		// Phones keep one peek, the bottom sheet, and still allow the full page.
+		await page.getByRole("button", { name: /^Open as:/ }).click()
+		await expect(page.getByRole("menuitemradio")).toHaveText(["Peek", "Full page"])
+		await page.keyboard.press("Escape")
+	} else {
+		await expect.poll(async () => Math.round((await box()).width)).toBe(480)
+		expect((await box()).x + (await box()).width).toBeCloseTo(viewport, 0)
+		await chooseMode(page, "Center peek")
+		await expect(page).toHaveURL(/drill=day%3A2026-10-05/)
+		await expect.poll(async () => Math.round((await box()).width)).toBe(720)
+		expect(Math.round((await box()).x * 2 + (await box()).width)).toBeCloseTo(viewport, -1)
+		await page.reload()
+		await expect(dialog).toBeVisible()
+		await expect.poll(async () => Math.round((await box()).width)).toBe(720)
+	}
+	await chooseMode(page, "Full page")
+	await expect(page).toHaveURL(/\/drill\?.*drill=day%3A2026-10-05/)
+	await expect(page.getByTestId("drill-total")).toHaveText("$84.20")
+	await expect(page.getByRole("dialog")).toHaveCount(0)
+	await page.reload()
+	await expect(page.getByTestId("drill-total")).toHaveText("$84.20")
+	// The preference is full page now: a Dashboard link with a drill opens the page.
+	await page.goto(`${overview}&drill=day:2026-10-05`)
+	await expect(page).toHaveURL(/\/drill\?/)
+	await chooseMode(page, isMobile ? "Peek" : "Side peek")
+	await expect(page).not.toHaveURL(/\/drill/)
+	await expect(dialog).toBeVisible()
+})
+
+test("Escape and Back restore scroll and focus in every mode", async ({ page, isMobile }) => {
+	await seedWorkspace(page)
+	await page.goto(overview)
+	const calendar = card(page, "Spending calendar")
+	const day = calendar.getByRole("button", { name: /^5 October:/ })
+	await day.scrollIntoViewIfNeeded()
+	const scrolled = await page.evaluate(() => window.scrollY)
+	expect(scrolled).toBeGreaterThan(100)
+	const peeks = isMobile ? ["Peek"] : ["Side peek", "Center peek"]
+	for (const peek of peeks) {
+		await day.focus()
+		await day.press("Enter")
+		await expect(page.getByTestId("drill-total")).toBeVisible()
+		await chooseMode(page, peek)
+		await page.keyboard.press("Escape")
+		await expect(page.getByTestId("drill-total")).toHaveCount(0)
+		await expect(day).toBeFocused()
+		expect(Math.abs((await page.evaluate(() => window.scrollY)) - scrolled)).toBeLessThan(3)
+	}
+	await day.focus()
+	await day.press("Enter")
+	await chooseMode(page, "Full page")
+	await expect(page).toHaveURL(/\/drill\?/)
+	await page.getByRole("button", { name: "Back to Dashboard" }).click()
+	await expect(page).not.toHaveURL(/\/drill/)
+	await expect(day).toBeFocused()
+	await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(scrolled - 3)
+	expect(Math.abs((await page.evaluate(() => window.scrollY)) - scrolled)).toBeLessThan(3)
+	await day.press("Enter")
+	await expect(page).toHaveURL(/\/drill\?/)
+	await page.keyboard.press("Escape")
+	await expect(page).not.toHaveURL(/\/drill/)
+	await expect(day).toBeFocused()
+	await day.press("Enter")
+	await page.goBack()
+	await expect(page).not.toHaveURL(/\/drill/)
+	await expect(day).toBeFocused()
+	await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(scrolled - 3)
 })

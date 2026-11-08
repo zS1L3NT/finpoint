@@ -140,6 +140,8 @@ export {
   SheetTrigger,
   SheetClose,
   SheetContent,
+  SheetOverlay,
+  SheetPortal,
   SheetHeader,
   SheetFooter,
   SheetTitle,

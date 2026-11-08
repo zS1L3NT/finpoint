@@ -2,6 +2,7 @@
 // Keep all route strings in one place so pages/components never hardcode URLs.
 
 export const pathDashboard = (query?: Record<string, string | undefined>) => withQuery("/", query)
+export const pathDrill = (query?: Record<string, string | undefined>) => withQuery("/drill", query)
 export const pathImporter = () => "/importer"
 export const pathAllocator = (query?: Record<string, string | undefined>) =>
 	withQuery("/allocator", query)

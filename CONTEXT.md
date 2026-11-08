@@ -63,8 +63,12 @@ A category presented under another category for one layer of grouping. Use subca
 _Avoid_: Child category
 
 **Drill-down**:
-The panel that lists the Records behind a number on the Dashboard, and their Allocations. On mobile it is a bottom sheet with two detents (half and full), switched with its grab handle button.
+The view that lists the Records behind a number on the Dashboard, and their Allocations. It opens over the Dashboard without moving it, in the **Drill mode** the user chose. On mobile the peek is a bottom sheet with two detents (half and full), switched with its grab handle button.
 _Avoid_: Inspect panel, breakdown, details
+
+**Drill mode**:
+How a Drill-down opens: **Side peek** (a sheet from the right, the default), **Center peek** (a centred dialog) or **Full page** (its own page, `/drill`, with the same URL state). Chosen with the "Open as" menu in the Drill-down header and remembered across reloads. Phones have one peek, the bottom sheet, so Side peek and Center peek both show it there.
+_Avoid_: Dock, panel position, view type
 
 **Effective spending**:
 Personal spending selected by the effective Record treatment (Record override, otherwise Category default, otherwise amount sign), net of refunds. Transfer / excluded and Saving / investment do not contribute.

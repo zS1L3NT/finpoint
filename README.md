@@ -161,7 +161,7 @@ To stress-test the UI with realistic worst-case data (long and one-letter names,
     - [![jose](https://img.shields.io/badge/jose-%5E6.2.12-red?style=flat-square)](https://www.npmjs.com/package/jose/v/6.2.12)
     - [![Biome](https://img.shields.io/badge/%40biomejs%2Fbiome-%5E2.4.12-red?style=flat-square)](https://www.npmjs.com/package/@biomejs/biome/v/2.4.12)
 
-Click a Spending calendar day to open its Drill-down: Records sorted by amount and the day’s effective spending total. On desktop it docks beside the Dashboard; on smaller screens it opens as a bottom sheet. Select another day to change its contents, or close with Escape, the close button, or browser Back. “Open in Records” carries the selected day and budget scope into the Records page.
+Click a Spending calendar day to open its Drill-down: Records sorted by amount and the day’s effective spending total. It opens over the Dashboard, which never moves: as a side peek from the right (the default), a centre peek or a full page. Close it with Escape, the close button, or browser Back; the Dashboard returns to the same scroll position with the opener focused. “Open in Records” carries the selected day and budget scope into the Records page.
 
 Select a Statement title in the Statements list to open its detail page and see the Records it funds. Record and Statement detail pages retain their tables and editors, with allocated portions shown alongside amounts. Expand a Record in the Dashboard drill-down to inspect its Allocations. Pending Records in the Drill-down state their reason before expansion: no Statement, an amount still to allocate, unconfirmed account activity, or opposite amount signs. Pending Records show allocation progress; fully allocated list rows keep their compact layout.
 
@@ -170,6 +170,8 @@ Expand a Record in the Dashboard Drill-down to see its Statements. Select a Stat
 Category rows, category trend month bars and their category lists open the Drill-down without leaving the Dashboard. Category rows and trend totals exclude refunds; Biggest changes describes each rise or fall in words and names the included comparison months. Open a row to compare this month with its same-period average, with refunds subtracted. The two columns list the Records behind each side; “Only this month” and “Only in comparison” identify titles absent from the other side. Current months compare the same days so far; completed months compare full months.
 
 Forecast days, Monthly Budget cards and forecast legend entries open their Records in the Drill-down. Choose “Show the dashboard for … only” inside a budget panel to change the dashboard scope. Use “New Monthly Budget” to create a plan; Edit remains a separate action.
+
+Use the **Open as** menu in the Drill-down header to switch between Side peek, Center peek and Full page; the choice applies at once and is remembered the next time you open a Drill-down. The expand button opens just the current Drill-down as a full page, whose **Back to Dashboard** button returns you to where you were. On mobile the peek is a bottom sheet, and Full page is still available.
 
 On mobile the Drill-down is a bottom sheet. It opens half height so the Dashboard stays visible above it; tap the handle at its top (or press Enter on it) to expand it to full height and again to collapse. Close it with the X, Escape or Back. Dragging the sheet is not supported yet.
 

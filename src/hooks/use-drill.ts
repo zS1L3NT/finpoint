@@ -1,14 +1,50 @@
 "use client"
 import { DateTime } from "luxon"
-import { useRouter, useSearchParams } from "next/navigation"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useRef } from "react"
 import { SELECTION_KINDS, type Selection } from "@/logic/drilldown"
-import { pathDashboard } from "@/routes"
+import { pathDashboard, pathDrill } from "@/routes"
+
+/** Where the Dashboard was when a drill left it for the full page, so Back can put it there. */
+const RETURN_KEY = "finpoint:drill-return"
+const RESTORABLE = 'button, a[href], [role="application"]'
+const labelOf = (element: Element) =>
+	element.getAttribute("aria-label") ?? element.textContent?.trim().slice(0, 80) ?? ""
+
+type DrillReturn = { y: number; label: string; index: number; returning?: boolean }
+
+// The browser's own Back and Forward restore too: note when the last one happened.
+let lastTraversal = 0
+if (typeof window !== "undefined")
+	window.addEventListener("popstate", () => {
+		lastTraversal = Date.now()
+	})
+
+function readReturn(): DrillReturn | null {
+	try {
+		return JSON.parse(sessionStorage.getItem(RETURN_KEY) ?? "null")
+	} catch {
+		return null
+	}
+}
+
+function writeReturn(value: DrillReturn | null) {
+	try {
+		if (value) sessionStorage.setItem(RETURN_KEY, JSON.stringify(value))
+		else sessionStorage.removeItem(RETURN_KEY)
+	} catch {
+		// Storage can be blocked; Back then lands at the top.
+	}
+}
+
 export function useDrill() {
 	const router = useRouter()
+	const pathname = usePathname()
 	const params = useSearchParams()
 	const trigger = useRef<HTMLElement | null>(null)
 	const wasOpen = useRef(false)
+	const page = pathname === pathDrill()
+	const base = page ? pathDrill : pathDashboard
 	const [kind, value = "", at, extra] = (params.get("drill") ?? "").split(":")
 	const focus = params.get("focus")
 	const validFocus = focus === null || /^(record|statement):[^:]+$/.test(focus)
@@ -28,7 +64,8 @@ export function useDrill() {
 			? { kind: kind as Selection["kind"], value: value ?? "", at }
 			: null
 	useEffect(() => {
-		if (!selection && wasOpen.current)
+		if (!selection && wasOpen.current && !page) {
+			writeReturn(null)
 			requestAnimationFrame(() => {
 				if (
 					document.activeElement === document.body ||
@@ -38,37 +75,76 @@ export function useDrill() {
 				)
 					trigger.current?.focus({ preventScroll: true })
 			})
+		}
 		wasOpen.current = !!selection
 	}, [!!selection])
+	// Back from the full page: put the Dashboard at its old scroll and focus the opener. The
+	// Dashboard fills in section by section, so keep nudging until it is tall enough.
+	useEffect(() => {
+		if (page || selection) return
+		const saved = readReturn()
+		writeReturn(null)
+		if (!saved || (!saved.returning && Date.now() - lastTraversal > 1500)) return
+		const until = performance.now() + 2000
+		let frame = 0
+		const restore = () => {
+			window.scrollTo({ top: saved.y, behavior: "instant" })
+			const opener = [...document.querySelectorAll(RESTORABLE)].filter(
+				element => labelOf(element) === saved.label,
+			)[saved.index]
+			if (
+				(Math.abs(window.scrollY - saved.y) < 2 && (opener || saved.index < 0)) ||
+				performance.now() > until
+			) {
+				if (opener instanceof HTMLElement) opener.focus({ preventScroll: true })
+				return
+			}
+			frame = requestAnimationFrame(restore)
+		}
+		frame = requestAnimationFrame(restore)
+		return () => cancelAnimationFrame(frame)
+	}, [page, !!selection])
+	const current = () => Object.fromEntries(params)
 	const href = (s: Selection) =>
-		pathDashboard({
-			...Object.fromEntries(params),
+		base({
+			...current(),
 			drill: [s.kind, s.value, s.at].filter(Boolean).join(":"),
 			focus: undefined,
 		})
 	const open = (s: Selection) => {
-		trigger.current = document.activeElement as HTMLElement
+		const element = document.activeElement
+		trigger.current = element as HTMLElement
+		if (!page && element instanceof HTMLElement && element !== document.body) {
+			const label = labelOf(element)
+			writeReturn({
+				y: window.scrollY,
+				label,
+				index: [...document.querySelectorAll(RESTORABLE)]
+					.filter(item => labelOf(item) === label)
+					.indexOf(element),
+			})
+		}
 		router.push(
 			selection?.kind === s.kind && selection.value === s.value && selection.at === s.at
-				? pathDashboard({
-						...Object.fromEntries(params),
-						drill: undefined,
-						focus: undefined,
-					})
+				? base({ ...current(), drill: undefined, focus: undefined })
 				: href(s),
 			{ scroll: false },
 		)
 	}
 	const close = () => {
-		router.push(
-			pathDashboard({ ...Object.fromEntries(params), drill: undefined, focus: undefined }),
-			{ scroll: false },
-		)
-	}
-	const pivot = (focus: string | null) => {
-		router.push(pathDashboard({ ...Object.fromEntries(params), focus: focus ?? undefined }), {
+		const saved = page ? readReturn() : null
+		if (saved) writeReturn({ ...saved, returning: true })
+		router.push(pathDashboard({ ...current(), drill: undefined, focus: undefined }), {
 			scroll: false,
 		})
 	}
-	return { selection, focus, pivot, open, close, href }
+	const pivot = (focus: string | null) => {
+		router.push(base({ ...current(), focus: focus ?? undefined }), { scroll: false })
+	}
+	/** Moves the open drill between the Dashboard overlay and the full page without a new history entry. */
+	const place = (full: boolean) => {
+		if (full === page) return
+		router.replace((full ? pathDrill : pathDashboard)(current()), { scroll: false })
+	}
+	return { selection, focus, page, pivot, open, close, href, place }
 }

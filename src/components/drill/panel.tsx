@@ -2,23 +2,27 @@
 import { useLiveQuery } from "dexie-react-hooks"
 import { AnimatePresence, motion, useIsPresent, useReducedMotion } from "framer-motion"
 import Link from "next/link"
+import { Dialog as DialogPrimitive } from "radix-ui"
 import { useEffect, useState } from "react"
 import { AllocationProgress } from "@/components/allocation-progress"
 import { AllocationRows } from "@/components/allocation-rows"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
 import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
+import PageContent from "@/components/layout/page-content"
 import MonthlyBudgetBadge from "@/components/monthly-budget-badge"
 import { amountTone, PendingBadge } from "@/components/table/record-columns"
 import Term from "@/components/term"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetOverlay, SheetPortal, SheetTitle } from "@/components/ui/sheet"
 import { useRecordEditor } from "@/hooks/use-record-editor"
 import { DRILL_PIVOT, SPRING, TRANSITION } from "@/lib/motion"
 import { cn, formatCurrency, parseDatetime, pluralize } from "@/lib/utils"
 import { listCategories } from "@/logic/categories"
 import { getDrilldown, getDrillStatement, type Selection } from "@/logic/drilldown"
+import { type DrillMode, getDrillMode, setDrillMode } from "@/logic/settings"
 import { pathAllocator, pathRecord } from "@/routes"
+import { DrillModeMenu, IconTip } from "./mode-menu"
 export function DrillPanel({
 	selection,
 	focus,
@@ -28,6 +32,8 @@ export function DrillPanel({
 	scope,
 	onScope,
 	close,
+	place,
+	page = false,
 }: {
 	focus: string | null
 	pivot: (focus: string | null) => void
@@ -37,6 +43,8 @@ export function DrillPanel({
 	scope: string
 	onScope: (value: string) => void
 	close: () => void
+	place: (full: boolean) => void
+	page?: boolean
 }) {
 	const { editingRecord, handleEdit, setEditingRecord } = useRecordEditor()
 	const categories = useLiveQuery(() => listCategories(), []) ?? []
@@ -54,26 +62,34 @@ export function DrillPanel({
 		[statementId],
 	)
 	const statement = statementId ? statementQuery : undefined
-	const [desktop, setDesktop] = useState(
-		() => typeof window !== "undefined" && matchMedia("(min-width:1280px)").matches,
+	const mode = useLiveQuery(() => getDrillMode(), [])
+	const [phone, setPhone] = useState(
+		() => typeof window !== "undefined" && matchMedia("(max-width:767px)").matches,
 	)
 	const [full, setFull] = useState(false)
+	const sheet = !page && phone
 	const reduced = useReducedMotion()
 	const present = useIsPresent()
 	useEffect(() => {
-		const media = matchMedia("(min-width:1280px)")
-		const update = () => setDesktop(media.matches)
+		const media = matchMedia("(max-width:767px)")
+		const update = () => setPhone(media.matches)
 		update()
 		media.addEventListener("change", update)
 		return () => media.removeEventListener("change", update)
 	}, [])
+	// Overlays close through their dialog; the full page has none, so Escape leaves it.
 	useEffect(() => {
+		if (!page) return
 		const handler = (e: KeyboardEvent) => {
-			if (e.key === "Escape" && !editingRecord) close()
+			if (e.key === "Escape" && !e.defaultPrevented && !editingRecord) close()
 		}
 		document.addEventListener("keydown", handler)
 		return () => document.removeEventListener("keydown", handler)
-	}, [close, editingRecord])
+	}, [page, close, editingRecord])
+	// The preferred mode decides where a drill opens, including one reached from a shared link.
+	useEffect(() => {
+		if (mode === "full" && !page) place(true)
+	}, [mode, page, place])
 	useEffect(() => {
 		if (
 			data === null ||
@@ -84,9 +100,14 @@ export function DrillPanel({
 	}, [data, statement, expanded, close])
 	const ready = !!data && (!statementId || !!statement)
 	useEffect(() => {
-		if (ready && desktop) document.getElementById("drill-title")?.focus({ preventScroll: true })
-	}, [ready, desktop])
+		if (ready && !sheet) document.getElementById("drill-title")?.focus({ preventScroll: true })
+	}, [ready, sheet])
 	const comparison = data?.comparison
+	// Picking a mode switches this drill now and becomes where the next one opens.
+	const choose = async (next: DrillMode) => {
+		await setDrillMode(next)
+		place(next === "full")
+	}
 	const content = data ? (
 		<>
 			{editingRecord ? (
@@ -112,11 +133,16 @@ export function DrillPanel({
 			<div
 				className={cn(
 					"flex items-start justify-between gap-3 border-b p-5",
-					!desktop && "shrink-0",
-					!desktop && !full && "px-5 py-2",
+					sheet && "shrink-0",
+					sheet && !full && "px-5 py-2",
 				)}
 			>
-				<div className={cn(!desktop && "min-w-0")}>
+				<div className="min-w-0">
+					{page ? (
+						<Button variant="outline" size="sm" className="mb-3" onClick={close}>
+							<IconifyIcon icon="lucide:arrow-left" /> Back to Dashboard
+						</Button>
+					) : null}
 					{ready ? (
 						<>
 							<h2
@@ -175,7 +201,7 @@ export function DrillPanel({
 								) : (
 									<>
 										{pluralize(data.records.length, "Record")} ·{" "}
-										{!desktop && !full ? (
+										{sheet && !full ? (
 											"Spending"
 										) : (
 											<>
@@ -198,14 +224,35 @@ export function DrillPanel({
 						</>
 					) : null}
 				</div>
-				<Button
-					variant="ghost"
-					size="icon-sm"
-					onClick={close}
-					aria-label="Close drill-down"
-				>
-					<IconifyIcon icon="lucide:x" />
-				</Button>
+				<div className="-mr-2 -mt-2 flex shrink-0 items-center">
+					{page ? null : (
+						<IconTip label="Open as full page">
+							<Button
+								variant="ghost"
+								size="icon-lg"
+								aria-label="Open as full page"
+								onClick={() => place(true)}
+							>
+								<IconifyIcon icon="lucide:maximize-2" />
+							</Button>
+						</IconTip>
+					)}
+					{mode ? (
+						<DrillModeMenu mode={page ? "full" : mode} phone={phone} onMode={choose} />
+					) : null}
+					{page ? null : (
+						<IconTip label="Close">
+							<Button
+								variant="ghost"
+								size="icon-lg"
+								onClick={close}
+								aria-label="Close drill-down"
+							>
+								<IconifyIcon icon="lucide:x" />
+							</Button>
+						</IconTip>
+					)}
+				</div>
 			</div>
 			<AnimatePresence mode="wait" custom={statementId ? 1 : -1}>
 				<motion.div
@@ -219,8 +266,9 @@ export function DrillPanel({
 					transition={reduced ? TRANSITION.fast : TRANSITION.base}
 					className={cn(
 						"min-h-0 flex-1 overflow-y-auto p-5",
-						!desktop && "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
-						!desktop && !full && (statementId ? "pt-3" : "py-0"),
+						page && "overflow-y-visible",
+						sheet && "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+						sheet && !full && (statementId ? "pt-3" : "py-0"),
 					)}
 				>
 					{statementId ? (
@@ -377,7 +425,7 @@ export function DrillPanel({
 												type="button"
 												className={cn(
 													"cursor-pointer flex w-full flex-wrap items-center gap-3 py-4 text-left transition-colors duration-150 ease-out hover:bg-muted/40 active:bg-muted/60",
-													!desktop && !full && "py-2",
+													sheet && !full && "py-2",
 												)}
 												aria-expanded={expanded === r.id}
 												onClick={() =>
@@ -499,8 +547,8 @@ export function DrillPanel({
 			<div
 				className={cn(
 					"grid gap-2 border-t p-5",
-					!desktop && "shrink-0",
-					!desktop && !full && "py-3",
+					sheet && "shrink-0",
+					sheet && !full && "py-3",
 				)}
 			>
 				{data.budget ? (
@@ -518,19 +566,28 @@ export function DrillPanel({
 			</div>
 		</>
 	) : null
-	return desktop ? (
-		<motion.aside
-			initial={{ opacity: 0, x: reduced ? 0 : 24 }}
-			animate={{ opacity: 1, x: 0 }}
-			exit={{ opacity: 0, x: reduced ? 0 : 24 }}
-			transition={reduced ? TRANSITION.fast : SPRING.snappy}
-			aria-labelledby="drill-title"
-			role="region"
-			className="sticky top-4 ml-6 flex h-[calc(100vh-2rem)] flex-col overflow-hidden rounded-xl border bg-card shadow-sm"
-		>
-			{content}
-		</motion.aside>
-	) : (
+	if (mode === undefined || (mode === "full" && !page)) return null
+	if (page)
+		return (
+			<PageContent>
+				<section
+					aria-labelledby="drill-title"
+					className="mx-auto flex w-full max-w-3xl flex-col rounded-xl border bg-card shadow-sm"
+				>
+					{content}
+				</section>
+			</PageContent>
+		)
+	const edge = (side: "right" | "center") =>
+		cn(
+			"motion-reduce:data-[state=open]:animate-in motion-reduce:data-[state=open]:fade-in motion-reduce:data-[state=closed]:animate-out motion-reduce:data-[state=closed]:fade-out",
+			side === "right" &&
+				"motion-reduce:data-[side=right]:data-[state=open]:slide-in-from-right-0 motion-reduce:data-[side=right]:data-[state=closed]:slide-out-to-right-0",
+		)
+	const outside = (event: Event) => {
+		if (editingRecord) event.preventDefault()
+	}
+	return (
 		<motion.div exit={{ opacity: 0 }} transition={TRANSITION.base}>
 			<Sheet
 				modal={!editingRecord}
@@ -539,46 +596,87 @@ export function DrillPanel({
 					if (!open) close()
 				}}
 			>
-				<SheetContent
-					onCloseAutoFocus={event => {
-						event.preventDefault()
-					}}
-					side="bottom"
-					showCloseButton={false}
-					overlayClassName={full ? undefined : "bg-transparent"}
-					className="h-auto! rounded-t-2xl motion-reduce:data-[state=open]:animate-in motion-reduce:data-[state=open]:fade-in motion-reduce:data-[state=closed]:animate-out motion-reduce:data-[state=closed]:fade-out"
-				>
-					<button
-						type="button"
-						data-testid="drill-grab"
-						aria-label={full ? "Collapse drill-down" : "Expand drill-down"}
-						aria-expanded={full}
-						onClick={() => setFull(v => !v)}
-						className="mx-auto flex h-11 w-full shrink-0 cursor-pointer flex-col items-center justify-center gap-0.5 text-muted-foreground outline-none focus-visible:bg-muted/40"
-					>
-						<span
-							aria-hidden="true"
-							className="h-1 w-10 rounded-full bg-muted-foreground/40"
-						/>
-						<IconifyIcon
-							icon={full ? "lucide:chevron-down" : "lucide:chevron-up"}
-							className="size-4"
-						/>
-					</button>
-					<SheetTitle className="sr-only">Drill-down</SheetTitle>
-					<motion.div
-						data-testid="drill-sheet-body"
-						data-detent={full ? "full" : "half"}
-						initial={false}
-						animate={{
-							height: full ? "calc(92dvh - 2.75rem)" : "calc(55dvh - 2.75rem)",
+				{sheet ? (
+					<SheetContent
+						onCloseAutoFocus={event => {
+							event.preventDefault()
 						}}
-						transition={reduced ? TRANSITION.fast : SPRING.snappy}
-						className="flex min-h-0 flex-col overflow-hidden"
+						onInteractOutside={outside}
+						aria-labelledby="drill-title"
+						side="bottom"
+						showCloseButton={false}
+						overlayClassName={full ? undefined : "bg-transparent"}
+						className={cn("h-auto! rounded-t-2xl", edge("center"))}
 					>
+						<button
+							type="button"
+							data-testid="drill-grab"
+							aria-label={full ? "Collapse drill-down" : "Expand drill-down"}
+							aria-expanded={full}
+							onClick={() => setFull(v => !v)}
+							className="mx-auto flex h-11 w-full shrink-0 cursor-pointer flex-col items-center justify-center gap-0.5 text-muted-foreground outline-none focus-visible:bg-muted/40"
+						>
+							<span
+								aria-hidden="true"
+								className="h-1 w-10 rounded-full bg-muted-foreground/40"
+							/>
+							<IconifyIcon
+								icon={full ? "lucide:chevron-down" : "lucide:chevron-up"}
+								className="size-4"
+							/>
+						</button>
+						<SheetTitle className="sr-only">Drill-down</SheetTitle>
+						<motion.div
+							data-testid="drill-sheet-body"
+							data-detent={full ? "full" : "half"}
+							initial={false}
+							animate={{
+								height: full ? "calc(92dvh - 2.75rem)" : "calc(55dvh - 2.75rem)",
+							}}
+							transition={reduced ? TRANSITION.fast : SPRING.snappy}
+							className="flex min-h-0 flex-col overflow-hidden"
+						>
+							{content}
+						</motion.div>
+					</SheetContent>
+				) : mode === "center" ? (
+					<SheetPortal>
+						<SheetOverlay className="bg-black/30" />
+						<DialogPrimitive.Content
+							data-slot="sheet-content"
+							data-side="center"
+							aria-labelledby="drill-title"
+							onCloseAutoFocus={event => {
+								event.preventDefault()
+							}}
+							onInteractOutside={outside}
+							className={cn(
+								"fixed inset-0 z-50 m-auto flex h-fit max-h-[min(46rem,calc(100dvh-4rem))] w-[calc(100vw-2rem)] max-w-180 flex-col overflow-hidden rounded-xl border bg-popover text-xs/relaxed text-popover-foreground shadow-2xl outline-none ease-out data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-97 data-[state=open]:duration-200 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-97 data-[state=closed]:duration-150 motion-reduce:zoom-in-100 motion-reduce:zoom-out-100",
+							)}
+						>
+							<SheetTitle className="sr-only">Drill-down</SheetTitle>
+							{content}
+						</DialogPrimitive.Content>
+					</SheetPortal>
+				) : (
+					<SheetContent
+						onCloseAutoFocus={event => {
+							event.preventDefault()
+						}}
+						onInteractOutside={outside}
+						aria-labelledby="drill-title"
+						side="right"
+						showCloseButton={false}
+						overlayClassName="bg-black/30"
+						className={cn(
+							"md:data-[side=right]:w-120 md:data-[side=right]:max-w-[calc(100vw-2rem)]",
+							edge("right"),
+						)}
+					>
+						<SheetTitle className="sr-only">Drill-down</SheetTitle>
 						{content}
-					</motion.div>
-				</SheetContent>
+					</SheetContent>
+				)}
 			</Sheet>
 		</motion.div>
 	)
