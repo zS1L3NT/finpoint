@@ -481,6 +481,8 @@ test("closing a deep-linked full-page drill replaces it with the Dashboard", asy
 	await page.goto(overview)
 	await page.goto(`${overview.replace(/^\/[^?]*/, "/drill")}&drill=metric:spent`)
 	await expect(page).toHaveURL(/\/drill\?/)
+	// Escape is heard once the drill is on screen, as it is for anyone who can see it.
+	await expect(page.getByTestId("drill-total")).toBeVisible()
 	await page.keyboard.press("Escape")
 	await expect(page).not.toHaveURL(/\/drill/)
 	await page.goBack()

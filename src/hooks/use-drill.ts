@@ -136,12 +136,20 @@ export function useDrill() {
 			})
 		}
 		if (page) bumpSteps()
-		router.push(
+		go(
 			selection?.kind === s.kind && selection.value === s.value && selection.at === s.at
 				? base({ ...current(), drill: undefined, focus: undefined })
 				: href(s),
-			{ scroll: false },
 		)
+	}
+	/**
+	 * Adds a history entry for a drill change. On the Dashboard only the search changes, so the
+	 * native history API updates it without a router navigation: a router push there could replay
+	 * a scroll-to-top that Next still held from page load, throwing the Dashboard to its top.
+	 */
+	const go = (url: string) => {
+		if (page) router.push(url, { scroll: false })
+		else window.history.pushState(null, "", url)
 	}
 	/** Counts a history entry pushed on the full page, so closing can step back over all of them. */
 	const bumpSteps = () => {
@@ -163,13 +171,11 @@ export function useDrill() {
 				)
 			return
 		}
-		router.push(pathDashboard({ ...current(), drill: undefined, focus: undefined }), {
-			scroll: false,
-		})
+		go(pathDashboard({ ...current(), drill: undefined, focus: undefined }))
 	}
 	const pivot = (focus: string | null) => {
 		if (page) bumpSteps()
-		router.push(base({ ...current(), focus: focus ?? undefined }), { scroll: false })
+		go(base({ ...current(), focus: focus ?? undefined }))
 	}
 	/** Moves the open drill between the Dashboard overlay and the full page without a new history entry. */
 	const place = (full: boolean) => {
