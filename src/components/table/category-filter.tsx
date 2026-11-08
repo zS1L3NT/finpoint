@@ -1,5 +1,5 @@
 import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
-import { FILTER_CONTROL_CLASS } from "@/components/table/filter-bar"
+import { FilterField, filterControlClass } from "@/components/table/filter-bar"
 import { Button } from "@/components/ui/button"
 import {
 	Command,
@@ -32,71 +32,73 @@ export default function CategoryFilter({
 		)
 
 	return (
-		<Popover>
-			<PopoverTrigger
-				render={
-					<Button
-						type="button"
-						variant="outline"
-						className={cn(
-							"grid w-full grid-cols-[1rem_minmax(0,1fr)_1rem] items-center sm:w-40",
-							FILTER_CONTROL_CLASS,
-						)}
-					/>
-				}
-			>
-				<IconifyIcon icon="lucide:tags" className="justify-self-start" />
-				<span className="truncate text-center">
-					{selectedIds.length
-						? `${selectedIds.length} categor${selectedIds.length === 1 ? "y" : "ies"}`
-						: "Any category"}
-				</span>
-				<IconifyIcon icon="lucide:chevron-down" className="justify-self-end" />
-			</PopoverTrigger>
-			<PopoverContent
-				align="start"
-				variant="filter"
-				className="w-[calc(100vw-2rem)] overflow-hidden sm:w-72"
-			>
-				<Command
-					filter={(value, search) =>
-						value.toLowerCase().includes(search.trim().toLowerCase()) ? 1 : 0
+		<FilterField name="category" active={!!selectedIds.length} onClear={() => onChange([])}>
+			<Popover>
+				<PopoverTrigger
+					render={
+						<Button
+							type="button"
+							variant="outline"
+							className={cn(
+								"grid w-full grid-cols-[1rem_minmax(0,1fr)_1rem] items-center",
+								filterControlClass(!!selectedIds.length),
+							)}
+						/>
 					}
 				>
-					<div className="relative">
-						<CommandInput
-							placeholder="Search categories..."
-							className={selectedIds.length ? "pr-6" : undefined}
-						/>
-						{selectedIds.length ? (
-							<Button
-								type="button"
-								variant="ghost"
-								size="icon-xs"
-								className="absolute top-2.5 right-2.5 z-10"
-								aria-label="Clear categories"
-								onClick={() => onChange([])}
-							>
-								<IconifyIcon icon="lucide:x" />
-							</Button>
-						) : null}
-					</div>
-					<CommandList>
-						<CommandEmpty>No categories found.</CommandEmpty>
-						<CommandGroup>
-							{categoriesFlat.map(category => (
-								<CategoryFilterItem
-									key={category.id}
-									category={category}
-									checked={selectedIds.includes(category.id)}
-									onSelect={() => toggle(category.id)}
-								/>
-							))}
-						</CommandGroup>
-					</CommandList>
-				</Command>
-			</PopoverContent>
-		</Popover>
+					<IconifyIcon icon="lucide:tags" className="justify-self-start" />
+					<span className="truncate text-center">
+						{selectedIds.length
+							? `${selectedIds.length} categor${selectedIds.length === 1 ? "y" : "ies"}`
+							: "Any category"}
+					</span>
+					<IconifyIcon icon="lucide:chevron-down" className="justify-self-end" />
+				</PopoverTrigger>
+				<PopoverContent
+					align="start"
+					variant="filter"
+					className="w-[calc(100vw-2rem)] overflow-hidden sm:w-72"
+				>
+					<Command
+						filter={(value, search) =>
+							value.toLowerCase().includes(search.trim().toLowerCase()) ? 1 : 0
+						}
+					>
+						<div className="relative">
+							<CommandInput
+								placeholder="Search categories..."
+								className={selectedIds.length ? "pr-6" : undefined}
+							/>
+							{selectedIds.length ? (
+								<Button
+									type="button"
+									variant="ghost"
+									size="icon-xs"
+									className="absolute top-2.5 right-2.5 z-10"
+									aria-label="Clear categories"
+									onClick={() => onChange([])}
+								>
+									<IconifyIcon icon="lucide:x" />
+								</Button>
+							) : null}
+						</div>
+						<CommandList>
+							<CommandEmpty>No categories found.</CommandEmpty>
+							<CommandGroup>
+								{categoriesFlat.map(category => (
+									<CategoryFilterItem
+										key={category.id}
+										category={category}
+										checked={selectedIds.includes(category.id)}
+										onSelect={() => toggle(category.id)}
+									/>
+								))}
+							</CommandGroup>
+						</CommandList>
+					</Command>
+				</PopoverContent>
+			</Popover>
+		</FilterField>
 	)
 }
 

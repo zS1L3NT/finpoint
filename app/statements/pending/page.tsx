@@ -12,7 +12,12 @@ import { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import StatementTabs from "@/components/statement-tabs"
-import { ClearFiltersButton, FILTER_CONTROL_CLASS, FilterBar } from "@/components/table/filter-bar"
+import {
+	ClearFiltersButton,
+	FILTER_CONTROL_CLASS,
+	FilterBar,
+	FilterSelect,
+} from "@/components/table/filter-bar"
 import PaginationFooter from "@/components/table/pagination-footer"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
@@ -349,12 +354,14 @@ export default function AllocatorPendingPage() {
 								}}
 							/>
 							<FilterBar>
-								<Select
-									value={accountId}
+								<FilterSelect
+									name="account"
+									icon="lucide:landmark"
+									value={accountId === "all" ? null : accountId}
 									onValueChange={value =>
 										updateParams(
 											{
-												account_id: value === "all" ? null : value,
+												account_id: value,
 												page: null,
 												pending_statement_id: null,
 											},
@@ -362,27 +369,16 @@ export default function AllocatorPendingPage() {
 										)
 									}
 								>
-									<SelectTrigger
-										className={cn("w-full sm:w-40", FILTER_CONTROL_CLASS)}
-									>
-										<IconifyIcon icon="lucide:landmark" />
-										<SelectValue />
-									</SelectTrigger>
-									<SelectContent align="start" variant="filter">
-										<SelectGroup>
-											<SelectItem value="all">All Accounts</SelectItem>
-											{accounts.map(account => (
-												<SelectItem key={account.id} value={account.id}>
-													{account.name}
-												</SelectItem>
-											))}
-										</SelectGroup>
-									</SelectContent>
-								</Select>
+									<SelectItem value="all">All Accounts</SelectItem>
+									{accounts.map(account => (
+										<SelectItem key={account.id} value={account.id}>
+											{account.name}
+										</SelectItem>
+									))}
+								</FilterSelect>
 								<ClearFiltersButton
 									count={activeFilterCount}
 									onClear={clearQueueFilters}
-									className="sm:w-auto"
 								/>
 							</FilterBar>
 						</div>
@@ -540,10 +536,7 @@ export default function AllocatorPendingPage() {
 												}
 											>
 												<SelectTrigger
-													className={cn(
-														"w-full sm:w-52",
-														FILTER_CONTROL_CLASS,
-													)}
+													className={cn("w-full", FILTER_CONTROL_CLASS)}
 												>
 													<IconifyIcon icon="lucide:list-filter" />
 													<SelectValue />
@@ -560,7 +553,7 @@ export default function AllocatorPendingPage() {
 												</SelectContent>
 											</Select>
 											{candidateScope === "suggested" ? (
-												<span className="self-center text-xs/relaxed text-muted-foreground">
+												<span className="col-span-full self-center text-xs/relaxed text-muted-foreground">
 													Within 7 days · up to $5 difference
 												</span>
 											) : null}

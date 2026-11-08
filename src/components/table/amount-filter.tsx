@@ -2,7 +2,7 @@
 
 import { useId, useState } from "react"
 import { UiIcon as IconifyIcon } from "@/components/icon"
-import { FILTER_CONTROL_CLASS } from "@/components/table/filter-bar"
+import { FilterField, filterControlClass } from "@/components/table/filter-bar"
 import { Button } from "@/components/ui/button"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group"
@@ -147,8 +147,8 @@ export default function AmountFilter({
 	}
 
 	const triggerClassName = cn(
-		"grid w-full grid-cols-[1rem_minmax(0,1fr)_1rem] items-center sm:w-44",
-		FILTER_CONTROL_CLASS,
+		"grid w-full grid-cols-[1rem_minmax(0,1fr)_1rem] items-center",
+		filterControlClass(selected),
 	)
 	const triggerContent = (
 		<>
@@ -285,39 +285,53 @@ export default function AmountFilter({
 	// on-screen keyboard resizes the viewport.
 	if (isMobile) {
 		return (
-			<Sheet open={open} onOpenChange={changeOpen}>
-				<SheetTrigger asChild>
-					<Button type="button" variant="outline" className={triggerClassName}>
-						{triggerContent}
-					</Button>
-				</SheetTrigger>
-				<SheetContent side="bottom" className="max-h-[85svh] gap-0 rounded-t-xl">
-					<SheetHeader className="border-b px-3 py-3">
-						<SheetTitle>Filter by amount</SheetTitle>
-						<SheetDescription className="sr-only">
-							Choose a direction and an amount range.
-						</SheetDescription>
-					</SheetHeader>
-					<div className="overflow-y-auto pb-[env(safe-area-inset-bottom)]">{form}</div>
-				</SheetContent>
-			</Sheet>
+			<FilterField
+				name="amount"
+				active={selected}
+				onClear={() => onChange({ min: null, max: null })}
+			>
+				<Sheet open={open} onOpenChange={changeOpen}>
+					<SheetTrigger asChild>
+						<Button type="button" variant="outline" className={triggerClassName}>
+							{triggerContent}
+						</Button>
+					</SheetTrigger>
+					<SheetContent side="bottom" className="max-h-[85svh] gap-0 rounded-t-xl">
+						<SheetHeader className="border-b px-3 py-3">
+							<SheetTitle>Filter by amount</SheetTitle>
+							<SheetDescription className="sr-only">
+								Choose a direction and an amount range.
+							</SheetDescription>
+						</SheetHeader>
+						<div className="overflow-y-auto pb-[env(safe-area-inset-bottom)]">
+							{form}
+						</div>
+					</SheetContent>
+				</Sheet>
+			</FilterField>
 		)
 	}
 
 	return (
-		<Popover open={open} onOpenChange={changeOpen}>
-			<PopoverTrigger
-				render={<Button type="button" variant="outline" className={triggerClassName} />}
-			>
-				{triggerContent}
-			</PopoverTrigger>
-			<PopoverContent
-				align="start"
-				variant="filter"
-				className="w-[min(20rem,calc(100vw-1rem))] overflow-hidden"
-			>
-				{form}
-			</PopoverContent>
-		</Popover>
+		<FilterField
+			name="amount"
+			active={selected}
+			onClear={() => onChange({ min: null, max: null })}
+		>
+			<Popover open={open} onOpenChange={changeOpen}>
+				<PopoverTrigger
+					render={<Button type="button" variant="outline" className={triggerClassName} />}
+				>
+					{triggerContent}
+				</PopoverTrigger>
+				<PopoverContent
+					align="start"
+					variant="filter"
+					className="w-[min(20rem,calc(100vw-1rem))] overflow-hidden"
+				>
+					{form}
+				</PopoverContent>
+			</Popover>
+		</FilterField>
 	)
 }

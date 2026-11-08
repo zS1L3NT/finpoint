@@ -1,4 +1,5 @@
 import { UiIcon as IconifyIcon } from "@/components/icon"
+import { filterControlClass } from "@/components/table/filter-bar"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 
@@ -24,7 +25,11 @@ export default function PaginationHeader({
 	return (
 		<div className={cn("flex flex-col gap-4", className)}>
 			<div className="flex min-w-0 flex-col gap-2 md:flex-row md:items-center md:justify-between">
-				<div className="relative w-full md:w-sm">
+				<div
+					data-filter="search"
+					data-active={query ? true : undefined}
+					className="relative w-full md:w-sm"
+				>
 					<IconifyIcon
 						icon="lucide:search"
 						className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground"
@@ -32,7 +37,7 @@ export default function PaginationHeader({
 					<Input
 						type="search"
 						aria-label={searchPlaceholder.replace(/\.+$/, "")}
-						className="border-border bg-input/20 pl-8 dark:bg-input/30"
+						className={cn("pl-8", filterControlClass(!!query))}
 						placeholder={searchPlaceholder}
 						value={query}
 						onChange={e => onQueryChange(e.target.value)}

@@ -10,22 +10,21 @@ import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import StatementTabs from "@/components/statement-tabs"
 import AmountFilter from "@/components/table/amount-filter"
-import { ClearFiltersButton, FILTER_CONTROL_CLASS, FilterBar } from "@/components/table/filter-bar"
+import {
+	ClearFiltersButton,
+	FilterBar,
+	FilterField,
+	FilterSelect,
+	filterControlClass,
+} from "@/components/table/filter-bar"
 import PaginatedDataTable from "@/components/table/paginated-data-table"
 import { byDay } from "@/components/table/row-groups"
 import { useStatementColumns, useStatementMobileRow } from "@/components/table/statement-columns"
 import { Button } from "@/components/ui/button"
-import {
-	Select,
-	SelectContent,
-	SelectGroup,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select"
+import { SelectItem } from "@/components/ui/select"
 import { useHistory } from "@/history"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
-import { cn, pluralize } from "@/lib/utils"
+import { pluralize } from "@/lib/utils"
 import { listAccounts } from "@/logic/accounts"
 import { paginateItems, parsePage, parsePageSize } from "@/logic/pagination"
 import { listStatements } from "@/logic/statements"
@@ -126,88 +125,63 @@ export default function StatementsPage() {
 						onPageSizeChange: handlePageSizeChange,
 						searchPlaceholder: "Search descriptions...",
 						filters: (
-							<FilterBar className="gap-y-1 sm:gap-y-2">
-								<Select
-									value={accountId}
+							<FilterBar>
+								<FilterSelect
+									name="account"
+									icon="lucide:landmark"
+									value={accountId === "all" ? null : accountId}
+									onValueChange={value => updateFilters({ account_id: value })}
+								>
+									<SelectItem value="all">All Accounts</SelectItem>
+									{accounts.map(account => (
+										<SelectItem key={account.id} value={account.id}>
+											{account.name}
+										</SelectItem>
+									))}
+								</FilterSelect>
+								<FilterSelect
+									name="status"
+									icon="lucide:circle-check-big"
+									value={isPending}
+									onValueChange={value => updateFilters({ is_pending: value })}
+								>
+									<SelectItem value="all">Any status</SelectItem>
+									<SelectItem value="true">Pending</SelectItem>
+									<SelectItem value="false">Imported</SelectItem>
+								</FilterSelect>
+								<FilterSelect
+									name="allocation"
+									icon="lucide:circle-check-big"
+									value={isUnallocated}
 									onValueChange={value =>
-										updateFilters({
-											account_id: value === "all" ? null : value,
-										})
+										updateFilters({ is_unallocated: value })
 									}
 								>
-									<SelectTrigger
-										className={cn("w-full sm:w-40", FILTER_CONTROL_CLASS)}
-									>
-										<IconifyIcon icon="lucide:landmark" />
-										<SelectValue />
-									</SelectTrigger>
-									<SelectContent align="start" variant="filter">
-										<SelectGroup>
-											<SelectItem value="all">All Accounts</SelectItem>
-											{accounts.map(account => (
-												<SelectItem key={account.id} value={account.id}>
-													{account.name}
-												</SelectItem>
-											))}
-										</SelectGroup>
-									</SelectContent>
-								</Select>
-								<Select
-									value={isPending ?? "all"}
-									onValueChange={value =>
-										updateFilters({
-											is_pending: value === "all" ? null : value,
-										})
+									<SelectItem value="all">Any allocation</SelectItem>
+									<SelectItem value="true">Unallocated</SelectItem>
+									<SelectItem value="false">Allocated</SelectItem>
+								</FilterSelect>
+								<FilterField
+									name="date"
+									active={!!(startDate ?? endDate)}
+									onClear={() =>
+										updateFilters({ start_date: null, end_date: null })
 									}
 								>
-									<SelectTrigger
-										className={cn("w-full sm:w-40", FILTER_CONTROL_CLASS)}
-									>
-										<IconifyIcon icon="lucide:circle-check-big" />
-										<SelectValue />
-									</SelectTrigger>
-									<SelectContent align="start" variant="filter">
-										<SelectGroup>
-											<SelectItem value="all">Any status</SelectItem>
-											<SelectItem value="true">Pending</SelectItem>
-											<SelectItem value="false">Imported</SelectItem>
-										</SelectGroup>
-									</SelectContent>
-								</Select>
-								<Select
-									value={isUnallocated ?? "all"}
-									onValueChange={value =>
-										updateFilters({
-											is_unallocated: value === "all" ? null : value,
-										})
-									}
-								>
-									<SelectTrigger
-										className={cn("w-full sm:w-40", FILTER_CONTROL_CLASS)}
-									>
-										<IconifyIcon icon="lucide:circle-check-big" />
-										<SelectValue />
-									</SelectTrigger>
-									<SelectContent align="start" variant="filter">
-										<SelectGroup>
-											<SelectItem value="all">Any allocation</SelectItem>
-											<SelectItem value="true">Unallocated</SelectItem>
-											<SelectItem value="false">Allocated</SelectItem>
-										</SelectGroup>
-									</SelectContent>
-								</Select>
-								<DateRange
-									id="statements_date_range"
-									value={{ start: startDate, end: endDate }}
-									className="sm:w-40"
-									triggerClassName={FILTER_CONTROL_CLASS}
-									onChange={value =>
-										updateFilters({
-											start_date: value.start,
-											end_date: value.end,
-										})
-									}
-								/>
+									<DateRange
+										id="statements_date_range"
+										value={{ start: startDate, end: endDate }}
+										triggerClassName={filterControlClass(
+											!!(startDate ?? endDate),
+										)}
+										onChange={value =>
+											updateFilters({
+												start_date: value.start,
+												end_date: value.end,
+											})
+										}
+									/>
+								</FilterField>
 								<AmountFilter
 									value={{ min: minAmount, max: maxAmount }}
 									onChange={value =>

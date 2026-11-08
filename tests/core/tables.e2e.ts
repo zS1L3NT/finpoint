@@ -619,3 +619,58 @@ test("Records month context is excluded from Clear filters and survives clearing
 	await expect(page).not.toHaveURL(/is_allocated=/)
 	await expect(page.getByRole("button", { name: /^Clear/ })).toBeDisabled()
 })
+
+test("filter controls keep one shared width on Records and Statements, with or without values", async ({
+	page,
+}) => {
+	await seedWorkspace(page)
+	const widths = async (path: string) => {
+		await page.goto(path)
+		const clear = page.getByRole("button", { name: /^Clear/ })
+		await expect(clear).toBeVisible()
+		return clear
+			.locator("..")
+			.evaluate(bar =>
+				[...bar.children]
+					.map(c => Math.round(c.getBoundingClientRect().width))
+					.filter(w => w > 1),
+			)
+	}
+	const base = await widths("/records")
+	expect(new Set(base).size).toBe(1)
+	expect(new Set(await widths("/statements")).size).toBe(1)
+	expect((await widths("/statements"))[0]).toBe(base[0])
+	expect(
+		await widths(
+			"/records?is_allocated=false&treatment=exclude&start_date=2026-10-01&end_date=2026-10-31&min_amount=-100",
+		),
+	).toEqual(base)
+	expect(new Set(await widths("/statements?is_pending=true&query=FairPrice")).size).toBe(1)
+})
+
+test("active filters are highlighted one for one with the Clear count and clear on their own", async ({
+	page,
+}) => {
+	await seedWorkspace(page)
+	const cases = [
+		["/records?is_allocated=false", "status"],
+		["/records?show_unbudgeted=1", "budget"],
+		["/records?start_date=2026-10-01&end_date=2026-10-31", "date"],
+		["/records?min_amount=-100", "amount"],
+		["/statements?is_pending=true", "status"],
+		["/statements?is_unallocated=true", "allocation"],
+		["/statements?min_amount=-100", "amount"],
+	]
+	for (const [url, name] of cases) {
+		await page.goto(url)
+		const active = page.locator("[data-filter][data-active]")
+		await expect(active).toHaveCount(1)
+		await expect(active).toHaveAttribute("data-filter", name)
+		await expect(page.getByRole("button", { name: /^Clear \d/ })).toHaveAccessibleName(
+			"Clear 1",
+		)
+		await page.getByRole("button", { name: `Reset ${name} filter` }).click()
+		await expect(active).toHaveCount(0)
+		await expect(page.getByRole("button", { name: /^Clear/ })).toBeDisabled()
+	}
+})

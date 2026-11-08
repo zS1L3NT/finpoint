@@ -11,7 +11,12 @@ import { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import StatementTabs from "@/components/statement-tabs"
-import { ClearFiltersButton, FILTER_CONTROL_CLASS, FilterBar } from "@/components/table/filter-bar"
+import {
+	ClearFiltersButton,
+	FILTER_CONTROL_CLASS,
+	FilterBar,
+	FilterSelect,
+} from "@/components/table/filter-bar"
 import PaginationFooter from "@/components/table/pagination-footer"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -170,7 +175,7 @@ export default function FixDuplicatesPage() {
 					/>
 				</div>
 				<div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:gap-4">
-					<FilterBar className="lg:w-auto">
+					<FilterBar className="lg:w-fit lg:grid-cols-[repeat(3,10rem)]">
 						<Select
 							value={view}
 							onValueChange={value =>
@@ -179,7 +184,7 @@ export default function FixDuplicatesPage() {
 						>
 							<SelectTrigger
 								aria-label="Duplicate view"
-								className={cn("w-full sm:w-56", FILTER_CONTROL_CLASS)}
+								className={cn("w-full", FILTER_CONTROL_CLASS)}
 							>
 								<SelectValue />
 							</SelectTrigger>
@@ -191,32 +196,23 @@ export default function FixDuplicatesPage() {
 								))}
 							</SelectContent>
 						</Select>
-						<Select
-							value={accountId || "all"}
-							onValueChange={value =>
-								updateParams({ account_id: value === "all" ? "" : value })
-							}
+						<FilterSelect
+							name="account"
+							icon="lucide:landmark"
+							label="Filter account"
+							value={accountId || null}
+							onValueChange={value => updateParams({ account_id: value ?? "" })}
 						>
-							<SelectTrigger
-								aria-label="Filter account"
-								className={cn("w-full sm:w-40", FILTER_CONTROL_CLASS)}
-							>
-								<IconifyIcon icon="lucide:landmark" />
-								<SelectValue />
-							</SelectTrigger>
-							<SelectContent align="start" variant="filter">
-								<SelectItem value="all">All Accounts</SelectItem>
-								{accounts?.map(a => (
-									<SelectItem key={a.id} value={a.id}>
-										{a.name}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
+							<SelectItem value="all">All Accounts</SelectItem>
+							{accounts?.map(a => (
+								<SelectItem key={a.id} value={a.id}>
+									{a.name}
+								</SelectItem>
+							))}
+						</FilterSelect>
 						<ClearFiltersButton
 							count={filterCount}
 							onClear={() => updateParams({ query: "", account_id: "" })}
-							className="sm:w-auto"
 						/>
 					</FilterBar>
 					<p className="text-xs/relaxed text-muted-foreground">
