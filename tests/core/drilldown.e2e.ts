@@ -271,6 +271,22 @@ test("Spending drill labels and signs refunds and reconciles its caption", async
 	)
 })
 
+test("Income drill with no income says None and never uses the Spending caption", async ({
+	page,
+}) => {
+	await seedWorkspace(page)
+	await page.goto("/?month=September&year=2026&drill=metric:income")
+	const header = page.locator("#drill-title").locator("..")
+	await expect(page.getByTestId("drill-total")).toHaveText(/^None (yet|recorded)$/)
+	await expect(header).toContainText("0 Records · Income")
+	await expect(header).not.toContainText("Spending")
+	await expect(header).not.toContainText("refunds")
+	await expect(page.getByTestId("drill-body")).toContainText("No income Records yet")
+	await page.goto(`${overview}&drill=metric:income`)
+	await expect(page.getByTestId("drill-total")).toHaveText("$5,203.50")
+	await expect(page.locator("#drill-title").locator("..")).not.toContainText("Spending")
+})
+
 test("past empty month shows one dated message and no empty charts", async ({ page }) => {
 	await seedWorkspace(page)
 	await page.goto("/?month=January&year=2025")

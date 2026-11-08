@@ -206,3 +206,25 @@ test("Dashboard spending includes the $2.50 outside Monthly Budgets", async () =
   expect(amounts).toEqual([...amounts].sort((a,b)=>b-a))
  }
  },30000)
+
+test("each metric drill states what it is made of", async () => {
+	const now = Settings.now
+	Settings.now = () => new Date("2026-11-07T12:00:00+08:00").getTime()
+	try {
+		await loadDemoWorkspace()
+		const meta = async (value: string) =>
+			(await getDrilldown("October", 2026, "all", { kind: "metric", value }))!.meta
+		expect(await meta("spent")).toBe("Spending · refunds subtracted")
+		expect(await meta("income")).toBe("Income")
+		expect(await meta("leftover")).toBe("Income less spending")
+		expect(await meta("saved")).toBe("Saving and investing less withdrawals")
+		expect(
+			(await getDrilldown("October", 2026, "all", { kind: "month", value: "2026-10" }))!.meta,
+		).toBe("Spending · refunds excluded")
+		const empty = (await getDrilldown("November", 2026, "all", { kind: "metric", value: "income" }))!
+		expect(empty.total).toBe(0)
+		expect(empty.incomeHistory?.amount).toBeGreaterThan(0)
+	} finally {
+		Settings.now = now
+	}
+})

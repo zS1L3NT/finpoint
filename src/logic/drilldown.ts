@@ -120,6 +120,20 @@ export async function getDrilldown(
 								? `${view.dashboard.monthlyBudgets.find(b => b.id === selection.value)?.name ?? (selection.value === "unbudgeted" ? "Unbudgeted" : "All budgets")} in ${date.toFormat("MMMM")}`
 								: `Spending in ${date.toFormat("MMMM")}`
 
+	const meta =
+		selection.kind === "metric"
+			? (
+					{
+						spent: "Spending · refunds subtracted",
+						income: "Income",
+						leftover: "Income less spending",
+						saved: "Saving and investing less withdrawals",
+					} as Record<string, string>
+				)[selection.value]
+			: selection.kind === "category-gross" || selection.kind === "month"
+				? "Spending · refunds excluded"
+				: "Spending · refunds subtracted"
+
 	const category = view.scopedCategories.find(c => c.id === selection.value)
 	const comparisonRecords =
 		selection.kind === "compare"
@@ -183,6 +197,9 @@ export async function getDrilldown(
 				? view.dashboard.monthlyBudgets.find(b => b.id === selection.value)
 				: undefined,
 		title,
+		meta,
+		incomeHistory:
+			selection.kind === "metric" && selection.value === "income" ? view.incomeHistory : null,
 		total,
 		groups: [...groups.values()].map(g => ({ ...g, total: g.total / 100 })),
 		gross_spending:

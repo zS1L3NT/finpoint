@@ -53,6 +53,8 @@ export function DrillPanel({
 		() => getDrilldown(month, year, scope, selection),
 		[month, year, scope, key],
 	)
+	const noIncome =
+		selection.kind === "metric" && selection.value === "income" && data?.total === 0
 	const expanded = focus?.startsWith("record:") ? focus.slice(7) : null
 	const [origin, setOrigin] = useState<{ key: string; id: string } | null>(null)
 	const statementId = focus?.startsWith("statement:") ? focus.slice(10) : null
@@ -180,13 +182,31 @@ export function DrillPanel({
 									{`${comparison.months.length}-month`} average
 								</p>
 							) : null}
-							<p
-								className="mt-1 text-3xl font-semibold tracking-tight tabular-nums"
-								data-testid="drill-total"
-								aria-live="polite"
-							>
-								{formatCurrency(statement ? statement.amount : data.total)}
-							</p>
+							{noIncome ? (
+								<>
+									<p
+										className="mt-1 text-3xl font-semibold tracking-tight"
+										data-testid="drill-total"
+										aria-live="polite"
+									>
+										{data.incomeHistory ? "None yet" : "None recorded"}
+									</p>
+									{data.incomeHistory ? (
+										<p className="mt-1 text-xs text-muted-foreground">
+											Usually ~{formatCurrency(data.incomeHistory.amount)}{" "}
+											arrives by day {data.incomeHistory.day}.
+										</p>
+									) : null}
+								</>
+							) : (
+								<p
+									className="mt-1 text-3xl font-semibold tracking-tight tabular-nums"
+									data-testid="drill-total"
+									aria-live="polite"
+								>
+									{formatCurrency(statement ? statement.amount : data.total)}
+								</p>
+							)}
 							<p className="mt-1 text-xs text-muted-foreground">
 								{statement ? (
 									<>
@@ -202,14 +222,11 @@ export function DrillPanel({
 									<>
 										{pluralize(data.records.length, "Record")} ·{" "}
 										{sheet && !full ? (
-											"Spending"
+											data.meta?.split(" · ")[0]
 										) : (
 											<>
-												{selection.kind === "category-gross" ||
-												selection.kind === "month"
-													? "Spending · refunds excluded"
-													: "Spending · refunds subtracted"}{" "}
-												· Includes <Term name="Pending" /> Records
+												{data.meta} · Includes <Term name="Pending" />{" "}
+												Records
 											</>
 										)}
 										{data.refund_total > 0 ? (
@@ -405,6 +422,12 @@ export function DrillPanel({
 										average divides spending by the included months.
 									</p>
 								</div>
+							) : !data.records.length ? (
+								<p className="text-xs text-muted-foreground">
+									{noIncome
+										? "No income Records yet this month."
+										: "No Records in this period."}
+								</p>
 							) : (
 								data.records.map((r, index) => {
 									const group =
