@@ -1,17 +1,17 @@
 # Graph Report - t3-69efe8e6  (2026-11-08)
 
 ## Corpus Check
-- 271 files · ~245,247 words
+- 271 files · ~245,477 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 9 file(s) not represented in the graph (top: (none) 5, .example 1, .lock 1)
 
 ## Summary
-- 2048 nodes · 8127 edges · 99 communities (85 shown, 14 thin omitted)
+- 2048 nodes · 8131 edges · 99 communities (85 shown, 14 thin omitted)
 - Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 144 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `265fe6d2`
+- Built from commit: `ab4420fe`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -114,13 +114,13 @@
 - src/components/*
 
 ## God Nodes (most connected - your core abstractions)
-1. `cn()` - 324 edges
+1. `cn()` - 326 edges
 2. `PrimitivesSection()` - 181 edges
 3. `Button()` - 127 edges
 4. `react` - 100 edges
 5. `formatCurrency()` - 84 edges
 6. `RecordEditorDialog()` - 65 edges
-7. `UiIcon()` - 60 edges
+7. `UiIcon()` - 61 edges
 8. `RecordCreatorDialog()` - 58 edges
 9. `round2()` - 48 edges
 10. `pluralize()` - 46 edges

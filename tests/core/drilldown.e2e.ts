@@ -1,4 +1,4 @@
-import type { Page } from "@playwright/test"
+import type { Locator, Page } from "@playwright/test"
 import { card, chartTooltip, overview } from "../support/charts"
 import { expect, seedWorkspace, test } from "../support/fixtures"
 
@@ -424,4 +424,42 @@ test("Escape and Back restore scroll and focus in every mode", async ({ page, is
 	await expect(page).not.toHaveURL(/\/drill/)
 	await expect(day).toBeFocused()
 	await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(scrolled - 3)
+})
+
+test("drill rows: only clickable rows react, hover fills sit inset and nothing shifts", async ({
+	page,
+	isMobile,
+}) => {
+	await seedWorkspace(page)
+	await page.goto(`${overview}&drill=metric:spent`)
+	const body = page.getByTestId("drill-body")
+	const row = body.locator("button[aria-expanded]").first()
+	const heading = body.getByRole("heading", { name: /^Groceries/ })
+	const fill = (locator: Locator) =>
+		locator.evaluate(element => getComputedStyle(element).backgroundColor)
+	await expect(row).toBeVisible()
+	// Let the body's entrance settle so the boxes below are final.
+	await page.waitForTimeout(600)
+	await body.evaluate(element => element.scrollTo(0, 0))
+	const before = await row.boundingBox()
+	const area = await body.boundingBox()
+	if (!before || !area) throw new Error("Drill rows are not on screen")
+	// The fill clears the text: the row sits inside the body's padding, not against its edge.
+	expect(before.x).toBeGreaterThan(area.x + 4)
+	expect(before.x + before.width).toBeLessThan(area.x + area.width - 4)
+	expect(await fill(row)).toBe("rgba(0, 0, 0, 0)")
+	if (!isMobile) {
+		await row.hover()
+		await expect.poll(() => fill(row)).not.toBe("rgba(0, 0, 0, 0)")
+		expect(await row.boundingBox()).toEqual(before)
+		await heading.hover()
+		expect(await fill(heading)).toBe("rgba(0, 0, 0, 0)")
+		await expect(heading).toHaveCSS("cursor", "auto")
+	}
+	await row.focus()
+	await page.keyboard.press("Shift+Tab")
+	await page.keyboard.press("Tab")
+	await expect(row).toBeFocused()
+	await expect(row).not.toHaveCSS("box-shadow", "none")
+	await expect(row).toHaveCSS("border-radius", "10px")
 })

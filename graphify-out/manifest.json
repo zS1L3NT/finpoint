@@ -1578,9 +1578,9 @@
     "semantic_hash": "22094bdb40cc65a0a6cb6a06360c02a9"
   },
   "src/components/drill/panel.tsx": {
-    "mtime": 1794129924.782771,
-    "seen": 1794130702.7983944,
-    "ast_hash": "f5b907557b54674d7b406b79ed4de417",
+    "mtime": 1794130745.573057,
+    "seen": 1794131008.8114488,
+    "ast_hash": "5eea8710df6a2c039895ef4a9e1e9047",
     "semantic_hash": ""
   },
   "src/hooks/use-drill.ts": {
@@ -1602,9 +1602,9 @@
     "semantic_hash": ""
   },
   "tests/core/drilldown.e2e.ts": {
-    "mtime": 1794130032.3254464,
-    "seen": 1794130702.798561,
-    "ast_hash": "307693ff3786f6ac8b87973c1688f022",
+    "mtime": 1794130892.2513776,
+    "seen": 1794131008.8117049,
+    "ast_hash": "dbb607b3ecbfa3e6b8c6891d9b10b3d5",
     "semantic_hash": ""
   },
   "tests/domain/drilldown.test.ts": {
@@ -1626,9 +1626,9 @@
     "semantic_hash": ""
   },
   "src/components/allocation-rows.tsx": {
-    "mtime": 1794080423.4063427,
-    "seen": 1794080495.4048526,
-    "ast_hash": "7525bfe39499004dc5538f2846e6de59",
+    "mtime": 1794130745.557057,
+    "seen": 1794131008.8114128,
+    "ast_hash": "6d4201d7072493a6516c0ab9a11e4200",
     "semantic_hash": ""
   },
   "tests/domain/pending-reason.test.ts": {

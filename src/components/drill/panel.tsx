@@ -342,54 +342,55 @@ export function DrillPanel({
 												) : null}
 											</p>
 											{side.rows.map(r => (
-												<Link
-													key={r.id}
-													href={pathRecord(r.id)}
-													className="block break-words border-t py-3 transition-colors duration-150 ease-out hover:bg-muted/40 active:bg-muted/60"
-												>
-													<span className="block font-medium">
-														{r.title}
-														<PendingBadge record={r} />
-														{r.analytics_treatment === "spending" &&
-														r.amount > 0 ? (
-															<Badge
-																variant="outline"
-																className="text-creative"
-															>
-																Refund
-															</Badge>
-														) : null}
-													</span>
-													<span className="block text-muted-foreground">
-														{parseDatetime(r.datetime).toFormat(
-															"ccc d MMM",
-														)}
-													</span>
-													{r.pendingReason ? (
-														<span className="block text-muted-foreground">
-															{r.pendingReason}
-														</span>
-													) : null}
-													<span
-														className={cn(
-															"block tabular-nums",
-															amountTone(r.amount),
-														)}
+												<div key={r.id} className="border-t">
+													<Link
+														href={pathRecord(r.id)}
+														className="-mx-2 block break-words rounded-lg px-2 py-3 outline-none transition-colors duration-150 ease-out hover:bg-muted/50 active:bg-muted/70 focus-visible:ring-2 focus-visible:ring-ring/50"
 													>
-														{r.analytics_treatment === "spending" &&
-														r.amount > 0
-															? "+"
-															: ""}
-														{formatCurrency(r.amount)}
-													</span>
-													{side.unique.includes(r.id) ? (
-														<span className="block text-muted-foreground">
-															{index
-																? "Only in comparison"
-																: "Only this month"}
+														<span className="block font-medium">
+															{r.title}
+															<PendingBadge record={r} />
+															{r.analytics_treatment === "spending" &&
+															r.amount > 0 ? (
+																<Badge
+																	variant="outline"
+																	className="text-creative"
+																>
+																	Refund
+																</Badge>
+															) : null}
 														</span>
-													) : null}
-												</Link>
+														<span className="block text-muted-foreground">
+															{parseDatetime(r.datetime).toFormat(
+																"ccc d MMM",
+															)}
+														</span>
+														{r.pendingReason ? (
+															<span className="block text-muted-foreground">
+																{r.pendingReason}
+															</span>
+														) : null}
+														<span
+															className={cn(
+																"block tabular-nums",
+																amountTone(r.amount),
+															)}
+														>
+															{r.analytics_treatment === "spending" &&
+															r.amount > 0
+																? "+"
+																: ""}
+															{formatCurrency(r.amount)}
+														</span>
+														{side.unique.includes(r.id) ? (
+															<span className="block text-muted-foreground">
+																{index
+																	? "Only in comparison"
+																	: "Only this month"}
+															</span>
+														) : null}
+													</Link>
+												</div>
 											))}
 											{!side.rows.length ? (
 												<p>No Records in this period.</p>
@@ -424,7 +425,7 @@ export function DrillPanel({
 											<button
 												type="button"
 												className={cn(
-													"cursor-pointer flex w-full flex-wrap items-center gap-3 py-4 text-left transition-colors duration-150 ease-out hover:bg-muted/40 active:bg-muted/60",
+													"cursor-pointer -mx-3 flex w-[calc(100%+1.5rem)] flex-wrap items-center gap-3 rounded-lg px-3 py-3 text-left outline-none transition-colors duration-150 ease-out hover:bg-muted/50 active:bg-muted/70 focus-visible:ring-2 focus-visible:ring-ring/50",
 													sheet && !full && "py-2",
 												)}
 												aria-expanded={expanded === r.id}
@@ -500,42 +501,50 @@ export function DrillPanel({
 													/>
 												</motion.span>
 											</button>
-											{expanded === r.id ? (
-												<motion.div
-													initial={{
-														opacity: 0,
-														height: reduced ? "auto" : 0,
-													}}
-													animate={{ opacity: 1, height: "auto" }}
-													transition={
-														reduced ? TRANSITION.fast : SPRING.snappy
-													}
-													className="mb-4 overflow-hidden rounded-lg bg-muted/40 p-3"
-												>
-													<Button
-														id={`drill-edit-${r.id}`}
-														variant="outline"
-														size="sm"
-														onClick={() => handleEdit(r)}
-													>
-														Edit Record
-													</Button>
-													<p className="my-2 text-xs text-muted-foreground">
-														<Term
-															name="Allocation"
-															label="Allocations"
-														/>
-													</p>
-													<AllocationRows
-														record={r}
-														showSummary={false}
-														onStatement={id => {
-															setOrigin({ key, id: r.id })
-															pivot(`statement:${id}`)
+											<AnimatePresence initial={false}>
+												{expanded === r.id ? (
+													<motion.div
+														initial={{
+															opacity: 0,
+															height: reduced ? "auto" : 0,
 														}}
-													/>
-												</motion.div>
-											) : null}
+														animate={{ opacity: 1, height: "auto" }}
+														exit={{
+															opacity: 0,
+															height: reduced ? "auto" : 0,
+														}}
+														transition={
+															reduced
+																? TRANSITION.fast
+																: SPRING.snappy
+														}
+														className="mb-4 overflow-hidden rounded-lg bg-muted/40 p-3"
+													>
+														<Button
+															id={`drill-edit-${r.id}`}
+															variant="outline"
+															size="sm"
+															onClick={() => handleEdit(r)}
+														>
+															Edit Record
+														</Button>
+														<p className="my-2 text-xs text-muted-foreground">
+															<Term
+																name="Allocation"
+																label="Allocations"
+															/>
+														</p>
+														<AllocationRows
+															record={r}
+															showSummary={false}
+															onStatement={id => {
+																setOrigin({ key, id: r.id })
+																pivot(`statement:${id}`)
+															}}
+														/>
+													</motion.div>
+												) : null}
+											</AnimatePresence>
 										</div>
 									)
 								})

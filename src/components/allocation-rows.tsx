@@ -5,9 +5,10 @@ import { motion } from "framer-motion"
 import Link from "next/link"
 import { useState } from "react"
 import { AllocationProgress } from "@/components/allocation-progress"
+import { UiIcon as IconifyIcon } from "@/components/icon"
 import { Badge } from "@/components/ui/badge"
 import { TRANSITION } from "@/lib/motion"
-import { formatCurrency, round2 } from "@/lib/utils"
+import { cn, formatCurrency, round2 } from "@/lib/utils"
 import { getRecord, pendingReason, type RecordDetail } from "@/logic/records"
 import { getStatement, type StatementDetail } from "@/logic/statements"
 import { pathRecord, pathStatement } from "@/routes"
@@ -15,6 +16,10 @@ import { pathRecord, pathStatement } from "@/routes"
 type AllocationSource =
 	| { record: RecordDetail; statement?: never }
 	| { record?: never; statement: StatementDetail }
+
+/** A clickable row: inset so its hover fill clears the text, one radius, press and focus states. */
+const ROW =
+	"-mx-2 flex items-center gap-2 rounded-lg px-2 py-2 outline-none transition-colors duration-150 ease-out hover:bg-muted active:bg-muted/80 focus-visible:ring-2 focus-visible:ring-ring/50"
 
 export function AllocationRows({
 	record,
@@ -44,19 +49,25 @@ export function AllocationRows({
 				const title = "title" in row ? row.title : row.description
 				const content = (
 					<>
-						<span className="block font-medium">{title}</span>
-						<span className="text-muted-foreground tabular-nums">
-							{formatCurrency(Math.abs(row.pivot.amount))} of{" "}
-							{formatCurrency(Math.abs(row.amount))}
+						<span className="min-w-0 flex-1">
+							<span className="block font-medium">{title}</span>
+							<span className="text-muted-foreground tabular-nums">
+								{formatCurrency(Math.abs(row.pivot.amount))} of{" "}
+								{formatCurrency(Math.abs(row.amount))}
+							</span>
+							{"statement_count" in row &&
+							typeof row.statement_count === "number" &&
+							row.statement_count > 1 ? (
+								<Badge variant="outline">Shared with other Statements</Badge>
+							) : null}
+							{"allocation_count" in row && row.allocation_count > 1 ? (
+								<Badge variant="outline">Shared with other Records</Badge>
+							) : null}
 						</span>
-						{"statement_count" in row &&
-						typeof row.statement_count === "number" &&
-						row.statement_count > 1 ? (
-							<Badge variant="outline">Shared with other Statements</Badge>
-						) : null}
-						{"allocation_count" in row && row.allocation_count > 1 ? (
-							<Badge variant="outline">Shared with other Records</Badge>
-						) : null}
+						<IconifyIcon
+							icon="lucide:chevron-right"
+							className="size-4 shrink-0 text-muted-foreground"
+						/>
 					</>
 				)
 				return onStatement ? (
@@ -64,7 +75,7 @@ export function AllocationRows({
 						type="button"
 						key={row.id}
 						onClick={() => onStatement(row.id)}
-						className="cursor-pointer rounded p-2 text-left hover:bg-muted"
+						className={cn(ROW, "cursor-pointer text-left")}
 					>
 						{content}
 					</button>
@@ -72,7 +83,7 @@ export function AllocationRows({
 					<Link
 						key={row.id}
 						href={record ? pathStatement(row.id) : pathRecord(row.id)}
-						className="rounded p-2 hover:bg-muted"
+						className={ROW}
 					>
 						{content}
 					</Link>
