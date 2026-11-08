@@ -2387,6 +2387,8 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"app/drill/page.tsx#route.navigation": [
 		"Escape and Back restore scroll and focus in every mode",
+		"closing the full-page drill leaves it out of Back history",
+		"closing a deep-linked full-page drill replaces it with the Dashboard",
 	],
 	"src/components/table/filter-bar.tsx#export.FilterField.behaviour": [
 		"active filters are highlighted one for one with the Clear count and clear on their own",

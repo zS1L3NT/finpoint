@@ -440,6 +440,38 @@ test("Escape and Back restore scroll and focus in every mode", async ({ page, is
 	await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(scrolled - 3)
 })
 
+test("closing the full-page drill leaves it out of Back history", async ({ page }) => {
+	await seedWorkspace(page)
+	for (const close of ["escape", "link"] as const) {
+		await page.goto(overview)
+		await page
+			.getByRole("button", { name: /^Spent/ })
+			.first()
+			.click()
+		await expect(page.getByTestId("drill-total")).toBeVisible()
+		await chooseMode(page, "Full page")
+		await expect(page).toHaveURL(/\/drill\?/)
+		if (close === "escape") await page.keyboard.press("Escape")
+		else await page.getByRole("button", { name: "Back to Dashboard" }).click()
+		await expect(page).not.toHaveURL(/\/drill/)
+		await page.goBack()
+		await expect(page).not.toHaveURL(/drill=/)
+		await expect(page.getByTestId("drill-total")).toHaveCount(0)
+	}
+})
+
+test("closing a deep-linked full-page drill replaces it with the Dashboard", async ({ page }) => {
+	await seedWorkspace(page)
+	await page.goto(overview)
+	await page.goto(`${overview.replace(/^\/[^?]*/, "/drill")}&drill=metric:spent`)
+	await expect(page).toHaveURL(/\/drill\?/)
+	await page.keyboard.press("Escape")
+	await expect(page).not.toHaveURL(/\/drill/)
+	await page.goBack()
+	await expect(page).not.toHaveURL(/\/drill/)
+	await expect(page).not.toHaveURL(/drill=/)
+})
+
 test("drill rows: only clickable rows react, hover fills sit inset and nothing shifts", async ({
 	page,
 	isMobile,

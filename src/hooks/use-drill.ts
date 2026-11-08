@@ -11,7 +11,14 @@ const RESTORABLE = 'button, a[href], [role="application"]'
 const labelOf = (element: Element) =>
 	element.getAttribute("aria-label") ?? element.textContent?.trim().slice(0, 80) ?? ""
 
-type DrillReturn = { y: number; label: string; index: number; returning?: boolean }
+type DrillReturn = {
+	y: number
+	label: string
+	index: number
+	returning?: boolean
+	/** History entries pushed on the full page since it replaced the Dashboard entry. */
+	steps?: number
+}
 
 function readReturn(): DrillReturn | null {
 	try {
@@ -105,6 +112,7 @@ export function useDrill() {
 			const saved = readReturn()
 			if (saved && window.location.pathname === pathDashboard())
 				writeReturn({ ...saved, returning: true })
+			else writeReturn(null)
 		}
 	}, [page])
 	const current = () => Object.fromEntries(params)
@@ -127,6 +135,7 @@ export function useDrill() {
 					.indexOf(element),
 			})
 		}
+		if (page) bumpSteps()
 		router.push(
 			selection?.kind === s.kind && selection.value === s.value && selection.at === s.at
 				? base({ ...current(), drill: undefined, focus: undefined })
@@ -134,12 +143,32 @@ export function useDrill() {
 			{ scroll: false },
 		)
 	}
+	/** Counts a history entry pushed on the full page, so closing can step back over all of them. */
+	const bumpSteps = () => {
+		const saved = readReturn()
+		if (saved) writeReturn({ ...saved, steps: (saved.steps ?? 0) + 1 })
+	}
 	const close = () => {
+		// The full page replaced a Dashboard entry: step back to it instead of pushing a new one, so
+		// Back does not reopen a drill that was closed. A deep link has no such entry, so replace.
+		if (page) {
+			const saved = readReturn()
+			if (saved) window.history.go(-((saved.steps ?? 0) + 1))
+			else
+				router.replace(
+					pathDashboard({ ...current(), drill: undefined, focus: undefined }),
+					{
+						scroll: false,
+					},
+				)
+			return
+		}
 		router.push(pathDashboard({ ...current(), drill: undefined, focus: undefined }), {
 			scroll: false,
 		})
 	}
 	const pivot = (focus: string | null) => {
+		if (page) bumpSteps()
 		router.push(base({ ...current(), focus: focus ?? undefined }), { scroll: false })
 	}
 	/** Moves the open drill between the Dashboard overlay and the full page without a new history entry. */
