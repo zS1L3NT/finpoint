@@ -420,6 +420,7 @@ test("Escape and Back restore scroll and focus in every mode", async ({ page, is
 	await expect(page).not.toHaveURL(/\/drill/)
 	await expect(day).toBeFocused()
 	await day.press("Enter")
+	await expect(page).toHaveURL(/\/drill\?/)
 	await page.goBack()
 	await expect(page).not.toHaveURL(/\/drill/)
 	await expect(day).toBeFocused()

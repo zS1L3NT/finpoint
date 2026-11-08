@@ -13,13 +13,6 @@ const labelOf = (element: Element) =>
 
 type DrillReturn = { y: number; label: string; index: number; returning?: boolean }
 
-// The browser's own Back and Forward restore too: note when the last one happened.
-let lastTraversal = 0
-if (typeof window !== "undefined")
-	window.addEventListener("popstate", () => {
-		lastTraversal = Date.now()
-	})
-
 function readReturn(): DrillReturn | null {
 	try {
 		return JSON.parse(sessionStorage.getItem(RETURN_KEY) ?? "null")
@@ -84,7 +77,7 @@ export function useDrill() {
 		if (page || selection) return
 		const saved = readReturn()
 		writeReturn(null)
-		if (!saved || (!saved.returning && Date.now() - lastTraversal > 1500)) return
+		if (!saved?.returning) return
 		const until = performance.now() + 2000
 		let frame = 0
 		const restore = () => {
@@ -104,6 +97,16 @@ export function useDrill() {
 		frame = requestAnimationFrame(restore)
 		return () => cancelAnimationFrame(frame)
 	}, [page, !!selection])
+	// Leaving the full page for the Dashboard by any route (its Back button, Escape, the browser's
+	// Back) means returning: the location has already changed when this cleanup runs.
+	useEffect(() => {
+		if (!page) return
+		return () => {
+			const saved = readReturn()
+			if (saved && window.location.pathname === pathDashboard())
+				writeReturn({ ...saved, returning: true })
+		}
+	}, [page])
 	const current = () => Object.fromEntries(params)
 	const href = (s: Selection) =>
 		base({
@@ -132,8 +135,6 @@ export function useDrill() {
 		)
 	}
 	const close = () => {
-		const saved = page ? readReturn() : null
-		if (saved) writeReturn({ ...saved, returning: true })
 		router.push(pathDashboard({ ...current(), drill: undefined, focus: undefined }), {
 			scroll: false,
 		})
