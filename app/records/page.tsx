@@ -243,7 +243,7 @@ export default function RecordsPage() {
 							? `Records for ${month} ${year}.`
 							: "Browse and manage your financial records. Choose a month to narrow the list."
 					}
-					description="Ledger view"
+					description="All your Records"
 					icon="lucide:receipt-text"
 					actions={
 						<ButtonGroup className="w-full sm:w-fit">
@@ -458,7 +458,7 @@ function RecordFilters({
 					</SelectTrigger>
 					<SelectContent align="start" variant="filter">
 						<SelectGroup>
-							<SelectItem value="all">Any treatment</SelectItem>
+							<SelectItem value="all">Any kind</SelectItem>
 							{TREATMENTS.map(item => (
 								<SelectItem key={item.value} value={item.value}>
 									{item.label}

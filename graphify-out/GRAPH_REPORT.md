@@ -1,17 +1,17 @@
-# Graph Report - t3-69efe8e6  (2026-11-08)
+# Graph Report - t3-69efe8e6  (2026-11-09)
 
 ## Corpus Check
-- 271 files · ~246,082 words
+- 271 files · ~246,702 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 9 file(s) not represented in the graph (top: (none) 5, .example 1, .lock 1)
 
 ## Summary
-- 2048 nodes · 8135 edges · 99 communities (85 shown, 14 thin omitted)
+- 2048 nodes · 8138 edges · 99 communities (85 shown, 14 thin omitted)
 - Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 144 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `d0665c2e`
+- Built from commit: `1fe8c074`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -491,7 +491,7 @@ Nodes (4): Agent Behavior, Generated / Ignored Files, src/components/*, src/comp
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `cn()` connect `cn` to `Button`, `duplicates/page.tsx`, `primitives.tsx`, `(month)/page.tsx`, `sync/page.tsx`, `category-filter.tsx`, `records/[id]/page.tsx`, `budgets/page.tsx`, `utils.ts`, `displays.tsx`, `routes.ts`, `combobox.tsx`, `importer/page.tsx`, `themeColor`, `alert-dialog.tsx`, `pagination.tsx`, `spending-calendar.tsx`, `lucide-react`, `mode-menu.tsx`, `category-history-chart.tsx`?**
-  _High betweenness centrality (0.102) - this node is a cross-community bridge._
+  _High betweenness centrality (0.101) - this node is a cross-community bridge._
 - **What connects `@fontsource-variable/inter`, `shadcn`, `tailwindcss` to the rest of the system?**
   _122 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Button` be split into smaller, more focused modules?**

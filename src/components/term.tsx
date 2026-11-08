@@ -8,6 +8,10 @@ const DEFINITIONS = {
 		"A Record is pending when the allocated money does not add up to its amount, or a Statement is unconfirmed. For example, a $20 Record with only $15 allocated is pending.",
 	Allocation:
 		"An Allocation assigns part or all of a Statement amount to a Record. For example, $12 of a $30 Statement can explain one Record.",
+	Statement:
+		"A Statement is one row imported from your bank. For example, a $12 card payment is one Statement.",
+	"Monthly Budget":
+		"A Monthly Budget is a spending plan you reuse each month. For example, Daily can hold $950 a month.",
 	"Effective spending":
 		"Personal spending with refunds subtracted, excluding transfers and saving / investment. For example, $50 spent and a $10 refund count as $40.",
 	"Left over":

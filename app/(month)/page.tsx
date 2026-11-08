@@ -586,7 +586,7 @@ function SummaryBand({
 						key: "leftover",
 						label: "Left over",
 						icon: "lucide:scale",
-						value: waiting ? "—" : formatCurrency(summary.surplus),
+						value: waiting ? "Not yet" : formatCurrency(summary.surplus),
 						detail: waiting
 							? "Waiting for income"
 							: summary.surplus_rate === null

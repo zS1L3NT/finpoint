@@ -31,7 +31,9 @@ export default function BudgetProgressChart({
 
 	return (
 		<div className="grid gap-2">
-			<p className="text-xs font-medium text-muted-foreground">Cumulative spending · SGD</p>
+			<p className="text-xs font-medium text-muted-foreground">
+				Running total of spending · SGD
+			</p>
 			<TrendChart
 				label="Cumulative budget spending by day"
 				className="h-72 w-full sm:h-80"

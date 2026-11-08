@@ -210,7 +210,7 @@ export function DrillPanel({
 							<p className="mt-1 text-xs text-muted-foreground">
 								{statement ? (
 									<>
-										Statement · {statement.account.name} ·{" "}
+										<Term name="Statement" /> · {statement.account.name} ·{" "}
 										{parseDatetime(statement.datetime).toFormat(
 											"d MMM yyyy, HH:mm",
 										)}
@@ -222,7 +222,7 @@ export function DrillPanel({
 									<>
 										{pluralize(data.records.length, "Record")} ·{" "}
 										{sheet && !full ? (
-											data.meta?.split(" · ")[0]
+											data.measureLabel
 										) : (
 											<>
 												{data.meta} · Includes <Term name="Pending" />{" "}
@@ -350,7 +350,7 @@ export function DrillPanel({
 												{index ? ` · ${comparison.months.join(", ")}` : ""}
 												{index && comparison.months.length ? (
 													<span className="block">
-														{formatCurrency(comparison.total)} ÷{" "}
+														{formatCurrency(comparison.total)} over{" "}
 														{comparison.months.length}{" "}
 														{comparison.months.length === 1
 															? "month"
@@ -418,8 +418,8 @@ export function DrillPanel({
 										</section>
 									))}
 									<p className="col-span-2 text-muted-foreground">
-										Labels show Record titles found on only one side. The
-										average divides spending by the included months.
+										A label marks a Record that appears on one side only. The
+										average is the total divided by the number of months.
 									</p>
 								</div>
 							) : !data.records.length ? (

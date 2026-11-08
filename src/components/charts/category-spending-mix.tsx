@@ -75,7 +75,7 @@ export default function CategorySpendingMix({
 				</p>
 			) : null}
 			<p className="text-[0.6875rem] leading-relaxed text-muted-foreground">
-				Shares exclude refunds.
+				Each share is spending before refunds.
 			</p>
 		</div>
 	)

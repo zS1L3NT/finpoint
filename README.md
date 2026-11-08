@@ -41,7 +41,7 @@ I've also hosted Finpoint on my personal subdomain at https://finpoint.zectan.co
   - Biggest category changes against your usual spending
   - Page-wide Monthly Budget scope that stays across chart links and month changes
   - Reusable Monthly Budgets with monthly amount overrides
-  - Review links for Pending Records, Pending Statements, unallocated Statements and unbudgeted spending
+  - Review links for Pending Records, Pending Statements, Statements with no Record yet and unbudgeted spending
   - A start state on an empty workspace offering statement import or demo data
   - A notice on an empty month offering the latest recorded month
 - Records
@@ -188,7 +188,7 @@ Allocate assigns Statements to Records. Statement cleanup lives in the Statement
 Dashboard metric labels open their Records directly. Dotted-underlined terms in drill-down copy offer definitions with examples. Hover, focus, or tap a term; press Escape to close. Effective spending follows treatment rules and includes refunds. Left over means income minus personal spending, before saving and investment contributions.
 
 The Dashboard starts with a factual month headline and an Attention list of up to three
-things to review. Over-plan Monthly Budgets come first, followed by unallocated Statements,
+things to review. Over-plan Monthly Budgets come first, followed by Statements with no Record yet,
 Pending Records, Pending Statements and unbudgeted spending. Select a budget row to see
 its Records in the drill-down; other rows take you to the filtered work list. Changing the
 budget scope updates the headline while Attention continues to cover the whole month.

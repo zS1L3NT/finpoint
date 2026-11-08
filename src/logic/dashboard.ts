@@ -1270,11 +1270,8 @@ export function buildAttention(
 		...(data.review.unallocated_statements
 			? [
 					{
-						label: pluralize(
-							data.review.unallocated_statements,
-							"unallocated Statement",
-						),
-						detail: "Totals may be low until these are allocated.",
+						label: `${pluralize(data.review.unallocated_statements, "Statement")} with no Record yet`,
+						detail: "Totals may be low until you allocate them.",
 						icon: "lucide:inbox",
 						href: pathAllocator({ ...range, is_pending: "false" }),
 						selection: undefined,

@@ -1447,7 +1447,7 @@
       "file_type": "code",
       "norm_label": "cashflowpoint",
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L9"
+      "source_location": "L10"
     },
     {
       "id": "src_components_charts_category_movers_mover",
@@ -5470,7 +5470,7 @@
       "file_type": "code",
       "norm_label": "buildseries()",
       "source_file": "src/components/charts/budget-progress-chart.tsx",
-      "source_location": "L68"
+      "source_location": "L70"
     },
     {
       "id": "src_components_charts_trend_chart_trendchart",
@@ -7162,7 +7162,7 @@
       "file_type": "code",
       "norm_label": "readreturn()",
       "source_file": "src/hooks/use-drill.ts",
-      "source_location": "L16"
+      "source_location": "L23"
     },
     {
       "id": "src_hooks_use_drill_usedrill",
@@ -7174,7 +7174,7 @@
       "file_type": "code",
       "norm_label": "usedrill()",
       "source_file": "src/hooks/use-drill.ts",
-      "source_location": "L33"
+      "source_location": "L40"
     },
     {
       "id": "src_hooks_use_drill_writereturn",
@@ -7186,7 +7186,7 @@
       "file_type": "code",
       "norm_label": "writereturn()",
       "source_file": "src/hooks/use-drill.ts",
-      "source_location": "L24"
+      "source_location": "L31"
     },
     {
       "id": "src_hooks_use_settings_usedefaultfilterenddatetoday",
@@ -7486,7 +7486,7 @@
       "file_type": "code",
       "norm_label": "getdrillstatement()",
       "source_file": "src/logic/drilldown.ts",
-      "source_location": "L213"
+      "source_location": "L242"
     },
     {
       "id": "src_logic_pending_pendingstatementids",
@@ -7762,7 +7762,7 @@
       "file_type": "code",
       "norm_label": "choosemode()",
       "source_file": "tests/core/drilldown.e2e.ts",
-      "source_location": "L315"
+      "source_location": "L331"
     },
     {
       "id": "tests_core_drilldown_e2e_dashboardcards",
@@ -7774,7 +7774,7 @@
       "file_type": "code",
       "norm_label": "dashboardcards()",
       "source_file": "tests/core/drilldown.e2e.ts",
-      "source_location": "L307"
+      "source_location": "L323"
     },
     {
       "id": "tests_support_charts_card",
@@ -10090,7 +10090,7 @@
       "file_type": "code",
       "norm_label": "cashflowchart()",
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L18"
+      "source_location": "L19"
     },
     {
       "id": "src_components_charts_category_movers_categorymovers",
@@ -12250,7 +12250,7 @@
       "file_type": "code",
       "norm_label": "term()",
       "source_file": "src/components/term.tsx",
-      "source_location": "L17"
+      "source_location": "L21"
     },
     {
       "id": "src_components_ui_sidebar_sidebarmenubutton",
@@ -17828,7 +17828,7 @@
       "file_type": "code",
       "norm_label": "facetnotapplicable",
       "source_file": "tests/component-inventory.ts",
-      "source_location": "L4428"
+      "source_location": "L4430"
     },
     {
       "id": "tests_component_inventory_modalanimationcoverage",
@@ -17839,7 +17839,7 @@
       "file_type": "code",
       "norm_label": "modalanimationcoverage",
       "source_file": "tests/component-inventory.ts",
-      "source_location": "L4717"
+      "source_location": "L4719"
     },
     {
       "id": "tests_component_inventory_notapplicable",
@@ -17861,7 +17861,7 @@
       "file_type": "code",
       "norm_label": "openfacets",
       "source_file": "tests/component-inventory.ts",
-      "source_location": "L4424"
+      "source_location": "L4426"
     },
     {
       "id": "tests_component_inventory_routeinventory",
@@ -17905,7 +17905,7 @@
       "file_type": "code",
       "norm_label": "scenarioprojectexemptions",
       "source_file": "tests/component-inventory.ts",
-      "source_location": "L4624"
+      "source_location": "L4626"
     },
     {
       "id": "tests_component_inventory_scenarioprojectlexiconexemptions",
@@ -17916,7 +17916,7 @@
       "file_type": "code",
       "norm_label": "scenarioprojectlexiconexemptions",
       "source_file": "tests/component-inventory.ts",
-      "source_location": "L4691"
+      "source_location": "L4693"
     },
     {
       "id": "tests_component_inventory_scenarioprojects",
@@ -17927,7 +17927,7 @@
       "file_type": "code",
       "norm_label": "scenarioprojects",
       "source_file": "tests/component-inventory.ts",
-      "source_location": "L4474"
+      "source_location": "L4476"
     },
     {
       "id": "tests_core_ledger_e2e",
@@ -32040,7 +32040,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/budget-progress-chart.tsx",
-      "source_location": "L35",
+      "source_location": "L37",
       "weight": 1.0
     },
     {
@@ -32052,7 +32052,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/budget-progress-chart.tsx",
-      "source_location": "L78",
+      "source_location": "L80",
       "weight": 1.0
     },
     {
@@ -32064,7 +32064,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/budget-progress-chart.tsx",
-      "source_location": "L82",
+      "source_location": "L84",
       "weight": 1.0
     },
     {
@@ -32076,7 +32076,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L131",
+      "source_location": "L132",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_charts_cashflow_chart_cashflowchart",
+      "target": "src_components_term_term",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/charts/cashflow-chart.tsx",
+      "source_location": "L137",
       "weight": 1.0
     },
     {
@@ -32088,7 +32100,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L56",
+      "source_location": "L57",
       "weight": 1.0
     },
     {
@@ -32100,7 +32112,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L60",
+      "source_location": "L61",
       "weight": 1.0
     },
     {
@@ -32112,7 +32124,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L84",
+      "source_location": "L85",
       "weight": 1.0
     },
     {
@@ -36804,7 +36816,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/drill/panel.tsx",
-      "source_location": "L108",
+      "source_location": "L110",
       "weight": 1.0
     },
     {
@@ -36816,7 +36828,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/drill/panel.tsx",
-      "source_location": "L114",
+      "source_location": "L116",
       "weight": 1.0
     },
     {
@@ -36828,7 +36840,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/drill/panel.tsx",
-      "source_location": "L134",
+      "source_location": "L136",
       "weight": 1.0
     },
     {
@@ -36840,7 +36852,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/drill/panel.tsx",
-      "source_location": "L142",
+      "source_location": "L144",
       "weight": 1.0
     },
     {
@@ -36852,31 +36864,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/drill/panel.tsx",
-      "source_location": "L159",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_drill_panel_drillpanel",
-      "target": "src_lib_utils_parsedatetime",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/drill/panel.tsx",
-      "source_location": "L194",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_drill_panel_drillpanel",
-      "target": "src_lib_utils_pluralize",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/drill/panel.tsx",
-      "source_location": "L198",
+      "source_location": "L161",
       "weight": 1.0
     },
     {
@@ -36888,7 +36876,31 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/drill/panel.tsx",
-      "source_location": "L212",
+      "source_location": "L213",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_drill_panel_drillpanel",
+      "target": "src_lib_utils_parsedatetime",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/drill/panel.tsx",
+      "source_location": "L214",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_drill_panel_drillpanel",
+      "target": "src_lib_utils_pluralize",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/drill/panel.tsx",
+      "source_location": "L218",
       "weight": 1.0
     },
     {
@@ -36900,7 +36912,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/drill/panel.tsx",
-      "source_location": "L229",
+      "source_location": "L246",
       "weight": 1.0
     },
     {
@@ -36912,7 +36924,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/drill/panel.tsx",
-      "source_location": "L241",
+      "source_location": "L258",
       "weight": 1.0
     },
     {
@@ -36924,7 +36936,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/drill/panel.tsx",
-      "source_location": "L289",
+      "source_location": "L306",
       "weight": 1.0
     },
     {
@@ -36936,7 +36948,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/drill/panel.tsx",
-      "source_location": "L293",
+      "source_location": "L310",
       "weight": 1.0
     },
     {
@@ -36948,7 +36960,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/drill/panel.tsx",
-      "source_location": "L347",
+      "source_location": "L364",
       "weight": 1.0
     },
     {
@@ -36960,7 +36972,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/drill/panel.tsx",
-      "source_location": "L352",
+      "source_location": "L369",
       "weight": 1.0
     },
     {
@@ -36972,7 +36984,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/drill/panel.tsx",
-      "source_location": "L358",
+      "source_location": "L375",
       "weight": 1.0
     },
     {
@@ -36984,7 +36996,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/drill/panel.tsx",
-      "source_location": "L379",
+      "source_location": "L396",
       "weight": 1.0
     },
     {
@@ -36996,31 +37008,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/drill/panel.tsx",
-      "source_location": "L419",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_drill_panel_drillpanel",
-      "target": "src_components_monthly_budget_badge_monthlybudgetbadge",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/drill/panel.tsx",
-      "source_location": "L467",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_drill_panel_drillpanel",
-      "target": "src_components_allocation_progress_allocationprogress",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/drill/panel.tsx",
-      "source_location": "L474",
+      "source_location": "L442",
       "weight": 1.0
     },
     {
@@ -37033,6 +37021,30 @@
       "context": "call",
       "source_file": "src/components/drill/panel.tsx",
       "source_location": "L49",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_drill_panel_drillpanel",
+      "target": "src_components_monthly_budget_badge_monthlybudgetbadge",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/drill/panel.tsx",
+      "source_location": "L490",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_drill_panel_drillpanel",
+      "target": "src_components_allocation_progress_allocationprogress",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/drill/panel.tsx",
+      "source_location": "L497",
       "weight": 1.0
     },
     {
@@ -37068,19 +37080,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/drill/panel.tsx",
-      "source_location": "L587",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_drill_panel_drillpanel",
-      "target": "src_components_ui_sheet_sheet",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/drill/panel.tsx",
-      "source_location": "L607",
+      "source_location": "L610",
       "weight": 1.0
     },
     {
@@ -37092,7 +37092,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/drill/panel.tsx",
-      "source_location": "L61",
+      "source_location": "L63",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_drill_panel_drillpanel",
+      "target": "src_components_ui_sheet_sheet",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/drill/panel.tsx",
+      "source_location": "L630",
       "weight": 1.0
     },
     {
@@ -37104,7 +37116,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/drill/panel.tsx",
-      "source_location": "L616",
+      "source_location": "L639",
       "weight": 1.0
     },
     {
@@ -37116,7 +37128,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/drill/panel.tsx",
-      "source_location": "L644",
+      "source_location": "L667",
       "weight": 1.0
     },
     {
@@ -37128,7 +37140,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/drill/panel.tsx",
-      "source_location": "L65",
+      "source_location": "L67",
       "weight": 1.0
     },
     {
@@ -37140,7 +37152,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/drill/panel.tsx",
-      "source_location": "L659",
+      "source_location": "L682",
       "weight": 1.0
     },
     {
@@ -37152,7 +37164,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/drill/panel.tsx",
-      "source_location": "L660",
+      "source_location": "L683",
       "weight": 1.0
     },
     {
@@ -41448,7 +41460,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/term.tsx",
-      "source_location": "L20",
+      "source_location": "L24",
       "weight": 1.0
     },
     {
@@ -41460,7 +41472,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/term.tsx",
-      "source_location": "L21",
+      "source_location": "L25",
       "weight": 1.0
     },
     {
@@ -41472,7 +41484,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/term.tsx",
-      "source_location": "L42",
+      "source_location": "L46",
       "weight": 1.0
     },
     {
@@ -45060,7 +45072,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/hooks/use-drill.ts",
-      "source_location": "L106",
+      "source_location": "L113",
       "weight": 1.0
     },
     {
@@ -45072,7 +45084,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/hooks/use-drill.ts",
-      "source_location": "L39",
+      "source_location": "L46",
       "weight": 1.0
     },
     {
@@ -45084,7 +45096,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/hooks/use-drill.ts",
-      "source_location": "L61",
+      "source_location": "L68",
       "weight": 1.0
     },
     {
@@ -45096,7 +45108,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/hooks/use-drill.ts",
-      "source_location": "L78",
+      "source_location": "L85",
       "weight": 1.0
     },
     {
@@ -45108,7 +45120,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/hooks/use-drill.ts",
-      "source_location": "L86",
+      "source_location": "L93",
       "weight": 1.0
     },
     {
@@ -45888,7 +45900,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L1279",
+      "source_location": "L1276",
       "weight": 1.0
     },
     {
@@ -45900,7 +45912,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L1290",
+      "source_location": "L1287",
       "weight": 1.0
     },
     {
@@ -45912,7 +45924,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/logic/dashboard.ts",
-      "source_location": "L1305",
+      "source_location": "L1302",
       "weight": 1.0
     },
     {
@@ -46608,7 +46620,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/logic/drilldown.ts",
-      "source_location": "L171",
+      "source_location": "L196",
       "weight": 1.0
     },
     {
@@ -46620,7 +46632,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/logic/drilldown.ts",
-      "source_location": "L204",
+      "source_location": "L233",
       "weight": 1.0
     },
     {
@@ -46692,7 +46704,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/logic/drilldown.ts",
-      "source_location": "L214",
+      "source_location": "L243",
       "weight": 1.0
     },
     {
@@ -53952,7 +53964,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/core/drilldown.e2e.ts",
-      "source_location": "L307",
+      "source_location": "L323",
       "weight": 1.0
     },
     {
@@ -53964,7 +53976,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/core/drilldown.e2e.ts",
-      "source_location": "L315",
+      "source_location": "L331",
       "weight": 1.0
     },
     {
@@ -62562,7 +62574,7 @@
     },
     {
       "source": "src_components_charts_cashflow_chart",
-      "target": "src_lib_chart_days_dayticks",
+      "target": "src_components_term_term",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -62574,7 +62586,7 @@
     },
     {
       "source": "src_components_charts_cashflow_chart",
-      "target": "src_lib_palette_themecolor",
+      "target": "src_lib_chart_days_dayticks",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -62586,7 +62598,7 @@
     },
     {
       "source": "src_components_charts_cashflow_chart",
-      "target": "src_logic_dashboard_getpaceview",
+      "target": "src_lib_palette_themecolor",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -62598,7 +62610,7 @@
     },
     {
       "source": "src_components_charts_cashflow_chart",
-      "target": "src_logic_drilldown_selection",
+      "target": "src_logic_dashboard_getpaceview",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -62606,6 +62618,18 @@
       "context": "import",
       "source_file": "src/components/charts/cashflow-chart.tsx",
       "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_charts_cashflow_chart",
+      "target": "src_logic_drilldown_selection",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/charts/cashflow-chart.tsx",
+      "source_location": "L8",
       "weight": 1.0
     },
     {
@@ -87094,7 +87118,7 @@
     },
     {
       "source": "src_components_charts_cashflow_chart",
-      "target": "src_lib_chart_days",
+      "target": "src_components_term",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -87106,7 +87130,7 @@
     },
     {
       "source": "src_components_charts_cashflow_chart",
-      "target": "src_lib_palette",
+      "target": "src_lib_chart_days",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -87118,7 +87142,7 @@
     },
     {
       "source": "src_components_charts_cashflow_chart",
-      "target": "src_logic_dashboard",
+      "target": "src_lib_palette",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -87126,6 +87150,18 @@
       "context": "import",
       "source_file": "src/components/charts/cashflow-chart.tsx",
       "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_charts_cashflow_chart",
+      "target": "src_logic_dashboard",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/charts/cashflow-chart.tsx",
+      "source_location": "L7",
       "type_only": true,
       "weight": 1.0
     },
@@ -87138,7 +87174,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L7",
+      "source_location": "L8",
       "type_only": true,
       "weight": 1.0
     },
@@ -103435,17 +103471,6 @@
     },
     {
       "source": "src_components_charts_budget_progress_chart",
-      "target": "src_components_charts_budget_progress_chart_buildseries",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/components/charts/budget-progress-chart.tsx",
-      "source_location": "L68",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_charts_budget_progress_chart",
       "target": "src_components_charts_budget_progress_chart_budgetprogresspoint",
       "relation": "contains",
       "_origin": "ast",
@@ -103456,14 +103481,14 @@
       "weight": 1.0
     },
     {
-      "source": "src_components_charts_cashflow_chart",
-      "target": "src_components_charts_cashflow_chart_cashflowchart",
+      "source": "src_components_charts_budget_progress_chart",
+      "target": "src_components_charts_budget_progress_chart_buildseries",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
-      "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L18",
+      "source_file": "src/components/charts/budget-progress-chart.tsx",
+      "source_location": "L70",
       "weight": 1.0
     },
     {
@@ -103474,7 +103499,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L9",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_charts_cashflow_chart",
+      "target": "src_components_charts_cashflow_chart_cashflowchart",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/charts/cashflow-chart.tsx",
+      "source_location": "L19",
       "weight": 1.0
     },
     {
@@ -105520,7 +105556,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/term.tsx",
-      "source_location": "L17",
+      "source_location": "L21",
       "weight": 1.0
     },
     {
@@ -109139,7 +109175,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/hooks/use-drill.ts",
-      "source_location": "L16",
+      "source_location": "L23",
       "weight": 1.0
     },
     {
@@ -109150,7 +109186,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/hooks/use-drill.ts",
-      "source_location": "L24",
+      "source_location": "L31",
       "weight": 1.0
     },
     {
@@ -109161,7 +109197,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/hooks/use-drill.ts",
-      "source_location": "L33",
+      "source_location": "L40",
       "weight": 1.0
     },
     {
@@ -110772,17 +110808,6 @@
     },
     {
       "source": "src_logic_drilldown",
-      "target": "src_logic_drilldown_getdrillstatement",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/logic/drilldown.ts",
-      "source_location": "L213",
-      "weight": 1.0
-    },
-    {
-      "source": "src_logic_drilldown",
       "target": "src_logic_drilldown_getdrilldown",
       "relation": "contains",
       "_origin": "ast",
@@ -110790,6 +110815,17 @@
       "confidence_score": 1.0,
       "source_file": "src/logic/drilldown.ts",
       "source_location": "L22",
+      "weight": 1.0
+    },
+    {
+      "source": "src_logic_drilldown",
+      "target": "src_logic_drilldown_getdrillstatement",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/logic/drilldown.ts",
+      "source_location": "L242",
       "weight": 1.0
     },
     {
@@ -113605,7 +113641,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tests/component-inventory.ts",
-      "source_location": "L4424",
+      "source_location": "L4426",
       "weight": 1.0
     },
     {
@@ -113616,7 +113652,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tests/component-inventory.ts",
-      "source_location": "L4428",
+      "source_location": "L4430",
       "weight": 1.0
     },
     {
@@ -113627,7 +113663,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tests/component-inventory.ts",
-      "source_location": "L4474",
+      "source_location": "L4476",
       "weight": 1.0
     },
     {
@@ -113638,7 +113674,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tests/component-inventory.ts",
-      "source_location": "L4624",
+      "source_location": "L4626",
       "weight": 1.0
     },
     {
@@ -113649,7 +113685,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tests/component-inventory.ts",
-      "source_location": "L4691",
+      "source_location": "L4693",
       "weight": 1.0
     },
     {
@@ -113660,7 +113696,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tests/component-inventory.ts",
-      "source_location": "L4717",
+      "source_location": "L4719",
       "weight": 1.0
     },
     {
@@ -120241,5 +120277,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "d0665c2e771050c8bfde060e731116fe3464dbda"
+  "built_at_commit": "1fe8c0749c366ac5a3f7dcc34ed90d8ec83bdb34"
 }

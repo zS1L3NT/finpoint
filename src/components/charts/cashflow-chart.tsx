@@ -1,6 +1,7 @@
 import { DateTime } from "luxon"
 import TrendChart from "@/components/charts/trend-chart"
 import MonthlyBudgetBadge from "@/components/monthly-budget-badge"
+import Term from "@/components/term"
 import { dayTicks } from "@/lib/chart-days"
 import { themeColor } from "@/lib/palette"
 import type { getPaceView } from "@/logic/dashboard"
@@ -51,7 +52,7 @@ export default function CashflowChart({
 		>
 			<div className="flex min-h-0 flex-1 flex-col">
 				<p className="mb-2 text-xs font-medium text-muted-foreground">
-					Cumulative spending · SGD
+					Running total of spending · SGD
 				</p>
 				<TrendChart
 					label="Cumulative spending by day"
@@ -133,14 +134,12 @@ export default function CashflowChart({
 				))}
 			</div>
 			<p className="text-xs text-muted-foreground">
-				Each colour shows a Monthly Budget's cumulative spending.{" "}
-				{showProjection
-					? "Dashed lines extend each budget's gross spending pace and include scheduled Records. "
-					: ""}
+				Each colour is one <Term name="Monthly Budget" />, added up day by day.{" "}
+				{showProjection ? "Dashed lines show where each one is heading. " : ""}
 				{forecast.some(b => b.previous)
 					? `Dotted line: ${previous.toFormat("MMMM")} for comparison. `
 					: ""}
-				Hover or focus a day to read its total. Select it to open its Records.
+				Select a day to see its Records.
 			</p>
 		</div>
 	)

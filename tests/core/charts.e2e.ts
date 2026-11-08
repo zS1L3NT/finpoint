@@ -458,7 +458,7 @@ test.describe("pinned overview date", () => {
 				await page.keyboard.press("Escape")
 			}
 			const mix = card(page, "Categories this month")
-			await expect(mix).toContainText("$306.63 expenses · $20.00 refunds")
+			await expect(mix).toContainText("$306.63 spent − $20.00 refunds")
 			await expect(mix.getByRole("button", { name: /Shopping/ })).toContainText("$100.00")
 			await expect(mix.getByRole("button", { name: /Shopping/ })).toContainText(
 				"$20.00 refunded · $80.00 net",
@@ -516,7 +516,7 @@ test.describe("pinned overview date", () => {
 			).toHaveAttribute("aria-pressed", "true")
 			await expect(budgets).toContainText("no plan")
 			await expect(card(page, "Categories this month")).toContainText(
-				"$192.03 expenses · $0.00 refunds",
+				"$192.03 spent − $0.00 refunds",
 			)
 			await budgets.getByRole("button", { name: "Recurring", exact: true }).click()
 			await page

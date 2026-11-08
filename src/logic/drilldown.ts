@@ -120,19 +120,30 @@ export async function getDrilldown(
 								? `${view.dashboard.monthlyBudgets.find(b => b.id === selection.value)?.name ?? (selection.value === "unbudgeted" ? "Unbudgeted" : "All budgets")} in ${date.toFormat("MMMM")}`
 								: `Spending in ${date.toFormat("MMMM")}`
 
+	const measureLabel =
+		selection.kind === "metric"
+			? (
+					{
+						spent: "Spending",
+						income: "Income",
+						leftover: "Left over",
+						saved: "Saved",
+					} as Record<string, string>
+				)[selection.value]
+			: "Spending"
 	const meta =
 		selection.kind === "metric"
 			? (
 					{
-						spent: "Spending · refunds subtracted",
+						spent: "Spending after refunds",
 						income: "Income",
 						leftover: "Income less spending",
 						saved: "Saving and investing less withdrawals",
 					} as Record<string, string>
 				)[selection.value]
 			: selection.kind === "category-gross" || selection.kind === "month"
-				? "Spending · refunds excluded"
-				: "Spending · refunds subtracted"
+				? "Spending before refunds"
+				: "Spending after refunds"
 
 	const category = view.scopedCategories.find(c => c.id === selection.value)
 	const comparisonRecords =
@@ -198,6 +209,7 @@ export async function getDrilldown(
 				: undefined,
 		title,
 		meta,
+		measureLabel,
 		incomeHistory:
 			selection.kind === "metric" && selection.value === "income" ? view.incomeHistory : null,
 		total,

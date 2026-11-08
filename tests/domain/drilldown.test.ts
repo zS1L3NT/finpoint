@@ -214,13 +214,13 @@ test("each metric drill states what it is made of", async () => {
 		await loadDemoWorkspace()
 		const meta = async (value: string) =>
 			(await getDrilldown("October", 2026, "all", { kind: "metric", value }))!.meta
-		expect(await meta("spent")).toBe("Spending · refunds subtracted")
+		expect(await meta("spent")).toBe("Spending after refunds")
 		expect(await meta("income")).toBe("Income")
 		expect(await meta("leftover")).toBe("Income less spending")
 		expect(await meta("saved")).toBe("Saving and investing less withdrawals")
 		expect(
 			(await getDrilldown("October", 2026, "all", { kind: "month", value: "2026-10" }))!.meta,
-		).toBe("Spending · refunds excluded")
+		).toBe("Spending before refunds")
 		const empty = (await getDrilldown("November", 2026, "all", { kind: "metric", value: "income" }))!
 		expect(empty.total).toBe(0)
 		expect(empty.incomeHistory?.amount).toBeGreaterThan(0)
