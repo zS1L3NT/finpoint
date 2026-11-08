@@ -59,7 +59,15 @@ export function DrillModeMenu({
 					</Button>
 				</DropdownMenuTrigger>
 			</IconTip>
-			<DropdownMenuContent align="end" className="w-44">
+			<DropdownMenuContent
+				align="end"
+				className="w-44"
+				// Back on the trigger its tooltip would open and swallow the next Escape.
+				onCloseAutoFocus={event => {
+					event.preventDefault()
+					document.getElementById("drill-title")?.focus({ preventScroll: true })
+				}}
+			>
 				<DropdownMenuRadioGroup
 					value={current?.value}
 					onValueChange={value => onMode(value as DrillMode)}

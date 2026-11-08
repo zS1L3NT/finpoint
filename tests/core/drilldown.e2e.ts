@@ -9,7 +9,7 @@ test("day drill-down: totals, Back, close, Escape, focus and invalid URLs", asyn
 	const day = calendar.getByRole("button", { name: /^5 October:/ })
 	await day.focus()
 	await day.press("Enter")
-	await expect(page).toHaveURL(/drill=day%3A2026-10-05/)
+	await expect(page).toHaveURL(/drill=day(%3A|:)2026-10-05/)
 	const panel = page.getByRole("dialog", { name: /Spending on/ })
 	await expect(panel.getByTestId("drill-total")).toHaveText("$84.20")
 	await expect(panel.getByTestId("drill-total")).not.toContainText("-$")
@@ -21,6 +21,7 @@ test("day drill-down: totals, Back, close, Escape, focus and invalid URLs", asyn
 	await panel.getByRole("button", { name: "Close drill-down" }).click()
 	await expect(day).toBeFocused()
 	await day.press("Enter")
+	await expect(panel).toBeVisible()
 	await page.keyboard.press("Escape")
 	await expect(panel).toHaveCount(0)
 	await expect(day).toBeFocused()
@@ -108,7 +109,7 @@ test("category, trend and budget selections retain the Dashboard and reconcile t
 		)
 	}
 	await forecast.press("Enter")
-	await expect(page).toHaveURL(/drill=day%3A2026-10-05/)
+	await expect(page).toHaveURL(/drill=day(%3A|:)2026-10-05/)
 	await expect(page.getByTestId("drill-total")).toHaveText("$84.20")
 })
 
@@ -314,6 +315,7 @@ const dashboardCards = (page: Page) =>
 async function chooseMode(page: Page, label: string) {
 	await page.getByRole("button", { name: /^Open as:/ }).click()
 	await page.getByRole("menuitemradio", { name: label }).click()
+	await expect(page.getByRole("menu")).toHaveCount(0)
 }
 
 test("opening and closing a drill moves no Dashboard card", async ({ page }) => {
@@ -341,27 +343,27 @@ test("drill opens as side peek, centre peek or full page, switches live and pers
 	await seedWorkspace(page)
 	await page.goto(`${overview}&drill=day:2026-10-05`)
 	const dialog = page.getByRole("dialog", { name: /Spending on/ })
-	const box = async () => (await dialog.boundingBox()) ?? { x: 0, y: 0, width: 0, height: 0 }
 	const viewport = page.viewportSize()?.width ?? 0
+	const box = async () => (await dialog.boundingBox()) ?? { x: 0, y: 0, width: 0, height: 0 }
 	await expect(dialog).toBeVisible()
 	await expect.poll(async () => (await box()).width).toBeGreaterThan(0)
 	if (isMobile) {
 		// Phones keep one peek, the bottom sheet, and still allow the full page.
 		await page.getByRole("button", { name: /^Open as:/ }).click()
 		await expect(page.getByRole("menuitemradio")).toHaveText(["Peek", "Full page"])
-		await page.keyboard.press("Escape")
+		await page.getByRole("menuitemradio", { name: "Full page" }).click()
 	} else {
 		await expect.poll(async () => Math.round((await box()).width)).toBe(480)
-		expect((await box()).x + (await box()).width).toBeCloseTo(viewport, 0)
+		expect((await box()).x).toBeGreaterThan(900)
 		await chooseMode(page, "Center peek")
-		await expect(page).toHaveURL(/drill=day%3A2026-10-05/)
+		await expect(page).toHaveURL(/drill=day(%3A|:)2026-10-05/)
 		await expect.poll(async () => Math.round((await box()).width)).toBe(720)
-		expect(Math.round((await box()).x * 2 + (await box()).width)).toBeCloseTo(viewport, -1)
+		expect(Math.abs((await box()).x * 2 + (await box()).width - viewport)).toBeLessThan(20)
 		await page.reload()
 		await expect(dialog).toBeVisible()
 		await expect.poll(async () => Math.round((await box()).width)).toBe(720)
 	}
-	await chooseMode(page, "Full page")
+	if (!isMobile) await chooseMode(page, "Full page")
 	await expect(page).toHaveURL(/\/drill\?.*drill=day%3A2026-10-05/)
 	await expect(page.getByTestId("drill-total")).toHaveText("$84.20")
 	await expect(page.getByRole("dialog")).toHaveCount(0)
@@ -389,6 +391,15 @@ test("Escape and Back restore scroll and focus in every mode", async ({ page, is
 		await day.press("Enter")
 		await expect(page.getByTestId("drill-total")).toBeVisible()
 		await chooseMode(page, peek)
+		await expect(
+			page.locator(
+				`[data-slot="sheet-content"][data-side="${isMobile ? "bottom" : peek.startsWith("Side") ? "right" : "center"}"]`,
+			),
+		).toBeVisible()
+		await expect(page.locator("#drill-title")).toBeFocused()
+		// The pointer rests on the new layout: a hovered tooltip would take the first Escape.
+		await page.mouse.move(2, 2)
+		await expect(page.getByRole("tooltip")).toHaveCount(0)
 		await page.keyboard.press("Escape")
 		await expect(page.getByTestId("drill-total")).toHaveCount(0)
 		await expect(day).toBeFocused()

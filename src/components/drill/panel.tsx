@@ -590,6 +590,7 @@ export function DrillPanel({
 	return (
 		<motion.div exit={{ opacity: 0 }} transition={TRANSITION.base}>
 			<Sheet
+				key={sheet ? "sheet" : mode}
 				modal={!editingRecord}
 				open={present}
 				onOpenChange={open => {
