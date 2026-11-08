@@ -420,15 +420,15 @@
     "semantic_hash": ""
   },
   "src/components/table/amount-filter.tsx": {
-    "mtime": 1794132223.475396,
-    "seen": 1794139826.2827303,
-    "ast_hash": "c7770338f1eb198b9af94886aedaa10f",
+    "mtime": 1794141301.1798074,
+    "seen": 1794144981.9589527,
+    "ast_hash": "7b3ebfa9ba194414f38e8c15893da827",
     "semantic_hash": ""
   },
   "src/components/table/category-filter.tsx": {
-    "mtime": 1794132223.4633949,
-    "seen": 1794139826.2827313,
-    "ast_hash": "81a4fe0656de995047e3f6d463007a94",
+    "mtime": 1794141301.1718075,
+    "seen": 1794144981.958954,
+    "ast_hash": "c6e0e8da39523f87f8aa36073530b6c6",
     "semantic_hash": ""
   },
   "src/components/table/data-table.tsx": {
@@ -438,9 +438,9 @@
     "semantic_hash": "a4ff84041ec7b14b7b4959d5a6b6858a"
   },
   "src/components/table/filter-bar.tsx": {
-    "mtime": 1794133807.307798,
-    "seen": 1794139826.2827332,
-    "ast_hash": "ae9881754f41e3040ab96bb33513695e",
+    "mtime": 1794141301.1718075,
+    "seen": 1794144981.9589562,
+    "ast_hash": "a740cf43cf814a4d7e9c258f255b1d75",
     "semantic_hash": ""
   },
   "src/components/table/paginated-data-table.tsx": {
@@ -462,9 +462,9 @@
     "semantic_hash": ""
   },
   "src/components/table/record-columns.tsx": {
-    "mtime": 1794053857.9473636,
-    "seen": 1794053991.1816723,
-    "ast_hash": "374688df13ba9b0f203dfa8088d6a5b0",
+    "mtime": 1794141301.2198079,
+    "seen": 1794144981.9589605,
+    "ast_hash": "257c948c4b69b4412a2b413a14c2b060",
     "semantic_hash": ""
   },
   "src/components/table/row-groups.tsx": {
@@ -618,10 +618,10 @@
     "semantic_hash": "38450497248dda0cd108d67cf365e4b7"
   },
   "src/components/ui/select.tsx": {
-    "mtime": 1793935852.1683228,
-    "seen": 1793992690.739505,
-    "ast_hash": "0aaa5445ef51a3f77de266f42f4d1d25",
-    "semantic_hash": "0aaa5445ef51a3f77de266f42f4d1d25"
+    "mtime": 1794140967.37358,
+    "seen": 1794144981.9589922,
+    "ast_hash": "bd832b6ae48b83f24cc6aef2e8fc62f6",
+    "semantic_hash": ""
   },
   "src/components/ui/separator.tsx": {
     "mtime": 1793935852.1683228,
@@ -1242,9 +1242,9 @@
     "semantic_hash": ""
   },
   "tests/component-inventory.ts": {
-    "mtime": 1794069964.2504203,
-    "seen": 1794070165.7308874,
-    "ast_hash": "0df2938f4d0a5660b054736809d8e8cb",
+    "mtime": 1794143487.3531315,
+    "seen": 1794144981.9590888,
+    "ast_hash": "d5433ebf658972993482608fd9bc2175",
     "semantic_hash": ""
   },
   "tests/core/charts.e2e.ts": {
@@ -1254,9 +1254,9 @@
     "semantic_hash": ""
   },
   "tests/core/components.e2e.ts": {
-    "mtime": 1793935852.1683228,
-    "seen": 1793992690.7395928,
-    "ast_hash": "d500b09286160200740bfd88532f1be6",
+    "mtime": 1794143317.3529255,
+    "seen": 1794144981.9590912,
+    "ast_hash": "dae924f8d4bf921b94ece1b0f82b6896",
     "semantic_hash": ""
   },
   "tests/core/editors.e2e.ts": {
@@ -1302,9 +1302,9 @@
     "semantic_hash": ""
   },
   "tests/core/sheets.e2e.ts": {
-    "mtime": 1794020351.3477237,
-    "seen": 1794020390.152879,
-    "ast_hash": "48136cf712f8570693b06edb41787116",
+    "mtime": 1794141298.6597934,
+    "seen": 1794144981.9591014,
+    "ast_hash": "707d2d6c5120b7c0f374dbcc6076474b",
     "semantic_hash": ""
   },
   "tests/core/tables.e2e.ts": {
@@ -1314,9 +1314,9 @@
     "semantic_hash": ""
   },
   "tests/core/workflows.e2e.ts": {
-    "mtime": 1793935852.1723228,
-    "seen": 1793992690.7396038,
-    "ast_hash": "8e04d314674be8805eae36bc91701158",
+    "mtime": 1794143248.7128525,
+    "seen": 1794144981.9591036,
+    "ast_hash": "27f53aca96ca321004728721ed10d827",
     "semantic_hash": ""
   },
   "tests/domain/drive-baseline.test.ts": {
@@ -1578,9 +1578,9 @@
     "semantic_hash": "22094bdb40cc65a0a6cb6a06360c02a9"
   },
   "src/components/drill/panel.tsx": {
-    "mtime": 1794130745.573057,
-    "seen": 1794131008.8114488,
-    "ast_hash": "5eea8710df6a2c039895ef4a9e1e9047",
+    "mtime": 1794141301.1438074,
+    "seen": 1794144981.958918,
+    "ast_hash": "e13e327adfebe01de987c3a01959e36f",
     "semantic_hash": ""
   },
   "src/hooks/use-drill.ts": {
@@ -1602,9 +1602,9 @@
     "semantic_hash": ""
   },
   "tests/core/drilldown.e2e.ts": {
-    "mtime": 1794131951.7117848,
-    "seen": 1794132045.9047227,
-    "ast_hash": "418208afbc146f81deadb2320294e634",
+    "mtime": 1794144816.1094294,
+    "seen": 1794144981.9590921,
+    "ast_hash": "8defb2f6b8021fc6181b15580ec69bdf",
     "semantic_hash": ""
   },
   "tests/domain/drilldown.test.ts": {

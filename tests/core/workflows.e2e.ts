@@ -188,7 +188,7 @@ test("Record creator: an insufficient Allocation warns that the Record stays Pen
 	expect(id).not.toBeNull()
 	await page.goto(`/records/${id}`)
 	await expect(page.locator("main").getByText("Pending", { exact: true }).first()).toBeVisible()
-	await expect(page.locator("main").getByText(/\[.*6\.80.*\]/)).toBeVisible()
+	await expect(page.locator("main").getByText("$6.80 of $20.00 allocated")).toBeVisible()
 	await page.reload()
 	await expect(page.locator("main").getByText("Pending", { exact: true }).first()).toBeVisible()
 })

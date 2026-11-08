@@ -2113,16 +2113,17 @@ test.describe("harness display section", () => {
 			}
 		})
 		await test.step("amount and badge: optional states keep signs, pending values and colour fallback", async () => {
-			await expect(page.getByTestId("pending-amount")).toHaveText("-$25.00[-$10.00]")
+			await expect(page.getByTestId("pending-amount")).toHaveText(
+				"-$25.00$10.00 of $25.00 allocated",
+			)
 			await expect(page.getByTestId("confirmed-amount")).toHaveText("$20.00")
 			await expect(page.getByTestId("zero-amount")).toHaveText("$0.00")
 			const badges = page.getByRole("region", { name: "Budget badges" })
 			for (const label of ["Unbudgeted", "No colour"])
-				await expect(badges.getByText(label).locator(":scope > span")).toHaveCSS(
-					"border-top-style",
-					"solid",
-				)
-			const colour = badges.locator("span[title]")
+				await expect(
+					badges.locator(`span[title="${label}"]`).locator(":scope > span").first(),
+				).toHaveCSS("border-top-style", "solid")
+			const colour = badges.locator("span[title*='早餐']")
 			await expect(colour.locator(":scope > span").first()).toHaveCSS(
 				"background-color",
 				await themedRgb(page, "#38bdf8"),

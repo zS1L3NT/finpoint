@@ -134,6 +134,24 @@ export const componentInventory: InventoryEntry[] = [
 		scenarios: ["display"],
 	},
 	{
+		path: "src/components/drill/mode-menu.tsx",
+		owner: "team3",
+		routes: ["/"],
+		visibleExports: ["DrillModeMenu", "IconTip"],
+		dormantExports: [],
+		helperExports: [],
+		scenarios: ["display"],
+	},
+	{
+		path: "src/components/dev-data-toggle.tsx",
+		owner: "team3",
+		routes: ["/"],
+		visibleExports: ["default"],
+		dormantExports: [],
+		helperExports: [],
+		scenarios: ["display"],
+	},
+	{
 		path: "src/components/allocate-bar.tsx",
 		owner: "team3",
 		routes: ["/statements/[id]"],
@@ -853,9 +871,9 @@ export const componentInventory: InventoryEntry[] = [
 			"/records",
 			"/",
 		],
-		visibleExports: ["ClearFiltersButton", "FilterBar"],
+		visibleExports: ["ClearFiltersButton", "FilterBar", "FilterField", "FilterSelect"],
 		dormantExports: [],
-		helperExports: ["FILTER_CONTROL_CLASS"],
+		helperExports: ["FILTER_CONTROL_CLASS", "filterControlClass"],
 		scenarios: ["table"],
 	},
 	{
@@ -1519,6 +1537,8 @@ export const componentInventory: InventoryEntry[] = [
 			"SheetContent",
 			"SheetDescription",
 			"SheetHeader",
+			"SheetOverlay",
+			"SheetPortal",
 			"SheetTitle",
 			"SheetTrigger",
 		],
@@ -1815,6 +1835,13 @@ export const routeInventory: RouteEntry[] = [
 	{
 		path: "app/records/[id]/page.tsx",
 		url: "/records/[id]",
+		kind: "page",
+		owner: "team3",
+		scenarios: ["route"],
+	},
+	{
+		path: "app/drill/page.tsx",
+		url: "/drill",
 		kind: "page",
 		owner: "team3",
 		scenarios: ["route"],
@@ -2261,6 +2288,16 @@ export const scenarioDescriptions: Record<string, string> = {
  * mapped nor pending: removing them from scenarios would hide the decision, and
  * mapping them would fabricate coverage. The ledger reports them separately. */
 export const notApplicable: Record<string, string> = {
+	"src/components/ui/sheet.tsx#export.SheetPortal.behaviour":
+		"Structural portal pass-through; covered through the composed backdrop/focus consumer rather than an isolated mount",
+	"src/components/dev-data-toggle.tsx#display.values":
+		"src/components/dev-data-toggle.tsx returns null in a production build unless NEXT_PUBLIC_DEV_TOOLS=1, so the production suite never renders it; its loaders are covered by tests/domain.",
+	"src/components/dev-data-toggle.tsx#display.interaction":
+		"src/components/dev-data-toggle.tsx returns null in a production build unless NEXT_PUBLIC_DEV_TOOLS=1, so no control exists to click in the production suite.",
+	"src/components/dev-data-toggle.tsx#export.default.behaviour":
+		"src/components/dev-data-toggle.tsx is a development-only switch (null when NODE_ENV is production), never visible to the production browser suite.",
+	"app/drill/page.tsx#route.viewport":
+		"app/drill/page.tsx renders the same DrillPanel in page mode; its containment at desktop and mobile is covered via route.navigation, and the page has no list or grid cascade of its own.",
 	"src/components/charts/monthly-budget-usage.tsx#chart.motion":
 		"src/components/charts/monthly-budget-usage.tsx renders static progress rows; the donut and its segment animation were deliberately removed.",
 	"src/components/dialogs/account.tsx#editor.conditional":
@@ -2333,14 +2370,38 @@ export const notApplicable: Record<string, string> = {
 
 /** Reviewed assertion mappings. Passing browser evidence is separate; unmapped cases fail by default. */
 export const behaviourCoverage: Record<string, string[]> = {
+	"src/components/drill/mode-menu.tsx#export.DrillModeMenu.behaviour": [
+		"drill opens as side peek, centre peek or full page, switches live and persists",
+	],
+	"src/components/drill/mode-menu.tsx#export.IconTip.behaviour": [
+		"drill opens as side peek, centre peek or full page, switches live and persists",
+	],
+	"src/components/drill/mode-menu.tsx#display.interaction": [
+		"drill opens as side peek, centre peek or full page, switches live and persists",
+	],
+	"src/components/drill/mode-menu.tsx#display.values": [
+		"drill opens as side peek, centre peek or full page, switches live and persists",
+	],
+	"app/drill/page.tsx#route.data": [
+		"drill opens as side peek, centre peek or full page, switches live and persists",
+	],
+	"app/drill/page.tsx#route.navigation": [
+		"Escape and Back restore scroll and focus in every mode",
+	],
+	"src/components/table/filter-bar.tsx#export.FilterField.behaviour": [
+		"active filters are highlighted one for one with the Clear count and clear on their own",
+	],
+	"src/components/table/filter-bar.tsx#export.FilterSelect.behaviour": [
+		"active filters are highlighted one for one with the Clear count and clear on their own",
+	],
 	"src/components/drill/panel.tsx#export.DrillPanel.behaviour": [
-		"day drill-down: totals, retarget, Back, close, focus and invalid URLs",
+		"day drill-down: totals, Back, close, Escape, focus and invalid URLs",
 	],
 	"src/components/drill/panel.tsx#display.interaction": [
-		"day drill-down: totals, retarget, Back, close, focus and invalid URLs",
+		"day drill-down: totals, Back, close, Escape, focus and invalid URLs",
 	],
 	"src/components/drill/panel.tsx#display.values": [
-		"day drill-down: totals, retarget, Back, close, focus and invalid URLs",
+		"day drill-down: totals, Back, close, Escape, focus and invalid URLs",
 	],
 	"src/components/charts/largest-records.tsx#export.default.behaviour": [
 		"Largest Records opens a sorted drill and preserves sort into Records",
@@ -2475,14 +2536,14 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"Record creator: rule autofill of Treatment and Monthly Budget follows the analytics rules",
 		"Record creator: backdrop, values, cursors, fit and keyboard reopen work",
 		"Record creator: popup enters as a whole",
-		"Record creator: validates required fields, applies Category defaults, and persists amount -12.34 and long text",
+		"Record creator: validates required fields, applies Category defaults, and persists amount 12.34 and long text",
 		"Record creator: pending warning reveals and collapses smoothly for amount -12.34",
 		"Record creator: validates required fields, applies Category defaults, and persists amount 0 and long text",
 		"Record creator: pending warning reveals and collapses smoothly for amount 0",
 		"Record creator: clearing the selected date shows date validation and archived Monthly Budgets stay unavailable",
 	],
 	"src/components/dialogs/record-creator.tsx#editor.validation": [
-		"Record creator: validates required fields, applies Category defaults, and persists amount -12.34 and long text",
+		"Record creator: validates required fields, applies Category defaults, and persists amount 12.34 and long text",
 		"Record creator: pending warning reveals and collapses smoothly for amount -12.34",
 		"Record creator: validates required fields, applies Category defaults, and persists amount 0 and long text",
 		"Record creator: pending warning reveals and collapses smoothly for amount 0",
@@ -2578,15 +2639,15 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"form labels: activate their controls and invalid input links its error",
 	],
 	"src/components/form/category-field.tsx#export.default.behaviour": [
-		"Record creator: validates required fields, applies Category defaults, and persists amount -12.34 and long text",
+		"Record creator: validates required fields, applies Category defaults, and persists amount 12.34 and long text",
 		"Record creator: validates required fields, applies Category defaults, and persists amount 0 and long text",
 	],
 	"src/components/form/category-field.tsx#field.options": [
-		"Record creator: validates required fields, applies Category defaults, and persists amount -12.34 and long text",
+		"Record creator: validates required fields, applies Category defaults, and persists amount 12.34 and long text",
 		"Record creator: validates required fields, applies Category defaults, and persists amount 0 and long text",
 	],
 	"src/components/form/category-field.tsx#field.input": [
-		"Record creator: validates required fields, applies Category defaults, and persists amount -12.34 and long text",
+		"Record creator: validates required fields, applies Category defaults, and persists amount 12.34 and long text",
 		"Record creator: validates required fields, applies Category defaults, and persists amount 0 and long text",
 	],
 	"src/components/form/date-field.tsx#export.default.behaviour": [
@@ -3211,6 +3272,9 @@ export const behaviourCoverage: Record<string, string[]> = {
 	"src/components/ui/dialog.tsx#primitive.consumer": [
 		"modal primitives: dialog header, description and footer stay readable and close restores the trigger",
 		"modal focus: Harness dialog shows a backdrop, contains Tab focus and restores the trigger",
+	],
+	"src/components/ui/sheet.tsx#export.SheetOverlay.behaviour": [
+		"modal focus: Harness sheet shows a backdrop, contains Tab focus and restores the trigger",
 	],
 	"src/components/ui/sheet.tsx#export.Sheet.behaviour": [
 		"modal primitives: sheet header, description and footer stay readable and close restores the trigger",
@@ -4100,7 +4164,7 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"Budget editor: prepopulates period and amount, rejects a cleared range, and persists a long name and zero",
 	],
 	"src/components/dialogs/record-creator.tsx#editor.long": [
-		"Record creator: validates required fields, applies Category defaults, and persists amount -12.34 and long text",
+		"Record creator: validates required fields, applies Category defaults, and persists amount 12.34 and long text",
 		"Record creator: pending warning reveals and collapses smoothly for amount -12.34",
 		"Record creator: validates required fields, applies Category defaults, and persists amount 0 and long text",
 		"Record creator: pending warning reveals and collapses smoothly for amount 0",
@@ -4113,7 +4177,7 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"Monthly Budget editor: inherited amount reveals smoothly after override action",
 	],
 	"src/components/dialogs/record-creator.tsx#editor.conditional": [
-		"Record creator: validates required fields, applies Category defaults, and persists amount -12.34 and long text",
+		"Record creator: validates required fields, applies Category defaults, and persists amount 12.34 and long text",
 		"Record creator: pending warning reveals and collapses smoothly for amount -12.34",
 		"Record creator: clearing the selected date shows date validation and archived Monthly Budgets stay unavailable",
 	],
@@ -4411,6 +4475,7 @@ export const scenarioProjects: Record<
 	string,
 	("mobile" | "tall-desktop" | "light" | "reduced-motion")[]
 > = {
+	"src/components/drill/mode-menu.tsx#display.interaction": ["mobile"],
 	"src/components/drill/panel.tsx#display.interaction": ["mobile"],
 	"src/components/charts/largest-records.tsx#display.interaction": ["mobile"],
 	"src/components/allocation-rows.tsx#display.interaction": ["mobile"],

@@ -660,7 +660,7 @@ test("active filters are highlighted one for one with the Clear count and clear 
 		["/statements?is_pending=true", "status"],
 		["/statements?is_unallocated=true", "allocation"],
 		["/statements?min_amount=-100", "amount"],
-	]
+	] as const
 	for (const [url, name] of cases) {
 		await page.goto(url)
 		const active = page.locator("[data-filter][data-active]")

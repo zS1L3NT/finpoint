@@ -382,6 +382,19 @@ test("Escape and Back restore scroll and focus in every mode", async ({ page, is
 	await page.goto(overview)
 	const calendar = card(page, "Spending calendar")
 	const day = calendar.getByRole("button", { name: /^5 October:/ })
+	// The Dashboard fills in section by section: measure once its height has stopped changing.
+	let height = 0
+	await expect
+		.poll(
+			async () => {
+				const next = await page.evaluate(() => document.documentElement.scrollHeight)
+				const stable = next === height
+				height = next
+				return stable
+			},
+			{ intervals: [300] },
+		)
+		.toBe(true)
 	await day.scrollIntoViewIfNeeded()
 	const scrolled = await page.evaluate(() => window.scrollY)
 	expect(scrolled).toBeGreaterThan(100)
