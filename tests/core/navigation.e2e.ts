@@ -837,3 +837,20 @@ test("monthly shell: direct drill URL hides a stale same-month Dashboard origin"
 	await page.getByRole("button", { name: "Back to September 2026", exact: true }).click()
 	await expect(page).toHaveURL(/month=September/)
 })
+
+test("month picker: choosing a month closes the picker on the Dashboard and on Records", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	for (const url of ["/?month=September&year=2026", "/records?month=September&year=2026"]) {
+		await page.goto(url)
+		await page.getByRole("button", { name: "Sep 2026" }).click()
+		const may = page.getByRole("button", { name: "May", exact: true })
+		await expect(may).toBeVisible()
+		await may.click()
+		await expect(page).toHaveURL(/month=May&year=2026/)
+		await expect(may).toBeHidden()
+		await expect(page.getByRole("button", { name: "May 2026" })).toBeVisible()
+	}
+})

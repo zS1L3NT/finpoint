@@ -47,6 +47,7 @@ import { listRecords } from "@/logic/records"
 import type { CategoryWithChildren, MonthlyBudget, Record } from "@/types"
 
 export default function RecordsPage() {
+	const [monthPickerOpen, setMonthPickerOpen] = useState(false)
 	const searchParams = useSearchParams()
 	const { month, year, date } = useMonthParams()
 	const selectedDay = searchParams.get("day")
@@ -254,7 +255,7 @@ export default function RecordsPage() {
 							>
 								<IconifyIcon icon="lucide:arrow-left" />
 							</Button>
-							<Popover>
+							<Popover open={monthPickerOpen} onOpenChange={setMonthPickerOpen}>
 								<PopoverTrigger
 									render={<Button variant="outline" className="flex-1 sm:w-32" />}
 								>
@@ -264,9 +265,10 @@ export default function RecordsPage() {
 								<PopoverContent className="w-auto p-0">
 									<MonthPicker
 										selectedMonth={date.toJSDate()}
-										onMonthSelect={value =>
+										onMonthSelect={value => {
+											setMonthPickerOpen(false)
 											changeMonth(DateTime.fromJSDate(value))
-										}
+										}}
 									/>
 								</PopoverContent>
 							</Popover>

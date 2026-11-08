@@ -20,6 +20,7 @@ import { armMonthTransition } from "@/hooks/use-month-transition"
  * while the selected month changes.
  */
 export default function MonthLayout({ children }: { children: React.ReactNode }) {
+	const [monthPickerOpen, setMonthPickerOpen] = useState(false)
 	const { month, year, date, setSearchParams } = useMonthParams()
 	const pathname = usePathname()
 
@@ -98,7 +99,7 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 								>
 									<IconifyIcon icon="lucide:arrow-left" />
 								</Button>
-								<Popover>
+								<Popover open={monthPickerOpen} onOpenChange={setMonthPickerOpen}>
 									<PopoverTrigger
 										render={
 											<Button variant="outline" className="flex-1 sm:w-32" />
@@ -110,9 +111,10 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 									<PopoverContent className="w-auto p-0">
 										<MonthPicker
 											selectedMonth={date.toJSDate()}
-											onMonthSelect={value =>
+											onMonthSelect={value => {
+												setMonthPickerOpen(false)
 												changeMonth(DateTime.fromJSDate(value))
-											}
+											}}
 										/>
 									</PopoverContent>
 								</Popover>
