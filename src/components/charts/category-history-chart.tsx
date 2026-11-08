@@ -84,8 +84,11 @@ export default function CategoryHistoryChart({
 	return (
 		<div
 			className={cn(
-				"grid items-start gap-5",
-				!compact && "@min-[860px]/dashboard:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]",
+				"grid gap-5",
+				// Side by side the cards stretch to one height. The floor keeps the row from changing
+				// height as months with fewer categories shorten the list.
+				!compact &&
+					"@min-[860px]/dashboard:min-h-[27rem] @min-[860px]/dashboard:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]",
 			)}
 		>
 			<Card className="order-2 min-h-0 min-w-0 @min-[600px]/dashboard:order-1">
@@ -103,7 +106,7 @@ export default function CategoryHistoryChart({
 							: "Gross spending · refunds excluded"}
 					</CardDescription>
 				</CardHeader>
-				<CardContent className="min-h-0 overflow-y-auto">
+				<CardContent className="flex min-h-0 flex-1 flex-col overflow-y-auto">
 					{shown?.current ? (
 						<div
 							role="group"
@@ -134,7 +137,7 @@ export default function CategoryHistoryChart({
 							onClick={() =>
 								setExpanded(limit === undefined ? null : (shown?.month ?? null))
 							}
-							className="cursor-pointer mt-3 text-xs text-muted-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+							className="cursor-pointer mt-auto self-start pt-3 text-xs text-muted-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 						>
 							{limit === undefined
 								? "Show fewer categories"

@@ -176,7 +176,7 @@ export default function DashboardPage() {
 					className={cn(
 						"grid gap-5",
 						!period.is_future &&
-							"items-start @min-[860px]/dashboard:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]",
+							"@min-[860px]/dashboard:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]",
 					)}
 				>
 					{!period.is_future ? (
@@ -206,7 +206,7 @@ export default function DashboardPage() {
 									showProjection={paceProjection.available}
 									onDrill={drill.open}
 								/>
-								<p className="mt-4 text-sm text-muted-foreground">
+								<p className="mt-auto pt-4 text-sm text-muted-foreground">
 									{paceProjection.available
 										? `At this pace, spending may reach ${formatCurrency(paceProjection.projected_spending ?? 0)} this month.`
 										: `${formatCurrency(paceData.spending)} spent this month.`}
@@ -263,7 +263,7 @@ export default function DashboardPage() {
 							/>
 							<Link
 								href={pathBudgets()}
-								className="mt-3 inline-flex min-h-11 items-center gap-2 text-xs text-muted-foreground underline underline-offset-4"
+								className="mt-auto inline-flex min-h-11 items-center gap-2 pt-3 text-xs text-muted-foreground underline underline-offset-4"
 							>
 								<IconifyIcon icon="lucide:calendar-range" /> Custom-period Budgets ·
 								View Budgets
@@ -292,11 +292,7 @@ export default function DashboardPage() {
 							/>
 						) : null}
 						{stage > 1 ? (
-							<div
-								className={
-									"grid items-start gap-5 @min-[860px]/dashboard:grid-cols-3"
-								}
-							>
+							<div className={"grid gap-5 @min-[860px]/dashboard:grid-cols-3"}>
 								<LargestRecords
 									month={dataMonth}
 									year={dataYear}

@@ -3406,7 +3406,7 @@
       "file_type": "code",
       "norm_label": "scopeselect()",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L471"
+      "source_location": "L467"
     },
     {
       "id": "app_records_page_recordcreatorhost",
@@ -4498,7 +4498,7 @@
       "file_type": "code",
       "norm_label": "aggregateseries()",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L248"
+      "source_location": "L251"
     },
     {
       "id": "src_components_charts_category_history_chart_categoryhistorychart",
@@ -4522,7 +4522,7 @@
       "file_type": "code",
       "norm_label": "monthbreakdown()",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L329"
+      "source_location": "L332"
     },
     {
       "id": "src_components_charts_category_history_chart_monthtick",
@@ -4534,7 +4534,7 @@
       "file_type": "code",
       "norm_label": "monthtick()",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L298"
+      "source_location": "L301"
     },
     {
       "id": "src_components_charts_category_history_chart_monthtotal",
@@ -4546,7 +4546,7 @@
       "file_type": "code",
       "norm_label": "monthtotal()",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L324"
+      "source_location": "L327"
     },
     {
       "id": "src_components_charts_category_history_chart_preparemonths",
@@ -4558,7 +4558,7 @@
       "file_type": "code",
       "norm_label": "preparemonths()",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L282"
+      "source_location": "L285"
     },
     {
       "id": "src_components_charts_category_history_chart_prepareseries",
@@ -4570,7 +4570,7 @@
       "file_type": "code",
       "norm_label": "prepareseries()",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L259"
+      "source_location": "L262"
     },
     {
       "id": "app_privacy_page_privacypage",
@@ -7162,7 +7162,7 @@
       "file_type": "code",
       "norm_label": "readreturn()",
       "source_file": "src/hooks/use-drill.ts",
-      "source_location": "L23"
+      "source_location": "L16"
     },
     {
       "id": "src_hooks_use_drill_usedrill",
@@ -7174,7 +7174,7 @@
       "file_type": "code",
       "norm_label": "usedrill()",
       "source_file": "src/hooks/use-drill.ts",
-      "source_location": "L40"
+      "source_location": "L33"
     },
     {
       "id": "src_hooks_use_drill_writereturn",
@@ -7186,7 +7186,7 @@
       "file_type": "code",
       "norm_label": "writereturn()",
       "source_file": "src/hooks/use-drill.ts",
-      "source_location": "L31"
+      "source_location": "L24"
     },
     {
       "id": "src_hooks_use_settings_usedefaultfilterenddatetoday",
@@ -10174,7 +10174,7 @@
       "file_type": "code",
       "norm_label": "attentionlist()",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L658"
+      "source_location": "L654"
     },
     {
       "id": "app_month_page_comparisontext",
@@ -10186,7 +10186,7 @@
       "file_type": "code",
       "norm_label": "comparisontext()",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L723"
+      "source_location": "L719"
     },
     {
       "id": "app_month_page_dashboardpage",
@@ -10210,7 +10210,7 @@
       "file_type": "code",
       "norm_label": "deltaof()",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L729"
+      "source_location": "L725"
     },
     {
       "id": "app_month_page_demooffer",
@@ -10222,7 +10222,7 @@
       "file_type": "code",
       "norm_label": "demooffer()",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L379"
+      "source_location": "L375"
     },
     {
       "id": "app_month_page_emptymonthnotice",
@@ -10234,7 +10234,7 @@
       "file_type": "code",
       "norm_label": "emptymonthnotice()",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L422"
+      "source_location": "L418"
     },
     {
       "id": "app_month_page_scopedcardtitle",
@@ -10246,7 +10246,7 @@
       "file_type": "code",
       "norm_label": "scopedcardtitle()",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L510"
+      "source_location": "L506"
     },
     {
       "id": "app_month_page_scopelabel",
@@ -10258,7 +10258,7 @@
       "file_type": "code",
       "norm_label": "scopelabel()",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L527"
+      "source_location": "L523"
     },
     {
       "id": "app_month_page_summaryband",
@@ -10270,7 +10270,7 @@
       "file_type": "code",
       "norm_label": "summaryband()",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L538"
+      "source_location": "L534"
     },
     {
       "id": "src_hooks_use_month_transition_takemonthdirection",
@@ -26916,7 +26916,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L669",
+      "source_location": "L665",
       "weight": 1.0
     },
     {
@@ -26928,7 +26928,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L672",
+      "source_location": "L668",
       "weight": 1.0
     },
     {
@@ -26940,7 +26940,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L679",
+      "source_location": "L675",
       "weight": 1.0
     },
     {
@@ -26952,7 +26952,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L726",
+      "source_location": "L722",
       "weight": 1.0
     },
     {
@@ -27216,7 +27216,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L300",
+      "source_location": "L296",
       "weight": 1.0
     },
     {
@@ -27228,7 +27228,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L320",
+      "source_location": "L316",
       "weight": 1.0
     },
     {
@@ -27240,7 +27240,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L342",
+      "source_location": "L338",
       "weight": 1.0
     },
     {
@@ -27252,7 +27252,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L362",
+      "source_location": "L358",
       "weight": 1.0
     },
     {
@@ -27372,7 +27372,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L733",
+      "source_location": "L729",
       "weight": 1.0
     },
     {
@@ -27384,7 +27384,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L385",
+      "source_location": "L381",
       "weight": 1.0
     },
     {
@@ -27396,7 +27396,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L406",
+      "source_location": "L402",
       "weight": 1.0
     },
     {
@@ -27408,7 +27408,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L407",
+      "source_location": "L403",
       "weight": 1.0
     },
     {
@@ -27420,7 +27420,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L431",
+      "source_location": "L427",
       "weight": 1.0
     },
     {
@@ -27432,7 +27432,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L432",
+      "source_location": "L428",
       "weight": 1.0
     },
     {
@@ -27444,7 +27444,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L436",
+      "source_location": "L432",
       "weight": 1.0
     },
     {
@@ -27456,7 +27456,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L446",
+      "source_location": "L442",
       "weight": 1.0
     },
     {
@@ -27468,7 +27468,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L447",
+      "source_location": "L443",
       "weight": 1.0
     },
     {
@@ -27480,7 +27480,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L520",
+      "source_location": "L516",
       "weight": 1.0
     },
     {
@@ -27492,7 +27492,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L522",
+      "source_location": "L518",
       "weight": 1.0
     },
     {
@@ -27504,7 +27504,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L529",
+      "source_location": "L525",
       "weight": 1.0
     },
     {
@@ -27516,7 +27516,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L481",
+      "source_location": "L477",
       "weight": 1.0
     },
     {
@@ -27528,7 +27528,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L482",
+      "source_location": "L478",
       "weight": 1.0
     },
     {
@@ -27540,7 +27540,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L484",
+      "source_location": "L480",
       "weight": 1.0
     },
     {
@@ -27552,7 +27552,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L487",
+      "source_location": "L483",
       "weight": 1.0
     },
     {
@@ -27564,7 +27564,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L489",
+      "source_location": "L485",
       "weight": 1.0
     },
     {
@@ -27576,7 +27576,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L490",
+      "source_location": "L486",
       "weight": 1.0
     },
     {
@@ -27588,7 +27588,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L491",
+      "source_location": "L487",
       "weight": 1.0
     },
     {
@@ -27600,7 +27600,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L499",
+      "source_location": "L495",
       "weight": 1.0
     },
     {
@@ -27612,7 +27612,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L557",
+      "source_location": "L553",
       "weight": 1.0
     },
     {
@@ -27624,7 +27624,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L558",
+      "source_location": "L554",
       "weight": 1.0
     },
     {
@@ -27636,7 +27636,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L564",
+      "source_location": "L560",
       "weight": 1.0
     },
     {
@@ -27648,7 +27648,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L586",
+      "source_location": "L582",
       "weight": 1.0
     },
     {
@@ -27660,7 +27660,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L613",
+      "source_location": "L609",
       "weight": 1.0
     },
     {
@@ -32117,7 +32117,7 @@
     },
     {
       "source": "src_components_charts_category_history_chart_categoryhistorychart",
-      "target": "src_lib_utils_formatcurrency",
+      "target": "src_components_ui_card_carddescription",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -32129,6 +32129,18 @@
     },
     {
       "source": "src_components_charts_category_history_chart_categoryhistorychart",
+      "target": "src_lib_utils_formatcurrency",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/charts/category-history-chart.tsx",
+      "source_location": "L105",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_charts_category_history_chart_categoryhistorychart",
       "target": "src_components_ui_card_cardcontent",
       "relation": "calls",
       "_origin": "ast",
@@ -32136,7 +32148,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L106",
+      "source_location": "L109",
       "weight": 1.0
     },
     {
@@ -32148,7 +32160,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L116",
+      "source_location": "L119",
       "weight": 1.0
     },
     {
@@ -32160,7 +32172,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L123",
+      "source_location": "L126",
       "weight": 1.0
     },
     {
@@ -32172,7 +32184,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L163",
+      "source_location": "L166",
       "weight": 1.0
     },
     {
@@ -32184,7 +32196,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L189",
+      "source_location": "L192",
       "weight": 1.0
     },
     {
@@ -32196,7 +32208,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L198",
+      "source_location": "L201",
       "weight": 1.0
     },
     {
@@ -32268,7 +32280,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L91",
+      "source_location": "L94",
       "weight": 1.0
     },
     {
@@ -32280,7 +32292,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L92",
+      "source_location": "L95",
       "weight": 1.0
     },
     {
@@ -32292,19 +32304,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L93",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_charts_category_history_chart_categoryhistorychart",
-      "target": "src_components_ui_card_carddescription",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L99",
+      "source_location": "L96",
       "weight": 1.0
     },
     {
@@ -32316,7 +32316,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L340",
+      "source_location": "L343",
       "weight": 1.0
     },
     {
@@ -32328,7 +32328,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L359",
+      "source_location": "L362",
       "weight": 1.0
     },
     {
@@ -32340,7 +32340,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L427",
+      "source_location": "L430",
       "weight": 1.0
     },
     {
@@ -45036,7 +45036,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/hooks/use-drill.ts",
-      "source_location": "L137",
+      "source_location": "L106",
       "weight": 1.0
     },
     {
@@ -45048,7 +45048,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/hooks/use-drill.ts",
-      "source_location": "L46",
+      "source_location": "L39",
       "weight": 1.0
     },
     {
@@ -45060,7 +45060,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/hooks/use-drill.ts",
-      "source_location": "L68",
+      "source_location": "L61",
       "weight": 1.0
     },
     {
@@ -45072,7 +45072,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/hooks/use-drill.ts",
-      "source_location": "L85",
+      "source_location": "L78",
       "weight": 1.0
     },
     {
@@ -45084,7 +45084,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/hooks/use-drill.ts",
-      "source_location": "L93",
+      "source_location": "L86",
       "weight": 1.0
     },
     {
@@ -100368,7 +100368,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L379",
+      "source_location": "L375",
       "weight": 1.0
     },
     {
@@ -100379,7 +100379,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L422",
+      "source_location": "L418",
       "weight": 1.0
     },
     {
@@ -100390,7 +100390,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L471",
+      "source_location": "L467",
       "weight": 1.0
     },
     {
@@ -100417,6 +100417,17 @@
     },
     {
       "source": "app_month_page",
+      "target": "app_month_page_scopedcardtitle",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "app/(month)/page.tsx",
+      "source_location": "L506",
+      "weight": 1.0
+    },
+    {
+      "source": "app_month_page",
       "target": "app_month_page_dashboardmonthlybudget",
       "relation": "contains",
       "_origin": "ast",
@@ -100424,17 +100435,6 @@
       "confidence_score": 1.0,
       "source_file": "app/(month)/page.tsx",
       "source_location": "L51",
-      "weight": 1.0
-    },
-    {
-      "source": "app_month_page",
-      "target": "app_month_page_scopedcardtitle",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "app/(month)/page.tsx",
-      "source_location": "L510",
       "weight": 1.0
     },
     {
@@ -100456,7 +100456,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L527",
+      "source_location": "L523",
       "weight": 1.0
     },
     {
@@ -100478,7 +100478,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L538",
+      "source_location": "L534",
       "weight": 1.0
     },
     {
@@ -100500,7 +100500,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L658",
+      "source_location": "L654",
       "weight": 1.0
     },
     {
@@ -100511,7 +100511,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L723",
+      "source_location": "L719",
       "weight": 1.0
     },
     {
@@ -100522,7 +100522,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/(month)/page.tsx",
-      "source_location": "L729",
+      "source_location": "L725",
       "weight": 1.0
     },
     {
@@ -103481,7 +103481,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L248",
+      "source_location": "L251",
       "weight": 1.0
     },
     {
@@ -103492,7 +103492,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L259",
+      "source_location": "L262",
       "weight": 1.0
     },
     {
@@ -103503,7 +103503,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L282",
+      "source_location": "L285",
       "weight": 1.0
     },
     {
@@ -103514,7 +103514,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L298",
+      "source_location": "L301",
       "weight": 1.0
     },
     {
@@ -103525,7 +103525,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L324",
+      "source_location": "L327",
       "weight": 1.0
     },
     {
@@ -103536,7 +103536,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/category-history-chart.tsx",
-      "source_location": "L329",
+      "source_location": "L332",
       "weight": 1.0
     },
     {
@@ -109091,7 +109091,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/hooks/use-drill.ts",
-      "source_location": "L23",
+      "source_location": "L16",
       "weight": 1.0
     },
     {
@@ -109102,7 +109102,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/hooks/use-drill.ts",
-      "source_location": "L31",
+      "source_location": "L24",
       "weight": 1.0
     },
     {
@@ -109113,7 +109113,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/hooks/use-drill.ts",
-      "source_location": "L40",
+      "source_location": "L33",
       "weight": 1.0
     },
     {
@@ -120193,5 +120193,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "ab4420fec88104ae1ce348430dbc9e9d5edd2b15"
+  "built_at_commit": "6aa41da162916be04aa18cab51910f7b8784fb38"
 }

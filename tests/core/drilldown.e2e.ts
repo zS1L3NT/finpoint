@@ -464,3 +464,29 @@ test("drill rows: only clickable rows react, hover fills sit inset and nothing s
 	await expect(row).not.toHaveCSS("box-shadow", "none")
 	await expect(row).toHaveCSS("border-radius", "10px")
 })
+
+for (const width of [1440, 1024]) {
+	test(`Dashboard cards sharing a row have equal heights at ${width}px`, {
+		tag: "@desktop-only",
+	}, async ({ page }) => {
+		await page.setViewportSize({ width, height: 900 })
+		await seedWorkspace(page)
+		await page.goto(overview)
+		await expect(card(page, "Largest Records")).toBeVisible()
+		await expect(card(page, "Biggest changes")).toBeVisible()
+		await page.waitForTimeout(800)
+		const rows = await page.locator('[data-slot="card"]').evaluateAll(cards => {
+			const byTop = new Map<number, number[]>()
+			for (const element of cards) {
+				const box = element.getBoundingClientRect()
+				const top = Math.round(box.top + window.scrollY)
+				byTop.set(top, [...(byTop.get(top) ?? []), box.height])
+			}
+			return [...byTop.values()].filter(heights => heights.length > 1)
+		})
+		// Wide layouts put cards side by side; every shared row must end at one height.
+		if (width >= 1440) expect(rows.length).toBeGreaterThanOrEqual(3)
+		for (const heights of rows)
+			expect(Math.max(...heights) - Math.min(...heights)).toBeLessThanOrEqual(1)
+	})
+}

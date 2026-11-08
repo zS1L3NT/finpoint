@@ -6,9 +6,9 @@
     "semantic_hash": ""
   },
   "app/(month)/page.tsx": {
-    "mtime": 1794102878.3461466,
-    "seen": 1794130702.798311,
-    "ast_hash": "76a1a5e536c802ac6a7aa102512cbbb9",
+    "mtime": 1794131065.925399,
+    "seen": 1794132045.90445,
+    "ast_hash": "84c855ab5afd3070b3585155156791ce",
     "semantic_hash": ""
   },
   "app/accounts/[id]/page.tsx": {
@@ -204,9 +204,9 @@
     "semantic_hash": ""
   },
   "src/components/charts/category-history-chart.tsx": {
-    "mtime": 1794098955.0509262,
-    "seen": 1794130702.7983649,
-    "ast_hash": "a4461bd00d42feaa9eb5abaf50ab1a89",
+    "mtime": 1794131548.483935,
+    "seen": 1794132045.9045167,
+    "ast_hash": "53ead0e55231486579ebcbfd474dfd8c",
     "semantic_hash": ""
   },
   "src/components/charts/category-movers.tsx": {
@@ -1584,9 +1584,9 @@
     "semantic_hash": ""
   },
   "src/hooks/use-drill.ts": {
-    "mtime": 1794109748.8959599,
-    "seen": 1794130702.798494,
-    "ast_hash": "27abd79178d54b0b97d27c6ec746165f",
+    "mtime": 1794131968.1781354,
+    "seen": 1794132045.9046564,
+    "ast_hash": "5d56039842e26150fb761efb262bde7b",
     "semantic_hash": ""
   },
   "src/logic/drilldown.ts": {
@@ -1602,9 +1602,9 @@
     "semantic_hash": ""
   },
   "tests/core/drilldown.e2e.ts": {
-    "mtime": 1794130892.2513776,
-    "seen": 1794131008.8117049,
-    "ast_hash": "dbb607b3ecbfa3e6b8c6891d9b10b3d5",
+    "mtime": 1794131951.7117848,
+    "seen": 1794132045.9047227,
+    "ast_hash": "418208afbc146f81deadb2320294e634",
     "semantic_hash": ""
   },
   "tests/domain/drilldown.test.ts": {
