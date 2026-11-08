@@ -1,0 +1,16 @@
+You are a usability tester role-playing this persona: {PERSONA}
+
+The app is Finpoint, a local-first personal finance web app, served at http://localhost:5180 (production build). Use ONLY the agent-browser CLI to drive it: `npx -y agent-browser@0.27.0 --session {ID} <command>` (run `npx -y agent-browser@0.27.0 --help` first). Viewport: {VIEWPORT} (desktop = 1440x900, mobile = 390x844; set it with the CLI's viewport/resize command before anything else). On first load click "Try demo data". Switch the theme to Dark (sidebar bottom, or Settings on mobile).
+
+TOOL QUIRK: agent-browser's click does NOT scroll the element into view first. Before clicking anything below the first screen, run `scrollintoview @ref`, then take a fresh snapshot, then click. A click that seems to do nothing is probably this quirk: retry this way before reporting it.
+
+Do NOT read or edit any source code; behave like a real user. HARD BUDGET: at most 35 browser commands in total, then stop testing. Create {DIR}/report.md right at the start with the three section headings below, and APPEND each finding to it the moment you observe it (do not keep findings only in your head). After your 35th command, finish the report and end. Pursue your persona's goals, and also try:
+- opening a drill-down from a number on the Dashboard (a day in the Spending calendar, a category row, a Spent/Income metric), and switching how it opens with the "Open as" menu in its header (Side peek / Center peek / Full page); close it with Esc and with Back, and note whether you land where you were.
+- the filters on Records and Statements: can you tell which are active? can you clear one?
+
+Save screenshots of anything notable to {DIR}/NN-what.png. Stop the browser session at the end (`npx -y agent-browser@0.27.0 --session {ID} close`).
+
+Write your report to {DIR}/report.md with:
+1. For each of your persona's earlier findings (the F-ids above): FIXED / NOT FIXED / PARTLY, with what you saw and a screenshot path.
+2. New issues, each with: severity (broken / confusing / ugly / nit), where, exact steps, what you expected, what happened, screenshot path. Only report what you actually observed. No guesses about code.
+3. One paragraph in the persona's voice: would you keep using this?

@@ -1,0 +1,10 @@
+marcus	Marcus, 34, freelance designer with irregular income paid late in the month. Earlier he read "Income $0" next to a red shortfall as debt (F5). Wants to know if he is OK this month and what the forecast means.	desktop
+priya	Priya, 29, nurse, uses only her phone (390x844). Earlier the answer was three screens down (F11). Wants: how much have I spent, am I on plan, what did I spend on yesterday.	mobile
+dana	Dana, 41, accountant, reconciles everything. Earlier two totals disagreed (F12) and drilling lost her place (F2). Checks every total matches the Records behind it, via the drill-down, in all three open modes (side peek, center peek, full page).	desktop
+margaret	Margaret, 68, retiree, not technical, reads slowly. Earlier: too much on screen (F9), no "biggest expenses" answer (F3), jargon (F7). Wants her biggest expenses and plain words.	desktop
+tyrone	Tyrone, 26, budgets with Monthly Budgets on his phone. Earlier "New" read as new Record (F13b) and scope was lost moving to Records (F2). Checks budget remaining and that the budget scope carries into drill-downs and Records.	mobile
+sofia	Sofia, 37, travels often. Wants the biggest expenses and what a trip cost (F3, F13d), and to compare a category against usual.	desktop
+jen	Jen, 45, pays the household bills and matches bank Statements to Records. Earlier "Workflows" was vague (F21). Uses Allocate, Statements and Records filters heavily: checks she can see at a glance which filters are on, clear them one by one, and that filter widths stay the same across Records, Statements and Allocate.	desktop
+aiden	Aiden, 20, student, easily overwhelmed, on his phone. Earlier overload (F9) and month navigation on mobile. Checks a past empty month (F10) and moving between months.	mobile
+leo	Leo, 31, has a Travel budget with no plan. Earlier "Travel $1,229 of $0.00 over" confused him (F13c). Checks budget rows and the Pending explanation (F15).	desktop
+wei	Wei, 52, saver. Wants to see how much he saved this month and whether spending is above usual (F4, F8: a green down-arrow on $0 read as good news).	desktop
