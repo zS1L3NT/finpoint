@@ -177,7 +177,7 @@ export async function pullDrive(): Promise<void> {
 }
 
 export async function disconnectDriveSync(): Promise<void> {
-	await disconnectDrive().catch(() => undefined)
+	await disconnectDrive()
 	await Promise.all([
 		db.meta.delete(FILE_ID_KEY),
 		db.meta.delete(LAST_SYNC_KEY),

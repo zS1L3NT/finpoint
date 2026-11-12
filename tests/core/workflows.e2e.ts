@@ -1009,3 +1009,17 @@ test("reset: a cancelled reset preserves workspace data", async ({ page, workspa
 		page.locator("main").getByText("Monthly Salary", { exact: true }).filter({ visible: true }),
 	).toBeVisible()
 })
+
+test("reset: arming one destructive button disarms the others", async ({ page, workspace }) => {
+	expect(workspace).toBe("populated")
+	await blockGoogle(page)
+
+	await page.goto("/sync")
+	await page.getByRole("button", { name: "Load demo data" }).click()
+	await expect(page.getByRole("button", { name: "Replace with demo data" })).toBeVisible()
+	await page.getByRole("button", { name: "Clear all data" }).click()
+	await expect(page.getByRole("button", { name: "Yes, clear everything" })).toBeVisible()
+	await expect(page.getByRole("button", { name: "Load demo data" })).toBeVisible()
+	await expect(page.getByRole("button", { name: "Replace with demo data" })).toHaveCount(0)
+	expect(await countStore(page, "records")).toBe(15)
+})

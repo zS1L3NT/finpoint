@@ -295,6 +295,41 @@ export async function ingestManualResult(result: DriveSyncResult): Promise<void>
 	await refreshSyncDisplay()
 }
 
+/**
+ * Run a manual Drive operation under the same lock and `running` flag as a background cycle,
+ * so the two never write the Drive keys together. Its result feeds the shared display.
+ */
+export async function runManualDrive(
+	activity: Exclude<SyncActivity, null>,
+	operation: () => Promise<DriveSyncResult>,
+): Promise<DriveSyncResult> {
+	const exclusive = async () => {
+		if (running) throw new Error("Google Drive is busy syncing. Try again in a moment.")
+		running = true
+		const seenWrites = writeSeq
+		set({ activity, error: null })
+		try {
+			const result = await operation()
+			await ingestManualResult(result)
+			// A write during the operation still needs a push of its own.
+			if (writeSeq !== seenWrites) {
+				pendingPush = true
+				armPushTimer()
+			}
+			return result
+		} finally {
+			running = false
+			set({ activity: null })
+		}
+	}
+	const locks = (
+		navigator as Navigator & {
+			locks?: { request: <R>(name: string, callback: () => Promise<R>) => Promise<R> }
+		}
+	).locks
+	return locks ? locks.request(LOCK_NAME, exclusive) : exclusive()
+}
+
 /** Forget Drive state on this device (after disconnect). */
 export async function resetSyncDisplay(): Promise<void> {
 	pendingPush = false
@@ -410,7 +445,14 @@ async function cycle(reason: "boot" | "dirty" | "focus" | "online"): Promise<voi
 }
 
 function flushOnHide(): void {
-	if (!pendingPush || !navigator.onLine || !hasFreshDriveToken() || !isDriveConfigured()) return
+	if (
+		running ||
+		!pendingPush ||
+		!navigator.onLine ||
+		!hasFreshDriveToken() ||
+		!isDriveConfigured()
+	)
+		return
 	try {
 		void pushDrive().catch(() => undefined)
 	} catch {

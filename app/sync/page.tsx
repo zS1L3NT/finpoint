@@ -21,7 +21,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { useSyncStatus } from "@/hooks/use-sync-status"
 import { cn } from "@/lib/utils"
-import { ingestManualResult, resetSyncDisplay } from "@/logic/auto-sync"
+import { resetSyncDisplay, runManualDrive } from "@/logic/auto-sync"
 import {
 	disconnectDriveSync,
 	pullDrive,
@@ -156,10 +156,8 @@ function WorkspaceRow({
 export default function DataSettingsPage() {
 	const [busy, setBusy] = useState<string | null>(null)
 	const [importFile, setImportFile] = useState<File | null>(null)
-	const [confirmingClear, setConfirmingClear] = useState(false)
-	const [confirmingDemo, setConfirmingDemo] = useState(false)
+	const [armed, setArmed] = useState<"clear" | "demo" | "pull" | null>(null)
 	const [confirmingPush, setConfirmingPush] = useState(false)
-	const [confirmingPull, setConfirmingPull] = useState(false)
 	const [now, setNow] = useState(() => Date.now())
 	const [dragging, setDragging] = useState(false)
 	const sync = useSyncStatus()
@@ -173,7 +171,11 @@ export default function DataSettingsPage() {
 		return () => window.clearInterval(timer)
 	}, [])
 
+	// Starting any operation disarms the confirmations except its own.
+	const begin = (own?: "clear" | "demo" | "pull") => setArmed(a => (a === own ? a : null))
+
 	const handleExport = async () => {
+		begin()
 		setBusy("export")
 		try {
 			await exportWorkspace()
@@ -190,6 +192,7 @@ export default function DataSettingsPage() {
 			toast.error("Choose a backup file first.")
 			return
 		}
+		begin()
 		setBusy("import")
 		try {
 			await importWorkspace(await importFile.text())
@@ -204,42 +207,44 @@ export default function DataSettingsPage() {
 	}
 
 	const handleClear = async () => {
-		if (!confirmingClear) {
-			setConfirmingClear(true)
+		if (armed !== "clear") {
+			setArmed("clear")
 			return
 		}
+		begin("clear")
 		setBusy("clear")
 		try {
 			await clearWorkspace()
 			toast.success("Workspace cleared.")
-			setConfirmingClear(false)
 		} catch {
 			toast.error("Could not clear data.")
 		} finally {
+			setArmed(null)
 			setBusy(null)
 		}
 	}
 
 	const handleDemo = async () => {
-		if (!confirmingDemo) {
-			setConfirmingDemo(true)
+		if (armed !== "demo") {
+			setArmed("demo")
 			return
 		}
+		begin("demo")
 		setBusy("demo")
 		try {
 			await loadDemoWorkspace()
 			toast.success("Demo workspace loaded.")
-			setConfirmingDemo(false)
 		} catch {
 			toast.error("Could not load demo data.")
 		} finally {
+			setArmed(null)
 			setBusy(null)
 		}
 	}
 
 	const clearDrivePrompts = () => {
 		setConfirmingPush(false)
-		setConfirmingPull(false)
+		setArmed(null)
 	}
 
 	const warnIfVaultUnproven = () => {
@@ -252,12 +257,11 @@ export default function DataSettingsPage() {
 	}
 
 	const handleDriveSync = async () => {
+		begin()
 		setBusy("drive")
 		try {
-			const result = await syncDrive()
-			await ingestManualResult(result)
-			setConfirmingPush(false)
-			setConfirmingPull(false)
+			const result = await runManualDrive("checking", syncDrive)
+			clearDrivePrompts()
 			if (result.outcome === "up-to-date") toast.success("Already in sync with Google Drive.")
 			else if (result.outcome === "pushed") {
 				toast.success("Saved data to your Drive.")
@@ -276,10 +280,13 @@ export default function DataSettingsPage() {
 	}
 
 	const resolveDrivePush = async () => {
+		begin()
 		setBusy("drive-push")
 		try {
-			await pushDrive()
-			await ingestManualResult({ outcome: "pushed" })
+			await runManualDrive("pushing", async () => {
+				await pushDrive()
+				return { outcome: "pushed" }
+			})
 			clearDrivePrompts()
 			toast.success("Saved data to your Drive.")
 		} catch (cause) {
@@ -290,28 +297,33 @@ export default function DataSettingsPage() {
 	}
 
 	const resolveDrivePull = async () => {
+		begin("pull")
 		setBusy("drive-pull")
 		try {
-			await pullDrive()
-			await ingestManualResult({ outcome: "pulled" })
+			await runManualDrive("pulling", async () => {
+				await pullDrive()
+				return { outcome: "pulled" }
+			})
 			clearDrivePrompts()
 			toast.success("Restored data from your Drive.")
 		} catch (cause) {
 			toast.error(cause instanceof Error ? cause.message : "Could not read from Drive.")
 		} finally {
+			setArmed(null)
 			setBusy(null)
 		}
 	}
 
 	const handleDrivePull = () => {
-		if (!confirmingPull) {
-			setConfirmingPull(true)
+		if (armed !== "pull") {
+			setArmed("pull")
 			return
 		}
 		void resolveDrivePull()
 	}
 
 	const handleDriveDisconnect = async () => {
+		begin()
 		setBusy("drive-disconnect")
 		try {
 			await disconnectDriveSync()
@@ -468,7 +480,7 @@ export default function DataSettingsPage() {
 										<Button
 											type="button"
 											variant="outline"
-											disabled={busy !== null}
+											disabled={busy !== null || sync.activity !== null}
 											onClick={() => void resolveDrivePull()}
 										>
 											<IconifyIcon icon="lucide:cloud-download" />
@@ -476,7 +488,7 @@ export default function DataSettingsPage() {
 										</Button>
 										<Button
 											type="button"
-											disabled={busy !== null}
+											disabled={busy !== null || sync.activity !== null}
 											onClick={() => setConfirmingPush(true)}
 										>
 											<IconifyIcon icon="lucide:monitor-check" />
@@ -489,7 +501,7 @@ export default function DataSettingsPage() {
 									<Button
 										type="button"
 										size="lg"
-										disabled={busy !== null}
+										disabled={busy !== null || sync.activity !== null}
 										onClick={() => void handleDriveSync()}
 									>
 										<IconifyIcon
@@ -608,7 +620,11 @@ export default function DataSettingsPage() {
 										type="button"
 										variant="outline"
 										size="sm"
-										disabled={busy !== null || !driveConnected}
+										disabled={
+											busy !== null ||
+											sync.activity !== null ||
+											!driveConnected
+										}
 										onClick={() => setConfirmingPush(true)}
 									>
 										<IconifyIcon icon="lucide:cloud-upload" />
@@ -618,13 +634,17 @@ export default function DataSettingsPage() {
 										type="button"
 										variant="outline"
 										size="sm"
-										disabled={busy !== null || !driveConnected}
+										disabled={
+											busy !== null ||
+											sync.activity !== null ||
+											!driveConnected
+										}
 										onClick={() => handleDrivePull()}
 									>
 										<IconifyIcon icon="lucide:cloud-download" />
 										{busy === "drive-pull"
 											? "Reading…"
-											: confirmingPull
+											: armed === "pull"
 												? "Click again to replace this browser"
 												: "Restore from Drive"}
 									</Button>
@@ -633,7 +653,11 @@ export default function DataSettingsPage() {
 										variant="ghost"
 										size="sm"
 										className="sm:ml-auto"
-										disabled={busy !== null || !driveConnected}
+										disabled={
+											busy !== null ||
+											sync.activity !== null ||
+											!driveConnected
+										}
 										onClick={() => void handleDriveDisconnect()}
 									>
 										{busy === "drive-disconnect"
@@ -758,28 +782,27 @@ export default function DataSettingsPage() {
 							title="Try demo data"
 							description="3 accounts, 5 months of Records, 470+ Statements (40+ waiting to be allocated), 2 budgets and monthly budgets. Replaces everything in this browser."
 						>
-							{confirmingDemo && busy !== "demo" ? (
+							{armed === "demo" && busy !== "demo" ? (
 								<Button
 									type="button"
 									variant="ghost"
 									className="animate-in duration-150 ease-out fade-in-0"
-									onClick={() => setConfirmingDemo(false)}
+									onClick={() => setArmed(null)}
 								>
 									Cancel
 								</Button>
 							) : null}
 							<Button
 								type="button"
-								variant={confirmingDemo ? "default" : "outline"}
+								variant={armed === "demo" ? "default" : "outline"}
 								disabled={busy !== null}
 								onClick={() => {
-									if (confirmingDemo) void handleDemo()
-									else setConfirmingDemo(true)
+									void handleDemo()
 								}}
 							>
 								{busy === "demo"
 									? "Loading…"
-									: confirmingDemo
+									: armed === "demo"
 										? "Replace with demo data"
 										: "Load demo data"}
 							</Button>
@@ -790,12 +813,12 @@ export default function DataSettingsPage() {
 							description="Delete everything in this browser, then restore the default categories and monthly budgets."
 							destructive
 						>
-							{confirmingClear && busy !== "clear" ? (
+							{armed === "clear" && busy !== "clear" ? (
 								<Button
 									type="button"
 									variant="ghost"
 									className="animate-in duration-150 ease-out fade-in-0"
-									onClick={() => setConfirmingClear(false)}
+									onClick={() => setArmed(null)}
 								>
 									Cancel
 								</Button>
@@ -805,13 +828,12 @@ export default function DataSettingsPage() {
 								variant="destructive"
 								disabled={busy !== null}
 								onClick={() => {
-									if (confirmingClear) void handleClear()
-									else setConfirmingClear(true)
+									void handleClear()
 								}}
 							>
 								{busy === "clear"
 									? "Clearing…"
-									: confirmingClear
+									: armed === "clear"
 										? "Yes, clear everything"
 										: "Clear all data"}
 							</Button>
