@@ -169,11 +169,13 @@ export async function updateCategory(currentId: string, input: CategoryInput) {
 }
 
 export async function deleteCategory(id: string) {
-	const records = await db.records.where("category_id").equals(id).count()
-	const children = await db.categories.where("parent_category_id").equals(id).count()
-	if (records > 0 || children > 0) {
-		throw new ValidationError({ category: ["This category is still in use."] })
-	}
+	await db.transaction("rw", [db.categories, db.records], async () => {
+		const records = await db.records.where("category_id").equals(id).count()
+		const children = await db.categories.where("parent_category_id").equals(id).count()
+		if (records > 0 || children > 0) {
+			throw new ValidationError({ category: ["This category is still in use."] })
+		}
 
-	await db.categories.delete(id)
+		await db.categories.delete(id)
+	})
 }

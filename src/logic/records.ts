@@ -358,15 +358,16 @@ function budgetCovers(budget: { start_date: string; end_date: string }, datetime
 export async function createRecord(input: RecordInput) {
 	const dto = validateRecordInput(input)
 
-	const category = await db.categories.get(dto.category_id)
-	if (!category) throw new ValidationError({ category_id: ["Select a category."] })
 	const statements = dto.statements ?? []
-	await validateAllocations(statements)
 
 	return db.transaction(
 		"rw",
-		[db.records, db.allocations, db.budgets, db.budget_records],
+		[db.records, db.allocations, db.budgets, db.budget_records, db.categories, db.statements],
 		async () => {
+			const category = await db.categories.get(dto.category_id)
+			if (!category) throw new ValidationError({ category_id: ["Select a category."] })
+			await validateAllocations(statements)
+
 			const analytics = analyticsValues(dto)
 			const id = newId()
 			await db.records.add({
@@ -442,44 +443,49 @@ export async function createMatchingRecords(
 export async function updateRecord(id: string, input: RecordInput & { revision?: number }) {
 	const dto = validateRecordInput(input)
 
-	const existing = await db.records.get(id)
-	if (!existing) throw new Error("Record not found.")
-	if (input.revision !== undefined && Number(input.revision) !== existing.revision) {
-		throw new ConflictError("This Record changed while you were editing it.")
-	}
-	const category = await db.categories.get(dto.category_id)
-	if (!category) throw new ValidationError({ category_id: ["Select a category."] })
 	const statements = dto.statements ?? []
-	const currentAllocations = await db.allocations.where("record_id").equals(id).toArray()
-	const prior = new Map(currentAllocations.map(a => [a.statement_id, a.amount]))
-	await validateAllocations(statements, prior)
 
-	return db.transaction("rw", [db.records, db.allocations], async () => {
-		const analytics = analyticsValues(dto, existing)
-		await db.records.update(id, {
-			title: dto.title.trim(),
-			people: dto.people?.trim() || null,
-			location: dto.location?.trim() || null,
-			description: dto.description?.trim() || null,
-			datetime: inputToStored(dto.datetime),
-			amount: dto.amount,
-			category_id: dto.category_id,
-			...analytics,
-			revision: existing.revision + 1,
-		})
-		await db.allocations.where("record_id").equals(id).delete()
-		for (const item of statements) {
-			await db.allocations.add({
-				statement_id: item.id,
-				record_id: id,
-				amount: round2(Number(item.amount)),
+	return db.transaction(
+		"rw",
+		[db.records, db.allocations, db.categories, db.statements],
+		async () => {
+			const existing = await db.records.get(id)
+			if (!existing) throw new Error("Record not found.")
+			if (input.revision !== undefined && Number(input.revision) !== existing.revision) {
+				throw new ConflictError("This Record changed while you were editing it.")
+			}
+			const category = await db.categories.get(dto.category_id)
+			if (!category) throw new ValidationError({ category_id: ["Select a category."] })
+			const currentAllocations = await db.allocations.where("record_id").equals(id).toArray()
+			const prior = new Map(currentAllocations.map(a => [a.statement_id, a.amount]))
+			await validateAllocations(statements, prior)
+
+			const analytics = analyticsValues(dto, existing)
+			await db.records.update(id, {
+				title: dto.title.trim(),
+				people: dto.people?.trim() || null,
+				location: dto.location?.trim() || null,
+				description: dto.description?.trim() || null,
+				datetime: inputToStored(dto.datetime),
+				amount: dto.amount,
+				category_id: dto.category_id,
+				...analytics,
+				revision: existing.revision + 1,
 			})
-		}
-		const updated = await db.records.get(id)
-		if (!updated) throw new Error("Record not found.")
+			await db.allocations.where("record_id").equals(id).delete()
+			for (const item of statements) {
+				await db.allocations.add({
+					statement_id: item.id,
+					record_id: id,
+					amount: round2(Number(item.amount)),
+				})
+			}
+			const updated = await db.records.get(id)
+			if (!updated) throw new Error("Record not found.")
 
-		return resolveRecordChoices(updated, category)
-	})
+			return resolveRecordChoices(updated, category)
+		},
+	)
 }
 
 export async function deleteRecord(id: string) {

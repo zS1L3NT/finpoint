@@ -178,46 +178,52 @@ export async function createPendingStatement(input: StatementInput) {
 }
 
 export async function updatePendingStatement(id: string, input: StatementInput) {
-	const existing = await db.statements.get(id)
-	if (!existing) throw new Error("Statement not found.")
-	if (existing.is_pending !== 1) {
-		throw new ValidationError({ statement: ["Imported statements are read-only."] })
-	}
-	const dto = validateStatement(input)
+	return db.transaction("rw", [db.statements, db.allocations], async () => {
+		const existing = await db.statements.get(id)
+		if (!existing) throw new Error("Statement not found.")
+		if (existing.is_pending !== 1) {
+			throw new ValidationError({ statement: ["Imported statements are read-only."] })
+		}
+		const dto = validateStatement(input)
 
-	const allocations = await db.allocations.where("statement_id").equals(id).toArray()
-	ensureAllocationsFit(
-		dto.amount,
-		allocations.map(a => a.amount),
-	)
-	await db.statements.update(id, {
-		account_id: dto.account_id,
-		datetime: inputToStored(dto.datetime),
-		description: dto.description,
-		amount: dto.amount,
+		const allocations = await db.allocations.where("statement_id").equals(id).toArray()
+		ensureAllocationsFit(
+			dto.amount,
+			allocations.map(a => a.amount),
+		)
+		await db.statements.update(id, {
+			account_id: dto.account_id,
+			datetime: inputToStored(dto.datetime),
+			description: dto.description,
+			amount: dto.amount,
+		})
+		const saved = await db.statements.get(id)
+		if (!saved) throw new Error("Statement not found.")
+
+		return saved
 	})
-	const saved = await db.statements.get(id)
-	if (!saved) throw new Error("Statement not found.")
-
-	return saved
 }
 
 export async function deletePendingStatement(id: string) {
-	const existing = await db.statements.get(id)
-	if (!existing) throw new Error("Statement not found.")
-	if (existing.is_pending !== 1) {
-		throw new ValidationError({ statement: ["Imported statements are read-only."] })
-	}
-	if ((await db.allocations.where("statement_id").equals(id).count()) > 0) {
-		throw new ValidationError({
-			statement: ["Remove every allocation before deleting this pending statement."],
-		})
-	}
+	await db.transaction(
+		"rw",
+		[db.statements, db.allocations, db.duplicate_dismissals],
+		async () => {
+			const existing = await db.statements.get(id)
+			if (!existing) throw new Error("Statement not found.")
+			if (existing.is_pending !== 1) {
+				throw new ValidationError({ statement: ["Imported statements are read-only."] })
+			}
+			if ((await db.allocations.where("statement_id").equals(id).count()) > 0) {
+				throw new ValidationError({
+					statement: ["Remove every allocation before deleting this pending statement."],
+				})
+			}
 
-	await db.transaction("rw", [db.statements, db.duplicate_dismissals], async () => {
-		await removeStatementDismissals([id])
-		await db.statements.delete(id)
-	})
+			await removeStatementDismissals([id])
+			await db.statements.delete(id)
+		},
+	)
 }
 
 function ensureAllocationsFit(amount: number, allocations: number[]) {
