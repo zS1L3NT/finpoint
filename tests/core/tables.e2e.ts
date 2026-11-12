@@ -604,3 +604,35 @@ test("Monthly budget filters: All budgets leads, budgets follow and Unbudgeted c
 	await page.getByRole("option", { name: "Daily", exact: true }).click()
 	await expect(page).toHaveURL(/monthly_budget_id=t1-mb-daily/)
 })
+
+test("Records table: fast typing keeps every keystroke and one Back undoes the search", async ({
+	page,
+}) => {
+	test.setTimeout(90_000)
+	await seedWorkspace(page, "dense")
+	await page.goto("/records")
+	const search = page.getByPlaceholder("Search title, people, location, description...")
+	await expect(page.getByText("Showing 60 of 60 records.", { exact: true })).toBeVisible()
+	const entries = await page.evaluate(() => history.length)
+
+	// Every keystroke lands before the router commits any of them.
+	await search.evaluate((input: HTMLInputElement, text: string) => {
+		const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set
+		let typed = ""
+		for (const char of text) {
+			typed += char
+			set?.call(input, typed)
+			input.dispatchEvent(new Event("input", { bubbles: true }))
+		}
+	}, "Dense Record 12")
+	await expect(search).toHaveValue("Dense Record 12")
+	await expect(page).toHaveURL(/query=Dense(?:\+|%20)Record(?:\+|%20)12$/)
+	await expect(page.getByText("Showing 1 of 1 record.", { exact: true })).toBeVisible()
+	await expect(search).toHaveValue("Dense Record 12")
+
+	expect(await page.evaluate(() => history.length)).toBe(entries + 1)
+	await page.goBack()
+	await expect(page).not.toHaveURL(/query=/)
+	await expect(search).toHaveValue("")
+	await expect(page.getByText("Showing 60 of 60 records.", { exact: true })).toBeVisible()
+})
