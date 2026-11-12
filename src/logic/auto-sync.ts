@@ -125,18 +125,30 @@ export function subscribeSyncEvents(listener: (event: SyncEvent) => void): () =>
 let started = false
 let running = false
 let pendingPush = false
+let writeSeq = 0
 let pushTimer: number | null = null
 let lastCycleAt = 0
 
-function markDirty(): void {
-	pendingPush = true
+function armPushTimer(): void {
 	if (pushTimer) clearTimeout(pushTimer)
 	pushTimer = window.setTimeout(() => {
 		pushTimer = null
 		void cycle("dirty")
 	}, PUSH_DEBOUNCE_MS)
+}
+
+function markDirty(): void {
+	pendingPush = true
+	writeSeq++
+	armPushTimer()
 	if (snapshot.configured && !snapshot.localDirty) {
-		set({ localDirty: true, kind: snapshot.lastSyncAt ? "local-changes" : "never-synced" })
+		// Only a settled display changes kind: states that need the user stay put.
+		set({
+			localDirty: true,
+			...(snapshot.kind === "up-to-date" && {
+				kind: snapshot.lastSyncAt ? "local-changes" : "never-synced",
+			}),
+		})
 	}
 }
 
@@ -198,7 +210,7 @@ export async function refreshSyncDisplay(): Promise<void> {
 		driveLocalDirty().catch(() => snapshot.localDirty),
 	])
 	const kind =
-		snapshot.kind === "conflict" || snapshot.kind === "needs-auth"
+		snapshot.kind === "conflict" || snapshot.kind === "needs-auth" || snapshot.kind === "error"
 			? snapshot.kind
 			: !times.lastSyncAt
 				? "never-synced"
@@ -212,12 +224,11 @@ export async function refreshSyncDisplay(): Promise<void> {
 		lastSyncAt: times.lastSyncAt,
 		remoteModifiedTime: times.remote,
 		lastCheckAt: times.check,
-		error: null,
+		error: kind === "error" ? snapshot.error : null,
 	})
 }
 
 async function finishCycle(outcome: DriveSyncResult, announced: boolean): Promise<void> {
-	pendingPush = false
 	lastCycleAt = Date.now()
 	await markDriveChecked().catch(() => undefined)
 	const times = await refreshTimes()
@@ -279,6 +290,7 @@ async function finishCycle(outcome: DriveSyncResult, announced: boolean): Promis
 
 /** Feed a manual result into the shared display (page keeps its own toasts). */
 export async function ingestManualResult(result: DriveSyncResult): Promise<void> {
+	pendingPush = false
 	await finishCycle(result, false)
 	await refreshSyncDisplay()
 }
@@ -286,17 +298,24 @@ export async function ingestManualResult(result: DriveSyncResult): Promise<void>
 /** Forget Drive state on this device (after disconnect). */
 export async function resetSyncDisplay(): Promise<void> {
 	pendingPush = false
-	set({ activity: null, activityStartedAt: null })
+	set({
+		activity: null,
+		activityStartedAt: null,
+		...(snapshot.kind === "error" && { kind: "up-to-date", error: null }),
+	})
 	await refreshSyncDisplay()
 }
 
+/** An early return must not clear the activity of a cycle that is still running. */
+const idle = () => (running ? {} : { activity: null })
+
 async function cycle(reason: "boot" | "dirty" | "focus" | "online"): Promise<void> {
 	if (!isDriveConfigured()) {
-		set({ configured: false, kind: "unconfigured", activity: null, error: null })
+		set({ configured: false, kind: "unconfigured", error: null, ...idle() })
 		return
 	}
 	if (!navigator.onLine) {
-		set({ configured: true, kind: "offline", activity: null, error: null })
+		set({ configured: true, kind: "offline", error: null, ...idle() })
 		return
 	}
 	if (typeof document !== "undefined" && document.hidden && reason !== "boot") return
@@ -305,10 +324,12 @@ async function cycle(reason: "boot" | "dirty" | "focus" | "online"): Promise<voi
 		return
 	}
 	let outcome: DriveSyncResult | "skipped" | undefined
+	let seenWrites = writeSeq
 	try {
 		outcome = await withSyncLock(async () => {
 			if (running) return "skipped" as const
 			running = true
+			seenWrites = writeSeq
 			try {
 				set({ configured: true, activity: "checking", error: null })
 				const token = await ensureDriveTokenSilent()
@@ -376,8 +397,14 @@ async function cycle(reason: "boot" | "dirty" | "focus" | "online"): Promise<voi
 		}
 		return
 	}
-	if (outcome === "skipped" || outcome === undefined) return
+	if (outcome === "skipped" || outcome === undefined) {
+		if (pendingPush) armPushTimer()
+		return
+	}
 	lastCycleAt = Date.now()
+	// A write after this cycle took its data still needs a push of its own.
+	if (writeSeq === seenWrites) pendingPush = false
+	else armPushTimer()
 	await finishCycle(outcome, true)
 	set({ activity: null })
 }
