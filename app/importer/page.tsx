@@ -228,6 +228,15 @@ export default function ImporterPage() {
 															form.setFieldValue("account_select", "")
 															form.setFieldValue("account_id", "")
 															form.setFieldValue("account_name", "")
+															if (
+																BANKS_REQUIRING_ADDITIONAL_INFO.includes(
+																	item.value,
+																)
+															) {
+																const first = files.slice(0, 1)
+																form.setFieldValue("files", first)
+																setFiles(first)
+															}
 															clearApiError(field.name)
 															clearApiError("account_select")
 															clearApiError("account_id")

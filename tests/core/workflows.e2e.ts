@@ -870,6 +870,37 @@ test("importer: invalid files are rejected without mutation and duplicates are s
 	expect(await countStore(page, "statements")).toBe(before + 1)
 })
 
+test("importer: switching to a one-file bank trims the selection to one file", async ({
+	page,
+	workspace,
+}) => {
+	expect(workspace).toBe("populated")
+	await blockGoogle(page)
+	await page.goto("/importer")
+
+	await page.getByRole("radio", { name: /DBS/ }).click()
+	const [chooser] = await Promise.all([
+		page.waitForEvent("filechooser"),
+		page.getByRole("button", { name: /Drop.*here/ }).click(),
+	])
+	await chooser.setFiles(
+		["first.csv", "second.csv"].map(name => ({
+			name,
+			mimeType: "text/csv",
+			buffer: Buffer.from("a,b\n1,2\n"),
+		})),
+	)
+	await expect(page.getByRole("button", { name: "Import 2 files" })).toBeVisible()
+
+	await page.getByRole("radio", { name: /Revolut/ }).click()
+	await expect(page.getByRole("button", { name: "Import 1 file" })).toBeVisible()
+	await expect(page.getByText("first.csv")).toBeVisible()
+	await expect(page.getByText("second.csv")).toHaveCount(0)
+
+	await page.getByRole("radio", { name: /DBS/ }).click()
+	await expect(page.getByRole("button", { name: "Import 1 file" })).toBeVisible()
+})
+
 test("importer: a Revolut pending import surfaces in the pending queue", async ({
 	page,
 	workspace,
