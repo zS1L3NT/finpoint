@@ -48,6 +48,7 @@ import { useHistory } from "@/history"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { useDialogCloseAnimation } from "@/hooks/use-dialog-close-animation"
 import { useDefaultFilterEndDateToday, useDefaultFilterStartDate } from "@/hooks/use-settings"
+import { useSubmitLock } from "@/hooks/use-submit-lock"
 import { COLLAPSE_MOTION, SPRING, TRANSITION } from "@/lib/motion"
 import { cn, formatCurrency, formatDatetime, round2 } from "@/lib/utils"
 import { listMonthlyBudgets } from "@/logic/monthly-budgets"
@@ -93,6 +94,7 @@ export default function RecordEditorDialog({
 	const [submitError, setSubmitError] = useState("")
 
 	const { mergeErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
+	const { locked, run } = useSubmitLock(isOpen)
 
 	useEffect(() => {
 		setStatementCache(statements)
@@ -161,26 +163,30 @@ export default function RecordEditorDialog({
 	})
 
 	const handleDelete = async () => {
-		try {
-			await deleteRecord(record.id)
-			setIsOpen(false)
+		await run(async () => {
+			try {
+				await deleteRecord(record.id)
+				setIsOpen(false)
 
-			if (location.pathname === pathRecord(record.id)) {
-				navigateBack({
-					name: "Records",
-					url: pathRecords(
-						defaultFilterStartDate || defaultFilterEndDate
-							? {
-									start_date: defaultFilterStartDate ?? undefined,
-									end_date: defaultFilterEndDate,
-								}
-							: undefined,
-					),
-				})
+				if (location.pathname === pathRecord(record.id)) {
+					navigateBack({
+						name: "Records",
+						url: pathRecords(
+							defaultFilterStartDate || defaultFilterEndDate
+								? {
+										start_date: defaultFilterStartDate ?? undefined,
+										end_date: defaultFilterEndDate,
+									}
+								: undefined,
+						),
+					})
+				}
+				return true
+			} catch {
+				toast.error("Unable to delete this record.")
+				return false
 			}
-		} catch {
-			toast.error("Unable to delete this record.")
-		}
+		})
 	}
 
 	const isPendingAmount = useStore(
@@ -629,7 +635,12 @@ export default function RecordEditorDialog({
 
 					<DialogFooter>
 						<div className="flex min-w-0 flex-col gap-2 sm:mr-auto sm:flex-row sm:items-center">
-							<Button type="button" variant="destructive" onClick={handleDelete}>
+							<Button
+								type="button"
+								variant="destructive"
+								disabled={locked}
+								onClick={handleDelete}
+							>
 								<IconifyIcon icon="lucide:trash-2" /> Delete
 							</Button>
 							{submitError ? (

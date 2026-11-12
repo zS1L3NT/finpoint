@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { toast } from "sonner"
 import TextField from "@/components/form/text-field"
 import { Button } from "@/components/ui/button"
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { useDialogCloseAnimation } from "@/hooks/use-dialog-close-animation"
+import { useSubmitLock } from "@/hooks/use-submit-lock"
 import { updateAccount } from "@/logic/accounts"
 import { ValidationError } from "@/logic/validate"
 import type { Account } from "@/types"
@@ -33,25 +34,33 @@ export default function AccountDialog({
 	const [name, setName] = useState(account.name)
 	const { getApiFieldErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
 
-	useEffect(() => {
-		if (isOpen) {
+	const { locked, run } = useSubmitLock(isOpen)
+
+	// Seed when the dialog opens, and again only for a different Account: a fresh object for
+	// the same one (a background write) must not replace what is being typed.
+	const seedKey = isOpen ? account.id : null
+	const [seededKey, setSeededKey] = useState<string | null>(null)
+	if (seedKey !== seededKey) {
+		setSeededKey(seedKey)
+		if (seedKey !== null) {
 			setName(account.name)
 			resetApiErrors()
 		}
-	}, [account, isOpen, resetApiErrors])
+	}
 
 	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault()
-		try {
-			await updateAccount(account.id, { name })
-			setIsOpen(false)
-		} catch (cause) {
-			if (cause instanceof ValidationError) {
-				setApiErrors(cause.errors)
-				return
+		await run(async () => {
+			try {
+				await updateAccount(account.id, { name })
+				setIsOpen(false)
+				return true
+			} catch (cause) {
+				if (cause instanceof ValidationError) setApiErrors(cause.errors)
+				else toast.error("Unable to save this account.")
+				return false
 			}
-			toast.error("Unable to save this account.")
-		}
+		})
 	}
 
 	return (
@@ -86,7 +95,7 @@ export default function AccountDialog({
 							</Button>
 						}
 					/>
-					<Button type="submit" form="account-form">
+					<Button type="submit" form="account-form" disabled={locked}>
 						Save changes
 					</Button>
 				</DialogFooter>

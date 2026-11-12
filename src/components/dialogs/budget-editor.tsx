@@ -21,6 +21,7 @@ import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui
 import { useHistory } from "@/history"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { useDialogCloseAnimation } from "@/hooks/use-dialog-close-animation"
+import { useSubmitLock } from "@/hooks/use-submit-lock"
 import { deleteBudget, updateBudget } from "@/logic/budgets"
 import { ValidationError } from "@/logic/validate"
 import { pathBudget, pathBudgets } from "@/routes"
@@ -42,6 +43,7 @@ export default function BudgetEditorDialog({
 	const pathname = usePathname()
 
 	const { mergeErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
+	const { locked, run } = useSubmitLock(isOpen)
 
 	const form = useForm({
 		defaultValues: {
@@ -72,16 +74,20 @@ export default function BudgetEditorDialog({
 	})
 
 	const handleDelete = async () => {
-		try {
-			await deleteBudget(budget.id)
-			setIsOpen(false)
+		await run(async () => {
+			try {
+				await deleteBudget(budget.id)
+				setIsOpen(false)
 
-			if (pathname === pathBudget(budget.id)) {
-				navigateBack({ name: "Budgets", url: pathBudgets() })
+				if (pathname === pathBudget(budget.id)) {
+					navigateBack({ name: "Budgets", url: pathBudgets() })
+				}
+				return true
+			} catch {
+				toast.error("Unable to delete this budget.")
+				return false
 			}
-		} catch {
-			toast.error("Unable to delete this budget.")
-		}
+		})
 	}
 
 	return (
@@ -206,6 +212,7 @@ export default function BudgetEditorDialog({
 						type="button"
 						variant="destructive"
 						className="mr-auto"
+						disabled={locked}
 						onClick={handleDelete}
 					>
 						<IconifyIcon icon="lucide:trash-2" /> Delete

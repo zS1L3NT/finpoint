@@ -1113,3 +1113,166 @@ test("Category popup: bringing an option into view preserves the modal page posi
 		"Category default · Spending",
 	)
 })
+
+// Dialog lifecycle: one submit per save, and no re-seeding while the user types.
+async function readRows(page: Page, store: string): Promise<Record<string, unknown>[]> {
+	return page.evaluate(async name => {
+		const database = await new Promise<IDBDatabase>((resolve, reject) => {
+			const open = indexedDB.open("finpoint")
+			open.onsuccess = () => resolve(open.result)
+			open.onerror = () => reject(open.error)
+		})
+		try {
+			return await new Promise<Record<string, unknown>[]>((resolve, reject) => {
+				const request = database.transaction(name, "readonly").objectStore(name).getAll()
+				request.onsuccess = () => resolve(request.result)
+				request.onerror = () => reject(request.error)
+			})
+		} finally {
+			database.close()
+		}
+	}, store)
+}
+
+test.describe("dialog lifecycle", () => {
+	test("Pending Statement creator: a double submit creates one Statement", async ({
+		page,
+		workspace,
+	}) => {
+		void workspace
+		const dialog = await openEditor(
+			page,
+			"/statements",
+			"Create Pending Statement",
+			"Create Pending Statement",
+		)
+		await dialog.getByLabel("Description", { exact: true }).fill("Double submit probe")
+		await dialog.getByLabel("Amount", { exact: true }).fill("-1.23")
+		await page.evaluate(() => {
+			const form = document.getElementById("pending-statement-form") as HTMLFormElement
+			form.requestSubmit()
+			form.requestSubmit()
+		})
+		await expect(dialog).not.toBeVisible()
+		const rows = await readRows(page, "statements")
+		expect(rows.filter(row => row.description === "Double submit probe")).toHaveLength(1)
+	})
+
+	test("Statement rule creator: a double submit creates one rule", async ({ page }) => {
+		await seedWorkspace(page, "populated", { statement_rules: statementRules() })
+		const dialog = await openEditor(page, "/statement-rules", "New rule", "New rule")
+		await dialog.getByLabel("Name", { exact: true }).fill("Double submit rule")
+		await dialog.getByLabel("Text to look for", { exact: true }).fill("probe")
+		await dialog.getByLabel("Title", { exact: true }).fill("Probe")
+		await page.keyboard.press("Escape")
+		await page.evaluate(() => {
+			const form = document.getElementById("statement-rule-form") as HTMLFormElement
+			form.requestSubmit()
+			form.requestSubmit()
+		})
+		await expect(dialog).not.toBeVisible()
+		const rows = await readRows(page, "statement_rules")
+		expect(rows.filter(row => row.name === "Double submit rule")).toHaveLength(1)
+	})
+
+	test("Pending Statement editor: a double delete removes it once without an error", async ({
+		page,
+	}) => {
+		const { tables } = getScenario("populated")
+		await seedWorkspace(page, "populated", {
+			statements: [...tables.statements, { ...pending, id: "free-pending" }],
+		})
+		const dialog = await openEditor(
+			page,
+			"/statements/free-pending",
+			"Edit Pending Statement",
+			"Edit Pending Statement",
+		)
+		await dialog
+			.getByRole("button", { name: "Delete", exact: true })
+			.evaluate((button: HTMLButtonElement) => {
+				for (let i = 0; i < 3; i++) button.click()
+			})
+		await expect(page.getByText("Pending statement deleted.")).toBeVisible()
+		// Let the second call settle: it would report its failure as a toast of its own.
+		await page.waitForTimeout(1000)
+		await expect(page.locator('[data-sonner-toast][data-type="error"]')).toHaveCount(0)
+		const rows = await readRows(page, "statements")
+		expect(rows.filter(row => row.id === "free-pending")).toHaveLength(0)
+	})
+
+	test("Budget creator: a double submit creates one Budget", async ({ page, workspace }) => {
+		void workspace
+		const dialog = await openEditor(page, "/budgets", "New Budget", "Create Budget")
+		await dialog.getByLabel("Name", { exact: true }).fill("Double submit budget")
+		await chooseRange(page, dialog)
+		await page.evaluate(() => {
+			const form = document.getElementById("budget-create-form") as HTMLFormElement
+			form.requestSubmit()
+			form.requestSubmit()
+		})
+		await expect(dialog).not.toBeVisible()
+		const rows = await readRows(page, "budgets")
+		expect(rows.filter(row => row.name === "Double submit budget")).toHaveLength(1)
+	})
+
+	test("Record creator: a double submit creates one Record", async ({ page, workspace }) => {
+		void workspace
+		const dialog = await openEditor(
+			page,
+			"/records",
+			"Create Pending Record",
+			"Create New Record",
+		)
+		await dialog.getByLabel("Title", { exact: true }).fill("Double submit record")
+		await dialog.getByLabel("Amount", { exact: true }).fill("-5")
+		await dialog.locator("#datetime-time").fill("12:00")
+		await chooseCategory(page, dialog)
+		await page.evaluate(() => {
+			const form = document.getElementById("allocate-record-form") as HTMLFormElement
+			form.requestSubmit()
+			form.requestSubmit()
+		})
+		await expect(dialog).not.toBeVisible()
+		const rows = await readRows(page, "records")
+		expect(rows.filter(row => row.title === "Double submit record")).toHaveLength(1)
+	})
+
+	test("Pending Statement editor: a write from another tab does not reset what is typed", async ({
+		page,
+	}) => {
+		const { tables } = getScenario("populated")
+		await seedWorkspace(page, "populated", {
+			statements: [...tables.statements, { ...pending, id: "free-pending" }],
+		})
+		const dialog = await openEditor(
+			page,
+			"/statements/free-pending",
+			"Edit Pending Statement",
+			"Edit Pending Statement",
+		)
+		const description = dialog.getByLabel("Description", { exact: true })
+		await description.fill("Typed but unsaved")
+
+		// Any Statement write hands the open dialog a fresh Statement object.
+		const other = await page.context().newPage()
+		await other.goto("/statements")
+		await other.getByRole("button", { name: "Create Pending Statement", exact: true }).click()
+		const otherDialog = other.getByRole("dialog", { name: "Create Pending Statement" })
+		await otherDialog.getByLabel("Description", { exact: true }).fill("From another tab")
+		await otherDialog.getByLabel("Amount", { exact: true }).fill("-2")
+		await otherDialog.getByRole("button", { name: "Create statement", exact: true }).click()
+		await expect
+			.poll(async () =>
+				(await readRows(page, "statements")).some(
+					row => row.description === "From another tab",
+				),
+			)
+			.toBe(true)
+		await other.close()
+
+		// Give the live query time to hand the dialog the changed Statement.
+		await page.waitForTimeout(1000)
+		await expect(description).toHaveValue("Typed but unsaved")
+	})
+})
