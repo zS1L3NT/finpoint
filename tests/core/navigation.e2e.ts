@@ -257,13 +257,14 @@ test("browser traversal: distinguishes the same detail URL entered from two filt
 	await expect(page).toHaveURL(firstOrigin)
 })
 
-test("monthly shell: browser Back removes self-target and Forward restores its chart origin", async ({
+test("Records sheet: a chart drill adds no Back, browser Back closes it and Forward reopens it", async ({
 	page,
 	workspace,
 }) => {
 	void workspace
 	await gotoReady(page, "/?month=October&year=2026")
 	const origin = page.url()
+	const sheet = page.getByRole("dialog", { name: "Groceries", exact: true })
 	await page
 		.locator('[data-slot="card"]')
 		.filter({
@@ -275,16 +276,22 @@ test("monthly shell: browser Back removes self-target and Forward restores its c
 		.click()
 	await expect(page).toHaveURL(/category_ids=t1-cat-groceries/)
 	const records = page.url()
-	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to overview")
+	await expect(sheet).toBeVisible()
+	await expectNoBack(page)
 	await page.goBack()
 	await expect(page).toHaveURL(origin)
+	await expect(sheet).toHaveCount(0)
+	await page.goForward()
+	await expect(page).toHaveURL(records)
+	await expect(sheet).toBeVisible()
+	// Closing pops the entry the drill pushed, so no duplicate Dashboard entry is left behind.
+	await page.keyboard.press("Escape")
+	await expect(page).toHaveURL(origin)
+	await expect(sheet).toHaveCount(0)
 	await expectNoBack(page)
 	await page.goForward()
 	await expect(page).toHaveURL(records)
-	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to overview")
-	await page.getByRole("button", { name: "Back to overview", exact: true }).click()
-	await expect(page).toHaveURL(origin)
-	await expectNoBack(page)
+	await expect(sheet).toBeVisible()
 })
 
 test("delayed navigation: ordinary navigation survives an intervening inert click", async ({
@@ -693,7 +700,7 @@ test("navigation history: Category drill, fallbacks and static links preserve hi
 	})
 })
 
-test("history clearing: cancelled links, sidebar, tabs and chart drills clear or preserve history", async ({
+test("history clearing: cancelled links, sidebar and chart drills clear or preserve history", async ({
 	page,
 	workspace,
 	isMobile,
@@ -714,7 +721,7 @@ test("history clearing: cancelled links, sidebar, tabs and chart drills clear or
 		await expect(page).toHaveURL(/\/privacy$/)
 		await expect(page.getByRole("button", { name: /^Back to / })).toHaveCount(0)
 	})
-	await test.step("sidebar and month tabs: clear drill history", async () => {
+	await test.step("sidebar: clears drill history", async () => {
 		await resetHistory(page, "/privacy")
 		await page.getByRole("link", { name: "Terms of Service", exact: true }).click()
 		await expect(page.getByRole("button", { name: /^Back to / })).toBeVisible()
@@ -727,35 +734,23 @@ test("history clearing: cancelled links, sidebar, tabs and chart drills clear or
 		// The sidebar clears history at once, so Terms can lose its Back before Dashboard commits.
 		await expect(page).toHaveURL(/\/(\?|$)/)
 		await expect(page.getByRole("button", { name: /^Back to / })).toHaveCount(0)
-		await page
-			.getByRole("navigation", { name: "Monthly finance views" })
-			.getByRole("link", { name: "Monthly Records", exact: true })
-			.click()
-		await expect(page).toHaveURL(/\/records\/monthly/)
-		await expect(page.getByRole("button", { name: /^Back to / })).toHaveCount(0)
 	})
-	await test.step("chart drill: nested Record returns through filtered overview", async () => {
+	await test.step("chart drill: nested Record returns to the open Records sheet", async () => {
 		const origin = "/?month=October&year=2026&scope=all"
 		await resetHistory(page, origin)
 		await page.getByRole("button", { name: /^5 October: \$84.20 spent/ }).click()
 		await page.getByRole("button", { name: "View Records", exact: true }).click()
 		await expect(page).toHaveURL(/start_date=2026-10-05/)
-		const back = page.getByRole("button", { name: /^Back to overview$/i })
-		await expect(back).toBeVisible()
-		const backBox = await back.boundingBox()
-		const headingBox = await page
-			.getByRole("heading", { name: "October 2026", level: 2 })
-			.boundingBox()
-		if (!backBox || !headingBox)
-			throw new Error("Back and month heading must have layout boxes")
-		expect(backBox.y + backBox.height).toBeLessThan(headingBox.y)
-		const monthly = page.url()
-		await page.getByRole("link", { name: "Open FairPrice Run", exact: true }).click()
-		// The monthly page's own Back matches /^Back to / until the Record commits.
+		const sheet = page.getByRole("dialog", { name: "Records", exact: true })
+		await expect(sheet).toBeVisible()
+		await expectNoBack(page)
+		const drilled = page.url()
+		await sheet.getByRole("link", { name: "Open FairPrice Run", exact: true }).click()
 		await expect(page).toHaveURL(/\/records\/t1-r-groceries$/)
-		await page.getByRole("button", { name: "Back to Monthly Records", exact: true }).click()
-		await expect(page).toHaveURL(monthly)
-		await back.click()
+		await page.getByRole("button", { name: "Back to Dashboard", exact: true }).click()
+		await expect(page).toHaveURL(drilled)
+		await expect(sheet).toBeVisible()
+		await page.keyboard.press("Escape")
 		await expect(page).toHaveURL(origin)
 	})
 })
@@ -800,12 +795,14 @@ test("Back button: the outgoing page's Back cancels a drill link that is still l
 	workspace,
 }) => {
 	void workspace
-	const origin = "/?month=October&year=2026&scope=all"
-	await resetHistory(page, origin)
+	await resetHistory(page, "/?month=October&year=2026&scope=all")
 	await page.getByRole("button", { name: /^5 October: \$84.20 spent/ }).click()
 	await page.getByRole("button", { name: "View Records", exact: true }).click()
 	await expect(page).toHaveURL(/start_date=2026-10-05/)
-	const back = page.getByRole("button", { name: "Back to overview", exact: true })
+	const origin = page.url()
+	await page.getByRole("link", { name: "Open in Records", exact: true }).click()
+	await expect(page).toHaveURL(/\/records\?start_date=2026-10-05/)
+	const back = page.getByRole("button", { name: "Back to October 2026", exact: true })
 	await expect(back).toBeEnabled()
 	// Hold the Record route so the drill is still loading when Back is pressed.
 	const { promise: held, resolve: release } = Promise.withResolvers<void>()
@@ -822,7 +819,7 @@ test("Back button: the outgoing page's Back cancels a drill link that is still l
 	await back.click()
 	release()
 	await expect(page).toHaveURL(origin)
-	await expect(page.getByRole("heading", { name: "October 2026", level: 2 })).toBeVisible()
+	await expect(page.getByRole("dialog", { name: "Records", exact: true })).toBeVisible()
 	await page.unrouteAll({ behavior: "wait" })
 	await expect(page).toHaveURL(origin)
 	await expect(page.getByRole("heading", { name: "FairPrice Run" })).toHaveCount(0)
@@ -837,7 +834,9 @@ test("Back button: a history restore while a drill link loads keeps its restored
 	await page.getByRole("button", { name: /^5 October: \$84.20 spent/ }).click()
 	await page.getByRole("button", { name: "View Records", exact: true }).click()
 	await expect(page).toHaveURL(/start_date=2026-10-05/)
-	const monthly = new URL(page.url())
+	await page.getByRole("link", { name: "Open in Records", exact: true }).click()
+	await expect(page).toHaveURL(/\/records\?start_date=2026-10-05/)
+	const records = new URL(page.url())
 	const { promise: held, resolve: release } = Promise.withResolvers<void>()
 	let requested = false
 	await page.route(/\/records\/t1-r-groceries/, async route => {
@@ -858,13 +857,13 @@ test("Back button: a history restore while a drill link loads keeps its restored
 					...history.state,
 					finpointHistory: [
 						{ name: "Privacy Policy", url: "/privacy" },
-						{ name: "Monthly Records", url: self },
+						{ name: "Records", url: self },
 					],
 				},
 			}),
 		)
-	}, monthly.pathname + monthly.search)
-	await page.getByRole("button", { name: "Back to Monthly Records", exact: true }).click()
+	}, records.pathname + records.search)
+	await page.getByRole("button", { name: "Back to Records", exact: true }).click()
 	await expect(
 		page.getByRole("button", { name: "Back to Privacy Policy", exact: true }),
 	).toBeVisible()

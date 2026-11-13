@@ -1,12 +1,10 @@
 import { DateTime } from "luxon"
-import { useRouter } from "next/navigation"
 import TrendChart from "@/components/charts/trend-chart"
 import MonthlyBudgetBadge from "@/components/monthly-budget-badge"
-import { useHistory } from "@/history"
+import { useRecordsSheet } from "@/hooks/use-records-sheet"
 import { dayTicks } from "@/lib/chart-days"
 import { themeColor } from "@/lib/palette"
 import type { getPaceView } from "@/logic/dashboard"
-import { pathMonthlyRecords } from "@/routes"
 
 export type CashflowPoint = {
 	day: number
@@ -36,24 +34,14 @@ export default function CashflowChart({
 	amountLabel: string | null
 	showProjection: boolean
 }) {
-	const router = useRouter()
-	const { handlePush } = useHistory()
+	const sheet = useRecordsSheet()
 	const length = data.length
 	const openDay = (index: number) => {
 		if (index >= data.length) return
 		const selected = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
 			.set({ day: index + 1 })
 			.toFormat("yyyy-MM-dd")
-		handlePush("overview")()
-		void router.push(
-			pathMonthlyRecords({
-				month,
-				year: String(year),
-				start_date: selected,
-				end_date: selected,
-				...recordFilters,
-			}),
-		)
+		sheet.open({ start_date: selected, end_date: selected, ...recordFilters })
 	}
 
 	return (

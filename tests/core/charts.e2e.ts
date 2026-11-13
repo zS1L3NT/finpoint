@@ -508,10 +508,14 @@ test.describe("pinned overview date", () => {
 			await card(page, "Categories this month")
 				.getByRole("link", { name: /Groceries/ })
 				.click()
+			// The drill stays on the Dashboard and opens its Records sheet.
+			await expect(page).toHaveURL(/\/\?month=October&year=2026&records=1&/)
 			await expect(page).toHaveURL(new RegExp(`category_ids=${IDS.categories.groceries}`))
 			await expect(page).toHaveURL(/effective_spending=true/)
+			const sheet = page.getByRole("dialog", { name: "Groceries", exact: true })
+			await expect(sheet).toContainText("October 2026")
 			await expect(
-				page.getByRole("link", { name: "Open FairPrice Run", exact: true }),
+				sheet.getByRole("link", { name: "Open FairPrice Run", exact: true }),
 			).toBeVisible()
 			await expect(
 				page.getByRole("link", { name: "Open Monthly Salary", exact: true }),
@@ -946,7 +950,10 @@ test("category trend: one shared list follows the read month and keeps its links
 	await surface.press("ArrowRight")
 	await surface.press("ArrowRight")
 	await expect(list).toHaveAccessibleName("Categories in Sep 2026")
-	await expect(list.getByRole("link").first()).toHaveAttribute("href", /month=September/)
+	await expect(list.getByRole("link").first()).toHaveAttribute(
+		"href",
+		/start_date=2026-09-01&end_date=2026-09-30/,
+	)
 	if (!isMobile) {
 		const box = await surface.boundingBox()
 		if (!box) throw new Error("Category trend surface missing")

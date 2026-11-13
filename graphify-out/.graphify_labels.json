@@ -59,6 +59,7 @@
   "57": "manifest.json",
   "58": "providers.tsx",
   "59": "scripts",
+  "60": "monthly-budget-usage.tsx",
   "62": "formatter",
   "63": "Records",
   "65": "Domain docs (single-context layout)",
@@ -90,7 +91,6 @@
   "91": "Generated demo data",
   "92": "Progressive Web Application",
   "93": "vite-env.d.ts",
-  "94": "statement-rules.ts",
   "99": "workflows.e2e.ts",
   "100": "trend-chart.tsx"
 }

@@ -8,7 +8,7 @@
   - `src/logic/*` holds domain reads and operations, retaining the old Laravel `Api/*Controller` mapping where applicable. Workspace backup/reset operations and background Drive sync also belong here.
   - `src/data/*` holds persistence, versioned migrations, seeding, backup serialization, and Drive storage. Outside this layer, only `src/logic/*` imports `@/data/*`, except `app/providers.tsx` for database boot and seeding.
   - `src/routes.ts` centralizes all route paths; `app/api/auth/*` are Route Handlers for the Google OAuth broker only (exchange/token/logout) — financial data never touches them.
-  - Overview + Monthly Records share the `(month)` route-group shell (title, month nav, tabs mount once, content swaps below), so tab switches never remount the header.
+  - The Dashboard uses the `(month)` route-group shell (title and month nav mount once), so month changes never remount the header. Dashboard drills open the Records sheet (`src/components/sheets/records-sheet.tsx`) from its URL (`records=1` plus Record filters); legacy `/records/monthly` URLs redirect there.
 - React Compiler is enabled in `next.config.ts`.
 - Keep validation errors as `ValidationError` with Laravel-shaped `{ field: string[] }` maps so forms keep working unchanged. Validate input shape through `Validator` in `src/logic/validate.ts`; a single-field rule failure after a read may throw `ValidationError({ field: [msg] })` directly. Aggregate failures through `Validator`, never a hand-built `errors` map.
 - For Dexie schema changes, bump the version and add an `upgrade` block; never rewrite old migration blocks.

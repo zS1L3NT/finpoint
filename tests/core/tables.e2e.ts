@@ -309,13 +309,14 @@ test("Records lists: later and future Records keep amounts and drills, long Reco
 	page,
 }) => {
 	await seedWorkspace(page)
-	await test.step("Monthly Records: later and future Records keep amounts and working drills", async () => {
+	await test.step("Records sheet: later and future Records keep amounts and working drills", async () => {
 		await patchRows(page, "records", [
 			{ id: IDS.records.unicode, datetime: "2026-11-10 13:20" },
 			{ id: "t1-r-refund", datetime: "2026-10-20 11:10" },
 		])
-		await page.goto("/records/monthly?month=October&year=2026")
+		await page.goto("/?month=October&year=2026&records=1")
 		const later = page
+			.getByRole("dialog", { name: "Records", exact: true })
 			.locator("section")
 			.filter({ has: page.getByRole("heading", { name: "Later this month", exact: true }) })
 		await expect(later).toContainText("Excluded from actual totals.")
@@ -325,13 +326,17 @@ test("Records lists: later and future Records keep amounts and drills, long Reco
 				.filter({ visible: true }),
 		).toBeVisible()
 		await expect(later).toContainText("$20.00")
-		await page.goto("/records/monthly?month=November&year=2026")
-		await expect(
-			page.getByRole("heading", { name: "November 2026", exact: true }),
-		).toBeVisible()
-		const future = page.getByRole("link", { name: /^Open Kōpi/ }).filter({ visible: true })
+		await page.goto("/?month=November&year=2026&records=1")
+		const sheet = page.getByRole("dialog", { name: "Records", exact: true })
+		await expect(sheet).toContainText("November 2026")
+		await expect(sheet).toContainText("Future-dated Records")
+		// Measure once the sheet has slid in.
+		await sheet.evaluate(element =>
+			Promise.all(element.getAnimations().map(animation => animation.finished)),
+		)
+		const future = sheet.getByRole("link", { name: /^Open Kōpi/ }).filter({ visible: true })
 		await fits(page, future)
-		await expect(page.locator("main")).toContainText("-$33.33")
+		await expect(sheet).toContainText("-$33.33")
 		await expect(page.getByText("No Records have been entered for this month.")).toHaveCount(0)
 		await future.focus()
 		await page.keyboard.press("Enter")
@@ -581,23 +586,21 @@ test("Monthly budget filters: All budgets leads, budgets follow and Unbudgeted c
 	workspace,
 }) => {
 	void workspace
-	for (const route of ["/records", "/records/monthly?month=October&year=2026"]) {
-		await page.goto(route)
-		await page
-			.getByRole("combobox")
-			.filter({ hasText: /^All budgets$/ })
-			.click()
-		const options = page.getByRole("option")
-		expect((await options.allTextContents()).map(text => text.trim())).toEqual([
-			"All budgets",
-			"Daily",
-			"Recurring",
-			"Unbudgeted",
-		])
-		await expect(
-			page.locator('[data-slot="select-content"] [data-slot="select-separator"]'),
-		).toHaveCount(0)
-		await page.getByRole("option", { name: "Daily", exact: true }).click()
-		await expect(page).toHaveURL(/monthly_budget_id=t1-mb-daily/)
-	}
+	await page.goto("/records")
+	await page
+		.getByRole("combobox")
+		.filter({ hasText: /^All budgets$/ })
+		.click()
+	const options = page.getByRole("option")
+	expect((await options.allTextContents()).map(text => text.trim())).toEqual([
+		"All budgets",
+		"Daily",
+		"Recurring",
+		"Unbudgeted",
+	])
+	await expect(
+		page.locator('[data-slot="select-content"] [data-slot="select-separator"]'),
+	).toHaveCount(0)
+	await page.getByRole("option", { name: "Daily", exact: true }).click()
+	await expect(page).toHaveURL(/monthly_budget_id=t1-mb-daily/)
 })

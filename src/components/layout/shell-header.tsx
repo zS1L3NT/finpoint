@@ -12,7 +12,6 @@ import {
 	pathDashboard,
 	pathDataSettings,
 	pathImporter,
-	pathMonthlyRecords,
 	pathPrivacy,
 	pathRecords,
 	pathSettings,
@@ -23,7 +22,6 @@ import {
 
 const TITLES: { match: (pathname: string) => boolean; title: string }[] = [
 	{ match: pathname => pathname === pathDashboard(), title: "Dashboard" },
-	{ match: pathname => pathname.startsWith(pathMonthlyRecords()), title: "Monthly Records" },
 	{ match: pathname => pathname.startsWith(`${pathRecords()}/`), title: "Record" },
 	{ match: pathname => pathname.startsWith(pathRecords()), title: "Records" },
 	{ match: pathname => pathname.startsWith(`${pathStatements()}/`), title: "Statement" },
@@ -48,13 +46,7 @@ export default function ShellHeader() {
 	const { date } = useMonthParams()
 	const title = TITLES.find(entry => entry.match(pathname))?.title ?? "Page not found"
 	// Month views lead with the month, so several open tabs stay tellable apart.
-	const monthView =
-		pathname === pathDashboard()
-			? "Overview"
-			: pathname.startsWith(pathMonthlyRecords())
-				? "Records"
-				: null
-	const tabTitle = `${monthView ? `${date.toFormat("MMM yyyy")} ${monthView}` : title} · Finpoint`
+	const tabTitle = `${pathname === pathDashboard() ? `${date.toFormat("MMM yyyy")} Overview` : title} · Finpoint`
 
 	// Set imperatively and only here: the root metadata deliberately has no title, since Next
 	// re-applies a metadata title over this one on every client navigation.

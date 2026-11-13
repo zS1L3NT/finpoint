@@ -26,15 +26,7 @@ export async function openMobileSidebarFromConsumerMotion(page: Page) {
 export type MotionConsumer = {
 	name: string
 	origin: string
-	action:
-		| "sidebar"
-		| "month-tab"
-		| "workflow"
-		| "heading"
-		| "link"
-		| "statement"
-		| "view"
-		| "pending"
+	action: "sidebar" | "sheet" | "workflow" | "heading" | "link" | "statement" | "view" | "pending"
 	target: string
 	selector: string
 	dense: boolean
