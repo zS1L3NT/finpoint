@@ -782,6 +782,46 @@ test.describe("pinned 15 October 2026 date", () => {
 		await expect(page).toHaveURL(new RegExp(`scope=${IDS.monthlyBudgets.daily}`))
 		await expect(scope).toContainText("Daily")
 	})
+	test("monthly shell: Pending review links sit under the month subtitle and still open the sheet", async ({
+		page,
+	}) => {
+		await seedWorkspace(page)
+		await page.goto(`/?${month}`)
+		const header = page.locator("main header")
+		const review = header.getByLabel("Review this month")
+		const pending = review.getByRole("link", { name: /Pending Records?$/ })
+		await expect(pending).toBeVisible()
+		const [links, subtitle] = await Promise.all([
+			review.boundingBox(),
+			header.getByText(/Based on Record dates/).boundingBox(),
+		])
+		if (!links || !subtitle) throw new Error("header status missing")
+		expect(links.y).toBeGreaterThan(subtitle.y + subtitle.height - 1)
+		expect(links.y - (subtitle.y + subtitle.height)).toBeLessThanOrEqual(16)
+		await pending.click()
+		await expect(page.getByRole("dialog", { name: "Pending", exact: true })).toBeVisible()
+	})
+	test("Records sheet: each Record shows its Monthly Budget under its amount", async ({
+		page,
+	}) => {
+		await seedWorkspace(page)
+		await page.goto(`/?${month}&records=1&start_date=2026-10-05&end_date=2026-10-05`)
+		const sheet = page.getByRole("dialog")
+		const open = sheet.getByRole("link", { name: "Open FairPrice Run", exact: true })
+		await expect(open).toBeVisible()
+		// The innermost element holding both the Record's link and its amount is its row.
+		const row = sheet
+			.locator("div")
+			.filter({ has: page.getByRole("link", { name: "Open FairPrice Run", exact: true }) })
+			.filter({ hasText: "-$84.20" })
+			.last()
+		const amount = row.getByText("-$84.20", { exact: true })
+		const badge = row.getByText("Daily", { exact: true })
+		await expect(badge).toBeVisible()
+		const [money, pill] = await Promise.all([amount.boundingBox(), badge.boundingBox()])
+		if (!money || !pill) throw new Error("amount or Monthly Budget missing")
+		expect(pill.y).toBeGreaterThan(money.y + money.height - 1)
+	})
 	test("Records sheet: phones get a bottom sheet and wider screens a side sheet", async ({
 		page,
 		isMobile,

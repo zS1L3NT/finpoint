@@ -256,6 +256,7 @@ export function useRecordMobileRow<TRecord extends RecordRow>({
 	leading,
 	onEdit,
 	grouped = false,
+	showMonthlyBudget = false,
 }: RecordTableOptions<TRecord> & {
 	leading?: (record: TRecord) => React.ReactNode
 }): (row: Row<TRecord>) => React.ReactNode {
@@ -283,15 +284,26 @@ export function useRecordMobileRow<TRecord extends RecordRow>({
 							</p>
 						</div>
 					</div>
-					<RecordAmountCell
-						record={record}
-						value={value}
-						showAllocated={amount === "amount" && record.is_pending}
-					/>
+					{showMonthlyBudget ? (
+						<span className="grid justify-items-end gap-1">
+							<RecordAmountCell
+								record={record}
+								value={value}
+								showAllocated={amount === "amount" && record.is_pending}
+							/>
+							<RecordMonthlyBudget record={record} />
+						</span>
+					) : (
+						<RecordAmountCell
+							record={record}
+							value={value}
+							showAllocated={amount === "amount" && record.is_pending}
+						/>
+					)}
 					<RecordActions record={record} options={{ pageName, extraActions, onEdit }} />
 				</>
 			)
 		},
-		[amount, pageName, extraActions, leading, onEdit, grouped],
+		[amount, pageName, extraActions, leading, onEdit, grouped, showMonthlyBudget],
 	)
 }

@@ -45,6 +45,7 @@ export default function RecordsSheet() {
 	const mobileRow = useRecordMobileRow<Record>({
 		pageName: "Dashboard",
 		grouped: true,
+		showMonthlyBudget: true,
 	})
 
 	// Keep the last filters while the sheet slides out, so its content does not blank mid-exit.

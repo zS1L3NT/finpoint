@@ -663,7 +663,7 @@ export const componentInventory: InventoryEntry[] = [
 		path: "src/components/layout/month-header-slot.tsx",
 		owner: "team3",
 		routes: ["/"],
-		visibleExports: ["MonthHeaderControls"],
+		visibleExports: ["MonthHeaderPortal"],
 		dormantExports: [],
 		helperExports: ["MonthHeaderSlotProvider"],
 		scenarios: ["display"],
@@ -2817,6 +2817,7 @@ export const behaviourCoverage: Record<string, string[]> = {
 	"src/components/sheets/records-sheet.tsx#display.interaction": [
 		"Records sheet: a chart drill adds no Back, browser Back closes it and Forward reopens it",
 		"Records sheet: phones get a bottom sheet and wider screens a side sheet",
+		"Records sheet: each Record shows its Monthly Budget under its amount",
 		"chart drill: nested Record returns to the open Records sheet",
 	],
 	"src/components/sheets/record-search.tsx#export.default.behaviour": [
@@ -3816,8 +3817,9 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"/records/t1-r-partial page: populated content and enabled controls stay inside the viewport",
 		"/statements/t1-s-pending page: populated content and enabled controls stay inside the viewport",
 	],
-	"src/components/layout/month-header-slot.tsx#export.MonthHeaderControls.behaviour": [
+	"src/components/layout/month-header-slot.tsx#export.MonthHeaderPortal.behaviour": [
 		"monthly shell: the scope picker sits beside the month navigation and still scopes the month",
+		"monthly shell: Pending review links sit under the month subtitle and still open the sheet",
 	],
 	"src/components/layout/page-content.tsx#export.default.behaviour": [
 		"/ page: populated content and enabled controls stay inside the viewport",

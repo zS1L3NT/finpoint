@@ -15,7 +15,7 @@ import SpendingCalendar from "@/components/charts/spending-calendar"
 import TotalSpendingChart from "@/components/charts/total-spending-chart"
 import MonthlyBudgetDialog from "@/components/dialogs/monthly-budget"
 import { UiIcon as IconifyIcon } from "@/components/icon"
-import { MonthHeaderControls } from "@/components/layout/month-header-slot"
+import { MonthHeaderPortal } from "@/components/layout/month-header-slot"
 import { Metric as DashboardMetric, type Delta, MetricGrid } from "@/components/metric"
 import MonthlyBudgetBadge from "@/components/monthly-budget-badge"
 import RecordsSheet from "@/components/sheets/records-sheet"
@@ -152,11 +152,13 @@ export default function DashboardPage() {
 					through={period.through}
 				/>
 			)}
-			<MonthHeaderControls>
+			<MonthHeaderPortal slot="controls">
 				<ScopeSelect value={scope} budgets={budgets} onChange={setScope} />
-			</MonthHeaderControls>
+			</MonthHeaderPortal>
 			{!period.is_future ? (
-				<ReviewLinks data={data} month={dataMonth} year={dataYear} />
+				<MonthHeaderPortal slot="status">
+					<ReviewLinks data={data} month={dataMonth} year={dataYear} />
+				</MonthHeaderPortal>
 			) : null}
 			<div
 				className={cn(

@@ -23,6 +23,7 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 	const { latest, isNavigatingBack, navigateBack } = useHistory()
 	const back = latest
 	const [hydrated, setHydrated] = useState(false)
+	const [status, setStatus] = useState<HTMLDivElement | null>(null)
 	const [controls, setControls] = useState<HTMLDivElement | null>(null)
 
 	// Calendar labels and links use the browser date, which can differ from SSR.
@@ -71,7 +72,7 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 							</Button>
 						) : null}
 						<div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-							<div>
+							<div className="min-w-0">
 								<p className="text-xs font-medium text-muted-foreground">
 									Monthly overview
 								</p>
@@ -79,6 +80,7 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 									<ValueSwap value={`${month} ${year}`} />
 								</h2>
 								<p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>
+								<div ref={setStatus} className="mt-3 empty:hidden" />
 							</div>
 							<div className="flex w-full flex-col-reverse gap-2 sm:w-fit sm:flex-row sm:items-center">
 								<div ref={setControls} className="contents" />
@@ -124,7 +126,9 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 					</header>
 				)}
 
-				<MonthHeaderSlotProvider value={controls}>{children}</MonthHeaderSlotProvider>
+				<MonthHeaderSlotProvider value={{ status, controls }}>
+					{children}
+				</MonthHeaderSlotProvider>
 			</PageContent>
 		</>
 	)
