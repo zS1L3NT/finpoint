@@ -759,6 +759,42 @@ test.describe("pinned 15 October 2026 date", () => {
 		await expect(page.getByText("Total income", { exact: false }).first()).toBeVisible()
 		await expect.poll(() => heading?.evaluate(node => node.isConnected)).toBe(true)
 	})
+	test("monthly shell: the scope picker sits beside the month navigation and still scopes the month", async ({
+		page,
+		isMobile,
+	}) => {
+		await seedWorkspace(page)
+		await page.goto(`/?${month}`)
+		const header = page.locator("main header")
+		const scope = header.getByRole("combobox", { name: "Spending scope", exact: true })
+		const next = header.getByRole("button", { name: "Next month", exact: true })
+		await expect(scope).toBeVisible()
+		const [picker, nav] = await Promise.all([scope.boundingBox(), next.boundingBox()])
+		if (!picker || !nav) throw new Error("header controls missing")
+		// Phones stack the picker just under the month navigation; wider screens put it beside it.
+		if (isMobile) expect(picker.y - (nav.y + nav.height)).toBeLessThanOrEqual(12)
+		else
+			expect(Math.abs(picker.y + picker.height / 2 - (nav.y + nav.height / 2))).toBeLessThan(
+				2,
+			)
+		await scope.click()
+		await page.getByRole("option", { name: "Daily", exact: true }).click()
+		await expect(page).toHaveURL(new RegExp(`scope=${IDS.monthlyBudgets.daily}`))
+		await expect(scope).toContainText("Daily")
+	})
+	test("Records sheet: phones get a bottom sheet and wider screens a side sheet", async ({
+		page,
+		isMobile,
+	}) => {
+		await seedWorkspace(page)
+		await page.goto(`/?${month}&records=1`)
+		const sheet = page.locator('[data-slot="sheet-content"]')
+		await expect(sheet).toHaveAttribute("data-side", isMobile ? "bottom" : "right")
+		await expect(page.locator('[data-slot="sheet-overlay"]')).toHaveCSS(
+			"backdrop-filter",
+			/blur/,
+		)
+	})
 	test("static and not-found routes: static pages are readable and unmatched routes offer Records", async ({
 		page,
 	}) => {

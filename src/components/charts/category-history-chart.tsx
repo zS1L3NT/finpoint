@@ -38,7 +38,7 @@ export default function CategoryHistoryChart({
 	recordHref: (ids: string, at: DateTime) => string
 	badge: React.ReactNode
 }) {
-	// The breakdown keeps the last month read, so its links stay reachable after the pointer leaves.
+	// The breakdown shows the last month selected, so reading another month never swaps it.
 	// Kept by month, not position: the months shift when the displayed month changes.
 	const [picked, setPicked] = useState<string | null>(null)
 	const [expanded, setExpanded] = useState<string | null>(null)
@@ -154,7 +154,7 @@ export default function CategoryHistoryChart({
 						excluded
 						{through &&
 							` · selected days 1–${Number(through.slice(-2))}; prior months in full`}
-						. Hold, hover or focus a month to update the category list.
+						. Select a month to update the category list.
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="flex min-h-0 flex-1 flex-col gap-3">
@@ -190,9 +190,7 @@ export default function CategoryHistoryChart({
 										</>
 									)
 								}}
-								onActive={index => {
-									if (index !== null) setPicked(chartData[index]?.month ?? null)
-								}}
+								onSelect={index => setPicked(chartData[index]?.month ?? null)}
 								introKey={months.find(month => month.current)?.month}
 							/>
 						</>

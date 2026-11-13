@@ -10,9 +10,9 @@ const HOLD_MS = 120
 
 /**
  * Shell of the custom charts: measures itself, owns the active index and reveals
- * the marks once per `introKey`. Touch reads only while a finger is down and
- * follows it as it scrubs; a mouse reads on hover and clicks to select; keyboard
- * focus starts at the first point.
+ * the marks once per `introKey`. A touch hold reads and follows the finger as it
+ * scrubs, and a quick tap selects; a mouse reads on hover and clicks to select;
+ * keyboard focus starts at the first point.
  */
 export default function ChartFrame({
 	label,
@@ -146,20 +146,23 @@ export default function ChartFrame({
 							if (press.current.reading) setActive(press.current.index)
 						}
 					}}
-					// Touch never selects: lifting the finger only ends the reading.
+					// A tap lifted before the hold selects; lifting after a hold only ends the reading.
+					// A scroll that starts on the chart cancels the pointer, so it never selects.
 					onPointerUp={event => {
 						if (press.current?.pointer !== event.pointerId) return
+						const { index, reading } = press.current
 						release()
 						setActive(null)
+						if (!reading) onSelect?.(index)
 					}}
 					onPointerCancel={event => {
 						if (press.current?.pointer !== event.pointerId) return
 						release()
 						setActive(null)
 					}}
-					// Only a mouse selects, judged at pointerdown because iOS Safari's click can
-					// misreport its pointer type; touch and pen holds only read. Click fires for
-					// the primary button only, pressed and released on the chart.
+					// A mouse selects on click, judged at pointerdown because iOS Safari's click can
+					// misreport its pointer type; touch and pen select on pointerup instead. Click
+					// fires for the primary button only, pressed and released on the chart.
 					onClick={event => {
 						if (pointerType.current === "mouse") onSelect?.(pointed(event))
 					}}

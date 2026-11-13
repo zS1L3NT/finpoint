@@ -660,6 +660,15 @@ export const componentInventory: InventoryEntry[] = [
 		scenarios: ["display"],
 	},
 	{
+		path: "src/components/layout/month-header-slot.tsx",
+		owner: "team3",
+		routes: ["/"],
+		visibleExports: ["MonthHeaderControls"],
+		dormantExports: [],
+		helperExports: ["MonthHeaderSlotProvider"],
+		scenarios: ["display"],
+	},
+	{
 		path: "src/components/layout/page-content.tsx",
 		owner: "team3",
 		routes: [
@@ -2318,6 +2327,10 @@ export const notApplicable: Record<string, string> = {
 		"Static badge with no enabled controls; assignment and fallback are covered via display.values",
 	"src/components/icon.tsx#display.interaction":
 		"Static icon output with no enabled controls; SVG output and size are covered via display.values",
+	"src/components/layout/month-header-slot.tsx#display.values":
+		"Portal slot with no own visible copy; the scope picker it places is covered via its export behaviour",
+	"src/components/layout/month-header-slot.tsx#display.interaction":
+		"Portal slot with no enabled controls of its own",
 	"src/components/layout/page-content.tsx#display.values":
 		"Layout container with no own visible copy; containment is exercised through route.layout consumers mapped to its export",
 	"src/components/layout/page-content.tsx#display.interaction":
@@ -2803,6 +2816,7 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"src/components/sheets/records-sheet.tsx#display.interaction": [
 		"Records sheet: a chart drill adds no Back, browser Back closes it and Forward reopens it",
+		"Records sheet: phones get a bottom sheet and wider screens a side sheet",
 		"chart drill: nested Record returns to the open Records sheet",
 	],
 	"src/components/sheets/record-search.tsx#export.default.behaviour": [
@@ -3801,6 +3815,9 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"/budgets/t1-b-manual page: populated content and enabled controls stay inside the viewport",
 		"/records/t1-r-partial page: populated content and enabled controls stay inside the viewport",
 		"/statements/t1-s-pending page: populated content and enabled controls stay inside the viewport",
+	],
+	"src/components/layout/month-header-slot.tsx#export.MonthHeaderControls.behaviour": [
+		"monthly shell: the scope picker sits beside the month navigation and still scopes the month",
 	],
 	"src/components/layout/page-content.tsx#export.default.behaviour": [
 		"/ page: populated content and enabled controls stay inside the viewport",

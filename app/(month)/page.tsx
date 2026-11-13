@@ -15,6 +15,7 @@ import SpendingCalendar from "@/components/charts/spending-calendar"
 import TotalSpendingChart from "@/components/charts/total-spending-chart"
 import MonthlyBudgetDialog from "@/components/dialogs/monthly-budget"
 import { UiIcon as IconifyIcon } from "@/components/icon"
+import { MonthHeaderControls } from "@/components/layout/month-header-slot"
 import { Metric as DashboardMetric, type Delta, MetricGrid } from "@/components/metric"
 import MonthlyBudgetBadge from "@/components/monthly-budget-badge"
 import RecordsSheet from "@/components/sheets/records-sheet"
@@ -151,14 +152,12 @@ export default function DashboardPage() {
 					through={period.through}
 				/>
 			)}
-			<div className="flex flex-wrap items-center justify-between gap-2">
-				<div className="min-w-0 flex-1 basis-full sm:basis-auto">
-					{!period.is_future ? (
-						<ReviewLinks data={data} month={dataMonth} year={dataYear} />
-					) : null}
-				</div>
+			<MonthHeaderControls>
 				<ScopeSelect value={scope} budgets={budgets} onChange={setScope} />
-			</div>
+			</MonthHeaderControls>
+			{!period.is_future ? (
+				<ReviewLinks data={data} month={dataMonth} year={dataYear} />
+			) : null}
 			<div
 				className={cn(
 					"grid gap-5",
@@ -347,8 +346,8 @@ export default function DashboardPage() {
 								</ScopedCardTitle>
 								<CardDescription>
 									Net daily spending across all monthly budgets, including
-									refunds. Hold or hover over a day to read it, and click it to
-									open its Records.
+									refunds. Hold or hover over a day to read it, and tap or click
+									it to open its Records.
 								</CardDescription>
 							</CardHeader>
 							<CardContent>

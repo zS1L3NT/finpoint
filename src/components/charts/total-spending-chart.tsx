@@ -69,7 +69,7 @@ export default function TotalSpendingChart({
 			<p className="text-xs text-muted-foreground">
 				Green is a surplus and red a shortfall.
 				{previous ? " The faint dashed line shows last month by day of month." : ""} Hold or
-				hover over a day to read it, and click it to open its Records.
+				hover over a day to read it, and tap or click it to open its Records.
 			</p>
 		</div>
 	)

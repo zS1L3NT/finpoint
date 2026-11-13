@@ -17,6 +17,7 @@ import {
 	SheetHeader,
 	SheetTitle,
 } from "@/components/ui/sheet"
+import { useIsMobile } from "@/hooks/use-mobile"
 import { useMonthParams } from "@/hooks/use-month-params"
 import { type RecordsSheetFilters, useRecordsSheet } from "@/hooks/use-records-sheet"
 import { treatmentLabel } from "@/lib/analytics"
@@ -33,6 +34,8 @@ export default function RecordsSheet() {
 	const router = useRouter()
 	const { month, year } = useMonthParams()
 	const { filters, close } = useRecordsSheet()
+	// Phones get a bottom sheet; wider screens keep the side sheet.
+	const isMobile = useIsMobile()
 	const categories = useLiveQuery(() => listCategories(), [])
 	const columns = useRecordColumns<Record>({
 		pageName: "Dashboard",
@@ -107,7 +110,17 @@ export default function RecordsSheet() {
 
 	return (
 		<Sheet open={!!filters} onOpenChange={isOpen => !isOpen && dismiss()}>
-			<SheetContent side="right" className="gap-0 md:data-[side=right]:max-w-xl">
+			<SheetContent
+				side={isMobile ? "bottom" : "right"}
+				overlayClassName="supports-backdrop-filter:backdrop-blur-xs"
+				className="gap-0 data-[side=bottom]:max-h-[85dvh] data-[side=bottom]:rounded-t-2xl md:data-[side=right]:max-w-xl"
+			>
+				{isMobile ? (
+					<span
+						aria-hidden="true"
+						className="mx-auto mt-2 h-1 w-10 shrink-0 rounded-full bg-muted-foreground/40"
+					/>
+				) : null}
 				<SheetHeader className="gap-1 border-b p-4 pr-12 md:px-6">
 					<SheetTitle className="text-base">{title}</SheetTitle>
 					<SheetDescription>

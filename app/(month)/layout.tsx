@@ -3,6 +3,7 @@
 import { DateTime } from "luxon"
 import { useEffect, useState } from "react"
 import { UiIcon as IconifyIcon } from "@/components/icon"
+import { MonthHeaderSlotProvider } from "@/components/layout/month-header-slot"
 import PageContent from "@/components/layout/page-content"
 import { Button } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
@@ -22,6 +23,7 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 	const { latest, isNavigatingBack, navigateBack } = useHistory()
 	const back = latest
 	const [hydrated, setHydrated] = useState(false)
+	const [controls, setControls] = useState<HTMLDivElement | null>(null)
 
 	// Calendar labels and links use the browser date, which can differ from SSR.
 	useEffect(() => setHydrated(true), [])
@@ -78,45 +80,51 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 								</h2>
 								<p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>
 							</div>
-							<ButtonGroup className="w-full sm:w-fit">
-								<Button
-									variant="outline"
-									aria-label="Previous month"
-									onClick={() => changeMonth(date.minus({ month: 1 }))}
-								>
-									<IconifyIcon icon="lucide:arrow-left" />
-								</Button>
-								<Popover>
-									<PopoverTrigger
-										render={
-											<Button variant="outline" className="flex-1 sm:w-32" />
-										}
+							<div className="flex w-full flex-col-reverse gap-2 sm:w-fit sm:flex-row sm:items-center">
+								<div ref={setControls} className="contents" />
+								<ButtonGroup className="w-full sm:w-fit">
+									<Button
+										variant="outline"
+										aria-label="Previous month"
+										onClick={() => changeMonth(date.minus({ month: 1 }))}
 									>
-										<IconifyIcon icon="lucide:calendar" />{" "}
-										{date.toFormat("MMM yyyy")}
-									</PopoverTrigger>
-									<PopoverContent className="w-auto p-0">
-										<MonthPicker
-											selectedMonth={date.toJSDate()}
-											onMonthSelect={value =>
-												changeMonth(DateTime.fromJSDate(value))
+										<IconifyIcon icon="lucide:arrow-left" />
+									</Button>
+									<Popover>
+										<PopoverTrigger
+											render={
+												<Button
+													variant="outline"
+													className="flex-1 sm:w-32"
+												/>
 											}
-										/>
-									</PopoverContent>
-								</Popover>
-								<Button
-									variant="outline"
-									aria-label="Next month"
-									onClick={() => changeMonth(date.plus({ month: 1 }))}
-								>
-									<IconifyIcon icon="lucide:arrow-right" />
-								</Button>
-							</ButtonGroup>
+										>
+											<IconifyIcon icon="lucide:calendar" />{" "}
+											{date.toFormat("MMM yyyy")}
+										</PopoverTrigger>
+										<PopoverContent className="w-auto p-0">
+											<MonthPicker
+												selectedMonth={date.toJSDate()}
+												onMonthSelect={value =>
+													changeMonth(DateTime.fromJSDate(value))
+												}
+											/>
+										</PopoverContent>
+									</Popover>
+									<Button
+										variant="outline"
+										aria-label="Next month"
+										onClick={() => changeMonth(date.plus({ month: 1 }))}
+									>
+										<IconifyIcon icon="lucide:arrow-right" />
+									</Button>
+								</ButtonGroup>
+							</div>
 						</div>
 					</header>
 				)}
 
-				{children}
+				<MonthHeaderSlotProvider value={controls}>{children}</MonthHeaderSlotProvider>
 			</PageContent>
 		</>
 	)

@@ -199,7 +199,7 @@ test("dense overview: cards render values and fit, and a long Category name stay
 	})
 })
 
-test("touch charts: a hold reads and follows the finger, and lifting or cancelling clears it without navigating", async ({
+test("touch charts: a hold reads and follows the finger, lifting or cancelling clears it, and a tap opens Records", async ({
 	page,
 	isMobile,
 	browserName,
@@ -221,13 +221,6 @@ test("touch charts: a hold reads and follows the finger, and lifting or cancelli
 		points: { x: number; y: number }[],
 	) => touch.send("Input.dispatchTouchEvent", { type, touchPoints: points })
 	const url = page.url()
-	await test.step("touch chart: a quick tap neither reads nor opens Records", async () => {
-		await send("touchStart", [at])
-		await send("touchEnd", [])
-		await page.waitForTimeout(400)
-		await expect(tooltip).toHaveCount(0)
-		expect(page.url()).toBe(url)
-	})
 	await test.step("touch chart: a hold reads and the reading follows the finger", async () => {
 		await send("touchStart", [at])
 		// Past the 120ms hold.
@@ -251,6 +244,13 @@ test("touch charts: a hold reads and follows the finger, and lifting or cancelli
 		await send("touchCancel", [])
 		await expect(tooltip).toHaveCount(0)
 		expect(page.url()).toBe(url)
+	})
+	await test.step("touch chart: a quick tap opens that day's Records without reading", async () => {
+		await send("touchStart", [at])
+		await send("touchEnd", [])
+		await expect(page).toHaveURL(/records=1.*start_date=2026-10-\d{2}/)
+		await expect(tooltip).toHaveCount(0)
+		await expect(page.getByRole("dialog")).toBeVisible()
 	})
 })
 
@@ -658,16 +658,21 @@ test.describe("pinned overview date", () => {
 				await surface.focus()
 				const tooltip = chart.locator(chartTooltip)
 				if (title === "Category trend") {
-					// Reading a month updates the shared category list beside the chart.
+					// Selecting a read month updates the shared category list beside the chart.
 					const breakdown = page.getByRole("group", { name: /^Categories in / })
 					await surface.press("Home")
 					await expect(tooltip).toBeVisible()
+					await expect(breakdown, "reading alone keeps the list").toHaveAccessibleName(
+						/^Categories in Oct 2026$/,
+					)
+					await surface.press("Enter")
 					const first = (await tooltip.locator("span").first().textContent()) ?? ""
 					expect(first, "readout names the first month").toMatch(/^[A-Z][a-z]{2} \d{4}$/)
 					await expect(breakdown, "list follows the read month").toHaveAccessibleName(
 						`Categories in ${first}`,
 					)
 					await surface.press("End")
+					await surface.press("Enter")
 					await expect(tooltip).toContainText("Total $")
 					await expect(breakdown).toContainText("selected month")
 					await expect(breakdown).toContainText("$100.00")
@@ -925,7 +930,7 @@ test("overview: forecast fills XL card and category hover preserves bars", async
 	await expect(page.getByText("Spending by weekday", { exact: true })).toHaveCount(0)
 })
 
-test("category trend: one shared list follows the read month and keeps its links reachable", async ({
+test("category trend: one shared list follows the selected month, ignores reading, and keeps its links reachable", async ({
 	page,
 	isMobile,
 }) => {
@@ -940,10 +945,14 @@ test("category trend: one shared list follows the read month and keeps its links
 	await surface.scrollIntoViewIfNeeded()
 	await surface.focus()
 	await surface.press("Home")
+	await expect(chart.locator(chartTooltip)).toContainText("Jun 2026")
+	await expect(list).toHaveAccessibleName("Categories in Oct 2026")
+	await surface.press("Enter")
 	await expect(list).toHaveAccessibleName("Categories in Jun 2026")
 	await surface.press("ArrowRight")
 	await surface.press("ArrowRight")
 	await surface.press("ArrowRight")
+	await surface.press("Enter")
 	await expect(list).toHaveAccessibleName("Categories in Sep 2026")
 	await expect(list.getByRole("link").first()).toHaveAttribute(
 		"href",
@@ -952,12 +961,17 @@ test("category trend: one shared list follows the read month and keeps its links
 	if (!isMobile) {
 		const box = await surface.boundingBox()
 		if (!box) throw new Error("Category trend surface missing")
-		await surface.hover({ position: { x: box.width * 0.7, y: 80 } })
-		await list.hover()
+		await surface.hover({ position: { x: box.width * 0.1, y: 80 } })
+		await expect(chart.locator(chartTooltip)).toContainText("Jun 2026")
 		await expect(list).toHaveAccessibleName("Categories in Sep 2026")
+		await surface.click({ position: { x: box.width * 0.1, y: 80 } })
+		await expect(list).toHaveAccessibleName("Categories in Jun 2026")
+		await list.hover()
+		await expect(list).toHaveAccessibleName("Categories in Jun 2026")
 	}
 	await surface.focus()
 	await surface.press("End")
+	await surface.press("Enter")
 	await expect(list).toHaveAccessibleName("Categories in Oct 2026")
 	await expect(card(page, "Categories this month")).toContainText("$20.00 refunded")
 })
@@ -1010,6 +1024,7 @@ test("category cards: reading different months keeps the XL row and chart height
 	const chartHeight = await surface.evaluate(element => element.getBoundingClientRect().height)
 	for (const key of ["Home", "ArrowRight", "ArrowRight", "ArrowRight", "End"]) {
 		await surface.press(key)
+		await surface.press("Enter")
 		await expect
 			.poll(() => chart.evaluate(element => element.getBoundingClientRect().height))
 			.toBe(height)
