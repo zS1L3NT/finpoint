@@ -9694,7 +9694,7 @@
       "file_type": "code",
       "norm_label": "compact()",
       "source_file": "src/components/charts/spending-calendar.tsx",
-      "source_location": "L27"
+      "source_location": "L26"
     },
     {
       "id": "src_components_charts_spending_calendar_heat",
@@ -9706,7 +9706,7 @@
       "file_type": "code",
       "norm_label": "heat()",
       "source_file": "src/components/charts/spending-calendar.tsx",
-      "source_location": "L22"
+      "source_location": "L21"
     },
     {
       "id": "src_components_charts_spending_calendar_quantile",
@@ -9718,7 +9718,7 @@
       "file_type": "code",
       "norm_label": "quantile()",
       "source_file": "src/components/charts/spending-calendar.tsx",
-      "source_location": "L33"
+      "source_location": "L32"
     },
     {
       "id": "src_components_charts_spending_calendar_rampcap",
@@ -9730,7 +9730,7 @@
       "file_type": "code",
       "norm_label": "rampcap()",
       "source_file": "src/components/charts/spending-calendar.tsx",
-      "source_location": "L45"
+      "source_location": "L44"
     },
     {
       "id": "src_components_charts_spending_calendar_spendingcalendar",
@@ -9742,7 +9742,7 @@
       "file_type": "code",
       "norm_label": "spendingcalendar()",
       "source_file": "src/components/charts/spending-calendar.tsx",
-      "source_location": "L57"
+      "source_location": "L56"
     },
     {
       "id": "src_hooks_use_month_transition_takemonthdirection",
@@ -19859,7 +19859,7 @@
       "file_type": "code",
       "norm_label": "ink",
       "source_file": "src/components/charts/spending-calendar.tsx",
-      "source_location": "L14"
+      "source_location": "L13"
     },
     {
       "id": "src_components_charts_spending_calendar_levels",
@@ -19870,7 +19870,7 @@
       "file_type": "code",
       "norm_label": "levels",
       "source_file": "src/components/charts/spending-calendar.tsx",
-      "source_location": "L10"
+      "source_location": "L9"
     },
     {
       "id": "src_components_charts_spending_calendar_strength",
@@ -19881,7 +19881,7 @@
       "file_type": "code",
       "norm_label": "strength",
       "source_file": "src/components/charts/spending-calendar.tsx",
-      "source_location": "L13"
+      "source_location": "L12"
     },
     {
       "id": "src_components_charts_spending_calendar_weekdays",
@@ -19892,7 +19892,7 @@
       "file_type": "code",
       "norm_label": "weekdays",
       "source_file": "src/components/charts/spending-calendar.tsx",
-      "source_location": "L8"
+      "source_location": "L7"
     },
     {
       "id": "biome",
@@ -31423,7 +31423,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/spending-calendar.tsx",
-      "source_location": "L48",
+      "source_location": "L47",
       "weight": 1.0
     },
     {
@@ -31435,7 +31435,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/spending-calendar.tsx",
-      "source_location": "L115",
+      "source_location": "L111",
       "weight": 1.0
     },
     {
@@ -31447,7 +31447,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/spending-calendar.tsx",
-      "source_location": "L130",
+      "source_location": "L125",
       "weight": 1.0
     },
     {
@@ -31459,7 +31459,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/spending-calendar.tsx",
-      "source_location": "L136",
+      "source_location": "L130",
       "weight": 1.0
     },
     {
@@ -31471,19 +31471,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/spending-calendar.tsx",
-      "source_location": "L143",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_charts_spending_calendar_spendingcalendar",
-      "target": "src_components_ui_button_button",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/charts/spending-calendar.tsx",
-      "source_location": "L162",
+      "source_location": "L137",
       "weight": 1.0
     },
     {
@@ -31495,7 +31483,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/charts/spending-calendar.tsx",
-      "source_location": "L81",
+      "source_location": "L80",
       "weight": 1.0
     },
     {
@@ -60346,7 +60334,7 @@
     },
     {
       "source": "src_components_charts_spending_calendar",
-      "target": "src_components_ui_button_button",
+      "target": "src_lib_utils_cn",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -60358,18 +60346,6 @@
     },
     {
       "source": "src_components_charts_spending_calendar",
-      "target": "src_lib_utils_cn",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/components/charts/spending-calendar.tsx",
-      "source_location": "L6",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_charts_spending_calendar",
       "target": "src_lib_utils_formatcurrency",
       "relation": "imports",
       "_origin": "ast",
@@ -60377,7 +60353,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/charts/spending-calendar.tsx",
-      "source_location": "L6",
+      "source_location": "L5",
       "weight": 1.0
     },
     {
@@ -83391,18 +83367,6 @@
     },
     {
       "source": "src_components_charts_spending_calendar",
-      "target": "src_components_ui_button",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/components/charts/spending-calendar.tsx",
-      "source_location": "L5",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_charts_spending_calendar",
       "target": "src_lib_utils",
       "relation": "imports_from",
       "_origin": "ast",
@@ -83410,7 +83374,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/charts/spending-calendar.tsx",
-      "source_location": "L6",
+      "source_location": "L5",
       "weight": 1.0
     },
     {
@@ -98782,24 +98746,13 @@
     },
     {
       "source": "src_components_charts_spending_calendar",
-      "target": "src_components_charts_spending_calendar_levels",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/components/charts/spending-calendar.tsx",
-      "source_location": "L10",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_charts_spending_calendar",
       "target": "src_components_charts_spending_calendar_strength",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/spending-calendar.tsx",
-      "source_location": "L13",
+      "source_location": "L12",
       "weight": 1.0
     },
     {
@@ -98810,7 +98763,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/spending-calendar.tsx",
-      "source_location": "L14",
+      "source_location": "L13",
       "weight": 1.0
     },
     {
@@ -98821,7 +98774,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/spending-calendar.tsx",
-      "source_location": "L22",
+      "source_location": "L21",
       "weight": 1.0
     },
     {
@@ -98832,7 +98785,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/spending-calendar.tsx",
-      "source_location": "L27",
+      "source_location": "L26",
       "weight": 1.0
     },
     {
@@ -98843,7 +98796,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/spending-calendar.tsx",
-      "source_location": "L33",
+      "source_location": "L32",
       "weight": 1.0
     },
     {
@@ -98854,7 +98807,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/spending-calendar.tsx",
-      "source_location": "L45",
+      "source_location": "L44",
       "weight": 1.0
     },
     {
@@ -98865,7 +98818,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/spending-calendar.tsx",
-      "source_location": "L57",
+      "source_location": "L56",
       "weight": 1.0
     },
     {
@@ -98876,7 +98829,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/charts/spending-calendar.tsx",
-      "source_location": "L8",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_charts_spending_calendar",
+      "target": "src_components_charts_spending_calendar_levels",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/charts/spending-calendar.tsx",
+      "source_location": "L9",
       "weight": 1.0
     },
     {
@@ -114499,5 +114463,5 @@
       "source_file": "tests/README.md"
     }
   ],
-  "built_at_commit": "3609d851ccd2b06ee8f7c6e5d026de49ea15d1fc"
+  "built_at_commit": "185f7c96602e5258e31523b998ffa55ad0afd018"
 }

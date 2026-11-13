@@ -1,17 +1,17 @@
 # Graph Report - finpoint  (2026-11-13)
 
 ## Corpus Check
-- 253 files · ~233,901 words
+- 253 files · ~233,783 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 8 file(s) not represented in the graph (top: (none) 4, .example 1, .lock 1)
 
 ## Summary
-- 1944 nodes · 7709 edges · 94 communities (84 shown, 10 thin omitted)
+- 1944 nodes · 7706 edges · 94 communities (84 shown, 10 thin omitted)
 - Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 126 edges (avg confidence: 0.84)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `3609d851`
+- Built from commit: `185f7c96`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -111,7 +111,7 @@
 ## God Nodes (most connected - your core abstractions)
 1. `cn()` - 319 edges
 2. `PrimitivesSection()` - 181 edges
-3. `Button()` - 125 edges
+3. `Button()` - 123 edges
 4. `react` - 97 edges
 5. `formatCurrency()` - 74 edges
 6. `RecordEditorDialog()` - 61 edges
@@ -491,16 +491,16 @@ Nodes (14): bar(), BarChart(), BarSeries, PAD, ChartFrame(), ChartSize, ReadoutR
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `cn()` connect `primitives.tsx` to `alert-dialog.tsx`, `record-creator.tsx`, `(month)/page.tsx`, `trend-chart.tsx`, `category-filter.tsx`, `Button`, `ValidationError`, `category-history-chart.tsx`, `sync/page.tsx`, `paginated-data-table.tsx`, `cn`, `PrimitivesSection`, `app-sidebar.tsx`, `pagination.tsx`, `use-appearance.tsx`, `(month)/layout.tsx`, `spending-calendar.tsx`, `monthly-budget-usage.tsx`?**
-  _High betweenness centrality (0.099) - this node is a cross-community bridge._
+  _High betweenness centrality (0.101) - this node is a cross-community bridge._
 - **What connects `@fontsource-variable/inter`, `shadcn`, `tailwindcss` to the rest of the system?**
   _83 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `record-creator.tsx` be split into smaller, more focused modules?**
   _Cohesion score 0.06357615894039735 - nodes in this community are weakly interconnected._
-- **Why does `react` connect `Button` to `record-creator.tsx`, `use-sync-status.ts`, `primitives.tsx`, `cn`, `ValidationError`, `sync/page.tsx`, `paginated-data-table.tsx`, `app-sidebar.tsx`, `app.tsx`, `package.json`, `alert-dialog.tsx`, `category-filter.tsx`, `category-history-chart.tsx`, `pagination.tsx`, `(month)/layout.tsx`, `spending-calendar.tsx`, `providers.tsx`, `monthly-budget-usage.tsx`, `(month)/page.tsx`, `PrimitivesSection`, `trend-chart.tsx`?**
-  _High betweenness centrality (0.075) - this node is a cross-community bridge._
+- **Why does `src/data/* (persistence, migrations, seeding, backup serialization, Drive storage)` connect `vite.config.ts` to `src/data/* (persistence, migrations, seeding, backup serialization, Drive storage)`, `app-sidebar.tsx`?**
+  _High betweenness centrality (0.071) - this node is a cross-community bridge._
 - **Should `monthly-budgets.test.ts` be split into smaller, more focused modules?**
   _Cohesion score 0.07585568917668825 - nodes in this community are weakly interconnected._
-- **Why does `src/data/* (persistence, migrations, seeding, backup serialization, Drive storage)` connect `vite.config.ts` to `src/data/* (persistence, migrations, seeding, backup serialization, Drive storage)`, `app-sidebar.tsx`?**
-  _High betweenness centrality (0.066) - this node is a cross-community bridge._
+- **Why does `react` connect `Button` to `record-creator.tsx`, `use-sync-status.ts`, `primitives.tsx`, `cn`, `ValidationError`, `sync/page.tsx`, `paginated-data-table.tsx`, `app-sidebar.tsx`, `app.tsx`, `package.json`, `alert-dialog.tsx`, `category-filter.tsx`, `category-history-chart.tsx`, `pagination.tsx`, `(month)/layout.tsx`, `spending-calendar.tsx`, `providers.tsx`, `monthly-budget-usage.tsx`, `(month)/page.tsx`, `PrimitivesSection`, `trend-chart.tsx`?**
+  _High betweenness centrality (0.069) - this node is a cross-community bridge._
 - **Should `Tests README` be split into smaller, more focused modules?**
   _Cohesion score 0.05928614640048397 - nodes in this community are weakly interconnected._

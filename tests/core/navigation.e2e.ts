@@ -739,7 +739,6 @@ test("history clearing: cancelled links, sidebar and chart drills clear or prese
 		const origin = "/?month=October&year=2026&scope=all"
 		await resetHistory(page, origin)
 		await page.getByRole("button", { name: /^5 October: \$84.20 spent/ }).click()
-		await page.getByRole("button", { name: "View Records", exact: true }).click()
 		await expect(page).toHaveURL(/start_date=2026-10-05/)
 		const sheet = page.getByRole("dialog", { name: "Records", exact: true })
 		await expect(sheet).toBeVisible()
@@ -797,7 +796,6 @@ test("Back button: the outgoing page's Back cancels a drill link that is still l
 	void workspace
 	await resetHistory(page, "/?month=October&year=2026&scope=all")
 	await page.getByRole("button", { name: /^5 October: \$84.20 spent/ }).click()
-	await page.getByRole("button", { name: "View Records", exact: true }).click()
 	await expect(page).toHaveURL(/start_date=2026-10-05/)
 	const origin = page.url()
 	await page.getByRole("link", { name: "Open in Records", exact: true }).click()
@@ -832,7 +830,6 @@ test("Back button: a history restore while a drill link loads keeps its restored
 	void workspace
 	await resetHistory(page, "/?month=October&year=2026&scope=all")
 	await page.getByRole("button", { name: /^5 October: \$84.20 spent/ }).click()
-	await page.getByRole("button", { name: "View Records", exact: true }).click()
 	await expect(page).toHaveURL(/start_date=2026-10-05/)
 	await page.getByRole("link", { name: "Open in Records", exact: true }).click()
 	await expect(page).toHaveURL(/\/records\?start_date=2026-10-05/)

@@ -139,7 +139,6 @@ test("Records sheet: animates in and out when closed by Escape and by its close 
 	const open = () =>
 		expectModalEntrance(page, '[data-slot="sheet-content"]', async () => {
 			await day.click()
-			await page.getByRole("button", { name: "View Records", exact: true }).click()
 		})
 	await open()
 	await expectModalExit(page, '[data-slot="sheet-content"]', () => page.keyboard.press("Escape"))
