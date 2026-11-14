@@ -1391,4 +1391,45 @@ test.describe("dialog lifecycle", () => {
 		expect(rows.find(row => row.id === record.id)?.title).toBe("From the second tab")
 	})
 
+	test("Record editor: a Statement attached but not saved survives a write from another tab", async ({
+		page,
+		workspace,
+	}) => {
+		void workspace
+		const dialog = await openEditor(
+			page,
+			`/records/${IDS.records.partialPending}`,
+			"Edit Record",
+			"Edit Record",
+		)
+		await dialog.getByRole("button", { name: "Allocate statement", exact: true }).click()
+		const sheet = page.getByRole("dialog", {
+			name: "Allocate statements to record",
+			exact: true,
+		})
+		await sheet.getByRole("button").filter({ hasText: /\$/ }).first().click()
+		await page.keyboard.press("Escape")
+		await expect(dialog.locator('[data-slot="card"]')).toHaveCount(2)
+
+		const other = await page.context().newPage()
+		await other.goto("/statements")
+		await other.getByRole("button", { name: "Create Pending Statement", exact: true }).click()
+		const otherDialog = other.getByRole("dialog", { name: "Create Pending Statement" })
+		await otherDialog.getByLabel("Description", { exact: true }).fill("From another tab")
+		await otherDialog.getByLabel("Amount", { exact: true }).fill("-2")
+		await otherDialog.getByRole("button", { name: "Create statement", exact: true }).click()
+		await expect
+			.poll(async () =>
+				(await readRows(page, "statements")).some(
+					row => row.description === "From another tab",
+				),
+			)
+			.toBe(true)
+		await other.close()
+
+		await page.waitForTimeout(1000)
+		await expect(dialog).toBeVisible()
+		await expect(dialog.locator('[data-slot="card"]')).toHaveCount(2)
+		await expect(page.getByText(/Application error/)).toHaveCount(0)
+	})
 })

@@ -2,7 +2,7 @@ import { useForm, useStore } from "@tanstack/react-form"
 import { useLiveQuery } from "dexie-react-hooks"
 import { AnimatePresence, motion } from "framer-motion"
 import { DateTime } from "luxon"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { toast } from "sonner"
 import AmountField from "@/components/form/amount-field"
 import CategoryField from "@/components/form/category-field"
@@ -89,16 +89,13 @@ export default function RecordEditorDialog({
 	// Analytics select keeps its laid-out label from the first frame.
 	const monthlyBudgets = useLiveQuery(() => listMonthlyBudgets(), [])
 
-	const [statementCache, setStatementCache] = useState(statements)
+	// Statements attached in this form that the `statements` prop does not hold (yet).
+	const [attached, setAttached] = useState(statements)
 	const [isAttachingStatement, setIsAttachingStatement] = useState(false)
 	const [submitError, setSubmitError] = useState("")
 
 	const { mergeErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
 	const { locked, run } = useSubmitLock(isOpen)
-
-	useEffect(() => {
-		setStatementCache(statements)
-	}, [statements])
 
 	const categoriesFlat = categories.flatMap(category => [category, ...category.children])
 
@@ -233,7 +230,7 @@ export default function RecordEditorDialog({
 					return
 				}
 
-				setStatementCache(prev =>
+				setAttached(prev =>
 					prev.some(s => s.id === statement.id) ? prev : [...prev, statement],
 				)
 				form.setFieldValue("statements", [
@@ -496,10 +493,13 @@ export default function RecordEditorDialog({
 														>
 															{field => {
 																const statement =
-																	// biome-ignore lint/style/noNonNullAssertion: All full statement objects must be cached
-																	statementCache.find(
+																	// biome-ignore lint/style/noNonNullAssertion: Every form Statement is in the prop or was attached here
+																	(statements.find(
 																		s => s.id === id,
-																	)!
+																	) ??
+																		attached.find(
+																			s => s.id === id,
+																		))!
 
 																const errors = mergeErrors(
 																	field.state.meta.errors,
