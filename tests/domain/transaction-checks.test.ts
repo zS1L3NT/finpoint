@@ -4,7 +4,7 @@ Dexie.dependencies.indexedDB = indexedDB
 Dexie.dependencies.IDBKeyRange = IDBKeyRange
 import { beforeEach, expect, test } from "bun:test"
 const { asPending, db } = await import("../../src/data/db")
-const { ConflictError, createRecord, updateRecord } = await import("../../src/logic/records")
+const { ConflictError, createRecord, deleteRecord, updateRecord } = await import("../../src/logic/records")
 const { deletePendingStatement, updatePendingStatement } = await import(
 	"../../src/logic/statements"
 )
@@ -15,7 +15,7 @@ const { attachBudgetRecord } = await import("../../src/logic/budgets")
 const { upsertMonthlyBudget } = await import("../../src/logic/monthly-budgets")
 const { ValidationError } = await import("../../src/logic/validate")
 
-beforeEach(async () => {
+async function reset() {
 	for (const table of db.tables) await table.clear()
 	await db.accounts.add({ id: "acc", name: "Main", color: "#000000" } as never)
 	await db.categories.add({
@@ -27,7 +27,9 @@ beforeEach(async () => {
 		analytics_treatment: "spending",
 		default_monthly_budget_id: null,
 	})
-})
+}
+
+beforeEach(reset)
 
 async function statement(id: string, amount: number, pending = 0) {
 	await db.statements.add({
@@ -49,16 +51,61 @@ const record = (statements: { id: string; amount: number }[]) => ({
 	statements,
 })
 
+// Runs `first` until it reaches its first write (opening its transaction, or a write outside
+// one), holds it there, lets `second` run, then lets `first` continue. Whatever `first` read or
+// checked before that point can have gone stale by then; code that checks inside its transaction
+// is unaffected because the transaction opens (and locks) only when `first` is released.
+const HELD = ["add", "put", "update", "delete", "bulkAdd", "bulkPut", "bulkDelete"]
+
+async function raceGap(
+	setup: () => Promise<void>,
+	first: () => Promise<unknown>,
+	second: () => Promise<unknown>,
+	check: () => Promise<void>,
+) {
+	await reset()
+	await setup()
+	let release = () => {}
+	let reached = () => {}
+	const gate = new Promise<void>(r => (release = r))
+	const held = new Promise<void>(r => (reached = r))
+	let armed = true
+	const restore: (() => void)[] = []
+	const hold = (target: Record<string, unknown>, key: string) => {
+		const original = target[key] as (...args: unknown[]) => unknown
+		target[key] = function (this: unknown, ...args: unknown[]) {
+			if (!armed) return original.apply(this, args)
+			armed = false
+			reached()
+			return gate.then(() => original.apply(this, args))
+		}
+		restore.push(() => (target[key] = original))
+	}
+	try {
+		const tableProto = Object.getPrototypeOf(db.accounts)
+		for (const key of HELD) hold(tableProto, key)
+		hold(db as never, "transaction")
+		const writing = first()
+		await Promise.race([held, writing.then(undefined, () => undefined)])
+		const other = second()
+		for (let tick = 0; tick < 30; tick++) await db.accounts.count()
+		release()
+		await Promise.allSettled([writing, other])
+	} finally {
+		for (const undo of restore) undo()
+	}
+	await check()
+}
+
+const allocatedSum = async () => (await db.allocations.toArray()).reduce((s, a) => s + a.amount, 0)
+
 test("overlapping createRecord calls cannot over-allocate a Statement", async () => {
-	await statement("s", -100)
-	const results = await Promise.allSettled(
-		Array.from({ length: 6 }, () => createRecord(record([{ id: "s", amount: -100 }]))),
+	await raceGap(
+		() => statement("s", -100),
+		() => createRecord(record([{ id: "s", amount: -100 }])),
+		() => createRecord(record([{ id: "s", amount: -100 }])),
+		async () => expect(await allocatedSum()).toBe(-100),
 	)
-	expect(results.filter(r => r.status === "fulfilled")).toHaveLength(1)
-	const rejected = results.find(r => r.status === "rejected")
-	expect((rejected as PromiseRejectedResult).reason).toBeInstanceOf(ValidationError)
-	const sum = (await db.allocations.toArray()).reduce((s, a) => s + a.amount, 0)
-	expect(sum).toBe(-100)
 })
 
 test("overlapping updateRecord calls with one revision conflict", async () => {
@@ -73,30 +120,44 @@ test("overlapping updateRecord calls with one revision conflict", async () => {
 })
 
 test("deleting a pending Statement while a Record allocates it leaves no orphan", async () => {
-	await statement("p", -100, 1)
-	await Promise.allSettled([
-		deletePendingStatement("p"),
-		createRecord(record([{ id: "p", amount: -100 }])),
-	])
-	for (const a of await db.allocations.toArray()) {
-		expect(await db.statements.get(a.statement_id)).toBeDefined()
+	let allocated = 0
+	let deleted = 0
+	const check = async () => {
+		const rows = await db.allocations.toArray()
+		for (const a of rows) expect(await db.statements.get(a.statement_id)).toBeDefined()
+		if (rows.length) allocated++
+		else if (!(await db.statements.get("p"))) deleted++
 	}
+	const create = () => createRecord(record([{ id: "p", amount: -100 }]))
+	const setup = () => statement("p", -100, 1)
+	await raceGap(setup, create, () => deletePendingStatement("p"), check)
+	await raceGap(setup, () => deletePendingStatement("p"), create, check)
+	// Both outcomes happen across the orderings, so the loops are not passing on an empty run.
+	expect(allocated).toBeGreaterThan(0)
+	expect(deleted).toBeGreaterThan(0)
 })
 
 test("editing a pending Statement while a Record allocates it never under-covers it", async () => {
-	await statement("p", -100, 1)
-	await Promise.allSettled([
+	let allocated = 0
+	const edit = () =>
 		updatePendingStatement("p", {
 			account_id: "acc",
 			datetime: "2026-01-01T00:00",
 			description: "p",
 			amount: -10,
-		} as never),
-		createRecord(record([{ id: "p", amount: -100 }])),
-	])
-	const stored = await db.statements.get("p")
-	const sum = (await db.allocations.toArray()).reduce((s, a) => s + a.amount, 0)
-	expect(sum).toBeGreaterThanOrEqual(stored?.amount ?? 0)
+		} as never)
+	const create = () => createRecord(record([{ id: "p", amount: -100 }]))
+	const setup = () => statement("p", -100, 1)
+	const check = async () => {
+		const stored = await db.statements.get("p")
+		const sum = await allocatedSum()
+		if (sum) allocated++
+		// An Allocation beyond the Statement's amount (more negative) over-covers it.
+		expect(sum).toBeGreaterThanOrEqual(stored?.amount ?? 0)
+	}
+	await raceGap(setup, create, edit, check)
+	await raceGap(setup, edit, create, check)
+	expect(allocated).toBeGreaterThan(0)
 })
 
 test("deleting a category while a Record is created in it leaves no orphan", async () => {
@@ -162,4 +223,29 @@ test("attaching a Record to a deleted Budget stores nothing", async () => {
 	const created = await createRecord(record([]))
 	await attachBudgetRecord("gone", created.id).catch(() => undefined)
 	expect(await db.budget_records.count()).toBe(0)
+})
+
+test("attaching a Budget to a Record that is being deleted stores nothing", async () => {
+	const budget = {
+		id: "b",
+		name: "Trip",
+		amount: 100,
+		start_date: "2026-01-01",
+		end_date: "2026-01-31",
+		automatic: false,
+	}
+	let recordId = ""
+	await raceGap(
+		async () => {
+			await db.budgets.add(budget)
+			recordId = (await createRecord(record([]))).id
+		},
+		() => attachBudgetRecord("b", recordId),
+		() => deleteRecord(recordId),
+		async () => {
+			for (const link of await db.budget_records.toArray()) {
+				expect(await db.records.get(link.record_id)).toBeDefined()
+			}
+		},
+	)
 })
