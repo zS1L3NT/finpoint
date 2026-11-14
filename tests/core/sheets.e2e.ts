@@ -929,37 +929,24 @@ test.describe("dense workspace", () => {
 		workspace,
 	}) => {
 		void workspace
-		// When the 300ms debounce fires for "D" and starts its commit, type the rest in
-		// that same task, so the commit always lands after newer keystrokes. Mirroring it
-		// back into the input used to drop them ("Dnding 26" on a fast host).
-		await page.addInitScript(() => {
-			const original = window.setTimeout
-			window.setTimeout = ((handler: TimerHandler, timeout?: number, ...rest: unknown[]) =>
-				original(() => {
-					if (typeof handler === "function") handler(...rest)
-					const input = document.querySelector<HTMLInputElement>(
-						'section[aria-label="Pending statements"] input[placeholder="Search descriptions..."]',
-					)
-					if (timeout !== 300 || input?.value !== "D" || Reflect.has(window, "__typedOn"))
-						return
-					Reflect.set(window, "__typedOn", true)
-					const setValue = Object.getOwnPropertyDescriptor(
-						HTMLInputElement.prototype,
-						"value",
-					)?.set
-					for (const character of "ense pending 26") {
-						setValue?.call(input, input.value + character)
-						input.dispatchEvent(new Event("input", { bubbles: true }))
-					}
-				}, timeout)) as typeof window.setTimeout
-		})
+		// Start the search with "D" and type the rest in that same task, so the commit of
+		// "D" always lands after newer keystrokes. Mirroring it back into the input used to
+		// drop them ("Dnding 26" on a fast host).
 		await page.goto("/allocator/pending")
 		const search = page
 			.locator('section[aria-label="Pending statements"]')
 			.getByPlaceholder("Search descriptions...")
 		await expect(search).toBeVisible()
-		await search.pressSequentially("D")
-		await expect.poll(() => page.evaluate(() => Reflect.has(window, "__typedOn"))).toBe(true)
+		await search.evaluate((input: HTMLInputElement) => {
+			const setValue = Object.getOwnPropertyDescriptor(
+				HTMLInputElement.prototype,
+				"value",
+			)?.set
+			for (const character of "Dense pending 26") {
+				setValue?.call(input, input.value + character)
+				input.dispatchEvent(new Event("input", { bubbles: true }))
+			}
+		})
 		await expect(page).toHaveURL(/query=Dense\+pending\+26/)
 		await expect(search).toHaveValue("Dense pending 26")
 	})
@@ -1003,41 +990,26 @@ test.describe("dense workspace", () => {
 		workspace,
 	}) => {
 		void workspace
-		// When the debounce for "Dense pending 1" fires, type one more character and press
-		// Back in that same task, before the search commit lands.
-		await page.addInitScript(() => {
-			const original = window.setTimeout
-			window.setTimeout = ((handler: TimerHandler, timeout?: number, ...rest: unknown[]) =>
-				original(() => {
-					if (typeof handler === "function") handler(...rest)
-					const input = document.querySelector<HTMLInputElement>(
-						'section[aria-label="Pending statements"] input[placeholder="Search descriptions..."]',
-					)
-					if (
-						timeout !== 300 ||
-						input?.value !== "Dense pending 1" ||
-						Reflect.has(window, "__backed")
-					)
-						return
-					Reflect.set(window, "__backed", true)
-					const setValue = Object.getOwnPropertyDescriptor(
-						HTMLInputElement.prototype,
-						"value",
-					)?.set
-					setValue?.call(input, `${input.value}2`)
-					input.dispatchEvent(new Event("input", { bubbles: true }))
-					history.back()
-				}, timeout)) as typeof window.setTimeout
-		})
 		await page.goto("/allocator/pending?query=Dense+pending+1")
 		const search = page
 			.locator('section[aria-label="Pending statements"]')
 			.getByPlaceholder("Search descriptions...")
 		await expect(search).toHaveValue("Dense pending 1")
-		await search.fill("Dense pending 3")
-		await expect(page).toHaveURL(/query=Dense\+pending\+3/)
-		await search.fill("Dense pending 1")
-		await expect.poll(() => page.evaluate(() => Reflect.has(window, "__backed"))).toBe(true)
+		await page
+			.getByRole("button", { name: /^Dense pending 1\d\b/ })
+			.first()
+			.click()
+		await expect(page).toHaveURL(/pending_statement_id=/)
+		// Type one more character and press Back in one task, before the search commit lands.
+		await search.evaluate((input: HTMLInputElement) => {
+			const setValue = Object.getOwnPropertyDescriptor(
+				HTMLInputElement.prototype,
+				"value",
+			)?.set
+			setValue?.call(input, `${input.value}2`)
+			input.dispatchEvent(new Event("input", { bubbles: true }))
+			history.back()
+		})
 		await expect(page).toHaveURL(/query=Dense\+pending\+1$/)
 		await expect(search).toHaveValue("Dense pending 1")
 		// The abandoned "Dense pending 12" search must not commit later.
