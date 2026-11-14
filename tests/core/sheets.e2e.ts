@@ -929,24 +929,45 @@ test.describe("dense workspace", () => {
 		workspace,
 	}) => {
 		void workspace
-		// Start the search with "D" and type the rest in that same task, so the commit of
-		// "D" always lands after newer keystrokes. Mirroring it back into the input used to
-		// drop them ("Dnding 26" on a fast host).
+		// Type "D", then the rest in the very task that commits "D" to the URL (the Navigation
+		// API reports the commit as it happens), so newer text is in the box when the older
+		// query lands. Mirroring that older query back into the input used to drop the newer
+		// text ("Dnding 26" on a fast host).
 		await page.goto("/allocator/pending")
 		const search = page
 			.locator('section[aria-label="Pending statements"]')
 			.getByPlaceholder("Search descriptions...")
 		await expect(search).toBeVisible()
-		await search.evaluate((input: HTMLInputElement) => {
-			const setValue = Object.getOwnPropertyDescriptor(
-				HTMLInputElement.prototype,
-				"value",
-			)?.set
-			for (const character of "Dense pending 26") {
-				setValue?.call(input, input.value + character)
-				input.dispatchEvent(new Event("input", { bubbles: true }))
-			}
-		})
+		const typedAtCommit = await search.evaluate(
+			(input: HTMLInputElement) =>
+				new Promise<string>(resolve => {
+					const setValue = Object.getOwnPropertyDescriptor(
+						HTMLInputElement.prototype,
+						"value",
+					)?.set
+					const type = (text: string) => {
+						for (const character of text) {
+							setValue?.call(input, input.value + character)
+							input.dispatchEvent(new Event("input", { bubbles: true }))
+						}
+					}
+					const navigation = (window as unknown as { navigation: EventTarget }).navigation
+					const onCommit = () => {
+						if (new URLSearchParams(location.search).get("query") !== "D") return
+						navigation.removeEventListener("currententrychange", onCommit)
+						// A microtask later: still before React renders the committed URL, but
+						// outside the commit that reported it.
+						queueMicrotask(() => {
+							type("ense pending 26")
+							resolve(input.value)
+						})
+					}
+					navigation.addEventListener("currententrychange", onCommit)
+					type("D")
+				}),
+		)
+		// "D" committed while "Dense pending 26" was already typed.
+		expect(typedAtCommit).toBe("Dense pending 26")
 		await expect(page).toHaveURL(/query=Dense\+pending\+26/)
 		await expect(search).toHaveValue("Dense pending 26")
 	})
