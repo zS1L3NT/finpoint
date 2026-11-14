@@ -47,7 +47,7 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 
 	return (
 		<>
-			<PageContent className="gap-7 md:gap-9">
+			<PageContent className="gap-5">
 				{hydrated && (
 					<header className="grid gap-5">
 						{back ? (

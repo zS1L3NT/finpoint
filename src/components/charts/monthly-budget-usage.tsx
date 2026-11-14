@@ -61,132 +61,139 @@ export default function MonthlyBudgetUsage({
 
 	return (
 		<div className="@container flex h-full flex-col gap-4">
-			<div className="grid gap-5 @[48rem]:grid-cols-[auto_minmax(0,30rem)] @[48rem]:items-center @[48rem]:justify-center @[48rem]:gap-12">
-				<div className="relative mx-auto size-52 shrink-0 @[28rem]:size-64 @[48rem]:size-72">
-					<svg
-						viewBox="0 0 240 240"
-						className="size-full overflow-visible"
-						aria-label="Monthly budget usage: segment sizes show planned shares; fill shows spending"
-						role="group"
-					>
-						<defs>
-							{segments.map(({ budget }) => (
-								<linearGradient
-									key={budget.id}
-									id={`${id}-${budget.id}`}
-									x1="0"
-									y1="0"
-									x2="1"
-									y2="1"
-								>
-									<stop
-										offset="0%"
-										stopColor={`color-mix(in oklab, ${themeColor(budget.color)} 75%, white)`}
-									/>
-									<stop offset="100%" stopColor={themeColor(budget.color)} />
-								</linearGradient>
-							))}
-						</defs>
-						{!planned ? (
-							<circle
-								cx="120"
-								cy="120"
-								r="91"
-								fill="none"
-								stroke="var(--muted)"
-								strokeWidth="25"
-							/>
-						) : null}
-						{segments.map(({ budget, start, end }) => {
-							const usage = Math.max(
-								0,
-								Math.min(1, budget.spending / (budget.amount ?? 1)),
-							)
-							return (
-								<g
-									key={budget.id}
-									className={cn(
-										"transition-opacity duration-150 motion-reduce:transition-none",
-										active && active !== budget.id && "opacity-40",
-									)}
-								>
-									<path
-										d={arc(start, end, 91)}
-										fill="none"
-										stroke={themeColor(budget.color)}
-										strokeOpacity="0.13"
-										strokeWidth="25"
-									/>
-									{usage > 0 ? (
+			<div className="flex min-h-0 flex-1 flex-col gap-5 @[48rem]:grid @[48rem]:flex-none @[48rem]:grid-cols-[auto_minmax(0,30rem)] @[48rem]:items-center @[48rem]:justify-center @[48rem]:gap-12">
+				{/* Stacked, the donut grows into whatever height the card has spare, so the budget
+				list sits on the footer; the size container keeps that space from feeding back into
+				the card's height. Side by side, it keeps a fixed size. */}
+				<div className="flex min-h-52 flex-1 items-center justify-center [container-type:size] @[28rem]:min-h-64 @[48rem]:flex-none @[48rem]:[container-type:normal]">
+					<div className="relative size-[min(100cqw,100cqh)] shrink-0 @[48rem]:size-72">
+						<svg
+							viewBox="0 0 240 240"
+							className="size-full overflow-visible"
+							aria-label="Monthly budget usage: segment sizes show planned shares; fill shows spending"
+							role="group"
+						>
+							<defs>
+								{segments.map(({ budget }) => (
+									<linearGradient
+										key={budget.id}
+										id={`${id}-${budget.id}`}
+										x1="0"
+										y1="0"
+										x2="1"
+										y2="1"
+									>
+										<stop
+											offset="0%"
+											stopColor={`color-mix(in oklab, ${themeColor(budget.color)} 75%, white)`}
+										/>
+										<stop offset="100%" stopColor={themeColor(budget.color)} />
+									</linearGradient>
+								))}
+							</defs>
+							{!planned ? (
+								<circle
+									cx="120"
+									cy="120"
+									r="91"
+									fill="none"
+									stroke="var(--muted)"
+									strokeWidth="25"
+								/>
+							) : null}
+							{segments.map(({ budget, start, end }) => {
+								const usage = Math.max(
+									0,
+									Math.min(1, budget.spending / (budget.amount ?? 1)),
+								)
+								return (
+									<g
+										key={budget.id}
+										className={cn(
+											"transition-opacity duration-150 motion-reduce:transition-none",
+											active && active !== budget.id && "opacity-40",
+										)}
+									>
 										<path
-											d={arc(start, start + (end - start) * usage, 91)}
+											d={arc(start, end, 91)}
 											fill="none"
-											stroke={`url(#${id}-${budget.id})`}
+											stroke={themeColor(budget.color)}
+											strokeOpacity="0.13"
 											strokeWidth="25"
-											className="drop-shadow-xs"
 										/>
-									) : null}
-									{budget.spending > (budget.amount ?? 0) ? (
+										{usage > 0 ? (
+											<path
+												d={arc(start, start + (end - start) * usage, 91)}
+												fill="none"
+												stroke={`url(#${id}-${budget.id})`}
+												strokeWidth="25"
+												className="drop-shadow-xs"
+											/>
+										) : null}
+										{budget.spending > (budget.amount ?? 0) ? (
+											<path
+												d={arc(start, end, 109)}
+												fill="none"
+												stroke="var(--destructive)"
+												strokeWidth="3"
+												strokeLinecap="round"
+											/>
+										) : null}
 										<path
-											d={arc(start, end, 109)}
+											d={arc(start, end, 91)}
 											fill="none"
-											stroke="var(--destructive)"
-											strokeWidth="3"
-											strokeLinecap="round"
+											stroke="transparent"
+											strokeWidth="35"
+											role="button"
+											tabIndex={0}
+											aria-label={`${budget.name}: ${formatCurrency(budget.spending)} spent of ${formatCurrency(budget.amount ?? 0)} planned${budget.spending > (budget.amount ?? 0) ? `, ${formatCurrency(budget.spending - (budget.amount ?? 0))} over` : ""}`}
+											aria-pressed={selected === budget.id}
+											className="cursor-pointer rounded-full focus-visible:outline-none focus-visible:stroke-foreground/20"
+											onMouseEnter={() => setHovered(budget.id)}
+											onMouseLeave={() => setHovered(null)}
+											onFocus={() => setHovered(budget.id)}
+											onBlur={() => setHovered(null)}
+											onClick={() => select(budget.id)}
+											onKeyDown={event => {
+												if (event.key === "Enter" || event.key === " ") {
+													event.preventDefault()
+													select(budget.id)
+												}
+											}}
 										/>
-									) : null}
-									<path
-										d={arc(start, end, 91)}
-										fill="none"
-										stroke="transparent"
-										strokeWidth="35"
-										role="button"
-										tabIndex={0}
-										aria-label={`${budget.name}: ${formatCurrency(budget.spending)} spent of ${formatCurrency(budget.amount ?? 0)} planned${budget.spending > (budget.amount ?? 0) ? `, ${formatCurrency(budget.spending - (budget.amount ?? 0))} over` : ""}`}
-										aria-pressed={selected === budget.id}
-										className="cursor-pointer rounded-full focus-visible:outline-none focus-visible:stroke-foreground/20"
-										onMouseEnter={() => setHovered(budget.id)}
-										onMouseLeave={() => setHovered(null)}
-										onFocus={() => setHovered(budget.id)}
-										onBlur={() => setHovered(null)}
-										onClick={() => select(budget.id)}
-										onKeyDown={event => {
-											if (event.key === "Enter" || event.key === " ") {
-												event.preventDefault()
-												select(budget.id)
-											}
-										}}
-									/>
-								</g>
-							)
-						})}
-					</svg>
-					<div
-						className="pointer-events-none absolute inset-[18%] flex min-w-0 flex-col items-center justify-center text-center"
-						aria-live="polite"
-					>
-						<p className="max-w-full truncate text-[0.6875rem] text-muted-foreground @[28rem]:text-xs">
-							{item?.name ?? "Monthly plan"}
-						</p>
-						<p
-							className="mt-1 max-w-full text-lg font-semibold tracking-tight tabular-nums @[28rem]:text-xl"
-							aria-label={
-								item?.amount === null
-									? "No planned amount"
-									: `${formatCurrency(item?.amount ?? planned)} planned`
-							}
+									</g>
+								)
+							})}
+						</svg>
+						<div
+							className="pointer-events-none absolute inset-[18%] flex min-w-0 flex-col items-center justify-center text-center"
+							aria-live="polite"
 						>
-							{item?.amount === null ? "—" : centerCurrency(item?.amount ?? planned)}
-						</p>
-						<p className="mt-1 text-[0.6875rem] text-muted-foreground @[28rem]:text-xs">
-							{item?.amount === null ? "No planned amount" : "planned"}
-						</p>
-						<p
-							className="mt-1 max-w-full text-xs tabular-nums"
-							aria-label={`${formatCurrency(item?.spending ?? spending)} spent`}
-						>
-							{centerCurrency(item?.spending ?? spending)} spent
-						</p>
+							<p className="max-w-full truncate text-[0.6875rem] text-muted-foreground @[28rem]:text-xs">
+								{item?.name ?? "Monthly plan"}
+							</p>
+							<p
+								className="mt-1 max-w-full text-lg font-semibold tracking-tight tabular-nums @[28rem]:text-xl"
+								aria-label={
+									item?.amount === null
+										? "No planned amount"
+										: `${formatCurrency(item?.amount ?? planned)} planned`
+								}
+							>
+								{item?.amount === null
+									? "—"
+									: centerCurrency(item?.amount ?? planned)}
+							</p>
+							<p className="mt-1 text-[0.6875rem] text-muted-foreground @[28rem]:text-xs">
+								{item?.amount === null ? "No planned amount" : "planned"}
+							</p>
+							<p
+								className="mt-1 max-w-full text-xs tabular-nums"
+								aria-label={`${formatCurrency(item?.spending ?? spending)} spent`}
+							>
+								{centerCurrency(item?.spending ?? spending)} spent
+							</p>
+						</div>
 					</div>
 				</div>
 				<div className="grid content-start gap-2 @[36rem]:grid-cols-2 @[48rem]:grid-cols-1">

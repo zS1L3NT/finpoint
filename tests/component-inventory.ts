@@ -930,7 +930,7 @@ export const componentInventory: InventoryEntry[] = [
 			"/records",
 			"/",
 		],
-		visibleExports: ["PendingBadge", "RecordAmountCell"],
+		visibleExports: ["PendingBadge", "RecordAmountCell", "RecordDetails"],
 		dormantExports: [],
 		helperExports: ["amountTone", "formatRowTime", "useRecordColumns", "useRecordMobileRow"],
 		scenarios: ["table"],
@@ -2817,7 +2817,7 @@ export const behaviourCoverage: Record<string, string[]> = {
 	"src/components/sheets/records-sheet.tsx#display.interaction": [
 		"Records sheet: a chart drill adds no Back, browser Back closes it and Forward reopens it",
 		"Records sheet: phones get a bottom sheet and wider screens a side sheet",
-		"Records sheet: each Record shows its Monthly Budget under its amount",
+		"Record lists: each Record shows its Monthly Budget under its title, not its category name",
 		"chart drill: nested Record returns to the open Records sheet",
 	],
 	"src/components/sheets/record-search.tsx#export.default.behaviour": [
@@ -3775,6 +3775,9 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"app/importer/page.tsx#route.navigation": [
 		"importer: keyboard bank select and invalid file rejection work",
+	],
+	"src/components/table/record-columns.tsx#export.RecordDetails.behaviour": [
+		"Record lists: each Record shows its Monthly Budget under its title, not its category name",
 	],
 	"src/components/table/record-columns.tsx#export.PendingBadge.behaviour": [
 		"Records table: rendered Records keep zero, negative amounts and pending reasons",

@@ -801,7 +801,7 @@ test.describe("pinned 15 October 2026 date", () => {
 		await pending.click()
 		await expect(page.getByRole("dialog", { name: "Pending", exact: true })).toBeVisible()
 	})
-	test("Records sheet: each Record shows its Monthly Budget under its amount", async ({
+	test("Record lists: each Record shows its Monthly Budget under its title, not its category name", async ({
 		page,
 	}) => {
 		await seedWorkspace(page)
@@ -815,12 +815,32 @@ test.describe("pinned 15 October 2026 date", () => {
 			.filter({ has: page.getByRole("link", { name: "Open FairPrice Run", exact: true }) })
 			.filter({ hasText: "-$84.20" })
 			.last()
+		const title = row.getByText("FairPrice Run", { exact: true })
 		const amount = row.getByText("-$84.20", { exact: true })
 		const badge = row.getByText("Daily", { exact: true })
 		await expect(badge).toBeVisible()
-		const [money, pill] = await Promise.all([amount.boundingBox(), badge.boundingBox()])
-		if (!money || !pill) throw new Error("amount or Monthly Budget missing")
-		expect(pill.y).toBeGreaterThan(money.y + money.height - 1)
+		await expect(row).toContainText("Bedok")
+		await expect(row).not.toContainText("Groceries")
+		const [name, money, pill] = await Promise.all([
+			title.boundingBox(),
+			amount.boundingBox(),
+			badge.boundingBox(),
+		])
+		if (!name || !money || !pill) throw new Error("title, amount or Monthly Budget missing")
+		expect(pill.y).toBeGreaterThan(name.y + name.height - 1)
+		expect(pill.x + pill.width).toBeLessThan(money.x)
+
+		// The Records page uses the same line.
+		await page.goto("/records")
+		const listed = page.getByRole("link", { name: "Open FairPrice Run", exact: true }).first()
+		await expect(listed).toBeVisible()
+		const record = page
+			.locator("tr, div")
+			.filter({ has: page.getByRole("link", { name: "Open FairPrice Run", exact: true }) })
+			.filter({ hasText: "-$84.20" })
+			.last()
+		await expect(record.getByText("Daily", { exact: true })).toBeVisible()
+		await expect(record).not.toContainText("Groceries")
 	})
 	test("Records sheet: phones get a bottom sheet and wider screens a side sheet", async ({
 		page,
