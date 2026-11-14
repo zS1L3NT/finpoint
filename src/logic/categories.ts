@@ -110,7 +110,8 @@ export async function updateCategory(currentId: string, input: CategoryInput) {
 		throw new ValidationError({ parent_category_id: ["A category cannot be its own parent."] })
 	}
 
-	return db.transaction("rw", [db.categories, db.records, db.monthly_budgets], async () => {
+	const tables = [db.categories, db.records, db.monthly_budgets, db.statement_rules]
+	return db.transaction("rw", tables, async () => {
 		const current = await db.categories.get(currentId)
 		if (!current) throw new Error("Category not found.")
 		if (id !== currentId && (await db.categories.get(id))) {
@@ -128,6 +129,11 @@ export async function updateCategory(currentId: string, input: CategoryInput) {
 				.equals(currentId)
 				.modify({ parent_category_id: id })
 			await db.records.where("category_id").equals(currentId).modify({ category_id: id })
+			await db.statement_rules
+				.filter(rule => rule.actions.category_id?.value === currentId)
+				.modify(rule => {
+					rule.actions.category_id = { value: id }
+				})
 			await db.categories.delete(currentId)
 		} else await db.categories.update(currentId, { ...dto, parent_category_id })
 		const saved = await db.categories.get(id)

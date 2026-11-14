@@ -252,9 +252,9 @@
     "semantic_hash": "28d4c71d103c11e32451ec4f6efc5a25"
   },
   "src/components/dialogs/account.tsx": {
-    "mtime": 1794620108.0678437,
-    "seen": 1794621035.1699286,
-    "ast_hash": "b904695fd6228e53018ce522bd8d508c",
+    "mtime": 1794621109.947999,
+    "seen": 1794643296.681961,
+    "ast_hash": "330a9ac52ef06804d34b7fb71fc443f7",
     "semantic_hash": ""
   },
   "src/components/dialogs/budget-creator.tsx": {
@@ -270,15 +270,15 @@
     "semantic_hash": ""
   },
   "src/components/dialogs/category.tsx": {
-    "mtime": 1794620108.0678437,
-    "seen": 1794621035.1699336,
-    "ast_hash": "0538c968a0b04743ba2e46cc22a883b2",
+    "mtime": 1794621109.947999,
+    "seen": 1794643296.6819649,
+    "ast_hash": "83e7bcd07c182be1dcd9ff5be7bc0cde",
     "semantic_hash": ""
   },
   "src/components/dialogs/pending-statement.tsx": {
-    "mtime": 1794620108.0678437,
-    "seen": 1794621035.1699417,
-    "ast_hash": "5260fb516926815d1a71721e311928ed",
+    "mtime": 1794621109.947999,
+    "seen": 1794643296.6819694,
+    "ast_hash": "68d22b108158846daadf15495ad70810",
     "semantic_hash": ""
   },
   "src/components/dialogs/record-creator.tsx": {
@@ -888,9 +888,9 @@
     "semantic_hash": ""
   },
   "src/logic/categories.ts": {
-    "mtime": 1794620661.2621317,
-    "seen": 1794621035.1701655,
-    "ast_hash": "b7f5bca7bb044d76a3c74be2c96533d5",
+    "mtime": 1794643272.9240787,
+    "seen": 1794643296.6821055,
+    "ast_hash": "cf90a28eb70b60d972173ac270af472e",
     "semantic_hash": ""
   },
   "src/logic/dashboard.ts": {
@@ -1188,9 +1188,9 @@
     "semantic_hash": ""
   },
   "src/components/dialogs/statement-rule.tsx": {
-    "mtime": 1794620108.0678437,
-    "seen": 1794621035.1699495,
-    "ast_hash": "36925f6cf73fa1e7514818851b396771",
+    "mtime": 1794621109.947999,
+    "seen": 1794643296.6819737,
+    "ast_hash": "6e6617db9ccc863b693e29ebeca8a23a",
     "semantic_hash": ""
   },
   "src/components/form/category-field.tsx": {
@@ -1380,9 +1380,9 @@
     "semantic_hash": "5dedcf5d6e0a84b2053d12818f3a0bb5"
   },
   "tests/domain/statement-rules.test.ts": {
-    "mtime": 1794451314.3814244,
-    "seen": 1794621035.1702945,
-    "ast_hash": "85ca56660f759e4f5c59da963b7b9cbd",
+    "mtime": 1794643266.0841286,
+    "seen": 1794643296.6821687,
+    "ast_hash": "af7d7810d9c7d419e80900ca3c162273",
     "semantic_hash": ""
   },
   "tests/harness/app.tsx": {
@@ -1641,6 +1641,12 @@
     "mtime": 1794620661.0421271,
     "seen": 1794621035.1702983,
     "ast_hash": "02578c8a74e6f896b5e8f2fc17d10cf3",
+    "semantic_hash": ""
+  },
+  "src/hooks/use-seed.ts": {
+    "mtime": 1794621109.947999,
+    "seen": 1794643296.6820836,
+    "ast_hash": "0fce272c134074565a956f7534564738",
     "semantic_hash": ""
   }
 }
