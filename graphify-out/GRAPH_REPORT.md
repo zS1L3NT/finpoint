@@ -1,17 +1,17 @@
 # Graph Report - t3-6b4fc13c-8de3ddf0f021ed8e  (2026-11-14)
 
 ## Corpus Check
-- 266 files · ~240,445 words
+- 266 files · ~240,022 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 9 file(s) not represented in the graph (top: (none) 5, .example 1, .lock 1)
 
 ## Summary
-- 1993 nodes · 7906 edges · 103 communities (92 shown, 11 thin omitted)
+- 1993 nodes · 7909 edges · 103 communities (92 shown, 11 thin omitted)
 - Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 129 edges (avg confidence: 0.84)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `b8fe727b`
+- Built from commit: `3a665b37`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -542,6 +542,6 @@ _Questions this graph is uniquely positioned to answer:_
 - **Should `record-creator.tsx` be split into smaller, more focused modules?**
   _Cohesion score 0.0651383841207716 - nodes in this community are weakly interconnected._
 - **Why does `src/data/* (persistence, migrations, seeding, backup serialization, Drive storage)` connect `src/data/* (persistence, migrations, seeding, backup serialization, Drive storage)` to `IndexedDB (Dexie)`, `app-sidebar.tsx`?**
-  _High betweenness centrality (0.064) - this node is a cross-community bridge._
+  _High betweenness centrality (0.065) - this node is a cross-community bridge._
 - **Should `db.ts` be split into smaller, more focused modules?**
   _Cohesion score 0.05704365079365079 - nodes in this community are weakly interconnected._
