@@ -3,6 +3,7 @@
 
 import { asPending, db, type StatementRow } from "@/data/db"
 import { duplicateStatementIds, removeStatementDismissals } from "@/logic/duplicates"
+import { paginateItems } from "@/logic/pagination"
 import { enrichRecords } from "@/logic/records"
 import {
 	dayDifference,
@@ -34,21 +35,6 @@ export type StatementFilters = {
 	is_allocable?: string | null
 	is_pending?: string | null
 	is_unallocated?: string | null
-}
-
-export function paginate<T>(items: T[], page: number, perPage: number) {
-	const total = items.length
-	const current_page = Math.max(1, page)
-	const safePerPage = Math.min(Math.max(1, perPage), 250)
-	const data = items.slice((current_page - 1) * safePerPage, current_page * safePerPage)
-	return {
-		data,
-		total,
-		per_page: safePerPage,
-		current_page,
-		last_page: Math.max(1, Math.ceil(total / safePerPage)),
-		links: [] as { active: boolean; label: string; url: string | null }[],
-	}
 }
 
 async function enrich(statements: StatementRow[]) {
@@ -327,7 +313,7 @@ export async function replacementCandidates(
 	const page = options.page ?? 1
 	const perPage = Math.min(Math.max(1, options.per_page ?? 25), 100)
 
-	return paginate(candidates, page, perPage)
+	return paginateItems(candidates, page, perPage)
 }
 
 /** Suggested replacement count per pending Statement, using the same rules as `replacementCandidates`. */
