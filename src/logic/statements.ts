@@ -3,6 +3,7 @@
 
 import { asPending, db, type StatementRow } from "@/data/db"
 import { duplicateStatementIds, removeStatementDismissals } from "@/logic/duplicates"
+import { flagParam, numberParam, type ParamSource, textParam } from "@/logic/filter-params"
 import { paginateItems } from "@/logic/pagination"
 import { enrichRecords } from "@/logic/records"
 import {
@@ -27,15 +28,29 @@ export type StatementDetail = Statement & {
 export type StatementFilters = {
 	query?: string | null
 	account_id?: string | null
-	ids?: string | null
-	exclude_ids?: string | null
+	ids?: string[]
+	exclude_ids?: string[]
 	start_date?: string | null
 	end_date?: string | null
-	min_amount?: string | null
-	max_amount?: string | null
-	is_allocable?: string | null
-	is_pending?: string | null
-	is_unallocated?: string | null
+	min_amount?: number
+	max_amount?: number
+	is_allocable?: boolean
+	is_pending?: boolean
+	is_unallocated?: boolean
+}
+
+/** The Statements list's URL filters (an `account_id` of `all` names no Account); `query` is read separately. */
+export function parseStatementFilters(params: ParamSource): StatementFilters {
+	const account_id = params.get("account_id")
+	return {
+		account_id: account_id === "all" ? undefined : textParam(account_id),
+		is_pending: flagParam(params.get("is_pending")),
+		is_unallocated: flagParam(params.get("is_unallocated")),
+		start_date: textParam(params.get("start_date")),
+		end_date: textParam(params.get("end_date")),
+		min_amount: numberParam(params.get("min_amount")),
+		max_amount: numberParam(params.get("max_amount")),
+	}
 }
 
 async function enrich(statements: StatementRow[]) {
@@ -46,8 +61,9 @@ async function enrich(statements: StatementRow[]) {
 }
 
 export async function listStatements(filters: StatementFilters = {}) {
-	let rows = filters.ids
-		? (await db.statements.bulkGet(filters.ids.split(",").filter(Boolean))).filter(s => !!s)
+	// An empty `ids` names nothing to narrow to, so it lists every Statement.
+	let rows = filters.ids?.length
+		? (await db.statements.bulkGet(filters.ids)).filter(s => !!s)
 		: await db.statements.toArray()
 
 	const q = (filters.query ?? "").trim().toLowerCase()
@@ -55,31 +71,25 @@ export async function listStatements(filters: StatementFilters = {}) {
 		rows = rows.filter(statement => statement.description.toLowerCase().includes(q))
 	}
 	if (filters.account_id) rows = rows.filter(s => s.account_id === filters.account_id)
-	if (filters.exclude_ids) {
-		const excluded = new Set(filters.exclude_ids.split(",").filter(Boolean))
+	if (filters.exclude_ids?.length) {
+		const excluded = new Set(filters.exclude_ids)
 		rows = rows.filter(s => !excluded.has(s.id))
 	}
 	const { start_date, end_date } = filters
 	if (start_date) rows = rows.filter(s => s.datetime.slice(0, 10) >= start_date)
 	if (end_date) rows = rows.filter(s => s.datetime.slice(0, 10) <= end_date)
-	const minAmount = filters.min_amount ? Number(filters.min_amount) : null
-	const maxAmount = filters.max_amount ? Number(filters.max_amount) : null
-	if (minAmount !== null && Number.isFinite(minAmount)) {
-		rows = rows.filter(s => s.amount >= minAmount)
-	}
-	if (maxAmount !== null && Number.isFinite(maxAmount)) {
-		rows = rows.filter(s => s.amount <= maxAmount)
-	}
-	if (filters.is_pending === "true") rows = rows.filter(s => s.is_pending === 1)
-	if (filters.is_pending === "false") rows = rows.filter(s => s.is_pending === 0)
+	const { min_amount, max_amount } = filters
+	if (min_amount !== undefined) rows = rows.filter(s => s.amount >= min_amount)
+	if (max_amount !== undefined) rows = rows.filter(s => s.amount <= max_amount)
+	if (filters.is_pending === true) rows = rows.filter(s => s.is_pending === 1)
+	if (filters.is_pending === false) rows = rows.filter(s => s.is_pending === 0)
 
 	let enriched = await enrich(rows)
 
-	if (filters.is_allocable === "true") enriched = enriched.filter(s => s.allocable_amount !== 0)
-	if (filters.is_allocable === "false") enriched = enriched.filter(s => s.allocable_amount === 0)
-	if (filters.is_unallocated === "true") enriched = enriched.filter(s => s.allocation_count === 0)
-	if (filters.is_unallocated === "false")
-		enriched = enriched.filter(s => s.allocation_count !== 0)
+	if (filters.is_allocable === true) enriched = enriched.filter(s => s.allocable_amount !== 0)
+	if (filters.is_allocable === false) enriched = enriched.filter(s => s.allocable_amount === 0)
+	if (filters.is_unallocated === true) enriched = enriched.filter(s => s.allocation_count === 0)
+	if (filters.is_unallocated === false) enriched = enriched.filter(s => s.allocation_count !== 0)
 
 	return enriched.sort(compareStatements)
 }

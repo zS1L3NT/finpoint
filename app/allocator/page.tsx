@@ -37,7 +37,7 @@ import { cn, formatCurrency, pluralize } from "@/lib/utils"
 import { listAccounts } from "@/logic/accounts"
 import { listCategories } from "@/logic/categories"
 import { paginateItems, parsePage, parsePageSize } from "@/logic/pagination"
-import { listStatements } from "@/logic/statements"
+import { listStatements, parseStatementFilters } from "@/logic/statements"
 import type { Statement } from "@/types"
 
 export default function AllocatorPage() {
@@ -59,14 +59,11 @@ export default function AllocatorPage() {
 	const statementsQuery = useLiveQuery(
 		() =>
 			listStatements({
+				...parseStatementFilters(searchParams),
 				query: query || null,
-				account_id: accountId === "all" ? null : accountId,
-				is_pending: isPending,
-				start_date: startDate,
-				end_date: endDate,
-				min_amount: minAmount,
-				max_amount: maxAmount,
-				is_allocable: "true",
+				// The Allocator has no Allocation filter in its URL.
+				is_unallocated: undefined,
+				is_allocable: true,
 			}),
 		[query, accountId, isPending, startDate, endDate, minAmount, maxAmount],
 	)
@@ -83,9 +80,7 @@ export default function AllocatorPage() {
 	const selectedQuery = useLiveQuery(
 		async () => ({
 			key: selectedKey,
-			rows: selectedKey
-				? await listStatements({ ids: selectedKey, is_allocable: "true" })
-				: [],
+			rows: selectedKey ? await listStatements({ ids: selectedIds, is_allocable: true }) : [],
 		}),
 		[selectedKey],
 	)

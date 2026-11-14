@@ -25,8 +25,8 @@ test("the ids filter keeps only the listed Statements, and drops ones that are g
 	await db.statements.bulkAdd([statement("s1", -10), statement("s2", -20), statement("s3", -30)])
 	await db.allocations.add({ statement_id: "s3", record_id: "r", amount: -30 })
 
-	expect((await listStatements({ ids: "s1,s3,missing" })).map(s => s.id).sort()).toEqual(["s1", "s3"])
-	expect((await listStatements({ ids: "s1,s3,missing", is_allocable: "true" })).map(s => s.id)).toEqual(["s1"])
-	expect(await listStatements({ ids: "missing" })).toEqual([])
-	expect(await listStatements({ ids: "" })).toHaveLength(3)
+	expect((await listStatements({ ids: ["s1", "s3", "missing"] })).map(s => s.id).sort()).toEqual(["s1", "s3"])
+	expect((await listStatements({ ids: ["s1", "s3", "missing"], is_allocable: true })).map(s => s.id)).toEqual(["s1"])
+	expect(await listStatements({ ids: ["missing"] })).toEqual([])
+	expect(await listStatements({ ids: [] })).toHaveLength(3)
 })

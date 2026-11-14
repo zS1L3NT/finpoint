@@ -218,8 +218,8 @@ export default function RecordEditorDialog({
 				) / 100
 			}
 			filters={{
-				is_allocable: "true",
-				exclude_ids: formStatements.map(s => s.id).join(","),
+				is_allocable: true,
+				exclude_ids: formStatements.map(s => s.id),
 				start_date: defaultFilterStartDate ?? undefined,
 				end_date: defaultFilterEndDate,
 			}}

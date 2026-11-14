@@ -93,12 +93,12 @@ export default function AllocatorPendingPage() {
 			listStatements({
 				query: queueQuery || null,
 				account_id: accountId === "all" ? null : accountId,
-				is_pending: "true",
+				is_pending: true,
 			}),
 		[queueQuery, accountId],
 	)
 	const pending = pendingQuery ?? []
-	const allPending = useLiveQuery(() => listStatements({ is_pending: "true" }), []) ?? []
+	const allPending = useLiveQuery(() => listStatements({ is_pending: true }), []) ?? []
 	const sortedPending = useMemo(
 		() =>
 			[...pending].sort(

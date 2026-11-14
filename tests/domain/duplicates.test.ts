@@ -35,7 +35,7 @@ test("duplicate warnings survive filtering and clear when separated or fixed", a
 		statement("pending", undefined, { is_pending: 1 }),
 		statement("unrelated", "COFFEE GARDEN"),
 	])
-	const filtered = await listStatements({ query: "-S 03", is_pending: "false" })
+	const filtered = await listStatements({ query: "-S 03", is_pending: false })
 	expect(filtered.map(s => [s.id, s.is_duplicate])).toEqual([["a", true]])
 	expect((await getStatement("b")).is_duplicate).toBe(true)
 	expect((await getStatement("pending")).is_duplicate).toBe(false)

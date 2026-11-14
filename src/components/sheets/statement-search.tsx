@@ -13,7 +13,7 @@ import {
 	SheetTrigger,
 } from "@/components/ui/sheet"
 import { classForCurrency, cn, formatCurrency, parseDatetime, pluralize, round2 } from "@/lib/utils"
-import { listStatements } from "@/logic/statements"
+import { listStatements, type StatementFilters } from "@/logic/statements"
 import type { Statement } from "@/types"
 
 const PAGE = 40
@@ -30,7 +30,7 @@ export default function StatementSearchSheet({
 }: {
 	title: string
 	placeholder?: string
-	filters?: globalThis.Record<string, string | undefined>
+	filters?: StatementFilters
 	/** Amount the record still needs; statements whose allocable amount equals it are surfaced first. */
 	target?: number
 	isOpen: boolean
@@ -55,15 +55,17 @@ export default function StatementSearchSheet({
 		}
 	}, [isOpen])
 	const accountId = filters?.account_id ?? null
-	const excludeIds = filters?.exclude_ids ?? null
+	const excludeIds = filters?.exclude_ids
+	// A list is new on every render; its ids key the cache and the query.
+	const excludeKey = excludeIds?.join(",") ?? ""
 	const startDate = includeOlder ? null : (filters?.start_date ?? null)
 	const endDate = filters?.end_date ?? null
-	const isAllocable = filters?.is_allocable ?? null
-	const isPending = filters?.is_pending ?? null
-	const isUnallocated = filters?.is_unallocated ?? null
+	const isAllocable = filters?.is_allocable
+	const isPending = filters?.is_pending
+	const isUnallocated = filters?.is_unallocated
 	// Cache tag for the current filter set; readiness gates on the opening
 	// epoch only, so prior rows stay mounted (dimmed) while a new read resolves.
-	const queryKey = `${deferredQuery}|${includeOlder}|${accountId ?? ""}|${excludeIds ?? ""}|${startDate ?? ""}|${endDate ?? ""}|${isAllocable ?? ""}|${isPending ?? ""}|${isUnallocated ?? ""}`
+	const queryKey = `${deferredQuery}|${includeOlder}|${accountId ?? ""}|${excludeKey}|${startDate ?? ""}|${endDate ?? ""}|${isAllocable ?? ""}|${isPending ?? ""}|${isUnallocated ?? ""}`
 	const data = useLiveQuery(async () => {
 		if (!isOpen) return null
 		const rows = await listStatements({
@@ -83,7 +85,7 @@ export default function StatementSearchSheet({
 		deferredQuery,
 		includeOlder,
 		accountId,
-		excludeIds,
+		excludeKey,
 		startDate,
 		endDate,
 		isAllocable,

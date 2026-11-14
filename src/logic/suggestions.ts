@@ -814,7 +814,7 @@ export async function similarStatements(statementIds: string[]) {
 	)
 	if (!ids.size) return []
 	// A Duplicate Statement repeats activity that already has its own Record.
-	return (await listStatements({ is_allocable: "true" }))
+	return (await listStatements({ is_allocable: true }))
 		.filter(s => ids.has(s.id) && !s.is_duplicate)
 		.slice(0, 20)
 }

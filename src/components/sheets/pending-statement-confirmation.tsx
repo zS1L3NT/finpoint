@@ -45,7 +45,7 @@ export default function PendingStatementConfirmationSheet({
 		const rows = await listStatements({
 			query: query || null,
 			account_id: accountId,
-			is_pending: "true",
+			is_pending: true,
 		})
 		return { epoch, statementId, accountId, query, rows }
 	}, [isOpen, epoch, statementId, accountId, query])

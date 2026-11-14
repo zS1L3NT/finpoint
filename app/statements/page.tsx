@@ -27,7 +27,7 @@ import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { cn, pluralize } from "@/lib/utils"
 import { listAccounts } from "@/logic/accounts"
 import { paginateItems, parsePage, parsePageSize } from "@/logic/pagination"
-import { listStatements } from "@/logic/statements"
+import { listStatements, parseStatementFilters } from "@/logic/statements"
 import type { Statement } from "@/types"
 
 export default function StatementsPage() {
@@ -71,17 +71,7 @@ export default function StatementsPage() {
 
 	const accounts = useLiveQuery(() => listAccounts(), [])
 	const statementsQuery = useLiveQuery(
-		() =>
-			listStatements({
-				query: query || null,
-				account_id: accountId === "all" ? null : accountId,
-				is_pending: isPending,
-				is_unallocated: isUnallocated,
-				start_date: startDate,
-				end_date: endDate,
-				min_amount: minAmount,
-				max_amount: maxAmount,
-			}),
+		() => listStatements({ ...parseStatementFilters(searchParams), query: query || null }),
 		[query, accountId, isPending, isUnallocated, startDate, endDate, minAmount, maxAmount],
 	)
 	const statements = statementsQuery ?? []
