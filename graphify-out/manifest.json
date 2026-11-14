@@ -1266,9 +1266,9 @@
     "semantic_hash": ""
   },
   "tests/animations/tables.e2e.ts": {
-    "mtime": 1794620107.8958411,
-    "seen": 1794621035.1702247,
-    "ast_hash": "b9f29b740d0ada4f4d6536ab49ceabf5",
+    "mtime": 1794677995.1778955,
+    "seen": 1794678236.7900524,
+    "ast_hash": "9e5092ceb6155300bab3824ed826ea1b",
     "semantic_hash": ""
   },
   "tests/component-inventory.ts": {

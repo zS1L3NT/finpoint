@@ -333,165 +333,187 @@ test("table refilter: rows interrupted mid-rise settle back in line", {
 			const selector = hrefs.map(rowParts).join(", ")
 			// Remount the full list from an empty result, then narrow back
 			// to the match set while the retained rows are still rising.
-			await page.goto(
-				`${route}?query=${encodeURIComponent("missing-ui-result")}&per_page=100`,
-			)
-			await expect(
-				page.getByText(emptyCopy, { exact: true }).filter({ visible: true }),
-			).toBeVisible()
-			const search = page.getByPlaceholder(searchName)
-			const samples = await sampleVisibleRowAnimations(page, selector, async () => {
-				await search.fill("")
-				// Catch a retained row mid-rise and narrow in the same task:
-				// the cascade settles in under a second, so any round trip
-				// between the catch and the narrow risks missing the window.
-				// Under reduced motion the rows snap to rest, so their
-				// mounting alone establishes the retained nodes.
-				const commit = await page.evaluate(
-					({
-						hrefSelector,
-						allSelector,
-						inputName,
-						narrowQuery,
-						reducedMotion,
-						retained,
-					}: {
-						hrefSelector: string
-						allSelector: string
-						inputName: string
-						narrowQuery: string
-						reducedMotion: boolean
-						retained: number
-					}) => {
-						const yOf = (row: Element) => {
-							const style = getComputedStyle(row)
-							let y = 0
-							if (style.transform !== "none")
-								y += new DOMMatrixReadOnly(style.transform).m42
-							const parts =
-								style.translate === "none"
-									? []
-									: style.translate.trim().split(/\s+/)
-							if (parts.length > 1) y += Number(parts[1])
-							return y
-						}
-						return new Promise<{
-							probeY: number
-							before: number
-							after: number
-							marked: number
-							connected: number
-							y: number
-						}>((resolve, reject) => {
-							const deadline = performance.now() + 8000
-							const waitCommit = (probeY: number, before: number) => {
-								const tick = () => {
-									const after = document.querySelectorAll(allSelector).length
-									if (after < before) {
-										const marked = [
-											...document.querySelectorAll('[data-probe="1"]'),
-										]
-										const kept = marked.filter(node => node.isConnected)
-										resolve({
-											probeY,
-											before,
-											after,
-											marked: marked.length,
-											connected: kept.length,
-											y: kept.length
-												? Math.max(...kept.map(node => Math.abs(yOf(node))))
-												: 0,
-										})
-										return
+			// The narrowed list can take as long to commit as the rise
+			// itself, which settles the rows before the removal: such an
+			// attempt proves nothing, so it is repeated. The last attempt
+			// must catch the window.
+			const attempts = 3
+			let samples: Awaited<ReturnType<typeof sampleVisibleRowAnimations>> = []
+			for (let attempt = 1; attempt <= attempts; attempt++) {
+				let missed = false
+				await page.goto(
+					`${route}?query=${encodeURIComponent("missing-ui-result")}&per_page=100`,
+				)
+				await expect(
+					page.getByText(emptyCopy, { exact: true }).filter({ visible: true }),
+				).toBeVisible()
+				const search = page.getByPlaceholder(searchName)
+				samples = await sampleVisibleRowAnimations(page, selector, async () => {
+					await search.fill("")
+					// Catch a retained row mid-rise and narrow in the same task:
+					// the cascade settles in under a second, so any round trip
+					// between the catch and the narrow risks missing the window.
+					// Under reduced motion the rows snap to rest, so their
+					// mounting alone establishes the retained nodes.
+					const commit = await page.evaluate(
+						({
+							hrefSelector,
+							allSelector,
+							inputName,
+							narrowQuery,
+							reducedMotion,
+							retained,
+						}: {
+							hrefSelector: string
+							allSelector: string
+							inputName: string
+							narrowQuery: string
+							reducedMotion: boolean
+							retained: number
+						}) => {
+							const yOf = (row: Element) => {
+								const style = getComputedStyle(row)
+								let y = 0
+								if (style.transform !== "none")
+									y += new DOMMatrixReadOnly(style.transform).m42
+								const parts =
+									style.translate === "none"
+										? []
+										: style.translate.trim().split(/\s+/)
+								if (parts.length > 1) y += Number(parts[1])
+								return y
+							}
+							return new Promise<{
+								probeY: number
+								before: number
+								after: number
+								marked: number
+								connected: number
+								y: number
+							}>((resolve, reject) => {
+								const deadline = performance.now() + 8000
+								const waitCommit = (probeY: number, before: number) => {
+									const tick = () => {
+										const after = document.querySelectorAll(allSelector).length
+										if (after < before) {
+											const marked = [
+												...document.querySelectorAll('[data-probe="1"]'),
+											]
+											const kept = marked.filter(node => node.isConnected)
+											resolve({
+												probeY,
+												before,
+												after,
+												marked: marked.length,
+												connected: kept.length,
+												y: kept.length
+													? Math.max(
+															...kept.map(node =>
+																Math.abs(yOf(node)),
+															),
+														)
+													: 0,
+											})
+											return
+										}
+										if (performance.now() > deadline)
+											reject(
+												new Error(
+													`refilter never committed a removal (rows stayed at ${after})`,
+												),
+											)
+										else requestAnimationFrame(tick)
+									}
+									tick()
+								}
+								const waitRise = () => {
+									const rows = [...document.querySelectorAll(hrefSelector)]
+									if (rows.length >= retained) {
+										// Catch the rise early (y well above rest) so the
+										// removal below still lands mid-flight.
+										const rising = reducedMotion
+											? rows
+											: rows.filter(row => Math.abs(yOf(row)) > 2)
+										if (rising.length > 0) {
+											for (const row of rising)
+												row.setAttribute("data-probe", "1")
+											const probeY = Math.max(
+												...rising.map(row => Math.abs(yOf(row))),
+											)
+											const before =
+												document.querySelectorAll(allSelector).length
+											const input = document.querySelector(
+												`input[placeholder="${CSS.escape(inputName)}"]`,
+											)
+											if (!(input instanceof HTMLInputElement)) {
+												reject(
+													new Error(
+														"search input not found for narrowing",
+													),
+												)
+												return
+											}
+											const setter = Object.getOwnPropertyDescriptor(
+												window.HTMLInputElement.prototype,
+												"value",
+											)?.set
+											if (!setter) {
+												reject(new Error("native value setter unavailable"))
+												return
+											}
+											setter.call(input, narrowQuery)
+											input.dispatchEvent(
+												new Event("input", { bubbles: true }),
+											)
+											waitCommit(probeY, before)
+											return
+										}
 									}
 									if (performance.now() > deadline)
 										reject(
 											new Error(
-												`refilter never committed a removal (rows stayed at ${after})`,
+												reducedMotion
+													? "retained rows never mounted"
+													: "retained rows never displaced mid-rise",
 											),
 										)
-									else requestAnimationFrame(tick)
+									else requestAnimationFrame(waitRise)
 								}
-								tick()
-							}
-							const waitRise = () => {
-								const rows = [...document.querySelectorAll(hrefSelector)]
-								if (rows.length >= retained) {
-									// Catch the rise early (y well above rest) so the
-									// removal below still lands mid-flight.
-									const rising = reducedMotion
-										? rows
-										: rows.filter(row => Math.abs(yOf(row)) > 2)
-									if (rising.length > 0) {
-										for (const row of rising)
-											row.setAttribute("data-probe", "1")
-										const probeY = Math.max(
-											...rising.map(row => Math.abs(yOf(row))),
-										)
-										const before = document.querySelectorAll(allSelector).length
-										const input = document.querySelector(
-											`input[placeholder="${CSS.escape(inputName)}"]`,
-										)
-										if (!(input instanceof HTMLInputElement)) {
-											reject(
-												new Error("search input not found for narrowing"),
-											)
-											return
-										}
-										const setter = Object.getOwnPropertyDescriptor(
-											window.HTMLInputElement.prototype,
-											"value",
-										)?.set
-										if (!setter) {
-											reject(new Error("native value setter unavailable"))
-											return
-										}
-										setter.call(input, narrowQuery)
-										input.dispatchEvent(new Event("input", { bubbles: true }))
-										waitCommit(probeY, before)
-										return
-									}
-								}
-								if (performance.now() > deadline)
-									reject(
-										new Error(
-											reducedMotion
-												? "retained rows never mounted"
-												: "retained rows never displaced mid-rise",
-										),
-									)
-								else requestAnimationFrame(waitRise)
-							}
-							waitRise()
-						})
-					},
-					{
-						hrefSelector: selector,
-						allSelector: allRows,
-						inputName: searchName,
-						narrowQuery: narrow,
-						reducedMotion: reduced,
-						retained: hrefs.length,
-					},
-				)
-				if (!reduced)
-					expect(
-						commit.probeY,
-						"interruption catches a retained row mid-rise",
-					).toBeGreaterThan(2)
-				expect(commit.after, "at least one nonmatching row disappears").toBeLessThan(
-					commit.before,
-				)
-				expect(commit.marked, "interruption marks a retained node").toBeGreaterThan(0)
-				expect(commit.connected, "the retained node is the same connected node").toBe(
-					commit.marked,
-				)
-				if (!reduced)
-					expect(
-						commit.y,
-						"retained node still displaced at the removal boundary; the interruption window was missed",
-					).toBeGreaterThan(0.5)
-			})
+								waitRise()
+							})
+						},
+						{
+							hrefSelector: selector,
+							allSelector: allRows,
+							inputName: searchName,
+							narrowQuery: narrow,
+							reducedMotion: reduced,
+							retained: hrefs.length,
+						},
+					)
+					if (!reduced)
+						expect(
+							commit.probeY,
+							"interruption catches a retained row mid-rise",
+						).toBeGreaterThan(2)
+					expect(commit.after, "at least one nonmatching row disappears").toBeLessThan(
+						commit.before,
+					)
+					expect(commit.marked, "interruption marks a retained node").toBeGreaterThan(0)
+					expect(commit.connected, "the retained node is the same connected node").toBe(
+						commit.marked,
+					)
+					if (!reduced) {
+						missed = commit.y <= 0.5
+						if (!missed || attempt === attempts)
+							expect(
+								commit.y,
+								"retained node still displaced at the removal boundary; the interruption window was missed",
+							).toBeGreaterThan(0.5)
+					}
+				})
+				if (!missed) break
+			}
 			expect(samples.length).toBeGreaterThanOrEqual(2)
 			if (reduced) {
 				expectReducedRowMovement(samples, 2)
