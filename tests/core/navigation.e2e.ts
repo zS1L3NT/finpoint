@@ -892,3 +892,21 @@ test("mobile sidebar: a tap before the mobile layout settles opens the mobile me
 	await page.setViewportSize({ width: 390, height: 844 })
 	await expect(page.locator('[data-sidebar="sidebar"][data-mobile="true"]')).toBeVisible()
 })
+
+test("month navigation: two fast clicks on Next month advance two months", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	await page.goto("/?month=October&year=2026")
+	const next = page.getByRole("button", { name: "Next month", exact: true })
+	await expect(page.getByRole("heading", { name: "October 2026" })).toBeVisible()
+	// Separate tasks, as two real clicks are, with the second before the router commits the first.
+	await next.evaluate(async (button: HTMLButtonElement) => {
+		button.click()
+		await new Promise(resolve => setTimeout(resolve, 0))
+		button.click()
+	})
+	await expect(page).toHaveURL(/month=December&year=2026/)
+	await expect(page.getByRole("heading", { name: "December 2026" })).toBeVisible()
+})
