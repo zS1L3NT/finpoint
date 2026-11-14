@@ -114,9 +114,9 @@
     "semantic_hash": ""
   },
   "app/settings/page.tsx": {
-    "mtime": 1794646217.3151777,
-    "seen": 1794646240.4630759,
-    "ast_hash": "b68c4ec9fba1623bafcd2fd29d701dc0",
+    "mtime": 1794678456.7031488,
+    "seen": 1794682833.785218,
+    "ast_hash": "b21b4b3b74809c21d34f3c084d5c8d0a",
     "semantic_hash": ""
   },
   "app/statements/[id]/page.tsx": {
@@ -210,9 +210,9 @@
     "semantic_hash": ""
   },
   "src/components/charts/category-history-chart.tsx": {
-    "mtime": 1794620107.887841,
-    "seen": 1794621035.1699066,
-    "ast_hash": "2434a23bdca0952875666e38c1861a69",
+    "mtime": 1794682563.1758204,
+    "seen": 1794682833.7852416,
+    "ast_hash": "78f1705e26e937bf0c0ef0e5e534ea7d",
     "semantic_hash": ""
   },
   "src/components/charts/category-movers.tsx": {
@@ -876,9 +876,9 @@
     "semantic_hash": ""
   },
   "src/logic/auto-sync.ts": {
-    "mtime": 1794620866.482548,
-    "seen": 1794621035.1701617,
-    "ast_hash": "547c0052f7d72e15fc9fc870aaa37c28",
+    "mtime": 1794678420.2466156,
+    "seen": 1794682833.7853966,
+    "ast_hash": "0070faca26c5585dcc4d484101a06213",
     "semantic_hash": ""
   },
   "src/logic/budgets.ts": {
@@ -1278,9 +1278,9 @@
     "semantic_hash": ""
   },
   "tests/core/charts.e2e.ts": {
-    "mtime": 1794620107.8998413,
-    "seen": 1794621035.1702285,
-    "ast_hash": "52930756eaf3911500892cdf819b5db7",
+    "mtime": 1794682621.9111764,
+    "seen": 1794682833.7854369,
+    "ast_hash": "6d2de26cf94680329610c8b2291a0afb",
     "semantic_hash": ""
   },
   "tests/core/components.e2e.ts": {
@@ -1290,9 +1290,9 @@
     "semantic_hash": ""
   },
   "tests/core/editors.e2e.ts": {
-    "mtime": 1794648890.041453,
-    "seen": 1794648915.079165,
-    "ast_hash": "617673c3c411e892e5969ce5aae4a2f9",
+    "mtime": 1794682429.085658,
+    "seen": 1794682833.785439,
+    "ast_hash": "e6e048d86441ca5ac5817d6aa090c900",
     "semantic_hash": ""
   },
   "tests/core/helpers.e2e.ts": {
@@ -1320,9 +1320,9 @@
     "semantic_hash": ""
   },
   "tests/core/navigation.e2e.ts": {
-    "mtime": 1794669250.878071,
-    "seen": 1794669272.0388508,
-    "ast_hash": "810a4f83e4efd58a573f51134759e87c",
+    "mtime": 1794682429.0616584,
+    "seen": 1794682833.7854445,
+    "ast_hash": "a3f94b7051fdcbd1524f9517fa8277b6",
     "semantic_hash": ""
   },
   "tests/core/routes.e2e.ts": {
@@ -1332,9 +1332,9 @@
     "semantic_hash": ""
   },
   "tests/core/sheets.e2e.ts": {
-    "mtime": 1794669250.878071,
-    "seen": 1794669272.0388622,
-    "ast_hash": "065d4e5f011495e6b06b8fddbc35b7a6",
+    "mtime": 1794682429.0736582,
+    "seen": 1794682833.7854466,
+    "ast_hash": "496e39586e723b3d12d7ba1d24038c98",
     "semantic_hash": ""
   },
   "tests/core/tables.e2e.ts": {
@@ -1344,9 +1344,9 @@
     "semantic_hash": ""
   },
   "tests/core/workflows.e2e.ts": {
-    "mtime": 1794646217.3151777,
-    "seen": 1794646240.4633255,
-    "ast_hash": "fbc626ded47d40355cd9c192960ef33a",
+    "mtime": 1794682429.0096593,
+    "seen": 1794682833.7854488,
+    "ast_hash": "f9ce3e721a875a3bfce93afc04928639",
     "semantic_hash": ""
   },
   "tests/domain/drive-baseline.test.ts": {
@@ -1614,15 +1614,15 @@
     "semantic_hash": ""
   },
   "src/hooks/use-submit-lock.ts": {
-    "mtime": 1794620108.0678437,
-    "seen": 1794621035.1701324,
-    "ast_hash": "d8b3610edddf909be574d7122773404d",
+    "mtime": 1794678456.7031488,
+    "seen": 1794682833.7853794,
+    "ast_hash": "2a74b9f61942b13af16eaa20754c0f07",
     "semantic_hash": ""
   },
   "tests/domain/auto-sync.test.ts": {
-    "mtime": 1794620107.9758425,
-    "seen": 1794621035.1702504,
-    "ast_hash": "2627efcbbe144998da082aa7a058a833",
+    "mtime": 1794678284.0683799,
+    "seen": 1794682833.7854497,
+    "ast_hash": "4d19844f41fcf099c7a6b2f3025c0126",
     "semantic_hash": ""
   },
   "tests/domain/drive-disconnect.test.ts": {
@@ -1638,9 +1638,9 @@
     "semantic_hash": ""
   },
   "tests/domain/transaction-checks.test.ts": {
-    "mtime": 1794620661.0421271,
-    "seen": 1794621035.1702983,
-    "ast_hash": "02578c8a74e6f896b5e8f2fc17d10cf3",
+    "mtime": 1794682428.9976594,
+    "seen": 1794682833.7854702,
+    "ast_hash": "0da03ae57469d396b0a09175c44876e4",
     "semantic_hash": ""
   },
   "src/hooks/use-seed.ts": {
