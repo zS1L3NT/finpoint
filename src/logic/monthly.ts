@@ -3,7 +3,7 @@
 import { DateTime } from "luxon"
 import { db } from "@/data/db"
 import { monthStart } from "@/logic/dashboard"
-import { expandCategoryIdsForMonthly } from "@/logic/monthly-shared"
+import { expandCategoryIds } from "@/logic/monthly-shared"
 import { listRecords } from "@/logic/records"
 
 export type MonthlyFilters = {
@@ -32,9 +32,7 @@ export async function getMonthlyRecords(month: string, year: number, filters: Mo
 	const rawCategoryIds = (filters.category_ids ?? "").split(",").filter(Boolean)
 	// Avoid awaiting a non-Dexie promise before the first read: liveQuery must
 	// retain its observation context when no Category filter is selected.
-	const category_ids = rawCategoryIds.length
-		? await expandCategoryIdsForMonthly(rawCategoryIds)
-		: []
+	const category_ids = rawCategoryIds.length ? await expandCategoryIds(rawCategoryIds) : []
 	const startDate = filters.start_date ?? date.toFormat("yyyy-MM-dd")
 	const endDate = filters.end_date ?? date.endOf("month").toFormat("yyyy-MM-dd")
 	const rangeStart = DateTime.fromFormat(startDate, "yyyy-MM-dd")

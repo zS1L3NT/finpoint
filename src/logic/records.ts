@@ -5,6 +5,7 @@ import { db, type RecordRow } from "@/data/db"
 import { canUseMonthlyBudget } from "@/lib/analytics"
 import { contribution } from "@/logic/analytics"
 import { duplicateStatementIds } from "@/logic/duplicates"
+import { expandCategoryIds } from "@/logic/monthly-shared"
 import { isPendingRecord, pendingStatementIds, tallyAllocations } from "@/logic/pending"
 import { resolveRecordChoices } from "@/logic/record-choices"
 import { inferRecordDatetime } from "@/logic/record-defaults"
@@ -94,24 +95,6 @@ export async function enrichRecords(rows: RecordRow[]) {
 				: null,
 		}
 	})
-}
-
-async function expandCategoryIds(ids: string[]): Promise<string[]> {
-	if (!ids.length) return ids
-	const categories = await db.categories.toArray()
-	const childrenByParent = new Map<string, string[]>()
-	for (const category of categories) {
-		if (category.parent_category_id) {
-			const list = childrenByParent.get(category.parent_category_id) ?? []
-			list.push(category.id)
-			childrenByParent.set(category.parent_category_id, list)
-		}
-	}
-	const expanded = new Set(ids)
-	for (const id of ids) {
-		for (const child of childrenByParent.get(id) ?? []) expanded.add(child)
-	}
-	return [...expanded]
 }
 
 export async function listRecords(filters: RecordFilters = {}) {
