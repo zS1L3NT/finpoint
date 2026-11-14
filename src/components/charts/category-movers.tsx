@@ -2,7 +2,6 @@
 
 import Link from "next/link"
 import { UiIcon } from "@/components/icon"
-import { useHistory } from "@/history"
 import { themeColor } from "@/lib/palette"
 import { cn, formatCurrency } from "@/lib/utils"
 
@@ -30,7 +29,6 @@ export default function CategoryMovers({
 	recordHref: (id: string) => string
 	limit?: number
 }) {
-	const { handlePush } = useHistory()
 	const movers = categories
 		.filter(category => category.comparison !== null && Math.abs(category.comparison) >= 0.5)
 		.sort((a, b) => Math.abs(b.comparison ?? 0) - Math.abs(a.comparison ?? 0))
@@ -53,7 +51,7 @@ export default function CategoryMovers({
 					<Link
 						key={category.id}
 						href={recordHref(category.id)}
-						onClick={handlePush("overview")}
+						scroll={false}
 						className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-lg px-2 py-2 transition-colors duration-150 ease-out hover:bg-muted/50 active:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 					>
 						<span

@@ -15,8 +15,6 @@ export const pathStatement = (id: string) => `/statements/${id}`
 export const pathAccounts = (query?: Record<string, string | undefined>) =>
 	withQuery("/accounts", query)
 export const pathAccount = (id: string) => `/accounts/${id}`
-export const pathMonthlyRecords = (query?: Record<string, string | undefined>) =>
-	withQuery("/records/monthly", query)
 export const pathRecords = (query?: Record<string, string | undefined>) =>
 	withQuery("/records", query)
 export const pathRecord = (id: string) => `/records/${id}`

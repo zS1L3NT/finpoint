@@ -1,11 +1,9 @@
 "use client"
 
-import { motion } from "framer-motion"
 import { DateTime } from "luxon"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
 import { UiIcon as IconifyIcon } from "@/components/icon"
+import { MonthHeaderSlotProvider } from "@/components/layout/month-header-slot"
 import PageContent from "@/components/layout/page-content"
 import { Button } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
@@ -15,22 +13,18 @@ import ValueSwap from "@/components/value-swap"
 import { useHistory } from "@/history"
 import { useMonthParams } from "@/hooks/use-month-params"
 import { armMonthTransition } from "@/hooks/use-month-transition"
-import { SPRING } from "@/lib/motion"
-import { cn } from "@/lib/utils"
-import { pathDashboard, pathMonthlyRecords, pathRecords } from "@/routes"
 
 /**
- * Persistent shell for the Overview / Monthly Records tabs. The title, month
- * navigation, and tabs mount once and never remount on tab switches, so the
- * month heading cannot flash. Pages below the Outlet render content only.
+ * Persistent shell for the Overview. The title and month navigation mount once and never
+ * remount on month changes, so the month heading cannot flash. The page renders content only.
  */
 export default function MonthLayout({ children }: { children: React.ReactNode }) {
 	const { month, year, date, setSearchParams } = useMonthParams()
-	const pathname = usePathname()
-	const { latest, isNavigatingBack, navigateBack, handleClear } = useHistory()
+	const { latest, isNavigatingBack, navigateBack } = useHistory()
 	const back = latest
-	const isMonthly = pathname.startsWith(`${pathRecords()}/`)
 	const [hydrated, setHydrated] = useState(false)
+	const [status, setStatus] = useState<HTMLDivElement | null>(null)
+	const [controls, setControls] = useState<HTMLDivElement | null>(null)
 
 	// Calendar labels and links use the browser date, which can differ from SSR.
 	useEffect(() => setHydrated(true), [])
@@ -38,43 +32,22 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 	const today = DateTime.now().startOf("day")
 	const isCurrent = date.hasSame(today, "month")
 	const isFuture = date.startOf("month") > today.startOf("month")
-	const through = isCurrent ? today.toFormat("yyyy-MM-dd") : null
-	const subtitle = isMonthly
-		? isCurrent && through
-			? `Actuals through ${DateTime.fromISO(through).toFormat("d MMM")}`
-			: isFuture
-				? "Future-dated Records"
-				: "Full month"
-		: `${isCurrent ? `Through ${today.toFormat("d MMM")}` : isFuture ? "Future month" : "Full month"} · SGD · Based on Record dates`
+	const subtitle = `${isCurrent ? `Through ${today.toFormat("d MMM")}` : isFuture ? "Future month" : "Full month"} · SGD · Based on Record dates`
 
 	const changeMonth = (next: DateTime) => {
 		if (next.hasSame(date, "month")) return
 		armMonthTransition(next > date ? 1 : -1)
-		const monthName = next.toFormat("MMMM")
-		const yearValue = String(next.year)
-		if (isMonthly) {
-			setSearchParams(previous => {
-				const params = new URLSearchParams(previous)
-				params.set("month", monthName)
-				params.set("year", yearValue)
-				params.delete("day")
-				params.delete("start_date")
-				params.delete("end_date")
-				return params
-			})
-		} else {
-			// Keep the Overview's selected budget across months.
-			setSearchParams(previous => ({
-				month: monthName,
-				year: yearValue,
-				scope: previous.get("scope") ?? undefined,
-			}))
-		}
+		// Keep the Overview's selected budget across months.
+		setSearchParams(previous => ({
+			month: next.toFormat("MMMM"),
+			year: String(next.year),
+			scope: previous.get("scope") ?? undefined,
+		}))
 	}
 
 	return (
 		<>
-			<PageContent className={isMonthly ? "gap-5 md:gap-7" : "gap-7 md:gap-9"}>
+			<PageContent className="gap-5">
 				{hydrated && (
 					<header className="grid gap-5">
 						{back ? (
@@ -99,98 +72,63 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 							</Button>
 						) : null}
 						<div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-							<div>
+							<div className="min-w-0">
 								<p className="text-xs font-medium text-muted-foreground">
-									{isMonthly ? "Monthly Records" : "Monthly overview"}
+									Monthly overview
 								</p>
 								<h2 className="mt-1 text-xl font-semibold tracking-tight md:text-2xl">
 									<ValueSwap value={`${month} ${year}`} />
 								</h2>
 								<p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>
+								<div ref={setStatus} className="mt-3 empty:hidden" />
 							</div>
-							<ButtonGroup className="w-full sm:w-fit">
-								<Button
-									variant="outline"
-									aria-label="Previous month"
-									onClick={() => changeMonth(date.minus({ month: 1 }))}
-								>
-									<IconifyIcon icon="lucide:arrow-left" />
-								</Button>
-								<Popover>
-									<PopoverTrigger
-										render={
-											<Button variant="outline" className="flex-1 sm:w-32" />
-										}
+							<div className="flex w-full flex-col-reverse gap-2 sm:w-fit sm:flex-row sm:items-center">
+								<div ref={setControls} className="contents" />
+								<ButtonGroup className="w-full sm:w-fit">
+									<Button
+										variant="outline"
+										aria-label="Previous month"
+										onClick={() => changeMonth(date.minus({ month: 1 }))}
 									>
-										<IconifyIcon icon="lucide:calendar" />{" "}
-										{date.toFormat("MMM yyyy")}
-									</PopoverTrigger>
-									<PopoverContent className="w-auto p-0">
-										<MonthPicker
-											selectedMonth={date.toJSDate()}
-											onMonthSelect={value =>
-												changeMonth(DateTime.fromJSDate(value))
-											}
-										/>
-									</PopoverContent>
-								</Popover>
-								<Button
-									variant="outline"
-									aria-label="Next month"
-									onClick={() => changeMonth(date.plus({ month: 1 }))}
-								>
-									<IconifyIcon icon="lucide:arrow-right" />
-								</Button>
-							</ButtonGroup>
-						</div>
-
-						<div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-							<nav
-								className="flex min-w-0 border-b sm:flex-1"
-								aria-label="Monthly finance views"
-							>
-								{(
-									[
-										[
-											"Overview",
-											false,
-											pathDashboard({ month, year: String(year) }),
-										],
-										[
-											"Monthly Records",
-											true,
-											pathMonthlyRecords({ month, year: String(year) }),
-										],
-									] as const
-								).map(([label, monthly, href]) => {
-									const active = monthly === isMonthly
-									return (
-										<Link
-											key={label}
-											className={cn(
-												"relative px-4 py-2 text-sm transition-colors duration-150 ease-out hover:text-foreground",
-												active ? "font-medium" : "text-muted-foreground",
-											)}
-											href={href}
-											onClick={handleClear}
-										>
-											{label}
-											{active ? (
-												<motion.span
-													layoutId="month-tab-indicator"
-													transition={SPRING.snappy}
-													className="absolute inset-x-0 bottom-0 h-0.5 bg-foreground"
+										<IconifyIcon icon="lucide:arrow-left" />
+									</Button>
+									<Popover>
+										<PopoverTrigger
+											render={
+												<Button
+													variant="outline"
+													className="flex-1 sm:w-32"
 												/>
-											) : null}
-										</Link>
-									)
-								})}
-							</nav>
+											}
+										>
+											<IconifyIcon icon="lucide:calendar" />{" "}
+											{date.toFormat("MMM yyyy")}
+										</PopoverTrigger>
+										<PopoverContent className="w-auto p-0">
+											<MonthPicker
+												selectedMonth={date.toJSDate()}
+												onMonthSelect={value =>
+													changeMonth(DateTime.fromJSDate(value))
+												}
+											/>
+										</PopoverContent>
+									</Popover>
+									<Button
+										variant="outline"
+										aria-label="Next month"
+										onClick={() => changeMonth(date.plus({ month: 1 }))}
+									>
+										<IconifyIcon icon="lucide:arrow-right" />
+									</Button>
+								</ButtonGroup>
+							</div>
 						</div>
 					</header>
 				)}
 
-				{children}
+				<MonthHeaderSlotProvider value={{ status, controls }}>
+					{children}
+				</MonthHeaderSlotProvider>
 			</PageContent>
 		</>
 	)

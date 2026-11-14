@@ -21,8 +21,6 @@ type RecordTableOptions<TRecord extends RecordRow> = {
 	onEdit?: (record: TRecord) => void | Promise<unknown>
 	/** Rows sit under day headers, so only the time is shown. */
 	grouped?: boolean
-	/** Adds a monthly budget column (desktop only). */
-	showMonthlyBudget?: boolean
 }
 
 /** Money in green, money out red: the app-wide currency colours. */
@@ -56,21 +54,41 @@ export function PendingBadge({ record }: { record: Record }) {
 	)
 }
 
-function RecordMonthlyBudget({ record }: { record: Record }) {
+/**
+ * A Record's secondary line in every Record list: its Monthly Budget (or treatment) as an
+ * inline badge, then the given details.
+ */
+export function RecordDetails({
+	record,
+	details,
+	className,
+}: {
+	record: Record
+	details: React.ReactNode
+	className?: string
+}) {
+	return (
+		<p className={cn("flex min-w-0 items-center gap-1 text-muted-foreground", className)}>
+			<RecordMonthlyBudget record={record} inline />
+			{details ? <span className="min-w-0 truncate">· {details}</span> : null}
+		</p>
+	)
+}
+
+/** `inline` drops the pill so the badge fits a line of muted row text. */
+function RecordMonthlyBudget({ record, inline = false }: { record: Record; inline?: boolean }) {
+	const className = inline ? "border-0 bg-transparent p-0" : undefined
 	if (record.monthly_budget)
 		return (
 			<MonthlyBudgetBadge
 				name={record.monthly_budget.name}
 				color={record.monthly_budget.color}
+				className={className}
 			/>
 		)
 	if (canUseMonthlyBudget(record.analytics_treatment, record.amount))
-		return <MonthlyBudgetBadge name="Unbudgeted" color={null} />
-	return (
-		<span className="text-xs text-muted-foreground">
-			{treatmentLabel(record.analytics_treatment)}
-		</span>
-	)
+		return <MonthlyBudgetBadge name="Unbudgeted" color={null} className={className} />
+	return <span className="shrink-0">{treatmentLabel(record.analytics_treatment)}</span>
 }
 
 export function RecordAmountCell({
@@ -165,7 +183,6 @@ export function useRecordColumns<TRecord extends RecordRow>({
 	extraActions,
 	onEdit,
 	grouped = false,
-	showMonthlyBudget = false,
 }: RecordTableOptions<TRecord>): ColumnDef<TRecord>[] {
 	return useMemo(
 		(): ColumnDef<TRecord>[] => [
@@ -181,10 +198,11 @@ export function useRecordColumns<TRecord extends RecordRow>({
 								</span>
 								<PendingBadge record={row.original} />
 							</p>
-							<p className="truncate text-muted-foreground">
-								{row.original.category.name}
-								{row.original.subtitle ? ` · ${row.original.subtitle}` : ""}
-							</p>
+							<RecordDetails
+								record={row.original}
+								details={row.original.subtitle}
+								className="text-xs"
+							/>
 						</div>
 					</div>
 				),
@@ -201,16 +219,6 @@ export function useRecordColumns<TRecord extends RecordRow>({
 					</p>
 				),
 			},
-			...(showMonthlyBudget
-				? [
-						{
-							id: "monthlyBudget",
-							header: "Monthly budget",
-							meta: { width: "hidden w-36 lg:table-cell" },
-							cell: ({ row }) => <RecordMonthlyBudget record={row.original} />,
-						} satisfies ColumnDef<TRecord>,
-					]
-				: []),
 			{
 				header: grouped ? "Time" : "Date",
 				meta: { width: grouped ? "w-24" : "w-36" },
@@ -245,7 +253,7 @@ export function useRecordColumns<TRecord extends RecordRow>({
 				cell: RecordActionsCell,
 			},
 		],
-		[amount, pageName, extraActions, onEdit, grouped, showMonthlyBudget],
+		[amount, pageName, extraActions, onEdit, grouped],
 	)
 }
 
@@ -263,7 +271,6 @@ export function useRecordMobileRow<TRecord extends RecordRow>({
 		() => (row: Row<TRecord>) => {
 			const record = row.original
 			const value = amount === "allocated" ? (record.pivot?.amount ?? 0) : record.amount
-			const time = formatRowTime(record.datetime, grouped)
 
 			// Three cells (main, amount, actions) for the list's shared subgrid.
 			return (
@@ -276,11 +283,13 @@ export function useRecordMobileRow<TRecord extends RecordRow>({
 								<span className="min-w-0 truncate font-medium">{record.title}</span>
 								<PendingBadge record={record} />
 							</p>
-							<p className="truncate text-xs text-muted-foreground">
-								{[record.category.name, record.subtitle, time]
+							<RecordDetails
+								record={record}
+								details={[record.subtitle, formatRowTime(record.datetime, grouped)]
 									.filter(Boolean)
 									.join(" · ")}
-							</p>
+								className="text-xs"
+							/>
 						</div>
 					</div>
 					<RecordAmountCell

@@ -23,7 +23,6 @@ const titles: Record<string, string> = {
 	"/sync": "Data",
 	"/privacy": "Privacy Policy",
 	"/terms": "Terms of Service",
-	"/records/monthly?month=October&year=2026": "Monthly Records",
 	"/accounts/t1-acc-dbs": "Account",
 	"/budgets/t1-b-manual": "Budget",
 	"/records/t1-r-partial": "Record",
@@ -32,7 +31,6 @@ const titles: Record<string, string> = {
 
 const routeReady: Record<string, string> = {
 	"/records": "Edit FairPrice Run",
-	"/records/monthly?month=October&year=2026": "Edit FairPrice Run",
 	"/accounts": "Rename Everyday Savings",
 	"/budgets": "Edit October Buffer",
 	"/categories": "Edit Groceries",
@@ -325,7 +323,6 @@ for (const [group, routes, tags] of [
 	[
 		"details",
 		[
-			"/records/monthly?month=October&year=2026",
 			"/accounts/t1-acc-dbs",
 			"/budgets/t1-b-manual",
 			"/records/t1-r-partial",
@@ -556,7 +553,7 @@ test.describe("pinned 15 October 2026 date", () => {
 			["/accounts", "Accounts", "No accounts yet. Import a bank export to create one."],
 			["/categories", "Categories", "No categories yet."],
 			["/budgets", "Budgets", "No budgets yet."],
-			[`/records/monthly?${month}`, "October 2026", "No Records for this month"],
+			[`/?${month}&records=1`, "Records", "No matching Records"],
 		] as const) {
 			await test.step(`${route} page: resolves to its useful empty state`, async () => {
 				await page.goto(route)
@@ -745,46 +742,118 @@ test.describe("pinned 15 October 2026 date", () => {
 			})
 		}
 	})
-	test("monthly shell: header and tabs keep DOM identity across tab switches", async ({
+	test("monthly shell: header keeps DOM identity while the Records sheet opens and closes", async ({
 		page,
-		isMobile,
 	}) => {
 		await seedWorkspace(page)
 		await page.goto(`/?${month}`)
 		const heading = await page
 			.getByRole("heading", { name: "October 2026", exact: true })
 			.elementHandle()
-		const tabs = await page
-			.getByRole("navigation", { name: "Monthly finance views" })
-			.elementHandle()
-		await page
-			.getByRole("navigation", { name: "Monthly finance views" })
-			.getByRole("link", { name: "Monthly Records", exact: true })
-			.click()
-		await expect(page.getByRole("heading", { name: "Recorded activity" })).toBeVisible()
-		await expect(
-			page.getByRole("link", { name: "Open FairPrice Run", exact: true }),
-		).toBeVisible()
-		// Compact record rows omit the desktop budget column; the filter exposes
-		// the same Monthly budgets at every viewport size.
-		await page
-			.getByRole("combobox")
-			.filter({ hasText: /^All budgets$/ })
-			.click()
-		await expect(page.getByRole("option", { name: "Daily", exact: true })).toBeVisible()
-		await page.keyboard.press("Escape")
-		if (!isMobile)
-			await expect(
-				page.getByText("Daily", { exact: true }).filter({ visible: true }).first(),
-			).toBeVisible()
+		await page.getByRole("link", { name: "View Records", exact: true }).click()
+		const sheet = page.getByRole("dialog", { name: "Saving / investment", exact: true })
+		await expect(sheet).toContainText("October 2026")
 		await expect.poll(() => heading?.evaluate(node => node.isConnected)).toBe(true)
-		await expect.poll(() => tabs?.evaluate(node => node.isConnected)).toBe(true)
-		await page
-			.getByRole("navigation", { name: "Monthly finance views" })
-			.getByRole("link", { name: "Overview", exact: true })
-			.click()
+		await page.keyboard.press("Escape")
+		await expect(sheet).toHaveCount(0)
 		await expect(page.getByText("Total income", { exact: false }).first()).toBeVisible()
 		await expect.poll(() => heading?.evaluate(node => node.isConnected)).toBe(true)
+	})
+	test("monthly shell: the scope picker sits beside the month navigation and still scopes the month", async ({
+		page,
+		isMobile,
+	}) => {
+		await seedWorkspace(page)
+		await page.goto(`/?${month}`)
+		const header = page.locator("main header")
+		const scope = header.getByRole("combobox", { name: "Spending scope", exact: true })
+		const next = header.getByRole("button", { name: "Next month", exact: true })
+		await expect(scope).toBeVisible()
+		const [picker, nav] = await Promise.all([scope.boundingBox(), next.boundingBox()])
+		if (!picker || !nav) throw new Error("header controls missing")
+		// Phones stack the picker just under the month navigation; wider screens put it beside it.
+		if (isMobile) expect(picker.y - (nav.y + nav.height)).toBeLessThanOrEqual(12)
+		else
+			expect(Math.abs(picker.y + picker.height / 2 - (nav.y + nav.height / 2))).toBeLessThan(
+				2,
+			)
+		await scope.click()
+		await page.getByRole("option", { name: "Daily", exact: true }).click()
+		await expect(page).toHaveURL(new RegExp(`scope=${IDS.monthlyBudgets.daily}`))
+		await expect(scope).toContainText("Daily")
+	})
+	test("monthly shell: Pending review links sit under the month subtitle and still open the sheet", async ({
+		page,
+	}) => {
+		await seedWorkspace(page)
+		await page.goto(`/?${month}`)
+		const header = page.locator("main header")
+		const review = header.getByLabel("Review this month")
+		const pending = review.getByRole("link", { name: /Pending Records?$/ })
+		await expect(pending).toBeVisible()
+		const [links, subtitle] = await Promise.all([
+			review.boundingBox(),
+			header.getByText(/Based on Record dates/).boundingBox(),
+		])
+		if (!links || !subtitle) throw new Error("header status missing")
+		expect(links.y).toBeGreaterThan(subtitle.y + subtitle.height - 1)
+		expect(links.y - (subtitle.y + subtitle.height)).toBeLessThanOrEqual(16)
+		await pending.click()
+		await expect(page.getByRole("dialog", { name: "Pending", exact: true })).toBeVisible()
+	})
+	test("Record lists: each Record shows its Monthly Budget under its title, not its category name", async ({
+		page,
+	}) => {
+		await seedWorkspace(page)
+		await page.goto(`/?${month}&records=1&start_date=2026-10-05&end_date=2026-10-05`)
+		const sheet = page.getByRole("dialog")
+		const open = sheet.getByRole("link", { name: "Open FairPrice Run", exact: true })
+		await expect(open).toBeVisible()
+		// The innermost element holding both the Record's link and its amount is its row.
+		const row = sheet
+			.locator("div")
+			.filter({ has: page.getByRole("link", { name: "Open FairPrice Run", exact: true }) })
+			.filter({ hasText: "-$84.20" })
+			.last()
+		const title = row.getByText("FairPrice Run", { exact: true })
+		const amount = row.getByText("-$84.20", { exact: true })
+		const badge = row.getByText("Daily", { exact: true })
+		await expect(badge).toBeVisible()
+		await expect(row).toContainText("Bedok")
+		await expect(row).not.toContainText("Groceries")
+		const [name, money, pill] = await Promise.all([
+			title.boundingBox(),
+			amount.boundingBox(),
+			badge.boundingBox(),
+		])
+		if (!name || !money || !pill) throw new Error("title, amount or Monthly Budget missing")
+		expect(pill.y).toBeGreaterThan(name.y + name.height - 1)
+		expect(pill.x + pill.width).toBeLessThan(money.x)
+
+		// The Records page uses the same line.
+		await page.goto("/records")
+		const listed = page.getByRole("link", { name: "Open FairPrice Run", exact: true }).first()
+		await expect(listed).toBeVisible()
+		const record = page
+			.locator("tr, div")
+			.filter({ has: page.getByRole("link", { name: "Open FairPrice Run", exact: true }) })
+			.filter({ hasText: "-$84.20" })
+			.last()
+		await expect(record.getByText("Daily", { exact: true })).toBeVisible()
+		await expect(record).not.toContainText("Groceries")
+	})
+	test("Records sheet: phones get a bottom sheet and wider screens a side sheet", async ({
+		page,
+		isMobile,
+	}) => {
+		await seedWorkspace(page)
+		await page.goto(`/?${month}&records=1`)
+		const sheet = page.locator('[data-slot="sheet-content"]')
+		await expect(sheet).toHaveAttribute("data-side", isMobile ? "bottom" : "right")
+		await expect(page.locator('[data-slot="sheet-overlay"]')).toHaveCSS(
+			"backdrop-filter",
+			/blur/,
+		)
 	})
 	test("static and not-found routes: static pages are readable and unmatched routes offer Records", async ({
 		page,
@@ -871,7 +940,6 @@ test("monthly headers: hydrate with a browser date different from the server", a
 	await setDateOnly(page, new Date("2001-01-15T12:00:00+08:00"))
 	for (const [route, heading, subtitle] of [
 		["/", "January 2001", "Through 15 Jan · SGD · Based on Record dates"],
-		["/records/monthly", "January 2001", "Actuals through 15 Jan"],
 		["/?month=December&year=2000", "December 2000", "Full month · SGD · Based on Record dates"],
 	] as const) {
 		await test.step(`${route} header: hydrates with the browser date and reports no hydration errors`, async () => {

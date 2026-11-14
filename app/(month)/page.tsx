@@ -15,8 +15,10 @@ import SpendingCalendar from "@/components/charts/spending-calendar"
 import TotalSpendingChart from "@/components/charts/total-spending-chart"
 import MonthlyBudgetDialog from "@/components/dialogs/monthly-budget"
 import { UiIcon as IconifyIcon } from "@/components/icon"
+import { MonthHeaderPortal } from "@/components/layout/month-header-slot"
 import { Metric as DashboardMetric, type Delta, MetricGrid } from "@/components/metric"
 import MonthlyBudgetBadge from "@/components/monthly-budget-badge"
+import RecordsSheet from "@/components/sheets/records-sheet"
 import { FILTER_CONTROL_CLASS } from "@/components/table/filter-bar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -31,18 +33,13 @@ import {
 import { useHistory } from "@/history"
 import { useMonthParams } from "@/hooks/use-month-params"
 import { STALE_MONTH_CLASS, useMonthTransition } from "@/hooks/use-month-transition"
+import { useRecordsSheet } from "@/hooks/use-records-sheet"
 import { useStagedMount } from "@/hooks/use-staged-mount"
 import { themeColor } from "@/lib/palette"
 import { cn, formatCurrency, pluralize } from "@/lib/utils"
 import { getDashboardView, type TrendMonth } from "@/logic/dashboard"
 import { hasWorkspaceActivity, loadDemoWorkspace } from "@/logic/workspace"
-import {
-	pathAllocator,
-	pathDashboard,
-	pathImporter,
-	pathMonthlyRecords,
-	pathStatements,
-} from "@/routes"
+import { pathAllocator, pathDashboard, pathImporter, pathStatements } from "@/routes"
 import type { AnalyticsSummary } from "@/types"
 
 type DashboardView = Awaited<ReturnType<typeof getDashboardView>>
@@ -54,8 +51,8 @@ type Projection = DashboardView["pace"]["projection"]
 type PaceData = DashboardView["pace"]
 
 export default function DashboardPage() {
-	const { handlePush } = useHistory()
 	const { month, year } = useMonthParams()
+	const sheet = useRecordsSheet()
 	const contentRef = useRef<HTMLDivElement>(null)
 	const router = useRouter()
 	const searchParams = useSearchParams()
@@ -112,25 +109,15 @@ export default function DashboardPage() {
 		dashed: budget.id === "unbudgeted",
 	}))
 	const categoryRecordHref = (id: string, at?: DateTime) =>
-		pathMonthlyRecords({
-			month: at?.toFormat("MMMM") ?? dataMonth,
-			year: String(at?.year ?? dataYear),
+		sheet.href({
 			category_ids: id,
 			effective_spending: "true",
+			start_date: at?.startOf("month").toISODate() ?? undefined,
+			end_date: at?.endOf("month").toISODate() ?? undefined,
 			...scopeFilters,
 		})
-	const openDay = (date: string) => {
-		handlePush("overview")()
-		router.push(
-			pathMonthlyRecords({
-				month: dataMonth,
-				year: String(dataYear),
-				start_date: date,
-				end_date: date,
-				...scopeFilters,
-			}),
-		)
-	}
+	const openDay = (date: string) =>
+		sheet.open({ start_date: date, end_date: date, ...scopeFilters })
 	return (
 		<div
 			ref={contentRef}
@@ -149,10 +136,7 @@ export default function DashboardPage() {
 						</p>
 					</div>
 					<Button variant="outline" size="sm" asChild>
-						<Link
-							onClick={handlePush("overview")}
-							href={pathMonthlyRecords({ month: dataMonth, year: String(dataYear) })}
-						>
+						<Link href={sheet.href()} scroll={false}>
 							{future_records_count
 								? `Review ${pluralize(future_records_count, "future-dated Record")}`
 								: "Plan Records"}
@@ -168,14 +152,14 @@ export default function DashboardPage() {
 					through={period.through}
 				/>
 			)}
-			<div className="flex flex-wrap items-center justify-between gap-2">
-				<div className="min-w-0 flex-1 basis-full sm:basis-auto">
-					{!period.is_future ? (
-						<ReviewLinks data={data} month={dataMonth} year={dataYear} />
-					) : null}
-				</div>
+			<MonthHeaderPortal slot="controls">
 				<ScopeSelect value={scope} budgets={budgets} onChange={setScope} />
-			</div>
+			</MonthHeaderPortal>
+			{!period.is_future ? (
+				<MonthHeaderPortal slot="status">
+					<ReviewLinks data={data} month={dataMonth} year={dataYear} />
+				</MonthHeaderPortal>
+			) : null}
 			<div
 				className={cn(
 					"grid gap-5",
@@ -300,8 +284,8 @@ export default function DashboardPage() {
 										Spending calendar
 									</ScopedCardTitle>
 									<CardDescription>
-										Stronger colour means more spending. Select a day to see its
-										total and open its Records.
+										Stronger colour means more spending. Select a day to open
+										its Records.
 									</CardDescription>
 								</CardHeader>
 								<CardContent>
@@ -364,8 +348,8 @@ export default function DashboardPage() {
 								</ScopedCardTitle>
 								<CardDescription>
 									Net daily spending across all monthly budgets, including
-									refunds. Hold or hover over a day to read it, and click it to
-									open its Records.
+									refunds. Hold or hover over a day to read it, and tap or click
+									it to open its Records.
 								</CardDescription>
 							</CardHeader>
 							<CardContent>
@@ -379,11 +363,10 @@ export default function DashboardPage() {
 						</Card>
 					) : null}
 
-					{stage > 4 ? (
-						<InvestmentRow summary={summary} month={dataMonth} year={dataYear} />
-					) : null}
+					{stage > 4 ? <InvestmentRow summary={summary} /> : null}
 				</>
 			) : null}
+			<RecordsSheet />
 		</div>
 	)
 }
@@ -563,16 +546,8 @@ function SummaryBand({
 	)
 }
 
-function InvestmentRow({
-	summary,
-	month,
-	year,
-}: {
-	summary: AnalyticsSummary
-	month: string
-	year: number
-}) {
-	const { handlePush } = useHistory()
+function InvestmentRow({ summary }: { summary: AnalyticsSummary }) {
+	const sheet = useRecordsSheet()
 	const net = Math.round((summary.withdrawals - summary.contributions) * 100) / 100
 	const rate = summary.income > 0 ? (net / summary.income) * 100 : null
 	return (
@@ -587,14 +562,7 @@ function InvestmentRow({
 					</p>
 				</div>
 				<Button variant="outline" size="sm" asChild>
-					<Link
-						onClick={handlePush("overview")}
-						href={pathMonthlyRecords({
-							month,
-							year: String(year),
-							treatment: "saving_investment",
-						})}
-					>
+					<Link href={sheet.href({ treatment: "saving_investment" })} scroll={false}>
 						View Records
 					</Link>
 				</Button>
@@ -761,6 +729,7 @@ function PaceSummary({
 
 function ReviewLinks({ data, month, year }: { data: DashboardData; month: string; year: number }) {
 	const { handlePush } = useHistory()
+	const sheet = useRecordsSheet()
 	const date = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
 	const start = date.startOf("month").toISODate() ?? ""
 	const end = date.endOf("month").toISODate() ?? ""
@@ -774,14 +743,7 @@ function ReviewLinks({ data, month, year }: { data: DashboardData; month: string
 					className="active:not-aria-[haspopup]:scale-100"
 					asChild
 				>
-					<Link
-						onClick={handlePush("overview")}
-						href={pathMonthlyRecords({
-							month,
-							year: String(year),
-							is_allocated: "false",
-						})}
-					>
+					<Link href={sheet.href({ is_allocated: "false" })} scroll={false}>
 						<IconifyIcon icon="lucide:circle-dashed" />
 						{data.review.pending_records} Pending Record
 						{data.review.pending_records === 1 ? "" : "s"}
@@ -839,13 +801,8 @@ function ReviewLinks({ data, month, year }: { data: DashboardData; month: string
 					asChild
 				>
 					<Link
-						onClick={handlePush("overview")}
-						href={pathMonthlyRecords({
-							month,
-							year: String(year),
-							show_unbudgeted: "true",
-							effective_spending: "true",
-						})}
+						href={sheet.href({ show_unbudgeted: "true", effective_spending: "true" })}
+						scroll={false}
 					>
 						<IconifyIcon icon="lucide:wallet" />
 						{data.summary.unbudgeted_count} unbudgeted spending Record

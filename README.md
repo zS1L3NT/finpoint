@@ -39,6 +39,7 @@ I've also hosted Finpoint on my personal subdomain at https://finpoint.zectan.co
   - Spending by day and weekday, plus a spending calendar that previews each day before opening its Records
   - Category and Monthly Budget breakdowns, with category trends that open each month's Records
   - Biggest category changes against your usual spending
+  - Clicking a chart, category or review link opens its Records in a side sheet, without leaving the Dashboard
   - Page-wide Monthly Budget scope that stays across chart links and month changes
   - Reusable Monthly Budgets with monthly amount overrides
   - Review links for Pending Records, Pending Statements, unallocated Statements and unbudgeted spending
@@ -50,7 +51,6 @@ I've also hosted Finpoint on my personal subdomain at https://finpoint.zectan.co
   - Suggested details learned from your past Records
   - Autofilled details from Statement Rules
   - Search, filter and paginate Records
-  - Monthly Records view with month navigation
 - Statements
   - Import Statements from
     - DBS

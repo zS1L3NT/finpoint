@@ -858,11 +858,12 @@ test("archived Monthly Budgets: retain archival state and historical assignments
 		await page.keyboard.press("Escape")
 		await expect(dialog).toBeVisible()
 		await page.keyboard.press("Escape")
-		await page.goto("/records/monthly?month=October&year=2026&monthly_budget_id=t1-mb-travel")
+		await page.goto("/?month=October&year=2026&records=1&monthly_budget_id=t1-mb-travel")
+		const sheet = page.getByRole("dialog", { name: /Travel/ })
 		await expect(
-			page.getByRole("link", { name: /^Open Kōpi/ }).filter({ visible: true }),
+			sheet.getByRole("link", { name: /^Open Kōpi/ }).filter({ visible: true }),
 		).toBeVisible()
-		await expect(page.locator("main")).toContainText("-$33.33")
+		await expect(sheet).toContainText("-$33.33")
 	})
 })
 
@@ -996,25 +997,28 @@ test.describe("empty workspace", () => {
 	})
 })
 
-test("Monthly Records editor: saved title appears immediately and survives reload", async ({
+test("Records sheet: a Record saved from its page shows in the sheet and survives reload", async ({
 	page,
 	workspace,
 }) => {
 	void workspace
-	await page.goto("/records/monthly?month=October&year=2026")
-	await page.getByRole("button", { name: "Edit FairPrice Run", exact: true }).click()
+	await page.goto("/?month=October&year=2026&records=1")
+	const sheet = page.getByRole("dialog", { name: "Records", exact: true })
+	await sheet.getByRole("link", { name: "Open FairPrice Run", exact: true }).click()
+	await expect(page).toHaveURL(/\/records\/t1-r-groceries$/)
+	await page.getByRole("button", { name: "Edit Record", exact: true }).click()
 	const dialog = page.getByRole("dialog", { name: "Edit Record", exact: true })
 	await dialog.getByLabel("Title", { exact: true }).fill("Updated groceries")
 	await dialog.getByLabel("Title", { exact: true }).press("Escape")
 	await dialog.getByRole("button", { name: "Save changes", exact: true }).click()
 	await expect(dialog).not.toBeVisible()
-	await expect(
-		page.getByRole("button", { name: "Edit Updated groceries", exact: true }),
-	).toBeVisible()
+	await page.getByRole("button", { name: "Back to Dashboard", exact: true }).click()
+	const updated = sheet
+		.getByRole("link", { name: "Open Updated groceries", exact: true })
+		.filter({ visible: true })
+	await expect(updated).toBeVisible()
 	await page.reload()
-	await expect(
-		page.getByRole("button", { name: "Edit Updated groceries", exact: true }),
-	).toBeVisible()
+	await expect(updated).toBeVisible()
 })
 
 test("Record editor: inherited budget hides an ineligible Category default", async ({ page }) => {

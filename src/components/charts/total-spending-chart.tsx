@@ -1,10 +1,8 @@
 import { DateTime } from "luxon"
-import { useRouter } from "next/navigation"
 import TrendChart from "@/components/charts/trend-chart"
-import { useHistory } from "@/history"
+import { useRecordsSheet } from "@/hooks/use-records-sheet"
 import { dayTicks } from "@/lib/chart-days"
 import type { CashflowHistoryMonth } from "@/logic/dashboard"
-import { pathMonthlyRecords } from "@/routes"
 
 type SurplusPoint = { day: number; surplus: number | null }
 
@@ -19,8 +17,7 @@ export default function TotalSpendingChart({
 	month: string
 	year: number
 }) {
-	const router = useRouter()
-	const { handlePush } = useHistory()
+	const sheet = useRecordsSheet()
 	// Last month only, as a faint dashed comparison line.
 	const previous = history.find(item => item.offset === 1)
 	// Last month's extra days are dropped: the chart has no dates past this month's end.
@@ -30,15 +27,7 @@ export default function TotalSpendingChart({
 		const selected = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
 			.set({ day: index + 1 })
 			.toFormat("yyyy-MM-dd")
-		handlePush("overview")()
-		void router.push(
-			pathMonthlyRecords({
-				month,
-				year: String(year),
-				start_date: selected,
-				end_date: selected,
-			}),
-		)
+		sheet.open({ start_date: selected, end_date: selected })
 	}
 
 	return (
@@ -80,7 +69,7 @@ export default function TotalSpendingChart({
 			<p className="text-xs text-muted-foreground">
 				Green is a surplus and red a shortfall.
 				{previous ? " The faint dashed line shows last month by day of month." : ""} Hold or
-				hover over a day to read it, and click it to open its Records.
+				hover over a day to read it, and tap or click it to open its Records.
 			</p>
 		</div>
 	)

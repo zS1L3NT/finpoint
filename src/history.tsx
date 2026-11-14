@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { createContext, startTransition, useContext, useEffect, useRef, useState } from "react"
+import { pathDashboard } from "@/routes"
 
 export type HistoryItem = { name: string; url: string }
 
@@ -117,9 +118,7 @@ export const HistoryProvider = ({ children }: { children: React.ReactNode }) => 
 			const link = event.target instanceof Element ? event.target.closest("a[href]") : null
 			if (!(link instanceof HTMLAnchorElement)) return
 			if (
-				link.closest(
-					'[data-sidebar], [role="tablist"], nav[aria-label="Monthly finance views"], nav[aria-label="Workflow views"]',
-				)
+				link.closest('[data-sidebar], [role="tablist"], nav[aria-label="Workflow views"]')
 			) {
 				pendingLink.current = null
 				if (link.closest('nav[aria-label="Workflow views"]')) {
@@ -131,9 +130,12 @@ export const HistoryProvider = ({ children }: { children: React.ReactNode }) => 
 			if (link.hasAttribute("download") || (link.target && link.target !== "_self")) return
 			const destination = new URL(link.href)
 			const url = window.location.pathname + window.location.search
+			// Opening the Dashboard's Records sheet stays on the Dashboard: no page to go back to.
 			if (
 				destination.origin !== window.location.origin ||
-				destination.pathname + destination.search === url
+				destination.pathname + destination.search === url ||
+				(destination.pathname === pathDashboard() &&
+					destination.searchParams.has("records"))
 			)
 				return
 			const name = document.querySelector("main h2")?.textContent?.trim() || document.title

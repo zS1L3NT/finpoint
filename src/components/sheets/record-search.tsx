@@ -1,6 +1,7 @@
 import { useLiveQuery } from "dexie-react-hooks"
 import { useDeferredValue, useEffect, useState } from "react"
 import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
+import { RecordDetails } from "@/components/table/record-columns"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -253,12 +254,16 @@ function RecordOption({
 						</Badge>
 					) : null}
 				</span>
-				<span className="block truncate text-xs text-muted-foreground">
-					{date.isValid ? date.toFormat("d MMM yyyy") : record.datetime}
-					{" · "}
-					{record.category.name}
-					{record.subtitle ? ` · ${record.subtitle}` : ""}
-				</span>
+				<RecordDetails
+					record={record}
+					details={[
+						date.isValid ? date.toFormat("d MMM yyyy") : record.datetime,
+						record.subtitle,
+					]
+						.filter(Boolean)
+						.join(" · ")}
+					className="text-xs"
+				/>
 				<span className="mt-1.5 block h-1 w-full overflow-hidden rounded-full bg-muted group-hover:bg-background">
 					<span
 						className="block h-full rounded-full bg-foreground/50"

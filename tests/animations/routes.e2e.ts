@@ -83,11 +83,8 @@ test("card grids: Accounts, Budgets and Categories enter as a cascade in the vie
 						.getByRole("link", { name: consumer.target, exact: true })
 						.filter({ visible: true })
 						.click()
-				else if (consumer.action === "month-tab")
-					await page
-						.getByRole("navigation", { name: "Monthly finance views" })
-						.getByRole("link", { name: consumer.target, exact: true })
-						.click()
+				else if (consumer.action === "sheet")
+					await page.getByRole("link", { name: new RegExp(consumer.target) }).click()
 				else if (consumer.action === "workflow")
 					await page
 						.getByRole("navigation", { name: "Workflow views" })

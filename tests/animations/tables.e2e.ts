@@ -57,21 +57,21 @@ const denseRowConsumers: MotionConsumer[] = [
 		dense: true,
 	},
 	{
-		name: "Monthly Records",
+		name: "Records sheet",
 		origin: "/?month=October&year=2026",
-		action: "month-tab",
-		target: "Monthly Records",
+		action: "sheet",
+		target: "^View Records$",
 		selector:
-			'main section[aria-labelledby="actual-records"] tbody tr:has(a[href^="/records/"]), main section[aria-labelledby="actual-records"] div.grid-cols-subgrid:has(a[href^="/records/"])',
+			'[data-slot="sheet-content"] tbody tr:not(section *):has(a[href^="/records/"]), [data-slot="sheet-content"] div.grid-cols-subgrid:not(section *):has(a[href^="/records/"])',
 		dense: true,
 	},
 	{
-		name: "future Monthly Records",
+		name: "future Records sheet",
 		origin: "/?month=October&year=2026",
-		action: "month-tab",
-		target: "Monthly Records",
+		action: "sheet",
+		target: "^Review \\d+ future-dated Records$",
 		selector:
-			'main section:not([aria-labelledby]) tbody tr:has(a[href^="/records/"]), main section:not([aria-labelledby]) div.grid-cols-subgrid:has(a[href^="/records/"])',
+			'[data-slot="sheet-content"] section tbody tr:has(a[href^="/records/"]), [data-slot="sheet-content"] section div.grid-cols-subgrid:has(a[href^="/records/"])',
 		dense: true,
 		future: true,
 	},
@@ -187,11 +187,8 @@ async function expectConsumerEntrance(page: Page, consumer: MotionConsumer, isMo
 				.getByRole("link", { name: consumer.target, exact: true })
 				.filter({ visible: true })
 				.click()
-		else if (consumer.action === "month-tab")
-			await page
-				.getByRole("navigation", { name: "Monthly finance views" })
-				.getByRole("link", { name: consumer.target, exact: true })
-				.click()
+		else if (consumer.action === "sheet")
+			await page.getByRole("link", { name: new RegExp(consumer.target) }).click()
 		else if (consumer.action === "workflow")
 			await page
 				.getByRole("navigation", { name: "Workflow views" })
@@ -667,7 +664,7 @@ test("table refilter from no results: visible results enter with an entrance", {
 	}
 })
 
-test("table rows: Records, Statements, Monthly Records, future Monthly Records, pending queue and Allocate enter as a cascade in the viewport", {
+test("table rows: Records, Statements, Records sheet, future Records sheet, pending queue and Allocate enter as a cascade in the viewport", {
 	tag: ["@tall", "@light", "@reduced-motion"],
 }, async ({ page, isMobile }) => {
 	test.setTimeout(180000)

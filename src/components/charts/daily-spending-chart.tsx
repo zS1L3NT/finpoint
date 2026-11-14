@@ -1,11 +1,9 @@
 import { DateTime } from "luxon"
-import { useRouter } from "next/navigation"
 import BarChart from "@/components/charts/bar-chart"
 import MonthlyBudgetBadge from "@/components/monthly-budget-badge"
-import { useHistory } from "@/history"
+import { useRecordsSheet } from "@/hooks/use-records-sheet"
 import { dayTicks } from "@/lib/chart-days"
 import { themeColor } from "@/lib/palette"
-import { pathMonthlyRecords } from "@/routes"
 
 export type MonthlyBudgetLine = {
 	id: string
@@ -26,21 +24,12 @@ export default function DailySpendingChart({
 	month: string
 	year: number
 }) {
-	const router = useRouter()
-	const { handlePush } = useHistory()
+	const sheet = useRecordsSheet()
 	const openDay = (index: number) => {
 		const selected = DateTime.fromFormat(`${month} ${year}`, "MMMM yyyy")
 			.set({ day: Number(rows[index]?.day ?? index + 1) })
 			.toFormat("yyyy-MM-dd")
-		handlePush("overview")()
-		void router.push(
-			pathMonthlyRecords({
-				month,
-				year: String(year),
-				start_date: selected,
-				end_date: selected,
-			}),
-		)
+		sheet.open({ start_date: selected, end_date: selected })
 	}
 
 	return (
