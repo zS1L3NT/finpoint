@@ -8,8 +8,12 @@ import { duplicateStatementIds } from "@/logic/duplicates"
 import { isPendingRecord, pendingStatementIds, tallyAllocations } from "@/logic/pending"
 import { resolveRecordChoices } from "@/logic/record-choices"
 import { inferRecordDatetime } from "@/logic/record-defaults"
-import { maskDescription } from "@/logic/replacements"
 import { inputToStored, newId, round2, TREATMENT_VALUES } from "@/logic/shared"
+import {
+	compareStatements,
+	enrichStatement,
+	tallyStatementAllocations,
+} from "@/logic/statement-enrichment"
 import { ValidationError, Validator } from "@/logic/validate"
 import type { Allocation, AnalyticsTreatment, Record as AppRecord, Statement } from "@/types"
 
@@ -201,45 +205,19 @@ export async function getRecord(id: string): Promise<RecordDetail> {
 		db.accounts.toArray(),
 	])
 	const amountByStatement = new Map(allocations.map(a => [a.statement_id, a.amount]))
-	const totalsByStatement = new Map<string, { sum: number; count: number }>()
-	for (const allocation of statementAllocations) {
-		const total = totalsByStatement.get(allocation.statement_id) ?? { sum: 0, count: 0 }
-		total.sum = round2(total.sum + allocation.amount)
-		total.count++
-		totalsByStatement.set(allocation.statement_id, total)
-	}
+	const totals = tallyStatementAllocations(statementAllocations)
 	const accounts = new Map(accountRows.map(a => [a.id, a]))
 	const duplicates = await duplicateStatementIds()
 
 	return {
 		...enriched,
 		statements: statements
-			.map(statement => {
-				const total = totalsByStatement.get(statement.id) ?? { sum: 0, count: 0 }
-				return {
-					...statement,
-					description: maskDescription(statement.description),
-					allocable_amount: round2(statement.amount - total.sum),
-					allocation_count: total.count,
-					is_pending: statement.is_pending === 1,
-					is_unallocated: total.count === 0,
-					is_duplicate: duplicates.has(statement.id),
-					pivot: { amount: amountByStatement.get(statement.id) ?? 0 },
-					account: accounts.get(statement.account_id) ?? {
-						id: statement.account_id,
-						name: statement.account_id,
-						balance: 0,
-						bank: "",
-					},
-				}
-			})
-			.sort(
-				(a, b) =>
-					b.datetime.localeCompare(a.datetime) ||
-					b.index - a.index ||
-					a.amount - b.amount ||
-					a.description.localeCompare(b.description),
-			),
+			.map(statement => ({
+				...statement,
+				...enrichStatement(statement, totals, duplicates, accounts),
+				pivot: { amount: amountByStatement.get(statement.id) ?? 0 },
+			}))
+			.sort(compareStatements),
 	}
 }
 

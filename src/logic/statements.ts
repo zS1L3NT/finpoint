@@ -1,17 +1,21 @@
 // Mirrors `Api\StatementController`, `Api\StatementReplacementController`,
 // and `Statement::appQuery` (filters, ordering, derived amounts).
 
-import { asPending, db } from "@/data/db"
+import { asPending, db, type StatementRow } from "@/data/db"
 import { duplicateStatementIds, removeStatementDismissals } from "@/logic/duplicates"
 import { enrichRecords } from "@/logic/records"
 import {
 	dayDifference,
 	ensureCanReplace,
-	maskDescription,
 	replacementComparison,
 	replacementReason,
 } from "@/logic/replacements"
 import { inputToStored, newId, round2, toCents } from "@/logic/shared"
+import {
+	compareStatements,
+	enrichStatement,
+	tallyStatementAllocations,
+} from "@/logic/statement-enrichment"
 import { ValidationError, Validator } from "@/logic/validate"
 import type { Allocation, Record as AppRecord, Statement } from "@/types"
 
@@ -47,49 +51,11 @@ export function paginate<T>(items: T[], page: number, perPage: number) {
 	}
 }
 
-async function enrich(
-	statements: {
-		id: string
-		account_id: string
-		datetime: string
-		description: string
-		amount: number
-		index: number
-		is_pending: number
-	}[],
-) {
+async function enrich(statements: StatementRow[]) {
 	const accounts = new Map((await db.accounts.toArray()).map(a => [a.id, a]))
-	const allocations = await db.allocations.toArray()
+	const totals = tallyStatementAllocations(await db.allocations.toArray())
 	const duplicates = await duplicateStatementIds()
-	const byStatement = new Map<string, { sum: number; count: number }>()
-	for (const allocation of allocations) {
-		const entry = byStatement.get(allocation.statement_id) ?? { sum: 0, count: 0 }
-		entry.sum = round2(entry.sum + allocation.amount)
-		entry.count++
-		byStatement.set(allocation.statement_id, entry)
-	}
-	return statements.map(statement => {
-		const entry = byStatement.get(statement.id) ?? { sum: 0, count: 0 }
-		const allocable_amount = round2(statement.amount - entry.sum)
-		return {
-			id: statement.id,
-			datetime: statement.datetime,
-			index: statement.index,
-			description: maskDescription(statement.description),
-			amount: statement.amount,
-			allocable_amount,
-			allocation_count: entry.count,
-			is_pending: statement.is_pending === 1,
-			is_unallocated: entry.count === 0,
-			is_duplicate: duplicates.has(statement.id),
-			account: accounts.get(statement.account_id) ?? {
-				id: statement.account_id,
-				name: statement.account_id,
-				balance: 0,
-				bank: "",
-			},
-		}
-	})
+	return statements.map(statement => enrichStatement(statement, totals, duplicates, accounts))
 }
 
 export async function listStatements(filters: StatementFilters = {}) {
@@ -126,15 +92,7 @@ export async function listStatements(filters: StatementFilters = {}) {
 	if (filters.is_unallocated === "false")
 		enriched = enriched.filter(s => s.allocation_count !== 0)
 
-	enriched.sort(
-		(a, b) =>
-			b.datetime.localeCompare(a.datetime) ||
-			b.index - a.index ||
-			a.amount - b.amount ||
-			a.description.localeCompare(b.description),
-	)
-
-	return enriched
+	return enriched.sort(compareStatements)
 }
 
 export type StatementInput = {
