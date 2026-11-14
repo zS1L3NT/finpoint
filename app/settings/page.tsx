@@ -82,7 +82,11 @@ export default function SettingsPage() {
 				default_filter_start_date: startDate || null,
 				default_filter_end_date_today: endDateToday,
 			})
-			setEdits({})
+			// Only what was saved stops being an edit; a field changed during the save stays one.
+			setEdits(prev => ({
+				startDate: prev.startDate === startDate ? undefined : prev.startDate,
+				endDateToday: prev.endDateToday === endDateToday ? undefined : prev.endDateToday,
+			}))
 			toast.success("Default filters saved.")
 		} catch (cause) {
 			toast.error(cause instanceof Error ? cause.message : "Could not save settings.")

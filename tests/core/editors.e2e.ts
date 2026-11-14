@@ -1294,6 +1294,55 @@ test.describe("dialog lifecycle", () => {
 		expect(rows.filter(row => row.description === "Reopen probe")).toHaveLength(1)
 	})
 
+	test("Category editor: a rejected save releases the lock so the corrected name saves", async ({
+		page,
+		workspace,
+	}) => {
+		void workspace
+		const dialog = await openEditor(page, "/categories", "Edit Groceries", "Edit Category")
+		const name = dialog.getByLabel("Name", { exact: true })
+		const save = dialog.getByRole("button", { name: "Save changes", exact: true })
+		// A name with no letters or numbers passes the form and is rejected by the save.
+		await name.fill("!!!")
+		await save.click()
+		await expect(dialog.getByText("The name must contain letters or numbers.")).toBeVisible()
+		await expect(save).toBeEnabled()
+
+		await name.fill("Groceries retried")
+		await save.click()
+		await expect(dialog).not.toBeVisible()
+		await expect
+			.poll(async () =>
+				(await readRows(page, "categories")).some(row => row.name === "Groceries retried"),
+			)
+			.toBe(true)
+	})
+
+	test("Settings: a field changed while a save is running stays an unsaved edit", async ({
+		page,
+		workspace,
+	}) => {
+		void workspace
+		await page.route(/google|gstatic/, route => route.abort())
+		await page.goto("/settings")
+		const start = page.locator("#default_filter_start_date")
+		await expect(start).toContainText("1 Oct 2026")
+		await page.locator("#default_filter_end_date").click()
+		await pickOption(page.getByRole("option", { name: "Today" }))
+		await holdWrites(page, ["settings"])
+		await page.getByRole("button", { name: "Save default filters" }).click()
+		await expect(page.getByRole("button", { name: "Saving…" })).toBeVisible()
+		await page.getByRole("button", { name: "Clear date" }).click()
+		await expect(start).toContainText("No default start date")
+
+		await releaseWrites(page)
+		await expect(page.getByText("Default filters saved.")).toBeVisible()
+		await page.waitForTimeout(300)
+		await expect(start).toContainText("No default start date")
+		await expect(page.locator("#default_filter_end_date")).toContainText("Today")
+		await expect(page.getByRole("button", { name: "Save default filters" })).toBeEnabled()
+	})
+
 	test("Monthly Budget creator: reopening while a save is still running cannot save twice", async ({
 		page,
 		workspace,
