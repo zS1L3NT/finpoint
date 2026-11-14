@@ -66,12 +66,14 @@ export default function SettingsPage() {
 	const [accuracy, setAccuracy] = useState<SuggestionAccuracy | null>(null)
 	const [measuring, setMeasuring] = useState(false)
 
-	const startDate = edits.startDate ?? settings?.default_filter_start_date ?? ""
-	const endDateToday = edits.endDateToday ?? settings?.default_filter_end_date_today ?? false
+	// An edit put back to the saved value is no longer an edit, so the field follows live again.
+	const savedStartDate = settings?.default_filter_start_date ?? ""
+	const savedEndDateToday = settings?.default_filter_end_date_today ?? false
+	const startDate = edits.startDate ?? savedStartDate
+	const endDateToday = edits.endDateToday ?? savedEndDateToday
 	const changed =
 		settings !== undefined &&
-		(startDate !== (settings.default_filter_start_date ?? "") ||
-			endDateToday !== settings.default_filter_end_date_today)
+		(startDate !== savedStartDate || endDateToday !== savedEndDateToday)
 	const handleSaveFilters = async () => {
 		if (!settings) return
 		setSaving(true)
@@ -128,7 +130,10 @@ export default function SettingsPage() {
 								value={startDate}
 								placeholder="No default start date"
 								onChange={value =>
-									setEdits(prev => ({ ...prev, startDate: value }))
+									setEdits(prev => ({
+										...prev,
+										startDate: value === savedStartDate ? undefined : value,
+									}))
 								}
 							/>
 							<FormField
@@ -141,7 +146,10 @@ export default function SettingsPage() {
 									onValueChange={value =>
 										setEdits(prev => ({
 											...prev,
-											endDateToday: value === "today",
+											endDateToday:
+												(value === "today") === savedEndDateToday
+													? undefined
+													: value === "today",
 										}))
 									}
 								>
