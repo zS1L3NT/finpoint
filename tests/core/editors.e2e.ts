@@ -1173,6 +1173,31 @@ async function holdWrites(page: Page, stores: string[]) {
 	}, stores)
 }
 
+// Counts the readwrite transactions the app opens on `store` once `startCounting` runs. Dexie
+// binds `IDBDatabase.prototype.transaction` when it opens the database, so the spy has to be
+// in place before the page loads.
+async function spyOnWrites(page: Page, store: string) {
+	await page.addInitScript(store => {
+		const w = window as unknown as { __attempts: number; __counting: boolean }
+		w.__attempts = 0
+		const open = IDBDatabase.prototype.transaction
+		IDBDatabase.prototype.transaction = function (names, mode, ...rest) {
+			if (w.__counting && mode === "readwrite" && [names].flat().includes(store)) {
+				w.__attempts++
+			}
+			return open.call(this, names, mode, ...rest)
+		}
+	}, store)
+}
+
+const startCounting = (page: Page) =>
+	page.evaluate(() => {
+		;(window as unknown as { __counting: boolean }).__counting = true
+	})
+
+const writeAttempts = (page: Page) =>
+	page.evaluate(() => (window as unknown as { __attempts: number }).__attempts)
+
 async function releaseWrites(page: Page) {
 	await page.evaluate(() => (window as unknown as { __release: () => void }).__release())
 }
@@ -1251,6 +1276,46 @@ test.describe("dialog lifecycle", () => {
 		await page.waitForTimeout(500)
 		const rows = await readRows(page, "statements")
 		expect(rows.filter(row => row.description === "Reopen probe")).toHaveLength(1)
+	})
+
+	test("Monthly Budget creator: reopening while a save is still running cannot save twice", async ({
+		page,
+		workspace,
+	}) => {
+		void workspace
+		await spyOnWrites(page, "monthly_budgets")
+		const dialog = await openEditor(
+			page,
+			"/?month=October&year=2026",
+			"New",
+			"Create monthly budget",
+		)
+		await dialog.getByLabel("Name", { exact: true }).fill("Reopen probe")
+		await holdWrites(page, ["monthly_budgets"])
+		await startCounting(page)
+		await dialog.getByRole("button", { name: "Create monthly budget", exact: true }).click()
+		await expect.poll(() => writeAttempts(page)).toBe(1)
+
+		// The save is stuck behind the held write: dismiss the dialog and open it again.
+		await page.keyboard.press("Escape")
+		await expect(dialog).not.toBeVisible()
+		await page.getByRole("button", { name: "New", exact: true }).click()
+		await expect(dialog).toBeVisible()
+		await dialog.getByLabel("Name", { exact: true }).fill("Reopen probe")
+		await dialog.locator("form").evaluate((form: HTMLFormElement) => form.requestSubmit())
+		await page.waitForTimeout(300)
+		expect(await writeAttempts(page)).toBe(1)
+		await expect(dialog.locator('button[type="submit"]')).toBeDisabled()
+
+		await releaseWrites(page)
+		await expect
+			.poll(
+				async () =>
+					(await readRows(page, "monthly_budgets")).filter(
+						row => row.name === "Reopen probe",
+					).length,
+			)
+			.toBe(1)
 	})
 
 	test("Statement rule creator: a double submit creates one rule", async ({ page }) => {
