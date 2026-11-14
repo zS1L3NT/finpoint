@@ -266,7 +266,14 @@ export async function replacementCandidates(
 
 	let rows = await db.statements.where("account_id").equals(pending.account_id).toArray()
 	rows = rows.filter(s => s.is_pending === 0)
-	const allocatedIds = new Set((await db.allocations.toArray()).map(a => a.statement_id))
+	const allocatedIds = new Set(
+		(
+			await db.allocations
+				.where("statement_id")
+				.anyOf(rows.map(s => s.id))
+				.toArray()
+		).map(a => a.statement_id),
+	)
 	rows = rows.filter(s => !allocatedIds.has(s.id))
 
 	if (scope === "suggested") {

@@ -274,9 +274,8 @@ async function validateAllocations(
 	const ids = statements.map(s => s.id)
 	const rows = ids.length ? await db.statements.where("id").anyOf(ids).toArray() : []
 	const byId = new Map(rows.map(r => [r.id, r]))
-	const allAllocations = await db.allocations.toArray()
 	const sums = new Map<string, number>()
-	for (const allocation of allAllocations) {
+	for (const allocation of await db.allocations.where("statement_id").anyOf(ids).toArray()) {
 		sums.set(
 			allocation.statement_id,
 			round2((sums.get(allocation.statement_id) ?? 0) + allocation.amount),
