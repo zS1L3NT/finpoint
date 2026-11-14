@@ -190,33 +190,37 @@ async function expectNoOrphanParents() {
 	}
 }
 
-// The parent is deleted after the write has checked it and before it stores the row: the
-// checks used to run outside the write's transaction, so the delete could slip between them.
-async function deleteParentMidWrite(write: () => Promise<unknown>) {
-	const writing = write()
-	for (let tick = 0; tick < 2; tick++) await db.accounts.count()
-	await Promise.allSettled([writing, deleteCategory("cat")])
-	await expectNoOrphanParents()
-}
-
+// The parent is deleted while the write is held at its first write: the checks used to run
+// outside the write's transaction, so the delete could slip between them.
 test("creating a child Category while its parent is deleted leaves no orphan", async () => {
-	await addMonthlyBudget()
-	await deleteParentMidWrite(() => createCategory(child("cat")))
+	await raceGap(
+		async () => void (await addMonthlyBudget()),
+		() => createCategory(child("cat")),
+		() => deleteCategory("cat"),
+		expectNoOrphanParents,
+	)
 })
 
 test("moving a Category under a parent that is being deleted leaves no orphan", async () => {
-	await addMonthlyBudget()
-	await db.categories.add({
-		id: "other",
-		name: "Other",
-		icon: "",
-		color: "",
-		parent_category_id: null,
-		analytics_treatment: "spending",
-		default_monthly_budget_id: null,
-	})
-	const created = await createCategory(child("other"))
-	await deleteParentMidWrite(() => updateCategory(created.id, child("cat")))
+	let id = ""
+	await raceGap(
+		async () => {
+			await addMonthlyBudget()
+			await db.categories.add({
+				id: "other",
+				name: "Other",
+				icon: "",
+				color: "",
+				parent_category_id: null,
+				analytics_treatment: "spending",
+				default_monthly_budget_id: null,
+			})
+			id = (await createCategory(child("other"))).id
+		},
+		() => updateCategory(id, child("cat")),
+		() => deleteCategory("cat"),
+		expectNoOrphanParents,
+	)
 })
 
 test("attaching a Record to a deleted Budget stores nothing", async () => {

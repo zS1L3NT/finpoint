@@ -888,8 +888,8 @@
     "semantic_hash": ""
   },
   "src/logic/categories.ts": {
-    "mtime": 1794643272.9240787,
-    "seen": 1794643296.6821055,
+    "mtime": 1794682917.797027,
+    "seen": 1794682942.1337733,
     "ast_hash": "cf90a28eb70b60d972173ac270af472e",
     "semantic_hash": ""
   },
@@ -1638,9 +1638,9 @@
     "semantic_hash": ""
   },
   "tests/domain/transaction-checks.test.ts": {
-    "mtime": 1794682428.9976594,
-    "seen": 1794682833.7854702,
-    "ast_hash": "0da03ae57469d396b0a09175c44876e4",
+    "mtime": 1794682916.341034,
+    "seen": 1794682942.1338453,
+    "ast_hash": "2c2e7071154622568752f3700cf7efd4",
     "semantic_hash": ""
   },
   "src/hooks/use-seed.ts": {
