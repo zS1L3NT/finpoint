@@ -140,13 +140,16 @@ export async function createPendingStatement(input: StatementInput) {
 }
 
 export async function updatePendingStatement(id: string, input: StatementInput) {
-	return db.transaction("rw", [db.statements, db.allocations], async () => {
+	return db.transaction("rw", [db.statements, db.allocations, db.accounts], async () => {
 		const existing = await db.statements.get(id)
 		if (!existing) throw new Error("Statement not found.")
 		if (existing.is_pending !== 1) {
 			throw new ValidationError({ statement: ["Imported statements are read-only."] })
 		}
 		const dto = validateStatement(input)
+		if (!(await db.accounts.get(dto.account_id))) {
+			throw new ValidationError({ account_id: ["Select an account."] })
+		}
 
 		const allocations = await db.allocations.where("statement_id").equals(id).toArray()
 		ensureAllocationsFit(

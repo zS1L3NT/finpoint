@@ -47,6 +47,10 @@ export async function listCategories(): Promise<CategoryWithChildren[]> {
 	await db.records.each(record => {
 		counts.set(record.category_id, (counts.get(record.category_id) ?? 0) + 1)
 	})
+	// A Statement Rule that fills a Category keeps it in use, as a Record does.
+	const ruleCategories = new Set(
+		(await db.statement_rules.toArray()).map(rule => rule.actions.category_id?.value),
+	)
 	const childCounts = new Map<string, number>()
 	for (const category of categories) {
 		if (category.parent_category_id) {
@@ -61,7 +65,9 @@ export async function listCategories(): Promise<CategoryWithChildren[]> {
 		records_count: counts.get(category.id) ?? 0,
 		children_count: childCounts.get(category.id) ?? 0,
 		can_delete:
-			(counts.get(category.id) ?? 0) === 0 && (childCounts.get(category.id) ?? 0) === 0,
+			(counts.get(category.id) ?? 0) === 0 &&
+			(childCounts.get(category.id) ?? 0) === 0 &&
+			!ruleCategories.has(category.id),
 		default_monthly_budget: category.default_monthly_budget_id
 			? (monthlyBudgetById.get(category.default_monthly_budget_id) ?? null)
 			: null,
@@ -157,10 +163,13 @@ async function checkReferences(parentId: string | null, monthlyBudgetId: string 
 }
 
 export async function deleteCategory(id: string) {
-	await db.transaction("rw", [db.categories, db.records], async () => {
+	await db.transaction("rw", [db.categories, db.records, db.statement_rules], async () => {
 		const records = await db.records.where("category_id").equals(id).count()
 		const children = await db.categories.where("parent_category_id").equals(id).count()
-		if (records > 0 || children > 0) {
+		const rules = await db.statement_rules
+			.filter(rule => rule.actions.category_id?.value === id)
+			.count()
+		if (records > 0 || children > 0 || rules > 0) {
 			throw new ValidationError({ category: ["This category is still in use."] })
 		}
 
