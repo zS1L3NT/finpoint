@@ -901,12 +901,37 @@ test("month navigation: two fast clicks on Next month advance two months", async
 	await page.goto("/?month=October&year=2026")
 	const next = page.getByRole("button", { name: "Next month", exact: true })
 	await expect(page.getByRole("heading", { name: "October 2026" })).toBeVisible()
-	// Separate tasks, as two real clicks are, with the second before the router commits the first.
-	await next.evaluate(async (button: HTMLButtonElement) => {
-		button.click()
-		await new Promise(resolve => setTimeout(resolve, 0))
-		button.click()
-	})
+	// The second click lands once the first navigation has rendered (the heading shows the
+	// optimistic month) or a frame has passed, and it must find the URL still on October: the
+	// first navigation has not committed.
+	const urlAtSecondClick = await next.evaluate(
+		(button: HTMLButtonElement) =>
+			new Promise<string>(resolve => {
+				let clicked = false
+				const clickAgain = () => {
+					if (clicked) return
+					clicked = true
+					observer.disconnect()
+					const url = location.search
+					button.click()
+					resolve(url)
+				}
+				const observer = new MutationObserver(() => {
+					const rendered = [...document.querySelectorAll("h1, h2, h3")].some(heading =>
+						heading.textContent?.includes("November 2026"),
+					)
+					if (rendered) clickAgain()
+				})
+				observer.observe(document.body, {
+					childList: true,
+					subtree: true,
+					characterData: true,
+				})
+				button.click()
+				requestAnimationFrame(() => requestAnimationFrame(clickAgain))
+			}),
+	)
+	expect(urlAtSecondClick).toContain("month=October")
 	await expect(page).toHaveURL(/month=December&year=2026/)
 	await expect(page.getByRole("heading", { name: "December 2026" })).toBeVisible()
 })
