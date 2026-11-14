@@ -8,6 +8,7 @@ import { duplicateStatementIds } from "@/logic/duplicates"
 import { isPendingRecord, pendingStatementIds, tallyAllocations } from "@/logic/pending"
 import { resolveRecordChoices } from "@/logic/record-choices"
 import { inferRecordDatetime } from "@/logic/record-defaults"
+import { maskDescription } from "@/logic/replacements"
 import { inputToStored, newId, round2, TREATMENT_VALUES } from "@/logic/shared"
 import { ValidationError, Validator } from "@/logic/validate"
 import type { Allocation, AnalyticsTreatment, Record as AppRecord, Statement } from "@/types"
@@ -217,6 +218,7 @@ export async function getRecord(id: string): Promise<RecordDetail> {
 				const total = totalsByStatement.get(statement.id) ?? { sum: 0, count: 0 }
 				return {
 					...statement,
+					description: maskDescription(statement.description),
 					allocable_amount: round2(statement.amount - total.sum),
 					allocation_count: total.count,
 					is_pending: statement.is_pending === 1,

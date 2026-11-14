@@ -936,9 +936,9 @@
     "semantic_hash": "42a96af047840ed2458ad0626d0d24e3"
   },
   "src/logic/records.ts": {
-    "mtime": 1794620107.9078414,
-    "seen": 1794621035.1701899,
-    "ast_hash": "817c87fe469b6c7e50f55c48a9ed69df",
+    "mtime": 1794643342.0036073,
+    "seen": 1794643372.8733277,
+    "ast_hash": "191804f36628537e339a2294810bb279",
     "semantic_hash": ""
   },
   "src/logic/replacements.ts": {
@@ -1647,6 +1647,12 @@
     "mtime": 1794621109.947999,
     "seen": 1794643296.6820836,
     "ast_hash": "0fce272c134074565a956f7534564738",
+    "semantic_hash": ""
+  },
+  "tests/domain/record-statements.test.ts": {
+    "mtime": 1794643336.0116458,
+    "seen": 1794643372.8733864,
+    "ast_hash": "e4f7b1f3132180d2e34cd0f07a459268",
     "semantic_hash": ""
   }
 }
