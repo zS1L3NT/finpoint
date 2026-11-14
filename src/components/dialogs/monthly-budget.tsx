@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dialog"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
+import { useSubmitLock } from "@/hooks/use-submit-lock"
 import { COLLAPSE_MOTION } from "@/lib/motion"
 import { formatCurrency } from "@/lib/utils"
 import { getMonthlyBudgetAmountSource, upsertMonthlyBudget } from "@/logic/monthly-budgets"
@@ -46,7 +47,7 @@ export default function MonthlyBudgetDialog({
 	const [amountScope, setAmountScope] = useState<string | null>(null)
 	const [archived, setArchived] = useState(monthlyBudget?.archived ?? false)
 	const { apiErrors, getApiFieldErrors, resetApiErrors, setApiErrors } = useApiFormErrors()
-	const [submitting, setSubmitting] = useState(false)
+	const { locked, run } = useSubmitLock(open)
 
 	const source = useLiveQuery(
 		() =>
@@ -86,31 +87,31 @@ export default function MonthlyBudgetDialog({
 		resetApiErrors()
 	}
 
-	const submit = async () => {
-		setSubmitting(true)
-		resetApiErrors()
-		try {
-			await upsertMonthlyBudget({
-				id: monthlyBudget?.id,
-				name,
-				color,
-				archived,
-				month: selectedMonth.toISODate() ?? "",
-				amount: noAmount ? null : amount,
-				scope,
-			})
+	const submit = () =>
+		run(async () => {
+			resetApiErrors()
+			try {
+				await upsertMonthlyBudget({
+					id: monthlyBudget?.id,
+					name,
+					color,
+					archived,
+					month: selectedMonth.toISODate() ?? "",
+					amount: noAmount ? null : amount,
+					scope,
+				})
 
-			setOpen(false)
-		} catch (cause) {
-			if (cause instanceof ValidationError) {
-				setApiErrors(cause.errors)
-			} else {
-				toast.error("Unable to save this monthly budget.")
+				setOpen(false)
+				return true
+			} catch (cause) {
+				if (cause instanceof ValidationError) {
+					setApiErrors(cause.errors)
+				} else {
+					toast.error("Unable to save this monthly budget.")
+				}
+				return false
 			}
-		} finally {
-			setSubmitting(false)
-		}
-	}
+		})
 
 	return (
 		<Dialog
@@ -328,8 +329,8 @@ export default function MonthlyBudgetDialog({
 										</Button>
 									}
 								/>
-								<Button type="submit" disabled={submitting}>
-									{submitting
+								<Button type="submit" disabled={locked}>
+									{locked
 										? "Saving…"
 										: monthlyBudget
 											? "Save changes"
