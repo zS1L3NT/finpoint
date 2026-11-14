@@ -638,6 +638,37 @@ test.describe("pinned overview date", () => {
 		}
 	})
 
+	test("Category trend: a Category name underlines on hover for the selected and another month", async ({
+		page,
+	}) => {
+		test.skip(test.info().project.name === "mobile", "Touch has no hover")
+		await seedWorkspace(page)
+		await page.goto(overview)
+		const surface = card(page, "Category trend").getByRole("application").first()
+		await surface.scrollIntoViewIfNeeded()
+		const breakdown = page.getByRole("group", { name: /^Categories in / })
+		const underlined = async () => {
+			const row = breakdown.getByRole("link").first()
+			await row.hover()
+			return row
+				.locator("span.truncate")
+				.first()
+				.evaluate(name => getComputedStyle(name).textDecorationLine)
+		}
+		await expect(breakdown).toHaveAccessibleName("Categories in Oct 2026")
+		expect(await underlined(), "selected month").toBe("underline")
+		await surface.focus()
+		// Walk back from the selected month to the nearest one that has spending to list.
+		await surface.press("End")
+		await expect(async () => {
+			await surface.press("ArrowLeft")
+			await surface.press("Enter")
+			await expect(breakdown).not.toHaveAccessibleName("Categories in Oct 2026")
+			await expect(breakdown.getByRole("link").first()).toBeVisible({ timeout: 500 })
+		}).toPass({ timeout: 15_000 })
+		expect(await underlined(), "another month").toBe("underline")
+	})
+
 	test("chart tooltips: keyboard sweeps expose actual numeric values", async ({ page }) => {
 		test.setTimeout(120_000)
 		await seedWorkspace(page)

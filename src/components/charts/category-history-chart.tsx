@@ -368,7 +368,9 @@ function MonthBreakdown({
 									className="size-2.5 rounded-full"
 									style={{ backgroundColor: config[key]?.color }}
 								/>
-								<span className="truncate">{config[key]?.label ?? key}</span>
+								<span className="truncate group-hover:underline">
+									{config[key]?.label ?? key}
+								</span>
 								<span className="font-medium tabular-nums">
 									{formatCurrency(value)}
 								</span>
