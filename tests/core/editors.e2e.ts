@@ -1164,7 +1164,7 @@ async function holdWrites(page: Page, stores: string[]) {
 			const pump = () => {
 				const request = tx.objectStore(stores[0] as string).count()
 				request.onsuccess = () => {
-					resolve()
+					void resolve()
 					if (holding) pump()
 				}
 			}
