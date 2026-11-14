@@ -126,39 +126,42 @@ export default function RecordEditorDialog({
 				amount: statement.pivot?.amount ?? statement.allocable_amount,
 			})),
 		},
-		onSubmit: async ({ value }) => {
-			setSubmitError("")
-			try {
-				await updateRecord(record.id, {
-					title: value.title,
-					people: value.people,
-					location: value.location,
-					description: value.description,
-					datetime: value.datetime,
-					amount: value.amount,
-					category_id: value.category_id,
-					analytics_treatment: value.analytics_treatment || null,
-					monthly_budget_id: value.monthly_budget_id || null,
-					monthly_budget_source: value.monthly_budget_source,
-					revision: record.revision,
-					statements: value.statements,
-				})
-				setIsOpen(false)
-			} catch (cause) {
-				if (cause instanceof ValidationError) {
-					setApiErrors(cause.errors)
-					setSubmitError("Correct the highlighted fields, then save again.")
-					return
+		onSubmit: ({ value }) =>
+			run(async () => {
+				setSubmitError("")
+				try {
+					await updateRecord(record.id, {
+						title: value.title,
+						people: value.people,
+						location: value.location,
+						description: value.description,
+						datetime: value.datetime,
+						amount: value.amount,
+						category_id: value.category_id,
+						analytics_treatment: value.analytics_treatment || null,
+						monthly_budget_id: value.monthly_budget_id || null,
+						monthly_budget_source: value.monthly_budget_source,
+						revision: record.revision,
+						statements: value.statements,
+					})
+					setIsOpen(false)
+					return true
+				} catch (cause) {
+					if (cause instanceof ValidationError) {
+						setApiErrors(cause.errors)
+						setSubmitError("Correct the highlighted fields, then save again.")
+					} else if (cause instanceof ConflictError) {
+						setSubmitError(cause.message)
+						toast.error(cause.message)
+					} else {
+						setSubmitError(
+							"Unable to save this Record. Refresh the page and try again.",
+						)
+						toast.error("Unable to save this record.")
+					}
+					return false
 				}
-				if (cause instanceof ConflictError) {
-					setSubmitError(cause.message)
-					toast.error(cause.message)
-					return
-				}
-				setSubmitError("Unable to save this Record. Refresh the page and try again.")
-				toast.error("Unable to save this record.")
-			}
-		},
+			}),
 		onSubmitInvalid: () => setSubmitError("Correct the highlighted fields, then save again."),
 	})
 
@@ -659,7 +662,11 @@ export default function RecordEditorDialog({
 								</Button>
 							}
 						/>
-						<Button type="button" onClick={() => void form.handleSubmit()}>
+						<Button
+							type="button"
+							disabled={locked}
+							onClick={() => void form.handleSubmit()}
+						>
 							Save changes
 						</Button>
 					</DialogFooter>

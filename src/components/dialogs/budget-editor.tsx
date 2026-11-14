@@ -53,24 +53,24 @@ export default function BudgetEditorDialog({
 			end_date: budget.end_date,
 			automatic: !!budget.automatic,
 		},
-		onSubmit: async ({ value }) => {
-			try {
-				await updateBudget(budget.id, {
-					name: value.name,
-					amount: value.amount,
-					start_date: value.start_date,
-					end_date: value.end_date,
-					automatic: value.automatic,
-				})
-				setIsOpen(false)
-			} catch (cause) {
-				if (cause instanceof ValidationError) {
-					setApiErrors(cause.errors)
-					return
+		onSubmit: ({ value }) =>
+			run(async () => {
+				try {
+					await updateBudget(budget.id, {
+						name: value.name,
+						amount: value.amount,
+						start_date: value.start_date,
+						end_date: value.end_date,
+						automatic: value.automatic,
+					})
+					setIsOpen(false)
+					return true
+				} catch (cause) {
+					if (cause instanceof ValidationError) setApiErrors(cause.errors)
+					else toast.error("Unable to save this budget.")
+					return false
 				}
-				toast.error("Unable to save this budget.")
-			}
-		},
+			}),
 	})
 
 	const handleDelete = async () => {
@@ -224,7 +224,7 @@ export default function BudgetEditorDialog({
 							</Button>
 						}
 					/>
-					<Button type="submit" form="budget-edit-form">
+					<Button type="submit" form="budget-edit-form" disabled={locked}>
 						Save changes
 					</Button>
 				</DialogFooter>

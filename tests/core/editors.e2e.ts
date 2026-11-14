@@ -1134,6 +1134,16 @@ async function readRows(page: Page, store: string): Promise<Record<string, unkno
 	}, store)
 }
 
+// Submits again 60ms apart, so a later call lands while the finished dialog is still fading out.
+async function resubmitWhileClosing(page: Page, form: string) {
+	await page.evaluate(async selector => {
+		for (let i = 0; i < 3; i++) {
+			;(document.querySelector(selector) as HTMLFormElement | null)?.requestSubmit()
+			await new Promise(resolve => setTimeout(resolve, 60))
+		}
+	}, form)
+}
+
 test.describe("dialog lifecycle", () => {
 	test("Pending Statement creator: a double submit creates one Statement", async ({
 		page,
@@ -1275,4 +1285,82 @@ test.describe("dialog lifecycle", () => {
 		await page.waitForTimeout(1000)
 		await expect(description).toHaveValue("Typed but unsaved")
 	})
+	test("Budget creator: a submit while the dialog is closing creates nothing more", async ({
+		page,
+		workspace,
+	}) => {
+		void workspace
+		const dialog = await openEditor(page, "/budgets", "New Budget", "Create Budget")
+		await dialog.getByLabel("Name", { exact: true }).fill("Closing submit budget")
+		await chooseRange(page, dialog)
+		await resubmitWhileClosing(page, "#budget-create-form")
+		await expect(dialog).not.toBeVisible()
+		const rows = await readRows(page, "budgets")
+		expect(rows.filter(row => row.name === "Closing submit budget")).toHaveLength(1)
+	})
+
+	test("Record creator: a submit while the dialog is closing creates nothing more", async ({
+		page,
+		workspace,
+	}) => {
+		void workspace
+		const dialog = await openEditor(
+			page,
+			"/records",
+			"Create Pending Record",
+			"Create New Record",
+		)
+		await dialog.getByLabel("Title", { exact: true }).fill("Closing submit record")
+		await dialog.getByLabel("Amount", { exact: true }).fill("-5")
+		await dialog.locator("#datetime-time").fill("12:00")
+		await chooseCategory(page, dialog)
+		await resubmitWhileClosing(page, "#allocate-record-form")
+		await expect(dialog).not.toBeVisible()
+		const rows = await readRows(page, "records")
+		expect(rows.filter(row => row.title === "Closing submit record")).toHaveLength(1)
+	})
+
+	test("Budget editor: a delete during a save does not remove the Budget", async ({
+		page,
+		workspace,
+	}) => {
+		void workspace
+		const dialog = await openEditor(page, `/budgets/${budget.id}`, "Edit Budget", "Edit Budget")
+		await dialog.getByLabel("Name", { exact: true }).fill("Saved during delete")
+		await page.evaluate(async () => {
+			const form = document.getElementById("budget-edit-form") as HTMLFormElement
+			form.requestSubmit()
+			await new Promise(resolve => setTimeout(resolve, 30))
+			const remove = [...document.querySelectorAll('[role="dialog"] button')].find(
+				button => button.textContent?.trim() === "Delete",
+			) as HTMLButtonElement
+			remove.click()
+		})
+		await expect(dialog).not.toBeVisible()
+		await page.waitForTimeout(500)
+		const rows = await readRows(page, "budgets")
+		expect(rows.find(row => row.id === budget.id)?.name).toBe("Saved during delete")
+	})
+
+	test("Record editor: a delete during a save does not remove the Record", async ({
+		page,
+		workspace,
+	}) => {
+		void workspace
+		const dialog = await openEditor(page, `/records/${record.id}`, "Edit Record", "Edit Record")
+		await dialog.getByLabel("Title", { exact: true }).fill("Saved during delete")
+		await page.evaluate(async () => {
+			const buttons = [...document.querySelectorAll('[role="dialog"] button')]
+			const named = (label: string) =>
+				buttons.find(button => button.textContent?.trim() === label) as HTMLButtonElement
+			named("Save changes").click()
+			await new Promise(resolve => setTimeout(resolve, 30))
+			named("Delete").click()
+		})
+		await expect(dialog).not.toBeVisible()
+		await page.waitForTimeout(500)
+		const rows = await readRows(page, "records")
+		expect(rows.find(row => row.id === record.id)?.title).toBe("Saved during delete")
+	})
+
 })
