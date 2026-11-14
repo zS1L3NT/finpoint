@@ -370,8 +370,7 @@ export async function replacementReview(pendingId: string, statementId: string) 
 		pendingAllocations,
 		statementAllocations,
 	)
-	const pendingEnriched = (await enrich([pending]))[0]
-	const statementEnriched = (await enrich([statement]))[0]
+	const [pendingEnriched, statementEnriched] = await enrich([pending, statement])
 	if (!pendingEnriched || !statementEnriched) throw new Error("Statement not found.")
 	const recordIds = pendingAllocations.map(a => a.record_id)
 	const records = recordIds.length ? await db.records.where("id").anyOf(recordIds).toArray() : []
