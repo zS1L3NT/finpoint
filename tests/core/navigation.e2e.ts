@@ -910,3 +910,24 @@ test("month navigation: two fast clicks on Next month advance two months", async
 	await expect(page).toHaveURL(/month=December&year=2026/)
 	await expect(page.getByRole("heading", { name: "December 2026" })).toBeVisible()
 })
+
+test("duplicates search: typing filters the list and one Back undoes the search", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	await page.goto("/allocator/duplicates?view=all")
+	const search = page.getByRole("textbox", { name: "Search statement descriptions" })
+	await expect(page.getByText("GRAB RIDE 7712").first()).toBeVisible()
+	const entries = await page.evaluate(() => history.length)
+	await search.pressSequentially("DONKI", { delay: 40 })
+	await expect(search).toHaveValue("DONKI")
+	await expect(page).toHaveURL(/query=DONKI$/)
+	await expect(page.getByText("GRAB RIDE 7712")).toHaveCount(0)
+	await expect(page.getByText("DON DON DONKI PURCHASE 8821").first()).toBeVisible()
+	expect(await page.evaluate(() => history.length)).toBe(entries + 1)
+	await page.goBack()
+	await expect(page).not.toHaveURL(/query=/)
+	await expect(search).toHaveValue("")
+	await expect(page.getByText("GRAB RIDE 7712").first()).toBeVisible()
+})

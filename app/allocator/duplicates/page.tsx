@@ -3,7 +3,6 @@
 import { useLiveQuery } from "dexie-react-hooks"
 import { AnimatePresence, motion } from "framer-motion"
 import Link from "next/link"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useState } from "react"
 import { toast } from "sonner"
 import DuplicateReviewDialog from "@/components/dialogs/duplicate-review"
@@ -25,6 +24,7 @@ import {
 } from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import WorkflowTabs from "@/components/workflow-tabs"
+import { useUrlParams } from "@/hooks/use-url-params"
 import { cardEnter, SPRING, TRANSITION } from "@/lib/motion"
 import {
 	classForCurrency,
@@ -79,9 +79,7 @@ const CARD_MOTION = {
 } as const
 
 export default function FixDuplicatesPage() {
-	const params = useSearchParams()
-	const router = useRouter()
-	const pathname = usePathname()
+	const { params, committed, setParams } = useUrlParams()
 	const viewParam = params.get("view")
 	const view = viewParam === "all" || viewParam === "dismissed" ? viewParam : "suggested"
 	const query = params.get("query") ?? ""
@@ -98,15 +96,10 @@ export default function FixDuplicatesPage() {
 	const [review, setReview] = useState<FixDuplicatesInput | null>(null)
 	const [busy, setBusy] = useState(false)
 
-	const updateParams = (changes: Record<string, string>) => {
-		const next = new URLSearchParams(params)
-		next.delete("page")
-		for (const [key, value] of Object.entries(changes)) {
-			if (value) next.set(key, value)
-			else next.delete(key)
-		}
-		router.push(next.size ? `${pathname}?${next}` : pathname, { scroll: false })
-	}
+	const updateParams = (changes: Record<string, string>) => setParams({ ...changes, page: null })
+	// The first keystroke starts a search (one Back undoes it); refining it replaces that entry.
+	const updateQuery = (value: string) =>
+		setParams({ query: value, page: null }, { replace: !!committed.get("query") })
 	const action = async (operation: () => Promise<unknown>) => {
 		setBusy(true)
 		try {
@@ -161,7 +154,7 @@ export default function FixDuplicatesPage() {
 					className="w-full md:w-sm"
 					placeholder="Search descriptions..."
 					value={query}
-					onChange={event => updateParams({ query: event.target.value })}
+					onChange={event => updateQuery(event.target.value)}
 				/>
 				<div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:gap-4">
 					<FilterBar className="lg:w-auto">
