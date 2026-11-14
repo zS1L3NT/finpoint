@@ -1144,6 +1144,39 @@ async function resubmitWhileClosing(page: Page, form: string) {
 	}, form)
 }
 
+// Holds IndexedDB writes to `stores` in flight: an open readwrite transaction of our own keeps
+// every later app transaction on them queued until `release` runs.
+async function holdWrites(page: Page, stores: string[]) {
+	await page.evaluate(async stores => {
+		const w = window as unknown as { __release?: () => void }
+		const database = await new Promise<IDBDatabase>((resolve, reject) => {
+			const open = indexedDB.open("finpoint")
+			open.onsuccess = () => resolve(open.result)
+			open.onerror = () => reject(open.error)
+		})
+		await new Promise<void>(resolve => {
+			let holding = true
+			w.__release = () => {
+				holding = false
+			}
+			const tx = database.transaction(stores, "readwrite")
+			tx.oncomplete = () => database.close()
+			const pump = () => {
+				const request = tx.objectStore(stores[0] as string).count()
+				request.onsuccess = () => {
+					resolve()
+					if (holding) pump()
+				}
+			}
+			pump()
+		})
+	}, stores)
+}
+
+async function releaseWrites(page: Page) {
+	await page.evaluate(() => (window as unknown as { __release: () => void }).__release())
+}
+
 test.describe("dialog lifecycle", () => {
 	test("Pending Statement creator: a double submit creates one Statement", async ({
 		page,
@@ -1166,6 +1199,58 @@ test.describe("dialog lifecycle", () => {
 		await expect(dialog).not.toBeVisible()
 		const rows = await readRows(page, "statements")
 		expect(rows.filter(row => row.description === "Double submit probe")).toHaveLength(1)
+	})
+
+	test("Pending Statement creator: reopening while a save is still running cannot save twice", async ({
+		page,
+		workspace,
+	}) => {
+		void workspace
+		const trigger = page.getByRole("button", {
+			name: "Create Pending Statement",
+			exact: true,
+		})
+		const dialog = await openEditor(
+			page,
+			"/statements",
+			"Create Pending Statement",
+			"Create Pending Statement",
+		)
+		const fill = async () => {
+			await dialog.getByLabel("Description", { exact: true }).fill("Reopen probe")
+			await dialog.getByLabel("Amount", { exact: true }).fill("-1.23")
+		}
+		await fill()
+		await holdWrites(page, ["statements"])
+		await page.evaluate(() =>
+			(document.getElementById("pending-statement-form") as HTMLFormElement).requestSubmit(),
+		)
+
+		// The save is stuck behind the held write: dismiss the dialog and open it again.
+		await page.keyboard.press("Escape")
+		await expect(dialog).not.toBeVisible()
+		await trigger.click()
+		await expect(dialog).toBeVisible()
+		await fill()
+		await page.evaluate(() =>
+			(document.getElementById("pending-statement-form") as HTMLFormElement).requestSubmit(),
+		)
+		await expect(
+			dialog.getByRole("button", { name: "Create statement", exact: true }),
+		).toBeDisabled()
+
+		await releaseWrites(page)
+		await expect
+			.poll(
+				async () =>
+					(await readRows(page, "statements")).filter(
+						row => row.description === "Reopen probe",
+					).length,
+			)
+			.toBeGreaterThan(0)
+		await page.waitForTimeout(500)
+		const rows = await readRows(page, "statements")
+		expect(rows.filter(row => row.description === "Reopen probe")).toHaveLength(1)
 	})
 
 	test("Statement rule creator: a double submit creates one rule", async ({ page }) => {
