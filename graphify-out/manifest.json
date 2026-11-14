@@ -114,9 +114,9 @@
     "semantic_hash": ""
   },
   "app/settings/page.tsx": {
-    "mtime": 1794678456.7031488,
-    "seen": 1794682833.785218,
-    "ast_hash": "b21b4b3b74809c21d34f3c084d5c8d0a",
+    "mtime": 1794684108.3160465,
+    "seen": 1794684675.8399475,
+    "ast_hash": "ee7cdf0d5adc80d32e083f66a254748a",
     "semantic_hash": ""
   },
   "app/statements/[id]/page.tsx": {
@@ -936,8 +936,8 @@
     "semantic_hash": "42a96af047840ed2458ad0626d0d24e3"
   },
   "src/logic/records.ts": {
-    "mtime": 1794671433.8992965,
-    "seen": 1794671458.0099883,
+    "mtime": 1794684042.3146882,
+    "seen": 1794684675.8402848,
     "ast_hash": "0cc3bf544724aafac8a6aea0e56f2342",
     "semantic_hash": ""
   },
@@ -1290,9 +1290,9 @@
     "semantic_hash": ""
   },
   "tests/core/editors.e2e.ts": {
-    "mtime": 1794682429.085658,
-    "seen": 1794682833.785439,
-    "ast_hash": "e6e048d86441ca5ac5817d6aa090c900",
+    "mtime": 1794684184.6734676,
+    "seen": 1794684675.8403184,
+    "ast_hash": "4fd0d44ccccc6627cf24ac7cb53fa245",
     "semantic_hash": ""
   },
   "tests/core/helpers.e2e.ts": {
@@ -1614,8 +1614,8 @@
     "semantic_hash": ""
   },
   "src/hooks/use-submit-lock.ts": {
-    "mtime": 1794678456.7031488,
-    "seen": 1794682833.7853794,
+    "mtime": 1794684232.050278,
+    "seen": 1794684675.8402407,
     "ast_hash": "2a74b9f61942b13af16eaa20754c0f07",
     "semantic_hash": ""
   },
@@ -1638,9 +1638,9 @@
     "semantic_hash": ""
   },
   "tests/domain/transaction-checks.test.ts": {
-    "mtime": 1794682916.341034,
-    "seen": 1794682942.1338453,
-    "ast_hash": "2c2e7071154622568752f3700cf7efd4",
+    "mtime": 1794684040.910658,
+    "seen": 1794684675.8403597,
+    "ast_hash": "de685938cd0cb60a614a0ca34de49d80",
     "semantic_hash": ""
   },
   "src/hooks/use-seed.ts": {
@@ -1650,9 +1650,9 @@
     "semantic_hash": ""
   },
   "tests/domain/record-statements.test.ts": {
-    "mtime": 1794643336.0116458,
-    "seen": 1794643372.8733864,
-    "ast_hash": "e4f7b1f3132180d2e34cd0f07a459268",
+    "mtime": 1794684040.914658,
+    "seen": 1794684675.8403516,
+    "ast_hash": "86b00554000dad4ad09f67870bd4f3a0",
     "semantic_hash": ""
   },
   "src/logic/statement-enrichment.ts": {

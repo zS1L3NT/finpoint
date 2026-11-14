@@ -1,7 +1,7 @@
 # Graph Report - t3-6b4fc13c-8de3ddf0f021ed8e  (2026-11-15)
 
 ## Corpus Check
-- 268 files · ~243,042 words
+- 268 files · ~243,375 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 9 file(s) not represented in the graph (top: (none) 5, .example 1, .lock 1)
 
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `3d22b2b2`
+- Built from commit: `21be17ff`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -537,10 +537,10 @@ _Questions this graph is uniquely positioned to answer:_
 - **Should `dashboard.ts` be split into smaller, more focused modules?**
   _Cohesion score 0.1495798319327731 - nodes in this community are weakly interconnected._
 - **Why does `react` connect `Button` to `sync/page.tsx`, `primitives.tsx`, `lib/motion.ts`, `cn`, `utils.ts`, `item.tsx`, `command.tsx`, `records.ts`, `package.json`, `suggestions.ts`, `app-sidebar.tsx`, `auto-sync.ts`, `category-history-chart.tsx`, `importer/page.tsx`, `input-group.tsx`, `app/layout.tsx`, `pagination.tsx`, `spending-calendar.tsx`, `icon.tsx`, `(month)/page.tsx`, `displays.tsx`, `(month)/layout.tsx`, `trend-chart.tsx`, `accounts/page.tsx`, `alert-dialog.tsx`, `budgets/[id]/page.tsx`, `monthly-budget-usage.tsx`, `lucide-react`?**
-  _High betweenness centrality (0.080) - this node is a cross-community bridge._
+  _High betweenness centrality (0.082) - this node is a cross-community bridge._
 - **Should `Button` be split into smaller, more focused modules?**
   _Cohesion score 0.07088502894954508 - nodes in this community are weakly interconnected._
 - **Why does `src/data/* (persistence, migrations, seeding, backup serialization, Drive storage)` connect `src/data/* (persistence, migrations, seeding, backup serialization, Drive storage)` to `IndexedDB (Dexie)`, `app-sidebar.tsx`?**
-  _High betweenness centrality (0.066) - this node is a cross-community bridge._
+  _High betweenness centrality (0.059) - this node is a cross-community bridge._
 - **Should `db.ts` be split into smaller, more focused modules?**
   _Cohesion score 0.08534850640113797 - nodes in this community are weakly interconnected._
