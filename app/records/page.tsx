@@ -32,7 +32,7 @@ import { cn, pluralize } from "@/lib/utils"
 import { listCategories } from "@/logic/categories"
 import { listMonthlyBudgets } from "@/logic/monthly-budgets"
 import { paginateItems, parsePage, parsePageSize } from "@/logic/pagination"
-import { listRecords } from "@/logic/records"
+import { listRecords, parseRecordFilters } from "@/logic/records"
 import type { CategoryWithChildren, MonthlyBudget, Record } from "@/types"
 
 export default function RecordsPage() {
@@ -43,13 +43,11 @@ export default function RecordsPage() {
 	const maxAmount = searchParams.get("max_amount")
 	const isAllocated = searchParams.get("is_allocated")
 	const monthlyBudgetId = searchParams.get("monthly_budget_id")
-	const showUnbudgeted = ["1", "true"].includes(searchParams.get("show_unbudgeted") ?? "")
 	const treatment = searchParams.get("treatment")
 	const categoryIdsParam = searchParams.get("category_ids") ?? ""
-	const categoryIds = useMemo(
-		() => categoryIdsParam.split(",").filter(Boolean),
-		[categoryIdsParam],
-	)
+	const filters = parseRecordFilters(searchParams)
+	const showUnbudgeted = !!filters.show_unbudgeted
+	const categoryIds = filters.category_ids ?? []
 
 	const categories = useLiveQuery(() => listCategories(), []) ?? []
 	const monthlyBudgets = useLiveQuery(() => listMonthlyBudgets(), []) ?? []
@@ -90,19 +88,7 @@ export default function RecordsPage() {
 	].filter(Boolean).length
 
 	const recordsQuery = useLiveQuery(
-		() =>
-			listRecords({
-				query: query || null,
-				start_date: startDate,
-				end_date: endDate,
-				min_amount: minAmount,
-				max_amount: maxAmount,
-				is_allocated: isAllocated,
-				category_ids: categoryIds.length ? categoryIds : null,
-				monthly_budget_id: monthlyBudgetId,
-				show_unbudgeted: showUnbudgeted,
-				treatment,
-			}),
+		() => listRecords({ ...filters, query: query || null }),
 		[
 			query,
 			startDate,

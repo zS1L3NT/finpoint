@@ -23,7 +23,7 @@ import { type RecordsSheetFilters, useRecordsSheet } from "@/hooks/use-records-s
 import { treatmentLabel } from "@/lib/analytics"
 import { pluralize } from "@/lib/utils"
 import { listCategories } from "@/logic/categories"
-import { getMonthlyRecords } from "@/logic/monthly"
+import { getMonthlyRecords, parseMonthlyFilters } from "@/logic/monthly"
 import { pathRecords } from "@/routes"
 import type { AnalyticsTreatment, Record } from "@/types"
 
@@ -68,16 +68,11 @@ export default function RecordsSheet() {
 	const data = useLiveQuery(
 		() =>
 			shown
-				? getMonthlyRecords(at.toFormat("MMMM"), at.year, {
-						category_ids: shown.category_ids,
-						is_allocated: shown.is_allocated,
-						monthly_budget_id: shown.monthly_budget_id,
-						show_unbudgeted: shown.show_unbudgeted === "true",
-						effective_spending: shown.effective_spending === "true",
-						treatment: shown.treatment,
-						start_date: shown.start_date,
-						end_date: shown.end_date,
-					}).catch(() => null)
+				? getMonthlyRecords(
+						at.toFormat("MMMM"),
+						at.year,
+						parseMonthlyFilters(new Map(Object.entries(shown))),
+					).catch(() => null)
 				: null,
 		[shownKey, month, year],
 	)

@@ -311,7 +311,7 @@ export default function AllocatorPage() {
 						end_date: defaultFilterEndDateToday
 							? DateTime.now().toFormat("yyyy-MM-dd")
 							: undefined,
-						is_allocated: "false",
+						is_allocated: false,
 					}}
 					isOpen={isAttachingRecord}
 					setIsOpen={setIsAttachingRecord}

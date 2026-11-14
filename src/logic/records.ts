@@ -5,6 +5,13 @@ import { db, type RecordRow } from "@/data/db"
 import { canUseMonthlyBudget } from "@/lib/analytics"
 import { contribution } from "@/logic/analytics"
 import { duplicateStatementIds } from "@/logic/duplicates"
+import {
+	listParam,
+	looseFlagParam,
+	numberParam,
+	type ParamSource,
+	textParam,
+} from "@/logic/filter-params"
 import { expandCategoryIds } from "@/logic/monthly-shared"
 import { isPendingRecord, pendingStatementIds, tallyAllocations } from "@/logic/pending"
 import { resolveRecordChoices } from "@/logic/record-choices"
@@ -27,14 +34,32 @@ export type RecordFilters = {
 	exclude_budget_id?: string | null
 	start_date?: string | null
 	end_date?: string | null
-	min_amount?: string | null
-	max_amount?: string | null
-	is_allocated?: string | null
+	min_amount?: number
+	max_amount?: number
+	is_allocated?: boolean
 	category_ids?: string[] | null
 	monthly_budget_id?: string | null
 	show_unbudgeted?: boolean
 	effective_spending?: boolean
 	treatment?: string | null
+}
+
+/**
+ * The Records list's URL filters; `query` is read separately. Flags also read `"1"` and `"0"`,
+ * which links to this list have always accepted.
+ */
+export function parseRecordFilters(params: ParamSource): RecordFilters {
+	return {
+		start_date: textParam(params.get("start_date")),
+		end_date: textParam(params.get("end_date")),
+		min_amount: numberParam(params.get("min_amount")),
+		max_amount: numberParam(params.get("max_amount")),
+		is_allocated: looseFlagParam(params.get("is_allocated")),
+		category_ids: listParam(params.get("category_ids")),
+		monthly_budget_id: textParam(params.get("monthly_budget_id")),
+		show_unbudgeted: looseFlagParam(params.get("show_unbudgeted")),
+		treatment: textParam(params.get("treatment")),
+	}
 }
 
 export class ConflictError extends Error {
@@ -113,14 +138,9 @@ export async function listRecords(filters: RecordFilters = {}) {
 	const { start_date, end_date } = filters
 	if (start_date) rows = rows.filter(r => r.datetime.slice(0, 10) >= start_date)
 	if (end_date) rows = rows.filter(r => r.datetime.slice(0, 10) <= end_date)
-	const minAmount = filters.min_amount ? Number(filters.min_amount) : null
-	const maxAmount = filters.max_amount ? Number(filters.max_amount) : null
-	if (minAmount !== null && Number.isFinite(minAmount)) {
-		rows = rows.filter(r => r.amount >= minAmount)
-	}
-	if (maxAmount !== null && Number.isFinite(maxAmount)) {
-		rows = rows.filter(r => r.amount <= maxAmount)
-	}
+	const { min_amount, max_amount } = filters
+	if (min_amount !== undefined) rows = rows.filter(r => r.amount >= min_amount)
+	if (max_amount !== undefined) rows = rows.filter(r => r.amount <= max_amount)
 	if (filters.category_ids?.length) {
 		const expanded = new Set(await expandCategoryIds(filters.category_ids))
 		rows = rows.filter(r => expanded.has(r.category_id))
@@ -150,12 +170,8 @@ export async function listRecords(filters: RecordFilters = {}) {
 
 	let enriched = await enrichRecords(rows)
 
-	const allocation = filters.is_allocated
-	if (allocation === "1" || allocation === "true") {
-		enriched = enriched.filter(r => !r.is_pending)
-	} else if (allocation === "0" || allocation === "false") {
-		enriched = enriched.filter(r => r.is_pending)
-	}
+	if (filters.is_allocated === true) enriched = enriched.filter(r => !r.is_pending)
+	if (filters.is_allocated === false) enriched = enriched.filter(r => r.is_pending)
 
 	enriched.sort(
 		(a, b) =>

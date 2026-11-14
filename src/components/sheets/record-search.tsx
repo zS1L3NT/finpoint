@@ -14,7 +14,7 @@ import {
 	SheetTrigger,
 } from "@/components/ui/sheet"
 import { classForCurrency, cn, formatCurrency, parseDatetime, pluralize, round2 } from "@/lib/utils"
-import { listRecords } from "@/logic/records"
+import { listRecords, type RecordFilters } from "@/logic/records"
 import type { Record } from "@/types"
 
 const PAGE = 40
@@ -31,7 +31,7 @@ export default function RecordSearchSheet({
 }: {
 	title: string
 	placeholder?: string
-	filters?: globalThis.Record<string, string | undefined>
+	filters?: RecordFilters
 	/** Amount being attached; Records whose remaining amount equals it are surfaced first. */
 	target?: number
 	isOpen: boolean
@@ -58,7 +58,7 @@ export default function RecordSearchSheet({
 	const excludeBudgetId = filters?.exclude_budget_id ?? null
 	const startDate = includeOlder ? null : (filters?.start_date ?? null)
 	const endDate = filters?.end_date ?? null
-	const isAllocated = filters?.is_allocated ?? null
+	const isAllocated = filters?.is_allocated
 	// Cache tag for the current filter set; readiness gates on the opening
 	// epoch only, so prior rows stay mounted (dimmed) while a new read resolves.
 	const queryKey = `${deferredQuery}|${includeOlder}|${excludeBudgetId ?? ""}|${startDate ?? ""}|${endDate ?? ""}|${isAllocated ?? ""}`
