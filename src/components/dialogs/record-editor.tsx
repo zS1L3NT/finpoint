@@ -125,6 +125,8 @@ export default function RecordEditorDialog({
 				id: statement.id,
 				amount: statement.pivot?.amount ?? statement.allocable_amount,
 			})),
+			// The revision the form was seeded from, so a write from another tab still conflicts.
+			revision: record.revision,
 		},
 		onSubmit: ({ value }) =>
 			run(async () => {
@@ -141,7 +143,7 @@ export default function RecordEditorDialog({
 						analytics_treatment: value.analytics_treatment || null,
 						monthly_budget_id: value.monthly_budget_id || null,
 						monthly_budget_source: value.monthly_budget_source,
-						revision: record.revision,
+						revision: value.revision,
 						statements: value.statements,
 					})
 					setIsOpen(false)

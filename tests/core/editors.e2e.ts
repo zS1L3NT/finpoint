@@ -1363,4 +1363,32 @@ test.describe("dialog lifecycle", () => {
 		expect(rows.find(row => row.id === record.id)?.title).toBe("Saved during delete")
 	})
 
+	test("Record editor: saving over a change from another tab reports a conflict", async ({
+		page,
+		workspace,
+	}) => {
+		void workspace
+		const dialog = await openEditor(page, `/records/${record.id}`, "Edit Record", "Edit Record")
+		await dialog.getByLabel("Title", { exact: true }).fill("From the first tab")
+		// Leave the Title so its suggestions close and the dialog is reachable again.
+		await dialog.getByLabel("Title", { exact: true }).press("Tab")
+
+		const other = await page.context().newPage()
+		await other.goto(`/records/${record.id}`)
+		await other.getByRole("button", { name: "Edit Record", exact: true }).click()
+		const otherDialog = other.getByRole("dialog", { name: "Edit Record", exact: true })
+		await otherDialog.getByLabel("Title", { exact: true }).fill("From the second tab")
+		await otherDialog.getByLabel("Title", { exact: true }).press("Tab")
+		await otherDialog.getByRole("button", { name: "Save changes" }).click()
+		await expect(otherDialog).not.toBeVisible()
+		await other.close()
+
+		// Let the live query hand the open dialog the Record with its new revision.
+		await page.waitForTimeout(1000)
+		await dialog.getByRole("button", { name: "Save changes" }).click()
+		await expect(dialog).toBeVisible()
+		const rows = await readRows(page, "records")
+		expect(rows.find(row => row.id === record.id)?.title).toBe("From the second tab")
+	})
+
 })
