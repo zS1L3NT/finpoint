@@ -1202,6 +1202,22 @@ async function releaseWrites(page: Page) {
 	await page.evaluate(() => (window as unknown as { __release: () => void }).__release())
 }
 
+// Clicks the confirm button of the open dialog three times in one task, then twice more
+// while the dialog fades out, bypassing the disabled state a repeated click cannot reach.
+async function confirmRepeatedly(page: Page, label: string) {
+	await page.evaluate(async label => {
+		const confirm = () =>
+			[...document.querySelectorAll('[role="dialog"] button')]
+				.find(button => button.textContent?.trim() === label)
+				?.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+		for (let i = 0; i < 3; i++) confirm()
+		for (let i = 0; i < 2; i++) {
+			await new Promise(resolve => setTimeout(resolve, 60))
+			confirm()
+		}
+	}, label)
+}
+
 test.describe("dialog lifecycle", () => {
 	test("Pending Statement creator: a double submit creates one Statement", async ({
 		page,
@@ -1316,6 +1332,58 @@ test.describe("dialog lifecycle", () => {
 					).length,
 			)
 			.toBe(1)
+	})
+
+	test("duplicate review: repeated confirms while it saves and closes delete once", async ({
+		page,
+		workspace,
+	}) => {
+		void workspace
+		await spyOnWrites(page, "statements")
+		await page.goto("/allocator/duplicates")
+		await page
+			.getByRole("radio", { name: "Keep DON DON DONKI 8821 PURCHASE", exact: true })
+			.click()
+		await page
+			.getByRole("radio", { name: "Delete DON DON DONKI PURCHASE 8821", exact: true })
+			.click()
+		await page.getByRole("button", { name: "Review deletion" }).click()
+		const review = page.getByRole("dialog", { name: "Delete duplicate Statements" })
+		await expect(review.getByRole("button", { name: "Delete 1 Statement" })).toBeEnabled()
+		await startCounting(page)
+		await confirmRepeatedly(page, "Delete 1 Statement")
+		await expect(review).toHaveCount(0)
+		expect(await writeAttempts(page)).toBe(1)
+	})
+
+	test("Statement replacement review: repeated confirms while it saves and closes replace once", async ({
+		page,
+		workspace,
+	}) => {
+		void workspace
+		await spyOnWrites(page, "statements")
+		await page.goto("/allocator/pending")
+		await page
+			.locator("section[aria-label='Pending statements']")
+			.getByPlaceholder("Search descriptions...")
+			.fill("Pasar malam")
+		await page.getByRole("button", { name: /Pasar malam/ }).click()
+		await page
+			.getByRole("combobox")
+			.filter({ hasText: "Suggested replacements", visible: true })
+			.click()
+		await pickOption(page.getByRole("option", { name: "All unallocated imports" }))
+		await page
+			.locator("section[aria-labelledby='candidate-title']")
+			.getByPlaceholder("Search descriptions...")
+			.fill("SHENG SIONG")
+		await page.getByRole("button", { name: "Replace", exact: true }).click()
+		const review = page.getByRole("dialog", { name: "Review Statement replacement" })
+		await expect(review.getByText(/Allocation.*ready to move/)).toBeVisible()
+		await startCounting(page)
+		await confirmRepeatedly(page, "Replace pending Statement")
+		await expect(review).toHaveCount(0)
+		expect(await writeAttempts(page)).toBe(1)
 	})
 
 	test("Statement rule creator: a double submit creates one rule", async ({ page }) => {
