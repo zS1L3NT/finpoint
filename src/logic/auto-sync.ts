@@ -152,23 +152,38 @@ function markDirty(): void {
 	}
 }
 
-async function withSyncLock(
-	run: () => Promise<DriveSyncResult | "skipped" | undefined>,
-): Promise<DriveSyncResult | "skipped" | undefined> {
-	const locks = (
-		navigator as Navigator & {
-			locks?: {
-				request: <R>(
-					name: string,
-					options: { ifAvailable: boolean },
-					callback: (lock: { name: string } | null) => Promise<R>,
-				) => Promise<R>
-			}
+type Locks = {
+	request: <R>(
+		name: string,
+		options: { ifAvailable: boolean },
+		callback: (lock: unknown) => Promise<R>,
+	) => Promise<R>
+}
+
+/**
+ * The one way Drive work runs: under the cross-tab lock and this tab's `running` flag, so
+ * two pieces of work never write the Drive keys together. Resolves "skipped" when work is
+ * already running in this tab, or in another tab unless `wait` is set. Work that succeeds
+ * settles the pending push: only a write made after it started still needs one.
+ */
+async function exclusive<R>(wait: boolean, work: () => Promise<R>): Promise<R | "skipped"> {
+	const guarded = async () => {
+		if (running) return "skipped" as const
+		running = true
+		const seenWrites = writeSeq
+		try {
+			const result = await work()
+			pendingPush = writeSeq !== seenWrites
+			if (pendingPush) armPushTimer()
+			return result
+		} finally {
+			running = false
 		}
-	).locks
-	if (!locks) return run()
-	return locks.request(LOCK_NAME, { ifAvailable: true }, lock =>
-		lock ? run() : Promise.resolve("skipped" as const),
+	}
+	const locks = (navigator as Navigator & { locks?: Locks }).locks
+	if (!locks) return guarded()
+	return locks.request(LOCK_NAME, { ifAvailable: !wait }, lock =>
+		lock ? guarded() : Promise.resolve("skipped" as const),
 	)
 }
 
@@ -288,46 +303,28 @@ async function finishCycle(outcome: DriveSyncResult, announced: boolean): Promis
 	}
 }
 
-/** Feed a manual result into the shared display (page keeps its own toasts). */
-export async function ingestManualResult(result: DriveSyncResult): Promise<void> {
-	pendingPush = false
-	await finishCycle(result, false)
-	await refreshSyncDisplay()
-}
-
 /**
- * Run a manual Drive operation under the same lock and `running` flag as a background cycle,
- * so the two never write the Drive keys together. Its result feeds the shared display.
+ * Run a manual Drive operation the way a background cycle runs, waiting for one in another
+ * tab to finish. Its result feeds the shared display; the page keeps its own toasts.
  */
 export async function runManualDrive(
 	activity: Exclude<SyncActivity, null>,
 	operation: () => Promise<DriveSyncResult>,
 ): Promise<DriveSyncResult> {
-	const exclusive = async () => {
-		if (running) throw new Error("Google Drive is busy syncing. Try again in a moment.")
-		running = true
-		const seenWrites = writeSeq
+	const result = await exclusive(true, async () => {
 		set({ activity, error: null })
 		try {
 			const result = await operation()
-			await ingestManualResult(result)
-			// A write during the operation still needs a push of its own.
-			if (writeSeq !== seenWrites) {
-				pendingPush = true
-				armPushTimer()
-			}
+			await finishCycle(result, false)
+			await refreshSyncDisplay()
 			return result
 		} finally {
-			running = false
 			set({ activity: null })
 		}
-	}
-	const locks = (
-		navigator as Navigator & {
-			locks?: { request: <R>(name: string, callback: () => Promise<R>) => Promise<R> }
-		}
-	).locks
-	return locks ? locks.request(LOCK_NAME, exclusive) : exclusive()
+	})
+	if (result === "skipped")
+		throw new Error("Google Drive is busy syncing. Try again in a moment.")
+	return result
 }
 
 /** Forget Drive state on this device (after disconnect). */
@@ -358,53 +355,40 @@ async function cycle(reason: "boot" | "dirty" | "focus" | "online"): Promise<voi
 		await refreshSyncDisplay()
 		return
 	}
-	let outcome: DriveSyncResult | "skipped" | undefined
-	let seenWrites = writeSeq
+	let outcome: DriveSyncResult | "skipped"
 	try {
-		outcome = await withSyncLock(async () => {
-			if (running) return "skipped" as const
-			running = true
-			seenWrites = writeSeq
-			try {
-				set({ configured: true, activity: "checking", error: null })
-				const token = await ensureDriveTokenSilent()
-				const [status, localDirty] = await Promise.all([driveStatus(), driveLocalDirty()])
-				let remote =
-					status.fileId != null
-						? await getFileMeta(token, status.fileId).catch(() => null)
-						: null
-				remote ??= await findBackupFile(token)
-				if (!remote) {
-					if (!localDirty) return { outcome: "up-to-date" } as DriveSyncResult
-					set({ activity: "pushing" })
-					await pushDrive()
-					return { outcome: "pushed" } as DriveSyncResult
-				}
-				const remoteDirty = isRemoteNewer(
-					remote.modifiedTime,
-					status.lastSyncAt,
-					getClockSkewMs(),
-				)
-				if (!localDirty && !remoteDirty) return { outcome: "up-to-date" } as DriveSyncResult
-				if (localDirty && remoteDirty)
-					return {
-						outcome: "conflict",
-						remoteModifiedTime: remote.modifiedTime,
-					} as DriveSyncResult
-				if (remoteDirty) {
-					set({ activity: "pulling" })
-					await pullDrive()
-					return {
-						outcome: "pulled",
-						remoteModifiedTime: remote.modifiedTime,
-					} as DriveSyncResult
-				}
+		outcome = await exclusive(false, async (): Promise<DriveSyncResult> => {
+			set({ configured: true, activity: "checking", error: null })
+			const token = await ensureDriveTokenSilent()
+			const [status, localDirty] = await Promise.all([driveStatus(), driveLocalDirty()])
+			let remote =
+				status.fileId != null
+					? await getFileMeta(token, status.fileId).catch(() => null)
+					: null
+			remote ??= await findBackupFile(token)
+			if (!remote) {
+				if (!localDirty) return { outcome: "up-to-date" }
 				set({ activity: "pushing" })
 				await pushDrive()
-				return { outcome: "pushed" } as DriveSyncResult
-			} finally {
-				running = false
+				return { outcome: "pushed" }
 			}
+			const remoteDirty = isRemoteNewer(
+				remote.modifiedTime,
+				status.lastSyncAt,
+				getClockSkewMs(),
+			)
+			if (!localDirty && !remoteDirty) return { outcome: "up-to-date" }
+			if (localDirty && remoteDirty)
+				return { outcome: "conflict", remoteModifiedTime: remote.modifiedTime }
+			if (remoteDirty) {
+				// The restore's own writes count as writes here, so one more check follows.
+				set({ activity: "pulling" })
+				await pullDrive()
+				return { outcome: "pulled", remoteModifiedTime: remote.modifiedTime }
+			}
+			set({ activity: "pushing" })
+			await pushDrive()
+			return { outcome: "pushed" }
 		})
 	} catch (cause) {
 		lastCycleAt = Date.now()
@@ -432,14 +416,10 @@ async function cycle(reason: "boot" | "dirty" | "focus" | "online"): Promise<voi
 		}
 		return
 	}
-	if (outcome === "skipped" || outcome === undefined) {
+	if (outcome === "skipped") {
 		if (pendingPush) armPushTimer()
 		return
 	}
-	lastCycleAt = Date.now()
-	// A write after this cycle took its data still needs a push of its own.
-	if (writeSeq === seenWrites) pendingPush = false
-	else armPushTimer()
 	await finishCycle(outcome, true)
 	set({ activity: null })
 }
