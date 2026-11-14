@@ -27,6 +27,7 @@ export type StatementDetail = Statement & {
 export type StatementFilters = {
 	query?: string | null
 	account_id?: string | null
+	ids?: string | null
 	exclude_ids?: string | null
 	start_date?: string | null
 	end_date?: string | null
@@ -45,7 +46,9 @@ async function enrich(statements: StatementRow[]) {
 }
 
 export async function listStatements(filters: StatementFilters = {}) {
-	let rows = await db.statements.toArray()
+	let rows = filters.ids
+		? (await db.statements.bulkGet(filters.ids.split(",").filter(Boolean))).filter(s => !!s)
+		: await db.statements.toArray()
 
 	const q = (filters.query ?? "").trim().toLowerCase()
 	if (q) {

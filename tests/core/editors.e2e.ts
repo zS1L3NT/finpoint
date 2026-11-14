@@ -1285,6 +1285,48 @@ test.describe("dialog lifecycle", () => {
 		await page.waitForTimeout(1000)
 		await expect(description).toHaveValue("Typed but unsaved")
 	})
+	test("Allocator selection follows Statements changed or deleted from another tab", async ({
+		page,
+	}) => {
+		const { tables } = getScenario("populated")
+		await seedWorkspace(page, "populated", {
+			statements: [
+				...tables.statements,
+				{ ...pending, id: "sel-a", description: "Selection probe A", amount: -10 },
+				{ ...pending, id: "sel-b", description: "Selection probe B", amount: -20 },
+			],
+		})
+		await page.goto("/allocator")
+		for (const id of ["sel-a", "sel-b"]) {
+			await page
+				.getByRole("checkbox", { name: `Select statement ${id}`, exact: true })
+				.click()
+		}
+		const bar = page.getByRole("complementary")
+		await expect(bar.getByText("2 selected · -$30.00")).toBeVisible()
+
+		const other = await page.context().newPage()
+		await other.goto("/statements/sel-a")
+		await other.getByRole("button", { name: "Edit Pending Statement", exact: true }).click()
+		const editor = other.getByRole("dialog", { name: "Edit Pending Statement", exact: true })
+		await editor.getByLabel("Amount", { exact: true }).fill("-15")
+		await editor.getByRole("button", { name: "Save changes", exact: true }).click()
+		await expect(editor).not.toBeVisible()
+		await expect(bar.getByText("2 selected · -$35.00")).toBeVisible()
+
+		await other.goto("/statements/sel-b")
+		await other.getByRole("button", { name: "Edit Pending Statement", exact: true }).click()
+		await other
+			.getByRole("dialog", { name: "Edit Pending Statement", exact: true })
+			.getByRole("button", { name: "Delete", exact: true })
+			.click()
+		await expect(other.getByText("Pending statement deleted.")).toBeVisible()
+		await other.close()
+
+		await expect(bar.getByText("1 selected · -$15.00")).toBeVisible()
+		await expect(page.locator("main").getByText(/^1 selected\. Showing/)).toBeVisible()
+	})
+
 	test("Budget creator: a submit while the dialog is closing creates nothing more", async ({
 		page,
 		workspace,
