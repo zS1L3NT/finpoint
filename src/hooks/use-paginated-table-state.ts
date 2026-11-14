@@ -8,7 +8,7 @@ import { useUrlParams } from "@/hooks/use-url-params"
 const DEFAULT_PAGE_SIZE = "100"
 
 export function usePaginatedTableState() {
-	const { params, committed, setParams } = useUrlParams()
+	const { params, setParams } = useUrlParams()
 
 	// The params are optimistic: they move on the keystroke, not when the router commits, so
 	// the input needs no copy of them.
@@ -21,7 +21,7 @@ export function usePaginatedTableState() {
 	// supersede the pending push, so a burst still adds one entry, whereas a replace would
 	// supersede it and add none.
 	const handleQueryChange = (value: string) =>
-		setParams({ query: value || null, page: null }, { replace: !!committed.get("query") })
+		setParams({ query: value || null, page: null }, { replace: url => !!url.get("query") })
 
 	const handlePageSizeChange = (value: string) => setParams({ per_page: value, page: null })
 

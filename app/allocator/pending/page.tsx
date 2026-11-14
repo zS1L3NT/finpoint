@@ -55,7 +55,7 @@ import type {
 type CandidatePage = Paginated<StatementReplacementCandidate>
 
 export default function AllocatorPendingPage() {
-	const { params, committed, setParams } = useUrlParams()
+	const { params, setParams } = useUrlParams()
 	// The params are optimistic, so the inputs and every change below build on what the user
 	// sees, never on a navigation that has not committed yet.
 	const queueQuery = params.get("query") ?? ""
@@ -78,13 +78,13 @@ export default function AllocatorPendingPage() {
 				candidate_page: null,
 				candidate_query: null,
 			},
-			{ replace: !!committed.get("query") && !committed.get("pending_statement_id") },
+			{ replace: url => !!url.get("query") && !url.get("pending_statement_id") },
 		)
 
 	const handleCandidateQuery = (value: string) =>
 		setParams(
 			{ candidate_query: value || null, candidate_page: null },
-			{ replace: !!committed.get("candidate_query") },
+			{ replace: url => !!url.get("candidate_query") },
 		)
 
 	const accounts = useLiveQuery(() => listAccounts(), []) ?? []

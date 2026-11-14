@@ -79,7 +79,7 @@ const CARD_MOTION = {
 } as const
 
 export default function FixDuplicatesPage() {
-	const { params, committed, setParams } = useUrlParams()
+	const { params, setParams } = useUrlParams()
 	const viewParam = params.get("view")
 	const view = viewParam === "all" || viewParam === "dismissed" ? viewParam : "suggested"
 	const query = params.get("query") ?? ""
@@ -99,7 +99,7 @@ export default function FixDuplicatesPage() {
 	const updateParams = (changes: Record<string, string>) => setParams({ ...changes, page: null })
 	// The first keystroke starts a search (one Back undoes it); refining it replaces that entry.
 	const updateQuery = (value: string) =>
-		setParams({ query: value, page: null }, { replace: !!committed.get("query") })
+		setParams({ query: value, page: null }, { replace: url => !!url.get("query") })
 	const action = async (operation: () => Promise<unknown>) => {
 		setBusy(true)
 		try {
