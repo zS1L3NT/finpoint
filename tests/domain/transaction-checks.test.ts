@@ -8,7 +8,10 @@ const { ConflictError, createRecord, updateRecord } = await import("../../src/lo
 const { deletePendingStatement, updatePendingStatement } = await import(
 	"../../src/logic/statements"
 )
-const { deleteCategory } = await import("../../src/logic/categories")
+const { createCategory, deleteCategory, updateCategory } = await import(
+	"../../src/logic/categories"
+)
+const { attachBudgetRecord } = await import("../../src/logic/budgets")
 const { upsertMonthlyBudget } = await import("../../src/logic/monthly-budgets")
 const { ValidationError } = await import("../../src/logic/validate")
 
@@ -107,4 +110,56 @@ test("overlapping Monthly Budget creates with one name leave one row", async () 
 	const input = { name: "Travel", color: "#123456", month: "2026-01-01", amount: 100, scope: "month" }
 	await Promise.allSettled([upsertMonthlyBudget(input), upsertMonthlyBudget(input)])
 	expect(await db.monthly_budgets.count()).toBe(1)
+})
+
+const child = (parent: string | null) => ({
+	name: "Snacks",
+	icon: "lucide:cookie",
+	color: "#111111",
+	parent_category_id: parent,
+	default_monthly_budget_id: "mb",
+})
+
+const addMonthlyBudget = () =>
+	db.monthly_budgets.add({ id: "mb", name: "Food", color: "", display_order: 0 } as never)
+
+async function expectNoOrphanParents() {
+	for (const c of await db.categories.toArray()) {
+		if (c.parent_category_id) expect(await db.categories.get(c.parent_category_id)).toBeDefined()
+	}
+}
+
+// The parent is deleted after the write has checked it and before it stores the row: the
+// checks used to run outside the write's transaction, so the delete could slip between them.
+async function deleteParentMidWrite(write: () => Promise<unknown>) {
+	const writing = write()
+	for (let tick = 0; tick < 2; tick++) await db.accounts.count()
+	await Promise.allSettled([writing, deleteCategory("cat")])
+	await expectNoOrphanParents()
+}
+
+test("creating a child Category while its parent is deleted leaves no orphan", async () => {
+	await addMonthlyBudget()
+	await deleteParentMidWrite(() => createCategory(child("cat")))
+})
+
+test("moving a Category under a parent that is being deleted leaves no orphan", async () => {
+	await addMonthlyBudget()
+	await db.categories.add({
+		id: "other",
+		name: "Other",
+		icon: "",
+		color: "",
+		parent_category_id: null,
+		analytics_treatment: "spending",
+		default_monthly_budget_id: null,
+	})
+	const created = await createCategory(child("other"))
+	await deleteParentMidWrite(() => updateCategory(created.id, child("cat")))
+})
+
+test("attaching a Record to a deleted Budget stores nothing", async () => {
+	const created = await createRecord(record([]))
+	await attachBudgetRecord("gone", created.id).catch(() => undefined)
+	expect(await db.budget_records.count()).toBe(0)
 })

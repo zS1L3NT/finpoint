@@ -138,7 +138,11 @@ export async function deleteBudget(id: string) {
 }
 
 export async function attachBudgetRecord(budgetId: string, recordId: string) {
-	await db.budget_records.put({ budget_id: budgetId, record_id: recordId })
+	await db.transaction("rw", [db.budgets, db.records, db.budget_records], async () => {
+		if (!(await db.budgets.get(budgetId))) throw new Error("Budget not found.")
+		if (!(await db.records.get(recordId))) throw new Error("Record not found.")
+		await db.budget_records.put({ budget_id: budgetId, record_id: recordId })
+	})
 }
 
 export async function detachBudgetRecord(budgetId: string, recordId: string) {

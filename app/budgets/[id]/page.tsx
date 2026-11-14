@@ -3,6 +3,7 @@
 import { useLiveQuery } from "dexie-react-hooks"
 import { DateTime } from "luxon"
 import { use, useMemo, useState } from "react"
+import { toast } from "sonner"
 import BudgetProgressChart from "@/components/charts/budget-progress-chart"
 import BudgetEditorDialog from "@/components/dialogs/budget-editor"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
@@ -66,8 +67,12 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 
 	const attach = async (record: Record) => {
 		if (!budget) return
-		await attachBudgetRecord(budget.id, record.id)
-		setIsAttachingRecord(false)
+		try {
+			await attachBudgetRecord(budget.id, record.id)
+			setIsAttachingRecord(false)
+		} catch {
+			toast.error("Unable to attach this Record.")
+		}
 	}
 
 	const detach = async (record: Record) => {
