@@ -247,27 +247,19 @@ async function finishCycle(outcome: DriveSyncResult, announced: boolean): Promis
 	lastCycleAt = Date.now()
 	await markDriveChecked().catch(() => undefined)
 	const times = await refreshTimes()
-	if (outcome.outcome === "pushed") {
+	if (outcome.outcome === "pushed" || outcome.outcome === "pulled") {
+		// A write made while the transfer ran is not in it, so ask instead of assuming.
+		const dirty = await driveLocalDirty().catch(() => false)
 		set({
-			kind: "up-to-date",
-			localDirty: false,
+			kind: dirty ? "local-changes" : "up-to-date",
+			localDirty: dirty,
 			lastSyncAt: times.lastSyncAt,
 			remoteModifiedTime: times.remote,
 			lastCheckAt: times.check,
 			conflictAt: null,
 			error: null,
 		})
-	} else if (outcome.outcome === "pulled") {
-		set({
-			kind: "up-to-date",
-			localDirty: false,
-			lastSyncAt: times.lastSyncAt,
-			remoteModifiedTime: times.remote,
-			lastCheckAt: times.check,
-			conflictAt: null,
-			error: null,
-		})
-		if (announced) {
+		if (outcome.outcome === "pulled" && announced) {
 			emit({
 				key: `pulled-${times.lastSyncAt}`,
 				title: "Restored from Drive.",
@@ -355,40 +347,41 @@ async function cycle(reason: "boot" | "dirty" | "focus" | "online"): Promise<voi
 		await refreshSyncDisplay()
 		return
 	}
-	let outcome: DriveSyncResult | "skipped"
-	try {
-		outcome = await exclusive(false, async (): Promise<DriveSyncResult> => {
-			set({ configured: true, activity: "checking", error: null })
-			const token = await ensureDriveTokenSilent()
-			const [status, localDirty] = await Promise.all([driveStatus(), driveLocalDirty()])
-			let remote =
-				status.fileId != null
-					? await getFileMeta(token, status.fileId).catch(() => null)
-					: null
-			remote ??= await findBackupFile(token)
-			if (!remote) {
-				if (!localDirty) return { outcome: "up-to-date" }
-				set({ activity: "pushing" })
-				await pushDrive()
-				return { outcome: "pushed" }
-			}
-			const remoteDirty = isRemoteNewer(
-				remote.modifiedTime,
-				status.lastSyncAt,
-				getClockSkewMs(),
-			)
-			if (!localDirty && !remoteDirty) return { outcome: "up-to-date" }
-			if (localDirty && remoteDirty)
-				return { outcome: "conflict", remoteModifiedTime: remote.modifiedTime }
-			if (remoteDirty) {
-				// The restore's own writes count as writes here, so one more check follows.
-				set({ activity: "pulling" })
-				await pullDrive()
-				return { outcome: "pulled", remoteModifiedTime: remote.modifiedTime }
-			}
+	const check = async (): Promise<DriveSyncResult> => {
+		set({ configured: true, activity: "checking", error: null })
+		const token = await ensureDriveTokenSilent()
+		const [status, localDirty] = await Promise.all([driveStatus(), driveLocalDirty()])
+		let remote =
+			status.fileId != null ? await getFileMeta(token, status.fileId).catch(() => null) : null
+		remote ??= await findBackupFile(token)
+		if (!remote) {
+			if (!localDirty) return { outcome: "up-to-date" }
 			set({ activity: "pushing" })
 			await pushDrive()
 			return { outcome: "pushed" }
+		}
+		const remoteDirty = isRemoteNewer(remote.modifiedTime, status.lastSyncAt, getClockSkewMs())
+		if (!localDirty && !remoteDirty) return { outcome: "up-to-date" }
+		if (localDirty && remoteDirty)
+			return { outcome: "conflict", remoteModifiedTime: remote.modifiedTime }
+		if (remoteDirty) {
+			// The restore's own writes count as writes here, so one more check follows.
+			set({ activity: "pulling" })
+			await pullDrive()
+			return { outcome: "pulled", remoteModifiedTime: remote.modifiedTime }
+		}
+		set({ activity: "pushing" })
+		await pushDrive()
+		return { outcome: "pushed" }
+	}
+	let outcome: DriveSyncResult | "skipped"
+	try {
+		// Settling stays inside the lock: a later operation must not start, and have its
+		// activity cleared, while this one is still writing its result.
+		outcome = await exclusive(false, async () => {
+			const result = await check()
+			await finishCycle(result, true)
+			return result
 		})
 	} catch (cause) {
 		lastCycleAt = Date.now()
@@ -420,7 +413,6 @@ async function cycle(reason: "boot" | "dirty" | "focus" | "online"): Promise<voi
 		if (pendingPush) armPushTimer()
 		return
 	}
-	await finishCycle(outcome, true)
 	set({ activity: null })
 }
 
@@ -433,11 +425,9 @@ function flushOnHide(): void {
 		!isDriveConfigured()
 	)
 		return
-	try {
-		void pushDrive().catch(() => undefined)
-	} catch {
-		// Best effort: the pending flag survives for the next visit.
-	}
+	// Best effort: the pending flag survives for the next visit. Skipped when another tab is
+	// syncing, so two uploads cannot overwrite each other.
+	void exclusive(false, pushDrive).catch(() => undefined)
 }
 
 export function startAutoSync(): void {

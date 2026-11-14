@@ -38,6 +38,7 @@ const drive = {
 	authNeeded: false,
 	dirty: true,
 	lastSyncAt: null as string | null,
+	checked: null as null | Promise<void>,
 }
 mock.module("../../src/data/google-drive", () => ({
 	...realDrive,
@@ -60,7 +61,7 @@ mock.module("../../src/logic/drive-sync", () => ({
 		lastCheckAt: null,
 	}),
 	driveLocalDirty: async () => drive.dirty,
-	markDriveChecked: async () => undefined,
+	markDriveChecked: async () => drive.checked ?? undefined,
 	pullDrive: async () => undefined,
 	pushDrive: async () => {
 		drive.pushes++
@@ -101,6 +102,8 @@ beforeEach(async () => {
 	drive.authNeeded = false
 	drive.dirty = true
 	drive.lastSyncAt = null
+	drive.checked = null
+	Reflect.deleteProperty(nav, "locks")
 	if (drive.release) drive.release()
 	drive.release = null
 	await settle()
@@ -183,4 +186,49 @@ test("an offline check does not clear the activity of a running cycle", async ()
 	expect(sync.getSyncSnapshot().activity).toBe("pushing")
 	drive.release?.()
 	await settle()
+})
+
+test("a write during a push still shows as unsynced when the push settles", async () => {
+	await write()
+	fireTimers()
+	await settle()
+	await write()
+	drive.release?.()
+	await settle()
+	expect(sync.getSyncSnapshot()).toMatchObject({ kind: "local-changes", localDirty: true })
+	drive.release?.()
+	await settle()
+})
+
+test("leaving the page does not upload while another tab holds the Drive lock", async () => {
+	await write()
+	Object.assign(nav, {
+		locks: { request: (_name: string, _options: object, run: (lock: null) => unknown) => run(null) },
+	})
+	listeners.get("pagehide")?.()
+	await settle()
+	expect(drive.pushes).toBe(0)
+})
+
+test("a manual operation cannot start while a background cycle is still settling", async () => {
+	let settled = () => {}
+	drive.checked = new Promise<void>(resolve => {
+		settled = resolve
+	})
+	await write()
+	fireTimers()
+	await settle()
+	drive.release?.()
+	await settle()
+
+	let ran = false
+	const manual = sync.runManualDrive("pulling", async () => {
+		ran = true
+		return { outcome: "up-to-date" }
+	})
+	await expect(manual).rejects.toThrow("busy")
+	expect(ran).toBe(false)
+	settled()
+	await settle()
+	expect(sync.getSyncSnapshot().activity).toBe(null)
 })
