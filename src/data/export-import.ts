@@ -228,9 +228,13 @@ export function parseImportFile(text: string): FinpointExport {
 	}
 }
 
-export async function importData(data: FinpointExport): Promise<void> {
+/**
+ * Replaces the whole database. Returns it as stored, read in the same transaction, so a
+ * caller can fingerprint exactly what it wrote and nothing written after.
+ */
+export async function importData(data: FinpointExport): Promise<FinpointExport> {
 	data = parseImportFile(JSON.stringify(data))
-	await db.transaction(
+	return db.transaction(
 		"rw",
 		[...TABLES.map(table => db.table(table)), db.settings, db.meta],
 		async () => {
@@ -242,6 +246,7 @@ export async function importData(data: FinpointExport): Promise<void> {
 			await replaceSettings(data.settings)
 			await db.meta.put({ key: "seeded_v1", value: "1" })
 			await db.meta.put({ key: "seeded_v2", value: "1" })
+			return exportData()
 		},
 	)
 }
