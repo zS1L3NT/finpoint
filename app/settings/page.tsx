@@ -2,7 +2,7 @@
 
 import { useLiveQuery } from "dexie-react-hooks"
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { toast } from "sonner"
 import DateField from "@/components/form/date-field"
 import { FormField } from "@/components/form/field"
@@ -60,23 +60,18 @@ function learnedSignals(field: RuleField, w: Weights) {
 export default function SettingsPage() {
 	const settings = useSettings()
 	const categories = useLiveQuery(() => listCategories(), []) ?? []
-	const [startDate, setStartDate] = useState("")
-	const [endDateToday, setEndDateToday] = useState(false)
+	// Only the unsaved edits live here; untouched fields follow the live settings.
+	const [edits, setEdits] = useState<{ startDate?: string; endDateToday?: boolean }>({})
 	const [saving, setSaving] = useState(false)
 	const [accuracy, setAccuracy] = useState<SuggestionAccuracy | null>(null)
 	const [measuring, setMeasuring] = useState(false)
 
-	useEffect(() => {
-		if (settings) {
-			setStartDate(settings.default_filter_start_date ?? "")
-			setEndDateToday(settings.default_filter_end_date_today)
-		}
-	}, [settings])
-
-	const saved = settings?.default_filter_start_date ?? ""
+	const startDate = edits.startDate ?? settings?.default_filter_start_date ?? ""
+	const endDateToday = edits.endDateToday ?? settings?.default_filter_end_date_today ?? false
 	const changed =
 		settings !== undefined &&
-		(startDate !== saved || endDateToday !== settings.default_filter_end_date_today)
+		(startDate !== (settings.default_filter_start_date ?? "") ||
+			endDateToday !== settings.default_filter_end_date_today)
 	const handleSaveFilters = async () => {
 		if (!settings) return
 		setSaving(true)
@@ -85,6 +80,7 @@ export default function SettingsPage() {
 				default_filter_start_date: startDate || null,
 				default_filter_end_date_today: endDateToday,
 			})
+			setEdits({})
 			toast.success("Default filters saved.")
 		} catch (cause) {
 			toast.error(cause instanceof Error ? cause.message : "Could not save settings.")
@@ -131,7 +127,9 @@ export default function SettingsPage() {
 								description="Leave empty to include Records and Statements from any earlier date."
 								value={startDate}
 								placeholder="No default start date"
-								onChange={setStartDate}
+								onChange={value =>
+									setEdits(prev => ({ ...prev, startDate: value }))
+								}
 							/>
 							<FormField
 								id="default_filter_end_date"
@@ -140,7 +138,12 @@ export default function SettingsPage() {
 							>
 								<Select
 									value={endDateToday ? "today" : "none"}
-									onValueChange={value => setEndDateToday(value === "today")}
+									onValueChange={value =>
+										setEdits(prev => ({
+											...prev,
+											endDateToday: value === "today",
+										}))
+									}
 								>
 									<SelectTrigger id="default_filter_end_date" className="w-full">
 										<span className="flex min-w-0 items-center gap-1.5">

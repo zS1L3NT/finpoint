@@ -962,6 +962,33 @@ test("settings: default filters validate, persist and reload", async ({ page, wo
 	await expect(page.locator("#default_filter_start_date")).toContainText("No default start date")
 })
 
+test("settings: a write from another tab keeps the default filter you are editing", async ({
+	page,
+	workspace,
+}) => {
+	expect(workspace).toBe("populated")
+	await blockGoogle(page)
+
+	await page.goto("/settings")
+	await expect(page.locator("#default_filter_start_date")).toContainText("1 Oct 2026")
+	await page.getByRole("button", { name: "Clear date" }).click()
+	await expect(page.locator("#default_filter_start_date")).toContainText("No default start date")
+
+	const other = await page.context().newPage()
+	await blockGoogle(other)
+	await other.goto("/settings")
+	await other.locator("#default_filter_end_date").click()
+	await pickOption(other.getByRole("option", { name: "Today" }))
+	await other.getByRole("button", { name: "Save default filters" }).click()
+	await expect(other.getByText("Default filters saved.")).toBeVisible()
+	await other.close()
+
+	// The saved end date arrives live; the unsaved start date stays cleared.
+	await expect(page.locator("#default_filter_end_date")).toContainText("Today")
+	await page.waitForTimeout(500)
+	await expect(page.locator("#default_filter_start_date")).toContainText("No default start date")
+})
+
 test("sync: signed-out data stays local with no external Google calls", {
 	tag: ["@desktop-only"],
 }, async ({ page, workspace }) => {
