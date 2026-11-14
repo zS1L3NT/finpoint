@@ -161,10 +161,19 @@ test("editing a pending Statement while a Record allocates it never under-covers
 })
 
 test("deleting a category while a Record is created in it leaves no orphan", async () => {
-	await Promise.allSettled([deleteCategory("cat"), createRecord(record([]))])
-	for (const r of await db.records.toArray()) {
-		expect(await db.categories.get(r.category_id)).toBeDefined()
+	const create = () => createRecord(record([]))
+	const remove = () => deleteCategory("cat")
+	let kept = 0
+	const check = async () => {
+		const records = await db.records.toArray()
+		for (const r of records) expect(await db.categories.get(r.category_id)).toBeDefined()
+		// One of the two must win: a Record in a kept Category, or a deleted Category and no Record.
+		expect(records.length === 1).toBe((await db.categories.get("cat")) !== undefined)
+		kept += records.length
 	}
+	await raceGap(async () => {}, create, remove, check)
+	await raceGap(async () => {}, remove, create, check)
+	expect(kept).toBeGreaterThan(0)
 })
 
 test("overlapping Monthly Budget creates with one name leave one row", async () => {

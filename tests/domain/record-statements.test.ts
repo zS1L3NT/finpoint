@@ -39,4 +39,7 @@ test("a Record shows its Statements as the Statement list does, card number mask
 	const [attached] = (await getRecord("r")).statements
 	expect(listed?.description).toBe("POS XXXX-XXXX-XXXX-4444 COFFEE")
 	expect(attached?.description).toBe(listed?.description)
+	// Everything the list derives (amounts, flags, Account) is the same on the Record.
+	expect(attached).toMatchObject(listed ?? {})
+	expect(attached).toMatchObject({ allocable_amount: 0, allocation_count: 1, is_unallocated: false })
 })
