@@ -1,4 +1,5 @@
 import { db, type StatementRow } from "@/data/db"
+import { maskDescription } from "@/logic/replacements"
 import { toCents } from "@/logic/shared"
 import { Validator } from "@/logic/validate"
 
@@ -61,6 +62,12 @@ export function pairKey(a: string, b: string) {
 
 export type DuplicateStatement = StatementRow
 
+/** What these readers return is shown, so it carries the same mask as the Statement list. */
+const masked = (statement: StatementRow): StatementRow => ({
+	...statement,
+	description: maskDescription(statement.description),
+})
+
 export type DuplicateGroup = {
 	id: string
 	statements: StatementRow[]
@@ -116,7 +123,7 @@ export async function duplicateGroups(ignoreDescriptions = false): Promise<Dupli
 				}
 			groups.push({
 				id: first,
-				statements: bucket.filter(s => connected.has(s.id)),
+				statements: bucket.filter(s => connected.has(s.id)).map(masked),
 				pairs: pairs.filter(([a, b]) => connected.has(a) && connected.has(b)),
 				allocationCounts: {},
 			})
@@ -139,7 +146,9 @@ export async function dismissedDuplicatePairs() {
 	return (await db.duplicate_dismissals.toArray()).flatMap(p => {
 		const a = rows.get(p.statement_id)
 		const b = rows.get(p.other_statement_id)
-		return a && b ? [{ statements: [a, b] as [StatementRow, StatementRow] }] : []
+		return a && b
+			? [{ statements: [masked(a), masked(b)] as [StatementRow, StatementRow] }]
+			: []
 	})
 }
 
@@ -213,7 +222,7 @@ export async function duplicateReview(ids: string[]) {
 	const allocations = await db.allocations.where("statement_id").anyOf(ids).toArray()
 	const records = await db.records.bulkGet([...new Set(allocations.map(a => a.record_id))])
 	return {
-		statements: statements.filter((s): s is StatementRow => !!s),
+		statements: statements.filter((s): s is StatementRow => !!s).map(masked),
 		allocations,
 		records: records.filter(r => !!r),
 	}

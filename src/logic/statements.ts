@@ -9,8 +9,10 @@ import { enrichRecords } from "@/logic/records"
 import {
 	dayDifference,
 	ensureCanReplace,
+	maskDescription,
 	replacementComparison,
 	replacementReason,
+	unmaskDescription,
 } from "@/logic/replacements"
 import { inputToStored, newId, round2 } from "@/logic/shared"
 import {
@@ -68,7 +70,10 @@ export async function listStatements(filters: StatementFilters = {}) {
 
 	const q = (filters.query ?? "").trim().toLowerCase()
 	if (q) {
-		rows = rows.filter(statement => statement.description.toLowerCase().includes(q))
+		// Search what the list shows, so hidden card digits cannot be found by guessing.
+		rows = rows.filter(statement =>
+			maskDescription(statement.description).toLowerCase().includes(q),
+		)
 	}
 	if (filters.account_id) rows = rows.filter(s => s.account_id === filters.account_id)
 	if (filters.exclude_ids?.length) {
@@ -151,7 +156,8 @@ export async function updatePendingStatement(id: string, input: StatementInput) 
 		await db.statements.update(id, {
 			account_id: dto.account_id,
 			datetime: inputToStored(dto.datetime),
-			description: dto.description,
+			// The editor is filled from the masked description.
+			description: unmaskDescription(dto.description, existing.description),
 			amount: dto.amount,
 		})
 		const saved = await db.statements.get(id)
@@ -295,7 +301,7 @@ export async function replacementCandidates(
 	}
 	if (options.query?.trim()) {
 		const q = options.query.trim().toLowerCase()
-		rows = rows.filter(s => s.description.toLowerCase().includes(q))
+		rows = rows.filter(s => maskDescription(s.description).toLowerCase().includes(q))
 	}
 
 	const pendingShape = { ...pending, is_pending: true }

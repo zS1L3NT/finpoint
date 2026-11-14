@@ -83,6 +83,14 @@ export function replacementComparison(
 	}
 }
 
+const CARD_NUMBER = /\b\d{4}-\d{4}-\d{4}-(\d{4})\b/
+
 export function maskDescription(description: string): string {
-	return description.replace(/\b\d{4}-\d{4}-\d{4}-(\d{4})\b/, "XXXX-XXXX-XXXX-$1")
+	return description.replace(CARD_NUMBER, "XXXX-XXXX-XXXX-$1")
+}
+
+/** A description edited from its masked form gets the stored card number back. */
+export function unmaskDescription(edited: string, stored: string): string {
+	const card = stored.match(CARD_NUMBER)
+	return card ? edited.replace(`XXXX-XXXX-XXXX-${card[1]}`, card[0]) : edited
 }
