@@ -38,11 +38,9 @@ export type RecordFilters = {
 }
 
 export class ConflictError extends Error {
-	stale_ids?: string[]
-	constructor(message: string, stale_ids?: string[]) {
+	constructor(message: string) {
 		super(message)
 		this.name = "ConflictError"
-		this.stale_ids = stale_ids
 	}
 }
 
@@ -65,7 +63,6 @@ export async function enrichRecords(rows: RecordRow[]) {
 		return {
 			...row,
 			allocated_amount,
-			statement_count: entry?.count ?? 0,
 			pending_statement_count: entry?.pending ?? 0,
 			is_pending: isPendingRecord(row.amount, entry),
 			subtitle: subtitle(row.people, row.location),

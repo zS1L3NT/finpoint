@@ -157,8 +157,6 @@ export default function ImporterPage() {
 
 				<form
 					className="grid max-w-3xl gap-6"
-					method="POST"
-					encType="multipart/form-data"
 					onSubmit={event => {
 						event.preventDefault()
 						void form.handleSubmit()

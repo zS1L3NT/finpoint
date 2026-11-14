@@ -11,7 +11,7 @@ import {
 	replacementComparison,
 	replacementReason,
 } from "@/logic/replacements"
-import { inputToStored, newId, round2, toCents } from "@/logic/shared"
+import { inputToStored, newId, round2 } from "@/logic/shared"
 import {
 	compareStatements,
 	enrichStatement,
@@ -373,5 +373,3 @@ export async function replacementReview(pendingId: string, statementId: string) 
 		disabled_reason: reason,
 	}
 }
-
-export { toCents }

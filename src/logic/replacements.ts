@@ -1,6 +1,6 @@
 // Port of `App\Support\StatementReplacement` (PHP -> TypeScript, same rules).
 
-import { fromCents, toCents } from "@/logic/shared"
+import { toCents } from "@/logic/shared"
 
 export type ReplacementStatement = {
 	id: string
@@ -83,12 +83,6 @@ export function replacementComparison(
 	}
 }
 
-export function sameDirection(a: ReplacementStatement, b: ReplacementStatement): boolean {
-	return toCents(a.amount) > 0 === toCents(b.amount) > 0
-}
-
 export function maskDescription(description: string): string {
 	return description.replace(/\b\d{4}-\d{4}-\d{4}-(\d{4})\b/, "XXXX-XXXX-XXXX-$1")
 }
-
-export { fromCents }
