@@ -21,6 +21,7 @@ import {
 import { FieldGroup } from "@/components/ui/field"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { useDialogCloseAnimation } from "@/hooks/use-dialog-close-animation"
+import { useSeed } from "@/hooks/use-seed"
 import { useSubmitLock } from "@/hooks/use-submit-lock"
 import {
 	createPendingStatement,
@@ -63,31 +64,25 @@ export default function PendingStatementDialog({
 	const { getApiFieldErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
 	const { locked, run } = useSubmitLock(isOpen)
 
-	// Seed when the dialog opens, and again only for a different Statement: a fresh object for
-	// the same one (a background write) must not replace what is being typed.
-	const seedKey = isOpen ? (statement?.id ?? "new") : null
-	const [seededKey, setSeededKey] = useState<string | null>(null)
-	if (seedKey !== seededKey) {
-		setSeededKey(seedKey)
-		if (seedKey !== null) {
-			setValues(
-				statement
-					? {
-							account_id: statement.account.id,
-							datetime: statement.datetime.replace(" ", "T"),
-							amount: statement.amount,
-							description: statement.description,
-						}
-					: {
-							account_id: accounts[0]?.id ?? "",
-							datetime: DateTime.now().startOf("day").toFormat("yyyy-MM-dd'T'HH:mm"),
-							amount: 0,
-							description: "",
-						},
-			)
-			resetApiErrors()
-		}
-	}
+	// Seeds on open and for a different Statement, not for a background write to the same one.
+	useSeed(isOpen ? (statement?.id ?? "new") : null, () => {
+		setValues(
+			statement
+				? {
+						account_id: statement.account.id,
+						datetime: statement.datetime.replace(" ", "T"),
+						amount: statement.amount,
+						description: statement.description,
+					}
+				: {
+						account_id: accounts[0]?.id ?? "",
+						datetime: DateTime.now().startOf("day").toFormat("yyyy-MM-dd'T'HH:mm"),
+						amount: 0,
+						description: "",
+					},
+		)
+		resetApiErrors()
+	})
 	// Accounts can arrive after a new Statement dialog opened.
 	const defaultAccountId = accounts[0]?.id
 	if (isOpen && !statement && !values.account_id && defaultAccountId) {

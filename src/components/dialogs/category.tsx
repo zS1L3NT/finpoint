@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dialog"
 import { FieldGroup } from "@/components/ui/field"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
+import { useSeed } from "@/hooks/use-seed"
 import { useSubmitLock } from "@/hooks/use-submit-lock"
 import { canUseDefaultMonthlyBudget, TREATMENTS, treatmentLabel } from "@/lib/analytics"
 import { cn } from "@/lib/utils"
@@ -96,28 +97,22 @@ export default function CategoryDialog({
 
 	const { locked, run } = useSubmitLock(isOpen)
 
-	// Seed when the dialog opens, and again only for a different Category: a fresh object for
-	// the same one (a background write) must not replace what is being typed.
-	const seedKey = isOpen ? (category?.id ?? "new") : null
-	const [seededKey, setSeededKey] = useState<string | null>(null)
-	if (seedKey !== seededKey) {
-		setSeededKey(seedKey)
-		if (seedKey !== null) {
-			setValues(
-				category
-					? {
-							name: category.name,
-							icon: category.icon,
-							color: category.color,
-							parent_category_id: category.parent_category_id ?? "",
-							analytics_treatment: category.analytics_treatment,
-							default_monthly_budget_id: category.default_monthly_budget_id ?? "",
-						}
-					: EMPTY_FORM_VALUES,
-			)
-			resetApiErrors()
-		}
-	}
+	// Seeds on open and for a different Category, not for a background write to the same one.
+	useSeed(isOpen ? (category?.id ?? "new") : null, () => {
+		setValues(
+			category
+				? {
+						name: category.name,
+						icon: category.icon,
+						color: category.color,
+						parent_category_id: category.parent_category_id ?? "",
+						analytics_treatment: category.analytics_treatment,
+						default_monthly_budget_id: category.default_monthly_budget_id ?? "",
+					}
+				: EMPTY_FORM_VALUES,
+		)
+		resetApiErrors()
+	})
 
 	const setValue = <TKey extends keyof CategoryFormValues>(
 		field: TKey,

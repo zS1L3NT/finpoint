@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { useDialogCloseAnimation } from "@/hooks/use-dialog-close-animation"
+import { useSeed } from "@/hooks/use-seed"
 import { useSubmitLock } from "@/hooks/use-submit-lock"
 import { updateAccount } from "@/logic/accounts"
 import { ValidationError } from "@/logic/validate"
@@ -36,17 +37,11 @@ export default function AccountDialog({
 
 	const { locked, run } = useSubmitLock(isOpen)
 
-	// Seed when the dialog opens, and again only for a different Account: a fresh object for
-	// the same one (a background write) must not replace what is being typed.
-	const seedKey = isOpen ? account.id : null
-	const [seededKey, setSeededKey] = useState<string | null>(null)
-	if (seedKey !== seededKey) {
-		setSeededKey(seedKey)
-		if (seedKey !== null) {
-			setName(account.name)
-			resetApiErrors()
-		}
-	}
+	// Seeds on open and for a different Account, not for a background write to the same one.
+	useSeed(isOpen ? account.id : null, () => {
+		setName(account.name)
+		resetApiErrors()
+	})
 
 	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault()

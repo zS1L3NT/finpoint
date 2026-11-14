@@ -21,6 +21,7 @@ import { FieldError } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
+import { useSeed } from "@/hooks/use-seed"
 import { useSubmitLock } from "@/hooks/use-submit-lock"
 import { TREATMENTS } from "@/lib/analytics"
 import { cn, formatCurrency, formatDatetime, pluralize } from "@/lib/utils"
@@ -74,25 +75,19 @@ export default function StatementRuleDialog({
 
 	const { locked, run } = useSubmitLock(isOpen)
 
-	// Seed when the dialog opens, and again only for a different rule: a fresh object for the
-	// same one (a background write) must not replace what is being typed.
-	const seedKey = isOpen ? (rule ? (rule.id ?? "draft") : "new") : null
-	const [seededKey, setSeededKey] = useState<string | null>(null)
-	if (seedKey !== seededKey) {
-		setSeededKey(seedKey)
-		if (seedKey !== null) {
-			setName(rule?.name ?? "")
-			setMode(rule?.conditions.mode ?? "all")
-			setConditions(
-				(rule?.conditions.items ?? [{ operator: "contains", value: "" }]).map(c => ({
-					...c,
-					key: crypto.randomUUID(),
-				})),
-			)
-			setActions(rule?.actions ?? {})
-			resetApiErrors()
-		}
-	}
+	// Seeds on open and for a different rule, not for a background write to the same one.
+	useSeed(isOpen ? (rule ? (rule.id ?? "draft") : "new") : null, () => {
+		setName(rule?.name ?? "")
+		setMode(rule?.conditions.mode ?? "all")
+		setConditions(
+			(rule?.conditions.items ?? [{ operator: "contains", value: "" }]).map(c => ({
+				...c,
+				key: crypto.randomUUID(),
+			})),
+		)
+		setActions(rule?.actions ?? {})
+		resetApiErrors()
+	})
 
 	const input = {
 		name,
