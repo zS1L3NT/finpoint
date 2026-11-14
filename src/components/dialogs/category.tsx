@@ -1,5 +1,5 @@
 import { useLiveQuery } from "dexie-react-hooks"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { toast } from "sonner"
 import ComboboxField from "@/components/form/combobox-field"
 import SelectField from "@/components/form/select-field"
@@ -18,6 +18,8 @@ import {
 } from "@/components/ui/dialog"
 import { FieldGroup } from "@/components/ui/field"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
+import { useSeed } from "@/hooks/use-seed"
+import { useSubmitLock } from "@/hooks/use-submit-lock"
 import { canUseDefaultMonthlyBudget, TREATMENTS, treatmentLabel } from "@/lib/analytics"
 import { cn } from "@/lib/utils"
 import { createCategory, deleteCategory, updateCategory } from "@/logic/categories"
@@ -93,11 +95,10 @@ export default function CategoryDialog({
 			"Default monthly budget")
 		: "Unbudgeted"
 
-	useEffect(() => {
-		if (!isOpen) {
-			return
-		}
+	const { locked, run } = useSubmitLock(isOpen)
 
+	// Seeds on open and for a different Category, not for a background write to the same one.
+	useSeed(isOpen ? (category?.id ?? "new") : null, () => {
 		setValues(
 			category
 				? {
@@ -111,7 +112,7 @@ export default function CategoryDialog({
 				: EMPTY_FORM_VALUES,
 		)
 		resetApiErrors()
-	}, [isOpen, category, resetApiErrors])
+	})
 
 	const setValue = <TKey extends keyof CategoryFormValues>(
 		field: TKey,
@@ -131,32 +132,37 @@ export default function CategoryDialog({
 			analytics_treatment: values.analytics_treatment,
 			default_monthly_budget_id: values.default_monthly_budget_id || null,
 		}
-		try {
-			if (isEditing && category) {
-				await updateCategory(category.id, input)
-			} else {
-				await createCategory(input)
+		await run(async () => {
+			try {
+				if (isEditing && category) {
+					await updateCategory(category.id, input)
+				} else {
+					await createCategory(input)
+				}
+				setIsOpen(false)
+				return true
+			} catch (cause) {
+				if (cause instanceof ValidationError) setApiErrors(cause.errors)
+				else toast.error("Unable to save this category.")
+				return false
 			}
-			setIsOpen(false)
-		} catch (cause) {
-			if (cause instanceof ValidationError) {
-				setApiErrors(cause.errors)
-				return
-			}
-			toast.error("Unable to save this category.")
-		}
+		})
 	}
 
 	const handleDelete = async () => {
 		if (!category) {
 			return
 		}
-		try {
-			await deleteCategory(category.id)
-			setIsOpen(false)
-		} catch {
-			toast.error("Unable to delete this category.")
-		}
+		await run(async () => {
+			try {
+				await deleteCategory(category.id)
+				setIsOpen(false)
+				return true
+			} catch {
+				toast.error("Unable to delete this category.")
+				return false
+			}
+		})
 	}
 
 	if (monthlyBudgets === undefined) return null
@@ -303,7 +309,7 @@ export default function CategoryDialog({
 							variant="destructive"
 							className="mr-auto"
 							onClick={handleDelete}
-							disabled={!category.can_delete}
+							disabled={locked || !category.can_delete}
 						>
 							<IconifyIcon icon="lucide:trash-2" /> Delete
 						</Button>
@@ -315,7 +321,7 @@ export default function CategoryDialog({
 							</Button>
 						}
 					/>
-					<Button type="submit" form="category-form">
+					<Button type="submit" form="category-form" disabled={locked}>
 						{isEditing ? "Save changes" : "Create category"}
 					</Button>
 				</DialogFooter>

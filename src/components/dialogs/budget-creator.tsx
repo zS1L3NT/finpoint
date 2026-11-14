@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dialog"
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
+import { useSubmitLock } from "@/hooks/use-submit-lock"
 import { createBudget } from "@/logic/budgets"
 import { ValidationError } from "@/logic/validate"
 
@@ -30,6 +31,7 @@ export default function BudgetCreatorDialog({
 	trigger?: React.ReactElement
 }) {
 	const { mergeErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
+	const { locked, run } = useSubmitLock(isOpen)
 
 	const form = useForm({
 		defaultValues: {
@@ -39,24 +41,24 @@ export default function BudgetCreatorDialog({
 			end_date: "",
 			automatic: true,
 		},
-		onSubmit: async ({ value }) => {
-			try {
-				await createBudget({
-					name: value.name,
-					amount: value.amount,
-					start_date: value.start_date,
-					end_date: value.end_date,
-					automatic: value.automatic,
-				})
-				setIsOpen(false)
-			} catch (cause) {
-				if (cause instanceof ValidationError) {
-					setApiErrors(cause.errors)
-					return
+		onSubmit: ({ value }) =>
+			run(async () => {
+				try {
+					await createBudget({
+						name: value.name,
+						amount: value.amount,
+						start_date: value.start_date,
+						end_date: value.end_date,
+						automatic: value.automatic,
+					})
+					setIsOpen(false)
+					return true
+				} catch (cause) {
+					if (cause instanceof ValidationError) setApiErrors(cause.errors)
+					else toast.error("Unable to create this budget.")
+					return false
 				}
-				toast.error("Unable to create this budget.")
-			}
-		},
+			}),
 	})
 
 	return (
@@ -183,7 +185,7 @@ export default function BudgetCreatorDialog({
 							</Button>
 						}
 					/>
-					<Button type="submit" form="budget-create-form">
+					<Button type="submit" form="budget-create-form" disabled={locked}>
 						Create budget
 					</Button>
 				</DialogFooter>

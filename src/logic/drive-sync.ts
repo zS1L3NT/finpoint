@@ -1,5 +1,5 @@
-// Mirrors a DriveSyncController: plaintext snapshot sync to the user's own
-// Google Drive appDataFolder. Manual JSON backup/restore stays untouched.
+// Plaintext snapshot sync to the user's own Google Drive appDataFolder. Manual JSON
+// backup/restore stays untouched.
 
 import { db } from "@/data/db"
 import { exportData, importData, parseImportFile } from "@/data/export-import"
@@ -164,20 +164,21 @@ export async function pullDrive(): Promise<void> {
 	if (!fileId) throw new Error("No backup found in Google Drive yet.")
 
 	const text = await downloadBackupFile(token, fileId)
-	const snapshot = parseImportFile(text)
-	await importData(snapshot)
+	// Hash what the restore stored, not a later read: an edit made while the rest of this
+	// function runs must still differ from the baseline and be pushed.
+	const localHash = await hashSnapshot(await importData(parseImportFile(text)))
 	const meta = await getFileMeta(token, fileId).catch(() => null)
 	const now = new Date().toISOString()
 	await Promise.all([
 		db.meta.put({ key: FILE_ID_KEY, value: fileId }),
 		db.meta.put({ key: LAST_SYNC_KEY, value: now }),
-		db.meta.put({ key: LAST_HASH_KEY, value: await hashSnapshot(await exportData()) }),
+		db.meta.put({ key: LAST_HASH_KEY, value: localHash }),
 		db.meta.put({ key: REMOTE_TIME_KEY, value: meta?.modifiedTime ?? now }),
 	])
 }
 
 export async function disconnectDriveSync(): Promise<void> {
-	await disconnectDrive().catch(() => undefined)
+	await disconnectDrive()
 	await Promise.all([
 		db.meta.delete(FILE_ID_KEY),
 		db.meta.delete(LAST_SYNC_KEY),

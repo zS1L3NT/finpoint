@@ -1,6 +1,6 @@
 import { DateTime } from "luxon"
 import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { toast } from "sonner"
 import AmountField from "@/components/form/amount-field"
 import DatetimeField from "@/components/form/datetime-field"
@@ -21,6 +21,8 @@ import {
 import { FieldGroup } from "@/components/ui/field"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { useDialogCloseAnimation } from "@/hooks/use-dialog-close-animation"
+import { useSeed } from "@/hooks/use-seed"
+import { useSubmitLock } from "@/hooks/use-submit-lock"
 import {
 	createPendingStatement,
 	deletePendingStatement,
@@ -60,12 +62,10 @@ export default function PendingStatementDialog({
 		description: "",
 	})
 	const { getApiFieldErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
+	const { locked, run } = useSubmitLock(isOpen)
 
-	useEffect(() => {
-		if (!isOpen) {
-			return
-		}
-
+	// Seeds on open and for a different Statement, not for a background write to the same one.
+	useSeed(isOpen ? (statement?.id ?? "new") : null, () => {
 		setValues(
 			statement
 				? {
@@ -82,7 +82,12 @@ export default function PendingStatementDialog({
 					},
 		)
 		resetApiErrors()
-	}, [accounts, isOpen, resetApiErrors, statement])
+	})
+	// Accounts can arrive after a new Statement dialog opened.
+	const defaultAccountId = accounts[0]?.id
+	if (isOpen && !statement && !values.account_id && defaultAccountId) {
+		setValues(current => ({ ...current, account_id: defaultAccountId }))
+	}
 
 	const setValue = <TKey extends keyof PendingStatementValues>(
 		field: TKey,
@@ -95,31 +100,34 @@ export default function PendingStatementDialog({
 	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault()
 
-		try {
-			if (statement) {
-				await updatePendingStatement(statement.id, {
-					account_id: values.account_id,
-					datetime: values.datetime,
-					amount: values.amount,
-					description: values.description,
-				})
-			} else {
-				await createPendingStatement({
-					account_id: values.account_id,
-					datetime: values.datetime,
-					amount: values.amount,
-					description: values.description,
-				})
+		await run(async () => {
+			try {
+				if (statement) {
+					await updatePendingStatement(statement.id, {
+						account_id: values.account_id,
+						datetime: values.datetime,
+						amount: values.amount,
+						description: values.description,
+					})
+				} else {
+					await createPendingStatement({
+						account_id: values.account_id,
+						datetime: values.datetime,
+						amount: values.amount,
+						description: values.description,
+					})
+				}
+				setIsOpen(false)
+				toast.success(
+					isEditing ? "Pending statement updated." : "Pending statement created.",
+				)
+				return true
+			} catch (cause) {
+				if (cause instanceof ValidationError) setApiErrors(cause.errors)
+				else toast.error("Unable to save this statement.")
+				return false
 			}
-			setIsOpen(false)
-			toast.success(isEditing ? "Pending statement updated." : "Pending statement created.")
-		} catch (cause) {
-			if (cause instanceof ValidationError) {
-				setApiErrors(cause.errors)
-				return
-			}
-			toast.error("Unable to save this statement.")
-		}
+		})
 	}
 
 	const handleDelete = async () => {
@@ -127,18 +135,19 @@ export default function PendingStatementDialog({
 			return
 		}
 
-		try {
-			await deletePendingStatement(statement.id)
-			setIsOpen(false)
-			toast.success("Pending statement deleted.")
-			void router.push(pathStatements())
-		} catch (cause) {
-			if (cause instanceof ValidationError) {
-				setApiErrors(cause.errors)
-				return
+		await run(async () => {
+			try {
+				await deletePendingStatement(statement.id)
+				setIsOpen(false)
+				toast.success("Pending statement deleted.")
+				void router.push(pathStatements())
+				return true
+			} catch (cause) {
+				if (cause instanceof ValidationError) setApiErrors(cause.errors)
+				else toast.error("Unable to delete this statement.")
+				return false
 			}
-			toast.error("Unable to delete this statement.")
-		}
+		})
 	}
 
 	return (
@@ -206,7 +215,7 @@ export default function PendingStatementDialog({
 						<Button
 							type="button"
 							variant="destructive"
-							disabled={!statement.is_unallocated}
+							disabled={locked || !statement.is_unallocated}
 							title={
 								statement.is_unallocated
 									? "Delete pending statement"
@@ -225,7 +234,7 @@ export default function PendingStatementDialog({
 								</Button>
 							}
 						/>
-						<Button type="submit" form="pending-statement-form">
+						<Button type="submit" form="pending-statement-form" disabled={locked}>
 							{isEditing ? "Save changes" : "Create statement"}
 						</Button>
 					</div>

@@ -1,8 +1,8 @@
-// Shared category-expansion helper (records + monthly pages need it).
+// Category expansion shared by the Records list and the Dashboard Records sheet.
 
 import { db } from "@/data/db"
 
-export async function expandCategoryIdsForMonthly(ids: string[]): Promise<string[]> {
+export async function expandCategoryIds(ids: string[]): Promise<string[]> {
 	if (!ids.length) return ids
 	const categories = await db.categories.toArray()
 	const childrenByParent = new Map<string, string[]>()

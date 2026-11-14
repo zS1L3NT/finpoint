@@ -14,7 +14,6 @@ import {
 } from "@/data/db"
 import { type AnalyticsRecord, contribution, summarize } from "@/logic/analytics"
 import { defaultAmountFor } from "@/logic/monthly-budgets"
-import { expandCategoryIdsForMonthly } from "@/logic/monthly-shared"
 import {
 	type AllocationTally,
 	isPendingRecord,
@@ -989,8 +988,6 @@ function buildCategories(
 		}
 	})
 }
-
-export { expandCategoryIdsForMonthly }
 
 export type TrendMonth = {
 	key: string

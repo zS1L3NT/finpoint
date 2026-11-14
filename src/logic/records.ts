@@ -5,10 +5,16 @@ import { db, type RecordRow } from "@/data/db"
 import { canUseMonthlyBudget } from "@/lib/analytics"
 import { contribution } from "@/logic/analytics"
 import { duplicateStatementIds } from "@/logic/duplicates"
+import { expandCategoryIds } from "@/logic/monthly-shared"
 import { isPendingRecord, pendingStatementIds, tallyAllocations } from "@/logic/pending"
 import { resolveRecordChoices } from "@/logic/record-choices"
 import { inferRecordDatetime } from "@/logic/record-defaults"
 import { inputToStored, newId, round2, TREATMENT_VALUES } from "@/logic/shared"
+import {
+	compareStatements,
+	enrichStatement,
+	tallyStatementAllocations,
+} from "@/logic/statement-enrichment"
 import { ValidationError, Validator } from "@/logic/validate"
 import type { Allocation, AnalyticsTreatment, Record as AppRecord, Statement } from "@/types"
 
@@ -32,11 +38,9 @@ export type RecordFilters = {
 }
 
 export class ConflictError extends Error {
-	stale_ids?: string[]
-	constructor(message: string, stale_ids?: string[]) {
+	constructor(message: string) {
 		super(message)
 		this.name = "ConflictError"
-		this.stale_ids = stale_ids
 	}
 }
 
@@ -59,7 +63,6 @@ export async function enrichRecords(rows: RecordRow[]) {
 		return {
 			...row,
 			allocated_amount,
-			statement_count: entry?.count ?? 0,
 			pending_statement_count: entry?.pending ?? 0,
 			is_pending: isPendingRecord(row.amount, entry),
 			subtitle: subtitle(row.people, row.location),
@@ -89,24 +92,6 @@ export async function enrichRecords(rows: RecordRow[]) {
 				: null,
 		}
 	})
-}
-
-async function expandCategoryIds(ids: string[]): Promise<string[]> {
-	if (!ids.length) return ids
-	const categories = await db.categories.toArray()
-	const childrenByParent = new Map<string, string[]>()
-	for (const category of categories) {
-		if (category.parent_category_id) {
-			const list = childrenByParent.get(category.parent_category_id) ?? []
-			list.push(category.id)
-			childrenByParent.set(category.parent_category_id, list)
-		}
-	}
-	const expanded = new Set(ids)
-	for (const id of ids) {
-		for (const child of childrenByParent.get(id) ?? []) expanded.add(child)
-	}
-	return [...expanded]
 }
 
 export async function listRecords(filters: RecordFilters = {}) {
@@ -200,44 +185,19 @@ export async function getRecord(id: string): Promise<RecordDetail> {
 		db.accounts.toArray(),
 	])
 	const amountByStatement = new Map(allocations.map(a => [a.statement_id, a.amount]))
-	const totalsByStatement = new Map<string, { sum: number; count: number }>()
-	for (const allocation of statementAllocations) {
-		const total = totalsByStatement.get(allocation.statement_id) ?? { sum: 0, count: 0 }
-		total.sum = round2(total.sum + allocation.amount)
-		total.count++
-		totalsByStatement.set(allocation.statement_id, total)
-	}
+	const totals = tallyStatementAllocations(statementAllocations)
 	const accounts = new Map(accountRows.map(a => [a.id, a]))
 	const duplicates = await duplicateStatementIds()
 
 	return {
 		...enriched,
 		statements: statements
-			.map(statement => {
-				const total = totalsByStatement.get(statement.id) ?? { sum: 0, count: 0 }
-				return {
-					...statement,
-					allocable_amount: round2(statement.amount - total.sum),
-					allocation_count: total.count,
-					is_pending: statement.is_pending === 1,
-					is_unallocated: total.count === 0,
-					is_duplicate: duplicates.has(statement.id),
-					pivot: { amount: amountByStatement.get(statement.id) ?? 0 },
-					account: accounts.get(statement.account_id) ?? {
-						id: statement.account_id,
-						name: statement.account_id,
-						balance: 0,
-						bank: "",
-					},
-				}
-			})
-			.sort(
-				(a, b) =>
-					b.datetime.localeCompare(a.datetime) ||
-					b.index - a.index ||
-					a.amount - b.amount ||
-					a.description.localeCompare(b.description),
-			),
+			.map(statement => ({
+				...statement,
+				...enrichStatement(statement, totals, duplicates, accounts),
+				pivot: { amount: amountByStatement.get(statement.id) ?? 0 },
+			}))
+			.sort(compareStatements),
 	}
 }
 
@@ -314,9 +274,8 @@ async function validateAllocations(
 	const ids = statements.map(s => s.id)
 	const rows = ids.length ? await db.statements.where("id").anyOf(ids).toArray() : []
 	const byId = new Map(rows.map(r => [r.id, r]))
-	const allAllocations = await db.allocations.toArray()
 	const sums = new Map<string, number>()
-	for (const allocation of allAllocations) {
+	for (const allocation of await db.allocations.where("statement_id").anyOf(ids).toArray()) {
 		sums.set(
 			allocation.statement_id,
 			round2((sums.get(allocation.statement_id) ?? 0) + allocation.amount),
@@ -358,15 +317,16 @@ function budgetCovers(budget: { start_date: string; end_date: string }, datetime
 export async function createRecord(input: RecordInput) {
 	const dto = validateRecordInput(input)
 
-	const category = await db.categories.get(dto.category_id)
-	if (!category) throw new ValidationError({ category_id: ["Select a category."] })
 	const statements = dto.statements ?? []
-	await validateAllocations(statements)
 
 	return db.transaction(
 		"rw",
-		[db.records, db.allocations, db.budgets, db.budget_records],
+		[db.records, db.allocations, db.budgets, db.budget_records, db.categories, db.statements],
 		async () => {
+			const category = await db.categories.get(dto.category_id)
+			if (!category) throw new ValidationError({ category_id: ["Select a category."] })
+			await validateAllocations(statements)
+
 			const analytics = analyticsValues(dto)
 			const id = newId()
 			await db.records.add({
@@ -442,44 +402,49 @@ export async function createMatchingRecords(
 export async function updateRecord(id: string, input: RecordInput & { revision?: number }) {
 	const dto = validateRecordInput(input)
 
-	const existing = await db.records.get(id)
-	if (!existing) throw new Error("Record not found.")
-	if (input.revision !== undefined && Number(input.revision) !== existing.revision) {
-		throw new ConflictError("This Record changed while you were editing it.")
-	}
-	const category = await db.categories.get(dto.category_id)
-	if (!category) throw new ValidationError({ category_id: ["Select a category."] })
 	const statements = dto.statements ?? []
-	const currentAllocations = await db.allocations.where("record_id").equals(id).toArray()
-	const prior = new Map(currentAllocations.map(a => [a.statement_id, a.amount]))
-	await validateAllocations(statements, prior)
 
-	return db.transaction("rw", [db.records, db.allocations], async () => {
-		const analytics = analyticsValues(dto, existing)
-		await db.records.update(id, {
-			title: dto.title.trim(),
-			people: dto.people?.trim() || null,
-			location: dto.location?.trim() || null,
-			description: dto.description?.trim() || null,
-			datetime: inputToStored(dto.datetime),
-			amount: dto.amount,
-			category_id: dto.category_id,
-			...analytics,
-			revision: existing.revision + 1,
-		})
-		await db.allocations.where("record_id").equals(id).delete()
-		for (const item of statements) {
-			await db.allocations.add({
-				statement_id: item.id,
-				record_id: id,
-				amount: round2(Number(item.amount)),
+	return db.transaction(
+		"rw",
+		[db.records, db.allocations, db.categories, db.statements],
+		async () => {
+			const existing = await db.records.get(id)
+			if (!existing) throw new Error("Record not found.")
+			if (input.revision !== undefined && Number(input.revision) !== existing.revision) {
+				throw new ConflictError("This Record changed while you were editing it.")
+			}
+			const category = await db.categories.get(dto.category_id)
+			if (!category) throw new ValidationError({ category_id: ["Select a category."] })
+			const currentAllocations = await db.allocations.where("record_id").equals(id).toArray()
+			const prior = new Map(currentAllocations.map(a => [a.statement_id, a.amount]))
+			await validateAllocations(statements, prior)
+
+			const analytics = analyticsValues(dto, existing)
+			await db.records.update(id, {
+				title: dto.title.trim(),
+				people: dto.people?.trim() || null,
+				location: dto.location?.trim() || null,
+				description: dto.description?.trim() || null,
+				datetime: inputToStored(dto.datetime),
+				amount: dto.amount,
+				category_id: dto.category_id,
+				...analytics,
+				revision: existing.revision + 1,
 			})
-		}
-		const updated = await db.records.get(id)
-		if (!updated) throw new Error("Record not found.")
+			await db.allocations.where("record_id").equals(id).delete()
+			for (const item of statements) {
+				await db.allocations.add({
+					statement_id: item.id,
+					record_id: id,
+					amount: round2(Number(item.amount)),
+				})
+			}
+			const updated = await db.records.get(id)
+			if (!updated) throw new Error("Record not found.")
 
-		return resolveRecordChoices(updated, category)
-	})
+			return resolveRecordChoices(updated, category)
+		},
+	)
 }
 
 export async function deleteRecord(id: string) {

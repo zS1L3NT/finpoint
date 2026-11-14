@@ -1,17 +1,22 @@
 // Mirrors `Api\StatementController`, `Api\StatementReplacementController`,
 // and `Statement::appQuery` (filters, ordering, derived amounts).
 
-import { asPending, db } from "@/data/db"
+import { asPending, db, type StatementRow } from "@/data/db"
 import { duplicateStatementIds, removeStatementDismissals } from "@/logic/duplicates"
+import { paginateItems } from "@/logic/pagination"
 import { enrichRecords } from "@/logic/records"
 import {
 	dayDifference,
 	ensureCanReplace,
-	maskDescription,
 	replacementComparison,
 	replacementReason,
 } from "@/logic/replacements"
-import { inputToStored, newId, round2, toCents } from "@/logic/shared"
+import { inputToStored, newId, round2 } from "@/logic/shared"
+import {
+	compareStatements,
+	enrichStatement,
+	tallyStatementAllocations,
+} from "@/logic/statement-enrichment"
 import { ValidationError, Validator } from "@/logic/validate"
 import type { Allocation, Record as AppRecord, Statement } from "@/types"
 
@@ -22,6 +27,7 @@ export type StatementDetail = Statement & {
 export type StatementFilters = {
 	query?: string | null
 	account_id?: string | null
+	ids?: string | null
 	exclude_ids?: string | null
 	start_date?: string | null
 	end_date?: string | null
@@ -32,68 +38,17 @@ export type StatementFilters = {
 	is_unallocated?: string | null
 }
 
-export function paginate<T>(items: T[], page: number, perPage: number) {
-	const total = items.length
-	const current_page = Math.max(1, page)
-	const safePerPage = Math.min(Math.max(1, perPage), 250)
-	const data = items.slice((current_page - 1) * safePerPage, current_page * safePerPage)
-	return {
-		data,
-		total,
-		per_page: safePerPage,
-		current_page,
-		last_page: Math.max(1, Math.ceil(total / safePerPage)),
-		links: [] as { active: boolean; label: string; url: string | null }[],
-	}
-}
-
-async function enrich(
-	statements: {
-		id: string
-		account_id: string
-		datetime: string
-		description: string
-		amount: number
-		index: number
-		is_pending: number
-	}[],
-) {
+async function enrich(statements: StatementRow[]) {
 	const accounts = new Map((await db.accounts.toArray()).map(a => [a.id, a]))
-	const allocations = await db.allocations.toArray()
+	const totals = tallyStatementAllocations(await db.allocations.toArray())
 	const duplicates = await duplicateStatementIds()
-	const byStatement = new Map<string, { sum: number; count: number }>()
-	for (const allocation of allocations) {
-		const entry = byStatement.get(allocation.statement_id) ?? { sum: 0, count: 0 }
-		entry.sum = round2(entry.sum + allocation.amount)
-		entry.count++
-		byStatement.set(allocation.statement_id, entry)
-	}
-	return statements.map(statement => {
-		const entry = byStatement.get(statement.id) ?? { sum: 0, count: 0 }
-		const allocable_amount = round2(statement.amount - entry.sum)
-		return {
-			id: statement.id,
-			datetime: statement.datetime,
-			index: statement.index,
-			description: maskDescription(statement.description),
-			amount: statement.amount,
-			allocable_amount,
-			allocation_count: entry.count,
-			is_pending: statement.is_pending === 1,
-			is_unallocated: entry.count === 0,
-			is_duplicate: duplicates.has(statement.id),
-			account: accounts.get(statement.account_id) ?? {
-				id: statement.account_id,
-				name: statement.account_id,
-				balance: 0,
-				bank: "",
-			},
-		}
-	})
+	return statements.map(statement => enrichStatement(statement, totals, duplicates, accounts))
 }
 
 export async function listStatements(filters: StatementFilters = {}) {
-	let rows = await db.statements.toArray()
+	let rows = filters.ids
+		? (await db.statements.bulkGet(filters.ids.split(",").filter(Boolean))).filter(s => !!s)
+		: await db.statements.toArray()
 
 	const q = (filters.query ?? "").trim().toLowerCase()
 	if (q) {
@@ -126,15 +81,7 @@ export async function listStatements(filters: StatementFilters = {}) {
 	if (filters.is_unallocated === "false")
 		enriched = enriched.filter(s => s.allocation_count !== 0)
 
-	enriched.sort(
-		(a, b) =>
-			b.datetime.localeCompare(a.datetime) ||
-			b.index - a.index ||
-			a.amount - b.amount ||
-			a.description.localeCompare(b.description),
-	)
-
-	return enriched
+	return enriched.sort(compareStatements)
 }
 
 export type StatementInput = {
@@ -178,46 +125,52 @@ export async function createPendingStatement(input: StatementInput) {
 }
 
 export async function updatePendingStatement(id: string, input: StatementInput) {
-	const existing = await db.statements.get(id)
-	if (!existing) throw new Error("Statement not found.")
-	if (existing.is_pending !== 1) {
-		throw new ValidationError({ statement: ["Imported statements are read-only."] })
-	}
-	const dto = validateStatement(input)
+	return db.transaction("rw", [db.statements, db.allocations], async () => {
+		const existing = await db.statements.get(id)
+		if (!existing) throw new Error("Statement not found.")
+		if (existing.is_pending !== 1) {
+			throw new ValidationError({ statement: ["Imported statements are read-only."] })
+		}
+		const dto = validateStatement(input)
 
-	const allocations = await db.allocations.where("statement_id").equals(id).toArray()
-	ensureAllocationsFit(
-		dto.amount,
-		allocations.map(a => a.amount),
-	)
-	await db.statements.update(id, {
-		account_id: dto.account_id,
-		datetime: inputToStored(dto.datetime),
-		description: dto.description,
-		amount: dto.amount,
+		const allocations = await db.allocations.where("statement_id").equals(id).toArray()
+		ensureAllocationsFit(
+			dto.amount,
+			allocations.map(a => a.amount),
+		)
+		await db.statements.update(id, {
+			account_id: dto.account_id,
+			datetime: inputToStored(dto.datetime),
+			description: dto.description,
+			amount: dto.amount,
+		})
+		const saved = await db.statements.get(id)
+		if (!saved) throw new Error("Statement not found.")
+
+		return saved
 	})
-	const saved = await db.statements.get(id)
-	if (!saved) throw new Error("Statement not found.")
-
-	return saved
 }
 
 export async function deletePendingStatement(id: string) {
-	const existing = await db.statements.get(id)
-	if (!existing) throw new Error("Statement not found.")
-	if (existing.is_pending !== 1) {
-		throw new ValidationError({ statement: ["Imported statements are read-only."] })
-	}
-	if ((await db.allocations.where("statement_id").equals(id).count()) > 0) {
-		throw new ValidationError({
-			statement: ["Remove every allocation before deleting this pending statement."],
-		})
-	}
+	await db.transaction(
+		"rw",
+		[db.statements, db.allocations, db.duplicate_dismissals],
+		async () => {
+			const existing = await db.statements.get(id)
+			if (!existing) throw new Error("Statement not found.")
+			if (existing.is_pending !== 1) {
+				throw new ValidationError({ statement: ["Imported statements are read-only."] })
+			}
+			if ((await db.allocations.where("statement_id").equals(id).count()) > 0) {
+				throw new ValidationError({
+					statement: ["Remove every allocation before deleting this pending statement."],
+				})
+			}
 
-	await db.transaction("rw", [db.statements, db.duplicate_dismissals], async () => {
-		await removeStatementDismissals([id])
-		await db.statements.delete(id)
-	})
+			await removeStatementDismissals([id])
+			await db.statements.delete(id)
+		},
+	)
 }
 
 function ensureAllocationsFit(amount: number, allocations: number[]) {
@@ -316,7 +269,14 @@ export async function replacementCandidates(
 
 	let rows = await db.statements.where("account_id").equals(pending.account_id).toArray()
 	rows = rows.filter(s => s.is_pending === 0)
-	const allocatedIds = new Set((await db.allocations.toArray()).map(a => a.statement_id))
+	const allocatedIds = new Set(
+		(
+			await db.allocations
+				.where("statement_id")
+				.anyOf(rows.map(s => s.id))
+				.toArray()
+		).map(a => a.statement_id),
+	)
 	rows = rows.filter(s => !allocatedIds.has(s.id))
 
 	if (scope === "suggested") {
@@ -363,7 +323,7 @@ export async function replacementCandidates(
 	const page = options.page ?? 1
 	const perPage = Math.min(Math.max(1, options.per_page ?? 25), 100)
 
-	return paginate(candidates, page, perPage)
+	return paginateItems(candidates, page, perPage)
 }
 
 /** Suggested replacement count per pending Statement, using the same rules as `replacementCandidates`. */
@@ -423,5 +383,3 @@ export async function replacementReview(pendingId: string, statementId: string) 
 		disabled_reason: reason,
 	}
 }
-
-export { toCents }

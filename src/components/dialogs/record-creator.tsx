@@ -32,6 +32,7 @@ import { Progress } from "@/components/ui/progress"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { useDialogCloseAnimation } from "@/hooks/use-dialog-close-animation"
+import { useSubmitLock } from "@/hooks/use-submit-lock"
 import { canUseMonthlyBudget } from "@/lib/analytics"
 import { COLLAPSE_MOTION, SPRING, TRANSITION } from "@/lib/motion"
 import { cn, formatCurrency, formatDatetime, pluralize, round2 } from "@/lib/utils"
@@ -125,6 +126,7 @@ export default function RecordCreatorDialog({
 	const [autofillSettled, setAutofillSettled] = useState(false)
 
 	const { mergeErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
+	const { locked, run } = useSubmitLock(isOpen)
 
 	const inferredDatetime = inferRecordDatetime(statements)
 	const datetimeAutopopulated =
@@ -156,43 +158,44 @@ export default function RecordCreatorDialog({
 				amount: round2(statement.allocable_amount),
 			})),
 		},
-		onSubmit: async ({ value }) => {
-			try {
-				const details = {
-					title: value.title,
-					people: value.people,
-					location: value.location,
-					description: value.description,
-					category_id: value.category_id,
-					analytics_treatment: value.analytics_treatment || null,
-					monthly_budget_id: value.monthly_budget_id || null,
-					monthly_budget_source: value.monthly_budget_source,
+		onSubmit: ({ value }) =>
+			run(async () => {
+				try {
+					const details = {
+						title: value.title,
+						people: value.people,
+						location: value.location,
+						description: value.description,
+						category_id: value.category_id,
+						analytics_treatment: value.analytics_treatment || null,
+						monthly_budget_id: value.monthly_budget_id || null,
+						monthly_budget_source: value.monthly_budget_source,
+					}
+					await createRecord({
+						...details,
+						datetime: value.datetime,
+						amount: value.amount,
+						statements: value.statements,
+					})
+					// The selected Record already exists, so a failed batch must not invite a resubmit.
+					if (includeSimilar && similar?.length)
+						await createMatchingRecords(
+							details,
+							similar.map(s => s.id),
+						).then(
+							created =>
+								toast.success(`Created ${pluralize(created + 1, "Record")}.`),
+							() => toast.error("Created this Record, but not the similar ones."),
+						)
+					created.current = true
+					setIsOpen(false)
+					return true
+				} catch (cause) {
+					if (cause instanceof ValidationError) setApiErrors(cause.errors)
+					else toast.error("Unable to create this record.")
+					return false
 				}
-				await createRecord({
-					...details,
-					datetime: value.datetime,
-					amount: value.amount,
-					statements: value.statements,
-				})
-				// The selected Record already exists, so a failed batch must not invite a resubmit.
-				if (includeSimilar && similar?.length)
-					await createMatchingRecords(
-						details,
-						similar.map(s => s.id),
-					).then(
-						created => toast.success(`Created ${pluralize(created + 1, "Record")}.`),
-						() => toast.error("Created this Record, but not the similar ones."),
-					)
-				created.current = true
-				setIsOpen(false)
-			} catch (cause) {
-				if (cause instanceof ValidationError) {
-					setApiErrors(cause.errors)
-					return
-				}
-				toast.error("Unable to create this record.")
-			}
-		},
+			}),
 	})
 
 	const isPendingAmount = useStore(
@@ -777,7 +780,7 @@ export default function RecordCreatorDialog({
 								</Button>
 							}
 						/>
-						<Button type="submit" form="allocate-record-form">
+						<Button type="submit" form="allocate-record-form" disabled={locked}>
 							Create Record
 						</Button>
 					</DialogFooter>

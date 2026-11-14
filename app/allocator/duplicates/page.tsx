@@ -319,7 +319,7 @@ export default function FixDuplicatesPage() {
 					<PaginationFooter
 						summary={`Showing ${page.data.length} of ${page.total} ${page.kind}`}
 						page={page.current_page}
-						lastPage={page.last_page ?? 1}
+						lastPage={page.last_page}
 					/>
 				</motion.div>
 			)}

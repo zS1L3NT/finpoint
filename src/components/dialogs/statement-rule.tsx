@@ -1,5 +1,5 @@
 import { useLiveQuery } from "dexie-react-hooks"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { toast } from "sonner"
 import CategoryField from "@/components/form/category-field"
 import SelectField from "@/components/form/select-field"
@@ -21,6 +21,8 @@ import { FieldError } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
+import { useSeed } from "@/hooks/use-seed"
+import { useSubmitLock } from "@/hooks/use-submit-lock"
 import { TREATMENTS } from "@/lib/analytics"
 import { cn, formatCurrency, formatDatetime, pluralize } from "@/lib/utils"
 import type { listMonthlyBudgets } from "@/logic/monthly-budgets"
@@ -71,8 +73,10 @@ export default function StatementRuleDialog({
 	const { apiErrors, getApiFieldErrors, clearApiError, resetApiErrors, setApiErrors } =
 		useApiFormErrors()
 
-	useEffect(() => {
-		if (!isOpen) return
+	const { locked, run } = useSubmitLock(isOpen)
+
+	// Seeds on open and for a different rule, not for a background write to the same one.
+	useSeed(isOpen ? (rule ? (rule.id ?? "draft") : "new") : null, () => {
 		setName(rule?.name ?? "")
 		setMode(rule?.conditions.mode ?? "all")
 		setConditions(
@@ -83,7 +87,7 @@ export default function StatementRuleDialog({
 		)
 		setActions(rule?.actions ?? {})
 		resetApiErrors()
-	}, [isOpen, rule, resetApiErrors])
+	})
 
 	const input = {
 		name,
@@ -120,25 +124,31 @@ export default function StatementRuleDialog({
 
 	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault()
-		try {
-			await saveStatementRule(input, rule?.id)
-			setIsOpen(false)
-		} catch (cause) {
-			if (cause instanceof ValidationError) {
-				setApiErrors(cause.errors)
-				return
+		await run(async () => {
+			try {
+				await saveStatementRule(input, rule?.id)
+				setIsOpen(false)
+				return true
+			} catch (cause) {
+				if (cause instanceof ValidationError) setApiErrors(cause.errors)
+				else toast.error("Unable to save this rule.")
+				return false
 			}
-			toast.error("Unable to save this rule.")
-		}
+		})
 	}
 	const handleDelete = async () => {
-		if (!rule?.id) return
-		try {
-			await deleteStatementRule(rule.id)
-			setIsOpen(false)
-		} catch {
-			toast.error("Unable to delete this rule.")
-		}
+		const id = rule?.id
+		if (!id) return
+		await run(async () => {
+			try {
+				await deleteStatementRule(id)
+				setIsOpen(false)
+				return true
+			} catch {
+				toast.error("Unable to delete this rule.")
+				return false
+			}
+		})
 	}
 
 	const conditionErrors = Object.entries(apiErrors)
@@ -422,6 +432,7 @@ export default function StatementRuleDialog({
 							type="button"
 							variant="destructive"
 							className="mr-auto"
+							disabled={locked}
 							onClick={handleDelete}
 						>
 							<UiIcon icon="lucide:trash-2" /> Delete
@@ -434,7 +445,7 @@ export default function StatementRuleDialog({
 							</Button>
 						}
 					/>
-					<Button type="submit" form="statement-rule-form">
+					<Button type="submit" form="statement-rule-form" disabled={locked}>
 						{rule?.id ? "Save changes" : "Create rule"}
 					</Button>
 				</DialogFooter>

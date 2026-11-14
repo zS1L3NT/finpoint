@@ -21,6 +21,7 @@ import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui
 import { useHistory } from "@/history"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { useDialogCloseAnimation } from "@/hooks/use-dialog-close-animation"
+import { useSubmitLock } from "@/hooks/use-submit-lock"
 import { deleteBudget, updateBudget } from "@/logic/budgets"
 import { ValidationError } from "@/logic/validate"
 import { pathBudget, pathBudgets } from "@/routes"
@@ -42,6 +43,7 @@ export default function BudgetEditorDialog({
 	const pathname = usePathname()
 
 	const { mergeErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
+	const { locked, run } = useSubmitLock(isOpen)
 
 	const form = useForm({
 		defaultValues: {
@@ -51,37 +53,41 @@ export default function BudgetEditorDialog({
 			end_date: budget.end_date,
 			automatic: !!budget.automatic,
 		},
-		onSubmit: async ({ value }) => {
-			try {
-				await updateBudget(budget.id, {
-					name: value.name,
-					amount: value.amount,
-					start_date: value.start_date,
-					end_date: value.end_date,
-					automatic: value.automatic,
-				})
-				setIsOpen(false)
-			} catch (cause) {
-				if (cause instanceof ValidationError) {
-					setApiErrors(cause.errors)
-					return
+		onSubmit: ({ value }) =>
+			run(async () => {
+				try {
+					await updateBudget(budget.id, {
+						name: value.name,
+						amount: value.amount,
+						start_date: value.start_date,
+						end_date: value.end_date,
+						automatic: value.automatic,
+					})
+					setIsOpen(false)
+					return true
+				} catch (cause) {
+					if (cause instanceof ValidationError) setApiErrors(cause.errors)
+					else toast.error("Unable to save this budget.")
+					return false
 				}
-				toast.error("Unable to save this budget.")
-			}
-		},
+			}),
 	})
 
 	const handleDelete = async () => {
-		try {
-			await deleteBudget(budget.id)
-			setIsOpen(false)
+		await run(async () => {
+			try {
+				await deleteBudget(budget.id)
+				setIsOpen(false)
 
-			if (pathname === pathBudget(budget.id)) {
-				navigateBack({ name: "Budgets", url: pathBudgets() })
+				if (pathname === pathBudget(budget.id)) {
+					navigateBack({ name: "Budgets", url: pathBudgets() })
+				}
+				return true
+			} catch {
+				toast.error("Unable to delete this budget.")
+				return false
 			}
-		} catch {
-			toast.error("Unable to delete this budget.")
-		}
+		})
 	}
 
 	return (
@@ -206,6 +212,7 @@ export default function BudgetEditorDialog({
 						type="button"
 						variant="destructive"
 						className="mr-auto"
+						disabled={locked}
 						onClick={handleDelete}
 					>
 						<IconifyIcon icon="lucide:trash-2" /> Delete
@@ -217,7 +224,7 @@ export default function BudgetEditorDialog({
 							</Button>
 						}
 					/>
-					<Button type="submit" form="budget-edit-form">
+					<Button type="submit" form="budget-edit-form" disabled={locked}>
 						Save changes
 					</Button>
 				</DialogFooter>
