@@ -636,3 +636,28 @@ test("Records table: fast typing keeps every keystroke and one Back undoes the s
 	await expect(search).toHaveValue("")
 	await expect(page.getByText("Showing 60 of 60 records.", { exact: true })).toBeVisible()
 })
+
+test("Records table: a keystroke erased before it commits does not hide a later Back from the input", async ({
+	page,
+}) => {
+	await seedWorkspace(page, "dense")
+	await page.goto("/records?query=Dense")
+	const search = page.getByPlaceholder("Search title, people, location, description...")
+	await expect(search).toHaveValue("Dense")
+	await page.getByRole("button", { name: /^Clear/ }).click()
+	await expect(page).not.toHaveURL(/query=/)
+	await expect(search).toHaveValue("")
+	// Type and erase in one tick: the router never commits the typing, so a stale entry for
+	// it would swallow the next arrival at that value.
+	await search.evaluate((input: HTMLInputElement) => {
+		const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set
+		for (const value of ["Dense", ""]) {
+			set?.call(input, value)
+			input.dispatchEvent(new Event("input", { bubbles: true }))
+		}
+	})
+	await expect(search).toHaveValue("")
+	await page.goBack()
+	await expect(page).toHaveURL(/query=Dense$/)
+	await expect(search).toHaveValue("Dense")
+})
