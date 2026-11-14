@@ -1503,6 +1503,39 @@ test.describe("dialog lifecycle", () => {
 		await page.waitForTimeout(1000)
 		await expect(description).toHaveValue("Typed but unsaved")
 	})
+	test("Account editor: a write from another tab does not reset what is typed", async ({
+		page,
+		workspace,
+	}) => {
+		void workspace
+		// The Account page hands its dialog the live Account, so a write reaches the open dialog.
+		const dialog = await openEditor(
+			page,
+			`/accounts/${account.id}`,
+			"Edit Account",
+			"Edit Account",
+		)
+		const name = dialog.getByLabel("Name", { exact: true })
+		await name.fill("Typed but unsaved")
+
+		const other = await page.context().newPage()
+		await other.goto(`/accounts/${account.id}`)
+		await other.getByRole("button", { name: "Edit Account", exact: true }).click()
+		const otherDialog = other.getByRole("dialog", { name: "Edit Account", exact: true })
+		await otherDialog.getByLabel("Name", { exact: true }).fill("From another tab")
+		await otherDialog.getByRole("button", { name: "Save changes", exact: true }).click()
+		await expect
+			.poll(async () =>
+				(await readRows(page, "accounts")).some(row => row.name === "From another tab"),
+			)
+			.toBe(true)
+		await other.close()
+
+		// Give the live query time to hand the dialog the changed Account.
+		await page.waitForTimeout(1000)
+		await expect(name).toHaveValue("Typed but unsaved")
+	})
+
 	test("Allocator selection follows Statements changed or deleted from another tab", async ({
 		page,
 	}) => {
