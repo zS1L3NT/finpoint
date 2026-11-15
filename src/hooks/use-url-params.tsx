@@ -38,6 +38,8 @@ export function UrlParamsProvider({ children }: { children: React.ReactNode }) {
 	// the latest params; it pushes when any of them asked for a new history entry.
 	const latest = useRef(committed)
 	const waiting = useRef<{ href: string; suffix: string; modes: Replace[] } | null>(null)
+	// The params last requested, readable before the render that shows them.
+	const head = useRef<URLSearchParams | null>(null)
 	const draining = useRef<Promise<void> | null>(null)
 	const onCommit = useRef<(() => void) | null>(null)
 	const url = `${pathname}?${committed}`
@@ -46,7 +48,23 @@ export function UrlParamsProvider({ children }: { children: React.ReactNode }) {
 		onCommit.current?.()
 	}, [url])
 
+	// Following a link abandons changes that have not been sent, so they cannot land after it.
+	useEffect(() => {
+		const abandon = (event: MouseEvent) => {
+			if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey) return
+			const link = event.target instanceof Element ? event.target.closest("a[href]") : null
+			if (!link || link.getAttribute("target") === "_blank") return
+			waiting.current = null
+			head.current = null
+		}
+		document.addEventListener("click", abandon, true)
+		return () => document.removeEventListener("click", abandon, true)
+	}, [])
+
 	const drain = async () => {
+		// Changes made in the same task leave as one navigation; a change undone in that task
+		// leaves no history entry.
+		await Promise.resolve()
 		while (waiting.current) {
 			const { href, suffix, modes } = waiting.current
 			waiting.current = null
@@ -66,7 +84,7 @@ export function UrlParamsProvider({ children }: { children: React.ReactNode }) {
 	}
 
 	const setParams: UrlParams["setParams"] = (changes, { replace = false } = {}) => {
-		const next = new URLSearchParams(params)
+		const next = new URLSearchParams(head.current ?? params)
 		for (const [key, value] of Object.entries(changes)) {
 			if (value) next.set(key, value)
 			else next.delete(key)
@@ -74,11 +92,13 @@ export function UrlParamsProvider({ children }: { children: React.ReactNode }) {
 		const suffix = next.toString()
 		const href = suffix ? `${pathname}?${suffix}` : pathname
 		waiting.current = { href, suffix, modes: [...(waiting.current?.modes ?? []), replace] }
+		head.current = next
 		setRequested(next)
 		// `finally` settles a tick later, so the slot is never cleared before it is filled. The
 		// requested params hold until every navigation waiting here has committed.
 		draining.current ??= drain().finally(() => {
 			draining.current = null
+			head.current = null
 			setRequested(null)
 		})
 	}
