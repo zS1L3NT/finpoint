@@ -1,7 +1,6 @@
 import { useLiveQuery } from "dexie-react-hooks"
 import { useState } from "react"
 import { toast } from "sonner"
-import { deleteFailureMessage } from "@/components/dialogs/delete-failure"
 import ComboboxField from "@/components/form/combobox-field"
 import SelectField from "@/components/form/select-field"
 import TextField from "@/components/form/text-field"
@@ -25,7 +24,7 @@ import { canUseDefaultMonthlyBudget, TREATMENTS, treatmentLabel } from "@/lib/an
 import { cn, selectableMonthlyBudgets } from "@/lib/utils"
 import { createCategory, deleteCategory, updateCategory } from "@/logic/categories"
 import { listMonthlyBudgets } from "@/logic/monthly-budgets"
-import { ValidationError } from "@/logic/validate"
+import { deleteFailureMessage, ValidationError } from "@/logic/validate"
 import type { AnalyticsTreatment, Category, CategoryWithChildren } from "@/types"
 
 type CategoryFormValues = {

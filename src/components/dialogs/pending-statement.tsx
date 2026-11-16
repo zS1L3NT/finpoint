@@ -2,7 +2,6 @@ import { DateTime } from "luxon"
 import { usePathname } from "next/navigation"
 import { useState } from "react"
 import { toast } from "sonner"
-import { deleteFailureMessage } from "@/components/dialogs/delete-failure"
 import AmountField from "@/components/form/amount-field"
 import DatetimeField from "@/components/form/datetime-field"
 import SelectField from "@/components/form/select-field"
@@ -31,7 +30,7 @@ import {
 	deletePendingStatement,
 	updatePendingStatement,
 } from "@/logic/statements"
-import { ValidationError } from "@/logic/validate"
+import { deleteFailureMessage, ValidationError } from "@/logic/validate"
 import { pathStatement, pathStatements } from "@/routes"
 import type { Account, Statement } from "@/types"
 

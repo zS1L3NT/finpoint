@@ -108,3 +108,7 @@ export class Validator {
 		if (Object.keys(this.errors).length) throw new ValidationError(this.errors)
 	}
 }
+
+/** The reason the logic layer gave for refusing a delete, or the caller's own fallback. */
+export const deleteFailureMessage = (cause: unknown, fallback: string) =>
+	cause instanceof ValidationError ? (Object.values(cause.errors)[0]?.[0] ?? fallback) : fallback

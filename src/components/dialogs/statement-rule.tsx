@@ -1,7 +1,6 @@
 import { useLiveQuery } from "dexie-react-hooks"
 import { useState } from "react"
 import { toast } from "sonner"
-import { deleteFailureMessage } from "@/components/dialogs/delete-failure"
 import CategoryField from "@/components/form/category-field"
 import SelectField from "@/components/form/select-field"
 import TextField from "@/components/form/text-field"
@@ -43,7 +42,7 @@ import {
 	type RuleInput,
 	saveStatementRule,
 } from "@/logic/statement-rules"
-import { ValidationError } from "@/logic/validate"
+import { deleteFailureMessage, ValidationError } from "@/logic/validate"
 import type { CategoryWithChildren, RuleActions, RuleCondition, RuleField } from "@/types"
 
 /** A saved rule to edit, or a suggested draft (no id) to review before creating it. */
