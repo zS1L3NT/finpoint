@@ -1039,3 +1039,26 @@ test.describe("dense workspace", () => {
 		await expect(search).toHaveValue("Dense pending 1")
 	})
 })
+
+test("pending queue: a valid selection in the URL never flashes the unavailable alert while loading", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	await page.addInitScript(() => {
+		const w = window as unknown as { __sawUnavailable: boolean }
+		w.__sawUnavailable = false
+		new MutationObserver(() => {
+			if (document.body?.textContent?.includes("Pending Statement unavailable"))
+				w.__sawUnavailable = true
+		}).observe(document, { childList: true, subtree: true, characterData: true })
+	})
+	await page.goto(`/allocator/pending?pending_statement_id=${pending.id}`)
+	await expect(page.getByRole("button", { name: new RegExp(pending.description) })).toBeVisible()
+	await page.waitForTimeout(500)
+	expect(
+		await page.evaluate(
+			() => (window as unknown as { __sawUnavailable: boolean }).__sawUnavailable,
+		),
+	).toBe(false)
+})

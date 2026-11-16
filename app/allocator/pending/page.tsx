@@ -98,7 +98,7 @@ export default function AllocatorPendingPage() {
 		[queueQuery, accountId],
 	)
 	const pending = pendingQuery ?? []
-	const allPending = useLiveQuery(() => listStatements({ is_pending: true }), []) ?? []
+	const allPending = useLiveQuery(() => listStatements({ is_pending: true }), [])
 	const sortedPending = useMemo(
 		() =>
 			[...pending].sort(
@@ -124,20 +124,28 @@ export default function AllocatorPendingPage() {
 	}
 
 	const selectedPendingStatement = pendingStatementId
-		? (allPending.find(statement => statement.id === pendingStatementId) ?? null)
+		? (allPending?.find(statement => statement.id === pendingStatementId) ?? null)
 		: null
-	const selectionMissing = !!pendingStatementId && !selectedPendingStatement
+	const selectionMissing =
+		!!pendingStatementId && allPending !== undefined && !selectedPendingStatement
 
 	const candidates = useLiveQuery(
-		() =>
+		(): Promise<{ data: CandidatePage | null; error: string | null }> =>
 			selectedPendingStatement
 				? replacementCandidates(selectedPendingStatement.id, {
 						query: candidateQuery || undefined,
 						scope: candidateScope === "all" ? "all" : "suggested",
 						page: candidatePage,
 						per_page: 25,
-					}).catch(() => null)
-				: Promise.resolve(null),
+					}).then(
+						data => ({ data, error: null }),
+						cause => ({
+							data: null,
+							error:
+								cause instanceof Error ? cause.message : "Unable to load imports.",
+						}),
+					)
+				: Promise.resolve({ data: null, error: null }),
 		[selectedPendingStatement?.id, candidateQuery, candidateScope, candidatePage],
 	)
 
@@ -428,8 +436,8 @@ export default function AllocatorPendingPage() {
 									</div>
 
 									<CandidateResults
-										data={candidates ?? null}
-										error={null}
+										data={candidates?.data ?? null}
+										error={candidates?.error ?? null}
 										scope={candidateScope}
 										onReview={setReviewStatement}
 										onPage={page =>
