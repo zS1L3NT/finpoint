@@ -264,21 +264,21 @@
     "semantic_hash": ""
   },
   "src/components/dialogs/budget-editor.tsx": {
-    "mtime": 1794808833.5547755,
-    "seen": 1794809312.2479575,
-    "ast_hash": "ccbc480e154f1957997d0df7627f0806",
+    "mtime": 1794810639.443068,
+    "seen": 1794811292.6682932,
+    "ast_hash": "c62955d8ffeb7e7adab42e427e07205c",
     "semantic_hash": ""
   },
   "src/components/dialogs/category.tsx": {
-    "mtime": 1794808833.5507755,
-    "seen": 1794809312.2479599,
-    "ast_hash": "5b1b10ed54d7ebb6b4e468ef0ca066f7",
+    "mtime": 1794810639.447068,
+    "seen": 1794811292.6682947,
+    "ast_hash": "d18f1e589b899dfc4fa0cc75368cc889",
     "semantic_hash": ""
   },
   "src/components/dialogs/pending-statement.tsx": {
-    "mtime": 1794809139.9876995,
-    "seen": 1794809312.2479746,
-    "ast_hash": "84d683ae6a61071ba38007b9d5cd4ba7",
+    "mtime": 1794810639.4550679,
+    "seen": 1794811292.6683004,
+    "ast_hash": "eafc33fa5504ec0fa8f8d8d3aca640f8",
     "semantic_hash": ""
   },
   "src/components/dialogs/record-creator.tsx": {
@@ -966,9 +966,9 @@
     "semantic_hash": ""
   },
   "src/logic/validate.ts": {
-    "mtime": 1794685439.9219832,
-    "seen": 1794685477.6915603,
-    "ast_hash": "0f998868fceeca996f5a312823b9c097",
+    "mtime": 1794810631.7670522,
+    "seen": 1794811292.6684647,
+    "ast_hash": "9108cfd9dc25f34c8f109e34107f72e5",
     "semantic_hash": ""
   },
   "src/routes.ts": {
@@ -996,9 +996,9 @@
     "semantic_hash": ""
   },
   "CONTEXT.md": {
-    "mtime": 1794809297.2428558,
-    "seen": 1794809312.248317,
-    "ast_hash": "10942263c530ed405f3f4da05c83bc5e",
+    "mtime": 1794809317.8827717,
+    "seen": 1794811292.668554,
+    "ast_hash": "536c764a521324b7a15b061cc61d0679",
     "semantic_hash": ""
   },
   "README.md": {
@@ -1188,9 +1188,9 @@
     "semantic_hash": ""
   },
   "src/components/dialogs/statement-rule.tsx": {
-    "mtime": 1794808833.5547755,
-    "seen": 1794809312.2479851,
-    "ast_hash": "7043bfac2882abad909ad11cbe3055f3",
+    "mtime": 1794810639.451068,
+    "seen": 1794811292.668305,
+    "ast_hash": "d27f9a53dac8fb83b8c2c959e30c6daf",
     "semantic_hash": ""
   },
   "src/components/form/category-field.tsx": {
@@ -1290,9 +1290,9 @@
     "semantic_hash": ""
   },
   "tests/core/editors.e2e.ts": {
-    "mtime": 1794809289.498889,
-    "seen": 1794809312.2482462,
-    "ast_hash": "86f896d78cbbea888fb971ce7cf12379",
+    "mtime": 1794810609.043006,
+    "seen": 1794811292.6684816,
+    "ast_hash": "396183bb03c14787dd8ba577cf4a266f",
     "semantic_hash": ""
   },
   "tests/core/helpers.e2e.ts": {
@@ -1326,21 +1326,21 @@
     "semantic_hash": ""
   },
   "tests/core/routes.e2e.ts": {
-    "mtime": 1794809085.0360925,
-    "seen": 1794809312.2482524,
-    "ast_hash": "01fdfbde265a98501a94fd81a9a25acb",
+    "mtime": 1794810609.047006,
+    "seen": 1794811292.668488,
+    "ast_hash": "842b938c3eae55c7f0ee30cce15b9810",
     "semantic_hash": ""
   },
   "tests/core/sheets.e2e.ts": {
-    "mtime": 1794808773.763684,
-    "seen": 1794809312.2482533,
-    "ast_hash": "c586304e6f173afff8e5bf9413808f31",
+    "mtime": 1794811255.8889115,
+    "seen": 1794811292.668489,
+    "ast_hash": "b11d8c9ac24ebfb0d980fadf80ae6cf7",
     "semantic_hash": ""
   },
   "tests/core/tables.e2e.ts": {
-    "mtime": 1794808956.4852605,
-    "seen": 1794809312.2482545,
-    "ast_hash": "eeeaa7ae0506d0f7ed9fa2f081905065",
+    "mtime": 1794811255.8889115,
+    "seen": 1794811292.66849,
+    "ast_hash": "475dec70bd4f9d04bfee421c2d505bd7",
     "semantic_hash": ""
   },
   "tests/core/workflows.e2e.ts": {
@@ -1707,12 +1707,6 @@
     "mtime": 1794685426.2178946,
     "seen": 1794685477.6915982,
     "ast_hash": "5f4bc2319e0e586795ff63c013a1b6a1",
-    "semantic_hash": ""
-  },
-  "src/components/dialogs/delete-failure.ts": {
-    "mtime": 1794808833.5307758,
-    "seen": 1794809312.2479627,
-    "ast_hash": "46ef1572a90f617b496fb167d412a907",
     "semantic_hash": ""
   },
   "tests/domain/archived-monthly-budgets.test.ts": {
