@@ -300,6 +300,10 @@ async function validateAllocations(
 	}
 	statements.forEach((item, index) => {
 		const statement = byId.get(item.id)
+		if (ids.indexOf(item.id) !== index) {
+			v.reject(`statements.${index}.id`, "This Statement is already attached.")
+			return
+		}
 		if (!statement) {
 			v.reject(`statements.${index}.id`, "Invalid statement.")
 			return
