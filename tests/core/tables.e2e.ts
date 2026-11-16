@@ -695,7 +695,12 @@ test("Statement rules page: search lives in the URL, survives reload and one Bac
 	// The search appears once there are more than five rules.
 	const rules = statementRules()
 	await seedWorkspace(page, "populated", {
-		statement_rules: [...rules, { ...rules[0], id: "t1-rule-extra", name: "Extra rule" }],
+		statement_rules: [
+			...rules,
+			...rules
+				.slice(0, 1)
+				.map(rule => ({ ...rule, id: "t1-rule-extra", name: "Extra rule" })),
+		],
 	})
 	await page.goto("/statement-rules")
 	const search = page.getByRole("searchbox", { name: "Search rules", exact: true })
