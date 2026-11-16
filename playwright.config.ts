@@ -11,6 +11,8 @@ const desktopOnly = ["**/helpers.e2e.ts", "**/ledger.e2e.ts"]
 // Project testIgnore replaces the top-level value instead of merging, so the
 // animations exclusion must be repeated in every project's own ignores.
 const animationIgnores = animations ? [] : ["**/animations/**"]
+// PLAYWRIGHT_WORKERS is text: a count ("8") becomes a number, a percentage ("50%") stays text.
+const parseWorkers = (value = "1") => (value.endsWith("%") ? value : Number(value) || 1)
 const piggyback = (tag: RegExp, invert: RegExp[] = [/@mobile-only/, /@tall-only/]) => ({
 	testIgnore: [...animationIgnores, ...desktopOnly],
 	grepInvert: invert,
@@ -23,7 +25,7 @@ export default defineConfig({
 	testIgnore: animations ? undefined : "**/animations/**",
 	fullyParallel: true,
 	forbidOnly: true,
-	workers: process.env.PLAYWRIGHT_WORKERS ?? 1,
+	workers: parseWorkers(process.env.PLAYWRIGHT_WORKERS),
 	retries: 0,
 	timeout: 45_000,
 	expect: { timeout: 10_000 },
