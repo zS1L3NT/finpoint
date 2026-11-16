@@ -21,6 +21,11 @@ import {
 	tallyAllocations,
 } from "@/logic/pending"
 import { resolveRecordChoices } from "@/logic/record-choices"
+import {
+	hasAllocable,
+	type StatementTotals,
+	tallyStatementAllocations,
+} from "@/logic/statement-enrichment"
 
 export const COMPARISON_MONTHS = 2
 export const BREAKDOWN_MONTHS = 4
@@ -114,7 +119,7 @@ const ISO_DAY = "yyyy-MM-dd"
 type LoadedTables = {
 	records: ReturnType<typeof resolveRecordChoices>[]
 	statements: StatementRow[]
-	allocatedStatementIds: Set<string>
+	statementTotals: StatementTotals
 	allocated: Map<string, AllocationTally>
 	categories: Map<string, CategoryRow>
 	monthlyBudgets: Map<string, MonthlyBudgetRow>
@@ -155,7 +160,7 @@ async function loadDashboardTables(): Promise<LoadedTables> {
 			),
 		),
 		statements,
-		allocatedStatementIds: new Set(allocations.map(a => a.statement_id)),
+		statementTotals: tallyStatementAllocations(allocations),
 		allocated: tallyAllocations(allocations, pending),
 		categories: new Map(categories.map(c => [c.id, c])),
 		monthlyBudgets: new Map(monthlyBudgets.map(b => [b.id, b])),
@@ -405,9 +410,8 @@ export async function getDashboard(
 		).length,
 		unallocated_statements: tables.statements.filter(
 			s =>
-				s.is_pending === 0 &&
 				inRange(s.datetime, monthStartKey, monthEndKey) &&
-				!tables.allocatedStatementIds.has(s.id),
+				hasAllocable(s, tables.statementTotals),
 		).length,
 	}
 

@@ -18,6 +18,11 @@ export function tallyStatementAllocations(allocations: AllocationRow[]): Stateme
 	return totals
 }
 
+/** Whether a Statement still has an amount left to allocate: the Allocator's rule. */
+export function hasAllocable(statement: StatementRow, totals: StatementTotals) {
+	return round2(statement.amount - (totals.get(statement.id)?.sum ?? 0)) !== 0
+}
+
 export function enrichStatement(
 	statement: StatementRow,
 	totals: StatementTotals,
