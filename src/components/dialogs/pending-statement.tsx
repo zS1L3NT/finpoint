@@ -1,5 +1,5 @@
 import { DateTime } from "luxon"
-import { useRouter } from "next/navigation"
+import { usePathname } from "next/navigation"
 import { useState } from "react"
 import { toast } from "sonner"
 import AmountField from "@/components/form/amount-field"
@@ -19,6 +19,7 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog"
 import { FieldGroup } from "@/components/ui/field"
+import { useHistory } from "@/history"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { useDialogCloseAnimation } from "@/hooks/use-dialog-close-animation"
 import { useSeed } from "@/hooks/use-seed"
@@ -29,7 +30,7 @@ import {
 	updatePendingStatement,
 } from "@/logic/statements"
 import { ValidationError } from "@/logic/validate"
-import { pathStatements } from "@/routes"
+import { pathStatement, pathStatements } from "@/routes"
 import type { Account, Statement } from "@/types"
 
 type PendingStatementValues = {
@@ -53,7 +54,8 @@ export default function PendingStatementDialog({
 	trigger?: React.ReactElement
 }) {
 	const { open, setIsOpen, onOpenChangeComplete } = useDialogCloseAnimation(isOpen, onOpenChange)
-	const router = useRouter()
+	const pathname = usePathname()
+	const { navigateBack } = useHistory()
 	const isEditing = !!statement
 	const [values, setValues] = useState<PendingStatementValues>({
 		account_id: "",
@@ -140,7 +142,8 @@ export default function PendingStatementDialog({
 				await deletePendingStatement(statement.id)
 				setIsOpen(false)
 				toast.success("Pending statement deleted.")
-				void router.push(pathStatements())
+				if (pathname === pathStatement(statement.id))
+					navigateBack({ name: "Statements", url: pathStatements() })
 				return true
 			} catch (cause) {
 				if (cause instanceof ValidationError) setApiErrors(cause.errors)

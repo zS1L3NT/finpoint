@@ -1811,3 +1811,30 @@ test("archived Monthly Budgets: a Category default and a rule action that point 
 		await expect(dialog.getByLabel("Monthly budget", { exact: true })).toContainText("Travel")
 	})
 })
+
+test("Pending Statement editor: deleting from an Account page stays on that page", async ({
+	page,
+}) => {
+	const { tables } = getScenario("populated")
+	await seedWorkspace(page, "populated", {
+		statements: [...tables.statements, { ...pending, id: "free-pending" }],
+	})
+	await page.goto(`/accounts/${pending.account_id}`)
+	await page
+		.locator('main a[href="/statements/free-pending"]')
+		.filter({ visible: true })
+		.locator('xpath=ancestor::*[self::tr or contains(@class,"grid-cols-subgrid")][1]')
+		.getByRole("button", { name: "Edit pending statement", exact: true })
+		.click()
+	await page
+		.getByRole("dialog", { name: "Edit Pending Statement", exact: true })
+		.getByRole("button", { name: "Delete", exact: true })
+		.click()
+	await expect(page.getByRole("dialog")).toHaveCount(0)
+	await expect
+		.poll(async () =>
+			(await readRows(page, "statements")).some(row => row.id === "free-pending"),
+		)
+		.toBe(false)
+	await expect(page).toHaveURL(new RegExp(`/accounts/${pending.account_id}$`))
+})
