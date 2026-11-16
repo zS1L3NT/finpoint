@@ -136,9 +136,8 @@ function debitCreditAmount(debit: string | null | undefined, credit: string | nu
 }
 
 function descriptionKey(description: string | null | undefined): string {
-	const value = description ?? ""
-	const trimmed = value.trim()
-	return trimmed === "" || trimmed === "-" ? "" : value
+	const trimmed = (description ?? "").trim()
+	return trimmed === "-" ? "" : trimmed
 }
 
 // Older DBS imports kept "-" in individual references before joining them.
@@ -365,12 +364,12 @@ export async function importUob(files: File[]): Promise<ImportResult> {
 		files,
 		async data => {
 			const numberRow = data.find(row => row[0] === "Account Number:")
-			if (!numberRow) {
+			const accountId = (numberRow?.[1] ?? "").trim()
+			if (!accountId) {
 				throw new ValidationError({
 					files: ["The account number is missing from this export."],
 				})
 			}
-			const accountId = numberRow[1] ?? ""
 			const typeRow = data.find(row => row[0] === "Account Type:")
 			if (!typeRow) {
 				throw new ValidationError({
