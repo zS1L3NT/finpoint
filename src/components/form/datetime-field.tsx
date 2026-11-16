@@ -7,10 +7,14 @@ import { Input } from "@/components/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
 
-type Props = FormFieldProps & {
+type Props = Omit<FormFieldProps, "label" | "description" | "autopopulated"> & {
 	value: string
+	/** Labels for the two inputs, which are edited and marked separately. */
+	label?: string
+	timeLabel?: string
+	/** A note per input whose value was filled in for the user. */
+	autopopulated?: { date?: string; time?: string }
 	placeholder?: string
-	autopopulatedTime?: boolean
 	onChange: (value: string) => void
 }
 
@@ -27,15 +31,14 @@ const toInputValue = (datetime: DateTime) => datetime.toFormat("yyyy-MM-dd'T'HH:
 
 export default function DatetimeField({
 	id,
-	label,
-	description,
+	label = "Date",
+	timeLabel = "Time",
 	autopopulated,
 	errors,
 	disabled,
 	className,
 	value,
-	placeholder = "Select date and time",
-	autopopulatedTime = false,
+	placeholder = "Select date",
 	onChange,
 }: Props) {
 	const selected = parseValue(value)
@@ -74,16 +77,19 @@ export default function DatetimeField({
 	}
 
 	return (
-		<FormField
-			id={id}
-			label={label}
-			description={description}
-			autopopulated={autopopulated}
-			errors={errors}
-			disabled={disabled}
-			className={className}
+		<div
+			className={cn(
+				"grid w-full min-w-0 grid-cols-1 items-start gap-x-2 gap-y-4 sm:grid-cols-[minmax(0,1fr)_8.5rem]",
+				className,
+			)}
 		>
-			<div className="grid w-full min-w-0 max-w-full grid-cols-1 gap-2 overflow-hidden sm:grid-cols-[minmax(0,1fr)_7.5rem]">
+			<FormField
+				id={id}
+				label={label}
+				autopopulated={autopopulated?.date}
+				errors={errors}
+				disabled={disabled}
+			>
 				<Popover>
 					<PopoverTrigger
 						render={
@@ -93,14 +99,16 @@ export default function DatetimeField({
 								disabled={disabled}
 								aria-invalid={invalid}
 								aria-describedby={
-									autopopulated && !invalid ? `${id}-autopopulated` : undefined
+									autopopulated?.date && !invalid
+										? `${id}-autopopulated`
+										: undefined
 								}
 								className={cn(
-									"min-w-0 max-w-full justify-start text-left text-sm font-normal md:text-xs/relaxed border-input",
+									"w-full min-w-0 justify-start border-input text-left text-sm font-normal md:text-xs/relaxed",
 									!selected && "text-muted-foreground",
 									invalid
 										? "border-destructive"
-										: autopopulated
+										: autopopulated?.date
 											? AUTOPOPULATED_BORDER
 											: null,
 								)}
@@ -123,6 +131,14 @@ export default function DatetimeField({
 						/>
 					</PopoverContent>
 				</Popover>
+			</FormField>
+			{/* The date field already reports the shared datetime errors. */}
+			<FormField
+				id={`${id}-time`}
+				label={timeLabel}
+				autopopulated={invalid ? undefined : autopopulated?.time}
+				disabled={disabled}
+			>
 				<Input
 					id={`${id}-time`}
 					type="time"
@@ -132,20 +148,18 @@ export default function DatetimeField({
 					onChange={event => updateTime(event.target.value)}
 					aria-invalid={invalid}
 					aria-describedby={
-						autopopulated && autopopulatedTime && !invalid
-							? `${id}-autopopulated`
-							: undefined
+						autopopulated?.time && !invalid ? `${id}-time-autopopulated` : undefined
 					}
 					className={cn(
 						"min-w-0 max-w-full appearance-none [max-inline-size:100%] [min-inline-size:0]",
 						invalid
 							? "border-destructive"
-							: autopopulated && autopopulatedTime
+							: autopopulated?.time
 								? AUTOPOPULATED_BORDER
 								: null,
 					)}
 				/>
-			</div>
-		</FormField>
+			</FormField>
+		</div>
 	)
 }

@@ -100,8 +100,8 @@ export const componentInventory: InventoryEntry[] = [
 	{
 		path: "src/components/allocate-bar.tsx",
 		owner: "team3",
-		routes: ["/statements/[id]"],
-		visibleExports: ["default"],
+		routes: ["/statements/[id]", "/allocator", "/records"],
+		visibleExports: ["AllocationMismatch", "default"],
 		dormantExports: [],
 		helperExports: [],
 		scenarios: ["display", "allocation"],
@@ -878,9 +878,9 @@ export const componentInventory: InventoryEntry[] = [
 			"/records",
 			"/",
 		],
-		visibleExports: ["ClearFiltersButton", "FilterBar"],
+		visibleExports: ["ClearFiltersButton", "FilterBar", "FilterField", "FilterSelect"],
 		dormantExports: [],
-		helperExports: ["FILTER_CONTROL_CLASS"],
+		helperExports: ["FILTER_CONTROL_CLASS", "filterControlClass"],
 		scenarios: ["table"],
 	},
 	{
@@ -2795,6 +2795,9 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"amount and badge: optional states keep signs, pending values and colour fallback",
 		"Record editor: long Monthly Budget option can be picked, cleared and disabled by Treatment",
 	],
+	"src/components/allocate-bar.tsx#export.AllocationMismatch.behaviour": [
+		"Record creator: an insufficient Allocation warns that the Record stays Pending",
+	],
 	"src/components/allocate-bar.tsx#export.default.behaviour": [
 		"Allocation bar: not, partial and fully allocated states show finite values",
 		"Allocation bar: zero, negative, full, excess and opposite-sign values stay finite and bounded",
@@ -2854,6 +2857,12 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"src/components/table/filter-bar.tsx#export.ClearFiltersButton.behaviour": [
 		"Records table: Category selection narrows Records and survives reload",
+	],
+	"src/components/table/filter-bar.tsx#export.FilterField.behaviour": [
+		"filter bar: active filters are highlighted one for one with the Clear count and reset on their own",
+	],
+	"src/components/table/filter-bar.tsx#export.FilterSelect.behaviour": [
+		"filter bar: active filters are highlighted one for one with the Clear count and reset on their own",
 	],
 	"src/components/table/filter-bar.tsx#export.FilterBar.behaviour": [
 		"Records table: Category selection narrows Records and survives reload",

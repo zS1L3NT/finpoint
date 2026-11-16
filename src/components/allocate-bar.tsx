@@ -1,3 +1,5 @@
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { classForCurrency, cn, formatCurrency } from "@/lib/utils"
 
 export default function AllocateBar({
@@ -47,6 +49,49 @@ export default function AllocateBar({
 					/>
 				) : null}
 			</div>
+		</div>
+	)
+}
+
+/** Why a Record whose amount differs from its Allocations stays Pending, and the one-step fix. */
+export function AllocationMismatch({
+	amount,
+	allocated,
+	onUseAllocated,
+}: {
+	amount: number
+	allocated: number
+	onUseAllocated: () => void
+}) {
+	return (
+		<div
+			role="status"
+			className="grid gap-1 rounded-lg border border-amber-500/25 bg-amber-500/5 px-2.5 py-2 text-xs/relaxed"
+		>
+			<div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+				<Badge variant="warning" className="shrink-0">
+					Pending
+				</Badge>
+				<p className="min-w-0 flex-1 font-medium tabular-nums">
+					{allocated === 0
+						? "No statements allocated yet"
+						: `${formatCurrency(allocated)} of ${formatCurrency(amount)} allocated`}
+				</p>
+				{allocated !== 0 ? (
+					<Button
+						type="button"
+						variant="outline"
+						size="xs"
+						className="shrink-0 tabular-nums"
+						onClick={onUseAllocated}
+					>
+						Use {formatCurrency(allocated)}
+					</Button>
+				) : null}
+			</div>
+			<p className="text-muted-foreground">
+				This Record stays Pending until its amount equals its Allocations.
+			</p>
 		</div>
 	)
 }

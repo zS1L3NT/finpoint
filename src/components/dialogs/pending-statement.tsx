@@ -184,7 +184,6 @@ export default function PendingStatementDialog({
 						/>
 						<DatetimeField
 							id="datetime"
-							label="Date and time"
 							value={values.datetime}
 							errors={getApiFieldErrors("datetime")}
 							onChange={value => setValue("datetime", value)}

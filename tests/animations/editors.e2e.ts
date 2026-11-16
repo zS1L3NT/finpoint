@@ -131,7 +131,7 @@ const editors = [
 
 async function sampleWarningCollapse(page: Page, dialog: Locator) {
 	await expect(
-		dialog.locator("div.overflow-hidden").filter({ hasText: "Amount does not match" }).first(),
+		dialog.locator("div.overflow-hidden").filter({ hasText: "stays Pending until" }).first(),
 	).toHaveCSS("opacity", "1")
 	const recorder = await page.evaluateHandle(() => ({
 		done: new Promise<{ opacity: number; height: number }[]>(resolve => {
@@ -142,7 +142,7 @@ async function sampleWarningCollapse(page: Page, dialog: Locator) {
 					...document.querySelectorAll(
 						'[data-slot="dialog-content"] div.overflow-hidden',
 					),
-				].find(element => element.textContent?.includes("Amount does not match"))
+				].find(element => element.textContent?.includes("stays Pending until"))
 				frames.push(
 					target
 						? {
@@ -268,16 +268,16 @@ test("Record creator: pending warning reveals and collapses smoothly", {
 				"Category default · Daily",
 			)
 			// The pending warning tracks the amount/allocation mismatch, not just mount state.
-			const mismatch = dialog.getByText("Amount does not match the sum of Allocation Amounts")
+			const mismatch = dialog.getByText(
+				"This Record stays Pending until its amount equals its Allocations.",
+			)
 			const expectWarningReveal = async (value: string) => {
 				const samples = await sampleVisibleRowAnimations(
 					page,
 					'[data-slot="dialog-content"] div.overflow-hidden',
 					() => dialog.getByLabel("Amount", { exact: true }).fill(value),
 				)
-				const warning = samples.find(sample =>
-					sample.text.includes("Amount does not match"),
-				)
+				const warning = samples.find(sample => sample.text.includes("stays Pending until"))
 				expect(warning, "Conditional warning wrapper is sampled").toBeDefined()
 				const frames = warning?.frames ?? []
 				expect(
@@ -407,8 +407,8 @@ test("Record creator: learned chips and late autofill notes rise in after the cr
 		'[aria-label="Suggestions from past Records"] button, #title-autopopulated, #category_id-autopopulated, #datetime-autopopulated',
 		() => page.getByRole("button", { name: "Create Record" }).click(),
 	)
-	const present = samples.filter(sample => sample.text.includes("copied from the statement"))
-	const late = samples.filter(sample => !sample.text.includes("copied from the statement"))
+	const present = samples.filter(sample => sample.text.includes("Copied from the statement"))
+	const late = samples.filter(sample => !sample.text.includes("Copied from the statement"))
 	expect(
 		samples.length,
 		"chips, late autofill notes and the open-time datetime note are all sampled",
