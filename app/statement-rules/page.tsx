@@ -3,6 +3,7 @@
 import { useLiveQuery } from "dexie-react-hooks"
 import { motion } from "framer-motion"
 import { useState } from "react"
+import { toast } from "sonner"
 import StatementRuleDialog from "@/components/dialogs/statement-rule"
 import { ruleValueLabel } from "@/components/form/rule-suggestions"
 import { UiIcon } from "@/components/icon"
@@ -11,6 +12,7 @@ import PageHeader from "@/components/layout/page-header"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
+import { useSubmitLock } from "@/hooks/use-submit-lock"
 import { cardEnter } from "@/lib/motion"
 import { cn, pluralize } from "@/lib/utils"
 import { listCategories } from "@/logic/categories"
@@ -31,6 +33,7 @@ export default function StatementRulesPage() {
 	const [dialogRule, setDialogRule] = useState<Rule | RuleInput | "new" | null>(null)
 
 	const { query, handleQueryChange } = usePaginatedTableState()
+	const { locked, run } = useSubmitLock(true)
 
 	const rules = useLiveQuery(() => listStatementRules(), [])
 	const suggestions = useLiveQuery(() => suggestedStatementRules(), []) ?? []
@@ -55,6 +58,17 @@ export default function StatementRulesPage() {
 				),
 			].some(text => text.toLowerCase().includes(needle)),
 	)
+
+	// Always resolves false: the lock only blocks a click while the previous one is running.
+	const toggleRule = (rule: Rule) =>
+		run(async () => {
+			try {
+				await setStatementRuleEnabled(rule.id, !rule.enabled)
+			} catch {
+				toast.error("Unable to update this rule.")
+			}
+			return false
+		})
 
 	return (
 		<>
@@ -162,9 +176,8 @@ export default function StatementRulesPage() {
 												ACTION_CLASS,
 												"opacity-60 group-hover:opacity-100",
 											)}
-											onClick={() =>
-												setStatementRuleEnabled(rule.id, !rule.enabled)
-											}
+											disabled={locked}
+											onClick={() => toggleRule(rule)}
 										>
 											<UiIcon
 												icon={rule.enabled ? "lucide:pause" : "lucide:play"}

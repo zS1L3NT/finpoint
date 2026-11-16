@@ -1073,3 +1073,31 @@ test("narrow desktop: pages stack by available width and popups keep side margin
 		expect(box.x + box.width).toBeLessThanOrEqual(800 - 8)
 	})
 })
+
+test("Statement rules page: a double click on Pause writes once", async ({ page }) => {
+	await seedWorkspace(page, "populated", { statement_rules: statementRules() })
+	await page.goto("/statement-rules")
+	const pause = page.getByRole("button", { name: "Pause Starbucks coffee", exact: true })
+	await expect(pause).toBeVisible()
+	await page.evaluate(() => {
+		const w = window as unknown as { __ruleWrites: number }
+		w.__ruleWrites = 0
+		const transaction = IDBDatabase.prototype.transaction
+		IDBDatabase.prototype.transaction = function (stores, mode, ...rest) {
+			if (mode === "readwrite" && [stores].flat().includes("statement_rules"))
+				w.__ruleWrites++
+			return transaction.call(this, stores, mode, ...rest)
+		}
+	})
+	await pause.evaluate((button: HTMLButtonElement) => {
+		button.click()
+		button.click()
+	})
+	await expect(
+		page.getByRole("button", { name: "Resume Starbucks coffee", exact: true }),
+	).toBeVisible()
+	await page.waitForTimeout(300)
+	expect(
+		await page.evaluate(() => (window as unknown as { __ruleWrites: number }).__ruleWrites),
+	).toBe(1)
+})
