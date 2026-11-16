@@ -1,7 +1,7 @@
 // Mirrors `Api\BudgetController` + `Api\BudgetRecordController` + `Budget::appQuery`.
 
 import { db } from "@/data/db"
-import { contribution } from "@/logic/analytics"
+import { compareRecords, contribution } from "@/logic/analytics"
 import { enrichRecords } from "@/logic/records"
 import { fromCents, newId } from "@/logic/shared"
 import { Validator } from "@/logic/validate"
@@ -57,9 +57,7 @@ export async function getBudget(id: string): Promise<BudgetDetail> {
 				.toArray()
 		: []
 	// Same read model as the Records list, so pending state and subtitles match.
-	const enriched = (await enrichRecords(records)).sort((x, y) =>
-		y.datetime.localeCompare(x.datetime),
-	)
+	const enriched = (await enrichRecords(records)).sort(compareRecords)
 
 	return { ...budget, used_amount: budgetSpent(enriched), records: enriched }
 }

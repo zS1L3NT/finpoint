@@ -279,7 +279,11 @@ export default function AllocatorPage() {
 					}}
 					selectedIds={selectedIds}
 					mobileRow={statementMobileRow}
-					groupBy={byDay<Statement>("Statement")}
+					groupBy={byDay<Statement>(
+						"Statement",
+						statement => statement.allocable_amount,
+						"Left to allocate on this page",
+					)}
 					onRowClick={toggleStatement}
 					emptyMessage="No statements found."
 					loading={statementsQuery === undefined}

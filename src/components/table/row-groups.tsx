@@ -10,6 +10,8 @@ export type RowGroup<TData> = {
 	label: (key: string, rows: TData[]) => React.ReactNode
 	/** Subtotal shown in the Amount column so it lines up with the row amounts. */
 	total?: (rows: TData[]) => number
+	/** Tooltip on the subtotal, for a total that covers less than its whole day. */
+	totalLabel?: string
 }
 
 /**
@@ -36,9 +38,10 @@ export function groupStarts<TData>(rows: TData[], group: RowGroup<TData> | undef
 	return starts
 }
 
-function GroupTotal({ value }: { value: number }) {
+function GroupTotal({ value, label }: { value: number; label?: string }) {
 	return (
 		<span
+			title={label}
 			className={cn("block text-right font-semibold tabular-nums", classForCurrency(value))}
 		>
 			{formatCurrency(value)}
@@ -83,7 +86,7 @@ export function GroupHeaderRow<TData>({
 				>
 					{index === 0 ? group.label(groupKey, rows) : null}
 					{column.id === "amount" && group.total ? (
-						<GroupTotal value={group.total(rows)} />
+						<GroupTotal value={group.total(rows)} label={group.totalLabel} />
 					) : null}
 				</TableCell>
 			))}
@@ -144,7 +147,11 @@ export function MobileGroupHeader<TData>({
 			className={cn(MOBILE_ROW_CLASS, "bg-muted/50 px-3 py-1.5 text-sm")}
 		>
 			<div className="min-w-0">{group.label(groupKey, rows)}</div>
-			{group.total ? <GroupTotal value={group.total(rows)} /> : <span />}
+			{group.total ? (
+				<GroupTotal value={group.total(rows)} label={group.totalLabel} />
+			) : (
+				<span />
+			)}
 			<span />
 		</motion.div>
 	)
@@ -176,6 +183,8 @@ export function dayLabel(day: string) {
 /** Day group: records and statements are listed newest first, so a day prefix groups them. */
 export function byDay<TData extends { datetime: string; amount: number }>(
 	noun: string,
+	amount: (row: TData) => number = row => row.amount,
+	totalLabel?: string,
 ): RowGroup<TData> {
 	return {
 		key: row => row.datetime.slice(0, 10),
@@ -188,6 +197,7 @@ export function byDay<TData extends { datetime: string; amount: number }>(
 				</span>
 			</span>
 		),
-		total: rows => rows.reduce((sum, row) => sum + row.amount, 0),
+		total: rows => rows.reduce((sum, row) => sum + amount(row), 0),
+		totalLabel,
 	}
 }

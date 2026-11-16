@@ -21,6 +21,7 @@ import {
 	tallyAllocations,
 } from "@/logic/pending"
 import { resolveRecordChoices } from "@/logic/record-choices"
+import { round2 } from "@/logic/shared"
 import {
 	hasAllocable,
 	type StatementTotals,
@@ -441,7 +442,11 @@ export async function getDashboard(
 					? "Future month"
 					: "Full month",
 		},
-		summary,
+		// The badge opens the Records sheet, which lists actual and later Records together.
+		summary: {
+			...summary,
+			unbudgeted_count: summary.unbudgeted_count + futureSummary.unbudgeted_count,
+		},
 		comparison,
 		comparison_history: comparisonHistory,
 		history: buildCashflowHistory(date, today, tables, null),
@@ -858,10 +863,11 @@ function buildProjection(
 				? {
 						id: paceMonthlyBudget.id,
 						name: paceMonthlyBudget.name,
-						remaining:
+						remaining: round2(
 							paceAmount -
-							paceMonthlyBudget.spending -
-							scheduledMonthlyBudgetSpending,
+								paceMonthlyBudget.spending -
+								scheduledMonthlyBudgetSpending,
+						),
 						spent: paceMonthlyBudget.spending,
 						amount: paceAmount,
 						projected:
@@ -929,7 +935,8 @@ function buildMonthlyBudgets(
 			...monthly_budget,
 			spending,
 			amount: amount === null || amount === undefined ? null : Number(amount),
-			remaining: amount === null || amount === undefined ? null : Number(amount) - spending,
+			remaining:
+				amount === null || amount === undefined ? null : round2(Number(amount) - spending),
 			comparison: baseline.has(monthly_budget.id)
 				? spending - (baseline.get(monthly_budget.id) ?? 0)
 				: null,

@@ -22,7 +22,9 @@ async function accountActivity(accountId?: string): Promise<Map<string, AccountA
 		? await db.statements.where("account_id").equals(accountId).toArray()
 		: await db.statements.toArray()
 	const totals = tallyStatementAllocations(await db.allocations.toArray())
-	const since = DateTime.now().minus({ days: 30 }).toFormat("yyyy-MM-dd")
+	const today = DateTime.now()
+	const since = today.minus({ days: 30 }).toFormat("yyyy-MM-dd")
+	const until = today.toFormat("yyyy-MM-dd")
 	const map = new Map<string, AccountActivity>()
 	for (const statement of statements) {
 		const entry = map.get(statement.account_id) ?? {
@@ -38,7 +40,8 @@ async function accountActivity(accountId?: string): Promise<Map<string, AccountA
 		if (statement.is_pending === 1) entry.pending_count++
 		if (!entry.last_activity || statement.datetime > entry.last_activity)
 			entry.last_activity = statement.datetime
-		if (statement.datetime.slice(0, 10) >= since) {
+		const day = statement.datetime.slice(0, 10)
+		if (day >= since && day <= until) {
 			if (statement.amount > 0) entry.inflow_30d = round2(entry.inflow_30d + statement.amount)
 			else entry.outflow_30d = round2(entry.outflow_30d - statement.amount)
 		}
