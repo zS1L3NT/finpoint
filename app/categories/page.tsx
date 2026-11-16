@@ -15,14 +15,13 @@ import { useHistory } from "@/history"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { canUseDefaultMonthlyBudget, treatmentLabel } from "@/lib/analytics"
 import { cardEnter } from "@/lib/motion"
-import { themeColor } from "@/lib/palette"
-import { pluralize } from "@/lib/utils"
+import { cn, pluralize } from "@/lib/utils"
 import { listCategories } from "@/logic/categories"
 import { pathRecords } from "@/routes"
 import type { AnalyticsTreatment, Category, CategoryWithChildren } from "@/types"
 
 type CategoryDialogState =
-	| { mode: "create" }
+	| { mode: "create"; parent?: CategoryWithChildren }
 	| { mode: "edit"; category: Category | CategoryWithChildren }
 	| null
 
@@ -33,12 +32,16 @@ export default function CategoriesPage() {
 	const categories = (categoriesQuery ?? []) as CategoryWithChildren[]
 	const { query, handleQueryChange } = usePaginatedTableState()
 	const needle = query.trim().toLowerCase()
+	// A Category found by name keeps all its subcategories; one found through a subcategory
+	// keeps only the matching ones.
 	const visible = needle
-		? categories.filter(
-				category =>
-					category.name.toLowerCase().includes(needle) ||
-					category.children.some(child => child.name.toLowerCase().includes(needle)),
-			)
+		? categories.flatMap(category => {
+				if (category.name.toLowerCase().includes(needle)) return [category]
+				const children = category.children.filter(child =>
+					child.name.toLowerCase().includes(needle),
+				)
+				return children.length ? [{ ...category, children }] : []
+			})
 		: categories
 
 	return (
@@ -90,37 +93,60 @@ export default function CategoriesPage() {
 							),
 						).length
 						if (!items.length) return null
-						const records = items.reduce(
-							(sum, category) =>
-								sum +
-								category.records_count +
-								category.children.reduce(
-									(total, child) => total + child.records_count,
-									0,
-								),
+						const subcategories = items.reduce(
+							(sum, category) => sum + category.children.length,
 							0,
 						)
 						return (
-							<section key={section.value} className="grid gap-3">
+							<section key={section.value} className="grid gap-2">
 								<h3 className="flex items-baseline gap-2 text-sm font-semibold">
 									{section.label}
 									<span className="text-xs font-normal text-muted-foreground">
 										{items.length}{" "}
-										{items.length === 1 ? "category" : "categories"} ·{" "}
-										{records.toLocaleString()} Records
+										{items.length === 1 ? "category" : "categories"}
+										{subcategories
+											? ` · ${subcategories} ${subcategories === 1 ? "subcategory" : "subcategories"}`
+											: ""}{" "}
+										·{" "}
+										{pluralize(
+											items.reduce((sum, c) => sum + totalRecords(c), 0),
+											"Record",
+										)}
 									</span>
 								</h3>
-								<div className="grid gap-3 @2xl/page:grid-cols-2 @5xl/page:grid-cols-3">
+								<div className="overflow-hidden rounded-xl border bg-card">
+									<div
+										aria-hidden
+										className={cn(
+											ROW_GRID,
+											"hidden border-b bg-muted/30 py-2 text-xs font-medium text-muted-foreground sm:grid",
+										)}
+									>
+										<span>Category</span>
+										<span>
+											{canUseDefaultMonthlyBudget(section.value)
+												? "Default monthly budget"
+												: null}
+										</span>
+										<span className="text-right">Records</span>
+										<span />
+									</div>
 									{items.map((category, index) => (
 										<motion.div
 											key={category.id}
-											className="grid min-w-0 grid-cols-1"
+											className="border-b last:border-b-0"
 											{...cardEnter(offset + index)}
 										>
-											<CategoryTile
+											<CategoryGroup
 												category={category}
 												onEdit={edit =>
 													setDialogState({ mode: "edit", category: edit })
+												}
+												onAddSubcategory={() =>
+													setDialogState({
+														mode: "create",
+														parent: category,
+													})
 												}
 												onFindRecords={handlePush("Categories")}
 											/>
@@ -137,6 +163,7 @@ export default function CategoriesPage() {
 				isOpen={dialogState !== null}
 				mode={dialogState?.mode ?? "create"}
 				category={dialogState?.mode === "edit" ? dialogState.category : null}
+				parent={dialogState?.mode === "create" ? dialogState.parent : null}
 				categories={categories}
 				setIsOpen={open => {
 					if (!open) {
@@ -152,88 +179,143 @@ const SECTIONS = (
 	["spending", "income", "saving_investment", "neutral", "automatic"] as AnalyticsTreatment[]
 ).map(value => ({ value, label: treatmentLabel(value) }))
 
-function CategoryTile({
+// One set of tracks for the header and every row, so budgets and counts line up down the list.
+const ROW_GRID =
+	"grid-cols-[minmax(0,1fr)_auto_2rem] items-center gap-x-3 px-3 sm:grid-cols-[minmax(0,1fr)_11rem_6.5rem_2rem] sm:px-4"
+
+const totalRecords = (category: CategoryWithChildren) =>
+	category.records_count + category.children.reduce((sum, child) => sum + child.records_count, 0)
+
+/** A Category and its subcategories: one row each, the subcategories hanging off a guide line. */
+function CategoryGroup({
 	category,
 	onEdit,
+	onAddSubcategory,
 	onFindRecords,
 }: {
 	category: CategoryWithChildren
 	onEdit: (category: Category | CategoryWithChildren) => void
+	onAddSubcategory: () => void
 	onFindRecords: () => void
+}) {
+	return (
+		<article className="grid min-w-0 grid-cols-1">
+			<CategoryRow
+				category={category}
+				records={totalRecords(category)}
+				onEdit={() => onEdit(category)}
+				onFindRecords={onFindRecords}
+				action={
+					<Button
+						type="button"
+						variant="ghost"
+						size="icon-sm"
+						title="Add subcategory"
+						aria-label={`Add subcategory to ${category.name}`}
+						className="text-muted-foreground hover:text-foreground"
+						onClick={onAddSubcategory}
+					>
+						<IconifyIcon icon="lucide:plus" />
+					</Button>
+				}
+			/>
+			{category.children.length ? (
+				<ul className="relative grid pb-1.5 before:absolute before:top-0 before:bottom-5.5 before:left-7 before:w-px before:bg-border sm:before:left-8">
+					{category.children.map(child => (
+						<li
+							key={child.id}
+							className="relative before:absolute before:top-1/2 before:left-7 before:h-px before:w-4 before:bg-border sm:before:left-8"
+						>
+							<CategoryRow
+								category={child}
+								records={child.records_count}
+								onEdit={() => onEdit(child)}
+								onFindRecords={onFindRecords}
+								child
+							/>
+						</li>
+					))}
+				</ul>
+			) : null}
+		</article>
+	)
+}
+
+function CategoryRow({
+	category,
+	records,
+	onEdit,
+	onFindRecords,
+	action,
+	child,
+}: {
+	category: Category | CategoryWithChildren
+	records: number
+	onEdit: () => void
+	onFindRecords: () => void
+	action?: React.ReactNode
+	child?: boolean
 }) {
 	const monthlyBudget = canUseDefaultMonthlyBudget(category.analytics_treatment)
 		? category.default_monthly_budget
 		: null
-	const childRecords = category.children.reduce((sum, child) => sum + child.records_count, 0)
 	return (
-		<article className="group grid min-w-0 grid-cols-1 content-start gap-3 rounded-xl border bg-card p-4 transition-shadow duration-150 ease-out hover:shadow-md">
-			<div className="flex items-start gap-3">
-				<button
-					type="button"
-					className="flex min-w-0 flex-1 cursor-pointer items-center gap-3 text-left"
-					onClick={() => onEdit(category)}
-					aria-label={`Edit ${category.name}`}
-				>
-					<Icon {...category} size={16} />
-					<span className="min-w-0">
-						<span className="block truncate font-medium">{category.name}</span>
-						<span className="block text-xs text-muted-foreground tabular-nums">
-							{(category.records_count + childRecords).toLocaleString()}{" "}
-							{category.records_count + childRecords === 1 ? "Record" : "Records"}
-						</span>
+		<div
+			className={cn(
+				ROW_GRID,
+				"relative grid transition-colors duration-150 ease-out hover:bg-muted/40 has-[[data-edit]:active]:bg-muted/60",
+				child ? "py-1.5" : "py-2.5",
+			)}
+		>
+			<button
+				type="button"
+				data-edit
+				className={cn(
+					"flex min-w-0 cursor-pointer items-center gap-3 rounded-md text-left outline-none after:absolute after:inset-0 focus-visible:ring-2 focus-visible:ring-ring",
+					child && "pl-10 sm:pl-11",
+				)}
+				onClick={onEdit}
+				aria-label={`Edit ${category.name}`}
+			>
+				<Icon {...category} size={child ? 12 : 16} />
+				<span className="grid min-w-0 gap-0.5">
+					<span className={cn("truncate", child ? "text-sm" : "font-medium")}>
+						{category.name}
 					</span>
-				</button>
-				<Button
-					variant="ghost"
-					size="icon-sm"
-					title="Open Records"
-					className="opacity-60 group-hover:opacity-100"
-					asChild
-				>
-					<Link
-						href={pathRecords({ category_ids: category.id })}
-						aria-label={`Open Records for ${category.name}`}
-						onClick={onFindRecords}
-					>
-						<IconifyIcon icon="lucide:arrow-up-right" />
-					</Link>
-				</Button>
-			</div>
-
-			{monthlyBudget ? (
-				<MonthlyBudgetBadge
-					name={monthlyBudget.name}
-					color={monthlyBudget.color}
-					title="Default monthly budget"
-				/>
-			) : category.analytics_treatment === "automatic" ? (
-				<p className="text-xs text-muted-foreground">
-					{treatmentLabel(category.analytics_treatment)}
-				</p>
-			) : null}
-
-			{category.children.length ? (
-				<div className="flex flex-wrap gap-1.5 border-t pt-3">
-					{category.children.map(child => (
-						<button
-							key={child.id}
-							type="button"
-							onClick={() => onEdit(child)}
-							title={`${pluralize(child.records_count, "Record")} · edit`}
-							className="flex min-w-0 max-w-full cursor-pointer items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs hover:bg-muted"
-						>
-							<span
-								className="size-2 shrink-0 rounded-full"
-								style={{ backgroundColor: themeColor(child.color) }}
-							/>
-							<span className="truncate">{child.name}</span>
-							<span className="text-muted-foreground tabular-nums">
-								{child.records_count}
-							</span>
-						</button>
-					))}
-				</div>
-			) : null}
-		</article>
+					{monthlyBudget ? (
+						<MonthlyBudgetBadge
+							name={monthlyBudget.name}
+							color={monthlyBudget.color}
+							title="Default monthly budget"
+							className="max-w-full sm:hidden"
+						/>
+					) : null}
+				</span>
+			</button>
+			<span className="hidden min-w-0 sm:block">
+				{monthlyBudget ? (
+					<MonthlyBudgetBadge
+						name={<span className="truncate">{monthlyBudget.name}</span>}
+						color={monthlyBudget.color}
+						title="Default monthly budget"
+						className="max-w-full"
+					/>
+				) : canUseDefaultMonthlyBudget(category.analytics_treatment) ? (
+					<span className="text-xs text-muted-foreground">Unbudgeted</span>
+				) : null}
+			</span>
+			<Link
+				href={pathRecords({ category_ids: category.id })}
+				aria-label={`Open Records for ${category.name}`}
+				title="Open Records"
+				className="relative flex items-center justify-end gap-1 rounded-md text-xs text-muted-foreground tabular-nums outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+				onClick={onFindRecords}
+			>
+				{records.toLocaleString()}
+				<span className="sm:hidden">{records === 1 ? "Record" : "Records"}</span>
+				<IconifyIcon icon="lucide:arrow-up-right" className="size-3.5" />
+			</Link>
+			<span className="relative flex justify-end">{action}</span>
+		</div>
 	)
 }
