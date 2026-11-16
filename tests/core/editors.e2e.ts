@@ -1898,3 +1898,17 @@ test("Pending Statement editor: the Account option names the bank, not its raw c
 	)
 	await expect(dialog.getByLabel("Account", { exact: true })).toContainText("· DBS")
 })
+
+test("Budget detail: a repeated Detach click writes once", async ({ page, workspace }) => {
+	void workspace
+	await spyOnWrites(page, "budget_records")
+	await page.goto("/budgets/t1-b-manual")
+	const detach = page.getByRole("button", { name: /^Detach / }).first()
+	await expect(detach).toBeVisible()
+	await startCounting(page)
+	await detach.evaluate(button => {
+		for (let i = 0; i < 3; i++) button.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+	})
+	await expect(page.getByRole("button", { name: /^Detach / })).toHaveCount(1)
+	expect(await writeAttempts(page)).toBe(1)
+})

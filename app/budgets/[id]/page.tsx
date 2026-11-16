@@ -25,6 +25,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card"
 import { useRecordEditor } from "@/hooks/use-record-editor"
+import { useSubmitLock } from "@/hooks/use-submit-lock"
 import { themeColor } from "@/lib/palette"
 import { formatCurrency, parseDate, round2 } from "@/lib/utils"
 import { attachBudgetRecord, budgetSpent, detachBudgetRecord, getBudget } from "@/logic/budgets"
@@ -42,6 +43,8 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 	const [isEditingBudget, setIsEditingBudget] = useState(false)
 	const [isAttachingRecord, setIsAttachingRecord] = useState(false)
 	const { editingRecord, handleEdit, setEditingRecord } = useRecordEditor()
+	// Inline actions have no dialog to close, so each run ends unlocked.
+	const detachLock = useSubmitLock(true)
 	const budget = (data ?? null) as Budget | null
 	const records = useMemo(() => data?.records ?? [], [data])
 	const budgetStart = parseDate(budget?.start_date ?? "2000-01-01")
@@ -72,10 +75,16 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 		}
 	}
 
-	const detach = async (record: Record) => {
-		if (!budget) return
-		await detachBudgetRecord(budget.id, record.id)
-	}
+	const detach = (record: Record) =>
+		detachLock.run(async () => {
+			if (!budget) return false
+			try {
+				await detachBudgetRecord(budget.id, record.id)
+			} catch {
+				toast.error("Unable to detach this Record.")
+			}
+			return false
+		})
 
 	const recordColumns = useRecordColumns<Record>({
 		grouped: true,
@@ -88,6 +97,7 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 				title="Detach from budget"
 				aria-label={`Detach ${record.title}`}
 				className="text-destructive hover:text-destructive"
+				disabled={detachLock.locked}
 				onClick={() => detach(record)}
 			>
 				<IconifyIcon icon="lucide:link-2-off" />
@@ -105,6 +115,7 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 				title="Detach from budget"
 				aria-label={`Detach ${record.title}`}
 				className="text-destructive hover:text-destructive"
+				disabled={detachLock.locked}
 				onClick={() => detach(record)}
 			>
 				<IconifyIcon icon="lucide:link-2-off" />
