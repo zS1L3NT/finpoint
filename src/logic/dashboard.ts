@@ -836,7 +836,7 @@ function buildProjection(
 		}
 	}
 	const remainingDays = Math.max((date.daysInMonth ?? 30) - elapsedDays, 0)
-	const dailySpending = summary.gross_spending / elapsedDays
+	const dailySpending = summary.spending / elapsedDays
 	const paceMonthlyBudget = monthlyBudgets.find(b => b.amount !== null && b.amount >= 0)
 	const paceAmount = paceMonthlyBudget?.amount ?? null
 	const futureMonthlyBudgets = new Map(futureSummary.monthlyBudgets.map(b => [b.id, b]))
