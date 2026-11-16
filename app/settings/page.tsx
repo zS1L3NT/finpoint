@@ -130,7 +130,7 @@ export default function SettingsPage() {
 							<DateField
 								id="default_filter_start_date"
 								label="Default filter start date"
-								description="Leave empty to include Records and Statements from any earlier date."
+								description="Leave empty to include Records from any earlier date."
 								value={startDate}
 								placeholder="No default start date"
 								onChange={value =>
@@ -143,7 +143,7 @@ export default function SettingsPage() {
 							<FormField
 								id="default_filter_end_date"
 								label="Default filter end date"
-								description="Choose Today to keep future-dated Records and Statements out of the default view."
+								description="Choose Today to keep future-dated Records out of the default view."
 							>
 								<Select
 									value={endDateToday ? "today" : "none"}

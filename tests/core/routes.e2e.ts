@@ -1101,3 +1101,17 @@ test("Statement rules page: a double click on Pause writes once", async ({ page 
 		await page.evaluate(() => (window as unknown as { __ruleWrites: number }).__ruleWrites),
 	).toBe(1)
 })
+
+test("Settings: the default date descriptions name only the screens that use them", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	await page.goto("/settings")
+	await expect(
+		page.getByText("Leave empty to include Records from any earlier date."),
+	).toBeVisible()
+	await expect(
+		page.getByText("Choose Today to keep future-dated Records out of the default view."),
+	).toBeVisible()
+})
