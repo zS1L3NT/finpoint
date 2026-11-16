@@ -37,12 +37,19 @@ _Avoid_: Survivor, double import, match
 Two same-day statements the user marked as not duplicates, so they are no longer suggested together. Marking is per pair and can be restored.
 _Avoid_: Ignored match, false positive
 
+**Unallocated Statement**:
+A Statement with an amount left to allocate, whether none or only part of it is allocated. Pending Statements count. Every count and list of unallocated Statements uses this one rule.
+_Avoid_: Untouched statement
+
+**Backup import**:
+Replacing the workspace from a backup file or a Drive restore. A backup whose rows point at missing rows is rejected before anything is replaced; it is never repaired silently. Clearing all data keeps Settings.
+
 **Budget**:
-A spending plan with a custom date period and amount. Budget membership can be manual, or automatic when records fall within the budget period; records may still be attached or detached outside the period.
+A spending plan with a custom date period and amount. Budget membership can be manual, or automatic when records fall within the budget period; records may still be attached or detached outside the period. Its spent figure follows the Dashboard rule for every attached Record: the Record's effective treatment decides whether it counts, a refund subtracts, and the figure can go below zero.
 _Avoid_: Spending bucket, monthly target
 
 **Monthly Budget**:
-A reusable spending plan for calendar months, such as Daily, Recurring, Irregular, or Travel. Each month takes its amount from one of three amount rules (see Monthly Budget amount). An explicit null means no comparison amount; zero is a valid amount. Only Records whose effective treatment is Spending contribute to its totals. Archived Monthly Budgets retain historical assignments.
+A reusable spending plan for calendar months, such as Daily, Recurring, Irregular, or Travel. Each month takes its amount from one of three amount rules (see Monthly Budget amount). An explicit null means no comparison amount; zero is a valid amount. Only Records whose effective treatment is Spending contribute to its totals. Archived Monthly Budgets retain historical assignments. A Monthly Budget cannot be archived while a Category default or a Statement Rule uses it, and an archived one cannot be newly assigned.
 _Avoid_: Bucket, spending bucket, monthly target, custom-period budget
 
 **Monthly Budget amount**:
