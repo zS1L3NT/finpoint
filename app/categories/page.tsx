@@ -12,6 +12,7 @@ import MonthlyBudgetBadge from "@/components/monthly-budget-badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useHistory } from "@/history"
+import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { canUseDefaultMonthlyBudget, treatmentLabel } from "@/lib/analytics"
 import { cardEnter } from "@/lib/motion"
 import { themeColor } from "@/lib/palette"
@@ -30,7 +31,7 @@ export default function CategoriesPage() {
 	const { handlePush } = useHistory()
 	const categoriesQuery = useLiveQuery(() => listCategories(), [])
 	const categories = (categoriesQuery ?? []) as CategoryWithChildren[]
-	const [query, setQuery] = useState("")
+	const { query, handleQueryChange } = usePaginatedTableState()
 	const needle = query.trim().toLowerCase()
 	const visible = needle
 		? categories.filter(
@@ -70,7 +71,7 @@ export default function CategoriesPage() {
 						placeholder="Search categories..."
 						className="pl-8"
 						value={query}
-						onChange={event => setQuery(event.target.value)}
+						onChange={event => handleQueryChange(event.target.value)}
 					/>
 				</div>
 

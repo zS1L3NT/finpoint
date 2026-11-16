@@ -1,5 +1,5 @@
 import { expectPointerCursor } from "../support/assertions"
-import { getScenario, IDS } from "../support/data"
+import { getScenario, IDS, statementRules } from "../support/data"
 import { setDateOnly } from "../support/date-only"
 import { pickOption } from "../support/editors"
 import { expect, seedWorkspace, test } from "../support/fixtures"
@@ -669,4 +669,38 @@ test("Monthly budget filters: an archived Budget in the URL keeps its name in th
 	void workspace
 	await page.goto(`/records?monthly_budget_id=${IDS.monthlyBudgets.travelArchived}`)
 	await expect(page.getByRole("combobox").filter({ hasText: /^Travel$/ })).toBeVisible()
+})
+
+test("Categories page: search lives in the URL, survives reload and one Back clears it", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	await page.goto("/categories")
+	const search = page.getByRole("searchbox", { name: "Search categories", exact: true })
+	await search.fill("Groceries")
+	await expect(page).toHaveURL(/query=Groceries/)
+	await page.reload()
+	await expect(search).toHaveValue("Groceries")
+	await expect(page.getByRole("button", { name: "Edit Groceries", exact: true })).toBeVisible()
+	await expect(page.getByRole("button", { name: "Edit Housing", exact: true })).toHaveCount(0)
+	await page.goBack()
+	await expect(page).not.toHaveURL(/query=/)
+	await expect(search).toHaveValue("")
+})
+
+test("Statement rules page: search lives in the URL, survives reload and one Back clears it", async ({
+	page,
+}) => {
+	await seedWorkspace(page, "populated", { statement_rules: statementRules() })
+	await page.goto("/statement-rules")
+	const search = page.getByRole("searchbox", { name: "Search rules", exact: true })
+	await search.fill("fairprice")
+	await expect(page).toHaveURL(/query=fairprice/)
+	await page.reload()
+	await expect(search).toHaveValue("fairprice")
+	await expect(page.locator("main section[aria-label='Your rules'] article")).toHaveCount(2)
+	await page.goBack()
+	await expect(page).not.toHaveURL(/query=/)
+	await expect(search).toHaveValue("")
 })

@@ -10,6 +10,7 @@ import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { cardEnter } from "@/lib/motion"
 import { cn, pluralize } from "@/lib/utils"
 import { listCategories } from "@/logic/categories"
@@ -29,7 +30,7 @@ type Rule = Awaited<ReturnType<typeof listStatementRules>>[number]
 export default function StatementRulesPage() {
 	const [dialogRule, setDialogRule] = useState<Rule | RuleInput | "new" | null>(null)
 
-	const [query, setQuery] = useState("")
+	const { query, handleQueryChange } = usePaginatedTableState()
 
 	const rules = useLiveQuery(() => listStatementRules(), [])
 	const suggestions = useLiveQuery(() => suggestedStatementRules(), []) ?? []
@@ -105,7 +106,7 @@ export default function StatementRulesPage() {
 									placeholder="Search rules..."
 									className="pl-8"
 									value={query}
-									onChange={event => setQuery(event.target.value)}
+									onChange={event => handleQueryChange(event.target.value)}
 								/>
 							</div>
 						) : null}
