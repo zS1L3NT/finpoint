@@ -1848,3 +1848,28 @@ test("Category editor: a Category in use says why Delete is unavailable", async 
 	await expect(dialog.getByRole("button", { name: "Delete", exact: true })).toBeDisabled()
 	await expect(dialog.getByText(/still use this category/)).toBeVisible()
 })
+
+test("Record editor: Delete asks for a second click, and closing the dialog disarms it", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	const dialog = await openEditor(page, `/records/${record.id}`, "Edit Record", "Edit Record")
+	await dialog.getByRole("button", { name: "Delete", exact: true }).click()
+	await expect(
+		dialog.getByRole("button", { name: "Yes, delete Record", exact: true }),
+	).toBeVisible()
+	expect((await readRows(page, "records")).some(row => row.id === record.id)).toBe(true)
+
+	await page.keyboard.press("Escape")
+	await expect(dialog).not.toBeVisible()
+	await page.getByRole("button", { name: "Edit Record", exact: true }).click()
+	await expect(dialog.getByRole("button", { name: "Delete", exact: true })).toBeVisible()
+
+	await dialog.getByRole("button", { name: "Delete", exact: true }).click()
+	await dialog.getByRole("button", { name: "Yes, delete Record", exact: true }).click()
+	await expect(dialog).not.toBeVisible()
+	await expect
+		.poll(async () => (await readRows(page, "records")).some(row => row.id === record.id))
+		.toBe(false)
+})

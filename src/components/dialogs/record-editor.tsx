@@ -93,6 +93,8 @@ export default function RecordEditorDialog({
 	const [attached, setAttached] = useState(statements)
 	const [isAttachingStatement, setIsAttachingStatement] = useState(false)
 	const [submitError, setSubmitError] = useState("")
+	// The first Delete click arms; the second deletes. Closing the dialog disarms.
+	const [armed, setArmed] = useState(false)
 
 	const { mergeErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
 	const { locked, run } = useSubmitLock(isOpen)
@@ -165,6 +167,10 @@ export default function RecordEditorDialog({
 	})
 
 	const handleDelete = async () => {
+		if (!armed) {
+			setArmed(true)
+			return
+		}
 		await run(async () => {
 			try {
 				await deleteRecord(record.id)
@@ -185,6 +191,7 @@ export default function RecordEditorDialog({
 				}
 				return true
 			} catch {
+				setArmed(false)
 				toast.error("Unable to delete this record.")
 				return false
 			}
@@ -253,6 +260,7 @@ export default function RecordEditorDialog({
 			onOpenChangeComplete={onOpenChangeComplete}
 			onOpenChange={isOpen => {
 				setIsOpen(isOpen)
+				setArmed(false)
 				if (isOpen) {
 					form.reset()
 					resetApiErrors()
@@ -646,7 +654,8 @@ export default function RecordEditorDialog({
 								disabled={locked}
 								onClick={handleDelete}
 							>
-								<IconifyIcon icon="lucide:trash-2" /> Delete
+								<IconifyIcon icon="lucide:trash-2" />{" "}
+								{armed ? "Yes, delete Record" : "Delete"}
 							</Button>
 							{submitError ? (
 								<p
