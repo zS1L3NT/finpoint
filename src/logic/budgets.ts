@@ -1,9 +1,10 @@
 // Mirrors `Api\BudgetController` + `Api\BudgetRecordController` + `Budget::appQuery`.
 
+import { DateTime } from "luxon"
 import { db } from "@/data/db"
 import { compareRecords, contribution } from "@/logic/analytics"
 import { enrichRecords } from "@/logic/records"
-import { fromCents, newId } from "@/logic/shared"
+import { fromCents, newId, round2 } from "@/logic/shared"
 import { Validator } from "@/logic/validate"
 import type { Record as AppRecord, Budget } from "@/types"
 
@@ -147,4 +148,88 @@ export async function attachBudgetRecord(budgetId: string, recordId: string) {
 
 export async function detachBudgetRecord(budgetId: string, recordId: string) {
 	await db.budget_records.delete([budgetId, recordId])
+}
+
+export type BudgetProgressPoint = {
+	/** `before` and `after` gather the attached Records dated outside the Budget's window. */
+	key: "before" | "after" | string
+	usage: number | null
+	projection: number | null
+	/** Spending by Records dated after today that land on this point. */
+	scheduled: number
+}
+
+/**
+ * A Budget's cumulative spending by day. Records dated outside the window keep their own
+ * point at either end, and Records dated after today are scheduled: they step the projection
+ * up on their day, and never count towards the daily pace.
+ */
+export function budgetProgress(
+	records: Pick<AppRecord, "amount" | "analytics_treatment" | "datetime">[],
+	start: string,
+	end: string,
+	today: string,
+) {
+	const first = DateTime.fromISO(start)
+	const dayCount = Math.max(Math.floor(DateTime.fromISO(end).diff(first, "days").days), 0) + 1
+	const days = Array.from({ length: dayCount }, (_, index) =>
+		first.plus({ days: index }).toFormat("yyyy-MM-dd"),
+	)
+	const elapsedDays = days.filter(day => day <= today).length
+	const actual = new Map<string, number>()
+	const scheduled = new Map<string, number>()
+	const keys = new Set<string>(days)
+	for (const record of records) {
+		const day = record.datetime.slice(0, 10)
+		const key = day < start ? "before" : day > end ? "after" : day
+		const amounts = day > today ? scheduled : actual
+		keys.add(key)
+		amounts.set(key, (amounts.get(key) ?? 0) + budgetSpent([record]))
+	}
+
+	const ordered = [
+		...(keys.has("before") ? ["before"] : []),
+		...days,
+		...(keys.has("after") ? ["after"] : []),
+	]
+	const reached = (key: string) =>
+		key === "before" || (key === "after" ? today > end : key <= today)
+	let spent = 0
+	const usage = ordered.map(key => {
+		if (!reached(key)) return null
+		spent = round2(spent + (actual.get(key) ?? 0))
+		return spent
+	})
+	const inWindow = round2(days.reduce((sum, day) => sum + (actual.get(day) ?? 0), 0))
+	const pace = elapsedDays ? inWindow / elapsedDays : 0
+	const scheduledTotal = round2([...scheduled.values()].reduce((sum, value) => sum + value, 0))
+
+	// The projection starts on the last reached point, or on the first one before any is.
+	const from = Math.max(
+		usage.findLastIndex(value => value !== null),
+		0,
+	)
+	const ahead = elapsedDays < dayCount || scheduledTotal !== 0
+	let projected = spent
+	const points = ordered.map((key, index): BudgetProgressPoint => {
+		if (index >= from)
+			projected += (scheduled.get(key) ?? 0) + (index > from && key.length === 10 ? pace : 0)
+		return {
+			key,
+			usage: usage[index] ?? null,
+			projection: ahead && index >= from ? round2(projected) : null,
+			scheduled: round2(scheduled.get(key) ?? 0),
+		}
+	})
+
+	return {
+		points,
+		dayCount,
+		elapsedDays,
+		remainingDays: dayCount - elapsedDays,
+		spent,
+		scheduled: scheduledTotal,
+		pace: round2(pace),
+		projected: round2(projected),
+	}
 }

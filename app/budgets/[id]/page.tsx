@@ -27,8 +27,14 @@ import {
 import { useRecordEditor } from "@/hooks/use-record-editor"
 import { useSubmitLock } from "@/hooks/use-submit-lock"
 import { themeColor } from "@/lib/palette"
-import { formatCurrency, parseDate, round2 } from "@/lib/utils"
-import { attachBudgetRecord, budgetSpent, detachBudgetRecord, getBudget } from "@/logic/budgets"
+import { formatCurrency, parseDate, pluralize, round2 } from "@/lib/utils"
+import {
+	attachBudgetRecord,
+	budgetProgress,
+	budgetSpent,
+	detachBudgetRecord,
+	getBudget,
+} from "@/logic/budgets"
 import { listCategories } from "@/logic/categories"
 import { pathBudgets } from "@/routes"
 import type { Budget, CategoryWithChildren, Record } from "@/types"
@@ -47,21 +53,21 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 	const detachLock = useSubmitLock(true)
 	const budget = (data ?? null) as Budget | null
 	const records = useMemo(() => data?.records ?? [], [data])
-	const budgetStart = parseDate(budget?.start_date ?? "2000-01-01")
-	const budgetEnd = parseDate(budget?.end_date ?? "2000-01-01")
-	const now = DateTime.now()
-	const budgetAsOf =
-		now < budgetStart.startOf("day")
-			? budgetStart.minus({ days: 1 })
-			: now > budgetEnd.endOf("day")
-				? budgetEnd
-				: now
-	const analytics = getBudgetAnalytics(
-		budgetStart,
-		budgetEnd,
-		budget?.amount ?? 0,
-		budgetAsOf,
-		budget?.used_amount ?? 0,
+	const today = DateTime.now().toFormat("yyyy-MM-dd")
+	const progress = useMemo(
+		() =>
+			budgetProgress(
+				records,
+				budget?.start_date ?? "2000-01-01",
+				budget?.end_date ?? "2000-01-01",
+				today,
+			),
+		[records, budget?.start_date, budget?.end_date, today],
+	)
+	const limit = budget?.amount ?? 0
+	const spent = budget?.used_amount ?? 0
+	const startsIn = Math.ceil(
+		parseDate(budget?.start_date ?? today).diff(parseDate(today), "days").days,
 	)
 	const categoryData = useMemo(() => getCategoryData(records, categories), [records, categories])
 
@@ -173,46 +179,43 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 					<Metric
 						icon="lucide:wallet-cards"
 						label="Spent"
-						value={formatCurrency(analytics.spent)}
-						detail={`${analytics.elapsedPercent}% of ${formatCurrency(budget.amount)}`}
-						tone={analytics.spent > budget.amount ? "negative" : "neutral"}
+						value={formatCurrency(spent)}
+						detail={`${limit ? round2((spent / limit) * 100) : 0}% of ${formatCurrency(limit)}${progress.scheduled ? ` · ${formatCurrency(progress.scheduled)} scheduled` : ""}`}
+						tone={spent > limit ? "negative" : "neutral"}
 					/>
 					<Metric
 						icon="lucide:scale"
-						label={analytics.spent > budget.amount ? "Over budget" : "Remaining"}
-						value={formatCurrency(Math.abs(budget.amount - analytics.spent))}
+						label={spent > limit ? "Over budget" : "Remaining"}
+						value={formatCurrency(Math.abs(limit - spent))}
 						detail={
-							analytics.remainingDays
-								? `${analytics.remainingDays} day${analytics.remainingDays === 1 ? "" : "s"} left in window`
-								: "Window complete"
+							startsIn > 0
+								? `Window starts in ${pluralize(startsIn, "day")}`
+								: progress.remainingDays
+									? `${pluralize(progress.remainingDays, "day")} left in window`
+									: "Window complete"
 						}
-						tone={analytics.spent > budget.amount ? "negative" : "positive"}
+						tone={spent > limit ? "negative" : "positive"}
 					/>
 					<Metric
 						icon="lucide:chart-no-axes-combined"
 						label="Projected"
-						value={formatCurrency(analytics.projectedSpending)}
-						detail={`${formatCurrency(Math.abs(budget.amount - analytics.projectedSpending))} ${analytics.projectedSpending > budget.amount ? "over" : "under"} limit`}
-						tone={analytics.projectedSpending > budget.amount ? "negative" : "neutral"}
+						value={formatCurrency(progress.projected)}
+						detail={`${formatCurrency(Math.abs(limit - progress.projected))} ${progress.projected > limit ? "over" : "under"} limit`}
+						tone={progress.projected > limit ? "negative" : "neutral"}
 						delta={
-							analytics.remainingDays
+							progress.remainingDays
 								? {
-										text:
-											analytics.projectedSpending > budget.amount
-												? "Over pace"
-												: "On pace",
-										good: analytics.projectedSpending <= budget.amount,
+										text: progress.projected > limit ? "Over pace" : "On pace",
+										good: progress.projected <= limit,
 									}
 								: undefined
 						}
 					/>
 					<Metric
 						icon="lucide:gauge"
-						label={
-							analytics.recommendedPace === null ? "Daily pace" : "Recommended pace"
-						}
-						value={`${formatCurrency(analytics.recommendedPace ?? analytics.currentPace)} / day`}
-						detail={`Now ${formatCurrency(analytics.currentPace)} / day · target ${formatCurrency(analytics.targetPace)}`}
+						label={progress.remainingDays ? "Recommended pace" : "Daily pace"}
+						value={`${formatCurrency(progress.remainingDays ? round2(Math.max(limit - spent, 0) / progress.remainingDays) : progress.pace)} / day`}
+						detail={`Now ${formatCurrency(progress.pace)} / day · target ${formatCurrency(round2(limit / progress.dayCount))}`}
 					/>
 				</MetricGrid>
 
@@ -221,23 +224,23 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 						<CardHeader className="border-b">
 							<CardTitle>Spending over time</CardTitle>
 							<CardDescription>
-								Cumulative usage against the budget limit, including the current
-								pace projection.
+								Cumulative usage against the budget limit. The projection extends
+								the current pace and steps up on days with scheduled Records.
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
-							<BudgetProgressChart
-								records={records}
-								start={budgetStart}
-								end={budgetEnd}
-								limit={budget.amount}
-								asOf={budgetAsOf}
-							/>
+							<BudgetProgressChart points={progress.points} limit={limit} />
 							<div className="mt-2 flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
 								<Legend color="bg-emerald-500" label="Usage" />
 								<Legend color="bg-rose-500" label="Exceed" />
 								<Legend color="bg-amber-400" label="Projection" />
 								<Legend color="bg-orange-500" label="Projected exceed" />
+								{progress.scheduled ? (
+									<span className="flex items-center gap-1.5">
+										<span className="size-2 rounded-full border-[1.5px] border-amber-400" />
+										Scheduled Record
+									</span>
+								) : null}
 							</div>
 						</CardContent>
 					</Card>
@@ -355,37 +358,6 @@ function Legend({ color, label }: { color: string; label: string }) {
 			{label}
 		</span>
 	)
-}
-
-function getBudgetAnalytics(
-	start: DateTime,
-	end: DateTime,
-	limit: number,
-	asOf: DateTime,
-	spent: number,
-) {
-	const dayCount =
-		Math.max(Math.floor(end.startOf("day").diff(start.startOf("day"), "days").days), 0) + 1
-	const elapsedDays = Math.min(
-		Math.max(Math.floor(asOf.startOf("day").diff(start.startOf("day"), "days").days) + 1, 0),
-		dayCount,
-	)
-	const remainingDays = dayCount - elapsedDays
-	const currentPace = elapsedDays ? round2(spent / elapsedDays) : 0
-	const projectedSpending = round2(spent + currentPace * remainingDays)
-	const recommendedPace = remainingDays
-		? round2(Math.max(limit - spent, 0) / remainingDays)
-		: null
-
-	return {
-		spent,
-		elapsedPercent: limit ? round2((spent / limit) * 100) : 0,
-		projectedSpending,
-		currentPace,
-		targetPace: dayCount ? round2(limit / dayCount) : 0,
-		recommendedPace,
-		remainingDays,
-	}
 }
 
 function getCategoryData(records: Record[], categories: CategoryWithChildren[]) {

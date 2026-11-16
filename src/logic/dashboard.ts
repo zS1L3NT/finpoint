@@ -794,12 +794,15 @@ function buildSeries(
 			income += entry?.income ?? 0
 			spending += entry?.spending ?? 0
 		}
+		const scheduled = isActual
+			? 0
+			: (futureSummary.daily.find(item => Number(item.date.slice(-2)) === day)?.spending ?? 0)
 		if (!isActual && projectedDailySpending !== null) {
-			const entry = futureSummary.daily.find(item => Number(item.date.slice(-2)) === day)
-			projectedSpending += projectedDailySpending + (entry?.spending ?? 0)
+			projectedSpending += projectedDailySpending + scheduled
 		}
 		return {
 			day,
+			scheduled_spending: Math.round(scheduled * 100) / 100,
 			income: isActual ? Math.round(income * 100) / 100 : null,
 			spending: isActual ? Math.round(spending * 100) / 100 : null,
 			projected_spending:

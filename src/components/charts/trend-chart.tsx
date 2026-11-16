@@ -19,6 +19,8 @@ export type TrendSeries = {
 	readoutPriority?: number
 	valuePill?: boolean
 	comparison?: boolean
+	/** Indexes that get a ring on the line, for a value worth pointing out. */
+	markers?: number[]
 }
 
 // The right gutter holds the value pills that replace a Y axis.
@@ -33,6 +35,7 @@ export default function TrendChart({
 	ticks,
 	split,
 	reference,
+	notes,
 	sortByValue = false,
 	introKey,
 	onSelect,
@@ -44,6 +47,8 @@ export default function TrendChart({
 	ticks: { index: number; label: string }[]
 	split?: number
 	reference?: { value: number; label: string; color?: string } | null
+	/** An extra readout row per index, such as what is scheduled on that day. */
+	notes?: ({ label: string; value: string } | null)[]
 	sortByValue?: boolean
 	introKey?: string
 	onSelect?: (index: number) => void
@@ -248,6 +253,26 @@ export default function TrendChart({
 								strokeLinejoin="round"
 							/>
 						))}
+						{series.flatMap(s =>
+							(s.markers ?? []).flatMap(index => {
+								const value = s.values[index]
+								return value == null
+									? []
+									: [
+											<circle
+												key={`${s.key}-${index}`}
+												data-slot="chart-marker"
+												cx={x(index)}
+												cy={y(value)}
+												r={3.5}
+												className="fill-card"
+												stroke={tone(s, value)}
+												strokeOpacity={s.opacity}
+												strokeWidth={2}
+											/>,
+										]
+							}),
+						)}
 					</>
 				)
 			}}
@@ -311,7 +336,22 @@ export default function TrendChart({
 						value: formatCurrency(s.values[index] ?? 0),
 					}))
 
-				return <ReadoutRows title={labels[index]} rows={rows} />
+				const note = notes?.[index]
+
+				return (
+					<>
+						<ReadoutRows title={labels[index]} rows={rows} />
+						{note ? (
+							<span className="flex items-center justify-between gap-4">
+								<span className="flex items-center gap-1.5 text-muted-foreground">
+									<span className="size-2 shrink-0 rounded-full border-[1.5px] border-current" />
+									{note.label}
+								</span>
+								<span className="font-medium tabular-nums">{note.value}</span>
+							</span>
+						) : null}
+					</>
+				)
 			}}
 		>
 			{size => {

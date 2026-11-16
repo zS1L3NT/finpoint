@@ -4,6 +4,7 @@ import MonthlyBudgetBadge from "@/components/monthly-budget-badge"
 import { useRecordsSheet } from "@/hooks/use-records-sheet"
 import { dayTicks } from "@/lib/chart-days"
 import { themeColor } from "@/lib/palette"
+import { formatCurrency } from "@/lib/utils"
 import type { getPaceView } from "@/logic/dashboard"
 
 export type CashflowPoint = {
@@ -11,6 +12,7 @@ export type CashflowPoint = {
 	income: number | null
 	spending: number | null
 	projected_spending: number | null
+	scheduled_spending: number
 	surplus: number | null
 	average_spending: number | null
 }
@@ -70,6 +72,14 @@ export default function CashflowChart({
 										: undefined,
 								}
 					}
+					notes={data.map(point =>
+						point.scheduled_spending
+							? {
+									label: "Scheduled",
+									value: formatCurrency(point.scheduled_spending),
+								}
+							: null,
+					)}
 					sortByValue
 					series={[
 						...forecast.filter(b => b.id !== "total"),
@@ -101,6 +111,9 @@ export default function CashflowChart({
 							readoutFallback: true,
 							readoutPriority: budget.id === "total" ? 1 : 0,
 							valuePill: budget.id === "total",
+							markers: budget.points.flatMap((p, index) =>
+								p.scheduled_spending ? [index] : [],
+							),
 						},
 						{
 							key: budget.id,
@@ -125,7 +138,7 @@ export default function CashflowChart({
 			<p className="text-xs text-muted-foreground">
 				Each colour shows a Monthly Budget's cumulative spending.
 				{showProjection
-					? " Dashed lines extend each budget's gross spending pace and include scheduled Records."
+					? " Dashed lines extend each budget's gross spending pace and step up, at a ring, on days with scheduled Records."
 					: ""}{" "}
 				Hold or hover over a day to read it, and tap or click it to open its Records.
 			</p>
