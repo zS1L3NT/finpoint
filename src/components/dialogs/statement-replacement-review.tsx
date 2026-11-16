@@ -12,6 +12,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog"
+import { useSubmitLock } from "@/hooks/use-submit-lock"
 import { classForCurrency, cn, formatCurrency, formatDatetime, pluralize } from "@/lib/utils"
 import { getRecord } from "@/logic/records"
 import { replacementReview, replacePendingStatement } from "@/logic/statements"
@@ -40,7 +41,7 @@ export default function StatementReplacementReviewDialog({
 }) {
 	const [review, setReview] = useState<ReplacementReview | null>(null)
 	const [error, setError] = useState<string | null>(null)
-	const [isSubmitting, setIsSubmitting] = useState(false)
+	const { locked, run } = useSubmitLock(isOpen)
 
 	useEffect(() => {
 		// While closing, keep the last review on screen; it's cleared once the exit completes.
@@ -96,28 +97,29 @@ export default function StatementReplacementReviewDialog({
 	}, [isOpen, statement, pendingStatement])
 
 	const handleReplace = async () => {
-		if (!review?.can_replace || isSubmitting) return
+		if (!review?.can_replace) return
 
-		setIsSubmitting(true)
-		try {
-			await replacePendingStatement(review.statement.id, review.pending_statement.id)
-			toast.success("Pending Statement replaced.", {
-				description: "Its Allocations now belong to the imported Statement.",
-			})
-			setIsSubmitting(false)
-			setIsOpen(false)
-			onConfirmed()
-		} catch (cause) {
-			const message =
-				cause instanceof ValidationError
-					? (Object.values(cause.errors)[0]?.[0] ??
-						"The Statements changed while you were reviewing them. Refresh the pair and try again.")
-					: "The Statements changed while you were reviewing them. Refresh the pair and try again."
-			toast.error("Pending Statement could not be replaced.", { description: message })
-			setIsSubmitting(false)
-			setReview(null)
-			setError(message)
-		}
+		await run(async () => {
+			try {
+				await replacePendingStatement(review.statement.id, review.pending_statement.id)
+				toast.success("Pending Statement replaced.", {
+					description: "Its Allocations now belong to the imported Statement.",
+				})
+				setIsOpen(false)
+				onConfirmed()
+				return true
+			} catch (cause) {
+				const message =
+					cause instanceof ValidationError
+						? (Object.values(cause.errors)[0]?.[0] ??
+							"The Statements changed while you were reviewing them. Refresh the pair and try again.")
+						: "The Statements changed while you were reviewing them. Refresh the pair and try again."
+				toast.error("Pending Statement could not be replaced.", { description: message })
+				setReview(null)
+				setError(message)
+				return false
+			}
+		})
 	}
 
 	return (
@@ -254,12 +256,12 @@ export default function StatementReplacementReviewDialog({
 							}
 						/>
 						<Button
-							disabled={!review?.can_replace || isSubmitting}
+							disabled={!review?.can_replace || locked}
 							onClick={() => void handleReplace()}
 						>
 							<IconifyIcon
-								icon={isSubmitting ? "lucide:loader-circle" : "lucide:replace"}
-								className={isSubmitting ? "animate-spin" : undefined}
+								icon={locked ? "lucide:loader-circle" : "lucide:replace"}
+								className={locked ? "animate-spin" : undefined}
 								data-icon="inline-start"
 							/>
 							Replace pending Statement

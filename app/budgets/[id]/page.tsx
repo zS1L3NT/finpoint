@@ -3,6 +3,7 @@
 import { useLiveQuery } from "dexie-react-hooks"
 import { DateTime } from "luxon"
 import { use, useMemo, useState } from "react"
+import { toast } from "sonner"
 import BudgetProgressChart from "@/components/charts/budget-progress-chart"
 import BudgetEditorDialog from "@/components/dialogs/budget-editor"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
@@ -24,9 +25,10 @@ import {
 	CardTitle,
 } from "@/components/ui/card"
 import { useRecordEditor } from "@/hooks/use-record-editor"
+import { useSubmitLock } from "@/hooks/use-submit-lock"
 import { themeColor } from "@/lib/palette"
-import { formatCurrency, parseDate, parseDatetime, round2 } from "@/lib/utils"
-import { attachBudgetRecord, detachBudgetRecord, getBudget } from "@/logic/budgets"
+import { formatCurrency, parseDate, round2 } from "@/lib/utils"
+import { attachBudgetRecord, budgetSpent, detachBudgetRecord, getBudget } from "@/logic/budgets"
 import { listCategories } from "@/logic/categories"
 import { pathBudgets } from "@/routes"
 import type { Budget, CategoryWithChildren, Record } from "@/types"
@@ -41,6 +43,8 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 	const [isEditingBudget, setIsEditingBudget] = useState(false)
 	const [isAttachingRecord, setIsAttachingRecord] = useState(false)
 	const { editingRecord, handleEdit, setEditingRecord } = useRecordEditor()
+	// Inline actions have no dialog to close, so each run ends unlocked.
+	const detachLock = useSubmitLock(true)
 	const budget = (data ?? null) as Budget | null
 	const records = useMemo(() => data?.records ?? [], [data])
 	const budgetStart = parseDate(budget?.start_date ?? "2000-01-01")
@@ -53,27 +57,34 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 				? budgetEnd
 				: now
 	const analytics = getBudgetAnalytics(
-		records,
 		budgetStart,
 		budgetEnd,
 		budget?.amount ?? 0,
 		budgetAsOf,
+		budget?.used_amount ?? 0,
 	)
-	const categoryData = useMemo(
-		() => getCategoryData(records, categories, budgetStart, budgetEnd),
-		[records, categories, budgetStart, budgetEnd],
-	)
+	const categoryData = useMemo(() => getCategoryData(records, categories), [records, categories])
 
 	const attach = async (record: Record) => {
 		if (!budget) return
-		await attachBudgetRecord(budget.id, record.id)
-		setIsAttachingRecord(false)
+		try {
+			await attachBudgetRecord(budget.id, record.id)
+			setIsAttachingRecord(false)
+		} catch {
+			toast.error("Unable to attach this Record.")
+		}
 	}
 
-	const detach = async (record: Record) => {
-		if (!budget) return
-		await detachBudgetRecord(budget.id, record.id)
-	}
+	const detach = (record: Record) =>
+		detachLock.run(async () => {
+			if (!budget) return false
+			try {
+				await detachBudgetRecord(budget.id, record.id)
+			} catch {
+				toast.error("Unable to detach this Record.")
+			}
+			return false
+		})
 
 	const recordColumns = useRecordColumns<Record>({
 		grouped: true,
@@ -86,6 +97,7 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 				title="Detach from budget"
 				aria-label={`Detach ${record.title}`}
 				className="text-destructive hover:text-destructive"
+				disabled={detachLock.locked}
 				onClick={() => detach(record)}
 			>
 				<IconifyIcon icon="lucide:link-2-off" />
@@ -103,6 +115,7 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 				title="Detach from budget"
 				aria-label={`Detach ${record.title}`}
 				className="text-destructive hover:text-destructive"
+				disabled={detachLock.locked}
 				onClick={() => detach(record)}
 			>
 				<IconifyIcon icon="lucide:link-2-off" />
@@ -345,25 +358,17 @@ function Legend({ color, label }: { color: string; label: string }) {
 }
 
 function getBudgetAnalytics(
-	records: Record[],
 	start: DateTime,
 	end: DateTime,
 	limit: number,
 	asOf: DateTime,
+	spent: number,
 ) {
 	const dayCount =
 		Math.max(Math.floor(end.startOf("day").diff(start.startOf("day"), "days").days), 0) + 1
 	const elapsedDays = Math.min(
 		Math.max(Math.floor(asOf.startOf("day").diff(start.startOf("day"), "days").days) + 1, 0),
 		dayCount,
-	)
-	const spent = round2(
-		records
-			.filter(record => {
-				const date = parseDatetime(record.datetime)
-				return date >= start.startOf("day") && date <= asOf.endOf("day")
-			})
-			.reduce((total, record) => total - record.amount, 0),
 	)
 	const remainingDays = dayCount - elapsedDays
 	const currentPace = elapsedDays ? round2(spent / elapsedDays) : 0
@@ -383,29 +388,16 @@ function getBudgetAnalytics(
 	}
 }
 
-function getCategoryData(
-	records: Record[],
-	categories: CategoryWithChildren[],
-	start: DateTime,
-	end: DateTime,
-) {
+function getCategoryData(records: Record[], categories: CategoryWithChildren[]) {
 	const data = categories
 		.map(category => {
-			const matching = records.filter(record => {
-				const date = parseDatetime(record.datetime)
-				return (
-					record.amount < 0 &&
-					date >= start.startOf("day") &&
-					date <= end.endOf("day") &&
+			const matching = records.filter(
+				record =>
+					budgetSpent([record]) !== 0 &&
 					(record.category.id === category.id ||
-						record.category.parent_category_id === category.id)
-				)
-			})
-			return {
-				...category,
-				records: matching.length,
-				amount: round2(matching.reduce((total, record) => total - record.amount, 0)),
-			}
+						record.category.parent_category_id === category.id),
+			)
+			return { ...category, records: matching.length, amount: budgetSpent(matching) }
 		})
 		.filter(category => category.records > 0)
 		.sort((a, b) => b.amount - a.amount)

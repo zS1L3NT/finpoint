@@ -1,8 +1,10 @@
 // Mirrors `Api\StatementController`, `Api\StatementReplacementController`,
 // and `Statement::appQuery` (filters, ordering, derived amounts).
 
-import { asPending, db } from "@/data/db"
+import { asPending, db, type StatementRow } from "@/data/db"
 import { duplicateStatementIds, removeStatementDismissals } from "@/logic/duplicates"
+import { flagParam, numberParam, type ParamSource, textParam } from "@/logic/filter-params"
+import { paginateItems } from "@/logic/pagination"
 import { enrichRecords } from "@/logic/records"
 import {
 	dayDifference,
@@ -10,8 +12,14 @@ import {
 	maskDescription,
 	replacementComparison,
 	replacementReason,
+	unmaskDescription,
 } from "@/logic/replacements"
-import { inputToStored, newId, round2, toCents } from "@/logic/shared"
+import { inputToStored, newId, round2 } from "@/logic/shared"
+import {
+	compareStatements,
+	enrichStatement,
+	tallyStatementAllocations,
+} from "@/logic/statement-enrichment"
 import { ValidationError, Validator } from "@/logic/validate"
 import type { Allocation, Record as AppRecord, Statement } from "@/types"
 
@@ -22,119 +30,73 @@ export type StatementDetail = Statement & {
 export type StatementFilters = {
 	query?: string | null
 	account_id?: string | null
-	exclude_ids?: string | null
+	ids?: string[]
+	exclude_ids?: string[]
 	start_date?: string | null
 	end_date?: string | null
-	min_amount?: string | null
-	max_amount?: string | null
-	is_allocable?: string | null
-	is_pending?: string | null
-	is_unallocated?: string | null
+	min_amount?: number
+	max_amount?: number
+	is_allocable?: boolean
+	is_pending?: boolean
+	is_unallocated?: boolean
 }
 
-export function paginate<T>(items: T[], page: number, perPage: number) {
-	const total = items.length
-	const current_page = Math.max(1, page)
-	const safePerPage = Math.min(Math.max(1, perPage), 250)
-	const data = items.slice((current_page - 1) * safePerPage, current_page * safePerPage)
+/** The Statements list's URL filters (an `account_id` of `all` names no Account); `query` is read separately. */
+export function parseStatementFilters(params: ParamSource): StatementFilters {
+	const account_id = params.get("account_id")
 	return {
-		data,
-		total,
-		per_page: safePerPage,
-		current_page,
-		last_page: Math.max(1, Math.ceil(total / safePerPage)),
-		links: [] as { active: boolean; label: string; url: string | null }[],
+		account_id: account_id === "all" ? undefined : textParam(account_id),
+		is_pending: flagParam(params.get("is_pending")),
+		is_unallocated: flagParam(params.get("is_unallocated")),
+		start_date: textParam(params.get("start_date")),
+		end_date: textParam(params.get("end_date")),
+		min_amount: numberParam(params.get("min_amount")),
+		max_amount: numberParam(params.get("max_amount")),
 	}
 }
 
-async function enrich(
-	statements: {
-		id: string
-		account_id: string
-		datetime: string
-		description: string
-		amount: number
-		index: number
-		is_pending: number
-	}[],
-) {
+async function enrich(statements: StatementRow[]) {
 	const accounts = new Map((await db.accounts.toArray()).map(a => [a.id, a]))
-	const allocations = await db.allocations.toArray()
+	const totals = tallyStatementAllocations(await db.allocations.toArray())
 	const duplicates = await duplicateStatementIds()
-	const byStatement = new Map<string, { sum: number; count: number }>()
-	for (const allocation of allocations) {
-		const entry = byStatement.get(allocation.statement_id) ?? { sum: 0, count: 0 }
-		entry.sum = round2(entry.sum + allocation.amount)
-		entry.count++
-		byStatement.set(allocation.statement_id, entry)
-	}
-	return statements.map(statement => {
-		const entry = byStatement.get(statement.id) ?? { sum: 0, count: 0 }
-		const allocable_amount = round2(statement.amount - entry.sum)
-		return {
-			id: statement.id,
-			datetime: statement.datetime,
-			index: statement.index,
-			description: maskDescription(statement.description),
-			amount: statement.amount,
-			allocable_amount,
-			allocation_count: entry.count,
-			is_pending: statement.is_pending === 1,
-			is_unallocated: entry.count === 0,
-			is_duplicate: duplicates.has(statement.id),
-			account: accounts.get(statement.account_id) ?? {
-				id: statement.account_id,
-				name: statement.account_id,
-				balance: 0,
-				bank: "",
-			},
-		}
-	})
+	return statements.map(statement => enrichStatement(statement, totals, duplicates, accounts))
 }
 
 export async function listStatements(filters: StatementFilters = {}) {
-	let rows = await db.statements.toArray()
+	// An empty `ids` names nothing to narrow to, so it lists every Statement.
+	let rows = filters.ids?.length
+		? (await db.statements.bulkGet(filters.ids)).filter(s => !!s)
+		: await db.statements.toArray()
 
 	const q = (filters.query ?? "").trim().toLowerCase()
 	if (q) {
-		rows = rows.filter(statement => statement.description.toLowerCase().includes(q))
+		// Search what the list shows, so hidden card digits cannot be found by guessing.
+		rows = rows.filter(statement =>
+			maskDescription(statement.description).toLowerCase().includes(q),
+		)
 	}
 	if (filters.account_id) rows = rows.filter(s => s.account_id === filters.account_id)
-	if (filters.exclude_ids) {
-		const excluded = new Set(filters.exclude_ids.split(",").filter(Boolean))
+	if (filters.exclude_ids?.length) {
+		const excluded = new Set(filters.exclude_ids)
 		rows = rows.filter(s => !excluded.has(s.id))
 	}
 	const { start_date, end_date } = filters
 	if (start_date) rows = rows.filter(s => s.datetime.slice(0, 10) >= start_date)
 	if (end_date) rows = rows.filter(s => s.datetime.slice(0, 10) <= end_date)
-	const minAmount = filters.min_amount ? Number(filters.min_amount) : null
-	const maxAmount = filters.max_amount ? Number(filters.max_amount) : null
-	if (minAmount !== null && Number.isFinite(minAmount)) {
-		rows = rows.filter(s => s.amount >= minAmount)
-	}
-	if (maxAmount !== null && Number.isFinite(maxAmount)) {
-		rows = rows.filter(s => s.amount <= maxAmount)
-	}
-	if (filters.is_pending === "true") rows = rows.filter(s => s.is_pending === 1)
-	if (filters.is_pending === "false") rows = rows.filter(s => s.is_pending === 0)
+	const { min_amount, max_amount } = filters
+	if (min_amount !== undefined) rows = rows.filter(s => s.amount >= min_amount)
+	if (max_amount !== undefined) rows = rows.filter(s => s.amount <= max_amount)
+	if (filters.is_pending === true) rows = rows.filter(s => s.is_pending === 1)
+	if (filters.is_pending === false) rows = rows.filter(s => s.is_pending === 0)
 
 	let enriched = await enrich(rows)
 
-	if (filters.is_allocable === "true") enriched = enriched.filter(s => s.allocable_amount !== 0)
-	if (filters.is_allocable === "false") enriched = enriched.filter(s => s.allocable_amount === 0)
-	if (filters.is_unallocated === "true") enriched = enriched.filter(s => s.allocation_count === 0)
-	if (filters.is_unallocated === "false")
-		enriched = enriched.filter(s => s.allocation_count !== 0)
+	if (filters.is_allocable === true) enriched = enriched.filter(s => s.allocable_amount !== 0)
+	if (filters.is_allocable === false) enriched = enriched.filter(s => s.allocable_amount === 0)
+	if (filters.is_unallocated === true) enriched = enriched.filter(s => s.allocation_count === 0)
+	if (filters.is_unallocated === false) enriched = enriched.filter(s => s.allocation_count !== 0)
 
-	enriched.sort(
-		(a, b) =>
-			b.datetime.localeCompare(a.datetime) ||
-			b.index - a.index ||
-			a.amount - b.amount ||
-			a.description.localeCompare(b.description),
-	)
-
-	return enriched
+	return enriched.sort(compareStatements)
 }
 
 export type StatementInput = {
@@ -178,46 +140,56 @@ export async function createPendingStatement(input: StatementInput) {
 }
 
 export async function updatePendingStatement(id: string, input: StatementInput) {
-	const existing = await db.statements.get(id)
-	if (!existing) throw new Error("Statement not found.")
-	if (existing.is_pending !== 1) {
-		throw new ValidationError({ statement: ["Imported statements are read-only."] })
-	}
-	const dto = validateStatement(input)
+	return db.transaction("rw", [db.statements, db.allocations, db.accounts], async () => {
+		const existing = await db.statements.get(id)
+		if (!existing) throw new Error("Statement not found.")
+		if (existing.is_pending !== 1) {
+			throw new ValidationError({ statement: ["Imported statements are read-only."] })
+		}
+		const dto = validateStatement(input)
+		if (!(await db.accounts.get(dto.account_id))) {
+			throw new ValidationError({ account_id: ["Select an account."] })
+		}
 
-	const allocations = await db.allocations.where("statement_id").equals(id).toArray()
-	ensureAllocationsFit(
-		dto.amount,
-		allocations.map(a => a.amount),
-	)
-	await db.statements.update(id, {
-		account_id: dto.account_id,
-		datetime: inputToStored(dto.datetime),
-		description: dto.description,
-		amount: dto.amount,
+		const allocations = await db.allocations.where("statement_id").equals(id).toArray()
+		ensureAllocationsFit(
+			dto.amount,
+			allocations.map(a => a.amount),
+		)
+		await db.statements.update(id, {
+			account_id: dto.account_id,
+			datetime: inputToStored(dto.datetime),
+			// The editor is filled from the masked description.
+			description: unmaskDescription(dto.description, existing.description),
+			amount: dto.amount,
+		})
+		const saved = await db.statements.get(id)
+		if (!saved) throw new Error("Statement not found.")
+
+		return saved
 	})
-	const saved = await db.statements.get(id)
-	if (!saved) throw new Error("Statement not found.")
-
-	return saved
 }
 
 export async function deletePendingStatement(id: string) {
-	const existing = await db.statements.get(id)
-	if (!existing) throw new Error("Statement not found.")
-	if (existing.is_pending !== 1) {
-		throw new ValidationError({ statement: ["Imported statements are read-only."] })
-	}
-	if ((await db.allocations.where("statement_id").equals(id).count()) > 0) {
-		throw new ValidationError({
-			statement: ["Remove every allocation before deleting this pending statement."],
-		})
-	}
+	await db.transaction(
+		"rw",
+		[db.statements, db.allocations, db.duplicate_dismissals],
+		async () => {
+			const existing = await db.statements.get(id)
+			if (!existing) throw new Error("Statement not found.")
+			if (existing.is_pending !== 1) {
+				throw new ValidationError({ statement: ["Imported statements are read-only."] })
+			}
+			if ((await db.allocations.where("statement_id").equals(id).count()) > 0) {
+				throw new ValidationError({
+					statement: ["Remove every allocation before deleting this pending statement."],
+				})
+			}
 
-	await db.transaction("rw", [db.statements, db.duplicate_dismissals], async () => {
-		await removeStatementDismissals([id])
-		await db.statements.delete(id)
-	})
+			await removeStatementDismissals([id])
+			await db.statements.delete(id)
+		},
+	)
 }
 
 function ensureAllocationsFit(amount: number, allocations: number[]) {
@@ -316,7 +288,14 @@ export async function replacementCandidates(
 
 	let rows = await db.statements.where("account_id").equals(pending.account_id).toArray()
 	rows = rows.filter(s => s.is_pending === 0)
-	const allocatedIds = new Set((await db.allocations.toArray()).map(a => a.statement_id))
+	const allocatedIds = new Set(
+		(
+			await db.allocations
+				.where("statement_id")
+				.anyOf(rows.map(s => s.id))
+				.toArray()
+		).map(a => a.statement_id),
+	)
 	rows = rows.filter(s => !allocatedIds.has(s.id))
 
 	if (scope === "suggested") {
@@ -325,7 +304,7 @@ export async function replacementCandidates(
 	}
 	if (options.query?.trim()) {
 		const q = options.query.trim().toLowerCase()
-		rows = rows.filter(s => s.description.toLowerCase().includes(q))
+		rows = rows.filter(s => maskDescription(s.description).toLowerCase().includes(q))
 	}
 
 	const pendingShape = { ...pending, is_pending: true }
@@ -363,7 +342,7 @@ export async function replacementCandidates(
 	const page = options.page ?? 1
 	const perPage = Math.min(Math.max(1, options.per_page ?? 25), 100)
 
-	return paginate(candidates, page, perPage)
+	return paginateItems(candidates, page, perPage)
 }
 
 /** Suggested replacement count per pending Statement, using the same rules as `replacementCandidates`. */
@@ -400,8 +379,7 @@ export async function replacementReview(pendingId: string, statementId: string) 
 		pendingAllocations,
 		statementAllocations,
 	)
-	const pendingEnriched = (await enrich([pending]))[0]
-	const statementEnriched = (await enrich([statement]))[0]
+	const [pendingEnriched, statementEnriched] = await enrich([pending, statement])
 	if (!pendingEnriched || !statementEnriched) throw new Error("Statement not found.")
 	const recordIds = pendingAllocations.map(a => a.record_id)
 	const records = recordIds.length ? await db.records.where("id").anyOf(recordIds).toArray() : []
@@ -423,5 +401,3 @@ export async function replacementReview(pendingId: string, statementId: string) 
 		disabled_reason: reason,
 	}
 }
-
-export { toCents }

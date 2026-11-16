@@ -46,6 +46,7 @@ Local runs use the dev servers (app on 5173, harness on 5174, reused when alread
 
 - `bun run test:e2e` — core tests, 1 worker. All Playwright arguments pass through: file
   paths, `--grep`, `--project`, `--workers`, `--headed`.
+  `PLAYWRIGHT_WORKERS` (a number or a percentage such as `50%`) sets the same worker count.
 - `PLAYWRIGHT_ANIMATIONS=1 bun run test:e2e -- tests/animations/<file> --workers=1` —
   animation tests, always one worker.
 

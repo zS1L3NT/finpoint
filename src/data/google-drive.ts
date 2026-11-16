@@ -187,9 +187,11 @@ export async function ensureDriveTokenSilent(): Promise<string> {
 	return cacheToken(parsed.access_token, parsed.expires_in ?? 3600)
 }
 
+/** Ends the sign-in cookie. Throws when it may survive, so callers keep the connection. */
 export async function disconnectDrive(): Promise<void> {
+	const response = await fetch("/api/auth/logout", { method: "POST" })
+	if (!response.ok) throw new Error("Could not sign out of Google.")
 	cachedToken = null
-	await fetch("/api/auth/logout", { method: "POST" }).catch(() => undefined)
 }
 
 export type DriveFileMeta = { id: string; modifiedTime: string; size?: string }

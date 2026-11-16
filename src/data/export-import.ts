@@ -210,6 +210,11 @@ export function parseImportFile(text: string): FinpointExport {
 			other_statement_id,
 		})
 	}
+	const broken = brokenReferences(parsed.tables)
+	if (broken.length)
+		throw new Error(
+			`This backup refers to rows that are not in it: ${broken.slice(0, 3).join("; ")}${broken.length > 3 ? `; and ${broken.length - 3} more` : ""}. Nothing was changed.`,
+		)
 	return {
 		...(parsed as Omit<FinpointExport, "settings">),
 		tables: {
@@ -228,9 +233,79 @@ export function parseImportFile(text: string): FinpointExport {
 	}
 }
 
-export async function importData(data: FinpointExport): Promise<void> {
+/** Each stored id a row points at that no row in the backup has, as readable lines. */
+function brokenReferences(tables: Record<TableName, unknown[]>): string[] {
+	const rows = (table: TableName) => tables[table] as Record<string, unknown>[]
+	const ids = (table: TableName) => new Set(rows(table).map(row => row.id))
+	const accounts = ids("accounts")
+	const statements = ids("statements")
+	const categories = ids("categories")
+	const records = ids("records")
+	const budgets = ids("budgets")
+	const monthlyBudgets = ids("monthly_budgets")
+	const lines: string[] = []
+	const check = (
+		table: TableName,
+		label: string,
+		field: (row: Record<string, unknown>) => unknown,
+		parents: Set<unknown>,
+		parent: string,
+	) => {
+		const count = rows(table).filter(row => {
+			const value = field(row)
+			return value != null && !parents.has(value)
+		}).length
+		if (count) lines.push(`${count} ${label} with a missing ${parent}`)
+	}
+	check("statements", "Statements", r => r.account_id, accounts, "Account")
+	check("records", "Records", r => r.category_id, categories, "Category")
+	check(
+		"records",
+		"Records",
+		r => (r.monthly_budget_choice as { id?: unknown } | undefined)?.id,
+		monthlyBudgets,
+		"Monthly Budget",
+	)
+	check("categories", "Categories", r => r.parent_category_id, categories, "parent Category")
+	check(
+		"categories",
+		"Categories",
+		r => r.default_monthly_budget_id,
+		monthlyBudgets,
+		"default Monthly Budget",
+	)
+	check("allocations", "allocations", r => r.statement_id, statements, "Statement")
+	check("allocations", "allocations", r => r.record_id, records, "Record")
+	check("budget_records", "Budget links", r => r.budget_id, budgets, "Budget")
+	check("budget_records", "Budget links", r => r.record_id, records, "Record")
+	for (const table of ["monthly_budget_defaults", "monthly_budget_amounts"] as const)
+		check(
+			table,
+			"Monthly Budget amounts",
+			r => r.monthly_budget_id,
+			monthlyBudgets,
+			"Monthly Budget",
+		)
+	const action = (key: string) => (r: Record<string, unknown>) =>
+		(r.actions as Record<string, { value?: unknown } | undefined> | undefined)?.[key]?.value
+	check("statement_rules", "Statement Rules", action("category_id"), categories, "Category")
+	check(
+		"statement_rules",
+		"Statement Rules",
+		action("monthly_budget_id"),
+		monthlyBudgets,
+		"Monthly Budget",
+	)
+	return lines
+}
+
+/**
+ * Replaces the whole database. Returns it as stored, read in the same transaction, so a
+ * caller can fingerprint exactly what it wrote and nothing written after.
+ */
+export async function importData(data: FinpointExport): Promise<FinpointExport> {
 	data = parseImportFile(JSON.stringify(data))
-	await db.transaction(
+	return db.transaction(
 		"rw",
 		[...TABLES.map(table => db.table(table)), db.settings, db.meta],
 		async () => {
@@ -242,6 +317,7 @@ export async function importData(data: FinpointExport): Promise<void> {
 			await replaceSettings(data.settings)
 			await db.meta.put({ key: "seeded_v1", value: "1" })
 			await db.meta.put({ key: "seeded_v2", value: "1" })
+			return exportData()
 		},
 	)
 }

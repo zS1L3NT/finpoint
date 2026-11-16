@@ -47,6 +47,10 @@ export async function listCategories(): Promise<CategoryWithChildren[]> {
 	await db.records.each(record => {
 		counts.set(record.category_id, (counts.get(record.category_id) ?? 0) + 1)
 	})
+	// A Statement Rule that fills a Category keeps it in use, as a Record does.
+	const ruleCategories = new Set(
+		(await db.statement_rules.toArray()).map(rule => rule.actions.category_id?.value),
+	)
 	const childCounts = new Map<string, number>()
 	for (const category of categories) {
 		if (category.parent_category_id) {
@@ -61,7 +65,9 @@ export async function listCategories(): Promise<CategoryWithChildren[]> {
 		records_count: counts.get(category.id) ?? 0,
 		children_count: childCounts.get(category.id) ?? 0,
 		can_delete:
-			(counts.get(category.id) ?? 0) === 0 && (childCounts.get(category.id) ?? 0) === 0,
+			(counts.get(category.id) ?? 0) === 0 &&
+			(childCounts.get(category.id) ?? 0) === 0 &&
+			!ruleCategories.has(category.id),
 		default_monthly_budget: category.default_monthly_budget_id
 			? (monthlyBudgetById.get(category.default_monthly_budget_id) ?? null)
 			: null,
@@ -88,65 +94,44 @@ export async function listCategories(): Promise<CategoryWithChildren[]> {
 
 export async function createCategory(input: CategoryInput) {
 	const { id, ...dto } = cleanInput(input)
-
 	if (dto.parent_category_id === id) {
 		throw new ValidationError({ parent_category_id: ["A category cannot be its own parent."] })
 	}
-	if (await db.categories.get(id)) {
-		throw new ValidationError({ name: ["A category with a similar name already exists."] })
-	}
-	if (dto.parent_category_id) {
-		const parent = await db.categories.get(dto.parent_category_id)
-		if (!parent || parent.parent_category_id) {
-			throw new ValidationError({ parent_category_id: ["Invalid parent category."] })
-		}
-	}
-	if (
-		dto.default_monthly_budget_id &&
-		!(await db.monthly_budgets.get(dto.default_monthly_budget_id))
-	) {
-		throw new ValidationError({ default_monthly_budget_id: ["Monthly budget not found."] })
-	}
-	const row = { id, ...dto }
-	await db.categories.add(row)
 
-	return row
+	return db.transaction("rw", [db.categories, db.monthly_budgets], async () => {
+		if (await db.categories.get(id)) {
+			throw new ValidationError({ name: ["A category with a similar name already exists."] })
+		}
+		await checkReferences(dto.parent_category_id, dto.default_monthly_budget_id, null)
+		const row = { id, ...dto }
+		await db.categories.add(row)
+
+		return row
+	})
 }
 
 export async function updateCategory(currentId: string, input: CategoryInput) {
 	const { id, ...dto } = cleanInput(input)
-
-	const current = await db.categories.get(currentId)
-	if (!current) throw new Error("Category not found.")
-	if (id !== currentId && (await db.categories.get(id))) {
-		throw new ValidationError({ name: ["A category with a similar name already exists."] })
-	}
 	if (dto.parent_category_id === id || dto.parent_category_id === currentId) {
 		throw new ValidationError({ parent_category_id: ["A category cannot be its own parent."] })
 	}
-	// Top-level categories keep their position (mirrors Laravel guard).
-	const parent_category_id =
-		current.parent_category_id === null ? current.parent_category_id : dto.parent_category_id
-	if (parent_category_id) {
-		const parent = await db.categories.get(parent_category_id)
-		if (!parent || parent.parent_category_id) {
-			throw new ValidationError({ parent_category_id: ["Invalid parent category."] })
-		}
-		if (parent.id === id && id !== currentId) {
-			throw new ValidationError({
-				parent_category_id: ["A category cannot be its own parent."],
-			})
-		}
-	}
 
-	if (
-		dto.default_monthly_budget_id &&
-		!(await db.monthly_budgets.get(dto.default_monthly_budget_id))
-	) {
-		throw new ValidationError({ default_monthly_budget_id: ["Monthly budget not found."] })
-	}
+	const tables = [db.categories, db.records, db.monthly_budgets, db.statement_rules]
+	return db.transaction("rw", tables, async () => {
+		const current = await db.categories.get(currentId)
+		if (!current) throw new Error("Category not found.")
+		if (id !== currentId && (await db.categories.get(id))) {
+			throw new ValidationError({ name: ["A category with a similar name already exists."] })
+		}
+		// Top-level categories keep their position.
+		const parent_category_id =
+			current.parent_category_id === null ? null : dto.parent_category_id
+		await checkReferences(
+			parent_category_id,
+			dto.default_monthly_budget_id,
+			current.default_monthly_budget_id,
+		)
 
-	return db.transaction("rw", [db.categories, db.records], async () => {
 		if (id !== currentId) {
 			await db.categories.add({ id, ...dto, parent_category_id })
 			await db.categories
@@ -154,26 +139,55 @@ export async function updateCategory(currentId: string, input: CategoryInput) {
 				.equals(currentId)
 				.modify({ parent_category_id: id })
 			await db.records.where("category_id").equals(currentId).modify({ category_id: id })
+			await db.statement_rules
+				.filter(rule => rule.actions.category_id?.value === currentId)
+				.modify(rule => {
+					rule.actions.category_id = { value: id }
+				})
 			await db.categories.delete(currentId)
-			const renamed = await db.categories.get(id)
-			if (!renamed) throw new Error("Category not found.")
-
-			return renamed
-		}
-		await db.categories.update(currentId, { ...dto, parent_category_id })
-		const saved = await db.categories.get(currentId)
+		} else await db.categories.update(currentId, { ...dto, parent_category_id })
+		const saved = await db.categories.get(id)
 		if (!saved) throw new Error("Category not found.")
 
 		return saved
 	})
 }
 
-export async function deleteCategory(id: string) {
-	const records = await db.records.where("category_id").equals(id).count()
-	const children = await db.categories.where("parent_category_id").equals(id).count()
-	if (records > 0 || children > 0) {
-		throw new ValidationError({ category: ["This category is still in use."] })
+/** Runs inside the write's transaction, so what it checks cannot change before the write. */
+async function checkReferences(
+	parentId: string | null,
+	monthlyBudgetId: string | null,
+	currentMonthlyBudgetId: string | null,
+) {
+	if (parentId) {
+		const parent = await db.categories.get(parentId)
+		if (!parent || parent.parent_category_id) {
+			throw new ValidationError({ parent_category_id: ["Invalid parent category."] })
+		}
 	}
+	if (monthlyBudgetId) {
+		const budget = await db.monthly_budgets.get(monthlyBudgetId)
+		if (!budget)
+			throw new ValidationError({ default_monthly_budget_id: ["Monthly budget not found."] })
+		// A default that is already stored stays, even once archived.
+		if (budget.archived && monthlyBudgetId !== currentMonthlyBudgetId)
+			throw new ValidationError({
+				default_monthly_budget_id: ["Select an active Monthly Budget."],
+			})
+	}
+}
 
-	await db.categories.delete(id)
+export async function deleteCategory(id: string) {
+	await db.transaction("rw", [db.categories, db.records, db.statement_rules], async () => {
+		const records = await db.records.where("category_id").equals(id).count()
+		const children = await db.categories.where("parent_category_id").equals(id).count()
+		const rules = await db.statement_rules
+			.filter(rule => rule.actions.category_id?.value === id)
+			.count()
+		if (records > 0 || children > 0 || rules > 0) {
+			throw new ValidationError({ category: ["This category is still in use."] })
+		}
+
+		await db.categories.delete(id)
+	})
 }

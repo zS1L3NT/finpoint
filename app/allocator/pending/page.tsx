@@ -3,8 +3,7 @@
 import { useLiveQuery } from "dexie-react-hooks"
 import { AnimatePresence, motion } from "framer-motion"
 import Link from "next/link"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useMemo, useState } from "react"
 import StatementReplacementReviewDialog, {
 	dateDifferenceLabel,
 } from "@/components/dialogs/statement-replacement-review"
@@ -28,6 +27,7 @@ import {
 } from "@/components/ui/select"
 import WorkflowTabs from "@/components/workflow-tabs"
 import { useHistory } from "@/history"
+import { useUrlParams } from "@/hooks/use-url-params"
 import { cardEnter, SPRING, TRANSITION } from "@/lib/motion"
 import {
 	classForCurrency,
@@ -55,180 +55,50 @@ import type {
 type CandidatePage = Paginated<StatementReplacementCandidate>
 
 export default function AllocatorPendingPage() {
-	const searchParams = useSearchParams()
-	const router = useRouter()
-	const pathname = usePathname()
-	// Latest pushed params. Debounce timers close over render-scope searchParams;
-	// when a rapid selectPending push has not committed yet, a firing timer would
-	// rebuild from the stale base and resurrect just-cleared params.
-	const latestParams = useRef<URLSearchParams | null>(null)
-	// True while a pushParams navigation has not committed yet. Timers prefer the
-	// ref base only in that window; otherwise the committed params are truth, so
-	// navigation that bypasses pushParams (footer Links, Back/Forward) can never
-	// be overwritten by a stale-forward mirror.
-	const navigationPending = useRef(false)
-	const pushParams = (next: URLSearchParams) => {
-		// Dedupe against the last intent, not the committed URL: during a slow
-		// commit a fast revert (e.g. Account X, then All) must still push.
-		const previous = (
-			navigationPending.current && latestParams.current ? latestParams.current : searchParams
-		).toString()
-		latestParams.current = next
-		if (next.toString() === previous) return
-		navigationPending.current = true
-		const suffix = next.toString()
-		router.push(suffix ? `${pathname}?${suffix}` : pathname, { scroll: false })
-	}
-	const setSearchParams = (init: URLSearchParams | Record<string, string>) => {
-		if (init instanceof URLSearchParams) {
-			pushParams(init)
-			return
-		}
-		const next = new URLSearchParams()
-		for (const [key, value] of Object.entries(init)) {
-			if (value !== undefined && value !== "") next.set(key, value)
-		}
-		pushParams(next)
-	}
-	const queueQueryParam = searchParams.get("query") ?? ""
-	const candidateQueryParam = searchParams.get("candidate_query") ?? ""
-	const accountId = searchParams.get("account_id") ?? "all"
-	const candidateScope = searchParams.get("candidate_scope") ?? "suggested"
-	const candidatePage = parsePage(searchParams.get("candidate_page"))
-	const pendingStatementId = searchParams.get("pending_statement_id")
-	const [queueQuery, setQueueQuery] = useState(queueQueryParam)
-	const [candidateQuery, setCandidateQuery] = useState(candidateQueryParam)
+	const { params, setParams } = useUrlParams()
+	// The params are optimistic, so the inputs and every change below build on what the user
+	// sees, never on a navigation that has not committed yet.
+	const queueQuery = params.get("query") ?? ""
+	const candidateQuery = params.get("candidate_query") ?? ""
+	const accountId = params.get("account_id") ?? "all"
+	const candidateScope = params.get("candidate_scope") ?? "suggested"
+	const candidatePage = parsePage(params.get("candidate_page"))
+	const pendingStatementId = params.get("pending_statement_id")
 	const [reviewStatement, setReviewStatement] = useState<Statement | null>(null)
-	const queueTimer = useRef<number | undefined>(undefined)
-	const candidateTimer = useRef<number | undefined>(undefined)
 
-	const updateParams = (
-		changes: globalThis.Record<string, string | number | null>,
-		clearCandidate = false,
-		base: URLSearchParams | null = null,
-	) => {
-		const next = new URLSearchParams((base ?? searchParams).toString())
-		for (const [key, value] of Object.entries(changes)) {
-			if (value === null || value === "") next.delete(key)
-			else next.set(key, String(value))
-		}
-		if (clearCandidate) {
-			next.delete("candidate_query")
-			next.delete("candidate_page")
-		}
-		pushParams(next)
-	}
+	// A new queue search abandons the selection and its candidate search in the same
+	// navigation. The first keystroke starts a search (one Back undoes it); refining it replaces
+	// that entry, unless a selection is being cleared, which Back should restore.
+	const handleQueueQuery = (value: string) =>
+		setParams(
+			{
+				query: value || null,
+				page: null,
+				pending_statement_id: null,
+				candidate_page: null,
+				candidate_query: null,
+			},
+			{ replace: url => !!url.get("query") && !url.get("pending_statement_id") },
+		)
 
-	// Mirror committed queries into the inputs, except the echo of a query this page
-	// pushed itself: by the time that commit lands the user may have typed on, and
-	// copying the older value back would drop those keystrokes.
-	const pushedQueueQuery = useRef<string | null>(null)
-	const pushedCandidateQuery = useRef<string | null>(null)
-	useEffect(() => {
-		const echo = pushedQueueQuery.current === queueQueryParam
-		pushedQueueQuery.current = null
-		if (!echo) setQueueQuery(queueQueryParam)
-	}, [queueQueryParam])
-	useEffect(() => {
-		const echo = pushedCandidateQuery.current === candidateQueryParam
-		pushedCandidateQuery.current = null
-		if (!echo) setCandidateQuery(candidateQueryParam)
-	}, [candidateQueryParam])
-
-	// Invalidate the intent mirror once its commit lands; treat any other
-	// committed change (footer Links, Back/Forward) as authoritative.
-	useEffect(() => {
-		if (latestParams.current?.toString() === searchParams.toString()) {
-			latestParams.current = null
-			navigationPending.current = false
-		} else if (!navigationPending.current) {
-			latestParams.current = null
-		}
-	}, [searchParams])
-
-	// Back/Forward and Links (pagination, footer) are authoritative even mid-flight: they
-	// supersede a pending push, so drop its intent rather than rebuild later pushes on it.
-	// Back/Forward also abandons pending searches and echo markers, so the restored URL
-	// is mirrored into the inputs instead of being overwritten by older typing.
-	useEffect(() => {
-		const dropIntent = () => {
-			latestParams.current = null
-			navigationPending.current = false
-		}
-		const onPopState = () => {
-			dropIntent()
-			pushedQueueQuery.current = null
-			pushedCandidateQuery.current = null
-			window.clearTimeout(queueTimer.current)
-			window.clearTimeout(candidateTimer.current)
-			// The restored URL can equal the last committed one, which leaves the
-			// mirror effects idle: copy its queries into the inputs here.
-			const restored = new URLSearchParams(window.location.search)
-			setQueueQuery(restored.get("query") ?? "")
-			setCandidateQuery(restored.get("candidate_query") ?? "")
-		}
-		const onLinkClick = (event: MouseEvent) => {
-			if (event.target instanceof Element && event.target.closest("a[href]")) dropIntent()
-		}
-		window.addEventListener("popstate", onPopState)
-		document.addEventListener("click", onLinkClick, true)
-		return () => {
-			window.removeEventListener("popstate", onPopState)
-			document.removeEventListener("click", onLinkClick, true)
-		}
-	}, [])
-
-	useEffect(() => {
-		if (queueQuery === queueQueryParam) return
-		const timer = window.setTimeout(() => {
-			// Typing a new queue query abandons any selection and candidate
-			// search, so clear those params in the same commit instead of
-			// pushing per keystroke (a push storm lets a slow response
-			// overwrite the query commit out of order).
-			pushedQueueQuery.current = queueQuery
-			updateParams(
-				{
-					query: queueQuery || null,
-					page: null,
-					pending_statement_id: null,
-					candidate_page: null,
-					candidate_query: null,
-				},
-				false,
-				navigationPending.current ? latestParams.current : null,
-			)
-			setCandidateQuery("")
-		}, 300)
-		queueTimer.current = timer
-		return () => window.clearTimeout(timer)
-	}, [queueQuery, queueQueryParam, searchParams])
-
-	useEffect(() => {
-		if (candidateQuery === candidateQueryParam) return
-		const timer = window.setTimeout(() => {
-			pushedCandidateQuery.current = candidateQuery
-			updateParams(
-				{ candidate_query: candidateQuery || null, candidate_page: null },
-				false,
-				navigationPending.current ? latestParams.current : null,
-			)
-		}, 300)
-		candidateTimer.current = timer
-		return () => window.clearTimeout(timer)
-	}, [candidateQuery, candidateQueryParam, searchParams])
+	const handleCandidateQuery = (value: string) =>
+		setParams(
+			{ candidate_query: value || null, candidate_page: null },
+			{ replace: url => !!url.get("candidate_query") },
+		)
 
 	const accounts = useLiveQuery(() => listAccounts(), []) ?? []
 	const pendingQuery = useLiveQuery(
 		() =>
 			listStatements({
-				query: queueQueryParam || null,
+				query: queueQuery || null,
 				account_id: accountId === "all" ? null : accountId,
-				is_pending: "true",
+				is_pending: true,
 			}),
-		[queueQueryParam, accountId],
+		[queueQuery, accountId],
 	)
 	const pending = pendingQuery ?? []
-	const allPending = useLiveQuery(() => listStatements({ is_pending: "true" }), []) ?? []
+	const allPending = useLiveQuery(() => listStatements({ is_pending: true }), [])
 	const sortedPending = useMemo(
 		() =>
 			[...pending].sort(
@@ -236,8 +106,8 @@ export default function AllocatorPendingPage() {
 			),
 		[pending],
 	)
-	const queuePage = parsePage(searchParams.get("page"))
-	const queuePageSize = parsePageSize(searchParams.get("per_page"), 25)
+	const queuePage = parsePage(params.get("page"))
+	const queuePageSize = parsePageSize(params.get("per_page"), 25)
 	const pendingPage = useMemo(
 		() => paginateItems(sortedPending, queuePage, queuePageSize),
 		[sortedPending, queuePage, queuePageSize],
@@ -254,30 +124,34 @@ export default function AllocatorPendingPage() {
 	}
 
 	const selectedPendingStatement = pendingStatementId
-		? (allPending.find(statement => statement.id === pendingStatementId) ?? null)
+		? (allPending?.find(statement => statement.id === pendingStatementId) ?? null)
 		: null
-	const selectionMissing = !!pendingStatementId && !selectedPendingStatement
+	const selectionMissing =
+		!!pendingStatementId && allPending !== undefined && !selectedPendingStatement
 
 	const candidates = useLiveQuery(
-		() =>
+		(): Promise<{ data: CandidatePage | null; error: string | null }> =>
 			selectedPendingStatement
 				? replacementCandidates(selectedPendingStatement.id, {
-						query: candidateQueryParam || undefined,
+						query: candidateQuery || undefined,
 						scope: candidateScope === "all" ? "all" : "suggested",
 						page: candidatePage,
 						per_page: 25,
-					}).catch(() => null)
-				: Promise.resolve(null),
-		[selectedPendingStatement?.id, candidateQueryParam, candidateScope, candidatePage],
+					}).then(
+						data => ({ data, error: null }),
+						cause => ({
+							data: null,
+							error:
+								cause instanceof Error ? cause.message : "Unable to load imports.",
+						}),
+					)
+				: Promise.resolve({ data: null, error: null }),
+		[selectedPendingStatement?.id, candidateQuery, candidateScope, candidatePage],
 	)
 
-	const selectPending = (statement: PendingReplacementStatement | null, query = queueQuery) => {
-		window.clearTimeout(queueTimer.current)
-		window.clearTimeout(candidateTimer.current)
+	const selectPending = (statement: PendingReplacementStatement | null) => {
 		setReviewStatement(null)
-		setCandidateQuery("")
-		updateParams({
-			query: query || null,
+		setParams({
 			page: null,
 			pending_statement_id: statement?.id ?? null,
 			candidate_page: null,
@@ -285,8 +159,9 @@ export default function AllocatorPendingPage() {
 		})
 	}
 
-	const clearQueueFilters = () => setSearchParams({})
-	const activeFilterCount = [queueQueryParam, accountId === "all" ? "" : accountId].filter(
+	const clearQueueFilters = () =>
+		setParams(Object.fromEntries([...params.keys()].map(key => [key, null])))
+	const activeFilterCount = [queueQuery, accountId === "all" ? "" : accountId].filter(
 		Boolean,
 	).length
 	const afterReplacement = () => {
@@ -296,16 +171,14 @@ export default function AllocatorPendingPage() {
 		const next =
 			pendingStatements.data[selectedIndex + 1] ?? pendingStatements.data[selectedIndex - 1]
 		setReviewStatement(null)
-		const nextParams = new URLSearchParams(searchParams.toString())
-		nextParams.delete("candidate_query")
-		nextParams.delete("candidate_page")
-		if (next) nextParams.set("pending_statement_id", next.id)
-		else {
-			nextParams.delete("pending_statement_id")
-			if (pendingStatements.current_page > 1)
-				nextParams.set("page", String(pendingStatements.current_page - 1))
-		}
-		pushParams(nextParams)
+		setParams({
+			candidate_query: null,
+			candidate_page: null,
+			pending_statement_id: next?.id ?? null,
+			...(!next && pendingStatements.current_page > 1
+				? { page: String(pendingStatements.current_page - 1) }
+				: {}),
+		})
 	}
 
 	return (
@@ -342,24 +215,19 @@ export default function AllocatorPendingPage() {
 							<Input
 								placeholder="Search descriptions..."
 								value={queueQuery}
-								onChange={event => {
-									setQueueQuery(event.target.value)
-									if (pendingStatementId || candidateQueryParam)
-										selectPending(null, queueQueryParam)
-								}}
+								onChange={event => handleQueueQuery(event.target.value)}
 							/>
 							<FilterBar>
 								<Select
 									value={accountId}
 									onValueChange={value =>
-										updateParams(
-											{
-												account_id: value === "all" ? null : value,
-												page: null,
-												pending_statement_id: null,
-											},
-											true,
-										)
+										setParams({
+											account_id: value === "all" ? null : value,
+											page: null,
+											pending_statement_id: null,
+											candidate_query: null,
+											candidate_page: null,
+										})
 									}
 								>
 									<SelectTrigger
@@ -437,7 +305,7 @@ export default function AllocatorPendingPage() {
 							<PaginationFooter
 								summary={`Showing ${pendingStatements.data.length} of ${pluralize(pendingStatements.total, "pending Statement")}.`}
 								page={pendingStatements.current_page}
-								lastPage={pendingStatements.last_page ?? 1}
+								lastPage={pendingStatements.last_page}
 							/>
 						)}
 					</section>
@@ -525,14 +393,14 @@ export default function AllocatorPendingPage() {
 											placeholder="Search descriptions..."
 											value={candidateQuery}
 											onChange={event =>
-												setCandidateQuery(event.target.value)
+												handleCandidateQuery(event.target.value)
 											}
 										/>
 										<FilterBar>
 											<Select
 												value={candidateScope}
 												onValueChange={value =>
-													updateParams({
+													setParams({
 														candidate_scope:
 															value === "suggested" ? null : value,
 														candidate_page: null,
@@ -568,13 +436,13 @@ export default function AllocatorPendingPage() {
 									</div>
 
 									<CandidateResults
-										data={candidates ?? null}
-										error={null}
+										data={candidates?.data ?? null}
+										error={candidates?.error ?? null}
 										scope={candidateScope}
 										onReview={setReviewStatement}
 										onPage={page =>
-											updateParams({
-												candidate_page: page === 1 ? null : page,
+											setParams({
+												candidate_page: page === 1 ? null : String(page),
 											})
 										}
 									/>

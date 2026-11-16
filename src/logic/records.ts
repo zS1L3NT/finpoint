@@ -3,12 +3,25 @@
 
 import { db, type RecordRow } from "@/data/db"
 import { canUseMonthlyBudget } from "@/lib/analytics"
-import { contribution } from "@/logic/analytics"
+import { compareRecords, contribution } from "@/logic/analytics"
 import { duplicateStatementIds } from "@/logic/duplicates"
+import {
+	listParam,
+	looseFlagParam,
+	numberParam,
+	type ParamSource,
+	textParam,
+} from "@/logic/filter-params"
+import { expandCategoryIds } from "@/logic/monthly-shared"
 import { isPendingRecord, pendingStatementIds, tallyAllocations } from "@/logic/pending"
 import { resolveRecordChoices } from "@/logic/record-choices"
 import { inferRecordDatetime } from "@/logic/record-defaults"
 import { inputToStored, newId, round2, TREATMENT_VALUES } from "@/logic/shared"
+import {
+	compareStatements,
+	enrichStatement,
+	tallyStatementAllocations,
+} from "@/logic/statement-enrichment"
 import { ValidationError, Validator } from "@/logic/validate"
 import type { Allocation, AnalyticsTreatment, Record as AppRecord, Statement } from "@/types"
 
@@ -21,9 +34,9 @@ export type RecordFilters = {
 	exclude_budget_id?: string | null
 	start_date?: string | null
 	end_date?: string | null
-	min_amount?: string | null
-	max_amount?: string | null
-	is_allocated?: string | null
+	min_amount?: number
+	max_amount?: number
+	is_allocated?: boolean
 	category_ids?: string[] | null
 	monthly_budget_id?: string | null
 	show_unbudgeted?: boolean
@@ -31,12 +44,29 @@ export type RecordFilters = {
 	treatment?: string | null
 }
 
+/**
+ * The Records list's URL filters; `query` is read separately. Flags also read `"1"` and `"0"`,
+ * which links to this list have always accepted.
+ */
+export function parseRecordFilters(params: ParamSource): RecordFilters {
+	return {
+		start_date: textParam(params.get("start_date")),
+		end_date: textParam(params.get("end_date")),
+		min_amount: numberParam(params.get("min_amount")),
+		max_amount: numberParam(params.get("max_amount")),
+		is_allocated: looseFlagParam(params.get("is_allocated")),
+		category_ids: listParam(params.get("category_ids")),
+		monthly_budget_id: textParam(params.get("monthly_budget_id")),
+		show_unbudgeted: looseFlagParam(params.get("show_unbudgeted")),
+		effective_spending: looseFlagParam(params.get("effective_spending")),
+		treatment: textParam(params.get("treatment")),
+	}
+}
+
 export class ConflictError extends Error {
-	stale_ids?: string[]
-	constructor(message: string, stale_ids?: string[]) {
+	constructor(message: string) {
 		super(message)
 		this.name = "ConflictError"
-		this.stale_ids = stale_ids
 	}
 }
 
@@ -59,7 +89,6 @@ export async function enrichRecords(rows: RecordRow[]) {
 		return {
 			...row,
 			allocated_amount,
-			statement_count: entry?.count ?? 0,
 			pending_statement_count: entry?.pending ?? 0,
 			is_pending: isPendingRecord(row.amount, entry),
 			subtitle: subtitle(row.people, row.location),
@@ -91,24 +120,6 @@ export async function enrichRecords(rows: RecordRow[]) {
 	})
 }
 
-async function expandCategoryIds(ids: string[]): Promise<string[]> {
-	if (!ids.length) return ids
-	const categories = await db.categories.toArray()
-	const childrenByParent = new Map<string, string[]>()
-	for (const category of categories) {
-		if (category.parent_category_id) {
-			const list = childrenByParent.get(category.parent_category_id) ?? []
-			list.push(category.id)
-			childrenByParent.set(category.parent_category_id, list)
-		}
-	}
-	const expanded = new Set(ids)
-	for (const id of ids) {
-		for (const child of childrenByParent.get(id) ?? []) expanded.add(child)
-	}
-	return [...expanded]
-}
-
 export async function listRecords(filters: RecordFilters = {}) {
 	const categories = new Map((await db.categories.toArray()).map(c => [c.id, c]))
 	let rows = (await db.records.toArray()).map(r =>
@@ -128,14 +139,9 @@ export async function listRecords(filters: RecordFilters = {}) {
 	const { start_date, end_date } = filters
 	if (start_date) rows = rows.filter(r => r.datetime.slice(0, 10) >= start_date)
 	if (end_date) rows = rows.filter(r => r.datetime.slice(0, 10) <= end_date)
-	const minAmount = filters.min_amount ? Number(filters.min_amount) : null
-	const maxAmount = filters.max_amount ? Number(filters.max_amount) : null
-	if (minAmount !== null && Number.isFinite(minAmount)) {
-		rows = rows.filter(r => r.amount >= minAmount)
-	}
-	if (maxAmount !== null && Number.isFinite(maxAmount)) {
-		rows = rows.filter(r => r.amount <= maxAmount)
-	}
+	const { min_amount, max_amount } = filters
+	if (min_amount !== undefined) rows = rows.filter(r => r.amount >= min_amount)
+	if (max_amount !== undefined) rows = rows.filter(r => r.amount <= max_amount)
 	if (filters.category_ids?.length) {
 		const expanded = new Set(await expandCategoryIds(filters.category_ids))
 		rows = rows.filter(r => expanded.has(r.category_id))
@@ -165,22 +171,10 @@ export async function listRecords(filters: RecordFilters = {}) {
 
 	let enriched = await enrichRecords(rows)
 
-	const allocation = filters.is_allocated
-	if (allocation === "1" || allocation === "true") {
-		enriched = enriched.filter(r => !r.is_pending)
-	} else if (allocation === "0" || allocation === "false") {
-		enriched = enriched.filter(r => r.is_pending)
-	}
+	if (filters.is_allocated === true) enriched = enriched.filter(r => !r.is_pending)
+	if (filters.is_allocated === false) enriched = enriched.filter(r => r.is_pending)
 
-	enriched.sort(
-		(a, b) =>
-			b.datetime.localeCompare(a.datetime) ||
-			a.amount - b.amount ||
-			a.title.localeCompare(b.title) ||
-			(a.people ?? "").localeCompare(b.people ?? "") ||
-			(a.location ?? "").localeCompare(b.location ?? "") ||
-			(a.description ?? "").localeCompare(b.description ?? ""),
-	)
+	enriched.sort(compareRecords)
 
 	return enriched
 }
@@ -200,44 +194,19 @@ export async function getRecord(id: string): Promise<RecordDetail> {
 		db.accounts.toArray(),
 	])
 	const amountByStatement = new Map(allocations.map(a => [a.statement_id, a.amount]))
-	const totalsByStatement = new Map<string, { sum: number; count: number }>()
-	for (const allocation of statementAllocations) {
-		const total = totalsByStatement.get(allocation.statement_id) ?? { sum: 0, count: 0 }
-		total.sum = round2(total.sum + allocation.amount)
-		total.count++
-		totalsByStatement.set(allocation.statement_id, total)
-	}
+	const totals = tallyStatementAllocations(statementAllocations)
 	const accounts = new Map(accountRows.map(a => [a.id, a]))
 	const duplicates = await duplicateStatementIds()
 
 	return {
 		...enriched,
 		statements: statements
-			.map(statement => {
-				const total = totalsByStatement.get(statement.id) ?? { sum: 0, count: 0 }
-				return {
-					...statement,
-					allocable_amount: round2(statement.amount - total.sum),
-					allocation_count: total.count,
-					is_pending: statement.is_pending === 1,
-					is_unallocated: total.count === 0,
-					is_duplicate: duplicates.has(statement.id),
-					pivot: { amount: amountByStatement.get(statement.id) ?? 0 },
-					account: accounts.get(statement.account_id) ?? {
-						id: statement.account_id,
-						name: statement.account_id,
-						balance: 0,
-						bank: "",
-					},
-				}
-			})
-			.sort(
-				(a, b) =>
-					b.datetime.localeCompare(a.datetime) ||
-					b.index - a.index ||
-					a.amount - b.amount ||
-					a.description.localeCompare(b.description),
-			),
+			.map(statement => ({
+				...statement,
+				...enrichStatement(statement, totals, duplicates, accounts),
+				pivot: { amount: amountByStatement.get(statement.id) ?? 0 },
+			}))
+			.sort(compareStatements),
 	}
 }
 
@@ -306,6 +275,24 @@ function analyticsValues(
 	}
 }
 
+/**
+ * An explicit Monthly Budget must exist and be active; a Record that already has an archived
+ * one keeps it, so its history stays editable.
+ */
+async function checkMonthlyBudget(input: RecordInput, existing?: RecordRow) {
+	if (input.monthly_budget_source === "category" || !input.monthly_budget_id) return
+	const budget = await db.monthly_budgets.get(input.monthly_budget_id)
+	const kept =
+		existing?.monthly_budget_choice.kind === "explicit" &&
+		existing.monthly_budget_choice.id === input.monthly_budget_id
+	if (!budget || (budget.archived && !kept))
+		throw new ValidationError({
+			monthly_budget_id: [
+				budget ? "Select an active Monthly Budget." : "Monthly Budget not found.",
+			],
+		})
+}
+
 async function validateAllocations(
 	statements: RecordStatementInput[],
 	existing: Map<string, number> = new Map(),
@@ -314,9 +301,8 @@ async function validateAllocations(
 	const ids = statements.map(s => s.id)
 	const rows = ids.length ? await db.statements.where("id").anyOf(ids).toArray() : []
 	const byId = new Map(rows.map(r => [r.id, r]))
-	const allAllocations = await db.allocations.toArray()
 	const sums = new Map<string, number>()
-	for (const allocation of allAllocations) {
+	for (const allocation of await db.allocations.where("statement_id").anyOf(ids).toArray()) {
 		sums.set(
 			allocation.statement_id,
 			round2((sums.get(allocation.statement_id) ?? 0) + allocation.amount),
@@ -324,6 +310,10 @@ async function validateAllocations(
 	}
 	statements.forEach((item, index) => {
 		const statement = byId.get(item.id)
+		if (ids.indexOf(item.id) !== index) {
+			v.reject(`statements.${index}.id`, "This Statement is already attached.")
+			return
+		}
 		if (!statement) {
 			v.reject(`statements.${index}.id`, "Invalid statement.")
 			return
@@ -358,15 +348,25 @@ function budgetCovers(budget: { start_date: string; end_date: string }, datetime
 export async function createRecord(input: RecordInput) {
 	const dto = validateRecordInput(input)
 
-	const category = await db.categories.get(dto.category_id)
-	if (!category) throw new ValidationError({ category_id: ["Select a category."] })
 	const statements = dto.statements ?? []
-	await validateAllocations(statements)
 
 	return db.transaction(
 		"rw",
-		[db.records, db.allocations, db.budgets, db.budget_records],
+		[
+			db.records,
+			db.allocations,
+			db.budgets,
+			db.budget_records,
+			db.categories,
+			db.statements,
+			db.monthly_budgets,
+		],
 		async () => {
+			const category = await db.categories.get(dto.category_id)
+			if (!category) throw new ValidationError({ category_id: ["Select a category."] })
+			await checkMonthlyBudget(dto)
+			await validateAllocations(statements)
+
 			const analytics = analyticsValues(dto)
 			const id = newId()
 			await db.records.add({
@@ -412,7 +412,15 @@ export async function createMatchingRecords(
 ) {
 	return db.transaction(
 		"rw",
-		[db.records, db.allocations, db.budgets, db.budget_records, db.categories, db.statements],
+		[
+			db.records,
+			db.allocations,
+			db.budgets,
+			db.budget_records,
+			db.categories,
+			db.statements,
+			db.monthly_budgets,
+		],
 		async () => {
 			const allocations = await db.allocations.toArray()
 			const statements = (await db.statements.bulkGet(statementIds)).filter(
@@ -442,44 +450,50 @@ export async function createMatchingRecords(
 export async function updateRecord(id: string, input: RecordInput & { revision?: number }) {
 	const dto = validateRecordInput(input)
 
-	const existing = await db.records.get(id)
-	if (!existing) throw new Error("Record not found.")
-	if (input.revision !== undefined && Number(input.revision) !== existing.revision) {
-		throw new ConflictError("This Record changed while you were editing it.")
-	}
-	const category = await db.categories.get(dto.category_id)
-	if (!category) throw new ValidationError({ category_id: ["Select a category."] })
 	const statements = dto.statements ?? []
-	const currentAllocations = await db.allocations.where("record_id").equals(id).toArray()
-	const prior = new Map(currentAllocations.map(a => [a.statement_id, a.amount]))
-	await validateAllocations(statements, prior)
 
-	return db.transaction("rw", [db.records, db.allocations], async () => {
-		const analytics = analyticsValues(dto, existing)
-		await db.records.update(id, {
-			title: dto.title.trim(),
-			people: dto.people?.trim() || null,
-			location: dto.location?.trim() || null,
-			description: dto.description?.trim() || null,
-			datetime: inputToStored(dto.datetime),
-			amount: dto.amount,
-			category_id: dto.category_id,
-			...analytics,
-			revision: existing.revision + 1,
-		})
-		await db.allocations.where("record_id").equals(id).delete()
-		for (const item of statements) {
-			await db.allocations.add({
-				statement_id: item.id,
-				record_id: id,
-				amount: round2(Number(item.amount)),
+	return db.transaction(
+		"rw",
+		[db.records, db.allocations, db.categories, db.statements, db.monthly_budgets],
+		async () => {
+			const existing = await db.records.get(id)
+			if (!existing) throw new Error("Record not found.")
+			if (input.revision !== undefined && Number(input.revision) !== existing.revision) {
+				throw new ConflictError("This Record changed while you were editing it.")
+			}
+			const category = await db.categories.get(dto.category_id)
+			if (!category) throw new ValidationError({ category_id: ["Select a category."] })
+			const currentAllocations = await db.allocations.where("record_id").equals(id).toArray()
+			const prior = new Map(currentAllocations.map(a => [a.statement_id, a.amount]))
+			await checkMonthlyBudget(dto, existing)
+			await validateAllocations(statements, prior)
+
+			const analytics = analyticsValues(dto, existing)
+			await db.records.update(id, {
+				title: dto.title.trim(),
+				people: dto.people?.trim() || null,
+				location: dto.location?.trim() || null,
+				description: dto.description?.trim() || null,
+				datetime: inputToStored(dto.datetime),
+				amount: dto.amount,
+				category_id: dto.category_id,
+				...analytics,
+				revision: existing.revision + 1,
 			})
-		}
-		const updated = await db.records.get(id)
-		if (!updated) throw new Error("Record not found.")
+			await db.allocations.where("record_id").equals(id).delete()
+			for (const item of statements) {
+				await db.allocations.add({
+					statement_id: item.id,
+					record_id: id,
+					amount: round2(Number(item.amount)),
+				})
+			}
+			const updated = await db.records.get(id)
+			if (!updated) throw new Error("Record not found.")
 
-		return resolveRecordChoices(updated, category)
-	})
+			return resolveRecordChoices(updated, category)
+		},
+	)
 }
 
 export async function deleteRecord(id: string) {

@@ -1,6 +1,6 @@
 "use client"
 
-import { useRouter, useSearchParams } from "next/navigation"
+import { useUrlParams } from "@/hooks/use-url-params"
 import { pathDashboard } from "@/routes"
 
 const FILTER_KEYS = [
@@ -21,29 +21,28 @@ export type RecordsSheetFilters = Partial<Record<(typeof FILTER_KEYS)[number], s
  * Dashboard's own `month`, `year` and `scope`, so a drill survives a reload and Back closes it.
  */
 export function useRecordsSheet() {
-	const router = useRouter()
-	const searchParams = useSearchParams()
+	const { params, setParams } = useUrlParams()
 
-	const dashboardParams = () => {
-		const params = Object.fromEntries(searchParams)
-		delete params.records
-		for (const key of FILTER_KEYS) delete params[key]
-		return params
-	}
+	const cleared = { records: null, ...Object.fromEntries(FILTER_KEYS.map(key => [key, null])) }
 	const href = (filters: RecordsSheetFilters = {}) =>
-		pathDashboard({ ...dashboardParams(), records: "1", ...filters })
+		pathDashboard({
+			...Object.fromEntries([...params].filter(([key]) => !(key in cleared))),
+			records: "1",
+			...filters,
+		})
 
 	return {
-		filters: searchParams.has("records")
+		filters: params.has("records")
 			? (Object.fromEntries(
 					FILTER_KEYS.flatMap(key => {
-						const value = searchParams.get(key)
+						const value = params.get(key)
 						return value ? [[key, value]] : []
 					}),
 				) as RecordsSheetFilters)
 			: null,
 		href,
-		open: (filters?: RecordsSheetFilters) => router.push(href(filters), { scroll: false }),
-		close: () => router.replace(pathDashboard(dashboardParams()), { scroll: false }),
+		open: (filters?: RecordsSheetFilters) =>
+			setParams({ ...cleared, records: "1", ...filters }),
+		close: () => setParams(cleared, { replace: true }),
 	}
 }

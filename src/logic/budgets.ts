@@ -1,14 +1,22 @@
 // Mirrors `Api\BudgetController` + `Api\BudgetRecordController` + `Budget::appQuery`.
 
 import { db } from "@/data/db"
+import { compareRecords, contribution } from "@/logic/analytics"
 import { enrichRecords } from "@/logic/records"
-import { newId, round2 } from "@/logic/shared"
+import { fromCents, newId } from "@/logic/shared"
 import { Validator } from "@/logic/validate"
 import type { Record as AppRecord, Budget } from "@/types"
 
 export type BudgetDetail = Budget & { records: AppRecord[] }
 
 export type BudgetFilters = { query?: string | null }
+
+/** A Budget's spent: the Dashboard's rule (Treatment-aware, refunds subtract, no clamp at zero). */
+export function budgetSpent(records: Pick<AppRecord, "amount" | "analytics_treatment">[]) {
+	return fromCents(
+		records.reduce((sum, r) => sum + contribution(r.analytics_treatment, r.amount).spending, 0),
+	)
+}
 
 export async function listBudgets(filters: BudgetFilters = {}) {
 	let rows = await db.budgets.toArray()
@@ -25,15 +33,12 @@ export async function listBudgets(filters: BudgetFilters = {}) {
 		list.push(link.record_id)
 		recordIdsByBudget.set(link.budget_id, list)
 	}
-	const records = await db.records.toArray()
-	const amountByRecord = new Map(records.map(r => [r.id, r.amount]))
+	const enrichedRecords = await enrichRecords(await db.records.toArray())
+	const recordById = new Map(enrichedRecords.map(r => [r.id, r]))
 	const enriched = rows.map(budget => ({
 		...budget,
-		used_amount: round2(
-			(recordIdsByBudget.get(budget.id) ?? []).reduce(
-				(sum, id) => sum + (amountByRecord.get(id) ?? 0),
-				0,
-			),
+		used_amount: budgetSpent(
+			(recordIdsByBudget.get(budget.id) ?? []).flatMap(id => recordById.get(id) ?? []),
 		),
 	}))
 	enriched.sort((a, b) => b.start_date.localeCompare(a.start_date))
@@ -52,15 +57,9 @@ export async function getBudget(id: string): Promise<BudgetDetail> {
 				.toArray()
 		: []
 	// Same read model as the Records list, so pending state and subtitles match.
-	const enriched = (await enrichRecords(records)).sort((x, y) =>
-		y.datetime.localeCompare(x.datetime),
-	)
+	const enriched = (await enrichRecords(records)).sort(compareRecords)
 
-	return {
-		...budget,
-		used_amount: round2(records.reduce((sum, r) => sum + r.amount, 0)),
-		records: enriched,
-	}
+	return { ...budget, used_amount: budgetSpent(enriched), records: enriched }
 }
 
 function validateBudget(input: {
@@ -72,6 +71,7 @@ function validateBudget(input: {
 	const v = new Validator()
 	const name = v.text(input.name, "name")
 	const amount = v.amount(input.amount, "amount")
+	if (amount < 0) v.reject("amount", "Amount must be zero or more.")
 	const start_date = v.date(input.start_date, "start_date", "Enter a valid start date.")
 	const end_date = v.date(input.end_date, "end_date", "Enter a valid end date.")
 	if (start_date && end_date && end_date < start_date) {
@@ -138,7 +138,11 @@ export async function deleteBudget(id: string) {
 }
 
 export async function attachBudgetRecord(budgetId: string, recordId: string) {
-	await db.budget_records.put({ budget_id: budgetId, record_id: recordId })
+	await db.transaction("rw", [db.budgets, db.records, db.budget_records], async () => {
+		if (!(await db.budgets.get(budgetId))) throw new Error("Budget not found.")
+		if (!(await db.records.get(recordId))) throw new Error("Record not found.")
+		await db.budget_records.put({ budget_id: budgetId, record_id: recordId })
+	})
 }
 
 export async function detachBudgetRecord(budgetId: string, recordId: string) {

@@ -802,6 +802,40 @@ test("archived Monthly Budgets: retain archival state and historical assignments
 		const dialog = page.getByRole("dialog", { name: "Edit Daily", exact: true })
 		await dialog.getByRole("checkbox", { name: "Archive monthly budget", exact: true }).check()
 		await dialog.getByRole("button", { name: "Save changes", exact: true }).click()
+		// A Monthly Budget that Categories still default to cannot be archived.
+		await expect(dialog.getByText(/This Monthly Budget is still used by/)).toBeVisible()
+		// Move the Categories off it and give the Record its own assignment, then archive.
+		await page.evaluate(async () => {
+			const database = await new Promise<IDBDatabase>((resolve, reject) => {
+				const open = indexedDB.open("finpoint")
+				open.onsuccess = () => resolve(open.result)
+				open.onerror = () => reject(open.error)
+			})
+			await new Promise<void>((resolve, reject) => {
+				const transaction = database.transaction(["categories", "records"], "readwrite")
+				transaction.oncomplete = () => {
+					database.close()
+					resolve()
+				}
+				transaction.onabort = () => reject(transaction.error)
+				const categories = transaction.objectStore("categories")
+				const all = categories.getAll()
+				all.onsuccess = () => {
+					for (const category of all.result) {
+						if (category.default_monthly_budget_id === "t1-mb-daily")
+							categories.put({ ...category, default_monthly_budget_id: null })
+					}
+				}
+				const records = transaction.objectStore("records")
+				const record = records.get("t1-r-unicode")
+				record.onsuccess = () =>
+					records.put({
+						...record.result,
+						monthly_budget_choice: { kind: "explicit", id: "t1-mb-daily" },
+					})
+			})
+		})
+		await dialog.getByRole("button", { name: "Save changes", exact: true }).click()
 		await expect(dialog).not.toBeVisible()
 		await page.reload()
 		const archived = await page.evaluate(async () => {
@@ -1112,4 +1146,840 @@ test("Category popup: bringing an option into view preserves the modal page posi
 	await expect(dialog.getByLabel("Treatment", { exact: true })).toContainText(
 		"Category default · Spending",
 	)
+})
+
+// Dialog lifecycle: one submit per save, and no re-seeding while the user types.
+async function readRows(page: Page, store: string): Promise<Record<string, unknown>[]> {
+	return page.evaluate(async name => {
+		const database = await new Promise<IDBDatabase>((resolve, reject) => {
+			const open = indexedDB.open("finpoint")
+			open.onsuccess = () => resolve(open.result)
+			open.onerror = () => reject(open.error)
+		})
+		try {
+			return await new Promise<Record<string, unknown>[]>((resolve, reject) => {
+				const request = database.transaction(name, "readonly").objectStore(name).getAll()
+				request.onsuccess = () => resolve(request.result)
+				request.onerror = () => reject(request.error)
+			})
+		} finally {
+			database.close()
+		}
+	}, store)
+}
+
+// Submits again 60ms apart, so a later call lands while the finished dialog is still fading out.
+async function resubmitWhileClosing(page: Page, form: string) {
+	await page.evaluate(async selector => {
+		for (let i = 0; i < 3; i++) {
+			;(document.querySelector(selector) as HTMLFormElement | null)?.requestSubmit()
+			await new Promise(resolve => setTimeout(resolve, 60))
+		}
+	}, form)
+}
+
+// Holds IndexedDB writes to `stores` in flight: an open readwrite transaction of our own keeps
+// every later app transaction on them queued until `release` runs.
+async function holdWrites(page: Page, stores: string[]) {
+	await page.evaluate(async stores => {
+		const w = window as unknown as { __release?: () => void }
+		const database = await new Promise<IDBDatabase>((resolve, reject) => {
+			const open = indexedDB.open("finpoint")
+			open.onsuccess = () => resolve(open.result)
+			open.onerror = () => reject(open.error)
+		})
+		await new Promise<void>(resolve => {
+			let holding = true
+			w.__release = () => {
+				holding = false
+			}
+			const tx = database.transaction(stores, "readwrite")
+			tx.oncomplete = () => database.close()
+			const pump = () => {
+				const request = tx.objectStore(stores[0] as string).count()
+				request.onsuccess = () => {
+					void resolve()
+					if (holding) pump()
+				}
+			}
+			pump()
+		})
+	}, stores)
+}
+
+// Counts the readwrite transactions the app opens on `store` once `startCounting` runs. Dexie
+// binds `IDBDatabase.prototype.transaction` when it opens the database, so the spy has to be
+// in place before the page loads.
+async function spyOnWrites(page: Page, store: string) {
+	await page.addInitScript(store => {
+		const w = window as unknown as { __attempts: number; __counting: boolean }
+		w.__attempts = 0
+		const open = IDBDatabase.prototype.transaction
+		IDBDatabase.prototype.transaction = function (names, mode, ...rest) {
+			if (w.__counting && mode === "readwrite" && [names].flat().includes(store)) {
+				w.__attempts++
+			}
+			return open.call(this, names, mode, ...rest)
+		}
+	}, store)
+}
+
+const startCounting = (page: Page) =>
+	page.evaluate(() => {
+		;(window as unknown as { __counting: boolean }).__counting = true
+	})
+
+const writeAttempts = (page: Page) =>
+	page.evaluate(() => (window as unknown as { __attempts: number }).__attempts)
+
+async function releaseWrites(page: Page) {
+	await page.evaluate(() => (window as unknown as { __release: () => void }).__release())
+}
+
+// Clicks the confirm button of the open dialog three times in one task, then twice more
+// while the dialog fades out, bypassing the disabled state a repeated click cannot reach.
+async function confirmRepeatedly(page: Page, label: string) {
+	await page.evaluate(async label => {
+		const confirm = () =>
+			[...document.querySelectorAll('[role="dialog"] button')]
+				.find(button => button.textContent?.trim() === label)
+				?.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+		for (let i = 0; i < 3; i++) confirm()
+		for (let i = 0; i < 2; i++) {
+			await new Promise(resolve => setTimeout(resolve, 60))
+			confirm()
+		}
+	}, label)
+}
+
+test.describe("dialog lifecycle", () => {
+	test("Pending Statement creator: a double submit creates one Statement", async ({
+		page,
+		workspace,
+	}) => {
+		void workspace
+		const dialog = await openEditor(
+			page,
+			"/statements",
+			"Create Pending Statement",
+			"Create Pending Statement",
+		)
+		await dialog.getByLabel("Description", { exact: true }).fill("Double submit probe")
+		await dialog.getByLabel("Amount", { exact: true }).fill("-1.23")
+		await page.evaluate(() => {
+			const form = document.getElementById("pending-statement-form") as HTMLFormElement
+			form.requestSubmit()
+			form.requestSubmit()
+		})
+		await expect(dialog).not.toBeVisible()
+		const rows = await readRows(page, "statements")
+		expect(rows.filter(row => row.description === "Double submit probe")).toHaveLength(1)
+	})
+
+	test("Pending Statement creator: reopening while a save is still running cannot save twice", async ({
+		page,
+		workspace,
+	}) => {
+		void workspace
+		const trigger = page.getByRole("button", {
+			name: "Create Pending Statement",
+			exact: true,
+		})
+		const dialog = await openEditor(
+			page,
+			"/statements",
+			"Create Pending Statement",
+			"Create Pending Statement",
+		)
+		const fill = async () => {
+			await dialog.getByLabel("Description", { exact: true }).fill("Reopen probe")
+			await dialog.getByLabel("Amount", { exact: true }).fill("-1.23")
+		}
+		await fill()
+		await holdWrites(page, ["statements"])
+		await page.evaluate(() =>
+			(document.getElementById("pending-statement-form") as HTMLFormElement).requestSubmit(),
+		)
+
+		// The save is stuck behind the held write: dismiss the dialog and open it again.
+		await page.keyboard.press("Escape")
+		await expect(dialog).not.toBeVisible()
+		await trigger.click()
+		await expect(dialog).toBeVisible()
+		await fill()
+		await page.evaluate(() =>
+			(document.getElementById("pending-statement-form") as HTMLFormElement).requestSubmit(),
+		)
+		await expect(
+			dialog.getByRole("button", { name: "Create statement", exact: true }),
+		).toBeDisabled()
+
+		await releaseWrites(page)
+		await expect
+			.poll(
+				async () =>
+					(await readRows(page, "statements")).filter(
+						row => row.description === "Reopen probe",
+					).length,
+			)
+			.toBeGreaterThan(0)
+		await page.waitForTimeout(500)
+		const rows = await readRows(page, "statements")
+		expect(rows.filter(row => row.description === "Reopen probe")).toHaveLength(1)
+	})
+
+	test("Category editor: a rejected save releases the lock so the corrected name saves", async ({
+		page,
+		workspace,
+	}) => {
+		void workspace
+		const dialog = await openEditor(page, "/categories", "Edit Groceries", "Edit Category")
+		const name = dialog.getByLabel("Name", { exact: true })
+		const save = dialog.getByRole("button", { name: "Save changes", exact: true })
+		// A name with no letters or numbers passes the form and is rejected by the save.
+		await name.fill("!!!")
+		await save.click()
+		await expect(dialog.getByText("The name must contain letters or numbers.")).toBeVisible()
+		await expect(save).toBeEnabled()
+
+		await name.fill("Groceries retried")
+		await save.click()
+		await expect(dialog).not.toBeVisible()
+		await expect
+			.poll(async () =>
+				(await readRows(page, "categories")).some(row => row.name === "Groceries retried"),
+			)
+			.toBe(true)
+	})
+
+	test("Settings: a field changed while a save is running stays an unsaved edit", async ({
+		page,
+		workspace,
+	}) => {
+		void workspace
+		await page.route(/google|gstatic/, route => route.abort())
+		await page.goto("/settings")
+		const start = page.locator("#default_filter_start_date")
+		await expect(start).toContainText("1 Oct 2026")
+		await page.locator("#default_filter_end_date").click()
+		await pickOption(page.getByRole("option", { name: "Today" }))
+		await holdWrites(page, ["settings"])
+		await page.getByRole("button", { name: "Save default filters" }).click()
+		await expect(page.getByRole("button", { name: "Saving…" })).toBeVisible()
+		await page.getByRole("button", { name: "Clear date" }).click()
+		await expect(start).toContainText("No default start date")
+
+		await releaseWrites(page)
+		await expect(page.getByText("Default filters saved.")).toBeVisible()
+		await page.waitForTimeout(300)
+		await expect(start).toContainText("No default start date")
+		await expect(page.locator("#default_filter_end_date")).toContainText("Today")
+		await expect(page.getByRole("button", { name: "Save default filters" })).toBeEnabled()
+	})
+
+	test("Monthly Budget creator: reopening while a save is still running cannot save twice", async ({
+		page,
+		workspace,
+	}) => {
+		void workspace
+		await spyOnWrites(page, "monthly_budgets")
+		const dialog = await openEditor(
+			page,
+			"/?month=October&year=2026",
+			"New",
+			"Create monthly budget",
+		)
+		await dialog.getByLabel("Name", { exact: true }).fill("Reopen probe")
+		await holdWrites(page, ["monthly_budgets"])
+		await startCounting(page)
+		await dialog.getByRole("button", { name: "Create monthly budget", exact: true }).click()
+		await expect.poll(() => writeAttempts(page)).toBe(1)
+
+		// The save is stuck behind the held write: dismiss the dialog and open it again.
+		await page.keyboard.press("Escape")
+		await expect(dialog).not.toBeVisible()
+		await page.getByRole("button", { name: "New", exact: true }).click()
+		await expect(dialog).toBeVisible()
+		await dialog.getByLabel("Name", { exact: true }).fill("Reopen probe")
+		await dialog.locator("form").evaluate((form: HTMLFormElement) => form.requestSubmit())
+		await page.waitForTimeout(300)
+		expect(await writeAttempts(page)).toBe(1)
+		await expect(dialog.locator('button[type="submit"]')).toBeDisabled()
+
+		await releaseWrites(page)
+		await expect
+			.poll(
+				async () =>
+					(await readRows(page, "monthly_budgets")).filter(
+						row => row.name === "Reopen probe",
+					).length,
+			)
+			.toBe(1)
+	})
+
+	test("duplicate review: repeated confirms while it saves and closes delete once", async ({
+		page,
+		workspace,
+	}) => {
+		void workspace
+		await spyOnWrites(page, "statements")
+		await page.goto("/allocator/duplicates")
+		await page
+			.getByRole("radio", { name: "Keep DON DON DONKI 8821 PURCHASE", exact: true })
+			.click()
+		await page
+			.getByRole("radio", { name: "Delete DON DON DONKI PURCHASE 8821", exact: true })
+			.click()
+		await page.getByRole("button", { name: "Review deletion" }).click()
+		const review = page.getByRole("dialog", { name: "Delete duplicate Statements" })
+		await expect(review.getByRole("button", { name: "Delete 1 Statement" })).toBeEnabled()
+		await startCounting(page)
+		await confirmRepeatedly(page, "Delete 1 Statement")
+		await expect(review).toHaveCount(0)
+		expect(await writeAttempts(page)).toBe(1)
+	})
+
+	test("Statement replacement review: repeated confirms while it saves and closes replace once", async ({
+		page,
+		workspace,
+	}) => {
+		void workspace
+		await spyOnWrites(page, "statements")
+		await page.goto("/allocator/pending")
+		await page
+			.locator("section[aria-label='Pending statements']")
+			.getByPlaceholder("Search descriptions...")
+			.fill("Pasar malam")
+		await page.getByRole("button", { name: /Pasar malam/ }).click()
+		await page
+			.getByRole("combobox")
+			.filter({ hasText: "Suggested replacements", visible: true })
+			.click()
+		await pickOption(page.getByRole("option", { name: "All unallocated imports" }))
+		await page
+			.locator("section[aria-labelledby='candidate-title']")
+			.getByPlaceholder("Search descriptions...")
+			.fill("SHENG SIONG")
+		await page.getByRole("button", { name: "Replace", exact: true }).click()
+		const review = page.getByRole("dialog", { name: "Review Statement replacement" })
+		await expect(review.getByText(/Allocation.*ready to move/)).toBeVisible()
+		await startCounting(page)
+		await confirmRepeatedly(page, "Replace pending Statement")
+		await expect(review).toHaveCount(0)
+		expect(await writeAttempts(page)).toBe(1)
+	})
+
+	test("Statement rule creator: a double submit creates one rule", async ({ page }) => {
+		await seedWorkspace(page, "populated", { statement_rules: statementRules() })
+		const dialog = await openEditor(page, "/statement-rules", "New rule", "New rule")
+		await dialog.getByLabel("Name", { exact: true }).fill("Double submit rule")
+		await dialog.getByLabel("Text to look for", { exact: true }).fill("probe")
+		await dialog.getByLabel("Title", { exact: true }).fill("Probe")
+		await page.keyboard.press("Escape")
+		await page.evaluate(() => {
+			const form = document.getElementById("statement-rule-form") as HTMLFormElement
+			form.requestSubmit()
+			form.requestSubmit()
+		})
+		await expect(dialog).not.toBeVisible()
+		const rows = await readRows(page, "statement_rules")
+		expect(rows.filter(row => row.name === "Double submit rule")).toHaveLength(1)
+	})
+
+	test("Pending Statement editor: a double delete removes it once without an error", async ({
+		page,
+	}) => {
+		const { tables } = getScenario("populated")
+		await seedWorkspace(page, "populated", {
+			statements: [...tables.statements, { ...pending, id: "free-pending" }],
+		})
+		const dialog = await openEditor(
+			page,
+			"/statements/free-pending",
+			"Edit Pending Statement",
+			"Edit Pending Statement",
+		)
+		await dialog
+			.getByRole("button", { name: "Delete", exact: true })
+			.evaluate((button: HTMLButtonElement) => {
+				for (let i = 0; i < 3; i++) button.click()
+			})
+		await expect(dialog).not.toBeVisible()
+		// Let the second call settle: it would report its failure as a toast of its own.
+		await page.waitForTimeout(1000)
+		await expect(page.locator('[data-sonner-toast][data-type="error"]')).toHaveCount(0)
+		const rows = await readRows(page, "statements")
+		expect(rows.filter(row => row.id === "free-pending")).toHaveLength(0)
+	})
+
+	test("Budget creator: a double submit creates one Budget", async ({ page, workspace }) => {
+		void workspace
+		const dialog = await openEditor(page, "/budgets", "New Budget", "Create Budget")
+		await dialog.getByLabel("Name", { exact: true }).fill("Double submit budget")
+		await chooseRange(page, dialog)
+		await page.evaluate(() => {
+			const form = document.getElementById("budget-create-form") as HTMLFormElement
+			form.requestSubmit()
+			form.requestSubmit()
+		})
+		await expect(dialog).not.toBeVisible()
+		const rows = await readRows(page, "budgets")
+		expect(rows.filter(row => row.name === "Double submit budget")).toHaveLength(1)
+	})
+
+	test("Record creator: a double submit creates one Record", async ({ page, workspace }) => {
+		void workspace
+		const dialog = await openEditor(
+			page,
+			"/records",
+			"Create Pending Record",
+			"Create New Record",
+		)
+		await dialog.getByLabel("Title", { exact: true }).fill("Double submit record")
+		await dialog.getByLabel("Amount", { exact: true }).fill("-5")
+		await dialog.locator("#datetime-time").fill("12:00")
+		await chooseCategory(page, dialog)
+		await page.evaluate(() => {
+			const form = document.getElementById("allocate-record-form") as HTMLFormElement
+			form.requestSubmit()
+			form.requestSubmit()
+		})
+		await expect(dialog).not.toBeVisible()
+		const rows = await readRows(page, "records")
+		expect(rows.filter(row => row.title === "Double submit record")).toHaveLength(1)
+	})
+
+	test("Pending Statement editor: a write from another tab does not reset what is typed", async ({
+		page,
+	}) => {
+		const { tables } = getScenario("populated")
+		await seedWorkspace(page, "populated", {
+			statements: [...tables.statements, { ...pending, id: "free-pending" }],
+		})
+		const dialog = await openEditor(
+			page,
+			"/statements/free-pending",
+			"Edit Pending Statement",
+			"Edit Pending Statement",
+		)
+		const description = dialog.getByLabel("Description", { exact: true })
+		await description.fill("Typed but unsaved")
+
+		// Any Statement write hands the open dialog a fresh Statement object.
+		const other = await page.context().newPage()
+		await other.goto("/statements")
+		await other.getByRole("button", { name: "Create Pending Statement", exact: true }).click()
+		const otherDialog = other.getByRole("dialog", { name: "Create Pending Statement" })
+		await otherDialog.getByLabel("Description", { exact: true }).fill("From another tab")
+		await otherDialog.getByLabel("Amount", { exact: true }).fill("-2")
+		await otherDialog.getByRole("button", { name: "Create statement", exact: true }).click()
+		await expect
+			.poll(async () =>
+				(await readRows(page, "statements")).some(
+					row => row.description === "From another tab",
+				),
+			)
+			.toBe(true)
+		await other.close()
+
+		// Give the live query time to hand the dialog the changed Statement.
+		await page.waitForTimeout(1000)
+		await expect(description).toHaveValue("Typed but unsaved")
+	})
+	test("Account editor: a write from another tab does not reset what is typed", async ({
+		page,
+		workspace,
+	}) => {
+		void workspace
+		// The Account page hands its dialog the live Account, so a write reaches the open dialog.
+		const dialog = await openEditor(
+			page,
+			`/accounts/${account.id}`,
+			"Edit Account",
+			"Edit Account",
+		)
+		const name = dialog.getByLabel("Name", { exact: true })
+		await name.fill("Typed but unsaved")
+
+		const other = await page.context().newPage()
+		await other.goto(`/accounts/${account.id}`)
+		await other.getByRole("button", { name: "Edit Account", exact: true }).click()
+		const otherDialog = other.getByRole("dialog", { name: "Edit Account", exact: true })
+		await otherDialog.getByLabel("Name", { exact: true }).fill("From another tab")
+		await otherDialog.getByRole("button", { name: "Save changes", exact: true }).click()
+		await expect
+			.poll(async () =>
+				(await readRows(page, "accounts")).some(row => row.name === "From another tab"),
+			)
+			.toBe(true)
+		await other.close()
+
+		// Give the live query time to hand the dialog the changed Account.
+		await page.waitForTimeout(1000)
+		await expect(name).toHaveValue("Typed but unsaved")
+	})
+
+	test("Allocator selection follows Statements changed or deleted from another tab", async ({
+		page,
+	}) => {
+		const { tables } = getScenario("populated")
+		await seedWorkspace(page, "populated", {
+			statements: [
+				...tables.statements,
+				{ ...pending, id: "sel-a", description: "Selection probe A", amount: -10 },
+				{ ...pending, id: "sel-b", description: "Selection probe B", amount: -20 },
+			],
+		})
+		await page.goto("/allocator")
+		for (const id of ["sel-a", "sel-b"]) {
+			await page
+				.getByRole("checkbox", { name: `Select statement ${id}`, exact: true })
+				.click()
+		}
+		const bar = page.getByRole("complementary")
+		await expect(bar.getByText("2 selected · -$30.00")).toBeVisible()
+
+		const other = await page.context().newPage()
+		await other.goto("/statements/sel-a")
+		await other.getByRole("button", { name: "Edit Pending Statement", exact: true }).click()
+		const editor = other.getByRole("dialog", { name: "Edit Pending Statement", exact: true })
+		await editor.getByLabel("Amount", { exact: true }).fill("-15")
+		await editor.getByRole("button", { name: "Save changes", exact: true }).click()
+		await expect(editor).not.toBeVisible()
+		await expect(bar.getByText("2 selected · -$35.00")).toBeVisible()
+
+		await other.goto("/statements/sel-b")
+		await other.getByRole("button", { name: "Edit Pending Statement", exact: true }).click()
+		const otherEditor = other.getByRole("dialog", {
+			name: "Edit Pending Statement",
+			exact: true,
+		})
+		await otherEditor.getByRole("button", { name: "Delete", exact: true }).click()
+		await expect(otherEditor).not.toBeVisible()
+		await other.close()
+
+		await expect(bar.getByText("1 selected · -$15.00")).toBeVisible()
+		await expect(page.locator("main").getByText(/^1 selected\. Showing/)).toBeVisible()
+	})
+
+	test("Budget creator: a submit while the dialog is closing creates nothing more", async ({
+		page,
+		workspace,
+	}) => {
+		void workspace
+		const dialog = await openEditor(page, "/budgets", "New Budget", "Create Budget")
+		await dialog.getByLabel("Name", { exact: true }).fill("Closing submit budget")
+		await chooseRange(page, dialog)
+		await resubmitWhileClosing(page, "#budget-create-form")
+		await expect(dialog).not.toBeVisible()
+		const rows = await readRows(page, "budgets")
+		expect(rows.filter(row => row.name === "Closing submit budget")).toHaveLength(1)
+	})
+
+	test("Record creator: a submit while the dialog is closing creates nothing more", async ({
+		page,
+		workspace,
+	}) => {
+		void workspace
+		const dialog = await openEditor(
+			page,
+			"/records",
+			"Create Pending Record",
+			"Create New Record",
+		)
+		await dialog.getByLabel("Title", { exact: true }).fill("Closing submit record")
+		await dialog.getByLabel("Amount", { exact: true }).fill("-5")
+		await dialog.locator("#datetime-time").fill("12:00")
+		await chooseCategory(page, dialog)
+		await resubmitWhileClosing(page, "#allocate-record-form")
+		await expect(dialog).not.toBeVisible()
+		const rows = await readRows(page, "records")
+		expect(rows.filter(row => row.title === "Closing submit record")).toHaveLength(1)
+	})
+
+	test("Budget editor: a delete during a save does not remove the Budget", async ({
+		page,
+		workspace,
+	}) => {
+		void workspace
+		const dialog = await openEditor(page, `/budgets/${budget.id}`, "Edit Budget", "Edit Budget")
+		await dialog.getByLabel("Name", { exact: true }).fill("Saved during delete")
+		await page.evaluate(async () => {
+			const form = document.getElementById("budget-edit-form") as HTMLFormElement
+			form.requestSubmit()
+			await new Promise(resolve => setTimeout(resolve, 30))
+			const remove = [...document.querySelectorAll('[role="dialog"] button')].find(
+				button => button.textContent?.trim() === "Delete",
+			) as HTMLButtonElement
+			remove.click()
+		})
+		await expect(dialog).not.toBeVisible()
+		await page.waitForTimeout(500)
+		const rows = await readRows(page, "budgets")
+		expect(rows.find(row => row.id === budget.id)?.name).toBe("Saved during delete")
+	})
+
+	test("Record editor: a delete during a save does not remove the Record", async ({
+		page,
+		workspace,
+	}) => {
+		void workspace
+		const dialog = await openEditor(page, `/records/${record.id}`, "Edit Record", "Edit Record")
+		await dialog.getByLabel("Title", { exact: true }).fill("Saved during delete")
+		await page.evaluate(async () => {
+			const buttons = [...document.querySelectorAll('[role="dialog"] button')]
+			const named = (label: string) =>
+				buttons.find(button => button.textContent?.trim() === label) as HTMLButtonElement
+			named("Save changes").click()
+			await new Promise(resolve => setTimeout(resolve, 30))
+			named("Delete").click()
+		})
+		await expect(dialog).not.toBeVisible()
+		await page.waitForTimeout(500)
+		const rows = await readRows(page, "records")
+		expect(rows.find(row => row.id === record.id)?.title).toBe("Saved during delete")
+	})
+
+	test("Record editor: saving over a change from another tab reports a conflict", async ({
+		page,
+		workspace,
+	}) => {
+		void workspace
+		const dialog = await openEditor(page, `/records/${record.id}`, "Edit Record", "Edit Record")
+		await dialog.getByLabel("Title", { exact: true }).fill("From the first tab")
+		// Leave the Title so its suggestions close and the dialog is reachable again.
+		await dialog.getByLabel("Title", { exact: true }).press("Tab")
+
+		const other = await page.context().newPage()
+		await other.goto(`/records/${record.id}`)
+		await other.getByRole("button", { name: "Edit Record", exact: true }).click()
+		const otherDialog = other.getByRole("dialog", { name: "Edit Record", exact: true })
+		await otherDialog.getByLabel("Title", { exact: true }).fill("From the second tab")
+		await otherDialog.getByLabel("Title", { exact: true }).press("Tab")
+		await otherDialog.getByRole("button", { name: "Save changes" }).click()
+		await expect(otherDialog).not.toBeVisible()
+		await other.close()
+
+		// Let the live query hand the open dialog the Record with its new revision.
+		await page.waitForTimeout(1000)
+		await dialog.getByRole("button", { name: "Save changes" }).click()
+		await expect(dialog).toBeVisible()
+		const rows = await readRows(page, "records")
+		expect(rows.find(row => row.id === record.id)?.title).toBe("From the second tab")
+	})
+
+	test("Record editor: a Statement attached but not saved survives a write from another tab", async ({
+		page,
+		workspace,
+	}) => {
+		void workspace
+		const dialog = await openEditor(
+			page,
+			`/records/${IDS.records.partialPending}`,
+			"Edit Record",
+			"Edit Record",
+		)
+		await dialog.getByRole("button", { name: "Allocate statement", exact: true }).click()
+		const sheet = page.getByRole("dialog", {
+			name: "Allocate statements to record",
+			exact: true,
+		})
+		await sheet.getByRole("button").filter({ hasText: /\$/ }).first().click()
+		await page.keyboard.press("Escape")
+		await expect(dialog.locator('[data-slot="card"]')).toHaveCount(2)
+
+		const other = await page.context().newPage()
+		await other.goto("/statements")
+		await other.getByRole("button", { name: "Create Pending Statement", exact: true }).click()
+		const otherDialog = other.getByRole("dialog", { name: "Create Pending Statement" })
+		await otherDialog.getByLabel("Description", { exact: true }).fill("From another tab")
+		await otherDialog.getByLabel("Amount", { exact: true }).fill("-2")
+		await otherDialog.getByRole("button", { name: "Create statement", exact: true }).click()
+		await expect
+			.poll(async () =>
+				(await readRows(page, "statements")).some(
+					row => row.description === "From another tab",
+				),
+			)
+			.toBe(true)
+		await other.close()
+
+		await page.waitForTimeout(1000)
+		await expect(dialog).toBeVisible()
+		await expect(dialog.locator('[data-slot="card"]')).toHaveCount(2)
+		await expect(page.getByText(/Application error/)).toHaveCount(0)
+	})
+})
+
+test("archived Monthly Budgets: a Category default and a rule action that point at one still show its name", async ({
+	page,
+}) => {
+	await seedWorkspace(page, "populated", {
+		categories: getScenario("populated").tables.categories.map(category =>
+			category.id === IDS.categories.groceries
+				? { ...category, default_monthly_budget_id: IDS.monthlyBudgets.travelArchived }
+				: category,
+		),
+		statement_rules: statementRules().map(rule =>
+			rule.id === "t1-rule-starbucks"
+				? {
+						...rule,
+						actions: {
+							...rule.actions,
+							monthly_budget_id: { value: IDS.monthlyBudgets.travelArchived },
+						},
+					}
+				: rule,
+		),
+	})
+	await test.step("Category editor: the archived default is shown, not a blank select", async () => {
+		const dialog = await openEditor(page, "/categories", "Edit Groceries", "Edit Category")
+		await expect(dialog.getByLabel("Monthly budget", { exact: true })).toContainText("Travel")
+	})
+	await test.step("Statement rule editor: the archived action Budget is shown, not a blank select", async () => {
+		const dialog = await openEditor(
+			page,
+			"/statement-rules",
+			"Edit Starbucks coffee",
+			"Edit rule",
+		)
+		await expect(dialog.getByLabel("Monthly budget", { exact: true })).toContainText("Travel")
+	})
+})
+
+test("Pending Statement editor: deleting from an Account page stays on that page", async ({
+	page,
+}) => {
+	const { tables } = getScenario("populated")
+	await seedWorkspace(page, "populated", {
+		statements: [...tables.statements, { ...pending, id: "free-pending" }],
+	})
+	await page.goto(`/accounts/${pending.account_id}`)
+	await page
+		.locator('main a[href="/statements/free-pending"]')
+		.filter({ visible: true })
+		.locator('xpath=ancestor::*[self::tr or contains(@class,"grid-cols-subgrid")][1]')
+		.getByRole("button", { name: "Edit pending statement", exact: true })
+		.click()
+	await page
+		.getByRole("dialog", { name: "Edit Pending Statement", exact: true })
+		.getByRole("button", { name: "Delete", exact: true })
+		.click()
+	await expect(page.getByRole("dialog")).toHaveCount(0)
+	await expect
+		.poll(async () =>
+			(await readRows(page, "statements")).some(row => row.id === "free-pending"),
+		)
+		.toBe(false)
+	await expect(page).toHaveURL(new RegExp(`/accounts/${pending.account_id}$`))
+})
+
+test("Category editor: a Category in use says why Delete is unavailable", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	const dialog = await openEditor(page, "/categories", "Edit Groceries", "Edit Category")
+	await expect(dialog.getByRole("button", { name: "Delete", exact: true })).toBeDisabled()
+	await expect(dialog.getByText(/still use this category/)).toBeVisible()
+})
+
+test("Record editor: Delete asks for a second click, and closing the dialog disarms it", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	const dialog = await openEditor(page, `/records/${record.id}`, "Edit Record", "Edit Record")
+	await dialog.getByRole("button", { name: "Delete", exact: true }).click()
+	await expect(
+		dialog.getByRole("button", { name: "Yes, delete Record", exact: true }),
+	).toBeVisible()
+	expect((await readRows(page, "records")).some(row => row.id === record.id)).toBe(true)
+
+	await page.keyboard.press("Escape")
+	await expect(dialog).not.toBeVisible()
+	await page.getByRole("button", { name: "Edit Record", exact: true }).click()
+	await expect(dialog.getByRole("button", { name: "Delete", exact: true })).toBeVisible()
+
+	await dialog.getByRole("button", { name: "Delete", exact: true }).click()
+	await dialog.getByRole("button", { name: "Yes, delete Record", exact: true }).click()
+	await expect(dialog).not.toBeVisible()
+	await expect
+		.poll(async () => (await readRows(page, "records")).some(row => row.id === record.id))
+		.toBe(false)
+})
+
+test("Fix Duplicates: Statement times use the shared 12-hour format", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	await page.goto("/allocator/duplicates")
+	await expect(page.getByText(/^9:14 AM · /).first()).toBeVisible()
+	await expect(page.getByText(/^09:14 · /)).toHaveCount(0)
+})
+
+test("Pending Statement editor: the Account option names the bank, not its raw code", async ({
+	page,
+}) => {
+	await seedWorkspace(page, "populated", {
+		accounts: getScenario("populated").tables.accounts.map(row => ({ ...row, bank: "dbs" })),
+	})
+	const dialog = await openEditor(
+		page,
+		`/statements/${pending.id}`,
+		"Edit Pending Statement",
+		"Edit Pending Statement",
+	)
+	await expect(dialog.getByLabel("Account", { exact: true })).toContainText("· DBS")
+})
+
+test("Budget detail: a repeated Detach click writes once", async ({ page, workspace }) => {
+	void workspace
+	await spyOnWrites(page, "budget_records")
+	await page.goto("/budgets/t1-b-manual")
+	const detach = page.getByRole("button", { name: /^Detach / }).first()
+	await expect(detach).toBeVisible()
+	await startCounting(page)
+	await detach.evaluate(button => {
+		for (let i = 0; i < 3; i++) button.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+	})
+	await expect(page.getByRole("button", { name: /^Detach / })).toHaveCount(1)
+	expect(await writeAttempts(page)).toBe(1)
+})
+
+test("Record creator: a failed save shows the correction line in the footer", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	const dialog = await openEditor(page, "/records", "Create Pending Record", "Create New Record")
+	await dialog.getByRole("button", { name: "Create Record", exact: true }).click()
+	await expect(dialog.getByText("Correct the highlighted fields, then save again.")).toBeVisible()
+})
+
+test("Pending Statement dialog: saving and deleting show no success toast", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	const dialog = await openEditor(
+		page,
+		"/statements",
+		"Create Pending Statement",
+		"Create Pending Statement",
+	)
+	await dialog.getByLabel("Description", { exact: true }).fill("No toast statement")
+	await dialog.getByLabel("Amount", { exact: true }).fill("-2")
+	await dialog.getByRole("button", { name: "Create statement", exact: true }).click()
+	await expect(dialog).not.toBeVisible()
+	await expect
+		.poll(async () =>
+			(await readRows(page, "statements")).some(
+				row => row.description === "No toast statement",
+			),
+		)
+		.toBe(true)
+	await page.waitForTimeout(500)
+	await expect(page.locator("[data-sonner-toast]")).toHaveCount(0)
 })

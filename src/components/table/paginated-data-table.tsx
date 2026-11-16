@@ -249,14 +249,7 @@ function PaginatedDataTable<TData extends { id: string }, TValue>({
 				<PaginationFooter
 					summary={loading ? null : footer.summary}
 					page={paginated.current_page}
-					lastPage={
-						typeof paginated.last_page === "number"
-							? paginated.last_page
-							: Math.max(
-									1,
-									Math.ceil(paginated.total / Math.max(1, paginated.per_page)),
-								)
-					}
+					lastPage={paginated.last_page}
 				/>
 			) : null}
 		</div>

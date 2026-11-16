@@ -3,21 +3,32 @@
 import { DateTime } from "luxon"
 import { db } from "@/data/db"
 import { monthStart } from "@/logic/dashboard"
-import { expandCategoryIdsForMonthly } from "@/logic/monthly-shared"
-import { listRecords } from "@/logic/records"
+import {
+	flagParam,
+	listParam,
+	looseFlagParam,
+	type ParamSource,
+	textParam,
+} from "@/logic/filter-params"
+import { listRecords, type RecordFilters } from "@/logic/records"
 
-export type MonthlyFilters = {
-	query?: string | null
-	category_ids?: string | null
-	is_allocated?: string | null
-	monthly_budget_id?: string | null
-	show_unbudgeted?: boolean
-	effective_spending?: boolean
-	treatment?: string | null
-	start_date?: string | null
-	end_date?: string | null
-	min_amount?: string | null
-	max_amount?: string | null
+export type MonthlyFilters = Omit<RecordFilters, "exclude_budget_id">
+
+/**
+ * The Records sheet's URL filters. `is_allocated` reads as the Records list does, so a link
+ * using `1`/`0` keeps its meaning; the other flags take `"true"` only.
+ */
+export function parseMonthlyFilters(params: ParamSource): MonthlyFilters {
+	return {
+		category_ids: listParam(params.get("category_ids")),
+		is_allocated: looseFlagParam(params.get("is_allocated")),
+		monthly_budget_id: textParam(params.get("monthly_budget_id")),
+		show_unbudgeted: flagParam(params.get("show_unbudgeted")),
+		effective_spending: flagParam(params.get("effective_spending")),
+		treatment: textParam(params.get("treatment")),
+		start_date: textParam(params.get("start_date")),
+		end_date: textParam(params.get("end_date")),
+	}
 }
 
 export async function getMonthlyRecords(month: string, year: number, filters: MonthlyFilters = {}) {
@@ -29,12 +40,6 @@ export async function getMonthlyRecords(month: string, year: number, filters: Mo
 		? today.toFormat("yyyy-MM-dd")
 		: date.endOf("month").toFormat("yyyy-MM-dd")
 
-	const rawCategoryIds = (filters.category_ids ?? "").split(",").filter(Boolean)
-	// Avoid awaiting a non-Dexie promise before the first read: liveQuery must
-	// retain its observation context when no Category filter is selected.
-	const category_ids = rawCategoryIds.length
-		? await expandCategoryIdsForMonthly(rawCategoryIds)
-		: []
 	const startDate = filters.start_date ?? date.toFormat("yyyy-MM-dd")
 	const endDate = filters.end_date ?? date.endOf("month").toFormat("yyyy-MM-dd")
 	const rangeStart = DateTime.fromFormat(startDate, "yyyy-MM-dd")
@@ -49,19 +54,7 @@ export async function getMonthlyRecords(month: string, year: number, filters: Mo
 		throw new Error("Invalid date range.")
 	}
 
-	const records = await listRecords({
-		query: filters.query ?? null,
-		start_date: startDate,
-		end_date: endDate,
-		min_amount: filters.min_amount ?? null,
-		max_amount: filters.max_amount ?? null,
-		is_allocated: filters.is_allocated ?? null,
-		category_ids,
-		monthly_budget_id: filters.monthly_budget_id ?? null,
-		show_unbudgeted: !!filters.show_unbudgeted,
-		effective_spending: !!filters.effective_spending,
-		treatment: filters.treatment ?? null,
-	})
+	const records = await listRecords({ ...filters, start_date: startDate, end_date: endDate })
 
 	const actualRecords = isFuture ? [] : records.filter(r => r.datetime.slice(0, 10) <= actualEnd)
 	const futureRecords = records.filter(r => !actualRecords.includes(r))

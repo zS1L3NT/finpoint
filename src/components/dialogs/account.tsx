@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { toast } from "sonner"
 import TextField from "@/components/form/text-field"
 import { Button } from "@/components/ui/button"
@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/dialog"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { useDialogCloseAnimation } from "@/hooks/use-dialog-close-animation"
+import { useSeed } from "@/hooks/use-seed"
+import { useSubmitLock } from "@/hooks/use-submit-lock"
 import { updateAccount } from "@/logic/accounts"
 import { ValidationError } from "@/logic/validate"
 import type { Account } from "@/types"
@@ -33,25 +35,27 @@ export default function AccountDialog({
 	const [name, setName] = useState(account.name)
 	const { getApiFieldErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
 
-	useEffect(() => {
-		if (isOpen) {
-			setName(account.name)
-			resetApiErrors()
-		}
-	}, [account, isOpen, resetApiErrors])
+	const { locked, run } = useSubmitLock(isOpen)
+
+	// Seeds on open and for a different Account, not for a background write to the same one.
+	useSeed(isOpen ? account.id : null, () => {
+		setName(account.name)
+		resetApiErrors()
+	})
 
 	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault()
-		try {
-			await updateAccount(account.id, { name })
-			setIsOpen(false)
-		} catch (cause) {
-			if (cause instanceof ValidationError) {
-				setApiErrors(cause.errors)
-				return
+		await run(async () => {
+			try {
+				await updateAccount(account.id, { name })
+				setIsOpen(false)
+				return true
+			} catch (cause) {
+				if (cause instanceof ValidationError) setApiErrors(cause.errors)
+				else toast.error("Unable to save this account.")
+				return false
 			}
-			toast.error("Unable to save this account.")
-		}
+		})
 	}
 
 	return (
@@ -86,7 +90,7 @@ export default function AccountDialog({
 							</Button>
 						}
 					/>
-					<Button type="submit" form="account-form">
+					<Button type="submit" form="account-form" disabled={locked}>
 						Save changes
 					</Button>
 				</DialogFooter>

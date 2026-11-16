@@ -15,6 +15,7 @@ import { seedIfEmpty } from "@/data/seed"
 import { HistoryProvider } from "@/history"
 import { initializeAppearance } from "@/hooks/use-appearance"
 import { useSyncToasts } from "@/hooks/use-sync-toasts"
+import { UrlParamsProvider } from "@/hooks/use-url-params"
 import { startAutoSync } from "@/logic/auto-sync"
 import { listCategoryIconNames } from "@/logic/categories"
 
@@ -60,27 +61,29 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 	return (
 		<MotionConfig reducedMotion="user">
 			<HistoryProvider>
-				<TooltipProvider delayDuration={0}>
-					<SidebarProvider
-						defaultOpen
-						style={
-							{
-								"--sidebar-width": "calc(var(--spacing) * 72)",
-								"--header-height": "calc(var(--spacing) * 12)",
-							} as React.CSSProperties
-						}
-					>
-						<Boot />
-						<Toaster />
-						<Analytics />
-						<SpeedInsights />
-						<AppSidebar />
-						<SidebarInset className="min-h-full">
-							<ShellHeader />
-							{children}
-						</SidebarInset>
-					</SidebarProvider>
-				</TooltipProvider>
+				<UrlParamsProvider>
+					<TooltipProvider delayDuration={0}>
+						<SidebarProvider
+							defaultOpen
+							style={
+								{
+									"--sidebar-width": "calc(var(--spacing) * 72)",
+									"--header-height": "calc(var(--spacing) * 12)",
+								} as React.CSSProperties
+							}
+						>
+							<Boot />
+							<Toaster />
+							<Analytics />
+							<SpeedInsights />
+							<AppSidebar />
+							<SidebarInset className="min-h-full">
+								<ShellHeader />
+								{children}
+							</SidebarInset>
+						</SidebarProvider>
+					</TooltipProvider>
+				</UrlParamsProvider>
 			</HistoryProvider>
 		</MotionConfig>
 	)

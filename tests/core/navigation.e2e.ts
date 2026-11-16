@@ -892,3 +892,158 @@ test("mobile sidebar: a tap before the mobile layout settles opens the mobile me
 	await page.setViewportSize({ width: 390, height: 844 })
 	await expect(page.locator('[data-sidebar="sidebar"][data-mobile="true"]')).toBeVisible()
 })
+
+test("month navigation: two fast clicks on Next month advance two months", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	await page.goto("/?month=October&year=2026")
+	const next = page.getByRole("button", { name: "Next month", exact: true })
+	await expect(page.getByRole("heading", { name: "October 2026" })).toBeVisible()
+	// The second click lands once the first navigation has rendered (the heading shows the
+	// optimistic month) or a frame has passed, and it must find the URL still on October: the
+	// first navigation has not committed.
+	const urlAtSecondClick = await next.evaluate(
+		(button: HTMLButtonElement) =>
+			new Promise<string>(resolve => {
+				let clicked = false
+				const clickAgain = () => {
+					if (clicked) return
+					clicked = true
+					observer.disconnect()
+					const url = location.search
+					button.click()
+					resolve(url)
+				}
+				const observer = new MutationObserver(() => {
+					const rendered = [...document.querySelectorAll("h1, h2, h3")].some(heading =>
+						heading.textContent?.includes("November 2026"),
+					)
+					if (rendered) clickAgain()
+				})
+				observer.observe(document.body, {
+					childList: true,
+					subtree: true,
+					characterData: true,
+				})
+				button.click()
+				requestAnimationFrame(() => requestAnimationFrame(clickAgain))
+			}),
+	)
+	expect(urlAtSecondClick).toContain("month=October")
+	await expect(page).toHaveURL(/month=December&year=2026/)
+	await expect(page.getByRole("heading", { name: "December 2026" })).toBeVisible()
+})
+
+test("duplicates search: typing filters the list and one Back undoes the search", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	await page.goto("/allocator/duplicates?view=all")
+	const search = page.getByRole("textbox", { name: "Search statement descriptions" })
+	await expect(page.getByText("GRAB RIDE 7712").first()).toBeVisible()
+	const entries = await page.evaluate(() => history.length)
+	await search.pressSequentially("DONKI", { delay: 40 })
+	await expect(search).toHaveValue("DONKI")
+	await expect(page).toHaveURL(/query=DONKI$/)
+	await expect(page.getByText("GRAB RIDE 7712")).toHaveCount(0)
+	await expect(page.getByText("DON DON DONKI PURCHASE 8821").first()).toBeVisible()
+	expect(await page.evaluate(() => history.length)).toBe(entries + 1)
+	await page.goBack()
+	await expect(page).not.toHaveURL(/query=/)
+	await expect(search).toHaveValue("")
+	await expect(page.getByText("GRAB RIDE 7712").first()).toBeVisible()
+})
+
+test.describe("pending queue URL state", () => {
+	test.use({ workspaceScenario: "dense" })
+	const queueSearch = (page: Page) =>
+		page
+			.locator('section[aria-label="Pending statements"]')
+			.getByPlaceholder("Search descriptions...")
+
+	test("pending queue: a row chosen while an Account filter is pending keeps that filter", async ({
+		page,
+		workspace,
+	}) => {
+		void workspace
+		await page.goto("/allocator/pending")
+		const queue = page.locator('section[aria-label="Pending statements"]')
+		const row = queue.locator("button[aria-pressed]").first()
+		await expect(row).toBeVisible()
+		const account = (await row.innerText()).match(/Dense Account \d+/)?.[0] ?? ""
+		expect(account).not.toBe("")
+		await queue.locator('[data-slot="select-trigger"]').first().click()
+		const option = page.getByRole("option", { name: account, exact: true })
+		await expect(async () => {
+			await option.hover({ position: { x: 8, y: 8 } })
+			await expect(option).toHaveAttribute("data-highlighted", "", { timeout: 250 })
+		}).toPass({ timeout: 5000 })
+		// The row is chosen after the filter's optimistic render but before its navigation
+		// commits: a microtask later, in the same task.
+		await page.evaluate(async () => {
+			document.querySelector<HTMLElement>('[role="option"][data-highlighted]')?.click()
+			await Promise.resolve()
+			document
+				.querySelector<HTMLElement>(
+					'section[aria-label="Pending statements"] button[aria-pressed]',
+				)
+				?.click()
+		})
+		await expect(page).toHaveURL(/pending_statement_id=/)
+		await expect(page).toHaveURL(/account_id=t1-d-acc-\d+/)
+	})
+
+	test("pending queue: one Back undoes a search and restores the URL and the box", async ({
+		page,
+		workspace,
+	}) => {
+		void workspace
+		await page.goto("/allocator/pending")
+		const search = queueSearch(page)
+		await expect(search).toBeVisible()
+		const entries = await page.evaluate(() => history.length)
+		await search.pressSequentially("Dense pending 2", { delay: 40 })
+		await expect(search).toHaveValue("Dense pending 2")
+		await expect(page).toHaveURL(/query=Dense\+pending\+2$/)
+		expect(await page.evaluate(() => history.length)).toBe(entries + 1)
+		await page.goBack()
+		await expect(page).not.toHaveURL(/query=/)
+		await expect(search).toHaveValue("")
+		await page.goForward()
+		await expect(page).toHaveURL(/query=Dense\+pending\+2$/)
+		await expect(search).toHaveValue("Dense pending 2")
+	})
+
+	test("pending queue: Back pressed right after typing restores the URL and the box", async ({
+		page,
+		workspace,
+	}) => {
+		void workspace
+		await page.goto("/allocator/pending")
+		const search = queueSearch(page)
+		await expect(search).toBeVisible()
+		await search.fill("Dense pending 1")
+		await expect(page).toHaveURL(/query=Dense\+pending\+1$/)
+		// Type and press Back in one task, before the typed search commits.
+		await page.evaluate(() => {
+			const input = document.querySelector<HTMLInputElement>(
+				'section[aria-label="Pending statements"] input[placeholder="Search descriptions..."]',
+			)
+			const setValue = Object.getOwnPropertyDescriptor(
+				HTMLInputElement.prototype,
+				"value",
+			)?.set
+			setValue?.call(input, "Dense pending 12")
+			input?.dispatchEvent(new Event("input", { bubbles: true }))
+			history.back()
+		})
+		await expect(page).not.toHaveURL(/query=/)
+		await expect(search).toHaveValue("")
+		await page.waitForTimeout(650)
+		await expect(page).not.toHaveURL(/query=/)
+		await expect(search).toHaveValue("")
+	})
+})

@@ -870,6 +870,64 @@ test("importer: invalid files are rejected without mutation and duplicates are s
 	expect(await countStore(page, "statements")).toBe(before + 1)
 })
 
+test("importer: switching to a one-file bank trims the selection to one file", async ({
+	page,
+	workspace,
+}) => {
+	expect(workspace).toBe("populated")
+	await blockGoogle(page)
+	await page.goto("/importer")
+
+	await page.getByRole("radio", { name: /DBS/ }).click()
+	const [chooser] = await Promise.all([
+		page.waitForEvent("filechooser"),
+		page.getByRole("button", { name: /Drop.*here/ }).click(),
+	])
+	await chooser.setFiles(
+		["first.csv", "second.csv"].map(name => ({
+			name,
+			mimeType: "text/csv",
+			buffer: Buffer.from("a,b\n1,2\n"),
+		})),
+	)
+	await expect(page.getByRole("button", { name: "Import 2 files" })).toBeVisible()
+
+	await page.getByRole("radio", { name: /Revolut/ }).click()
+	await expect(page.getByRole("button", { name: "Import 1 file" })).toBeVisible()
+	await expect(page.getByText("first.csv")).toBeVisible()
+	await expect(page.getByText("second.csv")).toHaveCount(0)
+
+	await page.getByRole("radio", { name: /DBS/ }).click()
+	await expect(page.getByRole("button", { name: "Import 1 file" })).toBeVisible()
+})
+
+test("importer: files trimmed by a bank switch are not imported", async ({ page, workspace }) => {
+	expect(workspace).toBe("populated")
+	await blockGoogle(page)
+	await page.goto("/importer")
+	const before = await countStore(page, "statements")
+
+	await page.getByRole("radio", { name: /DBS/ }).click()
+	const [chooser] = await Promise.all([
+		page.waitForEvent("filechooser"),
+		page.getByRole("button", { name: /Drop.*here/ }).click(),
+	])
+	await chooser.setFiles(
+		["TRIM FIRST", "TRIM SECOND"].map((description, index) => ({
+			name: `${index}.csv`,
+			mimeType: "text/csv",
+			buffer: Buffer.from(DBS_VALID.replace("WORKFLOW E2E IMPORT", description)),
+		})),
+	)
+	await expect(page.getByRole("button", { name: "Import 2 files" })).toBeVisible()
+
+	await page.getByRole("radio", { name: /Revolut/ }).click()
+	await page.getByRole("radio", { name: /DBS/ }).click()
+	await page.getByRole("button", { name: "Import 1 file" }).click()
+	await expect(page.getByText("1 new statement imported")).toBeVisible()
+	expect(await countStore(page, "statements")).toBe(before + 1)
+})
+
 test("importer: a Revolut pending import surfaces in the pending queue", async ({
 	page,
 	workspace,
@@ -929,6 +987,64 @@ test("settings: default filters validate, persist and reload", async ({ page, wo
 	await expect(page.getByText("Default filters saved.")).toBeVisible()
 	await page.reload()
 	await expect(page.locator("#default_filter_start_date")).toContainText("No default start date")
+})
+
+test("settings: a write from another tab keeps the default filter you are editing", async ({
+	page,
+	workspace,
+}) => {
+	expect(workspace).toBe("populated")
+	await blockGoogle(page)
+
+	await page.goto("/settings")
+	await expect(page.locator("#default_filter_start_date")).toContainText("1 Oct 2026")
+	await page.getByRole("button", { name: "Clear date" }).click()
+	await expect(page.locator("#default_filter_start_date")).toContainText("No default start date")
+
+	const other = await page.context().newPage()
+	await blockGoogle(other)
+	await other.goto("/settings")
+	await other.locator("#default_filter_end_date").click()
+	await pickOption(other.getByRole("option", { name: "Today" }))
+	await other.getByRole("button", { name: "Save default filters" }).click()
+	await expect(other.getByText("Default filters saved.")).toBeVisible()
+	await other.close()
+
+	// The saved end date arrives live; the unsaved start date stays cleared.
+	await expect(page.locator("#default_filter_end_date")).toContainText("Today")
+	await page.waitForTimeout(500)
+	await expect(page.locator("#default_filter_start_date")).toContainText("No default start date")
+})
+
+test("settings: an edit put back to the saved value follows another tab's save", async ({
+	page,
+	workspace,
+}) => {
+	expect(workspace).toBe("populated")
+	await blockGoogle(page)
+
+	await page.goto("/settings")
+	const endDate = page.locator("#default_filter_end_date")
+	const save = page.getByRole("button", { name: "Save default filters" })
+	await expect(endDate).toContainText("No default end date")
+	await endDate.click()
+	await pickOption(page.getByRole("option", { name: "Today" }))
+	await expect(save).toBeEnabled()
+	await endDate.click()
+	await pickOption(page.getByRole("option", { name: "No default end date" }))
+	await expect(save).toBeDisabled()
+
+	const other = await page.context().newPage()
+	await blockGoogle(other)
+	await other.goto("/settings")
+	await other.locator("#default_filter_end_date").click()
+	await pickOption(other.getByRole("option", { name: "Today" }))
+	await other.getByRole("button", { name: "Save default filters" }).click()
+	await expect(other.getByText("Default filters saved.")).toBeVisible()
+	await other.close()
+
+	await expect(endDate).toContainText("Today")
+	await expect(save).toBeDisabled()
 })
 
 test("sync: signed-out data stays local with no external Google calls", {
@@ -1008,4 +1124,18 @@ test("reset: a cancelled reset preserves workspace data", async ({ page, workspa
 	await expect(
 		page.locator("main").getByText("Monthly Salary", { exact: true }).filter({ visible: true }),
 	).toBeVisible()
+})
+
+test("reset: arming one destructive button disarms the others", async ({ page, workspace }) => {
+	expect(workspace).toBe("populated")
+	await blockGoogle(page)
+
+	await page.goto("/sync")
+	await page.getByRole("button", { name: "Load demo data" }).click()
+	await expect(page.getByRole("button", { name: "Replace with demo data" })).toBeVisible()
+	await page.getByRole("button", { name: "Clear all data" }).click()
+	await expect(page.getByRole("button", { name: "Yes, clear everything" })).toBeVisible()
+	await expect(page.getByRole("button", { name: "Load demo data" })).toBeVisible()
+	await expect(page.getByRole("button", { name: "Replace with demo data" })).toHaveCount(0)
+	expect(await countStore(page, "records")).toBe(15)
 })

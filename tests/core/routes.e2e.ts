@@ -1073,3 +1073,49 @@ test("narrow desktop: pages stack by available width and popups keep side margin
 		expect(box.x + box.width).toBeLessThanOrEqual(800 - 8)
 	})
 })
+
+test("Statement rules page: a double click on Pause writes once", async ({ page }) => {
+	await seedWorkspace(page, "populated", { statement_rules: statementRules() })
+	// Dexie binds the transaction function when it opens the database, so spy before the load.
+	await page.addInitScript(() => {
+		const w = window as unknown as { __ruleWrites: number }
+		w.__ruleWrites = 0
+		const transaction = IDBDatabase.prototype.transaction
+		IDBDatabase.prototype.transaction = function (stores, mode, ...rest) {
+			if (mode === "readwrite" && [stores].flat().includes("statement_rules"))
+				w.__ruleWrites++
+			return transaction.call(this, stores, mode, ...rest)
+		}
+	})
+	await page.goto("/statement-rules")
+	const pause = page.getByRole("button", { name: "Pause Starbucks coffee", exact: true })
+	await expect(pause).toBeVisible()
+	await page.evaluate(() => {
+		;(window as unknown as { __ruleWrites: number }).__ruleWrites = 0
+	})
+	await pause.evaluate((button: HTMLButtonElement) => {
+		button.click()
+		button.click()
+	})
+	await expect(
+		page.getByRole("button", { name: "Resume Starbucks coffee", exact: true }),
+	).toBeVisible()
+	await page.waitForTimeout(300)
+	expect(
+		await page.evaluate(() => (window as unknown as { __ruleWrites: number }).__ruleWrites),
+	).toBe(1)
+})
+
+test("Settings: the default date descriptions name only the screens that use them", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	await page.goto("/settings")
+	await expect(
+		page.getByText("Leave empty to include Records from any earlier date."),
+	).toBeVisible()
+	await expect(
+		page.getByText("Choose Today to keep future-dated Records out of the default view."),
+	).toBeVisible()
+})

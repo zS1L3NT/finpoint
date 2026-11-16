@@ -21,6 +21,35 @@ export type AnalyticsRecord = {
 	} | null
 }
 
+/** The Records list order: newest first, then the same tie-breaks wherever Records are listed. */
+export function compareRecords(
+	a: {
+		datetime: string
+		amount: number
+		title: string
+		people: string | null
+		location: string | null
+		description: string | null
+	},
+	b: {
+		datetime: string
+		amount: number
+		title: string
+		people: string | null
+		location: string | null
+		description: string | null
+	},
+) {
+	return (
+		b.datetime.localeCompare(a.datetime) ||
+		a.amount - b.amount ||
+		a.title.localeCompare(b.title) ||
+		(a.people ?? "").localeCompare(b.people ?? "") ||
+		(a.location ?? "").localeCompare(b.location ?? "") ||
+		(a.description ?? "").localeCompare(b.description ?? "")
+	)
+}
+
 export function contribution(treatment: string, amount: number) {
 	const cents = toCents(amount)
 	switch (treatment) {

@@ -13,13 +13,15 @@ import ValueSwap from "@/components/value-swap"
 import { useHistory } from "@/history"
 import { useMonthParams } from "@/hooks/use-month-params"
 import { armMonthTransition } from "@/hooks/use-month-transition"
+import { useUrlParams } from "@/hooks/use-url-params"
 
 /**
  * Persistent shell for the Overview. The title and month navigation mount once and never
  * remount on month changes, so the month heading cannot flash. The page renders content only.
  */
 export default function MonthLayout({ children }: { children: React.ReactNode }) {
-	const { month, year, date, setSearchParams } = useMonthParams()
+	const { month, year, date } = useMonthParams()
+	const { params, setParams } = useUrlParams()
 	const { latest, isNavigatingBack, navigateBack } = useHistory()
 	const back = latest
 	const [hydrated, setHydrated] = useState(false)
@@ -37,12 +39,13 @@ export default function MonthLayout({ children }: { children: React.ReactNode })
 	const changeMonth = (next: DateTime) => {
 		if (next.hasSame(date, "month")) return
 		armMonthTransition(next > date ? 1 : -1)
-		// Keep the Overview's selected budget across months.
-		setSearchParams(previous => ({
+		// Keep the Overview's selected budget across months and drop every other param (an open sheet).
+		setParams({
+			...Object.fromEntries([...params.keys()].map(key => [key, null])),
 			month: next.toFormat("MMMM"),
 			year: String(next.year),
-			scope: previous.get("scope") ?? undefined,
-		}))
+			scope: params.get("scope"),
+		})
 	}
 
 	return (

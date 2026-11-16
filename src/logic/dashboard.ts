@@ -14,7 +14,6 @@ import {
 } from "@/data/db"
 import { type AnalyticsRecord, contribution, summarize } from "@/logic/analytics"
 import { defaultAmountFor } from "@/logic/monthly-budgets"
-import { expandCategoryIdsForMonthly } from "@/logic/monthly-shared"
 import {
 	type AllocationTally,
 	isPendingRecord,
@@ -22,6 +21,12 @@ import {
 	tallyAllocations,
 } from "@/logic/pending"
 import { resolveRecordChoices } from "@/logic/record-choices"
+import { round2 } from "@/logic/shared"
+import {
+	hasAllocable,
+	type StatementTotals,
+	tallyStatementAllocations,
+} from "@/logic/statement-enrichment"
 
 export const COMPARISON_MONTHS = 2
 export const BREAKDOWN_MONTHS = 4
@@ -114,8 +119,10 @@ const ISO_DAY = "yyyy-MM-dd"
 
 type LoadedTables = {
 	records: ReturnType<typeof resolveRecordChoices>[]
+	/** Every Record when `records` is narrowed to one scope, so month coverage ignores the scope. */
+	coverageRecords?: ReturnType<typeof resolveRecordChoices>[]
 	statements: StatementRow[]
-	allocatedStatementIds: Set<string>
+	statementTotals: StatementTotals
 	allocated: Map<string, AllocationTally>
 	categories: Map<string, CategoryRow>
 	monthlyBudgets: Map<string, MonthlyBudgetRow>
@@ -156,7 +163,7 @@ async function loadDashboardTables(): Promise<LoadedTables> {
 			),
 		),
 		statements,
-		allocatedStatementIds: new Set(allocations.map(a => a.statement_id)),
+		statementTotals: tallyStatementAllocations(allocations),
 		allocated: tallyAllocations(allocations, pending),
 		categories: new Map(categories.map(c => [c.id, c])),
 		monthlyBudgets: new Map(monthlyBudgets.map(b => [b.id, b])),
@@ -204,10 +211,20 @@ function comparisonSummaries(
 			tables.categories,
 			tables.monthlyBudgets,
 		)
+		// Coverage is a fact about the month, so it looks at every Record, not the scoped ones.
+		const hasActivity =
+			toAnalyticsRecords(
+				(tables.coverageRecords ?? tables.records).filter(r =>
+					inRange(r.datetime, startKey, endKey),
+				),
+				tables.allocated,
+				tables.categories,
+				tables.monthlyBudgets,
+			).length > 0
 		const excluded =
 			(coverage?.excluded_from_comparisons ?? false) ||
 			(coverage?.coverage ?? null) === "incomplete" ||
-			(items.length === 0 && (coverage?.coverage ?? "unknown") !== "complete")
+			(!hasActivity && (coverage?.coverage ?? "unknown") !== "complete")
 		out.push({
 			month: month.toFormat("MMM yyyy"),
 			start: month.toFormat("yyyy-MM-dd"),
@@ -406,9 +423,8 @@ export async function getDashboard(
 		).length,
 		unallocated_statements: tables.statements.filter(
 			s =>
-				s.is_pending === 0 &&
 				inRange(s.datetime, monthStartKey, monthEndKey) &&
-				!tables.allocatedStatementIds.has(s.id),
+				hasAllocable(s, tables.statementTotals),
 		).length,
 	}
 
@@ -426,7 +442,11 @@ export async function getDashboard(
 					? "Future month"
 					: "Full month",
 		},
-		summary,
+		// The badge opens the Records sheet, which lists actual and later Records together.
+		summary: {
+			...summary,
+			unbudgeted_count: summary.unbudgeted_count + futureSummary.unbudgeted_count,
+		},
 		comparison,
 		comparison_history: comparisonHistory,
 		history: buildCashflowHistory(date, today, tables, null),
@@ -821,7 +841,7 @@ function buildProjection(
 		}
 	}
 	const remainingDays = Math.max((date.daysInMonth ?? 30) - elapsedDays, 0)
-	const dailySpending = summary.gross_spending / elapsedDays
+	const dailySpending = summary.spending / elapsedDays
 	const paceMonthlyBudget = monthlyBudgets.find(b => b.amount !== null && b.amount >= 0)
 	const paceAmount = paceMonthlyBudget?.amount ?? null
 	const futureMonthlyBudgets = new Map(futureSummary.monthlyBudgets.map(b => [b.id, b]))
@@ -843,10 +863,11 @@ function buildProjection(
 				? {
 						id: paceMonthlyBudget.id,
 						name: paceMonthlyBudget.name,
-						remaining:
+						remaining: round2(
 							paceAmount -
-							paceMonthlyBudget.spending -
-							scheduledMonthlyBudgetSpending,
+								paceMonthlyBudget.spending -
+								scheduledMonthlyBudgetSpending,
+						),
 						spent: paceMonthlyBudget.spending,
 						amount: paceAmount,
 						projected:
@@ -914,7 +935,8 @@ function buildMonthlyBudgets(
 			...monthly_budget,
 			spending,
 			amount: amount === null || amount === undefined ? null : Number(amount),
-			remaining: amount === null || amount === undefined ? null : Number(amount) - spending,
+			remaining:
+				amount === null || amount === undefined ? null : round2(Number(amount) - spending),
 			comparison: baseline.has(monthly_budget.id)
 				? spending - (baseline.get(monthly_budget.id) ?? 0)
 				: null,
@@ -989,8 +1011,6 @@ function buildCategories(
 		}
 	})
 }
-
-export { expandCategoryIdsForMonthly }
 
 export type TrendMonth = {
 	key: string
@@ -1069,6 +1089,7 @@ export async function getDashboardView(input: DashboardInput & { scope?: string 
 			? dashboard
 			: await getDashboard(input, {
 					...tables,
+					coverageRecords: tables.records,
 					records: tables.records.filter(r =>
 						inScope(r.monthly_budget_id, scopedBudgetIds),
 					),

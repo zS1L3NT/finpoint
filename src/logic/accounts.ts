@@ -3,6 +3,7 @@
 import { DateTime } from "luxon"
 import { db } from "@/data/db"
 import { round2 } from "@/logic/shared"
+import { hasAllocable, tallyStatementAllocations } from "@/logic/statement-enrichment"
 import { Validator } from "@/logic/validate"
 import type { Account } from "@/types"
 
@@ -20,8 +21,10 @@ async function accountActivity(accountId?: string): Promise<Map<string, AccountA
 	const statements = accountId
 		? await db.statements.where("account_id").equals(accountId).toArray()
 		: await db.statements.toArray()
-	const allocated = new Set((await db.allocations.toArray()).map(a => a.statement_id))
-	const since = DateTime.now().minus({ days: 30 }).toFormat("yyyy-MM-dd")
+	const totals = tallyStatementAllocations(await db.allocations.toArray())
+	const today = DateTime.now()
+	const since = today.minus({ days: 30 }).toFormat("yyyy-MM-dd")
+	const until = today.toFormat("yyyy-MM-dd")
 	const map = new Map<string, AccountActivity>()
 	for (const statement of statements) {
 		const entry = map.get(statement.account_id) ?? {
@@ -33,11 +36,12 @@ async function accountActivity(accountId?: string): Promise<Map<string, AccountA
 			outflow_30d: 0,
 		}
 		entry.statements_count++
-		if (!allocated.has(statement.id)) entry.unallocated_count++
+		if (hasAllocable(statement, totals)) entry.unallocated_count++
 		if (statement.is_pending === 1) entry.pending_count++
 		if (!entry.last_activity || statement.datetime > entry.last_activity)
 			entry.last_activity = statement.datetime
-		if (statement.datetime.slice(0, 10) >= since) {
+		const day = statement.datetime.slice(0, 10)
+		if (day >= since && day <= until) {
 			if (statement.amount > 0) entry.inflow_30d = round2(entry.inflow_30d + statement.amount)
 			else entry.outflow_30d = round2(entry.outflow_30d - statement.amount)
 		}

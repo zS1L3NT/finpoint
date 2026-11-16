@@ -3,69 +3,30 @@
 // Search text, page and page size live in the URL search params so links stay
 // shareable. Typing in search edits one history entry rather than adding one per key.
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useCallback, useEffect, useState } from "react"
+import { useUrlParams } from "@/hooks/use-url-params"
 
 const DEFAULT_PAGE_SIZE = "100"
 
 export function usePaginatedTableState() {
-	const searchParams = useSearchParams()
-	const router = useRouter()
-	const pathname = usePathname()
-	const [query, setQuery] = useState(() => searchParams.get("query") ?? "")
-	const [pageSize, setPageSize] = useState(
-		() => searchParams.get("per_page") ?? DEFAULT_PAGE_SIZE,
-	)
+	const { params, setParams } = useUrlParams()
 
-	useEffect(() => {
-		setQuery(searchParams.get("query") ?? "")
-		setPageSize(searchParams.get("per_page") ?? DEFAULT_PAGE_SIZE)
-	}, [searchParams])
+	// The params are optimistic: they move on the keystroke, not when the router commits, so
+	// the input needs no copy of them.
+	const query = params.get("query") ?? ""
+	const page = params.get("page") ?? "1"
+	const pageSize = params.get("per_page") ?? DEFAULT_PAGE_SIZE
 
-	const page = searchParams.get("page") ?? "1"
+	// The first keystroke starts a search (one Back undoes it); refining it replaces that
+	// entry. Keystrokes before the first commit keep pushing: the router lets the latest
+	// supersede the pending push, so a burst still adds one entry, whereas a replace would
+	// supersede it and add none.
+	const handleQueryChange = (value: string) =>
+		setParams({ query: value || null, page: null }, { replace: url => !!url.get("query") })
 
-	const setParams = useCallback(
-		(changes: Record<string, string | null>, { replace = false } = {}) => {
-			const next = new URLSearchParams(searchParams.toString())
-			for (const [key, value] of Object.entries(changes)) {
-				if (value === null || value === "") next.delete(key)
-				else next.set(key, value)
-			}
-			const suffix = next.toString()
-			const href = suffix ? `${pathname}?${suffix}` : pathname
-			if (replace) router.replace(href, { scroll: false })
-			else router.push(href, { scroll: false })
-		},
-		[searchParams, router, pathname],
-	)
+	const handlePageSizeChange = (value: string) => setParams({ per_page: value, page: null })
 
-	const handleQueryChange = useCallback(
-		(value: string) => {
-			setQuery(value)
-			// The first keystroke starts a search (one Back undoes it); refining it
-			// replaces that entry.
-			setParams(
-				{ query: value || null, page: null },
-				{ replace: !!searchParams.get("query") },
-			)
-		},
-		[setParams, searchParams],
-	)
-
-	const handlePageSizeChange = useCallback(
-		(value: string) => {
-			setPageSize(value)
-			setParams({ per_page: value, page: null })
-		},
-		[setParams],
-	)
-
-	const handlePageChange = useCallback(
-		(nextPage: number) => {
-			setParams({ page: nextPage <= 1 ? null : String(nextPage) })
-		},
-		[setParams],
-	)
+	const handlePageChange = (nextPage: number) =>
+		setParams({ page: nextPage <= 1 ? null : String(nextPage) })
 
 	return {
 		query,

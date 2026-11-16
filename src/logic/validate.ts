@@ -26,6 +26,12 @@ export class ValidationError extends Error {
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/
 const DATETIME_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/
 
+/** Whether "yyyy-MM-ddTHH:mm" names a real moment: the patterns alone accept 31 February. */
+function onCalendar(value: string): boolean {
+	const date = new Date(`${value}:00Z`)
+	return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 16) === value
+}
+
 export class Validator {
 	errors: FieldErrors = {}
 
@@ -60,7 +66,7 @@ export class Validator {
 	/** "yyyy-MM-dd"; "" when invalid. */
 	date(value: unknown, field: string, message = "Enter a valid date."): string {
 		const out = typeof value === "string" ? value : ""
-		if (!DATE_PATTERN.test(out)) {
+		if (!DATE_PATTERN.test(out) || !onCalendar(`${out}T00:00`)) {
 			this.reject(field, message)
 			return ""
 		}
@@ -70,7 +76,7 @@ export class Validator {
 	/** "yyyy-MM-ddTHH:mm"; "" when invalid. */
 	datetime(value: unknown, field: string, message = "Enter a valid date and time."): string {
 		const out = typeof value === "string" ? value : ""
-		if (!DATETIME_PATTERN.test(out)) {
+		if (!DATETIME_PATTERN.test(out) || !onCalendar(out)) {
 			this.reject(field, message)
 			return ""
 		}
@@ -102,3 +108,7 @@ export class Validator {
 		if (Object.keys(this.errors).length) throw new ValidationError(this.errors)
 	}
 }
+
+/** The reason the logic layer gave for refusing a delete, or the caller's own fallback. */
+export const deleteFailureMessage = (cause: unknown, fallback: string) =>
+	cause instanceof ValidationError ? (Object.values(cause.errors)[0]?.[0] ?? fallback) : fallback

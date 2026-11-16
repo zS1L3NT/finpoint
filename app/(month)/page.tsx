@@ -3,7 +3,6 @@
 import { useLiveQuery } from "dexie-react-hooks"
 import { DateTime } from "luxon"
 import Link from "next/link"
-import { useRouter, useSearchParams } from "next/navigation"
 import { useRef, useState } from "react"
 import { toast } from "sonner"
 import CashflowChart from "@/components/charts/cashflow-chart"
@@ -35,11 +34,12 @@ import { useMonthParams } from "@/hooks/use-month-params"
 import { STALE_MONTH_CLASS, useMonthTransition } from "@/hooks/use-month-transition"
 import { useRecordsSheet } from "@/hooks/use-records-sheet"
 import { useStagedMount } from "@/hooks/use-staged-mount"
+import { useUrlParams } from "@/hooks/use-url-params"
 import { themeColor } from "@/lib/palette"
 import { cn, formatCurrency, pluralize } from "@/lib/utils"
 import { getDashboardView, type TrendMonth } from "@/logic/dashboard"
 import { hasWorkspaceActivity, loadDemoWorkspace } from "@/logic/workspace"
-import { pathAllocator, pathDashboard, pathImporter, pathStatements } from "@/routes"
+import { pathAllocator, pathImporter, pathStatements } from "@/routes"
 import type { AnalyticsSummary } from "@/types"
 
 type DashboardView = Awaited<ReturnType<typeof getDashboardView>>
@@ -54,9 +54,8 @@ export default function DashboardPage() {
 	const { month, year } = useMonthParams()
 	const sheet = useRecordsSheet()
 	const contentRef = useRef<HTMLDivElement>(null)
-	const router = useRouter()
-	const searchParams = useSearchParams()
-	const storedScope = searchParams.get("scope") ?? "all"
+	const { params, setParams } = useUrlParams()
+	const storedScope = params.get("scope") ?? "all"
 	const active = useLiveQuery(() => hasWorkspaceActivity(), [])
 	// One live query, one table load: the three separate queries this replaced
 	// each re-scanned every table whenever anything changed.
@@ -70,12 +69,8 @@ export default function DashboardPage() {
 	const stale = dataKey !== null && dataKey !== `${month}-${year}`
 	useMonthTransition(contentRef, dataKey)
 	const budgets = data?.monthlyBudgets ?? []
-	const setScope = (value: string) => {
-		const params = Object.fromEntries(searchParams.entries())
-		if (value === "all") delete params.scope
-		else params.scope = value
-		router.replace(pathDashboard(params), { scroll: false })
-	}
+	const setScope = (value: string) =>
+		setParams({ scope: value === "all" ? null : value }, { replace: true })
 	const paceData = view?.pace
 	const monthlyBudgetDailyData = view?.monthlyBudgetDaily
 	// The summary and pace chart paint first; the sections below the fold then mount one per
@@ -784,7 +779,6 @@ function ReviewLinks({ data, month, year }: { data: DashboardData; month: string
 						href={pathAllocator({
 							start_date: start,
 							end_date: end,
-							is_pending: "false",
 						})}
 					>
 						<IconifyIcon icon="lucide:inbox" />

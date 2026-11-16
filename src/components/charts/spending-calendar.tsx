@@ -86,7 +86,8 @@ export default function SpendingCalendar({
 	const shown = preview?.startsWith(start.toFormat("yyyy-MM-")) ? preview : null
 	const shownEntry = shown ? byDate.get(shown) : undefined
 	const spendDays = daily.filter(day => day.spending > 0).length
-	const total = daily.reduce((sum, day) => sum + Math.max(day.spending, 0), 0)
+	// Net of refunds, like the month's Total spending; only the cell heat is clamped at zero.
+	const total = daily.reduce((sum, day) => sum + day.spending, 0)
 
 	return (
 		<div className="grid gap-3">

@@ -2,7 +2,7 @@ import { useForm, useStore } from "@tanstack/react-form"
 import { useLiveQuery } from "dexie-react-hooks"
 import { AnimatePresence, motion } from "framer-motion"
 import { DateTime } from "luxon"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { toast } from "sonner"
 import AmountField from "@/components/form/amount-field"
 import CategoryField from "@/components/form/category-field"
@@ -48,6 +48,7 @@ import { useHistory } from "@/history"
 import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { useDialogCloseAnimation } from "@/hooks/use-dialog-close-animation"
 import { useDefaultFilterEndDateToday, useDefaultFilterStartDate } from "@/hooks/use-settings"
+import { useSubmitLock } from "@/hooks/use-submit-lock"
 import { COLLAPSE_MOTION, SPRING, TRANSITION } from "@/lib/motion"
 import { cn, formatCurrency, formatDatetime, round2 } from "@/lib/utils"
 import { listMonthlyBudgets } from "@/logic/monthly-budgets"
@@ -88,15 +89,15 @@ export default function RecordEditorDialog({
 	// Analytics select keeps its laid-out label from the first frame.
 	const monthlyBudgets = useLiveQuery(() => listMonthlyBudgets(), [])
 
-	const [statementCache, setStatementCache] = useState(statements)
+	// Statements attached in this form that the `statements` prop does not hold (yet).
+	const [attached, setAttached] = useState(statements)
 	const [isAttachingStatement, setIsAttachingStatement] = useState(false)
 	const [submitError, setSubmitError] = useState("")
+	// The first Delete click arms; the second deletes. Closing the dialog disarms.
+	const [armed, setArmed] = useState(false)
 
 	const { mergeErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
-
-	useEffect(() => {
-		setStatementCache(statements)
-	}, [statements])
+	const { locked, run } = useSubmitLock(isOpen)
 
 	const categoriesFlat = categories.flatMap(category => [category, ...category.children])
 
@@ -123,64 +124,78 @@ export default function RecordEditorDialog({
 				id: statement.id,
 				amount: statement.pivot?.amount ?? statement.allocable_amount,
 			})),
+			// The revision the form was seeded from, so a write from another tab still conflicts.
+			revision: record.revision,
 		},
-		onSubmit: async ({ value }) => {
-			setSubmitError("")
-			try {
-				await updateRecord(record.id, {
-					title: value.title,
-					people: value.people,
-					location: value.location,
-					description: value.description,
-					datetime: value.datetime,
-					amount: value.amount,
-					category_id: value.category_id,
-					analytics_treatment: value.analytics_treatment || null,
-					monthly_budget_id: value.monthly_budget_id || null,
-					monthly_budget_source: value.monthly_budget_source,
-					revision: record.revision,
-					statements: value.statements,
-				})
-				setIsOpen(false)
-			} catch (cause) {
-				if (cause instanceof ValidationError) {
-					setApiErrors(cause.errors)
-					setSubmitError("Correct the highlighted fields, then save again.")
-					return
+		onSubmit: ({ value }) =>
+			run(async () => {
+				setSubmitError("")
+				try {
+					await updateRecord(record.id, {
+						title: value.title,
+						people: value.people,
+						location: value.location,
+						description: value.description,
+						datetime: value.datetime,
+						amount: value.amount,
+						category_id: value.category_id,
+						analytics_treatment: value.analytics_treatment || null,
+						monthly_budget_id: value.monthly_budget_id || null,
+						monthly_budget_source: value.monthly_budget_source,
+						revision: value.revision,
+						statements: value.statements,
+					})
+					setIsOpen(false)
+					return true
+				} catch (cause) {
+					if (cause instanceof ValidationError) {
+						setApiErrors(cause.errors)
+						setSubmitError("Correct the highlighted fields, then save again.")
+					} else if (cause instanceof ConflictError) {
+						setSubmitError(cause.message)
+						toast.error(cause.message)
+					} else {
+						setSubmitError(
+							"Unable to save this Record. Refresh the page and try again.",
+						)
+						toast.error("Unable to save this record.")
+					}
+					return false
 				}
-				if (cause instanceof ConflictError) {
-					setSubmitError(cause.message)
-					toast.error(cause.message)
-					return
-				}
-				setSubmitError("Unable to save this Record. Refresh the page and try again.")
-				toast.error("Unable to save this record.")
-			}
-		},
+			}),
 		onSubmitInvalid: () => setSubmitError("Correct the highlighted fields, then save again."),
 	})
 
 	const handleDelete = async () => {
-		try {
-			await deleteRecord(record.id)
-			setIsOpen(false)
-
-			if (location.pathname === pathRecord(record.id)) {
-				navigateBack({
-					name: "Records",
-					url: pathRecords(
-						defaultFilterStartDate || defaultFilterEndDate
-							? {
-									start_date: defaultFilterStartDate ?? undefined,
-									end_date: defaultFilterEndDate,
-								}
-							: undefined,
-					),
-				})
-			}
-		} catch {
-			toast.error("Unable to delete this record.")
+		if (!armed) {
+			setArmed(true)
+			return
 		}
+		await run(async () => {
+			try {
+				await deleteRecord(record.id)
+				setIsOpen(false)
+
+				if (location.pathname === pathRecord(record.id)) {
+					navigateBack({
+						name: "Records",
+						url: pathRecords(
+							defaultFilterStartDate || defaultFilterEndDate
+								? {
+										start_date: defaultFilterStartDate ?? undefined,
+										end_date: defaultFilterEndDate,
+									}
+								: undefined,
+						),
+					})
+				}
+				return true
+			} catch {
+				setArmed(false)
+				toast.error("Unable to delete this record.")
+				return false
+			}
+		})
 	}
 
 	const isPendingAmount = useStore(
@@ -210,8 +225,8 @@ export default function RecordEditorDialog({
 				) / 100
 			}
 			filters={{
-				is_allocable: "true",
-				exclude_ids: formStatements.map(s => s.id).join(","),
+				is_allocable: true,
+				exclude_ids: formStatements.map(s => s.id),
 				start_date: defaultFilterStartDate ?? undefined,
 				end_date: defaultFilterEndDate,
 			}}
@@ -222,7 +237,7 @@ export default function RecordEditorDialog({
 					return
 				}
 
-				setStatementCache(prev =>
+				setAttached(prev =>
 					prev.some(s => s.id === statement.id) ? prev : [...prev, statement],
 				)
 				form.setFieldValue("statements", [
@@ -245,6 +260,7 @@ export default function RecordEditorDialog({
 			onOpenChangeComplete={onOpenChangeComplete}
 			onOpenChange={isOpen => {
 				setIsOpen(isOpen)
+				setArmed(false)
 				if (isOpen) {
 					form.reset()
 					resetApiErrors()
@@ -485,10 +501,13 @@ export default function RecordEditorDialog({
 														>
 															{field => {
 																const statement =
-																	// biome-ignore lint/style/noNonNullAssertion: All full statement objects must be cached
-																	statementCache.find(
+																	// biome-ignore lint/style/noNonNullAssertion: Every form Statement is in the prop or was attached here
+																	(statements.find(
 																		s => s.id === id,
-																	)!
+																	) ??
+																		attached.find(
+																			s => s.id === id,
+																		))!
 
 																const errors = mergeErrors(
 																	field.state.meta.errors,
@@ -629,8 +648,14 @@ export default function RecordEditorDialog({
 
 					<DialogFooter>
 						<div className="flex min-w-0 flex-col gap-2 sm:mr-auto sm:flex-row sm:items-center">
-							<Button type="button" variant="destructive" onClick={handleDelete}>
-								<IconifyIcon icon="lucide:trash-2" /> Delete
+							<Button
+								type="button"
+								variant="destructive"
+								disabled={locked}
+								onClick={handleDelete}
+							>
+								<IconifyIcon icon="lucide:trash-2" />{" "}
+								{armed ? "Yes, delete Record" : "Delete"}
 							</Button>
 							{submitError ? (
 								<p
@@ -648,7 +673,11 @@ export default function RecordEditorDialog({
 								</Button>
 							}
 						/>
-						<Button type="button" onClick={() => void form.handleSubmit()}>
+						<Button
+							type="button"
+							disabled={locked}
+							onClick={() => void form.handleSubmit()}
+						>
 							Save changes
 						</Button>
 					</DialogFooter>

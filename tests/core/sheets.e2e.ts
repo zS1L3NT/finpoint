@@ -929,37 +929,45 @@ test.describe("dense workspace", () => {
 		workspace,
 	}) => {
 		void workspace
-		// When the 300ms debounce fires for "D" and starts its commit, type the rest in
-		// that same task, so the commit always lands after newer keystrokes. Mirroring it
-		// back into the input used to drop them ("Dnding 26" on a fast host).
-		await page.addInitScript(() => {
-			const original = window.setTimeout
-			window.setTimeout = ((handler: TimerHandler, timeout?: number, ...rest: unknown[]) =>
-				original(() => {
-					if (typeof handler === "function") handler(...rest)
-					const input = document.querySelector<HTMLInputElement>(
-						'section[aria-label="Pending statements"] input[placeholder="Search descriptions..."]',
-					)
-					if (timeout !== 300 || input?.value !== "D" || Reflect.has(window, "__typedOn"))
-						return
-					Reflect.set(window, "__typedOn", true)
-					const setValue = Object.getOwnPropertyDescriptor(
-						HTMLInputElement.prototype,
-						"value",
-					)?.set
-					for (const character of "ense pending 26") {
-						setValue?.call(input, input.value + character)
-						input.dispatchEvent(new Event("input", { bubbles: true }))
-					}
-				}, timeout)) as typeof window.setTimeout
-		})
+		// Type "D", then the rest in the very task that commits "D" to the URL (the Navigation
+		// API reports the commit as it happens), so newer text is in the box when the older
+		// query lands. Mirroring that older query back into the input used to drop the newer
+		// text ("Dnding 26" on a fast host).
 		await page.goto("/allocator/pending")
 		const search = page
 			.locator('section[aria-label="Pending statements"]')
 			.getByPlaceholder("Search descriptions...")
 		await expect(search).toBeVisible()
-		await search.pressSequentially("D")
-		await expect.poll(() => page.evaluate(() => Reflect.has(window, "__typedOn"))).toBe(true)
+		const typedAtCommit = await search.evaluate(
+			(input: HTMLInputElement) =>
+				new Promise<string>(resolve => {
+					const setValue = Object.getOwnPropertyDescriptor(
+						HTMLInputElement.prototype,
+						"value",
+					)?.set
+					const type = (text: string) => {
+						for (const character of text) {
+							setValue?.call(input, input.value + character)
+							input.dispatchEvent(new Event("input", { bubbles: true }))
+						}
+					}
+					const navigation = (window as unknown as { navigation: EventTarget }).navigation
+					const onCommit = () => {
+						if (new URLSearchParams(location.search).get("query") !== "D") return
+						navigation.removeEventListener("currententrychange", onCommit)
+						// A microtask later: still before React renders the committed URL, but
+						// outside the commit that reported it.
+						queueMicrotask(() => {
+							type("ense pending 26")
+							resolve(input.value)
+						})
+					}
+					navigation.addEventListener("currententrychange", onCommit)
+					type("D")
+				}),
+		)
+		// "D" committed while "Dense pending 26" was already typed.
+		expect(typedAtCommit).toBe("Dense pending 26")
 		await expect(page).toHaveURL(/query=Dense\+pending\+26/)
 		await expect(search).toHaveValue("Dense pending 26")
 	})
@@ -1003,41 +1011,26 @@ test.describe("dense workspace", () => {
 		workspace,
 	}) => {
 		void workspace
-		// When the debounce for "Dense pending 1" fires, type one more character and press
-		// Back in that same task, before the search commit lands.
-		await page.addInitScript(() => {
-			const original = window.setTimeout
-			window.setTimeout = ((handler: TimerHandler, timeout?: number, ...rest: unknown[]) =>
-				original(() => {
-					if (typeof handler === "function") handler(...rest)
-					const input = document.querySelector<HTMLInputElement>(
-						'section[aria-label="Pending statements"] input[placeholder="Search descriptions..."]',
-					)
-					if (
-						timeout !== 300 ||
-						input?.value !== "Dense pending 1" ||
-						Reflect.has(window, "__backed")
-					)
-						return
-					Reflect.set(window, "__backed", true)
-					const setValue = Object.getOwnPropertyDescriptor(
-						HTMLInputElement.prototype,
-						"value",
-					)?.set
-					setValue?.call(input, `${input.value}2`)
-					input.dispatchEvent(new Event("input", { bubbles: true }))
-					history.back()
-				}, timeout)) as typeof window.setTimeout
-		})
 		await page.goto("/allocator/pending?query=Dense+pending+1")
 		const search = page
 			.locator('section[aria-label="Pending statements"]')
 			.getByPlaceholder("Search descriptions...")
 		await expect(search).toHaveValue("Dense pending 1")
-		await search.fill("Dense pending 3")
-		await expect(page).toHaveURL(/query=Dense\+pending\+3/)
-		await search.fill("Dense pending 1")
-		await expect.poll(() => page.evaluate(() => Reflect.has(window, "__backed"))).toBe(true)
+		await page
+			.getByRole("button", { name: /^Dense pending 1\d\b/ })
+			.first()
+			.click()
+		await expect(page).toHaveURL(/pending_statement_id=/)
+		// Type one more character and press Back in one task, before the search commit lands.
+		await search.evaluate((input: HTMLInputElement) => {
+			const setValue = Object.getOwnPropertyDescriptor(
+				HTMLInputElement.prototype,
+				"value",
+			)?.set
+			setValue?.call(input, `${input.value}2`)
+			input.dispatchEvent(new Event("input", { bubbles: true }))
+			history.back()
+		})
 		await expect(page).toHaveURL(/query=Dense\+pending\+1$/)
 		await expect(search).toHaveValue("Dense pending 1")
 		// The abandoned "Dense pending 12" search must not commit later.
@@ -1045,4 +1038,27 @@ test.describe("dense workspace", () => {
 		await expect(page).toHaveURL(/query=Dense\+pending\+1$/)
 		await expect(search).toHaveValue("Dense pending 1")
 	})
+})
+
+test("pending queue: a valid selection in the URL never flashes the unavailable alert while loading", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	await page.addInitScript(() => {
+		const w = window as unknown as { __sawUnavailable: boolean }
+		w.__sawUnavailable = false
+		new MutationObserver(() => {
+			if (document.body?.textContent?.includes("Pending Statement unavailable"))
+				w.__sawUnavailable = true
+		}).observe(document, { childList: true, subtree: true, characterData: true })
+	})
+	await page.goto(`/allocator/pending?pending_statement_id=${pending.id}`)
+	await expect(page.getByText(pending.description).locator("visible=true").first()).toBeVisible()
+	await page.waitForTimeout(500)
+	expect(
+		await page.evaluate(
+			() => (window as unknown as { __sawUnavailable: boolean }).__sawUnavailable,
+		),
+	).toBe(false)
 })

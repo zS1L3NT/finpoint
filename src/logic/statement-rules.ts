@@ -122,8 +122,20 @@ export async function saveStatementRule(input: RuleInput, id?: string) {
 				id: id ?? newId(),
 				name,
 				enabled: input.enabled,
-				conditions: input.conditions,
-				actions: input.actions,
+				// Stored as the Record form would store the same text: trimmed.
+				conditions: {
+					...input.conditions,
+					items: input.conditions.items.map(item => ({
+						...item,
+						value: item.value.trim(),
+					})),
+				},
+				actions: Object.fromEntries(
+					Object.entries(input.actions).map(([field, action]) => [
+						field,
+						{ ...action, value: action.value?.trim() ?? null },
+					]),
+				) as StatementRule["actions"],
 				created_at: existing?.created_at ?? new Date().toISOString(),
 				updated_at: new Date().toISOString(),
 			}

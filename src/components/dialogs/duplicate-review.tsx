@@ -22,6 +22,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog"
+import { useSubmitLock } from "@/hooks/use-submit-lock"
 import { classForCurrency, cn, formatCurrency, formatDatetime, pluralize } from "@/lib/utils"
 import {
 	allocationOutcome,
@@ -48,7 +49,7 @@ export default function DuplicateReviewDialog({
 		[input?.keep_id, input?.delete_ids.join(",")],
 	)
 	const [source, setSource] = useState("")
-	const [isSubmitting, setIsSubmitting] = useState(false)
+	const { locked, run } = useSubmitLock(isOpen)
 	const [error, setError] = useState("")
 	const [snapshot, setSnapshot] = useState<{
 		input: FixDuplicatesInput
@@ -91,26 +92,27 @@ export default function DuplicateReviewDialog({
 		displayReview?.statements.find(s => s.id === id)?.description
 
 	const handleConfirm = async () => {
-		if (!input || isSubmitting || (mustChoose && !source)) return
+		if (!input || (mustChoose && !source)) return
 
-		setIsSubmitting(true)
-		setError("")
-		try {
-			await fixDuplicates({ ...input, allocation_source_id: effectiveSource })
-			setIsOpen(false)
-			onFixed()
-		} catch (cause) {
-			setError(cause instanceof Error ? cause.message : "Unable to fix duplicates.")
-		} finally {
-			setIsSubmitting(false)
-		}
+		await run(async () => {
+			setError("")
+			try {
+				await fixDuplicates({ ...input, allocation_source_id: effectiveSource })
+				setIsOpen(false)
+				onFixed()
+				return true
+			} catch (cause) {
+				setError(cause instanceof Error ? cause.message : "Unable to fix duplicates.")
+				return false
+			}
+		})
 	}
 
 	return (
 		<Dialog
 			open={isOpen}
 			onOpenChange={next => {
-				if (!next && isSubmitting) return
+				if (!next && locked) return
 				setIsOpen(next)
 			}}
 			onOpenChangeComplete={opened => {
@@ -287,19 +289,19 @@ export default function DuplicateReviewDialog({
 					<DialogFooter>
 						<DialogClose
 							render={
-								<Button type="button" variant="outline" disabled={isSubmitting}>
+								<Button type="button" variant="outline" disabled={locked}>
 									Cancel
 								</Button>
 							}
 						/>
 						<Button
 							variant="destructive"
-							disabled={!displayReview || isSubmitting || (mustChoose && !source)}
+							disabled={!displayReview || locked || (mustChoose && !source)}
 							onClick={() => void handleConfirm()}
 						>
 							<IconifyIcon
-								icon={isSubmitting ? "lucide:loader-circle" : "lucide:trash-2"}
-								className={isSubmitting ? "animate-spin" : undefined}
+								icon={locked ? "lucide:loader-circle" : "lucide:trash-2"}
+								className={locked ? "animate-spin" : undefined}
 								data-icon="inline-start"
 							/>
 							Delete {pluralize(displayInput?.delete_ids.length ?? 0, "Statement")}

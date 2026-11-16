@@ -1,5 +1,5 @@
 import { expectPointerCursor } from "../support/assertions"
-import { getScenario, IDS } from "../support/data"
+import { getScenario, IDS, statementRules } from "../support/data"
 import { setDateOnly } from "../support/date-only"
 import { pickOption } from "../support/editors"
 import { expect, seedWorkspace, test } from "../support/fixtures"
@@ -603,4 +603,113 @@ test("Monthly budget filters: All budgets leads, budgets follow and Unbudgeted c
 	).toHaveCount(0)
 	await page.getByRole("option", { name: "Daily", exact: true }).click()
 	await expect(page).toHaveURL(/monthly_budget_id=t1-mb-daily/)
+})
+
+test("Records table: fast typing keeps every keystroke and one Back undoes the search", async ({
+	page,
+}) => {
+	test.setTimeout(90_000)
+	await seedWorkspace(page, "dense")
+	await page.goto("/records")
+	const search = page.getByPlaceholder("Search title, people, location, description...")
+	await expect(page.getByText("Showing 60 of 60 records.", { exact: true })).toBeVisible()
+	const entries = await page.evaluate(() => history.length)
+
+	// Every keystroke lands before the router commits any of them.
+	await search.evaluate((input: HTMLInputElement, text: string) => {
+		const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set
+		let typed = ""
+		for (const char of text) {
+			typed += char
+			set?.call(input, typed)
+			input.dispatchEvent(new Event("input", { bubbles: true }))
+		}
+	}, "Dense Record 12")
+	await expect(search).toHaveValue("Dense Record 12")
+	await expect(page).toHaveURL(/query=Dense(?:\+|%20)Record(?:\+|%20)12$/)
+	await expect(page.getByText("Showing 1 of 1 record.", { exact: true })).toBeVisible()
+	await expect(search).toHaveValue("Dense Record 12")
+
+	expect(await page.evaluate(() => history.length)).toBe(entries + 1)
+	await page.goBack()
+	await expect(page).not.toHaveURL(/query=/)
+	await expect(search).toHaveValue("")
+	await expect(page.getByText("Showing 60 of 60 records.", { exact: true })).toBeVisible()
+})
+
+test("Records table: a keystroke erased before it commits does not hide a later Back from the input", async ({
+	page,
+}) => {
+	await seedWorkspace(page, "dense")
+	await page.goto("/records?query=Dense")
+	const search = page.getByPlaceholder("Search title, people, location, description...")
+	await expect(search).toHaveValue("Dense")
+	await page.getByRole("button", { name: /^Clear/ }).click()
+	await expect(page).not.toHaveURL(/query=/)
+	await expect(search).toHaveValue("")
+	// Type and erase in one tick: the router never commits the typing, so a stale entry for
+	// it would swallow the next arrival at that value.
+	await search.evaluate((input: HTMLInputElement) => {
+		const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set
+		for (const value of ["Dense", ""]) {
+			set?.call(input, value)
+			input.dispatchEvent(new Event("input", { bubbles: true }))
+		}
+	})
+	await expect(search).toHaveValue("")
+	await page.goBack()
+	await expect(page).toHaveURL(/query=Dense$/)
+	await expect(search).toHaveValue("Dense")
+})
+
+test("Monthly budget filters: an archived Budget in the URL keeps its name in the filter", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	await page.goto(`/records?monthly_budget_id=${IDS.monthlyBudgets.travelArchived}`)
+	await expect(page.getByRole("combobox").filter({ hasText: /^Travel$/ })).toBeVisible()
+})
+
+test("Categories page: search lives in the URL, survives reload and one Back clears it", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	await page.goto("/categories")
+	const search = page.getByRole("searchbox", { name: "Search categories", exact: true })
+	await search.fill("Groceries")
+	await expect(page).toHaveURL(/query=Groceries/)
+	await page.reload()
+	await expect(search).toHaveValue("Groceries")
+	await expect(page.getByRole("button", { name: "Edit Groceries", exact: true })).toBeVisible()
+	await expect(page.getByRole("button", { name: "Edit Housing", exact: true })).toHaveCount(0)
+	await page.goBack()
+	await expect(page).not.toHaveURL(/query=/)
+	await expect(search).toHaveValue("")
+})
+
+test("Statement rules page: search lives in the URL, survives reload and one Back clears it", async ({
+	page,
+}) => {
+	// The search appears once there are more than five rules.
+	const rules = statementRules()
+	await seedWorkspace(page, "populated", {
+		statement_rules: [
+			...rules,
+			...rules
+				.slice(0, 1)
+				.map(rule => ({ ...rule, id: "t1-rule-extra", name: "Extra rule" })),
+		],
+	})
+	await page.goto("/statement-rules")
+	const search = page.getByRole("searchbox", { name: "Search rules", exact: true })
+	await search.fill("fairprice")
+	await expect(page).toHaveURL(/query=fairprice/)
+	await page.reload()
+	await expect(search).toHaveValue("fairprice")
+	await expect(page.locator("main section[aria-label='Your rules'] article")).toHaveCount(1)
+	await page.goBack()
+	await expect(page).not.toHaveURL(/query=/)
+	await expect(search).toHaveValue("")
 })

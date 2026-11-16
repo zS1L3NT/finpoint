@@ -37,7 +37,7 @@ import { cn, formatCurrency, pluralize } from "@/lib/utils"
 import { listAccounts } from "@/logic/accounts"
 import { listCategories } from "@/logic/categories"
 import { paginateItems, parsePage, parsePageSize } from "@/logic/pagination"
-import { listStatements } from "@/logic/statements"
+import { listStatements, parseStatementFilters } from "@/logic/statements"
 import type { Statement } from "@/types"
 
 export default function AllocatorPage() {
@@ -59,14 +59,11 @@ export default function AllocatorPage() {
 	const statementsQuery = useLiveQuery(
 		() =>
 			listStatements({
+				...parseStatementFilters(searchParams),
 				query: query || null,
-				account_id: accountId === "all" ? null : accountId,
-				is_pending: isPending,
-				start_date: startDate,
-				end_date: endDate,
-				min_amount: minAmount,
-				max_amount: maxAmount,
-				is_allocable: "true",
+				// The Allocator has no Allocation filter in its URL.
+				is_unallocated: undefined,
+				is_allocable: true,
 			}),
 		[query, accountId, isPending, startDate, endDate, minAmount, maxAmount],
 	)
@@ -76,7 +73,31 @@ export default function AllocatorPage() {
 		[statements, page, pageSize],
 	)
 
-	const [selectedStatements, setSelectedStatements] = useState<Statement[]>([])
+	const [selectedIds, setSelectedIds] = useState<string[]>([])
+	const selectedKey = selectedIds.join(",")
+	// The result carries the key it was read for, so a result for an older selection is never
+	// mistaken for the current one while the query resubscribes.
+	const selectedQuery = useLiveQuery(
+		async () => ({
+			key: selectedKey,
+			rows: selectedKey ? await listStatements({ ids: selectedIds, is_allocable: true }) : [],
+		}),
+		[selectedKey],
+	)
+	if (selectedQuery?.key === selectedKey && selectedQuery.rows.length < selectedIds.length) {
+		// Rows deleted or no longer allocable fall out of the selection.
+		setSelectedIds(selectedIds.filter(id => selectedQuery.rows.some(s => s.id === id)))
+	}
+	// A just-ticked row is known from the table before the selection query answers; once the query
+	// has answered for the current ids it wins, so changed rows show their live values.
+	const known = new Map(
+		[
+			...(selectedQuery?.rows ?? []),
+			...statements,
+			...(selectedQuery?.key === selectedKey ? selectedQuery.rows : []),
+		].map(s => [s.id, s]),
+	)
+	const selectedStatements = selectedIds.flatMap(id => known.get(id) ?? [])
 	const [isCreatingRecord, setIsCreatingRecord] = useState(false)
 	const [isAttachingRecord, setIsAttachingRecord] = useState(false)
 	const [isReplacingPendingStatement, setIsReplacingPendingStatement] = useState(false)
@@ -121,10 +142,10 @@ export default function AllocatorPage() {
 		grouped: true,
 	})
 	const toggleStatement = (statement: Statement) =>
-		setSelectedStatements(prev =>
-			prev.some(s => s.id === statement.id)
-				? prev.filter(s => s.id !== statement.id)
-				: [...prev, statement],
+		setSelectedIds(prev =>
+			prev.includes(statement.id)
+				? prev.filter(id => id !== statement.id)
+				: [...prev, statement.id],
 		)
 	const statementMobileRow = useStatementMobileRow<Statement>({
 		amount: "allocable",
@@ -132,12 +153,8 @@ export default function AllocatorPage() {
 		grouped: true,
 		leading: statement => (
 			<Checkbox
-				checked={!!selectedStatements.find(s => s.id === statement.id)}
-				onCheckedChange={value =>
-					setSelectedStatements(prev =>
-						value ? [...prev, statement] : prev.filter(s => s.id !== statement.id),
-					)
-				}
+				checked={selectedIds.includes(statement.id)}
+				onCheckedChange={() => toggleStatement(statement)}
 				aria-label={`Select statement ${statement.id}`}
 			/>
 		),
@@ -164,16 +181,8 @@ export default function AllocatorPage() {
 							cell: ({ row }) => (
 								<div className="flex items-center justify-center">
 									<Checkbox
-										checked={
-											!!selectedStatements.find(s => s.id === row.original.id)
-										}
-										onCheckedChange={value =>
-											setSelectedStatements(prev =>
-												value
-													? [...prev, row.original]
-													: prev.filter(s => s.id !== row.original.id),
-											)
-										}
+										checked={selectedIds.includes(row.original.id)}
+										onCheckedChange={() => toggleStatement(row.original)}
 										aria-label={`Select statement ${row.original.id}`}
 									/>
 								</div>
@@ -268,9 +277,13 @@ export default function AllocatorPage() {
 					footer={{
 						summary: `${selectedStatements.length} selected. Showing ${paginated.data.length} of ${pluralize(paginated.total, "statement")}.`,
 					}}
-					selectedIds={selectedStatements.map(s => s.id)}
+					selectedIds={selectedIds}
 					mobileRow={statementMobileRow}
-					groupBy={byDay<Statement>("Statement")}
+					groupBy={byDay<Statement>(
+						"Statement",
+						statement => statement.allocable_amount,
+						"Left to allocate on this page",
+					)}
 					onRowClick={toggleStatement}
 					emptyMessage="No statements found."
 					loading={statementsQuery === undefined}
@@ -291,7 +304,7 @@ export default function AllocatorPage() {
 							<IconifyIcon icon="lucide:plus" /> Create Record
 						</Button>
 					}
-					clear={() => setSelectedStatements([])}
+					clear={() => setSelectedIds([])}
 				/>
 				<RecordSearchSheet
 					title="Allocate to pending record"
@@ -302,7 +315,7 @@ export default function AllocatorPage() {
 						end_date: defaultFilterEndDateToday
 							? DateTime.now().toFormat("yyyy-MM-dd")
 							: undefined,
-						is_allocated: "false",
+						is_allocated: false,
 					}}
 					isOpen={isAttachingRecord}
 					setIsOpen={setIsAttachingRecord}
@@ -320,7 +333,7 @@ export default function AllocatorPage() {
 					statement={replacementStatement}
 					isOpen={isReplacingPendingStatement}
 					setIsOpen={setIsReplacingPendingStatement}
-					onConfirmed={() => setSelectedStatements([])}
+					onConfirmed={() => setSelectedIds([])}
 					trigger={
 						<Button
 							disabled={!replacementStatement}
@@ -331,7 +344,7 @@ export default function AllocatorPage() {
 						</Button>
 					}
 				/>
-				<Button variant="ghost" onClick={() => setSelectedStatements([])}>
+				<Button variant="ghost" onClick={() => setSelectedIds([])}>
 					Clear
 				</Button>
 			</SelectionBar>
@@ -350,7 +363,7 @@ export default function AllocatorPage() {
 					setIsOpen={isOpen => {
 						if (!isOpen) {
 							setEditingRecord(null)
-							setSelectedStatements([])
+							setSelectedIds([])
 						}
 					}}
 				/>

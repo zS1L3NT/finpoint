@@ -270,3 +270,11 @@ test("version six upgrade turns suggest-mode actions into autofill and keeps the
 		)
 	}
 })
+test("renaming a Category keeps the rules that fill it", async () => {
+	const { updateCategory } = await import("../../src/logic/categories")
+	await db.statements.add(statement("s"))
+	const rule = await saveStatementRule(input())
+	await updateCategory("food", { name: "Dining", icon: "utensils", color: "#f00" })
+	expect((await db.statement_rules.get(rule.id))?.actions.category_id).toEqual({ value: "dining" })
+	expect(recommendationAutofill(await statementRecommendations(["s"])).category_id).toBe("dining")
+})

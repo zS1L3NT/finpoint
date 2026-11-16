@@ -3,7 +3,6 @@
 import { useLiveQuery } from "dexie-react-hooks"
 import { AnimatePresence, motion } from "framer-motion"
 import Link from "next/link"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useState } from "react"
 import { toast } from "sonner"
 import DuplicateReviewDialog from "@/components/dialogs/duplicate-review"
@@ -12,6 +11,8 @@ import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import { ClearFiltersButton, FILTER_CONTROL_CLASS, FilterBar } from "@/components/table/filter-bar"
 import PaginationFooter from "@/components/table/pagination-footer"
+import { formatRowTime } from "@/components/table/record-columns"
+import { dayLabel } from "@/components/table/row-groups"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
@@ -25,15 +26,9 @@ import {
 } from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import WorkflowTabs from "@/components/workflow-tabs"
+import { useUrlParams } from "@/hooks/use-url-params"
 import { cardEnter, SPRING, TRANSITION } from "@/lib/motion"
-import {
-	classForCurrency,
-	cn,
-	formatCurrency,
-	parseDate,
-	parseDatetime,
-	pluralize,
-} from "@/lib/utils"
+import { classForCurrency, cn, formatCurrency, pluralize } from "@/lib/utils"
 import { listAccounts } from "@/logic/accounts"
 import {
 	type DuplicateGroup,
@@ -79,9 +74,7 @@ const CARD_MOTION = {
 } as const
 
 export default function FixDuplicatesPage() {
-	const params = useSearchParams()
-	const router = useRouter()
-	const pathname = usePathname()
+	const { params, setParams } = useUrlParams()
 	const viewParam = params.get("view")
 	const view = viewParam === "all" || viewParam === "dismissed" ? viewParam : "suggested"
 	const query = params.get("query") ?? ""
@@ -98,15 +91,10 @@ export default function FixDuplicatesPage() {
 	const [review, setReview] = useState<FixDuplicatesInput | null>(null)
 	const [busy, setBusy] = useState(false)
 
-	const updateParams = (changes: Record<string, string>) => {
-		const next = new URLSearchParams(params)
-		next.delete("page")
-		for (const [key, value] of Object.entries(changes)) {
-			if (value) next.set(key, value)
-			else next.delete(key)
-		}
-		router.push(next.size ? `${pathname}?${next}` : pathname, { scroll: false })
-	}
+	const updateParams = (changes: Record<string, string>) => setParams({ ...changes, page: null })
+	// The first keystroke starts a search (one Back undoes it); refining it replaces that entry.
+	const updateQuery = (value: string) =>
+		setParams({ query: value, page: null }, { replace: url => !!url.get("query") })
 	const action = async (operation: () => Promise<unknown>) => {
 		setBusy(true)
 		try {
@@ -161,7 +149,7 @@ export default function FixDuplicatesPage() {
 					className="w-full md:w-sm"
 					placeholder="Search descriptions..."
 					value={query}
-					onChange={event => updateParams({ query: event.target.value })}
+					onChange={event => updateQuery(event.target.value)}
 				/>
 				<div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:gap-4">
 					<FilterBar className="lg:w-auto">
@@ -319,7 +307,7 @@ export default function FixDuplicatesPage() {
 					<PaginationFooter
 						summary={`Showing ${page.data.length} of ${page.total} ${page.kind}`}
 						page={page.current_page}
-						lastPage={page.last_page ?? 1}
+						lastPage={page.last_page}
 					/>
 				</motion.div>
 			)}
@@ -348,8 +336,7 @@ function GroupHeader({
 		<div className="flex items-start justify-between gap-3 text-sm">
 			<div className="flex flex-wrap items-center gap-2">
 				<h2 className="font-medium">
-					{accountName} ·{" "}
-					{parseDate((statement?.datetime ?? "").slice(0, 10)).toFormat("d MMM y")}
+					{accountName} · {dayLabel((statement?.datetime ?? "").slice(0, 10))}
 				</h2>
 				{children}
 			</div>
@@ -418,7 +405,8 @@ function DuplicateGroupCard({
 								)}
 							</Link>
 							<p className="mt-1 text-xs text-muted-foreground">
-								{parseDatetime(s.datetime).toFormat("HH:mm")} ·{" "}
+								{formatRowTime(s.datetime, true) &&
+									`${formatRowTime(s.datetime, true)} · `}
 								{group.allocationCounts[s.id]
 									? pluralize(group.allocationCounts[s.id] ?? 0, "Allocation")
 									: "No Allocations"}

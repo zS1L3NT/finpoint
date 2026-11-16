@@ -2,7 +2,7 @@
 
 import { useLiveQuery } from "dexie-react-hooks"
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { toast } from "sonner"
 import DateField from "@/components/form/date-field"
 import { FormField } from "@/components/form/field"
@@ -60,23 +60,20 @@ function learnedSignals(field: RuleField, w: Weights) {
 export default function SettingsPage() {
 	const settings = useSettings()
 	const categories = useLiveQuery(() => listCategories(), []) ?? []
-	const [startDate, setStartDate] = useState("")
-	const [endDateToday, setEndDateToday] = useState(false)
+	// Only the unsaved edits live here; untouched fields follow the live settings.
+	const [edits, setEdits] = useState<{ startDate?: string; endDateToday?: boolean }>({})
 	const [saving, setSaving] = useState(false)
 	const [accuracy, setAccuracy] = useState<SuggestionAccuracy | null>(null)
 	const [measuring, setMeasuring] = useState(false)
 
-	useEffect(() => {
-		if (settings) {
-			setStartDate(settings.default_filter_start_date ?? "")
-			setEndDateToday(settings.default_filter_end_date_today)
-		}
-	}, [settings])
-
-	const saved = settings?.default_filter_start_date ?? ""
+	// An edit put back to the saved value is no longer an edit, so the field follows live again.
+	const savedStartDate = settings?.default_filter_start_date ?? ""
+	const savedEndDateToday = settings?.default_filter_end_date_today ?? false
+	const startDate = edits.startDate ?? savedStartDate
+	const endDateToday = edits.endDateToday ?? savedEndDateToday
 	const changed =
 		settings !== undefined &&
-		(startDate !== saved || endDateToday !== settings.default_filter_end_date_today)
+		(startDate !== savedStartDate || endDateToday !== savedEndDateToday)
 	const handleSaveFilters = async () => {
 		if (!settings) return
 		setSaving(true)
@@ -85,6 +82,11 @@ export default function SettingsPage() {
 				default_filter_start_date: startDate || null,
 				default_filter_end_date_today: endDateToday,
 			})
+			// Only what was saved stops being an edit; a field changed during the save stays one.
+			setEdits(prev => ({
+				startDate: prev.startDate === startDate ? undefined : prev.startDate,
+				endDateToday: prev.endDateToday === endDateToday ? undefined : prev.endDateToday,
+			}))
 			toast.success("Default filters saved.")
 		} catch (cause) {
 			toast.error(cause instanceof Error ? cause.message : "Could not save settings.")
@@ -128,19 +130,32 @@ export default function SettingsPage() {
 							<DateField
 								id="default_filter_start_date"
 								label="Default filter start date"
-								description="Leave empty to include Records and Statements from any earlier date."
+								description="Leave empty to include Records from any earlier date."
 								value={startDate}
 								placeholder="No default start date"
-								onChange={setStartDate}
+								onChange={value =>
+									setEdits(prev => ({
+										...prev,
+										startDate: value === savedStartDate ? undefined : value,
+									}))
+								}
 							/>
 							<FormField
 								id="default_filter_end_date"
 								label="Default filter end date"
-								description="Choose Today to keep future-dated Records and Statements out of the default view."
+								description="Choose Today to keep future-dated Records out of the default view."
 							>
 								<Select
 									value={endDateToday ? "today" : "none"}
-									onValueChange={value => setEndDateToday(value === "today")}
+									onValueChange={value =>
+										setEdits(prev => ({
+											...prev,
+											endDateToday:
+												(value === "today") === savedEndDateToday
+													? undefined
+													: value === "today",
+										}))
+									}
 								>
 									<SelectTrigger id="default_filter_end_date" className="w-full">
 										<span className="flex min-w-0 items-center gap-1.5">

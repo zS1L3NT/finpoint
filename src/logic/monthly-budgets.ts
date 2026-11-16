@@ -3,7 +3,7 @@
 import { DateTime } from "luxon"
 import { db, type MonthlyBudgetDefaultRow } from "@/data/db"
 import { newId } from "@/logic/shared"
-import { Validator } from "@/logic/validate"
+import { ValidationError, Validator } from "@/logic/validate"
 
 export async function listMonthlyBudgets() {
 	const month = DateTime.now().toFormat("yyyy-MM-01")
@@ -55,6 +55,23 @@ async function updateMonthlyBudget(
 	if (clash && clash.id !== id) {
 		v.reject("name", "This monthly budget name is already taken.")
 		v.throwIfInvalid()
+	}
+
+	if (input.archived && !existing.archived) {
+		const users = [
+			...(await db.categories.filter(c => c.default_monthly_budget_id === id).toArray()).map(
+				c => `the default of the Category ${c.name}`,
+			),
+			...(await db.statement_rules.toArray())
+				.filter(rule => rule.actions.monthly_budget_id?.value === id)
+				.map(rule => `the Statement Rule ${rule.name}`),
+		]
+		if (users.length)
+			throw new ValidationError({
+				archived: [
+					`This Monthly Budget is still used by ${users.join(", ")}. Change ${users.length > 1 ? "them" : "it"} first.`,
+				],
+			})
 	}
 
 	await db.monthly_budgets.update(id, {
@@ -149,6 +166,8 @@ export async function upsertMonthlyBudget(input: {
 		db.monthly_budgets,
 		db.monthly_budget_defaults,
 		db.monthly_budget_amounts,
+		db.categories,
+		db.statement_rules,
 		async () => {
 			const row = input.id
 				? await updateMonthlyBudget(input.id, {

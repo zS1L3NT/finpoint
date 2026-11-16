@@ -9,6 +9,7 @@ import {
 	treatmentLabel,
 } from "@/lib/analytics"
 import { COLLAPSE_MOTION } from "@/lib/motion"
+import { selectableMonthlyBudgets } from "@/lib/utils"
 import { listMonthlyBudgets } from "@/logic/monthly-budgets"
 import type { AnalyticsTreatment } from "@/types"
 
@@ -117,17 +118,14 @@ export default function RecordAnalyticsFields({
 												},
 											]
 										: []),
-									...(monthlyBudgets ?? [])
-										.filter(
-											monthlyBudget =>
-												!monthlyBudget.archived ||
-												monthlyBudget.id === monthlyBudgetId,
-										)
-										.map(monthlyBudget => ({
-											value: monthlyBudget.id,
-											label: monthlyBudget.name,
-											disabled: monthlyBudget.archived,
-										})),
+									...selectableMonthlyBudgets(
+										monthlyBudgets ?? [],
+										monthlyBudgetId,
+									).map(monthlyBudget => ({
+										value: monthlyBudget.id,
+										label: monthlyBudget.name,
+										disabled: monthlyBudget.archived,
+									})),
 								]}
 								onChange={value => {
 									if (!value) return
