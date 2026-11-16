@@ -122,9 +122,6 @@ export default function PendingStatementDialog({
 					})
 				}
 				setIsOpen(false)
-				toast.success(
-					isEditing ? "Pending statement updated." : "Pending statement created.",
-				)
 				return true
 			} catch (cause) {
 				if (cause instanceof ValidationError) setApiErrors(cause.errors)
@@ -143,7 +140,6 @@ export default function PendingStatementDialog({
 			try {
 				await deletePendingStatement(statement.id)
 				setIsOpen(false)
-				toast.success("Pending statement deleted.")
 				if (pathname === pathStatement(statement.id))
 					navigateBack({ name: "Statements", url: pathStatements() })
 				return true

@@ -1912,3 +1912,39 @@ test("Budget detail: a repeated Detach click writes once", async ({ page, worksp
 	await expect(page.getByRole("button", { name: /^Detach / })).toHaveCount(1)
 	expect(await writeAttempts(page)).toBe(1)
 })
+
+test("Record creator: a failed save shows the correction line in the footer", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	const dialog = await openEditor(page, "/records", "Create Pending Record", "Create New Record")
+	await dialog.getByRole("button", { name: "Create Record", exact: true }).click()
+	await expect(dialog.getByText("Correct the highlighted fields, then save again.")).toBeVisible()
+})
+
+test("Pending Statement dialog: saving and deleting show no success toast", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	const dialog = await openEditor(
+		page,
+		"/statements",
+		"Create Pending Statement",
+		"Create Pending Statement",
+	)
+	await dialog.getByLabel("Description", { exact: true }).fill("No toast statement")
+	await dialog.getByLabel("Amount", { exact: true }).fill("-2")
+	await dialog.getByRole("button", { name: "Create statement", exact: true }).click()
+	await expect(dialog).not.toBeVisible()
+	await expect
+		.poll(async () =>
+			(await readRows(page, "statements")).some(
+				row => row.description === "No toast statement",
+			),
+		)
+		.toBe(true)
+	await page.waitForTimeout(500)
+	await expect(page.locator("[data-sonner-toast]")).toHaveCount(0)
+})

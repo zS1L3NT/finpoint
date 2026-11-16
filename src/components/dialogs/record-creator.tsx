@@ -125,6 +125,8 @@ export default function RecordCreatorDialog({
 	// flashes in and out.
 	const [autofillSettled, setAutofillSettled] = useState(false)
 
+	const [submitError, setSubmitError] = useState("")
+
 	const { mergeErrors, clearApiError, resetApiErrors, setApiErrors } = useApiFormErrors()
 	const { locked, run } = useSubmitLock(isOpen)
 
@@ -160,6 +162,7 @@ export default function RecordCreatorDialog({
 		},
 		onSubmit: ({ value }) =>
 			run(async () => {
+				setSubmitError("")
 				try {
 					const details = {
 						title: value.title,
@@ -191,11 +194,19 @@ export default function RecordCreatorDialog({
 					setIsOpen(false)
 					return true
 				} catch (cause) {
-					if (cause instanceof ValidationError) setApiErrors(cause.errors)
-					else toast.error("Unable to create this record.")
+					if (cause instanceof ValidationError) {
+						setApiErrors(cause.errors)
+						setSubmitError("Correct the highlighted fields, then save again.")
+					} else {
+						setSubmitError(
+							"Unable to create this Record. Refresh the page and try again.",
+						)
+						toast.error("Unable to create this record.")
+					}
 					return false
 				}
 			}),
+		onSubmitInvalid: () => setSubmitError("Correct the highlighted fields, then save again."),
 	})
 
 	const isPendingAmount = useStore(
@@ -341,6 +352,7 @@ export default function RecordCreatorDialog({
 				if (isOpen) {
 					form.reset()
 					resetApiErrors()
+					setSubmitError("")
 				}
 			}}
 		>
@@ -773,6 +785,14 @@ export default function RecordCreatorDialog({
 					</DialogBody>
 
 					<DialogFooter>
+						{submitError ? (
+							<p
+								className="fade-in animate-in text-xs text-destructive duration-150 ease-out sm:mr-auto"
+								aria-live="polite"
+							>
+								{submitError}
+							</p>
+						) : null}
 						<DialogClose
 							render={
 								<Button type="button" variant="outline">
