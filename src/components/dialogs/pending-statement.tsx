@@ -2,6 +2,7 @@ import { DateTime } from "luxon"
 import { usePathname } from "next/navigation"
 import { useState } from "react"
 import { toast } from "sonner"
+import { deleteFailureMessage } from "@/components/dialogs/delete-failure"
 import AmountField from "@/components/form/amount-field"
 import DatetimeField from "@/components/form/datetime-field"
 import SelectField from "@/components/form/select-field"
@@ -146,8 +147,7 @@ export default function PendingStatementDialog({
 					navigateBack({ name: "Statements", url: pathStatements() })
 				return true
 			} catch (cause) {
-				if (cause instanceof ValidationError) setApiErrors(cause.errors)
-				else toast.error("Unable to delete this statement.")
+				toast.error(deleteFailureMessage(cause, "Unable to delete this statement."))
 				return false
 			}
 		})
@@ -212,6 +212,12 @@ export default function PendingStatementDialog({
 						onChange={value => setValue("description", value)}
 					/>
 				</form>
+
+				{isEditing && !statement.is_unallocated ? (
+					<p className="text-xs text-muted-foreground">
+						Remove every allocation before deleting.
+					</p>
+				) : null}
 
 				<DialogFooter className={isEditing ? "sm:justify-between" : undefined}>
 					{isEditing ? (

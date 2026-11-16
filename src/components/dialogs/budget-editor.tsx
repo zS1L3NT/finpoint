@@ -1,6 +1,7 @@
 import { useForm } from "@tanstack/react-form"
 import { usePathname } from "next/navigation"
 import { toast } from "sonner"
+import { deleteFailureMessage } from "@/components/dialogs/delete-failure"
 import AmountField from "@/components/form/amount-field"
 import DateRange from "@/components/form/date-range"
 import TextField from "@/components/form/text-field"
@@ -83,8 +84,8 @@ export default function BudgetEditorDialog({
 					navigateBack({ name: "Budgets", url: pathBudgets() })
 				}
 				return true
-			} catch {
-				toast.error("Unable to delete this budget.")
+			} catch (cause) {
+				toast.error(deleteFailureMessage(cause, "Unable to delete this budget."))
 				return false
 			}
 		})

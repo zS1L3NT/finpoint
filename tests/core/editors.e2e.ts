@@ -1838,3 +1838,13 @@ test("Pending Statement editor: deleting from an Account page stays on that page
 		.toBe(false)
 	await expect(page).toHaveURL(new RegExp(`/accounts/${pending.account_id}$`))
 })
+
+test("Category editor: a Category in use says why Delete is unavailable", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	const dialog = await openEditor(page, "/categories", "Edit Groceries", "Edit Category")
+	await expect(dialog.getByRole("button", { name: "Delete", exact: true })).toBeDisabled()
+	await expect(dialog.getByText(/still use this category/)).toBeVisible()
+})

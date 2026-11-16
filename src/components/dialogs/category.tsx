@@ -1,6 +1,7 @@
 import { useLiveQuery } from "dexie-react-hooks"
 import { useState } from "react"
 import { toast } from "sonner"
+import { deleteFailureMessage } from "@/components/dialogs/delete-failure"
 import ComboboxField from "@/components/form/combobox-field"
 import SelectField from "@/components/form/select-field"
 import TextField from "@/components/form/text-field"
@@ -158,8 +159,8 @@ export default function CategoryDialog({
 				await deleteCategory(category.id)
 				setIsOpen(false)
 				return true
-			} catch {
-				toast.error("Unable to delete this category.")
+			} catch (cause) {
+				toast.error(deleteFailureMessage(cause, "Unable to delete this category."))
 				return false
 			}
 		})
@@ -303,6 +304,13 @@ export default function CategoryDialog({
 						)}
 					</div>
 				</form>
+
+				{isEditing && !category.can_delete ? (
+					<p className="text-xs text-muted-foreground">
+						Records, subcategories or Statement Rules still use this category. Remove
+						them before deleting it.
+					</p>
+				) : null}
 
 				<DialogFooter>
 					{isEditing ? (

@@ -1,6 +1,7 @@
 import { useLiveQuery } from "dexie-react-hooks"
 import { useState } from "react"
 import { toast } from "sonner"
+import { deleteFailureMessage } from "@/components/dialogs/delete-failure"
 import CategoryField from "@/components/form/category-field"
 import SelectField from "@/components/form/select-field"
 import TextField from "@/components/form/text-field"
@@ -150,8 +151,8 @@ export default function StatementRuleDialog({
 				await deleteStatementRule(id)
 				setIsOpen(false)
 				return true
-			} catch {
-				toast.error("Unable to delete this rule.")
+			} catch (cause) {
+				toast.error(deleteFailureMessage(cause, "Unable to delete this rule."))
 				return false
 			}
 		})
