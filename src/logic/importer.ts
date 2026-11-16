@@ -176,6 +176,7 @@ async function upsertIndexed(
 		countByDate.set(date, (countByDate.get(date) ?? 0) + 1)
 	}
 	const duplicateIndexes = new Map(duplicateCounts)
+	const seenInFile = new Map<string, number>()
 	const unmatched = new Map<string, { data: Parsed; raw: Parsed; index: number }[]>()
 	const sameDescription = (actual: string, expected: string) =>
 		normalizeDescription(actual) === normalizeDescription(expected)
@@ -194,7 +195,7 @@ async function upsertIndexed(
 				: `#${duplicateIndex}`
 		}
 
-		const existing = await db.statements
+		const matches = await db.statements
 			.where("[account_id+datetime]")
 			.equals([data.account_id, data.datetime])
 			.filter(
@@ -203,7 +204,12 @@ async function upsertIndexed(
 					s.amount === data.amount &&
 					s.is_pending === (data.is_pending ?? 0),
 			)
-			.first()
+			.toArray()
+		// Without an index, the nth identical row in the file matches the nth stored one.
+		const seenKey = `${meta.unique_key}\n${data.is_pending ?? 0}`
+		const seen = seenInFile.get(seenKey) ?? 0
+		seenInFile.set(seenKey, seen + 1)
+		const existing = withIndex ? matches[0] : matches.length > seen ? matches[seen] : undefined
 
 		if (existing) {
 			if (withIndex && existing.index !== index) {
