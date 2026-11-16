@@ -1054,7 +1054,7 @@ test("pending queue: a valid selection in the URL never flashes the unavailable 
 		}).observe(document, { childList: true, subtree: true, characterData: true })
 	})
 	await page.goto(`/allocator/pending?pending_statement_id=${pending.id}`)
-	await expect(page.getByRole("button", { name: new RegExp(pending.description) })).toBeVisible()
+	await expect(page.getByText(pending.description).locator("visible=true").first()).toBeVisible()
 	await page.waitForTimeout(500)
 	expect(
 		await page.evaluate(

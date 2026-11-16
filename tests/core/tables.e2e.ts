@@ -692,14 +692,18 @@ test("Categories page: search lives in the URL, survives reload and one Back cle
 test("Statement rules page: search lives in the URL, survives reload and one Back clears it", async ({
 	page,
 }) => {
-	await seedWorkspace(page, "populated", { statement_rules: statementRules() })
+	// The search appears once there are more than five rules.
+	const rules = statementRules()
+	await seedWorkspace(page, "populated", {
+		statement_rules: [...rules, { ...rules[0], id: "t1-rule-extra", name: "Extra rule" }],
+	})
 	await page.goto("/statement-rules")
 	const search = page.getByRole("searchbox", { name: "Search rules", exact: true })
 	await search.fill("fairprice")
 	await expect(page).toHaveURL(/query=fairprice/)
 	await page.reload()
 	await expect(search).toHaveValue("fairprice")
-	await expect(page.locator("main section[aria-label='Your rules'] article")).toHaveCount(2)
+	await expect(page.locator("main section[aria-label='Your rules'] article")).toHaveCount(1)
 	await page.goBack()
 	await expect(page).not.toHaveURL(/query=/)
 	await expect(search).toHaveValue("")

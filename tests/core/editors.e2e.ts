@@ -802,6 +802,40 @@ test("archived Monthly Budgets: retain archival state and historical assignments
 		const dialog = page.getByRole("dialog", { name: "Edit Daily", exact: true })
 		await dialog.getByRole("checkbox", { name: "Archive monthly budget", exact: true }).check()
 		await dialog.getByRole("button", { name: "Save changes", exact: true }).click()
+		// A Monthly Budget that Categories still default to cannot be archived.
+		await expect(dialog.getByText(/This Monthly Budget is still used by/)).toBeVisible()
+		// Move the Categories off it and give the Record its own assignment, then archive.
+		await page.evaluate(async () => {
+			const database = await new Promise<IDBDatabase>((resolve, reject) => {
+				const open = indexedDB.open("finpoint")
+				open.onsuccess = () => resolve(open.result)
+				open.onerror = () => reject(open.error)
+			})
+			await new Promise<void>((resolve, reject) => {
+				const transaction = database.transaction(["categories", "records"], "readwrite")
+				transaction.oncomplete = () => {
+					database.close()
+					resolve()
+				}
+				transaction.onabort = () => reject(transaction.error)
+				const categories = transaction.objectStore("categories")
+				const all = categories.getAll()
+				all.onsuccess = () => {
+					for (const category of all.result) {
+						if (category.default_monthly_budget_id === "t1-mb-daily")
+							categories.put({ ...category, default_monthly_budget_id: null })
+					}
+				}
+				const records = transaction.objectStore("records")
+				const record = records.get("t1-r-unicode")
+				record.onsuccess = () =>
+					records.put({
+						...record.result,
+						monthly_budget_choice: { kind: "explicit", id: "t1-mb-daily" },
+					})
+			})
+		})
+		await dialog.getByRole("button", { name: "Save changes", exact: true }).click()
 		await expect(dialog).not.toBeVisible()
 		await page.reload()
 		const archived = await page.evaluate(async () => {

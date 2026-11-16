@@ -1076,10 +1076,8 @@ test("narrow desktop: pages stack by available width and popups keep side margin
 
 test("Statement rules page: a double click on Pause writes once", async ({ page }) => {
 	await seedWorkspace(page, "populated", { statement_rules: statementRules() })
-	await page.goto("/statement-rules")
-	const pause = page.getByRole("button", { name: "Pause Starbucks coffee", exact: true })
-	await expect(pause).toBeVisible()
-	await page.evaluate(() => {
+	// Dexie binds the transaction function when it opens the database, so spy before the load.
+	await page.addInitScript(() => {
 		const w = window as unknown as { __ruleWrites: number }
 		w.__ruleWrites = 0
 		const transaction = IDBDatabase.prototype.transaction
@@ -1088,6 +1086,12 @@ test("Statement rules page: a double click on Pause writes once", async ({ page 
 				w.__ruleWrites++
 			return transaction.call(this, stores, mode, ...rest)
 		}
+	})
+	await page.goto("/statement-rules")
+	const pause = page.getByRole("button", { name: "Pause Starbucks coffee", exact: true })
+	await expect(pause).toBeVisible()
+	await page.evaluate(() => {
+		;(window as unknown as { __ruleWrites: number }).__ruleWrites = 0
 	})
 	await pause.evaluate((button: HTMLButtonElement) => {
 		button.click()
