@@ -3,7 +3,7 @@
 
 import { db, type RecordRow } from "@/data/db"
 import { canUseMonthlyBudget } from "@/lib/analytics"
-import { contribution } from "@/logic/analytics"
+import { compareRecords, contribution } from "@/logic/analytics"
 import { duplicateStatementIds } from "@/logic/duplicates"
 import {
 	listParam,
@@ -174,15 +174,7 @@ export async function listRecords(filters: RecordFilters = {}) {
 	if (filters.is_allocated === true) enriched = enriched.filter(r => !r.is_pending)
 	if (filters.is_allocated === false) enriched = enriched.filter(r => r.is_pending)
 
-	enriched.sort(
-		(a, b) =>
-			b.datetime.localeCompare(a.datetime) ||
-			a.amount - b.amount ||
-			a.title.localeCompare(b.title) ||
-			(a.people ?? "").localeCompare(b.people ?? "") ||
-			(a.location ?? "").localeCompare(b.location ?? "") ||
-			(a.description ?? "").localeCompare(b.description ?? ""),
-	)
+	enriched.sort(compareRecords)
 
 	return enriched
 }

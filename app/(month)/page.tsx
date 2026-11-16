@@ -779,7 +779,6 @@ function ReviewLinks({ data, month, year }: { data: DashboardData; month: string
 						href={pathAllocator({
 							start_date: start,
 							end_date: end,
-							is_pending: "false",
 						})}
 					>
 						<IconifyIcon icon="lucide:inbox" />
