@@ -102,7 +102,7 @@ export async function createCategory(input: CategoryInput) {
 		if (await db.categories.get(id)) {
 			throw new ValidationError({ name: ["A category with a similar name already exists."] })
 		}
-		await checkReferences(dto.parent_category_id, dto.default_monthly_budget_id)
+		await checkReferences(dto.parent_category_id, dto.default_monthly_budget_id, null)
 		const row = { id, ...dto }
 		await db.categories.add(row)
 
@@ -126,7 +126,11 @@ export async function updateCategory(currentId: string, input: CategoryInput) {
 		// Top-level categories keep their position.
 		const parent_category_id =
 			current.parent_category_id === null ? null : dto.parent_category_id
-		await checkReferences(parent_category_id, dto.default_monthly_budget_id)
+		await checkReferences(
+			parent_category_id,
+			dto.default_monthly_budget_id,
+			current.default_monthly_budget_id,
+		)
 
 		if (id !== currentId) {
 			await db.categories.add({ id, ...dto, parent_category_id })
@@ -150,15 +154,26 @@ export async function updateCategory(currentId: string, input: CategoryInput) {
 }
 
 /** Runs inside the write's transaction, so what it checks cannot change before the write. */
-async function checkReferences(parentId: string | null, monthlyBudgetId: string | null) {
+async function checkReferences(
+	parentId: string | null,
+	monthlyBudgetId: string | null,
+	currentMonthlyBudgetId: string | null,
+) {
 	if (parentId) {
 		const parent = await db.categories.get(parentId)
 		if (!parent || parent.parent_category_id) {
 			throw new ValidationError({ parent_category_id: ["Invalid parent category."] })
 		}
 	}
-	if (monthlyBudgetId && !(await db.monthly_budgets.get(monthlyBudgetId))) {
-		throw new ValidationError({ default_monthly_budget_id: ["Monthly budget not found."] })
+	if (monthlyBudgetId) {
+		const budget = await db.monthly_budgets.get(monthlyBudgetId)
+		if (!budget)
+			throw new ValidationError({ default_monthly_budget_id: ["Monthly budget not found."] })
+		// A default that is already stored stays, even once archived.
+		if (budget.archived && monthlyBudgetId !== currentMonthlyBudgetId)
+			throw new ValidationError({
+				default_monthly_budget_id: ["Select an active Monthly Budget."],
+			})
 	}
 }
 

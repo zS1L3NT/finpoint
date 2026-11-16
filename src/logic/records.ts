@@ -283,6 +283,24 @@ function analyticsValues(
 	}
 }
 
+/**
+ * An explicit Monthly Budget must exist and be active; a Record that already has an archived
+ * one keeps it, so its history stays editable.
+ */
+async function checkMonthlyBudget(input: RecordInput, existing?: RecordRow) {
+	if (input.monthly_budget_source === "category" || !input.monthly_budget_id) return
+	const budget = await db.monthly_budgets.get(input.monthly_budget_id)
+	const kept =
+		existing?.monthly_budget_choice.kind === "explicit" &&
+		existing.monthly_budget_choice.id === input.monthly_budget_id
+	if (!budget || (budget.archived && !kept))
+		throw new ValidationError({
+			monthly_budget_id: [
+				budget ? "Select an active Monthly Budget." : "Monthly Budget not found.",
+			],
+		})
+}
+
 async function validateAllocations(
 	statements: RecordStatementInput[],
 	existing: Map<string, number> = new Map(),
@@ -342,10 +360,19 @@ export async function createRecord(input: RecordInput) {
 
 	return db.transaction(
 		"rw",
-		[db.records, db.allocations, db.budgets, db.budget_records, db.categories, db.statements],
+		[
+			db.records,
+			db.allocations,
+			db.budgets,
+			db.budget_records,
+			db.categories,
+			db.statements,
+			db.monthly_budgets,
+		],
 		async () => {
 			const category = await db.categories.get(dto.category_id)
 			if (!category) throw new ValidationError({ category_id: ["Select a category."] })
+			await checkMonthlyBudget(dto)
 			await validateAllocations(statements)
 
 			const analytics = analyticsValues(dto)
@@ -393,7 +420,15 @@ export async function createMatchingRecords(
 ) {
 	return db.transaction(
 		"rw",
-		[db.records, db.allocations, db.budgets, db.budget_records, db.categories, db.statements],
+		[
+			db.records,
+			db.allocations,
+			db.budgets,
+			db.budget_records,
+			db.categories,
+			db.statements,
+			db.monthly_budgets,
+		],
 		async () => {
 			const allocations = await db.allocations.toArray()
 			const statements = (await db.statements.bulkGet(statementIds)).filter(
@@ -427,7 +462,7 @@ export async function updateRecord(id: string, input: RecordInput & { revision?:
 
 	return db.transaction(
 		"rw",
-		[db.records, db.allocations, db.categories, db.statements],
+		[db.records, db.allocations, db.categories, db.statements, db.monthly_budgets],
 		async () => {
 			const existing = await db.records.get(id)
 			if (!existing) throw new Error("Record not found.")
@@ -438,6 +473,7 @@ export async function updateRecord(id: string, input: RecordInput & { revision?:
 			if (!category) throw new ValidationError({ category_id: ["Select a category."] })
 			const currentAllocations = await db.allocations.where("record_id").equals(id).toArray()
 			const prior = new Map(currentAllocations.map(a => [a.statement_id, a.amount]))
+			await checkMonthlyBudget(dto, existing)
 			await validateAllocations(statements, prior)
 
 			const analytics = analyticsValues(dto, existing)
