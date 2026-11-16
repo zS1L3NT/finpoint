@@ -1470,7 +1470,7 @@ test.describe("dialog lifecycle", () => {
 			.evaluate((button: HTMLButtonElement) => {
 				for (let i = 0; i < 3; i++) button.click()
 			})
-		await expect(page.getByText("Pending statement deleted.")).toBeVisible()
+		await expect(dialog).not.toBeVisible()
 		// Let the second call settle: it would report its failure as a toast of its own.
 		await page.waitForTimeout(1000)
 		await expect(page.locator('[data-sonner-toast][data-type="error"]')).toHaveCount(0)
@@ -1616,11 +1616,12 @@ test.describe("dialog lifecycle", () => {
 
 		await other.goto("/statements/sel-b")
 		await other.getByRole("button", { name: "Edit Pending Statement", exact: true }).click()
-		await other
-			.getByRole("dialog", { name: "Edit Pending Statement", exact: true })
-			.getByRole("button", { name: "Delete", exact: true })
-			.click()
-		await expect(other.getByText("Pending statement deleted.")).toBeVisible()
+		const otherEditor = other.getByRole("dialog", {
+			name: "Edit Pending Statement",
+			exact: true,
+		})
+		await otherEditor.getByRole("button", { name: "Delete", exact: true }).click()
+		await expect(otherEditor).not.toBeVisible()
 		await other.close()
 
 		await expect(bar.getByText("1 selected · -$15.00")).toBeVisible()
