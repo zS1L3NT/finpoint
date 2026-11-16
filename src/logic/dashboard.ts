@@ -118,6 +118,8 @@ const ISO_DAY = "yyyy-MM-dd"
 
 type LoadedTables = {
 	records: ReturnType<typeof resolveRecordChoices>[]
+	/** Every Record when `records` is narrowed to one scope, so month coverage ignores the scope. */
+	coverageRecords?: ReturnType<typeof resolveRecordChoices>[]
 	statements: StatementRow[]
 	statementTotals: StatementTotals
 	allocated: Map<string, AllocationTally>
@@ -208,10 +210,20 @@ function comparisonSummaries(
 			tables.categories,
 			tables.monthlyBudgets,
 		)
+		// Coverage is a fact about the month, so it looks at every Record, not the scoped ones.
+		const hasActivity =
+			toAnalyticsRecords(
+				(tables.coverageRecords ?? tables.records).filter(r =>
+					inRange(r.datetime, startKey, endKey),
+				),
+				tables.allocated,
+				tables.categories,
+				tables.monthlyBudgets,
+			).length > 0
 		const excluded =
 			(coverage?.excluded_from_comparisons ?? false) ||
 			(coverage?.coverage ?? null) === "incomplete" ||
-			(items.length === 0 && (coverage?.coverage ?? "unknown") !== "complete")
+			(!hasActivity && (coverage?.coverage ?? "unknown") !== "complete")
 		out.push({
 			month: month.toFormat("MMM yyyy"),
 			start: month.toFormat("yyyy-MM-dd"),
@@ -1070,6 +1082,7 @@ export async function getDashboardView(input: DashboardInput & { scope?: string 
 			? dashboard
 			: await getDashboard(input, {
 					...tables,
+					coverageRecords: tables.records,
 					records: tables.records.filter(r =>
 						inScope(r.monthly_budget_id, scopedBudgetIds),
 					),
