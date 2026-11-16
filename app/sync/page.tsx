@@ -810,7 +810,7 @@ export default function DataSettingsPage() {
 						<WorkspaceRow
 							icon="lucide:trash-2"
 							title="Clear all data"
-							description="Delete everything in this browser, then restore the default categories and monthly budgets."
+							description="Delete everything in this browser, then restore the default categories and monthly budgets. Settings are kept."
 							destructive
 						>
 							{armed === "clear" && busy !== "clear" ? (
