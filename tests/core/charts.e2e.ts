@@ -1064,3 +1064,12 @@ test("category cards: reading different months keeps the XL row and chart height
 			.toBe(chartHeight)
 	}
 })
+
+test("spending calendar: footer total equals the Total spending figure, refunds included", async ({
+	page,
+}) => {
+	await seedWorkspace(page)
+	await page.goto(overview)
+	await expect(metric(page, "Total spending")).toContainText("$286.63")
+	await expect(card(page, "Spending calendar")).toContainText("$286.63")
+})
