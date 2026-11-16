@@ -11,7 +11,13 @@ import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import AmountFilter from "@/components/table/amount-filter"
 import CategoryFilter from "@/components/table/category-filter"
-import { ClearFiltersButton, FILTER_CONTROL_CLASS, FilterBar } from "@/components/table/filter-bar"
+import {
+	ClearFiltersButton,
+	FilterBar,
+	FilterField,
+	FilterSelect,
+	filterControlClass,
+} from "@/components/table/filter-bar"
 import PaginatedDataTable from "@/components/table/paginated-data-table"
 import { useRecordColumns, useRecordMobileRow } from "@/components/table/record-columns"
 import { byDay } from "@/components/table/row-groups"
@@ -283,88 +289,89 @@ function RecordFilters({
 	}
 
 	return (
-		<FilterBar className="sm:flex sm:flex-wrap">
+		<FilterBar>
 			<CategoryFilter
 				categories={categories}
 				selectedIds={categoryIds}
 				onChange={ids => onChange({ category_ids: ids.join(",") || null })}
 			/>
 
-			<Select value={monthlyBudgetScope} onValueChange={changeMonthlyBudgetScope}>
-				<SelectTrigger className={cn("w-full sm:w-40", FILTER_CONTROL_CLASS)}>
-					<IconifyIcon icon="lucide:wallet-cards" />
-					<SelectValue />
-				</SelectTrigger>
-				<SelectContent align="start" variant="filter">
-					<SelectGroup>
-						<SelectItem value="all">
-							<span className="size-2 rounded-full bg-foreground" />
-							All budgets
-						</SelectItem>
-						{shownMonthlyBudgets.map(monthlyBudget => (
-							<SelectItem
-								key={monthlyBudget.id}
-								value={`monthlyBudget:${monthlyBudget.id}`}
-							>
-								<span
-									className="size-2 rounded-full"
-									style={{ backgroundColor: themeColor(monthlyBudget.color) }}
-								/>
-								{monthlyBudget.name}
-							</SelectItem>
-						))}
-						<SelectItem value="unbudgeted">
-							<span className="size-2 rounded-full bg-muted-foreground" />
-							Unbudgeted
-						</SelectItem>
-					</SelectGroup>
-				</SelectContent>
-			</Select>
-
-			<Select
-				value={treatment ?? "all"}
-				onValueChange={value => onChange({ treatment: value === "all" ? null : value })}
+			<FilterField
+				name="monthly budget"
+				active={monthlyBudgetScope !== "all"}
+				onClear={() => changeMonthlyBudgetScope("all")}
 			>
-				<SelectTrigger className={cn("w-full sm:w-40", FILTER_CONTROL_CLASS)}>
-					<IconifyIcon icon="lucide:chart-no-axes-combined" />
-					<SelectValue />
-				</SelectTrigger>
-				<SelectContent align="start" variant="filter">
-					<SelectGroup>
-						<SelectItem value="all">Any treatment</SelectItem>
-						{TREATMENTS.map(item => (
-							<SelectItem key={item.value} value={item.value}>
-								{item.label}
+				<Select value={monthlyBudgetScope} onValueChange={changeMonthlyBudgetScope}>
+					<SelectTrigger
+						className={cn("w-full", filterControlClass(monthlyBudgetScope !== "all"))}
+					>
+						<IconifyIcon icon="lucide:wallet-cards" />
+						<SelectValue />
+					</SelectTrigger>
+					<SelectContent align="start" variant="filter">
+						<SelectGroup>
+							<SelectItem value="all">
+								<span className="size-2 rounded-full bg-foreground" />
+								All budgets
 							</SelectItem>
-						))}
-					</SelectGroup>
-				</SelectContent>
-			</Select>
+							{shownMonthlyBudgets.map(monthlyBudget => (
+								<SelectItem
+									key={monthlyBudget.id}
+									value={`monthlyBudget:${monthlyBudget.id}`}
+								>
+									<span
+										className="size-2 rounded-full"
+										style={{ backgroundColor: themeColor(monthlyBudget.color) }}
+									/>
+									{monthlyBudget.name}
+								</SelectItem>
+							))}
+							<SelectItem value="unbudgeted">
+								<span className="size-2 rounded-full bg-muted-foreground" />
+								Unbudgeted
+							</SelectItem>
+						</SelectGroup>
+					</SelectContent>
+				</Select>
+			</FilterField>
 
-			<Select
-				value={isAllocated ?? "all"}
-				onValueChange={value => onChange({ is_allocated: value === "all" ? null : value })}
+			<FilterSelect
+				name="treatment"
+				icon="lucide:chart-no-axes-combined"
+				value={treatment}
+				onValueChange={value => onChange({ treatment: value })}
 			>
-				<SelectTrigger className={cn("w-full sm:w-40", FILTER_CONTROL_CLASS)}>
-					<IconifyIcon icon="lucide:circle-check-big" />
-					<SelectValue />
-				</SelectTrigger>
-				<SelectContent align="start" variant="filter">
-					<SelectGroup>
-						<SelectItem value="all">Any status</SelectItem>
-						<SelectItem value="true">Complete</SelectItem>
-						<SelectItem value="false">Pending</SelectItem>
-					</SelectGroup>
-				</SelectContent>
-			</Select>
+				<SelectItem value="all">Any treatment</SelectItem>
+				{TREATMENTS.map(item => (
+					<SelectItem key={item.value} value={item.value}>
+						{item.label}
+					</SelectItem>
+				))}
+			</FilterSelect>
 
-			<DateRange
-				id="records_date_range"
-				value={{ start: startDate, end: endDate }}
-				className="sm:w-40"
-				triggerClassName={FILTER_CONTROL_CLASS}
-				onChange={value => onChange({ start_date: value.start, end_date: value.end })}
-			/>
+			<FilterSelect
+				name="status"
+				icon="lucide:circle-check-big"
+				value={isAllocated}
+				onValueChange={value => onChange({ is_allocated: value })}
+			>
+				<SelectItem value="all">Any status</SelectItem>
+				<SelectItem value="true">Complete</SelectItem>
+				<SelectItem value="false">Pending</SelectItem>
+			</FilterSelect>
+
+			<FilterField
+				name="date"
+				active={!!(startDate ?? endDate)}
+				onClear={() => onChange({ start_date: null, end_date: null })}
+			>
+				<DateRange
+					id="records_date_range"
+					value={{ start: startDate, end: endDate }}
+					triggerClassName={filterControlClass(!!(startDate ?? endDate))}
+					onChange={value => onChange({ start_date: value.start, end_date: value.end })}
+				/>
+			</FilterField>
 
 			<AmountFilter
 				value={{ min: minAmount, max: maxAmount }}

@@ -95,7 +95,10 @@ export default function DateRange({
 								className="absolute left-2"
 								data-icon="inline-start"
 							/>
-							<span className="w-full truncate px-5 text-center">
+							<span
+								className="w-full truncate px-5 text-center"
+								title={selected?.from ? formatRange(selected) : undefined}
+							>
 								{selected?.from ? formatRange(selected) : placeholder}
 							</span>
 						</Button>
