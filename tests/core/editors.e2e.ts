@@ -1873,3 +1873,28 @@ test("Record editor: Delete asks for a second click, and closing the dialog disa
 		.poll(async () => (await readRows(page, "records")).some(row => row.id === record.id))
 		.toBe(false)
 })
+
+test("Fix Duplicates: Statement times use the shared 12-hour format", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	await page.goto("/allocator/duplicates")
+	await expect(page.getByText(/^9:14 AM · /).first()).toBeVisible()
+	await expect(page.getByText(/^09:14 · /)).toHaveCount(0)
+})
+
+test("Pending Statement editor: the Account option names the bank, not its raw code", async ({
+	page,
+}) => {
+	await seedWorkspace(page, "populated", {
+		accounts: getScenario("populated").tables.accounts.map(row => ({ ...row, bank: "dbs" })),
+	})
+	const dialog = await openEditor(
+		page,
+		`/statements/${pending.id}`,
+		"Edit Pending Statement",
+		"Edit Pending Statement",
+	)
+	await expect(dialog.getByLabel("Account", { exact: true })).toContainText("· DBS")
+})

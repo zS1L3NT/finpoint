@@ -11,6 +11,8 @@ import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import { ClearFiltersButton, FILTER_CONTROL_CLASS, FilterBar } from "@/components/table/filter-bar"
 import PaginationFooter from "@/components/table/pagination-footer"
+import { formatRowTime } from "@/components/table/record-columns"
+import { dayLabel } from "@/components/table/row-groups"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
@@ -26,14 +28,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import WorkflowTabs from "@/components/workflow-tabs"
 import { useUrlParams } from "@/hooks/use-url-params"
 import { cardEnter, SPRING, TRANSITION } from "@/lib/motion"
-import {
-	classForCurrency,
-	cn,
-	formatCurrency,
-	parseDate,
-	parseDatetime,
-	pluralize,
-} from "@/lib/utils"
+import { classForCurrency, cn, formatCurrency, pluralize } from "@/lib/utils"
 import { listAccounts } from "@/logic/accounts"
 import {
 	type DuplicateGroup,
@@ -341,8 +336,7 @@ function GroupHeader({
 		<div className="flex items-start justify-between gap-3 text-sm">
 			<div className="flex flex-wrap items-center gap-2">
 				<h2 className="font-medium">
-					{accountName} ·{" "}
-					{parseDate((statement?.datetime ?? "").slice(0, 10)).toFormat("d MMM y")}
+					{accountName} · {dayLabel((statement?.datetime ?? "").slice(0, 10))}
 				</h2>
 				{children}
 			</div>
@@ -411,7 +405,8 @@ function DuplicateGroupCard({
 								)}
 							</Link>
 							<p className="mt-1 text-xs text-muted-foreground">
-								{parseDatetime(s.datetime).toFormat("HH:mm")} ·{" "}
+								{formatRowTime(s.datetime, true) &&
+									`${formatRowTime(s.datetime, true)} · `}
 								{group.allocationCounts[s.id]
 									? pluralize(group.allocationCounts[s.id] ?? 0, "Allocation")
 									: "No Allocations"}

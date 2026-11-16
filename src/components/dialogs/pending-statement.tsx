@@ -25,6 +25,7 @@ import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { useDialogCloseAnimation } from "@/hooks/use-dialog-close-animation"
 import { useSeed } from "@/hooks/use-seed"
 import { useSubmitLock } from "@/hooks/use-submit-lock"
+import { bankMeta } from "@/lib/banks"
 import {
 	createPendingStatement,
 	deletePendingStatement,
@@ -182,7 +183,7 @@ export default function PendingStatementDialog({
 							placeholder="Select an account"
 							items={accounts.map(account => ({
 								value: account.id,
-								label: `${account.name} · ${account.bank}`,
+								label: `${account.name} · ${bankMeta(account.bank).label}`,
 							}))}
 							onChange={value => setValue("account_id", value)}
 						/>
