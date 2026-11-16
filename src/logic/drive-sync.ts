@@ -24,6 +24,7 @@ const LAST_SYNC_KEY = "drive_last_sync_at"
 const LAST_HASH_KEY = "drive_last_hash"
 const REMOTE_TIME_KEY = "drive_remote_time"
 const LAST_CHECK_KEY = "drive_last_check_at"
+const PAUSED_KEY = "drive_sync_paused"
 
 export type DriveSyncOutcome = "up-to-date" | "pushed" | "pulled" | "conflict" | "empty"
 
@@ -52,6 +53,16 @@ export async function driveStatus(): Promise<DriveStatus> {
 		metaGet(LAST_CHECK_KEY),
 	])
 	return { configured: isDriveConfigured(), fileId, lastSyncAt, remoteModifiedTime, lastCheckAt }
+}
+
+/** Whether background sync is paused in this browser. Manual operations still run. */
+export async function driveSyncPaused(): Promise<boolean> {
+	return (await metaGet(PAUSED_KEY)) === "1"
+}
+
+export async function setDriveSyncPaused(paused: boolean): Promise<void> {
+	if (paused) await db.meta.put({ key: PAUSED_KEY, value: "1" })
+	else await db.meta.delete(PAUSED_KEY)
 }
 
 /** Stamp a completed Drive round trip (data moved or not). */
@@ -184,5 +195,6 @@ export async function disconnectDriveSync(): Promise<void> {
 		db.meta.delete(LAST_SYNC_KEY),
 		db.meta.delete(LAST_HASH_KEY),
 		db.meta.delete(REMOTE_TIME_KEY),
+		db.meta.delete(PAUSED_KEY),
 	])
 }

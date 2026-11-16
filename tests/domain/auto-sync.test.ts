@@ -232,3 +232,17 @@ test("a manual operation cannot start while a background cycle is still settling
 	await settle()
 	expect(sync.getSyncSnapshot().activity).toBe(null)
 })
+
+test("a paused sync keeps writes pending and uploads them when resumed", async () => {
+	await sync.setSyncPaused(true)
+	await write()
+	fireTimers()
+	await settle()
+	expect(drive.pushes).toBe(0)
+	expect(sync.getSyncSnapshot().paused).toBe(true)
+
+	void sync.setSyncPaused(false)
+	await settle()
+	expect(drive.pushes).toBe(1)
+	expect(sync.getSyncSnapshot().paused).toBe(false)
+})
