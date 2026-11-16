@@ -41,3 +41,12 @@ export const pluralize = (count: number, noun: string) =>
 export const classForCurrency = (amount: number) => {
 	return amount < 0 ? "text-destructive" : amount > 0 ? "text-creative" : "text-foreground"
 }
+
+/** Active Monthly Budgets plus the archived one that is the current value, so a select can still show it. */
+export const selectableMonthlyBudgets = <T extends { id: string; archived: boolean }>(
+	monthlyBudgets: T[],
+	currentId?: string | null,
+) =>
+	monthlyBudgets.filter(
+		monthlyBudget => !monthlyBudget.archived || monthlyBudget.id === currentId,
+	)

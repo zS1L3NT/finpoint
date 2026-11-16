@@ -24,7 +24,13 @@ import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { useSeed } from "@/hooks/use-seed"
 import { useSubmitLock } from "@/hooks/use-submit-lock"
 import { TREATMENTS } from "@/lib/analytics"
-import { cn, formatCurrency, formatDatetime, pluralize } from "@/lib/utils"
+import {
+	cn,
+	formatCurrency,
+	formatDatetime,
+	pluralize,
+	selectableMonthlyBudgets,
+} from "@/lib/utils"
 import type { listMonthlyBudgets } from "@/logic/monthly-budgets"
 import { recordCompletions } from "@/logic/records"
 import {
@@ -156,7 +162,7 @@ export default function StatementRuleDialog({
 		.flatMap(([, messages]) => messages)
 	const valueInput = (field: RuleField) => {
 		const value = actions[field]?.value
-		const select = (items: { value: string; label: string }[]) => (
+		const select = (items: { value: string; label: string; disabled?: boolean }[]) => (
 			<SelectField
 				id={`rule-${field}`}
 				value={value === undefined ? UNSET : (value ?? UNBUDGETED)}
@@ -181,9 +187,11 @@ export default function StatementRuleDialog({
 		) : field === "monthly_budget_id" ? (
 			select([
 				{ value: UNBUDGETED, label: "Unbudgeted" },
-				...monthlyBudgets
-					.filter(b => !b.archived)
-					.map(b => ({ value: b.id, label: b.name })),
+				...selectableMonthlyBudgets(monthlyBudgets, value).map(b => ({
+					value: b.id,
+					label: b.name,
+					disabled: b.archived,
+				})),
 			])
 		) : (
 			<TextField

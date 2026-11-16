@@ -1775,3 +1775,39 @@ test.describe("dialog lifecycle", () => {
 		await expect(page.getByText(/Application error/)).toHaveCount(0)
 	})
 })
+
+test("archived Monthly Budgets: a Category default and a rule action that point at one still show its name", async ({
+	page,
+}) => {
+	await seedWorkspace(page, "populated", {
+		categories: getScenario("populated").tables.categories.map(category =>
+			category.id === IDS.categories.groceries
+				? { ...category, default_monthly_budget_id: IDS.monthlyBudgets.travelArchived }
+				: category,
+		),
+		statement_rules: statementRules().map(rule =>
+			rule.id === "t1-rule-starbucks"
+				? {
+						...rule,
+						actions: {
+							...rule.actions,
+							monthly_budget_id: { value: IDS.monthlyBudgets.travelArchived },
+						},
+					}
+				: rule,
+		),
+	})
+	await test.step("Category editor: the archived default is shown, not a blank select", async () => {
+		const dialog = await openEditor(page, "/categories", "Edit Groceries", "Edit Category")
+		await expect(dialog.getByLabel("Monthly budget", { exact: true })).toContainText("Travel")
+	})
+	await test.step("Statement rule editor: the archived action Budget is shown, not a blank select", async () => {
+		const dialog = await openEditor(
+			page,
+			"/statement-rules",
+			"Edit Starbucks coffee",
+			"Edit rule",
+		)
+		await expect(dialog.getByLabel("Monthly budget", { exact: true })).toContainText("Travel")
+	})
+})

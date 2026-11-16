@@ -661,3 +661,12 @@ test("Records table: a keystroke erased before it commits does not hide a later 
 	await expect(page).toHaveURL(/query=Dense$/)
 	await expect(search).toHaveValue("Dense")
 })
+
+test("Monthly budget filters: an archived Budget in the URL keeps its name in the filter", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	await page.goto(`/records?monthly_budget_id=${IDS.monthlyBudgets.travelArchived}`)
+	await expect(page.getByRole("combobox").filter({ hasText: /^Travel$/ })).toBeVisible()
+})

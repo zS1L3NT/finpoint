@@ -21,7 +21,7 @@ import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { useSeed } from "@/hooks/use-seed"
 import { useSubmitLock } from "@/hooks/use-submit-lock"
 import { canUseDefaultMonthlyBudget, TREATMENTS, treatmentLabel } from "@/lib/analytics"
-import { cn } from "@/lib/utils"
+import { cn, selectableMonthlyBudgets } from "@/lib/utils"
 import { createCategory, deleteCategory, updateCategory } from "@/logic/categories"
 import { listMonthlyBudgets } from "@/logic/monthly-budgets"
 import { ValidationError } from "@/logic/validate"
@@ -283,12 +283,14 @@ export default function CategoryDialog({
 								value={values.default_monthly_budget_id || NO_DEFAULT}
 								items={[
 									{ value: NO_DEFAULT, label: "Unbudgeted" },
-									...monthlyBudgets
-										.filter(monthlyBudget => !monthlyBudget.archived)
-										.map(monthlyBudget => ({
-											value: monthlyBudget.id,
-											label: monthlyBudget.name,
-										})),
+									...selectableMonthlyBudgets(
+										monthlyBudgets,
+										values.default_monthly_budget_id,
+									).map(monthlyBudget => ({
+										value: monthlyBudget.id,
+										label: monthlyBudget.name,
+										disabled: monthlyBudget.archived,
+									})),
 								]}
 								errors={getApiFieldErrors("default_monthly_budget_id")}
 								onChange={value =>

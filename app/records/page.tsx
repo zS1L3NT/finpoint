@@ -28,7 +28,7 @@ import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { useRecordEditor } from "@/hooks/use-record-editor"
 import { TREATMENTS } from "@/lib/analytics"
 import { themeColor } from "@/lib/palette"
-import { cn, pluralize } from "@/lib/utils"
+import { cn, pluralize, selectableMonthlyBudgets } from "@/lib/utils"
 import { listCategories } from "@/logic/categories"
 import { listMonthlyBudgets } from "@/logic/monthly-budgets"
 import { paginateItems, parsePage, parsePageSize } from "@/logic/pagination"
@@ -264,7 +264,7 @@ function RecordFilters({
 		: monthlyBudgetId
 			? `monthlyBudget:${monthlyBudgetId}`
 			: "all"
-	const activeMonthlyBudgets = monthlyBudgets.filter(monthlyBudget => !monthlyBudget.archived)
+	const shownMonthlyBudgets = selectableMonthlyBudgets(monthlyBudgets, monthlyBudgetId)
 
 	const changeMonthlyBudgetScope = (scope: string) => {
 		const changes: { [key: string]: string | null } = {
@@ -298,7 +298,7 @@ function RecordFilters({
 							<span className="size-2 rounded-full bg-foreground" />
 							All budgets
 						</SelectItem>
-						{activeMonthlyBudgets.map(monthlyBudget => (
+						{shownMonthlyBudgets.map(monthlyBudget => (
 							<SelectItem
 								key={monthlyBudget.id}
 								value={`monthlyBudget:${monthlyBudget.id}`}
