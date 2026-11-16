@@ -26,8 +26,8 @@ import {
 } from "@/components/ui/card"
 import { useRecordEditor } from "@/hooks/use-record-editor"
 import { themeColor } from "@/lib/palette"
-import { formatCurrency, parseDate, parseDatetime, round2 } from "@/lib/utils"
-import { attachBudgetRecord, detachBudgetRecord, getBudget } from "@/logic/budgets"
+import { formatCurrency, parseDate, round2 } from "@/lib/utils"
+import { attachBudgetRecord, budgetSpent, detachBudgetRecord, getBudget } from "@/logic/budgets"
 import { listCategories } from "@/logic/categories"
 import { pathBudgets } from "@/routes"
 import type { Budget, CategoryWithChildren, Record } from "@/types"
@@ -54,16 +54,13 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 				? budgetEnd
 				: now
 	const analytics = getBudgetAnalytics(
-		records,
 		budgetStart,
 		budgetEnd,
 		budget?.amount ?? 0,
 		budgetAsOf,
+		budget?.used_amount ?? 0,
 	)
-	const categoryData = useMemo(
-		() => getCategoryData(records, categories, budgetStart, budgetEnd),
-		[records, categories, budgetStart, budgetEnd],
-	)
+	const categoryData = useMemo(() => getCategoryData(records, categories), [records, categories])
 
 	const attach = async (record: Record) => {
 		if (!budget) return
@@ -350,25 +347,17 @@ function Legend({ color, label }: { color: string; label: string }) {
 }
 
 function getBudgetAnalytics(
-	records: Record[],
 	start: DateTime,
 	end: DateTime,
 	limit: number,
 	asOf: DateTime,
+	spent: number,
 ) {
 	const dayCount =
 		Math.max(Math.floor(end.startOf("day").diff(start.startOf("day"), "days").days), 0) + 1
 	const elapsedDays = Math.min(
 		Math.max(Math.floor(asOf.startOf("day").diff(start.startOf("day"), "days").days) + 1, 0),
 		dayCount,
-	)
-	const spent = round2(
-		records
-			.filter(record => {
-				const date = parseDatetime(record.datetime)
-				return date >= start.startOf("day") && date <= asOf.endOf("day")
-			})
-			.reduce((total, record) => total - record.amount, 0),
 	)
 	const remainingDays = dayCount - elapsedDays
 	const currentPace = elapsedDays ? round2(spent / elapsedDays) : 0
@@ -388,29 +377,16 @@ function getBudgetAnalytics(
 	}
 }
 
-function getCategoryData(
-	records: Record[],
-	categories: CategoryWithChildren[],
-	start: DateTime,
-	end: DateTime,
-) {
+function getCategoryData(records: Record[], categories: CategoryWithChildren[]) {
 	const data = categories
 		.map(category => {
-			const matching = records.filter(record => {
-				const date = parseDatetime(record.datetime)
-				return (
-					record.amount < 0 &&
-					date >= start.startOf("day") &&
-					date <= end.endOf("day") &&
+			const matching = records.filter(
+				record =>
+					budgetSpent([record]) !== 0 &&
 					(record.category.id === category.id ||
-						record.category.parent_category_id === category.id)
-				)
-			})
-			return {
-				...category,
-				records: matching.length,
-				amount: round2(matching.reduce((total, record) => total - record.amount, 0)),
-			}
+						record.category.parent_category_id === category.id),
+			)
+			return { ...category, records: matching.length, amount: budgetSpent(matching) }
 		})
 		.filter(category => category.records > 0)
 		.sort((a, b) => b.amount - a.amount)

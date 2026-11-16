@@ -2,6 +2,7 @@ import { DateTime } from "luxon"
 import { useMemo } from "react"
 import TrendChart from "@/components/charts/trend-chart"
 import { parseDatetime, round2 } from "@/lib/utils"
+import { budgetSpent } from "@/logic/budgets"
 import type { Record } from "@/types"
 
 type BudgetProgressPoint = {
@@ -74,12 +75,17 @@ function buildSeries(records: Record[], start: DateTime, end: DateTime, asOf: Da
 	)
 	const spendingByDay = new Map<string, number>()
 
+	// Every attached Record counts, as in the Budget's spent; one dated outside the elapsed
+	// window lands on its nearest day so the last point equals that figure.
+	const first = start.startOf("day")
+	const lastElapsed = start.plus({ days: Math.max(elapsedDayCount - 1, 0) }).startOf("day")
 	for (const record of records) {
-		const date = parseDatetime(record.datetime)
-		if (record.amount >= 0 || date < start.startOf("day") || date > end.endOf("day")) continue
-		const key = date.toISODate()
+		const key = DateTime.min(
+			DateTime.max(parseDatetime(record.datetime).startOf("day"), first),
+			lastElapsed,
+		).toISODate()
 		if (!key) continue
-		spendingByDay.set(key, round2((spendingByDay.get(key) ?? 0) - record.amount))
+		spendingByDay.set(key, round2((spendingByDay.get(key) ?? 0) + budgetSpent([record])))
 	}
 
 	let cumulative = 0

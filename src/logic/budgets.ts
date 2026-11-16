@@ -1,14 +1,22 @@
 // Mirrors `Api\BudgetController` + `Api\BudgetRecordController` + `Budget::appQuery`.
 
 import { db } from "@/data/db"
+import { contribution } from "@/logic/analytics"
 import { enrichRecords } from "@/logic/records"
-import { newId, round2 } from "@/logic/shared"
+import { fromCents, newId } from "@/logic/shared"
 import { Validator } from "@/logic/validate"
 import type { Record as AppRecord, Budget } from "@/types"
 
 export type BudgetDetail = Budget & { records: AppRecord[] }
 
 export type BudgetFilters = { query?: string | null }
+
+/** A Budget's spent: the Dashboard's rule (Treatment-aware, refunds subtract, no clamp at zero). */
+export function budgetSpent(records: Pick<AppRecord, "amount" | "analytics_treatment">[]) {
+	return fromCents(
+		records.reduce((sum, r) => sum + contribution(r.analytics_treatment, r.amount).spending, 0),
+	)
+}
 
 export async function listBudgets(filters: BudgetFilters = {}) {
 	let rows = await db.budgets.toArray()
@@ -25,15 +33,12 @@ export async function listBudgets(filters: BudgetFilters = {}) {
 		list.push(link.record_id)
 		recordIdsByBudget.set(link.budget_id, list)
 	}
-	const records = await db.records.toArray()
-	const amountByRecord = new Map(records.map(r => [r.id, r.amount]))
+	const enrichedRecords = await enrichRecords(await db.records.toArray())
+	const recordById = new Map(enrichedRecords.map(r => [r.id, r]))
 	const enriched = rows.map(budget => ({
 		...budget,
-		used_amount: round2(
-			(recordIdsByBudget.get(budget.id) ?? []).reduce(
-				(sum, id) => sum + (amountByRecord.get(id) ?? 0),
-				0,
-			),
+		used_amount: budgetSpent(
+			(recordIdsByBudget.get(budget.id) ?? []).flatMap(id => recordById.get(id) ?? []),
 		),
 	}))
 	enriched.sort((a, b) => b.start_date.localeCompare(a.start_date))
@@ -56,11 +61,7 @@ export async function getBudget(id: string): Promise<BudgetDetail> {
 		y.datetime.localeCompare(x.datetime),
 	)
 
-	return {
-		...budget,
-		used_amount: round2(records.reduce((sum, r) => sum + r.amount, 0)),
-		records: enriched,
-	}
+	return { ...budget, used_amount: budgetSpent(enriched), records: enriched }
 }
 
 function validateBudget(input: {

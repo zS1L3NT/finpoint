@@ -139,7 +139,7 @@ function BudgetCard({ budget, onEdit }: { budget: Budget; onEdit: () => void }) 
 	const state = budgetState(budget)
 	const start = parseDate(budget.start_date).startOf("day")
 	const end = parseDate(budget.end_date).endOf("day")
-	const spent = Math.abs(Math.min(budget.used_amount, 0))
+	const spent = budget.used_amount
 	const usage = budget.amount === 0 ? 0 : (spent / budget.amount) * 100
 	const remaining = budget.amount - spent
 	const over = remaining < 0
