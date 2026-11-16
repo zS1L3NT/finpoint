@@ -73,6 +73,7 @@ function validateBudget(input: {
 	const v = new Validator()
 	const name = v.text(input.name, "name")
 	const amount = v.amount(input.amount, "amount")
+	if (amount < 0) v.reject("amount", "Amount must be zero or more.")
 	const start_date = v.date(input.start_date, "start_date", "Enter a valid start date.")
 	const end_date = v.date(input.end_date, "end_date", "Enter a valid end date.")
 	if (start_date && end_date && end_date < start_date) {

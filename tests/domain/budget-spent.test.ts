@@ -6,7 +6,7 @@ import { beforeEach, expect, test } from "bun:test"
 const { db } = await import("../../src/data/db")
 const { createCategory } = await import("../../src/logic/categories")
 const { createRecord } = await import("../../src/logic/records")
-const { attachBudgetRecord, createBudget, getBudget, listBudgets } = await import(
+const { attachBudgetRecord, createBudget, getBudget, listBudgets, updateBudget } = await import(
 	"../../src/logic/budgets"
 )
 
@@ -59,4 +59,16 @@ test("a refund on a spending Category subtracts and spent may go negative", asyn
 	await attachBudgetRecord(budget.id, await add("Refund", 130, cat.id))
 	expect((await getBudget(budget.id)).used_amount).toBe(-30)
 	expect((await listBudgets())[0].used_amount).toBe(-30)
+})
+
+test("a negative Budget amount is rejected on create and update", async () => {
+	const input = { name: "Bad", amount: -500, start_date: "2026-10-01", end_date: "2026-10-31" }
+	await expect(createBudget(input)).rejects.toMatchObject({
+		errors: { amount: ["Amount must be zero or more."] },
+	})
+	const { budget } = await seed()
+	await expect(updateBudget(budget.id, input)).rejects.toMatchObject({
+		errors: { amount: ["Amount must be zero or more."] },
+	})
+	expect((await db.budgets.get(budget.id))?.amount).toBe(2000)
 })
