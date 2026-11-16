@@ -176,6 +176,7 @@ export default function RecordsSheet() {
 								is_allocated: shown?.is_allocated,
 								monthly_budget_id: shown?.monthly_budget_id,
 								show_unbudgeted: shown?.show_unbudgeted,
+								effective_spending: shown?.effective_spending,
 								treatment: shown?.treatment,
 							})}
 						>

@@ -58,6 +58,7 @@ export function parseRecordFilters(params: ParamSource): RecordFilters {
 		category_ids: listParam(params.get("category_ids")),
 		monthly_budget_id: textParam(params.get("monthly_budget_id")),
 		show_unbudgeted: looseFlagParam(params.get("show_unbudgeted")),
+		effective_spending: looseFlagParam(params.get("effective_spending")),
 		treatment: textParam(params.get("treatment")),
 	}
 }
