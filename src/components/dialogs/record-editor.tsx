@@ -49,7 +49,7 @@ import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { useDialogCloseAnimation } from "@/hooks/use-dialog-close-animation"
 import { useDefaultFilterEndDateToday, useDefaultFilterStartDate } from "@/hooks/use-settings"
 import { useSubmitLock } from "@/hooks/use-submit-lock"
-import { COLLAPSE_MOTION, SPRING, TRANSITION } from "@/lib/motion"
+import { FIELD_NOTE_COLLAPSE_MOTION, SPRING, TRANSITION } from "@/lib/motion"
 import { cn, formatCurrency, formatDatetime, round2 } from "@/lib/utils"
 import { listMonthlyBudgets } from "@/logic/monthly-budgets"
 import { ConflictError, deleteRecord, recordCompletions, updateRecord } from "@/logic/records"
@@ -380,10 +380,9 @@ export default function RecordEditorDialog({
 										{isPendingAmount && (
 											<motion.div
 												className="overflow-hidden"
-												{...COLLAPSE_MOTION}
+												{...FIELD_NOTE_COLLAPSE_MOTION}
 											>
 												<AllocationMismatch
-													amount={mismatch.amount}
 													allocated={mismatch.allocated}
 													onUseAllocated={() => {
 														form.setFieldValue(

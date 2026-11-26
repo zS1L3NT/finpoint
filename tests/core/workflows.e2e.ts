@@ -179,12 +179,12 @@ test("Record creator: an insufficient Allocation warns that the Record stays Pen
 	await pickCategory(page, "Groceries")
 	await dialog.locator("#amount").fill("-20")
 	const mismatch = dialog.getByRole("status").filter({ hasText: "stays Pending" })
-	await expect(mismatch).toContainText("-$6.80 of -$20.00 allocated")
+	await expect(mismatch).toContainText("Allocated -$6.80")
 	await expect(mismatch).toContainText(
 		"This Record stays Pending until its amount equals its Allocations.",
 	)
 	// The one-step fix takes the Allocations' total; put the short amount back to stay Pending.
-	await mismatch.getByRole("button", { name: "Use -$6.80" }).click()
+	await mismatch.getByRole("button", { name: "Use total -$6.80" }).click()
 	await expect(mismatch).toHaveCount(0)
 	await expect(dialog.locator("#amount")).toHaveValue("-6.8")
 	await dialog.locator("#amount").fill("-20")

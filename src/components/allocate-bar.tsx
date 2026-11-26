@@ -1,4 +1,3 @@
-import { UiIcon as IconifyIcon } from "@/components/icon"
 import { classForCurrency, cn, formatCurrency } from "@/lib/utils"
 
 export default function AllocateBar({
@@ -54,40 +53,40 @@ export default function AllocateBar({
 
 /** Why a Record whose amount differs from its Allocations stays Pending, and the one-step fix. */
 export function AllocationMismatch({
-	amount,
 	allocated,
 	onUseAllocated,
 }: {
-	amount: number
 	allocated: number
 	onUseAllocated: () => void
 }) {
-	// Reads as a field note under Amount, like the green autofill notes, not a boxed alert.
+	// One quiet line in the Amount field's note slot: the state, the total and the fix.
 	return (
-		<div role="status" className="grid gap-0.5 text-xs/relaxed">
-			<p className="flex flex-wrap items-center gap-x-1.5 font-medium text-amber-700 tabular-nums dark:text-amber-400">
-				<IconifyIcon icon="lucide:circle-alert" className="size-3.5 shrink-0" />
+		<p
+			role="status"
+			className="flex flex-wrap items-baseline gap-x-1.5 text-xs/relaxed tabular-nums"
+		>
+			<span className="font-medium text-amber-700 dark:text-amber-400">Pending</span>
+			<span aria-hidden className="text-muted-foreground">
+				·
+			</span>
+			<span className="text-muted-foreground">
 				{allocated === 0
-					? "No statements allocated yet"
-					: `${formatCurrency(allocated)} of ${formatCurrency(amount)} allocated`}
-				{allocated !== 0 ? (
-					<>
-						<span aria-hidden className="text-muted-foreground">
-							·
-						</span>
-						<button
-							type="button"
-							className="cursor-pointer rounded-sm underline decoration-current/40 underline-offset-2 transition-colors duration-150 ease-out hover:decoration-current focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-							onClick={onUseAllocated}
-						>
-							Use {formatCurrency(allocated)}
-						</button>
-					</>
-				) : null}
-			</p>
-			<p className="text-muted-foreground">
+					? "No Statements allocated"
+					: `Allocated ${formatCurrency(allocated)}`}
+			</span>
+			<span className="sr-only">
 				This Record stays Pending until its amount equals its Allocations.
-			</p>
-		</div>
+			</span>
+			{allocated !== 0 ? (
+				<button
+					type="button"
+					aria-label={`Use total ${formatCurrency(allocated)}`}
+					className="cursor-pointer rounded-sm font-medium text-foreground underline decoration-current/40 underline-offset-2 transition-colors duration-150 ease-out hover:decoration-current focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+					onClick={onUseAllocated}
+				>
+					Use total
+				</button>
+			) : null}
+		</p>
 	)
 }
