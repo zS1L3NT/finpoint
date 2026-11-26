@@ -515,8 +515,8 @@ export default function DataSettingsPage() {
 												tone: "good",
 												icon: "lucide:cloud-check",
 												title: "In sync with Google Drive",
-												detail: sync.lastCheckAt
-													? `Last checked ${formatRelativeTime(sync.lastCheckAt, now)}`
+												detail: sync.lastSyncAt
+													? `Last synced ${formatRelativeTime(sync.lastSyncAt, now)}`
 													: "Everything is backed up.",
 											}
 
@@ -749,11 +749,11 @@ export default function DataSettingsPage() {
 												value={driveState.label}
 											/>
 										</dl>
-										<dl className="grid grid-cols-3 divide-x rounded-lg border bg-background/60 text-center">
+										{/* When the two copies last matched, and when the Drive copy last changed. */}
+										<dl className="grid grid-cols-2 divide-x rounded-lg border bg-background/60 text-center">
 											{[
 												["Last synced", sync.lastSyncAt],
-												["Drive copy saved", sync.remoteModifiedTime],
-												["Last checked", sync.lastCheckAt],
+												["Last Drive change", sync.remoteModifiedTime],
 											].map(([label, at]) => (
 												<div key={label} className="grid gap-0.5 px-2 py-2">
 													<dt className="text-[0.6875rem] text-muted-foreground">
