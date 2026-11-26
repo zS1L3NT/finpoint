@@ -86,9 +86,13 @@ export function ClearFiltersButton({
 	return (
 		<Button
 			type="button"
-			variant="outline"
+			variant="ghost"
 			data-filter-clear
-			className={cn("w-full", FILTER_CONTROL_CLASS, className)}
+			// A quiet ghost action: it only resets the filters beside it.
+			className={cn(
+				"w-full text-muted-foreground hover:text-foreground sm:justify-start",
+				className,
+			)}
 			disabled={!count}
 			onClick={onClear}
 		>
