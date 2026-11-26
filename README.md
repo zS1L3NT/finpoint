@@ -111,6 +111,8 @@ Finpoint will be available at [http://localhost:5173](http://localhost:5173). Th
 
 Google Drive sync is optional. To enable it, copy the `.env.example` file to `.env`, create a Web OAuth client in Google Cloud Console and fill in the credentials.
 
+On the OAuth client, add each site (for example `http://localhost:5173`) as an authorised JavaScript origin, and its `/sync` page (for example `http://localhost:5173/sync`) as an authorised redirect URI. Regular browser tabs sign in through a Google popup. Apps installed to the Home Screen, and tabs that block the popup, sign in by redirecting to Google and back to `/sync` instead.
+
 ```sh
 $ cp .env.example .env
 ```
