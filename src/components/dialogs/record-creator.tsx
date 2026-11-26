@@ -139,12 +139,14 @@ export default function RecordCreatorDialog({
 				: inferredDatetime.source === "description"
 					? "Inferred from the statement description."
 					: "Copied from the statement date.",
+		// A description date without a time fills midnight, which is not worth marking as copied.
 		time:
-			!inferredDatetime.hasTime || value.slice(11) !== inferredDatetime.value.slice(11)
+			value.slice(11) !== inferredDatetime.value.slice(11) ||
+			(inferredDatetime.source === "description" && !inferredDatetime.hasTime)
 				? undefined
 				: inferredDatetime.source === "description"
-					? "Inferred from the statement description."
-					: "Copied from the statement.",
+					? "From the description."
+					: "From the statement.",
 	})
 	const categoriesFlat = categories.flatMap(category => [category, ...category.children])
 
