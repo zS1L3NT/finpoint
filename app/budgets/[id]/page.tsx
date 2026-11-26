@@ -138,7 +138,7 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 
 	const recordColumns = useRecordColumns<Record>({
 		grouped: true,
-		pageName: `Budget ${budget?.id ?? ""}`,
+		pageName: budget?.name ?? "Budget",
 		onEdit: handleEdit,
 		extraActions: record => (
 			<Button
@@ -156,7 +156,7 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 	})
 	const recordMobileRow = useRecordMobileRow<Record>({
 		grouped: true,
-		pageName: `Budget ${budget?.id ?? ""}`,
+		pageName: budget?.name ?? "Budget",
 		onEdit: handleEdit,
 		extraActions: record => (
 			<Button
@@ -404,7 +404,7 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 					title={drillTitle}
 					description={`${budget.name} · ${pluralize(drillRecords.length, "Record")} · ${formatCurrency(budgetSpent(drillRecords))}`}
 					records={drillRecords}
-					pageName={`Budget ${budget.id}`}
+					pageName={budget.name}
 					onClose={closeDrill}
 				/>
 			) : null}
