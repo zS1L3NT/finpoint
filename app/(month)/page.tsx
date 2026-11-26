@@ -255,7 +255,6 @@ export default function DashboardPage() {
 						<CategoryHistoryChart
 							key={`${dataMonth}-${dataYear}`}
 							categories={scopedCategories}
-							scopeLabel={scopeLabel}
 							months={data.comparison_history}
 							through={period.through}
 							monthlyBudgetIds={scope === "all" ? null : scopedBudgetIds}

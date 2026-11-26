@@ -33,7 +33,7 @@ test("Budget detail: category and chart day drills open the Budget's Records in 
 	const sheet = page.locator('[data-slot="sheet-content"]')
 	await test.step("category drill: shows only that category's Records with their total", async () => {
 		await card(page, "Spending by category")
-			.getByRole("button", { name: "Open Groceries Records", exact: true })
+			.getByRole("link", { name: /^Groceries/ })
 			.click()
 		await expect(page).toHaveURL(/records=1/)
 		await expect(page).toHaveURL(/category=t1-cat-groceries/)
@@ -675,7 +675,7 @@ test.describe("pinned overview date", () => {
 		}
 	})
 
-	test("Category trend: a Category name underlines on hover for the selected and another month", async ({
+	test("Category trend: a Category row highlights on hover for the selected and another month", async ({
 		page,
 	}) => {
 		test.skip(test.info().project.name === "mobile", "Touch has no hover")
@@ -684,16 +684,22 @@ test.describe("pinned overview date", () => {
 		const surface = card(page, "Category trend").getByRole("application").first()
 		await surface.scrollIntoViewIfNeeded()
 		const breakdown = page.getByRole("group", { name: /^Categories in / })
-		const underlined = async () => {
+		// Every category list row shares one hover: a row background, never an underline.
+		const highlighted = async () => {
 			const row = breakdown.getByRole("link").first()
+			await page.mouse.move(0, 0)
+			const rest = await row.evaluate(element => getComputedStyle(element).backgroundColor)
 			await row.hover()
+			await expect
+				.poll(() => row.evaluate(element => getComputedStyle(element).backgroundColor))
+				.not.toBe(rest)
 			return row
 				.locator("span.truncate")
 				.first()
 				.evaluate(name => getComputedStyle(name).textDecorationLine)
 		}
 		await expect(breakdown).toHaveAccessibleName("Categories in Oct 2026")
-		expect(await underlined(), "selected month").toBe("underline")
+		expect(await highlighted(), "selected month").toBe("none")
 		await surface.focus()
 		// Walk back from the selected month to the nearest one that has spending to list.
 		await surface.press("End")
@@ -703,7 +709,7 @@ test.describe("pinned overview date", () => {
 			await expect(breakdown).not.toHaveAccessibleName("Categories in Oct 2026")
 			await expect(breakdown.getByRole("link").first()).toBeVisible({ timeout: 500 })
 		}).toPass({ timeout: 15_000 })
-		expect(await underlined(), "another month").toBe("underline")
+		expect(await highlighted(), "another month").toBe("none")
 	})
 
 	test("chart tooltips: keyboard sweeps expose actual numeric values", async ({ page }) => {

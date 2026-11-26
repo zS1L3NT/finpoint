@@ -5,9 +5,10 @@ import { DateTime } from "luxon"
 import { use, useMemo, useState } from "react"
 import { toast } from "sonner"
 import BudgetProgressChart from "@/components/charts/budget-progress-chart"
+import CategorySpendingMix from "@/components/charts/category-spending-mix"
 import BudgetEditorDialog from "@/components/dialogs/budget-editor"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
-import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
+import { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import { Metric, MetricGrid } from "@/components/metric"
@@ -28,7 +29,6 @@ import {
 import { useRecordEditor } from "@/hooks/use-record-editor"
 import { useSubmitLock } from "@/hooks/use-submit-lock"
 import { useUrlParams } from "@/hooks/use-url-params"
-import { themeColor } from "@/lib/palette"
 import { formatCurrency, parseDate, pluralize, round2 } from "@/lib/utils"
 import {
 	attachBudgetRecord,
@@ -38,7 +38,7 @@ import {
 	getBudget,
 } from "@/logic/budgets"
 import { listCategories } from "@/logic/categories"
-import { pathBudgets } from "@/routes"
+import { pathBudget, pathBudgets } from "@/routes"
 import type { Budget, CategoryWithChildren, Record } from "@/types"
 
 export default function BudgetPage({ params }: { params: Promise<{ id: string }> }) {
@@ -304,52 +304,19 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 						<CardHeader className="border-b">
 							<CardTitle>Spending by category</CardTitle>
 							<CardDescription>
-								Where this budget’s outgoing Records went. Select one to open its
+								Where this Budget’s outgoing Records went. Select one to open its
 								Records.
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
 							{categoryData.length ? (
-								<div className="-mx-2 grid gap-1">
-									{categoryData.map(category => (
-										<button
-											key={category.id}
-											type="button"
-											aria-label={`Open ${category.name} Records`}
-											className="grid cursor-pointer gap-2 rounded-lg p-2 text-left transition-colors duration-150 ease-out outline-none hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring active:bg-muted/70"
-											onClick={() => openDrill({ category: category.id })}
-										>
-											<div className="flex items-center gap-3">
-												<Icon
-													icon={category.icon}
-													color={category.color}
-													size={14}
-												/>
-												<div className="min-w-0 flex-1">
-													<p className="truncate text-sm font-medium">
-														{category.name}
-													</p>
-													<p className="text-xs text-muted-foreground">
-														{category.records} Record
-														{category.records === 1 ? "" : "s"}
-													</p>
-												</div>
-												<p className="text-sm font-medium tabular-nums">
-													{formatCurrency(category.amount)}
-												</p>
-											</div>
-											<div className="ml-10 h-1.5 overflow-hidden rounded-full bg-muted">
-												<div
-													className="h-full origin-left rounded-full transition-transform duration-300 ease-out motion-reduce:transition-none"
-													style={{
-														transform: `scaleX(${category.share / 100})`,
-														backgroundColor: themeColor(category.color),
-													}}
-												/>
-											</div>
-										</button>
-									))}
-								</div>
+								<CategorySpendingMix
+									categories={categoryData}
+									footnote="Shares of this Budget’s outgoing spending."
+									recordHref={id =>
+										`${pathBudget(budget?.id ?? "")}?${new URLSearchParams({ records: "1", category: id })}`
+									}
+								/>
 							) : (
 								<p className="py-10 text-center text-xs text-muted-foreground">
 									No outgoing Records in this budget.
@@ -438,7 +405,7 @@ function Legend({ color, label }: { color: string; label: string }) {
 }
 
 function getCategoryData(records: Record[], categories: CategoryWithChildren[]) {
-	const data = categories
+	return categories
 		.map(category => {
 			const matching = records.filter(
 				record =>
@@ -446,13 +413,17 @@ function getCategoryData(records: Record[], categories: CategoryWithChildren[]) 
 					(record.category.id === category.id ||
 						record.category.parent_category_id === category.id),
 			)
-			return { ...category, records: matching.length, amount: budgetSpent(matching) }
+			const amount = budgetSpent(matching)
+			return {
+				id: category.id,
+				name: category.name,
+				icon: category.icon,
+				color: category.color,
+				spending: amount,
+				outflow: amount,
+				refunds: 0,
+				records: matching.length,
+			}
 		})
 		.filter(category => category.records > 0)
-		.sort((a, b) => b.amount - a.amount)
-	const maximum = Math.max(...data.map(category => category.amount), 0)
-	return data.map(category => ({
-		...category,
-		share: maximum ? Math.max((category.amount / maximum) * 100, 2) : 0,
-	}))
 }

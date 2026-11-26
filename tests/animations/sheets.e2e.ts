@@ -156,7 +156,10 @@ test("Budget Records sheet: animates in and out when closed by Escape and by its
 }, async ({ page, workspace }) => {
 	void workspace
 	await page.goto("/budgets/t1-b-manual")
-	const category = page.getByRole("button", { name: "Open Groceries Records", exact: true })
+	const category = page
+		.locator('[data-slot="card"]')
+		.filter({ hasText: "Spending by category" })
+		.getByRole("link", { name: /^Groceries/ })
 	const open = () =>
 		expectModalEntrance(page, '[data-slot="sheet-content"]', async () => {
 			await category.click()

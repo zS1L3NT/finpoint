@@ -5,6 +5,7 @@ import Link from "next/link"
 import { type ComponentProps, useState } from "react"
 import BarChart from "@/components/charts/bar-chart"
 import CategorySpendingMix from "@/components/charts/category-spending-mix"
+import { UiIcon } from "@/components/icon"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { themeColor } from "@/lib/palette"
 import { cn, formatCurrency } from "@/lib/utils"
@@ -24,7 +25,6 @@ const otherColor = "var(--muted-foreground)"
 export default function CategoryHistoryChart({
 	months,
 	categories,
-	scopeLabel,
 	through,
 	monthlyBudgetIds,
 	recordHref,
@@ -32,7 +32,6 @@ export default function CategoryHistoryChart({
 }: {
 	months: SpendingHistoryMonth[]
 	categories: ComponentProps<typeof CategorySpendingMix>["categories"]
-	scopeLabel: string
 	through: string | null
 	monthlyBudgetIds: string[] | null
 	recordHref: (ids: string, at: DateTime) => string
@@ -52,6 +51,13 @@ export default function CategoryHistoryChart({
 						? category.spending
 						: monthlyBudgetIds.reduce(
 								(sum, id) => sum + (category.monthly_budget_spending[id] ?? 0),
+								0,
+							),
+				records:
+					monthlyBudgetIds === null
+						? category.records
+						: monthlyBudgetIds.reduce(
+								(sum, id) => sum + (category.monthly_budget_records[id] ?? 0),
 								0,
 							),
 			}))
@@ -83,7 +89,7 @@ export default function CategoryHistoryChart({
 		<div
 			className={cn(
 				"grid items-start gap-5 xl:items-stretch xl:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]",
-				limit !== undefined && "xl:h-[26rem]",
+				limit !== undefined && "xl:h-[28rem]",
 			)}
 		>
 			<Card className="order-2 min-h-0 min-w-0 xl:order-1">
@@ -94,10 +100,10 @@ export default function CategoryHistoryChart({
 							: `Categories in ${shown?.month ?? "this month"}`}
 						{badge}
 					</CardTitle>
+					{/* The scope is in the badge beside the title, so the line only describes amounts. */}
 					<CardDescription className="tabular-nums">
-						{scopeLabel} ·{" "}
 						{shown?.current
-							? `${formatCurrency(categories.reduce((sum, category) => sum + category.outflow, 0))} expenses · ${formatCurrency(categories.reduce((sum, category) => sum + category.refunds, 0))} refunds`
+							? `${formatCurrency(categories.reduce((sum, category) => sum + category.outflow, 0))} expenses · ${formatCurrency(categories.reduce((sum, category) => sum + category.refunds, 0))} refunds · shares exclude refunds`
 							: "Gross spending · refunds excluded"}
 					</CardDescription>
 				</CardHeader>
@@ -108,11 +114,20 @@ export default function CategoryHistoryChart({
 							aria-label={`Categories in ${shown.month}`}
 							aria-live="polite"
 						>
-							<p className="mb-3 text-xs font-medium">
-								{shown.month} · selected month
+							<p className="mb-2 flex justify-between gap-4 px-2 text-xs font-medium">
+								<span>{shown.month} · selected month</span>
+								<span className="tabular-nums">
+									{formatCurrency(
+										categories.reduce(
+											(sum, category) => sum + category.outflow,
+											0,
+										),
+									)}
+								</span>
 							</p>
 							<CategorySpendingMix
 								categories={categories}
+								footnote={null}
 								limit={limit}
 								recordHref={id =>
 									recordHref(id, DateTime.fromFormat(shown.month, "MMM yyyy"))
@@ -134,7 +149,7 @@ export default function CategoryHistoryChart({
 							onClick={() =>
 								setExpanded(limit === undefined ? null : (shown?.month ?? null))
 							}
-							className="mt-3 text-xs text-muted-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+							className="mt-2 px-2 text-xs text-muted-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 						>
 							{limit === undefined
 								? "Show fewer categories"
@@ -255,9 +270,12 @@ function prepareSeries(items: (SpendingSeries & { total: number })[]): ChartSeri
 		ranked.push({
 			id: "other",
 			name: `Other (${other.length})`,
+			icon: "",
 			color: otherColor,
 			spending: total,
 			monthly_budget_spending: {},
+			records: other.reduce((sum, item) => sum + item.records, 0),
+			monthly_budget_records: {},
 			total,
 			key: "series-other",
 			members: other,
@@ -328,16 +346,16 @@ function MonthBreakdown({
 	const entries = Object.entries(month.seriesValues)
 		.filter(([, value]) => value > 0)
 		.sort(([, a], [, b]) => b - a)
-	const share = (value: number) => (total ? `${((value / total) * 100).toFixed(1)}%` : "0%")
+	const share = (value: number) => (total ? `${((value / total) * 100).toFixed(0)}%` : "0%")
 
 	return (
 		<div
 			role="group"
 			aria-label={`Categories in ${month.month}`}
-			className="grid gap-4 text-xs"
+			className="grid gap-0.5"
 			aria-live="polite"
 		>
-			<p className="flex justify-between gap-4 pb-1 font-medium">
+			<p className="mb-2 flex justify-between gap-4 px-2 text-xs font-medium">
 				<span>
 					{month.month}
 					{month.current ? " · selected month" : ""}
@@ -347,70 +365,105 @@ function MonthBreakdown({
 				) : null}
 			</p>
 			{!month.included ? (
-				<p className="text-muted-foreground">Unavailable: {month.reason}</p>
+				<p className="text-xs text-muted-foreground">Unavailable: {month.reason}</p>
 			) : entries.length === 0 ? (
-				<p className="text-muted-foreground">No spending recorded in this period.</p>
+				<p className="text-xs text-muted-foreground">
+					No spending recorded in this period.
+				</p>
 			) : (
-				entries.slice(0, limit).map(([key, value]) => {
-					const details = month.seriesDetails[key] ?? []
-					return (
-						<Link
-							key={key}
-							href={recordHref(
-								details.map(item => item.id).join(","),
-								DateTime.fromFormat(month.month, "MMM yyyy"),
-							)}
-							scroll={false}
-							className="group grid min-w-0 gap-1.5 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+				<>
+					{/* One bar split by category, as in the selected month's list. */}
+					{entries.length > 1 ? (
+						<div
+							aria-hidden
+							className="mx-2 mb-2 flex h-2 gap-0.5 overflow-hidden rounded-full"
 						>
-							<div className="grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-x-3">
+							{entries.map(([key, value]) => (
 								<span
-									className="size-2.5 rounded-full"
-									style={{ backgroundColor: config[key]?.color }}
-								/>
-								<span className="truncate group-hover:underline">
-									{config[key]?.label ?? key}
-								</span>
-								<span className="font-medium tabular-nums">
-									{formatCurrency(value)}
-								</span>
-								<span className="w-12 text-right text-muted-foreground tabular-nums">
-									{share(value)}
-								</span>
-							</div>
-							<div className="h-1.5 overflow-hidden rounded-full bg-muted">
-								<div
-									className="h-full rounded-full"
+									key={key}
+									className="h-full first:rounded-l-full last:rounded-r-full"
 									style={{
-										width: share(value),
+										flex: `${value} 1 0`,
 										backgroundColor: config[key]?.color,
 									}}
 								/>
-							</div>
-							{limit === undefined &&
-								details.length > 1 &&
-								details.map(item => (
-									<div
-										key={item.id}
-										className="grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-x-3 pl-5 text-muted-foreground"
-									>
-										<span
-											className="size-2 rounded-full"
-											style={{ backgroundColor: themeColor(item.color) }}
-										/>
-										<span className="truncate">{item.name}</span>
-										<span className="tabular-nums">
-											{formatCurrency(item.spending)}
-										</span>
-										<span className="w-12 text-right tabular-nums">
-											{share(item.spending)}
-										</span>
-									</div>
-								))}
-						</Link>
-					)
-				})
+							))}
+						</div>
+					) : null}
+					{entries.slice(0, limit).map(([key, value]) => {
+						const details = month.seriesDetails[key] ?? []
+						// One category shows its icon; a group of several lists them beneath.
+						const icon = details.length === 1 ? details[0]?.icon : undefined
+						return (
+							<Link
+								key={key}
+								href={recordHref(
+									details.map(item => item.id).join(","),
+									DateTime.fromFormat(month.month, "MMM yyyy"),
+								)}
+								scroll={false}
+								className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 rounded-lg px-2 py-1.5 transition-colors duration-150 ease-out hover:bg-muted/50 active:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+							>
+								<span
+									aria-hidden
+									className="grid size-8 place-items-center rounded-full"
+									style={{ backgroundColor: config[key]?.color }}
+								>
+									{icon ? (
+										<UiIcon icon={icon} className="size-4 text-white" />
+									) : null}
+								</span>
+								<span className="grid min-w-0">
+									<span className="min-w-0 truncate text-sm font-medium">
+										{config[key]?.label ?? key}
+									</span>
+									<span className="overflow-hidden text-xs text-ellipsis whitespace-nowrap text-muted-foreground tabular-nums">
+										{recordCount(details)}
+										{details.length > 1
+											? ` · ${details.length} categories`
+											: ""}
+									</span>
+								</span>
+								<span className="grid shrink-0 justify-items-end tabular-nums">
+									<span className="text-sm font-medium">
+										{formatCurrency(value)}
+									</span>
+									<span className="text-xs text-muted-foreground">
+										{share(value)}
+									</span>
+								</span>
+								{limit === undefined && details.length > 1
+									? details.map(item => (
+											<span
+												key={item.id}
+												className="col-span-2 col-start-2 grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-x-3 text-xs text-muted-foreground"
+											>
+												<span
+													className="size-2 rounded-full"
+													style={{
+														backgroundColor: themeColor(item.color),
+													}}
+												/>
+												<span className="truncate">{item.name}</span>
+												<span className="tabular-nums">
+													{formatCurrency(item.spending)}
+												</span>
+												<span className="w-12 text-right tabular-nums">
+													{share(item.spending)}
+												</span>
+											</span>
+										))
+									: null}
+							</Link>
+						)
+					})}
+				</>
 			)}
 		</div>
 	)
+}
+
+const recordCount = (details: SpendingSeries[]) => {
+	const records = details.reduce((sum, item) => sum + item.records, 0)
+	return `${records} ${records === 1 ? "Record" : "Records"}`
 }
