@@ -8,12 +8,11 @@ import CategoryDialog from "@/components/dialogs/category"
 import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
-import MonthlyBudgetBadge from "@/components/monthly-budget-badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useHistory } from "@/history"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
-import { canUseDefaultMonthlyBudget, treatmentLabel } from "@/lib/analytics"
+import { treatmentLabel } from "@/lib/analytics"
 import { cardEnter } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 import { listCategories } from "@/logic/categories"
@@ -110,24 +109,6 @@ export default function CategoriesPage() {
 									</span>
 								</h3>
 								<div className="overflow-hidden rounded-xl border bg-card">
-									<div
-										aria-hidden
-										className={cn(
-											ROW_GRID,
-											"hidden border-b bg-muted/30 py-2 text-xs font-medium text-muted-foreground",
-											// A lone Category reads without column headings.
-											(items.length > 1 || subcategories > 0) && "sm:grid",
-										)}
-									>
-										<span>Category</span>
-										<span>
-											{canUseDefaultMonthlyBudget(section.value)
-												? "Default monthly budget"
-												: null}
-										</span>
-										<span className="text-right">Records</span>
-										<span />
-									</div>
 									{items.map((category, index) => (
 										<motion.div
 											key={category.id}
@@ -176,12 +157,8 @@ const SECTIONS = (
 	["spending", "income", "saving_investment", "neutral", "automatic"] as AnalyticsTreatment[]
 ).map(value => ({ value, label: treatmentLabel(value) }))
 
-// One set of tracks for the header and every row, so budgets and counts line up down the list.
-const ROW_GRID =
-	"grid-cols-[minmax(0,1fr)_auto_2rem] items-center gap-x-3 px-3 sm:grid-cols-[minmax(0,1fr)_11rem_5rem_7.5rem] sm:px-4"
-
-const totalRecords = (category: CategoryWithChildren) =>
-	category.records_count + category.children.reduce((sum, child) => sum + child.records_count, 0)
+// Every row shares one set of tracks, so the actions line up down the list.
+const ROW_GRID = "grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 px-3 sm:px-4"
 
 /** A Category and its subcategories: one row each, the subcategories hanging off a guide line. */
 function CategoryGroup({
@@ -199,7 +176,6 @@ function CategoryGroup({
 		<article className="grid min-w-0 grid-cols-1">
 			<CategoryRow
 				category={category}
-				records={totalRecords(category)}
 				onEdit={() => onEdit(category)}
 				onFindRecords={onFindRecords}
 				action={
@@ -226,7 +202,6 @@ function CategoryGroup({
 						>
 							<CategoryRow
 								category={child}
-								records={child.records_count}
 								onEdit={() => onEdit(child)}
 								onFindRecords={onFindRecords}
 								child
@@ -241,22 +216,17 @@ function CategoryGroup({
 
 function CategoryRow({
 	category,
-	records,
 	onEdit,
 	onFindRecords,
 	action,
 	child,
 }: {
 	category: Category | CategoryWithChildren
-	records: number
 	onEdit: () => void
 	onFindRecords: () => void
 	action?: React.ReactNode
 	child?: boolean
 }) {
-	const monthlyBudget = canUseDefaultMonthlyBudget(category.analytics_treatment)
-		? category.default_monthly_budget
-		: null
 	return (
 		<div
 			className={cn(
@@ -276,47 +246,27 @@ function CategoryRow({
 				aria-label={`Edit ${category.name}`}
 			>
 				<Icon {...category} size={child ? 12 : 16} />
-				<span className="grid min-w-0 gap-0.5">
-					<span
-						className={cn("break-words sm:truncate", child ? "text-sm" : "font-medium")}
-					>
-						{category.name}
-					</span>
-					{monthlyBudget ? (
-						<MonthlyBudgetBadge
-							name={<span className="min-w-0 truncate">{monthlyBudget.name}</span>}
-							color={monthlyBudget.color}
-							title="Default monthly budget"
-							className="max-w-full sm:hidden"
-						/>
-					) : canUseDefaultMonthlyBudget(category.analytics_treatment) ? (
-						<span className="text-xs text-muted-foreground sm:hidden">Unbudgeted</span>
-					) : null}
+				<span
+					className={cn(
+						"min-w-0 break-words sm:truncate",
+						child ? "text-sm" : "font-medium",
+					)}
+				>
+					{category.name}
 				</span>
 			</button>
-			<span className="hidden min-w-0 sm:block">
-				{monthlyBudget ? (
-					<MonthlyBudgetBadge
-						name={<span className="truncate">{monthlyBudget.name}</span>}
-						color={monthlyBudget.color}
-						title="Default monthly budget"
-						className="max-w-full"
-					/>
-				) : canUseDefaultMonthlyBudget(category.analytics_treatment) ? (
-					<span className="text-xs text-muted-foreground">Unbudgeted</span>
-				) : null}
+			<span className="relative flex items-center justify-end gap-1">
+				{action}
+				<Link
+					href={pathRecords({ category_ids: category.id })}
+					aria-label={`Open Records for ${category.name}`}
+					title="Open Records"
+					className="grid size-7 place-items-center rounded-md text-muted-foreground outline-none transition-colors duration-150 ease-out hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+					onClick={onFindRecords}
+				>
+					<IconifyIcon icon="lucide:receipt-text" className="size-3.5" />
+				</Link>
 			</span>
-			<Link
-				href={pathRecords({ category_ids: category.id })}
-				aria-label={`Open Records for ${category.name}`}
-				title="Open Records"
-				className="relative flex items-center justify-end gap-0.5 rounded-md text-xs text-muted-foreground tabular-nums underline-offset-4 outline-none hover:text-foreground hover:underline focus-visible:ring-2 focus-visible:ring-ring"
-				onClick={onFindRecords}
-			>
-				{records.toLocaleString()}
-				<IconifyIcon icon="lucide:chevron-right" className="size-3.5" />
-			</Link>
-			<span className="relative flex justify-end">{action}</span>
 		</div>
 	)
 }
