@@ -54,9 +54,9 @@
     "semantic_hash": "96cc4dd0279ebe7c859ea54c00d86d5d"
   },
   "app/budgets/[id]/page.tsx": {
-    "mtime": 1795709601.3387027,
-    "seen": 1795712774.073901,
-    "ast_hash": "6fbbb0b702aeadb93aa230b5d0f9655d",
+    "mtime": 1795716313.2937207,
+    "seen": 1795718434.586192,
+    "ast_hash": "e138056f895806c52e29396a62b11db5",
     "semantic_hash": ""
   },
   "app/budgets/page.tsx": {
@@ -66,9 +66,9 @@
     "semantic_hash": ""
   },
   "app/categories/page.tsx": {
-    "mtime": 1795710777.5121446,
-    "seen": 1795712774.073903,
-    "ast_hash": "4ede289490855efa3695d0c0cd8fc936",
+    "mtime": 1795716087.634434,
+    "seen": 1795718434.586194,
+    "ast_hash": "730ac6c05f597f07b9fc92191d67cf67",
     "semantic_hash": ""
   },
   "app/importer/page.tsx": {
@@ -132,9 +132,9 @@
     "semantic_hash": ""
   },
   "app/sync/page.tsx": {
-    "mtime": 1795710510.433237,
-    "seen": 1795712774.0739121,
-    "ast_hash": "0ea7dea02e473b34865024324df0524e",
+    "mtime": 1795715731.64328,
+    "seen": 1795718434.5862021,
+    "ast_hash": "5d531a6df53b4c974efc87bbf87e631e",
     "semantic_hash": ""
   },
   "app/template.tsx": {
@@ -162,9 +162,9 @@
     "semantic_hash": "7d8a33d5aa042f85737cd2f3334ae040"
   },
   "next-env.d.ts": {
-    "mtime": 1794904853.845375,
-    "seen": 1795712774.073916,
-    "ast_hash": "aa94238a90e7d04b7a47ecc3145ba6a0",
+    "mtime": 1795718406.36061,
+    "seen": 1795718434.586206,
+    "ast_hash": "8195d2c60ce847a459ae9d308d6a5724",
     "semantic_hash": ""
   },
   "next.config.ts": {
@@ -192,15 +192,15 @@
     "semantic_hash": "b095d9787931bce23ade158b88651f45"
   },
   "src/components/allocate-bar.tsx": {
-    "mtime": 1795708872.2132998,
-    "seen": 1795712774.073921,
-    "ast_hash": "e6c3d31b2e270bf6e53bd66b5525f7b8",
+    "mtime": 1795715808.2140195,
+    "seen": 1795718434.58621,
+    "ast_hash": "4baea6a43610c88400efcddfcde48f02",
     "semantic_hash": ""
   },
   "src/components/charts/budget-progress-chart.tsx": {
-    "mtime": 1795710815.3497972,
-    "seen": 1795712774.073923,
-    "ast_hash": "8913da645272c1195fbaa87cd13ba8dd",
+    "mtime": 1795716248.491101,
+    "seen": 1795718434.5862122,
+    "ast_hash": "f629d98188a138d7961ec6f4697727aa",
     "semantic_hash": ""
   },
   "src/components/charts/cashflow-chart.tsx": {
@@ -282,15 +282,15 @@
     "semantic_hash": ""
   },
   "src/components/dialogs/record-creator.tsx": {
-    "mtime": 1795711031.699378,
-    "seen": 1795712774.07394,
-    "ast_hash": "78f304c8d05088f24e35c124be2d24eb",
+    "mtime": 1795715808.91631,
+    "seen": 1795718434.586228,
+    "ast_hash": "508dd1a9a003eec5a4daa9a601cdeef5",
     "semantic_hash": ""
   },
   "src/components/dialogs/record-editor.tsx": {
-    "mtime": 1794868786.028797,
-    "seen": 1794871795.315249,
-    "ast_hash": "5b53ed0c0ea07435404c555ff84a69d8",
+    "mtime": 1795715835.5445411,
+    "seen": 1795718434.586228,
+    "ast_hash": "e0e20d5ca6a58f0a8d107ce729ca8f38",
     "semantic_hash": ""
   },
   "src/components/dialogs/statement-replacement-review.tsx": {
@@ -456,9 +456,9 @@
     "semantic_hash": "a4ff84041ec7b14b7b4959d5a6b6858a"
   },
   "src/components/table/filter-bar.tsx": {
-    "mtime": 1795710555.9324174,
-    "seen": 1795712774.0739672,
-    "ast_hash": "d8a6e3a5c298ae4091012a9268b93dba",
+    "mtime": 1795716019.4762642,
+    "seen": 1795718434.586255,
+    "ast_hash": "852b7c8107f0fdfec22862d6455fb556",
     "semantic_hash": ""
   },
   "src/components/table/paginated-data-table.tsx": {
@@ -816,8 +816,8 @@
     "semantic_hash": "dee6ea039eb9af120f6063ad8008cf43"
   },
   "src/hooks/use-sync-status.ts": {
-    "mtime": 1795710986.7396595,
-    "seen": 1795712774.074016,
+    "mtime": 1795716899.1247282,
+    "seen": 1795718434.5863008,
     "ast_hash": "3dc4b102044140e2a8e4d5118d45d286",
     "semantic_hash": "3dc4b102044140e2a8e4d5118d45d286"
   },
@@ -846,9 +846,9 @@
     "semantic_hash": "d8c92852de802125bc9968aa90eeba4c"
   },
   "src/lib/motion.ts": {
-    "mtime": 1794868314.628464,
-    "seen": 1794871795.3153138,
-    "ast_hash": "505b0a6354f7968616f736830f5789e5",
+    "mtime": 1795715808.2150788,
+    "seen": 1795718434.586307,
+    "ast_hash": "a7d9c2bd9ecbe79f6b2e61520431f613",
     "semantic_hash": ""
   },
   "src/lib/table-width-classnames.ts": {
@@ -1260,9 +1260,9 @@
     "semantic_hash": ""
   },
   "tests/animations/sheets.e2e.ts": {
-    "mtime": 1794868314.629255,
-    "seen": 1794871795.315337,
-    "ast_hash": "1c4499175fae7188634aeeda67dca8a1",
+    "mtime": 1795716416.594857,
+    "seen": 1795718434.586334,
+    "ast_hash": "349c5e7b99b9fe2d4199aecc9a3b075c",
     "semantic_hash": ""
   },
   "tests/animations/tables.e2e.ts": {
@@ -1272,15 +1272,15 @@
     "semantic_hash": ""
   },
   "tests/component-inventory.ts": {
-    "mtime": 1794870678.3128293,
-    "seen": 1794871795.315338,
-    "ast_hash": "79d90004a2c3dcfef299f03f827e6c6d",
+    "mtime": 1795716726.56392,
+    "seen": 1795718434.586335,
+    "ast_hash": "de4e1153f19fdbaeec919d477120b2b8",
     "semantic_hash": ""
   },
   "tests/core/charts.e2e.ts": {
-    "mtime": 1794868314.6351936,
-    "seen": 1794871795.315338,
-    "ast_hash": "fcd42c9b660c86d714bb1c0c08fcbeb6",
+    "mtime": 1795716726.5642548,
+    "seen": 1795718434.586336,
+    "ast_hash": "520673ccc2463c60d2dfed5eef8e3f1a",
     "semantic_hash": ""
   },
   "tests/core/components.e2e.ts": {
@@ -1344,9 +1344,9 @@
     "semantic_hash": ""
   },
   "tests/core/workflows.e2e.ts": {
-    "mtime": 1794870678.3118093,
-    "seen": 1794871795.3153448,
-    "ast_hash": "683d92d1130801a5e6e3bae56c64e7e2",
+    "mtime": 1795715875.0352218,
+    "seen": 1795718434.586344,
+    "ast_hash": "383f258232fb972ac1a3280726c477bc",
     "semantic_hash": ""
   },
   "tests/domain/drive-baseline.test.ts": {
@@ -1530,9 +1530,9 @@
     "semantic_hash": ""
   },
   "src/components/charts/chart-frame.tsx": {
-    "mtime": 1795709579.560456,
-    "seen": 1795712774.0739279,
-    "ast_hash": "6d148ddd92ad097b09cad7d0dca9b3e5",
+    "mtime": 1795716652.602175,
+    "seen": 1795718434.586216,
+    "ast_hash": "fda1b3027f8e5d3a5a1159b7bbee4eb4",
     "semantic_hash": ""
   },
   "src/lib/palette.ts": {
@@ -1779,6 +1779,12 @@
     "mtime": 1794869455.6476734,
     "seen": 1794871795.315348,
     "ast_hash": "c9b30a899e8784fb559278cd0938be56",
+    "semantic_hash": ""
+  },
+  "src/components/sheets/budget-records-sheet.tsx": {
+    "mtime": 1795716236.1129684,
+    "seen": 1795718434.5862489,
+    "ast_hash": "003804f033329f00299d6a25cdf6c348",
     "semantic_hash": ""
   }
 }
