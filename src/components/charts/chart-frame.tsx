@@ -124,7 +124,7 @@ export default function ChartFrame({
 					width={size.width}
 					height={size.height}
 					className={cn(
-						"absolute inset-0 block touch-pan-y [-webkit-touch-callout:none] focus:outline-hidden focus-visible:outline-2 focus-visible:outline-ring",
+						"absolute inset-0 block overflow-visible touch-pan-y [-webkit-touch-callout:none] focus:outline-hidden focus-visible:outline-2 focus-visible:outline-ring",
 						onSelect && "cursor-pointer",
 					)}
 					onPointerDown={event => {

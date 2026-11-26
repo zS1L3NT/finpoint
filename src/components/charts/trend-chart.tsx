@@ -21,6 +21,8 @@ export type TrendSeries = {
 	comparison?: boolean
 	/** Indexes that get a ring on the line, for a value worth pointing out. */
 	markers?: number[]
+	/** Indexes that get a filled dot, for a lone value that has no line to sit on. */
+	dots?: number[]
 }
 
 // The right gutter holds the value pills that replace a Y axis.
@@ -254,18 +256,22 @@ export default function TrendChart({
 							/>
 						))}
 						{series.flatMap(s =>
-							(s.markers ?? []).flatMap(index => {
+							[
+								...(s.markers ?? []).map(index => ({ index, dot: false })),
+								...(s.dots ?? []).map(index => ({ index, dot: true })),
+							].flatMap(({ index, dot }) => {
 								const value = s.values[index]
 								return value == null
 									? []
 									: [
 											<circle
-												key={`${s.key}-${index}`}
+												key={`${s.key}-${index}-${dot ? "dot" : "ring"}`}
 												data-slot="chart-marker"
 												cx={x(index)}
 												cy={y(value)}
 												r={3.5}
-												className="fill-card"
+												className={dot ? undefined : "fill-card"}
+												fill={dot ? tone(s, value) : undefined}
 												stroke={tone(s, value)}
 												strokeOpacity={s.opacity}
 												strokeWidth={2}
@@ -342,7 +348,7 @@ export default function TrendChart({
 					<>
 						<ReadoutRows title={labels[index]} rows={rows} />
 						{note ? (
-							<span className="flex items-center justify-between gap-4">
+							<span className="mt-0.5 flex items-center justify-between gap-4 border-t pt-1.5">
 								<span className="flex items-center gap-1.5 text-muted-foreground">
 									<span className="size-2 shrink-0 rounded-full border-[1.5px] border-current" />
 									{note.label}

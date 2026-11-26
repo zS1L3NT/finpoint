@@ -22,10 +22,21 @@ export default function BudgetProgressChart({
 		return { tick: date.toFormat("d MMM"), label: date.toFormat("d MMM yyyy") }
 	})
 	const last = points.length - 1
+	// Before and After take the end ticks, so the caption names the window itself.
+	const days = points.filter(point => point.key !== "before" && point.key !== "after")
+	const [start, end] = [days[0], days.at(-1)]
+	const range =
+		start && end
+			? `${DateTime.fromISO(start.key).toFormat("d MMM")} – ${DateTime.fromISO(end.key).toFormat("d MMM yyyy")}`
+			: null
+	// Before the window starts, money already spent is a single usage point with no line.
+	const reached = points.flatMap((point, index) => (point.usage === null ? [] : [index]))
 
 	return (
 		<div className="grid gap-2">
-			<p className="text-xs font-medium text-muted-foreground">Cumulative spending · SGD</p>
+			<p className="text-xs font-medium text-muted-foreground">
+				Cumulative spending · SGD{range ? ` · ${range}` : ""}
+			</p>
 			<TrendChart
 				label="Cumulative budget spending by day"
 				className="h-72 w-full sm:h-80"
@@ -58,6 +69,7 @@ export default function BudgetProgressChart({
 						color: "var(--color-emerald-500)",
 						over: "var(--color-rose-500)",
 						fill: 0.3,
+						dots: reached.length === 1 ? reached : [],
 					},
 				]}
 			/>

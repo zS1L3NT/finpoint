@@ -180,7 +180,12 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 						icon="lucide:wallet-cards"
 						label="Spent"
 						value={formatCurrency(spent)}
-						detail={`${limit ? round2((spent / limit) * 100) : 0}% of ${formatCurrency(limit)}${progress.scheduled ? ` · ${formatCurrency(progress.scheduled)} scheduled` : ""}`}
+						// With scheduled Records, the limit amount makes way for them so the line fits one row.
+						detail={
+							progress.scheduled
+								? `${limit ? round2((spent / limit) * 100) : 0}% used · incl. ${formatCurrency(progress.scheduled)} scheduled`
+								: `${limit ? round2((spent / limit) * 100) : 0}% of ${formatCurrency(limit)}`
+						}
 						tone={spent > limit ? "negative" : "neutral"}
 					/>
 					<Metric

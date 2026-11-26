@@ -75,7 +75,7 @@ export default function CashflowChart({
 					notes={data.map(point =>
 						point.scheduled_spending
 							? {
-									label: "Scheduled",
+									label: "Scheduled that day",
 									value: formatCurrency(point.scheduled_spending),
 								}
 							: null,
@@ -134,6 +134,12 @@ export default function CashflowChart({
 				{forecast.map(b => (
 					<MonthlyBudgetBadge key={b.id} name={b.name} color={b.color} />
 				))}
+				{showProjection && data.some(point => point.scheduled_spending) ? (
+					<span className="flex items-center gap-1.5 px-1.5 text-xs text-muted-foreground">
+						<span className="size-2 rounded-full border-[1.5px] border-current" />
+						Scheduled Record
+					</span>
+				) : null}
 			</div>
 			<p className="text-xs text-muted-foreground">
 				Each colour shows a Monthly Budget's cumulative spending.
