@@ -6,9 +6,9 @@
     "semantic_hash": ""
   },
   "app/(month)/page.tsx": {
-    "mtime": 1794868314.6215112,
-    "seen": 1794871795.315209,
-    "ast_hash": "c7f893fffa6341d18fd824c71df755ef",
+    "mtime": 1795724267.8812783,
+    "seen": 1795725628.782197,
+    "ast_hash": "deef6c78298eb1e02d4dfcf972938f76",
     "semantic_hash": ""
   },
   "app/accounts/[id]/page.tsx": {
@@ -54,9 +54,9 @@
     "semantic_hash": "96cc4dd0279ebe7c859ea54c00d86d5d"
   },
   "app/budgets/[id]/page.tsx": {
-    "mtime": 1795716313.2937207,
-    "seen": 1795718434.586192,
-    "ast_hash": "e138056f895806c52e29396a62b11db5",
+    "mtime": 1795724297.0721638,
+    "seen": 1795725628.782207,
+    "ast_hash": "1bbe897a37dd54c245939df40b32cb27",
     "semantic_hash": ""
   },
   "app/budgets/page.tsx": {
@@ -66,9 +66,9 @@
     "semantic_hash": ""
   },
   "app/categories/page.tsx": {
-    "mtime": 1795718919.378771,
-    "seen": 1795721835.066725,
-    "ast_hash": "eafbacf6ac15d3fc020c5a5fa5768f18",
+    "mtime": 1795722387.6786914,
+    "seen": 1795725628.782209,
+    "ast_hash": "71e623b9945605a3b827049fb28b7b0c",
     "semantic_hash": ""
   },
   "app/importer/page.tsx": {
@@ -162,8 +162,8 @@
     "semantic_hash": "7d8a33d5aa042f85737cd2f3334ae040"
   },
   "next-env.d.ts": {
-    "mtime": 1795721673.2667747,
-    "seen": 1795721835.066737,
+    "mtime": 1795725593.5356264,
+    "seen": 1795725628.782222,
     "ast_hash": "8195d2c60ce847a459ae9d308d6a5724",
     "semantic_hash": ""
   },
@@ -210,15 +210,15 @@
     "semantic_hash": ""
   },
   "src/components/charts/category-history-chart.tsx": {
-    "mtime": 1794868314.6555681,
-    "seen": 1794871795.315236,
-    "ast_hash": "78f1705e26e937bf0c0ef0e5e534ea7d",
+    "mtime": 1795724520.0242054,
+    "seen": 1795725628.782229,
+    "ast_hash": "2c75bca7d1502e36c416cb0464f3e712",
     "semantic_hash": ""
   },
   "src/components/charts/category-movers.tsx": {
-    "mtime": 1794868314.6557057,
-    "seen": 1794871795.315237,
-    "ast_hash": "d36dcf764486715aa64f3e9f14c77a29",
+    "mtime": 1795724298.5737062,
+    "seen": 1795725628.78223,
+    "ast_hash": "39dfef3abebaf8729b032bab4ce18370",
     "semantic_hash": ""
   },
   "src/components/charts/daily-spending-chart.tsx": {
@@ -894,9 +894,9 @@
     "semantic_hash": ""
   },
   "src/logic/dashboard.ts": {
-    "mtime": 1794869323.349998,
-    "seen": 1794871795.315319,
-    "ast_hash": "db30e8e782e0e781096e317ebcf0ebbd",
+    "mtime": 1795724161.9740443,
+    "seen": 1795725628.7823281,
+    "ast_hash": "8f778d6bd093c36c27eef0f671defc19",
     "semantic_hash": ""
   },
   "src/logic/drive-sync.ts": {
@@ -1110,9 +1110,9 @@
     "semantic_hash": ""
   },
   "src/components/charts/category-spending-mix.tsx": {
-    "mtime": 1794868314.6558225,
-    "seen": 1794871795.315238,
-    "ast_hash": "472067b6e7901e9a44262337ff764fd4",
+    "mtime": 1795724037.419065,
+    "seen": 1795725628.782231,
+    "ast_hash": "f46fe8892a180909c46a1408944688a4",
     "semantic_hash": ""
   },
   "src/components/charts/monthly-budget-usage.tsx": {
@@ -1260,9 +1260,9 @@
     "semantic_hash": ""
   },
   "tests/animations/sheets.e2e.ts": {
-    "mtime": 1795716416.594857,
-    "seen": 1795718434.586334,
-    "ast_hash": "349c5e7b99b9fe2d4199aecc9a3b075c",
+    "mtime": 1795723247.7616374,
+    "seen": 1795725628.782351,
+    "ast_hash": "c4f7fbbbd8a62a47fe691c75c81ee581",
     "semantic_hash": ""
   },
   "tests/animations/tables.e2e.ts": {
@@ -1272,15 +1272,15 @@
     "semantic_hash": ""
   },
   "tests/component-inventory.ts": {
-    "mtime": 1795716726.56392,
-    "seen": 1795718434.586335,
-    "ast_hash": "de4e1153f19fdbaeec919d477120b2b8",
+    "mtime": 1795722659.7267942,
+    "seen": 1795725628.782352,
+    "ast_hash": "7ff7e26a5d365d5de263fbec41e0de2c",
     "semantic_hash": ""
   },
   "tests/core/charts.e2e.ts": {
-    "mtime": 1795716726.5642548,
-    "seen": 1795718434.586336,
-    "ast_hash": "520673ccc2463c60d2dfed5eef8e3f1a",
+    "mtime": 1795723789.02199,
+    "seen": 1795725628.782353,
+    "ast_hash": "63566c32b3993623e5a3e6d4fe4dcbf8",
     "semantic_hash": ""
   },
   "tests/core/components.e2e.ts": {
@@ -1320,9 +1320,9 @@
     "semantic_hash": ""
   },
   "tests/core/navigation.e2e.ts": {
-    "mtime": 1794868314.6427107,
-    "seen": 1794871795.3153431,
-    "ast_hash": "a3f94b7051fdcbd1524f9517fa8277b6",
+    "mtime": 1795722660.7975948,
+    "seen": 1795725628.782358,
+    "ast_hash": "6f1d901e6fce0975a804a76fe8c9a394",
     "semantic_hash": ""
   },
   "tests/core/routes.e2e.ts": {
