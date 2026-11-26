@@ -11,9 +11,12 @@ const OUTSIDE = {
 export default function BudgetProgressChart({
 	points,
 	limit,
+	onSelect,
 }: {
 	points: BudgetProgressPoint[]
 	limit: number
+	/** Opens the Records behind a point: a day, or `before` / `after` the window. */
+	onSelect?: (key: string) => void
 }) {
 	const named = points.map(point => {
 		if (point.key === "before" || point.key === "after") return OUTSIDE[point.key]
@@ -46,6 +49,14 @@ export default function BudgetProgressChart({
 					.map(index => ({ index, label: named[index]?.tick ?? "" }))}
 				split={limit}
 				reference={{ value: limit, label: "Budget limit" }}
+				onSelect={
+					onSelect
+						? index => {
+								const key = points[index]?.key
+								if (key) onSelect(key)
+							}
+						: undefined
+				}
 				notes={points.map(point =>
 					point.scheduled
 						? { label: "Scheduled", value: formatCurrency(point.scheduled) }

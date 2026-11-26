@@ -151,6 +151,27 @@ test("Records sheet: animates in and out when closed by Escape and by its close 
 	)
 })
 
+test("Budget Records sheet: animates in and out when closed by Escape and by its close button", {
+	tag: ["@reduced-motion"],
+}, async ({ page, workspace }) => {
+	void workspace
+	await page.goto("/budgets/t1-b-manual")
+	const category = page.getByRole("button", { name: "Open Groceries Records", exact: true })
+	const open = () =>
+		expectModalEntrance(page, '[data-slot="sheet-content"]', async () => {
+			await category.click()
+		})
+	await open()
+	await expectModalExit(page, '[data-slot="sheet-content"]', () => page.keyboard.press("Escape"))
+	await open()
+	await expectModalExit(page, '[data-slot="sheet-content"]', () =>
+		page
+			.getByRole("dialog", { name: "Groceries", exact: true })
+			.getByRole("button", { name: "Close", exact: true })
+			.click(),
+	)
+})
+
 test("mobile modal sheets: sidebar and amount filter animate in and out", {
 	tag: ["@reduced-motion"],
 }, async ({ page, workspace }) => {

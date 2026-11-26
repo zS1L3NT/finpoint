@@ -11,6 +11,7 @@ import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import { Metric, MetricGrid } from "@/components/metric"
+import BudgetRecordsSheet from "@/components/sheets/budget-records-sheet"
 import RecordSearchSheet from "@/components/sheets/record-search"
 import DataTable from "@/components/table/data-table"
 import { useRecordColumns, useRecordMobileRow } from "@/components/table/record-columns"
@@ -26,6 +27,7 @@ import {
 } from "@/components/ui/card"
 import { useRecordEditor } from "@/hooks/use-record-editor"
 import { useSubmitLock } from "@/hooks/use-submit-lock"
+import { useUrlParams } from "@/hooks/use-url-params"
 import { themeColor } from "@/lib/palette"
 import { formatCurrency, parseDate, pluralize, round2 } from "@/lib/utils"
 import {
@@ -70,6 +72,48 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 		parseDate(budget?.start_date ?? today).diff(parseDate(today), "days").days,
 	)
 	const categoryData = useMemo(() => getCategoryData(records, categories), [records, categories])
+
+	// Like the Dashboard, a clicked category or chart day opens its Records in a sheet whose
+	// state lives in the URL (`records=1` plus `category` or `day`), so Back closes it.
+	const { params: urlParams, setParams } = useUrlParams()
+	const drill = urlParams.has("records")
+		? { category: urlParams.get("category"), day: urlParams.get("day") }
+		: null
+	const openDrill = (filters: { category?: string; day?: string }) =>
+		setParams({ records: "1", category: null, day: null, ...filters })
+	const closeDrill = () =>
+		setParams({ records: null, category: null, day: null }, { replace: true })
+	const drillCategory = drill?.category
+		? categories
+				.flatMap(category => [category, ...category.children])
+				.find(category => category.id === drill.category)
+		: null
+	const drillRecords = !drill
+		? []
+		: drill.category
+			? records.filter(
+					record =>
+						budgetSpent([record]) !== 0 &&
+						(record.category.id === drill.category ||
+							record.category.parent_category_id === drill.category),
+				)
+			: records.filter(
+					record =>
+						outsideKey(
+							record.datetime.slice(0, 10),
+							budget?.start_date ?? "",
+							budget?.end_date ?? "",
+						) === drill.day,
+				)
+	const drillTitle = drillCategory
+		? drillCategory.name
+		: drill?.day === "before"
+			? "Before the window"
+			: drill?.day === "after"
+				? "After the window"
+				: drill?.day
+					? DateTime.fromISO(drill.day).toFormat("cccc, d MMMM yyyy")
+					: "Records"
 
 	const attach = async (record: Record) => {
 		if (!budget) return
@@ -230,11 +274,17 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 							<CardTitle>Spending over time</CardTitle>
 							<CardDescription>
 								Cumulative usage against the budget limit. The projection extends
-								the current pace and steps up on days with scheduled Records.
+								the current pace and steps up on days with scheduled Records. Hold
+								or hover over a day to read it, and tap or click it to open its
+								Records.
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
-							<BudgetProgressChart points={progress.points} limit={limit} />
+							<BudgetProgressChart
+								points={progress.points}
+								limit={limit}
+								onSelect={day => openDrill({ day })}
+							/>
 							<div className="mt-2 flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
 								<Legend color="bg-emerald-500" label="Usage" />
 								<Legend color="bg-rose-500" label="Exceed" />
@@ -254,14 +304,21 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 						<CardHeader className="border-b">
 							<CardTitle>Spending by category</CardTitle>
 							<CardDescription>
-								Where this budget’s outgoing Records went.
+								Where this budget’s outgoing Records went. Select one to open its
+								Records.
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
 							{categoryData.length ? (
-								<div className="grid gap-4">
+								<div className="-mx-2 grid gap-1">
 									{categoryData.map(category => (
-										<div key={category.id} className="grid gap-2">
+										<button
+											key={category.id}
+											type="button"
+											aria-label={`Open ${category.name} Records`}
+											className="grid cursor-pointer gap-2 rounded-lg p-2 text-left transition-colors duration-150 ease-out outline-none hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring active:bg-muted/70"
+											onClick={() => openDrill({ category: category.id })}
+										>
 											<div className="flex items-center gap-3">
 												<Icon
 													icon={category.icon}
@@ -290,7 +347,7 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 													}}
 												/>
 											</div>
-										</div>
+										</button>
 									))}
 								</div>
 							) : (
@@ -341,6 +398,17 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 				</Card>
 			</PageContent>
 
+			{budget ? (
+				<BudgetRecordsSheet
+					open={drill !== null}
+					title={drillTitle}
+					description={`${budget.name} · ${pluralize(drillRecords.length, "Record")} · ${formatCurrency(budgetSpent(drillRecords))}`}
+					records={drillRecords}
+					pageName={`Budget ${budget.id}`}
+					onClose={closeDrill}
+				/>
+			) : null}
+
 			{editingRecord ? (
 				<RecordEditorDialog
 					record={editingRecord}
@@ -355,6 +423,10 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 		</>
 	)
 }
+
+/** Which chart point a Record falls on: its day, or `before` / `after` the Budget's window. */
+const outsideKey = (day: string, start: string, end: string) =>
+	day < start ? "before" : day > end ? "after" : day
 
 function Legend({ color, label }: { color: string; label: string }) {
 	return (

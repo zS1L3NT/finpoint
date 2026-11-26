@@ -807,6 +807,15 @@ export const componentInventory: InventoryEntry[] = [
 		scenarios: ["display"],
 	},
 	{
+		path: "src/components/sheets/budget-records-sheet.tsx",
+		owner: "team3",
+		routes: ["/budgets/[id]"],
+		visibleExports: ["default"],
+		dormantExports: [],
+		helperExports: [],
+		scenarios: ["display"],
+	},
+	{
 		path: "src/components/sheets/records-sheet.tsx",
 		owner: "team3",
 		routes: ["/"],
@@ -2042,6 +2051,10 @@ export const scenarioDescriptions: Record<string, string> = {
 		"No/partial/full allocation renders correct state and finite progress; zero total, negative, excess and opposite signs produce bounded rendered scales and exact amounts",
 	"src/components/selection-bar.tsx#display.interaction":
 		"One selected statement exposes Allocate action; action opens pending record search and selected allocation is persisted",
+	"src/components/sheets/budget-records-sheet.tsx#display.interaction":
+		"Budget category and chart day drills open the sheet with only those Records; browser Back and Escape close it, and keyboard Enter on a chart day keeps it open",
+	"src/components/sheets/budget-records-sheet.tsx#display.values":
+		"The sheet names the category or day, the Budget, the Record count and their spent total",
 	"src/components/sheets/records-sheet.tsx#display.interaction":
 		"Dashboard drills open the sheet in place without a Back entry; browser Back and Escape close it, Forward reopens it, and a Record opened from it returns to the open sheet",
 	"src/components/sheets/record-search.tsx#display.interaction":
@@ -2811,6 +2824,15 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"src/components/selection-bar.tsx#display.interaction": [
 		"Record search sheet: selected Statements allocate to a Pending Record",
+	],
+	"src/components/sheets/budget-records-sheet.tsx#export.default.behaviour": [
+		"Budget detail: category and chart day drills open the Budget's Records in a sheet that Back closes",
+	],
+	"src/components/sheets/budget-records-sheet.tsx#display.interaction": [
+		"Budget detail: category and chart day drills open the Budget's Records in a sheet that Back closes",
+	],
+	"src/components/sheets/budget-records-sheet.tsx#display.values": [
+		"Budget detail: category and chart day drills open the Budget's Records in a sheet that Back closes",
 	],
 	"src/components/sheets/records-sheet.tsx#export.default.behaviour": [
 		"Category mix: drilldown carries Treatment and Category filters",
@@ -4780,6 +4802,9 @@ export const modalAnimationCoverage: Record<string, string[]> = {
 	],
 	"src/components/sheets/records-sheet.tsx": [
 		"Records sheet: animates in and out when closed by Escape and by its close button",
+	],
+	"src/components/sheets/budget-records-sheet.tsx": [
+		"Budget Records sheet: animates in and out when closed by Escape and by its close button",
 	],
 	"src/components/sheets/record-search.tsx": [
 		"search sheets: every sheet animates in and out on dismissal and completion",

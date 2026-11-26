@@ -25,6 +25,43 @@ function metric(page: Page, label: string) {
 	return page.locator("div.min-h-24.bg-card", { hasText: label })
 }
 
+test("Budget detail: category and chart day drills open the Budget's Records in a sheet that Back closes", async ({
+	page,
+}) => {
+	await seedWorkspace(page)
+	await page.goto("/budgets/t1-b-manual")
+	const sheet = page.locator('[data-slot="sheet-content"]')
+	await test.step("category drill: shows only that category's Records with their total", async () => {
+		await card(page, "Spending by category")
+			.getByRole("button", { name: "Open Groceries Records", exact: true })
+			.click()
+		await expect(page).toHaveURL(/records=1/)
+		await expect(page).toHaveURL(/category=t1-cat-groceries/)
+		await expect(sheet.getByText("Groceries", { exact: true }).first()).toBeVisible()
+		await expect(sheet).toContainText("October Buffer · 2 Records · $117.53")
+		await expect(sheet).toContainText("FairPrice Run")
+		await page.goBack()
+		await expect(sheet).toHaveCount(0)
+		await expect(page).not.toHaveURL(/records=1/)
+	})
+	await test.step("chart day drill: Enter on a day opens that day's Records and Escape closes it", async () => {
+		const surface = card(page, "Spending over time").getByRole("application")
+		await surface.scrollIntoViewIfNeeded()
+		await surface.focus()
+		await page.keyboard.press("Home")
+		for (let index = 0; index < 4; index++) await page.keyboard.press("ArrowRight")
+		await page.keyboard.press("Enter")
+		await expect(page).toHaveURL(/day=2026-10-05/)
+		await expect(sheet).toContainText("Monday, 5 October 2026")
+		await expect(sheet).toContainText("October Buffer · 1 Record · $84.20")
+		await expect(sheet).toContainText("FairPrice Run")
+		await expect(sheet).not.toContainText("Gathering")
+		await page.keyboard.press("Escape")
+		await expect(sheet).toHaveCount(0)
+		await expect(page).not.toHaveURL(/records=1/)
+	})
+})
+
 test("Budget detail: usage tooltip reconciles actual and projected spending even with a zero plan", async ({
 	page,
 }) => {
