@@ -56,7 +56,7 @@ export function clientIp(request: Request): string {
 	return request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
 }
 
-/** The popup code flow is same-origin by construction; reject anything else. */
+/** The code exchange is same-origin by construction; reject anything else. */
 export function sameOrigin(request: Request): boolean {
 	const origin = request.headers.get("origin")
 	if (!origin) return true

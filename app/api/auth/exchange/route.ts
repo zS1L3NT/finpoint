@@ -8,6 +8,7 @@ import {
 	sealRefreshToken,
 	unsealRefreshToken,
 } from "@/lib/auth-vault"
+import { pathDataSettings } from "@/routes"
 
 export async function POST(request: NextRequest) {
 	if (!rateLimit(`exchange:${clientIp(request)}`)) {
@@ -17,13 +18,29 @@ export async function POST(request: NextRequest) {
 		return NextResponse.json({ error: "Forbidden." }, { status: 403 })
 	}
 	let code: unknown
+	let mode: unknown
 	try {
-		;({ code } = (await request.json()) as { code?: unknown })
+		;({ code, mode } = (await request.json()) as { code?: unknown; mode?: unknown })
 	} catch {
 		return NextResponse.json({ error: "Invalid request." }, { status: 400 })
 	}
 	if (typeof code !== "string" || code.length === 0 || code.length > 4096) {
 		return NextResponse.json({ error: "Invalid code." }, { status: 400 })
+	}
+	if (mode !== undefined && mode !== "popup" && mode !== "redirect") {
+		return NextResponse.json({ error: "Invalid request." }, { status: 400 })
+	}
+	let redirectUri = "postmessage"
+	if (mode === "redirect") {
+		try {
+			const origin = new URL(request.headers.get("origin") ?? request.nextUrl.origin)
+			if (origin.protocol !== "http:" && origin.protocol !== "https:") {
+				return NextResponse.json({ error: "Invalid request." }, { status: 400 })
+			}
+			redirectUri = `${origin.origin}${pathDataSettings()}`
+		} catch {
+			return NextResponse.json({ error: "Invalid request." }, { status: 400 })
+		}
 	}
 	const clientId = process.env.GOOGLE_CLIENT_ID ?? ""
 	const clientSecret = process.env.GOOGLE_CLIENT_SECRET ?? ""
@@ -39,7 +56,7 @@ export async function POST(request: NextRequest) {
 			code,
 			client_id: clientId,
 			client_secret: clientSecret,
-			redirect_uri: "postmessage",
+			redirect_uri: redirectUri,
 			grant_type: "authorization_code",
 		}),
 	})
