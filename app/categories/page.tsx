@@ -289,6 +289,8 @@ function CategoryRow({
 							title="Default monthly budget"
 							className="max-w-full sm:hidden"
 						/>
+					) : canUseDefaultMonthlyBudget(category.analytics_treatment) ? (
+						<span className="text-xs text-muted-foreground sm:hidden">Unbudgeted</span>
 					) : null}
 				</span>
 			</button>
