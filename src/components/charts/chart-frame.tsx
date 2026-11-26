@@ -107,8 +107,12 @@ export default function ChartFrame({
 		if (next !== null) {
 			event.preventDefault()
 			setActive(next)
-		} else if (event.key === "Enter" && current !== null) onSelect?.(current)
-		else if (event.key === "Escape") setActive(null)
+		} else if (event.key === "Enter" && current !== null) {
+			// Without this, the same Enter also activates whatever takes focus next, such as the
+			// Close button of the sheet this opens, which then closes it straight away.
+			event.preventDefault()
+			onSelect?.(current)
+		} else if (event.key === "Escape") setActive(null)
 	}
 
 	return (
