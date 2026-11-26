@@ -304,7 +304,7 @@ export async function runManualDrive(
 	operation: () => Promise<DriveSyncResult>,
 ): Promise<DriveSyncResult> {
 	const result = await exclusive(true, async () => {
-		set({ activity, error: null })
+		set({ configured: isDriveConfigured(), activity, error: null })
 		try {
 			const result = await operation()
 			await finishCycle(result, false)
