@@ -15,7 +15,7 @@ import { useHistory } from "@/history"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { canUseDefaultMonthlyBudget, treatmentLabel } from "@/lib/analytics"
 import { cardEnter } from "@/lib/motion"
-import { cn, pluralize } from "@/lib/utils"
+import { cn } from "@/lib/utils"
 import { listCategories } from "@/logic/categories"
 import { pathRecords } from "@/routes"
 import type { AnalyticsTreatment, Category, CategoryWithChildren } from "@/types"
@@ -98,7 +98,7 @@ export default function CategoriesPage() {
 							0,
 						)
 						return (
-							<section key={section.value} className="grid gap-2">
+							<section key={section.value} className="grid w-full max-w-5xl gap-2">
 								<h3 className="flex items-baseline gap-2 text-sm font-semibold">
 									{section.label}
 									<span className="text-xs font-normal text-muted-foreground">
@@ -106,12 +106,7 @@ export default function CategoriesPage() {
 										{items.length === 1 ? "category" : "categories"}
 										{subcategories
 											? ` · ${subcategories} ${subcategories === 1 ? "subcategory" : "subcategories"}`
-											: ""}{" "}
-										·{" "}
-										{pluralize(
-											items.reduce((sum, c) => sum + totalRecords(c), 0),
-											"Record",
-										)}
+											: ""}
 									</span>
 								</h3>
 								<div className="overflow-hidden rounded-xl border bg-card">
@@ -119,7 +114,9 @@ export default function CategoriesPage() {
 										aria-hidden
 										className={cn(
 											ROW_GRID,
-											"hidden border-b bg-muted/30 py-2 text-xs font-medium text-muted-foreground sm:grid",
+											"hidden border-b bg-muted/30 py-2 text-xs font-medium text-muted-foreground",
+											// A lone Category reads without column headings.
+											(items.length > 1 || subcategories > 0) && "sm:grid",
 										)}
 									>
 										<span>Category</span>
@@ -181,7 +178,7 @@ const SECTIONS = (
 
 // One set of tracks for the header and every row, so budgets and counts line up down the list.
 const ROW_GRID =
-	"grid-cols-[minmax(0,1fr)_auto_2rem] items-center gap-x-3 px-3 sm:grid-cols-[minmax(0,1fr)_11rem_6.5rem_2rem] sm:px-4"
+	"grid-cols-[minmax(0,1fr)_auto_2rem] items-center gap-x-3 px-3 sm:grid-cols-[minmax(0,1fr)_11rem_5rem_7.5rem] sm:px-4"
 
 const totalRecords = (category: CategoryWithChildren) =>
 	category.records_count + category.children.reduce((sum, child) => sum + child.records_count, 0)
@@ -209,13 +206,14 @@ function CategoryGroup({
 					<Button
 						type="button"
 						variant="ghost"
-						size="icon-sm"
+						size="sm"
 						title="Add subcategory"
 						aria-label={`Add subcategory to ${category.name}`}
-						className="text-muted-foreground hover:text-foreground"
+						className="size-7 p-0 text-muted-foreground hover:text-foreground sm:w-auto sm:px-2"
 						onClick={onAddSubcategory}
 					>
 						<IconifyIcon icon="lucide:plus" />
+						<span className="hidden sm:inline">Subcategory</span>
 					</Button>
 				}
 			/>
@@ -279,12 +277,14 @@ function CategoryRow({
 			>
 				<Icon {...category} size={child ? 12 : 16} />
 				<span className="grid min-w-0 gap-0.5">
-					<span className={cn("truncate", child ? "text-sm" : "font-medium")}>
+					<span
+						className={cn("break-words sm:truncate", child ? "text-sm" : "font-medium")}
+					>
 						{category.name}
 					</span>
 					{monthlyBudget ? (
 						<MonthlyBudgetBadge
-							name={monthlyBudget.name}
+							name={<span className="min-w-0 truncate">{monthlyBudget.name}</span>}
 							color={monthlyBudget.color}
 							title="Default monthly budget"
 							className="max-w-full sm:hidden"
@@ -310,12 +310,11 @@ function CategoryRow({
 				href={pathRecords({ category_ids: category.id })}
 				aria-label={`Open Records for ${category.name}`}
 				title="Open Records"
-				className="relative flex items-center justify-end gap-1 rounded-md text-xs text-muted-foreground tabular-nums outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+				className="relative flex items-center justify-end gap-0.5 rounded-md text-xs text-muted-foreground tabular-nums underline-offset-4 outline-none hover:text-foreground hover:underline focus-visible:ring-2 focus-visible:ring-ring"
 				onClick={onFindRecords}
 			>
 				{records.toLocaleString()}
-				<span className="sm:hidden">{records === 1 ? "Record" : "Records"}</span>
-				<IconifyIcon icon="lucide:arrow-up-right" className="size-3.5" />
+				<IconifyIcon icon="lucide:chevron-right" className="size-3.5" />
 			</Link>
 			<span className="relative flex justify-end">{action}</span>
 		</div>
