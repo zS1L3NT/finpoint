@@ -404,7 +404,7 @@ export default function AllocatorPendingPage() {
 											/>
 										</div>
 										<FilterBar>
-											<div>
+											<div data-filter-view>
 												<Select
 													value={candidateScope}
 													onValueChange={value =>
@@ -439,7 +439,10 @@ export default function AllocatorPendingPage() {
 												</Select>
 											</div>
 											{candidateScope === "suggested" ? (
-												<span className="col-span-2 self-center text-xs/relaxed text-muted-foreground">
+												<span
+													data-filter-view
+													className="col-span-2 self-center text-xs/relaxed text-muted-foreground"
+												>
 													Within 7 days · up to $5 difference
 												</span>
 											) : null}

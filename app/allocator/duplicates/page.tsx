@@ -165,7 +165,7 @@ export default function FixDuplicatesPage() {
 				</div>
 				<div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:gap-4">
 					<FilterBar>
-						<div>
+						<div data-filter-view>
 							<Select
 								value={view}
 								onValueChange={value =>

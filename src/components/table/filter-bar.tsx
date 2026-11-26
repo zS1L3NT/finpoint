@@ -62,10 +62,11 @@ export function FilterBar({
 	return (
 		<div
 			className={cn(
-				// Every filter is 13rem wide from sm up, on every page and whatever its value, so a long
-				// value truncates inside its control instead of resizing it. Clear
-				// (data-filter-clear) only needs its content.
-				"grid w-full grid-cols-2 gap-2 *:w-full *:min-w-0 sm:flex sm:flex-wrap sm:*:w-52 sm:*:data-filter-clear:w-auto",
+				// Every filter is 9.5rem wide from sm up, on every page and whatever its value, so a long
+				// value such as a date range truncates inside its control instead of resizing it. View
+				// pickers (data-filter-view) keep their whole label; Clear (data-filter-clear) only
+				// needs its content.
+				"grid w-full grid-cols-2 gap-2 *:w-full *:min-w-0 sm:flex sm:flex-wrap sm:*:w-38 sm:*:data-filter-view:w-auto sm:*:data-filter-view:min-w-38 sm:*:data-filter-clear:w-auto",
 				className,
 			)}
 		>
