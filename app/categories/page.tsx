@@ -2,21 +2,19 @@
 
 import { useLiveQuery } from "dexie-react-hooks"
 import { motion } from "framer-motion"
-import Link from "next/link"
 import { useState } from "react"
 import CategoryDialog from "@/components/dialogs/category"
 import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
+import MonthlyBudgetBadge from "@/components/monthly-budget-badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { useHistory } from "@/history"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
-import { treatmentLabel } from "@/lib/analytics"
+import { canUseDefaultMonthlyBudget, treatmentLabel } from "@/lib/analytics"
 import { cardEnter } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 import { listCategories } from "@/logic/categories"
-import { pathRecords } from "@/routes"
 import type { AnalyticsTreatment, Category, CategoryWithChildren } from "@/types"
 
 type CategoryDialogState =
@@ -26,7 +24,6 @@ type CategoryDialogState =
 
 export default function CategoriesPage() {
 	const [dialogState, setDialogState] = useState<CategoryDialogState>(null)
-	const { handlePush } = useHistory()
 	const categoriesQuery = useLiveQuery(() => listCategories(), [])
 	const categories = (categoriesQuery ?? []) as CategoryWithChildren[]
 	const { query, handleQueryChange } = usePaginatedTableState()
@@ -97,7 +94,7 @@ export default function CategoriesPage() {
 							0,
 						)
 						return (
-							<section key={section.value} className="grid w-full max-w-5xl gap-2">
+							<section key={section.value} className="grid gap-2">
 								<h3 className="flex items-baseline gap-2 text-sm font-semibold">
 									{section.label}
 									<span className="text-xs font-normal text-muted-foreground">
@@ -126,7 +123,6 @@ export default function CategoriesPage() {
 														parent: category,
 													})
 												}
-												onFindRecords={handlePush("Categories")}
 											/>
 										</motion.div>
 									))}
@@ -158,38 +154,35 @@ const SECTIONS = (
 ).map(value => ({ value, label: treatmentLabel(value) }))
 
 // Every row shares one set of tracks, so the actions line up down the list.
-const ROW_GRID = "grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 px-3 sm:px-4"
+const ROW_GRID =
+	"grid-cols-[minmax(0,1fr)_2rem] items-center gap-x-3 px-3 sm:grid-cols-[minmax(0,1fr)_12rem_2rem] sm:px-4"
 
 /** A Category and its subcategories: one row each, the subcategories hanging off a guide line. */
 function CategoryGroup({
 	category,
 	onEdit,
 	onAddSubcategory,
-	onFindRecords,
 }: {
 	category: CategoryWithChildren
 	onEdit: (category: Category | CategoryWithChildren) => void
 	onAddSubcategory: () => void
-	onFindRecords: () => void
 }) {
 	return (
 		<article className="grid min-w-0 grid-cols-1">
 			<CategoryRow
 				category={category}
 				onEdit={() => onEdit(category)}
-				onFindRecords={onFindRecords}
 				action={
 					<Button
 						type="button"
 						variant="ghost"
-						size="sm"
+						size="icon-sm"
 						title="Add subcategory"
 						aria-label={`Add subcategory to ${category.name}`}
-						className="size-7 p-0 text-muted-foreground hover:text-foreground sm:w-auto sm:px-2"
+						className="text-muted-foreground hover:text-foreground"
 						onClick={onAddSubcategory}
 					>
 						<IconifyIcon icon="lucide:plus" />
-						<span className="hidden sm:inline">Subcategory</span>
 					</Button>
 				}
 			/>
@@ -200,12 +193,7 @@ function CategoryGroup({
 							key={child.id}
 							className="relative before:absolute before:top-1/2 before:left-7 before:h-px before:w-4 before:bg-border sm:before:left-8"
 						>
-							<CategoryRow
-								category={child}
-								onEdit={() => onEdit(child)}
-								onFindRecords={onFindRecords}
-								child
-							/>
+							<CategoryRow category={child} onEdit={() => onEdit(child)} child />
 						</li>
 					))}
 				</ul>
@@ -217,13 +205,11 @@ function CategoryGroup({
 function CategoryRow({
 	category,
 	onEdit,
-	onFindRecords,
 	action,
 	child,
 }: {
 	category: Category | CategoryWithChildren
 	onEdit: () => void
-	onFindRecords: () => void
 	action?: React.ReactNode
 	child?: boolean
 }) {
@@ -246,27 +232,37 @@ function CategoryRow({
 				aria-label={`Edit ${category.name}`}
 			>
 				<Icon {...category} size={child ? 12 : 16} />
-				<span
-					className={cn(
-						"min-w-0 break-words sm:truncate",
-						child ? "text-sm" : "font-medium",
-					)}
-				>
-					{category.name}
+				<span className="grid min-w-0 gap-0.5">
+					<span
+						className={cn("break-words sm:truncate", child ? "text-sm" : "font-medium")}
+					>
+						{category.name}
+					</span>
+					<span className="sm:hidden">
+						<DefaultMonthlyBudget category={category} />
+					</span>
 				</span>
 			</button>
-			<span className="relative flex items-center justify-end gap-1">
-				{action}
-				<Link
-					href={pathRecords({ category_ids: category.id })}
-					aria-label={`Open Records for ${category.name}`}
-					title="Open Records"
-					className="grid size-7 place-items-center rounded-md text-muted-foreground outline-none transition-colors duration-150 ease-out hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
-					onClick={onFindRecords}
-				>
-					<IconifyIcon icon="lucide:receipt-text" className="size-3.5" />
-				</Link>
+			<span className="hidden min-w-0 sm:block">
+				<DefaultMonthlyBudget category={category} />
 			</span>
+			<span className="relative flex justify-end">{action}</span>
 		</div>
+	)
+}
+
+/** The Monthly Budget a Category's Records default to, or Unbudgeted where one can apply. */
+function DefaultMonthlyBudget({ category }: { category: Category | CategoryWithChildren }) {
+	if (!canUseDefaultMonthlyBudget(category.analytics_treatment)) return null
+	const monthlyBudget = category.default_monthly_budget
+	return monthlyBudget ? (
+		<MonthlyBudgetBadge
+			name={<span className="min-w-0 truncate">{monthlyBudget.name}</span>}
+			color={monthlyBudget.color}
+			title="Default monthly budget"
+			className="max-w-full"
+		/>
+	) : (
+		<span className="text-xs text-muted-foreground">Unbudgeted</span>
 	)
 }

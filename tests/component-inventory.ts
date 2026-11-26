@@ -3636,13 +3636,13 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"facet skeleton: pulse changes opacity through frames while placeholder geometry stays stable",
 	],
 	"src/components/layout/page-header.tsx#export.default.behaviour": [
-		"Category drill: nested detail returns to exact filtered origins",
+		"Budget drill: nested detail returns to exact filtered origins",
 	],
 	"src/components/layout/page-header.tsx#display.interaction": [
-		"Category drill: nested detail returns to exact filtered origins",
+		"Budget drill: nested detail returns to exact filtered origins",
 	],
 	"src/components/layout/page-header.tsx#display.values": [
-		"Category drill: nested detail returns to exact filtered origins",
+		"Budget drill: nested detail returns to exact filtered origins",
 	],
 	"src/components/workflow-tabs.tsx#export.default.behaviour": [
 		"workflow tabs: navigate by keyboard and Allocate keeps the default date filter",
@@ -3793,7 +3793,7 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"Records list: keyboard filtered list to detail to Back keeps exact origin",
 	],
 	"app/categories/page.tsx#route.navigation": [
-		"Categories drill: nested keyboard drill returns through exact origins",
+		"Categories page: search lives in the URL, survives reload and one Back clears it",
 	],
 	"app/statement-rules/page.tsx#route.navigation": [
 		"Statement rules page: the Plan Rules link opens it and pause, resume and delete persist after reload",
