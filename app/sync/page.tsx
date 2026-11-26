@@ -102,24 +102,25 @@ function MethodHeader({
 
 type LinkTone = "good" | "busy" | "warning" | "danger" | "neutral"
 
+// Chip tints are background images, so the badge keeps its opaque card colour over the line.
 const LINK_TONES: Record<LinkTone, { chip: string; line: string; dot: string }> = {
 	good: {
-		chip: "border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+		chip: "border-emerald-500/40 bg-linear-to-r from-emerald-500/10 to-emerald-500/10 text-emerald-600 dark:text-emerald-400",
 		line: "border-emerald-500/40",
 		dot: "bg-emerald-500",
 	},
 	busy: {
-		chip: "border-sky-500/40 bg-sky-500/10 text-sky-600 dark:text-sky-400",
+		chip: "border-sky-500/40 bg-linear-to-r from-sky-500/10 to-sky-500/10 text-sky-600 dark:text-sky-400",
 		line: "border-dashed border-sky-500/40",
 		dot: "bg-sky-500",
 	},
 	warning: {
-		chip: "border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400",
+		chip: "border-amber-500/40 bg-linear-to-r from-amber-500/10 to-amber-500/10 text-amber-600 dark:text-amber-400",
 		line: "border-dashed border-amber-500/40",
 		dot: "bg-amber-500",
 	},
 	danger: {
-		chip: "border-red-500/40 bg-red-500/10 text-red-600 dark:text-red-400",
+		chip: "border-red-500/40 bg-linear-to-r from-red-500/10 to-red-500/10 text-red-600 dark:text-red-400",
 		line: "border-dashed border-red-500/40",
 		dot: "bg-red-500",
 	},
@@ -419,7 +420,8 @@ export default function DataSettingsPage() {
 			: sync.activity === "pushing"
 				? "Writing to Drive"
 				: "Reading from Drive"
-	// The line between the two copies: what is moving, or what stops them matching.
+	// The line between the two copies: what is moving, or what stops them matching. Waiting
+	// changes share the banner's and the sidebar's blue.
 	const link: { tone: LinkTone; icon: string; label: string } = sync.activity
 		? { tone: "busy", icon: "lucide:refresh-cw", label: activityLabel }
 		: sync.kind === "conflict"
@@ -434,7 +436,7 @@ export default function DataSettingsPage() {
 							? { tone: "neutral", icon: "lucide:wifi-off", label: "Offline" }
 							: sync.localDirty
 								? {
-										tone: "warning",
+										tone: "busy",
 										icon: "lucide:arrow-right",
 										label: "Changes waiting to sync",
 									}
@@ -588,7 +590,9 @@ export default function DataSettingsPage() {
 									</>
 								) : (
 									<>
-										{driveConnected ? (
+										{/* Pausing means nothing while sign-in has expired: sync has stopped already. */}
+										{driveConnected &&
+										(sync.paused || sync.kind !== "needs-auth") ? (
 											<Button
 												type="button"
 												variant={sync.paused ? "default" : "outline"}
@@ -704,7 +708,7 @@ export default function DataSettingsPage() {
 											<SyncEndpoint
 												icon="lucide:monitor"
 												label="This browser"
-												tone={sync.localDirty ? "warning" : "good"}
+												tone={sync.localDirty ? "busy" : "good"}
 												value={
 													sync.localDirty
 														? "Changes waiting"
