@@ -47,7 +47,7 @@ export default function CategoryFilter({
 					}
 				>
 					<IconifyIcon icon="lucide:tags" className="justify-self-start" />
-					<span className="truncate text-center">
+					<span className="truncate text-left">
 						{selectedIds.length
 							? `${selectedIds.length} categor${selectedIds.length === 1 ? "y" : "ies"}`
 							: "Any category"}

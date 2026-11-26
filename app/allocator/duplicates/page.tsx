@@ -14,6 +14,7 @@ import {
 	FILTER_CONTROL_CLASS,
 	FilterBar,
 	FilterSelect,
+	filterControlClass,
 } from "@/components/table/filter-bar"
 import PaginationFooter from "@/components/table/pagination-footer"
 import { formatRowTime } from "@/components/table/record-columns"
@@ -149,16 +150,22 @@ export default function FixDuplicatesPage() {
 			/>
 			<WorkflowTabs active="duplicates" />
 			<div className="flex flex-col gap-2">
-				<Input
-					aria-label="Search statement descriptions"
-					className="w-full md:w-sm"
-					placeholder="Search descriptions..."
-					value={query}
-					onChange={event => updateQuery(event.target.value)}
-				/>
+				<div className="relative w-full md:w-sm">
+					<IconifyIcon
+						icon="lucide:search"
+						className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground"
+					/>
+					<Input
+						aria-label="Search statement descriptions"
+						className={cn("pl-8", filterControlClass(!!query))}
+						placeholder="Search descriptions..."
+						value={query}
+						onChange={event => updateQuery(event.target.value)}
+					/>
+				</div>
 				<div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:gap-4">
 					<FilterBar>
-						<div className="sm:col-span-2">
+						<div>
 							<Select
 								value={view}
 								onValueChange={value =>

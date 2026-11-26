@@ -154,7 +154,7 @@ export default function AmountFilter({
 		<>
 			<IconifyIcon icon="lucide:dollar-sign" className="justify-self-start" />
 			<span
-				className="truncate text-center"
+				className="truncate text-left"
 				title={selected ? describe(readRange(value)) : undefined}
 			>
 				{selected ? describe(readRange(value)) : "Any amount"}

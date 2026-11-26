@@ -306,7 +306,7 @@ function RecordFilters({
 						className={cn("w-full", filterControlClass(monthlyBudgetScope !== "all"))}
 					>
 						<IconifyIcon icon="lucide:wallet-cards" />
-						<SelectValue />
+						<SelectValue className="flex-1 text-left" />
 					</SelectTrigger>
 					<SelectContent align="start" variant="filter">
 						<SelectGroup>

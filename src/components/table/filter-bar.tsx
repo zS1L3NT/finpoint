@@ -62,9 +62,10 @@ export function FilterBar({
 	return (
 		<div
 			className={cn(
-				// One 11rem track per control from sm up, so every filter keeps the same width on every
-				// page whatever its value; long values truncate inside the control.
-				"grid w-full grid-cols-2 gap-2 *:w-full *:min-w-0 sm:grid-cols-[repeat(auto-fill,11rem)]",
+				// Every filter is 13rem wide from sm up, on every page and whatever its value, so a long
+				// value truncates inside its control instead of resizing it. Clear
+				// (data-filter-clear) only needs its content.
+				"grid w-full grid-cols-2 gap-2 *:w-full *:min-w-0 sm:flex sm:flex-wrap sm:*:w-52 sm:*:data-filter-clear:w-auto",
 				className,
 			)}
 		>
@@ -86,6 +87,7 @@ export function ClearFiltersButton({
 		<Button
 			type="button"
 			variant="outline"
+			data-filter-clear
 			className={cn("w-full", FILTER_CONTROL_CLASS, className)}
 			disabled={!count}
 			onClick={onClear}
@@ -123,7 +125,7 @@ export function FilterSelect({
 					className={cn("w-full", filterControlClass(value !== null))}
 				>
 					<IconifyIcon icon={icon} />
-					<SelectValue />
+					<SelectValue className="flex-1 text-left" />
 				</SelectTrigger>
 				<SelectContent align="start" variant="filter">
 					<SelectGroup>{children}</SelectGroup>

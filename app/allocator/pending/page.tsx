@@ -15,6 +15,7 @@ import {
 	FILTER_CONTROL_CLASS,
 	FilterBar,
 	FilterSelect,
+	filterControlClass,
 } from "@/components/table/filter-bar"
 import PaginationFooter from "@/components/table/pagination-footer"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -385,15 +386,25 @@ export default function AllocatorPendingPage() {
 										>
 											Imported Statements it could become
 										</h3>
-										<Input
-											placeholder="Search descriptions..."
-											value={candidateQuery}
-											onChange={event =>
-												handleCandidateQuery(event.target.value)
-											}
-										/>
+										<div className="relative">
+											<IconifyIcon
+												icon="lucide:search"
+												className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground"
+											/>
+											<Input
+												placeholder="Search descriptions..."
+												className={cn(
+													"pl-8",
+													filterControlClass(!!candidateQuery),
+												)}
+												value={candidateQuery}
+												onChange={event =>
+													handleCandidateQuery(event.target.value)
+												}
+											/>
+										</div>
 										<FilterBar>
-											<div className="sm:col-span-2">
+											<div>
 												<Select
 													value={candidateScope}
 													onValueChange={value =>
@@ -413,7 +424,7 @@ export default function AllocatorPendingPage() {
 														)}
 													>
 														<IconifyIcon icon="lucide:list-filter" />
-														<SelectValue />
+														<SelectValue className="flex-1 text-left" />
 													</SelectTrigger>
 													<SelectContent align="start" variant="filter">
 														<SelectGroup>
