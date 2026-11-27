@@ -18,12 +18,27 @@ import { listRecords, type RecordFilters } from "@/logic/records"
 import type { Record } from "@/types"
 
 const PAGE = 40
+const WIDEN = {
+	older: {
+		icon: "lucide:history",
+		label: "Include older",
+		short: "Older",
+		empty: "Search older Records too",
+	},
+	all: {
+		icon: "lucide:calendar-range",
+		label: "All dates",
+		short: "All",
+		empty: "Search Records from all dates",
+	},
+}
 
 export default function RecordSearchSheet({
 	title,
 	placeholder,
 	filters,
 	target,
+	widen = "older",
 	isOpen,
 	setIsOpen,
 	handler,
@@ -34,6 +49,8 @@ export default function RecordSearchSheet({
 	filters?: RecordFilters
 	/** Amount being attached; Records whose remaining amount equals it are surfaced first. */
 	target?: number
+	/** What the date toggle widens to: "older" drops only `start_date`; "all" drops the whole range. */
+	widen?: "older" | "all"
 	isOpen: boolean
 	setIsOpen: (isOpen: boolean) => void
 	handler: (record: Record) => Promise<void>
@@ -42,7 +59,7 @@ export default function RecordSearchSheet({
 	const [query, setQuery] = useState("")
 	// Typing stays responsive; the list catches up at lower priority.
 	const deferredQuery = useDeferredValue(query)
-	const [includeOlder, setIncludeOlder] = useState(false)
+	const [widened, setWidened] = useState(false)
 	const [limit, setLimit] = useState(PAGE)
 	const [attachingId, setAttachingId] = useState<string | null>(null)
 	const [epoch, setEpoch] = useState(0)
@@ -50,18 +67,20 @@ export default function RecordSearchSheet({
 		if (!isOpen) {
 			setEpoch(value => value + 1)
 			setQuery("")
-			setIncludeOlder(false)
+			setWidened(false)
 			setLimit(PAGE)
 			setAttachingId(null)
 		}
 	}, [isOpen])
 	const excludeBudgetId = filters?.exclude_budget_id ?? null
-	const startDate = includeOlder ? null : (filters?.start_date ?? null)
-	const endDate = filters?.end_date ?? null
+	const startDate = widened ? null : (filters?.start_date ?? null)
+	const endDate = widened && widen === "all" ? null : (filters?.end_date ?? null)
+	const canWiden =
+		widen === "all" ? !!(filters?.start_date || filters?.end_date) : !!filters?.start_date
 	const isAllocated = filters?.is_allocated
 	// Cache tag for the current filter set; readiness gates on the opening
 	// epoch only, so prior rows stay mounted (dimmed) while a new read resolves.
-	const queryKey = `${deferredQuery}|${includeOlder}|${excludeBudgetId ?? ""}|${startDate ?? ""}|${endDate ?? ""}|${isAllocated ?? ""}`
+	const queryKey = `${deferredQuery}|${widened}|${excludeBudgetId ?? ""}|${startDate ?? ""}|${endDate ?? ""}|${isAllocated ?? ""}`
 	const data = useLiveQuery(async () => {
 		if (!isOpen) return null
 		const rows = await listRecords({
@@ -72,16 +91,7 @@ export default function RecordSearchSheet({
 			is_allocated: isAllocated,
 		})
 		return { epoch, key: queryKey, rows }
-	}, [
-		isOpen,
-		epoch,
-		deferredQuery,
-		includeOlder,
-		excludeBudgetId,
-		startDate,
-		endDate,
-		isAllocated,
-	])
+	}, [isOpen, epoch, deferredQuery, widened, excludeBudgetId, startDate, endDate, isAllocated])
 	const current =
 		isOpen && data !== undefined && data !== null && data.epoch === epoch ? data : undefined
 	const records = current?.rows
@@ -141,16 +151,16 @@ export default function RecordSearchSheet({
 							}}
 						/>
 					</div>
-					{filters?.start_date ? (
+					{canWiden ? (
 						<Button
 							type="button"
-							variant={includeOlder ? "secondary" : "outline"}
-							aria-pressed={includeOlder}
-							onClick={() => setIncludeOlder(value => !value)}
+							variant={widened ? "secondary" : "outline"}
+							aria-pressed={widened}
+							onClick={() => setWidened(value => !value)}
 						>
-							<IconifyIcon icon="lucide:history" data-icon="inline-start" />
-							<span className="hidden sm:inline">Include older</span>
-							<span className="sm:hidden">Older</span>
+							<IconifyIcon icon={WIDEN[widen].icon} data-icon="inline-start" />
+							<span className="hidden sm:inline">{WIDEN[widen].label}</span>
+							<span className="sm:hidden">{WIDEN[widen].short}</span>
 						</Button>
 					) : null}
 				</div>
@@ -165,13 +175,9 @@ export default function RecordSearchSheet({
 						<div className="grid place-items-center gap-2 px-6 py-16 text-center text-sm text-muted-foreground">
 							<IconifyIcon icon="lucide:search-x" className="size-6" />
 							No matching Records.
-							{filters?.start_date && !includeOlder ? (
-								<Button
-									variant="link"
-									size="sm"
-									onClick={() => setIncludeOlder(true)}
-								>
-									Search older Records too
+							{canWiden && !widened ? (
+								<Button variant="link" size="sm" onClick={() => setWidened(true)}>
+									{WIDEN[widen].empty}
 								</Button>
 							) : null}
 						</div>

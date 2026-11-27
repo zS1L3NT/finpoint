@@ -338,7 +338,12 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 							<RecordSearchSheet
 								title="Attach record to budget"
 								placeholder="Search unattached records..."
-								filters={{ exclude_budget_id: budget.id }}
+								filters={{
+									exclude_budget_id: budget.id,
+									start_date: budget.start_date,
+									end_date: budget.end_date,
+								}}
+								widen="all"
 								isOpen={isAttachingRecord}
 								setIsOpen={setIsAttachingRecord}
 								handler={attach}

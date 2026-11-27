@@ -86,6 +86,7 @@ I've also hosted Finpoint on my personal subdomain at https://finpoint.zectan.co
   - Budgets
     - Custom date periods and amounts
     - Automatic or manual Record membership
+    - Attach Records from the budget period first, or widen the search to all dates
     - Progress tracking
 - Data management
   - Local IndexedDB storage with no account required
