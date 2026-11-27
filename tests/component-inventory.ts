@@ -100,8 +100,8 @@ export const componentInventory: InventoryEntry[] = [
 	{
 		path: "src/components/allocate-bar.tsx",
 		owner: "team3",
-		routes: ["/statements/[id]"],
-		visibleExports: ["default"],
+		routes: ["/statements/[id]", "/allocator", "/records"],
+		visibleExports: ["AllocationMismatch", "default"],
 		dormantExports: [],
 		helperExports: [],
 		scenarios: ["display", "allocation"],
@@ -779,6 +779,15 @@ export const componentInventory: InventoryEntry[] = [
 		scenarios: ["display"],
 	},
 	{
+		path: "src/components/sheets/budget-records-sheet.tsx",
+		owner: "team3",
+		routes: ["/budgets/[id]"],
+		visibleExports: ["default"],
+		dormantExports: [],
+		helperExports: [],
+		scenarios: ["display"],
+	},
+	{
 		path: "src/components/sheets/records-sheet.tsx",
 		owner: "team3",
 		routes: ["/"],
@@ -850,9 +859,9 @@ export const componentInventory: InventoryEntry[] = [
 			"/records",
 			"/",
 		],
-		visibleExports: ["ClearFiltersButton", "FilterBar"],
+		visibleExports: ["ClearFiltersButton", "FilterBar", "FilterField", "FilterSelect"],
 		dormantExports: [],
-		helperExports: ["FILTER_CONTROL_CLASS"],
+		helperExports: ["FILTER_CONTROL_CLASS", "filterControlClass"],
 		scenarios: ["table"],
 	},
 	{
@@ -1577,7 +1586,6 @@ export const componentInventory: InventoryEntry[] = [
 			"SidebarMenuButton",
 			"SidebarMenuItem",
 			"SidebarProvider",
-			"SidebarRail",
 			"SidebarTrigger",
 		],
 		dormantExports: [
@@ -1590,6 +1598,7 @@ export const componentInventory: InventoryEntry[] = [
 			"SidebarMenuSub",
 			"SidebarMenuSubButton",
 			"SidebarMenuSubItem",
+			"SidebarRail",
 			"SidebarSeparator",
 		],
 		helperExports: ["useSidebar"],
@@ -2041,6 +2050,10 @@ export const scenarioDescriptions: Record<string, string> = {
 		"No/partial/full allocation renders correct state and finite progress; zero total, negative, excess and opposite signs produce bounded rendered scales and exact amounts",
 	"src/components/selection-bar.tsx#display.interaction":
 		"One selected statement exposes Allocate action; action opens pending record search and selected allocation is persisted",
+	"src/components/sheets/budget-records-sheet.tsx#display.interaction":
+		"Budget category and chart day drills open the sheet with only those Records; browser Back and Escape close it, and keyboard Enter on a chart day keeps it open",
+	"src/components/sheets/budget-records-sheet.tsx#display.values":
+		"The sheet names the category or day, the Budget, the Record count and their spent total",
 	"src/components/sheets/records-sheet.tsx#display.interaction":
 		"Dashboard drills open the sheet in place without a Back entry; browser Back and Escape close it, Forward reopens it, and a Record opened from it returns to the open sheet",
 	"src/components/sheets/record-search.tsx#display.interaction":
@@ -2796,6 +2809,9 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"amount and badge: optional states keep signs, pending values and colour fallback",
 		"Record editor: long Monthly Budget option can be picked, cleared and disabled by Treatment",
 	],
+	"src/components/allocate-bar.tsx#export.AllocationMismatch.behaviour": [
+		"Record creator: an insufficient Allocation warns that the Record stays Pending",
+	],
 	"src/components/allocate-bar.tsx#export.default.behaviour": [
 		"Allocation bar: not, partial and fully allocated states show finite values",
 		"Allocation bar: zero, negative, full, excess and opposite-sign values stay finite and bounded",
@@ -2809,6 +2825,15 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"src/components/selection-bar.tsx#display.interaction": [
 		"Record search sheet: selected Statements allocate to a Pending Record",
+	],
+	"src/components/sheets/budget-records-sheet.tsx#export.default.behaviour": [
+		"Budget detail: category and chart day drills open the Budget's Records in a sheet that Back closes",
+	],
+	"src/components/sheets/budget-records-sheet.tsx#display.interaction": [
+		"Budget detail: category and chart day drills open the Budget's Records in a sheet that Back closes",
+	],
+	"src/components/sheets/budget-records-sheet.tsx#display.values": [
+		"Budget detail: category and chart day drills open the Budget's Records in a sheet that Back closes",
 	],
 	"src/components/sheets/records-sheet.tsx#export.default.behaviour": [
 		"Category mix: drilldown carries Treatment and Category filters",
@@ -2855,6 +2880,12 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"src/components/table/filter-bar.tsx#export.ClearFiltersButton.behaviour": [
 		"Records table: Category selection narrows Records and survives reload",
+	],
+	"src/components/table/filter-bar.tsx#export.FilterField.behaviour": [
+		"filter bar: active filters are highlighted one for one with the Clear count and reset on their own",
+	],
+	"src/components/table/filter-bar.tsx#export.FilterSelect.behaviour": [
+		"filter bar: active filters are highlighted one for one with the Clear count and reset on their own",
 	],
 	"src/components/table/filter-bar.tsx#export.FilterBar.behaviour": [
 		"Records table: Category selection narrows Records and survives reload",
@@ -3606,13 +3637,13 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"facet skeleton: pulse changes opacity through frames while placeholder geometry stays stable",
 	],
 	"src/components/layout/page-header.tsx#export.default.behaviour": [
-		"Category drill: a Record opens over the filtered list and Back returns to Categories",
+		"Budget drill: a Record opens over the Budget and Back returns to Budgets",
 	],
 	"src/components/layout/page-header.tsx#display.interaction": [
-		"Category drill: a Record opens over the filtered list and Back returns to Categories",
+		"Budget drill: a Record opens over the Budget and Back returns to Budgets",
 	],
 	"src/components/layout/page-header.tsx#display.values": [
-		"Category drill: a Record opens over the filtered list and Back returns to Categories",
+		"Budget drill: a Record opens over the Budget and Back returns to Budgets",
 	],
 	"src/components/tab-nav.tsx#export.default.behaviour": [
 		"workflow tabs: navigate by keyboard and Allocate keeps the default date filter",
@@ -3784,7 +3815,7 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"Records list: keyboard opens the Record editor over the filtered list",
 	],
 	"app/categories/page.tsx#route.navigation": [
-		"Categories drill: nested keyboard drill returns through exact origins",
+		"Categories page: search lives in the URL, survives reload and one Back clears it",
 	],
 	"app/statement-rules/page.tsx#route.navigation": [
 		"Statement rules page: the Settings tab opens it and pause, resume and delete persist after reload",
@@ -4762,6 +4793,9 @@ export const modalAnimationCoverage: Record<string, string[]> = {
 	],
 	"src/components/sheets/records-sheet.tsx": [
 		"Records sheet: animates in and out when closed by Escape and by its close button",
+	],
+	"src/components/sheets/budget-records-sheet.tsx": [
+		"Budget Records sheet: animates in and out when closed by Escape and by its close button",
 	],
 	"src/components/sheets/record-search.tsx": [
 		"search sheets: every sheet animates in and out on dismissal and completion",

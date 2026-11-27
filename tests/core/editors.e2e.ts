@@ -698,7 +698,9 @@ test("Record creator: validates required fields, applies Category defaults and p
 				"Category default · Daily",
 			)
 			// The pending warning tracks the amount/allocation mismatch, not just mount state.
-			const mismatch = dialog.getByText("Amount does not match the sum of Allocation Amounts")
+			const mismatch = dialog.getByText(
+				"This Record stays Pending until its amount equals its Allocations.",
+			)
 			if (amount === "0") {
 				await expect(mismatch).toHaveCount(0)
 				await dialog.getByLabel("Amount", { exact: true }).fill("-12.34")
@@ -748,7 +750,7 @@ test("Record creator: validates required fields, applies Category defaults and p
 		await expect(dialog).toBeVisible()
 		// A fresh creator starts dateless; stamp today first so clearing is meaningful.
 		await dialog.locator("#datetime-time").fill("12:00")
-		const dateButton = dialog.getByLabel("Date and time", { exact: true })
+		const dateButton = dialog.getByLabel("Date", { exact: true })
 		await dateButton.evaluate(element => element.scrollIntoView({ block: "center" }))
 		await dateButton.click()
 		const calendar = page.locator('[data-slot="popover-content"]')
@@ -758,7 +760,7 @@ test("Record creator: validates required fields, applies Category defaults and p
 		await expect(page.locator('[data-slot="popover-content"]')).toHaveCount(0)
 		await expect(dialog).toBeVisible()
 		await dialog.getByRole("button", { name: "Create Record", exact: true }).click()
-		await expect(dialog.getByLabel("Date and time", { exact: true })).toHaveAttribute(
+		await expect(dialog.getByLabel("Date", { exact: true })).toHaveAttribute(
 			"aria-invalid",
 			"true",
 		)

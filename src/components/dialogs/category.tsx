@@ -60,12 +60,15 @@ export default function CategoryDialog({
 	isOpen,
 	mode: modeProp,
 	category: categoryProp,
+	parent = null,
 	categories,
 	setIsOpen,
 }: {
 	isOpen: boolean
 	mode: "create" | "edit"
 	category: Category | CategoryWithChildren | null
+	/** A new subcategory starts under this Category with its treatment and monthly budget. */
+	parent?: Category | CategoryWithChildren | null
 	categories: (Category | CategoryWithChildren)[]
 	setIsOpen: (isOpen: boolean) => void
 }) {
@@ -98,7 +101,7 @@ export default function CategoryDialog({
 	const { locked, run } = useSubmitLock(isOpen)
 
 	// Seeds on open and for a different Category, not for a background write to the same one.
-	useSeed(isOpen ? (category?.id ?? "new") : null, () => {
+	useSeed(isOpen ? (category?.id ?? `new:${parent?.id ?? ""}`) : null, () => {
 		setValues(
 			category
 				? {
@@ -109,7 +112,14 @@ export default function CategoryDialog({
 						analytics_treatment: category.analytics_treatment,
 						default_monthly_budget_id: category.default_monthly_budget_id ?? "",
 					}
-				: EMPTY_FORM_VALUES,
+				: parent
+					? {
+							...EMPTY_FORM_VALUES,
+							parent_category_id: parent.id,
+							analytics_treatment: parent.analytics_treatment,
+							default_monthly_budget_id: parent.default_monthly_budget_id ?? "",
+						}
+					: EMPTY_FORM_VALUES,
 		)
 		resetApiErrors()
 	})

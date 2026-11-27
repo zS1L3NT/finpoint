@@ -86,6 +86,7 @@ I've also hosted Finpoint on my personal subdomain at https://finpoint.zectan.co
   - Budgets
     - Custom date periods and amounts
     - Automatic or manual Record membership
+    - Attach Records from the budget period first, or widen the search to all dates
     - Progress tracking
 - Data management
   - Local IndexedDB storage with no account required
@@ -110,6 +111,8 @@ $ npm run dev
 Finpoint will be available at [http://localhost:5173](http://localhost:5173). The application works without any environment variables and stores its data in the browser.
 
 Google Drive sync is optional. To enable it, copy the `.env.example` file to `.env`, create a Web OAuth client in Google Cloud Console and fill in the credentials.
+
+On the OAuth client, add each site (for example `http://localhost:5173`) as an authorised JavaScript origin, and its `/sync` page (for example `http://localhost:5173/sync`) as an authorised redirect URI. Regular browser tabs sign in through a Google popup. Apps installed to the Home Screen, and tabs that block the popup, sign in by redirecting to Google and back to `/sync` instead.
 
 ```sh
 $ cp .env.example .env

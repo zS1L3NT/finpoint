@@ -84,18 +84,17 @@ export default function DateRange({
 							disabled={disabled}
 							aria-invalid={invalid}
 							className={cn(
-								"relative w-full justify-center text-center font-normal",
+								"relative w-full justify-start text-left font-normal",
 								!selected && "text-muted-foreground",
 								invalid ? "border-destructive" : null,
 								triggerClassName,
 							)}
 						>
-							<IconifyIcon
-								icon="lucide:calendar-range"
-								className="absolute left-2"
-								data-icon="inline-start"
-							/>
-							<span className="w-full truncate px-5 text-center">
+							<IconifyIcon icon="lucide:calendar-range" data-icon="inline-start" />
+							<span
+								className="min-w-0 flex-1 truncate pr-4 text-left"
+								title={selected?.from ? formatRange(selected) : undefined}
+							>
 								{selected?.from ? formatRange(selected) : placeholder}
 							</span>
 						</Button>

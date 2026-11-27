@@ -163,7 +163,7 @@ export default function DashboardPage() {
 			>
 				{!period.is_future ? (
 					<Card className="min-w-0">
-						<CardHeader className="border-b">
+						<CardHeader>
 							<ScopedCardTitle scope={scopeLabel} color={scopeColor}>
 								Spending forecast
 							</ScopedCardTitle>
@@ -255,7 +255,6 @@ export default function DashboardPage() {
 						<CategoryHistoryChart
 							key={`${dataMonth}-${dataYear}`}
 							categories={scopedCategories}
-							scopeLabel={scopeLabel}
 							months={data.comparison_history}
 							through={period.through}
 							monthlyBudgetIds={scope === "all" ? null : scopedBudgetIds}
@@ -279,8 +278,7 @@ export default function DashboardPage() {
 										Spending calendar
 									</ScopedCardTitle>
 									<CardDescription>
-										Stronger colour means more spending. Select a day to open
-										its Records.
+										Stronger colour means more spending.
 									</CardDescription>
 								</CardHeader>
 								<CardContent>
@@ -337,14 +335,13 @@ export default function DashboardPage() {
 					) : null}
 					{stage > 3 ? (
 						<Card>
-							<CardHeader className="border-b">
+							<CardHeader>
 								<ScopedCardTitle scope="All budgets">
 									Spending by day
 								</ScopedCardTitle>
 								<CardDescription>
 									Net daily spending across all monthly budgets, including
-									refunds. Hold or hover over a day to read it, and tap or click
-									it to open its Records.
+									refunds.
 								</CardDescription>
 							</CardHeader>
 							<CardContent>

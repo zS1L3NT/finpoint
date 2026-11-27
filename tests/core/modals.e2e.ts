@@ -41,8 +41,8 @@ test("app modal surfaces: show backdrops, restore focus and reopen after Escape"
 		await expect(trigger).toBeVisible()
 		await trigger.click()
 		await expect(page.getByRole("dialog")).toBeVisible()
-		await expect(page.getByRole("dialog").getByRole("alert")).toContainText(
-			"Amount does not match the sum of Allocation Amounts",
+		await expect(page.getByRole("dialog").getByRole("status")).toContainText(
+			"This Record stays Pending until its amount equals its Allocations.",
 		)
 		await page.keyboard.press("Escape")
 		await expect(page.getByRole("dialog")).toHaveCount(0)

@@ -9,7 +9,13 @@ import DuplicateReviewDialog from "@/components/dialogs/duplicate-review"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
-import { ClearFiltersButton, FILTER_CONTROL_CLASS, FilterBar } from "@/components/table/filter-bar"
+import {
+	ClearFiltersButton,
+	FILTER_CONTROL_CLASS,
+	FilterBar,
+	FilterSelect,
+	filterControlClass,
+} from "@/components/table/filter-bar"
 import PaginationFooter from "@/components/table/pagination-footer"
 import { formatRowTime } from "@/components/table/record-columns"
 import { dayLabel } from "@/components/table/row-groups"
@@ -144,61 +150,60 @@ export default function FixDuplicatesPage() {
 			/>
 			<WorkflowTabs active="duplicates" />
 			<div className="flex flex-col gap-2">
-				<Input
-					aria-label="Search statement descriptions"
-					className="w-full md:w-sm"
-					placeholder="Search descriptions..."
-					value={query}
-					onChange={event => updateQuery(event.target.value)}
-				/>
+				<div className="relative w-full md:w-sm">
+					<IconifyIcon
+						icon="lucide:search"
+						className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground"
+					/>
+					<Input
+						aria-label="Search statement descriptions"
+						className={cn("pl-8", filterControlClass(!!query))}
+						placeholder="Search descriptions..."
+						value={query}
+						onChange={event => updateQuery(event.target.value)}
+					/>
+				</div>
 				<div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:gap-4">
-					<FilterBar className="lg:w-auto">
-						<Select
-							value={view}
-							onValueChange={value =>
-								updateParams({ view: value === "suggested" ? "" : value })
-							}
-						>
-							<SelectTrigger
-								aria-label="Duplicate view"
-								className={cn("w-full sm:w-56", FILTER_CONTROL_CLASS)}
+					<FilterBar>
+						<div data-filter-view>
+							<Select
+								value={view}
+								onValueChange={value =>
+									updateParams({ view: value === "suggested" ? "" : value })
+								}
 							>
-								<SelectValue />
-							</SelectTrigger>
-							<SelectContent align="start" variant="filter">
-								{Object.entries(VIEWS).map(([value, v]) => (
-									<SelectItem key={value} value={value}>
-										{v.label}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
-						<Select
-							value={accountId || "all"}
-							onValueChange={value =>
-								updateParams({ account_id: value === "all" ? "" : value })
-							}
+								<SelectTrigger
+									aria-label="Duplicate view"
+									className={cn("w-full", FILTER_CONTROL_CLASS)}
+								>
+									<SelectValue />
+								</SelectTrigger>
+								<SelectContent align="start" variant="filter">
+									{Object.entries(VIEWS).map(([value, v]) => (
+										<SelectItem key={value} value={value}>
+											{v.label}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						</div>
+						<FilterSelect
+							name="account"
+							icon="lucide:landmark"
+							label="Filter account"
+							value={accountId || null}
+							onValueChange={value => updateParams({ account_id: value ?? "" })}
 						>
-							<SelectTrigger
-								aria-label="Filter account"
-								className={cn("w-full sm:w-40", FILTER_CONTROL_CLASS)}
-							>
-								<IconifyIcon icon="lucide:landmark" />
-								<SelectValue />
-							</SelectTrigger>
-							<SelectContent align="start" variant="filter">
-								<SelectItem value="all">All Accounts</SelectItem>
-								{accounts?.map(a => (
-									<SelectItem key={a.id} value={a.id}>
-										{a.name}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
+							<SelectItem value="all">All Accounts</SelectItem>
+							{accounts?.map(a => (
+								<SelectItem key={a.id} value={a.id}>
+									{a.name}
+								</SelectItem>
+							))}
+						</FilterSelect>
 						<ClearFiltersButton
 							count={filterCount}
 							onClear={() => updateParams({ query: "", account_id: "" })}
-							className="sm:w-auto"
 						/>
 					</FilterBar>
 					<p className="text-xs/relaxed text-muted-foreground">

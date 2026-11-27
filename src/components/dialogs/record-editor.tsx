@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion"
 import { DateTime } from "luxon"
 import { useState } from "react"
 import { toast } from "sonner"
+import { AllocationMismatch } from "@/components/allocate-bar"
 import AmountField from "@/components/form/amount-field"
 import CategoryField from "@/components/form/category-field"
 import DatetimeField from "@/components/form/datetime-field"
@@ -14,7 +15,6 @@ import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
 import RecordAmount from "@/components/record-amount"
 import StatementSearchSheet from "@/components/sheets/statement-search"
 import { PendingBadge } from "@/components/table/record-columns"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
 	Card,
@@ -51,7 +51,7 @@ import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { useDialogCloseAnimation } from "@/hooks/use-dialog-close-animation"
 import { useDefaultFilterEndDateToday, useDefaultFilterStartDate } from "@/hooks/use-settings"
 import { useSubmitLock } from "@/hooks/use-submit-lock"
-import { COLLAPSE_MOTION, SPRING, TRANSITION } from "@/lib/motion"
+import { FIELD_NOTE_COLLAPSE_MOTION, SPRING, TRANSITION } from "@/lib/motion"
 import { cn, formatCurrency, formatDatetime, round2 } from "@/lib/utils"
 import { listMonthlyBudgets } from "@/logic/monthly-budgets"
 import { ConflictError, deleteRecord, recordCompletions, updateRecord } from "@/logic/records"
@@ -203,12 +203,11 @@ export default function RecordEditorDialog({
 		})
 	}
 
-	const isPendingAmount = useStore(
-		form.store,
-		state =>
-			round2(state.values.statements.reduce((acc, el) => acc + el.amount, 0)) !==
-			round2(state.values.amount),
-	)
+	const mismatch = useStore(form.store, state => ({
+		amount: round2(state.values.amount),
+		allocated: round2(state.values.statements.reduce((acc, el) => acc + el.amount, 0)),
+	}))
+	const isPendingAmount = mismatch.allocated !== mismatch.amount
 	const analytics = useStore(form.store, state => ({
 		treatment: state.values.analytics_treatment,
 		categoryId: state.values.category_id,
@@ -365,7 +364,6 @@ export default function RecordEditorDialog({
 										{field => (
 											<DatetimeField
 												id={field.name}
-												label="Date and time"
 												value={field.state.value}
 												errors={mergeErrors(
 													field.state.meta.errors,
@@ -399,20 +397,18 @@ export default function RecordEditorDialog({
 										{isPendingAmount && (
 											<motion.div
 												className="overflow-hidden"
-												{...COLLAPSE_MOTION}
+												{...FIELD_NOTE_COLLAPSE_MOTION}
 											>
-												<Alert className="mt-4 max-w-md border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-50">
-													<IconifyIcon icon="lucide:triangle-alert" />
-													<AlertTitle>
-														Amount does not match the sum of Allocation
-														Amounts
-													</AlertTitle>
-													<AlertDescription>
-														This record will be marked as pending until
-														the record amount matches the sum of
-														allocated statement amounts.
-													</AlertDescription>
-												</Alert>
+												<AllocationMismatch
+													allocated={mismatch.allocated}
+													onUseAllocated={() => {
+														form.setFieldValue(
+															"amount",
+															mismatch.allocated,
+														)
+														clearApiError("amount")
+													}}
+												/>
 											</motion.div>
 										)}
 									</AnimatePresence>

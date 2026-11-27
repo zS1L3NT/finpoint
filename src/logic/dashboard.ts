@@ -48,9 +48,13 @@ export type SpendingHistoryMonth = {
 	categories: {
 		id: string
 		name: string
+		icon: string
 		color: string
 		spending: number
 		monthly_budget_spending: Record<string, number>
+		/** Records behind the spending, in all and per Monthly Budget like the spending. */
+		records: number
+		monthly_budget_records: Record<string, number>
 	}[]
 }
 
@@ -291,7 +295,15 @@ function buildSpendingHistory(
 	const buildBreakdown = (items: AnalyticsRecord[]) => {
 		const totals = new Map<
 			string,
-			{ name: string; color: string; cents: number; monthlyBudgets: Record<string, number> }
+			{
+				name: string
+				icon: string
+				color: string
+				cents: number
+				monthlyBudgets: Record<string, number>
+				records: number
+				monthlyBudgetRecords: Record<string, number>
+			}
 		>()
 		for (const item of items) {
 			const category = item.category_parent ?? item.category
@@ -299,25 +311,34 @@ function buildSpendingHistory(
 			if (!category || cents <= 0) continue
 			const value = totals.get(category.id) ?? {
 				name: category.name,
+				icon: category.icon,
 				color: category.color,
 				cents: 0,
 				monthlyBudgets: {},
+				records: 0,
+				monthlyBudgetRecords: {},
 			}
 			value.cents += cents
+			value.records += 1
 			const monthly_budget = item.monthly_budget_id ?? "unbudgeted"
 			value.monthlyBudgets[monthly_budget] =
 				(value.monthlyBudgets[monthly_budget] ?? 0) + cents
+			value.monthlyBudgetRecords[monthly_budget] =
+				(value.monthlyBudgetRecords[monthly_budget] ?? 0) + 1
 			totals.set(category.id, value)
 		}
 		return {
 			categories: [...totals].map(([id, value]) => ({
 				id,
 				name: value.name,
+				icon: value.icon,
 				color: value.color,
 				spending: value.cents / 100,
 				monthly_budget_spending: Object.fromEntries(
 					Object.entries(value.monthlyBudgets).map(([id, cents]) => [id, cents / 100]),
 				),
+				records: value.records,
+				monthly_budget_records: value.monthlyBudgetRecords,
 			})),
 		}
 	}
@@ -794,12 +815,15 @@ function buildSeries(
 			income += entry?.income ?? 0
 			spending += entry?.spending ?? 0
 		}
+		const scheduled = isActual
+			? 0
+			: (futureSummary.daily.find(item => Number(item.date.slice(-2)) === day)?.spending ?? 0)
 		if (!isActual && projectedDailySpending !== null) {
-			const entry = futureSummary.daily.find(item => Number(item.date.slice(-2)) === day)
-			projectedSpending += projectedDailySpending + (entry?.spending ?? 0)
+			projectedSpending += projectedDailySpending + scheduled
 		}
 		return {
 			day,
+			scheduled_spending: Math.round(scheduled * 100) / 100,
 			income: isActual ? Math.round(income * 100) / 100 : null,
 			spending: isActual ? Math.round(spending * 100) / 100 : null,
 			projected_spending:

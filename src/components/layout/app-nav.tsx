@@ -43,15 +43,17 @@ function useSyncIndicator() {
 			? "bg-sky-500"
 			: sync.kind === "conflict"
 				? "bg-amber-500"
-				: sync.kind === "needs-auth" || sync.kind === "error"
-					? "bg-red-500"
-					: sync.kind === "offline"
-						? sync.localDirty
-							? "bg-amber-500"
-							: "bg-zinc-400"
-						: sync.kind === "local-changes" || sync.kind === "never-synced"
-							? "bg-sky-500"
-							: "bg-emerald-500"
+				: sync.paused
+					? "bg-zinc-400"
+					: sync.kind === "needs-auth" || sync.kind === "error"
+						? "bg-red-500"
+						: sync.kind === "offline"
+							? sync.localDirty
+								? "bg-amber-500"
+								: "bg-zinc-400"
+							: sync.kind === "local-changes" || sync.kind === "never-synced"
+								? "bg-sky-500"
+								: "bg-emerald-500"
 	const title =
 		sync.activity === "checking"
 			? "Checking Drive…"
@@ -61,17 +63,19 @@ function useSyncIndicator() {
 					? "Reading from Drive…"
 					: sync.kind === "conflict"
 						? "Needs your decision"
-						: sync.kind === "needs-auth"
-							? "Reconnect Google Drive"
-							: sync.kind === "offline"
-								? "Offline"
-								: sync.kind === "local-changes"
-									? "Changes waiting to sync"
-									: sync.kind === "never-synced"
-										? "Not connected yet"
-										: sync.kind === "error"
-											? (sync.error ?? "Sync failed")
-											: "In sync"
+						: sync.paused
+							? "Sync paused"
+							: sync.kind === "needs-auth"
+								? "Reconnect Google Drive"
+								: sync.kind === "offline"
+									? "Offline"
+									: sync.kind === "local-changes"
+										? "Changes waiting to sync"
+										: sync.kind === "never-synced"
+											? "Not connected yet"
+											: sync.kind === "error"
+												? (sync.error ?? "Sync failed")
+												: "In sync"
 	return { tone, title, busy }
 }
 

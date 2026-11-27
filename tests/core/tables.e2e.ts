@@ -719,3 +719,43 @@ test("Statement rules page: search lives in the URL, survives reload and one Bac
 	await expect(page).not.toHaveURL(/query=/)
 	await expect(search).toHaveValue("")
 })
+
+test("filter bar: active filters are highlighted one for one with the Clear count and reset on their own", async ({
+	page,
+}) => {
+	await seedWorkspace(page)
+	const cases = [
+		["/records?is_allocated=false", "status"],
+		["/records?show_unbudgeted=1", "monthly budget"],
+		["/records?start_date=2026-10-01&end_date=2026-10-31", "date"],
+		["/records?min_amount=-100", "amount"],
+		["/statements?is_pending=true", "status"],
+		["/statements?is_unallocated=true", "allocation"],
+		["/statements?min_amount=-100", "amount"],
+	] as const
+	for (const [url, name] of cases) {
+		await page.goto(url)
+		const active = page.locator("[data-filter][data-active]")
+		await expect(active).toHaveCount(1)
+		await expect(active).toHaveAttribute("data-filter", name)
+		await expect(page.getByRole("button", { name: /^Clear \d/ })).toHaveAccessibleName(
+			"Clear 1",
+		)
+		await page.getByRole("button", { name: `Reset ${name} filter` }).click()
+		await expect(active).toHaveCount(0)
+		await expect(page.getByRole("button", { name: /^Clear/ })).toBeDisabled()
+	}
+	// Every control keeps one width, whatever its value and whichever page it is on.
+	const widths: number[] = []
+	for (const url of ["/records?start_date=2026-01-01&end_date=2026-10-31", "/statements"]) {
+		await page.goto(url)
+		const controls = page.locator("[data-filter]")
+		await expect(controls.first()).toBeVisible()
+		widths.push(
+			...(await controls.evaluateAll(elements =>
+				elements.map(element => Math.round(element.getBoundingClientRect().width)),
+			)),
+		)
+	}
+	expect(new Set(widths).size).toBe(1)
+})

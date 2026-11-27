@@ -1,4 +1,5 @@
 import { UiIcon as IconifyIcon } from "@/components/icon"
+import { filterControlClass } from "@/components/table/filter-bar"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 
@@ -32,7 +33,7 @@ export default function PaginationHeader({
 					<Input
 						type="search"
 						aria-label={searchPlaceholder.replace(/\.+$/, "")}
-						className="border-border bg-input/20 pl-8 dark:bg-input/30"
+						className={cn("pl-8", filterControlClass(!!query))}
 						placeholder={searchPlaceholder}
 						value={query}
 						onChange={e => onQueryChange(e.target.value)}

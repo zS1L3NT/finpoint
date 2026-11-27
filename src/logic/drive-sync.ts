@@ -4,6 +4,8 @@
 import { db } from "@/data/db"
 import { exportData, importData, parseImportFile } from "@/data/export-import"
 import {
+	completeDriveRedirect,
+	type DriveAction,
 	disconnectDrive,
 	downloadBackupFile,
 	ensureDriveToken,
@@ -17,13 +19,19 @@ import { SEED_HASH_KEY } from "@/data/seed"
 import { hashSnapshot } from "@/data/snapshot-hash"
 import { isRemoteNewer } from "@/logic/shared"
 
-export { wasVaultProven } from "@/data/google-drive"
+export {
+	AuthRedirectError,
+	type DriveAction,
+	takeDriveRedirectCallback,
+	wasVaultProven,
+} from "@/data/google-drive"
 
 const FILE_ID_KEY = "drive_file_id"
 const LAST_SYNC_KEY = "drive_last_sync_at"
 const LAST_HASH_KEY = "drive_last_hash"
 const REMOTE_TIME_KEY = "drive_remote_time"
 const LAST_CHECK_KEY = "drive_last_check_at"
+const PAUSED_KEY = "drive_sync_paused"
 
 export type DriveSyncOutcome = "up-to-date" | "pushed" | "pulled" | "conflict" | "empty"
 
@@ -54,6 +62,16 @@ export async function driveStatus(): Promise<DriveStatus> {
 	return { configured: isDriveConfigured(), fileId, lastSyncAt, remoteModifiedTime, lastCheckAt }
 }
 
+/** Whether background sync is paused in this browser. Manual operations still run. */
+export async function driveSyncPaused(): Promise<boolean> {
+	return (await metaGet(PAUSED_KEY)) === "1"
+}
+
+export async function setDriveSyncPaused(paused: boolean): Promise<void> {
+	if (paused) await db.meta.put({ key: PAUSED_KEY, value: "1" })
+	else await db.meta.delete(PAUSED_KEY)
+}
+
 /** Stamp a completed Drive round trip (data moved or not). */
 export async function markDriveChecked(): Promise<void> {
 	await db.meta.put({ key: LAST_CHECK_KEY, value: new Date().toISOString() })
@@ -80,7 +98,7 @@ export async function driveLocalDirty(): Promise<boolean> {
 export async function syncDrive(): Promise<DriveSyncResult> {
 	if (!isDriveConfigured()) throw new Error("Google Drive is not set up yet (missing client ID).")
 
-	const token = await ensureDriveToken()
+	const token = await ensureDriveToken("sync")
 	const snapshot = await exportData()
 	const localHash = await hashSnapshot(snapshot)
 
@@ -137,7 +155,7 @@ export async function syncDrive(): Promise<DriveSyncResult> {
 export async function pushDrive(): Promise<void> {
 	if (!isDriveConfigured()) throw new Error("Google Drive is not set up yet (missing client ID).")
 
-	const token = await ensureDriveToken()
+	const token = await ensureDriveToken("push")
 	const snapshot = await exportData()
 	const localHash = await hashSnapshot(snapshot)
 
@@ -158,7 +176,7 @@ export async function pushDrive(): Promise<void> {
 export async function pullDrive(): Promise<void> {
 	if (!isDriveConfigured()) throw new Error("Google Drive is not set up yet (missing client ID).")
 
-	const token = await ensureDriveToken()
+	const token = await ensureDriveToken("pull")
 	const storedFileId = await metaGet(FILE_ID_KEY)
 	const fileId = storedFileId ?? (await findBackupFile(token))?.id
 	if (!fileId) throw new Error("No backup found in Google Drive yet.")
@@ -177,6 +195,22 @@ export async function pullDrive(): Promise<void> {
 	])
 }
 
+export async function resumeDriveRedirect(
+	code: string,
+	action: DriveAction,
+): Promise<DriveSyncResult> {
+	await completeDriveRedirect(code)
+	if (action === "push") {
+		await pushDrive()
+		return { outcome: "pushed" }
+	}
+	if (action === "pull") {
+		await pullDrive()
+		return { outcome: "pulled" }
+	}
+	return syncDrive()
+}
+
 export async function disconnectDriveSync(): Promise<void> {
 	await disconnectDrive()
 	await Promise.all([
@@ -184,5 +218,6 @@ export async function disconnectDriveSync(): Promise<void> {
 		db.meta.delete(LAST_SYNC_KEY),
 		db.meta.delete(LAST_HASH_KEY),
 		db.meta.delete(REMOTE_TIME_KEY),
+		db.meta.delete(PAUSED_KEY),
 	])
 }

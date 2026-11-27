@@ -17,9 +17,11 @@ import {
 	type DriveSyncResult,
 	driveLocalDirty,
 	driveStatus,
+	driveSyncPaused,
 	markDriveChecked,
 	pullDrive,
 	pushDrive,
+	setDriveSyncPaused,
 } from "@/logic/drive-sync"
 import { isRemoteNewer } from "@/logic/shared"
 
@@ -44,6 +46,8 @@ export type SyncSnapshot = {
 	remoteModifiedTime: string | null
 	lastCheckAt: string | null
 	localDirty: boolean
+	/** Background sync is paused in this browser; changes wait until it is resumed. */
+	paused: boolean
 	conflictAt: string | null
 	error: string | null
 }
@@ -63,6 +67,7 @@ let snapshot: SyncSnapshot = {
 	remoteModifiedTime: null,
 	lastCheckAt: null,
 	localDirty: false,
+	paused: false,
 	conflictAt: null,
 	error: null,
 }
@@ -80,6 +85,7 @@ function sameSnapshot(a: SyncSnapshot, b: SyncSnapshot): boolean {
 		a.remoteModifiedTime === b.remoteModifiedTime &&
 		a.lastCheckAt === b.lastCheckAt &&
 		a.localDirty === b.localDirty &&
+		a.paused === b.paused &&
 		a.conflictAt === b.conflictAt &&
 		a.error === b.error
 	)
@@ -220,9 +226,10 @@ export async function refreshSyncDisplay(): Promise<void> {
 		})
 		return
 	}
-	const [times, dirty] = await Promise.all([
+	const [times, dirty, paused] = await Promise.all([
 		refreshTimes(),
 		driveLocalDirty().catch(() => snapshot.localDirty),
+		driveSyncPaused().catch(() => snapshot.paused),
 	])
 	const kind =
 		snapshot.kind === "conflict" || snapshot.kind === "needs-auth" || snapshot.kind === "error"
@@ -236,6 +243,7 @@ export async function refreshSyncDisplay(): Promise<void> {
 		configured: true,
 		kind,
 		localDirty: dirty,
+		paused,
 		lastSyncAt: times.lastSyncAt,
 		remoteModifiedTime: times.remote,
 		lastCheckAt: times.check,
@@ -304,7 +312,7 @@ export async function runManualDrive(
 	operation: () => Promise<DriveSyncResult>,
 ): Promise<DriveSyncResult> {
 	const result = await exclusive(true, async () => {
-		set({ activity, error: null })
+		set({ configured: isDriveConfigured(), activity, error: null })
 		try {
 			const result = await operation()
 			await finishCycle(result, false)
@@ -330,6 +338,13 @@ export async function resetSyncDisplay(): Promise<void> {
 	await refreshSyncDisplay()
 }
 
+/** Pause or resume background sync in this browser. Resuming checks Drive straight away. */
+export async function setSyncPaused(paused: boolean): Promise<void> {
+	await setDriveSyncPaused(paused)
+	set({ paused })
+	if (!paused) await cycle("boot")
+}
+
 /** An early return must not clear the activity of a cycle that is still running. */
 const idle = () => (running ? {} : { activity: null })
 
@@ -343,6 +358,11 @@ async function cycle(reason: "boot" | "dirty" | "focus" | "online"): Promise<voi
 		return
 	}
 	if (typeof document !== "undefined" && document.hidden && reason !== "boot") return
+	// Read each time, so a pause set in another tab holds here too. Pending writes stay pending.
+	if (await driveSyncPaused().catch(() => snapshot.paused)) {
+		await refreshSyncDisplay()
+		return
+	}
 	if (!pendingPush && Date.now() - lastCycleAt < MIN_CYCLE_GAP_MS && reason !== "boot") {
 		await refreshSyncDisplay()
 		return
@@ -419,6 +439,7 @@ async function cycle(reason: "boot" | "dirty" | "focus" | "online"): Promise<voi
 function flushOnHide(): void {
 	if (
 		running ||
+		snapshot.paused ||
 		!pendingPush ||
 		!navigator.onLine ||
 		!hasFreshDriveToken() ||

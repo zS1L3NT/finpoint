@@ -624,20 +624,16 @@ test("keyboard origins: Records, Statements, Accounts, Budgets and Categories dr
 		await expect(page).toHaveURL(/\/budgets\/t1-b-manual/)
 		await keyboardBack(page, "Back to Budgets", origin)
 	})
-	await test.step("Categories drill: nested keyboard drill returns through exact origins", async () => {
-		// No /categories/[id] route exists: drill into filtered Records instead.
-		await reset("/categories?query=Groceries")
-		await expect(
-			page.getByRole("button", { name: "Edit Groceries", exact: true }),
-		).toBeVisible()
-		const drill = page.getByRole("link", { name: "Open Records for Groceries", exact: true })
-		await drill.focus()
+	await test.step("Budget drill: keyboard opens a Record over the Budget and Back returns to Budgets", async () => {
+		await reset("/budgets?query=October+Buffer")
+		const card = page.locator("article", { hasText: "October Buffer" }).first()
+		await expect(card).toBeVisible()
+		await card.focus()
 		await page.keyboard.press("Enter")
-		const recordsOrigin = new RegExp("/records\\?category_ids=t1-cat-groceries")
-		await expect(page).toHaveURL(recordsOrigin)
-		const recordsUrl = page.url()
+		await expect(page).toHaveURL(/\/budgets\/t1-b-manual/)
+		const budgetUrl = page.url()
 		await expect(
-			page.getByRole("button", { name: "Back to Categories", exact: true }),
+			page.getByRole("button", { name: "Back to Budgets", exact: true }),
 		).toBeVisible()
 		const open = page
 			.getByRole("link", { name: "Open FairPrice Run", exact: true })
@@ -645,48 +641,52 @@ test("keyboard origins: Records, Statements, Accounts, Budgets and Categories dr
 			.first()
 		await open.focus()
 		await page.keyboard.press("Enter")
-		// The Record opens over the filtered list, so Categories stays the only origin.
+		// The Record opens over the Budget, so Budgets stays the only origin.
 		const editor = page.getByRole("dialog", { name: "Edit Record", exact: true })
 		await expect(editor).toBeVisible()
-		await expect(page).toHaveURL(recordsUrl)
+		await expect(page).toHaveURL(budgetUrl)
 		await page.keyboard.press("Escape")
 		await expect(editor).toHaveCount(0)
-		await keyboardBack(page, "Back to Categories", /\/categories(\?|$)/)
+		await keyboardBack(page, "Back to Budgets", /\/budgets(\?|$)/)
 	})
 })
 
-test("navigation history: Category drill, fallbacks and static links preserve history", async ({
+test("navigation history: Budget drill, fallbacks and static links preserve history", async ({
 	page,
 	workspace,
 }) => {
 	void workspace
-	await test.step("Category drill: a Record opens over the filtered list and Back returns to Categories", async () => {
+	await test.step("Budget drill: a Record opens over the Budget and Back returns to Budgets", async () => {
 		void workspace
-		await resetHistory(page, "/categories?query=Groceries")
-		await page.getByRole("link", { name: "Open Records for Groceries", exact: true }).click()
-		await expect(page).toHaveURL(/\/records\?category_ids=t1-cat-groceries$/)
+		await resetHistory(page, "/budgets?query=October+Buffer")
+		await page.locator("article", { hasText: "October Buffer" }).first().click()
+		await expect(page).toHaveURL(/\/budgets\/t1-b-manual$/)
 		await expect(
-			page.getByRole("button", { name: "Back to Categories", exact: true }),
+			page.getByRole("button", { name: "Back to Budgets", exact: true }),
 		).toBeVisible()
 		const origin = page.url()
 		const back = await page
-			.getByRole("button", { name: "Back to Categories", exact: true })
+			.getByRole("button", { name: "Back to Budgets", exact: true })
 			.boundingBox()
 		const heading = await page
-			.getByRole("heading", { name: "Records", level: 2, exact: true })
+			.getByRole("heading", { name: "October Buffer", level: 2, exact: true })
 			.boundingBox()
 		if (!back || !heading) throw new Error("Back button and heading must have layout boxes")
 		expect(back.y + back.height).toBeLessThan(heading.y)
-		// A Record opens over the list, so the drill stack still ends at Categories.
-		await page.getByRole("link", { name: "Open FairPrice Run", exact: true }).click()
+		// A Record opens over the Budget, so the drill stack still ends at Budgets.
+		await page
+			.getByRole("link", { name: "Open FairPrice Run", exact: true })
+			.filter({ visible: true })
+			.first()
+			.click()
 		const editor = page.getByRole("dialog", { name: "Edit Record", exact: true })
 		await expect(editor).toBeVisible()
 		await expect(page).toHaveURL(origin)
 		await page.keyboard.press("Escape")
 		await expect(editor).toHaveCount(0)
 		await expect(page).toHaveURL(origin)
-		await page.getByRole("button", { name: "Back to Categories", exact: true }).click()
-		await expect(page).toHaveURL(/\/categories\?query=Groceries$/)
+		await page.getByRole("button", { name: "Back to Budgets", exact: true }).click()
+		await expect(page).toHaveURL(/\/budgets\?query=October\+Buffer$/)
 	})
 	for (const [route, name, fallback] of [
 		["/accounts/t1-acc-dbs", "Accounts", "/accounts"],

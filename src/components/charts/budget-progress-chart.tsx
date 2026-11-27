@@ -1,116 +1,89 @@
 import { DateTime } from "luxon"
-import { useMemo } from "react"
 import TrendChart from "@/components/charts/trend-chart"
-import { parseDatetime, round2 } from "@/lib/utils"
-import { budgetSpent } from "@/logic/budgets"
-import type { Record } from "@/types"
+import { formatCurrency } from "@/lib/utils"
+import type { BudgetProgressPoint } from "@/logic/budgets"
 
-type BudgetProgressPoint = {
-	/** Short axis label. */
-	date: string
-	/** Readout label with the year, since a Budget can cross into a new year. */
-	day: string
-	usage: number | null
-	projection: number | null
-}
+const OUTSIDE = {
+	before: { tick: "Before", label: "Before the window" },
+	after: { tick: "After", label: "After the window" },
+} as const
 
 export default function BudgetProgressChart({
-	records,
-	start,
-	end,
+	points,
 	limit,
-	asOf,
+	onSelect,
 }: {
-	records: Record[]
-	start: DateTime
-	end: DateTime
+	points: BudgetProgressPoint[]
 	limit: number
-	asOf: DateTime
+	/** Opens the Records behind a point: a day, or `before` / `after` the window. */
+	onSelect?: (key: string) => void
 }) {
-	const data = useMemo(() => buildSeries(records, start, end, asOf), [records, start, end, asOf])
-	const last = data.length - 1
+	const named = points.map(point => {
+		if (point.key === "before" || point.key === "after") return OUTSIDE[point.key]
+		const date = DateTime.fromISO(point.key)
+		// The readout label carries the year, since a Budget can cross into a new year.
+		return { tick: date.toFormat("d MMM"), label: date.toFormat("d MMM yyyy") }
+	})
+	const last = points.length - 1
+	// Before and After take the end ticks, so the caption names the window itself.
+	const days = points.filter(point => point.key !== "before" && point.key !== "after")
+	const [start, end] = [days[0], days.at(-1)]
+	const range =
+		start && end
+			? `${DateTime.fromISO(start.key).toFormat("d MMM")} – ${DateTime.fromISO(end.key).toFormat("d MMM yyyy")}`
+			: null
+	// Before the window starts, money already spent is a single usage point with no line.
+	const reached = points.flatMap((point, index) => (point.usage === null ? [] : [index]))
 
 	return (
 		<div className="grid gap-2">
-			<p className="text-xs font-medium text-muted-foreground">Cumulative spending · SGD</p>
+			<p className="text-xs font-medium text-muted-foreground">
+				Cumulative spending · SGD{range ? ` · ${range}` : ""}
+			</p>
 			<TrendChart
 				label="Cumulative budget spending by day"
 				className="h-72 w-full sm:h-80"
-				labels={data.map(point => point.day)}
+				labels={named.map(point => point.label)}
 				ticks={[...new Set([0, Math.round(last / 3), Math.round((last * 2) / 3), last])]
 					.filter(index => index >= 0)
-					.map(index => ({ index, label: data[index]?.date ?? "" }))}
+					.map(index => ({ index, label: named[index]?.tick ?? "" }))}
 				split={limit}
 				reference={{ value: limit, label: "Budget limit" }}
+				onSelect={
+					onSelect
+						? index => {
+								const key = points[index]?.key
+								if (key) onSelect(key)
+							}
+						: undefined
+				}
+				notes={points.map(point =>
+					point.scheduled
+						? { label: "Scheduled", value: formatCurrency(point.scheduled) }
+						: null,
+				)}
 				series={[
 					{
 						key: "projection",
 						label: "Usage (projection)",
-						values: data.map(point => point.projection),
+						values: points.map(point => point.projection),
 						color: "var(--color-amber-400)",
 						over: "var(--color-orange-500)",
 						dash: "7 5",
 						fill: 0.12,
+						markers: points.flatMap((point, index) => (point.scheduled ? [index] : [])),
 					},
 					{
 						key: "usage",
 						label: "Usage",
-						values: data.map(point => point.usage),
+						values: points.map(point => point.usage),
 						color: "var(--color-emerald-500)",
 						over: "var(--color-rose-500)",
 						fill: 0.3,
+						dots: reached.length === 1 ? reached : [],
 					},
 				]}
 			/>
 		</div>
 	)
-}
-
-function buildSeries(records: Record[], start: DateTime, end: DateTime, asOf: DateTime) {
-	const dayCount =
-		Math.max(Math.floor(end.startOf("day").diff(start.startOf("day"), "days").days), 0) + 1
-	const elapsedDayCount = Math.min(
-		Math.max(Math.floor(asOf.startOf("day").diff(start.startOf("day"), "days").days) + 1, 0),
-		dayCount,
-	)
-	const spendingByDay = new Map<string, number>()
-
-	// Every attached Record counts, as in the Budget's spent; one dated outside the elapsed
-	// window lands on its nearest day so the last point equals that figure.
-	const first = start.startOf("day")
-	const lastElapsed = start.plus({ days: Math.max(elapsedDayCount - 1, 0) }).startOf("day")
-	for (const record of records) {
-		const key = DateTime.min(
-			DateTime.max(parseDatetime(record.datetime).startOf("day"), first),
-			lastElapsed,
-		).toISODate()
-		if (!key) continue
-		spendingByDay.set(key, round2((spendingByDay.get(key) ?? 0) + budgetSpent([record])))
-	}
-
-	let cumulative = 0
-	const actual: Array<number | null> = []
-	for (let index = 0; index < dayCount; index += 1) {
-		const date = start.plus({ days: index })
-		if (index < elapsedDayCount) {
-			cumulative = round2(cumulative + (spendingByDay.get(date.toISODate() ?? "") ?? 0))
-			actual.push(cumulative)
-		} else {
-			actual.push(null)
-		}
-	}
-
-	const dailyPace = elapsedDayCount ? cumulative / elapsedDayCount : 0
-	return Array.from({ length: dayCount }, (_, index): BudgetProgressPoint => {
-		const showProjection =
-			elapsedDayCount > 0 && index >= elapsedDayCount - 1 && elapsedDayCount < dayCount
-		return {
-			date: start.plus({ days: index }).toFormat("d MMM"),
-			day: start.plus({ days: index }).toFormat("d MMM yyyy"),
-			usage: actual[index] ?? null,
-			projection: showProjection
-				? round2(cumulative + dailyPace * (index + 1 - elapsedDayCount))
-				: null,
-		}
-	})
 }

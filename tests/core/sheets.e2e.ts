@@ -171,6 +171,30 @@ test("Record search sheet: opens with backdrop and reopens after Escape", async 
 	await expect(sheet).not.toBeVisible()
 })
 
+test("Record search sheet: lists a Budget's period until All dates widens it", async ({
+	page,
+	workspace,
+}) => {
+	void workspace
+	await page.goto(`/budgets/${IDS.budgets.manual}`)
+	await page.getByRole("button", { name: "Attach Record", exact: true }).click()
+	const sheet = page.getByRole("dialog", { name: "Attach record to budget", exact: true })
+	await expect(sheet.getByText("Hawker Dinner")).toBeVisible()
+	// September's rent sits before October Buffer's period.
+	await sheet.getByLabel("Search records").fill("Monthly Rent")
+	await expect(sheet).toContainText("No matching Records.")
+	// Desktop names it "All dates"; mobile (sm:hidden) names it "All".
+	const toggle = sheet.getByRole("button", { name: /^(All dates|All)$/ })
+	await expect(toggle).toHaveAttribute("aria-pressed", "false")
+	await toggle.click()
+	await expect(toggle).toHaveAttribute("aria-pressed", "true")
+	await expect(sheet.getByText("Monthly Rent")).toBeVisible()
+	await toggle.click()
+	await expect(sheet).toContainText("No matching Records.")
+	await sheet.getByRole("button", { name: "Search Records from all dates", exact: true }).click()
+	await expect(sheet.getByText("Monthly Rent")).toBeVisible()
+})
+
 async function installReadHold(page: Page) {
 	// Scheduler-level hold: while holding, an open readwrite keeper transaction
 	// on every domain store blocks the app's later IndexedDB transactions behind

@@ -5,12 +5,14 @@ import { DateTime } from "luxon"
 import { use, useMemo, useState } from "react"
 import { toast } from "sonner"
 import BudgetProgressChart from "@/components/charts/budget-progress-chart"
+import CategorySpendingMix from "@/components/charts/category-spending-mix"
 import BudgetEditorDialog from "@/components/dialogs/budget-editor"
 import RecordEditorDialog from "@/components/dialogs/record-editor"
-import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
+import { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
 import { Metric, MetricGrid } from "@/components/metric"
+import BudgetRecordsSheet from "@/components/sheets/budget-records-sheet"
 import RecordSearchSheet from "@/components/sheets/record-search"
 import DataTable from "@/components/table/data-table"
 import { useRecordColumns, useRecordMobileRow } from "@/components/table/record-columns"
@@ -26,11 +28,17 @@ import {
 } from "@/components/ui/card"
 import { useRecordEditor } from "@/hooks/use-record-editor"
 import { useSubmitLock } from "@/hooks/use-submit-lock"
-import { themeColor } from "@/lib/palette"
-import { formatCurrency, parseDate, round2 } from "@/lib/utils"
-import { attachBudgetRecord, budgetSpent, detachBudgetRecord, getBudget } from "@/logic/budgets"
+import { useUrlParams } from "@/hooks/use-url-params"
+import { formatCurrency, parseDate, pluralize, round2 } from "@/lib/utils"
+import {
+	attachBudgetRecord,
+	budgetProgress,
+	budgetSpent,
+	detachBudgetRecord,
+	getBudget,
+} from "@/logic/budgets"
 import { listCategories } from "@/logic/categories"
-import { pathBudgets } from "@/routes"
+import { pathBudget, pathBudgets } from "@/routes"
 import type { Budget, CategoryWithChildren, Record } from "@/types"
 
 export default function BudgetPage({ params }: { params: Promise<{ id: string }> }) {
@@ -47,23 +55,65 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 	const detachLock = useSubmitLock(true)
 	const budget = (data ?? null) as Budget | null
 	const records = useMemo(() => data?.records ?? [], [data])
-	const budgetStart = parseDate(budget?.start_date ?? "2000-01-01")
-	const budgetEnd = parseDate(budget?.end_date ?? "2000-01-01")
-	const now = DateTime.now()
-	const budgetAsOf =
-		now < budgetStart.startOf("day")
-			? budgetStart.minus({ days: 1 })
-			: now > budgetEnd.endOf("day")
-				? budgetEnd
-				: now
-	const analytics = getBudgetAnalytics(
-		budgetStart,
-		budgetEnd,
-		budget?.amount ?? 0,
-		budgetAsOf,
-		budget?.used_amount ?? 0,
+	const today = DateTime.now().toFormat("yyyy-MM-dd")
+	const progress = useMemo(
+		() =>
+			budgetProgress(
+				records,
+				budget?.start_date ?? "2000-01-01",
+				budget?.end_date ?? "2000-01-01",
+				today,
+			),
+		[records, budget?.start_date, budget?.end_date, today],
+	)
+	const limit = budget?.amount ?? 0
+	const spent = budget?.used_amount ?? 0
+	const startsIn = Math.ceil(
+		parseDate(budget?.start_date ?? today).diff(parseDate(today), "days").days,
 	)
 	const categoryData = useMemo(() => getCategoryData(records, categories), [records, categories])
+
+	// Like the Dashboard, a clicked category or chart day opens its Records in a sheet whose
+	// state lives in the URL (`records=1` plus `category` or `day`), so Back closes it.
+	const { params: urlParams, setParams } = useUrlParams()
+	const drill = urlParams.has("records")
+		? { category: urlParams.get("category"), day: urlParams.get("day") }
+		: null
+	const openDrill = (filters: { category?: string; day?: string }) =>
+		setParams({ records: "1", category: null, day: null, ...filters })
+	const closeDrill = () =>
+		setParams({ records: null, category: null, day: null }, { replace: true })
+	const drillCategory = drill?.category
+		? categories
+				.flatMap(category => [category, ...category.children])
+				.find(category => category.id === drill.category)
+		: null
+	const drillRecords = !drill
+		? []
+		: drill.category
+			? records.filter(
+					record =>
+						budgetSpent([record]) !== 0 &&
+						(record.category.id === drill.category ||
+							record.category.parent_category_id === drill.category),
+				)
+			: records.filter(
+					record =>
+						outsideKey(
+							record.datetime.slice(0, 10),
+							budget?.start_date ?? "",
+							budget?.end_date ?? "",
+						) === drill.day,
+				)
+	const drillTitle = drillCategory
+		? drillCategory.name
+		: drill?.day === "before"
+			? "Before the window"
+			: drill?.day === "after"
+				? "After the window"
+				: drill?.day
+					? DateTime.fromISO(drill.day).toFormat("cccc, d MMMM yyyy")
+					: "Records"
 
 	const attach = async (record: Record) => {
 		if (!budget) return
@@ -171,118 +221,97 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 					<Metric
 						icon="lucide:wallet-cards"
 						label="Spent"
-						value={formatCurrency(analytics.spent)}
-						detail={`${analytics.elapsedPercent}% of ${formatCurrency(budget.amount)}`}
-						tone={analytics.spent > budget.amount ? "negative" : "neutral"}
+						value={formatCurrency(spent)}
+						// With scheduled Records, the limit amount makes way for them so the line fits one row.
+						detail={
+							progress.scheduled
+								? `${limit ? round2((spent / limit) * 100) : 0}% used · incl. ${formatCurrency(progress.scheduled)} scheduled`
+								: `${limit ? round2((spent / limit) * 100) : 0}% of ${formatCurrency(limit)}`
+						}
+						tone={spent > limit ? "negative" : "neutral"}
 					/>
 					<Metric
 						icon="lucide:scale"
-						label={analytics.spent > budget.amount ? "Over budget" : "Remaining"}
-						value={formatCurrency(Math.abs(budget.amount - analytics.spent))}
+						label={spent > limit ? "Over budget" : "Remaining"}
+						value={formatCurrency(Math.abs(limit - spent))}
 						detail={
-							analytics.remainingDays
-								? `${analytics.remainingDays} day${analytics.remainingDays === 1 ? "" : "s"} left in window`
-								: "Window complete"
+							startsIn > 0
+								? `Window starts in ${pluralize(startsIn, "day")}`
+								: progress.remainingDays
+									? `${pluralize(progress.remainingDays, "day")} left in window`
+									: "Window complete"
 						}
-						tone={analytics.spent > budget.amount ? "negative" : "positive"}
+						tone={spent > limit ? "negative" : "positive"}
 					/>
 					<Metric
 						icon="lucide:chart-no-axes-combined"
 						label="Projected"
-						value={formatCurrency(analytics.projectedSpending)}
-						detail={`${formatCurrency(Math.abs(budget.amount - analytics.projectedSpending))} ${analytics.projectedSpending > budget.amount ? "over" : "under"} limit`}
-						tone={analytics.projectedSpending > budget.amount ? "negative" : "neutral"}
+						value={formatCurrency(progress.projected)}
+						detail={`${formatCurrency(Math.abs(limit - progress.projected))} ${progress.projected > limit ? "over" : "under"} limit`}
+						tone={progress.projected > limit ? "negative" : "neutral"}
 						delta={
-							analytics.remainingDays
+							progress.remainingDays
 								? {
-										text:
-											analytics.projectedSpending > budget.amount
-												? "Over pace"
-												: "On pace",
-										good: analytics.projectedSpending <= budget.amount,
+										text: progress.projected > limit ? "Over pace" : "On pace",
+										good: progress.projected <= limit,
 									}
 								: undefined
 						}
 					/>
 					<Metric
 						icon="lucide:gauge"
-						label={
-							analytics.recommendedPace === null ? "Daily pace" : "Recommended pace"
-						}
-						value={`${formatCurrency(analytics.recommendedPace ?? analytics.currentPace)} / day`}
-						detail={`Now ${formatCurrency(analytics.currentPace)} / day · target ${formatCurrency(analytics.targetPace)}`}
+						label={progress.remainingDays ? "Recommended pace" : "Daily pace"}
+						value={`${formatCurrency(progress.remainingDays ? round2(Math.max(limit - spent, 0) / progress.remainingDays) : progress.pace)} / day`}
+						detail={`Now ${formatCurrency(progress.pace)} / day · target ${formatCurrency(round2(limit / progress.dayCount))}`}
 					/>
 				</MetricGrid>
 
 				<div className="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)]">
 					<Card>
-						<CardHeader className="border-b">
+						<CardHeader>
 							<CardTitle>Spending over time</CardTitle>
 							<CardDescription>
-								Cumulative usage against the budget limit, including the current
-								pace projection.
+								Cumulative usage against the budget limit. The projection extends
+								the current pace and steps up on days with scheduled Records.
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
 							<BudgetProgressChart
-								records={records}
-								start={budgetStart}
-								end={budgetEnd}
-								limit={budget.amount}
-								asOf={budgetAsOf}
+								points={progress.points}
+								limit={limit}
+								onSelect={day => openDrill({ day })}
 							/>
 							<div className="mt-2 flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
 								<Legend color="bg-emerald-500" label="Usage" />
 								<Legend color="bg-rose-500" label="Exceed" />
 								<Legend color="bg-amber-400" label="Projection" />
 								<Legend color="bg-orange-500" label="Projected exceed" />
+								{progress.scheduled ? (
+									<span className="flex items-center gap-1.5">
+										<span className="size-2 rounded-full border-[1.5px] border-amber-400" />
+										Scheduled Record
+									</span>
+								) : null}
 							</div>
 						</CardContent>
 					</Card>
 
 					<Card>
-						<CardHeader className="border-b">
+						<CardHeader>
 							<CardTitle>Spending by category</CardTitle>
 							<CardDescription>
-								Where this budget’s outgoing Records went.
+								Where this Budget’s outgoing spending went.
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
 							{categoryData.length ? (
-								<div className="grid gap-4">
-									{categoryData.map(category => (
-										<div key={category.id} className="grid gap-2">
-											<div className="flex items-center gap-3">
-												<Icon
-													icon={category.icon}
-													color={category.color}
-													size={14}
-												/>
-												<div className="min-w-0 flex-1">
-													<p className="truncate text-sm font-medium">
-														{category.name}
-													</p>
-													<p className="text-xs text-muted-foreground">
-														{category.records} Record
-														{category.records === 1 ? "" : "s"}
-													</p>
-												</div>
-												<p className="text-sm font-medium tabular-nums">
-													{formatCurrency(category.amount)}
-												</p>
-											</div>
-											<div className="ml-10 h-1.5 overflow-hidden rounded-full bg-muted">
-												<div
-													className="h-full origin-left rounded-full transition-transform duration-300 ease-out motion-reduce:transition-none"
-													style={{
-														transform: `scaleX(${category.share / 100})`,
-														backgroundColor: themeColor(category.color),
-													}}
-												/>
-											</div>
-										</div>
-									))}
-								</div>
+								<CategorySpendingMix
+									categories={categoryData}
+									footnote={null}
+									recordHref={id =>
+										`${pathBudget(budget?.id ?? "")}?${new URLSearchParams({ records: "1", category: id })}`
+									}
+								/>
 							) : (
 								<p className="py-10 text-center text-xs text-muted-foreground">
 									No outgoing Records in this budget.
@@ -307,7 +336,12 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 							<RecordSearchSheet
 								title="Attach record to budget"
 								placeholder="Search unattached records..."
-								filters={{ exclude_budget_id: budget.id }}
+								filters={{
+									exclude_budget_id: budget.id,
+									start_date: budget.start_date,
+									end_date: budget.end_date,
+								}}
+								widen="all"
 								isOpen={isAttachingRecord}
 								setIsOpen={setIsAttachingRecord}
 								handler={attach}
@@ -332,6 +366,16 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 				</Card>
 			</PageContent>
 
+			{budget ? (
+				<BudgetRecordsSheet
+					open={drill !== null}
+					title={drillTitle}
+					description={`${budget.name} · ${pluralize(drillRecords.length, "Record")} · ${formatCurrency(budgetSpent(drillRecords))}`}
+					records={drillRecords}
+					onClose={closeDrill}
+				/>
+			) : null}
+
 			{editingRecord ? (
 				<RecordEditorDialog
 					record={editingRecord}
@@ -347,6 +391,10 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 	)
 }
 
+/** Which chart point a Record falls on: its day, or `before` / `after` the Budget's window. */
+const outsideKey = (day: string, start: string, end: string) =>
+	day < start ? "before" : day > end ? "after" : day
+
 function Legend({ color, label }: { color: string; label: string }) {
 	return (
 		<span className="flex items-center gap-1.5">
@@ -356,39 +404,8 @@ function Legend({ color, label }: { color: string; label: string }) {
 	)
 }
 
-function getBudgetAnalytics(
-	start: DateTime,
-	end: DateTime,
-	limit: number,
-	asOf: DateTime,
-	spent: number,
-) {
-	const dayCount =
-		Math.max(Math.floor(end.startOf("day").diff(start.startOf("day"), "days").days), 0) + 1
-	const elapsedDays = Math.min(
-		Math.max(Math.floor(asOf.startOf("day").diff(start.startOf("day"), "days").days) + 1, 0),
-		dayCount,
-	)
-	const remainingDays = dayCount - elapsedDays
-	const currentPace = elapsedDays ? round2(spent / elapsedDays) : 0
-	const projectedSpending = round2(spent + currentPace * remainingDays)
-	const recommendedPace = remainingDays
-		? round2(Math.max(limit - spent, 0) / remainingDays)
-		: null
-
-	return {
-		spent,
-		elapsedPercent: limit ? round2((spent / limit) * 100) : 0,
-		projectedSpending,
-		currentPace,
-		targetPace: dayCount ? round2(limit / dayCount) : 0,
-		recommendedPace,
-		remainingDays,
-	}
-}
-
 function getCategoryData(records: Record[], categories: CategoryWithChildren[]) {
-	const data = categories
+	return categories
 		.map(category => {
 			const matching = records.filter(
 				record =>
@@ -396,13 +413,17 @@ function getCategoryData(records: Record[], categories: CategoryWithChildren[]) 
 					(record.category.id === category.id ||
 						record.category.parent_category_id === category.id),
 			)
-			return { ...category, records: matching.length, amount: budgetSpent(matching) }
+			const amount = budgetSpent(matching)
+			return {
+				id: category.id,
+				name: category.name,
+				icon: category.icon,
+				color: category.color,
+				spending: amount,
+				outflow: amount,
+				refunds: 0,
+				records: matching.length,
+			}
 		})
 		.filter(category => category.records > 0)
-		.sort((a, b) => b.amount - a.amount)
-	const maximum = Math.max(...data.map(category => category.amount), 0)
-	return data.map(category => ({
-		...category,
-		share: maximum ? Math.max((category.amount / maximum) * 100, 2) : 0,
-	}))
 }
