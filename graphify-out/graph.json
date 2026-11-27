@@ -466,6 +466,45 @@
       "source_location": "L46"
     },
     {
+      "id": "app_budgets_page_budgetstate",
+      "label": "BudgetState",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 101,
+      "community_name": "icon.tsx",
+      "file_type": "code",
+      "norm_label": "budgetstate",
+      "source_file": "app/budgets/page.tsx",
+      "source_location": "L121"
+    },
+    {
+      "id": "src_components_form_date_range_daterangevalue",
+      "label": "DateRangeValue",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 101,
+      "community_name": "icon.tsx",
+      "file_type": "code",
+      "norm_label": "daterangevalue",
+      "source_file": "src/components/form/date-range.tsx",
+      "source_location": "L13"
+    },
+    {
+      "id": "src_components_form_date_range_props",
+      "label": "Props",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 101,
+      "community_name": "icon.tsx",
+      "file_type": "code",
+      "norm_label": "props",
+      "source_file": "src/components/form/date-range.tsx",
+      "source_location": "L18"
+    },
+    {
       "id": "src_logic_importer_importresult",
       "label": "ImportResult",
       "_callable": true,
@@ -537,7 +576,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 15,
-      "community_name": "icon.tsx",
+      "community_name": "category-history-chart.tsx",
       "file_type": "code",
       "norm_label": "chartmonth",
       "source_file": "src/components/charts/category-history-chart.tsx",
@@ -550,7 +589,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 15,
-      "community_name": "icon.tsx",
+      "community_name": "category-history-chart.tsx",
       "file_type": "code",
       "norm_label": "chartseries",
       "source_file": "src/components/charts/category-history-chart.tsx",
@@ -563,7 +602,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 15,
-      "community_name": "icon.tsx",
+      "community_name": "category-history-chart.tsx",
       "file_type": "code",
       "norm_label": "spendingseries",
       "source_file": "src/components/charts/category-history-chart.tsx",
@@ -576,7 +615,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 15,
-      "community_name": "icon.tsx",
+      "community_name": "category-history-chart.tsx",
       "file_type": "code",
       "norm_label": "spendinghistorymonth",
       "source_file": "src/logic/dashboard.ts",
@@ -765,17 +804,17 @@
       "source_location": "L33"
     },
     {
-      "id": "app_budgets_page_budgetstate",
-      "label": "BudgetState",
+      "id": "app_accounts_page_accountrow",
+      "label": "AccountRow",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 21,
       "community_name": "Button",
       "file_type": "code",
-      "norm_label": "budgetstate",
-      "source_file": "app/budgets/page.tsx",
-      "source_location": "L121"
+      "norm_label": "accountrow",
+      "source_file": "app/accounts/page.tsx",
+      "source_location": "L24"
     },
     {
       "id": "app_categories_page_categorydialogstate",
@@ -804,30 +843,43 @@
       "source_location": "L30"
     },
     {
-      "id": "src_components_form_date_range_daterangevalue",
-      "label": "DateRangeValue",
+      "id": "src_components_table_statement_columns_statementrow",
+      "label": "StatementRow",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 21,
       "community_name": "Button",
       "file_type": "code",
-      "norm_label": "daterangevalue",
-      "source_file": "src/components/form/date-range.tsx",
+      "norm_label": "statementrow",
+      "source_file": "src/components/table/statement-columns.tsx",
       "source_location": "L13"
     },
     {
-      "id": "src_components_form_date_range_props",
-      "label": "Props",
+      "id": "src_components_table_statement_columns_statementtableoptions",
+      "label": "StatementTableOptions",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 21,
       "community_name": "Button",
       "file_type": "code",
-      "norm_label": "props",
-      "source_file": "src/components/form/date-range.tsx",
-      "source_location": "L18"
+      "norm_label": "statementtableoptions",
+      "source_file": "src/components/table/statement-columns.tsx",
+      "source_location": "L15"
+    },
+    {
+      "id": "src_logic_accounts_accountactivity",
+      "label": "AccountActivity",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 21,
+      "community_name": "Button",
+      "file_type": "code",
+      "norm_label": "accountactivity",
+      "source_file": "src/logic/accounts.ts",
+      "source_location": "L10"
     },
     {
       "id": "src_logic_filter_params_paramsource",
@@ -1298,30 +1350,30 @@
       "source_location": "L23"
     },
     {
-      "id": "app_accounts_page_accountrow",
-      "label": "AccountRow",
+      "id": "src_components_table_record_columns_recordrow",
+      "label": "RecordRow",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 36,
-      "community_name": "allocator/page.tsx",
+      "community_name": "record-columns.tsx",
       "file_type": "code",
-      "norm_label": "accountrow",
-      "source_file": "app/accounts/page.tsx",
-      "source_location": "L24"
+      "norm_label": "recordrow",
+      "source_file": "src/components/table/record-columns.tsx",
+      "source_location": "L14"
     },
     {
-      "id": "src_logic_accounts_accountactivity",
-      "label": "AccountActivity",
+      "id": "src_components_table_record_columns_recordtableoptions",
+      "label": "RecordTableOptions",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 36,
-      "community_name": "allocator/page.tsx",
+      "community_name": "record-columns.tsx",
       "file_type": "code",
-      "norm_label": "accountactivity",
-      "source_file": "src/logic/accounts.ts",
-      "source_location": "L10"
+      "norm_label": "recordtableoptions",
+      "source_file": "src/components/table/record-columns.tsx",
+      "source_location": "L16"
     },
     {
       "id": "src_logic_statement_rules_ruleinput",
@@ -1701,6 +1753,19 @@
       "source_location": "L50"
     },
     {
+      "id": "src_components_charts_cashflow_chart_cashflowpoint",
+      "label": "CashflowPoint",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "(month)/page.tsx",
+      "file_type": "code",
+      "norm_label": "cashflowpoint",
+      "source_file": "src/components/charts/cashflow-chart.tsx",
+      "source_location": "L10"
+    },
+    {
       "id": "src_components_charts_category_movers_mover",
       "label": "Mover",
       "_callable": true,
@@ -1712,6 +1777,32 @@
       "norm_label": "mover",
       "source_file": "src/components/charts/category-movers.tsx",
       "source_location": "L8"
+    },
+    {
+      "id": "src_components_charts_daily_spending_chart_monthlybudgetline",
+      "label": "MonthlyBudgetLine",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "(month)/page.tsx",
+      "file_type": "code",
+      "norm_label": "monthlybudgetline",
+      "source_file": "src/components/charts/daily-spending-chart.tsx",
+      "source_location": "L8"
+    },
+    {
+      "id": "src_components_charts_total_spending_chart_surpluspoint",
+      "label": "SurplusPoint",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "(month)/page.tsx",
+      "file_type": "code",
+      "norm_label": "surpluspoint",
+      "source_file": "src/components/charts/total-spending-chart.tsx",
+      "source_location": "L7"
     },
     {
       "id": "src_components_layout_app_sidebar_appearanceoption",
@@ -1863,7 +1954,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 45,
-      "community_name": "record-columns.tsx",
+      "community_name": "amount-filter.tsx",
       "file_type": "code",
       "norm_label": "shown",
       "source_file": "src/components/sheets/budget-records-sheet.tsx",
@@ -1876,7 +1967,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 45,
-      "community_name": "record-columns.tsx",
+      "community_name": "amount-filter.tsx",
       "file_type": "code",
       "norm_label": "amountrange",
       "source_file": "src/components/table/amount-filter.tsx",
@@ -1889,37 +1980,11 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 45,
-      "community_name": "record-columns.tsx",
+      "community_name": "amount-filter.tsx",
       "file_type": "code",
       "norm_label": "draft",
       "source_file": "src/components/table/amount-filter.tsx",
       "source_location": "L24"
-    },
-    {
-      "id": "src_components_table_record_columns_recordrow",
-      "label": "RecordRow",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "record-columns.tsx",
-      "file_type": "code",
-      "norm_label": "recordrow",
-      "source_file": "src/components/table/record-columns.tsx",
-      "source_location": "L14"
-    },
-    {
-      "id": "src_components_table_record_columns_recordtableoptions",
-      "label": "RecordTableOptions",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "record-columns.tsx",
-      "file_type": "code",
-      "norm_label": "recordtableoptions",
-      "source_file": "src/components/table/record-columns.tsx",
-      "source_location": "L16"
     },
     {
       "id": "tests_core_helpers_e2e_child",
@@ -1967,7 +2032,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "duplicates/page.tsx",
+      "community_name": "allocator/page.tsx",
       "file_type": "code",
       "norm_label": "props",
       "source_file": "src/components/form/select-field.tsx",
@@ -2091,58 +2156,6 @@
       "source_location": "L102"
     },
     {
-      "id": "src_components_charts_cashflow_chart_cashflowpoint",
-      "label": "CashflowPoint",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "themeColor",
-      "file_type": "code",
-      "norm_label": "cashflowpoint",
-      "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L10"
-    },
-    {
-      "id": "src_components_charts_daily_spending_chart_monthlybudgetline",
-      "label": "MonthlyBudgetLine",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "themeColor",
-      "file_type": "code",
-      "norm_label": "monthlybudgetline",
-      "source_file": "src/components/charts/daily-spending-chart.tsx",
-      "source_location": "L8"
-    },
-    {
-      "id": "src_components_charts_total_spending_chart_surpluspoint",
-      "label": "SurplusPoint",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "themeColor",
-      "file_type": "code",
-      "norm_label": "surpluspoint",
-      "source_file": "src/components/charts/total-spending-chart.tsx",
-      "source_location": "L7"
-    },
-    {
-      "id": "src_hooks_use_records_sheet_recordssheetfilters",
-      "label": "RecordsSheetFilters",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "themeColor",
-      "file_type": "code",
-      "norm_label": "recordssheetfilters",
-      "source_file": "src/hooks/use-records-sheet.ts",
-      "source_location": "L17"
-    },
-    {
       "id": "src_components_form_date_field_props",
       "label": "Props",
       "_callable": true,
@@ -2219,32 +2232,6 @@
       "norm_label": "workspacefixtures",
       "source_file": "tests/support/fixtures.ts",
       "source_location": "L23"
-    },
-    {
-      "id": "src_components_table_statement_columns_statementrow",
-      "label": "StatementRow",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 67,
-      "community_name": "next",
-      "file_type": "code",
-      "norm_label": "statementrow",
-      "source_file": "src/components/table/statement-columns.tsx",
-      "source_location": "L13"
-    },
-    {
-      "id": "src_components_table_statement_columns_statementtableoptions",
-      "label": "StatementTableOptions",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 67,
-      "community_name": "next",
-      "file_type": "code",
-      "norm_label": "statementtableoptions",
-      "source_file": "src/components/table/statement-columns.tsx",
-      "source_location": "L15"
     },
     {
       "id": "src_components_charts_bar_chart_barseries",
@@ -2416,6 +2403,19 @@
       "source_location": "L10"
     },
     {
+      "id": "src_components_layout_month_header_slot_monthheaderslots",
+      "label": "MonthHeaderSlots",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 95,
+      "community_name": "app.tsx",
+      "file_type": "code",
+      "norm_label": "monthheaderslots",
+      "source_file": "src/components/layout/month-header-slot.tsx",
+      "source_location": "L6"
+    },
+    {
       "id": "tests_harness_app_harnesssection",
       "label": "HarnessSection",
       "_callable": true,
@@ -2429,17 +2429,17 @@
       "source_location": "L6"
     },
     {
-      "id": "src_components_layout_month_header_slot_monthheaderslots",
-      "label": "MonthHeaderSlots",
+      "id": "src_hooks_use_records_sheet_recordssheetfilters",
+      "label": "RecordsSheetFilters",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 96,
       "community_name": "(month)/layout.tsx",
       "file_type": "code",
-      "norm_label": "monthheaderslots",
-      "source_file": "src/components/layout/month-header-slot.tsx",
-      "source_location": "L6"
+      "norm_label": "recordssheetfilters",
+      "source_file": "src/hooks/use-records-sheet.ts",
+      "source_location": "L17"
     },
     {
       "id": "src_hooks_use_url_params_replace",
@@ -4070,18 +4070,6 @@
       "source_location": "L34"
     },
     {
-      "id": "src_components_table_pagination_header_paginationheader",
-      "label": "PaginationHeader()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 10,
-      "community_name": "lib/motion.ts",
-      "file_type": "code",
-      "norm_label": "paginationheader()",
-      "source_file": "src/components/table/pagination-header.tsx",
-      "source_location": "L6"
-    },
-    {
       "id": "src_components_table_row_groups_groupheaderrow",
       "label": "GroupHeaderRow()",
       "_callable": true,
@@ -4418,6 +4406,66 @@
       "source_location": "L273"
     },
     {
+      "id": "app_budgets_page_budgetcard",
+      "label": "BudgetCard()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 101,
+      "community_name": "icon.tsx",
+      "file_type": "code",
+      "norm_label": "budgetcard()",
+      "source_file": "app/budgets/page.tsx",
+      "source_location": "L136"
+    },
+    {
+      "id": "app_budgets_page_budgetspage",
+      "label": "BudgetsPage()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 101,
+      "community_name": "icon.tsx",
+      "file_type": "code",
+      "norm_label": "budgetspage()",
+      "source_file": "app/budgets/page.tsx",
+      "source_location": "L25"
+    },
+    {
+      "id": "app_budgets_page_formatbudgetdatewindow",
+      "label": "formatBudgetDateWindow()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 101,
+      "community_name": "icon.tsx",
+      "file_type": "code",
+      "norm_label": "formatbudgetdatewindow()",
+      "source_file": "app/budgets/page.tsx",
+      "source_location": "L112"
+    },
+    {
+      "id": "src_components_form_date_range_formatrange",
+      "label": "formatRange()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 101,
+      "community_name": "icon.tsx",
+      "file_type": "code",
+      "norm_label": "formatrange()",
+      "source_file": "src/components/form/date-range.tsx",
+      "source_location": "L139"
+    },
+    {
+      "id": "src_components_form_date_range_rangefromvalue",
+      "label": "rangeFromValue()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 101,
+      "community_name": "icon.tsx",
+      "file_type": "code",
+      "norm_label": "rangefromvalue()",
+      "source_file": "src/components/form/date-range.tsx",
+      "source_location": "L132"
+    },
+    {
       "id": "src_components_icon_dynamicuiicon",
       "label": "DynamicUiIcon()",
       "_callable": true,
@@ -4464,6 +4512,42 @@
       "norm_label": "preloadcategoryicons()",
       "source_file": "src/components/icon.tsx",
       "source_location": "L40"
+    },
+    {
+      "id": "src_components_table_pagination_header_paginationheader",
+      "label": "PaginationHeader()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 101,
+      "community_name": "icon.tsx",
+      "file_type": "code",
+      "norm_label": "paginationheader()",
+      "source_file": "src/components/table/pagination-header.tsx",
+      "source_location": "L6"
+    },
+    {
+      "id": "src_lib_utils_parsedate",
+      "label": "parseDate()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 101,
+      "community_name": "icon.tsx",
+      "file_type": "code",
+      "norm_label": "parsedate()",
+      "source_file": "src/lib/utils.ts",
+      "source_location": "L17"
+    },
+    {
+      "id": "src_logic_budgets_listbudgets",
+      "label": "listBudgets()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 101,
+      "community_name": "icon.tsx",
+      "file_type": "code",
+      "norm_label": "listbudgets()",
+      "source_file": "src/logic/budgets.ts",
+      "source_location": "L22"
     },
     {
       "id": "playwright_config_parseworkers",
@@ -5227,7 +5311,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 15,
-      "community_name": "icon.tsx",
+      "community_name": "category-history-chart.tsx",
       "file_type": "code",
       "norm_label": "aggregateseries()",
       "source_file": "src/components/charts/category-history-chart.tsx",
@@ -5239,7 +5323,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 15,
-      "community_name": "icon.tsx",
+      "community_name": "category-history-chart.tsx",
       "file_type": "code",
       "norm_label": "categoryhistorychart()",
       "source_file": "src/components/charts/category-history-chart.tsx",
@@ -5251,7 +5335,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 15,
-      "community_name": "icon.tsx",
+      "community_name": "category-history-chart.tsx",
       "file_type": "code",
       "norm_label": "monthbreakdown()",
       "source_file": "src/components/charts/category-history-chart.tsx",
@@ -5263,7 +5347,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 15,
-      "community_name": "icon.tsx",
+      "community_name": "category-history-chart.tsx",
       "file_type": "code",
       "norm_label": "monthtick()",
       "source_file": "src/components/charts/category-history-chart.tsx",
@@ -5275,7 +5359,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 15,
-      "community_name": "icon.tsx",
+      "community_name": "category-history-chart.tsx",
       "file_type": "code",
       "norm_label": "monthtotal()",
       "source_file": "src/components/charts/category-history-chart.tsx",
@@ -5287,7 +5371,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 15,
-      "community_name": "icon.tsx",
+      "community_name": "category-history-chart.tsx",
       "file_type": "code",
       "norm_label": "preparemonths()",
       "source_file": "src/components/charts/category-history-chart.tsx",
@@ -5299,7 +5383,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 15,
-      "community_name": "icon.tsx",
+      "community_name": "category-history-chart.tsx",
       "file_type": "code",
       "norm_label": "prepareseries()",
       "source_file": "src/components/charts/category-history-chart.tsx",
@@ -5311,11 +5395,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 15,
-      "community_name": "icon.tsx",
+      "community_name": "category-history-chart.tsx",
       "file_type": "code",
       "norm_label": "recordcount()",
       "source_file": "src/components/charts/category-history-chart.tsx",
       "source_location": "L464"
+    },
+    {
+      "id": "src_components_charts_category_spending_mix_categoryspendingmix",
+      "label": "CategorySpendingMix()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "category-history-chart.tsx",
+      "file_type": "code",
+      "norm_label": "categoryspendingmix()",
+      "source_file": "src/components/charts/category-spending-mix.tsx",
+      "source_location": "L11"
     },
     {
       "id": "tests_core_ledger_e2e_collecttests",
@@ -5786,6 +5882,54 @@
       "source_location": "L5"
     },
     {
+      "id": "app_allocator_duplicates_page_duplicategroupcard",
+      "label": "DuplicateGroupCard()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "utils.ts",
+      "file_type": "code",
+      "norm_label": "duplicategroupcard()",
+      "source_file": "app/allocator/duplicates/page.tsx",
+      "source_location": "L360"
+    },
+    {
+      "id": "app_allocator_duplicates_page_fixduplicatespage",
+      "label": "FixDuplicatesPage()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "utils.ts",
+      "file_type": "code",
+      "norm_label": "fixduplicatespage()",
+      "source_file": "app/allocator/duplicates/page.tsx",
+      "source_location": "L82"
+    },
+    {
+      "id": "app_allocator_duplicates_page_groupheader",
+      "label": "GroupHeader()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "utils.ts",
+      "file_type": "code",
+      "norm_label": "groupheader()",
+      "source_file": "app/allocator/duplicates/page.tsx",
+      "source_location": "L331"
+    },
+    {
+      "id": "app_allocator_duplicates_page_highlightdifferences",
+      "label": "highlightDifferences()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "utils.ts",
+      "file_type": "code",
+      "norm_label": "highlightdifferences()",
+      "source_file": "app/allocator/duplicates/page.tsx",
+      "source_location": "L510"
+    },
+    {
       "id": "app_allocator_pending_page_allocatorpendingpage",
       "label": "AllocatorPendingPage()",
       "_callable": true,
@@ -5820,18 +5964,6 @@
       "norm_label": "pendingcard()",
       "source_file": "app/allocator/pending/page.tsx",
       "source_location": "L504"
-    },
-    {
-      "id": "src_components_allocate_bar_allocatebar",
-      "label": "AllocateBar()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "utils.ts",
-      "file_type": "code",
-      "norm_label": "allocatebar()",
-      "source_file": "src/components/allocate-bar.tsx",
-      "source_location": "L3"
     },
     {
       "id": "src_components_dialogs_statement_replacement_review_amount",
@@ -5882,16 +6014,16 @@
       "source_location": "L276"
     },
     {
-      "id": "src_components_record_amount_recordamount",
-      "label": "RecordAmount()",
+      "id": "src_components_table_row_groups_daylabel",
+      "label": "dayLabel()",
       "_callable": true,
       "_origin": "ast",
       "community": 19,
       "community_name": "utils.ts",
       "file_type": "code",
-      "norm_label": "recordamount()",
-      "source_file": "src/components/record-amount.tsx",
-      "source_location": "L4"
+      "norm_label": "daylabel()",
+      "source_file": "src/components/table/row-groups.tsx",
+      "source_location": "L173"
     },
     {
       "id": "src_components_ui_alert_alert",
@@ -6026,6 +6158,30 @@
       "source_location": "L21"
     },
     {
+      "id": "src_logic_duplicates_pairkey",
+      "label": "pairKey()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "utils.ts",
+      "file_type": "code",
+      "norm_label": "pairkey()",
+      "source_file": "src/logic/duplicates.ts",
+      "source_location": "L59"
+    },
+    {
+      "id": "src_routes_pathstatement",
+      "label": "pathStatement()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "utils.ts",
+      "file_type": "code",
+      "norm_label": "pathstatement()",
+      "source_file": "src/routes.ts",
+      "source_location": "L14"
+    },
+    {
       "id": "tests_support_data_builddense",
       "label": "buildDense()",
       "_callable": true,
@@ -6146,40 +6302,40 @@
       "source_location": "L995"
     },
     {
-      "id": "app_budgets_page_budgetcard",
-      "label": "BudgetCard()",
+      "id": "app_accounts_id_page_accountpage",
+      "label": "AccountPage()",
       "_callable": true,
       "_origin": "ast",
       "community": 21,
       "community_name": "Button",
       "file_type": "code",
-      "norm_label": "budgetcard()",
-      "source_file": "app/budgets/page.tsx",
-      "source_location": "L136"
+      "norm_label": "accountpage()",
+      "source_file": "app/accounts/[id]/page.tsx",
+      "source_location": "L24"
     },
     {
-      "id": "app_budgets_page_budgetspage",
-      "label": "BudgetsPage()",
+      "id": "app_accounts_page_accountcard",
+      "label": "AccountCard()",
       "_callable": true,
       "_origin": "ast",
       "community": 21,
       "community_name": "Button",
       "file_type": "code",
-      "norm_label": "budgetspage()",
-      "source_file": "app/budgets/page.tsx",
-      "source_location": "L25"
+      "norm_label": "accountcard()",
+      "source_file": "app/accounts/page.tsx",
+      "source_location": "L93"
     },
     {
-      "id": "app_budgets_page_formatbudgetdatewindow",
-      "label": "formatBudgetDateWindow()",
+      "id": "app_accounts_page_accountspage",
+      "label": "AccountsPage()",
       "_callable": true,
       "_origin": "ast",
       "community": 21,
       "community_name": "Button",
       "file_type": "code",
-      "norm_label": "formatbudgetdatewindow()",
-      "source_file": "app/budgets/page.tsx",
-      "source_location": "L112"
+      "norm_label": "accountspage()",
+      "source_file": "app/accounts/page.tsx",
+      "source_location": "L26"
     },
     {
       "id": "app_categories_page_categoriespage",
@@ -6278,54 +6434,6 @@
       "source_location": "L32"
     },
     {
-      "id": "src_components_form_date_range_daterange",
-      "label": "DateRange()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 21,
-      "community_name": "Button",
-      "file_type": "code",
-      "norm_label": "daterange()",
-      "source_file": "src/components/form/date-range.tsx",
-      "source_location": "L27"
-    },
-    {
-      "id": "src_components_form_date_range_formatrange",
-      "label": "formatRange()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 21,
-      "community_name": "Button",
-      "file_type": "code",
-      "norm_label": "formatrange()",
-      "source_file": "src/components/form/date-range.tsx",
-      "source_location": "L139"
-    },
-    {
-      "id": "src_components_form_date_range_rangefromvalue",
-      "label": "rangeFromValue()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 21,
-      "community_name": "Button",
-      "file_type": "code",
-      "norm_label": "rangefromvalue()",
-      "source_file": "src/components/form/date-range.tsx",
-      "source_location": "L132"
-    },
-    {
-      "id": "src_components_icon_icon",
-      "label": "Icon()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 21,
-      "community_name": "Button",
-      "file_type": "code",
-      "norm_label": "icon()",
-      "source_file": "src/components/icon.tsx",
-      "source_location": "L99"
-    },
-    {
       "id": "src_components_icon_uiicon",
       "label": "UiIcon()",
       "_callable": true,
@@ -6362,6 +6470,78 @@
       "source_location": "L7"
     },
     {
+      "id": "src_components_table_statement_columns_statementactions",
+      "label": "StatementActions()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 21,
+      "community_name": "Button",
+      "file_type": "code",
+      "norm_label": "statementactions()",
+      "source_file": "src/components/table/statement-columns.tsx",
+      "source_location": "L87"
+    },
+    {
+      "id": "src_components_table_statement_columns_statementactionscell",
+      "label": "StatementActionsCell()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 21,
+      "community_name": "Button",
+      "file_type": "code",
+      "norm_label": "statementactionscell()",
+      "source_file": "src/components/table/statement-columns.tsx",
+      "source_location": "L122"
+    },
+    {
+      "id": "src_components_table_statement_columns_statementamount",
+      "label": "StatementAmount()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 21,
+      "community_name": "Button",
+      "file_type": "code",
+      "norm_label": "statementamount()",
+      "source_file": "src/components/table/statement-columns.tsx",
+      "source_location": "L61"
+    },
+    {
+      "id": "src_components_table_statement_columns_statementbadges",
+      "label": "StatementBadges()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 21,
+      "community_name": "Button",
+      "file_type": "code",
+      "norm_label": "statementbadges()",
+      "source_file": "src/components/table/statement-columns.tsx",
+      "source_location": "L24"
+    },
+    {
+      "id": "src_components_table_statement_columns_usestatementcolumns",
+      "label": "useStatementColumns()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 21,
+      "community_name": "Button",
+      "file_type": "code",
+      "norm_label": "usestatementcolumns()",
+      "source_file": "src/components/table/statement-columns.tsx",
+      "source_location": "L132"
+    },
+    {
+      "id": "src_components_table_statement_columns_usestatementmobilerow",
+      "label": "useStatementMobileRow()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 21,
+      "community_name": "Button",
+      "file_type": "code",
+      "norm_label": "usestatementmobilerow()",
+      "source_file": "src/components/table/statement-columns.tsx",
+      "source_location": "L191"
+    },
+    {
       "id": "src_components_ui_button_button",
       "label": "Button()",
       "_callable": true,
@@ -6386,6 +6566,30 @@
       "source_location": "L252"
     },
     {
+      "id": "src_hooks_use_paginated_table_state_usepaginatedtablestate",
+      "label": "usePaginatedTableState()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 21,
+      "community_name": "Button",
+      "file_type": "code",
+      "norm_label": "usepaginatedtablestate()",
+      "source_file": "src/hooks/use-paginated-table-state.ts",
+      "source_location": "L10"
+    },
+    {
+      "id": "src_lib_banks_bankmeta",
+      "label": "bankMeta()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 21,
+      "community_name": "Button",
+      "file_type": "code",
+      "norm_label": "bankmeta()",
+      "source_file": "src/lib/banks.ts",
+      "source_location": "L15"
+    },
+    {
       "id": "src_lib_motion_cardenter",
       "label": "cardEnter()",
       "_callable": true,
@@ -6398,28 +6602,40 @@
       "source_location": "L92"
     },
     {
-      "id": "src_lib_utils_parsedate",
-      "label": "parseDate()",
+      "id": "src_lib_utils_pluralize",
+      "label": "pluralize()",
       "_callable": true,
       "_origin": "ast",
       "community": 21,
       "community_name": "Button",
       "file_type": "code",
-      "norm_label": "parsedate()",
+      "norm_label": "pluralize()",
       "source_file": "src/lib/utils.ts",
-      "source_location": "L17"
+      "source_location": "L38"
     },
     {
-      "id": "src_logic_budgets_listbudgets",
-      "label": "listBudgets()",
+      "id": "src_logic_accounts_getaccount",
+      "label": "getAccount()",
       "_callable": true,
       "_origin": "ast",
       "community": 21,
       "community_name": "Button",
       "file_type": "code",
-      "norm_label": "listbudgets()",
-      "source_file": "src/logic/budgets.ts",
-      "source_location": "L22"
+      "norm_label": "getaccount()",
+      "source_file": "src/logic/accounts.ts",
+      "source_location": "L78"
+    },
+    {
+      "id": "src_logic_accounts_listaccounts",
+      "label": "listAccounts()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 21,
+      "community_name": "Button",
+      "file_type": "code",
+      "norm_label": "listaccounts()",
+      "source_file": "src/logic/accounts.ts",
+      "source_location": "L62"
     },
     {
       "id": "src_logic_categories_listcategories",
@@ -6444,6 +6660,18 @@
       "norm_label": "suggestedstatementrules()",
       "source_file": "src/logic/suggestions.ts",
       "source_location": "L863"
+    },
+    {
+      "id": "src_routes_pathaccount",
+      "label": "pathAccount()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 21,
+      "community_name": "Button",
+      "file_type": "code",
+      "norm_label": "pathaccount()",
+      "source_file": "src/routes.ts",
+      "source_location": "L17"
     },
     {
       "id": "src_lib_utils_round2",
@@ -7406,6 +7634,18 @@
       "source_location": "L50"
     },
     {
+      "id": "src_components_allocate_bar_allocatebar",
+      "label": "AllocateBar()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 31,
+      "community_name": "displays.tsx",
+      "file_type": "code",
+      "norm_label": "allocatebar()",
+      "source_file": "src/components/allocate-bar.tsx",
+      "source_location": "L3"
+    },
+    {
       "id": "src_components_charts_sparkline_sparkline",
       "label": "Sparkline()",
       "_callable": true,
@@ -7452,6 +7692,18 @@
       "norm_label": "metric()",
       "source_file": "src/components/metric.tsx",
       "source_location": "L28"
+    },
+    {
+      "id": "src_components_record_amount_recordamount",
+      "label": "RecordAmount()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 31,
+      "community_name": "displays.tsx",
+      "file_type": "code",
+      "norm_label": "recordamount()",
+      "source_file": "src/components/record-amount.tsx",
+      "source_location": "L4"
     },
     {
       "id": "src_components_value_swap_valueswap",
@@ -8198,256 +8450,208 @@
       "source_location": "L44"
     },
     {
-      "id": "app_accounts_id_page_accountpage",
-      "label": "AccountPage()",
+      "id": "src_components_icon_icon",
+      "label": "Icon()",
       "_callable": true,
       "_origin": "ast",
       "community": 36,
-      "community_name": "allocator/page.tsx",
+      "community_name": "record-columns.tsx",
       "file_type": "code",
-      "norm_label": "accountpage()",
-      "source_file": "app/accounts/[id]/page.tsx",
-      "source_location": "L24"
+      "norm_label": "icon()",
+      "source_file": "src/components/icon.tsx",
+      "source_location": "L99"
     },
     {
-      "id": "app_accounts_page_accountcard",
-      "label": "AccountCard()",
+      "id": "src_components_sheets_record_search_recordoption",
+      "label": "RecordOption()",
       "_callable": true,
       "_origin": "ast",
       "community": 36,
-      "community_name": "allocator/page.tsx",
+      "community_name": "record-columns.tsx",
       "file_type": "code",
-      "norm_label": "accountcard()",
-      "source_file": "app/accounts/page.tsx",
-      "source_location": "L93"
+      "norm_label": "recordoption()",
+      "source_file": "src/components/sheets/record-search.tsx",
+      "source_location": "L226"
     },
     {
-      "id": "app_accounts_page_accountspage",
-      "label": "AccountsPage()",
+      "id": "src_components_sheets_statement_search_statementoption",
+      "label": "StatementOption()",
       "_callable": true,
       "_origin": "ast",
       "community": 36,
-      "community_name": "allocator/page.tsx",
+      "community_name": "record-columns.tsx",
       "file_type": "code",
-      "norm_label": "accountspage()",
-      "source_file": "app/accounts/page.tsx",
-      "source_location": "L26"
+      "norm_label": "statementoption()",
+      "source_file": "src/components/sheets/statement-search.tsx",
+      "source_location": "L238"
     },
     {
-      "id": "app_allocator_page_allocatorpage",
-      "label": "AllocatorPage()",
+      "id": "src_components_table_record_columns_amounttone",
+      "label": "amountTone()",
       "_callable": true,
       "_origin": "ast",
       "community": 36,
-      "community_name": "allocator/page.tsx",
+      "community_name": "record-columns.tsx",
       "file_type": "code",
-      "norm_label": "allocatorpage()",
-      "source_file": "app/allocator/page.tsx",
-      "source_location": "L42"
+      "norm_label": "amounttone()",
+      "source_file": "src/components/table/record-columns.tsx",
+      "source_location": "L27"
     },
     {
-      "id": "app_records_page_recordspage",
-      "label": "RecordsPage()",
+      "id": "src_components_table_record_columns_formatrowtime",
+      "label": "formatRowTime()",
       "_callable": true,
       "_origin": "ast",
       "community": 36,
-      "community_name": "allocator/page.tsx",
+      "community_name": "record-columns.tsx",
       "file_type": "code",
-      "norm_label": "recordspage()",
-      "source_file": "app/records/page.tsx",
-      "source_location": "L44"
+      "norm_label": "formatrowtime()",
+      "source_file": "src/components/table/record-columns.tsx",
+      "source_location": "L31"
     },
     {
-      "id": "app_statements_page_statementspage",
-      "label": "StatementsPage()",
+      "id": "src_components_table_record_columns_pendingbadge",
+      "label": "PendingBadge()",
       "_callable": true,
       "_origin": "ast",
       "community": 36,
-      "community_name": "allocator/page.tsx",
+      "community_name": "record-columns.tsx",
       "file_type": "code",
-      "norm_label": "statementspage()",
-      "source_file": "app/statements/page.tsx",
+      "norm_label": "pendingbadge()",
+      "source_file": "src/components/table/record-columns.tsx",
+      "source_location": "L48"
+    },
+    {
+      "id": "src_components_table_record_columns_pendingreason",
+      "label": "pendingReason()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 36,
+      "community_name": "record-columns.tsx",
+      "file_type": "code",
+      "norm_label": "pendingreason()",
+      "source_file": "src/components/table/record-columns.tsx",
+      "source_location": "L40"
+    },
+    {
+      "id": "src_components_table_record_columns_recordactions",
+      "label": "RecordActions()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 36,
+      "community_name": "record-columns.tsx",
+      "file_type": "code",
+      "norm_label": "recordactions()",
+      "source_file": "src/components/table/record-columns.tsx",
+      "source_location": "L144"
+    },
+    {
+      "id": "src_components_table_record_columns_recordactionscell",
+      "label": "RecordActionsCell()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 36,
+      "community_name": "record-columns.tsx",
+      "file_type": "code",
+      "norm_label": "recordactionscell()",
+      "source_file": "src/components/table/record-columns.tsx",
+      "source_location": "L170"
+    },
+    {
+      "id": "src_components_table_record_columns_recordamountcell",
+      "label": "RecordAmountCell()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 36,
+      "community_name": "record-columns.tsx",
+      "file_type": "code",
+      "norm_label": "recordamountcell()",
+      "source_file": "src/components/table/record-columns.tsx",
+      "source_location": "L94"
+    },
+    {
+      "id": "src_components_table_record_columns_recorddetails",
+      "label": "RecordDetails()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 36,
+      "community_name": "record-columns.tsx",
+      "file_type": "code",
+      "norm_label": "recorddetails()",
+      "source_file": "src/components/table/record-columns.tsx",
+      "source_location": "L61"
+    },
+    {
+      "id": "src_components_table_record_columns_recordeditbutton",
+      "label": "RecordEditButton()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 36,
+      "community_name": "record-columns.tsx",
+      "file_type": "code",
+      "norm_label": "recordeditbutton()",
+      "source_file": "src/components/table/record-columns.tsx",
+      "source_location": "L117"
+    },
+    {
+      "id": "src_components_table_record_columns_recordmonthlybudget",
+      "label": "RecordMonthlyBudget()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 36,
+      "community_name": "record-columns.tsx",
+      "file_type": "code",
+      "norm_label": "recordmonthlybudget()",
+      "source_file": "src/components/table/record-columns.tsx",
+      "source_location": "L79"
+    },
+    {
+      "id": "src_components_table_record_columns_userecordcolumns",
+      "label": "useRecordColumns()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 36,
+      "community_name": "record-columns.tsx",
+      "file_type": "code",
+      "norm_label": "userecordcolumns()",
+      "source_file": "src/components/table/record-columns.tsx",
+      "source_location": "L180"
+    },
+    {
+      "id": "src_components_table_record_columns_userecordmobilerow",
+      "label": "useRecordMobileRow()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 36,
+      "community_name": "record-columns.tsx",
+      "file_type": "code",
+      "norm_label": "userecordmobilerow()",
+      "source_file": "src/components/table/record-columns.tsx",
+      "source_location": "L260"
+    },
+    {
+      "id": "src_components_ui_badge_badge",
+      "label": "Badge()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 36,
+      "community_name": "record-columns.tsx",
+      "file_type": "code",
+      "norm_label": "badge()",
+      "source_file": "src/components/ui/badge.tsx",
       "source_location": "L32"
     },
     {
-      "id": "src_components_selection_bar_selectionbar",
-      "label": "SelectionBar()",
+      "id": "src_lib_utils_parsedatetime",
+      "label": "parseDatetime()",
       "_callable": true,
       "_origin": "ast",
       "community": 36,
-      "community_name": "allocator/page.tsx",
+      "community_name": "record-columns.tsx",
       "file_type": "code",
-      "norm_label": "selectionbar()",
-      "source_file": "src/components/selection-bar.tsx",
-      "source_location": "L5"
-    },
-    {
-      "id": "src_components_table_filter_bar_clearfiltersbutton",
-      "label": "ClearFiltersButton()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "allocator/page.tsx",
-      "file_type": "code",
-      "norm_label": "clearfiltersbutton()",
-      "source_file": "src/components/table/filter-bar.tsx",
-      "source_location": "L78"
-    },
-    {
-      "id": "src_components_table_filter_bar_filterbar",
-      "label": "FilterBar()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "allocator/page.tsx",
-      "file_type": "code",
-      "norm_label": "filterbar()",
-      "source_file": "src/components/table/filter-bar.tsx",
-      "source_location": "L55"
-    },
-    {
-      "id": "src_components_table_row_groups_byday",
-      "label": "byDay()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "allocator/page.tsx",
-      "file_type": "code",
-      "norm_label": "byday()",
-      "source_file": "src/components/table/row-groups.tsx",
-      "source_location": "L184"
-    },
-    {
-      "id": "src_components_table_row_groups_daylabel",
-      "label": "dayLabel()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "allocator/page.tsx",
-      "file_type": "code",
-      "norm_label": "daylabel()",
-      "source_file": "src/components/table/row-groups.tsx",
-      "source_location": "L173"
-    },
-    {
-      "id": "src_hooks_use_paginated_table_state_usepaginatedtablestate",
-      "label": "usePaginatedTableState()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "allocator/page.tsx",
-      "file_type": "code",
-      "norm_label": "usepaginatedtablestate()",
-      "source_file": "src/hooks/use-paginated-table-state.ts",
-      "source_location": "L10"
-    },
-    {
-      "id": "src_lib_banks_bankmeta",
-      "label": "bankMeta()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "allocator/page.tsx",
-      "file_type": "code",
-      "norm_label": "bankmeta()",
-      "source_file": "src/lib/banks.ts",
-      "source_location": "L15"
-    },
-    {
-      "id": "src_lib_utils_pluralize",
-      "label": "pluralize()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "allocator/page.tsx",
-      "file_type": "code",
-      "norm_label": "pluralize()",
+      "norm_label": "parsedatetime()",
       "source_file": "src/lib/utils.ts",
-      "source_location": "L38"
-    },
-    {
-      "id": "src_logic_accounts_getaccount",
-      "label": "getAccount()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "allocator/page.tsx",
-      "file_type": "code",
-      "norm_label": "getaccount()",
-      "source_file": "src/logic/accounts.ts",
-      "source_location": "L78"
-    },
-    {
-      "id": "src_logic_accounts_listaccounts",
-      "label": "listAccounts()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "allocator/page.tsx",
-      "file_type": "code",
-      "norm_label": "listaccounts()",
-      "source_file": "src/logic/accounts.ts",
-      "source_location": "L62"
-    },
-    {
-      "id": "src_logic_pagination_paginateitems",
-      "label": "paginateItems()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "allocator/page.tsx",
-      "file_type": "code",
-      "norm_label": "paginateitems()",
-      "source_file": "src/logic/pagination.ts",
-      "source_location": "L7"
-    },
-    {
-      "id": "src_logic_pagination_parsepage",
-      "label": "parsePage()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "allocator/page.tsx",
-      "file_type": "code",
-      "norm_label": "parsepage()",
-      "source_file": "src/logic/pagination.ts",
-      "source_location": "L21"
-    },
-    {
-      "id": "src_logic_pagination_parsepagesize",
-      "label": "parsePageSize()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "allocator/page.tsx",
-      "file_type": "code",
-      "norm_label": "parsepagesize()",
-      "source_file": "src/logic/pagination.ts",
-      "source_location": "L26"
-    },
-    {
-      "id": "src_logic_statements_parsestatementfilters",
-      "label": "parseStatementFilters()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "allocator/page.tsx",
-      "file_type": "code",
-      "norm_label": "parsestatementfilters()",
-      "source_file": "src/logic/statements.ts",
-      "source_location": "L45"
-    },
-    {
-      "id": "src_routes_pathaccount",
-      "label": "pathAccount()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "allocator/page.tsx",
-      "file_type": "code",
-      "norm_label": "pathaccount()",
-      "source_file": "src/routes.ts",
-      "source_location": "L17"
+      "source_location": "L13"
     },
     {
       "id": "src_logic_statement_rules_bycreation",
@@ -8810,6 +9014,18 @@
       "source_location": "L473"
     },
     {
+      "id": "src_components_charts_cashflow_chart_cashflowchart",
+      "label": "CashflowChart()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "(month)/page.tsx",
+      "file_type": "code",
+      "norm_label": "cashflowchart()",
+      "source_file": "src/components/charts/cashflow-chart.tsx",
+      "source_location": "L20"
+    },
+    {
       "id": "src_components_charts_category_movers_categorymovers",
       "label": "CategoryMovers()",
       "_callable": true,
@@ -8820,6 +9036,30 @@
       "norm_label": "categorymovers()",
       "source_file": "src/components/charts/category-movers.tsx",
       "source_location": "L21"
+    },
+    {
+      "id": "src_components_charts_daily_spending_chart_dailyspendingchart",
+      "label": "DailySpendingChart()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "(month)/page.tsx",
+      "file_type": "code",
+      "norm_label": "dailyspendingchart()",
+      "source_file": "src/components/charts/daily-spending-chart.tsx",
+      "source_location": "L16"
+    },
+    {
+      "id": "src_components_charts_total_spending_chart_totalspendingchart",
+      "label": "TotalSpendingChart()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "(month)/page.tsx",
+      "file_type": "code",
+      "norm_label": "totalspendingchart()",
+      "source_file": "src/components/charts/total-spending-chart.tsx",
+      "source_location": "L9"
     },
     {
       "id": "src_components_metric_metricgrid",
@@ -8834,28 +9074,28 @@
       "source_location": "L9"
     },
     {
-      "id": "src_hooks_use_month_transition_takemonthdirection",
-      "label": "takeMonthDirection()",
+      "id": "src_components_monthly_budget_badge_monthlybudgetbadge",
+      "label": "MonthlyBudgetBadge()",
       "_callable": true,
       "_origin": "ast",
       "community": 4,
       "community_name": "(month)/page.tsx",
       "file_type": "code",
-      "norm_label": "takemonthdirection()",
-      "source_file": "src/hooks/use-month-transition.ts",
-      "source_location": "L15"
+      "norm_label": "monthlybudgetbadge()",
+      "source_file": "src/components/monthly-budget-badge.tsx",
+      "source_location": "L9"
     },
     {
-      "id": "src_hooks_use_month_transition_usemonthtransition",
-      "label": "useMonthTransition()",
+      "id": "src_hooks_use_records_sheet_userecordssheet",
+      "label": "useRecordsSheet()",
       "_callable": true,
       "_origin": "ast",
       "community": 4,
       "community_name": "(month)/page.tsx",
       "file_type": "code",
-      "norm_label": "usemonthtransition()",
-      "source_file": "src/hooks/use-month-transition.ts",
-      "source_location": "L27"
+      "norm_label": "userecordssheet()",
+      "source_file": "src/hooks/use-records-sheet.ts",
+      "source_location": "L23"
     },
     {
       "id": "src_hooks_use_staged_mount_usestagedmount",
@@ -8868,6 +9108,30 @@
       "norm_label": "usestagedmount()",
       "source_file": "src/hooks/use-staged-mount.ts",
       "source_location": "L8"
+    },
+    {
+      "id": "src_lib_chart_days_dayticks",
+      "label": "dayTicks()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "(month)/page.tsx",
+      "file_type": "code",
+      "norm_label": "dayticks()",
+      "source_file": "src/lib/chart-days.ts",
+      "source_location": "L2"
+    },
+    {
+      "id": "src_lib_palette_themecolor",
+      "label": "themeColor()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "(month)/page.tsx",
+      "file_type": "code",
+      "norm_label": "themecolor()",
+      "source_file": "src/lib/palette.ts",
+      "source_location": "L18"
     },
     {
       "id": "src_logic_workspace_hasworkspaceactivity",
@@ -9823,7 +10087,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 45,
-      "community_name": "record-columns.tsx",
+      "community_name": "amount-filter.tsx",
       "file_type": "code",
       "norm_label": "budgetrecordssheet()",
       "source_file": "src/components/sheets/budget-records-sheet.tsx",
@@ -9835,23 +10099,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 45,
-      "community_name": "record-columns.tsx",
+      "community_name": "amount-filter.tsx",
       "file_type": "code",
       "norm_label": "pendingstatementconfirmationsheet()",
       "source_file": "src/components/sheets/pending-statement-confirmation.tsx",
       "source_location": "L19"
-    },
-    {
-      "id": "src_components_sheets_record_search_recordoption",
-      "label": "RecordOption()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "record-columns.tsx",
-      "file_type": "code",
-      "norm_label": "recordoption()",
-      "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L224"
     },
     {
       "id": "src_components_sheets_record_search_recordsearchsheet",
@@ -9859,11 +10111,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 45,
-      "community_name": "record-columns.tsx",
+      "community_name": "amount-filter.tsx",
       "file_type": "code",
       "norm_label": "recordsearchsheet()",
       "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L36"
+      "source_location": "L37"
     },
     {
       "id": "src_components_sheets_records_sheet_recordssheet",
@@ -9871,23 +10123,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 45,
-      "community_name": "record-columns.tsx",
+      "community_name": "amount-filter.tsx",
       "file_type": "code",
       "norm_label": "recordssheet()",
       "source_file": "src/components/sheets/records-sheet.tsx",
       "source_location": "L33"
-    },
-    {
-      "id": "src_components_sheets_statement_search_statementoption",
-      "label": "StatementOption()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "record-columns.tsx",
-      "file_type": "code",
-      "norm_label": "statementoption()",
-      "source_file": "src/components/sheets/statement-search.tsx",
-      "source_location": "L236"
     },
     {
       "id": "src_components_sheets_statement_search_statementsearchsheet",
@@ -9895,23 +10135,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 45,
-      "community_name": "record-columns.tsx",
+      "community_name": "amount-filter.tsx",
       "file_type": "code",
       "norm_label": "statementsearchsheet()",
       "source_file": "src/components/sheets/statement-search.tsx",
-      "source_location": "L21"
-    },
-    {
-      "id": "src_components_table_amount_filter_amountfilter",
-      "label": "AmountFilter()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "record-columns.tsx",
-      "file_type": "code",
-      "norm_label": "amountfilter()",
-      "source_file": "src/components/table/amount-filter.tsx",
-      "source_location": "L85"
+      "source_location": "L22"
     },
     {
       "id": "src_components_table_amount_filter_describe",
@@ -9919,7 +10147,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 45,
-      "community_name": "record-columns.tsx",
+      "community_name": "amount-filter.tsx",
       "file_type": "code",
       "norm_label": "describe()",
       "source_file": "src/components/table/amount-filter.tsx",
@@ -9931,7 +10159,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 45,
-      "community_name": "record-columns.tsx",
+      "community_name": "amount-filter.tsx",
       "file_type": "code",
       "norm_label": "readrange()",
       "source_file": "src/components/table/amount-filter.tsx",
@@ -9943,143 +10171,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 45,
-      "community_name": "record-columns.tsx",
+      "community_name": "amount-filter.tsx",
       "file_type": "code",
       "norm_label": "upperbound()",
       "source_file": "src/components/table/amount-filter.tsx",
       "source_location": "L69"
-    },
-    {
-      "id": "src_components_table_record_columns_pendingbadge",
-      "label": "PendingBadge()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "record-columns.tsx",
-      "file_type": "code",
-      "norm_label": "pendingbadge()",
-      "source_file": "src/components/table/record-columns.tsx",
-      "source_location": "L48"
-    },
-    {
-      "id": "src_components_table_record_columns_pendingreason",
-      "label": "pendingReason()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "record-columns.tsx",
-      "file_type": "code",
-      "norm_label": "pendingreason()",
-      "source_file": "src/components/table/record-columns.tsx",
-      "source_location": "L40"
-    },
-    {
-      "id": "src_components_table_record_columns_recordactions",
-      "label": "RecordActions()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "record-columns.tsx",
-      "file_type": "code",
-      "norm_label": "recordactions()",
-      "source_file": "src/components/table/record-columns.tsx",
-      "source_location": "L144"
-    },
-    {
-      "id": "src_components_table_record_columns_recordactionscell",
-      "label": "RecordActionsCell()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "record-columns.tsx",
-      "file_type": "code",
-      "norm_label": "recordactionscell()",
-      "source_file": "src/components/table/record-columns.tsx",
-      "source_location": "L170"
-    },
-    {
-      "id": "src_components_table_record_columns_recordamountcell",
-      "label": "RecordAmountCell()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "record-columns.tsx",
-      "file_type": "code",
-      "norm_label": "recordamountcell()",
-      "source_file": "src/components/table/record-columns.tsx",
-      "source_location": "L94"
-    },
-    {
-      "id": "src_components_table_record_columns_recorddetails",
-      "label": "RecordDetails()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "record-columns.tsx",
-      "file_type": "code",
-      "norm_label": "recorddetails()",
-      "source_file": "src/components/table/record-columns.tsx",
-      "source_location": "L61"
-    },
-    {
-      "id": "src_components_table_record_columns_recordeditbutton",
-      "label": "RecordEditButton()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "record-columns.tsx",
-      "file_type": "code",
-      "norm_label": "recordeditbutton()",
-      "source_file": "src/components/table/record-columns.tsx",
-      "source_location": "L117"
-    },
-    {
-      "id": "src_components_table_record_columns_recordmonthlybudget",
-      "label": "RecordMonthlyBudget()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "record-columns.tsx",
-      "file_type": "code",
-      "norm_label": "recordmonthlybudget()",
-      "source_file": "src/components/table/record-columns.tsx",
-      "source_location": "L79"
-    },
-    {
-      "id": "src_components_table_record_columns_userecordcolumns",
-      "label": "useRecordColumns()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "record-columns.tsx",
-      "file_type": "code",
-      "norm_label": "userecordcolumns()",
-      "source_file": "src/components/table/record-columns.tsx",
-      "source_location": "L180"
-    },
-    {
-      "id": "src_components_table_record_columns_userecordmobilerow",
-      "label": "useRecordMobileRow()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "record-columns.tsx",
-      "file_type": "code",
-      "norm_label": "userecordmobilerow()",
-      "source_file": "src/components/table/record-columns.tsx",
-      "source_location": "L260"
-    },
-    {
-      "id": "src_components_ui_badge_badge",
-      "label": "Badge()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "record-columns.tsx",
-      "file_type": "code",
-      "norm_label": "badge()",
-      "source_file": "src/components/ui/badge.tsx",
-      "source_location": "L32"
     },
     {
       "id": "src_components_ui_input_input",
@@ -10087,7 +10183,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 45,
-      "community_name": "record-columns.tsx",
+      "community_name": "amount-filter.tsx",
       "file_type": "code",
       "norm_label": "input()",
       "source_file": "src/components/ui/input.tsx",
@@ -10099,7 +10195,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 45,
-      "community_name": "record-columns.tsx",
+      "community_name": "amount-filter.tsx",
       "file_type": "code",
       "norm_label": "sheet()",
       "source_file": "src/components/ui/sheet.tsx",
@@ -10111,7 +10207,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 45,
-      "community_name": "record-columns.tsx",
+      "community_name": "amount-filter.tsx",
       "file_type": "code",
       "norm_label": "sheetcontent()",
       "source_file": "src/components/ui/sheet.tsx",
@@ -10123,7 +10219,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 45,
-      "community_name": "record-columns.tsx",
+      "community_name": "amount-filter.tsx",
       "file_type": "code",
       "norm_label": "sheetdescription()",
       "source_file": "src/components/ui/sheet.tsx",
@@ -10135,7 +10231,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 45,
-      "community_name": "record-columns.tsx",
+      "community_name": "amount-filter.tsx",
       "file_type": "code",
       "norm_label": "sheetheader()",
       "source_file": "src/components/ui/sheet.tsx",
@@ -10147,7 +10243,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 45,
-      "community_name": "record-columns.tsx",
+      "community_name": "amount-filter.tsx",
       "file_type": "code",
       "norm_label": "sheetoverlay()",
       "source_file": "src/components/ui/sheet.tsx",
@@ -10159,7 +10255,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 45,
-      "community_name": "record-columns.tsx",
+      "community_name": "amount-filter.tsx",
       "file_type": "code",
       "norm_label": "sheetportal()",
       "source_file": "src/components/ui/sheet.tsx",
@@ -10171,7 +10267,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 45,
-      "community_name": "record-columns.tsx",
+      "community_name": "amount-filter.tsx",
       "file_type": "code",
       "norm_label": "sheettitle()",
       "source_file": "src/components/ui/sheet.tsx",
@@ -10183,7 +10279,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 45,
-      "community_name": "record-columns.tsx",
+      "community_name": "amount-filter.tsx",
       "file_type": "code",
       "norm_label": "sheettrigger()",
       "source_file": "src/components/ui/sheet.tsx",
@@ -10195,7 +10291,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 45,
-      "community_name": "record-columns.tsx",
+      "community_name": "amount-filter.tsx",
       "file_type": "code",
       "norm_label": "sidebar()",
       "source_file": "src/components/ui/sidebar.tsx",
@@ -10207,23 +10303,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 45,
-      "community_name": "record-columns.tsx",
+      "community_name": "amount-filter.tsx",
       "file_type": "code",
       "norm_label": "useismobile()",
       "source_file": "src/hooks/use-mobile.ts",
       "source_location": "L5"
-    },
-    {
-      "id": "src_lib_utils_parsedatetime",
-      "label": "parseDatetime()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "record-columns.tsx",
-      "file_type": "code",
-      "norm_label": "parsedatetime()",
-      "source_file": "src/lib/utils.ts",
-      "source_location": "L13"
     },
     {
       "id": "src_logic_monthly_getmonthlyrecords",
@@ -10231,7 +10315,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 45,
-      "community_name": "record-columns.tsx",
+      "community_name": "amount-filter.tsx",
       "file_type": "code",
       "norm_label": "getmonthlyrecords()",
       "source_file": "src/logic/monthly.ts",
@@ -10538,52 +10622,16 @@
       "source_location": "L65"
     },
     {
-      "id": "app_allocator_duplicates_page_duplicategroupcard",
-      "label": "DuplicateGroupCard()",
+      "id": "app_allocator_page_allocatorpage",
+      "label": "AllocatorPage()",
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "duplicates/page.tsx",
+      "community_name": "allocator/page.tsx",
       "file_type": "code",
-      "norm_label": "duplicategroupcard()",
-      "source_file": "app/allocator/duplicates/page.tsx",
-      "source_location": "L360"
-    },
-    {
-      "id": "app_allocator_duplicates_page_fixduplicatespage",
-      "label": "FixDuplicatesPage()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "duplicates/page.tsx",
-      "file_type": "code",
-      "norm_label": "fixduplicatespage()",
-      "source_file": "app/allocator/duplicates/page.tsx",
-      "source_location": "L82"
-    },
-    {
-      "id": "app_allocator_duplicates_page_groupheader",
-      "label": "GroupHeader()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "duplicates/page.tsx",
-      "file_type": "code",
-      "norm_label": "groupheader()",
-      "source_file": "app/allocator/duplicates/page.tsx",
-      "source_location": "L331"
-    },
-    {
-      "id": "app_allocator_duplicates_page_highlightdifferences",
-      "label": "highlightDifferences()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "duplicates/page.tsx",
-      "file_type": "code",
-      "norm_label": "highlightdifferences()",
-      "source_file": "app/allocator/duplicates/page.tsx",
-      "source_location": "L510"
+      "norm_label": "allocatorpage()",
+      "source_file": "app/allocator/page.tsx",
+      "source_location": "L42"
     },
     {
       "id": "app_month_page_scopeselect",
@@ -10591,7 +10639,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "duplicates/page.tsx",
+      "community_name": "allocator/page.tsx",
       "file_type": "code",
       "norm_label": "scopeselect()",
       "source_file": "app/(month)/page.tsx",
@@ -10603,7 +10651,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "duplicates/page.tsx",
+      "community_name": "allocator/page.tsx",
       "file_type": "code",
       "norm_label": "recordcreatorhost()",
       "source_file": "app/records/page.tsx",
@@ -10615,11 +10663,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "duplicates/page.tsx",
+      "community_name": "allocator/page.tsx",
       "file_type": "code",
       "norm_label": "recordfilters()",
       "source_file": "app/records/page.tsx",
       "source_location": "L240"
+    },
+    {
+      "id": "app_records_page_recordspage",
+      "label": "RecordsPage()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "allocator/page.tsx",
+      "file_type": "code",
+      "norm_label": "recordspage()",
+      "source_file": "app/records/page.tsx",
+      "source_location": "L44"
     },
     {
       "id": "app_settings_page_learnedsignals",
@@ -10627,7 +10687,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "duplicates/page.tsx",
+      "community_name": "allocator/page.tsx",
       "file_type": "code",
       "norm_label": "learnedsignals()",
       "source_file": "app/settings/page.tsx",
@@ -10639,11 +10699,83 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "duplicates/page.tsx",
+      "community_name": "allocator/page.tsx",
       "file_type": "code",
       "norm_label": "settingspage()",
       "source_file": "app/settings/page.tsx",
       "source_location": "L60"
+    },
+    {
+      "id": "app_statements_page_statementspage",
+      "label": "StatementsPage()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "allocator/page.tsx",
+      "file_type": "code",
+      "norm_label": "statementspage()",
+      "source_file": "app/statements/page.tsx",
+      "source_location": "L32"
+    },
+    {
+      "id": "src_components_form_date_range_daterange",
+      "label": "DateRange()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "allocator/page.tsx",
+      "file_type": "code",
+      "norm_label": "daterange()",
+      "source_file": "src/components/form/date-range.tsx",
+      "source_location": "L27"
+    },
+    {
+      "id": "src_components_selection_bar_selectionbar",
+      "label": "SelectionBar()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "allocator/page.tsx",
+      "file_type": "code",
+      "norm_label": "selectionbar()",
+      "source_file": "src/components/selection-bar.tsx",
+      "source_location": "L5"
+    },
+    {
+      "id": "src_components_table_amount_filter_amountfilter",
+      "label": "AmountFilter()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "allocator/page.tsx",
+      "file_type": "code",
+      "norm_label": "amountfilter()",
+      "source_file": "src/components/table/amount-filter.tsx",
+      "source_location": "L85"
+    },
+    {
+      "id": "src_components_table_filter_bar_clearfiltersbutton",
+      "label": "ClearFiltersButton()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "allocator/page.tsx",
+      "file_type": "code",
+      "norm_label": "clearfiltersbutton()",
+      "source_file": "src/components/table/filter-bar.tsx",
+      "source_location": "L78"
+    },
+    {
+      "id": "src_components_table_filter_bar_filterbar",
+      "label": "FilterBar()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "allocator/page.tsx",
+      "file_type": "code",
+      "norm_label": "filterbar()",
+      "source_file": "src/components/table/filter-bar.tsx",
+      "source_location": "L55"
     },
     {
       "id": "src_components_table_filter_bar_filtercontrolclass",
@@ -10651,7 +10783,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "duplicates/page.tsx",
+      "community_name": "allocator/page.tsx",
       "file_type": "code",
       "norm_label": "filtercontrolclass()",
       "source_file": "src/components/table/filter-bar.tsx",
@@ -10663,7 +10795,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "duplicates/page.tsx",
+      "community_name": "allocator/page.tsx",
       "file_type": "code",
       "norm_label": "filterfield()",
       "source_file": "src/components/table/filter-bar.tsx",
@@ -10675,11 +10807,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "duplicates/page.tsx",
+      "community_name": "allocator/page.tsx",
       "file_type": "code",
       "norm_label": "filterselect()",
       "source_file": "src/components/table/filter-bar.tsx",
       "source_location": "L107"
+    },
+    {
+      "id": "src_components_table_row_groups_byday",
+      "label": "byDay()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "allocator/page.tsx",
+      "file_type": "code",
+      "norm_label": "byday()",
+      "source_file": "src/components/table/row-groups.tsx",
+      "source_location": "L184"
     },
     {
       "id": "src_components_ui_select_select",
@@ -10687,7 +10831,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "duplicates/page.tsx",
+      "community_name": "allocator/page.tsx",
       "file_type": "code",
       "norm_label": "select()",
       "source_file": "src/components/ui/select.tsx",
@@ -10699,7 +10843,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "duplicates/page.tsx",
+      "community_name": "allocator/page.tsx",
       "file_type": "code",
       "norm_label": "selectcontent()",
       "source_file": "src/components/ui/select.tsx",
@@ -10711,7 +10855,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "duplicates/page.tsx",
+      "community_name": "allocator/page.tsx",
       "file_type": "code",
       "norm_label": "selectgroup()",
       "source_file": "src/components/ui/select.tsx",
@@ -10723,7 +10867,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "duplicates/page.tsx",
+      "community_name": "allocator/page.tsx",
       "file_type": "code",
       "norm_label": "selectitem()",
       "source_file": "src/components/ui/select.tsx",
@@ -10735,7 +10879,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "duplicates/page.tsx",
+      "community_name": "allocator/page.tsx",
       "file_type": "code",
       "norm_label": "selectscrolldownbutton()",
       "source_file": "src/components/ui/select.tsx",
@@ -10747,7 +10891,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "duplicates/page.tsx",
+      "community_name": "allocator/page.tsx",
       "file_type": "code",
       "norm_label": "selectscrollupbutton()",
       "source_file": "src/components/ui/select.tsx",
@@ -10759,7 +10903,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "duplicates/page.tsx",
+      "community_name": "allocator/page.tsx",
       "file_type": "code",
       "norm_label": "selecttrigger()",
       "source_file": "src/components/ui/select.tsx",
@@ -10771,35 +10915,59 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "duplicates/page.tsx",
+      "community_name": "allocator/page.tsx",
       "file_type": "code",
       "norm_label": "selectvalue()",
       "source_file": "src/components/ui/select.tsx",
       "source_location": "L32"
     },
     {
-      "id": "src_logic_duplicates_pairkey",
-      "label": "pairKey()",
+      "id": "src_logic_pagination_paginateitems",
+      "label": "paginateItems()",
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "duplicates/page.tsx",
+      "community_name": "allocator/page.tsx",
       "file_type": "code",
-      "norm_label": "pairkey()",
-      "source_file": "src/logic/duplicates.ts",
-      "source_location": "L59"
+      "norm_label": "paginateitems()",
+      "source_file": "src/logic/pagination.ts",
+      "source_location": "L7"
     },
     {
-      "id": "src_routes_pathstatement",
-      "label": "pathStatement()",
+      "id": "src_logic_pagination_parsepage",
+      "label": "parsePage()",
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "duplicates/page.tsx",
+      "community_name": "allocator/page.tsx",
       "file_type": "code",
-      "norm_label": "pathstatement()",
-      "source_file": "src/routes.ts",
-      "source_location": "L14"
+      "norm_label": "parsepage()",
+      "source_file": "src/logic/pagination.ts",
+      "source_location": "L21"
+    },
+    {
+      "id": "src_logic_pagination_parsepagesize",
+      "label": "parsePageSize()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "allocator/page.tsx",
+      "file_type": "code",
+      "norm_label": "parsepagesize()",
+      "source_file": "src/logic/pagination.ts",
+      "source_location": "L26"
+    },
+    {
+      "id": "src_logic_statements_parsestatementfilters",
+      "label": "parseStatementFilters()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "allocator/page.tsx",
+      "file_type": "code",
+      "norm_label": "parsestatementfilters()",
+      "source_file": "src/logic/statements.ts",
+      "source_location": "L45"
     },
     {
       "id": "src_data_db_aspending",
@@ -11232,114 +11400,6 @@
       "norm_label": "statement()",
       "source_file": "tests/domain/duplicates.test.ts",
       "source_location": "L13"
-    },
-    {
-      "id": "src_components_charts_cashflow_chart_cashflowchart",
-      "label": "CashflowChart()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "themeColor",
-      "file_type": "code",
-      "norm_label": "cashflowchart()",
-      "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L20"
-    },
-    {
-      "id": "src_components_charts_category_spending_mix_categoryspendingmix",
-      "label": "CategorySpendingMix()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "themeColor",
-      "file_type": "code",
-      "norm_label": "categoryspendingmix()",
-      "source_file": "src/components/charts/category-spending-mix.tsx",
-      "source_location": "L11"
-    },
-    {
-      "id": "src_components_charts_daily_spending_chart_dailyspendingchart",
-      "label": "DailySpendingChart()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "themeColor",
-      "file_type": "code",
-      "norm_label": "dailyspendingchart()",
-      "source_file": "src/components/charts/daily-spending-chart.tsx",
-      "source_location": "L16"
-    },
-    {
-      "id": "src_components_charts_total_spending_chart_totalspendingchart",
-      "label": "TotalSpendingChart()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "themeColor",
-      "file_type": "code",
-      "norm_label": "totalspendingchart()",
-      "source_file": "src/components/charts/total-spending-chart.tsx",
-      "source_location": "L9"
-    },
-    {
-      "id": "src_components_charts_trend_chart_trendchart",
-      "label": "TrendChart()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "themeColor",
-      "file_type": "code",
-      "norm_label": "trendchart()",
-      "source_file": "src/components/charts/trend-chart.tsx",
-      "source_location": "L33"
-    },
-    {
-      "id": "src_components_monthly_budget_badge_monthlybudgetbadge",
-      "label": "MonthlyBudgetBadge()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "themeColor",
-      "file_type": "code",
-      "norm_label": "monthlybudgetbadge()",
-      "source_file": "src/components/monthly-budget-badge.tsx",
-      "source_location": "L9"
-    },
-    {
-      "id": "src_hooks_use_records_sheet_userecordssheet",
-      "label": "useRecordsSheet()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "themeColor",
-      "file_type": "code",
-      "norm_label": "userecordssheet()",
-      "source_file": "src/hooks/use-records-sheet.ts",
-      "source_location": "L23"
-    },
-    {
-      "id": "src_lib_chart_days_dayticks",
-      "label": "dayTicks()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "themeColor",
-      "file_type": "code",
-      "norm_label": "dayticks()",
-      "source_file": "src/lib/chart-days.ts",
-      "source_location": "L2"
-    },
-    {
-      "id": "src_lib_palette_themecolor",
-      "label": "themeColor()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "themeColor",
-      "file_type": "code",
-      "norm_label": "themecolor()",
-      "source_file": "src/lib/palette.ts",
-      "source_location": "L18"
     },
     {
       "id": "src_components_form_date_field_datefield",
@@ -12266,102 +12326,6 @@
       "source_location": "L13"
     },
     {
-      "id": "src_components_table_record_columns_amounttone",
-      "label": "amountTone()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 67,
-      "community_name": "next",
-      "file_type": "code",
-      "norm_label": "amounttone()",
-      "source_file": "src/components/table/record-columns.tsx",
-      "source_location": "L27"
-    },
-    {
-      "id": "src_components_table_record_columns_formatrowtime",
-      "label": "formatRowTime()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 67,
-      "community_name": "next",
-      "file_type": "code",
-      "norm_label": "formatrowtime()",
-      "source_file": "src/components/table/record-columns.tsx",
-      "source_location": "L31"
-    },
-    {
-      "id": "src_components_table_statement_columns_statementactions",
-      "label": "StatementActions()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 67,
-      "community_name": "next",
-      "file_type": "code",
-      "norm_label": "statementactions()",
-      "source_file": "src/components/table/statement-columns.tsx",
-      "source_location": "L87"
-    },
-    {
-      "id": "src_components_table_statement_columns_statementactionscell",
-      "label": "StatementActionsCell()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 67,
-      "community_name": "next",
-      "file_type": "code",
-      "norm_label": "statementactionscell()",
-      "source_file": "src/components/table/statement-columns.tsx",
-      "source_location": "L122"
-    },
-    {
-      "id": "src_components_table_statement_columns_statementamount",
-      "label": "StatementAmount()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 67,
-      "community_name": "next",
-      "file_type": "code",
-      "norm_label": "statementamount()",
-      "source_file": "src/components/table/statement-columns.tsx",
-      "source_location": "L61"
-    },
-    {
-      "id": "src_components_table_statement_columns_statementbadges",
-      "label": "StatementBadges()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 67,
-      "community_name": "next",
-      "file_type": "code",
-      "norm_label": "statementbadges()",
-      "source_file": "src/components/table/statement-columns.tsx",
-      "source_location": "L24"
-    },
-    {
-      "id": "src_components_table_statement_columns_usestatementcolumns",
-      "label": "useStatementColumns()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 67,
-      "community_name": "next",
-      "file_type": "code",
-      "norm_label": "usestatementcolumns()",
-      "source_file": "src/components/table/statement-columns.tsx",
-      "source_location": "L132"
-    },
-    {
-      "id": "src_components_table_statement_columns_usestatementmobilerow",
-      "label": "useStatementMobileRow()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 67,
-      "community_name": "next",
-      "file_type": "code",
-      "norm_label": "usestatementmobilerow()",
-      "source_file": "src/components/table/statement-columns.tsx",
-      "source_location": "L191"
-    },
-    {
       "id": "src_components_charts_bar_chart_bar",
       "label": "bar()",
       "_callable": true,
@@ -12468,6 +12432,18 @@
       "norm_label": "runs()",
       "source_file": "src/components/charts/trend-chart.tsx",
       "source_location": "L394"
+    },
+    {
+      "id": "src_components_charts_trend_chart_trendchart",
+      "label": "TrendChart()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 7,
+      "community_name": "trend-chart.tsx",
+      "file_type": "code",
+      "norm_label": "trendchart()",
+      "source_file": "src/components/charts/trend-chart.tsx",
+      "source_location": "L33"
     },
     {
       "id": "src_lib_chart_currency_formatchartcurrency",
@@ -13310,6 +13286,18 @@
       "source_location": "L13"
     },
     {
+      "id": "src_components_layout_month_header_slot_monthheaderportal",
+      "label": "MonthHeaderPortal()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 95,
+      "community_name": "app.tsx",
+      "file_type": "code",
+      "norm_label": "monthheaderportal()",
+      "source_file": "src/components/layout/month-header-slot.tsx",
+      "source_location": "L16"
+    },
+    {
       "id": "tests_harness_app_app",
       "label": "App()",
       "_callable": true,
@@ -13346,18 +13334,6 @@
       "source_location": "L22"
     },
     {
-      "id": "src_components_layout_month_header_slot_monthheaderportal",
-      "label": "MonthHeaderPortal()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 96,
-      "community_name": "(month)/layout.tsx",
-      "file_type": "code",
-      "norm_label": "monthheaderportal()",
-      "source_file": "src/components/layout/month-header-slot.tsx",
-      "source_location": "L16"
-    },
-    {
       "id": "src_hooks_use_month_params_usemonthparams",
       "label": "useMonthParams()",
       "_callable": true,
@@ -13380,6 +13356,30 @@
       "norm_label": "armmonthtransition()",
       "source_file": "src/hooks/use-month-transition.ts",
       "source_location": "L7"
+    },
+    {
+      "id": "src_hooks_use_month_transition_takemonthdirection",
+      "label": "takeMonthDirection()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 96,
+      "community_name": "(month)/layout.tsx",
+      "file_type": "code",
+      "norm_label": "takemonthdirection()",
+      "source_file": "src/hooks/use-month-transition.ts",
+      "source_location": "L15"
+    },
+    {
+      "id": "src_hooks_use_month_transition_usemonthtransition",
+      "label": "useMonthTransition()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 96,
+      "community_name": "(month)/layout.tsx",
+      "file_type": "code",
+      "norm_label": "usemonthtransition()",
+      "source_file": "src/hooks/use-month-transition.ts",
+      "source_location": "L27"
     },
     {
       "id": "src_hooks_use_url_params_useurlparams",
@@ -15550,6 +15550,17 @@
       "source_location": "L8"
     },
     {
+      "id": "src_components_allocate_bar",
+      "label": "allocate-bar.tsx",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "allocate-bar.tsx",
+      "source_file": "src/components/allocate-bar.tsx",
+      "source_location": "L1"
+    },
+    {
       "id": "src_components_charts_budget_progress_chart",
       "label": "budget-progress-chart.tsx",
       "_origin": "ast",
@@ -16298,6 +16309,39 @@
       "source_location": "L34"
     },
     {
+      "id": "app_budgets_page",
+      "label": "budgets/page.tsx",
+      "_origin": "ast",
+      "community": 101,
+      "community_name": "icon.tsx",
+      "file_type": "code",
+      "norm_label": "budgets/page.tsx",
+      "source_file": "app/budgets/page.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "app_budgets_page_budget_states",
+      "label": "BUDGET_STATES",
+      "_origin": "ast",
+      "community": 101,
+      "community_name": "icon.tsx",
+      "file_type": "code",
+      "norm_label": "budget_states",
+      "source_file": "app/budgets/page.tsx",
+      "source_location": "L123"
+    },
+    {
+      "id": "src_components_form_date_range",
+      "label": "date-range.tsx",
+      "_origin": "ast",
+      "community": 101,
+      "community_name": "icon.tsx",
+      "file_type": "code",
+      "norm_label": "date-range.tsx",
+      "source_file": "src/components/form/date-range.tsx",
+      "source_location": "L1"
+    },
+    {
       "id": "src_components_icon",
       "label": "icon.tsx",
       "_origin": "ast",
@@ -16373,6 +16417,28 @@
       "norm_label": "icons",
       "source_file": "src/components/icons.ts",
       "source_location": "L131"
+    },
+    {
+      "id": "src_components_table_pagination_header",
+      "label": "pagination-header.tsx",
+      "_origin": "ast",
+      "community": 101,
+      "community_name": "icon.tsx",
+      "file_type": "code",
+      "norm_label": "pagination-header.tsx",
+      "source_file": "src/components/table/pagination-header.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "ref_react_day_picker",
+      "label": "react-day-picker",
+      "_origin": "ast",
+      "community": 101,
+      "community_name": "icon.tsx",
+      "file_type": "concept",
+      "norm_label": "react-day-picker",
+      "source_file": "package.json",
+      "source_location": "L36"
     },
     {
       "id": "playwright_config",
@@ -17050,10 +17116,21 @@
       "label": "category-history-chart.tsx",
       "_origin": "ast",
       "community": 15,
-      "community_name": "icon.tsx",
+      "community_name": "category-history-chart.tsx",
       "file_type": "code",
       "norm_label": "category-history-chart.tsx",
       "source_file": "src/components/charts/category-history-chart.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_charts_category_spending_mix",
+      "label": "category-spending-mix.tsx",
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "category-history-chart.tsx",
+      "file_type": "code",
+      "norm_label": "category-spending-mix.tsx",
+      "source_file": "src/components/charts/category-spending-mix.tsx",
       "source_location": "L1"
     },
     {
@@ -17061,7 +17138,7 @@
       "label": "BREAKDOWN_MONTHS",
       "_origin": "ast",
       "community": 15,
-      "community_name": "icon.tsx",
+      "community_name": "category-history-chart.tsx",
       "file_type": "code",
       "norm_label": "breakdown_months",
       "source_file": "src/logic/dashboard.ts",
@@ -17464,6 +17541,39 @@
       "source_location": "L16"
     },
     {
+      "id": "app_allocator_duplicates_page",
+      "label": "duplicates/page.tsx",
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "utils.ts",
+      "file_type": "code",
+      "norm_label": "duplicates/page.tsx",
+      "source_file": "app/allocator/duplicates/page.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "app_allocator_duplicates_page_card_motion",
+      "label": "CARD_MOTION",
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "utils.ts",
+      "file_type": "code",
+      "norm_label": "card_motion",
+      "source_file": "app/allocator/duplicates/page.tsx",
+      "source_location": "L77"
+    },
+    {
+      "id": "app_allocator_duplicates_page_views",
+      "label": "VIEWS",
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "utils.ts",
+      "file_type": "code",
+      "norm_label": "views",
+      "source_file": "app/allocator/duplicates/page.tsx",
+      "source_location": "L52"
+    },
+    {
       "id": "app_allocator_pending_page",
       "label": "pending/page.tsx",
       "_origin": "ast",
@@ -17472,17 +17582,6 @@
       "file_type": "code",
       "norm_label": "pending/page.tsx",
       "source_file": "app/allocator/pending/page.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_allocate_bar",
-      "label": "allocate-bar.tsx",
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "utils.ts",
-      "file_type": "code",
-      "norm_label": "allocate-bar.tsx",
-      "source_file": "src/components/allocate-bar.tsx",
       "source_location": "L1"
     },
     {
@@ -17497,15 +17596,15 @@
       "source_location": "L1"
     },
     {
-      "id": "src_components_record_amount",
-      "label": "record-amount.tsx",
+      "id": "src_components_table_filter_bar_filter_control_class",
+      "label": "FILTER_CONTROL_CLASS",
       "_origin": "ast",
       "community": 19,
       "community_name": "utils.ts",
       "file_type": "code",
-      "norm_label": "record-amount.tsx",
-      "source_file": "src/components/record-amount.tsx",
-      "source_location": "L1"
+      "norm_label": "filter_control_class",
+      "source_file": "src/components/table/filter-bar.tsx",
+      "source_location": "L13"
     },
     {
       "id": "src_components_ui_alert",
@@ -17662,26 +17761,26 @@
       "source_location": "L55"
     },
     {
-      "id": "app_budgets_page",
-      "label": "budgets/page.tsx",
+      "id": "app_accounts_id_page",
+      "label": "accounts/[id]/page.tsx",
       "_origin": "ast",
       "community": 21,
       "community_name": "Button",
       "file_type": "code",
-      "norm_label": "budgets/page.tsx",
-      "source_file": "app/budgets/page.tsx",
+      "norm_label": "accounts/[id]/page.tsx",
+      "source_file": "app/accounts/[id]/page.tsx",
       "source_location": "L1"
     },
     {
-      "id": "app_budgets_page_budget_states",
-      "label": "BUDGET_STATES",
+      "id": "app_accounts_page",
+      "label": "accounts/page.tsx",
       "_origin": "ast",
       "community": 21,
       "community_name": "Button",
       "file_type": "code",
-      "norm_label": "budget_states",
-      "source_file": "app/budgets/page.tsx",
-      "source_location": "L123"
+      "norm_label": "accounts/page.tsx",
+      "source_file": "app/accounts/page.tsx",
+      "source_location": "L1"
     },
     {
       "id": "app_categories_page",
@@ -17739,17 +17838,6 @@
       "source_location": "L1"
     },
     {
-      "id": "src_components_form_date_range",
-      "label": "date-range.tsx",
-      "_origin": "ast",
-      "community": 21,
-      "community_name": "Button",
-      "file_type": "code",
-      "norm_label": "date-range.tsx",
-      "source_file": "src/components/form/date-range.tsx",
-      "source_location": "L1"
-    },
-    {
       "id": "src_components_layout_page_content",
       "label": "page-content.tsx",
       "_origin": "ast",
@@ -17772,6 +17860,17 @@
       "source_location": "L1"
     },
     {
+      "id": "src_components_table_statement_columns",
+      "label": "statement-columns.tsx",
+      "_origin": "ast",
+      "community": 21,
+      "community_name": "Button",
+      "file_type": "code",
+      "norm_label": "statement-columns.tsx",
+      "source_file": "src/components/table/statement-columns.tsx",
+      "source_location": "L1"
+    },
+    {
       "id": "src_components_ui_button",
       "label": "button.tsx",
       "_origin": "ast",
@@ -17783,15 +17882,48 @@
       "source_location": "L1"
     },
     {
-      "id": "ref_react_day_picker",
-      "label": "react-day-picker",
+      "id": "src_hooks_use_paginated_table_state",
+      "label": "use-paginated-table-state.ts",
       "_origin": "ast",
       "community": 21,
       "community_name": "Button",
-      "file_type": "concept",
-      "norm_label": "react-day-picker",
-      "source_file": "package.json",
-      "source_location": "L36"
+      "file_type": "code",
+      "norm_label": "use-paginated-table-state.ts",
+      "source_file": "src/hooks/use-paginated-table-state.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_lib_banks",
+      "label": "banks.ts",
+      "_origin": "ast",
+      "community": 21,
+      "community_name": "Button",
+      "file_type": "code",
+      "norm_label": "banks.ts",
+      "source_file": "src/lib/banks.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_logic_accounts",
+      "label": "accounts.ts",
+      "_origin": "ast",
+      "community": 21,
+      "community_name": "Button",
+      "file_type": "code",
+      "norm_label": "accounts.ts",
+      "source_file": "src/logic/accounts.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_logic_accounts_no_activity",
+      "label": "NO_ACTIVITY",
+      "_origin": "ast",
+      "community": 21,
+      "community_name": "Button",
+      "file_type": "code",
+      "norm_label": "no_activity",
+      "source_file": "src/logic/accounts.ts",
+      "source_location": "L53"
     },
     {
       "id": "src_logic_filter_params",
@@ -19246,6 +19378,17 @@
       "source_location": "L1"
     },
     {
+      "id": "src_components_record_amount",
+      "label": "record-amount.tsx",
+      "_origin": "ast",
+      "community": 31,
+      "community_name": "displays.tsx",
+      "file_type": "code",
+      "norm_label": "record-amount.tsx",
+      "source_file": "src/components/record-amount.tsx",
+      "source_location": "L1"
+    },
+    {
       "id": "src_components_selection_bar",
       "label": "selection-bar.tsx",
       "_origin": "ast",
@@ -19763,125 +19906,37 @@
       "source_location": "L5"
     },
     {
-      "id": "app_accounts_id_page",
-      "label": "accounts/[id]/page.tsx",
+      "id": "src_components_table_record_columns",
+      "label": "record-columns.tsx",
       "_origin": "ast",
       "community": 36,
-      "community_name": "allocator/page.tsx",
+      "community_name": "record-columns.tsx",
       "file_type": "code",
-      "norm_label": "accounts/[id]/page.tsx",
-      "source_file": "app/accounts/[id]/page.tsx",
+      "norm_label": "record-columns.tsx",
+      "source_file": "src/components/table/record-columns.tsx",
       "source_location": "L1"
     },
     {
-      "id": "app_accounts_page",
-      "label": "accounts/page.tsx",
+      "id": "src_components_ui_badge",
+      "label": "badge.tsx",
       "_origin": "ast",
       "community": 36,
-      "community_name": "allocator/page.tsx",
+      "community_name": "record-columns.tsx",
       "file_type": "code",
-      "norm_label": "accounts/page.tsx",
-      "source_file": "app/accounts/page.tsx",
+      "norm_label": "badge.tsx",
+      "source_file": "src/components/ui/badge.tsx",
       "source_location": "L1"
     },
     {
-      "id": "app_allocator_page",
-      "label": "allocator/page.tsx",
+      "id": "src_components_ui_badge_badgevariants",
+      "label": "badgeVariants",
       "_origin": "ast",
       "community": 36,
-      "community_name": "allocator/page.tsx",
+      "community_name": "record-columns.tsx",
       "file_type": "code",
-      "norm_label": "allocator/page.tsx",
-      "source_file": "app/allocator/page.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "app_statements_page",
-      "label": "statements/page.tsx",
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "allocator/page.tsx",
-      "file_type": "code",
-      "norm_label": "statements/page.tsx",
-      "source_file": "app/statements/page.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_hooks_use_paginated_table_state",
-      "label": "use-paginated-table-state.ts",
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "allocator/page.tsx",
-      "file_type": "code",
-      "norm_label": "use-paginated-table-state.ts",
-      "source_file": "src/hooks/use-paginated-table-state.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_lib_banks",
-      "label": "banks.ts",
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "allocator/page.tsx",
-      "file_type": "code",
-      "norm_label": "banks.ts",
-      "source_file": "src/lib/banks.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_lib_table_width_classnames",
-      "label": "table-width-classnames.ts",
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "allocator/page.tsx",
-      "file_type": "code",
-      "norm_label": "table-width-classnames.ts",
-      "source_file": "src/lib/table-width-classnames.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_lib_table_width_classnames_table_width_classnames",
-      "label": "TABLE_WIDTH_CLASSNAMES",
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "allocator/page.tsx",
-      "file_type": "code",
-      "norm_label": "table_width_classnames",
-      "source_file": "src/lib/table-width-classnames.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_logic_accounts",
-      "label": "accounts.ts",
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "allocator/page.tsx",
-      "file_type": "code",
-      "norm_label": "accounts.ts",
-      "source_file": "src/logic/accounts.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_logic_accounts_no_activity",
-      "label": "NO_ACTIVITY",
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "allocator/page.tsx",
-      "file_type": "code",
-      "norm_label": "no_activity",
-      "source_file": "src/logic/accounts.ts",
-      "source_location": "L53"
-    },
-    {
-      "id": "src_logic_pagination",
-      "label": "pagination.ts",
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "allocator/page.tsx",
-      "file_type": "code",
-      "norm_label": "pagination.ts",
-      "source_file": "src/logic/pagination.ts",
-      "source_location": "L1"
+      "norm_label": "badgevariants",
+      "source_file": "src/components/ui/badge.tsx",
+      "source_location": "L7"
     },
     {
       "id": "src_logic_statement_rules",
@@ -19983,6 +20038,17 @@
       "source_location": "L1"
     },
     {
+      "id": "src_components_charts_cashflow_chart",
+      "label": "cashflow-chart.tsx",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "(month)/page.tsx",
+      "file_type": "code",
+      "norm_label": "cashflow-chart.tsx",
+      "source_file": "src/components/charts/cashflow-chart.tsx",
+      "source_location": "L1"
+    },
+    {
       "id": "src_components_charts_category_movers",
       "label": "category-movers.tsx",
       "_origin": "ast",
@@ -19994,26 +20060,37 @@
       "source_location": "L1"
     },
     {
-      "id": "src_hooks_use_month_transition",
-      "label": "use-month-transition.ts",
+      "id": "src_components_charts_daily_spending_chart",
+      "label": "daily-spending-chart.tsx",
       "_origin": "ast",
       "community": 4,
       "community_name": "(month)/page.tsx",
       "file_type": "code",
-      "norm_label": "use-month-transition.ts",
-      "source_file": "src/hooks/use-month-transition.ts",
+      "norm_label": "daily-spending-chart.tsx",
+      "source_file": "src/components/charts/daily-spending-chart.tsx",
       "source_location": "L1"
     },
     {
-      "id": "src_hooks_use_month_transition_stale_month_class",
-      "label": "STALE_MONTH_CLASS",
+      "id": "src_components_charts_total_spending_chart",
+      "label": "total-spending-chart.tsx",
       "_origin": "ast",
       "community": 4,
       "community_name": "(month)/page.tsx",
       "file_type": "code",
-      "norm_label": "stale_month_class",
-      "source_file": "src/hooks/use-month-transition.ts",
-      "source_location": "L60"
+      "norm_label": "total-spending-chart.tsx",
+      "source_file": "src/components/charts/total-spending-chart.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_monthly_budget_badge",
+      "label": "monthly-budget-badge.tsx",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "(month)/page.tsx",
+      "file_type": "code",
+      "norm_label": "monthly-budget-badge.tsx",
+      "source_file": "src/components/monthly-budget-badge.tsx",
+      "source_location": "L1"
     },
     {
       "id": "src_hooks_use_staged_mount",
@@ -20025,6 +20102,39 @@
       "norm_label": "use-staged-mount.ts",
       "source_file": "src/hooks/use-staged-mount.ts",
       "source_location": "L1"
+    },
+    {
+      "id": "src_lib_chart_days",
+      "label": "chart-days.ts",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "(month)/page.tsx",
+      "file_type": "code",
+      "norm_label": "chart-days.ts",
+      "source_file": "src/lib/chart-days.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_lib_palette",
+      "label": "palette.ts",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "(month)/page.tsx",
+      "file_type": "code",
+      "norm_label": "palette.ts",
+      "source_file": "src/lib/palette.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_lib_palette_cache",
+      "label": "cache",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "(month)/page.tsx",
+      "file_type": "code",
+      "norm_label": "cache",
+      "source_file": "src/lib/palette.ts",
+      "source_location": "L8"
     },
     {
       "id": "app_layout",
@@ -20625,7 +20735,7 @@
       "label": "budget-records-sheet.tsx",
       "_origin": "ast",
       "community": 45,
-      "community_name": "record-columns.tsx",
+      "community_name": "amount-filter.tsx",
       "file_type": "code",
       "norm_label": "budget-records-sheet.tsx",
       "source_file": "src/components/sheets/budget-records-sheet.tsx",
@@ -20636,7 +20746,7 @@
       "label": "byRecordDay",
       "_origin": "ast",
       "community": 45,
-      "community_name": "record-columns.tsx",
+      "community_name": "amount-filter.tsx",
       "file_type": "code",
       "norm_label": "byrecordday",
       "source_file": "src/components/sheets/budget-records-sheet.tsx",
@@ -20647,7 +20757,7 @@
       "label": "pending-statement-confirmation.tsx",
       "_origin": "ast",
       "community": 45,
-      "community_name": "record-columns.tsx",
+      "community_name": "amount-filter.tsx",
       "file_type": "code",
       "norm_label": "pending-statement-confirmation.tsx",
       "source_file": "src/components/sheets/pending-statement-confirmation.tsx",
@@ -20658,7 +20768,7 @@
       "label": "record-search.tsx",
       "_origin": "ast",
       "community": 45,
-      "community_name": "record-columns.tsx",
+      "community_name": "amount-filter.tsx",
       "file_type": "code",
       "norm_label": "record-search.tsx",
       "source_file": "src/components/sheets/record-search.tsx",
@@ -20669,18 +20779,18 @@
       "label": "WIDEN",
       "_origin": "ast",
       "community": 45,
-      "community_name": "record-columns.tsx",
+      "community_name": "amount-filter.tsx",
       "file_type": "code",
       "norm_label": "widen",
       "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L21"
+      "source_location": "L22"
     },
     {
       "id": "src_components_sheets_records_sheet",
       "label": "records-sheet.tsx",
       "_origin": "ast",
       "community": 45,
-      "community_name": "record-columns.tsx",
+      "community_name": "amount-filter.tsx",
       "file_type": "code",
       "norm_label": "records-sheet.tsx",
       "source_file": "src/components/sheets/records-sheet.tsx",
@@ -20691,7 +20801,7 @@
       "label": "byRecordDay",
       "_origin": "ast",
       "community": 45,
-      "community_name": "record-columns.tsx",
+      "community_name": "amount-filter.tsx",
       "file_type": "code",
       "norm_label": "byrecordday",
       "source_file": "src/components/sheets/records-sheet.tsx",
@@ -20702,7 +20812,7 @@
       "label": "statement-search.tsx",
       "_origin": "ast",
       "community": 45,
-      "community_name": "record-columns.tsx",
+      "community_name": "amount-filter.tsx",
       "file_type": "code",
       "norm_label": "statement-search.tsx",
       "source_file": "src/components/sheets/statement-search.tsx",
@@ -20713,7 +20823,7 @@
       "label": "amount-filter.tsx",
       "_origin": "ast",
       "community": 45,
-      "community_name": "record-columns.tsx",
+      "community_name": "amount-filter.tsx",
       "file_type": "code",
       "norm_label": "amount-filter.tsx",
       "source_file": "src/components/table/amount-filter.tsx",
@@ -20724,51 +20834,18 @@
       "label": "COMPARISONS",
       "_origin": "ast",
       "community": 45,
-      "community_name": "record-columns.tsx",
+      "community_name": "amount-filter.tsx",
       "file_type": "code",
       "norm_label": "comparisons",
       "source_file": "src/components/table/amount-filter.tsx",
       "source_location": "L31"
     },
     {
-      "id": "src_components_table_record_columns",
-      "label": "record-columns.tsx",
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "record-columns.tsx",
-      "file_type": "code",
-      "norm_label": "record-columns.tsx",
-      "source_file": "src/components/table/record-columns.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_ui_badge",
-      "label": "badge.tsx",
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "record-columns.tsx",
-      "file_type": "code",
-      "norm_label": "badge.tsx",
-      "source_file": "src/components/ui/badge.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_ui_badge_badgevariants",
-      "label": "badgeVariants",
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "record-columns.tsx",
-      "file_type": "code",
-      "norm_label": "badgevariants",
-      "source_file": "src/components/ui/badge.tsx",
-      "source_location": "L7"
-    },
-    {
       "id": "src_components_ui_input",
       "label": "input.tsx",
       "_origin": "ast",
       "community": 45,
-      "community_name": "record-columns.tsx",
+      "community_name": "amount-filter.tsx",
       "file_type": "code",
       "norm_label": "input.tsx",
       "source_file": "src/components/ui/input.tsx",
@@ -20779,7 +20856,7 @@
       "label": "sheet.tsx",
       "_origin": "ast",
       "community": 45,
-      "community_name": "record-columns.tsx",
+      "community_name": "amount-filter.tsx",
       "file_type": "code",
       "norm_label": "sheet.tsx",
       "source_file": "src/components/ui/sheet.tsx",
@@ -20790,7 +20867,7 @@
       "label": "use-mobile.ts",
       "_origin": "ast",
       "community": 45,
-      "community_name": "record-columns.tsx",
+      "community_name": "amount-filter.tsx",
       "file_type": "code",
       "norm_label": "use-mobile.ts",
       "source_file": "src/hooks/use-mobile.ts",
@@ -20801,7 +20878,7 @@
       "label": "MOBILE_BREAKPOINT",
       "_origin": "ast",
       "community": 45,
-      "community_name": "record-columns.tsx",
+      "community_name": "amount-filter.tsx",
       "file_type": "code",
       "norm_label": "mobile_breakpoint",
       "source_file": "src/hooks/use-mobile.ts",
@@ -20812,7 +20889,7 @@
       "label": "dexie-react-hooks",
       "_origin": "ast",
       "community": 45,
-      "community_name": "record-columns.tsx",
+      "community_name": "amount-filter.tsx",
       "file_type": "concept",
       "norm_label": "dexie-react-hooks",
       "source_file": "package.json",
@@ -21314,44 +21391,22 @@
       "source_location": "L1"
     },
     {
-      "id": "app_allocator_duplicates_page",
-      "label": "duplicates/page.tsx",
+      "id": "app_allocator_page",
+      "label": "allocator/page.tsx",
       "_origin": "ast",
       "community": 5,
-      "community_name": "duplicates/page.tsx",
+      "community_name": "allocator/page.tsx",
       "file_type": "code",
-      "norm_label": "duplicates/page.tsx",
-      "source_file": "app/allocator/duplicates/page.tsx",
+      "norm_label": "allocator/page.tsx",
+      "source_file": "app/allocator/page.tsx",
       "source_location": "L1"
-    },
-    {
-      "id": "app_allocator_duplicates_page_card_motion",
-      "label": "CARD_MOTION",
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "duplicates/page.tsx",
-      "file_type": "code",
-      "norm_label": "card_motion",
-      "source_file": "app/allocator/duplicates/page.tsx",
-      "source_location": "L77"
-    },
-    {
-      "id": "app_allocator_duplicates_page_views",
-      "label": "VIEWS",
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "duplicates/page.tsx",
-      "file_type": "code",
-      "norm_label": "views",
-      "source_file": "app/allocator/duplicates/page.tsx",
-      "source_location": "L52"
     },
     {
       "id": "app_records_page",
       "label": "records/page.tsx",
       "_origin": "ast",
       "community": 5,
-      "community_name": "duplicates/page.tsx",
+      "community_name": "allocator/page.tsx",
       "file_type": "code",
       "norm_label": "records/page.tsx",
       "source_file": "app/records/page.tsx",
@@ -21362,10 +21417,21 @@
       "label": "settings/page.tsx",
       "_origin": "ast",
       "community": 5,
-      "community_name": "duplicates/page.tsx",
+      "community_name": "allocator/page.tsx",
       "file_type": "code",
       "norm_label": "settings/page.tsx",
       "source_file": "app/settings/page.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "app_statements_page",
+      "label": "statements/page.tsx",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "allocator/page.tsx",
+      "file_type": "code",
+      "norm_label": "statements/page.tsx",
+      "source_file": "app/statements/page.tsx",
       "source_location": "L1"
     },
     {
@@ -21373,7 +21439,7 @@
       "label": "select-field.tsx",
       "_origin": "ast",
       "community": 5,
-      "community_name": "duplicates/page.tsx",
+      "community_name": "allocator/page.tsx",
       "file_type": "code",
       "norm_label": "select-field.tsx",
       "source_file": "src/components/form/select-field.tsx",
@@ -21384,32 +21450,10 @@
       "label": "filter-bar.tsx",
       "_origin": "ast",
       "community": 5,
-      "community_name": "duplicates/page.tsx",
+      "community_name": "allocator/page.tsx",
       "file_type": "code",
       "norm_label": "filter-bar.tsx",
       "source_file": "src/components/table/filter-bar.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_table_filter_bar_filter_control_class",
-      "label": "FILTER_CONTROL_CLASS",
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "duplicates/page.tsx",
-      "file_type": "code",
-      "norm_label": "filter_control_class",
-      "source_file": "src/components/table/filter-bar.tsx",
-      "source_location": "L13"
-    },
-    {
-      "id": "src_components_table_pagination_header",
-      "label": "pagination-header.tsx",
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "duplicates/page.tsx",
-      "file_type": "code",
-      "norm_label": "pagination-header.tsx",
-      "source_file": "src/components/table/pagination-header.tsx",
       "source_location": "L1"
     },
     {
@@ -21417,10 +21461,43 @@
       "label": "select.tsx",
       "_origin": "ast",
       "community": 5,
-      "community_name": "duplicates/page.tsx",
+      "community_name": "allocator/page.tsx",
       "file_type": "code",
       "norm_label": "select.tsx",
       "source_file": "src/components/ui/select.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_lib_table_width_classnames",
+      "label": "table-width-classnames.ts",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "allocator/page.tsx",
+      "file_type": "code",
+      "norm_label": "table-width-classnames.ts",
+      "source_file": "src/lib/table-width-classnames.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_lib_table_width_classnames_table_width_classnames",
+      "label": "TABLE_WIDTH_CLASSNAMES",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "allocator/page.tsx",
+      "file_type": "code",
+      "norm_label": "table_width_classnames",
+      "source_file": "src/lib/table-width-classnames.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_logic_pagination",
+      "label": "pagination.ts",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "allocator/page.tsx",
+      "file_type": "code",
+      "norm_label": "pagination.ts",
+      "source_file": "src/logic/pagination.ts",
       "source_location": "L1"
     },
     {
@@ -21488,116 +21565,6 @@
       "norm_label": "duplicates.test.ts",
       "source_file": "tests/domain/duplicates.test.ts",
       "source_location": "L1"
-    },
-    {
-      "id": "src_components_charts_cashflow_chart",
-      "label": "cashflow-chart.tsx",
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "themeColor",
-      "file_type": "code",
-      "norm_label": "cashflow-chart.tsx",
-      "source_file": "src/components/charts/cashflow-chart.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_charts_category_spending_mix",
-      "label": "category-spending-mix.tsx",
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "themeColor",
-      "file_type": "code",
-      "norm_label": "category-spending-mix.tsx",
-      "source_file": "src/components/charts/category-spending-mix.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_charts_daily_spending_chart",
-      "label": "daily-spending-chart.tsx",
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "themeColor",
-      "file_type": "code",
-      "norm_label": "daily-spending-chart.tsx",
-      "source_file": "src/components/charts/daily-spending-chart.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_charts_total_spending_chart",
-      "label": "total-spending-chart.tsx",
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "themeColor",
-      "file_type": "code",
-      "norm_label": "total-spending-chart.tsx",
-      "source_file": "src/components/charts/total-spending-chart.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_monthly_budget_badge",
-      "label": "monthly-budget-badge.tsx",
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "themeColor",
-      "file_type": "code",
-      "norm_label": "monthly-budget-badge.tsx",
-      "source_file": "src/components/monthly-budget-badge.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_hooks_use_records_sheet",
-      "label": "use-records-sheet.ts",
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "themeColor",
-      "file_type": "code",
-      "norm_label": "use-records-sheet.ts",
-      "source_file": "src/hooks/use-records-sheet.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_hooks_use_records_sheet_filter_keys",
-      "label": "FILTER_KEYS",
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "themeColor",
-      "file_type": "code",
-      "norm_label": "filter_keys",
-      "source_file": "src/hooks/use-records-sheet.ts",
-      "source_location": "L6"
-    },
-    {
-      "id": "src_lib_chart_days",
-      "label": "chart-days.ts",
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "themeColor",
-      "file_type": "code",
-      "norm_label": "chart-days.ts",
-      "source_file": "src/lib/chart-days.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_lib_palette",
-      "label": "palette.ts",
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "themeColor",
-      "file_type": "code",
-      "norm_label": "palette.ts",
-      "source_file": "src/lib/palette.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_lib_palette_cache",
-      "label": "cache",
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "themeColor",
-      "file_type": "code",
-      "norm_label": "cache",
-      "source_file": "src/lib/palette.ts",
-      "source_location": "L8"
     },
     {
       "id": "package_optionaldependencies",
@@ -22511,17 +22478,6 @@
       "norm_label": "nextconfig",
       "source_file": "next.config.ts",
       "source_location": "L3"
-    },
-    {
-      "id": "src_components_table_statement_columns",
-      "label": "statement-columns.tsx",
-      "_origin": "ast",
-      "community": 67,
-      "community_name": "next",
-      "file_type": "code",
-      "norm_label": "statement-columns.tsx",
-      "source_file": "src/components/table/statement-columns.tsx",
-      "source_location": "L1"
     },
     {
       "id": "ref_next",
@@ -23567,6 +23523,28 @@
       "source_location": "L1"
     },
     {
+      "id": "src_components_layout_month_header_slot",
+      "label": "month-header-slot.tsx",
+      "_origin": "ast",
+      "community": 95,
+      "community_name": "app.tsx",
+      "file_type": "code",
+      "norm_label": "month-header-slot.tsx",
+      "source_file": "src/components/layout/month-header-slot.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_layout_month_header_slot_monthheaderslot",
+      "label": "MonthHeaderSlot",
+      "_origin": "ast",
+      "community": 95,
+      "community_name": "app.tsx",
+      "file_type": "code",
+      "norm_label": "monthheaderslot",
+      "source_file": "src/components/layout/month-header-slot.tsx",
+      "source_location": "L8"
+    },
+    {
       "id": "tests_harness_app",
       "label": "app.tsx",
       "_origin": "ast",
@@ -23600,6 +23578,17 @@
       "source_location": "L6"
     },
     {
+      "id": "ref_react_dom",
+      "label": "react-dom",
+      "_origin": "ast",
+      "community": 95,
+      "community_name": "app.tsx",
+      "file_type": "concept",
+      "norm_label": "react-dom",
+      "source_file": "package.json",
+      "source_location": "L37"
+    },
+    {
       "id": "app_month_layout",
       "label": "(month)/layout.tsx",
       "_origin": "ast",
@@ -23609,28 +23598,6 @@
       "norm_label": "(month)/layout.tsx",
       "source_file": "app/(month)/layout.tsx",
       "source_location": "L1"
-    },
-    {
-      "id": "src_components_layout_month_header_slot",
-      "label": "month-header-slot.tsx",
-      "_origin": "ast",
-      "community": 96,
-      "community_name": "(month)/layout.tsx",
-      "file_type": "code",
-      "norm_label": "month-header-slot.tsx",
-      "source_file": "src/components/layout/month-header-slot.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_layout_month_header_slot_monthheaderslot",
-      "label": "MonthHeaderSlot",
-      "_origin": "ast",
-      "community": 96,
-      "community_name": "(month)/layout.tsx",
-      "file_type": "code",
-      "norm_label": "monthheaderslot",
-      "source_file": "src/components/layout/month-header-slot.tsx",
-      "source_location": "L8"
     },
     {
       "id": "src_components_layout_month_header_slot_monthheaderslotprovider",
@@ -23655,6 +23622,50 @@
       "source_location": "L1"
     },
     {
+      "id": "src_hooks_use_month_transition",
+      "label": "use-month-transition.ts",
+      "_origin": "ast",
+      "community": 96,
+      "community_name": "(month)/layout.tsx",
+      "file_type": "code",
+      "norm_label": "use-month-transition.ts",
+      "source_file": "src/hooks/use-month-transition.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_hooks_use_month_transition_stale_month_class",
+      "label": "STALE_MONTH_CLASS",
+      "_origin": "ast",
+      "community": 96,
+      "community_name": "(month)/layout.tsx",
+      "file_type": "code",
+      "norm_label": "stale_month_class",
+      "source_file": "src/hooks/use-month-transition.ts",
+      "source_location": "L60"
+    },
+    {
+      "id": "src_hooks_use_records_sheet",
+      "label": "use-records-sheet.ts",
+      "_origin": "ast",
+      "community": 96,
+      "community_name": "(month)/layout.tsx",
+      "file_type": "code",
+      "norm_label": "use-records-sheet.ts",
+      "source_file": "src/hooks/use-records-sheet.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_hooks_use_records_sheet_filter_keys",
+      "label": "FILTER_KEYS",
+      "_origin": "ast",
+      "community": 96,
+      "community_name": "(month)/layout.tsx",
+      "file_type": "code",
+      "norm_label": "filter_keys",
+      "source_file": "src/hooks/use-records-sheet.ts",
+      "source_location": "L6"
+    },
+    {
       "id": "src_hooks_use_url_params",
       "label": "use-url-params.tsx",
       "_origin": "ast",
@@ -23664,17 +23675,6 @@
       "norm_label": "use-url-params.tsx",
       "source_file": "src/hooks/use-url-params.tsx",
       "source_location": "L1"
-    },
-    {
-      "id": "ref_react_dom",
-      "label": "react-dom",
-      "_origin": "ast",
-      "community": 96,
-      "community_name": "(month)/layout.tsx",
-      "file_type": "concept",
-      "norm_label": "react-dom",
-      "source_file": "package.json",
-      "source_location": "L37"
     },
     {
       "id": "src_data_export_import_sync_tables",
@@ -39707,7 +39707,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L241",
+      "source_location": "L243",
       "weight": 1.0
     },
     {
@@ -39719,7 +39719,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L247",
+      "source_location": "L249",
       "weight": 1.0
     },
     {
@@ -39731,7 +39731,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L253",
+      "source_location": "L255",
       "weight": 1.0
     },
     {
@@ -39743,7 +39743,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L258",
+      "source_location": "L260",
       "weight": 1.0
     },
     {
@@ -39755,7 +39755,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L263",
+      "source_location": "L265",
       "weight": 1.0
     },
     {
@@ -39767,7 +39767,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L284",
+      "source_location": "L286",
       "weight": 1.0
     },
     {
@@ -39779,7 +39779,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L287",
+      "source_location": "L289",
       "weight": 1.0
     },
     {
@@ -39791,7 +39791,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L100",
+      "source_location": "L101",
       "weight": 1.0
     },
     {
@@ -39803,7 +39803,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L113",
+      "source_location": "L114",
       "weight": 1.0
     },
     {
@@ -39815,7 +39815,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L114",
+      "source_location": "L115",
       "weight": 1.0
     },
     {
@@ -39827,7 +39827,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L115",
+      "source_location": "L116",
       "weight": 1.0
     },
     {
@@ -39839,7 +39839,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L116",
+      "source_location": "L117",
       "weight": 1.0
     },
     {
@@ -39851,7 +39851,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L117",
+      "source_location": "L118",
       "weight": 1.0
     },
     {
@@ -39863,7 +39863,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L118",
+      "source_location": "L119",
       "weight": 1.0
     },
     {
@@ -39875,7 +39875,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L123",
+      "source_location": "L124",
       "weight": 1.0
     },
     {
@@ -39887,7 +39887,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L126",
+      "source_location": "L127",
       "weight": 1.0
     },
     {
@@ -39899,7 +39899,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L141",
+      "source_location": "L142",
       "weight": 1.0
     },
     {
@@ -39911,7 +39911,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L155",
+      "source_location": "L156",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_sheets_record_search_recordsearchsheet",
+      "target": "src_components_table_filter_bar_filtercontrolclass",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/sheets/record-search.tsx",
+      "source_location": "L159",
       "weight": 1.0
     },
     {
@@ -39923,7 +39935,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L169",
+      "source_location": "L171",
       "weight": 1.0
     },
     {
@@ -39935,7 +39947,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L188",
+      "source_location": "L190",
       "weight": 1.0
     },
     {
@@ -39947,7 +39959,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L86",
+      "source_location": "L87",
       "weight": 1.0
     },
     {
@@ -40175,7 +40187,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/sheets/statement-search.tsx",
-      "source_location": "L245",
+      "source_location": "L247",
       "weight": 1.0
     },
     {
@@ -40187,7 +40199,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/sheets/statement-search.tsx",
-      "source_location": "L247",
+      "source_location": "L249",
       "weight": 1.0
     },
     {
@@ -40199,7 +40211,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/sheets/statement-search.tsx",
-      "source_location": "L252",
+      "source_location": "L254",
       "weight": 1.0
     },
     {
@@ -40211,7 +40223,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/sheets/statement-search.tsx",
-      "source_location": "L266",
+      "source_location": "L268",
       "weight": 1.0
     },
     {
@@ -40223,7 +40235,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/sheets/statement-search.tsx",
-      "source_location": "L291",
+      "source_location": "L293",
       "weight": 1.0
     },
     {
@@ -40235,7 +40247,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/sheets/statement-search.tsx",
-      "source_location": "L294",
+      "source_location": "L296",
       "weight": 1.0
     },
     {
@@ -40247,7 +40259,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/sheets/statement-search.tsx",
-      "source_location": "L103",
+      "source_location": "L104",
       "weight": 1.0
     },
     {
@@ -40259,7 +40271,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/sheets/statement-search.tsx",
-      "source_location": "L122",
+      "source_location": "L123",
       "weight": 1.0
     },
     {
@@ -40271,7 +40283,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/sheets/statement-search.tsx",
-      "source_location": "L123",
+      "source_location": "L124",
       "weight": 1.0
     },
     {
@@ -40283,7 +40295,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/sheets/statement-search.tsx",
-      "source_location": "L124",
+      "source_location": "L125",
       "weight": 1.0
     },
     {
@@ -40295,7 +40307,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/sheets/statement-search.tsx",
-      "source_location": "L125",
+      "source_location": "L126",
       "weight": 1.0
     },
     {
@@ -40307,7 +40319,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/sheets/statement-search.tsx",
-      "source_location": "L126",
+      "source_location": "L127",
       "weight": 1.0
     },
     {
@@ -40319,7 +40331,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/sheets/statement-search.tsx",
-      "source_location": "L127",
+      "source_location": "L128",
       "weight": 1.0
     },
     {
@@ -40331,7 +40343,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/sheets/statement-search.tsx",
-      "source_location": "L132",
+      "source_location": "L133",
       "weight": 1.0
     },
     {
@@ -40343,7 +40355,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/sheets/statement-search.tsx",
-      "source_location": "L135",
+      "source_location": "L136",
       "weight": 1.0
     },
     {
@@ -40355,7 +40367,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/sheets/statement-search.tsx",
-      "source_location": "L150",
+      "source_location": "L151",
       "weight": 1.0
     },
     {
@@ -40367,7 +40379,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/sheets/statement-search.tsx",
-      "source_location": "L164",
+      "source_location": "L165",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_sheets_statement_search_statementsearchsheet",
+      "target": "src_components_table_filter_bar_filtercontrolclass",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/sheets/statement-search.tsx",
+      "source_location": "L168",
       "weight": 1.0
     },
     {
@@ -40379,7 +40403,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/sheets/statement-search.tsx",
-      "source_location": "L178",
+      "source_location": "L180",
       "weight": 1.0
     },
     {
@@ -40391,7 +40415,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/sheets/statement-search.tsx",
-      "source_location": "L201",
+      "source_location": "L203",
       "weight": 1.0
     },
     {
@@ -40403,7 +40427,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/sheets/statement-search.tsx",
-      "source_location": "L71",
+      "source_location": "L72",
       "weight": 1.0
     },
     {
@@ -71550,7 +71574,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L16",
+      "source_location": "L17",
       "weight": 1.0
     },
     {
@@ -71562,7 +71586,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L16",
+      "source_location": "L17",
       "weight": 1.0
     },
     {
@@ -71574,7 +71598,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L16",
+      "source_location": "L17",
       "weight": 1.0
     },
     {
@@ -71586,7 +71610,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L16",
+      "source_location": "L17",
       "weight": 1.0
     },
     {
@@ -71598,7 +71622,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L16",
+      "source_location": "L17",
       "weight": 1.0
     },
     {
@@ -71610,7 +71634,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L16",
+      "source_location": "L17",
       "weight": 1.0
     },
     {
@@ -71622,7 +71646,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L17",
+      "source_location": "L18",
       "weight": 1.0
     },
     {
@@ -71634,7 +71658,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L17",
+      "source_location": "L18",
       "weight": 1.0
     },
     {
@@ -71663,7 +71687,7 @@
     },
     {
       "source": "src_components_sheets_record_search",
-      "target": "src_components_table_record_columns_recorddetails",
+      "target": "src_components_table_filter_bar_filtercontrolclass",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -71675,7 +71699,7 @@
     },
     {
       "source": "src_components_sheets_record_search",
-      "target": "src_components_ui_badge_badge",
+      "target": "src_components_table_record_columns_recorddetails",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -71687,7 +71711,7 @@
     },
     {
       "source": "src_components_sheets_record_search",
-      "target": "src_components_ui_button_button",
+      "target": "src_components_ui_badge_badge",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -71699,7 +71723,7 @@
     },
     {
       "source": "src_components_sheets_record_search",
-      "target": "src_components_ui_input_input",
+      "target": "src_components_ui_button_button",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -71711,7 +71735,7 @@
     },
     {
       "source": "src_components_sheets_record_search",
-      "target": "src_components_ui_sheet_sheet",
+      "target": "src_components_ui_input_input",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -71719,6 +71743,18 @@
       "context": "import",
       "source_file": "src/components/sheets/record-search.tsx",
       "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_sheets_record_search",
+      "target": "src_components_ui_sheet_sheet",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/sheets/record-search.tsx",
+      "source_location": "L9",
       "weight": 1.0
     },
     {
@@ -71730,7 +71766,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L8",
+      "source_location": "L9",
       "weight": 1.0
     },
     {
@@ -71742,7 +71778,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L8",
+      "source_location": "L9",
       "weight": 1.0
     },
     {
@@ -71754,7 +71790,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L8",
+      "source_location": "L9",
       "weight": 1.0
     },
     {
@@ -71766,7 +71802,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L8",
+      "source_location": "L9",
       "weight": 1.0
     },
     {
@@ -71778,7 +71814,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L8",
+      "source_location": "L9",
       "weight": 1.0
     },
     {
@@ -72030,7 +72066,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/sheets/statement-search.tsx",
-      "source_location": "L15",
+      "source_location": "L16",
       "weight": 1.0
     },
     {
@@ -72042,7 +72078,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/sheets/statement-search.tsx",
-      "source_location": "L15",
+      "source_location": "L16",
       "weight": 1.0
     },
     {
@@ -72054,7 +72090,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/sheets/statement-search.tsx",
-      "source_location": "L15",
+      "source_location": "L16",
       "weight": 1.0
     },
     {
@@ -72066,7 +72102,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/sheets/statement-search.tsx",
-      "source_location": "L15",
+      "source_location": "L16",
       "weight": 1.0
     },
     {
@@ -72078,7 +72114,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/sheets/statement-search.tsx",
-      "source_location": "L15",
+      "source_location": "L16",
       "weight": 1.0
     },
     {
@@ -72090,7 +72126,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/sheets/statement-search.tsx",
-      "source_location": "L15",
+      "source_location": "L16",
       "weight": 1.0
     },
     {
@@ -72102,7 +72138,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/sheets/statement-search.tsx",
-      "source_location": "L16",
+      "source_location": "L17",
       "weight": 1.0
     },
     {
@@ -72114,7 +72150,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/sheets/statement-search.tsx",
-      "source_location": "L16",
+      "source_location": "L17",
       "weight": 1.0
     },
     {
@@ -72131,7 +72167,7 @@
     },
     {
       "source": "src_components_sheets_statement_search",
-      "target": "src_components_ui_badge_badge",
+      "target": "src_components_table_filter_bar_filtercontrolclass",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -72143,7 +72179,7 @@
     },
     {
       "source": "src_components_sheets_statement_search",
-      "target": "src_components_ui_button_button",
+      "target": "src_components_ui_badge_badge",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -72155,7 +72191,7 @@
     },
     {
       "source": "src_components_sheets_statement_search",
-      "target": "src_components_ui_input_input",
+      "target": "src_components_ui_button_button",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -72167,7 +72203,7 @@
     },
     {
       "source": "src_components_sheets_statement_search",
-      "target": "src_components_ui_sheet_sheet",
+      "target": "src_components_ui_input_input",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -72175,6 +72211,18 @@
       "context": "import",
       "source_file": "src/components/sheets/statement-search.tsx",
       "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_sheets_statement_search",
+      "target": "src_components_ui_sheet_sheet",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/sheets/statement-search.tsx",
+      "source_location": "L8",
       "weight": 1.0
     },
     {
@@ -72186,7 +72234,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/sheets/statement-search.tsx",
-      "source_location": "L7",
+      "source_location": "L8",
       "weight": 1.0
     },
     {
@@ -72198,7 +72246,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/sheets/statement-search.tsx",
-      "source_location": "L7",
+      "source_location": "L8",
       "weight": 1.0
     },
     {
@@ -72210,7 +72258,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/sheets/statement-search.tsx",
-      "source_location": "L7",
+      "source_location": "L8",
       "weight": 1.0
     },
     {
@@ -72222,7 +72270,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/sheets/statement-search.tsx",
-      "source_location": "L7",
+      "source_location": "L8",
       "weight": 1.0
     },
     {
@@ -72234,7 +72282,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/sheets/statement-search.tsx",
-      "source_location": "L7",
+      "source_location": "L8",
       "weight": 1.0
     },
     {
@@ -93644,7 +93692,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L16",
+      "source_location": "L17",
       "weight": 1.0
     },
     {
@@ -93656,7 +93704,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L17",
+      "source_location": "L18",
       "weight": 1.0
     },
     {
@@ -93668,7 +93716,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L18",
+      "source_location": "L19",
       "type_only": true,
       "weight": 1.0
     },
@@ -93698,7 +93746,7 @@
     },
     {
       "source": "src_components_sheets_record_search",
-      "target": "src_components_table_record_columns",
+      "target": "src_components_table_filter_bar",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -93710,7 +93758,7 @@
     },
     {
       "source": "src_components_sheets_record_search",
-      "target": "src_components_ui_badge",
+      "target": "src_components_table_record_columns",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -93722,7 +93770,7 @@
     },
     {
       "source": "src_components_sheets_record_search",
-      "target": "src_components_ui_button",
+      "target": "src_components_ui_badge",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -93734,7 +93782,7 @@
     },
     {
       "source": "src_components_sheets_record_search",
-      "target": "src_components_ui_input",
+      "target": "src_components_ui_button",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -93746,7 +93794,7 @@
     },
     {
       "source": "src_components_sheets_record_search",
-      "target": "src_components_ui_sheet",
+      "target": "src_components_ui_input",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -93754,6 +93802,18 @@
       "context": "import",
       "source_file": "src/components/sheets/record-search.tsx",
       "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_sheets_record_search",
+      "target": "src_components_ui_sheet",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/sheets/record-search.tsx",
+      "source_location": "L9",
       "weight": 1.0
     },
     {
@@ -94006,7 +94066,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/sheets/statement-search.tsx",
-      "source_location": "L15",
+      "source_location": "L16",
       "weight": 1.0
     },
     {
@@ -94018,7 +94078,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/sheets/statement-search.tsx",
-      "source_location": "L16",
+      "source_location": "L17",
       "weight": 1.0
     },
     {
@@ -94030,7 +94090,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/sheets/statement-search.tsx",
-      "source_location": "L17",
+      "source_location": "L18",
       "type_only": true,
       "weight": 1.0
     },
@@ -94060,7 +94120,7 @@
     },
     {
       "source": "src_components_sheets_statement_search",
-      "target": "src_components_ui_badge",
+      "target": "src_components_table_filter_bar",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -94072,7 +94132,7 @@
     },
     {
       "source": "src_components_sheets_statement_search",
-      "target": "src_components_ui_button",
+      "target": "src_components_ui_badge",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -94084,7 +94144,7 @@
     },
     {
       "source": "src_components_sheets_statement_search",
-      "target": "src_components_ui_input",
+      "target": "src_components_ui_button",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -94096,7 +94156,7 @@
     },
     {
       "source": "src_components_sheets_statement_search",
-      "target": "src_components_ui_sheet",
+      "target": "src_components_ui_input",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -94104,6 +94164,18 @@
       "context": "import",
       "source_file": "src/components/sheets/statement-search.tsx",
       "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_sheets_statement_search",
+      "target": "src_components_ui_sheet",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/sheets/statement-search.tsx",
+      "source_location": "L8",
       "weight": 1.0
     },
     {
@@ -107470,7 +107542,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L21",
+      "source_location": "L22",
       "weight": 1.0
     },
     {
@@ -107481,7 +107553,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L224",
+      "source_location": "L226",
       "weight": 1.0
     },
     {
@@ -107492,7 +107564,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/sheets/record-search.tsx",
-      "source_location": "L36",
+      "source_location": "L37",
       "weight": 1.0
     },
     {
@@ -107525,7 +107597,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/sheets/statement-search.tsx",
-      "source_location": "L21",
+      "source_location": "L22",
       "weight": 1.0
     },
     {
@@ -107536,7 +107608,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/sheets/statement-search.tsx",
-      "source_location": "L236",
+      "source_location": "L238",
       "weight": 1.0
     },
     {
@@ -123689,5 +123761,5 @@
       "source_file": "tests/README.md"
     }
   ],
-  "built_at_commit": "d3f173270a6cf40859650920d71a44218bad218d"
+  "built_at_commit": "03c4fc1917fad373dfe2cd21765179433d62cd6c"
 }
