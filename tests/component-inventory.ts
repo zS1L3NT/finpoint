@@ -1614,7 +1614,6 @@ export const componentInventory: InventoryEntry[] = [
 			"SidebarMenuButton",
 			"SidebarMenuItem",
 			"SidebarProvider",
-			"SidebarRail",
 			"SidebarTrigger",
 		],
 		dormantExports: [
@@ -1627,6 +1626,7 @@ export const componentInventory: InventoryEntry[] = [
 			"SidebarMenuSub",
 			"SidebarMenuSubButton",
 			"SidebarMenuSubItem",
+			"SidebarRail",
 			"SidebarSeparator",
 		],
 		helperExports: ["useSidebar"],

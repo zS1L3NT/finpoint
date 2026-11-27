@@ -30,7 +30,7 @@ Each tier has one file per area. A file exists only if it has tests.
 | `sheets` | Search and confirmation sheets, held-IndexedDB loading, pending queue search | app |
 | `modals` | App modal surfaces, backdrops, dropdown and select scroll behaviour, exit fades (animations) | app |
 | `navigation` | Back button, history, browser traversal, workflow tabs | app |
-| `keyboard` | Keyboard-only flows, sidebar rail, chrome buttons | app |
+| `keyboard` | Keyboard-only flows, sidebar shortcut, chrome buttons | app |
 | `workflows` | Allocation, duplicates, importer, settings, sync, backup and reset | app |
 | `charts` | Chart values, tooltips, drills, containment, chart transitions (animations) | app |
 | `components` | Everything served by the Vite component harness | harness |

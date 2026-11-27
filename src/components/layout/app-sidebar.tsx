@@ -17,7 +17,6 @@ import {
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
-	SidebarRail,
 	useSidebar,
 } from "@/components/ui/sidebar"
 import { useHistory } from "@/history"
@@ -344,7 +343,6 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
 					<kbd className="font-sans">Ctrl/⌘ B</kbd> to collapse
 				</p>
 			</SidebarFooter>
-			<SidebarRail />
 		</Sidebar>
 	)
 }

@@ -80,25 +80,24 @@ test("chrome buttons: navigate months and create Records by keyboard, toggle the
 	})
 })
 
-test("sidebar rail: Enter collapses and Space expands the sidebar", {
+test("sidebar shortcut: Ctrl+B collapses and expands the sidebar with no rail handle in the shell", {
 	tag: ["@desktop-only"],
 }, async ({ page, isMobile }) => {
-	test.skip(isMobile, "Sidebar rail is desktop only; mobile has a separate trigger")
+	test.skip(isMobile, "The mobile Sidebar is a sheet opened by its trigger")
 	await page.goto("/records")
-	const rail = page.locator('[data-slot="sidebar-rail"]')
-	await expectPointerCursor(rail)
-	await rail.focus()
-	await page.keyboard.press("Enter")
-	await expect(page.locator('[data-slot="sidebar"]').first()).toHaveAttribute(
-		"data-state",
-		"collapsed",
-	)
-	await rail.focus()
-	await page.keyboard.press("Space")
-	await expect(page.locator('[data-slot="sidebar"]').first()).toHaveAttribute(
-		"data-state",
-		"expanded",
-	)
+	// The shortcut listener mounts in an effect; the rewritten history marker
+	// proves this document hydrated before the key press.
+	await page.evaluate(() => localStorage.removeItem("history"))
+	await page.reload()
+	await expect.poll(() => page.evaluate(() => localStorage.getItem("history"))).not.toBeNull()
+	const sidebar = page.locator('[data-slot="sidebar"]').first()
+	await expect(sidebar).toHaveAttribute("data-state", "expanded")
+	// The rail looked like a resize handle but only toggled the sidebar.
+	await expect(page.locator('[data-slot="sidebar-rail"]')).toHaveCount(0)
+	await page.keyboard.press("Control+b")
+	await expect(sidebar).toHaveAttribute("data-state", "collapsed")
+	await page.keyboard.press("Control+b")
+	await expect(sidebar).toHaveAttribute("data-state", "expanded")
 })
 
 // Allocator keyboard flows share one seed: none of them persist (dialogs and
