@@ -30,7 +30,6 @@ const titles: Record<string, string> = {
 }
 
 const routeReady: Record<string, string> = {
-	"/records": "Edit FairPrice Run",
 	"/accounts": "Rename Everyday Savings",
 	"/budgets": "Edit October Buffer",
 	"/categories": "Edit Groceries",
@@ -53,7 +52,9 @@ async function expectRouteLayout(page: Page, route: string, title: string) {
 			page.getByRole("link", { name: "Open FairPrice Run", exact: true }),
 		).toBeVisible()
 	if (route === "/statements" || route === "/allocator")
-		await expect(page.getByRole("link", { name: "Open statement" }).first()).toBeVisible()
+		await expect(
+			page.locator('a[href^="/statements/"]').filter({ visible: true }).first(),
+		).toBeVisible()
 	if (["/accounts", "/budgets", "/categories"].includes(route))
 		await expect(page.locator("main article").first()).toBeVisible()
 	if (route === "/")
@@ -83,6 +84,13 @@ async function expectRouteLayout(page: Page, route: string, title: string) {
 
 async function expectRouteButtons(page: Page, route: string) {
 	await expect(page.locator("main h2").first()).toBeVisible()
+	// Record rows carry no button of their own: the title link opens the Record.
+	if (route === "/records")
+		await expect(
+			page
+				.getByRole("link", { name: "Open FairPrice Run", exact: true })
+				.filter({ visible: true }),
+		).toBeVisible()
 	if (routeReady[route])
 		await expect(
 			page
@@ -239,16 +247,19 @@ test("Statement rules page: empty, populated and paused rules show conditions, a
 	for (let index = 0; index < 5; index++) await fits(page, cards.nth(index))
 })
 
-test("Statement rules page: the Plan Rules link opens it and pause, resume and delete persist after reload", async ({
+test("Statement rules page: the Settings tab opens it and pause, resume and delete persist after reload", async ({
 	page,
-	isMobile,
 }) => {
 	await seedWorkspace(page, "populated", { statement_rules: statementRules() })
 	await page.goto("/records")
-	// Tap at once: the mobile flag settles in a mount effect, and a tap before it
-	// must still open the mobile sheet rather than collapse the desktop sidebar.
-	if (isMobile) await page.locator('header [data-slot="sidebar-trigger"]').click()
-	await page.getByRole("link", { name: "Rules", exact: true }).filter({ visible: true }).click()
+	await page
+		.getByRole("navigation", { name: "Main", exact: true })
+		.getByRole("link", { name: "Settings", exact: true })
+		.click()
+	await page
+		.getByRole("navigation", { name: "Settings sections", exact: true })
+		.getByRole("link", { name: "Statement rules", exact: true })
+		.click()
 	await expect(page).toHaveURL(/\/statement-rules$/)
 	await expect(page.locator("header h1")).toHaveText("Statement rules")
 
@@ -694,12 +705,8 @@ test.describe("pinned 15 October 2026 date", () => {
 						for (const allocation of allocations)
 							await expect(
 								page
-									.getByRole("link", { name: "Open statement" })
-									.and(
-										page.locator(
-											`[href="/statements/${allocation.statement_id}"]`,
-										),
-									),
+									.locator(`a[href="/statements/${allocation.statement_id}"]`)
+									.filter({ visible: true }),
 							).toBeVisible()
 					if (key === "partialPending")
 						await expect(
@@ -1014,7 +1021,7 @@ test("Statement detail: long pending description stays readable on list and deta
 	await expect(row).toContainText(description)
 	await expect(row.getByText("Pending", { exact: true })).toBeVisible()
 	await fits(page, row)
-	await row.getByRole("link", { name: "Open statement", exact: true }).click()
+	await row.locator('a[href^="/statements/"]').click()
 	await expect(page.locator("main h2")).toContainText(description)
 	await expect(page.getByText("Status · Pending Statement", { exact: true })).toBeVisible()
 	await fits(page, page.locator("main h2"))

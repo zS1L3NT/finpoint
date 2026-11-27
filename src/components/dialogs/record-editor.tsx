@@ -10,8 +10,10 @@ import DatetimeField from "@/components/form/datetime-field"
 import RecordAnalyticsFields from "@/components/form/record-analytics-fields"
 import TextField from "@/components/form/text-field"
 import TextareaField from "@/components/form/textarea-field"
-import { UiIcon as IconifyIcon } from "@/components/icon"
+import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
+import RecordAmount from "@/components/record-amount"
 import StatementSearchSheet from "@/components/sheets/statement-search"
+import { PendingBadge } from "@/components/table/record-columns"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
@@ -64,6 +66,7 @@ export default function RecordEditorDialog({
 	isOpen,
 	setIsOpen: onOpenChange,
 	trigger,
+	container,
 }: {
 	record: Record
 	statements: (Statement & { pivot?: Allocation })[]
@@ -71,6 +74,8 @@ export default function RecordEditorDialog({
 	isOpen: boolean
 	setIsOpen: (isOpen: boolean) => void
 	trigger?: React.ReactElement
+	/** Where the dialog mounts: the sheet it was opened from, when there is one. */
+	container?: HTMLElement | null
 }) {
 	const { open, setIsOpen, onOpenChangeComplete } = useDialogCloseAnimation(isOpen, onOpenChange)
 	const { navigateBack } = useHistory()
@@ -269,12 +274,24 @@ export default function RecordEditorDialog({
 		>
 			{trigger && <DialogTrigger render={trigger} />}
 			{monthlyBudgets === undefined ? null : (
-				<DialogContent className="md:max-w-4xl">
-					<DialogHeader>
-						<DialogTitle>Edit Record</DialogTitle>
-						<DialogDescription>
-							Update the record details and its statement allocations.
-						</DialogDescription>
+				<DialogContent container={container} className="md:max-w-4xl">
+					<DialogHeader className="flex-row items-center gap-3 pr-8">
+						<Icon {...record.category} size={18} />
+						<div className="grid min-w-0 gap-0.5">
+							<DialogTitle className="text-xs font-medium text-muted-foreground">
+								Edit Record
+							</DialogTitle>
+							<p className="flex min-w-0 items-center gap-2 text-base font-semibold tracking-tight">
+								<span className="truncate">{record.title}</span>
+								<PendingBadge record={record} />
+							</p>
+							<DialogDescription className="flex min-w-0 items-center gap-x-1.5">
+								<RecordAmount record={record} showAccumulated={false} />
+								<span className="min-w-0 truncate">
+									· {formatDatetime(record.datetime)} · {record.category.name}
+								</span>
+							</DialogDescription>
+						</div>
 					</DialogHeader>
 
 					<DialogBody>

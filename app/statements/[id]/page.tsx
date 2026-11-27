@@ -31,13 +31,11 @@ export default function StatementPage({ params }: { params: Promise<{ id: string
 	const { editingRecord, handleEdit, setEditingRecord } = useRecordEditor()
 	const columns = useRecordColumns<Record & { pivot: Allocation }>({
 		amount: "allocated",
-		pageName: `Statement ${data?.id ?? ""}`,
-		onEdit: handleEdit,
+		onOpen: handleEdit,
 	})
 	const mobileRow = useRecordMobileRow<Record & { pivot: Allocation }>({
 		amount: "allocated",
-		pageName: `Statement ${data?.id ?? ""}`,
-		onEdit: handleEdit,
+		onOpen: handleEdit,
 	})
 
 	// undefined means the live query is still resolving; only null is genuinely missing.
@@ -140,6 +138,7 @@ export default function StatementPage({ params }: { params: Promise<{ id: string
 							data={records}
 							columns={columns}
 							mobileRow={mobileRow}
+							onRowClick={handleEdit}
 							emptyMessage="No records found."
 						/>
 					</CardContent>

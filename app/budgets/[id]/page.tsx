@@ -88,8 +88,7 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 
 	const recordColumns = useRecordColumns<Record>({
 		grouped: true,
-		pageName: `Budget ${budget?.id ?? ""}`,
-		onEdit: handleEdit,
+		onOpen: handleEdit,
 		extraActions: record => (
 			<Button
 				variant="ghost"
@@ -106,8 +105,7 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 	})
 	const recordMobileRow = useRecordMobileRow<Record>({
 		grouped: true,
-		pageName: `Budget ${budget?.id ?? ""}`,
-		onEdit: handleEdit,
+		onOpen: handleEdit,
 		extraActions: record => (
 			<Button
 				variant="ghost"
@@ -327,6 +325,7 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 							columns={recordColumns}
 							mobileRow={recordMobileRow}
 							groupBy={byDay<Record>("Record")}
+							onRowClick={handleEdit}
 							emptyMessage="No records found."
 						/>
 					</CardContent>

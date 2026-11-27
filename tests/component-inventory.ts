@@ -88,7 +88,7 @@ export const scenarioFamilies: Record<string, Record<string, string>> = {
 	},
 	shell: {
 		consumer:
-			"Verify shared shell/sidebar/theme/toasts or not-found behaviour through routes, stable month header and nonblocking query reveal",
+			"Verify shared shell/navigation/theme/toasts or not-found behaviour through routes, stable month header and nonblocking query reveal",
 	},
 	auth: {
 		boundary:
@@ -604,35 +604,7 @@ export const componentInventory: InventoryEntry[] = [
 		scenarios: ["indirect"],
 	},
 	{
-		path: "src/components/layout/app-header.tsx",
-		owner: "team3",
-		routes: [
-			"/statements/[id]",
-			"/statements",
-			"/budgets/[id]",
-			"/budgets",
-			"/accounts/[id]",
-			"/accounts",
-			"/allocator",
-			"/allocator/duplicates",
-			"/allocator/pending",
-			"/records/[id]",
-			"/records",
-			"/categories",
-			"/",
-			"/terms",
-			"/settings",
-			"/sync",
-			"/importer",
-			"/privacy",
-		],
-		visibleExports: ["default"],
-		dormantExports: [],
-		helperExports: [],
-		scenarios: ["display"],
-	},
-	{
-		path: "src/components/layout/app-sidebar.tsx",
+		path: "src/components/layout/app-nav.tsx",
 		owner: "team3",
 		routes: [
 			"/statements/[id]",
@@ -968,7 +940,7 @@ export const componentInventory: InventoryEntry[] = [
 		routes: ["/statements", "/accounts/[id]", "/allocator", "/records/[id]"],
 		visibleExports: [],
 		dormantExports: [],
-		helperExports: ["useStatementColumns", "useStatementMobileRow"],
+		helperExports: ["useOpenStatement", "useStatementColumns", "useStatementMobileRow"],
 		scenarios: ["table"],
 	},
 	{
@@ -1782,6 +1754,33 @@ export const componentInventory: InventoryEntry[] = [
 		helperExports: [],
 		scenarios: ["display"],
 	},
+	{
+		path: "src/components/tab-nav.tsx",
+		owner: "team3",
+		routes: [
+			"/allocator",
+			"/allocator/duplicates",
+			"/allocator/pending",
+			"/settings",
+			"/categories",
+			"/statement-rules",
+			"/importer",
+			"/sync",
+		],
+		visibleExports: ["default"],
+		dormantExports: [],
+		helperExports: [],
+		scenarios: ["display"],
+	},
+	{
+		path: "src/components/settings-tabs.tsx",
+		owner: "team3",
+		routes: ["/settings", "/categories", "/statement-rules", "/importer", "/sync"],
+		visibleExports: ["default"],
+		dormantExports: [],
+		helperExports: [],
+		scenarios: ["display"],
+	},
 ]
 
 export const routeInventory: RouteEntry[] = [
@@ -2131,12 +2130,16 @@ export const scenarioDescriptions: Record<string, string> = {
 		"Standalone and menu placeholders have visible bounded geometry; non-positional pulse changes opacity without moving or resizing the standalone placeholder under every motion preference",
 	"src/components/layout/page-header.tsx#display.interaction":
 		"Back control is above destination heading and restores exact category/record origin URLs",
+	"src/components/tab-nav.tsx#display.interaction":
+		"Keyboard Enter on a tab changes the page and marks that tab active, in both the Workflow views and the Settings sections",
+	"src/components/settings-tabs.tsx#display.interaction":
+		"Keyboard Enter opens General, Categories, Statement rules, Importer and Data from the Settings sections, each marked active while Settings stays current in the top navigation",
 	"src/components/workflow-tabs.tsx#display.interaction":
 		"Keyboard navigation changes Replace Pending, Fix Duplicates and Allocate destinations; returning to Allocate carries configured default start date",
-	"src/components/layout/app-sidebar.tsx#display.interaction":
-		"Visible sidebar Dashboard link navigates and clears drill history; header sidebar trigger toggles via keyboard (dialog on mobile)",
-	"src/components/layout/app-sidebar.tsx#export.default.behaviour":
-		"Visible sidebar Dashboard link navigates and clears drill history; header sidebar trigger toggles via keyboard (dialog on mobile)",
+	"src/components/layout/app-nav.tsx#display.interaction":
+		"Top navigation Dashboard link navigates and clears drill history; keyboard Enter opens Records and Settings and marks each active",
+	"src/components/layout/app-nav.tsx#export.default.behaviour":
+		"Top navigation Dashboard link navigates and clears drill history; keyboard Enter opens Records and Settings and marks each active",
 	"app/importer/page.tsx#route.data":
 		"Invalid CSV/workbook produces format errors without changing statements; valid import adds exactly one statement and repeat import adds none",
 	"app/settings/page.tsx#route.data":
@@ -2213,12 +2216,10 @@ export const scenarioDescriptions: Record<string, string> = {
 		"Statement pagination keeps search in the URL and changes row identity; search resets page and survives reload",
 	"src/components/table/statement-columns.tsx#table.rows":
 		"Populated/empty rows retain pending and duplicate badges, zero/signed amounts and allocable remainder; oversized description stays accessible and same-day signed subtotal reconciles; unsupported archive/null states have source reasons in facetNotApplicable",
-	"src/components/layout/app-header.tsx#display.values":
-		"Header h1 copy is asserted across all 19 layout routes and theme branches; reachable titles are fixed by ShellHeader.TITLES, so arbitrary entity-name h1 is inapplicable (facetNotApplicable)",
 	"src/components/layout/shell-header.tsx#display.values":
 		"Header h1 copy is asserted across all 19 layout routes and theme branches; ShellHeader.TITLES supplies fixed route labels, with no entity-name input (facetNotApplicable)",
-	"src/components/layout/app-sidebar.tsx#display.values":
-		"Finpoint/Local-first finance brand copy visible in the desktop sidebar and the mobile dialog via keyboard toggle",
+	"src/components/layout/app-nav.tsx#display.values":
+		"Finpoint brand link and the page links are visible in the top navigation, with the current page marked active",
 	"app/statements/page.tsx#route.navigation":
 		"Keyboard filtered list to detail with exact origin, Back above heading and keyboard return; pointer fallbacks covered separately",
 	"app/budgets/page.tsx#route.navigation":
@@ -2236,11 +2237,11 @@ export const scenarioDescriptions: Record<string, string> = {
 	"app/categories/page.tsx#route.navigation":
 		"Keyboard nested drill through filtered Records with two keyboard Back returns; no detail route exists by design",
 	"app/settings/page.tsx#route.navigation":
-		'Top-level sidebar destination (app-sidebar.tsx): Back exemption applies to that navigation. "settings keyboard save persists across reload" verifies date pick/save/reload; ordinary drill Back is covered by route-specific keyboard detail cases',
+		'Settings section reached from the top navigation (app-nav.tsx, settings-tabs.tsx): Back exemption applies to that navigation. "settings keyboard save persists across reload" verifies date pick/save/reload; ordinary drill Back is covered by route-specific keyboard detail cases',
 	"app/sync/page.tsx#route.navigation":
-		'Top-level sidebar destination (app-sidebar.tsx): Back exemption applies to that navigation. "sync keyboard clear cancelled preserves data" uses a visible-only Monthly Salary assertion on both responsive layouts; ordinary drill Back is covered by route-specific keyboard detail cases',
+		'Settings section reached from the top navigation (app-nav.tsx, settings-tabs.tsx): Back exemption applies to that navigation. "sync keyboard clear cancelled preserves data" uses a visible-only Monthly Salary assertion on both responsive layouts; ordinary drill Back is covered by route-specific keyboard detail cases',
 	"app/importer/page.tsx#route.navigation":
-		'Top-level sidebar destination (app-sidebar.tsx): Back exemption applies to that navigation. "importer keyboard bank select and invalid rejection" verifies bank radio/file chooser/rejection; ordinary drill Back is covered by route-specific keyboard detail cases',
+		'Settings section reached from the top navigation (app-nav.tsx, settings-tabs.tsx): Back exemption applies to that navigation. "importer keyboard bank select and invalid rejection" verifies bank radio/file chooser/rejection; ordinary drill Back is covered by route-specific keyboard detail cases',
 	"src/components/selection-bar.tsx#selection.state":
 		"Keyboard one-selection with dialog/cancel retention and clear, honestly disabled two-selection replace, small-viewport keyboard clear, and post-clear identity; no select-all header control exists by design",
 	"src/components/table/data-table.tsx#table.motion":
@@ -2812,13 +2813,13 @@ export const behaviourCoverage: Record<string, string[]> = {
 	"src/components/sheets/records-sheet.tsx#export.default.behaviour": [
 		"Category mix: drilldown carries Treatment and Category filters",
 		"monthly shell: header keeps DOM identity while the Records sheet opens and closes",
-		"Records sheet: a Record saved from its page shows in the sheet and survives reload",
+		"Records sheet: a Record saved from the sheet shows in it and survives reload",
 	],
 	"src/components/sheets/records-sheet.tsx#display.interaction": [
 		"Records sheet: a chart drill adds no Back, browser Back closes it and Forward reopens it",
 		"Records sheet: phones get a bottom sheet and wider screens a side sheet",
 		"Record lists: each Record shows its Monthly Budget under its title, not its category name",
-		"chart drill: nested Record returns to the open Records sheet",
+		"chart drill: a Record opens over the Records sheet and closes back to it",
 	],
 	"src/components/sheets/record-search.tsx#export.default.behaviour": [
 		"Record search sheet: handles query misses and hits, persists attachment, closes with Escape and reopens by click",
@@ -3605,13 +3606,34 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"facet skeleton: pulse changes opacity through frames while placeholder geometry stays stable",
 	],
 	"src/components/layout/page-header.tsx#export.default.behaviour": [
-		"Category drill: nested detail returns to exact filtered origins",
+		"Category drill: a Record opens over the filtered list and Back returns to Categories",
 	],
 	"src/components/layout/page-header.tsx#display.interaction": [
-		"Category drill: nested detail returns to exact filtered origins",
+		"Category drill: a Record opens over the filtered list and Back returns to Categories",
 	],
 	"src/components/layout/page-header.tsx#display.values": [
-		"Category drill: nested detail returns to exact filtered origins",
+		"Category drill: a Record opens over the filtered list and Back returns to Categories",
+	],
+	"src/components/tab-nav.tsx#export.default.behaviour": [
+		"workflow tabs: navigate by keyboard and Allocate keeps the default date filter",
+		"top navigation: keyboard opens a page, Settings and its sections",
+	],
+	"src/components/tab-nav.tsx#display.values": [
+		"workflow tabs: navigate by keyboard and Allocate keeps the default date filter",
+		"top navigation: keyboard opens a page, Settings and its sections",
+	],
+	"src/components/tab-nav.tsx#display.interaction": [
+		"workflow tabs: navigate by keyboard and Allocate keeps the default date filter",
+		"top navigation: keyboard opens a page, Settings and its sections",
+	],
+	"src/components/settings-tabs.tsx#export.default.behaviour": [
+		"top navigation: keyboard opens a page, Settings and its sections",
+	],
+	"src/components/settings-tabs.tsx#display.values": [
+		"top navigation: keyboard opens a page, Settings and its sections",
+	],
+	"src/components/settings-tabs.tsx#display.interaction": [
+		"top navigation: keyboard opens a page, Settings and its sections",
 	],
 	"src/components/workflow-tabs.tsx#export.default.behaviour": [
 		"workflow tabs: navigate by keyboard and Allocate keeps the default date filter",
@@ -3622,13 +3644,13 @@ export const behaviourCoverage: Record<string, string[]> = {
 	"src/components/workflow-tabs.tsx#display.interaction": [
 		"workflow tabs: navigate by keyboard and Allocate keeps the default date filter",
 	],
-	"src/components/layout/app-sidebar.tsx#export.default.behaviour": [
-		"sidebar: clears drill history",
-		"sidebar trigger: keyboard toggle opens and closes the sidebar",
+	"src/components/layout/app-nav.tsx#export.default.behaviour": [
+		"top navigation: clears drill history",
+		"top navigation: keyboard opens a page, Settings and its sections",
 	],
-	"src/components/layout/app-sidebar.tsx#display.interaction": [
-		"sidebar: clears drill history",
-		"sidebar trigger: keyboard toggle opens and closes the sidebar",
+	"src/components/layout/app-nav.tsx#display.interaction": [
+		"top navigation: clears drill history",
+		"top navigation: keyboard opens a page, Settings and its sections",
 	],
 	"app/(month)/layout.tsx#shell.consumer": [
 		"monthly shell: header keeps DOM identity while the Records sheet opens and closes",
@@ -3734,7 +3756,7 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"app/records/[id]/page.tsx#route.navigation": [
 		"direct Records detail: has a working fallback",
-		"Records list: keyboard filtered list to detail to Back keeps exact origin",
+		"Records list: keyboard opens the Record editor over the filtered list",
 	],
 	"app/statements/[id]/page.tsx#route.navigation": [
 		"direct Statements detail: has a working fallback",
@@ -3759,13 +3781,13 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"pending queue: keyboard replace and confirm replace the Pending Statement",
 	],
 	"app/records/page.tsx#route.navigation": [
-		"Records list: keyboard filtered list to detail to Back keeps exact origin",
+		"Records list: keyboard opens the Record editor over the filtered list",
 	],
 	"app/categories/page.tsx#route.navigation": [
 		"Categories drill: nested keyboard drill returns through exact origins",
 	],
 	"app/statement-rules/page.tsx#route.navigation": [
-		"Statement rules page: the Plan Rules link opens it and pause, resume and delete persist after reload",
+		"Statement rules page: the Settings tab opens it and pause, resume and delete persist after reload",
 	],
 	"app/settings/page.tsx#route.navigation": [
 		"settings: keyboard save of default filters persists across reload",
@@ -3794,32 +3816,6 @@ export const behaviourCoverage: Record<string, string[]> = {
 	"src/components/icons.ts#indirect.consumer": [
 		"icons: missing, invalid, prefixed and dynamic icons keep real SVG output and reserved size",
 	],
-	"src/components/layout/app-header.tsx#export.default.behaviour": [
-		"sidebar trigger: keyboard toggle opens and closes the sidebar",
-	],
-	"src/components/layout/app-header.tsx#display.interaction": [
-		"sidebar trigger: keyboard toggle opens and closes the sidebar",
-	],
-	"src/components/layout/app-header.tsx#display.values": [
-		"/ page: populated content and enabled controls stay inside the viewport",
-		"/records page: populated content and enabled controls stay inside the viewport",
-		"/statements page: populated content and enabled controls stay inside the viewport",
-		"/accounts page: populated content and enabled controls stay inside the viewport",
-		"/budgets page: populated content and enabled controls stay inside the viewport",
-		"/categories page: populated content and enabled controls stay inside the viewport",
-		"/allocator page: populated content and enabled controls stay inside the viewport",
-		"/allocator/pending page: populated content and enabled controls stay inside the viewport",
-		"/allocator/duplicates page: populated content and enabled controls stay inside the viewport",
-		"/importer page: populated content and enabled controls stay inside the viewport",
-		"/settings page: populated content and enabled controls stay inside the viewport",
-		"/sync page: populated content and enabled controls stay inside the viewport",
-		"/privacy page: populated content and enabled controls stay inside the viewport",
-		"/terms page: populated content and enabled controls stay inside the viewport",
-		"/accounts/t1-acc-dbs page: populated content and enabled controls stay inside the viewport",
-		"/budgets/t1-b-manual page: populated content and enabled controls stay inside the viewport",
-		"/records/t1-r-partial page: populated content and enabled controls stay inside the viewport",
-		"/statements/t1-s-pending page: populated content and enabled controls stay inside the viewport",
-	],
 	"src/components/layout/month-header-slot.tsx#export.MonthHeaderPortal.behaviour": [
 		"monthly shell: the scope picker sits beside the month navigation and still scopes the month",
 		"monthly shell: Pending review links sit under the month subtitle and still open the sheet",
@@ -3831,11 +3827,11 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"/privacy page: populated content and enabled controls stay inside the viewport",
 	],
 	"src/components/layout/shell-header.tsx#export.default.behaviour": [
-		"sidebar trigger: keyboard toggle opens and closes the sidebar",
+		"top navigation: keyboard opens a page, Settings and its sections",
 		"/privacy page: populated content and enabled controls stay inside the viewport",
 	],
 	"src/components/layout/shell-header.tsx#display.interaction": [
-		"sidebar trigger: keyboard toggle opens and closes the sidebar",
+		"top navigation: keyboard opens a page, Settings and its sections",
 	],
 	"src/components/layout/shell-header.tsx#display.values": [
 		"/ page: populated content and enabled controls stay inside the viewport",
@@ -3857,8 +3853,8 @@ export const behaviourCoverage: Record<string, string[]> = {
 		"/records/t1-r-partial page: populated content and enabled controls stay inside the viewport",
 		"/statements/t1-s-pending page: populated content and enabled controls stay inside the viewport",
 	],
-	"src/components/layout/app-sidebar.tsx#display.values": [
-		"sidebar trigger: keyboard toggle opens and closes the sidebar",
+	"src/components/layout/app-nav.tsx#display.values": [
+		"top navigation: keyboard opens a page, Settings and its sections",
 	],
 	"src/components/ui/alert.tsx#export.Alert.behaviour": [
 		"alerts: render both variants with title, description and action",
@@ -4347,7 +4343,7 @@ export const behaviourCoverage: Record<string, string[]> = {
 	],
 	"app/(month)/page.tsx#route.navigation": [
 		"monthly shell: header keeps DOM identity while the Records sheet opens and closes",
-		"sidebar: clears drill history",
+		"top navigation: clears drill history",
 	],
 	"app/layout.tsx#shell.consumer": [
 		"monthly shell: header keeps DOM identity while the Records sheet opens and closes",
@@ -4421,10 +4417,6 @@ export const openFacets: Record<string, string[]> = {}
 /** Source-backed exceptions within otherwise applicable scenarios. These do not
  * exempt the remaining facets or provide behavioural evidence. */
 export const facetNotApplicable: Record<string, Record<string, string>> = {
-	"src/components/layout/app-header.tsx#display.values": {
-		"arbitrary long h1":
-			"src/components/layout/shell-header.tsx TITLES supplies every reachable AppHeader title; no entity name or user text reaches h1. Real fixed titles are checked by route.layout cases.",
-	},
 	"src/components/layout/shell-header.tsx#display.values": {
 		"arbitrary long h1":
 			"src/components/layout/shell-header.tsx TITLES and Page not found fallback are fixed strings. Entity names render in PageHeader h2, covered separately by long Record/Statement cases.",
@@ -4591,10 +4583,9 @@ export const scenarioProjects: Record<
 	"src/components/value-swap.tsx#display.values": ["reduced-motion"],
 	"src/components/table/row-groups.tsx#table.rows": ["mobile"],
 	"src/components/ui/sidebar.tsx#primitive.consumer": ["mobile"],
-	"src/components/layout/app-sidebar.tsx#export.default.behaviour": ["mobile"],
-	"src/components/layout/app-sidebar.tsx#display.interaction": ["mobile"],
-	"src/components/layout/app-sidebar.tsx#display.values": ["mobile"],
-	"src/components/layout/app-header.tsx#display.interaction": ["reduced-motion"],
+	"src/components/layout/app-nav.tsx#export.default.behaviour": ["mobile"],
+	"src/components/layout/app-nav.tsx#display.interaction": ["mobile"],
+	"src/components/layout/app-nav.tsx#display.values": ["mobile"],
 	"src/components/layout/shell-header.tsx#display.interaction": ["reduced-motion"],
 	"src/components/dialogs/account.tsx#editor.long": ["mobile"],
 	"src/components/dialogs/budget-editor.tsx#editor.long": ["mobile"],
@@ -4781,11 +4772,9 @@ export const modalAnimationCoverage: Record<string, string[]> = {
 	"src/components/sheets/pending-statement-confirmation.tsx": [
 		"search sheets: every sheet animates in and out on dismissal and completion",
 	],
-	"src/components/table/amount-filter.tsx": [
-		"mobile modal sheets: sidebar and amount filter animate in and out",
-	],
+	"src/components/table/amount-filter.tsx": ["mobile amount filter sheet: animates in and out"],
 	"src/components/ui/sidebar.tsx": [
-		"mobile modal sheets: sidebar and amount filter animate in and out",
+		"mobile sidebar sheet: trigger and Escape animate in and out",
 	],
 	"src/components/ui/command.tsx": [
 		"modal primitives: dialog, sheet, command and alert animate in and out",

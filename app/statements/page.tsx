@@ -12,7 +12,11 @@ import AmountFilter from "@/components/table/amount-filter"
 import { ClearFiltersButton, FILTER_CONTROL_CLASS, FilterBar } from "@/components/table/filter-bar"
 import PaginatedDataTable from "@/components/table/paginated-data-table"
 import { byDay } from "@/components/table/row-groups"
-import { useStatementColumns, useStatementMobileRow } from "@/components/table/statement-columns"
+import {
+	useOpenStatement,
+	useStatementColumns,
+	useStatementMobileRow,
+} from "@/components/table/statement-columns"
 import { Button } from "@/components/ui/button"
 import {
 	Select,
@@ -89,6 +93,8 @@ export default function StatementsPage() {
 		onEdit: setEditingStatement,
 		grouped: true,
 	})
+
+	const openStatement = useOpenStatement("Statements")
 
 	if (accounts === undefined || statementsQuery === undefined) return null
 
@@ -228,6 +234,7 @@ export default function StatementsPage() {
 					}}
 					mobileRow={mobileRow}
 					groupBy={byDay<Statement>("Statement")}
+					onRowClick={openStatement}
 					emptyMessage="No statements found."
 					loading={statementsQuery === undefined}
 				/>

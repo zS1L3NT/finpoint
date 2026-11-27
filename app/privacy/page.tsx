@@ -42,7 +42,7 @@ const SECTIONS: { heading: string; body: string[] }[] = [
 			"Hosting: the app is served as static files. Our hosting provider necessarily processes standard connection data (such as IP address) to deliver the page, per its own privacy policy.",
 			"Usage telemetry: the app includes Vercel Analytics and Speed Insights, which collect aggregate, privacy-friendly telemetry such as pages visited and page-load performance. They do not receive your financial data. See Vercel's Privacy Policy for details.",
 			"Google scripts: connecting Drive sync loads Google's sign-in library from Google's servers; Google may process technical data per its policies at that point.",
-			"We use cookies for appearance, sidebar preferences, and optional Google Drive sign-in. We set no tracking cookies, run no ads, and sell no data.",
+			"We use cookies for appearance and optional Google Drive sign-in. We set no tracking cookies, run no ads, and sell no data.",
 		],
 	},
 	{

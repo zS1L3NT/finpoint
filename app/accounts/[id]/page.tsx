@@ -10,7 +10,11 @@ import PageHeader from "@/components/layout/page-header"
 import { Metric, MetricGrid } from "@/components/metric"
 import PaginatedDataTable from "@/components/table/paginated-data-table"
 import { byDay } from "@/components/table/row-groups"
-import { useStatementColumns, useStatementMobileRow } from "@/components/table/statement-columns"
+import {
+	useOpenStatement,
+	useStatementColumns,
+	useStatementMobileRow,
+} from "@/components/table/statement-columns"
 import { Button } from "@/components/ui/button"
 import { usePaginatedTableState } from "@/hooks/use-paginated-table-state"
 import { bankMeta } from "@/lib/banks"
@@ -49,6 +53,8 @@ export default function AccountPage({ params }: { params: Promise<{ id: string }
 		onEdit: setEditingStatement,
 		grouped: true,
 	})
+
+	const openStatement = useOpenStatement(`Account ${account?.name ?? ""}`)
 
 	// undefined means the live query is still resolving; only null is genuinely missing.
 	if (account === undefined) return null
@@ -134,6 +140,7 @@ export default function AccountPage({ params }: { params: Promise<{ id: string }
 					}}
 					mobileRow={mobileRow}
 					groupBy={byDay<Statement>("Statement")}
+					onRowClick={openStatement}
 					emptyMessage="No statements found."
 				/>
 			</PageContent>

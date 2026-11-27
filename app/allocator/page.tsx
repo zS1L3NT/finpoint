@@ -139,6 +139,7 @@ export default function AllocatorPage() {
 	const statementColumns = useStatementColumns<Statement>({
 		amount: "allocable",
 		pageName: "Allocator",
+		selectable: true,
 		grouped: true,
 	})
 	const toggleStatement = (statement: Statement) =>
@@ -150,6 +151,7 @@ export default function AllocatorPage() {
 	const statementMobileRow = useStatementMobileRow<Statement>({
 		amount: "allocable",
 		pageName: "Allocator",
+		selectable: true,
 		grouped: true,
 		leading: statement => (
 			<Checkbox

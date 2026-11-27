@@ -715,8 +715,10 @@ test("Record creator: validates required fields, applies Category defaults and p
 			await dialog.getByRole("button", { name: "Create Record", exact: true }).click()
 			await expect(dialog).not.toBeVisible()
 			await page.reload()
-			await page.getByRole("link", { name: `Open ${text.trim()}`, exact: true }).click()
-			await page.getByRole("button", { name: "Edit Record", exact: true }).click()
+			await page
+				.getByRole("link", { name: `Open ${text.trim()}`, exact: true })
+				.filter({ visible: true })
+				.click()
 			const update = page.getByRole("dialog", { name: "Edit Record" })
 			await expect(update.getByLabel("Amount", { exact: true }).first()).toHaveValue(amount)
 			await expect(update.getByLabel("Description", { exact: true })).toHaveValue(
@@ -1031,22 +1033,22 @@ test.describe("empty workspace", () => {
 	})
 })
 
-test("Records sheet: a Record saved from its page shows in the sheet and survives reload", async ({
+test("Records sheet: a Record saved from the sheet shows in it and survives reload", async ({
 	page,
 	workspace,
 }) => {
 	void workspace
 	await page.goto("/?month=October&year=2026&records=1")
 	const sheet = page.getByRole("dialog", { name: "Records", exact: true })
-	await sheet.getByRole("link", { name: "Open FairPrice Run", exact: true }).click()
-	await expect(page).toHaveURL(/\/records\/t1-r-groceries$/)
-	await page.getByRole("button", { name: "Edit Record", exact: true }).click()
+	await sheet
+		.getByRole("link", { name: "Open FairPrice Run", exact: true })
+		.filter({ visible: true })
+		.click()
 	const dialog = page.getByRole("dialog", { name: "Edit Record", exact: true })
 	await dialog.getByLabel("Title", { exact: true }).fill("Updated groceries")
 	await dialog.getByLabel("Title", { exact: true }).press("Escape")
 	await dialog.getByRole("button", { name: "Save changes", exact: true }).click()
 	await expect(dialog).not.toBeVisible()
-	await page.getByRole("button", { name: "Back to Dashboard", exact: true }).click()
 	const updated = sheet
 		.getByRole("link", { name: "Open Updated groceries", exact: true })
 		.filter({ visible: true })

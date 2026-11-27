@@ -12,8 +12,9 @@ import { ScrollBar } from "@/components/ui/scroll-area"
 function Dialog({ onOpenChange, ...props }: DialogPrimitive.Root.Props) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} onOpenChange={(open, details) => {
     // Radix sheets are portalled outside the Base UI dialog tree. Let the
-    // focused sheet handle Escape before closing its underlying editor.
-    if (!open && details.reason === "escape-key" && details.event.target instanceof Element && details.event.target.closest('[data-slot="sheet-content"]')) {
+    // focused sheet handle Escape before closing its underlying editor. A dialog
+    // mounted inside a sheet is nearer the focus than that sheet, and closes itself.
+    if (!open && details.reason === "escape-key" && details.event.target instanceof Element && details.event.target.closest('[data-slot="sheet-content"], [data-slot="dialog-content"]')?.getAttribute("data-slot") === "sheet-content") {
       details.cancel()
       details.allowPropagation()
       return
@@ -54,12 +55,15 @@ function DialogContent({
   className,
   children,
   showCloseButton = true,
+  container,
   ...props
 }: DialogPrimitive.Popup.Props & {
   showCloseButton?: boolean
+  /** Portal target. A dialog opened from a Radix sheet mounts inside it, so the sheet's focus trap and pointer lock include the dialog. */
+  container?: DialogPrimitive.Portal.Props["container"]
 }) {
   return (
-    <DialogPortal>
+    <DialogPortal container={container}>
       <DialogOverlay />
       <DialogPrimitive.Popup
         data-slot="dialog-content"

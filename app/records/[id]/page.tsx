@@ -11,7 +11,11 @@ import PageHeader from "@/components/layout/page-header"
 import MonthlyBudgetBadge from "@/components/monthly-budget-badge"
 import RecordAmount from "@/components/record-amount"
 import DataTable from "@/components/table/data-table"
-import { useStatementColumns, useStatementMobileRow } from "@/components/table/statement-columns"
+import {
+	useOpenStatement,
+	useStatementColumns,
+	useStatementMobileRow,
+} from "@/components/table/statement-columns"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -41,6 +45,8 @@ export default function RecordPage({ params }: { params: Promise<{ id: string }>
 		pageName: `Record ${data?.id ?? ""}`,
 		onEdit: setEditingStatement,
 	})
+
+	const openStatement = useOpenStatement(`Record ${data?.id ?? ""}`)
 
 	// undefined means the live query is still resolving; only null is genuinely missing.
 	if (data === undefined || accounts === undefined) return null
@@ -149,6 +155,7 @@ export default function RecordPage({ params }: { params: Promise<{ id: string }>
 							data={statements}
 							columns={columns}
 							mobileRow={mobileRow}
+							onRowClick={openStatement}
 							emptyMessage="No statements found."
 						/>
 					</CardContent>

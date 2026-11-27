@@ -53,7 +53,12 @@ export function UrlParamsProvider({ children }: { children: React.ReactNode }) {
 		const abandon = (event: MouseEvent) => {
 			if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey) return
 			const link = event.target instanceof Element ? event.target.closest("a[href]") : null
-			if (!link || link.getAttribute("target") === "_blank") return
+			if (
+				!link ||
+				link.getAttribute("target") === "_blank" ||
+				link.hasAttribute("data-opens-in-place")
+			)
+				return
 			waiting.current = null
 			head.current = null
 		}

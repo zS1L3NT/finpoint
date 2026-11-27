@@ -9,30 +9,7 @@ import {
 	poseIsIdentity,
 	sampleVisibleRowAnimations,
 } from "../support/motion"
-import { type MotionConsumer, openMobileSidebarFromConsumerMotion } from "../support/tables"
-
-// Mobile sidebar taps race hydration: useIsMobile() starts false and flips in
-// a mount effect, so a tap before that commit toggles the invisible desktop
-// state and nothing opens. localStorage.history survives reloads and gotos,
-// so a pre-existing marker proves nothing about the current mount — clear it
-// and reload first; the rewritten marker then proves THIS document hydrated
-// (the history provider wraps the sidebar's, so both mount effects commit in
-// the same pass). Retry the tap boundedly for swallowed taps under load. A
-// permanently absent sheet still fails the dialog check below, and the
-// subsequent visible-link wait keeps its own strict proof.
-async function openMobileSidebarFromTableUpdates(page: Page) {
-	await page.evaluate(() => localStorage.removeItem("history"))
-	await page.reload()
-	await expect.poll(() => page.evaluate(() => localStorage.getItem("history"))).not.toBeNull()
-	await expect.poll(() => page.evaluate(() => localStorage.getItem("history"))).not.toBeNull()
-	const trigger = page.locator('header [data-slot="sidebar-trigger"]')
-	for (let attempt = 0; attempt < 3; attempt++) {
-		await trigger.click()
-		await page.waitForTimeout(500)
-		if ((await page.getByRole("dialog").count()) > 0) break
-	}
-	await expect(page.getByRole("dialog")).toBeVisible()
-}
+import type { MotionConsumer } from "../support/tables"
 
 const recordRows =
 	'main table:has(a[href^="/records/"]) tbody tr:has(a[href^="/records/"]), main div:has(> div.grid-cols-subgrid a[href^="/records/"]) > div.grid-cols-subgrid:has(a[href^="/records/"])'
@@ -43,7 +20,7 @@ const denseRowConsumers: MotionConsumer[] = [
 	{
 		name: "Records",
 		origin: "/accounts",
-		action: "sidebar",
+		action: "nav",
 		target: "Records",
 		selector: recordRows,
 		dense: true,
@@ -51,7 +28,7 @@ const denseRowConsumers: MotionConsumer[] = [
 	{
 		name: "Statements",
 		origin: "/accounts",
-		action: "sidebar",
+		action: "nav",
 		target: "Statements",
 		selector: statementRows,
 		dense: true,
@@ -88,7 +65,7 @@ const denseRowConsumers: MotionConsumer[] = [
 	{
 		name: "Allocate",
 		origin: "/accounts",
-		action: "sidebar",
+		action: "nav",
 		target: "Workflows",
 		selector: statementRows,
 		dense: true,
@@ -178,11 +155,8 @@ async function expectConsumerEntrance(page: Page, consumer: MotionConsumer, isMo
 		await setDateOnly(page, new Date("2026-09-15T12:00:00+08:00"))
 	await page.goto(consumer.origin)
 	await expect(page.locator("main h2").first()).toBeVisible()
-	if (consumer.action === "sidebar" && isMobile) {
-		await openMobileSidebarFromConsumerMotion(page)
-	}
 	const samples = await sampleVisibleRowAnimations(page, consumer.selector, async () => {
-		if (consumer.action === "sidebar")
+		if (consumer.action === "nav")
 			await page
 				.getByRole("link", { name: consumer.target, exact: true })
 				.filter({ visible: true })
@@ -198,7 +172,7 @@ async function expectConsumerEntrance(page: Page, consumer: MotionConsumer, isMo
 			await page.getByRole("heading", { name: consumer.target, exact: true }).click()
 		else if (consumer.action === "statement")
 			await page
-				.getByRole("link", { name: "Open statement" })
+				.locator('a[href^="/statements/"]')
 				.and(page.locator(`[href="/statements/${consumer.target}"]`))
 				.click()
 		else if (consumer.action === "view") {
@@ -636,7 +610,6 @@ test("Records table: visible day headers enter with their grouped Records", {
 }, async ({ page, isMobile }) => {
 	await seedWorkspace(page, "dense")
 	await page.goto("/accounts")
-	if (isMobile) await openMobileSidebarFromTableUpdates(page)
 	const samples = await sampleVisibleRowAnimations(
 		page,
 		'tbody tr:not(:has(a[href^="/records/"])), div.grid-cols-subgrid:not(:has(a[href^="/records/"]))',

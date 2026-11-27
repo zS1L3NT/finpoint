@@ -183,21 +183,14 @@ test.describe("pinned 15 October 2026 date", () => {
 				await expect(
 					page.getByRole("link", { name: "Go to previous page" }),
 				).toHaveAttribute("aria-disabled", "true")
-				const first = await page
-					.getByRole("link", {
-						name: noun === "record" ? /^Open Dense Record/ : "Open statement",
-					})
+				const rowLink = page
+					.locator(`a[href^="/${noun}s/"]`)
+					.filter({ visible: true })
 					.first()
-					.getAttribute("href")
+				const first = await rowLink.getAttribute("href")
 				await page.getByRole("link", { name: "Go to next page" }).click()
 				await expect(page).toHaveURL(/page=2/)
-				await expect(
-					page
-						.getByRole("link", {
-							name: noun === "record" ? /^Open Dense Record/ : "Open statement",
-						})
-						.first(),
-				).not.toHaveAttribute("href", first ?? "")
+				await expect(rowLink).not.toHaveAttribute("href", first ?? "")
 				await page.getByPlaceholder(search).fill("Dense Record 1")
 				await expect(page).toHaveURL(/query=Dense(?:\+|%20)Record(?:\+|%20)1/)
 				await expect(page).not.toHaveURL(/page=2/)
@@ -340,7 +333,9 @@ test("Records lists: later and future Records keep amounts and drills, long Reco
 		await expect(page.getByText("No Records have been entered for this month.")).toHaveCount(0)
 		await future.focus()
 		await page.keyboard.press("Enter")
-		await expect(page).toHaveURL(new RegExp(`/records/${IDS.records.unicode}$`))
+		// The Record opens over the sheet it is listed in.
+		await expect(page.getByRole("dialog", { name: "Edit Record", exact: true })).toBeVisible()
+		await expect(page).toHaveURL(/month=November&year=2026&records=1$/)
 	})
 	await test.step("Records table: long title and optional Record values survive list drill and reload", async () => {
 		const title = `Record 早餐 café ${"long value ".repeat(8)}`.trim()
@@ -362,8 +357,19 @@ test("Records lists: later and future Records keep amounts and drills, long Reco
 		await expect(row).toContainText("-$33.33")
 		await open.focus()
 		await page.keyboard.press("Enter")
-		await expect(page).toHaveURL(new RegExp(`/records/${IDS.records.unicode}$`))
+		const editor = page.getByRole("dialog", { name: "Edit Record", exact: true })
+		await expect(editor).toContainText(title)
+		for (const [label, value] of [
+			["Title", title],
+			["People", people],
+			["Location", location],
+			["Description", description],
+		] as const)
+			await expect(editor.getByLabel(label, { exact: true })).toHaveValue(value)
+		await fits(page, editor.getByRole("button", { name: "Save changes", exact: true }))
 		await page.reload()
+		await expect(row).toContainText(title)
+		await page.goto(`/records/${IDS.records.unicode}`)
 		await expect(page.locator("main h2")).toContainText(title)
 		for (const value of [people, location, description])
 			await expect(page.locator("main")).toContainText(value)
@@ -486,7 +492,7 @@ test("Statement cells: retain pending, Allocation, zero and signed amount meanin
 		const statement = added[id] ?? data.statements.find(row => row.id === id)
 		if (!statement) throw new Error(`Missing fixture ${id}`)
 		const link = page
-			.getByRole("link", { name: "Open statement", exact: true })
+			.locator('a[href^="/statements/"]')
 			.and(page.locator(`[href="/statements/${id}"]`))
 			.filter({ visible: true })
 		const row = link.locator(

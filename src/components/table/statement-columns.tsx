@@ -1,5 +1,6 @@
 import type { CellContext, ColumnDef, Row } from "@tanstack/react-table"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useMemo } from "react"
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import { amountTone, formatRowTime } from "@/components/table/record-columns"
@@ -15,7 +16,10 @@ type StatementRow = Statement & { pivot?: Allocation }
 type StatementTableOptions<TStatement extends StatementRow> = {
 	amount?: "amount" | "allocable" | "allocated"
 	showAccount?: boolean
+	/** Names this page on the Statement page's Back button. */
 	pageName?: string
+	/** Row clicks select instead of opening, so the title stays plain and an Open button is shown. */
+	selectable?: boolean
 	onEdit?: (statement: TStatement) => void
 	/** Rows sit under day headers, so only the time is shown. */
 	grouped?: boolean
@@ -84,6 +88,39 @@ function StatementAmount({
 	)
 }
 
+/** Opens a Statement's page from a row click. Pass it as the table's `onRowClick`. */
+export function useOpenStatement(pageName?: string) {
+	const router = useRouter()
+	const { handlePush } = useHistory()
+	return (statement: Statement) => {
+		if (pageName) handlePush(pageName)()
+		router.push(pathStatement(statement.id))
+	}
+}
+
+/** The Statement's description. Outside selectable tables it links to the Statement page. */
+function StatementTitle({
+	statement,
+	options,
+}: {
+	statement: Statement
+	options: Pick<StatementTableOptions<StatementRow>, "pageName" | "selectable">
+}) {
+	const { handlePush } = useHistory()
+	const description = statement.description || "No description"
+	if (options.selectable)
+		return <span className="min-w-0 truncate font-medium">{description}</span>
+	return (
+		<Link
+			href={pathStatement(statement.id)}
+			className="min-w-0 truncate rounded-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+			onClick={options.pageName ? handlePush(options.pageName) : undefined}
+		>
+			{description}
+		</Link>
+	)
+}
+
 function StatementActions<TStatement extends StatementRow>({
 	statement,
 	options,
@@ -92,7 +129,7 @@ function StatementActions<TStatement extends StatementRow>({
 	options: StatementTableOptions<TStatement>
 }) {
 	const { handlePush } = useHistory()
-	const { pageName, onEdit } = options
+	const { pageName, selectable, onEdit } = options
 	return (
 		<div className="flex shrink-0 items-center justify-end gap-0.5">
 			{onEdit && statement.is_pending ? (
@@ -106,15 +143,17 @@ function StatementActions<TStatement extends StatementRow>({
 					<IconifyIcon icon="lucide:pencil" />
 				</Button>
 			) : null}
-			<Button variant="ghost" size="icon-sm" title="Open" asChild>
-				<Link
-					href={pathStatement(statement.id)}
-					aria-label="Open statement"
-					onClick={pageName ? handlePush(pageName) : undefined}
-				>
-					<IconifyIcon icon="lucide:chevron-right" />
-				</Link>
-			</Button>
+			{selectable ? (
+				<Button variant="ghost" size="icon-sm" title="Open statement" asChild>
+					<Link
+						href={pathStatement(statement.id)}
+						aria-label="Open statement"
+						onClick={pageName ? handlePush(pageName) : undefined}
+					>
+						<IconifyIcon icon="lucide:arrow-up-right" />
+					</Link>
+				</Button>
+			) : null}
 		</div>
 	)
 }
@@ -133,6 +172,7 @@ export function useStatementColumns<TStatement extends StatementRow>({
 	amount = "amount",
 	showAccount = true,
 	pageName,
+	selectable,
 	onEdit,
 	grouped = false,
 }: StatementTableOptions<TStatement>): ColumnDef<TStatement>[] {
@@ -143,9 +183,10 @@ export function useStatementColumns<TStatement extends StatementRow>({
 				cell: ({ row }) => (
 					<div className="min-w-0">
 						<p className="flex items-center gap-1.5">
-							<span className="min-w-0 truncate font-medium">
-								{row.original.description || "No description"}
-							</span>
+							<StatementTitle
+								statement={row.original}
+								options={{ pageName, selectable }}
+							/>
 							<StatementBadges
 								statement={row.original}
 								showUnallocated={amount !== "allocable"}
@@ -175,16 +216,20 @@ export function useStatementColumns<TStatement extends StatementRow>({
 				meta: { width: "w-40" },
 				cell: ({ row }) => <StatementAmount statement={row.original} amount={amount} />,
 			},
-			{
-				id: "actions",
-				meta: {
-					statementActions: { pageName, onEdit },
-					width: onEdit ? "w-24" : "w-14",
-				},
-				cell: StatementActionsCell,
-			},
+			...(selectable || onEdit
+				? [
+						{
+							id: "actions",
+							meta: {
+								statementActions: { pageName, selectable, onEdit },
+								width: "w-14",
+							},
+							cell: StatementActionsCell,
+						},
+					]
+				: []),
 		],
-		[amount, showAccount, pageName, onEdit, grouped],
+		[amount, showAccount, pageName, selectable, onEdit, grouped],
 	)
 }
 
@@ -192,6 +237,7 @@ export function useStatementMobileRow<TStatement extends StatementRow>({
 	amount = "amount",
 	showAccount = true,
 	pageName,
+	selectable,
 	leading,
 	onEdit,
 	grouped = false,
@@ -209,9 +255,10 @@ export function useStatementMobileRow<TStatement extends StatementRow>({
 						{leading?.(statement)}
 						<div className="min-w-0 flex-1">
 							<p className="flex items-center gap-1.5">
-								<span className="min-w-0 truncate font-medium">
-									{statement.description || "No description"}
-								</span>
+								<StatementTitle
+									statement={statement}
+									options={{ pageName, selectable }}
+								/>
 								<StatementBadges
 									statement={statement}
 									showUnallocated={amount !== "allocable"}
@@ -225,10 +272,13 @@ export function useStatementMobileRow<TStatement extends StatementRow>({
 						</div>
 					</div>
 					<StatementAmount statement={statement} amount={amount} />
-					<StatementActions statement={statement} options={{ pageName, onEdit }} />
+					<StatementActions
+						statement={statement}
+						options={{ pageName, selectable, onEdit }}
+					/>
 				</>
 			)
 		},
-		[amount, showAccount, pageName, leading, onEdit, grouped],
+		[amount, showAccount, pageName, selectable, leading, onEdit, grouped],
 	)
 }

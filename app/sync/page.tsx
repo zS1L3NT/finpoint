@@ -8,6 +8,7 @@ import DriveOverwriteConfirmation from "@/components/dialogs/drive-overwrite-con
 import { UiIcon as IconifyIcon } from "@/components/icon"
 import PageContent from "@/components/layout/page-content"
 import PageHeader from "@/components/layout/page-header"
+import SettingsTabs from "@/components/settings-tabs"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -432,6 +433,8 @@ export default function DataSettingsPage() {
 	return (
 		<>
 			<PageContent>
+				<SettingsTabs active="data" />
+
 				<PageHeader
 					title="Data"
 					subtitle="Your data lives in this browser. Back it up automatically to your own Google Drive, or to a file you keep."

@@ -1,32 +1,9 @@
 import { expect, type Locator, type Page } from "@playwright/test"
 
-// Mobile sidebar taps race hydration: useIsMobile() starts false and flips in
-// a mount effect, so a tap before that commit toggles the invisible desktop
-// state and nothing opens. localStorage.history survives reloads and gotos, so
-// a pre-existing marker proves nothing about the current mount — clear it and
-// reload first; the rewritten marker then proves THIS document hydrated (the
-// history provider wraps the sidebar's, so both mount effects commit in the
-// same pass). Retry the tap boundedly for swallowed taps under load. The
-// visible dialog below stays the strict proof: a genuinely broken sheet still
-// fails there, and single-tap reliability stays covered by the header-trigger
-// keyboard test.
-export async function openMobileSidebarFromConsumerMotion(page: Page) {
-	await page.evaluate(() => localStorage.removeItem("history"))
-	await page.reload()
-	await expect.poll(() => page.evaluate(() => localStorage.getItem("history"))).not.toBeNull()
-	const trigger = page.locator('header [data-slot="sidebar-trigger"]')
-	for (let attempt = 0; attempt < 3; attempt++) {
-		await trigger.click()
-		await page.waitForTimeout(500)
-		if ((await page.getByRole("dialog").count()) > 0) break
-	}
-	await expect(page.getByRole("dialog")).toBeVisible()
-}
-
 export type MotionConsumer = {
 	name: string
 	origin: string
-	action: "sidebar" | "sheet" | "workflow" | "heading" | "link" | "statement" | "view" | "pending"
+	action: "nav" | "sheet" | "workflow" | "heading" | "link" | "statement" | "view" | "pending"
 	target: string
 	selector: string
 	dense: boolean

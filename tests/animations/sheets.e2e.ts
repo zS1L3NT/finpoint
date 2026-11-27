@@ -151,22 +151,13 @@ test("Records sheet: animates in and out when closed by Escape and by its close 
 	)
 })
 
-test("mobile modal sheets: sidebar and amount filter animate in and out", {
+test("mobile amount filter sheet: animates in and out", {
 	tag: ["@reduced-motion"],
 }, async ({ page, workspace }) => {
 	void workspace
 	await page.setViewportSize({ width: 390, height: 844 })
 	await page.goto("/allocator")
 	await expect.poll(() => page.evaluate(() => localStorage.getItem("history"))).not.toBeNull()
-	await test.step("sidebar: trigger and Escape retain the sheet exit", async () => {
-		const trigger = page.locator('header [data-slot="sidebar-trigger"]')
-		await expectModalEntrance(page, '[data-slot="sidebar"][data-mobile="true"]', () =>
-			trigger.click(),
-		)
-		await expectModalExit(page, '[data-slot="sidebar"][data-mobile="true"]', () =>
-			page.keyboard.press("Escape"),
-		)
-	})
 	await test.step("amount filter: trigger and close retain the sheet exit", async () => {
 		const trigger = page.getByRole("button", { name: "Any amount", exact: true })
 		await expectModalEntrance(page, '[data-slot="sheet-content"]', () => trigger.click())

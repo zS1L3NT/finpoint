@@ -110,16 +110,8 @@ export default function RecordsPage() {
 		() => paginateItems(records, parsePage(page), parsePageSize(pageSize)),
 		[records, page, pageSize],
 	)
-	const columns = useRecordColumns<Record>({
-		pageName: "Records",
-		onEdit: handleEdit,
-		grouped: true,
-	})
-	const mobileRow = useRecordMobileRow<Record>({
-		pageName: "Records",
-		onEdit: handleEdit,
-		grouped: true,
-	})
+	const columns = useRecordColumns<Record>({ onOpen: handleEdit, grouped: true })
+	const mobileRow = useRecordMobileRow<Record>({ onOpen: handleEdit, grouped: true })
 	const tableHeader = useMemo(
 		() => ({
 			query,
@@ -193,6 +185,7 @@ export default function RecordsPage() {
 					footer={tableFooter}
 					mobileRow={mobileRow}
 					groupBy={byDay<Record>("Record")}
+					onRowClick={handleEdit}
 					emptyMessage="No records found."
 					loading={recordsQuery === undefined}
 				/>
