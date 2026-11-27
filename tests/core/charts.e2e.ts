@@ -473,7 +473,9 @@ test.describe("pinned overview date", () => {
 			await expect(metric(page, "Total surplus")).toContainText("$4,916.87")
 			await expect(metric(page, "Total surplus rate")).toContainText("94.5%")
 			const mix = card(page, "Categories this month")
-			await expect(mix).toContainText("$306.63 expenses · $20.00 refunds")
+			await expect(mix.getByRole("group", { name: "Categories in Oct 2026" })).toContainText(
+				"$306.63",
+			)
 			await expect(mix.getByRole("link", { name: /Shopping/ })).toContainText("$100.00")
 			await expect(mix.getByRole("link", { name: /Shopping/ })).toContainText(
 				"$20.00 refunded · $80.00 net",
@@ -521,9 +523,11 @@ test.describe("pinned overview date", () => {
 				budgets.getByRole("button", { name: "Daily", exact: true }),
 			).toHaveAttribute("aria-pressed", "true")
 			await expect(budgets).toContainText("No planned amount")
-			await expect(card(page, "Categories this month")).toContainText(
-				"$192.03 expenses · $0.00 refunds",
-			)
+			await expect(
+				card(page, "Categories this month").getByRole("group", {
+					name: "Categories in Oct 2026",
+				}),
+			).toContainText("$192.03")
 			await budgets.getByRole("button", { name: "Recurring", exact: true }).click()
 			await expect(page).toHaveURL(new RegExp(`scope=${IDS.monthlyBudgets.recurring}`))
 			await expect(budgets.locator('[aria-label="$0.00 planned"]')).toBeVisible()

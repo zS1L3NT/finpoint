@@ -145,8 +145,7 @@ export default function CashflowChart({
 				Each colour shows a Monthly Budget's cumulative spending.
 				{showProjection
 					? " Dashed lines extend each budget's gross spending pace and step up, at a ring, on days with scheduled Records."
-					: ""}{" "}
-				Hold or hover over a day to read it, and tap or click it to open its Records.
+					: ""}
 			</p>
 		</div>
 	)

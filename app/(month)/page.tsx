@@ -278,8 +278,7 @@ export default function DashboardPage() {
 										Spending calendar
 									</ScopedCardTitle>
 									<CardDescription>
-										Stronger colour means more spending. Select a day to open
-										its Records.
+										Stronger colour means more spending.
 									</CardDescription>
 								</CardHeader>
 								<CardContent>
@@ -342,8 +341,7 @@ export default function DashboardPage() {
 								</ScopedCardTitle>
 								<CardDescription>
 									Net daily spending across all monthly budgets, including
-									refunds. Hold or hover over a day to read it, and tap or click
-									it to open its Records.
+									refunds.
 								</CardDescription>
 							</CardHeader>
 							<CardContent>

@@ -274,9 +274,7 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 							<CardTitle>Spending over time</CardTitle>
 							<CardDescription>
 								Cumulative usage against the budget limit. The projection extends
-								the current pace and steps up on days with scheduled Records. Hold
-								or hover over a day to read it, and tap or click it to open its
-								Records.
+								the current pace and steps up on days with scheduled Records.
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
@@ -304,15 +302,14 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 						<CardHeader className="border-b">
 							<CardTitle>Spending by category</CardTitle>
 							<CardDescription>
-								Where this Budget’s outgoing Records went. Select one to open its
-								Records.
+								Where this Budget’s outgoing spending went.
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
 							{categoryData.length ? (
 								<CategorySpendingMix
 									categories={categoryData}
-									footnote="Shares of this Budget’s outgoing spending."
+									footnote={null}
 									recordHref={id =>
 										`${pathBudget(budget?.id ?? "")}?${new URLSearchParams({ records: "1", category: id })}`
 									}

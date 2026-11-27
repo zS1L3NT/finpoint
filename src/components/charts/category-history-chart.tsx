@@ -100,11 +100,10 @@ export default function CategoryHistoryChart({
 							: `Categories in ${shown?.month ?? "this month"}`}
 						{badge}
 					</CardTitle>
-					{/* The scope is in the badge beside the title, so the line only describes amounts. */}
-					<CardDescription className="tabular-nums">
+					<CardDescription>
 						{shown?.current
-							? `${formatCurrency(categories.reduce((sum, category) => sum + category.outflow, 0))} expenses · ${formatCurrency(categories.reduce((sum, category) => sum + category.refunds, 0))} refunds · shares exclude refunds`
-							: "Gross spending · refunds excluded"}
+							? "Where this month’s spending went."
+							: `Where ${shown?.month ?? "the month"}’s spending went.`}
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="min-h-0 overflow-y-auto">
@@ -169,7 +168,6 @@ export default function CategoryHistoryChart({
 						excluded
 						{through &&
 							` · selected days 1–${Number(through.slice(-2))}; prior months in full`}
-						. Select a month to update the category list.
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="flex min-h-0 flex-1 flex-col gap-3">
