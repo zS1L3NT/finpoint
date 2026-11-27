@@ -36,10 +36,10 @@
     "semantic_hash": ""
   },
   "app/api/auth/exchange/route.ts": {
-    "mtime": 1794868314.6266952,
-    "seen": 1794871795.315215,
-    "ast_hash": "c04fe126f09e73c5d31e974cf421b9ee",
-    "semantic_hash": "c04fe126f09e73c5d31e974cf421b9ee"
+    "mtime": 1795776389.174529,
+    "seen": 1795776397.776973,
+    "ast_hash": "7b113339f9f78786a35f769c713d9f5f",
+    "semantic_hash": ""
   },
   "app/api/auth/logout/route.ts": {
     "mtime": 1794868314.6274514,
@@ -132,9 +132,9 @@
     "semantic_hash": ""
   },
   "app/sync/page.tsx": {
-    "mtime": 1795715731.64328,
-    "seen": 1795718434.5862021,
-    "ast_hash": "5d531a6df53b4c974efc87bbf87e631e",
+    "mtime": 1795776389.175096,
+    "seen": 1795776397.7769861,
+    "ast_hash": "99731e87a89948f6d1a2efbc8295ae71",
     "semantic_hash": ""
   },
   "app/template.tsx": {
@@ -162,9 +162,9 @@
     "semantic_hash": "7d8a33d5aa042f85737cd2f3334ae040"
   },
   "next-env.d.ts": {
-    "mtime": 1795760533.7479873,
-    "seen": 1795760729.878293,
-    "ast_hash": "aa94238a90e7d04b7a47ecc3145ba6a0",
+    "mtime": 1795760734.8140953,
+    "seen": 1795776397.776989,
+    "ast_hash": "8195d2c60ce847a459ae9d308d6a5724",
     "semantic_hash": ""
   },
   "next.config.ts": {
@@ -720,9 +720,9 @@
     "semantic_hash": ""
   },
   "src/data/google-drive.ts": {
-    "mtime": 1794868314.6301427,
-    "seen": 1794871795.315296,
-    "ast_hash": "7b010823cf9255d32c07cacf6a64d8b7",
+    "mtime": 1795776389.1851494,
+    "seen": 1795776397.7770638,
+    "ast_hash": "59f919aceaa1ad3db413f64c2ff38e1e",
     "semantic_hash": ""
   },
   "src/data/seed.ts": {
@@ -834,10 +834,10 @@
     "semantic_hash": ""
   },
   "src/lib/auth-vault.ts": {
-    "mtime": 1794868314.6265502,
-    "seen": 1794871795.3153112,
-    "ast_hash": "07f5608e93b92f36fe3d1bb7678d687a",
-    "semantic_hash": "07f5608e93b92f36fe3d1bb7678d687a"
+    "mtime": 1795776389.1853893,
+    "seen": 1795776397.777081,
+    "ast_hash": "5040eeb31c5241f51090332ffcd859d4",
+    "semantic_hash": ""
   },
   "src/lib/banks.ts": {
     "mtime": 1794868314.6267717,
@@ -876,9 +876,9 @@
     "semantic_hash": ""
   },
   "src/logic/auto-sync.ts": {
-    "mtime": 1794869434.4884026,
-    "seen": 1794871795.315317,
-    "ast_hash": "dedb1db3a4bfbfc82556cce75b5096a6",
+    "mtime": 1795776389.1859157,
+    "seen": 1795776397.777087,
+    "ast_hash": "aeeed07cb3cbda618f03a574c93e6014",
     "semantic_hash": ""
   },
   "src/logic/budgets.ts": {
@@ -900,9 +900,9 @@
     "semantic_hash": ""
   },
   "src/logic/drive-sync.ts": {
-    "mtime": 1794869416.381688,
-    "seen": 1794871795.315319,
-    "ast_hash": "9265e09d6b72f035dfed5afbe377151f",
+    "mtime": 1795776389.1863556,
+    "seen": 1795776397.77709,
+    "ast_hash": "9855c999c0db8e5d6e4f70f430a0c4f1",
     "semantic_hash": ""
   },
   "src/logic/importer.ts": {
@@ -1002,9 +1002,9 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1794868314.6205637,
-    "seen": 1794871795.315381,
-    "ast_hash": "d2124101f8e43a076bef421aebf80ee1",
+    "mtime": 1795776389.1740563,
+    "seen": 1795776397.777159,
+    "ast_hash": "9d76090781958ffae6146f84552aa6f4",
     "semantic_hash": ""
   },
   "assets/branding/finpoint-icon-prompt.txt": {
@@ -1785,6 +1785,12 @@
     "mtime": 1795716236.1129684,
     "seen": 1795718434.5862489,
     "ast_hash": "003804f033329f00299d6a25cdf6c348",
+    "semantic_hash": ""
+  },
+  "tests/domain/drive-auth-redirect.test.ts": {
+    "mtime": 1795776389.1866817,
+    "seen": 1795776397.7771242,
+    "ast_hash": "340f23d641047316d10b9e52a725441e",
     "semantic_hash": ""
   }
 }

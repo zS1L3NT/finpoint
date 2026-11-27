@@ -23,10 +23,14 @@ import { useSyncStatus } from "@/hooks/use-sync-status"
 import { cn } from "@/lib/utils"
 import { resetSyncDisplay, runManualDrive, setSyncPaused } from "@/logic/auto-sync"
 import {
+	AuthRedirectError,
+	type DriveSyncResult,
 	disconnectDriveSync,
 	pullDrive,
 	pushDrive,
+	resumeDriveRedirect,
 	syncDrive,
+	takeDriveRedirectCallback,
 	wasVaultProven,
 } from "@/logic/drive-sync"
 import { formatRelativeTime } from "@/logic/shared"
@@ -300,23 +304,65 @@ export default function DataSettingsPage() {
 		}
 	}
 
+	const toastSyncResult = (result: DriveSyncResult) => {
+		if (result.outcome === "up-to-date") toast.success("Already in sync with Google Drive.")
+		else if (result.outcome === "pushed") {
+			toast.success("Saved data to your Drive.")
+			warnIfVaultUnproven()
+		} else if (result.outcome === "pulled") {
+			toast.success("Restored data from your Drive.")
+			warnIfVaultUnproven()
+		} else if (result.outcome === "conflict") {
+			toast.warning("Both sides changed — choose which to keep.")
+		} else toast.info("Nothing to sync yet.")
+	}
+
+	// Resume a same-window OAuth redirect (installed PWAs and popup-blocked browsers).
+	useEffect(() => {
+		const pending = takeDriveRedirectCallback()
+		if (!pending) return
+		if (pending.error) {
+			toast.error(pending.error)
+			return
+		}
+		if (!pending.code) return
+		const code = pending.code
+		const activity =
+			pending.action === "push"
+				? "pushing"
+				: pending.action === "pull"
+					? "pulling"
+					: "checking"
+		const busyKey =
+			pending.action === "push"
+				? "drive-push"
+				: pending.action === "pull"
+					? "drive-pull"
+					: "drive"
+		setBusy(busyKey)
+		void runManualDrive(activity, () => resumeDriveRedirect(code, pending.action))
+			.then(result => {
+				clearDrivePrompts()
+				toastSyncResult(result)
+			})
+			.catch(cause => {
+				if (cause instanceof AuthRedirectError) return
+				toast.error(cause instanceof Error ? cause.message : "Drive sync failed.")
+			})
+			.finally(() => {
+				setBusy(null)
+			})
+	}, [])
+
 	const handleDriveSync = async () => {
 		begin()
 		setBusy("drive")
 		try {
 			const result = await runManualDrive("checking", syncDrive)
 			clearDrivePrompts()
-			if (result.outcome === "up-to-date") toast.success("Already in sync with Google Drive.")
-			else if (result.outcome === "pushed") {
-				toast.success("Saved data to your Drive.")
-				warnIfVaultUnproven()
-			} else if (result.outcome === "pulled") {
-				toast.success("Restored data from your Drive.")
-				warnIfVaultUnproven()
-			} else if (result.outcome === "conflict") {
-				toast.warning("Both sides changed — choose which to keep.")
-			} else toast.info("Nothing to sync yet.")
+			toastSyncResult(result)
 		} catch (cause) {
+			if (cause instanceof AuthRedirectError) return
 			toast.error(cause instanceof Error ? cause.message : "Drive sync failed.")
 		} finally {
 			setBusy(null)
@@ -333,7 +379,9 @@ export default function DataSettingsPage() {
 			})
 			clearDrivePrompts()
 			toast.success("Saved data to your Drive.")
+			warnIfVaultUnproven()
 		} catch (cause) {
+			if (cause instanceof AuthRedirectError) return
 			toast.error(cause instanceof Error ? cause.message : "Could not write to Drive.")
 		} finally {
 			setBusy(null)
@@ -350,7 +398,9 @@ export default function DataSettingsPage() {
 			})
 			clearDrivePrompts()
 			toast.success("Restored data from your Drive.")
+			warnIfVaultUnproven()
 		} catch (cause) {
+			if (cause instanceof AuthRedirectError) return
 			toast.error(cause instanceof Error ? cause.message : "Could not read from Drive.")
 		} finally {
 			setArmed(null)
@@ -684,7 +734,9 @@ export default function DataSettingsPage() {
 												Create a Web OAuth client in Google Cloud Console.
 											</li>
 											<li>
-												Add this site as an authorised JavaScript origin.
+												Add this site as an authorised JavaScript origin,
+												and <code>/sync</code> on it as an authorised
+												redirect URI.
 											</li>
 											<li>
 												Set <code>NEXT_PUBLIC_GOOGLE_CLIENT_ID</code> in{" "}

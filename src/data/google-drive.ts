@@ -1,12 +1,34 @@
 // Google Drive persistence (user's own Drive, plaintext JSON).
 //
-// Nothing financial is sent to us. Signing in uses a one-time popup code
-// that our /api/auth/* broker exchanges for tokens; the lasting grant lives
-// sealed inside an httpOnly cookie, never in JS. Set
+// Nothing financial is sent to us. Signing in uses a one-time code (popup in
+// regular tabs, same-window redirect in installed PWAs or when popups are
+// blocked) that our /api/auth/* broker exchanges for tokens; the lasting grant
+// lives sealed inside an httpOnly cookie, never in JS. Set
 // NEXT_PUBLIC_GOOGLE_CLIENT_ID to enable.
+
+import { pathDataSettings } from "@/routes"
 
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.appdata"
 const DRIVE_FILENAME = "finpoint-backup.json"
+const REDIRECT_STATE_KEY = "finpoint_drive_oauth"
+const REDIRECT_STATE_TTL_MS = 10 * 60_000
+const OAUTH_QUERY_KEYS = [
+	"code",
+	"state",
+	"scope",
+	"error",
+	"error_description",
+	"authuser",
+	"prompt",
+] as const
+
+export type DriveAction = "sync" | "push" | "pull"
+
+export type PendingDriveRedirect = {
+	action: DriveAction
+	code?: string
+	error?: string
+}
 
 type CodeResponse = {
 	code?: string
@@ -50,6 +72,20 @@ export class AuthNeededError extends Error {
 	}
 }
 
+export class AuthRedirectError extends Error {
+	constructor() {
+		super("Redirecting to Google sign-in.")
+		this.name = "AuthRedirectError"
+	}
+}
+
+class PopupBlockedError extends Error {
+	constructor() {
+		super("Google sign-in popup was blocked.")
+		this.name = "PopupBlockedError"
+	}
+}
+
 export function hasFreshDriveToken(): boolean {
 	return !!cachedToken && Date.now() < cachedToken.expiresAt - 60_000
 }
@@ -65,6 +101,89 @@ export function wasVaultProven(): boolean | null {
 function cacheToken(accessToken: string, expiresIn: number): string {
 	cachedToken = { token: accessToken, expiresAt: Date.now() + expiresIn * 1000 }
 	return accessToken
+}
+
+function isStandaloneApp(): boolean {
+	if (typeof window === "undefined") return false
+	return (
+		(navigator as Navigator & { standalone?: boolean }).standalone === true ||
+		window.matchMedia?.("(display-mode: standalone)").matches === true
+	)
+}
+
+function startDriveRedirect(action: DriveAction): never {
+	const clientId = googleClientId()
+	if (!clientId) throw new Error("Google Drive is not set up yet (missing client ID).")
+	const state = crypto.randomUUID()
+	try {
+		window.localStorage.setItem(
+			REDIRECT_STATE_KEY,
+			JSON.stringify({ state, action, startedAt: Date.now() }),
+		)
+	} catch {
+		throw new Error("Could not start Google sign-in. Allow site storage and try again.")
+	}
+	const params = new URLSearchParams({
+		client_id: clientId,
+		redirect_uri: `${window.location.origin}${pathDataSettings()}`,
+		response_type: "code",
+		scope: DRIVE_SCOPE,
+		access_type: "offline",
+		prompt: "consent",
+		include_granted_scopes: "true",
+		state,
+	})
+	window.location.assign(`https://accounts.google.com/o/oauth2/v2/auth?${params}`)
+	throw new AuthRedirectError()
+}
+
+export function takeDriveRedirectCallback(): PendingDriveRedirect | null {
+	if (typeof window === "undefined") return null
+	const url = new URL(window.location.href)
+	if (!url.searchParams.has("code") && !url.searchParams.has("error")) return null
+
+	const code = url.searchParams.get("code")
+	const error = url.searchParams.get("error")
+	const state = url.searchParams.get("state")
+
+	for (const key of OAUTH_QUERY_KEYS) url.searchParams.delete(key)
+	window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}${url.hash}`)
+
+	let stored: { state?: unknown; action?: unknown; startedAt?: unknown } | null = null
+	try {
+		const raw = window.localStorage.getItem(REDIRECT_STATE_KEY)
+		window.localStorage.removeItem(REDIRECT_STATE_KEY)
+		stored = raw
+			? (JSON.parse(raw) as { state?: unknown; action?: unknown; startedAt?: unknown })
+			: null
+	} catch {
+		stored = null
+	}
+
+	const action: DriveAction =
+		stored?.action === "push" || stored?.action === "pull" ? stored.action : "sync"
+	const validState =
+		typeof stored?.state === "string" &&
+		stored.state === state &&
+		typeof stored.startedAt === "number" &&
+		Date.now() - stored.startedAt < REDIRECT_STATE_TTL_MS
+
+	if (error) {
+		return {
+			action,
+			error:
+				error === "access_denied"
+					? "Google Drive connection was cancelled."
+					: "Could not connect Google Drive.",
+		}
+	}
+	if (!code || !validState) {
+		return {
+			action: "sync",
+			error: "Google sign-in expired or opened in a different browser. Try connecting again.",
+		}
+	}
+	return { action, code }
 }
 
 function loadGsi(): Promise<void> {
@@ -124,7 +243,11 @@ async function requestDriveCode(): Promise<string> {
 				}
 				done(() => resolve(response.code as string))
 			},
-			error_callback: () => {
+			error_callback: error => {
+				if (error.type === "popup_failed_to_open") {
+					done(() => reject(new PopupBlockedError()))
+					return
+				}
 				done(() => reject(new Error("Google Drive connection was cancelled.")))
 			},
 		})
@@ -137,33 +260,20 @@ async function requestDriveCode(): Promise<string> {
 	}
 }
 
-export async function ensureDriveToken(): Promise<string> {
-	if (hasFreshDriveToken() && cachedToken) return cachedToken.token
-	vaultProven = null
-
-	// Prefer the invisible refresh first: a popup is only warranted when the
-	// grant itself is gone (first connect, revoked access).
-	if (typeof navigator !== "undefined" && !navigator.onLine) {
-		throw new Error("You're offline — reconnect to sync with Google Drive.")
-	}
-	try {
-		return await ensureDriveTokenSilent()
-	} catch (cause) {
-		if (!(cause instanceof AuthNeededError)) throw cause
-	}
-
+async function exchangeDriveCode(code: string, mode: "popup" | "redirect"): Promise<string> {
 	const response = await fetch("/api/auth/exchange", {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({ code: await requestDriveCode() }),
+		body: JSON.stringify({ code, mode }),
 	})
 	const parsed = (await response.json().catch(() => null)) as {
 		access_token?: string
 		expires_in?: number
 		message?: string
+		error?: string
 	} | null
 	if (!response.ok || !parsed?.access_token) {
-		throw new Error(parsed?.message ?? "Could not connect Google Drive.")
+		throw new Error(parsed?.message ?? parsed?.error ?? "Could not connect Google Drive.")
 	}
 	const token = cacheToken(parsed.access_token, parsed.expires_in ?? 3600)
 	// Prove the vault round-trips right now, while the user is watching —
@@ -173,6 +283,43 @@ export async function ensureDriveToken(): Promise<string> {
 		vaultProven = !!probe?.ok
 	}
 	return token
+}
+
+export async function completeDriveRedirect(code: string): Promise<string> {
+	vaultProven = null
+	if (typeof navigator !== "undefined" && !navigator.onLine) {
+		throw new Error("You're offline — reconnect to sync with Google Drive.")
+	}
+	return exchangeDriveCode(code, "redirect")
+}
+
+export async function ensureDriveToken(action: DriveAction = "sync"): Promise<string> {
+	if (hasFreshDriveToken() && cachedToken) return cachedToken.token
+	vaultProven = null
+
+	// Prefer the invisible refresh first: interactive sign-in is only warranted when
+	// the grant itself is gone (first connect, revoked access).
+	if (typeof navigator !== "undefined" && !navigator.onLine) {
+		throw new Error("You're offline — reconnect to sync with Google Drive.")
+	}
+	try {
+		return await ensureDriveTokenSilent()
+	} catch (cause) {
+		if (!(cause instanceof AuthNeededError)) throw cause
+	}
+
+	// Installed PWAs (especially iOS/iPadOS Home Screen apps) block popups or drop
+	// window.opener across the standalone boundary; redirect in the same window instead.
+	if (isStandaloneApp()) startDriveRedirect(action)
+
+	let code: string
+	try {
+		code = await requestDriveCode()
+	} catch (cause) {
+		if (cause instanceof PopupBlockedError) startDriveRedirect(action)
+		throw cause
+	}
+	return exchangeDriveCode(code, "popup")
 }
 
 export async function ensureDriveTokenSilent(): Promise<string> {
