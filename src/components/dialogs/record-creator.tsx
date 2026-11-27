@@ -3,6 +3,7 @@ import { useLiveQuery } from "dexie-react-hooks"
 import { AnimatePresence, motion } from "framer-motion"
 import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
+import { AllocationMismatch } from "@/components/allocate-bar"
 import AmountField from "@/components/form/amount-field"
 import CategoryField from "@/components/form/category-field"
 import DatetimeField from "@/components/form/datetime-field"
@@ -11,7 +12,6 @@ import RuleSuggestions, { ruleValueLabel } from "@/components/form/rule-suggesti
 import TextField from "@/components/form/text-field"
 import TextareaField from "@/components/form/textarea-field"
 import { UiIcon as IconifyIcon } from "@/components/icon"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -34,7 +34,7 @@ import { useApiFormErrors } from "@/hooks/use-api-form-errors"
 import { useDialogCloseAnimation } from "@/hooks/use-dialog-close-animation"
 import { useSubmitLock } from "@/hooks/use-submit-lock"
 import { canUseMonthlyBudget } from "@/lib/analytics"
-import { COLLAPSE_MOTION, SPRING, TRANSITION } from "@/lib/motion"
+import { COLLAPSE_MOTION, FIELD_NOTE_COLLAPSE_MOTION, SPRING, TRANSITION } from "@/lib/motion"
 import { cn, formatCurrency, formatDatetime, pluralize, round2 } from "@/lib/utils"
 import { listMonthlyBudgets } from "@/logic/monthly-budgets"
 import { inferRecordDatetime } from "@/logic/record-defaults"
@@ -131,14 +131,23 @@ export default function RecordCreatorDialog({
 	const { locked, run } = useSubmitLock(isOpen)
 
 	const inferredDatetime = inferRecordDatetime(statements)
-	const datetimeAutopopulated =
-		inferredDatetime.source === "description"
-			? inferredDatetime.hasTime
-				? "Date and time inferred from the statement description."
-				: "Date inferred from the statement description."
-			: inferredDatetime.hasTime
-				? "Date and time copied from the statement."
-				: "Date copied from the statement date."
+	// The date and the time are filled in, and edited away, independently.
+	const datetimeNote = (value: string) => ({
+		date:
+			value.slice(0, 10) !== inferredDatetime.value.slice(0, 10)
+				? undefined
+				: inferredDatetime.source === "description"
+					? "Inferred from the statement description."
+					: "Copied from the statement date.",
+		// A description date without a time fills midnight, which is not worth marking as copied.
+		time:
+			value.slice(11) !== inferredDatetime.value.slice(11) ||
+			(inferredDatetime.source === "description" && !inferredDatetime.hasTime)
+				? undefined
+				: inferredDatetime.source === "description"
+					? "From the description."
+					: "From the statement.",
+	})
 	const categoriesFlat = categories.flatMap(category => [category, ...category.children])
 
 	const form = useForm({
@@ -209,12 +218,11 @@ export default function RecordCreatorDialog({
 		onSubmitInvalid: () => setSubmitError("Correct the highlighted fields, then save again."),
 	})
 
-	const isPendingAmount = useStore(
-		form.store,
-		state =>
-			round2(state.values.statements.reduce((acc, el) => acc + el.amount, 0)) !==
-			round2(state.values.amount),
-	)
+	const mismatch = useStore(form.store, state => ({
+		amount: round2(state.values.amount),
+		allocated: round2(state.values.statements.reduce((acc, el) => acc + el.amount, 0)),
+	}))
+	const isPendingAmount = mismatch.allocated !== mismatch.amount
 	const analytics = useStore(form.store, state => ({
 		treatment: state.values.analytics_treatment,
 		categoryId: state.values.category_id,
@@ -455,13 +463,9 @@ export default function RecordCreatorDialog({
 										{field => (
 											<DatetimeField
 												id={field.name}
-												label="Date and time"
-												autopopulatedTime={inferredDatetime.hasTime}
 												autopopulated={
-													!!statements.length &&
-													!!field.state.value &&
-													!field.state.meta.isDirty
-														? datetimeAutopopulated
+													statements.length && field.state.value
+														? datetimeNote(field.state.value)
 														: undefined
 												}
 												value={field.state.value}
@@ -502,20 +506,18 @@ export default function RecordCreatorDialog({
 										{isPendingAmount && (
 											<motion.div
 												className="overflow-hidden"
-												{...COLLAPSE_MOTION}
+												{...FIELD_NOTE_COLLAPSE_MOTION}
 											>
-												<Alert className="mt-4 max-w-md border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-50">
-													<IconifyIcon icon="lucide:triangle-alert" />
-													<AlertTitle>
-														Amount does not match the sum of Allocation
-														Amounts
-													</AlertTitle>
-													<AlertDescription>
-														This record will be marked as pending until
-														the record amount matches the sum of
-														allocated statement amounts.
-													</AlertDescription>
-												</Alert>
+												<AllocationMismatch
+													allocated={mismatch.allocated}
+													onUseAllocated={() => {
+														form.setFieldValue(
+															"amount",
+															mismatch.allocated,
+														)
+														clearApiError("amount")
+													}}
+												/>
 											</motion.div>
 										)}
 									</AnimatePresence>

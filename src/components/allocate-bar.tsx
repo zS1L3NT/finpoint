@@ -50,3 +50,43 @@ export default function AllocateBar({
 		</div>
 	)
 }
+
+/** Why a Record whose amount differs from its Allocations stays Pending, and the one-step fix. */
+export function AllocationMismatch({
+	allocated,
+	onUseAllocated,
+}: {
+	allocated: number
+	onUseAllocated: () => void
+}) {
+	// One quiet line in the Amount field's note slot: the state, the total and the fix.
+	return (
+		<p
+			role="status"
+			className="flex flex-wrap items-baseline gap-x-1.5 text-xs/relaxed tabular-nums"
+		>
+			<span className="font-medium text-amber-700 dark:text-amber-400">Pending</span>
+			<span aria-hidden className="text-muted-foreground">
+				·
+			</span>
+			<span className="text-muted-foreground">
+				{allocated === 0
+					? "No Statements allocated"
+					: `Allocated ${formatCurrency(allocated)}`}
+			</span>
+			<span className="sr-only">
+				This Record stays Pending until its amount equals its Allocations.
+			</span>
+			{allocated !== 0 ? (
+				<button
+					type="button"
+					aria-label={`Use total ${formatCurrency(allocated)}`}
+					className="cursor-pointer rounded-sm font-medium text-foreground underline decoration-current/40 underline-offset-2 transition-colors duration-150 ease-out hover:decoration-current focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+					onClick={onUseAllocated}
+				>
+					Use total
+				</button>
+			) : null}
+		</p>
+	)
+}

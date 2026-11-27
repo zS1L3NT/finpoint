@@ -170,33 +170,39 @@ test("nested drill: browser Back and Forward restore filtered drill with usable 
 	workspace,
 }) => {
 	void workspace
-	await gotoReady(page, "/categories?query=Groceries")
+	await gotoReady(page, "/budgets?query=October+Buffer")
 	const origin = page.url()
-	await page.getByRole("link", { name: "Open Records for Groceries", exact: true }).click()
-	await expect(page).toHaveURL(/\/records\?category_ids=t1-cat-groceries/)
-	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to Categories")
+	await page.locator("article", { hasText: "October Buffer" }).first().click()
+	await expect(page).toHaveURL(/\/budgets\/t1-b-manual$/)
+	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to Budgets")
 	const records = page.url()
-	await page.getByRole("link", { name: "Open FairPrice Run", exact: true }).click()
+	await page
+		.getByRole("link", { name: "Open FairPrice Run", exact: true })
+		.filter({ visible: true })
+		.first()
+		.click()
 	await expect(page).toHaveURL(/\/records\/t1-r-groceries$/)
 	const detail = page.url()
-	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to Records")
+	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to October Buffer")
 	await page.goBack()
 	await expect(page).toHaveURL(records)
-	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to Categories")
-	await expect(page.getByRole("button", { name: "Back to Records", exact: true })).toHaveCount(0)
+	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to Budgets")
+	await expect(
+		page.getByRole("button", { name: "Back to October Buffer", exact: true }),
+	).toHaveCount(0)
 	await page.goBack()
 	await expect(page).toHaveURL(origin)
 	await expectNoBack(page)
 	await page.goForward()
 	await expect(page).toHaveURL(records)
-	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to Categories")
+	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to Budgets")
 	await page.goForward()
 	await expect(page).toHaveURL(detail)
-	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to Records")
-	await page.getByRole("button", { name: "Back to Records", exact: true }).click()
+	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to October Buffer")
+	await page.getByRole("button", { name: "Back to October Buffer", exact: true }).click()
 	await expect(page).toHaveURL(records)
-	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to Categories")
-	await page.getByRole("button", { name: "Back to Categories", exact: true }).click()
+	await expectBackAboveHeadingFromHistoryRegressions(page, "Back to Budgets")
+	await page.getByRole("button", { name: "Back to Budgets", exact: true }).click()
 	await expect(page).toHaveURL(origin)
 	await expectNoBack(page)
 })
@@ -454,26 +460,34 @@ test("rapid Back clicks: pop exactly once while navigation is pending", async ({
 	workspace,
 }) => {
 	void workspace
-	await gotoReady(page, "/categories?query=Groceries")
-	await page.getByRole("link", { name: "Open Records for Groceries", exact: true }).click()
-	await expect(page).toHaveURL(/\/records\?category_ids=t1-cat-groceries$/)
-	await expect(
-		page.getByRole("button", { name: "Back to Categories", exact: true }),
-	).toBeVisible()
+	await gotoReady(page, "/budgets?query=October+Buffer")
+	await page.locator("article", { hasText: "October Buffer" }).first().click()
+	await expect(page).toHaveURL(/\/budgets\/t1-b-manual$/)
+	await expect(page.getByRole("button", { name: "Back to Budgets", exact: true })).toBeVisible()
 	const origin = page.url()
-	await page.getByRole("link", { name: "Open FairPrice Run", exact: true }).click()
+	await page
+		.getByRole("link", { name: "Open FairPrice Run", exact: true })
+		.filter({ visible: true })
+		.first()
+		.click()
 	await expect(page).toHaveURL(/\/records\/t1-r-groceries$/)
-	await expect(page.getByRole("button", { name: "Back to Records", exact: true })).toBeVisible()
+	await expect(
+		page.getByRole("button", { name: "Back to October Buffer", exact: true }),
+	).toBeVisible()
 	// Two synchronous activations: the second lands while the first
 	// navigation is still pending and must be ignored.
-	await page.getByRole("button", { name: "Back to Records", exact: true }).evaluate(back => {
-		back.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, button: 0 }))
-		back.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, button: 0 }))
-	})
+	await page
+		.getByRole("button", { name: "Back to October Buffer", exact: true })
+		.evaluate(back => {
+			back.dispatchEvent(
+				new MouseEvent("click", { bubbles: true, cancelable: true, button: 0 }),
+			)
+			back.dispatchEvent(
+				new MouseEvent("click", { bubbles: true, cancelable: true, button: 0 }),
+			)
+		})
 	await expect(page).toHaveURL(origin)
-	await expect(
-		page.getByRole("button", { name: "Back to Categories", exact: true }),
-	).toBeVisible()
+	await expect(page.getByRole("button", { name: "Back to Budgets", exact: true })).toBeVisible()
 	await expect(page.getByRole("button", { name: /^Back to / })).toHaveCount(1)
 })
 
@@ -604,20 +618,16 @@ test("keyboard origins: Records, Statements, Accounts, Budgets and Categories dr
 		await expect(page).toHaveURL(/\/budgets\/t1-b-manual/)
 		await keyboardBack(page, "Back to Budgets", origin)
 	})
-	await test.step("Categories drill: nested keyboard drill returns through exact origins", async () => {
-		// No /categories/[id] route exists: drill into filtered Records instead.
-		await reset("/categories?query=Groceries")
-		await expect(
-			page.getByRole("button", { name: "Edit Groceries", exact: true }),
-		).toBeVisible()
-		const drill = page.getByRole("link", { name: "Open Records for Groceries", exact: true })
-		await drill.focus()
+	await test.step("Budget drill: nested keyboard drill returns through exact origins", async () => {
+		await reset("/budgets?query=October+Buffer")
+		const card = page.locator("article", { hasText: "October Buffer" }).first()
+		await expect(card).toBeVisible()
+		await card.focus()
 		await page.keyboard.press("Enter")
-		const recordsOrigin = new RegExp("/records\\?category_ids=t1-cat-groceries")
-		await expect(page).toHaveURL(recordsOrigin)
-		const recordsUrl = page.url()
+		await expect(page).toHaveURL(/\/budgets\/t1-b-manual/)
+		const budgetUrl = page.url()
 		await expect(
-			page.getByRole("button", { name: "Back to Categories", exact: true }),
+			page.getByRole("button", { name: "Back to Budgets", exact: true }),
 		).toBeVisible()
 		const open = page
 			.getByRole("link", { name: "Open FairPrice Run", exact: true })
@@ -626,43 +636,47 @@ test("keyboard origins: Records, Statements, Accounts, Budgets and Categories dr
 		await open.focus()
 		await page.keyboard.press("Enter")
 		await expect(page).toHaveURL(/\/records\/t1-r-groceries/)
-		await keyboardBack(page, "Back to Records", recordsUrl)
-		await keyboardBack(page, "Back to Categories", /\/categories(\?|$)/)
+		await keyboardBack(page, "Back to October Buffer", budgetUrl)
+		await keyboardBack(page, "Back to Budgets", /\/budgets(\?|$)/)
 	})
 })
 
-test("navigation history: Category drill, fallbacks and static links preserve history", async ({
+test("navigation history: Budget drill, fallbacks and static links preserve history", async ({
 	page,
 	workspace,
 }) => {
 	void workspace
-	await test.step("Category drill: nested detail returns to exact filtered origins", async () => {
+	await test.step("Budget drill: nested detail returns to exact filtered origins", async () => {
 		void workspace
-		await resetHistory(page, "/categories?query=Groceries")
-		await page.getByRole("link", { name: "Open Records for Groceries", exact: true }).click()
-		await expect(page).toHaveURL(/\/records\?category_ids=t1-cat-groceries$/)
+		await resetHistory(page, "/budgets?query=October+Buffer")
+		await page.locator("article", { hasText: "October Buffer" }).first().click()
+		await expect(page).toHaveURL(/\/budgets\/t1-b-manual$/)
 		await expect(
-			page.getByRole("button", { name: "Back to Categories", exact: true }),
+			page.getByRole("button", { name: "Back to Budgets", exact: true }),
 		).toBeVisible()
 		const origin = page.url()
 		const back = await page
-			.getByRole("button", { name: "Back to Categories", exact: true })
+			.getByRole("button", { name: "Back to Budgets", exact: true })
 			.boundingBox()
 		const heading = await page
-			.getByRole("heading", { name: "Records", level: 2, exact: true })
+			.getByRole("heading", { name: "October Buffer", level: 2, exact: true })
 			.boundingBox()
 		if (!back || !heading) throw new Error("Back button and heading must have layout boxes")
 		expect(back.y + back.height).toBeLessThan(heading.y)
-		await page.getByRole("link", { name: "Open FairPrice Run", exact: true }).click()
+		await page
+			.getByRole("link", { name: "Open FairPrice Run", exact: true })
+			.filter({ visible: true })
+			.first()
+			.click()
 		// Let the drill commit first: a Back pressed while it is still finishing can be
 		// overridden by it (.scratch/ui-regression/issues/12-back-during-pending-drill.md).
 		await expect(
 			page.getByRole("heading", { name: "FairPrice Run", level: 2, exact: true }),
 		).toBeVisible()
-		await page.getByRole("button", { name: "Back to Records", exact: true }).click()
+		await page.getByRole("button", { name: "Back to October Buffer", exact: true }).click()
 		await expect(page).toHaveURL(origin)
-		await page.getByRole("button", { name: "Back to Categories", exact: true }).click()
-		await expect(page).toHaveURL(/\/categories\?query=Groceries$/)
+		await page.getByRole("button", { name: "Back to Budgets", exact: true }).click()
+		await expect(page).toHaveURL(/\/budgets\?query=October\+Buffer$/)
 	})
 	for (const [route, name, fallback] of [
 		["/accounts/t1-acc-dbs", "Accounts", "/accounts"],

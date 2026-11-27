@@ -120,3 +120,12 @@ export const COLLAPSE_MOTION = {
 		opacity: TRANSITION.base,
 	},
 } as const
+
+/**
+ * COLLAPSE_MOTION for a note that belongs to the field above it. It opens 8px under that field,
+ * where the field's own notes sit, instead of a whole 16px gap between fields.
+ */
+export const FIELD_NOTE_COLLAPSE_MOTION = {
+	...COLLAPSE_MOTION,
+	animate: { ...COLLAPSE_MOTION.animate, marginTop: -8 },
+} as const

@@ -107,8 +107,12 @@ export default function ChartFrame({
 		if (next !== null) {
 			event.preventDefault()
 			setActive(next)
-		} else if (event.key === "Enter" && current !== null) onSelect?.(current)
-		else if (event.key === "Escape") setActive(null)
+		} else if (event.key === "Enter" && current !== null) {
+			// Without this, the same Enter also activates whatever takes focus next, such as the
+			// Close button of the sheet this opens, which then closes it straight away.
+			event.preventDefault()
+			onSelect?.(current)
+		} else if (event.key === "Escape") setActive(null)
 	}
 
 	return (
@@ -124,7 +128,7 @@ export default function ChartFrame({
 					width={size.width}
 					height={size.height}
 					className={cn(
-						"absolute inset-0 block touch-pan-y [-webkit-touch-callout:none] focus:outline-hidden focus-visible:outline-2 focus-visible:outline-ring",
+						"absolute inset-0 block overflow-visible touch-pan-y [-webkit-touch-callout:none] focus:outline-hidden focus-visible:outline-2 focus-visible:outline-ring",
 						onSelect && "cursor-pointer",
 					)}
 					onPointerDown={event => {

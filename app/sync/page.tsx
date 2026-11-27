@@ -21,7 +21,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { useSyncStatus } from "@/hooks/use-sync-status"
 import { cn } from "@/lib/utils"
-import { resetSyncDisplay, runManualDrive } from "@/logic/auto-sync"
+import { resetSyncDisplay, runManualDrive, setSyncPaused } from "@/logic/auto-sync"
 import {
 	AuthRedirectError,
 	type DriveSyncResult,
@@ -104,19 +104,63 @@ function MethodHeader({
 	)
 }
 
-function StateRow({ tone, label, value }: { tone: string; label: string; value: string }) {
+type LinkTone = "good" | "busy" | "warning" | "danger" | "neutral"
+
+// Chip tints are background images, so the badge keeps its opaque card colour over the line.
+const LINK_TONES: Record<LinkTone, { chip: string; line: string; dot: string }> = {
+	good: {
+		chip: "border-emerald-500/40 bg-linear-to-r from-emerald-500/10 to-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+		line: "border-emerald-500/40",
+		dot: "bg-emerald-500",
+	},
+	busy: {
+		chip: "border-sky-500/40 bg-linear-to-r from-sky-500/10 to-sky-500/10 text-sky-600 dark:text-sky-400",
+		line: "border-dashed border-sky-500/40",
+		dot: "bg-sky-500",
+	},
+	warning: {
+		chip: "border-amber-500/40 bg-linear-to-r from-amber-500/10 to-amber-500/10 text-amber-600 dark:text-amber-400",
+		line: "border-dashed border-amber-500/40",
+		dot: "bg-amber-500",
+	},
+	danger: {
+		chip: "border-red-500/40 bg-linear-to-r from-red-500/10 to-red-500/10 text-red-600 dark:text-red-400",
+		line: "border-dashed border-red-500/40",
+		dot: "bg-red-500",
+	},
+	neutral: {
+		chip: "border-border bg-muted text-muted-foreground",
+		line: "border-dashed border-border",
+		dot: "bg-zinc-400",
+	},
+}
+
+function SyncEndpoint({
+	icon,
+	label,
+	tone,
+	value,
+}: {
+	icon: string
+	label: string
+	tone: LinkTone
+	value: string
+}) {
 	return (
-		<div className="flex items-center justify-between gap-3 border-b py-1.5 last:border-b-0">
-			<dt className="flex items-center gap-2 text-muted-foreground">
+		<div className="grid min-w-0 justify-items-center gap-1.5 text-center">
+			<span className="grid size-10 place-items-center rounded-xl border bg-background">
+				<IconifyIcon icon={icon} className="size-4.5" />
+			</span>
+			<dt className="text-xs font-medium">{label}</dt>
+			<dd className="flex items-center gap-1.5 text-xs text-muted-foreground">
 				<span
 					className={cn(
-						"size-2 shrink-0 rounded-full transition-colors duration-200 ease-out",
-						tone,
+						"size-1.5 shrink-0 rounded-full transition-colors duration-200 ease-out",
+						LINK_TONES[tone].dot,
 					)}
 				/>
-				{label}
-			</dt>
-			<dd className="font-medium tabular-nums">{value}</dd>
+				{value}
+			</dd>
 		</div>
 	)
 }
@@ -372,6 +416,19 @@ export default function DataSettingsPage() {
 		void resolveDrivePull()
 	}
 
+	const handlePause = async (paused: boolean) => {
+		begin()
+		setBusy("drive-pause")
+		try {
+			await setSyncPaused(paused)
+			toast.success(paused ? "Sync paused in this browser." : "Sync resumed.")
+		} catch {
+			toast.error(paused ? "Could not pause sync." : "Could not resume sync.")
+		} finally {
+			setBusy(null)
+		}
+	}
+
 	const handleDriveDisconnect = async () => {
 		begin()
 		setBusy("drive-disconnect")
@@ -391,24 +448,49 @@ export default function DataSettingsPage() {
 	const driveConnected = sync.lastSyncAt != null
 	const driveTeaser = sync.configured && sync.kind === "never-synced"
 	const syncConflict = sync.kind === "conflict"
-	const driveState: { tone: string; label: string } =
+	const driveState: { tone: LinkTone; label: string } =
 		sync.kind === "conflict"
-			? { tone: "bg-amber-500", label: "Needs your decision" }
-			: sync.kind === "needs-auth"
-				? { tone: "bg-red-500", label: "Reconnect needed" }
-				: sync.kind === "offline"
-					? { tone: "bg-zinc-400", label: "Offline" }
-					: sync.kind === "error"
-						? { tone: "bg-red-500", label: "Sync failed" }
-						: sync.remoteModifiedTime
-							? { tone: "bg-emerald-500", label: "Up to date" }
-							: { tone: "bg-zinc-400", label: "No copy yet" }
+			? { tone: "warning", label: "Needs your decision" }
+			: sync.paused
+				? { tone: "neutral", label: "Paused" }
+				: sync.kind === "needs-auth"
+					? { tone: "danger", label: "Reconnect needed" }
+					: sync.kind === "offline"
+						? { tone: "neutral", label: "Offline" }
+						: sync.kind === "error"
+							? { tone: "danger", label: "Sync failed" }
+							: !sync.remoteModifiedTime
+								? { tone: "neutral", label: "No copy yet" }
+								: sync.localDirty
+									? { tone: "neutral", label: "Behind this browser" }
+									: { tone: "good", label: "Up to date" }
 	const activityLabel =
 		sync.activity === "checking"
 			? "Checking Drive"
 			: sync.activity === "pushing"
 				? "Writing to Drive"
 				: "Reading from Drive"
+	// The line between the two copies: what is moving, or what stops them matching. Waiting
+	// changes share the banner's and the sidebar's blue.
+	const link: { tone: LinkTone; icon: string; label: string } = sync.activity
+		? { tone: "busy", icon: "lucide:refresh-cw", label: activityLabel }
+		: sync.kind === "conflict"
+			? { tone: "warning", icon: "lucide:git-compare-arrows", label: "Both sides changed" }
+			: sync.paused
+				? { tone: "neutral", icon: "lucide:pause", label: "Sync paused" }
+				: sync.kind === "needs-auth"
+					? { tone: "danger", icon: "lucide:unlink", label: "Sign-in expired" }
+					: sync.kind === "error"
+						? { tone: "danger", icon: "lucide:triangle-alert", label: "Sync failed" }
+						: sync.kind === "offline"
+							? { tone: "neutral", icon: "lucide:wifi-off", label: "Offline" }
+							: sync.localDirty
+								? {
+										tone: "busy",
+										icon: "lucide:arrow-right",
+										label: "Changes waiting to sync",
+									}
+								: { tone: "good", icon: "lucide:check", label: "In sync" }
 	const status: StatusTone = driveUnconfigured
 		? {
 				tone: "neutral",
@@ -440,44 +522,53 @@ export default function DataSettingsPage() {
 							title: "Needs your decision",
 							detail: `This browser and Google Drive both changed${sync.conflictAt ? ` (Drive copy from ${new Date(sync.conflictAt).toLocaleString()})` : ""}. Keep one; the other is replaced.`,
 						}
-					: sync.kind === "needs-auth"
+					: sync.paused
 						? {
-								tone: "danger",
-								icon: "lucide:key-round",
-								title: "Reconnect Google Drive",
-								detail: "Sign-in expired, so background sync has paused.",
+								tone: "neutral",
+								icon: "lucide:circle-pause",
+								title: "Sync paused",
+								detail: sync.localDirty
+									? "Changes stay in this browser until you resume."
+									: "Nothing leaves or reaches this browser until you resume.",
 							}
-						: sync.kind === "error"
+						: sync.kind === "needs-auth"
 							? {
 									tone: "danger",
-									icon: "lucide:triangle-alert",
-									title: "Sync failed",
-									detail: sync.error ?? "Try again in a moment.",
+									icon: "lucide:key-round",
+									title: "Reconnect Google Drive",
+									detail: "Sign-in expired, so background sync has paused.",
 								}
-							: sync.kind === "offline"
+							: sync.kind === "error"
 								? {
-										tone: "neutral",
-										icon: "lucide:wifi-off",
-										title: "Offline",
-										detail: sync.localDirty
-											? "Your changes will sync when you're back online."
-											: "Nothing waiting to sync.",
+										tone: "danger",
+										icon: "lucide:triangle-alert",
+										title: "Sync failed",
+										detail: sync.error ?? "Try again in a moment.",
 									}
-								: sync.localDirty
+								: sync.kind === "offline"
 									? {
-											tone: "busy",
-											icon: "lucide:cloud-upload",
-											title: "Changes waiting to sync",
-											detail: "They're saved here and will reach Drive shortly.",
+											tone: "neutral",
+											icon: "lucide:wifi-off",
+											title: "Offline",
+											detail: sync.localDirty
+												? "Your changes will sync when you're back online."
+												: "Nothing waiting to sync.",
 										}
-									: {
-											tone: "good",
-											icon: "lucide:cloud-check",
-											title: "In sync with Google Drive",
-											detail: sync.lastCheckAt
-												? `Last checked ${formatRelativeTime(sync.lastCheckAt, now)}`
-												: "Everything is backed up.",
-										}
+									: sync.localDirty
+										? {
+												tone: "busy",
+												icon: "lucide:cloud-upload",
+												title: "Changes waiting to sync",
+												detail: "They're saved here and will reach Drive shortly.",
+											}
+										: {
+												tone: "good",
+												icon: "lucide:cloud-check",
+												title: "In sync with Google Drive",
+												detail: sync.lastSyncAt
+													? `Last synced ${formatRelativeTime(sync.lastSyncAt, now)}`
+													: "Everything is backed up.",
+											}
 
 	return (
 		<>
@@ -548,23 +639,50 @@ export default function DataSettingsPage() {
 										</Button>
 									</>
 								) : (
-									<Button
-										type="button"
-										size="lg"
-										disabled={busy !== null || sync.activity !== null}
-										onClick={() => void handleDriveSync()}
-									>
-										<IconifyIcon
-											icon={driveTeaser ? "lucide:link" : "lucide:refresh-cw"}
-										/>
-										{busy === "drive"
-											? "Syncing…"
-											: driveTeaser
-												? "Connect Google Drive"
-												: sync.kind === "needs-auth"
-													? "Reconnect"
-													: "Sync now"}
-									</Button>
+									<>
+										{/* Pausing means nothing while sign-in has expired: sync has stopped already. */}
+										{driveConnected &&
+										(sync.paused || sync.kind !== "needs-auth") ? (
+											<Button
+												type="button"
+												variant={sync.paused ? "default" : "outline"}
+												size="lg"
+												disabled={busy !== null || sync.activity !== null}
+												onClick={() => void handlePause(!sync.paused)}
+											>
+												<IconifyIcon
+													icon={
+														sync.paused ? "lucide:play" : "lucide:pause"
+													}
+												/>
+												{sync.paused ? "Resume sync" : "Pause"}
+											</Button>
+										) : null}
+										<Button
+											type="button"
+											variant={sync.paused ? "outline" : "default"}
+											size="lg"
+											disabled={busy !== null || sync.activity !== null}
+											onClick={() => void handleDriveSync()}
+										>
+											<IconifyIcon
+												icon={
+													driveTeaser
+														? "lucide:link"
+														: "lucide:refresh-cw"
+												}
+											/>
+											{busy === "drive"
+												? "Syncing…"
+												: driveTeaser
+													? "Connect Google Drive"
+													: sync.kind === "needs-auth"
+														? "Reconnect"
+														: sync.paused
+															? "Sync once"
+															: "Sync now"}
+										</Button>
+									</>
 								)}
 							</div>
 						)}
@@ -637,33 +755,76 @@ export default function DataSettingsPage() {
 										devices in step in the background.
 									</p>
 								) : (
-									<dl className="grid gap-2">
-										<StateRow
-											tone={
-												sync.localDirty ? "bg-amber-500" : "bg-emerald-500"
-											}
-											label="This browser"
-											value={
-												sync.localDirty
-													? "Changes waiting to sync"
-													: "Saved locally"
-											}
-										/>
-										<StateRow
-											tone={driveState.tone}
-											label="Google Drive"
-											value={driveState.label}
-										/>
-										<StateRow
-											tone="bg-zinc-400"
-											label="Last checked"
-											value={
-												sync.lastCheckAt
-													? formatRelativeTime(sync.lastCheckAt, now)
-													: "Never"
-											}
-										/>
-									</dl>
+									<div className="grid gap-4">
+										<dl className="grid grid-cols-[minmax(6.5rem,auto)_minmax(2.5rem,1fr)_minmax(6.5rem,auto)] items-start gap-2 px-2 pt-1 sm:px-6">
+											<SyncEndpoint
+												icon="lucide:monitor"
+												label="This browser"
+												tone={sync.localDirty ? "busy" : "good"}
+												value={
+													sync.localDirty
+														? "Changes waiting"
+														: "Saved locally"
+												}
+											/>
+											<div
+												className="relative flex h-10 items-center"
+												title={link.label}
+											>
+												<span
+													className={cn(
+														"w-full border-t transition-colors duration-200 ease-out",
+														LINK_TONES[link.tone].line,
+													)}
+												/>
+												<span
+													className={cn(
+														"absolute inset-0 m-auto grid size-6 place-items-center rounded-full border bg-card transition-colors duration-200 ease-out",
+														LINK_TONES[link.tone].chip,
+													)}
+												>
+													<IconifyIcon
+														icon={link.icon}
+														aria-label={link.label}
+														className={cn(
+															"size-3.5",
+															sync.activity &&
+																"animate-spin [animation-duration:2s] motion-reduce:animate-none",
+														)}
+													/>
+												</span>
+											</div>
+											<SyncEndpoint
+												icon="lucide:cloud"
+												label="Google Drive"
+												tone={driveState.tone}
+												value={driveState.label}
+											/>
+										</dl>
+										{/* When the two copies last matched, and when the Drive copy last changed. */}
+										<dl className="grid grid-cols-2 divide-x rounded-lg border bg-background/60 text-center">
+											{[
+												["Last synced", sync.lastSyncAt],
+												["Last Drive change", sync.remoteModifiedTime],
+											].map(([label, at]) => (
+												<div key={label} className="grid gap-0.5 px-2 py-2">
+													<dt className="text-[0.6875rem] text-muted-foreground">
+														{label}
+													</dt>
+													<dd
+														className="font-medium tabular-nums"
+														title={
+															at
+																? new Date(at).toLocaleString()
+																: undefined
+														}
+													>
+														{at ? formatRelativeTime(at, now) : "Never"}
+													</dd>
+												</div>
+											))}
+										</dl>
+									</div>
 								)}
 							</CardContent>
 							{driveUnconfigured || driveTeaser ? null : (
@@ -726,7 +887,7 @@ export default function DataSettingsPage() {
 								title="Backup file"
 								description="Manual. Download one file you keep, and restore it here or on another device."
 							/>
-							<CardContent className="grid gap-4 py-4">
+							<CardContent className="flex flex-1 flex-col gap-4 py-4">
 								<Button
 									type="button"
 									className="w-full"
@@ -762,7 +923,7 @@ export default function DataSettingsPage() {
 										if (file) setImportFile(file)
 									}}
 									className={cn(
-										"grid cursor-pointer place-items-center gap-1.5 rounded-lg border border-dashed px-4 py-6 text-center text-sm transition-[background-color,border-color,transform] duration-150 ease-out hover:bg-muted/50 active:scale-[0.99] motion-reduce:transition-none motion-reduce:scale-100 motion-reduce:active:scale-100 disabled:active:scale-100",
+										"grid flex-1 cursor-pointer place-content-center place-items-center gap-1.5 rounded-lg border border-dashed px-4 py-6 text-center text-sm transition-[background-color,border-color,transform] duration-150 ease-out hover:bg-muted/50 active:scale-[0.99] motion-reduce:transition-none motion-reduce:scale-100 motion-reduce:active:scale-100 disabled:active:scale-100",
 										dragging && "scale-[1.01] border-foreground bg-muted/60",
 									)}
 								>

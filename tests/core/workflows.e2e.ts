@@ -178,9 +178,17 @@ test("Record creator: an insufficient Allocation warns that the Record stays Pen
 	await dialog.locator("#title").fill("Workflow short supper")
 	await pickCategory(page, "Groceries")
 	await dialog.locator("#amount").fill("-20")
-	await expect(
-		dialog.getByText("Amount does not match the sum of Allocation Amounts"),
-	).toBeVisible()
+	const mismatch = dialog.getByRole("status").filter({ hasText: "stays Pending" })
+	await expect(mismatch).toContainText("Allocated -$6.80")
+	await expect(mismatch).toContainText(
+		"This Record stays Pending until its amount equals its Allocations.",
+	)
+	// The one-step fix takes the Allocations' total; put the short amount back to stay Pending.
+	await mismatch.getByRole("button", { name: "Use total -$6.80" }).click()
+	await expect(mismatch).toHaveCount(0)
+	await expect(dialog.locator("#amount")).toHaveValue("-6.8")
+	await dialog.locator("#amount").fill("-20")
+	await expect(mismatch).toBeVisible()
 	await dialog.getByRole("button", { name: "Create Record" }).click()
 	await expect(dialog).toHaveCount(0)
 
@@ -249,7 +257,7 @@ test("Record creator: rule autofill fills fields, notes the rule and drops the n
 		"Autofilled by the “Starbucks coffee” rule.",
 	)
 	await expect(dialog.locator("#datetime-autopopulated")).toHaveText(
-		"Date copied from the statement date.",
+		"Copied from the statement date.",
 	)
 
 	await title.fill("Morning coffee, edited")
@@ -259,7 +267,7 @@ test("Record creator: rule autofill fills fields, notes the rule and drops the n
 	await expect(title).not.toHaveAttribute("aria-describedby", /.+/)
 	await expect(dialog.locator("#category_id-autopopulated")).toBeVisible()
 	await expect(dialog.locator("#datetime-autopopulated")).toHaveText(
-		"Date copied from the statement date.",
+		"Copied from the statement date.",
 	)
 
 	await dialog.getByRole("button", { name: "Create Record", exact: true }).click()
