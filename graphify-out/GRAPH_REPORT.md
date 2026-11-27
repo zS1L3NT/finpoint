@@ -1,7 +1,7 @@
 # Graph Report - t3-921312b2-87521e3c3b96e93a  (2026-11-27)
 
 ## Corpus Check
-- 283 files · ~254,474 words
+- 283 files · ~254,350 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 9 file(s) not represented in the graph (top: (none) 5, .example 1, .lock 1)
 
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `0a431406`
+- Built from commit: `6e27701c`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -485,13 +485,13 @@ Nodes (20): class-variance-authority, radix-ui, AppHeader(), ButtonGroup(), Butt
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `cn()` connect `cn` to `Button`, `(month)/page.tsx`, `duplicates/page.tsx`, `trend-chart.tsx`, `budgets/page.tsx`, `category-history-chart.tsx`, `PrimitivesSection`, `themeColor`, `providers.tsx`, `spending-calendar.tsx`, `primitives.tsx`, `category-filter.tsx`, `app-sidebar.tsx`, `utils.ts`, `pagination.tsx`, `item.tsx`, `monthly-budget-usage.tsx`, `lucide-react`, `alert-dialog.tsx`, `ui/field.tsx`?**
-  _High betweenness centrality (0.097) - this node is a cross-community bridge._
+  _High betweenness centrality (0.098) - this node is a cross-community bridge._
 - **What connects `@fontsource-variable/inter`, `shadcn`, `tailwindcss` to the rest of the system?**
   _83 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `dashboard.ts` be split into smaller, more focused modules?**
   _Cohesion score 0.12181616832779624 - nodes in this community are weakly interconnected._
 - **Why does `react` connect `Button` to `(month)/page.tsx`, `duplicates/page.tsx`, `cn`, `trend-chart.tsx`, `budgets/page.tsx`, `category-history-chart.tsx`, `PrimitivesSection`, `providers.tsx`, `package.json`, `spending-calendar.tsx`, `primitives.tsx`, `category-filter.tsx`, `app-sidebar.tsx`, `budgets/[id]/page.tsx`, `utils.ts`, `pagination.tsx`, `useUrlParams`, `item.tsx`, `monthly-budget-usage.tsx`, `lucide-react`, `alert-dialog.tsx`, `auto-sync.ts`, `ui/field.tsx`?**
-  _High betweenness centrality (0.083) - this node is a cross-community bridge._
+  _High betweenness centrality (0.082) - this node is a cross-community bridge._
 - **Should `Button` be split into smaller, more focused modules?**
   _Cohesion score 0.06228550565899964 - nodes in this community are weakly interconnected._
 - **Why does `src/data/* (persistence, migrations, seeding, backup serialization, Drive storage)` connect `src/data/* (persistence, migrations, seeding, backup serialization, Drive storage)` to `UI layer (app pages + components)`, `providers.tsx`?**
