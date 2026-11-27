@@ -163,7 +163,7 @@ export default function DashboardPage() {
 			>
 				{!period.is_future ? (
 					<Card className="min-w-0">
-						<CardHeader className="border-b">
+						<CardHeader>
 							<ScopedCardTitle scope={scopeLabel} color={scopeColor}>
 								Spending forecast
 							</ScopedCardTitle>
@@ -335,7 +335,7 @@ export default function DashboardPage() {
 					) : null}
 					{stage > 3 ? (
 						<Card>
-							<CardHeader className="border-b">
+							<CardHeader>
 								<ScopedCardTitle scope="All budgets">
 									Spending by day
 								</ScopedCardTitle>

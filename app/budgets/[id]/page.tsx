@@ -270,7 +270,7 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 
 				<div className="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)]">
 					<Card>
-						<CardHeader className="border-b">
+						<CardHeader>
 							<CardTitle>Spending over time</CardTitle>
 							<CardDescription>
 								Cumulative usage against the budget limit. The projection extends
@@ -299,7 +299,7 @@ export default function BudgetPage({ params }: { params: Promise<{ id: string }>
 					</Card>
 
 					<Card>
-						<CardHeader className="border-b">
+						<CardHeader>
 							<CardTitle>Spending by category</CardTitle>
 							<CardDescription>
 								Where this Budget’s outgoing spending went.
