@@ -15,7 +15,7 @@ Every line earns its place by carrying behavior, clarity, reuse, or a constraint
 - Delete props, branches, imports, wrappers, and helpers that carry nothing.
 - Write one-off logic inline. Abstract only for real reuse or where the repo already has a matching shared pattern.
 - Keep simple logic simple, free of defensive layers and line-heavy rewrites.
-- Treat comments as code with intent. Keep those recording rationale, workflow notes, constraints, temporary options, domain caveats, or non-obvious positioning; remove only the stale, misleading, or boilerplate. Describe present purpose; mention removed stacks (Laravel, Inertia, Vite) only where that history explains a current decision.
+- Treat comments as code with intent. Keep those recording rationale, workflow notes, constraints, temporary options, domain caveats, or non-obvious positioning; remove only the stale, misleading, or boilerplate.
 
 ### Grouping And Order
 
@@ -48,10 +48,10 @@ Every line earns its place by carrying behavior, clarity, reuse, or a constraint
 
 ## React / TypeScript Style
 
-- Group imports in the local order: external libraries, local components, UI primitives, constants/history/hooks, libs, types, routes/helpers.
-- Use `import type` for type-only dependencies and `React.X` for React types.
+- Group imports in the local order: external libraries, local components, UI primitives, constants/history/hooks, libs, types, generated routes/helpers.
+- Use `type` imports where the repo does, and match its React type style (`React.ReactNode` vs imported `ReactNode`).
 - Use small inline prop types for one-off components and named types for reused/shared surfaces, matching nearby files.
-- Order props by how the component reads: core data, external data collections, open/state controls, callbacks/actions, then optional trigger/render/config. Controlled dialog/sheet props use `isOpen`/`setIsOpen`.
+- Order props by how the component reads: core data, external data collections, open/state controls, callbacks/actions, then optional trigger/render/config.
 - Common component flow: history/navigation helpers, fetch/query hooks, local state, form/error helpers, effects, derived values, form/table setup, handlers, selected JSX fragments, return.
 - Reach for `useMemo`, `useCallback`, and extra helper components only when the codebase already does or identity/performance constraints are real.
 - A variable holding a JSX fragment earns its place when it makes a large return readable.
@@ -72,6 +72,9 @@ Project-specific code style rules preserved from the previous guide.
 - Do not deviate from library defaults or use hacky methods unless necessary. Deep-dive into the library before choosing a workaround.
 - Code scoped to one component should stay in that component file.
 - Generic logic that is not specific to one hook/component/page belongs in an appropriate shared utility.
+- Mention removed stacks (Laravel, Inertia, Vite) in comments only where that history explains a current decision.
+- Use `import type` for type-only dependencies and `React.X` for React types.
+- Controlled dialog and sheet props are named `isOpen`/`setIsOpen`.
 
 - Every `.ts`/`.tsx` filename is kebab-case (`export-import.ts`). Use camelCase locals; retain snake_case for persisted fields.
 - Logic functions read in three blocks separated by blank lines: validate input, fetch/persist via Dexie, then return.
