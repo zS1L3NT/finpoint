@@ -1,6 +1,7 @@
 import { useLiveQuery } from "dexie-react-hooks"
 import { useDeferredValue, useEffect, useState } from "react"
 import Icon, { UiIcon as IconifyIcon } from "@/components/icon"
+import { filterControlClass } from "@/components/table/filter-bar"
 import { RecordDetails } from "@/components/table/record-columns"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -154,7 +155,8 @@ export default function RecordSearchSheet({
 					{canWiden ? (
 						<Button
 							type="button"
-							variant={widened ? "default" : "outline"}
+							variant="outline"
+							className={filterControlClass(widened)}
 							aria-pressed={widened}
 							onClick={() => setWidened(value => !value)}
 						>

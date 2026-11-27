@@ -1,6 +1,7 @@
 import { useLiveQuery } from "dexie-react-hooks"
 import { useDeferredValue, useEffect, useState } from "react"
 import { UiIcon as IconifyIcon } from "@/components/icon"
+import { filterControlClass } from "@/components/table/filter-bar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -163,7 +164,8 @@ export default function StatementSearchSheet({
 					{filters?.start_date ? (
 						<Button
 							type="button"
-							variant={includeOlder ? "default" : "outline"}
+							variant="outline"
+							className={filterControlClass(includeOlder)}
 							aria-pressed={includeOlder}
 							onClick={() => setIncludeOlder(value => !value)}
 						>
