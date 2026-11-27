@@ -163,7 +163,7 @@ export default function StatementSearchSheet({
 					{filters?.start_date ? (
 						<Button
 							type="button"
-							variant={includeOlder ? "secondary" : "outline"}
+							variant={includeOlder ? "default" : "outline"}
 							aria-pressed={includeOlder}
 							onClick={() => setIncludeOlder(value => !value)}
 						>

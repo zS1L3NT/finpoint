@@ -154,7 +154,7 @@ export default function RecordSearchSheet({
 					{canWiden ? (
 						<Button
 							type="button"
-							variant={widened ? "secondary" : "outline"}
+							variant={widened ? "default" : "outline"}
 							aria-pressed={widened}
 							onClick={() => setWidened(value => !value)}
 						>
